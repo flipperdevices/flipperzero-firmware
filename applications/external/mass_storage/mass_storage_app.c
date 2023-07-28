@@ -21,6 +21,19 @@ static void mass_storage_app_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
+void mass_storage_app_show_loading_popup(MassStorageApp* app, bool show) {
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+
+    if(show) {
+        // Raise timer priority so that animations can play
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewLoading);
+    } else {
+        // Restore default timer priority
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    }
+}
+
 MassStorageApp* mass_storage_app_alloc(char* arg) {
     MassStorageApp* app = malloc(sizeof(MassStorageApp));
     app->file_path = furi_string_alloc();
@@ -31,10 +44,9 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         furi_string_set_str(app->file_path, MASS_STORAGE_APP_PATH_FOLDER);
     }
 
-    app->gui = furi_record_open(RECORD_GUI);
-    app->fs_api = furi_record_open(RECORD_STORAGE);
-    app->notifications = furi_record_open(RECORD_NOTIFICATION);
-    app->dialogs = furi_record_open(RECORD_DIALOGS);
+    app->gui = furi_record_open("gui");
+    app->fs_api = furi_record_open("storage");
+    app->dialogs = furi_record_open("dialogs");
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
@@ -55,12 +67,26 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         MassStorageAppViewWork,
         mass_storage_get_view(app->mass_storage_view));
 
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MassStorageAppViewTextInput, text_input_get_view(app->text_input));
+
+    app->loading = loading_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MassStorageAppViewLoading, loading_get_view(app->loading));
+
+    app->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        MassStorageAppViewStart,
+        variable_item_list_get_view(app->variable_item_list));
+
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     if(storage_file_exists(app->fs_api, furi_string_get_cstr(app->file_path))) {
         scene_manager_next_scene(app->scene_manager, MassStorageSceneWork);
     } else {
-        scene_manager_next_scene(app->scene_manager, MassStorageSceneFileSelect);
+        scene_manager_next_scene(app->scene_manager, MassStorageSceneStart);
     }
 
     return app;
@@ -71,7 +97,14 @@ void mass_storage_app_free(MassStorageApp* app) {
 
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewWork);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewTextInput);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewStart);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewLoading);
+
     mass_storage_free(app->mass_storage_view);
+    text_input_free(app->text_input);
+    variable_item_list_free(app->variable_item_list);
+    loading_free(app->loading);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
@@ -80,10 +113,9 @@ void mass_storage_app_free(MassStorageApp* app) {
     furi_string_free(app->file_path);
 
     // Close records
-    furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_STORAGE);
-    furi_record_close(RECORD_NOTIFICATION);
-    furi_record_close(RECORD_DIALOGS);
+    furi_record_close("gui");
+    furi_record_close("storage");
+    furi_record_close("dialogs");
 
     free(app);
 }

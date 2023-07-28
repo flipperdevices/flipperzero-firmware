@@ -1,0 +1,15 @@
+App(
+    appid="gpio_controller",
+    name="GPIO Controller",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_controller_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_category="GPIO",
+    fap_icon="icon10px.png",
+    fap_icon_assets="images",
+    fap_author="Lokno",
+    fap_weburl="https://github.com/Lokno/gpio_controller",
+    fap_version=(1, 0),
+    fap_description="A visual tool to control the general purpose pins of the Flipper Zero",
+)

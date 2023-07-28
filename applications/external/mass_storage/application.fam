@@ -13,7 +13,9 @@ App(
     fap_icon_assets="assets",
     fap_category="USB",
     fap_icon_assets_symbol="mass_storage",
-    fap_author="Willy-JL",
+    fap_author="kevinwallace & nminaylov",
+    fap_weburl="https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage",
+    # fap_weburl="https://github.com/flipperdevices/flipperzero-firmware/pull/1060",
     fap_version=(1, 1),
     fap_description="This is a plugin for USB Mass Storage access with Flipper Zero",
 )

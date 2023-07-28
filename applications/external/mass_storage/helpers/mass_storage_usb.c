@@ -44,6 +44,7 @@ typedef struct {
     uint8_t cmd_len;
     uint8_t cmd[16];
 } __attribute__((packed)) CBW;
+
 typedef struct {
     uint32_t sig;
     uint32_t tag;
@@ -80,11 +81,11 @@ static int32_t mass_thread_worker(void* context) {
     while(true) {
         uint32_t flags = furi_thread_flags_wait(EventAll, FuriFlagWaitAny, FuriWaitForever);
         if(flags & EventExit) {
-            FURI_LOG_I(TAG, "exit");
+            FURI_LOG_D(TAG, "exit");
             break;
         }
         if(flags & EventReset) {
-            FURI_LOG_I(TAG, "reset");
+            FURI_LOG_D(TAG, "reset");
             scsi.sk = 0;
             scsi.asc = 0;
             memset(&cbw, 0, sizeof(cbw));
@@ -99,10 +100,10 @@ static int32_t mass_thread_worker(void* context) {
         if(flags & EventRxTx) do {
                 switch(state) {
                 case StateReadCBW: {
-                    // FURI_LOG_I(TAG, "StateReadCBW");
+                    FURI_LOG_T(TAG, "StateReadCBW");
                     int32_t len = usbd_ep_read(dev, USB_MSC_RX_EP, &cbw, sizeof(cbw));
                     if(len <= 0) {
-                        // FURI_LOG_I(TAG, "cbw not ready");
+                        FURI_LOG_T(TAG, "cbw not ready");
                         break;
                     }
                     if(len != sizeof(cbw) || cbw.sig != CBW_SIG) {
@@ -131,14 +132,14 @@ static int32_t mass_thread_worker(void* context) {
                     continue;
                 }; break;
                 case StateReadData: {
-                    // FURI_LOG_I(TAG, "StateReadData %d/%d", buf_len, cbw.len);
+                    FURI_LOG_T(TAG, "StateReadData %lu/%lu", buf_len, cbw.len);
                     if(!cbw.len) {
                         state = StateBuildCSW;
                         continue;
                     }
                     uint32_t buf_clamp = MIN(cbw.len, USB_MSC_BUF_MAX);
                     if(buf_clamp > buf_cap) {
-                        FURI_LOG_I(TAG, "growing buf %lu -> %lu", buf_cap, buf_clamp);
+                        FURI_LOG_T(TAG, "growing buf %lu -> %lu", buf_cap, buf_clamp);
                         if(buf) {
                             free(buf);
                         }
@@ -149,10 +150,10 @@ static int32_t mass_thread_worker(void* context) {
                         int32_t len =
                             usbd_ep_read(dev, USB_MSC_RX_EP, buf + buf_len, buf_clamp - buf_len);
                         if(len < 0) {
-                            // FURI_LOG_I(TAG, "rx not ready %d", len);
+                            FURI_LOG_T(TAG, "rx not ready %ld", len);
                             break;
                         }
-                        // FURI_LOG_I(TAG, "clamp %ld len %d", buf_clamp, len);
+                        FURI_LOG_T(TAG, "clamp %lu len %ld", buf_clamp, len);
                         buf_len += len;
                     }
                     if(buf_len == buf_clamp) {
@@ -172,14 +173,14 @@ static int32_t mass_thread_worker(void* context) {
                     continue;
                 }; break;
                 case StateWriteData: {
-                    // FURI_LOG_I(TAG, "StateWriteData %d", cbw.len);
+                    FURI_LOG_T(TAG, "StateWriteData %lu", cbw.len);
                     if(!cbw.len) {
                         state = StateBuildCSW;
                         continue;
                     }
                     uint32_t buf_clamp = MIN(cbw.len, USB_MSC_BUF_MAX);
                     if(buf_clamp > buf_cap) {
-                        FURI_LOG_I(TAG, "growing buf %lu -> %lu", buf_cap, buf_clamp);
+                        FURI_LOG_T(TAG, "growing buf %lu -> %lu", buf_cap, buf_clamp);
                         if(buf) {
                             free(buf);
                         }
@@ -198,7 +199,7 @@ static int32_t mass_thread_worker(void* context) {
                         buf + buf_sent,
                         MIN(USB_MSC_TX_EP_SIZE, buf_len - buf_sent));
                     if(len < 0) {
-                        // FURI_LOG_I(TAG, "tx not ready %d", len);
+                        FURI_LOG_T(TAG, "tx not ready %ld", len);
                         break;
                     }
                     buf_sent += len;
@@ -210,7 +211,7 @@ static int32_t mass_thread_worker(void* context) {
                     continue;
                 }; break;
                 case StateBuildCSW: {
-                    // FURI_LOG_I(TAG, "StateBuildCSW");
+                    FURI_LOG_T(TAG, "StateBuildCSW");
                     csw.sig = CSW_SIG;
                     csw.tag = cbw.tag;
                     if(scsi_cmd_end(&scsi)) {
@@ -223,7 +224,7 @@ static int32_t mass_thread_worker(void* context) {
                     continue;
                 }; break;
                 case StateWriteCSW: {
-                    // FURI_LOG_I(TAG, "StateWriteCSW");
+                    FURI_LOG_T(TAG, "StateWriteCSW");
                     if(csw.status) {
                         FURI_LOG_W(
                             TAG,
@@ -235,7 +236,7 @@ static int32_t mass_thread_worker(void* context) {
                     }
                     int32_t len = usbd_ep_write(dev, USB_MSC_TX_EP, &csw, sizeof(csw));
                     if(len < 0) {
-                        // FURI_LOG_I(TAG, "csw not ready");
+                        FURI_LOG_T(TAG, "csw not ready");
                         break;
                     }
                     if(len != sizeof(csw)) {
