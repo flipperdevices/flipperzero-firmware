@@ -343,11 +343,62 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 			return;
 		}
 
-		/* handle ongoing inputs when chaning to chat view */
+		/* handle ongoing inputs when changing to chat view */
 		if (event->type == InputTypePress) {
 			state->kbd_ok_input_ongoing = true;
 		} else if (event->type == InputTypeRelease) {
 			state->kbd_ok_input_ongoing = false;
+		}
+	}
+
+	if (event->key == InputKeyLeft) {
+		/* if we are in the chat view and no input is ongoing, allow
+		 * switching to msg input */
+		if (state->view_dispatcher->current_view ==
+				text_box_get_view(state->chat_box) &&
+				!(state->kbd_left_input_ongoing)) {
+			/* go to msg input upon short press of Left button */
+			if (event->type == InputTypeShort) {
+				view_dispatcher_send_custom_event(state->view_dispatcher,
+						ESubGhzChatEvent_GotoMsgInput);
+			}
+
+			/* do not handle any Left key events to prevent
+			 * blocking of other keys */
+			return;
+		}
+
+		/* handle ongoing inputs when changing to chat view */
+		if (event->type == InputTypePress) {
+			state->kbd_left_input_ongoing = true;
+		} else if (event->type == InputTypeRelease) {
+			state->kbd_left_input_ongoing = false;
+		}
+	}
+
+	if (event->key == InputKeyRight) {
+		/* if we are in the chat view and no input is ongoing, allow
+		 * switching to key display */
+		if (state->view_dispatcher->current_view ==
+				text_box_get_view(state->chat_box) &&
+				!(state->kbd_right_input_ongoing)) {
+			/* go to key display upon short press of Right button
+			 */
+			if (event->type == InputTypeShort) {
+				view_dispatcher_send_custom_event(state->view_dispatcher,
+						ESubGhzChatEvent_GotoKeyDisplay);
+			}
+
+			/* do not handle any Right key events to prevent
+			 * blocking of other keys */
+			return;
+		}
+
+		/* handle ongoing inputs when changing to chat view */
+		if (event->type == InputTypePress) {
+			state->kbd_right_input_ongoing = true;
+		} else if (event->type == InputTypeRelease) {
+			state->kbd_right_input_ongoing = false;
 		}
 	}
 
@@ -459,6 +510,11 @@ int32_t esubghz_chat(void)
 		goto err_alloc_cb;
 	}
 
+	state->key_display = dialog_ex_alloc();
+	if (state->key_display == NULL) {
+		goto err_alloc_kd;
+	}
+
 	state->subghz_worker = subghz_tx_rx_worker_alloc();
 	if (state->subghz_worker == NULL) {
 		goto err_alloc_worker;
@@ -518,6 +574,8 @@ int32_t esubghz_chat(void)
 			text_input_get_view(state->text_input));
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_ChatBox,
 			text_box_get_view(state->chat_box));
+	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_KeyDisplay,
+			dialog_ex_get_view(state->key_display));
 
 	/* get the GUI record and attach the view dispatcher to the GUI */
 	/* no error handling here, don't know how */
@@ -550,6 +608,8 @@ int32_t esubghz_chat(void)
 			ESubGhzChatView_Input);
 	view_dispatcher_remove_view(state->view_dispatcher,
 			ESubGhzChatView_ChatBox);
+	view_dispatcher_remove_view(state->view_dispatcher,
+			ESubGhzChatView_KeyDisplay);
 
 	/* close notification record */
 	furi_record_close(RECORD_NOTIFICATION);
@@ -557,6 +617,7 @@ int32_t esubghz_chat(void)
 	/* clear the key and potential password */
 	crypto_explicit_bzero(state->text_input_store,
 			sizeof(state->text_input_store));
+	crypto_explicit_bzero(state->key_hex_str, sizeof(state->key_hex_str));
 	crypto_ctx_clear(state->crypto_ctx);
 
 	/* deinit devices */
@@ -573,6 +634,9 @@ err_alloc_crypto:
 	subghz_tx_rx_worker_free(state->subghz_worker);
 
 err_alloc_worker:
+	dialog_ex_free(state->key_display);
+
+err_alloc_kd:
 	chat_box_free(state);
 
 err_alloc_cb:

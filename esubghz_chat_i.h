@@ -4,6 +4,7 @@
 #include <gui/view_dispatcher_i.h>
 #include <gui/view_port_i.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/dialog_ex.h>
 #include <gui/modules/menu.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
@@ -23,6 +24,8 @@
 #define CHAT_BOX_STORE_SIZE 4096
 #define TEXT_INPUT_STORE_SIZE 256
 
+#define KEY_HEX_STR_SIZE ((KEY_BITS / 8) * 3)
+
 typedef struct {
 	SceneManager *scene_manager;
 	ViewDispatcher *view_dispatcher;
@@ -34,6 +37,8 @@ typedef struct {
 	FuriString *chat_box_store;
 	TextInput *text_input;
 	char text_input_store[TEXT_INPUT_STORE_SIZE + 1];
+	DialogEx *key_display;
+	char key_hex_str[KEY_HEX_STR_SIZE + 1];
 
 	// for Sub-GHz
 	uint32_t frequency;
@@ -60,7 +65,11 @@ typedef struct {
 	bool kbd_locked;
 	uint32_t kbd_lock_msg_ticks;
 	uint8_t kbd_lock_count;
+
+	// for ongoing inputs
 	bool kbd_ok_input_ongoing;
+	bool kbd_left_input_ongoing;
+	bool kbd_right_input_ongoing;
 } ESubGhzChatState;
 
 typedef enum {
@@ -68,13 +77,17 @@ typedef enum {
 	ESubGhzChatEvent_KeyMenuNoEncryption,
 	ESubGhzChatEvent_KeyMenuPassword,
 	ESubGhzChatEvent_PassEntered,
-	ESubGhzChatEvent_MsgEntered
+	ESubGhzChatEvent_MsgEntered,
+	ESubGhzChatEvent_GotoMsgInput,
+	ESubGhzChatEvent_GotoKeyDisplay,
+	ESubGhzChatEvent_KeyDisplayBack
 } ESubGhzChatEvent;
 
 typedef enum {
 	ESubGhzChatView_Menu,
 	ESubGhzChatView_Input,
 	ESubGhzChatView_ChatBox,
+	ESubGhzChatView_KeyDisplay,
 } ESubGhzChatView;
 
 void tx_msg_input(ESubGhzChatState *state);
