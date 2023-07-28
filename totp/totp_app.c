@@ -115,6 +115,7 @@ static bool on_user_idle(void* context) {
     if(plugin_state->current_scene != TotpSceneAuthentication &&
        plugin_state->current_scene != TotpSceneStandby) {
         totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication);
+        totp_scene_director_force_redraw(plugin_state);
         return true;
     }
 

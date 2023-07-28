@@ -551,6 +551,10 @@ bool totp_config_file_update_encryption(
         return false;
     }
 
+    if(!totp_crypto_check_key_slot(new_crypto_key_slot)) {
+        return false;
+    }
+
     uint8_t old_iv[CRYPTO_IV_LENGTH];
     memcpy(&old_iv[0], &plugin_state->iv[0], CRYPTO_IV_LENGTH);
 
