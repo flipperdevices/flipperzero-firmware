@@ -4,6 +4,7 @@
 #include <gui/view_dispatcher_i.h>
 #include <gui/view_port_i.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/menu.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
@@ -17,8 +18,6 @@
 
 #define DEFAULT_FREQ 433920000
 
-#define CHAT_LEAVE_DELAY 10
-
 #define RX_TX_BUFFER_SIZE 1024
 
 #define CHAT_BOX_STORE_SIZE 4096
@@ -30,6 +29,7 @@ typedef struct {
 	NotificationApp *notification;
 
 	// UI elements
+	Menu *menu;
 	TextBox *chat_box;
 	FuriString *chat_box_store;
 	TextInput *text_input;
@@ -65,13 +65,17 @@ typedef struct {
 
 typedef enum {
 	ESubGhzChatEvent_FreqEntered,
+	ESubGhzChatEvent_KeyMenuNoEncryption,
+	ESubGhzChatEvent_KeyMenuPassword,
 	ESubGhzChatEvent_PassEntered,
 	ESubGhzChatEvent_MsgEntered
 } ESubGhzChatEvent;
 
 typedef enum {
+	ESubGhzChatView_Menu,
 	ESubGhzChatView_Input,
 	ESubGhzChatView_ChatBox,
 } ESubGhzChatView;
 
 void tx_msg_input(ESubGhzChatState *state);
+void enter_chat(ESubGhzChatState *state);

@@ -98,22 +98,7 @@ bool scene_on_event_chat_input(void* context, SceneManagerEvent event)
 		break;
 
 	case SceneManagerEventTypeBack:
-		/* stop the application and send a leave message if the user
-		 * presses back here */
-
-		/* concatenate the name prefix and leave message */
-		furi_string_set(state->msg_input, state->name_prefix);
-		furi_string_cat_str(state->msg_input, " left chat.");
-
-		/* encrypt and transmit message */
-		tx_msg_input(state);
-
-		/* clear message input buffer */
-		furi_string_set_char(state->msg_input, 0, 0);
-
-		/* wait for leave message to be delivered */
-                furi_delay_ms(CHAT_LEAVE_DELAY);
-
+		/* stop the application if the user presses back here */
 		view_dispatcher_stop(state->view_dispatcher);
 		consumed = true;
 		break;

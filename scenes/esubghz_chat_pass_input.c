@@ -1,33 +1,12 @@
 #include "../esubghz_chat_i.h"
 
-/* Sends PassEntered event to scene manager and displays whether or not
- * encryption has been enabled in the text box. Also clears the text input
- * buffer to remove the password and starts the Sub-GHz worker. After starting
- * the worker a join message is transmitted. */
+/* Sends PassEntered event to scene manager and enters the chat. */
 static void pass_input_cb(void *context)
 {
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
-	furi_string_cat_printf(state->chat_box_store, "\nEncrypted: %s",
-			(state->encrypted ? "yes" : "no"));
-
-	/* clear the text input buffer to remove the password */
-	crypto_explicit_bzero(state->text_input_store,
-			sizeof(state->text_input_store));
-
-	subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device,
-			state->frequency);
-
-	/* concatenate the name prefix and join message */
-	furi_string_set(state->msg_input, state->name_prefix);
-	furi_string_cat_str(state->msg_input, " joined chat.");
-
-	/* encrypt and transmit message */
-	tx_msg_input(state);
-
-	/* clear message input buffer */
-	furi_string_set_char(state->msg_input, 0, 0);
+	enter_chat(state);
 
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_PassEntered);
@@ -45,18 +24,9 @@ static bool pass_input_validator(const char *text, FuriString *error,
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
-#ifdef FW_ORIGIN_Official
 	if (strlen(text) == 0) {
 		furi_string_printf(error, "Enter a\npassword!");
 		return false;
-	}
-
-	if (strcmp(text, " ") == 0) {
-#else /* FW_ORIGIN_Official */
-	if (strlen(text) == 0) {
-#endif /* FW_ORIGIN_Official */
-		state->encrypted = false;
-		return true;
 	}
 
 	unsigned char key[KEY_BITS / 8];
@@ -104,12 +74,7 @@ void scene_on_enter_pass_input(void* context)
 			state);
 	text_input_set_header_text(
 			state->text_input,
-#ifdef FW_ORIGIN_Official
-			"Password (space for no encr.)");
-#else /* FW_ORIGIN_Official */
-			"Password (empty for no encr.)");
-	text_input_set_minimum_length(state->text_input, 0);
-#endif /* FW_ORIGIN_Official */
+			"Password");
 
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Input);
 }
@@ -134,12 +99,6 @@ bool scene_on_event_pass_input(void* context, SceneManagerEvent event)
 			consumed = true;
 			break;
 		}
-		break;
-
-	case SceneManagerEventTypeBack:
-		/* stop the application if the user presses back here */
-		view_dispatcher_stop(state->view_dispatcher);
-		consumed = true;
 		break;
 
 	default:

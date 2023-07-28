@@ -7,6 +7,7 @@
 
 #include "esubghz_chat_i.h"
 
+#define CHAT_LEAVE_DELAY 10
 #define TICK_INTERVAL 50
 #define MESSAGE_COMPLETION_TIMEOUT 500
 #define TIMEOUT_BETWEEN_MESSAGES 500
@@ -113,6 +114,49 @@ void tx_msg_input(ESubGhzChatState *state)
 	/* transmit */
 	subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer,
 			tx_size);
+}
+
+/* Displays whether or not encryption has been enabled in the text box. Also
+ * clears the text input buffer to remove the password and starts the Sub-GHz
+ * worker. After starting the worker a join message is transmitted. */
+void enter_chat(ESubGhzChatState *state)
+{
+	furi_string_cat_printf(state->chat_box_store, "\nEncrypted: %s",
+			(state->encrypted ? "yes" : "no"));
+
+	/* clear the text input buffer to remove a password or key */
+	crypto_explicit_bzero(state->text_input_store,
+			sizeof(state->text_input_store));
+
+	subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device,
+			state->frequency);
+
+	/* concatenate the name prefix and join message */
+	furi_string_set(state->msg_input, state->name_prefix);
+	furi_string_cat_str(state->msg_input, " joined chat.");
+
+	/* encrypt and transmit message */
+	tx_msg_input(state);
+
+	/* clear message input buffer */
+	furi_string_set_char(state->msg_input, 0, 0);
+}
+
+/* Sends a leave message */
+void exit_chat(ESubGhzChatState *state)
+{
+	/* concatenate the name prefix and leave message */
+	furi_string_set(state->msg_input, state->name_prefix);
+	furi_string_cat_str(state->msg_input, " left chat.");
+
+	/* encrypt and transmit message */
+	tx_msg_input(state);
+
+	/* clear message input buffer */
+	furi_string_set_char(state->msg_input, 0, 0);
+
+	/* wait for leave message to be delivered */
+	furi_delay_ms(CHAT_LEAVE_DELAY);
 }
 
 /* Whether or not to display the locked message. */
@@ -401,6 +445,11 @@ int32_t esubghz_chat(void)
 		goto err_alloc_hs;
 	}
 
+	state->menu = menu_alloc();
+	if (state->menu == NULL) {
+		goto err_alloc_menu;
+	}
+
 	state->text_input = text_input_alloc();
 	if (state->text_input == NULL) {
 		goto err_alloc_ti;
@@ -463,6 +512,8 @@ int32_t esubghz_chat(void)
 			TICK_INTERVAL);
 
 	/* add our two views to the view dispatcher */
+	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_Menu,
+			menu_get_view(state->menu));
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_Input,
 			text_input_get_view(state->text_input));
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_ChatBox,
@@ -483,6 +534,7 @@ int32_t esubghz_chat(void)
 
 	/* if it is running, stop the Sub-GHz worker */
 	if (subghz_tx_rx_worker_is_running(state->subghz_worker)) {
+		exit_chat(state);
 		subghz_tx_rx_worker_stop(state->subghz_worker);
 	}
 
@@ -492,6 +544,8 @@ int32_t esubghz_chat(void)
 	furi_record_close(RECORD_GUI);
 
 	/* remove our two views from the view dispatcher */
+	view_dispatcher_remove_view(state->view_dispatcher,
+			ESubGhzChatView_Menu);
 	view_dispatcher_remove_view(state->view_dispatcher,
 			ESubGhzChatView_Input);
 	view_dispatcher_remove_view(state->view_dispatcher,
@@ -525,6 +579,9 @@ err_alloc_cb:
 	text_input_free(state->text_input);
 
 err_alloc_ti:
+	menu_free(state->menu);
+
+err_alloc_menu:
 	helper_strings_free(state);
 
 err_alloc_hs:

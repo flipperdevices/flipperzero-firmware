@@ -95,7 +95,7 @@ bool scene_on_event_freq_input(void* context, SceneManagerEvent event)
 		/* switch to password input scene */
 		case ESubGhzChatEvent_FreqEntered:
 			scene_manager_next_scene(state->scene_manager,
-					ESubGhzChatScene_PassInput);
+					ESubGhzChatScene_KeyMenu);
 			consumed = true;
 			break;
 		}
