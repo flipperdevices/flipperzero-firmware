@@ -175,7 +175,7 @@ def bench_serial(request):
     port = request.config.getoption("--bench_port")
     if port:
         pass
-    if is_windows():
+    elif is_windows():
         port = "COM5"
     else:
         port = "/dev/ttyUSB0"
