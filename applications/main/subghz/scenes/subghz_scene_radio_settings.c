@@ -127,7 +127,6 @@ static void subghz_scene_reciever_config_set_ext_mod_power_amp_text(VariableItem
 
     // Set globally in furi hal
     furi_hal_subghz_set_ext_power_amp(subghz->last_settings->external_module_power_amp);
-
     subghz_last_settings_save(subghz->last_settings);
 }
 

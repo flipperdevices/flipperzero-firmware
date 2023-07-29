@@ -46,14 +46,6 @@ void furi_hal_subghz_set_rolling_counter_mult(uint8_t mult) {
     furi_hal_subghz.rolling_counter_mult = mult;
 }
 
-void furi_hal_subghz_set_external_power_disable(bool state) {
-    furi_hal_subghz.ext_module_power_disabled = state;
-}
-
-bool furi_hal_subghz_get_external_power_disable(void) {
-    return furi_hal_subghz.ext_module_power_disabled;
-}
-
 void furi_hal_subghz_set_ext_power_amp(bool enabled) {
     furi_hal_subghz.ext_power_amp = enabled;
 }

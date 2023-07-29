@@ -66,7 +66,6 @@ typedef struct {
     const GpioPin* async_mirror_pin;
 
     uint8_t rolling_counter_mult;
-    bool ext_module_power_disabled : 1;
     bool ext_power_amp : 1;
 } FuriHalSubGhz;
 
@@ -338,8 +337,14 @@ void furi_hal_subghz_stop_async_tx();
 // void furi_hal_subghz_select_radio_type(SubGhzRadioType state);
 
 // External CC1101 Ebytes power amplifier control
+/** Set external amplifier power state
+ * @param      enabled  true to enable amplifier state, false to disable state
+ */
 void furi_hal_subghz_set_ext_power_amp(bool enabled);
 
+/** Get external amplifier power state
+ * @return     true if amplifier is enabled
+ */
 bool furi_hal_subghz_get_ext_power_amp();
 
 #ifdef __cplusplus
