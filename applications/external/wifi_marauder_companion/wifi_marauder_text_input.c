@@ -1,5 +1,6 @@
 #include "wifi_marauder_text_input.h"
 #include <gui/elements.h>
+#include "esp32_wifi_marauder_icons.h"
 #include "wifi_marauder_app_i.h"
 #include <furi.h>
 
@@ -135,8 +136,8 @@ static const WIFI_TextInputKey symbol_keyboard_keys_row_3[] = {
     {SWITCH_KEYBOARD_KEY, 1, 23},
     {'.', 15, 32},
     {',', 29, 32},
-    {';', 41, 32},
-    {'`', 53, 32},
+    {':', 41, 32},
+    {'/', 53, 32},
     {'\'', 65, 32},
     {ENTER_KEY, 74, 23},
     {'7', 100, 32},
@@ -232,6 +233,12 @@ static bool char_is_lowercase(char letter) {
 static char char_to_uppercase(const char letter) {
     if(letter == '_') {
         return 0x20;
+    } else if(letter == ':') {
+        return 0x3B;
+    } else if(letter == '/') {
+        return 0x5C;
+    } else if(letter == '\'') {
+        return 0x60;
     } else if(char_is_lowercase(letter)) {
         return (letter - 0x20);
     } else {
@@ -299,7 +306,7 @@ static void wifi_text_input_view_draw_callback(Canvas* canvas, void* _model) {
         while(len && canvas_string_width(canvas, str) > needed_string_width) {
             str[len--] = '\0';
         }
-        //strcat(str, "..."); // TODO - find replacement
+        strcat(str, "...");
     }
 
     canvas_draw_str(canvas, start_pos, 22, str);

@@ -163,7 +163,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     scene_manager_free(app->scene_manager);
 
     wifi_marauder_uart_free(app->uart);
-    // wifi_marauder_uart_free(app->lp_uart);
+    wifi_marauder_uart_free(app->lp_uart);
 
     // Close records
     furi_record_close(RECORD_GUI);
@@ -188,8 +188,8 @@ int32_t wifi_marauder_app(void* p) {
     wifi_marauder_make_app_folder(wifi_marauder_app);
     wifi_marauder_load_settings(wifi_marauder_app);
 
-    wifi_marauder_app->uart =
-        wifi_marauder_uart_init(wifi_marauder_app, UART_CH, "WifiMarauderUartRxThread");
+    wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
+    wifi_marauder_app->lp_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
 
     view_dispatcher_run(wifi_marauder_app->view_dispatcher);
 

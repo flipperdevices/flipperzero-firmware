@@ -25,10 +25,6 @@
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>
-#include <cfw.h>
-
-#define UART_CH \
-    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define NUM_MENU_ITEMS (20)
 
@@ -82,6 +78,7 @@ struct WifiMarauderApp {
     int open_log_file_num_pages;
 
     WifiMarauderUart* uart;
+    WifiMarauderUart* lp_uart;
     int selected_menu_index;
     int selected_option_index[NUM_MENU_ITEMS];
     const char* selected_tx_string;

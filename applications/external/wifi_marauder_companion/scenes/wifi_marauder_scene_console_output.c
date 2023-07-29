@@ -185,6 +185,7 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
 
     // Unregister rx callback
     wifi_marauder_uart_set_handle_rx_data_cb(app->uart, NULL);
+    wifi_marauder_uart_set_handle_rx_data_cb(app->lp_uart, NULL);
 
     wifi_marauder_script_worker_free(app->script_worker);
     app->script_worker = NULL;
