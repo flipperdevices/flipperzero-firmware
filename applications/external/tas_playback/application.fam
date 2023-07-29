@@ -1,0 +1,14 @@
+App(
+    appid="tas_playback",
+    name="TAS Playback",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tas_playback_app",
+    stack_size=4 * 1024,
+    fap_category="GPIO",
+    fap_icon="images/tas_playback.png",
+    fap_icon_assets="images",
+    fap_author="rcombs",
+    fap_weburl="https://github.com/rcombs/tas-playback",
+    fap_version=(0, 1),
+    fap_description="This app plays back tool-assisted speedrun files on video game consoles (currently only the Nintendo 64)",
+)
