@@ -41,18 +41,23 @@ bool cfw_app_scene_interface_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         switch(event.event) {
         case VarItemListIndexCommon:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceCommon, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceCommon);
             break;
         case VarItemListIndexDesktop:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceDesktop, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceDesktop);
             break;
         case VarItemListIndexLockmenu:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceLockmenu, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceLockmenu);
             break;
         case VarItemListIndexMainmenu:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceMainmenu, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceMainmenu);
             break;
         case VarItemListIndexPassport:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfacePassport, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfacePassport);
             break;
         default:

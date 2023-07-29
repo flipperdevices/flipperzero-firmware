@@ -85,6 +85,7 @@ bool cfw_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         switch(event.event) {
         case VarItemListIndexChangeDeviceName:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneMiscRename, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneMiscRename);
             break;
         case VarItemListIndexRgbBacklight: {
@@ -110,6 +111,7 @@ bool cfw_app_scene_misc_on_event(void* context, SceneManagerEvent event) {
                 app->save_settings = true;
                 notification_message(app->notification, &sequence_display_backlight_on);
                 scene_manager_previous_scene(app->scene_manager);
+                scene_manager_set_scene_state(app->scene_manager, CfwAppSceneMisc, 0);
                 scene_manager_next_scene(app->scene_manager, CfwAppSceneMisc);
             }
             break;

@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Advanced Wifi Sniffer (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c8e5c3bd8b353092c7fd5b7ed0327d044ee53b74)
 - NULL pointer fixes for [Configurable SPI & UART Channels (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc4c6bdacd7aac9ba8377fddcb966a9ae17da36a)
 - UL: [SubGhz External High Power / External Power AMP modifications (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/62e817f183991596ac3f86889cebb77dc142ed70#diff-03d45d82d88e74ebd92e63db17d8fa296cf1aeb01639a25866fdb72ff8b227d6)
+- Reset menu index when entering scene in CFW Settings app (By Willy-JL)
 
 <a name="release">
 

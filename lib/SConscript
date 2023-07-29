@@ -14,6 +14,7 @@ env.Append(
         Dir("toolbox"),
         Dir("u8g2"),
         Dir("update_util"),
+        Dir("cfw"),
         Dir("print"),
         Dir("music_worker"),
     ],

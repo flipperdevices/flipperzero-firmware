@@ -38,12 +38,15 @@ bool cfw_app_scene_start_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
         switch(event.event) {
         case VarItemListIndexInterface:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterface, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterface);
             break;
         case VarItemListIndexProtocols:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneProtocols, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneProtocols);
             break;
         case VarItemListIndexMisc:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneMisc, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneMisc);
             break;
         default:
