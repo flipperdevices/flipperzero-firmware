@@ -33,6 +33,12 @@ const Evil_PortalItem items[NUM_MENU_ITEMS] = {
     // console
     {"Save logs", {""}, 1, {"savelogs"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
 
+    // set AP name
+    {"Set AP name", {""}, 1, {"setapname"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
+
+    // select HTML Portal File
+    {"Select HTML", {""}, 1, {"selecthtml"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
+
     // help
     {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
 };

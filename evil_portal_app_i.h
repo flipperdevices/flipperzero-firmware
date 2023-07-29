@@ -4,14 +4,19 @@
 #include "evil_portal_custom_event.h"
 #include "evil_portal_uart.h"
 #include "scenes/evil_portal_scene.h"
+#include "evil_portal_icons.h"
 
 #include <gui/gui.h>
+#include <gui/modules/loading.h>
 #include <gui/modules/text_box.h>
+#include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
+#include <gui/view_stack.h>
+#include <dialogs/dialogs.h>
 
-#define NUM_MENU_ITEMS (4)
+#define NUM_MENU_ITEMS (6)
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
 #define UART_CH (FuriHalUartIdUSART1)
@@ -19,6 +24,9 @@
 #define SET_HTML_CMD "sethtml"
 #define SET_AP_CMD "setap"
 #define RESET_CMD "reset"
+
+#define HTML_EXTENSION ".html"
+#define HTML_FOLDER ANY_PATH("apps_data/evil_portal/html")
 
 struct Evil_PortalApp {
     Gui* gui;
@@ -36,6 +44,11 @@ struct Evil_PortalApp {
 
     VariableItemList* var_item_list;
     Evil_PortalUart* uart;
+    TextInput* text_input;
+    DialogsApp* dialogs;
+    FuriString* file_path;
+    Loading* loading;
+    ViewStack* view_stack;
 
     int selected_menu_index;
     int selected_option_index[NUM_MENU_ITEMS];
@@ -48,6 +61,7 @@ struct Evil_PortalApp {
     bool sent_html;
     bool sent_reset;
     int BAUDRATE;
+    char text_store[2][128 + 1];
 
     uint8_t* index_html;
     uint8_t* ap_name;
@@ -57,4 +71,5 @@ typedef enum {
     Evil_PortalAppViewVarItemList,
     Evil_PortalAppViewConsoleOutput,
     Evil_PortalAppViewStartPortal,
+    Evil_PortalAppViewTextInput,
 } Evil_PortalAppView;
