@@ -2,10 +2,7 @@
 #include <stream/buffered_file_stream.h>
 #include "../evil_portal_uart.h"
 
-#define PORTAL_FILE_DIRECTORY_PATH EXT_PATH("apps_data/evil_portal")
-#define EVIL_PORTAL_AP_SAVE_PATH PORTAL_FILE_DIRECTORY_PATH "/ap.config.txt"
-
-static const char TAG[] = "evil_portal_command";
+#define TAG "evil_portal_command"
 
 static bool send_file_over_uart(Storage *storage, const char* path) {
     Stream *file_stream = buffered_file_stream_alloc(storage);
@@ -54,13 +51,14 @@ bool evil_portal_set_html(Storage *storage, const char* path) {
     return true;
 }
 
-bool evil_portal_set_ap_name(Storage *storage) {
+bool evil_portal_set_ap_name(Storage *storage, const char *ap_config_path) {
     furi_assert(storage, "storage is null");
+    furi_assert(ap_config_path, "the ap config path is null");
 
     // Start the html set sending to the esp the command, use -1 to exclude the string terminator bytes.
     evil_portal_uart_tx((uint8_t*) "setap=", 6);
 
-    bool ap_name_sent = send_file_over_uart(storage, EVIL_PORTAL_AP_SAVE_PATH);
+    bool ap_name_sent = send_file_over_uart(storage, ap_config_path);
 
     if (!ap_name_sent) {
         char *default_name = "Evil Portal";
