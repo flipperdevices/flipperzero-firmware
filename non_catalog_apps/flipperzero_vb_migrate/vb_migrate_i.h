@@ -34,7 +34,7 @@
 #include <notification/notification.h>
 #include <dialogs/dialogs.h>
 
-#include "lib/nfc/nfc_worker.h"
+#include <lib/nfc/nfc_worker.h>
 
 #include "vb_migrate.h"
 #include "scenes/vb_migrate_scene.h"
