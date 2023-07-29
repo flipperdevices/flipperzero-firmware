@@ -10,9 +10,7 @@
 #define EVIL_PORTAL_AP_SAVE_PATH PORTAL_FILE_DIRECTORY_PATH "/ap.config.txt"
 #define EVIL_PORTAL_LOG_SAVE_PATH PORTAL_FILE_DIRECTORY_PATH "/logs"
 
-Storage* evil_portal_open_storage();
-void evil_portal_close_storage();
-void write_logs(FuriString* portal_logs);
+void write_logs(Storage* storage, FuriString* portal_logs);
 char* sequential_file_resolve_path(
     Storage* storage,
     const char* dir,

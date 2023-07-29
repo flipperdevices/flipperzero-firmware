@@ -16,6 +16,7 @@
 #include <gui/view_stack.h>
 #include <dialogs/dialogs.h>
 #include <cfw.h>
+#include <storage/storage.h>
 
 #define NUM_MENU_ITEMS (6)
 
@@ -34,6 +35,7 @@ struct Evil_PortalApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
+    Storage* storage;
 
     FuriString* portal_logs;
     const char* command_queue[1];

@@ -54,7 +54,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             const char* help_msg = "Logs saved.\n\n";
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
-            write_logs(app->portal_logs);
+            write_logs(app->storage, app->portal_logs);
             furi_string_reset(app->portal_logs);
             if(app->show_stopscan_tip) {
                 const char* msg = "Press BACK to return\n";
@@ -105,9 +105,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
 
     if(app->is_command && app->selected_tx_string) {
         if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
-            Storage *storage = evil_portal_open_storage();
-            app->sent_html = evil_portal_set_html(storage, EVIL_PORTAL_INDEX_SAVE_PATH);
-            evil_portal_close_storage();
+            app->sent_html = evil_portal_set_html(app->storage, EVIL_PORTAL_INDEX_SAVE_PATH);
         } else if(0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
             app->sent_html = false;
             app->sent_ap = false;

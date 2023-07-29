@@ -55,9 +55,7 @@ static int32_t uart_worker(void* context) {
                                         SET_AP_CMD,
                                         uart->app->command_queue[uart->app->command_index],
                                         strlen(SET_AP_CMD))) {
-                                Storage* storage = evil_portal_open_storage();
-                                uart->app->sent_ap = evil_portal_set_ap_name(storage);
-                                evil_portal_close_storage();
+                                uart->app->sent_ap = evil_portal_set_ap_name(uart->app->storage);
                             }
 
                             uart->app->command_index = 0;
@@ -71,7 +69,7 @@ static int32_t uart_worker(void* context) {
                     }
 
                     if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
-                        write_logs(uart->app->portal_logs);
+                        write_logs(uart->app->storage, uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
                 } else {
@@ -81,7 +79,7 @@ static int32_t uart_worker(void* context) {
                     }
 
                     if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
-                        write_logs(uart->app->portal_logs);
+                        write_logs(uart->app->storage, uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
                 }
