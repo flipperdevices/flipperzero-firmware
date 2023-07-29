@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mag_app",
     requires=[
-        "gui", 
+        "gui",
         "storage",
         "notification",
         "dialogs",

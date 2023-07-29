@@ -7,7 +7,7 @@ App(
     stack_size=8 * 1024,
     fap_category="Games",
     fap_icon="trexrunner_icon.png",
-    fap_icon_assets="assets",  
+    fap_icon_assets="assets",
     order=36,
     fap_author="@Rrycbarm",
     fap_weburl="https://github.com/Rrycbarm/t-rex-runner",

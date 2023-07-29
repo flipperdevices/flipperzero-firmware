@@ -12,5 +12,5 @@ App(
     fap_category="Games",
     fap_author="jamisonderek",
     fap_description="Play the rock-paper-scissors game with your friends using the Flipper Zero Sub-GHz radio!",
-    fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/plugins/rock_paper_scissors/README.md"
+    fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/plugins/rock_paper_scissors/README.md",
 )

@@ -4,11 +4,11 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="camera_app",
     requires=["gui"],
-    stack_size=8*1024,
+    stack_size=8 * 1024,
     order=1,
     fap_icon="icon.png",
     fap_category="GPIO/ESP32",
     fap_description="ESP32-CAM live feed and photo capture",
     fap_author="Z4urce",
-    fap_weburl="https://github.com/Z4urce/flipper-camera"
+    fap_weburl="https://github.com/Z4urce/flipper-camera",
 )

@@ -4,30 +4,35 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="seader_app",
     requires=[
-        "gui", "storage", "nfc",
+        "gui",
+        "storage",
+        "nfc",
     ],
     stack_size=7 * 1024,
     order=20,
     sources=[
-      "seader.c",
-      "bsearch.c", "aeabi_uldivmod.sx",
-      "ccid.c", "uart.c",
-      "rfal_picopass.c", "scenes/*.c",
-      "seader_worker.c",
-      "seader_credential.c",
-      "seader_icons.c",
-      "views/*.c",
+        "seader.c",
+        "bsearch.c",
+        "aeabi_uldivmod.sx",
+        "ccid.c",
+        "uart.c",
+        "rfal_picopass.c",
+        "scenes/*.c",
+        "seader_worker.c",
+        "seader_credential.c",
+        "seader_icons.c",
+        "views/*.c",
     ],
     fap_icon="icons/logo.png",
     fap_category="NFC",
     fap_version=(1, 1),
     fap_author="bettse",
-#    fap_extbuild=(
-#        ExtFile(
-#            path="${FAP_SRC_DIR}/lib/asn1/asn_system.h",
-#            command="asn1c -D ${FAP_SRC_DIR}/lib/asn1 -no-gen-example -pdu=all ${FAP_SRC_DIR}/seader.asn1"
-#        ),
-#    ),
+    #    fap_extbuild=(
+    #        ExtFile(
+    #            path="${FAP_SRC_DIR}/lib/asn1/asn_system.h",
+    #            command="asn1c -D ${FAP_SRC_DIR}/lib/asn1 -no-gen-example -pdu=all ${FAP_SRC_DIR}/seader.asn1"
+    #        ),
+    #    ),
     fap_private_libs=[
         Lib(
             name="asn1",

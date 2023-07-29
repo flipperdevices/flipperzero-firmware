@@ -238,7 +238,7 @@ class Main(App):
                 )
             )
         bundle_args.extend(self.other_args)
-        
+
         if (bundle_result := UpdateMain(no_exit=True)(bundle_args)) == 0:
             self.note_dist_component("update", "dir", bundle_dir)
             self.logger.info(

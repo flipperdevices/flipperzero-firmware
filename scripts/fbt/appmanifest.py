@@ -8,6 +8,7 @@ from typing import Callable, ClassVar, List, Optional, Tuple, Union
 class FlipperManifestException(Exception):
     pass
 
+
 class FlipperAppType(Enum):
     SERVICE = "Service"
     SYSTEM = "System"
@@ -20,6 +21,7 @@ class FlipperAppType(Enum):
     MENUEXTERNAL = "MenuExternal"
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
+
 
 @dataclass
 class FlipperApplication:
@@ -97,6 +99,7 @@ class FlipperApplication:
                 raise FlipperManifestException(
                     f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
                 )
+
 
 class AppManager:
     def __init__(self):
@@ -374,6 +377,7 @@ class ApplicationsCGenerator:
         "FlipperExternalApplication",
         "FLIPPER_EXTERNAL_APPS",
     )
+
     def __init__(self, buildset: AppBuildset, autorun_app: str = ""):
         self.buildset = buildset
         self.autorun = autorun_app
@@ -412,7 +416,9 @@ class ApplicationsCGenerator:
             f'const char* FLIPPER_AUTORUN_APP_NAME = "{self.autorun}";',
         ]
         for apptype in self.APP_TYPE_MAP:
-            contents.extend(map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype)))
+            contents.extend(
+                map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype))
+            )
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
             contents.append(f"const {entry_type} {entry_block}[] = {{")
             contents.append(
@@ -421,7 +427,9 @@ class ApplicationsCGenerator:
                 )
             )
             contents.append("};")
-            contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
+            contents.append(
+                f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});"
+            )
 
         archive_app = self.buildset.get_apps_of_type(FlipperAppType.ARCHIVE)
         if archive_app:

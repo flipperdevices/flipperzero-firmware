@@ -6,11 +6,7 @@ App(
     stack_size=1 * 1024,
     order=90,
     fap_category="Games",
-    requires=[
-        "storage",
-        "gui",
-        "dialogs"
-    ],
+    requires=["storage", "gui", "dialogs"],
     fap_icon_assets="assets",
     fap_icon_assets_symbol="nfc_crocodile",
     fap_author="@Firemoon777",

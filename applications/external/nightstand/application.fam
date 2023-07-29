@@ -14,4 +14,3 @@ App(
     fap_version=(1, 0),
     fap_description="Clock with screen brightness controls",
 )
-

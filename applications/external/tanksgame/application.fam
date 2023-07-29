@@ -9,7 +9,7 @@ App(
     fap_icon="tanksIcon.png",
     fap_category="Games",
     fap_icon_assets="images",
-    fap_author="@alexgr13 & @b1rd & @lagoushque & @Kolobamanacas", # I THINK
+    fap_author="@alexgr13 & @b1rd & @lagoushque & @Kolobamanacas",  # I THINK
     fap_weburl="https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game",
     fap_version=(1, 0),
     fap_description="A simplified version of the Battle city game",

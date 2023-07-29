@@ -12,21 +12,21 @@ App(
     fap_icon_assets_symbol="esp_flasher",
     fap_category="GPIO",
     fap_private_libs=[
-            Lib(
-                name="esp-serial-flasher",
-                fap_include_paths=["include"],
-                sources=[
-                    "src/esp_loader.c",
-                    "src/esp_targets.c",
-                    "src/md5_hash.c",
-                    "src/protocol_common.c",
-                    "src/protocol_uart.c",
-                    "src/slip.c"
-                ],
-                cincludes=["lib/esp-serial-flasher/private_include"],
-                cdefines=["SERIAL_FLASHER_INTERFACE_UART=1", "MD5_ENABLED=1"],
-            ),
-        ],
+        Lib(
+            name="esp-serial-flasher",
+            fap_include_paths=["include"],
+            sources=[
+                "src/esp_loader.c",
+                "src/esp_targets.c",
+                "src/md5_hash.c",
+                "src/protocol_common.c",
+                "src/protocol_uart.c",
+                "src/slip.c",
+            ],
+            cincludes=["lib/esp-serial-flasher/private_include"],
+            cdefines=["SERIAL_FLASHER_INTERFACE_UART=1", "MD5_ENABLED=1"],
+        ),
+    ],
     fap_author="@0xchocolate",
     fap_weburl="https://github.com/0xchocolate/flipperzero-esp-flasher",
     fap_version=(1, 1),

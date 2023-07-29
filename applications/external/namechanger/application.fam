@@ -3,7 +3,7 @@ App(
     name="Name Changer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="namechanger_app",
-    requires=["gui","storage"],
+    requires=["gui", "storage"],
     stack_size=2 * 1024,
     order=90,
     fap_icon="namechanger_10px.png",

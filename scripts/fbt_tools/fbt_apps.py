@@ -65,6 +65,7 @@ def build_apps_c(target, source, env):
     with open(target_file_name, "w") as file:
         file.write(gen.generate())
 
+
 def generate(env):
     env.AddMethod(LoadAppManifest)
     env.AddMethod(PrepareApplicationsBuild)

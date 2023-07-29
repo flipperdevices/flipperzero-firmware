@@ -11,7 +11,7 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_icon="ublox_app_icon.png",
-    fap_category="GPIO", 
+    fap_category="GPIO",
     fap_icon_assets="images",
     fap_author="liamhays",
     fap_weburl="https://github.com/liamhays/ublox",

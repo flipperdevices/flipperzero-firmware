@@ -35,16 +35,10 @@ class GitVersion:
             or "unknown"
         )
 
-        version = (
-            os.environ.get("DIST_SUFFIX", None)
-            or "0.87.1"
-        )
+        version = os.environ.get("DIST_SUFFIX", None) or "0.87.1"
 
-        force_no_dirty = (
-            os.environ.get("FORCE_NO_DIRTY", None)
-            or ""
-        )
-        if (force_no_dirty != ""):
+        force_no_dirty = os.environ.get("FORCE_NO_DIRTY", None) or ""
+        if force_no_dirty != "":
             dirty = False
 
         if "SOURCE_DATE_EPOCH" in os.environ:
@@ -65,7 +59,7 @@ class GitVersion:
             "GIT_ORIGIN": "https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git",
             "GIT_COMMIT_DATE": commit_date,
         }
-    
+
     # "GIT_ORIGIN": ",".join(self._get_git_origins()),
 
     def _get_git_origins(self):

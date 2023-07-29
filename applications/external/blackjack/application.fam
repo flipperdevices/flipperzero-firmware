@@ -3,7 +3,7 @@ App(
     name="BlackJack",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="blackjack_app",
-    requires=["gui","storage","canvas"],
+    requires=["gui", "storage", "canvas"],
     stack_size=2 * 1024,
     order=30,
     fap_icon="blackjack_10px.png",

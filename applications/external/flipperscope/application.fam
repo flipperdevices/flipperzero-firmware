@@ -10,5 +10,5 @@ App(
     fap_icon_assets_symbol="scope",
     fap_author="anfractuosity",
     fap_version="0.1",
-    fap_description="Oscilloscope application - apply signal to pin 16/PC0, with a voltage ranging from 0V to 2.5V and ground to pin 18/GND"
+    fap_description="Oscilloscope application - apply signal to pin 16/PC0, with a voltage ranging from 0V to 2.5V and ground to pin 18/GND",
 )
