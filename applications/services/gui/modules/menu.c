@@ -143,7 +143,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             furi_string_free(name);
             break;
         }
-
         case MenuStyleDsi: {
             for(int8_t i = -2; i <= 2; i++) {
                 shift_position = (position + items_count + i) % items_count;
@@ -154,19 +153,23 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 size_t pos_y = 36;
                 if(i == 0) {
                     width += 6;
-                    height += 6;
+                    height += 4;
                     elements_bold_rounded_frame(
-                        canvas, pos_x - width / 2, pos_y - height / 2, width, height + 4);
+                        canvas, pos_x - width / 2, pos_y - height / 2, width, height + 5);
                     canvas_set_font(canvas, FontBatteryPercent);
                     canvas_draw_str_aligned(
-                        canvas, pos_x, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "START");
+                        canvas, pos_x - 9, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "S");
+                    canvas_draw_str_aligned(
+                        canvas, pos_x, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "TAR");
+                    canvas_draw_str_aligned(
+                        canvas, pos_x + 9, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "T");
 
                     canvas_draw_rframe(canvas, 0, 0, 128, 18, 3);
                     canvas_draw_line(canvas, 60, 18, 64, 26);
                     canvas_draw_line(canvas, 64, 26, 68, 18);
                     canvas_set_color(canvas, ColorWhite);
                     canvas_draw_line(canvas, 60, 17, 68, 17);
-                    canvas_draw_box(canvas, 62, 20, 5, 2);
+                    canvas_draw_box(canvas, 62, 21, 5, 2);
                     canvas_set_color(canvas, ColorBlack);
 
                     canvas_set_font(canvas, FontPrimary);
@@ -225,11 +228,7 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             break;
         }
     } else {
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignTop, "Menu is Empty");
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignTop, "Use CFW Settings");
-        canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignTop, "to add menu items.");
+        canvas_draw_str(canvas, 2, 32, "Empty");
         elements_scrollbar(canvas, 0, 0);
     }
 }
@@ -335,7 +334,9 @@ Menu* menu_pos_alloc(size_t pos) {
     view_set_input_callback(menu->view, menu_input_callback);
     view_set_enter_callback(menu->view, menu_enter);
     view_set_exit_callback(menu->view, menu_exit);
+
     menu->scroll_timer = furi_timer_alloc(menu_scroll_timer_callback, FuriTimerTypePeriodic, menu);
+
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -437,8 +438,12 @@ static void menu_process_up(Menu* menu) {
             case MenuStyleList:
                 if(model->position > 0) {
                     model->position--;
+                    if(model->vertical_offset && model->vertical_offset == model->position) {
+                        model->vertical_offset--;
+                    }
                 } else {
                     model->position = count - 1;
+                    model->vertical_offset = count - 8;
                 }
                 break;
             case MenuStyleWii:
@@ -447,6 +452,8 @@ static void menu_process_up(Menu* menu) {
                 } else {
                     model->position++;
                 }
+                model->vertical_offset =
+                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
@@ -478,8 +485,13 @@ static void menu_process_down(Menu* menu) {
             case MenuStyleList:
                 if(model->position < count - 1) {
                     model->position++;
+                    if(model->vertical_offset < count - 8 &&
+                       model->vertical_offset == model->position - 7) {
+                        model->vertical_offset++;
+                    }
                 } else {
                     model->position = 0;
+                    model->vertical_offset = 0;
                 }
                 break;
             case MenuStyleWii:
@@ -488,6 +500,8 @@ static void menu_process_down(Menu* menu) {
                 } else {
                     model->position++;
                 }
+                model->vertical_offset =
+                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
@@ -526,22 +540,21 @@ static void menu_process_left(Menu* menu) {
                 } else {
                     model->position -= 2;
                 }
+                model->vertical_offset =
+                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
+            case MenuStyleVertical:
                 if(model->position > 0) {
                     model->position--;
+                    if(model->vertical_offset && model->vertical_offset == model->position) {
+                        model->vertical_offset--;
+                    }
                 } else {
                     model->position = count - 1;
-                }
-                break;
-            case MenuStyleVertical:
-                if(model->vertical_offset > 0 && model->vertical_offset == model->position - 1) {
-                    model->vertical_offset--;
-                }
-                if(model->position == 0) {
                     model->vertical_offset = count - 8;
                 }
-                /* fall through */
+                break;
             default:
                 break;
             }
@@ -584,23 +597,22 @@ static void menu_process_right(Menu* menu) {
                         model->position = model->position % 2;
                     }
                 }
+                model->vertical_offset =
+                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
+            case MenuStyleVertical:
                 if(model->position < count - 1) {
                     model->position++;
+                    if(model->vertical_offset < count - 8 &&
+                       model->vertical_offset == model->position - 7) {
+                        model->vertical_offset++;
+                    }
                 } else {
                     model->position = 0;
-                }
-                break;
-            case MenuStyleVertical:
-                if(model->vertical_offset < count - 8 &&
-                   model->vertical_offset == model->position - 6) {
-                    model->vertical_offset++;
-                }
-                if(model->position == count - 1) {
                     model->vertical_offset = 0;
                 }
-                /* fall through */
+                break;
             default:
                 break;
             }
