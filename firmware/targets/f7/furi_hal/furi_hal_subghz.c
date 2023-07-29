@@ -35,7 +35,7 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .regulation = SubGhzRegulationTxRx,
     .async_mirror_pin = NULL,
     .rolling_counter_mult = 1,
-    .ext_module_power_disabled = false,
+    .ext_power_amp = false,
 };
 
 uint8_t furi_hal_subghz_get_rolling_counter_mult(void) {
@@ -52,6 +52,14 @@ void furi_hal_subghz_set_external_power_disable(bool state) {
 
 bool furi_hal_subghz_get_external_power_disable(void) {
     return furi_hal_subghz.ext_module_power_disabled;
+}
+
+void furi_hal_subghz_set_ext_power_amp(bool enabled) {
+    furi_hal_subghz.ext_power_amp = enabled;
+}
+
+bool furi_hal_subghz_get_ext_power_amp() {
+    return furi_hal_subghz.ext_power_amp;
 }
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
