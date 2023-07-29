@@ -131,8 +131,12 @@ void getInitInput() {
   bool has_ap = false;
   bool has_html = false;
   String flipperMessage;
+  unsigned long last_reception = 0;
+
   while (!has_html || !has_ap) {
       if (Serial.available() > 0) {
+        // Save the current reception timestamp.
+        last_reception = millis();
         flipperMessage += Serial.readString();
         // Check if we have received the terminator character.
         if (!flipperMessage.endsWith("\n")) {
@@ -167,6 +171,10 @@ void getInitInput() {
 
         // Clear the string after processing the command.
         flipperMessage.clear();
+      } else if (flipperMessage.length() > 0 && millis() - last_reception > 100) {
+        // If we have a dangling command for more than 100ms, clear flipperMessage.
+        flipperMessage.clear();
+        Serial.println("reception timed out");
       }
   }
   Serial.println("all set");
