@@ -23,6 +23,7 @@
 - [Software Installation](#software-installation)
 - [Software Guide](#software-guide)
 - [Attributions](#attributions)
+- [Contributions](#contributions)
 
 ## Previews <a name="previews"></a>
 
@@ -91,12 +92,12 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 1. Connect your Flipper Zero via USB, or insert your MicroSD.
 2. Navigate to the GitHub actions: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions
 3. Open the most recent action and download the fap zip for either "dev" or "release" build versions of the Flipper Zero firmware.
-4. Move "camerasuite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
+4. Move "camera_suite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
    ```
    .                            # The Flipper Zero MicroSD root.
    ├── apps                     # The Flipper Zero Applications folder.
    |   ├── gpio                 # The Flipper Zero GPIO folder.
-   |   |   ├── camerasuite.fap  # The Camera Suite application.
+   |   |   ├── camera_suite.fap  # The Camera Suite application.
    ```
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
 6. Plug in your ESP32-CAM module to your Flipper Zero.
@@ -127,7 +128,7 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 
 ### Camera Suite settings:
 
-**Orientation** = Rotate the camera image 90 degrees clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
+**Orientation** = Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
 
 **Haptic FX** = Toggle haptic feedback on/off.
 
@@ -145,6 +146,16 @@ by [Dave Lee][github-profile-leedave].
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
+## Contributions <a name="contributions"></a>
+
+1. Fork.
+2. Create a new branch: `<username>/[<issue-#>]-<feature-or-bug-fix-desc>`
+3. Program. Commit changes, push.
+4. Request PR [here][pull-request-link], introduce work via your branch.
+5. Wait for review and merge. Thank you!
+
+<p align="right">[ <a href="#index">Back to top</a> ]</p>
+
 Fin. Thanks for looking and happy programming friend!
 
 Cody
@@ -159,3 +170,4 @@ Cody
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-profile-leedave]: https://github.com/leedave
 [github-profile-z4urce]: https://github.com/Z4urce
+[pull-request-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pulls
