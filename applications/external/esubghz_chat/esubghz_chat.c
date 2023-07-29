@@ -3,8 +3,6 @@
 #include <gui/gui.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
-#include "esubghz_chat_icons.h"
-
 #include "esubghz_chat_i.h"
 
 #define CHAT_LEAVE_DELAY 10
@@ -478,10 +476,26 @@ int32_t esubghz_chat(void) {
         goto err_alloc_kd;
     }
 
+    state->nfc_popup = popup_alloc();
+    if(state->nfc_popup == NULL) {
+        goto err_alloc_np;
+    }
+
     state->subghz_worker = subghz_tx_rx_worker_alloc();
     if(state->subghz_worker == NULL) {
         goto err_alloc_worker;
     }
+
+    state->nfc_worker = nfc_worker_alloc();
+    if(state->nfc_worker == NULL) {
+        goto err_alloc_nworker;
+    }
+
+    state->nfc_dev_data = malloc(sizeof(NfcDeviceData));
+    if(state->nfc_dev_data == NULL) {
+        goto err_alloc_ndevdata;
+    }
+    memset(state->nfc_dev_data, 0, sizeof(NfcDeviceData));
 
     state->crypto_ctx = crypto_ctx_alloc();
     if(state->crypto_ctx == NULL) {
@@ -539,6 +553,8 @@ int32_t esubghz_chat(void) {
         state->view_dispatcher,
         ESubGhzChatView_KeyDisplay,
         dialog_ex_get_view(state->key_display));
+    view_dispatcher_add_view(
+        state->view_dispatcher, ESubGhzChatView_NfcPopup, popup_get_view(state->nfc_popup));
 
     /* get the GUI record and attach the view dispatcher to the GUI */
     /* no error handling here, don't know how */
@@ -558,6 +574,9 @@ int32_t esubghz_chat(void) {
         subghz_tx_rx_worker_stop(state->subghz_worker);
     }
 
+    /* if it is running, stop the NFC worker */
+    nfc_worker_stop(state->nfc_worker);
+
     err = 0;
 
     /* close GUI record */
@@ -569,6 +588,7 @@ int32_t esubghz_chat(void) {
     view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_HexKeyInput);
     view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_ChatBox);
     view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_KeyDisplay);
+    view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_NfcPopup);
 
     /* close notification record */
     furi_record_close(RECORD_NOTIFICATION);
@@ -578,6 +598,12 @@ int32_t esubghz_chat(void) {
     crypto_explicit_bzero(state->hex_key_input_store, sizeof(state->hex_key_input_store));
     crypto_explicit_bzero(state->key_hex_str, sizeof(state->key_hex_str));
     crypto_ctx_clear(state->crypto_ctx);
+
+    /* clear nfc data */
+    if(state->nfc_dev_data->parsed_data != NULL) {
+        furi_string_free(state->nfc_dev_data->parsed_data);
+    }
+    crypto_explicit_bzero(state->nfc_dev_data, sizeof(NfcDeviceData));
 
     /* deinit devices */
     subghz_devices_deinit();
@@ -590,9 +616,18 @@ int32_t esubghz_chat(void) {
     crypto_ctx_free(state->crypto_ctx);
 
 err_alloc_crypto:
+    free(state->nfc_dev_data);
+
+err_alloc_ndevdata:
+    nfc_worker_free(state->nfc_worker);
+
+err_alloc_nworker:
     subghz_tx_rx_worker_free(state->subghz_worker);
 
 err_alloc_worker:
+    popup_free(state->nfc_popup);
+
+err_alloc_np:
     dialog_ex_free(state->key_display);
 
 err_alloc_kd:

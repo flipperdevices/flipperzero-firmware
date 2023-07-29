@@ -39,7 +39,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [DSi Layout for Main Menu (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/de5a8d222d138a7d01f82a265b088b37576b7a0b)
 - Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - OFW: [Fix fbtenv restore #2924 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2924)
-- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Added: [GPIO Controller (By Lokno)](https://github.com/Lokno/gpio_controller)
 - Updated: [USB Mass Storage (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
 - Added: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
@@ -48,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - NULL pointer fixes for [Configurable SPI & UART Channels (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc4c6bdacd7aac9ba8377fddcb966a9ae17da36a)
 - UL: [SubGhz External High Power / External Power AMP modifications (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/62e817f183991596ac3f86889cebb77dc142ed70#diff-03d45d82d88e74ebd92e63db17d8fa296cf1aeb01639a25866fdb72ff8b227d6)
 - Reset menu index when entering scene in CFW Settings app (By Willy-JL)
+- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 
 <a name="release">
 

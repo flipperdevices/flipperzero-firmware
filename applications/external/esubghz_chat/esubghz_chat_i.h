@@ -7,14 +7,18 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/menu.h>
+#include <gui/modules/popup.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
+#include <lib/nfc/nfc_worker.h>
 #include <lib/subghz/subghz_tx_rx_worker.h>
 #include <toolbox/sha256.h>
 
 #include "crypto_wrapper.h"
 #include "scenes/esubghz_chat_scene.h"
+
+#include "esubghz_chat_icons.h"
 
 #define APPLICATION_NAME "ESubGhzChat"
 
@@ -42,11 +46,16 @@ typedef struct {
     uint8_t hex_key_input_store[KEY_BITS / 8];
     DialogEx* key_display;
     char key_hex_str[KEY_HEX_STR_SIZE + 1];
+    Popup* nfc_popup;
 
     // for Sub-GHz
     uint32_t frequency;
     SubGhzTxRxWorker* subghz_worker;
     const SubGhzDevice* subghz_device;
+
+    // for NFC
+    NfcWorker* nfc_worker;
+    NfcDeviceData* nfc_dev_data;
 
     // message assembly before TX
     FuriString* name_prefix;
@@ -81,12 +90,14 @@ typedef enum {
     ESubGhzChatEvent_KeyMenuPassword,
     ESubGhzChatEvent_KeyMenuHexKey,
     ESubGhzChatEvent_KeyMenuGenKey,
+    ESubGhzChatEvent_KeyMenuReadKeyFromNfc,
     ESubGhzChatEvent_PassEntered,
     ESubGhzChatEvent_HexKeyEntered,
     ESubGhzChatEvent_MsgEntered,
     ESubGhzChatEvent_GotoMsgInput,
     ESubGhzChatEvent_GotoKeyDisplay,
-    ESubGhzChatEvent_KeyDisplayBack
+    ESubGhzChatEvent_KeyDisplayBack,
+    ESubGhzChatEvent_KeyDisplayShare,
 } ESubGhzChatEvent;
 
 typedef enum {
@@ -95,6 +106,7 @@ typedef enum {
     ESubGhzChatView_HexKeyInput,
     ESubGhzChatView_ChatBox,
     ESubGhzChatView_KeyDisplay,
+    ESubGhzChatView_NfcPopup,
 } ESubGhzChatView;
 
 void tx_msg_input(ESubGhzChatState* state);

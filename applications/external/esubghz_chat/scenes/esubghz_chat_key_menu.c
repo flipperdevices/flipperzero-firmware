@@ -5,6 +5,7 @@ typedef enum {
     ESubGhzChatKeyMenuItems_Password,
     ESubGhzChatKeyMenuItems_HexKey,
     ESubGhzChatKeyMenuItems_GenKey,
+    ESubGhzChatKeyMenuItems_ReadKeyFromNfc,
 } ESubGhzChatKeyMenuItems;
 
 static void key_menu_cb(void* context, uint32_t index) {
@@ -52,6 +53,11 @@ static void key_menu_cb(void* context, uint32_t index) {
         scene_manager_handle_custom_event(state->scene_manager, ESubGhzChatEvent_KeyMenuGenKey);
         break;
 
+    case ESubGhzChatKeyMenuItems_ReadKeyFromNfc:
+        scene_manager_handle_custom_event(
+            state->scene_manager, ESubGhzChatEvent_KeyMenuReadKeyFromNfc);
+        break;
+
     default:
         break;
     }
@@ -79,6 +85,13 @@ void scene_on_enter_key_menu(void* context) {
         state->menu, "Hex Key", NULL, ESubGhzChatKeyMenuItems_HexKey, key_menu_cb, state);
     menu_add_item(
         state->menu, "Generate Key", NULL, ESubGhzChatKeyMenuItems_GenKey, key_menu_cb, state);
+    menu_add_item(
+        state->menu,
+        "Read Key from NFC",
+        NULL,
+        ESubGhzChatKeyMenuItems_ReadKeyFromNfc,
+        key_menu_cb,
+        state);
 
     view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Menu);
 }
@@ -111,6 +124,12 @@ bool scene_on_event_key_menu(void* context, SceneManagerEvent event) {
         /* switch to hex key input scene */
         case ESubGhzChatEvent_KeyMenuHexKey:
             scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_HexKeyInput);
+            consumed = true;
+            break;
+
+        /* switch to hex key read scene */
+        case ESubGhzChatEvent_KeyMenuReadKeyFromNfc:
+            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeyReadPopup);
             consumed = true;
             break;
         }

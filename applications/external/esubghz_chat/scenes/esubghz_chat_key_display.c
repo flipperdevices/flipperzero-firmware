@@ -9,6 +9,13 @@ void key_display_result_cb(DialogExResult result, void* context) {
         scene_manager_handle_custom_event(state->scene_manager, ESubGhzChatEvent_KeyDisplayBack);
         break;
 
+    case DialogExResultCenter:
+        if(state->encrypted) {
+            scene_manager_handle_custom_event(
+                state->scene_manager, ESubGhzChatEvent_KeyDisplayShare);
+        }
+        break;
+
     default:
         break;
     }
@@ -80,6 +87,10 @@ void scene_on_enter_key_display(void* context) {
 
     dialog_ex_set_left_button_text(state->key_display, "Back");
 
+    if(state->encrypted) {
+        dialog_ex_set_center_button_text(state->key_display, "Share");
+    }
+
     dialog_ex_set_result_callback(state->key_display, key_display_result_cb);
     dialog_ex_set_context(state->key_display, state);
 
@@ -103,6 +114,12 @@ bool scene_on_event_key_display(void* context, SceneManagerEvent event) {
             if(!scene_manager_previous_scene(state->scene_manager)) {
                 view_dispatcher_stop(state->view_dispatcher);
             }
+            consumed = true;
+            break;
+
+        /* open key sharing popup */
+        case ESubGhzChatEvent_KeyDisplayShare:
+            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeySharePopup);
             consumed = true;
             break;
         }
