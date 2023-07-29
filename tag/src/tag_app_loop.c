@@ -5,6 +5,7 @@
 static void tag_app_start_playing(TagAppState* state) {
     furi_mutex_acquire(state->data_mutex, FuriWaitForever);
     tag_ir_rx_start(tag_ir_callback_decode_to_queue, state->queue);
+    state->data->energy = 0.0; // start empty
     state->mode = TagAppModePlaying;
     furi_mutex_release(state->data_mutex);
 }
@@ -58,15 +59,24 @@ static bool tag_app_handle_input(TagAppState* state, InputEvent input) {
     return false;
 }
 
-void tag_app_game_loop_run(TagAppState* state, uint32_t duration_s) {
-    view_port_update(state->view_port); // make an initial update before the loop starts
-    uint32_t start = furi_hal_rtc_get_timestamp();
+void tag_app_game_loop_recover_energy(TagAppState* state, uint32_t delta) {
+    if(state->data->energy < ENERGY_MAX) {
+        state->data->energy += ENERGY_MAX * (delta / ENERGY_RECOVERY_ms);
+        if(state->data->energy > ENERGY_MAX) state->data->energy = ENERGY_MAX;
+    }
+}
 
+void tag_app_game_loop_run(TagAppState* state) {
     FURI_LOG_I(TAG, "Starting run loop...");
+    view_port_update(state->view_port); // make an initial update before the loop starts
+    uint32_t previous_loop_timestamp = furi_hal_rtc_get_timestamp();
     TagEvent event;
     state->running = true;
     while(state->running) {
-        switch(furi_message_queue_get(state->queue, &event, 500)) {
+        uint32_t delta = furi_hal_rtc_get_timestamp() - previous_loop_timestamp;
+
+        // fetch the next message (with a small timeout if none)
+        switch(furi_message_queue_get(state->queue, &event, LOOP_MESSAGE_TIMEOUT_ms)) {
         case FuriStatusOk:
             FURI_LOG_I(TAG, "Event from queue: %d", event.type);
             bool updated = false;
@@ -106,20 +116,16 @@ void tag_app_game_loop_run(TagAppState* state, uint32_t duration_s) {
             tag_app_error(state);
         }
 
-        // TODO: this is for testing - remove when there are end conditions for the app
-        // if duration_s > 0 secs then check for the finish time
-        if(state->running && duration_s > 0) {
-            uint32_t now = furi_hal_rtc_get_timestamp();
-            uint32_t duration = now - start;
-            if(duration > duration_s) {
-                FURI_LOG_I(TAG, "Finishing the run loop");
-                tag_app_quit(state);
-            }
-        } // duration check
+        // do things that always happen in each loop
+        tag_app_game_loop_recover_energy(state, delta);
 
+        // exit the application if necessary
         if(state->mode == TagAppModeQuit || state->mode == TagAppModeError) {
             state->running = false;
         }
+
+        // prepare for next iteration of the loop
+        previous_loop_timestamp += delta;
     } // run loop
     FURI_LOG_I(TAG, "Run loop completed");
 }

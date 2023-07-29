@@ -60,7 +60,7 @@ int32_t tag_game_app(void* p) {
 
     // start the main loop
     FURI_LOG_I(TAG, "Starting the main loop");
-    tag_app_game_loop_run(state, 0);
+    tag_app_game_loop_run(state);
 
     FURI_LOG_I(TAG, "Tearing down app");
     tag_ir_destroy();

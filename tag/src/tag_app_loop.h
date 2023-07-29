@@ -7,6 +7,6 @@
 #include <gui/gui.h>
 #include "tag_app.h"
 
-void tag_app_game_loop_run(TagAppState* state, uint32_t duration_s);
+void tag_app_game_loop_run(TagAppState* state);
 
 #endif

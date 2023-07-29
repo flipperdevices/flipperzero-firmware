@@ -11,6 +11,10 @@
 
 #define TAG "tag"
 
+#define LOOP_MESSAGE_TIMEOUT_ms 500
+#define ENERGY_MAX 50.0
+#define ENERGY_RECOVERY_ms 10000
+
 typedef enum {
     TagEventTypeInput,
     TagEventTypeSubGhzDataDetected,
@@ -36,7 +40,7 @@ typedef struct {
     uint32_t start;
     uint8_t total_damage;
     uint8_t total_hits;
-    uint8_t current_energy;
+    float_t energy;
     uint32_t last_ir_address;
     uint32_t last_ir_command;
     FuriString* string_buffer;

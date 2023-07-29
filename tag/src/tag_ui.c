@@ -49,10 +49,32 @@ static void tag_ui_render_mode(Canvas* canvas, TagAppState* state) {
     }
 }
 
+#define HEALTH_BAR_left 67
+#define HEALTH_BAR_width 50
+#define HEALTH_BAR_bottom 48
+#define HEALTH_BAR_height 8
+
 static void tag_ui_render_play(Canvas* canvas, TagAppState* state) {
     FURI_LOG_T(TAG, "tag_ui_render_play");
     UNUSED(state);
     canvas_draw_icon(canvas, 0, 0, &I_background);
+
+    if(state->data->energy < ENERGY_MAX) {
+        uint8_t removal_width =
+            state->data->energy * ((float)HEALTH_BAR_width / (float)ENERGY_MAX);
+        canvas_set_color(canvas, ColorWhite);
+
+        char* comment;
+        asprintf(&comment, "nrg: %f", (double)state->data->energy); // TODO: no worky
+        canvas_draw_str(canvas, 0, 20, comment);
+
+        canvas_draw_box(
+            canvas,
+            (HEALTH_BAR_left + HEALTH_BAR_width) - removal_width,
+            HEALTH_BAR_bottom,
+            removal_width,
+            HEALTH_BAR_height);
+    }
 }
 
 static void tag_ui_render_callback(Canvas* canvas, void* context) {
