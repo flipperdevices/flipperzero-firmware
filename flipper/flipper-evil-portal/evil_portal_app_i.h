@@ -64,9 +64,6 @@ struct Evil_PortalApp {
     bool sent_reset;
     int BAUDRATE;
     char text_store[2][128 + 1];
-
-    uint8_t* index_html;
-    uint8_t* ap_name;
 };
 
 typedef enum {

@@ -1,6 +1,7 @@
 #include "evil_portal_app_i.h"
 #include "evil_portal_uart.h"
 #include "helpers/evil_portal_storage.h"
+#include "helpers/evil_portal_commands.h"
 
 struct Evil_PortalUart {
     Evil_PortalApp* app;
@@ -54,20 +55,9 @@ static int32_t uart_worker(void* context) {
                                         SET_AP_CMD,
                                         uart->app->command_queue[uart->app->command_index],
                                         strlen(SET_AP_CMD))) {
-                                FuriString* out_data = furi_string_alloc();
-
-                                furi_string_cat(out_data, "setap=");
-                                furi_string_cat(out_data, (char*)uart->app->ap_name);
-
-                                evil_portal_uart_tx(
-                                    (uint8_t*)(furi_string_get_cstr(out_data)),
-                                    strlen(furi_string_get_cstr(out_data)));
-                                evil_portal_uart_tx((uint8_t*)("\n"), 1);
-
-                                uart->app->sent_ap = true;
-
-                                free(out_data);
-                                free(uart->app->ap_name);
+                                Storage* storage = evil_portal_open_storage();
+                                uart->app->sent_ap = evil_portal_set_ap_name(storage);
+                                evil_portal_close_storage();
                             }
 
                             uart->app->command_index = 0;

@@ -1,10 +1,10 @@
 #include "evil_portal_storage.h"
 
-static Storage* evil_portal_open_storage() {
-    return furi_record_open(RECORD_STORAGE);
+Storage* evil_portal_open_storage() {
+  return furi_record_open(RECORD_STORAGE);
 }
 
-static void evil_portal_close_storage() {
+void evil_portal_close_storage() {
     furi_record_close(RECORD_STORAGE);
 }
 

@@ -1,5 +1,6 @@
 #include "../evil_portal_app_i.h"
 #include "../helpers/evil_portal_storage.h"
+#include "../helpers/evil_portal_commands.h"
 
 void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
@@ -104,22 +105,9 @@ void evil_portal_scene_console_output_on_enter(void* context) {
 
     if(app->is_command && app->selected_tx_string) {
         if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
-            evil_portal_read_index_html(context);
-
-            FuriString* data = furi_string_alloc();
-            furi_string_cat(data, "sethtml=");
-            furi_string_cat(data, (char*)app->index_html);
-
-            evil_portal_uart_tx(
-                (uint8_t*)(furi_string_get_cstr(data)), strlen(furi_string_get_cstr(data)));
-            evil_portal_uart_tx((uint8_t*)("\n"), 1);
-
-            app->sent_html = true;
-
-            free(data);
-            free(app->index_html);
-
-            evil_portal_read_ap_name(context);
+            Storage *storage = evil_portal_open_storage();
+            app->sent_html = evil_portal_set_html(storage, EVIL_PORTAL_INDEX_SAVE_PATH);
+            evil_portal_close_storage();
         } else if(0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
             app->sent_html = false;
             app->sent_ap = false;
