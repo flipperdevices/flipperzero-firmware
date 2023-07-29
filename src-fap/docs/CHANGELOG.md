@@ -22,7 +22,7 @@
 
 - Builds upon Z4urce's software found here (updated 6 months ago): https://github.com/Z4urce/flipperzero-camera
 - Utilizes the superb C boilerplate examples laid out by leedave (updated last month): https://github.com/leedave/flipper-zero-fap-boilerplate
-- Builds upon the "[ESP32] Camera" software into the new "[ESP32] Camera Suite" application with new usage:
+- Builds upon the "Camera" software into the new "Camera Suite" application with new usage:
   - Add a scene for a guide.
   - Add a scene for settings.
   - Add ability to rotate the camera orientation.
