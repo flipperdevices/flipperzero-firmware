@@ -1,0 +1,15 @@
+App(
+    appid="gps_adv_wifi_sniffer",
+    name="[GPS] Advanced Wifi Sniffer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="wifisniffer_app",
+    stack_size=2 * 1024,
+    fap_category="GPIO/ESP32",
+    fap_icon="sniff.png",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="wifisniffer",
+    fap_author="Sil333033",
+    fap_weburl="https://github.com/Sil333033",
+    fap_version=(1, 0),
+    fap_description="Advanced wifi sniffer for ESP32 GPS",
+)
