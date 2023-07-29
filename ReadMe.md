@@ -133,6 +133,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon) - `A letter/number Morse beacon on 125 kHz`
 - [Enhanced Sub-GHz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms/tree/main)
+- [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
 
 --- 
 
