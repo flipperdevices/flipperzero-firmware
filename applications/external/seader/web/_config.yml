@@ -26,6 +26,10 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://seader.ericbetts.dev" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  bettse
 gitlab_username:  bettse
+linkedin_username: eric-betts
+mastodon:
+  - username: bettse
+    instance: defcon.social
 
 responsive_image:
   template: _includes/responsive-image.html
