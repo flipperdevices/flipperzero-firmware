@@ -51,6 +51,7 @@ static int32_t uart_worker(void* context) {
         }
     }
 
+    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
     furi_stream_buffer_free(uart->rx_stream);
 
     return 0;
@@ -95,7 +96,6 @@ void uart_terminal_uart_free(UART_TerminalUart* uart) {
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 
-    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
     if(UART_CH == FuriHalUartIdLPUART1) {
         furi_hal_uart_deinit(UART_CH);
     } else {
