@@ -172,7 +172,7 @@ void getInitInput() {
         // Clear the string after processing the command.
         flipperMessage.clear();
       } else if (flipperMessage.length() > 0 && millis() - last_reception > 100) {
-        // If we have a dangling command for more than 100ms, clear flipperMessage.
+        // If we have a dangling command for more than 100ms clear flipperMessage.
         flipperMessage.clear();
         Serial.println("reception timed out");
       }
