@@ -25,6 +25,7 @@ Ublox* ublox_alloc() {
   ublox->worker = ublox_worker_alloc();
   
   ublox->gui = furi_record_open(RECORD_GUI);
+  view_dispatcher_attach_to_gui(ublox->view_dispatcher, ublox->gui, ViewDispatcherTypeFullscreen);
 
   ublox->submenu = submenu_alloc();
   view_dispatcher_add_view(ublox->view_dispatcher, UbloxViewMenu, submenu_get_view(ublox->submenu));
@@ -87,13 +88,11 @@ int32_t ublox_app(void* p) {
   
   Ublox* ublox = ublox_alloc();
 
-  view_dispatcher_attach_to_gui(ublox->view_dispatcher, ublox->gui, ViewDispatcherTypeFullscreen);
-  
   scene_manager_next_scene(ublox->scene_manager, UbloxSceneStart);
 
   view_dispatcher_run(ublox->view_dispatcher);
   
-  // force restore the default backlight
+  // force restore the default backlight on exit
   notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
 
   ublox_free(ublox);

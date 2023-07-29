@@ -88,10 +88,12 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 	notification_message(ublox->notifications, &sequence_new_reading);
       }
 
-      // Not setting the NAV messages in the data display seems to help...?
-      // (so many things have "seemed to help" that it's immensely confusing).
-
-      // disabling refresh in the with_view_model() call in the update function kinda helps
+      if ((ublox->data_display_state).view_mode == UbloxDataDisplayViewModeHandheld) {
+	  data_display_set_state(ublox->data_display, DataDisplayHandheldMode);
+      } else if ((ublox->data_display_state).view_mode == UbloxDataDisplayViewModeCar) {
+	  data_display_set_state(ublox->data_display, DataDisplayCarMode);
+      }
+      
       data_display_set_nav_messages(ublox->data_display, ublox->nav_pvt, ublox->nav_odo);
 
       // There used to be a "set view_mode" if/else here. I don't
@@ -100,11 +102,9 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
       // (and the leakage "automatically" fixes itself: some memory
       // will be incorrectly allocated but then fixed).
 
-      // The upshot is that we used to refresh the data display scene
-      // 3 times in this callback. I suspect that the view handling
-      // code in the OS is good but not perfect, and holds on to
-      // memory for longer than it needs to. Reducing the number of
-      // total updates has helped.
+      // Sometimes, however, it comes back. I think the app might not
+      // be freeing all the memory it's supposed to, causing issues
+      // the next time it's run.
       
     } else if (event.event == UbloxWorkerEventFailed) {
       FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
