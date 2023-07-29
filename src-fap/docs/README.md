@@ -8,7 +8,7 @@ Firmware is needed for the ESP32-CAM module, see here for more information: http
 
 ## Software Guide
 
-### Button mappings:
+Button mappings:
 
 **Up** = Contrast Up
 
@@ -22,7 +22,7 @@ Firmware is needed for the ESP32-CAM module, see here for more information: http
 
 **Back** = Go back.
 
-### Settings:
+Settings:
 
 **Orientation** = Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
 
