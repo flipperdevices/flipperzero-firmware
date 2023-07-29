@@ -97,7 +97,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [MH-Z19 - CO2 sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon)
-- [Evil captive portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - WIP
+- [Evil captive portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - WIP -> +2 new features [by leedave](https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename)
 - [ESP Flasher (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP32-C6 Gravity terminal (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
