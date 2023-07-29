@@ -32,7 +32,6 @@ bool evil_portal_set_html(Storage *storage, const char* path) {
     furi_assert(storage, "storage is null");
     furi_assert(path, "the html file path is null");
 
-    // Start the html set sending to the esp the command, use -1 to exclude the string terminator bytes.
     evil_portal_uart_tx((uint8_t*) "sethtml=", 8);
 
     bool html_sent = send_file_over_uart(storage, path);
@@ -45,7 +44,6 @@ bool evil_portal_set_html(Storage *storage, const char* path) {
         evil_portal_uart_tx((uint8_t*) error_message, strlen(error_message));
     }
 
-    // Send the commands terminator.
     evil_portal_uart_tx((uint8_t*) "\n", 1);
 
     return true;
@@ -55,7 +53,6 @@ bool evil_portal_set_ap_name(Storage *storage, const char *ap_config_path) {
     furi_assert(storage, "storage is null");
     furi_assert(ap_config_path, "the ap config path is null");
 
-    // Start the html set sending to the esp the command, use -1 to exclude the string terminator bytes.
     evil_portal_uart_tx((uint8_t*) "setap=", 6);
 
     bool ap_name_sent = send_file_over_uart(storage, ap_config_path);
@@ -65,7 +62,6 @@ bool evil_portal_set_ap_name(Storage *storage, const char *ap_config_path) {
         evil_portal_uart_tx((uint8_t*) default_name, strlen(default_name));
     }
 
-    // Send the commands terminator.
     evil_portal_uart_tx((uint8_t*) "\n", 1);
     return true;
 }
