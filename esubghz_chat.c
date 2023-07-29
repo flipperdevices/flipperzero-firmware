@@ -648,6 +648,12 @@ int32_t esubghz_chat(void)
 	crypto_explicit_bzero(state->key_hex_str, sizeof(state->key_hex_str));
 	crypto_ctx_clear(state->crypto_ctx);
 
+	/* clear nfc data */
+	if (state->nfc_dev_data->parsed_data != NULL) {
+		furi_string_free(state->nfc_dev_data->parsed_data);
+	}
+	crypto_explicit_bzero(state->nfc_dev_data, sizeof(NfcDeviceData));
+
 	/* deinit devices */
 	subghz_devices_deinit();
 
