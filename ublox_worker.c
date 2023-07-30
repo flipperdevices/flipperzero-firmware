@@ -105,18 +105,19 @@ void ublox_read_messages(void* context) {
     // break the loop when the thread state changes
     while(ublox_worker->state == UbloxWorkerStateRead) {
 	ublox_worker_read_pvt(ublox_worker);
+	// this makes the read process much faster
+	clear_ublox_data();
 	ublox_worker_read_odo(ublox_worker);
 	ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
-        // don't try to do tricky non-blocking delays here, they
-	// break other things like the backlight timeout
-	furi_delay_ms(furi_ms_to_ticks(((ublox->data_display_state).refresh_rate * 1000)));
-	/*uint32_t ticks = furi_get_tick();
-	while (furi_get_tick() - ticks < furi_ms_to_ticks(10000)) {
+        // sometimes fancy non-blocking delays like the one below seem
+        // to cause things in the system to not work, like the backlight timeout.
+	uint32_t ticks = furi_get_tick();
+	while (furi_get_tick() - ticks < furi_ms_to_ticks(((ublox->data_display_state).refresh_rate * 1000))) {
 	    if (ublox_worker->state != UbloxWorkerStateRead) {
 		furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 		return;
 	    }
-	    }*/
+	}
     }
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
@@ -165,8 +166,7 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
     // more bytes make it so that the data is completely read out and no
     // longer available?)
 
-
-    // this loop is slow
+    //FURI_LOG_I(TAG, "start ticks at %lu", furi_get_tick()); // returns ms
     while(true) {
 	if(!furi_hal_i2c_rx(
 	       &furi_hal_i2c_handle_external,
@@ -180,6 +180,7 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
 	
         // checking with 0xb5 prevents strange bursts of junk data from becoming an issue.
         if(response[0] != 0xff && response[0] == 0xb5) {
+	    //FURI_LOG_I(TAG, "read rest of message at %lu", furi_get_tick());
             if(!furi_hal_i2c_rx(
                    &furi_hal_i2c_handle_external,
                    UBLOX_I2C_ADDRESS << 1,
