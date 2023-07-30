@@ -7,6 +7,7 @@
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_bus.h>
+#include <furi_hal_subghz.h>
 
 #include <stm32wbxx_ll_dma.h>
 #include <furi_hal_cortex.h>
@@ -204,7 +205,8 @@ bool subghz_device_cc1101_ext_alloc() {
              &furi_hal_spi_bus_handle_external_extra);
 
     // this is needed if multiple SPI devices are connected to the same bus but with different CS pins
-    if(CFW_SETTINGS()->spi_cc1101_handle == SpiDefault) {
+    if(CFW_SETTINGS()->spi_cc1101_handle == SpiDefault &&
+       !furi_hal_subghz_get_ext_power_amp()) {
         furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
         furi_hal_gpio_write(&gpio_ext_pc3, true);
     } else if(CFW_SETTINGS()->spi_cc1101_handle == SpiExtra) {
