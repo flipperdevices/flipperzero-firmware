@@ -125,7 +125,6 @@ int32_t ublox_worker_task(void* context) {
     UbloxWorker* ublox_worker = context;
 
     if(ublox_worker->state == UbloxWorkerStateRead) {
-	// this lasts
 	ublox_read_messages(context);
     } else if(ublox_worker->state == UbloxWorkerStateResetOdometer) {
         ublox_worker_reset_odo(ublox_worker);
