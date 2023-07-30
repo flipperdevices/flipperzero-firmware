@@ -172,8 +172,12 @@ bool tpms_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             app->txrx->rx_key_state = TPMSRxKeyStateIDLE;
             tpms_preset_init(
                 app, "AM650", subghz_setting_get_default_frequency(app->setting), NULL, 0);
-            scene_manager_search_and_switch_to_previous_scene(app->scene_manager, TPMSSceneStart);
-            consumed = true;
+            if(scene_manager_has_previous_scene(app->scene_manager, TPMSSceneStart)) {
+                consumed = scene_manager_search_and_switch_to_previous_scene(
+                    app->scene_manager, TPMSSceneStart);
+            } else {
+                scene_manager_next_scene(app->scene_manager, TPMSSceneStart);
+            }
             break;
         case TPMSCustomEventViewReceiverOK:
             app->txrx->idx_menu_chosen = tpms_view_receiver_get_idx_menu(app->tpms_receiver);

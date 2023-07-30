@@ -112,7 +112,7 @@ TPMSApp* tpms_app_alloc() {
 
     furi_hal_power_suppress_charge_enter();
 
-    scene_manager_next_scene(app->scene_manager, TPMSSceneStart);
+    scene_manager_next_scene(app->scene_manager, TPMSSceneReceiver);
 
     return app;
 }
