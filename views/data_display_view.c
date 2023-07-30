@@ -29,6 +29,7 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         // TODO: check invalidLlh flag in flags3
         Ublox_NAV_PVT_Message message = m->nav_pvt;
         Ublox_NAV_ODO_Message nav_odo = m->nav_odo;
+	UNUSED(nav_odo);
         FuriString* s = furi_string_alloc();
         elements_button_left(canvas, "Config");
         elements_button_center(canvas, "Reset");
@@ -63,11 +64,13 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
 
         /*** Draw odometer ***/
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 74, 9, "Odo:");
+        //canvas_draw_str(canvas, 74, 9, "Odo:");
+	furi_string_printf(s, "%d", memmgr_get_free_heap());
+	canvas_draw_str(canvas, 74, 9, furi_string_get_cstr(s));
 
         canvas_set_font(canvas, FontSecondary);
-        furi_string_printf(s, "%.1f", (double)(nav_odo.distance / 1e3));
-        canvas_draw_str(canvas, 100, 9, furi_string_get_cstr(s));
+        //furi_string_printf(s, "%.1f", (double)(nav_odo.distance / 1e3));
+        //canvas_draw_str(canvas, 100, 9, furi_string_get_cstr(s));
 
         /*** Draw latitude ***/
         canvas_set_font(canvas, FontPrimary);

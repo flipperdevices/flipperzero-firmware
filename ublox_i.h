@@ -36,7 +36,6 @@ struct Ublox {
     NotificationApp* notifications;
 
     UbloxWorker* worker;
-    FuriTimer* timer;
 
     Ublox_NAV_PVT_Message nav_pvt;
     Ublox_NAV_ODO_Message nav_odo;
