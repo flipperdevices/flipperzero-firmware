@@ -172,7 +172,7 @@ TPMSHistoryStateAddKey
     } while(false);
     flipper_format_free(fff);
 
-    //Update record if found
+    // Update record if found
     bool sensor_found = false;
     for(size_t i = 0; i < TPMSHistoryItemArray_size(instance->history->data); i++) {
         TPMSHistoryItem* item = TPMSHistoryItemArray_get(instance->history->data, i);
@@ -216,25 +216,14 @@ TPMSHistoryStateAddKey
                 FURI_LOG_E(TAG, "Rewind error");
                 break;
             }
-            uint8_t key_data[sizeof(uint64_t)] = {0};
-            if(!flipper_format_read_hex(item->flipper_string, "Data", key_data, sizeof(uint64_t))) {
-                FURI_LOG_E(TAG, "Missing Data");
-                break;
-            }
-            uint64_t data = 0;
-            for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-                data = (data << 8) | key_data[i];
-            }
-            uint32_t temp_data = 0;
-            if(!flipper_format_read_uint32(item->flipper_string, "Id", &temp_data, 1)) {
+            uint32_t id = 0;
+            if(!flipper_format_read_uint32(item->flipper_string, "Id", &id, 1)) {
                 FURI_LOG_E(TAG, "Missing Id");
                 break;
             }
-            furi_string_cat_printf(instance->tmp_string, "%X", (uint8_t)temp_data);
+            furi_string_cat_printf(instance->tmp_string, " %lX", id);
 
-            furi_string_printf(
-                item->item_str, "%s %llX", furi_string_get_cstr(instance->tmp_string), data);
-
+            furi_string_set(item->item_str, instance->tmp_string);
         } while(false);
         instance->last_index_write++;
         return TPMSHistoryStateAddKeyNewDada;

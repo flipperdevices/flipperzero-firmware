@@ -46,7 +46,7 @@ Data layout:
 static const SubGhzBlockConst tpms_protocol_schrader_gg4_const = {
     .te_short = 120,
     .te_long = 240,
-    .te_delta = 55, // 50% of te_short due to bad sensitivity
+    .te_delta = 55, // 50% of te_short due to poor sensitivity
     .min_count_bit_for_found = 64,
 };
 
@@ -151,7 +151,7 @@ static void tpms_protocol_schrader_gg4_analyze(TPMSBlockGeneric* instance) {
     instance->battery_low = TPMS_NO_BATT;
 
     instance->temperature = ((instance->data >> 8) & 0xFF) - 50;
-    instance->pressure = ((instance->data >> 16) & 0xFF) * 2.5 / 0.069;
+    instance->pressure = ((instance->data >> 16) & 0xFF) * 2.5 * 0.069;
 }
 
 static ManchesterEvent level_and_duration_to_event(bool level, uint32_t duration) {

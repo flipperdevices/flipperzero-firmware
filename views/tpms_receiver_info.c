@@ -51,18 +51,8 @@ void tpms_view_receiver_info_draw(Canvas* canvas, TPMSReceiverInfoModel* model) 
         model->generic->data_count_bit);
     canvas_draw_str(canvas, 0, 8, buffer);
 
-    // if(model->generic->channel != TPMS_NO_CHANNEL) {
-    //     snprintf(buffer, sizeof(buffer), "Ch: %01d", model->generic->channel);
-    //     canvas_draw_str(canvas, 106, 8, buffer);
-    // }
-
     snprintf(buffer, sizeof(buffer), "ID: 0x%lX", model->generic->id);
     canvas_draw_str(canvas, 0, 20, buffer);
-
-    // if(model->generic->btn != TPMS_NO_BTN) {
-    //     snprintf(buffer, sizeof(buffer), "Btn: %01d", model->generic->btn);
-    //     canvas_draw_str(canvas, 57, 20, buffer);
-    // }
 
     if(model->generic->battery_low != TPMS_NO_BATT) {
         snprintf(
@@ -70,8 +60,8 @@ void tpms_view_receiver_info_draw(Canvas* canvas, TPMSReceiverInfoModel* model) 
         canvas_draw_str_aligned(canvas, 126, 17, AlignRight, AlignCenter, buffer);
     }
 
-    snprintf(buffer, sizeof(buffer), "Data: 0x%llX", model->generic->data);
-    canvas_draw_str(canvas, 0, 32, buffer);
+    // snprintf(buffer, sizeof(buffer), "Data: 0x%llX", model->generic->data);
+    // canvas_draw_str(canvas, 0, 32, buffer);
 
     elements_bold_rounded_frame(canvas, 0, 38, 127, 25);
     canvas_set_font(canvas, FontPrimary);
@@ -82,26 +72,26 @@ void tpms_view_receiver_info_draw(Canvas* canvas, TPMSReceiverInfoModel* model) 
     uint8_t temp_x1 = 0;
     uint8_t temp_x2 = 0;
     if(furi_hal_rtc_get_locale_units() == FuriHalRtcLocaleUnitsMetric) {
-        snprintf(buffer, sizeof(buffer), "%3.1f C", (double)model->generic->temperature);
+        snprintf(buffer, sizeof(buffer), "%2.0f C", (double)model->generic->temperature);
         if(model->generic->temperature < -9.0f) {
-            temp_x1 = 49;
-            temp_x2 = 40;
+            temp_x1 = 42;
+            temp_x2 = 33;
         } else {
-            temp_x1 = 47;
-            temp_x2 = 38;
+            temp_x1 = 40;
+            temp_x2 = 30;
         }
     } else {
         snprintf(
             buffer,
             sizeof(buffer),
-            "%3.1f F",
+            "%3.0f F",
             (double)locale_celsius_to_fahrenheit(model->generic->temperature));
         if((model->generic->temperature < -27.77f) || (model->generic->temperature > 37.77f)) {
-            temp_x1 = 50;
-            temp_x2 = 42;
+            temp_x1 = 43;
+            temp_x2 = 35;
         } else {
-            temp_x1 = 48;
-            temp_x2 = 40;
+            temp_x1 = 41;
+            temp_x2 = 33;
         }
     }
 
@@ -109,14 +99,14 @@ void tpms_view_receiver_info_draw(Canvas* canvas, TPMSReceiverInfoModel* model) 
     canvas_draw_circle(canvas, temp_x2, 46, 1);
 
     // Pressure
-    canvas_draw_icon(canvas, 53, 44, &I_Humid_8x13);
-    snprintf(buffer, sizeof(buffer), "%2.1f", (double)model->generic->pressure);
-    canvas_draw_str(canvas, 64, 55, buffer);
+    canvas_draw_icon(canvas, 46, 43, &I_Press_7x16);
+    snprintf(buffer, sizeof(buffer), "%2.1fbar", (double)model->generic->pressure);
+    canvas_draw_str(canvas, 56, 55, buffer);
 
     if((int)model->generic->timestamp > 0 && model->curr_ts) {
         int ts_diff = (int)model->curr_ts - (int)model->generic->timestamp;
 
-        canvas_draw_icon(canvas, 91, 46, &I_Timer_11x11);
+        canvas_draw_icon(canvas, 92, 46, &I_Timer_11x11);
 
         if(ts_diff > 60) {
             int tmp_sec = ts_diff;
@@ -127,13 +117,13 @@ void tpms_view_receiver_info_draw(Canvas* canvas, TPMSReceiverInfoModel* model) 
             }
 
             if(model->curr_ts % 2 == 0) {
-                canvas_draw_str_aligned(canvas, 105, 51, AlignLeft, AlignCenter, "Old");
+                canvas_draw_str_aligned(canvas, 106, 51, AlignLeft, AlignCenter, "Old");
             } else {
                 if(cnt_min >= 59) {
-                    canvas_draw_str_aligned(canvas, 105, 51, AlignLeft, AlignCenter, "Old");
+                    canvas_draw_str_aligned(canvas, 106, 51, AlignLeft, AlignCenter, "Old");
                 } else {
                     snprintf(buffer, sizeof(buffer), "%dm", cnt_min);
-                    canvas_draw_str_aligned(canvas, 114, 51, AlignCenter, AlignCenter, buffer);
+                    canvas_draw_str_aligned(canvas, 115, 51, AlignCenter, AlignCenter, buffer);
                 }
             }
 
