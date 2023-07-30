@@ -18,5 +18,6 @@ App(
     #         name="loclass",
     #     ),
     # ],
-    # fap_icon_assets="icons",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="uhf_rfid",
 )

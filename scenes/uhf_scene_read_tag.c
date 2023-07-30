@@ -2,9 +2,13 @@
 #include <dolphin/dolphin.h>
 
 void uhf_read_tag_worker_callback(UHFWorkerEvent event, void* ctx) {
-    UNUSED(event);
     UHFApp* uhf_app = ctx;
-    view_dispatcher_send_custom_event(uhf_app->view_dispatcher, UHFCustomEventWorkerExit);
+    if(event == UHFWorkerEventSuccess) {
+        view_dispatcher_send_custom_event(uhf_app->view_dispatcher, UHFCustomEventWorkerExit);
+    }
+    // } else if(event == UHFWorkerEventAborted) {
+    //     scene_manager_search_and_switch_to_previous_scene(uhf_app->scene_manager, UHFSceneStart);
+    // }
 }
 
 void uhf_scene_read_tag_on_enter(void* ctx) {
@@ -22,30 +26,16 @@ void uhf_scene_read_tag_on_enter(void* ctx) {
     uhf_worker_start(uhf_app->worker, UHFWorkerStateDetect, uhf_read_tag_worker_callback, uhf_app);
 
     uhf_blink_start(uhf_app);
-
-    // furi_delay_ms(2000);
-    // view_dispatcher_send_custom_event(uhf_app->view_dispatcher, UHFCustomEventWorkerExit);
 }
 
 bool uhf_scene_read_tag_on_event(void* ctx, SceneManagerEvent event) {
+    // UNUSED(ctx);
     UHFApp* uhf_app = ctx;
     bool consumed = false;
-    uint8_t cmd[] = {0xBB, 0x00, 0x22, 0x00, 0x00, 0x22, 0x7E};
-    // while(uhf_worker->state != UHFWorkerStateStop || !first_data->data_full) {
-    FURI_LOG_E("uhf_scene_read_tag_on_event", "sending single polling command");
-    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, 7);
-    if(uhf_app->worker->data->data->data_full) {
+    if(event.event == UHFCustomEventWorkerExit) {
+        FURI_LOG_E("uhf_scene_read_tag_on_event", "event was registered");
         scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadTagSuccess);
         consumed = true;
-    }
-    // FURI_LOG_E("33", "uhf_scene_read_tag_on_event was called! event.event: %lu", event.event);
-    if(event.type == SceneManagerEventTypeCustom) {
-        // FURI_LOG_E("36", "SceneManagerEventTypeCustom");
-        if(event.event == UHFCustomEventWorkerExit) {
-            uhf_app->worker->state = UHFWorkerStateStop;
-            // scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadTagSuccess);
-            consumed = true;
-        }
     }
     return consumed;
 }

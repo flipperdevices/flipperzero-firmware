@@ -1,5 +1,5 @@
 #include "uhf_worker.h"
-// #include "uhf_cmd.h"
+#include "uhf_cmd.h"
 
 void single_poll_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
     UNUSED(event);
@@ -9,21 +9,23 @@ void single_poll_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
 }
 
 UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
-    // UNUSED(uhf_worker);
-    // furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, single_poll_rx_callback, uhf_worker->data);
-    // UHFData* first_data = uhf_worker->data->data;
-
-    // furi_delay_ms(1000);
-    // FURI_LOG_E("read_single_card", "waiting on read");
-    // }
+    UHFResponseData* uhf_response_data = uhf_worker->data;
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, single_poll_rx_callback, uhf_response_data);
+    UHFData* uhf_data = uhf_response_data->data;
+    uhf_data_reset(uhf_data);
+    while(!uhf_data->end) {
+        furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SINGLE_POLLING.cmd, CMD_SINGLE_POLLING.length);
+        furi_delay_ms(100);
+        if(uhf_worker->state == UHFWorkerStateStop) {
+            return UHFWorkerEventAborted;
+        }
+    }
     return UHFWorkerEventSuccess;
 }
 
 int32_t uhf_worker_task(void* ctx) {
     UHFWorker* uhf_worker = ctx;
-    // // FURI_LOG_E("uhf_worker", "worker callback has been called");
     if(uhf_worker->state == UHFWorkerStateDetect) {
         UHFWorkerEvent event = read_single_card(uhf_worker);
         uhf_worker->callback(event, uhf_worker->ctx);

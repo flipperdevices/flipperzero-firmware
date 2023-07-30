@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -7,7 +8,8 @@
 typedef struct UHFData {
     uint8_t data[MAX_DATA_SIZE];
     size_t length;
-    bool data_full;
+    bool start;
+    bool end;
     struct UHFData* next;
 } UHFData;
 
@@ -19,6 +21,7 @@ typedef struct UHFResponseData {
 
 UHFData* uhf_data_alloc();
 int uhf_data_append(UHFData* uhf_data, uint8_t data);
+void uhf_data_reset(UHFData* uhf_data);
 void uhf_data_free(UHFData* uhf_data);
 
 UHFResponseData* uhf_response_data_alloc();

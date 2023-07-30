@@ -184,8 +184,7 @@ void uhf_show_loading_popup(void* ctx, bool show) {
 int32_t uhf_app_main(void* ctx) {
     UNUSED(ctx);
     UHFApp* uhf_app = uhf_alloc();
-    view_dispatcher_attach_to_gui(
-        uhf_app->view_dispatcher, uhf_app->gui, ViewDispatcherTypeFullscreen);
+
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneStart);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
