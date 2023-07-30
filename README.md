@@ -105,7 +105,7 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * Sniff: On, Off
 * target-ssids: add, remove, list
 * scan: on, off
-* hop: on, off, default
+* hop: on, off, sequential, random, default, set
 * view: sta, ap, sta+ap
 * select: sta, ap
 * selected: sta, ap, sta+ap
@@ -115,6 +115,7 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * mana: on, off, clear
 * mana verbose: on, off
 * mana loud: on, off
+* DOS AP: on, off
 * help: commands help info
 
 
