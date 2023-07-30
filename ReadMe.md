@@ -51,8 +51,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - UL: Updated: [WiFi (Marauder) v6.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
-- Updated: [External Power Amp Code (By Sil333033)]
-- Settings: [CFW Settings for PS4 Layout for Main Menu (By Willy-JL)]
+- Updated: [External Power Amp Code (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3bcc4b9ab76cf64acec4a9117a1230741a5fc82e)
+- Settings: [CFW Settings for PS4 Layout for Main Menu (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/39f08d3f51f99a52202ec75185bbd3b109af9689)
 
 <a name="release">
 
