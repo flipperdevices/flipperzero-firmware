@@ -47,6 +47,15 @@ void ublox_worker_stop(UbloxWorker* ublox_worker) {
     furi_assert(ublox_worker->thread);
     FURI_LOG_I(TAG, "worker_stop");
 
+    /*FuriThreadState state = furi_thread_get_state(ublox_worker->thread);
+  if (state == FuriThreadStateStopped) {
+      FURI_LOG_I(TAG, "worker state stopped");
+  } else if (state == FuriThreadStateStarting) {
+      FURI_LOG_I(TAG, "worker state starting");
+  } else if (state == FuriThreadStateRunning) {
+      FURI_LOG_I(TAG, "worker state running");
+      }*/
+
     if(furi_thread_get_state(ublox_worker->thread) != FuriThreadStateStopped) {
         FURI_LOG_I(TAG, "set thread state to stopped");
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
@@ -79,8 +88,9 @@ int32_t ublox_worker_task(void* context) {
     UbloxWorker* ublox_worker = context;
     Ublox* ublox = ublox_worker->context;
 
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
+
     if(ublox_worker->state == UbloxWorkerStateRead) {
-        furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
         if(!ublox->gps_initted) {
             if(ublox_worker_init_gps(ublox_worker)) {
                 ublox->gps_initted = true;
@@ -97,26 +107,26 @@ int32_t ublox_worker_task(void* context) {
             clear_ublox_data();
         }
 
-        ublox_worker_read_pvt(ublox_worker);
-        ublox_worker_read_odo(ublox_worker);
-        furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-        ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
-        /*if (ublox_worker_read_odo(ublox_worker)) {
-      ublox_worker_read_pvt(ublox_worker);
-    } else {
-      next_state = UbloxWorkerStateStop;
-      ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
-      }*/
-
+        // try to read both messages
+        if(ublox_worker_read_pvt(ublox_worker)) {
+            if(ublox_worker_read_odo(ublox_worker)) {
+                ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
+            }
+        } else {
+            // if we failed, send event failed
+            ublox_worker->state = UbloxWorkerStateStop;
+            ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+        }
     } else if(ublox_worker->state == UbloxWorkerStateResetOdometer) {
         ublox_worker_reset_odo(ublox_worker);
     } else if(ublox_worker->state == UbloxWorkerStateStop) {
-        FURI_LOG_I(TAG, "state stop");
+        FURI_LOG_D(TAG, "state stop");
     } else if(ublox_worker->state == UbloxWorkerStateReady) {
-        FURI_LOG_I(TAG, "state ready");
+        FURI_LOG_D(TAG, "state ready");
     }
 
     ublox_worker_change_state(ublox_worker, UbloxWorkerStateReady);
+    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
     //FURI_LOG_I(TAG, "mem free after: %u", memmgr_get_free_heap());
     return 0;
@@ -179,10 +189,8 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
             free(response);
             return NULL;
         }
-        //FURI_LOG_I(TAG, "read one byte");
         // checking with 0xb5 prevents strange bursts of junk data from becoming an issue.
         if(response[0] != 0xff && response[0] == 0xb5) {
-            //FURI_LOG_I(TAG, "mem free before final read: %u", memmgr_get_free_heap());
             //FURI_LOG_I(TAG, "got data that isn't 0xff");
             if(!furi_hal_i2c_trx(
                    &furi_hal_i2c_handle_external,
@@ -196,7 +204,6 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
                 free(response);
                 return NULL;
             }
-            //FURI_LOG_I(TAG, "mem free after final read: %u", memmgr_get_free_heap());
             break;
         }
     }
@@ -208,7 +215,7 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
     return message_rx; // message_rx->message needs to be freed later
 }
 
-void ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
+bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     //FURI_LOG_I(TAG, "mem free before PVT read: %u", memmgr_get_free_heap());
     Ublox* ublox = ublox_worker->context;
 
@@ -226,8 +233,8 @@ void ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     if(message_rx == NULL) {
         FURI_LOG_E(TAG, "read_pvt transfer failed");
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
-        ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
-        return;
+        //ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+        return false;
     }
 
     UbloxFrame* frame_rx = ublox_bytes_to_frame(message_rx);
@@ -236,7 +243,8 @@ void ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     if(frame_rx == NULL) {
         FURI_LOG_E(TAG, "NULL pointer, something wrong with NAV-PVT message!");
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
-        ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+        //ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+        return false;
     } else {
         // build nav-pvt struct. yes this is very ugly.
         Ublox_NAV_PVT_Message nav_pvt = {
@@ -300,9 +308,9 @@ void ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
         // effectively compiles to a memcpy.
         ublox->nav_pvt = nav_pvt;
         ublox_frame_free(frame_rx);
-        //ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
+        return true;
     }
-    //FURI_LOG_I(TAG, "mem free after PVT read: %u", memmgr_get_free_heap());
+    return false;
 }
 
 bool ublox_worker_read_odo(UbloxWorker* ublox_worker) {

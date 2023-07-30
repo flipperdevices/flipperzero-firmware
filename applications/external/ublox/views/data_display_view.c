@@ -4,11 +4,11 @@
 
 #define TAG "data_display_view"
 
-struct DataDisplayView {
+typedef struct DataDisplayView {
     View* view;
     DataDisplayViewCallback callback;
     void* context;
-};
+} DataDisplayView;
 
 typedef struct {
     DataDisplayState state;
