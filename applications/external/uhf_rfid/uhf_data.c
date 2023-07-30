@@ -5,18 +5,33 @@
 UHFData* uhf_data_alloc() {
     UHFData* uhf_data = (UHFData*)malloc(sizeof(UHFData));
     uhf_data->length = 0;
-    uhf_data->data_full = false;
+    uhf_data->start = false;
+    uhf_data->end = false;
     uhf_data->next = NULL;
     return uhf_data;
 }
 
 int uhf_data_append(UHFData* uhf_data, uint8_t data) {
-    if(uhf_data->length >= MAX_DATA_SIZE || uhf_data->data_full) return 0;
-    uhf_data->data[uhf_data->length++] = data;
-    if(data == 0x7E) {
-        uhf_data->data_full = true;
+    if(data == 0xBB) {
+        uhf_data->start = true;
     }
+    if(!uhf_data->start) return 0;
+    if(uhf_data->end) return 0;
+    if(uhf_data->length >= MAX_DATA_SIZE) return 0;
+    if(data == 0x7E) {
+        uhf_data->end = true;
+    }
+    uhf_data->data[uhf_data->length++] = data;
     return 1;
+}
+
+void uhf_data_reset(UHFData* uhf_data) {
+    for(size_t i = 0; i < uhf_data->length; i++) {
+        uhf_data->data[i] = 0x00;
+    }
+    uhf_data->start = false;
+    uhf_data->end = false;
+    uhf_data->length = 0;
 }
 
 void uhf_data_free(UHFData* uhf_data) {
