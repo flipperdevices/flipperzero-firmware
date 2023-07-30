@@ -102,42 +102,27 @@ static void retrieve_ap_ssid_distance(const char *data, char *apssid, char *dst)
         }
 }
 
-typedef struct {
-        int x;
-        int y;
-} ap_point;
-
-static ap_point get_ap_text_coordinates(int apnmbr, int dst) {
-        ap_point appnt;
-        float a;
-        float dlt = M_PI/20;
-        
-        if (apnmbr < 10)
-                a = (M_PI/2) - (apnmbr * dlt);
-        else
-                a = (2*M_PI) + (apnmbr * dlt);
-
-        appnt.x = dst * cos(a);
-        appnt.y = dst * sin(a);
-        return appnt;
-} 
-
 static void uart_echo_view_draw_callback(Canvas* canvas, void* _model) 
 {
         WifiMapModel* model = _model;
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
+        int cntr = 0;
         for (size_t i = 0; i < MAX_AP_LIST; i++) {
             const char *line = furi_string_get_cstr(model->lines[i]->line);
             char apssid[2], dst[6];
             retrieve_ap_ssid_distance(line, apssid, dst);
             if (strlen(line) > 0) {
                     int d = atoi(dst);
-                    ap_point appt = get_ap_text_coordinates(i, d);
                     canvas_draw_circle(canvas, 0, SCREEN_HEIGHT/2, d); 
-                    /*canvas_draw_str(canvas, d, appt.y - (SCREEN_HEIGHT/2), apssid);*/
-                    canvas_draw_str(canvas, d, appt.y, apssid);
-                    /*canvas_draw_str(canvas, appt.x, appt.y, apssid);*/
+                    if (i%2) {
+                            canvas_draw_str(canvas, d, (SCREEN_HEIGHT/2) + cntr, apssid);
+                    } else {
+                            canvas_draw_str(canvas, d, (SCREEN_HEIGHT/2) - cntr, apssid);
+                            cntr = cntr + 8;
+                    }
+                    if (i > 8)
+                            cntr = 8;
             }
         }
         
