@@ -25,33 +25,32 @@
 #include "helpers/ublox_custom_event.h"
 
 struct Ublox {
-  ViewDispatcher* view_dispatcher;
-  Gui* gui;
-  SceneManager* scene_manager;
+    ViewDispatcher* view_dispatcher;
+    Gui* gui;
+    SceneManager* scene_manager;
 
-  Submenu* submenu;
-  Widget* widget;
-  VariableItemList* variable_item_list;
-  DataDisplayView* data_display;
-  NotificationApp* notifications;
-  
-  UbloxWorker* worker;
-  FuriTimer* timer;
-  
-  Ublox_NAV_PVT_Message nav_pvt;
-  Ublox_NAV_ODO_Message nav_odo;
-  
-  UbloxDataDisplayState data_display_state;
-  UbloxDeviceState device_state;
-  bool gps_initted;
+    Submenu* submenu;
+    Widget* widget;
+    VariableItemList* variable_item_list;
+    DataDisplayView* data_display;
+    NotificationApp* notifications;
+
+    UbloxWorker* worker;
+    FuriTimer* timer;
+
+    Ublox_NAV_PVT_Message nav_pvt;
+    Ublox_NAV_ODO_Message nav_odo;
+
+    UbloxDataDisplayState data_display_state;
+    UbloxDeviceState device_state;
+    bool gps_initted;
 };
 
 typedef enum {
-  UbloxViewMenu,
-  UbloxViewWidget,
-  UbloxViewDataDisplay,
-  UbloxViewVariableItemList,
+    UbloxViewMenu,
+    UbloxViewWidget,
+    UbloxViewDataDisplay,
+    UbloxViewVariableItemList,
 } UbloxView;
 
 Ublox* ublox_alloc();
-

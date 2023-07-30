@@ -7,13 +7,13 @@
 #include <furi_hal.h>
 
 struct UbloxWorker {
-  FuriThread* thread;
-  FuriTimer* timer;
-  
-  UbloxWorkerCallback callback;
-  void* context;
+    FuriThread* thread;
+    FuriTimer* timer;
 
-  UbloxWorkerState state;
+    UbloxWorkerCallback callback;
+    void* context;
+
+    UbloxWorkerState state;
 };
 
 void ublox_worker_change_state(UbloxWorker* ublox_worker, UbloxWorkerState state);

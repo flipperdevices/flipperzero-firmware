@@ -1,5 +1,5 @@
 #pragma once
 
 typedef enum {
-  UbloxCustomEventResetOdometer,
+    UbloxCustomEventResetOdometer,
 } UbloxCustomEvent;
