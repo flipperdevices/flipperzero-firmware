@@ -33,7 +33,7 @@ void tpms_scene_about_on_enter(void* context) {
     } while(protocol_name != NULL);
 
     widget_add_text_box_element(
-        app->widget, 0, 2, 128, 14, AlignCenter, AlignBottom, "TPMS reader\n", false);
+        app->widget, 0, 2, 128, 14, AlignCenter, AlignBottom, "TPMS Reader\n", false);
     widget_add_text_scroll_element(app->widget, 0, 16, 128, 50, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
 

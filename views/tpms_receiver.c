@@ -243,7 +243,7 @@ void tpms_view_receiver_draw(Canvas* canvas, TPMSReceiverModel* model) {
         canvas_draw_str(canvas, 63, 46, "Scanning...");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 44, 10, model->external_radio ? "Ext" : "Int");
-        canvas_draw_str(canvas, 70, 10, "-> to relearn");
+        canvas_draw_str(canvas, 70, 9, "-> to relearn");
     }
 
     // Draw RSSI
