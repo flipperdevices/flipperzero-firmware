@@ -27,7 +27,8 @@ void tpms_view_receiver_add_data_statusbar(
     TPMSReceiver* tpms_receiver,
     const char* frequency_str,
     const char* preset_str,
-    const char* history_stat_str);
+    const char* history_stat_str,
+    bool external);
 
 void tpms_view_receiver_add_item_to_menu(
     TPMSReceiver* tpms_receiver,

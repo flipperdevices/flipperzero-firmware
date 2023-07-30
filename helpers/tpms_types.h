@@ -5,14 +5,13 @@
 
 #define TPMS_VERSION_APP "0.1"
 #define TPMS_DEVELOPED "wosk"
-#define TPMS_GITHUB "https://github.com/flipperdevices/flipperzero-firmware"
+#define TPMS_GITHUB "https://github.com/beewosk/flipperzero-tpms"
 
 #define TPMS_KEY_FILE_VERSION 1
 #define TPMS_KEY_FILE_TYPE "Flipper Tire Pressure Monitoring System Key File"
 
 /** TPMSRxKeyState state */
-typedef enum
-{
+typedef enum {
     TPMSRxKeyStateIDLE,
     TPMSRxKeyStateBack,
     TPMSRxKeyStateStart,
@@ -20,23 +19,19 @@ typedef enum
 } TPMSRxKeyState;
 
 /** TPMSHopperState state */
-typedef enum
-{
+typedef enum {
     TPMSHopperStateOFF,
     TPMSHopperStateRunnig,
     TPMSHopperStatePause,
     TPMSHopperStateRSSITimeOut,
 } TPMSHopperState;
 
-/** TPMSLock */
-typedef enum
-{
+typedef enum {
     TPMSLockOff,
     TPMSLockOn,
 } TPMSLock;
 
-typedef enum
-{
+typedef enum {
     TPMSViewVariableItemList,
     TPMSViewSubmenu,
     TPMSViewReceiver,
@@ -45,10 +40,19 @@ typedef enum
 } TPMSView;
 
 /** TPMSTxRx state */
-typedef enum
-{
+typedef enum {
     TPMSTxRxStateIDLE,
     TPMSTxRxStateRx,
     TPMSTxRxStateTx,
     TPMSTxRxStateSleep,
 } TPMSTxRxState;
+
+typedef enum {
+    TPMSRelearnOff,
+    TPMSRelearnOn,
+} TPMSRelearn;
+
+typedef enum {
+    TPMSRelearnTypeCommon,
+    //TPMSRelearnAnotherOEM,
+} TPMSRelearnType;

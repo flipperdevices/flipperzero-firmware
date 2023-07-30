@@ -48,13 +48,18 @@ static void tpms_scene_receiver_update_statusbar(void* context) {
             app->tpms_receiver,
             furi_string_get_cstr(frequency_str),
             furi_string_get_cstr(modulation_str),
-            furi_string_get_cstr(history_stat_str));
+            furi_string_get_cstr(history_stat_str),
+            radio_device_loader_is_external(app->txrx->radio_device));
 
         furi_string_free(frequency_str);
         furi_string_free(modulation_str);
     } else {
         tpms_view_receiver_add_data_statusbar(
-            app->tpms_receiver, furi_string_get_cstr(history_stat_str), "", "");
+            app->tpms_receiver,
+            furi_string_get_cstr(history_stat_str),
+            "",
+            "",
+            radio_device_loader_is_external(app->txrx->radio_device));
     }
     furi_string_free(history_stat_str);
 }
