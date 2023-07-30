@@ -51,20 +51,18 @@ void tpms_view_receiver_info_draw(Canvas* canvas, TPMSReceiverInfoModel* model) 
         model->generic->data_count_bit);
     canvas_draw_str(canvas, 0, 8, buffer);
 
-    if(model->generic->channel != TPMS_NO_CHANNEL) {
-        snprintf(buffer, sizeof(buffer), "Ch: %01d", model->generic->channel);
-        canvas_draw_str(canvas, 106, 8, buffer);
-    }
+    // if(model->generic->channel != TPMS_NO_CHANNEL) {
+    //     snprintf(buffer, sizeof(buffer), "Ch: %01d", model->generic->channel);
+    //     canvas_draw_str(canvas, 106, 8, buffer);
+    // }
 
-    if(model->generic->id != TPMS_NO_ID) {
-        snprintf(buffer, sizeof(buffer), "Sn: 0x%02lX", model->generic->id);
-        canvas_draw_str(canvas, 0, 20, buffer);
-    }
+    snprintf(buffer, sizeof(buffer), "ID: 0x%lX", model->generic->id);
+    canvas_draw_str(canvas, 0, 20, buffer);
 
-    if(model->generic->btn != TPMS_NO_BTN) {
-        snprintf(buffer, sizeof(buffer), "Btn: %01d", model->generic->btn);
-        canvas_draw_str(canvas, 57, 20, buffer);
-    }
+    // if(model->generic->btn != TPMS_NO_BTN) {
+    //     snprintf(buffer, sizeof(buffer), "Btn: %01d", model->generic->btn);
+    //     canvas_draw_str(canvas, 57, 20, buffer);
+    // }
 
     if(model->generic->battery_low != TPMS_NO_BATT) {
         snprintf(
@@ -78,44 +76,42 @@ void tpms_view_receiver_info_draw(Canvas* canvas, TPMSReceiverInfoModel* model) 
     elements_bold_rounded_frame(canvas, 0, 38, 127, 25);
     canvas_set_font(canvas, FontPrimary);
 
-    if(!float_is_equal(model->generic->temp, TPMS_NO_TEMPERATURE)) {
-        canvas_draw_icon(canvas, 6, 43, &I_Therm_7x16);
+    // Temperature
+    canvas_draw_icon(canvas, 6, 43, &I_Therm_7x16);
 
-        uint8_t temp_x1 = 0;
-        uint8_t temp_x2 = 0;
-        if(furi_hal_rtc_get_locale_units() == FuriHalRtcLocaleUnitsMetric) {
-            snprintf(buffer, sizeof(buffer), "%3.1f C", (double)model->generic->temp);
-            if(model->generic->temp < -9.0f) {
-                temp_x1 = 49;
-                temp_x2 = 40;
-            } else {
-                temp_x1 = 47;
-                temp_x2 = 38;
-            }
+    uint8_t temp_x1 = 0;
+    uint8_t temp_x2 = 0;
+    if(furi_hal_rtc_get_locale_units() == FuriHalRtcLocaleUnitsMetric) {
+        snprintf(buffer, sizeof(buffer), "%3.1f C", (double)model->generic->temperature);
+        if(model->generic->temperature < -9.0f) {
+            temp_x1 = 49;
+            temp_x2 = 40;
         } else {
-            snprintf(
-                buffer,
-                sizeof(buffer),
-                "%3.1f F",
-                (double)locale_celsius_to_fahrenheit(model->generic->temp));
-            if((model->generic->temp < -27.77f) || (model->generic->temp > 37.77f)) {
-                temp_x1 = 50;
-                temp_x2 = 42;
-            } else {
-                temp_x1 = 48;
-                temp_x2 = 40;
-            }
+            temp_x1 = 47;
+            temp_x2 = 38;
         }
-
-        canvas_draw_str_aligned(canvas, temp_x1, 47, AlignRight, AlignTop, buffer);
-        canvas_draw_circle(canvas, temp_x2, 46, 1);
+    } else {
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "%3.1f F",
+            (double)locale_celsius_to_fahrenheit(model->generic->temperature));
+        if((model->generic->temperature < -27.77f) || (model->generic->temperature > 37.77f)) {
+            temp_x1 = 50;
+            temp_x2 = 42;
+        } else {
+            temp_x1 = 48;
+            temp_x2 = 40;
+        }
     }
 
-    if(model->generic->humidity != TPMS_NO_HUMIDITY) {
-        canvas_draw_icon(canvas, 53, 44, &I_Humid_8x13);
-        snprintf(buffer, sizeof(buffer), "%d%%", model->generic->humidity);
-        canvas_draw_str(canvas, 64, 55, buffer);
-    }
+    canvas_draw_str_aligned(canvas, temp_x1, 47, AlignRight, AlignTop, buffer);
+    canvas_draw_circle(canvas, temp_x2, 46, 1);
+
+    // Pressure
+    canvas_draw_icon(canvas, 53, 44, &I_Humid_8x13);
+    snprintf(buffer, sizeof(buffer), "%2.1f", (double)model->generic->pressure);
+    canvas_draw_str(canvas, 64, 55, buffer);
 
     if((int)model->generic->timestamp > 0 && model->curr_ts) {
         int ts_diff = (int)model->curr_ts - (int)model->generic->timestamp;

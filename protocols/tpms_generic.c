@@ -103,9 +103,9 @@ SubGhzProtocolStatus tpms_block_generic_serialize(
             break;
         }
 
-        temp_data = instance->humidity;
-        if(!flipper_format_write_uint32(flipper_format, "Hum", &temp_data, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Humidity");
+        float temp = instance->pressure;
+        if(!flipper_format_write_float(flipper_format, "Pressure", &temp, 1)) {
+            FURI_LOG_E(TAG, "Unable to add Pressure");
             res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
@@ -122,21 +122,7 @@ SubGhzProtocolStatus tpms_block_generic_serialize(
             break;
         }
 
-        temp_data = instance->channel;
-        if(!flipper_format_write_uint32(flipper_format, "Ch", &temp_data, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Channel");
-            res = SubGhzProtocolStatusErrorParserOthers;
-            break;
-        }
-
-        temp_data = instance->btn;
-        if(!flipper_format_write_uint32(flipper_format, "Btn", &temp_data, 1)) {
-            FURI_LOG_E(TAG, "Unable to add Btn");
-            res = SubGhzProtocolStatusErrorParserOthers;
-            break;
-        }
-
-        float temp = instance->temp;
+        temp = instance->temperature;
         if(!flipper_format_write_float(flipper_format, "Temp", &temp, 1)) {
             FURI_LOG_E(TAG, "Unable to add Temperature");
             res = SubGhzProtocolStatusErrorParserOthers;
@@ -162,14 +148,14 @@ SubGhzProtocolStatus
             break;
         }
 
-        if(!flipper_format_read_uint32(flipper_format, "Id", (uint32_t*)&temp_data, 1)) {
+        if(!flipper_format_read_uint32(flipper_format, "Id", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Missing Id");
             res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
-        instance->id = (uint32_t)temp_data;
+        instance->id = temp_data;
 
-        if(!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&temp_data, 1)) {
+        if(!flipper_format_read_uint32(flipper_format, "Bit", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Missing Bit");
             res = SubGhzProtocolStatusErrorParserBitCount;
             break;
@@ -187,48 +173,34 @@ SubGhzProtocolStatus
             instance->data = instance->data << 8 | key_data[i];
         }
 
-        if(!flipper_format_read_uint32(flipper_format, "Batt", (uint32_t*)&temp_data, 1)) {
+        if(!flipper_format_read_uint32(flipper_format, "Batt", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Missing Battery_low");
             res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         instance->battery_low = (uint8_t)temp_data;
 
-        if(!flipper_format_read_uint32(flipper_format, "Hum", (uint32_t*)&temp_data, 1)) {
-            FURI_LOG_E(TAG, "Missing Humidity");
+        float temp;
+        if(!flipper_format_read_float(flipper_format, "Pressure", &temp, 1)) {
+            FURI_LOG_E(TAG, "Missing Pressure");
             res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
-        instance->humidity = (uint8_t)temp_data;
+        instance->pressure = temp;
 
-        if(!flipper_format_read_uint32(flipper_format, "Ts", (uint32_t*)&temp_data, 1)) {
+        if(!flipper_format_read_uint32(flipper_format, "Ts", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Missing timestamp");
             res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
-        instance->timestamp = (uint32_t)temp_data;
+        instance->timestamp = temp_data;
 
-        if(!flipper_format_read_uint32(flipper_format, "Ch", (uint32_t*)&temp_data, 1)) {
-            FURI_LOG_E(TAG, "Missing Channel");
-            res = SubGhzProtocolStatusErrorParserOthers;
-            break;
-        }
-        instance->channel = (uint8_t)temp_data;
-
-        if(!flipper_format_read_uint32(flipper_format, "Btn", (uint32_t*)&temp_data, 1)) {
-            FURI_LOG_E(TAG, "Missing Btn");
-            res = SubGhzProtocolStatusErrorParserOthers;
-            break;
-        }
-        instance->btn = (uint8_t)temp_data;
-
-        float temp;
-        if(!flipper_format_read_float(flipper_format, "Temp", (float*)&temp, 1)) {
+        if(!flipper_format_read_float(flipper_format, "Temp", &temp, 1)) {
             FURI_LOG_E(TAG, "Missing Temperature");
             res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
-        instance->temp = temp;
+        instance->temperature = temp;
 
         res = SubGhzProtocolStatusOk;
     } while(0);

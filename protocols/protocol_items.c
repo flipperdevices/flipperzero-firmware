@@ -12,7 +12,7 @@ const SubGhzProtocol* tpms_protocol_registry_items[] = {
     // &tpms_protocol_lacrosse_tx141thbv2,
     // &tpms_protocol_oregon2,
     // &tpms_protocol_oregon3,
-    &tpms_protocol_abarth124,
+    &tpms_protocol_schrader_gg4,
     // &tpms_protocol_ambient_weather,
     // &tpms_protocol_auriol_th,
     // &tpms_protocol_oregon_v1,
