@@ -1,5 +1,5 @@
 # TPMS application for [Flipper Zero](https://flipperzero.one/)
-[![FlipC.org](https://flipc.org/wosk/tpms/badge)](https://flipc.org/wosk/tpms)
+[![FlipC.org](https://flipc.org/wosk/flipperzero-tpms/badge)](https://flipc.org/wosk/flipperzero-tpms)
 
 ## Features
 
