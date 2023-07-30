@@ -366,8 +366,8 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
         return false;
     }
 
-    // set power setup value to "aggressive with 1Hz"
-    pms_message_rx->message[6 + 1] = 0x03;
+    // set power setup value to "balanced"
+    pms_message_rx->message[6 + 1] = 0x01;
 
     pms_frame_tx = malloc(sizeof(UbloxFrame));
     pms_frame_tx->class = UBX_CFG_CLASS;
@@ -457,7 +457,7 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
     nav5_frame_tx->len = 36;
     nav5_frame_tx->payload = nav5_message_rx->message;
 
-    nav5_frame_tx->payload[0] |= 1;
+    nav5_frame_tx->payload[0] = 1; // tell GPS to apply only the platform model settings
     nav5_frame_tx->payload[2] = (ublox->device_state).platform_model;
 
     nav5_message_tx = ublox_frame_to_bytes(nav5_frame_tx);
