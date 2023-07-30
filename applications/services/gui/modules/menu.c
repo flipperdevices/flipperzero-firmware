@@ -5,6 +5,8 @@
 #include <gui/icon_i.h>
 #include <gui/icon_animation_i.h>
 #include <gui/canvas_i.h>
+#include <dolphin/dolphin_i.h>
+#include <dolphin/helpers/dolphin_state.h>
 #include <furi.h>
 #include <m-array.h>
 #include <cfw.h>
@@ -189,6 +191,54 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                     elements_slightly_rounded_frame(
                         canvas, pos_x - width / 2, pos_y - height / 2, width, height);
                 }
+                menu_centered_icon(canvas, item, pos_x - 7, pos_y - 7, 14, 14);
+            }
+            elements_scrollbar_horizontal(canvas, 0, 64, 128, position, items_count);
+            break;
+        }
+        case MenuStylePs4: {
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(
+                canvas, 1, 1, AlignLeft, AlignTop, furi_hal_version_get_name_ptr());
+            char str[10];
+            Dolphin* dolphin = furi_record_open(RECORD_DOLPHIN);
+            snprintf(str, 10, "Level %i", dolphin_get_level(dolphin->state->data.icounter));
+            furi_record_close(RECORD_DOLPHIN);
+            canvas_draw_str_aligned(canvas, 127, 1, AlignRight, AlignTop, str);
+            for(int8_t i = -1; i <= 4; i++) {
+                shift_position = position + i;
+                if(shift_position >= items_count) continue;
+                item = MenuItemArray_get(model->items, shift_position);
+                size_t width = 20;
+                size_t height = 20;
+                size_t pos_x = 36;
+                size_t pos_y = 27;
+                if(i == 0) {
+                    width += 10;
+                    height += 10;
+                    pos_y += 2;
+                    canvas_draw_box(canvas, pos_x - width / 2, pos_y + height / 2, width, 9);
+                    canvas_set_color(canvas, ColorWhite);
+                    canvas_set_font(canvas, FontBatteryPercent);
+                    canvas_draw_str_aligned(
+                        canvas, pos_x, pos_y + height / 2 + 1, AlignCenter, AlignTop, "Start");
+
+                    canvas_set_color(canvas, ColorBlack);
+                    canvas_set_font(canvas, FontSecondary);
+                    size_t scroll_counter = menu_scroll_counter(model, true);
+                    elements_scrollable_text_line_str(
+                        canvas,
+                        pos_x + width / 2 + 2,
+                        pos_y + height / 2 + 7,
+                        74,
+                        item->label,
+                        scroll_counter,
+                        false,
+                        false);
+                } else {
+                    pos_x += (width + 1) * i + (i < 0 ? -6 : 6);
+                }
+                canvas_draw_frame(canvas, pos_x - width / 2, pos_y - height / 2, width, height);
                 menu_centered_icon(canvas, item, pos_x - 7, pos_y - 7, 14, 14);
             }
             elements_scrollbar_horizontal(canvas, 0, 64, 128, position, items_count);
@@ -413,7 +463,19 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
         menu->view,
         MenuModel * model,
         {
-            if(index < MenuItemArray_size(model->items)) {
+            if(index < MenuItemArray_size(model->items) && index != model->position) {
+                model->scroll_counter = 0;
+
+                MenuItem* item = MenuItemArray_get(model->items, model->position);
+                if(item && item->icon) {
+                    icon_animation_stop(item->icon);
+                }
+
+                item = MenuItemArray_get(model->items, index);
+                if(item && item->icon) {
+                    icon_animation_start(item->icon);
+                }
+
                 model->position = index;
             }
         },
@@ -421,208 +483,180 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
 }
 
 static void menu_process_up(Menu* menu) {
-    MenuStyle menu_style = CFW_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleDsi || menu_style == MenuStyleVertical) return;
+    size_t position;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
-            model->scroll_counter = 0;
+            position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            size_t vertical_offset = model->vertical_offset;
 
-            switch(menu_style) {
+            switch(CFW_SETTINGS()->menu_style) {
             case MenuStyleList:
-                if(model->position > 0) {
-                    model->position--;
-                    if(model->vertical_offset && model->vertical_offset == model->position) {
-                        model->vertical_offset--;
+                if(position > 0) {
+                    position--;
+                    if(vertical_offset && vertical_offset == position) {
+                        vertical_offset--;
                     }
                 } else {
-                    model->position = count - 1;
-                    model->vertical_offset = count - 8;
+                    position = count - 1;
+                    vertical_offset = count - 8;
                 }
                 break;
             case MenuStyleWii:
-                if(model->position % 2 || (model->position == count - 1 && count % 2)) {
-                    model->position--;
+                if(position % 2 || (position == count - 1 && count % 2)) {
+                    position--;
                 } else {
-                    model->position++;
+                    position++;
                 }
-                model->vertical_offset =
-                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
             }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
-            }
+            model->vertical_offset = vertical_offset;
         },
-        true);
+        false);
+    menu_set_selected_item(menu, position);
 }
 
 static void menu_process_down(Menu* menu) {
-    MenuStyle menu_style = CFW_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleDsi || menu_style == MenuStyleVertical) return;
+    size_t position;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
-            model->scroll_counter = 0;
+            position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            size_t vertical_offset = model->vertical_offset;
 
-            switch(menu_style) {
+            switch(CFW_SETTINGS()->menu_style) {
             case MenuStyleList:
-                if(model->position < count - 1) {
-                    model->position++;
-                    if(model->vertical_offset < count - 8 &&
-                       model->vertical_offset == model->position - 7) {
-                        model->vertical_offset++;
+                if(position < count - 1) {
+                    position++;
+                    if(vertical_offset < count - 8 && vertical_offset == position - 7) {
+                        vertical_offset++;
                     }
                 } else {
-                    model->position = 0;
-                    model->vertical_offset = 0;
+                    position = 0;
+                    vertical_offset = 0;
                 }
                 break;
             case MenuStyleWii:
-                if(model->position % 2 || (model->position == count - 1 && count % 2)) {
-                    model->position--;
+                if(position % 2 || (position == count - 1 && count % 2)) {
+                    position--;
                 } else {
-                    model->position++;
+                    position++;
                 }
-                model->vertical_offset =
-                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             default:
                 break;
             }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
-            }
+            model->vertical_offset = vertical_offset;
         },
-        true);
+        false);
+    menu_set_selected_item(menu, position);
 }
 
 static void menu_process_left(Menu* menu) {
-    MenuStyle menu_style = CFW_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleList) return;
+    size_t position;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
-            model->scroll_counter = 0;
+            position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            size_t vertical_offset = model->vertical_offset;
 
-            switch(menu_style) {
+            switch(CFW_SETTINGS()->menu_style) {
             case MenuStyleWii:
-                if(model->position < 2) {
+                if(position < 2) {
                     if(count % 2) {
-                        model->position = count - 1;
+                        position = count - 1;
                     } else {
-                        model->position = count - 2 + model->position % 2;
+                        position = count - 2 + position % 2;
                     }
                 } else {
-                    model->position -= 2;
+                    position -= 2;
                 }
-                model->vertical_offset =
-                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
+            case MenuStylePs4:
             case MenuStyleVertical:
-                if(model->position > 0) {
-                    model->position--;
-                    if(model->vertical_offset && model->vertical_offset == model->position) {
-                        model->vertical_offset--;
+                if(position > 0) {
+                    position--;
+                    if(vertical_offset && vertical_offset == position) {
+                        vertical_offset--;
                     }
                 } else {
-                    model->position = count - 1;
-                    model->vertical_offset = count - 8;
+                    position = count - 1;
+                    vertical_offset = count - 8;
                 }
                 break;
             default:
                 break;
             }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
-            }
+            model->vertical_offset = vertical_offset;
         },
-        true);
+        false);
+    menu_set_selected_item(menu, position);
 }
 
 static void menu_process_right(Menu* menu) {
-    MenuStyle menu_style = CFW_SETTINGS()->menu_style;
-    if(menu_style == MenuStyleList) return;
+    size_t position;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
-            model->scroll_counter = 0;
+            position = model->position;
             size_t count = MenuItemArray_size(model->items);
-            MenuItem* item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_stop(item->icon);
-            }
+            size_t vertical_offset = model->vertical_offset;
 
-            switch(menu_style) {
+            switch(CFW_SETTINGS()->menu_style) {
             case MenuStyleWii:
                 if(count % 2) {
-                    if(model->position == count - 1) {
-                        model->position = 0;
-                    } else if(model->position == count - 2) {
-                        model->position = count - 1;
+                    if(position == count - 1) {
+                        position = 0;
+                    } else if(position == count - 2) {
+                        position = count - 1;
                     } else {
-                        model->position += 2;
+                        position += 2;
                     }
                 } else {
-                    model->position += 2;
-                    if(model->position >= count) {
-                        model->position = model->position % 2;
+                    position += 2;
+                    if(position >= count) {
+                        position = position % 2;
                     }
                 }
-                model->vertical_offset =
-                    CLAMP(MAX((int)model->position - 4, 0), MAX((int)count - 8, 0), 0);
+                vertical_offset = CLAMP(MAX((int)position - 4, 0), MAX((int)count - 8, 0), 0);
                 break;
             case MenuStyleDsi:
+            case MenuStylePs4:
             case MenuStyleVertical:
-                if(model->position < count - 1) {
-                    model->position++;
-                    if(model->vertical_offset < count - 8 &&
-                       model->vertical_offset == model->position - 7) {
-                        model->vertical_offset++;
+                if(position < count - 1) {
+                    position++;
+                    if(vertical_offset < count - 8 && vertical_offset == position - 7) {
+                        vertical_offset++;
                     }
                 } else {
-                    model->position = 0;
-                    model->vertical_offset = 0;
+                    position = 0;
+                    vertical_offset = 0;
                 }
                 break;
             default:
                 break;
             }
 
-            item = MenuItemArray_get(model->items, model->position);
-            if(item && item->icon) {
-                icon_animation_start(item->icon);
-            }
+            model->vertical_offset = vertical_offset;
         },
-        true);
+        false);
+    menu_set_selected_item(menu, position);
 }
 
 static void menu_process_ok(Menu* menu) {
