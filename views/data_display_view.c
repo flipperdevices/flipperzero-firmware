@@ -26,7 +26,7 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 5, 34, "Connect u-blox 8 series GPS.");
 
     } else if(m->state == DataDisplayHandheldMode) {
-        // TODO: check invalidLlh flag in flags3
+        // TODO: check invalidLlh flag in flags3?
         Ublox_NAV_PVT_Message message = m->nav_pvt;
         Ublox_NAV_ODO_Message nav_odo = m->nav_odo;
 
@@ -182,8 +182,6 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
 
         furi_string_free(s);
 
-        // TODO: compass direction next to heading?
-        // TODO: better localization
     }
 }
 

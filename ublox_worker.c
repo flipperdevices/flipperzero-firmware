@@ -155,7 +155,7 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
            message_tx->message,
            message_tx->length,
            furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
-        FURI_LOG_I(TAG, "error writing message from GPS");
+        FURI_LOG_E(TAG, "error writing message to GPS");
         return NULL;
     }
     uint8_t* response = malloc((size_t)read_length);
@@ -165,31 +165,24 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
     // more bytes make it so that the data is completely read out and no
     // longer available?)
 
-    // Also, we know that this function is the traceable source of the
-    // memory leak whenever it's run a second time.
 
-    // ** The leak comes after this point.
-    uint8_t tx[] = {0xff};
-
+    // this loop is slow
     while(true) {
-        //FURI_LOG_I(TAG, "mem free in loop: %u", memmgr_get_free_heap());
-        if(!furi_hal_i2c_trx(
-               &furi_hal_i2c_handle_external,
+	if(!furi_hal_i2c_rx(
+	       &furi_hal_i2c_handle_external,
                UBLOX_I2C_ADDRESS << 1,
-               tx, 1,
                response, 1,
                furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
-            FURI_LOG_E(TAG, "error reading first byte of response");
+	    FURI_LOG_E(TAG, "error reading first byte of response");
             free(response);
             return NULL;
-        }
+	}
+	
         // checking with 0xb5 prevents strange bursts of junk data from becoming an issue.
         if(response[0] != 0xff && response[0] == 0xb5) {
-            //FURI_LOG_I(TAG, "got data that isn't 0xff");
-            if(!furi_hal_i2c_trx(
+            if(!furi_hal_i2c_rx(
                    &furi_hal_i2c_handle_external,
                    UBLOX_I2C_ADDRESS << 1,
-                   tx, 1,
                    &(response[1]), read_length - 1, // first byte already read
                    furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
                 FURI_LOG_E(TAG, "error reading rest of response");
@@ -198,9 +191,9 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
             }
             break;
         }
+	furi_delay_ms(1);
     }
 
-    //FURI_LOG_I(TAG, "i2c_transfer: byte 0 = %d", response[0]);
     UbloxMessage* message_rx = malloc(sizeof(UbloxMessage));
     message_rx->message = response;
     message_rx->length = read_length;

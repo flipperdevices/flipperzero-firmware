@@ -94,10 +94,10 @@ const UbloxOdometerMode odometer_mode_values[ODOMETER_MODE_COUNT] = {
 #define PLATFORM_MODEL_COUNT 6
 const char* const platform_model_text[PLATFORM_MODEL_COUNT] = {
     "Portable",
-    "Pedestrian",
-    "Automotive",
+    "Pedest.",
+    "Automot.",
     "At Sea",
-    "Airborne <2g",
+    "Air. <2g",
     "Wrist",
 };
 
