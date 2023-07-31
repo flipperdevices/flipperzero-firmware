@@ -8,6 +8,7 @@ typedef enum {
     UbloxWorkerStateNone,
     UbloxWorkerStateReady,
     UbloxWorkerStateRead,
+    UbloxWorkerStateSyncTime,
     UbloxWorkerStateResetOdometer,
     UbloxWorkerStateStop,
 } UbloxWorkerState;
@@ -37,4 +38,10 @@ void ublox_worker_start(
 
 void ublox_worker_stop(UbloxWorker* ublox_worker);
 
-bool ublox_worker_init_gps(); //UbloxWorker* ublox_worker);
+UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length);
+
+bool ublox_worker_init_gps();
+
+void ublox_worker_read_nav_messages(void* context);
+
+void ublox_worker_sync_to_gps_time(void* context);

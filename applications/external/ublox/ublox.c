@@ -52,7 +52,7 @@ Ublox* ublox_alloc() {
     // Establish default data display state
     (ublox->data_display_state).view_mode = UbloxDataDisplayViewModeHandheld;
     (ublox->data_display_state).backlight_mode = UbloxDataDisplayBacklightDefault;
-    (ublox->data_display_state).refresh_rate = 2;
+    (ublox->data_display_state).refresh_rate = 5; //2;
     (ublox->data_display_state).notify_mode = UbloxDataDisplayNotifyOn;
 
     (ublox->device_state).odometer_mode = UbloxOdometerModeRunning;

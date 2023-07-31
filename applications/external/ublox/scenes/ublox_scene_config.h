@@ -1,5 +1,6 @@
 ADD_SCENE(ublox, start, Start)
 ADD_SCENE(ublox, data_display, DataDisplay)
+ADD_SCENE(ublox, sync_time, SyncTime)
 ADD_SCENE(ublox, data_display_config, DataDisplayConfig)
 ADD_SCENE(ublox, wiring, Wiring)
 ADD_SCENE(ublox, about, About)

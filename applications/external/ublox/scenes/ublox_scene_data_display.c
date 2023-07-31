@@ -1,6 +1,3 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "../ublox_i.h"
 #include "../ublox_worker_i.h"
 
@@ -32,17 +29,6 @@ void ublox_scene_data_display_view_callback(void* context, InputKey key) {
     }
 }
 
-static void timer_callback(void* context) {
-    Ublox* ublox = context;
-    FURI_LOG_I(TAG, "mem free before timer callback: %u", memmgr_get_free_heap());
-    // every time, try to set the view back to a GPS-found mode
-
-    // TODO: maybe different states for each message, to fix the leak?
-    ublox_worker_start(
-        ublox->worker, UbloxWorkerStateRead, ublox_scene_data_display_worker_callback, ublox);
-    FURI_LOG_I(TAG, "mem free after timer callback: %u", memmgr_get_free_heap());
-}
-
 void ublox_scene_data_display_on_enter(void* context) {
     Ublox* ublox = context;
 
@@ -55,12 +41,6 @@ void ublox_scene_data_display_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(ublox->view_dispatcher, UbloxViewDataDisplay);
 
-    ublox->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, ublox);
-
-    // convert from seconds to milliseconds
-    furi_timer_start(
-        ublox->timer, furi_ms_to_ticks((ublox->data_display_state).refresh_rate * 1000));
-
     ublox_worker_start(
         ublox->worker, UbloxWorkerStateRead, ublox_scene_data_display_worker_callback, ublox);
 }
@@ -72,12 +52,12 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
             FURI_LOG_I(TAG, "left button pressed");
+            ublox_worker_stop(ublox->worker);
             scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
             consumed = true;
 
         } else if(event.event == GuiButtonTypeCenter) {
-            furi_timer_stop(ublox->timer);
-            // MUST stop the worker first! (idk why though)
+            // must stop the worker first
             ublox_worker_stop(ublox->worker);
             FURI_LOG_I(TAG, "reset odometer");
             ublox_worker_start(
@@ -85,8 +65,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
                 UbloxWorkerStateResetOdometer,
                 ublox_scene_data_display_worker_callback,
                 ublox);
-            furi_timer_start(
-                ublox->timer, furi_ms_to_ticks((ublox->data_display_state).refresh_rate * 1000));
 
         } else if(event.event == UbloxWorkerEventDataReady) {
             if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
@@ -101,10 +79,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
             data_display_set_nav_messages(ublox->data_display, ublox->nav_pvt, ublox->nav_odo);
 
-            // Memory leak appears to not really be related to how many
-            // times you refresh the view (though reducing the number of
-            // times is still good)
-
         } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);
@@ -116,9 +90,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
 void ublox_scene_data_display_on_exit(void* context) {
     Ublox* ublox = context;
-
-    furi_timer_stop(ublox->timer);
-    furi_timer_free(ublox->timer);
 
     ublox_worker_stop(ublox->worker);
 

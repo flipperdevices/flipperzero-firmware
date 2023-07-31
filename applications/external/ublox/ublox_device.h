@@ -41,6 +41,8 @@
 #define UBX_NAV_ODO_MESSAGE 0x09
 #define UBX_NAV_ODO_MESSAGE_LENGTH (8 + 20)
 #define UBX_NAV_RESETODO_MESSAGE 0x10
+#define UBX_NAV_TIMEUTC_MESSAGE 0x21
+#define UBX_NAV_TIMEUTC_MESSAGE_LENGTH (8 + 20)
 
 // CFG_CLASS
 #define UBX_CFG_PMS_MESSAGE 0x86
@@ -124,6 +126,19 @@ typedef struct Ublox_NAV_ODO_Message {
     uint32_t totalDistance;
     uint32_t distanceStd;
 } Ublox_NAV_ODO_Message;
+
+typedef struct Ublox_NAV_TIMEUTC_Message {
+    uint32_t iTOW;
+    uint32_t tAcc;
+    int32_t nano;
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t min;
+    uint8_t sec;
+    uint8_t valid;
+} Ublox_NAV_TIMEUTC_Message;
 
 /** For a given UbloxFrame, populate the sync bytes, calculate the
  * checksum bytes (storing them in `frame`), allocate a uint8_t array,

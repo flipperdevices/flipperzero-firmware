@@ -26,9 +26,10 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 5, 34, "Connect u-blox 8 series GPS.");
 
     } else if(m->state == DataDisplayHandheldMode) {
-        // TODO: check invalidLlh flag in flags3
+        // TODO: check invalidLlh flag in flags3?
         Ublox_NAV_PVT_Message message = m->nav_pvt;
         Ublox_NAV_ODO_Message nav_odo = m->nav_odo;
+
         FuriString* s = furi_string_alloc();
         elements_button_left(canvas, "Config");
         elements_button_center(canvas, "Reset");
@@ -63,11 +64,15 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
 
         /*** Draw odometer ***/
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 74, 9, "Odo:");
+        canvas_draw_str(canvas, 74, 9, "Od:");
 
         canvas_set_font(canvas, FontSecondary);
-        furi_string_printf(s, "%.1f", (double)(nav_odo.distance / 1e3));
-        canvas_draw_str(canvas, 100, 9, furi_string_get_cstr(s));
+        if(locale_get_measurement_unit() == LocaleMeasurementUnitsMetric) {
+            furi_string_printf(s, "%.1fm", (double)(nav_odo.distance / 1e3)); // meters
+        } else {
+            furi_string_printf(s, "%.1fmi", (double)(nav_odo.distance / 1e3 * 3.281)); // mi
+        }
+        canvas_draw_str(canvas, 93, 9, furi_string_get_cstr(s));
 
         /*** Draw latitude ***/
         canvas_set_font(canvas, FontPrimary);
@@ -176,9 +181,6 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 60, 49, furi_string_get_cstr(s));
 
         furi_string_free(s);
-
-        // TODO: compass direction next to heading?
-        // TODO: better localization
     }
 }
 

@@ -2,6 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexDataDisplay,
+    SubmenuIndexSyncTime,
     SubmenuIndexWiring,
     SubmenuIndexAbout,
 };
@@ -23,6 +24,12 @@ void ublox_scene_start_on_enter(void* context) {
         ublox_scene_start_submenu_callback,
         ublox);
     submenu_add_item(
+        submenu,
+        "Sync Time to GPS",
+        SubmenuIndexSyncTime,
+        ublox_scene_start_submenu_callback,
+        ublox);
+    submenu_add_item(
         submenu, "Wiring", SubmenuIndexWiring, ublox_scene_start_submenu_callback, ublox);
     submenu_add_item(
         submenu, "About", SubmenuIndexAbout, ublox_scene_start_submenu_callback, ublox);
@@ -41,17 +48,22 @@ bool ublox_scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexDataDisplay) {
             scene_manager_set_scene_state(
-                ublox->scene_manager, UbloxSceneDataDisplay, SubmenuIndexDataDisplay);
+                ublox->scene_manager, UbloxSceneStart, SubmenuIndexDataDisplay);
             scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplay);
             consumed = true;
         } else if(event.event == SubmenuIndexWiring) {
             scene_manager_set_scene_state(
-                ublox->scene_manager, UbloxSceneWiring, SubmenuIndexWiring);
+                ublox->scene_manager, UbloxSceneStart, SubmenuIndexWiring);
             scene_manager_next_scene(ublox->scene_manager, UbloxSceneWiring);
+            consumed = true;
+        } else if(event.event == SubmenuIndexSyncTime) {
+            scene_manager_set_scene_state(
+                ublox->scene_manager, UbloxSceneStart, SubmenuIndexSyncTime);
+            scene_manager_next_scene(ublox->scene_manager, UbloxSceneSyncTime);
             consumed = true;
         } else if(event.event == SubmenuIndexAbout) {
             scene_manager_set_scene_state(
-                ublox->scene_manager, UbloxSceneAbout, SubmenuIndexAbout);
+                ublox->scene_manager, UbloxSceneStart, SubmenuIndexAbout);
             scene_manager_next_scene(ublox->scene_manager, UbloxSceneAbout);
             consumed = true;
         }
