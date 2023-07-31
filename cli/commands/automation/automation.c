@@ -89,7 +89,8 @@ static void print_kb_layout(AutomationKeyboardLayout layout, const char* color) 
     TOTP_CLI_PRINTF_COLORFUL(color, "%s", layoutToPrint);
 }
 
-static bool parse_automation_keyboard_layout(const FuriString* str, AutomationKeyboardLayout* out) {
+static bool
+    parse_automation_keyboard_layout(const FuriString* str, AutomationKeyboardLayout* out) {
     bool result = true;
     if(furi_string_cmpi_str(str, TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTY) == 0) {
         *out = AutomationKeyboardLayoutQWERTY;
