@@ -12,7 +12,12 @@ bool iso15693_3_inventory_response_parse(Iso15693_3Data* data, const BitBuffer* 
 
 bool iso15693_3_system_info_response_parse(Iso15693_3Data* data, const BitBuffer* buf);
 
-bool iso15693_3_read_block_response_parse(uint8_t* data, size_t data_size, const BitBuffer* buf);
+bool iso15693_3_read_block_response_parse(uint8_t* data, uint8_t block_size, const BitBuffer* buf);
+
+bool iso15693_3_get_block_security_response_parse(
+    uint8_t* data,
+    uint16_t block_count,
+    const BitBuffer* buf);
 
 #ifdef __cplusplus
 }

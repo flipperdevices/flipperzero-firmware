@@ -57,7 +57,7 @@ bool iso15693_3_system_info_response_parse(Iso15693_3Data* data, const BitBuffer
     return true;
 }
 
-bool iso15693_3_read_block_response_parse(uint8_t* data, size_t data_size, const BitBuffer* buf) {
+bool iso15693_3_read_block_response_parse(uint8_t* data, uint8_t block_size, const BitBuffer* buf) {
     typedef struct {
         uint8_t flags;
         uint8_t block_data[];
@@ -74,10 +74,40 @@ bool iso15693_3_read_block_response_parse(uint8_t* data, size_t data_size, const
 
         if(resp->flags & ISO15693_3_RESP_FLAG_ERROR) break;
 
-        const size_t block_size = buf_size - sizeof(ReadBlockResponseLayout);
-        if(block_size != data_size) break;
+        const size_t received_block_size = buf_size - sizeof(ReadBlockResponseLayout);
+        if(received_block_size != block_size) break;
 
-        memcpy(data, resp->block_data, block_size);
+        memcpy(data, resp->block_data, received_block_size);
+        parsed = true;
+    } while(false);
+
+    return parsed;
+}
+
+bool iso15693_3_get_block_security_response_parse(
+    uint8_t* data,
+    uint16_t block_count,
+    const BitBuffer* buf) {
+    typedef struct {
+        uint8_t flags;
+        uint8_t block_security[];
+    } GetBlockSecurityResponseLayout;
+
+    bool parsed = false;
+
+    do {
+        const size_t buf_size = bit_buffer_get_size_bytes(buf);
+        if(buf_size <= sizeof(GetBlockSecurityResponseLayout)) return false;
+
+        const GetBlockSecurityResponseLayout* resp =
+            (const GetBlockSecurityResponseLayout*)bit_buffer_get_data(buf);
+
+        if(resp->flags & ISO15693_3_RESP_FLAG_ERROR) break;
+
+        const size_t received_block_count = buf_size - sizeof(GetBlockSecurityResponseLayout);
+        if(received_block_count != block_count) break;
+
+        memcpy(data, resp->block_security, received_block_count);
         parsed = true;
     } while(false);
 

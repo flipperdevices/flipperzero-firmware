@@ -16,6 +16,8 @@
 #define ISO15693_RESP_PATTERN_0 (0x01U)
 #define ISO15693_RESP_PATTERN_1 (0x02U)
 
+#define ISO15693_3_POLLER_NUM_BLOCKS_PER_QUERY (32U)
+
 static Iso15693_3Error iso15693_3_poller_process_error(NfcError error) {
     switch(error) {
     case NfcErrorNone:
@@ -243,8 +245,15 @@ Iso15693_3Error
                 iso15693_3_data->block_size);
             if(ret != Iso15693_3ErrorNone) break;
 
-            // TODO: Read security status
+            // Read block security status
+            // Backward compatibility: the first byte is used for AFI/DSFID lock, hence + 1
             simple_array_init(iso15693_3_data->security_status, iso15693_3_data->block_count + 1);
+
+            ret = iso15693_3_poller_async_get_blocks_security(
+                instance,
+                simple_array_get_data(iso15693_3_data->security_status) + 1,
+                iso15693_3_data->block_count);
+            if(ret != Iso15693_3ErrorNone) break;
         }
 
         instance->state = Iso15693_3PollerStateActivated;
@@ -262,7 +271,7 @@ Iso15693_3Error iso15693_3_poller_async_read_block(
     Iso15693_3Poller* instance,
     uint8_t* data,
     uint8_t block_number,
-    size_t block_size) {
+    uint8_t block_size) {
     furi_assert(instance);
     furi_assert(data);
 
@@ -307,6 +316,51 @@ Iso15693_3Error iso15693_3_poller_async_read_blocks(
     for(uint32_t i = 0; i < block_count; ++i) {
         ret = iso15693_3_poller_async_read_block(instance, &data[block_size * i], i, block_size);
         if(ret != Iso15693_3ErrorNone) break;
+    }
+
+    return ret;
+}
+
+Iso15693_3Error iso15693_3_poller_async_get_blocks_security(
+    Iso15693_3Poller* instance,
+    uint8_t* data,
+    uint16_t block_count) {
+    furi_assert(instance);
+    furi_assert(data);
+
+    // Limit the number of blocks to 32 in a single query
+    const uint32_t num_queries = block_count / ISO15693_3_POLLER_NUM_BLOCKS_PER_QUERY +
+                                 (block_count % ISO15693_3_POLLER_NUM_BLOCKS_PER_QUERY ? 1 : 0);
+
+    Iso15693_3Error ret = Iso15693_3ErrorNone;
+
+    for(uint32_t i = 0; i < num_queries; ++i) {
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_reset(instance->rx_buffer);
+
+        bit_buffer_append_byte(
+            instance->tx_buffer,
+            ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI);
+
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_GET_BLOCKS_SECURITY);
+
+        const uint8_t start_block_num = i * ISO15693_3_POLLER_NUM_BLOCKS_PER_QUERY;
+        bit_buffer_append_byte(instance->tx_buffer, start_block_num);
+
+        const uint8_t block_count_per_query =
+            MIN(block_count - start_block_num, (uint16_t)ISO15693_3_POLLER_NUM_BLOCKS_PER_QUERY);
+        // No mention of -1 in the docs, but without it the card always returns 1 extra byte
+        bit_buffer_append_byte(instance->tx_buffer, block_count_per_query - 1);
+
+        ret = iso15693_3_poller_send_frame(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
+        if(ret != Iso15693_3ErrorNone) break;
+
+        if(!iso15693_3_get_block_security_response_parse(
+               &data[start_block_num], block_count_per_query, instance->rx_buffer)) {
+            ret = Iso15693_3ErrorCommunication;
+            break;
+        }
     }
 
     return ret;

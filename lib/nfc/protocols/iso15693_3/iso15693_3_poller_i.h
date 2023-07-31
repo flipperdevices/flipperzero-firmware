@@ -47,13 +47,18 @@ Iso15693_3Error iso15693_3_poller_async_read_block(
     Iso15693_3Poller* instance,
     uint8_t* data,
     uint8_t block_number,
-    size_t block_size);
+    uint8_t block_size);
 
 Iso15693_3Error iso15693_3_poller_async_read_blocks(
     Iso15693_3Poller* instance,
     uint8_t* data,
     uint16_t block_count,
     uint8_t block_size);
+
+Iso15693_3Error iso15693_3_poller_async_get_blocks_security(
+    Iso15693_3Poller* instance,
+    uint8_t* data,
+    uint16_t block_count);
 
 Iso15693_3Error iso15693_3_poller_halt(Iso15693_3Poller* instance);
 
