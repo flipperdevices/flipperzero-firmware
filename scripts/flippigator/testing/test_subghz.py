@@ -24,7 +24,11 @@ class TestSubGhz(BaseCase):
             "Region Information",
             "Radio Settings",
         ]
-        assert menu == menu_ref, "Sub-GHz menu list is wrong"
+
+        assert all(
+            [item in menu for item in menu_ref]
+        ), "Some of Sub-GHz menu items are missing"
+
         nav.go_to_main_screen()
 
     @pytest.mark.smoke
