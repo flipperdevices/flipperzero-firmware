@@ -14,7 +14,6 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 #include <locale/locale.h>
-#include <math.h>
 
 #define MAX_AP_LIST 20
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
