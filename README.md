@@ -1,6 +1,6 @@
 # WIFI_MAP
 
-![wifi_map](https://github.com/carvilsi/flipper0-wifi-map/blob/ap_drawing_bis/wifi_map.png?raw=true)
+![wifi_map](https://github.com/carvilsi/flipper0-wifi-map/blob/main/wifi_map.png?raw=true)
 
 An ESP32 and FlipperZero wifi mapping.
 
