@@ -19,47 +19,30 @@ Please check the example `index.html` to get an idea of what this has to look li
 
 Thank you so much to the following contributors for providing awesome portals. 
 
-- `Google_Modern.html` by [roshanravan](https://github.com/roshanravan)
-- `Twitter.html` by [roshanravan](https://github.com/roshanravan)
-- `Facebook.html` by [roshanravan](https://github.com/roshanravan)
+- `Alaska_Airlines.html` by [roshanravan](https://github.com/roshanravan)
+- `Amazon.html` by [jules0835](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/44)
+- `American_Airlines.html` by [roshanravan](https://github.com/roshanravan)
+- `Apple.html` by [black28p](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/46)
+- `AT&T.html` by [roshanravan](https://github.com/roshanravan)
 - `CoxWifi.html` by [qqmajikpp](https://github.com/qqmajikpp)
-- `Starlink.html` by [roshanravan](https://github.com/roshanravan)
-- `Spectrum.html` by [roshanravan](https://github.com/roshanravan)
-- `T_Mobile.html` by [roshanravan](https://github.com/roshanravan)
-- `Verizon.html` by [roshanravan](https://github.com/roshanravan)
-- `at&t.html` by [roshanravan](https://github.com/roshanravan)
-- `southwest_airline.html` by [roshanravan](https://github.com/roshanravan)
-- `delta_airline.html` by [roshanravan](https://github.com/roshanravan)
-- `united_airline.html` by [roshanravan](https://github.com/roshanravan)
-- `american_airline.html` by [roshanravan](https://github.com/roshanravan)
-- `Jet_Blue.html` by [roshanravan](https://github.com/roshanravan)
-- `Better_Google_Mobile.html` by [breaching](https://github.com/breaching)
-- `AlaskaAirline.html` by [roshanravan](https://github.com/roshanravan)
-- `Amazon.html` by [roshanravan](https://github.com/roshanravan)
+- `Delta_Airlines.html` by [roshanravan](https://github.com/roshanravan)
+- `Facebook.html` by [roshanravan](https://github.com/roshanravan)
 - `FakeHack.html` by [roshanravan](https://github.com/roshanravan)
 - `FakeHack2.html` by [roshanravan](https://github.com/roshanravan)
+- `Google_Mobile.html` by [breaching](https://github.com/breaching)
+- `Google_Modern.html` by [roshanravan](https://github.com/roshanravan)
+- `Instagram.html` by [grugnoymeme](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/713)
+- `Jet_Blue.html` by [roshanravan](https://github.com/roshanravan)
 - `Matrix.html` by [roshanravan](https://github.com/roshanravan)
 - `Microsoft.html` by [roshanravan](https://github.com/roshanravan)
+- `PornHub.html` by [roshanravan](https://github.com/roshanravan)
 - `Prank_Game.html` by [roshanravan](https://github.com/roshanravan)
+- `Southwest_Airlines.html` by [roshanravan](https://github.com/roshanravan)
+- `Spectrum.html` by [roshanravan](https://github.com/roshanravan)
 - `SpiritAirlines.html` by [roshanravan](https://github.com/roshanravan)
+- `Starlink.html` by [roshanravan](https://github.com/roshanravan)
 - `Twitch.html` by [roshanravan](https://github.com/roshanravan)
-- `apple.html` by [Jules](https://github.com/jules0835)
-- `Frequency.html` by [roshanravan](https://github.com/roshanravan)
-
-## Disclaimer
-
-Dear User,
-
-Our captive WiFi login portals designed specifically for educational purposes. These portals have been carefully developed to offer a hands-on experience in the field of cybersecurity and penetration testing. As a responsible provider, I would like to emphasize that any illegal use of these portals is strictly prohibited.
-
-It is crucial to acknowledge that using these portals for any unauthorized activities, such as hacking into networks or attempting to access sensitive information without proper authorization, is deemed illegal and unethical. I strongly discourage engaging in any activities that may cause harm, compromise network security, or infringe upon others' privacy rights.
-
-By accessing and utilizing the captive WiFi login portals, users take complete responsibility for their actions and the consequences that may arise from them. I expect users to act responsibly, adhere to ethical guidelines, and ensure that their activities remain within the boundaries of the law and ethical norms.
-
-Remember, these portals are aimed at promoting knowledge, improving cybersecurity skills, and raising awareness about the potential vulnerabilities present in network infrastructures. I encourage you to explore the portals, learn from them, and embrace the opportunity to enhance your understanding in a controlled and legal environment.
-
-Thank you for your cooperation and commitment to responsible usage. Together, let us foster a secure and ethical cyberspace.
-
-Best regards,
-[roshanravan](https://github.com/roshanravan)
-
+- `Twitter.html` by [roshanravan](https://github.com/roshanravan)
+- `T_Mobile.html` by [roshanravan](https://github.com/roshanravan)
+- `United_Airlines.html` by [roshanravan](https://github.com/roshanravan)
+- `Verizon.html` by [roshanravan](https://github.com/roshanravan)

