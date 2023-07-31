@@ -1,5 +1,8 @@
 #include "uhf_app_i.h"
 
+static const char* uhf_file_header = "Flipper UHF device";
+static const uint32_t uhf_file_version = 1;
+
 char* convertToHexString(const uint8_t* array, size_t length) {
     if(array == NULL || length == 0) {
         return NULL;
@@ -24,7 +27,6 @@ char* convertToHexString(const uint8_t* array, size_t length) {
 }
 
 bool uhf_save_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename) {
-    bool saved = false;
     if(!storage_dir_exists(storage, UHF_APPS_DATA_FOLDER)) {
         storage_simply_mkdir(storage, UHF_APPS_DATA_FOLDER);
     }
@@ -32,26 +34,22 @@ bool uhf_save_data(UHFResponseData* uhf_response_data, Storage* storage, const c
         storage_simply_mkdir(storage, UHF_APPS_STORAGE_FOLDER);
     }
 
-    File* file = storage_file_alloc(storage);
-    char file_path_result[100];
-    strcpy(file_path_result, UHF_APPS_STORAGE_FOLDER);
-    strcat(file_path_result, "/");
-    strcat(file_path_result, filename);
-    strcat(file_path_result, UHF_FILE_EXTENSION);
-    if(storage_file_open(file, file_path_result, FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
-        storage_file_seek(file, 0, true);
-        storage_file_truncate(file);
-        char* hex_data =
-            convertToHexString(uhf_response_data->data->data, uhf_response_data->data->length);
-        storage_file_write(file, "UHF App Version : ", 19);
-        storage_file_write(file, UHF_DATA_VERSION, 2);
-        storage_file_write(file, "\n", 1);
-        storage_file_write(file, hex_data, strlen(hex_data));
-        storage_file_close(file);
-        storage_file_free(file);
-        saved = true;
-    }
-    return saved;
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+    FuriString* temp_str = furi_string_alloc();
+    // set file name
+    furi_string_cat_printf(
+        temp_str, "%s/%s%s", UHF_APPS_STORAGE_FOLDER, filename, UHF_FILE_EXTENSION);
+    // open file
+    if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) return false;
+    // write header
+    if(!flipper_format_write_header_cstr(file, uhf_file_header, uhf_file_version)) return false;
+    // write epc bank
+    if(!flipper_format_write_hex(
+           file, "EPC", uhf_response_data->data->data, uhf_response_data->data->length))
+        return false;
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+    return true;
 }
 
 bool uhf_custom_event_callback(void* ctx, uint32_t event) {
@@ -184,6 +182,7 @@ void uhf_free(UHFApp* uhf_app) {
 // void uhf_text_store_clear(UHFApp* uhf_app) {
 //     memset(uhf_app->text_store, 0, sizeof(uhf_app->text_store));
 // }
+
 //  ==================
 static const NotificationSequence uhf_sequence_blink_start_cyan = {
     &message_blink_start_10,

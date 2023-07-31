@@ -8,12 +8,16 @@
  * Just set fap_icon_assets in application.fam and #include {APPID}_icons.h */
 #include "gpio_controller_icons.h"
 
-#include "gpio_items.h"
+#define GPIO_PIN_COUNT 8
+#define ANIMATE_FRAME_TIME_MS 133
+#define FRAME_TIME 66.666666
 
 typedef struct {
     int selected;
-    GPIOItems* gpio_items;
+    //GPIOItems* gpio_items;
     int wiggle_frame;
+    size_t prev_frame_time;
+    size_t elapsed_time;
 } ViewerState;
 
 //  5V  A7  A6  A4  B3  B2  C3 GND SET
@@ -59,18 +63,33 @@ typedef struct {
     Icon* selected_icon;
 } ViewElement;
 
-static ViewerState vstate = {.selected = PIN_A7, .gpio_items = NULL, .wiggle_frame = -1};
+typedef struct {
+    uint8_t element_idx;
+    const GpioPin* pin;
+    GpioMode mode;
+    GpioPull pull;
+    GpioSpeed speed;
+    uint8_t value;
+    const char* name;
+    char* expression;
+    bool unset;
+    bool found;
+    bool input;
+} GPIOPin;
+
+static ViewerState vstate = {.selected = PIN_A7, .wiggle_frame = -1};
 
 static int wiggle[] = {-1, 1, -1, 1};
+static uint32_t wiggle_frame_count = 4;
 
 static ViewElement elements[] = {
     {PIN_5V, PIN_3V, true, false, true, true, -1, 0, 0, "5V", (Icon*)&I_5v_pin, NULL},
-    {PIN_A7, PIN_SWC, true, true, true, true, 0, 14, 0, "A7", (Icon*)&I_a7_pin, NULL},
-    {PIN_A6, NONE, true, true, true, true, 1, 28, 0, "A6", (Icon*)&I_a6_pin, NULL},
-    {PIN_A4, PIN_SIO, true, true, true, true, 2, 42, 0, "A4", (Icon*)&I_a4_pin, NULL},
-    {PIN_B3, PIN_TX, true, true, true, true, 3, 56, 0, "B3", (Icon*)&I_b3_pin, NULL},
-    {PIN_B2, PIN_RX, true, true, true, true, 4, 70, 0, "B2", (Icon*)&I_b2_pin, NULL},
-    {PIN_C3, PIN_C1, true, true, true, true, 5, 84, 0, "C3", (Icon*)&I_c3_pin, NULL},
+    {PIN_A7, PIN_SWC, true, false, true, true, -1, 14, 0, "PA7", (Icon*)&I_a7_pin, NULL},
+    {PIN_A6, NONE, true, false, true, true, -1, 28, 0, "PA6", (Icon*)&I_a6_pin, NULL},
+    {PIN_A4, PIN_SIO, true, false, true, true, -1, 42, 0, "PA4", (Icon*)&I_a4_pin, NULL},
+    {PIN_B3, PIN_TX, true, false, true, true, -1, 56, 0, "PB3", (Icon*)&I_b3_pin, NULL},
+    {PIN_B2, PIN_RX, true, false, true, true, -1, 70, 0, "PB2", (Icon*)&I_b2_pin, NULL},
+    {PIN_C3, PIN_C1, true, false, true, true, -1, 84, 0, "PC3", (Icon*)&I_c3_pin, NULL},
     {GEARIC,
      PIN_1W,
      true,
@@ -99,8 +118,8 @@ static ViewElement elements[] = {
     {PIN_SIO, PIN_A4, true, false, false, true, -1, 42, 48, "Serial IO", (Icon*)&I_sio_pin, NULL},
     {PIN_TX, PIN_B3, true, false, false, true, -1, 56, 48, "UART - Transmit", (Icon*)&I_tx_pin, NULL},
     {PIN_RX, PIN_B2, true, false, false, true, -1, 70, 48, "UART - Receive", (Icon*)&I_rx_pin, NULL},
-    {PIN_C1, PIN_C3, true, true, false, true, 6, 84, 48, "C1", (Icon*)&I_c1_pin, NULL},
-    {PIN_C0, NONE, true, true, false, true, 7, 98, 48, "C0", (Icon*)&I_c0_pin, NULL},
+    {PIN_C1, PIN_C3, true, false, false, true, -1, 84, 48, "PC1", (Icon*)&I_c1_pin, NULL},
+    {PIN_C0, NONE, true, false, false, true, -1, 98, 48, "PC0", (Icon*)&I_c0_pin, NULL},
     {PIN_1W, GEARIC, true, true, false, true, -1, 112, 48, "1-Wire", (Icon*)&I_1w_pin, NULL},
     {PIN_GND_08,
      NONE,
@@ -140,13 +159,148 @@ static ViewElement elements[] = {
      NULL},
 };
 
+static GPIOPin gpio_pin_config[GPIO_PIN_COUNT];
+
 static int element_count = NONE;
+
+// GPIO enums from firmware/targets/f7/furi_hal/furi_hal_gpio.h
+
+// /**
+//  * Gpio modes
+//  */
+// typedef enum {
+//     *GpioModeInput,
+//     *GpioModeOutputPushPull,
+//     GpioModeOutputOpenDrain,
+//     GpioModeAltFunctionPushPull,
+//     GpioModeAltFunctionOpenDrain,
+//     *GpioModeAnalog,
+//     GpioModeInterruptRise,
+//     GpioModeInterruptFall,
+//     GpioModeInterruptRiseFall,
+//     GpioModeEventRise,
+//     GpioModeEventFall,
+//     GpioModeEventRiseFall,
+// } GpioMode;
+
+// /**
+//  * Gpio pull modes
+//  */
+// typedef enum {
+//     GpioPullNo,
+//     GpioPullUp,
+//     GpioPullDown,
+// } GpioPull;
+
+// /**
+//  * Gpio speed modes
+//  */
+// typedef enum {
+//     GpioSpeedLow,
+//     GpioSpeedMedium,
+//     GpioSpeedHigh,
+//     GpioSpeedVeryHigh,
+// } GpioSpeed;
+
+static void init_gpio() {
+    int count = 0;
+    for(size_t i = 0; i < gpio_pins_count; i++) {
+        if(!gpio_pins[i].debug) {
+            for(int j = 0; j < element_count; j++) {
+                if(strcmp(elements[j].name, gpio_pins[i].name) == 0) {
+                    gpio_pin_config[count].element_idx = j;
+                    gpio_pin_config[count].pin = gpio_pins[i].pin;
+                    gpio_pin_config[count].mode = GpioModeOutputPushPull;
+                    gpio_pin_config[count].pull = GpioPullNo;
+                    gpio_pin_config[count].speed = GpioSpeedVeryHigh;
+                    gpio_pin_config[count].value = 0;
+                    gpio_pin_config[count].name = gpio_pins[i].name;
+                    gpio_pin_config[count].expression = NULL;
+                    gpio_pin_config[count].unset = true;
+                    gpio_pin_config[count].found = true;
+                    gpio_pin_config[count].input = false;
+
+                    elements[j].gp_idx = i;
+                    elements[j].editable = true;
+
+                    count++;
+                }
+            }
+        }
+    }
+
+    // naively set all as digitial output
+    for(int i = 0; i < count; i++) {
+        GPIOPin* gpc = &gpio_pin_config[i];
+        gpc->input = true;
+        gpc->unset = false;
+        furi_hal_gpio_write(gpc->pin, false);
+        furi_hal_gpio_init(gpc->pin, gpc->mode, gpc->pull, gpc->speed);
+    }
+}
+
+//static void update_gpio()
+//{
+//    // write to gpio pins
+//
+//    // read frm gpio pins
+//}
+
+// TODO: Determine the lowest frame delta we can get away with.
+// TODO: Redraw only what changes.
+//       - clear previous (drawn) selected pin
+//       - clear newly selected pin
 
 // Screen is 128x64 px
 static void app_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     canvas_clear(canvas);
+
+    size_t current_frame_time = furi_get_tick();
+    size_t delta_cycles =
+        (current_frame_time > vstate.prev_frame_time ?
+             current_frame_time - vstate.prev_frame_time :
+             0);
+    size_t delta_time_ms = delta_cycles * 1000 / furi_kernel_get_tick_frequency();
+
+    // delay until desired delta time and recalculate
+    if(delta_time_ms < FRAME_TIME) {
+        furi_delay_ms(FRAME_TIME - delta_time_ms);
+        current_frame_time = furi_get_tick();
+        delta_cycles =
+            (current_frame_time > vstate.prev_frame_time ?
+                 current_frame_time - vstate.prev_frame_time :
+                 0);
+        delta_time_ms = delta_cycles * 1000 / furi_kernel_get_tick_frequency();
+    }
+
+    vstate.elapsed_time += delta_time_ms;
+    vstate.prev_frame_time = current_frame_time;
+
+    // draw values
+    for(int i = 0; i < GPIO_PIN_COUNT; i++) {
+        if(!gpio_pin_config[i].unset) {
+            ViewElement e = elements[gpio_pin_config[i].element_idx];
+
+            // draw wire
+            if(e.top_row) {
+                canvas_draw_line(canvas, e.x_pos + 6, e.y_pos + 16, e.x_pos + 6, e.y_pos + 16 + 8);
+            } else {
+                canvas_draw_line(canvas, e.x_pos + 6, e.y_pos, e.x_pos + 6, e.y_pos - 8);
+            }
+
+            if(gpio_pin_config[i].mode == GpioModeAnalog) {
+            } else {
+                const Icon* icon = gpio_pin_config[i].value ? &I_digi_one : &I_digi_zero;
+                if(e.top_row) {
+                    canvas_draw_icon(canvas, e.x_pos + 2, e.y_pos + 20, icon);
+                } else {
+                    canvas_draw_icon(canvas, e.x_pos + 2, e.y_pos - 13, icon);
+                }
+            }
+        }
+    }
 
     for(int i = 0; i < element_count; i++) {
         ViewElement e = elements[i];
@@ -163,10 +317,16 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
             }
 
             if(vstate.wiggle_frame >= 0) {
-                x += wiggle[vstate.wiggle_frame / 2];
-                vstate.wiggle_frame++;
-                if((unsigned int)(vstate.wiggle_frame / 2) >= (sizeof(wiggle) / sizeof(int))) {
-                    vstate.wiggle_frame = -1;
+                x += wiggle[vstate.wiggle_frame];
+
+                if(vstate.elapsed_time >= ANIMATE_FRAME_TIME_MS) {
+                    vstate.wiggle_frame++;
+                    if((unsigned int)(vstate.wiggle_frame) >=
+                       wiggle_frame_count) //(sizeof(wiggle)/sizeof(int)))
+                    {
+                        vstate.wiggle_frame = -1;
+                    }
+                    vstate.elapsed_time = 0;
                 }
             }
         }
@@ -200,8 +360,10 @@ int32_t gpio_controller_main(void* p) {
 
     InputEvent event;
 
-    vstate.gpio_items = gpio_items_alloc();
-    gpio_items_configure_all_pins(vstate.gpio_items, GpioModeOutputPushPull);
+    init_gpio();
+
+    vstate.prev_frame_time = furi_get_tick();
+    vstate.elapsed_time = 0;
 
     bool running = true;
     while(running) {
@@ -211,13 +373,14 @@ int32_t gpio_controller_main(void* p) {
                    event.key == InputKeyOk) {
                     if(event.type == InputTypePress && elements[vstate.selected].gp_idx < 0) {
                         vstate.wiggle_frame = 0;
+                        vstate.elapsed_time = 0;
                     } else if(
                         elements[vstate.selected].gp_idx >= 0 &&
                         (event.type == InputTypePress || event.type == InputTypeRelease)) {
-                        gpio_items_set_pin(
-                            vstate.gpio_items,
-                            elements[vstate.selected].gp_idx,
-                            event.type == InputTypePress);
+                        int gp_idx = elements[vstate.selected].gp_idx;
+                        furi_hal_gpio_write(
+                            gpio_pin_config[gp_idx].pin, event.type == InputTypePress);
+                        gpio_pin_config[gp_idx].value = event.type == InputTypePress ? 1 : 0;
                     }
                 } else if(event.type == InputTypePress || event.type == InputTypeRepeat) {
                     switch(event.key) {
@@ -253,8 +416,6 @@ int32_t gpio_controller_main(void* p) {
         }
         view_port_update(view_port);
     }
-
-    gpio_items_free(vstate.gpio_items);
 
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);

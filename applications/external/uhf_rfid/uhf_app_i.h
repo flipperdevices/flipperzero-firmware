@@ -26,7 +26,9 @@
 #include "uhf_worker.h"
 #include <uhf_rfid_icons.h>
 
-#define UHF_DATA_VERSION "V0"
+#define UHF_FILE_HEADER            \
+    "Filetype: Flipper uhf data\n" \
+    "Version: 1"
 #define UHF_TEXT_STORE_SIZE 128
 #define UHF_APPS_DATA_FOLDER EXT_PATH("apps_data")
 #define UHF_APPS_STORAGE_FOLDER \
