@@ -1,5 +1,7 @@
 # WIFI_MAP
 
+![wifi_map](https://github.com/carvilsi/flipper0-wifi-map/blob/main/wifi_map.png?raw=true)
+
 An ESP32 and FlipperZero wifi mapping.
 
 Check the ESP32 side at: [esp32-wifi-map](https://github.com/carvilsi/esp32-wifi-map)
@@ -12,7 +14,7 @@ Clone this repo at `applications_user/` folder under `flipperzero-firmware`
 
 ### Build and flash
 
-`$ ./fbt launch_app APPSRC=wifi_map`
+`$ ./fbt launch APPSRC=wifi_map`
 
 ### Logs
 
@@ -25,3 +27,4 @@ Clone this repo at `applications_user/` folder under `flipperzero-firmware`
 |      GND          |     GND     |
 |      RX           | TXD GPIO_17 |
 |      3V3          |     3V3     |
+

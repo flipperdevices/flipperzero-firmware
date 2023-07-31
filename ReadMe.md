@@ -57,6 +57,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Init config for external radio driver #564 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/564)
 - Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- Updated: [ESP32 WIFI Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map)
+- Updated: [GPIO Controller (By Lokno)](https://github.com/Lokno/gpio_controller)
 
 <a name="release">
 
