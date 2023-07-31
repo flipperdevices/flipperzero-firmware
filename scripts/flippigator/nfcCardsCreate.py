@@ -34,7 +34,7 @@ def main():
     nav = Navigator(proto)
     nav.update_screen()
 
-    #NFC-A 7-bytes UID adding
+    # NFC-A 7-bytes UID adding
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -47,7 +47,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN0")
 
-    #NFC-A 7-bytes UID adding
+    # NFC-A 7-bytes UID adding
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -60,7 +60,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN1")
 
-    #Mifare Ultralight
+    # Mifare Ultralight
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -72,7 +72,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN2")
 
-    #Mifare Ultralight EV1 11
+    # Mifare Ultralight EV1 11
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -84,7 +84,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN3")
 
-    #Mifare Ultralight EV1 H11
+    # Mifare Ultralight EV1 H11
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -96,7 +96,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN4")
 
-    #Mifare Ultralight EV1 21
+    # Mifare Ultralight EV1 21
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -108,7 +108,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN5")
 
-    #Mifare Ultralight EV1 H21
+    # Mifare Ultralight EV1 H21
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -120,7 +120,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN6")
 
-    #NTAG203
+    # NTAG203
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -132,7 +132,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN7")
 
-    #NTAG213
+    # NTAG213
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -144,7 +144,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN8")
 
-    #NTAG215
+    # NTAG215
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -156,7 +156,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN9")
 
-    #NTAG216
+    # NTAG216
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -168,7 +168,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN10")
 
-    #NTAG I2C 1k
+    # NTAG I2C 1k
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -180,7 +180,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN11")
 
-    #NTAG I2C 2k
+    # NTAG I2C 2k
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -192,7 +192,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN12")
 
-    #NTAG I2C Plus 1k
+    # NTAG I2C Plus 1k
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -204,7 +204,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN13")
 
-    #NTAG I2C Plus 2k
+    # NTAG I2C Plus 2k
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -216,7 +216,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN14")
 
-    #Mifare Mini
+    # Mifare Mini
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -228,7 +228,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN15")
 
-    #Mifare Classic 1k 4byte UID
+    # Mifare Classic 1k 4byte UID
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -240,7 +240,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN16")
 
-    #Mifare Classic 1k 7byte UID
+    # Mifare Classic 1k 7byte UID
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -252,7 +252,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN17")
 
-    #Mifare Classic 4k 4byte UID
+    # Mifare Classic 4k 4byte UID
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()
@@ -264,7 +264,7 @@ def main():
     key = FlipperTextKeyboard(nav)
     key.send("tN18")
 
-    #Mifare Classic 4k 4byte UID
+    # Mifare Classic 4k 4byte UID
     nav.nfc.go_into()
     nav.go_to("Add Manually")
     nav.press_ok()

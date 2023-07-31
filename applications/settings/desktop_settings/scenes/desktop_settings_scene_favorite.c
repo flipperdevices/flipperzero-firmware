@@ -1,11 +1,30 @@
 #include "../desktop_settings_app.h"
 #include "applications.h"
 #include "desktop_settings_scene.h"
+#include <flipper_application/flipper_application.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
+#define APPS_COUNT (FLIPPER_APPS_COUNT + FLIPPER_EXTERNAL_APPS_COUNT)
+
+#define EXTERNAL_BROWSER_NAME ("Applications")
+#define EXTERNAL_BROWSER_INDEX (APPS_COUNT + 1)
+
 #define EXTERNAL_APPLICATION_NAME ("[External Application]")
-#define EXTERNAL_APPLICATION_INDEX (FLIPPER_APPS_COUNT + 1)
+#define EXTERNAL_APPLICATION_INDEX (APPS_COUNT + 2)
+
+#define PRESELECTED_SPECIAL 0xffffffff
+
+static const char* favorite_fap_get_app_name(size_t i) {
+    const char* name;
+    if(i < FLIPPER_APPS_COUNT) {
+        name = FLIPPER_APPS[i].name;
+    } else {
+        name = FLIPPER_EXTERNAL_APPS[i - FLIPPER_APPS_COUNT].name;
+    }
+
+    return name;
+}
 
 static bool favorite_fap_selector_item_callback(
     FuriString* file_path,
@@ -13,16 +32,9 @@ static bool favorite_fap_selector_item_callback(
     uint8_t** icon_ptr,
     FuriString* item_name) {
     UNUSED(context);
-#ifdef APP_FAP_LOADER
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    bool success = fap_loader_load_name_and_icon(file_path, storage, icon_ptr, item_name);
+    bool success = flipper_application_load_name_and_icon(file_path, storage, icon_ptr, item_name);
     furi_record_close(RECORD_STORAGE);
-#else
-    UNUSED(file_path);
-    UNUSED(icon_ptr);
-    UNUSED(item_name);
-    bool success = false;
-#endif
     return success;
 }
 
@@ -45,33 +57,43 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
 
     uint32_t primary_favorite =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
-    uint32_t pre_select_item = 0;
+    uint32_t pre_select_item = PRESELECTED_SPECIAL;
     FavoriteApp* curr_favorite_app = primary_favorite ? &app->settings.favorite_primary :
                                                         &app->settings.favorite_secondary;
 
-    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        submenu_add_item(
-            submenu,
-            FLIPPER_APPS[i].name,
-            i,
-            desktop_settings_scene_favorite_submenu_callback,
-            app);
+    for(size_t i = 0; i < APPS_COUNT; i++) {
+        const char* name = favorite_fap_get_app_name(i);
+
+        submenu_add_item(submenu, name, i, desktop_settings_scene_favorite_submenu_callback, app);
 
         // Select favorite item in submenu
-        if(!curr_favorite_app->is_external &&
-           !strcmp(FLIPPER_APPS[i].name, curr_favorite_app->name_or_path)) {
+        if(!strcmp(name, curr_favorite_app->name_or_path)) {
             pre_select_item = i;
         }
     }
 
+    // Special case: Application browser
+    submenu_add_item(
+        submenu,
+        EXTERNAL_BROWSER_NAME,
+        EXTERNAL_BROWSER_INDEX,
+        desktop_settings_scene_favorite_submenu_callback,
+        app);
+
+    // Special case: Specific application
     submenu_add_item(
         submenu,
         EXTERNAL_APPLICATION_NAME,
         EXTERNAL_APPLICATION_INDEX,
         desktop_settings_scene_favorite_submenu_callback,
         app);
-    if(curr_favorite_app->is_external) {
-        pre_select_item = EXTERNAL_APPLICATION_INDEX;
+
+    if(pre_select_item == PRESELECTED_SPECIAL) {
+        if(curr_favorite_app->name_or_path[0] == '\0') {
+            pre_select_item = EXTERNAL_BROWSER_INDEX;
+        } else {
+            pre_select_item = EXTERNAL_APPLICATION_INDEX;
+        }
     }
 
     submenu_set_header(
@@ -92,7 +114,10 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                                                         &app->settings.favorite_secondary;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == EXTERNAL_APPLICATION_INDEX) {
+        if(event.event == EXTERNAL_BROWSER_INDEX) {
+            curr_favorite_app->name_or_path[0] = '\0';
+            consumed = true;
+        } else if(event.event == EXTERNAL_APPLICATION_INDEX) {
             const DialogsFileBrowserOptions browser_options = {
                 .extension = ".fap",
                 .icon = &I_unknown_10px,
@@ -110,7 +135,6 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
 
             if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
                 submenu_reset(app->submenu); // Prevent menu from being shown when we exiting scene
-                curr_favorite_app->is_external = true;
                 strncpy(
                     curr_favorite_app->name_or_path,
                     furi_string_get_cstr(temp_path),
@@ -118,9 +142,8 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                 consumed = true;
             }
         } else {
-            curr_favorite_app->is_external = false;
-            strncpy(
-                curr_favorite_app->name_or_path, FLIPPER_APPS[event.event].name, MAX_APP_LENGTH);
+            const char* name = favorite_fap_get_app_name(event.event);
+            if(name) strncpy(curr_favorite_app->name_or_path, name, MAX_APP_LENGTH);
             consumed = true;
         }
         if(consumed) {
