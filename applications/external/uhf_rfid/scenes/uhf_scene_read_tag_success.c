@@ -87,8 +87,8 @@ bool uhf_scene_read_tag_success_on_event(void* ctx, SceneManagerEvent event) {
             consumed = scene_manager_search_and_switch_to_previous_scene(
                 uhf_app->scene_manager, UHFSceneStart);
         } else if(event.event == GuiButtonTypeRight) {
-            // scene_manager_next_scene(picopass->scene_manager, PicopassSceneCardMenu);
-            // consumed = true;
+            scene_manager_next_scene(uhf_app->scene_manager, UHFSceneCardMenu);
+            consumed = true;
         } else if(event.event == GuiButtonTypeCenter) {
             // consumed = scene_manager_search_and_switch_to_another_scene(
             //     picopass->scene_manager, PicopassSceneStart);
@@ -106,6 +106,4 @@ void uhf_scene_read_tag_success_on_exit(void* ctx) {
     popup_reset(uhf_app->popup);
     // clear widget
     widget_reset(uhf_app->widget);
-
-    // uhf_blink_stop(uhf_app);
 }

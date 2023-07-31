@@ -23,6 +23,37 @@ char* convertToHexString(const uint8_t* array, size_t length) {
     return hexArray;
 }
 
+bool uhf_save_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename) {
+    bool saved = false;
+    if(!storage_dir_exists(storage, UHF_APPS_DATA_FOLDER)) {
+        storage_simply_mkdir(storage, UHF_APPS_DATA_FOLDER);
+    }
+    if(!storage_dir_exists(storage, UHF_APPS_STORAGE_FOLDER)) {
+        storage_simply_mkdir(storage, UHF_APPS_STORAGE_FOLDER);
+    }
+
+    File* file = storage_file_alloc(storage);
+    char file_path_result[100];
+    strcpy(file_path_result, UHF_APPS_STORAGE_FOLDER);
+    strcat(file_path_result, "/");
+    strcat(file_path_result, filename);
+    strcat(file_path_result, UHF_FILE_EXTENSION);
+    if(storage_file_open(file, file_path_result, FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
+        storage_file_seek(file, 0, true);
+        storage_file_truncate(file);
+        char* hex_data =
+            convertToHexString(uhf_response_data->data->data, uhf_response_data->data->length);
+        storage_file_write(file, "UHF App Version : ", 19);
+        storage_file_write(file, UHF_DATA_VERSION, 2);
+        storage_file_write(file, "\n", 1);
+        storage_file_write(file, hex_data, strlen(hex_data));
+        storage_file_close(file);
+        storage_file_free(file);
+        saved = true;
+    }
+    return saved;
+}
+
 bool uhf_custom_event_callback(void* ctx, uint32_t event) {
     furi_assert(ctx);
     UHFApp* uhf_app = ctx;
@@ -58,6 +89,9 @@ UHFApp* uhf_alloc() {
     uhf_app->gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(
         uhf_app->view_dispatcher, uhf_app->gui, ViewDispatcherTypeFullscreen);
+
+    // Storage
+    uhf_app->storage = furi_record_open(RECORD_STORAGE);
 
     // Open Notification record
     uhf_app->notifications = furi_record_open(RECORD_NOTIFICATION);
@@ -126,6 +160,10 @@ void uhf_free(UHFApp* uhf_app) {
     // GUI
     furi_record_close(RECORD_GUI);
     uhf_app->gui = NULL;
+
+    // Storage
+    furi_record_close(RECORD_STORAGE);
+    uhf_app->storage = NULL;
 
     // Notifications
     furi_record_close(RECORD_NOTIFICATION);
