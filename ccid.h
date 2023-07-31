@@ -83,7 +83,7 @@ struct CCID_Message {
 };
 
 void seader_ccid_check_for_sam(SeaderUartBridge* seader_uart);
-void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart);
+void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart, uint8_t slot);
 void seader_ccid_GetSlotStatus(SeaderUartBridge* seader_uart);
 void seader_ccid_SetParameters(SeaderUartBridge* seader_uart);
 void seader_ccid_GetParameters(SeaderUartBridge* seader_uart);

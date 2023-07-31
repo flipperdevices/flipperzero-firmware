@@ -8,14 +8,15 @@ const uint8_t SAM_ATR[] =
 const uint8_t SAM_ATR2[] = {0x3b, 0x90, 0x96, 0x91, 0x81, 0xb1, 0xfe, 0x55, 0x1f, 0xc7, 0xd4};
 
 bool powered = false;
-uint8_t slot = 0;
-uint8_t sequence = 0;
+uint8_t sam_slot = 0;
+uint8_t sequence[2] = {0, 0};
 uint8_t retries = 3;
-uint8_t getSequence() {
-    if(sequence > 254) {
-        sequence = 0;
+
+uint8_t getSequence(uint8_t slot) {
+    if(sequence[slot] > 254) {
+        sequence[slot] = 0;
     }
-    return sequence++;
+    return sequence[slot]++;
 }
 
 size_t seader_ccid_add_lrc(uint8_t* data, size_t len) {
@@ -27,7 +28,7 @@ size_t seader_ccid_add_lrc(uint8_t* data, size_t len) {
     return len + 1;
 }
 
-void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart) {
+void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart, uint8_t slot) {
     if(powered) {
         return;
     }
@@ -39,7 +40,7 @@ void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart) {
     seader_uart->tx_buf[2 + 0] = CCID_MESSAGE_TYPE_PC_to_RDR_IccPowerOn;
 
     seader_uart->tx_buf[2 + 5] = slot;
-    seader_uart->tx_buf[2 + 6] = getSequence();
+    seader_uart->tx_buf[2 + 6] = getSequence(slot);
     seader_uart->tx_buf[2 + 7] = 2; //power
 
     seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10);
@@ -58,8 +59,8 @@ void seader_ccid_GetSlotStatus(SeaderUartBridge* seader_uart) {
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
     seader_uart->tx_buf[2 + 0] = CCID_MESSAGE_TYPE_PC_to_RDR_GetSlotStatus;
-    seader_uart->tx_buf[2 + 5] = slot;
-    seader_uart->tx_buf[2 + 6] = getSequence();
+    seader_uart->tx_buf[2 + 5] = sam_slot;
+    seader_uart->tx_buf[2 + 6] = getSequence(sam_slot);
 
     seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10);
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
@@ -72,8 +73,8 @@ void seader_ccid_SetParameters(SeaderUartBridge* seader_uart) {
     seader_uart->tx_buf[1] = CTRL;
     seader_uart->tx_buf[2 + 0] = CCID_MESSAGE_TYPE_PC_to_RDR_SetParameters;
     seader_uart->tx_buf[2 + 1] = 0;
-    seader_uart->tx_buf[2 + 5] = slot;
-    seader_uart->tx_buf[2 + 6] = getSequence();
+    seader_uart->tx_buf[2 + 5] = sam_slot;
+    seader_uart->tx_buf[2 + 6] = getSequence(sam_slot);
     seader_uart->tx_buf[2 + 7] = T1;
     seader_uart->tx_buf[2 + 8] = 0;
     seader_uart->tx_buf[2 + 9] = 0;
@@ -89,8 +90,8 @@ void seader_ccid_GetParameters(SeaderUartBridge* seader_uart) {
     seader_uart->tx_buf[1] = CTRL;
     seader_uart->tx_buf[2 + 0] = CCID_MESSAGE_TYPE_PC_to_RDR_GetParameters;
     seader_uart->tx_buf[2 + 1] = 0;
-    seader_uart->tx_buf[2 + 5] = slot;
-    seader_uart->tx_buf[2 + 6] = getSequence();
+    seader_uart->tx_buf[2 + 5] = sam_slot;
+    seader_uart->tx_buf[2 + 6] = getSequence(sam_slot);
     seader_uart->tx_buf[2 + 7] = 0;
     seader_uart->tx_buf[2 + 8] = 0;
     seader_uart->tx_buf[2 + 9] = 0;
@@ -106,8 +107,8 @@ void seader_ccid_XfrBlock(SeaderUartBridge* seader_uart, uint8_t* data, size_t l
     seader_uart->tx_buf[1] = CTRL;
     seader_uart->tx_buf[2 + 0] = CCID_MESSAGE_TYPE_PC_to_RDR_XfrBlock;
     seader_uart->tx_buf[2 + 1] = len;
-    seader_uart->tx_buf[2 + 5] = slot;
-    seader_uart->tx_buf[2 + 6] = getSequence();
+    seader_uart->tx_buf[2 + 5] = sam_slot;
+    seader_uart->tx_buf[2 + 6] = getSequence(sam_slot);
     seader_uart->tx_buf[2 + 7] = 5;
     seader_uart->tx_buf[2 + 8] = 0;
     seader_uart->tx_buf[2 + 9] = 0;
@@ -128,7 +129,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
     for(uint8_t i = 0; i < cmd_len; i++) {
         snprintf(display + (i * 2), sizeof(display), "%02x", cmd[i]);
     }
-    FURI_LOG_D(TAG, "CCID %d: %s", cmd_len, display);
+    FURI_LOG_D(TAG, "UART %d: %s", cmd_len, display);
 
     if(cmd_len == 2) {
         if(cmd[0] == CCID_MESSAGE_TYPE_RDR_to_PC_NotifySlotChange) {
@@ -142,19 +143,19 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
             case CARD_IN_1:
                 FURI_LOG_D(TAG, "Card Inserted (1)");
                 retries = 0;
-                slot = 0;
-                sequence = 0;
-                seader_ccid_IccPowerOn(seader_uart);
+                sequence[0] = 0;
+                seader_ccid_IccPowerOn(seader_uart, 0);
                 break;
             case CARD_IN_2:
                 FURI_LOG_D(TAG, "Card Inserted (2)");
                 retries = 0;
-                slot = 1;
-                sequence = 0;
-                seader_ccid_IccPowerOn(seader_uart);
+                sequence[1] = 0;
+                seader_ccid_IccPowerOn(seader_uart, 1);
                 break;
             case CARD_IN_BOTH:
-                FURI_LOG_W(TAG, "Loading 2 cards not supported");
+                FURI_LOG_W(TAG, "Two card support in beta");
+                //seader_ccid_IccPowerOn(seader_uart, 0);
+                seader_ccid_IccPowerOn(seader_uart, 1);
                 break;
             };
             return 2;
@@ -180,9 +181,19 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
         uint8_t* ccid = cmd + 2;
         message.bMessageType = ccid[0];
         message.dwLength = *((uint32_t*)(ccid + 1));
+        message.bSlot = ccid[5];
+        message.bSeq = ccid[6];
         message.bStatus = ccid[7];
         message.bError = ccid[8];
         message.payload = ccid + 10;
+
+        memset(display, 0, sizeof(display));
+        for(uint8_t i = 0; i < message.dwLength; i++) {
+            snprintf(display + (i * 2), sizeof(display), "%02x", message.payload[i]);
+        }
+
+        FURI_LOG_D(
+            TAG, "CCID [%d|%d] %ld: %s", message.bSlot, message.bSeq, message.dwLength, display);
 
         if(cmd_len < 2 + 10 + message.dwLength + 1) {
             return message.consumed;
@@ -194,7 +205,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
         if(message.bMessageType == CCID_MESSAGE_TYPE_RDR_to_PC_SlotStatus) {
             uint8_t status = (message.bStatus & BMICCSTATUS_MASK);
             if(status == 0 || status == 1) {
-                seader_ccid_IccPowerOn(seader_uart);
+                seader_ccid_IccPowerOn(seader_uart, status);
                 return message.consumed;
             } else if(status == 2) {
                 FURI_LOG_W(TAG, "No ICC is present [retries %d]", retries);
@@ -227,7 +238,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
             return message.consumed;
         }
         if(message.bError != 0) {
-            FURI_LOG_W(TAG, "CCID error");
+            FURI_LOG_W(TAG, "CCID error %02x", message.bError);
             message.consumed = cmd_len;
             if(seader_worker->callback) {
                 seader_worker->callback(SeaderWorkerEventSamMissing, seader_worker->context);
@@ -242,6 +253,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
                 if(memcmp(SAM_ATR, message.payload, sizeof(SAM_ATR)) == 0) {
                     FURI_LOG_I(TAG, "SAM ATR!");
                     hasSAM = true;
+                    sam_slot = message.bSlot;
                     seader_worker_send_version(seader_worker);
                     if(seader_worker->callback) {
                         seader_worker->callback(
@@ -250,6 +262,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
                 } else if(memcmp(SAM_ATR2, message.payload, sizeof(SAM_ATR2)) == 0) {
                     FURI_LOG_I(TAG, "SAM ATR2!");
                     hasSAM = true;
+                    sam_slot = message.bSlot;
                     seader_worker_send_version(seader_worker);
                     if(seader_worker->callback) {
                         seader_worker->callback(
