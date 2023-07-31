@@ -9,7 +9,7 @@
 #include "storage/filesystem_api_defines.h"
 #include "storage/storage.h"
 #include <stdint.h>
-#include <lib/toolbox/md5.h>
+#include <lib/toolbox/md5_calc.h>
 #include <lib/toolbox/path.h>
 #include <update_util/lfs_backup.h>
 
@@ -569,23 +569,10 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
 
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(fs_api);
+    FuriString* md5 = furi_string_alloc();
+    FS_Error file_error;
 
-    if(storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        const uint16_t size_to_read = 512;
-        const uint8_t hash_size = 16;
-        uint8_t* data = malloc(size_to_read);
-        uint8_t* hash = malloc(sizeof(uint8_t) * hash_size);
-        md5_context* md5_ctx = malloc(sizeof(md5_context));
-
-        md5_starts(md5_ctx);
-        while(true) {
-            uint16_t read_size = storage_file_read(file, data, size_to_read);
-            if(read_size == 0) break;
-            md5_update(md5_ctx, data, read_size);
-        }
-        md5_finish(md5_ctx, hash);
-        free(md5_ctx);
-
+    if(md5_string_calc_file(file, filename, md5, &file_error)) {
         PB_Main response = {
             .command_id = request->command_id,
             .command_status = PB_CommandStatus_OK,
@@ -595,21 +582,15 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
 
         char* md5sum = response.content.storage_md5sum_response.md5sum;
         size_t md5sum_size = sizeof(response.content.storage_md5sum_response.md5sum);
-        (void)md5sum_size;
-        furi_assert(hash_size <= ((md5sum_size - 1) / 2)); //-V547
-        for(uint8_t i = 0; i < hash_size; i++) {
-            md5sum += snprintf(md5sum, md5sum_size, "%02x", hash[i]);
-        }
+        snprintf(md5sum, md5sum_size, "%s", furi_string_get_cstr(md5));
 
-        free(hash);
-        free(data);
-        storage_file_close(file);
         rpc_send_and_release(session, &response);
     } else {
         rpc_send_and_release_empty(
-            session, request->command_id, rpc_system_storage_get_file_error(file));
+            session, request->command_id, rpc_system_storage_get_error(file_error));
     }
 
+    furi_string_free(md5);
     storage_file_free(file);
 
     furi_record_close(RECORD_STORAGE);

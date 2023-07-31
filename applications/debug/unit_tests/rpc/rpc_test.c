@@ -13,7 +13,7 @@
 #include <pb.h>
 #include <pb_encode.h>
 #include <m-list.h>
-#include <lib/toolbox/md5.h>
+#include <lib/toolbox/md5_calc.h>
 #include <lib/toolbox/path.h>
 #include <cli/cli.h>
 #include <loader/loader.h>
@@ -430,10 +430,10 @@ static void
 }
 
 static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
-    mu_check(result->command_id == expected->command_id);
-    mu_check(result->command_status == expected->command_status);
-    mu_check(result->has_next == expected->has_next);
-    mu_check(result->which_content == expected->which_content);
+    mu_assert_int_eq(expected->command_id, result->command_id);
+    mu_assert_int_eq(expected->command_status, result->command_status);
+    mu_assert_int_eq(expected->has_next, result->has_next);
+    mu_assert_int_eq(expected->which_content, result->which_content);
     if(result->command_status != PB_CommandStatus_OK) {
         mu_check(result->which_content == PB_Main_empty_tag);
     }
@@ -1229,33 +1229,15 @@ MU_TEST(test_storage_mkdir) {
 static void test_storage_calculate_md5sum(const char* path, char* md5sum, size_t md5sum_size) {
     Storage* api = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(api);
+    FuriString* md5 = furi_string_alloc();
 
-    if(storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        const uint16_t once_read_size = 512;
-        const uint8_t hash_size = MD5SUM_SIZE;
-        uint8_t* data = malloc(once_read_size);
-        uint8_t* hash = malloc(sizeof(uint8_t) * hash_size);
-        md5_context* md5_ctx = malloc(sizeof(md5_context));
-
-        md5_starts(md5_ctx);
-        while(true) {
-            uint16_t read_size = storage_file_read(file, data, once_read_size);
-            if(read_size == 0) break;
-            md5_update(md5_ctx, data, read_size);
-        }
-        md5_finish(md5_ctx, hash);
-        free(md5_ctx);
-
-        for(uint8_t i = 0; i < hash_size; i++) {
-            md5sum += snprintf(md5sum, md5sum_size, "%02x", hash[i]);
-        }
-
-        free(hash);
-        free(data);
+    if(md5_string_calc_file(file, path, md5, NULL)) {
+        snprintf(md5sum, md5sum_size, "%s", furi_string_get_cstr(md5));
     } else {
         furi_check(0);
     }
 
+    furi_string_free(md5);
     storage_file_close(file);
     storage_file_free(file);
 

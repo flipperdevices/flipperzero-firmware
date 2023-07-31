@@ -614,8 +614,8 @@ MU_TEST(test_md5_calc) {
     FuriString* md5_output_str = furi_string_alloc();
     memset(md5_output, 0, MD5_HASH_SIZE);
 
-    mu_check(md5_calc_file(file, path, md5_output));
-    mu_check(md5_string_calc_file(file, path, md5_output_str));
+    mu_check(md5_calc_file(file, path, md5_output, NULL));
+    mu_check(md5_string_calc_file(file, path, md5_output_str, NULL));
 
     mu_assert_mem_eq(md5, md5_output, MD5_HASH_SIZE);
     mu_assert_string_eq(md5_cstr, furi_string_get_cstr(md5_output_str));

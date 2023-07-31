@@ -1,7 +1,7 @@
 #include "md5.h"
 #include "md5_calc.h"
 
-bool md5_calc_file(File* file, const char* path, unsigned char output[16]) {
+bool md5_calc_file(File* file, const char* path, unsigned char output[16], FS_Error* file_error) {
     bool result = storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
@@ -20,14 +20,18 @@ bool md5_calc_file(File* file, const char* path, unsigned char output[16]) {
         free(data);
     }
 
+    if(file_error != NULL) {
+        *file_error = storage_file_get_error(file);
+    }
+
     storage_file_close(file);
     return result;
 }
 
-bool md5_string_calc_file(File* file, const char* path, FuriString* output) {
+bool md5_string_calc_file(File* file, const char* path, FuriString* output, FS_Error* file_error) {
     const size_t hash_size = 16;
     unsigned char hash[hash_size];
-    bool result = md5_calc_file(file, path, hash);
+    bool result = md5_calc_file(file, path, hash, file_error);
 
     if(result) {
         furi_string_set(output, "");
