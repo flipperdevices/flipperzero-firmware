@@ -8,7 +8,7 @@ const char USAGE_TARGET_SSIDS[] =
     "Manage SSID targets. Usage: target-ssids [ ( ADD | REMOVE ) <ssid_name> ]";
 const char USAGE_PROBE[] = "Probe flood attack. Usage: probe [ ANY | TARGET-SSIDs | APs | OFF ]";
 const char USAGE_FUZZ[] =
-    "Various invalid packets that may (or may not) have interesting effects. Usage: fuzz OFF | ( ( BEACON | REQ | RESP )+ ( OVERFLOW | MALFORMED ) )";
+    "Various invalid packets. Usage: fuzz OFF | ( ( BEACON | REQ | RESP )+ ( OVERFLOW | MALFORMED ) )";
 const char USAGE_SNIFF[] = "Display interesting packets. Usage: sniff [ ON | OFF ]";
 const char USAGE_DEAUTH[] =
     "Deauth attack. Usage: deauth [ <millis> ] [ FRAME | DEVICE | SPOOF ] [ STA | AP | BROADCAST | OFF ]";
@@ -48,7 +48,7 @@ const char SHORT_HOP[] = "hop <millis>";
 const char SHORT_SET[] = "set <variable> <value>";
 const char SHORT_GET[] = "get <variable>";
 const char SHORT_VIEW[] = "VIEW ( ( AP [ selectedSTA ] ) | ( STA [ selectedAP ] ) )+";
-const char SHORT_SELECT[] = "select ( AP | STA ) <id>+";
+const char SHORT_SELECT[] = "select ( AP | STA ) <id>+  sep. ^";
 const char SHORT_SELECTED[] = "selected ( AP | STA )";
 const char SHORT_CLEAR[] = "clear ( AP | STA | ALL )";
 const char SHORT_HANDSHAKE[] = "handshake [ ON | OFF ]";

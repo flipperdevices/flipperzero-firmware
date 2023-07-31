@@ -55,6 +55,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms)
 - Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
+- Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 
 <a name="release">
 
