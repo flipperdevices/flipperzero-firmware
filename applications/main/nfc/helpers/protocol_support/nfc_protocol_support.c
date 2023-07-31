@@ -344,7 +344,7 @@ static void nfc_protocol_support_scene_saved_menu_on_enter(NfcApp* instance) {
         nfc_protocol_support_common_submenu_callback,
         instance);
 
-    if(!nfc_has_shadow_file(instance)) {
+    if(nfc_has_shadow_file(instance)) {
         submenu_add_item(
             submenu,
             "Restore Data Changes",
