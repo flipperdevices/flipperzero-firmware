@@ -275,10 +275,10 @@ class Navigator:
                     menus.append(cur[0])
             else:
                 menus.append("Missed template!!")
-                self.logger.warning("Finded undescribed item")
+                self.logger.warning("Found undescribed item")
             self.press_down()
 
-        self.logger.info("Finded menus: " + str(menus))
+        self.logger.info("Found menus: " + str(menus))
         return menus
 
     def get_first_item(self, browser: Optional[bool] = False):
