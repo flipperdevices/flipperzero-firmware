@@ -39,7 +39,8 @@ struct Ublox {
 
     Ublox_NAV_PVT_Message nav_pvt;
     Ublox_NAV_ODO_Message nav_odo;
-
+    Ublox_NAV_TIMEUTC_Message nav_timeutc;
+    
     UbloxDataDisplayState data_display_state;
     UbloxDeviceState device_state;
     bool gps_initted;

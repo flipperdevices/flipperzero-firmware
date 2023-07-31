@@ -81,7 +81,27 @@ void clear_ublox_data() {
     }
 }
 
-void ublox_read_messages(void* context) {
+
+int32_t ublox_worker_task(void* context) {
+    UbloxWorker* ublox_worker = context;
+
+    if(ublox_worker->state == UbloxWorkerStateRead) {
+	ublox_worker_read_nav_messages(context);
+    } else if (ublox_worker->state == UbloxWorkerStateSyncTime) {
+	ublox_worker_sync_to_gps_time(context);
+    } else if(ublox_worker->state == UbloxWorkerStateResetOdometer) {
+        ublox_worker_reset_odo(ublox_worker);
+    } else if(ublox_worker->state == UbloxWorkerStateStop) {
+        FURI_LOG_D(TAG, "state stop");
+    }
+
+    ublox_worker_change_state(ublox_worker, UbloxWorkerStateReady);
+
+    return 0;
+}
+
+
+void ublox_worker_read_nav_messages(void* context) {
     UbloxWorker* ublox_worker = context;
     Ublox* ublox = ublox_worker->context;
     
@@ -104,10 +124,21 @@ void ublox_read_messages(void* context) {
     
     // break the loop when the thread state changes
     while(ublox_worker->state == UbloxWorkerStateRead) {
-	ublox_worker_read_pvt(ublox_worker);
-	// this makes the read process much faster
+	if (!ublox_worker_read_pvt(ublox_worker)) {
+	    ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+	    ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+	    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+	    return;
+	}
+	// clearing makes the read process much faster
 	clear_ublox_data();
-	ublox_worker_read_odo(ublox_worker);
+	if (!ublox_worker_read_odo(ublox_worker)) {
+	    ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+	    ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+	    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+	    return;
+	}
+	// if they both succeeded, notify success
 	ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
         // sometimes fancy non-blocking delays like the one below seem
         // to cause things in the system to not work, like the backlight timeout.
@@ -122,20 +153,57 @@ void ublox_read_messages(void* context) {
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
-int32_t ublox_worker_task(void* context) {
+void ublox_worker_sync_to_gps_time(void* context) {
     UbloxWorker* ublox_worker = context;
+    Ublox* ublox = ublox_worker->context;
 
-    if(ublox_worker->state == UbloxWorkerStateRead) {
-	ublox_read_messages(context);
-    } else if(ublox_worker->state == UbloxWorkerStateResetOdometer) {
-        ublox_worker_reset_odo(ublox_worker);
-    } else if(ublox_worker->state == UbloxWorkerStateStop) {
-        FURI_LOG_D(TAG, "state stop");
+    UbloxFrame* frame_tx = malloc(sizeof(UbloxFrame));
+    frame_tx->class = UBX_NAV_CLASS;
+    frame_tx->id = UBX_NAV_TIMEUTC_MESSAGE;
+    frame_tx->len = 0;
+    frame_tx->payload = NULL;
+    UbloxMessage* message_tx = ublox_frame_to_bytes(frame_tx);
+    ublox_frame_free(frame_tx);
+
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
+    UbloxMessage* message_rx = ublox_worker_i2c_transfer(message_tx, UBX_NAV_TIMEUTC_MESSAGE_LENGTH);
+    if(message_rx == NULL) {
+	FURI_LOG_E(TAG, "get_gps_time transfer failed");
+	//ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+	ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+	return;
     }
 
-    ublox_worker_change_state(ublox_worker, UbloxWorkerStateReady);
+    UbloxFrame* frame_rx = ublox_bytes_to_frame(message_rx);
+    ublox_message_free(message_rx);
 
-    return 0;
+    if(frame_rx == NULL) {
+	FURI_LOG_E(TAG, "NULL pointer, something wrong with NAV-TIMEUTC message!");
+	//ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+	ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+	return;
+    } else {
+	Ublox_NAV_TIMEUTC_Message nav_timeutc = {
+	    .iTOW = (frame_rx->payload[0]) | (frame_rx->payload[1] << 8) |
+                    (frame_rx->payload[2] << 16) | (frame_rx->payload[3] << 24),
+	    .tAcc = (frame_rx->payload[4]) | (frame_rx->payload[5] << 8) |
+                    (frame_rx->payload[6] << 16) | (frame_rx->payload[7] << 24),
+	    .nano = (frame_rx->payload[8]) | (frame_rx->payload[9] << 8) |
+                    (frame_rx->payload[10] << 16) | (frame_rx->payload[11] << 24),
+            .year = (frame_rx->payload[12]) | (frame_rx->payload[13] << 8),
+            .month = frame_rx->payload[14],
+            .day = frame_rx->payload[15],
+            .hour = frame_rx->payload[16],
+            .min = frame_rx->payload[17],
+            .sec = frame_rx->payload[18],
+            .valid = frame_rx->payload[19],
+	};
+
+	ublox->nav_timeutc = nav_timeutc;
+	ublox_frame_free(frame_rx);
+	ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
+    }
+    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
 FuriString* print_uint8_array(uint8_t* array, int length) {
@@ -150,11 +218,15 @@ FuriString* print_uint8_array(uint8_t* array, int length) {
 }
 
 UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length) {
+    // Either our I2C implementation is broken or the GPS's is, so we
+    // end up reading a lot more data than we need to. That means that
+    // the I2C comm code for this app is a little bit of a hack, but
+    // it works fine and is fast enough, so I don't really care. It
+    // certainly doesn't break the GPS.
     if(!furi_hal_i2c_tx(
            &furi_hal_i2c_handle_external,
            UBLOX_I2C_ADDRESS << 1,
-           message_tx->message,
-           message_tx->length,
+           message_tx->message, message_tx->length,
            furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
         FURI_LOG_E(TAG, "error writing message to GPS");
         return NULL;
@@ -219,7 +291,6 @@ bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     if(message_rx == NULL) {
         FURI_LOG_E(TAG, "read_pvt transfer failed");
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
-        //ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
         return false;
     }
 
@@ -229,10 +300,9 @@ bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     if(frame_rx == NULL) {
         FURI_LOG_E(TAG, "NULL pointer, something wrong with NAV-PVT message!");
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
-        //ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
         return false;
     } else {
-        // build nav-pvt struct. yes this is very ugly.
+        // build nav-pvt struct. this is very ugly and there's not much I can do about it.
         Ublox_NAV_PVT_Message nav_pvt = {
             .iTOW = (frame_rx->payload[0]) | (frame_rx->payload[1] << 8) |
                     (frame_rx->payload[2] << 16) | (frame_rx->payload[3] << 24),
@@ -300,7 +370,6 @@ bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
 }
 
 bool ublox_worker_read_odo(UbloxWorker* ublox_worker) {
-    //FURI_LOG_I(TAG, "mem free before odo read: %u", memmgr_get_free_heap());
     Ublox* ublox = ublox_worker->context;
     UbloxFrame* frame_tx = malloc(sizeof(UbloxFrame));
     frame_tx->class = UBX_NAV_CLASS;
@@ -339,13 +408,15 @@ bool ublox_worker_read_odo(UbloxWorker* ublox_worker) {
         };
         ublox->nav_odo = nav_odo;
         ublox_frame_free(frame_rx);
-        //FURI_LOG_I(TAG, "mem free after odo read: %u", memmgr_get_free_heap());
         return true;
     }
 }
 
-/** Set the power mode to "Aggressive with 1Hz", enable the odometer,
-    and configure odometer and dynamic platform model. */
+/**
+ * Set the power mode to "Balanced", enable the odometer, and
+ * configure odometer and dynamic platform model according to user
+ * settings.
+ */
 bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
     Ublox* ublox = ublox_worker->context;
     // Set power mode
@@ -503,9 +574,3 @@ void ublox_worker_reset_odo(UbloxWorker* ublox_worker) {
     // no reason to trigger an event on success, the user will see that
     // the odometer has been reset on the next update.
 }
-/*FuriString* s = furi_string_alloc();
-  for (int i = 0; i < 92+8; i++) {
-    furi_string_cat_printf(s, "0x%x, ", message_rx->message[i]);
-  }
-  FURI_LOG_I(TAG, "array: %s", furi_string_get_cstr(s));
-  furi_string_free(s);*/
