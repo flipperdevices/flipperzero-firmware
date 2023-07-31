@@ -171,7 +171,7 @@ Iso15693_3Error iso15693_3_poller_check_presence(Iso15693_3Poller* instance) {
             break;
         }
 
-        if(!iso15693_3_inventory_response_parse(data, instance->rx_buffer)) {
+        if(!iso15693_3_inventory_response_parse(data->uid, instance->rx_buffer)) {
             ret = Iso15693_3ErrorCommunication;
             break;
         }
@@ -211,7 +211,7 @@ Iso15693_3Error
             break;
         }
 
-        if(!iso15693_3_inventory_response_parse(iso15693_3_data, instance->rx_buffer)) {
+        if(!iso15693_3_inventory_response_parse(iso15693_3_data->uid, instance->rx_buffer)) {
             ret = Iso15693_3ErrorCommunication;
             break;
         }
@@ -232,27 +232,27 @@ Iso15693_3Error
             break;
         }
 
-        if(iso15693_3_system_info_response_parse(instance->data, instance->rx_buffer)) {
+        Iso15693_3SystemInfo* system_info = &iso15693_3_data->system_info;
+        if(iso15693_3_system_info_response_parse(system_info, instance->rx_buffer)) {
             // Read blocks
             simple_array_init(
-                iso15693_3_data->block_data,
-                iso15693_3_data->block_count * iso15693_3_data->block_size);
+                iso15693_3_data->block_data, system_info->block_count * system_info->block_size);
 
             ret = iso15693_3_poller_async_read_blocks(
                 instance,
                 simple_array_get_data(iso15693_3_data->block_data),
-                iso15693_3_data->block_count,
-                iso15693_3_data->block_size);
+                system_info->block_count,
+                system_info->block_size);
             if(ret != Iso15693_3ErrorNone) break;
 
             // Read block security status
             // Backward compatibility: the first byte is used for AFI/DSFID lock, hence + 1
-            simple_array_init(iso15693_3_data->security_status, iso15693_3_data->block_count + 1);
+            simple_array_init(iso15693_3_data->security_status, system_info->block_count + 1);
 
             ret = iso15693_3_poller_async_get_blocks_security(
                 instance,
                 simple_array_get_data(iso15693_3_data->security_status) + 1,
-                iso15693_3_data->block_count);
+                system_info->block_count);
             if(ret != Iso15693_3ErrorNone) break;
         }
 
@@ -349,7 +349,7 @@ Iso15693_3Error iso15693_3_poller_async_get_blocks_security(
 
         const uint8_t block_count_per_query =
             MIN(block_count - start_block_num, (uint16_t)ISO15693_3_POLLER_NUM_BLOCKS_PER_QUERY);
-        // No mention of -1 in the docs, but without it the card always returns 1 extra byte
+        // Block count byte must be 1 less than the desired count
         bit_buffer_append_byte(instance->tx_buffer, block_count_per_query - 1);
 
         ret = iso15693_3_poller_send_frame(

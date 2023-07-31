@@ -8,9 +8,9 @@
 extern "C" {
 #endif
 
-bool iso15693_3_inventory_response_parse(Iso15693_3Data* data, const BitBuffer* buf);
+bool iso15693_3_inventory_response_parse(uint8_t* data, const BitBuffer* buf);
 
-bool iso15693_3_system_info_response_parse(Iso15693_3Data* data, const BitBuffer* buf);
+bool iso15693_3_system_info_response_parse(Iso15693_3SystemInfo* data, const BitBuffer* buf);
 
 bool iso15693_3_read_block_response_parse(uint8_t* data, uint8_t block_size, const BitBuffer* buf);
 

@@ -1,6 +1,6 @@
 #include "iso15693_3_i.h"
 
-bool iso15693_3_inventory_response_parse(Iso15693_3Data* data, const BitBuffer* buf) {
+bool iso15693_3_inventory_response_parse(uint8_t* data, const BitBuffer* buf) {
     typedef struct {
         uint8_t flags;
         uint8_t dsfid;
@@ -11,17 +11,15 @@ bool iso15693_3_inventory_response_parse(Iso15693_3Data* data, const BitBuffer* 
 
     const InventoryResponseLayout* resp = (const InventoryResponseLayout*)bit_buffer_get_data(buf);
 
-    data->dsfid = resp->dsfid;
-
     // Reverse UID for backwards compatibility
     for(uint32_t i = 0; i < ISO15693_3_UID_SIZE; ++i) {
-        data->uid[i] = resp->uid[ISO15693_3_UID_SIZE - i - 1];
+        data[i] = resp->uid[ISO15693_3_UID_SIZE - i - 1];
     }
 
     return true;
 }
 
-bool iso15693_3_system_info_response_parse(Iso15693_3Data* data, const BitBuffer* buf) {
+bool iso15693_3_system_info_response_parse(Iso15693_3SystemInfo* data, const BitBuffer* buf) {
     typedef struct {
         uint8_t flags;
         uint8_t info_flags;
@@ -36,21 +34,23 @@ bool iso15693_3_system_info_response_parse(Iso15693_3Data* data, const BitBuffer
 
     const uint8_t* extra = resp->extra;
 
-    if(resp->info_flags & ISO15693_3_SYSINFO_FLAG_DSFID) {
+    data->flags = resp->info_flags;
+
+    if(data->flags & ISO15693_3_SYSINFO_FLAG_DSFID) {
         data->dsfid = *extra++;
     }
 
-    if(resp->info_flags & ISO15693_3_SYSINFO_FLAG_AFI) {
+    if(data->flags & ISO15693_3_SYSINFO_FLAG_AFI) {
         data->afi = *extra++;
     }
 
-    if(resp->info_flags & ISO15693_3_SYSINFO_FLAG_MEMORY) {
-        // For some reason, we need to add 1 to these values
+    if(data->flags & ISO15693_3_SYSINFO_FLAG_MEMORY) {
+        // Add 1 to get actual values
         data->block_count = *extra++ + 1;
         data->block_size = (*extra++ & 0x1F) + 1;
     }
 
-    if(resp->info_flags & ISO15693_3_SYSINFO_FLAG_IC_REF) {
+    if(data->flags & ISO15693_3_SYSINFO_FLAG_IC_REF) {
         data->ic_ref = *extra;
     }
 

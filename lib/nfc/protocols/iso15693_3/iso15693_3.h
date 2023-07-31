@@ -85,12 +85,17 @@ typedef enum {
 } Iso15693_3Error;
 
 typedef struct {
-    uint8_t uid[ISO15693_3_UID_SIZE];
+    uint8_t flags;
     uint8_t dsfid;
     uint8_t afi;
     uint8_t ic_ref;
     uint16_t block_count;
     uint8_t block_size;
+} Iso15693_3SystemInfo;
+
+typedef struct {
+    uint8_t uid[ISO15693_3_UID_SIZE];
+    Iso15693_3SystemInfo system_info;
     SimpleArray* block_data;
     SimpleArray* security_status;
 } Iso15693_3Data;
