@@ -89,7 +89,7 @@ typedef struct {
     uint8_t dsfid;
     uint8_t afi;
     uint8_t ic_ref;
-    uint8_t block_count;
+    uint16_t block_count;
     uint8_t block_size;
     SimpleArray* block_data;
     SimpleArray* security_status;

@@ -112,7 +112,7 @@ static bool iso15693_3_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(instance->state == Iso15693_3PollerStateIdle);
 
     if(nfc_event->type == NfcEventTypePollerReady) {
-        Iso15693_3Error error = iso15693_3_poller_async_activate(instance, NULL);
+        Iso15693_3Error error = iso15693_3_poller_check_presence(instance);
         protocol_detected = (error == Iso15693_3ErrorNone);
     }
 

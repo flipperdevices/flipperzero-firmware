@@ -9,8 +9,7 @@ bool iso15693_3_inventory_response_parse(Iso15693_3Data* data, const BitBuffer* 
 
     if(bit_buffer_get_size_bytes(buf) < sizeof(InventoryResponseLayout)) return false;
 
-    const InventoryResponseLayout* resp =
-        (const InventoryResponseLayout*)bit_buffer_get_data(buf);
+    const InventoryResponseLayout* resp = (const InventoryResponseLayout*)bit_buffer_get_data(buf);
 
     data->dsfid = resp->dsfid;
 
@@ -56,4 +55,31 @@ bool iso15693_3_system_info_response_parse(Iso15693_3Data* data, const BitBuffer
     }
 
     return true;
+}
+
+bool iso15693_3_read_block_response_parse(uint8_t* data, size_t data_size, const BitBuffer* buf) {
+    typedef struct {
+        uint8_t flags;
+        uint8_t block_data[];
+    } ReadBlockResponseLayout;
+
+    bool parsed = false;
+
+    do {
+        const size_t buf_size = bit_buffer_get_size_bytes(buf);
+        if(buf_size <= sizeof(ReadBlockResponseLayout)) return false;
+
+        const ReadBlockResponseLayout* resp =
+            (const ReadBlockResponseLayout*)bit_buffer_get_data(buf);
+
+        if(resp->flags & ISO15693_3_RESP_FLAG_ERROR) break;
+
+        const size_t block_size = buf_size - sizeof(ReadBlockResponseLayout);
+        if(block_size != data_size) break;
+
+        memcpy(data, resp->block_data, block_size);
+        parsed = true;
+    } while(false);
+
+    return parsed;
 }
