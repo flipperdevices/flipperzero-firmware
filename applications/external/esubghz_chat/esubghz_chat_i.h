@@ -24,6 +24,8 @@
 
 #define DEFAULT_FREQ 433920000
 
+#define KEY_READ_POPUP_MS 3000
+
 #define RX_TX_BUFFER_SIZE 1024
 
 #define CHAT_BOX_STORE_SIZE 4096
@@ -91,6 +93,8 @@ typedef enum {
     ESubGhzChatEvent_KeyMenuHexKey,
     ESubGhzChatEvent_KeyMenuGenKey,
     ESubGhzChatEvent_KeyMenuReadKeyFromNfc,
+    ESubGhzChatEvent_KeyReadPopupFailed,
+    ESubGhzChatEvent_KeyReadPopupSucceeded,
     ESubGhzChatEvent_PassEntered,
     ESubGhzChatEvent_HexKeyEntered,
     ESubGhzChatEvent_MsgEntered,

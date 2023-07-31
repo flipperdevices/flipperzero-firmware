@@ -4,6 +4,8 @@ typedef enum {
     KeyReadPopupState_Idle,
     KeyReadPopupState_Detecting,
     KeyReadPopupState_Reading,
+    KeyReadPopupState_Fail,
+    KeyReadPopupState_Success,
 } KeyReadPopupState;
 
 static bool read_worker_cb(NfcWorkerEvent event, void* context) {
@@ -13,6 +15,25 @@ static bool read_worker_cb(NfcWorkerEvent event, void* context) {
     view_dispatcher_send_custom_event(state->view_dispatcher, event);
 
     return true;
+}
+
+static void key_read_popup_timeout_cb(void* context) {
+    furi_assert(context);
+    ESubGhzChatState* state = context;
+
+    uint32_t cur_state =
+        scene_manager_get_scene_state(state->scene_manager, ESubGhzChatScene_KeyReadPopup);
+
+    /* done displaying our failure */
+    if(cur_state == KeyReadPopupState_Fail) {
+        view_dispatcher_send_custom_event(
+            state->view_dispatcher, ESubGhzChatEvent_KeyReadPopupFailed);
+        /* done displaying our success, enter chat */
+    } else if(cur_state == KeyReadPopupState_Success) {
+        enter_chat(state);
+        view_dispatcher_send_custom_event(
+            state->view_dispatcher, ESubGhzChatEvent_KeyReadPopupSucceeded);
+    }
 }
 
 static bool key_read_popup_handle_key_read(ESubGhzChatState* state) {
@@ -33,9 +54,8 @@ static bool key_read_popup_handle_key_read(ESubGhzChatState* state) {
         return false;
     }
 
-    /* set encrypted flag and enter the chat */
+    /* set encrypted flag */
     state->encrypted = true;
-    enter_chat(state);
 
     return true;
 }
@@ -49,29 +69,56 @@ static void key_read_popup_set_state(ESubGhzChatState* state, KeyReadPopupState 
 
     if(new_state == KeyReadPopupState_Detecting) {
         popup_reset(state->nfc_popup);
-        popup_set_text(
-            state->nfc_popup,
-            "Apply card to\nFlipper's "
-            "back",
-            97,
-            24,
-            AlignCenter,
-            AlignTop);
+        popup_disable_timeout(state->nfc_popup);
+        popup_set_text(state->nfc_popup, "Tap Flipper\n to sender", 97, 24, AlignCenter, AlignTop);
         popup_set_icon(state->nfc_popup, 0, 8, &I_NFC_manual_60x50);
+        notification_message(state->notification, &sequence_blink_start_cyan);
     } else if(new_state == KeyReadPopupState_Reading) {
         popup_reset(state->nfc_popup);
+        popup_disable_timeout(state->nfc_popup);
         popup_set_header(
             state->nfc_popup,
-            "Reading card\nDon't "
+            "Reading key\nDon't "
             "move...",
             85,
             24,
             AlignCenter,
             AlignTop);
         popup_set_icon(state->nfc_popup, 12, 23, &I_Loading_24);
+        notification_message(state->notification, &sequence_blink_start_yellow);
+    } else if(new_state == KeyReadPopupState_Fail) {
+        nfc_worker_stop(state->nfc_worker);
+
+        popup_reset(state->nfc_popup);
+        popup_set_header(state->nfc_popup, "Failure!", 64, 2, AlignCenter, AlignTop);
+        popup_set_text(state->nfc_popup, "Failed\nto read\nkey.", 78, 16, AlignLeft, AlignTop);
+        popup_set_icon(state->nfc_popup, 21, 13, &I_Cry_dolph_55x52);
+
+        popup_set_timeout(state->nfc_popup, KEY_READ_POPUP_MS);
+        popup_set_context(state->nfc_popup, state);
+        popup_set_callback(state->nfc_popup, key_read_popup_timeout_cb);
+        popup_enable_timeout(state->nfc_popup);
+
+        notification_message(state->notification, &sequence_blink_stop);
+    } else if(new_state == KeyReadPopupState_Success) {
+        nfc_worker_stop(state->nfc_worker);
+
+        popup_reset(state->nfc_popup);
+        popup_set_header(state->nfc_popup, "Key\nread!", 13, 22, AlignLeft, AlignBottom);
+        popup_set_icon(state->nfc_popup, 32, 5, &I_DolphinNice_96x59);
+
+        popup_set_timeout(state->nfc_popup, KEY_READ_POPUP_MS);
+        popup_set_context(state->nfc_popup, state);
+        popup_set_callback(state->nfc_popup, key_read_popup_timeout_cb);
+        popup_enable_timeout(state->nfc_popup);
+
+        notification_message(state->notification, &sequence_success);
+        notification_message(state->notification, &sequence_blink_stop);
     }
 
     scene_manager_set_scene_state(state->scene_manager, ESubGhzChatScene_KeyReadPopup, new_state);
+
+    view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_NfcPopup);
 }
 
 /* Prepares the key share read scene. */
@@ -91,10 +138,6 @@ void scene_on_enter_key_read_popup(void* context) {
 
     nfc_worker_start(
         state->nfc_worker, NfcWorkerStateRead, state->nfc_dev_data, read_worker_cb, state);
-
-    notification_message(state->notification, &sequence_blink_start_cyan);
-
-    view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_NfcPopup);
 }
 
 /* Handles scene manager events for the key read popup scene. */
@@ -112,33 +155,42 @@ bool scene_on_event_key_read_popup(void* context, SceneManagerEvent event) {
         /* card detected */
         case NfcWorkerEventCardDetected:
             key_read_popup_set_state(state, KeyReadPopupState_Reading);
-            notification_message(state->notification, &sequence_blink_start_yellow);
             consumed = true;
             break;
 
         /* no card detected */
         case NfcWorkerEventNoCardDetected:
             key_read_popup_set_state(state, KeyReadPopupState_Detecting);
-            notification_message(state->notification, &sequence_blink_start_cyan);
             consumed = true;
             break;
 
         /* key probably read */
         case NfcWorkerEventReadMfUltralight:
             if(key_read_popup_handle_key_read(state)) {
-                scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_ChatInput);
+                key_read_popup_set_state(state, KeyReadPopupState_Success);
             } else {
-                if(!scene_manager_previous_scene(state->scene_manager)) {
-                    view_dispatcher_stop(state->view_dispatcher);
-                }
+                key_read_popup_set_state(state, KeyReadPopupState_Fail);
             }
             consumed = true;
             break;
 
-        default:
+        /* close the popup and go back */
+        case ESubGhzChatEvent_KeyReadPopupFailed:
             if(!scene_manager_previous_scene(state->scene_manager)) {
                 view_dispatcher_stop(state->view_dispatcher);
             }
+            consumed = true;
+            break;
+
+        /* success, go to chat input */
+        case ESubGhzChatEvent_KeyReadPopupSucceeded:
+            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_ChatInput);
+            consumed = true;
+            break;
+
+        /* something else happend, treat as failure */
+        default:
+            key_read_popup_set_state(state, KeyReadPopupState_Fail);
             consumed = true;
             break;
         }
