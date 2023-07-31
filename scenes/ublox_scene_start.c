@@ -24,7 +24,7 @@ void ublox_scene_start_on_enter(void* context) {
         ublox_scene_start_submenu_callback,
         ublox);
     submenu_add_item(
-		     submenu, "Sync Time to GPS", SubmenuIndexSyncTime, ublox_scene_start_submenu_callback, ublox);
+        submenu, "Sync Time to GPS", SubmenuIndexSyncTime, ublox_scene_start_submenu_callback, ublox);
     submenu_add_item(
         submenu, "Wiring", SubmenuIndexWiring, ublox_scene_start_submenu_callback, ublox);
     submenu_add_item(

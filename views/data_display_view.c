@@ -33,7 +33,7 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         FuriString* s = furi_string_alloc();
         elements_button_left(canvas, "Config");
         elements_button_center(canvas, "Reset");
-
+	elements_button_right(canvas, "Log");
         /*** Draw fix ***/
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 0, 9, "Fix:");
@@ -120,7 +120,6 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
             .hour = message.hour,
             .minute = message.min,
             .second = message.sec,
-
         };
 
         FuriString* s2 = furi_string_alloc();
@@ -145,7 +144,8 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         FuriString* s = furi_string_alloc();
         elements_button_left(canvas, "Config");
         elements_button_center(canvas, "Reset");
-
+	elements_button_right(canvas, "Log");
+	
         // TODO: imperial/metric
         canvas_set_font(canvas, FontPrimary);
         // gSpeed is in mm/s
