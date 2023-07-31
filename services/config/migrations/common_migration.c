@@ -1,6 +1,7 @@
 #include "common_migration.h"
 #include "../constants.h"
 #include "../../../types/token_info.h"
+#include "../../../types/automation_kb_layout.h"
 #include <flipper_format/flipper_format_i.h>
 
 bool totp_config_migrate_to_latest(
@@ -86,6 +87,21 @@ bool totp_config_migrate_to_latest(
             uint32_t default_font_index = 0;
             flipper_format_write_uint32(
                 fff_data_file, TOTP_CONFIG_KEY_FONT, &default_font_index, 1);
+        }
+
+        flipper_format_rewind(fff_backup_data_file);
+
+        if(flipper_format_read_string(
+               fff_backup_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, temp_str)) {
+            flipper_format_write_string(
+                fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, temp_str);
+        } else {
+            uint32_t default_automation_kb_layout = AutomationKeyboardLayoutQWERTY;
+            flipper_format_write_uint32(
+                fff_data_file,
+                TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT,
+                &default_automation_kb_layout,
+                1);
         }
 
         flipper_format_rewind(fff_backup_data_file);
