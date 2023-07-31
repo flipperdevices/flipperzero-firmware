@@ -271,6 +271,11 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
     };
     PB_Storage_ListResponse* list = &response.content.storage_list_response;
 
+    bool include_md5 = request->content.storage_list_request.include_md5;
+    FuriString* md5 = furi_string_alloc();
+    FuriString* md5_path = furi_string_alloc();
+    File* file = storage_file_alloc(fs_api);
+
     bool finish = false;
     int i = 0;
 
@@ -296,6 +301,18 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
                 list->file[i].size = fileinfo.size;
                 list->file[i].data = NULL;
                 list->file[i].name = name;
+
+                if(include_md5 && !file_info_is_dir(&fileinfo)) {
+                    furi_string_printf(
+                        md5_path, "%s/%s", request->content.storage_list_request.path, name);
+
+                    if(md5_string_calc_file(file, furi_string_get_cstr(md5_path), md5, NULL)) {
+                        char* md5sum = list->file[i].md5sum;
+                        size_t md5sum_size = sizeof(list->file[i].md5sum);
+                        snprintf(md5sum, md5sum_size, "%s", furi_string_get_cstr(md5));
+                    }
+                }
+
                 ++i;
             } else {
                 free(name);
@@ -310,8 +327,11 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
     response.has_next = false;
     rpc_send_and_release(session, &response);
 
+    furi_string_free(md5);
+    furi_string_free(md5_path);
     storage_dir_close(dir);
     storage_file_free(dir);
+    storage_file_free(file);
 
     furi_record_close(RECORD_STORAGE);
 }
