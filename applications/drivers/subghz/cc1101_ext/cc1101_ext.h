@@ -5,6 +5,7 @@
 
 #pragma once
 #include <lib/subghz/devices/preset.h>
+#include <lib/subghz/devices/types.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -35,7 +36,7 @@ const GpioPin* subghz_device_cc1101_ext_get_data_gpio();
  *
  * @return     true if success
  */
-bool subghz_device_cc1101_ext_alloc();
+bool subghz_device_cc1101_ext_alloc(SubGhzDeviceConf* conf);
 
 /** Deinitialize device
  */
