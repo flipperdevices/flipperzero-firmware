@@ -13,9 +13,13 @@
 typedef struct {
     int selected;
     GPIOItems* gpio_items;
+    int wiggle_frame;
 } ViewerState;
 
-static ViewerState vstate = {.selected = 0};
+//  5V  A7  A6  A4  B3  B2  C3 GND SET
+//
+//
+//  3V SWC GND SIO  TX  RX  C1  C0  1W GND
 
 typedef enum {
     PIN_5V = 0,
@@ -38,95 +42,50 @@ typedef enum {
     PIN_GND_11,
     PIN_GND_18,
     NONE
+}enum_view_element;
+
+typedef struct {
+    enum_view_element element;
+    enum_view_element opposite;
+    bool selectable;
+    bool editable;
+    bool top_row;
+    bool pull_out;
+    int gp_idx;
+    uint8_t x_pos;
+    uint8_t y_pos;
+    const char* name;
+    Icon* icon;
+    Icon* selected_icon;
 }ViewElement;
 
- //  5V  A7  A6  A4  B3  B2  C3 GND SET
- //
- //
- //  3V SWC GND SIO  TX  RX  C1  C0  1W GND
+static ViewerState vstate = {.selected = PIN_A7,.gpio_items = NULL,.wiggle_frame=-1};
 
-// next element when pressing up or down from a given element
-// ground pins cannot be selected
-static uint8_t y_mapping[] = { 
-    PIN_3V,  // <- PIN_5V
-    PIN_SWC, // <- PIN_A7
-    NONE,    // <- PIN_A6
-    PIN_SIO, // <- PIN_A4
-    PIN_TX,  // <- PIN_B3
-    PIN_RX,  // <- PIN_B2
-    PIN_C1,  // <- PIN_C3
-    PIN_1W,  // <- GEARIC
-    PIN_5V,  // <- PIN_3V
-    PIN_A7,  // <- PIN_SWC
-    PIN_A4,  // <- PIN_SIO
-    PIN_B3,  // <- PIN_TX
-    PIN_B2,  // <- PIN_RX
-    PIN_C3,  // <- PIN_C1
-    NONE,    // <- PIN_C0
-    GEARIC   // <- PIN_1W
+static int wiggle[] = {-1,1,-1,1};
+
+static ViewElement elements[] = {
+    {PIN_5V,     PIN_3V,  true, false,  true,  true, -1,   0,   0, "5V" ,                (Icon*)&I_5v_pin, NULL},
+    {PIN_A7,     PIN_SWC, true,  true,  true,  true,  0,  14,   0, "A7",                 (Icon*)&I_a7_pin, NULL},
+    {PIN_A6,     NONE,    true,  true,  true,  true,  1,  28,   0, "A6",                 (Icon*)&I_a6_pin, NULL},
+    {PIN_A4,     PIN_SIO, true,  true,  true,  true,  2,  42,   0, "A4",                 (Icon*)&I_a4_pin, NULL},
+    {PIN_B3,     PIN_TX,  true,  true,  true,  true,  3,  56,   0, "B3",                 (Icon*)&I_b3_pin, NULL},
+    {PIN_B2,     PIN_RX,  true,  true,  true,  true,  4,  70,   0, "B2",                 (Icon*)&I_b2_pin, NULL},
+    {PIN_C3,     PIN_C1,  true,  true,  true,  true,  5,  84,   0, "C3",                 (Icon*)&I_c3_pin, NULL}, 
+    {GEARIC,     PIN_1W,  true,  true,  true, false, -1, 112,   0, "Settings",               (Icon*)&I_gear_unhighlighted, (Icon*)&I_gear_highlighted},
+    {PIN_3V,     PIN_5V,  true, false, false,  true, -1,   0,  48, "3.3V",               (Icon*)&I_3v_pin, NULL},
+    {PIN_SWC,    PIN_A7,  true, false, false,  true, -1,  14,  48, "Serial Wire Clock", (Icon*)&I_swc_pin, NULL},
+    {PIN_SIO,    PIN_A4,  true, false, false,  true, -1,  42,  48, "Serial IO",         (Icon*)&I_sio_pin, NULL},
+    {PIN_TX,     PIN_B3,  true, false, false,  true, -1,  56,  48, "UART - Transmit",   (Icon*)&I_tx_pin, NULL},
+    {PIN_RX,     PIN_B2,  true, false, false,  true, -1,  70,  48, "UART - Receive",    (Icon*)&I_rx_pin, NULL},
+    {PIN_C1,     PIN_C3,  true,  true, false,  true,  6,  84,  48, "C1",                (Icon*)&I_c1_pin, NULL},
+    {PIN_C0,     NONE,    true,  true, false,  true,  7,  98,  48, "C0",                (Icon*)&I_c0_pin, NULL},
+    {PIN_1W,     GEARIC,  true,  true, false,  true, -1, 112,  48, "1-Wire",            (Icon*)&I_1w_pin, NULL},
+    {PIN_GND_08, NONE,   false, false,  true, false, -1,  98,  -1, "GND (Ground)",       (Icon*)&I_gnd_pin, NULL},
+    {PIN_GND_11, NONE,   false, false, false, false, -1,  28,  48, "GND (Ground)",      (Icon*)&I_gnd_pin, NULL},
+    {PIN_GND_18, NONE,   false, false, false, false, -1, 126,  48, "GND (Ground)",      (Icon*)&I_gnd_pin, NULL},
 };
 
-static uint8_t x_pos[] = {
-      0, // PIN_5V
-     14, // PIN_A7
-     28, // PIN_A6
-     42, // PIN_A4
-     56, // PIN_B3
-     70, // PIN_B2
-     84, // PIN_C3
-    112, // GEARIC
-      0, // PIN_3V
-     14, // PIN_SWC
-     42, // PIN_SIO
-     56, // PIN_TX
-     70, // PIN_RX
-     84, // PIN_C1
-     98, // PIN_C0
-    112, // PIN_1W
-     98, // PIN_GND_08
-     28, // PIN_GND_11
-    126  // PIN_GND_18
-};
-
-static int gp_pins[] = {
-     -1, // PIN_5V
-      0, // PIN_A7
-      1, // PIN_A6
-      2, // PIN_A4
-      3, // PIN_B3
-      4, // PIN_B2
-      5, // PIN_C3
-     -1, // GEARIC
-     -1, // PIN_3V
-     -1, // PIN_SWC
-     -1, // PIN_SIO
-     -1, // PIN_TX
-     -1, // PIN_RX
-      6, // PIN_C1
-      7, // PIN_C0
-     -1, // PIN_1W
-};
-
-static Icon * icons[] = {
-    (Icon*)&I_5v_pin,   // PIN_5V
-    (Icon*)&I_a7_pin,   // PIN_A7
-    (Icon*)&I_a6_pin,   // PIN_A6
-    (Icon*)&I_a4_pin,   // PIN_A4
-    (Icon*)&I_b3_pin,   // PIN_B3
-    (Icon*)&I_b2_pin,   // PIN_B2
-    (Icon*)&I_c3_pin,   // PIN_C3
-    (Icon*)&I_gear_unhighlighted, // GEARIC
-    (Icon*)&I_3v_pin,   // PIN_3V
-    (Icon*)&I_swc_pin,  // PIN_SWC
-    (Icon*)&I_sio_pin,  // PIN_SIO
-    (Icon*)&I_tx_pin,   // PIN_TX
-    (Icon*)&I_rx_pin,   // PIN_RX
-    (Icon*)&I_c1_pin,   // PIN_C1
-    (Icon*)&I_c0_pin,   // PIN_C0
-    (Icon*)&I_1w_pin    // PIN_1W
-};
-
-static uint8_t bot_row_y = 48;
+static int element_count = NONE;
 
 // Screen is 128x64 px
 static void app_draw_callback(Canvas* canvas, void* ctx) {
@@ -134,27 +93,40 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
 
-    // draw ground pins
-    canvas_draw_icon(canvas, x_pos[PIN_GND_08], -1, &I_gnd_pin);
-    canvas_draw_icon(canvas, x_pos[PIN_GND_11], bot_row_y, &I_gnd_pin);
-    canvas_draw_icon(canvas, x_pos[PIN_GND_18], bot_row_y, &I_gnd_pin);
-
-    // draw gear
-    canvas_draw_icon(canvas, x_pos[GEARIC], 0, (vstate.selected == GEARIC ? &I_gear_highlighted : &I_gear_unhighlighted));
-
-    // draw top row of pins
-    for( int i = 0; i < GEARIC; i++ )
+    for(int i = 0; i < element_count; i++)
     {
-        int y = vstate.selected == i ? 0 : -3;
-        canvas_draw_icon(canvas, x_pos[i], y, icons[i]);
+        ViewElement e = elements[i];
+        int x = e.x_pos;
+        int y = e.y_pos + (e.top_row && e.pull_out ? -3 : 0);
+        Icon* icon = e.icon;
+
+        if( vstate.selected == i )
+        {
+            if( e.pull_out )
+            {
+                y += e.top_row ? 3 : -3;
+            }
+            if( e.selected_icon != NULL )
+            {
+                icon = e.selected_icon;
+            }
+
+            if(vstate.wiggle_frame >= 0)
+            {
+                x += wiggle[vstate.wiggle_frame/2];
+                vstate.wiggle_frame++;
+                if ((unsigned int)(vstate.wiggle_frame/2) >= (sizeof(wiggle)/sizeof(int)))
+                {
+                    vstate.wiggle_frame = -1;
+                }
+            }
+        }
+
+        canvas_draw_icon(canvas, x, y, icon);
     }
 
-    // draw bottom row of pins
-    for( int i = PIN_3V; i <= PIN_1W; i++ )
-    {
-        int y = bot_row_y - (vstate.selected == i ? 3 : 0);
-        canvas_draw_icon(canvas, x_pos[i], y, icons[i]);
-    }
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 0, 40, elements[vstate.selected].name);
 }
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
@@ -185,42 +157,49 @@ int32_t gpio_controller_main(void* p) {
     bool running = true;
     while(running) {
         if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
-            if((event.type == InputTypePress) || (event.type == InputTypeRepeat)) {
-                switch(event.key) {
-                case InputKeyLeft:
-                    vstate.selected--;
-                    if(vstate.selected == GEARIC) vstate.selected = PIN_1W;
-                    else if(vstate.selected < 0) vstate.selected = GEARIC;
-                    break;
-                case InputKeyRight:
-                    if(vstate.selected <= GEARIC)
-                    {
-                        vstate.selected++;
-                        vstate.selected = vstate.selected > GEARIC ? PIN_5V : vstate.selected;
-                    }
-                    else
-                    {
-                        vstate.selected++;
-                        vstate.selected = vstate.selected > PIN_1W ? PIN_3V : vstate.selected;
-                    }
-                    break;
-                case InputKeyUp:
-                case InputKeyDown:
-                    if (y_mapping[vstate.selected] != NONE) vstate.selected = y_mapping[vstate.selected];
-                    break;
-                case InputKeyBack:
-                    running = false;
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-        else if(event.key == InputKeyOk)
-        {
-            if( gp_pins[vstate.selected] >= 0 && (event.type == InputTypePress || event.type == InputTypeRelease) )
+            if( vstate.wiggle_frame < 0 )
             {
-                gpio_items_set_pin(vstate.gpio_items, gp_pins[vstate.selected], event.type == InputTypePress);
+                if( (event.type == InputTypePress || event.type == InputTypeRelease) && event.key == InputKeyOk )
+                {
+                    if( event.type == InputTypePress && elements[vstate.selected].gp_idx < 0 )
+                    {
+                        vstate.wiggle_frame = 0;
+                    }
+                    else if( elements[vstate.selected].gp_idx >= 0 && (event.type == InputTypePress || event.type == InputTypeRelease) )
+                    {
+                        gpio_items_set_pin(vstate.gpio_items, elements[vstate.selected].gp_idx, event.type == InputTypePress);
+                    }
+                }
+                else if(event.type == InputTypePress || event.type == InputTypeRepeat) {
+                    switch(event.key) {
+                    case InputKeyLeft:
+                        vstate.selected--;
+                        if(vstate.selected == GEARIC) vstate.selected = PIN_1W;
+                        else if(vstate.selected < 0) vstate.selected = GEARIC;
+                        break;
+                    case InputKeyRight:
+                        if(vstate.selected <= GEARIC)
+                        {
+                            vstate.selected++;
+                            vstate.selected = vstate.selected > GEARIC ? PIN_5V : vstate.selected;
+                        }
+                        else
+                        {
+                            vstate.selected++;
+                            vstate.selected = vstate.selected > PIN_1W ? PIN_3V : vstate.selected;
+                        }
+                        break;
+                    case InputKeyUp:
+                    case InputKeyDown:
+                        if (elements[vstate.selected].opposite != NONE) vstate.selected = elements[vstate.selected].opposite;
+                        break;
+                    case InputKeyBack:
+                        running = false;
+                        break;
+                    default:
+                        break;
+                    }
+                }
             }
         }
         view_port_update(view_port);
