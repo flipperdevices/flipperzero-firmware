@@ -135,38 +135,50 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
 
     if(cmd_len == 2) {
         if(cmd[0] == CCID_MESSAGE_TYPE_RDR_to_PC_NotifySlotChange) {
-            switch(cmd[1]) {
-            case CARD_OUT:
-                FURI_LOG_D(TAG, "Card removed");
-                powered[sam_slot] = false;
-                hasSAM = false;
-                retries = 3;
-                break;
+            switch(cmd[1] & SLOT_0_MASK) {
             case CARD_IN_1:
-                FURI_LOG_D(TAG, "Card Inserted (1)");
+                FURI_LOG_D(TAG, "Card Inserted (0)");
+                if(hasSAM && sam_slot == 0) {
+                    break;
+                }
                 retries = 0;
                 sequence[0] = 0;
                 seader_ccid_IccPowerOn(seader_uart, 0);
                 break;
+            case CARD_OUT_1:
+                FURI_LOG_D(TAG, "Card Removed (0)");
+                if(hasSAM && sam_slot == 0) {
+                    powered[0] = false;
+                    hasSAM = false;
+                    retries = 3;
+                }
+                break;
+            default:
+                FURI_LOG_D(TAG, "Unknown slot 0 card event");
+            };
+
+            switch(cmd[1] & SLOT_1_MASK) {
             case CARD_IN_2:
-                FURI_LOG_D(TAG, "Card Inserted (2)");
+                FURI_LOG_D(TAG, "Card Inserted (1)");
+                if(hasSAM && sam_slot == 1) {
+                    break;
+                }
                 retries = 0;
                 sequence[1] = 0;
                 seader_ccid_IccPowerOn(seader_uart, 1);
                 break;
-            case CARD_IN_BOTH:
-                FURI_LOG_W(TAG, "Two card support in beta");
-                if(hasSAM) {
-                    if(sam_slot == 0) {
-                        seader_ccid_IccPowerOn(seader_uart, 1);
-                    } else if(sam_slot == 1) {
-                        seader_ccid_IccPowerOn(seader_uart, 0);
-                    }
+            case CARD_OUT_2:
+                FURI_LOG_D(TAG, "Card Removed (1)");
+                if(hasSAM && sam_slot == 1) {
+                    powered[1] = false;
+                    hasSAM = false;
+                    retries = 3;
                 }
                 break;
             default:
-                FURI_LOG_W(TAG, "Unknown card state event");
+                FURI_LOG_D(TAG, "Unknown slot 1 card event");
             };
+
             return 2;
         }
     }
@@ -257,7 +269,11 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
 
         if(message.bMessageType == CCID_MESSAGE_TYPE_RDR_to_PC_DataBlock) {
             if(hasSAM) {
-                seader_worker_process_message(seader_worker, &message);
+                if(message.bSlot == sam_slot) {
+                    seader_worker_process_message(seader_worker, &message);
+                } else {
+                    FURI_LOG_D(TAG, "Discarding message on non-sam slot");
+                }
             } else {
                 if(memcmp(SAM_ATR, message.payload, sizeof(SAM_ATR)) == 0) {
                     FURI_LOG_I(TAG, "SAM ATR!");

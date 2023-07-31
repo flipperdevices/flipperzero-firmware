@@ -14,10 +14,20 @@
 #define NAK (0x15)
 
 #define BMICCSTATUS_MASK 0x03
-#define CARD_OUT 0x02
+/*
+ * Bit 0 = Slot 0 current state
+ * Bit 1 = Slot 0 changed status
+ * Bit 2 = Slot 1 current state
+ * Bit 3 = Slot 1 changed status
+ */
+
+// TODO: rename/renumber
+#define SLOT_0_MASK 0x03
+#define CARD_OUT_1 0x02
 #define CARD_IN_1 0x03
-#define CARD_IN_2 0x06
-#define CARD_IN_BOTH 0x07
+#define SLOT_1_MASK 0x0C
+#define CARD_IN_2 0x04
+#define CARD_OUT_2 0x0C
 
 /*
  *  * BULK_OUT messages from PC to Reader
