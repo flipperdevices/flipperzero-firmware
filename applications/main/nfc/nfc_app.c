@@ -272,7 +272,10 @@ static bool nfc_set_shadow_file_path(FuriString* file_path, FuriString* shadow_f
     furi_assert(shadow_file_path);
 
     bool shadow_file_path_set = false;
-    if(furi_string_end_with(file_path, NFC_APP_EXTENSION)) {
+    if(furi_string_end_with(file_path, NFC_APP_SHADOW_EXTENSION)) {
+        furi_string_set(shadow_file_path, file_path);
+        shadow_file_path_set = true;
+    } else if(furi_string_end_with(file_path, NFC_APP_EXTENSION)) {
         size_t path_len = furi_string_size(file_path);
         // Cut .nfc
         furi_string_set_n(shadow_file_path, file_path, 0, path_len - 4);
