@@ -369,18 +369,22 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
 bool nfc_delete(NfcApp* instance) {
     furi_assert(instance);
 
-    bool result = false;
-    FuriString* shadow_file_path = furi_string_alloc();
-
     if(nfc_has_shadow_file(instance)) {
-        nfc_set_shadow_file_path(instance->file_path, shadow_file_path);
-        storage_simply_remove(instance->storage, furi_string_get_cstr(shadow_file_path));
+        nfc_delete_shadow_file(instance);
     }
 
-    result = storage_simply_remove(instance->storage, furi_string_get_cstr(instance->file_path));
+    return storage_simply_remove(instance->storage, furi_string_get_cstr(instance->file_path));
+}
+
+bool nfc_delete_shadow_file(NfcApp* instance) {
+    furi_assert(instance);
+
+    FuriString* shadow_file_path = furi_string_alloc();
+
+    bool result = nfc_set_shadow_file_path(instance->file_path, shadow_file_path) &&
+                  storage_simply_remove(instance->storage, furi_string_get_cstr(shadow_file_path));
 
     furi_string_free(shadow_file_path);
-
     return result;
 }
 
