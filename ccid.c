@@ -7,7 +7,7 @@ const uint8_t SAM_ATR[] =
     {0x3b, 0x95, 0x96, 0x80, 0xb1, 0xfe, 0x55, 0x1f, 0xc7, 0x47, 0x72, 0x61, 0x63, 0x65, 0x13};
 const uint8_t SAM_ATR2[] = {0x3b, 0x90, 0x96, 0x91, 0x81, 0xb1, 0xfe, 0x55, 0x1f, 0xc7, 0xd4};
 
-bool powered = false;
+bool powered[2] = {false, false};
 uint8_t sam_slot = 0;
 uint8_t sequence[2] = {0, 0};
 uint8_t retries = 3;
@@ -29,11 +29,12 @@ size_t seader_ccid_add_lrc(uint8_t* data, size_t len) {
 }
 
 void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart, uint8_t slot) {
-    if(powered) {
+    if(powered[slot]) {
         return;
     }
-    powered = true;
-    FURI_LOG_D(TAG, "Sending Power On");
+    powered[slot] = true;
+
+    FURI_LOG_D(TAG, "Sending Power On (%d)", slot);
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -49,7 +50,8 @@ void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart, uint8_t slot) {
 
 void seader_ccid_check_for_sam(SeaderUartBridge* seader_uart) {
     hasSAM = false; // If someone is calling this, reset sam state
-    powered = false;
+    powered[0] = false;
+    powered[1] = false;
     seader_ccid_GetSlotStatus(seader_uart, 0);
 }
 
@@ -129,14 +131,14 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
     for(uint8_t i = 0; i < cmd_len; i++) {
         snprintf(display + (i * 2), sizeof(display), "%02x", cmd[i]);
     }
-    FURI_LOG_D(TAG, "UART %d: %s", cmd_len, display);
+    // FURI_LOG_D(TAG, "UART %d: %s", cmd_len, display);
 
     if(cmd_len == 2) {
         if(cmd[0] == CCID_MESSAGE_TYPE_RDR_to_PC_NotifySlotChange) {
             switch(cmd[1]) {
             case CARD_OUT:
                 FURI_LOG_D(TAG, "Card removed");
-                powered = false;
+                powered[sam_slot] = false;
                 hasSAM = false;
                 retries = 3;
                 break;
@@ -154,9 +156,16 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
                 break;
             case CARD_IN_BOTH:
                 FURI_LOG_W(TAG, "Two card support in beta");
-                //seader_ccid_IccPowerOn(seader_uart, 0);
-                seader_ccid_IccPowerOn(seader_uart, 1);
+                if(hasSAM) {
+                    if(sam_slot == 0) {
+                        seader_ccid_IccPowerOn(seader_uart, 1);
+                    } else if(sam_slot == 1) {
+                        seader_ccid_IccPowerOn(seader_uart, 0);
+                    }
+                }
                 break;
+            default:
+                FURI_LOG_W(TAG, "Unknown card state event");
             };
             return 2;
         }
