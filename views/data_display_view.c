@@ -271,5 +271,9 @@ void data_display_set_nav_messages(
 void data_display_set_state(DataDisplayView* data_display, DataDisplayState state) {
     furi_assert(data_display);
     with_view_model(
-        data_display->view, DataDisplayViewModel * model, { model->state = state; }, true);
+        data_display->view,
+	DataDisplayViewModel * model,
+	{ model->state = state; },
+	// do refresh
+	true);
 }
