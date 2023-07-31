@@ -17,7 +17,6 @@ void uhf_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = uhf_app->text_input;
-    bool dev_name_empty = false;
     set_random_name(uhf_app->text_store, sizeof(uhf_app->text_store));
     text_input_set_header_text(text_input, "Name the tag");
     text_input_set_result_callback(
@@ -26,7 +25,7 @@ void uhf_scene_save_name_on_enter(void* context) {
         uhf_app,
         uhf_app->text_store,
         UHF_DEV_NAME_MAX_LEN,
-        dev_name_empty);
+        true);
 
     FuriString* folder_path;
     folder_path = furi_string_alloc_set(STORAGE_APP_DATA_PATH_PREFIX);
