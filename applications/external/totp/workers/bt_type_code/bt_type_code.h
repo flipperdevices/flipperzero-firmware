@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <furi/core/mutex.h>
+#include "../../types/automation_kb_layout.h"
 
 #define TOTP_BT_KEYS_STORAGE_PATH EXT_PATH("apps_data/authenticator/.bt_hid.keys")
 
@@ -49,12 +50,14 @@ void totp_bt_type_code_worker_free(TotpBtTypeCodeWorkerContext* context);
  * @param code_buffer code buffer to be used to automate
  * @param code_buffer_size code buffer size
  * @param code_buffer_sync code buffer synchronization primitive
+ * @param keyboard_layout keyboard layout to be used
  */
 void totp_bt_type_code_worker_start(
     TotpBtTypeCodeWorkerContext* context,
     char* code_buffer,
     uint8_t code_buffer_size,
-    FuriMutex* code_buffer_sync);
+    FuriMutex* code_buffer_sync,
+    AutomationKeyboardLayout keyboard_layout);
 
 /**
  * @brief Stops bluetooth token input automation worker

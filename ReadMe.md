@@ -37,7 +37,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Configurable SPI & UART Channels (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc4c6bdacd7aac9ba8377fddcb966a9ae17da36a)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
 - [DSi Layout for Main Menu (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/de5a8d222d138a7d01f82a265b088b37576b7a0b)
-- Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - OFW: [Fix fbtenv restore #2924 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2924)
 - Added: [GPIO Controller (By Lokno)](https://github.com/Lokno/gpio_controller)
 - Updated: [USB Mass Storage (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
@@ -57,6 +56,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - UL: [Init config for external radio driver #564 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/564)
+- Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 <a name="release">
 
