@@ -46,3 +46,20 @@ Thank you so much to the following contributors for providing awesome portals.
 - `T_Mobile.html` by [roshanravan](https://github.com/roshanravan)
 - `United_Airlines.html` by [roshanravan](https://github.com/roshanravan)
 - `Verizon.html` by [roshanravan](https://github.com/roshanravan)
+
+## Disclaimer
+
+Dear User,
+
+Our captive WiFi login portals designed specifically for educational purposes. These portals have been carefully developed to offer a hands-on experience in the field of cybersecurity and penetration testing. As a responsible provider, I would like to emphasize that any illegal use of these portals is strictly prohibited.
+
+It is crucial to acknowledge that using these portals for any unauthorized activities, such as hacking into networks or attempting to access sensitive information without proper authorization, is deemed illegal and unethical. I strongly discourage engaging in any activities that may cause harm, compromise network security, or infringe upon others' privacy rights.
+
+By accessing and utilizing the captive WiFi login portals, users take complete responsibility for their actions and the consequences that may arise from them. I expect users to act responsibly, adhere to ethical guidelines, and ensure that their activities remain within the boundaries of the law and ethical norms.
+
+Remember, these portals are aimed at promoting knowledge, improving cybersecurity skills, and raising awareness about the potential vulnerabilities present in network infrastructures. I encourage you to explore the portals, learn from them, and embrace the opportunity to enhance your understanding in a controlled and legal environment.
+
+Thank you for your cooperation and commitment to responsible usage. Together, let us foster a secure and ethical cyberspace.
+
+Best regards,
+[roshanravan](https://github.com/roshanravan)
