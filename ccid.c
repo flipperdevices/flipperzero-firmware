@@ -50,17 +50,17 @@ void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart, uint8_t slot) {
 void seader_ccid_check_for_sam(SeaderUartBridge* seader_uart) {
     hasSAM = false; // If someone is calling this, reset sam state
     powered = false;
-    seader_ccid_GetSlotStatus(seader_uart);
+    seader_ccid_GetSlotStatus(seader_uart, 0);
 }
 
-void seader_ccid_GetSlotStatus(SeaderUartBridge* seader_uart) {
-    FURI_LOG_D(TAG, "seader_ccid_GetSlotStatus");
+void seader_ccid_GetSlotStatus(SeaderUartBridge* seader_uart, uint8_t slot) {
+    FURI_LOG_D(TAG, "seader_ccid_GetSlotStatus(%d)", slot);
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
     seader_uart->tx_buf[2 + 0] = CCID_MESSAGE_TYPE_PC_to_RDR_GetSlotStatus;
-    seader_uart->tx_buf[2 + 5] = sam_slot;
-    seader_uart->tx_buf[2 + 6] = getSequence(sam_slot);
+    seader_uart->tx_buf[2 + 5] = slot;
+    seader_uart->tx_buf[2 + 6] = getSequence(slot);
 
     seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10);
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
@@ -205,13 +205,13 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
         if(message.bMessageType == CCID_MESSAGE_TYPE_RDR_to_PC_SlotStatus) {
             uint8_t status = (message.bStatus & BMICCSTATUS_MASK);
             if(status == 0 || status == 1) {
-                seader_ccid_IccPowerOn(seader_uart, status);
+                seader_ccid_IccPowerOn(seader_uart, message.bSlot);
                 return message.consumed;
             } else if(status == 2) {
                 FURI_LOG_W(TAG, "No ICC is present [retries %d]", retries);
                 if(retries-- > 1 && hasSAM == false) {
                     furi_delay_ms(100);
-                    seader_ccid_GetSlotStatus(seader_uart);
+                    seader_ccid_GetSlotStatus(seader_uart, retries % 2);
                 } else {
                     if(seader_worker->callback) {
                         seader_worker->callback(
