@@ -53,7 +53,7 @@ bool evil_portal_set_ap_name(const char* ap_name) {
     furi_assert(ap_name, "the ap name is null");
 
     evil_portal_uart_tx((uint8_t*)"setap=", 6);
-    evil_portal_uart_tx((uint8_t*) ap_name, strlen(ap_name));
+    evil_portal_uart_tx((uint8_t*)ap_name, strlen(ap_name));
     evil_portal_uart_tx((uint8_t*)"\n", 1);
 
     return true;

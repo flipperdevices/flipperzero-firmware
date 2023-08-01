@@ -31,7 +31,8 @@ void evil_portal_read_ap_name(void* context) {
     if(storage_common_stat(storage, EVIL_PORTAL_AP_SAVE_PATH, &fi) == FSE_OK) {
         File* ap_name = storage_file_alloc(storage);
         if(storage_file_open(ap_name, EVIL_PORTAL_AP_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            uint16_t now_read = storage_file_read(ap_name, app->ap_name, (uint16_t)sizeof(app->ap_name) - 1);
+            uint16_t now_read =
+                storage_file_read(ap_name, app->ap_name, (uint16_t)sizeof(app->ap_name) - 1);
             app->ap_name[now_read] = '\0';
         }
         storage_file_close(ap_name);
