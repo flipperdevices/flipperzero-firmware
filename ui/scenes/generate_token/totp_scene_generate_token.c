@@ -15,7 +15,7 @@
 #include "../../../features_config.h"
 #include "../../../workers/generate_totp_code/generate_totp_code.h"
 #include "../../../workers/usb_type_code/usb_type_code.h"
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
 #include "../../../workers/bt_type_code/bt_type_code.h"
 #endif
 
@@ -214,7 +214,7 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
     scene_state->active_font = available_fonts[plugin_state->active_font_index];
     scene_state->notification_app = furi_record_open(RECORD_NOTIFICATION);
 
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
 
     if(plugin_state->automation_method & AutomationMethodBadBt) {
         if(plugin_state->bt_type_code_worker_context == NULL) {
@@ -309,11 +309,10 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
             canvas, SCREEN_WIDTH - 8, SCREEN_HEIGHT_CENTER - 24, &I_totp_arrow_right_8x9);
     }
 
-#ifdef TOTP_AUTOMATION_ICONS_ENABLED
     if(plugin_state->automation_method & AutomationMethodBadUsb) {
         canvas_draw_icon(
             canvas,
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
             SCREEN_WIDTH_CENTER -
                 (plugin_state->automation_method & AutomationMethodBadBt ? 33 : 15),
 #else
@@ -324,7 +323,7 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
             &I_hid_usb_31x9);
     }
 
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
     if(plugin_state->automation_method & AutomationMethodBadBt &&
        plugin_state->bt_type_code_worker_context != NULL &&
        totp_bt_type_code_worker_is_advertising(plugin_state->bt_type_code_worker_context)) {
@@ -335,7 +334,6 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
             SCREEN_HEIGHT_CENTER + 12,
             &I_hid_ble_31x9);
     }
-#endif
 #endif
 }
 
@@ -366,7 +364,7 @@ bool totp_scene_generate_token_handle_event(
                 get_notification_sequence_automation(plugin_state, scene_state));
             return true;
         }
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
         else if(
             event->input.key == InputKeyUp &&
             plugin_state->automation_method & AutomationMethodBadBt) {
@@ -444,7 +442,7 @@ void totp_scene_generate_token_deactivate(PluginState* plugin_state) {
     if(plugin_state->automation_method & AutomationMethodBadUsb) {
         totp_usb_type_code_worker_stop(scene_state->usb_type_code_worker_context);
     }
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
     if(plugin_state->automation_method & AutomationMethodBadBt) {
         totp_bt_type_code_worker_stop(plugin_state->bt_type_code_worker_context);
     }
