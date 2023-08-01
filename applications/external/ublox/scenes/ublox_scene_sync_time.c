@@ -14,6 +14,9 @@ void ublox_scene_sync_time_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(ublox->view_dispatcher, UbloxViewWidget);
 
+    widget_add_string_element(
+        ublox->widget, 3, 5, AlignLeft, AlignCenter, FontPrimary, "Syncing time...");
+
     ublox_worker_start(
         ublox->worker, UbloxWorkerStateSyncTime, ublox_scene_sync_time_worker_callback, ublox);
 }
@@ -24,6 +27,7 @@ bool ublox_scene_sync_time_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UbloxWorkerEventDataReady) {
+            widget_reset(ublox->widget);
             // We don't have a timezone (or even UTC offset) in the
             // RTC, so we can only update the minute and second---not
             // even the date.
@@ -34,7 +38,7 @@ bool ublox_scene_sync_time_on_event(void* context, SceneManagerEvent event) {
             furi_hal_rtc_set_datetime(&datetime);
 
             widget_add_string_element(
-                ublox->widget, 5, 5, AlignLeft, AlignCenter, FontPrimary, "Updated min/sec to GPS");
+                ublox->widget, 3, 5, AlignLeft, AlignCenter, FontPrimary, "Updated min/sec to GPS");
 
             FuriString* s = furi_string_alloc();
             furi_string_cat_printf(s, "New date/time: ");
@@ -47,10 +51,10 @@ bool ublox_scene_sync_time_on_event(void* context, SceneManagerEvent event) {
 
             furi_string_cat(date, time);
             widget_add_string_element(
-                ublox->widget, 5, 25, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(s));
+                ublox->widget, 3, 25, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(s));
             widget_add_string_element(
                 ublox->widget,
-                5,
+                3,
                 35,
                 AlignLeft,
                 AlignTop,

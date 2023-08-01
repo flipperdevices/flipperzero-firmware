@@ -33,7 +33,7 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         FuriString* s = furi_string_alloc();
         elements_button_left(canvas, "Config");
         elements_button_center(canvas, "Reset");
-
+        elements_button_right(canvas, "Log");
         /*** Draw fix ***/
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 0, 9, "Fix:");
@@ -120,7 +120,6 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
             .hour = message.hour,
             .minute = message.min,
             .second = message.sec,
-
         };
 
         FuriString* s2 = furi_string_alloc();
@@ -145,6 +144,7 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         FuriString* s = furi_string_alloc();
         elements_button_left(canvas, "Config");
         elements_button_center(canvas, "Reset");
+        elements_button_right(canvas, "Log");
 
         // TODO: imperial/metric
         canvas_set_font(canvas, FontPrimary);
@@ -198,6 +198,11 @@ static bool data_display_input_callback(InputEvent* event, void* context) {
             if(data_display->callback) {
                 data_display->callback(data_display->context, event->key);
             }
+        } else if(event->key == InputKeyRight) {
+            if(data_display->callback) {
+                data_display->callback(data_display->context, event->key);
+            }
+            consumed = true;
         }
     }
     return consumed;
@@ -270,5 +275,9 @@ void data_display_set_nav_messages(
 void data_display_set_state(DataDisplayView* data_display, DataDisplayState state) {
     furi_assert(data_display);
     with_view_model(
-        data_display->view, DataDisplayViewModel * model, { model->state = state; }, true);
+        data_display->view,
+        DataDisplayViewModel * model,
+        { model->state = state; },
+        // do refresh
+        true);
 }

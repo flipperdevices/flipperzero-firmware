@@ -67,6 +67,13 @@ void ublox_worker_change_state(UbloxWorker* ublox_worker, UbloxWorkerState state
 }
 
 void clear_ublox_data() {
+    if(!furi_hal_i2c_is_device_ready(
+           &furi_hal_i2c_handle_external,
+           UBLOX_I2C_ADDRESS << 1,
+           furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
+        FURI_LOG_E(TAG, "clear_ublox_data(): device not ready");
+        return;
+    }
     uint8_t tx[] = {0xff};
     uint8_t response = 0;
     while(response != 0xff) {
@@ -78,14 +85,45 @@ void clear_ublox_data() {
                &response,
                1,
                furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
-            FURI_LOG_E(TAG, "error reading first byte of response");
+            FURI_LOG_E(TAG, "clear_ublox_data(): error clearing ublox data");
         }
     }
 }
 
 int32_t ublox_worker_task(void* context) {
     UbloxWorker* ublox_worker = context;
+    //Ublox* ublox = ublox_worker->context;
 
+    /*char* name = "/ext/log.csv";
+    strcpy(ublox->text_store, name);
+    
+    if (ublox->logfile == NULL) {
+	ublox->logfile = storage_file_alloc(ublox->storage);
+	// need to open the file
+	FURI_LOG_I(TAG, "opening file %s", ublox->text_store);
+	if (!storage_file_open(ublox->logfile, ublox->text_store, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+	    FURI_LOG_E(TAG, "failed to open file %s!", ublox->text_store);
+	    ublox->file_ok = false;
+	} else {
+	    ublox->file_ok = true;
+	}
+    }
+    
+    if (ublox->file_ok) {
+	const char* str = "hello world from csv";
+	if (!storage_file_write(ublox->logfile, str, strlen(str))) {
+	    FURI_LOG_E(TAG, "failed to write to file!");
+	    ublox->file_ok = false;
+	}
+    }
+
+    if (ublox->file_ok) {
+	storage_file_close(ublox->logfile);
+	storage_file_free(ublox->logfile);
+
+	ublox->file_ok = false;
+	ublox->logfile = NULL;
+	}*/
     if(ublox_worker->state == UbloxWorkerStateRead) {
         ublox_worker_read_nav_messages(context);
     } else if(ublox_worker->state == UbloxWorkerStateSyncTime) {
@@ -106,42 +144,74 @@ void ublox_worker_read_nav_messages(void* context) {
     Ublox* ublox = ublox_worker->context;
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    if(!ublox->gps_initted) {
-        if(ublox_worker_init_gps(ublox_worker)) {
-            ublox->gps_initted = true;
-        } else {
-            ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
-            FURI_LOG_E(TAG, "init GPS failed");
+    while(!ublox->gps_initted) {
+        if(ublox_worker->state != UbloxWorkerStateRead) {
             furi_hal_i2c_release(&furi_hal_i2c_handle_external);
             return;
         }
-        // have to do this...don't know why, though, because the data
-        // should already be cleared out (also why does this even work, it
-        // seems like it should be capturing the first byte of the next
-        // message)
+
+        // have to clear right before init to make retrying init work
         clear_ublox_data();
+        if(ublox_worker_init_gps(ublox_worker)) {
+            ublox->gps_initted = true;
+            break;
+        } else {
+            ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
+            FURI_LOG_E(TAG, "init GPS failed, try again");
+        }
+        // don't try constantly, no reason to
+        furi_delay_ms(500);
     }
+
+    // clear data so we don't an error on startup
+    clear_ublox_data();
 
     // break the loop when the thread state changes
     while(ublox_worker->state == UbloxWorkerStateRead) {
-        if(!ublox_worker_read_pvt(ublox_worker)) {
-            ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
-            ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
-            furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-            return;
+        if(ublox->log_state == UbloxLogStateStartLogging) {
+            FURI_LOG_I(TAG, "start logging");
+            // need to open new log file with the name in ublox->text_store
+            FuriString* fullname = furi_string_alloc_printf("/ext/%s", ublox->text_store);
+
+            if(!kml_open_file(ublox->storage, &(ublox->kmlfile), furi_string_get_cstr(fullname))) {
+                FURI_LOG_E(TAG, "failed to open KML file %s!", furi_string_get_cstr(fullname));
+                ublox->log_state = UbloxLogStateNone;
+            }
+
+            ublox->log_state = UbloxLogStateLogging;
+            furi_string_free(fullname);
+
+        } else if(ublox->log_state == UbloxLogStateStopLogging) {
+            FURI_LOG_I(TAG, "stop logging");
+            if(!kml_close_file(&(ublox->kmlfile))) {
+                FURI_LOG_E(TAG, "failed to close KML file!");
+            }
+            ublox->log_state = UbloxLogStateNone;
         }
-        // clearing makes the read process much faster
+
+        bool pvt = ublox_worker_read_pvt(ublox_worker);
+        // clearing makes the second read much faster
         clear_ublox_data();
-        if(!ublox_worker_read_odo(ublox_worker)) {
-            ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+        bool odo = ublox_worker_read_odo(ublox_worker);
+
+        if(pvt && odo) {
+            ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
+
+            if(ublox->log_state == UbloxLogStateLogging) {
+                if(!kml_add_path_point(
+                       &(ublox->kmlfile),
+                       (double)(ublox->nav_pvt.lat) / (double)1e7,
+                       (double)(ublox->nav_pvt.lon) / (double)1e7,
+                       ublox->nav_pvt.hMSL / 1e3)) { // convert altitude to meters
+                    FURI_LOG_E(TAG, "failed to write line to file");
+                }
+            }
+        } else {
             ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
-            furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-            return;
         }
-        // if they both succeeded, notify success
-        ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
         // sometimes fancy non-blocking delays like the one below seem
-        // to cause things in the system to not work, like the backlight timeout.
+        // to cause things in the system to not work, like the
+        // backlight timeout.
         uint32_t ticks = furi_get_tick();
         while(furi_get_tick() - ticks <
               furi_ms_to_ticks(((ublox->data_display_state).refresh_rate * 1000))) {
@@ -220,6 +290,13 @@ FuriString* print_uint8_array(uint8_t* array, int length) {
 }
 
 UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length) {
+    if(!furi_hal_i2c_is_device_ready(
+           &furi_hal_i2c_handle_external,
+           UBLOX_I2C_ADDRESS << 1,
+           furi_ms_to_ticks(I2C_TIMEOUT_MS))) {
+        FURI_LOG_E(TAG, "device not ready");
+        return NULL;
+    }
     // Either our I2C implementation is broken or the GPS's is, so we
     // end up reading a lot more data than we need to. That means that
     // the I2C comm code for this app is a little bit of a hack, but
@@ -295,7 +372,7 @@ bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
     ublox_message_free(message_tx);
     if(message_rx == NULL) {
         FURI_LOG_E(TAG, "read_pvt transfer failed");
-        ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+        //ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
         return false;
     }
 
@@ -304,7 +381,7 @@ bool ublox_worker_read_pvt(UbloxWorker* ublox_worker) {
 
     if(frame_rx == NULL) {
         FURI_LOG_E(TAG, "NULL pointer, something wrong with NAV-PVT message!");
-        ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+        //ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
         return false;
     } else {
         // build nav-pvt struct. this is very ugly and there's not much I can do about it.

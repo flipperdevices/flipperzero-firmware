@@ -2,4 +2,5 @@
 
 typedef enum {
     UbloxCustomEventResetOdometer,
+    UbloxCustomEventTextInputDone,
 } UbloxCustomEvent;

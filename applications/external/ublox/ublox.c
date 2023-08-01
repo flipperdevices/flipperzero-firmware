@@ -37,22 +37,28 @@ Ublox* ublox_alloc() {
     view_dispatcher_add_view(
         ublox->view_dispatcher, UbloxViewWidget, widget_get_view(ublox->widget));
 
-    ublox->data_display = data_display_alloc();
-    view_dispatcher_add_view(
-        ublox->view_dispatcher, UbloxViewDataDisplay, data_display_get_view(ublox->data_display));
-
     ublox->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         ublox->view_dispatcher,
         UbloxViewVariableItemList,
         variable_item_list_get_view(ublox->variable_item_list));
 
-    ublox->notifications = furi_record_open(RECORD_NOTIFICATION);
+    ublox->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        ublox->view_dispatcher, UbloxViewTextInput, text_input_get_view(ublox->text_input));
 
+    ublox->data_display = data_display_alloc();
+    view_dispatcher_add_view(
+        ublox->view_dispatcher, UbloxViewDataDisplay, data_display_get_view(ublox->data_display));
+
+    ublox->notifications = furi_record_open(RECORD_NOTIFICATION);
+    ublox->storage = furi_record_open(RECORD_STORAGE);
+
+    ublox->log_state = UbloxLogStateNone;
     // Establish default data display state
     (ublox->data_display_state).view_mode = UbloxDataDisplayViewModeHandheld;
     (ublox->data_display_state).backlight_mode = UbloxDataDisplayBacklightDefault;
-    (ublox->data_display_state).refresh_rate = 5; //2;
+    (ublox->data_display_state).refresh_rate = 2;
     (ublox->data_display_state).notify_mode = UbloxDataDisplayNotifyOn;
 
     (ublox->device_state).odometer_mode = UbloxOdometerModeRunning;
@@ -88,6 +94,8 @@ void ublox_free(Ublox* ublox) {
     ublox->gui = NULL;
     furi_record_close(RECORD_NOTIFICATION);
     ublox->notifications = NULL;
+    furi_record_close(RECORD_STORAGE);
+    ublox->storage = NULL;
 
     free(ublox);
 }
