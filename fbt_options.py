@@ -1,4 +1,4 @@
-from pathlib import Path
+from pathlib import path
 import posixpath
 
 # For more details on these options, run 'fbt -h'
