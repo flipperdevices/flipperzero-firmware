@@ -914,7 +914,7 @@ ReturnCode seader_picopass_card_read(SeaderWorker* seader_worker) {
     return err;
 }
 
-void seader_worker_process_message(SeaderWorker* seader_worker, CCID_Message* message) {
+void seader_worker_process_sam_message(SeaderWorker* seader_worker, CCID_Message* message) {
     if(seader_process_apdu(seader_worker, message->payload, message->dwLength)) {
         // no-op
     } else {
