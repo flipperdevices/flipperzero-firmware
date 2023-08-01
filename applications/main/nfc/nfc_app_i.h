@@ -30,6 +30,7 @@
 #include "helpers/mf_dict.h"
 #include "helpers/mfkey32_logger.h"
 #include "helpers/mf_user_dict.h"
+#include "helpers/mf_classic_key_cache.h"
 
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -62,7 +63,7 @@
 #define NFC_APP_SHADOW_EXTENSION ".shd"
 
 #define NFC_APP_MFKEY32_LOGS_FILE_NAME ".mfkey32.log"
-#define NFC_APP_MFKEY32_LOGS_FILE_PATH NFC_APP_FOLDER "/" NFC_APP_MFKEY32_LOGS_FILE_NAME
+#define NFC_APP_MFKEY32_LOGS_FILE_PATH (NFC_APP_FOLDER "/" NFC_APP_MFKEY32_LOGS_FILE_NAME)
 
 typedef enum {
     NfcRpcStateIdle,

@@ -244,7 +244,7 @@ void nfc_blink_stop(NfcApp* nfc) {
     notification_message(nfc->notifications, &sequence_blink_stop);
 }
 
-void nfc_make_app_folder(NfcApp* instance) {
+void nfc_make_app_folders(NfcApp* instance) {
     furi_assert(instance);
 
     if(!storage_simply_mkdir(instance->storage, NFC_APP_FOLDER)) {
@@ -260,6 +260,10 @@ bool nfc_save_file(NfcApp* instance, FuriString* path) {
 
     if(!result) {
         dialog_message_show_storage_error(instance->dialogs, "Cannot save\nkey file");
+    }
+
+    if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
+        mf_classic_key_cache_save(nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic));
     }
 
     return result;
@@ -313,7 +317,7 @@ static bool nfc_save_internal(NfcApp* instance, const char* extension) {
 
     bool result = false;
 
-    nfc_make_app_folder(instance);
+    nfc_make_app_folders(instance);
 
     if(furi_string_end_with(instance->file_path, NFC_APP_EXTENSION)) {
         size_t filename_start = furi_string_search_rchar(instance->file_path, '/');

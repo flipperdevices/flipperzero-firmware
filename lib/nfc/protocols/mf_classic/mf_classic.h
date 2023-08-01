@@ -120,10 +120,10 @@ typedef struct {
 } MfClassicSectorTrailer;
 
 typedef struct {
-    MfClassicKey key_a[MF_CLASSIC_TOTAL_SECTORS_MAX];
-    MfClassicKey key_b[MF_CLASSIC_TOTAL_SECTORS_MAX];
     uint64_t key_a_mask;
+    MfClassicKey key_a[MF_CLASSIC_TOTAL_SECTORS_MAX];
     uint64_t key_b_mask;
+    MfClassicKey key_b[MF_CLASSIC_TOTAL_SECTORS_MAX];
 } MfClassicDeviceKeys;
 
 typedef struct {

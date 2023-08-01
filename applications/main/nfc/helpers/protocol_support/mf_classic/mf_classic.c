@@ -41,8 +41,18 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
     NfcApp* instance = context;
     const MfClassicPollerEvent* mf_classic_event = event.data;
     NfcCommand command = NfcCommandStop;
+
+    // const MfClassicData* mfc_data = nfc_poller_get_data(instance->poller);
+    // size_t uid_len = 0;
+    // const uint8_t* uid = mf_classic_get_uid(mfc_data, &uid_len);
+    // MfClassicDeviceKeys keys = {};
+    // if(!mf_classic_key_cache_load(uid, uid_len, &keys)) {
+        
+    // }
+
+    nfc_device_set_data(
+        instance->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(instance->poller));
     view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerIncomplete);
-    return command;
 
     // TODO: Implement read mf_classic using key cache
     if(mf_classic_event->type == MfClassicPollerEventTypeReadComplete) {
@@ -188,7 +198,9 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
             .on_enter = nfc_scene_saved_menu_on_enter_mf_classic,
             .on_event = nfc_scene_saved_menu_on_event_mf_classic,
         },
-    .scene_emulate = {
-        .on_enter = nfc_scene_emulate_on_enter_mf_classic,
-        .on_event = NULL,
-    }};
+    .scene_emulate =
+        {
+            .on_enter = nfc_scene_emulate_on_enter_mf_classic,
+            .on_event = NULL,
+        },
+};
