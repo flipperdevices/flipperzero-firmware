@@ -98,4 +98,9 @@ void seader_ccid_GetSlotStatus(SeaderUartBridge* seader_uart, uint8_t slot);
 void seader_ccid_SetParameters(SeaderUartBridge* seader_uart);
 void seader_ccid_GetParameters(SeaderUartBridge* seader_uart);
 void seader_ccid_XfrBlock(SeaderUartBridge* seader_uart, uint8_t* data, size_t len);
+void seader_ccid_XfrBlockToSlot(
+    SeaderUartBridge* seader_uart,
+    uint8_t slot,
+    uint8_t* data,
+    size_t len);
 size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len);

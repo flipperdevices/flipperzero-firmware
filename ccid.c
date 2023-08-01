@@ -104,13 +104,21 @@ void seader_ccid_GetParameters(SeaderUartBridge* seader_uart) {
 }
 
 void seader_ccid_XfrBlock(SeaderUartBridge* seader_uart, uint8_t* data, size_t len) {
+    seader_ccid_XfrBlockToSlot(seader_uart, sam_slot, data, len);
+}
+
+void seader_ccid_XfrBlockToSlot(
+    SeaderUartBridge* seader_uart,
+    uint8_t slot,
+    uint8_t* data,
+    size_t len) {
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
     seader_uart->tx_buf[2 + 0] = CCID_MESSAGE_TYPE_PC_to_RDR_XfrBlock;
     seader_uart->tx_buf[2 + 1] = len;
-    seader_uart->tx_buf[2 + 5] = sam_slot;
-    seader_uart->tx_buf[2 + 6] = getSequence(sam_slot);
+    seader_uart->tx_buf[2 + 5] = slot;
+    seader_uart->tx_buf[2 + 6] = getSequence(slot);
     seader_uart->tx_buf[2 + 7] = 5;
     seader_uart->tx_buf[2 + 8] = 0;
     seader_uart->tx_buf[2 + 9] = 0;
