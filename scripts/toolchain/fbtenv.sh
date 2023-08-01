@@ -200,7 +200,7 @@ fbtenv_download_toolchain_tar()
     return 0;
 }
 
-fbtenv_remove_old_tooclhain()
+fbtenv_remove_old_toolchain()
 {
     printf "Removing old toolchain..";
     rm -rf "${TOOLCHAIN_ARCH_DIR:?}";
@@ -231,12 +231,16 @@ fbtenv_unpack_toolchain()
 
 fbtenv_cleanup()
 {
-    printf "Cleaning up..";
     if [ -n "${FBT_TOOLCHAIN_PATH:-""}" ]; then
-        rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/"*.tar.gz;
+        printf "Cleaning up..";
         rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/"*.part;
+        if [ -z "${FBT_PRESERVE_TAR:-""}" ]; then
+            rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/"*.tar.gz;
+        else
+            echo " Preserve .tar.gz files";
+        fi
+        echo "done";
     fi
-    echo "done";
     trap - 2;
     return 0;
 }
@@ -289,7 +293,7 @@ fbtenv_download_toolchain()
         fbtenv_curl_wget_check || return 1;
         fbtenv_download_toolchain_tar || return 1;
     fi
-    fbtenv_remove_old_tooclhain;
+    fbtenv_remove_old_toolchain;
     fbtenv_unpack_toolchain || return 1;
     fbtenv_cleanup;
     return 0;
@@ -304,7 +308,9 @@ fbtenv_print_version()
 
 fbtenv_main()
 {
-    fbtenv_check_sourced || return 1;
+    if [ -z "${FBT_SKIP_CHECK_SOURCED:-""}" ]; then
+        fbtenv_check_sourced || return 1;
+    fi
     fbtenv_get_kernel_type || return 1;
     if [ "$1" = "--restore" ]; then
         fbtenv_restore_env;
