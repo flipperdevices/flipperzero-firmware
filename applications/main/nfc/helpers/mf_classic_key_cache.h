@@ -6,9 +6,17 @@
 extern "C" {
 #endif
 
-bool mf_classic_key_cache_save(const MfClassicData* data);
+typedef struct MfClassicKeyCache MfClassicKeyCache;
 
-bool mf_classic_key_cache_load(const uint8_t* uid, size_t uid_len, MfClassicDeviceKeys* keys);
+MfClassicKeyCache* mf_classic_key_cache_alloc();
+
+void mf_classic_key_cache_free(MfClassicKeyCache* instance);
+
+bool mf_classic_key_cache_load(MfClassicKeyCache* instance, const uint8_t* uid, size_t uid_len);
+
+bool mf_classic_key_cache_save(MfClassicKeyCache* instance, const MfClassicData* data);
+
+void mf_classic_key_cache_reset(MfClassicKeyCache* instance);
 
 #ifdef __cplusplus
 }

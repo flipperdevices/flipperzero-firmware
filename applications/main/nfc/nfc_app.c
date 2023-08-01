@@ -48,6 +48,7 @@ NfcApp* nfc_app_alloc() {
     instance->nfc = nfc_alloc();
 
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
+    instance->mfc_key_cache = mf_classic_key_cache_alloc();
 
     // Nfc device
     instance->nfc_device = nfc_device_alloc();
@@ -148,6 +149,7 @@ void nfc_app_free(NfcApp* instance) {
     nfc_free(instance->nfc);
 
     mf_ultralight_auth_free(instance->mf_ul_auth);
+    mf_classic_key_cache_free(instance->mfc_key_cache);
 
     // Nfc device
     nfc_device_free(instance->nfc_device);
@@ -263,7 +265,9 @@ bool nfc_save_file(NfcApp* instance, FuriString* path) {
     }
 
     if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
-        mf_classic_key_cache_save(nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic));
+        mf_classic_key_cache_save(
+            instance->mfc_key_cache,
+            nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic));
     }
 
     return result;

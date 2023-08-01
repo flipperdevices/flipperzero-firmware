@@ -7,6 +7,8 @@
 
 #include "../nfc_protocol_support_gui_common.h"
 
+#define TAG "MfClassicApp"
+
 enum {
     SubmenuIndexDetectReader = SubmenuIndexCommonMax,
     SubmenuIndexWrite,
@@ -40,22 +42,23 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
 
     NfcApp* instance = context;
     const MfClassicPollerEvent* mf_classic_event = event.data;
-    NfcCommand command = NfcCommandStop;
+    NfcCommand command = NfcCommandContinue;
 
-    // const MfClassicData* mfc_data = nfc_poller_get_data(instance->poller);
-    // size_t uid_len = 0;
-    // const uint8_t* uid = mf_classic_get_uid(mfc_data, &uid_len);
-    // MfClassicDeviceKeys keys = {};
-    // if(!mf_classic_key_cache_load(uid, uid_len, &keys)) {
-        
-    // }
-
-    nfc_device_set_data(
-        instance->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(instance->poller));
-    view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerIncomplete);
-
-    // TODO: Implement read mf_classic using key cache
-    if(mf_classic_event->type == MfClassicPollerEventTypeReadComplete) {
+    if(mf_classic_event->type == MfClassicPollerEventTypeRequestMode) {
+        nfc_device_set_data(
+            instance->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(instance->poller));
+        size_t uid_len = 0;
+        const uint8_t* uid = nfc_device_get_uid(instance->nfc_device, &uid_len);
+        if(mf_classic_key_cache_load(instance->mfc_key_cache, uid, uid_len)) {
+            FURI_LOG_I(TAG, "Key cache found");
+            mf_classic_event->data->poller_mode.mode = MfClassicPollerModeKeyCache;
+        } else {
+            FURI_LOG_I(TAG, "Key cache not found");
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventPollerIncomplete);
+            command = NfcCommandStop;
+        }
+    } else if(mf_classic_event->type == MfClassicPollerEventTypeReadComplete) {
         const MfClassicData* mf_classic_data = nfc_poller_get_data(instance->poller);
         nfc_device_set_data(instance->nfc_device, NfcProtocolMfClassic, mf_classic_data);
 
@@ -70,6 +73,7 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
 }
 
 static void nfc_scene_read_on_enter_mf_classic(NfcApp* instance) {
+    mf_classic_key_cache_reset(instance->mfc_key_cache);
     nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_mf_classic, instance);
 }
 

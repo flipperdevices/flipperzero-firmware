@@ -119,6 +119,7 @@ struct NfcApp {
     NfcMfClassicDictAttackContext mf_dict_context;
     Mfkey32Logger* mfkey32_logger;
     MfUserDict* mf_user_dict;
+    MfClassicKeyCache* mfc_key_cache;
 
     NfcDevice* nfc_device;
     Iso14443_3aData* iso14443_3a_edit_data;
