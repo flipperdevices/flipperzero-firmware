@@ -22,6 +22,32 @@ static void have_read_cb(void* context) {
     state->last_time_rx_data = furi_get_tick();
 }
 
+/* Sets the header for the chat input field depending on whether or not a
+ * message preview exists. */
+void set_chat_input_header(ESubGhzChatState* state) {
+    if(strlen(state->msg_preview) == 0) {
+        text_input_set_header_text(state->text_input, "Message");
+    } else {
+        text_input_set_header_text(state->text_input, state->msg_preview);
+    }
+}
+
+/* Appends the latest message to the chat box and prepares the message preview.
+ */
+void append_msg(ESubGhzChatState* state, const char* msg) {
+    /* append message to text box */
+    furi_string_cat_printf(state->chat_box_store, "\n%s", msg);
+
+    /* prepare message preview */
+    strncpy(state->msg_preview, msg, MSG_PREVIEW_SIZE);
+    state->msg_preview[MSG_PREVIEW_SIZE] = 0;
+    set_chat_input_header(state);
+
+    /* reset text box contents and focus */
+    text_box_set_text(state->chat_box, furi_string_get_cstr(state->chat_box_store));
+    text_box_set_focus(state->chat_box, TextBoxFocusEnd);
+}
+
 /* Decrypts a message for post_rx(). */
 static bool post_rx_decrypt(ESubGhzChatState* state, size_t rx_size) {
     bool ret = crypto_ctx_decrypt(
@@ -36,8 +62,7 @@ static bool post_rx_decrypt(ESubGhzChatState* state, size_t rx_size) {
     return ret;
 }
 
-/* Post RX handler, decrypts received messages, displays them in the text box
- * and sends a notification. */
+/* Post RX handler, decrypts received messages and calls append_msg(). */
 static void post_rx(ESubGhzChatState* state, size_t rx_size) {
     furi_assert(state);
 
@@ -64,15 +89,11 @@ static void post_rx(ESubGhzChatState* state, size_t rx_size) {
         }
     }
 
-    /* append message to text box */
-    furi_string_cat_printf(state->chat_box_store, "\n%s", state->rx_str_buffer);
+    /* append message to text box and prepare message preview */
+    append_msg(state, state->rx_str_buffer);
 
     /* send notification (make the flipper vibrate) */
     notification_message(state->notification, &sequence_single_vibro);
-
-    /* reset text box contents and focus */
-    text_box_set_text(state->chat_box, furi_string_get_cstr(state->chat_box_store));
-    text_box_set_focus(state->chat_box, TextBoxFocusEnd);
 }
 
 /* Reads the message from msg_input, encrypts it if necessary and then
@@ -452,7 +473,7 @@ int32_t esubghz_chat(void) {
         goto err_alloc_hs;
     }
 
-    state->menu = menu_pos_alloc(0);
+    state->menu = menu_alloc();
     if(state->menu == NULL) {
         goto err_alloc_menu;
     }

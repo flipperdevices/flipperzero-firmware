@@ -30,6 +30,7 @@
 
 #define CHAT_BOX_STORE_SIZE 4096
 #define TEXT_INPUT_STORE_SIZE 256
+#define MSG_PREVIEW_SIZE 32
 
 #define KEY_HEX_STR_SIZE ((KEY_BITS / 8) * 3)
 
@@ -62,6 +63,9 @@ typedef struct {
     // message assembly before TX
     FuriString* name_prefix;
     FuriString* msg_input;
+
+    // message preview
+    char msg_preview[MSG_PREVIEW_SIZE + 1];
 
     // encryption
     bool encrypted;
@@ -113,5 +117,7 @@ typedef enum {
     ESubGhzChatView_NfcPopup,
 } ESubGhzChatView;
 
+void set_chat_input_header(ESubGhzChatState* state);
+void append_msg(ESubGhzChatState* state, const char* msg);
 void tx_msg_input(ESubGhzChatState* state);
 void enter_chat(ESubGhzChatState* state);

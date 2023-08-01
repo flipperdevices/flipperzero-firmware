@@ -12,13 +12,14 @@
 #include "../../types/token_info.h"
 #include "../type_code_common.h"
 #include "../../features_config.h"
+#include "../../services/config/constants.h"
 
 #if TOTP_TARGET_FIRMWARE == TOTP_FIRMWARE_CFW
 #define TOTP_BT_WORKER_BT_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH
 #define TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
 #endif
 
-#define HID_BT_KEYS_STORAGE_PATH TOTP_BT_KEYS_STORAGE_PATH
+#define HID_BT_KEYS_STORAGE_PATH CONFIG_FILE_DIRECTORY_PATH "/.bt_hid.keys"
 
 struct TotpBtTypeCodeWorkerContext {
     char* code_buffer;

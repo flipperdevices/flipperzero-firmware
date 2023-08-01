@@ -8,7 +8,7 @@ static void freq_input_cb(void* context) {
 
     furi_string_cat_printf(state->chat_box_store, "Frequency: %lu", state->frequency);
 
-    scene_manager_handle_custom_event(state->scene_manager, ESubGhzChatEvent_FreqEntered);
+    view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_FreqEntered);
 }
 
 /* Validates the entered frequency. */

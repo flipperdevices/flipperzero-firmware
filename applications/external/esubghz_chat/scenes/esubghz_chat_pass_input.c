@@ -9,7 +9,7 @@ static void pass_input_cb(void* context) {
 
     enter_chat(state);
 
-    scene_manager_handle_custom_event(state->scene_manager, ESubGhzChatEvent_PassEntered);
+    view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_PassEntered);
 }
 
 /* If a password was entered this derives a key from the password using a

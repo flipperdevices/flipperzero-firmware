@@ -4,13 +4,8 @@
 #endif
 
 // Include Bluetooth token input automation
-#ifndef TOTP_NO_BADBT_TYPE
-#define TOTP_BADBT_TYPE_ENABLED
-#endif
-
-// Include token input automation icons on the main screen
-#ifndef TOTP_NO_AUTOMATION_ICONS
-#define TOTP_AUTOMATION_ICONS_ENABLED
+#ifndef TOTP_NO_BADBT_AUTOMATION
+#define TOTP_BADBT_AUTOMATION_ENABLED
 #endif
 
 // List of compatible firmwares
@@ -22,8 +17,6 @@
 // Checking FlipC.org definitions (https://github.com/playmean/fap-list/issues/9)
 #if defined(TARGET_FIRMWARE_OFFICIAL)
 #define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
-#elif defined(TARGET_FIRMWARE_UNLEASHED)
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_CFW
 #elif defined(TARGET_FIRMWARE_ROGUEMASTER)
 #define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_CFW
 #endif

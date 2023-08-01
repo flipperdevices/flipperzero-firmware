@@ -6,13 +6,13 @@ void key_display_result_cb(DialogExResult result, void* context) {
 
     switch(result) {
     case DialogExResultLeft:
-        scene_manager_handle_custom_event(state->scene_manager, ESubGhzChatEvent_KeyDisplayBack);
+        view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_KeyDisplayBack);
         break;
 
     case DialogExResultCenter:
         if(state->encrypted) {
-            scene_manager_handle_custom_event(
-                state->scene_manager, ESubGhzChatEvent_KeyDisplayShare);
+            view_dispatcher_send_custom_event(
+                state->view_dispatcher, ESubGhzChatEvent_KeyDisplayShare);
         }
         break;
 

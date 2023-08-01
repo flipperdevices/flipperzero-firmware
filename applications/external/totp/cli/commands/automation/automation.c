@@ -7,7 +7,7 @@
 #define TOTP_CLI_COMMAND_AUTOMATION_ARG_METHOD "automation"
 #define TOTP_CLI_COMMAND_AUTOMATION_METHOD_NONE "none"
 #define TOTP_CLI_COMMAND_AUTOMATION_METHOD_USB "usb"
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
 #define TOTP_CLI_COMMAND_AUTOMATION_METHOD_BT "bt"
 #endif
 #define TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTY "QWERTY"
@@ -31,7 +31,7 @@ void totp_cli_command_automation_docopt_arguments() {
         "  " TOTP_CLI_COMMAND_AUTOMATION_ARG_METHOD
         "    Automation method to be set. Must be one of: " TOTP_CLI_COMMAND_AUTOMATION_METHOD_NONE
         ", " TOTP_CLI_COMMAND_AUTOMATION_METHOD_USB
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
         ", " TOTP_CLI_COMMAND_AUTOMATION_METHOD_BT
 #endif
         "\r\n");
@@ -47,17 +47,17 @@ void totp_cli_command_automation_docopt_options() {
 }
 
 static void print_method(AutomationMethod method, const char* color) {
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
     bool has_previous_method = false;
 #endif
     if(method & AutomationMethodBadUsb) {
         TOTP_CLI_PRINTF_COLORFUL(color, "\"" TOTP_CLI_COMMAND_AUTOMATION_METHOD_USB "\"");
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
         has_previous_method = true;
 #endif
     }
 
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
     if(method & AutomationMethodBadBt) {
         if(has_previous_method) {
             TOTP_CLI_PRINTF_COLORFUL(color, " and ");
@@ -121,7 +121,7 @@ void totp_cli_command_automation_handle(PluginState* plugin_state, FuriString* a
             new_method_provided = true;
             new_method |= AutomationMethodBadUsb;
         }
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
         else if(furi_string_cmpi_str(temp_str, TOTP_CLI_COMMAND_AUTOMATION_METHOD_BT) == 0) {
             new_method_provided = true;
             new_method |= AutomationMethodBadBt;
@@ -161,7 +161,7 @@ void totp_cli_command_automation_handle(PluginState* plugin_state, FuriString* a
                 totp_cli_print_error_updating_config_file();
             }
 
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
             if(!(new_method & AutomationMethodBadBt) &&
                plugin_state->bt_type_code_worker_context != NULL) {
                 totp_bt_type_code_worker_free(plugin_state->bt_type_code_worker_context);

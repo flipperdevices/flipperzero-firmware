@@ -12,30 +12,30 @@
 #include "../../../services/convert/convert.h"
 #include <roll_value.h>
 #include "../../../features_config.h"
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
 #include "../../../workers/bt_type_code/bt_type_code.h"
 #endif
+
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
+#define AUTOMATION_LIST_MAX_INDEX (3)
+#else
+#define AUTOMATION_LIST_MAX_INDEX (1)
+#endif
+#define BAD_KB_LAYOUT_LIST_MAX_INDEX (1)
+#define FONT_TEST_STR_LENGTH (7)
 
 static const char* YES_NO_LIST[] = {"NO", "YES"};
 static const char* AUTOMATION_LIST[] = {
     "None",
     "USB"
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
     ,
     "Bluetooth",
     "BT and USB"
 #endif
 };
-
-#ifdef TOTP_BADBT_TYPE_ENABLED
-#define AUTOMATION_LIST_MAX_INDEX (3)
-#else
-#define AUTOMATION_LIST_MAX_INDEX (1)
-#endif
-
 static const char* BAD_KB_LAYOUT_LIST[] = {"QWERTY", "AZERTY"};
 static const char* FONT_TEST_STR = "0123BCD";
-static const uint8_t FONT_TEST_STR_LENGTH = 7;
 
 typedef enum {
     HoursInput,
@@ -71,8 +71,10 @@ void totp_scene_app_settings_activate(PluginState* plugin_state) {
     scene_state->tz_offset_minutes = 60.0f * off_dec;
     scene_state->notification_sound = plugin_state->notification_method & NotificationMethodSound;
     scene_state->notification_vibro = plugin_state->notification_method & NotificationMethodVibro;
-    scene_state->automation_method = plugin_state->automation_method;
-    scene_state->automation_kb_layout = plugin_state->automation_kb_layout;
+    scene_state->automation_method =
+        MIN(plugin_state->automation_method, AUTOMATION_LIST_MAX_INDEX);
+    scene_state->automation_kb_layout =
+        MIN(plugin_state->automation_kb_layout, BAD_KB_LAYOUT_LIST_MAX_INDEX);
 
     scene_state->active_font = plugin_state->active_font_index;
 }
@@ -281,7 +283,11 @@ bool totp_scene_app_settings_handle_event(
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == BadKeyboardLayoutSelect) {
                 totp_roll_value_uint8_t(
-                    &scene_state->automation_kb_layout, 1, 0, 1, RollOverflowBehaviorRoll);
+                    &scene_state->automation_kb_layout,
+                    1,
+                    0,
+                    BAD_KB_LAYOUT_LIST_MAX_INDEX,
+                    RollOverflowBehaviorRoll);
             }
             break;
         case InputKeyLeft:
@@ -311,7 +317,11 @@ bool totp_scene_app_settings_handle_event(
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == BadKeyboardLayoutSelect) {
                 totp_roll_value_uint8_t(
-                    &scene_state->automation_kb_layout, -1, 0, 1, RollOverflowBehaviorRoll);
+                    &scene_state->automation_kb_layout,
+                    -1,
+                    0,
+                    BAD_KB_LAYOUT_LIST_MAX_INDEX,
+                    RollOverflowBehaviorRoll);
             }
             break;
         case InputKeyOk:
@@ -342,7 +352,7 @@ bool totp_scene_app_settings_handle_event(
             return false;
         }
 
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
         if((scene_state->automation_method & AutomationMethodBadBt) == 0 &&
            plugin_state->bt_type_code_worker_context != NULL) {
             totp_bt_type_code_worker_free(plugin_state->bt_type_code_worker_context);
