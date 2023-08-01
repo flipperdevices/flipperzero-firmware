@@ -1,0 +1,16 @@
+App(
+    appid="rock_paper_scissors_2",
+    name="Rock Paper Scissors 2",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rps_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_category="Games",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="rps",
+    fap_icon="assets/fist.png",
+    fap_version="1.0",
+    fap_description="Rock Paper Scissor app",
+    fap_author="@benwoo1110",
+    fap_weburl="https://github.com/benwoo1110/rps-FlipperZero",
+)
