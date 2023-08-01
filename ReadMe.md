@@ -58,7 +58,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [BMO (By wrenchathome)](https://github.com/wrenchathome/flip0anims/tree/main/Animations/BMO) will be released with next Patreon release
 - [New Patreon Animation added to DBZ build: G0ku N3xt L3v3L (By RM)](https://www.patreon.com/RogueMaster/membership)
-- Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - Added: [Rock Paper Scissors 2 v1.0 (By benwoo1110)](https://github.com/benwoo1110/rps-FlipperZero)
 - OFW: [Move U2F path to ext #2935 (Copied By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2935) (Already In RM, Keeping Key Internal)
 - OFW: [faploader: always create app dir, even if it doesnt have subdirs #2901 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2901)
@@ -69,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Backlight notification fix #2878 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2878)
 - Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 
 <a name="release">
 

@@ -9,6 +9,7 @@ enum UbloxSettingIndex {
     UbloxSettingIndexNotify,
     UbloxSettingIndexPlatformModel,
     UbloxSettingIndexOdometerMode,
+    UbloxSettingIndexResetOdometer,
 };
 
 enum UbloxDataDisplayConfigIndex {
@@ -271,6 +272,13 @@ static void ublox_scene_data_display_config_set_platform_model(VariableItem* ite
     ublox->gps_initted = false;
 }
 
+static void ublox_scene_data_display_config_enter_callback(void* context, uint32_t index) {
+    Ublox* ublox = context;
+    if(index == UbloxSettingIndexResetOdometer) {
+        view_dispatcher_send_custom_event(ublox->view_dispatcher, UbloxCustomEventResetOdometer);
+    }
+}
+
 void ublox_scene_data_display_config_on_enter(void* context) {
     Ublox* ublox = context;
     VariableItem* item;
@@ -343,13 +351,39 @@ void ublox_scene_data_display_config_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, odometer_mode_text[value_index]);
 
+    item = variable_item_list_add(ublox->variable_item_list, "Reset Odometer", 1, NULL, NULL);
+    variable_item_list_set_enter_callback(
+        ublox->variable_item_list, ublox_scene_data_display_config_enter_callback, ublox);
     view_dispatcher_switch_to_view(ublox->view_dispatcher, UbloxViewVariableItemList);
 }
 
+void ublox_scene_data_display_config_worker_callback(UbloxWorkerEvent event, void* context) {
+    Ublox* ublox = context;
+
+    view_dispatcher_send_custom_event(ublox->view_dispatcher, event);
+}
+
 bool ublox_scene_data_display_config_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
-    return false;
+    Ublox* ublox = context;
+    bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == UbloxCustomEventResetOdometer) {
+            ublox_worker_start(
+                ublox->worker,
+                UbloxWorkerStateResetOdometer,
+                ublox_scene_data_display_config_worker_callback,
+                ublox);
+            // don't consume, we want to stay here
+        } else if(event.event == UbloxWorkerEventOdoReset) {
+            if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
+                notification_message(ublox->notifications, &sequence_new_reading);
+            }
+            FURI_LOG_I(TAG, "odometer reset done");
+        }
+    }
+
+    return consumed;
 }
 
 void ublox_scene_data_display_config_on_exit(void* context) {

@@ -3,15 +3,6 @@
 
 #define TAG "ublox_scene_data_display"
 
-const NotificationSequence sequence_new_reading = {
-    //&message_vibro_on,
-    &message_green_255,
-    &message_delay_100,
-    &message_green_0,
-    //&message_vibro_off,
-    NULL,
-};
-
 void ublox_scene_data_display_worker_callback(UbloxWorkerEvent event, void* context) {
     Ublox* ublox = context;
 
@@ -65,11 +56,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
             // must stop the worker first
             ublox_worker_stop(ublox->worker);
             FURI_LOG_I(TAG, "reset odometer");
-            ublox_worker_start(
-                ublox->worker,
-                UbloxWorkerStateResetOdometer,
-                ublox_scene_data_display_worker_callback,
-                ublox);
 
         } else if(event.event == GuiButtonTypeRight) {
             // TODO: only allow if GPS is detected?
@@ -97,6 +83,14 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
             data_display_set_nav_messages(ublox->data_display, ublox->nav_pvt, ublox->nav_odo);
 
+            data_display_set_log_state(ublox->data_display, ublox->log_state);
+        } else if(event.event == UbloxWorkerEventOdoReset) {
+            // restart the thread
+            ublox_worker_start(
+                ublox->worker,
+                UbloxWorkerStateRead,
+                ublox_scene_data_display_worker_callback,
+                ublox);
         } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);

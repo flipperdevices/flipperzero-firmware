@@ -29,6 +29,8 @@
 #include "helpers/ublox_custom_event.h"
 #include "helpers/kml.h"
 
+extern const NotificationSequence sequence_new_reading;
+
 struct Ublox {
     ViewDispatcher* view_dispatcher;
     Gui* gui;

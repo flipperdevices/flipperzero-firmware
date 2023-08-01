@@ -1,5 +1,14 @@
 #include "ublox_i.h"
 
+const NotificationSequence sequence_new_reading = {
+    //&message_vibro_on,
+    &message_green_255,
+    &message_delay_100,
+    &message_green_0,
+    //&message_vibro_off,
+    NULL,
+};
+
 bool ublox_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Ublox* ublox = context;

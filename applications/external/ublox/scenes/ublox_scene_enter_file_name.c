@@ -8,6 +8,46 @@ void ublox_text_input_callback(void* context) {
     view_dispatcher_send_custom_event(ublox->view_dispatcher, UbloxCustomEventTextInputDone);
 }
 
+FuriString* ublox_scene_enter_file_name_get_timename() {
+    FuriHalRtcDateTime datetime;
+    furi_hal_rtc_get_datetime(&datetime);
+    FuriString* s = furi_string_alloc();
+
+    if(locale_get_date_format() == LocaleDateFormatDMY) {
+        furi_string_printf(
+            s,
+            "log-%.2d%.2d%.4d-%.2d%.2d%.2d.kml",
+            datetime.day,
+            datetime.month,
+            datetime.year,
+            datetime.hour,
+            datetime.minute,
+            datetime.second);
+    } else if(locale_get_date_format() == LocaleDateFormatMDY) {
+        furi_string_printf(
+            s,
+            "log-%.2d%.2d%.4d-%.2d%.2d%.2d.kml",
+            datetime.month,
+            datetime.day,
+            datetime.year,
+            datetime.hour,
+            datetime.minute,
+            datetime.second);
+    } else if(locale_get_date_format() == LocaleDateFormatYMD) {
+        furi_string_printf(
+            s,
+            "log-%.4d%.2d%.2d-%.2d%.2d%.2d.kml",
+            datetime.year,
+            datetime.month,
+            datetime.day,
+            datetime.hour,
+            datetime.minute,
+            datetime.second);
+    }
+
+    return s;
+}
+
 void ublox_scene_enter_file_name_on_enter(void* context) {
     Ublox* ublox = context;
     TextInput* text_input = ublox->text_input;
@@ -16,6 +56,9 @@ void ublox_scene_enter_file_name_on_enter(void* context) {
     text_input_set_result_callback(
         text_input, ublox_text_input_callback, context, ublox->text_store, 100, false);
 
+    FuriString* fname = ublox_scene_enter_file_name_get_timename();
+    strcpy(ublox->text_store, furi_string_get_cstr(fname));
+    furi_string_free(fname);
     view_dispatcher_switch_to_view(ublox->view_dispatcher, UbloxViewTextInput);
 }
 
@@ -25,6 +68,7 @@ bool ublox_scene_enter_file_name_on_event(void* context, SceneManagerEvent event
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UbloxCustomEventTextInputDone) {
+            //FuriString* fullname;
             FURI_LOG_I(TAG, "text: %s", ublox->text_store);
             ublox->log_state = UbloxLogStateStartLogging;
             //scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplay);

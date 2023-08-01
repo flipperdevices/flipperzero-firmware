@@ -632,27 +632,34 @@ bool ublox_worker_init_gps(UbloxWorker* ublox_worker) {
 
 void ublox_worker_reset_odo(UbloxWorker* ublox_worker) {
     FURI_LOG_I(TAG, "ublox_worker_reset_odo");
-    UbloxFrame* odo_frame_tx = malloc(sizeof(UbloxFrame));
-    odo_frame_tx->class = UBX_NAV_CLASS;
-    odo_frame_tx->id = UBX_NAV_RESETODO_MESSAGE;
-    odo_frame_tx->len = 0;
-    odo_frame_tx->payload = NULL;
-    UbloxMessage* odo_message_tx = ublox_frame_to_bytes(odo_frame_tx);
-    ublox_frame_free(odo_frame_tx);
+    UbloxFrame odo_frame_tx;
+    odo_frame_tx.class = UBX_NAV_CLASS;
+    odo_frame_tx.id = UBX_NAV_RESETODO_MESSAGE;
+    odo_frame_tx.len = 0;
+    odo_frame_tx.payload = NULL;
+    UbloxMessage* odo_message_tx = ublox_frame_to_bytes(&odo_frame_tx);
 
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     UbloxMessage* ack = ublox_worker_i2c_transfer(odo_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
+    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+
+    FURI_LOG_I(TAG, "transfer done");
+    ublox_message_free(odo_message_tx);
+
     if(ack == NULL) {
         FURI_LOG_E(TAG, "ACK after NAV-RESETODO set transfer failed");
         ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
         return;
+    } else {
+        FURI_LOG_I(
+            TAG,
+            "NAV-RESETODO ack: id = %u, type = %s",
+            ack->message[3],
+            ack->message[3] ? "ACK" : "NAK");
+
+        ublox_message_free(ack);
     }
-    FURI_LOG_I(
-        TAG,
-        "NAV-RESETODO ack: id = %u, type = %s",
-        ack->message[3],
-        ack->message[3] ? "ACK" : "NAK");
-    ublox_message_free(odo_message_tx);
-    ublox_message_free(ack);
+    ublox_worker->callback(UbloxWorkerEventOdoReset, ublox_worker->context);
     // no reason to trigger an event on success, the user will see that
     // the odometer has been reset on the next update.
 }
