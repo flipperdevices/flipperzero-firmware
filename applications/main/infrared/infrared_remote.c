@@ -110,7 +110,7 @@ bool infrared_remote_delete_button(InfraredRemote* remote, size_t index) {
 
 bool infrared_remote_move_button(InfraredRemote* remote, size_t index_orig, size_t index_dest) {
     furi_assert(index_orig < InfraredButtonArray_size(remote->buttons));
-    furi_assert(index_dest < InfraredButtonArray_size(remote->buttons));
+    furi_assert(index_dest <= InfraredButtonArray_size(remote->buttons));
     if(index_orig == index_dest) {
         return true;
     }
