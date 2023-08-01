@@ -1,6 +1,13 @@
 #pragma once
 
 typedef enum {
+    UbloxLogStateStartLogging,
+    UbloxLogStateLogging,
+    UbloxLogStateStopLogging,
+    UbloxLogStateNone,
+} UbloxLogState;
+
+typedef enum {
     UbloxDataDisplayViewModeHandheld,
     UbloxDataDisplayViewModeCar,
 } UbloxDataDisplayViewMode;

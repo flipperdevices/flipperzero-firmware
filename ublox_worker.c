@@ -91,7 +91,38 @@ void clear_ublox_data() {
 
 int32_t ublox_worker_task(void* context) {
     UbloxWorker* ublox_worker = context;
+    //Ublox* ublox = ublox_worker->context;
+    
+    /*char* name = "/ext/log.csv";
+    strcpy(ublox->text_store, name);
+    
+    if (ublox->logfile == NULL) {
+	ublox->logfile = storage_file_alloc(ublox->storage);
+	// need to open the file
+	FURI_LOG_I(TAG, "opening file %s", ublox->text_store);
+	if (!storage_file_open(ublox->logfile, ublox->text_store, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+	    FURI_LOG_E(TAG, "failed to open file %s!", ublox->text_store);
+	    ublox->file_ok = false;
+	} else {
+	    ublox->file_ok = true;
+	}
+    }
+    
+    if (ublox->file_ok) {
+	const char* str = "hello world from csv";
+	if (!storage_file_write(ublox->logfile, str, strlen(str))) {
+	    FURI_LOG_E(TAG, "failed to write to file!");
+	    ublox->file_ok = false;
+	}
+    }
 
+    if (ublox->file_ok) {
+	storage_file_close(ublox->logfile);
+	storage_file_free(ublox->logfile);
+
+	ublox->file_ok = false;
+	ublox->logfile = NULL;
+	}*/
     if(ublox_worker->state == UbloxWorkerStateRead) {
 	ublox_worker_read_nav_messages(context);
     } else if (ublox_worker->state == UbloxWorkerStateSyncTime) {
@@ -131,10 +162,33 @@ void ublox_worker_read_nav_messages(void* context) {
 	// don't try constantly, no reason to
 	furi_delay_ms(500);
     }
+
+    // clear data so we don't an error on startup
+    clear_ublox_data();
     
     // break the loop when the thread state changes
     while(ublox_worker->state == UbloxWorkerStateRead) {
-	//FURI_LOG_I(TAG, "loop");
+	if (ublox->log_state == UbloxLogStateStartLogging) {
+	    FURI_LOG_I(TAG, "start logging");
+	    // need to open new log file with the name in ublox->text_store
+	    FuriString* fullname = furi_string_alloc_printf("/ext/%s", ublox->text_store);
+
+	    if (!kml_open_file(ublox->storage, &(ublox->kmlfile), furi_string_get_cstr(fullname))) {
+		FURI_LOG_E(TAG, "failed to open KML file %s!", furi_string_get_cstr(fullname));
+		ublox->log_state = UbloxLogStateNone;
+	    }
+
+	    ublox->log_state = UbloxLogStateLogging;
+	    furi_string_free(fullname);
+	
+	} else if (ublox->log_state == UbloxLogStateStopLogging) {
+	    FURI_LOG_I(TAG, "stop logging");
+	    if (!kml_close_file(&(ublox->kmlfile))) {
+		FURI_LOG_E(TAG, "failed to close KML file!");
+	    }
+	    ublox->log_state = UbloxLogStateNone;
+	}
+	
 	bool pvt = ublox_worker_read_pvt(ublox_worker);
 	// clearing makes the second read much faster
 	clear_ublox_data();
@@ -142,6 +196,15 @@ void ublox_worker_read_nav_messages(void* context) {
 
 	if (pvt && odo) {
 	    ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
+	    
+	    if (ublox->log_state == UbloxLogStateLogging) {
+		if (!kml_add_path_point(&(ublox->kmlfile),
+					(double)(ublox->nav_pvt.lat) / (double)1e7,
+					(double)(ublox->nav_pvt.lon) / (double)1e7,
+					ublox->nav_pvt.hMSL / 1e3)) { // convert altitude to meters
+		    FURI_LOG_E(TAG, "failed to write line to file");
+		}
+	    }
 	} else {
 	    ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
 	}

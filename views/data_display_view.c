@@ -199,7 +199,12 @@ static bool data_display_input_callback(InputEvent* event, void* context) {
             if(data_display->callback) {
                 data_display->callback(data_display->context, event->key);
             }
-        }
+        } else if(event->key == InputKeyRight) {
+	    if(data_display->callback) {
+                data_display->callback(data_display->context, event->key);
+            }
+	    consumed = true;
+	}
     }
     return consumed;
 }
