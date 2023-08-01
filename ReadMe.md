@@ -62,6 +62,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Animation added to DBZ build: G0ku N3xt L3v3L (By RM)](https://www.patreon.com/RogueMaster/membership)
 - Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - Added: [Rock Paper Scissors 2 v1.0 (By benwoo1110)](https://github.com/benwoo1110/rps-FlipperZero)
+- OFW: [Move U2F path to ext #2935 (Copied By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2935) (Already In RM, Keeping Key Internal)
+- OFW: [faploader: always create app dir, even if it doesnt have subdirs #2901 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2901)
+- OFW: [SubGHz - Keeloq: Read Centurion Nova remotes #2892 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/2892)
+- OFW: [UI: New way to input bytes in byte_input #2890 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/2890)
+- OFW: [New RTC flags in device info #2884 (By Programistich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2884)
+- OFW: [Backlight notification fix #2878 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2878)
+- OFW: [Backlight notification fix #2878 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2878)
 
 <a name="release">
 

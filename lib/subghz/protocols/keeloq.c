@@ -726,19 +726,6 @@ static inline bool subghz_protocol_keeloq_check_decrypt_centurion(
     }
     return false;
 }
-// Centurion specific check
-static inline bool subghz_protocol_keeloq_check_decrypt_centurion(
-    SubGhzBlockGeneric* instance,
-    uint32_t decrypt,
-    uint8_t btn) {
-    furi_assert(instance);
-
-    if((decrypt >> 28 == btn) && (((((uint16_t)(decrypt >> 16)) & 0x3FF) == 0x1CE))) {
-        instance->cnt = decrypt & 0x0000FFFF;
-        return true;
-    }
-    return false;
-}
 
 /** 
  * Checking the accepted code against the database manafacture key
@@ -778,84 +765,97 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
     }
     for
         M_EACH(manufacture_code, *subghz_keystore_get_data(keystore), SubGhzKeyArray_t) {
-            switch(manufacture_code->type) {
-            case KEELOQ_LEARNING_SIMPLE:
-                // Simple Learning
-                decrypt = subghz_protocol_keeloq_common_decrypt(hop, manufacture_code->key);
-                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
-                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                    return 1;
-                }
-                break;
-            case KEELOQ_LEARNING_NORMAL:
-                // Normal Learning
-                // https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
-                man = subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
-                decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                if((strcmp(furi_string_get_cstr(manufacture_code->name), "Centurion") == 0)) {
-                    if(subghz_protocol_keeloq_check_decrypt_centurion(instance, decrypt, btn)) {
-                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                        return 1;
-                    }
-                } else {
+            if(mf_not_set || (strcmp(furi_string_get_cstr(manufacture_code->name), mfname) == 0)) {
+                switch(manufacture_code->type) {
+                case KEELOQ_LEARNING_SIMPLE:
+                    // Simple Learning
+                    decrypt = subghz_protocol_keeloq_common_decrypt(hop, manufacture_code->key);
                     if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
                         *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        keystore->mfname = *manufacture_name;
                         return 1;
                     }
-                }
-                break;
-            case KEELOQ_LEARNING_SECURE:
-                man = subghz_protocol_keeloq_common_secure_learning(
-                    fix, seed, manufacture_code->key);
-                decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
-                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                    return 1;
-                }
-                break;
-            case KEELOQ_LEARNING_MAGIC_XOR_TYPE_1:
-                man = subghz_protocol_keeloq_common_magic_xor_type1_learning(
-                    fix, manufacture_code->key);
-                decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
-                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                    return 1;
-                }
-                break;
-            case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_1:
-                man = subghz_protocol_keeloq_common_magic_serial_type1_learning(
-                    fix, manufacture_code->key);
-                decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
-                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                    return 1;
-                }
-                break;
-            case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_2:
-                man = subghz_protocol_keeloq_common_magic_serial_type2_learning(
-                    fix, manufacture_code->key);
-                decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
-                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                    return 1;
-                }
-                break;
-            case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_3:
-                man = subghz_protocol_keeloq_common_magic_serial_type3_learning(
-                    fix, manufacture_code->key);
-                decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
-                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                    return 1;
-                }
-                break;
-            case KEELOQ_LEARNING_UNKNOWN:
-                // Simple Learning
-                decrypt = subghz_protocol_keeloq_common_decrypt(hop, manufacture_code->key);
-                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
-                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                    return 1;
-                }
+                    break;
+                case KEELOQ_LEARNING_NORMAL:
+                    // Normal Learning
+                    // https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
+                    man =
+                        subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
+                    decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
+                    if((strcmp(furi_string_get_cstr(manufacture_code->name), "Centurion") == 0)) {
+                        if(subghz_protocol_keeloq_check_decrypt_centurion(instance, decrypt, btn)) {
+                            *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                            keystore->mfname = *manufacture_name;
+                            return 1;
+                        }
+                    } else {
+                        if(subghz_protocol_keeloq_check_decrypt(
+                               instance, decrypt, btn, end_serial)) {
+                            *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                            keystore->mfname = *manufacture_name;
+                            return 1;
+                        }
+                    }
+                    break;
+                case KEELOQ_LEARNING_SECURE:
+                    man = subghz_protocol_keeloq_common_secure_learning(
+                        fix, instance->seed, manufacture_code->key);
+                    decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
+                    if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        keystore->mfname = *manufacture_name;
+                        return 1;
+                    }
+                    break;
+                case KEELOQ_LEARNING_MAGIC_XOR_TYPE_1:
+                    man = subghz_protocol_keeloq_common_magic_xor_type1_learning(
+                        fix, manufacture_code->key);
+                    decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
+                    if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        keystore->mfname = *manufacture_name;
+                        return 1;
+                    }
+                    break;
+                case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_1:
+                    man = subghz_protocol_keeloq_common_magic_serial_type1_learning(
+                        fix, manufacture_code->key);
+                    decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
+                    if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        keystore->mfname = *manufacture_name;
+                        return 1;
+                    }
+                    break;
+                case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_2:
+                    man = subghz_protocol_keeloq_common_magic_serial_type2_learning(
+                        fix, manufacture_code->key);
+                    decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
+                    if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        keystore->mfname = *manufacture_name;
+                        return 1;
+                    }
+                    break;
+                case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_3:
+                    man = subghz_protocol_keeloq_common_magic_serial_type3_learning(
+                        fix, manufacture_code->key);
+                    decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
+                    if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        keystore->mfname = *manufacture_name;
+                        return 1;
+                    }
+                    break;
+                case KEELOQ_LEARNING_UNKNOWN:
+                    // Simple Learning
+                    decrypt = subghz_protocol_keeloq_common_decrypt(hop, manufacture_code->key);
+                    if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        keystore->mfname = *manufacture_name;
+                        keystore->kl_type = 1;
+                        return 1;
+                    }
 
                     // Check for mirrored man
                     uint64_t man_rev = 0;
