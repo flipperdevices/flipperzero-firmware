@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0731-2343-0.87.1-da32ff5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-31 23:45 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-31 23:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-01 13:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-01 13:50 EST`
 - [Fixed Memory leak/Pointer issue with CFW Settings app (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/724)
 - [Configurable SPI & UART Channels (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc4c6bdacd7aac9ba8377fddcb966a9ae17da36a)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
@@ -53,8 +53,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms)
 - Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - UL: [Init config for external radio driver #564 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/564)
-- Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [ESP32 WIFI Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map)
 - Updated: [GPIO Controller (By Lokno)](https://github.com/Lokno/gpio_controller)
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
@@ -69,6 +67,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [New RTC flags in device info #2884 (By Programistich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2884)
 - OFW: [Backlight notification fix #2878 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2878)
 - OFW: [Backlight notification fix #2878 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2878)
+- Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 
 <a name="release">
 
