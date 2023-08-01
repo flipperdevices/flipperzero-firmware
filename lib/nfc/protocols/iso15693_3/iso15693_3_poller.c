@@ -113,7 +113,7 @@ static bool iso15693_3_poller_detect(NfcGenericEvent event, void* context) {
 
     if(nfc_event->type == NfcEventTypePollerReady) {
         uint8_t uid[ISO15693_3_UID_SIZE];
-        Iso15693_3Error error = iso15693_3_poller_check_presence(instance, uid);
+        Iso15693_3Error error = iso15693_3_poller_async_inventory(instance, uid);
         protocol_detected = (error == Iso15693_3ErrorNone);
     }
 

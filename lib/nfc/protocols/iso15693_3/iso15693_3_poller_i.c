@@ -157,35 +157,6 @@ static Iso15693_3Error iso15693_3_poller_frame_exchange(
     return ret;
 }
 
-Iso15693_3Error iso15693_3_poller_check_presence(Iso15693_3Poller* instance, uint8_t* uid) {
-    furi_assert(instance);
-    furi_assert(instance->nfc);
-    furi_assert(uid);
-
-    bit_buffer_reset(instance->tx_buffer);
-    bit_buffer_reset(instance->rx_buffer);
-
-    // Send INVENTORY
-    bit_buffer_append_byte(
-        instance->tx_buffer,
-        ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI |
-            ISO15693_3_REQ_FLAG_INVENTORY_T5 | ISO15693_3_REQ_FLAG_T5_N_SLOTS_1);
-    bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_INVENTORY);
-    bit_buffer_append_byte(instance->tx_buffer, 0x00);
-
-    Iso15693_3Error ret;
-
-    do {
-        ret = iso15693_3_poller_frame_exchange(
-            instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
-        if(ret != Iso15693_3ErrorNone) break;
-
-        ret = iso15693_3_inventory_response_parse(uid, instance->rx_buffer);
-    } while(false);
-
-    return ret;
-}
-
 Iso15693_3Error
     iso15693_3_poller_async_activate(Iso15693_3Poller* instance, Iso15693_3Data* data) {
     furi_assert(instance);
@@ -199,8 +170,13 @@ Iso15693_3Error
         instance->state = Iso15693_3PollerStateColResInProgress;
 
         // Inventory: Mandatory command
-        ret = iso15693_3_poller_check_presence(instance, data->uid);
-        if(ret != Iso15693_3ErrorNone) break;
+        ret = iso15693_3_poller_async_inventory(instance, data->uid);
+        if(ret != Iso15693_3ErrorNone) {
+            instance->state = Iso15693_3PollerStateColResFailed;
+            break;
+        }
+
+        instance->state = Iso15693_3PollerStateActivationInProgress;
 
         // Get system info: Optional command
         Iso15693_3SystemInfo* system_info = &data->system_info;
@@ -234,6 +210,35 @@ Iso15693_3Error
 
         instance->state = Iso15693_3PollerStateActivated;
 
+    } while(false);
+
+    return ret;
+}
+
+Iso15693_3Error iso15693_3_poller_async_inventory(Iso15693_3Poller* instance, uint8_t* uid) {
+    furi_assert(instance);
+    furi_assert(instance->nfc);
+    furi_assert(uid);
+
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_reset(instance->rx_buffer);
+
+    // Send INVENTORY
+    bit_buffer_append_byte(
+        instance->tx_buffer,
+        ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI |
+            ISO15693_3_REQ_FLAG_INVENTORY_T5 | ISO15693_3_REQ_FLAG_T5_N_SLOTS_1);
+    bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_INVENTORY);
+    bit_buffer_append_byte(instance->tx_buffer, 0x00);
+
+    Iso15693_3Error ret;
+
+    do {
+        ret = iso15693_3_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
+        if(ret != Iso15693_3ErrorNone) break;
+
+        ret = iso15693_3_inventory_response_parse(uid, instance->rx_buffer);
     } while(false);
 
     return ret;

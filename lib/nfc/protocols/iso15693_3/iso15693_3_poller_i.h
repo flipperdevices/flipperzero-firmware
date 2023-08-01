@@ -17,7 +17,6 @@ typedef enum {
     Iso15693_3PollerStateColResInProgress,
     Iso15693_3PollerStateColResFailed,
     Iso15693_3PollerStateActivationInProgress,
-    Iso15693_3PollerStateActivationFailed,
     Iso15693_3PollerStateActivated,
 } Iso15693_3PollerState;
 
@@ -39,9 +38,9 @@ struct Iso15693_3Poller {
 
 const Iso15693_3Data* iso15693_3_poller_get_data(Iso15693_3Poller* instance);
 
-Iso15693_3Error iso15693_3_poller_check_presence(Iso15693_3Poller* instance, uint8_t* uid);
-
 Iso15693_3Error iso15693_3_poller_async_activate(Iso15693_3Poller* instance, Iso15693_3Data* data);
+
+Iso15693_3Error iso15693_3_poller_async_inventory(Iso15693_3Poller* instance, uint8_t* uid);
 
 Iso15693_3Error
     iso15693_3_poller_async_get_system_info(Iso15693_3Poller* instance, Iso15693_3SystemInfo* data);
