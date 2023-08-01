@@ -61,6 +61,7 @@ extern "C" {
 #define ISO15693_3_RESP_ERROR_BLOCK_WRITE (0x13U)
 #define ISO15693_3_RESP_ERROR_BLOCK_LOCK (0x14U)
 #define ISO15693_3_RESP_ERROR_CUSTOM_START (0xA0U)
+#define ISO15693_3_RESP_ERROR_CUSTOM_END (0xDFU)
 
 #define ISO15693_3_CMD_INVENTORY (0x01U)
 #define ISO15693_3_CMD_STAY_QUIET (0x02U)
@@ -91,7 +92,6 @@ typedef enum {
     Iso15693_3ErrorNotPresent,
     Iso15693_3ErrorBufferEmpty,
     Iso15693_3ErrorBufferOverflow,
-    Iso15693_3ErrorCommunication,
     Iso15693_3ErrorFraming,
     Iso15693_3ErrorFieldOff,
     Iso15693_3ErrorWrongCrc,
@@ -100,6 +100,7 @@ typedef enum {
     Iso15693_3ErrorNotSupported,
     Iso15693_3ErrorUnexpectedResponse,
     Iso15693_3ErrorInternal,
+    Iso15693_3ErrorCustom,
     Iso15693_3ErrorUnknown,
 } Iso15693_3Error;
 

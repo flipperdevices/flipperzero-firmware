@@ -18,7 +18,7 @@
 
 #define ISO15693_3_POLLER_NUM_BLOCKS_PER_QUERY (32U)
 
-static Iso15693_3Error iso15693_3_poller_process_error(NfcError error) {
+static Iso15693_3Error iso15693_3_poller_process_nfc_error(NfcError error) {
     switch(error) {
     case NfcErrorNone:
         return Iso15693_3ErrorNone;
@@ -26,6 +26,19 @@ static Iso15693_3Error iso15693_3_poller_process_error(NfcError error) {
         return Iso15693_3ErrorTimeout;
     default:
         return Iso15693_3ErrorNotPresent;
+    }
+}
+
+static Iso15693_3Error iso15693_3_poller_filter_error(Iso15693_3Error error) {
+    switch(error) {
+    /* If a particular optional command is not supported, the card might
+     * respond with a "Not supported" error or not respond at all.
+     * Therefore, treat these errors as non-critical ones. */
+    case Iso15693_3ErrorNotSupported:
+    case Iso15693_3ErrorTimeout:
+        return Iso15693_3ErrorNone;
+    default:
+        return error;
     }
 }
 
@@ -123,7 +136,7 @@ static Iso15693_3Error iso15693_3_poller_frame_exchange(
         NfcError error =
             nfc_trx(instance->nfc, instance->tx_frame_buffer, instance->rx_frame_buffer, fwt);
         if(error != NfcErrorNone) {
-            ret = iso15693_3_poller_process_error(error);
+            ret = iso15693_3_poller_process_nfc_error(error);
             break;
         }
 
@@ -193,7 +206,7 @@ Iso15693_3Error
         Iso15693_3SystemInfo* system_info = &data->system_info;
         ret = iso15693_3_poller_async_get_system_info(instance, system_info);
         if(ret != Iso15693_3ErrorNone) {
-            // TODO: Determine which errors signify that the command is not supported
+            ret = iso15693_3_poller_filter_error(ret);
             break;
         }
 
@@ -205,7 +218,7 @@ Iso15693_3Error
             system_info->block_count,
             system_info->block_size);
         if(ret != Iso15693_3ErrorNone) {
-            // TODO: Determine which errors signify that the command is not supported
+            ret = iso15693_3_poller_filter_error(ret);
             break;
         }
 
@@ -215,7 +228,7 @@ Iso15693_3Error
         ret = iso15693_3_poller_async_get_blocks_security(
             instance, simple_array_get_data(data->block_security), system_info->block_count);
         if(ret != Iso15693_3ErrorNone) {
-            // TODO: Determine which errors signify that the command is not supported
+            ret = iso15693_3_poller_filter_error(ret);
             break;
         }
 
@@ -342,22 +355,6 @@ Iso15693_3Error iso15693_3_poller_async_get_blocks_security(
             &data[start_block_num], block_count_per_query, instance->rx_buffer);
         if(ret != Iso15693_3ErrorNone) break;
     }
-
-    return ret;
-}
-
-Iso15693_3Error iso15693_3_poller_halt(Iso15693_3Poller* instance) {
-    furi_assert(instance);
-
-    bit_buffer_reset(instance->tx_buffer);
-    bit_buffer_reset(instance->rx_buffer);
-
-    Iso15693_3Error ret = Iso15693_3ErrorNone;
-
-    do {
-        // TODO: Implement HALT command
-        instance->state = Iso15693_3PollerStateIdle;
-    } while(false);
 
     return ret;
 }

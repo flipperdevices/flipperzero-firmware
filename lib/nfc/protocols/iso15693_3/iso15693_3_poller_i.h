@@ -63,8 +63,6 @@ Iso15693_3Error iso15693_3_poller_async_get_blocks_security(
     uint8_t* data,
     uint16_t block_count);
 
-Iso15693_3Error iso15693_3_poller_halt(Iso15693_3Poller* instance);
-
 Iso15693_3Error iso15693_3_poller_send_frame(
     Iso15693_3Poller* instance,
     const BitBuffer* tx_buffer,

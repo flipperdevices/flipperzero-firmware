@@ -23,6 +23,12 @@ bool iso15693_3_error_response_parse(Iso15693_3Error* error, const BitBuffer* bu
         // Error bit is set, but not enough data to determine the error
         *error = Iso15693_3ErrorUnexpectedResponse;
         return true;
+    } else if(
+        resp->error >= ISO15693_3_RESP_ERROR_CUSTOM_START &&
+        resp->error <= ISO15693_3_RESP_ERROR_CUSTOM_END) {
+        // Custom vendor-specific error, must be checked in the respective protocol implementation
+        *error = Iso15693_3ErrorCustom;
+        return true;
     }
 
     switch(resp->error) {
