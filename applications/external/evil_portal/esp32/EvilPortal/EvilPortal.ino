@@ -3,8 +3,6 @@
 #include <DNSServer.h>
 #include <WiFi.h>
 
-#define MAX_HTML_SIZE 20000
-
 #define B_PIN 4
 #define G_PIN 5
 #define R_PIN 6
@@ -30,8 +28,10 @@ String password;
 bool name_received = false;
 bool password_received = false;
 
-char apName[30] = "";
-char index_html[MAX_HTML_SIZE] = "TEST";
+// Ap name length can be maximum 32, make the buffer 33 to include the
+// null terminator character.
+char apName[33] = "";
+String index_html;
 
 // RESET
 void (*resetFunction)(void) = 0;
@@ -45,7 +45,7 @@ public:
   bool canHandle(AsyncWebServerRequest *request) { return true; }
 
   void handleRequest(AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html", index_html);
+    request->send_P(200, "text/html", index_html.c_str());
   }
 };
 
@@ -67,7 +67,7 @@ void setLed(int i) {
 
 void setupServer() {  
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html", index_html);
+    request->send_P(200, "text/html", index_html.c_str());
     Serial.println("client connected");
   });
 
@@ -130,24 +130,51 @@ void getInitInput() {
   Serial.println("Waiting for HTML");
   bool has_ap = false;
   bool has_html = false;
+  String flipperMessage;
+  unsigned long last_reception = 0;
+
   while (!has_html || !has_ap) {
       if (Serial.available() > 0) {
-        String flipperMessage = Serial.readString();
-        const char *serialMessage = flipperMessage.c_str();
-        if (strncmp(serialMessage, SET_HTML_CMD, strlen(SET_HTML_CMD)) == 0) {
-          serialMessage += strlen(SET_HTML_CMD);
-          strncpy(index_html, serialMessage, strlen(serialMessage) - 1);
+        // Save the current reception timestamp.
+        last_reception = millis();
+        flipperMessage += Serial.readString();
+        // Check if we have received the terminator character.
+        if (!flipperMessage.endsWith("\n")) {
+            continue;
+        }
+
+        // We received the whole command, remove the terminator character.
+        flipperMessage.remove(flipperMessage.length() - 1);
+
+        if (flipperMessage.indexOf(SET_HTML_CMD) == 0) {
+          index_html = flipperMessage.substring(strlen(SET_HTML_CMD));
           has_html = true;
           Serial.println("html set");
-        } else if (strncmp(serialMessage, SET_AP_CMD, strlen(SET_AP_CMD)) ==
-                   0) {
-          serialMessage += strlen(SET_AP_CMD);
-          strncpy(apName, serialMessage, strlen(serialMessage) - 1);
-          has_ap = true;
-          Serial.println("ap set");
-        } else if (strncmp(serialMessage, RESET_CMD, strlen(RESET_CMD)) == 0) {
+        } else if (flipperMessage.indexOf(SET_AP_CMD) == 0) {
+          size_t cmd_len = strlen(SET_AP_CMD);
+          size_t to_copy_bytes = flipperMessage.length() - cmd_len;
+          if (to_copy_bytes > 0) {
+              if (to_copy_bytes > 32) {
+                  // Truncate AP name longer then 32 characters.
+                  to_copy_bytes = 32;
+              }
+              // Copy the ap name to the apName buffer.
+              const char *ap_name_start = flipperMessage.c_str() + cmd_len;
+              snprintf(apName, sizeof(apName), "%s", ap_name_start);
+
+              has_ap = true;
+              Serial.println("ap set");
+          }
+        } else if (flipperMessage.indexOf(RESET_CMD) == 0) {
           resetFunction();
         }
+
+        // Clear the string after processing the command.
+        flipperMessage.clear();
+      } else if (flipperMessage.length() > 0 && millis() - last_reception > 100) {
+        // If we have a dangling command for more than 100ms clear flipperMessage.
+        flipperMessage.clear();
+        Serial.println("reception timed out");
       }
   }
   Serial.println("all set");
@@ -192,7 +219,7 @@ void loop() {
     Serial.println(logValue2);
   }
   if(checkForCommand(RESET_CMD)) {
-    Serial.println("resetting");
+    Serial.println("reseting");
     resetFunction();
   }  
 }

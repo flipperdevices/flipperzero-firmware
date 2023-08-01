@@ -1,5 +1,6 @@
 #include "../evil_portal_app_i.h"
 #include "../helpers/evil_portal_storage.h"
+#include "../helpers/evil_portal_commands.h"
 
 void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
@@ -53,7 +54,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             const char* help_msg = "Logs saved.\n\n";
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
-            write_logs(app->portal_logs);
+            write_logs(app->storage, app->portal_logs);
             furi_string_reset(app->portal_logs);
             if(app->show_stopscan_tip) {
                 const char* msg = "Press BACK to return\n";
@@ -104,22 +105,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
 
     if(app->is_command && app->selected_tx_string) {
         if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
-            evil_portal_read_index_html(context);
-
-            FuriString* data = furi_string_alloc();
-            furi_string_cat(data, "sethtml=");
-            furi_string_cat(data, (char*)app->index_html);
-
-            evil_portal_uart_tx(
-                (uint8_t*)(furi_string_get_cstr(data)), strlen(furi_string_get_cstr(data)));
-            evil_portal_uart_tx((uint8_t*)("\n"), 1);
-
-            app->sent_html = true;
-
-            free(data);
-            free(app->index_html);
-
-            evil_portal_read_ap_name(context);
+            app->sent_html = evil_portal_set_html(app->storage, EVIL_PORTAL_INDEX_SAVE_PATH);
         } else if(0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
             app->sent_html = false;
             app->sent_ap = false;

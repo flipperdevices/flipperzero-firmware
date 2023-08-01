@@ -1,8 +1,6 @@
+#include <furi.h>
 #include "evil_portal_app_i.h"
 #include "helpers/evil_portal_storage.h"
-
-#include <furi.h>
-#include <furi_hal.h>
 
 static bool evil_portal_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -36,6 +34,7 @@ Evil_PortalApp* evil_portal_app_alloc() {
     app->file_path = furi_string_alloc();
 
     app->gui = furi_record_open(RECORD_GUI);
+    app->storage = furi_record_open(RECORD_STORAGE);
 
     app->view_dispatcher = view_dispatcher_alloc();
 
@@ -84,7 +83,7 @@ Evil_PortalApp* evil_portal_app_alloc() {
 void evil_portal_app_free(Evil_PortalApp* app) {
     // save latest logs
     if(furi_string_utf8_length(app->portal_logs) > 0) {
-        write_logs(app->portal_logs);
+        write_logs(app->storage, app->portal_logs);
         furi_string_free(app->portal_logs);
     }
 
@@ -113,6 +112,7 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 
     // Close records
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_STORAGE);
 
     furi_record_close(RECORD_DIALOGS);
     furi_string_free(app->file_path);
