@@ -139,19 +139,23 @@ bool furi_hal_crypto_ctr(
  * decryption failed and the plaintext returned needs to be discarded.
  * Inits and deinits the AES engine internally.
  *
- * @param[in]  key     pointer to 32 bytes key data
- * @param[in]  iv      pointer to 12 bytes Initialization Vector data
- * @param[in]  input   pointer to input data
- * @param[out] output  pointer to output data
- * @param      length  length of the input and output in bytes
- * @param[out] tag     pointer to 16 bytes space for the tag
- * @param      decrypt true for decryption, false otherwise
+ * @param[in]  key        pointer to 32 bytes key data
+ * @param[in]  iv         pointer to 12 bytes Initialization Vector data
+ * @param[in]  aad        pointer to additional authentication data
+ * @param      aad_length length of the additional authentication data in bytes
+ * @param[in]  input      pointer to input data
+ * @param[out] output     pointer to output data
+ * @param      length     length of the input and output in bytes
+ * @param[out] tag        pointer to 16 bytes space for the tag
+ * @param      decrypt    true for decryption, false otherwise
  *
  * @return     true on success
  */
 bool furi_hal_crypto_gcm(
     const uint8_t* key,
     const uint8_t* iv,
+    const uint8_t* aad,
+    size_t aad_length,
     const uint8_t* input,
     uint8_t* output,
     size_t length,
@@ -161,12 +165,14 @@ bool furi_hal_crypto_gcm(
 /** Encrypt the input using AES-GCM and generate a tag
  * Inits and deinits the AES engine internally.
  *
- * @param[in]  key     pointer to 32 bytes key data
- * @param[in]  iv      pointer to 12 bytes Initialization Vector data
- * @param[in]  input   pointer to input data
- * @param[out] output  pointer to output data
- * @param      length  length of the input and output in bytes
- * @param[out] tag     pointer to 16 bytes space for the tag
+ * @param[in]  key        pointer to 32 bytes key data
+ * @param[in]  iv         pointer to 12 bytes Initialization Vector data
+ * @param[in]  aad        pointer to additional authentication data
+ * @param      aad_length length of the additional authentication data in bytes
+ * @param[in]  input      pointer to input data
+ * @param[out] output     pointer to output data
+ * @param      length     length of the input and output in bytes
+ * @param[out] tag        pointer to 16 bytes space for the tag
  *
  * @return     FuriHalCryptoGCMStateOk on success, FuriHalCryptoGCMStateError
  *             on failure
@@ -174,6 +180,8 @@ bool furi_hal_crypto_gcm(
 FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(
     const uint8_t* key,
     const uint8_t* iv,
+    const uint8_t* aad,
+    size_t aad_length,
     const uint8_t* input,
     uint8_t* output,
     size_t length,
@@ -182,12 +190,14 @@ FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(
 /** Decrypt the input using AES-GCM and verify the provided tag
  * Inits and deinits the AES engine internally.
  *
- * @param[in]  key     pointer to 32 bytes key data
- * @param[in]  iv      pointer to 12 bytes Initialization Vector data
- * @param[in]  input   pointer to input data
- * @param[out] output  pointer to output data
- * @param      length  length of the input and output in bytes
- * @param[out] tag     pointer to 16 bytes tag
+ * @param[in]  key        pointer to 32 bytes key data
+ * @param[in]  iv         pointer to 12 bytes Initialization Vector data
+ * @param[in]  aad        pointer to additional authentication data
+ * @param      aad_length length of the additional authentication data in bytes
+ * @param[in]  input      pointer to input data
+ * @param[out] output     pointer to output data
+ * @param      length     length of the input and output in bytes
+ * @param[out] tag        pointer to 16 bytes tag
  *
  * @return     FuriHalCryptoGCMStateOk on success, FuriHalCryptoGCMStateError
  *             on failure, FuriHalCryptoGCMStateAuthFailure if the tag does not
@@ -196,6 +206,8 @@ FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(
 FuriHalCryptoGCMState furi_hal_crypto_gcm_decrypt_and_verify(
     const uint8_t* key,
     const uint8_t* iv,
+    const uint8_t* aad,
+    size_t aad_length,
     const uint8_t* input,
     uint8_t* output,
     size_t length,

@@ -33,6 +33,7 @@
 #define CRYPTO_GCM_CTR_LEN 4
 #define CRYPTO_GCM_TAG_LEN 16
 #define CRYPTO_GCM_PH_INIT 0U
+#define CRYPTO_GCM_PH_HEADER (AES_CR_GCMPH_0)
 #define CRYPTO_GCM_PH_PAYLOAD (AES_CR_GCMPH_1)
 #define CRYPTO_GCM_PH_FINAL (AES_CR_GCMPH_1 | AES_CR_GCMPH_0)
 
@@ -422,6 +423,22 @@ static bool
     return true;
 }
 
+static bool wait_for_crypto(void) {
+    uint32_t countdown = CRYPTO_TIMEOUT;
+    while(!READ_BIT(AES1->SR, AES_SR_CCF)) {
+        if(LL_SYSTICK_IsActiveCounterFlag()) {
+            countdown--;
+        }
+        if(countdown == 0) {
+            return false;
+        }
+    }
+
+    SET_BIT(AES1->CR, AES_CR_CCFC);
+
+    return true;
+}
+
 static bool furi_hal_crypto_process_block_bswap(const uint8_t* in, uint8_t* out, size_t bytes) {
     uint32_t block[CRYPTO_BLK_LEN / 4];
     memset(block, 0, sizeof(block));
@@ -445,6 +462,20 @@ static bool furi_hal_crypto_process_block_bswap(const uint8_t* in, uint8_t* out,
     memcpy(out, block, bytes);
 
     return true;
+}
+
+static bool furi_hal_crypto_process_block_no_read_bswap(const uint8_t* in, size_t bytes) {
+    uint32_t block[CRYPTO_BLK_LEN / 4];
+    memset(block, 0, sizeof(block));
+
+    memcpy(block, in, bytes);
+
+    AES1->DINR = __builtin_bswap32(block[0]);
+    AES1->DINR = __builtin_bswap32(block[1]);
+    AES1->DINR = __builtin_bswap32(block[2]);
+    AES1->DINR = __builtin_bswap32(block[3]);
+
+    return wait_for_crypto();
 }
 
 static void furi_hal_crypto_ctr_prep_iv(uint8_t* iv) {
@@ -507,22 +538,6 @@ bool furi_hal_crypto_ctr(
     return state;
 }
 
-static bool wait_for_crypto(void) {
-    uint32_t countdown = CRYPTO_TIMEOUT;
-    while(!READ_BIT(AES1->SR, AES_SR_CCF)) {
-        if(LL_SYSTICK_IsActiveCounterFlag()) {
-            countdown--;
-        }
-        if(countdown == 0) {
-            return false;
-        }
-    }
-
-    SET_BIT(AES1->CR, AES_CR_CCFC);
-
-    return true;
-}
-
 static void furi_hal_crypto_gcm_prep_iv(uint8_t* iv) {
     /* append counter to IV */
     iv[CRYPTO_GCM_IV_LEN] = 0;
@@ -549,6 +564,34 @@ static bool furi_hal_crypto_gcm_init(bool decrypt) {
     }
 
     return true;
+}
+
+static bool furi_hal_crypto_gcm_header(const uint8_t* aad, size_t aad_length) {
+    /* GCM header phase */
+
+    MODIFY_REG(AES1->CR, AES_CR_GCMPH, CRYPTO_GCM_PH_HEADER);
+    SET_BIT(AES1->CR, AES_CR_EN);
+
+    size_t last_block_bytes = aad_length % CRYPTO_BLK_LEN;
+
+    size_t i;
+    for(i = 0; i < aad_length - last_block_bytes; i += CRYPTO_BLK_LEN) {
+        if(!furi_hal_crypto_process_block_no_read_bswap(&aad[i], CRYPTO_BLK_LEN)) {
+            goto out_enc_err;
+        }
+    }
+
+    if(last_block_bytes > 0) {
+        if(!furi_hal_crypto_process_block_no_read_bswap(&aad[i], last_block_bytes)) {
+            goto out_enc_err;
+        }
+    }
+
+    return true;
+
+out_enc_err:
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
+    return false;
 }
 
 static bool furi_hal_crypto_gcm_payload(
@@ -587,14 +630,15 @@ out_enc_err:
     return false;
 }
 
-static bool furi_hal_crypto_gcm_finish(size_t length, uint8_t* tag) {
+static bool furi_hal_crypto_gcm_finish(size_t aad_length, size_t payload_length, uint8_t* tag) {
     /* GCM final phase */
 
     MODIFY_REG(AES1->CR, AES_CR_GCMPH, CRYPTO_GCM_PH_FINAL);
 
     uint32_t last_block[CRYPTO_BLK_LEN / 4];
     memset(last_block, 0, sizeof(last_block));
-    last_block[3] = __builtin_bswap32((uint32_t)(length * 8));
+    last_block[1] = __builtin_bswap32((uint32_t)(aad_length * 8));
+    last_block[3] = __builtin_bswap32((uint32_t)(payload_length * 8));
 
     if(!furi_hal_crypto_process_block_bswap((uint8_t*)&last_block[0], tag, CRYPTO_BLK_LEN)) {
         CLEAR_BIT(AES1->CR, AES_CR_EN);
@@ -618,6 +662,8 @@ static bool furi_hal_crypto_gcm_compare_tag(const uint8_t* tag1, const uint8_t* 
 bool furi_hal_crypto_gcm(
     const uint8_t* key,
     const uint8_t* iv,
+    const uint8_t* aad,
+    size_t aad_length,
     const uint8_t* input,
     uint8_t* output,
     size_t length,
@@ -642,7 +688,13 @@ bool furi_hal_crypto_gcm(
         goto out_enc_err;
     }
 
-    /* no GCM header phase, we do not process authenticated data */
+    /* GCM header phase */
+
+    if(aad_length > 0) {
+        if(!furi_hal_crypto_gcm_header(aad, aad_length)) {
+            goto out_enc_err;
+        }
+    }
 
     /* GCM payload phase */
 
@@ -652,7 +704,7 @@ bool furi_hal_crypto_gcm(
 
     /* GCM final phase */
 
-    if(!furi_hal_crypto_gcm_finish(length, tag)) {
+    if(!furi_hal_crypto_gcm_finish(aad_length, length, tag)) {
         goto out_enc_err;
     }
 
@@ -666,11 +718,13 @@ out_enc_err:
 FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(
     const uint8_t* key,
     const uint8_t* iv,
+    const uint8_t* aad,
+    size_t aad_length,
     const uint8_t* input,
     uint8_t* output,
     size_t length,
     uint8_t* tag) {
-    if(!furi_hal_crypto_gcm(key, iv, input, output, length, tag, false)) {
+    if(!furi_hal_crypto_gcm(key, iv, aad, aad_length, input, output, length, tag, false)) {
         memset(output, 0, length);
         memset(tag, 0, CRYPTO_GCM_TAG_LEN);
         return FuriHalCryptoGCMStateError;
@@ -682,13 +736,15 @@ FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(
 FuriHalCryptoGCMState furi_hal_crypto_gcm_decrypt_and_verify(
     const uint8_t* key,
     const uint8_t* iv,
+    const uint8_t* aad,
+    size_t aad_length,
     const uint8_t* input,
     uint8_t* output,
     size_t length,
     const uint8_t* tag) {
     uint8_t dtag[CRYPTO_GCM_TAG_LEN];
 
-    if(!furi_hal_crypto_gcm(key, iv, input, output, length, dtag, true)) {
+    if(!furi_hal_crypto_gcm(key, iv, aad, aad_length, input, output, length, dtag, true)) {
         memset(output, 0, length);
         return FuriHalCryptoGCMStateError;
     }
