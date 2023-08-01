@@ -1,24 +1,60 @@
 #include "uhf_worker.h"
 #include "uhf_cmd.h"
 
-void single_poll_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
+// uart callback functions
+void module_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
     UNUSED(event);
-    UHFResponseData* response_data = ctx;
-    UHFData* first_data = response_data->data;
-    uhf_data_append(first_data, data);
+    UHFData* uhf_data = ctx;
+    uhf_data_append(uhf_data, data);
+    // FURI_LOG_E("module_rx_callback", "%02x", data);
+}
+
+// yrm100 module commands
+UHFWorkerEvent verify_module_connected(UHFWorker* uhf_worker) {
+    UHFResponseData* uhf_response_data = uhf_worker->data;
+    UHFData* hardware_version = uhf_response_data->data;
+    uhf_data_reset(hardware_version);
+    // UHFData* software_version = uhf_response_data_add_new_uhf_data(uhf_response_data);
+    // UHFData* manufacturer = uhf_response_data_add_new_uhf_data(uhf_response_data);
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
+    // read hardware version
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, hardware_version);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_HARDWARE_VERSION.cmd, CMD_HARDWARE_VERSION.length);
+    furi_delay_ms(200);
+    // // read software version
+    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, software_version);
+    // furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SOFTWARE_VERSION.cmd, CMD_SOFTWARE_VERSION.length);
+    // furi_delay_ms(200);
+    // // read manufacturer
+    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, manufacturer);
+    // furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_MANUFACTURERS.cmd, CMD_MANUFACTURERS.length);
+    // furi_delay_ms(200);
+
+    if(!hardware_version->end) { //|| !software_version->end || !manufacturer->end) {
+        return UHFWorkerEventFail;
+    }
+    return UHFWorkerEventSuccess;
 }
 
 UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
     UHFResponseData* uhf_response_data = uhf_worker->data;
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, single_poll_rx_callback, uhf_response_data);
     UHFData* uhf_data = uhf_response_data->data;
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, uhf_data);
     uhf_data_reset(uhf_data);
-    while(!uhf_data->end) {
+    while(true) {
         furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SINGLE_POLLING.cmd, CMD_SINGLE_POLLING.length);
         furi_delay_ms(100);
         if(uhf_worker->state == UHFWorkerStateStop) {
             return UHFWorkerEventAborted;
+        }
+        if(uhf_data->end) {
+            // before breaking, check if the response is not an error
+            // index 1 = response type, index 5 = parameter
+            if(uhf_data->data[1] == 0x01 && uhf_data->data[5] == 0x15) {
+                continue;
+            } else if(uhf_data->data[1] == 0x02)
+                break; // success read
         }
     }
     return UHFWorkerEventSuccess;
@@ -26,7 +62,11 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
 
 int32_t uhf_worker_task(void* ctx) {
     UHFWorker* uhf_worker = ctx;
-    if(uhf_worker->state == UHFWorkerStateDetect) {
+    if(uhf_worker->state == UHFWorkerStateVerify) {
+        UHFWorkerEvent event = verify_module_connected(uhf_worker);
+        uhf_worker->callback(event, uhf_worker->ctx);
+    }
+    if(uhf_worker->state == UHFWorkerStateDetectSingle) {
         UHFWorkerEvent event = read_single_card(uhf_worker);
         uhf_worker->callback(event, uhf_worker->ctx);
     }

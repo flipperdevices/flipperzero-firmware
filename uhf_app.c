@@ -26,7 +26,7 @@ char* convertToHexString(const uint8_t* array, size_t length) {
     return hexArray;
 }
 
-bool uhf_save_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename) {
+bool uhf_save_read_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename) {
     if(!storage_dir_exists(storage, UHF_APPS_DATA_FOLDER)) {
         storage_simply_mkdir(storage, UHF_APPS_DATA_FOLDER);
     }
@@ -170,20 +170,6 @@ void uhf_free(UHFApp* uhf_app) {
     free(uhf_app);
 }
 
-// void uhf_text_store_set(UHFApp* uhf_app, const char* text, ...) {
-//     va_list args;
-//     va_start(args, text);
-
-//     vsnprintf(uhf_app->text_store, sizeof(uhf_app->text_store), text, args);
-
-//     va_end(args);
-// }
-
-// void uhf_text_store_clear(UHFApp* uhf_app) {
-//     memset(uhf_app->text_store, 0, sizeof(uhf_app->text_store));
-// }
-
-//  ==================
 static const NotificationSequence uhf_sequence_blink_start_cyan = {
     &message_blink_start_10,
     &message_blink_set_color_cyan,
@@ -222,8 +208,14 @@ int32_t uhf_app_main(void* ctx) {
     UNUSED(ctx);
     UHFApp* uhf_app = uhf_alloc();
 
-    scene_manager_next_scene(uhf_app->scene_manager, UHFSceneStart);
+    // enable 5v pin
+    furi_hal_power_enable_otg();
+
+    scene_manager_next_scene(uhf_app->scene_manager, UHFSceneVerify);
     view_dispatcher_run(uhf_app->view_dispatcher);
+
+    // disable 5v pin
+    furi_hal_power_disable_otg();
 
     uhf_free(uhf_app);
     return 0;

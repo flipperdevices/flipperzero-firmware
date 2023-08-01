@@ -9,9 +9,10 @@ typedef enum {
     UHFWorkerStateNone,
     UHFWorkerStateBroken,
     UHFWorkerStateReady,
+    UHFWorkerStateVerify,
     // Main worker states
-    UHFWorkerStateDetect,
-    UHFWorkerStateWrite,
+    UHFWorkerStateDetectSingle,
+    UHFWorkerStateWriteSingle,
     UHFWorkerStateWriteKey,
     // Transition
     UHFWorkerStateStop,

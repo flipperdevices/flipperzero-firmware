@@ -25,5 +25,6 @@ void uhf_data_reset(UHFData* uhf_data);
 void uhf_data_free(UHFData* uhf_data);
 
 UHFResponseData* uhf_response_data_alloc();
-UHFData* add_uhf_data_to_uhf_response_data(UHFResponseData* uhf_response_data);
+UHFData* uhf_response_data_add_new_uhf_data(UHFResponseData* uhf_response_data);
+UHFData* uhf_response_data_get_uhf_data(UHFResponseData* uhf_response_data, uint index);
 void uhf_response_data_free(UHFResponseData* uhf_response_data);

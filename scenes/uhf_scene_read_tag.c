@@ -23,7 +23,8 @@ void uhf_scene_read_tag_on_enter(void* ctx) {
 
     // Start worker
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewPopup);
-    uhf_worker_start(uhf_app->worker, UHFWorkerStateDetect, uhf_read_tag_worker_callback, uhf_app);
+    uhf_worker_start(
+        uhf_app->worker, UHFWorkerStateDetectSingle, uhf_read_tag_worker_callback, uhf_app);
 
     uhf_blink_start(uhf_app);
 }
