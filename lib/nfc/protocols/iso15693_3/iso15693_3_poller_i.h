@@ -16,7 +16,6 @@ typedef enum {
     Iso15693_3PollerStateIdle,
     Iso15693_3PollerStateColResInProgress,
     Iso15693_3PollerStateColResFailed,
-    Iso15693_3PollerStateActivationInProgress,
     Iso15693_3PollerStateActivated,
 } Iso15693_3PollerState;
 

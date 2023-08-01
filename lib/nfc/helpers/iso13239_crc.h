@@ -11,7 +11,10 @@ extern "C" {
 
 #define ISO13239_CRC_SIZE sizeof(uint16_t)
 
-typedef enum { Iso13239CrcTypeDefault, Iso13239CrcTypePicopass } Iso13239CrcType;
+typedef enum {
+    Iso13239CrcTypeDefault,
+    Iso13239CrcTypePicopass,
+} Iso13239CrcType;
 
 void iso13239_crc_append(Iso13239CrcType type, BitBuffer* buf);
 

@@ -176,7 +176,7 @@ Iso15693_3Error
             break;
         }
 
-        instance->state = Iso15693_3PollerStateActivationInProgress;
+        instance->state = Iso15693_3PollerStateActivated;
 
         // Get system info: Optional command
         Iso15693_3SystemInfo* system_info = &data->system_info;
@@ -207,8 +207,6 @@ Iso15693_3Error
             ret = iso15693_3_poller_filter_error(ret);
             break;
         }
-
-        instance->state = Iso15693_3PollerStateActivated;
 
     } while(false);
 
