@@ -350,6 +350,10 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
     FuriString* load_path = furi_string_alloc();
     if(nfc_has_shadow_file_internal(instance, path)) {
         nfc_set_shadow_file_path(path, load_path);
+    } else if(furi_string_end_with(path, NFC_APP_SHADOW_EXTENSION)) {
+        size_t path_len = furi_string_size(path);
+        furi_string_set_n(load_path, path, 0, path_len - 4);
+        furi_string_cat_printf(load_path, "%s", NFC_APP_EXTENSION);
     } else {
         furi_string_set(load_path, path);
     }

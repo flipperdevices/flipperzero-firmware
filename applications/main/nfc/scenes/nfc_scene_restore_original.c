@@ -25,10 +25,6 @@ bool nfc_scene_restore_original_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventViewExit) {
-            size_t path_len = furi_string_size(nfc->file_path);
-            furi_string_set_n(nfc->file_path, nfc->file_path, 0, path_len - 4);
-            furi_string_cat_printf(nfc->file_path, "%s", NFC_APP_EXTENSION);
-
             if(nfc_load_file(nfc, nfc->file_path, false)) {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
                     nfc->scene_manager, NfcSceneSavedMenu);
