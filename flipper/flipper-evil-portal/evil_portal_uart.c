@@ -1,6 +1,7 @@
 #include "evil_portal_app_i.h"
 #include "evil_portal_uart.h"
 #include "helpers/evil_portal_storage.h"
+#include "helpers/evil_portal_commands.h"
 
 struct Evil_PortalUart {
     Evil_PortalApp* app;
@@ -54,20 +55,7 @@ static int32_t uart_worker(void* context) {
                                         SET_AP_CMD,
                                         uart->app->command_queue[uart->app->command_index],
                                         strlen(SET_AP_CMD))) {
-                                FuriString* out_data = furi_string_alloc();
-
-                                furi_string_cat(out_data, "setap=");
-                                furi_string_cat(out_data, (char*)uart->app->ap_name);
-
-                                evil_portal_uart_tx(
-                                    (uint8_t*)(furi_string_get_cstr(out_data)),
-                                    strlen(furi_string_get_cstr(out_data)));
-                                evil_portal_uart_tx((uint8_t*)("\n"), 1);
-
-                                uart->app->sent_ap = true;
-
-                                free(out_data);
-                                free(uart->app->ap_name);
+                                uart->app->sent_ap = evil_portal_set_ap_name(uart->app->ap_name);
                             }
 
                             uart->app->command_index = 0;
@@ -81,7 +69,7 @@ static int32_t uart_worker(void* context) {
                     }
 
                     if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
-                        write_logs(uart->app->portal_logs);
+                        write_logs(uart->app->storage, uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
                 } else {
@@ -91,7 +79,7 @@ static int32_t uart_worker(void* context) {
                     }
 
                     if(furi_string_utf8_length(uart->app->portal_logs) > 4000) {
-                        write_logs(uart->app->portal_logs);
+                        write_logs(uart->app->storage, uart->app->portal_logs);
                         furi_string_reset(uart->app->portal_logs);
                     }
                 }

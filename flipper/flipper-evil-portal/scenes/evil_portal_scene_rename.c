@@ -10,16 +10,14 @@ void evil_portal_text_input_callback(void* context) {
 void evil_portal_scene_rename_on_enter(void* context) {
     Evil_PortalApp* app = context;
     TextInput* text_input = app->text_input;
-    size_t enter_name_length = 25;
     evil_portal_read_ap_name(app);
     text_input_set_header_text(text_input, "AP Name/SSID");
-    strncpy(app->text_store[0], (char*)app->ap_name, enter_name_length);
     text_input_set_result_callback(
         text_input,
         evil_portal_text_input_callback,
         context,
-        app->text_store[0],
-        enter_name_length,
+        app->ap_name,
+        sizeof(app->ap_name),
         false);
     view_dispatcher_switch_to_view(app->view_dispatcher, Evil_PortalAppViewTextInput);
 }

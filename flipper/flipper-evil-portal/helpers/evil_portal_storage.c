@@ -1,49 +1,6 @@
 #include "evil_portal_storage.h"
 
-static Storage* evil_portal_open_storage() {
-    return furi_record_open(RECORD_STORAGE);
-}
-
-static void evil_portal_close_storage() {
-    furi_record_close(RECORD_STORAGE);
-}
-
-void evil_portal_read_index_html(void* context) {
-    Evil_PortalApp* app = context;
-    Storage* storage = evil_portal_open_storage();
-    FileInfo fi;
-
-    if(storage_common_stat(storage, EVIL_PORTAL_INDEX_SAVE_PATH, &fi) == FSE_OK) {
-        File* index_html = storage_file_alloc(storage);
-        if(storage_file_open(
-               index_html, EVIL_PORTAL_INDEX_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            app->index_html = malloc((size_t)fi.size);
-            uint8_t* buf_ptr = app->index_html;
-            size_t read = 0;
-            while(read < fi.size) {
-                size_t to_read = fi.size - read;
-                if(to_read > UINT16_MAX) to_read = UINT16_MAX;
-                uint16_t now_read = storage_file_read(index_html, buf_ptr, (uint16_t)to_read);
-                read += now_read;
-                buf_ptr += now_read;
-            }
-            free(buf_ptr);
-        }
-        storage_file_close(index_html);
-        storage_file_free(index_html);
-    } else {
-        char* html_error = "<b>Evil portal</b><br>Unable to read the html file.<br>"
-                           "Is the SD Card set up correctly? <br>See instructions @ "
-                           "github.com/bigbrodude6119/flipper-zero-evil-portal<br>"
-                           "Under the 'Install pre-built app on the flipper' section.";
-        app->index_html = (uint8_t*)html_error;
-    }
-
-    evil_portal_close_storage();
-}
-
-void evil_portal_replace_index_html(FuriString* path) {
-    Storage* storage = evil_portal_open_storage();
+void evil_portal_replace_index_html(Storage* storage, FuriString* path) {
     FS_Error error;
     error = storage_common_remove(storage, EVIL_PORTAL_INDEX_SAVE_PATH);
     if(error != FSE_OK) {
@@ -55,63 +12,49 @@ void evil_portal_replace_index_html(FuriString* path) {
     if(error != FSE_OK) {
         FURI_LOG_D("EVIL PORTAL", "Error copying file");
     }
-    evil_portal_close_storage();
 }
 
-void evil_portal_create_html_folder_if_not_exists() {
-    Storage* storage = evil_portal_open_storage();
+void evil_portal_create_html_folder_if_not_exists(Storage* storage) {
     if(storage_common_stat(storage, HTML_FOLDER, NULL) == FSE_NOT_EXIST) {
         FURI_LOG_D("Evil Portal", "Directory %s doesn't exist. Will create new.", HTML_FOLDER);
         if(!storage_simply_mkdir(storage, HTML_FOLDER)) {
             FURI_LOG_E("Evil Portal", "Error creating directory %s", HTML_FOLDER);
         }
     }
-    evil_portal_close_storage();
 }
 
 void evil_portal_read_ap_name(void* context) {
     Evil_PortalApp* app = context;
-    Storage* storage = evil_portal_open_storage();
+    Storage* storage = app->storage;
     FileInfo fi;
 
     if(storage_common_stat(storage, EVIL_PORTAL_AP_SAVE_PATH, &fi) == FSE_OK) {
         File* ap_name = storage_file_alloc(storage);
         if(storage_file_open(ap_name, EVIL_PORTAL_AP_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            app->ap_name = malloc((size_t)fi.size);
-            uint8_t* buf_ptr = app->ap_name;
-            size_t read = 0;
-            while(read < fi.size) {
-                size_t to_read = fi.size - read;
-                if(to_read > UINT16_MAX) to_read = UINT16_MAX;
-                uint16_t now_read = storage_file_read(ap_name, buf_ptr, (uint16_t)to_read);
-                read += now_read;
-                buf_ptr += now_read;
-            }
-            free(buf_ptr);
+            uint16_t now_read =
+                storage_file_read(ap_name, app->ap_name, (uint16_t)sizeof(app->ap_name) - 1);
+            app->ap_name[now_read] = '\0';
         }
         storage_file_close(ap_name);
         storage_file_free(ap_name);
     } else {
-        char* app_default = "Evil Portal";
-        app->ap_name = (uint8_t*)app_default;
+        snprintf(app->ap_name, sizeof(app->ap_name), "Evil Portal");
     }
-    evil_portal_close_storage();
 }
 
 void evil_portal_write_ap_name(void* context) {
     Evil_PortalApp* app = context;
-    Storage* storage = evil_portal_open_storage();
+    Storage* storage = app->storage;
 
     File* ap_name = storage_file_alloc(storage);
     if(storage_file_open(ap_name, EVIL_PORTAL_AP_SAVE_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        storage_file_write(ap_name, app->text_store[0], strlen(app->text_store[0]));
+        storage_file_write(ap_name, app->ap_name, strlen(app->ap_name));
     }
     storage_file_close(ap_name);
     storage_file_free(ap_name);
-    evil_portal_close_storage();
 }
 
-char* sequential_file_resolve_path(
+static char* sequential_file_resolve_path(
     Storage* storage,
     const char* dir,
     const char* prefix,
@@ -135,9 +78,7 @@ char* sequential_file_resolve_path(
     return strdup(file_path);
 }
 
-void write_logs(FuriString* portal_logs) {
-    Storage* storage = evil_portal_open_storage();
-
+void write_logs(Storage* storage, FuriString* portal_logs) {
     if(!storage_file_exists(storage, EVIL_PORTAL_LOG_SAVE_PATH)) {
         storage_simply_mkdir(storage, EVIL_PORTAL_LOG_SAVE_PATH);
     }
@@ -153,5 +94,4 @@ void write_logs(FuriString* portal_logs) {
     }
     storage_file_close(file);
     storage_file_free(file);
-    evil_portal_close_storage();
 }
