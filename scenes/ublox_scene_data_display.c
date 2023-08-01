@@ -96,6 +96,7 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
             data_display_set_nav_messages(ublox->data_display, ublox->nav_pvt, ublox->nav_odo);
 
+	    data_display_set_log_state(ublox->data_display, ublox->log_state);
         } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);

@@ -7,6 +7,7 @@
 #include <locale/locale.h>
 #include <furi_hal.h>
 #include "../ublox_device.h"
+#include "../helpers/ublox_types.h"
 
 typedef enum {
     DataDisplayHandheldMode,
@@ -37,3 +38,5 @@ void data_display_set_nav_messages(
     Ublox_NAV_ODO_Message odo_message);
 
 void data_display_set_state(DataDisplayView* data_display, DataDisplayState state);
+
+void data_display_set_log_state(DataDisplayView* data_display, UbloxLogState log_state);
