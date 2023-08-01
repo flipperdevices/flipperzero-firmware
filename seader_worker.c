@@ -278,7 +278,7 @@ void seader_send_payload(
         (&asn_DEF_Payload)
             ->op->print_struct(&asn_DEF_Payload, payload, 1, seader_asn_to_string, payloadDebug);
         if(strlen(payloadDebug) > 0) {
-            FURI_LOG_D(TAG, "Sending payload: %s", payloadDebug);
+            FURI_LOG_D(TAG, "Sending payload[%d %d %d]: %s", to, from, replyTo, payloadDebug);
         }
     }
 #endif
