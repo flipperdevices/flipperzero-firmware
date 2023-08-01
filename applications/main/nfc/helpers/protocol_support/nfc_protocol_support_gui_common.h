@@ -11,6 +11,7 @@ enum {
     SubmenuIndexCommonInfo,
     SubmenuIndexCommonRename,
     SubmenuIndexCommonDelete,
+    SubmenuIndexCommonRestore,
     SubmenuIndexCommonMax,
 };
 

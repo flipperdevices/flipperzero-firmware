@@ -272,7 +272,10 @@ static bool nfc_set_shadow_file_path(FuriString* file_path, FuriString* shadow_f
     furi_assert(shadow_file_path);
 
     bool shadow_file_path_set = false;
-    if(furi_string_end_with(file_path, NFC_APP_EXTENSION)) {
+    if(furi_string_end_with(file_path, NFC_APP_SHADOW_EXTENSION)) {
+        furi_string_set(shadow_file_path, file_path);
+        shadow_file_path_set = true;
+    } else if(furi_string_end_with(file_path, NFC_APP_EXTENSION)) {
         size_t path_len = furi_string_size(file_path);
         // Cut .nfc
         furi_string_set_n(shadow_file_path, file_path, 0, path_len - 4);
@@ -347,6 +350,10 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
     FuriString* load_path = furi_string_alloc();
     if(nfc_has_shadow_file_internal(instance, path)) {
         nfc_set_shadow_file_path(path, load_path);
+    } else if(furi_string_end_with(path, NFC_APP_SHADOW_EXTENSION)) {
+        size_t path_len = furi_string_size(path);
+        furi_string_set_n(load_path, path, 0, path_len - 4);
+        furi_string_cat_printf(load_path, "%s", NFC_APP_EXTENSION);
     } else {
         furi_string_set(load_path, path);
     }
@@ -369,18 +376,22 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
 bool nfc_delete(NfcApp* instance) {
     furi_assert(instance);
 
-    bool result = false;
-    FuriString* shadow_file_path = furi_string_alloc();
-
     if(nfc_has_shadow_file(instance)) {
-        nfc_set_shadow_file_path(instance->file_path, shadow_file_path);
-        storage_simply_remove(instance->storage, furi_string_get_cstr(shadow_file_path));
+        nfc_delete_shadow_file(instance);
     }
 
-    result = storage_simply_remove(instance->storage, furi_string_get_cstr(instance->file_path));
+    return storage_simply_remove(instance->storage, furi_string_get_cstr(instance->file_path));
+}
+
+bool nfc_delete_shadow_file(NfcApp* instance) {
+    furi_assert(instance);
+
+    FuriString* shadow_file_path = furi_string_alloc();
+
+    bool result = nfc_set_shadow_file_path(instance->file_path, shadow_file_path) &&
+                  storage_simply_remove(instance->storage, furi_string_get_cstr(shadow_file_path));
 
     furi_string_free(shadow_file_path);
-
     return result;
 }
 

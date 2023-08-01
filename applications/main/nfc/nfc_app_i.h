@@ -157,6 +157,8 @@ bool nfc_has_shadow_file(NfcApp* instance);
 
 bool nfc_save_shadow_file(NfcApp* instance);
 
+bool nfc_delete_shadow_file(NfcApp* instance);
+
 bool nfc_save(NfcApp* instance);
 
 bool nfc_delete(NfcApp* instance);
