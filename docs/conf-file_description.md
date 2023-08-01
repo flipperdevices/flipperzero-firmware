@@ -1,6 +1,6 @@
 # Flipper Authenticator config file description
 
-By default Flipper Authenticator stores all its settings in `/ext/authenticator/totp.conf` file.
+By default Flipper Authenticator stores all its settings in `/ext/apps_data/totp/totp.conf` file.
 
 File format is standard for Flipper Zero device. Each line has one setting identified by key, where key and value are separated by `:` symbol.
 
@@ -11,8 +11,6 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 <p>
 
 **Type:** const string
-
-**Default value:** `Flipper TOTP plugin config file`
 
 **Description:** File type definition. Used internally. Should not be updated manually
 
@@ -25,9 +23,29 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Type:** const unsigned int
 
-**Default value:** `2`
-
 **Description:** File version. Used internally. Should not be updated manually.
+
+</p>
+</details>
+
+<details>
+<summary><h3 style="display: inline">CryptoVersion</h3></summary>
+<p>
+
+**Type:** const unsigned int
+
+**Description:** Cryptographic algorithms version used for encryption\decryption. Should not be updated manually.
+
+</p>
+</details>
+
+<details>
+<summary><h3 style="display: inline">CryptoKeySlot</h3></summary>
+<p>
+
+**Type:** const unsigned int
+
+**Description:** Key vault slot to be used for encryption\decryption. Should not be updated manually, instead CLI should be used to update encryption parameters.
 
 </p>
 </details>
@@ -40,7 +58,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** none
 
-**Description:** Initialization vector (IV) which is getting generated randomly at first app start. It is used to setup encryption subsytem. Should not be updated manually.
+**Description:** Initialization vector (IV) base seed which is getting generated randomly at first app start. It is used to setup encryption subsytem. Should not be updated manually.
 
 **Important note:** changing or loosing this value will lead to incorrect decryption of all the encrypted data in the application and as a result it will not be possible to generate valid TOTP tokens
 
@@ -55,7 +73,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** none
 
-**Description:** Used internally to verify user's PIN. Should not be changed manually.
+**Description:** Used internally to verify user's PIN and\or file consistency. Should not be changed manually.
 
 **Important note:** changing or loosing this value will lead to incorrect PIN verification and it will not be possible to signin into app
 
@@ -129,6 +147,35 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 </details>
 
 <details>
+<summary><h3 style="display: inline">Font</h3></summary>
+<p>
+
+**Type:** enum (available options are `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`)
+
+**Default value:** `7`
+
+**Description:** Font index to be used to display token. Can be modified manually.
+
+</p>
+</details>
+
+<details>
+<summary><h3 style="display: inline">AutomationKbLayout</h3></summary>
+<p>
+
+**Type:** enum (available options are `0`, `1`)
+
+**Default value:** `0`
+
+**Description:** Keyboard layout index to be used during token input automation. Can be modified manually.
+
+* `0` - QWERTY
+* `1` - AZERTY
+
+</p>
+</details>
+
+<details>
 <summary><h3 style="display: inline">TokenName</h3></summary>
 <p>
 
@@ -160,11 +207,16 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 <summary><h3 style="display: inline">TokenAlgo</h3></summary>
 <p>
 
-**Type:** enum (available options are: `0` (`sha1`), `1` (`sha256`), `2` (`sha512`), `3` (`steam`))
+**Type:** enum (available options are: `0`, `1`, `2`, `3`)
 
-**Default value:** `0` (`sha1`)
+**Default value:** `0`
 
-**Description:** Token hashing algorithm to be used to generate TOTP code. If you don't know which one to use - use `0` (`sha1`).
+**Description:** Token hashing algorithm to be used to generate TOTP code. If you don't know which one to use - use `0`.
+
+* `0` - `SHA1`
+* `1` - `SHA256`
+* `2` - `SHA512`
+* `3` - `STEAM`
 
 </p>
 </details>
@@ -216,28 +268,33 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 ```text
 Filetype: Flipper TOTP plugin config file
-Version: 5
-BaseIV: AD F2 DE F3 31 92 C8 77 4B EB BF FE 7D E1 27 51
-Crypto: FE CC 38 99 28 A9 28 6B BC E1 E3 92 B9 02 8A DF
+Version: 8
+CryptoVersion: 2
+CryptoKeySlot: 12
+BaseIV: 71 88 EF D4 F0 3E 40 B5 3D 0A 0E 39 C2 AF C5 D6
+Crypto: 43 41 1F 91 A8 41 77 DB D7 EC 9D 0E 23 36 B5 0B
 Timezone: 2.000000
 PinIsSet: true
-NotificationMethod: 3
-TokenName: Test plain
-TokenSecret: 95 6B CE 3E 2F 01 AF 29 B2 9A DE CA E7 EF F5 B1
+NotificationMethod: 0
+AutomationMethod: 3
+Font: 7
+AutomationKbLayout: 0
+TokenName: Steam token
+TokenSecret: C7 F5 35 9D 77 B6 99 8A 5F 05 71 EB 9F DD A4 07 29 82 1E 50 C8 A7 D0 E9 9D 21 52 56 6C 09 DA 38
+TokenAlgo: 3
+TokenDigits: 5
+TokenDuration: 30
+TokenAutomationFeatures: 0
+TokenName: sha1 token
+TokenSecret: 1F 13 EC CB C7 24 32 BC 48 28 92 BB A6 A2 60 68 D6 DA 74 65 53 08 84 BD 7D 2B 4F FC 17 F1 C8 35 3E B0 37 EA 82 69 95 00 47 5E DA 12 7F 3C 73 05 10 A1 E6 89 1D C0 58 A7 E4 1D 46 B9 28 9E 16 48
 TokenAlgo: 0
 TokenDigits: 6
 TokenDuration: 30
 TokenAutomationFeatures: 0
-TokenName: Verifyr sha256
-TokenSecret: SSECIUHGRYRCRBCNKKXPUQBLBGEQZ3PKNA7TA7TQV6IL5WDFU62TNNT3NHKVWRCQWF4QTSE4IGLG4S7RGY3LDMVDZVMAGB2ARPG7XYQ
+TokenName: sha256 token
+TokenSecret: 80 02 69 36 AC 28 6B 83 08 90 75 81 CA 39 4B 11 C9 69 C7 45 C2 F8 98 14 D7 BB 1E B8 03 BB 52 3E 79 6E 1D F3 A7 E5 89 99 06 4E 08 87 66 9A BD C2 D9 95 65 ED 3A 40 50 F5 D3 2B C4 FE 48 D0 78 4B
 TokenAlgo: 1
 TokenDigits: 6
-TokenDuration: 60
-TokenAutomationFeatures: 0
-TokenName: Verifyr sha512 8
-TokenSecret: 3KKGABEJ4CKS5AHBZBDHFFNKUZHN6D7TKUGI3T7SHEUBAMIAPBUBWQNCMEEGEJX2LF23PYAFUCSRNVQ2ENOQWLHISCOJQCU2SCND4CI
-TokenAlgo: 2
-TokenDigits: 8
 TokenDuration: 30
 TokenAutomationFeatures: 0
 ```
