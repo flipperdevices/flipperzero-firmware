@@ -51,6 +51,17 @@ extern "C" {
 #define ISO15693_3_RESP_FLAG_ERROR (1U << 0)
 #define ISO15693_3_RESP_FLAG_EXTENSION (1U << 3)
 
+#define ISO15693_3_RESP_ERROR_NOT_SUPPORTED (0x01U)
+#define ISO15693_3_RESP_ERROR_FORMAT (0x02U)
+#define ISO15693_3_RESP_ERROR_OPTION (0x03U)
+#define ISO15693_3_RESP_ERROR_UNKNOWN (0x0FU)
+#define ISO15693_3_RESP_ERROR_BLOCK_UNAVAILABLE (0x10U)
+#define ISO15693_3_RESP_ERROR_BLOCK_ALREADY_LOCKED (0x11U)
+#define ISO15693_3_RESP_ERROR_BLOCK_LOCKED (0x12U)
+#define ISO15693_3_RESP_ERROR_BLOCK_WRITE (0x13U)
+#define ISO15693_3_RESP_ERROR_BLOCK_LOCK (0x14U)
+#define ISO15693_3_RESP_ERROR_CUSTOM_START (0xA0U)
+
 #define ISO15693_3_CMD_INVENTORY (0x01U)
 #define ISO15693_3_CMD_STAY_QUIET (0x02U)
 #define ISO15693_3_CMD_READ_BLOCK (0x20U)
@@ -78,13 +89,18 @@ extern "C" {
 typedef enum {
     Iso15693_3ErrorNone,
     Iso15693_3ErrorNotPresent,
-    Iso15693_3ErrorColResFailed,
+    Iso15693_3ErrorBufferEmpty,
     Iso15693_3ErrorBufferOverflow,
     Iso15693_3ErrorCommunication,
     Iso15693_3ErrorFraming,
     Iso15693_3ErrorFieldOff,
     Iso15693_3ErrorWrongCrc,
     Iso15693_3ErrorTimeout,
+    Iso15693_3ErrorFormat,
+    Iso15693_3ErrorNotSupported,
+    Iso15693_3ErrorUnexpectedResponse,
+    Iso15693_3ErrorInternal,
+    Iso15693_3ErrorUnknown,
 } Iso15693_3Error;
 
 typedef struct {

@@ -165,14 +165,9 @@ Iso15693_3Error iso15693_3_poller_check_presence(Iso15693_3Poller* instance, uin
     do {
         ret = iso15693_3_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
-        if(ret != Iso15693_3ErrorNone) {
-            break;
-        }
+        if(ret != Iso15693_3ErrorNone) break;
 
-        if(!iso15693_3_inventory_response_parse(uid, instance->rx_buffer)) {
-            ret = Iso15693_3ErrorCommunication;
-            break;
-        }
+        ret = iso15693_3_inventory_response_parse(uid, instance->rx_buffer);
     } while(false);
 
     return ret;
@@ -197,9 +192,11 @@ Iso15693_3Error
         // Get system info: Optional command
         Iso15693_3SystemInfo* system_info = &data->system_info;
         ret = iso15693_3_poller_async_get_system_info(instance, system_info);
-        if(ret != Iso15693_3ErrorNone) break;
+        if(ret != Iso15693_3ErrorNone) {
+            // TODO: Determine which errors signify that the command is not supported
+            break;
+        }
 
-        if(!(system_info->flags & ISO15693_3_SYSINFO_FLAG_MEMORY)) break;
         // Read blocks: Optional command
         simple_array_init(data->block_data, system_info->block_count * system_info->block_size);
         ret = iso15693_3_poller_async_read_blocks(
@@ -207,14 +204,20 @@ Iso15693_3Error
             simple_array_get_data(data->block_data),
             system_info->block_count,
             system_info->block_size);
-        if(ret != Iso15693_3ErrorNone) break;
+        if(ret != Iso15693_3ErrorNone) {
+            // TODO: Determine which errors signify that the command is not supported
+            break;
+        }
 
         // Get block security status: Optional command
         simple_array_init(data->block_security, system_info->block_count);
 
         ret = iso15693_3_poller_async_get_blocks_security(
             instance, simple_array_get_data(data->block_security), system_info->block_count);
-        if(ret != Iso15693_3ErrorNone) break;
+        if(ret != Iso15693_3ErrorNone) {
+            // TODO: Determine which errors signify that the command is not supported
+            break;
+        }
 
         instance->state = Iso15693_3PollerStateActivated;
 
@@ -245,11 +248,7 @@ Iso15693_3Error iso15693_3_poller_async_get_system_info(
             instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
         if(ret != Iso15693_3ErrorNone) break;
 
-        if(!iso15693_3_system_info_response_parse(data, instance->rx_buffer)) {
-            ret = Iso15693_3ErrorCommunication;
-            break;
-        }
-
+        ret = iso15693_3_system_info_response_parse(data, instance->rx_buffer);
     } while(false);
 
     return ret;
@@ -278,11 +277,7 @@ Iso15693_3Error iso15693_3_poller_async_read_block(
             instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
         if(ret != Iso15693_3ErrorNone) break;
 
-        if(!iso15693_3_read_block_response_parse(data, block_size, instance->rx_buffer)) {
-            ret = Iso15693_3ErrorCommunication;
-            break;
-        }
-
+        ret = iso15693_3_read_block_response_parse(data, block_size, instance->rx_buffer);
     } while(false);
 
     return ret;
@@ -298,7 +293,7 @@ Iso15693_3Error iso15693_3_poller_async_read_blocks(
     furi_assert(block_count);
     furi_assert(block_size);
 
-    Iso15693_3Error ret;
+    Iso15693_3Error ret = Iso15693_3ErrorNone;
 
     for(uint32_t i = 0; i < block_count; ++i) {
         ret = iso15693_3_poller_async_read_block(instance, &data[block_size * i], i, block_size);
@@ -343,11 +338,9 @@ Iso15693_3Error iso15693_3_poller_async_get_blocks_security(
             instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
         if(ret != Iso15693_3ErrorNone) break;
 
-        if(!iso15693_3_get_block_security_response_parse(
-               &data[start_block_num], block_count_per_query, instance->rx_buffer)) {
-            ret = Iso15693_3ErrorCommunication;
-            break;
-        }
+        ret = iso15693_3_get_block_security_response_parse(
+            &data[start_block_num], block_count_per_query, instance->rx_buffer);
+        if(ret != Iso15693_3ErrorNone) break;
     }
 
     return ret;
