@@ -55,7 +55,7 @@ static int32_t uart_worker(void* context) {
                                         SET_AP_CMD,
                                         uart->app->command_queue[uart->app->command_index],
                                         strlen(SET_AP_CMD))) {
-                                uart->app->sent_ap = evil_portal_set_ap_name(uart->app->storage);
+                                uart->app->sent_ap = evil_portal_set_ap_name(uart->app->ap_name);
                             }
 
                             uart->app->command_index = 0;

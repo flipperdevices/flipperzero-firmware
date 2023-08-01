@@ -65,7 +65,10 @@ struct Evil_PortalApp {
     bool sent_html;
     bool sent_reset;
     int BAUDRATE;
-    char text_store[2][128 + 1];
+
+    // AP SSID length can be maximum 32.
+    // Make the buffer 33 to accommodate the terminator char.
+    char ap_name[33];
 };
 
 typedef enum {

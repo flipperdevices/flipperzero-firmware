@@ -9,10 +9,8 @@
 bool evil_portal_set_html(Storage* storage, const char* path);
 
 /**
- * Reads the access point name from the storage and sends it to the ESP32.
- * @param storage - The storage instance to use.
- * @param ap_config_path - The path of the configuration file that contains the access point (AP) name
- * to be sent to the ESP32.
+ * Sets the access point name that will be created by the ESP32.
+ * @param ap_name - The access point (AP) name to be sent to the ESP32.
  * @return Returns true if the AP name has been sent correctly, false otherwise.
  */
-bool evil_portal_set_ap_name(Storage* storage, const char* ap_config_path);
+bool evil_portal_set_ap_name(const char* ap_name);
