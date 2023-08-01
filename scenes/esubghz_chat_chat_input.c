@@ -26,9 +26,8 @@ static bool chat_input_validator(const char *text, FuriString *error,
 	furi_string_cat_str(state->msg_input, ": ");
 	furi_string_cat_str(state->msg_input, text);
 
-	/* append the message to the chat box */
-	furi_string_cat_printf(state->chat_box_store, "\n%s",
-		furi_string_get_cstr(state->msg_input));
+	/* append the message to the chat box and prepare message preview */
+	append_msg(state, furi_string_get_cstr(state->msg_input));
 
 	/* encrypt and transmit message */
 	tx_msg_input(state);
@@ -66,9 +65,7 @@ void scene_on_enter_chat_input(void* context)
 			state->text_input,
 			chat_input_validator,
 			state);
-	text_input_set_header_text(
-			state->text_input,
-			"Message");
+	set_chat_input_header(state);
 
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Input);
 }
