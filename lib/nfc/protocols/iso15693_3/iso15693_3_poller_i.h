@@ -39,9 +39,12 @@ struct Iso15693_3Poller {
 
 const Iso15693_3Data* iso15693_3_poller_get_data(Iso15693_3Poller* instance);
 
-Iso15693_3Error iso15693_3_poller_check_presence(Iso15693_3Poller* instance);
+Iso15693_3Error iso15693_3_poller_check_presence(Iso15693_3Poller* instance, uint8_t* uid);
 
 Iso15693_3Error iso15693_3_poller_async_activate(Iso15693_3Poller* instance, Iso15693_3Data* data);
+
+Iso15693_3Error
+    iso15693_3_poller_async_get_system_info(Iso15693_3Poller* instance, Iso15693_3SystemInfo* data);
 
 Iso15693_3Error iso15693_3_poller_async_read_block(
     Iso15693_3Poller* instance,

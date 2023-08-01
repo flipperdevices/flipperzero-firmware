@@ -144,34 +144,32 @@ static Iso15693_3Error iso15693_3_poller_frame_exchange(
     return ret;
 }
 
-Iso15693_3Error iso15693_3_poller_check_presence(Iso15693_3Poller* instance) {
+Iso15693_3Error iso15693_3_poller_check_presence(Iso15693_3Poller* instance, uint8_t* uid) {
     furi_assert(instance);
     furi_assert(instance->nfc);
+    furi_assert(uid);
 
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
 
-    Iso15693_3Data* data = instance->data;
-    iso15693_3_reset(data);
+    // Send INVENTORY
+    bit_buffer_append_byte(
+        instance->tx_buffer,
+        ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI |
+            ISO15693_3_REQ_FLAG_INVENTORY_T5 | ISO15693_3_REQ_FLAG_T5_N_SLOTS_1);
+    bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_INVENTORY);
+    bit_buffer_append_byte(instance->tx_buffer, 0x00);
 
-    Iso15693_3Error ret = Iso15693_3ErrorTimeout;
+    Iso15693_3Error ret;
 
     do {
-        // Send INVENTORY
-        bit_buffer_append_byte(
-            instance->tx_buffer,
-            ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI |
-                ISO15693_3_REQ_FLAG_INVENTORY_T5 | ISO15693_3_REQ_FLAG_T5_N_SLOTS_1);
-        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_INVENTORY);
-        bit_buffer_append_byte(instance->tx_buffer, 0x00);
-
         ret = iso15693_3_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
         if(ret != Iso15693_3ErrorNone) {
             break;
         }
 
-        if(!iso15693_3_inventory_response_parse(data->uid, instance->rx_buffer)) {
+        if(!iso15693_3_inventory_response_parse(uid, instance->rx_buffer)) {
             ret = Iso15693_3ErrorCommunication;
             break;
         }
@@ -185,80 +183,71 @@ Iso15693_3Error
     furi_assert(instance);
     furi_assert(instance->nfc);
 
-    Iso15693_3Data* iso15693_3_data = instance->data;
+    iso15693_3_reset(data);
 
-    iso15693_3_reset(iso15693_3_data);
-
-    Iso15693_3Error ret = Iso15693_3ErrorTimeout;
+    Iso15693_3Error ret;
 
     do {
         instance->state = Iso15693_3PollerStateColResInProgress;
 
-        bit_buffer_reset(instance->tx_buffer);
-        bit_buffer_reset(instance->rx_buffer);
+        // Inventory: Mandatory command
+        ret = iso15693_3_poller_check_presence(instance, data->uid);
+        if(ret != Iso15693_3ErrorNone) break;
 
-        // Send INVENTORY
-        bit_buffer_append_byte(
-            instance->tx_buffer,
-            ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI |
-                ISO15693_3_REQ_FLAG_INVENTORY_T5 | ISO15693_3_REQ_FLAG_T5_N_SLOTS_1);
-        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_INVENTORY);
-        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+        // Get system info: Optional command
+        Iso15693_3SystemInfo* system_info = &data->system_info;
+        ret = iso15693_3_poller_async_get_system_info(instance, system_info);
+        if(ret != Iso15693_3ErrorNone) break;
 
-        ret = iso15693_3_poller_frame_exchange(
-            instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
-        if(ret != Iso15693_3ErrorNone) {
-            break;
-        }
+        if(!(system_info->flags & ISO15693_3_SYSINFO_FLAG_MEMORY)) break;
+        // Read blocks: Optional command
+        simple_array_init(data->block_data, system_info->block_count * system_info->block_size);
+        ret = iso15693_3_poller_async_read_blocks(
+            instance,
+            simple_array_get_data(data->block_data),
+            system_info->block_count,
+            system_info->block_size);
+        if(ret != Iso15693_3ErrorNone) break;
 
-        if(!iso15693_3_inventory_response_parse(iso15693_3_data->uid, instance->rx_buffer)) {
-            ret = Iso15693_3ErrorCommunication;
-            break;
-        }
+        // Get block security status: Optional command
+        simple_array_init(data->block_security, system_info->block_count);
 
-        bit_buffer_reset(instance->tx_buffer);
-        bit_buffer_reset(instance->rx_buffer);
-
-        // Send GET SYSTEM INFO
-        bit_buffer_append_byte(
-            instance->tx_buffer,
-            ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI);
-
-        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_GET_SYS_INFO);
-
-        ret = iso15693_3_poller_frame_exchange(
-            instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
-        if(ret != Iso15693_3ErrorNone) {
-            break;
-        }
-
-        Iso15693_3SystemInfo* system_info = &iso15693_3_data->system_info;
-        if(iso15693_3_system_info_response_parse(system_info, instance->rx_buffer)) {
-            // Read blocks
-            simple_array_init(
-                iso15693_3_data->block_data, system_info->block_count * system_info->block_size);
-
-            ret = iso15693_3_poller_async_read_blocks(
-                instance,
-                simple_array_get_data(iso15693_3_data->block_data),
-                system_info->block_count,
-                system_info->block_size);
-            if(ret != Iso15693_3ErrorNone) break;
-
-            // Read block security status
-            simple_array_init(iso15693_3_data->block_security, system_info->block_count);
-
-            ret = iso15693_3_poller_async_get_blocks_security(
-                instance,
-                simple_array_get_data(iso15693_3_data->block_security),
-                system_info->block_count);
-            if(ret != Iso15693_3ErrorNone) break;
-        }
+        ret = iso15693_3_poller_async_get_blocks_security(
+            instance, simple_array_get_data(data->block_security), system_info->block_count);
+        if(ret != Iso15693_3ErrorNone) break;
 
         instance->state = Iso15693_3PollerStateActivated;
 
-        if(data) {
-            iso15693_3_copy(data, instance->data);
+    } while(false);
+
+    return ret;
+}
+
+Iso15693_3Error iso15693_3_poller_async_get_system_info(
+    Iso15693_3Poller* instance,
+    Iso15693_3SystemInfo* data) {
+    furi_assert(instance);
+    furi_assert(data);
+
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_reset(instance->rx_buffer);
+
+    // Send GET SYSTEM INFO
+    bit_buffer_append_byte(
+        instance->tx_buffer, ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI);
+
+    bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_GET_SYS_INFO);
+
+    Iso15693_3Error ret;
+
+    do {
+        ret = iso15693_3_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
+        if(ret != Iso15693_3ErrorNone) break;
+
+        if(!iso15693_3_system_info_response_parse(data, instance->rx_buffer)) {
+            ret = Iso15693_3ErrorCommunication;
+            break;
         }
 
     } while(false);
@@ -277,13 +266,12 @@ Iso15693_3Error iso15693_3_poller_async_read_block(
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
 
-    Iso15693_3Error ret = Iso15693_3ErrorNone;
-
     bit_buffer_append_byte(
         instance->tx_buffer, ISO15693_3_REQ_FLAG_SUBCARRIER_1 | ISO15693_3_REQ_FLAG_DATA_RATE_HI);
-
     bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_READ_BLOCK);
     bit_buffer_append_byte(instance->tx_buffer, block_number);
+
+    Iso15693_3Error ret;
 
     do {
         ret = iso15693_3_poller_send_frame(
@@ -310,7 +298,7 @@ Iso15693_3Error iso15693_3_poller_async_read_blocks(
     furi_assert(block_count);
     furi_assert(block_size);
 
-    Iso15693_3Error ret = Iso15693_3ErrorNone;
+    Iso15693_3Error ret;
 
     for(uint32_t i = 0; i < block_count; ++i) {
         ret = iso15693_3_poller_async_read_block(instance, &data[block_size * i], i, block_size);

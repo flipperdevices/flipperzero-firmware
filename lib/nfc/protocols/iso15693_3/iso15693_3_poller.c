@@ -78,7 +78,7 @@ static NfcCommand iso15693_3_poller_run(NfcGenericEvent event, void* context) {
 
     if(nfc_event->type == NfcEventTypePollerReady) {
         if(instance->state != Iso15693_3PollerStateActivated) {
-            Iso15693_3Error error = iso15693_3_poller_async_activate(instance, NULL);
+            Iso15693_3Error error = iso15693_3_poller_async_activate(instance, instance->data);
             if(error == Iso15693_3ErrorNone) {
                 instance->iso15693_3_event.type = Iso15693_3PollerEventTypeReady;
                 instance->iso15693_3_event_data.error = error;
@@ -112,7 +112,8 @@ static bool iso15693_3_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(instance->state == Iso15693_3PollerStateIdle);
 
     if(nfc_event->type == NfcEventTypePollerReady) {
-        Iso15693_3Error error = iso15693_3_poller_check_presence(instance);
+        uint8_t uid[ISO15693_3_UID_SIZE];
+        Iso15693_3Error error = iso15693_3_poller_check_presence(instance, uid);
         protocol_detected = (error == Iso15693_3ErrorNone);
     }
 
