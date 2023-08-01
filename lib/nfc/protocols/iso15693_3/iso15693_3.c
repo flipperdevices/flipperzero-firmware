@@ -12,6 +12,7 @@
 #define ISO15693_3_BLOCK_COUNT_KEY "Block Count"
 #define ISO15693_3_BLOCK_SIZE_KEY "Block Size"
 #define ISO15693_3_DATA_CONTENT_KEY "Data Content"
+#define ISO15693_3_LOCK_BITS_KEY "Lock Bits"
 #define ISO15693_3_SECURITY_STATUS_KEY "Security Status"
 
 const NfcDeviceBase nfc_device_iso15693_3 = {
@@ -34,7 +35,7 @@ Iso15693_3Data* iso15693_3_alloc() {
     Iso15693_3Data* data = malloc(sizeof(Iso15693_3Data));
 
     data->block_data = simple_array_alloc(&simple_array_config_uint8_t);
-    data->security_status = simple_array_alloc(&simple_array_config_uint8_t);
+    data->block_security = simple_array_alloc(&simple_array_config_uint8_t);
 
     return data;
 }
@@ -43,7 +44,7 @@ void iso15693_3_free(Iso15693_3Data* data) {
     furi_assert(data);
 
     simple_array_free(data->block_data);
-    simple_array_free(data->security_status);
+    simple_array_free(data->block_security);
     free(data);
 }
 
@@ -52,9 +53,10 @@ void iso15693_3_reset(Iso15693_3Data* data) {
 
     memset(data->uid, 0, ISO15693_3_UID_SIZE);
     memset(&data->system_info, 0, sizeof(Iso15693_3SystemInfo));
+    memset(&data->settings, 0, sizeof(Iso15693_3Settings));
 
     simple_array_reset(data->block_data);
-    simple_array_reset(data->security_status);
+    simple_array_reset(data->block_security);
 }
 
 void iso15693_3_copy(Iso15693_3Data* data, const Iso15693_3Data* other) {
@@ -62,15 +64,68 @@ void iso15693_3_copy(Iso15693_3Data* data, const Iso15693_3Data* other) {
     furi_assert(other);
 
     memcpy(data->uid, other->uid, ISO15693_3_UID_SIZE);
+
     data->system_info = other->system_info;
+    data->settings = other->settings;
 
     simple_array_copy(data->block_data, other->block_data);
-    simple_array_copy(data->security_status, other->security_status);
+    simple_array_copy(data->block_security, other->block_security);
 }
 
 bool iso15693_3_verify(Iso15693_3Data* data, const FuriString* device_type) {
     UNUSED(data);
     return furi_string_equal(device_type, ISO15693_3_PROTOCOL_NAME_LEGACY);
+}
+
+static inline bool iso15693_3_load_security_legacy(Iso15693_3Data* data, FlipperFormat* ff) {
+    bool loaded = false;
+    uint8_t* legacy_data = NULL;
+
+    do {
+        uint32_t value_count;
+        if(!flipper_format_get_value_count(ff, ISO15693_3_SECURITY_STATUS_KEY, &value_count))
+            break;
+        if(simple_array_get_count(data->block_security) + 1 != value_count) break;
+
+        legacy_data = malloc(value_count);
+        if(!flipper_format_read_hex(ff, ISO15693_3_SECURITY_STATUS_KEY, legacy_data, value_count))
+            break;
+
+        // First legacy data byte is lock bits
+        data->settings.lock_bits = legacy_data[0];
+        // The rest are block security
+        memcpy(
+            &legacy_data[1],
+            simple_array_get_data(data->block_security),
+            simple_array_get_count(data->block_security));
+
+        loaded = true;
+    } while(false);
+
+    if(legacy_data) free(legacy_data);
+
+    return loaded;
+}
+
+static inline bool iso15693_3_load_security(Iso15693_3Data* data, FlipperFormat* ff) {
+    bool loaded = false;
+
+    do {
+        uint32_t value_count;
+        if(!flipper_format_get_value_count(ff, ISO15693_3_SECURITY_STATUS_KEY, &value_count))
+            break;
+        if(simple_array_get_count(data->block_security) != value_count) break;
+        if(!flipper_format_read_hex(
+               ff,
+               ISO15693_3_SECURITY_STATUS_KEY,
+               simple_array_get_data(data->block_security),
+               simple_array_get_count(data->block_security)))
+            break;
+
+        loaded = true;
+    } while(false);
+
+    return loaded;
 }
 
 bool iso15693_3_load(Iso15693_3Data* data, FlipperFormat* ff, uint32_t version) {
@@ -97,6 +152,12 @@ bool iso15693_3_load(Iso15693_3Data* data, FlipperFormat* ff, uint32_t version) 
             data->system_info.flags |= ISO15693_3_SYSINFO_FLAG_IC_REF;
         }
 
+        const bool has_lock_bits = flipper_format_key_exist(ff, ISO15693_3_LOCK_BITS_KEY);
+        if(has_lock_bits) {
+            if(!flipper_format_read_hex(ff, ISO15693_3_LOCK_BITS_KEY, &data->settings.lock_bits, 1))
+                break;
+        }
+
         if(flipper_format_key_exist(ff, ISO15693_3_BLOCK_COUNT_KEY) &&
            flipper_format_key_exist(ff, ISO15693_3_BLOCK_SIZE_KEY)) {
             uint32_t block_count;
@@ -120,13 +181,12 @@ bool iso15693_3_load(Iso15693_3Data* data, FlipperFormat* ff, uint32_t version) 
                 break;
 
             if(flipper_format_key_exist(ff, ISO15693_3_SECURITY_STATUS_KEY)) {
-                simple_array_init(data->security_status, data->system_info.block_count + 1);
-                if(!flipper_format_read_hex(
-                       ff,
-                       ISO15693_3_SECURITY_STATUS_KEY,
-                       simple_array_get_data(data->security_status),
-                       simple_array_get_count(data->security_status)))
-                    break;
+                simple_array_init(data->block_security, data->system_info.block_count);
+
+                const bool security_loaded = has_lock_bits ?
+                                                 iso15693_3_load_security(data, ff) :
+                                                 iso15693_3_load_security_legacy(data, ff);
+                if(!security_loaded) break;
             }
         }
 
@@ -154,14 +214,21 @@ bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
         }
 
         if(data->system_info.flags & ISO15693_3_SYSINFO_FLAG_IC_REF) {
-            if(!flipper_format_write_comment_cstr(ff, "IC Reference")) break;
+            if(!flipper_format_write_comment_cstr(ff, "IC Reference - Vendor specific meaning"))
+                break;
             if(!flipper_format_write_hex(ff, ISO15693_3_IC_REF_KEY, &data->system_info.ic_ref, 1))
                 break;
         }
 
+        if(!flipper_format_write_comment_cstr(ff, "Lock Bits: 0x01 = DSFID, 0x02 = AFI")) break;
+        if(!flipper_format_write_hex(ff, ISO15693_3_LOCK_BITS_KEY, &data->settings.lock_bits, 1))
+            break;
+
         if(data->system_info.flags & ISO15693_3_SYSINFO_FLAG_MEMORY) {
             const uint32_t block_count = data->system_info.block_count;
-            if(!flipper_format_write_comment_cstr(ff, "Number of memory blocks, 1 to 256")) break;
+            if(!flipper_format_write_comment_cstr(
+                   ff, "Number of memory blocks, valid range = 1..256"))
+                break;
             if(!flipper_format_write_uint32(ff, ISO15693_3_BLOCK_COUNT_KEY, &block_count, 1))
                 break;
 
@@ -179,13 +246,13 @@ bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
                 break;
 
             if(!flipper_format_write_comment_cstr(
-                   ff, "First byte: DSFID (0x01) / AFI (0x02) lock info, others: block lock info"))
+                   ff, "Block Security Status: 0x01 = locked, 0x00 = not locked"))
                 break;
             if(!flipper_format_write_hex(
                    ff,
                    ISO15693_3_SECURITY_STATUS_KEY,
-                   simple_array_cget_data(data->security_status),
-                   simple_array_get_count(data->security_status)))
+                   simple_array_cget_data(data->block_security),
+                   simple_array_get_count(data->block_security)))
                 break;
         }
         saved = true;

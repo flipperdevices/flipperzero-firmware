@@ -246,12 +246,11 @@ Iso15693_3Error
             if(ret != Iso15693_3ErrorNone) break;
 
             // Read block security status
-            // Backward compatibility: the first byte is used for AFI/DSFID lock, hence + 1
-            simple_array_init(iso15693_3_data->security_status, system_info->block_count + 1);
+            simple_array_init(iso15693_3_data->block_security, system_info->block_count);
 
             ret = iso15693_3_poller_async_get_blocks_security(
                 instance,
-                simple_array_get_data(iso15693_3_data->security_status) + 1,
+                simple_array_get_data(iso15693_3_data->block_security),
                 system_info->block_count);
             if(ret != Iso15693_3ErrorNone) break;
         }
