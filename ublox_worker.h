@@ -20,6 +20,7 @@ typedef enum {
     UbloxWorkerEventSuccess,
     UbloxWorkerEventFailed,
     UbloxWorkerEventDataReady,
+    UbloxWorkerEventOdoReset,
 } UbloxWorkerEvent;
 
 typedef void (*UbloxWorkerCallback)(UbloxWorkerEvent event, void* context);

@@ -8,7 +8,6 @@ typedef struct DataDisplayView {
     View* view;
     DataDisplayViewCallback callback;
     void* context;
-
 } DataDisplayView;
 
 typedef struct {
@@ -18,6 +17,16 @@ typedef struct {
     UbloxLogState log_state;
 } DataDisplayViewModel;
 
+static void draw_buttons(Canvas* canvas, void* model) {
+    DataDisplayViewModel* m = model;
+    elements_button_left(canvas, "Config");
+    if(m->log_state == UbloxLogStateLogging) {
+	elements_button_right(canvas, "Stop Log");
+    } else {
+	elements_button_right(canvas, "Start Log");
+    }
+}
+	
 static void data_display_draw_callback(Canvas* canvas, void* model) {
     DataDisplayViewModel* m = model;
     if(m->state == DataDisplayGPSNotFound) {
@@ -31,11 +40,9 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         // TODO: check invalidLlh flag in flags3?
         Ublox_NAV_PVT_Message message = m->nav_pvt;
         Ublox_NAV_ODO_Message nav_odo = m->nav_odo;
-
+	draw_buttons(canvas, model);
         FuriString* s = furi_string_alloc();
-        elements_button_left(canvas, "Config");
-        elements_button_center(canvas, "Reset");
-	elements_button_right(canvas, "Log");
+
         /*** Draw fix ***/
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 0, 9, "F/S:");
@@ -150,10 +157,7 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
         Ublox_NAV_PVT_Message message = m->nav_pvt;
         Ublox_NAV_ODO_Message nav_odo = m->nav_odo;
         FuriString* s = furi_string_alloc();
-        elements_button_left(canvas, "Config");
-        elements_button_center(canvas, "Reset");
-	elements_button_right(canvas, "Log");
-	
+	draw_buttons(canvas, model);
         // TODO: imperial/metric
         canvas_set_font(canvas, FontPrimary);
         // gSpeed is in mm/s
