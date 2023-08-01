@@ -26,7 +26,7 @@ def bf_to_str(bf):
 
 
 def display_build_status():
-    """Display the build status.  Called by atexit.
+    """Display the build status. Called by atexit.
     Here you could do all kinds of complicated things."""
     bf = GetBuildFailures()
     if bf:
