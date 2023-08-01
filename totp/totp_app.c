@@ -134,7 +134,7 @@ static bool totp_plugin_state_init(PluginState* const plugin_state) {
 
     plugin_state->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
     if(plugin_state->automation_method & AutomationMethodBadBt) {
         plugin_state->bt_type_code_worker_context = totp_bt_type_code_worker_init();
     } else {
@@ -168,14 +168,17 @@ static void totp_plugin_state_free(PluginState* plugin_state) {
         free(plugin_state->crypto_verify_data);
     }
 
-#ifdef TOTP_BADBT_TYPE_ENABLED
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
     if(plugin_state->bt_type_code_worker_context != NULL) {
         totp_bt_type_code_worker_free(plugin_state->bt_type_code_worker_context);
         plugin_state->bt_type_code_worker_context = NULL;
     }
 #endif
 
-    furi_message_queue_free(plugin_state->event_queue);
+    if(plugin_state->event_queue != NULL) {
+        furi_message_queue_free(plugin_state->event_queue);
+    }
+
     free(plugin_state);
 }
 

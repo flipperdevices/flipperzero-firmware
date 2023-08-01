@@ -1,6 +1,4 @@
 param (
-    [switch]$doNotBuildBaseFap = $false,
-    [switch]$buildCustomFontFap = $false,
     [switch]$doNotClearBuildFolder = $false
 )
 
@@ -79,68 +77,11 @@ function Build-Run {
     }
 }
 
-if ($doNotBuildBaseFap -eq $false) {
-    Write-Information 'Building with all the features enables'
-    Build-Run -FeaturesSuffix ''
+Write-Information 'Building with all the features enables'
+Build-Run -FeaturesSuffix ''
 
-    Write-Information 'Building with BadBT but without BadBT icon'
-    Build-Run -FeaturesSuffix '_badbt-wo-icon' -CppDefine TOTP_NO_AUTOMATION_ICONS
-
-    Write-Information 'Building without BadBT'
-    Build-Run -FeaturesSuffix '_no-badbt' -CppDefine TOTP_NO_BADBT_TYPE,TOTP_NO_AUTOMATION_ICONS
-}
-
-if ($buildCustomFontFap -eq $true) {
-    $custom_fonts = @(
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_REDHATMONO";
-            Subfolder = 'Redhat_Mono'
-        },
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_BEDSTEAD";
-            Subfolder = 'Bedstead'
-        },
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_ZECTOR";
-            Subfolder = 'Zector'
-        },
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_712SERIF";
-            Subfolder = '7-12_Serif'
-        },
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_GRAPH35PIX";
-            Subfolder = 'Graph35_pix'
-        },
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_KARMAFUTURE";
-            Subfolder = 'Karma_future'
-        },
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_FUNCLIMBING";
-            Subfolder = 'Funclimbing'
-        },
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_DPCOMIC";
-            Subfolder = 'DPComic'
-        },
-        [PSCustomObject]@{
-            CDEF = "TOTP_FONT_PIXELFLAG";
-            Subfolder = 'Pixel_flag'
-        }
-    )
-
-    foreach ($custom_font in $custom_fonts) {
-        Write-Information "Custom font ($($custom_font.Subfolder)): Building with all the features enables"
-        Build-Run -FeaturesSuffix '' -CppDefine TOTP_FONT=$($custom_font.CDEF) -Subfolder $($custom_font.Subfolder)
-
-        Write-Information "Custom font ($($custom_font.Subfolder)): Building with BadBT but without BadBT icon"
-        Build-Run -FeaturesSuffix '_badbt-wo-icon' -CppDefine TOTP_NO_AUTOMATION_ICONS,TOTP_FONT=$($custom_font.CDEF) -Subfolder $($custom_font.Subfolder)
-
-        Write-Information "Custom font ($($custom_font.Subfolder)): Building without BadBT"
-        Build-Run -FeaturesSuffix '_no-badbt' -CppDefine TOTP_NO_BADBT_TYPE,TOTP_NO_AUTOMATION_ICONS,TOTP_FONT=$($custom_font.CDEF) -Subfolder $($custom_font.Subfolder)
-    }
-}
+Write-Information 'Building without BadBT'
+Build-Run -FeaturesSuffix '_no-badbt' -CppDefine TOTP_NO_BADBT_AUTOMATION
 
 $checksum_file = 'build/checksums.sha256'
 New-Item $checksum_file -ItemType File -Force
