@@ -265,7 +265,11 @@ bool iso15693_3_is_equal(const Iso15693_3Data* data, const Iso15693_3Data* other
     furi_assert(data);
     furi_assert(other);
 
-    return memcmp(data, other, sizeof(Iso15693_3Data)) == 0;
+    return memcmp(data->uid, other->uid, ISO15693_3_UID_SIZE) == 0 &&
+           memcmp(&data->settings, &other->settings, sizeof(Iso15693_3Settings)) == 0 &&
+           memcmp(&data->system_info, &other->system_info, sizeof(Iso15693_3SystemInfo)) == 0 &&
+           simple_array_is_equal(data->block_data, other->block_data) &&
+           simple_array_is_equal(data->block_security, other->block_security);
 }
 
 const char* iso15693_3_get_device_name(const Iso15693_3Data* data, NfcDeviceNameType name_type) {

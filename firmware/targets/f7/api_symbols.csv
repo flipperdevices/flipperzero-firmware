@@ -2676,6 +2676,7 @@ Function,+,simple_array_get,SimpleArrayElement*,"SimpleArray*, uint32_t"
 Function,+,simple_array_get_count,uint32_t,const SimpleArray*
 Function,+,simple_array_get_data,SimpleArrayData*,SimpleArray*
 Function,+,simple_array_init,void,"SimpleArray*, uint32_t"
+Function,+,simple_array_is_equal,_Bool,"const SimpleArray*, const SimpleArray*"
 Function,+,simple_array_reset,void,SimpleArray*
 Function,-,sin,double,double
 Function,-,sincos,void,"double, double*, double*"
