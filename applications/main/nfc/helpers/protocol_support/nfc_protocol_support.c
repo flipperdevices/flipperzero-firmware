@@ -344,7 +344,14 @@ static void nfc_protocol_support_scene_saved_menu_on_enter(NfcApp* instance) {
         nfc_protocol_support_common_submenu_callback,
         instance);
 
-    // TODO: Implement restore from shadow file
+    if(nfc_has_shadow_file(instance)) {
+        submenu_add_item(
+            submenu,
+            "Restore Data Changes",
+            SubmenuIndexCommonRestore,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
+    }
 
     submenu_set_selected_item(
         instance->submenu,
@@ -360,9 +367,10 @@ static bool
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(instance->scene_manager, NfcSceneSavedMenu, event.event);
 
-        // TODO: Implement restore from shadow file
-
-        if(event.event == SubmenuIndexCommonInfo) {
+        if(event.event == SubmenuIndexCommonRestore) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneRestoreOriginalConfirm);
+            consumed = true;
+        } else if(event.event == SubmenuIndexCommonInfo) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSupportedCard);
             consumed = true;
         } else if(event.event == SubmenuIndexCommonRename) {
@@ -489,6 +497,19 @@ static bool
 
 static void nfc_protocol_support_scene_emulate_on_exit(NfcApp* instance) {
     nfc_listener_stop(instance->listener);
+
+    NfcDevice* nfc_stub = nfc_device_alloc();
+    NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+    const NfcDeviceData* data = nfc_listener_get_data(instance->listener, protocol);
+    nfc_device_set_data(nfc_stub, protocol, data);
+
+    //TODO: think about nfc_device_is_equal(NfcDevice*,NfcDeviceData*);
+    if(!nfc_device_is_equal(nfc_stub, instance->nfc_device)) {
+        nfc_device_set_data(instance->nfc_device, protocol, data);
+        nfc_save_shadow_file(instance);
+    }
+    nfc_device_free(nfc_stub);
+
     nfc_listener_free(instance->listener);
 
     // Clear view
