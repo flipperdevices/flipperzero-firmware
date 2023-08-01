@@ -4,9 +4,9 @@
 
 #define TAG "evil_portal_command"
 
-static bool send_file_over_uart(Storage *storage, const char* path) {
-    Stream *file_stream = buffered_file_stream_alloc(storage);
-    if (!buffered_file_stream_open(file_stream, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+static bool send_file_over_uart(Storage* storage, const char* path) {
+    Stream* file_stream = buffered_file_stream_alloc(storage);
+    if(!buffered_file_stream_open(file_stream, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         FURI_LOG_E(TAG, "Unable to open stream: %s", path);
         // The stream should be closed also if the open fails.
         buffered_file_stream_close(file_stream);
@@ -28,40 +28,40 @@ static bool send_file_over_uart(Storage *storage, const char* path) {
     return true;
 }
 
-bool evil_portal_set_html(Storage *storage, const char* path) {
+bool evil_portal_set_html(Storage* storage, const char* path) {
     furi_assert(storage, "storage is null");
     furi_assert(path, "the html file path is null");
 
-    evil_portal_uart_tx((uint8_t*) "sethtml=", 8);
+    evil_portal_uart_tx((uint8_t*)"sethtml=", 8);
 
     bool html_sent = send_file_over_uart(storage, path);
 
-    if (!html_sent) {
-        char *error_message = "<b>Evil portal</b><br>Unable to read the html file.<br>"
+    if(!html_sent) {
+        char* error_message = "<b>Evil portal</b><br>Unable to read the html file.<br>"
                               "Is the SD Card set up correctly? <br>See instructions @ "
                               "github.com/bigbrodude6119/flipper-zero-evil-portal<br>"
                               "Under the 'Install pre-built app on the flipper' section.";
-        evil_portal_uart_tx((uint8_t*) error_message, strlen(error_message));
+        evil_portal_uart_tx((uint8_t*)error_message, strlen(error_message));
     }
 
-    evil_portal_uart_tx((uint8_t*) "\n", 1);
+    evil_portal_uart_tx((uint8_t*)"\n", 1);
 
     return true;
 }
 
-bool evil_portal_set_ap_name(Storage *storage, const char *ap_config_path) {
+bool evil_portal_set_ap_name(Storage* storage, const char* ap_config_path) {
     furi_assert(storage, "storage is null");
     furi_assert(ap_config_path, "the ap config path is null");
 
-    evil_portal_uart_tx((uint8_t*) "setap=", 6);
+    evil_portal_uart_tx((uint8_t*)"setap=", 6);
 
     bool ap_name_sent = send_file_over_uart(storage, ap_config_path);
 
-    if (!ap_name_sent) {
-        char *default_name = "Evil Portal";
-        evil_portal_uart_tx((uint8_t*) default_name, strlen(default_name));
+    if(!ap_name_sent) {
+        char* default_name = "Evil Portal";
+        evil_portal_uart_tx((uint8_t*)default_name, strlen(default_name));
     }
 
-    evil_portal_uart_tx((uint8_t*) "\n", 1);
+    evil_portal_uart_tx((uint8_t*)"\n", 1);
     return true;
 }
