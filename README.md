@@ -5,8 +5,7 @@ feature that is available on the CLI. In addition it allows for basic
 encryption of messages.
 
 The plugin has been tested on the official firmware (version 0.87.0) and on
-Unleashed (version unlshd-059). Due to limitations of the official firmware,
-the behavior is slightly different there.
+Unleashed (version unlshd-059).
 
 Currently the use of an external antenna is not supported.
 
@@ -28,9 +27,8 @@ the key from another Flipper via NFC are supported.
 
 Finally the a message can be input. After the message is confirmed, the plugin
 will switch to the chat view, where sent and received messages are displayed.
-To view the chat view without entering a message, enter nothing (on Unleashed)
-or a single space (on OFW). To go back to entering a message press the back
-button.
+To view the chat view without entering a message, enter nothing. To go back to
+entering a message press the back button.
 
 In the chat view the keyboard can be locked by pressing and holding the OK
 button for a few seconds. To unlock the keyboard again quickly press the back
@@ -79,4 +77,5 @@ The implementations of AES and GCM are taken directly from
 https://github.com/mko-x/SharedAES-GCM. They were released to the public domain
 by Markus Kosmal.
 
-The app icon was made by [xMasterX](https://github.com/xMasterX).
+The app icon was made by [xMasterX](https://github.com/xMasterX). Other icons
+and graphics were taken from the Flipper Zero firmware.
