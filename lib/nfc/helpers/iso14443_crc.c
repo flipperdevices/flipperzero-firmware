@@ -7,8 +7,6 @@
 
 static uint16_t
     iso14443_crc_calculate(Iso14443CrcType type, const uint8_t* data, size_t data_size) {
-    furi_assert(data);
-
     uint16_t crc;
 
     if(type == Iso14443CrcTypeA) {
