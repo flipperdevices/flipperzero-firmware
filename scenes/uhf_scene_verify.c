@@ -52,10 +52,10 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
             if(verify_success) {
                 widget_reset(uhf_app->widget);
                 furi_string_reset(temp_str);
-                UHFResponseData* response_data = uhf_app->worker->data;
-                UHFData* hardware_version = uhf_response_data_get_uhf_data(response_data, 0);
-                UHFData* software_version = uhf_response_data_get_uhf_data(response_data, 1);
-                UHFData* manufacturer = uhf_response_data_get_uhf_data(response_data, 2);
+                UHFResponseData* uhf_response_data = uhf_app->worker->response_data;
+                UHFData* hardware_version = uhf_response_data_get_uhf_data(uhf_response_data, 0);
+                UHFData* software_version = uhf_response_data_get_uhf_data(uhf_response_data, 1);
+                UHFData* manufacturer = uhf_response_data_get_uhf_data(uhf_response_data, 2);
                 uint offset = 6;
                 widget_add_string_element(
                     uhf_app->widget, 64, 5, AlignCenter, AlignCenter, FontPrimary, "Module Info");

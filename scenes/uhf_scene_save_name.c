@@ -45,7 +45,7 @@ void uhf_scene_save_name_on_enter(void* context) {
 
 bool uhf_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     UHFApp* uhf_app = context;
-    UHFResponseData* uhf_data_save = uhf_app->worker->data;
+    UHFResponseData* uhf_data_save = uhf_app->worker->response_data;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UHFCustomEventTextInputDone) {

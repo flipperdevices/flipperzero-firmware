@@ -14,7 +14,8 @@ typedef struct UHFData {
 } UHFData;
 
 typedef struct UHFResponseData {
-    UHFData* data;
+    UHFData* head;
+    UHFData* tail;
     size_t size;
 
 } UHFResponseData;
@@ -27,4 +28,5 @@ void uhf_data_free(UHFData* uhf_data);
 UHFResponseData* uhf_response_data_alloc();
 UHFData* uhf_response_data_add_new_uhf_data(UHFResponseData* uhf_response_data);
 UHFData* uhf_response_data_get_uhf_data(UHFResponseData* uhf_response_data, uint index);
+void uhf_response_data_reset(UHFResponseData* uhf_response_data);
 void uhf_response_data_free(UHFResponseData* uhf_response_data);

@@ -5,13 +5,13 @@ enum SubmenuIndex {
     SubmenuIndexChangeKey,
 };
 
-void uhf_scene_card_menu_submenu_callback(void* context, uint32_t index) {
-    UHFApp* uhf_app = context;
+void uhf_scene_card_menu_submenu_callback(void* ctx, uint32_t index) {
+    UHFApp* uhf_app = ctx;
     view_dispatcher_send_custom_event(uhf_app->view_dispatcher, index);
 }
 
-void uhf_scene_card_menu_on_enter(void* context) {
-    UHFApp* uhf_app = context;
+void uhf_scene_card_menu_on_enter(void* ctx) {
+    UHFApp* uhf_app = ctx;
 
     Submenu* submenu = uhf_app->submenu;
 
@@ -30,12 +30,11 @@ void uhf_scene_card_menu_on_enter(void* context) {
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewMenu);
 }
 
-bool uhf_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
-    UHFApp* uhf_app = context;
+bool uhf_scene_card_menu_on_event(void* ctx, SceneManagerEvent event) {
+    UHFApp* uhf_app = ctx;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        FURI_LOG_E("LOG", "%lu", event.event);
         if(event.event == SubmenuIndexSave) {
             scene_manager_set_scene_state(
                 uhf_app->scene_manager, UHFSceneCardMenu, SubmenuIndexSave);
@@ -56,8 +55,8 @@ bool uhf_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void uhf_scene_card_menu_on_exit(void* context) {
-    UHFApp* uhf_app = context;
+void uhf_scene_card_menu_on_exit(void* ctx) {
+    UHFApp* uhf_app = ctx;
 
     submenu_reset(uhf_app->submenu);
 }

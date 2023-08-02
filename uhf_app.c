@@ -52,7 +52,7 @@ bool uhf_save_read_data(UHFResponseData* uhf_response_data, Storage* storage, co
     if(!flipper_format_write_header_cstr(file, uhf_file_header, uhf_file_version)) return false;
     // write epc bank
     if(!flipper_format_write_hex(
-           file, "EPC", uhf_response_data->data->data, uhf_response_data->data->length))
+           file, "EPC", uhf_response_data->head->data, uhf_response_data->head->length))
         return false;
     furi_string_free(temp_str);
     flipper_format_free(file);
