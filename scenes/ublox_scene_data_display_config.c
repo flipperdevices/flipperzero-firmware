@@ -68,13 +68,13 @@ const UbloxDataDisplayRefreshRate refresh_rate_values[REFRESH_RATE_COUNT] = {
 
 #define NOTIFY_MODE_COUNT 2
 const char* const notify_mode_text[NOTIFY_MODE_COUNT] = {
-    "On",
     "Off",
+    "On",
 };
 
 const UbloxDataDisplayNotifyMode notify_mode_values[NOTIFY_MODE_COUNT] = {
-    UbloxDataDisplayNotifyOn,
     UbloxDataDisplayNotifyOff,
+    UbloxDataDisplayNotifyOn,
 };
 
 #define ODOMETER_MODE_COUNT 4

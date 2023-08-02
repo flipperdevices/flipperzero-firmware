@@ -1,5 +1,9 @@
 #pragma once
 
+#define UBLOX_VERSION_APP "0.1"
+#define UBLOX_DEVELOPED "liamhays"
+#define UBLOX_GITHUB "https://github.com/liamhays/ublox"
+
 typedef enum {
     UbloxLogStateStartLogging,
     UbloxLogStateLogging,

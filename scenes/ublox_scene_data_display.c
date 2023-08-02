@@ -83,6 +83,7 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
             data_display_set_nav_messages(ublox->data_display, ublox->nav_pvt, ublox->nav_odo);
 
 	    data_display_set_log_state(ublox->data_display, ublox->log_state);
+	    
 	} else if(event.event == UbloxWorkerEventOdoReset) {
 	    // restart the thread
 	    ublox_worker_start(ublox->worker, UbloxWorkerStateRead, ublox_scene_data_display_worker_callback, ublox);
