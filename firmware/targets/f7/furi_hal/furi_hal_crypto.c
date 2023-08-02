@@ -25,14 +25,14 @@
 #define CRYPTO_AES_CBC (AES_CR_CHMOD_0)
 
 #define CRYPTO_AES_CTR (AES_CR_CHMOD_1)
-#define CRYPTO_CTR_IV_LEN 12
-#define CRYPTO_CTR_CTR_LEN 4
+#define CRYPTO_CTR_IV_LEN (12U)
+#define CRYPTO_CTR_CTR_LEN (4U)
 
 #define CRYPTO_AES_GCM (AES_CR_CHMOD_1 | AES_CR_CHMOD_0)
-#define CRYPTO_GCM_IV_LEN 12
-#define CRYPTO_GCM_CTR_LEN 4
-#define CRYPTO_GCM_TAG_LEN 16
-#define CRYPTO_GCM_PH_INIT 0U
+#define CRYPTO_GCM_IV_LEN (12U)
+#define CRYPTO_GCM_CTR_LEN (4U)
+#define CRYPTO_GCM_TAG_LEN (16U)
+#define CRYPTO_GCM_PH_INIT (0x0U << AES_CR_GCMPH_Pos)
 #define CRYPTO_GCM_PH_HEADER (AES_CR_GCMPH_0)
 #define CRYPTO_GCM_PH_PAYLOAD (AES_CR_GCMPH_1)
 #define CRYPTO_GCM_PH_FINAL (AES_CR_GCMPH_1 | AES_CR_GCMPH_0)
@@ -295,10 +295,6 @@ bool furi_hal_crypto_load_key(const uint8_t* key, const uint8_t* iv) {
 
     furi_hal_bus_enable(FuriHalBusAES1);
 
-    if(!furi_hal_bt_is_alive()) {
-        return false;
-    }
-
     furi_hal_crypto_mode_init_done = false;
     crypto_key_init((uint32_t*)key, (uint32_t*)iv);
 
@@ -306,10 +302,6 @@ bool furi_hal_crypto_load_key(const uint8_t* key, const uint8_t* iv) {
 }
 
 bool furi_hal_crypto_unload_key(void) {
-    if(!furi_hal_bt_is_alive()) {
-        return false;
-    }
-
     CLEAR_BIT(AES1->CR, AES_CR_EN);
 
     furi_hal_bus_disable(FuriHalBusAES1);
@@ -414,10 +406,6 @@ static bool
 
     furi_hal_bus_enable(FuriHalBusAES1);
 
-    if(!furi_hal_bt_is_alive()) {
-        return false;
-    }
-
     crypto_key_init_bswap((uint32_t*)key, (uint32_t*)iv, chaining_mode);
 
     return true;
@@ -490,27 +478,25 @@ static bool furi_hal_crypto_ctr_payload(const uint8_t* input, uint8_t* output, s
     SET_BIT(AES1->CR, AES_CR_EN);
     MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_ENCRYPT);
 
-    bool state = false;
     size_t last_block_bytes = length % CRYPTO_BLK_LEN;
 
     size_t i;
     for(i = 0; i < length - last_block_bytes; i += CRYPTO_BLK_LEN) {
         if(!furi_hal_crypto_process_block_bswap(&input[i], &output[i], CRYPTO_BLK_LEN)) {
-            goto out_enc_err;
+            CLEAR_BIT(AES1->CR, AES_CR_EN);
+            return false;
         }
     }
 
     if(last_block_bytes > 0) {
         if(!furi_hal_crypto_process_block_bswap(&input[i], &output[i], last_block_bytes)) {
-            goto out_enc_err;
+            CLEAR_BIT(AES1->CR, AES_CR_EN);
+            return false;
         }
     }
 
-    state = true;
-
-out_enc_err:
     CLEAR_BIT(AES1->CR, AES_CR_EN);
-    return state;
+    return true;
 }
 
 bool furi_hal_crypto_ctr(
@@ -577,21 +563,19 @@ static bool furi_hal_crypto_gcm_header(const uint8_t* aad, size_t aad_length) {
     size_t i;
     for(i = 0; i < aad_length - last_block_bytes; i += CRYPTO_BLK_LEN) {
         if(!furi_hal_crypto_process_block_no_read_bswap(&aad[i], CRYPTO_BLK_LEN)) {
-            goto out_enc_err;
+            CLEAR_BIT(AES1->CR, AES_CR_EN);
+            return false;
         }
     }
 
     if(last_block_bytes > 0) {
         if(!furi_hal_crypto_process_block_no_read_bswap(&aad[i], last_block_bytes)) {
-            goto out_enc_err;
+            CLEAR_BIT(AES1->CR, AES_CR_EN);
+            return false;
         }
     }
 
     return true;
-
-out_enc_err:
-    CLEAR_BIT(AES1->CR, AES_CR_EN);
-    return false;
 }
 
 static bool furi_hal_crypto_gcm_payload(
@@ -609,7 +593,8 @@ static bool furi_hal_crypto_gcm_payload(
     size_t i;
     for(i = 0; i < length - last_block_bytes; i += CRYPTO_BLK_LEN) {
         if(!furi_hal_crypto_process_block_bswap(&input[i], &output[i], CRYPTO_BLK_LEN)) {
-            goto out_enc_err;
+            CLEAR_BIT(AES1->CR, AES_CR_EN);
+            return false;
         }
     }
 
@@ -619,15 +604,12 @@ static bool furi_hal_crypto_gcm_payload(
                 AES1->CR, AES_CR_NPBLB, (CRYPTO_BLK_LEN - last_block_bytes) << AES_CR_NPBLB_Pos);
         }
         if(!furi_hal_crypto_process_block_bswap(&input[i], &output[i], last_block_bytes)) {
-            goto out_enc_err;
+            CLEAR_BIT(AES1->CR, AES_CR_EN);
+            return false;
         }
     }
 
     return true;
-
-out_enc_err:
-    CLEAR_BIT(AES1->CR, AES_CR_EN);
-    return false;
 }
 
 static bool furi_hal_crypto_gcm_finish(size_t aad_length, size_t payload_length, uint8_t* tag) {
@@ -669,8 +651,6 @@ bool furi_hal_crypto_gcm(
     size_t length,
     uint8_t* tag,
     bool decrypt) {
-    bool state = false;
-
     /* GCM init phase */
 
     /* prepare IV and counter */
@@ -685,34 +665,35 @@ bool furi_hal_crypto_gcm(
     }
 
     if(!furi_hal_crypto_gcm_init(decrypt)) {
-        goto out_enc_err;
+        furi_hal_crypto_unload_key();
+        return false;
     }
 
     /* GCM header phase */
 
     if(aad_length > 0) {
         if(!furi_hal_crypto_gcm_header(aad, aad_length)) {
-            goto out_enc_err;
+            furi_hal_crypto_unload_key();
+            return false;
         }
     }
 
     /* GCM payload phase */
 
     if(!furi_hal_crypto_gcm_payload(input, output, length, decrypt)) {
-        goto out_enc_err;
+        furi_hal_crypto_unload_key();
+        return false;
     }
 
     /* GCM final phase */
 
     if(!furi_hal_crypto_gcm_finish(aad_length, length, tag)) {
-        goto out_enc_err;
+        furi_hal_crypto_unload_key();
+        return false;
     }
 
-    state = true;
-
-out_enc_err:
     furi_hal_crypto_unload_key();
-    return state;
+    return true;
 }
 
 FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(

@@ -60,6 +60,9 @@ extern "C" {
 #define FURI_HAL_CRYPTO_ENCLAVE_USER_KEY_SLOT_START (12u)
 #define FURI_HAL_CRYPTO_ENCLAVE_USER_KEY_SLOT_END (100u)
 
+/** Indicate availability of advanced crypto functions */
+#define FURI_HAL_CRYPTO_ADVANCED_AVAIL 1
+
 /** FuriHalCryptoKey Type */
 typedef enum {
     FuriHalCryptoKeyTypeMaster, /**< Master key */
