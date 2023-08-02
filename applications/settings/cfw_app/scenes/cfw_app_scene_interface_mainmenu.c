@@ -174,7 +174,13 @@ bool cfw_app_scene_interface_mainmenu_on_event(void* context, SceneManagerEvent 
             CharList_remove_v(
                 app->mainmenu_app_paths, app->mainmenu_app_index, app->mainmenu_app_index + 1);
             if(app->mainmenu_app_index) app->mainmenu_app_index--;
-            /* fall through */
+            app->save_mainmenu_apps = true;
+            app->require_reboot = true;
+            scene_manager_previous_scene(app->scene_manager);
+            scene_manager_set_scene_state(
+                app->scene_manager, CfwAppSceneInterfaceMainmenu, VarItemListIndexRemoveApp);
+            scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceMainmenu);
+            break;
         case VarItemListIndexMoveApp:
             app->save_mainmenu_apps = true;
             app->require_reboot = true;
