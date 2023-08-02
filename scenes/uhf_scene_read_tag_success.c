@@ -15,10 +15,9 @@ void uhf_scene_read_card_success_widget_callback(GuiButtonType result, InputType
 }
 
 void uhf_scene_read_tag_success_on_enter(void* ctx) {
-    // UNUSED(ctx);
     UHFApp* uhf_app = ctx;
 
-    const uint8_t* read_data = uhf_app->worker->data->data->data;
+    const uint8_t* read_data = uhf_app->worker->response_data->head->data;
 
     widget_add_string_element(
         uhf_app->widget, 32, 5, AlignLeft, AlignCenter, FontPrimary, "Read Success");
@@ -78,7 +77,6 @@ bool uhf_scene_read_tag_success_on_event(void* ctx, SceneManagerEvent event) {
     UHFApp* uhf_app = ctx;
     bool consumed = false;
     if(event.event == SceneManagerEventTypeBack) {
-        // FURI_LOG_E("36", "Back button was pressed");
         uhf_app->worker->state = UHFWorkerStateStop;
     }
     if(event.type == SceneManagerEventTypeCustom) {
@@ -101,7 +99,7 @@ void uhf_scene_read_tag_success_on_exit(void* ctx) {
     UHFApp* uhf_app = ctx;
 
     // // Stop worker
-    // uhf_worker_stop(uhf_app->worker);
+    uhf_worker_stop(uhf_app->worker);
     // Clear view
     popup_reset(uhf_app->popup);
     // clear widget

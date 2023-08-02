@@ -26,9 +26,6 @@
 #include "uhf_worker.h"
 #include <uhf_rfid_icons.h>
 
-#define UHF_FILE_HEADER            \
-    "Filetype: Flipper uhf data\n" \
-    "Version: 1"
 #define UHF_TEXT_STORE_SIZE 128
 #define UHF_APPS_DATA_FOLDER EXT_PATH("apps_data")
 #define UHF_APPS_STORAGE_FOLDER \
@@ -40,6 +37,7 @@ enum UHFCustomEvent {
     // Reserve first 100 events for button types and indexes, starting from 0
     UHFCustomEventReserved = 100,
 
+    UHFCustomEventVerifyDone,
     UHFCustomEventViewExit,
     UHFCustomEventWorkerExit,
     UHFCustomEventByteInputDone,
@@ -104,4 +102,4 @@ bool uhf_is_memset(const uint8_t* data, const uint8_t pattern, size_t size);
 
 char* convertToHexString(const uint8_t* array, size_t length);
 
-bool uhf_save_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename);
+bool uhf_save_read_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename);
