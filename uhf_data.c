@@ -32,6 +32,7 @@ void uhf_data_reset(UHFData* uhf_data) {
     uhf_data->start = false;
     uhf_data->end = false;
     uhf_data->length = 0;
+    uhf_data->next = NULL;
 }
 
 void uhf_data_free(UHFData* uhf_data) {
