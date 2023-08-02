@@ -35,6 +35,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-02 04:00 EST`
 - [Removed duplicated dolphin deeds (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f3edcba5b28574c32ec1f781f0b5f6c936ef5214)
 - [Small fix for Moving Main Menu Apps in CFW Settings #725 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/725)
+- [Small fix for Removing Main Menu Apps in CFW Settings #726 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/726)
 
 <a name="release">
 
