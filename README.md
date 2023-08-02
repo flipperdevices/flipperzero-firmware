@@ -28,6 +28,7 @@ button  | function
 ------------- | -------------
 **Ok** *[short press]*  | Start/stop the chronometer
 **Ok** *[long press]*  | Reset the chronometer
+**Back** *[long press]*  | Exit
 
 If you don't want to build this application, just simply copy **flipper_chronometer.fap** on your **Flipper Zero** 
 
