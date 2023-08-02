@@ -82,6 +82,9 @@ fbtenv_restore_env()
 
 fbtenv_check_sourced()
 {
+    if [ ! -z "${FBT_SKIP_CHECK_SOURCED:-""}" ]; then
+        return 0;
+    fi
     case "${ZSH_EVAL_CONTEXT:-""}" in *:file:*)
         setopt +o nomatch;  # disabling 'no match found' warning in zsh
         return 0;;
@@ -236,8 +239,6 @@ fbtenv_cleanup()
         rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/"*.part;
         if [ -z "${FBT_PRESERVE_TAR:-""}" ]; then
             rm -rf "${FBT_TOOLCHAIN_PATH:?}/toolchain/"*.tar.gz;
-        else
-            echo " Preserve .tar.gz files";
         fi
         echo "done";
     fi
@@ -299,18 +300,22 @@ fbtenv_download_toolchain()
     return 0;
 }
 
-fbtenv_print_version()
+fbtenv_print_config()
 {
-    if [ -n "$FBT_VERBOSE" ]; then
+    if [ -n "${FBT_VERBOSE:-""}" ]; then
         echo "FBT: using toolchain version $(cat "$TOOLCHAIN_ARCH_DIR/VERSION")";
+        if [ ! -z "${FBT_SKIP_CHECK_SOURCED:-""}" ]; then
+            echo "FBT: fbtenv will not check if it is sourced or not";
+        fi
+        if [ ! -z "${FBT_PRESERVE_TAR:-""}" ]; then
+            echo "FBT: toochain archives will be saved";
+        fi
     fi
 }
 
 fbtenv_main()
 {
-    if [ -z "${FBT_SKIP_CHECK_SOURCED:-""}" ]; then
-        fbtenv_check_sourced || return 1;
-    fi
+    fbtenv_check_sourced || return 1;
     fbtenv_get_kernel_type || return 1;
     if [ "$1" = "--restore" ]; then
         fbtenv_restore_env;
@@ -322,7 +327,7 @@ fbtenv_main()
     fbtenv_check_env_vars || return 1;
     fbtenv_check_download_toolchain || return 1;
     fbtenv_set_shell_prompt;
-    fbtenv_print_version;
+    fbtenv_print_config;
     PATH="$TOOLCHAIN_ARCH_DIR/python/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
