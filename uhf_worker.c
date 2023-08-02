@@ -40,10 +40,12 @@ UHFWorkerEvent verify_module_connected(UHFWorker* uhf_worker) {
 
 UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
     UHFResponseData* uhf_response_data = uhf_worker->response_data;
+    uhf_response_data_reset(uhf_response_data);
     UHFData* uhf_data = uhf_response_data->head;
     furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, uhf_data);
     uhf_data_reset(uhf_data);
+    // read epc bank
     while(true) {
         furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SINGLE_POLLING.cmd, CMD_SINGLE_POLLING.length);
         furi_delay_ms(100);
@@ -51,12 +53,11 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
             return UHFWorkerEventAborted;
         }
         if(uhf_data->end) {
-            // before breaking, check if the response is not an error
-            // index 1 = response type, index 5 = parameter
             if(uhf_data->data[1] == 0x01 && uhf_data->data[5] == 0x15) {
+                uhf_data_reset(uhf_data);
                 continue;
             } else if(uhf_data->data[1] == 0x02)
-                break; // success read
+                break; // read success
         }
     }
     return UHFWorkerEventSuccess;
