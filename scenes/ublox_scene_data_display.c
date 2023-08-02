@@ -44,7 +44,7 @@ void ublox_scene_data_display_on_enter(void* context) {
 bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
     Ublox* ublox = context;
     bool consumed = false;
-    //FURI_LOG_I(TAG, "mem free before event branch: %u", memmgr_get_free_heap());
+
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
 	    ublox_worker_stop(ublox->worker);
@@ -55,7 +55,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
             // must stop the worker first
             ublox_worker_stop(ublox->worker);
             FURI_LOG_I(TAG, "reset odometer");
-            
 	    
 	} else if(event.event == GuiButtonTypeRight) {
 	    // TODO: only allow if GPS is detected?
@@ -92,7 +91,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);
         }
     }
-    //FURI_LOG_I(TAG, "mem free after event branch: %u", memmgr_get_free_heap());
     return consumed;
 }
 

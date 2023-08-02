@@ -45,6 +45,7 @@ void ublox_worker_start(
 void ublox_worker_stop(UbloxWorker* ublox_worker) {
     furi_assert(ublox_worker);
     furi_assert(ublox_worker->thread);
+    Ublox* ublox = ublox_worker->context;
     FURI_LOG_I(TAG, "worker_stop");
 
     /*FuriThreadState state = furi_thread_get_state(ublox_worker->thread);
@@ -56,6 +57,14 @@ void ublox_worker_stop(UbloxWorker* ublox_worker) {
       FURI_LOG_I(TAG, "worker state running");
       }*/
 
+    // close the logfile if currently logging
+    if(ublox->log_state == UbloxLogStateLogging) {
+	FURI_LOG_I(TAG, "closing log file on worker stop");
+	ublox->log_state = UbloxLogStateNone;
+	if (!kml_close_file(&(ublox->kmlfile))) {
+	    FURI_LOG_E(TAG, "failed to close KML file!");
+	}
+    }
     if(furi_thread_get_state(ublox_worker->thread) != FuriThreadStateStopped) {
         ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
         furi_thread_join(ublox_worker->thread);
@@ -255,7 +264,7 @@ FuriString* print_uint8_array(uint8_t* array, int length) {
 }
 
 UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length) {
-    FURI_LOG_I(TAG, "i2c transfer");
+
     if (!furi_hal_i2c_is_device_ready(
 	    &furi_hal_i2c_handle_external,
 	    UBLOX_I2C_ADDRESS << 1,
@@ -263,7 +272,7 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
 	FURI_LOG_E(TAG, "device not ready");
 	return NULL;
     }
-    FURI_LOG_I(TAG, "device ready");
+
     // Either our I2C implementation is broken or the GPS's is, so we
     // end up reading a lot more data than we need to. That means that
     // the I2C comm code for this app is a little bit of a hack, but
