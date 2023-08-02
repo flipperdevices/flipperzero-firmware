@@ -82,7 +82,7 @@ fbtenv_restore_env()
 
 fbtenv_check_sourced()
 {
-    if [ ! -z "${FBT_SKIP_CHECK_SOURCED:-""}" ]; then
+    if [ -n "${FBT_SKIP_CHECK_SOURCED:-""}" ]; then
         return 0;
     fi
     case "${ZSH_EVAL_CONTEXT:-""}" in *:file:*)
@@ -304,11 +304,11 @@ fbtenv_print_config()
 {
     if [ -n "${FBT_VERBOSE:-""}" ]; then
         echo "FBT: using toolchain version $(cat "$TOOLCHAIN_ARCH_DIR/VERSION")";
-        if [ ! -z "${FBT_SKIP_CHECK_SOURCED:-""}" ]; then
+        if [ -n "${FBT_SKIP_CHECK_SOURCED:-""}" ]; then
             echo "FBT: fbtenv will not check if it is sourced or not";
         fi
-        if [ ! -z "${FBT_PRESERVE_TAR:-""}" ]; then
-            echo "FBT: toochain archives will be saved";
+        if [ -n "${FBT_PRESERVE_TAR:-""}" ]; then
+            echo "FBT: toolchain archives will be saved";
         fi
     fi
 }
