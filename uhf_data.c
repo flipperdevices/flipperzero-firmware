@@ -47,7 +47,7 @@ void uhf_data_free(UHFData* uhf_data) {
 UHFResponseData* uhf_response_data_alloc() {
     UHFResponseData* uhf_response_data = (UHFResponseData*)malloc(sizeof(UHFResponseData));
     uhf_response_data->data = uhf_data_alloc();
-    uhf_response_data->size = 0;
+    uhf_response_data->size = 1;
     return uhf_response_data;
 }
 

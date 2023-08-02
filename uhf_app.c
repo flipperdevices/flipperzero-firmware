@@ -3,6 +3,13 @@
 static const char* uhf_file_header = "Flipper UHF device";
 static const uint32_t uhf_file_version = 1;
 
+// empty callback
+void empty_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
+    UNUSED(event);
+    UNUSED(data);
+    UNUSED(ctx);
+}
+
 char* convertToHexString(const uint8_t* array, size_t length) {
     if(array == NULL || length == 0) {
         return NULL;
@@ -217,6 +224,10 @@ int32_t uhf_app_main(void* ctx) {
     // disable 5v pin
     furi_hal_power_disable_otg();
 
+    // set uart callback to none
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, empty_rx_callback, NULL);
+
+    // exit app
     uhf_free(uhf_app);
     return 0;
 }

@@ -17,14 +17,6 @@ void uhf_scene_card_menu_on_enter(void* context) {
 
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, uhf_scene_card_menu_submenu_callback, uhf_app);
-    // if(picopass->dev->dev_data.pacs.record.valid) {
-    //     submenu_add_item(
-    //         submenu,
-    //         "Save as LF",
-    //         SubmenuIndexSaveAsLF,
-    //         picopass_scene_card_menu_submenu_callback,
-    //         picopass);
-    // }
     submenu_add_item(
         submenu,
         "Change Key",

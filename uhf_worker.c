@@ -14,21 +14,21 @@ UHFWorkerEvent verify_module_connected(UHFWorker* uhf_worker) {
     UHFResponseData* uhf_response_data = uhf_worker->data;
     UHFData* hardware_version = uhf_response_data->data;
     uhf_data_reset(hardware_version);
-    // UHFData* software_version = uhf_response_data_add_new_uhf_data(uhf_response_data);
-    // UHFData* manufacturer = uhf_response_data_add_new_uhf_data(uhf_response_data);
+    UHFData* software_version = uhf_response_data_add_new_uhf_data(uhf_response_data);
+    UHFData* manufacturer = uhf_response_data_add_new_uhf_data(uhf_response_data);
     furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
     // read hardware version
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, hardware_version);
     furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_HARDWARE_VERSION.cmd, CMD_HARDWARE_VERSION.length);
-    furi_delay_ms(200);
-    // // read software version
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, software_version);
-    // furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SOFTWARE_VERSION.cmd, CMD_SOFTWARE_VERSION.length);
-    // furi_delay_ms(200);
-    // // read manufacturer
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, manufacturer);
-    // furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_MANUFACTURERS.cmd, CMD_MANUFACTURERS.length);
-    // furi_delay_ms(200);
+    furi_delay_ms(150);
+    // read software version
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, software_version);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SOFTWARE_VERSION.cmd, CMD_SOFTWARE_VERSION.length);
+    furi_delay_ms(150);
+    // read manufacturer
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, manufacturer);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_MANUFACTURERS.cmd, CMD_MANUFACTURERS.length);
+    furi_delay_ms(150);
 
     if(!hardware_version->end) { //|| !software_version->end || !manufacturer->end) {
         return UHFWorkerEventFail;
