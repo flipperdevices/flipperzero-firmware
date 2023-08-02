@@ -144,6 +144,10 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
     if(cmd_len == 2) {
         if(cmd[0] == CCID_MESSAGE_TYPE_RDR_to_PC_NotifySlotChange) {
             switch(cmd[1] & SLOT_0_MASK) {
+            case 0:
+            case 1:
+                // No change, no-op
+                break;
             case CARD_IN_1:
                 FURI_LOG_D(TAG, "Card Inserted (0)");
                 if(hasSAM && sam_slot == 0) {
@@ -166,6 +170,10 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
             };
 
             switch(cmd[1] & SLOT_1_MASK) {
+            case 0:
+            case 1:
+                // No change, no-op
+                break;
             case CARD_IN_2:
                 FURI_LOG_D(TAG, "Card Inserted (1)");
                 if(hasSAM && sam_slot == 1) {
