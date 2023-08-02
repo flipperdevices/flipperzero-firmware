@@ -53,7 +53,7 @@ This project is licensed under the [MIT License](link_to_license_file). -->
 
 ## Extra Resources
 
-- [MagicRF M100&QM100_Firmware_manual_en.pdf](assets\res\MagicRF_M100&QM100_Firmware_manual_en.pdf)
+- [MagicRF M100&QM100_Firmware_manual_en.pdf](assets/res/MagicRF_M100&QM100_Firmware_manual_en.pdf)
 
 ## Contact
 
