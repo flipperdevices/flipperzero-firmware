@@ -1,6 +1,10 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <storage/storage.h>
+#include <toolbox/stream/stream.h>
+#include <toolbox/stream/file_stream.h>
+
 #include <gui/gui.h>
 #include <input/input.h>
 
@@ -8,76 +12,19 @@
  * Just set fap_icon_assets in application.fam and #include {APPID}_icons.h */
 #include "gpio_controller_icons.h"
 
-#define GPIO_PIN_COUNT 8
-#define ANIMATE_FRAME_TIME_MS 133
-#define FRAME_TIME 66.666666
+#include "app_defines.h"
 
-typedef struct {
-    int selected;
-    //GPIOItems* gpio_items;
-    int wiggle_frame;
-    size_t prev_frame_time;
-    size_t elapsed_time;
-} ViewerState;
+static void draw_main_view(Canvas* canvas, void* ctx);
+static void draw_config_menu_view(Canvas* canvas, void* ctx);
 
-//  5V  A7  A6  A4  B3  B2  C3 GND SET
-//
-//
-//  3V SWC GND SIO  TX  RX  C1  C0  1W GND
+static DrawView draw_view_funcs[] = {draw_main_view, draw_config_menu_view};
 
-typedef enum {
-    PIN_5V = 0,
-    PIN_A7,
-    PIN_A6,
-    PIN_A4,
-    PIN_B3,
-    PIN_B2,
-    PIN_C3,
-    GEARIC,
-    PIN_3V,
-    PIN_SWC,
-    PIN_SIO,
-    PIN_TX,
-    PIN_RX,
-    PIN_C1,
-    PIN_C0,
-    PIN_1W,
-    PIN_GND_08,
-    PIN_GND_11,
-    PIN_GND_18,
-    NONE
-} enum_view_element;
+static void handle_main_input(InputEvent* event, void* ctx);
+static void handle_config_menu_input(InputEvent* event, void* ctx);
 
-typedef struct {
-    enum_view_element element;
-    enum_view_element opposite;
-    bool selectable;
-    bool editable;
-    bool top_row;
-    bool pull_out;
-    int gp_idx;
-    uint8_t x_pos;
-    uint8_t y_pos;
-    const char* name;
-    Icon* icon;
-    Icon* selected_icon;
-} ViewElement;
+static HandleInput input_handlers[] = {handle_main_input, handle_config_menu_input};
 
-typedef struct {
-    uint8_t element_idx;
-    const GpioPin* pin;
-    GpioMode mode;
-    GpioPull pull;
-    GpioSpeed speed;
-    uint8_t value;
-    const char* name;
-    char* expression;
-    bool unset;
-    bool found;
-    bool input;
-} GPIOPin;
-
-static ViewerState vstate = {.selected = PIN_A7, .wiggle_frame = -1};
+static ViewerState vstate;
 
 static int wiggle[] = {-1, 1, -1, 1};
 static uint32_t wiggle_frame_count = 4;
@@ -161,46 +108,22 @@ static ViewElement elements[] = {
 
 static GPIOPin gpio_pin_config[GPIO_PIN_COUNT];
 
-static int element_count = NONE;
+static int element_count =
+    NONE; // The NONE enum will a value equal to the number of elements defined in enum_view_element
 
-// GPIO enums from firmware/targets/f7/furi_hal/furi_hal_gpio.h
+size_t strnlen(const char* str, size_t maxlen) {
+    size_t len = 0;
+    while(len < maxlen && str[len] != '\0') {
+        len++;
+    }
+    return len;
+}
 
-// /**
-//  * Gpio modes
-//  */
-// typedef enum {
-//     *GpioModeInput,
-//     *GpioModeOutputPushPull,
-//     GpioModeOutputOpenDrain,
-//     GpioModeAltFunctionPushPull,
-//     GpioModeAltFunctionOpenDrain,
-//     *GpioModeAnalog,
-//     GpioModeInterruptRise,
-//     GpioModeInterruptFall,
-//     GpioModeInterruptRiseFall,
-//     GpioModeEventRise,
-//     GpioModeEventFall,
-//     GpioModeEventRiseFall,
-// } GpioMode;
-
-// /**
-//  * Gpio pull modes
-//  */
-// typedef enum {
-//     GpioPullNo,
-//     GpioPullUp,
-//     GpioPullDown,
-// } GpioPull;
-
-// /**
-//  * Gpio speed modes
-//  */
-// typedef enum {
-//     GpioSpeedLow,
-//     GpioSpeedMedium,
-//     GpioSpeedHigh,
-//     GpioSpeedVeryHigh,
-// } GpioSpeed;
+static void init_state() {
+    vstate.selected = PIN_A7;
+    vstate.wiggle_frame = -1;
+    vstate.view = MAIN_VIEW;
+}
 
 static void init_gpio() {
     int count = 0;
@@ -215,10 +138,14 @@ static void init_gpio() {
                     gpio_pin_config[count].speed = GpioSpeedVeryHigh;
                     gpio_pin_config[count].value = 0;
                     gpio_pin_config[count].name = gpio_pins[i].name;
-                    gpio_pin_config[count].expression = NULL;
                     gpio_pin_config[count].unset = true;
                     gpio_pin_config[count].found = true;
                     gpio_pin_config[count].input = false;
+
+                    gpio_pin_config[count].user.mode = GPIO_MODE_UNSET;
+                    gpio_pin_config[count].user.value = GPIO_VALUE_FALSE;
+                    gpio_pin_config[count].user.gp_idx_input = -1;
+                    gpio_pin_config[count].user.changed = false;
 
                     elements[j].gp_idx = i;
                     elements[j].editable = true;
@@ -229,30 +156,75 @@ static void init_gpio() {
         }
     }
 
-    // naively set all as digitial output
-    for(int i = 0; i < count; i++) {
+    vstate.result = 0;
+}
+
+static void update_gpio() {
+    // read from gpio pins
+    for(int i = 0; i < GPIO_PIN_COUNT; i++) {
         GPIOPin* gpc = &gpio_pin_config[i];
-        gpc->input = true;
-        gpc->unset = false;
-        furi_hal_gpio_write(gpc->pin, false);
-        furi_hal_gpio_init(gpc->pin, gpc->mode, gpc->pull, gpc->speed);
+        if(!gpc->unset) {
+            if(gpc->mode == GpioModeInput) {
+                gpc->value = furi_hal_gpio_read(gpc->pin) ? 1 : 0;
+            }
+        }
     }
 }
 
-//static void update_gpio()
-//{
-//    // write to gpio pins
-//
-//    // read frm gpio pins
-//}
+#define TOGGLECOLOR(state, canvas, setting, selected_col, deselected_col) \
+    canvas_set_color(canvas, (state == setting) ? selected_col : deselected_col)
+
+const char* gpio_user_mode_strs[] = {"INPUT", "INPUT_PULLUP", "OUTPUT", "UNSET"};
+const char* gpio_user_value_strs[] = {"TRUE", "FALSE", "INPUT"};
+
+static void draw_config_menu_view(Canvas* canvas, void* ctx) {
+    UNUSED(ctx);
+
+    int gp_idx = elements[vstate.selected].gp_idx;
+    GPIOPin* gpc = &gpio_pin_config[gp_idx];
+
+    UNUSED(gpc);
+
+    canvas_set_font(canvas, FontSecondary);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, 1, 1, 126, 62, 0);
+
+    TOGGLECOLOR(vstate.config_menu_selected, canvas, CONFIG_MENU_MODE, ColorBlack, ColorWhite);
+    canvas_draw_box(canvas, 2, 2, 124, 15);
+
+    TOGGLECOLOR(vstate.config_menu_selected, canvas, CONFIG_MENU_MODE, ColorWhite, ColorBlack);
+    canvas_draw_str(canvas, 6, 12, "Mode");
+
+    if(gpc->user.mode > 0) canvas_draw_str(canvas, 34, 12, "<");
+
+    canvas_draw_str(canvas, 45, 12, gpio_user_mode_strs[gpc->user.mode]);
+
+    if(gpc->user.mode < GPIO_MODE_UNSET) canvas_draw_str(canvas, 120, 12, ">");
+
+    if(gpc->user.mode == GPIO_MODE_OUTPUT) {
+        TOGGLECOLOR(
+            vstate.config_menu_selected, canvas, CONFIG_MENU_VALUE, ColorBlack, ColorWhite);
+        canvas_draw_box(canvas, 2, 16, 124, 15);
+
+        TOGGLECOLOR(
+            vstate.config_menu_selected, canvas, CONFIG_MENU_VALUE, ColorWhite, ColorBlack);
+        canvas_draw_str(canvas, 6, 12 + 16, "Value");
+
+        if(gpc->user.value > 0) canvas_draw_str(canvas, 34, 12 + 16, "<");
+
+        canvas_draw_str(canvas, 45, 12 + 16, gpio_user_value_strs[gpc->user.value]);
+
+        if(gpc->user.value < GPIO_VALUE_INPUT) canvas_draw_str(canvas, 120, 12 + 16, ">");
+    }
+}
 
 // TODO: Determine the lowest frame delta we can get away with.
 // TODO: Redraw only what changes.
 //       - clear previous (drawn) selected pin
 //       - clear newly selected pin
 
-// Screen is 128x64 px
-static void app_draw_callback(Canvas* canvas, void* ctx) {
+static void draw_main_view(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     canvas_clear(canvas);
@@ -278,6 +250,10 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     vstate.elapsed_time += delta_time_ms;
     vstate.prev_frame_time = current_frame_time;
 
+    canvas_set_font(canvas, FontSecondary);
+
+    char hex_string[3];
+
     // draw values
     for(int i = 0; i < GPIO_PIN_COUNT; i++) {
         if(!gpio_pin_config[i].unset) {
@@ -291,8 +267,17 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
             }
 
             if(gpio_pin_config[i].mode == GpioModeAnalog) {
+                snprintf(hex_string, sizeof(hex_string), "%02X", (int)gpio_pin_config[i].value);
+                if(e.top_row) {
+                    canvas_draw_icon(canvas, e.x_pos - 1, e.y_pos + 20, &I_analog_box);
+                    canvas_draw_str(canvas, e.x_pos + 1, e.y_pos + 22 + 7, hex_string);
+
+                } else {
+                    canvas_draw_icon(canvas, e.x_pos - 1, e.y_pos - 15, &I_analog_box);
+                    canvas_draw_str(canvas, e.x_pos + 1, e.y_pos - 6, hex_string);
+                }
             } else {
-                const Icon* icon = gpio_pin_config[i].value ? &I_digi_one : &I_digi_zero;
+                const Icon* icon = (int)gpio_pin_config[i].value ? &I_digi_one : &I_digi_zero;
                 if(e.top_row) {
                     canvas_draw_icon(canvas, e.x_pos + 2, e.y_pos + 20, icon);
                 } else {
@@ -321,9 +306,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
 
                 if(vstate.elapsed_time >= ANIMATE_FRAME_TIME_MS) {
                     vstate.wiggle_frame++;
-                    if((unsigned int)(vstate.wiggle_frame) >=
-                       wiggle_frame_count) //(sizeof(wiggle)/sizeof(int)))
-                    {
+                    if((unsigned int)(vstate.wiggle_frame) >= wiggle_frame_count) {
                         vstate.wiggle_frame = -1;
                     }
                     vstate.elapsed_time = 0;
@@ -334,15 +317,214 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_icon(canvas, x, y, icon);
     }
 
+    // draw arrows
+    for(int i = 0; i < GPIO_PIN_COUNT; i++) {
+        if(!gpio_pin_config[i].unset) {
+            ViewElement e = elements[gpio_pin_config[i].element_idx];
+
+            bool selected = vstate.selected == gpio_pin_config[i].element_idx;
+
+            // draw arrow
+            if(e.top_row) {
+                int offset = selected ? 3 : 0;
+                const Icon* arrow_icon = gpio_pin_config[i].input ? &I_arrow_up : &I_arrow_down;
+                canvas_draw_icon(canvas, e.x_pos + 3, e.y_pos + 8 + offset, arrow_icon);
+            } else {
+                int offset = selected ? 0 : 3;
+                const Icon* arrow_icon = gpio_pin_config[i].input ? &I_arrow_down : &I_arrow_up;
+                canvas_draw_icon(canvas, e.x_pos + 3, e.y_pos + -1 + offset, arrow_icon);
+            }
+        }
+    }
+
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 40, elements[vstate.selected].name);
+    canvas_draw_str(canvas, 0, 42, elements[vstate.selected].name);
+}
+
+static void handle_main_input(InputEvent* event, void* ctx) {
+    if(vstate.wiggle_frame < 0) {
+        furi_assert(ctx);
+        FuriMessageQueue* event_queue = ctx;
+
+        // place in queue to handle backing out of app
+        furi_message_queue_put(event_queue, event, FuriWaitForever);
+
+        if((event->type == InputTypePress || event->type == InputTypeRelease) &&
+           event->key == InputKeyOk) {
+            if(event->type == InputTypePress && elements[vstate.selected].gp_idx < 0) {
+                vstate.wiggle_frame = 0;
+                vstate.elapsed_time = 0;
+            } else if(
+                elements[vstate.selected].gp_idx >= 0 &&
+                (event->type == InputTypePress || event->type == InputTypeRelease)) {
+                int gp_idx = elements[vstate.selected].gp_idx;
+                gpio_pin_config[gp_idx].user.prev_mode = gpio_pin_config[gp_idx].user.mode;
+
+                vstate.view = CONFIG_MENU_VIEW;
+                vstate.config_menu_selected = CONFIG_MENU_MODE;
+            }
+        } else if(event->type == InputTypePress || event->type == InputTypeRepeat) {
+            switch(event->key) {
+            case InputKeyLeft:
+                vstate.selected--;
+                if(vstate.selected == GEARIC)
+                    vstate.selected = PIN_1W;
+                else if(vstate.selected < 0)
+                    vstate.selected = GEARIC;
+                break;
+            case InputKeyRight:
+                if(vstate.selected <= GEARIC) {
+                    vstate.selected++;
+                    vstate.selected = vstate.selected > GEARIC ? PIN_5V : vstate.selected;
+                } else {
+                    vstate.selected++;
+                    vstate.selected = vstate.selected > PIN_1W ? PIN_3V : vstate.selected;
+                }
+                break;
+            case InputKeyUp:
+            case InputKeyDown:
+                if(elements[vstate.selected].opposite != NONE)
+                    vstate.selected = elements[vstate.selected].opposite;
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+static void set_GPIO_pin_via_user(int gp_idx) {
+    GPIOPin* gpc = &gpio_pin_config[gp_idx];
+
+    if(gpc->user.changed) {
+        // update attributes
+        switch(gpc->user.mode) {
+        case GPIO_MODE_INPUT:
+            gpc->mode = GpioModeInput;
+            gpc->pull = GpioPullNo;
+            gpc->input = true;
+            break;
+        case GPIO_MODE_INPUT_PULLUP:
+            gpc->mode = GpioModeInput;
+            gpc->pull = GpioPullUp;
+            gpc->input = true;
+            break;
+        case GPIO_MODE_OUTPUT:
+            gpc->mode = GpioModeOutputPushPull;
+            gpc->pull = GpioPullNo;
+            gpc->input = false;
+            break;
+        default:
+            break;
+        }
+
+        switch(gpc->user.value) {
+        case GPIO_VALUE_TRUE:
+            gpc->value = (double)1.0;
+            break;
+        case GPIO_VALUE_FALSE:
+        case GPIO_VALUE_INPUT:
+        case GPIO_VALUE_NONE:
+            gpc->value = (double)0.0;
+            break;
+        default:
+            break;
+        }
+
+        furi_hal_gpio_write(gpc->pin, gpc->value != (double)0.0 ? true : false);
+        if(gpc->user.mode != gpc->user.prev_mode) {
+            furi_hal_gpio_init(gpc->pin, gpc->mode, gpc->pull, gpc->speed);
+            gpc->unset = false;
+        }
+
+        gpc->user.changed = false;
+    }
+}
+
+static void handle_config_menu_input(InputEvent* event, void* ctx) {
+    UNUSED(ctx);
+
+    int gp_idx = elements[vstate.selected].gp_idx;
+    GPIOPin* gpc = &gpio_pin_config[gp_idx];
+
+    if(event->type == InputTypePress || event->type == InputTypeRepeat) {
+        switch(event->key) {
+        case InputKeyLeft:
+            switch(vstate.config_menu_selected) {
+            case CONFIG_MENU_MODE:
+                if(gpc->user.mode > 0) {
+                    gpc->user.mode--;
+                    gpc->user.changed = true;
+                }
+                break;
+            case CONFIG_MENU_VALUE:
+                if(gpc->user.value > 0) {
+                    gpc->user.value--;
+                    gpc->user.changed = true;
+                }
+                break;
+            case CONFIG_MENU_INPUT:
+                break;
+            default:
+                break;
+            }
+            break;
+        case InputKeyRight:
+            switch(vstate.config_menu_selected) {
+            case CONFIG_MENU_MODE:
+                if(gpc->user.mode < GPIO_MODE_UNSET) {
+                    gpc->user.mode++;
+                    gpc->user.changed = true;
+                }
+                break;
+            case CONFIG_MENU_VALUE:
+                if(gpc->user.value < GPIO_VALUE_FALSE) {
+                    gpc->user.value++;
+                    gpc->user.changed = true;
+                }
+                break;
+            case CONFIG_MENU_INPUT:
+                break;
+            default:
+                break;
+            }
+            break;
+        case InputKeyUp:
+            if(gpc->user.mode == GPIO_MODE_OUTPUT) {
+                if(vstate.config_menu_selected == 0)
+                    vstate.config_menu_selected = CONFIG_MENU_VALUE;
+                else
+                    vstate.config_menu_selected--;
+            }
+            break;
+        case InputKeyDown:
+            if(gpc->user.mode == GPIO_MODE_OUTPUT) {
+                if(vstate.config_menu_selected == CONFIG_MENU_VALUE)
+                    vstate.config_menu_selected = 0;
+                else
+                    vstate.config_menu_selected++;
+            }
+            break;
+        case InputKeyBack:
+
+            // Set new pin configuration
+            set_GPIO_pin_via_user(gp_idx);
+
+            vstate.view = MAIN_VIEW;
+
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+static void app_draw_callback(Canvas* canvas, void* ctx) {
+    draw_view_funcs[vstate.view](canvas, ctx);
 }
 
 static void app_input_callback(InputEvent* input_event, void* ctx) {
-    furi_assert(ctx);
-
-    FuriMessageQueue* event_queue = ctx;
-    furi_message_queue_put(event_queue, input_event, FuriWaitForever);
+    input_handlers[vstate.view](input_event, ctx);
 }
 
 int32_t gpio_controller_main(void* p) {
@@ -360,6 +542,7 @@ int32_t gpio_controller_main(void* p) {
 
     InputEvent event;
 
+    init_state();
     init_gpio();
 
     vstate.prev_frame_time = furi_get_tick();
@@ -368,52 +551,18 @@ int32_t gpio_controller_main(void* p) {
     bool running = true;
     while(running) {
         if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
-            if(vstate.wiggle_frame < 0) {
-                if((event.type == InputTypePress || event.type == InputTypeRelease) &&
-                   event.key == InputKeyOk) {
-                    if(event.type == InputTypePress && elements[vstate.selected].gp_idx < 0) {
-                        vstate.wiggle_frame = 0;
-                        vstate.elapsed_time = 0;
-                    } else if(
-                        elements[vstate.selected].gp_idx >= 0 &&
-                        (event.type == InputTypePress || event.type == InputTypeRelease)) {
-                        int gp_idx = elements[vstate.selected].gp_idx;
-                        furi_hal_gpio_write(
-                            gpio_pin_config[gp_idx].pin, event.type == InputTypePress);
-                        gpio_pin_config[gp_idx].value = event.type == InputTypePress ? 1 : 0;
-                    }
-                } else if(event.type == InputTypePress || event.type == InputTypeRepeat) {
-                    switch(event.key) {
-                    case InputKeyLeft:
-                        vstate.selected--;
-                        if(vstate.selected == GEARIC)
-                            vstate.selected = PIN_1W;
-                        else if(vstate.selected < 0)
-                            vstate.selected = GEARIC;
-                        break;
-                    case InputKeyRight:
-                        if(vstate.selected <= GEARIC) {
-                            vstate.selected++;
-                            vstate.selected = vstate.selected > GEARIC ? PIN_5V : vstate.selected;
-                        } else {
-                            vstate.selected++;
-                            vstate.selected = vstate.selected > PIN_1W ? PIN_3V : vstate.selected;
-                        }
-                        break;
-                    case InputKeyUp:
-                    case InputKeyDown:
-                        if(elements[vstate.selected].opposite != NONE)
-                            vstate.selected = elements[vstate.selected].opposite;
-                        break;
-                    case InputKeyBack:
-                        running = false;
-                        break;
-                    default:
-                        break;
-                    }
+            if(event.type == InputTypePress || event.type == InputTypeRepeat) {
+                switch(event.key) {
+                case InputKeyBack:
+                    running = false;
+                    break;
+                default:
+                    break;
                 }
             }
         }
+
+        update_gpio();
         view_port_update(view_port);
     }
 

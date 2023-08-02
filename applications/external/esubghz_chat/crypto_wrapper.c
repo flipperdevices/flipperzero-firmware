@@ -65,8 +65,14 @@ bool crypto_ctx_decrypt(ESubGhzChatCryptoCtx* ctx, uint8_t* in, size_t in_len, u
 #ifdef FURI_HAL_CRYPTO_ADVANCED_AVAIL
     return (
         furi_hal_crypto_gcm_decrypt_and_verify(
-            ctx->key, in, in + IV_BYTES, out, in_len - MSG_OVERHEAD, in + in_len - TAG_BYTES) ==
-        FuriHalCryptoGCMStateOk);
+            ctx->key,
+            in,
+            NULL,
+            0,
+            in + IV_BYTES,
+            out,
+            in_len - MSG_OVERHEAD,
+            in + in_len - TAG_BYTES) == FuriHalCryptoGCMStateOk);
 #else /* FURI_HAL_CRYPTO_ADVANCED_AVAIL */
     return (
         gcm_auth_decrypt(
@@ -89,7 +95,7 @@ bool crypto_ctx_encrypt(ESubGhzChatCryptoCtx* ctx, uint8_t* in, size_t in_len, u
 #ifdef FURI_HAL_CRYPTO_ADVANCED_AVAIL
     return (
         furi_hal_crypto_gcm_encrypt_and_tag(
-            ctx->key, out, in, out + IV_BYTES, in_len, out + IV_BYTES + in_len) ==
+            ctx->key, out, NULL, 0, in, out + IV_BYTES, in_len, out + IV_BYTES + in_len) ==
         FuriHalCryptoGCMStateOk);
 #else /* FURI_HAL_CRYPTO_ADVANCED_AVAIL */
     return (

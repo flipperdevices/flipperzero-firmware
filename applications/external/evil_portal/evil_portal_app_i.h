@@ -29,7 +29,7 @@
 #define RESET_CMD "reset"
 
 #define HTML_EXTENSION ".html"
-#define HTML_FOLDER ANY_PATH("apps_data/esp32_evil_portal/html")
+#define HTML_FOLDER ANY_PATH("apps_data/evil_portal/html")
 
 struct Evil_PortalApp {
     Gui* gui;

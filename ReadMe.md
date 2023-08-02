@@ -54,8 +54,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - UL: [Init config for external radio driver #564 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/564)
 - Updated: [ESP32 WIFI Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map)
-- Updated: [GPIO Controller (By Lokno)](https://github.com/Lokno/gpio_controller)
-- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [BMO (By wrenchathome)](https://github.com/wrenchathome/flip0anims/tree/main/Animations/BMO) will be released with next Patreon release
 - [New Patreon Animation added to DBZ build: G0ku N3xt L3v3L (By RM)](https://www.patreon.com/RogueMaster/membership)
 - Added: [Rock Paper Scissors 2 v1.0 (By benwoo1110)](https://github.com/benwoo1110/rps-FlipperZero)
@@ -66,15 +64,18 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [New RTC flags in device info #2884 (By Programistich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2884)
 - OFW: [Backlight notification fix #2878 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2878)
 - Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
-- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By manu0466]( https://github.com/RogueMaster/flipper-zero-evil-portal/pull/1)
 - OFW: [Overly missed feature: Infrared: move button (change button order in a remote) #2894 (By plgcoder)](https://github.com/flipperdevices/flipperzero-firmware/pull/2894)
 - OFW: [External apps icounter #2928 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2928) Experience for every FAP!
 - OFW: [change FuriThreadPriorityIsr to 31 (configMAX_PRIORITIES-1) #2920 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/2920)
 - OFW: [Add Daikin FTXC35DV1B ac remote #2913 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2913)
 - OFW: [SubGhz: change CC1101_ext TIM17 resolution to 2µs #2909 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2909)
 - OFW: [Fix about screen #2907 (By andzhr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2907)
+- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- Updated: [GPIO Controller (By Lokno)](https://github.com/Lokno/gpio_controller)
+- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
+- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By manu0466]( https://github.com/RogueMaster/flipper-zero-evil-portal/pull/1)
+- [Better Google Login for Evil Portal (By 8Root)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/56)
 
 <a name="release">
 

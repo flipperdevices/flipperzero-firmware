@@ -27,7 +27,6 @@ bool uhf_scene_start_on_event(void* ctx, SceneManagerEvent event) {
     UHFApp* uhf_app = ctx;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        // FURI_LOG_E("scene_start_on_event", "%lu", event.event);
         if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(uhf_app->scene_manager, UHFSceneStart, SubmenuIndexRead);
             scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadTag);

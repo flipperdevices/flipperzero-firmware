@@ -1,3 +1,4 @@
+ADD_SCENE(uhf, verify, Verify)
 ADD_SCENE(uhf, start, Start)
 ADD_SCENE(uhf, read_tag, ReadTag)
 ADD_SCENE(uhf, read_tag_success, ReadTagSuccess)

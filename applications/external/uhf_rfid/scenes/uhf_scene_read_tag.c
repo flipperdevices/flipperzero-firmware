@@ -12,7 +12,6 @@ void uhf_read_tag_worker_callback(UHFWorkerEvent event, void* ctx) {
 }
 
 void uhf_scene_read_tag_on_enter(void* ctx) {
-    // FURI_LOG_E("33", "uhf_scene_read_tag_on_enter was called!");
     UHFApp* uhf_app = ctx;
     dolphin_deed(DolphinDeedNfcRead);
 
@@ -23,7 +22,8 @@ void uhf_scene_read_tag_on_enter(void* ctx) {
 
     // Start worker
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewPopup);
-    uhf_worker_start(uhf_app->worker, UHFWorkerStateDetect, uhf_read_tag_worker_callback, uhf_app);
+    uhf_worker_start(
+        uhf_app->worker, UHFWorkerStateDetectSingle, uhf_read_tag_worker_callback, uhf_app);
 
     uhf_blink_start(uhf_app);
 }
@@ -33,7 +33,6 @@ bool uhf_scene_read_tag_on_event(void* ctx, SceneManagerEvent event) {
     UHFApp* uhf_app = ctx;
     bool consumed = false;
     if(event.event == UHFCustomEventWorkerExit) {
-        FURI_LOG_E("uhf_scene_read_tag_on_event", "event was registered");
         scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadTagSuccess);
         consumed = true;
     }
