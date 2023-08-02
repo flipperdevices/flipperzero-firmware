@@ -165,8 +165,6 @@ int32_t flipper_chronometer_app()
                     enableChrono = 0;
                 }
             }
-
-            screenRefresh = 1;
             furi_mutex_release(mutexVal.mutex);
 
             view_port_update(view_port);
