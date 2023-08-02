@@ -7,7 +7,7 @@ This chronometer is accurate to the millisecond. **TIM2** internal timer of the 
 
 <img src="https://github.com/nmrr/flipperzero-chronometer/blob/main/img/chrono2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-chronometer/blob/main/img/chrono3.png" width=25% height=25%>
 
-Note: Chronometer stops after one hour
+**Note:** Chronometer stops after one hour
 
 ## Build the program
 
