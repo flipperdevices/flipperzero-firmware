@@ -131,7 +131,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                 item = MenuItemArray_get(model->items, item_i);
                 menu_centered_icon(canvas, item, x_off, y_off, 40, 20);
                 menu_short_name(item, name);
-                if(item->label == (char*)"Applications") furi_string_set(name, "Apps");
                 if(item->label == (char*)"125 kHz RFID") furi_string_set(name, "RFID");
                 if(item->label == (char*)"Sub-GHz") furi_string_set(name, "SubGHz");
                 elements_scrollable_text_line(

@@ -20,8 +20,8 @@ void cfw_app_scene_interface_mainmenu_add_main_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Applications",
-        (uint32_t) "Applications",
+        LOADER_APPLICATIONS_NAME,
+        (uint32_t) LOADER_APPLICATIONS_NAME,
         cfw_app_scene_interface_mainmenu_add_main_submenu_callback,
         app);
 
