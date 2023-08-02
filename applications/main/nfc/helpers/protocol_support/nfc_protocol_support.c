@@ -128,10 +128,12 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
             consumed = true;
         } else if(event.event == NfcCustomEventPollerIncomplete) {
             nfc_supported_cards_read(instance->nfc_device, instance->nfc);
-
-            view_dispatcher_send_custom_event(
-                instance->view_dispatcher, NfcCustomEventPollerSuccess);
-            consumed = true;
+            const NfcProtocol protocol =
+                instance->protocols_detected[instance->protocols_detected_idx];
+            if(nfc_protocol_support[protocol]->scene_read.on_event) {
+                consumed =
+                    nfc_protocol_support[protocol]->scene_read.on_event(instance, event.event);
+            }
         } else if(event.event == NfcCustomEventPollerFailure) {
             if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneDetect)) {
                 scene_manager_search_and_switch_to_previous_scene(

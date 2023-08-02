@@ -52,21 +52,17 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
         if(mf_classic_key_cache_load(instance->mfc_key_cache, uid, uid_len)) {
             FURI_LOG_I(TAG, "Key cache found");
             mf_classic_event->data->poller_mode.mode = MfClassicPollerModeKeyCache;
+
+            // DELETE
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventPollerIncomplete);
+            command = NfcCommandStop;
         } else {
             FURI_LOG_I(TAG, "Key cache not found");
             view_dispatcher_send_custom_event(
                 instance->view_dispatcher, NfcCustomEventPollerIncomplete);
             command = NfcCommandStop;
         }
-    } else if(mf_classic_event->type == MfClassicPollerEventTypeReadComplete) {
-        const MfClassicData* mf_classic_data = nfc_poller_get_data(instance->poller);
-        nfc_device_set_data(instance->nfc_device, NfcProtocolMfClassic, mf_classic_data);
-
-        const NfcCustomEvent custom_event = mf_classic_is_card_read(mf_classic_data) ?
-                                                NfcCustomEventPollerSuccess :
-                                                NfcCustomEventPollerIncomplete;
-        view_dispatcher_send_custom_event(instance->view_dispatcher, custom_event);
-        return NfcCommandStop;
     }
 
     return command;
@@ -75,6 +71,20 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
 static void nfc_scene_read_on_enter_mf_classic(NfcApp* instance) {
     mf_classic_key_cache_reset(instance->mfc_key_cache);
     nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_mf_classic, instance);
+}
+
+static bool nfc_scene_read_on_event_mf_classic(NfcApp* instance, uint32_t event) {
+    if(event == NfcCustomEventPollerIncomplete) {
+        const MfClassicData* mfc_data = nfc_poller_get_data(instance->poller);
+        if(mf_classic_is_card_read(mfc_data)) {
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventPollerSuccess);
+        } else {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicDictAttack);
+        }
+    }
+
+    return true;
 }
 
 static void nfc_scene_read_menu_on_enter_mf_classic(NfcApp* instance) {
@@ -185,7 +195,7 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
     .scene_read =
         {
             .on_enter = nfc_scene_read_on_enter_mf_classic,
-            .on_event = NULL,
+            .on_event = nfc_scene_read_on_event_mf_classic,
         },
     .scene_read_menu =
         {
