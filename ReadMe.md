@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0801-1802-0.87.1-2cdd054](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-01 18:01 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-01 18:01 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-02 01:28 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-02 01:28 EST`
 - [Fixed Memory leak/Pointer issue with CFW Settings app (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/724)
 - [Configurable SPI & UART Channels (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc4c6bdacd7aac9ba8377fddcb966a9ae17da36a)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
@@ -65,11 +65,16 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [UI: New way to input bytes in byte_input #2890 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/2890)
 - OFW: [New RTC flags in device info #2884 (By Programistich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2884)
 - OFW: [Backlight notification fix #2878 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2878)
-- OFW: [Backlight notification fix #2878 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2878)
 - Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By manu0466]( https://github.com/RogueMaster/flipper-zero-evil-portal/pull/1)
+- OFW: [Overly missed feature: Infrared: move button (change button order in a remote) #2894 (By plgcoder)](https://github.com/flipperdevices/flipperzero-firmware/pull/2894)
+- OFW: [External apps icounter #2928 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2928) Experience for every FAP!
+- OFW: [change FuriThreadPriorityIsr to 31 (configMAX_PRIORITIES-1) #2920 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/2920)
+- OFW: [Add Daikin FTXC35DV1B ac remote #2913 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2913)
+- OFW: [SubGhz: change CC1101_ext TIM17 resolution to 2µs #2909 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2909)
+- OFW: [Fix about screen #2907 (By andzhr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2907)
 
 <a name="release">
 
