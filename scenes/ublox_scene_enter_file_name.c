@@ -15,31 +15,31 @@ FuriString* ublox_scene_enter_file_name_get_timename() {
     
     if(locale_get_date_format() == LocaleDateFormatDMY) {
         furi_string_printf(s,
-			       "log-%.2d%.2d%.4d-%.2d%.2d%.2d.kml",
-			       datetime.day,
-			       datetime.month,
-			       datetime.year,
-			       datetime.hour,
-			       datetime.minute,
-			       datetime.second);
+			   "log-%.2d%.2d%.4d-%.2d%.2d%.2d.kml",
+			   datetime.day,
+			   datetime.month,
+			   datetime.year,
+			   datetime.hour,
+			   datetime.minute,
+			   datetime.second);
     } else if(locale_get_date_format() == LocaleDateFormatMDY) {
 	furi_string_printf(s,
-			       "log-%.2d%.2d%.4d-%.2d%.2d%.2d.kml",
-			       datetime.month,
-			       datetime.day,
-			       datetime.year,
-			       datetime.hour,
-			       datetime.minute,
-			       datetime.second);
+			   "log-%.2d%.2d%.4d-%.2d%.2d%.2d.kml",
+			   datetime.month,
+			   datetime.day,
+			   datetime.year,
+			   datetime.hour,
+			   datetime.minute,
+			   datetime.second);
     } else if(locale_get_date_format() == LocaleDateFormatYMD) {
 	furi_string_printf(s,
-			       "log-%.4d%.2d%.2d-%.2d%.2d%.2d.kml",
-			       datetime.year,
-			       datetime.month,
-			       datetime.day,
-			       datetime.hour,
-			       datetime.minute,
-			       datetime.second);
+			   "log-%.4d%.2d%.2d-%.2d%.2d%.2d.kml",
+			   datetime.year,
+			   datetime.month,
+			   datetime.day,
+			   datetime.hour,
+			   datetime.minute,
+			   datetime.second);
     }
     
     return s;
@@ -49,7 +49,7 @@ void ublox_scene_enter_file_name_on_enter(void* context) {
     Ublox* ublox = context;
     TextInput* text_input = ublox->text_input;
 
-    text_input_set_header_text(text_input, "Enter log file name");
+    text_input_set_header_text(text_input, "Enter KML log file name");
     text_input_set_result_callback(text_input,
 				   ublox_text_input_callback,
 				   context,

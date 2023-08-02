@@ -90,43 +90,15 @@ void clear_ublox_data() {
 
 
 int32_t ublox_worker_task(void* context) {
+
     UbloxWorker* ublox_worker = context;
-    //Ublox* ublox = ublox_worker->context;
-    
-    /*char* name = "/ext/log.csv";
-    strcpy(ublox->text_store, name);
-    
-    if (ublox->logfile == NULL) {
-	ublox->logfile = storage_file_alloc(ublox->storage);
-	// need to open the file
-	FURI_LOG_I(TAG, "opening file %s", ublox->text_store);
-	if (!storage_file_open(ublox->logfile, ublox->text_store, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-	    FURI_LOG_E(TAG, "failed to open file %s!", ublox->text_store);
-	    ublox->file_ok = false;
-	} else {
-	    ublox->file_ok = true;
-	}
-    }
-    
-    if (ublox->file_ok) {
-	const char* str = "hello world from csv";
-	if (!storage_file_write(ublox->logfile, str, strlen(str))) {
-	    FURI_LOG_E(TAG, "failed to write to file!");
-	    ublox->file_ok = false;
-	}
-    }
 
-    if (ublox->file_ok) {
-	storage_file_close(ublox->logfile);
-	storage_file_free(ublox->logfile);
-
-	ublox->file_ok = false;
-	ublox->logfile = NULL;
-	}*/
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     if(ublox_worker->state == UbloxWorkerStateRead) {
 	ublox_worker_read_nav_messages(context);
     } else if (ublox_worker->state == UbloxWorkerStateSyncTime) {
-	ublox_worker_sync_to_gps_time(context);
+	FURI_LOG_I(TAG, "sync time");
+	ublox_worker_sync_to_gps_time(ublox_worker);
     } else if(ublox_worker->state == UbloxWorkerStateResetOdometer) {
         ublox_worker_reset_odo(ublox_worker);
     } else if(ublox_worker->state == UbloxWorkerStateStop) {
@@ -134,6 +106,8 @@ int32_t ublox_worker_task(void* context) {
     }
 
     ublox_worker_change_state(ublox_worker, UbloxWorkerStateReady);
+
+    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 
     return 0;
 }
@@ -143,10 +117,8 @@ void ublox_worker_read_nav_messages(void* context) {
     UbloxWorker* ublox_worker = context;
     Ublox* ublox = ublox_worker->context;
     
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     while(!ublox->gps_initted) {
 	if(ublox_worker->state != UbloxWorkerStateRead) {
-	    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 	    return;
 	}
 
@@ -214,41 +186,38 @@ void ublox_worker_read_nav_messages(void* context) {
 	uint32_t ticks = furi_get_tick();
 	while(furi_get_tick() - ticks < furi_ms_to_ticks(((ublox->data_display_state).refresh_rate * 1000))) {
 	    if(ublox_worker->state != UbloxWorkerStateRead) {
-		furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 		return;
 	    }
 	}
     }
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
 void ublox_worker_sync_to_gps_time(void* context) {
     UbloxWorker* ublox_worker = context;
     Ublox* ublox = ublox_worker->context;
 
-    UbloxFrame* frame_tx = malloc(sizeof(UbloxFrame));
-    frame_tx->class = UBX_NAV_CLASS;
-    frame_tx->id = UBX_NAV_TIMEUTC_MESSAGE;
-    frame_tx->len = 0;
-    frame_tx->payload = NULL;
-    UbloxMessage* message_tx = ublox_frame_to_bytes(frame_tx);
-    ublox_frame_free(frame_tx);
+    UbloxFrame frame_tx;
+    frame_tx.class = UBX_NAV_CLASS;
+    frame_tx.id = UBX_NAV_TIMEUTC_MESSAGE;
+    frame_tx.len = 0;
+    frame_tx.payload = NULL;
+    UbloxMessage* message_tx = ublox_frame_to_bytes(&frame_tx);
 
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
+
     UbloxMessage* message_rx = ublox_worker_i2c_transfer(message_tx, UBX_NAV_TIMEUTC_MESSAGE_LENGTH);
     if(message_rx == NULL) {
 	FURI_LOG_E(TAG, "get_gps_time transfer failed");
-	//ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+	ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
 	ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
 	return;
     }
-
+    FURI_LOG_I(TAG, "got message");
     UbloxFrame* frame_rx = ublox_bytes_to_frame(message_rx);
     ublox_message_free(message_rx);
 
     if(frame_rx == NULL) {
 	FURI_LOG_E(TAG, "NULL pointer, something wrong with NAV-TIMEUTC message!");
-	//ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
+	ublox_worker_change_state(ublox_worker, UbloxWorkerStateStop);
 	ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
 	return;
     } else {
@@ -272,7 +241,6 @@ void ublox_worker_sync_to_gps_time(void* context) {
 	ublox_frame_free(frame_rx);
 	ublox_worker->callback(UbloxWorkerEventDataReady, ublox_worker->context);
     }
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
 FuriString* print_uint8_array(uint8_t* array, int length) {
@@ -287,7 +255,7 @@ FuriString* print_uint8_array(uint8_t* array, int length) {
 }
 
 UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_length) {
-
+    FURI_LOG_I(TAG, "i2c transfer");
     if (!furi_hal_i2c_is_device_ready(
 	    &furi_hal_i2c_handle_external,
 	    UBLOX_I2C_ADDRESS << 1,
@@ -295,6 +263,7 @@ UbloxMessage* ublox_worker_i2c_transfer(UbloxMessage* message_tx, uint8_t read_l
 	FURI_LOG_E(TAG, "device not ready");
 	return NULL;
     }
+    FURI_LOG_I(TAG, "device ready");
     // Either our I2C implementation is broken or the GPS's is, so we
     // end up reading a lot more data than we need to. That means that
     // the I2C comm code for this app is a little bit of a hack, but
@@ -634,9 +603,7 @@ void ublox_worker_reset_odo(UbloxWorker* ublox_worker) {
     odo_frame_tx.payload = NULL;
     UbloxMessage* odo_message_tx = ublox_frame_to_bytes(&odo_frame_tx);
 
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
     UbloxMessage* ack = ublox_worker_i2c_transfer(odo_message_tx, UBX_ACK_ACK_MESSAGE_LENGTH);
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
     
     FURI_LOG_I(TAG, "transfer done");
     ublox_message_free(odo_message_tx);
