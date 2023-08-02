@@ -111,7 +111,6 @@ int32_t flipp_pomodoro_app(void* p) {
     FlippPomodoroApp* app = flipp_pomodoro_app_alloc();
 
     FURI_LOG_I(TAG, "Run deed added");
-    dolphin_deed(DolphinDeedPluginGameStart);
 
     view_dispatcher_run(app->view_dispatcher);
 

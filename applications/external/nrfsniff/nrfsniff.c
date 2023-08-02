@@ -317,7 +317,6 @@ static void start_sniffing() {
 
 int32_t nrfsniff_app(void* p) {
     UNUSED(p);
-    dolphin_deed(DolphinDeedPluginStart);
     uint8_t address[5] = {0};
     uint32_t start = 0;
     hexlify(address, 5, top_address);

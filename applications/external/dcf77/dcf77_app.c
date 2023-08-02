@@ -2,7 +2,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
@@ -349,8 +348,6 @@ int32_t dcf77_app_main(void* p) {
     if(furi_hal_speaker_acquire(500)) {
         ;
     }
-
-    dolphin_deed(DolphinDeedPluginGameStart);
 
     AppEvent event;
     for(bool processing = true; processing;) {

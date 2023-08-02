@@ -15,7 +15,6 @@
 #include <dialogs/dialogs.h>
 #include <input/input.h>
 #include <storage/storage.h>
-#include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 

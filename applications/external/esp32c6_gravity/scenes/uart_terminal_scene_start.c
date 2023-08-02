@@ -1,5 +1,4 @@
 #include "../uart_terminal_app_i.h"
-#include <dolphin/dolphin.h>
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -284,8 +283,6 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
 
     furi_assert(index < NUM_MENU_ITEMS);
     const UART_TerminalItem* item = &items[index];
-
-    dolphin_deed(DolphinDeedGpioUartBridge);
 
     const int selected_option_index = app->selected_option_index[index];
     furi_assert(selected_option_index < item->num_options_menu);

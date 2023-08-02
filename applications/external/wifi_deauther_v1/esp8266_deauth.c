@@ -6,7 +6,6 @@
 #include <gui/canvas_i.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <dolphin/dolphin.h>
 //#include <math.h>
 //#include <notification/notification.h>
 //#include <notification/notification_messages.h>
@@ -325,7 +324,6 @@ int32_t esp8266_deauth_app(void* p) {
 
     SWiFiDeauthApp* app = malloc(sizeof(SWiFiDeauthApp));
 
-    dolphin_deed(DolphinDeedPluginStart);
     esp8266_deauth_app_init(app);
 
     furi_hal_gpio_init_simple(app->m_GpioButtons.pinButtonUp, GpioModeOutputPushPull);

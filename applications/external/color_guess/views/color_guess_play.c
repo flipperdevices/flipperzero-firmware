@@ -293,7 +293,6 @@ void color_guess_play_exit(void* context) {
 void color_guess_play_enter(void* context) {
     furi_assert(context);
     ColorGuessPlay* instance = (ColorGuessPlay*)context;
-    dolphin_deed(DolphinDeedPluginGameStart);
     with_view_model(
         instance->view,
         ColorGuessPlayModel * model,

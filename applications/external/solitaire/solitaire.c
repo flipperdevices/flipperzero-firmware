@@ -401,7 +401,6 @@ void tick(GameState* game_state, NotificationApp* notification) {
 }
 
 void init(GameState* game_state) {
-    dolphin_deed(DolphinDeedPluginGameStart);
     game_state->selectColumn = 0;
     game_state->selected_card = 0;
     game_state->selectRow = 0;
@@ -483,11 +482,7 @@ int32_t solitaire_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    dolphin_deed(DolphinDeedPluginGameStart);
     AppEvent event;
-
-    // Call Dolphin deed on game start
-    dolphin_deed(DolphinDeedPluginGameStart);
 
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 150);

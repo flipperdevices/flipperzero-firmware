@@ -13,7 +13,6 @@
 #include "level.h"
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <dolphin/dolphin.h>
 
 #define SOUND
 
@@ -994,8 +993,6 @@ int32_t doom_app() {
     music_player_worker_load_rtttl_from_string(plugin_state->music_instance->worker, dsintro);
     music_player_worker_start(plugin_state->music_instance->worker);
 #endif
-    // Call dolphin deed on game start
-    dolphin_deed(DolphinDeedPluginGameStart);
 
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);

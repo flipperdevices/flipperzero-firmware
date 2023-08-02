@@ -4,7 +4,6 @@
 #include <furi_hal.h>
 #include <lib/flipper_format/flipper_format.h>
 #include "protocols/protocol_items.h"
-#include <dolphin/dolphin.h>
 #include <storage/storage.h>
 
 static bool pocsag_pager_app_custom_event_callback(void* context, uint32_t event) {
@@ -200,7 +199,6 @@ int32_t pocsag_pager_app(void* p) {
     UNUSED(p);
     POCSAGPagerApp* pocsag_pager_app = pocsag_pager_app_alloc();
 
-    dolphin_deed(DolphinDeedPluginStart);
     view_dispatcher_run(pocsag_pager_app->view_dispatcher);
 
     pocsag_pager_app_free(pocsag_pager_app);

@@ -5,7 +5,6 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include "ledpulser_icons.h"
-#include <dolphin/dolphin.h>
 
 const int color_green = 1;
 const int color_blue = 2;
@@ -108,7 +107,6 @@ int32_t ledpulser_app(void* p) {
     }
     plugin_state->direction = 0;
     plugin_state->intensity = 0;
-    dolphin_deed(DolphinDeedPluginStart);
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();

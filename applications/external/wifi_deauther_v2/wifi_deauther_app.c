@@ -3,7 +3,6 @@
 #include <furi_hal_power.h>
 #include <furi.h>
 #include <furi_hal.h>
-#include <dolphin/dolphin.h>
 
 static bool wifi_deauther_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -25,7 +24,6 @@ static void wifi_deauther_app_tick_event_callback(void* context) {
 
 WifideautherApp* wifi_deauther_app_alloc() {
     WifideautherApp* app = malloc(sizeof(WifideautherApp));
-    dolphin_deed(DolphinDeedPluginStart);
 
     app->gui = furi_record_open(RECORD_GUI);
 

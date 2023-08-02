@@ -12,7 +12,6 @@
 #include <storage/storage.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
-#include <dolphin/dolphin.h>
 #include "bt_trigger_icons.h"
 
 #define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps_data/hid_ble/.bt_hid.keys")

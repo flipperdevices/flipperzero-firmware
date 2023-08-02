@@ -1,7 +1,6 @@
 #include "subbrute_i.h"
 #include "subbrute_custom_event.h"
 #include "scenes/subbrute_scene.h"
-#include <dolphin/dolphin.h>
 
 #define TAG "SubBruteApp"
 
@@ -203,7 +202,6 @@ int32_t subbrute_app(void* p) {
     UNUSED(p);
     furi_hal_power_suppress_charge_enter();
 
-    dolphin_deed(DolphinDeedPluginStart);
     SubBruteState* instance = subbrute_alloc();
     view_dispatcher_attach_to_gui(
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);

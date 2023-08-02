@@ -3,7 +3,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <storage/storage.h>
-#include <dolphin/dolphin.h>
 
 #include "sandbox.h"
 
@@ -465,9 +464,6 @@ int32_t game15_app() {
 
     sandbox_init(
         FPS, (SandboxRenderCallback)render_callback, (SandboxEventHandler)game_event_handler);
-
-    // Call dolphin deed on game start
-    dolphin_deed(DolphinDeedPluginGameStart);
 
     sandbox_loop();
     sandbox_free();

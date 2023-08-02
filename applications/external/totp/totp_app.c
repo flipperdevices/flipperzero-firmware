@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <dolphin/dolphin.h>
 #include "features_config.h"
 #include "services/config/config.h"
 #include "types/plugin_state.h"
@@ -204,9 +203,6 @@ int32_t totp_app() {
         totp_plugin_state_free(plugin_state);
         return 253;
     }
-
-    // Affecting dolphin level
-    dolphin_deed(DolphinDeedPluginStart);
 
     FuriMutex* main_loop_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     struct TotpRenderCallbackContext render_context = {

@@ -570,9 +570,6 @@ int32_t blackjack_app(void* p) {
 
     AppEvent event;
 
-    // Call dolphin deed on game start
-    dolphin_deed(DolphinDeedPluginGameStart);
-
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         furi_mutex_acquire(game_state->mutex, FuriWaitForever);

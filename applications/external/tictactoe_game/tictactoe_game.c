@@ -3,7 +3,6 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include <gui/view.h>
-#include <dolphin/dolphin.h>
 
 #define TAG "TicTacToe"
 
@@ -331,9 +330,6 @@ int32_t tictactoe_game_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
-
-    // Call dolphin deed on game start
-    dolphin_deed(DolphinDeedPluginGameStart);
 
     GameEvent event;
     for(bool processing = true; processing;) {

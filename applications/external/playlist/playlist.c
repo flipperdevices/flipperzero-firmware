@@ -18,7 +18,6 @@
 
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/protocols/raw.h>
-#include <dolphin/dolphin.h>
 
 #include "playlist_file.h"
 #include "canvas_helper.h"
@@ -724,7 +723,6 @@ void playlist_free(Playlist* app) {
 
 int32_t playlist_app(void* p) {
     UNUSED(p);
-    dolphin_deed(DolphinDeedPluginStart);
 
     // create playlist folder
     {

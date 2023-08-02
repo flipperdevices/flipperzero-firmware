@@ -326,8 +326,6 @@ int32_t snake_game_app(void* p) {
 
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
 
-    dolphin_deed(DolphinDeedPluginGameStart);
-
     SnakeEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
