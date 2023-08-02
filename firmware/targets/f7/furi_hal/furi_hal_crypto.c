@@ -93,7 +93,7 @@ static bool furi_hal_crypto_generate_unique_keys(uint8_t start_slot, uint8_t end
         key.size = FuriHalCryptoKeySize256;
         key.data = key_data;
         furi_hal_random_fill_buf(key_data, 32);
-        if(!furi_hal_crypto_store_add_key(&key, &slot)) {
+        if(!furi_hal_crypto_enclave_store_key(&key, &slot)) {
             FURI_LOG_E(TAG, "Error writing key to slot %u", slot);
             return false;
         }
@@ -101,21 +101,21 @@ static bool furi_hal_crypto_generate_unique_keys(uint8_t start_slot, uint8_t end
     return true;
 }
 
-bool furi_hal_crypto_verify_key(uint8_t key_slot) {
+bool furi_hal_crypto_enclave_ensure_key(uint8_t key_slot) {
     uint8_t keys_nb = 0;
     uint8_t valid_keys_nb = 0;
     uint8_t last_valid_slot = ENCLAVE_FACTORY_KEY_SLOTS;
     uint8_t empty_iv[16] = {0};
-    furi_hal_crypto_verify_enclave(&keys_nb, &valid_keys_nb);
+    furi_hal_crypto_enclave_verify(&keys_nb, &valid_keys_nb);
     if(key_slot <= ENCLAVE_FACTORY_KEY_SLOTS) { // It's a factory key
         if(key_slot > keys_nb) return false;
     } else { // Unique key
         if(keys_nb < ENCLAVE_FACTORY_KEY_SLOTS) // Some factory keys are missing
             return false;
         for(uint8_t i = key_slot; i > ENCLAVE_FACTORY_KEY_SLOTS; i--) {
-            if(furi_hal_crypto_store_load_key(i, empty_iv)) {
+            if(furi_hal_crypto_enclave_load_key(i, empty_iv)) {
                 last_valid_slot = i;
-                furi_hal_crypto_store_unload_key(i);
+                furi_hal_crypto_enclave_unload_key(i);
                 break;
             }
         }
@@ -127,14 +127,14 @@ bool furi_hal_crypto_verify_key(uint8_t key_slot) {
     return true;
 }
 
-bool furi_hal_crypto_verify_enclave(uint8_t* keys_nb, uint8_t* valid_keys_nb) {
+bool furi_hal_crypto_enclave_verify(uint8_t* keys_nb, uint8_t* valid_keys_nb) {
     furi_assert(keys_nb);
     furi_assert(valid_keys_nb);
     uint8_t keys = 0;
     uint8_t keys_valid = 0;
     uint8_t buffer[ENCLAVE_SIGNATURE_SIZE];
     for(size_t key_slot = 0; key_slot < ENCLAVE_FACTORY_KEY_SLOTS; key_slot++) {
-        if(furi_hal_crypto_store_load_key(key_slot + 1, enclave_signature_iv[key_slot])) {
+        if(furi_hal_crypto_enclave_load_key(key_slot + 1, enclave_signature_iv[key_slot])) {
             keys++;
             if(furi_hal_crypto_encrypt(
                    enclave_signature_input[key_slot], buffer, ENCLAVE_SIGNATURE_SIZE)) {
@@ -142,7 +142,7 @@ bool furi_hal_crypto_verify_enclave(uint8_t* keys_nb, uint8_t* valid_keys_nb) {
                     memcmp(buffer, enclave_signature_expected[key_slot], ENCLAVE_SIGNATURE_SIZE) ==
                     0;
             }
-            furi_hal_crypto_store_unload_key(key_slot + 1);
+            furi_hal_crypto_enclave_unload_key(key_slot + 1);
         }
     }
     *keys_nb = keys;
@@ -153,7 +153,7 @@ bool furi_hal_crypto_verify_enclave(uint8_t* keys_nb, uint8_t* valid_keys_nb) {
         return false;
 }
 
-bool furi_hal_crypto_store_add_key(FuriHalCryptoKey* key, uint8_t* slot) {
+bool furi_hal_crypto_enclave_store_key(FuriHalCryptoKey* key, uint8_t* slot) {
     furi_assert(key);
     furi_assert(slot);
 
@@ -250,7 +250,7 @@ static bool crypto_process_block(uint32_t* in, uint32_t* out, uint8_t blk_len) {
     return true;
 }
 
-bool furi_hal_crypto_store_load_key(uint8_t slot, const uint8_t* iv) {
+bool furi_hal_crypto_enclave_load_key(uint8_t slot, const uint8_t* iv) {
     furi_assert(slot > 0 && slot <= 100);
     furi_assert(furi_hal_crypto_mutex);
     furi_check(furi_mutex_acquire(furi_hal_crypto_mutex, FuriWaitForever) == FuriStatusOk);
@@ -273,7 +273,7 @@ bool furi_hal_crypto_store_load_key(uint8_t slot, const uint8_t* iv) {
     }
 }
 
-bool furi_hal_crypto_store_unload_key(uint8_t slot) {
+bool furi_hal_crypto_enclave_unload_key(uint8_t slot) {
     if(!furi_hal_bt_is_alive()) {
         return false;
     }

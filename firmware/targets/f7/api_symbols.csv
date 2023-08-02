@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,34.4,,
+Version,+,35.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1107,12 +1107,12 @@ Function,+,furi_hal_crypto_gcm_decrypt_and_verify,FuriHalCryptoGCMState,"const u
 Function,+,furi_hal_crypto_gcm_encrypt_and_tag,FuriHalCryptoGCMState,"const uint8_t*, const uint8_t*, const uint8_t*, size_t, const uint8_t*, uint8_t*, size_t, uint8_t*"
 Function,-,furi_hal_crypto_init,void,
 Function,+,furi_hal_crypto_load_key,_Bool,"const uint8_t*, const uint8_t*"
-Function,+,furi_hal_crypto_store_add_key,_Bool,"FuriHalCryptoKey*, uint8_t*"
-Function,+,furi_hal_crypto_store_load_key,_Bool,"uint8_t, const uint8_t*"
-Function,+,furi_hal_crypto_store_unload_key,_Bool,uint8_t
+Function,+,furi_hal_crypto_enclave_store_key,_Bool,"FuriHalCryptoKey*, uint8_t*"
+Function,+,furi_hal_crypto_enclave_load_key,_Bool,"uint8_t, const uint8_t*"
+Function,+,furi_hal_crypto_enclave_unload_key,_Bool,uint8_t
 Function,+,furi_hal_crypto_unload_key,_Bool,
-Function,+,furi_hal_crypto_verify_enclave,_Bool,"uint8_t*, uint8_t*"
-Function,+,furi_hal_crypto_verify_key,_Bool,uint8_t
+Function,+,furi_hal_crypto_enclave_verify,_Bool,"uint8_t*, uint8_t*"
+Function,+,furi_hal_crypto_enclave_ensure_key,_Bool,uint8_t
 Function,+,furi_hal_debug_disable,void,
 Function,+,furi_hal_debug_enable,void,
 Function,+,furi_hal_debug_is_gdb_session_active,_Bool,
