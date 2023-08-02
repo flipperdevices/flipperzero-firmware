@@ -945,22 +945,6 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     deactivated = true;
                 }
                 if(!mf_classic_is_key_found(data, i, MfClassicKeyB)) {
-                    if(mf_classic_is_key_found(data, i, MfClassicKeyA)) {
-                        uint64_t found_key;
-                        if(nfc_worker_mf_get_b_key_from_sector_trailer(
-                               &tx_rx, i, key, &found_key)) {
-                            FURI_LOG_D(TAG, "Found B key via reading sector %d", i);
-                            mf_classic_set_key_found(data, i, MfClassicKeyB, found_key);
-
-                            if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
-                                nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
-                            }
-
-                            nfc_worker_mf_classic_key_attack(nfc_worker, found_key, &tx_rx, i + 1);
-                            break;
-                        }
-                    }
-
                     if(mf_classic_authenticate_skip_activate(
                            &tx_rx, block_num, key, MfClassicKeyB, !deactivated, cuid)) {
                         FURI_LOG_D(TAG, "Key B found: %012llX", key);
