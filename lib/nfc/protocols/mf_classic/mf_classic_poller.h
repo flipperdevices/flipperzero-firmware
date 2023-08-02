@@ -12,6 +12,7 @@ typedef struct MfClassicPoller MfClassicPoller;
 typedef enum {
     MfClassicPollerEventTypeRequestMode,
     MfClassicPollerEventTypeRequestKey,
+    MfClassicPollerEventTypeRequestReadSector,
     MfClassicPollerEventTypeNewSector,
     MfClassicPollerEventTypeFoundKeyA,
     MfClassicPollerEventTypeFoundKeyB,
@@ -39,6 +40,13 @@ typedef struct {
 } MfClassicPollerEventDataKeyRequest;
 
 typedef struct {
+    uint8_t sector_num;
+    MfClassicKey key;
+    MfClassicKeyType key_type;
+    bool key_provided;
+} MfClassicPollerEventDataReadSectorRequest;
+
+typedef struct {
     uint8_t start_sector;
 } MfClassicPollerEventKeyAttackData;
 
@@ -46,6 +54,7 @@ typedef union {
     MfClassicError error;
     MfClassicPollerEventDataRequestMode poller_mode;
     MfClassicPollerEventDataKeyRequest key_request_data;
+    MfClassicPollerEventDataReadSectorRequest read_sector_request_data;
     MfClassicPollerEventKeyAttackData key_attack_data;
 } MfClassicPollerEventData;
 

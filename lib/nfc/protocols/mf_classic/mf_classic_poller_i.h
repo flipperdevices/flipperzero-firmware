@@ -29,6 +29,7 @@ typedef enum {
     MfClassicPollerStateIdle,
     MfClassicPollerStateNewSector,
     MfClassicPollerStateRequestKey,
+    MfClassicPollerStateRequestReadSector,
     MfClassicPollerStateAuthKeyA,
     MfClassicPollerStateAuthKeyB,
     MfClassicPollerStateReadSector,

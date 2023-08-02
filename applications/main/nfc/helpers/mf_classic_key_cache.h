@@ -14,6 +14,12 @@ void mf_classic_key_cache_free(MfClassicKeyCache* instance);
 
 bool mf_classic_key_cache_load(MfClassicKeyCache* instance, const uint8_t* uid, size_t uid_len);
 
+bool mf_classic_key_cahce_get_next_key(
+    MfClassicKeyCache* instance,
+    uint8_t* sector_num,
+    MfClassicKey* key,
+    MfClassicKeyType* key_type);
+
 bool mf_classic_key_cache_save(MfClassicKeyCache* instance, const MfClassicData* data);
 
 void mf_classic_key_cache_reset(MfClassicKeyCache* instance);
