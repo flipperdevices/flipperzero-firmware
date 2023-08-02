@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0802-0244-0.87.1-89ffaf6.tgz&channel=RM0802-0244-0.87.1-89ffaf6&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0802-0244-0.87.1-89ffaf6-NoAnim.tgz&channel=RM0802-0244-0.87.1-89ffaf6-NoAnim&version=0.86.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0802-0244-0.87.1-89ffaf6.tgz&channel=RM0802-0244-0.87.1-89ffaf6&version=0.87.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0802-0244-0.87.1-89ffaf6-NoAnim.tgz&channel=RM0802-0244-0.87.1-89ffaf6-NoAnim&version=0.87.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -433,4 +433,4 @@ $ ./fbt dolphin_ext
 - [Air Tag for FZ ($50 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/696)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0802-0244-0.87.1-89ffaf6.tgz&channel=RM0802-0244-0.87.1-89ffaf6&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0802-0244-0.87.1-89ffaf6-NoAnim.tgz&channel=RM0802-0244-0.87.1-89ffaf6-NoAnim&version=0.86.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0802-0244-0.87.1-89ffaf6.tgz&channel=RM0802-0244-0.87.1-89ffaf6&version=0.87.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0802-0244-0.87.1-89ffaf6-NoAnim.tgz&channel=RM0802-0244-0.87.1-89ffaf6-NoAnim&version=0.87.1)
