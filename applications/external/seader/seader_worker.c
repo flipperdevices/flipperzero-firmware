@@ -278,7 +278,7 @@ void seader_send_payload(
         (&asn_DEF_Payload)
             ->op->print_struct(&asn_DEF_Payload, payload, 1, seader_asn_to_string, payloadDebug);
         if(strlen(payloadDebug) > 0) {
-            FURI_LOG_D(TAG, "Sending payload: %s", payloadDebug);
+            FURI_LOG_D(TAG, "Sending payload[%d %d %d]: %s", to, from, replyTo, payloadDebug);
         }
     }
 #endif
@@ -914,7 +914,7 @@ ReturnCode seader_picopass_card_read(SeaderWorker* seader_worker) {
     return err;
 }
 
-void seader_worker_process_message(SeaderWorker* seader_worker, CCID_Message* message) {
+void seader_worker_process_sam_message(SeaderWorker* seader_worker, CCID_Message* message) {
     if(seader_process_apdu(seader_worker, message->payload, message->dwLength)) {
         // no-op
     } else {
