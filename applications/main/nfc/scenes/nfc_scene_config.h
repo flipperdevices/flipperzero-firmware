@@ -35,6 +35,8 @@ ADD_SCENE(nfc, mf_classic_dict_attack, MfClassicDictAttack)
 ADD_SCENE(nfc, mf_classic_detect_reader, MfClassicDetectReader)
 ADD_SCENE(nfc, mf_classic_mfkey_nonces_info, MfClassicMfkeyNoncesInfo)
 ADD_SCENE(nfc, mf_classic_mfkey_complete, MfClassicMfkeyComplete)
+ADD_SCENE(nfc, mf_classic_update_initial, MfClassicUpdateInitial)
+ADD_SCENE(nfc, mf_classic_write_initial, MfClassicWriteInitial)
 
 ADD_SCENE(nfc, mf_classic_keys, MfClassicKeys)
 ADD_SCENE(nfc, mf_classic_keys_list, MfClassicKeysList)

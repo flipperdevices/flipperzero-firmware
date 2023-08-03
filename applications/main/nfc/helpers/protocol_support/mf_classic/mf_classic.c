@@ -189,13 +189,13 @@ static bool nfc_scene_saved_menu_on_event_mf_classic(NfcApp* instance, uint32_t 
     bool consumed = false;
 
     if(event == SubmenuIndexDetectReader) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicDetectReader);
         consumed = true;
     } else if(event == SubmenuIndexWrite) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicWriteInitial);
         consumed = true;
     } else if(event == SubmenuIndexUpdate) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicUpdateInitial);
         consumed = true;
     }
 
