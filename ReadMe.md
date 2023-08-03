@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fixed Apps link in Main Menu & Games Menu Order (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/43d3483cc7a448063484e8a58effd25b037bbdbd)
 - Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader)
 - Updated: [SD Card Assets: Includes NFC Assets: 86 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) (19 More Added)](https://www.patreon.com/RogueMaster/membership)
+- [Evil Portal Assets: Google Realistic (By JMcrafter26)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/60)
 
 <a name="release">
 
