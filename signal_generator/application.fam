@@ -1,6 +1,7 @@
 App(
     appid="signal_generator",
     name="Signal Generator",
+    description="Control GPIO pins to generate digital signals",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="signal_gen_app",
     requires=["gui"],

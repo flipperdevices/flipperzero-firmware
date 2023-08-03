@@ -1,6 +1,7 @@
 App(
     appid="weather_station",
     name="Weather Station",
+    description="Receive weather data from a wide range of supported Sub-1GHz remote sensor",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="weather_station_app",

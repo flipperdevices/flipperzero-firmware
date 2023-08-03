@@ -1,6 +1,7 @@
 App(
     appid="picopass",
     name="PicoPass",
+    description="App to communicate with NFC tags using the PicoPass format",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="picopass_app",

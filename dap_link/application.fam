@@ -1,6 +1,7 @@
 App(
     appid="dap_link",
     name="DAP Link",
+    description="Enables use of Flipper as a debug probe for ARM devices, implements the CMSIS-DAP protocol",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dap_link_app",
     requires=[
