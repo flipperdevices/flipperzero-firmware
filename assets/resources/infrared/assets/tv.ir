@@ -1724,13 +1724,13 @@ protocol: NEC
 address: 40 00 00 00
 command: 0B 00 00 00
 # 
-name: Volume_up
+name: Vol_up
 type: parsed
 protocol: NEC
 address: 40 00 00 00
 command: 13 00 00 00
 # 
-name: Volume_down
+name: Vol_dn
 type: parsed
 protocol: NEC
 address: 40 00 00 00
