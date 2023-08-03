@@ -328,10 +328,10 @@ static Loader* loader_alloc() {
                 }
             }
 
-            if(!path && strcmp(furi_string_get_cstr(line), LOADER_APPLICATIONS_NAME) == 0) {
-                label = LOADER_APPLICATIONS_NAME;
+            if(!path && strcmp(furi_string_get_cstr(line), "Applications") == 0) {
+                label = "Apps";
                 icon = &A_Plugins_14;
-                path = LOADER_APPLICATIONS_NAME;
+                path = "Applications";
             }
 
             if(!path && strcmp(furi_string_get_cstr(line), "Settings") == 0) {
