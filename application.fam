@@ -1,6 +1,7 @@
 App(
     appid="nfc_rfid_detector",
     name="NFC/RFID detector",
+    description="Identify the reader type: NFC (12.54 MHz) and/or RFID (125 KHz)",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="nfc_rfid_detector_app",
