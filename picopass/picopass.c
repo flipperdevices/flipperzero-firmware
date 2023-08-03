@@ -68,6 +68,13 @@ Picopass* picopass_alloc() {
         PicopassViewTextInput,
         text_input_get_view(picopass->text_input));
 
+    // Byte Input
+    picopass->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        picopass->view_dispatcher,
+        PicopassViewByteInput,
+        byte_input_get_view(picopass->byte_input));
+
     // Custom Widget
     picopass->widget = widget_alloc();
     view_dispatcher_add_view(
@@ -108,6 +115,10 @@ void picopass_free(Picopass* picopass) {
     // TextInput
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewTextInput);
     text_input_free(picopass->text_input);
+
+    // ByteInput
+    view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewByteInput);
+    byte_input_free(picopass->byte_input);
 
     // Custom Widget
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewWidget);
