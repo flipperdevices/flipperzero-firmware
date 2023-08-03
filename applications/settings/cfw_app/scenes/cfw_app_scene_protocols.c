@@ -4,6 +4,11 @@ enum VarItemListIndex {
     VarItemListIndexSubghzFrequencies,
     VarItemListIndexSubghzExtend,
     VarItemListIndexSubghzBypass,
+    VarItemListIndexSpiCc1101Handle,
+    VarItemListIndexSpiNrf24Handle,
+    VarItemListIndexUartEspChannel,
+    VarItemListIndexUartNmeaChannel,
+    VarItemListIndexUartGeneralChannel,
 };
 
 void cfw_app_scene_protocols_var_item_list_callback(void* context, uint32_t index) {

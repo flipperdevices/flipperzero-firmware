@@ -1,5 +1,7 @@
 #include "../wifi_marauder_app_i.h"
 
+#define MAX_NAME_LEN 254
+
 static void wifi_marauder_scene_script_select_callback(void* context, uint32_t index) {
     WifiMarauderApp* app = context;
 
@@ -35,10 +37,10 @@ void wifi_marauder_scene_script_select_on_enter(void* context) {
     File* dir_scripts = storage_file_alloc(app->storage);
     if(storage_dir_open(dir_scripts, MARAUDER_APP_FOLDER_SCRIPTS)) {
         FileInfo file_info;
-        char file_path[255];
+        char file_path[MAX_NAME_LEN];
         app->script_list_count = 0;
         // Goes through the files in the folder counting the ones that end with the json extension
-        while(storage_dir_read(dir_scripts, &file_info, file_path, 255)) {
+        while(storage_dir_read(dir_scripts, &file_info, file_path, MAX_NAME_LEN)) {
             app->script_list_count++;
         }
         if(app->script_list_count > 0) {
@@ -48,7 +50,7 @@ void wifi_marauder_scene_script_select_on_enter(void* context) {
             storage_dir_open(dir_scripts, MARAUDER_APP_FOLDER_SCRIPTS);
             // Read the files again from the beginning, adding the scripts in the list
             int script_index = 0;
-            while(storage_dir_read(dir_scripts, &file_info, file_path, 255)) {
+            while(storage_dir_read(dir_scripts, &file_info, file_path, MAX_NAME_LEN)) {
                 app->script_list[script_index] = furi_string_alloc();
                 path_extract_filename_no_ext(file_path, app->script_list[script_index]);
                 submenu_add_item(
