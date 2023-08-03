@@ -12,9 +12,6 @@ void subghz_devices_init() {
 void subghz_devices_deinit(void) {
     furi_check(subghz_device_registry_is_valid());
     subghz_device_registry_deinit();
-    if(furi_hal_subghz_get_ext_power_amp()) {
-        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
-    }
 }
 
 const SubGhzDevice* subghz_devices_get_by_name(const char* device_name) {
