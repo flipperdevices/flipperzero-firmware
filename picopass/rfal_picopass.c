@@ -29,8 +29,7 @@ static uint16_t rfalPicoPassUpdateCcitt(uint16_t crcSeed, uint8_t dataByte) {
     return crc;
 }
 
-static uint16_t
-    rfalPicoPassCalculateCcitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length) {
+uint16_t rfalPicoPassCalculateCcitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length) {
     uint16_t crc = preloadValue;
     uint16_t index;
 
@@ -73,7 +72,7 @@ FuriHalNfcReturn rfalPicoPassPollerCheckPresence(void) {
 FuriHalNfcReturn rfalPicoPassPollerIdentify(rfalPicoPassIdentifyRes* idRes) {
     FuriHalNfcReturn ret;
 
-    uint8_t txBuf[1] = {RFAL_PICOPASS_CMD_IDENTIFY};
+    uint8_t txBuf[1] = {RFAL_PICOPASS_CMD_READ_OR_IDENTIFY};
     uint16_t recvLen = 0;
     uint32_t flags = RFAL_PICOPASS_TXRX_FLAGS;
     uint32_t fwt = furi_hal_nfc_ll_ms2fc(20);
@@ -119,7 +118,7 @@ FuriHalNfcReturn rfalPicoPassPollerSelect(uint8_t* csn, rfalPicoPassSelectRes* s
 
 FuriHalNfcReturn rfalPicoPassPollerReadCheck(rfalPicoPassReadCheckRes* rcRes) {
     FuriHalNfcReturn ret;
-    uint8_t txBuf[2] = {RFAL_PICOPASS_CMD_READCHECK, 0x02};
+    uint8_t txBuf[2] = {RFAL_PICOPASS_CMD_READCHECK_KD, 0x02};
     uint16_t recvLen = 0;
     uint32_t flags = RFAL_PICOPASS_TXRX_FLAGS;
     uint32_t fwt = furi_hal_nfc_ll_ms2fc(20);
@@ -171,7 +170,7 @@ FuriHalNfcReturn rfalPicoPassPollerCheck(uint8_t* mac, rfalPicoPassCheckRes* chk
 FuriHalNfcReturn rfalPicoPassPollerReadBlock(uint8_t blockNum, rfalPicoPassReadBlockRes* readRes) {
     FuriHalNfcReturn ret;
 
-    uint8_t txBuf[4] = {RFAL_PICOPASS_CMD_READ, 0, 0, 0};
+    uint8_t txBuf[4] = {RFAL_PICOPASS_CMD_READ_OR_IDENTIFY, 0, 0, 0};
     txBuf[1] = blockNum;
     uint16_t crc = rfalPicoPassCalculateCcitt(0xE012, txBuf + 1, 1);
     memcpy(txBuf + 2, &crc, sizeof(uint16_t));
@@ -194,8 +193,8 @@ FuriHalNfcReturn rfalPicoPassPollerReadBlock(uint8_t blockNum, rfalPicoPassReadB
 FuriHalNfcReturn rfalPicoPassPollerWriteBlock(uint8_t blockNum, uint8_t data[8], uint8_t mac[4]) {
     FuriHalNfcReturn ret;
 
-    uint8_t txBuf[14] = {RFAL_PICOPASS_CMD_WRITE, blockNum, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    memcpy(txBuf + 2, data, RFAL_PICOPASS_MAX_BLOCK_LEN);
+    uint8_t txBuf[14] = {RFAL_PICOPASS_CMD_UPDATE, blockNum, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    memcpy(txBuf + 2, data, RFAL_PICOPASS_BLOCK_LEN);
     memcpy(txBuf + 10, mac, 4);
 
     uint16_t recvLen = 0;
