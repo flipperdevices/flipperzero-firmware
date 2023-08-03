@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader)
 - Updated: [SD Card Assets: Includes NFC Assets: 86 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) (19 More Added)](https://www.patreon.com/RogueMaster/membership)
 - [Evil Portal Assets: Google Realistic (By JMcrafter26)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/60)
+- Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 <a name="release">
 

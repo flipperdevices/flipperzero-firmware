@@ -1,4 +1,6 @@
 #include "crypto_v2.h"
+#include <stdlib.h>
+#include <furi.h>
 #include <furi_hal_crypto.h>
 #include <furi_hal_random.h>
 #include <furi_hal_version.h>
@@ -28,8 +30,7 @@ static uint8_t get_crypto_verify_key_length() {
 uint8_t* totp_crypto_encrypt_v2(
     const uint8_t* plain_data,
     const size_t plain_data_length,
-    const uint8_t* iv,
-    uint8_t key_slot,
+    const CryptoSettings* crypto_settings,
     size_t* encrypted_data_length) {
     uint8_t* encrypted_data;
     size_t remain = plain_data_length % CRYPTO_ALIGNMENT_FACTOR;
@@ -45,12 +46,14 @@ uint8_t* totp_crypto_encrypt_v2(
         *encrypted_data_length = plain_data_aligned_length;
 
         furi_check(
-            furi_hal_crypto_store_load_key(key_slot, iv), "Encryption failed: store_load_key");
+            furi_hal_crypto_store_load_key(crypto_settings->crypto_key_slot, crypto_settings->iv),
+            "Encryption failed: store_load_key");
         furi_check(
             furi_hal_crypto_encrypt(plain_data_aligned, encrypted_data, plain_data_aligned_length),
             "Encryption failed: encrypt");
         furi_check(
-            furi_hal_crypto_store_unload_key(key_slot), "Encryption failed: store_unload_key");
+            furi_hal_crypto_store_unload_key(crypto_settings->crypto_key_slot),
+            "Encryption failed: store_unload_key");
 
         memset_s(plain_data_aligned, plain_data_aligned_length, 0, plain_data_aligned_length);
         free(plain_data_aligned);
@@ -60,12 +63,14 @@ uint8_t* totp_crypto_encrypt_v2(
         *encrypted_data_length = plain_data_length;
 
         furi_check(
-            furi_hal_crypto_store_load_key(key_slot, iv), "Encryption failed: store_load_key");
+            furi_hal_crypto_store_load_key(crypto_settings->crypto_key_slot, crypto_settings->iv),
+            "Encryption failed: store_load_key");
         furi_check(
             furi_hal_crypto_encrypt(plain_data, encrypted_data, plain_data_length),
             "Encryption failed: encrypt");
         furi_check(
-            furi_hal_crypto_store_unload_key(key_slot), "Encryption failed: store_unload_key");
+            furi_hal_crypto_store_unload_key(crypto_settings->crypto_key_slot),
+            "Encryption failed: store_unload_key");
     }
 
     return encrypted_data;
@@ -74,29 +79,34 @@ uint8_t* totp_crypto_encrypt_v2(
 uint8_t* totp_crypto_decrypt_v2(
     const uint8_t* encrypted_data,
     const size_t encrypted_data_length,
-    const uint8_t* iv,
-    uint8_t key_slot,
+    const CryptoSettings* crypto_settings,
     size_t* decrypted_data_length) {
     *decrypted_data_length = encrypted_data_length;
     uint8_t* decrypted_data = malloc(*decrypted_data_length);
     furi_check(decrypted_data != NULL);
-    furi_check(furi_hal_crypto_store_load_key(key_slot, iv), "Decryption failed: store_load_key");
+    furi_check(
+        furi_hal_crypto_store_load_key(crypto_settings->crypto_key_slot, crypto_settings->iv),
+        "Decryption failed: store_load_key");
     furi_check(
         furi_hal_crypto_decrypt(encrypted_data, decrypted_data, encrypted_data_length),
         "Decryption failed: decrypt");
-    furi_check(furi_hal_crypto_store_unload_key(key_slot), "Decryption failed: store_unload_key");
+    furi_check(
+        furi_hal_crypto_store_unload_key(crypto_settings->crypto_key_slot),
+        "Decryption failed: store_unload_key");
     return decrypted_data;
 }
 
-CryptoSeedIVResult
-    totp_crypto_seed_iv_v2(PluginState* plugin_state, const uint8_t* pin, uint8_t pin_length) {
+CryptoSeedIVResult totp_crypto_seed_iv_v2(
+    CryptoSettings* crypto_settings,
+    const uint8_t* pin,
+    uint8_t pin_length) {
     CryptoSeedIVResult result;
-    if(plugin_state->crypto_verify_data == NULL) {
+    if(crypto_settings->crypto_verify_data == NULL) {
         FURI_LOG_I(LOGGING_TAG, "Generating new IV");
-        furi_hal_random_fill_buf(&plugin_state->base_iv[0], CRYPTO_IV_LENGTH);
+        furi_hal_random_fill_buf(&crypto_settings->base_iv[0], CRYPTO_IV_LENGTH);
     }
 
-    memcpy(&plugin_state->iv[0], &plugin_state->base_iv[0], CRYPTO_IV_LENGTH);
+    memcpy(&crypto_settings->iv[0], &crypto_settings->base_iv[0], CRYPTO_IV_LENGTH);
 
     const uint8_t* device_uid = get_device_uid();
     uint8_t device_uid_length = get_device_uid_length();
@@ -117,7 +127,7 @@ CryptoSeedIVResult
 
     uint8_t hmac[HMAC_SHA512_RESULT_SIZE] = {0};
     int hmac_result_code = hmac_sha512(
-        hmac_key, hmac_key_length, &plugin_state->base_iv[0], CRYPTO_IV_LENGTH, &hmac[0]);
+        hmac_key, hmac_key_length, &crypto_settings->base_iv[0], CRYPTO_IV_LENGTH, &hmac[0]);
 
     memset_s(hmac_key, hmac_key_length, 0, hmac_key_length);
     free(hmac_key);
@@ -125,25 +135,24 @@ CryptoSeedIVResult
     if(hmac_result_code == 0) {
         uint8_t offset =
             hmac[HMAC_SHA512_RESULT_SIZE - 1] % (HMAC_SHA512_RESULT_SIZE - CRYPTO_IV_LENGTH - 1);
-        memcpy(&plugin_state->iv[0], &hmac[offset], CRYPTO_IV_LENGTH);
+        memcpy(&crypto_settings->iv[0], &hmac[offset], CRYPTO_IV_LENGTH);
 
         result = CryptoSeedIVResultFlagSuccess;
-        if(plugin_state->crypto_verify_data == NULL) {
+        if(crypto_settings->crypto_verify_data == NULL) {
             const uint8_t* crypto_vkey = get_crypto_verify_key();
             uint8_t crypto_vkey_length = get_crypto_verify_key_length();
             FURI_LOG_I(LOGGING_TAG, "Generating crypto verify data");
-            plugin_state->crypto_verify_data = malloc(crypto_vkey_length);
-            furi_check(plugin_state->crypto_verify_data != NULL);
-            plugin_state->crypto_verify_data_length = crypto_vkey_length;
+            crypto_settings->crypto_verify_data = malloc(crypto_vkey_length);
+            furi_check(crypto_settings->crypto_verify_data != NULL);
+            crypto_settings->crypto_verify_data_length = crypto_vkey_length;
 
-            plugin_state->crypto_verify_data = totp_crypto_encrypt_v2(
+            crypto_settings->crypto_verify_data = totp_crypto_encrypt_v2(
                 crypto_vkey,
                 crypto_vkey_length,
-                &plugin_state->iv[0],
-                plugin_state->crypto_key_slot,
-                &plugin_state->crypto_verify_data_length);
+                crypto_settings,
+                &crypto_settings->crypto_verify_data_length);
 
-            plugin_state->pin_set = pin != NULL && pin_length > 0;
+            crypto_settings->pin_required = pin != NULL && pin_length > 0;
 
             result |= CryptoSeedIVResultFlagNewCryptoVerifyData;
         }
@@ -154,13 +163,12 @@ CryptoSeedIVResult
     return result;
 }
 
-bool totp_crypto_verify_key_v2(const PluginState* plugin_state) {
+bool totp_crypto_verify_key_v2(const CryptoSettings* crypto_settings) {
     size_t decrypted_key_length;
     uint8_t* decrypted_key = totp_crypto_decrypt_v2(
-        plugin_state->crypto_verify_data,
-        plugin_state->crypto_verify_data_length,
-        &plugin_state->iv[0],
-        plugin_state->crypto_key_slot,
+        crypto_settings->crypto_verify_data,
+        crypto_settings->crypto_verify_data_length,
+        crypto_settings,
         &decrypted_key_length);
 
     const uint8_t* crypto_vkey = get_crypto_verify_key();

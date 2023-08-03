@@ -33,8 +33,8 @@ typedef struct {
 typedef struct {
     char last_code[TokenDigitsCountMax + 1];
     TotpUsbTypeCodeWorkerContext* usb_type_code_worker_context;
-    NotificationMessage const** notification_sequence_new_token;
-    NotificationMessage const** notification_sequence_automation;
+    NotificationMessage const* notification_sequence_new_token[8];
+    NotificationMessage const* notification_sequence_automation[11];
     FuriMutex* last_code_update_sync;
     TotpGenerateCodeWorkerContext* generate_code_worker_context;
     UiPrecalculatedDimensions ui_precalculated_dimensions;
@@ -44,40 +44,29 @@ typedef struct {
 
 static const NotificationSequence*
     get_notification_sequence_new_token(const PluginState* plugin_state, SceneState* scene_state) {
-    if(scene_state->notification_sequence_new_token == NULL) {
-        uint8_t i = 0;
-        uint8_t length = 4;
+    if(scene_state->notification_sequence_new_token[0] == NULL) {
+        NotificationMessage const** sequence = &scene_state->notification_sequence_new_token[0];
+        *(sequence++) = &message_display_backlight_on;
+        *(sequence++) = &message_green_255;
         if(plugin_state->notification_method & NotificationMethodVibro) {
-            length += 2;
+            *(sequence++) = &message_vibro_on;
         }
 
         if(plugin_state->notification_method & NotificationMethodSound) {
-            length += 2;
+            *(sequence++) = &message_note_c5;
         }
 
-        scene_state->notification_sequence_new_token = malloc(sizeof(void*) * length);
-        furi_check(scene_state->notification_sequence_new_token != NULL);
-        scene_state->notification_sequence_new_token[i++] = &message_display_backlight_on;
-        scene_state->notification_sequence_new_token[i++] = &message_green_255;
+        *(sequence++) = &message_delay_50;
+
         if(plugin_state->notification_method & NotificationMethodVibro) {
-            scene_state->notification_sequence_new_token[i++] = &message_vibro_on;
+            *(sequence++) = &message_vibro_off;
         }
 
         if(plugin_state->notification_method & NotificationMethodSound) {
-            scene_state->notification_sequence_new_token[i++] = &message_note_c5;
+            *(sequence++) = &message_sound_off;
         }
 
-        scene_state->notification_sequence_new_token[i++] = &message_delay_50;
-
-        if(plugin_state->notification_method & NotificationMethodVibro) {
-            scene_state->notification_sequence_new_token[i++] = &message_vibro_off;
-        }
-
-        if(plugin_state->notification_method & NotificationMethodSound) {
-            scene_state->notification_sequence_new_token[i++] = &message_sound_off;
-        }
-
-        scene_state->notification_sequence_new_token[i++] = NULL;
+        *(sequence++) = NULL;
     }
 
     return (NotificationSequence*)scene_state->notification_sequence_new_token;
@@ -85,44 +74,33 @@ static const NotificationSequence*
 
 static const NotificationSequence*
     get_notification_sequence_automation(const PluginState* plugin_state, SceneState* scene_state) {
-    if(scene_state->notification_sequence_automation == NULL) {
-        uint8_t i = 0;
-        uint8_t length = 3;
+    if(scene_state->notification_sequence_automation[0] == NULL) {
+        NotificationMessage const** sequence = &scene_state->notification_sequence_automation[0];
+
+        *(sequence++) = &message_blue_255;
         if(plugin_state->notification_method & NotificationMethodVibro) {
-            length += 2;
+            *(sequence++) = &message_vibro_on;
         }
 
         if(plugin_state->notification_method & NotificationMethodSound) {
-            length += 6;
+            *(sequence++) = &message_note_d5; //-V525
+            *(sequence++) = &message_delay_50;
+            *(sequence++) = &message_note_e4;
+            *(sequence++) = &message_delay_50;
+            *(sequence++) = &message_note_f3;
         }
 
-        scene_state->notification_sequence_automation = malloc(sizeof(void*) * length);
-        furi_check(scene_state->notification_sequence_automation != NULL);
+        *(sequence++) = &message_delay_50;
 
-        scene_state->notification_sequence_automation[i++] = &message_blue_255;
         if(plugin_state->notification_method & NotificationMethodVibro) {
-            scene_state->notification_sequence_automation[i++] = &message_vibro_on;
+            *(sequence++) = &message_vibro_off;
         }
 
         if(plugin_state->notification_method & NotificationMethodSound) {
-            scene_state->notification_sequence_automation[i++] = &message_note_d5; //-V525
-            scene_state->notification_sequence_automation[i++] = &message_delay_50;
-            scene_state->notification_sequence_automation[i++] = &message_note_e4;
-            scene_state->notification_sequence_automation[i++] = &message_delay_50;
-            scene_state->notification_sequence_automation[i++] = &message_note_f3;
+            *(sequence++) = &message_sound_off;
         }
 
-        scene_state->notification_sequence_automation[i++] = &message_delay_50;
-
-        if(plugin_state->notification_method & NotificationMethodVibro) {
-            scene_state->notification_sequence_automation[i++] = &message_vibro_off;
-        }
-
-        if(plugin_state->notification_method & NotificationMethodSound) {
-            scene_state->notification_sequence_automation[i++] = &message_sound_off;
-        }
-
-        scene_state->notification_sequence_automation[i++] = NULL;
+        *(sequence++) = NULL;
     }
 
     return (NotificationSequence*)scene_state->notification_sequence_automation;
@@ -213,6 +191,8 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
 
     scene_state->active_font = available_fonts[plugin_state->active_font_index];
     scene_state->notification_app = furi_record_open(RECORD_NOTIFICATION);
+    scene_state->notification_sequence_automation[0] = NULL;
+    scene_state->notification_sequence_new_token[0] = NULL;
 
 #ifdef TOTP_BADBT_AUTOMATION_ENABLED
 
@@ -235,9 +215,7 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
         totp_token_info_iterator_get_current_token(iterator_context),
         scene_state->last_code_update_sync,
         plugin_state->timezone_offset,
-        plugin_state->iv,
-        plugin_state->crypto_version,
-        plugin_state->crypto_key_slot);
+        &plugin_state->crypto_settings);
 
     totp_generate_code_worker_set_code_generated_handler(
         scene_state->generate_code_worker_context, &on_new_token_code_generated, plugin_state);
@@ -447,14 +425,6 @@ void totp_scene_generate_token_deactivate(PluginState* plugin_state) {
         totp_bt_type_code_worker_stop(plugin_state->bt_type_code_worker_context);
     }
 #endif
-
-    if(scene_state->notification_sequence_new_token != NULL) {
-        free(scene_state->notification_sequence_new_token);
-    }
-
-    if(scene_state->notification_sequence_automation != NULL) {
-        free(scene_state->notification_sequence_automation);
-    }
 
     furi_mutex_free(scene_state->last_code_update_sync);
 
