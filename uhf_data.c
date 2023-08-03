@@ -1,6 +1,5 @@
 #include <furi.h>
 #include "uhf_data.h"
-// #include "uhf_cmd.h"
 
 UHFData* uhf_data_alloc() {
     UHFData* uhf_data = (UHFData*)malloc(sizeof(UHFData));
