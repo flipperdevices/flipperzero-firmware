@@ -105,7 +105,7 @@ void totp_cli_command_pin_handle(PluginState* plugin_state, FuriString* args, Cl
 
     bool do_change = false;
     bool do_remove = false;
-    uint8_t crypto_key_slot = plugin_state->crypto_key_slot;
+    uint8_t crypto_key_slot = plugin_state->crypto_settings.crypto_key_slot;
 
     bool arguments_parsed = true;
     while(args_read_string_and_trim(args, temp_str)) {
