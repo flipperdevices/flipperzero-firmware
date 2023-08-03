@@ -2,6 +2,7 @@ App(
     appid="mass_storage",
     name="Mass Storage",
     apptype=FlipperAppType.EXTERNAL,
+    description="Implements a mass storage device over USB for disk images",
     entry_point="mass_storage_app",
     requires=[
         "gui",
