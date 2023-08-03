@@ -12,6 +12,7 @@ extern "C" {
 
 #define ISO15693_3_GUARD_TIME_US (5000U)
 #define ISO15693_3_FDT_POLL_FC (4202U)
+#define ISO15693_3_FDT_LISTEN_FC (4320U)
 #define ISO15693_3_POLL_POLL_MIN_US (1500U)
 
 /* true: modulating releases load, false: modulating adds load resistor to field coil */
