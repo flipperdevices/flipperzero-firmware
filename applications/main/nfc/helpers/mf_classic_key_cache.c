@@ -145,6 +145,25 @@ bool mf_classic_key_cache_load(MfClassicKeyCache* instance, const uint8_t* uid, 
     return load_success;
 }
 
+void mf_classic_key_cache_load_from_data(MfClassicKeyCache* instance, const MfClassicData* data) {
+    furi_assert(instance);
+    furi_assert(data);
+
+    mf_classic_key_cache_reset(instance);
+    instance->keys.key_a_mask = data->key_a_mask;
+    instance->keys.key_b_mask = data->key_b_mask;
+    for(size_t i = 0; i < MF_CLASSIC_TOTAL_SECTORS_MAX; i++) {
+        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
+
+        if(FURI_BIT(data->key_a_mask, i)) {
+            instance->keys.key_a[i] = sec_tr->key_a;
+        }
+        if(FURI_BIT(data->key_b_mask, i)) {
+            instance->keys.key_b[i] = sec_tr->key_b;
+        }
+    }
+}
+
 bool mf_classic_key_cahce_get_next_key(
     MfClassicKeyCache* instance,
     uint8_t* sector_num,
