@@ -1,0 +1,13 @@
+App(
+    appid="chronometer",
+    name="Chronometer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_chronometer_app",
+    stack_size=1 * 1024,
+    fap_icon="chronometer.png",
+    fap_category="Tools",
+    fap_author="nmrr",
+    fap_weburl="https://github.com/nmrr/flipperzero-chronometer",
+    fap_version=(1, 0),
+    fap_description="This chronometer is accurate to the millisecond. TIM2 internal timer of the STM32 MCU is used to generate a 64 MHz clock signal. This signal is used to count elapsed time.",
+)
