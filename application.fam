@@ -1,6 +1,7 @@
 App(
     appid="spi_mem_manager",
     name="SPI Mem Manager",
+    description="Application for reading and writing 25-series SPI memory chips",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="spi_mem_app",
     requires=["gui"],
