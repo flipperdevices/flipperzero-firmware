@@ -13,9 +13,7 @@
 struct TotpUpdateContext {
     FuriString* args;
     Cli* cli;
-    uint8_t* iv;
-    uint8_t crypto_version;
-    uint8_t crypto_key_slot;
+    const CryptoSettings* crypto_settings;
 };
 
 enum TotpIteratorUpdateTokenResultsEx {
@@ -98,9 +96,7 @@ static TotpIteratorUpdateTokenResult
                furi_string_get_cstr(temp_str),
                furi_string_size(temp_str),
                token_secret_encoding,
-               context_t->iv,
-               context_t->crypto_version,
-               context_t->crypto_key_slot)) {
+               context_t->crypto_settings)) {
             furi_string_secure_free(temp_str);
             return TotpIteratorUpdateTokenResultInvalidSecret;
         }
@@ -155,11 +151,7 @@ void totp_cli_command_update_handle(PluginState* plugin_state, FuriString* args,
     totp_token_info_iterator_go_to(iterator_context, token_number - 1);
 
     struct TotpUpdateContext update_context = {
-        .args = args,
-        .cli = cli,
-        .iv = &plugin_state->iv[0],
-        .crypto_version = plugin_state->crypto_version,
-        .crypto_key_slot = plugin_state->crypto_key_slot};
+        .args = args, .cli = cli, .crypto_settings = &plugin_state->crypto_settings};
     TotpIteratorUpdateTokenResult update_result = totp_token_info_iterator_update_current_token(
         iterator_context, &update_token_handler, &update_context);
 

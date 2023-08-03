@@ -13,7 +13,7 @@
 #ifdef TOTP_BADBT_AUTOMATION_ENABLED
 #include "../workers/bt_type_code/bt_type_code.h"
 #endif
-#include "../services/crypto/constants.h"
+#include "crypto_settings.h"
 
 /**
  * @brief Application state structure
@@ -50,31 +50,6 @@ typedef struct {
     ConfigFileContext* config_file_context;
 
     /**
-     * @brief Encrypted well-known data
-     */
-    uint8_t* crypto_verify_data;
-
-    /**
-     * @brief Encrypted well-known data length
-     */
-    size_t crypto_verify_data_length;
-
-    /**
-     * @brief Whether PIN is set by user or not 
-     */
-    bool pin_set;
-
-    /**
-     * @brief Initialization vector (IV) to be used for encryption\decryption 
-     */
-    uint8_t iv[CRYPTO_IV_LENGTH];
-
-    /**
-     * @brief Basic randomly-generated initialization vector (IV)
-     */
-    uint8_t base_iv[CRYPTO_IV_LENGTH];
-
-    /**
      * @brief Notification method
      */
     NotificationMethod notification_method;
@@ -107,17 +82,12 @@ typedef struct {
     uint8_t active_font_index;
 
     /**
-     * @brief Crypto key slot to be used
-     */
-    uint8_t crypto_key_slot;
-
-    /**
-     * @brief Crypto algorithms version to be used
-     */
-    uint8_t crypto_version;
-
-    /**
      * @brief Application even queue
      */
     FuriMessageQueue* event_queue;
+
+    /**
+     * @brief Crypto settings
+     */
+    CryptoSettings crypto_settings;
 } PluginState;
