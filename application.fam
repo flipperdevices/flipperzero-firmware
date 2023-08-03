@@ -1,6 +1,7 @@
 App(
     appid="nfc_magic",
     name="Nfc Magic",
+    description="Application for writing to NFC tags with modifiable sector 0",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="nfc_magic_app",
