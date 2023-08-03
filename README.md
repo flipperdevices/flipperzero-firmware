@@ -68,6 +68,11 @@ The same key is used for all messages. This means that no forward-secrecy is
 provided. If the key is compromised, all previous messages are compromised as
 well.
 
+Currently, no protection against replay attacks is implemented. This means that
+someone without the key can capture an encrypted message and resend it as many
+times as they want. A receiving flipper will display the replayed message as if
+it were new.
+
 If you do not understand the implications of the caveats mentioned here, do not
 expect to gain any security by using encryption.
 
