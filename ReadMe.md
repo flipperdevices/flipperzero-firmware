@@ -40,8 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: Fix MFC key invalidation #2912 (By AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2912)
 - OFW: [NFC CLI: Fix multiple apdu commands from not working when one of them gives an empty response #2922 (By erikj95)](https://github.com/flipperdevices/flipperzero-firmware/pull/2922)
 - OFW: [fbtenv: add additional environ variable to control execution flow #2938 (By lomalkin)](https://github.com/flipperdevices/flipperzero-firmware/pull/2938)
-- Updated: [WiFi (Marauder) v6.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` (CFW Settings UART Added By Sil333033)
-- Updated Ext Power Amp Code (Changes By Sil333033)
+- Updated: [WiFi (Marauder) v6.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [(CFW Settings UART Added By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/18298d9e09b9389b9a876f620079de8a88da412f)
+- Updated: [Ext Power Amp Code (Changes By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/63084d5e7687858065f4cd84a7217659ccf7910f)
 
 <a name="release">
 
