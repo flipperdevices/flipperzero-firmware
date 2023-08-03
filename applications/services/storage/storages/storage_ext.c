@@ -396,6 +396,22 @@ static uint64_t storage_ext_file_tell(void* ctx, File* file) {
     return position;
 }
 
+static bool storage_ext_file_expand(void* ctx, File* file, const uint64_t size) {
+#ifdef FURI_RAM_EXEC
+    UNUSED(ctx);
+    UNUSED(file);
+    UNUSED(size);
+    return FSE_NOT_READY;
+#else
+    StorageData* storage = ctx;
+    SDFile* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = f_expand(file_data, size, 1);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
+    return (file->error_id == FSE_OK);
+#endif
+}
+
 static bool storage_ext_file_truncate(void* ctx, File* file) {
 #ifdef FURI_RAM_EXEC
     UNUSED(ctx);
@@ -597,6 +613,7 @@ static const FS_Api fs_api = {
             .write = storage_ext_file_write,
             .seek = storage_ext_file_seek,
             .tell = storage_ext_file_tell,
+            .expand = storage_ext_file_expand,
             .truncate = storage_ext_file_truncate,
             .size = storage_ext_file_size,
             .sync = storage_ext_file_sync,

@@ -62,6 +62,12 @@ struct File {
  *      @param file pointer to file object
  *      @return current r/w pointer position
  * 
+ *  @var FS_File_Api::expand
+ *      @brief Expand the file (allocate space for it) 
+ *      @param file pointer to file object
+ *      @param size how many bytes to allocate
+ *      @return success flag
+ * 
  *  @var FS_File_Api::truncate
  *      @brief Truncate file size to current r/w pointer position
  *      @param file pointer to file object
@@ -94,6 +100,7 @@ typedef struct {
     uint16_t (*write)(void* context, File* file, const void* buff, uint16_t bytes_to_write);
     bool (*const seek)(void* context, File* file, uint32_t offset, bool from_start);
     uint64_t (*tell)(void* context, File* file);
+    bool (*const expand)(void* context, File* file, uint64_t size);
     bool (*const truncate)(void* context, File* file);
     uint64_t (*size)(void* context, File* file);
     bool (*const sync)(void* context, File* file);

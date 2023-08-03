@@ -34,6 +34,11 @@ typedef struct {
 
 typedef struct {
     File* file;
+    uint64_t size;
+} SADataFExpand;
+
+typedef struct {
+    File* file;
     const char* path;
     FuriThreadId thread_id;
 } SADataDOpen;
@@ -91,6 +96,7 @@ typedef union {
     SADataFRead fread;
     SADataFWrite fwrite;
     SADataFSeek fseek;
+    SADataFExpand fexpand;
 
     SADataDOpen dopen;
     SADataDRead dread;
@@ -123,6 +129,7 @@ typedef enum {
     StorageCommandFileWrite,
     StorageCommandFileSeek,
     StorageCommandFileTell,
+    StorageCommandFileExpand,
     StorageCommandFileTruncate,
     StorageCommandFileSize,
     StorageCommandFileSync,

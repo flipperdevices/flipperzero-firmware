@@ -117,6 +117,13 @@ bool storage_file_seek(File* file, uint32_t offset, bool from_start);
  */
 uint64_t storage_file_tell(File* file);
 
+/** Expand the file (allocate space for it) 
+ * @param file pointer to file object.
+ * @param size how many bytes to allocate
+ * @return success flag
+ */
+bool storage_file_expand(File* file, uint64_t size);
+
 /** Truncates the file size to the current position of the r/w pointer
  * @param file pointer to file object.
  * @return bool success flag

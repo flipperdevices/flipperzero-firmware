@@ -21,8 +21,8 @@ static void mass_storage_draw_callback(Canvas* canvas, void* _model) {
 
     elements_string_fit_width(canvas, model->file_name, 87 - 2);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 12, 25, "Disc image:");
-    canvas_draw_str(canvas, 12, 40, furi_string_get_cstr(model->file_name));
+    canvas_draw_str(canvas, 16, 27, "Disc image:");
+    canvas_draw_str(canvas, 16, 40, furi_string_get_cstr(model->file_name));
 }
 
 MassStorage* mass_storage_alloc() {

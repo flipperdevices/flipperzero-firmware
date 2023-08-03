@@ -204,6 +204,21 @@ uint64_t storage_file_tell(File* file) {
     return S_RETURN_UINT64;
 }
 
+bool storage_file_expand(File* file, uint64_t size) {
+    S_FILE_API_PROLOGUE;
+    S_API_PROLOGUE;
+
+    SAData data = {
+        .fexpand = {
+            .file = file,
+            .size = size,
+        }};
+
+    S_API_MESSAGE(StorageCommandFileExpand);
+    S_API_EPILOGUE;
+    return S_RETURN_BOOL;
+}
+
 bool storage_file_truncate(File* file) {
     S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;

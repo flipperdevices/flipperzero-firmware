@@ -455,6 +455,13 @@ static uint64_t storage_int_file_tell(void* ctx, File* file) {
     return position;
 }
 
+static bool storage_int_file_expand(void* ctx, File* file, const uint64_t size) {
+    UNUSED(ctx);
+    UNUSED(file);
+    UNUSED(size);
+    return false;
+}
+
 static bool storage_int_file_truncate(void* ctx, File* file) {
     StorageData* storage = ctx;
     lfs_t* lfs = lfs_get_from_storage(storage);
@@ -696,6 +703,7 @@ static const FS_Api fs_api = {
             .write = storage_int_file_write,
             .seek = storage_int_file_seek,
             .tell = storage_int_file_tell,
+            .expand = storage_int_file_expand,
             .truncate = storage_int_file_truncate,
             .size = storage_int_file_size,
             .sync = storage_int_file_sync,
