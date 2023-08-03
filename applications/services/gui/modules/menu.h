@@ -22,7 +22,7 @@ typedef void (*MenuItemCallback)(void* context, uint32_t index);
  * @return     Menu instance
  * @param      pos  size_t position
  */
-Menu* menu_pos_alloc(size_t pos);
+Menu* menu_alloc();
 
 /** Free menu
  *

@@ -162,7 +162,9 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
     furi_record_close(RECORD_LOADER);
 
     uint32_t my_start_point = CLAMP(CFW_SETTINGS()->start_point, APP_COUNT - 1, 0U);
-    app->primary_menu = menu_pos_alloc((size_t)my_start_point);
+    app->primary_menu = menu_alloc();
+    if(my_start_point != 0) menu_set_selected_item(app->primary_menu, my_start_point);
+
     app->settings_menu = submenu_alloc();
 
     loader_menu_build_menu(app, loader_menu);
@@ -191,7 +193,7 @@ static LoaderMenuApp* loader_gamesmenu_app_alloc(LoaderMenu* loader_menu) {
     app->gui = furi_record_open(RECORD_GUI);
     app->view_dispatcher = view_dispatcher_alloc();
 
-    app->primary_menu = menu_pos_alloc(0);
+    app->primary_menu = menu_alloc();
     loader_menu_build_gamesmenu(app, loader_menu);
 
     // Primary menu
