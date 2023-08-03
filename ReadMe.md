@@ -45,7 +45,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Main Menu Lefty Mode Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f66ee9181015a95375648c78b6ec74a8b368e37c)
 - Added: [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)
 - Updated: [USB Mass Storage (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [(Changed By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e21b41a6f2b181794ce7ff0e35a6bbffdd0f0610)
-- [Revert `menu_pos_alloc` function to `menu_alloc` & Fix Start Point Setter (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8081a1809d528337de56a6880610cf4c663ecb5f)
 
 <a name="release">
 

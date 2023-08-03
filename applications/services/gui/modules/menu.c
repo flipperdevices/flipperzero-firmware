@@ -376,7 +376,7 @@ static void menu_exit(void* context) {
     furi_timer_stop(menu->scroll_timer);
 }
 
-Menu* menu_alloc() {
+Menu* menu_pos_alloc(size_t pos) {
     Menu* menu = malloc(sizeof(Menu));
     menu->view = view_alloc(menu->view);
     view_set_context(menu->view, menu);
@@ -393,7 +393,7 @@ Menu* menu_alloc() {
         MenuModel * model,
         {
             MenuItemArray_init(model->items);
-            model->position = 0;
+            model->position = pos;
         },
         true);
 
