@@ -42,7 +42,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [fbtenv: add additional environ variable to control execution flow #2938 (By lomalkin)](https://github.com/flipperdevices/flipperzero-firmware/pull/2938)
 - Updated: [WiFi (Marauder) v6.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [(CFW Settings UART Added By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/18298d9e09b9389b9a876f620079de8a88da412f)
 - Updated: [Ext Power Amp Code (Changes By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/63084d5e7687858065f4cd84a7217659ccf7910f)
-- Main Menu Lefty Mode Fixes (By WillyJL)
+- [Main Menu Lefty Mode Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f66ee9181015a95375648c78b6ec74a8b368e37c)
+- Added: [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)
+- Updated: [USB Mass Storage (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [(Changed By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e21b41a6f2b181794ce7ff0e35a6bbffdd0f0610)
 
 <a name="release">
 
@@ -285,6 +287,7 @@ $ ./fbt dolphin_ext
 - [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca)
+- [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)
 - [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
 - [Clock (By kowalski7cc)](https://github.com/kowalski7cc/flipperzero-firmware/tree/clock-v1)
 - [Continuity Tester (By benallen-dev)](https://github.com/benallen-dev/flipper-zero-apps/tree/main/continuity)
