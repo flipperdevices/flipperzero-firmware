@@ -71,7 +71,7 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
         } else {
             mfc_event->data->read_sector_request_data.key_provided = false;
         }
-    } else if(mfc_event->type == MfClassicPollerEventTypeReadComplete) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeSuccess) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(instance->poller));
         const MfClassicData* mfc_data =

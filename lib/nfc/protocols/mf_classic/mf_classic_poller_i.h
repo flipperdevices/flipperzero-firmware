@@ -27,13 +27,16 @@ typedef enum {
 typedef enum {
     MfClassicPollerStateStart,
     MfClassicPollerStateIdle,
+    MfClassicPollerStateRequestSectorTrailer,
+    MfClassicPollerStateRequestWriteBlock,
     MfClassicPollerStateNewSector,
     MfClassicPollerStateRequestKey,
     MfClassicPollerStateRequestReadSector,
     MfClassicPollerStateAuthKeyA,
     MfClassicPollerStateAuthKeyB,
     MfClassicPollerStateReadSector,
-    MfClassicPollerStateReadComplete,
+    MfClassicPollerStateSuccess,
+    MfClassicPollerStateFail,
 
     MfClassicPollerStateNum,
 } MfClassicPollerState;
@@ -51,6 +54,9 @@ struct MfClassicPoller {
     uint8_t sectors_read;
     uint8_t key_reuse_sector;
     uint8_t sectors_total;
+    uint8_t current_write_block;
+    MfClassicSectorTrailer current_sec_tr;
+
     Crypto1* crypto;
     BitBuffer* tx_plain_buffer;
     BitBuffer* tx_encrypted_buffer;

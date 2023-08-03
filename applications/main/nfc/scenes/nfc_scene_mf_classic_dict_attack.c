@@ -69,7 +69,7 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
     } else if(mfc_event->type == MfClassicPollerEventTypeKeyAttackNextSector) {
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackKeyAttackNextSector);
-    } else if(mfc_event->type == MfClassicPollerEventTypeReadComplete) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeSuccess) {
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackComplete);
         command = NfcCommandStop;

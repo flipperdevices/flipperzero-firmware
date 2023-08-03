@@ -77,14 +77,19 @@ NfcCommand mf_classic_poller_handler_start(MfClassicPoller* instance) {
     mf_classic_detect_protocol(instance->data->iso14443_3a_data, &instance->data->type);
     instance->sectors_read = 0;
     instance->sectors_total = mf_classic_get_total_sectors_num(instance->data->type);
+    instance->current_write_block = 0;
 
     instance->mfc_event.type = MfClassicPollerEventTypeRequestMode;
     command = instance->callback(instance->general_event, instance->context);
 
     if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeDictAttack) {
         instance->state = MfClassicPollerStateNewSector;
-    } else {
+    } else if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeKeyCache) {
         instance->state = MfClassicPollerStateRequestReadSector;
+    } else if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeWrite) {
+        instance->state = MfClassicPollerStateRequestSectorTrailer;
+    } else {
+        furi_crash("Invalid mode selected");
     }
 
     instance->prev_state = MfClassicPollerStateStart;
@@ -111,7 +116,7 @@ NfcCommand mf_classic_poller_handler_new_sector(MfClassicPoller* instance) {
         }
     } else {
         if(instance->sectors_read == instance->sectors_total) {
-            instance->state = MfClassicPollerStateReadComplete;
+            instance->state = MfClassicPollerStateSuccess;
         } else if(mf_classic_is_sector_read(instance->data, instance->sectors_read)) {
             instance->sectors_read++;
             instance->mfc_event.type = MfClassicPollerEventTypeNewSector;
@@ -141,6 +146,139 @@ NfcCommand mf_classic_poller_handler_request_key(MfClassicPoller* instance) {
     return command;
 }
 
+NfcCommand mf_classic_poller_handler_request_sector_trailer(MfClassicPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+
+    if(instance->sectors_read == instance->sectors_total) {
+        instance->state = MfClassicPollerStateSuccess;
+    } else {
+        instance->mfc_event.type = MfClassicPollerEventTypeRequestSectorTrailer;
+        instance->mfc_event_data.sec_tr_data.sector_num = instance->sectors_read;
+        command = instance->callback(instance->general_event, instance->context);
+        if(instance->mfc_event_data.sec_tr_data.sector_trailer_provided) {
+            instance->state = MfClassicPollerStateRequestWriteBlock;
+            memcpy(
+                &instance->current_sec_tr,
+                &instance->mfc_event_data.sec_tr_data.sector_trailer,
+                sizeof(MfClassicSectorTrailer));
+            instance->current_write_block =
+                mf_classic_get_first_block_num_of_sector(instance->sectors_read);
+        } else {
+            instance->sectors_read++;
+        }
+    }
+
+    return command;
+}
+
+NfcCommand mf_classic_poller_handler_request_write_block(MfClassicPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+
+    MfClassicSectorTrailer* sec_tr = &instance->current_sec_tr;
+    MfClassicKey key_a = sec_tr->key_a;
+    MfClassicKey key_b = sec_tr->key_b;
+
+    MfClassicKeyType key_type_read = MfClassicKeyTypeA;
+    MfClassicKeyType key_type_write = MfClassicKeyTypeB;
+    MfClassicBlock tag_block = {};
+    MfClassicError error = MfClassicErrorNone;
+    uint8_t block_num = instance->current_write_block;
+
+    do {
+        uint8_t sec_tr_num = mf_classic_get_sector_trailer_num_by_sector(instance->sectors_read);
+        if(block_num == sec_tr_num) {
+            instance->sectors_read++;
+            instance->state = MfClassicPollerStateRequestSectorTrailer;
+            break;
+        }
+
+        FURI_LOG_I(TAG, "Writing to block %d", block_num);
+
+        // Check write and read access
+        if(mf_classic_is_allowed_access_data_block(
+               sec_tr, block_num, MfClassicKeyTypeA, MfClassicActionDataWrite)) {
+            key_type_write = MfClassicKeyTypeA;
+        } else if(mf_classic_is_allowed_access_data_block(
+                      sec_tr, block_num, MfClassicKeyTypeB, MfClassicActionDataWrite)) {
+            key_type_write = MfClassicKeyTypeB;
+        } else {
+            FURI_LOG_D(TAG, "Not allowed to write block %d", block_num);
+            instance->current_write_block++;
+            break;
+        }
+
+        if(mf_classic_is_allowed_access_data_block(
+               sec_tr, block_num, key_type_write, MfClassicActionDataRead)) {
+            key_type_read = key_type_write;
+        } else {
+            key_type_read = key_type_write == MfClassicKeyTypeA ? MfClassicKeyTypeB :
+                                                                  MfClassicKeyTypeA;
+            if(!mf_classic_is_allowed_access_data_block(
+                   sec_tr, block_num, key_type_read, MfClassicActionDataRead)) {
+                FURI_LOG_D(TAG, "Not allowed to read block %d", block_num);
+                instance->current_write_block++;
+            }
+        }
+
+        // Authenticate to sector
+        MfClassicKey* auth_key = key_type_read == MfClassicKeyTypeA ? &key_a : &key_b;
+        error = mf_classic_async_auth(instance, block_num, auth_key, key_type_read, NULL);
+        if(error != MfClassicErrorNone) {
+            FURI_LOG_D(TAG, "Failed to auth to block %d", block_num);
+            instance->state = MfClassicPollerStateFail;
+            break;
+        }
+
+        // Read block from tag
+        error = mf_classic_async_read_block(instance, block_num, &tag_block);
+        if(error != MfClassicErrorNone) {
+            FURI_LOG_D(TAG, "Failed to read block %d", block_num);
+            instance->state = MfClassicPollerStateFail;
+            break;
+        }
+
+        // Request block to write
+        instance->mfc_event.type = MfClassicPollerEventTypeRequestWriteBlock;
+        instance->mfc_event_data.write_block_data.block_num = block_num;
+        command = instance->callback(instance->general_event, instance->context);
+        if(!instance->mfc_event_data.write_block_data.write_block_provided) continue;
+
+        // Compare tag and flippers block
+        if(memcmp(
+               tag_block.data,
+               instance->mfc_event_data.write_block_data.write_block.data,
+               sizeof(MfClassicBlock)) == 0) {
+            FURI_LOG_D(TAG, "Block %d is equal. Skip writing", block_num);
+            mf_classic_aync_halt(instance);
+            instance->current_write_block++;
+            break;
+        }
+
+        // Reauth if necessary
+        // TODO move to separate state
+        if(key_type_write != key_type_read) {
+            FURI_LOG_W(TAG, "Will not work");
+            mf_classic_aync_halt(instance);
+            auth_key = key_type_write == MfClassicKeyTypeA ? &key_a : &key_b;
+            error = mf_classic_async_auth(instance, block_num, auth_key, key_type_write, NULL);
+        }
+
+        // Write block
+        error = mf_classic_async_write_block(
+            instance, block_num, &instance->mfc_event_data.write_block_data.write_block);
+        if(error != MfClassicErrorNone) {
+            FURI_LOG_D(TAG, "Failed to write block %d", block_num);
+            instance->state = MfClassicPollerStateFail;
+            break;
+        }
+
+        mf_classic_aync_halt(instance);
+        instance->current_write_block++;
+    } while(false);
+
+    return command;
+}
+
 NfcCommand mf_classic_poller_handler_request_read_sector(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
@@ -149,7 +287,7 @@ NfcCommand mf_classic_poller_handler_request_read_sector(MfClassicPoller* instan
     instance->mfc_event.type = MfClassicPollerEventTypeRequestReadSector;
     command = instance->callback(instance->general_event, instance->context);
     if(!instance->mfc_event_data.read_sector_request_data.key_provided) {
-        instance->state = MfClassicPollerStateReadComplete;
+        instance->state = MfClassicPollerStateSuccess;
     } else {
         do {
             uint8_t block_num = mf_classic_get_first_block_num_of_sector(sec_read->sector_num);
@@ -318,10 +456,19 @@ NfcCommand mf_classic_poller_handler_read_sector(MfClassicPoller* instance) {
     return command;
 }
 
-NfcCommand mf_classic_poller_handler_read_complete(MfClassicPoller* instance) {
+NfcCommand mf_classic_poller_handler_success(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
-    instance->mfc_event.type = MfClassicPollerEventTypeReadComplete;
+    instance->mfc_event.type = MfClassicPollerEventTypeSuccess;
     command = instance->callback(instance->general_event, instance->context);
+
+    return command;
+}
+
+NfcCommand mf_classic_poller_handler_fail(MfClassicPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+    instance->mfc_event.type = MfClassicPollerEventTypeFail;
+    command = instance->callback(instance->general_event, instance->context);
+    instance->state = MfClassicPollerStateStart;
 
     return command;
 }
@@ -330,13 +477,17 @@ static const MfClassicPollerReadHandler
     mf_classic_poller_dict_attack_handler[MfClassicPollerStateNum] = {
         [MfClassicPollerStateIdle] = mf_classic_poller_handler_idle,
         [MfClassicPollerStateStart] = mf_classic_poller_handler_start,
+        [MfClassicPollerStateRequestSectorTrailer] =
+            mf_classic_poller_handler_request_sector_trailer,
+        [MfClassicPollerStateRequestWriteBlock] = mf_classic_poller_handler_request_write_block,
         [MfClassicPollerStateNewSector] = mf_classic_poller_handler_new_sector,
         [MfClassicPollerStateRequestKey] = mf_classic_poller_handler_request_key,
         [MfClassicPollerStateRequestReadSector] = mf_classic_poller_handler_request_read_sector,
         [MfClassicPollerStateAuthKeyA] = mf_classic_poller_handler_auth_a,
         [MfClassicPollerStateAuthKeyB] = mf_classic_poller_handler_auth_b,
         [MfClassicPollerStateReadSector] = mf_classic_poller_handler_read_sector,
-        [MfClassicPollerStateReadComplete] = mf_classic_poller_handler_read_complete,
+        [MfClassicPollerStateSuccess] = mf_classic_poller_handler_success,
+        [MfClassicPollerStateFail] = mf_classic_poller_handler_fail,
 };
 
 NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {

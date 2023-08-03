@@ -10,9 +10,18 @@ extern "C" {
 typedef struct MfClassicPoller MfClassicPoller;
 
 typedef enum {
+    // Start event
     MfClassicPollerEventTypeRequestMode,
-    MfClassicPollerEventTypeRequestKey,
+
+    // Read with key cache events
     MfClassicPollerEventTypeRequestReadSector,
+
+    // Write events
+    MfClassicPollerEventTypeRequestSectorTrailer,
+    MfClassicPollerEventTypeRequestWriteBlock,
+
+    // Dictionary attack events
+    MfClassicPollerEventTypeRequestKey,
     MfClassicPollerEventTypeNewSector,
     MfClassicPollerEventTypeFoundKeyA,
     MfClassicPollerEventTypeFoundKeyB,
@@ -21,12 +30,16 @@ typedef enum {
     MfClassicPollerEventTypeKeyAttackStart,
     MfClassicPollerEventTypeKeyAttackStop,
     MfClassicPollerEventTypeKeyAttackNextSector,
-    MfClassicPollerEventTypeReadComplete,
+
+    // Common events
+    MfClassicPollerEventTypeSuccess,
+    MfClassicPollerEventTypeFail,
 } MfClassicPollerEventType;
 
 typedef enum {
     MfClassicPollerModeDictAttack,
     MfClassicPollerModeKeyCache,
+    MfClassicPollerModeWrite,
 } MfClassicPollerMode;
 
 typedef struct {
@@ -47,6 +60,18 @@ typedef struct {
 } MfClassicPollerEventDataReadSectorRequest;
 
 typedef struct {
+    uint8_t sector_num;
+    MfClassicBlock sector_trailer;
+    bool sector_trailer_provided;
+} MfClassicPollerEventDataSectorTrailerRequest;
+
+typedef struct {
+    uint8_t block_num;
+    MfClassicBlock write_block;
+    bool write_block_provided;
+} MfClassicPollerEventDataWriteBlockRequest;
+
+typedef struct {
     uint8_t start_sector;
 } MfClassicPollerEventKeyAttackData;
 
@@ -56,6 +81,8 @@ typedef union {
     MfClassicPollerEventDataKeyRequest key_request_data;
     MfClassicPollerEventDataReadSectorRequest read_sector_request_data;
     MfClassicPollerEventKeyAttackData key_attack_data;
+    MfClassicPollerEventDataSectorTrailerRequest sec_tr_data;
+    MfClassicPollerEventDataWriteBlockRequest write_block_data;
 } MfClassicPollerEventData;
 
 typedef struct {

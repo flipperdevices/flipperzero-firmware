@@ -41,7 +41,7 @@ NfcCommand nfc_mf_classic_update_initial_worker_callback(NfcGenericEvent event, 
         } else {
             mfc_event->data->read_sector_request_data.key_provided = false;
         }
-    } else if(mfc_event->type == MfClassicPollerEventTypeReadComplete) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeSuccess) {
         const MfClassicData* updated_data = nfc_poller_get_data(instance->poller);
         nfc_device_set_data(instance->nfc_device, NfcProtocolMfClassic, updated_data);
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventWorkerExit);

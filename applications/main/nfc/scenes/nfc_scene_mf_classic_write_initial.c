@@ -1,18 +1,60 @@
 #include "../nfc_app_i.h"
 
+#include <nfc/protocols/mf_classic/mf_classic_poller.h>
+
 enum {
     NfcSceneMfClassicWriteInitialStateCardSearch,
     NfcSceneMfClassicWriteInitialStateCardFound,
 };
 
-// bool nfc_mf_classic_write_initial_worker_callback(NfcWorkerEvent event, void* context) {
-//     furi_assert(context);
+NfcCommand
+    nfc_scene_mf_classic_write_initial_worker_callback(NfcGenericEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.data);
+    furi_assert(event.protocol == NfcProtocolMfClassic);
 
-//     NfcApp* nfc = context;
-//     view_dispatcher_send_custom_event(instance->view_dispatcher, event);
+    NfcCommand command = NfcCommandContinue;
+    NfcApp* instance = context;
+    MfClassicPollerEvent* mfc_event = event.data;
+    const MfClassicData* write_data =
+        nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
 
-//     return true;
-// }
+    if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
+        const MfClassicData* tag_data = nfc_poller_get_data(instance->poller);
+        if(iso14443_3a_is_equal(tag_data->iso14443_3a_data, write_data->iso14443_3a_data)) {
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventDictAttackCardDetected);
+            mfc_event->data->poller_mode.mode = MfClassicPollerModeWrite;
+        } else {
+            view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventWrongCard);
+            command = NfcCommandStop;
+        }
+    } else if(mfc_event->type == MfClassicPollerEventTypeRequestSectorTrailer) {
+        uint8_t sector = mfc_event->data->sec_tr_data.sector_num;
+        uint8_t sec_tr = mf_classic_get_sector_trailer_num_by_sector(sector);
+        if(mf_classic_is_block_read(write_data, sec_tr)) {
+            mfc_event->data->sec_tr_data.sector_trailer = write_data->block[sec_tr];
+            mfc_event->data->sec_tr_data.sector_trailer_provided = true;
+        } else {
+            mfc_event->data->sec_tr_data.sector_trailer_provided = false;
+        }
+    } else if(mfc_event->type == MfClassicPollerEventTypeRequestWriteBlock) {
+        uint8_t block_num = mfc_event->data->write_block_data.block_num;
+        if(mf_classic_is_block_read(write_data, block_num)) {
+            mfc_event->data->write_block_data.write_block = write_data->block[block_num];
+            mfc_event->data->write_block_data.write_block_provided = true;
+        } else {
+            mfc_event->data->write_block_data.write_block_provided = false;
+        }
+    } else if(mfc_event->type == MfClassicPollerEventTypeSuccess) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
+        command = NfcCommandStop;
+    } else if(mfc_event->type == MfClassicPollerEventTypeFail) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerFailure);
+        command = NfcCommandStop;
+    }
+    return command;
+}
 
 static void nfc_scene_mf_classic_write_initial_setup_view(NfcApp* instance) {
     Popup* popup = instance->popup;
@@ -43,45 +85,46 @@ void nfc_scene_mf_classic_write_initial_on_enter(void* context) {
     nfc_scene_mf_classic_write_initial_setup_view(instance);
 
     // Setup and start worker
+    instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfClassic);
+    nfc_poller_start(
+        instance->poller, nfc_scene_mf_classic_write_initial_worker_callback, instance);
+
     nfc_blink_emulate_start(instance);
 }
 
 bool nfc_scene_mf_classic_write_initial_on_event(void* context, SceneManagerEvent event) {
     NfcApp* instance = context;
-    UNUSED(instance);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        // if(event.event == NfcWorkerEventSuccess) {
-        //     scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicWriteInitialSuccess);
-        //     consumed = true;
-        // } else if(event.event == NfcWorkerEventFail) {
-        //     scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicWriteInitialFail);
-        //     consumed = true;
-        // } else if(event.event == NfcWorkerEventWrongCard) {
-        //     scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicWrongCard);
-        //     consumed = true;
-        // } else if(event.event == NfcWorkerEventCardDetected) {
-        //     scene_manager_set_scene_state(
-        //         instance->scene_manager,
-        //         NfcSceneMfClassicWriteInitial,
-        //         NfcSceneMfClassicWriteInitialStateCardFound);
-        //     nfc_scene_mf_classic_write_initial_setup_view(nfc);
-        //     consumed = true;
-        // } else if(event.event == NfcWorkerEventNoCardDetected) {
-        //     scene_manager_set_scene_state(
-        //         instance->scene_manager,
-        //         NfcSceneMfClassicWriteInitial,
-        //         NfcSceneMfClassicWriteInitialStateCardSearch);
-        //     nfc_scene_mf_classic_write_initial_setup_view(nfc);
-        //     consumed = true;
-        // }
+        if(event.event == NfcCustomEventDictAttackCardDetected) {
+            scene_manager_set_scene_state(
+                instance->scene_manager,
+                NfcSceneMfClassicWriteInitial,
+                NfcSceneMfClassicWriteInitialStateCardFound);
+            nfc_scene_mf_classic_write_initial_setup_view(instance);
+            consumed = true;
+        } else if(event.event == NfcCustomEventWrongCard) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicWrongCard);
+            consumed = true;
+        } else if(event.event == NfcCustomEventPollerSuccess) {
+            scene_manager_next_scene(
+                instance->scene_manager, NfcSceneMfClassicWriteInitialSuccess);
+            consumed = true;
+        } else if(event.event == NfcCustomEventPollerFailure) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicWriteInitialFail);
+            consumed = true;
+        }
     }
+
     return consumed;
 }
 
 void nfc_scene_mf_classic_write_initial_on_exit(void* context) {
     NfcApp* instance = context;
+
+    nfc_poller_stop(instance->poller);
+    nfc_poller_free(instance->poller);
 
     scene_manager_set_scene_state(
         instance->scene_manager,

@@ -673,13 +673,13 @@ static bool mf_classic_is_allowed_access_sector_trailer(
     return true;
 }
 
-static bool mf_classic_is_allowed_access_data_block(
-    MfClassicData* data,
+bool mf_classic_is_allowed_access_data_block(
+    MfClassicSectorTrailer* sec_tr,
     uint8_t block_num,
     MfClassicKeyType key_type,
     MfClassicAction action) {
-    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
-    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
+    furi_assert(sec_tr);
+
     uint8_t* access_bits_arr = sec_tr->access_bits.data;
 
     if(block_num == 0 && action == MfClassicActionDataWrite) {
@@ -755,8 +755,10 @@ bool mf_classic_is_allowed_access(
         access_allowed =
             mf_classic_is_allowed_access_sector_trailer(data, block_num, key_type, action);
     } else {
+        uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
         access_allowed =
-            mf_classic_is_allowed_access_data_block(data, block_num, key_type, action);
+            mf_classic_is_allowed_access_data_block(sec_tr, block_num, key_type, action);
     }
 
     return access_allowed;
@@ -765,11 +767,14 @@ bool mf_classic_is_allowed_access(
 bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num) {
     furi_assert(data);
 
+    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
+
     // Check if key A can write, if it can, it's transport configuration, not data block
     return !mf_classic_is_allowed_access_data_block(
-               data, block_num, MfClassicKeyTypeA, MfClassicActionDataWrite) &&
+               sec_tr, block_num, MfClassicKeyTypeA, MfClassicActionDataWrite) &&
            (mf_classic_is_allowed_access_data_block(
-                data, block_num, MfClassicKeyTypeB, MfClassicActionDataInc) ||
+                sec_tr, block_num, MfClassicKeyTypeB, MfClassicActionDataInc) ||
             mf_classic_is_allowed_access_data_block(
-                data, block_num, MfClassicKeyTypeB, MfClassicActionDataDec));
+                sec_tr, block_num, MfClassicKeyTypeB, MfClassicActionDataDec));
 }
