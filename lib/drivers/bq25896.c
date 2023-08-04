@@ -35,13 +35,15 @@ typedef struct {
 
 static bq25896_regs_t bq25896_regs;
 
-void bq25896_init(FuriHalI2cBusHandle* handle) {
+bool bq25896_init(FuriHalI2cBusHandle* handle) {
+    bool result = true;
+
     bq25896_regs.r14.REG_RST = 1;
-    furi_hal_i2c_write_reg_8(
+    result &= furi_hal_i2c_write_reg_8(
         handle, BQ25896_ADDRESS, 0x14, *(uint8_t*)&bq25896_regs.r14, BQ25896_I2C_TIMEOUT);
 
     // Readout all registers
-    furi_hal_i2c_read_mem(
+    result &= furi_hal_i2c_read_mem(
         handle,
         BQ25896_ADDRESS,
         0x00,
@@ -52,26 +54,34 @@ void bq25896_init(FuriHalI2cBusHandle* handle) {
     // Poll ADC forever
     bq25896_regs.r02.CONV_START = 1;
     bq25896_regs.r02.CONV_RATE = 1;
-    furi_hal_i2c_write_reg_8(
+    result &= furi_hal_i2c_write_reg_8(
         handle, BQ25896_ADDRESS, 0x02, *(uint8_t*)&bq25896_regs.r02, BQ25896_I2C_TIMEOUT);
 
     bq25896_regs.r07.WATCHDOG = WatchdogDisable;
-    furi_hal_i2c_write_reg_8(
+    result &= furi_hal_i2c_write_reg_8(
         handle, BQ25896_ADDRESS, 0x07, *(uint8_t*)&bq25896_regs.r07, BQ25896_I2C_TIMEOUT);
 
     // OTG power configuration
     bq25896_regs.r0A.BOOSTV = 0x8; // BOOST Voltage: 5.062V
-    bq25896_regs.r0A.BOOST_LIM = BOOST_LIM_1400; // BOOST Current limit: 1.4A
-    furi_hal_i2c_write_reg_8(
+    bq25896_regs.r0A.BOOST_LIM = BoostLim_1400; // BOOST Current limit: 1.4A
+    result &= furi_hal_i2c_write_reg_8(
         handle, BQ25896_ADDRESS, 0x0A, *(uint8_t*)&bq25896_regs.r0A, BQ25896_I2C_TIMEOUT);
 
-    furi_hal_i2c_read_mem(
+    result &= furi_hal_i2c_read_mem(
         handle,
         BQ25896_ADDRESS,
         0x00,
         (uint8_t*)&bq25896_regs,
         sizeof(bq25896_regs),
         BQ25896_I2C_TIMEOUT);
+
+    return result;
+}
+
+void bq25896_set_boost_lim(FuriHalI2cBusHandle* handle, BoostLim boost_lim) {
+    bq25896_regs.r0A.BOOST_LIM = boost_lim;
+    furi_hal_i2c_write_reg_8(
+        handle, BQ25896_ADDRESS, 0x0A, *(uint8_t*)&bq25896_regs.r0A, BQ25896_I2C_TIMEOUT);
 }
 
 void bq25896_poweroff(FuriHalI2cBusHandle* handle) {
@@ -140,19 +150,16 @@ uint16_t bq25896_get_vreg_voltage(FuriHalI2cBusHandle* handle) {
 
 void bq25896_set_vreg_voltage(FuriHalI2cBusHandle* handle, uint16_t vreg_voltage) {
     if(vreg_voltage < 3840) {
-        // Minimum value is 3840 mV
-        bq25896_regs.r06.VREG = 0;
-    } else {
-        // Find the nearest voltage value (subtract offset, divide into sections)
-        // Values are truncated downward as needed (e.g. 4200mV -> 4192 mV)
-        bq25896_regs.r06.VREG = (uint8_t)((vreg_voltage - 3840) / 16);
+        // Minimum valid value is 3840 mV
+        vreg_voltage = 3840;
+    } else if(vreg_voltage > 4208) {
+        // Maximum safe value is 4208 mV
+        vreg_voltage = 4208;
     }
 
-    // Do not allow values above 23 (0x17, 4208mV)
-    // Exceeding 4.2v will overcharge the battery!
-    if(bq25896_regs.r06.VREG > 23) {
-        bq25896_regs.r06.VREG = 23;
-    }
+    // Find the nearest voltage value (subtract offset, divide into sections)
+    // Values are truncated downward as needed (e.g. 4200mV -> 4192 mV)
+    bq25896_regs.r06.VREG = (uint8_t)((vreg_voltage - 3840) / 16);
 
     // Apply changes
     furi_hal_i2c_write_reg_8(

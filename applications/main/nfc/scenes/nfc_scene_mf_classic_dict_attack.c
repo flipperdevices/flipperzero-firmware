@@ -111,18 +111,19 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             } else {
                 notification_message(nfc->notifications, &sequence_success);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
-                DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+                dolphin_deed(DolphinDeedNfcReadSuccess);
                 consumed = true;
             }
         } else if(event.event == NfcWorkerEventAborted) {
-            if(state == DictAttackStateUserDictInProgress) {
+            if(state == DictAttackStateUserDictInProgress &&
+               dict_attack_get_card_state(nfc->dict_attack)) {
                 nfc_scene_mf_classic_dict_attack_prepare_view(nfc, state);
                 consumed = true;
             } else {
                 notification_message(nfc->notifications, &sequence_success);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
                 // Counting failed attempts too
-                DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+                dolphin_deed(DolphinDeedNfcReadSuccess);
                 consumed = true;
             }
         } else if(event.event == NfcWorkerEventCardDetected) {

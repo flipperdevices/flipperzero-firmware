@@ -1,5 +1,5 @@
-#include "furi_hal_interrupt.h"
-#include "furi_hal_os.h"
+#include <furi_hal_interrupt.h>
+#include <furi_hal_os.h>
 
 #include <furi.h>
 
@@ -62,7 +62,7 @@ const IRQn_Type furi_hal_interrupt_irqn[FuriHalInterruptIdMax] = {
 
 __attribute__((always_inline)) static inline void
     furi_hal_interrupt_call(FuriHalInterruptId index) {
-    furi_assert(furi_hal_interrupt_isr[index].isr);
+    furi_check(furi_hal_interrupt_isr[index].isr);
     furi_hal_interrupt_isr[index].isr(furi_hal_interrupt_isr[index].context);
 }
 
@@ -72,6 +72,21 @@ __attribute__((always_inline)) static inline void
         furi_hal_interrupt_irqn[index],
         NVIC_EncodePriority(NVIC_GetPriorityGrouping(), priority, 0));
     NVIC_EnableIRQ(furi_hal_interrupt_irqn[index]);
+}
+
+__attribute__((always_inline)) static inline void
+    furi_hal_interrupt_clear_pending(FuriHalInterruptId index) {
+    NVIC_ClearPendingIRQ(furi_hal_interrupt_irqn[index]);
+}
+
+__attribute__((always_inline)) static inline void
+    furi_hal_interrupt_get_pending(FuriHalInterruptId index) {
+    NVIC_GetPendingIRQ(furi_hal_interrupt_irqn[index]);
+}
+
+__attribute__((always_inline)) static inline void
+    furi_hal_interrupt_set_pending(FuriHalInterruptId index) {
+    NVIC_SetPendingIRQ(furi_hal_interrupt_irqn[index]);
 }
 
 __attribute__((always_inline)) static inline void
@@ -112,17 +127,16 @@ void furi_hal_interrupt_set_isr_ex(
     uint16_t priority,
     FuriHalInterruptISR isr,
     void* context) {
-    furi_assert(index < FuriHalInterruptIdMax);
-    furi_assert(priority < 15);
-    furi_assert(furi_hal_interrupt_irqn[index]);
+    furi_check(index < FuriHalInterruptIdMax);
+    furi_check(priority <= 15);
 
     if(isr) {
         // Pre ISR set
-        furi_assert(furi_hal_interrupt_isr[index].isr == NULL);
+        furi_check(furi_hal_interrupt_isr[index].isr == NULL);
     } else {
         // Pre ISR clear
-        furi_assert(furi_hal_interrupt_isr[index].isr != NULL);
         furi_hal_interrupt_disable(index);
+        furi_hal_interrupt_clear_pending(index);
     }
 
     furi_hal_interrupt_isr[index].isr = isr;
@@ -131,6 +145,7 @@ void furi_hal_interrupt_set_isr_ex(
 
     if(isr) {
         // Post ISR set
+        furi_hal_interrupt_clear_pending(index);
         furi_hal_interrupt_enable(index, priority);
     } else {
         // Post ISR clear

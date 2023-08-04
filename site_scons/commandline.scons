@@ -27,6 +27,14 @@ AddOption(
 )
 
 AddOption(
+    "--extra-define",
+    action="append",
+    dest="extra_defines",
+    default=[],
+    help="Extra global define that will be passed to C/C++ compiler, can be specified multiple times",
+)
+
+AddOption(
     "--extra-ext-apps",
     action="store",
     dest="extra_ext_apps",
@@ -79,6 +87,7 @@ vars.AddVariables(
         default="7",
         allowed_values=[
             "7",
+            "18",
         ],
     ),
     (
@@ -193,11 +202,7 @@ vars.AddVariables(
                 "system_apps",
                 # Settings
                 "settings_apps",
-                # Plugins
-                # "basic_plugins",
-                # Debug
-                # "debug_apps",
-            )
+            ),
         },
     ),
     (
@@ -221,8 +226,9 @@ vars.AddVariables(
             ("applications/settings", False),
             ("applications/system", False),
             ("applications/debug", False),
-            ("applications/plugins", False),
+            ("applications/external", False),
             ("applications/examples", False),
+            ("applications/drivers", False),
             ("applications_user", False),
         ],
     ),
@@ -230,6 +236,18 @@ vars.AddVariables(
         "PVSNOBROWSER",
         help="Don't open browser after generating error repots",
         default=False,
+    ),
+    (
+        "FIRMWARE_ORIGIN",
+        "Firmware origin. 'Official' if follows upstream's API structure, otherwise fork name. "
+        " This will also create a C define FW_ORIGIN_<origin> so that "
+        " app can check what version it is being built for.",
+        "Official",
+    ),
+    (
+        "FLIP_PORT",
+        "Full port name of Flipper to use, if multiple Flippers are connected",
+        "auto",
     ),
 )
 

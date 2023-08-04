@@ -1,6 +1,5 @@
-from SCons.Builder import Builder
 from SCons.Action import Action
-from SCons.Script import Mkdir
+from SCons.Builder import Builder
 from SCons.Defaults import Touch
 
 
@@ -112,6 +111,8 @@ def DistCommand(env, name, source, **kw):
 
 
 def generate(env):
+    if not env["VERBOSE"]:
+        env.SetDefault(COPROCOMSTR="\tCOPRO\t${TARGET}")
     env.AddMethod(AddFwProject)
     env.AddMethod(DistCommand)
     env.AddMethod(AddOpenOCDFlashTarget)
@@ -131,7 +132,7 @@ def generate(env):
             "UsbInstall": Builder(
                 action=[
                     Action(
-                        '${PYTHON3} "${SELFUPDATE_SCRIPT}" ${UPDATE_BUNDLE_DIR}/update.fuf'
+                        '${PYTHON3} "${SELFUPDATE_SCRIPT}" -p ${FLIP_PORT} ${UPDATE_BUNDLE_DIR}/update.fuf'
                     ),
                     Touch("${TARGET}"),
                 ]
@@ -147,7 +148,7 @@ def generate(env):
                         '--stack_file="${COPRO_STACK_BIN}" '
                         "--stack_addr=${COPRO_STACK_ADDR} ",
                     ],
-                    "\tCOPRO\t${TARGET}",
+                    "$COPROCOMSTR",
                 )
             ),
         }

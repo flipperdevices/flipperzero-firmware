@@ -27,6 +27,7 @@ int run_minunit_test_nfc();
 int run_minunit_test_bit_lib();
 int run_minunit_test_float_tools();
 int run_minunit_test_bt();
+int run_minunit_test_dialogs_file_browser_options();
 
 typedef int (*UnitTestEntry)();
 
@@ -55,6 +56,8 @@ const UnitTest unit_tests[] = {
     {.name = "bit_lib", .entry = run_minunit_test_bit_lib},
     {.name = "float_tools", .entry = run_minunit_test_float_tools},
     {.name = "bt", .entry = run_minunit_test_bt},
+    {.name = "dialogs_file_browser_options",
+     .entry = run_minunit_test_dialogs_file_browser_options},
 };
 
 void minunit_print_progress() {
@@ -70,7 +73,7 @@ void minunit_print_progress() {
 }
 
 void minunit_print_fail(const char* str) {
-    printf(FURI_LOG_CLR_E "%s\r\n" FURI_LOG_CLR_RESET, str);
+    printf(_FURI_LOG_CLR_E "%s\r\n" _FURI_LOG_CLR_RESET, str);
 }
 
 void unit_tests_cli(Cli* cli, FuriString* args, void* context) {

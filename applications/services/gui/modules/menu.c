@@ -1,9 +1,9 @@
 #include "menu.h"
 
-#include <m-array.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <furi.h>
+#include <m-array.h>
 
 struct Menu {
     View* view;
@@ -154,6 +154,8 @@ Menu* menu_alloc() {
 void menu_free(Menu* menu) {
     furi_assert(menu);
     menu_reset(menu);
+    with_view_model(
+        menu->view, MenuModel * model, { MenuItemArray_clear(model->items); }, false);
     view_free(menu->view);
     free(menu);
 }

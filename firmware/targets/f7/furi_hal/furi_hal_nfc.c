@@ -1,5 +1,5 @@
 #include <limits.h>
-#include "furi_hal_nfc.h"
+#include <furi_hal_nfc.h>
 #include <st25r3916.h>
 #include <st25r3916_irq.h>
 #include <rfal_rf.h>
@@ -24,13 +24,29 @@ FuriEventFlag* event = NULL;
 #define FURI_HAL_NFC_UID_INCOMPLETE (0x04)
 
 void furi_hal_nfc_init() {
+    furi_assert(!event);
+    event = furi_event_flag_alloc();
+
     ReturnCode ret = rfalNfcInitialize();
     if(ret == ERR_NONE) {
         furi_hal_nfc_start_sleep();
-        event = furi_event_flag_alloc();
         FURI_LOG_I(TAG, "Init OK");
     } else {
-        FURI_LOG_W(TAG, "Initialization failed, RFAL returned: %d", ret);
+        FURI_LOG_W(TAG, "Init Failed, RFAL returned: %d", ret);
+    }
+}
+
+void furi_hal_nfc_deinit() {
+    ReturnCode ret = rfalDeinitialize();
+    if(ret == ERR_NONE) {
+        FURI_LOG_I(TAG, "Deinit OK");
+    } else {
+        FURI_LOG_W(TAG, "Deinit Failed, RFAL returned: %d", ret);
+    }
+
+    if(event) {
+        furi_event_flag_free(event);
+        event = NULL;
     }
 }
 
@@ -451,7 +467,7 @@ bool furi_hal_nfc_emulate_nfca(
                     buff_tx,
                     buff_tx_len,
                     buff_rx,
-                    sizeof(buff_rx),
+                    rfalConvBytesToBits(buff_rx_size),
                     &buff_rx_len,
                     data_type,
                     RFAL_FWT_NONE);
@@ -475,7 +491,7 @@ bool furi_hal_nfc_emulate_nfca(
                         buff_tx,
                         buff_tx_len,
                         buff_rx,
-                        sizeof(buff_rx),
+                        rfalConvBytesToBits(buff_rx_size),
                         &buff_rx_len,
                         data_type,
                         RFAL_FWT_NONE);
@@ -802,4 +818,18 @@ FuriHalNfcReturn furi_hal_nfc_ll_txrx_bits(
 
 void furi_hal_nfc_ll_poll() {
     rfalWorker();
+}
+
+void furi_hal_nfc_field_detect_start() {
+    st25r3916WriteRegister(
+        ST25R3916_REG_OP_CONTROL,
+        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_en_fd_mask);
+    st25r3916WriteRegister(ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ | ST25R3916_REG_MODE_om0);
+}
+
+bool furi_hal_nfc_field_is_present() {
+    return st25r3916CheckReg(
+        ST25R3916_REG_AUX_DISPLAY,
+        ST25R3916_REG_AUX_DISPLAY_efd_o,
+        ST25R3916_REG_AUX_DISPLAY_efd_o);
 }

@@ -1,4 +1,4 @@
-#include "furi_hal_resources.h"
+#include <furi_hal_resources.h>
 #include "notification.h"
 #include "notification_messages_notes.h"
 #include <stddef.h>
@@ -195,6 +195,10 @@ const NotificationMessage message_force_vibro_setting_off = {
 const NotificationMessage message_force_display_brightness_setting_1f = {
     .type = NotificationMessageTypeForceDisplayBrightnessSetting,
     .data.forced_settings.display_brightness = 1.0f,
+};
+
+const NotificationMessage message_lcd_contrast_update = {
+    .type = NotificationMessageTypeLcdContrastUpdate,
 };
 
 /****************************** Message sequences ******************************/
@@ -564,5 +568,10 @@ const NotificationSequence sequence_audiovisual_alert = {
 
     &message_sound_off,
     &message_vibro_off,
+    NULL,
+};
+
+const NotificationSequence sequence_lcd_contrast_update = {
+    &message_lcd_contrast_update,
     NULL,
 };

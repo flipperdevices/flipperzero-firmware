@@ -37,11 +37,12 @@ typedef struct {
 typedef struct {
     bool gauge_is_ok;
     bool is_charging;
+    bool is_shutdown_requested;
 
     float current_charger;
     float current_gauge;
 
-    float voltage_battery_charging;
+    float voltage_battery_charge_limit;
     float voltage_charger;
     float voltage_gauge;
     float voltage_vbus;
