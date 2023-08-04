@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0803-0000-0.87.1-1dae77b](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-03 18:00 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-03 18:00 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-04 03:20 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-04 03:20 EST`
 - [Removed duplicated dolphin deeds (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f3edcba5b28574c32ec1f781f0b5f6c936ef5214)
 - [Small fix for Moving Main Menu Apps in CFW Settings #725 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/725)
 - [Small fix for Removing Main Menu Apps in CFW Settings #726 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/726)
