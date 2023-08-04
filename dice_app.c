@@ -303,17 +303,23 @@ int32_t dice_dnd_app(void* p) {
                     if(event.input.key == InputKeyOk && isAnimState(state->app_state) == false) {
                         roll(state);
                     }
-                    // back to dice select state or quit from app
-                    if(event.input.key == InputKeyBack) {
-                        if(state->app_state == ResultState ||
-                           state->app_state == AnimResultState) {
+                    
+                }
+                
+                // back button handlers
+                if(event.input.key == InputKeyBack){
+                    // switch states
+                    if(event.input.type == InputTypeShort) {
+                        if(state->app_state == ResultState || state->app_state == AnimResultState) {
                             state->anim_frame = 0;
                             state->app_state = SelectState;
-                        } else {
-                            processing = false;
                         }
                     }
-                }
+                    // exit
+                    else if(event.input.type == InputTypeLong) {
+                        processing = false;
+                    }
+                }                
             }
         } else {
             FURI_LOG_D(TAG, "osMessageQueue: event timeout");
