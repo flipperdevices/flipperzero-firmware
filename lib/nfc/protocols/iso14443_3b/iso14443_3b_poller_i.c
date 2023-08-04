@@ -65,7 +65,7 @@ Iso14443_3bError
     furi_assert(instance);
     furi_assert(instance->nfc);
 
-    iso14443_3b_reset(instance->data);
+    iso14443_3b_reset(data);
 
     Iso14443_3bError ret;
 
@@ -99,16 +99,16 @@ Iso14443_3bError
         const Iso14443_3bAtqB* atqb =
             (const Iso14443_3bAtqB*)bit_buffer_get_data(instance->rx_buffer);
 
-        memcpy(instance->data->uid, atqb->uid, ISO14443_3B_UID_SIZE);
-        memcpy(instance->data->app_data, atqb->app_data, ISO14443_3B_APP_DATA_SIZE);
-        memcpy(instance->data->protocol_info, atqb->protocol_info, ISO14443_3B_PROTOCOL_INFO_SIZE);
+        memcpy(data->uid, atqb->uid, ISO14443_3B_UID_SIZE);
+        memcpy(data->app_data, atqb->app_data, ISO14443_3B_APP_DATA_SIZE);
+        memcpy(data->protocol_info, atqb->protocol_info, ISO14443_3B_PROTOCOL_INFO_SIZE);
 
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_reset(instance->rx_buffer);
 
         // Send ATTRIB
         bit_buffer_append_byte(instance->tx_buffer, 0x1d);
-        bit_buffer_append_bytes(instance->tx_buffer, atqb->uid, ISO14443_3B_UID_SIZE);
+        bit_buffer_append_bytes(instance->tx_buffer, data->uid, ISO14443_3B_UID_SIZE);
         bit_buffer_append_byte(instance->tx_buffer, 0x00);
         bit_buffer_append_byte(instance->tx_buffer, ISO14443_3B_ATTRIB_FRAME_SIZE_256);
         bit_buffer_append_byte(instance->tx_buffer, 0x01);
@@ -130,11 +130,6 @@ Iso14443_3bError
         }
 
         instance->state = Iso14443_3bPollerStateActivated;
-
-        if(data) {
-            iso14443_3b_copy(data, instance->data);
-        }
-
     } while(false);
 
     return ret;
