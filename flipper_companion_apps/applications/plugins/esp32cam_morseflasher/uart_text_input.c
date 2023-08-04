@@ -1,6 +1,5 @@
 #include "uart_text_input.h"
 #include <gui/elements.h>
-#include "MAYHEM_MorseFlash_icons.h"
 #include <furi.h>
 
 struct UART_TextInput {
