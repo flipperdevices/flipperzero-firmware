@@ -19,7 +19,7 @@
 Iso15693_3Error iso15693_3_listener_sleep(Iso15693_3Listener* instance) {
     furi_assert(instance);
     UNUSED(instance);
-    FURI_LOG_D(TAG, "Sleepy sleep!");
+
     return Iso15693_3ErrorNone;
 }
 

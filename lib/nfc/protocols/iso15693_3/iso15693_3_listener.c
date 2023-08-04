@@ -7,7 +7,7 @@
 
 #define TAG "Iso15693_3Listener"
 
-#define ISO15693_3_LISTENER_MAX_BUFFER_SIZE (64U)
+#define ISO15693_3_LISTENER_BUFFER_SIZE (64U)
 
 Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, const Iso15693_3Data* data) {
     furi_assert(nfc);
@@ -16,7 +16,7 @@ Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, const Iso15693_3Data* da
     instance->nfc = nfc;
     instance->data = iso15693_3_alloc();
     iso15693_3_copy(instance->data, data);
-    instance->tx_buffer = bit_buffer_alloc(ISO15693_3_LISTENER_MAX_BUFFER_SIZE);
+    instance->tx_buffer = bit_buffer_alloc(ISO15693_3_LISTENER_BUFFER_SIZE);
 
     instance->iso15693_3_event.data = &instance->iso15693_3_event_data;
     instance->generic_event.protocol = NfcProtocolIso15693_3;
@@ -69,13 +69,19 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
             instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeFieldOff;
             command = instance->callback(instance->generic_event, instance->context);
         }
+        FURI_LOG_D(TAG, "Field OFF");
         iso15693_3_listener_sleep(instance);
     } else if(nfc_event->type == NfcEventTypeListenerActivated) {
         FURI_LOG_D(TAG, "Listener activated");
         instance->state = Iso15693_3ListenerStateActive;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
-        FURI_LOG_D(TAG, "Receive end!");
-        // TODO: Implement the listener lol
+        const BitBuffer* data = nfc_event->data.buffer;
+        const size_t data_size = bit_buffer_get_size_bytes(data);
+
+        FURI_LOG_D(TAG, "Received %zu bytes", data_size);
+        for(size_t i = 0; i < data_size; ++i) {
+            FURI_LOG_D(TAG, "%02X", bit_buffer_get_byte(data, i));
+        }
     }
 
     return command;
