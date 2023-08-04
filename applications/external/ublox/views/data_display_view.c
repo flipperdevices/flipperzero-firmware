@@ -69,15 +69,16 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
 
         /*** Draw odometer ***/
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 55, 9, "Od:");
+        canvas_draw_str(canvas, 58, 9, "Od:");
 
         canvas_set_font(canvas, FontSecondary);
+        // distance values are in meters
         if(locale_get_measurement_unit() == LocaleMeasurementUnitsMetric) {
-            furi_string_printf(s, "%.1fm", (double)(nav_odo.distance / 1e3)); // meters
+            furi_string_printf(s, "%.1fkm", (double)(nav_odo.distance / 1e3)); // km
         } else {
-            furi_string_printf(s, "%.1fmi", (double)(nav_odo.distance / 1e3 * 3.281)); // mi
+            furi_string_printf(s, "%.1fmi", (double)(nav_odo.distance / 1e3 * 0.6214)); // km to mi
         }
-        canvas_draw_str(canvas, 74, 9, furi_string_get_cstr(s));
+        canvas_draw_str(canvas, 77, 9, furi_string_get_cstr(s));
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 112, 9, "L:");

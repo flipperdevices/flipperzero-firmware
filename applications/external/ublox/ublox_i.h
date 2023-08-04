@@ -17,6 +17,7 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/validators.h>
 
 #include <notification/notification_messages.h>
 
@@ -50,6 +51,7 @@ struct Ublox {
     // file stuff
     KMLFile kmlfile;
     UbloxLogState log_state;
+    FuriString* logfile_folder;
     char text_store[100];
     Ublox_NAV_PVT_Message nav_pvt;
     Ublox_NAV_ODO_Message nav_odo;

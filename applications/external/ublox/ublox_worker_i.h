@@ -6,6 +6,8 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#include <toolbox/path.h>
+
 struct UbloxWorker {
     FuriThread* thread;
     FuriTimer* timer;

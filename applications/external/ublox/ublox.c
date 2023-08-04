@@ -64,6 +64,9 @@ Ublox* ublox_alloc() {
     ublox->storage = furi_record_open(RECORD_STORAGE);
 
     ublox->log_state = UbloxLogStateNone;
+    // default to "/data", which maps to "/ext/apps_data/ublox"
+    ublox->logfile_folder = furi_string_alloc_set(STORAGE_APP_DATA_PATH_PREFIX);
+
     // Establish default data display state
     (ublox->data_display_state).view_mode = UbloxDataDisplayViewModeHandheld;
     (ublox->data_display_state).backlight_mode = UbloxDataDisplayBacklightDefault;
@@ -74,13 +77,22 @@ Ublox* ublox_alloc() {
     // "suitable for most applications" according to u-blox.
     (ublox->device_state).platform_model = UbloxPlatformModelPortable;
     ublox->gps_initted = false;
+
     return ublox;
 }
 
+#define TAG "ublox"
+//#include "ublox_worker_i.h"
 void ublox_free(Ublox* ublox) {
     furi_assert(ublox);
 
-    ublox_worker_stop(ublox->worker);
+    // no need to stop the worker, plus it causes the app to crash by NULL
+    // pointer dereference from context in the worker struct
+
+    //FURI_LOG_I(TAG, "stop worker");
+    //ublox_worker_stop(ublox->worker);
+    //FURI_LOG_I(TAG, "%p", ublox->worker->context);
+    FURI_LOG_I(TAG, "free worker");
     ublox_worker_free(ublox->worker);
 
     view_dispatcher_remove_view(ublox->view_dispatcher, UbloxViewMenu);
@@ -95,6 +107,9 @@ void ublox_free(Ublox* ublox) {
     view_dispatcher_remove_view(ublox->view_dispatcher, UbloxViewVariableItemList);
     variable_item_list_free(ublox->variable_item_list);
 
+    view_dispatcher_remove_view(ublox->view_dispatcher, UbloxViewTextInput);
+    text_input_free(ublox->text_input);
+
     view_dispatcher_free(ublox->view_dispatcher);
 
     scene_manager_free(ublox->scene_manager);
@@ -106,6 +121,9 @@ void ublox_free(Ublox* ublox) {
     furi_record_close(RECORD_STORAGE);
     ublox->storage = NULL;
 
+    if(ublox->logfile_folder != NULL) {
+        furi_string_free(ublox->logfile_folder);
+    }
     free(ublox);
 }
 

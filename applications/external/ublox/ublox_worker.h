@@ -21,6 +21,8 @@ typedef enum {
     UbloxWorkerEventFailed,
     UbloxWorkerEventDataReady,
     UbloxWorkerEventOdoReset,
+    // specific event to update the screen on log state changed
+    UbloxWorkerEventLogStateChanged,
 } UbloxWorkerEvent;
 
 typedef void (*UbloxWorkerCallback)(UbloxWorkerEvent event, void* context);

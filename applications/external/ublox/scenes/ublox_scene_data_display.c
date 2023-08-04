@@ -45,17 +45,12 @@ void ublox_scene_data_display_on_enter(void* context) {
 bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
     Ublox* ublox = context;
     bool consumed = false;
-    //FURI_LOG_I(TAG, "mem free before event branch: %u", memmgr_get_free_heap());
+
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
             ublox_worker_stop(ublox->worker);
             scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
             consumed = true;
-
-        } else if(event.event == GuiButtonTypeCenter) {
-            // must stop the worker first
-            ublox_worker_stop(ublox->worker);
-            FURI_LOG_I(TAG, "reset odometer");
 
         } else if(event.event == GuiButtonTypeRight) {
             // TODO: only allow if GPS is detected?
@@ -83,25 +78,26 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
             data_display_set_nav_messages(ublox->data_display, ublox->nav_pvt, ublox->nav_odo);
 
+        } else if(event.event == UbloxWorkerEventLogStateChanged) {
             data_display_set_log_state(ublox->data_display, ublox->log_state);
-        } else if(event.event == UbloxWorkerEventOdoReset) {
-            // restart the thread
-            ublox_worker_start(
-                ublox->worker,
-                UbloxWorkerStateRead,
-                ublox_scene_data_display_worker_callback,
-                ublox);
+
         } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);
         }
     }
-    //FURI_LOG_I(TAG, "mem free after event branch: %u", memmgr_get_free_heap());
     return consumed;
 }
 
 void ublox_scene_data_display_on_exit(void* context) {
     Ublox* ublox = context;
+
+    /*if(ublox->log_state == UbloxLogStateLogging) {
+	FURI_LOG_I(TAG, "stop logging on exit");
+	ublox->log_state = UbloxLogStateStopLogging;
+	//while (ublox->log_state != UbloxLogStateNone);
+	//furi_delay_ms(500);
+	}*/
 
     ublox_worker_stop(ublox->worker);
 

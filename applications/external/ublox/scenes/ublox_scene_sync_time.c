@@ -63,6 +63,12 @@ bool ublox_scene_sync_time_on_event(void* context, SceneManagerEvent event) {
             furi_string_free(time);
             furi_string_free(date);
             furi_string_free(s);
+        } else if(event.event == UbloxWorkerEventFailed) {
+            widget_reset(ublox->widget);
+            widget_add_string_element(
+                ublox->widget, 3, 5, AlignLeft, AlignCenter, FontPrimary, "Syncing time...failed!");
+            widget_add_string_element(
+                ublox->widget, 3, 20, AlignLeft, AlignCenter, FontSecondary, "No GPS found!");
         }
     }
 
