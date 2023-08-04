@@ -92,7 +92,7 @@ static void draw_ui(const State* state, Canvas* canvas) {
     }
     // dice arrow buttons
     if(isDiceButtonsVisible(state->app_state)) {
-        if(state->dice_index > 0) canvas_draw_icon(canvas, 45, 44, &I_ui_button_left);
+        if(state->dice_index > 0) canvas_draw_icon(canvas, 44, 44, &I_ui_button_left);
         if(state->dice_index < DICE_TYPES - 1)
             canvas_draw_icon(canvas, 78, 44, &I_ui_button_right);
     }
