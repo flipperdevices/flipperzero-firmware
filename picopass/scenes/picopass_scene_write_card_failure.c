@@ -1,7 +1,7 @@
 #include "../picopass_i.h"
 #include <dolphin/dolphin.h>
 
-void picopass_scene_write_card_success_widget_callback(
+void picopass_scene_write_card_failure_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
@@ -13,28 +13,23 @@ void picopass_scene_write_card_success_widget_callback(
     }
 }
 
-void picopass_scene_write_card_success_on_enter(void* context) {
+void picopass_scene_write_card_failure_on_enter(void* context) {
     Picopass* picopass = context;
     Widget* widget = picopass->widget;
-    FuriString* str = furi_string_alloc_set("Write Success!");
-
-    dolphin_deed(DolphinDeedNfcReadSuccess);
-
-    // Send notification
-    notification_message(picopass->notifications, &sequence_success);
+    FuriString* str = furi_string_alloc_set("Write Failure!");
 
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,
         "Retry",
-        picopass_scene_write_card_success_widget_callback,
+        picopass_scene_write_card_failure_widget_callback,
         picopass);
 
     widget_add_button_element(
         widget,
         GuiButtonTypeRight,
         "Menu",
-        picopass_scene_write_card_success_widget_callback,
+        picopass_scene_write_card_failure_widget_callback,
         picopass);
 
     widget_add_string_element(
@@ -45,7 +40,7 @@ void picopass_scene_write_card_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewWidget);
 }
 
-bool picopass_scene_write_card_success_on_event(void* context, SceneManagerEvent event) {
+bool picopass_scene_write_card_failure_on_event(void* context, SceneManagerEvent event) {
     Picopass* picopass = context;
     bool consumed = false;
 
@@ -62,7 +57,7 @@ bool picopass_scene_write_card_success_on_event(void* context, SceneManagerEvent
     return consumed;
 }
 
-void picopass_scene_write_card_success_on_exit(void* context) {
+void picopass_scene_write_card_failure_on_exit(void* context) {
     Picopass* picopass = context;
 
     // Clear view
