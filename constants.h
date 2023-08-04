@@ -4,6 +4,7 @@
 #define TAG "DiceApp"
 
 #define DICE_TYPES 8
+#define HISTORY_SIZE 8
 
 #define MAX_DICE_COUNT 10
 #define MAX_COIN_FRAMES 9
@@ -47,6 +48,8 @@ const Icon* dice_frames[] = {
     &I_d100_1, &I_d100_2, &I_d100_3, &I_d100_4, // d100
 };
 
+const uint8_t screen_pos[] = {};
+
 typedef struct {
     uint8_t type;
     int x;
@@ -54,7 +57,10 @@ typedef struct {
     char* name;
 } Dice;
 
-const uint8_t screen_pos[] = {};
+typedef struct {
+    char* name;
+    uint8_t result;
+} History;
 
 static const Dice dice_types[] = {
     {2, 0, 0, "Coin"},
@@ -74,7 +80,8 @@ typedef enum {
     SwipeRightState,
     AnimState,
     AnimResultState,
-    ResultState
+    ResultState,
+    HistoryState,
 } AppState;
 
 typedef struct {
@@ -91,6 +98,7 @@ typedef struct {
     uint8_t dice_count;
     int8_t result_pos;
     Dice dices[DICE_TYPES];
+    History history[HISTORY_SIZE];
     FuriMutex* mutex;
 } State;
 

@@ -79,7 +79,7 @@ static void roll(State* const state) {
     state->app_state = AnimState;
 }
 
-static void draw_ui(const State* state, Canvas* canvas) {
+static void draw_main_menu(const State* state, Canvas* canvas) {
     canvas_set_font(canvas, FontSecondary);
 
     FuriString* count = furi_string_alloc();
@@ -108,12 +108,22 @@ static void draw_ui(const State* state, Canvas* canvas) {
     if(isAnimState(state->app_state) == false) canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
 
     if(state->app_state != AnimResultState && state->app_state != ResultState) {
-        canvas_draw_icon(canvas, 0, 54, &I_ui_button_exit);
+        canvas_draw_icon(canvas, 0, 54, &I_ui_button_history);
     } else {
         canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
     }
 
     furi_string_free(count);
+}
+
+static void draw_history(const State* state, Canvas* canvas) {
+
+    if(state == NULL) {
+        return;
+    }
+
+    canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
+    canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
 }
 
 static void draw_dice(const State* state, Canvas* canvas) {
@@ -200,12 +210,16 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
 
-    draw_ui(state, canvas);
-
-    if(isResultVisible(state->app_state, state->dice_index)) {
-        draw_results(state, canvas);
+    if (state->app_state == HistoryState) {
+        draw_history(state, canvas);
     } else {
-        draw_dice(state, canvas);
+        draw_main_menu(state, canvas);
+
+        if(isResultVisible(state->app_state, state->dice_index)) {
+            draw_results(state, canvas);
+        } else {
+            draw_dice(state, canvas);
+        }
     }
 
     furi_mutex_release(state->mutex);
@@ -310,7 +324,13 @@ int32_t dice_dnd_app(void* p) {
                 if(event.input.key == InputKeyBack){
                     // switch states
                     if(event.input.type == InputTypeShort) {
-                        if(state->app_state == ResultState || state->app_state == AnimResultState) {
+                        if(state->app_state == SelectState){
+                            state->app_state = HistoryState;
+                        }
+                        else if(state->app_state == HistoryState) {
+                            state->app_state = SelectState;
+                        }
+                        else if(state->app_state == ResultState || state->app_state == AnimResultState) {
                             state->anim_frame = 0;
                             state->app_state = SelectState;
                         }
