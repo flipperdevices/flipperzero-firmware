@@ -34,8 +34,15 @@ void ublox_scene_about_on_enter(void* context) {
     furi_string_cat_printf(s,
 			   "This app is a multi-purpose tool for u-blox GPS modules connected over I2C."
 			   " It is compatible with 8 and 9 series GPS units, and probably other models,"
-			   " sold by Sparkfun and other vendors.");
+			   " sold by Sparkfun and other vendors.\n");
 
+    furi_string_cat_printf(s, "\e#%s\n", "Usage");
+    furi_string_cat_printf(s,
+			   "Data Display shows GPS data. You can enable logging to a KML file to be"
+			   " viewed in a map program.\n"
+			   "Sync Time to GPS will sync the Flipper's RTC to the GPS. Note that this"
+			   " may be up to one second off, because there is no PPS signal connected.");
+			   
     widget_add_text_scroll_element(ublox->widget, 0, 16, 128, 50, furi_string_get_cstr(s));
 
     furi_string_free(s);
