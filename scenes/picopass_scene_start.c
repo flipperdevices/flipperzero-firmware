@@ -58,7 +58,7 @@ bool picopass_scene_start_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexLoclass) {
             scene_manager_set_scene_state(
-                picopass->scene_manager, PicopassSceneLoclass, PicopassSceneLoclass);
+                picopass->scene_manager, PicopassSceneStart, PicopassSceneLoclass);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneLoclass);
             consumed = true;
         }
