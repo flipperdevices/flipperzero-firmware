@@ -36,6 +36,7 @@ void bit_buffer_reset(BitBuffer* buf) {
     furi_assert(buf);
 
     memset(buf->data, 0, buf->capacity_bytes);
+    memset(buf->parity, 0, buf->capacity_bytes);
     buf->size_bits = 0;
 }
 
