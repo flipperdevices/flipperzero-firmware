@@ -13,7 +13,7 @@ void mass_storage_scene_create_image_name_on_enter(void* context) {
     MassStorageApp* app = context;
     TextInput* text_input = app->text_input;
 
-    text_input_set_header_text(text_input, "Leave empty for default");
+    text_input_set_header_text(text_input, "Image name, empty = default");
 
     text_input_set_minimum_length(text_input, 0);
 
@@ -21,8 +21,8 @@ void mass_storage_scene_create_image_name_on_enter(void* context) {
         text_input,
         mass_storage_scene_create_image_name_text_input_callback,
         app,
-        app->create_name,
-        sizeof(app->create_name),
+        app->create_image_name,
+        sizeof(app->create_image_name),
         false);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewTextInput);

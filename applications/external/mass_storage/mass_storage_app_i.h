@@ -9,56 +9,49 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <dialogs/dialogs.h>
-#include <notification/notification_messages.h>
-#include <gui/modules/widget.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/popup.h>
+#include <gui/modules/loading.h>
 #include <storage/storage.h>
 #include "views/mass_storage_view.h"
 
 #define MASS_STORAGE_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
+#define MASS_STORAGE_APP_EXTENSION ".img"
 #define MASS_STORAGE_FILE_NAME_LEN 40
-
-typedef enum {
-    SizeUnitBytes,
-    SizeUnitKb,
-    SizeUnitMb,
-    SizeUnitGb,
-    SizeUnitCount,
-} SizeUnit;
 
 struct MassStorageApp {
     Gui* gui;
     Storage* fs_api;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
-    NotificationApp* notifications;
     DialogsApp* dialogs;
-    Widget* widget;
-    MassStorage* mass_storage_view;
     VariableItemList* var_item_list;
     Submenu* submenu;
     TextInput* text_input;
     Popup* popup;
+    Loading* loading;
 
-    uint32_t create_image_size;
-    SizeUnit create_size_unit;
-    char create_name[MASS_STORAGE_FILE_NAME_LEN];
+    uint64_t create_image_max;
+    uint8_t create_image_size;
+    char create_image_name[MASS_STORAGE_FILE_NAME_LEN];
 
     FuriString* file_path;
     File* file;
+    MassStorage* mass_storage_view;
 
     FuriMutex* usb_mutex;
     MassStorageUsb* usb;
 };
 
 typedef enum {
-    MassStorageAppViewError,
-    MassStorageAppViewWork,
     MassStorageAppViewVarItemList,
     MassStorageAppViewSubmenu,
     MassStorageAppViewTextInput,
     MassStorageAppViewPopup,
+    MassStorageAppViewLoading,
+    MassStorageAppViewWork,
 } MassStorageAppView;
+
+void mass_storage_app_show_loading_popup(MassStorageApp* app, bool show);

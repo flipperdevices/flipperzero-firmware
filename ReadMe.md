@@ -44,7 +44,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Ext Power Amp Code (Changes By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/63084d5e7687858065f4cd84a7217659ccf7910f)
 - [Main Menu Lefty Mode Fixes (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f66ee9181015a95375648c78b6ec74a8b368e37c)
 - Added: [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)
-- Updated: [USB Mass Storage (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [(Changed By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e21b41a6f2b181794ce7ff0e35a6bbffdd0f0610)
 - [Fixed Apps link in Main Menu & Games Menu Order (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/43d3483cc7a448063484e8a58effd25b037bbdbd)
 - Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader)
 - Updated: [SD Card Assets: Includes NFC Assets: 86 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) (19 More Added)](https://www.patreon.com/RogueMaster/membership)
@@ -52,6 +51,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Evil Portal Assets: Google Realistic V2 (By JMcrafter26)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/60)
 - Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [USB Mass Storage (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [(Changed By Willy-JL)]
+
 
 <a name="release">
 

@@ -353,20 +353,20 @@ static uint16_t
 
 static uint16_t
     storage_ext_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write) {
+    uint16_t bytes_written = 0;
 #ifdef FURI_RAM_EXEC
     UNUSED(ctx);
     UNUSED(file);
     UNUSED(buff);
     UNUSED(bytes_to_write);
-    return FSE_NOT_READY;
+    file->error_id = FSE_NOT_READY;
 #else
     StorageData* storage = ctx;
     SDFile* file_data = storage_get_storage_file_data(file, storage);
-    uint16_t bytes_written = 0;
     file->internal_error_id = f_write(file_data, buff, bytes_to_write, &bytes_written);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return bytes_written;
 #endif
+    return bytes_written;
 }
 
 static bool
@@ -401,45 +401,45 @@ static bool storage_ext_file_expand(void* ctx, File* file, const uint64_t size) 
     UNUSED(ctx);
     UNUSED(file);
     UNUSED(size);
-    return FSE_NOT_READY;
+    file->error_id = FSE_NOT_READY;
 #else
     StorageData* storage = ctx;
     SDFile* file_data = storage_get_storage_file_data(file, storage);
 
     file->internal_error_id = f_expand(file_data, size, 1);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
 #endif
+    return (file->error_id == FSE_OK);
 }
 
 static bool storage_ext_file_truncate(void* ctx, File* file) {
 #ifdef FURI_RAM_EXEC
     UNUSED(ctx);
     UNUSED(file);
-    return FSE_NOT_READY;
+    file->error_id = FSE_NOT_READY;
 #else
     StorageData* storage = ctx;
     SDFile* file_data = storage_get_storage_file_data(file, storage);
 
     file->internal_error_id = f_truncate(file_data);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
 #endif
+    return (file->error_id == FSE_OK);
 }
 
 static bool storage_ext_file_sync(void* ctx, File* file) {
 #ifdef FURI_RAM_EXEC
     UNUSED(ctx);
     UNUSED(file);
-    return FSE_NOT_READY;
+    file->error_id = FSE_NOT_READY;
 #else
     StorageData* storage = ctx;
     SDFile* file_data = storage_get_storage_file_data(file, storage);
 
     file->internal_error_id = f_sync(file_data);
     file->error_id = storage_ext_parse_error(file->internal_error_id);
-    return (file->error_id == FSE_OK);
 #endif
+    return (file->error_id == FSE_OK);
 }
 
 static uint64_t storage_ext_file_size(void* ctx, File* file) {

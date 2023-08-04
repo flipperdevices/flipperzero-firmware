@@ -459,7 +459,8 @@ static bool storage_int_file_expand(void* ctx, File* file, const uint64_t size) 
     UNUSED(ctx);
     UNUSED(file);
     UNUSED(size);
-    return false;
+    file->error_id = FSE_NOT_IMPLEMENTED;
+    return (file->error_id == FSE_OK);
 }
 
 static bool storage_int_file_truncate(void* ctx, File* file) {

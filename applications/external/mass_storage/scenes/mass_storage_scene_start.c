@@ -12,7 +12,7 @@ void mass_storage_scene_start_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Emulate Image",
+        "Select Disc Image",
         MassStorageSceneFileSelect,
         mass_storage_scene_start_submenu_callback,
         app);
