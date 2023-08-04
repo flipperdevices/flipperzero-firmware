@@ -71,7 +71,8 @@ jobs:
       - name: 'Bundle core2 firmware'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
-          cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
+          ./fbt copro_dist
+          tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz -C assets core2_firmware
 
       - name: 'Copy map analyser files'
         if: ${{ !github.event.pull_request.head.repo.fork }}
