@@ -9,40 +9,14 @@ DELAY 300
 F4
 DELAY 1000
 STRING Terminal
-DELAY 500
-ENTER
-DELAY 1000
-STRING cd /tmp
 DELAY 200
 ENTER
-DELAY 500
-STRING curl -L -o qFlipper.dmg https://update.flipperzero.one/qFlipper/release/macos-amd64/dmg && open qFlipper.dmg
-DELAY 500
-ENTER
-DELAY 7000
-GUI w
 DELAY 1000
-GUI TAB
-DELAY 1000
-STRING rm qFlipper.dmg
+STRING cd /tmp && curl -L -o qFlipper.dmg https://update.flipperzero.one/qFlipper/release/macos-amd64/dmg && hdiutil attach qFlipper.dmg && app_volume=$(ls /Volumes | grep -i "qFlipper") && cp -R "/Volumes/$app_volume/qFlipper.app" /Applications/ && hdiutil detach "/Volumes/$app_volume" && rm qFlipper.dmg
 DELAY 500
 ENTER
 DELAY 1000
-STRING cd /
-DELAY 500
-ENTER
-DELAY 1000
-STRING cd /Volumes/qFlipper
-DELAY 200
-TAB
-DELAY 500
-ENTER
-DELAY 1000
-STRING cp -R qFlipper.app /Applications
-DELAY 500
-ENTER
-DELAY 1000
-STRING cd /Applications
+STRING cd ../Applications
 DELAY 200
 ENTER
 DELAY 500
