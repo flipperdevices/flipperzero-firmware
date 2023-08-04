@@ -111,6 +111,6 @@ void totp_cli_print_error_updating_config_file();
 void totp_cli_print_error_loading_token_info();
 
 /**
- * @brief Prints message to let user knwo that command is processing now
+ * @brief Prints message to let user know that command is processing now
  */
 void totp_cli_print_processing();
