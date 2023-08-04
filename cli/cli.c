@@ -16,6 +16,10 @@
 #include "commands/automation/automation.h"
 #include "commands/details/details.h"
 
+struct TotpCliContext {
+    PluginState* plugin_state;
+};
+
 static void totp_cli_print_unknown_command(const FuriString* unknown_command) {
     TOTP_CLI_PRINTF_ERROR(
         "Command \"%s\" is unknown. Use \"" TOTP_CLI_COMMAND_HELP

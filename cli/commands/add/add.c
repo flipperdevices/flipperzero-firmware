@@ -54,7 +54,7 @@ static TotpIteratorUpdateTokenResult
 
     // Reading token secret
     furi_string_reset(temp_str);
-    TOTP_CLI_PRINTF("Enter token secret and confirm with [ENTER]\r\n");
+    TOTP_CLI_PRINTF("Enter token secret and confirm with [ENTER]:\r\n");
     if(!totp_cli_read_line(context_t->cli, temp_str, mask_user_input)) {
         totp_cli_delete_last_line();
         furi_string_secure_free(temp_str);
