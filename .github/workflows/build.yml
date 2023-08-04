@@ -62,9 +62,6 @@ jobs:
             mv dist/${TARGET}-*/* artifacts/
             tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
               -C assets resources
-            ./fbt TARGET_HW=$TARGET_HW fap_dist
-            tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
-              -C dist/${TARGET}-*/apps/Debug .
           done
 
       - name: "Check for uncommitted changes"
