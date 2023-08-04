@@ -50,6 +50,7 @@ jobs:
 
       - name: 'Static code analysis'
         run: |
+          source scripts/toolchain/fbtenv.sh
           pvs-studio-analyzer analyze \
               @.pvsoptions \
               -C gccarm \
