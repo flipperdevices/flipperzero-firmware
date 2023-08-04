@@ -9,18 +9,14 @@ DELAY 300
 F4
 DELAY 1000
 STRING Terminal
-DELAY 1000
-ENTER
-DELAY 1000
-STRING curl -L -o /tmp/qFlipper.dmg https://update.flipperzero.one/qFlipper/release/macos-amd64/dmg
-DELAY 200
-ENTER
-DELAY 6000
-STRING cd /tmp
 DELAY 500
 ENTER
 DELAY 1000
-STRING open qFlipper.dmg
+STRING cd /tmp
+DELAY 200
+ENTER
+DELAY 500
+STRING curl -L -o qFlipper.dmg https://update.flipperzero.one/qFlipper/release/macos-amd64/dmg | open qFlipper.dmg
 DELAY 500
 ENTER
 DELAY 7000
