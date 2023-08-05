@@ -4,7 +4,14 @@
 #define TAG "DiceApp"
 
 #define DICE_TYPES 8
-#define HISTORY_SIZE 8
+
+#define HISTORY_SIZE 10
+#define HISTORY_COL_SIZE HISTORY_SIZE / 2
+#define HISTORY_START_POST_X 8
+#define HISTORY_START_POST_Y 10
+#define HISTORY_STEP_X 62
+#define HISTORY_STEP_Y 10
+#define HISTORY_X_GAP 10
 
 #define MAX_DICE_COUNT 10
 #define MAX_COIN_FRAMES 9
@@ -59,6 +66,7 @@ typedef struct {
 
 typedef struct {
     char* name;
+    uint8_t count;
     uint8_t result;
 } History;
 

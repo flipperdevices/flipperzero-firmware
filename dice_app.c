@@ -122,8 +122,32 @@ static void draw_history(const State* state, Canvas* canvas) {
         return;
     }
 
+    canvas_set_font(canvas, FontSecondary);
+    FuriString* hist = furi_string_alloc();
+
+    uint8_t x = HISTORY_START_POST_X;
+    uint8_t y = HISTORY_START_POST_Y;
+    for(uint8_t i = 0; i < HISTORY_SIZE / 2; i++) {
+        //furi_string_printf(count, "%01d. %s [%01d] - %01d", i, state->history[i].name, state->history[i].count, state->history[i].result);
+
+        // left side
+        furi_string_printf(hist, "%01d.", i + 1);
+        canvas_draw_str_aligned(canvas, x, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+        furi_string_printf(hist, "%01d%s - %01d", state->dice_count, "d20", 13);
+        canvas_draw_str_aligned(canvas, x + HISTORY_X_GAP, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+        // right side
+        furi_string_printf(hist, "%01d.", i + HISTORY_COL_SIZE);
+        canvas_draw_str_aligned(canvas, x + HISTORY_STEP_X, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+        furi_string_printf(hist, "%01d%s - %01d", state->dice_count, "d20", 13);
+        canvas_draw_str_aligned(canvas, x + HISTORY_STEP_X + HISTORY_X_GAP, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+
+        y += HISTORY_STEP_Y;
+    }
+
     canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
     canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
+    furi_string_free(hist);
+
 }
 
 static void draw_dice(const State* state, Canvas* canvas) {
