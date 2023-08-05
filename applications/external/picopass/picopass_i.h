@@ -16,6 +16,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
 
 #include <input/input.h>
@@ -26,7 +27,7 @@
 
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
-#include "picopass_icons.h"
+#include <picopass_icons.h>
 
 #define PICOPASS_TEXT_STORE_SIZE 128
 
@@ -60,12 +61,14 @@ struct Picopass {
 
     char text_store[PICOPASS_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
+    uint8_t byte_input_store[RFAL_PICOPASS_BLOCK_LEN];
 
     // Common Views
     Submenu* submenu;
     Popup* popup;
     Loading* loading;
     TextInput* text_input;
+    ByteInput* byte_input;
     Widget* widget;
     DictAttack* dict_attack;
     Loclass* loclass;
@@ -76,6 +79,7 @@ typedef enum {
     PicopassViewPopup,
     PicopassViewLoading,
     PicopassViewTextInput,
+    PicopassViewByteInput,
     PicopassViewWidget,
     PicopassViewDictAttack,
     PicopassViewLoclass,

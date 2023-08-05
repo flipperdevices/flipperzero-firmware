@@ -6,7 +6,7 @@ enum SubmenuIndex {
     SubmenuIndexWriteiCE,
     SubmenuIndexWriteiCL,
     SubmenuIndexWriteiCS,
-    SubmenuIndexWriteCustom, //TODO: user input of key
+    SubmenuIndexWriteCustom,
 };
 
 void picopass_scene_key_menu_submenu_callback(void* context, uint32_t index) {
@@ -41,6 +41,12 @@ void picopass_scene_key_menu_on_enter(void* context) {
         submenu,
         "Write iCS",
         SubmenuIndexWriteiCS,
+        picopass_scene_key_menu_submenu_callback,
+        picopass);
+    submenu_add_item(
+        submenu,
+        "Write Elite",
+        SubmenuIndexWriteCustom,
         picopass_scene_key_menu_submenu_callback,
         picopass);
 
@@ -83,6 +89,12 @@ bool picopass_scene_key_menu_on_event(void* context, SceneManagerEvent event) {
             memcpy(picopass->dev->dev_data.pacs.key, picopass_xics_key, RFAL_PICOPASS_BLOCK_LEN);
             picopass->dev->dev_data.pacs.elite_kdf = false;
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteKey);
+            consumed = true;
+        } else if(event.event == SubmenuIndexWriteCustom) {
+            scene_manager_set_scene_state(
+                picopass->scene_manager, PicopassSceneKeyMenu, SubmenuIndexWriteCustom);
+            // Key and elite_kdf = true are both set in key_input scene
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneKeyInput);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {

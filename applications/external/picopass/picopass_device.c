@@ -2,7 +2,7 @@
 
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
-#include "picopass_icons.h"
+#include <picopass_icons.h>
 
 #define TAG "PicopassDevice"
 
@@ -130,7 +130,7 @@ bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
         return picopass_device_save_file(
             dev, dev_name, STORAGE_APP_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
     } else if(dev->format == PicopassDeviceSaveFormatLF) {
-        return picopass_device_save_file(dev, dev_name, EXT_PATH("lfrfid"), ".rfid", true);
+        return picopass_device_save_file(dev, dev_name, ANY_PATH("lfrfid"), ".rfid", true);
     }
 
     return false;

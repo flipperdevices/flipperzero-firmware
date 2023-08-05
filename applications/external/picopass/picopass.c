@@ -68,6 +68,13 @@ Picopass* picopass_alloc() {
         PicopassViewTextInput,
         text_input_get_view(picopass->text_input));
 
+    // Byte Input
+    picopass->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        picopass->view_dispatcher,
+        PicopassViewByteInput,
+        byte_input_get_view(picopass->byte_input));
+
     // Custom Widget
     picopass->widget = widget_alloc();
     view_dispatcher_add_view(
@@ -108,6 +115,10 @@ void picopass_free(Picopass* picopass) {
     // TextInput
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewTextInput);
     text_input_free(picopass->text_input);
+
+    // ByteInput
+    view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewByteInput);
+    byte_input_free(picopass->byte_input);
 
     // Custom Widget
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewWidget);
@@ -200,7 +211,7 @@ void picopass_show_loading_popup(void* context, bool show) {
 
 static void picopass_migrate_from_old_folder() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_migrate(storage, EXT_PATH("picopass"), STORAGE_APP_DATA_PATH_PREFIX);
+    storage_common_migrate(storage, "/ext/picopass", STORAGE_APP_DATA_PATH_PREFIX);
     furi_record_close(RECORD_STORAGE);
 }
 
