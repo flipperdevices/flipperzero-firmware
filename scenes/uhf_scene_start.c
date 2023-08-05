@@ -32,7 +32,7 @@ bool uhf_scene_start_on_event(void* ctx, SceneManagerEvent event) {
             scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadTag);
             consumed = true;
         }
-        //else if(event.event == SubmenuIndexSaved) {
+        // else if(event.event == SubmenuIndexSaved) {
         // Explicitly save state so that the correct item is
         // reselected if the user cancels loading a file.
         // scene_manager_set_scene_state(

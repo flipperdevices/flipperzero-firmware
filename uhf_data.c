@@ -34,6 +34,23 @@ void uhf_data_reset(UHFData* uhf_data) {
     uhf_data->next = NULL;
 }
 
+uint8_t uhf_data_calculate_checksum(UHFData* uhf_data) {
+    // CheckSum8 Modulo 256
+    // Sum of Bytes % 256
+    uint8_t sum_val = 0x00;
+    size_t length = uhf_data->length - 2;
+    for(size_t i = 1; i < length; i++) {
+        sum_val += uhf_data->data[i];
+    }
+    return sum_val % 256;
+}
+
+bool uhf_data_verfiy_checksum(UHFData* uhf_data) {
+    uint8_t data_checksum = uhf_data->data[uhf_data->length - 2];
+    uint8_t actual_checksum = uhf_data_calculate_checksum(uhf_data);
+    return data_checksum == actual_checksum;
+}
+
 void uhf_data_free(UHFData* uhf_data) {
     if(uhf_data == NULL) return;
     while(uhf_data != NULL) {

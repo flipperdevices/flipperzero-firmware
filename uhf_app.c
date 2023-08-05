@@ -1,10 +1,5 @@
 #include "uhf_app_i.h"
 
-static const char* uhf_file_header = "Flipper UHF device";
-static const uint32_t uhf_file_version = 1;
-static const uint8_t bank_data_start = 20;
-static const uint8_t bank_data_length = 16;
-
 // empty callback
 void empty_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
     UNUSED(event);
@@ -35,66 +30,6 @@ char* convertToHexString(const uint8_t* array, size_t length) {
     return hexArray;
 }
 
-bool uhf_save_read_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename) {
-    if(!storage_dir_exists(storage, UHF_APPS_DATA_FOLDER)) {
-        storage_simply_mkdir(storage, UHF_APPS_DATA_FOLDER);
-    }
-    if(!storage_dir_exists(storage, UHF_APPS_STORAGE_FOLDER)) {
-        storage_simply_mkdir(storage, UHF_APPS_STORAGE_FOLDER);
-    }
-
-    FlipperFormat* file = flipper_format_file_alloc(storage);
-    FuriString* temp_str = furi_string_alloc();
-    // set file name
-    furi_string_cat_printf(
-        temp_str, "%s/%s%s", UHF_APPS_STORAGE_FOLDER, filename, UHF_FILE_EXTENSION);
-    // open file
-    if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) return false;
-    // write header
-    if(!flipper_format_write_header_cstr(file, uhf_file_header, uhf_file_version)) return false;
-    // write rfu data to file
-    UHFData* rfu_data = uhf_response_data_get_uhf_data(uhf_response_data, 1);
-    if(rfu_data->length) {
-        if(!flipper_format_write_hex(
-               file, "RFU", rfu_data->data + bank_data_start, bank_data_length))
-            return false;
-    } else {
-        if(!flipper_format_write_hex(file, "RFU", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
-    }
-
-    // write epc data to file
-    UHFData* epc_data = uhf_response_data_get_uhf_data(uhf_response_data, 2);
-    if(epc_data->length) {
-        if(!flipper_format_write_hex(
-               file, "EPC", epc_data->data + bank_data_start, bank_data_length))
-            return false;
-    } else {
-        if(!flipper_format_write_hex(file, "EPC", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
-    }
-
-    // write tid data to file
-    UHFData* tid_data = uhf_response_data_get_uhf_data(uhf_response_data, 3);
-    if(tid_data->length) {
-        if(!flipper_format_write_hex(
-               file, "TID", tid_data->data + bank_data_start, bank_data_length))
-            return false;
-    } else {
-        if(!flipper_format_write_hex(file, "TID", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
-    }
-    // write user data to file
-    UHFData* user_data = uhf_response_data_get_uhf_data(uhf_response_data, 4);
-    if(user_data->length) {
-        if(!flipper_format_write_hex(
-               file, "USER", user_data->data + bank_data_start, bank_data_length))
-            return false;
-    } else {
-        if(!flipper_format_write_hex(file, "USER", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
-    }
-    furi_string_free(temp_str);
-    flipper_format_free(file);
-    return true;
-}
-
 bool uhf_custom_event_callback(void* ctx, uint32_t event) {
     furi_assert(ctx);
     UHFApp* uhf_app = ctx;
@@ -115,7 +50,6 @@ void uhf_tick_event_callback(void* ctx) {
 
 UHFApp* uhf_alloc() {
     UHFApp* uhf_app = (UHFApp*)malloc(sizeof(UHFApp));
-    uhf_app->worker = (UHFWorker*)uhf_worker_alloc();
     uhf_app->view_dispatcher = view_dispatcher_alloc();
     uhf_app->scene_manager = scene_manager_alloc(&uhf_scene_handlers, uhf_app);
     view_dispatcher_enable_queue(uhf_app->view_dispatcher);
@@ -131,8 +65,12 @@ UHFApp* uhf_alloc() {
     view_dispatcher_attach_to_gui(
         uhf_app->view_dispatcher, uhf_app->gui, ViewDispatcherTypeFullscreen);
 
-    // Storage
-    uhf_app->storage = furi_record_open(RECORD_STORAGE);
+    //worker
+    uhf_app->worker = uhf_worker_alloc();
+
+    // device
+    uhf_app->uhf_device = uhf_device_alloc();
+    uhf_app->uhf_device->dev_data = uhf_app->worker->response_data;
 
     // Open Notification record
     uhf_app->notifications = furi_record_open(RECORD_NOTIFICATION);
@@ -202,9 +140,8 @@ void uhf_free(UHFApp* uhf_app) {
     furi_record_close(RECORD_GUI);
     uhf_app->gui = NULL;
 
-    // Storage
-    furi_record_close(RECORD_STORAGE);
-    uhf_app->storage = NULL;
+    // UHFDevice
+    uhf_device_free(uhf_app->uhf_device);
 
     // Notifications
     furi_record_close(RECORD_NOTIFICATION);

@@ -23,6 +23,8 @@ typedef struct UHFResponseData {
 UHFData* uhf_data_alloc();
 int uhf_data_append(UHFData* uhf_data, uint8_t data);
 void uhf_data_reset(UHFData* uhf_data);
+uint8_t uhf_data_calculate_checksum(UHFData* uhf_data);
+bool uhf_data_verfiy_checksum(UHFData* uhf_data);
 void uhf_data_free(UHFData* uhf_data);
 
 UHFResponseData* uhf_response_data_alloc();
