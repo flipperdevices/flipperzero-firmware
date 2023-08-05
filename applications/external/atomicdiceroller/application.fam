@@ -1,0 +1,14 @@
+App(
+    appid="atomicdiceroller",
+    name="Atomic Dice Roller",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_atomicdiceroller_app",
+    stack_size=2 * 1024,
+    fap_icon="atomicdiceroller.png",
+    fap_category="GPIO/Sensors",
+    fap_icon_assets_symbol="flipper_atomicdiceroller",
+    fap_author="nmrr",
+    fap_weburl="https://github.com/nmrr/flipperzero-atomicdiceroller",
+    fap_version=(1, 0),
+    fap_description="Works with J305 Geiger tube on external board. You absolutely need a geiger board to run this application. Geiger Counter Dice rolls are produced by transforming hashes into 1 to 6 numbers. Output is balanced by ignoring out of scope values.",
+)
