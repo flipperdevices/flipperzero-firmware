@@ -21,8 +21,8 @@ static const uint8_t loclass_csns[LOCLASS_NUM_CSNS][RFAL_PICOPASS_BLOCK_LEN] = {
 };
 
 static void picopass_worker_enable_field() {
-    furi_hal_nfc_ll_txrx_on();
     furi_hal_nfc_exit_sleep();
+    furi_hal_nfc_ll_txrx_on();
     furi_hal_nfc_ll_poll();
 }
 
@@ -1198,6 +1198,8 @@ static void picopass_emu_handle_packet(
 }
 
 void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode) {
+    furi_hal_nfc_exit_sleep();
+
     FuriHalNfcTxRxContext tx_rx = {};
     PicopassEmulatorCtx emu_ctx = {
         .state = PicopassEmulatorStateIdle,
