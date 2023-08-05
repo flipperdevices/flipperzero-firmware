@@ -69,7 +69,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     1,
                     15,
                     AlignLeft,
-                    AlignCenter,
+                    AlignTop,
                     FontSecondary,
                     furi_string_get_cstr(temp_str));
                 furi_string_reset(temp_str);
@@ -83,7 +83,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     1,
                     27,
                     AlignLeft,
-                    AlignCenter,
+                    AlignTop,
                     FontSecondary,
                     furi_string_get_cstr(temp_str));
                 furi_string_reset(temp_str);
@@ -97,7 +97,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     1,
                     39,
                     AlignLeft,
-                    AlignCenter,
+                    AlignTop,
                     FontSecondary,
                     furi_string_get_cstr(temp_str));
 

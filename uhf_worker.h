@@ -46,3 +46,5 @@ void uhf_worker_start(
     void* ctx);
 void uhf_worker_stop(UHFWorker* uhf_worker);
 void uhf_worker_free(UHFWorker* uhf_worker);
+uint8_t calculate_checksum(UHFData* uhf_data);
+bool validate_checksum(UHFData* uhf_data);
