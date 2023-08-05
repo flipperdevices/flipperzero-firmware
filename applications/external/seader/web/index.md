@@ -35,6 +35,8 @@ Or build it yourself from the files in the [NARD repo](https://github.com/killer
 
 Put **[SAM](https://www.cdw.com/product/hp-sim-for-hid-iclass-for-hip2-reader-security-sim/4854794)** into **[adapter](https://a.co/d/1E9Zk1h)** (because of chip on top) and plug into **[reader](https://www.mikroe.com/smart-card-2-click)**. Connect reader to Flipper Zero (See `Connections` below).
 
+Optionally 3d print a [case designed by sean](https://www.printables.com/model/543149-case-for-flipper-zero-devboard-smart2click-samsim)
+
 ### Connections
 
 | Smart Card 2 Click | Flipper     |

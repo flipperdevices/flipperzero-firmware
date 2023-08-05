@@ -79,7 +79,7 @@ static void roll(State* const state) {
     state->app_state = AnimState;
 }
 
-static void draw_ui(const State* state, Canvas* canvas) {
+static void draw_main_menu(const State* state, Canvas* canvas) {
     canvas_set_font(canvas, FontSecondary);
 
     FuriString* count = furi_string_alloc();
@@ -92,7 +92,7 @@ static void draw_ui(const State* state, Canvas* canvas) {
     }
     // dice arrow buttons
     if(isDiceButtonsVisible(state->app_state)) {
-        if(state->dice_index > 0) canvas_draw_icon(canvas, 45, 44, &I_ui_button_left);
+        if(state->dice_index > 0) canvas_draw_icon(canvas, 44, 44, &I_ui_button_left);
         if(state->dice_index < DICE_TYPES - 1)
             canvas_draw_icon(canvas, 78, 44, &I_ui_button_right);
     }
@@ -108,12 +108,52 @@ static void draw_ui(const State* state, Canvas* canvas) {
     if(isAnimState(state->app_state) == false) canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
 
     if(state->app_state != AnimResultState && state->app_state != ResultState) {
-        canvas_draw_icon(canvas, 0, 54, &I_ui_button_exit);
+        canvas_draw_icon(canvas, 0, 54, &I_ui_button_history);
     } else {
         canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
     }
 
     furi_string_free(count);
+}
+
+static void draw_history(const State* state, Canvas* canvas) {
+    if(state == NULL) {
+        return;
+    }
+
+    canvas_set_font(canvas, FontSecondary);
+    FuriString* hist = furi_string_alloc();
+
+    uint8_t x = HISTORY_START_POST_X;
+    uint8_t y = HISTORY_START_POST_Y;
+    for(uint8_t i = 0; i < HISTORY_SIZE / 2; i++) {
+        //furi_string_printf(count, "%01d. %s [%01d] - %01d", i, state->history[i].name, state->history[i].count, state->history[i].result);
+
+        // left side
+        furi_string_printf(hist, "%01d.", i + 1);
+        canvas_draw_str_aligned(canvas, x, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+        furi_string_printf(hist, "%01d%s - %01d", state->dice_count, "d20", 13);
+        canvas_draw_str_aligned(
+            canvas, x + HISTORY_X_GAP, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+        // right side
+        furi_string_printf(hist, "%01d.", i + HISTORY_COL_SIZE);
+        canvas_draw_str_aligned(
+            canvas, x + HISTORY_STEP_X, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+        furi_string_printf(hist, "%01d%s - %01d", state->dice_count, "d20", 13);
+        canvas_draw_str_aligned(
+            canvas,
+            x + HISTORY_STEP_X + HISTORY_X_GAP,
+            y,
+            AlignLeft,
+            AlignBottom,
+            furi_string_get_cstr(hist));
+
+        y += HISTORY_STEP_Y;
+    }
+
+    canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
+    canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
+    furi_string_free(hist);
 }
 
 static void draw_dice(const State* state, Canvas* canvas) {
@@ -200,12 +240,16 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
 
-    draw_ui(state, canvas);
-
-    if(isResultVisible(state->app_state, state->dice_index)) {
-        draw_results(state, canvas);
+    if(state->app_state == HistoryState) {
+        draw_history(state, canvas);
     } else {
-        draw_dice(state, canvas);
+        draw_main_menu(state, canvas);
+
+        if(isResultVisible(state->app_state, state->dice_index)) {
+            draw_results(state, canvas);
+        } else {
+            draw_dice(state, canvas);
+        }
     }
 
     furi_mutex_release(state->mutex);
@@ -303,15 +347,26 @@ int32_t dice_dnd_app(void* p) {
                     if(event.input.key == InputKeyOk && isAnimState(state->app_state) == false) {
                         roll(state);
                     }
-                    // back to dice select state or quit from app
-                    if(event.input.key == InputKeyBack) {
-                        if(state->app_state == ResultState ||
-                           state->app_state == AnimResultState) {
+                }
+
+                // back button handlers
+                if(event.input.key == InputKeyBack) {
+                    // switch states
+                    if(event.input.type == InputTypeShort) {
+                        if(state->app_state == SelectState) {
+                            state->app_state = HistoryState;
+                        } else if(state->app_state == HistoryState) {
+                            state->app_state = SelectState;
+                        } else if(
+                            state->app_state == ResultState ||
+                            state->app_state == AnimResultState) {
                             state->anim_frame = 0;
                             state->app_state = SelectState;
-                        } else {
-                            processing = false;
                         }
+                    }
+                    // exit
+                    else if(event.input.type == InputTypeLong) {
+                        processing = false;
                     }
                 }
             }
