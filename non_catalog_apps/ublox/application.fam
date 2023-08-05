@@ -8,6 +8,7 @@ App(
         "gui",
 	"i2c",
 	"locale",
+	"storage",
     ],
     stack_size=2 * 1024,
     order=20,
