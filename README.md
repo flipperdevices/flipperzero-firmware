@@ -5,13 +5,13 @@
 
 [**Geiger Counter**](https://github.com/nmrr/flipperzero-geigercounter) application must work on your **Flipper Zero** to be able to use this application. You need the same **geiger board** and this board must be connected in the same way as described in the description of the **Geiger Counter** application.
 
-**Note:** There is no test port, your absolutely need a **geiger board** to run this application.
+**Note:** There is no test port compared to the **Geiger Counter** application, your absolutely need a **geiger board** to run this application.
 
 This application generates random numbers by hashing timestamps from a 64 MHz 32-bit time clock (TIM2) from the **MCU**. Two hash methods have been implemented:
 - CRC32: 8 ticks are needed to obtain a hash, for low activity sources
 - MD5: 32 ticks are needed to obtain a hash, for high activity source
 
-Dice rolls are produced by transforming hashes into 1 to 6 numbers. Output is balanced by ignoring out of scope values. Modulo-based methods are ugly because there are unbalanced.
+Dice rolls are produced by transforming hashes into 1 to 6 numbers. Output is balanced by ignoring out of scope values. Modulo-based methods are ugly because they are usually unbalanced.
 
 It's possible to roll the dice without using a **radioactive isotope**. Air contains **radon** gas that is **radioactive**. **Geiger board** can detect descendants of radon gas that emit strong **beta** or **gamma** rays.
 
