@@ -67,18 +67,14 @@ ADD_SCENE(nfc, passport_auth_save_name, PassportAuthSaveName)
 ADD_SCENE(nfc, passport_date, PassportDate)
 ADD_SCENE(nfc, passport_docnr, PassportDocNr)
 ADD_SCENE(nfc, passport_pace_todo, PassportPaceTodo)
-#if FURI_DEBUG
 ADD_SCENE(nfc, emulate_apdu_sequence, EmulateApduSequence)
-#endif
 ADD_SCENE(nfc, device_info, DeviceInfo)
 ADD_SCENE(nfc, delete, Delete)
 ADD_SCENE(nfc, delete_success, DeleteSuccess)
 ADD_SCENE(nfc, restore_original_confirm, RestoreOriginalConfirm)
 ADD_SCENE(nfc, restore_original, RestoreOriginal)
-#if FURI_DEBUG
 ADD_SCENE(nfc, debug, Debug)
 ADD_SCENE(nfc, field, Field)
-#endif
 ADD_SCENE(nfc, dict_not_found, DictNotFound)
 ADD_SCENE(nfc, rpc, Rpc)
 ADD_SCENE(nfc, exit_confirm, ExitConfirm)

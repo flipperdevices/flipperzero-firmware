@@ -14,14 +14,6 @@
 #define TOTP_FIRMWARE_CFW (3)
 // End of list
 
-// Checking FlipC.org definitions (https://github.com/playmean/fap-list/issues/9)
-#if defined(TARGET_FIRMWARE_OFFICIAL)
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
-#elif defined(TARGET_FIRMWARE_ROGUEMASTER)
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_CFW
-#endif
-// End of FlipC.org definition checks
-
 #ifndef TOTP_TARGET_FIRMWARE
 #define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_CFW
 #endif
