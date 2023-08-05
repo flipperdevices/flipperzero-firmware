@@ -58,7 +58,7 @@ typedef struct {
     uint8_t bit_index;
 } SubBruteDevice;
 
-SubBruteDevice* subbrute_device_alloc(const SubGhzDevice* radio_device;);
+SubBruteDevice* subbrute_device_alloc(const SubGhzDevice* radio_device);
 void subbrute_device_free(SubBruteDevice* instance);
 
 bool subbrute_device_save_file(SubBruteDevice* instance, const char* key_name);
