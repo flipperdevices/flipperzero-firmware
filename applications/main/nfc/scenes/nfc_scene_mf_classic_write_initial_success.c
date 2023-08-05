@@ -29,7 +29,7 @@ bool nfc_scene_mf_classic_write_initial_success_on_event(void* context, SceneMan
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventViewExit) {
             consumed = scene_manager_search_and_switch_to_previous_scene(
-                instance->scene_manager, NfcSceneFileSelect);
+                instance->scene_manager, NfcSceneSavedMenu);
         }
     }
     return consumed;

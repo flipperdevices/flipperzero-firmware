@@ -77,7 +77,8 @@ NfcCommand mf_classic_poller_handler_start(MfClassicPoller* instance) {
     mf_classic_detect_protocol(instance->data->iso14443_3a_data, &instance->data->type);
     instance->sectors_read = 0;
     instance->sectors_total = mf_classic_get_total_sectors_num(instance->data->type);
-    instance->current_write_block = 0;
+
+    memset(&instance->mode_ctx, 0, sizeof(MfClassicPollerModeContext));
 
     instance->mfc_event.type = MfClassicPollerEventTypeRequestMode;
     command = instance->callback(instance->general_event, instance->context);
@@ -148,133 +149,182 @@ NfcCommand mf_classic_poller_handler_request_key(MfClassicPoller* instance) {
 
 NfcCommand mf_classic_poller_handler_request_sector_trailer(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
+    MfClassicPollerWriteContext* write_ctx = &instance->mode_ctx.write_ctx;
 
-    if(instance->sectors_read == instance->sectors_total) {
+    if(write_ctx->current_sector == instance->sectors_total) {
         instance->state = MfClassicPollerStateSuccess;
     } else {
         instance->mfc_event.type = MfClassicPollerEventTypeRequestSectorTrailer;
-        instance->mfc_event_data.sec_tr_data.sector_num = instance->sectors_read;
+        instance->mfc_event_data.sec_tr_data.sector_num = write_ctx->current_sector;
         command = instance->callback(instance->general_event, instance->context);
         if(instance->mfc_event_data.sec_tr_data.sector_trailer_provided) {
-            instance->state = MfClassicPollerStateRequestWriteBlock;
+            instance->state = MfClassicPollerStateCheckWriteConditions;
             memcpy(
-                &instance->current_sec_tr,
+                &write_ctx->sec_tr,
                 &instance->mfc_event_data.sec_tr_data.sector_trailer,
                 sizeof(MfClassicSectorTrailer));
-            instance->current_write_block =
-                mf_classic_get_first_block_num_of_sector(instance->sectors_read);
+            write_ctx->current_block =
+                MAX(1, mf_classic_get_first_block_num_of_sector(write_ctx->current_sector));
+
         } else {
-            instance->sectors_read++;
+            write_ctx->current_sector++;
         }
     }
 
     return command;
 }
 
-NfcCommand mf_classic_poller_handler_request_write_block(MfClassicPoller* instance) {
+NfcCommand mf_classic_handler_check_write_conditions(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
-    MfClassicSectorTrailer* sec_tr = &instance->current_sec_tr;
-    MfClassicKey key_a = sec_tr->key_a;
-    MfClassicKey key_b = sec_tr->key_b;
-
-    MfClassicKeyType key_type_read = MfClassicKeyTypeA;
-    MfClassicKeyType key_type_write = MfClassicKeyTypeB;
-    MfClassicBlock tag_block = {};
-    MfClassicError error = MfClassicErrorNone;
-    uint8_t block_num = instance->current_write_block;
+    MfClassicPollerWriteContext* write_ctx = &instance->mode_ctx.write_ctx;
+    MfClassicSectorTrailer* sec_tr = &write_ctx->sec_tr;
 
     do {
-        uint8_t sec_tr_num = mf_classic_get_sector_trailer_num_by_sector(instance->sectors_read);
-        if(block_num == sec_tr_num) {
-            instance->sectors_read++;
+        // Check last block in sector to write
+        uint8_t sec_tr_block_num =
+            mf_classic_get_sector_trailer_num_by_sector(write_ctx->current_sector);
+        if(write_ctx->current_block == sec_tr_block_num) {
+            write_ctx->current_sector++;
             instance->state = MfClassicPollerStateRequestSectorTrailer;
             break;
         }
 
-        FURI_LOG_I(TAG, "Writing to block %d", block_num);
-
         // Check write and read access
         if(mf_classic_is_allowed_access_data_block(
-               sec_tr, block_num, MfClassicKeyTypeA, MfClassicActionDataWrite)) {
-            key_type_write = MfClassicKeyTypeA;
+               sec_tr, write_ctx->current_block, MfClassicKeyTypeA, MfClassicActionDataWrite)) {
+            write_ctx->key_type_write = MfClassicKeyTypeA;
         } else if(mf_classic_is_allowed_access_data_block(
-                      sec_tr, block_num, MfClassicKeyTypeB, MfClassicActionDataWrite)) {
-            key_type_write = MfClassicKeyTypeB;
+                      sec_tr,
+                      write_ctx->current_block,
+                      MfClassicKeyTypeB,
+                      MfClassicActionDataWrite)) {
+            write_ctx->key_type_write = MfClassicKeyTypeB;
         } else {
-            FURI_LOG_D(TAG, "Not allowed to write block %d", block_num);
-            instance->current_write_block++;
+            FURI_LOG_D(TAG, "Not allowed to write block %d", write_ctx->current_block);
+            write_ctx->current_block++;
             break;
         }
 
         if(mf_classic_is_allowed_access_data_block(
-               sec_tr, block_num, key_type_write, MfClassicActionDataRead)) {
-            key_type_read = key_type_write;
+               sec_tr,
+               write_ctx->current_block,
+               write_ctx->key_type_write,
+               MfClassicActionDataRead)) {
+            write_ctx->key_type_read = write_ctx->key_type_write;
         } else {
-            key_type_read = key_type_write == MfClassicKeyTypeA ? MfClassicKeyTypeB :
-                                                                  MfClassicKeyTypeA;
+            write_ctx->key_type_read = write_ctx->key_type_write == MfClassicKeyTypeA ?
+                                           MfClassicKeyTypeB :
+                                           MfClassicKeyTypeA;
             if(!mf_classic_is_allowed_access_data_block(
-                   sec_tr, block_num, key_type_read, MfClassicActionDataRead)) {
-                FURI_LOG_D(TAG, "Not allowed to read block %d", block_num);
-                instance->current_write_block++;
+                   sec_tr,
+                   write_ctx->current_block,
+                   write_ctx->key_type_read,
+                   MfClassicActionDataRead)) {
+                FURI_LOG_D(TAG, "Not allowed to read block %d", write_ctx->current_block);
+                write_ctx->current_block++;
+                break;
             }
         }
 
+        write_ctx->need_halt_before_write =
+            (write_ctx->key_type_read != write_ctx->key_type_write);
+        instance->state = MfClassicPollerStateReadBlock;
+    } while(false);
+
+    return command;
+}
+
+NfcCommand mf_classic_poller_handler_read_block(MfClassicPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+    MfClassicPollerWriteContext* write_ctx = &instance->mode_ctx.write_ctx;
+
+    MfClassicKey* auth_key = write_ctx->key_type_read == MfClassicKeyTypeA ?
+                                 &write_ctx->sec_tr.key_a :
+                                 &write_ctx->sec_tr.key_b;
+    MfClassicError error = MfClassicErrorNone;
+
+    do {
         // Authenticate to sector
-        MfClassicKey* auth_key = key_type_read == MfClassicKeyTypeA ? &key_a : &key_b;
-        error = mf_classic_async_auth(instance, block_num, auth_key, key_type_read, NULL);
+        error = mf_classic_async_auth(
+            instance, write_ctx->current_block, auth_key, write_ctx->key_type_read, NULL);
         if(error != MfClassicErrorNone) {
-            FURI_LOG_D(TAG, "Failed to auth to block %d", block_num);
+            FURI_LOG_D(TAG, "Failed to auth to block %d", write_ctx->current_block);
             instance->state = MfClassicPollerStateFail;
             break;
         }
 
         // Read block from tag
-        error = mf_classic_async_read_block(instance, block_num, &tag_block);
+        error =
+            mf_classic_async_read_block(instance, write_ctx->current_block, &write_ctx->tag_block);
         if(error != MfClassicErrorNone) {
-            FURI_LOG_D(TAG, "Failed to read block %d", block_num);
+            FURI_LOG_D(TAG, "Failed to read block %d", write_ctx->current_block);
             instance->state = MfClassicPollerStateFail;
             break;
         }
 
+        if(write_ctx->need_halt_before_write) {
+            mf_classic_aync_halt(instance);
+        }
+        instance->state = MfClassicPollerStateWriteBlock;
+    } while(false);
+
+    return command;
+}
+
+NfcCommand mf_classic_poller_handler_write_block(MfClassicPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+
+    MfClassicPollerWriteContext* write_ctx = &instance->mode_ctx.write_ctx;
+    MfClassicKey* auth_key = write_ctx->key_type_write == MfClassicKeyTypeA ?
+                                 &write_ctx->sec_tr.key_a :
+                                 &write_ctx->sec_tr.key_b;
+    MfClassicError error = MfClassicErrorNone;
+
+    do {
         // Request block to write
         instance->mfc_event.type = MfClassicPollerEventTypeRequestWriteBlock;
-        instance->mfc_event_data.write_block_data.block_num = block_num;
+        instance->mfc_event_data.write_block_data.block_num = write_ctx->current_block;
         command = instance->callback(instance->general_event, instance->context);
-        if(!instance->mfc_event_data.write_block_data.write_block_provided) continue;
+        if(!instance->mfc_event_data.write_block_data.write_block_provided) break;
 
-        // Compare tag and flippers block
+        // Compare tag and saved block
         if(memcmp(
-               tag_block.data,
+               write_ctx->tag_block.data,
                instance->mfc_event_data.write_block_data.write_block.data,
                sizeof(MfClassicBlock)) == 0) {
-            FURI_LOG_D(TAG, "Block %d is equal. Skip writing", block_num);
-            mf_classic_aync_halt(instance);
-            instance->current_write_block++;
+            FURI_LOG_D(TAG, "Block %d is equal. Skip writing", write_ctx->current_block);
             break;
         }
 
         // Reauth if necessary
-        // TODO move to separate state
-        if(key_type_write != key_type_read) {
-            FURI_LOG_W(TAG, "Will not work");
-            mf_classic_aync_halt(instance);
-            auth_key = key_type_write == MfClassicKeyTypeA ? &key_a : &key_b;
-            error = mf_classic_async_auth(instance, block_num, auth_key, key_type_write, NULL);
+        if(write_ctx->need_halt_before_write) {
+            error = mf_classic_async_auth(
+                instance, write_ctx->current_block, auth_key, write_ctx->key_type_write, NULL);
+            if(error != MfClassicErrorNone) {
+                FURI_LOG_D(
+                    TAG, "Failed to auth to block %d for writing", write_ctx->current_block);
+                instance->state = MfClassicPollerStateFail;
+                break;
+            }
         }
 
         // Write block
         error = mf_classic_async_write_block(
-            instance, block_num, &instance->mfc_event_data.write_block_data.write_block);
+            instance,
+            write_ctx->current_block,
+            &instance->mfc_event_data.write_block_data.write_block);
         if(error != MfClassicErrorNone) {
-            FURI_LOG_D(TAG, "Failed to write block %d", block_num);
+            FURI_LOG_D(TAG, "Failed to write block %d", write_ctx->current_block);
             instance->state = MfClassicPollerStateFail;
             break;
         }
 
-        mf_classic_aync_halt(instance);
-        instance->current_write_block++;
     } while(false);
+
+    mf_classic_aync_halt(instance);
+    write_ctx->current_block++;
+    instance->state = MfClassicPollerStateCheckWriteConditions;
 
     return command;
 }
@@ -479,7 +529,9 @@ static const MfClassicPollerReadHandler
         [MfClassicPollerStateStart] = mf_classic_poller_handler_start,
         [MfClassicPollerStateRequestSectorTrailer] =
             mf_classic_poller_handler_request_sector_trailer,
-        [MfClassicPollerStateRequestWriteBlock] = mf_classic_poller_handler_request_write_block,
+        [MfClassicPollerStateCheckWriteConditions] = mf_classic_handler_check_write_conditions,
+        [MfClassicPollerStateReadBlock] = mf_classic_poller_handler_read_block,
+        [MfClassicPollerStateWriteBlock] = mf_classic_poller_handler_write_block,
         [MfClassicPollerStateNewSector] = mf_classic_poller_handler_new_sector,
         [MfClassicPollerStateRequestKey] = mf_classic_poller_handler_request_key,
         [MfClassicPollerStateRequestReadSector] = mf_classic_poller_handler_request_read_sector,

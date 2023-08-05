@@ -46,7 +46,7 @@ bool nfc_scene_mf_classic_write_initial_fail_on_event(void* context, SceneManage
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
             consumed = scene_manager_search_and_switch_to_previous_scene(
-                instance->scene_manager, NfcSceneFileSelect);
+                instance->scene_manager, NfcSceneSavedMenu);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_search_and_switch_to_previous_scene(
