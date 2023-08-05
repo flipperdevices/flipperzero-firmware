@@ -85,7 +85,7 @@ NfcCommand mf_classic_poller_handler_start(MfClassicPoller* instance) {
 
     if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeDictAttack) {
         instance->state = MfClassicPollerStateNewSector;
-    } else if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeKeyCache) {
+    } else if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeRead) {
         instance->state = MfClassicPollerStateRequestReadSector;
     } else if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeWrite) {
         instance->state = MfClassicPollerStateRequestSectorTrailer;
@@ -336,6 +336,7 @@ NfcCommand mf_classic_poller_handler_request_read_sector(MfClassicPoller* instan
         &instance->mfc_event_data.read_sector_request_data;
     instance->mfc_event.type = MfClassicPollerEventTypeRequestReadSector;
     command = instance->callback(instance->general_event, instance->context);
+
     if(!instance->mfc_event_data.read_sector_request_data.key_provided) {
         instance->state = MfClassicPollerStateSuccess;
     } else {
@@ -357,6 +358,7 @@ NfcCommand mf_classic_poller_handler_request_read_sector(MfClassicPoller* instan
             mf_classic_set_key_found(
                 instance->data, sec_read->sector_num, sec_read->key_type, key);
 
+            // TODO remove loop
             MfClassicBlock block = {};
             for(size_t i = block_num; i < block_num + sector_size; i++) {
                 if(mf_classic_is_block_read(instance->data, i)) continue;

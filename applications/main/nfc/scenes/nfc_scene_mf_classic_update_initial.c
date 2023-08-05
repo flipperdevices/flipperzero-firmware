@@ -16,14 +16,16 @@ NfcCommand nfc_mf_classic_update_initial_worker_callback(NfcGenericEvent event, 
     const MfClassicPollerEvent* mfc_event = event.data;
     NfcApp* instance = context;
 
-    if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
+    if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardDetected);
+    } else if(mfc_event->type == MfClassicPollerEventTypeCardLost) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardLost);
+    } else if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
         const MfClassicData* updated_data = nfc_poller_get_data(instance->poller);
         const MfClassicData* old_data =
             nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
         if(iso14443_3a_is_equal(updated_data->iso14443_3a_data, old_data->iso14443_3a_data)) {
-            view_dispatcher_send_custom_event(
-                instance->view_dispatcher, NfcCustomEventDictAttackCardDetected);
-            mfc_event->data->poller_mode.mode = MfClassicPollerModeKeyCache;
+            mfc_event->data->poller_mode.mode = MfClassicPollerModeRead;
         } else {
             view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventWrongCard);
             command = NfcCommandStop;
@@ -94,11 +96,18 @@ bool nfc_scene_mf_classic_update_initial_on_event(void* context, SceneManagerEve
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventDictAttackCardDetected) {
+        if(event.event == NfcCustomEventCardDetected) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
                 NfcSceneMfClassicUpdateInitial,
                 NfcSceneMfClassicUpdateInitialStateCardFound);
+            nfc_scene_mf_classic_update_initial_setup_view(instance);
+            consumed = true;
+        } else if(event.event == NfcCustomEventCardLost) {
+            scene_manager_set_scene_state(
+                instance->scene_manager,
+                NfcSceneMfClassicUpdateInitial,
+                NfcSceneMfClassicUpdateInitialStateCardSearch);
             nfc_scene_mf_classic_update_initial_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcCustomEventWrongCard) {

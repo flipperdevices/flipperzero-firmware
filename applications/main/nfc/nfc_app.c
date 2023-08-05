@@ -323,7 +323,8 @@ static bool nfc_save_internal(NfcApp* instance, const char* extension) {
 
     nfc_make_app_folders(instance);
 
-    if(furi_string_end_with(instance->file_path, NFC_APP_EXTENSION)) {
+    if(furi_string_end_with(instance->file_path, NFC_APP_EXTENSION) ||
+       (furi_string_end_with(instance->file_path, NFC_APP_SHADOW_EXTENSION))) {
         size_t filename_start = furi_string_search_rchar(instance->file_path, '/');
         furi_string_left(instance->file_path, filename_start);
     }

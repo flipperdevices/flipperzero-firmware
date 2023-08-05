@@ -51,7 +51,7 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
         const uint8_t* uid = nfc_device_get_uid(instance->nfc_device, &uid_len);
         if(mf_classic_key_cache_load(instance->mfc_key_cache, uid, uid_len)) {
             FURI_LOG_I(TAG, "Key cache found");
-            mfc_event->data->poller_mode.mode = MfClassicPollerModeKeyCache;
+            mfc_event->data->poller_mode.mode = MfClassicPollerModeRead;
         } else {
             FURI_LOG_I(TAG, "Key cache not found");
             view_dispatcher_send_custom_event(

@@ -39,7 +39,7 @@ typedef enum {
 
 typedef enum {
     MfClassicPollerModeDictAttack,
-    MfClassicPollerModeKeyCache,
+    MfClassicPollerModeRead,
     MfClassicPollerModeWrite,
 } MfClassicPollerMode;
 
