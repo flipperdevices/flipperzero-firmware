@@ -25,19 +25,13 @@ extern "C" {
 /// @endcond
 //-----------------------------------------------------------------------------
 
-
-
-
-
 /*! @brief Show which device is detected on the console
  *
  * @param[in] *pComp Is the pointed structure of the device connected
  * @param[in] sysclk Is the system clock of the component (Usually MCP251XFD_Config.SYSCLK_Result)
  * @return Returns an #eERRORRESULT value enum
  */
-void ShowDeviceDetected(MCP251XFD *pComp, uint32_t sysclk);
-
-
+void show_device_detected(MCP251XFD* pComp, uint32_t sysclk);
 
 /*! @brief Show device configuration on the console
  *
@@ -45,9 +39,7 @@ void ShowDeviceDetected(MCP251XFD *pComp, uint32_t sysclk);
  * @param[in] *btStats Is the device bit time configuration of the component (Usually MCP251XFD_Config.BitTimeStats)
  * @return Returns an #eERRORRESULT value enum
  */
-void ShowDeviceConfiguration(MCP251XFD_BitTimeStats* btStats);
-
-
+void show_device_configuration(MCP251XFD_BitTimeStats* btStats);
 
 /*! @brief Show device FIFO configuration
  *
@@ -56,9 +48,7 @@ void ShowDeviceConfiguration(MCP251XFD_BitTimeStats* btStats);
  * @param[in] count Is the count of elements in the FIFO list
  * @return Returns an #eERRORRESULT value enum
  */
-void ShowDeviceFIFOConfiguration(MCP251XFD_FIFO *listFIFO, size_t count);
-
-
+void show_device_fifo_configuration(MCP251XFD_FIFO* listFIFO, size_t count);
 
 /*! @brief Show device Filter configuration
  *
@@ -68,19 +58,7 @@ void ShowDeviceFIFOConfiguration(MCP251XFD_FIFO *listFIFO, size_t count);
  * @param[in] UseSID11 Indicate if the device use the SID11 bit in FDmode
  * @return Returns an #eERRORRESULT value enum
  */
-void ShowDeviceFilterConfiguration(MCP251XFD_Filter *listFilter, size_t count, bool UseSID11);
-
-
-
-/*! @brief Show more device configuration
- *
- * It will show more device configuration with the selected component
- * @param[in] *pComp Is the pointed structure of the device
- * @return Returns an #eERRORRESULT value enum
- */
-void ShowMoreDeviceConfiguration(MCP251XFD *pComp);
-
-
+void show_device_filter_configuration(MCP251XFD_Filter* listFilter, size_t count, bool UseSID11);
 
 //-----------------------------------------------------------------------------
 /*! @brief Show the current error of a device
@@ -89,22 +67,16 @@ void ShowMoreDeviceConfiguration(MCP251XFD *pComp);
  * @param[in] error Is the error to show on console
  * @return Returns an #eERRORRESULT value enum
  */
-void ShowDeviceError(MCP251XFD *pComp, eERRORRESULT error);
-
-
+void show_device_error(MCP251XFD* pComp, eERRORRESULT error);
 
 //-----------------------------------------------------------------------------
-void GetAndShowMCP251XFD_SFRreg(MCP251XFD *pComp);
+void show_device_show_mcp251xfd_sfr_reg(MCP251XFD* pComp);
 
-void GetAndShowMCP251XFD_CANSFRreg(MCP251XFD *pComp);
+void show_device_show_mcp251xfd_can_sfr_reg(MCP251XFD* pComp);
 
-void GetAndShowMCP251XFD_FIFOreg(MCP251XFD *pComp);
+void show_device_show_mcp251xfd_fifo_reg(MCP251XFD* pComp);
 
-void GetAndShowMCP251XFD_FILTERreg(MCP251XFD *pComp);
-
-
-
-
+void show_device_show_mcp251xfd_filter_reg(MCP251XFD* pComp);
 
 //-----------------------------------------------------------------------------
 /// @cond 0

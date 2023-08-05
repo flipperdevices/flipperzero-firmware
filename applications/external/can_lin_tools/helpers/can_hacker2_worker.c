@@ -2,8 +2,8 @@
 
 #include <furi.h>
 
-#include "../lib/driver/mcp251xfd_interconnect/CANEXTFunctions.h"
-#include "../lib/driver/mcp251xfd_interconnect/ShowDemoData.h"
+#include "../lib/driver/mcp251xfd_interconnect/can_function.h"
+#include "../lib/driver/mcp251xfd_interconnect/show_device.h"
 
 #define TAG "CanChacker2Worker"
 
@@ -175,19 +175,17 @@ static int32_t can_hacker2_worker_thread(void* context) {
     UNUSED(err);
 
     if(err != ERR_OK) {
-        ShowDeviceError(CANEXT2, err); // Show device error
+        show_device_error(CAN0, err); // Show device error
         //Ext1ModulePresent = false;
     } else {
-        ShowDeviceDetected(CANEXT2, SYSCLK_Ext2);
-        ShowDeviceConfiguration(&MCP2517FD_Ext2_BTStats);
-        ShowDeviceFIFOConfiguration(&MCP2517FD_Ext2_FIFOlist[0], MCP2517FD_EXT2_FIFO_COUNT);
-        ShowDeviceFilterConfiguration(
-            &MCP2517FD_Ext2_FilterList[0], MCP2517FD_EXT2_FILTER_COUNT, false);
-        ShowMoreDeviceConfiguration(CANEXT2);
-        GetAndShowMCP251XFD_SFRreg(CANEXT2);
-        GetAndShowMCP251XFD_CANSFRreg(CANEXT2);
-        GetAndShowMCP251XFD_FIFOreg(CANEXT2);
-        GetAndShowMCP251XFD_FILTERreg(CANEXT2);
+        show_device_detected(CAN0, can0_sysclk);
+        show_device_configuration(&can0_bt_stats);
+        show_device_fifo_configuration(&can0_fifo_list[0], CAN0_FIFO_COUNT);
+        show_device_filter_configuration(&can_filter_list[0], CAN0_FILTER_COUNT, false);
+        // show_device_show_mcp251xfd_sfr_reg(CAN0);
+        // show_device_show_mcp251xfd_can_sfr_reg(CAN0);
+        // show_device_show_mcp251xfd_fifo_reg(CAN0);
+        // show_device_show_mcp251xfd_filter_reg(CAN0);
         //Ext2ModulePresent = true;
     }
     furi_delay_ms(100);
@@ -219,7 +217,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
         //--- Get a frame if available in the MCP251XFD on Ext2 ---
 
         err = ReceiveMessageFromEXT2(
-            CANEXT2, &receive_event, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp);
+            CAN0, &receive_event, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp);
 
         while(receive_event) {
             receive_event = false;
@@ -237,11 +235,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
             FURI_LOG_I(TAG, "**** %ld", Ext2SequenceCounter);
 
             err = ReceiveMessageFromEXT2(
-                CANEXT2,
-                &receive_event,
-                &ReceivedMessage,
-                MCP251XFD_PAYLOAD_8BYTE,
-                &MessageTimeStamp);
+                CAN0, &receive_event, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp);
 
             // err = TransmitMessageToEXT2(
             // 0x101,
