@@ -61,7 +61,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     uhf_app->widget, 64, 5, AlignCenter, AlignCenter, FontPrimary, "Module Info");
                 // hardware info
                 furi_string_cat_str(temp_str, "HW Version: ");
-                for(int i = 0; i < 10; i++) {
+                for(int i = 0; i < (int)hardware_version->data[4]; i++) {
                     furi_string_cat_printf(temp_str, "%c", hardware_version->data[offset + i]);
                 }
                 widget_add_string_element(
@@ -69,13 +69,13 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     1,
                     15,
                     AlignLeft,
-                    AlignCenter,
+                    AlignTop,
                     FontSecondary,
                     furi_string_get_cstr(temp_str));
                 furi_string_reset(temp_str);
                 // software info
                 furi_string_cat_str(temp_str, "SW Version: ");
-                for(int i = 0; i < 10; i++) {
+                for(int i = 0; i < (int)software_version->data[4]; i++) {
                     furi_string_cat_printf(temp_str, "%c", software_version->data[offset + i]);
                 }
                 widget_add_string_element(
@@ -83,13 +83,13 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     1,
                     27,
                     AlignLeft,
-                    AlignCenter,
+                    AlignTop,
                     FontSecondary,
                     furi_string_get_cstr(temp_str));
                 furi_string_reset(temp_str);
                 // manufacturer info
                 furi_string_cat_str(temp_str, "Manufacturer: ");
-                for(int i = 0; i < 10; i++) {
+                for(int i = 0; i < (int)manufacturer->data[4]; i++) {
                     furi_string_cat_printf(temp_str, "%c", manufacturer->data[offset + i]);
                 }
                 widget_add_string_element(
@@ -97,7 +97,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     1,
                     39,
                     AlignLeft,
-                    AlignCenter,
+                    AlignTop,
                     FontSecondary,
                     furi_string_get_cstr(temp_str));
 

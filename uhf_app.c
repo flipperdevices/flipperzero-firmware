@@ -2,6 +2,8 @@
 
 static const char* uhf_file_header = "Flipper UHF device";
 static const uint32_t uhf_file_version = 1;
+static const uint8_t bank_data_start = 20;
+static const uint8_t bank_data_length = 16;
 
 // empty callback
 void empty_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
@@ -50,10 +52,44 @@ bool uhf_save_read_data(UHFResponseData* uhf_response_data, Storage* storage, co
     if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) return false;
     // write header
     if(!flipper_format_write_header_cstr(file, uhf_file_header, uhf_file_version)) return false;
-    // write epc bank
-    if(!flipper_format_write_hex(
-           file, "EPC", uhf_response_data->head->data, uhf_response_data->head->length))
-        return false;
+    // write rfu data to file
+    UHFData* rfu_data = uhf_response_data_get_uhf_data(uhf_response_data, 1);
+    if(rfu_data->length) {
+        if(!flipper_format_write_hex(
+               file, "RFU", rfu_data->data + bank_data_start, bank_data_length))
+            return false;
+    } else {
+        if(!flipper_format_write_hex(file, "RFU", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
+    }
+
+    // write epc data to file
+    UHFData* epc_data = uhf_response_data_get_uhf_data(uhf_response_data, 2);
+    if(epc_data->length) {
+        if(!flipper_format_write_hex(
+               file, "EPC", epc_data->data + bank_data_start, bank_data_length))
+            return false;
+    } else {
+        if(!flipper_format_write_hex(file, "EPC", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
+    }
+
+    // write tid data to file
+    UHFData* tid_data = uhf_response_data_get_uhf_data(uhf_response_data, 3);
+    if(tid_data->length) {
+        if(!flipper_format_write_hex(
+               file, "TID", tid_data->data + bank_data_start, bank_data_length))
+            return false;
+    } else {
+        if(!flipper_format_write_hex(file, "TID", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
+    }
+    // write user data to file
+    UHFData* user_data = uhf_response_data_get_uhf_data(uhf_response_data, 4);
+    if(user_data->length) {
+        if(!flipper_format_write_hex(
+               file, "USER", user_data->data + bank_data_start, bank_data_length))
+            return false;
+    } else {
+        if(!flipper_format_write_hex(file, "USER", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
+    }
     furi_string_free(temp_str);
     flipper_format_free(file);
     return true;
@@ -217,7 +253,6 @@ int32_t uhf_app_main(void* ctx) {
 
     // enable 5v pin
     furi_hal_power_enable_otg();
-
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneVerify);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
