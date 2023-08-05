@@ -12,5 +12,5 @@ App(
     fap_description="Counter App with 4 counter for tabletop games",
     fap_author="@JadePossible & Roro",
     fap_version="1.0",
-    fap_weburl=https://github.com/JadePossible/Flipper-Multi-Counter,
+    fap_weburl="https://github.com/JadePossible/Flipper-Multi-Counter"
 )
