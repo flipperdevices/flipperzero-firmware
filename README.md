@@ -19,6 +19,8 @@ It's possible to roll the dice without using a **radioactive isotope**. Air cont
 
 <img src="https://github.com/nmrr/flipperzero-atomicdiceroller/blob/main/img/flipper2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-atomicdiceroller/blob/main/img/flipper3.png" width=25% height=25%>
 
+In the left corner, **counts per second** (cps) indicates the activity. In the right corner, **availiable dice rolls** are indicated. 64 rolls can be stored.
+
 ## Build the program
 
 Assuming the toolchain is already installed, copy **flipper_atomicdiceroller** directory to **applications_user**
