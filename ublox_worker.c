@@ -177,8 +177,14 @@ void ublox_worker_read_nav_messages(void* context) {
 	    ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
 	    FURI_LOG_E(TAG, "init GPS failed, try again");
 	}
+	uint32_t ticks = furi_get_tick();
 	// don't try constantly, no reason to
-	furi_delay_ms(500);
+	while (furi_get_tick() - ticks < furi_ms_to_ticks(500)) {
+	    if(ublox_worker->state != UbloxWorkerStateRead) {
+		return;
+	    }
+	}
+	//furi_delay_ms(500);
     }
 
     // clear data so we don't an error on startup

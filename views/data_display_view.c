@@ -200,6 +200,8 @@ static void data_display_draw_callback(Canvas* canvas, void* model) {
 
 static bool data_display_input_callback(InputEvent* event, void* context) {
     DataDisplayView* data_display = context;
+    // this method of getting the model breaks the whole app
+    //DataDisplayViewModel* model = view_get_model(data_display->view);
     bool consumed = false;
 
     if(event->type == InputTypeShort) {
@@ -208,11 +210,7 @@ static bool data_display_input_callback(InputEvent* event, void* context) {
                 data_display->callback(data_display->context, event->key);
             }
             consumed = true;
-        } else if(event->key == InputKeyOk) {
-            if(data_display->callback) {
-                data_display->callback(data_display->context, event->key);
-            }
-        } else if(event->key == InputKeyRight) {
+        } else if(event->key == InputKeyRight) {// && model->state != DataDisplayGPSNotFound) {
 	    if(data_display->callback) {
                 data_display->callback(data_display->context, event->key);
             }
