@@ -19,7 +19,7 @@ UHFDevice* uhf_device_alloc() {
     return uhf_device;
 }
 
-void picopass_device_set_name(UHFDevice* dev, const char* name) {
+void uhf_device_set_name(UHFDevice* dev, const char* name) {
     furi_assert(dev);
 
     strlcpy(dev->dev_name, name, UHF_DEV_NAME_MAX_LEN);
@@ -58,39 +58,47 @@ static bool uhf_device_save_file(
         UHFData* rfu_data = uhf_response_data_get_uhf_data(uhf_response_data, 1);
         if(rfu_data->length) {
             if(!flipper_format_write_hex(
-                   file, "RFU", rfu_data->data + bank_data_start, bank_data_length))
+                   file, UHF_RFU_BANK, rfu_data->data + bank_data_start, bank_data_length))
                 return false;
         } else {
-            if(!flipper_format_write_hex(file, "RFU", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
+            if(!flipper_format_write_hex(
+                   file, UHF_RFU_BANK, UHF_BANK_DOES_NOT_EXIST, bank_data_length))
+                return false;
         }
 
         // write epc data to file
         UHFData* epc_data = uhf_response_data_get_uhf_data(uhf_response_data, 2);
         if(epc_data->length) {
             if(!flipper_format_write_hex(
-                   file, "EPC", epc_data->data + bank_data_start, bank_data_length))
+                   file, UHF_EPC_BANK, epc_data->data + bank_data_start, bank_data_length))
                 return false;
         } else {
-            if(!flipper_format_write_hex(file, "EPC", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
+            if(!flipper_format_write_hex(
+                   file, UHF_EPC_BANK, UHF_BANK_DOES_NOT_EXIST, bank_data_length))
+                return false;
         }
 
         // write tid data to file
         UHFData* tid_data = uhf_response_data_get_uhf_data(uhf_response_data, 3);
         if(tid_data->length) {
             if(!flipper_format_write_hex(
-                   file, "TID", tid_data->data + bank_data_start, bank_data_length))
+                   file, UHF_TID_BANK, tid_data->data + bank_data_start, bank_data_length))
                 return false;
         } else {
-            if(!flipper_format_write_hex(file, "TID", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
+            if(!flipper_format_write_hex(
+                   file, UHF_TID_BANK, UHF_BANK_DOES_NOT_EXIST, bank_data_length))
+                return false;
         }
         // write user data to file
         UHFData* user_data = uhf_response_data_get_uhf_data(uhf_response_data, 4);
         if(user_data->length) {
             if(!flipper_format_write_hex(
-                   file, "USER", user_data->data + bank_data_start, bank_data_length))
+                   file, UHF_USER_BANK, user_data->data + bank_data_start, bank_data_length))
                 return false;
         } else {
-            if(!flipper_format_write_hex(file, "USER", UHF_BANK_DOES_NOT_EXIST, 1)) return false;
+            if(!flipper_format_write_hex(
+                   file, UHF_USER_BANK, UHF_BANK_DOES_NOT_EXIST, bank_data_length))
+                return false;
         }
         saved = true;
     } while(0);
@@ -111,75 +119,71 @@ bool uhf_device_save(UHFDevice* dev, const char* dev_name) {
 }
 // uncomment
 
-// static bool uhf_device_load_data(UHFDevice* dev, FuriString* path, bool show_dialog) {
-//     bool parsed = false;
-//     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
-//     FuriString* temp_str;
-//     temp_str = furi_string_alloc();
-//     bool deprecated_version = false;
+static bool uhf_device_load_data(UHFDevice* dev, FuriString* path, bool show_dialog) {
+    bool parsed = false;
+    FlipperFormat* file = flipper_format_file_alloc(dev->storage);
+    UHFResponseData* uhf_response_data = dev->dev_data;
+    // reset response list
+    uhf_response_data_reset(uhf_response_data);
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
+    bool deprecated_version = false;
 
-//     if(dev->loading_cb) {
-//         dev->loading_cb(dev->loading_cb_ctx, true);
-//     }
+    if(dev->loading_cb) {
+        dev->loading_cb(dev->loading_cb_ctx, true);
+    }
 
-//     do {
-//         if(!flipper_format_file_open_existing(file, furi_string_get_cstr(path))) break;
+    do {
+        if(!flipper_format_file_open_existing(file, furi_string_get_cstr(path))) break;
 
-//         // Read and verify file header
-//         uint32_t version = 0;
-//         if(!flipper_format_read_header(file, temp_str, &version)) break;
-//         if(furi_string_cmp_str(temp_str, uhf_file_header) || (version != uhf_file_version)) {
-//             deprecated_version = true;
-//             break;
-//         }
+        // Read and verify file header
+        uint32_t version = 0;
+        if(!flipper_format_read_header(file, temp_str, &version)) break;
+        if(furi_string_cmp_str(temp_str, uhf_file_header) || (version != uhf_file_version)) {
+            deprecated_version = true;
+            break;
+        }
 
-//         // // Parse header blocks
-//         // bool block_read = true;
-//         // for(size_t i = 0; i < 6; i++) {
-//         //     furi_string_printf(temp_str, "Block %d", i);
-//         //     if(!flipper_format_read_hex(
-//         //            file, furi_string_get_cstr(temp_str), AA1[i].data, PICOPASS_BLOCK_LEN)) {
-//         //         block_read = false;
-//         //         break;
-//         //     }
-//         // }
+        // Parse RFU Bank
+        UHFData* rfu_bank = uhf_response_data_get_uhf_data(uhf_response_data, 0);
+        if(!flipper_format_read_hex(file, UHF_RFU_BANK, rfu_bank->data, bank_data_length)) break;
 
-//         // size_t app_limit = AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[0];
-//         // // Fix for unpersonalized cards that have app_limit set to 0xFF
-//         // if(app_limit > PICOPASS_MAX_APP_LIMIT) app_limit = PICOPASS_MAX_APP_LIMIT;
-//         // for(size_t i = 6; i < app_limit; i++) {
-//         //     furi_string_printf(temp_str, "Block %d", i);
-//         //     if(!flipper_format_read_hex(
-//         //            file, furi_string_get_cstr(temp_str), AA1[i].data, PICOPASS_BLOCK_LEN)) {
-//         //         block_read = false;
-//         //         break;
-//         //     }
-//         // }
-//         // if(!block_read) break;
+        rfu_bank->length = bank_data_length;
 
-//         // if(picopass_device_parse_credential(AA1, pacs) != ERR_NONE) break;
-//         // if(picopass_device_parse_wiegand(pacs->credential, &pacs->record) != ERR_NONE) break;
+        // Parse EPC Bank
+        UHFData* epc_bank = uhf_response_data_add_new_uhf_data(uhf_response_data);
+        if(!flipper_format_read_hex(file, UHF_EPC_BANK, epc_bank->data, bank_data_length)) break;
+        epc_bank->length = bank_data_length;
 
-//         parsed = true;
-//     } while(false);
+        // Parse TID Bank
+        UHFData* tid_bank = uhf_response_data_add_new_uhf_data(uhf_response_data);
+        if(!flipper_format_read_hex(file, UHF_TID_BANK, tid_bank->data, bank_data_length)) break;
+        tid_bank->length = bank_data_length;
 
-//     if(dev->loading_cb) {
-//         dev->loading_cb(dev->loading_cb_ctx, false);
-//     }
+        // Parse USER Bank
+        UHFData* user_bank = uhf_response_data_add_new_uhf_data(uhf_response_data);
+        if(!flipper_format_read_hex(file, UHF_USER_BANK, user_bank->data, bank_data_length)) break;
+        user_bank->length = bank_data_length;
+        parsed = true;
+    } while(false);
 
-//     if((!parsed) && (show_dialog)) {
-//         if(deprecated_version) {
-//             dialog_message_show_storage_error(dev->dialogs, "File format deprecated");
-//         } else {
-//             dialog_message_show_storage_error(dev->dialogs, "Can not parse\nfile");
-//         }
-//     }
+    if(dev->loading_cb) {
+        dev->loading_cb(dev->loading_cb_ctx, false);
+    }
 
-//     furi_string_free(temp_str);
-//     flipper_format_free(file);
+    if((!parsed) && (show_dialog)) {
+        if(deprecated_version) {
+            dialog_message_show_storage_error(dev->dialogs, "File format deprecated");
+        } else {
+            dialog_message_show_storage_error(dev->dialogs, "Can not parse\nfile");
+        }
+    }
 
-//     return parsed;
-// }
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+
+    return parsed;
+}
 
 // void picopass_device_clear(UHFDevice* dev) {
 //     furi_assert(dev);
@@ -200,34 +204,34 @@ void uhf_device_free(UHFDevice* uhf_dev) {
     free(uhf_dev);
 }
 
-// bool uhf_file_select(UHFDevice* dev) {
-//     furi_assert(dev);
+bool uhf_file_select(UHFDevice* dev) {
+    furi_assert(dev);
 
-//     FuriString* uhf_app_folder;
-//     uhf_app_folder = furi_string_alloc_set(STORAGE_APP_DATA_PATH_PREFIX);
+    FuriString* uhf_app_folder;
+    uhf_app_folder = furi_string_alloc_set(STORAGE_APP_DATA_PATH_PREFIX);
 
-//     DialogsFileBrowserOptions browser_options;
-//     dialog_file_browser_set_basic_options(&browser_options, UHF_APP_EXTENSION, &I_Nfc_10px);
-//     browser_options.base_path = STORAGE_APP_DATA_PATH_PREFIX;
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, UHF_APP_EXTENSION, &I_Nfc_10px);
+    browser_options.base_path = STORAGE_APP_DATA_PATH_PREFIX;
 
-//     bool res =
-//         dialog_file_browser_show(dev->dialogs, dev->load_path, uhf_app_folder, &browser_options);
+    bool res =
+        dialog_file_browser_show(dev->dialogs, dev->load_path, uhf_app_folder, &browser_options);
 
-//     furi_string_free(uhf_app_folder);
-//     if(res) {
-//         FuriString* filename;
-//         filename = furi_string_alloc();
-//         path_extract_filename(dev->load_path, filename, true);
-//         strncpy(dev->dev_name, furi_string_get_cstr(filename), UHF_DEV_NAME_MAX_LEN);
-//         res = uhf_device_load_data(dev, dev->load_path, true);
-//         if(res) {
-//             uhf_device_set_name(dev, dev->dev_name);
-//         }
-//         furi_string_free(filename);
-//     }
+    furi_string_free(uhf_app_folder);
+    if(res) {
+        FuriString* filename;
+        filename = furi_string_alloc();
+        path_extract_filename(dev->load_path, filename, true);
+        strncpy(dev->dev_name, furi_string_get_cstr(filename), UHF_DEV_NAME_MAX_LEN);
+        res = uhf_device_load_data(dev, dev->load_path, true);
+        if(res) {
+            uhf_device_set_name(dev, dev->dev_name);
+        }
+        furi_string_free(filename);
+    }
 
-//     return res;
-// }
+    return res;
+}
 
 // void uhf_device_data_clear(UHFDevice* dev_data) {
 //     for(size_t i = 0; i < PICOPASS_MAX_APP_LIMIT; i++) {

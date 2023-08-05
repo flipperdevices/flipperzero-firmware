@@ -70,6 +70,7 @@ UHFApp* uhf_alloc() {
 
     // device
     uhf_app->uhf_device = uhf_device_alloc();
+    // use same linked list
     uhf_app->uhf_device->dev_data = uhf_app->worker->response_data;
 
     // Open Notification record

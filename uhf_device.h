@@ -13,8 +13,15 @@
 #define PICOPASS_READER_DATA_MAX_SIZE 64
 #define PICOPASS_BLOCK_LEN 8
 #define PICOPASS_MAX_APP_LIMIT 32
-#define UHF_BANK_DOES_NOT_EXIST (uint8_t[]){0xFF}
-
+#define UHF_BANK_DOES_NOT_EXIST                                                                   \
+    (uint8_t[]) {                                                                                 \
+        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
+            0xFF                                                                                  \
+    }
+#define UHF_RFU_BANK "RFU"
+#define UHF_EPC_BANK "EPC"
+#define UHF_TID_BANK "TID"
+#define UHF_USER_BANK "USER"
 
 #define UHF_APP_EXTENSION ".uhf"
 // #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
