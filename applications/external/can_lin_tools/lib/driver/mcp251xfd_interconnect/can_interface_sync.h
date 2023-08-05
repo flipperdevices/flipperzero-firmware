@@ -86,13 +86,21 @@ eERRORRESULT can_interface_sync_transfer(
     uint8_t* rxData,
     size_t size);
 
-//********************************************************************************************************************
+/*! @brief CAN SPI de-initialization for the FLIPPER
+*
+* This function will be called at driver de-initialization to de-initialize the interface driver SPI
+* @param[in] *pComp Is the pointed structure of the device that call this function
+* @return Returns an #eERRORRESULT value enum
+*/
+eERRORRESULT can_interface_sync_deinit(MCP251XFD* pComp);
 
-/*! @brief CAN get millisecond
+    //********************************************************************************************************************
+
+    /*! @brief CAN get millisecond
  *
  * This function will be called when the driver needs to get current millisecond
  */
-uint32_t can_interface_sync_get_currentms(void);
+    uint32_t can_interface_sync_get_currentms(void);
 
 /*! @brief CAN compute CRC16-CMS
  *

@@ -1,6 +1,6 @@
 #include "show_device.h"
 #include "Conf_MCP251XFD.h"
-#include "can_function.h"
+#include "can0_function.h"
 #include "can_interface_sync.h"
 #include <furi.h>
 

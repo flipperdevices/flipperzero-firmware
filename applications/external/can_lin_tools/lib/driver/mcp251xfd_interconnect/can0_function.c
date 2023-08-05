@@ -1,64 +1,11 @@
-#include "can_function.h"
+#include "can0_function.h"
 #include "can_interface_sync.h"
 #include "mcp251xfd_spi.h"
 #include "mpc251xfd_user_driver_data.h"
 
-#define TAG "CANEXTFunctions"
+#define TAG "CAN0_Functions"
 
-// //! Enum Ext2 counters
-// typedef enum
-// {
-//   SID_0x000_to_0x1FF = 0,
-//   SID_0x200_to_0x3FF,
-//   SID_0x400_to_0x5FF,
-//   SID_0x600_to_0x7FF,
-//   EID_0x00000_to_0x07FFF,
-//   EID_0x08000_to_0x0FFFF,
-//   EID_0x10000_to_0x17FFF,
-//   EID_0x18000_to_0x1FFFF,
-//   EID_0x20000_to_0x27FFF,
-//   EID_0x28000_to_0x2FFFF,
-//   EID_0x30000_to_0x37FFF,
-//   EID_0x38000_to_0x3FFFF,
-//   EXT2_ALL,
-//   EXT2_COUNTERS_COUNT     // Stay last
-// } eExt2Counters;
-
-// typedef union Ext2MessagesStats
-// {
-//   uint8_t Bytes[8];
-//   struct
-//   {
-//     uint32_t MessagesPerSecond;
-//     uint32_t ByteCount;
-//   };
-// } Ext2MessagesStats;
-
-//bool Ext2ModulePresent = false;                   //! True if a MCP251XFD is present on EXT2 and configured
-//Ext2MessagesStats Ext2Stats[EXT2_COUNTERS_COUNT]; //! Ext2 message counter for the MPS (Messages Per Second) and byte count
-//uint32_t Ext2SequenceCounter = 0;                 //! Ext2 sequence counter
-
-//=============================================================================
-// SID/EID to counter index
-//=============================================================================
-// static eExt2Counters SIDEIDtoCounterIndex(uint32_t sideid)
-// {
-//   if (sideid <   0x200) return SID_0x000_to_0x1FF;
-//   if (sideid <   0x400) return SID_0x200_to_0x3FF;
-//   if (sideid <   0x600) return SID_0x400_to_0x5FF;
-//   if (sideid <   0x800) return SID_0x600_to_0x7FF;
-//   if (sideid < 0x08000) return EID_0x00000_to_0x07FFF;
-//   if (sideid < 0x10000) return EID_0x08000_to_0x0FFFF;
-//   if (sideid < 0x18000) return EID_0x10000_to_0x17FFF;
-//   if (sideid < 0x20000) return EID_0x18000_to_0x1FFFF;
-//   if (sideid < 0x28000) return EID_0x20000_to_0x27FFF;
-//   if (sideid < 0x30000) return EID_0x28000_to_0x2FFFF;
-//   if (sideid < 0x38000) return EID_0x30000_to_0x37FFF;
-//   return EID_0x38000_to_0x3FFFF;
-// }
-//**********************************************************************************************************************************************************
-
-const char OpModeStr[8][25 + 1 /* \0 */] = {
+const char op_mode_str[8][25 + 1 /* \0 */] = {
     "normal CAN FD mode",
     "sleep mode",
     "internal loopback mode",
@@ -69,38 +16,8 @@ const char OpModeStr[8][25 + 1 /* \0 */] = {
     "restricted operation mode",
 };
 
-const char* AutoRTRmessage = "DEMO";
-// //-----------------------------------------------------------------------------
-
 //=============================================================================
-// All configuration structure of the MCP251XFD on the Ext1
-//=============================================================================
-// MCP251XFD MCP251XFD_Ext1 =
-// {
-//   .UserDriverData = NULL,
-//   //--- Driver configuration ---
-//   .DriverConfig   = MCP251XFD_DRIVER_NORMAL_USE
-//                   | MCP251XFD_DRIVER_SAFE_RESET
-//                   | MCP251XFD_DRIVER_USE_READ_WRITE_CRC
-//                   | MCP251XFD_DRIVER_INIT_SET_RAM_AT_0
-//                   | MCP251XFD_DRIVER_CLEAR_BUFFER_BEFORE_READ,
-//   //--- IO configuration ---
-//   .GPIOsOutState   = MCP251XFD_GPIO0_LOW | MCP251XFD_GPIO1_HIGH,
-//   //--- Interface driver call functions ---
-//   .SPI_ChipSelect  = MCP252XFD_SPI_CS_EXT1,
-//   .InterfaceDevice = &mcp251xfd_spi_bus_handle_external,
-//   .fnSPI_Init      = MCP251XFD_InterfaceInit,
-//   .fnSPI_Transfer  = MCP251XFD_InterfaceTransfer,
-//   //--- Time call function ---
-//   .fnGetCurrentms  = GetCurrentms,
-//   //--- CRC16-USB call function ---
-//   .fnComputeCRC16  = ComputeCRC16,
-//   //--- Interface clocks ---
-//   .SPIClockSpeed   = 2000000, // 20MHz
-// };
-
-//=============================================================================
-// All configuration structure of the MCP251XFD on the Ext2
+// All configuration structure of the MCP251XFD on the CAN0
 //=============================================================================
 MCP251XFD_BitTimeStats can0_bt_stats;
 uint32_t can0_sysclk;
@@ -156,7 +73,6 @@ MCP251XFD can0 = {
     .SPIClockSpeed = 4000000, // 10MHz
 };
 
-
 // MCP251XFD_RAMInfos Ext2_TEF_RAMInfos;
 // MCP251XFD_RAMInfos Ext2_TXQ_RAMInfos;
 // MCP251XFD_RAMInfos Ext2_FIFOs_RAMInfos[MCP2517FD_EXT2_FIFO_COUNT - 2];
@@ -164,7 +80,7 @@ MCP251XFD can0 = {
 // MCP251XFD_FIFO MCP2517FD_Ext2_FIFOlist[MCP2517FD_EXT2_FIFO_COUNT] =
 // {
 //   { .Name = MCP251XFD_TEF   , .Size = MCP251XFD_FIFO_20_MESSAGE_DEEP,                                                                                                                                                              .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_OBJ, .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_EVENT_FIFO_NOT_EMPTY_INT               , .RAMInfos = &Ext2_TEF_RAMInfos      , },
-//   { .Name = MCP251XFD_TXQ   , .Size = MCP251XFD_FIFO_12_MESSAGE_DEEP, .Payload = MCP251XFD_PAYLOAD_8BYTE,                                       .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_TXQ_RAMInfos      , }, // Buttons + Events menu
+//   { .Name = MCP251XFD_TXQ   , .Size = MCP251XFD_FIFO_12_MESSAGE_DEEP, .Payload = MCP251XFD_PAYLOAD_8BYTE,                                       .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_TXQ_RAMInfos      , }, // Buttons + events menu
 
 //   { .Name = MCP251XFD_FIFO1 , .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 0], }, // SID: 0x000..0x1FF ; No EID
 //   { .Name = MCP251XFD_FIFO2 , .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 1], }, // SID: 0x200..0x3FF ; No EID
@@ -194,11 +110,11 @@ MCP251XFD can0 = {
 
 //   { .Name = MCP251XFD_FIFO25, .Size = MCP251XFD_FIFO_1_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY30, .ControlFlags = MCP251XFD_FIFO_AUTO_RTR_RESPONSE   , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT, .RAMInfos = &Ext2_FIFOs_RAMInfos[24], }, // Response for RTR
 //   { .Name = MCP251XFD_FIFO26, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[25], }, // SOF-CLKO Ext1 - Counts per second
-//   { .Name = MCP251XFD_FIFO27, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[26], }, // SOF-CLKO Ext2 - Counts per second
+//   { .Name = MCP251XFD_FIFO27, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[26], }, // SOF-CLKO CAN0 - Counts per second
 //   { .Name = MCP251XFD_FIFO28, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[27], }, // Ext1: FPS + Data count per second
 //   { .Name = MCP251XFD_FIFO29, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY20, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[28], }, // Ext1: Error Message
-//   { .Name = MCP251XFD_FIFO30, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[29], }, // Ext2: FPS + Data count per second
-//   { .Name = MCP251XFD_FIFO31, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY20, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[30], }, // Ext2: Error Message
+//   { .Name = MCP251XFD_FIFO30, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[29], }, // CAN0: FPS + Data count per second
+//   { .Name = MCP251XFD_FIFO31, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY20, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[30], }, // CAN0: Error Message
 // };
 
 // MCP251XFD_Filter MCP2517FD_Ext2_FilterList[MCP2517FD_EXT2_FILTER_COUNT] =
@@ -363,168 +279,168 @@ MCP251XFD_Filter can_filter_list[CAN0_FILTER_COUNT] = {
     }, // 0x600..0x7FF
 };
 
-static bool TransmitEvent = false;
-static bool ReceiveEvent = false;
+static bool transmit_event = false;
+static bool receive_event = false;
 
 //**********************************************************************************************************************************************************
 //=============================================================================
-// Configure the MCP251XFD device on EXT2
+// Configure the MCP251XFD device on CAN0
 //=============================================================================
-eERRORRESULT ConfigureMCP251XFDDeviceOnEXT2(void) {
+eERRORRESULT can0_function_device_init_can20(uint32_t nominal_bitrate) {
+    can0_config.NominalBitrate = nominal_bitrate;
 
     //--- Initialize Int pins or GPIOs ---
     can_interface_sync_pin_init(CAN0);
     can_interface_sync_int0_gpio0_pin_init(CAN0);
     can_interface_sync_int1_gpio1_pin_init(CAN0);
 
-    // //--- Configure CLKO pin from EXT2 as input ---
-    // ioport_set_pin_dir(EXT2_PIN_7, IOPORT_DIR_INPUT);
-    // ioport_set_pin_mode(EXT2_PIN_7, IOPORT_MODE_PULLUP);
-    // ioport_set_pin_sense_mode(EXT2_PIN_7, IOPORT_SENSE_FALLING);
-    // // Enable interrupt
-    // if (pio_handler_set_pin(EXT2_PIN_7, PIO_IT_FALL_EDGE, &MCP251XFD_CLKO_Handler) != 0) return ERR__CONFIGURATION;
-    // pio_enable_pin_interrupt(EXT2_PIN_7);
-
-    //--- Configure module on Ext2 ---
-    eERRORRESULT ErrorExt2 = ERR__NO_DEVICE_DETECTED;
-    ErrorExt2 = Init_MCP251XFD(CAN0, &can0_config);
-    if(ErrorExt2 == ERR_OK) {
-        ErrorExt2 = MCP251XFD_ConfigureTimeStamp(
+    //--- Configure module on CAN0 ---
+    eERRORRESULT error_can = ERR__NO_DEVICE_DETECTED;
+    error_can = Init_MCP251XFD(CAN0, &can0_config);
+    if(error_can == ERR_OK) {
+        error_can = MCP251XFD_ConfigureTimeStamp(
             CAN0, true, MCP251XFD_TS_CAN20_SOF_CANFD_SOF, TIMESTAMP_TICK(can0_sysclk), true);
-        if(ErrorExt2 == ERR_OK)
-            ErrorExt2 = MCP251XFD_ConfigureFIFOList(CAN0, &can0_fifo_list[0], CAN0_FIFO_COUNT);
-        if(ErrorExt2 == ERR_OK)
-            ErrorExt2 = MCP251XFD_ConfigureFilterList(
+        if(error_can == ERR_OK)
+            error_can = MCP251XFD_ConfigureFIFOList(CAN0, &can0_fifo_list[0], CAN0_FIFO_COUNT);
+        if(error_can == ERR_OK)
+            error_can = MCP251XFD_ConfigureFilterList(
                 CAN0, MCP251XFD_D_NET_FILTER_DISABLE, &can_filter_list[0], CAN0_FILTER_COUNT);
-        if(ErrorExt2 == ERR_OK) ErrorExt2 = MCP251XFD_StartCAN20(CAN0);
-        //ErrorExt2 = MCP251XFD_RequestOperationMode(CANEXT2, MCP251XFD_NORMAL_CAN20_MODE, false);
-        //ErrorExt2 = MCP251XFD_RequestOperationMode(CANEXT2, MCP251XFD_INTERNAL_LOOPBACK_MODE, false);
-        //ErrorExt2 = MCP251XFD_RequestOperationMode(CANEXT2, MCP251XFD_EXTERNAL_LOOPBACK_MODE, false);
-        //ErrorExt2 = MCP251XFD_RequestOperationMode(CANEXT2, MCP251XFD_LISTEN_ONLY_MODE, false);
+        if(error_can == ERR_OK) error_can = MCP251XFD_StartCAN20(CAN0);
+        //error_can = MCP251XFD_RequestOperationMode(CANEXT2, MCP251XFD_NORMAL_CAN20_MODE, false);
+        //error_can = MCP251XFD_RequestOperationMode(CANEXT2, MCP251XFD_INTERNAL_LOOPBACK_MODE, false);
+        //error_can = MCP251XFD_RequestOperationMode(CANEXT2, MCP251XFD_EXTERNAL_LOOPBACK_MODE, false);
+        //error_can = MCP251XFD_RequestOperationMode(CAN0, mode, false);
     }
-    return ErrorExt2;
+    return error_can;
 }
 
 //=============================================================================
-// Transmit messages to MCP251XFD device on EXT2 no irq
+// Deinit the MCP251XFD device on CAN0
 //=============================================================================
-eERRORRESULT TransmitMessageFromEXT2_No_IRQ(
-    uint32_t messageID,
-    uint32_t* messageSEQ,
-    setMCP251XFD_MessageCtrlFlags controlFlags,
-    eMCP251XFD_DataLength dlc,
-    uint8_t* payloadData,
-    bool flush) {
-    eERRORRESULT ErrorExt2 = ERR_OK;
-    eMCP251XFD_FIFOstatus FIFOstatus = 0;
-    setMCP251XFD_InterruptOnFIFO InterruptOnFIFO = 0;
-    ErrorExt2 = MCP251XFD_GetTransmitPendingInterruptStatusOfAllFIFO(
-        CAN0, &InterruptOnFIFO); // Get all FIFO status
-    if(ErrorExt2 != ERR_OK) return ErrorExt2;
-    for(eMCP251XFD_FIFO zFIFO = 0; zFIFO < MCP251XFD_TX_FIFO_MAX;
-        zFIFO++) // For each transmit FIFO, TXQ but not TEF
-        if((InterruptOnFIFO & (1 << zFIFO)) > 0) // If an Interrupt is flagged
-        {
-            ErrorExt2 = MCP251XFD_GetFIFOStatus(
-                CAN0, zFIFO, &FIFOstatus); // Get the status of the flagged FIFO
-            if(ErrorExt2 != ERR_OK) return ErrorExt2;
-            if((FIFOstatus & MCP251XFD_TX_FIFO_NOT_FULL) > 0) // Check FIFO not empty
-            {
-                eMCP251XFD_Devices Dev = MCP2517FD;
-                MCP251XFD_GetDeviceID(CAN0, &Dev, NULL, NULL);
-                uint32_t MaxSequence = MCP2518FD_SEQUENCE_MAX;
-                if(Dev == MCP2517FD) MaxSequence = MCP2517FD_SEQUENCE_MAX;
+eERRORRESULT can0_function_device_deinit(void) {
+    return can_interface_sync_deinit(CAN0);
+}
 
-                MCP251XFD_CANMessage TansmitMessage;
+//=============================================================================
+// Transmit messages to MCP251XFD device on CAN0 no irq
+//=============================================================================
+eERRORRESULT can0_function_transmit_msg_no_irq(
+    uint32_t message_id,
+    uint32_t* message_seq,
+    setMCP251XFD_MessageCtrlFlags control_flags,
+    eMCP251XFD_DataLength dlc,
+    uint8_t* payload_data,
+    bool flush) {
+    eERRORRESULT error_can = ERR_OK;
+    eMCP251XFD_FIFOstatus fifo_status = 0;
+    setMCP251XFD_InterruptOnFIFO interrupt_on_fifo = 0;
+    error_can = MCP251XFD_GetTransmitPendingInterruptStatusOfAllFIFO(
+        CAN0, &interrupt_on_fifo); // Get all FIFO status
+    if(error_can != ERR_OK) return error_can;
+    for(eMCP251XFD_FIFO z_fifo = 0; z_fifo < MCP251XFD_TX_FIFO_MAX;
+        z_fifo++) // For each transmit FIFO, TXQ but not TEF
+        if((interrupt_on_fifo & (1 << z_fifo)) > 0) // If an Interrupt is flagged
+        {
+            error_can = MCP251XFD_GetFIFOStatus(
+                CAN0, z_fifo, &fifo_status); // Get the status of the flagged FIFO
+            if(error_can != ERR_OK) return error_can;
+            if((fifo_status & MCP251XFD_TX_FIFO_NOT_FULL) > 0) // Check FIFO not empty
+            {
+                eMCP251XFD_Devices dev = MCP2517FD;
+                MCP251XFD_GetDeviceID(CAN0, &dev, NULL, NULL);
+                uint32_t max_sequence = MCP2518FD_SEQUENCE_MAX;
+                if(dev == MCP2517FD) max_sequence = MCP2517FD_SEQUENCE_MAX;
+
+                MCP251XFD_CANMessage can_msg;
                 //***** Fill the message as you want *****
-                TansmitMessage.MessageID = messageID;
-                TansmitMessage.MessageSEQ = *messageSEQ;
-                (*messageSEQ)++;
-                if(*messageSEQ > MaxSequence)
-                    *messageSEQ =
+                can_msg.MessageID = message_id;
+                can_msg.MessageSEQ = *message_seq;
+                (*message_seq)++;
+                if(*message_seq > max_sequence)
+                    *message_seq =
                         0; // Roll over the sequence value (maximum differ if it's a MCP2517FD or a MCP2518FD)
-                TansmitMessage.ControlFlags = controlFlags;
-                TansmitMessage.DLC = dlc;
-                TansmitMessage.PayloadData = payloadData;
-                ErrorExt2 = MCP251XFD_TransmitMessageToFIFO(
-                    CAN0, &TansmitMessage, zFIFO, flush); // Send message and flush
+                can_msg.ControlFlags = control_flags;
+                can_msg.DLC = dlc;
+                can_msg.PayloadData = payload_data;
+                error_can = MCP251XFD_TransmitMessageToFIFO(
+                    CAN0, &can_msg, z_fifo, flush); // Send message and flush
             }
         }
-    return ErrorExt2;
+    return error_can;
 }
 
 //=============================================================================
-// Transmit a message to MCP251XFD device on EXT2
+// Transmit a message to MCP251XFD device on CAN0
 //=============================================================================
-eERRORRESULT TransmitMessageToEXT2(
-    uint32_t messageID,
-    uint32_t* messageSEQ,
-    setMCP251XFD_MessageCtrlFlags controlFlags,
+eERRORRESULT can0_function_transmit_msg(
+    uint32_t message_id,
+    uint32_t* message_seq,
+    setMCP251XFD_MessageCtrlFlags control_flags,
     eMCP251XFD_DataLength dlc,
-    uint8_t* payloadData,
-    eMCP251XFD_FIFO toFIFO,
+    uint8_t* payload_data,
+    eMCP251XFD_FIFO to_fifo,
     bool flush) {
     // if (Ext2ModulePresent == false) return ERR_OK;
-    TransmitEvent = false;
-    MCP251XFD_CANMessage CanMessage;
+    transmit_event = false;
+    MCP251XFD_CANMessage can_msg;
 
-    eMCP251XFD_Devices Dev = MCP2517FD;
-    MCP251XFD_GetDeviceID(CAN0, &Dev, NULL, NULL);
-    uint32_t MaxSequence = MCP2518FD_SEQUENCE_MAX;
-    if(Dev == MCP2517FD) MaxSequence = MCP2517FD_SEQUENCE_MAX;
+    eMCP251XFD_Devices dev = MCP2517FD;
+    MCP251XFD_GetDeviceID(CAN0, &dev, NULL, NULL);
+    uint32_t max_sequence = MCP2518FD_SEQUENCE_MAX;
+    if(dev == MCP2517FD) max_sequence = MCP2517FD_SEQUENCE_MAX;
 
     //--- Create message ---
-    CanMessage.MessageID = messageID;
-    CanMessage.MessageSEQ = *messageSEQ;
-    (*messageSEQ)++;
-    if(*messageSEQ > MaxSequence)
-        *messageSEQ =
+    can_msg.MessageID = message_id;
+    can_msg.MessageSEQ = *message_seq;
+    (*message_seq)++;
+    if(*message_seq > max_sequence)
+        *message_seq =
             0; // Roll over the sequence value (maximum differ if it's a MCP2517FD or a MCP2518FD)
-    CanMessage.ControlFlags = controlFlags;
-    CanMessage.DLC = dlc;
-    CanMessage.PayloadData = payloadData;
-    return MCP251XFD_TransmitMessageToFIFO(CAN0, &CanMessage, toFIFO, flush);
+    can_msg.ControlFlags = control_flags;
+    can_msg.DLC = dlc;
+    can_msg.PayloadData = payload_data;
+    return MCP251XFD_TransmitMessageToFIFO(CAN0, &can_msg, to_fifo, flush);
 }
 
 //=============================================================================
-// Receive a message from MCP251XFD device on EXT2
+// Receive a message from MCP251XFD device on CAN0
 //=============================================================================
-eERRORRESULT ReceiveMessageFromEXT2(
+eERRORRESULT can0_function_receive_msg(
     MCP251XFD* pComp,
     bool* receive_event,
     MCP251XFD_CANMessage* msg,
     eMCP251XFD_PayloadSize payload_size,
     uint32_t* msg_time_stamp) {
     //if (Ext2ModulePresent == false) return ERR_OK;
-    eERRORRESULT ErrorExt2 = ERR_OK;
+    eERRORRESULT error_can = ERR_OK;
 
 #ifdef APP_USE_EXT2_INT1_PIN
-    eMCP251XFD_FIFO FIFOname;
-    eMCP251XFD_FIFOstatus FIFOstatus = 0;
+    eMCP251XFD_FIFO fifo_name;
+    eMCP251XFD_FIFOstatus fifo_status = 0;
     if((ioport_get_pin_level(EXT2_PIN_14) == 0) ||
-       (ReceiveEvent ==
+       (receive_event ==
         true)) // Check INT1 pin status of the MCP251XFD (Active low state), this pin is configured for all receive FIFO not empty
     {
-        ErrorExt2 =
-            MCP251XFD_GetCurrentReceiveFIFONameAndStatusInterrupt(pComp, &FIFOname, &FIFOstatus);
-        if(ErrorExt2 != ERR_OK)
-            return ErrorExt2; // First get which FIFO set interrupt and its status
-        if(((FIFOstatus & MCP251XFD_RX_FIFO_NOT_EMPTY) > 0) &&
-           (FIFOname != MCP251XFD_NO_FIFO)) // Second check FIFO not empty
+        error_can =
+            MCP251XFD_GetCurrentReceiveFIFONameAndStatusInterrupt(pComp, &fifo_name, &fifo_status);
+        if(error_can != ERR_OK)
+            return error_can; // First get which FIFO set interrupt and its status
+        if(((fifo_status & MCP251XFD_RX_FIFO_NOT_EMPTY) > 0) &&
+           (fifo_name != MCP251XFD_NO_FIFO)) // Second check FIFO not empty
 #else
-    eMCP251XFD_FIFOstatus FIFOstatus = 0;
-    setMCP251XFD_InterruptOnFIFO InterruptOnFIFO = 0;
-    ErrorExt2 = MCP251XFD_GetReceivePendingInterruptStatusOfAllFIFO(
-        pComp, &InterruptOnFIFO); // Get all FIFO status
-    if(ErrorExt2 != ERR_OK) return ErrorExt2;
-    for(eMCP251XFD_FIFO FIFOname = 1; FIFOname < MCP251XFD_FIFO_MAX;
-        FIFOname++) // For each receive FIFO but not TEF, TXQ
-        if((InterruptOnFIFO & (1 << FIFOname)) > 0) // If an Interrupt is flagged
+    eMCP251XFD_FIFOstatus fifo_status = 0;
+    setMCP251XFD_InterruptOnFIFO interrupt_on_fifo = 0;
+    error_can = MCP251XFD_GetReceivePendingInterruptStatusOfAllFIFO(
+        pComp, &interrupt_on_fifo); // Get all FIFO status
+    if(error_can != ERR_OK) return error_can;
+    for(eMCP251XFD_FIFO fifo_name = 1; fifo_name < MCP251XFD_FIFO_MAX;
+        fifo_name++) // For each receive FIFO but not TEF, TXQ
+        if((interrupt_on_fifo & (1 << fifo_name)) > 0) // If an Interrupt is flagged
         {
-            ErrorExt2 = MCP251XFD_GetFIFOStatus(
-                pComp, FIFOname, &FIFOstatus); // Get the status of the flagged FIFO
-            if(ErrorExt2 != ERR_OK) return ErrorExt2;
-            if((FIFOstatus & MCP251XFD_RX_FIFO_NOT_EMPTY) >
+            error_can = MCP251XFD_GetFIFOStatus(
+                pComp, fifo_name, &fifo_status); // Get the status of the flagged FIFO
+            if(error_can != ERR_OK) return error_can;
+            if((fifo_status & MCP251XFD_RX_FIFO_NOT_EMPTY) >
                0) // Check FIFO not empty and no error while retrieve FIFO status
 #endif
 
@@ -532,54 +448,54 @@ eERRORRESULT ReceiveMessageFromEXT2(
             // uint32_t MessageTimeStamp = 0;
             // uint8_t RxPayloadData[8];                                                            // In the default demo configuration, all the FIFO have 8 bytes of payload
             // MCP251XFD_CANMessage ReceivedMessage;
-            // ReceivedMessage.PayloadData = &RxPayloadData[0];                                     // Add receive payload data pointer to the message structure that will be received
-            //ErrorExt2 = MCP251XFD_ReceiveMessageFromFIFO(CANEXT2, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp, FIFOname);
-            // if (ErrorExt2 == ERR_OK)
+            // ReceivedMessage.payload_data = &RxPayloadData[0];                                     // Add receive payload data pointer to the message structure that will be received
+            //error_can = MCP251XFD_ReceiveMessageFromFIFO(CANEXT2, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp, fifo_name);
+            // if (error_can == ERR_OK)
             // {
             //   //***** Do what you want with the message *****
 
             //   //*** Processing for the demo ***
-            //   eExt2Counters Counter = SIDEIDtoCounterIndex(ReceivedMessage.MessageID);
+            //   eExt2Counters Counter = SIDEIDtoCounterIndex(ReceivedMessage.message_id);
             //   Ext2Stats[Counter].MessagesPerSecond++;
             //   Ext2Stats[Counter].ByteCount += MCP251XFD_DLCToByte(ReceivedMessage.DLC, false);
 
             //   Ext2Stats[EXT2_ALL].MessagesPerSecond++;
             //   Ext2Stats[EXT2_ALL].ByteCount += MCP251XFD_DLCToByte(ReceivedMessage.DLC, false);
             // }
-            ErrorExt2 = MCP251XFD_ReceiveMessageFromFIFO(
-                pComp, msg, payload_size, msg_time_stamp, FIFOname);
+            error_can = MCP251XFD_ReceiveMessageFromFIFO(
+                pComp, msg, payload_size, msg_time_stamp, fifo_name);
             *receive_event = true;
         }
     }
     //*receive_event = false;
-    return ErrorExt2;
+    return error_can;
 }
 
 //=============================================================================
-// Check device interrupt (INT) on EXT2
+// Check device interrupt (INT) on CAN0
 //=============================================================================
-void CheckDeviceINTOnEXT2(void) {
+void can0_function_device_check_irq(void) {
     //if (Ext2ModulePresent == false) return;
-    eERRORRESULT ErrorExt2;
-    setMCP251XFD_CRCEvents CRCEvent;
-    eMCP251XFD_OperationMode OpMode;
-    setMCP251XFD_InterruptEvents Events;
-    setMCP251XFD_ECCEvents ECCEvent;
+    eERRORRESULT error_can;
+    setMCP251XFD_CRCEvents crc_event;
+    eMCP251XFD_OperationMode op_mode;
+    setMCP251XFD_InterruptEvents events;
+    setMCP251XFD_ECCEvents ecc_event;
 
 #ifdef APP_USE_EXT2_INT_PIN
     if(ioport_get_pin_level(EXT2_PIN_IRQ) != 0)
         return; // Check INT pin status of the MCP251XFD (Active low state)
 #endif
-    bool TransmitError = true;
-    setMCP251XFD_InterruptOnFIFO InterruptOnFIFO = 0;
-    eMCP251XFD_InterruptFlagCode InterruptCode = 0;
-    ErrorExt2 = MCP251XFD_GetCurrentInterruptEvent(
-        CAN0, &InterruptCode); // Get the current Interrupt event
-    if(ErrorExt2 == ERR_OK) // If no errors, process
+    bool transmit_error = true;
+    setMCP251XFD_InterruptOnFIFO interrupt_on_fifo = 0;
+    eMCP251XFD_InterruptFlagCode interrupt_code = 0;
+    error_can = MCP251XFD_GetCurrentInterruptEvent(
+        CAN0, &interrupt_code); // Get the current Interrupt event
+    if(error_can == ERR_OK) // If no errors, process
     {
-        switch(InterruptCode) {
+        switch(interrupt_code) {
         case MCP251XFD_ERROR_INTERRUPT: // CAN Bus Error Interrupt
-            FURI_LOG_E(TAG, "Ext2: CAN Bus Error");
+            FURI_LOG_E(TAG, "CAN0: CAN Bus Error");
             MCP251XFD_ClearInterruptEvents(CAN0, MCP251XFD_INT_BUS_ERROR_EVENT);
             break;
 
@@ -589,42 +505,42 @@ void CheckDeviceINTOnEXT2(void) {
             break;
 
         case MCP251XFD_RECEIVE_FIFO_OVF: // Receive FIFO Overflow Interrupt
-            MCP251XFD_GetReceiveOverflowInterruptStatusOfAllFIFO(CAN0, &InterruptOnFIFO);
-            for(eMCP251XFD_FIFO zFIFO = 1; zFIFO < MCP251XFD_RX_FIFO_MAX;
-                zFIFO++) // For each receive FIFO but not the TEF
-                if((InterruptOnFIFO & (1 << zFIFO)) > 0) // If the Overflow Interrupt is flagged
+            MCP251XFD_GetReceiveOverflowInterruptStatusOfAllFIFO(CAN0, &interrupt_on_fifo);
+            for(eMCP251XFD_FIFO z_fifo = 1; z_fifo < MCP251XFD_RX_FIFO_MAX;
+                z_fifo++) // For each receive FIFO but not the TEF
+                if((interrupt_on_fifo & (1 << z_fifo)) > 0) // If the Overflow Interrupt is flagged
                 {
                     FURI_LOG_E(
                         TAG,
-                        "Ext2: Receive FIFO%u Overflow",
-                        (unsigned int)zFIFO); // Display an error for this FIFO
-                    MCP251XFD_ClearFIFOOverflowEvent(CAN0, zFIFO); // Clear the flag of this FIFO
+                        "CAN0: Receive FIFO%u Overflow",
+                        (unsigned int)z_fifo); // Display an error for this FIFO
+                    MCP251XFD_ClearFIFOOverflowEvent(CAN0, z_fifo); // Clear the flag of this FIFO
                 }
             break;
 
         case MCP251XFD_TRANSMIT_ATTEMPT: // Transmit Attempt Interrupt
-            MCP251XFD_GetTransmitAttemptInterruptStatusOfAllFIFO(CAN0, &InterruptOnFIFO);
-            for(eMCP251XFD_FIFO zFIFO = 0; zFIFO < MCP251XFD_TX_FIFO_MAX;
-                zFIFO++) // For each transmit FIFO
-                if((InterruptOnFIFO & (1 << zFIFO)) > 0) // If the Attempt Interrupt is flagged
+            MCP251XFD_GetTransmitAttemptInterruptStatusOfAllFIFO(CAN0, &interrupt_on_fifo);
+            for(eMCP251XFD_FIFO z_fifo = 0; z_fifo < MCP251XFD_TX_FIFO_MAX;
+                z_fifo++) // For each transmit FIFO
+                if((interrupt_on_fifo & (1 << z_fifo)) > 0) // If the Attempt Interrupt is flagged
                 {
                     FURI_LOG_E(
                         TAG,
-                        "Ext2: Transmit FIFO%u Attempts Exhaust",
-                        (unsigned int)zFIFO); // Display an error for this FIFO
-                    MCP251XFD_ClearFIFOAttemptsEvent(CAN0, zFIFO); // Clear the flag of this FIFO
+                        "CAN0: Transmit FIFO%u Attempts Exhaust",
+                        (unsigned int)z_fifo); // Display an error for this FIFO
+                    MCP251XFD_ClearFIFOAttemptsEvent(CAN0, z_fifo); // Clear the flag of this FIFO
                 }
             break;
 
         case MCP251XFD_ADDRESS_ERROR_INTERRUPT: // Address Error Interrupt (illegal FIFO address presented to system)
-            FURI_LOG_E(TAG, "Ext2: Illegal FIFO address presented to system");
+            FURI_LOG_E(TAG, "CAN0: Illegal FIFO address presented to system");
             MCP251XFD_ClearInterruptEvents(CAN0, MCP251XFD_INT_SYSTEM_ERROR_EVENT);
             break;
 
         case MCP251XFD_RXTX_MAB_OVF_UVF: // RX MAB Overflow (RX: message received before previous message was saved to memory)
             FURI_LOG_E(
                 TAG,
-                "Ext2: RX MAB Overflow (RX: message received before previous message was saved to memory)");
+                "CAN0: RX MAB Overflow (RX: message received before previous message was saved to memory)");
             MCP251XFD_ClearInterruptEvents(CAN0, MCP251XFD_INT_SYSTEM_ERROR_EVENT);
             break;
 
@@ -636,13 +552,13 @@ void CheckDeviceINTOnEXT2(void) {
             break;
 
         case MCP251XFD_OPMODE_CHANGE_OCCURED: // Operation Mode Change Occurred
-            MCP251XFD_GetActualOperationMode(CAN0, &OpMode);
-            FURI_LOG_I(TAG, "Ext2: Operation mode change to %s", OpModeStr[(size_t)OpMode]);
+            MCP251XFD_GetActualOperationMode(CAN0, &op_mode);
+            FURI_LOG_I(TAG, "CAN0: Operation mode change to %s", op_mode_str[(size_t)op_mode]);
             MCP251XFD_ClearInterruptEvents(CAN0, MCP251XFD_INT_OPERATION_MODE_CHANGE_EVENT);
             break;
 
         case MCP251XFD_INVALID_MESSAGE_OCCURED: // Invalid Message Occurred
-            FURI_LOG_W(TAG, "Ext2: Invalid Message Occurred");
+            FURI_LOG_W(TAG, "CAN0: Invalid Message Occurred");
             MCP251XFD_ClearInterruptEvents(CAN0, MCP251XFD_INT_RX_INVALID_MESSAGE_EVENT);
             break;
 
@@ -651,7 +567,7 @@ void CheckDeviceINTOnEXT2(void) {
             //*** Do something with the TEF object ***
 
             MCP251XFD_UpdateTEF(CAN0);
-            TransmitError = false;
+            transmit_error = false;
             return;
 
         case MCP251XFD_FIFO25_INTERRUPT:
@@ -673,7 +589,7 @@ void CheckDeviceINTOnEXT2(void) {
         case MCP251XFD_FIFO15_INTERRUPT:
         case MCP251XFD_FIFO16_INTERRUPT:
             FURI_LOG_I(TAG, "receve 1-16");
-            ReceiveEvent = true;
+            receive_event = true;
             return;
 
         case MCP251XFD_FIFO5_INTERRUPT:
@@ -695,7 +611,7 @@ void CheckDeviceINTOnEXT2(void) {
         case MCP251XFD_FIFO30_INTERRUPT:
         case MCP251XFD_FIFO31_INTERRUPT:
             FURI_LOG_I(TAG, "Transm 15-31");
-            TransmitEvent = true;
+            transmit_event = true;
             return;
 
         case MCP251XFD_NO_INTERRUPT: // No interrupt
@@ -703,34 +619,34 @@ void CheckDeviceINTOnEXT2(void) {
 
         default:
             //--- Check others interrupts ---
-            MCP251XFD_GetInterruptEvents(CAN0, &Events);
+            MCP251XFD_GetInterruptEvents(CAN0, &events);
 
-            if((Events & MCP251XFD_INT_SPI_CRC_EVENT) > 0) // SPI CRC event
+            if((events & MCP251XFD_INT_SPI_CRC_EVENT) > 0) // SPI CRC event
             {
-                MCP251XFD_GetCRCEvents(CAN0, &CRCEvent, NULL);
-                if(CRCEvent == MCP251XFD_CRC_CRCERR_EVENT)
-                    FURI_LOG_E(TAG, "Ext2: CRC mismatch occurred on device");
+                MCP251XFD_GetCRCEvents(CAN0, &crc_event, NULL);
+                if(crc_event == MCP251XFD_CRC_CRCERR_EVENT)
+                    FURI_LOG_E(TAG, "CAN0: CRC mismatch occurred on device");
                 else
                     FURI_LOG_E(
                         TAG,
-                        "Ext2: Number of Bytes mismatch during 'SPI with CRC' command occurred");
+                        "CAN0: Number of Bytes mismatch during 'SPI with CRC' command occurred");
                 MCP251XFD_ClearCRCEvents(CAN0);
             }
 
-            if((Events & MCP251XFD_INT_RAM_ECC_EVENT) > 0) // ECC event
+            if((events & MCP251XFD_INT_RAM_ECC_EVENT) > 0) // ECC event
             {
                 uint16_t AddrError = 0;
-                MCP251XFD_GetECCEvents(CAN0, &ECCEvent, &AddrError);
-                if(ECCEvent == MCP251XFD_ECC_SEC_EVENT)
-                    FURI_LOG_E(TAG, "Ext2: ECC Single Error was corrected");
+                MCP251XFD_GetECCEvents(CAN0, &ecc_event, &AddrError);
+                if(ecc_event == MCP251XFD_ECC_SEC_EVENT)
+                    FURI_LOG_E(TAG, "CAN0: ECC Single Error was corrected");
                 else
-                    FURI_LOG_E(TAG, "Ext2: ECC Double Error was detected");
+                    FURI_LOG_E(TAG, "CAN0: ECC Double Error was detected");
                 MCP251XFD_ClearECCEvents(CAN0);
             }
 
-            if((Events & MCP251XFD_INT_BUS_ERROR_EVENT) > 0) // Bus error event
+            if((events & MCP251XFD_INT_BUS_ERROR_EVENT) > 0) // Bus error event
             {
-                FURI_LOG_E(TAG, "Ext2: Bus error");
+                FURI_LOG_E(TAG, "CAN0: Bus error");
                 //MCP251XFD_GetBusDiagnostic();
                 //MCP251XFD_ClearBusDiagnostic();
                 MCP251XFD_ClearInterruptEvents(CAN0, MCP251XFD_INT_BUS_ERROR_EVENT);
@@ -738,6 +654,6 @@ void CheckDeviceINTOnEXT2(void) {
             break;
         }
     }
-    if(TransmitError) FURI_LOG_W(TAG, "TransmitError = %d", InterruptCode);
-    //TransmitMessageToEXT2(SID_EXT2_ERROR_EVENT, &Ext2SequenceCounter, MCP251XFD_STANDARD_MESSAGE_ID, MCP251XFD_DLC_1BYTE, &InterruptCode, MCP251XFD_FIFO31, true); // Send last error on Ext2 module through Ext2
+    if(transmit_error) FURI_LOG_W(TAG, "transmit_error = %d", interrupt_code);
+    //TransmitMessageToEXT2(SID_EXT2_ERROR_EVENT, &Ext2SequenceCounter, MCP251XFD_STANDARD_MESSAGE_ID, MCP251XFD_DLC_1BYTE, &interrupt_code, MCP251XFD_FIFO31, true); // Send last error on CAN0 module through CAN0
 }

@@ -2,7 +2,7 @@
 
 #include <furi.h>
 
-#include "../lib/driver/mcp251xfd_interconnect/can_function.h"
+#include "../lib/driver/mcp251xfd_interconnect/can0_function.h"
 #include "../lib/driver/mcp251xfd_interconnect/show_device.h"
 
 #define TAG "CanChacker2Worker"
@@ -171,7 +171,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
 
     //--- Configure the MCP251XFD device ----------
 
-    volatile eERRORRESULT err = ConfigureMCP251XFDDeviceOnEXT2();
+    volatile eERRORRESULT err = can0_function_device_init_can20(500000);
     UNUSED(err);
 
     if(err != ERR_OK) {
@@ -190,11 +190,11 @@ static int32_t can_hacker2_worker_thread(void* context) {
     }
     furi_delay_ms(100);
     while(instance->worker_running) {
-        CheckDeviceINTOnEXT2();
+        can0_function_device_check_irq();
         // furi_delay_ms(100);
         //FURI_LOG_I(TAG, "**** %ld", Ext2SequenceCounter);
 
-        err = TransmitMessageToEXT2(
+        err = can0_function_transmit_msg(
             0x201,
             &Ext2SequenceCounter,
             MCP251XFD_STANDARD_MESSAGE_ID,
@@ -202,7 +202,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
             &data[0],
             MCP251XFD_TXQ,
             true);
-        err = TransmitMessageToEXT2(
+        err = can0_function_transmit_msg(
             0x301,
             &Ext2SequenceCounter,
             MCP251XFD_STANDARD_MESSAGE_ID,
@@ -216,7 +216,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
 
         //--- Get a frame if available in the MCP251XFD on Ext2 ---
 
-        err = ReceiveMessageFromEXT2(
+        err = can0_function_receive_msg(
             CAN0, &receive_event, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp);
 
         while(receive_event) {
@@ -234,7 +234,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
             FURI_LOG_RAW_I("\r\n");
             FURI_LOG_I(TAG, "**** %ld", Ext2SequenceCounter);
 
-            err = ReceiveMessageFromEXT2(
+            err = can0_function_receive_msg(
                 CAN0, &receive_event, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp);
 
             // err = TransmitMessageToEXT2(
@@ -246,7 +246,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
             // MCP251XFD_FIFO5,
             // true);
         }
-        err = TransmitMessageToEXT2(
+        err = can0_function_transmit_msg(
             0x101,
             &Ext2SequenceCounter,
             MCP251XFD_STANDARD_MESSAGE_ID,
@@ -305,7 +305,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
     // furi_thread_free(prog_thread);
 
     //can_hacker2_prog_free(prog);
-
+    can0_function_device_deinit();
     can_hacker2_worker_vcp_cdc_deinit();
     return 0;
 }

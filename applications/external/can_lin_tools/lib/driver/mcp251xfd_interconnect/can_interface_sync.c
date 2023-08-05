@@ -5,9 +5,8 @@
 
 #include "mcp251xfd_spi.h"
 #include <furi_hal_spi.h>
-#include "can_function.h"
+#include "can0_function.h"
 #include "mpc251xfd_user_driver_data.h"
-
 
 //-----------------------------------------------------------------------------
 
@@ -167,7 +166,6 @@ eERRORRESULT can_interface_sync_init(void* pIntDev, uint8_t chipSelect, const ui
     return ERR_OK;
 }
 
-
 //=============================================================================
 // MCP251XFD SPI transfer data for the Flipper Zero
 //=============================================================================
@@ -190,6 +188,41 @@ eERRORRESULT can_interface_sync_transfer(
     furi_hal_spi_release(pIntDev);
 
     return result;
+}
+
+//=============================================================================
+// MCP251XFD  deinit for the Flipper Zero
+//=============================================================================
+eERRORRESULT can_interface_sync_deinit(MCP251XFD* pComp) {
+    if(pComp == NULL) return ERR__PARAMETER_ERROR;
+    if(pComp->UserDriverData == NULL) return ERR__PARAMETER_ERROR;
+
+    MCP251XFD_UserDriverData* user_driver_data =
+        (MCP251XFD_UserDriverData*)(pComp->UserDriverData);
+    MCP251XFD_Config* conf = (MCP251XFD_Config*)(user_driver_data->config);
+
+    if(user_driver_data->can_irq != NULL) {
+        furi_hal_gpio_remove_int_callback(user_driver_data->can_irq);
+        furi_hal_gpio_init(user_driver_data->can_irq, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    }
+
+    if(user_driver_data->can_gpio0 != NULL) {
+        if(conf->GPIO0PinMode == MCP251XFD_PIN_AS_INT0_TX) {
+            furi_hal_gpio_remove_int_callback(user_driver_data->can_gpio0);
+        }
+        furi_hal_gpio_init(user_driver_data->can_gpio0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    }
+
+    if(user_driver_data->can_gpio1 != NULL) {
+        if(conf->GPIO1PinMode == MCP251XFD_PIN_AS_INT1_RX) {
+            furi_hal_gpio_remove_int_callback(user_driver_data->can_gpio1);
+        }
+        furi_hal_gpio_init(user_driver_data->can_gpio1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    }
+
+    furi_hal_spi_bus_handle_deinit(pComp->InterfaceDevice);
+
+    return ERR_OK;
 }
 
 //**********************************************************************************************************************************************************
