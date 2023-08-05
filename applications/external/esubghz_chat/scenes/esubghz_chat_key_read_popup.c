@@ -44,7 +44,8 @@ static bool key_read_popup_handle_key_read(ESubGhzChatState* state) {
     }
 
     /* initiate the crypto context */
-    bool ret = crypto_ctx_set_key(state->crypto_ctx, dev_data->mf_ul_data.data);
+    bool ret = crypto_ctx_set_key(
+        state->crypto_ctx, dev_data->mf_ul_data.data, state->name_prefix, furi_get_tick());
 
     /* cleanup */
     crypto_explicit_bzero(dev_data->mf_ul_data.data, KEY_BITS / 8);

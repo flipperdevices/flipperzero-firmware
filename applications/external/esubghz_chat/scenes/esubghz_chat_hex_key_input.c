@@ -7,7 +7,8 @@ static void hex_key_input_cb(void* context) {
     ESubGhzChatState* state = context;
 
     /* initiate the crypto context */
-    bool ret = crypto_ctx_set_key(state->crypto_ctx, state->hex_key_input_store);
+    bool ret = crypto_ctx_set_key(
+        state->crypto_ctx, state->hex_key_input_store, state->name_prefix, furi_get_tick());
 
     /* cleanup */
     crypto_explicit_bzero(state->hex_key_input_store, sizeof(state->hex_key_input_store));

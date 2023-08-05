@@ -17,7 +17,8 @@ void uhf_scene_read_card_success_widget_callback(GuiButtonType result, InputType
 void uhf_scene_read_tag_success_on_enter(void* ctx) {
     UHFApp* uhf_app = ctx;
 
-    const uint8_t* read_data = uhf_app->worker->response_data->head->data;
+    const uint8_t* read_data =
+        uhf_response_data_get_uhf_data(uhf_app->worker->response_data, 0)->data;
 
     widget_add_string_element(
         uhf_app->widget, 32, 5, AlignLeft, AlignCenter, FontPrimary, "Read Success");
@@ -38,7 +39,6 @@ void uhf_scene_read_tag_success_on_enter(void* ctx) {
         AlignCenter,
         FontKeyboard,
         convertToHexString(read_data + 6, 2));
-
     widget_add_string_element(
         uhf_app->widget,
         96,

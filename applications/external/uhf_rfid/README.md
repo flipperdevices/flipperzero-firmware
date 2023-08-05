@@ -8,10 +8,14 @@ This repository contains a UHF RFID application developed for FlipperZero, a ver
 
 ## Features
 
-- [x] Read UHF RFID tags.
-- [ ] Write UHF RFID tags.
+- [x] Read Single UHF RFID tag.
+- [ ] View saved UHF RFID tag. __(in progress)__
+- [ ] Write Single UHF RFID tag.
 - [ ] Communicate with the YRM100 module to perform UHF RFID operations.
 - [ ] Easy-to-use interface on FlipperZero's display.
+    - Extras
+        - [ ] Read multiple tags at once
+        - [ ] View multiple on a list view
 
 ## Requirements
 
@@ -30,12 +34,16 @@ To run this application on FlipperZero, you will need:
      1. Press `Ctrl+Shift+B` on vscode while in the uhf_app folder
      2. Select the `Launch App on Flipper` option. And watch as the app launches on your flipper
      - If you don't have vscode setup you can use the cli command `./fbt COMPACT=1 DEBUG=0 launch APPSRC=applications_user\uhf_rfid`
+   - ### MacOS
+     ... tbd
 
 ## Usage
 
 1. Power on your FlipperZero device.
-2. Navigate to the UHF RFID app on FlipperZero's menu.
-3. (Add detailed instructions on how to use the UHF RFID app)
+2. Connect the uhf module to the flipper via gpio.
+3. Navigate to the UHF RFID app on FlipperZero's menu.
+4. Currently Reading the EPC tag is the only usable option
+... will further update this page as it development goes
 
 ## Contributions
 

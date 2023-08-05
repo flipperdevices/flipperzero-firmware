@@ -33,7 +33,7 @@ static bool pass_input_validator(const char* text, FuriString* error, void* cont
     sha256((unsigned char*)text, strlen(text), key);
 
     /* initiate the crypto context */
-    bool ret = crypto_ctx_set_key(state->crypto_ctx, key);
+    bool ret = crypto_ctx_set_key(state->crypto_ctx, key, state->name_prefix, furi_get_tick());
 
     /* cleanup */
     crypto_explicit_bzero(key, sizeof(key));

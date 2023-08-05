@@ -26,6 +26,10 @@
 #include "uhf_worker.h"
 #include <uhf_rfid_icons.h>
 
+#define UHF_BANK_DOES_NOT_EXIST \
+    (uint8_t[]) {               \
+        0xFF                    \
+    }
 #define UHF_TEXT_STORE_SIZE 128
 #define UHF_APPS_DATA_FOLDER EXT_PATH("apps_data")
 #define UHF_APPS_STORAGE_FOLDER \
