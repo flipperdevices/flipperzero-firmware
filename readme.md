@@ -19,18 +19,20 @@ Or build it yourself from the files in the [NARD repo](https://github.com/killer
 
 Put **[SAM](https://www.cdw.com/product/hp-sim-for-hid-iclass-for-hip2-reader-security-sim/4854794)** into **[adapter](https://a.co/d/1E9Zk1h)** (because of chip on top) and plug into **[reader](https://www.mikroe.com/smart-card-2-click)**. Connect reader to Flipper Zero (See `Connections` below).
 
+Optionally 3d print a [case designed by sean](https://www.printables.com/model/543149-case-for-flipper-zero-devboard-smart2click-samsim)
+
 ## Development
-
-### To Build ASN1
-
- * Install git version of [asnc1](https://github.com/vlm/asn1c) (`brew install asn1c --head` on macos)
- * Run `asn1c -D ./lib/asn1 -no-gen-example -pdu=all seader.asn` in in root to generate asn1c files
 
 ### To Build App
 
  * Install [UFBT](https://github.com/flipperdevices/flipperzero-ufbt)
  * `ufbt` to build
  * `ufbt launch` to launch
+
+### To Build ASN1 (if you change seader.asn1)
+
+ * Install git version of [asnc1](https://github.com/vlm/asn1c) (`brew install asn1c --head` on macos)
+ * Run `asn1c -D ./lib/asn1 -no-gen-example -pdu=all seader.asn` in in root to generate asn1c files
 
 ## References
 
