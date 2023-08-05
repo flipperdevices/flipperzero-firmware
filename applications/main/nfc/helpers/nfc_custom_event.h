@@ -17,6 +17,9 @@ typedef enum {
     NfcCustomEventDictAttackKeyAttackStop,
     NfcCustomEventDictAttackKeyAttackNextSector,
 
+    NfcCustomEventCardDetected,
+    NfcCustomEventCardLost,
+
     NfcCustomEventViewExit,
     NfcCustomEventWorkerExit,
     NfcCustomEventWorkerUpdate,

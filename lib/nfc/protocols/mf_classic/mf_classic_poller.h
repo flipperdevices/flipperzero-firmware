@@ -25,13 +25,14 @@ typedef enum {
     MfClassicPollerEventTypeNewSector,
     MfClassicPollerEventTypeFoundKeyA,
     MfClassicPollerEventTypeFoundKeyB,
-    MfClassicPollerEventTypeCardDetected,
     MfClassicPollerEventTypeCardNotDetected,
     MfClassicPollerEventTypeKeyAttackStart,
     MfClassicPollerEventTypeKeyAttackStop,
     MfClassicPollerEventTypeKeyAttackNextSector,
 
     // Common events
+    MfClassicPollerEventTypeCardDetected,
+    MfClassicPollerEventTypeCardLost,
     MfClassicPollerEventTypeSuccess,
     MfClassicPollerEventTypeFail,
 } MfClassicPollerEventType;

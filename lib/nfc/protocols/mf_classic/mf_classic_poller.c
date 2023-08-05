@@ -57,7 +57,7 @@ NfcCommand mf_classic_poller_handler_idle(MfClassicPoller* instance) {
         instance->data->iso14443_3a_data,
         iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
     if(mf_classic_detect_protocol(instance->data->iso14443_3a_data, &instance->data->type)) {
-        if(instance->card_state == MfClassicCardStateNotDetected) {
+        if(instance->card_state == MfClassicCardStateLost) {
             instance->card_state = MfClassicCardStateDetected;
             instance->mfc_event.type = MfClassicPollerEventTypeCardDetected;
             command = instance->callback(instance->general_event, instance->context);
@@ -552,15 +552,17 @@ NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
     NfcCommand command = NfcCommandContinue;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
+        if(instance->card_state == MfClassicCardStateLost) {
+            instance->card_state = MfClassicCardStateDetected;
+            instance->mfc_event.type = MfClassicPollerEventTypeCardDetected;
+            instance->callback(instance->general_event, instance->context);
+        }
         command = mf_classic_poller_dict_attack_handler[instance->state](instance);
     } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
-        if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
-            if(instance->card_state == MfClassicCardStateDetected) {
-                instance->card_state = MfClassicCardStateNotDetected;
-                instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;
-                command = instance->callback(instance->general_event, instance->context);
-                instance->state = MfClassicPollerStateIdle;
-            }
+        if(instance->card_state == MfClassicCardStateDetected) {
+            instance->card_state = MfClassicCardStateLost;
+            instance->mfc_event.type = MfClassicPollerEventTypeCardLost;
+            command = instance->callback(instance->general_event, instance->context);
         }
     }
 

@@ -19,11 +19,13 @@ NfcCommand
     const MfClassicData* write_data =
         nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
 
-    if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
+    if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardDetected);
+    } else if(mfc_event->type == MfClassicPollerEventTypeCardLost) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardLost);
+    } else if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
         const MfClassicData* tag_data = nfc_poller_get_data(instance->poller);
         if(iso14443_3a_is_equal(tag_data->iso14443_3a_data, write_data->iso14443_3a_data)) {
-            view_dispatcher_send_custom_event(
-                instance->view_dispatcher, NfcCustomEventDictAttackCardDetected);
             mfc_event->data->poller_mode.mode = MfClassicPollerModeWrite;
         } else {
             view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventWrongCard);
@@ -97,11 +99,18 @@ bool nfc_scene_mf_classic_write_initial_on_event(void* context, SceneManagerEven
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventDictAttackCardDetected) {
+        if(event.event == NfcCustomEventCardDetected) {
             scene_manager_set_scene_state(
                 instance->scene_manager,
                 NfcSceneMfClassicWriteInitial,
                 NfcSceneMfClassicWriteInitialStateCardFound);
+            nfc_scene_mf_classic_write_initial_setup_view(instance);
+            consumed = true;
+        } else if(event.event == NfcCustomEventCardLost) {
+            scene_manager_set_scene_state(
+                instance->scene_manager,
+                NfcSceneMfClassicWriteInitial,
+                NfcSceneMfClassicWriteInitialStateCardSearch);
             nfc_scene_mf_classic_write_initial_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcCustomEventWrongCard) {

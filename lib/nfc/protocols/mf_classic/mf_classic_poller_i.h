@@ -15,7 +15,7 @@ typedef enum {
 } MfClassicAuthState;
 
 typedef enum {
-    MfClassicCardStateNotDetected,
+    MfClassicCardStateLost,
     MfClassicCardStateDetected,
 } MfClassicCardState;
 
