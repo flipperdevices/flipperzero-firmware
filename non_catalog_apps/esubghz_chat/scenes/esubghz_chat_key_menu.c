@@ -20,17 +20,17 @@ static void key_menu_cb(void* context, uint32_t index)
 		state->encrypted = false;
 		enter_chat(state);
 
-		scene_manager_handle_custom_event(state->scene_manager,
+		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyMenuNoEncryption);
 		break;
 
 	case ESubGhzChatKeyMenuItems_Password:
-		scene_manager_handle_custom_event(state->scene_manager,
+		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyMenuPassword);
 		break;
 
 	case ESubGhzChatKeyMenuItems_HexKey:
-		scene_manager_handle_custom_event(state->scene_manager,
+		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyMenuHexKey);
 		break;
 
@@ -39,7 +39,8 @@ static void key_menu_cb(void* context, uint32_t index)
 		furi_hal_random_fill_buf(key, KEY_BITS / 8);
 
 		/* initiate the crypto context */
-		bool ret = crypto_ctx_set_key(state->crypto_ctx, key);
+		bool ret = crypto_ctx_set_key(state->crypto_ctx, key,
+				state->name_prefix, furi_get_tick());
 
 		/* cleanup */
 		crypto_explicit_bzero(key, sizeof(key));
@@ -53,12 +54,12 @@ static void key_menu_cb(void* context, uint32_t index)
 		state->encrypted = true;
 		enter_chat(state);
 
-		scene_manager_handle_custom_event(state->scene_manager,
+		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyMenuGenKey);
 		break;
 
 	case ESubGhzChatKeyMenuItems_ReadKeyFromNfc:
-		scene_manager_handle_custom_event(state->scene_manager,
+		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyMenuReadKeyFromNfc);
 		break;
 

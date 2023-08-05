@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `29 Jul 05:07 GMT +3`
+### Apps checked & updated at `5 Aug 13:51 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -102,6 +102,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [ESP32-C6 Gravity terminal (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - [GPIO Controller (By Lokno)](https://github.com/Lokno/gpio_controller) -> `A visual tool to control the general purpose pins of the Flipper Zero`
+- [TAS playback (By rcombs)](https://github.com/rcombs/tas-playback) -> `This app plays back TAS files for retro video games. Connect the GPIO pins to the console's controller port and select a file to play back.`
 
 ## Tools / Misc / NFC / RFID / Infrared / etc..
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -134,6 +135,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Enhanced Sub-GHz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms/tree/main)
 - [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
+- [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)
 
 --- 
 
