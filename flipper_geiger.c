@@ -33,15 +33,15 @@ typedef struct {
     InputEvent input;
 } EventApp;
 
-#define lineArraySize 128
-
 typedef struct {
     FuriMutex* mutex;
     uint32_t cps, cpm;
-    uint32_t line[lineArraySize];
+    uint32_t line[SCREEN_SIZE_X];
     float coef;
     uint8_t data;
     uint8_t zoom;
+    uint8_t newLinePosition;
+    uint8_t version;
 } mutexStruct;
 
 static void draw_callback(Canvas* canvas, void* ctx) 
@@ -54,50 +54,73 @@ static void draw_callback(Canvas* canvas, void* ctx)
     memcpy(&mutexDraw, mutexVal, sizeof(mutexStruct));
     furi_mutex_release(mutexVal->mutex);
 
-    char buffer[32];
-    if (mutexDraw.data == 0) snprintf(buffer, sizeof(buffer), "%ld cps - %ld cpm", mutexDraw.cps, mutexDraw.cpm);
-    else if (mutexDraw.data == 1) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f uSv/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR));
-    else if (mutexDraw.data == 2) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f mSv/y", mutexDraw.cps, (((double)mutexDraw.cpm*(double)CONVERSION_FACTOR))*(double)8.76);
-    else if (mutexDraw.data == 3) snprintf(buffer, sizeof(buffer), "%ld cps - %.4f Rad/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR)/(double)10000);
-    else if (mutexDraw.data == 4) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f mR/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR)/(double)10);
-    else snprintf(buffer, sizeof(buffer), "%ld cps - %.2f uR/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR)*(double)100);
+    if (mutexDraw.version == 0)
+    {
+        char buffer[32];
+        if (mutexDraw.data == 0) snprintf(buffer, sizeof(buffer), "%ld cps - %ld cpm", mutexDraw.cps, mutexDraw.cpm);
+        else if (mutexDraw.data == 1) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f uSv/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR));
+        else if (mutexDraw.data == 2) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f mSv/y", mutexDraw.cps, (((double)mutexDraw.cpm*(double)CONVERSION_FACTOR))*(double)8.76);
+        else if (mutexDraw.data == 3) snprintf(buffer, sizeof(buffer), "%ld cps - %.4f Rad/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR)/(double)10000);
+        else if (mutexDraw.data == 4) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f mR/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR)/(double)10);
+        else snprintf(buffer, sizeof(buffer), "%ld cps - %.2f uR/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR)*(double)100);
 
-    if (mutexDraw.zoom == 0)
-    {
-        for (int i=0;i<SCREEN_SIZE_X;i+=8)
-        {
-            float Y = SCREEN_SIZE_Y-(mutexDraw.line[i/8]*mutexDraw.coef);
-            for (int j=0;j<8;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
-        }
-    }
-    else if (mutexDraw.zoom == 1)
-    {
-        for (int i=0;i<SCREEN_SIZE_X;i+=4)
-        {
-            float Y = SCREEN_SIZE_Y-(mutexDraw.line[i/4]*mutexDraw.coef);
-            for (int j=0;j<4;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
-        }
-    }
-    else if (mutexDraw.zoom == 2)
-    {
-        for (int i=0;i<SCREEN_SIZE_X;i+=2)
-        {
-            float Y = SCREEN_SIZE_Y-(mutexDraw.line[i/2]*mutexDraw.coef);
-            for (int j=0;j<2;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
-        }
-    }
-    else if (mutexDraw.zoom == 3)
-    {
-        for (int i=0;i<SCREEN_SIZE_X;i++)
-        {
-            float Y = SCREEN_SIZE_Y-(mutexDraw.line[i]*mutexDraw.coef);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignBottom, buffer);
 
-            canvas_draw_line(canvas, i, Y, i, SCREEN_SIZE_Y);
+        uint8_t linePosition = mutexDraw.newLinePosition;
+
+        if (mutexDraw.zoom == 0)
+        {
+            for (int i=0;i<SCREEN_SIZE_X;i+=8)
+            {
+                if (linePosition != 0) linePosition--;
+                else linePosition = SCREEN_SIZE_X - 1;
+
+                float Y = SCREEN_SIZE_Y-(mutexDraw.line[linePosition]*mutexDraw.coef);
+                for (int j=0;j<8;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
+            }
+        }
+        else if (mutexDraw.zoom == 1)
+        {
+            for (int i=0;i<SCREEN_SIZE_X;i+=4)
+            {
+                if (linePosition != 0) linePosition--;
+                else linePosition = SCREEN_SIZE_X - 1;
+
+                float Y = SCREEN_SIZE_Y-(mutexDraw.line[linePosition]*mutexDraw.coef);
+                for (int j=0;j<4;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
+            }
+        }
+        else if (mutexDraw.zoom == 2)
+        {
+            for (int i=0;i<SCREEN_SIZE_X;i+=2)
+            {
+                if (linePosition != 0) linePosition--;
+                else linePosition = SCREEN_SIZE_X - 1;
+
+                float Y = SCREEN_SIZE_Y-(mutexDraw.line[linePosition]*mutexDraw.coef);
+                for (int j=0;j<2;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
+            }
+        }
+        else if (mutexDraw.zoom == 3)
+        {
+            for (int i=0;i<SCREEN_SIZE_X;i++)
+            {
+                if (linePosition != 0) linePosition--;
+                else linePosition = SCREEN_SIZE_X - 1;
+
+                float Y = SCREEN_SIZE_Y-(mutexDraw.line[linePosition]*mutexDraw.coef);
+                canvas_draw_line(canvas, i, Y, i, SCREEN_SIZE_Y);
+            }
         }
     }
-
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignBottom, buffer);
+    else
+    {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignBottom, "Geiger Counter");
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignBottom, "Version 20230806");
+        canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignBottom, "github.com/nmrr");
+    }
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) 
@@ -140,10 +163,12 @@ int32_t flipper_geiger_app()
     mutexStruct mutexVal;
     mutexVal.cps = 0;
     mutexVal.cpm = 0;
-    for (int i=0;i<lineArraySize;i++) mutexVal.line[i] = 0;
+    for (int i=0;i<SCREEN_SIZE_X;i++) mutexVal.line[i] = 0;
     mutexVal.coef = 1;
     mutexVal.data = 0;
     mutexVal.zoom = 2;
+    mutexVal.newLinePosition = 0;
+    mutexVal.version = 0;
 
     uint32_t counter = 0;
 
@@ -197,7 +222,8 @@ int32_t flipper_geiger_app()
 
                     mutexVal.cps = 0;
                     mutexVal.cpm = 0;
-                    for (int i=0;i<lineArraySize;i++) mutexVal.line[i] = 0;
+                    for (uint8_t i=0;i<SCREEN_SIZE_X;i++) mutexVal.line[i] = 0;
+                    mutexVal.newLinePosition = 0;
 
                     screenRefresh = 1;
                     furi_mutex_release(mutexVal.mutex);
@@ -264,33 +290,48 @@ int32_t flipper_geiger_app()
                     screenRefresh = 1;
                     furi_mutex_release(mutexVal.mutex);
                 }
+                else if((event.input.key == InputKeyDown && event.input.type == InputTypeLong))
+                {
+                    furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                    if (mutexVal.version == 0) mutexVal.version = 1;
+                    else mutexVal.version = 0;
+
+                    screenRefresh = 1;
+                    furi_mutex_release(mutexVal.mutex);
+                }
             }
             else if (event.type == ClockEventTypeTick)
             {
-                furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
-
                 if (recordData == 1)
                 {
                     furi_string_printf(dataString, "%lu,%lu\n", epoch++, counter);
                     stream_write_string(file_stream, dataString);
                 }
 
-                for (int i=0;i<lineArraySize-1;i++) mutexVal.line[lineArraySize-1-i] = mutexVal.line[lineArraySize-2-i]; 
+                furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
-                mutexVal.line[0] = counter;
+                mutexVal.line[mutexVal.newLinePosition] = counter;
                 mutexVal.cps = counter;
                 counter = 0;
 
-                mutexVal.cpm = mutexVal.line[0];
-                uint32_t max = mutexVal.line[0];
-                for (int i=1;i<lineArraySize;i++)
+                mutexVal.cpm = mutexVal.line[mutexVal.newLinePosition];
+                uint32_t max = mutexVal.line[mutexVal.newLinePosition];
+                uint8_t linePosition = mutexVal.newLinePosition;
+
+                for (int i=1;i<SCREEN_SIZE_X;i++)
                 {
-                    if (i < 60) mutexVal.cpm += mutexVal.line[i];
-                    if (mutexVal.line[i] > max) max = mutexVal.line[i];
+                    if (linePosition != 0) linePosition--;
+                    else linePosition = SCREEN_SIZE_X - 1;
+
+                    if (i < 60) mutexVal.cpm += mutexVal.line[linePosition];
+                    if (mutexVal.line[linePosition] > max) max = mutexVal.line[linePosition];
                 }
 
                 if (max > 0) mutexVal.coef = ((float)(SCREEN_SIZE_Y-15))/((float)max);
                 else mutexVal.coef = 1;
+
+                if (mutexVal.newLinePosition != SCREEN_SIZE_X - 1) mutexVal.newLinePosition++;
+                else mutexVal.newLinePosition = 0;
 
                 screenRefresh = 1;
                 furi_mutex_release(mutexVal.mutex);
