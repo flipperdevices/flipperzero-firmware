@@ -15,8 +15,8 @@ typedef enum {
 } MfClassicAuthState;
 
 typedef enum {
-    MfClassicCardStateLost,
     MfClassicCardStateDetected,
+    MfClassicCardStateLost,
 } MfClassicCardState;
 
 typedef enum {
@@ -121,12 +121,18 @@ typedef struct {
     int32_t new_value;
 } MfClassicChangeValueContext;
 
+typedef struct {
+    MfClassicDeviceKeys keys;
+    uint8_t current_sector;
+} MfClassicReadContext;
+
 typedef union {
     MfClassicAuthContext auth_context;
     MfClassicReadBlockContext read_block_context;
     MfClassicWriteBlockContext write_block_context;
     MfClassicReadValueContext read_value_context;
     MfClassicChangeValueContext change_value_context;
+    MfClassicReadContext read_context;
 } MfClassicPollerContextData;
 
 MfClassicError mf_classic_process_error(Iso14443_3aError error);

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,36.0,,
+Version,+,35.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2089,6 +2089,7 @@ Function,-,mf_classic_is_value_block,_Bool,"MfClassicData*, uint8_t"
 Function,+,mf_classic_load,_Bool,"MfClassicData*, FlipperFormat*, uint32_t"
 Function,+,mf_classic_poller_auth,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
 Function,+,mf_classic_poller_change_value,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, int32_t, int32_t*"
+Function,+,mf_classic_poller_read,MfClassicError,"Nfc*, const MfClassicDeviceKeys*, MfClassicData*"
 Function,+,mf_classic_poller_read_block,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicBlock*"
 Function,+,mf_classic_poller_read_value,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, int32_t*"
 Function,+,mf_classic_poller_write_block,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicBlock*"

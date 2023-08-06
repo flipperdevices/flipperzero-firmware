@@ -38,9 +38,9 @@ typedef enum {
 } MfClassicPollerEventType;
 
 typedef enum {
-    MfClassicPollerModeDictAttack,
     MfClassicPollerModeRead,
     MfClassicPollerModeWrite,
+    MfClassicPollerModeDictAttack,
 } MfClassicPollerMode;
 
 typedef struct {

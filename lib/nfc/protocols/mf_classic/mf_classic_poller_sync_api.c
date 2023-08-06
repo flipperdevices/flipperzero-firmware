@@ -350,3 +350,113 @@ MfClassicError mf_classic_poller_change_value(
 
     return error;
 }
+
+static bool mf_classic_poller_read_get_next_key(
+    MfClassicReadContext* read_ctx,
+    uint8_t* sector_num,
+    MfClassicKey* key,
+    MfClassicKeyType* key_type) {
+    bool next_key_found = false;
+
+    for(uint8_t i = read_ctx->current_sector; i < MF_CLASSIC_TOTAL_SECTORS_MAX; i++) {
+        if(FURI_BIT(read_ctx->keys.key_a_mask, i)) {
+            FURI_BIT_CLEAR(read_ctx->keys.key_a_mask, i);
+            *key = read_ctx->keys.key_a[i];
+            *key_type = MfClassicKeyTypeA;
+            *sector_num = i;
+
+            next_key_found = true;
+            break;
+        }
+        if(FURI_BIT(read_ctx->keys.key_b_mask, i)) {
+            FURI_BIT_CLEAR(read_ctx->keys.key_b_mask, i);
+            *key = read_ctx->keys.key_b[i];
+            *key_type = MfClassicKeyTypeB;
+            *sector_num = i;
+
+            next_key_found = true;
+            read_ctx->current_sector = i;
+            break;
+        }
+    }
+
+    return next_key_found;
+}
+
+NfcCommand mf_classic_poller_read_callback(NfcGenericEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.data);
+    furi_assert(event.protocol == NfcProtocolMfClassic);
+
+    NfcCommand command = NfcCommandContinue;
+    MfClassicPollerContext* poller_context = context;
+    MfClassicPollerEvent* mfc_event = event.data;
+
+    if(mfc_event->type == MfClassicPollerEventTypeCardLost) {
+        poller_context->error = MfClassicErrorNotPresent;
+        command = NfcCommandStop;
+    } else if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
+        mfc_event->data->poller_mode.mode = MfClassicPollerModeRead;
+    } else if(mfc_event->type == MfClassicPollerEventTypeRequestReadSector) {
+        MfClassicPollerEventDataReadSectorRequest* req_data =
+            &mfc_event->data->read_sector_request_data;
+        MfClassicKey key = {};
+        MfClassicKeyType key_type = MfClassicKeyTypeA;
+        uint8_t sector_num = 0;
+        if(mf_classic_poller_read_get_next_key(
+               &poller_context->data.read_context, &sector_num, &key, &key_type)) {
+            req_data->sector_num = sector_num;
+            req_data->key = key;
+            req_data->key_type = key_type;
+            req_data->key_provided = true;
+        } else {
+            req_data->key_provided = false;
+        }
+    } else if(mfc_event->type == MfClassicPollerEventTypeSuccess) {
+        command = NfcCommandStop;
+    }
+
+    if(command == NfcCommandStop) {
+        furi_thread_flags_set(poller_context->thread_id, MF_CLASSIC_POLLER_COMPLETE_EVENT);
+    }
+
+    return command;
+}
+
+MfClassicError
+    mf_classic_poller_read(Nfc* nfc, const MfClassicDeviceKeys* keys, MfClassicData* data) {
+    furi_assert(nfc);
+    furi_assert(keys);
+    furi_assert(data);
+
+    MfClassicError error = MfClassicErrorNone;
+    MfClassicPollerContext poller_context = {};
+    poller_context.thread_id = furi_thread_get_current_id();
+    poller_context.data.read_context.keys = *keys;
+
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolMfClassic);
+    nfc_poller_start(poller, mf_classic_poller_read_callback, &poller_context);
+    furi_thread_flags_wait(MF_CLASSIC_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    furi_thread_flags_clear(MF_CLASSIC_POLLER_COMPLETE_EVENT);
+
+    nfc_poller_stop(poller);
+
+    if(poller_context.error != MfClassicErrorNone) {
+        error = poller_context.error;
+    } else {
+        const MfClassicData* mfc_data = nfc_poller_get_data(poller);
+        uint8_t sectors_read = 0;
+        uint8_t keys_found = 0;
+
+        mf_classic_get_read_sectors_and_keys(mfc_data, &sectors_read, &keys_found);
+        if((sectors_read > 0) || (keys_found > 0)) {
+            mf_classic_copy(data, mfc_data);
+        } else {
+            error = MfClassicErrorNotPresent;
+        }
+    }
+
+    nfc_poller_free(poller);
+
+    return error;
+}
