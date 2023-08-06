@@ -250,6 +250,8 @@ static void can_hacher2_can_open(CanHacker2* instance) {
                 instance->can_open = true;
                 can_hacker2_tx_add_ch(instance, CH2_OK);
             } else {
+                show_device_fifo_configuration(&can0_fifo_list[0], CAN0_FIFO_COUNT);
+                show_device_filter_configuration(&can_filter_list[0], CAN0_FILTER_COUNT, false);
                 can_hacker2_tx_add_ch(instance, CH2_BELL);
             }
         }
@@ -450,7 +452,8 @@ static void can_hacker2_can_receive(CanHacker2* instance) {
     }
 
     if(instance->can_timestamp) {
-        uint16_t ts = (uint16_t)instance->rx_msg_time_stamp;
+        //FURI_LOG_I(TAG, "Timestamp: %ld", instance->rx_msg_time_stamp);
+        uint16_t ts = (uint16_t)(instance->rx_msg_time_stamp/40);
         put_hex_byte(data + offset, ts >> 8);
         offset += 2;
         put_hex_byte(data + offset, ts);

@@ -17,12 +17,12 @@ extern MCP251XFD_BitTimeStats can0_bt_stats;
 extern uint32_t can0_sysclk;
 extern MCP251XFD_Config can0_config;
 
-#define CAN0_FIFO_COUNT 10
+#define CAN0_FIFO_COUNT 18
 extern MCP251XFD_RAMInfos can0_tef_ram_infos;
 extern MCP251XFD_RAMInfos can0_txq_ram_infos;
 extern MCP251XFD_FIFO can0_fifo_list[CAN0_FIFO_COUNT];
 
-#define CAN0_FILTER_COUNT 4
+#define CAN0_FILTER_COUNT 12
 extern MCP251XFD_Filter can_filter_list[CAN0_FILTER_COUNT];
 
 #define CAN0_GPIO0_Low MCP251XFD_SetGPIOPinsOutputLevel(CAN0, GPIO0_LOW, GPIO0_Mask)
