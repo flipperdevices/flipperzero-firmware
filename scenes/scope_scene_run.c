@@ -544,6 +544,10 @@ void scope_scene_run_on_enter(void* context) {
 
     furi_hal_bus_disable(FuriHalBusTIM2);
 
+    // Disable ADC interrupt and timer
+    LL_ADC_DisableIT_OVR(ADC1);
+    LL_TIM_DisableCounter(TIM2);
+
     // Stop DMA and switch back to original vector table
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
 
