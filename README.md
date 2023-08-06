@@ -143,6 +143,8 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 
 **Dithering Type** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
 
+**Flash** Toggle the ESP32-CAM onboard LED on/off when taking a picture.
+
 **Haptic FX** = Toggle haptic feedback on/off.
 
 **Sound FX** = Toggle sound effects on/off.

@@ -26,6 +26,8 @@ Settings:
 
 **Orientation** = Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
 
+**Flash** Toggle the ESP32-CAM onboard LED on/off when taking a picture.
+
 **Dithering Type** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
 
 **Haptic FX** = Toggle haptic feedback on/off.
