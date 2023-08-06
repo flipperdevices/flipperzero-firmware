@@ -1,0 +1,7 @@
+[submodule ".submodules/flipper-application-catalog"]
+	path = .submodules/flipper-application-catalog
+	url = https://github.com/flipperdevices/flipper-application-catalog
+[submodule ".submodules/flipperzero-firmware"]
+	path = .submodules/flipperzero-firmware
+	url = https://github.com/flipperdevices/flipperzero-firmware
+	branch = dev
