@@ -24,7 +24,7 @@
 - [Software Guide](#software-guide)
 - [Attributions](#attributions)
 - [Contributions](#contributions)
-- [Changelog](CHANGELOG.md)
+- [Changelog](src-fap/docs/CHANGELOG.md)
 
 ## Previews <a name="previews"></a>
 
