@@ -24,14 +24,25 @@
 - [Software Guide](#software-guide)
 - [Attributions](#attributions)
 - [Contributions](#contributions)
+- [Changelog](CHANGELOG.md)
 
 ## Previews <a name="previews"></a>
 
-<img align="center" src=".github/images/preview_01.png" />
+Greetings!
 
-<img align="center" src=".github/images/preview_02.png" />
+- <img align="center" src=".github/images/preview_01.png" />
 
-<img align="center" src=".github/images/preview.gif" />
+Preview with a camera module attached to the Flipper Zero.
+
+- <img align="center" src=".github/images/preview_02.png" />
+
+Version 1.1.0 and above now supports new dithering options and bug fixes!
+
+- <img align="center" src=".github/images/v1-1.gif" />
+
+Version 1.2.0 and above now supports taking pictures, configurable dithering, and LED flash!
+
+- <img align="center" src=".github/images/v1-2.gif" />
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
