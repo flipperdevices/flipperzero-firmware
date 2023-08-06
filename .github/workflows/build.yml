@@ -12,7 +12,6 @@ jobs:
             sdk-channel: dev
           - name: xtreme firmware
             sdk-url: https://github.com/Flipper-XFW/Xtreme-Firmware/releases/download/XFW-0050_27072023/XFW-0050_27072023-sdk.zip
-            sdk-channel: release
     name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
       - name: Checkout
