@@ -144,7 +144,7 @@ epoch  | cps
 
 <p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/dice.jpg" width=25% height=25%></p>
 
-I maintain another application that uses the **geiger board** to roll dice by using radioactivy: https://github.com/nmrr/flipperzero-atomicdiceroller
+I maintain another application that uses the **geiger board** to roll dice by using radioactivity: https://github.com/nmrr/flipperzero-atomicdiceroller
 
 ## User gallery & video
 
