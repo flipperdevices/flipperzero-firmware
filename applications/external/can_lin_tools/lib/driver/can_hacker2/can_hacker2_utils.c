@@ -1,5 +1,20 @@
 #include "can_hacker2_utils.h"
 
+const char hex_asc_upper[] = "0123456789ABCDEF";
+
+inline void put_hex_byte(uint8_t* buf, uint8_t byte) {
+    buf[0] = hex_asc_upper_hi(byte);
+    buf[1] = hex_asc_upper_lo(byte);
+}
+
+inline void _put_id(uint8_t* buf, int end_offset, uint32_t id) {
+    /* build 3 (SFF) or 8 (EFF) digit CAN identifier */
+    while(end_offset >= 0) {
+        buf[end_offset--] = hex_asc_upper[id & 0xF];
+        id >>= 4;
+    }
+}
+
 unsigned char hexCharToByte(char hex)
 {
     unsigned char result = 0;

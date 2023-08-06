@@ -300,9 +300,7 @@ static void can_hacker2_can_transmit(CanHacker2* instance) {
         if(is_rtr) {
             tx_msg.ControlFlags |= MCP251XFD_REMOTE_TRANSMISSION_REQUEST;
         }
-        // else {
-        //     tx_msg.ControlFlags |= MCP251XFD_TRANSMIT_MESSAGE;
-        // }
+
         if(is_exended) {
             tx_msg.ControlFlags |= MCP251XFD_CAN20_FRAME | MCP251XFD_EXTENDED_MESSAGE_ID;
         } else {
@@ -417,20 +415,55 @@ void can_hacker2_process_cmd(CanHacker2* instance) {
     }
 }
 
-// static void can_hacker2_can_to_canhacker2(CanHacker2* instance) {
-//     furi_assert(instance);
-//     furi_assert(msg);
-//     furi_assert(msg->PayloadData);
-//     furi_assert(msg->PayloadLength <= CAN_HACKER2_PAYLOAD_DATA_SIZE);
+static void can_hacker2_can_receive(CanHacker2* instance) {
+    furi_assert(instance);
 
-//     uint8_t data[32] = {0};
+    if(instance->rx_msg.ControlFlags & MCP251XFD_TRANSMIT_ERROR_PASSIVE) {
+        FURI_LOG_E(TAG, "Transmit error passive");
+        return;
+    }
 
-//     if(instance->recive_msg.ControlFlags & MCP251XFD_STANDARD_MESSAGE_ID){
-//         sprintf(data, "r%03X%0", instance->recive_msg.MessageID, );
-//     }
+    uint8_t data[32] = {0};
+    uint8_t offset = 0;
 
-//     can_hacker2_tx_add_data(instance, data, len);
-// }
+    uint8_t is_rtr = (instance->rx_msg.ControlFlags & MCP251XFD_REMOTE_TRANSMISSION_REQUEST) ? 1 :
+                                                                                               0;
+    uint8_t is_exended = (instance->rx_msg.ControlFlags & MCP251XFD_EXTENDED_MESSAGE_ID) ? 1 : 0;
+
+    if(is_exended) {
+        data[offset++] = is_rtr ? CH2_SEND_R29BIT_ID : CH2_SEND_T29BIT_ID;
+        put_eff_id(data + offset, instance->rx_msg.MessageID);
+        offset += 8;
+    } else {
+        data[offset++] = is_rtr ? CH2_SEND_R11BIT_ID : CH2_SEND_T11BIT_ID;
+        put_sff_id(data + offset, instance->rx_msg.MessageID);
+        offset += 3;
+    }
+
+    data[offset++] = hex_asc_upper_lo(instance->rx_msg.DLC);
+
+    if(!is_rtr) {
+        for(uint8_t i = 0; i < instance->rx_msg.DLC; i++) {
+            put_hex_byte(data + offset, instance->rx_msg.PayloadData[i]);
+            offset += 2;
+        }
+    }
+
+    if(instance->can_timestamp) {
+        uint16_t ts = (uint16_t)instance->rx_msg_time_stamp;
+        put_hex_byte(data + offset, ts >> 8);
+        offset += 2;
+        put_hex_byte(data + offset, ts);
+        offset += 2;
+    }
+
+    data[offset++] = CH2_OK;
+    data[offset] = '\0';
+    can_hacker2_tx_add_data(instance, data, offset);
+    if(instance->callback) {
+        instance->callback(instance->context);
+    }
+}
 
 void can_hacker2_process(CanHacker2* instance) {
     furi_assert(instance);
@@ -438,13 +471,18 @@ void can_hacker2_process(CanHacker2* instance) {
 
     if(instance->can_open) {
         can0_function_device_check_irq(); //check irq
-        // bool recieve_event = false;
-        // do{
-        //     recieve_event = false;
-        //     can0_function_receive_msg(CAN0, &receive_event, &instance->recive_msg, MCP251XFD_PAYLOAD_8BYTE, &instance->recive_msg_time_stamp);
-        //     if(recieve_event){
-
-        //     }
-        // }
+        bool receive_event = false;
+        do {
+            receive_event = false;
+            can0_function_receive_msg(
+                CAN0,
+                &receive_event,
+                &instance->rx_msg,
+                MCP251XFD_PAYLOAD_8BYTE,
+                &instance->rx_msg_time_stamp);
+            if(receive_event) {
+                can_hacker2_can_receive(instance);
+            }
+        } while(receive_event);
     }
 }
