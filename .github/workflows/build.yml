@@ -3,7 +3,17 @@ on: [push, pull_request]
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
-    name: 'ufbt: Build for Dev branch'
+    strategy:
+      matrix:
+        include:
+          - name: release channel
+            sdk-channel: release
+          - name: dev channel
+            sdk-channel: dev
+          - name: xtreme firmware
+            sdk-url: https://github.com/Flipper-XFW/Xtreme-Firmware/releases/download/XFW-0050_27072023/XFW-0050_27072023-sdk.zip
+            sdk-channel: release
+    name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -11,8 +21,8 @@ jobs:
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
         id: build-app
         with:
-          # Set to 'release' to build for latest published release version
-          sdk-channel: dev
+          sdk-channel: ${{ matrix.sdk-channel }}
+          sdk-url: ${{ matrix.sdk-url }}
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
