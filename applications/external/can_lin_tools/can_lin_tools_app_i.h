@@ -24,7 +24,7 @@ struct CanLinToolsApp {
     CanLinToolsCanHacker2* can_lin_tools_can_hacker2;
 };
 
-void can_lin_tools_app_can_hacker2_start(CanLinToolsApp* app);
-void can_lin_tools_app_can_hacker2_stop(CanLinToolsApp* app);
-bool can_lin_tools_app_can_hacker2_is_nfc(CanLinToolsApp* app);
-bool can_lin_tools_app_can_hacker2_is_rfid(CanLinToolsApp* app, uint32_t* frequency);
+// void can_lin_tools_app_can_hacker2_start(CanLinToolsApp* app);
+// void can_lin_tools_app_can_hacker2_stop(CanLinToolsApp* app);
+// bool can_lin_tools_app_can_hacker2_is_nfc(CanLinToolsApp* app);
+// bool can_lin_tools_app_can_hacker2_is_rfid(CanLinToolsApp* app, uint32_t* frequency);

@@ -57,7 +57,7 @@ eERRORRESULT can0_function_transmit_msg_no_irq(
 //=============================================================================
 // Transmit a message to MCP251XFD device on CAN0
 //=============================================================================
-eERRORRESULT can0_function_transmit_msg(
+eERRORRESULT can0_function_transmit_msg1(
     uint32_t message_id,
     uint32_t* message_seq,
     setMCP251XFD_MessageCtrlFlags control_flags,
@@ -65,6 +65,8 @@ eERRORRESULT can0_function_transmit_msg(
     uint8_t* payload_data,
     eMCP251XFD_FIFO to_fifo,
     bool flush);
+
+eERRORRESULT can0_function_transmit_msg(MCP251XFD_CANMessage* can_msg, uint32_t* message_seq, eMCP251XFD_FIFO to_fifo, bool flush);
 
 //=============================================================================
 // Receive a message from MCP251XFD device on CAN0

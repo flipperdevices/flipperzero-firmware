@@ -55,7 +55,7 @@ CanLinToolsApp* can_lin_tools_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, CanLinToolsViewWidget, widget_get_view(app->widget));
 
-    // Field Presence
+    // Can Hacker 2
     app->can_lin_tools_can_hacker2 = can_lin_tools_view_can_hacker2_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -78,7 +78,7 @@ void can_lin_tools_app_free(CanLinToolsApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, CanLinToolsViewWidget);
     widget_free(app->widget);
 
-    // Field Presence
+    // Can Hacker 2
     view_dispatcher_remove_view(app->view_dispatcher, CanLinToolsViewCanHacker2);
     can_lin_tools_view_can_hacker2_free(app->can_lin_tools_can_hacker2);
 

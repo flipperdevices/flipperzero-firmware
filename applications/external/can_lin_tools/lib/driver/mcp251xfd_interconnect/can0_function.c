@@ -372,7 +372,7 @@ eERRORRESULT can0_function_transmit_msg_no_irq(
 //=============================================================================
 // Transmit a message to MCP251XFD device on CAN0
 //=============================================================================
-eERRORRESULT can0_function_transmit_msg(
+eERRORRESULT can0_function_transmit_msg1(
     uint32_t message_id,
     uint32_t* message_seq,
     setMCP251XFD_MessageCtrlFlags control_flags,
@@ -400,6 +400,23 @@ eERRORRESULT can0_function_transmit_msg(
     can_msg.DLC = dlc;
     can_msg.PayloadData = payload_data;
     return MCP251XFD_TransmitMessageToFIFO(CAN0, &can_msg, to_fifo, flush);
+}
+
+//=============================================================================
+// Transmit a message to MCP251XFD device on CAN0
+//=============================================================================
+eERRORRESULT can0_function_transmit_msg(MCP251XFD_CANMessage* can_msg, uint32_t* message_seq, eMCP251XFD_FIFO to_fifo, bool flush) {
+    eMCP251XFD_Devices dev = MCP2517FD;
+    MCP251XFD_GetDeviceID(CAN0, &dev, NULL, NULL);
+    uint32_t max_sequence = MCP2518FD_SEQUENCE_MAX;
+    if(dev == MCP2517FD) max_sequence = MCP2517FD_SEQUENCE_MAX;
+
+    can_msg->MessageSEQ = *message_seq;
+    (*message_seq)++;
+    if(*message_seq > max_sequence)
+        *message_seq =
+            0; // Roll over the sequence value (maximum differ if it's a MCP2517FD or a MCP2518FD)
+    return MCP251XFD_TransmitMessageToFIFO(CAN0, can_msg, to_fifo, flush);
 }
 
 //=============================================================================
@@ -610,7 +627,7 @@ void can0_function_device_check_irq(void) {
         case MCP251XFD_FIFO29_INTERRUPT:
         case MCP251XFD_FIFO30_INTERRUPT:
         case MCP251XFD_FIFO31_INTERRUPT:
-            FURI_LOG_I(TAG, "Transm 15-31");
+            //FURI_LOG_I(TAG, "Transm 15-31");
             transmit_event = true;
             return;
 
