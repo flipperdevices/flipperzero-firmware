@@ -115,28 +115,24 @@ static void save_image(void* _model) {
         datetime.day,
         datetime.hour,
         datetime.minute,
-        datetime.second
-    );
+        datetime.second);
 
-    // Open the file for writing. If the file does not exist (it shouldn't), 
+    // Open the file for writing. If the file does not exist (it shouldn't),
     // create it.
-    bool result = storage_file_open(
-        file, 
-        furi_string_get_cstr(file_name), 
-        FSAM_WRITE, FSOM_OPEN_ALWAYS
-    );
+    bool result =
+        storage_file_open(file, furi_string_get_cstr(file_name), FSAM_WRITE, FSOM_OPEN_ALWAYS);
 
     // Free the file name after use.
     furi_string_free(file_name);
 
     // If the file was opened successfully, write the bitmap header and the
     // image data.
-    if (result){
+    if(result) {
         storage_file_write(file, bitmap_header, BITMAP_HEADER_LENGTH);
         int8_t row_buffer[ROW_BUFFER_LENGTH];
-        for (size_t i = 64; i > 0; --i) {
-            for (size_t j = 0; j < ROW_BUFFER_LENGTH; ++j){
-                row_buffer[j] = model->pixels[((i-1)*ROW_BUFFER_LENGTH) + j];
+        for(size_t i = 64; i > 0; --i) {
+            for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
             }
             storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
         }
@@ -272,7 +268,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 },
                 true);
             return true;
-        }  
+        }
         case InputKeyMAX:
             break;
         }
@@ -308,15 +304,15 @@ static void camera_suite_view_camera_enter(void* context) {
     // Initialize the camera with the selected dithering option from options.
     CameraSuite* instanceContext = instance->context;
     switch(instanceContext->dither) {
-        case 0: // Floyd Steinberg
-            data[0] = '0';
-            break;
-        case 1: // Stucki
-            data[0] = '1';
-            break;
-        case 2: // Jarvis Judice Ninke
-            data[0] = '2';
-            break;
+    case 0: // Floyd Steinberg
+        data[0] = '0';
+        break;
+    case 1: // Stucki
+        data[0] = '1';
+        break;
+    case 2: // Jarvis Judice Ninke
+        data[0] = '2';
+        break;
     }
 
     // Send `data` to the ESP32-CAM
