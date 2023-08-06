@@ -1,1 +1,11 @@
+*.zip
+.DS_Store
+.clang-format
+.editorconfig
+.idea
 .vscode
+/venv
+__pycache__
+dist/*
+src-fap/.gitignore
+.submodules/*

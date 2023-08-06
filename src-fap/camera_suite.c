@@ -44,9 +44,11 @@ CameraSuite* camera_suite_app_alloc() {
 
     // Set defaults, in case no config loaded
     app->orientation = 0; // Orientation is "portrait", zero degrees by default.
-    app->haptic = 1; // Haptic is on by default
-    app->speaker = 1; // Speaker is on by default
-    app->led = 1; // LED is on by default
+    app->dither = 0; // Dither algorithm is "Floyd Steinberg" by default.
+    app->flash = 1; // Flash is enabled by default.
+    app->haptic = 1; // Haptic is enabled by default
+    app->speaker = 1; // Speaker is enabled by default
+    app->led = 1; // LED is enabled by default
 
     // Load configs
     camera_suite_read_settings(app);
