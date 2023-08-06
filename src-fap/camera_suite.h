@@ -31,6 +31,7 @@ typedef struct {
     CameraSuiteViewGuide* camera_suite_view_guide;
     uint32_t orientation;
     uint32_t dither;
+    uint32_t flash;
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
@@ -57,6 +58,11 @@ typedef enum {
     CameraSuiteDitherStucki,
     CameraSuiteDitherJarvisJudiceNinke,
 } CameraSuiteDitherState;
+
+typedef enum {
+    CameraSuiteFlashOff,
+    CameraSuiteFlashOn,
+} CameraSuiteFlashState;
 
 typedef enum {
     CameraSuiteHapticOff,

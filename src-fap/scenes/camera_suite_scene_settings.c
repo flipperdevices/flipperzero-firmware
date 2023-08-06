@@ -29,6 +29,16 @@ const uint32_t dither_value[4] = {
     CameraSuiteDitherJarvisJudiceNinke,
 };
 
+const char* const flash_text[2] = {
+    "OFF",
+    "ON",
+};
+
+const uint32_t flash_value[2] = {
+    CameraSuiteFlashOff,
+    CameraSuiteFlashOn,
+};
+
 const char* const haptic_text[2] = {
     "OFF",
     "ON",
@@ -73,6 +83,14 @@ static void camera_suite_scene_settings_set_camera_dither(VariableItem* item) {
 
     variable_item_set_current_value_text(item, dither_text[index]);
     app->dither = dither_value[index];
+}
+
+static void camera_suite_scene_settings_set_flash(VariableItem* item) {
+    CameraSuite* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, flash_text[index]);
+    app->flash = flash_value[index];
 }
 
 static void camera_suite_scene_settings_set_haptic(VariableItem* item) {
@@ -128,6 +146,13 @@ void camera_suite_scene_settings_on_enter(void* context) {
     value_index = value_index_uint32(app->dither, dither_value, 3);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, dither_text[value_index]);
+
+    // Flash ON/OFF
+    item = variable_item_list_add(
+        app->variable_item_list, "Flash:", 2, camera_suite_scene_settings_set_flash, app);
+    value_index = value_index_uint32(app->flash, flash_value, 2);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, flash_text[value_index]);
 
     // Haptic FX ON/OFF
     item = variable_item_list_add(

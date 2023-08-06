@@ -249,13 +249,16 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
-        case InputKeyOk:
-            // Camera: Initialize take picture mode.
-            data[0] = 'P';
-            // Initialize the ESP32-CAM onboard torch immediately.
-            furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
-            // Delay for 500ms to make sure flash is on before taking picture.
-            furi_delay_ms(500);
+        case InputKeyOk: {
+            CameraSuite* app = current_instance->context;
+            // If flash is enabled, flash the onboard ESP32-CAM LED.
+            if(app->flash) {
+                data[0] = 'P';
+                // Initialize the ESP32-CAM onboard torch immediately.
+                furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+                // Delay for 500ms to make sure flash is on before taking picture.
+                furi_delay_ms(500);
+            }
             // Take picture.
             with_view_model(
                 instance->view,
@@ -269,6 +272,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 },
                 true);
             return true;
+        }  
         case InputKeyMAX:
             break;
         }
