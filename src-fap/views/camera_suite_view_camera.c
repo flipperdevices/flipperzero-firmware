@@ -82,6 +82,73 @@ static void camera_suite_view_camera_draw(Canvas* canvas, void* _model) {
     }
 }
 
+static void save_image(void* _model) {
+    UartDumpModel* model = _model;
+
+    // This pointer is used to access the storage.
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    // This pointer is used to access the filesystem.
+    File* file = storage_file_alloc(storage);
+
+    // Store path in local variable.
+    const char* folderName = EXT_PATH("DCIM");
+
+    // Create the folder name for the image file if it does not exist.
+    if(storage_common_stat(storage, folderName, NULL) == FSE_NOT_EXIST) {
+        storage_simply_mkdir(storage, folderName);
+    }
+
+    // This pointer is used to access the file name.
+    FuriString* file_name = furi_string_alloc();
+
+    // Get the current date and time.
+    FuriHalRtcDateTime datetime = {0};
+    furi_hal_rtc_get_datetime(&datetime);
+
+    // Create the file name.
+    furi_string_printf(
+        file_name,
+        EXT_PATH("DCIM/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
+        datetime.year,
+        datetime.month,
+        datetime.day,
+        datetime.hour,
+        datetime.minute,
+        datetime.second
+    );
+
+    // Open the file for writing. If the file does not exist (it shouldn't), 
+    // create it.
+    bool result = storage_file_open(
+        file, 
+        furi_string_get_cstr(file_name), 
+        FSAM_WRITE, FSOM_OPEN_ALWAYS
+    );
+
+    // Free the file name after use.
+    furi_string_free(file_name);
+
+    // If the file was opened successfully, write the bitmap header and the
+    // image data.
+    if (result){
+        storage_file_write(file, bitmap_header, BITMAP_HEADER_LENGTH);
+        int8_t row_buffer[ROW_BUFFER_LENGTH];
+        for (size_t i = 64; i > 0; --i) {
+            for (size_t j = 0; j < ROW_BUFFER_LENGTH; ++j){
+                row_buffer[j] = model->pixels[((i-1)*ROW_BUFFER_LENGTH) + j];
+            }
+            storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
+        }
+    }
+
+    // Close the file.
+    storage_file_close(file);
+
+    // Freeing up memory.
+    storage_file_free(file);
+}
+
 static void camera_suite_view_camera_model_init(UartDumpModel* const model) {
     for(size_t i = 0; i < FRAME_BUFFER_LENGTH; i++) {
         model->pixels[i] = 0;
@@ -106,7 +173,6 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 true);
             break;
         }
-        // Send `data` to the ESP32-CAM
     } else if(event->type == InputTypePress) {
         uint8_t data[1];
         switch(event->key) {
@@ -185,19 +251,25 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
             break;
         case InputKeyOk:
             // Switch dithering types.
-            data[0] = 'D';
+            // data[0] = 'D';
+            data[0] = 'P';
+            // Initialize the ESP32-CAM onboard torch immediately.
+            furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+            // Delay for 500ms to make sure flash is on before taking picture.
+            furi_delay_ms(500);
+            // Take picture.
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
-                    UNUSED(model);
                     camera_suite_play_happy_bump(instance->context);
                     camera_suite_play_input_sound(instance->context);
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
+                    save_image(model);
                     instance->callback(CameraSuiteCustomEventSceneCameraOk, instance->context);
                 },
                 true);
-            break;
+            return true;
         case InputKeyMAX:
             break;
         }
