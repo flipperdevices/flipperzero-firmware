@@ -306,3 +306,16 @@ void data_display_set_state(DataDisplayView* data_display, DataDisplayState stat
 	// do refresh
 	true);
 }
+
+DataDisplayState data_display_get_state(DataDisplayView* data_display) {
+    DataDisplayState state;
+    furi_assert(data_display);
+    with_view_model(
+        data_display->view,
+	DataDisplayViewModel * model,
+	{ state = model->state; },
+	// no refresh
+	false);
+
+    return state;
+}

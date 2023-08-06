@@ -192,6 +192,8 @@ void ublox_worker_read_nav_messages(void* context) {
     
     // break the loop when the thread state changes
     while(ublox_worker->state == UbloxWorkerStateRead) {
+	// reading takes a little time, measure here
+	uint32_t ticks = furi_get_tick();
 	// we interrupt with checking the state to help reduce
 	// lag. it's not perfect, but it does overall improve things.
 	bool pvt = ublox_worker_read_pvt(ublox_worker);
@@ -220,7 +222,7 @@ void ublox_worker_read_nav_messages(void* context) {
 	    ublox_worker->callback(UbloxWorkerEventFailed, ublox_worker->context);
 	}
 
-	uint32_t ticks = furi_get_tick();
+
 	while(furi_get_tick() - ticks < furi_ms_to_ticks(((ublox->data_display_state).refresh_rate * 1000))) {
 	    // putting this here (should) make the logging response faster
 	    if(ublox->log_state == UbloxLogStateStopLogging) {
@@ -498,7 +500,7 @@ bool ublox_worker_read_odo(UbloxWorker* ublox_worker) {
             .distanceStd = (frame_rx->payload[16]) | (frame_rx->payload[17] << 8) |
                            (frame_rx->payload[18] << 16) | (frame_rx->payload[19] << 24),
         };
-	FURI_LOG_I(TAG, "odo (m): %lu", nav_odo.distance);
+	//FURI_LOG_I(TAG, "odo (m): %lu", nav_odo.distance);
         ublox->nav_odo = nav_odo;
         ublox_frame_free(frame_rx);
         return true;
