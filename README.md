@@ -42,6 +42,16 @@ Global schema:
 
 <p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schema.jpg" width=75% height=75%></p>
 
+UI of the application:
+
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper3.png" width=33% height=33%></p>
+
+**CPS**: **c**ounts **p**er **s**econd (nstantaneous measure of the activity). CPS is alway displayed on the left corner.
+
+**CPM**: **c**ounts **p**er **m**inut (the sum of CPS over a period of one minute). Other units of measurement can be chosen with **Left/Right**.
+
+New CPS bar measure appears on the left.
+
 ## Build the program
 
 Assuming the toolchain is already installed, copy **flipper_geiger** directory to **applications_user**
@@ -62,7 +72,7 @@ The program will automatically be launched after compilation
 button  | function
 ------------- | -------------
 **Ok** *[long press]*  | Clear the graph
-**Left/Right** *[short press]* | Choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** on the left is always displayed
+**Left/Right** *[short press]* | Choose unit on the right corner (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** on the left is always displayed
 **Up** *[long press]*  | Enable/disable recording, led of **Flipper Zero** is colored in red when recording
 **Up/Down** *[short press]*  | Zoom/unzoom 
 **Down** *[long press]*  | Display version of the application
@@ -130,6 +140,11 @@ epoch  | cps
 3  | 11
 4  | 9
 
+## Atomic Dice Roller
+
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/dice.jpg" width=25% height=25%></p>
+
+I maintain another application that uses the **geiger board** to roll dice by using radioactivy: https://github.com/nmrr/flipperzero-atomicdiceroller
 
 ## User gallery & video
 
