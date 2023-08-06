@@ -46,11 +46,11 @@ UI of the application:
 
 <p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper3.png" width=33% height=33%></p>
 
-**CPS**: **c**ounts **p**er **s**econd (nstantaneous measure of the activity). CPS is alway displayed on the left corner.
+**CPS**: **c**ounts **p**er **s**econd (instantaneous measure of the radioactivity). CPS is alway displayed on the left corner.
 
-**CPM**: **c**ounts **p**er **m**inut (the sum of CPS over a period of one minute). Other units of measurement can be chosen with **Left/Right**.
+**CPM**: **c**ounts **p**er **m**inute (the sum of CPS over a period of one minute). Other units of measurement can be chosen with **Left/Right**.
 
-New CPS bar measure appears on the left.
+New CPS bar measure appears on the left every second.
 
 ## Build the program
 
