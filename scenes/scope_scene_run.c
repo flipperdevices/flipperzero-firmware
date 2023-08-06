@@ -24,6 +24,7 @@
 #include "stm32wbxx_ll_gpio.h"
 
 #include "../scope_app_i.h"
+#include "flipperscope_icons.h"
 
 #define DIGITAL_SCALE_12BITS ((uint32_t)0xFFF)
 #define ADC_CONVERTED_DATA_BUFFER_SIZE ((uint32_t)128)
@@ -351,6 +352,11 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     float max = 0.0;
     float min = FLT_MAX;
     int count = 0;
+
+    if(pause)
+        canvas_draw_icon(canvas, 115, 0, &I_pause_10x10);
+    else
+        canvas_draw_icon(canvas, 115, 0, &I_play_10x10);
 
     // Calculate voltage measurements
     for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++) {
