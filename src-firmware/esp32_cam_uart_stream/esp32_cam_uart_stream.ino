@@ -112,8 +112,14 @@ void handleSerialInput() {
       case 's': // Stop stream
         stopStream = true;
         break;
-      case 'D': // Change dithering algorithm.
-        ditherAlgorithm = static_cast<DitheringAlgorithm>((ditherAlgorithm + 1) % 3);
+      case '0': // Use Floyd Steinberg dithering.
+        ditherAlgorithm = FLOYD_STEINBERG;
+        break;
+      case '1': // Use Jarvis Judice dithering.
+        ditherAlgorithm = JARVIS_JUDICE_NINKE;
+        break;
+      case '2': // Use Stucki dithering.
+        ditherAlgorithm = STUCKI;
         break;
       default:
         // Do nothing.

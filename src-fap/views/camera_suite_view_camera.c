@@ -250,8 +250,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 true);
             break;
         case InputKeyOk:
-            // Switch dithering types.
-            // data[0] = 'D';
+            // Camera: Initialize take picture mode.
             data[0] = 'P';
             // Initialize the ESP32-CAM onboard torch immediately.
             furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
@@ -295,6 +294,27 @@ static void camera_suite_view_camera_enter(void* context) {
 
     uint8_t data[1];
     data[0] = 'S'; // Uppercase `S` to start the camera
+
+    // Send `data` to the ESP32-CAM
+    furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+
+    // Delay for 50ms to make sure the camera is started before sending any other commands.
+    furi_delay_ms(50);
+
+    // Initialize the camera with the selected dithering option from options.
+    CameraSuite* instanceContext = instance->context;
+    switch(instanceContext->dither) {
+        case 0: // Floyd Steinberg
+            data[0] = '0';
+            break;
+        case 1: // Stucki
+            data[0] = '1';
+            break;
+        case 2: // Jarvis Judice Ninke
+            data[0] = '2';
+            break;
+    }
+
     // Send `data` to the ESP32-CAM
     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
 

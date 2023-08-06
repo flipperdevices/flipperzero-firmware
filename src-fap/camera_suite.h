@@ -30,6 +30,7 @@ typedef struct {
     CameraSuiteViewCamera* camera_suite_view_camera;
     CameraSuiteViewGuide* camera_suite_view_guide;
     uint32_t orientation;
+    uint32_t dither;
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
@@ -50,6 +51,12 @@ typedef enum {
     CameraSuiteOrientation180,
     CameraSuiteOrientation270,
 } CameraSuiteOrientationState;
+
+typedef enum {
+    CameraSuiteDitherFloydSteinberg,
+    CameraSuiteDitherStucki,
+    CameraSuiteDitherJarvisJudiceNinke,
+} CameraSuiteDitherState;
 
 typedef enum {
     CameraSuiteHapticOff,
