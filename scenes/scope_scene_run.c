@@ -460,6 +460,10 @@ void scope_scene_run_on_enter(void* context) {
     // What type of measurement are we performing
     type = app->measurement;
 
+    // Pause capture, when first started, if capturing
+    if(type == m_capture)
+        pause = 1;
+
     // Copy vector table, modify to use our own IRQ handlers
     __disable_irq();
     memcpy(ramVector, (uint32_t*)(FLASH_BASE | SCB->VTOR), sizeof(uint32_t) * TABLE_SIZE);
