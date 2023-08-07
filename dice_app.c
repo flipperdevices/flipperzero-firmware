@@ -76,6 +76,7 @@ static void roll(State* const state) {
 
     if(state->dice_index == 0) coin_set_end(state->roll_result); // change coin anim
 
+    add_to_history(state, state->dice_index, state->dice_count, state->roll_result);
     state->app_state = AnimState;
 }
 
@@ -105,11 +106,12 @@ static void draw_main_menu(const State* state, Canvas* canvas) {
     canvas_draw_str_aligned(canvas, 58, 61, AlignCenter, AlignBottom, furi_string_get_cstr(count));
 
     // buttons
-    if(isAnimState(state->app_state) == false) canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
-
-    if(state->app_state != AnimResultState && state->app_state != ResultState) {
+    if(isAnimState(state->app_state) == false) {
+        canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
         canvas_draw_icon(canvas, 0, 54, &I_ui_button_history);
-    } else {
+    }
+
+    if(state->app_state == AnimResultState || state->app_state == ResultState) {
         canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
     }
 
@@ -126,21 +128,29 @@ static void draw_history(const State* state, Canvas* canvas) {
         // left side
         furi_string_printf(hist, "%01d.", i + 1);
         canvas_draw_str_aligned(canvas, x, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
-        if (state->history[i].count == 0) {
+        if (state->history[i].index < 0) {
             furi_string_printf(hist, "--------");
         } else {
-            furi_string_printf(hist, "%01d%s - %01d", state->history[i].count, state->history[i].name, state->history[i].result);
+            if (state->history[i].index == 0){
+                furi_string_printf(hist, state->history[i].result == 1 ? "Heads" : "Tails");
+            } else {
+                furi_string_printf(hist, "%01d%s: %01d", state->history[i].count, dice_types[state->history[i].index].name, state->history[i].result);
+            }
         }
         canvas_draw_str_aligned(canvas, x + HISTORY_X_GAP, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
 
         // right side
         uint8_t r_index = i + HISTORY_COL;
-        furi_string_printf(hist, "%01d.", r_index);
+        furi_string_printf(hist, "%01d.", r_index + 1);
         canvas_draw_str_aligned(canvas, x + HISTORY_STEP_X, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
-        if (state->history[r_index].count == 0){
+        if (state->history[r_index].index < 0){
             furi_string_printf(hist, "--------");
         } else {
-            furi_string_printf(hist, "%01d%s - %01d", state->history[r_index].count, state->history[r_index].name, state->history[r_index].result);
+            if (state->history[r_index].index == 0){
+                furi_string_printf(hist, state->history[r_index].result == 1 ? "Heads" : "Tails");
+            } else {
+                furi_string_printf(hist, "%01d%s: %01d", state->history[r_index].count, dice_types[state->history[r_index].index].name, state->history[r_index].result);
+            }
         }
         canvas_draw_str_aligned(canvas, x + HISTORY_STEP_X + HISTORY_X_GAP, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
 
@@ -329,13 +339,13 @@ int32_t dice_dnd_app(void* p) {
                             if(state->dice_index != 0) {
                                 state->dice_count += 1;
                                 if(state->dice_count > MAX_DICE_COUNT) {
-                                    state->dice_count = MAX_DICE_COUNT;
+                                    state->dice_count = 1;
                                 }
                             }
                         } else if(event.input.key == InputKeyDown) {
                             state->dice_count -= 1;
                             if(state->dice_count < 1) {
-                                state->dice_count = 1;
+                                state->dice_count = MAX_DICE_COUNT;
                             }
                         }
                     }
@@ -343,7 +353,6 @@ int32_t dice_dnd_app(void* p) {
                     if(event.input.key == InputKeyOk && isAnimState(state->app_state) == false) {
                         roll(state);
                     }
-                    
                 }
                 
                 // back button handlers
