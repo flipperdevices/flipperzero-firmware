@@ -1,0 +1,10 @@
+App(
+    appid="princeton_send",
+    name="Princeton Sender",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="princeton_send_app",
+    requires=["gui", "subghz"],
+    stack_size=2 * 1024,
+    fap_icon="princeton_send.png",
+    fap_category="Sub-GHz",
+)
