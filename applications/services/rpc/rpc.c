@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <m-dict.h>
 
+#include <bt/bt_service/bt.h>
+
 #define TAG "RpcSrv"
 
 typedef enum {
@@ -209,6 +211,13 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
                     session->terminate = true;
                     istream->bytes_left = 0;
                     bytes_received = 0;
+
+                    if(session->owner == RpcOwnerBle) {
+                        // Disconnect BLE session
+                        Bt* bt = furi_record_open(RECORD_BT);
+                        bt_disconnect(bt);
+                        furi_record_close(RECORD_BT);
+                    }
                     break;
                 } else {
                     /* Save disconnect flag and continue reading buffer */
