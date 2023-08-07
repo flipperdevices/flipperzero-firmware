@@ -76,10 +76,11 @@ static void roll(State* const state) {
 
     if(state->dice_index == 0) coin_set_end(state->roll_result); // change coin anim
 
+    add_to_history(state, state->dice_index, state->dice_count, state->roll_result);
     state->app_state = AnimState;
 }
 
-static void draw_ui(const State* state, Canvas* canvas) {
+static void draw_main_menu(const State* state, Canvas* canvas) {
     canvas_set_font(canvas, FontSecondary);
 
     FuriString* count = furi_string_alloc();
@@ -92,7 +93,7 @@ static void draw_ui(const State* state, Canvas* canvas) {
     }
     // dice arrow buttons
     if(isDiceButtonsVisible(state->app_state)) {
-        if(state->dice_index > 0) canvas_draw_icon(canvas, 45, 44, &I_ui_button_left);
+        if(state->dice_index > 0) canvas_draw_icon(canvas, 44, 44, &I_ui_button_left);
         if(state->dice_index < DICE_TYPES - 1)
             canvas_draw_icon(canvas, 78, 44, &I_ui_button_right);
     }
@@ -105,15 +106,60 @@ static void draw_ui(const State* state, Canvas* canvas) {
     canvas_draw_str_aligned(canvas, 58, 61, AlignCenter, AlignBottom, furi_string_get_cstr(count));
 
     // buttons
-    if(isAnimState(state->app_state) == false) canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
+    if(isAnimState(state->app_state) == false) {
+        canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
+        canvas_draw_icon(canvas, 0, 54, &I_ui_button_history);
+    }
 
-    if(state->app_state != AnimResultState && state->app_state != ResultState) {
-        canvas_draw_icon(canvas, 0, 54, &I_ui_button_exit);
-    } else {
+    if(state->app_state == AnimResultState || state->app_state == ResultState) {
         canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
     }
 
     furi_string_free(count);
+}
+
+static void draw_history(const State* state, Canvas* canvas) {
+    canvas_set_font(canvas, FontSecondary);
+    FuriString* hist = furi_string_alloc();
+
+    uint8_t x = HISTORY_START_POST_X;
+    uint8_t y = HISTORY_START_POST_Y;
+    for(uint8_t i = 0; i < HISTORY_COL; i++) {
+        // left side
+        furi_string_printf(hist, "%01d.", i + 1);
+        canvas_draw_str_aligned(canvas, x, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+        if (state->history[i].index < 0) {
+            furi_string_printf(hist, "--------");
+        } else {
+            if (state->history[i].index == 0){
+                furi_string_printf(hist, state->history[i].result == 1 ? "Heads" : "Tails");
+            } else {
+                furi_string_printf(hist, "%01d%s: %01d", state->history[i].count, dice_types[state->history[i].index].name, state->history[i].result);
+            }
+        }
+        canvas_draw_str_aligned(canvas, x + HISTORY_X_GAP, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+
+        // right side
+        uint8_t r_index = i + HISTORY_COL;
+        furi_string_printf(hist, "%01d.", r_index + 1);
+        canvas_draw_str_aligned(canvas, x + HISTORY_STEP_X, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+        if (state->history[r_index].index < 0){
+            furi_string_printf(hist, "--------");
+        } else {
+            if (state->history[r_index].index == 0){
+                furi_string_printf(hist, state->history[r_index].result == 1 ? "Heads" : "Tails");
+            } else {
+                furi_string_printf(hist, "%01d%s: %01d", state->history[r_index].count, dice_types[state->history[r_index].index].name, state->history[r_index].result);
+            }
+        }
+        canvas_draw_str_aligned(canvas, x + HISTORY_STEP_X + HISTORY_X_GAP, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+
+        y += HISTORY_STEP_Y;
+    }
+
+    canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
+    canvas_draw_icon(canvas, 75, 54, &I_ui_button_exit);
+    furi_string_free(hist);
 }
 
 static void draw_dice(const State* state, Canvas* canvas) {
@@ -200,12 +246,16 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
 
-    draw_ui(state, canvas);
-
-    if(isResultVisible(state->app_state, state->dice_index)) {
-        draw_results(state, canvas);
+    if (state->app_state == HistoryState) {
+        draw_history(state, canvas);
     } else {
-        draw_dice(state, canvas);
+        draw_main_menu(state, canvas);
+
+        if(isResultVisible(state->app_state, state->dice_index)) {
+            draw_results(state, canvas);
+        } else {
+            draw_dice(state, canvas);
+        }
     }
 
     furi_mutex_release(state->mutex);
@@ -289,13 +339,13 @@ int32_t dice_dnd_app(void* p) {
                             if(state->dice_index != 0) {
                                 state->dice_count += 1;
                                 if(state->dice_count > MAX_DICE_COUNT) {
-                                    state->dice_count = MAX_DICE_COUNT;
+                                    state->dice_count = 1;
                                 }
                             }
                         } else if(event.input.key == InputKeyDown) {
                             state->dice_count -= 1;
                             if(state->dice_count < 1) {
-                                state->dice_count = 1;
+                                state->dice_count = MAX_DICE_COUNT;
                             }
                         }
                     }
@@ -303,17 +353,28 @@ int32_t dice_dnd_app(void* p) {
                     if(event.input.key == InputKeyOk && isAnimState(state->app_state) == false) {
                         roll(state);
                     }
-                    // back to dice select state or quit from app
-                    if(event.input.key == InputKeyBack) {
-                        if(state->app_state == ResultState ||
-                           state->app_state == AnimResultState) {
+                }
+                
+                // back button handlers
+                if(event.input.key == InputKeyBack){
+                    // switch states
+                    if(event.input.type == InputTypeShort) {
+                        if(state->app_state == SelectState){
+                            state->app_state = HistoryState;
+                        }
+                        else if(state->app_state == HistoryState) {
+                            state->app_state = SelectState;
+                        }
+                        else if(state->app_state == ResultState || state->app_state == AnimResultState) {
                             state->anim_frame = 0;
                             state->app_state = SelectState;
-                        } else {
-                            processing = false;
                         }
                     }
-                }
+                    // exit
+                    else if(event.input.type == InputTypeLong) {
+                        processing = false;
+                    }
+                }                
             }
         } else {
             FURI_LOG_D(TAG, "osMessageQueue: event timeout");

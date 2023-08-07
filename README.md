@@ -1,4 +1,5 @@
-# Flipper Zero DnD Dice
+# Flipper Zero DnD Dice 
+Version: 1.1 ([Changelog](https://github.com/Ka3u6y6a/flipper-zero-dice/blob/main/CHANGELOG.md))
 
 <div style="text-align:center"><img src=".flipcorg/banner.png"/></div>
 <br />
@@ -10,8 +11,10 @@ Dice types: Coin, d4, d6, d8, d10, d12, d20, d100
 ## Screenshots
 
 <div style="text-align:center"><img src=".flipcorg/gallery/main-screen.png"/></div>
- <br />
+<br />
 <div style="text-align:center"><img src=".flipcorg/gallery/roll-screen.png"/></div>
+<br />
+<div style="text-align:center"><img src=".flipcorg/gallery/history-screen.png"/></div>
 
 ## Compiling
 
