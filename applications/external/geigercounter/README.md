@@ -21,7 +21,7 @@ You also need jumper wires to connect the board on the **Flipper Zero**.
 - iodine-131 (beta & gamma)
 
 **Not really usable** radioactive sources: 
-- americium-241 (alpha & low gamma, some strong beta/gamma rays are emitted during radioactive cascade or due to the presence of radioisotope impurity)
+- americium-241 (alpha & low gamma, some strong beta/gamma rays are emitted during radioactive cascade or due to the presence of radioisotope impurities)
 - high purity metallic uranium/thorium (same as am241)
 
 
@@ -41,6 +41,16 @@ Black wire is usually used for the ground (sleeve on the schematic). You can use
 Global schema:
 
 <p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schema.jpg" width=75% height=75%></p>
+
+UI of the application:
+
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper3.png" width=33% height=33%></p>
+
+**CPS**: **c**ounts **p**er **s**econd (instantaneous measure of the radioactivity). CPS is alway displayed on the left corner.
+
+**CPM**: **c**ounts **p**er **m**inute (the sum of CPS over a period of one minute). Other units of measurement can be chosen with **Left/Right**.
+
+New CPS bar measure appears on the left every second.
 
 ## Build the program
 
@@ -62,9 +72,10 @@ The program will automatically be launched after compilation
 button  | function
 ------------- | -------------
 **Ok** *[long press]*  | Clear the graph
-**Left/Right** *[short press]* | Choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** on the left is always displayed
+**Left/Right** *[short press]* | Choose unit on the right corner (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** on the left is always displayed
 **Up** *[long press]*  | Enable/disable recording, led of **Flipper Zero** is colored in red when recording
 **Up/Down** *[short press]*  | Zoom/unzoom 
+**Down** *[long press]*  | Display version of the application
 **Back** *[long press]*  | Exit
 
 If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero** 
@@ -99,7 +110,7 @@ Measure of uranium orange pottery:
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper10.png" width=25% height=25%>
 
-Measure of americium-241 button from a smoke detector (descendants of americium or radioisotope impurity are detected, not americium itself):
+Measure of americium-241 button from a smoke detector (descendants of americium or radioisotope impurities are detected, not americium itself):
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper11.png" width=25% height=25%>
 
@@ -110,6 +121,10 @@ Measure of americium-241 button from a smoke detector (descendants of americium 
 Zoom levels (the third picture is the default zoom):
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom0.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom1.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom3.png" width=25% height=25%>
+
+Version of the application (press down button during 1 sec to display version):
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/version.png" width=25% height=25%>
 
 ## Recording function
 
@@ -125,8 +140,13 @@ epoch  | cps
 3  | 11
 4  | 9
 
+## Atomic Dice Roller
 
-## User gallery
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/dice.jpg" width=25% height=25%></p>
+
+I maintain another application that uses the **geiger board** to roll dice by using radioactivity: https://github.com/nmrr/flipperzero-atomicdiceroller
+
+## User gallery & video
 
 [BRD8 [Reddit]](https://www.reddit.com/user/BRD8/) - https://www.reddit.com/r/flipperzero/comments/110062z/am_i_a_hacker_now_mom/: 
 
@@ -140,16 +160,24 @@ epoch  | cps
 
 [![Watch the video](https://img.youtube.com/vi/JQB2jvY1oZ0/maxresdefault.jpg)](https://youtu.be/JQB2jvY1oZ0)
 
+[Boboso5676 [YouTube]](https://www.youtube.com/@boboso5676): 
+
+[![Watch the video](https://img.youtube.com/vi/jYQlC2NJScQ/maxresdefault.jpg)](https://youtu.be/jYQlC2NJScQ)
+
 ## What's next ?
 
 Here are some nice ideas to improve this app:
 
-* ~~Save output data in XML / JSON file~~ **DONE !** Output data are stored in CSV (lighter than XML / JSON and easy to parse)
-* Use the geiger board as random number generator
+* ~~Save output data in XML / JSON file~~ **DONE !** Output data are stored in CSV (lighter than XML / JSON and easier to parse)
+* ~~Use the geiger board as random number generator~~ **DONE !** A separate project uses the same geiger board to roll dice: https://github.com/nmrr/flipperzero-atomicdiceroller
 * Send data on the air in real time to monitor remotly
 * Buzz when it gets dangerous like a dosimeter
 
 ## Changelog
+
+* 2023-08-06
+  * Code optimization (shift operation on CPS array has been removed)
+  * Version section has been added
 
 * 2023-07-03
   * Data recording function has been added

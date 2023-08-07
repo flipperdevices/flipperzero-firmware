@@ -11,6 +11,6 @@ App(
     fap_category="GPIO/Sensors",
     fap_author="@nmrr",
     fap_weburl="https://github.com/nmrr/flipperzero-geigercounter",
-    fap_version=(1, 0),
+    fap_version=(1, 1),
     fap_description="Works with J305 Geiger tube on external board",
 )
