@@ -3,6 +3,7 @@
 
 UHFData* uhf_data_alloc() {
     UHFData* uhf_data = (UHFData*)malloc(sizeof(UHFData));
+    uhf_data->word_length = 0;
     uhf_data->length = 0;
     uhf_data->start = false;
     uhf_data->end = false;
@@ -58,6 +59,41 @@ void uhf_data_free(UHFData* uhf_data) {
         free(uhf_data);
         uhf_data = next;
     }
+}
+
+UHFTag* uhf_tag_alloc() {
+    UHFTag* uhf_tag = (UHFTag*)malloc(sizeof(UHFTag));
+    return uhf_tag;
+}
+
+void uhf_tag_set_epc(UHFTag* uhf_tag, uint8_t* data) {
+    // ED 1A 34 00 22 11 22 11 22 11 22 11 22 11 22 11
+    // memcpy((void*)&select_cmd->data, (void*)&CMD_SET_SELECT_PARAMETER.cmd[0], select_cmd->length);
+    memcpy(&uhf_tag->CRC, &data, 2);
+    data += 2;
+    memcpy(&uhf_tag->PC, data, 2);
+    uint16_t epc_length = uhf_tag->PC[0];
+    epc_length <<= 1;
+    epc_length += uhf_tag->PC[1] & 0x08;
+    epc_length *= 2;
+    uhf_tag->epc_length = epc_length;
+    memcpy(&uhf_tag->EPC, &data, (size_t)epc_length);
+}
+
+void uhf_tag_set_tid(UHFTag* uhf_tag, uint8_t* data) {
+    memcpy(&uhf_tag->CRC, &data, 2);
+    data += 2;
+    memcpy(&uhf_tag->PC, data, 2);
+    uint16_t epc_length = uhf_tag->PC[0];
+    epc_length <<= 1;
+    epc_length += uhf_tag->PC[1] & 0x08;
+    epc_length *= 2;
+    uhf_tag->epc_length = epc_length;
+    memcpy(&uhf_tag->EPC, &data, (size_t)epc_length);
+}
+
+void uhf_tag_free(UHFTag* uhf_tag) {
+    free(uhf_tag);
 }
 
 UHFResponseData* uhf_response_data_alloc() {
