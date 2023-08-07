@@ -192,8 +192,9 @@ bool crypto_ctx_encrypt(ESubGhzChatCryptoCtx* ctx, uint8_t* in, size_t in_len, u
              TAG_BYTES) == 0);
 #endif /* FURI_HAL_CRYPTO_ADVANCED_AVAIL */
 
-    // increase internal counter
+    // update replay dict and increase internal counter
     if(ret) {
+        ESubGhzChatReplayDict_set_at(ctx->replay_dict, ctx->run_id, ctx->counter);
         ctx->counter++;
     }
 
