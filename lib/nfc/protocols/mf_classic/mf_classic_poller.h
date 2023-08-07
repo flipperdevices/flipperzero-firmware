@@ -22,7 +22,8 @@ typedef enum {
 
     // Dictionary attack events
     MfClassicPollerEventTypeRequestKey,
-    MfClassicPollerEventTypeNewSector,
+    MfClassicPollerEventTypeNextSector,
+    MfClassicPollerEventTypeDataUpdate,
     MfClassicPollerEventTypeFoundKeyA,
     MfClassicPollerEventTypeFoundKeyB,
     MfClassicPollerEventTypeCardNotDetected,
@@ -48,7 +49,17 @@ typedef struct {
 } MfClassicPollerEventDataRequestMode;
 
 typedef struct {
-    uint8_t sector_num;
+    uint8_t current_sector;
+    uint8_t total_sectors;
+} MfClassicPollerEventDataDictAttackNextSector;
+
+typedef struct {
+    uint8_t sectors_total;
+    uint8_t sectors_read;
+    uint8_t keys_read;
+} MfClassicPollerEventDataUpdate;
+
+typedef struct {
     MfClassicKey key;
     bool key_provided;
 } MfClassicPollerEventDataKeyRequest;
@@ -73,13 +84,15 @@ typedef struct {
 } MfClassicPollerEventDataWriteBlockRequest;
 
 typedef struct {
-    uint8_t start_sector;
+    uint8_t current_sector;
 } MfClassicPollerEventKeyAttackData;
 
 typedef union {
     MfClassicError error;
     MfClassicPollerEventDataRequestMode poller_mode;
+    MfClassicPollerEventDataDictAttackNextSector next_sector_data;
     MfClassicPollerEventDataKeyRequest key_request_data;
+    MfClassicPollerEventDataUpdate data_update;
     MfClassicPollerEventDataReadSectorRequest read_sector_request_data;
     MfClassicPollerEventKeyAttackData key_attack_data;
     MfClassicPollerEventDataSectorTrailerRequest sec_tr_data;

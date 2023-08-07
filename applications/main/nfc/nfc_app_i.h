@@ -75,8 +75,8 @@ typedef struct {
     MfDict* dict;
     uint32_t total_keys;
     uint32_t current_key;
+    uint8_t total_sectors;
     uint8_t current_sector;
-    MfClassicType type;
 } NfcMfClassicDictAttackContext;
 
 struct NfcApp {

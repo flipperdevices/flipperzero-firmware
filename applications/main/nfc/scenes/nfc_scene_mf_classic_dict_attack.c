@@ -21,18 +21,13 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
     MfClassicPollerEvent* mfc_event = event.data;
 
     NfcApp* instance = context;
-    if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
-        const MfClassicData* data = nfc_poller_get_data(instance->poller);
-        instance->mf_dict_context.type = data->type;
+    if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcCustomEventDictAttackCardDetected);
+    } else if(mfc_event->type == MfClassicPollerEventTypeCardLost) {
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardLost);
+    } else if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
         mfc_event->data->poller_mode.mode = MfClassicPollerModeDictAttack;
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventDictAttackCardDetected);
-    } else if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventDictAttackCardDetected);
-    } else if(mfc_event->type == MfClassicPollerEventTypeCardNotDetected) {
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventDictAttackCardNotDetected);
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestKey) {
         MfClassicKey key = {};
         if(mf_dict_get_next_key(instance->mf_dict_context.dict, &key)) {
@@ -46,7 +41,7 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
         } else {
             mfc_event->data->key_request_data.key_provided = false;
         }
-    } else if(mfc_event->type == MfClassicPollerEventTypeNewSector) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeNextSector) {
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackNewSector);
         mf_dict_rewind(instance->mf_dict_context.dict);
@@ -58,7 +53,7 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackFoundKeyB);
     } else if(mfc_event->type == MfClassicPollerEventTypeKeyAttackStart) {
-        instance->mf_dict_context.current_sector = mfc_event->data->key_attack_data.start_sector;
+        instance->mf_dict_context.current_sector = mfc_event->data->key_attack_data.current_sector;
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackKeyAttackStart);
     } else if(mfc_event->type == MfClassicPollerEventTypeKeyAttackStop) {
@@ -164,7 +159,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 consumed = true;
             }
         } else if(event.event == NfcCustomEventDictAttackCardDetected) {
-            dict_attack_set_card_detected(instance->dict_attack, instance->mf_dict_context.type);
+            dict_attack_set_card_detected(instance->dict_attack, MfClassicType1k);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackCardNotDetected) {
             dict_attack_set_card_removed(instance->dict_attack);

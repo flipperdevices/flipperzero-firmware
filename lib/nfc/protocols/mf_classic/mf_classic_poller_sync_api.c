@@ -56,7 +56,7 @@ static MfClassicError mf_classic_poller_read_block_handler(
             poller, data->read_block_context.block_num, &data->read_block_context.block);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_aync_halt(poller);
+        error = mf_classic_async_halt(poller);
         if(error != MfClassicErrorNone) break;
 
     } while(false);
@@ -82,7 +82,7 @@ static MfClassicError mf_classic_poller_write_block_handler(
             poller, data->write_block_context.block_num, &data->write_block_context.block);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_aync_halt(poller);
+        error = mf_classic_async_halt(poller);
         if(error != MfClassicErrorNone) break;
 
     } while(false);
@@ -113,7 +113,7 @@ static MfClassicError mf_classic_poller_read_value_handler(
             break;
         }
 
-        error = mf_classic_aync_halt(poller);
+        error = mf_classic_async_halt(poller);
         if(error != MfClassicErrorNone) break;
 
     } while(false);
@@ -149,7 +149,7 @@ static MfClassicError mf_classic_poller_change_value_handler(
         error = mf_classic_async_read_block(poller, data->change_value_context.block_num, &block);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_aync_halt(poller);
+        error = mf_classic_async_halt(poller);
         if(error != MfClassicErrorNone) break;
 
         if(!mf_classic_block_to_value(&block, &data->change_value_context.new_value, NULL)) {

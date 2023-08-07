@@ -20,13 +20,7 @@ typedef enum {
 } MfClassicCardState;
 
 typedef enum {
-    MfClassicReadModeDictAttack,
-    MfClassicReadModeKeyReuse,
-} MfClassicReadMode;
-
-typedef enum {
     MfClassicPollerStateStart,
-    MfClassicPollerStateIdle,
 
     // Write states
     MfClassicPollerStateRequestSectorTrailer,
@@ -35,12 +29,16 @@ typedef enum {
     MfClassicPollerStateWriteBlock,
 
     // Read states
-    MfClassicPollerStateNewSector,
+    MfClassicPollerStateNextSector,
     MfClassicPollerStateRequestKey,
     MfClassicPollerStateRequestReadSector,
     MfClassicPollerStateAuthKeyA,
     MfClassicPollerStateAuthKeyB,
     MfClassicPollerStateReadSector,
+    MfClassicPollerStateKeyReuseStart,
+    MfClassicPollerStateKeyReuseAuthKeyA,
+    MfClassicPollerStateKeyReuseAuthKeyB,
+    MfClassicPollerStateKeyReuseReadSector,
     MfClassicPollerStateSuccess,
     MfClassicPollerStateFail,
 
@@ -57,24 +55,28 @@ typedef struct {
     MfClassicBlock tag_block;
 } MfClassicPollerWriteContext;
 
+typedef struct {
+    uint8_t current_sector;
+    MfClassicKey current_key;
+    MfClassicKeyType current_key_type;
+    bool auth_passed;
+    uint8_t current_block;
+    uint8_t reuse_key_sector;
+} MfClassicPollerDictAttackContext;
+
 typedef union {
     MfClassicPollerWriteContext write_ctx;
+    MfClassicPollerDictAttackContext dict_attack_ctx;
 } MfClassicPollerModeContext;
 
 struct MfClassicPoller {
     Iso14443_3aPoller* iso14443_3a_poller;
 
     MfClassicPollerState state;
-    MfClassicPollerState prev_state;
     MfClassicAuthState auth_state;
     MfClassicCardState card_state;
 
-    MfClassicReadMode read_mode;
-    MfClassicKey current_key;
-    uint8_t sectors_read;
-    uint8_t key_reuse_sector;
     uint8_t sectors_total;
-
     MfClassicPollerModeContext mode_ctx;
 
     Crypto1* crypto;
@@ -148,7 +150,7 @@ MfClassicError mf_classic_async_auth(
     MfClassicKeyType key_type,
     MfClassicAuthContext* data);
 
-MfClassicError mf_classic_aync_halt(MfClassicPoller* instance);
+MfClassicError mf_classic_async_halt(MfClassicPoller* instance);
 
 MfClassicError
     mf_classic_async_read_block(MfClassicPoller* instance, uint8_t block_num, MfClassicBlock* data);
