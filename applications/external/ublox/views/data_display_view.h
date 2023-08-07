@@ -40,3 +40,5 @@ void data_display_set_nav_messages(
 void data_display_set_state(DataDisplayView* data_display, DataDisplayState state);
 
 void data_display_set_log_state(DataDisplayView* data_display, UbloxLogState log_state);
+
+DataDisplayState data_display_get_state(DataDisplayView* data_display);
