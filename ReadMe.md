@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fixes for [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) for menu_alloc (By xtruan)
 - Fixes to bring back menu_alloc (By RogueMaster)
 - Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
+- Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 
 <a name="release">
 

@@ -32,12 +32,11 @@ void camera_suite_view_guide_draw(Canvas* canvas, CameraSuiteViewGuideModel* mod
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Guide");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 12, AlignLeft, AlignTop, "Left = Toggle Invert");
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Right = Toggle Dithering");
-    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "Up = Contrast Up");
-    canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, "Down = Contrast Down");
-    // TODO: Possibly update to take picture instead.
-    canvas_draw_str_aligned(canvas, 0, 52, AlignLeft, AlignTop, "Center = Toggle Dither Type");
+    canvas_draw_str_aligned(canvas, 0, 12, AlignLeft, AlignTop, "Left = Toggle invert");
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Right = Toggle dithering");
+    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "Up = Contrast up");
+    canvas_draw_str_aligned(canvas, 0, 42, AlignLeft, AlignTop, "Down = Contrast down");
+    canvas_draw_str_aligned(canvas, 0, 52, AlignLeft, AlignTop, "Center = Take picture");
 }
 
 static void camera_suite_view_guide_model_init(CameraSuiteViewGuideModel* const model) {

@@ -24,14 +24,25 @@
 - [Software Guide](#software-guide)
 - [Attributions](#attributions)
 - [Contributions](#contributions)
+- [Changelog](src-fap/docs/CHANGELOG.md)
 
 ## Previews <a name="previews"></a>
 
-<img align="center" src=".github/images/preview_01.png" />
+Greetings!
 
-<img align="center" src=".github/images/preview_02.png" />
+- <img align="center" src=".github/images/preview_01.png" />
 
-<img align="center" src=".github/images/preview.gif" />
+Preview with a camera module attached to the Flipper Zero.
+
+- <img align="center" src=".github/images/preview_02.png" />
+
+Version 1.1.0 and above now supports new dithering options and bug fixes!
+
+- <img align="center" src=".github/images/v1-1.gif" />
+
+Version 1.2.0 and above now supports taking pictures, configurable dithering, and LED flash!
+
+- <img align="center" src=".github/images/v1-2.gif" />
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -122,13 +133,17 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 
 ▶️ = Toggle dithering on/off.
 
-⚪ = Cycle Floyd–Steinberg/Jarvis-Judice-Ninke/Stucki dithering types.
+⚪ = Take a picture and save to the "DCIM" folder at the root of your SD card. Image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp"). If flash is on in the settings (enabled by default) the ESP32-CAM onboard LED will light up when the picture is taken.
 
 ↩️ = Go back.
 
 ### Camera Suite settings:
 
 **Orientation** = Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
+
+**Dithering Type** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
+
+**Flash** Toggle the ESP32-CAM onboard LED on/off when taking a picture.
 
 **Haptic FX** = Toggle haptic feedback on/off.
 
@@ -162,8 +177,8 @@ Cody
 
 <!-- LINKS -->
 
-[amazon-esp32-cam-link-1]: https://amzn.to/3NCoQUq
-[amazon-esp32-cam-link-2]: https://amzn.to/46IuAF9
+[amazon-esp32-cam-link-1]: https://amzn.to/3ODsCOZ
+[amazon-esp32-cam-link-2]: https://amzn.to/3OllPIE
 [arduino-ide]: https://www.arduino.cc/en/software
 [flipper-zero-camera-suite-releases]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/releases
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate

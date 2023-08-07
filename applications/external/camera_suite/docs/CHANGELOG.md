@@ -1,11 +1,20 @@
 ## Roadmap
 
-- Save image support.
 - Full screen 90 degree and 270 degree fill.
-- Camera flash support.
 - In-camera GUI.
 
-## v1.1 (current)
+## v1.2 (current)
+
+- Save image support. When the center button is pressed take a picture and save it to the "DCIM" folder at the root of your SD card. The image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp").
+- Camera flash support. Flashes the ESP32-CAM onboard LED when a picture is taken if enabled in the settings.
+- Move the camera dithering type to the settings scene as a new configurable option.
+- Add "Flash" option to the settings scene as a new configurable option.
+- Update documentation to reflect changes.
+- Update firmware with new dithering options set.
+- Update firmware with new flash support.
+- Update repo to reflect https://github.com/CodyTolene/Flipper-Zero-Development-Toolkit for easier tooling.
+
+## v1.1
 
 - Support and picture stabilization for all camera orientations (0 degree, 90 degree, 180 degree, and 270 degree).
 - Rename "Scene 1" to "Camera". No UX changes there.
