@@ -41,25 +41,18 @@ typedef enum {
 } FHalNfcError;
 
 typedef enum {
-    FHalNfcModeIso14443aPoller,
-    FHalNfcModeIso14443aListener,
-
-    FHalNfcModeIso14443bPoller,
-    FHalNfcModeIso14443bListener,
-
-    FHalNfcModeNfcfPoller,
-    FHalNfcModeNfcfListener,
-
-    FHalNfcModeIso15693Poller,
-    FHalNfcModeIso15693Listener,
+    FHalNfcModePoller,
+    FHalNfcModeListener,
 
     FHalNfcModeNum,
 } FHalNfcMode;
 
 typedef enum {
-    FHalNfcBitrate26p48,
-    FHalNfcBitrate106,
-} FHalNfcBitrate;
+    FHalNfcTechIso14443a,
+    FHalNfcTechIso14443b,
+    FHalNfcTechIso15693,
+    FHalNfcTechNum,
+} FHalNfcTech;
 
 typedef enum {
     FHalNfcaShortFrameAllReq,
@@ -97,7 +90,7 @@ FHalNfcError f_hal_nfc_low_power_mode_stop();
  * 
  * @return FHalNfcError 
  */
-FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate);
+FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcTech tech);
 
 FHalNfcError f_hal_nfc_reset_mode();
 
@@ -157,11 +150,6 @@ FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame);
 FHalNfcError f_hal_nfca_send_sdd_frame(const uint8_t* tx_data, size_t tx_bits);
 
 FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
-
-// TODO virtual methods?
-FHalNfcError f_hal_nfca_listener_init();
-
-FHalNfcError f_hal_nfca_listener_deinit();
 
 FHalNfcError
     furi_hal_nfca_set_col_res_data(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t sak);

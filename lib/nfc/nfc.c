@@ -251,21 +251,21 @@ void nfc_config(Nfc* instance, NfcMode mode) {
         f_hal_nfc_reset_mode();
         instance->config_state = NfcConfigurationStateIdle;
     } else if(mode == NfcModeIso14443aPoller) {
-        f_hal_nfc_set_mode(FHalNfcModeIso14443aPoller, FHalNfcBitrate106);
+        f_hal_nfc_set_mode(FHalNfcModePoller, FHalNfcTechIso14443a);
         instance->config_state = NfcConfigurationStateDone;
     } else if(mode == NfcModeIso14443aListener) {
         f_hal_nfc_low_power_mode_stop();
-        f_hal_nfc_set_mode(FHalNfcModeIso14443aListener, FHalNfcBitrate106);
+        f_hal_nfc_set_mode(FHalNfcModeListener, FHalNfcTechIso14443a);
         instance->config_state = NfcConfigurationStateDone;
     } else if(mode == NfcModeIso14443bPoller) {
-        f_hal_nfc_set_mode(FHalNfcModeIso14443bPoller, FHalNfcBitrate106);
+        f_hal_nfc_set_mode(FHalNfcModePoller, FHalNfcTechIso14443b);
         instance->config_state = NfcConfigurationStateDone;
     } else if(mode == NfcModeIso15693Poller) {
-        f_hal_nfc_set_mode(FHalNfcModeIso15693Poller, FHalNfcBitrate26p48);
+        f_hal_nfc_set_mode(FHalNfcModePoller, FHalNfcTechIso15693);
         instance->config_state = NfcConfigurationStateDone;
     } else if(mode == NfcModeIso15693Listener) {
         f_hal_nfc_low_power_mode_stop();
-        f_hal_nfc_set_mode(FHalNfcModeIso15693Listener, FHalNfcBitrate26p48);
+        f_hal_nfc_set_mode(FHalNfcModeListener, FHalNfcTechIso15693);
         instance->config_state = NfcConfigurationStateDone;
     }
 }

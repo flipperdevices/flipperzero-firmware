@@ -47,6 +47,28 @@ bool f_hal_nfc_event_wait_for_specific_irq(
     uint32_t mask,
     uint32_t timeout_ms);
 
+// Technology specific API
+typedef FHalNfcError (*FHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
+
+typedef struct {
+    FHalNfcChipConfig init;
+    FHalNfcChipConfig deinit;
+} FHalNfcTechPollerBase;
+
+typedef struct {
+    FHalNfcChipConfig init;
+    FHalNfcChipConfig deinit;
+} FHalNfcTechListenerBase;
+
+typedef struct {
+    FHalNfcTechPollerBase poller;
+    FHalNfcTechListenerBase listener;
+} FHalNfcTechBase;
+
+extern const FHalNfcTechBase f_hal_nfc_iso14443a;
+extern const FHalNfcTechBase f_hal_nfc_iso14443b;
+extern const FHalNfcTechBase f_hal_nfc_iso15693;
+
 #ifdef __cplusplus
 }
 #endif
