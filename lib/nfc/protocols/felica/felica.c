@@ -5,8 +5,8 @@
 #include <nfc/nfc_common.h>
 #include <nfc/helpers/iso14443_crc.h>
 
-#define FELICA_PROTOCOL_NAME "ISO14443-3B"
-#define FELICA_DEVICE_NAME "ISO14443-3B (Unknown)"
+#define FELICA_PROTOCOL_NAME "Felica"
+#define FELICA_DEVICE_NAME "Felica"
 
 #define FELICA_APP_DATA_KEY "Application data"
 #define FELICA_PROTOCOL_INFO_KEY "Protocol info"
@@ -64,14 +64,10 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
     do {
         if(version < NFC_UNIFIED_FORMAT_VERSION) break;
 
-        if(!flipper_format_read_hex(
-               ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
+        if(!flipper_format_read_hex(ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
             break;
         if(!flipper_format_read_hex(
-               ff,
-               FELICA_PROTOCOL_INFO_KEY,
-               data->protocol_info,
-               FELICA_PROTOCOL_INFO_SIZE))
+               ff, FELICA_PROTOCOL_INFO_KEY, data->protocol_info, FELICA_PROTOCOL_INFO_SIZE))
             break;
 
         parsed = true;
@@ -86,16 +82,11 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
     bool saved = false;
 
     do {
-        if(!flipper_format_write_comment_cstr(ff, FELICA_PROTOCOL_NAME " specific data"))
+        if(!flipper_format_write_comment_cstr(ff, FELICA_PROTOCOL_NAME " specific data")) break;
+        if(!flipper_format_write_hex(ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
             break;
         if(!flipper_format_write_hex(
-               ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
-            break;
-        if(!flipper_format_write_hex(
-               ff,
-               FELICA_PROTOCOL_INFO_KEY,
-               data->protocol_info,
-               FELICA_PROTOCOL_INFO_SIZE))
+               ff, FELICA_PROTOCOL_INFO_KEY, data->protocol_info, FELICA_PROTOCOL_INFO_SIZE))
             break;
         saved = true;
     } while(false);

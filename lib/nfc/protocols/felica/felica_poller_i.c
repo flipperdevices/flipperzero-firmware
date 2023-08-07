@@ -60,8 +60,7 @@ static FelicaError felica_poller_frame_exchange(
     return ret;
 }
 
-FelicaError
-    felica_poller_async_activate(FelicaPoller* instance, FelicaData* data) {
+FelicaError felica_poller_async_activate(FelicaPoller* instance, FelicaData* data) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
@@ -75,20 +74,27 @@ FelicaError
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_reset(instance->rx_buffer);
 
-        // Send REQB
-        bit_buffer_append_byte(instance->tx_buffer, 0x05);
-        bit_buffer_append_byte(instance->tx_buffer, 0x00);
-        bit_buffer_append_byte(instance->tx_buffer, 0x08);
+        // Send Polling command
+        FURI_LOG_I(TAG, "Polling command tx");
+        const uint8_t tx[] = {0xb2, 0x4d, 0x06, 0x00, 0xff, 0xff, 0x00, 0x00, 0x09, 0x21};
+        bit_buffer_copy_bytes(instance->tx_buffer, tx, sizeof(tx));
 
         ret = felica_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, FELICA_FDT_POLL_FC);
         if(ret != FelicaErrorNone) {
+            FURI_LOG_I(TAG, "Polling command rx error: %d", ret);
             instance->state = FelicaPollerStateColResFailed;
             break;
         }
 
+        FURI_LOG_I(TAG, "Polling command rx");
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(instance->rx_buffer); i++) {
+            printf("%02X ", bit_buffer_get_byte(instance->rx_buffer, i));
+        }
+        printf("\r\n");
+
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(FelicaAtqB)) {
-            FURI_LOG_D(TAG, "Unexpected REQB response");
+            FURI_LOG_D(TAG, "Unexpected Polling response");
             instance->state = FelicaPollerStateColResFailed;
             ret = FelicaErrorCommunication;
             break;
@@ -96,8 +102,7 @@ FelicaError
 
         instance->state = FelicaPollerStateActivationInProgress;
 
-        const FelicaAtqB* atqb =
-            (const FelicaAtqB*)bit_buffer_get_data(instance->rx_buffer);
+        const FelicaAtqB* atqb = (const FelicaAtqB*)bit_buffer_get_data(instance->rx_buffer);
 
         memcpy(data->uid, atqb->uid, FELICA_UID_SIZE);
         memcpy(data->app_data, atqb->app_data, FELICA_APP_DATA_SIZE);

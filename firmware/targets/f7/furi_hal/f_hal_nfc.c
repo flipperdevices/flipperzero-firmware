@@ -531,6 +531,70 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
             st25r3916_write_reg(
                 handle, ST25R3916_REG_CORR_CONF2, ST25R3916_REG_CORR_CONF2_corr_s8);
         }
+    } else if(mode == FHalNfcModeFelicaPoller) {
+        f_hal_nfc_configure_poller_common(handle);
+        // Enable ISO14443B mode, AM modulation
+        st25r3916_change_reg_bits(
+            handle,
+            ST25R3916_REG_MODE,
+            ST25R3916_REG_MODE_om_mask | ST25R3916_REG_MODE_tr_am,
+            ST25R3916_REG_MODE_om_felica | ST25R3916_REG_MODE_tr_am_am);
+
+        // 10% ASK modulation
+        st25r3916_change_reg_bits(
+            handle,
+            ST25R3916_REG_TX_DRIVER,
+            ST25R3916_REG_TX_DRIVER_am_mod_mask,
+            ST25R3916_REG_TX_DRIVER_am_mod_10percent);
+
+        // Use regulator AM, resistive AM disabled
+        st25r3916_clear_reg_bits(
+            handle,
+            ST25R3916_REG_AUX_MOD,
+            ST25R3916_REG_AUX_MOD_dis_reg_am | ST25R3916_REG_AUX_MOD_res_am);
+        
+        st25r3916_change_reg_bits(
+            handle,
+            ST25R3916_REG_BIT_RATE,
+            ST25R3916_REG_BIT_RATE_txrate_mask | ST25R3916_REG_BIT_RATE_rxrate_mask,
+            ST25R3916_REG_BIT_RATE_txrate_212 | ST25R3916_REG_BIT_RATE_rxrate_212);
+
+        // if(bitrate == FHalNfcBitrate106) {
+        //     // Bitrate-dependent NFC-B settings
+
+        //     // 1st stage zero = 60kHz, 3rd stage zero = 200 kHz
+        //     st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF1, ST25R3916_REG_RX_CONF1_h200);
+
+        //     // Enable AGC
+        //     // AGC Ratio 6
+        //     // AGC algorithm with RESET (recommended for ISO14443-B)
+        //     // AGC operation during complete receive period
+        //     // Squelch ratio 6/3 (recommended for ISO14443-B)
+        //     // Squelch automatic activation on TX end
+        //     st25r3916_write_reg(
+        //         handle,
+        //         ST25R3916_REG_RX_CONF2,
+        //         ST25R3916_REG_RX_CONF2_agc6_3 | ST25R3916_REG_RX_CONF2_agc_alg |
+        //             ST25R3916_REG_RX_CONF2_agc_m | ST25R3916_REG_RX_CONF2_agc_en |
+        //             ST25R3916_REG_RX_CONF2_pulz_61 | ST25R3916_REG_RX_CONF2_sqm_dyn);
+
+        //     // HF operation, full gain on AM and PM channels
+        //     st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF3, 0x00);
+        //     // No gain reduction on AM and PM channels
+        //     st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF4, 0x00);
+
+        //     // Subcarrier end detector enabled
+        //     // Subcarrier end detection level = 66%
+        //     // BPSK start 33 pilot pulses
+        //     // AM & PM summation before digitizing on
+        //     st25r3916_write_reg(
+        //         handle,
+        //         ST25R3916_REG_CORR_CONF1,
+        //         ST25R3916_REG_CORR_CONF1_corr_s0 | ST25R3916_REG_CORR_CONF1_corr_s1 |
+        //             ST25R3916_REG_CORR_CONF1_corr_s3 | ST25R3916_REG_CORR_CONF1_corr_s4);
+        //     // Sleep mode disable, 424kHz mode off
+        //     st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0x00);
+        // }
     }
 
     return error;
@@ -544,6 +608,11 @@ FHalNfcError f_hal_nfc_reset_mode() {
     // Set default value in mode register
     st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om0);
     st25r3916_clear_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
+    st25r3916_clear_reg_bits(
+        handle,
+        ST25R3916_REG_BIT_RATE,
+        ST25R3916_REG_BIT_RATE_txrate_mask | ST25R3916_REG_BIT_RATE_rxrate_mask);
+
     f_hal_nfca_listener_deinit();
 
     return error;
