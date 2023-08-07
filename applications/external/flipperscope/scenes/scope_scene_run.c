@@ -24,6 +24,7 @@
 #include "stm32wbxx_ll_gpio.h"
 
 #include "../scope_app_i.h"
+#include "scope_icons.h"
 
 #define DIGITAL_SCALE_12BITS ((uint32_t)0xFFF)
 #define ADC_CONVERTED_DATA_BUFFER_SIZE ((uint32_t)128)
@@ -352,6 +353,11 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     float min = FLT_MAX;
     int count = 0;
 
+    if(pause)
+        canvas_draw_icon(canvas, 115, 0, &I_pause_10x10);
+    else
+        canvas_draw_icon(canvas, 115, 0, &I_play_10x10);
+
     // Calculate voltage measurements
     for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++) {
         if(mvoltDisplay[x] < min) min = mvoltDisplay[x];
@@ -454,6 +460,9 @@ void scope_scene_run_on_enter(void* context) {
     // What type of measurement are we performing
     type = app->measurement;
 
+    // Pause capture, when first started, if capturing
+    if(type == m_capture) pause = 1;
+
     // Copy vector table, modify to use our own IRQ handlers
     __disable_irq();
     memcpy(ramVector, (uint32_t*)(FLASH_BASE | SCB->VTOR), sizeof(uint32_t) * TABLE_SIZE);
@@ -533,6 +542,10 @@ void scope_scene_run_on_enter(void* context) {
     }
 
     furi_hal_bus_disable(FuriHalBusTIM2);
+
+    // Disable ADC interrupt and timer
+    LL_ADC_DisableIT_OVR(ADC1);
+    LL_TIM_DisableCounter(TIM2);
 
     // Stop DMA and switch back to original vector table
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
