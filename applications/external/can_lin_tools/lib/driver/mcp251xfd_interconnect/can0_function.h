@@ -22,7 +22,7 @@ extern MCP251XFD_RAMInfos can0_tef_ram_infos;
 extern MCP251XFD_RAMInfos can0_txq_ram_infos;
 extern MCP251XFD_FIFO can0_fifo_list[CAN0_FIFO_COUNT];
 
-#define CAN0_FILTER_COUNT 12
+#define CAN0_FILTER_COUNT 13
 extern MCP251XFD_Filter can_filter_list[CAN0_FILTER_COUNT];
 
 #define CAN0_GPIO0_Low MCP251XFD_SetGPIOPinsOutputLevel(CAN0, GPIO0_LOW, GPIO0_Mask)
@@ -36,7 +36,7 @@ extern MCP251XFD_Filter can_filter_list[CAN0_FILTER_COUNT];
 //=============================================================================
 // Configure the MCP251XFD device on CAN0
 //=============================================================================
-eERRORRESULT can0_function_device_init_can20(uint32_t nominal_bitrate);
+eERRORRESULT can0_function_device_init_can20(uint32_t nominal_bitrate, eMCP251XFD_OperationMode mode);
 
 //=============================================================================
 // Deinit the MCP251XFD device on CAN0

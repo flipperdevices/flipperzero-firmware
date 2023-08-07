@@ -149,6 +149,7 @@ static void can_hacker2_can_close(CanHacker2* instance) {
     if(instance->can_open) {
         can0_function_device_deinit();
         instance->can_open = false;
+        instance->can_listen_only = false;
         can_hacker2_tx_add_ch(instance, CH2_OK);
     } else {
         can_hacker2_tx_add_ch(instance, CH2_BELL);
@@ -230,7 +231,6 @@ static void can_hacker2_set_timestamp(CanHacker2* instance) {
 
 static void can_hacher2_can_open(CanHacker2* instance) {
     furi_assert(instance);
-    furi_assert(instance->cmd_buf[0] == CH2_OPEN_CAN_CHAN);
 
     if(instance->can_open) {
         can_hacker2_tx_add_ch(instance, CH2_BELL);
@@ -241,7 +241,15 @@ static void can_hacher2_can_open(CanHacker2* instance) {
             can_hacker2_tx_add_ch(instance, CH2_BELL);
         } else {
             //Todo: add loopback mode
-            eERRORRESULT ret = can0_function_device_init_can20(instance->can0_bitrate);
+            eERRORRESULT ret = ERR__UNKNOWN;
+            if(instance->can_listen_only) {
+                ret = can0_function_device_init_can20(
+                    instance->can0_bitrate, MCP251XFD_LISTEN_ONLY_MODE);
+            } else {
+                ret = can0_function_device_init_can20(
+                    instance->can0_bitrate, MCP251XFD_NORMAL_CAN20_MODE);
+            }
+
             if(ret == ERR_OK) {
                 show_device_detected(CAN0, can0_sysclk);
                 show_device_configuration(&can0_bt_stats);
@@ -334,6 +342,21 @@ static void can_hacker2_can_transmit(CanHacker2* instance) {
     }
 }
 
+static void can_hacker2_process_set_fifo(CanHacker2* instance) {
+    furi_assert(instance);
+    furi_assert(instance->cmd_buf[0] == CH2_SET_ACR);
+    //Todo: add fifo support
+    can_hacker2_tx_add_ch(instance, CH2_BELL);
+}
+
+static void can_hacker2_process_set_filter_list(CanHacker2* instance) {
+    furi_assert(instance);
+    furi_assert(instance->cmd_buf[0] == CH2_SET_AMR);
+
+    //Todo: add filter support
+    can_hacker2_tx_add_ch(instance, CH2_BELL);
+}
+
 void can_hacker2_process_cmd(CanHacker2* instance) {
     furi_assert(instance);
     switch(instance->cmd_buf[0]) {
@@ -366,49 +389,52 @@ void can_hacker2_process_cmd(CanHacker2* instance) {
         can_hacker2_set_bitrate(instance);
         break;
     case CH2_SET_ACR:
-        //return receiveSetAcrCommand(buffer, length);
+        can_hacker2_process_set_fifo(instance);
         break;
     case CH2_SET_AMR:
-        //return receiveSetAmrCommand(buffer, length);
+        can_hacker2_process_set_filter_list(instance);
         break;
     case CH2_SET_BTR:
-        //{
-        //     if(isConnected()) {
-        //         writeStream(BEL);
-        //         writeDebugStream(F("SET_BTR command cannot be called while connected\n"));
-        //         return ERROR_CONNECTED;
-        //     }
-        //     writeDebugStream(F("SET_BTR not supported\n"));
-        //     return writeStream(CR);
-        // }
+        if(instance->can_open) {
+            can_hacker2_tx_add_ch(instance, CH2_BELL);
+            FURI_LOG_E(TAG, "SET_BTR command cannot be called while connected\n");
+        } else {
+            FURI_LOG_E(TAG, "SET_BTR not supported\n");
+            can_hacker2_tx_add_ch(instance, CH2_OK);
+        }
+
         break;
 
     case CH2_LISTEN_ONLY:
-        //return receiveListenOnlyCommand(buffer, length);
+        if(instance->can_open) {
+            can_hacker2_tx_add_ch(instance, CH2_BELL);
+        } else {
+            instance->can_listen_only = true;
+            can_hacher2_can_open(instance);
+            can_hacker2_tx_add_ch(instance, CH2_OK);
+        }
         break;
     case CH2_TIME_STAMP:
         can_hacker2_set_timestamp(instance);
         break;
     case CH2_WRITE_REG:
     case CH2_READ_REG:
-        // {
-        //     return writeStream(CR);
-        // }
+        FURI_LOG_E(TAG, "CH2_WRITE_REG / CH2_READ_REG not supported\n");
+        can_hacker2_tx_add_ch(instance, CH2_OK);
         break;
     case CH2_READ_STATUS:
     case CH2_READ_ECR:
     case CH2_READ_ALCR:
-        // {
-        //     if(!isConnected()) {
-        //         writeDebugStream(F("Read status, ecr, alcr while not connected\n"));
-        //         writeStream(BEL);
-        //         return ERROR_NOT_CONNECTED;
-        //     }
-        //     return writeStream(CR);
-        // }
+        FURI_LOG_E(TAG, "CH2_READ_STATUS / CH2_READ_ECR / CH2_READ_ALCR not supported\n");
+        if(instance->can_open) {
+            can_hacker2_tx_add_ch(instance, CH2_BELL);
+        } else {
+            can_hacker2_tx_add_ch(instance, CH2_OK);
+        }
         break;
 
     default:
+        FURI_LOG_E(TAG, "Unknown command: %c", instance->cmd_buf[0]);
         can_hacker2_tx_add_ch(instance, CH2_BELL);
         break;
     }
@@ -453,7 +479,7 @@ static void can_hacker2_can_receive(CanHacker2* instance) {
 
     if(instance->can_timestamp) {
         //FURI_LOG_I(TAG, "Timestamp: %ld", instance->rx_msg_time_stamp);
-        uint16_t ts = (uint16_t)(instance->rx_msg_time_stamp/40);
+        uint16_t ts = (uint16_t)(instance->rx_msg_time_stamp / 40);
         put_hex_byte(data + offset, ts >> 8);
         offset += 2;
         put_hex_byte(data + offset, ts);
