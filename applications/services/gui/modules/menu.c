@@ -377,7 +377,7 @@ static void menu_exit(void* context) {
 }
 
 Menu* menu_alloc() {
-	menu_pos_alloc(0);
+	return menu_pos_alloc(0);
 }
 
 Menu* menu_pos_alloc(size_t pos) {
