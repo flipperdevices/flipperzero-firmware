@@ -92,6 +92,8 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 
 ![Gravity Mana Attack](https://github.com/chris-bc/flipper-gravity/blob/main/flip-grav-mana.jpg)
 
+![Gravity About Page](https://github.com/chris-bc/flipper-gravity/blob/main/flip-grav-about.png)
+
 
 ## TODO
 * Bug: Console scrolls to top mid-scroll when text is added to it

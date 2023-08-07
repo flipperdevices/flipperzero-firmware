@@ -1,4 +1,5 @@
 #include "../uart_terminal_app_i.h"
+#include <dolphin/dolphin.h>
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -234,6 +235,13 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
      NO_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
+    {"AP Clone Attack",
+     {"Status", "On", "Off"},
+     3,
+     {"ap-clone", "ap-clone on", "ap-clone off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Help",
      {"Info <cmd>", "Get Started", "Commands", "About", "Help"},
      5,
@@ -283,6 +291,8 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
 
     furi_assert(index < NUM_MENU_ITEMS);
     const UART_TerminalItem* item = &items[index];
+
+    dolphin_deed(DolphinDeedGpioUartBridge);
 
     const int selected_option_index = app->selected_option_index[index];
     furi_assert(selected_option_index < item->num_options_menu);
