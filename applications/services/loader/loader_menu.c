@@ -191,7 +191,7 @@ static LoaderMenuApp* loader_gamesmenu_app_alloc(LoaderMenu* loader_menu) {
     app->gui = furi_record_open(RECORD_GUI);
     app->view_dispatcher = view_dispatcher_alloc();
 
-    app->primary_menu = menu_pos_alloc(0);
+    app->primary_menu = menu_alloc();
     loader_menu_build_gamesmenu(app, loader_menu);
 
     // Primary menu

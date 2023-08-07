@@ -2056,6 +2056,7 @@ Function,-,mempcpy,void*,"void*, const void*, size_t"
 Function,-,memrchr,void*,"const void*, int, size_t"
 Function,+,memset,void*,"void*, int, size_t"
 Function,+,menu_add_item,void,"Menu*, const char*, const Icon*, uint32_t, MenuItemCallback, void*"
+Function,+,menu_alloc,Menu*,
 Function,+,menu_free,void,Menu*
 Function,+,menu_get_view,View*,Menu*
 Function,+,menu_pos_alloc,Menu*,size_t

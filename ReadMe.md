@@ -46,6 +46,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sub-GHz Bruteforcer v3.7 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Added: [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - Updated: [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
+- Fixes for [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) for menu_alloc (By xtruan)
+- Fixes to bring back menu_alloc (By RogueMaster)
 
 <a name="release">
 
