@@ -21,34 +21,30 @@ FLIPPER PIN | AVR PIN
 11          | GND
 12-18       | -
 
-## Features
+# Features
 
-### Dump
+## Dump
 
 The Dump feature allows you to dump the contents of the microcontroller's flash memory to a file on your Flipper Zero's SD card. Along with the EEPROM memory, the dump files include the fuses and lock bits of the microcontroller.
 
 This can be used to backup the contents of the microcontroller's flash memory, or to extract the firmware from a device.
 
-### Flash
+## Flash
 
 The Flash feature allows you to flash the contents of a file on your Flipper Zero's SD card to the microcontroller's flash memory. It also flashes the fuses and lock bits of the microcontroller.
 
 This can help you quickly flash multiple devices with the same firmware, or to restore a device to its original firmware if it has been bricked.
 
-### ISP
+## ISP
 
 The ISP feature allows you to use your Flipper Zero as an ISP programmer for your desktop computer. After connecting your Flipper Zero to the AVR microcontroller, you can flash it via USB from your desktop computer using avrdude.
 
-Example command:
-
-```bash
-avrdude.exe -p m328p -c stk500v1 -P COMxx -U flash:r:X:\\sketch_sample.hex:i
-```
+Example command: "avrdude.exe -p m328p -c stk500v1 -P COMxx -U flash:r:X:\\sketch_sample.hex:i"
 
 Where:
 
-* `-p m328p` is the brand of your chip,
-* `-P COMxx` is the com port number of the ISP programmer
+* -p m328p is the brand of your chip,
+* -P COMxx is the com port number of the ISP programmer
 
 ## Supported Microcontrollers
 
