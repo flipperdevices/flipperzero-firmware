@@ -61,21 +61,19 @@ FelicaError felica_poller_async_polling(
     // TODO Set length in felica_poller_frame_exchange() ?
     bit_buffer_set_byte(instance->tx_buffer, 0, sizeof(FelicaPollerPollingCommand) + 2);
     // Set command code
-    bit_buffer_set_byte(instance->tx_buffer, 1, 0x00);
+    bit_buffer_set_byte(instance->tx_buffer, 1, FELICA_POLLER_CMD_POLLING_CODE);
     // Set other data
-    bit_buffer_append_byte(instance->tx_buffer, (uint8_t)(cmd->system_code >> 8));
-    bit_buffer_append_byte(instance->tx_buffer, (uint8_t)(cmd->system_code >> 0));
-    bit_buffer_append_byte(instance->tx_buffer, (uint8_t)(cmd->request_code));
-    bit_buffer_append_byte(instance->tx_buffer, (uint8_t)(cmd->time_slot));
+    bit_buffer_append_bytes(
+        instance->tx_buffer, (uint8_t*)cmd, sizeof(FelicaPollerPollingCommand));
 
     FelicaError error = felica_poller_frame_exchange(
         instance, instance->tx_buffer, instance->rx_buffer, FELICA_POLLER_POLLING_FWT);
 
     if(error == FelicaErrorNone) {
         // TODO extract length in felica_poller_frame_exchange() ?
-        bit_buffer_write_bytes_mid(instance->rx_buffer, resp->idm.data, 1, sizeof(FelicaIDm));
+        bit_buffer_write_bytes_mid(instance->rx_buffer, resp->idm.data, 2, sizeof(FelicaIDm));
         bit_buffer_write_bytes_mid(
-            instance->rx_buffer, resp->pmm.data, sizeof(FelicaIDm) + 1, sizeof(FelicaPMm));
+            instance->rx_buffer, resp->pmm.data, sizeof(FelicaIDm) + 2, sizeof(FelicaPMm));
     }
 
     return error;
