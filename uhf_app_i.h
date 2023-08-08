@@ -28,8 +28,8 @@
 
 #define UHF_TEXT_STORE_SIZE 128
 // #define UHF_APPS_DATA_FOLDER EXT_PATH("apps_data")
-// #define UHF_APPS_STORAGE_FOLDER 
-//     UHF_APPS_DATA_FOLDER "/"    
+// #define UHF_APPS_STORAGE_FOLDER
+//     UHF_APPS_DATA_FOLDER "/"
 //                          "uhf_rfid"
 // #define UHF_FILE_EXTENSION ".uhf"
 
@@ -59,7 +59,6 @@ struct UHFApp {
     UHFDevice* uhf_device;
     char text_store[UHF_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
-
     // Common Views
     Submenu* submenu;
     Popup* popup;

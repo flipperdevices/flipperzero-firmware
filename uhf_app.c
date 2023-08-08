@@ -70,8 +70,11 @@ UHFApp* uhf_alloc() {
 
     // device
     uhf_app->uhf_device = uhf_device_alloc();
-    // use same linked list
-    uhf_app->uhf_device->dev_data = uhf_app->worker->response_data;
+
+    UHFTag* uhf_tag = uhf_tag_alloc();
+    // point tag object to worker
+    uhf_app->worker->uhf_tag = uhf_tag;
+    uhf_app->uhf_device->uhf_tag = uhf_tag;
 
     // Open Notification record
     uhf_app->notifications = furi_record_open(RECORD_NOTIFICATION);
@@ -130,6 +133,9 @@ void uhf_free(UHFApp* uhf_app) {
     // Worker
     uhf_worker_stop(uhf_app->worker);
     uhf_worker_free(uhf_app->worker);
+
+    // Tag
+    uhf_tag_free(uhf_app->worker->uhf_tag);
 
     // View Dispatcher
     view_dispatcher_free(uhf_app->view_dispatcher);

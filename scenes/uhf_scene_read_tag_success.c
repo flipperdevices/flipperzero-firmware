@@ -16,10 +16,9 @@ void uhf_scene_read_card_success_widget_callback(GuiButtonType result, InputType
 
 void uhf_scene_read_tag_success_on_enter(void* ctx) {
     UHFApp* uhf_app = ctx;
-
-    const uint8_t* read_data =
-        uhf_response_data_get_uhf_data(uhf_app->worker->response_data, 0)->data;
-
+    FURI_LOG_E("TAG", "working till here 6");
+    UHFTag* uhf_tag = uhf_app->worker->uhf_tag;
+    FURI_LOG_E("TAG", "working till here 7");
     widget_add_string_element(
         uhf_app->widget, 32, 5, AlignLeft, AlignCenter, FontPrimary, "Read Success");
 
@@ -31,32 +30,35 @@ void uhf_scene_read_tag_success_on_enter(void* ctx) {
     widget_add_string_element(
         uhf_app->widget, 3, 32, AlignLeft, AlignCenter, FontPrimary, "EPC :");
 
-    widget_add_string_element(
-        uhf_app->widget,
-        26,
-        19,
-        AlignLeft,
-        AlignCenter,
-        FontKeyboard,
-        convertToHexString(read_data + 6, 2));
-    widget_add_string_element(
-        uhf_app->widget,
-        96,
-        19,
-        AlignLeft,
-        AlignCenter,
-        FontKeyboard,
-        convertToHexString(read_data + 20, 2));
+    FURI_LOG_E("TAG", "crc %02x %02x", uhf_tag->crc[0], uhf_tag->crc[1]);
 
-    widget_add_string_multiline_element(
-        uhf_app->widget,
-        34,
-        29,
-        AlignLeft,
-        AlignTop,
-        FontKeyboard,
-        convertToHexString(read_data + 8, 12));
-
+    // widget_add_string_element(
+    //     uhf_app->widget,
+    //     26,
+    //     19,
+    //     AlignLeft,
+    //     AlignCenter,
+    //     FontKeyboard,
+    //     convertToHexString((uint8_t*)&uhf_tag->pc, 2));
+    // FURI_LOG_E("TAG", "working till here 8");
+    // widget_add_string_element(
+    //     uhf_app->widget,
+    //     96,
+    //     19,
+    //     AlignLeft,
+    //     AlignCenter,
+    //     FontKeyboard,
+    //     convertToHexString((uint8_t*)&uhf_tag->crc, 2));
+    // FURI_LOG_E("TAG", "working till here 9");
+    // widget_add_string_multiline_element(
+    //     uhf_app->widget,
+    //     34,
+    //     29,
+    //     AlignLeft,
+    //     AlignTop,
+    //     FontKeyboard,
+    //     convertToHexString((uint8_t*)&uhf_tag->epc, uhf_tag->epc_length));
+    // FURI_LOG_E("TAG", "working till here 10");
     widget_add_button_element(
         uhf_app->widget,
         GuiButtonTypeRight,

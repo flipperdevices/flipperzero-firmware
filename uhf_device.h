@@ -10,78 +10,33 @@
 // #include "rfal_picopass.h"
 
 #define UHF_DEV_NAME_MAX_LEN 22
-#define PICOPASS_READER_DATA_MAX_SIZE 64
-#define PICOPASS_BLOCK_LEN 8
-#define PICOPASS_MAX_APP_LIMIT 32
+// #define PICOPASS_READER_DATA_MAX_SIZE 64
+// #define PICOPASS_BLOCK_LEN 8
+// #define PICOPASS_MAX_APP_LIMIT 32
 #define UHF_BANK_DOES_NOT_EXIST                                                                   \
     (uint8_t[]) {                                                                                 \
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
             0xFF                                                                                  \
     }
-#define UHF_RFU_BANK "RFU"
-#define UHF_EPC_BANK "EPC"
-#define UHF_TID_BANK "TID"
-#define UHF_USER_BANK "USER"
+
+#define UHF_EPC_BANK_LENGTH_LABEL "EPC_LENGTH"
+#define UHF_TID_BANK_LENGTH_LABEL "TID_LENGTH"
+#define UHF_USER_BANK_LENGTH_LABEL "USER_LENGTH"
+#define UHF_RFU_BANK_LABEL "RFU"
+#define UHF_EPC_BANK_LABEL "EPC"
+#define UHF_TID_BANK_LABEL "TID"
+#define UHF_USER_BANK_LABEL "USER"
 
 #define UHF_APP_EXTENSION ".uhf"
 // #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 
 typedef void (*UHFLoadingCallback)(void* context, bool state);
 
-// typedef struct {
-//     IclassEliteDict* dict;
-//     IclassEliteDictType type;
-//     uint8_t current_sector;
-// } IclassEliteDictAttackData;
-
-// typedef enum {
-//     PicopassDeviceEncryptionUnknown = 0,
-//     PicopassDeviceEncryptionNone = 0x14,
-//     PicopassDeviceEncryptionDES = 0x15,
-//     PicopassDeviceEncryption3DES = 0x17,
-// } PicopassEncryption;
-
-// typedef enum {
-//     PicopassDeviceSaveFormatHF,
-//     PicopassDeviceSaveFormatLF,
-// } PicopassDeviceSaveFormat;
-
-// typedef struct {
-//     bool valid;
-//     uint8_t bitLength;
-//     uint8_t FacilityCode;
-//     uint16_t CardNumber;
-// } PicopassWiegandRecord;
-
-// typedef struct {
-//     bool legacy;
-//     bool se_enabled;
-//     bool sio;
-//     bool biometrics;
-//     uint8_t key[8];
-//     bool elite_kdf;
-//     uint8_t pin_length;
-//     PicopassEncryption encryption;
-//     uint8_t credential[8];
-//     uint8_t pin0[8];
-//     uint8_t pin1[8];
-//     PicopassWiegandRecord record;
-// } PicopassPacs;
-
-// typedef struct {
-//     uint8_t data[PICOPASS_BLOCK_LEN];
-// } PicopassBlock;
-
-// typedef struct {
-//     PicopassBlock AA1[PICOPASS_MAX_APP_LIMIT];
-//     PicopassPacs pacs;
-//     IclassEliteDictAttackData iclass_elite_dict_attack_data;
-// } PicopassDeviceData;
-
 typedef struct {
     Storage* storage;
     DialogsApp* dialogs;
-    UHFResponseData* dev_data;
+    // UHFResponseData* dev_data;
+    UHFTag* uhf_tag;
     char dev_name[UHF_DEV_NAME_MAX_LEN + 1];
     FuriString* load_path;
     UHFLoadingCallback loading_cb;

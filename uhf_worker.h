@@ -31,6 +31,7 @@ typedef void (*UHFWorkerCallback)(UHFWorkerEvent event, void* ctx);
 typedef struct UHFWorker {
     FuriThread* thread;
     UHFResponseData* response_data;
+    UHFTag* uhf_tag;
     UHFWorkerCallback callback;
     UHFWorkerState state;
     void* ctx;
