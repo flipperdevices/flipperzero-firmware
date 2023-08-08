@@ -14,7 +14,6 @@ static const FHalNfcTechBase* f_hal_nfc_tech[FHalNfcTechNum] = {
 };
 
 FHalNfc f_hal_nfc;
-// static FuriMutex* f_hal_nfc_mutex = NULL;
 
 static FHalNfcError f_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
     FHalNfcError error = FHalNfcErrorNone;
@@ -478,20 +477,25 @@ FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
     return err;
 }
 
-FHalNfcError f_hal_nfc_listener_rx_start() {
-    FURI_LOG_D(TAG, "Listener RX start");
+FHalNfcError f_hal_nfc_common_listener_rx_start(FuriHalSpiBusHandle* handle) {
+    UNUSED(handle);
+    /* Empty implementation */
     return FHalNfcErrorNone;
 }
 
-FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
-    return f_hal_nfc_poller_rx(rx_data, rx_data_size, rx_bits);
-}
-
-FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
-    furi_assert(rx_data);
-    furi_assert(rx_bits);
+FHalNfcError f_hal_nfc_listener_rx_start() {
+    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
+    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.rx_start(handle);
+}
+
+FHalNfcError f_hal_nfc_common_fifo_rx(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* rx_data,
+    size_t rx_data_size,
+    size_t* rx_bits) {
     FHalNfcError error = FHalNfcErrorNone;
 
     if(!st25r3916_read_fifo(handle, rx_data, rx_data_size, rx_bits)) {
@@ -499,6 +503,25 @@ FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* 
     }
 
     return error;
+}
+
+FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
+    furi_assert(rx_data);
+    furi_assert(rx_bits);
+
+    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
+    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.rx(handle, rx_data, rx_data_size, rx_bits);
+}
+
+FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
+    furi_assert(rx_data);
+    furi_assert(rx_bits);
+
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    return f_hal_nfc_common_fifo_rx(handle, rx_data, rx_data_size, rx_bits);
 }
 
 FHalNfcError f_hal_nfc_trx_reset() {

@@ -95,9 +95,5 @@ const FHalNfcTechBase f_hal_nfc_iso14443b = {
             .deinit = f_hal_nfc_iso14443b_poller_deinit,
         },
 
-    .listener =
-        {
-            .init = NULL,
-            .deinit = NULL,
-        },
+    .listener = {0},
 };

@@ -31,7 +31,6 @@ FHalNfcEvent f_hal_nfc_event_wait(uint32_t timeout_ms) {
     furi_assert(f_hal_nfc_event);
     furi_assert(f_hal_nfc_event->thread);
 
-
     FHalNfcEvent event = 0;
     uint32_t event_timeout = timeout_ms == F_HAL_NFC_EVENT_WAIT_FOREVER ? FuriWaitForever :
                                                                           timeout_ms;
@@ -81,6 +80,14 @@ FHalNfcEvent f_hal_nfc_event_wait(uint32_t timeout_ms) {
         if(event_flag & FHalNfcEventInternalTypeAbort) {
             event |= FHalNfcEventAbortRequest;
             furi_thread_flags_clear(FHalNfcEventInternalTypeAbort);
+        }
+        if(event_flag & FHalNfcEventInternalTypeTransparentRxEnd) {
+            event |= FHalNfcEventRxEnd;
+            furi_thread_flags_clear(FHalNfcEventInternalTypeTransparentRxEnd);
+        }
+        if(event_flag & FHalNfcEventInternalTypeTransparentTimeout) {
+            event |= FHalNfcEventTimeout;
+            furi_thread_flags_clear(FHalNfcEventInternalTypeTransparentTimeout);
         }
     } else {
         event = FHalNfcEventTimeout;

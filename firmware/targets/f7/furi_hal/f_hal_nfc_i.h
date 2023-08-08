@@ -15,6 +15,8 @@ typedef enum {
     FHalNfcEventInternalTypeIrq = (1U << 1),
     FHalNfcEventInternalTypeTimerFwtExpired = (1U << 2),
     FHalNfcEventInternalTypeTimerBlockTxExpired = (1U << 3),
+    FHalNfcEventInternalTypeTransparentRxEnd = (1U << 4),
+    FHalNfcEventInternalTypeTransparentTimeout = (1U << 5),
 } FHalNfcEventInternalType;
 
 #define F_HAL_NFC_EVENT_INTERNAL_ALL                                \
@@ -33,7 +35,6 @@ typedef struct {
 } FHalNfc;
 
 extern FHalNfc f_hal_nfc;
-// extern FHalNfcEventInternal* f_hal_nfc_event;
 
 void f_hal_nfc_event_init();
 
@@ -54,8 +55,21 @@ bool f_hal_nfc_event_wait_for_specific_irq(
     uint32_t mask,
     uint32_t timeout_ms);
 
+// Common technology methods
+FHalNfcError f_hal_nfc_common_listener_rx_start(FuriHalSpiBusHandle* handle);
+FHalNfcError f_hal_nfc_common_fifo_rx(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* rx_data,
+    size_t rx_data_size,
+    size_t* rx_bits);
+
 // Technology specific API
 typedef FHalNfcError (*FHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
+typedef FHalNfcError (*FHalNfcChipRx)(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* rx_data,
+    size_t rx_data_size,
+    size_t* rx_bits);
 
 typedef struct {
     FHalNfcChipConfig init;
@@ -65,6 +79,8 @@ typedef struct {
 typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
+    FHalNfcChipConfig rx_start;
+    FHalNfcChipRx rx;
 } FHalNfcTechListenerBase;
 
 typedef struct {

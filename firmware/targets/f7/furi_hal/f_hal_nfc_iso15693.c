@@ -1,5 +1,58 @@
 #include "f_hal_nfc_i.h"
 
+#include <pulse_reader/pulse_reader.h>
+// #include <digital_signal/digital_signal.h>
+
+#include <furi_hal_resources.h>
+
+#define ISO15693_LOAD_MODULATION_POLARITY (false)
+
+#define ISO15693_FC (13560000.0f)
+#define ISO15693_RESP_SUBC1_PULSE_32 (1.0f / (ISO15693_FC / 32) / 2.0f)
+#define ISO15693_RESP_SUBC1_UNMOD_256 (256.0f / ISO15693_FC)
+#define ISO15693_PULSE_DURATION_NS (128.0f * 1000000000.0f / ISO15693_FC)
+
+#define FURI_HAL_ISO15693_BUFFER_SIZE (512U)
+
+#define BITS_IN_BYTE (8U)
+
+#define TAG "FuriHalIso15693"
+
+typedef enum {
+    FuriHalIso15693FrameStateSof1,
+    FuriHalIso15693FrameStateSof2,
+    FuriHalIso15693FrameStateCoding4,
+    FuriHalIso15693FrameStateCoding256,
+    FuriHalIso15693FrameStateEof,
+    FuriHalIso15693FrameStateReset,
+} FuriHalIso15693FrameState;
+
+typedef struct {
+    uint8_t rx_buf[FURI_HAL_ISO15693_BUFFER_SIZE];
+    size_t rx_bits;
+    PulseReader* reader;
+} FHalNfcIso15693Listener;
+
+static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener;
+
+static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener_alloc() {
+    FHalNfcIso15693Listener* instance = malloc(sizeof(FHalNfcIso15693Listener));
+
+    instance->reader = pulse_reader_alloc(&gpio_nfc_irq_rfid_pull, FURI_HAL_ISO15693_BUFFER_SIZE);
+    pulse_reader_set_timebase(instance->reader, PulseReaderUnitNanosecond);
+    pulse_reader_set_bittime(instance->reader, ISO15693_PULSE_DURATION_NS);
+    pulse_reader_set_pull(instance->reader, GpioPullDown);
+
+    return instance;
+}
+
+static void f_hal_nfc_iso15693_listener_free(FHalNfcIso15693Listener* instance) {
+    furi_assert(instance);
+
+    pulse_reader_free(instance->reader);
+    free(instance);
+}
+
 static FHalNfcError f_hal_nfc_iso15693_common_init(FuriHalSpiBusHandle* handle) {
     // Common NFC-V settings, 26.48 kbps
 
@@ -69,12 +122,50 @@ static FHalNfcError f_hal_nfc_iso15693_poller_deinit(FuriHalSpiBusHandle* handle
 }
 
 static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle) {
-    // TODO: Init listener
+    furi_assert(f_hal_nfc_iso15693_listener == NULL);
+
+    f_hal_nfc_iso15693_listener = f_hal_nfc_iso15693_listener_alloc();
+
     return f_hal_nfc_iso15693_common_init(handle);
 }
 
 static FHalNfcError f_hal_nfc_iso15693_listener_deinit(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
+
+    f_hal_nfc_iso15693_listener_free(f_hal_nfc_iso15693_listener);
+
+    return FHalNfcErrorNone;
+}
+
+static FHalNfcError f_hal_nfc_iso15693_listener_rx_start(FuriHalSpiBusHandle* handle) {
+    UNUSED(handle);
+
+    FURI_LOG_D(TAG, "Rx Start");
+
+    // Do the receive stuff
+    f_hal_nfc_event_set(FHalNfcEventInternalTypeTransparentRxEnd);
+
+    return FHalNfcErrorNone;
+}
+
+static FHalNfcError f_hal_nfc_iso15693_listener_rx(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* rx_data,
+    size_t rx_data_size,
+    size_t* rx_bits) {
+    furi_assert(f_hal_nfc_iso15693_listener);
+    UNUSED(handle);
+
+    const size_t rx_bits_ready = f_hal_nfc_iso15693_listener->rx_bits;
+    const size_t rx_bytes_ready = rx_bits_ready / BITS_IN_BYTE;
+
+    if(rx_bytes_ready > rx_data_size) {
+        return FHalNfcErrorBufferOverflow;
+    }
+
+    memcpy(rx_data, f_hal_nfc_iso15693_listener->rx_buf, rx_bytes_ready);
+    *rx_bits = rx_bits_ready;
+
     return FHalNfcErrorNone;
 }
 
@@ -89,5 +180,7 @@ const FHalNfcTechBase f_hal_nfc_iso15693 = {
         {
             .init = f_hal_nfc_iso15693_listener_init,
             .deinit = f_hal_nfc_iso15693_listener_deinit,
+            .rx_start = f_hal_nfc_iso15693_listener_rx_start,
+            .rx = f_hal_nfc_iso15693_listener_rx,
         },
 };

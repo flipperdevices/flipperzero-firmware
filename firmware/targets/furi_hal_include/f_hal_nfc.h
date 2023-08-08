@@ -117,8 +117,6 @@ FHalNfcError f_hal_nfc_listener_rx_start();
 
 FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
-FHalNfcError f_hal_nfc_trx_reset();
-
 FHalNfcError f_hal_nfc_listener_start();
 
 FHalNfcError f_hal_nfc_listener_reset();
@@ -126,6 +124,8 @@ FHalNfcError f_hal_nfc_listener_reset();
 FHalNfcError f_hal_nfc_listener_sleep();
 
 FHalNfcError f_hal_nfc_listener_disable_auto_col_res();
+
+FHalNfcError f_hal_nfc_trx_reset();
 
 FHalNfcError f_hal_nfc_abort();
 
