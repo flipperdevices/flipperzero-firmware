@@ -7,6 +7,7 @@ App(
     requires=["gui"],
     stack_size=4 * 1024,
     fap_description="Receive weather data from a wide range of supported Sub-1GHz remote sensor",
+    fap_version="1.0",
     fap_icon="weather_station_10px.png",
     fap_category="Sub-GHz",
     fap_icon_assets="images",
