@@ -58,17 +58,18 @@ bool felica_verify(FelicaData* data, const FuriString* device_type) {
 
 bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
     furi_assert(data);
+    UNUSED(ff);
 
     bool parsed = false;
 
     do {
         if(version < NFC_UNIFIED_FORMAT_VERSION) break;
 
-        if(!flipper_format_read_hex(ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
-            break;
-        if(!flipper_format_read_hex(
-               ff, FELICA_PROTOCOL_INFO_KEY, data->protocol_info, FELICA_PROTOCOL_INFO_SIZE))
-            break;
+        // if(!flipper_format_read_hex(ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
+        //     break;
+        // if(!flipper_format_read_hex(
+        //        ff, FELICA_PROTOCOL_INFO_KEY, data->protocol_info, FELICA_PROTOCOL_INFO_SIZE))
+        //     break;
 
         parsed = true;
     } while(false);
@@ -78,16 +79,17 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
 
 bool felica_save(const FelicaData* data, FlipperFormat* ff) {
     furi_assert(data);
+    UNUSED(ff);
 
     bool saved = false;
 
     do {
-        if(!flipper_format_write_comment_cstr(ff, FELICA_PROTOCOL_NAME " specific data")) break;
-        if(!flipper_format_write_hex(ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
-            break;
-        if(!flipper_format_write_hex(
-               ff, FELICA_PROTOCOL_INFO_KEY, data->protocol_info, FELICA_PROTOCOL_INFO_SIZE))
-            break;
+        // if(!flipper_format_write_comment_cstr(ff, FELICA_PROTOCOL_NAME " specific data")) break;
+        // if(!flipper_format_write_hex(ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
+        //     break;
+        // if(!flipper_format_write_hex(
+        //        ff, FELICA_PROTOCOL_INFO_KEY, data->protocol_info, FELICA_PROTOCOL_INFO_SIZE))
+        //     break;
         saved = true;
     } while(false);
 
@@ -112,19 +114,19 @@ const uint8_t* felica_get_uid(const FelicaData* data, size_t* uid_len) {
     furi_assert(data);
 
     if(uid_len) {
-        *uid_len = FELICA_UID_SIZE;
+        *uid_len = FELICA_IDM_SIZE;
     }
 
-    return data->uid;
+    return data->idm.data;
 }
 
 bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len) {
     furi_assert(data);
 
-    const bool uid_valid = uid_len == FELICA_UID_SIZE;
+    const bool uid_valid = uid_len == FELICA_IDM_SIZE;
 
     if(uid_valid) {
-        memcpy(data->uid, uid, uid_len);
+        memcpy(data->idm.data, uid, uid_len);
     }
 
     return uid_valid;

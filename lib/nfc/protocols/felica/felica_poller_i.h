@@ -10,12 +10,10 @@ extern "C" {
 
 #define FELICA_POLLER_MAX_BUFFER_SIZE (256U)
 
+#define FELICA_POLLER_POLLING_FWT (200000U)
+
 typedef enum {
     FelicaPollerStateIdle,
-    FelicaPollerStateColResInProgress,
-    FelicaPollerStateColResFailed,
-    FelicaPollerStateActivationInProgress,
-    FelicaPollerStateActivationFailed,
     FelicaPollerStateActivated,
 } FelicaPollerState;
 
@@ -33,18 +31,26 @@ struct FelicaPoller {
     void* context;
 };
 
+typedef struct {
+    uint16_t system_code;
+    uint8_t request_code;
+    uint8_t time_slot;
+} FelicaPollerPollingCommand;
+
+typedef struct {
+    FelicaIDm idm;
+    FelicaPMm pmm;
+    uint8_t request_data[2];
+} FelicaPollerPollingResponse;
+
 const FelicaData* felica_poller_get_data(FelicaPoller* instance);
 
-FelicaError
-    felica_poller_async_activate(FelicaPoller* instance, FelicaData* data);
-
-FelicaError felica_poller_halt(FelicaPoller* instance);
-
-FelicaError felica_poller_send_frame(
+FelicaError felica_poller_async_polling(
     FelicaPoller* instance,
-    const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt);
+    const FelicaPollerPollingCommand* cmd,
+    FelicaPollerPollingResponse* resp);
+
+FelicaError felica_poller_async_activate(FelicaPoller* instance, FelicaData* data);
 
 #ifdef __cplusplus
 }

@@ -7,24 +7,19 @@
 extern "C" {
 #endif
 
-#define FELICA_UID_SIZE (4U)
-#define FELICA_APP_DATA_SIZE (4U)
-#define FELICA_PROTOCOL_INFO_SIZE (3U)
+#define FELICA_IDM_SIZE (8U)
+#define FELICA_PMM_SIZE (8U)
 
 #define FELICA_GUARD_TIME_US (5000U)
-#define FELICA_FDT_POLL_FC (12000U)
-#define FELICA_FDT_ATTRIB_FC (42000U)
+#define FELICA_FDT_POLL_FC (10000U)
 #define FELICA_POLL_POLL_MIN_US (1280U)
 
-#define FELICA_REQB_ALL (1U << 3)
-
-#define FELICA_ATTRIB_FRAME_SIZE_32 (0x02)
-#define FELICA_ATTRIB_FRAME_SIZE_40 (0x03)
-#define FELICA_ATTRIB_FRAME_SIZE_48 (0x04)
-#define FELICA_ATTRIB_FRAME_SIZE_64 (0x05)
-#define FELICA_ATTRIB_FRAME_SIZE_96 (0x06)
-#define FELICA_ATTRIB_FRAME_SIZE_128 (0x07)
-#define FELICA_ATTRIB_FRAME_SIZE_256 (0x08)
+#define FELICA_SYSTEM_CODE_CODE (0xFFFFU)
+#define FELICA_TIME_SLOT_1 (0x00U)
+#define FELICA_TIME_SLOT_2 (0x01U)
+#define FELICA_TIME_SLOT_4 (0x03U)
+#define FELICA_TIME_SLOT_8 (0x07U)
+#define FELICA_TIME_SLOT_16 (0x0FU)
 
 typedef enum {
     FelicaErrorNone,
@@ -38,16 +33,16 @@ typedef enum {
 } FelicaError;
 
 typedef struct {
-    uint8_t flag;
-    uint8_t uid[FELICA_UID_SIZE];
-    uint8_t app_data[FELICA_APP_DATA_SIZE];
-    uint8_t protocol_info[FELICA_PROTOCOL_INFO_SIZE];
-} FelicaAtqB;
+    uint8_t data[FELICA_IDM_SIZE];
+} FelicaIDm;
 
 typedef struct {
-    uint8_t uid[FELICA_UID_SIZE];
-    uint8_t app_data[FELICA_APP_DATA_SIZE];
-    uint8_t protocol_info[FELICA_PROTOCOL_INFO_SIZE];
+    uint8_t data[FELICA_PMM_SIZE];
+} FelicaPMm;
+
+typedef struct {
+    FelicaIDm idm;
+    FelicaPMm pmm;
 } FelicaData;
 
 extern const NfcDeviceBase nfc_device_felica;
