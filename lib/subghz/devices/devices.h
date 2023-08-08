@@ -47,6 +47,8 @@ bool subghz_devices_is_rx_data_crc_valid(const SubGhzDevice* device);
 void subghz_devices_read_packet(const SubGhzDevice* device, uint8_t* data, uint8_t* size);
 void subghz_devices_write_packet(const SubGhzDevice* device, const uint8_t* data, uint8_t size);
 
+bool subghz_devices_io_control(const SubGhzDevice* device, uint32_t io_control_code, void* in_out_data);
+
 #ifdef __cplusplus
 }
 #endif

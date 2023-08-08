@@ -2,6 +2,7 @@
 
 #include <lib/subghz/protocols/protocol_items.h>
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
+#include <applications/drivers/subghz/si4463_ext/si4463_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
 #define TAG "SubGhz"
@@ -69,7 +70,9 @@ SubGhzTxRx* subghz_txrx_alloc() {
     subghz_devices_init();
     instance->radio_device_type = SubGhzRadioDeviceTypeInternal;
     instance->radio_device_type =
-        subghz_txrx_radio_device_set(instance, SubGhzRadioDeviceTypeExternalCC1101);
+        //subghz_txrx_radio_device_set(instance, SubGhzRadioDeviceTypeExternalCC1101);
+        subghz_txrx_radio_device_set(instance, SubGhzRadioDeviceTypeExternalSi4463);
+
 
     return instance;
 }
@@ -579,6 +582,12 @@ SubGhzRadioDeviceType
         instance->radio_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
         subghz_devices_begin(instance->radio_device);
         instance->radio_device_type = SubGhzRadioDeviceTypeExternalCC1101;
+    } else if(radio_device_type == SubGhzRadioDeviceTypeExternalSi4463 &&
+       subghz_txrx_radio_device_is_external_connected(instance, SUBGHZ_DEVICE_SI4463_EXT_NAME)) {
+        subghz_txrx_radio_device_power_on(instance);
+        instance->radio_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_SI4463_EXT_NAME);
+        subghz_devices_begin(instance->radio_device);
+        instance->radio_device_type = SubGhzRadioDeviceTypeExternalSi4463;
     } else {
         subghz_txrx_radio_device_power_off(instance);
         if(instance->radio_device_type != SubGhzRadioDeviceTypeInternal) {

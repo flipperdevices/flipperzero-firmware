@@ -1,6 +1,7 @@
 entry,status,name,type,params
-Version,+,34.3,,
+Version,+,34.5,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
+Header,+,applications/drivers/subghz/si4463_ext/si4463_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2701,6 +2702,7 @@ Function,+,subghz_block_generic_deserialize_check_count_bit,SubGhzProtocolStatus
 Function,+,subghz_block_generic_get_preset_name,void,"const char*, FuriString*"
 Function,+,subghz_block_generic_serialize,SubGhzProtocolStatus,"SubGhzBlockGeneric*, FlipperFormat*, SubGhzRadioPreset*"
 Function,-,subghz_device_cc1101_ext_ep,const FlipperAppPluginDescriptor*,
+Function,-,subghz_device_si4463_ext_ep,const FlipperAppPluginDescriptor*,
 Function,+,subghz_devices_begin,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_deinit,void,
 Function,+,subghz_devices_end,void,const SubGhzDevice*
@@ -2713,6 +2715,7 @@ Function,+,subghz_devices_get_name,const char*,const SubGhzDevice*
 Function,+,subghz_devices_get_rssi,float,const SubGhzDevice*
 Function,+,subghz_devices_idle,void,const SubGhzDevice*
 Function,+,subghz_devices_init,void,
+Function,+,subghz_devices_io_control,_Bool,"const SubGhzDevice*, uint32_t, void*"
 Function,+,subghz_devices_is_async_complete_tx,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_is_connect,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_is_frequency_valid,_Bool,"const SubGhzDevice*, uint32_t"

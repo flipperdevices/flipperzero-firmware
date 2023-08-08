@@ -67,6 +67,7 @@ typedef struct {
 
 void subghz_receiver_rssi(SubGhzViewReceiver* instance, float rssi) {
     furi_assert(instance);
+    FURI_LOG_I("RSSI", "%f", (double)rssi);
     with_view_model(
         instance->view,
         SubGhzViewReceiverModel * model,

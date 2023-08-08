@@ -10,7 +10,10 @@
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/subghz_file_encoder_worker.h>
 #include <lib/subghz/protocols/protocol_items.h>
+
 #include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
+#include <applications/drivers/subghz/si4463_ext/si4463_ext_interconnect.h>
+
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 #include <lib/subghz/devices/devices.h>
 #include <lib/subghz/devices/cc1101_configs.h>
@@ -141,6 +144,10 @@ static const SubGhzDevice* subghz_cli_command_get_device(uint32_t* device_ind) {
         subghz_cli_radio_device_power_on();
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
         break;
+    case 2:
+        subghz_cli_radio_device_power_on();
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_SI4463_EXT_NAME);
+        break;
 
     default:
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
@@ -161,7 +168,7 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
     uint32_t key = 0x0074BADE;
     uint32_t repeat = 10;
     uint32_t te = 403;
-    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
+    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
 
     if(furi_string_size(args)) {
         int ret = sscanf(
@@ -183,7 +190,7 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
                 device_ind);
             cli_print_usage(
                 "subghz tx",
-                "<3 Byte Key: in hex> <Frequency: in Hz> <Te us> <Repeat count> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
+                "<3 Byte Key: in hex> <Frequency: in Hz> <Te us> <Repeat count> <Device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>",
                 furi_string_get_cstr(args));
             return;
         }
@@ -294,7 +301,7 @@ static void subghz_cli_command_rx_callback(
 void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     uint32_t frequency = 433920000;
-    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
+    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
 
     if(furi_string_size(args)) {
         int ret = sscanf(furi_string_get_cstr(args), "%lu %lu", &frequency, &device_ind);
@@ -303,7 +310,7 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
                 "sscanf returned %d, frequency: %lu device: %lu\r\n", ret, frequency, device_ind);
             cli_print_usage(
                 "subghz rx",
-                "<Frequency: in Hz> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
+                "<Frequency: in Hz> <Device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>",
                 furi_string_get_cstr(args));
             return;
         }
@@ -361,7 +368,7 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
             instance->stream, &level_duration, sizeof(LevelDuration), 10);
         if(ret == sizeof(LevelDuration)) {
             if(level_duration_is_reset(level_duration)) {
-                printf(".");
+                furi_hal_console_printf(".");
                 subghz_receiver_reset(receiver);
             } else {
                 bool level = level_duration_get_level(level_duration);
@@ -586,10 +593,11 @@ static void subghz_cli_command_print_usage() {
     printf("Cmd list:\r\n");
 
     printf(
-        "\tchat <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Chat with other Flippers\r\n");
+        "\tchat <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>\t - Chat with other Flippers\r\n");
     printf(
         "\ttx <3 byte Key: in hex> <frequency: in Hz> <te: us> <repeat: count> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Transmitting key\r\n");
-    printf("\trx <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Receive\r\n");
+    printf(
+        "\trx <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>\t - Receive\r\n");
     printf("\trx_raw <frequency:in Hz>\t - Receive RAW\r\n");
     printf("\tdecode_raw <file_name: path_RAW_file>\t - Testing\r\n");
 
@@ -687,7 +695,7 @@ static void subghz_cli_command_encrypt_raw(Cli* cli, FuriString* args) {
 
 static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     uint32_t frequency = 433920000;
-    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT
+    uint32_t device_ind = 0; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
 
     if(furi_string_size(args)) {
         int ret = sscanf(furi_string_get_cstr(args), "%lu %lu", &frequency, &device_ind);
@@ -696,7 +704,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
             printf("sscanf returned %d, Device: %lu\r\n", ret, device_ind);
             cli_print_usage(
                 "subghz chat",
-                "<Frequency: in Hz> <Device: 0 - CC1101_INT, 1 - CC1101_EXT>",
+                "<Frequency: in Hz> <Device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>",
                 furi_string_get_cstr(args));
             return;
         }
@@ -984,15 +992,369 @@ static bool subghz_on_system_start_istream_decode_band(
     return true;
 }
 
+static void subghz_cli_command_si4463_print_usage() {
+    printf("Usage:\r\n");
+    printf("subghz_si4463 <cmd> <args>\r\n");
+    printf("Cmd list:\r\n");
+
+    printf(
+        "\tset - Set registers si4463 <2 Byte Prop: in hex> <1 Byte Data: in hex> [<1 Byte Data: in hex>] before 12 bytes\r\n");
+    printf("\tget - Get registers si4463 <2 Byte Prop: in hex> <1 Byte Size: in hex>\r\n");
+
+    printf(
+        "\tcw - Carrier transmission si4463 <Frequency: in Hz> <Path 0 or 433 or 315 or 868> <1 Byte PA: in hex>\r\n");
+    printf("\tget_rssi - Show RSSI si4463 <Frequency: in Hz> <Path 0 or 433 or 315 or 868>\r\n");
+}
+
+#include <applications/drivers/subghz/si4463_ext/si4463_ext.h>
+#include <applications/drivers/subghz/si4463_ext/driver/si446x_regs.h>
+
+void subghz_cli_command_si4463_get(Cli* cli, FuriString* args, void* context) {
+    UNUSED(context);
+    UNUSED(cli);
+    UNUSED(args);
+
+    uint16_t prop = 0;
+    uint32_t size = 0;
+
+    if(furi_string_size(args)) {
+        int ret = sscanf(furi_string_get_cstr(args), "%hx %lx", &prop, &size);
+        if(ret != 2 || size > 16) {
+            printf("You must specify the prop address and from 1 to 16 bytes of size\r\n ");
+
+            cli_print_usage(
+                "subghz_si4463 get",
+                "<2 Byte Prop: in hex> <1 Byte Size: in hex>",
+                furi_string_get_cstr(args));
+            return;
+        }
+    }
+
+    uint32_t device_ind = 2; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+
+    UNUSED(device);
+    if(device_ind != 2) {
+        printf("No connect Si4463\r\n");
+        return;
+    }
+
+    SubGhzDeviceIOCTL_SI4463GetPropertiesData get_properties_data = {.prop = prop, .size = size};
+
+    if(subghz_devices_io_control(
+           device, SubGhzDeviceIOCTL_SI4463GetProperties, &get_properties_data)) {
+        printf("GET SI446X_PROP 0x%X \033[0;32mOK\033[0m\r\n", prop);
+        printf("DATA: ");
+        for(size_t i = 0; i < get_properties_data.size; i++) {
+            printf("0x%02X ", get_properties_data.data[i]);
+        }
+        printf("\r\n");
+
+    } else {
+        printf("GET SI446X_PROP 0x%X \033[0;31mERR\033[0m\r\n", prop);
+    }
+}
+
+void subghz_cli_command_si4463_set(Cli* cli, FuriString* args, void* context) {
+    UNUSED(context);
+    UNUSED(cli);
+
+    uint32_t prop = 0;
+    uint8_t size = 0;
+    uint16_t data[12] = {0};
+    uint32_t device_ind = 2; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
+
+    if(furi_string_size(args)) {
+        int ret = sscanf(
+            furi_string_get_cstr(args),
+            "%lx %hx %hx %hx %hx %hx %hx %hx %hx %hx %hx %hx %hx",
+            &prop,
+            &data[0],
+            &data[1],
+            &data[2],
+            &data[3],
+            &data[4],
+            &data[5],
+            &data[6],
+            &data[7],
+            &data[8],
+            &data[9],
+            &data[10],
+            &data[11]);
+        if(ret < 2) {
+            printf("You must specify the prop address and from 1 to 12 bytes of data\r\n ");
+
+            cli_print_usage(
+                "subghz_si4463 set",
+                "<2 Byte Prop: in hex> <1 Byte Data: in hex> [<1 Byte Data: in hex>] before 12 bytes",
+                furi_string_get_cstr(args));
+            return;
+        } else {
+            size = ret - 1;
+        }
+    }
+
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+
+    UNUSED(device);
+    if(device_ind != 2) {
+        printf("No connect Si4463\r\n");
+        return;
+    }
+
+    SubGhzDeviceIOCTL_SI4463SetPropertiesData set_properties_data = {
+        .prop = (uint16_t)prop,
+        .size = size,
+        .data = {
+            data[0],
+            data[1],
+            data[2],
+            data[3],
+            data[4],
+            data[5],
+            data[6],
+            data[7],
+            data[8],
+            data[9],
+            data[10],
+            data[11]}};
+
+    subghz_devices_idle(device);
+    if(subghz_devices_io_control(
+           device, SubGhzDeviceIOCTL_SI4463SetProperties, &set_properties_data)) {
+        printf("SET SI446X_PROP 0x%X \033[0;32mOK\033[0m\r\n", (uint16_t)prop);
+        printf("DATA: ");
+        for(size_t i = 0; i < size; i++) {
+            printf("0x%02X ", data[i]);
+        }
+        printf("\r\n");
+
+    } else {
+        printf("SET SI446X_PROP 0x%X \033[0;31mERR\033[0m\r\n", (uint16_t)prop);
+    }
+    subghz_devices_set_rx(device);
+}
+
+void subghz_cli_command_si4463_cw(Cli* cli, FuriString* args, void* context) {
+    UNUSED(context);
+    uint32_t frequency = 433920000;
+    uint32_t path = 0xFFFFFFFF;
+    uint32_t pa = 0x1f;
+
+    uint32_t device_ind = 2; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
+
+    if(furi_string_size(args)) {
+        int ret = sscanf(furi_string_get_cstr(args), "%lu %lu %lx", &frequency, &path, &pa);
+        if(ret != 3) {
+            printf(
+                "sscanf returned %d, frequency: %lu, path: %lu, pa: %lx\r\n ",
+                ret,
+                frequency,
+                path,
+                pa);
+            cli_print_usage(
+                "subghz_si4463 cw",
+                "<Frequency: in Hz> <Path 0 or 433 or 315 or 868> <1 Byte PA: in hex>",
+                furi_string_get_cstr(args));
+            return;
+        }
+        if(path != 0xFFFFFFFF && path != SubGhzDeviceIOCTL_Si4463ExtPathIsolate &&
+           path != SubGhzDeviceIOCTL_Si4463ExtPath433 &&
+           path != SubGhzDeviceIOCTL_Si4463ExtPath315 &&
+           path != SubGhzDeviceIOCTL_Si4463ExtPath868) {
+            printf("Path must be 0 or 433 or 315 or 868, not %lu\r\n", path);
+            return;
+        }
+    }
+    subghz_devices_init();
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+    if(!subghz_devices_is_frequency_valid(device, frequency)) {
+        printf(
+            "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        subghz_devices_deinit();
+        subghz_cli_radio_device_power_off();
+        return;
+    }
+
+    subghz_devices_begin(device);
+    subghz_devices_reset(device);
+
+    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async, NULL);
+    frequency = subghz_devices_set_frequency(device, frequency);
+
+    SubGhzDeviceIOCTL_SI4463SetPropertiesData set_pa = {
+        .prop = SI446X_PROP_PA_PWR_LVL, .size = 1, .data[0] = (pa & 0x7F)};
+    SubGhzDeviceIOCTL_SI4463SetPropertiesData set_mod_cw = {
+        .prop = SI446X_PROP_MODEM_MOD_TYPE,
+        .size = 1,
+        .data[0] =
+            (SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_TYPE_ASYNCHRONOUS |
+             SI446X_MODEM_MOD_TYPE_TX_DIRECT_MODE_GPIO1 |
+             SI446X_MODEM_MOD_TYPE_MOD_SOURCE_DIRECT_MODE | SI446X_MODEM_MOD_TYPE_MOD_TYPE_CW)};
+
+    if(path != 0xFFFFFFFF) {
+        //set path
+        if(path == SubGhzDeviceIOCTL_Si4463ExtPathIsolate)
+            set_pa.data[0] &= 0x07; //we limit the output power so as not to burn the tx path
+        SubGhzDeviceIOCTL_SI4463SetPathData set_path = {.path = path};
+        subghz_devices_io_control(device, SubGhzDeviceIOCTL_SI4463SetPath, &set_path);
+    }
+
+    //set PA adn CW
+    if(!subghz_devices_io_control(device, SubGhzDeviceIOCTL_SI4463SetProperties, &set_pa) ||
+       !subghz_devices_io_control(device, SubGhzDeviceIOCTL_SI4463SetProperties, &set_mod_cw)) {
+        printf("Set prop \033[0;31mERR\033[0m\r\n");
+        subghz_devices_deinit();
+        subghz_cli_radio_device_power_off();
+        return;
+    }
+
+    printf(
+        "Transmitting CW at \033[0;32m%lu\033[0m, path \033[0;32m%lu\033[0m, PA \033[0;32m%x\033[0m. Press CTRL+C to stop\r\n",
+        frequency,
+        path == 0xFFFFFFFF ? 433 : path,
+        set_pa.data[0]);
+
+    furi_hal_power_suppress_charge_enter();
+
+    subghz_devices_set_tx(device);
+
+    while(!(cli_cmd_interrupt_received(cli))) {
+        printf(".");
+        fflush(stdout);
+        furi_delay_ms(333);
+    }
+
+    // stop tx
+    subghz_devices_idle(device);
+    subghz_devices_sleep(device);
+    subghz_devices_end(device);
+    subghz_devices_deinit();
+    subghz_cli_radio_device_power_off();
+
+    furi_hal_power_suppress_charge_exit();
+}
+
+void subghz_cli_command_si4463_get_rssi(Cli* cli, FuriString* args, void* context) {
+    UNUSED(context);
+    uint32_t frequency = 433920000;
+    uint32_t path = 0xFFFFFFFF;
+
+    uint32_t device_ind = 2; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
+
+    if(furi_string_size(args)) {
+        int ret = sscanf(furi_string_get_cstr(args), "%lu %lu", &frequency, &path);
+        if(ret != 2) {
+            printf("sscanf returned %d, frequency: %lu, path: %lu\r\n ", ret, frequency, path);
+            cli_print_usage(
+                "subghz_si4463 get_rssi",
+                "<Frequency: in Hz> <Path 0 or 433 or 315 or 868>",
+                furi_string_get_cstr(args));
+            return;
+        }
+        if(path != 0xFFFFFFFF && path != SubGhzDeviceIOCTL_Si4463ExtPathIsolate &&
+           path != SubGhzDeviceIOCTL_Si4463ExtPath433 &&
+           path != SubGhzDeviceIOCTL_Si4463ExtPath315 &&
+           path != SubGhzDeviceIOCTL_Si4463ExtPath868) {
+            printf("Path must be 0 or 433 or 315 or 868, not %lu\r\n", path);
+            return;
+        }
+    }
+    subghz_devices_init();
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+    if(!subghz_devices_is_frequency_valid(device, frequency)) {
+        printf(
+            "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        subghz_devices_deinit();
+        subghz_cli_radio_device_power_off();
+        return;
+    }
+    printf(
+        "RSSI at \033[0;32m%lu\033[0m, path \033[0;32m%lu\033[0m. Press CTRL+C to stop\r\n",
+        frequency,
+        path == 0xFFFFFFFF ? 433 : path);
+
+    subghz_devices_begin(device);
+    subghz_devices_reset(device);
+
+    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async, NULL);
+    frequency = subghz_devices_set_frequency(device, frequency);
+
+    if(path != 0xFFFFFFFF) {
+        //set path
+        SubGhzDeviceIOCTL_SI4463SetPathData set_path = {.path = path};
+        subghz_devices_io_control(device, SubGhzDeviceIOCTL_SI4463SetPath, &set_path);
+    }
+
+    furi_hal_power_suppress_charge_enter();
+
+    subghz_devices_set_rx(device);
+
+    while(!cli_cmd_interrupt_received(cli)) {
+        printf("RSSI: \033[0;32m%f\033[0m\r\n", (double)subghz_devices_get_rssi(device));
+        fflush(stdout);
+        furi_delay_ms(100);
+    }
+
+    // stop tx
+    subghz_devices_idle(device);
+    subghz_devices_sleep(device);
+    subghz_devices_end(device);
+    subghz_devices_deinit();
+    subghz_cli_radio_device_power_off();
+
+    furi_hal_power_suppress_charge_exit();
+}
+
+static void subghz_cli_command_si4463(Cli* cli, FuriString* args, void* context) {
+    FuriString* cmd;
+    cmd = furi_string_alloc();
+
+    do {
+        if(!args_read_string_and_trim(args, cmd)) {
+            subghz_cli_command_si4463_print_usage();
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "set") == 0) {
+            subghz_cli_command_si4463_set(cli, args, context);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "get") == 0) {
+            subghz_cli_command_si4463_get(cli, args, context);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "cw") == 0) {
+            subghz_cli_command_si4463_cw(cli, args, context);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "get_rssi") == 0) {
+            subghz_cli_command_si4463_get_rssi(cli, args, context);
+            break;
+        }
+
+        subghz_cli_command_si4463_print_usage();
+    } while(false);
+
+    furi_string_free(cmd);
+}
+
 void subghz_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open(RECORD_CLI);
 
     cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
 
+    cli_add_command(
+        cli, "subghz_si4463", CliCommandFlagParallelSafe, subghz_cli_command_si4463, NULL);
+
     furi_record_close(RECORD_CLI);
 #else
     UNUSED(subghz_cli_command);
+    UNUSED(subghz_cli_command_si4463);
 #endif
 
 #ifdef SRV_STORAGE

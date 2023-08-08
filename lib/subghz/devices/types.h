@@ -49,6 +49,8 @@ typedef bool (*SubGhzRxIsDataCrcValid)(void);
 typedef void (*SubGhzReadPacket)(uint8_t* data, uint8_t* size);
 typedef void (*SubGhzWritePacket)(const uint8_t* data, uint8_t size);
 
+typedef bool (*SubGhzDeviceIoControl)(uint32_t io_control_code, void* in_out_data);
+
 typedef struct {
     SubGhzBegin begin;
     SubGhzEnd end;
@@ -82,6 +84,8 @@ typedef struct {
     SubGhzRxIsDataCrcValid is_rx_data_crc_valid;
     SubGhzReadPacket read_packet;
     SubGhzWritePacket write_packet;
+
+    SubGhzDeviceIoControl device_io_control;
 
 } SubGhzDeviceInterconnect;
 
