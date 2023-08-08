@@ -2,8 +2,8 @@
 
 #include <furi/furi.h>
 
-#define FELICA_CRC_POLY 0x1021 // Polynomial: x^16 + x^12 + x^5 + 1
-#define FELICA_CRC_INIT 0x0000 // Initial value: 0x0000
+#define FELICA_CRC_POLY (0x1021U) // Polynomial: x^16 + x^12 + x^5 + 1
+#define FELICA_CRC_INIT (0x0000U)
 
 uint16_t felica_crc_calculate(const uint8_t* data, size_t length) {
     uint16_t crc = FELICA_CRC_INIT;

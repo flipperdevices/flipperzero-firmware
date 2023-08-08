@@ -3,10 +3,9 @@
 #include <furi.h>
 
 #include <nfc/nfc_common.h>
-#include <nfc/helpers/iso14443_crc.h>
 
-#define FELICA_PROTOCOL_NAME "Felica"
-#define FELICA_DEVICE_NAME "Felica"
+#define FELICA_PROTOCOL_NAME "FeliCa"
+#define FELICA_DEVICE_NAME "FeliCa"
 
 #define FELICA_DATA_FORMAT_VERSION "Data format version"
 #define FELICA_MANUFACTURE_ID "Manufacture id"
@@ -55,7 +54,7 @@ void felica_copy(FelicaData* data, const FelicaData* other) {
 bool felica_verify(FelicaData* data, const FuriString* device_type) {
     UNUSED(data);
     UNUSED(device_type);
-    // TODO: How to distinguish from old ISO14443-3/4a?
+
     return false;
 }
 
@@ -73,7 +72,8 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
         if(data_format_version != felica_data_format_version) break;
         if(!flipper_format_read_hex(ff, FELICA_MANUFACTURE_ID, data->idm.data, FELICA_IDM_SIZE))
             break;
-        if(!flipper_format_read_hex(ff, FELICA_MANUFACTURE_ID, data->pmm.data, FELICA_PMM_SIZE))
+        if(!flipper_format_read_hex(
+               ff, FELICA_MANUFACTURE_PARAMETER, data->pmm.data, FELICA_PMM_SIZE))
             break;
 
         parsed = true;
@@ -94,7 +94,8 @@ bool felica_save(const FelicaData* data, FlipperFormat* ff) {
             break;
         if(!flipper_format_write_hex(ff, FELICA_MANUFACTURE_ID, data->idm.data, FELICA_IDM_SIZE))
             break;
-        if(!flipper_format_write_hex(ff, FELICA_MANUFACTURE_ID, data->pmm.data, FELICA_PMM_SIZE))
+        if(!flipper_format_write_hex(
+               ff, FELICA_MANUFACTURE_PARAMETER, data->pmm.data, FELICA_PMM_SIZE))
             break;
 
         saved = true;
