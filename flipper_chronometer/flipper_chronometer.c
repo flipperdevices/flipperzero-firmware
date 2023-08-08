@@ -7,10 +7,8 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include <furi_hal_pwm.h>
 #include <furi_hal_power.h>
 #include <locale/locale.h>
-#include <lib/toolbox/md5.h>
 
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
@@ -18,7 +16,6 @@
 typedef enum {
     EventTypeInput,
     ClockEventTypeTick,
-    EventGPIO,
 } EventType;
 
 typedef struct {
@@ -26,12 +23,11 @@ typedef struct {
     InputEvent input;
 } EventApp;
 
-#define lineArraySize 128
-
 typedef struct {
     FuriMutex* mutex;
     uint32_t timer;
     uint8_t minute;
+    uint8_t hour;
 } mutexStruct;
 
 static void draw_callback(Canvas* canvas, void* ctx) 
@@ -43,9 +39,13 @@ static void draw_callback(Canvas* canvas, void* ctx)
     furi_mutex_release(mutexVal->mutex);
 
     char buffer[16];
-    snprintf(buffer, sizeof(buffer), "%02u:%02lu:%03lu", mutexDraw.minute, mutexDraw.timer / 64000000, (mutexDraw.timer % 64000000) / 64000);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, SCREEN_SIZE_X/2, SCREEN_SIZE_Y/2 + 5, AlignCenter, AlignBottom, buffer);
+    snprintf(buffer, sizeof(buffer), "%02u:%02u:%02lu", mutexDraw.hour, mutexDraw.minute, mutexDraw.timer / 64000000);
+    canvas_draw_str_aligned(canvas, 5, SCREEN_SIZE_Y/2 + 5, AlignLeft, AlignBottom, buffer);
+
+    canvas_set_font(canvas, FontPrimary);
+    snprintf(buffer, sizeof(buffer), "%03lu", (mutexDraw.timer % 64000000) / 64000);
+    canvas_draw_str_aligned(canvas, SCREEN_SIZE_X - 5, SCREEN_SIZE_Y/2, AlignRight, AlignBottom, buffer);
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) 
@@ -81,6 +81,7 @@ int32_t flipper_chronometer_app()
     mutexStruct mutexVal;
     mutexVal.minute = 0;
     mutexVal.timer = 0;
+    mutexVal.hour = 0;
 
     uint32_t previousTimer = 0;
 
@@ -137,6 +138,7 @@ int32_t flipper_chronometer_app()
                     LL_TIM_SetCounter(TIM2, 0);
                     furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                     mutexVal.minute = 0;
+                    mutexVal.hour = 0;
                     mutexVal.timer = 0;
                     furi_mutex_release(mutexVal.mutex);
 
@@ -157,12 +159,20 @@ int32_t flipper_chronometer_app()
             if (mutexVal.timer < previousTimer)
             {
                 if (mutexVal.minute < 59) mutexVal.minute++;
-                else 
+                else
                 {
-                    LL_TIM_DisableCounter(TIM2);
-                    mutexVal.timer = 3839999999;
-                    furi_timer_stop(timer);
-                    enableChrono = 0;
+                    if (mutexVal.hour < 99)
+                    {
+                        mutexVal.hour++;
+                        mutexVal.minute = 0;
+                    }
+                    else
+                    {
+                        LL_TIM_DisableCounter(TIM2);
+                        mutexVal.timer = 3839999999;
+                        furi_timer_stop(timer);
+                        enableChrono = 0;
+                    }
                 }
             }
             furi_mutex_release(mutexVal.mutex);
