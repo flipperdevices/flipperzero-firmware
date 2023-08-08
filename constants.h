@@ -1,5 +1,5 @@
 #include <gui/icon.h>
-#include "dice_dnd_app_icons.h"
+#include "dice_app_icons.h"
 
 #define TAG "DiceApp"
 
@@ -130,7 +130,7 @@ void init(State* const state) {
 
 void add_to_history(State* const state, uint8_t index, uint8_t count, uint8_t result) {
     uint8_t last = HISTORY_SIZE - 1;
-    if (state->history[last].index >= 0){
+    if(state->history[last].index >= 0) {
         for(uint8_t i = 1; i < HISTORY_SIZE; i++) {
             state->history[i - 1] = state->history[i];
         }
@@ -142,7 +142,7 @@ void add_to_history(State* const state, uint8_t index, uint8_t count, uint8_t re
     }
 
     for(uint8_t i = 0; i < HISTORY_SIZE; i++) {
-        if (state->history[i].index < 0){
+        if(state->history[i].index < 0) {
             state->history[i].index = index;
             state->history[i].count = count;
             state->history[i].result = result;
