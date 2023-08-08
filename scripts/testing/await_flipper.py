@@ -22,7 +22,7 @@ def flp_serial_by_name(flp_name):
     if os.path.exists(flp_serial):
         return flp_serial
     else:
-        logging.info(f"Couldn't find {logging.info} on this attempt.")
+        logging.info(f"Couldn't find {flp_name} on this attempt.")
         if os.path.exists(flp_name):
             return flp_name
         else:

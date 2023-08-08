@@ -33,18 +33,18 @@ class Main(App):
 
     def _get_flipper(self, retry_count: Optional[int] = 1):
         port = None
-        self.logger.debug(f"Attempting to find flipper with {retry_count} attempts.")
+        self.logger.info(f"Attempting to find flipper with {retry_count} attempts.")
 
         for i in range(retry_count):
             time.sleep(1)
-            self.logger.debug(f"Attempting to find flipper #{i}.")
+            self.logger.info(f"Attempting to find flipper #{i}.")
 
             if port := resolve_port(self.logger, self.args.port):
-                self.logger.debug(f"Found flipper at {port}")
+                self.logger.info(f"Found flipper at {port}")
                 break
 
         if not port:
-            self.logger.debug(f"Failed to find flipper")
+            self.logger.info(f"Failed to find flipper")
             return None
 
         flipper = FlipperStorage(port)
@@ -55,7 +55,7 @@ class Main(App):
         if not (flipper := self._get_flipper(retry_count=10)):
             sys.exit(1)
 
-        self.logger.debug("Powering off")
+        self.logger.info("Powering off")
         flipper.send("power off" + "\r")
         flipper.stop()
         sys.exit(0)
@@ -64,7 +64,7 @@ class Main(App):
         if not (flipper := self._get_flipper(retry_count=10)):
             sys.exit(1)
 
-        self.logger.debug("Rebooting")
+        self.logger.info("Rebooting")
         flipper.send("power reboot" + "\r")
         flipper.stop()
         sys.exit(0)
@@ -73,7 +73,7 @@ class Main(App):
         if not (flipper := self._get_flipper(retry_count=10)):
             sys.exit(1)
 
-        self.logger.debug("Rebooting to DFU")
+        self.logger.info("Rebooting to DFU")
         flipper.send("power reboot2dfu" + "\r")
         flipper.stop()
 
