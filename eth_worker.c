@@ -4,10 +4,9 @@
 
 #include <furi_hal.h>
 #include "dhcp.h"
-#include "ping.h"
 #include "socket.h"
 #include "stm32wbxx_hal_gpio.h"
-#include "wizchip_conf.h"
+#include <wizchip_conf.h>
 
 #define TAG "EthWorker"
 
@@ -158,7 +157,6 @@ void eth_run(EthWorker* worker, EthWorkerProcess process) {
             break;
         }
         worker->next_state = EthWorkerStatePing;
-        eth_log(EthWorkerProcessPing, "Fuck you");
         break;
     case EthWorkerProcessReset:
         worker->next_state = EthWorkerStateNotInited;
@@ -170,6 +168,7 @@ void eth_run(EthWorker* worker, EthWorkerProcess process) {
     case EthWorkerProcessExit:
         if(worker->state != EthWorkerStateNotAllocated) {
             worker->next_state = EthWorkerStateStop;
+            worker->state = EthWorkerStateStop;
             furi_thread_join(worker->thread);
             furi_thread_free(worker->thread);
             worker->state = EthWorkerStateNotAllocated;
@@ -243,6 +242,37 @@ void update_WIZNETINFO(uint8_t is_dhcp) {
         memcpy(gWIZNETINFO.dns, static_worker->config->dns, 4);
         gWIZNETINFO.dhcp = NETINFO_STATIC;
     }
+}
+
+int check_phylink(EthWorker* worker, EthWorkerState state, EthWorkerProcess proc, int timeout) {
+    uint32_t start_time = furi_get_tick();
+    uint32_t last_log_time = start_time;
+    eth_log(proc, "phy link check 0");
+    for(;;) {
+        if(furi_get_tick() > start_time + timeout) {
+            eth_log(proc, "phy link timeout");
+            break;
+        }
+        if(worker->state != state) {
+            eth_log(proc, "state changed");
+            break;
+        }
+        uint8_t link = PHY_LINK_OFF;
+        if(ctlwizchip(CW_GET_PHYLINK, (void*)&link) == -1) {
+            eth_log(proc, "Unknown PHY link status");
+            break;
+        }
+        if(link != PHY_LINK_OFF) {
+            eth_log(proc, "phy link on");
+            return 1;
+        }
+        furi_delay_ms(20);
+        if(furi_get_tick() > last_log_time + 1000) {
+            eth_log(proc, "phy link check %d", (last_log_time - start_time) / 1000);
+            last_log_time = furi_get_tick();
+        }
+    }
+    return 0;
 }
 
 #define DHCP_SOCKET 0
@@ -322,22 +352,16 @@ int32_t eth_worker_task(void* context) {
         } else if(worker->state == EthWorkerStateInited) {
             if(worker->next_state == EthWorkerStateDHCP) {
                 worker->state = EthWorkerStateDHCP;
-                uint8_t temp = PHY_LINK_OFF;
-                while(temp == PHY_LINK_OFF && worker->state == EthWorkerStateDHCP) {
-                    if(ctlwizchip(CW_GET_PHYLINK, (void*)&temp) == -1) {
-                        eth_log(EthWorkerProcessDHCP, "Unknown PHY link status");
-                    }
-                    furi_delay_ms(1);
-                }
-                if(worker->state != EthWorkerStateDHCP) {
-                    break;
+                if(!check_phylink(worker, EthWorkerStateDHCP, EthWorkerProcessDHCP, 5000)) {
+                    worker->state = EthWorkerStateInited;
+                    continue;
                 }
                 reg_dhcp_cbfunc(Callback_IPAssigned, Callback_IPAssigned, Callback_IPConflict);
                 DHCP_init(DHCP_SOCKET, dhcp_buffer);
-                uint8_t dhcp_ret = DHCP_STOPPED;
                 uint8_t next_cycle = 1;
+                uint8_t divider = 0;
                 while(next_cycle && worker->state == EthWorkerStateDHCP) {
-                    dhcp_ret = DHCP_run();
+                    uint8_t dhcp_ret = DHCP_run();
                     switch(dhcp_ret) {
                     case DHCP_IP_ASSIGN:
                     case DHCP_IP_CHANGED:
@@ -357,7 +381,16 @@ int32_t eth_worker_task(void* context) {
                         eth_log(EthWorkerProcessDHCP, "DHCP Failed");
                         break;
                     }
-                    furi_delay_ms(1000);
+                    furi_delay_ms(100);
+                    if(divider++ % 10 == 0) {
+                        eth_log(EthWorkerProcessDHCP, "DHCP process %d", divider / 10);
+                        if(divider > 250) {
+                            DHCP_stop();
+                            eth_log(EthWorkerProcessDHCP, "DHCP Stop by timer");
+                            worker->state = EthWorkerStateInited;
+                            break;
+                        }
+                    }
                     next_cycle = (dhcp_ret == DHCP_RUNNING);
                 }
                 if(worker->state != EthWorkerStateDHCP) {
@@ -399,7 +432,7 @@ int32_t eth_worker_task(void* context) {
                 worker->state = EthWorkerStatePing;
                 uint8_t* adress = static_worker->config->ping_ip;
                 eth_log(
-                    EthWorkerProcessDHCP,
+                    EthWorkerProcessPing,
                     "ping %d.%d.%d.%d",
                     adress[0],
                     adress[1],
@@ -410,14 +443,14 @@ int32_t eth_worker_task(void* context) {
                 while(try < tryes && worker->state == EthWorkerStatePing) {
                     try++;
                     uint32_t start_time = furi_get_tick();
-                    uint8_t res = 3; //ping_auto(1, adress);
+                    uint8_t res = ping_auto_interface(adress);
                     uint32_t res_time = furi_get_tick();
                     if(res == 3) {
                         eth_log(
-                            EthWorkerProcessDHCP, "%d success %d ms", try, res_time - start_time);
+                            EthWorkerProcessPing, "%d success %d ms", try, res_time - start_time);
                     } else {
                         eth_log(
-                            EthWorkerProcessDHCP,
+                            EthWorkerProcessPing,
                             "%d error %d, %d",
                             try,
                             res,
@@ -429,6 +462,7 @@ int32_t eth_worker_task(void* context) {
                     break;
                 }
                 worker->state = EthWorkerStateOnline;
+                worker->next_state = EthWorkerStateDefaultNext;
             } else {
             }
         }

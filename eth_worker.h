@@ -8,6 +8,7 @@ typedef struct EthViewProcess EthViewProcess;
 typedef enum {
     EthWorkerStateNotAllocated = 0,
     EthWorkerStateNotInited,
+    EthWorkerStateDefaultNext,
     EthWorkerStateInited,
     EthWorkerStateInit,
     EthWorkerStateModulePowerOn,
@@ -70,3 +71,6 @@ void eth_worker_stop(EthWorker* eth_worker);
 void eth_worker_dhcp(EthWorker* eth_worker);
 void eth_worker_w5500(EthWorker* eth_worker);
 void eth_worker_init_process(EthWorker* eth_worker);
+
+#define PING_SOCKET 1
+uint8_t ping_auto_interface(uint8_t* adress);

@@ -205,19 +205,14 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
             }
         }
     } else if(process->type == EthWorkerProcessPing) {
-        canvas_draw_box(canvas, 26, 8, 5, 13);
-        canvas_draw_box(canvas, 52, 8, 3, 13);
-        canvas_draw_box(canvas, 76, 8, 3, 13);
-        canvas_draw_box(canvas, 100, 8, 3, 13);
-        canvas_draw_box(canvas, 124, 8, 4, 13);
-        canvas_draw_frame(canvas, 31, 8, 21, 13);
-        canvas_draw_frame(canvas, 55, 8, 21, 13);
-        canvas_draw_frame(canvas, 79, 8, 21, 13);
-        canvas_draw_frame(canvas, 103, 8, 21, 13);
+        canvas_draw_frame(canvas, 35, 8, 21, 13);
+        canvas_draw_frame(canvas, 59, 8, 21, 13);
+        canvas_draw_frame(canvas, 83, 8, 21, 13);
+        canvas_draw_frame(canvas, 107, 8, 21, 13);
         uint8_t current_digit = ((EthViewDrawPing*)process->draw_struct)->current_digit;
         uint8_t* adress = ((EthViewDrawPing*)process->draw_struct)->ip;
         for(uint8_t i = 0; i < 4; ++i) {
-            uint8_t x = 33 + i * 24;
+            uint8_t x = 37 + i * 24;
             draw_dec_number(canvas, x, 17, adress[i]);
             if(process->editing && (current_digit / 3 == i)) {
                 uint8_t x1 = x + 6 * (current_digit % 3);
