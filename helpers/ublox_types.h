@@ -48,7 +48,6 @@ typedef enum {
 
 typedef struct UbloxDataDisplayState {
     UbloxDataDisplayViewMode view_mode;
-    UbloxDataDisplayBacklightMode backlight_mode;
     UbloxDataDisplayRefreshRate refresh_rate;
     UbloxDataDisplayNotifyMode notify_mode;
 } UbloxDataDisplayState;
