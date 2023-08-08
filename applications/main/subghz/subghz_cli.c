@@ -540,6 +540,7 @@ void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
         SubGhzReceiver* receiver = subghz_receiver_alloc_init(environment);
         subghz_receiver_set_filter(receiver, SubGhzProtocolFlag_Decodable);
         subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
+        subghz_devices_init();
 
         SubGhzFileEncoderWorker* file_worker_encoder = subghz_file_encoder_worker_alloc();
         if(subghz_file_encoder_worker_start(
@@ -568,6 +569,7 @@ void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
         printf("\r\nPackets received \033[0;32m%u\033[0m\r\n", instance->packet_count);
 
         // Cleanup
+        subghz_devices_deinit();
         subghz_receiver_free(receiver);
         subghz_environment_free(environment);
 
