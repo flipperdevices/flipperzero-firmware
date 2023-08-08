@@ -7,7 +7,14 @@
 
 #define TAG "FHalNfc"
 
-static FuriMutex* f_hal_nfc_mutex = NULL;
+static const FHalNfcTechBase* f_hal_nfc_tech[FHalNfcTechNum] = {
+    [FHalNfcTechIso14443a] = &f_hal_nfc_iso14443a,
+    [FHalNfcTechIso14443b] = &f_hal_nfc_iso14443b,
+    [FHalNfcTechIso15693] = &f_hal_nfc_iso15693,
+};
+
+FHalNfc f_hal_nfc;
+// static FuriMutex* f_hal_nfc_mutex = NULL;
 
 static FHalNfcError f_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
     FHalNfcError error = FHalNfcErrorNone;
@@ -59,13 +66,12 @@ FHalNfcError f_hal_nfc_is_hal_ready() {
 }
 
 FHalNfcError f_hal_nfc_init() {
-    furi_assert(f_hal_nfc_mutex == NULL);
+    furi_assert(f_hal_nfc.mutex == NULL);
 
-    f_hal_nfc_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    f_hal_nfc.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     FHalNfcError error = FHalNfcErrorNone;
 
     f_hal_nfc_event_init();
-    f_hal_nfc_event_start();
 
     do {
         error = f_hal_nfc_acquire();
@@ -234,16 +240,16 @@ FHalNfcError f_hal_nfc_init() {
 }
 
 static bool f_hal_nfc_is_mine() {
-    return (furi_mutex_get_owner(f_hal_nfc_mutex) == furi_thread_get_current_id());
+    return (furi_mutex_get_owner(f_hal_nfc.mutex) == furi_thread_get_current_id());
 }
 
 FHalNfcError f_hal_nfc_acquire() {
-    furi_check(f_hal_nfc_mutex);
+    furi_check(f_hal_nfc.mutex);
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
 
     FHalNfcError error = FHalNfcErrorNone;
-    if(furi_mutex_acquire(f_hal_nfc_mutex, 100) != FuriStatusOk) {
+    if(furi_mutex_acquire(f_hal_nfc.mutex, 100) != FuriStatusOk) {
         furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
         error = FHalNfcErrorBusy;
     }
@@ -252,9 +258,9 @@ FHalNfcError f_hal_nfc_acquire() {
 }
 
 FHalNfcError f_hal_nfc_release() {
-    furi_check(f_hal_nfc_mutex);
+    furi_check(f_hal_nfc.mutex);
     furi_check(f_hal_nfc_is_mine());
-    furi_check(furi_mutex_release(f_hal_nfc_mutex) == FuriStatusOk);
+    furi_check(furi_mutex_release(f_hal_nfc.mutex) == FuriStatusOk);
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 
@@ -298,7 +304,7 @@ FHalNfcError f_hal_nfc_low_power_mode_stop() {
     return error;
 }
 
-static void f_hal_nfc_configure_poller_common(FuriHalSpiBusHandle* handle) {
+static FHalNfcError f_hal_nfc_poller_init_common(FuriHalSpiBusHandle* handle) {
     // Disable wake up
     st25r3916_clear_reg_bits(handle, ST25R3916_REG_OP_CONTROL, ST25R3916_REG_OP_CONTROL_wu);
     // Enable correlator
@@ -315,224 +321,41 @@ static void f_hal_nfc_configure_poller_common(FuriHalSpiBusHandle* handle) {
     st25r3916_write_reg(handle, ST25R3916_REG_OVERSHOOT_CONF2, 0x00);
     st25r3916_write_reg(handle, ST25R3916_REG_UNDERSHOOT_CONF1, 0x00);
     st25r3916_write_reg(handle, ST25R3916_REG_UNDERSHOOT_CONF2, 0x00);
+
+    return FHalNfcErrorNone;
 }
 
-// TODO: Refactor this function to be more modular and readable
-FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
-    FHalNfcError error = FHalNfcErrorNone;
+static FHalNfcError f_hal_nfc_listener_init_common(FuriHalSpiBusHandle* handle) {
+    UNUSED(handle);
+    // TODO: Common listener configuration
+    return FHalNfcErrorNone;
+}
+
+FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcTech tech) {
+    furi_assert(mode < FHalNfcModeNum);
+    furi_assert(tech < FHalNfcTechNum);
+
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    if(mode == FHalNfcModeIso14443aPoller || mode == FHalNfcModeIso14443aListener) {
-        if(mode == FHalNfcModeIso14443aPoller) {
-            // Poller configuration
-            f_hal_nfc_configure_poller_common(handle);
-            // Enable ISO14443A mode, OOK modulation
-            st25r3916_change_reg_bits(
-                handle,
-                ST25R3916_REG_MODE,
-                ST25R3916_REG_MODE_om_mask | ST25R3916_REG_MODE_tr_am,
-                ST25R3916_REG_MODE_om_iso14443a | ST25R3916_REG_MODE_tr_am_ook);
+    FHalNfcError error = FHalNfcErrorNone;
 
-            // Overshoot protection - is this necessary here?
-            st25r3916_change_reg_bits(handle, ST25R3916_REG_OVERSHOOT_CONF1, 0xff, 0x40);
-            st25r3916_change_reg_bits(handle, ST25R3916_REG_OVERSHOOT_CONF2, 0xff, 0x03);
-            st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF1, 0xff, 0x40);
-            st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF2, 0xff, 0x03);
+    if(mode == FHalNfcModePoller) {
+        do {
+            error = f_hal_nfc_poller_init_common(handle);
+            if(error != FHalNfcErrorNone) break;
+            error = f_hal_nfc_tech[tech]->poller.init(handle);
+        } while(false);
 
-        } else {
-            // Listener configuration
-            f_hal_nfca_listener_init();
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_OP_CONTROL,
-                ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
-                    ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
-            st25r3916_write_reg(
-                handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ_targ | ST25R3916_REG_MODE_om0);
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_PASSIVE_TARGET,
-                ST25R3916_REG_PASSIVE_TARGET_fdel_2 | ST25R3916_REG_PASSIVE_TARGET_fdel_0 |
-                    ST25R3916_REG_PASSIVE_TARGET_d_ac_ap2p |
-                    ST25R3916_REG_PASSIVE_TARGET_d_212_424_1r);
-
-            st25r3916_write_reg(handle, ST25R3916_REG_MASK_RX_TIMER, 0x02);
-        }
-
-        if(bitrate == FHalNfcBitrate106) {
-            // Bitrate-dependent NFC-A settings
-
-            // 1st stage zero = 600kHz, 3rd stage zero = 200 kHz
-            st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF1, ST25R3916_REG_RX_CONF1_z600k);
-            // AGC enabled, ratio 3:1, squelch after TX
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_RX_CONF2,
-                ST25R3916_REG_RX_CONF2_agc6_3 | ST25R3916_REG_RX_CONF2_agc_m |
-                    ST25R3916_REG_RX_CONF2_agc_en | ST25R3916_REG_RX_CONF2_sqm_dyn);
-            // HF operation, full gain on AM and PM channels
-            st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF3, 0x00);
-            // No gain reduction on AM and PM channels
-            st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF4, 0x00);
-            // Correlator config
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_CORR_CONF1,
-                ST25R3916_REG_CORR_CONF1_corr_s0 | ST25R3916_REG_CORR_CONF1_corr_s4 |
-                    ST25R3916_REG_CORR_CONF1_corr_s6);
-            // Sleep mode disable, 424kHz mode off
-            st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0x00);
-        }
-
-    } else if(mode == FHalNfcModeIso14443bPoller /* TODO: Listener support */) {
-        f_hal_nfc_configure_poller_common(handle);
-        // Enable ISO14443B mode, AM modulation
-        st25r3916_change_reg_bits(
-            handle,
-            ST25R3916_REG_MODE,
-            ST25R3916_REG_MODE_om_mask | ST25R3916_REG_MODE_tr_am,
-            ST25R3916_REG_MODE_om_iso14443b | ST25R3916_REG_MODE_tr_am_am);
-
-        // 10% ASK modulation
-        st25r3916_change_reg_bits(
-            handle,
-            ST25R3916_REG_TX_DRIVER,
-            ST25R3916_REG_TX_DRIVER_am_mod_mask,
-            ST25R3916_REG_TX_DRIVER_am_mod_10percent);
-
-        // Use regulator AM, resistive AM disabled
-        st25r3916_clear_reg_bits(
-            handle,
-            ST25R3916_REG_AUX_MOD,
-            ST25R3916_REG_AUX_MOD_dis_reg_am | ST25R3916_REG_AUX_MOD_res_am);
-
-        // EGT = 0 etu
-        // SOF = 10 etu LOW + 2 etu HIGH
-        // EOF = 10 etu
-        st25r3916_change_reg_bits(
-            handle,
-            ST25R3916_REG_ISO14443B_1,
-            ST25R3916_REG_ISO14443B_1_egt_mask | ST25R3916_REG_ISO14443B_1_sof_mask |
-                ST25R3916_REG_ISO14443B_1_eof,
-            (0U << ST25R3916_REG_ISO14443B_1_egt_shift) | ST25R3916_REG_ISO14443B_1_sof_0_10etu |
-                ST25R3916_REG_ISO14443B_1_sof_1_2etu | ST25R3916_REG_ISO14443B_1_eof_10etu);
-
-        // TR1 = 80 / fs
-        // B' mode off (no_sof & no_eof = 0)
-        st25r3916_change_reg_bits(
-            handle,
-            ST25R3916_REG_ISO14443B_2,
-            ST25R3916_REG_ISO14443B_2_tr1_mask | ST25R3916_REG_ISO14443B_2_no_sof |
-                ST25R3916_REG_ISO14443B_2_no_eof,
-            ST25R3916_REG_ISO14443B_2_tr1_80fs80fs);
-
-        if(bitrate == FHalNfcBitrate106) {
-            // Bitrate-dependent NFC-B settings
-
-            // 1st stage zero = 60kHz, 3rd stage zero = 200 kHz
-            st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF1, ST25R3916_REG_RX_CONF1_h200);
-
-            // Enable AGC
-            // AGC Ratio 6
-            // AGC algorithm with RESET (recommended for ISO14443-B)
-            // AGC operation during complete receive period
-            // Squelch ratio 6/3 (recommended for ISO14443-B)
-            // Squelch automatic activation on TX end
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_RX_CONF2,
-                ST25R3916_REG_RX_CONF2_agc6_3 | ST25R3916_REG_RX_CONF2_agc_alg |
-                    ST25R3916_REG_RX_CONF2_agc_m | ST25R3916_REG_RX_CONF2_agc_en |
-                    ST25R3916_REG_RX_CONF2_pulz_61 | ST25R3916_REG_RX_CONF2_sqm_dyn);
-
-            // HF operation, full gain on AM and PM channels
-            st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF3, 0x00);
-            // No gain reduction on AM and PM channels
-            st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF4, 0x00);
-
-            // Subcarrier end detector enabled
-            // Subcarrier end detection level = 66%
-            // BPSK start 33 pilot pulses
-            // AM & PM summation before digitizing on
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_CORR_CONF1,
-                ST25R3916_REG_CORR_CONF1_corr_s0 | ST25R3916_REG_CORR_CONF1_corr_s1 |
-                    ST25R3916_REG_CORR_CONF1_corr_s3 | ST25R3916_REG_CORR_CONF1_corr_s4);
-            // Sleep mode disable, 424kHz mode off
-            st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0x00);
-        }
-
-    } else if(mode == FHalNfcModeIso15693Poller || mode == FHalNfcModeIso15693Listener) {
-        if(mode == FHalNfcModeIso15693Poller) {
-            // Poller configuration
-            f_hal_nfc_configure_poller_common(handle);
-            // Enable Subcarrier Stream mode, OOK modulation
-            st25r3916_change_reg_bits(
-                handle,
-                ST25R3916_REG_MODE,
-                ST25R3916_REG_MODE_om_mask | ST25R3916_REG_MODE_tr_am,
-                ST25R3916_REG_MODE_om_subcarrier_stream | ST25R3916_REG_MODE_tr_am_ook);
-
-            // Subcarrier 424 kHz mode
-            // 8 sub-carrier pulses in report period
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_STREAM_MODE,
-                ST25R3916_REG_STREAM_MODE_scf_sc424 | ST25R3916_REG_STREAM_MODE_stx_106 |
-                    ST25R3916_REG_STREAM_MODE_scp_8pulses);
-
-            // Use regulator AM, resistive AM disabled
-            st25r3916_clear_reg_bits(
-                handle,
-                ST25R3916_REG_AUX_MOD,
-                ST25R3916_REG_AUX_MOD_dis_reg_am | ST25R3916_REG_AUX_MOD_res_am);
-
-        } else {
-            // Listener configuration
-            f_hal_nfca_listener_init();
-            // TODO: Implement listener config
-        }
-
-        if(bitrate == FHalNfcBitrate26p48) {
-            // Bitrate-dependent NFC-V settings
-
-            // 1st stage zero = 12 kHz, 3rd stage zero = 80 kHz, low-pass = 600 kHz
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_RX_CONF1,
-                ST25R3916_REG_RX_CONF1_z12k | ST25R3916_REG_RX_CONF1_h80 |
-                    ST25R3916_REG_RX_CONF1_lp_600khz);
-
-            // Enable AGC
-            // AGC Ratio 6
-            // AGC algorithm with RESET (recommended for ISO15693)
-            // AGC operation during complete receive period
-            // Squelch automatic activation on TX end
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_RX_CONF2,
-                ST25R3916_REG_RX_CONF2_agc6_3 | ST25R3916_REG_RX_CONF2_agc_m |
-                    ST25R3916_REG_RX_CONF2_agc_en | ST25R3916_REG_RX_CONF2_sqm_dyn);
-
-            // HF operation, full gain on AM and PM channels
-            st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF3, 0x00);
-            // No gain reduction on AM and PM channels
-            st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF4, 0x00);
-
-            // Collision detection level 53%
-            // AM & PM summation before digitizing on
-            st25r3916_write_reg(
-                handle,
-                ST25R3916_REG_CORR_CONF1,
-                ST25R3916_REG_CORR_CONF1_corr_s0 | ST25R3916_REG_CORR_CONF1_corr_s1 |
-                    ST25R3916_REG_CORR_CONF1_corr_s4);
-            // 424 kHz subcarrier stream mode on
-            st25r3916_write_reg(
-                handle, ST25R3916_REG_CORR_CONF2, ST25R3916_REG_CORR_CONF2_corr_s8);
-        }
+    } else if(mode == FHalNfcModeListener) {
+        do {
+            error = f_hal_nfc_listener_init_common(handle);
+            if(error != FHalNfcErrorNone) break;
+            error = f_hal_nfc_tech[tech]->listener.init(handle);
+        } while(false);
     }
 
+    f_hal_nfc.mode = mode;
+    f_hal_nfc.tech = tech;
     return error;
 }
 
@@ -544,7 +367,15 @@ FHalNfcError f_hal_nfc_reset_mode() {
     // Set default value in mode register
     st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om0);
     st25r3916_clear_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
-    f_hal_nfca_listener_deinit();
+
+    const FHalNfcMode mode = f_hal_nfc.mode;
+    const FHalNfcTech tech = f_hal_nfc.tech;
+
+    if(mode == FHalNfcModePoller) {
+        error = f_hal_nfc_tech[tech]->poller.deinit(handle);
+    } else if(mode == FHalNfcModeListener) {
+        error = f_hal_nfc_tech[tech]->listener.deinit(handle);
+    }
 
     return error;
 }
@@ -646,6 +477,14 @@ FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
     return err;
 }
 
+FHalNfcError f_hal_nfc_listener_rx_start() {
+    return FHalNfcErrorNone;
+}
+
+FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
+    return f_hal_nfc_poller_rx(rx_data, rx_data_size, rx_bits);
+}
+
 FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
     furi_assert(rx_data);
     furi_assert(rx_bits);
@@ -668,7 +507,7 @@ FHalNfcError f_hal_nfc_trx_reset() {
     return FHalNfcErrorNone;
 }
 
-FHalNfcError f_hal_nfc_listen_start() {
+FHalNfcError f_hal_nfc_listener_start() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
@@ -690,7 +529,7 @@ FHalNfcError f_hal_nfc_listen_start() {
     return FHalNfcErrorNone;
 }
 
-FHalNfcError f_hal_nfc_listen_reset() {
+FHalNfcError f_hal_nfc_listener_reset() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);

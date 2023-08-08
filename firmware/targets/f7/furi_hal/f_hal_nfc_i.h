@@ -26,7 +26,14 @@ typedef struct {
     void* context;
 } FHalNfcEventInternal;
 
-extern FHalNfcEventInternal* f_hal_nfc;
+typedef struct {
+    FuriMutex* mutex;
+    FHalNfcMode mode;
+    FHalNfcTech tech;
+} FHalNfc;
+
+extern FHalNfc f_hal_nfc;
+// extern FHalNfcEventInternal* f_hal_nfc_event;
 
 void f_hal_nfc_event_init();
 
@@ -46,6 +53,28 @@ bool f_hal_nfc_event_wait_for_specific_irq(
     FuriHalSpiBusHandle* handle,
     uint32_t mask,
     uint32_t timeout_ms);
+
+// Technology specific API
+typedef FHalNfcError (*FHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
+
+typedef struct {
+    FHalNfcChipConfig init;
+    FHalNfcChipConfig deinit;
+} FHalNfcTechPollerBase;
+
+typedef struct {
+    FHalNfcChipConfig init;
+    FHalNfcChipConfig deinit;
+} FHalNfcTechListenerBase;
+
+typedef struct {
+    FHalNfcTechPollerBase poller;
+    FHalNfcTechListenerBase listener;
+} FHalNfcTechBase;
+
+extern const FHalNfcTechBase f_hal_nfc_iso14443a;
+extern const FHalNfcTechBase f_hal_nfc_iso14443b;
+extern const FHalNfcTechBase f_hal_nfc_iso15693;
 
 #ifdef __cplusplus
 }

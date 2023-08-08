@@ -873,10 +873,12 @@ Function,-,f_hal_nfc_acquire,FHalNfcError,
 Function,-,f_hal_nfc_event_start,FHalNfcError,
 Function,-,f_hal_nfc_init,FHalNfcError,
 Function,-,f_hal_nfc_is_hal_ready,FHalNfcError,
-Function,-,f_hal_nfc_listen_reset,FHalNfcError,
-Function,-,f_hal_nfc_listen_start,FHalNfcError,
 Function,-,f_hal_nfc_listener_disable_auto_col_res,FHalNfcError,
+Function,+,f_hal_nfc_listener_reset,FHalNfcError,
+Function,+,f_hal_nfc_listener_rx,FHalNfcError,"uint8_t*, size_t, size_t*"
+Function,+,f_hal_nfc_listener_rx_start,FHalNfcError,
 Function,-,f_hal_nfc_listener_sleep,FHalNfcError,
+Function,+,f_hal_nfc_listener_start,FHalNfcError,
 Function,-,f_hal_nfc_listener_tx,FHalNfcError,"const uint8_t*, size_t"
 Function,-,f_hal_nfc_low_power_mode_start,FHalNfcError,
 Function,-,f_hal_nfc_low_power_mode_stop,FHalNfcError,
@@ -887,7 +889,7 @@ Function,-,f_hal_nfc_poller_tx_custom_parity,FHalNfcError,"const uint8_t*, size_
 Function,-,f_hal_nfc_release,FHalNfcError,
 Function,-,f_hal_nfc_reset_mode,FHalNfcError,
 Function,-,f_hal_nfc_set_mask_receive_timer,void,uint32_t
-Function,-,f_hal_nfc_set_mode,FHalNfcError,"FHalNfcMode, FHalNfcBitrate"
+Function,+,f_hal_nfc_set_mode,FHalNfcError,"FHalNfcMode, FHalNfcTech"
 Function,-,f_hal_nfc_timer_block_tx_is_running,_Bool,
 Function,-,f_hal_nfc_timer_block_tx_start,void,uint32_t
 Function,-,f_hal_nfc_timer_block_tx_start_us,void,uint32_t
@@ -896,8 +898,6 @@ Function,-,f_hal_nfc_timer_fwt_start,void,uint32_t
 Function,-,f_hal_nfc_timer_fwt_stop,void,
 Function,-,f_hal_nfc_trx_reset,FHalNfcError,
 Function,-,f_hal_nfc_wait_event,FHalNfcEvent,uint32_t
-Function,-,f_hal_nfca_listener_deinit,FHalNfcError,
-Function,-,f_hal_nfca_listener_init,FHalNfcError,
 Function,-,f_hal_nfca_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const _Bool*, size_t"
 Function,-,f_hal_nfca_receive_sdd_frame,FHalNfcError,"uint8_t*, size_t, size_t*"
 Function,-,f_hal_nfca_send_sdd_frame,FHalNfcError,"const uint8_t*, size_t"
