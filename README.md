@@ -9,9 +9,9 @@ This repository contains a UHF RFID application developed for FlipperZero, a ver
 ## Features
 
 - [x] Read Single UHF RFID tag.
-- [ ] View saved UHF RFID tag. __(in progress)__
-- [ ] Write Single UHF RFID tag.
-- [ ] Communicate with the YRM100 module to perform UHF RFID operations.
+- [x] View saved UHF RFID tag.
+- [ ] Write Single UHF RFID tag. __(in progress)__
+- [ ] Change Module setting parameters.
 - [ ] Easy-to-use interface on FlipperZero's display.
     - Extras
         - [ ] Read multiple tags at once
