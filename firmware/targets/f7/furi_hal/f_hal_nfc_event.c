@@ -6,14 +6,14 @@ void f_hal_nfc_event_init() {
     f_hal_nfc_event = malloc(sizeof(FHalNfcEventInternal));
 }
 
-FHalNfcError f_hal_nfc_event_start() {
-    furi_assert(f_hal_nfc_event);
-
-    f_hal_nfc_event->thread = furi_thread_get_current_id();
-    furi_thread_flags_clear(F_HAL_NFC_EVENT_INTERNAL_ALL);
-
-    return FHalNfcErrorNone;
-}
+// FHalNfcError f_hal_nfc_event_start() {
+//     furi_assert(f_hal_nfc_event);
+//
+//     f_hal_nfc_event->thread = furi_thread_get_current_id();
+//     furi_thread_flags_clear(F_HAL_NFC_EVENT_INTERNAL_ALL);
+//
+//     return FHalNfcErrorNone;
+// }
 
 void f_hal_nfc_set_event(FHalNfcEventInternalType event) {
     furi_assert(f_hal_nfc_event);

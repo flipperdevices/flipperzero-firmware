@@ -13,7 +13,8 @@ static const FHalNfcTechBase* f_hal_nfc_tech[FHalNfcTechNum] = {
     [FHalNfcTechIso15693] = &f_hal_nfc_iso15693,
 };
 
-static FuriMutex* f_hal_nfc_mutex = NULL;
+FHalNfc f_hal_nfc;
+// static FuriMutex* f_hal_nfc_mutex = NULL;
 
 static FHalNfcError f_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
     FHalNfcError error = FHalNfcErrorNone;
@@ -65,13 +66,12 @@ FHalNfcError f_hal_nfc_is_hal_ready() {
 }
 
 FHalNfcError f_hal_nfc_init() {
-    furi_assert(f_hal_nfc_mutex == NULL);
+    furi_assert(f_hal_nfc.mutex == NULL);
 
-    f_hal_nfc_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    f_hal_nfc.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     FHalNfcError error = FHalNfcErrorNone;
 
     f_hal_nfc_event_init();
-    f_hal_nfc_event_start();
 
     do {
         error = f_hal_nfc_acquire();
@@ -240,16 +240,16 @@ FHalNfcError f_hal_nfc_init() {
 }
 
 static bool f_hal_nfc_is_mine() {
-    return (furi_mutex_get_owner(f_hal_nfc_mutex) == furi_thread_get_current_id());
+    return (furi_mutex_get_owner(f_hal_nfc.mutex) == furi_thread_get_current_id());
 }
 
 FHalNfcError f_hal_nfc_acquire() {
-    furi_check(f_hal_nfc_mutex);
+    furi_check(f_hal_nfc.mutex);
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
 
     FHalNfcError error = FHalNfcErrorNone;
-    if(furi_mutex_acquire(f_hal_nfc_mutex, 100) != FuriStatusOk) {
+    if(furi_mutex_acquire(f_hal_nfc.mutex, 100) != FuriStatusOk) {
         furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
         error = FHalNfcErrorBusy;
     }
@@ -258,9 +258,9 @@ FHalNfcError f_hal_nfc_acquire() {
 }
 
 FHalNfcError f_hal_nfc_release() {
-    furi_check(f_hal_nfc_mutex);
+    furi_check(f_hal_nfc.mutex);
     furi_check(f_hal_nfc_is_mine());
-    furi_check(furi_mutex_release(f_hal_nfc_mutex) == FuriStatusOk);
+    furi_check(furi_mutex_release(f_hal_nfc.mutex) == FuriStatusOk);
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 
@@ -354,6 +354,8 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcTech tech) {
         } while(false);
     }
 
+    f_hal_nfc.mode = mode;
+    f_hal_nfc.tech = tech;
     return error;
 }
 
@@ -366,12 +368,13 @@ FHalNfcError f_hal_nfc_reset_mode() {
     st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om0);
     st25r3916_clear_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
 
-    // TODO: Decide where to keep the current mode and tech info
-    // This is temporary code
-    for(int i = 0; i < FHalNfcTechNum; ++i) {
-        const FHalNfcTechBase* tech = f_hal_nfc_tech[i];
-        if(tech->poller.deinit) tech->poller.deinit(handle);
-        if(tech->listener.deinit) tech->listener.deinit(handle);
+    const FHalNfcMode mode = f_hal_nfc.mode;
+    const FHalNfcTech tech = f_hal_nfc.tech;
+
+    if(mode == FHalNfcModePoller) {
+        error = f_hal_nfc_tech[tech]->poller.deinit(handle);
+    } else if(mode == FHalNfcModeListener) {
+        error = f_hal_nfc_tech[tech]->listener.deinit(handle);
     }
 
     return error;
@@ -474,6 +477,14 @@ FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
     return err;
 }
 
+FHalNfcError f_hal_nfc_listener_rx_start() {
+    return FHalNfcErrorNone;
+}
+
+FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
+    return f_hal_nfc_poller_rx(rx_data, rx_data_size, rx_bits);
+}
+
 FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
     furi_assert(rx_data);
     furi_assert(rx_bits);
@@ -496,7 +507,7 @@ FHalNfcError f_hal_nfc_trx_reset() {
     return FHalNfcErrorNone;
 }
 
-FHalNfcError f_hal_nfc_listen_start() {
+FHalNfcError f_hal_nfc_listener_start() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
@@ -518,7 +529,7 @@ FHalNfcError f_hal_nfc_listen_start() {
     return FHalNfcErrorNone;
 }
 
-FHalNfcError f_hal_nfc_listen_reset() {
+FHalNfcError f_hal_nfc_listener_reset() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);

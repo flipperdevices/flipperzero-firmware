@@ -12,7 +12,7 @@
 typedef enum {
     NfcStateIdle,
     NfcStateFieldOn,
-    NfcStateListenStarted,
+    NfcStateListenerStarted,
     NfcStatePollerReady,
     NfcStatePollerReset,
 } NfcState;
@@ -82,10 +82,8 @@ static int32_t nfc_worker_listener(void* context) {
     furi_assert(instance->callback);
     furi_assert(instance->config_state == NfcConfigurationStateDone);
 
-    f_hal_nfc_listen_start();
-    instance->state = NfcStateListenStarted;
-
-    f_hal_nfc_event_start();
+    f_hal_nfc_listener_start();
+    instance->state = NfcStateListenerStarted;
 
     NfcEventData event_data = {};
     event_data.buffer = bit_buffer_alloc(NFC_MAX_BUFFER_SIZE);
@@ -103,6 +101,7 @@ static int32_t nfc_worker_listener(void* context) {
         if(event & FHalNfcEventFieldOn) {
             nfc_event.type = NfcEventTypeFieldOn;
             instance->callback(nfc_event, instance->context);
+            f_hal_nfc_listener_rx_start();
         }
         if(event & FHalNfcEventFieldOff) {
             FURI_LOG_T(TAG, "Field off");
@@ -117,14 +116,14 @@ static int32_t nfc_worker_listener(void* context) {
         }
         if(event & FHalNfcEventRxEnd) {
             nfc_event.type = NfcEventTypeRxEnd;
-            f_hal_nfc_poller_rx(
+            f_hal_nfc_listener_rx(
                 instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
             bit_buffer_copy_bits(event_data.buffer, instance->rx_buffer, instance->rx_bits);
             command = instance->callback(nfc_event, instance->context);
             if(command == NfcCommandStop) {
                 break;
             } else if(command == NfcCommandReset) {
-                f_hal_nfc_listen_reset();
+                f_hal_nfc_listener_reset();
             }
         }
     }
@@ -202,8 +201,6 @@ static int32_t nfc_worker_poller(void* context) {
     furi_assert(instance->callback);
     instance->poller_state = NfcPollerStateIdle;
 
-    f_hal_nfc_event_start();
-
     bool exit = false;
     while(!exit) {
         exit = nfc_worker_poller_state_handlers[instance->poller_state](instance);
@@ -233,7 +230,7 @@ Nfc* nfc_alloc() {
 void nfc_free(Nfc* instance) {
     furi_assert(instance);
     // TODO REWORK!!!
-    if(instance->state == NfcStateListenStarted) {
+    if(instance->state == NfcStateListenerStarted) {
         f_hal_nfc_abort();
         furi_thread_join(instance->worker_thread);
     }
@@ -346,7 +343,7 @@ void nfc_stop(Nfc* instance) {
 
 NfcError nfc_listener_sleep(Nfc* instance) {
     furi_assert(instance);
-    furi_assert(instance->state == NfcStateListenStarted);
+    furi_assert(instance->state == NfcStateListenerStarted);
 
     f_hal_nfc_listener_sleep();
 

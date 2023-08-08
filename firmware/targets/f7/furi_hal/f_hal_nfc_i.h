@@ -26,7 +26,14 @@ typedef struct {
     void* context;
 } FHalNfcEventInternal;
 
-extern FHalNfcEventInternal* f_hal_nfc;
+typedef struct {
+    FuriMutex* mutex;
+    FHalNfcMode mode;
+    FHalNfcTech tech;
+} FHalNfc;
+
+extern FHalNfc f_hal_nfc;
+// extern FHalNfcEventInternal* f_hal_nfc_event;
 
 void f_hal_nfc_event_init();
 
