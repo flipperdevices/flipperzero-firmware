@@ -533,7 +533,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
         }
     } else if(mode == FHalNfcModeFelicaPoller) {
         f_hal_nfc_configure_poller_common(handle);
-        // Enable ISO14443B mode, AM modulation
+        // Enable Felica mode, AM modulation
         st25r3916_change_reg_bits(
             handle,
             ST25R3916_REG_MODE,

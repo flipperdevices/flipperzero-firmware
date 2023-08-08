@@ -4,8 +4,6 @@
 
 #include <furi.h>
 
-#define TAG "ISO14443_3bPoller"
-
 const FelicaData* felica_poller_get_data(FelicaPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
