@@ -49,12 +49,12 @@ static FelicaError felica_poller_frame_exchange(
         }
 
         bit_buffer_copy(rx_buffer, instance->rx_buffer);
-        if(!iso14443_crc_check(Iso14443CrcTypeB, instance->rx_buffer)) {
-            ret = FelicaErrorWrongCrc;
-            break;
-        }
+        // if(!iso14443_crc_check(Iso14443CrcTypeB, instance->rx_buffer)) {
+        //     ret = FelicaErrorWrongCrc;
+        //     break;
+        // }
 
-        iso14443_crc_trim(rx_buffer);
+        // iso14443_crc_trim(rx_buffer);
     } while(false);
 
     return ret;
@@ -76,11 +76,11 @@ FelicaError felica_poller_async_activate(FelicaPoller* instance, FelicaData* dat
 
         // Send Polling command
         FURI_LOG_I(TAG, "Polling command tx");
-        const uint8_t tx[] = {0xb2, 0x4d, 0x06, 0x00, 0xff, 0xff, 0x00, 0x00, 0x09, 0x21};
+        const uint8_t tx[] = {0x06, 0x00, 0xff, 0xff, 0x00, 0x00, 0x09, 0x21};
         bit_buffer_copy_bytes(instance->tx_buffer, tx, sizeof(tx));
 
         ret = felica_poller_frame_exchange(
-            instance, instance->tx_buffer, instance->rx_buffer, FELICA_FDT_POLL_FC);
+            instance, instance->tx_buffer, instance->rx_buffer, 0);//FELICA_FDT_POLL_FC);
         if(ret != FelicaErrorNone) {
             FURI_LOG_I(TAG, "Polling command rx error: %d", ret);
             instance->state = FelicaPollerStateColResFailed;

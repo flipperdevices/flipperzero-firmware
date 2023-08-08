@@ -552,49 +552,25 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
             handle,
             ST25R3916_REG_AUX_MOD,
             ST25R3916_REG_AUX_MOD_dis_reg_am | ST25R3916_REG_AUX_MOD_res_am);
-        
+
         st25r3916_change_reg_bits(
             handle,
             ST25R3916_REG_BIT_RATE,
             ST25R3916_REG_BIT_RATE_txrate_mask | ST25R3916_REG_BIT_RATE_rxrate_mask,
             ST25R3916_REG_BIT_RATE_txrate_212 | ST25R3916_REG_BIT_RATE_rxrate_212);
 
-        // if(bitrate == FHalNfcBitrate106) {
-        //     // Bitrate-dependent NFC-B settings
+        // Receive configuration
+        st25r3916_write_reg(
+            handle,
+            ST25R3916_REG_RX_CONF1,
+            ST25R3916_REG_RX_CONF1_lp0 | ST25R3916_REG_RX_CONF1_hz_12_80khz);
 
-        //     // 1st stage zero = 60kHz, 3rd stage zero = 200 kHz
-        //     st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF1, ST25R3916_REG_RX_CONF1_h200);
-
-        //     // Enable AGC
-        //     // AGC Ratio 6
-        //     // AGC algorithm with RESET (recommended for ISO14443-B)
-        //     // AGC operation during complete receive period
-        //     // Squelch ratio 6/3 (recommended for ISO14443-B)
-        //     // Squelch automatic activation on TX end
-        //     st25r3916_write_reg(
-        //         handle,
-        //         ST25R3916_REG_RX_CONF2,
-        //         ST25R3916_REG_RX_CONF2_agc6_3 | ST25R3916_REG_RX_CONF2_agc_alg |
-        //             ST25R3916_REG_RX_CONF2_agc_m | ST25R3916_REG_RX_CONF2_agc_en |
-        //             ST25R3916_REG_RX_CONF2_pulz_61 | ST25R3916_REG_RX_CONF2_sqm_dyn);
-
-        //     // HF operation, full gain on AM and PM channels
-        //     st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF3, 0x00);
-        //     // No gain reduction on AM and PM channels
-        //     st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF4, 0x00);
-
-        //     // Subcarrier end detector enabled
-        //     // Subcarrier end detection level = 66%
-        //     // BPSK start 33 pilot pulses
-        //     // AM & PM summation before digitizing on
-        //     st25r3916_write_reg(
-        //         handle,
-        //         ST25R3916_REG_CORR_CONF1,
-        //         ST25R3916_REG_CORR_CONF1_corr_s0 | ST25R3916_REG_CORR_CONF1_corr_s1 |
-        //             ST25R3916_REG_CORR_CONF1_corr_s3 | ST25R3916_REG_CORR_CONF1_corr_s4);
-        //     // Sleep mode disable, 424kHz mode off
-        //     st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0x00);
-        // }
+        // Correlator setup
+        st25r3916_write_reg(
+            handle,
+            ST25R3916_REG_CORR_CONF1,
+            ST25R3916_REG_CORR_CONF1_corr_s6 | ST25R3916_REG_CORR_CONF1_corr_s4 |
+                ST25R3916_REG_CORR_CONF1_corr_s3);
     }
 
     return error;
