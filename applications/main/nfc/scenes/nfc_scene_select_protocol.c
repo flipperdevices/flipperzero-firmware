@@ -23,9 +23,6 @@ void nfc_scene_select_protocol_on_enter(void* context) {
         submenu_set_header(submenu, "Multi-protocol card");
     }
 
-    instance->protocols_detected_idx = 0;
-    instance->protocols_detected_num = 1;
-
     for(size_t i = 0; i < instance->protocols_detected_num; i++) {
         furi_string_printf(
             temp_str,

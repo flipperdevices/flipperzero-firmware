@@ -67,7 +67,7 @@ FelicaError felica_poller_async_polling(
     bit_buffer_append_byte(instance->tx_buffer, (uint8_t)(cmd->system_code >> 0));
     bit_buffer_append_byte(instance->tx_buffer, (uint8_t)(cmd->request_code));
     bit_buffer_append_byte(instance->tx_buffer, (uint8_t)(cmd->time_slot));
-    
+
     FelicaError error = felica_poller_frame_exchange(
         instance, instance->tx_buffer, instance->rx_buffer, FELICA_POLLER_POLLING_FWT);
 
@@ -96,7 +96,7 @@ FelicaError felica_poller_async_activate(FelicaPoller* instance, FelicaData* dat
         const FelicaPollerPollingCommand polling_cmd = {
             .system_code = FELICA_SYSTEM_CODE_CODE,
             .request_code = 0,
-            .time_slot = FELICA_TIME_SLOT_16,
+            .time_slot = FELICA_TIME_SLOT_1,
         };
         FelicaPollerPollingResponse polling_resp = {};
 

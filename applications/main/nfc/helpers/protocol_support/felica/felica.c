@@ -22,8 +22,7 @@ static void nfc_scene_info_on_enter_felica(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static NfcCommand
-    nfc_scene_read_poller_callback_felica(NfcGenericEvent event, void* context) {
+static NfcCommand nfc_scene_read_poller_callback_felica(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolFelica);
 
     NfcApp* instance = context;

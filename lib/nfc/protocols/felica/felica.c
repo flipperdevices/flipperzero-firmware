@@ -8,8 +8,11 @@
 #define FELICA_PROTOCOL_NAME "Felica"
 #define FELICA_DEVICE_NAME "Felica"
 
-#define FELICA_APP_DATA_KEY "Application data"
-#define FELICA_PROTOCOL_INFO_KEY "Protocol info"
+#define FELICA_DATA_FORMAT_VERSION "Data format version"
+#define FELICA_MANUFACTURE_ID "Manufacture id"
+#define FELICA_MANUFACTURE_PARAMETER "Manufacture parameter"
+
+static const uint32_t felica_data_format_version = 1;
 
 const NfcDeviceBase nfc_device_felica = {
     .protocol_name = FELICA_PROTOCOL_NAME,
@@ -58,18 +61,20 @@ bool felica_verify(FelicaData* data, const FuriString* device_type) {
 
 bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
     furi_assert(data);
-    UNUSED(ff);
 
     bool parsed = false;
 
     do {
         if(version < NFC_UNIFIED_FORMAT_VERSION) break;
 
-        // if(!flipper_format_read_hex(ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
-        //     break;
-        // if(!flipper_format_read_hex(
-        //        ff, FELICA_PROTOCOL_INFO_KEY, data->protocol_info, FELICA_PROTOCOL_INFO_SIZE))
-        //     break;
+        uint32_t data_format_version = 0;
+        if(!flipper_format_read_uint32(ff, FELICA_DATA_FORMAT_VERSION, &data_format_version, 1))
+            break;
+        if(data_format_version != felica_data_format_version) break;
+        if(!flipper_format_read_hex(ff, FELICA_MANUFACTURE_ID, data->idm.data, FELICA_IDM_SIZE))
+            break;
+        if(!flipper_format_read_hex(ff, FELICA_MANUFACTURE_ID, data->pmm.data, FELICA_PMM_SIZE))
+            break;
 
         parsed = true;
     } while(false);
@@ -79,17 +84,19 @@ bool felica_load(FelicaData* data, FlipperFormat* ff, uint32_t version) {
 
 bool felica_save(const FelicaData* data, FlipperFormat* ff) {
     furi_assert(data);
-    UNUSED(ff);
 
     bool saved = false;
 
     do {
-        // if(!flipper_format_write_comment_cstr(ff, FELICA_PROTOCOL_NAME " specific data")) break;
-        // if(!flipper_format_write_hex(ff, FELICA_APP_DATA_KEY, data->app_data, FELICA_APP_DATA_SIZE))
-        //     break;
-        // if(!flipper_format_write_hex(
-        //        ff, FELICA_PROTOCOL_INFO_KEY, data->protocol_info, FELICA_PROTOCOL_INFO_SIZE))
-        //     break;
+        if(!flipper_format_write_comment_cstr(ff, FELICA_PROTOCOL_NAME " specific data")) break;
+        if(!flipper_format_write_uint32(
+               ff, FELICA_DATA_FORMAT_VERSION, &felica_data_format_version, 1))
+            break;
+        if(!flipper_format_write_hex(ff, FELICA_MANUFACTURE_ID, data->idm.data, FELICA_IDM_SIZE))
+            break;
+        if(!flipper_format_write_hex(ff, FELICA_MANUFACTURE_ID, data->pmm.data, FELICA_PMM_SIZE))
+            break;
+
         saved = true;
     } while(false);
 
