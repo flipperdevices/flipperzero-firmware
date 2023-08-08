@@ -37,12 +37,13 @@ bool uhf_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(uhf_app->scene_manager, UHFSceneSavedMenu, event.event);
 
-        // if(event.event == SubmenuIndexDelete) {
-        //     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneDelete);
-        //     consumed = true;
-        // } else if(event.event == SubmenuIndexInfo) {
-        //     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneDeviceInfo);
-        //     consumed = true;
+        if(event.event == SubmenuIndexDelete) {
+            scene_manager_next_scene(uhf_app->scene_manager, UHFSceneDelete);
+            consumed = true;
+        } else if(event.event == SubmenuIndexInfo) {
+            scene_manager_next_scene(uhf_app->scene_manager, UHFSceneDeviceInfo);
+            consumed = true;
+        }
         // } else if(event.event == SubmenuIndexWrite) {
         //     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneWriteCard);
         //     consumed = true;

@@ -9,7 +9,7 @@ void empty_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
 
 char* convertToHexString(const uint8_t* array, size_t length) {
     if(array == NULL || length == 0) {
-        return NULL;
+        return " ";
     }
     FuriString* temp_str = furi_string_alloc();
 

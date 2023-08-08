@@ -34,6 +34,7 @@ static bool uhf_device_save_file(
     furi_assert(dev);
 
     UHFTag* uhf_tag = dev->uhf_tag;
+    uhf_tag_reset(uhf_tag);
     bool saved = false;
     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
     FuriString* temp_str;
@@ -100,6 +101,7 @@ static bool uhf_device_load_data(UHFDevice* dev, FuriString* path, bool show_dia
     temp_str = furi_string_alloc();
     bool deprecated_version = false;
     UHFTag* uhf_tag = dev->uhf_tag;
+    uhf_tag_reset(uhf_tag);
     uint32_t temp_arr[1];
     if(dev->loading_cb) {
         dev->loading_cb(dev->loading_cb_ctx, true);

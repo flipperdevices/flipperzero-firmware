@@ -57,6 +57,7 @@ void uhf_response_data_reset(UHFResponseData* uhf_response_data);
 void uhf_response_data_free(UHFResponseData* uhf_response_data);
 
 UHFTag* uhf_tag_alloc();
+void uhf_tag_reset(UHFTag* uhf_tag);
 void uhf_tag_set_epc(UHFTag* uhf_tag, uint8_t* data, size_t length);
 void uhf_tag_set_tid(UHFTag* uhf_tag, uint8_t* data, size_t length);
 void uhf_tag_set_user(UHFTag* uhf_tag, uint8_t* data, size_t length);

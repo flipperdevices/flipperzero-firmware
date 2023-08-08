@@ -117,6 +117,22 @@ void uhf_tag_set_epc(UHFTag* uhf_tag, uint8_t* data, size_t length) {
     uhf_tag->epc_length = length;
 }
 
+void uhf_tag_reset(UHFTag* uhf_tag) {
+    for(int i = 0; i < 2; i++) {
+        uhf_tag->crc[i] = 0;
+        uhf_tag->pc[i] = 0;
+        uhf_tag->xpc[i] = 0;
+    }
+    for(int i = 0; i < MAX_BANK_SIZE; i++) {
+        uhf_tag->epc[i] = 0;
+        uhf_tag->tid[i] = 0;
+        uhf_tag->user[i] = 0;
+    }
+    uhf_tag->epc_length = 0;
+    uhf_tag->tid_length = 0;
+    uhf_tag->user_length = 0;
+}
+
 void uhf_tag_set_tid(UHFTag* uhf_tag, uint8_t* data, size_t length) {
     memcpy(uhf_tag->tid, data, length);
     uhf_tag->tid_length = length;
