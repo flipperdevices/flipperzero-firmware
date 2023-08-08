@@ -220,7 +220,9 @@ const FHalNfcTechBase f_hal_nfc_iso14443a = {
             .deinit = f_hal_nfc_iso14443a_poller_deinit,
         },
 
-    .listener = {
-        .init = f_hal_nfc_iso14443a_listener_init,
-        .deinit = f_hal_nfc_iso14443a_listener_deinit,
-    }};
+    .listener =
+        {
+            .init = f_hal_nfc_iso14443a_listener_init,
+            .deinit = f_hal_nfc_iso14443a_listener_deinit,
+        },
+};

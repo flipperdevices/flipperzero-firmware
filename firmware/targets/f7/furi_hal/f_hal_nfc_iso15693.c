@@ -85,7 +85,9 @@ const FHalNfcTechBase f_hal_nfc_iso15693 = {
             .deinit = f_hal_nfc_iso15693_poller_deinit,
         },
 
-    .listener = {
-        .init = f_hal_nfc_iso15693_listener_init,
-        .deinit = f_hal_nfc_iso15693_listener_deinit,
-    }};
+    .listener =
+        {
+            .init = f_hal_nfc_iso15693_listener_init,
+            .deinit = f_hal_nfc_iso15693_listener_deinit,
+        },
+};
