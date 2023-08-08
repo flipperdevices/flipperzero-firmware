@@ -303,8 +303,11 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
                 list->file[i].name = name;
 
                 if(include_md5 && !file_info_is_dir(&fileinfo)) {
-                    furi_string_printf(
-                        md5_path, "%s/%s", request->content.storage_list_request.path, name);
+                    furi_string_printf( //-V576
+                        md5_path,
+                        "%s/%s",
+                        request->content.storage_list_request.path,
+                        name);
 
                     if(md5_string_calc_file(file, furi_string_get_cstr(md5_path), md5, NULL)) {
                         char* md5sum = list->file[i].md5sum;
