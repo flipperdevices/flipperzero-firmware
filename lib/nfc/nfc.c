@@ -94,39 +94,53 @@ static int32_t nfc_worker_listener(void* context) {
 
     while(true) {
         FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
+        FURI_LOG_W(TAG, "--St: %X--", event);
         if(event & FHalNfcEventAbortRequest) {
             FURI_LOG_D(TAG, "Abort request received");
             nfc_event.type = NfcEventTypeUserAbort;
             instance->callback(nfc_event, instance->context);
+            event &= ~(FHalNfcEventAbortRequest);
             break;
         }
         if(event & FHalNfcEventFieldOn) {
             nfc_event.type = NfcEventTypeFieldOn;
             instance->callback(nfc_event, instance->context);
+            event &= ~(FHalNfcEventFieldOn);
         }
         if(event & FHalNfcEventFieldOff) {
-            FURI_LOG_T(TAG, "Field off");
+            FURI_LOG_W(TAG, "Field off");
             nfc_event.type = NfcEventTypeFieldOff;
             instance->callback(nfc_event, instance->context);
             f_hal_nfc_listener_sleep();
+            event &= ~(FHalNfcEventFieldOff);
         }
         if(event & FHalNfcEventListenerActive) {
+            FURI_LOG_W(TAG, "Listener active");
             f_hal_nfc_listener_disable_auto_col_res();
             nfc_event.type = NfcEventTypeListenerActivated;
             instance->callback(nfc_event, instance->context);
+            event &= ~(FHalNfcEventListenerActive);
         }
         if(event & FHalNfcEventRxEnd) {
+            FURI_LOG_W(TAG, "RX end");
             nfc_event.type = NfcEventTypeRxEnd;
             f_hal_nfc_poller_rx(
                 instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
             bit_buffer_copy_bits(event_data.buffer, instance->rx_buffer, instance->rx_bits);
             command = instance->callback(nfc_event, instance->context);
             if(command == NfcCommandStop) {
+                FURI_LOG_W(TAG, "NFC Stop");
                 break;
             } else if(command == NfcCommandReset) {
-                f_hal_nfc_listen_reset();
+                FURI_LOG_W(TAG, "NFC Reset");
+                //f_hal_nfc_listen_reset();
+            } else {
+                FURI_LOG_W(TAG, "Command: %d", command);
             }
+            event &= ~(FHalNfcEventRxEnd);
         }
+
+        FURI_LOG_W(TAG, "--En: %X--", event);
     }
 
     nfc_config(instance, NfcModeIdle);
