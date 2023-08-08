@@ -870,7 +870,8 @@ Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
 Function,-,f_hal_nfc_abort,FHalNfcError,
 Function,-,f_hal_nfc_acquire,FHalNfcError,
-Function,-,f_hal_nfc_event_start,FHalNfcError,
+Function,+,f_hal_nfc_event_start,FHalNfcError,
+Function,+,f_hal_nfc_event_wait,FHalNfcEvent,uint32_t
 Function,-,f_hal_nfc_init,FHalNfcError,
 Function,-,f_hal_nfc_is_hal_ready,FHalNfcError,
 Function,-,f_hal_nfc_listener_disable_auto_col_res,FHalNfcError,
@@ -897,7 +898,6 @@ Function,-,f_hal_nfc_timer_block_tx_stop,void,
 Function,-,f_hal_nfc_timer_fwt_start,void,uint32_t
 Function,-,f_hal_nfc_timer_fwt_stop,void,
 Function,-,f_hal_nfc_trx_reset,FHalNfcError,
-Function,-,f_hal_nfc_wait_event,FHalNfcEvent,uint32_t
 Function,-,f_hal_nfca_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const _Bool*, size_t"
 Function,-,f_hal_nfca_receive_sdd_frame,FHalNfcError,"uint8_t*, size_t, size_t*"
 Function,-,f_hal_nfca_send_sdd_frame,FHalNfcError,"const uint8_t*, size_t"

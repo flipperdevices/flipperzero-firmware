@@ -37,7 +37,7 @@ extern FHalNfc f_hal_nfc;
 
 void f_hal_nfc_event_init();
 
-void f_hal_nfc_set_event(FHalNfcEventInternalType event);
+void f_hal_nfc_event_set(FHalNfcEventInternalType event);
 
 void f_hal_nfc_init_gpio_isr();
 

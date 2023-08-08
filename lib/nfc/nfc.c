@@ -85,13 +85,15 @@ static int32_t nfc_worker_listener(void* context) {
     f_hal_nfc_listener_start();
     instance->state = NfcStateListenerStarted;
 
+    f_hal_nfc_event_start();
+
     NfcEventData event_data = {};
     event_data.buffer = bit_buffer_alloc(NFC_MAX_BUFFER_SIZE);
     NfcEvent nfc_event = {.data = event_data};
     NfcCommand command = NfcCommandContinue;
 
     while(true) {
-        FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
+        FHalNfcEvent event = f_hal_nfc_event_wait(F_HAL_NFC_EVENT_WAIT_FOREVER);
         if(event & FHalNfcEventAbortRequest) {
             FURI_LOG_D(TAG, "Abort request received");
             nfc_event.type = NfcEventTypeUserAbort;
@@ -148,7 +150,7 @@ bool nfc_worker_poller_start_handler(Nfc* instance) {
     f_hal_nfc_poller_field_on();
     if(instance->guard_time_us) {
         f_hal_nfc_timer_block_tx_start_us(instance->guard_time_us);
-        FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
+        FHalNfcEvent event = f_hal_nfc_event_wait(F_HAL_NFC_EVENT_WAIT_FOREVER);
         furi_assert(event & FHalNfcEventTimerBlockTxExpired);
     }
     instance->poller_state = NfcPollerStateReady;
@@ -200,6 +202,8 @@ static int32_t nfc_worker_poller(void* context) {
     Nfc* instance = context;
     furi_assert(instance->callback);
     instance->poller_state = NfcPollerStateIdle;
+
+    f_hal_nfc_event_start();
 
     bool exit = false;
     while(!exit) {
@@ -370,7 +374,7 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
     NfcError error = NfcErrorNone;
 
     while(true) {
-        event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
+        event = f_hal_nfc_event_wait(F_HAL_NFC_EVENT_WAIT_FOREVER);
         if(event & FHalNfcEventTimerBlockTxExpired) {
             if(instance->comm_state == NfcCommStateWaitBlockTxTimer) {
                 instance->comm_state = NfcCommStateReadyTx;

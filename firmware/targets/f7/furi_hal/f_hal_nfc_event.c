@@ -6,16 +6,16 @@ void f_hal_nfc_event_init() {
     f_hal_nfc_event = malloc(sizeof(FHalNfcEventInternal));
 }
 
-// FHalNfcError f_hal_nfc_event_start() {
-//     furi_assert(f_hal_nfc_event);
-//
-//     f_hal_nfc_event->thread = furi_thread_get_current_id();
-//     furi_thread_flags_clear(F_HAL_NFC_EVENT_INTERNAL_ALL);
-//
-//     return FHalNfcErrorNone;
-// }
+FHalNfcError f_hal_nfc_event_start() {
+    furi_assert(f_hal_nfc_event);
 
-void f_hal_nfc_set_event(FHalNfcEventInternalType event) {
+    f_hal_nfc_event->thread = furi_thread_get_current_id();
+    furi_thread_flags_clear(F_HAL_NFC_EVENT_INTERNAL_ALL);
+
+    return FHalNfcErrorNone;
+}
+
+void f_hal_nfc_event_set(FHalNfcEventInternalType event) {
     furi_assert(f_hal_nfc_event);
     furi_assert(f_hal_nfc_event->thread);
 
@@ -23,13 +23,14 @@ void f_hal_nfc_set_event(FHalNfcEventInternalType event) {
 }
 
 FHalNfcError f_hal_nfc_abort() {
-    f_hal_nfc_set_event(FHalNfcEventInternalTypeAbort);
+    f_hal_nfc_event_set(FHalNfcEventInternalTypeAbort);
     return FHalNfcErrorNone;
 }
 
-FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms) {
+FHalNfcEvent f_hal_nfc_event_wait(uint32_t timeout_ms) {
     furi_assert(f_hal_nfc_event);
     furi_assert(f_hal_nfc_event->thread);
+
 
     FHalNfcEvent event = 0;
     uint32_t event_timeout = timeout_ms == F_HAL_NFC_EVENT_WAIT_FOREVER ? FuriWaitForever :

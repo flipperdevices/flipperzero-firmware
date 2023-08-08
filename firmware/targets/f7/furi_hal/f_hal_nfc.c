@@ -72,6 +72,7 @@ FHalNfcError f_hal_nfc_init() {
     FHalNfcError error = FHalNfcErrorNone;
 
     f_hal_nfc_event_init();
+    f_hal_nfc_event_start();
 
     do {
         error = f_hal_nfc_acquire();
@@ -478,6 +479,7 @@ FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
 }
 
 FHalNfcError f_hal_nfc_listener_rx_start() {
+    FURI_LOG_D(TAG, "Listener RX start");
     return FHalNfcErrorNone;
 }
 
