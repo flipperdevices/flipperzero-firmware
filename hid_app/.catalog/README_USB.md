@@ -1,20 +1,18 @@
 # BLE Remote
 
-## Overview
-
 This application allows you to use your Flipper Zero as a HID (Human Interface Device) keyboard or mouse over USB. It can be used to control a computer or a smartphone.
 
-## Modes
+# Modes
 
-### Keynote
+## Keynote
 
 Use your Flipper Zero as a presenter for any presentation software that supports keyboard navigation. There is also a vertical version that has the interface and controls rotated 90 degrees for easier use.
 
-### Keyboard
+## Keyboard
 
 Use your Flipper Zero as a keyboard. Please note that key combinations are not supported.
 
-### Media
+## Media
 
 Media controller mode allows you to control media playback on your computer or smartphone. It supports the following commands:
 
@@ -24,11 +22,11 @@ Media controller mode allows you to control media playback on your computer or s
 * Volume Up
 * Volume Down
 
-### Mouse
+## Mouse
 
 Use your Flipper Zero as a mouse. Use the D-pad to move the cursor, and click with the OK and BACK buttons.
 
-### TikTok Controller
+## TikTok Controller
 
 Use your Flipper Zero as a TikTok controller. It supports the following commands:
 
@@ -38,10 +36,10 @@ Use your Flipper Zero as a TikTok controller. It supports the following commands
 * Volume Up
 * Volume Down
 
-### Mouse Clicker
+## Mouse Clicker
 
 Repeatedly clicks the mouse button. The click interval can be adjusted with the UP and DOWN buttons.
 
-### Mouse Jiggler
+## Mouse Jiggler
 
 Moves your cursor slightly a few times per second. This can be used to prevent your computer from going to sleep.
