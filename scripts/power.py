@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import sys
+import time
+from typing import Optional
+
 from flipper.app import App
 from flipper.storage import FlipperStorage
 from flipper.utils.cdc import resolve_port
@@ -27,8 +31,20 @@ class Main(App):
         )
         self.parser_reboot2dfu.set_defaults(func=self.reboot2dfu)
 
-    def _get_flipper(self):
-        if not (port := resolve_port(self.logger, self.args.port)):
+    def _get_flipper(self, retry_count: Optional[int] = 1):
+        port = None
+        self.logger.debug(f"Attempting to find flipper with {retry_count} attempts.")
+
+        for i in range(retry_count):
+            time.sleep(1)
+            self.logger.debug(f"Attempting to find flipper #{i}.")
+
+            if port := resolve_port(self.logger, self.args.port):
+                self.logger.debug(f"Found flipper at {port}")
+                break
+
+        if not port:
+            self.logger.debug(f"Failed to find flipper")
             return None
 
         flipper = FlipperStorage(port)
@@ -36,32 +52,32 @@ class Main(App):
         return flipper
 
     def power_off(self):
-        if not (flipper := self._get_flipper()):
-            return 1
+        if not (flipper := self._get_flipper(retry_count=10)):
+            sys.exit(1)
 
         self.logger.debug("Powering off")
         flipper.send("power off" + "\r")
         flipper.stop()
-        return 0
+        sys.exit(0)
 
     def reboot(self):
-        if not (flipper := self._get_flipper()):
-            return 1
+        if not (flipper := self._get_flipper(retry_count=10)):
+            sys.exit(1)
 
         self.logger.debug("Rebooting")
         flipper.send("power reboot" + "\r")
         flipper.stop()
-        return 0
+        sys.exit(0)
 
     def reboot2dfu(self):
-        if not (flipper := self._get_flipper()):
-            return 1
+        if not (flipper := self._get_flipper(retry_count=10)):
+            sys.exit(1)
 
         self.logger.debug("Rebooting to DFU")
         flipper.send("power reboot2dfu" + "\r")
         flipper.stop()
 
-        return 0
+        sys.exit(0)
 
 
 if __name__ == "__main__":
