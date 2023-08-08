@@ -1,12 +1,5 @@
 #include "uhf_app_i.h"
 
-// empty callback
-void empty_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
-    UNUSED(event);
-    UNUSED(data);
-    UNUSED(ctx);
-}
-
 char* convertToHexString(const uint8_t* array, size_t length) {
     if(array == NULL || length == 0) {
         return " ";
@@ -191,16 +184,18 @@ int32_t uhf_app_main(void* ctx) {
     UNUSED(ctx);
     UHFApp* uhf_app = uhf_alloc();
 
+    furi_hal_uart_resume(FuriHalUartIdUSART1);
+
     // enable 5v pin
     furi_hal_power_enable_otg();
+
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneVerify);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
     // disable 5v pin
     furi_hal_power_disable_otg();
 
-    // set uart callback to none
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, empty_rx_callback, NULL);
+    furi_hal_uart_suspend(FuriHalUartIdUSART1);
 
     // exit app
     uhf_free(uhf_app);

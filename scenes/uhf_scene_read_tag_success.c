@@ -1,4 +1,5 @@
 #include "../uhf_app_i.h"
+#include <dolphin/dolphin.h>
 
 void uhf_read_tag_success_worker_callback(UHFWorkerEvent event, void* ctx) {
     UNUSED(event);
@@ -17,6 +18,12 @@ void uhf_scene_read_card_success_widget_callback(GuiButtonType result, InputType
 void uhf_scene_read_tag_success_on_enter(void* ctx) {
     UHFApp* uhf_app = ctx;
     UHFTag* uhf_tag = uhf_app->worker->uhf_tag;
+
+    dolphin_deed(DolphinDeedNfcReadSuccess);
+
+    // Send notification
+    notification_message(uhf_app->notifications, &sequence_success);
+
     widget_add_string_element(
         uhf_app->widget, 32, 5, AlignLeft, AlignCenter, FontPrimary, "Read Success");
 
