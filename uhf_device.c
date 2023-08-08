@@ -38,9 +38,6 @@ static bool uhf_device_save_file(
     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
     FuriString* temp_str;
     temp_str = furi_string_alloc();
-    FURI_LOG_E("TAG", "epc_len = %d", uhf_tag->epc_length);
-    FURI_LOG_E("TAG", "tid_len = %d", uhf_tag->tid_length);
-    FURI_LOG_E("TAG", "user_len = %d", uhf_tag->user_length);
     do {
         if(use_load_path && !furi_string_empty(dev->load_path)) {
             // Get directory name

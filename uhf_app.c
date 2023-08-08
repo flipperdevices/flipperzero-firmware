@@ -11,23 +11,19 @@ char* convertToHexString(const uint8_t* array, size_t length) {
     if(array == NULL || length == 0) {
         return NULL;
     }
+    FuriString* temp_str = furi_string_alloc();
 
-    // Each byte takes 3 characters in the hex representation (2 characters + space), plus 1 for the null terminator
-    size_t hexLength = (length * 3) + 1;
-
-    char* hexArray = (char*)malloc(hexLength * sizeof(char));
-    if(hexArray == NULL) {
-        return NULL;
-    }
-
-    size_t index = 0;
     for(size_t i = 0; i < length; i++) {
-        index += snprintf(&hexArray[index], hexLength - index, "%02x ", array[i]);
+        furi_string_cat_printf(temp_str, "%02X ", array[i]);
     }
+    const char* furi_str = furi_string_get_cstr(temp_str);
 
-    hexArray[hexLength - 1] = '\0';
+    size_t str_len = strlen(furi_str);
+    char* str = (char*)malloc(sizeof(char) * str_len);
 
-    return hexArray;
+    memcpy(str, furi_str, str_len);
+    furi_string_free(temp_str);
+    return str;
 }
 
 bool uhf_custom_event_callback(void* ctx, uint32_t event) {

@@ -110,20 +110,20 @@ UHFTag* uhf_tag_alloc() {
 }
 
 void uhf_tag_set_epc(UHFTag* uhf_tag, uint8_t* data, size_t length) {
-    memcpy(&uhf_tag->crc, &data, 2);
+    memcpy(uhf_tag->crc, data, 2);
     data += 2;
-    memcpy(&uhf_tag->pc, data, 2);
-    data += 2;
-    memcpy(&uhf_tag->epc, &data, length);
+    memcpy(uhf_tag->pc, data, 2);
+    memcpy(uhf_tag->epc, data, length);
+    uhf_tag->epc_length = length;
 }
 
 void uhf_tag_set_tid(UHFTag* uhf_tag, uint8_t* data, size_t length) {
-    memcpy(&uhf_tag->tid, &data, length);
+    memcpy(uhf_tag->tid, data, length);
     uhf_tag->tid_length = length;
 }
 
 void uhf_tag_set_user(UHFTag* uhf_tag, uint8_t* data, size_t length) {
-    memcpy(&uhf_tag->user, &data, length);
+    memcpy(uhf_tag->user, data, length);
     uhf_tag->user_length = length;
 }
 
