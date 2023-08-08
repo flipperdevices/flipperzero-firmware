@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_random.h>
 #include <gui/gui.h>
 #include <gui/icon_i.h>
 #include <gui/elements.h>
@@ -7,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "t-rex-runner_icons.h"
+#include "t_rex_runner_icons.h"
 
 #define DINO_START_X 10
 #define DINO_START_Y 34 // 64 - 22 - BACKGROUND_H / 2 - 2
@@ -21,7 +22,8 @@
 
 #define CACTUS_W 10
 #define CACTUS_H 10
-#define START_x_speed 25
+#define START_x_speed 35
+#define X_INCREASE 3
 
 #define BACKGROUND_W 128
 #define BACKGROUND_H 12
@@ -99,16 +101,23 @@ static void timer_callback(void *ctx) {
 
     // Update Cactus state
     if (game_state->has_cactus){
-        game_state->cactus_position = game_state->cactus_position - game_state->x_speed * delta_time_ms / 1000;
+        game_state->cactus_position = game_state->cactus_position - (game_state->x_speed - 15) * delta_time_ms / 1000;
         if (game_state->cactus_position <= 0 ) {
             game_state->has_cactus = 0;
             game_state->score = game_state->score + 1;
+
+            // Increase speed
+            game_state->x_speed = game_state->x_speed + X_INCREASE;
         }
     } 
-    // Create cactus (not random)
+    // Create cactus (random frame in 1.5s)
     else {
-        game_state->has_cactus = 1;
-        game_state->cactus_position = 120;
+        uint8_t randomuint8[1];
+        furi_hal_random_fill_buf(randomuint8,1);
+        if (randomuint8[0] % 30 == 0) {
+            game_state->has_cactus = 1;
+            game_state->cactus_position = 120;
+        }
     }
 
     // Move horizontal line
@@ -117,7 +126,7 @@ static void timer_callback(void *ctx) {
     game_state->background_position = game_state->background_position - game_state->x_speed * delta_time_ms / 1000;
 
     // Lose condition
-    if ((game_state->y_position + 22 >= (64 - CACTUS_H)) && ((DINO_START_X+20) >= game_state->cactus_position) && (DINO_START_X <= (game_state->cactus_position + CACTUS_W)))
+    if (game_state->has_cactus && ((game_state->y_position + 22 >= (64 - CACTUS_H)) && ((DINO_START_X+20) >= game_state->cactus_position) && (DINO_START_X <= (game_state->cactus_position + CACTUS_W))))
         game_state->lost = 1;
 
     furi_mutex_release(game_state->mutex);

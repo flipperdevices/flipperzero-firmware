@@ -1,5 +1,5 @@
 App(
-    appid="t-rex-runner",
+    appid="t_rex_runner",
     name="T-Rex runner",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="trexrunner_app",
