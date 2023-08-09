@@ -90,21 +90,6 @@ typedef struct {
 } esp_loader_bin_segment_t;
 
 /**
- * @brief SPI pin configuration arguments
- */
-typedef union {
-    struct {
-        uint32_t pin_clk: 6;
-        uint32_t pin_q:   6;
-        uint32_t pin_d:   6;
-        uint32_t pin_cs:  6;
-        uint32_t pin_hd:  6;
-        uint32_t zero:    2;
-    };
-    uint32_t val;
-} esp_loader_spi_config_t;
-
-/**
  * @brief Connection arguments
  */
 typedef struct {
