@@ -183,8 +183,7 @@ int32_t flipbip_app(void* p) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    scene_manager_next_scene(
-        app->scene_manager, FlipBipSceneMenu); //Start with start screen
+    scene_manager_next_scene(app->scene_manager, FlipBipSceneMenu); //Start with start screen
     //scene_manager_next_scene(app->scene_manager, FlipBipSceneMenu); //if you want to directly start with Menu
 
     furi_hal_power_suppress_charge_enter();

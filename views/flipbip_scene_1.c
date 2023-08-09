@@ -161,7 +161,8 @@ static void flipbip_scene_1_init_address(
         addr_text[1] = 'x';
         // Convert the hash to a hex string
         flipbip_btox((uint8_t*)buf, 20, addr_text + 2);
-    } else if(coin_info[5] == FlipBipCoinZEC133) { // ETH
+
+    } else if(coin_info[5] == FlipBipCoinZEC133) { // ZEC
         ecdsa_get_address(
             s_addr_node->public_key, coin_info[3], HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
         addr_text[0] = 't';
