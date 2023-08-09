@@ -367,7 +367,7 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff) {
             }
             furi_string_printf(temp_str, "%s %d", MF_ULTRALIGHT_TEARING_KEY, i);
             if(!flipper_format_write_hex(
-                   ff, furi_string_get_cstr(temp_str), data->tearing_flag->data, 1)) {
+                   ff, furi_string_get_cstr(temp_str), data->tearing_flag[i].data, 1)) {
                 counters_saved = false;
                 break;
             }
