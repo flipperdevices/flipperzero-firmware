@@ -98,15 +98,7 @@ static bool read_bank(UHFData* read_bank_cmd, UHFData* response_bank, UHFBank ba
     return response_bank->data[2] == read_bank_cmd->data[2];
 }
 
-UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
-    // debug
-    // FuriString* temp_str;
-    // temp_str = furi_string_alloc();
-    // e-debug
-    UHFResponseData* uhf_response_data = uhf_worker->response_data;
-    uhf_response_data_reset(uhf_response_data);
-    UHFData* raw_read_data = uhf_response_data_get_uhf_data(uhf_response_data, 0);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
+UHFWorkerEvent send_polling_command(UHFWorker* uhf_worker, UHFData* raw_read_data) {
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, raw_read_data);
     uhf_data_reset(raw_read_data);
     // read epc bank
@@ -124,6 +116,20 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
                 break; // read success
         }
     }
+    return UHFWorkerEventSuccess;
+}
+
+UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
+    // debug
+    // FuriString* temp_str;
+    // temp_str = furi_string_alloc();
+    // e-debug
+    UHFResponseData* uhf_response_data = uhf_worker->response_data;
+    uhf_response_data_reset(uhf_response_data);
+    UHFData* raw_read_data = uhf_response_data_get_uhf_data(uhf_response_data, 0);
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
+
+    send_polling_command(uhf_worker, raw_read_data);
 
     // todo : rfu ?
     UHFTag* uhf_tag = uhf_worker->uhf_tag;
@@ -201,14 +207,19 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
     return UHFWorkerEventSuccess;
 }
 
+UHFWorkerEvent write_single_card(UHFWorker* worker) {
+}
+
 int32_t uhf_worker_task(void* ctx) {
     UHFWorker* uhf_worker = ctx;
     if(uhf_worker->state == UHFWorkerStateVerify) {
         UHFWorkerEvent event = verify_module_connected(uhf_worker);
         uhf_worker->callback(event, uhf_worker->ctx);
-    }
-    if(uhf_worker->state == UHFWorkerStateDetectSingle) {
+    } else if(uhf_worker->state == UHFWorkerStateDetectSingle) {
         UHFWorkerEvent event = read_single_card(uhf_worker);
+        uhf_worker->callback(event, uhf_worker->ctx);
+    } else if(uhf_worker->state == UHFWorkerStateWriteSingle) {
+        UHFWorkerEvent event = write_single_card(uhf_worker);
         uhf_worker->callback(event, uhf_worker->ctx);
     }
     return 0;
