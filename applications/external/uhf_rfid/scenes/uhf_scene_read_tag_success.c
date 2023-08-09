@@ -1,4 +1,5 @@
 #include "../uhf_app_i.h"
+#include <dolphin/dolphin.h>
 
 void uhf_read_tag_success_worker_callback(UHFWorkerEvent event, void* ctx) {
     UNUSED(event);
@@ -16,9 +17,12 @@ void uhf_scene_read_card_success_widget_callback(GuiButtonType result, InputType
 
 void uhf_scene_read_tag_success_on_enter(void* ctx) {
     UHFApp* uhf_app = ctx;
+    UHFTag* uhf_tag = uhf_app->worker->uhf_tag;
 
-    const uint8_t* read_data =
-        uhf_response_data_get_uhf_data(uhf_app->worker->response_data, 0)->data;
+    dolphin_deed(DolphinDeedNfcReadSuccess);
+
+    // Send notification
+    notification_message(uhf_app->notifications, &sequence_success);
 
     widget_add_string_element(
         uhf_app->widget, 32, 5, AlignLeft, AlignCenter, FontPrimary, "Read Success");
@@ -31,32 +35,13 @@ void uhf_scene_read_tag_success_on_enter(void* ctx) {
     widget_add_string_element(
         uhf_app->widget, 3, 32, AlignLeft, AlignCenter, FontPrimary, "EPC :");
 
-    widget_add_string_element(
-        uhf_app->widget,
-        26,
-        19,
-        AlignLeft,
-        AlignCenter,
-        FontKeyboard,
-        convertToHexString(read_data + 6, 2));
-    widget_add_string_element(
-        uhf_app->widget,
-        96,
-        19,
-        AlignLeft,
-        AlignCenter,
-        FontKeyboard,
-        convertToHexString(read_data + 20, 2));
-
+    char* pc = convertToHexString(uhf_tag->pc, 2);
+    widget_add_string_element(uhf_app->widget, 26, 19, AlignLeft, AlignCenter, FontKeyboard, pc);
+    char* crc = convertToHexString(uhf_tag->crc, 2);
+    widget_add_string_element(uhf_app->widget, 96, 19, AlignLeft, AlignCenter, FontKeyboard, crc);
+    char* epc = convertToHexString(uhf_tag->epc + 2, uhf_tag->epc_length - 2);
     widget_add_string_multiline_element(
-        uhf_app->widget,
-        34,
-        29,
-        AlignLeft,
-        AlignTop,
-        FontKeyboard,
-        convertToHexString(read_data + 8, 12));
-
+        uhf_app->widget, 34, 29, AlignLeft, AlignTop, FontKeyboard, epc);
     widget_add_button_element(
         uhf_app->widget,
         GuiButtonTypeRight,
@@ -69,8 +54,10 @@ void uhf_scene_read_tag_success_on_enter(void* ctx) {
         "Exit",
         uhf_scene_read_card_success_widget_callback,
         uhf_app);
-
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewWidget);
+    free(pc);
+    free(crc);
+    free(epc);
 }
 
 bool uhf_scene_read_tag_success_on_event(void* ctx, SceneManagerEvent event) {
