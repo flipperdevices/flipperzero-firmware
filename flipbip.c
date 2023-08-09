@@ -118,11 +118,6 @@ FlipBip* flipbip_app_alloc() {
 
     view_dispatcher_add_view(
         app->view_dispatcher, FlipBipViewIdMenu, submenu_get_view(app->submenu));
-    app->flipbip_startscreen = flipbip_startscreen_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        FlipBipViewIdStartscreen,
-        flipbip_startscreen_get_view(app->flipbip_startscreen));
     app->flipbip_scene_1 = flipbip_scene_1_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, FlipBipViewIdScene1, flipbip_scene_1_get_view(app->flipbip_scene_1));
@@ -189,7 +184,7 @@ int32_t flipbip_app(void* p) {
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     scene_manager_next_scene(
-        app->scene_manager, FlipBipSceneStartscreen); //Start with start screen
+        app->scene_manager, FlipBipSceneMenu); //Start with start screen
     //scene_manager_next_scene(app->scene_manager, FlipBipSceneMenu); //if you want to directly start with Menu
 
     furi_hal_power_suppress_charge_enter();

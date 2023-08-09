@@ -12,7 +12,6 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include "scenes/flipbip_scene.h"
-#include "views/flipbip_startscreen.h"
 #include "views/flipbip_scene_1.h"
 
 #define FLIPBIP_VERSION "v1.12.0"
@@ -32,7 +31,6 @@ typedef struct {
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     TextInput* text_input;
-    FlipBipStartscreen* flipbip_startscreen;
     FlipBipScene1* flipbip_scene_1;
     // Settings options
     int haptic;
