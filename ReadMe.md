@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [T-Rex Runner (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
 - Updated: [FlipBIP Crypto Wallet v1.12 (By xtruan)](https://github.com/xtruan/FlipBIP) [add ZEC t-address #19 (By wh00hw)](https://github.com/xtruan/FlipBIP/pull/19)
 - Updated: [DnD Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
+- Updated: [Chronometer (By nmrr)](https://github.com/nmrr/flipperzero-chronometer)
 
 <a name="release">
 
