@@ -213,38 +213,30 @@ static bool
     return command_processed;
 }
 
-static bool mf_ultralight_listener_check_ntag_tearing(MfUltralightType type) {
-    //TODO move this to mf_ultralight.c
-    return (type == MfUltralightTypeNTAG213) || (type == MfUltralightTypeNTAG215) ||
-           (type == MfUltralightTypeNTAG216);
-}
-
 static bool mf_ultralight_listener_check_tearing_handler(
     MfUltralightListener* instance,
     BitBuffer* buffer) {
     bool command_processed = false;
-    bool ntag_tearing = false;
+
+    FURI_LOG_D(TAG, "CMD_CHECK_TEARING");
+
     do {
         uint8_t tearing_flag_num = bit_buffer_get_byte(buffer, 1);
-        if((instance->features & MfUltralightFeatureSupportCheckTearingFlag) == 0) {
-            if(mf_ultralight_listener_check_ntag_tearing(instance->data->type))
-                ntag_tearing = true;
-            else
+        if(instance->features & (MfUltralightFeatureSupportCheckTearingFlag |
+                                 MfUltralightFeatureSupportSingleCounter)) {
+            if((instance->features & MfUltralightFeatureSupportSingleCounter) &&
+               (tearing_flag_num != 2)) {
                 break;
-        }
-        if(tearing_flag_num > 2) break;
-        bit_buffer_set_size_bytes(instance->tx_buffer, 1);
-        bit_buffer_set_byte(
-            instance->tx_buffer,
-            0,
-            ntag_tearing ? MF_ULTRALIGHT_TEARING_FLAG_DEFAULT :
-                           instance->data->tearing_flag->data[0]);
-        iso14443_3a_listener_send_standard_frame(
-            instance->iso14443_3a_listener, instance->tx_buffer);
-        command_processed = true;
-    } while(false);
+            }
 
-    FURI_LOG_W(TAG, "CMD_CHECK_TEARING: %d", command_processed);
+            bit_buffer_set_size_bytes(instance->tx_buffer, 1);
+            bit_buffer_set_byte(
+                instance->tx_buffer, 0, instance->data->tearing_flag->data[tearing_flag_num]);
+            iso14443_3a_listener_send_standard_frame(
+                instance->iso14443_3a_listener, instance->tx_buffer);
+            command_processed = true;
+        }
+    } while(false);
 
     return command_processed;
 }
