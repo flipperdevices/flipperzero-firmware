@@ -149,7 +149,7 @@ static void flipbip_scene_1_init_address(
         // BTC / DOGE style address
         ecdsa_get_address(
             s_addr_node->public_key, coin_info[3], HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
-        
+
         strcpy(addr_text, buf);
 
         //ecdsa_get_wif(addr_node->private_key, WIF_VERSION, HASHER_SHA2D, buf, buflen);
