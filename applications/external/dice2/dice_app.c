@@ -76,6 +76,7 @@ static void roll(State* const state) {
 
     if(state->dice_index == 0) coin_set_end(state->roll_result); // change coin anim
 
+    add_to_history(state, state->dice_index, state->dice_count, state->roll_result);
     state->app_state = AnimState;
 }
 
@@ -105,11 +106,12 @@ static void draw_main_menu(const State* state, Canvas* canvas) {
     canvas_draw_str_aligned(canvas, 58, 61, AlignCenter, AlignBottom, furi_string_get_cstr(count));
 
     // buttons
-    if(isAnimState(state->app_state) == false) canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
-
-    if(state->app_state != AnimResultState && state->app_state != ResultState) {
+    if(isAnimState(state->app_state) == false) {
+        canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
         canvas_draw_icon(canvas, 0, 54, &I_ui_button_history);
-    } else {
+    }
+
+    if(state->app_state == AnimResultState || state->app_state == ResultState) {
         canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
     }
 
@@ -117,29 +119,51 @@ static void draw_main_menu(const State* state, Canvas* canvas) {
 }
 
 static void draw_history(const State* state, Canvas* canvas) {
-    if(state == NULL) {
-        return;
-    }
-
     canvas_set_font(canvas, FontSecondary);
     FuriString* hist = furi_string_alloc();
 
     uint8_t x = HISTORY_START_POST_X;
     uint8_t y = HISTORY_START_POST_Y;
-    for(uint8_t i = 0; i < HISTORY_SIZE / 2; i++) {
-        //furi_string_printf(count, "%01d. %s [%01d] - %01d", i, state->history[i].name, state->history[i].count, state->history[i].result);
-
+    for(uint8_t i = 0; i < HISTORY_COL; i++) {
         // left side
         furi_string_printf(hist, "%01d.", i + 1);
         canvas_draw_str_aligned(canvas, x, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
-        furi_string_printf(hist, "%01d%s - %01d", state->dice_count, "d20", 13);
+        if(state->history[i].index < 0) {
+            furi_string_printf(hist, "--------");
+        } else {
+            if(state->history[i].index == 0) {
+                furi_string_printf(hist, state->history[i].result == 1 ? "Heads" : "Tails");
+            } else {
+                furi_string_printf(
+                    hist,
+                    "%01d%s: %01d",
+                    state->history[i].count,
+                    dice_types[state->history[i].index].name,
+                    state->history[i].result);
+            }
+        }
         canvas_draw_str_aligned(
             canvas, x + HISTORY_X_GAP, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
+
         // right side
-        furi_string_printf(hist, "%01d.", i + HISTORY_COL_SIZE);
+        uint8_t r_index = i + HISTORY_COL;
+        furi_string_printf(hist, "%01d.", r_index + 1);
         canvas_draw_str_aligned(
             canvas, x + HISTORY_STEP_X, y, AlignLeft, AlignBottom, furi_string_get_cstr(hist));
-        furi_string_printf(hist, "%01d%s - %01d", state->dice_count, "d20", 13);
+        if(state->history[r_index].index < 0) {
+            furi_string_printf(hist, "--------");
+        } else {
+            if(state->history[r_index].index == 0) {
+                furi_string_printf(hist, state->history[r_index].result == 1 ? "Heads" : "Tails");
+            } else {
+                furi_string_printf(
+                    hist,
+                    "%01d%s: %01d",
+                    state->history[r_index].count,
+                    dice_types[state->history[r_index].index].name,
+                    state->history[r_index].result);
+            }
+        }
         canvas_draw_str_aligned(
             canvas,
             x + HISTORY_STEP_X + HISTORY_X_GAP,
@@ -152,7 +176,7 @@ static void draw_history(const State* state, Canvas* canvas) {
     }
 
     canvas_draw_icon(canvas, 0, 54, &I_ui_button_back);
-    canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
+    canvas_draw_icon(canvas, 75, 54, &I_ui_button_exit);
     furi_string_free(hist);
 }
 
@@ -333,13 +357,13 @@ int32_t dice_dnd_app(void* p) {
                             if(state->dice_index != 0) {
                                 state->dice_count += 1;
                                 if(state->dice_count > MAX_DICE_COUNT) {
-                                    state->dice_count = MAX_DICE_COUNT;
+                                    state->dice_count = 1;
                                 }
                             }
                         } else if(event.input.key == InputKeyDown) {
                             state->dice_count -= 1;
                             if(state->dice_count < 1) {
-                                state->dice_count = 1;
+                                state->dice_count = MAX_DICE_COUNT;
                             }
                         }
                     }

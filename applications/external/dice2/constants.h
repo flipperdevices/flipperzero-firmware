@@ -6,12 +6,12 @@
 #define DICE_TYPES 8
 
 #define HISTORY_SIZE 10
-#define HISTORY_COL_SIZE HISTORY_SIZE / 2
-#define HISTORY_START_POST_X 8
+#define HISTORY_COL HISTORY_SIZE / 2
+#define HISTORY_START_POST_X 2
 #define HISTORY_START_POST_Y 10
-#define HISTORY_STEP_X 62
+#define HISTORY_STEP_X 66
 #define HISTORY_STEP_Y 10
-#define HISTORY_X_GAP 10
+#define HISTORY_X_GAP 11
 
 #define MAX_DICE_COUNT 10
 #define MAX_COIN_FRAMES 9
@@ -65,7 +65,7 @@ typedef struct {
 } Dice;
 
 typedef struct {
-    char* name;
+    int8_t index;
     uint8_t count;
     uint8_t result;
 } History;
@@ -122,6 +122,33 @@ void init(State* const state) {
         state->dices[i].x = DICE_X + (i * DICE_GAP);
         state->dices[i].y = i == 0 ? DICE_Y_T : DICE_Y;
     }
+
+    for(uint8_t i = 0; i < HISTORY_SIZE; i++) {
+        state->history[i].index = -1;
+    }
+}
+
+void add_to_history(State* const state, uint8_t index, uint8_t count, uint8_t result) {
+    uint8_t last = HISTORY_SIZE - 1;
+    if(state->history[last].index >= 0) {
+        for(uint8_t i = 1; i < HISTORY_SIZE; i++) {
+            state->history[i - 1] = state->history[i];
+        }
+
+        state->history[last].index = index;
+        state->history[last].count = count;
+        state->history[last].result = result;
+        return;
+    }
+
+    for(uint8_t i = 0; i < HISTORY_SIZE; i++) {
+        if(state->history[i].index < 0) {
+            state->history[i].index = index;
+            state->history[i].count = count;
+            state->history[i].result = result;
+            return;
+        }
+    }
 }
 
 void coin_set_start(uint16_t type) {
@@ -154,7 +181,7 @@ bool isDiceNameVisible(AppState state) {
 
 bool isDiceButtonsVisible(AppState state) {
     return isDiceNameVisible(state) && state != AnimResultState && state != ResultState &&
-           state != AnimState;
+           state != AnimState && state != HistoryState;
 }
 
 bool isOneDice(uint8_t dice_index) {
@@ -163,7 +190,7 @@ bool isOneDice(uint8_t dice_index) {
 
 bool isDiceSettingsDisabled(AppState state, uint8_t dice_index) {
     return isOneDice(dice_index) || state == ResultState || state == AnimResultState ||
-           state == AnimState;
+           state == AnimState || state == HistoryState;
 }
 
 bool isAnimState(AppState state) {

@@ -41,7 +41,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Plugins: Add * in NFC Maker keyboard (hold `.`) (By xMasterX)
 - UL: Revert old nfc debug defines was used to save space (By xMasterX)
 - UL: FDX-B temperature now uses system units (By Astrrra)
-- Updated: [DnD Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - Updated: [Sub-GHz Bruteforcer v3.7 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Added: [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - Updated: [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
@@ -61,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Evil Portal Assets: Better Google Login (By 8Root)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/56)
 - Updated: [T-Rex Runner (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
 - Updated: [FlipBIP Crypto Wallet v1.12 (By xtruan)](https://github.com/xtruan/FlipBIP) [add ZEC t-address #19 (By wh00hw)](https://github.com/xtruan/FlipBIP/pull/19)
+- Updated: [DnD Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 
 <a name="release">
 
