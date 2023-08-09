@@ -34,7 +34,6 @@ typedef struct {
     FlipBipScene1* flipbip_scene_1;
     // Settings options
     int haptic;
-    int led;
     int bip39_strength;
     int passphrase;
     // Main menu options
@@ -60,11 +59,6 @@ typedef enum {
     FlipBipHapticOff,
     FlipBipHapticOn,
 } FlipBipHapticState;
-
-typedef enum {
-    FlipBipLedOff,
-    FlipBipLedOn,
-} FlipBipLedState;
 
 typedef enum {
     FlipBipStrength128,

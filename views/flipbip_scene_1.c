@@ -8,7 +8,6 @@
 #include <string.h>
 #include "flipbip_icons.h"
 #include "../helpers/flipbip_haptic.h"
-#include "../helpers/flipbip_led.h"
 #include "../helpers/flipbip_string.h"
 #include "../helpers/flipbip_file.h"
 // From: /lib/crypto
@@ -666,7 +665,7 @@ void flipbip_scene_1_enter(void* context) {
 
     flipbip_play_happy_bump(app);
     //notification_message(app->notification, &sequence_blink_cyan_100);
-    flipbip_led_set_rgb(app, 255, 0, 0);
+    //flipbip_led_set_rgb(app, 255, 0, 0);
 
     with_view_model(
         instance->view,

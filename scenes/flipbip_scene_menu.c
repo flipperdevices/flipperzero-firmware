@@ -1,6 +1,8 @@
 #include "../flipbip.h"
 #include "../helpers/flipbip_file.h"
 
+#define FLIPBIP_MENU_HEADER_TEXT "- FlipBIP wallet " FLIPBIP_VERSION " -"
+
 enum SubmenuIndex {
     SubmenuIndexScene1BTC = 10,
     SubmenuIndexScene1ETH,
@@ -9,6 +11,7 @@ enum SubmenuIndex {
     SubmenuIndexScene1New,
     SubmenuIndexScene1Import,
     SubmenuIndexSettings,
+    SubmenuIndexNOP,
 };
 
 void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
@@ -18,6 +21,13 @@ void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
 
 void flipbip_scene_menu_on_enter(void* context) {
     FlipBip* app = context;
+
+    submenu_add_item(
+        app->submenu,
+        FLIPBIP_MENU_HEADER_TEXT,
+        SubmenuIndexNOP,
+        flipbip_scene_menu_submenu_callback,
+        app);
 
     if(flipbip_has_file(FlipBipFileKey, NULL, false) &&
        flipbip_has_file(FlipBipFileDat, NULL, false)) {
@@ -133,6 +143,8 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexSettings);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneSettings);
+            return true;
+        } else if(event.event == SubmenuIndexNOP) {
             return true;
         }
     }

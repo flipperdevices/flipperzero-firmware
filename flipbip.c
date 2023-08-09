@@ -104,7 +104,6 @@ FlipBip* flipbip_app_alloc() {
 
     // Settings
     app->haptic = FlipBipHapticOn;
-    app->led = FlipBipLedOn;
     app->bip39_strength = FlipBipStrength256; // 256 bits (24 words)
     app->passphrase = FlipBipPassphraseOff;
 
