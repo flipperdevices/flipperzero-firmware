@@ -1,4 +1,5 @@
 #include <furi_hal_crypto.h>
+#include <furi_hal_cortex.h>
 #include <furi_hal_bt.h>
 #include <furi_hal_random.h>
 #include <furi_hal_bus.h>
@@ -13,7 +14,7 @@
 #define ENCLAVE_SIGNATURE_SIZE 16
 
 #define CRYPTO_BLK_LEN (4 * sizeof(uint32_t))
-#define CRYPTO_TIMEOUT (1000)
+#define CRYPTO_TIMEOUT_US (1000000)
 
 #define CRYPTO_MODE_ENCRYPT 0U
 #define CRYPTO_MODE_INIT (AES_CR_MODE_0)
@@ -218,6 +219,16 @@ static void crypto_key_init(uint32_t* key, uint32_t* iv) {
     AES1->IVR0 = iv[3];
 }
 
+static bool furi_hal_crypto_wait_flag(uint32_t flag) {
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(CRYPTO_TIMEOUT_US);
+    while(!READ_BIT(AES1->SR, flag)) {
+        if(furi_hal_cortex_timer_is_expired(timer)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static bool crypto_process_block(uint32_t* in, uint32_t* out, uint8_t blk_len) {
     furi_check((blk_len <= 4) && (blk_len > 0));
 
@@ -229,14 +240,8 @@ static bool crypto_process_block(uint32_t* in, uint32_t* out, uint8_t blk_len) {
         }
     }
 
-    uint32_t countdown = CRYPTO_TIMEOUT;
-    while(!READ_BIT(AES1->SR, AES_SR_CCF)) {
-        if(LL_SYSTICK_IsActiveCounterFlag()) {
-            countdown--;
-        }
-        if(countdown == 0) {
-            return false;
-        }
+    if(!furi_hal_crypto_wait_flag(AES_SR_CCF)) {
+        return false;
     }
 
     SET_BIT(AES1->CR, AES_CR_CCFC);
@@ -341,14 +346,8 @@ bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size)
 
         SET_BIT(AES1->CR, AES_CR_EN);
 
-        uint32_t countdown = CRYPTO_TIMEOUT;
-        while(!READ_BIT(AES1->SR, AES_SR_CCF)) {
-            if(LL_SYSTICK_IsActiveCounterFlag()) {
-                countdown--;
-            }
-            if(countdown == 0) {
-                return false;
-            }
+        if(!furi_hal_crypto_wait_flag(AES_SR_CCF)) {
+            return false;
         }
 
         SET_BIT(AES1->CR, AES_CR_CCFC);
@@ -412,14 +411,8 @@ static bool
 }
 
 static bool wait_for_crypto(void) {
-    uint32_t countdown = CRYPTO_TIMEOUT;
-    while(!READ_BIT(AES1->SR, AES_SR_CCF)) {
-        if(LL_SYSTICK_IsActiveCounterFlag()) {
-            countdown--;
-        }
-        if(countdown == 0) {
-            return false;
-        }
+    if(!furi_hal_crypto_wait_flag(AES_SR_CCF)) {
+        return false;
     }
 
     SET_BIT(AES1->CR, AES_CR_CCFC);
