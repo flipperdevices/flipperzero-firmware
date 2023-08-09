@@ -60,7 +60,7 @@ extern "C" {
 #define FURI_HAL_CRYPTO_ENCLAVE_USER_KEY_SLOT_START (12u)
 #define FURI_HAL_CRYPTO_ENCLAVE_USER_KEY_SLOT_END (100u)
 
-/** Indicate availability of advanced crypto functions */
+/** [Deprecated] Indicates availability of advanced crypto functions, will be dropped before v1.0 */
 #define FURI_HAL_CRYPTO_ADVANCED_AVAIL 1
 
 /** FuriHalCryptoKey Type */
@@ -90,8 +90,7 @@ typedef enum {
     FuriHalCryptoGCMStateAuthFailure, /**< tags do not match, auth failed */
 } FuriHalCryptoGCMState;
 
-/** Initialize cryptography layer This includes AES engines, PKA and RNG
- */
+/** Initialize cryptography layer(includes AES engines, PKA and RNG) */
 void furi_hal_crypto_init();
 
 /** Verify factory provisioned keys
