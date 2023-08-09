@@ -292,3 +292,19 @@ class OpenOCDProgrammer(Programmer):
             if validation_result
             else OpenOCDProgrammerResult.ErrorValidation
         )
+
+    def option_bytes_recover(self) -> bool:
+        self.openocd.start()
+        self.openocd.send_tcl("reset halt")
+        self.openocd.send_tcl("mww 0x58004010 0x8000")
+        self.openocd.send_tcl("mww 0x58004008 0x45670123")
+        self.openocd.send_tcl("mww 0x58004008 0xCDEF89AB")
+        self.openocd.send_tcl("mww 0x5800400c 0x08192A3B")
+        self.openocd.send_tcl("mww 0x5800400c 0x4C5D6E7F")
+        self.openocd.send_tcl("mmw 0x58004020 0x3ffff1aa 0xffffffff")
+        self.openocd.send_tcl("mww 0x5800402c 0xff")
+        self.openocd.send_tcl("mww 0x58004030 0xff")
+        self.openocd.send_tcl("mmw 0x58004014 0x00020000 0")
+        self.openocd.send_tcl("mmw 0x58004014 0x08000000 0")
+        self.openocd.stop()
+        return True
