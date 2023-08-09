@@ -3,9 +3,6 @@
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 
-#define UHF_DEV_NAME_MAX_LEN 22
-#define UHF_APP_EXTENSION ".uhf"
-
 void uhf_scene_save_name_text_input_callback(void* context) {
     UHFApp* uhf_app = context;
 
@@ -30,12 +27,12 @@ void uhf_scene_save_name_on_enter(void* context) {
     FuriString* folder_path;
     folder_path = furi_string_alloc_set(STORAGE_APP_DATA_PATH_PREFIX);
 
-    // if(furi_string_end_with(uhf_app->dev->load_path, UHF_APP_EXTENSION)) {
-    //     path_extract_dirname(furi_string_get_cstr(uhf_app->dev->load_path), folder_path);
-    // }
+    if(furi_string_end_with(uhf_app->uhf_device->load_path, UHF_APP_EXTENSION)) {
+        path_extract_dirname(furi_string_get_cstr(uhf_app->uhf_device->load_path), folder_path);
+    }
 
-    ValidatorIsFile* validator_is_file =
-        validator_is_file_alloc_init(furi_string_get_cstr(folder_path), UHF_APP_EXTENSION, "test");
+    ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
+        furi_string_get_cstr(folder_path), UHF_APP_EXTENSION, uhf_app->uhf_device->dev_name);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewTextInput);
@@ -45,11 +42,15 @@ void uhf_scene_save_name_on_enter(void* context) {
 
 bool uhf_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     UHFApp* uhf_app = context;
-    UHFResponseData* uhf_data_save = uhf_app->worker->response_data;
     bool consumed = false;
+
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UHFCustomEventTextInputDone) {
-            if(uhf_save_read_data(uhf_data_save, uhf_app->storage, uhf_app->text_store)) {
+            strlcpy(
+                uhf_app->uhf_device->dev_name,
+                uhf_app->text_store,
+                strlen(uhf_app->text_store) + 1);
+            if(uhf_device_save(uhf_app->uhf_device, uhf_app->text_store)) {
                 scene_manager_next_scene(uhf_app->scene_manager, UHFSceneSaveSuccess);
                 consumed = true;
             } else {

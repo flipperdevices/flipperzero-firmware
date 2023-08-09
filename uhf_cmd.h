@@ -16,6 +16,13 @@ typedef enum{
 }UHFFrameType;
 
 typedef enum{
+    RFU_BANK,
+    EPC_BANK,
+    TID_BANK,
+    USER_BANK
+}UHFBank;
+
+typedef enum{
     CHINA_900MHZ = 1,
     CHINA_800MHZ = 4,
     US = 2,

@@ -116,6 +116,14 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     AlignCenter,
                     FontPrimary,
                     "No UHF Module found");
+                widget_add_string_multiline_element(
+                    uhf_app->widget,
+                    64,
+                    30,
+                    AlignCenter,
+                    AlignCenter,
+                    FontSecondary,
+                    "Please connect your module.\nPlease refer to the frux-c/uhf_rfid for help.");
                 widget_add_button_element(
                     uhf_app->widget,
                     GuiButtonTypeLeft,
