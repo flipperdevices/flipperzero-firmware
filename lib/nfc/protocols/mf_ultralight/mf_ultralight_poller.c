@@ -325,10 +325,14 @@ static NfcCommand mf_ultralight_poller_handler_read_counters(MfUltralightPoller*
 }
 
 static NfcCommand mf_ultralight_poller_handler_read_tearing_flags(MfUltralightPoller* instance) {
-    if(instance->feature_set & MfUltralightFeatureSupportCheckTearingFlag) {
+    if(instance->feature_set &
+       (MfUltralightFeatureSupportCheckTearingFlag | MfUltralightFeatureSupportSingleCounter)) {
         if(instance->tearing_flag_read == instance->tearing_flag_total) {
             instance->state = MfUltralightPollerStateTryDefaultPass;
         } else {
+            if(instance->feature_set & MfUltralightFeatureSupportSingleCounter) {
+                instance->tearing_flag_read = 2;
+            }
             FURI_LOG_D(TAG, "Reading tearing flag %d", instance->tearing_flag_read);
             instance->error = mf_ultralight_poller_async_read_tearing_flag(
                 instance,
