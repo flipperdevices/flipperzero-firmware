@@ -13,3 +13,7 @@
 	url = https://github.com/ClaraCrazy/Flipper-Xtreme
 	branch = main
 	ignore = dirty
+[submodule "totp/lib/wolfssl"]
+	path = totp/lib/wolfssl
+	url = https://github.com/wolfSSL/wolfssl.git
+	branch = master

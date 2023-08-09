@@ -1,4 +1,4 @@
-#include "crypto_v2.h"
+#include "crypto_v3.h"
 #include <stdlib.h>
 #include <furi.h>
 #include <furi_hal_crypto.h>
@@ -7,10 +7,12 @@
 #include "../../types/common.h"
 #include "../../wolfssl_config.h"
 #include <wolfssl/wolfcrypt/hmac.h>
+#include <wolfssl/wolfcrypt/pwdbased.h>
 #include "memset_s.h"
 #include "constants.h"
 
 #define CRYPTO_ALIGNMENT_FACTOR (16)
+#define PBKDF2_ITERATIONS_COUNT (200)
 
 static const uint8_t* get_device_uid() {
     return (const uint8_t*)UID64_BASE; //-V566
@@ -28,7 +30,7 @@ static uint8_t get_crypto_verify_key_length() {
     return get_device_uid_length();
 }
 
-uint8_t* totp_crypto_encrypt_v2(
+uint8_t* totp_crypto_encrypt_v3(
     const uint8_t* plain_data,
     const size_t plain_data_length,
     const CryptoSettings* crypto_settings,
@@ -77,7 +79,7 @@ uint8_t* totp_crypto_encrypt_v2(
     return encrypted_data;
 }
 
-uint8_t* totp_crypto_decrypt_v2(
+uint8_t* totp_crypto_decrypt_v3(
     const uint8_t* encrypted_data,
     const size_t encrypted_data_length,
     const CryptoSettings* crypto_settings,
@@ -97,7 +99,7 @@ uint8_t* totp_crypto_decrypt_v2(
     return decrypted_data;
 }
 
-CryptoSeedIVResult totp_crypto_seed_iv_v2(
+CryptoSeedIVResult totp_crypto_seed_iv_v3(
     CryptoSettings* crypto_settings,
     const uint8_t* pin,
     uint8_t pin_length) {
@@ -110,36 +112,39 @@ CryptoSeedIVResult totp_crypto_seed_iv_v2(
     const uint8_t* device_uid = get_device_uid();
     uint8_t device_uid_length = get_device_uid_length();
 
-    uint8_t hmac_key_length = device_uid_length;
+    uint8_t pbkdf_key_length = device_uid_length;
     if(pin != NULL && pin_length > 0) {
-        hmac_key_length += pin_length;
+        pbkdf_key_length += pin_length;
     }
 
-    uint8_t* hmac_key = malloc(hmac_key_length);
-    furi_check(hmac_key != NULL);
+    uint8_t* pbkdf_key = malloc(pbkdf_key_length);
+    furi_check(pbkdf_key != NULL);
 
-    memcpy(hmac_key, device_uid, device_uid_length);
+    memcpy(pbkdf_key, device_uid, device_uid_length);
 
     if(pin != NULL && pin_length > 0) {
-        memcpy(hmac_key + device_uid_length, pin, pin_length);
+        memcpy(pbkdf_key + device_uid_length, pin, pin_length);
     }
 
-    uint8_t hmac[WC_SHA512_DIGEST_SIZE] = {0};
+    uint8_t pbkdf_output[WC_SHA512_DIGEST_SIZE] = {0};
 
-    Hmac hmac_context;
-    wc_HmacSetKey(&hmac_context, WC_SHA512, hmac_key, hmac_key_length);
-    wc_HmacUpdate(&hmac_context, &crypto_settings->salt[0], CRYPTO_SALT_LENGTH);
-    int hmac_result_code = wc_HmacFinal(&hmac_context, &hmac[0]);
-    wc_HmacFree(&hmac_context);
+    int pbkdf_result_code = wc_PBKDF2(
+        &pbkdf_output[0],
+        pbkdf_key,
+        pbkdf_key_length,
+        &crypto_settings->salt[0],
+        CRYPTO_SALT_LENGTH,
+        PBKDF2_ITERATIONS_COUNT,
+        WC_SHA512_DIGEST_SIZE,
+        WC_SHA512);
 
-    memset_s(hmac_key, hmac_key_length, 0, hmac_key_length);
-    free(hmac_key);
+    memset_s(pbkdf_key, pbkdf_key_length, 0, pbkdf_key_length);
+    free(pbkdf_key);
 
-    if(hmac_result_code == 0) {
-        uint8_t offset =
-            hmac[WC_SHA512_DIGEST_SIZE - 1] % (WC_SHA512_DIGEST_SIZE - CRYPTO_IV_LENGTH - 1);
-        memcpy(&crypto_settings->iv[0], &hmac[offset], CRYPTO_IV_LENGTH);
-
+    if(pbkdf_result_code == 0) {
+        uint8_t offset = pbkdf_output[WC_SHA512_DIGEST_SIZE - 1] %
+                         (WC_SHA512_DIGEST_SIZE - CRYPTO_IV_LENGTH - 1);
+        memcpy(&crypto_settings->iv[0], &pbkdf_output[offset], CRYPTO_IV_LENGTH);
         result = CryptoSeedIVResultFlagSuccess;
         if(crypto_settings->crypto_verify_data == NULL) {
             const uint8_t* crypto_vkey = get_crypto_verify_key();
@@ -149,7 +154,7 @@ CryptoSeedIVResult totp_crypto_seed_iv_v2(
             furi_check(crypto_settings->crypto_verify_data != NULL);
             crypto_settings->crypto_verify_data_length = crypto_vkey_length;
 
-            crypto_settings->crypto_verify_data = totp_crypto_encrypt_v2(
+            crypto_settings->crypto_verify_data = totp_crypto_encrypt_v3(
                 crypto_vkey,
                 crypto_vkey_length,
                 crypto_settings,
@@ -163,12 +168,14 @@ CryptoSeedIVResult totp_crypto_seed_iv_v2(
         result = CryptoSeedIVResultFailed;
     }
 
+    memset_s(&pbkdf_output[0], WC_SHA512_DIGEST_SIZE, 0, WC_SHA512_DIGEST_SIZE);
+
     return result;
 }
 
-bool totp_crypto_verify_key_v2(const CryptoSettings* crypto_settings) {
+bool totp_crypto_verify_key_v3(const CryptoSettings* crypto_settings) {
     size_t decrypted_key_length;
-    uint8_t* decrypted_key = totp_crypto_decrypt_v2(
+    uint8_t* decrypted_key = totp_crypto_decrypt_v3(
         crypto_settings->crypto_verify_data,
         crypto_settings->crypto_verify_data_length,
         crypto_settings,
