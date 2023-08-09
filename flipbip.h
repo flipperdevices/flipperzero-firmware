@@ -20,6 +20,7 @@
 #define COIN_BTC 0
 #define COIN_DOGE 3
 #define COIN_ETH 60
+#define COIN_ZEC 133
 
 #define TEXT_BUFFER_SIZE 256
 
@@ -82,6 +83,7 @@ typedef enum {
     FlipBipCoinBTC0,
     FlipBipCoinETH60,
     FlipBipCoinDOGE3,
+    FlipBipCoinZEC133,
 } FlipBipCoin;
 
 typedef enum {

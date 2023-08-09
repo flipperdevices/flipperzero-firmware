@@ -42,6 +42,7 @@ The application will be compiled and copied onto your device
   - Generation of offline `m/44'/0'/0'/0` BTC wallet
   - Generation of offline `m/44'/60'/0'/0` ETH wallet (coded from the $SPORK Castle of ETHDenver 2023!)
   - Generation of offline `m/44'/3'/0'/0` DOGE wallet
+  - Generation of offline `m/44'/133'/0'/0` ZEC transparent address wallet
   - Similar features to: https://iancoleman.io/bip39/
 - Saving wallets to SD card
   - Wallets are saved to SD card upon creation in `apps_data/flipbip`
