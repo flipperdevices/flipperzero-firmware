@@ -121,6 +121,7 @@ const char* felica_get_device_name(const FelicaData* data, NfcDeviceNameType nam
 const uint8_t* felica_get_uid(const FelicaData* data, size_t* uid_len) {
     furi_assert(data);
 
+    // Consider Manufacturer ID as UID
     if(uid_len) {
         *uid_len = FELICA_IDM_SIZE;
     }
@@ -131,8 +132,8 @@ const uint8_t* felica_get_uid(const FelicaData* data, size_t* uid_len) {
 bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len) {
     furi_assert(data);
 
+    // Consider Manufacturer ID as UID
     const bool uid_valid = uid_len == FELICA_IDM_SIZE;
-
     if(uid_valid) {
         memcpy(data->idm.data, uid, uid_len);
     }
