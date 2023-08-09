@@ -34,6 +34,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4.16.0
         with:
           commit_message: Updated version
+          push_options: '--force'
 
   build:
     runs-on: ubuntu-latest
