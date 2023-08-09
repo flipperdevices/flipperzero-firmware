@@ -14,7 +14,7 @@
         "flipper18",
         "furi",
         "freertos",
-        "stm32cubewb",
+        "stm32wb",
         "hwdrivers",
         "fatfs",
         "littlefs",
@@ -24,6 +24,8 @@
         "usb_stm32",
         "appframe",
         "assets",
+        "one_wire",
+        "music_worker",
         "misc",
         "flipper_application",
         "flipperformat",
@@ -45,10 +47,10 @@
         "furi_hal_subghz_configs.h"
     ],
     "excluded_modules": [
-        "one_wire",
         "nfc",
         "lfrfid",
         "subghz",
+        "ibutton",
         "infrared",
         "st25rfal002"
     ]

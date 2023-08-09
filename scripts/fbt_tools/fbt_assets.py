@@ -1,10 +1,10 @@
-from SCons.Builder import Builder
-from SCons.Action import Action
-from SCons.Errors import SConsEnvironmentError
-
 import os
 import subprocess
+
 from ansi.color import fg
+from SCons.Action import Action
+from SCons.Builder import Builder
+from SCons.Errors import StopError
 
 
 def icons_emitter(target, source, env):
@@ -76,11 +76,11 @@ def proto_ver_generator(target, source, env):
     target_file = target[0]
     src_dir = source[0].dir.abspath
     try:
-        git_fetch = _invoke_git(
+        _invoke_git(
             ["fetch", "--tags"],
             source_dir=src_dir,
         )
-    except (subprocess.CalledProcessError, EnvironmentError) as e:
+    except (subprocess.CalledProcessError, EnvironmentError):
         # Not great, not terrible
         print(fg.boldred("Git: fetch failed"))
 
@@ -89,8 +89,8 @@ def proto_ver_generator(target, source, env):
             ["describe", "--tags", "--abbrev=0"],
             source_dir=src_dir,
         )
-    except (subprocess.CalledProcessError, EnvironmentError) as e:
-        raise SConsEnvironmentError("Git: describe failed")
+    except (subprocess.CalledProcessError, EnvironmentError):
+        raise StopError("Git: describe failed")
 
     git_major, git_minor = git_describe.split(".")
     version_file_data = (
@@ -137,14 +137,14 @@ def generate(env):
         BUILDERS={
             "IconBuilder": Builder(
                 action=Action(
-                    '${PYTHON3} "${ASSETS_COMPILER}" icons "${ABSPATHGETTERFUNC(SOURCE)}" "${TARGET.dir}" --filename ${ICON_FILE_NAME}',
+                    '${PYTHON3} ${ASSETS_COMPILER} icons ${ABSPATHGETTERFUNC(SOURCE)} ${TARGET.dir} --filename "${ICON_FILE_NAME}"',
                     "${ICONSCOMSTR}",
                 ),
                 emitter=icons_emitter,
             ),
             "ProtoBuilder": Builder(
                 action=Action(
-                    '${PYTHON3} "${NANOPB_COMPILER}" -q -I${SOURCE.dir.posix} -D${TARGET.dir.posix} ${SOURCES.posix}',
+                    "${PYTHON3} ${NANOPB_COMPILER} -q -I${SOURCE.dir.posix} -D${TARGET.dir.posix} ${SOURCES.posix}",
                     "${PROTOCOMSTR}",
                 ),
                 emitter=proto_emitter,
@@ -153,14 +153,14 @@ def generate(env):
             ),
             "DolphinSymBuilder": Builder(
                 action=Action(
-                    '${PYTHON3} "${ASSETS_COMPILER}" dolphin -s dolphin_${DOLPHIN_RES_TYPE} "${SOURCE}" "${_DOLPHIN_OUT_DIR}"',
+                    "${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} ${SOURCE} ${_DOLPHIN_OUT_DIR}",
                     "${DOLPHINCOMSTR}",
                 ),
                 emitter=dolphin_emitter,
             ),
             "DolphinExtBuilder": Builder(
                 action=Action(
-                    '${PYTHON3} "${ASSETS_COMPILER}" dolphin "${SOURCE}" "${_DOLPHIN_OUT_DIR}"',
+                    "${PYTHON3} ${ASSETS_COMPILER} dolphin ${SOURCE} ${_DOLPHIN_OUT_DIR}",
                     "${DOLPHINCOMSTR}",
                 ),
                 emitter=dolphin_emitter,

@@ -1,10 +1,9 @@
-import SCons
-from SCons.Subst import quote_spaces
-from SCons.Errors import StopError
-
-import re
 import os
+import re
 
+import SCons
+from SCons.Errors import StopError
+from SCons.Subst import quote_spaces
 
 WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
 
@@ -60,7 +59,9 @@ def extract_abs_dir_path(node):
     if abs_dir_node is None:
         raise StopError(f"Can't find absolute path for {node.name}")
 
-    return abs_dir_node.abspath
+    # Don't return abspath attribute (type is str), it will break in
+    # OverrideEnvironment.subst_list() by splitting path on spaces
+    return abs_dir_node
 
 
 def path_as_posix(path):

@@ -1,7 +1,7 @@
 #include "bt_i.h"
-#include "battery_service.h"
 #include "bt_keys_storage.h"
 
+#include <services/battery_service.h>
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
@@ -225,7 +225,7 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         furi_event_flag_clear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         if(bt->profile == BtProfileSerial) {
             // Open RPC session
-            bt->rpc_session = rpc_session_open(bt->rpc);
+            bt->rpc_session = rpc_session_open(bt->rpc, RpcOwnerBle);
             if(bt->rpc_session) {
                 FURI_LOG_I(TAG, "Open RPC connection");
                 rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);

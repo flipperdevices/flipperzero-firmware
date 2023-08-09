@@ -165,6 +165,10 @@ static Infrared* infrared_alloc() {
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewStack, view_stack_get_view(infrared->view_stack));
 
+    infrared->move_view = infrared_move_view_alloc();
+    view_dispatcher_add_view(
+        view_dispatcher, InfraredViewMove, infrared_move_view_get_view(infrared->move_view));
+
     if(app_state->is_debug_enabled) {
         infrared->debug_view = infrared_debug_view_alloc();
         view_dispatcher_add_view(
@@ -208,6 +212,9 @@ static void infrared_free(Infrared* infrared) {
 
     view_dispatcher_remove_view(view_dispatcher, InfraredViewStack);
     view_stack_free(infrared->view_stack);
+
+    view_dispatcher_remove_view(view_dispatcher, InfraredViewMove);
+    infrared_move_view_free(infrared->move_view);
 
     if(app_state->is_debug_enabled) {
         view_dispatcher_remove_view(view_dispatcher, InfraredViewDebugView);
@@ -312,13 +319,14 @@ void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
 
     if(infrared_signal_is_raw(signal)) {
         InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
-        infrared_worker_set_raw_signal(infrared->worker, raw->timings, raw->timings_size);
+        infrared_worker_set_raw_signal(
+            infrared->worker, raw->timings, raw->timings_size, raw->frequency, raw->duty_cycle);
     } else {
         InfraredMessage* message = infrared_signal_get_message(signal);
         infrared_worker_set_decoded_signal(infrared->worker, message);
     }
 
-    DOLPHIN_DEED(DolphinDeedIrSend);
+    dolphin_deed(DolphinDeedIrSend);
     infrared_play_notification_message(infrared, InfraredNotificationMessageBlinkStartSend);
 
     infrared_worker_tx_set_get_signal_callback(

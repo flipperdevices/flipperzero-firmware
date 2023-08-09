@@ -14,7 +14,8 @@ typedef struct {
     FuriString* frequency_str;
     FuriString* preset_str;
     FuriString* key_str;
-    uint8_t show_button;
+    bool show_button;
+    SubGhzRadioDeviceType device_type;
 } SubGhzViewTransmitterModel;
 
 void subghz_view_transmitter_set_callback(
@@ -32,7 +33,7 @@ void subghz_view_transmitter_add_data_to_show(
     const char* key_str,
     const char* frequency_str,
     const char* preset_str,
-    uint8_t show_button) {
+    bool show_button) {
     furi_assert(subghz_transmitter);
     with_view_model(
         subghz_transmitter->view,
@@ -46,6 +47,17 @@ void subghz_view_transmitter_add_data_to_show(
         true);
 }
 
+void subghz_view_transmitter_set_radio_device_type(
+    SubGhzViewTransmitter* subghz_transmitter,
+    SubGhzRadioDeviceType device_type) {
+    furi_assert(subghz_transmitter);
+    with_view_model(
+        subghz_transmitter->view,
+        SubGhzViewTransmitterModel * model,
+        { model->device_type = device_type; },
+        true);
+}
+
 static void subghz_view_transmitter_button_right(Canvas* canvas, const char* str) {
     const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;
@@ -56,7 +68,7 @@ static void subghz_view_transmitter_button_right(Canvas* canvas, const char* str
     const uint8_t icon_width_with_offset = icon_get_width(icon) + icon_offset;
     const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
-    const uint8_t x = (canvas_width(canvas) - button_width) / 2 + 40;
+    const uint8_t x = (canvas_width(canvas) - button_width) / 2 + 44;
     const uint8_t y = canvas_height(canvas);
 
     canvas_draw_box(canvas, x, y - button_height, button_width, button_height);
@@ -88,7 +100,14 @@ void subghz_view_transmitter_draw(Canvas* canvas, SubGhzViewTransmitterModel* mo
         canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(model->key_str));
     canvas_draw_str(canvas, 78, 7, furi_string_get_cstr(model->frequency_str));
     canvas_draw_str(canvas, 113, 7, furi_string_get_cstr(model->preset_str));
-    if(model->show_button) subghz_view_transmitter_button_right(canvas, "Send");
+    if(model->show_button) {
+        if(model->device_type == SubGhzRadioDeviceTypeInternal) {
+            canvas_draw_icon(canvas, 108, 39, &I_Internal_antenna_20x12);
+        } else {
+            canvas_draw_icon(canvas, 108, 39, &I_External_antenna_20x12);
+        }
+        subghz_view_transmitter_button_right(canvas, "Send");
+    }
 }
 
 bool subghz_view_transmitter_input(InputEvent* event, void* context) {
@@ -104,7 +123,7 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
                 furi_string_reset(model->frequency_str);
                 furi_string_reset(model->preset_str);
                 furi_string_reset(model->key_str);
-                model->show_button = 0;
+                model->show_button = false;
             },
             false);
         return false;

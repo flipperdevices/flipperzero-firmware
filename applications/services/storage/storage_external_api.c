@@ -422,12 +422,41 @@ FS_Error storage_common_remove(Storage* storage, const char* path) {
 }
 
 FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
-    FS_Error error = storage_common_copy(storage, old_path, new_path);
-    if(error == FSE_OK) {
+    FS_Error error;
+
+    do {
+        if(!storage_common_exists(storage, old_path)) {
+            error = FSE_INVALID_NAME;
+            break;
+        }
+
+        if(storage_dir_exists(storage, old_path)) {
+            FuriString* dir_path = furi_string_alloc_set_str(old_path);
+            if(!furi_string_end_with_str(dir_path, "/")) {
+                furi_string_cat_str(dir_path, "/");
+            }
+            const char* dir_path_s = furi_string_get_cstr(dir_path);
+            if(strncmp(new_path, dir_path_s, strlen(dir_path_s)) == 0) {
+                error = FSE_INVALID_NAME;
+                furi_string_free(dir_path);
+                break;
+            }
+            furi_string_free(dir_path);
+        }
+
+        if(storage_file_exists(storage, new_path)) {
+            storage_common_remove(storage, new_path);
+        }
+
+        error = storage_common_copy(storage, old_path, new_path);
+        if(error != FSE_OK) {
+            break;
+        }
+
         if(!storage_simply_remove_recursive(storage, old_path)) {
             error = FSE_INTERNAL;
         }
-    }
+    } while(false);
 
     return error;
 }
@@ -803,6 +832,7 @@ void storage_file_free(File* file) {
 }
 
 FuriPubSub* storage_get_pubsub(Storage* storage) {
+    furi_assert(storage);
     return storage->pubsub;
 }
 

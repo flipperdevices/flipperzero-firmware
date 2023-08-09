@@ -28,7 +28,7 @@ typedef enum {
     FuriThreadPriorityNormal = 16, /**< Normal */
     FuriThreadPriorityHigh = 17, /**< High */
     FuriThreadPriorityHighest = 18, /**< Highest */
-    FuriThreadPriorityIsr = 32, /**< Deffered Isr (highest possible) */
+    FuriThreadPriorityIsr = (configMAX_PRIORITIES - 1), /**< Deferred ISR (highest possible) */
 } FuriThreadPriority;
 
 /** FuriThread anonymous structure */
@@ -75,6 +75,8 @@ FuriThread* furi_thread_alloc_ex(
     void* context);
 
 /** Release FuriThread
+ *
+ * @warning    see furi_thread_join
  *
  * @param      thread  FuriThread instance
  */
@@ -174,6 +176,9 @@ void furi_thread_start(FuriThread* thread);
 
 /** Join FuriThread
  *
+ * @warning    Use this method only when CPU is not busy(Idle task receives
+ *             control), otherwise it will wait forever.
+ *
  * @param      thread  FuriThread instance
  *
  * @return     bool
@@ -228,7 +233,7 @@ FuriThreadId furi_thread_get_current_id();
 
 /** Get FuriThread instance for current thread
  * 
- * @return FuriThread* 
+ * @return pointer to FuriThread or NULL if this thread doesn't belongs to Furi
  */
 FuriThread* furi_thread_get_current();
 
@@ -283,12 +288,10 @@ uint32_t furi_thread_get_stack_space(FuriThreadId thread_id);
 FuriThreadStdoutWriteCallback furi_thread_get_stdout_callback();
 
 /** Set STDOUT callback for thread
- * 
+ *
  * @param      callback  callback or NULL to clear
- * 
- * @return     true on success, otherwise fail
  */
-bool furi_thread_set_stdout_callback(FuriThreadStdoutWriteCallback callback);
+void furi_thread_set_stdout_callback(FuriThreadStdoutWriteCallback callback);
 
 /** Write data to buffered STDOUT
  * 
