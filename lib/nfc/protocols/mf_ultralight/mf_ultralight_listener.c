@@ -68,7 +68,7 @@ static bool
     uint16_t pages_total = instance->data->pages_total;
     MfUltralightPageReadCommandData read_cmd_data = {};
 
-    FURI_LOG_W(TAG, "CMD_READ");
+    FURI_LOG_D(TAG, "CMD_READ");
 
     if(pages_total < start_page) {
         mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
@@ -108,7 +108,7 @@ static bool
     uint8_t start_page = bit_buffer_get_byte(buffer, 1);
     uint16_t pages_total = instance->data->pages_total;
 
-    FURI_LOG_W(TAG, "CMD_WRITE");
+    FURI_LOG_D(TAG, "CMD_WRITE");
 
     if(pages_total < start_page) {
         mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
@@ -133,7 +133,7 @@ static bool
     mf_ultralight_listener_read_version_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     UNUSED(buffer);
 
-    FURI_LOG_W(TAG, "CMD_GET_VERSION");
+    FURI_LOG_D(TAG, "CMD_GET_VERSION");
 
     bool command_processed = false;
 
@@ -156,7 +156,7 @@ static bool mf_ultralight_listener_read_signature_handler(
     BitBuffer* buffer) {
     UNUSED(buffer);
 
-    FURI_LOG_W(TAG, "CMD_READ_SIG");
+    FURI_LOG_D(TAG, "CMD_READ_SIG");
 
     bool command_processed = false;
 
@@ -178,7 +178,7 @@ static bool
     mf_ultralight_listener_read_counter_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     bool command_processed = false;
 
-    FURI_LOG_W(TAG, "CMD_READ_CNT");
+    FURI_LOG_D(TAG, "CMD_READ_CNT");
 
     do {
         uint8_t counter_num = bit_buffer_get_byte(buffer, 1);
@@ -253,7 +253,7 @@ static bool
     mf_ultralight_listener_auth_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     bool command_processed = false;
 
-    FURI_LOG_W(TAG, "CMD_AUTH");
+    FURI_LOG_D(TAG, "CMD_AUTH");
 
     do {
         if((instance->features & MfUltralightFeatureSupportAuthentication) == 0) break;
@@ -396,7 +396,6 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
             command = NfcCommandReset;
         }
     } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData) {
-        FURI_LOG_W(TAG, "MFU_RESET");
         command = NfcCommandReset;
     } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff) {
         command = NfcCommandReset;

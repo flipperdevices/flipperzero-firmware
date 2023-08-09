@@ -96,7 +96,6 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
         instance->state = Iso14443_3aListenerStateActive;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         if(iso14443_3a_listener_halt_received(nfc_event->data.buffer)) {
-            FURI_LOG_W(TAG, "CMD_HALT");
             iso14443_3a_listener_sleep(instance);
             instance->state = Iso14443_3aListenerStateIdle;
             if(instance->callback) {
@@ -108,16 +107,7 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
                 instance->iso14443_3a_event.type =
                     Iso14443_3aListenerEventTypeReceivedStandardFrame;
                 iso14443_crc_trim(nfc_event->data.buffer);
-                FURI_LOG_W(TAG, "Std frame");
             } else {
-                FURI_LOG_W(TAG, "Not std frame"); //TODO print frame to logs
-
-                uint8_t n = bit_buffer_get_size_bytes(nfc_event->data.buffer);
-                const uint8_t* d = bit_buffer_get_data(nfc_event->data.buffer);
-                for(uint8_t i = 0; i < n; i++) {
-                    FURI_LOG_W(TAG, "d[%d] = 0x%02X", i, d[i]);
-                }
-
                 instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeReceivedData;
             }
             instance->iso14443_3a_event_data.buffer = nfc_event->data.buffer;
@@ -126,7 +116,6 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
             }
 
             if(command == NfcCommandReset) {
-                FURI_LOG_W(TAG, "ISO_RESET");
                 iso14443_3a_listener_sleep(instance);
             }
         }
