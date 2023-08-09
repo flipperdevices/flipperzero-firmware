@@ -378,8 +378,11 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
             if(bit_buffer_get_size(rx_buffer) != mf_ultralight_command[i].cmd_len_bits) continue;
             if(bit_buffer_get_byte(rx_buffer, 0) != mf_ultralight_command[i].cmd) continue;
-            cmd_processed = mf_ultralight_command[i].callback(instance, rx_buffer);
-            if(cmd_processed) break;
+            cmd_processed = mf_ultralight_command[i].callback(
+                instance, rx_buffer); //TODO make commands return enumed status, not just bool
+            if(cmd_processed) { //to make immediate NACK response when not processed
+                break;
+            }
         }
         if(!cmd_processed) {
             mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
