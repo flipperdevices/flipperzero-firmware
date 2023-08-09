@@ -5,6 +5,7 @@ enum SubmenuIndex {
     SubmenuIndexScene1BTC = 10,
     SubmenuIndexScene1ETH,
     SubmenuIndexScene1DOGE,
+    SubmenuIndexScene1ZEC,
     SubmenuIndexScene1New,
     SubmenuIndexScene1Import,
     SubmenuIndexSettings,
@@ -36,6 +37,12 @@ void flipbip_scene_menu_on_enter(void* context) {
             app->submenu,
             "View DOGE wallet",
             SubmenuIndexScene1DOGE,
+            flipbip_scene_menu_submenu_callback,
+            app);
+        submenu_add_item(
+            app->submenu,
+            "View ZEC (t-addr) wallet",
+            SubmenuIndexScene1ZEC,
             flipbip_scene_menu_submenu_callback,
             app);
         submenu_add_item(
@@ -99,6 +106,14 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
             app->bip44_coin = FlipBipCoinDOGE3;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1DOGE);
+            scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
+            return true;
+        } else if(event.event == SubmenuIndexScene1ZEC) {
+            app->overwrite_saved_seed = 0;
+            app->import_from_mnemonic = 0;
+            app->bip44_coin = FlipBipCoinZEC133;
+            scene_manager_set_scene_state(
+                app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1ZEC);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
         } else if(event.event == SubmenuIndexScene1New) {

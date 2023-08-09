@@ -55,16 +55,19 @@ const char* TEXT_INFO = "-Scroll pages with up/down-"
 #define TEXT_QRFILE_EXT ".qrcode" // 7 chars + 1 null
 
 // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
-const uint32_t COIN_INFO_ARRAY[3][6] = {
+const uint32_t COIN_INFO_ARRAY[4][6] = {
     {COIN_BTC, 0x0488ade4, 0x0488b21e, 0x00, 0x80, FlipBipCoinBTC0},
     {COIN_ETH, 0x0488ade4, 0x0488b21e, 0x00, 0x80, FlipBipCoinETH60},
-    {COIN_DOGE, 0x02fac398, 0x02facafd, 0x1e, 0x9e, FlipBipCoinBTC0}};
+    {COIN_DOGE, 0x02fac398, 0x02facafd, 0x1e, 0x9e, FlipBipCoinBTC0},
+    {COIN_ZEC, 0x0488ade4, 0x0488b21e, 0x1cb8, 0x80, FlipBipCoinZEC133},
+};
 
 // coin_name, derivation_path
-const char* COIN_TEXT_ARRAY[3][3] = {
+const char* COIN_TEXT_ARRAY[4][3] = {
     {"BTC", "m/44'/0'/0'/0", "bitcoin:"},
     {"ETH", "m/44'/60'/0'/0", "ethereum:"},
-    {"DOGE", "m/44'/3'/0'/0", "dogecoin:"}};
+    {"DOGE", "m/44'/3'/0'/0", "dogecoin:"},
+    {"ZEC", "m/44'/133'/0'/0", "zcash:"}};
 
 struct FlipBipScene1 {
     View* view;
@@ -146,6 +149,7 @@ static void flipbip_scene_1_init_address(
         // BTC / DOGE style address
         ecdsa_get_address(
             s_addr_node->public_key, coin_info[3], HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
+
         strcpy(addr_text, buf);
 
         //ecdsa_get_wif(addr_node->private_key, WIF_VERSION, HASHER_SHA2D, buf, buflen);
@@ -157,6 +161,11 @@ static void flipbip_scene_1_init_address(
         addr_text[1] = 'x';
         // Convert the hash to a hex string
         flipbip_btox((uint8_t*)buf, 20, addr_text + 2);
+    } else if(coin_info[5] == FlipBipCoinZEC133) { // ETH
+        ecdsa_get_address(
+            s_addr_node->public_key, coin_info[3], HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
+        addr_text[0] = 't';
+        strcpy(addr_text, buf);
     }
 
     // Clear the address node
