@@ -127,6 +127,29 @@ static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle
 
     f_hal_nfc_iso15693_listener = f_hal_nfc_iso15693_listener_alloc();
 
+    // Set default operation mode
+    st25r3916_change_reg_bits(
+        handle,
+        ST25R3916_REG_MODE,
+        ST25R3916_REG_MODE_om_mask | ST25R3916_REG_MODE_tr_am,
+        ST25R3916_REG_MODE_om_targ_nfca | ST25R3916_REG_MODE_tr_am_ook);
+
+    st25r3916_change_reg_bits(
+        handle,
+        ST25R3916_REG_OP_CONTROL,
+        ST25R3916_REG_OP_CONTROL_rx_en,
+        ST25R3916_REG_OP_CONTROL_rx_en);
+
+    // Modulator settings, is it necessary?
+    // st25r3916_write_reg(
+    //     handle,
+    //     ST25R3916_REG_PT_MOD,
+    //     (0x00 << ST25R3916_REG_PT_MOD_ptm_res_shift) | (0x0f << ST25R3916_REG_PT_MOD_pt_res_shift));
+
+    // Enable passive target mode
+    st25r3916_change_reg_bits(
+        handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ, ST25R3916_REG_MODE_targ_targ);
+
     return f_hal_nfc_iso15693_common_init(handle);
 }
 
@@ -139,39 +162,21 @@ static FHalNfcError f_hal_nfc_iso15693_listener_deinit(FuriHalSpiBusHandle* hand
 }
 
 static void f_hal_nfc_iso15693_listener_transparent_mode_enter(FuriHalSpiBusHandle* handle) {
-    /* stop operation to configure for transparent and passive mode */
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
-    /* set enable, rx_enable and field detector enable */
-    st25r3916_write_reg(
-        handle,
-        ST25R3916_REG_OP_CONTROL,
-        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
-            ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
-    /* explicitly set the modulation resistor in case system config changes for some reason */
-    st25r3916_write_reg(
-        handle,
-        ST25R3916_REG_PT_MOD,
-        (0 << ST25R3916_REG_PT_MOD_ptm_res_shift) | (15 << ST25R3916_REG_PT_MOD_pt_res_shift));
-    /* target mode: target, other fields do not have any effect as we use transparent mode */
-    st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ);
-    /* let us modulate the field using MOSI, read ASK modulation using IRQ */
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
 
     furi_hal_spi_bus_handle_deinit(handle);
     f_hal_nfc_deinit_gpio_isr();
 
-    //
-    furi_hal_gpio_init(&gpio_spi_r_mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+    // furi_hal_gpio_init(&gpio_spi_r_mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    // furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 }
 
 static void f_hal_nfc_iso15693_listener_transparent_mode_exit(FuriHalSpiBusHandle* handle) {
     // Configure gpio back to SPI and exit transparent mode
-    furi_hal_spi_bus_handle_init(handle);
     f_hal_nfc_init_gpio_isr();
-    // st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
-    st25r3916_write_reg(handle, ST25R3916_REG_OP_CONTROL, 0x00);
-    st25r3916_write_reg(handle, ST25R3916_REG_MODE, 0x08);
+    furi_hal_spi_bus_handle_init(handle);
+
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 }
 
 static FHalNfcError f_hal_nfc_iso15693_listener_rx_transparent() {
@@ -353,8 +358,6 @@ static FHalNfcError f_hal_nfc_iso15693_listener_rx(
 
     memcpy(rx_data, f_hal_nfc_iso15693_listener->rx_buf, rx_bytes_ready);
     *rx_bits = rx_bits_ready;
-
-    FURI_LOG_D(TAG, "RX");
 
     // f_hal_nfc_event_set(FHalNfcEventInternalTypeTransparentFieldOn);
 
