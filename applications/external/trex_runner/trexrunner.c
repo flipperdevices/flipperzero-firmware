@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_random.h>
 #include <gui/gui.h>
 #include <gui/icon_i.h>
 #include <gui/elements.h>
@@ -22,7 +23,8 @@
 
 #define CACTUS_W 10
 #define CACTUS_H 10
-#define START_x_speed 25
+#define START_x_speed 35
+#define X_INCREASE 3
 
 #define BACKGROUND_W 128
 #define BACKGROUND_H 12
@@ -101,16 +103,23 @@ static void timer_callback(void* ctx) {
     // Update Cactus state
     if(game_state->has_cactus) {
         game_state->cactus_position =
-            game_state->cactus_position - game_state->x_speed * delta_time_ms / 1000;
+            game_state->cactus_position - (game_state->x_speed - 15) * delta_time_ms / 1000;
         if(game_state->cactus_position <= 0) {
             game_state->has_cactus = 0;
             game_state->score = game_state->score + 1;
+
+            // Increase speed
+            game_state->x_speed = game_state->x_speed + X_INCREASE;
         }
     }
-    // Create cactus (not random)
+    // Create cactus (random frame in 1.5s)
     else {
-        game_state->has_cactus = 1;
-        game_state->cactus_position = 120;
+        uint8_t randomuint8[1];
+        furi_hal_random_fill_buf(randomuint8, 1);
+        if(randomuint8[0] % 30 == 0) {
+            game_state->has_cactus = 1;
+            game_state->cactus_position = 120;
+        }
     }
 
     // Move horizontal line
@@ -120,9 +129,9 @@ static void timer_callback(void* ctx) {
         game_state->background_position - game_state->x_speed * delta_time_ms / 1000;
 
     // Lose condition
-    if((game_state->y_position + 22 >= (64 - CACTUS_H)) &&
-       ((DINO_START_X + 20) >= game_state->cactus_position) &&
-       (DINO_START_X <= (game_state->cactus_position + CACTUS_W)))
+    if(game_state->has_cactus && ((game_state->y_position + 22 >= (64 - CACTUS_H)) &&
+                                  ((DINO_START_X + 20) >= game_state->cactus_position) &&
+                                  (DINO_START_X <= (game_state->cactus_position + CACTUS_W))))
         game_state->lost = 1;
 
     furi_mutex_release(game_state->mutex);
@@ -196,17 +205,6 @@ static void game_state_init(GameState* const game_state) {
     game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
-static void game_state_reinit(GameState* const game_state) {
-    game_state->last_tick = furi_get_tick();
-    game_state->y_acceleration = game_state->y_speed = 0;
-    game_state->y_position = DINO_START_Y;
-    game_state->has_cactus = 0;
-    game_state->background_position = 0;
-    game_state->lost = 0;
-    game_state->x_speed = START_x_speed;
-    game_state->score = 0;
-}
-
 int32_t trexrunner_app() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
@@ -233,7 +231,7 @@ int32_t trexrunner_app() {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     PluginEvent event;
-    for(bool processing = true; processing;) {
+    for(bool processing = true; processing && !game_state->lost;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         if(event_status == FuriStatusOk) {
             // press events
@@ -249,10 +247,6 @@ int32_t trexrunner_app() {
                     case InputKeyRight:
                         break;
                     case InputKeyOk:
-                        if(game_state->lost) {
-                            game_state_reinit(game_state);
-                            break;
-                        }
                         if(game_state->y_position == DINO_START_Y)
                             game_state->y_speed = JUMP_SPEED;
                         break;
@@ -265,6 +259,10 @@ int32_t trexrunner_app() {
                     }
                 }
             }
+        }
+        if(game_state->lost) {
+            furi_message_queue_get(
+                event_queue, &event, 1500); //Sleep to show  the "you lost" message
         }
         view_port_update(view_port);
         furi_mutex_release(game_state->mutex);

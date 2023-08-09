@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
 - [Evil Portal Assets: Better Google Login (By 8Root)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/56)
+- Updated: [T-Rex Runner (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
 
 <a name="release">
 
