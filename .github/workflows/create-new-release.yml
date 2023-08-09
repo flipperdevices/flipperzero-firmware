@@ -24,10 +24,10 @@ jobs:
             MAJOR="${BASH_REMATCH[1]}"
             MINOR="${BASH_REMATCH[2]}"
             PATCH="${BASH_REMATCH[3]}"
-            sed -r -i "s/TOTP_APP_VERSION_MAJOR\s+\([0-9]+\)/TOTP_APP_VERSION_MAJOR ($MAJOR)/g" totp/version.h
-            sed -r -i "s/TOTP_APP_VERSION_MINOR\s+\([0-9]+\)/TOTP_APP_VERSION_MINOR ($MINOR)/g" totp/version.h
-            sed -r -i "s/TOTP_APP_VERSION_PATCH\s+\([0-9]+\)/TOTP_APP_VERSION_PATCH ($PATCH)/g" totp/version.h
-            sed -r -i "s/fap_version="[0-9]+\.[0-9]+\"/fap_version="$MAJOR.$MINOR$PATCH\"/g" totp/application.fam
+            sed -r -i "s/TOTP_APP_VERSION_MAJOR\\s+\\([0-9]+\\)/TOTP_APP_VERSION_MAJOR ($MAJOR)/g" totp/version.h
+            sed -r -i "s/TOTP_APP_VERSION_MINOR\\s+\\([0-9]+\\)/TOTP_APP_VERSION_MINOR ($MINOR)/g" totp/version.h
+            sed -r -i "s/TOTP_APP_VERSION_PATCH\\s+\\([0-9]+\\)/TOTP_APP_VERSION_PATCH ($PATCH)/g" totp/version.h
+            sed -r -i "s/fap_version=\"[0-9]+\\.[0-9]+\"/fap_version=\"$MAJOR.$MINOR$PATCH\"/g" totp/application.fam
           else 
             echo "Invalid version format";
             exit 1
