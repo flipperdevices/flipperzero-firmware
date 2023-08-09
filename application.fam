@@ -41,5 +41,17 @@ App(
         Lib(
             name="fonts",
         ),
+        Lib(
+            name="wolfssl",
+            sources=[
+                "wolfcrypt/src/pwdbased.c",
+                "wolfcrypt/src/hmac.c",
+                "wolfcrypt/src/hash.c",
+                "wolfcrypt/src/sha.c",
+                "wolfcrypt/src/sha256.c",
+                "wolfcrypt/src/sha512.c"
+            ],
+            cflags=["-Wno-error", "-include${FAP_SRC_DIR}/wolfssl_config.h"]
+        ),
     ],
 )

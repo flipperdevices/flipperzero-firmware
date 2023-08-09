@@ -72,10 +72,10 @@ CryptoSeedIVResult totp_crypto_seed_iv_v1(
     CryptoSeedIVResult result;
     if(crypto_settings->crypto_verify_data == NULL) {
         FURI_LOG_I(LOGGING_TAG, "Generating new IV");
-        furi_hal_random_fill_buf(&crypto_settings->base_iv[0], TOTP_IV_SIZE);
+        furi_hal_random_fill_buf(&crypto_settings->salt[0], CRYPTO_SALT_LENGTH);
     }
 
-    memcpy(&crypto_settings->iv[0], &crypto_settings->base_iv[0], TOTP_IV_SIZE);
+    memcpy(&crypto_settings->iv[0], &crypto_settings->salt[0], TOTP_IV_SIZE);
     if(pin != NULL && pin_length > 0) {
         uint8_t max_i;
         if(pin_length > TOTP_IV_SIZE) {
