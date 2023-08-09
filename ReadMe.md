@@ -58,6 +58,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fixes #2957 - subghz decode_raw #2958 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/2958)
 - Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
+- [Evil Portal Assets: Better Google Login (By 8Root)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/56)
 
 <a name="release">
 
