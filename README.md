@@ -6,6 +6,7 @@
 - Last built against `0.86.1` Flipper Zero firmware release
 - Using Trezor crypto libs from `core/v2.5.3` release
 - Included in [RogueMaster Custom Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
+- NOTE: This app uses very close to the maximum Flipper Zero RAM. If you get `furi_check failed` on launch, try running again!
 
 ### DONATE IF YOU FIND THE APP USEFUL
   - ETH (or ERC-20): `xtruan.eth` or `0xa9Ad79502cdaf4F6881f3C2ef260713e5B771CE2`
