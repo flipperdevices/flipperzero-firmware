@@ -57,6 +57,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [RPC: md5 in storage list #2929 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2929)
 - OFW: [Fixes #2957 - subghz decode_raw #2958 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/2958)
 - Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
+- Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
 
 <a name="release">
 

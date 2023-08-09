@@ -17,6 +17,8 @@ void mag_scene_saved_menu_on_enter(void* context) {
     Mag* mag = context;
     Submenu* submenu = mag->submenu;
 
+    notification_message(mag->notifications, &sequence_blink_cyan_10);
+
     // messy code to quickly check which tracks are available for emulation/display
     // there's likely a better spot to do this, but the MagDevice functions don't have access to the full mag struct...
     bool is_empty_t1 = furi_string_empty(mag->mag_dev->dev_data.track[0].str);
