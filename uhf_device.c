@@ -34,7 +34,6 @@ static bool uhf_device_save_file(
     furi_assert(dev);
 
     UHFTag* uhf_tag = dev->uhf_tag;
-    uhf_tag_reset(uhf_tag);
     bool saved = false;
     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
     FuriString* temp_str;

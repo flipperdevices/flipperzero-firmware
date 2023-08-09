@@ -99,8 +99,10 @@ static bool read_bank(UHFData* read_bank_cmd, UHFData* response_bank, UHFBank ba
 }
 
 UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    // debug
+    // FuriString* temp_str;
+    // temp_str = furi_string_alloc();
+    // e-debug
     UHFResponseData* uhf_response_data = uhf_worker->response_data;
     uhf_response_data_reset(uhf_response_data);
     UHFData* raw_read_data = uhf_response_data_get_uhf_data(uhf_response_data, 0);
@@ -125,6 +127,8 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
 
     // todo : rfu ?
     UHFTag* uhf_tag = uhf_worker->uhf_tag;
+    uhf_tag_reset(uhf_tag);
+
     // add to tag object
     UHFData* raw_bank_data = uhf_data_alloc();
     size_t epc_length = (size_t)get_epc_length_in_bits(raw_read_data->data[6]) / 8;
@@ -137,20 +141,24 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
         (void*)&CMD_READ_LABEL_DATA_STORAGE.cmd[0],
         read_bank_cmd->length);
 
-    send_set_select_command(raw_read_data, EPC_BANK);
+    if(!send_set_select_command(raw_read_data, EPC_BANK)) return UHFWorkerEventFail;
 
     int retry = 3;
     do {
         if(read_bank(read_bank_cmd, raw_bank_data, EPC_BANK)) {
             uhf_tag_set_epc(uhf_tag, raw_bank_data->data + offset, epc_length + 2);
+            FURI_LOG_E("TAG", "epc read");
             break;
         }
 
     } while(retry--);
-    furi_string_reset(temp_str);
-    for(size_t i = 0; i < raw_bank_data->length; i++) {
-        furi_string_cat_printf(temp_str, "%02x ", raw_bank_data->data[i]);
-    }
+    // // debug
+    // furi_string_reset(temp_str);
+    // for(size_t i = 0; i < raw_bank_data->length; i++) {
+    //     furi_string_cat_printf(temp_str, "%02x ", raw_bank_data->data[i]);
+    // }
+    // FURI_LOG_E("TAG", "data = %s", furi_string_get_cstr(temp_str));
+    // // e-debug
     uhf_data_reset(raw_bank_data);
     retry = 3;
     do {
@@ -159,10 +167,13 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
             break;
         }
     } while(retry--);
-    furi_string_reset(temp_str);
-    for(size_t i = 0; i < raw_bank_data->length; i++) {
-        furi_string_cat_printf(temp_str, "%02x ", raw_bank_data->data[i]);
-    }
+    // // debug
+    // furi_string_reset(temp_str);
+    // for(size_t i = 0; i < raw_bank_data->length; i++) {
+    //     furi_string_cat_printf(temp_str, "%02x ", raw_bank_data->data[i]);
+    // }
+    // FURI_LOG_E("TAG", "data = %s", furi_string_get_cstr(temp_str));
+    // // e-debug
     uhf_data_reset(raw_bank_data);
     retry = 3;
     if(raw_read_data->data[6] & 0x04) {
@@ -173,11 +184,19 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
             }
         } while(retry--);
     }
+    // // debug
+    // furi_string_reset(temp_str);
+    // for(size_t i = 0; i < raw_bank_data->length; i++) {
+    //     furi_string_cat_printf(temp_str, "%02x ", raw_bank_data->data[i]);
+    // }
+    // FURI_LOG_E("TAG", "data = %s", furi_string_get_cstr(temp_str));
+    // // e-debug
     uhf_data_reset(raw_bank_data);
-
     uhf_data_free(raw_bank_data);
     uhf_data_free(read_bank_cmd);
-    furi_string_free(temp_str);
+    // debug
+    // furi_string_free(temp_str);
+    // e-debug
 
     return UHFWorkerEventSuccess;
 }
