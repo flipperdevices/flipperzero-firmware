@@ -54,6 +54,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [WatchDogs (By wrenchathome)](https://github.com/wrenchathome/flip0anims/tree/main/Animations/WatchDogs) will be released with next Patreon release
+- OFW: [RPC: md5 in storage list #2929 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2929)
+- OFW: [Fixes #2957 - subghz decode_raw #2958 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/2958)
+- Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 
 <a name="release">
 
