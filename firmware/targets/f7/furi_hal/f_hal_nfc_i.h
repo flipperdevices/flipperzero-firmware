@@ -15,8 +15,10 @@ typedef enum {
     FHalNfcEventInternalTypeIrq = (1U << 1),
     FHalNfcEventInternalTypeTimerFwtExpired = (1U << 2),
     FHalNfcEventInternalTypeTimerBlockTxExpired = (1U << 3),
-    FHalNfcEventInternalTypeTransparentRxEnd = (1U << 4),
-    FHalNfcEventInternalTypeTransparentTimeout = (1U << 5),
+    FHalNfcEventInternalTypeTransparentFieldOn = (1U << 4),
+    FHalNfcEventInternalTypeTransparentFieldOff = (1U << 5),
+    FHalNfcEventInternalTypeTransparentRxEnd = (1U << 6),
+    FHalNfcEventInternalTypeTransparentTimeout = (1U << 7),
 } FHalNfcEventInternalType;
 
 #define F_HAL_NFC_EVENT_INTERNAL_ALL                                \

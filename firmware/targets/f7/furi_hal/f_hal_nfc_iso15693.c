@@ -147,7 +147,7 @@ static void f_hal_nfc_iso15693_listener_transparent_mode_enter(FuriHalSpiBusHand
         ST25R3916_REG_OP_CONTROL,
         ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
             ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
-    /* explicitely set the modulation resistor in case system config changes for some reason */
+    /* explicitly set the modulation resistor in case system config changes for some reason */
     st25r3916_write_reg(
         handle,
         ST25R3916_REG_PT_MOD,
@@ -158,15 +158,20 @@ static void f_hal_nfc_iso15693_listener_transparent_mode_enter(FuriHalSpiBusHand
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
 
     furi_hal_spi_bus_handle_deinit(handle);
+    f_hal_nfc_deinit_gpio_isr();
+
+    //
+    furi_hal_gpio_init(&gpio_spi_r_mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 }
 
 static void f_hal_nfc_iso15693_listener_transparent_mode_exit(FuriHalSpiBusHandle* handle) {
-    // Exit transparent mode
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-
-    // Configure gpio back to SPI and exit transparent
+    // Configure gpio back to SPI and exit transparent mode
     furi_hal_spi_bus_handle_init(handle);
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
+    f_hal_nfc_init_gpio_isr();
+    // st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
+    st25r3916_write_reg(handle, ST25R3916_REG_OP_CONTROL, 0x00);
+    st25r3916_write_reg(handle, ST25R3916_REG_MODE, 0x08);
 }
 
 static FHalNfcError f_hal_nfc_iso15693_listener_rx_transparent() {
@@ -197,7 +202,7 @@ static FHalNfcError f_hal_nfc_iso15693_listener_rx_transparent() {
         if(wait_for_pulse) {
             wait_for_pulse = false;
             if(periods != 1) {
-                frame_state = FuriHalIso15693FrameStateSof1;
+                frame_state = FuriHalIso15693FrameStateReset;
             }
             continue;
         }
@@ -282,7 +287,7 @@ static FHalNfcError f_hal_nfc_iso15693_listener_rx_transparent() {
                 break;
             }
 
-            if(bits_received >= 8) {
+            if(bits_received >= BITS_IN_BYTE) {
                 if(frame_pos < FURI_HAL_ISO15693_BUFFER_SIZE) {
                     f_hal_nfc_iso15693_listener->rx_buf[frame_pos++] = (uint8_t)byte_value;
                 }
@@ -324,6 +329,8 @@ static FHalNfcError f_hal_nfc_iso15693_listener_rx_start(FuriHalSpiBusHandle* ha
 
     if(error == FHalNfcErrorNone) {
         f_hal_nfc_event_set(FHalNfcEventInternalTypeTransparentRxEnd);
+    } else {
+        FURI_LOG_D(TAG, "Pulse Reader Error: %d", error);
     }
 
     return error;
@@ -346,6 +353,10 @@ static FHalNfcError f_hal_nfc_iso15693_listener_rx(
 
     memcpy(rx_data, f_hal_nfc_iso15693_listener->rx_buf, rx_bytes_ready);
     *rx_bits = rx_bits_ready;
+
+    FURI_LOG_D(TAG, "RX");
+
+    // f_hal_nfc_event_set(FHalNfcEventInternalTypeTransparentFieldOn);
 
     return FHalNfcErrorNone;
 }
