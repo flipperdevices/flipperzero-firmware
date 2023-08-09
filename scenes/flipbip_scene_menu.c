@@ -1,7 +1,7 @@
 #include "../flipbip.h"
 #include "../helpers/flipbip_file.h"
 
-#define FLIPBIP_MENU_HEADER_TEXT "- FlipBIP wallet " FLIPBIP_VERSION " -"
+#define FLIPBIP_SUBMENU_TEXT "- FlipBIP wallet " FLIPBIP_VERSION " -"
 
 enum SubmenuIndex {
     SubmenuIndexScene1BTC = 10,
@@ -22,9 +22,10 @@ void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
 void flipbip_scene_menu_on_enter(void* context) {
     FlipBip* app = context;
 
+    // FlipBIP header with version
     submenu_add_item(
         app->submenu,
-        FLIPBIP_MENU_HEADER_TEXT,
+        FLIPBIP_SUBMENU_TEXT,
         SubmenuIndexNOP,
         flipbip_scene_menu_submenu_callback,
         app);

@@ -14,7 +14,7 @@
 #include "scenes/flipbip_scene.h"
 #include "views/flipbip_scene_1.h"
 
-#define FLIPBIP_VERSION "v1.12.0"
+#define FLIPBIP_VERSION "v1.13.0"
 
 #define COIN_BTC 0
 #define COIN_DOGE 3
