@@ -49,16 +49,11 @@ def resolve_real_dir_node(node):
     if isinstance(node, SCons.Node.FS.EntryProxy):
         node = node.get()
 
-    real_node = None
     for repo_dir in node.get_all_rdirs():
         if os.path.exists(repo_dir.abspath):
-            real_node = repo_dir
-            break
+            return repo_dir
 
-    if not real_node:
-        raise StopError(f"Can't find absolute path for {node.name} ({node})")
-
-    return real_node
+    raise StopError(f"Can't find absolute path for {node.name} ({node})")
 
 
 def path_as_posix(path):
