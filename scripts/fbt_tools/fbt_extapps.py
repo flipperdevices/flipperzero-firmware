@@ -11,7 +11,7 @@ from fbt.appmanifest import FlipperApplication, FlipperAppType, FlipperManifestE
 from fbt.elfmanifest import assemble_manifest_data
 from fbt.fapassets import FileBundler
 from fbt.sdk.cache import SdkCache
-from fbt.util import extract_abs_dir_path
+from fbt.util import resolve_real_dir_node
 from SCons.Action import Action
 from SCons.Builder import Builder
 from SCons.Errors import UserError
@@ -119,7 +119,7 @@ class AppBuilder:
             CPPDEFINES=lib_def.cdefines,
             CPPPATH=list(
                 map(
-                    lambda cpath: extract_abs_dir_path(self.app._appdir.Dir(cpath)),
+                    lambda cpath: resolve_real_dir_node(self.app._appdir.Dir(cpath)),
                     lib_def.cincludes,
                 )
             ),
