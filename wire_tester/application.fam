@@ -11,5 +11,5 @@ App(
     fap_author="@unixispower",
     fap_weburl="https://gitlab.com/unixispower/flipper-wire-tester",
     fap_version="1.0",
-    fap_description="Test if a wire is continuous",
+    fap_description="Beeps if a wire is continuous",
 )

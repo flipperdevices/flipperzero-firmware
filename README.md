@@ -1,5 +1,5 @@
 # Flipper Wire Tester
-This is a simple Flipper Zero app that tests if a wire is continuous.
+This is a simple Flipper Zero app that beeps if a wire is continuous.
 
 ![Screenshot](screen_1.png)
 
