@@ -29,7 +29,6 @@ void uhf_scene_read_tag_on_enter(void* ctx) {
 }
 
 bool uhf_scene_read_tag_on_event(void* ctx, SceneManagerEvent event) {
-    // UNUSED(ctx);
     UHFApp* uhf_app = ctx;
     bool consumed = false;
     if(event.event == UHFCustomEventWorkerExit) {

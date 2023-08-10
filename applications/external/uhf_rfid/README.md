@@ -24,7 +24,7 @@ To run this application on FlipperZero, you will need:
 - FlipperZero device (purchase from [Flipper Devices](https://www.flipperdevices.com))
 - YRM100 UHF RFID module (purchase from [Ali-Express](https://www.aliexpress.com/item/1005005296512846.html))
 
-## Installation
+## Setup and Installation
 
 1. Ensure you have set up your FlipperZero device with the YRM100 module properly. You can also read more about how to setup the module from the [Md5Stack Docs page](http://docs.m5stack.com/en/unit/uhf_rfid).
    ![wiring diagram](https://static-cdn.m5stack.com/resource/docs/products/unit/uhf_rfid/uhf_rfid_sch_01.webp)
@@ -52,6 +52,78 @@ As this app is still in the development stage, I welcome contributions to this p
 <!-- ## License
 
 This project is licensed under the [MIT License](link_to_license_file). -->
+
+## Future Plans
+- Code cleanup
+- Build a framework around the chip communication commands
+- Build a proper tag class
+```c
+// Ideal concept
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {
+    int uart_fd; // UART file descriptor or other identifier
+} YRM100_RFID;
+
+void sendCommand(YRM100_RFID *rfid, const uint8_t *command, size_t length) {
+    // Implementation to send the command through UART
+    // Write the command to the UART interface using rfid->uart_fd
+}
+
+// Configuration functions:
+
+void setCommunicationBaudRate(YRM100_RFID *rfid) {
+    uint8_t command[] = {0xBB, 0x00, 0x11, 0x00, 0x02, 0x00, 0xC0, 0xD3, 0x7E};
+    sendCommand(rfid, command, sizeof(command));
+}
+
+void setWorkingArea(YRM100_RFID *rfid, uint8_t area) {
+    uint8_t command[] = {0xBB, 0x00, 0x07, 0x00, 0x01, area, 0x09, 0x7E}; 
+    sendCommand(rfid, command, sizeof(command));
+}
+
+// other method etc ... 
+```
+
+```c
+// Ideal concept
+#include <stdint.h>
+#include <stdlib.h>
+
+typedef struct {
+    uint8_t *killPassword;
+    uint8_t *accessPassword;
+    size_t size;
+} ReservedMemory;
+
+typedef struct {
+    uint8_t *header;
+    uint8_t *filter;
+    uint8_t *partition;
+    uint8_t *companyPrefix;
+    uint8_t *itemReference;
+    size_t size;
+} EPCMemory;
+
+typedef struct {
+    uint8_t *tid;
+    size_t size;
+} TIDMemory;
+
+typedef struct {
+    uint8_t *userMemory;
+    size_t size;
+} UserMemory;
+
+typedef struct {
+    ReservedMemory reserved;
+    EPCMemory epc;
+    TIDMemory tid;
+    UserMemory user;
+} ISO18000_6C_Tag;
+```
 
 ## Disclaimer
 
