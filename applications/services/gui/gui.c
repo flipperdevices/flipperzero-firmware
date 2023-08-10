@@ -22,7 +22,6 @@ size_t gui_active_view_port_count(Gui* gui, GuiLayer layer) {
     furi_check(layer < GuiLayerMAX);
     size_t ret = 0;
 
-
     gui_lock(gui);
     ViewPortArray_it_t it;
     ViewPortArray_it_last(it, gui->layers[layer]);
