@@ -1,0 +1,14 @@
+App(
+    appid="secret_toggle",
+    name="Secret Toggle",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="secret_toggle_app",
+    stack_size=2 * 1024,
+    fap_category="Games",
+    fap_icon="secret_toggle_icon.png",
+    fap_icon_assets="images",
+    fap_weburl="https://github.com/nostrumuva/secret_toggle.git",
+    fap_author="@nostrumuva",
+    fap_version=(0, 1),
+    fap_description="A game that toggles squares.",
+)

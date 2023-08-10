@@ -74,6 +74,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [FBT: update WiFi devboard firmware #2968 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2968)
 - OFW: [Scripts: OB recovery #2964 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2964)
 - OFW: [Expose additional functions of the crypto engine to user #2923 (By twisted-pear)](https://github.com/flipperdevices/flipperzero-firmware/pull/2923)
+- Added: [Secret Toggle (By nostrumuva)](https://github.com/nostrumuva/secret_toggle)
 
 <a name="release">
 
@@ -276,6 +277,7 @@ $ ./fbt dolphin_ext
 - [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life)
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
+- [Secret Toggle (By nostrumuva)](https://github.com/nostrumuva/secret_toggle)
 - [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
 - [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
 - [Snake (By OlegSchwann)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/829)(With updates from DrZlo13, xMasterX, QtRoS and RogueMaster) [Snake Score Saving (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922) [Turns anywhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/125) [Food Spawns Anywwhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/130)
