@@ -4,9 +4,6 @@
 
 #include "../lib/driver/can_hacker2/can_hacker2.h"
 
-// #include "../lib/driver/mcp251xfd_interconnect/can0_function.h"
-// #include "../lib/driver/mcp251xfd_interconnect/show_device.h"
-
 #define TAG "CanChacker2Worker"
 
 typedef enum {
@@ -163,108 +160,8 @@ static int32_t can_hacker2_worker_thread(void* context) {
 
     FURI_LOG_I(TAG, "Start");
 
-    //bool Ext2ModulePresent = false; //! True if a MCP251XFD is present on EXT2 and configured
-    // uint32_t Ext2SequenceCounter = 0; //! Ext2 sequence counter
-    // uint8_t data[8] = {0x01, 0x02, 0x03, 0x04, 0x01, 0x02, 0x03, 0x04};
-    // UNUSED(data);
-
-    // uint32_t MessageTimeStamp = 0;
-    // uint8_t
-    //     RxPayloadData[8]; // In the default demo configuration, all the FIFO have 8 bytes of payload
-    // MCP251XFD_CANMessage ReceivedMessage;
-    // ReceivedMessage.PayloadData = &RxPayloadData[0];
-    // bool receive_event = false;
-
-    //--- Configure the MCP251XFD device ----------
-
-    // volatile eERRORRESULT err = can0_function_device_init_can20(500000);
-    // UNUSED(err);
-
-    // if(err != ERR_OK) {
-    //     show_device_error(CAN0, err); // Show device error
-    //     //Ext1ModulePresent = false;
-    // } else {
-    //     show_device_detected(CAN0, can0_sysclk);
-    //     show_device_configuration(&can0_bt_stats);
-    //     show_device_fifo_configuration(&can0_fifo_list[0], CAN0_FIFO_COUNT);
-    //     show_device_filter_configuration(&can_filter_list[0], CAN0_FILTER_COUNT, false);
-    //     // show_device_show_mcp251xfd_sfr_reg(CAN0);
-    //     // show_device_show_mcp251xfd_can_sfr_reg(CAN0);
-    //     // show_device_show_mcp251xfd_fifo_reg(CAN0);
-    //     // show_device_show_mcp251xfd_filter_reg(CAN0);
-    //     //Ext2ModulePresent = true;
-    // }
     furi_delay_ms(100);
     while(instance->worker_running) {
-        // can0_function_device_check_irq();
-        // // furi_delay_ms(100);
-        // //FURI_LOG_I(TAG, "**** %ld", Ext2SequenceCounter);
-
-        // err = can0_function_transmit_msg(
-        //     0x201,
-        //     &Ext2SequenceCounter,
-        //     MCP251XFD_STANDARD_MESSAGE_ID,
-        //     MCP251XFD_DLC_4BYTE,
-        //     &data[0],
-        //     MCP251XFD_TXQ,
-        //     true);
-        // err = can0_function_transmit_msg(
-        //     0x301,
-        //     &Ext2SequenceCounter,
-        //     MCP251XFD_STANDARD_MESSAGE_ID,
-        //     MCP251XFD_DLC_4BYTE,
-        //     &data[0],
-        //     MCP251XFD_TXQ,
-        //     true);
-        // //TransmitMessageToEXT2(EID_0x10000_to_0x17FFF_MPS_EVENT, &Ext2SequenceCounter, MCP251XFD_EXTENDED_MESSAGE_ID, MCP251XFD_DLC_8BYTE, &data[0], MCP251XFD_FIFO19, true);
-        // //TransmitMessageToEXT2(SID_EXT1_CLKO_EVENT, &Ext2SequenceCounter, MCP251XFD_STANDARD_MESSAGE_ID, MCP251XFD_DLC_4BYTE, &data[0], MCP251XFD_FIFO26, true);
-        // //TransmitMessageToEXT2(SID_EXT2_CLKO_EVENT, &Ext2SequenceCounter, MCP251XFD_STANDARD_MESSAGE_ID, MCP251XFD_DLC_4BYTE, &data[0], MCP251XFD_FIFO27, true);
-
-        // //--- Get a frame if available in the MCP251XFD on Ext2 ---
-
-        // err = can0_function_receive_msg(
-        //     CAN0, &receive_event, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp);
-
-        // while(receive_event) {
-        //     receive_event = false;
-        //     FURI_LOG_I(
-        //         TAG,
-        //         "MTS: %ld, ID:%04lX, SEQ: %ld, DLC: %d",
-        //         MessageTimeStamp,
-        //         ReceivedMessage.MessageID,
-        //         ReceivedMessage.MessageSEQ,
-        //         ReceivedMessage.DLC);
-        //     for(size_t i = 0; i < ReceivedMessage.DLC; i++) {
-        //         FURI_LOG_RAW_I(" %02X", ReceivedMessage.PayloadData[i]);
-        //     }
-        //     FURI_LOG_RAW_I("\r\n");
-        //     FURI_LOG_I(TAG, "**** %ld", Ext2SequenceCounter);
-
-        //     err = can0_function_receive_msg(
-        //         CAN0, &receive_event, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp);
-
-        //     // err = TransmitMessageToEXT2(
-        //     // 0x101,
-        //     // &Ext2SequenceCounter,
-        //     // MCP251XFD_STANDARD_MESSAGE_ID,
-        //     // MCP251XFD_DLC_4BYTE,
-        //     // &data[0],
-        //     // MCP251XFD_FIFO5,
-        //     // true);
-        // }
-        // err = can0_function_transmit_msg(
-        //     0x101,
-        //     &Ext2SequenceCounter,
-        //     MCP251XFD_STANDARD_MESSAGE_ID,
-        //     MCP251XFD_DLC_4BYTE,
-        //     &data[0],
-        //     MCP251XFD_FIFO5,
-        //     true);
-        // //TransmitMessageFromEXT2_No_IRQ(0x101, &Ext2SequenceCounter, MCP251XFD_STANDARD_MESSAGE_ID, MCP251XFD_DLC_4BYTE, &data[0], true);
-        // //furi_delay_ms(50);
-        // //--- Check status of the MCP251XFD on Ext2 ---
-
-        // err = ERR_OK;
 
         uint32_t events = furi_thread_flags_wait(
             CAN_HACKER2_WORKER_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
@@ -281,7 +178,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
                     else if(buf[i] == 0x0A)
                         FURI_LOG_RAW_I(" [LF]");
                     else
-                        FURI_LOG_RAW_I(" %c", buf[i]);
+                        FURI_LOG_RAW_I(" %c (%02X)", buf[i], buf[i]);
                 }
                 FURI_LOG_RAW_I("\r\n");
 
@@ -304,7 +201,7 @@ static int32_t can_hacker2_worker_thread(void* context) {
                 else if(buf[i] == 0x07)
                     FURI_LOG_RAW_I(" [BELL]");
                 else
-                    FURI_LOG_RAW_I(" %c", buf[i]);
+                    FURI_LOG_RAW_I(" %c (%02X)", buf[i], buf[i]);
             }
             FURI_LOG_RAW_I("\r\n");
 
@@ -330,7 +227,6 @@ static int32_t can_hacker2_worker_thread(void* context) {
     furi_thread_free(can_hacker2_proc);
 
     can_hacker2_free(can_hacker2);
-    //can0_function_device_deinit();
     can_hacker2_worker_vcp_cdc_deinit();
     return 0;
 }

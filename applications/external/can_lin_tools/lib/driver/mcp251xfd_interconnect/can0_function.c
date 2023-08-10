@@ -74,355 +74,49 @@ MCP251XFD can0 = {
     .SPIClockSpeed = 4000000, // 10MHz
 };
 
-// MCP251XFD_RAMInfos Ext2_TEF_RAMInfos;
-// MCP251XFD_RAMInfos Ext2_TXQ_RAMInfos;
-// MCP251XFD_RAMInfos Ext2_FIFOs_RAMInfos[MCP2517FD_EXT2_FIFO_COUNT - 2];
-
-// MCP251XFD_FIFO MCP2517FD_Ext2_FIFOlist[MCP2517FD_EXT2_FIFO_COUNT] =
-// {
-//   { .Name = MCP251XFD_TEF   , .Size = MCP251XFD_FIFO_20_MESSAGE_DEEP,                                                                                                                                                              .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_OBJ, .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_EVENT_FIFO_NOT_EMPTY_INT               , .RAMInfos = &Ext2_TEF_RAMInfos      , },
-//   { .Name = MCP251XFD_TXQ   , .Size = MCP251XFD_FIFO_12_MESSAGE_DEEP, .Payload = MCP251XFD_PAYLOAD_8BYTE,                                       .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_TXQ_RAMInfos      , }, // Buttons + events menu
-
-//   { .Name = MCP251XFD_FIFO1 , .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 0], }, // SID: 0x000..0x1FF ; No EID
-//   { .Name = MCP251XFD_FIFO2 , .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 1], }, // SID: 0x200..0x3FF ; No EID
-//   { .Name = MCP251XFD_FIFO3 , .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 2], }, // SID: 0x400..0x5FF ; No EID
-//   { .Name = MCP251XFD_FIFO4 , .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 3], }, // SID: 0x600..0x7FF ; No EID
-//   { .Name = MCP251XFD_FIFO5 , .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 4], }, // FPS + Byte Count per second FIFO1
-//   { .Name = MCP251XFD_FIFO6 , .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 5], }, // FPS + Byte Count per second FIFO2
-//   { .Name = MCP251XFD_FIFO7 , .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 6], }, // FPS + Byte Count per second FIFO3
-//   { .Name = MCP251XFD_FIFO8 , .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 7], }, // FPS + Byte Count per second FIFO4
-
-//   { .Name = MCP251XFD_FIFO9 , .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 8], }, // EID: 0x00000..0x07FFF ; All SID
-//   { .Name = MCP251XFD_FIFO10, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[ 9], }, // EID: 0x08000..0x0FFFF ; All SID
-//   { .Name = MCP251XFD_FIFO11, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[10], }, // EID: 0x10000..0x17FFF ; All SID
-//   { .Name = MCP251XFD_FIFO12, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[11], }, // EID: 0x18000..0x1FFFF ; All SID
-//   { .Name = MCP251XFD_FIFO13, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[12], }, // EID: 0x20000..0x27FFF ; All SID
-//   { .Name = MCP251XFD_FIFO14, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[13], }, // EID: 0x28000..0x2FFFF ; All SID
-//   { .Name = MCP251XFD_FIFO15, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[14], }, // EID: 0x30000..0x37FFF ; All SID
-//   { .Name = MCP251XFD_FIFO16, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_RECEIVE_FIFO ,                                                                                    .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX , .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT             , .RAMInfos = &Ext2_FIFOs_RAMInfos[15], }, // EID: 0x38000..0x3FFFF ; All SID
-//   { .Name = MCP251XFD_FIFO17, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[16], }, // FPS + Byte Count per second FIFO9
-//   { .Name = MCP251XFD_FIFO18, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[17], }, // FPS + Byte Count per second FIFO10
-//   { .Name = MCP251XFD_FIFO19, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[18], }, // FPS + Byte Count per second FIFO11
-//   { .Name = MCP251XFD_FIFO20, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[19], }, // FPS + Byte Count per second FIFO12
-//   { .Name = MCP251XFD_FIFO21, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[20], }, // FPS + Byte Count per second FIFO13
-//   { .Name = MCP251XFD_FIFO22, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[21], }, // FPS + Byte Count per second FIFO14
-//   { .Name = MCP251XFD_FIFO23, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[22], }, // FPS + Byte Count per second FIFO15
-//   { .Name = MCP251XFD_FIFO24, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[23], }, // FPS + Byte Count per second FIFO16
-
-//   { .Name = MCP251XFD_FIFO25, .Size = MCP251XFD_FIFO_1_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY30, .ControlFlags = MCP251XFD_FIFO_AUTO_RTR_RESPONSE   , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT, .RAMInfos = &Ext2_FIFOs_RAMInfos[24], }, // Response for RTR
-//   { .Name = MCP251XFD_FIFO26, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[25], }, // SOF-CLKO Ext1 - Counts per second
-//   { .Name = MCP251XFD_FIFO27, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[26], }, // SOF-CLKO CAN0 - Counts per second
-//   { .Name = MCP251XFD_FIFO28, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[27], }, // Ext1: FPS + Data count per second
-//   { .Name = MCP251XFD_FIFO29, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY20, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[28], }, // Ext1: Error Message
-//   { .Name = MCP251XFD_FIFO30, .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[29], }, // CAN0: FPS + Data count per second
-//   { .Name = MCP251XFD_FIFO31, .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP , .Payload = MCP251XFD_PAYLOAD_8BYTE, .Direction = MCP251XFD_TRANSMIT_FIFO, .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY20, .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE     , .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT                                            , .RAMInfos = &Ext2_FIFOs_RAMInfos[30], }, // CAN0: Error Message
-// };
-
-// MCP251XFD_Filter MCP2517FD_Ext2_FilterList[MCP2517FD_EXT2_FILTER_COUNT] =
-// {
-//   { .Filter = MCP251XFD_FILTER0 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_SID, .AcceptanceID = 0x000, .AcceptanceMask = 0x7FF, .PointTo = MCP251XFD_FIFO25, }, // 0x000 for RTR response
-
-//   { .Filter = MCP251XFD_FILTER1 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_SID, .AcceptanceID = 0x100, .AcceptanceMask = 0x700, .PointTo = MCP251XFD_FIFO1, }, // 0x100..0x1FF
-//   { .Filter = MCP251XFD_FILTER2 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_SID, .AcceptanceID = 0x200, .AcceptanceMask = 0x600, .PointTo = MCP251XFD_FIFO2, }, // 0x200..0x3FF
-//   { .Filter = MCP251XFD_FILTER3 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_SID, .AcceptanceID = 0x400, .AcceptanceMask = 0x600, .PointTo = MCP251XFD_FIFO3, }, // 0x400..0x5FF
-//   { .Filter = MCP251XFD_FILTER4 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_SID, .AcceptanceID = 0x600, .AcceptanceMask = 0x600, .PointTo = MCP251XFD_FIFO4, }, // 0x600..0x7FF
-
-//   { .Filter = MCP251XFD_FILTER5 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_EID, .AcceptanceID = 0x00000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO9 , }, // 0x00000000..0x1C000000
-//   { .Filter = MCP251XFD_FILTER6 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_EID, .AcceptanceID = 0x04000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO10, }, // 0x04000000..0x1C000000
-//   { .Filter = MCP251XFD_FILTER7 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_EID, .AcceptanceID = 0x08000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO11, }, // 0x08000000..0x1C000000
-//   { .Filter = MCP251XFD_FILTER8 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_EID, .AcceptanceID = 0x0C000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO12, }, // 0x0C000000..0x1C000000
-//   { .Filter = MCP251XFD_FILTER9 , .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_EID, .AcceptanceID = 0x10000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO13, }, // 0x10000000..0x1C000000
-//   { .Filter = MCP251XFD_FILTER10, .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_EID, .AcceptanceID = 0x14000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO14, }, // 0x14000000..0x1C000000
-//   { .Filter = MCP251XFD_FILTER11, .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_EID, .AcceptanceID = 0x18000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO15, }, // 0x18000000..0x1C000000
-//   { .Filter = MCP251XFD_FILTER12, .EnableFilter = true, .Match = MCP251XFD_MATCH_ONLY_EID, .AcceptanceID = 0x1C000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO16, }, // 0x1C000000..0x1C000000
-// };
-
 MCP251XFD_RAMInfos can0_tef_ram_infos;
 MCP251XFD_RAMInfos can0_txq_ram_infos;
 MCP251XFD_RAMInfos can_fifo_ram_infos[CAN0_FIFO_COUNT - 2];
 MCP251XFD_FIFO can0_fifo_list[CAN0_FIFO_COUNT] = {
-    {
-        .Name = MCP251XFD_TEF,
-        .Size = MCP251XFD_FIFO_10_MESSAGE_DEEP,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_OBJ,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_EVENT_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can0_tef_ram_infos,
-    },
-    {
-        .Name = MCP251XFD_TXQ,
-        .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_64BYTE,
-        .Attempts = MCP251XFD_THREE_ATTEMPTS,
-        .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,
-        .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,
-        .InterruptFlags =
-            MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT,
-        .RAMInfos = &can0_txq_ram_infos,
-    },
-    {
-        .Name = MCP251XFD_FIFO1,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_64BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[0],
-    }, // SID: 0x000..0x1FF ; No EID
-    {
-        .Name = MCP251XFD_FIFO2,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_64BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[1],
-    }, // SID: 0x200..0x3FF ; No EID
-    {
-        .Name = MCP251XFD_FIFO3,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_64BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[2],
-    }, // SID: 0x400..0x5FF ; No EID
-    {
-        .Name = MCP251XFD_FIFO4,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_64BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[3],
-    }, // SID: 0x600..0x7FF ; No EID
+    { .Name = MCP251XFD_TEF,    .Size = MCP251XFD_FIFO_10_MESSAGE_DEEP,                                                                                                                                                                         .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_OBJ,    .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_EVENT_FIFO_NOT_EMPTY_INT,                .RAMInfos = &can0_tef_ram_infos,    },
+    { .Name = MCP251XFD_TXQ,    .Size = MCP251XFD_FIFO_4_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,                                            .Attempts = MCP251XFD_THREE_ATTEMPTS, .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,      .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,         .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT, .RAMInfos = &can0_txq_ram_infos,    },
+    { .Name = MCP251XFD_FIFO1,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[0], }, // SID: 0x000..0x1FF ; No EID
+    { .Name = MCP251XFD_FIFO2,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[1], }, // SID: 0x200..0x3FF ; No EID
+    { .Name = MCP251XFD_FIFO3,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[2], }, // SID: 0x400..0x5FF ; No EID
+    { .Name = MCP251XFD_FIFO4,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[3], }, // SID: 0x600..0x7FF ; No EID
+    
+    { .Name = MCP251XFD_FIFO5,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[4], },   // EID: 0x00000..0x07FFF ; All SID
+    { .Name = MCP251XFD_FIFO6,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[5], },   // EID: 0x08000..0x0FFFF ; All SID
+    { .Name = MCP251XFD_FIFO7,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[6], },   // EID: 0x10000..0x17FFF ; All SID
+    { .Name = MCP251XFD_FIFO8,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[7], },   // EID: 0x18000..0x1FFFF ; All SID
+    { .Name = MCP251XFD_FIFO9,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[8], },   // EID: 0x20000..0x27FFF ; All SID
+    { .Name = MCP251XFD_FIFO10,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[9], },  // EID: 0x28000..0x2FFFF ; All SID
+    { .Name = MCP251XFD_FIFO11,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[10], }, // EID: 0x30000..0x37FFF ; All SID
+    { .Name = MCP251XFD_FIFO12,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[11], }, // EID: 0x38000..0x3FFFF ; All SID
+    { .Name = MCP251XFD_FIFO13,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_8BYTE,    .Direction = MCP251XFD_RECEIVE_FIFO,                                                                                            .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,     .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,              .RAMInfos = &can_fifo_ram_infos[11], }, // EID: 0x38000..0x3FFFF ; All SID
+    
 
-    {
-        .Name = MCP251XFD_FIFO5,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[4],
-    }, // EID: 0x00000..0x07FFF ; All SID
-    {
-        .Name = MCP251XFD_FIFO6,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[5],
-    }, // EID: 0x08000..0x0FFFF ; All SID
-    {
-        .Name = MCP251XFD_FIFO7,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[6],
-    }, // EID: 0x10000..0x17FFF ; All SID
-    {
-        .Name = MCP251XFD_FIFO8,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[7],
-    }, // EID: 0x18000..0x1FFFF ; All SID
-    {
-        .Name = MCP251XFD_FIFO9,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[8],
-    }, // EID: 0x20000..0x27FFF ; All SID
-    {
-        .Name = MCP251XFD_FIFO10,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[9],
-    }, // EID: 0x28000..0x2FFFF ; All SID
-    {
-        .Name = MCP251XFD_FIFO11,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[10],
-    }, // EID: 0x30000..0x37FFF ; All SID
-    {
-        .Name = MCP251XFD_FIFO12,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[11],
-    }, // EID: 0x38000..0x3FFFF ; All SID
-    {
-        .Name = MCP251XFD_FIFO13,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_8BYTE,
-        .Direction = MCP251XFD_RECEIVE_FIFO,
-        .ControlFlags = MCP251XFD_FIFO_ADD_TIMESTAMP_ON_RX,
-        .InterruptFlags = MCP251XFD_FIFO_OVERFLOW_INT + MCP251XFD_FIFO_RECEIVE_FIFO_NOT_EMPTY_INT,
-        .RAMInfos = &can_fifo_ram_infos[11],
-    }, // EID: 0x38000..0x3FFFF ; All SID
-
-    // { .Name = MCP251XFD_FIFO13,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_TRANSMIT_FIFO,   .Attempts = MCP251XFD_THREE_ATTEMPTS,   .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,    .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,         .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT, .RAMInfos = &can_fifo_ram_infos[12], },
-    {
-        .Name = MCP251XFD_FIFO14,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_64BYTE,
-        .Direction = MCP251XFD_TRANSMIT_FIFO,
-        .Attempts = MCP251XFD_THREE_ATTEMPTS,
-        .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,
-        .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,
-        .InterruptFlags =
-            MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT,
-        .RAMInfos = &can_fifo_ram_infos[13],
-    },
-    {
-        .Name = MCP251XFD_FIFO15,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_64BYTE,
-        .Direction = MCP251XFD_TRANSMIT_FIFO,
-        .Attempts = MCP251XFD_THREE_ATTEMPTS,
-        .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,
-        .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,
-        .InterruptFlags =
-            MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT,
-        .RAMInfos = &can_fifo_ram_infos[14],
-    },
-    {
-        .Name = MCP251XFD_FIFO16,
-        .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,
-        .Payload = MCP251XFD_PAYLOAD_64BYTE,
-        .Direction = MCP251XFD_TRANSMIT_FIFO,
-        .Attempts = MCP251XFD_THREE_ATTEMPTS,
-        .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,
-        .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,
-        .InterruptFlags =
-            MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT,
-        .RAMInfos = &can_fifo_ram_infos[15],
-    },
+   // { .Name = MCP251XFD_FIFO13,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_TRANSMIT_FIFO,   .Attempts = MCP251XFD_THREE_ATTEMPTS,   .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,    .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,         .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT, .RAMInfos = &can_fifo_ram_infos[12], },
+    { .Name = MCP251XFD_FIFO14,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_TRANSMIT_FIFO,   .Attempts = MCP251XFD_THREE_ATTEMPTS,   .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,    .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,         .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT, .RAMInfos = &can_fifo_ram_infos[13], },
+    { .Name = MCP251XFD_FIFO15,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_TRANSMIT_FIFO,   .Attempts = MCP251XFD_THREE_ATTEMPTS,   .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,    .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,         .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT, .RAMInfos = &can_fifo_ram_infos[14], },
+    { .Name = MCP251XFD_FIFO16,  .Size = MCP251XFD_FIFO_2_MESSAGE_DEEP,  .Payload = MCP251XFD_PAYLOAD_64BYTE,    .Direction = MCP251XFD_TRANSMIT_FIFO,   .Attempts = MCP251XFD_THREE_ATTEMPTS,   .Priority = MCP251XFD_MESSAGE_TX_PRIORITY16,    .ControlFlags = MCP251XFD_FIFO_NO_RTR_RESPONSE,         .InterruptFlags = MCP251XFD_FIFO_TX_ATTEMPTS_EXHAUSTED_INT + MCP251XFD_FIFO_TRANSMIT_FIFO_NOT_FULL_INT, .RAMInfos = &can_fifo_ram_infos[15], },
 };
 
 MCP251XFD_Filter can_filter_list[CAN0_FILTER_COUNT] = {
-    {
-        .Filter = MCP251XFD_FILTER0,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_SID,
-        .AcceptanceID = 0x000,
-        .AcceptanceMask = 0x600,
-        .PointTo = MCP251XFD_FIFO1,
-    }, // 0x000..0x1FF
-    {
-        .Filter = MCP251XFD_FILTER1,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_SID,
-        .AcceptanceID = 0x200,
-        .AcceptanceMask = 0x600,
-        .PointTo = MCP251XFD_FIFO2,
-    }, // 0x200..0x3FF
-    {
-        .Filter = MCP251XFD_FILTER2,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_SID,
-        .AcceptanceID = 0x400,
-        .AcceptanceMask = 0x600,
-        .PointTo = MCP251XFD_FIFO3,
-    }, // 0x400..0x5FF
-    {
-        .Filter = MCP251XFD_FILTER3,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_SID,
-        .AcceptanceID = 0x600,
-        .AcceptanceMask = 0x600,
-        .PointTo = MCP251XFD_FIFO4,
-    }, // 0x600..0x7FF
+    { .Filter = MCP251XFD_FILTER0,  .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_SID,    .AcceptanceID = 0x000,    .AcceptanceMask = 0x600,    .PointTo = MCP251XFD_FIFO1, }, // 0x000..0x1FF
+    { .Filter = MCP251XFD_FILTER1,  .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_SID,    .AcceptanceID = 0x200,    .AcceptanceMask = 0x600,    .PointTo = MCP251XFD_FIFO2, }, // 0x200..0x3FF
+    { .Filter = MCP251XFD_FILTER2,  .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_SID,    .AcceptanceID = 0x400,    .AcceptanceMask = 0x600,    .PointTo = MCP251XFD_FIFO3, }, // 0x400..0x5FF
+    { .Filter = MCP251XFD_FILTER3,  .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_SID,    .AcceptanceID = 0x600,    .AcceptanceMask = 0x600,    .PointTo = MCP251XFD_FIFO4, }, // 0x600..0x7FF
 
-    {
-        .Filter = MCP251XFD_FILTER4,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_EID,
-        .AcceptanceID = 0x00000000,
-        .AcceptanceMask = 0x1C000000,
-        .PointTo = MCP251XFD_FIFO5,
-    }, // 0x00000000..0x1C000000
-    {
-        .Filter = MCP251XFD_FILTER5,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_EID,
-        .AcceptanceID = 0x04000000,
-        .AcceptanceMask = 0x1C000000,
-        .PointTo = MCP251XFD_FIFO6,
-    }, // 0x04000000..0x1C000000
-    {
-        .Filter = MCP251XFD_FILTER6,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_EID,
-        .AcceptanceID = 0x08000000,
-        .AcceptanceMask = 0x1C000000,
-        .PointTo = MCP251XFD_FIFO7,
-    }, // 0x08000000..0x1C000000
-    {
-        .Filter = MCP251XFD_FILTER7,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_EID,
-        .AcceptanceID = 0x0C000000,
-        .AcceptanceMask = 0x1C000000,
-        .PointTo = MCP251XFD_FIFO8,
-    }, // 0x0C000000..0x1C000000
-    {
-        .Filter = MCP251XFD_FILTER8,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_EID,
-        .AcceptanceID = 0x10000000,
-        .AcceptanceMask = 0x1C000000,
-        .PointTo = MCP251XFD_FIFO9,
-    }, // 0x10000000..0x1C000000
-    {
-        .Filter = MCP251XFD_FILTER9,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_EID,
-        .AcceptanceID = 0x14000000,
-        .AcceptanceMask = 0x1C000000,
-        .PointTo = MCP251XFD_FIFO10,
-    }, // 0x14000000..0x1C000000
-    {
-        .Filter = MCP251XFD_FILTER10,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_EID,
-        .AcceptanceID = 0x18000000,
-        .AcceptanceMask = 0x1C000000,
-        .PointTo = MCP251XFD_FIFO11,
-    }, // 0x18000000..0x1C000000
-    {
-        .Filter = MCP251XFD_FILTER11,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_ONLY_EID,
-        .AcceptanceID = 0x1C000000,
-        .AcceptanceMask = 0x1C000000,
-        .PointTo = MCP251XFD_FIFO12,
-    }, // 0x1C000000..0x1C000000
-    {
-        .Filter = MCP251XFD_FILTER13,
-        .EnableFilter = true,
-        .Match = MCP251XFD_MATCH_SID_EID,
-        .AcceptanceID = MCP251XFD_ACCEPT_ALL_MESSAGES,
-        .AcceptanceMask = MCP251XFD_ACCEPT_ALL_MESSAGES,
-        .PointTo = MCP251XFD_FIFO13,
-    },
+    { .Filter = MCP251XFD_FILTER4 , .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_EID,    .AcceptanceID = 0x00000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO5,  },  // 0x00000000..0x1C000000
+    { .Filter = MCP251XFD_FILTER5 , .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_EID,    .AcceptanceID = 0x04000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO6,  },  // 0x04000000..0x1C000000
+    { .Filter = MCP251XFD_FILTER6 , .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_EID,    .AcceptanceID = 0x08000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO7,  },  // 0x08000000..0x1C000000
+    { .Filter = MCP251XFD_FILTER7 , .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_EID,    .AcceptanceID = 0x0C000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO8,  },  // 0x0C000000..0x1C000000
+    { .Filter = MCP251XFD_FILTER8 , .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_EID,    .AcceptanceID = 0x10000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO9,  },  // 0x10000000..0x1C000000
+    { .Filter = MCP251XFD_FILTER9,  .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_EID,    .AcceptanceID = 0x14000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO10, },  // 0x14000000..0x1C000000
+    { .Filter = MCP251XFD_FILTER10, .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_EID,    .AcceptanceID = 0x18000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO11, },  // 0x18000000..0x1C000000
+    { .Filter = MCP251XFD_FILTER11, .EnableFilter = true,   .Match = MCP251XFD_MATCH_ONLY_EID,    .AcceptanceID = 0x1C000000, .AcceptanceMask = 0x1C000000, .PointTo = MCP251XFD_FIFO12, },  // 0x1C000000..0x1C000000
+    { .Filter = MCP251XFD_FILTER13,  .EnableFilter = true,   .Match = MCP251XFD_MATCH_SID_EID,     .AcceptanceID = MCP251XFD_ACCEPT_ALL_MESSAGES, .AcceptanceMask = MCP251XFD_ACCEPT_ALL_MESSAGES, .PointTo = MCP251XFD_FIFO13, },
 };
 
 static bool transmit_event = false;
@@ -637,32 +331,12 @@ eERRORRESULT can0_function_receive_msg(
 #endif
 
         {
-            // uint32_t MessageTimeStamp = 0;
-            // uint8_t RxPayloadData[8];                                                            // In the default demo configuration, all the FIFO have 8 bytes of payload
-            // MCP251XFD_CANMessage ReceivedMessage;
-            // ReceivedMessage.payload_data = &RxPayloadData[0];                                     // Add receive payload data pointer to the message structure that will be received
-            //error_can = MCP251XFD_ReceiveMessageFromFIFO(CANEXT2, &ReceivedMessage, MCP251XFD_PAYLOAD_8BYTE, &MessageTimeStamp, fifo_name);
-            // if (error_can == ERR_OK)
-            // {
-            //   //***** Do what you want with the message *****
-
-            //   //*** Processing for the demo ***
-            //   eExt2Counters Counter = SIDEIDtoCounterIndex(ReceivedMessage.message_id);
-            //   Ext2Stats[Counter].MessagesPerSecond++;
-            //   Ext2Stats[Counter].ByteCount += MCP251XFD_DLCToByte(ReceivedMessage.DLC, false);
-
-            //   Ext2Stats[EXT2_ALL].MessagesPerSecond++;
-            //   Ext2Stats[EXT2_ALL].ByteCount += MCP251XFD_DLCToByte(ReceivedMessage.DLC, false);
-            // }
-
             //Todo add getting more than one fifo
             error_can = MCP251XFD_ReceiveMessageFromFIFO(
                 pComp, msg, payload_size, msg_time_stamp, fifo_name);
             *receive_event = true;
-            //return error_can;
         }
     }
-    //*receive_event = false;
     return error_can;
 }
 

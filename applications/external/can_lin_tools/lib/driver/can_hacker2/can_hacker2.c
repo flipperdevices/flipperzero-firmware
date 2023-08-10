@@ -126,13 +126,15 @@ void can_hacker2_get_cmd(CanHacker2* instance) {
         return;
     }
     switch(data[0]) {
+
     case CH2_CR:
     case CH2_LF:
         instance->cmd_buf[instance->cmd_buf_len] = CH2_END_OF_CMD;
-        can_hacker2_process_cmd(instance);
+        if(instance->cmd_buf_len > 0) can_hacker2_process_cmd(instance);
         instance->cmd_buf_len = 0;
         break;
     case CH2_END_OF_CMD:
+        instance->cmd_buf_len = 0;
         break;
 
     default:
@@ -397,7 +399,7 @@ void can_hacker2_process_cmd(CanHacker2* instance) {
     case CH2_SET_BTR:
         if(instance->can_open) {
             can_hacker2_tx_add_ch(instance, CH2_BELL);
-            FURI_LOG_E(TAG, "SET_BTR command cannot be called while connected\n");
+            FURI_LOG_E(TAG, "SET_BTR command cannot be called while connected");
         } else {
             FURI_LOG_E(TAG, "SET_BTR not supported\n");
             can_hacker2_tx_add_ch(instance, CH2_OK);
@@ -419,13 +421,13 @@ void can_hacker2_process_cmd(CanHacker2* instance) {
         break;
     case CH2_WRITE_REG:
     case CH2_READ_REG:
-        FURI_LOG_E(TAG, "CH2_WRITE_REG / CH2_READ_REG not supported\n");
+        FURI_LOG_E(TAG, "CH2_WRITE_REG / CH2_READ_REG not supported");
         can_hacker2_tx_add_ch(instance, CH2_OK);
         break;
     case CH2_READ_STATUS:
     case CH2_READ_ECR:
     case CH2_READ_ALCR:
-        FURI_LOG_E(TAG, "CH2_READ_STATUS / CH2_READ_ECR / CH2_READ_ALCR not supported\n");
+        FURI_LOG_E(TAG, "CH2_READ_STATUS / CH2_READ_ECR / CH2_READ_ALCR not supported");
         if(instance->can_open) {
             can_hacker2_tx_add_ch(instance, CH2_BELL);
         } else {

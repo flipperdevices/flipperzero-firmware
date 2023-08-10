@@ -1,8 +1,11 @@
 #pragma once
 
 #define CH2_SERIAL_RESPONSE "N0001\r\0"
-#define CH2_SW_VERSION_RESPONSE "v0107\r\0"
-#define CH2_VERSION_RESPONSE "V1010\r\0"
+// #define CH2_SW_VERSION_RESPONSE "v0107\r\0"
+// #define CH2_VERSION_RESPONSE "V1010\r\0"
+
+#define CH2_SW_VERSION_RESPONSE "vCH-OBD.M2\r\0"
+#define CH2_VERSION_RESPONSE "VLIN_20191106\r\0"
 
 #define CH2_CR 0x0D // "\r"
 #define CH2_LF 0x0A // "\n"
