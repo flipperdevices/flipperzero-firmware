@@ -77,6 +77,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Secret Toggle (By nostrumuva)](https://github.com/nostrumuva/secret_toggle)
 - UL PR: [NFC App: Add manual MF Classic custom UID #571 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/571)
 - UL PR: [SubGhz: fix assert failure during signal openning #573 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/573)
+- OFW: [ufbt: fixed FAP_SRC_DIR #2970 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2970)
+- OFW: [UI: Clock on Desktop #2891 (By gid9798)](https://github.com/flipperdevices/flipperzero-firmware/pull/2891) (Mostly Already In RM)
 
 <a name="release">
 
