@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include "options.h"
 
 void random_reseed(const uint32_t value);
 uint32_t random32(void);

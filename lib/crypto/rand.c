@@ -21,11 +21,9 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#define FLIPPER_HAL_RANDOM
-
 #include "rand.h"
 
-#ifdef FLIPPER_HAL_RANDOM
+#if USE_FLIPPER_HAL_RANDOM
 
 // NOTE:
 // random32() and random_buffer() have been replaced in this implementation
@@ -67,6 +65,8 @@ void random_buffer(uint8_t* buf, size_t len) {
 // The following code is platform independent
 //
 
+static uint32_t seed = 0;
+
 uint32_t random32(void) {
   // Linear congruential generator from Numerical Recipes
   // https://en.wikipedia.org/wiki/Linear_congruential_generator
@@ -74,7 +74,7 @@ uint32_t random32(void) {
   return seed;
 }
 
-void __attribute__((weak)) random_buffer(uint8_t *buf, size_t len) {
+void random_buffer(uint8_t *buf, size_t len) {
   uint32_t r = 0;
   for (size_t i = 0; i < len; i++) {
     if (i % 4 == 0) {
@@ -84,7 +84,7 @@ void __attribute__((weak)) random_buffer(uint8_t *buf, size_t len) {
   }
 }
 
-#endif /* FLIPPER_HAL_RANDOM */
+#endif /* USE_FLIPPER_HAL_RANDOM */
 
 uint32_t random_uniform(uint32_t n) {
     uint32_t x = 0, max = 0xFFFFFFFF - (0xFFFFFFFF % n);

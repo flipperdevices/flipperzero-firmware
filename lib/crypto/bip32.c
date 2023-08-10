@@ -26,7 +26,9 @@
 #include <string.h>
 
 #include "address.h"
+#if USE_NEM
 #include "aes/aes.h"
+#endif
 #include "base58.h"
 #include "bignum.h"
 #include "bip32.h"

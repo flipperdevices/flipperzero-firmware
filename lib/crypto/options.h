@@ -86,9 +86,14 @@
 #define USE_KECCAK 1
 #endif
 
-// add way how to mark confidential data
+// add a way to mark confidential data
 #ifndef CONFIDENTIAL
 #define CONFIDENTIAL
+#endif
+
+// use Flipper Zero hardware random number generator
+#ifndef USE_FLIPPER_HAL_RANDOM
+#define USE_FLIPPER_HAL_RANDOM 1
 #endif
 
 #endif
