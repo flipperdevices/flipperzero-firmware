@@ -101,8 +101,7 @@ uint8_t ping_count(uint8_t s, uint16_t pCount, uint8_t* addr) {
             /* Check socket register */
             while(getSn_SR(s) != SOCK_IPRAW)
                 ;
-            ping_wait_ms(1000); // wait 1000ms
-            ping_wait_ms(1000); // wait 1000ms
+            ping_wait_ms(1000);
             break;
         case SOCK_IPRAW:
             ping_request(s, addr);
@@ -120,7 +119,7 @@ uint8_t ping_count(uint8_t s, uint16_t pCount, uint8_t* addr) {
                     break;
                 } else {
                     cnt++;
-                    ping_wait_ms(50); // wait 50ms
+                    ping_wait_ms(20);
                 }
             }
             break;

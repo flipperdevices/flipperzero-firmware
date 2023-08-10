@@ -19,6 +19,7 @@ typedef enum {
     EthWorkerStateOnline,
     EthWorkerStatePing,
     EthWorkerStateStop,
+    EthWorkerStateReset,
 } EthWorkerState;
 
 typedef enum {
