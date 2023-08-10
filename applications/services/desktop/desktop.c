@@ -50,14 +50,16 @@ static void desktop_dummy_mode_icon_draw_callback(Canvas* canvas, void* context)
     canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
 }
 
-static void desktop_clock_update(Desktop* desktop, bool forced) {
+static void desktop_clock_update(Desktop* desktop) {
     furi_assert(desktop);
 
     FuriHalRtcDateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
+    bool time_format_12 = locale_get_time_format() == LocaleTimeFormat12h;
 
-    if(forced || desktop->time_hour != curr_dt.hour || (desktop->time_minute != curr_dt.minute)) {
-        desktop->time_format_12 = (locale_get_time_format() == LocaleTimeFormat12h);
+    if(desktop->time_hour != curr_dt.hour || desktop->time_minute != curr_dt.minute ||
+       desktop->time_format_12 != time_format_12) {
+        desktop->time_format_12 = time_format_12;
         desktop->time_hour = curr_dt.hour;
         desktop->time_minute = curr_dt.minute;
         view_port_update(desktop->clock_viewport);
@@ -67,7 +69,7 @@ static void desktop_clock_update(Desktop* desktop, bool forced) {
 static void desktop_clock_toggle_view(Desktop* desktop, bool is_enabled) {
     furi_assert(desktop);
 
-    desktop_clock_update(desktop, true);
+    desktop_clock_update(desktop);
 
     if(is_enabled) {
         furi_timer_start(desktop->update_clock_timer, furi_ms_to_ticks(1000));
@@ -200,7 +202,7 @@ static void desktop_clock_timer_callback(void* context) {
     Desktop* desktop = context;
 
     if(gui_active_view_port_count(desktop->gui, GuiLayerStatusBarLeft) < 6) {
-        desktop_clock_update(desktop, false);
+        desktop_clock_update(desktop);
 
         view_port_enabled_set(desktop->clock_viewport, true);
     } else {
@@ -400,8 +402,6 @@ Desktop* desktop_alloc() {
 
     desktop->update_clock_timer =
         furi_timer_alloc(desktop_clock_timer_callback, FuriTimerTypePeriodic, desktop);
-
-    desktop_clock_update(desktop, true);
 
     furi_record_create(RECORD_DESKTOP, desktop);
 
