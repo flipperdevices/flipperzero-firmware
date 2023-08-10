@@ -50,7 +50,8 @@ class AppBuilder:
 
     def _setup_app_env(self):
         self.app_env = self.fw_env.Clone(
-            FAP_SRC_DIR=self.app._appdir, FAP_WORK_DIR=self.app_work_dir
+            FAP_SRC_DIR=self.app._appdir,
+            FAP_WORK_DIR=self.app_work_dir,
         )
         self.app_env.VariantDir(self.app_work_dir, self.app._appdir, duplicate=False)
 
@@ -133,7 +134,7 @@ class AppBuilder:
     def _build_app(self):
         self.app_env.Append(
             LIBS=[*self.app.fap_libs, *self.private_libs],
-            CPPPATH=self.app_env.Dir(self.app_work_dir),
+            CPPPATH=[self.app_env.Dir(self.app_work_dir), self.app._appdir],
         )
 
         app_sources = list(
