@@ -27,7 +27,6 @@ const UbloxDataDisplayViewMode display_view_mode_value[DISPLAY_VIEW_MODE_COUNT] 
     UbloxDataDisplayViewModeCar,
 };
 
-
 #define REFRESH_RATE_COUNT 8
 // double const means that the data is constant and that the pointer
 // is constant.
@@ -124,7 +123,6 @@ static void ublox_scene_data_display_config_set_refresh_rate(VariableItem* item)
     (ublox->data_display_state).refresh_rate = refresh_rate_values[index];
     FURI_LOG_I(TAG, "set refresh rate to %lds", (ublox->data_display_state).refresh_rate);
 }
-
 
 static uint8_t ublox_scene_data_display_config_next_display_view_mode(
     const UbloxDataDisplayViewMode value,
@@ -233,7 +231,7 @@ static void ublox_scene_data_display_config_set_platform_model(VariableItem* ite
 static void ublox_scene_data_display_config_enter_callback(void* context, uint32_t index) {
     Ublox* ublox = context;
     if(index == UbloxSettingIndexResetOdometer) {
-	view_dispatcher_send_custom_event(ublox->view_dispatcher, UbloxCustomEventResetOdometer);
+        view_dispatcher_send_custom_event(ublox->view_dispatcher, UbloxCustomEventResetOdometer);
     }
 }
 
@@ -298,13 +296,9 @@ void ublox_scene_data_display_config_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, odometer_mode_text[value_index]);
 
-    item = variable_item_list_add(
-				  ublox->variable_item_list,
-				  "Reset Odometer",
-				  1, NULL, NULL);
-    variable_item_list_set_enter_callback(ublox->variable_item_list,
-					  ublox_scene_data_display_config_enter_callback,
-					  ublox);
+    item = variable_item_list_add(ublox->variable_item_list, "Reset Odometer", 1, NULL, NULL);
+    variable_item_list_set_enter_callback(
+        ublox->variable_item_list, ublox_scene_data_display_config_enter_callback, ublox);
     view_dispatcher_switch_to_view(ublox->view_dispatcher, UbloxViewVariableItemList);
 }
 
@@ -319,19 +313,19 @@ bool ublox_scene_data_display_config_on_event(void* context, SceneManagerEvent e
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-	if(event.event == UbloxCustomEventResetOdometer) {
-	    ublox_worker_start(
+        if(event.event == UbloxCustomEventResetOdometer) {
+            ublox_worker_start(
                 ublox->worker,
                 UbloxWorkerStateResetOdometer,
                 ublox_scene_data_display_config_worker_callback,
                 ublox);
-	    // don't consume, we want to stay here
-	} else if(event.event == UbloxWorkerEventOdoReset) {
-	    if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
+            // don't consume, we want to stay here
+        } else if(event.event == UbloxWorkerEventOdoReset) {
+            if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
                 notification_message(ublox->notifications, &sequence_new_reading);
             }
-	    FURI_LOG_I(TAG, "odometer reset done");
-	}
+            FURI_LOG_I(TAG, "odometer reset done");
+        }
     }
 
     return consumed;

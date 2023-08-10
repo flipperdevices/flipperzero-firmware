@@ -18,5 +18,3 @@ bool kml_open_file(Storage* storage, KMLFile* kml, const char* path);
 bool kml_add_path_point(KMLFile* kml, double lat, double lon, uint32_t alt);
 
 bool kml_close_file(KMLFile* kml);
-
-
