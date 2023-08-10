@@ -132,13 +132,6 @@ Canvas* gui_direct_draw_acquire(Gui* gui);
  */
 void gui_direct_draw_release(Gui* gui);
 
-/** Get count of view ports in layer
- *
- * @param      gui        Gui instance
- * @param[in]  layer      GuiLayer that we want to get count of view ports
- */
-size_t gui_active_view_port_count(Gui* gui, GuiLayer layer);
-
 #ifdef __cplusplus
 }
 #endif
