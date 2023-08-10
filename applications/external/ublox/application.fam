@@ -13,8 +13,8 @@ App(
     fap_icon="ublox_app_icon.png",
     fap_category="GPIO",
     fap_icon_assets="images",
-    fap_author="liamhays",
+    fap_author="liamur",
     fap_weburl="https://github.com/liamhays/ublox",
-    fap_version=(1, 0),
-    fap_description="Flipper Zero u-blox GPS app",
+    fap_version=(0, 1),
+    fap_description="App to display and log data from u-blox GPS modules over I2C",
 )
