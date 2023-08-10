@@ -9,6 +9,9 @@
 #include <notification/notification_messages.h>
 #include <stdlib.h>
 
-void utilShowDialog(const char *paramTitle,const char *paramMessage,const char *paramConfirmButtonText);
+void utilShowDialog(
+    const char* paramTitle,
+    const char* paramMessage,
+    const char* paramConfirmButtonText);
 
 #endif

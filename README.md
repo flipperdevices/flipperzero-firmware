@@ -29,6 +29,8 @@ ufbt launch
 ## Validating Manifest
 
 ```
+sudo apt-get install python3.10-venv
+cd flipper-application-catalog
 python3 -m venv venv
 source venv/bin/activate
 pip install -r tools/requirements.txt
