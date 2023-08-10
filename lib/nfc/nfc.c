@@ -95,7 +95,6 @@ static int32_t nfc_worker_listener(void* context) {
     while(true) {
         FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
         if(event & FHalNfcEventAbortRequest) {
-            FURI_LOG_D(TAG, "Abort request received");
             nfc_event.type = NfcEventTypeUserAbort;
             instance->callback(nfc_event, instance->context);
             break;
@@ -105,7 +104,6 @@ static int32_t nfc_worker_listener(void* context) {
             instance->callback(nfc_event, instance->context);
         }
         if(event & FHalNfcEventFieldOff) {
-            FURI_LOG_T(TAG, "Field off");
             nfc_event.type = NfcEventTypeFieldOff;
             instance->callback(nfc_event, instance->context);
             f_hal_nfc_listener_sleep();
@@ -124,7 +122,7 @@ static int32_t nfc_worker_listener(void* context) {
             if(command == NfcCommandStop) {
                 break;
             } else if(command == NfcCommandReset) {
-                f_hal_nfc_listen_reset();
+                //f_hal_nfc_listen_reset();
             }
         }
     }

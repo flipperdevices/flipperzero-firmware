@@ -114,6 +114,10 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
             if(instance->callback) {
                 command = instance->callback(instance->generic_event, instance->context);
             }
+
+            if(command == NfcCommandReset) {
+                iso14443_3a_listener_sleep(instance);
+            }
         }
     }
 

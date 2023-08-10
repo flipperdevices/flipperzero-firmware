@@ -170,6 +170,7 @@ static MfClassicListenerCommand
         instance->auth_state = MfClassicListenerAuthStateIdle;
         instance->state = MfClassicListenerStateAuthComplete;
         instance->comm_state = MfClassicListenerCommStateEncrypted;
+        command = MfClassicListenerCommandProcessed;
 
         if(instance->callback) {
             instance->mfc_event.type = MfClassicListenerEventTypeAuthContextFullCollected,
