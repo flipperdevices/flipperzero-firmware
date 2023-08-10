@@ -200,3 +200,38 @@ bool crypto_ctx_encrypt(ESubGhzChatCryptoCtx* ctx, uint8_t* in, size_t in_len, u
 
     return ret;
 }
+
+size_t crypto_ctx_dump_replay_dict(
+    ESubGhzChatCryptoCtx* ctx,
+    CryptoCtxReplayDictWriter writer,
+    void* writer_ctx) {
+    size_t ret = 0;
+    ESubGhzChatReplayDict_it_t i;
+
+    for(ESubGhzChatReplayDict_it(i, ctx->replay_dict); !ESubGhzChatReplayDict_end_p(i);
+        ESubGhzChatReplayDict_next(i), ret++) {
+        ESubGhzChatReplayDict_itref_t* ref = ESubGhzChatReplayDict_ref(i);
+        if(!writer(ref->key, ref->value, writer_ctx)) {
+            break;
+        }
+    }
+
+    return ret;
+}
+
+size_t crypto_ctx_read_replay_dict(
+    ESubGhzChatCryptoCtx* ctx,
+    CryptoCtxReplayDictReader reader,
+    void* reader_ctx) {
+    size_t ret = 0;
+
+    uint64_t run_id;
+    uint32_t counter;
+
+    while(reader(&run_id, &counter, reader_ctx)) {
+        ESubGhzChatReplayDict_set_at(ctx->replay_dict, run_id, counter);
+        ret++;
+    }
+
+    return ret;
+}

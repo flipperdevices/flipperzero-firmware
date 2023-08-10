@@ -47,7 +47,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fixes to bring back menu_alloc (By RogueMaster)
 - Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
@@ -65,6 +64,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [External apps removed #2934 (By F*ck NO)] THIS PR WAS SKIPPED SINCE ITS STUPID
 - OFW: [Add compressor.h to the SDK #2962 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2962)
 - OFW: [BadUSB: qFlipper install script for MacOS #2915 (By grugnoymeme)](https://github.com/flipperdevices/flipperzero-firmware/pull/2915)
+- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 
 <a name="release">
 

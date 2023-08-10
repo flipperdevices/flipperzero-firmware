@@ -1,4 +1,5 @@
 #include "../esubghz_chat_i.h"
+#include "../nfc_helpers.h"
 
 typedef enum {
     KeyReadPopupState_Idle,
@@ -36,10 +37,39 @@ static void key_read_popup_timeout_cb(void* context) {
     }
 }
 
+struct ReplayDictNfcReaderContext {
+    uint8_t* cur;
+    uint8_t* max;
+};
+
+static bool replay_dict_nfc_reader(uint64_t* run_id, uint32_t* counter, void* context) {
+    struct ReplayDictNfcReaderContext* ctx = (struct ReplayDictNfcReaderContext*)context;
+
+    if(ctx->cur + sizeof(struct ReplayDictNfcEntry) > ctx->max) {
+        return false;
+    }
+
+    struct ReplayDictNfcEntry* entry = (struct ReplayDictNfcEntry*)ctx->cur;
+    *run_id = entry->run_id;
+    *counter = __ntohl(entry->counter);
+
+    ctx->cur += sizeof(struct ReplayDictNfcEntry);
+
+    return true;
+}
+
 static bool key_read_popup_handle_key_read(ESubGhzChatState* state) {
     NfcDeviceData* dev_data = state->nfc_dev_data;
 
-    if(dev_data->mf_ul_data.data_read < KEY_BITS / 8) {
+    /* check for config pages */
+    if(dev_data->mf_ul_data.data_read < NFC_CONFIG_PAGES * 4) {
+        return false;
+    }
+
+    size_t data_read = dev_data->mf_ul_data.data_read - (NFC_CONFIG_PAGES * 4);
+
+    /* check if key was transmitted */
+    if(data_read < KEY_BITS / 8) {
         return false;
     }
 
@@ -54,6 +84,14 @@ static bool key_read_popup_handle_key_read(ESubGhzChatState* state) {
         crypto_ctx_clear(state->crypto_ctx);
         return false;
     }
+
+    /* read the replay dict */
+    struct ReplayDictNfcReaderContext rd_ctx = {
+        .cur = dev_data->mf_ul_data.data + (KEY_BITS / 8),
+        .max =
+            dev_data->mf_ul_data.data + (data_read < NFC_MAX_BYTES ? data_read : NFC_MAX_BYTES)};
+
+    crypto_ctx_read_replay_dict(state->crypto_ctx, replay_dict_nfc_reader, &rd_ctx);
 
     /* set encrypted flag */
     state->encrypted = true;
