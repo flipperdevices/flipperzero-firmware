@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.0.0 - 9 Aug 2023
+
+* Dropped homebrew hashing algo implementations and replaced them with [WolfSSL](https://github.com/wolfSSL/wolfssl/) library ([#185](https://github.com/akopachov/flipper-zero_authenticator/issues/185))
+* Updated crypto algorithms to use PBKDF2 instead of plain HMAC to generate IV.
+* Fixed CLI bugs when dealing with conf file and folders
+
 ## v3.2.0 - 2 Aug 2023
 
 * Implemented [#177](https://github.com/akopachov/flipper-zero_authenticator/issues/177)

@@ -8,7 +8,7 @@
 #include <memset_s.h>
 #include "../../types/common.h"
 #include "../../types/token_info.h"
-#include "../../features_config.h"
+#include "../../config/app/config.h"
 #include "../crypto/crypto_facade.h"
 #include "../crypto/constants.h"
 #include "migrations/common_migration.h"
@@ -149,7 +149,7 @@ static bool totp_open_config_file(Storage* storage, FlipperFormat** file) {
 
         flipper_format_write_comment_cstr(
             fff_data_file,
-            "Config file format specification can be found here: https://github.com/akopachov/flipper-zero_authenticator/blob/master/docs/conf-file_description.md");
+            "Config file format specification can be found here: https://t.ly/zwQjE");
 
         float tmp_tz = 0;
         flipper_format_write_float(fff_data_file, TOTP_CONFIG_KEY_TIMEZONE, &tmp_tz, 1);

@@ -66,10 +66,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [BadUSB: qFlipper install script for MacOS #2915 (By grugnoymeme)](https://github.com/flipperdevices/flipperzero-firmware/pull/2915)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
-- Updated: [Authenticator/TOTP v4 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [Added Support For Auriol AHFL 433B2 IPX4 sensor (By tomjschwanke)](https://github.com/flipperdevices/flipperzero-good-faps/pull/17)
 - Added: [Text Viewer 2 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae4fc4a54febccb44b010c4025a99c2edef9a7f0) Original by kowalski7cc & kyhwana, new has code borrowed from Archive-Show
 - Settings: [CFW Settings for Commodore 64 Layout for Main Menu (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a47e7a4a8459a32f493b2f2f4c20137e98da1a1)
+- Updated: [Authenticator/TOTP v4.0.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 <a name="release">
 
@@ -295,7 +295,7 @@ $ ./fbt dolphin_ext
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
-- [Authenticator/TOTP v4 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- [Authenticator/TOTP v4.0.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad BT (By Willy-JL)(Imported By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/620)

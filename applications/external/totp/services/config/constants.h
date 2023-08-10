@@ -2,7 +2,7 @@
 
 #include <storage/storage.h>
 
-#define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/authenticator")
+#define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/totp")
 #define CONFIG_FILE_HEADER "Flipper TOTP plugin config file"
 #define CONFIG_FILE_ACTUAL_VERSION (9)
 
