@@ -112,6 +112,9 @@ class STM32WB55:
         self.openocd = openocd
         self.logger = logging.getLogger("STM32WB55")
 
+        self.FLASH_CR.set_openocd(self.openocd)
+        self.FLASH_SR.set_openocd(self.openocd)
+
     class RunMode(Enum):
         Init = "init"
         Run = "run"
@@ -125,7 +128,7 @@ class STM32WB55:
         # Errata 2.2.9: Flash OPTVERR flag is always set after system reset
         # And also clear all other flash error flags
         self.logger.debug("Resetting flash errors")
-        self.FLASH_SR.load(self.openocd)
+        self.FLASH_SR.load()
         self.FLASH_SR.OP_ERR = 1
         self.FLASH_SR.PROG_ERR = 1
         self.FLASH_SR.WRP_ERR = 1
@@ -136,11 +139,11 @@ class STM32WB55:
         self.FLASH_SR.FAST_ERR = 1
         self.FLASH_SR.RD_ERR = 1
         self.FLASH_SR.OPTV_ERR = 1
-        self.FLASH_SR.store(self.openocd)
+        self.FLASH_SR.store()
 
     def flash_unlock(self):
         # Check if flash is already unlocked
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         if self.FLASH_CR.LOCK == 0:
             self.logger.debug("Flash is already unlocked")
             return
@@ -151,7 +154,7 @@ class STM32WB55:
         self.openocd.write_32(self.FLASH_KEYR, self.FLASH_UNLOCK_KEY2)
 
         # Check if flash is unlocked
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         if self.FLASH_CR.LOCK == 0:
             self.logger.debug("Flash unlocked")
         else:
@@ -160,7 +163,7 @@ class STM32WB55:
 
     def option_bytes_unlock(self):
         # Check if options is already unlocked
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         if self.FLASH_CR.OPT_LOCK == 0:
             self.logger.debug("Options is already unlocked")
             return
@@ -171,7 +174,7 @@ class STM32WB55:
         self.openocd.write_32(self.FLASH_OPTKEYR, self.FLASH_UNLOCK_OPTKEY2)
 
         # Check if options is unlocked
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         if self.FLASH_CR.OPT_LOCK == 0:
             self.logger.debug("Options unlocked")
         else:
@@ -180,7 +183,7 @@ class STM32WB55:
 
     def option_bytes_lock(self):
         # Check if options is already locked
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         if self.FLASH_CR.OPT_LOCK == 1:
             self.logger.debug("Options is already locked")
             return
@@ -188,10 +191,10 @@ class STM32WB55:
         # Lock options
         self.logger.debug("Locking Options")
         self.FLASH_CR.OPT_LOCK = 1
-        self.FLASH_CR.store(self.openocd)
+        self.FLASH_CR.store()
 
         # Check if options is locked
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         if self.FLASH_CR.OPT_LOCK == 1:
             self.logger.debug("Options locked")
         else:
@@ -200,7 +203,7 @@ class STM32WB55:
 
     def flash_lock(self):
         # Check if flash is already locked
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         if self.FLASH_CR.LOCK == 1:
             self.logger.debug("Flash is already locked")
             return
@@ -208,10 +211,10 @@ class STM32WB55:
         # Lock flash
         self.logger.debug("Locking Flash")
         self.FLASH_CR.LOCK = 1
-        self.FLASH_CR.store(self.openocd)
+        self.FLASH_CR.store()
 
         # Check if flash is locked
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         if self.FLASH_CR.LOCK == 1:
             self.logger.debug("Flash locked")
         else:
@@ -221,18 +224,18 @@ class STM32WB55:
     def option_bytes_apply(self):
         self.logger.debug("Applying Option Bytes")
 
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         self.FLASH_CR.OPT_STRT = 1
-        self.FLASH_CR.store(self.openocd)
+        self.FLASH_CR.store()
 
         # Wait for Option Bytes to be applied
         self.flash_wait_for_operation()
 
     def option_bytes_load(self):
         self.logger.debug("Loading Option Bytes")
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         self.FLASH_CR.OBL_LAUNCH = 1
-        self.FLASH_CR.store(self.openocd)
+        self.FLASH_CR.store()
 
     def option_bytes_id_to_address(self, id: int) -> int:
         # Check if this option byte (dword) is mapped to a register
@@ -246,12 +249,12 @@ class STM32WB55:
         # Wait for flash operation to complete
         # TODO: timeout
         while True:
-            self.FLASH_SR.load(self.openocd)
+            self.FLASH_SR.load()
             if self.FLASH_SR.BSY == 0:
                 break
 
     def flash_dump_status_register(self):
-        self.FLASH_SR.load(self.openocd)
+        self.FLASH_SR.load()
         self.logger.info(f"FLASH_SR: {self.FLASH_SR.get():08x}")
         if self.FLASH_SR.EOP:
             self.logger.info("    End of operation")
@@ -297,34 +300,34 @@ class STM32WB55:
             self.logger.debug("Data is already programmed")
             return
 
-        self.flash_unlock(self.openocd)
+        self.flash_unlock()
 
         # Check that no flash main memory operation is ongoing by checking the BSY bit
-        self.FLASH_SR.load(self.openocd)
+        self.FLASH_SR.load()
         if self.FLASH_SR.BSY:
             self.logger.error("Flash is busy")
-            self.flash_dump_status_register(self.openocd)
+            self.flash_dump_status_register()
             raise Exception("Flash is busy")
 
         # Enable end of operation interrupts and error interrupts
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         self.FLASH_CR.EOPIE = 1
         self.FLASH_CR.ERRIE = 1
-        self.FLASH_CR.store(self.openocd)
+        self.FLASH_CR.store()
 
         # Check that flash memory program and erase operations are allowed
         if self.FLASH_SR.PESD:
             self.logger.error("Flash operations are not allowed")
-            self.flash_dump_status_register(self.openocd)
+            self.flash_dump_status_register()
             raise Exception("Flash operations are not allowed")
 
         # Check and clear all error programming flags due to a previous programming.
-        self.clear_flash_errors(self.openocd)
+        self.clear_flash_errors()
 
         # Set the PG bit in the Flash memory control register (FLASH_CR)
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         self.FLASH_CR.PG = 1
-        self.FLASH_CR.store(self.openocd)
+        self.FLASH_CR.store()
 
         # Perform the data write operation at the desired memory address, only double word (64 bits) can be programmed.
         # Write the first word
@@ -336,30 +339,33 @@ class STM32WB55:
         self.flash_wait_for_operation()
 
         # Check that EOP flag is set in the FLASH_SR register
-        self.FLASH_SR.load(self.openocd)
+        self.FLASH_SR.load()
         if not self.FLASH_SR.EOP:
             self.logger.error("Flash operation failed")
-            self.flash_dump_status_register(self.openocd)
+            self.flash_dump_status_register()
             raise Exception("Flash operation failed")
 
         # Clear the EOP flag
-        self.FLASH_SR.load(self.openocd)
+        self.FLASH_SR.load()
         self.FLASH_SR.EOP = 1
-        self.FLASH_SR.store(self.openocd)
+        self.FLASH_SR.store()
 
         # Clear the PG bit in the FLASH_CR register
-        self.FLASH_CR.load(self.openocd)
+        self.FLASH_CR.load()
         self.FLASH_CR.PG = 0
-        self.FLASH_CR.store(self.openocd)
+        self.FLASH_CR.store()
 
-        self.flash_lock(self.openocd)
+        self.flash_lock()
 
     def option_bytes_recover(self):
         self.openocd.send_tcl("mww 0x58004010 0x8000")  # set OPTVERR to reset
-        self.openocd.send_tcl("mww 0x58004008 0x45670123")  # unlock FLASH
-        self.openocd.send_tcl("mww 0x58004008 0xCDEF89AB")
-        self.openocd.send_tcl("mww 0x5800400c 0x08192A3B")  # unlock OB
-        self.openocd.send_tcl("mww 0x5800400c 0x4C5D6E7F")
+        # Replace flash_unlock and option_bytes_unlock with the following lines, if this does not work
+        # self.openocd.send_tcl("mww 0x58004008 0x45670123")  # unlock FLASH
+        # self.openocd.send_tcl("mww 0x58004008 0xCDEF89AB")
+        # self.openocd.send_tcl("mww 0x5800400c 0x08192A3B")  # unlock OB
+        # self.openocd.send_tcl("mww 0x5800400c 0x4C5D6E7F")
+        self.flash_unlock()
+        self.option_bytes_unlock()
         self.openocd.send_tcl("mmw 0x58004020 0x3ffff1aa 0xffffffff")  # Reset OB
         self.openocd.send_tcl("mww 0x5800402c 0xff")  # Reset WRP1AR
         self.openocd.send_tcl("mww 0x58004030 0xff")  # Reset WRP1BR
