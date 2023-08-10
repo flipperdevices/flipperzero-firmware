@@ -77,7 +77,7 @@ static void desktop_clock_reconfigure(Desktop* desktop) {
         furi_timer_stop(desktop->update_clock_timer);
     }
 
-    view_port_enabled_set(desktop->clock_viewport, is_enabled);
+    view_port_enabled_set(desktop->clock_viewport, desktop->settings.display_clock);
 }
 
 static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
