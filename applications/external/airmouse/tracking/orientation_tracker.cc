@@ -89,7 +89,7 @@ Vector4 OrientationTracker::OnGyroscopeData(const GyroscopeData& event)
 
     sensor_fusion_->ProcessGyroscopeSample(data);
 
-    return OrientationTracker::GetPose(data.sensor_timestamp_ns + sampling_period_ns_);
+    return GetPose(data.sensor_timestamp_ns + sampling_period_ns_);
 }
 
 } // namespace cardboard

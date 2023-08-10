@@ -65,6 +65,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Add compressor.h to the SDK #2962 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2962)
 - OFW: [BadUSB: qFlipper install script for MacOS #2915 (By grugnoymeme)](https://github.com/flipperdevices/flipperzero-firmware/pull/2915)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 
 <a name="release">
 

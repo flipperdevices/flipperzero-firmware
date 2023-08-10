@@ -2,6 +2,10 @@
 
 ## v0.0.5 (2023-06-18)
 
+**Fix firmware 0.88 issues**
+
+## v0.0.5 (2023-06-18)
+
 **Closed issues:**
 
 - Error on firmware 0.77.1
