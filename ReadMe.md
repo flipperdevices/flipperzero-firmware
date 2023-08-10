@@ -75,6 +75,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Scripts: OB recovery #2964 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2964)
 - OFW: [Expose additional functions of the crypto engine to user #2923 (By twisted-pear)](https://github.com/flipperdevices/flipperzero-firmware/pull/2923)
 - Added: [Secret Toggle (By nostrumuva)](https://github.com/nostrumuva/secret_toggle)
+- UL PR: [NFC App: Add manual MF Classic custom UID #571 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/571)
+- UL PR: [SubGhz: fix assert failure during signal openning #573 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/573)
 
 <a name="release">
 
