@@ -213,12 +213,12 @@ bool storage_file_truncate(File* file) {
     return S_RETURN_BOOL;
 }
 
-bool storage_file_allocate(File* file, uint64_t size) {
+bool storage_file_expand(File* file, uint64_t size) {
     S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
 
     SAData data = {
-        .fallocate = {
+        .fexpand = {
             .file = file,
             .size = size,
         }};

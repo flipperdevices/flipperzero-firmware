@@ -221,7 +221,7 @@ static bool storage_process_file_truncate(Storage* app, File* file) {
     return ret;
 }
 
-static bool storage_process_file_allocate(Storage* app, File* file, const uint64_t size) {
+static bool storage_process_file_expand(Storage* app, File* file, const uint64_t size) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -569,8 +569,8 @@ static void storage_process_message_internal(Storage* app, StorageMessage* messa
             storage_process_file_truncate(app, message->data->file.file);
         break;
     case StorageCommandFileExpand:
-        message->return_data->bool_value = storage_process_file_allocate(
-            app, message->data->file.file, message->data->fallocate.size);
+        message->return_data->bool_value = storage_process_file_expand(
+            app, message->data->file.file, message->data->fexpand.size);
         break;
     case StorageCommandFileSync:
         message->return_data->bool_value =
