@@ -21,6 +21,7 @@ const char* const menu_style_names[MenuStyleCount] = {
     "DSi",
     "PS4",
     "Vertical",
+    "C64",
 };
 static void cfw_app_scene_interface_mainmenu_menu_style_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);

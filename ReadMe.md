@@ -69,6 +69,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP v4 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [Added Support For Auriol AHFL 433B2 IPX4 sensor (By tomjschwanke)](https://github.com/flipperdevices/flipperzero-good-faps/pull/17)
 - Added: [Text Viewer 2 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae4fc4a54febccb44b010c4025a99c2edef9a7f0) Original by kowalski7cc & kyhwana, new has code borrowed from Archive-Show
+- Settings: [CFW Settings for Commodore 64 Layout for Main Menu (By Willy-JL)]
 
 <a name="release">
 
