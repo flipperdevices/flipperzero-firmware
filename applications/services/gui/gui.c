@@ -27,6 +27,7 @@ uint8_t gui_get_count_of_enabled_view_port_in_layer(Gui* gui, GuiLayer layer) {
     furi_check(layer < GuiLayerMAX);
     uint8_t ret = 0;
 
+    gui_lock(gui);
     ViewPortArray_it_t it;
     ViewPortArray_it_last(it, gui->layers[layer]);
     while(!ViewPortArray_end_p(it)) {
@@ -36,6 +37,8 @@ uint8_t gui_get_count_of_enabled_view_port_in_layer(Gui* gui, GuiLayer layer) {
         }
         ViewPortArray_previous(it);
     }
+    gui_unlock(gui);
+
     return ret;
 }
 
