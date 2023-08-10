@@ -27,9 +27,9 @@ bool uhf_scene_save_success_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UHFCustomEventViewExit) {
-            if(scene_manager_has_previous_scene(uhf_app->scene_manager, UHFSceneCardMenu)) {
+            if(scene_manager_has_previous_scene(uhf_app->scene_manager, UHFSceneTagMenu)) {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
-                    uhf_app->scene_manager, UHFSceneCardMenu);
+                    uhf_app->scene_manager, UHFSceneTagMenu);
             } else {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
                     uhf_app->scene_manager, UHFSceneStart);
