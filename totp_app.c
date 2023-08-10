@@ -5,7 +5,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
-#include "features_config.h"
+#include "config/app/config.h"
 #include "services/config/config.h"
 #include "types/plugin_state.h"
 #include "types/token_info.h"
