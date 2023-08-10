@@ -76,18 +76,6 @@ void desktop_settings_scene_start_on_enter(void* context) {
         desktop_settings_scene_start_auto_lock_delay_changed,
         app);
 
-    variable_item_list_add(variable_item_list, "Favorite App - Left Short", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite App - Left Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite App - Right Short", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite App - Right Long", 1, NULL, NULL);
-
-    variable_item_list_add(variable_item_list, "Dummy Mode App - Left", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Dummy Mode App - Right", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Dummy Mode App - Down", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Dummy Mode App - Ok", 1, NULL, NULL);
-
-    variable_item_list_set_enter_callback(
-        variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
     value_index = value_index_uint32(
         app->settings.auto_lock_delay_ms, auto_lock_delay_value, AUTO_LOCK_DELAY_COUNT);
     variable_item_set_current_value_index(item, value_index);
@@ -104,6 +92,19 @@ void desktop_settings_scene_start_on_enter(void* context) {
         value_index_uint32(app->settings.display_clock, clock_enable_value, CLOCK_ENABLE_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, clock_enable_text[value_index]);
+
+    variable_item_list_add(variable_item_list, "Favorite App - Left Short", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite App - Left Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite App - Right Short", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite App - Right Long", 1, NULL, NULL);
+
+    variable_item_list_add(variable_item_list, "Dummy Mode App - Left", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Dummy Mode App - Right", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Dummy Mode App - Down", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Dummy Mode App - Ok", 1, NULL, NULL);
+
+    variable_item_list_set_enter_callback(
+        variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewVarItemList);
 }
