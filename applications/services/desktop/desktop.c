@@ -233,7 +233,7 @@ static void desktop_clock_timer_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
 
-    if(gui_get_count_of_enabled_view_port_in_layer(desktop->gui, GuiLayerStatusBarLeft) < 6) {
+    if(gui_active_view_port_count(desktop->gui, GuiLayerStatusBarLeft) < 6) {
         desktop_clock_upd_time(desktop, false);
 
         view_port_enabled_set(desktop->clock_viewport, true);

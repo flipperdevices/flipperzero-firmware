@@ -137,7 +137,7 @@ void gui_direct_draw_release(Gui* gui);
  * @param      gui        Gui instance
  * @param[in]  layer      GuiLayer that we want to get count of view ports
  */
-uint8_t gui_get_count_of_enabled_view_port_in_layer(Gui* gui, GuiLayer layer);
+size_t gui_active_view_port_count(Gui* gui, GuiLayer layer);
 
 #ifdef __cplusplus
 }
