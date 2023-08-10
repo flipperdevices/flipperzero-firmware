@@ -66,12 +66,12 @@ static void desktop_clock_update(Desktop* desktop) {
     }
 }
 
-static void desktop_clock_toggle_view(Desktop* desktop, bool is_enabled) {
+static void desktop_clock_reconfigure(Desktop* desktop) {
     furi_assert(desktop);
 
     desktop_clock_update(desktop);
 
-    if(is_enabled) {
+    if(desktop->settings.display_clock) {
         furi_timer_start(desktop->update_clock_timer, furi_ms_to_ticks(1000));
     } else {
         furi_timer_stop(desktop->update_clock_timer);
@@ -130,7 +130,7 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         // locking and unlocking
         DESKTOP_SETTINGS_LOAD(&desktop->settings);
 
-        desktop_clock_toggle_view(desktop, desktop->settings.display_clock);
+        desktop_clock_reconfigure(desktop);
 
         desktop_auto_lock_arm(desktop);
         return true;
@@ -449,7 +449,7 @@ int32_t desktop_srv(void* p) {
 
     view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
 
-    desktop_clock_toggle_view(desktop, desktop->settings.display_clock);
+    desktop_clock_reconfigure(desktop);
 
     desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
     animation_manager_set_dummy_mode_state(
