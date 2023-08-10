@@ -1,0 +1,19 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/README.md
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/wolfssl/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/wolfssl/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/test_RA6M4Debug.launch
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/src/test_main.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/src/wolf_client.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/src/wolfssl_sce_unit_test.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/src/SEGGER_RTT/myprint.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/src/common/.gitignore
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/key_data/key_data_sce.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/test/key_data/key_data.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/common/wolfssl_demo.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M4/common/user_settings.h

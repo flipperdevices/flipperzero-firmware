@@ -1,0 +1,12 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+
+if BUILD_EXAMPLE_ASN1
+noinst_PROGRAMS += examples/pem/pem
+examples_pem_pem_SOURCES = examples/pem/pem.c
+examples_pem_pem_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD)
+examples_pem_pem_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+

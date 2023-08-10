@@ -1,0 +1,39 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+        certs/ocsp/index-ca-and-intermediate-cas.txt \
+        certs/ocsp/index-ca-and-intermediate-cas.txt.attr \
+        certs/ocsp/index-intermediate1-ca-issued-certs.txt \
+        certs/ocsp/index-intermediate1-ca-issued-certs.txt.attr \
+        certs/ocsp/index-intermediate2-ca-issued-certs.txt \
+        certs/ocsp/index-intermediate2-ca-issued-certs.txt.attr \
+        certs/ocsp/index-intermediate3-ca-issued-certs.txt \
+        certs/ocsp/index-intermediate3-ca-issued-certs.txt.attr \
+        certs/ocsp/openssl.cnf \
+        certs/ocsp/renewcerts-for-test.sh \
+        certs/ocsp/intermediate1-ca-key.pem \
+        certs/ocsp/intermediate1-ca-cert.pem \
+        certs/ocsp/intermediate2-ca-key.pem \
+        certs/ocsp/intermediate2-ca-cert.pem \
+        certs/ocsp/intermediate3-ca-key.pem \
+        certs/ocsp/intermediate3-ca-cert.pem \
+        certs/ocsp/ocsp-responder-key.pem \
+        certs/ocsp/ocsp-responder-cert.pem \
+        certs/ocsp/server1-key.pem \
+        certs/ocsp/server1-cert.pem \
+        certs/ocsp/server2-key.pem \
+        certs/ocsp/server2-cert.pem \
+        certs/ocsp/server3-key.pem \
+        certs/ocsp/server3-cert.pem \
+        certs/ocsp/server4-key.pem \
+        certs/ocsp/server4-cert.pem \
+        certs/ocsp/server5-key.pem \
+        certs/ocsp/server5-cert.pem \
+        certs/ocsp/root-ca-key.pem \
+        certs/ocsp/root-ca-cert.pem \
+        certs/ocsp/test-response.der \
+        certs/ocsp/test-response-rsapss.der \
+        certs/ocsp/test-response-nointern.der \
+        certs/ocsp/test-multi-response.der

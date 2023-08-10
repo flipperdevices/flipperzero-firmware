@@ -1,0 +1,17 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+
+EXTRA_DIST += IDE/iotsafe/README.md
+EXTRA_DIST += IDE/iotsafe/Makefile
+EXTRA_DIST += IDE/iotsafe/target.ld
+
+EXTRA_DIST += IDE/iotsafe/main.c
+EXTRA_DIST += IDE/iotsafe/startup.c
+EXTRA_DIST += IDE/iotsafe/startup.c
+EXTRA_DIST += IDE/iotsafe/memory-tls.c
+EXTRA_DIST += IDE/iotsafe/devices.c
+EXTRA_DIST += IDE/iotsafe/ca-cert.c
+EXTRA_DIST += IDE/iotsafe/devices.h
+EXTRA_DIST += IDE/iotsafe/user_settings.h
+
+DISTCLEANFILES+= IDE/iotsafe/build

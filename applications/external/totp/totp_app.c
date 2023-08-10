@@ -18,6 +18,7 @@
 #include "services/crypto/crypto_facade.h"
 #include "cli/cli.h"
 #include "version.h"
+#include <wolfssl/version.h>
 
 struct TotpRenderCallbackContext {
     FuriMutex* mutex;
@@ -218,6 +219,8 @@ int32_t totp_app() {
         TOTP_APP_VERSION_MAJOR,
         TOTP_APP_VERSION_MINOR,
         TOTP_APP_VERSION_PATCH);
+    FURI_LOG_I(LOGGING_TAG, "WolfSSL version: " LIBWOLFSSL_VERSION_STRING);
+
     PluginState* plugin_state = malloc(sizeof(PluginState));
     furi_check(plugin_state != NULL);
 

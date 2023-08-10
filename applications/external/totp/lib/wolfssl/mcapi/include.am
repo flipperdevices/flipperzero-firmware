@@ -1,0 +1,19 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+if BUILD_MCAPI
+check_PROGRAMS += mcapi/test
+noinst_PROGRAMS += mcapi/test
+mcapi_test_SOURCES = mcapi/crypto.c \
+                     mcapi/mcapi_test.c
+mcapi_test_LDADD        = src/libwolfssl@LIBSUFFIX@.la
+mcapi_test_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+
+noinst_HEADERS += mcapi/crypto.h
+
+EXTRA_DIST += \
+         mcapi/README \
+         mcapi/PIC32MZ-serial.h \
+         mcapi/user_settings.h

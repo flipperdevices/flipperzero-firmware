@@ -1,0 +1,304 @@
+#!/bin/bash
+
+# trusted_peer.test
+# copyright wolfSSL 2016
+
+# if we can, isolate the network namespace to eliminate port collisions.
+if [[ -n "$NETWORK_UNSHARE_HELPER" ]]; then
+     if [[ -z "$NETWORK_UNSHARE_HELPER_CALLED" ]]; then
+         export NETWORK_UNSHARE_HELPER_CALLED=yes
+         exec "$NETWORK_UNSHARE_HELPER" "$0" "$@" || exit $?
+     fi
+elif [ "${AM_BWRAPPED-}" != "yes" ]; then
+    bwrap_path="$(command -v bwrap)"
+    if [ -n "$bwrap_path" ]; then
+        export AM_BWRAPPED=yes
+        exec "$bwrap_path" --unshare-net --dev-bind / / "$0" "$@"
+    fi
+    unset AM_BWRAPPED
+fi
+
+# getting unique port is modeled after resume.test script
+# need a unique port since may run the same time as testsuite
+# use server port zero hack to get one
+port=0
+no_pid=-1
+server_pid=$no_pid
+counter=0
+# let's use absolute path to a local dir (make distcheck may be in sub dir)
+# also let's add some randomness by adding pid in case multiple 'make check's
+# per source tree
+ready_file=`pwd`/wolfssl_tp_ready$$
+
+# variables for certs so can use RSA or ECC
+client_cert=`pwd`/certs/client-cert.pem
+client_ca=`pwd`/certs/ca-cert.pem
+client_key=`pwd`/certs/client-key.pem
+ca_key=`pwd`/certs/ca-key.pem
+server_cert=`pwd`/certs/server-cert.pem
+server_key=`pwd`/certs/server-key.pem
+combined_cert=`pwd`/certs/client_combined.pem
+wrong_ca=`pwd`/certs/wolfssl-website-ca.pem
+wrong_cert=`pwd`/certs/server-revoked-cert.pem
+
+echo "ready file \"$ready_file\""
+
+create_port() {
+    while [ ! -s "$ready_file" -a "$counter" -lt 20 ]; do
+        echo -e "waiting for ready file..."
+        sleep 0.1
+        counter=$((counter+ 1))
+    done
+
+    if test -e "$ready_file"; then
+        echo -e "found ready file, starting client..."
+
+        # sleep for an additional 0.1 to mitigate race on write/read of $ready_file:
+        sleep 0.1
+
+        # get created port 0 ephemeral port
+        port=`cat "$ready_file"`
+    else
+        echo -e "NO ready file ending test..."
+        do_cleanup
+    fi
+}
+
+remove_ready_file() {
+    if test -e "$ready_file"; then
+        echo -e "removing existing ready file"
+    rm "$ready_file"
+    fi
+}
+
+do_cleanup() {
+    echo "in cleanup"
+
+    if  [ $server_pid != $no_pid ]
+    then
+        echo "killing server"
+        kill -9 $server_pid
+    fi
+    remove_ready_file
+}
+
+do_trap() {
+    echo "got trap"
+    do_cleanup
+    exit 1
+}
+
+trap do_trap INT TERM
+
+[ ! -x ./examples/client/client ] && echo -e "\n\nClient doesn't exist" && exit 1
+
+# Look for if RSA and/or ECC is enabled and adjust certs/keys
+ciphers=`./examples/client/client -e`
+if [[  "$ciphers" != *"RSA"* ]]; then
+    if [[ $ciphers == *"ECDSA"* ]]; then
+        client_cert=`pwd`/certs/client-ecc-cert.pem
+        client_ca=`pwd`/certs/server-ecc.pem
+        client_key=`pwd`/certs/ecc-client-key.pem
+        ca_key=`pwd`/certs/ecc-key.pem
+        server_cert=`pwd`/certs/server-ecc.pem
+        server_key=`pwd`/certs/ecc-key.pem
+        wrong_ca=`pwd`/certs/server-ecc-comp.pem
+        wrong_cert=`pwd`/certs/server-ecc-comp.pem
+    else
+        echo "configure options not set up for test. No RSA or ECC"
+        exit 0
+    fi
+fi
+
+# CRL list not set up for tests
+crl_test=`./examples/client/client -h`
+if [[ "$crl_test" == *"-C "* ]]; then
+    echo "test not set up to run with CRL"
+    exit 0
+fi
+
+# Test for trusted peer certs build
+echo ""
+echo "Checking built with trusted peer certs "
+echo "-----------------------------------------------------"
+port=0
+remove_ready_file
+./examples/server/server -E "$client_cert" -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$client_ca" -p $port
+RESULT=$?
+remove_ready_file
+# if fail here then is a settings issue so return 0
+if [ $RESULT -ne 0 ]; then
+    echo -e "\n\nTrusted peer certs not enabled \"WOLFSSL_TRUST_PEER_CERT\""
+    do_cleanup
+    exit 0
+fi
+echo ""
+
+# Test that using no CA's and only trusted peer certs works
+echo "Server and Client relying on trusted peer cert loaded"
+echo "-----------------------------------------------------"
+port=0
+./examples/server/server -A "$wrong_ca" -E "$client_cert" -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$wrong_ca" -E "$server_cert" -c "$client_cert" -p $port
+RESULT=$?
+remove_ready_file
+if [ $RESULT -ne 0 ]; then
+    echo -e "\nServer and Client trusted peer cert failed!"
+    do_cleanup
+    exit 1
+fi
+echo ""
+
+# Test that using server trusted peer certs works
+echo "Server relying on trusted peer cert loaded"
+echo "-----------------------------------------------------"
+port=0
+./examples/server/server -A "$wrong_ca" -E "$client_cert" -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$client_ca" -c "$client_cert" -p $port
+RESULT=$?
+remove_ready_file
+if [ $RESULT -ne 0 ]; then
+    echo -e "\nServer trusted peer cert test failed!"
+    do_cleanup
+    exit 1
+fi
+echo ""
+
+# Test that using client trusted peer certs works
+echo "Client relying on trusted peer cert loaded"
+echo "-----------------------------------------------------"
+port=0
+./examples/server/server -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$wrong_ca" -E "$server_cert" -p $port
+RESULT=$?
+remove_ready_file
+if [ $RESULT -ne 0 ]; then
+    echo -e "\nClient trusted peer cert test failed!"
+    do_cleanup
+    exit 1
+fi
+echo ""
+
+# Test that client fall through to CA works
+echo "Client fall through to loaded CAs"
+echo "-----------------------------------------------------"
+port=0
+./examples/server/server -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$client_ca" -E "$wrong_cert" -p $port
+RESULT=$?
+remove_ready_file
+if [ $RESULT -ne 0 ]; then
+    echo -e "\nClient trusted peer cert fall through to CA test failed!"
+    do_cleanup
+    exit 1
+fi
+echo ""
+
+# Test that client can fail
+# check if using ECC client example is hard coded to load correct ECC ca so skip
+if [[ $wrong_ca != *"ecc"* ]]; then
+echo "Client wrong CA and wrong trusted peer cert loaded"
+echo "-----------------------------------------------------"
+port=0
+./examples/server/server -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$wrong_ca" -E "$wrong_cert" -p $port
+RESULT=$?
+remove_ready_file
+if [ $RESULT -eq 0 ]; then
+    echo -e "\nClient trusted peer cert test failed!"
+    do_cleanup
+    exit 1
+fi
+echo ""
+fi
+
+# Test that server can fail
+echo "Server wrong CA and wrong trusted peer cert loaded"
+echo "-----------------------------------------------------"
+port=0
+./examples/server/server -A "$wrong_ca" -E "$wrong_cert" -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$client_ca" -p $port
+RESULT=$?
+remove_ready_file
+if [ $RESULT -eq 0 ]; then
+    echo -e "\nServer trusted peer cert test failed!"
+    do_cleanup
+    exit 1
+fi
+echo ""
+
+# Test that server fall through to CA works
+echo "Server fall through to loaded CAs"
+echo "-----------------------------------------------------"
+port=0
+./examples/server/server -E "$wrong_cert" -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$client_ca" -p $port
+RESULT=$?
+remove_ready_file
+if [ $RESULT -ne 0 ]; then
+    echo -e "\nServer trusted peer cert fall through to CA test failed!"
+    do_cleanup
+    exit 1
+fi
+echo ""
+
+# test loading multiple certs
+echo "Server loading multiple trusted peer certs"
+echo "Test two success cases and one fail case"
+echo "-----------------------------------------------------"
+port=0
+cat "$client_cert" "$client_ca" > "$combined_cert"
+./examples/server/server -i -A "$wrong_ca" -E "$combined_cert" -c "$server_cert" -k "$server_key" -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -A "$client_ca" -c "$client_cert" -k "$client_key" -p $port
+RESULT=$?
+if [ $RESULT -ne 0 ]; then
+    echo -e "\nServer load multiple trusted peer certs failed!"
+    do_cleanup
+    exit 1
+fi
+./examples/client/client -A "$client_ca" -c "$client_ca" -k "$ca_key"  -p $port
+RESULT=$?
+if [ $RESULT -ne 0 ]; then
+    echo -e "\nServer load multiple trusted peer certs failed!"
+    do_cleanup
+    exit 1
+fi
+./examples/client/client -A "$client_ca" -c "$wrong_cert" -k "$client_key" -p $port
+RESULT=$?
+if [ $RESULT -eq 0 ]; then
+    echo -e "\nServer load multiple trusted peer certs failed!"
+    do_cleanup
+    exit 1
+fi
+
+do_cleanup # kill PID of server running in infinite loop
+rm "$combined_cert"
+remove_ready_file
+echo ""
+
+echo "-----------------------------------------------------"
+echo "ALL TESTS PASSED"
+echo "-----------------------------------------------------"
+
+exit 0
+
+

@@ -1,0 +1,24 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST+= IDE/apple-universal/README.md
+EXTRA_DIST+= IDE/apple-universal/build-wolfssl-framework.sh
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform.xcodeproj/project.pbxproj
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/simple_client_example.c
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/simple_client_example.h
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/wolfssl_test_driver.c
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/wolfssl_test_driver.h
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/wolfssl-multiplatform-Bridging-Header.h
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/wolfssl_multiplatformApp.swift
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/ContentView.swift
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/Assets.xcassets/AppIcon.appiconset/Contents.json
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/Assets.xcassets/AccentColor.colorset/Contents.json
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/Assets.xcassets/Contents.json
+EXTRA_DIST+= IDE/apple-universal/wolfssl-multiplatform/wolfssl-multiplatform/wolfssl_multiplatform.entitlements
+
+
+
+
+

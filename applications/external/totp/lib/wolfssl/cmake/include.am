@@ -1,0 +1,4 @@
+EXTRA_DIST += cmake/Config.cmake.in
+EXTRA_DIST += cmake/config.in
+EXTRA_DIST += cmake/functions.cmake
+EXTRA_DIST += cmake/modules/FindOQS.cmake

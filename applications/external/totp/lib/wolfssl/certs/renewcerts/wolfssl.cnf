@@ -1,0 +1,395 @@
+#
+# wolfssl configuration file
+#
+HOME        = .
+
+oid_section = new_oids
+
+[ new_oids ]
+# Policies used by the TSA examples.
+tsa_policy1 = 1.2.3.4.1
+tsa_policy2 = 1.2.3.4.5.6
+tsa_policy3 = 1.2.3.4.5.7
+
+####################################################################
+[ ca ]
+default_ca  = CA_default        # The default ca section
+
+####################################################################
+[ CA_default ]
+
+####################################################################
+# CHANGE THIS LINE TO BE YOUR WOLFSSL_ROOT DIRECTORY               #
+#                                                                  #
+dir             = $HOME./..                                        #
+####################################################################
+
+certs            = $dir/certs                 # Where the issued certs are kept
+crl_dir          = $dir/certs/crl             # Where the issued crl are kept
+database         = $dir/certs/crl/demoCA/index.txt # database index file.
+
+new_certs_dir    = $dir/certs                 # default place for new certs.
+
+certificate      = $dir/certs/ca-cert.pem     # The CA certificate
+serial           = $dir/certs/serial          # The current serial number
+crlnumber        = $dir/certs/crl/crlnumber   # the current crl number
+
+crl              = $dir/certs/crl/crl.pem     # The current CRL
+private_key      = $dir/certs/ca-key.pem      # The private key
+RANDFILE         = $dir/certs/.rnd            # private random number file
+
+x509_extensions  = usr_cert                   # The extensions to add to the cert
+
+name_opt         = ca_default                 # Subject Name options
+cert_opt         = ca_default                 # Certificate field options
+
+default_days     = 1000                       # how long to certify for
+default_crl_days = 30                         # how long before next CRL
+default_md       = default                    # use public key default MD
+preserve         = no                         # keep passed DN ordering
+policy           = policy_match
+
+# For the CA policy
+[ policy_match ]
+countryName             = match
+stateOrProvinceName     = match
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+# For the 'anything' policy
+[ policy_anything ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+# default req
+[ req ]
+default_bits            = 2048
+default_keyfile         = privkey.pem
+distinguished_name      = req_distinguished_name
+attributes              = req_attributes
+x509_extensions         = v3_ca  # The extensions to add to the self signed cert
+string_mask             = utf8only
+
+#default req_dist_name
+[ req_distinguished_name ]
+countryName                     = Country Name (2 letter code)
+countryName_default             = US
+countryName_min                 = 2
+countryName_max                 = 2
+
+stateOrProvinceName             = State or Province Name (full name)
+stateOrProvinceName_default     = Montana
+
+localityName                    = Locality Name (eg, city)
+localityName_default            = Bozeman
+
+0.organizationName              = Organization Name (eg, company)
+0.organizationName_default      = Sawtooth
+
+organizationalUnitName          = Organizational Unit Name (eg, section)
+organizationalUnitName_default  = Consulting
+
+commonName                      = Common Name (e.g. server FQDN or YOUR name)
+commonName_default              = www.wolfssl.com
+commonName_max                  = 64
+
+emailAddress                    = Email Address
+emailAddress_default            = info@wolfssl.com
+emailAddress_max                = 64
+
+userId                          = User ID
+userId_default                  = wolfSSL
+
+#default req_attr
+[ req_attributes ]
+challengePassword               = A challenge password
+challengePassword_min           = 4
+challengePassword_max           = 20
+unstructuredName                = An optional company name
+
+# These extensions are added when 'ca' signs a request.
+[ usr_cert ]
+basicConstraints=CA:FALSE
+nsComment            = "wolfSSL Generated Certificate using openSSL command line utility."
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+
+#wolfssl extensions
+[wolfssl_opts]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true
+subjectAltName=DNS:example.com, IP:127.0.0.1
+extendedKeyUsage=serverAuth, clientAuth
+
+#wolfssl extensions for intermediate CAs
+[wolfssl_opts_ICA]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 0
+[ pathlen_0 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:0
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 1
+[ pathlen_1 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:1
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 127
+[ pathlen_127 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:127
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 100
+[ pathlen_100 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:100
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 128
+[ pathlen_128 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:128
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 5
+[ pathlen_5 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:5
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 10
+[ pathlen_10 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:10
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 20
+[ pathlen_20 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:20
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 99
+[ pathlen_99 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:99
+keyUsage=keyCertSign, cRLSign
+
+# CA with pathlen 2
+[ pathlen_2 ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true,pathlen:2
+keyUsage=keyCertSign, cRLSign
+
+# test pathlen server cert
+[ test_pathlen ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:false
+
+[ entity_no_CA_BOOL ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=pathlen:0
+keyUsage=digitalSignature
+extendedKeyUsage=clientAuth,serverAuth
+
+# Extensions to add to a certificate request
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+
+# Extensions for a typical CA
+[ v3_ca ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints = CA:true
+
+# CRL extensions.
+[ crl_ext ]
+authorityKeyIdentifier=keyid:always
+
+# These extensions should be added when creating a proxy certificate
+[ proxy_cert_ext ]
+basicConstraints=CA:FALSE
+nsComment            = "wolfSSL Generated Certificate using openSSL command line utility"
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
+proxyCertInfo=critical,language:id-ppl-anyLanguage,pathlen:3,policy:foo
+
+# Test of rejecting duplicate policy extension OIDs
+[ policy_test ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:FALSE
+certificatePolicies=1.2.3.4,@policy_add
+
+[ policy_add ]
+policyIdentifier=1.2.3.4
+CPS.1="www.wolfssl.com"
+userNotice.1=@policy_usr
+
+[ policy_usr ]
+explicitText="Test of duplicate OIDs with different qualifiers"
+
+# create certificate without the digitalSignature bit set and uses sha1 sig
+[ digsigku ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=critical, CA:TRUE
+keyUsage=critical, nonRepudiation, keyEncipherment
+
+# ca-ecc-cert extensions
+[ ca_ecc_cert ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always
+basicConstraints=critical, CA:TRUE
+keyUsage=critical, digitalSignature, keyCertSign, cRLSign
+
+# server-ecc extensions
+[ server_ecc ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always
+basicConstraints=critical, CA:FALSE
+keyUsage=critical, digitalSignature, keyEncipherment, keyAgreement
+extendedKeyUsage=serverAuth
+nsCertType=server
+
+# client-ecc extensions
+[ client_ecc ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always
+basicConstraints=critical, CA:FALSE
+keyUsage=critical, digitalSignature, keyEncipherment, keyAgreement
+extendedKeyUsage=clientAuth
+
+# test parsing URI
+[ uri ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:false
+subjectAltName=URI:https://www.wolfssl.com
+
+# test parsing absolute URN
+[ absolute_urn ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:false
+subjectAltName=URI:urn:example:test
+
+# test parsing relative URI
+[ relative_uri ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:false
+subjectAltName=URI:../relative/page.html
+
+# client cert ext
+[ client_cert_ext ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer:always
+basicConstraints=CA:true
+subjectAltName=DNS:example.com
+keyUsage=critical, digitalSignature, keyCertSign, cRLSign
+
+# test CRL distribution points
+[ crl_dist_points ]
+crlDistributionPoints=URI:http://www.wolfssl.com/crl.pem
+
+#tsa default
+[ tsa ]
+default_tsa = tsa_config1
+
+# These are used by the TSA reply generation only.
+[ tsa_config1 ]
+dir                     = ./demoCA                              # directory
+serial                  = $dir/tsaserial                        # (mandatory)
+crypto_device           = builtin                               # engine
+signer_cert             = $dir/tsacert.pem                      # certificate
+certs                   = $dir/cacert.pem                       # chain
+signer_key              = $dir/private/tsakey.pem               # (optional)
+default_policy          = tsa_policy1                           # Policy
+other_policies          = tsa_policy2, tsa_policy3              # (optional)
+digests                 = md5, sha1                             # (mandatory)
+accuracy                = secs:1, millisecs:500, microsecs:100  # (optional)
+clock_precision_digits  = 0                                     # (optional)
+ordering                = yes                                   # timestamps?
+tsa_name                = yes                                   # include?
+ess_cert_id_chain       = no                                    # include chain?
+
+
+[fpki_ext]
+basicConstraints = CA:FALSE,pathlen:0
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+keyUsage = critical, digitalSignature
+extendedKeyUsage = critical, clientAuth, 1.3.6.1.4.1.311.20.2.2, 1.3.6.1.5.2.3.4, 1.3.6.1.5.5.7.3.21
+subjectAltName = @FASC_UUID_altname
+certificatePolicies = 2.16.840.1.101.3.2.1.3.13, 2.16.840.1.101.3.2.1.3.40, 2.16.840.1.101.3.2.1.3.41, 2.16.840.1.101.3.2.1.3.45
+subjectDirectoryAttributes = ASN1:SEQUENCE:SubjDirAttr
+policyConstraints = requireExplicitPolicy:0
+2.16.840.1.101.3.6.10.1 = ASN1:SEQUENCE:PIVCertExt
+
+# using example UUID from RFC4122
+[FASC_UUID_altname]
+otherName.1 = 1.3.6.1.4.1.311.20.2.3;UTF8:facts@wolfssl.com
+otherName.2 = 2.16.840.1.101.3.6.6;FORMAT:HEX,OCT:D1:38:10:D8:28:AF:2C:10:84:35:15:A1:68:58:28:AF:02:10:86:A2:84:E7:39:C3:EB
+URI = urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+
+[SubjDirAttr]
+attribute = SEQUENCE:SDA_attr
+
+[SDA_attr]
+type = OID:1.3.6.1.5.5.7.9.4
+values = SET:SDA_coc
+
+[SDA_coc]
+value = PRINTABLESTRING:US
+
+[PIVCertExt]
+attribute = SEQUENCE:PCE_attr
+
+[PCE_attr]
+type = OID:2.16.840.1.101.3.6.9.1
+value = BOOLEAN:true
+
+[rid_ext]
+basicConstraints = CA:FALSE,pathlen:0
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid
+keyUsage = critical, digitalSignature
+subjectAltName = @RID_altname
+
+[RID_altname]
+otherName.1 = 1.3.6.1.4.1.311.20.2.3;UTF8:facts@wolfssl.com
+RID.1 = 1.2.3.4.5
+DNS.1 = www.example.org
+URI.1 = https://www.wolfssl.com/
+otherName.2 = 2.16.840.1.101.3.6.6;FORMAT:HEX,OCT:D1:38:10:D8:28:AF:2C:10:84:35:15:A1:68:58:28:AF:02:10:86:A2:84:E7:39:C3:EB
+
+

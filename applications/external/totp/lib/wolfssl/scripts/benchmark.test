@@ -1,0 +1,117 @@
+#!/bin/sh
+
+#benchmark.test
+
+if [ "$#" -lt 2 ]; then
+    echo "Usage: $0 [mode] [num] [clientargs] [serverargs]" >&2
+    echo "    [mode]: 1=Connection Rate (TPS), 2=Throughput Bytes" >&2
+    echo "    [num]: Mode 1=Connection Count, Mode 2=Bytes to TX/RX" >&2
+    echo "    [clientargs]: Passed to client (see \"./example/client/client -?\" for help)" >&2
+    echo "                  Example: Use different cipher suite: \"-l DHE-RSA-AES256-SHA\"" >&2
+    echo "    [serverargs]: Passed to server (see \"./example/server/server -?\" for help)" >&2
+    echo "                  Example: Disable client certificate check: \"-d\"" >&2
+    echo "Note: If additional client or server args contains spaces wrap with double quotes" >&2
+    exit 1
+fi
+
+# Use unique benchmark port so it won't conflict with any other tests
+bench_port=11113
+no_pid=-1
+server_pid=$no_pid
+counter=0
+client_result=-1
+
+remove_ready_file() {
+    if test -e /tmp/wolfssl_server_ready; then
+        echo "removing existing server_ready file"
+        rm /tmp/wolfssl_server_ready
+    fi
+}
+
+
+do_cleanup() {
+    echo "in cleanup"
+
+    if  [ $server_pid != $no_pid ]
+    then
+        echo "killing server"
+        kill -9 $server_pid
+    fi
+    remove_ready_file
+}
+
+do_trap() {
+    echo "got trap"
+    do_cleanup
+    exit 1
+}
+
+trap do_trap INT TERM
+
+# Start server in loop continuous mode (-L) with echo data (-e) enabled and non-blocking (-N)
+echo "\nStarting example server for benchmark test"
+remove_ready_file
+# benchmark connections
+if [ $1 -eq 1 ]
+then
+    # start server in loop mode with port
+    ./examples/server/server -i -p $bench_port $4 &
+    server_pid=$!
+fi
+
+# benchmark throughput
+if [ $1 -eq 2 ]
+then
+    # start server in loop mode, non-blocking, benchmark throughput with port
+    ./examples/server/server -i -N -B $2 -p $bench_port $4 &
+    server_pid=$!
+fi
+
+# NOTE: We sleep for 2 seconds below. If timing the execution of this script
+#       with "time", bear in mind that those 2 seconds will be reflected in
+#       the "real" time.
+echo "Waiting for server_ready file..."
+while [ ! -s /tmp/wolfssl_server_ready -a "$counter" -lt 20 ]; do
+    sleep 0.1
+    counter=$((counter+ 1))
+done
+
+# benchmark connections
+if [ $1 -eq 1 ]
+then
+    echo "Starting example client to benchmark connection average time"
+    # start client to benchmark average time for each connection using port
+    ./examples/client/client -b $2 -p $bench_port $3
+    client_result=$?
+fi
+
+# benchmark throughput
+if [ $1 -eq 2 ]
+then
+    echo "Starting example client to benchmark throughput"
+    # start client in non-blocking mode, benchmark throughput using port
+    ./examples/client/client -N -B $2 -p $bench_port $3
+    client_result=$?
+fi
+
+if [ $client_result != 0 ]
+then
+    echo "Client failed!"
+    do_cleanup
+    exit 1
+fi
+
+# End server
+kill -6 $server_pid
+server_result=$?
+remove_ready_file
+
+if [ $server_result != 0 ]
+then
+    echo "Server failed!"
+    exit 1
+fi
+
+echo "\nSuccess!\n"
+
+exit 0

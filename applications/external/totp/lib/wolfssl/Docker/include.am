@@ -1,0 +1,11 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= Docker/Dockerfile
+EXTRA_DIST+= Docker/run.sh
+EXTRA_DIST+= Docker/README.md
+
+ignore_files+=Docker/OpenWRT/Dockerfile
+ignore_files+=Docker/OpenWRT/runTests.sh
+ignore_files+=Docker/OpenWRT/README.md

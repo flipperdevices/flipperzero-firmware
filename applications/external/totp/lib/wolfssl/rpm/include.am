@@ -1,0 +1,29 @@
+# vim:ft=automake
+
+rpm-build: rpm/spec dist
+	@rm -f *.rpm
+	rpmdev-setuptree
+	find ~/rpmbuild/RPMS ~/rpmbuild/SRPMS -name "$(PACKAGE)-$(VERSION)*.rpm" | xargs rm -f
+	@cp $(PACKAGE)-$(VERSION).tar.gz ~/rpmbuild/SOURCES/
+	@rpmbuild -ba --clean rpm/spec
+	@cp ~/rpmbuild/RPMS/*/$(PACKAGE)-$(VERSION)*.rpm .
+	@cp ~/rpmbuild/RPMS/*/$(PACKAGE)-devel-$(VERSION)*.rpm .
+	@cp ~/rpmbuild/RPMS/*/$(PACKAGE)-debuginfo-$(VERSION)*.rpm .
+	@cp ~/rpmbuild/SRPMS/$(PACKAGE)-$(VERSION)*.rpm .
+
+rpm-sign: rpm-build
+	@rpm --addsign *.rpm
+	@rpm --checksig *.rpm
+
+clean-rpm:
+	@rm -f *.tar.gz
+	@rm -f *.src.rpm
+	@rm -f *.rpm
+
+rpm: rpm-build
+
+release: rpm-sign
+
+auto-rpmbuild:
+	@auto-br-rpmbuild -ba rpm/spec
+

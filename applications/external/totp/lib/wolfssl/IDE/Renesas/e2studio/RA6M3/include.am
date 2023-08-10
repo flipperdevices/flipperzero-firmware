@@ -1,0 +1,35 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/benchmark-wolfcrypt/src/wolfssl_thread_entry.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/benchmark-wolfcrypt/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/benchmark-wolfcrypt/.project
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/client-wolfssl/src/wolfssl_thread_entry.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/client-wolfssl/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/client-wolfssl/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/client-wolfssl/wolfssl_thread_entry.h
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/common/ra6m3g/README.md
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/common/src/freertos_tcp_port.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/common/user_settings.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/common/util.h
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/server-wolfssl/src/wolfssl_thread_entry.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/server-wolfssl/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/server-wolfssl/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/server-wolfssl/wolfssl_thread_entry.h
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/test-wolfcrypt/src/wolfssl_thread_entry.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/test-wolfcrypt/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/test-wolfcrypt/.project
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/wolfssl/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/wolfssl/.project
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/README.md
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3G/README.md
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/README_APRA6M_en.md
+EXTRA_DIST+= IDE/Renesas/e2studio/RA6M3/README_APRA6M_jp.md

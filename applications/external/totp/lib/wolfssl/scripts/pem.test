@@ -1,0 +1,459 @@
+#!/bin/bash
+
+# pem.test
+# Copyright wolfSSL 2023-2023
+
+tmp_file=./pem_test.$$
+tmp_der_file=./pem_test_out_der.$$
+tmp_pem_file=./pem_test_out_pem.$$
+PEM_EXE=./examples/pem/pem
+ASN1_EXE=./examples/asn1/asn1
+TEST_CNT=0
+TEST_PASS_CNT=0
+TEST_SKIP_CNT=0
+TEST_FAIL_CNT=0
+TEST_FAIL=
+TEST_CASES=()
+RUN_ALL="YES"
+CR=$'\n'
+ENC_STRING="encrypt"
+DER_TO_PEM_STRING="input is DER and output is PEM"
+
+# Cleanup temporaries created during testing.
+do_cleanup() {
+    echo
+    echo "in cleanup"
+
+    if [ -e "$tmp_der_file" ]; then
+        echo -e "removing existing temporary DER output file"
+        rm "$tmp_der_file"
+    fi
+    if [ -e "$tmp_pem_file" ]; then
+        echo -e "removing existing temporary PEM output file"
+        rm "$tmp_pem_file"
+    fi
+    if [ -e "$tmp_file" ]; then
+        echo -e "removing existing temporary output file"
+        rm "$tmp_file"
+    fi
+}
+
+# Called when a signal is trapped.
+do_trap() {
+    echo
+    echo "got trap"
+    do_cleanup
+    exit 1
+}
+
+# Trap keyboard interrupt and termination signal.
+trap do_trap INT TERM
+
+# Check the usage text for a string to determine feature support.
+#
+# @param [in] $1  String to search for,
+# @return  1 when string is found.
+# @return  0 otherwise.
+check_usage_string() {
+    $PEM_EXE -? | grep "$1" >$tmp_file 2>&1
+    if [ "$?" = "0" ]; then
+        return 1
+    fi
+    return 0
+}
+
+# Check whether the test case is to be run.
+# When command line parameters given - only run those.
+#
+# @return  1 when test case is to be run.
+# @return  0 otherwise.
+check_run() {
+    # When RUN_ALL set them all test cases are run.
+    if [ "$RUN_ALL" != "" ]; then
+       return 1
+    else
+       # Check if test case number in list.
+       for T in "${TEST_CASE[@]}"; do
+           if [ "$T" = "$TEST_CNT" ]; then
+               return 1
+           fi
+       done
+       return 0
+    fi
+}
+
+# Setup for new test case.
+#
+# @param [in] $*  Name of test case.
+test_setup() {
+    TEST_CNT=$((TEST_CNT+1))
+    TEST_DESC="$TEST_CNT: $*"
+    FAILED=
+    SKIP=
+
+    if [ "$USAGE_STRING" != "" ]; then
+        # Check usage output for string to see whether we have to skip test case
+        # due to wolfSSL missing features.
+        check_usage_string "$USAGE_STRING"
+        if [ "$?" = "0" ] ; then
+            echo
+            echo "$TEST_DESC"
+            echo "SKIPPED"
+            SKIP="missing feature"
+        fi
+        USAGE_STRING=
+    fi
+
+    if [ "$SKIP" = "" ]; then
+        # Check whether this test case is to be run.
+        check_run
+        if [ "$?" = "1" ]; then
+            echo
+            echo "$TEST_DESC"
+            TEST_PASS_CNT=$((TEST_PASS_CNT+1))
+        else
+            SKIP="not requested"
+        fi
+    fi
+
+    # Handle skipping
+    if [ "$SKIP" != "" ]; then
+        TEST_SKIP_CNT=$((TEST_SKIP_CNT+1))
+    fi
+}
+
+# Handle when a test case failed.
+test_fail() {
+    if [ "$SKIP" = "" -a "$FAILED" = "" ]; then
+        TEST_PASS_CNT=$((TEST_PASS_CNT-1))
+        TEST_FAIL_CNT=$((TEST_FAIL_CNT+1))
+        TEST_FAIL="$TEST_FAIL$CR  $TEST_DESC"
+        FAILED=yes
+    fi
+}
+
+# Use asn1 to check DER produced is valid.
+check_der() {
+    $ASN1_EXE $tmp_der_file >$tmp_file 2>&1
+    if [ "$?" != "0" ]; then
+        echo
+        echo "  DER result bad"
+        test_fail
+    fi
+}
+
+# Convert PEM file to DER
+#
+# @param [in] $*  Command line parameters to pem example.
+convert_to_der() {
+    if [ "$SKIP" = "" -a "$FAILED" = "" ]; then
+        echo "    $PEM_EXE $* -out $tmp_pem_file"
+        $PEM_EXE "$@" -out $tmp_der_file
+        if [ "$?" != "0" ]; then
+            echo "  Failed to convert to DER"
+            test_fail
+        fi
+        check_der
+    fi
+}
+
+# Compare generated DER file to existing file.
+#
+# @param [in] $1  File to compare to.
+compare_der() {
+    diff $tmp_der_file $1
+    if [ "$?" != "0" ]; then
+        echo "  Created DER file different from expected"
+        test_fail
+    fi
+}
+
+# Convert DER file to PEM
+#
+# PEM_TYPE contains PEM header to encode.
+#
+# @param [in] $*  Command line parameters to pem example.
+convert_to_pem() {
+    if [ "$SKIP" = "" -a "$FAILED" = "" ]; then
+        echo "    $PEM_EXE --der -t \"$PEM_TYPE\" $* -out $tmp_pem_file"
+        $PEM_EXE --der "$@" -t "$PEM_TYPE" -out $tmp_pem_file
+        if [ "$?" != "0" ]; then
+            test_fail
+        fi
+    fi
+}
+
+# Compare generated PEM file to existing file.
+compare_pem() {
+    diff $tmp_pem_file $1 >$tmp_file 2>&1
+    if [ "$?" != "0" ]; then
+        cat $tmp_file
+        echo
+        echo "  Created PEM file different from expected"
+        test_fail
+    fi
+}
+
+# Convert to and from PEM and DER and compare to file containing expected DER.
+#
+# @param [in] $1  Name of PEM file to read.
+# @param [in] $2  Name of DER file to compare to.
+# @param [in] $3  PEM type expected in PEM file and to place in created PEM
+#                 file.
+pem_der_exp() {
+    if [ "$SKIP" = "" -a "$FAILED" = "" ]; then
+        PEM_FILE=$1
+        DER_FILE=$2
+        PEM_TYPE="$3"
+
+        # Convert PEM to DER
+        convert_to_der -in $PEM_FILE
+        if [ "$FAILED" = "" ]; then
+          # On success, compare to DER file.
+          compare_der $DER_FILE
+        fi
+        # Check if converting from DER to PEM is supported.
+        check_usage_string $DER_TO_PEM_STRING
+        if [ "$?" = "1" ]; then
+            if [ "$FAILED" = "" ]; then
+                # Convert expected DER file to PEM
+                convert_to_pem -in $DER_FILE
+            fi
+            if [ "$FAILED" = "" ]; then
+                # On success, compare to original PEM file.
+                compare_pem $PEM_FILE
+            fi
+        fi
+    fi
+}
+
+# Convert DER to encrypted PEM.
+#
+# @param [in] $@  Command line parameters to pem example when encrypting.
+der_pem_enc() {
+    PEM_TYPE="ENCRYPTED PRIVATE KEY"
+    convert_to_pem -in ./certs/server-key.der -p yassl123 "$@"
+    convert_to_der -in $tmp_pem_file -p yassl123
+}
+
+
+################################################################################
+
+# Check for pem example - can't test without it.
+if [ ! -x $PEM_EXE ]; then
+    echo "PEM example not available, won't run"
+    exit 77
+fi
+# Check for asn1 example - don't want to test without it.
+if [ ! -x $ASN1_EXE ]; then
+    echo "ASN.1 example not available, won't run"
+    exit 77
+fi
+
+# Check the available features compiled into pem example.
+echo "wolfSSL features:"
+check_usage_string $DER_TO_PEM_STRING
+if [ "$?" = "1" ]; then
+    echo "  Conversion from DER to PEM support compiled in."
+else
+    echo "  Conversion from DER to PEM support NOT compiled in."
+fi
+check_usage_string $ENC_STRING
+if [ "$?" = "1" ]; then
+    echo "  Encryption support compiled in."
+else
+    echo "  Encryption support NOT compiled in."
+fi
+echo
+
+# Command line parameters are test cases to run.
+while [ $# -gt 0 ]; do
+    TEST_CASE[${#TEST_CASE[@]}]=$1
+    RUN_ALL=
+    shift 1
+done
+
+
+test_setup "Convert PEM certificate (first of many) to DER"
+convert_to_der -in ./certs/server-cert.pem
+
+test_setup "Convert PEM certificate (second of many) to DER"
+convert_to_der -in ./certs/server-cert.pem --offset 6000
+
+test_setup "RSA private key"
+pem_der_exp ./certs/server-key.pem \
+            ./certs/server-key.der "RSA PRIVATE KEY"
+
+test_setup "RSA public key"
+pem_der_exp ./certs/server-keyPub.pem \
+            ./certs/server-keyPub.der "RSA PUBLIC KEY"
+
+test_setup "DH parameters"
+pem_der_exp ./certs/dh3072.pem \
+            ./certs/dh3072.der "DH PARAMETERS"
+
+test_setup "X9.42 parameters"
+pem_der_exp ./certs/x942dh2048.pem \
+            ./certs/x942dh2048.der "X9.42 DH PARAMETERS"
+
+USAGE_STRING="  DSA PARAMETERS"
+test_setup "DSA parameters"
+pem_der_exp ./certs/dsaparams.pem \
+            ./certs/dsaparams.der "DSA PARAMETERS"
+
+USAGE_STRING="  DSA PRIVATE KEY"
+test_setup "DSA private key"
+pem_der_exp ./certs/1024/dsa1024.pem \
+            ./certs/1024/dsa1024.der "DSA PRIVATE KEY"
+
+USAGE_STRING="  EC PRIVATE KEY"
+test_setup "ECC private key"
+pem_der_exp ./certs/ecc-keyPkcs8.pem \
+            ./certs/ecc-keyPkcs8.der "PRIVATE KEY"
+
+USAGE_STRING="  EC PRIVATE KEY"
+test_setup "EC PRIVATE KEY"
+pem_der_exp ./certs/ecc-privkey.pem \
+            ./certs/ecc-privkey.der "EC PRIVATE KEY"
+
+USAGE_STRING="  EC PARAMETERS"
+test_setup "ECC parameters"
+pem_der_exp ./certs/ecc-params.pem \
+            ./certs/ecc-params.der "EC PARAMETERS"
+
+test_setup "ECC public key"
+pem_der_exp ./certs/ecc-keyPub.pem \
+            ./certs/ecc-keyPub.der "PUBLIC KEY"
+
+test_setup "Ed25519 public key"
+pem_der_exp ./certs/ed25519/client-ed25519-key.pem \
+            ./certs/ed25519/client-ed25519-key.der 'PUBLIC KEY'
+
+test_setup "Ed25519 private key"
+pem_der_exp ./certs/ed25519/client-ed25519-priv.pem \
+            ./certs/ed25519/client-ed25519-priv.der 'PRIVATE KEY'
+
+USAGE_STRING="  EDDSA PRIVATE KEY"
+test_setup "EdDSA private key"
+pem_der_exp ./certs/ed25519/eddsa-ed25519.pem \
+            ./certs/ed25519/eddsa-ed25519.der 'EDDSA PRIVATE KEY'
+
+test_setup "Ed448 public key"
+pem_der_exp ./certs/ed448/client-ed448-key.pem \
+            ./certs/ed448/client-ed448-key.der 'PUBLIC KEY'
+
+test_setup "Ed448 private key"
+pem_der_exp ./certs/ed448/client-ed448-priv.pem \
+            ./certs/ed448/client-ed448-priv.der 'PRIVATE KEY'
+
+USAGE_STRING="  CERTIFICATE REQUEST"
+test_setup "Certificate Request"
+pem_der_exp ./certs/csr.dsa.pem \
+            ./certs/csr.dsa.der 'CERTIFICATE REQUEST'
+
+USAGE_STRING="  X509 CRL"
+test_setup "X509 CRL"
+pem_der_exp ./certs/crl/caEccCrl.pem \
+            ./certs/crl/caEccCrl.der 'X509 CRL'
+
+USAGE_STRING=$ENC_STRING
+test_setup "Encrypted Key with header"
+convert_to_der -in ./certs/server-keyEnc.pem -p yassl123 --padding
+
+USAGE_STRING=$ENC_STRING
+test_setup "Encrypted Key - PKCS#8"
+convert_to_der -in ./certs/server-keyPkcs8Enc.pem -p yassl123
+
+USAGE_STRING=$ENC_STRING
+test_setup "Encrypted Key - PKCS#8 (PKCS#12 PBE)"
+convert_to_der -in ./certs/server-keyPkcs8Enc12.pem -p yassl123
+
+USAGE_STRING="PBES1_MD5_DES"
+test_setup "Encrypted Key - PKCS#8 (PKCS#5 PBES1-MD5-DES)"
+convert_to_der -in ./certs/ecc-keyPkcs8Enc.pem -p yassl123
+
+USAGE_STRING=" DES3"
+test_setup "Encrypted Key - PKCS#8 (PKCS#5v2 PBE-SHA1-DES3)"
+convert_to_der -in ./certs/server-keyPkcs8Enc2.pem -p yassl123
+
+USAGE_STRING="AES-256-CBC"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (Default: PKCS#5 PBES2 AES-256-CBC)"
+der_pem_enc
+
+USAGE_STRING="AES-256-CBC"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 - Large salt"
+der_pem_enc -s 16
+
+USAGE_STRING="AES-256-CBC"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 - 10000 iterations (DER encoding check)"
+der_pem_enc -i 10000
+
+USAGE_STRING="AES-256-CBC"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 - 100 iterations (DER encoding check)"
+der_pem_enc -i 100
+
+USAGE_STRING="AES-128-CBC"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (PKCS#5 PBES2 AES-128-CBC)"
+der_pem_enc --pbe-alg AES-128-CBC
+
+USAGE_STRING="DES"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (PKCS#5 PBES2 DES)"
+der_pem_enc --pbe-alg DES
+
+
+USAGE_STRING="DES3"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (PKCS#5 PBES2 DES3)"
+der_pem_enc --pbe-alg DES3
+
+USAGE_STRING="PBES1_MD5_DES"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (PKCS#5 PBES1-MD5-DES)"
+der_pem_enc --pbe PBES1_MD5_DES
+
+USAGE_STRING="PBES1_SHA1_DES"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (PKCS#5 PBES1-SHA1-DES)"
+der_pem_enc --pbe PBES1_SHA1_DES
+
+USAGE_STRING="  SHA1_RC4_128"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (PKCS#12 PBE-SHA1-RC4-128)"
+der_pem_enc --pbe-ver PKCS12 --pbe SHA1_RC4_128
+
+USAGE_STRING="  SHA1_DES3"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (PKCS#12 PBE-SHA1-DES3)"
+der_pem_enc --pbe-ver PKCS12 --pbe SHA1_DES3
+
+USAGE_STRING="SHA1_40RC2_CBC"
+PEM_TYPE="ENCRYPTED PRIVATE KEY"
+test_setup "Encrypt Key - PKCS#8 (PKCS#12 PBE-SHA1-40RC2-CBC)"
+der_pem_enc --pbe-ver PKCS12 --pbe SHA1_40RC2_CBC
+
+# Note: PKCS#12 with SHA1_DES doesn't work as we encode as PKCS#5 SHA1_DES as
+# ids are the same
+
+
+# Report results
+echo
+if [ "$TEST_SKIP_CNT" = "0" ]; then
+    echo "RESULT: $TEST_PASS_CNT/$TEST_CNT (pass/total)"
+else
+    echo "RESULT: $TEST_PASS_CNT/$TEST_SKIP_CNT/$TEST_CNT (pass/skip/total)"
+fi
+if [ "$TEST_FAIL_CNT" != "0" ]; then
+    echo "FAILURES ($TEST_FAIL_CNT):$TEST_FAIL"
+else
+    echo "PASSED"
+fi
+
+# Cleanup temporaries
+do_cleanup
+

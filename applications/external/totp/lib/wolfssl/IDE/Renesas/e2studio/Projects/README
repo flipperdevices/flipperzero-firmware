@@ -1,0 +1,18 @@
+This is procedure how to build wolfssl and test project on Renesas e2studio.
+
+wolfssl:
+  Build wolfssl.lib
+
+test:
+  Get missing files 
+  - create DUMMY project
+  - copy generate directory of DUMMY project under src directory of test project 
+  - uncomment "Use SIM I/O" lines in resetprg.c
+  - set heap size in sbrk.h
+  - set stack size in stacksct.h
+  - replace lowlvl.src with sample project's lowlvl.src which you can download below.
+    https://www.renesas.com/jp/ja/software/D3012028.html
+    * copy lowlvl.c and lowlvl.h in sample project's above into src directory of test project too.
+  Build test wolfCrypt
+
+Setting MPU: R5F565MLCxFC or R5F571MLDxFC

@@ -1,0 +1,15 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+
+if BUILD_THREADED_EXAMPLES
+noinst_PROGRAMS += examples/benchmark/tls_bench
+noinst_HEADERS += examples/benchmark/tls_bench.h
+examples_benchmark_tls_bench_SOURCES      = examples/benchmark/tls_bench.c
+examples_benchmark_tls_bench_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD)
+examples_benchmark_tls_bench_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+
+dist_example_DATA+= examples/benchmark/tls_bench.c
+DISTCLEANFILES+= examples/benchmark/.libs/tls_bench

@@ -1,0 +1,17 @@
+{
+  "SchemaVersion": 1,
+  "Name": "wolfSSL_Client",
+  "ComponentId": "00000000-0000-0000-0000-000000000002",
+  "EntryPoint": "/bin/app",
+  "CmdArgs": [],
+  "Capabilities": {
+    "AllowedConnections": [
+      "www.wolfssl.com",
+      "192.168.1.128",
+      "192.168.1.150",
+      "192.168.1.200",
+      "192.168.1.225"
+    ]
+  },
+  "ApplicationType": "Default"
+}

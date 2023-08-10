@@ -1,0 +1,247 @@
+# Set to @ if you want to suppress command echo
+CMD_ECHO =
+
+# Important directories
+BUILD_DIR = ./Build
+
+# Toolchain location and prefix
+#TOOLCHAIN =
+TOOLCHAIN ?= /opt/gcc-arm-none-eabi/bin/arm-none-eabi-
+
+# Tools selection
+CC = $(TOOLCHAIN)gcc
+AS = $(CC)
+LD = $(CC)
+AR = $(TOOLCHAIN)ar
+NM = $(TOOLCHAIN)nm
+OBJCOPY ?= $(TOOLCHAIN)objcopy
+OBJDUMP ?= $(TOOLCHAIN)objdump
+SIZE ?= $(TOOLCHAIN)size
+
+# Includes
+USER_SETTINGS_DIR ?= ./Header
+INC = -I$(USER_SETTINGS_DIR) \
+      -I../..
+
+# Defines
+DEF = -DWOLFSSL_USER_SETTINGS
+
+# Architecture
+ARCHFLAGS ?= -mcpu=cortex-m4 -mthumb -mabi=aapcs -DUSE_WOLF_ARM_STARTUP
+#ARCHFLAGS = -mcpu=cortex-m0 -mthumb -mabi=aapcs -DUSE_WOLF_ARM_STARTUP
+#ARCHFLAGS = -mcpu=cortex-r5 -mthumb -mabi=aapcs
+#ARCHFLAGS = -mcpu=cortex-a53 -mthumb -mabi=aapcs
+
+# Compiler and linker flags
+ASFLAGS ?= $(ARCHFLAGS)
+CFLAGS_EXTRA ?= -Wno-cpp
+CFLAGS ?= $(ARCHFLAGS) -std=gnu99 -Wall $(CFLAGS_EXTRA)
+LDFLAGS ?= $(ARCHFLAGS)
+
+FIPS?=1
+# LD: Link with nosys
+LDFLAGS += --specs=nosys.specs
+
+# LD: Link with nano or rdimon implementation for standard library
+LDFLAGS += --specs=nano.specs
+#LDFLAGS += --specs=rdimon.specs
+
+# LD: generate map
+LDFLAGS += -Wl,-Map=$(BUILD_DIR)/$(BIN).map
+
+# LD: Entry point
+LDFLAGS += -Wl,-ereset_handler
+
+# Math lib (for DH)
+LIBS = -lm
+
+# Memory Map
+SRC_LD = -T./linker.ld
+
+# Optimization level and place functions / data into separate sections to allow dead code removal
+CFLAGS += -Os -ffunction-sections -fdata-sections -fno-builtin
+# Remove unused sections and link time optimizations
+LDFLAGS += -Wl,--gc-sections -flto
+
+# Debugging
+#DBGFLAGS = -ggdb -g3
+CFLAGS += $(DBGFLAGS)
+LDFLAGS += $(DBGFLAGS)
+
+
+# FILES
+
+# Port and Test/Benchmark
+ifndef NO_EXAMPLES
+SRC_C += ./Source/wolf_main.c
+SRC_C += ./Source/armtarget.c
+SRC_C += ../../wolfcrypt/test/test.c
+SRC_C += ../../wolfcrypt/benchmark/benchmark.c
+endif
+
+# WOLFSSL TLS FILES
+SRC_C += ../../src/bio.c
+SRC_C += ../../src/crl.c
+SRC_C += ../../src/internal.c
+SRC_C += ../../src/keys.c
+SRC_C += ../../src/ocsp.c
+SRC_C += ../../src/sniffer.c
+SRC_C += ../../src/ssl.c
+SRC_C += ../../src/tls.c
+SRC_C += ../../src/tls13.c
+SRC_C += ../../src/wolfio.c
+
+# wolfCrypt Core (FIPS)
+ifeq "$(FIPS)" "1"
+SRC_C += ../../wolfcrypt/src/wolfcrypt_first.c
+endif
+SRC_C += ../../wolfcrypt/src/aes.c
+SRC_C += ../../wolfcrypt/src/cmac.c
+SRC_C += ../../wolfcrypt/src/des3.c
+SRC_C += ../../wolfcrypt/src/dh.c
+SRC_C += ../../wolfcrypt/src/ecc.c
+SRC_C += ../../wolfcrypt/src/hmac.c
+SRC_C += ../../wolfcrypt/src/kdf.c
+SRC_C += ../../wolfcrypt/src/random.c
+SRC_C += ../../wolfcrypt/src/rsa.c
+SRC_C += ../../wolfcrypt/src/sha.c
+SRC_C += ../../wolfcrypt/src/sha256.c
+SRC_C += ../../wolfcrypt/src/sha512.c
+SRC_C += ../../wolfcrypt/src/sha3.c
+ifeq "$(FIPS)" "1"
+SRC_C += ../../wolfcrypt/src/fips.c
+SRC_C += ../../wolfcrypt/src/fips_test.c
+SRC_C += ../../wolfcrypt/src/wolfcrypt_last.c
+endif
+
+# wolfCrypt Additional
+SRC_C += ../../wolfcrypt/src/asm.c
+SRC_C += ../../wolfcrypt/src/asn.c
+SRC_C += ../../wolfcrypt/src/blake2s.c
+SRC_C += ../../wolfcrypt/src/chacha.c
+SRC_C += ../../wolfcrypt/src/chacha20_poly1305.c
+SRC_C += ../../wolfcrypt/src/coding.c
+SRC_C += ../../wolfcrypt/src/compress.c
+SRC_C += ../../wolfcrypt/src/cpuid.c
+SRC_C += ../../wolfcrypt/src/cryptocb.c
+SRC_C += ../../wolfcrypt/src/curve25519.c
+SRC_C += ../../wolfcrypt/src/curve448.c
+SRC_C += ../../wolfcrypt/src/ecc_fp.c
+SRC_C += ../../wolfcrypt/src/eccsi.c
+SRC_C += ../../wolfcrypt/src/ed25519.c
+SRC_C += ../../wolfcrypt/src/ed448.c
+SRC_C += ../../wolfcrypt/src/error.c
+SRC_C += ../../wolfcrypt/src/evp.c
+SRC_C += ../../wolfcrypt/src/fe_448.c
+SRC_C += ../../wolfcrypt/src/fe_low_mem.c
+SRC_C += ../../wolfcrypt/src/fe_operations.c
+SRC_C += ../../wolfcrypt/src/ge_448.c
+SRC_C += ../../wolfcrypt/src/ge_low_mem.c
+SRC_C += ../../wolfcrypt/src/ge_operations.c
+SRC_C += ../../wolfcrypt/src/hash.c
+SRC_C += ../../wolfcrypt/src/integer.c
+SRC_C += ../../wolfcrypt/src/logging.c
+SRC_C += ../../wolfcrypt/src/md5.c
+SRC_C += ../../wolfcrypt/src/memory.c
+SRC_C += ../../wolfcrypt/src/misc.c
+SRC_C += ../../wolfcrypt/src/pkcs12.c
+SRC_C += ../../wolfcrypt/src/pkcs7.c
+SRC_C += ../../wolfcrypt/src/poly1305.c
+SRC_C += ../../wolfcrypt/src/pwdbased.c
+SRC_C += ../../wolfcrypt/src/rc2.c
+SRC_C += ../../wolfcrypt/src/sakke.c
+SRC_C += ../../wolfcrypt/src/signature.c
+SRC_C += ../../wolfcrypt/src/srp.c
+SRC_C += ../../wolfcrypt/src/sp_arm32.c
+SRC_C += ../../wolfcrypt/src/sp_arm64.c
+SRC_C += ../../wolfcrypt/src/sp_armthumb.c
+SRC_C += ../../wolfcrypt/src/sp_c32.c
+SRC_C += ../../wolfcrypt/src/sp_c64.c
+SRC_C += ../../wolfcrypt/src/sp_cortexm.c
+SRC_C += ../../wolfcrypt/src/sp_dsp32.c
+SRC_C += ../../wolfcrypt/src/sp_int.c
+SRC_C += ../../wolfcrypt/src/sp_x86_64.c
+SRC_C += ../../wolfcrypt/src/tfm.c
+SRC_C += ../../wolfcrypt/src/wc_dsp.c
+SRC_C += ../../wolfcrypt/src/wc_encrypt.c
+SRC_C += ../../wolfcrypt/src/wc_pkcs11.c
+SRC_C += ../../wolfcrypt/src/wc_port.c
+SRC_C += ../../wolfcrypt/src/wolfevent.c
+SRC_C += ../../wolfcrypt/src/wolfmath.c
+
+ifeq "$(ASYNC)" "1"
+SRC_C += ../../wolfcrypt/src/async.c
+endif
+
+ifeq "$(SELFTEST)" "1"
+SRC_C += ../../wolfcrypt/src/selftest.c
+endif
+
+# wolfCrypt non-standard algorithms (disabled by default)
+SRC_C += ../../wolfcrypt/src/arc4.c
+SRC_C += ../../wolfcrypt/src/blake2b.c
+SRC_C += ../../wolfcrypt/src/camellia.c
+SRC_C += ../../wolfcrypt/src/dsa.c
+SRC_C += ../../wolfcrypt/src/md2.c
+SRC_C += ../../wolfcrypt/src/md4.c
+SRC_C += ../../wolfcrypt/src/ripemd.c
+
+
+FILENAMES_C = $(notdir $(SRC_C))
+FILENAMES_C := $(filter-out evp.c, $(FILENAMES_C))
+OBJS_C = $(addprefix $(BUILD_DIR)/, $(FILENAMES_C:.c=.o))
+vpath %.c $(dir $(SRC_C))
+
+
+build_hex: $(BUILD_DIR) $(BUILD_DIR)/$(BIN).hex
+	@echo ""
+	$(CMD_ECHO) $(SIZE) $(BUILD_DIR)/$(BIN).elf
+
+build_static: $(BUILD_DIR) $(BUILD_DIR)/$(BIN).a
+	@echo ""
+	$(CMD_ECHO) $(SIZE) $(BUILD_DIR)/$(BIN).a
+
+$(BUILD_DIR):
+	$(CMD_ECHO) mkdir -p $(BUILD_DIR)
+
+$(BUILD_DIR)/$(BIN).hex: $(BUILD_DIR)/$(BIN).elf
+	@echo "Generating HEX binary: $(notdir $@)"
+	$(CMD_ECHO) $(OBJCOPY) -O ihex $< $@
+
+$(BUILD_DIR)/%.o: %.s
+	@echo "Compiling ASM file: $(notdir $<)"
+	$(CMD_ECHO) $(AS) $(ASFLAGS) $(DEF) $(INC) -c -o $@ $<
+
+$(BUILD_DIR)/%.o: %.c
+	@echo "Compiling C file: $(notdir $<)"
+	$(CMD_ECHO) $(CC) $(CFLAGS) $(DEF) $(INC) -c -o $@ $<
+
+$(BUILD_DIR)/$(BIN).elf: $(OBJS_ASM) $(OBJS_C)
+	@echo "Linking ELF binary: $(notdir $@)"
+	$(CMD_ECHO) $(LD) $(LDFLAGS) $(SRC_LD) -o $@ $^ $(LIBS)
+
+	@echo "Generating name list: $(BIN).sym"
+	$(CMD_ECHO) $(NM) -n $@ > $(BUILD_DIR)/$(BIN).sym
+
+	@echo "Showing final size:"
+	$(CMD_ECHO) ls -la $@
+
+	@echo "Generating disassembly: $(BIN).disasm"
+	$(CMD_ECHO) $(OBJDUMP) -S $@ > $(BUILD_DIR)/$(BIN).disasm
+
+$(BUILD_DIR)/$(BIN).a: $(OBJS_ASM) $(OBJS_C)
+	@echo "Building static library: $(notdir $@)"
+	$(CMD_ECHO) $(AR) -r $@ $^
+
+	@echo "Generating name list: $(BIN).sym"
+	$(CMD_ECHO) $(NM) -n $@ > $(BUILD_DIR)/$(BIN).sym
+
+	@echo "Showing final size:"
+	$(CMD_ECHO) ls -la $@
+
+	@echo "Generating disassembly: $(BIN).disasm"
+	$(CMD_ECHO) $(OBJDUMP) -S $@ > $(BUILD_DIR)/$(BIN).disasm
+
+clean:
+	rm -f $(BUILD_DIR)/*.elf $(BUILD_DIR)/*.hex $(BUILD_DIR)/*.map
+	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.a $(BUILD_DIR)/*.sym $(BUILD_DIR)/*.disasm

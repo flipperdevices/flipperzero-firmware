@@ -1,0 +1,28 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST += IDE/MCUEXPRESSO/wolfssl/.cproject
+EXTRA_DIST += IDE/MCUEXPRESSO/wolfssl/.project
+EXTRA_DIST += IDE/MCUEXPRESSO/wolfssl/.settings
+EXTRA_DIST += IDE/MCUEXPRESSO/wolfssl/liblinks.xml
+
+EXTRA_DIST += IDE/MCUEXPRESSO/wolfcrypt_test/.cproject
+EXTRA_DIST += IDE/MCUEXPRESSO/wolfcrypt_test/.project
+EXTRA_DIST += IDE/MCUEXPRESSO/wolfcrypt_test.c
+
+EXTRA_DIST += IDE/MCUEXPRESSO/benchmark/.cproject
+EXTRA_DIST += IDE/MCUEXPRESSO/benchmark/.project
+EXTRA_DIST += IDE/MCUEXPRESSO/benchmark/source/run_benchmark.c
+
+EXTRA_DIST += IDE/MCUEXPRESSO/README.md
+EXTRA_DIST += IDE/MCUEXPRESSO/user_settings.h
+
+EXTRA_DIST += IDE/MCUEXPRESSO/RT1170/user_settings.h
+EXTRA_DIST += IDE/MCUEXPRESSO/RT1170/wolfssl_cm7/.cproject
+EXTRA_DIST += IDE/MCUEXPRESSO/RT1170/wolfssl_cm7/.project
+EXTRA_DIST += IDE/MCUEXPRESSO/RT1170/wolfcrypt_test_cm7/.cproject
+EXTRA_DIST += IDE/MCUEXPRESSO/RT1170/wolfcrypt_test_cm7/.project
+EXTRA_DIST += IDE/MCUEXPRESSO/RT1170/fsl_caam_h.patch
+EXTRA_DIST += IDE/MCUEXPRESSO/RT1170/fsl_caam_c.patch
+

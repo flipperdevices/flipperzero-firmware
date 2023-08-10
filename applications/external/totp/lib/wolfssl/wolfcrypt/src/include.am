@@ -1,0 +1,215 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+
+ASYNC_FILES =						\
+	wolfcrypt/src/port/cavium/cavium_nitrox.c	\
+	wolfcrypt/src/port/intel/quickassist.c		\
+	wolfcrypt/src/port/intel/quickassist_mem.c
+
+BUILT_SOURCES+= $(ASYNC_FILES)
+
+MAINTAINERCLEANFILES+= $(ASYNC_FILES)
+
+EXTRA_DIST += wolfcrypt/src/misc.c
+EXTRA_DIST += wolfcrypt/src/evp.c
+EXTRA_DIST += wolfcrypt/src/asm.c
+EXTRA_DIST += wolfcrypt/src/aes_asm.asm
+EXTRA_DIST += wolfcrypt/src/aes_gcm_asm.asm
+EXTRA_DIST += wolfcrypt/src/wc_dsp.c
+EXTRA_DIST += wolfcrypt/src/sp_dsp32.c
+EXTRA_DIST += wolfcrypt/src/sp_x86_64_asm.asm
+
+EXTRA_DIST += \
+              wolfcrypt/src/ecc_fp.c \
+              wolfcrypt/src/fp_mont_small.i \
+              wolfcrypt/src/fp_mul_comba_12.i \
+              wolfcrypt/src/fp_mul_comba_17.i \
+              wolfcrypt/src/fp_mul_comba_20.i \
+              wolfcrypt/src/fp_mul_comba_24.i \
+              wolfcrypt/src/fp_mul_comba_28.i \
+              wolfcrypt/src/fp_mul_comba_32.i \
+              wolfcrypt/src/fp_mul_comba_3.i \
+              wolfcrypt/src/fp_mul_comba_48.i \
+              wolfcrypt/src/fp_mul_comba_4.i \
+              wolfcrypt/src/fp_mul_comba_64.i \
+              wolfcrypt/src/fp_mul_comba_6.i \
+              wolfcrypt/src/fp_mul_comba_7.i \
+              wolfcrypt/src/fp_mul_comba_8.i \
+              wolfcrypt/src/fp_mul_comba_9.i \
+              wolfcrypt/src/fp_mul_comba_small_set.i \
+              wolfcrypt/src/fp_sqr_comba_12.i \
+              wolfcrypt/src/fp_sqr_comba_17.i \
+              wolfcrypt/src/fp_sqr_comba_20.i \
+              wolfcrypt/src/fp_sqr_comba_24.i \
+              wolfcrypt/src/fp_sqr_comba_28.i \
+              wolfcrypt/src/fp_sqr_comba_32.i \
+              wolfcrypt/src/fp_sqr_comba_3.i \
+              wolfcrypt/src/fp_sqr_comba_48.i \
+              wolfcrypt/src/fp_sqr_comba_4.i \
+              wolfcrypt/src/fp_sqr_comba_64.i \
+              wolfcrypt/src/fp_sqr_comba_6.i \
+              wolfcrypt/src/fp_sqr_comba_7.i \
+              wolfcrypt/src/fp_sqr_comba_8.i \
+              wolfcrypt/src/fp_sqr_comba_9.i \
+              wolfcrypt/src/fp_sqr_comba_small_set.i \
+              wolfcrypt/src/fe_x25519_128.i
+
+EXTRA_DIST += wolfcrypt/src/port/ti/ti-aes.c \
+              wolfcrypt/src/port/ti/ti-des3.c \
+              wolfcrypt/src/port/ti/ti-hash.c \
+              wolfcrypt/src/port/ti/ti-ccm.c \
+              wolfcrypt/src/port/pic32/pic32mz-crypt.c \
+              wolfcrypt/src/port/nrf51.c \
+              wolfcrypt/src/port/arm/armv8-aes.c \
+              wolfcrypt/src/port/arm/armv8-sha256.c \
+              wolfcrypt/src/port/arm/armv8-chacha.c \
+              wolfcrypt/src/port/aria/aria-crypt.c \
+              wolfcrypt/src/port/aria/aria-cryptocb.c \
+              wolfcrypt/src/port/nxp/ksdk_port.c \
+              wolfcrypt/src/port/nxp/dcp_port.c \
+              wolfcrypt/src/port/nxp/se050_port.c \
+              wolfcrypt/src/port/nxp/README.md \
+              wolfcrypt/src/port/atmel/README.md \
+              wolfcrypt/src/port/xilinx/xil-sha3.c \
+              wolfcrypt/src/port/xilinx/xil-aesgcm.c \
+              wolfcrypt/src/port/xilinx/xil-versal-glue.c \
+              wolfcrypt/src/port/xilinx/xil-versal-trng.c \
+              wolfcrypt/src/port/caam/caam_aes.c \
+              wolfcrypt/src/port/caam/caam_driver.c \
+              wolfcrypt/src/port/caam/caam_error.c \
+              wolfcrypt/src/port/caam/caam_qnx.c \
+              wolfcrypt/src/port/caam/caam_integrity.c \
+              wolfcrypt/src/port/caam/caam_sha.c \
+              wolfcrypt/src/port/caam/caam_doc.pdf \
+              wolfcrypt/src/port/caam/wolfcaam_init.c \
+              wolfcrypt/src/port/caam/wolfcaam_seco.c \
+              wolfcrypt/src/port/caam/wolfcaam_qnx.c \
+              wolfcrypt/src/port/caam/wolfcaam_x25519.c \
+              wolfcrypt/src/port/caam/wolfcaam_ecdsa.c \
+              wolfcrypt/src/port/caam/wolfcaam_cmac.c \
+              wolfcrypt/src/port/caam/wolfcaam_hash.c \
+              wolfcrypt/src/port/caam/wolfcaam_rsa.c \
+              wolfcrypt/src/port/caam/wolfcaam_hmac.c \
+              wolfcrypt/src/port/caam/wolfcaam_aes.c \
+              wolfcrypt/src/port/caam/wolfcaam_fsl_nxp.c \
+              wolfcrypt/src/port/silabs/silabs_aes.c \
+              wolfcrypt/src/port/silabs/silabs_ecc.c \
+              wolfcrypt/src/port/silabs/silabs_hash.c \
+              wolfcrypt/src/port/silabs/silabs_random.c \
+              wolfcrypt/src/port/silabs/README.md \
+              wolfcrypt/src/port/st/stm32.c \
+              wolfcrypt/src/port/st/stsafe.c \
+              wolfcrypt/src/port/st/README.md \
+              wolfcrypt/src/port/af_alg/afalg_aes.c \
+              wolfcrypt/src/port/af_alg/afalg_hash.c \
+              wolfcrypt/src/port/kcapi/kcapi_aes.c \
+              wolfcrypt/src/port/kcapi/kcapi_hash.c \
+              wolfcrypt/src/port/kcapi/kcapi_hmac.c \
+              wolfcrypt/src/port/kcapi/kcapi_ecc.c \
+              wolfcrypt/src/port/kcapi/kcapi_rsa.c \
+              wolfcrypt/src/port/kcapi/kcapi_dh.c \
+              wolfcrypt/src/port/kcapi/README.md \
+              wolfcrypt/src/port/devcrypto/devcrypto_hash.c \
+              wolfcrypt/src/port/devcrypto/wc_devcrypto.c \
+              wolfcrypt/src/port/devcrypto/README.md \
+              wolfcrypt/src/port/mynewt/mynewt_port.c \
+              wolfcrypt/src/port/Espressif/esp32_aes.c \
+              wolfcrypt/src/port/Espressif/esp32_sha.c \
+              wolfcrypt/src/port/Espressif/esp32_util.c \
+              wolfcrypt/src/port/Espressif/esp32_mp.c \
+              wolfcrypt/src/port/Espressif/README.md \
+              wolfcrypt/src/port/arm/cryptoCell.c \
+              wolfcrypt/src/port/arm/cryptoCellHash.c \
+              wolfcrypt/src/port/Renesas/renesas_tsip_aes.c \
+              wolfcrypt/src/port/Renesas/renesas_tsip_sha.c \
+              wolfcrypt/src/port/Renesas/renesas_tsip_rsa.c \
+              wolfcrypt/src/port/Renesas/renesas_tsip_util.c \
+              wolfcrypt/src/port/Renesas/renesas_sce_util.c \
+              wolfcrypt/src/port/Renesas/renesas_sce_aes.c \
+              wolfcrypt/src/port/Renesas/renesas_sce_sha.c \
+              wolfcrypt/src/port/Renesas/renesas_sce_rsa.c \
+              wolfcrypt/src/port/Renesas/renesas_common.c \
+              wolfcrypt/src/port/Renesas/renesas_rx64_hw_sha.c \
+              wolfcrypt/src/port/Renesas/renesas_rx64_hw_util.c \
+              wolfcrypt/src/port/Renesas/README.md \
+              wolfcrypt/src/port/cypress/psoc6_crypto.c
+
+$(ASYNC_FILES):
+	$(AM_V_at)touch $(srcdir)/$@
+
+if BUILD_CRYPTOCB
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/cryptocb.c
+endif
+
+if BUILD_PKCS11
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/wc_pkcs11.c
+endif
+
+if BUILD_DEVCRYPTO
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/devcrypto/devcrypto_ecdsa.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/devcrypto/devcrypto_x25519.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/devcrypto/devcrypto_rsa.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/devcrypto/devcrypto_hmac.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/devcrypto/devcrypto_hash.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/devcrypto/devcrypto_aes.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/devcrypto/wc_devcrypto.c
+endif
+
+if BUILD_CAVIUM
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/cavium/cavium_nitrox.c
+endif
+EXTRA_DIST += wolfcrypt/src/port/cavium/README.md
+
+if BUILD_OCTEON_SYNC
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/cavium/cavium_octeon_sync.c
+endif
+EXTRA_DIST += wolfcrypt/src/port/cavium/README_Octeon.md
+
+if BUILD_INTEL_QA
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/intel/quickassist.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/intel/quickassist_mem.c
+endif
+EXTRA_DIST += wolfcrypt/src/port/intel/README.md
+
+if BUILD_INTEL_QA_SYNC
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/intel/quickassist_sync.c
+endif
+
+if BUILD_CRYPTOAUTHLIB
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/atmel/atmel.c
+endif
+
+if BUILD_IOTSAFE
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/iotsafe/iotsafe.c
+endif
+
+
+if BUILD_CAAM
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_init.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_qnx.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_seco.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_x25519.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_ecdsa.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_cmac.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_aes.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_hash.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_rsa.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/caam/wolfcaam_hmac.c
+endif
+
+if BUILD_SE050
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/nxp/se050_port.c
+endif
+
+if BUILD_PSA
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/psa/psa.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/psa/psa_hash.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/psa/psa_aes.c
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/psa/psa_pkcbs.c
+endif
+EXTRA_DIST += wolfcrypt/src/port/psa/README.md
+
+if BUILD_MAXQ10XX
+src_libwolfssl@LIBSUFFIX@_la_SOURCES += wolfcrypt/src/port/maxim/maxq10xx.c
+endif
+EXTRA_DIST += wolfcrypt/src/port/maxim/README.md

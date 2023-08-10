@@ -1,0 +1,171 @@
+#!/bin/bash
+
+set -e
+
+cleanup () {
+    echo
+    echo "Cleaning up..."
+    if [ ! -z "$UDP_PROXY_PID" ];then
+        echo "Killing udp_proxy $UDP_PROXY_PID"
+        kill $UDP_PROXY_PID
+    fi
+    if [ ! -z "$SERVER_PID" ];then
+        echo "Killing server $SERVER_PID"
+        kill $SERVER_PID
+    fi
+}
+
+trap cleanup err exit
+
+WOLFSSL_ROOT=$(pwd)
+if [ -z $UDP_PROXY_PATH ];then
+UDP_PROXY_PATH=$WOLFSSL_ROOT/../udp-proxy/udp_proxy
+fi
+PROXY_PORT=12345
+SERVER_PORT=11111
+NEW_SESSION_TICKET_SIZE=200
+KEY_UPDATE_SIZE=35
+
+(killall udp_proxy || true)
+(killall lt-server || true)
+(killall lt-client || true)
+
+# $WOLFSSL_ROOT/tests/unit.test tests/test-dtls13.conf
+
+test_dropping_packets () {
+    for i in $(seq 0 11);do
+        echo -e "\ndropping packet $i\n" | tee -a /tmp/serr | tee -a /tmp/cerr | tee -a /tmp/udp
+        $UDP_PROXY_PATH -p $PROXY_PORT -s 127.0.0.1:$SERVER_PORT -f $i -u >>/tmp/udp &
+        UDP_PROXY_PID=$!
+        $WOLFSSL_ROOT/examples/server/server -v4 -u -Ta 2>>/tmp/serr &
+        SERVER_PID=$!
+        sleep 0.2
+        now=$(date +%s.%N)
+        $WOLFSSL_ROOT/examples/client/client -v4 -u -p$PROXY_PORT 2>>/tmp/cerr
+        elapsed=$(echo $(date +%s.%N) - $now | bc)
+        echo "it took ${elapsed} sec(s)" >> /tmp/udp
+        wait $SERVER_PID
+        SERVER_PID=
+        kill $UDP_PROXY_PID
+        UDP_PROXY_PID=
+    done
+
+
+    echo -e "\nTesting WANT_WRITE\n" | tee -a /tmp/serr | tee -a /tmp/cerr | tee -a /tmp/udp
+
+    # dropping last ack would be client error as wolfssl_read doesn't support WANT_WRITE as returned error
+    for i in $(seq 0 10);do
+        echo -e "\ndropping packet $i\n" | tee -a /tmp/serr | tee -a /tmp/cerr | tee -a /tmp/udp
+        $UDP_PROXY_PATH -p $PROXY_PORT -s 127.0.0.1:$SERVER_PORT -f $i -u >>/tmp/udp &
+        UDP_PROXY_PID=$!
+        $WOLFSSL_ROOT/examples/server/server -v4 -u -Ta -6 2>>/tmp/serr &
+        SERVER_PID=$!
+        sleep 0.2
+        now=$(date +%s.%N)
+        $WOLFSSL_ROOT/examples/client/client -v4 -u -p$PROXY_PORT -6 2>>/tmp/cerr
+        elapsed=$(echo $(date +%s.%N) - $now | bc)
+        echo "it took ${elapsed} sec(s)" >> /tmp/udp
+        wait $SERVER_PID
+        SERVER_PID=
+        kill $UDP_PROXY_PID
+        UDP_PROXY_PID=
+    done
+}
+
+# this test is based on detecting newSessionTicket message by its size. This is rather fragile.
+test_dropping_new_session_ticket() {
+    echo -e "\ndropping new session ticket packet of size $NEW_SESSION_TICKET_SIZE\n" | tee -a /tmp/serr | tee -a /tmp/cerr | tee -a /tmp/udp
+    $UDP_PROXY_PATH -p $PROXY_PORT -s 127.0.0.1:$SERVER_PORT -F $NEW_SESSION_TICKET_SIZE -u >>/tmp/udp &
+    UDP_PROXY_PID=$!
+    $WOLFSSL_ROOT/examples/server/server -v4 -w -u 2>>/tmp/serr &
+    SERVER_PID=$!
+    sleep 0.2
+    now=$(date +%s.%N)
+    $WOLFSSL_ROOT/examples/client/client -v4 -u -p$PROXY_PORT -w --waitTicket 2>>/tmp/cerr
+    elapsed=$(echo $(date +%s.%N) - $now | bc)
+    echo "it took ${elapsed} sec(s)" >> /tmp/udp
+    wait $SERVER_PID
+    SERVER_PID=
+    kill $UDP_PROXY_PID
+    UDP_PROXY_PID=
+}
+
+test_permutations () {
+    SIDE=$1
+    PERMUTATIONS=$(python3 << EOF
+import itertools
+for p in itertools.permutations("$2"):
+    print(''.join(p))
+EOF
+    )
+    echo "Testing $SIDE msg permutations"
+    for i in $PERMUTATIONS;do
+        echo -n "Testing $SIDE order $i"
+        UDP_LOGFILE=/tmp/udp-$SIDE-$i
+        $UDP_PROXY_PATH -p $PROXY_PORT -s 127.0.0.1:$SERVER_PORT -u -r $i -l $UDP_LOGFILE -S $SIDE &
+        UDP_PROXY_PID=$!
+        $WOLFSSL_ROOT/examples/server/server -v4 -u -Ta -w &> /tmp/serr &
+        SERVER_PID=$!
+        sleep 0.2
+        now=$(date +%s.%N)
+        $WOLFSSL_ROOT/examples/client/client -v4 -u -p$PROXY_PORT -w &> /tmp/cerr
+        elapsed=$(echo $(date +%s.%N) - $now | bc)
+        udp_lines=$(grep -P 'client:|server:' $UDP_LOGFILE | wc -l)
+        echo " took ${elapsed} sec(s) and produced ${udp_lines} messages"
+        wait $SERVER_PID
+        SERVER_PID=
+        kill $UDP_PROXY_PID
+        UDP_PROXY_PID=
+        rm $UDP_LOGFILE
+    done
+    echo "All $SIDE msg permutations succeeded"
+}
+
+
+test_time_delays () {
+    DELAYS=$(python3 << EOF
+import itertools
+t = [0.1, 0.5, 1.1]
+tt = []
+for i in itertools.product(t, t, t):
+    tt.append(i * 15)
+for i in tt:
+    print(','.join(map(lambda x: str(x) , i)))
+EOF
+    )
+    for DELAY in $DELAYS;do
+        echo -n "Testing delay $DELAY"
+        UDP_LOGFILE=/tmp/udp-delay-$DELAY
+        $UDP_PROXY_PATH -p $PROXY_PORT -s 127.0.0.1:$SERVER_PORT -u -l "$UDP_LOGFILE" -t $DELAY &
+        UDP_PROXY_PID=$!
+        $WOLFSSL_ROOT/examples/server/server -v4 -u -Ta -w &> /tmp/serr &
+        SERVER_PID=$!
+        sleep 0.2
+        now=$(date +%s.%N)
+        $WOLFSSL_ROOT/examples/client/client -v4 -u -p$PROXY_PORT -w &> /tmp/cerr
+        elapsed=$(echo $(date +%s.%N) - $now | bc)
+        udp_lines=$(grep -P 'client:|server:' "$UDP_LOGFILE" | wc -l)
+        echo " took ${elapsed} sec(s) and produced ${udp_lines} messages"
+        wait $SERVER_PID
+        SERVER_PID=
+        kill $UDP_PROXY_PID
+        UDP_PROXY_PID=
+        rm "$UDP_LOGFILE"
+    done
+}
+
+test_dropping_packets
+test_permutations client 012
+test_dropping_new_session_ticket
+
+if [ ! -z $DTLS13_DO_SERVER_PERMUTATION_TEST ];then
+   test_permutations server 0123456
+fi
+
+# TODO: fix udp_proxy to not re-order close alert before app data
+if [ ! -z $DTLS13_DO_DELAY_TEST ];then
+   test_time_delays
+fi
+
+echo
+echo "All tests SUCCEEDED!!!"

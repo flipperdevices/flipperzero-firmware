@@ -1,0 +1,12 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         mqx/util_lib/.cproject \
+         mqx/util_lib/.project
+
+EXTRA_DIST += \
+         mqx/util_lib/Sources/util.c \
+         mqx/util_lib/Sources/util.h
+

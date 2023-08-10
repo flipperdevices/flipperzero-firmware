@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ASCII"?>
+<sdkproject:SdkProject xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sdkproject="http://www.xilinx.com/sdkproject" name="wolfCrypt_example" platformUID="xilinx:vmk180::0.0(custom)" systemProject="wolfCrypt_example_system" sysConfig="vmk180" runtime="cpp" cpu="standalone_domain" cpuInstance="versal_cips_0_pspmc_0_psv_cortexa72_0" os="standalone" mssSignature="69319cadb247104471151c20895b8098">
+  <configuration name="Debug" id="xilinx.gnu.arm.a53.exe.debug.1474877702" dirty="true">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+    <lastBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <configuration name="Release" id="xilinx.gnu.arm.a53.exe.release.1927748810">
+    <configBuildOptions xsi:type="sdkproject:SdkOptions"/>
+    <lastBuildOptions xsi:type="sdkproject:SdkOptions"/>
+  </configuration>
+  <template appTemplateName="empty_application"/>
+</sdkproject:SdkProject>

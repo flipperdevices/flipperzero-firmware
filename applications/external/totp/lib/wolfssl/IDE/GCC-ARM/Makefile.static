@@ -1,0 +1,6 @@
+# Project name
+BIN = libwolfssl
+
+all: build_static
+
+include Makefile.common

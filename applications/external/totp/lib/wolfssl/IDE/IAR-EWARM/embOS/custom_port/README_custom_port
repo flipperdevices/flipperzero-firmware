@@ -1,0 +1,221 @@
+Steps taken to evaluate wolfSSL with the following:
+
+Required Software for this guide:
+IAR Embedded Workbench IDE - ARM v7.60.1 (or similar version)
+embOS (version that supports your CPU)
+wolfssl (latest version)
+
+#----------------------------------------------------------------------------#
+# SECTION 1:
+# Setting up the file system
+#----------------------------------------------------------------------------#
+
+1. Browse to wolfssl/IDE/IAR-EWARM/embOS/
+    a. copy/paste the directory custom_port and re-name it to the CPU
+       you intend to target. For now we will just use the term CUSTOM_DIR
+       to signify a copy of the custom_port directory
+
+#----------------------------------------------------------------------------#
+# SECTION 2:
+# Create wolfcrypt_lib.a
+#----------------------------------------------------------------------------#
+
+1. Open IAR Workbench -> Project -> Create New Project -> Empty Project
+    c. Browse to CUSTOM_DIR/wolfcrypt_lib_custom_port/ (from section 1)
+    d. Called it "wolfcrypt_lib" and hit "Save"
+
+2. Go to Project -> Add Group...
+    a. call group wolfcrypt_sources
+
+3. Right click on wolfcrypt_sources group -> Add -> Add Files...
+
+4. Browse to wolfssl/wolfcrypt/src directory and select the following files:
+
+ #---------------------------------------------#
+ #     aes.c                   memory.c        #
+ #     asn.c                   misc.c          #
+ #     chacha.c                poly1305.c      #
+ #     chacha20_poly1305.c     pwdbased.c      #
+ #     coding.c                random.c        #
+ #     des3.c                  rsa.c           #
+ #     dh.c                    sha.c           #
+ #     dsa.c                   sha256.c        #
+ #     ecc.c                   sha512.c        #
+ #     hash.c                  tfm.c           #
+ #     hmac.c                  wc_encrypt.c    #
+ #     md4.c                   wc_port.c       #
+ #     md5.c                                   #
+ #     kdf.c                                   #
+ #---------------------------------------------#
+
+5. Once those are all added go to
+                    Project -> Properties C/C++ Compiler -> Preprocessor (Tab)
+    a. In the field "Defined symbols:" add WOLFSSL_USER_SETTINGS
+    b. In the field "Additional include directories:"
+        put in this line: $PROJ_DIR$\..\..\..\..\..\
+		   and this line: $PROJ_DIR$\..\custom_port_user_settings
+		#---------------------------------------------
+        #(Or alternately you can use the browse option to navigate to
+        #C:\<path-to>\wolfssl and
+        #C:\<path-to>\wolfssl\IDE\IAR-EWARM\CUSTOM_DIR\
+        #                                        custom_port_user_settings\)
+		#(If you ever need to change or customize your build settings this
+	    #is the file that should be modified:
+	    #CUSTOM_DIR\custom_port_user_settings\user_settings.h)
+        #---------------------------------------------
+
+7. In Project -> Options -> General Options -> Output (Tab)
+    Check the option for "Library" instead of "Executable"
+    Click "OK"
+
+8. Go to Project -> Rebuild all (The library should build)
+
+9. Confirm the library is now located here:
+    C:\<path to>\wolfssl\IDE\IAR-EWARM\CUSTOM_DIR\wolfcrypt_lib_custom_port\
+                                                    Debug\Exe\wolfcrypt_lib.a
+
+We are now set to link to this library in the evaluation project
+
+#----------------------------------------------------------------------------#
+# SECTION 3:
+# Evaluate wolfcrypt tests in embOS project:
+#----------------------------------------------------------------------------#
+
+
+1. go to embOS website and download a trial for your platform
+   https://www.segger.com/downloads/embos ->
+                                     embOS trial for Cortex-M and IAR compiler
+
+2. After downloading, extract the zip to:
+                  C:\<path-to>\wolfssl\IDE\IAR-EWARM\embOS\extract_trial_here\
+
+3. Open IAR Workbench -> Project -> Create New Project -> Empty Project
+    c. Browse to CUSTOM_DIR\wolfcrypt_test_custom_port\ (from section 1)
+    d. Called it "wolfcrypt_test" and hit "Save"
+
+4. Go to Project -> Options -> C/C++ Compiler -> Preprocessor (Tab)
+    a. Add these to the field "Defined symbols:"
+        DEBUG=1
+        __CPU-YOU-ARE-TARGETING__ (For example: __SAMV71Q21__)
+        WOLFSSL_USER_SETTINGS
+
+    b. Now in the field "Additional include directories:"
+        $PROJ_DIR$\..\..\..\..\..\
+		$PROJ_DIR$\..\custom_port_user_settings
+		#---------------------------------------------
+        #(Or alternately you can use the browse option to navigate to
+        #C:\<path-to>\wolfssl and
+        #C:\<path-to>\wolfssl\IDE\IAR-EWARM\CUSTOM_DIR\
+        #                                        custom_port_user_settings\)
+        #---------------------------------------------
+
+5. Go to Project -> Options -> Linker -> Library (Tab)
+    Add to the field "Additional libraries:"
+    $PROJ_DIR$\..\embOS_wolfcrypt_lib_SAMV71_XULT\Debug\Exe\wolfcrypt_lib.a
+    $PROJ_DIR$\..\..\extract_trial_here\Start\Lib\os7m_tlv_dp.a
+
+6. The main project file is located here:
+      CUSTOM_DIR\wolfcrypt_test_custom_port\Application\runWolfcryptTests.c
+
+7. Right Click the project name: Add -> Add Group
+                                           add a group called "Application"
+8. Right Click that group and Add -> Add files
+                            browse to the main project file in step 5 above
+
+9. Create Groups and add files for your CPU's support. These will be .c
+   files found in the extracted directory in two places:
+
+   extract_trial_here\Start\BoardSupport\<vendor>\<CPU>\DeviceSupport
+   extract_trial_here\Start\BoardSupport\<vendor>\<CPU>\Setup
+   #---------------------------------------------
+   # For example:
+   # extract_trial_here\Start\BoardSupport\Atmel\SAMV71_XPlainedUltra\
+   #                                                          DeviceSupport
+   # extract_trial_here\Start\BoardSupport\Atmel\SAMV71_XPlainedUltra\Setup
+   #---------------------------------------------
+   
+10. To get Logging working for seeing test results:
+    a. Go to Project -> Options -> General Options -> Library Configuration
+    b. In the field "Library low-level interface implementation"
+        Check the radio button for Semihosted
+        Then in the inner field marked "stdout/stderr"
+            Check the radio button for "Via semihosting" and click "OK"
+
+11. Now we're ready to build and debug the project.
+    a. Project -> Options -> Debugger
+        In the field marked "Driver" Select drop-down and choose J-Link/J-Trace
+        Click "OK"
+    b. Project -> Rebuild All
+    c. Connect your Cortex-M evaluation board to j-Trace and j-Trace to PC
+    d. Connect the micro-USB to the debug port of the Cortex-M and PC for power
+    e. Project -> Download and Debug
+
+12. Once the Debug environment spawns go to View -> Terminal I/O
+    This is where the "printf" to stdout will be directed
+
+13. In the Debug Menu bar look for the little square with three arrows pointing
+    to the right. When you mouse over it should say "GO"
+    Click this option and in the Terminal I/O Window you should see something
+    like this (depends on which functionality you set in user_settings.h)
+
+    SEE NOTE 1 BELOW IF YOU OBSERVE AN ERROR (-40) IN RSA TEST
+
+Begin wolfcrypt tests
+MD5      test passed!
+MD4      test passed!
+SHA      test passed!
+SHA-256  test passed!
+SHA-384  test passed!
+SHA-512  test passed!
+HMAC-MD5 test passed!
+HMAC-SHA test passed!
+HMAC-SHA256 test passed!
+HMAC-SHA384 test passed!
+HMAC-SHA512 test passed!
+GMAC     test passed!
+Chacha   test passed!
+POLY1305 test passed!
+ChaCha20-Poly1305 AEAD test passed!
+DES      test passed!
+DES3     test passed!
+AES      test passed!
+AES-GCM  test passed!
+RANDOM   test passed!
+RSA      test passed!
+DH       test passed!
+DSA      test passed!
+PWDBASED test passed!
+ECC      test passed!
+wolfcrypt tests complete.
+
+#----------------------------------------------------------------------------#
+# SECTION 4:
+# Evaluate benchmark tests in embOS project:
+#----------------------------------------------------------------------------#
+
+Follow the steps from section 3 only using
+CUSTOM_DIR\wolfcrypt_benchmark_custom_port\
+
+#----------------------------------------------------------------------------#
+#----------------------------------------------------------------------------#
+
+Thank you for using this guide and we hope this was helpful to you. If you have
+any suggestions / feedback for us please contact us:
+support@wolfssl.com
+info@wolfssl.com
+
+/* --------------------------------------------------------------------------*/
+#### NOTE 1: ####
+
+If you are working off of a base example project and you observe memory errors
+when malloc is called, make sure that the linker script has set the HEAP high
+enough.
+Project -> Options -> Linker -> (Config Tab) -> Linker configuration file
+
+Check this file for __size_heap__ it is typically set to 0x200 by default.
+There are places in wolfSSL that malloc as much as 4k at a time and peak usage
+can be as high as 29K if using full functionality.
+/* --------------------------------------------------------------------------*/
+
+Copyright © 2016 wolfSSL Inc.  All rights reserved.
+

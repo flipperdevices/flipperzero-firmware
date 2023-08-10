@@ -1,0 +1,53 @@
+<!-- liblinks.xml
+
+     NXP MCUXpresso IDE "Smart update wizard" script file
+     When executed on a particular application project, will
+     add appropriate links to the specified library project.
+
+     Note that this script assumes that the application project
+     contains the standard 'Debug' and 'Release' build 
+     configurations.
+-->
+
+<project name="" update="true">
+	<setting id="all.compiler.inc">
+		<value>${MacroStart}workspace_loc:/${ProjName}/lwIP${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/other${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/lists${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/CMSIS${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/source${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/FreeRTOS kernel${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/utilities${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/drivers${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/fatfs${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/board${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/ram${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/flash_config${MacroEnd}</value>
+    </setting>
+    <setting id="assembler.inc">
+		<value>${MacroStart}workspace_loc:/${ProjName}/lwIP${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/other${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/lists${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/CMSIS${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/source${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/FreeRTOS kernel${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/utilities${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/drivers${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/fatfs${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/board${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/ram${MacroEnd}</value>
+		<value>${MacroStart}workspace_loc:/${ProjName}/flash_config${MacroEnd}</value>
+    </setting>
+	<setting id="linker.libs">
+		<value>${ProjName}</value>
+	</setting>
+	<setting id="linker.paths" buildType="Debug">
+		<value>${MacroStart}workspace_loc:/${ProjName}/Debug${MacroEnd}</value>
+	</setting>
+	<setting id="linker.paths" buildType="Release">
+		<value>${MacroStart}workspace_loc:/${ProjName}/Release${MacroEnd}</value>
+	</setting>
+	<requires msg="Library project `${ProjName}` not found">
+		<value>${ProjName}</value>
+	</requires>
+</project>

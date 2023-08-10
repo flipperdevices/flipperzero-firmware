@@ -1,0 +1,12 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+
+if BUILD_EXAMPLE_ASN1
+noinst_PROGRAMS += examples/asn1/asn1
+examples_asn1_asn1_SOURCES = examples/asn1/asn1.c
+examples_asn1_asn1_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD)
+examples_asn1_asn1_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+

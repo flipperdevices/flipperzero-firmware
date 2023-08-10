@@ -1,0 +1,29 @@
+menu "Example Configuration"
+
+config BENCH_ARGV
+    string "Arguments for benchmark test"
+    default "-lng 0"
+    help
+        -? <num>    Help, print this usage
+                     0: English, 1: Japanese
+        -csv        Print terminal output in csv format
+        -base10     Display bytes as power of 10 (eg 1 kB = 1000 Bytes)
+        -no_aad     No additional authentication data passed.
+        -dgst_full  Full digest operation performed.
+        -rsa_sign   Measure RSA sign/verify instead of encrypt/decrypt.
+        -<alg>      Algorithm to benchmark. Available algorithms include:
+                    cipher aes-cbc aes-gcm chacha20 chacha20-poly1305
+                    digest md5 poly1305 sha sha2 sha224 sha256 sha384 sha512 sha3
+                    sha3-224 sha3-256 sha3-384 sha3-512
+                    mac hmac hmac-md5 hmac-sha hmac-sha224 hmac-sha256 hmac-sha384
+                    hmac-sha512
+                    asym rsa rsa-sz dh ecc-kg ecc
+                    other rng
+        -lng <num>  Display benchmark result by specified language.
+                    0: English, 1: Japanese
+        <num>       Size of block in bytes
+        
+        e.g -lng 1
+        e.g sha
+
+endmenu

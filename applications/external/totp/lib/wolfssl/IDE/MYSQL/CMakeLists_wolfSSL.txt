@@ -1,0 +1,41 @@
+# CMakeLists.txt
+#
+# Copyright (C) 2006-2023 wolfSSL Inc.
+#
+# This file is part of wolfSSL.
+#
+# wolfSSL is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# wolfSSL is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
+
+INCLUDE_DIRECTORIES(
+ ${CMAKE_SOURCE_DIR}/include
+ ${CMAKE_SOURCE_DIR}/extra/wolfssl
+ ${CMAKE_SOURCE_DIR}/extra/wolfssl/wolfssl)
+
+
+ADD_DEFINITIONS(${SSL_DEFINES})
+
+# rename get_tty_password to avoid collisions with the main binary
+ADD_DEFINITIONS(-Dget_tty_password_ext=wolfssl_mysql_get_tty_password_ext)
+ADD_DEFINITIONS(-Dget_tty_password=wolfssl_mysql_get_tty_password)
+
+SET(WOLFSSL_SOURCES  src/crl.c src/internal.c src/keys.c src/sniffer.c
+        src/tls.c src/wolfio.c src/ocsp.c src/ssl.c
+                                ../../client/get_password.c )
+
+ADD_CONVENIENCE_LIBRARY(wolfssl ${WOLFSSL_SOURCES})
+
+IF(MSVC)
+   INSTALL_DEBUG_TARGET(wolfssl DESTINATION ${INSTALL_LIBDIR}/debug)
+ENDIF()

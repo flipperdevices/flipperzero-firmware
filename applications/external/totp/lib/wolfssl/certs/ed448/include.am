@@ -1,0 +1,30 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/ed448/ca-ed448.der \
+         certs/ed448/ca-ed448.pem \
+         certs/ed448/ca-ed448-key.der \
+         certs/ed448/ca-ed448-key.pem \
+         certs/ed448/ca-ed448-priv.der \
+         certs/ed448/ca-ed448-priv.pem \
+         certs/ed448/client-ed448.der \
+         certs/ed448/client-ed448.pem \
+         certs/ed448/client-ed448-key.der \
+         certs/ed448/client-ed448-key.pem \
+         certs/ed448/client-ed448-priv.der \
+         certs/ed448/client-ed448-priv.pem \
+         certs/ed448/root-ed448.der \
+         certs/ed448/root-ed448.pem \
+         certs/ed448/root-ed448-key.der \
+         certs/ed448/root-ed448-key.pem \
+         certs/ed448/root-ed448-priv.der \
+         certs/ed448/root-ed448-priv.pem \
+         certs/ed448/server-ed448.der \
+         certs/ed448/server-ed448.pem \
+         certs/ed448/server-ed448-cert.pem \
+         certs/ed448/server-ed448-key.der \
+         certs/ed448/server-ed448-key.pem \
+         certs/ed448/server-ed448-priv.der \
+         certs/ed448/server-ed448-priv.pem

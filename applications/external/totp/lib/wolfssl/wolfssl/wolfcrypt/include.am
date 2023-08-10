@@ -1,0 +1,216 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+
+nobase_include_HEADERS+= \
+                         wolfssl/wolfcrypt/aes.h \
+                         wolfssl/wolfcrypt/arc4.h \
+                         wolfssl/wolfcrypt/asn.h \
+                         wolfssl/wolfcrypt/asn_public.h \
+                         wolfssl/wolfcrypt/poly1305.h \
+                         wolfssl/wolfcrypt/camellia.h \
+                         wolfssl/wolfcrypt/cmac.h \
+                         wolfssl/wolfcrypt/coding.h \
+                         wolfssl/wolfcrypt/compress.h \
+                         wolfssl/wolfcrypt/des3.h \
+                         wolfssl/wolfcrypt/dh.h \
+                         wolfssl/wolfcrypt/dsa.h \
+                         wolfssl/wolfcrypt/ecc.h \
+                         wolfssl/wolfcrypt/curve25519.h \
+                         wolfssl/wolfcrypt/ed25519.h \
+                         wolfssl/wolfcrypt/fe_operations.h \
+                         wolfssl/wolfcrypt/ge_operations.h \
+                         wolfssl/wolfcrypt/curve448.h \
+                         wolfssl/wolfcrypt/ed448.h \
+                         wolfssl/wolfcrypt/falcon.h \
+                         wolfssl/wolfcrypt/dilithium.h \
+                         wolfssl/wolfcrypt/sphincs.h \
+                         wolfssl/wolfcrypt/fe_448.h \
+                         wolfssl/wolfcrypt/ge_448.h \
+                         wolfssl/wolfcrypt/eccsi.h \
+                         wolfssl/wolfcrypt/sakke.h \
+                         wolfssl/wolfcrypt/error-crypt.h \
+                         wolfssl/wolfcrypt/fips_test.h \
+                         wolfssl/wolfcrypt/hash.h \
+                         wolfssl/wolfcrypt/hmac.h \
+                         wolfssl/wolfcrypt/hpke.h \
+                         wolfssl/wolfcrypt/kdf.h \
+                         wolfssl/wolfcrypt/integer.h \
+                         wolfssl/wolfcrypt/md2.h \
+                         wolfssl/wolfcrypt/md4.h \
+                         wolfssl/wolfcrypt/md5.h \
+                         wolfssl/wolfcrypt/misc.h \
+                         wolfssl/wolfcrypt/pkcs7.h \
+                         wolfssl/wolfcrypt/wc_encrypt.h \
+                         wolfssl/wolfcrypt/wc_port.h \
+                         wolfssl/wolfcrypt/pwdbased.h \
+                         wolfssl/wolfcrypt/chacha.h \
+                         wolfssl/wolfcrypt/chacha20_poly1305.h \
+                         wolfssl/wolfcrypt/random.h \
+                         wolfssl/wolfcrypt/ripemd.h \
+                         wolfssl/wolfcrypt/rsa.h \
+                         wolfssl/wolfcrypt/rc2.h \
+                         wolfssl/wolfcrypt/settings.h \
+                         wolfssl/wolfcrypt/sha256.h \
+                         wolfssl/wolfcrypt/sha512.h \
+                         wolfssl/wolfcrypt/sha.h \
+                         wolfssl/wolfcrypt/signature.h \
+                         wolfssl/wolfcrypt/blake2.h \
+                         wolfssl/wolfcrypt/blake2-int.h \
+                         wolfssl/wolfcrypt/blake2-impl.h \
+                         wolfssl/wolfcrypt/tfm.h \
+                         wolfssl/wolfcrypt/srp.h \
+                         wolfssl/wolfcrypt/types.h \
+                         wolfssl/wolfcrypt/visibility.h \
+                         wolfssl/wolfcrypt/logging.h \
+                         wolfssl/wolfcrypt/memory.h \
+                         wolfssl/wolfcrypt/mpi_class.h \
+                         wolfssl/wolfcrypt/mpi_superclass.h \
+                         wolfssl/wolfcrypt/mem_track.h \
+                         wolfssl/wolfcrypt/wolfevent.h \
+                         wolfssl/wolfcrypt/pkcs12.h \
+                         wolfssl/wolfcrypt/wolfmath.h \
+                         wolfssl/wolfcrypt/sha3.h \
+                         wolfssl/wolfcrypt/siphash.h \
+                         wolfssl/wolfcrypt/cpuid.h \
+                         wolfssl/wolfcrypt/cryptocb.h \
+                         wolfssl/wolfcrypt/kyber.h \
+                         wolfssl/wolfcrypt/wc_kyber.h \
+                         wolfssl/wolfcrypt/ext_kyber.h \
+                         wolfssl/wolfcrypt/sm2.h \
+                         wolfssl/wolfcrypt/sm3.h \
+                         wolfssl/wolfcrypt/sm4.h \
+                         wolfssl/wolfcrypt/lms.h \
+                         wolfssl/wolfcrypt/wc_lms.h \
+                         wolfssl/wolfcrypt/ext_lms.h
+
+noinst_HEADERS+= \
+                         wolfssl/wolfcrypt/port/aria/aria-crypt.h \
+                         wolfssl/wolfcrypt/port/aria/aria-cryptocb.h \
+                         wolfssl/wolfcrypt/port/pic32/pic32mz-crypt.h \
+                         wolfssl/wolfcrypt/port/ti/ti-hash.h \
+                         wolfssl/wolfcrypt/port/ti/ti-ccm.h \
+                         wolfssl/wolfcrypt/port/nrf51.h \
+                         wolfssl/wolfcrypt/port/nxp/ksdk_port.h \
+                         wolfssl/wolfcrypt/port/nxp/dcp_port.h \
+                         wolfssl/wolfcrypt/port/xilinx/xil-sha3.h \
+                         wolfssl/wolfcrypt/port/xilinx/xil-versal-glue.h \
+                         wolfssl/wolfcrypt/port/xilinx/xil-versal-trng.h \
+                         wolfssl/wolfcrypt/port/caam/caam_driver.h \
+                         wolfssl/wolfcrypt/port/caam/caam_error.h \
+                         wolfssl/wolfcrypt/port/caam/caam_qnx.h \
+                         wolfssl/wolfcrypt/port/silabs/silabs_aes.h \
+                         wolfssl/wolfcrypt/port/silabs/silabs_ecc.h \
+                         wolfssl/wolfcrypt/port/silabs/silabs_hash.h \
+                         wolfssl/wolfcrypt/port/silabs/silabs_random.h \
+                         wolfssl/wolfcrypt/port/st/stm32.h \
+                         wolfssl/wolfcrypt/port/st/stsafe.h \
+                         wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h \
+                         wolfssl/wolfcrypt/port/arm/cryptoCell.h \
+                         wolfssl/wolfcrypt/port/Renesas/renesas-tsip-crypt.h \
+                         wolfssl/wolfcrypt/port/Renesas/renesas-sce-crypt.h \
+                         wolfssl/wolfcrypt/port/Renesas/renesas_sync.h \
+                         wolfssl/wolfcrypt/port/Renesas/renesas_cmn.h \
+                         wolfssl/wolfcrypt/port/Renesas/renesas_tsip_types.h \
+                         wolfssl/wolfcrypt/port/cypress/psoc6_crypto.h
+
+if BUILD_CRYPTOAUTHLIB
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/atmel/atmel.h
+endif
+
+if BUILD_AFALG
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/af_alg/afalg_hash.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/af_alg/wc_afalg.h
+endif
+
+if BUILD_KCAPI
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/kcapi/wc_kcapi.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/kcapi/kcapi_hash.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/kcapi/kcapi_hmac.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/kcapi/kcapi_ecc.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/kcapi/kcapi_rsa.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/kcapi/kcapi_dh.h
+endif
+
+if BUILD_DEVCRYPTO
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/devcrypto/wc_devcrypto.h
+endif
+
+if BUILD_ARIA
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/aria/aria-crypt.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/aria/aria-cryptocb.h
+endif
+
+if BUILD_ASYNCCRYPT
+nobase_include_HEADERS+= wolfssl/wolfcrypt/async.h
+endif
+
+if BUILD_PKCS11
+nobase_include_HEADERS+= wolfssl/wolfcrypt/wc_pkcs11.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/pkcs11.h
+endif
+
+if BUILD_CAVIUM
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/cavium/cavium_nitrox.h
+endif
+
+if BUILD_OCTEON_SYNC
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/cavium/cavium_octeon_sync.h
+endif
+
+if BUILD_INTEL_QA
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/intel/quickassist.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/intel/quickassist_mem.h
+endif
+
+if BUILD_INTEL_QA_SYNC
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/intel/quickassist_sync.h
+endif
+
+if BUILD_SP
+nobase_include_HEADERS+= wolfssl/wolfcrypt/sp.h
+nobase_include_HEADERS+= wolfssl/wolfcrypt/sp_int.h
+else
+if BUILD_SP_INT
+nobase_include_HEADERS+= wolfssl/wolfcrypt/sp_int.h
+endif
+endif
+
+if BUILD_SELFTEST
+nobase_include_HEADERS+= wolfssl/wolfcrypt/selftest.h
+endif
+
+if BUILD_FIPS
+if !BUILD_FIPS_V1
+nobase_include_HEADERS+= wolfssl/wolfcrypt/fips.h
+endif
+endif
+
+if BUILD_CAAM
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/caam/wolfcaam.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_sha.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_hash.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_rsa.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_x25519.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_ecdsa.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_cmac.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_aes.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_qnx.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_seco.h \
+                         wolfssl/wolfcrypt/port/caam/wolfcaam_fsl_nxp.h
+endif
+
+if BUILD_IOTSAFE
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/iotsafe/iotsafe.h
+endif
+
+if BUILD_PSA
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/psa/psa.h
+endif
+
+if BUILD_SE050
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/nxp/se050_port.h
+endif
+
+if BUILD_MAXQ10XX
+nobase_include_HEADERS+= wolfssl/wolfcrypt/port/maxim/maxq10xx.h
+endif

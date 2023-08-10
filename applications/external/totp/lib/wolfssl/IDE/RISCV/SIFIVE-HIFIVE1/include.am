@@ -1,0 +1,9 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST += \
+    IDE/RISCV/SIFIVE-HIFIVE1/README.md \
+    IDE/RISCV/SIFIVE-HIFIVE1/main.c \
+    IDE/RISCV/SIFIVE-HIFIVE1/Makefile\
+    IDE/RISCV/SIFIVE-HIFIVE1/user_settings.h

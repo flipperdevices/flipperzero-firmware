@@ -1,0 +1,22 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         mqx/wolfcrypt_test/.cproject \
+         mqx/wolfcrypt_test/.project \
+         mqx/wolfcrypt_test/Debugger/K70FN1M0.mem \
+         mqx/wolfcrypt_test/Debugger/init_kinetis.tcl \
+         mqx/wolfcrypt_test/Debugger/mass_erase_kinetis.tcl \
+         mqx/wolfcrypt_test/ReferencedRSESystems.xml \
+         mqx/wolfcrypt_test/wolfcrypt_test_twrk70f120m_Int_Flash_DDRData_Debug_PnE_U-MultiLink.launch \
+         mqx/wolfcrypt_test/wolfcrypt_test_twrk70f120m_Int_Flash_DDRData_Release_PnE_U-MultiLink.launch \
+         mqx/wolfcrypt_test/wolfcrypt_test_twrk70f120m_Int_Flash_SramData_Debug_JTrace.jlink \
+         mqx/wolfcrypt_test/wolfcrypt_test_twrk70f120m_Int_Flash_SramData_Debug_JTrace.launch \
+         mqx/wolfcrypt_test/wolfcrypt_test_twrk70f120m_Int_Flash_SramData_Debug_PnE_U-MultiLink.launch \
+         mqx/wolfcrypt_test/wolfcrypt_test_twrk70f120m_Int_Flash_SramData_Release_PnE_U-MultiLink.launch
+
+EXTRA_DIST += \
+         mqx/wolfcrypt_test/Sources/main.c \
+         mqx/wolfcrypt_test/Sources/main.h
+

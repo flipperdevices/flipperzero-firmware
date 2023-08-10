@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://www.ddci.com/DEOS_SHARED_OBJECToptions" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="ddci:/xsd/DEOS_SHARED_OBJECT.xsd http://www.ddci.com/DEOS_SHARED_OBJECToptions">
+  <version>26</version>
+  <targetArch>ppc</targetArch>
+  <variant>diagnostic</variant>
+  <depend>kernel</depend>
+  <depend variant="diagnostic">video</depend>
+  <depend>ansi</depend>
+  <depend>math</depend>
+  <depend>deos-time</depend>
+  <depend>sal</depend>
+  <depend>mtl</depend>
+  <depend>printx</depend>
+  <depend>gnu-language</depend>
+  <kernelFile kfs="hypstart">lib$(PROJECT_NAME).so</kernelFile>
+  <copyToAppbin>$(BINARY)</copyToAppbin>
+  <copyToAppbin>$(BINARY).dbg</copyToAppbin>
+  <gccCCompileDirectories targetArch="arm">$(DESK_DIR)/arm/include</gccCCompileDirectories>
+  <gccCCompileDirectories targetArch="ppc">$(DESK_DIR)/ppc/include</gccCCompileDirectories>
+  <gccCCompileDirectories targetArch="x86">$(DESK_DIR)/x86/include</gccCCompileDirectories>
+  <gccCCompileDirectories>$(DESK_DIR)/include</gccCCompileDirectories>
+  <gccCCompileDirectories>$(PROJECT_DIR)/../../../..</gccCCompileDirectories>
+  <gccCCompileDirectories>$(PROJECT_DIR)/../../../../fips</gccCCompileDirectories>
+  <gccCCompileDirectories>$(PROJECT_DIR)/..</gccCCompileDirectories>
+  <gccCCompileDirectories>$(PROJECT_DIR.printx)/code</gccCCompileDirectories>
+  <gccCCompileDefinedMacros>WOLFSSL_USER_SETTINGS</gccCCompileDefinedMacros>
+  <gccCppLinkDirectories targetArch="arm">$(DESK_DIR)/arm/appbin</gccCppLinkDirectories>
+  <gccCppLinkDirectories targetArch="ppc">$(DESK_DIR)/ppc/appbin</gccCppLinkDirectories>
+  <gccCppLinkDirectories targetArch="x86">$(DESK_DIR)/x86/appbin</gccCppLinkDirectories>
+  <gccCppLinkUseIntermediateArchive>true</gccCppLinkUseIntermediateArchive>
+  <gccCppLinkAdditionalOptions>-L $(PROJECT_DIR.printx)/output/powerpc-motorola-elf/diagnostic</gccCppLinkAdditionalOptions>
+  <fpuType>none</fpuType>
+  <ignore>fips.c</ignore>
+  <ignore>fips_test.c</ignore>
+  <ignore>selftest.c</ignore>
+</project>

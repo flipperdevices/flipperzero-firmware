@@ -1,0 +1,17 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= wrapper/Ada/README.md
+EXTRA_DIST+= wrapper/Ada/default.gpr
+EXTRA_DIST+= wrapper/Ada/gnat.adc
+EXTRA_DIST+= wrapper/Ada/ada_binding.c
+EXTRA_DIST+= wrapper/Ada/tls_client_main.adb
+EXTRA_DIST+= wrapper/Ada/tls_client.adb
+EXTRA_DIST+= wrapper/Ada/tls_client.ads
+EXTRA_DIST+= wrapper/Ada/tls_server_main.adb
+EXTRA_DIST+= wrapper/Ada/tls_server.adb
+EXTRA_DIST+= wrapper/Ada/tls_server.ads
+EXTRA_DIST+= wrapper/Ada/user_settings.h
+EXTRA_DIST+= wrapper/Ada/wolfssl.adb
+EXTRA_DIST+= wrapper/Ada/wolfssl.ads

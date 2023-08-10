@@ -1,0 +1,17 @@
+# wolfSSL library for TI-RTOS
+
+This directory contains the files that build wolfSSL library for TI-RTOS.
+Please follow the instructions in "Using wolfSSL with TI-RTOS" (https://www.wolfssl.com/documentation/Using_wolfSSL_with_TI-RTOS.pdf) to build the wolfSSL
+library and the example applications.
+
+Also read TI-RTOS Getting Started Guide and TI-RTOS User Guide to learn more
+about TI-RTOS (http://www.ti.com/tool/ti-rtos).
+
+For more information see:
+(https://github.com/wolfSSL/wolfssl-examples/blob/master/tirtos_ccs_examples/README.md)
+
+## Example Application
+
+A simple "TCP echo server with TLS" example application is provided with TI-RTOS
+product. Look in the TI-RTOS Getting Started Guide for instructions to build
+examples.

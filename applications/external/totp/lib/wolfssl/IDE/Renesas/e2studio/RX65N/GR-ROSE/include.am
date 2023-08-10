@@ -1,0 +1,26 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/README_EN.md
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/README_JP.md
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/wolfssl/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/wolfssl/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/wolfssl/wolfssl.rcpc
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/test_HardwareDebug.launch
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/test.rcpc
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/src/test_main.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/src/key_data.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/src/key_data.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/src/wolf_client.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/src/wolf_server.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/test/src/wolfssl_demo.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/common/wolfssl_dummy.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/common/strings.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/common/unistd.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/common/user_settings.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/smc/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/smc/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RX65N/GR-ROSE/smc/smc.scfg

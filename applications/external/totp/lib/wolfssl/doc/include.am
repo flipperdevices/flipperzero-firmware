@@ -1,0 +1,23 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+dist_doc_DATA+= doc/README.txt \
+	doc/QUIC.md
+
+
+dox-pdf:
+	echo "Generating PDF"
+	cd doc && ./generate_documentation.sh -install -pdf || (echo "HTML generation failed $$?"; exit 1)
+
+dox-html:
+	echo "Generating HTML"
+	cd doc && ./generate_documentation.sh -install -html || (echo "HTML generation failed $$?"; exit 1)
+
+dox: dox-html dox-pdf
+
+clean-local:
+	-rm -rf doc/build/
+	-rm -rf doc/html/
+	-rm -f doc/refman.pdf
+	-rm -f doc/doxygen_warnings

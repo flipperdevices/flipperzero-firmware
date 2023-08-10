@@ -1,0 +1,8 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/AURIX/Cpu0_Main.c
+EXTRA_DIST+= IDE/AURIX/README.md
+EXTRA_DIST+= IDE/AURIX/user_settings.h
+EXTRA_DIST+= IDE/AURIX/wolf_main.c

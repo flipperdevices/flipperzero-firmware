@@ -1,0 +1,311 @@
+0. Building on *nix from git repository
+
+    Run the autogen script to generate configure, then proceed to step 1.
+    Prerequisites: You'll need autoconf, automake and libtool installed.
+
+    $ ./autogen.sh
+
+1. Building on *nix from a release
+
+    $ ./configure
+    $ make
+    $ make check   # (optional, but highly recommended)
+    $ sudo make install
+
+2. Building on iOS
+
+    Use on the xcode project in IDE/iOS/wolfssl.xcodeproj
+    There is a README in IDE/iOS with more information
+
+3. Building for Apple ARM64
+
+    When building for an Apple ARM64 platform, ensure the host CPU type is detected as "aarch64" during configure, if not, pass --host=aarch64-apple-darwin to configure.
+
+4. Building on Windows
+
+    Use the Visual Studio Solution wolfssl64.sln
+
+5. Building with IAR
+
+    Please see the README in IDE/IAR-EWARM for detailed instructions
+
+6. Building with Keil
+
+    Please see the Keil Projects in IDE/MDK5-ARM/Projects
+
+7. Building with Microchip tools
+
+    Please see the README in mplabx
+
+8. Building with Freescale MQX
+
+    Please see the README in mqx
+
+9. Building with Rowley CrossWorks for ARM
+
+    Use the CrossWorks project in IDE/ROWLEY-CROSSWORKS-ARM/wolfssl.hzp
+    There is a README.md in IDE/ROWLEY-CROSSWORKS-ARM with more information
+
+10. Building with Arduino
+
+    Use the script IDE/ARDUINO/wolfssl-arduino.sh to reformat the wolfSSL
+    library for compatibility with the Arduino IDE. There is a README.md in
+    IDE/ARDUINO for detailed instructions.
+
+11. Building for Android with Visual Studio 2017
+
+    Please see the README in IDE/VS-ARM.
+    Use the Visual Studio solution IDE/VS-ARM/wolfssl.sln.
+
+12. Building for Yocto Project or OpenEmbedded
+
+    Please see the README in the "meta-wolfssl" repository. This repository
+    holds wolfSSL's Yocto and OpenEmbedded layer, which contains recipes
+    for wolfSSL, wolfSSH, wolfMQTT, wolfTPM, wolfCrypt examples, and OSS
+    project bbappend files.
+
+    https://github.com/wolfssl/meta-wolfssl
+
+    The wolfSSL recipe can also be found in the OpenEmbedded
+    "meta-openembedded/meta-networking/recipes-connectivity" layer:
+
+    https://github.com/openembedded/meta-openembedded
+
+13. Porting to a new platform
+
+    Please see section 2.4 in the manual:
+    http://www.wolfssl.com/yaSSL/Docs-cyassl-manual-2-building-cyassl.html
+
+14. Building with CMake
+    Note: Primary development uses automake (./configure). The support for CMake
+    is still under development.
+
+    For configuring wolfssl using CMake, we recommend downloading the CMake
+    GUI (https://cmake.org/download/). This tool allows you to see all of
+    wolfssl's configuration variables, set them, and view their descriptions.
+    Looking at the GUI or CMakeCache.txt (generated after running cmake once) is
+    the best way to find out what configuration options are available and what
+    they do. You can also invoke CMake from the GUI, which is described in the
+    Windows instructions below. For Unix-based systems, we describe the command
+    line work flow. Regardless of your chosen workflow, cmake will generate
+    a header options.h in the wolfssl directory that contains the options used
+    to configure the build.
+
+    Unix-based Platforms
+    ---
+    1) Navigate to the wolfssl root directory containing "CMakeLists.txt".
+    2) Create a directory called "build" and change into it. This is where
+       CMake will store build files.
+    3) Run `cmake ..` to generate the target build files (e.g. UNIX Makefiles).
+       To enable or disable features, set them using -D<option>=[yes/no]. For
+       example, to disable TLS 1.3 support, run cmake .. -DWOLFSSL_TLS13=no
+       (autoconf equivalent: ./configure --disable-tls13) To enable DSA, run
+       cmake .. -DWOLFSSL_DSA=yes (autoconf equivalent: ./configure
+       --enable-dsa). Again, you can find a list of these options and their
+       descriptions either using the CMake GUI or by looking at CMakeCache.txt.
+    5) The build directory should now contain the generated build files. Build
+       with `cmake --build .`. Under the hood, this runs the target build tool
+       (by default, make). You can also invoke the target build tool directly
+       (e.g. make).
+
+       To build with debugging use: `cmake .. -DCMAKE_BUILD_TYPE=Debug`.
+
+    Windows (Visual Studio)
+    ---
+    1) Go to this page, download the appropriate Windows installer, and install
+       to get the CMake GUI: https://cmake.org/download/ Native CMake support in
+       Visual Studio 16 2019 (and possibly older versions) has proven buggy. We
+       recommend using the CMake GUI in concert with Visual Studio, as described
+    in these steps.
+    2) Open CMake.
+    3) Where is the source code: <root directory of wolfssl containing
+       CMakeLists.txt>
+    4) Where to build the binaries: <build directory, e.g. wolfssl/build>
+    5) Hit Configure. CMake runs the code in CMakeLists.txt and builds up an
+       internal representation of the project.
+    6) Hit Generate. CMake generates the build files. For Windows, this will
+       be Visual Studio project (.vcxproj) and solution (.sln) files.
+    7) Open Visual Studio and select "Open a project or solution".
+    8) Navigate to the build directory and select wolfssl.sln to load the
+       project.
+
+    Windows (command line)
+    ---
+    1) Open Command Prompt
+    2) Run the Visual Studio batch to setup command line variables, e.g. C:\Program Files (x86)\Microsoft Visual   
+       Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat
+    3) Follow steps in "Unix-based Platforms" above.
+
+15. Building with liboqs for TLS 1.3 [EXPERIMENTAL]
+    In order be able to use liboqs, you must have it built and installed on your
+    system. We support liboqs at a specific git commit.
+
+    NOTE: Even if you have already installed liboqs, you need to follow these
+          steps to install liboqs again as we support sphincs variants that are
+          disabled by default in OQS's fork of OpenSSL.
+
+    Here are instructions for obtaining and building liboqs:
+
+    $ mkdir ~/oqs
+    $ cd ~/oqs
+    $ git clone --single-branch https://github.com/open-quantum-safe/liboqs.git
+    $ cd liboqs/
+    $ git checkout 0.8.0
+    $ mkdir build
+    $ cd build
+    $ cmake -DOQS_USE_OPENSSL=0 ..
+    $ make all
+    $ sudo make install
+
+    And then for building wolfssl, the following is sufficient:
+
+    $ cd wolfssl
+    $ ./autogen.sh (Might not be necessary)
+    $ ./configure --with-liboqs
+    $ make all
+
+    Execute the following to see the liboqs-related options for KEM groups near
+    the end of the output of these commands:
+
+    $ ./examples/server/server -?
+    $ ./examples/client/client -?
+
+    For a quick start, you can run the client and server like this:
+
+    $ ./examples/server/server -v 4 --pqc P521_KYBER_LEVEL5
+    $ ./examples/client/client -v 4 --pqc P521_KYBER_LEVEL5
+
+    Look for the following line in the output of the server and client:
+
+    ```
+    Using Post-Quantum KEM: P521_KYBER_LEVEL5
+    ```
+
+    For authentication, you can generate a certificate chain using a patch on
+    top of the Open Quantum Safe project's fork of OpenSSL. We support
+    certificates and keys generated by the patched version which is maintained
+    in our OSP repo.
+
+    Instructions for obtaining and building our patched version of OQS's fork of
+    OpenSSL can be found at:
+
+    https://github.com/wolfSSL/osp/tree/master/oqs/README.md
+
+    There are scripts for generating FALCON, Dilithium and SPHINCS+ certificate
+    chains which can be found in the same directory as the `README.md` file in
+    the `osp` github repo. Please find instructions on how to generate the keys
+    and certificates in the `README.md` file.
+
+    Once the certificates and keys are generated, copy them from the
+    to the certs directory of wolfssl. Now you can run the server and client
+    like this:
+
+    $ examples/server/server -v 4 -l TLS_AES_256_GCM_SHA384 \
+      -A certs/falcon_level5_root_cert.pem \
+      -c certs/falcon_level1_entity_cert.pem \
+      -k certs/falcon_level1_entity_key.pem \
+      --pqc P521_KYBER_LEVEL5
+
+    $ examples/client/client -v 4 -l TLS_AES_256_GCM_SHA384 \
+      -A certs/falcon_level1_root_cert.pem \
+      -c certs/falcon_level5_entity_cert.pem \
+      -k certs/falcon_level5_entity_key.pem \
+      --pqc P521_KYBER_LEVEL5
+
+    Congratulations! You have just achieved a fully quantum-safe TLS 1.3
+    connection!
+
+    The following NIST Competition winning algorithms are supported:
+    - CRYSTALS-KYBER (KEM)
+    - Dilithium (signature scheme)
+    - FALCON (signature scheme)
+    - SPHINCS+ (signature scheme)
+
+    The following NIST Competition Round 3 finalist algorithms were supported,
+    but have been removed after 5.3.3
+    - SABER (KEM)
+    - NTRU (KEM)
+
+    Links to more information about all of these algorithms can be found here:
+
+    https://csrc.nist.gov/projects/post-quantum-cryptography/round-3-submissions
+
+    NOTE: The quantum-safe algorithms provided by liboqs are unstandardized and
+          experimental. It is highly advised that they NOT be used in production
+          environments. All OIDs and codepoints are temporary and expected to
+          change in the future. You should have no expectation of backwards
+          compatibility.
+
+16. Building with vcpkg
+
+# Building wolfssl - Using vcpkg
+
+ You can download and install wolfssl using the [vcpkg](https://github.com/Microsoft/vcpkg):
+
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
+    ./bootstrap-vcpkg.sh
+    OR for Windows
+    bootstrap-vcpkg.bat
+
+    ./vcpkg integrate install
+    ./vcpkg install wolfssl
+
+The wolfssl port in vcpkg is kept up to date by wolfSSL.
+
+We also have vcpkg ports for wolftpm, wolfmqtt and curl.
+
+17. Building with hash-sigs lib for LMS/HSS support [EXPERIMENTAL]
+
+    Using LMS/HSS requires that the hash-sigs lib has been built on
+    your system. We support hash-sigs lib at this git commit:
+      b0631b8891295bf2929e68761205337b7c031726
+    At the time of writing this, this is the HEAD of the master
+    branch of the hash-sigs project.
+
+    Currently the hash-sigs project only builds static libraries:
+      - hss_lib.a: a single-threaded static lib.
+      - hss_lib_thread.a: a multi-threaded static lib.
+
+    The multi-threaded version will mainly have speedups for key
+    generation and signing.
+
+    Additionally, the hash-sigs project can be modified to build
+    and install a shared library in /usr/local with either single
+    or multi-threaded versions.  If the shared version has been
+    built, libhss.so is the assumed name.
+
+    wolfSSL supports either option, and by default will look for
+    hss_lib.a first, and hss_lib_thread.a second, and libhss.so
+    lastly, in a specified hash-sigs dir.
+
+    How to get and build the hash-sigs library:
+      $ mkdir ~/hash_sigs
+      $ cd ~/hash_sigs
+      $ git clone https://github.com/cisco/hash-sigs.git src
+      $ cd src
+      $ git checkout b0631b8891295bf2929e68761205337b7c031726
+
+    In sha256.h, set USE_OPENSSL to 0:
+      #define USE_OPENSSL 0
+
+    To build the single-threaded version:
+      $ make hss_lib.a
+      $ ls *.a
+      hss_lib.a
+
+    To build multi-threaded:
+      $ make hss_lib_thread.a
+      $ ls *.a
+      hss_lib_thread.a
+
+    Build wolfSSL with
+    $ ./configure \
+        --enable-static \
+        --disable-shared \
+        --enable-lms=yes \
+        --with-liblms=<path to dir containing hss_lib_thread.a>
+    $ make
+
+    Run the benchmark against LMS/HSS with:
+    $ ./wolfcrypt/benchmark/benchmark -lms_hss

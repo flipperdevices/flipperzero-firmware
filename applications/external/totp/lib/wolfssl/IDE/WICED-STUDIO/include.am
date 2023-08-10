@@ -1,0 +1,6 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/WICED-STUDIO/README
+EXTRA_DIST+= IDE/WICED-STUDIO/user_settings.h

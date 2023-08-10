@@ -1,0 +1,31 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/p521/ca-p521.der \
+         certs/p521/ca-p521.pem \
+         certs/p521/ca-p521-key.der \
+         certs/p521/ca-p521-key.pem \
+         certs/p521/ca-p521-priv.der \
+         certs/p521/ca-p521-priv.pem \
+         certs/p521/client-p521.der \
+         certs/p521/client-p521.pem \
+         certs/p521/client-p521-key.der \
+         certs/p521/client-p521-key.pem \
+         certs/p521/client-p521-priv.der \
+         certs/p521/client-p521-priv.pem \
+         certs/p521/root-p521.der \
+         certs/p521/root-p521.pem \
+         certs/p521/root-p521-key.der \
+         certs/p521/root-p521-key.pem \
+         certs/p521/root-p521-priv.der \
+         certs/p521/root-p521-priv.pem \
+         certs/p521/server-p521.der \
+         certs/p521/server-p521.pem \
+         certs/p521/server-p521-cert.pem \
+         certs/p521/server-p521-key.der \
+         certs/p521/server-p521-key.pem \
+         certs/p521/server-p521-priv.der \
+         certs/p521/server-p521-priv.pem
+

@@ -1,0 +1,5 @@
+syscfg.defs:
+    WOLFSSL_MNSOCK_MEM_BUF_COUNT:
+        value: 10
+    WOLFSSL_MNSOCK_MEM_BUF_SIZE:
+        value: 2048

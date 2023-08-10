@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{803FD0C6-D64E-4E16-9DC3-1DAEC859A3D2}") = "wolfssl_benchmark_IDF_v5_ESP32", "wolfssl_benchmark_IDF_v5_ESP32.vgdbproj", "{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "wolfssl", "wolfssl", "{BDD063E3-67C1-437F-9F9B-7175E36EE6EE}"
+	ProjectSection(SolutionItems) = preProject
+		..\components\wolfssl\CMakeLists.txt = ..\components\wolfssl\CMakeLists.txt
+		..\components\wolfssl\include\config.h = ..\components\wolfssl\include\config.h
+		..\components\wolfssl\Kconfig = ..\components\wolfssl\Kconfig
+		..\components\wolfssl\include\user_settings.h = ..\components\wolfssl\include\user_settings.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E25A35EF-64B9-48AA-939B-49340C2A4B03}"
+	ProjectSection(SolutionItems) = preProject
+		..\sdkconfig = ..\sdkconfig
+		..\build\VisualGDB\Debug\config\sdkconfig.h = ..\build\VisualGDB\Debug\config\sdkconfig.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "wolfcrypt", "wolfcrypt", "{68571B42-6509-475F-A79D-FB5F6188753B}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\..\..\wolfssl\wolfcrypt\port\Espressif\esp32-crypt.h = ..\..\..\..\..\..\wolfssl\wolfcrypt\port\Espressif\esp32-crypt.h
+		..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_aes.c = ..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_aes.c
+		..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_mp.c = ..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_mp.c
+		..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_sha.c = ..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_sha.c
+		..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_util.c = ..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_util.c
+		..\..\..\..\..\..\wolfcrypt\src\port\Espressif\README.md = ..\..\..\..\..\..\wolfcrypt\src\port\Espressif\README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|VisualGDB = Debug|VisualGDB
+		Release|VisualGDB = Release|VisualGDB
+		Tests (Debug)|VisualGDB = Tests (Debug)|VisualGDB
+		Tests (Release)|VisualGDB = Tests (Release)|VisualGDB
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Debug|VisualGDB.ActiveCfg = Debug|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Debug|VisualGDB.Build.0 = Debug|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Release|VisualGDB.ActiveCfg = Release|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Release|VisualGDB.Build.0 = Release|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Tests (Debug)|VisualGDB.ActiveCfg = Tests (Debug)|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Tests (Debug)|VisualGDB.Build.0 = Tests (Debug)|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Tests (Release)|VisualGDB.ActiveCfg = Tests (Release)|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Tests (Release)|VisualGDB.Build.0 = Tests (Release)|VisualGDB
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BDD063E3-67C1-437F-9F9B-7175E36EE6EE} = {E25A35EF-64B9-48AA-939B-49340C2A4B03}
+		{68571B42-6509-475F-A79D-FB5F6188753B} = {E25A35EF-64B9-48AA-939B-49340C2A4B03}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DED328BF-3A3C-47F4-A536-4554945B865B}
+	EndGlobalSection
+EndGlobal

@@ -3,6 +3,7 @@
 #include <furi/core/check.h>
 #include "crypto_v1.h"
 #include "crypto_v2.h"
+#include "crypto_v3.h"
 #include "constants.h"
 
 bool totp_crypto_check_key_slot(uint8_t key_slot) {
@@ -31,6 +32,11 @@ uint8_t* totp_crypto_encrypt(
             plain_data, plain_data_length, crypto_settings, encrypted_data_length);
     }
 
+    if(crypto_settings->crypto_version == 3) {
+        return totp_crypto_encrypt_v3(
+            plain_data, plain_data_length, crypto_settings, encrypted_data_length);
+    }
+
     furi_crash("Unsupported crypto version");
 }
 
@@ -49,6 +55,11 @@ uint8_t* totp_crypto_decrypt(
             encrypted_data, encrypted_data_length, crypto_settings, decrypted_data_length);
     }
 
+    if(crypto_settings->crypto_version == 3) {
+        return totp_crypto_decrypt_v3(
+            encrypted_data, encrypted_data_length, crypto_settings, decrypted_data_length);
+    }
+
     furi_crash("Unsupported crypto version");
 }
 
@@ -62,6 +73,10 @@ CryptoSeedIVResult
         return totp_crypto_seed_iv_v2(crypto_settings, pin, pin_length);
     }
 
+    if(crypto_settings->crypto_version == 3) {
+        return totp_crypto_seed_iv_v3(crypto_settings, pin, pin_length);
+    }
+
     furi_crash("Unsupported crypto version");
 }
 
@@ -72,6 +87,10 @@ bool totp_crypto_verify_key(const CryptoSettings* crypto_settings) {
 
     if(crypto_settings->crypto_version == 2) {
         return totp_crypto_verify_key_v2(crypto_settings);
+    }
+
+    if(crypto_settings->crypto_version == 3) {
+        return totp_crypto_verify_key_v3(crypto_settings);
     }
 
     furi_crash("Unsupported crypto version");

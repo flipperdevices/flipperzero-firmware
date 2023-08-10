@@ -1,0 +1,22 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         mqx/wolfssl_client/.cproject \
+         mqx/wolfssl_client/.project \
+         mqx/wolfssl_client/Debugger/K70FN1M0.mem \
+         mqx/wolfssl_client/Debugger/init_kinetis.tcl \
+         mqx/wolfssl_client/Debugger/mass_erase_kinetis.tcl \
+         mqx/wolfssl_client/ReferencedRSESystems.xml \
+         mqx/wolfssl_client/wolfssl_client_twrk70f120m_Int_Flash_DDRData_Debug_PnE_U-MultiLink.launch \
+         mqx/wolfssl_client/wolfssl_client_twrk70f120m_Int_Flash_DDRData_Release_PnE_U-MultiLink.launch \
+         mqx/wolfssl_client/wolfssl_client_twrk70f120m_Int_Flash_SramData_Debug_JTrace.jlink \
+         mqx/wolfssl_client/wolfssl_client_twrk70f120m_Int_Flash_SramData_Debug_JTrace.launch \
+         mqx/wolfssl_client/wolfssl_client_twrk70f120m_Int_Flash_SramData_Debug_PnE_U-MultiLink.launch \
+         mqx/wolfssl_client/wolfssl_client_twrk70f120m_Int_Flash_SramData_Release_PnE_U-MultiLink.launch
+
+EXTRA_DIST += \
+         mqx/wolfssl_client/Sources/main.c \
+         mqx/wolfssl_client/Sources/main.h
+

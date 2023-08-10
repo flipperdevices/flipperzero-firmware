@@ -1,0 +1,57 @@
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#cmakedefine HAVE_ARPA_INET_H @HAVE_ARPA_INET_H@
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#cmakedefine HAVE_SYS_SOCKET_H @HAVE_SYS_SOCKET_H@
+
+/* Define to 1 if you have the <errno.h> header file. */
+#cmakedefine HAVE_ERRNO_H @HAVE_ERRNO_H@
+
+/* Define to 1 if you have the `getaddrinfo' function. */
+#cmakedefine HAVE_GETADDRINFO @HAVE_GETADDRINFO@
+
+/* Define to 1 if you have the `gmtime_r' function. */
+#cmakedefine HAVE_GMTIME_R @HAVE_GMTIME_R@
+
+/* Define to 1 if you have the <limits.h> header file. */
+#cmakedefine HAVE_LIMITS_H @HAVE_LIMITS_H@
+
+/* Define to 1 if you have the <pcap/pcap.h> header file. */
+#cmakedefine HAVE_PCAP_PCAP_H @HAVE_PCAP_PCAP_H@
+
+/* Define if you have POSIX threads libraries and header files. */
+#cmakedefine HAVE_PTHREAD @HAVE_PTHREAD@
+
+/* Define to 1 if you have the `strftime' function. */
+#cmakedefine HAVE_STRFTIME @HAVE_STRFTIME@
+
+/* Define to 1 if you have the <strings.h> header file. */
+#cmakedefine HAVE_STRINGS_H @HAVE_STRINGS_H@
+
+/* Define to 1 if you have the <string.h> header file. */
+#cmakedefine HAVE_STRING_H @HAVE_STRING_H@
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#cmakedefine HAVE_SYS_TIME_H @HAVE_SYS_TIME_H@
+
+/* Define to 1 if you have the <Security/SecTrustSettings.h> header file. */
+#cmakedefine HAVE_SECURITY_SECTRUSTSETTINGS_H @HAVE_SECURITY_SECTRUSTSETTINGS_H@
+
+/* Define to 1 if the system has the type `__uint128_t'. */
+#cmakedefine HAVE___UINT128_T @HAVE___UINT128_T@
+
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "@CMAKE_PROJECT_NAME@"
+
+/* The size of `long', as computed by sizeof. */
+#cmakedefine SIZEOF_LONG @SIZEOF_LONG@
+
+/* The size of `long long', as computed by sizeof. */
+#cmakedefine SIZEOF_LONG_LONG @SIZEOF_LONG_LONG@
+
+/* The size of `time_t', as computed by sizeof. */
+#cmakedefine SIZEOF_TIME_T @SIZEOF_TIME_T@
+
+/* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
+   significant byte first (like Motorola and SPARC, unlike Intel). */
+#cmakedefine WORDS_BIGENDIAN

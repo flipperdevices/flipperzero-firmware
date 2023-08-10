@@ -1,0 +1,22 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         mqx/wolfcrypt_benchmark/.cproject \
+         mqx/wolfcrypt_benchmark/.project \
+         mqx/wolfcrypt_benchmark/Debugger/K70FN1M0.mem \
+         mqx/wolfcrypt_benchmark/Debugger/init_kinetis.tcl \
+         mqx/wolfcrypt_benchmark/Debugger/mass_erase_kinetis.tcl \
+         mqx/wolfcrypt_benchmark/ReferencedRSESystems.xml \
+         mqx/wolfcrypt_benchmark/wolfcrypt_benchmark_twrk70f120m_Int_Flash_DDRData_Debug_PnE_U-MultiLink.launch \
+         mqx/wolfcrypt_benchmark/wolfcrypt_benchmark_twrk70f120m_Int_Flash_DDRData_Release_PnE_U-MultiLink.launch \
+         mqx/wolfcrypt_benchmark/wolfcrypt_benchmark_twrk70f120m_Int_Flash_SramData_Debug_JTrace.jlink \
+         mqx/wolfcrypt_benchmark/wolfcrypt_benchmark_twrk70f120m_Int_Flash_SramData_Debug_JTrace.launch \
+         mqx/wolfcrypt_benchmark/wolfcrypt_benchmark_twrk70f120m_Int_Flash_SramData_Debug_PnE_U-MultiLink.launch \
+         mqx/wolfcrypt_benchmark/wolfcrypt_benchmark_twrk70f120m_Int_Flash_SramData_Release_PnE_U-MultiLink.launch
+
+EXTRA_DIST += \
+         mqx/wolfcrypt_benchmark/Sources/main.c \
+         mqx/wolfcrypt_benchmark/Sources/main.h
+

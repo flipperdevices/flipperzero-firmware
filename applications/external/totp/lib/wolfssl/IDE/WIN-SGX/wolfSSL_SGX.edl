@@ -1,0 +1,11 @@
+enclave {
+
+    trusted {
+
+    };
+
+    untrusted {
+        /* define OCALLs here. */
+    
+    };
+};

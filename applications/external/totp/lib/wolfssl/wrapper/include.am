@@ -1,0 +1,8 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+include wrapper/Ada/include.am
+include wrapper/CSharp/include.am
+
+EXTRA_DIST+= wrapper/python/README.md

@@ -1,0 +1,43 @@
+autogen.sh - creates ./configure from source checkout, sets up git hooks
+
+pre-commit.sh - our pre commit hook, saves current state before running commit
+                tests to allow a restore back to current state
+
+commit-tests.sh - our commit tests, must pass before a commit is accepted, use
+                  -n (--no-verify) to disable
+
+fips-hash.sh - updates the verifyCore hash in fips_test.c
+
+fips-check.sh - checks if current wolfSSL version works against FIPS wolfCrypt
+                comment out last line to leave working directory
+
+async-check.sh - internal script for validating wolfSSL Async using the simulator.
+
+gencertbuf.pl - creates certs_test.h, our certs / keys C array for easy non
+                filesystem testing
+
+pull_to_vagrant.sh - synchronize to a vm without using git
+
+certs/
+ renewcerts.sh - renews test certs and crls
+ crl/
+  gencrls.sh   - generates crls, used by renewcerts.sh
+ ocsp/
+  renewcerts.sh - renews ocsp certs
+  ocspd0.sh - ocsp responder for root-ca-cert.pem
+  ocspd1.sh - ocsp responder for intermediate1-ca-cert.pem
+  ocspd2.sh - ocsp responder for intermediate2-ca-cert.pem
+ test-pathlen/
+  assemble-chains.sh - composes the cert chain files out of the certs
+
+scripts/
+ external.test - example client test against our website, part of tests
+ google.test   - example client test against google, part of tests
+ resume.test   - example sessoin resume test, part of tests
+ ocsp-stapling.test - example client test against globalsign, part of tests
+ ocsp-stapling2.test - example client test against example server, part of tests
+ sniffer-testsuite.test - runs snifftest on a pcap of testsuite, part of tests
+                          in sniffer mode
+
+valgrind-error.sh - deprecated, was used to detect valgrind errors before
+                    automake switched to concurrent tests

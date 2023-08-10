@@ -1,0 +1,32 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+	     certs/crl/hash_pem/0fdb2da4.r0 \
+	     certs/crl/hash_der/0fdb2da4.r0 \
+	     certs/crl/crl.pem \
+	     certs/crl/cliCrl.pem \
+	     certs/crl/eccSrvCRL.pem \
+	     certs/crl/eccCliCRL.pem \
+	     certs/crl/crl2.pem \
+	     certs/crl/caEccCrl.der \
+	     certs/crl/caEccCrl.pem \
+	     certs/crl/caEcc384Crl.pem \
+	     certs/crl/wolfssl.cnf \
+	     certs/crl/crl.der \
+	     certs/crl/crl2.der
+
+EXTRA_DIST += \
+	     certs/crl/crl.revoked
+
+# Intermediate cert CRL's
+EXTRA_DIST += \
+		 certs/crl/ca-int.pem \
+		 certs/crl/ca-int2.pem \
+		 certs/crl/client-int.pem \
+	     certs/crl/server-int.pem \
+	     certs/crl/ca-int-ecc.pem \
+		 certs/crl/ca-int2-ecc.pem \
+		 certs/crl/client-int-ecc.pem \
+	     certs/crl/server-int-ecc.pem

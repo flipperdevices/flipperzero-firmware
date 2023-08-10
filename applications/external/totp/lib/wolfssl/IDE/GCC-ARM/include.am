@@ -1,0 +1,21 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/GCC-ARM/Header/user_settings.h
+EXTRA_DIST+= IDE/GCC-ARM/Source/armtarget.c
+EXTRA_DIST+= IDE/GCC-ARM/Source/wolf_main.c
+EXTRA_DIST+= IDE/GCC-ARM/Source/benchmark_main.c
+EXTRA_DIST+= IDE/GCC-ARM/Source/test_main.c
+EXTRA_DIST+= IDE/GCC-ARM/Source/tls_client.c
+EXTRA_DIST+= IDE/GCC-ARM/Source/tls_server.c
+EXTRA_DIST+= IDE/GCC-ARM/linker.ld
+EXTRA_DIST+= IDE/GCC-ARM/linker_fips.ld
+EXTRA_DIST+= IDE/GCC-ARM/Makefile
+EXTRA_DIST+= IDE/GCC-ARM/Makefile.bench
+EXTRA_DIST+= IDE/GCC-ARM/Makefile.client
+EXTRA_DIST+= IDE/GCC-ARM/Makefile.server
+EXTRA_DIST+= IDE/GCC-ARM/Makefile.common
+EXTRA_DIST+= IDE/GCC-ARM/Makefile.test
+EXTRA_DIST+= IDE/GCC-ARM/Makefile.static
+EXTRA_DIST+= IDE/GCC-ARM/README.md

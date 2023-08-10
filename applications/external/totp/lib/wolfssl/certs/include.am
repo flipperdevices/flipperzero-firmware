@@ -1,0 +1,143 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+             certs/ca-cert-chain.der \
+             certs/ca-cert.pem \
+             certs/ca-key.pem \
+             certs/client-cert.pem \
+             certs/client-keyEnc.pem \
+             certs/client-key.pem \
+             certs/client-uri-cert.pem \
+             certs/client-absolute-urn.pem \
+             certs/client-relative-uri.pem \
+             certs/client-crl-dist.pem \
+             certs/client-crl-dist.der \
+             certs/ecc-key.pem \
+             certs/ecc-keyPub.pem \
+             certs/ecc-params.der \
+             certs/ecc-params.pem \
+             certs/ecc-privkey.der \
+             certs/ecc-privkey.pem \
+             certs/ecc-privkeyPkcs8.der \
+             certs/ecc-privkeyPkcs8.pem \
+             certs/ecc-keyPkcs8Enc.pem \
+             certs/ecc-keyPkcs8Enc.der \
+             certs/ecc-key-comp.pem \
+             certs/ecc-keyPkcs8.pem \
+             certs/ecc-keyPkcs8.der \
+             certs/ecc-client-key.pem \
+             certs/ecc-client-keyPub.pem \
+             certs/client-ecc-cert.pem \
+             certs/client-ca.pem \
+             certs/dh2048.pem \
+             certs/server-cert.pem \
+             certs/server-ecc.pem \
+             certs/server-ecc-self.pem \
+             certs/server-ecc-comp.pem \
+             certs/server-ecc-rsa.pem \
+             certs/server-keyEnc.pem \
+             certs/server-key.pem \
+             certs/server-keyPub.der \
+             certs/server-keyPub.pem \
+             certs/server-keyPkcs8.der \
+             certs/server-keyPkcs8Enc12.pem \
+             certs/server-keyPkcs8Enc2.pem \
+             certs/server-keyPkcs8Enc.pem \
+             certs/server-keyPkcs8Enc.der \
+             certs/server-keyPkcs8.pem \
+             certs/server-revoked-cert.pem \
+             certs/server-revoked-key.pem \
+             certs/wolfssl-website-ca.pem \
+             certs/test-degenerate.p7b \
+             certs/test-ber-exp02-05-2022.p7b \
+             certs/test-servercert.p12 \
+             certs/test-servercert-rc2.p12 \
+             certs/ecc-rsa-server.p12 \
+             certs/dsaparams.der \
+             certs/dsaparams.pem \
+             certs/ecc-privOnlyKey.pem \
+             certs/ecc-privOnlyCert.pem \
+             certs/dh3072.pem \
+             certs/dh4096.pem \
+             certs/client-cert-ext.pem \
+             certs/csr.attr.der \
+             certs/csr.dsa.der \
+             certs/csr.dsa.pem \
+             certs/csr.signed.der \
+             certs/csr.ext.der \
+             certs/entity-no-ca-bool-cert.pem \
+             certs/entity-no-ca-bool-key.pem \
+             certs/x942dh2048.der \
+             certs/x942dh2048.pem \
+             certs/fpki-cert.der \
+             certs/rid-cert.der
+
+EXTRA_DIST += \
+             certs/ca-key.der \
+             certs/ca-cert.der \
+             certs/client-cert.der \
+             certs/client-key.der \
+             certs/client-ecc-cert.der \
+             certs/client-keyPub.der \
+             certs/client-keyPub.pem \
+             certs/dh2048.der \
+             certs/dh3072.der \
+             certs/dh4096.der \
+             certs/dh-pubkey-2048.der \
+             certs/rsa2048.der \
+             certs/rsa-pub-2048.pem \
+             certs/rsa3072.der \
+             certs/dsa2048.der \
+             certs/dsa3072.der \
+             certs/dsa-pubkey-2048.der \
+             certs/ecc-client-key.der \
+             certs/ecc-client-keyPub.der \
+             certs/ecc-key.der \
+             certs/ecc-keyPub.der \
+             certs/server-key.der \
+             certs/server-cert.der \
+             certs/server-ecc-comp.der \
+             certs/server-ecc.der \
+             certs/server-ecc-self.der \
+             certs/server-ecc-rsa.der \
+             certs/server-cert-chain.der \
+             certs/client-cert-ext.der
+
+# ECC CA prime256v1
+EXTRA_DIST += \
+              certs/ca-ecc-cert.der \
+              certs/ca-ecc-cert.pem \
+              certs/ca-ecc-key.der \
+              certs/ca-ecc-key.pem
+
+# ECC CA SECP384R1
+EXTRA_DIST += \
+              certs/ca-ecc384-cert.der \
+              certs/ca-ecc384-cert.pem \
+              certs/ca-ecc384-key.der \
+              certs/ca-ecc384-key.pem
+
+dist_doc_DATA+= certs/taoCert.txt
+
+include certs/1024/include.am
+include certs/3072/include.am
+include certs/4096/include.am
+include certs/crl/include.am
+include certs/ecc/include.am
+include certs/ed25519/include.am
+include certs/ed448/include.am
+include certs/p521/include.am
+include certs/sm2/include.am
+include certs/external/include.am
+include certs/ocsp/include.am
+include certs/statickeys/include.am
+include certs/test/include.am
+include certs/test-pathlen/include.am
+include certs/intermediate/include.am
+include certs/falcon/include.am
+include certs/rsapss/include.am
+include certs/dilithium/include.am
+include certs/sphincs/include.am
+

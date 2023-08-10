@@ -1,0 +1,176 @@
+
+***** Create a self signed cert ************
+
+1) openssl genrsa 1024 > client-key.pem
+
+2) openssl req -new -x509 -nodes -sha1 -days 1000 -key client-key.pem > client-cert.pem
+
+3) note md5 would be -md5
+
+-- adding metadata to beginning
+
+3) openssl x509 -in client-cert.pem -text > tmp.pem
+
+4) mv tmp.pem client-cert.pem
+
+
+***** Create a CA, signing authority **********
+
+same as self signed, use ca prefix instead of client
+
+
+***** Create a cert signed by CA **************
+
+1) openssl req -newkey rsa:1024 -sha1 -days 1000 -nodes -keyout server-key.pem > server-req.pem
+
+* note if using existing key do: -new -key keyName
+
+2) copy ca-key.pem ca-cert.srl   (why ????)
+
+3) openssl x509 -req -in server-req.pem -days 1000 -sha1 -CA ca-cert.pem -CAkey ca-key.pem -set_serial 01 > server-cert.pem
+
+
+***** Adding Subject Key ID and Authentication Key ID extensions to a cert *****
+
+Create a config file for OpenSSL with the example contents:
+
+    [skidakid]
+    subjectKeyIdentifier=hash
+    authorityKeyIdentifier=keyid
+
+Add to the openssl command for creating a cert signed by a CA step 3 the
+following options:
+
+    -extfile <file.cnf> -extensions skidakid
+
+anywhere before the redirect. This will add the cert's public key hash as the
+Subject Key Identifier, and the signer's SKID as the Authentication Key ID.
+
+
+***** To create a dsa cert ********************
+
+1) openssl dsaparam 512 > dsa512.param       # creates group params
+
+2) openssl gendsa dsa512.param > dsa512.pem  # creates private key
+
+3) openssl req -new -x509 -nodes -days 1000 -key dsa512.pem > dsa-cert.pem 
+
+
+
+
+***** To convert from PEM to DER **************
+
+a) openssl x509 -in cert.pem -inform PEM -out cert.der -outform DER
+
+to convert rsa private PEM to DER :
+
+b) openssl rsa -in key.pem -outform DER -out key.der
+
+
+**** To encrypt rsa key already in pem **********
+
+a) openssl rsa <server-key.pem.bak -des >server-keyEnc.pem
+
+note location of des, pass = yassl123
+
+
+*** To make a public key from a private key ******
+
+
+openssl rsa -in 1024rsa.priv -pubout -out 1024rsa.pub
+
+
+**** To convert to pkcs8 *******
+
+openssl pkcs8 -nocrypt -topk8 -in server-key.pem -out server-keyPkcs8.pem
+
+
+**** To convert to pkcs8 encrypted *******
+
+openssl pkcs8 -topk8 -in server-key.pem -out server-keyPkcs8Enc.pem
+
+passwd: yassl123
+
+to use PKCS#5 v2 instead of v1.5 which is default add
+
+-v2 des3       # file Pkcs8Enc2
+
+to use PKCS#12 instead use -v1 witch a 12 algo like
+
+-v1 PBE-SHA1-3DES   # file Pkcs8Enc12 , see man pkcs8 for more info
+-v1 PBE-SHA1-RC4-128   # no longer file Pkcs8Enc12, arc4 now off by default
+
+
+**** To convert from pkcs8 to traditional ****
+
+openssl pkcs8 -nocrypt -in server-keyPkcs8.pem -out server-key.pem
+
+
+*** DH parameters ***
+
+openssl dhparam 2048 > dh2048.param
+
+to add metadata
+
+openssl dhparam -in dh2048.param -text > dh2048.pem
+
+**** ECC ******
+
+1) make a key
+
+    to see types available do
+        openssl ecparam -list_curves
+
+    make a new key
+        openssl ecparam -genkey -text -name secp256r1 -out ecc-key.pem
+
+    convert to compressed
+        openssl ec -in ecc-key.pem -conv_form compressed -out ecc-key-comp.pem 
+
+*** CRL ***
+
+1) create a crl
+
+a) openssl ca -gencrl -crldays 120 -out crl.pem -keyfile ./ca-key.pem -cert ./ca-cert.pem
+
+Error No ./CA root/index.txt so:
+
+b) touch ./CA root/index.txt
+
+a) again
+
+Error No ./CA root/crlnumber so:
+
+c) touch ./CA root/crlnumber
+
+a) again
+
+Error unable to load CRL number
+
+d) add '01' to crlnumber file
+
+a) again
+
+2)  view crl file
+
+openssl crl -in crl.pem -text
+
+3) revoke
+
+openssl ca -revoke server-cert.pem -keyfile ./ca-key.pem -cert ./ca-cert.pem
+
+Then regenerate crl with a)
+
+4) verify
+
+openssl verify -CAfile ./ca-cert.pem  ./server-cert.pem
+
+OK
+
+Make file with both ca and crl
+
+cat ca-cert.pem crl.pem > ca-crl.pem
+
+openssl verify -CAfile ./ca-crl.pem -crl_check ./ca-cert.pem
+
+revoked

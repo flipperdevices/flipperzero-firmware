@@ -1,0 +1,13 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+# TODO: The following will be added by the end of the project
+# EXTRA_DIST+= IDE/XCODE-FIPSv2/README.md
+
+# NOTE: The app will be stored in wolfssl/fips repository and copied
+#       into the proper release bundles when packaging the release.
+
+EXTRA_DIST+= IDE/XCODE-FIPSv2/user_settings.h
+EXTRA_DIST+= IDE/XCODE-FIPSv2/macOS-C++/M1/user_settings.h
+EXTRA_DIST+= IDE/XCODE-FIPSv2/macOS-C++/Intel/user_settings.h

@@ -1,0 +1,11 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/sphincs/bench_sphincs_fast_level1_key.der \
+         certs/sphincs/bench_sphincs_fast_level3_key.der \
+         certs/sphincs/bench_sphincs_fast_level5_key.der \
+         certs/sphincs/bench_sphincs_small_level1_key.der \
+         certs/sphincs/bench_sphincs_small_level3_key.der \
+         certs/sphincs/bench_sphincs_small_level5_key.der

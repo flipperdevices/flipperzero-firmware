@@ -1,0 +1,6 @@
+- The user_settings.h in this directory is intended for use with the FIPS 140-3
+submission candidate. As such it is subject to change between now and when the
+CMVP issues the wolfCrypt FIPS 140-3 certificate.
+
+- Last updated: 15 Mar 2023
+

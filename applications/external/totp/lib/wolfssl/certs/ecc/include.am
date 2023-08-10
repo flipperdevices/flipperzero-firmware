@@ -1,0 +1,26 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+	     certs/ecc/genecc.sh \
+	     certs/ecc/wolfssl.cnf \
+	     certs/ecc/wolfssl_384.cnf
+
+# Koblitz Curves
+EXTRA_DIST += \
+	     certs/ecc/secp256k1-key.der \
+		 certs/ecc/secp256k1-key.pem \
+		 certs/ecc/client-secp256k1-cert.der \
+		 certs/ecc/client-secp256k1-cert.pem \
+		 certs/ecc/server-secp256k1-cert.der \
+		 certs/ecc/server-secp256k1-cert.pem
+
+# Brainpool Curves
+EXTRA_DIST += \
+		 certs/ecc/bp256r1-key.der \
+		 certs/ecc/bp256r1-key.pem \
+		 certs/ecc/client-bp256r1-cert.der \
+		 certs/ecc/client-bp256r1-cert.pem \
+		 certs/ecc/server-bp256r1-cert.der \
+		 certs/ecc/server-bp256r1-cert.pem

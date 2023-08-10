@@ -1,0 +1,37 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/sm2/ca-sm2.der \
+         certs/sm2/ca-sm2.pem \
+         certs/sm2/ca-sm2-key.der \
+         certs/sm2/ca-sm2-key.pem \
+         certs/sm2/ca-sm2-priv.der \
+         certs/sm2/ca-sm2-priv.pem \
+         certs/sm2/client-sm2.der \
+         certs/sm2/client-sm2.pem \
+         certs/sm2/client-sm2-key.der \
+         certs/sm2/client-sm2-key.pem \
+         certs/sm2/client-sm2-priv.der \
+         certs/sm2/client-sm2-priv.pem \
+         certs/sm2/root-sm2.der \
+         certs/sm2/root-sm2.pem \
+         certs/sm2/root-sm2-key.der \
+         certs/sm2/root-sm2-key.pem \
+         certs/sm2/root-sm2-priv.der \
+         certs/sm2/root-sm2-priv.pem \
+         certs/sm2/server-sm2.der \
+         certs/sm2/server-sm2.pem \
+         certs/sm2/server-sm2-cert.pem \
+         certs/sm2/server-sm2-key.der \
+         certs/sm2/server-sm2-key.pem \
+         certs/sm2/server-sm2-priv.der \
+         certs/sm2/server-sm2-priv.pem \
+         certs/sm2/self-sm2-cert.pem \
+         certs/sm2/self-sm2-key.pem \
+         certs/sm2/self-sm2-priv.pem
+
+EXTRA_DIST += \
+         certs/sm2/gen-sm2-certs.sh \
+         certs/sm2/gen-sm2-keys.sh

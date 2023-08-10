@@ -5,7 +5,8 @@
 #include <furi_hal_random.h>
 #include <furi_hal_version.h>
 #include "../../types/common.h"
-#include "../hmac/hmac_sha512.h"
+#include "../../wolfssl_config.h"
+#include <wolfssl/wolfcrypt/hmac.h>
 #include "memset_s.h"
 #include "constants.h"
 
@@ -102,11 +103,9 @@ CryptoSeedIVResult totp_crypto_seed_iv_v2(
     uint8_t pin_length) {
     CryptoSeedIVResult result;
     if(crypto_settings->crypto_verify_data == NULL) {
-        FURI_LOG_I(LOGGING_TAG, "Generating new IV");
-        furi_hal_random_fill_buf(&crypto_settings->base_iv[0], CRYPTO_IV_LENGTH);
+        FURI_LOG_I(LOGGING_TAG, "Generating new salt");
+        furi_hal_random_fill_buf(&crypto_settings->salt[0], CRYPTO_SALT_LENGTH);
     }
-
-    memcpy(&crypto_settings->iv[0], &crypto_settings->base_iv[0], CRYPTO_IV_LENGTH);
 
     const uint8_t* device_uid = get_device_uid();
     uint8_t device_uid_length = get_device_uid_length();
@@ -125,16 +124,20 @@ CryptoSeedIVResult totp_crypto_seed_iv_v2(
         memcpy(hmac_key + device_uid_length, pin, pin_length);
     }
 
-    uint8_t hmac[HMAC_SHA512_RESULT_SIZE] = {0};
-    int hmac_result_code = hmac_sha512(
-        hmac_key, hmac_key_length, &crypto_settings->base_iv[0], CRYPTO_IV_LENGTH, &hmac[0]);
+    uint8_t hmac[WC_SHA512_DIGEST_SIZE] = {0};
+
+    Hmac hmac_context;
+    wc_HmacSetKey(&hmac_context, WC_SHA512, hmac_key, hmac_key_length);
+    wc_HmacUpdate(&hmac_context, &crypto_settings->salt[0], CRYPTO_SALT_LENGTH);
+    int hmac_result_code = wc_HmacFinal(&hmac_context, &hmac[0]);
+    wc_HmacFree(&hmac_context);
 
     memset_s(hmac_key, hmac_key_length, 0, hmac_key_length);
     free(hmac_key);
 
     if(hmac_result_code == 0) {
         uint8_t offset =
-            hmac[HMAC_SHA512_RESULT_SIZE - 1] % (HMAC_SHA512_RESULT_SIZE - CRYPTO_IV_LENGTH - 1);
+            hmac[WC_SHA512_DIGEST_SIZE - 1] % (WC_SHA512_DIGEST_SIZE - CRYPTO_IV_LENGTH - 1);
         memcpy(&crypto_settings->iv[0], &hmac[offset], CRYPTO_IV_LENGTH);
 
         result = CryptoSeedIVResultFlagSuccess;

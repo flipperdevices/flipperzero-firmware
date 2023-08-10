@@ -1,0 +1,6 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+include IDE/RISCV/SIFIVE-HIFIVE1/include.am
+include IDE/RISCV/SIFIVE-UNLEASHED/include.am

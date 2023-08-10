@@ -1,0 +1,11 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         mcapi/wolfcrypt_mcapi.X/Makefile
+
+EXTRA_DIST += \
+         mcapi/wolfcrypt_mcapi.X/nbproject/configurations.xml \
+         mcapi/wolfcrypt_mcapi.X/nbproject/project.xml
+

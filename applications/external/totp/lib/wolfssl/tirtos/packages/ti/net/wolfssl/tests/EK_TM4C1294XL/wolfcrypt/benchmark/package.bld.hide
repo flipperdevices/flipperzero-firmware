@@ -1,0 +1,53 @@
+/*
+ *  ======== package.bld ========
+ *  Build script for benchmark application
+ */
+
+if ((typeof(TivaWareDir) == undefined) || (TivaWareDir == "")) {
+    throw("ERROR: NO VALID TIVAWARE PATH DEFINED!!!");
+}
+
+var Build = xdc.useModule('xdc.bld.BuildEnvironment');
+var Pkg = xdc.useModule('xdc.bld.PackageContents');
+
+/* make command to search for the srcs */
+Pkg.makePrologue = "vpath %.c $(subst ;,  ,$(XPKGPATH))";
+
+var srcs = [
+    "main.c",
+    "wolfcrypt/benchmark/benchmark.c",
+    "examples/boards/EK_TM4C1294XL/EK_TM4C1294XL.c",
+];
+
+for each (var targ in Build.targets) {
+
+    var lnkOpts = "";
+    var platform = "ti.platforms.tiva:TM4C1294NCPDT:1";
+    if (targ.$name.match(/^ti/)) {
+        lnkOpts = " -l" + TivaWareDir + "/driverlib/ccs/Debug/driverlib.lib";
+        lnkOpts += " -x ";
+    }
+    else if (targ.$name.match(/^iar/)) {
+        lnkOpts = TivaWareDir + "/driverlib/ewarm/Exe/driverlib.a"
+                + " --config TM4C1294NC.icf";
+        platform = "ti.platforms.tiva:TM4C1294NCPDT";
+
+        /* Floating point print support */
+        var suffix = targ.$orig.lnkOpts.suffix;
+        targ.$orig.lnkOpts.suffix = suffix.replace(/PrintfSmall/, "PrintfFull");
+    }
+    else if (targ.$name.match(/^gnu/)) {
+        targ.$orig.lnkOpts.suffix += " -L" + TivaWareDir + "/driverlib/gcc "
+                + " -Wl,--start-group -ldriver -Wl,--end-group ";
+        targ.$orig.bspLib = "rdimon";
+    }
+
+    var exeOptions = { incs: wolfsslPathInclude
+            + " -DNO_MAIN_DRIVER -D_INCLUDE_NIMU_CODE -DBENCH_EMBEDDED "
+            + " -DTIVAWARE -DPART_TM4C1294NCPDT",
+            lopts: lnkOpts
+    };
+
+    var exe = Pkg.addExecutable("benchmark", targ, platform, exeOptions);
+    exe.addObjects(srcs);
+}

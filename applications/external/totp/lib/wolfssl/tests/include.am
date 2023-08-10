@@ -1,0 +1,74 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+
+if BUILD_TESTS
+noinst_PROGRAMS += tests/unit.test
+tests_unit_test_SOURCES = \
+                  tests/unit.c \
+                  tests/api.c \
+                  tests/suites.c \
+                  tests/hash.c \
+                  tests/w64wrapper.c \
+                  tests/srp.c \
+                  tests/quic.c \
+                  examples/client/client.c \
+                  examples/server/server.c
+tests_unit_test_CFLAGS       = -DNO_MAIN_DRIVER $(AM_CFLAGS) $(WOLFSENTRY_INCLUDE)
+tests_unit_test_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD) $(WOLFSENTRY_LIB)
+tests_unit_test_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+EXTRA_DIST += tests/unit.h \
+              tests/test.conf \
+              tests/test-sha2.conf \
+              tests/test-tls13.conf \
+              tests/test-tls13-down.conf \
+              tests/test-tls13-ecc.conf \
+              tests/test-tls13-psk.conf \
+              tests/test-tls13-pq.conf \
+              tests/test-tls13-pq-2.conf \
+              tests/test-dtls13-pq.conf \
+              tests/test-dtls13-pq-2.conf \
+              tests/test-psk.conf \
+              tests/test-psk-no-id.conf \
+              tests/test-psk-no-id-sha2.conf \
+              tests/test-dtls.conf \
+              tests/test-dtls-downgrade.conf \
+              tests/test-dtls-fails.conf \
+              tests/test-dtls-fails-cipher.conf \
+              tests/test-dtls-group.conf \
+              tests/test-dtls-mtu.conf \
+              tests/test-dtls-reneg-client.conf \
+              tests/test-dtls-reneg-server.conf \
+              tests/test-dtls-resume.conf \
+              tests/test-dtls-sha2.conf \
+              tests/test-dtls-srtp.conf \
+              tests/test-dtls-srtp-fails.conf \
+              tests/test-dtls13.conf \
+              tests/test-dtls13-downgrade.conf \
+              tests/test-dtls13-downgrade-fails.conf \
+              tests/test-dtls13-psk.conf \
+              tests/test-dtls13-cid.conf \
+              tests/test-sctp.conf \
+              tests/test-sctp-sha2.conf \
+              tests/test-sig.conf \
+              tests/test-rsapss.conf \
+              tests/test-ed25519.conf \
+              tests/test-ed448.conf \
+              tests/test-enckeys.conf \
+              tests/test-maxfrag.conf \
+              tests/test-maxfrag-dtls.conf \
+              tests/test-fails.conf \
+              tests/test-chains.conf \
+              tests/test-altchains.conf \
+              tests/test-trustpeer.conf \
+              tests/test-dhprime.conf \
+              tests/test-p521.conf \
+              tests/test-ecc-cust-curves.conf \
+              tests/test-sm2.conf \
+              tests/NCONF_test.cnf \
+              tests/test-tls-downgrade.conf \
+              tests/TXT_DB.txt \
+              tests/utils.c
+DISTCLEANFILES+= tests/.libs/unit.test

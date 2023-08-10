@@ -1,0 +1,479 @@
+--- fsl_caam.c	2023-01-12 23:39:04.000000000 -0800
++++ fsl_caam-expanded.c	2023-06-23 00:18:14.395128903 -0700
+@@ -7872,3 +7872,476 @@
+     }
+     return status;
+ }
++
++
++#define CAAM_ECDSA_PD 0x00400000
++#define CAAM_ECDSA_KEYGEN_PD 0x02000000
++
++static const uint32_t templateKeyPairECC[] = {
++    /* 00 */ 0xB0840000u,  /* HEADER */
++    /* 01 */ 0x00000000u,  /* ECDSEL */
++    /* 02 */ 0x00000000u,  /* Private Key Address */
++    /* 03 */ 0x00000000u,  /* Public Key Address */
++    /* 04 */ 0x80140002u,  /* Operation */
++};
++
++
++static const uint32_t templateSignECC[] = {
++    /* 00 */ 0xB0870000u,  /* HEADER */
++    /* 01 */ 0x00000000u,  /* ECDSEL */
++    /* 02 */ 0x00000000u,  /* Private Key Address */
++    /* 03 */ 0x00000000u,  /* Message Address */
++    /* 04 */ 0x00000000u,  /* R of signature */
++    /* 05 */ 0x00000000u,  /* S of signature */
++    /* 06 */ 0x00000000u,  /* Message Size */
++    /* 07 */ 0x80150802u,  /* Operation */
++};
++
++
++static const uint32_t templateVerifyECC[] = {
++    /* 00 */ 0xB0880000u,  /* HEADER */
++    /* 01 */ 0x00000000u,  /* ECDSEL */
++    /* 02 */ 0x00000000u,  /* Public Key Address (X,Y) */
++    /* 03 */ 0x00000000u,  /* Message Address */
++    /* 04 */ 0x00000000u,  /* R of signature */
++    /* 05 */ 0x00000000u,  /* S of signature */
++    /* 06 */ 0x00000000u,  /* tmp buffer */
++    /* 07 */ 0x00000000u,  /* Message Size */
++    /* 08 */ 0x80160802u,  /* Operation */
++};
++
++
++static const uint32_t templateAgreeECC[] = {
++    /* 00 */ 0xB0850000u,  /* HEADER */
++    /* 01 */ 0x00000000u,  /* ECDSEL */
++    /* 02 */ 0x00000000u,  /* Public Key Address */
++    /* 03 */ 0x00000000u,  /* Private Key Address */
++    /* 04 */ 0x00000000u,  /* Shared Output */
++    /* 07 */ 0x80170002u,  /* Operation */
++};
++
++
++static int CheckSupportedKeyType(int keyType)
++{
++    int ret = 0;
++
++    switch (keyType) {
++        case CAAM_ECDSA_P256:
++            ret = 32;
++            break;
++
++        case CAAM_ECDSA_P384:
++            ret = 48;
++            break;
++
++        case CAAM_ECDSA_P521:
++            ret = 66;
++            break;
++    }
++    return ret;
++}
++
++
++/*!
++ * brief generate ECC Keypair.
++ *
++ * This function generates ECC private/public key pair.
++ *
++ * param base CAAM peripheral base address
++ * param[out] k private key
++ * param[in,out] sizeK pointer to size variable. On input it holds size of input k in bytes. On output it holds size of
++ *                of generated private key k in bytes.
++ * param[out] p public key
++ * param[in,out] sizeP pointer to size variable. On input it holds size of input p in bytes. On output it holds size of
++ *                of generated public key p in bytes.
++ * param keyType type of ECC key, i.e P256 / P384
++ * param enc option to create black key
++ * return Operation status.
++ */
++status_t CAAM_ECC_Keygen(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      uint8_t *k,
++                                      size_t *sizeK,
++                                      uint8_t *p,
++                                      size_t *sizeP,
++                                      int keyType,
++                                      uint32_t enc)
++{
++    caam_desc_pkha_ecc_t descriptor;
++    status_t status = kStatus_InvalidArgument;
++    uint32_t descriptorSize = ARRAY_SIZE(templateKeyPairECC);
++    BUILD_ASSURE(sizeof(caam_desc_pkha_ecc_t) >= sizeof(templateKeyPairECC), caam_desc_pkha_ecc_t_size_too_low);
++
++    /* check if known type of key encryption */
++    if (enc != 0 && enc != CAAM_PKHA_ENC_PRI_AESECB) {
++        return status;
++    }
++
++    /* check is supported key type */
++    if (CheckSupportedKeyType(keyType) == 0) {
++        return status;
++    }
++
++    /* initialize descriptor from template */
++    (void)caam_memcpy(descriptor, templateKeyPairECC, sizeof(templateKeyPairECC));
++
++    /* add descriptor length in bytes to HEADER descriptor command */
++    DESC_HEADER_ADD_DESCLEN(descriptor[0], descriptorSize);
++
++    DESC_SET_ADDR(descriptor[1], (CAAM_ECDSA_KEYGEN_PD | keyType));
++    DESC_SET_ADDR(descriptor[2], k);
++    DESC_SET_ADDR(descriptor[3], p);
++
++    /* add in if is encrypted */
++    descriptor[4] |= enc;
++
++    /* schedule the job */
++    do {
++        status = caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
++    } while (status == kStatus_CAAM_Again);
++    if (status == kStatus_Success) {
++        status = CAAM_Wait(base, handle, descriptor, kCAAM_Blocking);
++    }
++
++#if defined(CAAM_OUT_INVALIDATE) && (CAAM_OUT_INVALIDATE > 0u)
++    /* NOTE: DCACHE must be set to write-trough mode to safely invalidate cache!! */
++    /* Invalidate unaligned data can cause memory corruption in write-back mode   */
++    DCACHE_InvalidateByRange((uint32_t)k, *sizeK);
++    DCACHE_InvalidateByRange((uint32_t)p, *sizeP);
++#endif /* CAAM_OUT_INVALIDATE */
++    return status;
++}
++
++
++/*!
++ * brief generate ECC signature.
++ *
++ * This function creates an ECC signature.
++ *
++ * param base CAAM peripheral base address
++ * param[in] k private key
++ * param[in] sizeK holds size of input k in bytes.
++ * param[in] hash contains the hash to sign
++ * param[in] sizeHash is the size of 'hash' in bytes.
++ * param[out] sig signature output
++ * param[in,out] sizeSig pointer to size variable. On input it holds size of input sig in bytes. On output it holds size of
++ *                of generated signature in bytes.
++ * param keyType type of ECC key i.e P256 / P384
++ * param enc option to use black key
++ * return Operation status.
++ */
++status_t CAAM_ECC_Sign(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      const uint8_t *k,
++                                      size_t sizeK,
++                                      const uint8_t *hash,
++                                      size_t sizeHash,
++                                      uint8_t *r,
++                                      size_t sizeR,
++                                      uint8_t *s,
++                                      size_t sizeS,
++                                      int keyType,
++                                      uint32_t enc)
++{
++    size_t keySz = 0;
++    caam_desc_pkha_ecc_t descriptor;
++    status_t status = kStatus_InvalidArgument;
++    uint32_t descriptorSize = ARRAY_SIZE(templateSignECC);
++    BUILD_ASSURE(sizeof(caam_desc_pkha_ecc_t) >= sizeof(templateSignECC), caam_desc_pkha_ecc_t_size_too_low);
++
++    /* check if known type of key encryption */
++    if (enc != 0 && enc != CAAM_PKHA_ENC_PRI_AESECB) {
++        return status;
++    }
++
++    /* check is supported key type */
++    keySz = CheckSupportedKeyType(keyType);
++    if (keySz == 0) {
++        return status;
++    }
++
++    /* sanity check on size of buffers passed in */
++    if (sizeR < keySz || sizeS < keySz) {
++        return status;
++    }
++
++    /* initialize descriptor from template */
++    (void)caam_memcpy(descriptor, templateSignECC, sizeof(templateSignECC));
++
++    /* add descriptor length in bytes to HEADER descriptor command */
++    DESC_HEADER_ADD_DESCLEN(descriptor[0], descriptorSize);
++
++    DESC_SET_ADDR(descriptor[1], (CAAM_ECDSA_PD | keyType));
++    DESC_SET_ADDR(descriptor[2], k);
++    DESC_SET_ADDR(descriptor[3], hash);
++    DESC_SET_ADDR(descriptor[4], r);
++    DESC_SET_ADDR(descriptor[5], s);
++    DESC_ADD_LEN(descriptor[6], sizeHash);
++
++    /* add in if is encrypted */
++    descriptor[7] |= enc;
++
++    /* schedule the job */
++    do {
++        status = caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
++    } while (status == kStatus_CAAM_Again);
++    if (status == kStatus_Success) {
++        status = CAAM_Wait(base, handle, descriptor, kCAAM_Blocking);
++    }
++#if defined(CAAM_OUT_INVALIDATE) && (CAAM_OUT_INVALIDATE > 0u)
++    /* NOTE: DCACHE must be set to write-trough mode to safely invalidate cache!! */
++    /* Invalidate unaligned data can cause memory corruption in write-back mode   */
++    DCACHE_InvalidateByRange((uint32_t)r, sizeR);
++    DCACHE_InvalidateByRange((uint32_t)s, sizeS);
++#endif /* CAAM_OUT_INVALIDATE */
++    return status;
++}
++
++
++/*!
++ * brief do an ECC verify.
++ *
++ * This function verifies an ECC signature.
++ *
++ * param base CAAM peripheral base address
++ * param[in] p public key
++ * param[in] sizeP pointer to size variable. On input it holds size of input k in bytes. On output it holds size of
++ *                of generated private key k in bytes.
++ * param[in] sig signature to verify
++ * param[in] sizeSig size of signature in bytes
++ * param[in] hash contains the hash to sign
++ * param[in] sizeHash is the size of 'hash' in bytes.
++ * param keyType type of ECC key i.e P256 / P384
++ * param enc option to use black key
++ * return Operation status.
++ */
++status_t CAAM_ECC_Verify(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      const uint8_t *p,
++                                      size_t sizeP,
++                                      const uint8_t *r,
++                                      size_t sizeR,
++                                      const uint8_t *s,
++                                      size_t sizeS,
++                                      const uint8_t *hash,
++                                      size_t sizeHash,
++                                      int keyType)
++{
++    size_t keySz = 0;
++    caam_desc_pkha_ecc_t descriptor;
++    status_t status = kStatus_InvalidArgument;
++    uint8_t tmp[256];
++    uint32_t descriptorSize = ARRAY_SIZE(templateVerifyECC);
++    BUILD_ASSURE(sizeof(caam_desc_pkha_ecc_t) >= sizeof(templateVerifyECC), caam_desc_pkha_ecc_t_size_too_low);
++
++    /* check is supported key type */
++    keySz = CheckSupportedKeyType(keyType);
++    if (keySz == 0 || sizeR < keySz || sizeS < keySz) {
++        return status;
++    }
++
++    /* initialize descriptor from template */
++    (void)caam_memcpy(descriptor, templateVerifyECC, sizeof(templateVerifyECC));
++
++    /* add descriptor length in bytes to HEADER descriptor command */
++    DESC_HEADER_ADD_DESCLEN(descriptor[0], descriptorSize);
++
++    DESC_SET_ADDR(descriptor[1], (CAAM_ECDSA_PD | keyType));
++    DESC_SET_ADDR(descriptor[2], p);
++    DESC_SET_ADDR(descriptor[3], hash);
++    DESC_SET_ADDR(descriptor[4], r);
++    DESC_SET_ADDR(descriptor[5], s);
++    DESC_SET_ADDR(descriptor[6], tmp);
++    DESC_ADD_LEN(descriptor[7], sizeHash);
++
++    /* schedule the job */
++    do {
++        status = caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
++    } while (status == kStatus_CAAM_Again);
++    if (status == kStatus_Success) {
++        status = CAAM_Wait(base, handle, descriptor, kCAAM_Blocking);
++    }
++    return status;
++}
++
++
++/*!
++ * brief generate ECC shared secret.
++ *
++ * This function creates an ECC shared secret.
++ *
++ * param base CAAM peripheral base address
++ * param[in] k private key
++ * param[in] sizeK holds size of input k in bytes.
++ * param[in] pub contains the public key (x,y)
++ * param[in] sizePub is the size of 'pub' in bytes.
++ * param[out] out output buffer to hold shared secret
++ * param[in] sizeOut size of out buffer
++ * param keyType type of ECC key i.e P256 / P384
++ * param enc option to use black key
++ * return Operation status.
++ */
++status_t CAAM_ECC_ECDH(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      const uint8_t *k,
++                                      size_t sizeK,
++                                      const uint8_t *pub,
++                                      size_t sizePub,
++                                      uint8_t *out,
++                                      size_t sizeOut,
++                                      int keyType,
++                                      uint32_t enc)
++{
++    size_t keySz = 0;
++    caam_desc_pkha_ecc_t descriptor;
++    status_t status = kStatus_InvalidArgument;
++    uint32_t descriptorSize = ARRAY_SIZE(templateAgreeECC);
++    BUILD_ASSURE(sizeof(caam_desc_pkha_ecc_t) >= sizeof(templateAgreeECC), caam_desc_pkha_ecc_t_size_too_low);
++
++    /* check if known type of key encryption */
++    if (enc != 0 && enc != CAAM_PKHA_ENC_PRI_AESECB) {
++        return status;
++    }
++
++    /* check is supported key type */
++    keySz = CheckSupportedKeyType(keyType);
++    if (keySz == 0 || sizeK > keySz || sizeOut != keySz) {
++        return status;
++    }
++
++    /* initialize descriptor from template */
++    (void)caam_memcpy(descriptor, templateAgreeECC, sizeof(templateAgreeECC));
++
++    /* add descriptor length in bytes to HEADER descriptor command */
++    DESC_HEADER_ADD_DESCLEN(descriptor[0], descriptorSize);
++
++    DESC_SET_ADDR(descriptor[1], (CAAM_ECDSA_KEYGEN_PD | keyType));
++    DESC_SET_ADDR(descriptor[2], pub);
++    DESC_SET_ADDR(descriptor[3], k);
++    DESC_SET_ADDR(descriptor[4], out);
++
++    /* add in if is encrypted */
++    descriptor[5] |= enc;
++
++    /* schedule the job */
++    do {
++        status = caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
++    } while (status == kStatus_CAAM_Again);
++    if (status == kStatus_Success) {
++        status = CAAM_Wait(base, handle, descriptor, kCAAM_Blocking);
++    }
++
++#if defined(CAAM_OUT_INVALIDATE) && (CAAM_OUT_INVALIDATE > 0u)
++    /* NOTE: DCACHE must be set to write-trough mode to safely invalidate cache!! */
++    /* Invalidate unaligned data can cause memory corruption in write-back mode   */
++    DCACHE_InvalidateByRange((uint32_t)out, sizeOut);
++#endif /* CAAM_OUT_INVALIDATE */
++    return status;
++}
++
++
++/* Handle BLOB create and open */
++static const uint32_t templateBlob[] = {
++    /* 00 */ 0xB0800000u,  /* HEADER */
++    /* 01 */ 0x04000000u,  /* class */
++    /* 02 */ 0x00000000u,  /* key mod */
++    /* 03 */ 0xF0000000u,  /* SEQ input size */
++    /* 04 */ 0x00000000u,  /* input */
++    /* 05 */ 0xF8000000u,  /* SEQ output size */
++    /* 06 */ 0x00000000u,  /* output */
++    /* 07 */ 0x800D0000u,  /* Operation */
++};
++
++
++/*!
++ * brief generate ECC Keypair.
++ *
++ * This function generates ECC private/public key pair.
++ *
++ * param base CAAM peripheral base address
++ * param[out] k private key
++ * param[in,out] sizeK pointer to size variable. On input it holds size of input k in bytes. On output it holds size of
++ *                of generated private key k in bytes.
++ * param[out] p public key
++ * param[in,out] sizeP pointer to size variable. On input it holds size of input p in bytes. On output it holds size of
++ *                of generated public key p in bytes.
++ * param keyType type of ECC key, i.e P256 / P384
++ * param enc option to create black key
++ * return Operation status.
++ */
++status_t CAAM_Blob(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      uint8_t *in,
++                                      size_t sizeIn,
++                                      uint8_t *out,
++                                      size_t sizeOut,
++                                      uint8_t *keyMod,
++                                      size_t keyModSz,
++                                      uint32_t dir,
++                                      uint32_t color)
++{
++    caam_desc_pkha_ecc_t descriptor;
++    status_t status = kStatus_InvalidArgument;
++    uint32_t descriptorSize = ARRAY_SIZE(templateBlob);
++    BUILD_ASSURE(sizeof(caam_desc_pkha_ecc_t) >= sizeof(templateBlob), caam_desc_pkha_ecc_t_size_too_low);
++
++    /* check if known type of key encryption */
++    if (color != CAAM_RED_BLOB && color != CAAM_BLACK_BLOB) {
++        return status;
++    }
++
++    if (dir != CAAM_ENCAP_BLOB && dir != CAAM_DECAP_BLOB) {
++        return status;
++    }
++
++    /* simple sanity check on output size to avoid invalidating more
++     * than wanted */
++    if (dir == CAAM_ENCAP_BLOB &&
++            (sizeOut > sizeIn + CAAM_PADDING_SIZE_BLOB)) {
++        return status;
++    }
++
++    if (keyModSz != CAAM_SM_KEYMODSZ && keyModSz != CAAM_KEYMODSZ) {
++        return status;
++    }
++
++    if (dir == CAAM_DECAP_BLOB &&
++                (sizeOut > sizeIn - CAAM_PADDING_SIZE_BLOB)) {
++        return status;
++    }
++
++    /* initialize descriptor from template */
++    (void)caam_memcpy(descriptor, templateBlob, sizeof(templateBlob));
++
++    /* add descriptor length in bytes to HEADER descriptor command */
++    DESC_HEADER_ADD_DESCLEN(descriptor[0], descriptorSize);
++    descriptor[1] |= keyModSz;
++    DESC_SET_ADDR(descriptor[2], keyMod);
++    DESC_ADD_LEN(descriptor[3], sizeIn);
++    DESC_SET_ADDR(descriptor[4], in);
++    DESC_ADD_LEN(descriptor[5], sizeOut);
++    DESC_SET_ADDR(descriptor[6], out);
++    descriptor[7] |= dir; /* add in direction of blob (encap / decap) */
++
++    /* set black key flag */
++    if (color == CAAM_BLACK_BLOB) {
++        descriptor[7] |= 0x4; /* ECB black key */
++        /* additionally AES-CCM would have EXT (bit 8) hot */
++    }
++
++    /* schedule the job */
++    do {
++        status = caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
++    } while (status == kStatus_CAAM_Again);
++    if (status == kStatus_Success) {
++        status = CAAM_Wait(base, handle, descriptor, kCAAM_Blocking);
++    }
++
++#if defined(CAAM_OUT_INVALIDATE) && (CAAM_OUT_INVALIDATE > 0u)
++    /* NOTE: DCACHE must be set to write-trough mode to safely invalidate cache!! */
++    /* Invalidate unaligned data can cause memory corruption in write-back mode   */
++    DCACHE_InvalidateByRange((uint32_t)out, sizeOut);
++#endif /* CAAM_OUT_INVALIDATE */
++    return status;
++}
++

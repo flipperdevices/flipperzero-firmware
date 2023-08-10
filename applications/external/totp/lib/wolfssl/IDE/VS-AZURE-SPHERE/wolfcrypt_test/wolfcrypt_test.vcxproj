@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CD96C02B-1FC9-424E-88BE-816BE143A1C3}</ProjectGuid>
+    <Keyword>AzureSphere</Keyword>
+    <RootNamespace>echoclient</RootNamespace>
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+    <ApplicationType>Linux</ApplicationType>
+    <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
+    <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
+    <LinuxProjectType>{D51BCBC9-82E9-4017-911E-C93873C4EA2B}</LinuxProjectType>
+    <DebugMachineType>Device</DebugMachineType>
+    <PlatformToolset>GCC_AzureSphere_1_0</PlatformToolset>
+    <ProjectPublicIncludePath>$(MSBuildProjectDirectory)\Inc\Public</ProjectPublicIncludePath>
+    <PublicIncludePath>$(MSBuildProjectDirectory)\Inc\Public</PublicIncludePath>
+    <ProjectName>wolfcrypt_test</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <TargetSysroot>2</TargetSysroot>
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <TargetSysroot>2</TargetSysroot>
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <TargetName>$(ProjectName)</TargetName>
+    <TargetExt>.out</TargetExt>
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(SysRootIncludePath);$(IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetExt>.out</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalOptions>-Werror=implicit-function-declaration %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">..\..\..;../;$(ProjectDir);$(SysRootIncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">WOLFSSL_USER_SETTINGS;_POSIX_C_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CAdditionalWarning Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">strict-prototypes;%(CAdditionalWarning);deprecated-declarations</CAdditionalWarning>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">TurnOffAllWarnings</WarningLevel>
+      <Verbose Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</Verbose>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">..\..\..;$(ProjectDir);$(SysRootIncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">WOLFSSL_USER_SETTINGS;_POSIX_C_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">applibs;pthread;gcc_s;c;wolfssl</LibraryDependencies>
+      <SharedLibrarySearchPath Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">%(SharedLibrarySearchPath)</SharedLibrarySearchPath>
+      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ShowProgress Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ShowProgress>
+    </Link>
+    <Link>
+      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <LibraryDependencies Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">applibs;pthread;gcc_s;c;wolfssl</LibraryDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\wolfcrypt\test\test.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\wolfcrypt\test\test.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\certs\ecc-key.der" />
+    <None Include="app_manifest.json" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

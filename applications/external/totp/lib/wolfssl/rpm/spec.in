@@ -1,0 +1,312 @@
+Summary: Embedded SSL Library
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 1
+License: GPLv2
+Group: System Environment/Libraries
+BuildRequires: gcc
+BuildRequires: glibc
+BuildRequires: glibc-common
+BuildRequires: glibc-devel
+BuildRequires: glibc-headers
+BuildRequires: make
+BuildRequires: pkgconfig
+BuildRequires: sed
+BuildRequires: tar
+URL: http://www.wolfssl.com/
+
+Packager: Brian Aker <brian@tangent.org>
+
+Source: http://wolfssl.com/%{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+
+%description
+Misc tools for wolfSSL.
+
+%package devel
+Summary: Header files and development libraries for %{name}
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+
+%description devel
+This package contains the header files and development libraries
+for %{name}. If you like to develop programs using %{name},
+you will need to install %{name}-devel.
+
+%prep
+%setup -q
+
+%build
+%configure @WOLFSSL_CONFIG_ARGS@
+%{__make} %{?_smp_mflags}
+if [ "@ENABLED_FIPS@" = "yes" ]
+then
+echo Updating wolfSSL FIPS hash
+./fips-hash.sh
+%{__make} %{?_smp_mflags}
+fi
+
+%install
+%{__rm} -rf %{buildroot}
+%{__make} install  DESTDIR="%{buildroot}" AM_INSTALL_PROGRAM_FLAGS=""
+mkdir -p $RPM_BUILD_ROOT/
+%{__rm} -f %{buildroot}/%{_libdir}/libwolfssl@LIBSUFFIX@.la
+
+%check
+
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(-,root,root,-)
+%doc AUTHORS ChangeLog.md COPYING README README.md
+%{_docdir}/wolfssl/taoCert.txt
+%{_docdir}/wolfssl/example/echoserver.c
+%{_docdir}/wolfssl/example/server.c
+%{_docdir}/wolfssl/example/echoclient.c
+%{_docdir}/wolfssl/example/client.c
+%{_docdir}/wolfssl/example/sctp-client.c
+%{_docdir}/wolfssl/example/sctp-server.c
+%{_docdir}/wolfssl/example/sctp-client-dtls.c
+%{_docdir}/wolfssl/example/sctp-server-dtls.c
+%{_docdir}/wolfssl/example/tls_bench.c
+%{_docdir}/wolfssl/README.txt
+%{_docdir}/wolfssl/QUIC.md
+
+%{_libdir}/libwolfssl@LIBSUFFIX@.so
+%{_libdir}/libwolfssl@LIBSUFFIX@.so.@WOLFSSL_LIBRARY_VERSION_FIRST@
+%{_libdir}/libwolfssl@LIBSUFFIX@.so.@WOLFSSL_LIBRARY_VERSION_FIRST@.@WOLFSSL_LIBRARY_VERSION_SECOND@.@WOLFSSL_LIBRARY_VERSION_THIRD@
+
+%files devel
+%defattr(-,root,root,-)
+%doc AUTHORS ChangeLog.md COPYING README README.md
+%{_bindir}/wolfssl-config
+%{_includedir}/wolfssl/callbacks.h
+%{_includedir}/wolfssl/certs_test.h
+%{_includedir}/wolfssl/crl.h
+%{_includedir}/wolfssl/error-ssl.h
+%{_includedir}/wolfssl/ocsp.h
+%{_includedir}/wolfssl/openssl/aes.h
+%{_includedir}/wolfssl/openssl/asn1.h
+%{_includedir}/wolfssl/openssl/asn1t.h
+%{_includedir}/wolfssl/openssl/bio.h
+%{_includedir}/wolfssl/openssl/bn.h
+%{_includedir}/wolfssl/openssl/cms.h
+%{_includedir}/wolfssl/openssl/buffer.h
+%{_includedir}/wolfssl/openssl/camellia.h
+%{_includedir}/wolfssl/openssl/cmac.h
+%{_includedir}/wolfssl/openssl/compat_types.h
+%{_includedir}/wolfssl/openssl/conf.h
+%{_includedir}/wolfssl/openssl/crypto.h
+%{_includedir}/wolfssl/openssl/des.h
+%{_includedir}/wolfssl/openssl/dh.h
+%{_includedir}/wolfssl/openssl/dsa.h
+%{_includedir}/wolfssl/openssl/ec.h
+%{_includedir}/wolfssl/openssl/ec25519.h
+%{_includedir}/wolfssl/openssl/ec448.h
+%{_includedir}/wolfssl/openssl/ecdh.h
+%{_includedir}/wolfssl/openssl/ecdsa.h
+%{_includedir}/wolfssl/openssl/ed25519.h
+%{_includedir}/wolfssl/openssl/ed448.h
+%{_includedir}/wolfssl/openssl/engine.h
+%{_includedir}/wolfssl/openssl/err.h
+%{_includedir}/wolfssl/openssl/evp.h
+%{_includedir}/wolfssl/openssl/fips_rand.h
+%{_includedir}/wolfssl/openssl/hmac.h
+%{_includedir}/wolfssl/openssl/kdf.h
+%{_includedir}/wolfssl/openssl/lhash.h
+%{_includedir}/wolfssl/openssl/md4.h
+%{_includedir}/wolfssl/openssl/md5.h
+%{_includedir}/wolfssl/openssl/modes.h
+%{_includedir}/wolfssl/openssl/obj_mac.h
+%{_includedir}/wolfssl/openssl/objects.h
+%{_includedir}/wolfssl/openssl/ocsp.h
+%{_includedir}/wolfssl/openssl/opensslconf.h
+%{_includedir}/wolfssl/openssl/opensslv.h
+%{_includedir}/wolfssl/openssl/ossl_typ.h
+%{_includedir}/wolfssl/openssl/pem.h
+%{_includedir}/wolfssl/openssl/pkcs12.h
+%{_includedir}/wolfssl/openssl/pkcs7.h
+%{_includedir}/wolfssl/openssl/rand.h
+%{_includedir}/wolfssl/openssl/rc4.h
+%{_includedir}/wolfssl/openssl/ripemd.h
+%{_includedir}/wolfssl/openssl/rsa.h
+%{_includedir}/wolfssl/openssl/sha.h
+%{_includedir}/wolfssl/openssl/srp.h
+%{_includedir}/wolfssl/openssl/sha3.h
+%{_includedir}/wolfssl/openssl/ssl.h
+%{_includedir}/wolfssl/openssl/ssl23.h
+%{_includedir}/wolfssl/openssl/stack.h
+%{_includedir}/wolfssl/openssl/txt_db.h
+%{_includedir}/wolfssl/openssl/tls1.h
+%{_includedir}/wolfssl/openssl/ui.h
+%{_includedir}/wolfssl/openssl/x509.h
+%{_includedir}/wolfssl/openssl/x509_vfy.h
+%{_includedir}/wolfssl/openssl/x509v3.h
+%{_includedir}/wolfssl/options.h
+%{_includedir}/wolfssl/quic.h
+%{_includedir}/wolfssl/sniffer.h
+%{_includedir}/wolfssl/sniffer_error.h
+%{_includedir}/wolfssl/ssl.h
+%{_includedir}/wolfssl/test.h
+%{_includedir}/wolfssl/version.h
+%{_includedir}/wolfssl/wolfcrypt/aes.h
+%{_includedir}/wolfssl/wolfcrypt/arc4.h
+%{_includedir}/wolfssl/wolfcrypt/asn.h
+%{_includedir}/wolfssl/wolfcrypt/asn_public.h
+%{_includedir}/wolfssl/wolfcrypt/blake2-impl.h
+%{_includedir}/wolfssl/wolfcrypt/blake2-int.h
+%{_includedir}/wolfssl/wolfcrypt/blake2.h
+%{_includedir}/wolfssl/wolfcrypt/camellia.h
+%{_includedir}/wolfssl/wolfcrypt/chacha.h
+%{_includedir}/wolfssl/wolfcrypt/chacha20_poly1305.h
+%{_includedir}/wolfssl/wolfcrypt/cmac.h
+%{_includedir}/wolfssl/wolfcrypt/coding.h
+%{_includedir}/wolfssl/wolfcrypt/compress.h
+%{_includedir}/wolfssl/wolfcrypt/cpuid.h
+%{_includedir}/wolfssl/wolfcrypt/cryptocb.h
+%{_includedir}/wolfssl/wolfcrypt/curve25519.h
+%{_includedir}/wolfssl/wolfcrypt/curve448.h
+%{_includedir}/wolfssl/wolfcrypt/des3.h
+%{_includedir}/wolfssl/wolfcrypt/dh.h
+%{_includedir}/wolfssl/wolfcrypt/dsa.h
+%{_includedir}/wolfssl/wolfcrypt/ecc.h
+%{_includedir}/wolfssl/wolfcrypt/eccsi.h
+%{_includedir}/wolfssl/wolfcrypt/ed25519.h
+%{_includedir}/wolfssl/wolfcrypt/ed448.h
+%{_includedir}/wolfssl/wolfcrypt/error-crypt.h
+%{_includedir}/wolfssl/wolfcrypt/ext_kyber.h
+%{_includedir}/wolfssl/wolfcrypt/falcon.h
+%{_includedir}/wolfssl/wolfcrypt/dilithium.h
+%{_includedir}/wolfssl/wolfcrypt/sphincs.h
+%{_includedir}/wolfssl/wolfcrypt/fe_448.h
+%{_includedir}/wolfssl/wolfcrypt/fe_operations.h
+%{_includedir}/wolfssl/wolfcrypt/fips_test.h
+%{_includedir}/wolfssl/wolfcrypt/ge_448.h
+%{_includedir}/wolfssl/wolfcrypt/ge_operations.h
+%{_includedir}/wolfssl/wolfcrypt/hash.h
+%{_includedir}/wolfssl/wolfcrypt/hmac.h
+%{_includedir}/wolfssl/wolfcrypt/hpke.h
+%{_includedir}/wolfssl/wolfcrypt/integer.h
+%{_includedir}/wolfssl/wolfcrypt/kdf.h
+%{_includedir}/wolfssl/wolfcrypt/kyber.h
+%{_includedir}/wolfssl/wolfcrypt/logging.h
+%{_includedir}/wolfssl/wolfcrypt/md2.h
+%{_includedir}/wolfssl/wolfcrypt/md4.h
+%{_includedir}/wolfssl/wolfcrypt/md5.h
+%{_includedir}/wolfssl/wolfcrypt/mem_track.h
+%{_includedir}/wolfssl/wolfcrypt/memory.h
+%{_includedir}/wolfssl/wolfcrypt/misc.h
+%{_includedir}/wolfssl/wolfcrypt/mpi_class.h
+%{_includedir}/wolfssl/wolfcrypt/mpi_superclass.h
+%{_includedir}/wolfssl/wolfcrypt/pkcs12.h
+%{_includedir}/wolfssl/wolfcrypt/pkcs7.h
+%{_includedir}/wolfssl/wolfcrypt/poly1305.h
+%{_includedir}/wolfssl/wolfcrypt/pwdbased.h
+%{_includedir}/wolfssl/wolfcrypt/random.h
+%{_includedir}/wolfssl/wolfcrypt/ripemd.h
+%{_includedir}/wolfssl/wolfcrypt/rc2.h
+%{_includedir}/wolfssl/wolfcrypt/rsa.h
+%{_includedir}/wolfssl/wolfcrypt/sakke.h
+%{_includedir}/wolfssl/wolfcrypt/settings.h
+%{_includedir}/wolfssl/wolfcrypt/sha.h
+%{_includedir}/wolfssl/wolfcrypt/sha256.h
+%{_includedir}/wolfssl/wolfcrypt/sha3.h
+%{_includedir}/wolfssl/wolfcrypt/sha512.h
+%{_includedir}/wolfssl/wolfcrypt/siphash.h
+%{_includedir}/wolfssl/wolfcrypt/signature.h
+%if "@INCLUDE_SP_INT@" != "no"
+%{_includedir}/wolfssl/wolfcrypt/sp_int.h
+%endif
+%{_includedir}/wolfssl/wolfcrypt/srp.h
+%{_includedir}/wolfssl/wolfcrypt/tfm.h
+%{_includedir}/wolfssl/wolfcrypt/types.h
+%{_includedir}/wolfssl/wolfcrypt/visibility.h
+%{_includedir}/wolfssl/wolfcrypt/wc_encrypt.h
+%{_includedir}/wolfssl/wolfcrypt/wc_port.h
+%{_includedir}/wolfssl/wolfcrypt/wc_kyber.h
+%{_includedir}/wolfssl/wolfcrypt/wolfevent.h
+%{_includedir}/wolfssl/wolfcrypt/wolfmath.h
+%{_includedir}/wolfssl/wolfio.h
+%{_libdir}/pkgconfig/wolfssl.pc
+%if "@ENABLED_FIPS@" != "no"
+%{_includedir}/wolfssl/wolfcrypt/fips.h
+%endif
+
+%changelog
+* Mon Oct 17 2022 Juliusz Sosinowicz <juliusz@wolfssl.com>
+- Updates for building FIPS packages and general maintenance
+* Tue Sep 27 2022 Jacob Barthelmeh <jacob@wolfssl.com>
+- Add include of kyber headers
+* Tue Aug 30 2022 Jacob Barthelmeh <jacob@wolfssl.com>
+- Add include of QUIC documentation
+* Wed Aug 17 2022 Anthony Hu <anthony@wolfssl.com>
+- Add a new header sphincs.h.
+* Wed Jul 20 2022 Anthony Hu <anthony@wolfssl.com>
+- Add a new header dilithium.h.
+* Fri Jul 8 2022 Jacob Barthelmeh <jacob@wolfssl.com>
+- Add missing sp_int.h file
+* Mon May 2 2022 Jacob Barthelmeh <jacob@wolfssl.com>
+- Add missing kdf.h file
+* Wed Feb 16 2022 John Safranek <john@wolfssl.com>
+- Update for new release.
+* Mon Dec 27 2021 Jacob Barthelmeh <jacob@wolfssl.com>
+- Add a missing headers camellia.h, modes.h from compat layer.
+- Add a missing header falcon.h.
+* Mon Nov 01 2021 Jacob Barthelmeh <jacob@wolfssl.com>
+- Add a missing headers cmac.h, compat_types.h from compat layer.
+* Thu Jul 08 2021 Jacob Barthelmeh <jacob@wolfssl.com>
+- Add a missing header eccsi, sakke.
+* Thu Mar 25 2021 John Safranek <john@wolfssl.com>
+- Add new header kdf.h
+* Mon Aug 17 2020 John Safranek <john@wolfssl.com>
+- Add a missing header.
+- Update for release.
+* Thu Apr 16 2020 John Safranek <john@wolfssl.com>
+- Add some missing headers.
+- Sort the file list.
+* Thu Dec 19 2019 Jacob Barthelmeh <jacob@wolfssl.com>
+- Add wolfssl/openssl/tls1.h, wolfssl/openssl/x509_vfy.h
+* Fri Mar 15 2019 John Safranek <john@wolfssl.com>
+- Updates for the v4 release.
+* Thu Dec 20 2018 Jacob Barthelmeh <jacob@wolfssl.com>
+- Remove wolfssl/wolfcrypt/fips.h, add wolfssl/openssl/pkcs7.h
+* Wed Jun 20 2018 Jacob Barthelmeh <jacob@wolfssl.com>
+- Remove NEWS, update ChangeLog to ChangeLog.md, remove wolfssl/wolfcrypt/fips.h, add wolfssl/wolfcrypt/cryptocb.h
+* Thu May 31 2018 John Safranek <john@wolfssl.com>
+- Update the version number on the library SO file.
+* Fri Mar 02 2018 Jacob Barthelmeh <jacob@wolfssl.com>
+- Added header files fips.h, buffer.h, objects.h, rc4.h and example tls_bench.c
+* Fri Sep 08 2017 Jacob Barthelmeh <jacob@wolfssl.com>
+- Change name for header wolfssl/io.h to wolfssl/wolfio.h
+* Fri Aug 04 2017 Jacob Barthelmeh <jacob@wolfssl.com>
+- Added header for wolfssl/wolfcrypt/cpuid.h, wolfssl/wolfcrypt/sha3.h
+* Thu May 04 2017 Jacob Barthelmeh <jacob@wolfssl.com>
+- Added header for wolfssl/io.h, wolfssl/openssl/ssl23.h, cyassl/openssl/ssl23.h
+* Thu Feb 09 2017 Jacob Barthelmeh <jacob@wolfssl.com>
+- Added header for wolfssl/wolfcrypt/wolfmath.h
+* Fri Nov 11 2016 Jacob Barthelmeh <jacob@wolfssl.com>
+- Added header for wolfssl/openssl/aes.h
+* Fri Oct 28 2016 Jacob Barthelmeh <jacob@wolfssl.com>
+- Added header for pkcs12
+* Fri Sep 23 2016 John Safranek <john@wolfssl.com>
+- Add the dtls-sctp example sources
+* Tue Jun 14 2016 Jacob Barthelmeh <jacob@wolfssl.com>
+- Change location for mem_track.h header
+- Added header for cmac.h
+* Thu Mar 17 2016 Jacob Barthelmeh <jacob@wolfssl.com>
+- Added header for mem_track.h
+* Wed Dec 30 2015 Jacob Barthelmeh <jacob@wolfssl.com>
+- Added headers for curve25519 and ed25519 openssl compatibility
+- Added headers for Idea, srp, signature, and wc_encrypt
+* Tue Mar 31 2015 John Safranek <john@wolfssl.com>
+- Added recent new wolfcrypt headers for curve25519
+* Fri Jan 09 2015 John Safranek <john@wolfssl.com>
+- Update for cyassl->wolfssl name change
+* Sat Oct 20 2012 Brian Aker <brian@tangent.org>
+- Initial package

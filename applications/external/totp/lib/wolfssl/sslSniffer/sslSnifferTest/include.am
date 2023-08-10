@@ -1,0 +1,17 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+if BUILD_SNIFFTEST
+noinst_PROGRAMS += sslSniffer/sslSnifferTest/snifftest
+sslSniffer_sslSnifferTest_snifftest_SOURCES = sslSniffer/sslSnifferTest/snifftest.c
+sslSniffer_sslSnifferTest_snifftest_LDADD        = src/libwolfssl@LIBSUFFIX@.la -lpcap $(LIB_STATIC_ADD)
+sslSniffer_sslSnifferTest_snifftest_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+EXTRA_DIST += sslSniffer/README.md
+EXTRA_DIST += sslSniffer/sslSniffer.vcproj
+EXTRA_DIST += sslSniffer/sslSniffer.vcxproj
+EXTRA_DIST += sslSniffer/sslSnifferTest/sslSniffTest.vcproj
+EXTRA_DIST += sslSniffer/sslSnifferTest/sslSniffTest.vcxproj
+EXTRA_DIST += sslSniffer/sslSnifferTest/README_WIN.md
+DISTCLEANFILES+= sslSniffer/sslSnifferTest/.libs/snifftest

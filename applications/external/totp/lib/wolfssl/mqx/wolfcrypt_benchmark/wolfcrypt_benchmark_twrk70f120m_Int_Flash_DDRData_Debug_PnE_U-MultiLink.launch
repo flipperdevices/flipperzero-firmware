@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.freescale.cdt.launch.cw.download">
+<stringAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Debugger.processor" value="K70FN1M0"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Exceptions.busFaultErr" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Exceptions.checkUsageFaultErr" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Exceptions.hardFaultErr" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Exceptions.intErr" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Exceptions.memManageErr" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Exceptions.noCoprocessorErr" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Exceptions.stateUsageFaultErr" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Interrupt.interrupt_enabled" value="false"/>
+<intAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Interrupt.interrupt_mask" value="0"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.IDconstant" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.IDexecutable" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.IDinitialized" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.IDuninitialized" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.IVconstant" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.IVexecutable" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.IVinitialized" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.IVuninitialized" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.SDconstant" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.SDexecutable" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.SDinitialized" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.SDuninitialized" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.SVconstant" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.SVexecutable" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.SVinitialized" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Download.SVuninitialized" value="false"/>
+<intAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.coreIndex" value="0"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.homogeneousMulticore" value="false"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.initPath" value="${ProjDirPath}/Debugger/init_kinetis.tcl"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.memConfigPath" value="${ProjDirPath}/Debugger/K70FN1M0.mem"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.simulator" value=""/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.smp" value="false"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.systemType" value="com.freescale.cw.system.kinetis.K70F.K70FN1M0"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.useDefaultConfigFile" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.useInitFile" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.useMemoryConfigFile" value="true"/>
+<listAttribute key="com.freescale.cdt.debug.cw.CoreNameList">
+<listEntry value="K70FN1M0#0"/>
+</listAttribute>
+<booleanAttribute key="com.freescale.cdt.debug.cw.DebuggerTab.StopAtProgramEntryPoint" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.DebuggerTab.StopAtStartUp" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.DebuggerTab.StopAtUserSpecified" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.PN_StopAtProgramEntryPoint" value="false"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.RefreshPolicy.RefreshPeriod" value="2.0"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.Symbolics.CacheSymbolicsBetweenRuns" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.Symbolics.UseExecutableCopy" value="false"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.UDPPort" value="1234"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.core.settings.ConnectionCommonData.TargetConnectionLost.RetryConnectionOn" value="false"/>
+<intAttribute key="com.freescale.cdt.debug.cw.core.settings.ConnectionCommonData.TargetConnectionLost.RetryTimeout" value="20"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.core.settings.ConnectionCommonData.TargetConnectionLost.RetryWithTimeoutOn" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.core.settings.ConnectionCommonData.TargetConnectionLost.TerminateConnectionOn" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.core.settings.ConnectionCommonData.TargetConnectionLost.promptUserActionOn" value="true"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.core.settings.DebuggerCommonData.Connection Protocol Plugin Name" value="ARM GDI"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.core.settings.DebuggerCommonData.Connection Type" value="com.pemicro.mcu.debug.connections.pne.arm"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.core.settings.DebuggerCommonData.Processor Attr Name" value="com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.ARM Debugger.processor"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.core.settings.GdiConnection.Common.PhysicalConnectionAttributeBase" value="com.pemicro.mcu.debug.connections.pne.arm."/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.core.settings.GdiConnection.Common.logData" value="false"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.core.settings.rseSystemId" value="com.freescale.cdt.debug.cw.core.ui.rse.systemtype.bareboard.hardware.140905160549-0600"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.core.settings.wizardSystemNameHint" value="PnE U-MultiLink"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.debuggerAddress" value="127.0.0.1"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.disableIO" value="false"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.ethCtrl" value="UEC1"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.executePerCoresReset" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.executePerprocessorReset" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.executeReset" value="true"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.gateway" value="127.0.0.1"/>
+<listAttribute key="com.freescale.cdt.debug.cw.initPathList">
+<listEntry value="${ProjDirPath}/Debugger/init_kinetis.tcl"/>
+</listAttribute>
+<stringAttribute key="com.freescale.cdt.debug.cw.macAddress" value="**-**-**-**-**-**"/>
+<listAttribute key="com.freescale.cdt.debug.cw.memConfigPathList">
+<listEntry value="${ProjDirPath}/Debugger/K70FN1M0.mem"/>
+</listAttribute>
+<stringAttribute key="com.freescale.cdt.debug.cw.netMask" value="255.255.255.255"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.osawareness.osContributorID" value="com.freescale.os.mqx.cortexm"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.osawareness.rtospluginname" value="MQX RTOS CORTEXM"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.osawareness.targetos" value="MQX OS for Cortex"/>
+<listAttribute key="com.freescale.cdt.debug.cw.perCoreResetList"/>
+<listAttribute key="com.freescale.cdt.debug.cw.perProcessorResetList"/>
+<stringAttribute key="com.freescale.cdt.debug.cw.processor" value="Generic"/>
+<listAttribute key="com.freescale.cdt.debug.cw.runOutOfResetList">
+<listEntry value="false"/>
+</listAttribute>
+<stringAttribute key="com.freescale.cdt.debug.cw.targetAddress" value="127.0.0.1"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.useGateway" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.useHSSTIO" value="false"/>
+<listAttribute key="com.freescale.cdt.debug.cw.useInitPathList">
+<listEntry value="true"/>
+</listAttribute>
+<booleanAttribute key="com.freescale.cdt.debug.cw.useMacAddress" value="false"/>
+<listAttribute key="com.freescale.cdt.debug.cw.useMemConfigPathList">
+<listEntry value="true"/>
+</listAttribute>
+<booleanAttribute key="com.freescale.cdt.debug.cw.useNetworkTransferIO" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.useSerialTransferIO" value="false"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.useStopTransferIO" value="true"/>
+<booleanAttribute key="com.freescale.cdt.debug.cw.useUDPPort" value="false"/>
+<listAttribute key="com.freescale.panel.list">
+<listEntry value="Debugger Common Settings"/>
+<listEntry value="ARM Exceptions"/>
+<listEntry value="ARM Interrupt"/>
+<listEntry value="Embedded Download"/>
+<listEntry value="Debugger PIC Settings Panel"/>
+<listEntry value="Other Executables"/>
+<listEntry value="Symbolics"/>
+<listEntry value="osawareness"/>
+</listAttribute>
+<stringAttribute key="com.pemicro.mcu.debug.connections.pne.arm.CommandLineArgs" value="arm_icd"/>
+<stringAttribute key="com.pemicro.mcu.debug.connections.pne.arm.Library" value="arm_pne_gdi"/>
+<stringAttribute key="com.pemicro.mcu.debug.connections.pne.arm.PEDEBUG_CURRENTDEVICE" value="K70FN1M0"/>
+<stringAttribute key="com.pemicro.mcu.debug.connections.pne.arm.STARTUP_PORT" value="21"/>
+<stringAttribute key="com.pemicro.mcu.debug.connections.pne.arm.STARTUP_interface_selection" value="1"/>
+<booleanAttribute key="forceShellDownload" value="false"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_ID" value="com.freescale.cdt.debug.cw.arm.ArmDebugger"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_REGISTER_GROUPS" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="run"/>
+<booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="true"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
+<booleanAttribute key="org.eclipse.cdt.launch.ENABLE_REGISTER_BOOKKEEPING" value="false"/>
+<booleanAttribute key="org.eclipse.cdt.launch.ENABLE_RESTORE_WATCHPOINTS" value="true"/>
+<booleanAttribute key="org.eclipse.cdt.launch.ENABLE_VARIABLE_BOOKKEEPING" value="false"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="twrk70f120m_Int_Flash_DDRData_Debug/wolfcrypt_benchmark.elf"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="wolfcrypt_benchmark"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="org.eclipse.cdt.cross.arm.gnu.sourcery.windows.elf.debug.685476017"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/wolfcrypt_benchmark"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+</launchConfiguration>

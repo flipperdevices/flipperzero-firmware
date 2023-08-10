@@ -1,0 +1,14 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench.xcodeproj/project.pbxproj
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/AppDelegate.h
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/AppDelegate.m
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/Info.plist
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/main.m
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/ViewController.h
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/ViewController.m
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/Assets.xcassets/AppIcon.appiconset/Contents.json
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/Base.lproj/LaunchScreen.storyboard
+EXTRA_DIST+= IDE/XCODE/Benchmark/wolfBench/Base.lproj/Main.storyboard

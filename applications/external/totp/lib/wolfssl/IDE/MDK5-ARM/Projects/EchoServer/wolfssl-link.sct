@@ -1,0 +1,14 @@
+LR_IROM1 0x08000000 0x00100000  {    ; load region size_region
+  ER_IROM1 0x08000000 0x00100000  {  ; load address = execution address
+   *.o (RESET, +First)
+   *(InRoot$$Sections)
+   .ANY (+RO)
+  }
+  RW_IRAM1 0x20010000 0x00040000  {  ; RW data
+   .ANY (+RW +ZI)
+  }
+  RW_RETARGET 0x2000FFF0 0x00000010  {
+    retarget_io.o (+ZI +RW)
+  }
+}
+

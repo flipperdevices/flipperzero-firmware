@@ -1,0 +1,403 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8BC456822A5DCC3D008A4AF7 /* wolfssl_multiplatformApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC456812A5DCC3D008A4AF7 /* wolfssl_multiplatformApp.swift */; };
+		8BC456842A5DCC3D008A4AF7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BC456832A5DCC3D008A4AF7 /* ContentView.swift */; };
+		8BC456862A5DCC3F008A4AF7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8BC456852A5DCC3F008A4AF7 /* Assets.xcassets */; };
+		8BC456922A5DD04E008A4AF7 /* libwolfssl.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8BC456912A5DD04E008A4AF7 /* libwolfssl.xcframework */; };
+		8BC456972A5DD1F2008A4AF7 /* wolfssl_test_driver.c in Sources */ = {isa = PBXBuildFile; fileRef = 8BC456962A5DD1F2008A4AF7 /* wolfssl_test_driver.c */; };
+		8BC456AB2A5DF7A6008A4AF7 /* test.c in Sources */ = {isa = PBXBuildFile; fileRef = 8BC456AA2A5DF7A6008A4AF7 /* test.c */; settings = {COMPILER_FLAGS = "-DUSE_FLAT_TEST_H -DNO_MAIN_DRIVER -DNO_FILESYSTEM -DSINGLE_THREADED"; }; };
+		8BC456AE2A5DF7BA008A4AF7 /* benchmark.c in Sources */ = {isa = PBXBuildFile; fileRef = 8BC456AC2A5DF7BA008A4AF7 /* benchmark.c */; settings = {COMPILER_FLAGS = "-DUSE_FLAT_BENCHMARK_H -DNO_MAIN_DRIVER -DSINGLE_THREADED"; }; };
+		8BC456F32A5F20C8008A4AF7 /* simple_client_example.c in Sources */ = {isa = PBXBuildFile; fileRef = 8BC456F12A5F20C8008A4AF7 /* simple_client_example.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		8BC4567E2A5DCC3D008A4AF7 /* wolfssl-multiplatform.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "wolfssl-multiplatform.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BC456812A5DCC3D008A4AF7 /* wolfssl_multiplatformApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = wolfssl_multiplatformApp.swift; sourceTree = "<group>"; };
+		8BC456832A5DCC3D008A4AF7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		8BC456852A5DCC3F008A4AF7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8BC456872A5DCC3F008A4AF7 /* wolfssl_multiplatform.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = wolfssl_multiplatform.entitlements; sourceTree = "<group>"; };
+		8BC456912A5DD04E008A4AF7 /* libwolfssl.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = libwolfssl.xcframework; path = ../artifacts/xcframework/libwolfssl.xcframework; sourceTree = "<group>"; };
+		8BC456942A5DD1F2008A4AF7 /* wolfssl-multiplatform-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "wolfssl-multiplatform-Bridging-Header.h"; sourceTree = "<group>"; };
+		8BC456952A5DD1F2008A4AF7 /* wolfssl_test_driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wolfssl_test_driver.h; sourceTree = "<group>"; };
+		8BC456962A5DD1F2008A4AF7 /* wolfssl_test_driver.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = wolfssl_test_driver.c; sourceTree = "<group>"; };
+		8BC456A92A5DF7A6008A4AF7 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = test.h; path = ../../../../wolfcrypt/test/test.h; sourceTree = "<group>"; };
+		8BC456AA2A5DF7A6008A4AF7 /* test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = test.c; path = ../../../../wolfcrypt/test/test.c; sourceTree = "<group>"; };
+		8BC456AC2A5DF7BA008A4AF7 /* benchmark.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = benchmark.c; path = ../../../../wolfcrypt/benchmark/benchmark.c; sourceTree = "<group>"; };
+		8BC456AD2A5DF7BA008A4AF7 /* benchmark.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = benchmark.h; path = ../../../../wolfcrypt/benchmark/benchmark.h; sourceTree = "<group>"; };
+		8BC456F12A5F20C8008A4AF7 /* simple_client_example.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = simple_client_example.c; sourceTree = "<group>"; };
+		8BC456F22A5F20C8008A4AF7 /* simple_client_example.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simple_client_example.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8BC4567B2A5DCC3D008A4AF7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8BC456922A5DD04E008A4AF7 /* libwolfssl.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8BC456752A5DCC3D008A4AF7 = {
+			isa = PBXGroup;
+			children = (
+				8BC456802A5DCC3D008A4AF7 /* wolfssl-multiplatform */,
+				8BC4567F2A5DCC3D008A4AF7 /* Products */,
+				8BC456902A5DD04E008A4AF7 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		8BC4567F2A5DCC3D008A4AF7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8BC4567E2A5DCC3D008A4AF7 /* wolfssl-multiplatform.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8BC456802A5DCC3D008A4AF7 /* wolfssl-multiplatform */ = {
+			isa = PBXGroup;
+			children = (
+				8BC456A82A5DF787008A4AF7 /* wolfssl-test-apps */,
+				8BC456812A5DCC3D008A4AF7 /* wolfssl_multiplatformApp.swift */,
+				8BC456832A5DCC3D008A4AF7 /* ContentView.swift */,
+				8BC456852A5DCC3F008A4AF7 /* Assets.xcassets */,
+				8BC456872A5DCC3F008A4AF7 /* wolfssl_multiplatform.entitlements */,
+				8BC456952A5DD1F2008A4AF7 /* wolfssl_test_driver.h */,
+				8BC456962A5DD1F2008A4AF7 /* wolfssl_test_driver.c */,
+				8BC456942A5DD1F2008A4AF7 /* wolfssl-multiplatform-Bridging-Header.h */,
+			);
+			path = "wolfssl-multiplatform";
+			sourceTree = "<group>";
+		};
+		8BC456902A5DD04E008A4AF7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8BC456912A5DD04E008A4AF7 /* libwolfssl.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		8BC456A82A5DF787008A4AF7 /* wolfssl-test-apps */ = {
+			isa = PBXGroup;
+			children = (
+				8BC456F12A5F20C8008A4AF7 /* simple_client_example.c */,
+				8BC456F22A5F20C8008A4AF7 /* simple_client_example.h */,
+				8BC456AC2A5DF7BA008A4AF7 /* benchmark.c */,
+				8BC456AD2A5DF7BA008A4AF7 /* benchmark.h */,
+				8BC456AA2A5DF7A6008A4AF7 /* test.c */,
+				8BC456A92A5DF7A6008A4AF7 /* test.h */,
+			);
+			name = "wolfssl-test-apps";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8BC4567D2A5DCC3D008A4AF7 /* wolfssl-multiplatform */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8BC4568D2A5DCC3F008A4AF7 /* Build configuration list for PBXNativeTarget "wolfssl-multiplatform" */;
+			buildPhases = (
+				8BC4567A2A5DCC3D008A4AF7 /* Sources */,
+				8BC4567B2A5DCC3D008A4AF7 /* Frameworks */,
+				8BC4567C2A5DCC3D008A4AF7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "wolfssl-multiplatform";
+			productName = "wolfssl-multiplatform";
+			productReference = 8BC4567E2A5DCC3D008A4AF7 /* wolfssl-multiplatform.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8BC456762A5DCC3D008A4AF7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					8BC4567D2A5DCC3D008A4AF7 = {
+						CreatedOnToolsVersion = 14.3.1;
+						LastSwiftMigration = 1430;
+					};
+				};
+			};
+			buildConfigurationList = 8BC456792A5DCC3D008A4AF7 /* Build configuration list for PBXProject "wolfssl-multiplatform" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8BC456752A5DCC3D008A4AF7;
+			productRefGroup = 8BC4567F2A5DCC3D008A4AF7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8BC4567D2A5DCC3D008A4AF7 /* wolfssl-multiplatform */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8BC4567C2A5DCC3D008A4AF7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8BC456862A5DCC3F008A4AF7 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8BC4567A2A5DCC3D008A4AF7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8BC456972A5DD1F2008A4AF7 /* wolfssl_test_driver.c in Sources */,
+				8BC456842A5DCC3D008A4AF7 /* ContentView.swift in Sources */,
+				8BC456F32A5F20C8008A4AF7 /* simple_client_example.c in Sources */,
+				8BC456822A5DCC3D008A4AF7 /* wolfssl_multiplatformApp.swift in Sources */,
+				8BC456AB2A5DF7A6008A4AF7 /* test.c in Sources */,
+				8BC456AE2A5DF7BA008A4AF7 /* benchmark.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		8BC4568B2A5DCC3F008A4AF7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8BC4568C2A5DCC3F008A4AF7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		8BC4568E2A5DCC3F008A4AF7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "wolfssl-multiplatform/wolfssl_multiplatform.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "CERT_PATH=\\\"$PROJECT_DIR/../../../certs/wolfssl-website-ca.pem\\\"";
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MARKETING_VERSION = 1.0;
+				OTHER_CFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "wolfSSL.wolfssl-multiplatform";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "wolfssl-multiplatform/wolfssl-multiplatform-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,3";
+			};
+			name = Debug;
+		};
+		8BC4568F2A5DCC3F008A4AF7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "wolfssl-multiplatform/wolfssl_multiplatform.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "CERT_PATH=\\\"$PROJECT_DIR/../../../certs/wolfssl-website-ca.pem\\\"";
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 13.3;
+				MARKETING_VERSION = 1.0;
+				OTHER_CFLAGS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "wolfSSL.wolfssl-multiplatform";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "appletvos appletvsimulator iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "wolfssl-multiplatform/wolfssl-multiplatform-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,3";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8BC456792A5DCC3D008A4AF7 /* Build configuration list for PBXProject "wolfssl-multiplatform" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8BC4568B2A5DCC3F008A4AF7 /* Debug */,
+				8BC4568C2A5DCC3F008A4AF7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8BC4568D2A5DCC3F008A4AF7 /* Build configuration list for PBXNativeTarget "wolfssl-multiplatform" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8BC4568E2A5DCC3F008A4AF7 /* Debug */,
+				8BC4568F2A5DCC3F008A4AF7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8BC456762A5DCC3D008A4AF7 /* Project object */;
+}

@@ -1,0 +1,167 @@
+--- fsl_caam.h	2023-06-23 00:08:46.491699533 -0700
++++ fsl_caam-expanded.h	2023-06-23 00:10:22.702730462 -0700
+@@ -3038,6 +3038,164 @@
+  *@}
+  */ /* end of caam_driver_pkha */
+ 
++
++/* define for application to check for ECC CAAM additions */
++#define CAAM_ECC_EXPANSION
++#define CAAM_PKHA_ENC_PRI_AESECB 0x00000004
++#define CAAM_ECDSEL_SHIFT 7
++#define CAAM_ECDSA_P256 (0x02 << CAAM_ECDSEL_SHIFT)
++#define CAAM_ECDSA_P384 (0x03 << CAAM_ECDSEL_SHIFT)
++#define CAAM_ECDSA_P521 (0x04 << CAAM_ECDSEL_SHIFT)
++
++/*!
++ * brief generate ECC Keypair.
++ *
++ * This function generates ECC private/public key pair.
++ *
++ * param base CAAM peripheral base address
++ * param[out] k private key
++ * param[in,out] sizeK pointer to size variable. On input it holds size of input k in bytes. On output it holds size of
++ *                of generated private key k in bytes.
++ * param[out] p public key
++ * param[in,out] sizeP pointer to size variable. On input it holds size of input p in bytes. On output it holds size of
++ *                of generated public key p in bytes.
++ * param keyType type of ECC key, i.e P256 / P384
++ * param enc option to create black key
++ * return Operation status.
++ */
++status_t CAAM_ECC_Keygen(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      uint8_t *k,
++                                      size_t *sizeK,
++                                      uint8_t *p,
++                                      size_t *sizeP,
++                                      int keyType,
++                                      uint32_t enc);
++
++/*!
++ * brief generate ECC signature.
++ *
++ * This function creates an ECC signature.
++ *
++ * param base CAAM peripheral base address
++ * param[in] k private key
++ * param[in] sizeK holds size of input k in bytes.
++ * param[in] hash contains the hash to sign
++ * param[in] sizeHash is the size of 'hash' in bytes.
++ * param[out] sig signature output
++ * param[in,out] sizeSig pointer to size variable. On input it holds size of input sig in bytes. On output it holds size of
++ *                of generated signature in bytes.
++ * param keyType type of ECC key i.e P256 / P384
++ * param enc option to use black key
++ * return Operation status.
++ */
++status_t CAAM_ECC_Sign(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      const uint8_t *k,
++                                      size_t sizeK,
++                                      const uint8_t *hash,
++                                      size_t sizeHash,
++                                      uint8_t *r,
++                                      size_t sizeR,
++                                      uint8_t *s,
++                                      size_t sizeS,
++                                      int keyType,
++                                      uint32_t enc);
++
++/*!
++ * brief do an ECC verify.
++ *
++ * This function verifies an ECC signature.
++ *
++ * param base CAAM peripheral base address
++ * param[in] p public key
++ * param[in] sizeP pointer to size variable. On input it holds size of input k in bytes. On output it holds size of
++ *                of generated private key k in bytes.
++ * param[in] sig signature to verify
++ * param[in] sizeSig size of signature in bytes
++ * param[in] hash contains the hash to sign
++ * param[in] sizeHash is the size of 'hash' in bytes.
++ * param keyType type of ECC key i.e P256 / P384
++ * param enc option to use black key
++ * return Operation status.
++ */
++status_t CAAM_ECC_Verify(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      const uint8_t *p,
++                                      size_t sizeP,
++                                      const uint8_t *r,
++                                      size_t sizeR,
++                                      const uint8_t *s,
++                                      size_t sizeS,
++                                      const uint8_t *hash,
++                                      size_t sizeHash,
++                                      int keyType);
++
++/*!
++ * brief generate ECC shared secret.
++ *
++ * This function creates an ECC shared secret.
++ *
++ * param base CAAM peripheral base address
++ * param[in] k private key
++ * param[in] sizeK holds size of input k in bytes.
++ * param[in] pub contains the public key (x,y)
++ * param[in] sizePub is the size of 'pub' in bytes.
++ * param[out] out output buffer to hold shared secret
++ * param[in] sizeOut size of out buffer
++ * param keyType type of ECC key i.e P256 / P384
++ * param enc option to use black key
++ * return Operation status.
++ */
++status_t CAAM_ECC_ECDH(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      const uint8_t *k,
++                                      size_t sizeK,
++                                      const uint8_t *pub,
++                                      size_t sizePub,
++                                      uint8_t *out,
++                                      size_t sizeOut,
++                                      int keyType,
++                                      uint32_t enc);
++
++
++/* define for application to check for ECC CAAM additions */
++#define CAAM_BLOB_EXPANSION
++#define CAAM_RED_BLOB 1
++#define CAAM_BLACK_BLOB 2
++#define CAAM_ENCAP_BLOB 0x07000000
++#define CAAM_DECAP_BLOB 0x06000000
++#define CAAM_SM_KEYMODSZ 8
++#define CAAM_KEYMODSZ 16
++#define CAAM_PADDING_SIZE_BLOB 48
++
++/*!
++ * brief create or open a NXP blob.
++ *
++ * This function creates or opens a blob.
++ *
++ * param base CAAM peripheral base address
++ * param[in] in buffer to do operation on
++ * param[in] sizeIn holds size of input in in bytes.
++ * param[out] out buffer to hold the result of the operation
++ * param[in] sizeOut size in bytes of out buffer
++ * param[in] keyMod key that is used when creating or opening blob
++ * param[in] keyModSz size in bytes of keyMod
++ * param dir encap or decap of blob
++ * param color black or red blob type
++ * return Operation status.
++ */
++status_t CAAM_Blob(CAAM_Type *base,
++                                      caam_handle_t *handle,
++                                      uint8_t *in,
++                                      size_t sizeIn,
++                                      uint8_t *out,
++                                      size_t sizeOut,
++                                      uint8_t *keyMod,
++                                      size_t keyModSz,
++                                      uint32_t dir,
++                                      uint32_t color);
++
+ #if defined(__cplusplus)
+ }
+ #endif

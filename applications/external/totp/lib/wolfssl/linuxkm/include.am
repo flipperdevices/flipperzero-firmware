@@ -1,0 +1,15 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST += m4/ax_linuxkm.m4 \
+	      linuxkm/Kbuild \
+	      linuxkm/Makefile \
+	      linuxkm/get_thread_size.c \
+	      linuxkm/module_hooks.c \
+	      linuxkm/module_exports.c.template \
+	      linuxkm/pie_first.c \
+	      linuxkm/pie_redirect_table.c \
+	      linuxkm/pie_last.c \
+	      linuxkm/linuxkm_memory.c \
+	      linuxkm/linuxkm_wc_port.h

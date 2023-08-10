@@ -1,0 +1,166 @@
+#!/bin/bash
+
+# psk.test
+# copyright wolfSSL 2016
+
+# if we can, isolate the network namespace to eliminate port collisions.
+if [[ -n "$NETWORK_UNSHARE_HELPER" ]]; then
+     if [[ -z "$NETWORK_UNSHARE_HELPER_CALLED" ]]; then
+         export NETWORK_UNSHARE_HELPER_CALLED=yes
+         exec "$NETWORK_UNSHARE_HELPER" "$0" "$@" || exit $?
+     fi
+elif [ "${AM_BWRAPPED-}" != "yes" ]; then
+    bwrap_path="$(command -v bwrap)"
+    if [ -n "$bwrap_path" ]; then
+        export AM_BWRAPPED=yes
+        exec "$bwrap_path" --unshare-net --dev-bind / / "$0" "$@"
+    fi
+    unset AM_BWRAPPED
+fi
+
+# getting unique port is modeled after resume.test script
+# need a unique port since may run the same time as testsuite
+# use server port zero hack to get one
+port=0
+no_pid=-1
+server_pid=$no_pid
+counter=0
+# let's use absolute path to a local dir (make distcheck may be in sub dir)
+# also let's add some randomness by adding pid in case multiple 'make check's
+# per source tree
+ready_file=`pwd`/wolfssl_psk_ready$$
+
+echo "ready file \"$ready_file\""
+
+create_port() {
+    while [ ! -s "$ready_file" -a "$counter" -lt 20 ]; do
+        echo -e "waiting for ready file..."
+        sleep 0.1
+        counter=$((counter+ 1))
+    done
+
+    if test -e "$ready_file"; then
+        echo -e "found ready file, starting client..."
+
+        # sleep for an additional 0.1 to mitigate race on write/read of $ready_file:
+        sleep 0.1
+
+        # get created port 0 ephemeral port
+        port=`cat "$ready_file"`
+    else
+        echo -e "NO ready file ending test..."
+        do_cleanup
+    fi
+}
+
+remove_ready_file() {
+    if test -e "$ready_file"; then
+        echo -e "removing existing ready file"
+    rm "$ready_file"
+    fi
+}
+
+do_cleanup() {
+    echo "in cleanup"
+
+    if  [ $server_pid != $no_pid ]
+    then
+        echo "killing server"
+        kill -9 $server_pid
+    fi
+    remove_ready_file
+}
+
+do_trap() {
+    echo "got trap"
+    do_cleanup
+    exit 1
+}
+
+trap do_trap INT TERM
+
+[ ! -x ./examples/client/client ] && echo -e "\n\nClient doesn't exist" && exit 1
+./examples/client/client '-?' 2>&1 | grep -- 'Client not compiled in!'
+if [ $? -eq 0 ]; then
+    exit 0
+fi
+./examples/server/server '-?' 2>&1 | grep -- 'Server not compiled in!'
+if [ $? -eq 0 ]; then
+    exit 0
+fi
+
+# Usual psk server / psk client. This use case is tested in
+# tests/unit.test and is used here for just checking if PSK is enabled
+port=0
+./examples/server/server -s -R "$ready_file" -p $port &
+server_pid=$!
+create_port
+./examples/client/client -s -p $port
+RESULT=$?
+remove_ready_file
+# if fail here then is a settings issue so return 0
+if [ $RESULT -ne 0 ]; then
+    echo -e "\n\nPSK not enabled"
+    do_cleanup
+    exit 0
+fi
+echo ""
+
+# client test against the server
+###############################
+
+./examples/client/client -v 3 2>&1 | grep -- 'Bad SSL version'
+if [ $? -ne 0 ]; then
+    # Usual server / client. This use case is tested in
+    # tests/unit.test and is used here for just checking if cipher suite
+    # is available (one case for example is with disable-asn)
+    port=0
+    ./examples/server/server -R "$ready_file" -p $port -l DHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-DES-CBC3-SHA &
+    server_pid=$!
+    create_port
+    ./examples/client/client -p $port
+    RESULT=$?
+    remove_ready_file
+    # if fail here then is a settings issue so return 0
+    if [ $RESULT -ne 0 ]; then
+        echo -e "\n\nIssue with chosen non PSK suites"
+        do_cleanup
+        exit 0
+    fi
+    echo ""
+
+    # psk server with non psk client
+    port=0
+    ./examples/server/server -j -R "$ready_file" -p $port &
+    server_pid=$!
+    create_port
+    ./examples/client/client -p $port
+    RESULT=$?
+    remove_ready_file
+    if [ $RESULT -ne 0 ]; then
+        echo -e "\n\nClient connection failed"
+        do_cleanup
+        exit 1
+    fi
+    echo ""
+
+    # check fail if no auth, psk server with non psk client
+    echo "Checking fail when not sending peer cert"
+    port=0
+    ./examples/server/server -j -R "$ready_file" -p $port &
+    server_pid=$!
+    create_port
+    ./examples/client/client -x -p $port
+    RESULT=$?
+    remove_ready_file
+    if [ $RESULT -eq 0 ]; then
+        echo -e "\n\nClient connected when supposed to fail"
+        do_cleanup
+        exit 1
+    fi
+fi
+
+echo -e "\nALL Tests Passed"
+
+exit 0
+

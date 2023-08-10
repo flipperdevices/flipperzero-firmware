@@ -1,0 +1,78 @@
+project Client is
+   type OS_Kind is ("Windows", "Linux_Or_Mac");
+
+   OS : OS_Kind := external ("OS", "Linux_Or_Mac");
+
+   for Languages use ("C", "Ada");
+
+   for Source_Dirs use (".",
+                        "../../",
+                        "../../src",
+                        "../../wolfcrypt/src");
+
+   for Object_Dir use "obj";
+
+   for Main use ("tls_client_main.adb");
+
+   package Naming is
+      for Spec_Suffix ("C") use ".h";
+   end Naming;
+
+   package Compiler is
+      for Switches ("C") use
+         ("-DWOLFSSL_USER_SETTINGS",  --  Use the user_settings.h file.
+          "-Wno-pragmas",
+          "-Wall",
+          "-Wextra",
+          "-Wunknown-pragmas",
+          "--param=ssp-buffer-size=1",
+          "-Waddress",
+          "-Warray-bounds",
+          "-Wbad-function-cast",
+          "-Wchar-subscripts",
+          "-Wcomment",
+          "-Wfloat-equal",
+          "-Wformat-security",
+          "-Wformat=2",
+          "-Wmaybe-uninitialized",
+          "-Wmissing-field-initializers",
+          "-Wmissing-noreturn",
+          "-Wmissing-prototypes",
+          "-Wnested-externs",
+          "-Wnormalized=id",
+          "-Woverride-init",
+          "-Wpointer-arith",
+          "-Wpointer-sign",
+          "-Wshadow",
+          "-Wsign-compare",
+          "-Wstrict-overflow=1",
+          "-Wstrict-prototypes",
+          "-Wswitch-enum",
+          "-Wundef",
+          "-Wunused",
+          "-Wunused-result",
+          "-Wunused-variable",
+          "-Wwrite-strings",
+          "-fwrapv");
+
+      for Switches ("Ada") use ("-g");
+   end Compiler;
+
+   package Linker is
+      case OS is
+         when "Windows" =>
+            for Switches ("Ada") use
+               ("-lm",         --  To include the math library (used by WolfSSL).
+                "-lcrypt32");  --  Needed on Windows.
+
+         when "Linux_Or_Mac" =>
+            for Switches ("Ada") use
+               ("-lm");  --  To include the math library (used by WolfSSL).
+      end case;
+   end Linker;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es");  --  To include stack traces.
+   end Binder;
+
+end Client;

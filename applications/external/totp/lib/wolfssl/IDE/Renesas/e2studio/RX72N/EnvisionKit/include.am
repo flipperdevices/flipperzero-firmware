@@ -1,0 +1,35 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/README_EN.md
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/README_JP.md
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/InstructionManualForExample_RX72N_EnvisonKit_EN.pdf
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/InstructionManualForExample_RX72N_EnvisonKit_JP.pdf
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/resource/section.esi
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl/wolfssl.rcpc
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl_demo/key_data.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl_demo/key_data.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl_demo/wolfssl_demo.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl_demo/wolfssl_demo.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl_demo/user_settings.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/wolfssl_demo/wolfssl_tsip_unit_test.c
+
+# Simple Example Contents
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/common/sectioninfo.esi
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/common/wolfssl_dummy.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/src/client/simple_tcp_client.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/src/client/simple_tls_tsip_client.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/src/server/simple_tcp_server.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/src/server/simple_tls_server.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/src/test_main.c
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/src/wolfssl_simple_demo.h
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/.project
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/test_HardwareDebug.launch
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/test.rcpc
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/test/test.scfg
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/wolfssl/.cproject
+EXTRA_DIST+= IDE/Renesas/e2studio/RX72N/EnvisionKit/Simple/wolfssl/.project

@@ -1,0 +1,38 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+
+if BUILD_SCTP
+if BUILD_EXAMPLE_SERVERS
+noinst_PROGRAMS += \
+				examples/sctp/sctp-server \
+				examples/sctp/sctp-server-dtls
+examples_sctp_sctp_server_SOURCES      = examples/sctp/sctp-server.c
+examples_sctp_sctp_server_LDADD        = $(LIB_STATIC_ADD)
+examples_sctp_sctp_server_dtls_SOURCES      = examples/sctp/sctp-server-dtls.c
+examples_sctp_sctp_server_dtls_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD)
+examples_sctp_sctp_server_dtls_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+if BUILD_EXAMPLE_CLIENTS
+noinst_PROGRAMS += \
+				examples/sctp/sctp-client \
+				examples/sctp/sctp-client-dtls
+examples_sctp_sctp_client_SOURCES      = examples/sctp/sctp-client.c
+examples_sctp_sctp_client_LDADD        = $(LIB_STATIC_ADD)
+examples_sctp_sctp_client_dtls_SOURCES      = examples/sctp/sctp-client-dtls.c
+examples_sctp_sctp_client_dtls_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD)
+examples_sctp_sctp_client_dtls_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+endif
+
+dist_example_DATA += \
+				examples/sctp/sctp-server.c \
+				examples/sctp/sctp-server-dtls.c \
+				examples/sctp/sctp-client.c \
+				examples/sctp/sctp-client-dtls.c
+DISTCLEANFILES += \
+				examples/sctp/.libs/sctp-server \
+				examples/sctp/.libs/sctp-server-dtls \
+				examples/sctp/.libs/sctp-client \
+				examples/sctp/.libs/sctp-client-dtls

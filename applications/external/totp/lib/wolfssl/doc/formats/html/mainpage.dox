@@ -1,0 +1,21 @@
+/*
+    This file is for customizing the doxygen mainpage style.
+*/
+/*!
+    \mainpage This Documentation Covers %wolfSSL, %wolfCrypt, and %CertManager API
+
+    \section apiRef API Reference
+    <a href="https://www.wolfssl.com/doxygen/modules.html">Complete API Reference</a><br>
+    <a href="https://www.wolfssl.com/doxygen/wolfssl_API.html">wolfSSL API Reference</a><br>
+    <a href="https://www.wolfssl.com/doxygen/wolfcrypt_API.html">wolfCrypt API Reference</a><br>
+    <!-- <a href="https://www.wolfssl.com/doxygen/annotated.html">wolfSSL Data Structures</a><br> -->
+    <a href="https://www.wolfssl.com/doxygen/pages.html">Useful guides/documentation</a><br>
+
+    <br>
+
+    \subsection website Useful Links
+    https://www.wolfssl.com/ - Main website<br>
+    https://www.wolfssl.com/docs/wolfssl-manual/ - %wolfSSL Manual<br>
+    https://www.wolfssl.com/docs/wolfssl-manual/ch10/ - wolfCrypt Usage Reference<br>
+    https://github.com/wolfssl/wolfssl.git - Git repository
+*/

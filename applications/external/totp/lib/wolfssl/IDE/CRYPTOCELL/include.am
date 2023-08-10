@@ -1,0 +1,8 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST += \
+    IDE/CRYPTOCELL/README.md \
+    IDE/CRYPTOCELL/main.c \
+    IDE/CRYPTOCELL/user_settings.h

@@ -1,0 +1,86 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/test/cert-ext-ia.cfg \
+         certs/test/cert-ext-ia.der \
+         certs/test/cert-ext-ia.pem \
+         certs/test/cert-ext-nc.cfg \
+         certs/test/cert-ext-nc.der \
+         certs/test/cert-ext-nc.pem \
+         certs/test/cert-ext-ncdns.der \
+         certs/test/cert-ext-ncmixed.der \
+         certs/test/cert-ext-mnc.der \
+         certs/test/cert-ext-nct.cfg \
+         certs/test/cert-ext-nct.der \
+         certs/test/cert-ext-nct.pem \
+         certs/test/cert-ext-ndir.cfg \
+         certs/test/cert-ext-ndir.der \
+         certs/test/cert-ext-ndir.pem \
+         certs/test/cert-ext-ns.der \
+         certs/test/cert-ext-ndir-exc.cfg \
+         certs/test/cert-ext-ndir-exc.der \
+         certs/test/cert-ext-ndir-exc.pem \
+         certs/test/gen-ext-certs.sh \
+         certs/test/server-duplicate-policy.pem \
+         certs/test/cert-ext-joi.der \
+         certs/test/cert-ext-joi.pem \
+         certs/test/cert-ext-joi.cfg \
+         certs/test/cert-ext-multiple.cfg \
+         certs/test/cert-ext-multiple.der \
+         certs/test/cert-ext-multiple.pem
+
+# The certs/server-cert with the last byte (signature byte) changed
+EXTRA_DIST += \
+         certs/test/server-cert-rsa-badsig.der \
+         certs/test/server-cert-rsa-badsig.pem \
+         certs/test/server-cert-ecc-badsig.der \
+         certs/test/server-cert-ecc-badsig.pem
+
+EXTRA_DIST += \
+         certs/test/gen-testcerts.sh \
+         certs/test/server-garbage.der \
+         certs/test/server-garbage.pem \
+         certs/test/server-goodcn.pem \
+         certs/test/server-goodcn.der \
+         certs/test/server-goodalt.pem \
+         certs/test/server-goodalt.der \
+         certs/test/server-goodcnwild.pem \
+         certs/test/server-goodcnwild.der \
+         certs/test/server-goodaltwild.pem \
+         certs/test/server-goodaltwild.der \
+         certs/test/server-badcnnull.pem \
+         certs/test/server-badcnnull.der \
+         certs/test/server-badcn.pem \
+         certs/test/server-badcn.der \
+         certs/test/server-badaltnull.pem \
+         certs/test/server-badaltnull.der \
+         certs/test/server-badaltname.der \
+         certs/test/server-badaltname.pem \
+         certs/test/server-localhost.der \
+         certs/test/server-localhost.pem \
+         certs/test/ktri-keyid-cms.msg \
+         certs/test/smime-test.p7s \
+         certs/test/smime-test-canon.p7s \
+         certs/test/smime-test-multipart.p7s \
+         certs/test/smime-test-multipart-badsig.p7s \
+         certs/crl/server-goodaltCrl.pem \
+         certs/crl/server-goodcnCrl.pem \
+         certs/crl/server-goodaltwildCrl.pem \
+         certs/crl/server-goodcnwildCrl.pem
+
+EXTRA_DIST += \
+         certs/test/crit-cert.pem \
+         certs/test/crit-key.pem \
+         certs/test/dh1024.der \
+         certs/test/dh1024.pem \
+         certs/test/dh512.der \
+         certs/test/dh512.pem \
+         certs/test/digsigku.pem
+
+EXTRA_DIST += \
+         certs/test/expired/expired-ca.pem \
+         certs/test/expired/expired-ca.der \
+         certs/test/expired/expired-cert.pem \
+         certs/test/expired/expired-cert.der

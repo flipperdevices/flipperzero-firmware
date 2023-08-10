@@ -1,0 +1,9 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/WIN-SGX/ReadMe.txt
+EXTRA_DIST+= IDE/WIN-SGX/wolfSSL_SGX.edl
+EXTRA_DIST+= IDE/WIN-SGX/wolfSSL_SGX.sln
+EXTRA_DIST+= IDE/WIN-SGX/wolfSSL_SGX.vcxproj
+EXTRA_DIST+= IDE/WIN-SGX/wolfSSL_SGX.vcxproj.filters

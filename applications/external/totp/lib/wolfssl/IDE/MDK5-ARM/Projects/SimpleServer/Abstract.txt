@@ -1,0 +1,15 @@
+wolfSSL example: TLS Server
+
+Use Configuration Wizard tab
+
+RTE_Device.h: Check SDMMC1 (SD/SDIO/MMC card host interface 1)
+RTE_Device.h: Check ETH (Ethernet Interface)
+main.c for server port or TLS version
+user_settings.h for wolfCrypt or wolfSSL options
+
+For further options, details, see wolfSSL User Manual.
+
+
+Support
+-------
+Please send questions or comments to support@wolfssl.com

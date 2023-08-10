@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33027.164
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{803FD0C6-D64E-4E16-9DC3-1DAEC859A3D2}") = "wolfssl_benchmark_IDF_v5_ESP32C3", "wolfssl_benchmark_IDF_v5_ESP32C3.vgdbproj", "{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{68202294-86F7-471F-BBBF-47F6B3E3137C}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\..\..\wolfcrypt\benchmark\benchmark.c = ..\..\..\..\..\..\wolfcrypt\benchmark\benchmark.c
+		..\..\..\..\..\..\wolfcrypt\benchmark\benchmark.h = ..\..\..\..\..\..\wolfcrypt\benchmark\benchmark.h
+		..\components\wolfssl\include\config.h = ..\components\wolfssl\include\config.h
+		..\components\wolfssl\include\user_settings.h = ..\components\wolfssl\include\user_settings.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "wolfcrypt", "wolfcrypt", "{35897992-1F28-4AB1-B432-7F7D76D61162}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\..\..\wolfcrypt\src\sha.c = ..\..\..\..\..\..\wolfcrypt\src\sha.c
+		..\..\..\..\..\..\wolfssl\openssl\sha.h = ..\..\..\..\..\..\wolfssl\openssl\sha.h
+		..\..\..\..\..\..\wolfssl\wolfcrypt\sha.h = ..\..\..\..\..\..\wolfssl\wolfcrypt\sha.h
+		..\..\..\..\..\..\wolfcrypt\src\sha256.c = ..\..\..\..\..\..\wolfcrypt\src\sha256.c
+		..\..\..\..\..\..\wolfssl\wolfcrypt\sha256.h = ..\..\..\..\..\..\wolfssl\wolfcrypt\sha256.h
+		..\..\..\..\..\..\wolfcrypt\src\sha512.c = ..\..\..\..\..\..\wolfcrypt\src\sha512.c
+		..\..\..\..\..\..\wolfssl\wolfcrypt\sha512.h = ..\..\..\..\..\..\wolfssl\wolfcrypt\sha512.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Espressif Port", "Espressif Port", "{66DEEB01-9378-4714-9EF7-23A0CA65A996}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\..\..\wolfssl\wolfcrypt\port\Espressif\esp32-crypt.h = ..\..\..\..\..\..\wolfssl\wolfcrypt\port\Espressif\esp32-crypt.h
+		..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_sha.c = ..\..\..\..\..\..\wolfcrypt\src\port\Espressif\esp32_sha.c
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{3BA29EA8-68C5-4144-B471-33BA380C323E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|VisualGDB = Debug|VisualGDB
+		Release|VisualGDB = Release|VisualGDB
+		Tests (Debug)|VisualGDB = Tests (Debug)|VisualGDB
+		Tests (Release)|VisualGDB = Tests (Release)|VisualGDB
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Debug|VisualGDB.ActiveCfg = Debug|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Debug|VisualGDB.Build.0 = Debug|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Release|VisualGDB.ActiveCfg = Release|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Release|VisualGDB.Build.0 = Release|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Tests (Debug)|VisualGDB.ActiveCfg = Tests (Debug)|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Tests (Debug)|VisualGDB.Build.0 = Tests (Debug)|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Tests (Release)|VisualGDB.ActiveCfg = Tests (Release)|VisualGDB
+		{EADCC9AB-72B3-4B51-A838-593E5D80DDF7}.Tests (Release)|VisualGDB.Build.0 = Tests (Release)|VisualGDB
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{35897992-1F28-4AB1-B432-7F7D76D61162} = {68202294-86F7-471F-BBBF-47F6B3E3137C}
+		{66DEEB01-9378-4714-9EF7-23A0CA65A996} = {68202294-86F7-471F-BBBF-47F6B3E3137C}
+		{3BA29EA8-68C5-4144-B471-33BA380C323E} = {68202294-86F7-471F-BBBF-47F6B3E3137C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8F3E87F6-73E7-446B-A5B7-ADB94756C9D4}
+	EndGlobalSection
+EndGlobal

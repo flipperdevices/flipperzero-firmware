@@ -1,0 +1,13 @@
+#ifndef WOLFSSL_DSP_INC
+#define WOLFSSL_DSP_INC
+
+#include "AEEStdDef.idl"
+#include "remote.idl"
+
+interface wolfSSL: remote_handle64{
+
+	/* ecc operations */
+	long DSP_ECC_Verify_256(inrout sequence<int32>  hash, inrout sequence<int32> pX, inrout sequence<int32> pY,
+		inrout sequence<int32> pZ, inrout sequence<int32> r, inrout sequence<int32> sm, inrout long res);
+};
+#endif

@@ -1,0 +1,189 @@
+/* module_exports.c.template -- static preamble for dynamically generated
+ * module_exports.c (see Kbuild)
+ *
+ * Copyright (C) 2006-2023 wolfSSL Inc.
+ *
+ * This file is part of wolfSSL.
+ *
+ * wolfSSL is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * wolfSSL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
+ */
+
+#ifdef HAVE_CONFIG_H
+    #include <config.h>
+#endif
+
+#include <wolfssl/wolfcrypt/settings.h>
+
+#ifdef HAVE_FIPS
+#define FIPS_NO_WRAPPERS
+#endif
+
+#include <wolfssl/wolfcrypt/error-crypt.h>
+#ifndef WOLFCRYPT_ONLY
+    #include <wolfssl/ssl.h>
+    #include <wolfssl/internal.h>
+#endif
+#ifndef NO_CRYPT_TEST
+#include <wolfcrypt/test/test.h>
+#include <linux/delay.h>
+#endif
+
+#ifndef EXPORT_SYMBOL_NS
+#define EXPORT_SYMBOL_NS(sym, ns) EXPORT_SYMBOL(sym)
+#endif
+#ifndef EXPORT_SYMBOL_NS_GPL
+#define EXPORT_SYMBOL_NS_GPL(sym, ns) EXPORT_SYMBOL_GPL(sym)
+#endif
+
+#include <wolfssl/wolfcrypt/memory.h>
+#include <wolfssl/wolfcrypt/wc_port.h>
+#include <wolfssl/wolfcrypt/logging.h>
+#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/wolfmath.h>
+#include <wolfssl/wolfcrypt/asn.h>
+#include <wolfssl/wolfcrypt/md2.h>
+#include <wolfssl/wolfcrypt/md5.h>
+#include <wolfssl/wolfcrypt/md4.h>
+#include <wolfssl/wolfcrypt/sha.h>
+#include <wolfssl/wolfcrypt/sha256.h>
+#include <wolfssl/wolfcrypt/sha512.h>
+#ifdef WOLFSSL_SIPHASH
+#include <wolfssl/wolfcrypt/siphash.h>
+#endif
+#include <wolfssl/wolfcrypt/arc4.h>
+#if defined(WC_NO_RNG)
+    #include <wolfssl/wolfcrypt/integer.h>
+#else
+    #include <wolfssl/wolfcrypt/random.h>
+#endif
+#include <wolfssl/wolfcrypt/coding.h>
+#include <wolfssl/wolfcrypt/signature.h>
+#include <wolfssl/wolfcrypt/rsa.h>
+#include <wolfssl/wolfcrypt/des3.h>
+#include <wolfssl/wolfcrypt/aes.h>
+#include <wolfssl/wolfcrypt/wc_encrypt.h>
+#include <wolfssl/wolfcrypt/cmac.h>
+#include <wolfssl/wolfcrypt/poly1305.h>
+#include <wolfssl/wolfcrypt/camellia.h>
+#include <wolfssl/wolfcrypt/hmac.h>
+#include <wolfssl/wolfcrypt/dh.h>
+#include <wolfssl/wolfcrypt/dsa.h>
+#include <wolfssl/wolfcrypt/srp.h>
+#include <wolfssl/wolfcrypt/chacha.h>
+#include <wolfssl/wolfcrypt/chacha20_poly1305.h>
+#include <wolfssl/wolfcrypt/pwdbased.h>
+#include <wolfssl/wolfcrypt/ripemd.h>
+#include <wolfssl/wolfcrypt/error-crypt.h>
+#ifdef HAVE_ECC
+    #include <wolfssl/wolfcrypt/ecc.h>
+#endif
+#ifdef HAVE_HPKE
+    #include <wolfssl/wolfcrypt/hpke.h>
+#endif
+#ifdef HAVE_CURVE25519
+    #include <wolfssl/wolfcrypt/curve25519.h>
+#endif
+#ifdef HAVE_ED25519
+    #include <wolfssl/wolfcrypt/ed25519.h>
+#endif
+#ifdef HAVE_CURVE448
+    #include <wolfssl/wolfcrypt/curve448.h>
+#endif
+#ifdef HAVE_ED448
+    #include <wolfssl/wolfcrypt/ed448.h>
+#endif
+#if defined(HAVE_BLAKE2) || defined(HAVE_BLAKE2S)
+    #include <wolfssl/wolfcrypt/blake2.h>
+#endif
+#ifdef WOLFSSL_SHA3
+    #include <wolfssl/wolfcrypt/sha3.h>
+#endif
+#ifdef HAVE_LIBZ
+    #include <wolfssl/wolfcrypt/compress.h>
+#endif
+#ifdef HAVE_PKCS7
+    #include <wolfssl/wolfcrypt/pkcs7.h>
+#endif
+#ifdef HAVE_PKCS12
+    #include <wolfssl/wolfcrypt/pkcs12.h>
+#endif
+#ifdef HAVE_FIPS
+    #include <wolfssl/wolfcrypt/fips.h>
+    #include <wolfssl/wolfcrypt/fips_test.h>
+#endif
+#ifdef HAVE_SELFTEST
+    #include <wolfssl/wolfcrypt/selftest.h>
+#endif
+#ifdef WOLFSSL_ASYNC_CRYPT
+    #include <wolfssl/wolfcrypt/async.h>
+#endif
+#if defined(OPENSSL_EXTRA) || defined(DEBUG_WOLFSSL_VERBOSE)
+    #include <wolfssl/wolfcrypt/logging.h>
+#endif
+#ifdef WOLFSSL_IMX6_CAAM_BLOB
+    #include <wolfssl/wolfcrypt/port/caam/wolfcaam.h>
+#endif
+#ifdef WOLF_CRYPTO_CB
+    #include <wolfssl/wolfcrypt/cryptocb.h>
+    #ifdef HAVE_INTEL_QA_SYNC
+        #include <wolfssl/wolfcrypt/port/intel/quickassist_sync.h>
+    #endif
+    #ifdef HAVE_CAVIUM_OCTEON_SYNC
+        #include <wolfssl/wolfcrypt/port/cavium/cavium_octeon_sync.h>
+    #endif
+#endif
+
+#ifndef NO_KDF
+    #include <wolfssl/wolfcrypt/kdf.h>
+#endif
+
+#ifdef OPENSSL_EXTRA
+  #ifndef WOLFCRYPT_ONLY
+    #include <wolfssl/openssl/evp.h>
+  #endif
+    #include <wolfssl/openssl/rand.h>
+    #include <wolfssl/openssl/hmac.h>
+    #include <wolfssl/openssl/aes.h>
+    #include <wolfssl/openssl/des.h>
+#endif
+
+#if defined(NO_FILESYSTEM)
+    #if !defined(USE_CERT_BUFFERS_1024) && !defined(USE_CERT_BUFFERS_2048) && \
+        !defined(USE_CERT_BUFFERS_3072) && !defined(USE_CERT_BUFFERS_4096)
+        #define USE_CERT_BUFFERS_2048
+    #endif
+    #if !defined(USE_CERT_BUFFERS_256)
+        #define USE_CERT_BUFFERS_256
+    #endif
+#endif
+
+#if defined(WOLFSSL_CERT_GEN) && (defined(HAVE_ECC384) || defined(HAVE_ALL_CURVES))
+    #define ENABLE_ECC384_CERT_GEN_TEST
+#endif
+
+#include <wolfssl/certs_test.h>
+
+#ifdef OPENSSL_EXTRA
+#include <wolfssl/openssl/x509_vfy.h>
+#include <wolfssl/openssl/buffer.h>
+#include <wolfssl/openssl/ec25519.h>
+#include <wolfssl/openssl/ed25519.h>
+#include <wolfssl/openssl/ec448.h>
+#include <wolfssl/openssl/ed448.h>
+#include <wolfssl/openssl/ecdsa.h>
+#include <wolfssl/openssl/ecdh.h>
+#include <wolfssl/openssl/pem.h>
+#endif
+

@@ -1,0 +1,8 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/dilithium/bench_dilithium_level2_key.der \
+         certs/dilithium/bench_dilithium_level3_key.der \
+         certs/dilithium/bench_dilithium_level5_key.der

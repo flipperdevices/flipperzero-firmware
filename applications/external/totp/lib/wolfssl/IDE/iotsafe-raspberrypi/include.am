@@ -1,0 +1,9 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+
+EXTRA_DIST += IDE/iotsafe-raspberrypi/README.md
+EXTRA_DIST += IDE/iotsafe-raspberrypi/Makefile
+EXTRA_DIST += IDE/iotsafe-raspberrypi/main.c
+EXTRA_DIST += IDE/iotsafe-raspberrypi/client-tls13.c
+
+DISTCLEANFILES+= IDE/iotsafe-raspberrypi/build

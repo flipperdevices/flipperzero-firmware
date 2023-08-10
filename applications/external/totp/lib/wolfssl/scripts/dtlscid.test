@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -e
+
+# if we can, isolate the network namespace to eliminate port collisions.
+if [[ -n "$NETWORK_UNSHARE_HELPER" ]]; then
+     if [[ -z "$NETWORK_UNSHARE_HELPER_CALLED" ]]; then
+         export NETWORK_UNSHARE_HELPER_CALLED=yes
+         exec "$NETWORK_UNSHARE_HELPER" "$0" "$@" || exit $?
+     fi
+elif [ "${AM_BWRAPPED-}" != "yes" ]; then
+    bwrap_path="$(command -v bwrap)"
+    if [ -n "$bwrap_path" ]; then
+        export AM_BWRAPPED=yes
+        exec "$bwrap_path" --unshare-net --dev-bind / / "$0" "$@"
+    fi
+    unset AM_BWRAPPED
+fi
+
+cleanup () {
+    echo "Cleaning up..."
+    if [ ! -z "$SERVER_PID" ];then
+        echo "Killing server $SERVER_PID"
+        kill $SERVER_PID
+    fi
+}
+
+trap cleanup err exit
+
+CCID="AA"
+SCID="BB"
+HEXCID=$(printf $CCID | od -An -tx1 | tr -d ' \n')
+HEXSCID=$(printf $SCID | od -An -tx1 | tr -d ' \n')
+WOLFSSL_ROOT=$(pwd)
+
+test_cid () {
+    echo "Running test_cid"
+    SERVER_FILE=$(mktemp)
+    CLIENT_FILE=$(mktemp)
+    $WOLFSSL_ROOT/examples/server/server -v4 -u --cid $SCID 1> $SERVER_FILE &
+    SERVER_PID=$!
+    sleep 0.2
+    $WOLFSSL_ROOT/examples/client/client -v4 -u --cid $CCID 1> $CLIENT_FILE
+    wait $SERVER_PID
+    SERVER_PID=
+    grep "Sending CID is ${HEXSCID}" $CLIENT_FILE > /dev/null
+    grep "Sending CID is ${HEXCID}" $SERVER_FILE > /dev/null
+    echo "test_cid has passed"
+}
+
+test_cid

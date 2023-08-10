@@ -1,0 +1,9 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+# NOTE: The app will be stored in wolfssl/fips repository and copied
+#       into the proper release bundles when packaging the release.
+
+EXTRA_DIST+= IDE/XCODE-FIPSv5/user_settings.h
+EXTRA_DIST+= IDE/XCODE-FIPSv5/README

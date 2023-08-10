@@ -1,0 +1,17 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+
+if BUILD_EXAMPLE_CLIENTS
+noinst_PROGRAMS += examples/client/client
+noinst_HEADERS += examples/client/client.h
+examples_client_client_SOURCES      = examples/client/client.c
+examples_client_client_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD) $(WOLFSENTRY_LIB)
+examples_client_client_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+examples_client_client_CFLAGS = $(WOLFSENTRY_INCLUDE) $(AM_CFLAGS)
+endif
+EXTRA_DIST += examples/client/client.sln
+EXTRA_DIST += examples/client/client.vcproj
+EXTRA_DIST += examples/client/client.vcxproj
+
+dist_example_DATA+= examples/client/client.c
+DISTCLEANFILES+= examples/client/.libs/client

@@ -1,0 +1,7 @@
+# Project name
+BIN = WolfSSLServer
+SRC_C = ./Source/tls_server.c
+
+all: build_hex
+
+include Makefile.common

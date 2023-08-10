@@ -1,0 +1,37 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/ed25519/ca-ed25519.der \
+         certs/ed25519/ca-ed25519.pem \
+         certs/ed25519/ca-ed25519-key.der \
+         certs/ed25519/ca-ed25519-key.pem \
+         certs/ed25519/ca-ed25519-priv.der \
+         certs/ed25519/ca-ed25519-priv.pem \
+         certs/ed25519/client-ed25519.der \
+         certs/ed25519/client-ed25519.pem \
+         certs/ed25519/client-ed25519-key.der \
+         certs/ed25519/client-ed25519-key.pem \
+         certs/ed25519/client-ed25519-priv.der \
+         certs/ed25519/client-ed25519-priv.pem \
+         certs/ed25519/root-ed25519.der \
+         certs/ed25519/root-ed25519.pem \
+         certs/ed25519/root-ed25519-key.der \
+         certs/ed25519/root-ed25519-key.pem \
+         certs/ed25519/root-ed25519-priv.der \
+         certs/ed25519/root-ed25519-priv.pem \
+         certs/ed25519/server-ed25519.der \
+         certs/ed25519/server-ed25519.pem \
+         certs/ed25519/server-ed25519-cert.pem \
+         certs/ed25519/server-ed25519-key.der \
+         certs/ed25519/server-ed25519-key.pem \
+         certs/ed25519/server-ed25519-priv.der \
+         certs/ed25519/server-ed25519-priv.pem \
+         certs/ed25519/eddsa-ed25519.der \
+         certs/ed25519/eddsa-ed25519.pem
+
+EXTRA_DIST += \
+         certs/ed25519/gen-ed25519.sh \
+         certs/ed25519/gen-ed25519-certs.sh \
+         certs/ed25519/gen-ed25519-keys.sh

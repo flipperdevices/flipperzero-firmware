@@ -1,0 +1,27 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+
+if BUILD_WOLFCRYPT_TESTS
+if BUILD_BENCHMARK
+
+noinst_PROGRAMS += wolfcrypt/benchmark/benchmark
+wolfcrypt_benchmark_benchmark_SOURCES      = wolfcrypt/benchmark/benchmark.c
+wolfcrypt_benchmark_benchmark_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD)
+wolfcrypt_benchmark_benchmark_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+noinst_HEADERS += wolfcrypt/benchmark/benchmark.h
+
+endif
+endif
+
+if BUILD_WOLFCRYPT_TESTS_LIBS
+lib_LTLIBRARIES += wolfcrypt/benchmark/libwolfcryptbench.la
+wolfcrypt_benchmark_libwolfcryptbench_la_SOURCES      = wolfcrypt/benchmark/benchmark.c
+wolfcrypt_benchmark_libwolfcryptbench_la_CPPFLAGS     = -DNO_MAIN_DRIVER
+wolfcrypt_benchmark_libwolfcryptbench_la_LIBADD       = src/libwolfssl@LIBSUFFIX@.la
+wolfcrypt_benchmark_libwolfcryptbench_la_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+
+EXTRA_DIST += wolfcrypt/benchmark/benchmark.sln
+EXTRA_DIST += wolfcrypt/benchmark/benchmark.vcproj
+EXTRA_DIST += wolfcrypt/benchmark/README.md
+DISTCLEANFILES+= wolfcrypt/benchmark/.libs/benchmark

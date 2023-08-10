@@ -1,0 +1,8 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST += \
+    IDE/ECLIPSE/RTTHREAD/README.md \
+    IDE/ECLIPSE/RTTHREAD/user_settings.h \
+    IDE/ECLIPSE/RTTHREAD/wolfssl_test.c

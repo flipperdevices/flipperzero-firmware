@@ -1,0 +1,42 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+	     certs/intermediate/genintcerts.sh \
+	     certs/intermediate/ca-int-cert.der \
+	     certs/intermediate/ca-int-cert.pem \
+	     certs/intermediate/ca-int-ecc-cert.der \
+	     certs/intermediate/ca-int-ecc-cert.pem \
+	     certs/intermediate/ca-int-ecc-key.der \
+	     certs/intermediate/ca-int-ecc-key.pem \
+	     certs/intermediate/ca-int-key.der \
+	     certs/intermediate/ca-int-key.pem \
+	     certs/intermediate/client-chain-alt-ecc.pem \
+	     certs/intermediate/client-chain-alt.pem \
+		 certs/intermediate/ca-int2-cert.der \
+	     certs/intermediate/ca-int2-cert.pem \
+	     certs/intermediate/ca-int2-ecc-cert.der \
+	     certs/intermediate/ca-int2-ecc-cert.pem \
+	     certs/intermediate/ca-int2-ecc-key.der \
+	     certs/intermediate/ca-int2-ecc-key.pem \
+	     certs/intermediate/ca-int2-key.der \
+	     certs/intermediate/ca-int2-key.pem \
+	     certs/intermediate/client-chain-ecc.der \
+	     certs/intermediate/client-chain-ecc.pem \
+		 certs/intermediate/client-chain.der \
+	     certs/intermediate/client-chain.pem \
+	     certs/intermediate/client-int-cert.der \
+	     certs/intermediate/client-int-cert.pem \
+	     certs/intermediate/client-int-ecc-cert.der \
+	     certs/intermediate/client-int-ecc-cert.pem \
+	     certs/intermediate/server-chain-alt-ecc.pem \
+	     certs/intermediate/server-chain-alt.pem \
+	     certs/intermediate/server-chain-ecc.der \
+	     certs/intermediate/server-chain-ecc.pem \
+	     certs/intermediate/server-chain.der \
+	     certs/intermediate/server-chain.pem \
+	     certs/intermediate/server-int-cert.der \
+	     certs/intermediate/server-int-cert.pem \
+	     certs/intermediate/server-int-ecc-cert.der \
+	     certs/intermediate/server-int-ecc-cert.pem

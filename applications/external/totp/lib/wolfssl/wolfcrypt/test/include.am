@@ -1,0 +1,30 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+
+if BUILD_WOLFCRYPT_TESTS
+if !BUILD_LINUXKM
+
+noinst_PROGRAMS+= wolfcrypt/test/testwolfcrypt
+if BUILD_CRYPTONLY
+check_PROGRAMS+= wolfcrypt/test/testwolfcrypt
+endif
+noinst_PROGRAMS+= wolfcrypt/test/testwolfcrypt
+wolfcrypt_test_testwolfcrypt_SOURCES      = wolfcrypt/test/test.c
+wolfcrypt_test_testwolfcrypt_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD)
+wolfcrypt_test_testwolfcrypt_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+noinst_HEADERS += wolfcrypt/test/test.h wolfcrypt/test/test_paths.h.in
+endif
+endif
+
+if BUILD_WOLFCRYPT_TESTS_LIBS
+lib_LTLIBRARIES += wolfcrypt/test/libwolfcrypttest.la
+wolfcrypt_test_libwolfcrypttest_la_SOURCES      = wolfcrypt/test/test.c
+wolfcrypt_test_libwolfcrypttest_la_CPPFLAGS     = -DNO_MAIN_DRIVER
+wolfcrypt_test_libwolfcrypttest_la_LIBADD       = src/libwolfssl@LIBSUFFIX@.la
+wolfcrypt_test_libwolfcrypttest_la_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+endif
+
+EXTRA_DIST += wolfcrypt/test/test.sln
+EXTRA_DIST += wolfcrypt/test/test.vcproj
+EXTRA_DIST += wolfcrypt/test/README.md
+DISTCLEANFILES+= wolfcrypt/test/.libs/testwolfcrypt

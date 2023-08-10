@@ -1,0 +1,20 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+
+if BUILD_EXAMPLE_SERVERS
+noinst_PROGRAMS += examples/server/server
+noinst_HEADERS += examples/server/server.h
+examples_server_server_SOURCES      = examples/server/server.c
+examples_server_server_LDADD        = src/libwolfssl@LIBSUFFIX@.la $(LIB_STATIC_ADD) $(WOLFSENTRY_LIB)
+examples_server_server_DEPENDENCIES = src/libwolfssl@LIBSUFFIX@.la
+examples_server_server_CFLAGS = $(WOLFSENTRY_INCLUDE) $(AM_CFLAGS)
+endif
+EXTRA_DIST += examples/server/server.sln
+EXTRA_DIST += examples/server/server.vcproj
+EXTRA_DIST += examples/server/server.vcxproj
+
+dist_example_DATA+= examples/server/server.c
+DISTCLEANFILES+= examples/server/.libs/server
+

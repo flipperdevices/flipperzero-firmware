@@ -1,0 +1,270 @@
+#!/bin/bash
+
+# ocsp-stapling-with-ca-as-responder.test
+
+SCRIPT_DIR="$(dirname "$0")"
+
+# if we can, isolate the network namespace to eliminate port collisions.
+if [[ -n "$NETWORK_UNSHARE_HELPER" ]]; then
+     if [[ -z "$NETWORK_UNSHARE_HELPER_CALLED" ]]; then
+         export NETWORK_UNSHARE_HELPER_CALLED=yes
+         exec "$NETWORK_UNSHARE_HELPER" "$0" "$@" || exit $?
+     fi
+elif [ "${AM_BWRAPPED-}" != "yes" ]; then
+    bwrap_path="$(command -v bwrap)"
+    if [ -n "$bwrap_path" ]; then
+        export AM_BWRAPPED=yes
+        exec "$bwrap_path" --unshare-net --dev-bind / / "$0" "$@"
+    fi
+    unset AM_BWRAPPED
+fi
+
+if [[ -z "${RETRIES_REMAINING-}" ]]; then
+    export RETRIES_REMAINING=2
+fi
+
+if ! ./examples/client/client -V | grep -q 3; then
+    echo 'skipping ocsp-stapling-with-ca-as-responder.test because TLS1.2 is not available.' 1>&2
+    exit 77
+fi
+
+PARENTDIR="$PWD"
+
+# create a unique workspace directory ending in PID for the script instance ($$)
+# to make this instance orthogonal to any others running, even on same repo.
+# TCP ports are also carefully formed below from the PID, to minimize conflicts.
+
+WORKSPACE="${PARENTDIR}/workspace.pid$$"
+
+mkdir "${WORKSPACE}" || exit $?
+cp -pR ${SCRIPT_DIR}/../certs "${WORKSPACE}"/ || exit $?
+cd "$WORKSPACE" || exit $?
+ln -s ../examples
+
+CERT_DIR="certs/ocsp"
+
+
+ready_file="${WORKSPACE}"/wolf_ocsp_s1_readyF$$
+ready_file2="${WORKSPACE}"/wolf_ocsp_s1_readyF2$$
+printf '%s\n' "ready files:  \"$ready_file\" \"$ready_file2\""
+
+test_cnf="ocsp_s_w_ca_a_r.cnf"
+
+wait_for_readyFile(){
+
+    counter=0
+
+    while [ ! -s "$1" -a "$counter" -lt 20 ]; do
+        if [[ -n "${2-}" ]]; then
+            if ! kill -0 $2 2>&-; then
+                echo "pid $2 for port ${3-} exited before creating ready file.  bailing..."
+                exit 1
+            fi
+        fi
+        echo -e "waiting for ready file..."
+        sleep 0.1
+        counter=$((counter+ 1))
+    done
+
+    if test -e "$1"; then
+        echo -e "found ready file, starting client..."
+    else
+        echo -e "NO ready file at \"$1\" -- ending test..."
+        exit 1
+    fi
+
+}
+
+remove_single_rF(){
+    if test -e "$1"; then
+        printf '%s\n' "removing ready file: \"$1\""
+        rm "$1"
+    fi
+}
+
+#create a configure file for cert generation with the port 0 solution
+create_new_cnf() {
+    printf '%s\n' "Random Port Selected: $RPORTSELECTED"
+
+    printf '%s\n' "#" > $test_cnf
+    printf '%s\n' "# openssl configuration file for OCSP certificates" >> $test_cnf
+    printf '%s\n' "#" >> $test_cnf
+    printf '%s\n' "" >> $test_cnf
+    printf '%s\n' "# Extensions to add to a certificate request (intermediate1-ca)" >> $test_cnf
+    printf '%s\n' "[ v3_req1 ]" >> $test_cnf
+    printf '%s\n' "basicConstraints       = CA:false" >> $test_cnf
+    printf '%s\n' "subjectKeyIdentifier   = hash" >> $test_cnf
+    printf '%s\n' "authorityKeyIdentifier = keyid:always,issuer:always" >> $test_cnf
+    printf '%s\n' "keyUsage               = nonRepudiation, digitalSignature, keyEncipherment" >> $test_cnf
+    printf '%s\n' "authorityInfoAccess    = OCSP;URI:http://127.0.0.1:$1" >> $test_cnf
+    printf '%s\n' "" >> $test_cnf
+    printf '%s\n' "# Extensions to add to a certificate request (intermediate2-ca)" >> $test_cnf
+    printf '%s\n' "[ v3_req2 ]" >> $test_cnf
+    printf '%s\n' "basicConstraints       = CA:false" >> $test_cnf
+    printf '%s\n' "subjectKeyIdentifier   = hash" >> $test_cnf
+    printf '%s\n' "authorityKeyIdentifier = keyid:always,issuer:always" >> $test_cnf
+    printf '%s\n' "keyUsage               = nonRepudiation, digitalSignature, keyEncipherment" >> $test_cnf
+    printf '%s\n' "authorityInfoAccess    = OCSP;URI:http://127.0.0.1:22222" >> $test_cnf
+    printf '%s\n' "" >> $test_cnf
+    printf '%s\n' "# Extensions to add to a certificate request (intermediate3-ca)" >> $test_cnf
+    printf '%s\n' "[ v3_req3 ]" >> $test_cnf
+    printf '%s\n' "basicConstraints       = CA:false" >> $test_cnf
+    printf '%s\n' "subjectKeyIdentifier   = hash" >> $test_cnf
+    printf '%s\n' "authorityKeyIdentifier = keyid:always,issuer:always" >> $test_cnf
+    printf '%s\n' "keyUsage               = nonRepudiation, digitalSignature, keyEncipherment" >> $test_cnf
+    printf '%s\n' "authorityInfoAccess    = OCSP;URI:http://127.0.0.1:22223" >> $test_cnf
+    printf '%s\n' "" >> $test_cnf
+    printf '%s\n' "# Extensions for a typical CA" >> $test_cnf
+    printf '%s\n' "[ v3_ca ]" >> $test_cnf
+    printf '%s\n' "basicConstraints       = CA:true" >> $test_cnf
+    printf '%s\n' "subjectKeyIdentifier   = hash" >> $test_cnf
+    printf '%s\n' "authorityKeyIdentifier = keyid:always,issuer:always" >> $test_cnf
+    printf '%s\n' "keyUsage               = keyCertSign, cRLSign" >> $test_cnf
+    printf '%s\n' "authorityInfoAccess    = OCSP;URI:http://127.0.0.1:22220" >> $test_cnf
+    printf '%s\n' "" >> $test_cnf
+    printf '%s\n' "# OCSP extensions." >> $test_cnf
+    printf '%s\n' "[ v3_ocsp ]" >> $test_cnf
+    printf '%s\n' "basicConstraints       = CA:false" >> $test_cnf
+    printf '%s\n' "subjectKeyIdentifier   = hash" >> $test_cnf
+    printf '%s\n' "authorityKeyIdentifier = keyid:always,issuer:always" >> $test_cnf
+    printf '%s\n' "extendedKeyUsage       = OCSPSigning" >> $test_cnf
+
+    mv $test_cnf $CERT_DIR/$test_cnf
+    cd $CERT_DIR
+    CURR_LOC="$PWD"
+    printf '%s\n' "echo now in $CURR_LOC"
+    ./renewcerts-for-test.sh $test_cnf
+    cd $WORKSPACE
+}
+
+remove_ready_file() {
+    if test -e "$ready_file"; then
+        printf '%s\n' "removing ready file"
+        rm "$ready_file"
+    fi
+    if test -e "$ready_file2"; then
+        printf '%s\n' "removing ready file: \"$ready_file2\""
+        rm "$ready_file2"
+    fi
+}
+
+
+cleanup()
+{
+    exit_status=$?
+    for i in $(jobs -pr)
+    do
+        kill -s kill "$i"
+    done
+    remove_ready_file
+    rm $CERT_DIR/$test_cnf
+    cd "$PARENTDIR" || return 1
+    rm -r "$WORKSPACE" || return 1
+
+    if [[ ("$exit_status" == 1) && ($RETRIES_REMAINING -gt 0) ]]; then
+        echo "retrying..."
+        RETRIES_REMAINING=$((RETRIES_REMAINING - 1))
+        exec $0 "$@"
+    fi
+}
+trap cleanup EXIT INT TERM HUP
+
+server=login.live.com
+ca=certs/external/baltimore-cybertrust-root.pem
+
+[ ! -x ./examples/client/client ] && printf '\n\n%s\n' "Client doesn't exist" && exit 1
+
+
+# choose consecutive ports based on the PID, skipping any that are
+# already bound, to avoid the birthday problem in case other
+# instances are sharing this host.
+
+get_first_free_port() {
+    local ret="$1"
+    while :; do
+        if [[ "$ret" -ge 65536 ]]; then
+            ret=1024
+        fi
+        if ! nc -z 127.0.0.1 "$ret"; then
+            break
+        fi
+        ret=$((ret+1))
+    done
+    echo "$ret"
+    return 0
+}
+
+base_port=$((((($$ + $RETRIES_REMAINING) * 5) % (65536 - 2048)) + 1024))
+port1=$(get_first_free_port $base_port)
+port2=$(get_first_free_port $((port1 + 1)))
+
+
+# create a port to use with openssl ocsp responder
+./examples/server/server -R "$ready_file" -p $port1 &
+wolf_pid=$!
+wait_for_readyFile "$ready_file" $wolf_pid $port1
+if [ ! -f "$ready_file" ]; then
+    printf '%s\n' "Failed to create ready file: \"$ready_file\""
+    exit 1
+else
+    printf '%s\n' "Random port selected: $port1"
+    # Use client connection to shutdown the server cleanly
+    ./examples/client/client -p $port1
+    create_new_cnf $port1
+fi
+sleep 0.1
+
+# is our desired server there? - login.live.com doesn't answers PING
+#./scripts/ping.test $server 2
+
+# client test against the server
+# external test case was never running, disable for now but retain case in event
+# we wish to re-activate in the future.
+#./examples/client/client -X -C -h $server -p 443 -A $ca -g -W 1
+#RESULT=$?
+#[ $RESULT -ne 0 ] && echo -e "\n\nClient connection failed" && exit 1
+
+# setup ocsp responder
+# OLD: ./certs/ocsp/ocspd-intermediate1-ca-issued-certs-with-ca-as-responder.sh &
+# NEW: openssl isn't being cleaned up, invoke directly in script for cleanup
+# purposes!
+openssl ocsp -port $port1 -nmin 1                               \
+    -index   certs/ocsp/index-intermediate1-ca-issued-certs.txt \
+    -rsigner certs/ocsp/intermediate1-ca-cert.pem               \
+    -rkey    certs/ocsp/intermediate1-ca-key.pem                \
+    -CA      certs/ocsp/intermediate1-ca-cert.pem               \
+    "$@"                                                        \
+    &
+
+sleep 0.1
+# "jobs" is not portable for posix. Must use bash interpreter!
+[ $(jobs -r | wc -l) -ne 1 ] && printf '\n\n%s\n' "Setup ocsp responder failed, skipping" && exit 0
+
+printf '%s\n\n' "------------- TEST CASE 1 SHOULD PASS ------------------------"
+# client test against our own server - GOOD CERT
+./examples/server/server -c certs/ocsp/server1-cert.pem \
+                         -k certs/ocsp/server1-key.pem -R "$ready_file2" \
+                         -p $port2 &
+wolf_pid2=$!
+wait_for_readyFile "$ready_file2" $wolf_pid2 $port2
+./examples/client/client -C -A certs/ocsp/root-ca-cert.pem -W 1 \
+                         -p $port2
+RESULT=$?
+[ $RESULT -ne 0 ] && printf '\n\n%s\n' "Client connection failed" && exit 1
+printf '%s\n\n' "Test PASSED!"
+
+printf '%s\n\n' "------------- TEST CASE 2 SHOULD REVOKE ----------------------"
+# client test against our own server - REVOKED CERT
+remove_single_rF "$ready_file2"
+./examples/server/server -c certs/ocsp/server2-cert.pem \
+                         -k certs/ocsp/server2-key.pem -R "$ready_file2" \
+                         -p $port2 &
+wolf_pid2=$!
+wait_for_readyFile "$ready_file2" $wolf_pid2 $port2
+./examples/client/client -C -A certs/ocsp/root-ca-cert.pem -W 1 \
+                         -p $port2
+RESULT=$?
+[ $RESULT -ne 1 ] && printf '\n\n%s\n' "Client connection succeeded $RESULT" && exit 1
+printf '%s\n\n' "Test successfully REVOKED!"
+
+exit 0

@@ -1,0 +1,11 @@
+{
+  "SchemaVersion": 1,
+  "Name": "wolfSSL_Server",
+  "ComponentId": "00000000-0000-0000-0000-000000000001",
+  "EntryPoint": "/bin/app",
+  "CmdArgs": [],
+  "Capabilities": {
+    "AllowedTcpServerPorts": [ 11111 ]
+  },
+  "ApplicationType": "Default"
+}

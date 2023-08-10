@@ -1,0 +1,69 @@
+Steps taken to evaluate wolfSSL with the following:
+
+Required Software for this guide:
+IAR Embedded Workbench IDE - ARM v7.60.1 (or similar version)
+embOS v4.16 (for Cortex-M and IAR compiler)
+wolfssl (latest version)
+
+Required items (Hardware) for this guide:
+Atmel SAM V71 Xplained Ultra (Or equivalent Cortex-M Evaluation Board)
+    Note: Must have J-Trace adapter (SWD or SWD + ETM)
+j-Trace for ARM Cortex-M Processors
+    Note: You can see here: https://www.segger.com/j-trace-for-cortex-m.html
+    Note: You can also purchase other models, we used one from IAR v3.2
+20 pin target ribbon cable
+USB Cable with j-Trace adapter end
+Micro usb cable
+
+#--!! NOTE !!--#
+For this guide "**SAMV71_DIR" will signify the directory:
+C:\<path-to>\wolfssl\IDE\IAR-EWARM\embOS\SAMV71_XULT\
+
+#----------------------------------------------------------------------------#
+# Setup file system to evaluate wolfssl  in embOS project:
+# (If you have not already done so)
+#----------------------------------------------------------------------------#
+
+1. In wolfssl you will notice the directory:
+    wolfssl\IDE\IAR-EWARM\embOS\extract_trial_here
+
+2. go to embOS website and download a trial for your platform
+   https://www.segger.com/downloads/embos ->
+                                      embOS trial for Cortex-M and IAR compiler
+
+3. Extract (unzip) the download to
+    C:\<path-to>\wolfssl\IDE\IAR-EWARM\embOS\extract_trial_here\
+    (Note: you do not need to do anything further in this directory, the
+      wolfSSL evaluation projects will simply link against it)
+
+#----------------------------------------------------------------------------#
+# Evaluate wolfcrypt_tests in embOS project:
+#----------------------------------------------------------------------------#
+
+1. In IAR Workbench go to Project -> Add Existing Project
+    a. Browse to **SAMV71_DIR\embOS_wolfcrypt_test_SAMV71_XULT\
+    b. Choose wolfcrypt_test.ewp and click "Open"
+
+2. Go to Project -> Rebuild All
+
+3. Connect your SAMV71 Xplained Ultra to your PC with micro USB in the "Debug"
+   port for power and the J-Link hooked up to SWD pins and your PC
+
+4. Go to Project -> Download and Debug
+
+5. Once the "Debug" environment has loaded go to: View -> Terminal I/O
+   (This is where the printf's will be directed to)
+
+6. Hit "Go" (Debug option with 3 right arrows "→→→")
+
+7. You should observe the tests run and pass.
+
+#----------------------------------------------------------------------------#
+#----------------------------------------------------------------------------#
+
+Thank you for using this guide and we hope this was helpful to you. If you have
+any suggestions / feedback for us please contact us:
+support@wolfssl.com
+info@wolfssl.com
+
+Copyright © 2016 wolfSSL Inc.  All rights reserved.

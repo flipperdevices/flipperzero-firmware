@@ -1,0 +1,14 @@
+{
+  "version": "0.2.1",
+  "configurations": [
+    {
+      "type": "azurespheredbg",
+      "name": "wolfssl_new_azsphere (HLCore)",
+      "project": "CMakeLists.txt",
+      "workingDirectory": "${workspaceRoot}",
+      "applicationPath": "${debugInfo.target}",
+      "imagePath": "${debugInfo.targetImage}",
+      "partnerComponents": []
+    }
+  ]
+}

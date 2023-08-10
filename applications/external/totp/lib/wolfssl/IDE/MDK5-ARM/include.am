@@ -1,0 +1,9 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/MDK5-ARM/README.md
+EXTRA_DIST+= IDE/MDK5-ARM/Conf/user_settings.h
+EXTRA_DIST+= IDE/MDK5-ARM/Inc/wolfssl_MDK_ARM.h
+EXTRA_DIST+= IDE/MDK5-ARM/Projects
+EXTRA_DIST+= IDE/MDK5-ARM/Src/ssl-dummy.c

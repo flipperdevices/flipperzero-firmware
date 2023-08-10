@@ -1,0 +1,61 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+include IDE/XCODE/include.am
+include IDE/XCODE-FIPSv2/include.am
+include IDE/XCODE-FIPSv5/include.am
+include IDE/WIN/include.am
+include IDE/WIN10/include.am
+include IDE/WIN-SGX/include.am
+include IDE/LINUX-SGX/include.am
+include IDE/WORKBENCH/include.am
+include IDE/ROWLEY-CROSSWORKS-ARM/include.am
+include IDE/TRUESTUDIO/include.am
+include IDE/ARDUINO/include.am
+include IDE/INTIME-RTOS/include.am
+include IDE/KDS/include.am
+include IDE/STM32Cube/include.am
+include IDE/VS-ARM/include.am
+include IDE/MSVS-2019-AZSPHERE/include.am
+include IDE/VS-AZURE-SPHERE/include.am
+include IDE/GCC-ARM/include.am
+include IDE/CSBENCH/include.am
+include IDE/ECLIPSE/DEOS/include.am
+include IDE/ECLIPSE/MICRIUM/include.am
+include IDE/ECLIPSE/SIFIVE/include.am
+include IDE/MQX/include.am
+include IDE/ECLIPSE/RTTHREAD/include.am
+include IDE/mynewt/include.am
+include IDE/Renesas/e2studio/DK-S7G2/include.am
+include IDE/Renesas/cs+/Projects/include.am
+include IDE/Renesas/e2studio/Projects/include.am
+include IDE/Renesas/e2studio/RA6M3/include.am
+include IDE/Renesas/e2studio/RX65N/GR-ROSE/include.am
+include IDE/Renesas/e2studio/RX72N/EnvisionKit/include.am
+include IDE/Renesas/e2studio/RX65N/RSK/include.am
+include IDE/Renesas/e2studio/RA6M4/include.am
+include IDE/WICED-STUDIO/include.am
+include IDE/CRYPTOCELL/include.am
+include IDE/M68K/include.am
+include IDE/HEXAGON/include.am
+include IDE/RISCV/include.am
+include IDE/XilinxSDK/include.am
+include IDE/VisualDSP/include.am
+include IDE/QNX/include.am
+include IDE/WINCE/include.am
+include IDE/iotsafe/include.am
+include IDE/Android/include.am
+include IDE/NETOS/include.am
+include IDE/IAR-MSP430/include.am
+include IDE/zephyr/include.am
+include IDE/AURIX/include.am
+include IDE/MCUEXPRESSO/include.am
+include IDE/Espressif/include.am
+include IDE/STARCORE/include.am
+include IDE/MDK5-ARM/include.am
+include IDE/SimplicityStudio/include.am
+include IDE/apple-universal/include.am
+
+EXTRA_DIST+= IDE/IAR-EWARM IDE/MDK-ARM IDE/MYSQL IDE/LPCXPRESSO IDE/HEXIWEAR IDE/Espressif
+EXTRA_DIST+= IDE/OPENSTM32/README.md

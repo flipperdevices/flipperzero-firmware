@@ -1,0 +1,26 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/1024/ca-cert.pem \
+         certs/1024/ca-key.pem \
+         certs/1024/client-cert.pem \
+         certs/1024/client-key.pem \
+         certs/1024/dh1024.pem \
+         certs/1024/dsa1024.pem \
+         certs/1024/dsa-pub-1024.pem \
+         certs/1024/server-cert.pem \
+         certs/1024/server-key.pem
+
+EXTRA_DIST += \
+         certs/1024/ca-cert.der \
+         certs/1024/ca-key.der \
+         certs/1024/client-cert.der \
+         certs/1024/client-key.der \
+         certs/1024/client-keyPub.der \
+         certs/1024/dh1024.der \
+         certs/1024/dsa1024.der \
+         certs/1024/rsa1024.der \
+         certs/1024/server-cert.der \
+         certs/1024/server-key.der

@@ -1,0 +1,79 @@
+WolfSSL MPLAB X Project Files
+
+This directory contains project files for the Microchip MPLAB X IDE. These
+projects have been set up to use the Microchip PIC32 Ethernet Starter Kit
+and the Microchip XC32 compiler, and have been created specifically to test
+the Microchip-specific WolfCrypt API with compression support. For MPLAB X 
+projects that don't use compression and are generic to the WolfCrypt API, 
+please see the <wolfssl_root>/mplabx directory.
+
+In order to generate the necessary auto-generated MPLAB X files, make sure
+to import the cyassl.X and zlib.X projects into your MPLAB X workspace before 
+trying to build either the WolfCrypt test or benchmark applications. This will
+correctly set up the respective project's Makefiles.
+
+Included Project Files
+-----------------------
+
+1. wolfSSL library (wolfssl.X)
+
+    This project builds a static wolfSSL library. Prior to building this
+    project, uncomment the MICROCHIP_PIC32 define located in:
+
+    <wolfssl_root>/wolfssl/wolfcrypt/settings.h
+
+    After this project has been built, the compiled library will be located
+    at:
+
+    <wolfssl_root>/mplabx/wolfssl.X/dist/default/production/wolfssl.X.a
+
+    Note that this project includes the zlib header location in the project's
+    include paths. This is because this project has been set up to be compiled
+    with zlib support to enable compression and decompression features.
+
+2. wolfCrypt Test App (wolfcrypt_test.X)
+
+    This project tests the wolfCrypt cryptography modules. It is generally
+    a good idea to run this first on an embedded system after compiling
+    wolfSSL in order to verify all underlying crypto is working correctly.
+
+3. wolfCrypt Benchmark App (wolfcrypt_benchmark.X)
+
+    This project builds the wolfCrypt benchmark application. If the wolfSSL
+    project (wolfssl.X) has been compiled with libz support and is being
+    used to build this project, the zlib.X project will need to added to
+    the "Libraries" folder under the wolfcrypt_benchmark.X project before
+    it will compile successfully.
+
+4. wolfCrypt MCAPI Test App (wolfcrypt_mcapi.X)
+
+    This project tests the Microchip crypto API layer. The Microchip crypto
+    layer is located under the <wolfssl_root>/mcapi directory.
+
+5. zlib library (zlib.X)
+
+    This project builds the zlib library for use in the wolfcrypt_test.X
+    and wolfcrypt_mcapi.X projects. This project expects the zlib sources
+    to be located under the wolfSSL root directory. It is set up to work
+    with the latest zlib, and looks for sources under:
+
+    <wolfssl_root>/zlib
+
+PIC32MX/PIC32MZ
+---------------
+
+The projects are set for PIC32MX by default. For PIC32MZ, change project
+properties->Devices and add "WOLFSSL_MICROCHIP_PIC32M" to 
+XC32-gcc->Preprocessing and messages-> Preprocessor macros.
+
+MIPS16 and MIPS32 Support
+-------------------------
+
+These projects support both MIPS16 and MIPS32 instruction sets. Switching
+between these two instruction sets can be done in each project's properties
+settings by checking the "Generate 16-bit code" checkbox.
+
+Support
+-------
+Please send questions or comments to support@wolfssl.com
+

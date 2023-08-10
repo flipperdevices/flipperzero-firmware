@@ -1,0 +1,8 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/LINUX-SGX/README.md
+EXTRA_DIST+= IDE/LINUX-SGX/sgx_t_static.mk
+EXTRA_DIST+= IDE/LINUX-SGX/build.sh
+EXTRA_DIST+= IDE/LINUX-SGX/clean.sh

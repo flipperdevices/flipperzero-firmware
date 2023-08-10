@@ -1,0 +1,10 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+		 mplabx/README \
+		 mplabx/benchmark_main.c \
+		 mplabx/test_main.c \
+         mplabx/PIC32MZ-serial.h \
+         mplabx/user_settings.h

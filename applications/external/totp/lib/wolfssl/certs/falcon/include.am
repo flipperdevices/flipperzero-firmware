@@ -1,0 +1,7 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/falcon/bench_falcon_level1_key.der \
+         certs/falcon/bench_falcon_level5_key.der

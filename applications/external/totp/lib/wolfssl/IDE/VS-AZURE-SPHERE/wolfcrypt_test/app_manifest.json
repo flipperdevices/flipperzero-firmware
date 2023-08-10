@@ -1,0 +1,10 @@
+{
+  "SchemaVersion": 1,
+  "Name": "wolfCrypt_Test",
+  "ComponentId": "00000000-0000-0000-0000-000000000003",
+  "EntryPoint": "/bin/app",
+  "CmdArgs": [],
+  "Capabilities": {
+  },
+  "ApplicationType": "Default"
+}

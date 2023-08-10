@@ -1,0 +1,9 @@
+menu "Example Configuration"
+
+config TARGET_HOST
+    string "Target host"
+    default "127.0.01.1"
+    help
+        host address for the example to connect
+        
+endmenu

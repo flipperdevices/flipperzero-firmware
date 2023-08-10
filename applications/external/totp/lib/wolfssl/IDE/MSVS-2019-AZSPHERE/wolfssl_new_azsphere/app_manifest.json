@@ -1,0 +1,12 @@
+{
+  "SchemaVersion": 1,
+  "Name": "wolfssl_new_azsphere",
+  "ComponentId": "959b4478-a9a3-440a-b1e7-9bb0b1f1d357",
+  "EntryPoint": "/bin/app",
+  "CmdArgs": [],
+  "Capabilities": {
+    "Gpio": [ "$WOLF_AZSPHERE" ],
+    "AllowedApplicationConnections": []
+  },
+  "ApplicationType": "Default"
+}

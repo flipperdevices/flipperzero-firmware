@@ -1,0 +1,15 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/arm_startup.c
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/benchmark_main.c
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/hw.h
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/kinetis_hw.c
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/Kinetis_FlashPlacement.xml
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/README.md
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/test_main.c
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/retarget.c
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/user_settings.h
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/wolfssl.hzp
+EXTRA_DIST+= IDE/ROWLEY-CROSSWORKS-ARM/wolfssl_ltc.hzp

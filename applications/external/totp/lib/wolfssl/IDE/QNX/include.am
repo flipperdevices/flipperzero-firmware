@@ -1,0 +1,23 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+
+EXTRA_DIST+= IDE/QNX/README.md
+EXTRA_DIST+= IDE/QNX/CAAM-DRIVER/.cproject
+EXTRA_DIST+= IDE/QNX/CAAM-DRIVER/.project
+EXTRA_DIST+= IDE/QNX/CAAM-DRIVER/Makefile
+EXTRA_DIST+= IDE/QNX/wolfssl/.cproject
+EXTRA_DIST+= IDE/QNX/wolfssl/.project
+EXTRA_DIST+= IDE/QNX/wolfssl/Makefile
+EXTRA_DIST+= IDE/QNX/wolfssl/user_settings.h
+EXTRA_DIST+= IDE/QNX/testwolfcrypt/.cproject
+EXTRA_DIST+= IDE/QNX/testwolfcrypt/.project
+EXTRA_DIST+= IDE/QNX/testwolfcrypt/Makefile
+
+
+EXTRA_DIST+= IDE/QNX/example-server/Makefile
+EXTRA_DIST+= IDE/QNX/example-server/server-tls.c
+EXTRA_DIST+= IDE/QNX/example-client/Makefile
+EXTRA_DIST+= IDE/QNX/example-client/client-tls.c
+EXTRA_DIST+= IDE/QNX/example-cmac/Makefile
+EXTRA_DIST+= IDE/QNX/example-cmac/cmac-test.c

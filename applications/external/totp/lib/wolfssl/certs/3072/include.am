@@ -1,0 +1,10 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+#
+
+EXTRA_DIST += \
+         certs/3072/client-cert.der \
+         certs/3072/client-cert.pem \
+         certs/3072/client-key.der \
+         certs/3072/client-key.pem \
+         certs/3072/client-keyPub.der

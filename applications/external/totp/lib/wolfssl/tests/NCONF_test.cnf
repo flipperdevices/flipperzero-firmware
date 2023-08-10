@@ -1,0 +1,19 @@
+#
+# This file is a sample configuration file that
+# can be loaded with wolfSSL_NCONF_load
+#
+
+dir = ./test-dir
+port = 1234
+
+[ section1 ]
+file1 = ./test-dir/file1 	# test comment
+file1_copy = $dir/file1
+s1_dir = ./section1			# more comments
+
+[section2]
+
+fileName2 = file2 
+file_list = ${section1::file1}:$dir/file2:${section1::s1_dir}:$fileName2
+
+port = 4321

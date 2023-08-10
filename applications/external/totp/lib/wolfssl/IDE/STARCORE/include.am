@@ -1,0 +1,13 @@
+# vim:ft=automake
+# included from Top Level Makefile.am
+# All paths should be given relative to the root
+#
+# NOTE: append_wolfssl_git_version.sh is not included as the
+#       distribution file set will not contain GitHub info
+#
+#
+
+EXTRA_DIST+= IDE/STARCORE/README.txt
+EXTRA_DIST+= IDE/STARCORE/starcore_test.c
+EXTRA_DIST+= IDE/STARCORE/user_settings.h
+
