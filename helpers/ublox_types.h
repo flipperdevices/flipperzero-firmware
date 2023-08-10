@@ -56,4 +56,3 @@ typedef struct UbloxDeviceState {
     UbloxOdometerMode odometer_mode;
     UbloxPlatformModel platform_model;
 } UbloxDeviceState;
-

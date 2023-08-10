@@ -24,7 +24,11 @@ void ublox_scene_start_on_enter(void* context) {
         ublox_scene_start_submenu_callback,
         ublox);
     submenu_add_item(
-        submenu, "Sync Time to GPS", SubmenuIndexSyncTime, ublox_scene_start_submenu_callback, ublox);
+        submenu,
+        "Sync Time to GPS",
+        SubmenuIndexSyncTime,
+        ublox_scene_start_submenu_callback,
+        ublox);
     submenu_add_item(
         submenu, "Wiring", SubmenuIndexWiring, ublox_scene_start_submenu_callback, ublox);
     submenu_add_item(
@@ -52,8 +56,8 @@ bool ublox_scene_start_on_event(void* context, SceneManagerEvent event) {
                 ublox->scene_manager, UbloxSceneStart, SubmenuIndexWiring);
             scene_manager_next_scene(ublox->scene_manager, UbloxSceneWiring);
             consumed = true;
-	} else if(event.event == SubmenuIndexSyncTime) {
-	    scene_manager_set_scene_state(
+        } else if(event.event == SubmenuIndexSyncTime) {
+            scene_manager_set_scene_state(
                 ublox->scene_manager, UbloxSceneStart, SubmenuIndexSyncTime);
             scene_manager_next_scene(ublox->scene_manager, UbloxSceneSyncTime);
             consumed = true;
