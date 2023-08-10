@@ -68,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - Updated: [Authenticator/TOTP v4 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [Added Support For Auriol AHFL 433B2 IPX4 sensor (By tomjschwanke)](https://github.com/flipperdevices/flipperzero-good-faps/pull/17)
+- Added: [Text Viewer 2 (By Willy-JL)] Original by kowalski7cc & kyhwana, new has code borrowed from Archive-Show
 
 <a name="release">
 

@@ -1,0 +1,14 @@
+App(
+    appid="text_viewer2",
+    name="Text Viewer 2",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="text_viewer",
+    stack_size=10 * 1024,
+    fap_icon="icons/text_10px.png",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="text_viewer",
+    fap_category="Tools",
+    fap_author="@Willy-JL",  # Original by @kowalski7cc & @kyhwana, new has code borrowed from archive > show
+    fap_version="1.0",
+    fap_description="Text viewer application",
+)
