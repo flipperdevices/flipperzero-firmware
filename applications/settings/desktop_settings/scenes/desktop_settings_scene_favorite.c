@@ -167,7 +167,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                     MAX_APP_LENGTH);
                 consumed = true;
             }
-        } else if(event.event >= 2) {
+        } else {
             size_t app_index = event.event - 2;
             const char* name = favorite_fap_get_app_name(app_index);
             if(name) strncpy(curr_favorite_app->name_or_path, name, MAX_APP_LENGTH);
