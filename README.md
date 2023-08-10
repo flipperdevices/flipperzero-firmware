@@ -1,6 +1,7 @@
 # Flipper Wire Tester
 This is a simple Flipper Zero app that tests if a wire is continuous.
 
+![Screenshot](screen_1.png)
 
 ## Installation
 Copy the `wire_tester` directory to the `applications_user` directory of your
@@ -16,4 +17,4 @@ see the LED turn green and the flipper will beep.
 
 ## Licensing
 Source in this repository is licensed under the 2-clause BSD license, see
-`wire_tester/LICENSE` for details.
+`LICENSE` for details.
