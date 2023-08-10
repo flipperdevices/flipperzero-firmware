@@ -478,7 +478,7 @@ static bool storage_int_file_truncate(void* ctx, File* file) {
     return (file->error_id == FSE_OK);
 }
 
-static bool storage_int_file_expand(void* ctx, File* file, const uint64_t size) {
+static bool storage_int_file_allocate(void* ctx, File* file, const uint64_t size) {
     UNUSED(ctx);
     UNUSED(file);
     UNUSED(size);
@@ -704,7 +704,7 @@ static const FS_Api fs_api = {
             .seek = storage_int_file_seek,
             .tell = storage_int_file_tell,
             .truncate = storage_int_file_truncate,
-            .expand = storage_int_file_expand,
+            .expand = storage_int_file_allocate,
             .size = storage_int_file_size,
             .sync = storage_int_file_sync,
             .eof = storage_int_file_eof,

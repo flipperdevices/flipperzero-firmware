@@ -411,7 +411,7 @@ static bool storage_ext_file_truncate(void* ctx, File* file) {
 #endif
 }
 
-static bool storage_ext_file_expand(void* ctx, File* file, const uint64_t size) {
+static bool storage_ext_file_allocate(void* ctx, File* file, const uint64_t size) {
 #ifdef FURI_RAM_EXEC
     UNUSED(ctx);
     UNUSED(file);
@@ -614,7 +614,7 @@ static const FS_Api fs_api = {
             .seek = storage_ext_file_seek,
             .tell = storage_ext_file_tell,
             .truncate = storage_ext_file_truncate,
-            .expand = storage_ext_file_expand,
+            .expand = storage_ext_file_allocate,
             .size = storage_ext_file_size,
             .sync = storage_ext_file_sync,
             .eof = storage_ext_file_eof,

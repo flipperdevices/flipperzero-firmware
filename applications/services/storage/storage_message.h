@@ -35,7 +35,7 @@ typedef struct {
 typedef struct {
     File* file;
     uint64_t size;
-} SADataFExpand;
+} SADataFAllocate;
 
 typedef struct {
     File* file;
@@ -96,7 +96,7 @@ typedef union {
     SADataFRead fread;
     SADataFWrite fwrite;
     SADataFSeek fseek;
-    SADataFExpand fexpand;
+    SADataFAllocate fallocate;
 
     SADataDOpen dopen;
     SADataDRead dread;
