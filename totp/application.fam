@@ -51,7 +51,9 @@ App(
                 "wolfcrypt/src/sha256.c",
                 "wolfcrypt/src/sha512.c"
             ],
-            cflags=["-Wno-error", "-include${FAP_SRC_DIR}/wolfssl_config.h"]
+            cflags=["-Wno-error"],
+            cdefines=["HAVE_CONFIG_H"],
+            cincludes=["config/wolfssl"]
         ),
     ],
 )

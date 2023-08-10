@@ -1,4 +1,5 @@
 #include "crypto_v1.h"
+#ifdef TOTP_OBSOLETE_CRYPTO_V1_COMPATIBILITY_ENABLED
 #include <stdlib.h>
 #include <furi.h>
 #include <furi_hal_crypto.h>
@@ -6,6 +7,7 @@
 #include <furi_hal_version.h>
 #include "../../types/common.h"
 #include "memset_s.h"
+#include "polyfills.h"
 
 #define CRYPTO_KEY_SLOT (2)
 #define CRYPTO_VERIFY_KEY_LENGTH (16)
@@ -32,9 +34,9 @@ uint8_t* totp_crypto_encrypt_v1(
         furi_check(encrypted_data != NULL);
         *encrypted_data_length = plain_data_aligned_length;
 
-        furi_hal_crypto_store_load_key(CRYPTO_KEY_SLOT, crypto_settings->iv);
+        furi_hal_crypto_enclave_load_key(CRYPTO_KEY_SLOT, crypto_settings->iv);
         furi_hal_crypto_encrypt(plain_data_aligned, encrypted_data, plain_data_aligned_length);
-        furi_hal_crypto_store_unload_key(CRYPTO_KEY_SLOT);
+        furi_hal_crypto_enclave_unload_key(CRYPTO_KEY_SLOT);
 
         memset_s(plain_data_aligned, plain_data_aligned_length, 0, plain_data_aligned_length);
         free(plain_data_aligned);
@@ -43,9 +45,9 @@ uint8_t* totp_crypto_encrypt_v1(
         furi_check(encrypted_data != NULL);
         *encrypted_data_length = plain_data_length;
 
-        furi_hal_crypto_store_load_key(CRYPTO_KEY_SLOT, crypto_settings->iv);
+        furi_hal_crypto_enclave_load_key(CRYPTO_KEY_SLOT, crypto_settings->iv);
         furi_hal_crypto_encrypt(plain_data, encrypted_data, plain_data_length);
-        furi_hal_crypto_store_unload_key(CRYPTO_KEY_SLOT);
+        furi_hal_crypto_enclave_unload_key(CRYPTO_KEY_SLOT);
     }
 
     return encrypted_data;
@@ -59,9 +61,9 @@ uint8_t* totp_crypto_decrypt_v1(
     *decrypted_data_length = encrypted_data_length;
     uint8_t* decrypted_data = malloc(*decrypted_data_length);
     furi_check(decrypted_data != NULL);
-    furi_hal_crypto_store_load_key(CRYPTO_KEY_SLOT, crypto_settings->iv);
+    furi_hal_crypto_enclave_load_key(CRYPTO_KEY_SLOT, crypto_settings->iv);
     furi_hal_crypto_decrypt(encrypted_data, decrypted_data, encrypted_data_length);
-    furi_hal_crypto_store_unload_key(CRYPTO_KEY_SLOT);
+    furi_hal_crypto_enclave_unload_key(CRYPTO_KEY_SLOT);
     return decrypted_data;
 }
 
@@ -140,3 +142,4 @@ bool totp_crypto_verify_key_v1(const CryptoSettings* crypto_settings) {
 
     return key_valid;
 }
+#endif

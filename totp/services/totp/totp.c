@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <timezone_utils.h>
-#include "../../wolfssl_config.h"
+#include "../../config/wolfssl/config.h"
 #include <wolfssl/wolfcrypt/hmac.h>
 
 #define HMAC_MAX_RESULT_SIZE WC_SHA512_DIGEST_SIZE
