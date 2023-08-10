@@ -9,8 +9,6 @@ App(
     stack_size=3 * 1024,
     order=10,
     fap_icon="flipbip_10px.png",
-    fap_icon_assets="icons",
-    fap_icon_assets_symbol="flipbip",
     fap_private_libs=[
         Lib(
             name="crypto",

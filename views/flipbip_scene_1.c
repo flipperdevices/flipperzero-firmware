@@ -6,7 +6,7 @@
 //#include <dolphin/dolphin.h>
 #include <storage/storage.h>
 #include <string.h>
-#include "flipbip_icons.h"
+// #include "flipbip_icons.h"
 #include "../helpers/flipbip_haptic.h"
 #include "../helpers/flipbip_string.h"
 #include "../helpers/flipbip_file.h"
@@ -42,7 +42,7 @@
 #define TEXT_NEW_WALLET "New wallet"
 #define TEXT_DEFAULT_COIN "Coin"
 #define TEXT_RECEIVE_ADDRESS "receive address:"
-#define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
+// #define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
 const char* TEXT_INFO = "-Scroll pages with up/down-"
                         "p1,2)   BIP39 Mnemonic/Seed"
                         "p3)       BIP32 Root Key   "
@@ -100,7 +100,7 @@ static CONFIDENTIAL char* s_disp_text4 = NULL;
 static CONFIDENTIAL char* s_disp_text5 = NULL;
 static CONFIDENTIAL char* s_disp_text6 = NULL;
 // Derivation path text
-static const char* s_derivation_text = TEXT_DEFAULT_DERIV;
+static const char* s_derivation_text = TEXT_DEFAULT_COIN; // TEXT_DEFAULT_DERIV;
 // Warning text
 static bool s_warn_insecure = false;
 #define WARN_INSECURE_TEXT_1 "Recommendation:"
@@ -320,7 +320,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 2, 10, TEXT_LOADING);
         canvas_draw_str(canvas, 7, 30, s_derivation_text);
-        canvas_draw_icon(canvas, 86, 22, &I_Keychain_39x36);
+        // canvas_draw_icon(canvas, 86, 22, &I_Keychain_39x36);
         if(s_warn_insecure) {
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_str(canvas, 2, 50, WARN_INSECURE_TEXT_1);
