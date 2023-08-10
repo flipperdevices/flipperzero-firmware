@@ -68,7 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - Updated: [Authenticator/TOTP v4 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [Added Support For Auriol AHFL 433B2 IPX4 sensor (By tomjschwanke)](https://github.com/flipperdevices/flipperzero-good-faps/pull/17)
-- Added: [Text Viewer 2 (By Willy-JL)] Original by kowalski7cc & kyhwana, new has code borrowed from Archive-Show
+- Added: [Text Viewer 2 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae4fc4a54febccb44b010c4025a99c2edef9a7f0) Original by kowalski7cc & kyhwana, new has code borrowed from Archive-Show
 
 <a name="release">
 
@@ -435,6 +435,7 @@ $ ./fbt dolphin_ext
 - [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
 - [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer)
+- [Text Viewer 2 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae4fc4a54febccb44b010c4025a99c2edef9a7f0)
 - [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms)
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
