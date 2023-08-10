@@ -30,53 +30,59 @@ struct File {
  *      @param access_mode access mode from FS_AccessMode 
  *      @param open_mode open mode from FS_OpenMode 
  *      @return success flag
- * 
+ *
  *  @var FS_File_Api::close 
  *      @brief Close file
  *      @param file pointer to file object
  *      @return success flag
- * 
+ *
  *  @var FS_File_Api::read
  *      @brief Read bytes from file to buffer
  *      @param file pointer to file object
  *      @param buff pointer to buffer for reading
  *      @param bytes_to_read how many bytes to read, must be smaller or equal to buffer size 
  *      @return how many bytes actually has been read
- * 
+ *
  *  @var FS_File_Api::write
  *      @brief Write bytes from buffer to file
  *      @param file pointer to file object
  *      @param buff pointer to buffer for writing
  *      @param bytes_to_read how many bytes to write, must be smaller or equal to buffer size 
  *      @return how many bytes actually has been written
- * 
+ *
  *  @var FS_File_Api::seek
  *      @brief Move r/w pointer 
  *      @param file pointer to file object
  *      @param offset offset to move r/w pointer
  *      @param from_start set offset from start, or from current position
  *      @return success flag
- * 
+ *
  *  @var FS_File_Api::tell
  *      @brief Get r/w pointer position
  *      @param file pointer to file object
  *      @return current r/w pointer position
- * 
+ *
  *  @var FS_File_Api::truncate
  *      @brief Truncate file size to current r/w pointer position
  *      @param file pointer to file object
  *      @return success flag
- * 
+ *
+ *  @var FS_File_Api::expand
+ *      @brief Expand file to given size
+ *      @param file pointer to file object
+ *      @param size new file size
+ *      @return success flag
+ *
  *  @var FS_File_Api::size
  *      @brief Fet file size
  *      @param file pointer to file object
  *      @return file size
- * 
+ *
  *  @var FS_File_Api::sync
  *      @brief Write file cache to storage
  *      @param file pointer to file object
  *      @return success flag
- * 
+ *
  *  @var FS_File_Api::eof
  *      @brief Checks that the r/w pointer is at the end of the file
  *      @param file pointer to file object
@@ -95,6 +101,7 @@ typedef struct {
     bool (*const seek)(void* context, File* file, uint32_t offset, bool from_start);
     uint64_t (*tell)(void* context, File* file);
     bool (*const truncate)(void* context, File* file);
+    bool (*const expand)(void* context, File* file, uint64_t size);
     uint64_t (*size)(void* context, File* file);
     bool (*const sync)(void* context, File* file);
     bool (*const eof)(void* context, File* file);

@@ -121,6 +121,13 @@ uint64_t storage_file_tell(File* file);
  */
 bool storage_file_truncate(File* file);
 
+/** Expands the file size to the given size
+ * @param file pointer to file object.
+ * @param size new size of the file
+ * @return bool success flag
+*/
+bool storage_file_expand(File* file, uint64_t size);
+
 /** Gets the size of the file
  * @param file pointer to file object.
  * @return uint64_t size of the file

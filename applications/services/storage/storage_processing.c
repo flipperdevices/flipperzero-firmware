@@ -1,4 +1,5 @@
 #include "storage_processing.h"
+#include "storage/storage_message.h"
 #include <m-list.h>
 #include <m-dict.h>
 
@@ -100,7 +101,7 @@ static FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** s
 
 /******************* File Functions *******************/
 
-bool storage_process_file_open(
+static bool storage_process_file_open(
     Storage* app,
     File* file,
     FuriString* path,
@@ -220,6 +221,20 @@ static bool storage_process_file_truncate(Storage* app, File* file) {
     return ret;
 }
 
+static bool storage_process_file_expand(Storage* app, File* file, const uint64_t size) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+
+    if(storage == NULL) {
+        file->error_id = FSE_INVALID_PARAMETER;
+    } else {
+        storage_data_timestamp(storage);
+        FS_CALL(storage, file.expand(storage, file, size));
+    }
+
+    return ret;
+}
+
 static bool storage_process_file_sync(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
@@ -262,7 +277,7 @@ static bool storage_process_file_eof(Storage* app, File* file) {
 
 /******************* Dir Functions *******************/
 
-bool storage_process_dir_open(Storage* app, File* file, FuriString* path) {
+static bool storage_process_dir_open(Storage* app, File* file, FuriString* path) {
     bool ret = false;
     StorageData* storage;
     file->error_id = storage_get_data(app, path, &storage);
@@ -279,7 +294,7 @@ bool storage_process_dir_open(Storage* app, File* file, FuriString* path) {
     return ret;
 }
 
-bool storage_process_dir_close(Storage* app, File* file) {
+static bool storage_process_dir_close(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -296,7 +311,7 @@ bool storage_process_dir_close(Storage* app, File* file) {
     return ret;
 }
 
-bool storage_process_dir_read(
+static bool storage_process_dir_read(
     Storage* app,
     File* file,
     FileInfo* fileinfo,
@@ -314,7 +329,7 @@ bool storage_process_dir_read(
     return ret;
 }
 
-bool storage_process_dir_rewind(Storage* app, File* file) {
+static bool storage_process_dir_rewind(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -461,7 +476,7 @@ static FS_Error storage_process_sd_status(Storage* app) {
 
 /******************** Aliases processing *******************/
 
-void storage_process_alias(
+static void storage_process_alias(
     Storage* app,
     FuriString* path,
     FuriThreadId thread_id,
@@ -505,7 +520,7 @@ void storage_process_alias(
 
 /****************** API calls processing ******************/
 
-void storage_process_message_internal(Storage* app, StorageMessage* message) {
+static void storage_process_message_internal(Storage* app, StorageMessage* message) {
     FuriString* path = NULL;
 
     switch(message->command) {
@@ -552,6 +567,10 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
     case StorageCommandFileTruncate:
         message->return_data->bool_value =
             storage_process_file_truncate(app, message->data->file.file);
+        break;
+    case StorageCommandFileExpand:
+        message->return_data->bool_value = storage_process_file_expand(
+            app, message->data->file.file, message->data->fexpand.size);
         break;
     case StorageCommandFileSync:
         message->return_data->bool_value =
