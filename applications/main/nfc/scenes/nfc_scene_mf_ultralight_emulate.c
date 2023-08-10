@@ -29,7 +29,7 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
         nfc_text_store_set(nfc, "MIFARE\nNTAG");
     }
     popup_set_icon(popup, 0, 3, &I_NFC_dolphin_emulation_47x61);
-    popup_set_text(popup, nfc->text_store, 90, 28, AlignCenter, AlignTop);
+    popup_set_text(popup, nfc->text_store, 89, 28, AlignCenter, AlignTop);
 
     // Setup and start worker
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
