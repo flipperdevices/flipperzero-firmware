@@ -79,7 +79,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL PR: [SubGhz: fix assert failure during signal openning #573 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/573)
 - OFW: [ufbt: fixed FAP_SRC_DIR #2970 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2970)
 - OFW: [UI: Clock on Desktop #2891 (By gid9798)](https://github.com/flipperdevices/flipperzero-firmware/pull/2891) (Mostly Already In RM)
-- Updated: [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) Reverts and Fixes (Reverted to UL Version)
 
 <a name="release">
 
