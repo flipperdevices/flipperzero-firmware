@@ -50,16 +50,16 @@ static void desktop_dummy_mode_icon_draw_callback(Canvas* canvas, void* context)
     canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
 }
 
-static void desktop_clock_upd_time(Desktop* desktop, bool forced) {
+static void desktop_clock_update(Desktop* desktop, bool forced) {
     furi_assert(desktop);
 
     FuriHalRtcDateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
 
-    if(forced || desktop->minute != curr_dt.minute || (desktop->minute != curr_dt.minute)) {
-        desktop->clock_type = (locale_get_time_format() == LocaleTimeFormat12h);
-        desktop->hour = curr_dt.hour;
-        desktop->minute = curr_dt.minute;
+    if(forced || desktop->time_hour != curr_dt.hour || (desktop->time_minute != curr_dt.minute)) {
+        desktop->time_format_12 = (locale_get_time_format() == LocaleTimeFormat12h);
+        desktop->time_hour = curr_dt.hour;
+        desktop->time_minute = curr_dt.minute;
         view_port_update(desktop->clock_viewport);
     }
 }
@@ -67,11 +67,11 @@ static void desktop_clock_upd_time(Desktop* desktop, bool forced) {
 static void desktop_clock_toggle_view(Desktop* desktop, bool is_enabled) {
     furi_assert(desktop);
 
-    desktop_clock_upd_time(desktop, true);
+    desktop_clock_update(desktop, true);
 
-    if(is_enabled) { // && !furi_timer_is_running(desktop->update_clock_timer)) {
+    if(is_enabled) {
         furi_timer_start(desktop->update_clock_timer, furi_ms_to_ticks(1000));
-    } else if(!is_enabled) { //&& furi_timer_is_running(desktop->update_clock_timer)) {
+    } else {
         furi_timer_stop(desktop->update_clock_timer);
     }
 
@@ -86,8 +86,8 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontPrimary);
 
-    uint8_t hour = desktop->hour;
-    if(desktop->clock_type) {
+    uint8_t hour = desktop->time_hour;
+    if(desktop->time_format_12) {
         if(hour > 12) {
             hour -= 12;
         }
@@ -97,10 +97,12 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
     }
 
     char buffer[20];
-    snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->minute);
+    snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->time_minute);
+
+    // ToDo: never do that, may cause visual glitches
     view_port_set_width(
         desktop->clock_viewport,
-        canvas_string_width(canvas, buffer) - 1 + (desktop->minute % 10 == 1));
+        canvas_string_width(canvas, buffer) - 1 + (desktop->time_minute % 10 == 1));
 
     canvas_draw_str_aligned(canvas, 0, 8, AlignLeft, AlignBottom, buffer);
 }
@@ -198,7 +200,7 @@ static void desktop_clock_timer_callback(void* context) {
     Desktop* desktop = context;
 
     if(gui_active_view_port_count(desktop->gui, GuiLayerStatusBarLeft) < 6) {
-        desktop_clock_upd_time(desktop, false);
+        desktop_clock_update(desktop, false);
 
         view_port_enabled_set(desktop->clock_viewport, true);
     } else {
@@ -399,7 +401,7 @@ Desktop* desktop_alloc() {
     desktop->update_clock_timer =
         furi_timer_alloc(desktop_clock_timer_callback, FuriTimerTypePeriodic, desktop);
 
-    desktop_clock_upd_time(desktop, true);
+    desktop_clock_update(desktop, true);
 
     furi_record_create(RECORD_DESKTOP, desktop);
 
