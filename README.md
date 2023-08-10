@@ -2,8 +2,6 @@
 
 A game for the Flipper Zero device.
 
-![screenshot](screenshot.png)
-
 ## Instructions
 
 - Arrow buttons move around the board.
