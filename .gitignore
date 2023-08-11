@@ -1,3 +1,14 @@
-.vscode
-/*/dist
+
 /*/.clang-format
+
+# Compiled source
+/*/dist
+
+# JetBrains IDEs
+.idea
+
+# Visual Studio Code
+.vscode
+
+# OS Crap
+.DS_Store
