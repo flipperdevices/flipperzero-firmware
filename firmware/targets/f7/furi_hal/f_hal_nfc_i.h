@@ -59,6 +59,8 @@ bool f_hal_nfc_event_wait_for_specific_irq(
 
 // Common technology methods
 FHalNfcError f_hal_nfc_common_listener_rx_start(FuriHalSpiBusHandle* handle);
+FHalNfcError
+    f_hal_nfc_common_fifo_tx(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
 FHalNfcError f_hal_nfc_common_fifo_rx(
     FuriHalSpiBusHandle* handle,
     uint8_t* rx_data,
@@ -67,6 +69,8 @@ FHalNfcError f_hal_nfc_common_fifo_rx(
 
 // Technology specific API
 typedef FHalNfcError (*FHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
+typedef FHalNfcError (
+    *FHalNfcChipTx)(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
 typedef FHalNfcError (*FHalNfcChipRx)(
     FuriHalSpiBusHandle* handle,
     uint8_t* rx_data,
@@ -82,6 +86,7 @@ typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
     FHalNfcChipConfig rx_start;
+    FHalNfcChipTx tx;
     FHalNfcChipRx rx;
 } FHalNfcTechListenerBase;
 

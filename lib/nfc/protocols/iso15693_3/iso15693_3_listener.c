@@ -76,12 +76,10 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
         instance->state = Iso15693_3ListenerStateActive;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         const BitBuffer* data = nfc_event->data.buffer;
-        const size_t data_size = bit_buffer_get_size_bytes(data);
-
-        FURI_LOG_D(TAG, "Received %zu bytes", data_size);
-        for(size_t i = 0; i < data_size; ++i) {
-            FURI_LOG_D(TAG, "%02X", bit_buffer_get_byte(data, i));
-        }
+        // const size_t data_size = bit_buffer_get_size_bytes(data);
+        // FURI_LOG_D(TAG, "Received %zu bytes", data_size);
+        // Echo the received data back for testing purposes
+        nfc_listener_tx(instance->nfc, data);
     }
 
     return command;
