@@ -137,7 +137,7 @@ static bool
 
     bool command_processed = false;
 
-    if((instance->features & MfUltralightFeatureSupportReadVersion)) {
+    if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportReadVersion)) {
         bit_buffer_copy_bytes(
             instance->tx_buffer, (uint8_t*)&instance->data->version, sizeof(MfUltralightVersion));
         iso14443_3a_listener_send_standard_frame(
@@ -160,7 +160,7 @@ static bool mf_ultralight_listener_read_signature_handler(
 
     bool command_processed = false;
 
-    if((instance->features & MfUltralightFeatureSupportReadSignature)) {
+    if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportReadSignature)) {
         bit_buffer_copy_bytes(
             instance->tx_buffer, instance->data->signature.data, sizeof(MfUltralightSignature));
         iso14443_3a_listener_send_standard_frame(
@@ -182,16 +182,16 @@ static bool
 
     do {
         uint8_t counter_num = bit_buffer_get_byte(buffer, 1);
-        if((instance->features & MfUltralightFeatureSupportReadCounter) == 0) break;
-        if(instance->features & MfUltralightFeatureSupportSingleCounter) {
-            if(counter_num != 2) {
-                break;
-            }
-        }
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportReadCounter))
+            break;
+
+        if(mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportSingleCounter) &&
+           (counter_num != 2))
+            break;
+
         if(instance->config) {
-            /* if(!instance->config->access.nfc_cnt_en) {
-                break;
-            }*/
             if(instance->config->access.nfc_cnt_pwd_prot) {
                 if(instance->auth_state != MfUltralightListenerAuthStateSuccess) {
                     break;
@@ -222,20 +222,25 @@ static bool mf_ultralight_listener_check_tearing_handler(
 
     do {
         uint8_t tearing_flag_num = bit_buffer_get_byte(buffer, 1);
-        if(instance->features & (MfUltralightFeatureSupportCheckTearingFlag |
-                                 MfUltralightFeatureSupportSingleCounter)) {
-            if((instance->features & MfUltralightFeatureSupportSingleCounter) &&
-               (tearing_flag_num != 2)) {
-                break;
-            }
-
-            bit_buffer_set_size_bytes(instance->tx_buffer, 1);
-            bit_buffer_set_byte(
-                instance->tx_buffer, 0, instance->data->tearing_flag->data[tearing_flag_num]);
-            iso14443_3a_listener_send_standard_frame(
-                instance->iso14443_3a_listener, instance->tx_buffer);
-            command_processed = true;
+        if(!mf_ultralight_support_feature(
+               instance->features,
+               MfUltralightFeatureSupportCheckTearingFlag |
+                   MfUltralightFeatureSupportSingleCounter)) {
+            break;
         }
+        if(mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportSingleCounter) &&
+           (tearing_flag_num != 2)) {
+            break;
+        }
+
+        bit_buffer_set_size_bytes(instance->tx_buffer, 1);
+        bit_buffer_set_byte(
+            instance->tx_buffer, 0, instance->data->tearing_flag->data[tearing_flag_num]);
+        iso14443_3a_listener_send_standard_frame(
+            instance->iso14443_3a_listener, instance->tx_buffer);
+        command_processed = true;
+
     } while(false);
 
     return command_processed;
@@ -248,7 +253,9 @@ static bool
     FURI_LOG_D(TAG, "CMD_AUTH");
 
     do {
-        if((instance->features & MfUltralightFeatureSupportAuthentication) == 0) break;
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportAuthentication))
+            break;
 
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
         MfUltralightAuthPassword password = {};
