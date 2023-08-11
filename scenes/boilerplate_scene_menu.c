@@ -20,6 +20,7 @@ void boilerplate_scene_menu_on_enter(void* context) {
     submenu_add_item(app->submenu, "Scene 1 (empty)", SubmenuIndexScene1, boilerplate_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Scene 2 (Inputs/Effects)", SubmenuIndexScene2, boilerplate_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Scene 3 (Buttonmenu)", SubmenuIndexScene3, boilerplate_scene_menu_submenu_callback, app);
+    submenu_add_item(app->submenu, "Scene 4 (File Browser)", SubmenuIndexScene4, boilerplate_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, boilerplate_scene_menu_submenu_callback, app);
 
     submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, BoilerplateSceneMenu));
@@ -50,6 +51,10 @@ bool boilerplate_scene_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene3);
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_3);
+        } else if (event.event == SubmenuIndexScene4) {
+            scene_manager_set_scene_state(
+                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene4);
+            scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_4);
         } else if (event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
                 app->scene_manager, BoilerplateSceneMenu, SubmenuIndexSettings);

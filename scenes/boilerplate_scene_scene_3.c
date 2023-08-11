@@ -2,7 +2,6 @@
 #include "../helpers/boilerplate_custom_event.h"
 #include "../helpers/boilerplate_haptic.h"
 #include "../helpers/boilerplate_led.h"
-#include "../views/boilerplate_scene_2.h"
 
 typedef enum {
     ButtonIndexControl3 = -3,
