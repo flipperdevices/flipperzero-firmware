@@ -535,6 +535,10 @@ uint16_t mf_ultralight_get_config_page_num(MfUltralightType type) {
     return mf_ultralight_features[type].config_page;
 }
 
+bool mf_ultralight_support_feature(const uint32_t feature_set, const uint32_t features_to_check) {
+    return (feature_set & features_to_check) != 0;
+}
+
 bool mf_ultralight_get_config_page(const MfUltralightData* data, MfUltralightConfigPages** config) {
     furi_assert(data);
     furi_assert(config);

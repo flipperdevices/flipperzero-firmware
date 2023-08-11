@@ -200,6 +200,8 @@ uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type);
 
 uint16_t mf_ultralight_get_config_page_num(MfUltralightType type);
 
+bool mf_ultralight_support_feature(const uint32_t feature_set, const uint32_t features_to_check);
+
 bool mf_ultralight_get_config_page(const MfUltralightData* data, MfUltralightConfigPages** config);
 
 bool mf_ultralight_is_all_data_read(const MfUltralightData* data);
