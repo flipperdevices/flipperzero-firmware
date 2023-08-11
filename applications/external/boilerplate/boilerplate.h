@@ -6,12 +6,14 @@
 #include <input/input.h>
 #include <stdlib.h>
 #include <boilerplate_icons.h>
+#include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/button_menu.h>
+#include <gui/modules/dialog_ex.h>
 #include "scenes/boilerplate_scene.h"
 #include "views/boilerplate_startscreen.h"
 #include "views/boilerplate_scene_1.h"
@@ -19,6 +21,9 @@
 #include "helpers/boilerplate_storage.h"
 
 #define TAG "Boilerplate"
+
+#define SUBGHZ_APP_EXTENSION ".sub"
+#define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
 
 typedef struct {
     Gui* gui;
@@ -30,11 +35,13 @@ typedef struct {
     BoilerplateStartscreen* boilerplate_startscreen;
     BoilerplateScene1* boilerplate_scene_1;
     BoilerplateScene2* boilerplate_scene_2;
+    DialogsApp* dialogs; // File Browser
+    FuriString* file_path; // File Browser
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;
-    ButtonMenu* button_menu;
+    ButtonMenu* button_menu; // Button Menu
 } Boilerplate;
 
 typedef enum {

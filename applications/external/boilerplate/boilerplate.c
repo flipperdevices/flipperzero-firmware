@@ -47,6 +47,10 @@ Boilerplate* boilerplate_app_alloc() {
     app->led = 1;
     app->save_settings = 1;
 
+    // Used for File Browser
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
+    app->file_path = furi_string_alloc();
+
     // Load configs
     boilerplate_read_settings(app);
 
@@ -100,6 +104,10 @@ void boilerplate_app_free(Boilerplate* app) {
 
     app->gui = NULL;
     app->notification = NULL;
+
+    // Close File Browser
+    furi_record_close(RECORD_DIALOGS);
+    furi_string_free(app->file_path);
 
     //Remove whatever is left
     free(app);

@@ -8,6 +8,7 @@ Use this code as a foundation for developing Flipper Zero Applications, change t
 - Start Screen
 - Menu
 - Button Menu
+- File Browser
 - Different Scenes / Views
 - Settings Page (On/Off for haptics, sound, led)
 - Handling of Button Inputs
@@ -40,8 +41,11 @@ This code is open-source and may be used for whatever you want to do with it.
 - [Nikita Vostokov](https://github.com/wosk) for code contributions
 
 ## Some cool projects I found using this 
-(let me know if you want yours added)<br>
+(love seeing it being used. Let me know if you want yours added)<br>
 
 - [Flipper Zero Evil Portal](https://github.com/bigbrodude6119/flipper-zero-evil-portal) by [bigbrodude6110](https://github.com/bigbrodude6119)
 - [Flipper Chess](https://github.com/xtruan/flipper-chess) by [xtruan](https://github.com/xtruan)
 - [Crypto toolkit for Flipper Zero](https://github.com/xtruan/FlipBIP) by [xtruan](https://github.com/xtruan)
+- [Camera Suite](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite) by [Cody Tolene](https://github.com/CodyTolene)
+- [Color Guess](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/main/Games/color_guess) by me
+- [Cross Remote](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/main/Tools/xremote) by me

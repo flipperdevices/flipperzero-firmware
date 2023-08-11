@@ -79,6 +79,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [ufbt: fixed FAP_SRC_DIR #2970 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2970)
 - OFW: [UI: Clock on Desktop #2891 (By gid9798)](https://github.com/flipperdevices/flipperzero-firmware/pull/2891) (Mostly Already In RM)
 - Updated: [FlipBIP Crypto Wallet v1.13 (By xtruan)](https://github.com/xtruan/FlipBIP)
+- Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 
 <a name="release">
 
