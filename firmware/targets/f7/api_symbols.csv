@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,35.0,,
+Version,+,36.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2136,6 +2136,7 @@ Function,+,mf_ultralight_poller_write_page,MfUltralightError,"Nfc*, uint16_t, Mf
 Function,+,mf_ultralight_reset,void,MfUltralightData*
 Function,+,mf_ultralight_save,_Bool,"const MfUltralightData*, FlipperFormat*"
 Function,+,mf_ultralight_set_uid,_Bool,"MfUltralightData*, const uint8_t*, size_t"
+Function,+,mf_ultralight_support_feature,_Bool,"const uint32_t, const uint32_t"
 Function,+,mf_ultralight_verify,_Bool,"MfUltralightData*, const FuriString*"
 Function,-,mkdtemp,char*,char*
 Function,-,mkostemp,int,"char*, int"
