@@ -11,6 +11,7 @@
 #include <gui/modules/widget.h>
 #include <notification/notification_messages.h>
 #include "views/can_lin_tools_view_can_hacker2.h"
+#include "views/can_lin_tools_view_lin_hacker.h"
 
 typedef struct CanLinToolsApp CanLinToolsApp;
 
@@ -22,9 +23,5 @@ struct CanLinToolsApp {
     Submenu* submenu;
     Widget* widget;
     CanLinToolsCanHacker2* can_lin_tools_can_hacker2;
+    CanLinToolsLinHacker* can_lin_tools_lin_hacker;
 };
-
-// void can_lin_tools_app_can_hacker2_start(CanLinToolsApp* app);
-// void can_lin_tools_app_can_hacker2_stop(CanLinToolsApp* app);
-// bool can_lin_tools_app_can_hacker2_is_nfc(CanLinToolsApp* app);
-// bool can_lin_tools_app_can_hacker2_is_rfid(CanLinToolsApp* app, uint32_t* frequency);

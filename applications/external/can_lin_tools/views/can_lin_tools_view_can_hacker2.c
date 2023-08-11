@@ -6,18 +6,6 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
-// #define FIELD_FOUND_WEIGHT 5
-
-// typedef enum {
-//     CanLinToolsTypeCanHacker2Nfc,
-//     CanLinToolsTypeCanHacker2Rfid,
-// } CanLinToolsTypeCanHacker2;
-
-// static const Icon* CanLinToolsCanHacker2Icons[] = {
-//     [CanLinToolsTypeCanHacker2Nfc] = &I_NFC_detect_45x30,
-//     [CanLinToolsTypeCanHacker2Rfid] = &I_Rfid_detect_45x30,
-// };
-
 struct CanLinToolsCanHacker2 {
     View* view;
     CanChacker2Worker* worker;
@@ -27,33 +15,8 @@ struct CanLinToolsCanHacker2 {
 
 typedef struct {
     CanLinToolsCanHacker2ViewStatus status;
-    // uint32_t rfid_frequency;
 } CanLinToolsCanHacker2Model;
 
-// void can_lin_tools_view_can_hacker2_update(
-//     CanLinToolsCanHacker2* instance,
-//     bool nfc_field,
-//     bool rfid_field,
-//     uint32_t rfid_frequency) {
-//     furi_assert(instance);
-//     with_view_model(
-//         instance->view,
-//         CanLinToolsCanHacker2Model * model,
-//         {
-//             if(nfc_field) {
-//                 model->nfc_field = FIELD_FOUND_WEIGHT;
-//             } else if(model->nfc_field) {
-//                 model->nfc_field--;
-//             }
-//             if(rfid_field) {
-//                 model->rfid_field = FIELD_FOUND_WEIGHT;
-//                 model->rfid_frequency = rfid_frequency;
-//             } else if(model->rfid_field) {
-//                 model->rfid_field--;
-//             }
-//         },
-//         true);
-// }
 
 void can_lin_tools_view_can_hacker2_draw(Canvas* canvas, CanLinToolsCanHacker2Model* model) {
     canvas_clear(canvas);
@@ -63,38 +26,6 @@ void can_lin_tools_view_can_hacker2_draw(Canvas* canvas, CanLinToolsCanHacker2Mo
 
     UNUSED(model);
 
-    // if(!model->nfc_field && !model->rfid_field) {
-    //     canvas_draw_icon(canvas, 0, 16, &I_Modern_reader_18x34);
-    //     canvas_draw_icon(canvas, 22, 12, &I_Move_flipper_26x39);
-    //     canvas_set_font(canvas, FontSecondary);
-    //     canvas_draw_str(canvas, 56, 36, "Touch the reader");
-    // } else {
-    //     if(model->nfc_field) {
-    //         canvas_set_font(canvas, FontPrimary);
-    //         canvas_draw_str(canvas, 21, 10, "NFC");
-    //         canvas_draw_icon(
-    //             canvas,
-    //             9,
-    //             17,
-    //             CanLinToolsCanHacker2Icons[CanLinToolsTypeCanHacker2Nfc]);
-    //         canvas_set_font(canvas, FontSecondary);
-    //         canvas_draw_str(canvas, 9, 62, "13,56 MHz");
-    //     }
-
-    //     if(model->rfid_field) {
-    //         char str[16];
-    //         snprintf(str, sizeof(str), "%.02f KHz", (double)model->rfid_frequency / 1000);
-    //         canvas_set_font(canvas, FontPrimary);
-    //         canvas_draw_str(canvas, 76, 10, "LF RFID");
-    //         canvas_draw_icon(
-    //             canvas,
-    //             71,
-    //             17,
-    //             CanLinToolsCanHacker2Icons[CanLinToolsTypeCanHacker2Rfid]);
-    //         canvas_set_font(canvas, FontSecondary);
-    //         canvas_draw_str(canvas, 69, 62, str);
-    //     }
-    // }
 }
 
 bool can_lin_tools_view_can_hacker2_input(InputEvent* event, void* context) {
@@ -144,16 +75,6 @@ void can_lin_tools_view_can_hacker2_enter(void* context) {
         instance->worker, can_lin_tools_view_can_hacker2_usb_connect_callback, instance);
 
     can_hacker2_worker_start(instance->worker);
-
-    // with_view_model(
-    //     instance->view,
-    //     CanLinToolsCanHacker2Model * model,
-    //     {
-    //         model->nfc_field = 0;
-    //         model->rfid_field = 0;
-    //         model->rfid_frequency = 0;
-    //     },
-    //     true);
 }
 
 void can_lin_tools_view_can_hacker2_exit(void* context) {
@@ -185,15 +106,7 @@ CanLinToolsCanHacker2* can_lin_tools_view_can_hacker2_alloc() {
         CanLinToolsCanHacker2Model * model,
         { model->status = CanLinToolsCanHacker2ViewStatusNoUSBConnect; },
         true);
-    // with_view_model(
-    //     instance->view,
-    //     CanLinToolsCanHacker2Model * model,
-    //     {
-    //         model->nfc_field = 0;
-    //         model->rfid_field = 0;
-    //         model->rfid_frequency = 0;
-    //     },
-    //     true);
+
     return instance;
 }
 

@@ -61,6 +61,13 @@ CanLinToolsApp* can_lin_tools_app_alloc() {
         app->view_dispatcher,
         CanLinToolsViewCanHacker2,
         can_lin_tools_view_can_hacker2_get_view(app->can_lin_tools_can_hacker2));
+    
+    // Lin Hacker
+    app->can_lin_tools_lin_hacker = can_lin_tools_view_lin_hacker_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        CanLinToolsViewLinHacker,
+        can_lin_tools_view_lin_hacker_get_view(app->can_lin_tools_lin_hacker));
 
     scene_manager_next_scene(app->scene_manager, CanLinToolsSceneStart);
 
@@ -81,6 +88,10 @@ void can_lin_tools_app_free(CanLinToolsApp* app) {
     // Can Hacker 2
     view_dispatcher_remove_view(app->view_dispatcher, CanLinToolsViewCanHacker2);
     can_lin_tools_view_can_hacker2_free(app->can_lin_tools_can_hacker2);
+
+    // Lin Hacker 2
+    view_dispatcher_remove_view(app->view_dispatcher, CanLinToolsViewLinHacker);
+    can_lin_tools_view_lin_hacker_free(app->can_lin_tools_lin_hacker);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
