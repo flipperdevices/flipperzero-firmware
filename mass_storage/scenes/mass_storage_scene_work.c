@@ -21,6 +21,7 @@ static bool file_read(
     uint16_t clamp = MIN(out_cap, count * SCSI_BLOCK_SIZE);
     *out_len = storage_file_read(app->file, out, clamp);
     FURI_LOG_T(TAG, "%lu/%lu", *out_len, count * SCSI_BLOCK_SIZE);
+    app->bytes_read += *out_len;
     return *out_len == clamp;
 }
 
@@ -35,6 +36,7 @@ static bool file_write(void* ctx, uint32_t lba, uint16_t count, uint8_t* buf, ui
         FURI_LOG_W(TAG, "seek failed");
         return false;
     }
+    app->bytes_written += len;
     return storage_file_write(app->file, buf, len) == len;
 }
 
@@ -56,6 +58,9 @@ bool mass_storage_scene_work_on_event(void* context, SceneManagerEvent event) {
     MassStorageApp* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeTick) {
+        // Update stats
+        mass_storage_set_stats(app->mass_storage_view, app->bytes_read, app->bytes_written);
+        // Handle eject
         bool ejected;
         furi_check(furi_mutex_acquire(app->usb_mutex, FuriWaitForever) == FuriStatusOk);
         ejected = app->usb == NULL;
@@ -77,6 +82,7 @@ bool mass_storage_scene_work_on_event(void* context, SceneManagerEvent event) {
 
 void mass_storage_scene_work_on_enter(void* context) {
     MassStorageApp* app = context;
+    app->bytes_read = app->bytes_written = 0;
 
     if(!storage_file_exists(app->fs_api, furi_string_get_cstr(app->file_path))) {
         scene_manager_search_and_switch_to_previous_scene(
