@@ -21,3 +21,4 @@ AmbientWeather
 Avriol HG06061
 TX8300
 Wendox W6276
+Auriol AHFL
