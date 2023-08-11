@@ -59,8 +59,6 @@ static void furi_hal_usart_init(uint32_t baud) {
         ;
 
     LL_USART_DisableIT_ERROR(USART1);
-
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, furi_hal_uart_irq_callback, NULL);
 }
 
 static void furi_hal_lpuart_irq_callback() {
@@ -107,8 +105,6 @@ static void furi_hal_lpuart_init(uint32_t baud) {
 
     furi_hal_uart_set_br(FuriHalUartIdLPUART1, baud);
     LL_LPUART_DisableIT_ERROR(LPUART1);
-
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, furi_hal_lpuart_irq_callback, NULL);
 }
 
 void furi_hal_uart_init(FuriHalUartId ch, uint32_t baud) {
@@ -158,14 +154,12 @@ void furi_hal_uart_deinit(FuriHalUartId ch) {
         }
         furi_hal_gpio_init(&gpio_usart_tx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(&gpio_usart_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
     } else if(ch == FuriHalUartIdLPUART1) {
         if(furi_hal_bus_is_enabled(FuriHalBusLPUART1)) {
             furi_hal_bus_disable(FuriHalBusLPUART1);
         }
         furi_hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
     }
 }
 
@@ -225,10 +219,10 @@ void furi_hal_uart_set_irq_cb(
     void* ctx) {
     if(cb == NULL) {
         if(ch == FuriHalUartIdUSART1) {
-            NVIC_DisableIRQ(USART1_IRQn);
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
             LL_USART_DisableIT_RXNE_RXFNE(USART1);
         } else if(ch == FuriHalUartIdLPUART1) {
-            NVIC_DisableIRQ(LPUART1_IRQn);
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
             LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
         }
         irq_cb[ch] = cb;
@@ -237,10 +231,11 @@ void furi_hal_uart_set_irq_cb(
         irq_ctx[ch] = ctx;
         irq_cb[ch] = cb;
         if(ch == FuriHalUartIdUSART1) {
-            NVIC_EnableIRQ(USART1_IRQn);
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, furi_hal_uart_irq_callback, NULL);
             LL_USART_EnableIT_RXNE_RXFNE(USART1);
         } else if(ch == FuriHalUartIdLPUART1) {
-            NVIC_EnableIRQ(LPUART1_IRQn);
+            furi_hal_interrupt_set_isr(
+                FuriHalInterruptIdLpUart1, furi_hal_lpuart_irq_callback, NULL);
             LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
         }
     }
