@@ -1,6 +1,5 @@
 #include "flipbip.h"
 #include "helpers/flipbip_file.h"
-//#include "helpers/flipbip_haptic.h"
 // From: lib/crypto
 #include <memzero.h>
 #include <bip39.h>
@@ -44,7 +43,8 @@ static void text_input_callback(void* context) {
             // reset input state
             app->input_state = FlipBipTextInputDefault;
             handled = true;
-            //view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
+            // switch back to settings view
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
         } else if(app->input_state == FlipBipTextInputMnemonic) {
             if(app->import_from_mnemonic == 1) {
                 strcpy(app->import_mnemonic_text, app->input_text);
@@ -85,7 +85,8 @@ static void text_input_callback(void* context) {
         memzero(app->input_text, TEXT_BUFFER_SIZE);
         // reset input state
         app->input_state = FlipBipTextInputDefault;
-        //view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
+        // something went wrong, switch to menu view
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
     }
 }
 
@@ -191,9 +192,8 @@ int32_t flipbip_app(void* p) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    scene_manager_next_scene(app->scene_manager, FlipBipSceneMenu); //Start with start screen
-    //scene_manager_next_scene(app->scene_manager, FlipBipSceneMenu); //if you want to directly start with Menu
-
+    scene_manager_next_scene(app->scene_manager, FlipBipSceneMenu); //Start with menu
+    
     furi_hal_power_suppress_charge_enter();
 
     view_dispatcher_run(app->view_dispatcher);

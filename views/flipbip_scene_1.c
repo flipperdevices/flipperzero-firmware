@@ -7,7 +7,6 @@
 #include <storage/storage.h>
 #include <string.h>
 //#include "flipbip_icons.h"
-//#include "../helpers/flipbip_haptic.h"
 #include "../helpers/flipbip_string.h"
 #include "../helpers/flipbip_file.h"
 // From: /lib/crypto
