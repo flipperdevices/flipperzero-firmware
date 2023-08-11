@@ -6,5 +6,5 @@ App(
     requires=["gui", "subghz"],
     stack_size=2 * 1024,
     fap_icon="gpio_badge.png",
-    fap_category="Utilities",
+    fap_category="Misc",
 )
