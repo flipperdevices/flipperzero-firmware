@@ -50,6 +50,7 @@ void memzero(void* const pnt, const size_t len) {
     SecureZeroMemory(pnt, len);
 #elif defined(HAVE_MEMSET_S)
     memset_s(pnt, (rsize_t)len, 0, (rsize_t)len);
+// REMOVED - Flipper Zero does not have this function
 // #elif defined(HAVE_EXPLICIT_BZERO)
 //   explicit_bzero(pnt, len);
 #elif defined(HAVE_EXPLICIT_MEMSET)
