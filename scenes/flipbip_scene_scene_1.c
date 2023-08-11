@@ -14,7 +14,8 @@ void flipbip_scene_scene_1_on_enter(void* context) {
 
     if(app->import_from_mnemonic == 1) {
         // handle mnemonic seed import mode with text input, this only
-        // uses this scene to have a correct stack os scenes
+        // uses this scene to have a correct stack of scenes
+        app->input_state = FlipBipTextInputMnemonic;
         text_input_set_header_text(app->text_input, "Enter mnemonic phrase");
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdTextInput);
     } else {

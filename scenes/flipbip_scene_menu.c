@@ -136,7 +136,6 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
             return true;
         } else if(event.event == SubmenuIndexScene1Import) {
             app->import_from_mnemonic = 1;
-            app->input_state = FlipBipTextInputMnemonic;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1Import);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
