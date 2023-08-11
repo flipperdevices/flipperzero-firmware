@@ -8,7 +8,7 @@ Acurite 592TXR
 Acurite-606TX
 Acurite-606TXC
 AmbientWeather
-Auriol AHFL 433B2 IPX4 sensor
+Auriol AHFL
 Avriol HG06061
 GT-WT02
 GT-WT03
