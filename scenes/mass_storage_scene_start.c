@@ -11,6 +11,12 @@ static const struct {
     {"16M", 16 * 1024 * 1024},
     {"32M", 32 * 1024 * 1024},
     {"64M", 64 * 1024 * 1024},
+    {"128M", 128 * 1024 * 1024},
+    {"256M", 256 * 1024 * 1024},
+    {"512M", 512 * 1024 * 1024},
+    {"700M", 700 * 1024 * 1024},
+    {"1G", 1024 * 1024 * 1024},
+    {"2G", 2u * 1024 * 1024 * 1024},
 };
 
 static void mass_storage_item_select(void* context, uint32_t index) {
@@ -31,8 +37,9 @@ static void mass_storage_image_size(VariableItem* item) {
 
 void mass_storage_scene_start_on_enter(void* context) {
     MassStorageApp* app = context;
+
     VariableItem* item =
-        variable_item_list_add(app->variable_item_list, "Select disc image", 0, NULL, NULL);
+        variable_item_list_add(app->variable_item_list, "Select disk image", 0, NULL, NULL);
 
     item = variable_item_list_add(
         app->variable_item_list, "New image", COUNT_OF(image_size), mass_storage_image_size, app);

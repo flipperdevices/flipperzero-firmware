@@ -44,9 +44,9 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         furi_string_set_str(app->file_path, MASS_STORAGE_APP_PATH_FOLDER);
     }
 
-    app->gui = furi_record_open("gui");
-    app->fs_api = furi_record_open("storage");
-    app->dialogs = furi_record_open("dialogs");
+    app->gui = furi_record_open(RECORD_GUI);
+    app->fs_api = furi_record_open(RECORD_STORAGE);
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
