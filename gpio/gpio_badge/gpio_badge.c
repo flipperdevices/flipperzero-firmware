@@ -23,6 +23,7 @@ typedef enum {
     EffectIdLRL,
     EffectIdBothLRL,
     EffectIdLR,
+    EffectIdCounter,
     EffectIdCount // Make sure this is last
 } EffectId;
 
@@ -137,6 +138,27 @@ void do_effect_lr() {
     }
 }
 
+void do_effect_counter() {
+    uint32_t c = 0;
+
+    while(true) {
+        for(size_t i = 0; i < COUNT_OF(pin_leds); i++) {
+            if((c & (1 << i)) != 0) {
+                furi_hal_gpio_write(pin_leds[i], true);
+            }
+        }
+        furi_delay_ms(speed);
+        for(size_t i = 0; i < COUNT_OF(pin_leds); i++) {
+            furi_hal_gpio_write(pin_leds[i], false);
+        }
+        c++;
+
+        if(furi_hal_gpio_read(pin_back) == false || effect != EffectIdCounter) {
+            break;
+        }
+    }
+}
+
 void do_effects() {
     while(furi_hal_gpio_read(pin_back)) {
         switch(effect) {
@@ -145,6 +167,9 @@ void do_effects() {
             break;
         case EffectIdBothLRL:
             do_effect_both_lrl();
+            break;
+        case EffectIdCounter:
+            do_effect_counter();
             break;
         default:
             do_effect_lr();
