@@ -6,7 +6,7 @@
 
 #define MNEMONIC_MENU_DEFAULT "Import mnemonic seed"
 #define MNEMONIC_MENU_SUCCESS "Import seed (success)"
-#define MNEMONIC_MENU_FAILURE "Import seed (failure)"
+#define MNEMONIC_MENU_FAILURE "Import seed (failed!)"
 
 bool flipbip_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -112,7 +112,6 @@ FlipBip* flipbip_app_alloc() {
     app->submenu = submenu_alloc();
 
     // Settings
-    app->haptic = FlipBipHapticOn;
     app->bip39_strength = FlipBipStrength256; // 256 bits (24 words)
     app->passphrase = FlipBipPassphraseOff;
 

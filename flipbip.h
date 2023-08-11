@@ -14,7 +14,7 @@
 #include "scenes/flipbip_scene.h"
 #include "views/flipbip_scene_1.h"
 
-#define FLIPBIP_VERSION "v1.13.0"
+#define FLIPBIP_VERSION "v1.13"
 
 #define COIN_BTC 0
 #define COIN_DOGE 3
@@ -34,7 +34,6 @@ typedef struct {
     FlipBipScene1* flipbip_scene_1;
     char* mnemonic_menu_text;
     // Settings options
-    int haptic;
     int bip39_strength;
     int passphrase;
     // Main menu options
@@ -55,11 +54,6 @@ typedef enum {
     FlipBipViewIdSettings,
     FlipBipViewIdTextInput,
 } FlipBipViewId;
-
-typedef enum {
-    FlipBipHapticOff,
-    FlipBipHapticOn,
-} FlipBipHapticState;
 
 typedef enum {
     FlipBipStrength128,

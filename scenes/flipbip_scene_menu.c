@@ -1,7 +1,7 @@
 #include "../flipbip.h"
 #include "../helpers/flipbip_file.h"
 
-#define FLIPBIP_SUBMENU_TEXT "* FlipBIP wallet " FLIPBIP_VERSION " *"
+#define FLIPBIP_SUBMENU_TEXT "** FlipBIP wallet " FLIPBIP_VERSION " **"
 
 enum SubmenuIndex {
     SubmenuIndexScene1BTC = 10,
