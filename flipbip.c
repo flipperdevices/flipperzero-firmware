@@ -95,10 +95,10 @@ FlipBip* flipbip_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     //app->notification = furi_record_open(RECORD_NOTIFICATION);
 
-    //Turn backlight on, believe me this makes testing your app easier
+    // Turn backlight on, believe me this makes testing your app easier
     //notification_message(app->notification, &sequence_display_backlight_on);
 
-    //Scene additions
+    // Scene additions
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
 
@@ -143,13 +143,13 @@ FlipBip* flipbip_app_alloc() {
         (void*)app,
         app->input_text,
         TEXT_BUFFER_SIZE,
-        //clear default text
+        // clear default text
         true);
-    text_input_set_header_text(app->text_input, "Input");
+    //text_input_set_header_text(app->text_input, "Input");
     view_dispatcher_add_view(
         app->view_dispatcher, FlipBipViewIdTextInput, text_input_get_view(app->text_input));
 
-    //End Scene Additions
+    // End Scene Additions
 
     return app;
 }
