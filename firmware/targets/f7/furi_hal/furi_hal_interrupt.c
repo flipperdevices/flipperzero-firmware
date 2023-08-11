@@ -7,6 +7,8 @@
 #include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_cortex.h>
+#include <stm32wbxx_ll_lpuart.h>
+#include <stm32wbxx_ll_usart.h>
 
 #define TAG "FuriHalInterrupt"
 
@@ -58,6 +60,12 @@ const IRQn_Type furi_hal_interrupt_irqn[FuriHalInterruptIdMax] = {
     // LPTIMx
     [FuriHalInterruptIdLpTim1] = LPTIM1_IRQn,
     [FuriHalInterruptIdLpTim2] = LPTIM2_IRQn,
+
+    // UARTx
+    [FuriHalInterruptIdUart1] = USART1_IRQn,
+
+    // LPUARTx
+    [FuriHalInterruptIdLpUart1] = LPUART1_IRQn,
 };
 
 __attribute__((always_inline)) static inline void
@@ -327,4 +335,12 @@ void LPTIM1_IRQHandler() {
 
 void LPTIM2_IRQHandler() {
     furi_hal_interrupt_call(FuriHalInterruptIdLpTim2);
+}
+
+void USART1_IRQHandler(void) {
+    furi_hal_interrupt_call(FuriHalInterruptIdUart1);
+}
+
+void LPUART1_IRQHandler(void){
+    furi_hal_interrupt_call(FuriHalInterruptIdLpUart1);
 }
