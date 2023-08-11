@@ -3,7 +3,7 @@
 [![Build](https://github.com/xtruan/FlipBIP/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xtruan/FlipBIP/actions/workflows/build.yml)
 
 ## Crypto toolkit for Flipper Zero
-- Last built against `0.86.1` Flipper Zero firmware release
+- Last built against `0.88.0` Flipper Zero firmware release
 - Using Trezor crypto libs from `core/v2.5.3` release
 - Included in [RogueMaster Custom Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
 - NOTE: This app uses very close to the maximum Flipper Zero RAM. If you get `furi_check failed` on launch, try running again!
