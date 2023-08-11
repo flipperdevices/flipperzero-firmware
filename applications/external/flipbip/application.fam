@@ -9,8 +9,6 @@ App(
     stack_size=3 * 1024,
     order=10,
     fap_icon="flipbip_10px.png",
-    fap_icon_assets="icons",
-    fap_icon_assets_symbol="flipbip",
     fap_private_libs=[
         Lib(
             name="crypto",
@@ -19,6 +17,6 @@ App(
     fap_category="Tools",
     fap_author="Struan Clark (xtruan)",
     fap_weburl="https://github.com/xtruan/FlipBIP",
-    fap_version=(1, 12),
-    fap_description="Crypto wallet tools for Flipper",
+    fap_version=(1, 13),
+    fap_description="Crypto wallet for Flipper",
 )
