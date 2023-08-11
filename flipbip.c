@@ -1,9 +1,13 @@
 #include "flipbip.h"
 #include "helpers/flipbip_file.h"
-#include "helpers/flipbip_haptic.h"
+//#include "helpers/flipbip_haptic.h"
 // From: lib/crypto
 #include <memzero.h>
 #include <bip39.h>
+
+#define MNEMONIC_MENU_DEFAULT "Import mnemonic seed"
+#define MNEMONIC_MENU_SUCCESS "Import seed (success)"
+#define MNEMONIC_MENU_FAILURE "Import seed (failure)"
 
 bool flipbip_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -40,7 +44,7 @@ static void text_input_callback(void* context) {
             // reset input state
             app->input_state = FlipBipTextInputDefault;
             handled = true;
-            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
+            //view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
         } else if(app->input_state == FlipBipTextInputMnemonic) {
             if(app->import_from_mnemonic == 1) {
                 strcpy(app->import_mnemonic_text, app->input_text);
@@ -54,11 +58,13 @@ static void text_input_callback(void* context) {
                     status = FlipBipStatusSaveError; // 12 = save error
 
                 if(status == FlipBipStatusSuccess) {
+                    app->mnemonic_menu_text = MNEMONIC_MENU_SUCCESS;
                     //notification_message(app->notification, &sequence_blink_cyan_100);
-                    flipbip_play_happy_bump(app);
+                    //flipbip_play_happy_bump(app);
                 } else {
+                    app->mnemonic_menu_text = MNEMONIC_MENU_FAILURE;
                     //notification_message(app->notification, &sequence_blink_red_100);
-                    flipbip_play_long_bump(app);
+                    //flipbip_play_long_bump(app);
                 }
 
                 memzero(app->import_mnemonic_text, TEXT_BUFFER_SIZE);
@@ -68,7 +74,9 @@ static void text_input_callback(void* context) {
             // reset input state
             app->input_state = FlipBipTextInputDefault;
             handled = true;
-            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
+            // exit scene 1 instance that's being used for text input and go back to menu
+            scene_manager_previous_scene(app->scene_manager);
+            //view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
         }
     }
 
@@ -77,17 +85,17 @@ static void text_input_callback(void* context) {
         memzero(app->input_text, TEXT_BUFFER_SIZE);
         // reset input state
         app->input_state = FlipBipTextInputDefault;
-        view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
+        //view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
     }
 }
 
 FlipBip* flipbip_app_alloc() {
     FlipBip* app = malloc(sizeof(FlipBip));
     app->gui = furi_record_open(RECORD_GUI);
-    app->notification = furi_record_open(RECORD_NOTIFICATION);
+    //app->notification = furi_record_open(RECORD_NOTIFICATION);
 
     //Turn backlight on, believe me this makes testing your app easier
-    notification_message(app->notification, &sequence_display_backlight_on);
+    //notification_message(app->notification, &sequence_display_backlight_on);
 
     //Scene additions
     app->view_dispatcher = view_dispatcher_alloc();
@@ -111,6 +119,7 @@ FlipBip* flipbip_app_alloc() {
     app->bip44_coin = FlipBipCoinBTC0; // 0 (BTC)
     app->overwrite_saved_seed = 0;
     app->import_from_mnemonic = 0;
+    app->mnemonic_menu_text = MNEMONIC_MENU_DEFAULT;
 
     // Text input
     app->input_state = FlipBipTextInputDefault;
@@ -163,7 +172,7 @@ void flipbip_app_free(FlipBip* app) {
     furi_record_close(RECORD_GUI);
 
     app->gui = NULL;
-    app->notification = NULL;
+    //app->notification = NULL;
 
     //Remove whatever is left
     memzero(app, sizeof(FlipBip));

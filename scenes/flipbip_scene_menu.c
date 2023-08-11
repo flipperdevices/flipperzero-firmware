@@ -72,7 +72,7 @@ void flipbip_scene_menu_on_enter(void* context) {
     }
     submenu_add_item(
         app->submenu,
-        "Import from mnemonic",
+        app->mnemonic_menu_text,
         SubmenuIndexScene1Import,
         flipbip_scene_menu_submenu_callback,
         app);
@@ -137,8 +137,11 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexScene1Import) {
             app->import_from_mnemonic = 1;
             app->input_state = FlipBipTextInputMnemonic;
-            text_input_set_header_text(app->text_input, "Enter mnemonic phrase");
-            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdTextInput);
+
+            scene_manager_set_scene_state(
+                app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1Import);
+            scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
+
             return true;
         } else if(event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(

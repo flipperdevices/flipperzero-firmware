@@ -5,7 +5,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include <notification/notification_messages.h>
+//#include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/scene_manager.h>
@@ -25,13 +25,14 @@
 
 typedef struct {
     Gui* gui;
-    NotificationApp* notification;
+    // NotificationApp* notification;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     TextInput* text_input;
     FlipBipScene1* flipbip_scene_1;
+    char* mnemonic_menu_text;
     // Settings options
     int haptic;
     int bip39_strength;

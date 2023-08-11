@@ -6,8 +6,8 @@
 //#include <dolphin/dolphin.h>
 #include <storage/storage.h>
 #include <string.h>
-// #include "flipbip_icons.h"
-#include "../helpers/flipbip_haptic.h"
+//#include "flipbip_icons.h"
+//#include "../helpers/flipbip_haptic.h"
 #include "../helpers/flipbip_string.h"
 #include "../helpers/flipbip_file.h"
 // From: /lib/crypto
@@ -663,7 +663,10 @@ void flipbip_scene_1_enter(void* context) {
         s_derivation_text = TEXT_NEW_WALLET;
     }
 
-    flipbip_play_happy_bump(app);
+    // Wait a beat to allow the display time to update to the loading screen
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 20);
+
+    //flipbip_play_happy_bump(app);
     //notification_message(app->notification, &sequence_blink_cyan_100);
     //flipbip_led_set_rgb(app, 255, 0, 0);
 
@@ -678,7 +681,8 @@ void flipbip_scene_1_enter(void* context) {
 
             // nonzero status, free the mnemonic
             if(status != FlipBipStatusSuccess) {
-                memzero((void*)model->mnemonic, strlen(model->mnemonic));
+                // calling strlen on mnemonic here can cause a crash, don't.
+                // it wasn't loaded properly anyways, no need to zero the memory
                 free((void*)model->mnemonic);
             }
 
@@ -686,15 +690,15 @@ void flipbip_scene_1_enter(void* context) {
             if(status == FlipBipStatusSaveError) {
                 model->mnemonic = "ERROR:,Save error";
                 model->page = PAGE_MNEMONIC;
-                flipbip_play_long_bump(app);
+                //flipbip_play_long_bump(app);
             } else if(status == FlipBipStatusLoadError) {
                 model->mnemonic = "ERROR:,Load error";
                 model->page = PAGE_MNEMONIC;
-                flipbip_play_long_bump(app);
+                //flipbip_play_long_bump(app);
             } else if(status == FlipBipStatusMnemonicCheckError) {
                 model->mnemonic = "ERROR:,Mnemonic check error";
                 model->page = PAGE_MNEMONIC;
-                flipbip_play_long_bump(app);
+                //flipbip_play_long_bump(app);
             }
 
             // s_busy = false;
