@@ -49,7 +49,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
-- Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [WatchDogs (By wrenchathome)](https://github.com/wrenchathome/flip0anims/tree/main/Animations/WatchDogs)
 - OFW: [RPC: md5 in storage list #2929 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2929)
 - OFW: [Fixes #2957 - subghz decode_raw #2958 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/2958)
@@ -80,6 +79,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [UI: Clock on Desktop #2891 (By gid9798)](https://github.com/flipperdevices/flipperzero-firmware/pull/2891) (Mostly Already In RM)
 - Updated: [FlipBIP Crypto Wallet v1.13 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
+- Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 
 <a name="release">
 

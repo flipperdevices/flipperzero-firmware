@@ -53,7 +53,6 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
 
         } else if(event.event == GuiButtonTypeRight) {
-            // TODO: only allow if GPS is detected?
             if(data_display_get_state(ublox->data_display) != DataDisplayGPSNotFound) {
                 FURI_LOG_I(TAG, "right button");
                 if(ublox->log_state == UbloxLogStateNone) {

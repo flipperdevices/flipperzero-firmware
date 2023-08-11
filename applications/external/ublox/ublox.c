@@ -69,7 +69,6 @@ Ublox* ublox_alloc() {
 
     // Establish default data display state
     (ublox->data_display_state).view_mode = UbloxDataDisplayViewModeHandheld;
-    (ublox->data_display_state).backlight_mode = UbloxDataDisplayBacklightDefault;
     (ublox->data_display_state).refresh_rate = 2;
     (ublox->data_display_state).notify_mode = UbloxDataDisplayNotifyOn;
 
@@ -137,6 +136,10 @@ int32_t ublox_app(void* p) {
     view_dispatcher_run(ublox->view_dispatcher);
 
     // force restore the default backlight on exit
+
+    // TODO: this is breaking the backlight timeout for everything
+    // else: test by opening ublox, then leaving and opening DAP
+    // Link. DAP Link should force the backlight on but doesn't.
     notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
 
     ublox_free(ublox);

@@ -4,7 +4,6 @@
 
 enum UbloxSettingIndex {
     UbloxSettingIndexRefreshRate,
-    UbloxSettingIndexBacklightMode,
     UbloxSettingIndexDisplayMode,
     UbloxSettingIndexNotify,
     UbloxSettingIndexPlatformModel,
@@ -15,7 +14,6 @@ enum UbloxSettingIndex {
 enum UbloxDataDisplayConfigIndex {
     UbloxDataDisplayConfigIndexDisplayMode,
     UbloxDataDisplayConfigIndexRefreshRate,
-    UbloxDataDisplayConfigIndexBacklightMode,
 };
 
 #define DISPLAY_VIEW_MODE_COUNT 2
@@ -27,17 +25,6 @@ const char* const display_view_mode_text[DISPLAY_VIEW_MODE_COUNT] = {
 const UbloxDataDisplayViewMode display_view_mode_value[DISPLAY_VIEW_MODE_COUNT] = {
     UbloxDataDisplayViewModeHandheld,
     UbloxDataDisplayViewModeCar,
-};
-
-#define BACKLIGHT_MODE_COUNT 2
-const char* const backlight_mode_text[BACKLIGHT_MODE_COUNT] = {
-    "Default",
-    "On",
-};
-
-const UbloxDataDisplayBacklightMode backlight_mode_value[BACKLIGHT_MODE_COUNT] = {
-    UbloxDataDisplayBacklightDefault,
-    UbloxDataDisplayBacklightOn,
 };
 
 #define REFRESH_RATE_COUNT 8
@@ -135,37 +122,6 @@ static void ublox_scene_data_display_config_set_refresh_rate(VariableItem* item)
     variable_item_set_current_value_text(item, refresh_rate_text[index]);
     (ublox->data_display_state).refresh_rate = refresh_rate_values[index];
     FURI_LOG_I(TAG, "set refresh rate to %lds", (ublox->data_display_state).refresh_rate);
-}
-
-static uint8_t ublox_scene_data_display_config_next_backlight_mode(
-    const UbloxDataDisplayBacklightMode value,
-    void* context) {
-    furi_assert(context);
-
-    uint8_t index = 0;
-    for(int i = 0; i < BACKLIGHT_MODE_COUNT; i++) {
-        if(value == backlight_mode_value[i]) {
-            index = i;
-            break;
-        } else {
-            index = 0;
-        }
-    }
-    return index;
-}
-
-static void ublox_scene_data_display_config_set_backlight_mode(VariableItem* item) {
-    Ublox* ublox = variable_item_get_context(item);
-    uint8_t index = variable_item_get_current_value_index(item);
-
-    variable_item_set_current_value_text(item, backlight_mode_text[index]);
-    (ublox->data_display_state).backlight_mode = backlight_mode_value[index];
-
-    if((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightOn) {
-        notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_on);
-    } else if((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightDefault) {
-        notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
-    }
 }
 
 static uint8_t ublox_scene_data_display_config_next_display_view_mode(
@@ -295,17 +251,6 @@ void ublox_scene_data_display_config_on_enter(void* context) {
         (ublox->data_display_state).refresh_rate, ublox);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, refresh_rate_text[value_index]);
-
-    item = variable_item_list_add(
-        ublox->variable_item_list,
-        "Backlight:",
-        BACKLIGHT_MODE_COUNT,
-        ublox_scene_data_display_config_set_backlight_mode,
-        ublox);
-    value_index = ublox_scene_data_display_config_next_backlight_mode(
-        (ublox->data_display_state).backlight_mode, ublox);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, backlight_mode_text[value_index]);
 
     item = variable_item_list_add(
         ublox->variable_item_list,
