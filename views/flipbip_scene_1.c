@@ -6,9 +6,7 @@
 //#include <dolphin/dolphin.h>
 #include <storage/storage.h>
 #include <string.h>
-#include "flipbip_icons.h"
-#include "../helpers/flipbip_haptic.h"
-#include "../helpers/flipbip_led.h"
+//#include "flipbip_icons.h"
 #include "../helpers/flipbip_string.h"
 #include "../helpers/flipbip_file.h"
 // From: /lib/crypto
@@ -43,7 +41,7 @@
 #define TEXT_NEW_WALLET "New wallet"
 #define TEXT_DEFAULT_COIN "Coin"
 #define TEXT_RECEIVE_ADDRESS "receive address:"
-#define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
+// #define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
 const char* TEXT_INFO = "-Scroll pages with up/down-"
                         "p1,2)   BIP39 Mnemonic/Seed"
                         "p3)       BIP32 Root Key   "
@@ -101,7 +99,7 @@ static CONFIDENTIAL char* s_disp_text4 = NULL;
 static CONFIDENTIAL char* s_disp_text5 = NULL;
 static CONFIDENTIAL char* s_disp_text6 = NULL;
 // Derivation path text
-static const char* s_derivation_text = TEXT_DEFAULT_DERIV;
+static const char* s_derivation_text = TEXT_DEFAULT_COIN; // TEXT_DEFAULT_DERIV;
 // Warning text
 static bool s_warn_insecure = false;
 #define WARN_INSECURE_TEXT_1 "Recommendation:"
@@ -161,7 +159,8 @@ static void flipbip_scene_1_init_address(
         addr_text[1] = 'x';
         // Convert the hash to a hex string
         flipbip_btox((uint8_t*)buf, 20, addr_text + 2);
-    } else if(coin_info[5] == FlipBipCoinZEC133) { // ETH
+
+    } else if(coin_info[5] == FlipBipCoinZEC133) { // ZEC
         ecdsa_get_address(
             s_addr_node->public_key, coin_info[3], HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
         addr_text[0] = 't';
@@ -320,7 +319,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 2, 10, TEXT_LOADING);
         canvas_draw_str(canvas, 7, 30, s_derivation_text);
-        canvas_draw_icon(canvas, 86, 22, &I_Keychain_39x36);
+        // canvas_draw_icon(canvas, 86, 22, &I_Keychain_39x36);
         if(s_warn_insecure) {
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_str(canvas, 2, 50, WARN_INSECURE_TEXT_1);
@@ -663,9 +662,12 @@ void flipbip_scene_1_enter(void* context) {
         s_derivation_text = TEXT_NEW_WALLET;
     }
 
-    flipbip_play_happy_bump(app);
+    // Wait a beat to allow the display time to update to the loading screen
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 20);
+
+    //flipbip_play_happy_bump(app);
     //notification_message(app->notification, &sequence_blink_cyan_100);
-    flipbip_led_set_rgb(app, 255, 0, 0);
+    //flipbip_led_set_rgb(app, 255, 0, 0);
 
     with_view_model(
         instance->view,
@@ -678,7 +680,8 @@ void flipbip_scene_1_enter(void* context) {
 
             // nonzero status, free the mnemonic
             if(status != FlipBipStatusSuccess) {
-                memzero((void*)model->mnemonic, strlen(model->mnemonic));
+                // calling strlen on mnemonic here can cause a crash, don't.
+                // it wasn't loaded properly anyways, no need to zero the memory
                 free((void*)model->mnemonic);
             }
 
@@ -686,15 +689,15 @@ void flipbip_scene_1_enter(void* context) {
             if(status == FlipBipStatusSaveError) {
                 model->mnemonic = "ERROR:,Save error";
                 model->page = PAGE_MNEMONIC;
-                flipbip_play_long_bump(app);
+                //flipbip_play_long_bump(app);
             } else if(status == FlipBipStatusLoadError) {
                 model->mnemonic = "ERROR:,Load error";
                 model->page = PAGE_MNEMONIC;
-                flipbip_play_long_bump(app);
+                //flipbip_play_long_bump(app);
             } else if(status == FlipBipStatusMnemonicCheckError) {
                 model->mnemonic = "ERROR:,Mnemonic check error";
                 model->page = PAGE_MNEMONIC;
-                flipbip_play_long_bump(app);
+                //flipbip_play_long_bump(app);
             }
 
             // s_busy = false;
