@@ -242,20 +242,31 @@ void nfc_free(Nfc* instance) {
     f_hal_nfc_release();
 }
 
+// TODO: refactor this function (use 2 parameters for mode?)
 void nfc_config(Nfc* instance, NfcMode mode) {
     furi_assert(instance);
     if(mode == NfcModeIdle) {
         f_hal_nfc_reset_mode();
         instance->config_state = NfcConfigurationStateIdle;
-    } else if(mode == NfcModeIso14443_3aPoller) {
-        f_hal_nfc_set_mode(FHalNfcModeIso14443_3aPoller, FHalNfcBitrate106);
+    } else if(mode == NfcModeIso14443aPoller) {
+        f_hal_nfc_set_mode(FHalNfcModeIso14443aPoller, FHalNfcBitrate106);
         instance->config_state = NfcConfigurationStateDone;
-    } else if(mode == NfcModeIso14443_3aListener) {
+    } else if(mode == NfcModeIso14443aListener) {
         f_hal_nfc_low_power_mode_stop();
-        f_hal_nfc_set_mode(FHalNfcModeIso14443_3aListener, FHalNfcBitrate106);
+        f_hal_nfc_set_mode(FHalNfcModeIso14443aListener, FHalNfcBitrate106);
         instance->config_state = NfcConfigurationStateDone;
-    } else if(mode == NfcModeIso14443_3bPoller) {
-        f_hal_nfc_set_mode(FHalNfcModeIso14443_3bPoller, FHalNfcBitrate106);
+    } else if(mode == NfcModeIso14443bPoller) {
+        f_hal_nfc_set_mode(FHalNfcModeIso14443bPoller, FHalNfcBitrate106);
+        instance->config_state = NfcConfigurationStateDone;
+    } else if(mode == NfcModeIso15693Poller) {
+        f_hal_nfc_set_mode(FHalNfcModeIso15693Poller, FHalNfcBitrate26p48);
+        instance->config_state = NfcConfigurationStateDone;
+    } else if(mode == NfcModeIso15693Listener) {
+        f_hal_nfc_low_power_mode_stop();
+        f_hal_nfc_set_mode(FHalNfcModeIso15693Listener, FHalNfcBitrate26p48);
+        instance->config_state = NfcConfigurationStateDone;
+    } else if(mode == NfcModeFelicaPoller) {
+        f_hal_nfc_set_mode(FHalNfcModeFelicaPoller, FHalNfcBitrate106);
         instance->config_state = NfcConfigurationStateDone;
     }
 }

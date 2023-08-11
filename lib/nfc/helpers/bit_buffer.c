@@ -35,6 +35,8 @@ void bit_buffer_free(BitBuffer* buf) {
 void bit_buffer_reset(BitBuffer* buf) {
     furi_assert(buf);
 
+    memset(buf->data, 0, buf->capacity_bytes);
+    memset(buf->parity, 0, buf->capacity_bytes);
     buf->size_bits = 0;
 }
 
@@ -212,6 +214,19 @@ uint8_t bit_buffer_get_byte(const BitBuffer* buf, size_t index) {
     return buf->data[index];
 }
 
+uint8_t bit_buffer_get_byte_from_bit(const BitBuffer* buf, size_t index_bits) {
+    furi_assert(buf);
+    furi_assert(buf->capacity_bytes * BITS_IN_BYTE > index_bits);
+
+    const size_t byte_index = index_bits / BITS_IN_BYTE;
+    const size_t bit_offset = index_bits % BITS_IN_BYTE;
+
+    const uint8_t lo = buf->data[byte_index] >> bit_offset;
+    const uint8_t hi = buf->data[byte_index + 1] << (BITS_IN_BYTE - bit_offset);
+
+    return lo | hi;
+}
+
 const uint8_t* bit_buffer_get_data(const BitBuffer* buf) {
     furi_assert(buf);
 
@@ -227,8 +242,8 @@ const bool* bit_buffer_get_parity(const BitBuffer* buf) {
 void bit_buffer_set_byte(BitBuffer* buf, size_t index, uint8_t byte) {
     furi_assert(buf);
 
-    size_t size_byted = bit_buffer_get_size_bytes(buf);
-    furi_assert(size_byted > index);
+    const size_t size_bytes = bit_buffer_get_size_bytes(buf);
+    furi_assert(size_bytes > index);
 
     buf->data[index] = byte;
 }
@@ -293,4 +308,19 @@ void bit_buffer_append_bytes(BitBuffer* buf, const uint8_t* data, size_t size_by
     // TODO: Correct size
     memcpy(&buf->data[buf_size_bytes], data, size_bytes);
     buf->size_bits += size_bytes * BITS_IN_BYTE;
+}
+
+void bit_buffer_append_bit(BitBuffer* buf, bool bit) {
+    furi_assert(buf);
+    furi_assert(
+        bit_buffer_get_size_bytes(buf) <=
+        (buf->capacity_bytes - (bit_buffer_has_partial_byte(buf) ? 0 : 1)));
+
+    if(bit) {
+        const size_t byte_index = buf->size_bits / BITS_IN_BYTE;
+        const size_t bit_offset = (buf->size_bits % BITS_IN_BYTE);
+        buf->data[byte_index] |= 1U << bit_offset;
+    }
+
+    buf->size_bits++;
 }

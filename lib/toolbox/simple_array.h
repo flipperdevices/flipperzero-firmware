@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,6 +85,16 @@ void simple_array_reset(SimpleArray* instance);
  * @param [in] other Pointer to the SimpleArray instance to copy from
  */
 void simple_array_copy(SimpleArray* instance, const SimpleArray* other);
+
+/**
+ * Check if another SimpleArray instance is equal (the same object or holds the
+ * same data) to this one.
+ *
+ * @param [in] instance Pointer to the SimpleArray instance to be compared
+ * @param [in] other Pointer to the SimpleArray instance to be compared
+ * @return True if instances are considered equal, false otherwise
+ */
+bool simple_array_is_equal(const SimpleArray* instance, const SimpleArray* other);
 
 /**
  * Get the count of elements currently contained in a SimpleArray instance.

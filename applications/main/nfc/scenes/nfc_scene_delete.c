@@ -35,7 +35,6 @@ void nfc_scene_delete_on_enter(void* context) {
     furi_string_set_str(temp_str, nfc_device_get_name(nfc->nfc_device, NfcDeviceNameTypeFull));
     widget_add_string_element(
         nfc->widget, 64, 34, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
-    widget_add_string_element(nfc->widget, 64, 44, AlignCenter, AlignTop, FontSecondary, "NFC-A");
     furi_string_free(temp_str);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
