@@ -184,8 +184,6 @@ int32_t uhf_app_main(void* ctx) {
     UNUSED(ctx);
     UHFApp* uhf_app = uhf_alloc();
 
-    furi_hal_uart_resume(FuriHalUartIdUSART1);
-
     // enable 5v pin
     furi_hal_power_enable_otg();
 
@@ -194,8 +192,6 @@ int32_t uhf_app_main(void* ctx) {
 
     // disable 5v pin
     furi_hal_power_disable_otg();
-
-    furi_hal_uart_suspend(FuriHalUartIdUSART1);
 
     // exit app
     uhf_free(uhf_app);

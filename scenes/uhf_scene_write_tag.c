@@ -32,7 +32,7 @@ bool uhf_scene_write_tag_on_event(void* ctx, SceneManagerEvent event) {
     UHFApp* uhf_app = ctx;
     bool consumed = false;
     if(event.event == UHFCustomEventWorkerExit) {
-        scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadTagSuccess);
+        scene_manager_next_scene(uhf_app->scene_manager, UHFSceneWriteTagSuccess);
         consumed = true;
     }
     return consumed;
