@@ -8,7 +8,10 @@ while read entry status name type params
 do
 	if [ "$entry" == "Version" ]; then
 		echo "API: $name"
-		echo "Apps build for Unleashed FW with API version: $name" > changelog.md
+		echo '' >> CHANGELOG.md
+		echo "Apps build for Unleashed FW with API version: $name" >> CHANGELOG.md
+		echo '' >> CHANGELOG.md
+		echo "Extra pack = all apps / Base pack = apps that was in UL by default" >> CHANGELOG.md
 		break;
 	fi
 done < $FILE

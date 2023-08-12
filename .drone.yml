@@ -110,7 +110,7 @@ steps:
         - publish/*.tgz
         - publish/*.zip
       title: ${DRONE_TAG}
-      note: changelog.md
+      note: CHANGELOG.md
       checksum:
         - md5
         - sha1
