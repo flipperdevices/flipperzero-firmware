@@ -86,16 +86,16 @@ steps:
       - zip -r all-the-apps-base.zip base_pack_build
       - tar czpf all-the-apps-extra.tgz extra_pack_build
       - tar czpf all-the-apps-base.tgz base_pack_build
-      - mkdir publish
-      - mv all-the-apps-extra.zip publish/
-      - mv all-the-apps-base.zip publish/
-      - mv all-the-apps-extra.tgz publish/
-      - mv all-the-apps-base.tgz publish/
+      - mkdir ${DRONE_TAG}
+      - mv all-the-apps-extra.zip ${DRONE_TAG}/
+      - mv all-the-apps-base.zip ${DRONE_TAG}/
+      - mv all-the-apps-extra.tgz ${DRONE_TAG}/
+      - mv all-the-apps-base.tgz ${DRONE_TAG}/
       - rm -rf extra_pack_build
       - rm -rf base_pack_build
       - rm -rf unleashed-firmware
       - ls -laS
-      - ls -laS publish
+      - ls -laS ${DRONE_TAG}
 
   - name: "Do Github release"
     image: ddplugins/github-release
@@ -107,8 +107,8 @@ steps:
       api_key:
         from_secret: github_apikey
       files:
-        - publish/*.tgz
-        - publish/*.zip
+        - ${DRONE_TAG}/*.tgz
+        - ${DRONE_TAG}/*.zip
       title: ${DRONE_TAG}
       note: CHANGELOG.md
       checksum:
