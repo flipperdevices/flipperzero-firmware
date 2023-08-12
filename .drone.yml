@@ -109,7 +109,7 @@ steps:
       files:
         - publish/*.tgz
         - publish/*.zip
-      title: ${DRONE_BUILD_NUMBER}
+      title: ${DRONE_TAG}
       note: changelog.md
       checksum:
         - md5
@@ -117,10 +117,8 @@ steps:
         - crc32
 
 trigger:
-  branch:
-    - dev
   event:
-    - push
+    - tag
 
 node:
   typ: haupt
