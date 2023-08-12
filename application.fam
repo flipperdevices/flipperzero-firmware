@@ -3,7 +3,7 @@ App(
     name="Chess",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipchess_app",
-        requires=[
+    requires=[
         "gui",
     ],
     stack_size=4 * 1024,
