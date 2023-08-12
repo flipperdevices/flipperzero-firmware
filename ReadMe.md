@@ -80,6 +80,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - Updated: [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
 - Updated: [USB Mass Storage (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage)
+- Added: [Wire Tester (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 
 <a name="release">
 
@@ -465,6 +466,7 @@ $ ./fbt dolphin_ext
 - [WiFi (Marauder) v6.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
+- [Wire Tester (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES

@@ -1,0 +1,14 @@
+App(
+    appid="wire_tester",
+    name="Wire Tester",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="app_main",
+    stack_size=1 * 1024,
+    fap_icon="icon.png",
+    fap_icon_assets="assets",
+    fap_category="GPIO",
+    fap_author="@unixispower",
+    fap_weburl="https://gitlab.com/unixispower/flipper-wire-tester",
+    fap_version="1.0",
+    fap_description="Beeps if a wire is continuous",
+)
