@@ -300,6 +300,37 @@ int check_phylink(EthWorker* worker, EthWorkerState state, EthWorkerProcess proc
 #define DHCP_SOCKET 0
 uint8_t ping_auto(uint8_t s, uint8_t* addr);
 
+static void load_net_parameters(const EthernetSaveConfig* cfg) {
+    gWIZNETINFO.gw[0] = cfg->gateway[0];
+    gWIZNETINFO.gw[1] = cfg->gateway[1];
+    gWIZNETINFO.gw[2] = cfg->gateway[2];
+    gWIZNETINFO.gw[3] = cfg->gateway[3];
+
+    gWIZNETINFO.sn[0] = cfg->mask[0];
+    gWIZNETINFO.sn[1] = cfg->mask[1];
+    gWIZNETINFO.sn[2] = cfg->mask[2];
+    gWIZNETINFO.sn[3] = cfg->mask[3];
+
+    gWIZNETINFO.mac[0] = cfg->mac[0];
+    gWIZNETINFO.mac[1] = cfg->mac[1];
+    gWIZNETINFO.mac[2] = cfg->mac[2];
+    gWIZNETINFO.mac[3] = cfg->mac[3];
+    gWIZNETINFO.mac[4] = cfg->mac[4];
+    gWIZNETINFO.mac[5] = cfg->mac[5];
+
+    gWIZNETINFO.ip[0] = cfg->ip[0];
+    gWIZNETINFO.ip[1] = cfg->ip[1];
+    gWIZNETINFO.ip[2] = cfg->ip[2];
+    gWIZNETINFO.ip[3] = cfg->ip[3];
+
+    gWIZNETINFO.dns[0] = cfg->dns[0];
+    gWIZNETINFO.dns[1] = cfg->dns[1];
+    gWIZNETINFO.dns[2] = cfg->dns[2];
+    gWIZNETINFO.dns[3] = cfg->dns[3];
+
+    gWIZNETINFO.dhcp = NETINFO_STATIC;
+}
+
 int32_t eth_worker_task(void* context) {
     furi_assert(context);
     EthWorker* worker = (EthWorker*)context;
@@ -450,6 +481,43 @@ int32_t eth_worker_task(void* context) {
                 gWIZNETINFO.dns[1],
                 gWIZNETINFO.dns[2],
                 gWIZNETINFO.dns[3]);
+            eth_set_force_state(EthWorkerStateOnline);
+        } else if(worker->state == EthWorkerStateStaticIp) {
+            if(!check_phylink(worker, EthWorkerStateStaticIp, EthWorkerProcessStatic, 5000)) {
+                worker->state = EthWorkerStateInited;
+                continue;
+            }
+            eth_log(EthWorkerProcessStatic, "set static ip");
+            load_net_parameters(worker->config);
+            eth_log(
+                EthWorkerProcessStatic,
+                "IP address:\n %d.%d.%d.%d",
+                gWIZNETINFO.ip[0],
+                gWIZNETINFO.ip[1],
+                gWIZNETINFO.ip[2],
+                gWIZNETINFO.ip[3]);
+            eth_log(
+                EthWorkerProcessStatic,
+                "SM Mask:\n %d.%d.%d.%d",
+                gWIZNETINFO.sn[0],
+                gWIZNETINFO.sn[1],
+                gWIZNETINFO.sn[2],
+                gWIZNETINFO.sn[3]);
+            eth_log(
+                EthWorkerProcessStatic,
+                "Gate way:\n %d.%d.%d.%d",
+                gWIZNETINFO.gw[0],
+                gWIZNETINFO.gw[1],
+                gWIZNETINFO.gw[2],
+                gWIZNETINFO.gw[3]);
+            eth_log(
+                EthWorkerProcessStatic,
+                "DNS Server:\n %d.%d.%d.%d",
+                gWIZNETINFO.dns[0],
+                gWIZNETINFO.dns[1],
+                gWIZNETINFO.dns[2],
+                gWIZNETINFO.dns[3]);
+            ctlnetwork(CN_SET_NETINFO, (void*)&gWIZNETINFO);
             eth_set_force_state(EthWorkerStateOnline);
         } else if(worker->state == EthWorkerStatePing) {
             uint8_t* adress = worker->config->ping_ip;
