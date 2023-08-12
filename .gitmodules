@@ -1,0 +1,12 @@
+[submodule "base_pack/dap_link/lib/free-dap"]
+	path = base_pack/dap_link/lib/free-dap
+	url = https://github.com/ataradov/free-dap.git
+[submodule "base_pack/subbrute"]
+	path = base_pack/subbrute
+	url = https://github.com/DarkFlippers/flipperzero-subbrute.git
+[submodule "base_pack/multi_fuzzer"]
+	path = base_pack/multi_fuzzer
+	url = https://github.com/DarkFlippers/Multi_Fuzzer.git
+[submodule "base_pack/totp/lib/wolfssl"]
+	path = base_pack/totp/lib/wolfssl
+	url = https://github.com/wolfSSL/wolfssl.git
