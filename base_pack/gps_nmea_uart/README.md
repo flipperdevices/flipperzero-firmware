@@ -1,40 +1,46 @@
 # GPS for Flipper Zero
 
-[Original link](https://github.com/ezod/flipperzero-gps)
+A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the
+- Adafruit Ultimate GPS Breakout.
 
-[Adafruit Ultimate GPS Breakout].
+Heavy lifting (NMEA parsing) provided by minmea.
 
-![ui](ui.png)
+## Usage
 
-Heavy lifting (NMEA parsing) provided by [minmea], which is included in this
-repository.
+This is a single-screen app, and a few interactions are provided via the
+hardware buttons:
 
-## Modifications made by @xMasterX
-- Ability to change baudrate using Up button, hold button to switch between baudrates (9600, 57600, 115200) (i set 57600 as default)
-- Ok button will set backlight to always on mode, to disable press ok button again (it will restore default settings after app exit too)
-- Long press Right button to change speed from knots to kilometers per hour
-- Exit from app using long press on back button instead of short press, may be useful in case you want to turn backlight on and accidentally click back
+- Long press the up button to change the **baud rate**. The default baud rate
+  is 9600, but 19200, 38400, 57600, and 115200 baud are also supported.
+- Long press the right button to change **speed units** from knots to
+  kilometers per hour.
+- Press the OK button to set the **backlight** to always on mode. Press it
+  again to disable.
+- Long press the back button to **exit** the app.
 
 ## Hardware Setup
 
 Connect the GPS module to power and the USART using GPIO pins 9 (3.3V), 11
 (GND), 13 (TX), and 14 (RX), as appropriate.
 
-![wiring](wiring.png)
 
+See the tutorial video - https://www.youtube.com/watch?v=5vSGFzEBp-k from
+Lab401 by RocketGod - https://github.com/RocketGod-git for a visual guide to
+the hardware setup.
 
-## Contributing
+## Confirmed Compatible Modules
 
-This project was a learning exercise and is more or less "complete" from my
-perspective, but I will happily accept pull requests that improve and enhance
-the functionality for others.
+* Adafruit Ultimate GPS Breakout
+* Beitian BN-180
+* Royaltek RBT-2100LP
+* u-blox NEO-6M
 
-Currently, the app only parses RMC and GGA sentences, and displays a subset of
-the data that fits on the screen. The UART is also hard-coded to 9600 baud.
-These limitations are largely driven by the GPS module I have to work with. A
-more elaborate UI with scrolling or multiple screens, as well as a configurable
-baud rate, may be useful for other GPS modules.
+If you have verified this application working with a module not listed here,
+please submit a PR adding it to the list.
 
-[Adafruit Ultimate GPS Breakout]: https://www.adafruit.com/product/746
-[minmea]: https://github.com/kosma/minmea
-[flipperzero-firmware]: https://github.com/flipperdevices/flipperzero-firmware
+## Links
+
+Original repo link - https://github.com/ezod/flipperzero-gps
+Adafruit Ultimate GPS Breakout: https://www.adafruit.com/product/746
+minmea: https://github.com/kosma/minmea
+u-blox NEO-6M: https://www.u-blox.com/en/product/neo-6-series
