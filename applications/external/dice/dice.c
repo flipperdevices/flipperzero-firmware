@@ -27,7 +27,7 @@ typedef struct {
     FuriHalRtcDateTime datetime;
     uint8_t diceSelect;
     uint8_t diceQty;
-    uint8_t diceRoll;
+    uint16_t diceRoll;
     uint8_t playerOneScore;
     uint8_t playerTwoScore;
     char rollTime[1][15];
@@ -36,6 +36,15 @@ typedef struct {
     char theScores[1][45];
     bool letsRoll;
 } DiceState;
+
+static uint16_t unbiased_rand(uint16_t max) {
+    uint16_t remainder = RAND_MAX % max;
+    uint16_t x;
+    do {
+        x = rand();
+    } while(x >= RAND_MAX - remainder);
+    return 1 + x % max;
+}
 
 static void dice_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
@@ -87,6 +96,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             state->datetime.minute,
             state->datetime.second,
             strAMPM);
+        state->diceRoll = ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
         if(state->diceSelect == 229) {
             const char* eightBall[] = {
                 "It is certain",
@@ -109,8 +119,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "My sources say no",
                 "Very doubtful",
                 "My reply is no"};
-            state->diceRoll =
-                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "8BALL");
             snprintf(
                 state->strings[0],
@@ -118,7 +126,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "%s at %s",
                 state->diceType[0],
                 state->rollTime[0]);
-            uint8_t d1_i = rand() % COUNT_OF(eightBall);
+            uint16_t d1_i = unbiased_rand(COUNT_OF(eightBall)) - 1;
             snprintf(state->strings[1], sizeof(state->strings[1]), "%s", eightBall[d1_i]);
         } else if(state->diceSelect == 228) {
             const char* eightBall[] = {
@@ -142,8 +150,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "I wouldn't if I were you.",
                 "My money's on the snowball.",
                 "Oh Hell no!"};
-            state->diceRoll =
-                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "Devil Ball");
             snprintf(
                 state->strings[0],
@@ -151,7 +157,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "%s at %s",
                 state->diceType[0],
                 state->rollTime[0]);
-            uint8_t d1_i = rand() % COUNT_OF(eightBall);
+            uint16_t d1_i = unbiased_rand(COUNT_OF(eightBall)) - 1;
             snprintf(state->strings[1], sizeof(state->strings[1]), "%s", eightBall[d1_i]);
         } else if(state->diceSelect == 230) {
             const char* diceOne[] = {
@@ -177,8 +183,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "Breasts",
                 "???",
                 "Genitals"};
-            state->diceRoll =
-                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "SEX?");
             snprintf(
                 state->strings[0],
@@ -186,8 +190,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "%s at %s",
                 state->diceType[0],
                 state->rollTime[0]);
-            uint8_t d1_i = rand() % COUNT_OF(diceOne);
-            uint8_t d2_i = rand() % COUNT_OF(diceTwo);
+            uint16_t d1_i = unbiased_rand(COUNT_OF(diceOne)) - 1;
+            uint16_t d2_i = unbiased_rand(COUNT_OF(diceTwo)) - 1;
             snprintf(
                 state->strings[1],
                 sizeof(state->strings[1]),
@@ -207,8 +211,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                                "8S", "9H", "9C", "9D", "9S", "10H", "10C", "10D", "10S",
                                "JH", "JC", "JD", "JS", "QH", "QC",  "QD",  "QS",  "KH",
                                "KC", "KD", "KS", "AH", "AC", "AD"}; // ONE LESS SINCE ONE WILL BE REMOVED
-            state->diceRoll =
-                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "WAR!");
             snprintf(
                 state->strings[0],
@@ -216,7 +218,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "%s at %s",
                 state->diceType[0],
                 state->rollTime[0]);
-            uint8_t d1_i = rand() % COUNT_OF(deckOne);
+            uint16_t d1_i = unbiased_rand(COUNT_OF(deckOne)) - 1;
             // INITIALIZE WITH PLACEHOLDERS TO AVOID MAYBE UNINITIALIZED ERROR
             for(uint8_t i = 0; i < COUNT_OF(deckOne); i++) {
                 if(i < d1_i) {
@@ -225,7 +227,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                     snprintf(deckTwo[i - 1], 8, "%s", deckOne[i]);
                 }
             }
-            uint8_t d2_i = rand() % COUNT_OF(deckTwo);
+            uint16_t d2_i = unbiased_rand(COUNT_OF(deckTwo)) - 1;
             if(d1_i > d2_i) {
                 state->playerOneScore++;
                 snprintf(
@@ -267,8 +269,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "with the player to your left",
                 "then sing a song",
                 "then do a dance"};
-            state->diceRoll =
-                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "WEED!");
             snprintf(
                 state->strings[0],
@@ -276,10 +276,10 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "%s at %s",
                 state->diceType[0],
                 state->rollTime[0]);
-            uint8_t d1_i = rand() % COUNT_OF(diceOne);
-            uint8_t d2_i = rand() % COUNT_OF(diceTwo);
-            uint8_t d3_i = rand() % COUNT_OF(diceThree);
-            uint8_t d4_i = rand() % COUNT_OF(diceFour);
+            uint16_t d1_i = unbiased_rand(COUNT_OF(diceOne)) - 1;
+            uint16_t d2_i = unbiased_rand(COUNT_OF(diceTwo)) - 1;
+            uint16_t d3_i = unbiased_rand(COUNT_OF(diceThree)) - 1;
+            uint16_t d4_i = unbiased_rand(COUNT_OF(diceFour)) - 1;
             snprintf(state->strings[1], sizeof(state->strings[1]), "%s", diceOne[d1_i]);
             snprintf(state->strings[2], sizeof(state->strings[2]), "%s", diceTwo[d2_i]);
             snprintf(state->strings[3], sizeof(state->strings[3]), "%s", diceThree[d3_i]);
@@ -303,12 +303,12 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "%s at %s",
                 state->diceType[0],
                 state->rollTime[0]);
-            uint8_t d1_i = rand() % COUNT_OF(diceOne);
-            uint8_t d2_i = rand() % COUNT_OF(diceTwo);
+            uint16_t d1_i = unbiased_rand(COUNT_OF(diceOne)) - 1;
+            uint16_t d2_i = unbiased_rand(COUNT_OF(diceTwo)) - 1;
             snprintf(state->strings[2], sizeof(state->strings[2]), "%s", diceOne[d1_i]);
             snprintf(state->strings[3], sizeof(state->strings[3]), "%s", diceTwo[d2_i]);
         } else {
-            state->diceRoll = ((rand() % state->diceSelect) + 1);
+            state->diceRoll = unbiased_rand(state->diceSelect);
             snprintf(
                 state->diceType[0], sizeof(state->diceType[0]), "%s%d", "d", state->diceSelect);
             snprintf(
@@ -330,45 +330,45 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                     sizeof(state->strings[1]),
                     "%d %d",
                     state->diceRoll,
-                    ((rand() % state->diceSelect) + 1));
+                    unbiased_rand(state->diceSelect));
             } else if(state->diceQty == 3) {
                 snprintf(
                     state->strings[1],
                     sizeof(state->strings[1]),
                     "%d %d %d",
                     state->diceRoll,
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1));
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect));
             } else if(state->diceQty == 4) {
                 snprintf(
                     state->strings[1],
                     sizeof(state->strings[1]),
                     "%d %d %d %d",
                     state->diceRoll,
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1));
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect));
             } else if(state->diceQty == 5) {
                 snprintf(
                     state->strings[1],
                     sizeof(state->strings[1]),
                     "%d %d %d %d %d",
                     state->diceRoll,
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1));
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect));
             } else if(state->diceQty == 6) {
                 snprintf(
                     state->strings[1],
                     sizeof(state->strings[1]),
                     "%d %d %d %d %d %d",
                     state->diceRoll,
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1),
-                    ((rand() % state->diceSelect) + 1));
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect),
+                    unbiased_rand(state->diceSelect));
             }
         }
         state->letsRoll = false;
