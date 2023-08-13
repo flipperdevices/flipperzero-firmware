@@ -177,6 +177,7 @@ int32_t wifi_marauder_app(void* p) {
     UNUSED(p);
 
     uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);
@@ -200,7 +201,7 @@ int32_t wifi_marauder_app(void* p) {
 
     wifi_marauder_app_free(wifi_marauder_app);
 
-    if(furi_hal_power_is_otg_enabled()) {
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
 

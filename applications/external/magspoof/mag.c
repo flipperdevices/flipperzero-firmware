@@ -179,10 +179,23 @@ int32_t mag_app(void* p) {
 
     mag_make_app_folder(mag);
 
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
+
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(mag->scene_manager, MagSceneStart);
 
     view_dispatcher_run(mag->view_dispatcher);
+
+    // Disable 5v power
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     mag_free(mag);
 

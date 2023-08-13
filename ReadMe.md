@@ -41,6 +41,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer) to get replaced by: [Text Viewer (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae4fc4a54febccb44b010c4025a99c2edef9a7f0)
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [T-Rex Runner (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
+- Updated: [WiFi (Marauder) v6.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/05874086b6484cc63996ade2233fb87c26bdd8d1)
+- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/05874086b6484cc63996ade2233fb87c26bdd8d1)
+- Updated: [ESP Flasher v1.1 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/05874086b6484cc63996ade2233fb87c26bdd8d1)
+- Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/c3c9a9089fff6daa1b3829e6ef0454d4831458a2)
 
 <a name="release">
 
