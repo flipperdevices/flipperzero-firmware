@@ -1,0 +1,20 @@
+{
+    "cortex-debug.enableTelemetry": false,
+    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.showRTOS": true,
+    "cortex-debug.armToolchainPath": "/home/nostrum/.ufbt/toolchain/x86_64-linux/bin",
+    "cortex-debug.openocdPath": "/home/nostrum/.ufbt/toolchain/x86_64-linux/openocd/bin/openocd",
+    "cortex-debug.gdbPath": "/home/nostrum/.ufbt/toolchain/x86_64-linux/bin/arm-none-eabi-gdb-py",
+    "editor.formatOnSave": true,
+    "files.associations": {
+        "*.scons": "python",
+        "SConscript": "python",
+        "SConstruct": "python",
+        "*.fam": "python"
+    },
+    "cortex-debug.registerUseNaturalFormat": false,
+    "python.analysis.typeCheckingMode": "off",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    }
+}
