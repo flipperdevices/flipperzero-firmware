@@ -21,7 +21,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Keep Your Flipper Up To Date With [PATREON membership](https://www.patreon.com/RogueMaster/membership)
 - [PATREON for daily compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. GitHub releases will occur weekly or with OFW version updates.
 - [Contact me on Discord/Patreon to RENAME your Flipper or for GIF conversion for Flipper Zero](https://www.patreon.com/RogueMaster/membership)
-- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), 420, 420+18, Anime Only, Anime+420, Anime+420+18, BMO, CHERUI 18+, DBZ, Dolphin, HACKZ, MARIO, No Anim, ONE PIECE, P0KEMON, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE, SJUMP, WATCHDOGS AND STOCK with all assets updated to look like stock. ALL, Anime and RM Select builds are very large and can slow down F0.
+- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), 420, 420+18, Anime Only, Anime+420, Anime+420+18, BMO, CHERUI 18+, DBZ, Dolphin, HACKZ, MARIO, No Anim, ONE PIECE, P0KEMON, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE, SJUMP, SQUATCH, WATCHDOGS AND STOCK with all assets updated to look like stock. ALL, Anime and RM Select builds are very large and can slow down F0.
 - [VIDEO PREVIEW FOR ALL ANIMATIONS](https://www.patreon.com/posts/animation-all-v4-77935728)
 - [Supporters also get SD Card Assets zip file with extra NFC Assets such as Infrared remotes, NFC files, SubGHz files and 86 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a` - Let me know on Discord when you send
@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice) [Fix biased randomness in dice roll (By x42)](https://github.com/Ka3u6y6a/flipper-zero-dice/pull/4)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [External Radio Support (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/a8f6ee595f768020e0ff77d25b574ef25813f140)
+- [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external) for next Patreon release
 
 <a name="release">
 
