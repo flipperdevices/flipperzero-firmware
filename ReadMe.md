@@ -174,6 +174,7 @@ Games:
 ## RFID
 - [RFID Beacon (by nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon) - `A letter/number Morse beacon on 125 kHz`
 - [EM4100 universal keys generator (for RFID Fuzzer) (by Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
+- [YRM100 UHF RFID (by frux-c)](https://github.com/frux-c/uhf_rfid) -> WIP -> (+Added icon by @xMasterX)
 
 ## Sub-GHz
 - [Enhanced Sub-GHz Chat (by twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
