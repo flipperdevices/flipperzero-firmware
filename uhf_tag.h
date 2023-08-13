@@ -14,6 +14,8 @@ typedef struct {
 typedef struct {
     size_t size; // Size of EPC memory data
     uint8_t data[18]; // 2 bytes for CRC16, 2 bytes for PC, and max 14 bytes for EPC
+    uint16_t pc;
+    uint16_t crc;
 } EPCMemoryBank;
 
 // TID Memory Bank
@@ -30,10 +32,10 @@ typedef struct {
 
 // EPC Gen 2 Tag containing all memory banks
 typedef struct {
-    ReservedMemoryBank reserved;
-    EPCMemoryBank epc;
-    TIDMemoryBank tid;
-    UserMemoryBank user;
+    ReservedMemoryBank* reserved;
+    EPCMemoryBank* epc;
+    TIDMemoryBank* tid;
+    UserMemoryBank* user;
 } UHFTag;
 
 UHFTag* uhf_tag_alloc();
@@ -41,6 +43,8 @@ void uhf_tag_free(UHFTag* uhf_tag);
 
 void uhf_tag_set_kill_pwd(UHFTag* uhf_tag, uint8_t* data_in);
 void uhf_tag_set_access_pwd(UHFTag* uhf_tag, uint8_t* data_in);
+void uhf_tag_set_epc_pc(UHFTag* uhf_tag, uint16_t pc);
+void uhf_tag_set_epc_crc(UHFTag* uhf_tag, uint16_t crc);
 void uhf_tag_set_epc(UHFTag* uhf_tag, uint8_t* data_in, size_t size);
 void uhf_tag_set_tid(UHFTag* uhf_tag, uint8_t* data_in, size_t size);
 void uhf_tag_set_user(UHFTag* uhf_tag, uint8_t* data_in, size_t size);
