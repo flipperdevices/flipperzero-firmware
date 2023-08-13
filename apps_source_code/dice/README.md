@@ -1,5 +1,6 @@
-# Flipper Zero DnD Dice 
-Version: 1.1 ([Changelog](https://github.com/Ka3u6y6a/flipper-zero-dice/blob/main/CHANGELOG.md))
+# Flipper Zero DnD Dice
+
+Version: 1.2 ([Changelog](https://github.com/Ka3u6y6a/flipper-zero-dice/blob/main/CHANGELOG.md))
 
 <div style="text-align:center"><img src=".flipcorg/banner.png"/></div>
 <br />
