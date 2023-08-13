@@ -9,6 +9,6 @@ App(
     ],
     stack_size=1 * 1024,
     order=90,
-    fap_icon="motion_detection_icon_10x10px.png",
+    fap_icon="mot_10x.png",
     fap_category="GPIO",
 )
