@@ -10,4 +10,5 @@ typedef enum {
     ScopeViewVariableItemList,
     ScopeViewSubmenu,
     ScopeViewWidget,
+    ScopeViewSave,
 } ScopeView;
