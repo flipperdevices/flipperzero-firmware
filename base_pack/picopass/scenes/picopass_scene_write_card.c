@@ -4,7 +4,7 @@
 void picopass_write_card_worker_callback(PicopassWorkerEvent event, void* context) {
     UNUSED(event);
     Picopass* picopass = context;
-    view_dispatcher_send_custom_event(picopass->view_dispatcher, PicopassCustomEventWorkerExit);
+    view_dispatcher_send_custom_event(picopass->view_dispatcher, event);
 }
 
 void picopass_scene_write_card_on_enter(void* context) {
@@ -33,7 +33,10 @@ bool picopass_scene_write_card_on_event(void* context, SceneManagerEvent event) 
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == PicopassCustomEventWorkerExit) {
+        if(event.event == PicopassWorkerEventFail) {
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteCardFailure);
+            consumed = true;
+        } else if(event.event == PicopassWorkerEventSuccess) {
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteCardSuccess);
             consumed = true;
         }

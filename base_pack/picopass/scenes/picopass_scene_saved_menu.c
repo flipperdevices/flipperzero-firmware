@@ -4,6 +4,7 @@ enum SubmenuIndex {
     SubmenuIndexDelete,
     SubmenuIndexInfo,
     SubmenuIndexWrite,
+    SubmenuIndexEmulate,
 };
 
 void picopass_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
@@ -26,6 +27,12 @@ void picopass_scene_saved_menu_on_enter(void* context) {
         submenu, "Info", SubmenuIndexInfo, picopass_scene_saved_menu_submenu_callback, picopass);
     submenu_add_item(
         submenu, "Write", SubmenuIndexWrite, picopass_scene_saved_menu_submenu_callback, picopass);
+    submenu_add_item(
+        submenu,
+        "Emulate",
+        SubmenuIndexEmulate,
+        picopass_scene_saved_menu_submenu_callback,
+        picopass);
 
     submenu_set_selected_item(
         picopass->submenu,
@@ -50,6 +57,9 @@ bool picopass_scene_saved_menu_on_event(void* context, SceneManagerEvent event) 
             consumed = true;
         } else if(event.event == SubmenuIndexWrite) {
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteCard);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEmulate) {
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneEmulate);
             consumed = true;
         }
     }
