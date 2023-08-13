@@ -1,4 +1,4 @@
-# Flipper Application Files (FAPs) for Any Firmware
+# Flipper Application Files (FAPs)
 ## Compare your firmware API version with API version in releases to avoid compatibility issues
 
 #### [Download .zip file by using this link, unpack, and copy only specific apps folders or specific apps onto your microSD into apps folder](https://github.com/xMasterX/all-the-plugins/releases/latest)
