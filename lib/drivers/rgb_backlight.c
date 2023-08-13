@@ -33,10 +33,10 @@ static RGBBacklightSettings rgb_settings = {
     .settings_is_loaded = false};
 
 static const RGBBacklightColor colors[] = {
-    {"Orange", 255, 69, 0},
+    {"Orange", 255, 60, 0},
     {"Red", 255, 0, 0},
     {"Maroon", 128, 0, 0},
-    {"Yellow", 255, 255, 0},
+    {"Yellow", 255, 150, 0},
     {"Olive", 128, 128, 0},
     {"Lime", 0, 255, 0},
     {"Green", 0, 128, 0},
@@ -46,11 +46,11 @@ static const RGBBacklightColor colors[] = {
     {"Teal", 0, 128, 128},
     {"Blue", 0, 0, 255},
     {"Navy", 0, 0, 128},
-    {"Purple", 128, 0, 128},
+    {"Purple", 127, 0, 255},
     {"Fuchsia", 255, 0, 255},
-    {"Pink", 173, 31, 173},
+    {"Pink", 255, 0, 127},
     {"Brown", 165, 42, 42},
-    {"White", 255, 192, 203},
+    {"White", 150, 150, 110},
 };
 
 uint8_t rgb_backlight_get_color_count(void) {
