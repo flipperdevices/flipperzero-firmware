@@ -3,9 +3,7 @@ App(
     name="AVR Flasher",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="avr_isp_app",
-    requires=["gui"],
     stack_size=4 * 1024,
-    order=20,
     fap_icon="avr_app_icon_10x10.png",
     fap_category="GPIO",
     fap_icon_assets="images",
@@ -15,4 +13,6 @@ App(
         ),
     ],
     fap_icon_assets_symbol="avr_isp",
+    fap_version="1.0",
+    fap_description="Application for flashing AVR microcontrollers",
 )

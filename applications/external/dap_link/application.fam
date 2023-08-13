@@ -3,12 +3,7 @@ App(
     name="DAP Link",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dap_link_app",
-    requires=[
-        "gui",
-        "dialogs",
-    ],
     stack_size=4 * 1024,
-    order=20,
     fap_icon="dap_link.png",
     fap_category="GPIO",
     fap_private_libs=[
@@ -21,4 +16,6 @@ App(
         ),
     ],
     fap_icon_assets="icons",
+    fap_description="Enables use of Flipper as a debug probe for ARM devices, implements the CMSIS-DAP protocol",
+    fap_version="1.0",
 )
