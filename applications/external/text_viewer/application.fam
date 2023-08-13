@@ -2,18 +2,13 @@ App(
     appid="text_viewer",
     name="Text Viewer",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="text_viewer_app",
-    requires=[
-        "gui",
-        "dialogs",
-    ],
-    stack_size=2 * 1024,
-    order=20,
+    entry_point="text_viewer",
+    stack_size=10 * 1024,
     fap_icon="icons/text_10px.png",
-    fap_category="Tools",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="text_viewer",
-    fap_author="@kowalski7cc & @kyhwana",
-    fap_version=(1, 1),
+    fap_category="Tools",
+    fap_author="@Willy-JL",  # Original by @kowalski7cc & @kyhwana, new has code borrowed from archive > show
+    fap_version="1.0",
     fap_description="Text viewer application",
 )
