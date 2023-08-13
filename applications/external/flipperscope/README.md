@@ -10,6 +10,8 @@ cd ..
 ./fbt launch_app APPSRC=applications_user/flipperscope
 ```
 
+Alternatively the binary can now be installed from https://lab.flipper.net/apps/flipperscope or the Flipper Mobile App.
+
 Provide signal to **pin 16/PC0**, with a voltage ranging from 0V to 2.5V and ground to **pin 18/GND**.
 
 Press the 'ok' button (button in the centre of joypad) to pause/unpause the waveform display.
@@ -30,6 +32,31 @@ Also see [Derek Jamison's demonstration](https://www.youtube.com/watch?v=iC5fBGw
 ![Rigol](photos/rigol.jpg)
 
 ![Flipper Zero running flipperscope](photos/volt.jpg)
+
+## Processing captures
+
+You can use the following simple Python script, for processing the captured waveforms, from flipperscope.
+
+```
+import matplotlib.pyplot as plt
+import numpy as np
+import struct
+
+fig, ax = plt.subplots()
+data = open("Sine.dat", "rb").read()
+y = [(float(x[0]) / 2500) * 2.5 for x in struct.iter_unpack("<H", data)]
+x = np.arange(len(y))
+
+ax.plot(x, y, label='Voltage')
+ax.set_xlabel('Sample')
+ax.set_ylabel('Voltage / V')
+ax.set_title('ADC Voltage')
+ax.set_ylim([0, 2.5])
+ax.legend()
+plt.show()
+```
+
+![Captured waveform](photos/sine.png)
 
 ## To Do
 

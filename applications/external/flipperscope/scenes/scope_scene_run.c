@@ -8,6 +8,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
+#include <gui/elements.h>
 #include <notification/notification_messages.h>
 
 #include "stm32wbxx_ll_adc.h"
@@ -27,7 +28,6 @@
 #include "scope_icons.h"
 
 #define DIGITAL_SCALE_12BITS ((uint32_t)0xFFF)
-#define ADC_CONVERTED_DATA_BUFFER_SIZE ((uint32_t)128)
 #define VAR_CONVERTED_DATA_INIT_VALUE (DIGITAL_SCALE_12BITS + 1)
 #define VAR_CONVERTED_DATA_INIT_VALUE_16BITS (0xFFFF + 1U)
 #define __ADC_CALC_DATA_VOLTAGE(__VREFANALOG_VOLTAGE__, __ADC_DATA__) \
@@ -353,6 +353,15 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     float min = FLT_MAX;
     int count = 0;
 
+    if(type == m_capture) {
+        if(!pause)
+            elements_button_center(canvas, "Stop");
+        else {
+            elements_button_center(canvas, "REC");
+            elements_button_right(canvas, "Save");
+        }
+    }
+
     if(pause)
         canvas_draw_icon(canvas, 115, 0, &I_pause_10x10);
     else
@@ -436,13 +445,6 @@ static void app_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-void scope_scene_run_widget_callback(GuiButtonType result, InputType type, void* context) {
-    ScopeApp* app = context;
-    if(type == InputTypeShort) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, result);
-    }
-}
-
 void scope_scene_run_on_enter(void* context) {
     ScopeApp* app = context;
 
@@ -459,9 +461,6 @@ void scope_scene_run_on_enter(void* context) {
 
     // What type of measurement are we performing
     type = app->measurement;
-
-    // Pause capture, when first started, if capturing
-    if(type == m_capture) pause = 1;
 
     // Copy vector table, modify to use our own IRQ handlers
     __disable_irq();
@@ -515,16 +514,23 @@ void scope_scene_run_on_enter(void* context) {
     // Register view port in GUI
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
     InputEvent event;
     bool running = true;
+    bool save = false;
     while(running) {
         if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
             if((event.type == InputTypePress) || (event.type == InputTypeRepeat)) {
                 switch(event.key) {
                 case InputKeyLeft:
                     break;
-                case InputKeyRight:
-                    break;
+                case InputKeyRight: {
+                    // Save data if in capture mode
+                    if(type == m_capture && pause == 1) {
+                        running = false;
+                        save = true;
+                    }
+                } break;
                 case InputKeyUp:
                     break;
                 case InputKeyDown:
@@ -554,22 +560,31 @@ void scope_scene_run_on_enter(void* context) {
     SCB->VTOR = 0;
     __enable_irq();
 
-    view_port_enabled_set(view_port, false);
-    gui_remove_view_port(gui, view_port);
-    view_port_free(view_port);
+    if(!save) {
+        view_port_enabled_set(view_port, false);
+        gui_remove_view_port(gui, view_port);
+        view_port_free(view_port);
 
-    // Switch back to original scene
-    furi_record_close(RECORD_GUI);
-    scene_manager_previous_scene(app->scene_manager);
-    submenu_set_selected_item(app->submenu, 0);
+        // Switch back to original scene
+        furi_record_close(RECORD_GUI);
+        scene_manager_previous_scene(app->scene_manager);
+        submenu_set_selected_item(app->submenu, 0);
+    } else {
+        view_port_enabled_set(view_port, false);
+        gui_remove_view_port(gui, view_port);
+        view_port_free(view_port);
+
+        app->data = malloc(sizeof(uint16_t) * ADC_CONVERTED_DATA_BUFFER_SIZE);
+        memcpy(
+            app->data, (uint16_t*)mvoltDisplay, sizeof(uint16_t) * ADC_CONVERTED_DATA_BUFFER_SIZE);
+        scene_manager_next_scene(app->scene_manager, ScopeSceneSave);
+    }
 }
 
 bool scope_scene_run_on_event(void* context, SceneManagerEvent event) {
-    ScopeApp* app = context;
-    bool consumed = false;
-    UNUSED(app);
+    UNUSED(context);
     UNUSED(event);
-    return consumed;
+    return false;
 }
 
 void scope_scene_run_on_exit(void* context) {

@@ -75,6 +75,10 @@ ScopeApp* scope_app_alloc() {
     app->widget = widget_alloc();
     view_dispatcher_add_view(app->view_dispatcher, ScopeViewWidget, widget_get_view(app->widget));
 
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, ScopeViewSave, text_input_get_view(app->text_input));
+
     app->time = 0.001;
     app->measurement = m_time;
 
@@ -93,8 +97,12 @@ void scope_app_free(ScopeApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, ScopeViewVariableItemList);
     variable_item_list_free(app->variable_item_list);
 
-    //  Widget
+    // Text input
     view_dispatcher_remove_view(app->view_dispatcher, ScopeViewWidget);
+    text_input_free(app->text_input);
+
+    //  Widget
+    view_dispatcher_remove_view(app->view_dispatcher, ScopeViewSave);
     widget_free(app->widget);
 
     // View dispatcher
