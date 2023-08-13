@@ -132,6 +132,11 @@ void bt_mouse_connection_status_changed_callback(BtStatus status, void* context)
     BtMouse* bt_mouse = context;
 
     bt_mouse->connected = (status == BtStatusConnected);
+    if(!bt_mouse->notifications) {
+        tracking_end();
+        return;
+    }
+
     if(bt_mouse->connected) {
         notification_internal_message(bt_mouse->notifications, &sequence_set_blue_255);
         tracking_begin();
@@ -140,9 +145,6 @@ void bt_mouse_connection_status_changed_callback(BtStatus status, void* context)
         tracking_end();
         notification_internal_message(bt_mouse->notifications, &sequence_reset_blue);
     }
-
-    //with_view_model(
-    //    bt_mouse->view, void * model, { model->connected = connected; }, true);
 }
 
 bool bt_mouse_move(int8_t dx, int8_t dy, void* context) {
@@ -158,46 +160,6 @@ bool bt_mouse_move(int8_t dx, int8_t dy, void* context) {
     }
 
     return true;
-}
-
-void bt_mouse_enter_callback(void* context) {
-    furi_assert(context);
-    BtMouse* bt_mouse = context;
-
-    bt_mouse->bt = furi_record_open(RECORD_BT);
-    bt_mouse->notifications = furi_record_open(RECORD_NOTIFICATION);
-    bt_set_status_changed_callback(
-        bt_mouse->bt, bt_mouse_connection_status_changed_callback, bt_mouse);
-    furi_assert(bt_set_profile(bt_mouse->bt, BtProfileHidKeyboard));
-    furi_hal_bt_start_advertising();
-}
-
-bool bt_mouse_custom_callback(uint32_t event, void* context) {
-    UNUSED(event);
-    furi_assert(context);
-    BtMouse* bt_mouse = context;
-
-    tracking_step(bt_mouse_move, context);
-    furi_delay_ms(3); // Magic! Removing this will break the buttons
-
-    view_dispatcher_send_custom_event(bt_mouse->view_dispatcher, 0);
-    return true;
-}
-
-void bt_mouse_exit_callback(void* context) {
-    furi_assert(context);
-    BtMouse* bt_mouse = context;
-
-    tracking_end();
-    notification_internal_message(bt_mouse->notifications, &sequence_reset_blue);
-
-    furi_hal_bt_stop_advertising();
-    bt_set_profile(bt_mouse->bt, BtProfileSerial);
-
-    furi_record_close(RECORD_NOTIFICATION);
-    bt_mouse->notifications = NULL;
-    furi_record_close(RECORD_BT);
-    bt_mouse->bt = NULL;
 }
 
 static int8_t clamp(int t) {
@@ -279,6 +241,50 @@ void bt_mouse_thread_stop(BtMouse* bt_mouse) {
     furi_thread_join(bt_mouse->thread);
     furi_thread_free(bt_mouse->thread);
     furi_mutex_free(bt_mouse->mutex);
+    bt_mouse->mutex = NULL;
+    bt_mouse->thread = NULL;
+}
+
+void bt_mouse_enter_callback(void* context) {
+    furi_assert(context);
+    BtMouse* bt_mouse = context;
+
+    bt_mouse->bt = furi_record_open(RECORD_BT);
+    bt_mouse->notifications = furi_record_open(RECORD_NOTIFICATION);
+    bt_set_status_changed_callback(
+        bt_mouse->bt, bt_mouse_connection_status_changed_callback, bt_mouse);
+    furi_assert(bt_set_profile(bt_mouse->bt, BtProfileHidKeyboard));
+    furi_hal_bt_start_advertising();
+    bt_mouse_thread_start(bt_mouse);
+}
+
+bool bt_mouse_custom_callback(uint32_t event, void* context) {
+    UNUSED(event);
+    furi_assert(context);
+    BtMouse* bt_mouse = context;
+
+    tracking_step(bt_mouse_move, context);
+    furi_delay_ms(3); // Magic! Removing this will break the buttons
+
+    view_dispatcher_send_custom_event(bt_mouse->view_dispatcher, 0);
+    return true;
+}
+
+void bt_mouse_exit_callback(void* context) {
+    furi_assert(context);
+    BtMouse* bt_mouse = context;
+
+    bt_mouse_thread_stop(bt_mouse);
+    tracking_end();
+    notification_internal_message(bt_mouse->notifications, &sequence_reset_blue);
+
+    furi_hal_bt_stop_advertising();
+    bt_set_profile(bt_mouse->bt, BtProfileSerial);
+
+    furi_record_close(RECORD_NOTIFICATION);
+    bt_mouse->notifications = NULL;
+    furi_record_close(RECORD_BT);
+    bt_mouse->bt = NULL;
 }
 
 BtMouse* bt_mouse_alloc(ViewDispatcher* view_dispatcher) {
@@ -293,13 +299,11 @@ BtMouse* bt_mouse_alloc(ViewDispatcher* view_dispatcher) {
     view_set_enter_callback(bt_mouse->view, bt_mouse_enter_callback);
     view_set_custom_callback(bt_mouse->view, bt_mouse_custom_callback);
     view_set_exit_callback(bt_mouse->view, bt_mouse_exit_callback);
-    bt_mouse_thread_start(bt_mouse);
     return bt_mouse;
 }
 
 void bt_mouse_free(BtMouse* bt_mouse) {
     furi_assert(bt_mouse);
-    bt_mouse_thread_stop(bt_mouse);
     view_free(bt_mouse->view);
     free(bt_mouse);
 }

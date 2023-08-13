@@ -59,13 +59,14 @@ namespace {
     // angle = norm(a)
     // axis = a.normalized()
     // If norm(a) == 0, it returns an identity rotation.
-    static inline Rotation RotationFromVector(const Vector3& a)
+    static inline void RotationFromVector(const Vector3& a, Rotation& r)
     {
         const double norm_a = Length(a);
         if (norm_a < kEpsilon) {
-            return Rotation::Identity();
+            r = Rotation::Identity();
+            return;
         }
-        return Rotation::FromAxisAndAngle(a / norm_a, norm_a);
+        r = Rotation::FromAxisAndAngle(a / norm_a, norm_a);
     }
 
 } // namespace
@@ -199,7 +200,8 @@ void SensorFusionEkf::ComputeMeasurementJacobian()
         Vector3 delta = Vector3::Zero();
         delta[dof] = kFiniteDifferencingEpsilon;
 
-        const Rotation epsilon_rotation = RotationFromVector(delta);
+        Rotation epsilon_rotation;
+        RotationFromVector(delta, epsilon_rotation);
         const Vector3 delta_rotation
             = ComputeInnovation(epsilon_rotation * current_state_.sensor_from_start_rotation);
 
@@ -263,7 +265,8 @@ void SensorFusionEkf::ProcessAccelerometerSample(const AccelerometerData& sample
         * state_covariance_;
 
     // Updates pose and associate covariance matrix.
-    const Rotation rotation_from_state_update = RotationFromVector(state_update_);
+    Rotation rotation_from_state_update;
+    RotationFromVector(state_update_, rotation_from_state_update);
 
     current_state_.sensor_from_start_rotation
         = rotation_from_state_update * current_state_.sensor_from_start_rotation;
