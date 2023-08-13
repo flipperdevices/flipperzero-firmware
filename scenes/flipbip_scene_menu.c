@@ -1,13 +1,17 @@
 #include "../flipbip.h"
 #include "../helpers/flipbip_file.h"
 
+#define FLIPBIP_SUBMENU_TEXT "** FlipBIP wallet " FLIPBIP_VERSION " **"
+
 enum SubmenuIndex {
     SubmenuIndexScene1BTC = 10,
     SubmenuIndexScene1ETH,
     SubmenuIndexScene1DOGE,
+    SubmenuIndexScene1ZEC,
     SubmenuIndexScene1New,
     SubmenuIndexScene1Import,
     SubmenuIndexSettings,
+    SubmenuIndexNOP,
 };
 
 void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
@@ -17,6 +21,14 @@ void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
 
 void flipbip_scene_menu_on_enter(void* context) {
     FlipBip* app = context;
+
+    // FlipBIP header with version
+    submenu_add_item(
+        app->submenu,
+        FLIPBIP_SUBMENU_TEXT,
+        SubmenuIndexNOP,
+        flipbip_scene_menu_submenu_callback,
+        app);
 
     if(flipbip_has_file(FlipBipFileKey, NULL, false) &&
        flipbip_has_file(FlipBipFileDat, NULL, false)) {
@@ -40,6 +52,12 @@ void flipbip_scene_menu_on_enter(void* context) {
             app);
         submenu_add_item(
             app->submenu,
+            "View ZEC (t-addr) wallet",
+            SubmenuIndexScene1ZEC,
+            flipbip_scene_menu_submenu_callback,
+            app);
+        submenu_add_item(
+            app->submenu,
             "Regenerate wallet",
             SubmenuIndexScene1New,
             flipbip_scene_menu_submenu_callback,
@@ -54,7 +72,7 @@ void flipbip_scene_menu_on_enter(void* context) {
     }
     submenu_add_item(
         app->submenu,
-        "Import from mnemonic",
+        app->mnemonic_menu_text,
         SubmenuIndexScene1Import,
         flipbip_scene_menu_submenu_callback,
         app);
@@ -101,6 +119,14 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1DOGE);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
+        } else if(event.event == SubmenuIndexScene1ZEC) {
+            app->overwrite_saved_seed = 0;
+            app->import_from_mnemonic = 0;
+            app->bip44_coin = FlipBipCoinZEC133;
+            scene_manager_set_scene_state(
+                app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1ZEC);
+            scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
+            return true;
         } else if(event.event == SubmenuIndexScene1New) {
             app->overwrite_saved_seed = 1;
             app->import_from_mnemonic = 0;
@@ -110,14 +136,16 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
             return true;
         } else if(event.event == SubmenuIndexScene1Import) {
             app->import_from_mnemonic = 1;
-            app->input_state = FlipBipTextInputMnemonic;
-            text_input_set_header_text(app->text_input, "Enter mnemonic phrase");
-            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdTextInput);
+            scene_manager_set_scene_state(
+                app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1Import);
+            scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
         } else if(event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexSettings);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneSettings);
+            return true;
+        } else if(event.event == SubmenuIndexNOP) {
             return true;
         }
     }
