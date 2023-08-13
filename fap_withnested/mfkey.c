@@ -12,7 +12,7 @@
 #include <gui/elements.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include "mfkey32_icons.h"
+#include "mfkey_icons.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,7 +28,7 @@
 #define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
 #define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
 #define MF_CLASSIC_NONCE_PATH EXT_PATH("nfc/.mfkey32.log")
-#define TAG "Mfkey32"
+#define TAG "MFKey"
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
 #define MIN_RAM 115632
@@ -74,23 +74,23 @@ typedef struct {
 typedef enum {
     MissingNonces,
     ZeroNonces,
-} MfkeyError;
+} MFKeyError;
 
 typedef enum {
     Ready,
     Initializing,
     DictionaryAttack,
-    MfkeyAttack,
+    MFKeyAttack,
     Complete,
     Error,
     Help,
-} MfkeyState;
+} MFKeyState;
 
 // TODO: Can we eliminate any of the members of this struct?
 typedef struct {
     FuriMutex* mutex;
-    MfkeyError err;
-    MfkeyState mfkey_state;
+    MFKeyError err;
+    MFKeyState mfkey_state;
     int cracked;
     int unique_cracked;
     int num_completed;
@@ -229,6 +229,24 @@ static inline void crypt_word_noret(struct Crypto1State* s, uint32_t in, int x) 
     return;
 }
 
+static inline uint32_t crypt_word_ret(struct Crypto1State* s, uint32_t in, int x) {
+    uint32_t ret = 0;
+    uint32_t feedin, t, next_in;
+    uint8_t next_ret;
+    for(int i = 0; i <= 31; i++) {
+        next_in = BEBIT(in, i);
+        next_ret = filter(s->odd);
+        feedin = next_ret & (!!x);
+        feedin ^= LF_POLY_EVEN & s->even;
+        feedin ^= LF_POLY_ODD & s->odd;
+        feedin ^= !!next_in;
+        s->even = s->even << 1 | (evenparity32(feedin));
+        t = s->odd, s->odd = s->even, s->even = t;
+        ret |= next_ret << (24 ^ i);
+    }
+    return ret;
+}
+
 static inline void rollback_word_noret(struct Crypto1State* s, uint32_t in, int x) {
     uint8_t ret;
     uint32_t feedin, t, next_in;
@@ -285,6 +303,12 @@ int check_state(struct Crypto1State* t, struct Crypto1Params* p) {
         return 1;
     }
     return 0;
+}
+
+int key_matches_ks1( uint32_t odd, uint32_t even, uint32_t uid, uint32_t nt0, uint32_t ks1 ) {
+    struct Crypto1State temp = {odd, even};
+    uint32_t expected_ks1 = crypt_word_ret(&temp, uid ^ nt0, 0);
+    return ks1 == expected_ks1;
 }
 
 static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m2) {
@@ -996,7 +1020,7 @@ static void finished_beep() {
     furi_record_close("notification");
 }
 
-void mfkey32(ProgramState* program_state) {
+void mfkey(ProgramState* program_state) {
     uint64_t found_key; // recovered key
     size_t keyarray_size = 0;
     uint64_t* keyarray = malloc(sizeof(uint64_t) * 1);
@@ -1047,7 +1071,7 @@ void mfkey32(ProgramState* program_state) {
         eta_total_time *= 2;
         MSB_LIMIT /= 2;
     }
-    program_state->mfkey_state = MfkeyAttack;
+    program_state->mfkey_state = MFKeyAttack;
     // TODO: Work backwards on this array and free memory
     for(i = 0; i < nonce_arr->total_nonces; i++) {
         MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
@@ -1117,7 +1141,7 @@ void mfkey32(ProgramState* program_state) {
     napi_mf_classic_nonce_array_free(nonce_arr);
     napi_mf_classic_dict_free(user_dict);
     free(keyarray);
-    //FURI_LOG_I(TAG, "mfkey32 function completed normally"); // DEBUG
+    //FURI_LOG_I(TAG, "mfkey function completed normally"); // DEBUG
     program_state->mfkey_state = Complete;
     // No need to alert the user if they asked it to stop
     if(!(program_state->close_thread_please)) {
@@ -1136,9 +1160,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_draw_frame(canvas, 0, 15, 128, 64);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 5, 4, AlignLeft, AlignTop, "Mfkey32");
+    canvas_draw_str_aligned(canvas, 5, 4, AlignLeft, AlignTop, "MFKey");
     canvas_draw_icon(canvas, 114, 4, &I_mfkey);
-    if(program_state->is_thread_running && program_state->mfkey_state == MfkeyAttack) {
+    if(program_state->is_thread_running && program_state->mfkey_state == MFKeyAttack) {
         float eta_round = (float)1 - ((float)program_state->eta_round / (float)eta_round_time);
         float eta_total = (float)1 - ((float)program_state->eta_total / (float)eta_total_time);
         float progress = (float)program_state->num_completed / (float)program_state->total;
@@ -1223,7 +1247,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void mfkey32_state_init(ProgramState* program_state) {
+static void mfkey_state_init(ProgramState* program_state) {
     program_state->is_thread_running = false;
     program_state->mfkey_state = Ready;
     program_state->cracked = 0;
@@ -1234,28 +1258,28 @@ static void mfkey32_state_init(ProgramState* program_state) {
 }
 
 // Entrypoint for worker thread
-static int32_t mfkey32_worker_thread(void* ctx) {
+static int32_t mfkey_worker_thread(void* ctx) {
     ProgramState* program_state = ctx;
     program_state->is_thread_running = true;
     program_state->mfkey_state = Initializing;
-    //FURI_LOG_I(TAG, "Hello from the mfkey32 worker thread"); // DEBUG
-    mfkey32(program_state);
+    //FURI_LOG_I(TAG, "Hello from the mfkey worker thread"); // DEBUG
+    mfkey(program_state);
     program_state->is_thread_running = false;
     return 0;
 }
 
-void start_mfkey32_thread(ProgramState* program_state) {
+void start_mfkey_thread(ProgramState* program_state) {
     if(!program_state->is_thread_running) {
         furi_thread_start(program_state->mfkeythread);
     }
 }
 
-int32_t mfkey32_main() {
+int32_t mfkey_main() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
     ProgramState* program_state = malloc(sizeof(ProgramState));
 
-    mfkey32_state_init(program_state);
+    mfkey_state_init(program_state);
 
     program_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!program_state->mutex) {
@@ -1274,10 +1298,10 @@ int32_t mfkey32_main() {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     program_state->mfkeythread = furi_thread_alloc();
-    furi_thread_set_name(program_state->mfkeythread, "Mfkey32 Worker");
+    furi_thread_set_name(program_state->mfkeythread, "MFKey Worker");
     furi_thread_set_stack_size(program_state->mfkeythread, 2048);
     furi_thread_set_context(program_state->mfkeythread, program_state);
-    furi_thread_set_callback(program_state->mfkeythread, mfkey32_worker_thread);
+    furi_thread_set_callback(program_state->mfkeythread, mfkey_worker_thread);
 
     PluginEvent event;
     for(bool main_loop = true; main_loop;) {
@@ -1306,7 +1330,7 @@ int32_t mfkey32_main() {
                     case InputKeyOk:
                         if(!program_state->is_thread_running &&
                            program_state->mfkey_state == Ready) {
-                            start_mfkey32_thread(program_state);
+                            start_mfkey_thread(program_state);
                             view_port_update(view_port);
                         }
                         break;
