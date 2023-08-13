@@ -216,7 +216,13 @@ int32_t flipper_geiger_app() {
     furi_timer_start(timer, 1000);
 
     // ENABLE 5V pin
-    furi_hal_power_enable_otg();
+
+    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     Stream* file_stream = buffered_file_stream_alloc(storage);
@@ -378,11 +384,15 @@ int32_t flipper_geiger_app() {
     stream_free(file_stream);
     furi_record_close(RECORD_STORAGE);
 
-    furi_hal_power_disable_otg();
+    // Disable 5v power
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     furi_hal_gpio_disable_int_callback(&gpio_ext_pa7);
     furi_hal_gpio_remove_int_callback(&gpio_ext_pa7);
     furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
+    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     furi_message_queue_free(event_queue);
     furi_mutex_free(mutexVal.mutex);
