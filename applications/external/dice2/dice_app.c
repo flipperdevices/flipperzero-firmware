@@ -5,6 +5,15 @@
 
 const Icon* draw_dice_frame;
 
+static uint16_t unbiased_rand(uint16_t max) {
+    uint16_t remainder = RAND_MAX % max;
+    uint16_t x;
+    do {
+        x = rand();
+    } while(x >= RAND_MAX - remainder);
+    return 1 + x % max;
+}
+
 static void update(State* const state) {
     if(state->app_state == SwipeLeftState) {
         for(uint8_t i = 0; i < DICE_TYPES; i++) {
@@ -67,7 +76,7 @@ static void roll(State* const state) {
 
     for(uint8_t i = 0; i < MAX_DICE_COUNT; i++) {
         if(i < state->dice_count) {
-            state->rolled_dices[i] = (rand() % dice_types[state->dice_index].type) + 1;
+            state->rolled_dices[i] = unbiased_rand(dice_types[state->dice_index].type);
             state->roll_result += state->rolled_dices[i];
         } else {
             state->rolled_dices[i] = 0;

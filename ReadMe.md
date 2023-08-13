@@ -35,6 +35,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-12 22:00 EST`
 - Added: [Wire Tester (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - Not Removing Apps from firmware like OFW and Unleashed (By RogueMaster)
+- Updated: [DnD Dice v1.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice) [Fix biased randomness in dice roll (By x42)](https://github.com/Ka3u6y6a/flipper-zero-dice/pull/4)
+- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 
 <a name="release">
 
@@ -212,7 +214,7 @@ $ ./fbt dolphin_ext
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
-- [DnD Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
+- [DnD Dice v1.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)

@@ -43,11 +43,10 @@ bool uhf_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_next_scene(uhf_app->scene_manager, UHFSceneDeviceInfo);
             consumed = true;
+        } else if(event.event == SubmenuIndexWrite) {
+            scene_manager_next_scene(uhf_app->scene_manager, UHFSceneWriteTag);
+            consumed = true;
         }
-        // } else if(event.event == SubmenuIndexWrite) {
-        //     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneWriteCard);
-        //     consumed = true;
-        // }
     }
 
     return consumed;

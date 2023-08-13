@@ -11,6 +11,6 @@ App(
     fap_icon_assets="assets",
     fap_author="@Ka3u6y6a",
     fap_weburl="https://github.com/Ka3u6y6a/flipper-zero-dice",
-    fap_version=(1, 1),
+    fap_version=(1, 2),
     fap_description="Dice rolling, types: Coin, d4, d6, d8, d10, d12, d20, d100",
 )

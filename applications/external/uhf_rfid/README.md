@@ -10,7 +10,7 @@ This repository contains a UHF RFID application developed for FlipperZero, a ver
 
 - [x] Read Single UHF RFID tag.
 - [x] View saved UHF RFID tag.
-- [ ] Write Single UHF RFID tag. __(in progress)__
+- [x] Write Single UHF RFID tag. __(Beta)__ Branch: [write_tag commit#32bc411](https://github.com/frux-c/uhf_rfid/commit/32bc4114c707b128db91ab01b2f49d0cb852d257)
 - [ ] Change Module setting parameters.
 - [ ] Easy-to-use interface on FlipperZero's display.
     - Extras
