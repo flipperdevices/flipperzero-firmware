@@ -1,7 +1,7 @@
 #include <furi_hal.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
-#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
+#include "helpers/radio_device_loader.h"
 
 #include "esubghz_chat_i.h"
 
@@ -133,6 +133,12 @@ void enter_chat(ESubGhzChatState* state) {
         state->chat_box_store, "\nEncrypted: %s", (state->encrypted ? "yes" : "no"));
 
     subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device, state->frequency);
+
+    if(strcmp(state->subghz_device->name, "cc1101_ext") == 0) {
+        furi_string_cat_printf(state->chat_box_store, "\nRadio: External");
+    } else {
+        furi_string_cat_printf(state->chat_box_store, "\nRadio: Internal");
+    }
 
     /* concatenate the name prefix and join message */
     furi_string_set(state->msg_input, state->name_prefix);
@@ -531,7 +537,12 @@ int32_t esubghz_chat(void) {
 
     /* init internal device */
     subghz_devices_init();
-    state->subghz_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+
+    state->subghz_device =
+        radio_device_loader_set(state->subghz_device, SubGhzRadioDeviceTypeExternalCC1101);
+
+    subghz_devices_reset(state->subghz_device);
+    subghz_devices_idle(state->subghz_device);
 
     /* set chat name prefix */
     furi_string_printf(state->name_prefix, "%s", furi_hal_version_get_name_ptr());
@@ -627,6 +638,8 @@ int32_t esubghz_chat(void) {
     crypto_explicit_bzero(state->nfc_dev_data, sizeof(NfcDeviceData));
 
     /* deinit devices */
+    radio_device_loader_end(state->subghz_device);
+
     subghz_devices_deinit();
 
     /* exit suppress charge mode */
