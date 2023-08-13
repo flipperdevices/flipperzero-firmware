@@ -4,7 +4,6 @@
 
 enum UbloxSettingIndex {
     UbloxSettingIndexRefreshRate,
-    UbloxSettingIndexBacklightMode,
     UbloxSettingIndexDisplayMode,
     UbloxSettingIndexNotify,
     UbloxSettingIndexPlatformModel,
@@ -15,7 +14,6 @@ enum UbloxSettingIndex {
 enum UbloxDataDisplayConfigIndex {
     UbloxDataDisplayConfigIndexDisplayMode,
     UbloxDataDisplayConfigIndexRefreshRate,
-    UbloxDataDisplayConfigIndexBacklightMode,
 };
 
 #define DISPLAY_VIEW_MODE_COUNT 2
@@ -27,17 +25,6 @@ const char* const display_view_mode_text[DISPLAY_VIEW_MODE_COUNT] = {
 const UbloxDataDisplayViewMode display_view_mode_value[DISPLAY_VIEW_MODE_COUNT] = {
     UbloxDataDisplayViewModeHandheld,
     UbloxDataDisplayViewModeCar,
-};
-
-#define BACKLIGHT_MODE_COUNT 2
-const char* const backlight_mode_text[BACKLIGHT_MODE_COUNT] = {
-    "Default",
-    "On",
-};
-
-const UbloxDataDisplayBacklightMode backlight_mode_value[BACKLIGHT_MODE_COUNT] = {
-    UbloxDataDisplayBacklightDefault,
-    UbloxDataDisplayBacklightOn,
 };
 
 #define REFRESH_RATE_COUNT 8
@@ -135,37 +122,6 @@ static void ublox_scene_data_display_config_set_refresh_rate(VariableItem* item)
     variable_item_set_current_value_text(item, refresh_rate_text[index]);
     (ublox->data_display_state).refresh_rate = refresh_rate_values[index];
     FURI_LOG_I(TAG, "set refresh rate to %lds", (ublox->data_display_state).refresh_rate);
-}
-
-static uint8_t ublox_scene_data_display_config_next_backlight_mode(
-    const UbloxDataDisplayBacklightMode value,
-    void* context) {
-    furi_assert(context);
-
-    uint8_t index = 0;
-    for(int i = 0; i < BACKLIGHT_MODE_COUNT; i++) {
-        if(value == backlight_mode_value[i]) {
-            index = i;
-            break;
-        } else {
-            index = 0;
-        }
-    }
-    return index;
-}
-
-static void ublox_scene_data_display_config_set_backlight_mode(VariableItem* item) {
-    Ublox* ublox = variable_item_get_context(item);
-    uint8_t index = variable_item_get_current_value_index(item);
-
-    variable_item_set_current_value_text(item, backlight_mode_text[index]);
-    (ublox->data_display_state).backlight_mode = backlight_mode_value[index];
-
-    if((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightOn) {
-        notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_on);
-    } else if((ublox->data_display_state).backlight_mode == UbloxDataDisplayBacklightDefault) {
-        notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
-    }
 }
 
 static uint8_t ublox_scene_data_display_config_next_display_view_mode(
@@ -275,7 +231,7 @@ static void ublox_scene_data_display_config_set_platform_model(VariableItem* ite
 static void ublox_scene_data_display_config_enter_callback(void* context, uint32_t index) {
     Ublox* ublox = context;
     if(index == UbloxSettingIndexResetOdometer) {
-	view_dispatcher_send_custom_event(ublox->view_dispatcher, UbloxCustomEventResetOdometer);
+        view_dispatcher_send_custom_event(ublox->view_dispatcher, UbloxCustomEventResetOdometer);
     }
 }
 
@@ -295,17 +251,6 @@ void ublox_scene_data_display_config_on_enter(void* context) {
         (ublox->data_display_state).refresh_rate, ublox);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, refresh_rate_text[value_index]);
-
-    item = variable_item_list_add(
-        ublox->variable_item_list,
-        "Backlight:",
-        BACKLIGHT_MODE_COUNT,
-        ublox_scene_data_display_config_set_backlight_mode,
-        ublox);
-    value_index = ublox_scene_data_display_config_next_backlight_mode(
-        (ublox->data_display_state).backlight_mode, ublox);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, backlight_mode_text[value_index]);
 
     item = variable_item_list_add(
         ublox->variable_item_list,
@@ -351,13 +296,9 @@ void ublox_scene_data_display_config_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, odometer_mode_text[value_index]);
 
-    item = variable_item_list_add(
-				  ublox->variable_item_list,
-				  "Reset Odometer",
-				  1, NULL, NULL);
-    variable_item_list_set_enter_callback(ublox->variable_item_list,
-					  ublox_scene_data_display_config_enter_callback,
-					  ublox);
+    item = variable_item_list_add(ublox->variable_item_list, "Reset Odometer", 1, NULL, NULL);
+    variable_item_list_set_enter_callback(
+        ublox->variable_item_list, ublox_scene_data_display_config_enter_callback, ublox);
     view_dispatcher_switch_to_view(ublox->view_dispatcher, UbloxViewVariableItemList);
 }
 
@@ -372,19 +313,19 @@ bool ublox_scene_data_display_config_on_event(void* context, SceneManagerEvent e
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-	if(event.event == UbloxCustomEventResetOdometer) {
-	    ublox_worker_start(
+        if(event.event == UbloxCustomEventResetOdometer) {
+            ublox_worker_start(
                 ublox->worker,
                 UbloxWorkerStateResetOdometer,
                 ublox_scene_data_display_config_worker_callback,
                 ublox);
-	    // don't consume, we want to stay here
-	} else if(event.event == UbloxWorkerEventOdoReset) {
-	    if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
+            // don't consume, we want to stay here
+        } else if(event.event == UbloxWorkerEventOdoReset) {
+            if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
                 notification_message(ublox->notifications, &sequence_new_reading);
             }
-	    FURI_LOG_I(TAG, "odometer reset done");
-	}
+            FURI_LOG_I(TAG, "odometer reset done");
+        }
     }
 
     return consumed;

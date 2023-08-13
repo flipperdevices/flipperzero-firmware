@@ -9,7 +9,6 @@ const NotificationSequence sequence_new_reading = {
     NULL,
 };
 
-
 bool ublox_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Ublox* ublox = context;
@@ -56,7 +55,7 @@ Ublox* ublox_alloc() {
     ublox->text_input = text_input_alloc();
     view_dispatcher_add_view(
         ublox->view_dispatcher, UbloxViewTextInput, text_input_get_view(ublox->text_input));
-    
+
     ublox->data_display = data_display_alloc();
     view_dispatcher_add_view(
         ublox->view_dispatcher, UbloxViewDataDisplay, data_display_get_view(ublox->data_display));
@@ -67,10 +66,9 @@ Ublox* ublox_alloc() {
     ublox->log_state = UbloxLogStateNone;
     // default to "/data", which maps to "/ext/apps_data/ublox"
     ublox->logfile_folder = furi_string_alloc_set(STORAGE_APP_DATA_PATH_PREFIX);
-    
+
     // Establish default data display state
     (ublox->data_display_state).view_mode = UbloxDataDisplayViewModeHandheld;
-    (ublox->data_display_state).backlight_mode = UbloxDataDisplayBacklightDefault;
     (ublox->data_display_state).refresh_rate = 2;
     (ublox->data_display_state).notify_mode = UbloxDataDisplayNotifyOn;
 
@@ -79,7 +77,6 @@ Ublox* ublox_alloc() {
     (ublox->device_state).platform_model = UbloxPlatformModelPortable;
     ublox->gps_initted = false;
 
-    
     return ublox;
 }
 
@@ -90,7 +87,7 @@ void ublox_free(Ublox* ublox) {
 
     // no need to stop the worker, plus it causes the app to crash by NULL
     // pointer dereference from context in the worker struct
-    
+
     //FURI_LOG_I(TAG, "stop worker");
     //ublox_worker_stop(ublox->worker);
     //FURI_LOG_I(TAG, "%p", ublox->worker->context);
@@ -111,7 +108,7 @@ void ublox_free(Ublox* ublox) {
 
     view_dispatcher_remove_view(ublox->view_dispatcher, UbloxViewTextInput);
     text_input_free(ublox->text_input);
-    
+
     view_dispatcher_free(ublox->view_dispatcher);
 
     scene_manager_free(ublox->scene_manager);
@@ -124,7 +121,7 @@ void ublox_free(Ublox* ublox) {
     ublox->storage = NULL;
 
     if(ublox->logfile_folder != NULL) {
-	furi_string_free(ublox->logfile_folder);
+        furi_string_free(ublox->logfile_folder);
     }
     free(ublox);
 }
@@ -139,6 +136,10 @@ int32_t ublox_app(void* p) {
     view_dispatcher_run(ublox->view_dispatcher);
 
     // force restore the default backlight on exit
+
+    // TODO: this is breaking the backlight timeout for everything
+    // else: test by opening ublox, then leaving and opening DAP
+    // Link. DAP Link should force the backlight on but doesn't.
     notification_message_block(ublox->notifications, &sequence_display_backlight_enforce_auto);
 
     ublox_free(ublox);

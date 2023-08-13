@@ -10,7 +10,7 @@ cd ..
 ./fbt launch_app APPSRC=applications_user/flipperscope
 ```
 
-Alternatively upload the **scope.fap** file in the binary folder of this repository to your flipper zero.
+Alternatively the binary can now be installed from https://lab.flipper.net/apps/flipperscope or the Flipper Mobile App.
 
 Provide signal to **pin 16/PC0**, with a voltage ranging from 0V to 2.5V and ground to **pin 18/GND**.
 

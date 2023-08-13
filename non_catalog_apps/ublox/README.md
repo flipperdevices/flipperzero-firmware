@@ -1,6 +1,7 @@
 # ublox
-Flipper Zero app to read from a u-blox GPS over I2C. This used to be
-in my repository `flipped`, but got to be both large and good enough
-to merit its own repo. Furthermore, I really, truly fixed the awful
-memory leak that had been plaguing this app for months, so now feature
-development can continue.
+Flipper Zero app to read from a u-blox GPS over I2C. This app can
+display data, log a path to a KML file, and sync the Flipper's time to
+GPS time.
+
+This app used to reside in my "flipped" GitHub repository, but I made
+it much better and moved it here.

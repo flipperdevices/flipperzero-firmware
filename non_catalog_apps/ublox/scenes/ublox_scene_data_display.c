@@ -18,7 +18,7 @@ void ublox_scene_data_display_view_callback(void* context, InputKey key) {
     } else if(key == InputKeyOk) {
         view_dispatcher_send_custom_event(ublox->view_dispatcher, GuiButtonTypeCenter);
     } else if(key == InputKeyRight) {
-	view_dispatcher_send_custom_event(ublox->view_dispatcher, GuiButtonTypeRight);
+        view_dispatcher_send_custom_event(ublox->view_dispatcher, GuiButtonTypeRight);
     }
 }
 
@@ -27,9 +27,9 @@ void ublox_scene_data_display_on_enter(void* context) {
 
     // Use any existing data
     data_display_set_nav_messages(ublox->data_display, ublox->nav_pvt, ublox->nav_odo);
-    
+
     data_display_set_callback(ublox->data_display, ublox_scene_data_display_view_callback, ublox);
-    
+
     if((ublox->data_display_state).view_mode == UbloxDataDisplayViewModeHandheld) {
         data_display_set_state(ublox->data_display, DataDisplayHandheldMode);
     } else if((ublox->data_display_state).view_mode == UbloxDataDisplayViewModeCar) {
@@ -38,7 +38,8 @@ void ublox_scene_data_display_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(ublox->view_dispatcher, UbloxViewDataDisplay);
 
-    ublox_worker_start(ublox->worker, UbloxWorkerStateRead, ublox_scene_data_display_worker_callback, ublox);
+    ublox_worker_start(
+        ublox->worker, UbloxWorkerStateRead, ublox_scene_data_display_worker_callback, ublox);
 }
 
 bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
@@ -47,23 +48,24 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-	    ublox_worker_stop(ublox->worker);
+            ublox_worker_stop(ublox->worker);
             scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplayConfig);
             consumed = true;
-        
-	} else if(event.event == GuiButtonTypeRight) {
-	    // TODO: only allow if GPS is detected?
-	    FURI_LOG_I(TAG, "right button");
-	    if (ublox->log_state == UbloxLogStateNone) {
-		// start logging
-		ublox_worker_stop(ublox->worker);
-		scene_manager_next_scene(ublox->scene_manager, UbloxSceneEnterFileName);
-		consumed = true;
-	    } else if(ublox->log_state == UbloxLogStateLogging) {
-		FURI_LOG_I(TAG, "stop logging from scene");
-		ublox->log_state = UbloxLogStateStopLogging;
-	    }
-	    
+
+        } else if(event.event == GuiButtonTypeRight) {
+            if(data_display_get_state(ublox->data_display) != DataDisplayGPSNotFound) {
+                FURI_LOG_I(TAG, "right button");
+                if(ublox->log_state == UbloxLogStateNone) {
+                    // start logging
+                    ublox_worker_stop(ublox->worker);
+                    scene_manager_next_scene(ublox->scene_manager, UbloxSceneEnterFileName);
+                    consumed = true;
+                } else if(ublox->log_state == UbloxLogStateLogging) {
+                    FURI_LOG_I(TAG, "stop logging from scene");
+                    ublox->log_state = UbloxLogStateStopLogging;
+                }
+            }
+
         } else if(event.event == UbloxWorkerEventDataReady) {
             if((ublox->data_display_state).notify_mode == UbloxDataDisplayNotifyOn) {
                 notification_message(ublox->notifications, &sequence_new_reading);
@@ -77,11 +79,10 @@ bool ublox_scene_data_display_on_event(void* context, SceneManagerEvent event) {
 
             data_display_set_nav_messages(ublox->data_display, ublox->nav_pvt, ublox->nav_odo);
 
+        } else if(event.event == UbloxWorkerEventLogStateChanged) {
+            data_display_set_log_state(ublox->data_display, ublox->log_state);
 
-	} else if(event.event == UbloxWorkerEventLogStateChanged) {
-	    data_display_set_log_state(ublox->data_display, ublox->log_state);
-
-	} else if(event.event == UbloxWorkerEventFailed) {
+        } else if(event.event == UbloxWorkerEventFailed) {
             FURI_LOG_I(TAG, "UbloxWorkerEventFailed");
             data_display_set_state(ublox->data_display, DataDisplayGPSNotFound);
         }
@@ -98,9 +99,8 @@ void ublox_scene_data_display_on_exit(void* context) {
 	//while (ublox->log_state != UbloxLogStateNone);
 	//furi_delay_ms(500);
 	}*/
-    
+
     ublox_worker_stop(ublox->worker);
 
     data_display_reset(ublox->data_display);
-
 }

@@ -28,65 +28,74 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
     // Setup view
     UART_TextInput* text_input = app->text_input;
     // Add help message to header
-    char* helpStr = NULL;
-    switch(app->gravityCommand) {
-    case GRAVITY_BEACON:
-        helpStr = (char*)SHORT_BEACON;
-        break;
-    case GRAVITY_TARGET_SSIDS:
-        helpStr = (char*)SHORT_TARGET_SSIDS;
-        break;
-    case GRAVITY_PROBE:
-        helpStr = (char*)SHORT_PROBE;
-        break;
-    case GRAVITY_SNIFF:
-        helpStr = (char*)SHORT_SNIFF;
-        break;
-    case GRAVITY_DEAUTH:
-        helpStr = (char*)SHORT_DEAUTH;
-        break;
-    case GRAVITY_MANA:
-        helpStr = (char*)SHORT_MANA;
-        break;
-    case GRAVITY_STALK:
-        helpStr = (char*)SHORT_STALK;
-        break;
-    case GRAVITY_AP_DOS:
-        helpStr = (char*)SHORT_AP_DOS;
-        break;
-    case GRAVITY_AP_CLONE:
-        helpStr = (char*)SHORT_AP_CLONE;
-        break;
-    case GRAVITY_SCAN:
-        helpStr = (char*)SHORT_SCAN;
-        break;
-    case GRAVITY_HOP:
-        helpStr = (char*)SHORT_HOP;
-        break;
-    case GRAVITY_SET:
-        helpStr = (char*)SHORT_SET;
-        break;
-    case GRAVITY_GET:
-        helpStr = (char*)SHORT_GET;
-        break;
-    case GRAVITY_VIEW:
-        helpStr = (char*)SHORT_VIEW;
-        break;
-    case GRAVITY_SELECT:
-        helpStr = (char*)SHORT_SELECT;
-        break;
-    case GRAVITY_CLEAR:
-        helpStr = (char*)SHORT_CLEAR;
-        break;
-    case GRAVITY_HANDSHAKE:
-        helpStr = (char*)SHORT_HANDSHAKE;
-        break;
-    case GRAVITY_COMMANDS:
-        helpStr = (char*)SHORT_COMMANDS;
-        break;
-    default:
-        helpStr = "Send command to UART";
-        break;
+    char *helpStr = NULL;
+    switch (app->gravityCommand) {
+        case GRAVITY_BEACON:
+            helpStr = (char *)SHORT_BEACON;
+            break;
+        case GRAVITY_TARGET_SSIDS:
+            helpStr = (char*)SHORT_TARGET_SSIDS;
+            break;
+        case GRAVITY_PROBE:
+            helpStr = (char *)SHORT_PROBE;
+            break;
+        case GRAVITY_FUZZ:
+            helpStr = (char *)SHORT_FUZZ;
+            break;
+        case GRAVITY_SNIFF:
+            helpStr = (char *)SHORT_SNIFF;
+            break;
+        case GRAVITY_DEAUTH:
+            helpStr = (char *)SHORT_DEAUTH;
+            break;
+        case GRAVITY_MANA:
+            helpStr = (char *)SHORT_MANA;
+            break;
+        case GRAVITY_STALK:
+            helpStr = (char *)SHORT_STALK;
+            break;
+        case GRAVITY_AP_DOS:
+            helpStr = (char *)SHORT_AP_DOS;
+            break;
+        case GRAVITY_AP_CLONE:
+            helpStr = (char *)SHORT_AP_CLONE;
+            break;
+        case GRAVITY_SCAN:
+            helpStr = (char *)SHORT_SCAN;
+            break;
+        case GRAVITY_HOP:
+            helpStr = (char *)SHORT_HOP;
+            break;
+        case GRAVITY_SET:
+            helpStr = (char *)SHORT_SET;
+            break;
+        case GRAVITY_GET:
+            helpStr = (char *)SHORT_GET;
+            break;
+        case GRAVITY_VIEW:
+            helpStr = (char *)SHORT_VIEW;
+            break;
+        case GRAVITY_SELECT:
+            helpStr = (char *)SHORT_SELECT;
+            break;
+        case GRAVITY_SELECTED:
+            helpStr = (char *)SHORT_SELECTED;
+            break;
+        case GRAVITY_CLEAR:
+            helpStr = (char *)SHORT_CLEAR;
+            break;
+        case GRAVITY_HANDSHAKE:
+            helpStr = (char *)SHORT_HANDSHAKE;
+            break;
+        case GRAVITY_COMMANDS:
+            helpStr = (char *)SHORT_COMMANDS;
+            break;
+        case GRAVITY_INFO:
+            helpStr = (char *)SHORT_INFO;
+            break;
+        default:
+            helpStr = "Send command to UART";
+            break;
     }
 
     uart_text_input_set_header_text(text_input, helpStr);
