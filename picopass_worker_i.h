@@ -1,6 +1,7 @@
 #pragma once
 
 #include "picopass_worker.h"
+#include "loclass_writer.h"
 #include "picopass_i.h"
 
 #include <furi.h>
@@ -32,3 +33,4 @@ int32_t picopass_worker_task(void* context);
 void picopass_worker_detect(PicopassWorker* picopass_worker);
 void picopass_worker_write(PicopassWorker* picopass_worker);
 void picopass_worker_write_key(PicopassWorker* picopass_worker);
+void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode);

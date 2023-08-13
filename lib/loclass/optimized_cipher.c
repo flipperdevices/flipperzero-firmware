@@ -280,7 +280,22 @@ void loclass_opt_doTagMAC_2(
     loclass_opt_output(div_key_p, &_init, mac);
 }
 
-void loclass_iclass_calc_div_key(uint8_t* csn, uint8_t* key, uint8_t* div_key, bool elite) {
+void loclass_opt_doBothMAC_2(
+    LoclassState_t _init,
+    uint8_t* nr,
+    uint8_t rmac[4],
+    uint8_t tmac[4],
+    const uint8_t* div_key_p) {
+    loclass_opt_suc(div_key_p, &_init, nr, 4, false);
+    // Save internal state for reuse before outputting
+    LoclassState_t nr_state = _init;
+    loclass_opt_output(div_key_p, &_init, rmac);
+    // Feed the 32 0 bits for the tag mac
+    loclass_opt_suc(div_key_p, &nr_state, NULL, 0, true);
+    loclass_opt_output(div_key_p, &nr_state, tmac);
+}
+
+void loclass_iclass_calc_div_key(uint8_t* csn, const uint8_t* key, uint8_t* div_key, bool elite) {
     if(elite) {
         uint8_t keytable[128] = {0};
         uint8_t key_index[8] = {0};
