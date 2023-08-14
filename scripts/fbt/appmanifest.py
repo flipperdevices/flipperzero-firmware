@@ -2,6 +2,7 @@ import os
 import re
 from dataclasses import dataclass, field
 from enum import Enum
+from fbt.util import resolve_real_dir_node
 from typing import Callable, ClassVar, List, Optional, Tuple, Union
 
 
@@ -152,7 +153,7 @@ class AppManager:
                 FlipperApplication(
                     *args,
                     **kw,
-                    _appdir=app_dir_node,
+                    _appdir=resolve_real_dir_node(app_dir_node),
                     _apppath=os.path.dirname(app_manifest_path),
                     _appmanager=self,
                 ),
@@ -328,10 +329,7 @@ class AppBuildset:
             sdk_headers.extend(
                 [
                     src._appdir.File(header)
-                    for src in [
-                        app,
-                        *(plugin for plugin in app._plugins),
-                    ]
+                    for src in [app, *app._plugins]
                     for header in src.sdk_headers
                 ]
             )
