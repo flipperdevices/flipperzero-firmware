@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0813-1711-0.88.1-493abcc](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-13 17:11 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-13 17:11 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-14 03:35 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-14 03:35 EST`
 - Added: [Wire Tester (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - Not Removing Apps from firmware like OFW and Unleashed (By RogueMaster)
 - Updated: [DnD Dice v1.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice) [Fix biased randomness in dice roll (By x42)](https://github.com/Ka3u6y6a/flipper-zero-dice/pull/4)
@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [External Radio Support (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/a8f6ee595f768020e0ff77d25b574ef25813f140)
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external) for next Patreon release
+- UL: NFC Random UID Fix (By xMasterX)
 
 <a name="release">
 
