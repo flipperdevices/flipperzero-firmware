@@ -1845,6 +1845,9 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
     } else if(dev_data->protocol == NfcDeviceProtocolFelica) {
         felica_clear(&dev_data->felica_data);
     }
+
+    furi_string_reset(dev_data->parsed_data);
+
     memset(&dev_data->nfc_data, 0, sizeof(FuriHalNfcDevData));
     dev_data->protocol = NfcDeviceProtocolUnknown;
     furi_string_reset(dev_data->parsed_data);
