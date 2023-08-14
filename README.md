@@ -5,9 +5,7 @@ feature that is available on the CLI. In addition it allows for basic
 encryption of messages.
 
 The plugin has been tested on the official firmware (version 0.87.0) and on
-Unleashed (version unlshd-059).
-
-Currently the use of an external antenna is not supported.
+Unleashed (version unlshd-060).
 
 ## Warning
 
@@ -87,3 +85,6 @@ by Markus Kosmal.
 
 The app icon was made by [xMasterX](https://github.com/xMasterX). Other icons
 and graphics were taken from the Flipper Zero firmware.
+
+Support for the external radio was also contributed by
+[xMasterX](https://github.com/xMasterX).
