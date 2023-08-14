@@ -32,6 +32,9 @@ Iso15693_3Error iso15693_3_listener_sleep(Iso15693_3Listener* instance);
 Iso15693_3Error
     iso15693_3_listener_send_frame(Iso15693_3Listener* instance, const BitBuffer* tx_buffer);
 
+Iso15693_3Error
+    iso15693_3_listener_process_request(Iso15693_3Listener* instance, const BitBuffer* rx_buffer);
+
 #ifdef __cplusplus
 }
 #endif

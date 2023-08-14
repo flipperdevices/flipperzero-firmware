@@ -4,6 +4,7 @@
 
 #include <nfc/nfc.h>
 #include <nfc/protocols/nfc_listener_base.h>
+#include <nfc/helpers/iso13239_crc.h>
 
 #define TAG "Iso15693_3Listener"
 
@@ -71,15 +72,13 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
         }
         FURI_LOG_D(TAG, "Field OFF");
         iso15693_3_listener_sleep(instance);
-    } else if(nfc_event->type == NfcEventTypeListenerActivated) {
-        FURI_LOG_D(TAG, "Listener activated");
-        instance->state = Iso15693_3ListenerStateActive;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
-        const BitBuffer* data = nfc_event->data.buffer;
-        // const size_t data_size = bit_buffer_get_size_bytes(data);
-        // FURI_LOG_D(TAG, "Received %zu bytes", data_size);
-        // Echo the received data back for testing purposes
-        nfc_listener_tx(instance->nfc, data);
+        if(iso13239_crc_check(Iso13239CrcTypeDefault, nfc_event->data.buffer)) {
+            iso13239_crc_trim(nfc_event->data.buffer);
+            iso15693_3_listener_process_request(instance, nfc_event->data.buffer);
+        } else {
+            FURI_LOG_D(TAG, "Wrong CRC");
+        }
     }
 
     return command;
