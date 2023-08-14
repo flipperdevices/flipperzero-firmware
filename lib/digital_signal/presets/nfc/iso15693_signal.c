@@ -4,6 +4,9 @@
 
 #define BITS_IN_BYTE (8U)
 
+#define ISO15693_SIGNAL_COEFF_HI (1U)
+#define ISO15693_SIGNAL_COEFF_LO (4U)
+
 #define ISO15693_SIGNAL_ZERO_EDGES (16U)
 #define ISO15693_SIGNAL_ONE_EDGES (ISO15693_SIGNAL_ZERO_EDGES + 1U)
 #define ISO15693_SIGNAL_EOF_EDGES (64U)
@@ -15,8 +18,16 @@
 #define ISO15693_SIGNAL_FC_256 (256.0e11 / ISO15693_SIGNAL_FC)
 #define ISO15693_SIGNAL_FC_768 (768.0e11 / ISO15693_SIGNAL_FC)
 
+typedef struct {
+    DigitalSignal* sof;
+    DigitalSignal* eof;
+    DigitalSignal* one;
+    DigitalSignal* zero;
+} Iso15693Signals;
+
 struct Iso15693Signal {
     const GpioPin* pin;
+    Iso15693Signals signals[Iso15693SignalDataRateNum];
     DigitalSignal* sof;
     DigitalSignal* eof;
     DigitalSignal* one;
@@ -25,43 +36,30 @@ struct Iso15693Signal {
 };
 
 // TODO: Rewrite all of this with digital sequence!
-static inline void iso15693_add_sof(DigitalSignal* signal) {
-    signal->start_level = false;
-    signal->edge_cnt = ISO15693_SIGNAL_SOF_EDGES;
 
-    for(uint32_t i = 0; i < ISO15693_SIGNAL_SOF_EDGES; ++i) {
-        signal->edge_timings[i] = ISO15693_SIGNAL_FC_16;
-    }
-
-    signal->edge_timings[0] = ISO15693_SIGNAL_FC_768;
-    signal->edge_timings[ISO15693_SIGNAL_SOF_EDGES - ISO15693_SIGNAL_ONE_EDGES] =
-        ISO15693_SIGNAL_FC_256 + ISO15693_SIGNAL_FC_16;
+// Add an unmodulated signal for the length of Fc / 256 * k (where k = 1 or 4)
+static void iso15693_add_silence(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
+    const uint32_t k = data_rate == Iso15693SignalDataRateHi ? ISO15693_SIGNAL_COEFF_HI :
+                                                               ISO15693_SIGNAL_COEFF_LO;
+    digital_signal_add_pulse(signal, ISO15693_SIGNAL_FC_256 * k, false);
 }
 
-static inline void iso15693_add_eof(DigitalSignal* signal) {
-    signal->start_level = true;
-    signal->edge_cnt = ISO15693_SIGNAL_EOF_EDGES;
-
-    for(uint32_t i = 0; i < ISO15693_SIGNAL_EOF_EDGES; ++i) {
-        signal->edge_timings[i] = ISO15693_SIGNAL_FC_16;
+// Add 8 * k subcarrier pulses of Fc / 16 (where k = 1 or 4)
+static void iso15693_add_subcarrier(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
+    const uint32_t k = data_rate == Iso15693SignalDataRateHi ? ISO15693_SIGNAL_COEFF_HI :
+                                                               ISO15693_SIGNAL_COEFF_LO;
+    for(uint32_t i = 0; i < ISO15693_SIGNAL_ZERO_EDGES * k; ++i) {
+        digital_signal_add_pulse(signal, ISO15693_SIGNAL_FC_16, !(i % 2));
     }
-
-    signal->edge_timings[ISO15693_SIGNAL_ZERO_EDGES - 1] =
-        ISO15693_SIGNAL_FC_256 + ISO15693_SIGNAL_FC_16;
-    signal->edge_timings[ISO15693_SIGNAL_EOF_EDGES - 1] = ISO15693_SIGNAL_FC_768;
 }
 
-static void iso15693_add_bit(DigitalSignal* signal, bool bit) {
+static void iso15693_add_bit(DigitalSignal* signal, Iso15693SignalDataRate data_rate, bool bit) {
     if(bit) {
-        digital_signal_add_pulse(signal, ISO15693_SIGNAL_FC_256, false);
-        for(uint32_t i = 0; i < ISO15693_SIGNAL_ZERO_EDGES; ++i) {
-            digital_signal_add_pulse(signal, ISO15693_SIGNAL_FC_16, !(i % 2));
-        }
+        iso15693_add_silence(signal, data_rate);
+        iso15693_add_subcarrier(signal, data_rate);
     } else {
-        for(uint32_t i = 0; i < ISO15693_SIGNAL_ZERO_EDGES; ++i) {
-            digital_signal_add_pulse(signal, ISO15693_SIGNAL_FC_16, !(i % 2));
-        }
-        digital_signal_add_pulse(signal, ISO15693_SIGNAL_FC_256, false);
+        iso15693_add_subcarrier(signal, data_rate);
+        iso15693_add_silence(signal, data_rate);
     }
 }
 
@@ -69,6 +67,30 @@ static void iso15693_add_byte(Iso15693Signal* instance, uint8_t byte) {
     for(size_t i = 0; i < BITS_IN_BYTE; i++) {
         const uint8_t bit = byte & (1U << i);
         digital_signal_append(instance->tx_signal, bit ? instance->one : instance->zero);
+    }
+}
+
+static void iso15693_add_sof(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
+    for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
+        iso15693_add_silence(signal, data_rate);
+    }
+
+    for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
+        iso15693_add_subcarrier(signal, data_rate);
+    }
+
+    iso15693_add_bit(signal, data_rate, true);
+}
+
+static void iso15693_add_eof(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
+    iso15693_add_bit(signal, data_rate, false);
+
+    for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
+        iso15693_add_subcarrier(signal, data_rate);
+    }
+
+    for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
+        iso15693_add_silence(signal, data_rate);
     }
 }
 
@@ -98,10 +120,10 @@ Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin) {
     instance->zero = digital_signal_alloc(ISO15693_SIGNAL_ZERO_EDGES);
     instance->tx_signal = digital_signal_alloc(ISO15693_SIGNAL_EDGES);
 
-    iso15693_add_sof(instance->sof);
-    iso15693_add_eof(instance->eof);
-    iso15693_add_bit(instance->one, true);
-    iso15693_add_bit(instance->zero, false);
+    iso15693_add_sof(instance->sof, Iso15693SignalDataRateHi);
+    iso15693_add_eof(instance->eof, Iso15693SignalDataRateHi);
+    iso15693_add_bit(instance->one, Iso15693SignalDataRateHi, true);
+    iso15693_add_bit(instance->zero, Iso15693SignalDataRateHi, false);
 
     return instance;
 }

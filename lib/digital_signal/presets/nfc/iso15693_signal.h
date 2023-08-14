@@ -11,6 +11,12 @@ extern "C" {
 
 typedef struct Iso15693Signal Iso15693Signal;
 
+typedef enum {
+    Iso15693SignalDataRateHi,
+    Iso15693SignalDataRateLo,
+    Iso15693SignalDataRateNum,
+} Iso15693SignalDataRate;
+
 Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin);
 
 void iso15693_signal_free(Iso15693Signal* instance);
