@@ -83,8 +83,14 @@ The implementations of AES and GCM are taken directly from
 https://github.com/mko-x/SharedAES-GCM. They were released to the public domain
 by Markus Kosmal.
 
-The app icon was made by [xMasterX](https://github.com/xMasterX). Other icons
-and graphics were taken from the Flipper Zero firmware.
+The app icon was made by [xMasterX](https://github.com/xMasterX). The icon for
+the hexadecimal key input was taken from [QtRoS](https://github.com/QtRoS) hex
+viewer app, which can be found here:
+https://github.com/QtRoS/flipper-zero-hex-viewer. Other icons and graphics were
+taken from the Flipper Zero firmware.
+
+The icons used in the key input method menu were picked by
+[Willy-JL](https://github.com/Willy-JL).
 
 Support for the external radio was also contributed by
 [xMasterX](https://github.com/xMasterX).
