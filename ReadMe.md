@@ -51,6 +51,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external) for next Patreon release
 - UL: NFC Random UID Fix (By xMasterX)
 - UL PR: [NFC app: MF Custom UID, fix SAK & ATQA save #574 (By git9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/574)
+- UL: Properly reset the NFC device data (By Astrrra)
+- UL: fix somfy telis wrong frequency in add manually (By xMasterX)
 
 <a name="release">
 
