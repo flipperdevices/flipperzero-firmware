@@ -1,8 +1,8 @@
 #include <furi_hal.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
-#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
+#include "helpers/radio_device_loader.h"
 #include "esubghz_chat_i.h"
 
 #define CHAT_LEAVE_DELAY 10
@@ -137,16 +137,28 @@ void tx_msg_input(ESubGhzChatState *state)
 			tx_size);
 }
 
-/* Displays whether or not encryption has been enabled in the text box. Also
- * clears the text input buffer to remove the password and starts the Sub-GHz
- * worker. After starting the worker a join message is transmitted. */
+/* Displays information on frequency, encryption and radio type in the text
+ * box. Also clears the text input buffer to remove the password and starts the
+ * Sub-GHz worker. After starting the worker a join message is transmitted. */
 void enter_chat(ESubGhzChatState *state)
 {
+	furi_string_cat_printf(state->chat_box_store, "Frequency: %lu",
+			state->frequency);
+
 	furi_string_cat_printf(state->chat_box_store, "\nEncrypted: %s",
 			(state->encrypted ? "yes" : "no"));
 
 	subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device,
 			state->frequency);
+
+	if (strcmp(state->subghz_device->name, "cc1101_ext") == 0) {
+		furi_string_cat_printf(state->chat_box_store,
+				"\nRadio: External");
+	} else {
+		furi_string_cat_printf(state->chat_box_store,
+				"\nRadio: Internal");
+	}
+
 
 	/* concatenate the name prefix and join message */
 	furi_string_set(state->msg_input, state->name_prefix);
@@ -572,7 +584,12 @@ int32_t esubghz_chat(void)
 
 	/* init internal device */
 	subghz_devices_init();
-	state->subghz_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+
+	state->subghz_device = radio_device_loader_set(state->subghz_device,
+			SubGhzRadioDeviceTypeExternalCC1101);
+
+	subghz_devices_reset(state->subghz_device);
+	subghz_devices_idle(state->subghz_device);
 
 	/* set chat name prefix */
 	furi_string_printf(state->name_prefix, "%s",
@@ -678,6 +695,8 @@ int32_t esubghz_chat(void)
 	crypto_explicit_bzero(state->nfc_dev_data, sizeof(NfcDeviceData));
 
 	/* deinit devices */
+	radio_device_loader_end(state->subghz_device);
+
 	subghz_devices_deinit();
 
 	/* exit suppress charge mode */
