@@ -5,6 +5,12 @@
 // TODO: More efficient dictionary bruteforce by scanning through hardcoded very common keys and previously found dictionary keys first?
 //       (a cache for napi_key_already_found_for_nonce)
 
+// Static Nested TODO:
+// 1. Check for known keys
+// 2. Add "in" parameter back into recovery process (from lfsr_recovery32)
+// 3. Pass: lfsr_recovery32(ks2, nt_enc ^ cuid)
+// 4. Use key_matches_ks1 in Nested mode of recovery to validate keys (making sure it has all of the Crypto1Params)
+
 #include <furi.h>
 #include <furi_hal.h>
 #include "time.h"
@@ -28,8 +34,11 @@
 #define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
 #define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
 #define MF_CLASSIC_NONCE_PATH EXT_PATH("nfc/.mfkey32.log")
+#define MF_CLASSIC_NESTED_NONCE_PATH EXT_PATH("nfc/.nested")
 #define TAG "MFKey"
 #define NFC_MF_CLASSIC_KEY_LEN (13)
+#define MAX_NAME_LEN 32
+#define MAX_PATH_LEN 64
 
 #define MIN_RAM 115632
 #define LF_POLY_ODD (0x29CE5C)
@@ -880,6 +889,65 @@ bool napi_mf_classic_nonces_check_presence() {
     return nonces_present;
 }
 
+bool distance_in_nonces_file(const char* file_path, const char* file_name) {
+    char full_path[MAX_PATH_LEN];
+    snprintf(full_path, sizeof(full_path), "%s/%s", file_path, file_name);
+    bool distance_present = false;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* file_stream = buffered_file_stream_alloc(storage);
+    FuriString* line_str;
+    line_str = furi_string_alloc();
+
+    if (buffered_file_stream_open(file_stream, full_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        while (true) {
+            if (!stream_read_line(file_stream, line_str)) break;
+            if (furi_string_search_str(line_str, "distance") != FURI_STRING_FAILURE) {
+                distance_present = true;
+                break;
+            }
+        }
+    }
+
+    buffered_file_stream_close(file_stream);
+    stream_free(file_stream);
+    furi_string_free(line_str);
+    furi_record_close(RECORD_STORAGE);
+
+    return distance_present;
+}
+
+bool napi_mf_classic_nested_nonces_check_presence() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    if (!(storage_dir_exists(storage, MF_CLASSIC_NESTED_NONCE_PATH))) {
+        furi_record_close(RECORD_STORAGE);
+        return false;
+    }
+
+    bool nonces_present = false;
+    File* dir = storage_file_alloc(storage);
+    char filename_buffer[MAX_NAME_LEN];
+    FileInfo file_info;
+
+    if (storage_dir_open(dir, MF_CLASSIC_NESTED_NONCE_PATH)) {
+        while (storage_dir_read(dir, &file_info, filename_buffer, MAX_NAME_LEN)) {
+            // We only care about Static Nested files
+            if (!(file_info.flags & FSF_DIRECTORY) &&
+                strstr(filename_buffer, ".nonces") &&
+                !(distance_in_nonces_file(MF_CLASSIC_NESTED_NONCE_PATH, filename_buffer))) {
+                nonces_present = true;
+                break;
+            }
+        }
+    }
+
+    storage_dir_close(dir);
+    storage_file_free(dir);
+    furi_record_close(RECORD_STORAGE);
+
+    return nonces_present;
+}
+
 MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
     MfClassicDict* system_dict,
     bool system_dict_exists,
@@ -1026,8 +1094,17 @@ void mfkey(ProgramState* program_state) {
     uint64_t* keyarray = malloc(sizeof(uint64_t) * 1);
     uint32_t i = 0, j = 0;
     // Check for nonces
-    if(!napi_mf_classic_nonces_check_presence()) {
+    bool is_mfkey = napi_mf_classic_nonces_check_presence();
+    bool is_nested = napi_mf_classic_nested_nonces_check_presence();
+    if(!(is_mfkey) && !(is_nested)) {
         program_state->err = MissingNonces;
+        program_state->mfkey_state = Error;
+        free(keyarray);
+        return;
+    }
+    // TODO: Fail if this is a Nested attack (WIP)
+    if(is_nested) {
+        program_state->err = ZeroNonces;
         program_state->mfkey_state = Error;
         free(keyarray);
         return;
@@ -1220,10 +1297,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         elements_button_right(canvas, "Help");
     } else if(program_state->mfkey_state == Help) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 7, 20, AlignLeft, AlignTop, "Collect nonces using");
-        canvas_draw_str_aligned(canvas, 7, 30, AlignLeft, AlignTop, "Detect Reader.");
-        canvas_draw_str_aligned(canvas, 7, 40, AlignLeft, AlignTop, "Developers: noproto, AG");
-        canvas_draw_str_aligned(canvas, 7, 50, AlignLeft, AlignTop, "Thanks: bettse");
+        canvas_draw_str_aligned(canvas, 7, 20, AlignLeft, AlignTop, "Collect nonces using Detect");
+        canvas_draw_str_aligned(canvas, 7, 30, AlignLeft, AlignTop, "Reader or FlipperNested.");
+        canvas_draw_str_aligned(canvas, 7, 40, AlignLeft, AlignTop, "Devs: noproto, AG, ALiberty");
+        canvas_draw_str_aligned(canvas, 7, 50, AlignLeft, AlignTop, "Thanks: bettse, Foxushka");
     } else if(program_state->mfkey_state == Error) {
         canvas_draw_str_aligned(canvas, 50, 25, AlignLeft, AlignTop, "Error");
         canvas_set_font(canvas, FontSecondary);
