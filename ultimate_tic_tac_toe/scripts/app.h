@@ -18,16 +18,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 typedef struct SceneManager SceneManager;
 typedef struct AppGameplayState AppGameplayState;
 
-typedef struct AppContext
-{
+typedef struct AppContext {
     Gui* gui;
     SceneManager* sceneManager;
     AppGameplayState* gameplay;
 
 } AppContext;
 
-typedef enum SceneType
-{
+typedef enum SceneType {
     SceneType_None,
     SceneType_Menu,
     SceneType_Game,

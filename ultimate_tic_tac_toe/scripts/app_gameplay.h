@@ -1,7 +1,6 @@
 #include <stdbool.h>
 
-typedef enum PlayerType
-{
+typedef enum PlayerType {
     PlayerType_Human,
     PlayerType_AiRandom,
     PlayerType_AiHeuristic,
@@ -28,6 +27,9 @@ void gameplay_selection_set(AppGameplayState* gameplay, int boardIndex, int cell
 
 PlayerType gameplay_get_player_type(AppGameplayState* gameplay, PlayerTurn playerIndex);
 PlayerType gameplay_get_next_player_type(AppGameplayState* gameplay);
-void gameplay_set_player_type(AppGameplayState* gameplay, PlayerTurn playerIndex, PlayerType playerType);
+void gameplay_set_player_type(
+    AppGameplayState* gameplay,
+    PlayerTurn playerIndex,
+    PlayerType playerType);
 int gameplay_get_last_action_at(AppGameplayState* gameplay);
 void gameplay_set_last_action_at(AppGameplayState* gameplay, int lastActionAt);

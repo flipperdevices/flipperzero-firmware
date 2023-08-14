@@ -3,8 +3,7 @@
 #include "scene_management.h"
 #include "racso_ultimate_tic_tac_toe_icons.h"
 
-void credits_render_callback(Canvas* const canvas, void* context)
-{
+void credits_render_callback(Canvas* const canvas, void* context) {
     UNUSED(context);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -27,15 +26,13 @@ void credits_render_callback(Canvas* const canvas, void* context)
     canvas_set_font(canvas, FontKeyboard);
     canvas_draw_str_aligned(canvas, 64, 62, AlignCenter, AlignBottom, "https://rac.so");
 
-    for (int x = 0, y = 58, dx = 0; dx <= 3; dx++)
+    for(int x = 0, y = 58, dx = 0; dx <= 3; dx++)
         canvas_draw_line(canvas, x + dx, y - dx, x + dx, y + dx);
 }
 
-void credits_input_callback(InputKey key, InputType type, void* context)
-{
+void credits_input_callback(InputKey key, InputType type, void* context) {
     UNUSED(key);
     AppContext* app = (AppContext*)context;
 
-    if (type == InputTypePress)
-        scene_manager_set_scene(app->sceneManager, SceneType_Menu);
+    if(type == InputTypePress) scene_manager_set_scene(app->sceneManager, SceneType_Menu);
 }
