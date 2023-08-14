@@ -77,7 +77,7 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
             iso13239_crc_trim(nfc_event->data.buffer);
             iso15693_3_listener_process_request(instance, nfc_event->data.buffer);
         } else {
-            FURI_LOG_D(TAG, "Wrong CRC");
+            FURI_LOG_D(TAG, "Wrong CRC, buffer size: %zu", bit_buffer_get_size(nfc_event->data.buffer));
         }
     }
 

@@ -345,15 +345,10 @@ static FHalNfcError f_hal_nfc_iso15693_listener_tx(
     FuriHalSpiBusHandle* handle,
     const uint8_t* tx_data,
     size_t tx_bits) {
-    // UNUSED(tx_data);
-    // UNUSED(tx_bits);
     furi_assert(f_hal_nfc_iso15693_listener);
 
     FHalNfcError error = FHalNfcErrorNone;
     f_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
-
-    // static const uint8_t data = 0x7F;
-    // error = f_hal_nfc_iso15693_listener_tx_transparent(&data, 1);
 
     error = f_hal_nfc_iso15693_listener_tx_transparent(tx_data, tx_bits / BITS_IN_BYTE);
 
@@ -380,6 +375,7 @@ static FHalNfcError f_hal_nfc_iso15693_listener_rx(
     memcpy(rx_data, f_hal_nfc_iso15693_listener->rx_buf, rx_bytes_ready);
     *rx_bits = rx_bits_ready;
 
+    f_hal_nfc_iso15693_listener->rx_bytes = 0;
     // f_hal_nfc_event_set(FHalNfcEventInternalTypeTransparentFieldOn);
 
     return FHalNfcErrorNone;

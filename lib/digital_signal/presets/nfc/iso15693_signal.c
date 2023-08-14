@@ -189,6 +189,7 @@ void iso15693_signal_tx(
     furi_assert(tx_data_size / BITS_IN_BYTE);
 
     FURI_CRITICAL_ENTER();
+    digital_sequence_clear(instance->tx_sequence);
     iso15693_signal_encode(instance, data_rate, tx_data, tx_data_size);
     digital_sequence_send(instance->tx_sequence);
     FURI_CRITICAL_EXIT();
