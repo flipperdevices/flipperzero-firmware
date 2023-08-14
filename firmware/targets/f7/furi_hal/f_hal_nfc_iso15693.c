@@ -175,7 +175,8 @@ static void f_hal_nfc_iso15693_listener_transparent_mode_exit(FuriHalSpiBusHandl
 
 static FHalNfcError
     f_hal_nfc_iso15693_listener_tx_transparent(const uint8_t* data, size_t data_size) {
-    iso15693_signal_tx(f_hal_nfc_iso15693_listener->signal, data, data_size);
+    iso15693_signal_tx(
+        f_hal_nfc_iso15693_listener->signal, Iso15693SignalDataRateHi, data, data_size);
 
     return FHalNfcErrorNone;
 }

@@ -21,7 +21,11 @@ Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin);
 
 void iso15693_signal_free(Iso15693Signal* instance);
 
-void iso15693_signal_tx(Iso15693Signal* instance, const uint8_t* tx_data, size_t tx_data_size);
+void iso15693_signal_tx(
+    Iso15693Signal* instance,
+    Iso15693SignalDataRate data_rate,
+    const uint8_t* tx_data,
+    size_t tx_data_size);
 
 #ifdef __cplusplus
 }
