@@ -18,20 +18,20 @@
 #define ISO15693_SIGNAL_FC_256 (256.0e11 / ISO15693_SIGNAL_FC)
 #define ISO15693_SIGNAL_FC_768 (768.0e11 / ISO15693_SIGNAL_FC)
 
-typedef struct {
-    DigitalSignal* sof;
-    DigitalSignal* eof;
-    DigitalSignal* one;
-    DigitalSignal* zero;
-} Iso15693SignalComponents;
+typedef enum {
+    Iso15693SignalIndexSof,
+    Iso15693SignalIndexEof,
+    Iso15693SignalIndexOne,
+    Iso15693SignalIndexZero,
+    Iso15693SignalIndexNum,
+} Iso15693SignalIndex;
+
+typedef DigitalSignal* Iso15693SignalBank[Iso15693SignalIndexNum];
 
 struct Iso15693Signal {
-    const GpioPin* pin;
-    DigitalSignal* tx_signal;
-    Iso15693SignalComponents* components[Iso15693SignalDataRateNum];
+    DigitalSequence* tx_sequence;
+    Iso15693SignalBank banks[Iso15693SignalDataRateNum];
 };
-
-// TODO: Rewrite all of this with digital sequence!
 
 // Add an unmodulated signal for the length of Fc / 256 * k (where k = 1 or 4)
 static void iso15693_add_silence(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
@@ -59,17 +59,23 @@ static void iso15693_add_bit(DigitalSignal* signal, Iso15693SignalDataRate data_
     }
 }
 
-static void
-    iso15693_add_byte(Iso15693Signal* instance, Iso15693SignalDataRate data_rate, uint8_t byte) {
-    const Iso15693SignalComponents* components = instance->components[data_rate];
+static inline uint32_t
+    iso15693_get_sequence_index(Iso15693SignalIndex index, Iso15693SignalDataRate data_rate) {
+    return index + data_rate * Iso15693SignalIndexNum;
+}
 
+static inline void
+    iso15693_add_byte(Iso15693Signal* instance, Iso15693SignalDataRate data_rate, uint8_t byte) {
     for(size_t i = 0; i < BITS_IN_BYTE; i++) {
         const uint8_t bit = byte & (1U << i);
-        digital_signal_append(instance->tx_signal, bit ? components->one : components->zero);
+        digital_sequence_add(
+            instance->tx_sequence,
+            iso15693_get_sequence_index(
+                bit ? Iso15693SignalIndexOne : Iso15693SignalIndexZero, data_rate));
     }
 }
 
-static void iso15693_add_sof(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
+static inline void iso15693_add_sof(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
     for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
         iso15693_add_silence(signal, data_rate);
     }
@@ -81,7 +87,7 @@ static void iso15693_add_sof(DigitalSignal* signal, Iso15693SignalDataRate data_
     iso15693_add_bit(signal, data_rate, true);
 }
 
-static void iso15693_add_eof(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
+static inline void iso15693_add_eof(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
     iso15693_add_bit(signal, data_rate, false);
 
     for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
@@ -93,50 +99,56 @@ static void iso15693_add_eof(DigitalSignal* signal, Iso15693SignalDataRate data_
     }
 }
 
-static void iso15693_signal_encode(
+static inline void iso15693_signal_encode(
     Iso15693Signal* instance,
     Iso15693SignalDataRate data_rate,
     const uint8_t* tx_data,
     size_t tx_data_size) {
-    instance->tx_signal->edge_cnt = 0;
-    instance->tx_signal->start_level = false;
-
-    const Iso15693SignalComponents* components = instance->components[data_rate];
-
-    digital_signal_append(instance->tx_signal, components->sof);
+    digital_sequence_add(
+        instance->tx_sequence, iso15693_get_sequence_index(Iso15693SignalIndexSof, data_rate));
 
     for(size_t i = 0; i < tx_data_size; i++) {
         iso15693_add_byte(instance, data_rate, tx_data[i]);
     }
 
-    digital_signal_append(instance->tx_signal, components->eof);
+    digital_sequence_add(
+        instance->tx_sequence, iso15693_get_sequence_index(Iso15693SignalIndexEof, data_rate));
 }
 
-static Iso15693SignalComponents*
-    iso15693_signal_components_alloc(Iso15693SignalDataRate data_rate) {
-    Iso15693SignalComponents* instance = malloc(sizeof(Iso15693SignalComponents));
-
+static void iso15693_signal_bank_fill(Iso15693Signal* instance, Iso15693SignalDataRate data_rate) {
     const uint32_t k = data_rate == Iso15693SignalDataRateHi ? ISO15693_SIGNAL_COEFF_HI :
                                                                ISO15693_SIGNAL_COEFF_LO;
-    // TODO: possible a couple of wasted edges when k > 1
-    instance->sof = digital_signal_alloc(ISO15693_SIGNAL_SOF_EDGES * k);
-    instance->eof = digital_signal_alloc(ISO15693_SIGNAL_EOF_EDGES * k);
-    instance->one = digital_signal_alloc(ISO15693_SIGNAL_ONE_EDGES * k);
-    instance->zero = digital_signal_alloc(ISO15693_SIGNAL_ZERO_EDGES * k);
+    DigitalSignal** bank = instance->banks[data_rate];
 
-    iso15693_add_sof(instance->sof, data_rate);
-    iso15693_add_eof(instance->eof, data_rate);
-    iso15693_add_bit(instance->one, data_rate, true);
-    iso15693_add_bit(instance->zero, data_rate, false);
+    // FIXME: possibly a couple of wasted edges when k > 1
+    bank[Iso15693SignalIndexSof] = digital_signal_alloc(ISO15693_SIGNAL_SOF_EDGES * k);
+    bank[Iso15693SignalIndexEof] = digital_signal_alloc(ISO15693_SIGNAL_EOF_EDGES * k);
+    bank[Iso15693SignalIndexOne] = digital_signal_alloc(ISO15693_SIGNAL_ONE_EDGES * k);
+    bank[Iso15693SignalIndexZero] = digital_signal_alloc(ISO15693_SIGNAL_ZERO_EDGES * k);
 
-    return instance;
+    iso15693_add_sof(bank[Iso15693SignalIndexSof], data_rate);
+    iso15693_add_eof(bank[Iso15693SignalIndexEof], data_rate);
+    iso15693_add_bit(bank[Iso15693SignalIndexOne], data_rate, true);
+    iso15693_add_bit(bank[Iso15693SignalIndexZero], data_rate, false);
 }
 
-static void iso15693_signal_components_free(Iso15693SignalComponents* instance) {
-    digital_signal_free(instance->sof);
-    digital_signal_free(instance->eof);
-    digital_signal_free(instance->one);
-    digital_signal_free(instance->zero);
+static void
+    iso15693_signal_bank_clear(Iso15693Signal* instance, Iso15693SignalDataRate data_rate) {
+    DigitalSignal** bank = instance->banks[data_rate];
+
+    for(uint32_t i = 0; i < Iso15693SignalIndexNum; ++i) {
+        digital_signal_free(bank[i]);
+    }
+}
+
+static void
+    iso15693_signal_bank_register(Iso15693Signal* instance, Iso15693SignalDataRate data_rate) {
+    for(uint32_t i = 0; i < Iso15693SignalIndexNum; ++i) {
+        digital_sequence_set_signal(
+            instance->tx_sequence,
+            iso15693_get_sequence_index(i, data_rate),
+            instance->banks[data_rate][i]);
+    }
 }
 
 Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin) {
@@ -144,11 +156,11 @@ Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin) {
 
     Iso15693Signal* instance = malloc(sizeof(Iso15693Signal));
 
-    instance->pin = pin;
-    instance->tx_signal = digital_signal_alloc(ISO15693_SIGNAL_EDGES);
+    instance->tx_sequence = digital_sequence_alloc(BITS_IN_BYTE * 255 + 2, pin);
 
     for(uint32_t i = 0; i < Iso15693SignalDataRateNum; ++i) {
-        instance->components[i] = iso15693_signal_components_alloc(i);
+        iso15693_signal_bank_fill(instance, i);
+        iso15693_signal_bank_register(instance, i);
     }
 
     return instance;
@@ -157,11 +169,11 @@ Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin) {
 void iso15693_signal_free(Iso15693Signal* instance) {
     furi_assert(instance);
 
-    for(uint32_t i = 0; i < Iso15693SignalDataRateNum; ++i) {
-        iso15693_signal_components_free(instance->components[i]);
-    }
+    digital_sequence_free(instance->tx_sequence);
 
-    digital_signal_free(instance->tx_signal);
+    for(uint32_t i = 0; i < Iso15693SignalDataRateNum; ++i) {
+        iso15693_signal_bank_clear(instance, i);
+    }
 
     free(instance);
 }
@@ -178,6 +190,6 @@ void iso15693_signal_tx(
 
     FURI_CRITICAL_ENTER();
     iso15693_signal_encode(instance, data_rate, tx_data, tx_data_size);
-    digital_signal_send(instance->tx_signal, instance->pin);
+    digital_sequence_send(instance->tx_sequence);
     FURI_CRITICAL_EXIT();
 }
