@@ -59,22 +59,6 @@ static void iso15693_add_bit(DigitalSignal* signal, Iso15693SignalDataRate data_
     }
 }
 
-static inline uint32_t
-    iso15693_get_sequence_index(Iso15693SignalIndex index, Iso15693SignalDataRate data_rate) {
-    return index + data_rate * Iso15693SignalIndexNum;
-}
-
-static inline void
-    iso15693_add_byte(Iso15693Signal* instance, Iso15693SignalDataRate data_rate, uint8_t byte) {
-    for(size_t i = 0; i < BITS_IN_BYTE; i++) {
-        const uint8_t bit = byte & (1U << i);
-        digital_sequence_add(
-            instance->tx_sequence,
-            iso15693_get_sequence_index(
-                bit ? Iso15693SignalIndexOne : Iso15693SignalIndexZero, data_rate));
-    }
-}
-
 static inline void iso15693_add_sof(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
     for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
         iso15693_add_silence(signal, data_rate);
@@ -96,6 +80,22 @@ static inline void iso15693_add_eof(DigitalSignal* signal, Iso15693SignalDataRat
 
     for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
         iso15693_add_silence(signal, data_rate);
+    }
+}
+
+static inline uint32_t
+    iso15693_get_sequence_index(Iso15693SignalIndex index, Iso15693SignalDataRate data_rate) {
+    return index + data_rate * Iso15693SignalIndexNum;
+}
+
+static inline void
+    iso15693_add_byte(Iso15693Signal* instance, Iso15693SignalDataRate data_rate, uint8_t byte) {
+    for(size_t i = 0; i < BITS_IN_BYTE; i++) {
+        const uint8_t bit = byte & (1U << i);
+        digital_sequence_add(
+            instance->tx_sequence,
+            iso15693_get_sequence_index(
+                bit ? Iso15693SignalIndexOne : Iso15693SignalIndexZero, data_rate));
     }
 }
 
