@@ -228,6 +228,12 @@ dist_env.PhonyTarget(
     ],
 )
 
+dist_env.PhonyTarget(
+    "flash_dap",
+    "${PYTHON3} ${FBT_SCRIPT_DIR}/program.py flash --interface cmsis-dap ${SOURCE}",
+    source=dist_env["FW_BIN"],
+)
+
 flash_usb_full = dist_env.UsbInstall(
     dist_env["UFBT_STATE_DIR"].File("usbinstall"),
     [],
