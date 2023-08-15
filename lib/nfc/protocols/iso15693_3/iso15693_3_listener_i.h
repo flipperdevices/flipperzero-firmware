@@ -4,6 +4,8 @@
 
 #include "iso15693_3_listener.h"
 
+#include "iso15693_3_i.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

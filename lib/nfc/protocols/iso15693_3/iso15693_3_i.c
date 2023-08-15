@@ -210,3 +210,10 @@ Iso15693_3Error iso15693_3_get_block_security_response_parse(
 
     return ret;
 }
+
+void iso15693_3_append_uid(const Iso15693_3Data* data, BitBuffer* buf) {
+    for(size_t i = 0; i < ISO15693_3_UID_SIZE; ++i) {
+        // Reverse the UID
+        bit_buffer_append_byte(buf, data->uid[ISO15693_3_UID_SIZE - i - 1]);
+    }
+}

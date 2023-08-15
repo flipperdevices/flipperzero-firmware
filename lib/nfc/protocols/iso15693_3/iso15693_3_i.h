@@ -33,6 +33,8 @@ Iso15693_3Error iso15693_3_get_block_security_response_parse(
     uint16_t block_count,
     const BitBuffer* buf);
 
+void iso15693_3_append_uid(const Iso15693_3Data* data, BitBuffer* buf);
+
 #ifdef __cplusplus
 }
 #endif

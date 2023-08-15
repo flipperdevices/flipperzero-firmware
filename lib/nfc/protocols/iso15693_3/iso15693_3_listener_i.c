@@ -22,12 +22,7 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
 
         bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
         bit_buffer_append_byte(instance->tx_buffer, instance->data->system_info.dsfid); // DSFID
-
-        for(size_t i = 0; i < ISO15693_3_UID_SIZE; ++i) {
-            // Reverse the UID
-            bit_buffer_append_byte(
-                instance->tx_buffer, instance->data->uid[ISO15693_3_UID_SIZE - i - 1]);
-        }
+        iso15693_3_append_uid(instance->data, instance->tx_buffer); // UID
 
         error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
 
@@ -52,30 +47,26 @@ static Iso15693_3Error iso15693_3_listener_get_system_info_handler(
         bit_buffer_reset(instance->tx_buffer);
 
         bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
-        bit_buffer_append_byte(instance->tx_buffer, instance->data->system_info.flags);
 
-        for(size_t i = 0; i < ISO15693_3_UID_SIZE; ++i) {
-            // Reverse the UID
-            bit_buffer_append_byte(
-                instance->tx_buffer, instance->data->uid[ISO15693_3_UID_SIZE - i - 1]);
-        }
+        const uint8_t system_flags = instance->data->system_info.flags;
+        bit_buffer_append_byte(instance->tx_buffer, system_flags); // System info flags
 
-        const uint8_t flags = instance->data->system_info.flags;
+        iso15693_3_append_uid(instance->data, instance->tx_buffer); // UID
 
-        if(flags & ISO15693_3_SYSINFO_FLAG_DSFID) {
+        if(system_flags & ISO15693_3_SYSINFO_FLAG_DSFID) {
             bit_buffer_append_byte(instance->tx_buffer, instance->data->system_info.dsfid);
         }
-        if(flags & ISO15693_3_SYSINFO_FLAG_AFI) {
+        if(system_flags & ISO15693_3_SYSINFO_FLAG_AFI) {
             bit_buffer_append_byte(instance->tx_buffer, instance->data->system_info.afi);
         }
-        if(flags & ISO15693_3_SYSINFO_FLAG_MEMORY) {
+        if(system_flags & ISO15693_3_SYSINFO_FLAG_MEMORY) {
             const uint8_t memory_info[2] = {
                 instance->data->system_info.block_count - 1,
                 instance->data->system_info.block_size - 1,
             };
             bit_buffer_append_bytes(instance->tx_buffer, memory_info, COUNT_OF(memory_info));
         }
-        if(flags & ISO15693_3_SYSINFO_FLAG_IC_REF) {
+        if(system_flags & ISO15693_3_SYSINFO_FLAG_IC_REF) {
             bit_buffer_append_byte(instance->tx_buffer, instance->data->system_info.ic_ref);
         }
 
