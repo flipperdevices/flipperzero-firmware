@@ -1,6 +1,6 @@
 #include "mass_storage_view.h"
+#include "../mass_storage_app_i.h"
 #include <gui/elements.h>
-#include <mass_storage_icons.h>
 
 struct MassStorage {
     View* view;
