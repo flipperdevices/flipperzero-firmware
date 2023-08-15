@@ -48,27 +48,23 @@ static uint32_t file_num_blocks(void* ctx) {
 static void file_eject(void* ctx) {
     MassStorageApp* app = ctx;
     FURI_LOG_D(TAG, "EJECT");
-    furi_check(furi_mutex_acquire(app->usb_mutex, FuriWaitForever) == FuriStatusOk);
-    mass_storage_usb_stop(app->usb);
-    app->usb = NULL;
-    furi_check(furi_mutex_release(app->usb_mutex) == FuriStatusOk);
+    view_dispatcher_send_custom_event(app->view_dispatcher, MassStorageCustomEventEject);
 }
 
 bool mass_storage_scene_work_on_event(void* context, SceneManagerEvent event) {
     MassStorageApp* app = context;
     bool consumed = false;
-    if(event.type == SceneManagerEventTypeTick) {
-        // Update stats
-        mass_storage_set_stats(app->mass_storage_view, app->bytes_read, app->bytes_written);
-        // Handle eject
-        bool ejected;
-        furi_check(furi_mutex_acquire(app->usb_mutex, FuriWaitForever) == FuriStatusOk);
-        ejected = app->usb == NULL;
-        furi_check(furi_mutex_release(app->usb_mutex) == FuriStatusOk);
-        if(ejected) {
-            scene_manager_previous_scene(app->scene_manager);
-            consumed = true;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == MassStorageCustomEventEject) {
+            consumed = scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, MassStorageSceneFileSelect);
+            if(!consumed) {
+                consumed = scene_manager_search_and_switch_to_previous_scene(
+                    app->scene_manager, MassStorageSceneStart);
+            }
         }
+    } else if(event.type == SceneManagerEventTypeTick) {
+        mass_storage_set_stats(app->mass_storage_view, app->bytes_read, app->bytes_written);
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_search_and_switch_to_previous_scene(
             app->scene_manager, MassStorageSceneFileSelect);

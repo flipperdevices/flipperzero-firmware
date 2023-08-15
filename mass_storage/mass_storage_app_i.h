@@ -13,8 +13,10 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/loading.h>
+#include <gui/modules/widget.h>
 #include <storage/storage.h>
 #include "views/mass_storage_view.h"
+#include <mass_storage_icons.h>
 
 #define MASS_STORAGE_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define MASS_STORAGE_APP_EXTENSION ".img"
@@ -25,6 +27,7 @@ struct MassStorageApp {
     Storage* fs_api;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
+    Widget* widget;
     DialogsApp* dialogs;
     TextInput* text_input;
     VariableItemList* variable_item_list;
@@ -48,12 +51,14 @@ typedef enum {
     MassStorageAppViewTextInput,
     MassStorageAppViewWork,
     MassStorageAppViewLoading,
+    MassStorageAppViewWidget,
 } MassStorageAppView;
 
 enum MassStorageCustomEvent {
     // Reserve first 100 events for button types and indexes, starting from 0
     MassStorageCustomEventReserved = 100,
 
+    MassStorageCustomEventEject,
     MassStorageCustomEventFileSelect,
     MassStorageCustomEventNewImage,
     MassStorageCustomEventNameInput,
