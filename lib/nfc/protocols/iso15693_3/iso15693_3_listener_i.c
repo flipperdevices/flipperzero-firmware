@@ -4,6 +4,12 @@
 
 #define TAG "Iso15693_3Listener"
 
+typedef struct {
+    uint8_t flags;
+    uint8_t command;
+    uint8_t data[];
+} Iso15693_3RequestLayout;
+
 typedef Iso15693_3Error (
     *Iso15693_3ListenerHandler)(Iso15693_3Listener* instance, const BitBuffer* rx_buffer);
 
@@ -13,14 +19,8 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        typedef struct {
-            uint8_t flags;
-            uint8_t command;
-            uint8_t data[];
-        } Iso15693_3InventoryRequestLayout;
-
-        const Iso15693_3InventoryRequestLayout* layout =
-            (const Iso15693_3InventoryRequestLayout*)bit_buffer_get_data(rx_buffer);
+        const Iso15693_3RequestLayout* layout =
+            (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
         if(layout->command != ISO15693_3_CMD_INVENTORY) {
             error = Iso15693_3ErrorNotSupported;
@@ -33,7 +33,7 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
         const bool afi_flag = layout->flags & ISO15693_3_REQ_FLAG_T5_AFI_PRESENT;
         const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
         const size_t buf_size_min =
-            sizeof(Iso15693_3InventoryRequestLayout) + sizeof(uint8_t) * (afi_flag ? 2 : 1);
+            sizeof(Iso15693_3RequestLayout) + sizeof(uint8_t) * (afi_flag ? 2 : 1);
 
         if(buf_size < buf_size_min) {
             error = Iso15693_3ErrorFormat;
@@ -79,24 +79,15 @@ static Iso15693_3Error iso15693_3_listener_get_system_info_handler(
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        typedef struct {
-            uint8_t flags;
-            uint8_t command;
-            uint8_t uid[];
-        } Iso15693_3SystemInfoRequestLayout;
-
-        const Iso15693_3SystemInfoRequestLayout* layout =
-            (const Iso15693_3SystemInfoRequestLayout*)bit_buffer_get_data(rx_buffer);
+        const Iso15693_3RequestLayout* layout =
+            (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
         if(layout->command != ISO15693_3_CMD_GET_SYS_INFO) {
             error = Iso15693_3ErrorNotSupported;
             break;
         }
 
-        // TODO: Flags, addressed mode, etc
-
         bit_buffer_reset(instance->tx_buffer);
-
         bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
 
         const uint8_t system_flags = instance->data->system_info.flags;
@@ -134,40 +125,26 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        typedef struct {
-            uint8_t flags;
-            uint8_t command;
-            union {
-                struct {
-                    uint8_t uid[ISO15693_3_UID_SIZE];
-                    uint8_t block_num;
-                } with_uid;
-                struct {
-                    uint8_t block_num;
-                } no_uid;
-            };
-        } Iso15693_3ReadBlockRequestLayout;
-
-        const Iso15693_3ReadBlockRequestLayout* layout =
-            (const Iso15693_3ReadBlockRequestLayout*)bit_buffer_get_data(rx_buffer);
+        const Iso15693_3RequestLayout* layout =
+            (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
         if(layout->command != ISO15693_3_CMD_READ_BLOCK) {
             error = Iso15693_3ErrorNotSupported;
             break;
         }
 
-        uint8_t block_num;
-        const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
+        const bool addressed_mode = layout->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
 
-        if(buf_size == sizeof(Iso15693_3ReadBlockRequestLayout)) {
-            // TODO: If UID is present, do something with it?
-            block_num = layout->with_uid.block_num;
-        } else if(buf_size == sizeof(Iso15693_3ReadBlockRequestLayout) - ISO15693_3_UID_SIZE) {
-            block_num = layout->no_uid.block_num;
-        } else {
+        const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
+        const size_t buf_size_required = sizeof(Iso15693_3RequestLayout) + sizeof(uint8_t) +
+                                         (addressed_mode ? ISO15693_3_UID_SIZE : 0);
+
+        if(buf_size != buf_size_required) {
             error = Iso15693_3ErrorFormat;
             break;
         }
+
+        const uint8_t block_num = layout->data[addressed_mode ? ISO15693_3_UID_SIZE : 0];
 
         if(block_num >= instance->data->system_info.block_count) {
             error = Iso15693_3ErrorInternal;
@@ -240,22 +217,16 @@ Iso15693_3Error
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        typedef struct {
-            uint8_t flags;
-            uint8_t command;
-            uint8_t uid[];
-        } Iso15693_3RequestHeaderLayout;
-
         const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
-        const size_t buf_size_min = sizeof(Iso15693_3RequestHeaderLayout);
+        const size_t buf_size_min = sizeof(Iso15693_3RequestLayout);
 
         if(buf_size < buf_size_min) {
             error = Iso15693_3ErrorFormat;
             break;
         }
 
-        const Iso15693_3RequestHeaderLayout* layout =
-            (const Iso15693_3RequestHeaderLayout*)bit_buffer_get_data(rx_buffer);
+        const Iso15693_3RequestLayout* layout =
+            (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
         if(layout->command >= ISO15693_3_CMD_RFU_START) {
             error = Iso15693_3ErrorNotSupported;
