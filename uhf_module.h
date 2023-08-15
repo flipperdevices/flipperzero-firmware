@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "uhf_buffer.h"
+#include "uhf_tag.h"
+#include <furi_hal.h>
 
 #define FRAME_END 0x7E
 
@@ -51,8 +53,14 @@ uint8_t checksum(const uint8_t* data, size_t length);
 char* m100_get_hardware_version(M100Module* module);
 char* m100_get_software_version(M100Module* module);
 char* m100_get_manufacturers(M100Module* module);
+
+// set attrs
 void m100_set_baudrate(M100Module* module, uint16_t baudrate);
 bool m100_set_working_area(M100Module* module, WorkingArea area);
 bool m100_set_working_channel(M100Module* module, WorkingChannel channel);
 bool m100_set_transmitting_power(M100Module* module, uint16_t power);
 bool m100_set_freq_hopping(M100Module* module, bool hopping);
+
+// gen2 cmds
+UHFTag* m100_send_single_poll(M100Module* module);
+bool m100_set_select(M100Module* module, UHFTag* uhf_tag);

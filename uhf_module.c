@@ -1,8 +1,7 @@
 #include "uhf_module.h"
 #include "uhf_module_cmd.h"
-#include "uhf_buffer.h"
-#include "uhf_tag.h"
-#include <furi_hal.h>
+
+#define DELAY_MS 50
 
 static void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
     UNUSED(event);
@@ -16,6 +15,9 @@ static void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
 
 M100ModuleInfo* m100_module_info_alloc() {
     M100ModuleInfo* module_info = (M100ModuleInfo*)malloc(sizeof(M100ModuleInfo));
+    module_info->hw_version = NULL;
+    module_info->sw_version = NULL;
+    module_info->manufacturer = NULL;
     return module_info;
 }
 
@@ -37,7 +39,7 @@ void m100_module_free(M100Module* module) {
     free(module);
 }
 
-uint8_t checksum(uint8_t* data, size_t length) {
+uint8_t checksum(const uint8_t* data, size_t length) {
     // CheckSum8 Modulo 256
     // Sum of Bytes % 256
     uint8_t sum_val = 0x00;
@@ -66,19 +68,56 @@ uint16_t crc16_genibus(const uint8_t* data, size_t length) {
 }
 
 char* m100_get_hardware_version(M100Module* module) {
-    return module->info->hw_version;
+    if(!module->info->hw_version == NULL) return module->info->hw_version;
+    buffer_reset(module->buf);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_HW_VERSION.cmd, CMD_HW_VERSION.length);
+    furi_delay_ms(DELAY_MS);
+    if(!buffer_get_size(module->buf)) return NULL;
+    uint8_t* data = buffer_get_data(module->buf);
+    uint16_t payload_len = data[3];
+    payload_len = (payload_len << 8) + data[4];
+    char hw_version[payload_len];
+    memcpy(hw_version, data + 6, (size_t)payload_len);
+    module->info->hw_version = hw_version;
+    return hw_version;
 }
 char* m100_get_software_version(M100Module* module) {
-    return module->info->sw_version;
+    if(!module->info->sw_version == NULL) return module->info->hw_version;
+    buffer_reset(module->buf);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SW_VERSION.cmd, CMD_SW_VERSION.length);
+    furi_delay_ms(DELAY_MS);
+    if(!buffer_get_size(module->buf)) return NULL;
+    uint8_t* data = buffer_get_data(module->buf);
+    uint16_t payload_len = data[3];
+    payload_len = (payload_len << 8) + data[4];
+    char sw_version[payload_len];
+    memcpy(sw_version, data + 6, (size_t)payload_len);
+    module->info->sw_version = sw_version;
+    return sw_version;
 }
 char* m100_get_manufacturers(M100Module* module) {
-    return module->info->manufacturer;
+    if(!module->info->manufacturer == NULL) return module->info->manufacturer;
+    buffer_reset(module->buf);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_MANUFACTURERS.cmd, CMD_MANUFACTURERS.length);
+    furi_delay_ms(DELAY_MS);
+    if(!buffer_get_size(module->buf)) return NULL;
+    uint8_t* data = buffer_get_data(module->buf);
+    uint16_t payload_len = data[3];
+    payload_len = (payload_len << 8) + data[4];
+    char manufacturer[payload_len];
+    memcpy(manufacturer, data + 6, (size_t)payload_len);
+    module->info->manufacturer = manufacturer;
+    return manufacturer;
 }
 
-UHFTag* m100_read_single(M100Module* module) {
+UHFTag* m100_send_single_poll(M100Module* module) {
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, rx_callback, module->buf);
     furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SINGLE_POLLING.cmd, CMD_SINGLE_POLLING.length);
+    furi_delay_ms(DELAY_MS);
     uint8_t* data = buffer_get_data(module->buf);
     size_t length = buffer_get_size(module->buf);
     if(length == 7 && data[2] == 0xFF) return NULL;
@@ -100,6 +139,44 @@ UHFTag* m100_read_single(M100Module* module) {
     uhf_tag_set_epc_crc(uhf_tag, crc);
     uhf_tag_set_epc(uhf_tag, data + 8, epc_len);
     return uhf_tag;
+}
+
+bool m100_set_select(M100Module* module, UHFTag* uhf_tag) {
+    buffer_reset(module->buf);
+    // Set select
+    uint8_t cmd[MAX_BUFFER_SIZE];
+    size_t cmd_length = CMD_SET_SELECT_PARAMETER.length;
+    size_t mask_length_bytes = uhf_tag->epc->size;
+    size_t mask_length_bits = mask_length_bytes * 8;
+    size_t payload_len = 7 + mask_length_bytes;
+    memcpy(cmd, CMD_SET_SELECT_PARAMETER.cmd, cmd_length);
+    // set payload length
+    // payload len = sel param len + ptr len + mask len + epc len
+    cmd[3] = (payload_len >> 8) & 0xFF;
+    cmd[4] = payload_len & 0xFF;
+    // set select param
+    cmd[5] = 0x01; // 0x00=rfu, 0x01=epc, 0x10=tid, 0x11=user
+    // set ptr
+    cmd[9] = 0x20; // epc data begins after 0x20
+    // set mask length
+    cmd[10] = mask_length_bits;
+    // truncate
+    cmd[11] = false;
+    // set mask
+    memcpy(cmd[12], uhf_tag->epc->data, mask_length_bytes);
+    // set checksum
+    cmd[12 + mask_length_bytes + 1] = checksum(cmd + 1, 11 + mask_length_bytes);
+    // end frame
+    cmd[12 + mask_length_bytes + 2] = FRAME_END;
+    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, rx_callback, module->buf);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, 12 + mask_length_bytes + 3);
+    furi_delay_ms(DELAY_MS);
+
+    uint8_t* data = buffer_get_data(module->buf);
+    if(checksum(data + 1, 5) != data[6]) return false; // error in rx
+    if(data[5] != 0x00) return false; // error if not 0
+
+    return true;
 }
 
 void m100_set_baudrate(M100Module* module, uint16_t baudrate) {

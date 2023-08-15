@@ -38,6 +38,14 @@ typedef struct {
     UserMemoryBank* user;
 } UHFTag;
 
+typedef struct UHFTagWrapper{
+    UHFTag* uhf_tag;
+}UHFTagWrapper;
+
+UHFTagWrapper* uhf_tag_wrapper_alloc();
+void uhf_tag_wrapper_set_tag(UHFTagWrapper* uhf_tag_wrapper, UHFTag* uhf_tag);
+void uhf_tag_wrapper_free(UHFTagWrapper* uhf_tag_wrapper);
+
 UHFTag* uhf_tag_alloc();
 void uhf_tag_free(UHFTag* uhf_tag);
 
@@ -57,3 +65,6 @@ uint8_t* uhf_tag_get_tid(UHFTag* uhf_tag);
 size_t uhf_tag_get_tid_size(UHFTag* uhf_tag);
 uint8_t* uhf_tag_get_user(UHFTag* uhf_tag);
 size_t uhf_tag_get_user_size(UHFTag* uhf_tag);
+
+// debug
+char* uhf_tag_get_cstr(UHFTag* uhf_tag);

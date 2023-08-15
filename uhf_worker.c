@@ -1,46 +1,13 @@
 #include "uhf_worker.h"
-#include "uhf_cmd.h"
-
-#define CB_DELAY 50
-
-// uart callback functions
-void module_rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
-    UNUSED(event);
-    UHFData* uhf_data = ctx;
-    uhf_data_append(uhf_data, data);
-}
+#include "uhf_tag.h"
 
 // yrm100 module commands
 UHFWorkerEvent verify_module_connected(UHFWorker* uhf_worker) {
-    UHFResponseData* uhf_response_data = uhf_worker->response_data;
-    uhf_response_data_reset(uhf_response_data);
-    // FURI_LOG_E("log", "freeing done");
-    UHFData* hardware_version = uhf_response_data->head;
-    UHFData* software_version = uhf_response_data_add_new_uhf_data(uhf_response_data);
-    UHFData* manufacturer = uhf_response_data_add_new_uhf_data(uhf_response_data);
-    // FURI_LOG_E("log", "alloc done");
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
-    // read hardware version
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, hardware_version);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_HARDWARE_VERSION.cmd, CMD_HARDWARE_VERSION.length);
-    furi_delay_ms(CB_DELAY);
-    // read software version
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, software_version);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SOFTWARE_VERSION.cmd, CMD_SOFTWARE_VERSION.length);
-    furi_delay_ms(CB_DELAY);
-    // read manufacturer
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, manufacturer);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_MANUFACTURERS.cmd, CMD_MANUFACTURERS.length);
-    furi_delay_ms(CB_DELAY);
-    // verify that we received all data
-    if(!hardware_version->end || !software_version->end || !manufacturer->end) {
-        return UHFWorkerEventFail;
-    }
-    // verify all data was received correctly
-    if(!uhf_data_verfiy_checksum(hardware_version) ||
-       !uhf_data_verfiy_checksum(software_version) || !uhf_data_verfiy_checksum(manufacturer))
-        return UHFWorkerEventFail;
-
+    char* hw_version = m100_get_hardware_version(uhf_worker->module);
+    char* sw_version = m100_get_software_version(uhf_worker->module);
+    char* manufacturer = m100_get_manufacturers(uhf_worker->module);
+    // verify all data exists
+    if(hw_version == NULL || sw_version == NULL || manufacturer == NULL) return UHFWorkerEventFail;
     return UHFWorkerEventSuccess;
 }
 
@@ -127,38 +94,24 @@ bool write_bank(UHFData* write_bank_cmd, UHFBank bank, uint8_t* bank_data, size_
     return success;
 }
 
-UHFWorkerEvent send_polling_command(UHFWorker* uhf_worker, UHFData* raw_read_data) {
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, module_rx_callback, raw_read_data);
-    uhf_data_reset(raw_read_data);
+UHFTag* send_polling_command(UHFWorker* uhf_worker) {
     // read epc bank
+    UHFTag* uhf_tag;
     while(true) {
-        furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SINGLE_POLLING.cmd, CMD_SINGLE_POLLING.length);
+        uhf_tag = m100_send_single_poll(uhf_worker->module);
         furi_delay_ms(100);
         if(uhf_worker->state == UHFWorkerStateStop) {
-            return UHFWorkerEventAborted;
+            return NULL;
         }
-        if(raw_read_data->end) {
-            if(raw_read_data->data[1] == 0x01 && raw_read_data->data[5] == 0x15) {
-                uhf_data_reset(raw_read_data);
-                continue;
-            } else if(raw_read_data->data[1] == 0x02)
-                break; // read success
-        }
+        if(uhf_tag != NULL) break;
     }
-    return UHFWorkerEventSuccess;
+
+    return uhf_tag;
 }
 
 UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
-    // debug
-    // FuriString* temp_str;
-    // temp_str = furi_string_alloc();
-    // e-debug
-    UHFResponseData* uhf_response_data = uhf_worker->response_data;
-    uhf_response_data_reset(uhf_response_data);
-    UHFData* raw_read_data = uhf_response_data_get_uhf_data(uhf_response_data, 0);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUD_RATE);
 
-    send_polling_command(uhf_worker, raw_read_data);
+    UHFTag*
 
     // todo : rfu ?
     UHFTag* uhf_tag = uhf_worker->uhf_tag;
@@ -286,7 +239,7 @@ int32_t uhf_worker_task(void* ctx) {
 UHFWorker* uhf_worker_alloc() {
     UHFWorker* uhf_worker = (UHFWorker*)malloc(sizeof(UHFWorker));
     uhf_worker->thread = furi_thread_alloc_ex("UHFWorker", 8 * 1024, uhf_worker_task, uhf_worker);
-    uhf_worker->response_data = uhf_response_data_alloc();
+    uhf_worker->module = m100_module_alloc();
     uhf_worker->callback = NULL;
     uhf_worker->ctx = NULL;
     return uhf_worker;
@@ -320,6 +273,6 @@ void uhf_worker_stop(UHFWorker* uhf_worker) {
 void uhf_worker_free(UHFWorker* uhf_worker) {
     furi_assert(uhf_worker);
     furi_thread_free(uhf_worker->thread);
-    uhf_response_data_free(uhf_worker->response_data);
+    m100_module_free(uhf_worker->module);
     free(uhf_worker);
 }
