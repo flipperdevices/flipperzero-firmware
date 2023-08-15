@@ -64,7 +64,7 @@ To run cleanup (think of `make clean`) for specified targets, add the `-c` optio
 - `fap_dist` - build external plugins & publish to the `dist` folder.
 - `updater_package`, `updater_minpackage` - build a self-update package. The minimal version only includes the firmware's DFU file; the full version also includes a radio stack & resources for the SD card.
 - `copro_dist` - bundle Core2 FUS+stack binaries for qFlipper.
-- `flash` - flash the attached device with OpenOCD over ST-Link.
+- `flash`, `flash_blackmagic`, `flash_dap` - flash the attached device with OpenOCD over ST-Link; blackmagic probe over WiFi or USB; DAP interface over USB.
 - `flash_usb`, `flash_usb_full` - build, upload and install the update package to the device over USB. See details on `updater_package` and `updater_minpackage`.
 - `debug` - build and flash firmware, then attach with gdb with firmware's .elf loaded.
 - `debug_other`, `debug_other_blackmagic` - attach GDB without loading any `.elf`. It will allow you to manually add external `.elf` files with `add-symbol-file` in GDB.

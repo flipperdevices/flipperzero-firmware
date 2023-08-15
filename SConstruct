@@ -204,7 +204,13 @@ firmware_bm_flash = distenv.PhonyTarget(
     ],
 )
 
-gdb_backtrace_all_threads = distenv.PhonyTarget(
+distenv.PhonyTarget(
+    "flash_dap",
+    "${PYTHON3} ${FBT_SCRIPT_DIR}/program.py flash --interface cmsis-dap ${SOURCE}",
+    source=firmware_env["FW_BIN"],
+)
+
+distenv.PhonyTarget(
     "gdb_trace_all",
     "$GDB $GDBOPTS $SOURCES $GDBFLASH",
     source=firmware_env["FW_ELF"],
