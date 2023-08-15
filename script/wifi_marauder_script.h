@@ -196,6 +196,7 @@ typedef struct WifiMarauderScriptStageSniffEsp {
 
 typedef struct WifiMarauderScriptStageSniffPmkid {
     bool force_deauth;
+    bool hop_channels;
     int channel;
     int timeout;
 } WifiMarauderScriptStageSniffPmkid;
