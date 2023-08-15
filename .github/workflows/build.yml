@@ -65,7 +65,7 @@ jobs:
           set -e
           for TARGET in ${TARGETS}; do
             TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package \
+            ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package fap_dist \
               ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
             mv dist/${TARGET}-*/* artifacts/
             tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
@@ -73,6 +73,8 @@ jobs:
             ./fbt TARGET_HW=$TARGET_HW fap_dist
             tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
               -C dist/${TARGET}-*/apps/Debug .
+            tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \
+              -C dist/${TARGET}-*/debug_elf .
           done
 
       - name: "Check for uncommitted changes"
