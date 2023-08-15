@@ -478,5 +478,4 @@ MassStorageUsb* mass_storage_usb_start(const char* filename, SCSIDeviceFunc fn) 
 
 void mass_storage_usb_stop(MassStorageUsb* mass) {
     furi_hal_usb_set_config(mass->usb_prev, NULL);
-    // freed by usb_deinit asynchronously from usb thread
 }
