@@ -1,8 +1,8 @@
 #include <furi_hal.h>
 #include <gui/elements.h>
 #include <gui/gui.h>
-#include "helpers/radio_device_loader.h"
 
+#include "helpers/radio_device_loader.h"
 #include "esubghz_chat_i.h"
 
 #define CHAT_LEAVE_DELAY 10
@@ -125,10 +125,12 @@ void tx_msg_input(ESubGhzChatState* state) {
     subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer, tx_size);
 }
 
-/* Displays whether or not encryption has been enabled in the text box. Also
- * clears the text input buffer to remove the password and starts the Sub-GHz
- * worker. After starting the worker a join message is transmitted. */
+/* Displays information on frequency, encryption and radio type in the text
+ * box. Also clears the text input buffer to remove the password and starts the
+ * Sub-GHz worker. After starting the worker a join message is transmitted. */
 void enter_chat(ESubGhzChatState* state) {
+    furi_string_cat_printf(state->chat_box_store, "Frequency: %lu", state->frequency);
+
     furi_string_cat_printf(
         state->chat_box_store, "\nEncrypted: %s", (state->encrypted ? "yes" : "no"));
 

@@ -1,5 +1,5 @@
 #include "../esubghz_chat_i.h"
-#include "../nfc_helpers.h"
+#include "../helpers/nfc_helpers.h"
 
 typedef enum {
     KeyReadPopupState_Idle,

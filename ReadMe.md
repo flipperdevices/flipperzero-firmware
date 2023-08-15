@@ -47,12 +47,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/c3c9a9089fff6daa1b3829e6ef0454d4831458a2)
 - Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice) [Fix biased randomness in dice roll (By x42)](https://github.com/Ka3u6y6a/flipper-zero-dice/pull/4)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
-- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat) [External Radio Support (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/a8f6ee595f768020e0ff77d25b574ef25813f140)
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external) for next Patreon release
 - UL: NFC Random UID Fix (By xMasterX)
 - UL PR: [NFC app: MF Custom UID, fix SAK & ATQA save #574 (By git9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/574)
 - UL: Properly reset the NFC device data (By Astrrra)
 - UL: fix somfy telis wrong frequency in add manually (By xMasterX)
+- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 
 <a name="release">
 

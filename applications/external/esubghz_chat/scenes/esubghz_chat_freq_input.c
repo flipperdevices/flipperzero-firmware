@@ -1,12 +1,9 @@
 #include "../esubghz_chat_i.h"
 
-/* Sends FreqEntered event to scene manager and displays the frequency in the
- * text box. */
+/* Sends FreqEntered event to scene manager. */
 static void freq_input_cb(void* context) {
     furi_assert(context);
     ESubGhzChatState* state = context;
-
-    furi_string_cat_printf(state->chat_box_store, "Frequency: %lu", state->frequency);
 
     view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_FreqEntered);
 }
