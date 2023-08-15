@@ -7,7 +7,7 @@ App(
     requires=["gui"],
     stack_size=4 * 1024,
     order=90,
-    fap_icon="wifi_10px.png",
+    fap_icon="update_10px.png",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="esp_flasher",
     fap_category="GPIO",
