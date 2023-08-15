@@ -72,7 +72,7 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
         "Read RTF (Reader Talks First)",
         SubmenuIndexHitag,
         lfrfid_scene_extra_actions_submenu_callback,
-       app);
+        app);
     submenu_add_item(
         submenu,
         "Read RAW RFID data",

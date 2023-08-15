@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: fix somfy telis wrong frequency in add manually (By xMasterX)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [USB Mass Storage v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage)
+- OFW PR: [Hitag #2658 (By blackvault88)](https://github.com/flipperdevices/flipperzero-firmware/pull/2658)
 
 <a name="release">
 
