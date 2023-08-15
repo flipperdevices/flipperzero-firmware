@@ -58,14 +58,14 @@ jobs:
       - name: 'Bundle scripts'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
-          tar czpf artifacts/flipper-z-any-scripts-${SUFFIX}.tgz scripts
+          tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
 
       - name: 'Build the firmware'
         run: |
           set -e
           for TARGET in ${TARGETS}; do
             TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package fap_dist \
+            ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package \
               ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
             mv dist/${TARGET}-*/* artifacts/
             tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
