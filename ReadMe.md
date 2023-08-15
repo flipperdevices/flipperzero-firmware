@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0811-1755-0.88.1-8b79063.tgz&channel=RM0811-1755-0.88.1-8b79063&version=0.88.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0811-1755-0.88.1-8b79063-NoAnim.tgz&channel=RM0811-1755-0.88.1-8b79063-NoAnim&version=0.88.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0815-0250-0.89.1-67fe5f9.tgz&channel=RM0815-0250-0.89.1-67fe5f9&version=0.89.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0815-0250-0.89.1-67fe5f9-NoAnim.tgz&channel=RM0815-0250-0.89.1-67fe5f9-NoAnim&version=0.89.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,30 +31,9 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0815-0222-0.89.1-713d8e8](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-15 02:22 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-15 02:22 EST`
-- Added: [Wire Tester (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- Not Removing Apps from firmware like OFW and Unleashed (By RogueMaster)
-- Updated: [DnD Dice v1.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice) [Fix biased randomness in dice roll (By x42)](https://github.com/Ka3u6y6a/flipper-zero-dice/pull/4)
-- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
-- UL: RGB Color Tweaks (By xMasterX)
-- Removed [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer) to get replaced by: [Text Viewer (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae4fc4a54febccb44b010c4025a99c2edef9a7f0)
-- Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- Updated: [T-Rex Runner (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
-- Updated: [WiFi (Marauder) v6.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/05874086b6484cc63996ade2233fb87c26bdd8d1)
-- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/05874086b6484cc63996ade2233fb87c26bdd8d1)
-- Updated: [ESP Flasher v1.1 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/05874086b6484cc63996ade2233fb87c26bdd8d1)
-- Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [with 5V Power Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/c3c9a9089fff6daa1b3829e6ef0454d4831458a2)
-- Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice) [Fix biased randomness in dice roll (By x42)](https://github.com/Ka3u6y6a/flipper-zero-dice/pull/4)
-- Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
-- [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external)
-- UL: NFC Random UID Fix (By xMasterX)
-- UL PR: [NFC app: MF Custom UID, fix SAK & ATQA save #574 (By git9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/574)
-- UL: Properly reset the NFC device data (By Astrrra)
-- UL: fix somfy telis wrong frequency in add manually (By xMasterX)
-- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
-- Updated: [USB Mass Storage v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage)
-- OFW PR: [Hitag #2658 (By blackvault88)](https://github.com/flipperdevices/flipperzero-firmware/pull/2658)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-15 02:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-15 02:50 EST`
+- [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external) for next Patreon release!
 
 <a name="release">
 
@@ -455,4 +434,4 @@ $ ./fbt dolphin_ext
 - [Air Tag for FZ ($50 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/696)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0811-1755-0.88.1-8b79063.tgz&channel=RM0811-1755-0.88.1-8b79063&version=0.88.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0811-1755-0.88.1-8b79063-NoAnim.tgz&channel=RM0811-1755-0.88.1-8b79063-NoAnim&version=0.88.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0815-0250-0.89.1-67fe5f9.tgz&channel=RM0815-0250-0.89.1-67fe5f9&version=0.89.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0815-0250-0.89.1-67fe5f9-NoAnim.tgz&channel=RM0815-0250-0.89.1-67fe5f9-NoAnim&version=0.89.1)
