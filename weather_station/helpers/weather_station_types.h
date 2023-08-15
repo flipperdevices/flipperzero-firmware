@@ -5,7 +5,7 @@
 
 #define WS_VERSION_APP "1.1"
 #define WS_DEVELOPED "SkorP"
-#define WS_GITHUB "https://github.com/flipperdevices/flipperzero-firmware"
+#define WS_GITHUB "https://github.com/flipperdevices/flipperzero-good-faps"
 
 #define WS_KEY_FILE_VERSION 1
 #define WS_KEY_FILE_TYPE "Flipper Weather Station Key File"
