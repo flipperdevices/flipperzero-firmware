@@ -157,32 +157,36 @@ void lin_bus_break_callback(void* context) {
 
 void lin_uart_rx_callback(uint8_t data, void* context) {
     LinBus* instance = (LinBus*)context;
-    UNUSED(instance);
-    UNUSED(data);
-    // instance->rx_buf[instance->rx_buf_index++] = data;
-    // instance->rx_buf_index %= RX_BUFFER_LENGTH;
 
-    // if(txFrame.Type == LIN_BUS_MASTER_REQUEST && instance->is_rx) {
-    //     /* Last byte received */
-    //     if(instance->rx_buf_index >= txFrame.ResponseLength + 1 + 3) {
-    //         for(uint8_t i = 0; i < txFrame.ResponseLength + 1 && i < RX_BUFFER_LENGTH - 3; i++)
-    //             instance->rx_buf[i] = instance->rx_buf[i + 3];
+    instance->rx_buf[instance->rx_buf_index++] = data;
+    instance->rx_buf_index %= LIN_BUS_RX_BUFFER_LENGTH;
 
-    //         instance->is_rx = 0;
-    //         LinTimeoutTimerStop();
-    //         uint8_t chkTmp;
-    //         if(instance->rx_buf[txFrame.ResponseLength] ==
-    //            (chkTmp = calcChecksum(
-    //                 instance->rx_buf, txFrame.ResponseLength, txFrame.ChecksumType, txFrame.ID))) {
-    //             LIN_Frame* pFr = FindRxFrame(txFrame.ID & 0x3f);
-    //             /* Copy the data to the scheduler frame buffer */
-    //             if(pFr != NULL) memcpy(pFr->Data, instance->rx_buf, txFrame.ResponseLength);
-    //         } else {
-    //             /* Bad checksum */
-    //             linErrorCallback();
-    //         }
-    //     }
-    // }
+    if(instance->frame.frame_type == LinBusMasterRequest && instance->is_rx) {
+        /* Last byte received */
+        if(instance->rx_buf_index >= instance->frame.response_length + 1 + 3) {
+            for(uint8_t i = 0;
+                i < instance->frame.response_length + 1 && i < LIN_BUS_RX_BUFFER_LENGTH - 3;
+                i++)
+                instance->rx_buf[i] = instance->rx_buf[i + 3];
+
+            instance->is_rx = 0;
+            lin_uart_timeout_stop();
+            uint8_t chkTmp;
+            if(instance->rx_buf[instance->frame.response_length] ==
+               (chkTmp = lin_bus_get_crc(
+                    instance->frame.id,
+                    instance->frame.data,
+                    instance->frame.length,
+                    instance->frame.crc_type))) {
+                // LinBusFrame* pFr = FindRxFrame(txFrame.ID & 0x3f);
+                // /* Copy the data to the scheduler frame buffer */
+                // if(pFr != NULL) memcpy(pFr->Data, instance->rx_buf, txFrame.ResponseLength);
+            } else {
+                /* Bad checksum */
+                lin_bus_error_callback(context);
+            }
+        }
+    }
 }
 
 static uint16_t lin_bus_response_timeout(uint8_t data_size) {
@@ -190,14 +194,12 @@ static uint16_t lin_bus_response_timeout(uint8_t data_size) {
     return (data_size + 1) * 14;
 }
 
-void lin_bus_timeout_start(void)
-{
-  responseTimeoutValue = 0;
+void lin_bus_timeout_start(void) {
+    responseTimeoutValue = 0;
 
-  /* Reset the counter value */
-  lin_uart_timeout_start();
+    /* Reset the counter value */
+    lin_uart_timeout_start();
 }
-
 
 void lin_uart_tx_callback(void* context) {
     LinBus* instance = (LinBus*)context;

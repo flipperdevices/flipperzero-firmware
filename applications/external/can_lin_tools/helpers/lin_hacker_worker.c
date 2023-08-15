@@ -176,7 +176,8 @@ static int32_t lin_hacker_worker_thread(void* context) {
         .id = 0x01,
         .data = {0x01, 0x02, 0x03, 0x04, 0x05},
         .length = 5,
-        .frame_type = LinBusMasterResponse,
+        .response_length = 2,
+        .frame_type = LinBusMasterRequest,
     };
 
     while(instance->worker_running) {
