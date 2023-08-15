@@ -81,10 +81,18 @@ MassStorageApp* mass_storage_app_alloc(char* arg) {
         MassStorageAppViewStart,
         variable_item_list_get_view(app->variable_item_list));
 
+    app->widget = widget_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, MassStorageAppViewWidget, widget_get_view(app->widget));
+
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     if(storage_file_exists(app->fs_api, furi_string_get_cstr(app->file_path))) {
-        scene_manager_next_scene(app->scene_manager, MassStorageSceneWork);
+        if(!furi_hal_usb_is_locked()) {
+            scene_manager_next_scene(app->scene_manager, MassStorageSceneWork);
+        } else {
+            scene_manager_next_scene(app->scene_manager, MassStorageSceneUsbLocked);
+        }
     } else {
         scene_manager_next_scene(app->scene_manager, MassStorageSceneStart);
     }
@@ -100,11 +108,13 @@ void mass_storage_app_free(MassStorageApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewStart);
     view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewLoading);
+    view_dispatcher_remove_view(app->view_dispatcher, MassStorageAppViewWidget);
 
     mass_storage_free(app->mass_storage_view);
     text_input_free(app->text_input);
     variable_item_list_free(app->variable_item_list);
     loading_free(app->loading);
+    widget_free(app->widget);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
@@ -113,9 +123,9 @@ void mass_storage_app_free(MassStorageApp* app) {
     furi_string_free(app->file_path);
 
     // Close records
-    furi_record_close("gui");
-    furi_record_close("storage");
-    furi_record_close("dialogs");
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_DIALOGS);
 
     free(app);
 }

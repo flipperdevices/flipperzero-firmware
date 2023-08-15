@@ -1,3 +1,8 @@
+## v.1.2
+
+ * Fix deadlock on disk eject
+ * Locked USB notification
+
 ## v.1.1
 
  * Faster image creation
