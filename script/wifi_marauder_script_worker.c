@@ -1,6 +1,7 @@
 #include "../wifi_marauder_app_i.h"
 #include "wifi_marauder_script_worker.h"
 
+
 WifiMarauderScriptWorker* wifi_marauder_script_worker_alloc() {
     WifiMarauderScriptWorker* worker = malloc(sizeof(WifiMarauderScriptWorker));
     if(worker == NULL) {
@@ -39,6 +40,7 @@ int32_t _wifi_marauder_script_worker_task(void* worker) {
     }
 
     script_worker->is_running = false;
+
     return WifiMarauderScriptWorkerStatusSuccess;
 }
 
