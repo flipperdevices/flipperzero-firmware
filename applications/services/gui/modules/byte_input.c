@@ -25,7 +25,7 @@ typedef struct {
     void* callback_context;
 
     bool selected_high_nibble;
-    uint8_t selected_byte;
+    uint16_t selected_byte;
     int8_t selected_row; // row -2 - mini_editor, -1 - input, row 0 & 1 - keyboard
     uint8_t selected_column;
     uint16_t first_visible_byte;
