@@ -1,7 +1,11 @@
 # flipper-zero-tutorials
+[Discord invite: NsjCvqwPAd](https://discord.com/invite/NsjCvqwPAd)
+
+[YouTube: @MrDerekJamison](https://YouTube.com/@MrDerekJamison)
+
 I will use this repository for my Flipper Zero projects.  The various README.md files should describe how to use the files on your Flipper Zero.
 
-Feel free to reach out to me at CodeAllNight@outlook.com with any questions or leave them in the [issues section](https://github.com/jamisonderek/flipper-zero-tutorials/issues) for this project.
+Feel free to reach out to me at Discord with any questions or leave them in the [issues section](https://github.com/jamisonderek/flipper-zero-tutorials/issues) for this project.
 
 
 ## YouTube
