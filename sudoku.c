@@ -399,15 +399,12 @@ int32_t sudoku_main(void* p) {
                 switch(event.key) {
                 case InputKeyLeft:
                 case InputKeyUp:
-                    if(state->menuCursor > 0) {
-                        state->menuCursor--;
-                    }
+                    state->menuCursor =
+                        (state->menuCursor + MENU_ITEMS_COUNT - 1) % MENU_ITEMS_COUNT;
                     break;
                 case InputKeyRight:
                 case InputKeyDown:
-                    if(state->menuCursor < MENU_ITEMS_COUNT - 1) {
-                        state->menuCursor++;
-                    }
+                    state->menuCursor = (state->menuCursor + 1) % MENU_ITEMS_COUNT;
                     break;
                 case InputKeyOk:
                     if(state->state == GameStatePaused && state->menuCursor == 0) {
