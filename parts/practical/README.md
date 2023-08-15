@@ -22,7 +22,7 @@ Cut a perfectly shaped screen protector
 
 **Download:** [screen.studio3](screen.studio3) | [screen.svg](screen.svg) 
 
-## Case and camera protector (in development)
+## Case and camera protector
 
 Protects the lens and the back part, and optionally adding antenna mount points
 
