@@ -85,7 +85,7 @@ static void infrared_cli_print_usage(void) {
     printf("\tir decode <input_file> [<output_file>]\r\n");
     printf("\tir universal <remote_name> <signal_name>\r\n");
     printf("\tir universal list <remote_name>\r\n");
-    // TODO: Do not hardcode universal remote names
+    // TODO FL-3496: Do not hardcode universal remote names
     printf("\tAvailable universal remotes: tv audio ac projector\r\n");
 }
 
