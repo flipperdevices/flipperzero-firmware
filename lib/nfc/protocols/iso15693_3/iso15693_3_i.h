@@ -35,6 +35,16 @@ Iso15693_3Error iso15693_3_get_block_security_response_parse(
 
 void iso15693_3_append_uid(const Iso15693_3Data* data, BitBuffer* buf);
 
+void iso15693_3_append_block(const Iso15693_3Data* data, uint8_t block_num, BitBuffer* buf);
+
+void iso15693_3_append_block_security(
+    const Iso15693_3Data* data,
+    uint8_t block_num,
+    BitBuffer* buf);
+
+// NOTE: the uid parameter has reversed byte order with respect to data
+bool iso15693_3_is_equal_uid(const Iso15693_3Data* data, const uint8_t* uid);
+
 #ifdef __cplusplus
 }
 #endif

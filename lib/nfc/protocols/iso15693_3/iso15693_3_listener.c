@@ -65,17 +65,23 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
     NfcEvent* nfc_event = event.data;
     NfcCommand command = NfcCommandContinue;
 
-    if(nfc_event->type == NfcEventTypeFieldOff) {
+    if(nfc_event->type == NfcEventTypeFieldOn) {
+        iso15693_3_listener_ready(instance);
+    } else if(nfc_event->type == NfcEventTypeFieldOff) {
         if(instance->callback) {
             instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeFieldOff;
             command = instance->callback(instance->generic_event, instance->context);
         }
-        FURI_LOG_D(TAG, "Field OFF");
         iso15693_3_listener_sleep(instance);
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         if(iso13239_crc_check(Iso13239CrcTypeDefault, nfc_event->data.buffer)) {
             iso13239_crc_trim(nfc_event->data.buffer);
-            iso15693_3_listener_process_request(instance, nfc_event->data.buffer);
+            const Iso15693_3Error error =
+                iso15693_3_listener_process_request(instance, nfc_event->data.buffer);
+            if(error == Iso15693_3ErrorNotSupported) {
+                instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeCustomCommand;
+                command = instance->callback(instance->generic_event, instance->context);
+            }
         } else {
             FURI_LOG_D(
                 TAG, "Wrong CRC, buffer size: %zu", bit_buffer_get_size(nfc_event->data.buffer));

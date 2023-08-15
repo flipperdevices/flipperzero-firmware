@@ -12,7 +12,9 @@ extern "C" {
 
 typedef enum {
     Iso15693_3ListenerStateIdle,
-    Iso15693_3ListenerStateActive,
+    Iso15693_3ListenerStateReady,
+    Iso15693_3ListenerStateSelected,
+    Iso15693_3ListenerStateQuiet,
 } Iso15693_3ListenerState;
 
 struct Iso15693_3Listener {
@@ -28,6 +30,8 @@ struct Iso15693_3Listener {
     NfcGenericCallback callback;
     void* context;
 };
+
+Iso15693_3Error iso15693_3_listener_ready(Iso15693_3Listener* instance);
 
 Iso15693_3Error iso15693_3_listener_sleep(Iso15693_3Listener* instance);
 

@@ -217,3 +217,24 @@ void iso15693_3_append_uid(const Iso15693_3Data* data, BitBuffer* buf) {
         bit_buffer_append_byte(buf, data->uid[ISO15693_3_UID_SIZE - i - 1]);
     }
 }
+
+void iso15693_3_append_block(const Iso15693_3Data* data, uint8_t block_num, BitBuffer* buf) {
+    const uint32_t block_offset = block_num * data->system_info.block_size;
+    const uint8_t* block_data = simple_array_cget(data->block_data, block_offset);
+
+    bit_buffer_append_bytes(buf, block_data, data->system_info.block_size);
+}
+
+void iso15693_3_append_block_security(
+    const Iso15693_3Data* data,
+    uint8_t block_num,
+    BitBuffer* buf) {
+    bit_buffer_append_byte(buf, *(uint8_t*)simple_array_cget(data->block_security, block_num));
+}
+
+bool iso15693_3_is_equal_uid(const Iso15693_3Data* data, const uint8_t* uid) {
+    for(size_t i = 0; i < ISO15693_3_UID_SIZE; ++i) {
+        if(data->uid[i] != uid[ISO15693_3_UID_SIZE - i - 1]) return false;
+    }
+    return true;
+}

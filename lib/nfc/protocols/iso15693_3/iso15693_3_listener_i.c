@@ -13,9 +13,51 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        if(bit_buffer_get_byte(rx_buffer, 1) != ISO15693_3_CMD_INVENTORY) {
+        typedef struct {
+            uint8_t flags;
+            uint8_t command;
+            uint8_t data[];
+        } Iso15693_3InventoryRequestLayout;
+
+        const Iso15693_3InventoryRequestLayout* layout =
+            (const Iso15693_3InventoryRequestLayout*)bit_buffer_get_data(rx_buffer);
+
+        if(layout->command != ISO15693_3_CMD_INVENTORY) {
             error = Iso15693_3ErrorNotSupported;
             break;
+        } else if(!(layout->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5)) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        const bool afi_flag = layout->flags & ISO15693_3_REQ_FLAG_T5_AFI_PRESENT;
+        const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
+        const size_t buf_size_min =
+            sizeof(Iso15693_3InventoryRequestLayout) + sizeof(uint8_t) * (afi_flag ? 2 : 1);
+
+        if(buf_size < buf_size_min) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        const uint8_t* data = layout->data;
+
+        if(afi_flag) {
+            const uint8_t afi = *data++;
+            //TODO: Do the AFI check
+            UNUSED(afi);
+        }
+
+        const uint8_t mask_len = *data++;
+        const size_t buf_size_required = buf_size_min + mask_len;
+
+        if(buf_size != buf_size_required) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        if(mask_len != 0) {
+            // TODO: Take mask_len and mask_value into account (if present)
         }
 
         bit_buffer_reset(instance->tx_buffer);
@@ -37,12 +79,21 @@ static Iso15693_3Error iso15693_3_listener_get_system_info_handler(
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        if(bit_buffer_get_byte(rx_buffer, 1) != ISO15693_3_CMD_GET_SYS_INFO) {
+        typedef struct {
+            uint8_t flags;
+            uint8_t command;
+            uint8_t uid[];
+        } Iso15693_3SystemInfoRequestLayout;
+
+        const Iso15693_3SystemInfoRequestLayout* layout =
+            (const Iso15693_3SystemInfoRequestLayout*)bit_buffer_get_data(rx_buffer);
+
+        if(layout->command != ISO15693_3_CMD_GET_SYS_INFO) {
             error = Iso15693_3ErrorNotSupported;
             break;
         }
 
-        // TODO: If UID is present, do something with it?
+        // TODO: Flags, addressed mode, etc
 
         bit_buffer_reset(instance->tx_buffer);
 
@@ -77,9 +128,73 @@ static Iso15693_3Error iso15693_3_listener_get_system_info_handler(
     return error;
 }
 
+static Iso15693_3Error iso15693_3_listener_read_block_handler(
+    Iso15693_3Listener* instance,
+    const BitBuffer* rx_buffer) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t flags;
+            uint8_t command;
+            union {
+                struct {
+                    uint8_t uid[ISO15693_3_UID_SIZE];
+                    uint8_t block_num;
+                } with_uid;
+                struct {
+                    uint8_t block_num;
+                } no_uid;
+            };
+        } Iso15693_3ReadBlockRequestLayout;
+
+        const Iso15693_3ReadBlockRequestLayout* layout =
+            (const Iso15693_3ReadBlockRequestLayout*)bit_buffer_get_data(rx_buffer);
+
+        if(layout->command != ISO15693_3_CMD_READ_BLOCK) {
+            error = Iso15693_3ErrorNotSupported;
+            break;
+        }
+
+        uint8_t block_num;
+        const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
+
+        if(buf_size == sizeof(Iso15693_3ReadBlockRequestLayout)) {
+            // TODO: If UID is present, do something with it?
+            block_num = layout->with_uid.block_num;
+        } else if(buf_size == sizeof(Iso15693_3ReadBlockRequestLayout) - ISO15693_3_UID_SIZE) {
+            block_num = layout->no_uid.block_num;
+        } else {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        if(block_num >= instance->data->system_info.block_count) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
+
+        if(layout->flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
+            iso15693_3_append_block_security(
+                instance->data, block_num, instance->tx_buffer); // Block security (optional)
+        }
+
+        iso15693_3_append_block(instance->data, block_num, instance->tx_buffer); // Block data
+
+        error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+
+    } while(false);
+
+    return error;
+}
+
 static const Iso15693_3ListenerHandler iso15693_listener_handlers[] = {
     iso15693_3_listener_inventory_handler,
     iso15693_3_listener_get_system_info_handler,
+    iso15693_3_listener_read_block_handler,
 };
 
 static Iso15693_3Error iso15693_3_listener_process_nfc_error(NfcError error) {
@@ -96,10 +211,15 @@ static Iso15693_3Error iso15693_3_listener_process_nfc_error(NfcError error) {
     return ret;
 }
 
+Iso15693_3Error iso15693_3_listener_ready(Iso15693_3Listener* instance) {
+    furi_assert(instance);
+    instance->state = Iso15693_3ListenerStateReady;
+    return Iso15693_3ErrorNone;
+}
+
 Iso15693_3Error iso15693_3_listener_sleep(Iso15693_3Listener* instance) {
     furi_assert(instance);
-    UNUSED(instance);
-
+    instance->state = Iso15693_3ListenerStateIdle;
     return Iso15693_3ErrorNone;
 }
 
@@ -119,11 +239,62 @@ Iso15693_3Error
     iso15693_3_listener_process_request(Iso15693_3Listener* instance, const BitBuffer* rx_buffer) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
-    // TODO: Preliminary checks
-    for(uint32_t i = 0; i < COUNT_OF(iso15693_listener_handlers); ++i) {
-        error = iso15693_listener_handlers[i](instance, rx_buffer);
-        if(error == Iso15693_3ErrorNone) break;
-    }
+    do {
+        typedef struct {
+            uint8_t flags;
+            uint8_t command;
+            uint8_t uid[];
+        } Iso15693_3RequestHeaderLayout;
+
+        const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
+        const size_t buf_size_min = sizeof(Iso15693_3RequestHeaderLayout);
+
+        if(buf_size < buf_size_min) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        const Iso15693_3RequestHeaderLayout* layout =
+            (const Iso15693_3RequestHeaderLayout*)bit_buffer_get_data(rx_buffer);
+
+        if(layout->command >= ISO15693_3_CMD_RFU_START) {
+            error = Iso15693_3ErrorNotSupported;
+            break;
+        }
+
+        if(!(layout->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5)) {
+            const bool selected_mode = layout->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
+            const bool addressed_mode = layout->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
+
+            if(instance->state == Iso15693_3ListenerStateSelected) {
+                // If the card is not selected, ignore the command
+                if(!selected_mode) break;
+            } else if(instance->state == Iso15693_3ListenerStateQuiet) {
+                // If the card is quiet, ignore non-addressed commands
+                if(!addressed_mode) break;
+            }
+
+            // In addressed mode, UID must be included in each command
+            const size_t buf_size_min_prime =
+                buf_size_min + (addressed_mode ? +ISO15693_3_UID_SIZE : 0);
+
+            if(buf_size < buf_size_min_prime) {
+                error = Iso15693_3ErrorFormat;
+                break;
+            }
+
+        } else {
+            // If the card is quiet, ignore inventory commands
+            if(instance->state == Iso15693_3ListenerStateQuiet) {
+                break;
+            }
+        }
+
+        for(uint32_t i = 0; i < COUNT_OF(iso15693_listener_handlers); ++i) {
+            error = iso15693_listener_handlers[i](instance, rx_buffer);
+            if(error != Iso15693_3ErrorNotSupported) break;
+        }
+    } while(false);
 
     return error;
 }
