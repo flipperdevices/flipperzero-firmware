@@ -101,7 +101,6 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * Add space to keyboard
 * add channel, mode, count STA+AP on console header
 * Add auth type to AP Clone
-* Sometimes beacon status is fine, often it restarts the Flipper
 * Add stalk
 
 ## Menu Structure
