@@ -4,43 +4,21 @@
 
 #define TAG "Iso15693_3Listener"
 
-typedef struct {
-    uint8_t flags;
-    uint8_t command;
-    uint8_t data[];
-} Iso15693_3RequestLayout;
-
-typedef Iso15693_3Error (
-    *Iso15693_3ListenerHandler)(Iso15693_3Listener* instance, const BitBuffer* rx_buffer);
-
 static Iso15693_3Error iso15693_3_listener_inventory_handler(
     Iso15693_3Listener* instance,
-    const BitBuffer* rx_buffer) {
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        const Iso15693_3RequestLayout* layout =
-            (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
+        const bool afi_flag = flags & ISO15693_3_REQ_FLAG_T5_AFI_PRESENT;
+        const size_t data_size_min = sizeof(uint8_t) * (afi_flag ? 2 : 1);
 
-        if(layout->command != ISO15693_3_CMD_INVENTORY) {
-            error = Iso15693_3ErrorNotSupported;
-            break;
-        } else if(!(layout->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5)) {
+        if(data_size < data_size_min) {
             error = Iso15693_3ErrorFormat;
             break;
         }
-
-        const bool afi_flag = layout->flags & ISO15693_3_REQ_FLAG_T5_AFI_PRESENT;
-        const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
-        const size_t buf_size_min =
-            sizeof(Iso15693_3RequestLayout) + sizeof(uint8_t) * (afi_flag ? 2 : 1);
-
-        if(buf_size < buf_size_min) {
-            error = Iso15693_3ErrorFormat;
-            break;
-        }
-
-        const uint8_t* data = layout->data;
 
         if(afi_flag) {
             const uint8_t afi = *data++;
@@ -49,9 +27,9 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
         }
 
         const uint8_t mask_len = *data++;
-        const size_t buf_size_required = buf_size_min + mask_len;
+        const size_t data_size_required = data_size_min + mask_len;
 
-        if(buf_size != buf_size_required) {
+        if(data_size != data_size_required) {
             error = Iso15693_3ErrorFormat;
             break;
         }
@@ -73,20 +51,10 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
     return error;
 }
 
-static Iso15693_3Error iso15693_3_listener_get_system_info_handler(
-    Iso15693_3Listener* instance,
-    const BitBuffer* rx_buffer) {
+static Iso15693_3Error iso15693_3_listener_get_system_info_handler(Iso15693_3Listener* instance) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        const Iso15693_3RequestLayout* layout =
-            (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
-
-        if(layout->command != ISO15693_3_CMD_GET_SYS_INFO) {
-            error = Iso15693_3ErrorNotSupported;
-            break;
-        }
-
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
 
@@ -121,30 +89,18 @@ static Iso15693_3Error iso15693_3_listener_get_system_info_handler(
 
 static Iso15693_3Error iso15693_3_listener_read_block_handler(
     Iso15693_3Listener* instance,
-    const BitBuffer* rx_buffer) {
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        const Iso15693_3RequestLayout* layout =
-            (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
-
-        if(layout->command != ISO15693_3_CMD_READ_BLOCK) {
-            error = Iso15693_3ErrorNotSupported;
-            break;
-        }
-
-        const bool addressed_mode = layout->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
-
-        const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
-        const size_t buf_size_required = sizeof(Iso15693_3RequestLayout) + sizeof(uint8_t) +
-                                         (addressed_mode ? ISO15693_3_UID_SIZE : 0);
-
-        if(buf_size != buf_size_required) {
+        if(data_size != sizeof(uint8_t)) {
             error = Iso15693_3ErrorFormat;
             break;
         }
 
-        const uint8_t block_num = layout->data[addressed_mode ? ISO15693_3_UID_SIZE : 0];
+        const uint8_t block_num = data[0];
 
         if(block_num >= instance->data->system_info.block_count) {
             error = Iso15693_3ErrorInternal;
@@ -154,7 +110,7 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
 
-        if(layout->flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
+        if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
             iso15693_3_append_block_security(
                 instance->data, block_num, instance->tx_buffer); // Block security (optional)
         }
@@ -167,12 +123,6 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
 
     return error;
 }
-
-static const Iso15693_3ListenerHandler iso15693_listener_handlers[] = {
-    iso15693_3_listener_inventory_handler,
-    iso15693_3_listener_get_system_info_handler,
-    iso15693_3_listener_read_block_handler,
-};
 
 static Iso15693_3Error iso15693_3_listener_process_nfc_error(NfcError error) {
     Iso15693_3Error ret = Iso15693_3ErrorNone;
@@ -217,6 +167,12 @@ Iso15693_3Error
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
+        typedef struct {
+            uint8_t flags;
+            uint8_t command;
+            uint8_t data[];
+        } Iso15693_3RequestLayout;
+
         const size_t buf_size = bit_buffer_get_size_bytes(rx_buffer);
         const size_t buf_size_min = sizeof(Iso15693_3RequestLayout);
 
@@ -228,12 +184,9 @@ Iso15693_3Error
         const Iso15693_3RequestLayout* layout =
             (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
-        if(layout->command >= ISO15693_3_CMD_RFU_START) {
-            error = Iso15693_3ErrorNotSupported;
-            break;
-        }
+        const bool inventory_flag = layout->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5;
 
-        if(!(layout->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5)) {
+        if(!inventory_flag) {
             const bool selected_mode = layout->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
             const bool addressed_mode = layout->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
 
@@ -245,12 +198,43 @@ Iso15693_3Error
                 if(!addressed_mode) break;
             }
 
-            // In addressed mode, UID must be included in each command
-            const size_t buf_size_min_prime =
-                buf_size_min + (addressed_mode ? +ISO15693_3_UID_SIZE : 0);
+            const uint8_t* data;
+            size_t data_size;
 
-            if(buf_size < buf_size_min_prime) {
-                error = Iso15693_3ErrorFormat;
+            if(addressed_mode) {
+                // In addressed mode, UID must be included in each command
+                const size_t buf_size_min_addr = buf_size_min + ISO15693_3_UID_SIZE;
+
+                if(buf_size < buf_size_min_addr) {
+                    error = Iso15693_3ErrorFormat;
+                    break;
+                } else if(!iso15693_3_is_equal_uid(instance->data, layout->data)) {
+                    // In addressed mode, ignore all commands with non-matching UID
+                    break;
+                }
+
+                data = &layout->data[ISO15693_3_UID_SIZE];
+                data_size = buf_size - buf_size_min_addr;
+
+            } else {
+                data = layout->data;
+                data_size = buf_size - buf_size_min;
+            }
+
+            switch(layout->command) {
+            case ISO15693_3_CMD_INVENTORY:
+                // An INVENTORY command is not expected here
+                error = Iso15693_3ErrorUnknown;
+                break;
+            case ISO15693_3_CMD_READ_BLOCK:
+                error = iso15693_3_listener_read_block_handler(
+                    instance, data, data_size, layout->flags);
+                break;
+            case ISO15693_3_CMD_GET_SYS_INFO:
+                error = iso15693_3_listener_get_system_info_handler(instance);
+                break;
+            default:
+                error = Iso15693_3ErrorNotSupported;
                 break;
             }
 
@@ -259,12 +243,16 @@ Iso15693_3Error
             if(instance->state == Iso15693_3ListenerStateQuiet) {
                 break;
             }
+
+            // A command other than INVENTORY is not expected here
+            if(layout->command == ISO15693_3_CMD_INVENTORY) {
+                error = iso15693_3_listener_inventory_handler(
+                    instance, layout->data, buf_size - buf_size_min, layout->flags);
+            } else {
+                error = Iso15693_3ErrorUnknown;
+            }
         }
 
-        for(uint32_t i = 0; i < COUNT_OF(iso15693_listener_handlers); ++i) {
-            error = iso15693_listener_handlers[i](instance, rx_buffer);
-            if(error != Iso15693_3ErrorNotSupported) break;
-        }
     } while(false);
 
     return error;
