@@ -19,7 +19,11 @@ void can_lin_tools_scene_about_on_enter(void* context) {
     furi_string_cat_printf(temp_str, "Github: %s\n\n", CAN_LIN_TOOLS_GITHUB);
 
     furi_string_cat_printf(temp_str, "\e#%s\n", "Description");
-    furi_string_cat_printf(temp_str, "Bla Bla Bla Bla\nbla bla bla\n\n");
+    furi_string_cat_printf(
+        temp_str,
+        "This is a companion app for an external CAN/CAN-FD/LIN external module. It allows you to connect Flipper with the\nmodule to PC programs and\nuse is as an CAN?CAN-FD/\nLIN external adapter.\n\n");
+    furi_string_cat_printf(temp_str, "\e#%s\n", "Supported programs");
+    furi_string_cat_printf(temp_str, "CAN Hacker 2.xx\nCARBUS Analyzer????\netc...\n");
 
     widget_add_text_box_element(
         app->widget,

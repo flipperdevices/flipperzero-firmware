@@ -40,14 +40,14 @@ void can_lin_tools_view_can_hacker2_draw(Canvas* canvas, CanLinToolsCanHacker2Mo
         break;
     case CanChacker2WorkerStatusProcDisconnected:
         canvas_draw_icon(canvas, 0, 39, &I_waiting_for_can_software_127x24);
-        elements_multiline_text(canvas, 13, 10, "Waiting for software");
-        elements_multiline_text(canvas, 38, 20, "connection");
+        elements_multiline_text(canvas, 13, 12, "Waiting for software");
+        elements_multiline_text(canvas, 38, 22, "connection");
         break;
     case CanChacker2WorkerStatusProcConnected:
         canvas_draw_icon(canvas, 0, 40, &I_can_module_ready_127x24);
-        elements_multiline_text(canvas, 13, 10, "Software connected!");
+        elements_multiline_text(canvas, 13, 12, "Software connected!");
         canvas_set_font(canvas, FontSecondary);
-        elements_multiline_text(canvas, 20, 20, "Module is ready to use");
+        elements_multiline_text(canvas, 20, 22, "Module is ready to use");
         break;
 
     default:
@@ -73,6 +73,24 @@ static void can_lin_tools_view_can_hacker2_usb_connect_callback(
     CanChacker2WorkerStatus status) {
     furi_assert(context);
     CanLinToolsCanHacker2View* instance = context;
+
+    switch(status) {
+    case CanChacker2WorkerStatusModuleDisconnect:
+        if(instance->callback)
+            instance->callback(CanLinToolsCustomEventModuleDisconnected, instance->context);
+        break;
+    case CanChacker2WorkerStatusProcDisconnected:
+        if(instance->callback)
+            instance->callback(CanLinToolsCustomEventProcDisconnected, instance->context);
+        break;
+    case CanChacker2WorkerStatusProcConnected:
+        if(instance->callback)
+            instance->callback(CanLinToolsCustomEventProcConnected, instance->context);
+        break;
+
+    default:
+        break;
+    }
 
     with_view_model(
         instance->view, CanLinToolsCanHacker2Model * model, { model->status = status; }, true);
