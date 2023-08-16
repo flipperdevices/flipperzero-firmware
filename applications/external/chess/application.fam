@@ -14,6 +14,6 @@ App(
     fap_category="Games",
     fap_author="Struan Clark (xtruan)",
     fap_weburl="https://github.com/xtruan/flipper-chess",
-    fap_version=(1, 8),
+    fap_version=(1, 9),
     fap_description="Chess for Flipper",
 )

@@ -32,10 +32,18 @@ void flipchess_startscreen_draw(Canvas* canvas, FlipChessStartscreenModel* model
 
     canvas_draw_icon(canvas, 0, 0, &I_FLIPR_128x64);
 
+#ifdef CANVAS_HAS_FONT_SCUMM_ROMAN_OUTLINE
+    const uint8_t text_x_pos = 2;
+    const uint8_t text_y_pos = 12;
+    canvas_set_font(canvas, FontScummRomanOutline);
+#else
+    const uint8_t text_x_pos = 4;
+    const uint8_t text_y_pos = 11;
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 4, 11, "Chess");
+#endif
+    canvas_draw_str(canvas, text_x_pos, text_y_pos, "Chess");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 62, 11, FLIPCHESS_VERSION);
+    canvas_draw_str(canvas, 62, text_y_pos, FLIPCHESS_VERSION);
 
     //canvas_set_font(canvas, FontSecondary);
     //canvas_draw_str(canvas, 10, 11, "How about a nice game of...");
