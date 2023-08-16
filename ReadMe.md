@@ -44,7 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [fbt: improvements #2982 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2982)
 - Added: [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku)
 - Added: [Calendar (By Adiras)](https://github.com/Adiras/flipperzero-calendar)
-- Updated: [Authenticator/TOTP v4.0.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator) [Removed Bloat (By RogueMaster)]
+- Updated: [Authenticator/TOTP v4.0.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator) [Removed Bloat & No Directory Fix (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5da04f29c23f1b96463a38cf19997f81389be603)
 
 <a name="release">
 
@@ -273,7 +273,7 @@ $ ./fbt dolphin_ext
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
-- [Authenticator/TOTP v4.0.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- [Authenticator/TOTP v4.0.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad BT (By Willy-JL)(Imported By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/620)
