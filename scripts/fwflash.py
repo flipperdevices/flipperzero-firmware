@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from flipper.app import App
 
 
+# When adding an interface, also add it to SWD_TRANSPORT in fbt options
+
+
 class Programmer(ABC):
     @abstractmethod
     def flash(self, bin: str) -> bool:
@@ -314,7 +317,9 @@ class BlackmagicProgrammer(Programmer):
         return self.name
 
 
-programmers: list[Programmer] = [
+####################
+
+local_flash_interfaces: list[Programmer] = [
     OpenOCDProgrammer(
         OpenOCDInterface(
             "cmsis-dap",
@@ -331,41 +336,46 @@ programmers: list[Programmer] = [
     BlackmagicProgrammer(blackmagic_find_serial, "blackmagic_usb"),
 ]
 
-network_programmers = [
+network_flash_interfaces: list[Programmer] = [
     BlackmagicProgrammer(blackmagic_find_networked, "blackmagic_wifi")
 ]
 
+all_flash_interfaces = [*local_flash_interfaces, *network_flash_interfaces]
+
+####################
+
 
 class Main(App):
+    AUTO_INTERFACE = "auto"
+
     def init(self):
-        self.subparsers = self.parser.add_subparsers(help="sub-command help")
-        self.parser_flash = self.subparsers.add_parser("flash", help="Flash a binary")
-        self.parser_flash.add_argument(
+        self.parser.add_argument(
             "bin",
             type=str,
             help="Binary to flash",
         )
-        interfaces = [i.get_name() for i in programmers]
-        interfaces.extend([i.get_name() for i in network_programmers])
-        self.parser_flash.add_argument(
+        all_interface_names = [i.get_name() for i in all_flash_interfaces]
+        self.parser.add_argument(
             "--interface",
-            choices=interfaces,
+            choices=(self.AUTO_INTERFACE, *all_interface_names),
             type=str,
+            default=self.AUTO_INTERFACE,
             help="Interface to use",
         )
-        self.parser_flash.add_argument(
+        self.parser.add_argument(
             "--serial",
             type=str,
+            default=self.AUTO_INTERFACE,
             help="Serial number or port of the programmer",
         )
-        self.parser_flash.set_defaults(func=self.flash)
+        self.parser.set_defaults(func=self.flash)
 
-    def _search_interface(self, serial: typing.Optional[str]) -> list[Programmer]:
+    def _search_interface(self, interface_list: list[Programmer]) -> list[Programmer]:
         found_programmers = []
 
-        for p in programmers:
+        for p in interface_list:
             name = p.get_name()
-            if serial:
+            if (serial := self.args.serial) != self.AUTO_INTERFACE:
                 p.set_serial(serial)
                 self.logger.debug(f"Trying {name} with {serial}")
             else:
@@ -373,29 +383,7 @@ class Main(App):
 
             if p.probe():
                 self.logger.debug(f"Found {name}")
-                found_programmers += [p]
-            else:
-                self.logger.debug(f"Failed to probe {name}")
-
-        return found_programmers
-
-    def _search_network_interface(
-        self, serial: typing.Optional[str]
-    ) -> list[Programmer]:
-        found_programmers = []
-
-        for p in network_programmers:
-            name = p.get_name()
-
-            if serial:
-                p.set_serial(serial)
-                self.logger.debug(f"Trying {name} with {serial}")
-            else:
-                self.logger.debug(f"Trying {name}")
-
-            if p.probe():
-                self.logger.debug(f"Found {name}")
-                found_programmers += [p]
+                found_programmers.append(p)
             else:
                 self.logger.debug(f"Failed to probe {name}")
 
@@ -409,34 +397,39 @@ class Main(App):
             self.logger.error(f"Binary file not found: {bin_path}")
             return 1
 
-        if self.args.interface:
-            i_name = self.args.interface
-            interfaces = [p for p in programmers if p.get_name() == i_name]
-            if len(interfaces) == 0:
-                interfaces = [p for p in network_programmers if p.get_name() == i_name]
-        else:
-            self.logger.info("Probing for interfaces...")
-            interfaces = self._search_interface(self.args.serial)
+        if self.args.interface != self.AUTO_INTERFACE:
+            available_interfaces = [
+                p for p in local_flash_interfaces if p.get_name() == self.args.interface
+            ]
+            if len(available_interfaces) == 0:
+                available_interfaces = [
+                    p
+                    for p in network_flash_interfaces
+                    if p.get_name() == self.args.interface
+                ]
 
-            if len(interfaces) == 0:
+        else:
+            self.logger.info("Probing for local interfaces...")
+            available_interfaces = self._search_interface(local_flash_interfaces)
+
+            if not available_interfaces:
                 # Probe network blackmagic
                 self.logger.info("Probing for network interfaces...")
-                interfaces = self._search_network_interface(self.args.serial)
+                available_interfaces = self._search_interface(network_flash_interfaces)
 
-            if len(interfaces) == 0:
+            if not available_interfaces:
                 self.logger.error("No interface found")
                 return 1
-
-            if len(interfaces) > 1:
+            elif len(available_interfaces) > 1:
                 self.logger.error("Multiple interfaces found: ")
                 self.logger.error(
-                    f"Please specify '--interface={[i.get_name() for i in interfaces]}'"
+                    f"Please specify '--interface={[i.get_name() for i in available_interfaces]}'"
                 )
                 return 1
 
-        interface = interfaces[0]
+        interface = available_interfaces.pop(0)
 
-        if self.args.serial:
+        if self.args.serial != self.AUTO_INTERFACE:
             interface.set_serial(self.args.serial)
             self.logger.info(
                 f"Flashing {bin_path} via {interface.get_name()} with {self.args.serial}"
