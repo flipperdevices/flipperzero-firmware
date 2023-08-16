@@ -171,7 +171,7 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"Help",
     {"Info <cmd>", "Get Started", "Commands", "About", "Help"},
     5,
-    {"info ", "GET_STARTED", "commands", "ABOUT", "help"},
+    {"info ", "GET_STARTED", "commands", "gravity-version", "help"},
     TOGGLE_ARGS,
     FOCUS_CONSOLE_START,
     NO_TIP},
