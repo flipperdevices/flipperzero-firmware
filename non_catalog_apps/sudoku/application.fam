@@ -1,0 +1,19 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
+App(
+    appid="sudoku",
+    name="Sudoku",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="sudoku_main",
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    fap_category="Games",
+    fap_version="0.1",
+    fap_icon="sudoku.png",
+    fap_description="Sudoku game",
+    fap_author="@profelis",
+    # fap_weburl="https://github.com/user/template",
+    # fap_icon_assets="images",  # Image assets to compile for this application
+)

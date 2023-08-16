@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `13 Aug 21:57 GMT +3`
+### Apps checked & updated at `17 Aug 02:19 GMT +3`
 
 
 # Default pack
@@ -109,6 +109,7 @@ Games:
 - [Video Poker (by PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee (by emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 - [Secret Toggle (by nostrumuva)](https://github.com/nostrumuva/secret_toggle)
+- [Sudoku Game (by profelis)](https://github.com/profelis/fz-sudoku)
 
 ## GPIO
 - [Air Mouse (by ginkage)](https://github.com/ginkage/FlippAirMouse/)
@@ -200,6 +201,7 @@ Games:
 - [QR Code (by bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [Resistance calculator (by instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [VB Lab Migration Assistant (by GMMan (cyanic))](https://github.com/GMMan/flipperzero-vb-migrate)
+- [Simple calendar app (by Adiras)](https://github.com/Adiras/flipperzero-calendar)
 
 ## USB
 - [USB HID Autofire (by pbek)](https://github.com/pbek/usb_hid_autofire)
