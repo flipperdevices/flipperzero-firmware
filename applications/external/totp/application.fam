@@ -40,11 +40,11 @@ App(
                 "wolfcrypt/src/hash.c",
                 "wolfcrypt/src/sha.c",
                 "wolfcrypt/src/sha256.c",
-                "wolfcrypt/src/sha512.c"
+                "wolfcrypt/src/sha512.c",
             ],
             cflags=["-Wno-error"],
             cdefines=["HAVE_CONFIG_H"],
-            cincludes=["config/wolfssl"]
+            cincludes=["config/wolfssl"],
         ),
     ],
 )
