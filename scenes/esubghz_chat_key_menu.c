@@ -83,7 +83,7 @@ void scene_on_enter_key_menu(void* context)
 	menu_add_item(
 		state->menu,
 		"No encryption",
-		&I_chat_10px,
+		&I_chat_14px,
 		ESubGhzChatKeyMenuItems_NoEncryption,
 		key_menu_cb,
 		state
@@ -91,7 +91,7 @@ void scene_on_enter_key_menu(void* context)
 	menu_add_item(
 		state->menu,
 		"Password",
-		&I_keyboard_10px,
+		&I_keyboard_14px,
 		ESubGhzChatKeyMenuItems_Password,
 		key_menu_cb,
 		state
@@ -99,7 +99,7 @@ void scene_on_enter_key_menu(void* context)
 	menu_add_item(
 		state->menu,
 		"Hex Key",
-		&I_hex_10px,
+		&I_hex_14px,
 		ESubGhzChatKeyMenuItems_HexKey,
 		key_menu_cb,
 		state
@@ -107,7 +107,7 @@ void scene_on_enter_key_menu(void* context)
 	menu_add_item(
 		state->menu,
 		"Generate Key",
-		&I_u2f_10px,
+		&I_u2f_14px,
 		ESubGhzChatKeyMenuItems_GenKey,
 		key_menu_cb,
 		state
@@ -115,7 +115,7 @@ void scene_on_enter_key_menu(void* context)
 	menu_add_item(
 		state->menu,
 		"Read Key from NFC",
-		&I_Nfc_10px,
+		&I_Nfc_14px,
 		ESubGhzChatKeyMenuItems_ReadKeyFromNfc,
 		key_menu_cb,
 		state
