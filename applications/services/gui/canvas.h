@@ -20,6 +20,11 @@ typedef enum {
     ColorXOR = 0x02,
 } Color;
 
+/** Provide defines to permit checking if new are fonts available*/
+#define CANVAS_HAS_FONT_SCUMM_ROMAN_OUTLINE = 1
+#define CANVAS_HAS_FONT_SCUMM_ROMAN = 1
+#define CANVAS_HAS_FONT_EUROCORP = 1
+
 /** Fonts enumeration */
 typedef enum {
     FontPrimary,
@@ -27,6 +32,9 @@ typedef enum {
     FontKeyboard,
     FontBigNumbers,
     FontBatteryPercent,
+    FontScummRomanOutline,
+    FontScummRoman,
+    FontEurocorp,
 
     // Keep last for fonts number calculation
     FontTotalNumber,
