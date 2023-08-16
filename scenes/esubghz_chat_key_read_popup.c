@@ -93,9 +93,17 @@ static bool key_read_popup_handle_key_read(ESubGhzChatState *state)
 		return false;
 	}
 
+	/* read the frequency */
+	if (data_read >= (KEY_BITS / 8) + sizeof(struct FreqNfcEntry)) {
+		struct FreqNfcEntry *freq_entry = (struct FreqNfcEntry *)
+			(dev_data->mf_ul_data.data + (KEY_BITS / 8));
+		state->frequency = __ntohl(freq_entry->frequency);
+	}
+
 	/* read the replay dict */
 	struct ReplayDictNfcReaderContext rd_ctx = {
-		.cur = dev_data->mf_ul_data.data + (KEY_BITS / 8),
+		.cur = dev_data->mf_ul_data.data + (KEY_BITS / 8) +
+			sizeof(struct FreqNfcEntry),
 		.max = dev_data->mf_ul_data.data + (data_read < NFC_MAX_BYTES ?
 				data_read : NFC_MAX_BYTES)
 	};
