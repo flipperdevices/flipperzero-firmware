@@ -240,7 +240,7 @@ void cfw_app_scene_misc_screen_on_enter(void* context) {
     item = variable_item_list_add(
         var_item_list,
         "Rainbow Saturation",
-        255,
+        160,
         cfw_app_scene_misc_screen_rainbow_saturation_changed,
         app);
     value_index = rgb_backlight_get_rainbow_saturation();
