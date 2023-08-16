@@ -4,8 +4,12 @@
 
 #include <stm32wbxx_ll_pwr.h>
 #include <stm32wbxx_ll_rcc.h>
+#include <stm32wbxx_ll_hsem.h>
 #include <stm32wbxx_ll_utils.h>
 #include <stm32wbxx_ll_cortex.h>
+
+#include <hw_conf.h>
+#include <interface/patterns/ble_thread/shci/shci.h>
 
 #define TAG "FuriHalClock"
 
@@ -79,14 +83,14 @@ void furi_hal_clock_init() {
         ;
 
     /* Sysclk activation on the main PLL */
-    /* Set CPU1 prescaler*/
+    /* Set CPU1 prescaler */
     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-    /* Set CPU2 prescaler*/
-    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
+    /* Set CPU2 prescaler, from this point we are not allowed to touch it. */
+    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSE);
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE)
         ;
 
     /* Set AHB SHARED prescaler*/
@@ -122,7 +126,7 @@ void furi_hal_clock_init() {
     FURI_LOG_I(TAG, "Init OK");
 }
 
-void furi_hal_clock_switch_to_hsi() {
+void furi_hal_clock_switch_hse2hsi() {
     LL_RCC_HSI_Enable();
 
     while(!LL_RCC_HSI_IsReady())
@@ -134,14 +138,12 @@ void furi_hal_clock_switch_to_hsi() {
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSI)
         ;
 
-    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
     while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_0)
         ;
 }
 
-void furi_hal_clock_switch_to_pll() {
+void furi_hal_clock_switch_hsi2hse() {
 #ifdef FURI_HAL_CLOCK_TRACK_STARTUP
     uint32_t clock_start_time = DWT->CYCCNT;
 #endif
@@ -157,15 +159,13 @@ void furi_hal_clock_switch_to_pll() {
     while(!LL_RCC_PLLSAI1_IsReady())
         ;
 
-    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
-
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
     while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
         ;
 
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSE);
 
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE)
         ;
 
 #ifdef FURI_HAL_CLOCK_TRACK_STARTUP
@@ -174,6 +174,29 @@ void furi_hal_clock_switch_to_pll() {
         furi_crash("Slow HSE/PLL startup");
     }
 #endif
+}
+
+void furi_hal_clock_switch_hse2pll() {
+    furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
+
+    SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL);
+    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
+
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
+}
+
+void furi_hal_clock_switch_pll2hse() {
+    furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
+
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
+
+    SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE);
+
+    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
 
 void furi_hal_clock_suspend_tick() {

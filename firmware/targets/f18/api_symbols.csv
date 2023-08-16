@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,35.0,,
+Version,+,36.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1018,8 +1018,8 @@ Function,+,furi_hal_clock_mco_disable,void,
 Function,+,furi_hal_clock_mco_enable,void,"FuriHalClockMcoSourceId, FuriHalClockMcoDivisorId"
 Function,-,furi_hal_clock_resume_tick,void,
 Function,-,furi_hal_clock_suspend_tick,void,
-Function,-,furi_hal_clock_switch_to_hsi,void,
-Function,-,furi_hal_clock_switch_to_pll,void,
+Function,-,furi_hal_clock_switch_hse2hsi,void,
+Function,-,furi_hal_clock_switch_hsi2hse,void,
 Function,+,furi_hal_console_disable,void,
 Function,+,furi_hal_console_enable,void,
 Function,+,furi_hal_console_init,void,

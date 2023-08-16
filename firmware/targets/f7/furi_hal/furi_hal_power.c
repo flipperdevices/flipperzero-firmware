@@ -171,13 +171,13 @@ static inline void furi_hal_power_deep_sleep() {
             LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
 
             // The switch on HSI before entering Stop Mode is required
-            furi_hal_clock_switch_to_hsi();
+            furi_hal_clock_switch_hse2hsi();
         }
     } else {
         /**
          * The switch on HSI before entering Stop Mode is required 
          */
-        furi_hal_clock_switch_to_hsi();
+        furi_hal_clock_switch_hse2hsi();
     }
 
     /* Release RCC semaphore */
@@ -202,7 +202,7 @@ static inline void furi_hal_power_deep_sleep() {
         ;
 
     if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
-        furi_hal_clock_switch_to_pll();
+        furi_hal_clock_switch_hsi2hse();
     }
 
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);

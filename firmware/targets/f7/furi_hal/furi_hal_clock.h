@@ -40,11 +40,23 @@ void furi_hal_clock_deinit_early();
 /** Initialize clocks */
 void furi_hal_clock_init();
 
-/** Switch to HSI clock */
-void furi_hal_clock_switch_to_hsi();
+/** Switch clock from HSE to HSI */
+void furi_hal_clock_switch_hse2hsi();
 
-/** Switch to PLL clock */
-void furi_hal_clock_switch_to_pll();
+/** Switch clock from HSI to HSE */
+void furi_hal_clock_switch_hsi2hse();
+
+/** Switch clock from HSE to PLL
+ * 
+ * @warning    can not be used in ISR or critical section
+ */
+void furi_hal_clock_switch_hse2pll();
+
+/** Switch clock from PLL to HSE
+ *
+ * @warning    can not be used in ISR or critical section
+ */
+void furi_hal_clock_switch_pll2hse();
 
 /** Stop SysTick counter without resetting */
 void furi_hal_clock_suspend_tick();
