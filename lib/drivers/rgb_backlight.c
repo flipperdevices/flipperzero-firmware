@@ -1,6 +1,7 @@
 /*
     RGB backlight FlipperZero driver
     Copyright (C) 2022-2023 Victor Nikitchuk (https://github.com/quen0n)
+    Heavily modified by Willy-JL and Z3bro
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,159 +20,243 @@
 #include "rgb_backlight.h"
 #include <furi_hal.h>
 #include <storage/storage.h>
+#include <toolbox/saved_struct.h>
 
-#define RGB_BACKLIGHT_SETTINGS_VERSION 5
+#define RGB_BACKLIGHT_SETTINGS_MAGIC 0x15
+#define RGB_BACKLIGHT_SETTINGS_VERSION 6
 #define RGB_BACKLIGHT_SETTINGS_PATH CFG_PATH("rgb_backlight.settings")
 
-#define COLOR_COUNT (sizeof(colors) / sizeof(RGBBacklightColor))
-
-#define TAG "RGB Backlight"
-
-static RGBBacklightSettings rgb_settings = {
-    .version = RGB_BACKLIGHT_SETTINGS_VERSION,
-    .display_color_index = 0,
-    .settings_is_loaded = false};
-
-static const RGBBacklightColor colors[] = {
-    {"Orange", 255, 60, 0},
-    {"Red", 255, 0, 0},
-    {"Maroon", 128, 0, 0},
-    {"Yellow", 255, 150, 0},
-    {"Olive", 128, 128, 0},
-    {"Lime", 0, 255, 0},
-    {"Green", 0, 128, 0},
-    {"Aqua", 0, 255, 127},
-    {"Cyan", 0, 210, 210},
-    {"Azure", 0, 127, 255},
-    {"Teal", 0, 128, 128},
-    {"Blue", 0, 0, 255},
-    {"Navy", 0, 0, 128},
-    {"Purple", 127, 0, 255},
-    {"Fuchsia", 255, 0, 255},
-    {"Pink", 255, 0, 127},
-    {"Brown", 165, 42, 42},
-    {"White", 150, 150, 110},
+static struct {
+    RgbColor colors[SK6805_LED_COUNT];
+    RGBBacklightRainbowMode rainbow_mode;
+    uint8_t rainbow_speed;
+    uint32_t rainbow_interval;
+    uint32_t rainbow_saturation;
+} rgb_settings = {
+    .colors =
+        {
+            {255, 69, 0},
+            {255, 69, 0},
+            {255, 69, 0},
+        },
+    .rainbow_mode = RGBBacklightRainbowModeOff,
+    .rainbow_speed = 5,
+    .rainbow_interval = 250,
+    .rainbow_saturation = 255,
 };
 
-uint8_t rgb_backlight_get_color_count(void) {
-    return COLOR_COUNT;
+static struct {
+    bool settings_loaded;
+    bool enabled;
+    bool last_rainbow;
+    uint8_t last_brightness;
+    RgbColor last_colors[SK6805_LED_COUNT];
+    FuriTimer* rainbow_timer;
+    HsvColor rainbow_hsv;
+} rgb_state = {
+    .settings_loaded = false,
+    .enabled = false,
+    .last_rainbow = true,
+    .last_brightness = 0,
+    .last_colors =
+        {
+            {0, 0, 0},
+            {0, 0, 0},
+            {0, 0, 0},
+        },
+    .rainbow_timer = NULL,
+    .rainbow_hsv = {0, 255, 255},
+};
+
+static void rainbow_timer(void* ctx) {
+    UNUSED(ctx);
+    rgb_backlight_update(rgb_state.last_brightness, true);
 }
 
-const char* rgb_backlight_get_color_text(uint8_t index) {
-    return colors[index].name;
+void rgb_backlight_reconfigure(bool enabled) {
+    if(enabled && !rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    rgb_state.enabled = enabled;
+
+    if(rgb_state.enabled && rgb_settings.rainbow_mode != RGBBacklightRainbowModeOff) {
+        if(rgb_state.rainbow_timer == NULL) {
+            rgb_state.rainbow_timer = furi_timer_alloc(rainbow_timer, FuriTimerTypePeriodic, NULL);
+        } else {
+            furi_timer_stop(rgb_state.rainbow_timer);
+        }
+        furi_timer_start(rgb_state.rainbow_timer, rgb_settings.rainbow_interval);
+    } else if(rgb_state.rainbow_timer != NULL) {
+        furi_timer_stop(rgb_state.rainbow_timer);
+        furi_timer_free(rgb_state.rainbow_timer);
+        rgb_state.rainbow_timer = NULL;
+    }
+    rgb_state.rainbow_hsv.s = rgb_settings.rainbow_saturation;
+
+    rgb_backlight_update(rgb_state.last_brightness, false);
 }
 
 void rgb_backlight_load_settings(void) {
-    //Не загружать данные из внутренней памяти при загрузке в режиме DFU
-    if(!furi_hal_is_normal_boot()) {
-        rgb_settings.settings_is_loaded = true;
+    // Do not load data from internal memory when booting in DFU mode
+    if(!furi_hal_is_normal_boot() || rgb_state.settings_loaded) {
+        rgb_state.settings_loaded = true;
         return;
     }
 
-    RGBBacklightSettings settings;
-    File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
-    const size_t settings_size = sizeof(RGBBacklightSettings);
+    saved_struct_load(
+        RGB_BACKLIGHT_SETTINGS_PATH,
+        &rgb_settings,
+        sizeof(rgb_settings),
+        RGB_BACKLIGHT_SETTINGS_MAGIC,
+        RGB_BACKLIGHT_SETTINGS_VERSION);
 
-    FURI_LOG_I(TAG, "loading settings from \"%s\"", RGB_BACKLIGHT_SETTINGS_PATH);
-    bool fs_result =
-        storage_file_open(file, RGB_BACKLIGHT_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
-
-    if(fs_result) {
-        uint16_t bytes_count = storage_file_read(file, &settings, settings_size);
-
-        if(bytes_count != settings_size) {
-            fs_result = false;
-        }
-    }
-
-    if(fs_result) {
-        FURI_LOG_I(TAG, "load success");
-        if(settings.version != RGB_BACKLIGHT_SETTINGS_VERSION) {
-            FURI_LOG_E(
-                TAG,
-                "version(%d != %d) mismatch",
-                settings.version,
-                RGB_BACKLIGHT_SETTINGS_VERSION);
-        } else {
-            memcpy(&rgb_settings, &settings, settings_size);
-        }
-    } else {
-        FURI_LOG_E(TAG, "load failed, %s", storage_file_get_error_desc(file));
-    }
-
-    storage_file_close(file);
-    storage_file_free(file);
-    furi_record_close(RECORD_STORAGE);
-    rgb_settings.settings_is_loaded = true;
+    rgb_state.settings_loaded = true;
+    rgb_backlight_reconfigure(rgb_state.enabled);
 }
 
 void rgb_backlight_save_settings(void) {
-    RGBBacklightSettings settings;
-    File* file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
-    const size_t settings_size = sizeof(RGBBacklightSettings);
+    saved_struct_save(
+        RGB_BACKLIGHT_SETTINGS_PATH,
+        &rgb_settings,
+        sizeof(rgb_settings),
+        RGB_BACKLIGHT_SETTINGS_MAGIC,
+        RGB_BACKLIGHT_SETTINGS_VERSION);
+}
 
-    FURI_LOG_I(TAG, "saving settings to \"%s\"", RGB_BACKLIGHT_SETTINGS_PATH);
+void rgb_backlight_set_color(uint8_t index, RgbColor color) {
+    if(index >= COUNT_OF(rgb_settings.colors)) return;
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    rgb_settings.colors[index] = color;
+    rgb_backlight_reconfigure(rgb_state.enabled);
+}
 
-    memcpy(&settings, &rgb_settings, settings_size);
+RgbColor rgb_backlight_get_color(uint8_t index) {
+    if(index >= COUNT_OF(rgb_settings.colors)) return (RgbColor){0, 0, 0};
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    return rgb_settings.colors[index];
+}
 
-    bool fs_result =
-        storage_file_open(file, RGB_BACKLIGHT_SETTINGS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode) {
+    if(rainbow_mode >= RGBBacklightRainbowModeCount) return;
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    rgb_settings.rainbow_mode = rainbow_mode;
+    rgb_backlight_reconfigure(rgb_state.enabled);
+}
 
-    if(fs_result) {
-        uint16_t bytes_count = storage_file_write(file, &settings, settings_size);
+RGBBacklightRainbowMode rgb_backlight_get_rainbow_mode() {
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    return rgb_settings.rainbow_mode;
+}
 
-        if(bytes_count != settings_size) {
-            fs_result = false;
+void rgb_backlight_set_rainbow_speed(uint8_t rainbow_speed) {
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    rgb_settings.rainbow_speed = rainbow_speed;
+}
+
+uint8_t rgb_backlight_get_rainbow_speed() {
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    return rgb_settings.rainbow_speed;
+}
+
+void rgb_backlight_set_rainbow_interval(uint32_t rainbow_interval) {
+    if(rainbow_interval < 100) return;
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    rgb_settings.rainbow_interval = rainbow_interval;
+    rgb_backlight_reconfigure(rgb_state.enabled);
+}
+
+uint32_t rgb_backlight_get_rainbow_interval() {
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    return rgb_settings.rainbow_interval;
+}
+
+void rgb_backlight_set_rainbow_saturation(uint8_t rainbow_saturation) {
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    rgb_settings.rainbow_saturation = rainbow_saturation;
+    rgb_backlight_reconfigure(rgb_state.enabled);
+}
+
+uint8_t rgb_backlight_get_rainbow_saturation() {
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+    return rgb_settings.rainbow_saturation;
+}
+
+void rgb_backlight_update(uint8_t brightness, bool tick) {
+    if(!rgb_state.enabled) return;
+    if(!rgb_state.settings_loaded) {
+        rgb_backlight_load_settings();
+    }
+
+    switch(rgb_settings.rainbow_mode) {
+    case RGBBacklightRainbowModeOff: {
+        if(!rgb_state.last_rainbow && rgb_state.last_brightness == brightness &&
+           memcmp(rgb_state.last_colors, rgb_settings.colors, sizeof(rgb_settings.colors)) == 0) {
+            return;
         }
+        rgb_state.last_rainbow = false;
+        memcpy(rgb_state.last_colors, rgb_settings.colors, sizeof(rgb_settings.colors));
+
+        float bright = brightness / 255.0f;
+        for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
+            SK6805_set_led_color(
+                i,
+                rgb_settings.colors[i].r * bright,
+                rgb_settings.colors[i].g * bright,
+                rgb_settings.colors[i].b * bright);
+        }
+        break;
     }
 
-    if(fs_result) {
-        FURI_LOG_I(TAG, "save success");
-    } else {
-        FURI_LOG_E(TAG, "save failed, %s", storage_file_get_error_desc(file));
+    case RGBBacklightRainbowModeWave:
+    case RGBBacklightRainbowModeSolid: {
+        rgb_state.last_rainbow = true;
+
+        if(tick && brightness) {
+            rgb_state.rainbow_hsv.h += rgb_settings.rainbow_speed;
+        } else {
+            if(rgb_state.last_brightness == brightness && rgb_state.last_rainbow) {
+                return;
+            }
+            rgb_state.rainbow_hsv.v = brightness;
+        }
+
+        HsvColor hsv = rgb_state.rainbow_hsv;
+        RgbColor rgb = hsv2rgb(hsv);
+
+        for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
+            if(i && rgb_settings.rainbow_mode == RGBBacklightRainbowModeWave) {
+                hsv.h += (50 * i);
+                rgb = hsv2rgb(hsv);
+            }
+            SK6805_set_led_color(i, rgb.r, rgb.g, rgb.b);
+        }
+        break;
     }
 
-    storage_file_close(file);
-    storage_file_free(file);
-    furi_record_close(RECORD_STORAGE);
-}
-
-RGBBacklightSettings* rgb_backlight_get_settings(void) {
-    if(!rgb_settings.settings_is_loaded) {
-        rgb_backlight_load_settings();
-    }
-    return &rgb_settings;
-}
-
-void rgb_backlight_set_color(uint8_t color_index) {
-    if(color_index > (rgb_backlight_get_color_count() - 1)) color_index = 0;
-    rgb_settings.display_color_index = color_index;
-}
-
-void rgb_backlight_update(uint8_t brightness) {
-    if(!rgb_settings.settings_is_loaded) {
-        rgb_backlight_load_settings();
-    }
-
-    static uint8_t last_color_index = 255;
-    static uint8_t last_brightness = 123;
-    static uint32_t last_update_time = 0;
-
-    if(last_brightness == brightness && last_color_index == rgb_settings.display_color_index &&
-       furi_get_tick() - last_update_time < 1000)
+    default:
         return;
-
-    last_brightness = brightness;
-    last_color_index = rgb_settings.display_color_index;
-    last_update_time = furi_get_tick();
-
-    for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
-        uint8_t r = colors[rgb_settings.display_color_index].red * (brightness / 255.0f);
-        uint8_t g = colors[rgb_settings.display_color_index].green * (brightness / 255.0f);
-        uint8_t b = colors[rgb_settings.display_color_index].blue * (brightness / 255.0f);
-
-        SK6805_set_led_color(i, r, g, b);
     }
 
+    rgb_state.last_brightness = brightness;
     SK6805_update();
 }

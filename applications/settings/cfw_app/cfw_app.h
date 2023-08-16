@@ -11,6 +11,7 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/popup.h>
 #include <lib/toolbox/path.h>
 #include <lib/toolbox/value_index.h>
@@ -50,6 +51,7 @@ typedef struct {
     VariableItemList* var_item_list;
     Submenu* submenu;
     TextInput* text_input;
+    ByteInput* byte_input;
     Popup* popup;
     DialogEx* dialog_ex;
 
@@ -70,6 +72,7 @@ typedef struct {
     char subghz_freq_buffer[CFW_SUBGHZ_FREQ_BUFFER_SIZE];
     bool subghz_extend;
     bool subghz_bypass;
+    RgbColor lcd_color;
     char device_name[FURI_HAL_VERSION_ARRAY_NAME_LENGTH];
     FuriString* version_tag;
 
@@ -86,6 +89,7 @@ typedef enum {
     CfwAppViewVarItemList,
     CfwAppViewSubmenu,
     CfwAppViewTextInput,
+    CfwAppViewByteInput,
     CfwAppViewPopup,
     CfwAppViewDialogEx,
 } CfwAppView;

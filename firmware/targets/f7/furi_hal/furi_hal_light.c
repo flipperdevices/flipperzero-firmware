@@ -45,7 +45,7 @@ void furi_hal_light_set(Light light, uint8_t value) {
     }
     if(light & LightBacklight) {
         if(CFW_SETTINGS()->rgb_backlight) {
-            rgb_backlight_update(value);
+            rgb_backlight_update(value, false);
         } else {
             uint8_t prev =
                 lp5562_get_channel_value(&furi_hal_i2c_handle_power, LP5562ChannelWhite);

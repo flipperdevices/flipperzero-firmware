@@ -1,6 +1,7 @@
 #include "cfw.h"
 #include "private.h"
 #include <furi_hal.h>
+#include <rgb_backlight.h>
 #include <flipper_format/flipper_format.h>
 
 #define TAG "CfwSettings"
@@ -55,6 +56,8 @@ void CFW_SETTINGS_LOAD() {
     }
     flipper_format_free(file);
     furi_record_close(RECORD_STORAGE);
+
+    rgb_backlight_reconfigure(x->rgb_backlight);
     FURI_LOG_I(TAG, "RM WUZ HERE");
 }
 

@@ -1,6 +1,7 @@
 /*
     RGB backlight FlipperZero driver
     Copyright (C) 2022-2023 Victor Nikitchuk (https://github.com/quen0n)
+    Heavily modified by Willy-JL and Z3bro
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,69 +19,89 @@
 
 #include <furi.h>
 #include "SK6805.h"
+#include <toolbox/colors.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-    char* name;
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-} RGBBacklightColor;
-
-typedef struct {
-    uint8_t version;
-    uint8_t display_color_index;
-    bool settings_is_loaded;
-} RGBBacklightSettings;
+typedef enum {
+    RGBBacklightRainbowModeOff,
+    RGBBacklightRainbowModeWave,
+    RGBBacklightRainbowModeSolid,
+    RGBBacklightRainbowModeCount,
+} RGBBacklightRainbowMode;
 
 /**
- * @brief Получить текущие настройки RGB-подсветки
+ * @brief Reconfigure rgb backlight with new settings
  *
- * @return Указатель на структуру настроек
+ * @param enabled Whether the rgb backlight is enabled
  */
-RGBBacklightSettings* rgb_backlight_get_settings(void);
+void rgb_backlight_reconfigure(bool enabled);
 
 /**
- * @brief Загрузить настройки подсветки с SD-карты
+ * @brief Load backlight settings from SD card
  */
-void rgb_backlight_load_settings(void);
+void rgb_backlight_load_settings();
 
 /**
- * @brief Сохранить текущие настройки RGB-подсветки
+ * @brief Save Current RGB Lighting Settings
  */
-void rgb_backlight_save_settings(void);
+void rgb_backlight_save_settings();
 
 /**
- * @brief Применить текущие настройки RGB-подсветки
+ * @brief Change the color of the backlight
  *
- * @param brightness Яркость свечения (0-255)
+ * @param index What led to set the color to (0 - SK6805_LED_COUNT-1)
+ * @param color RGB color to use
  */
-void rgb_backlight_update(uint8_t brightness);
+void rgb_backlight_set_color(uint8_t index, RgbColor color);
+
+RgbColor rgb_backlight_get_color(uint8_t index);
 
 /**
- * @brief Установить цвет RGB-подсветки
+ * @brief Change rainbow mode
  *
- * @param color_index Индекс цвета (0 - rgb_backlight_get_color_count())
+ * @param rainbow_mode What mode to use (0 - RGBBacklightRainbowModeCount)
  */
-void rgb_backlight_set_color(uint8_t color_index);
+void rgb_backlight_set_rainbow_mode(RGBBacklightRainbowMode rainbow_mode);
+
+RGBBacklightRainbowMode rgb_backlight_get_rainbow_mode();
 
 /**
- * @brief Получить количество доступных цветов
+ * @brief Change rainbow speed
  *
- * @return Число доступных вариантов цвета
+ * @param rainbow_speed What speed to use (0 - 255)
  */
-uint8_t rgb_backlight_get_color_count(void);
+void rgb_backlight_set_rainbow_speed(uint8_t rainbow_speed);
+
+uint8_t rgb_backlight_get_rainbow_speed();
 
 /**
- * @brief Получить текстовое название цвета
+ * @brief Change rainbow interval
  *
- * @param index Индекс из доступных вариантов цвета
- * @return Указатель на строку с названием цвета
+ * @param rainbow_interval What interval to use
  */
-const char* rgb_backlight_get_color_text(uint8_t index);
+void rgb_backlight_set_rainbow_interval(uint32_t rainbow_interval);
+
+uint32_t rgb_backlight_get_rainbow_interval();
+
+/**
+ * @brief Change rainbow saturation
+ *
+ * @param rainbow_saturation What saturation to use (0 - 255)
+ */
+void rgb_backlight_set_rainbow_saturation(uint8_t rainbow_saturation);
+
+uint8_t rgb_backlight_get_rainbow_saturation();
+
+/**
+ * @brief Apply current RGB lighting settings
+ *
+ * @param brightness Backlight intensity (0-255)
+ * @param tick       Whether this update was a tick (for rainbow)
+ */
+void rgb_backlight_update(uint8_t brightness, bool tick);
 
 #ifdef __cplusplus
 }
