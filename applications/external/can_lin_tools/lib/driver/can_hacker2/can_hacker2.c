@@ -31,6 +31,7 @@ struct CanHacker2 {
     uint32_t rx_msg_time_stamp;
 
     CanHacker2Callback callback;
+    CanHacker2ConnectCallback connect_callback;
     void* context;
 };
 
@@ -65,11 +66,31 @@ void can_hacker2_free(CanHacker2* instance) {
     free(instance);
 }
 
-void can_hacker2_set_callback(CanHacker2* instance, CanHacker2Callback callback, void* context) {
+void can_hacker2_set_callback(
+    CanHacker2* instance,
+    CanHacker2Callback callback,
+    CanHacker2ConnectCallback connect_callback,
+    void* context) {
     furi_assert(instance);
 
     instance->callback = callback;
+    instance->connect_callback = connect_callback;
     instance->context = context;
+}
+
+bool can_hacker2_is_device_connected(CanHacker2* instance) {
+    furi_assert(instance);
+    bool ret = false;
+
+    if(instance->can_open) {
+        ret = true;
+    } else {
+        if(can0_function_device_init_can20(500000, MCP251XFD_LISTEN_ONLY_MODE) == ERR_OK) {
+            ret = true;
+            can0_function_device_deinit();
+        }
+    }
+    return ret;
 }
 
 size_t can_hacker2_spaces_rx(CanHacker2* instance) {
@@ -126,7 +147,6 @@ void can_hacker2_get_cmd(CanHacker2* instance) {
         return;
     }
     switch(data[0]) {
-
     case CH2_CR:
     case CH2_LF:
         instance->cmd_buf[instance->cmd_buf_len] = CH2_END_OF_CMD;
@@ -150,6 +170,9 @@ static void can_hacker2_can_close(CanHacker2* instance) {
     furi_assert(instance);
     if(instance->can_open) {
         can0_function_device_deinit();
+        if(instance->callback) {
+            instance->connect_callback(instance->context, CanHacker2Disconnected);
+        }
         instance->can_open = false;
         instance->can_listen_only = false;
         can_hacker2_tx_add_ch(instance, CH2_OK);
@@ -253,6 +276,9 @@ static void can_hacher2_can_open(CanHacker2* instance) {
             }
 
             if(ret == ERR_OK) {
+                if(instance->callback) {
+                    instance->connect_callback(instance->context, CanHacker2Connected);
+                }
                 show_device_detected(CAN0, can0_sysclk);
                 show_device_configuration(&can0_bt_stats);
                 show_device_fifo_configuration(&can0_fifo_list[0], CAN0_FIFO_COUNT);

@@ -4,17 +4,23 @@
 #include "../helpers/can_lin_tools_types.h"
 #include "../helpers/can_lin_tools_event.h"
 
-typedef struct CanLinToolsCanHacker2 CanLinToolsCanHacker2;
+typedef struct CanLinToolsCanHacker2View CanLinToolsCanHacker2View;
 
 typedef void (*CanLinToolsCanHacker2ViewCallback)(CanLinToolsCustomEvent event, void* context);
 
 typedef enum {
+    CanLinToolsCanHacker2ViewStatusNoModuleConnect,
     CanLinToolsCanHacker2ViewStatusNoUSBConnect,
     CanLinToolsCanHacker2ViewStatusUSBConnect,
 } CanLinToolsCanHacker2ViewStatus;
 
-CanLinToolsCanHacker2* can_lin_tools_view_can_hacker2_alloc();
+void can_lin_tools_view_can_hacker2_set_callback(
+    CanLinToolsCanHacker2View* instance,
+    CanLinToolsCanHacker2ViewCallback callback,
+    void* context);
 
-void can_lin_tools_view_can_hacker2_free(CanLinToolsCanHacker2* instance);
+CanLinToolsCanHacker2View* can_lin_tools_view_can_hacker2_alloc();
 
-View* can_lin_tools_view_can_hacker2_get_view(CanLinToolsCanHacker2* instance);
+void can_lin_tools_view_can_hacker2_free(CanLinToolsCanHacker2View* instance);
+
+View* can_lin_tools_view_can_hacker2_get_view(CanLinToolsCanHacker2View* instance);

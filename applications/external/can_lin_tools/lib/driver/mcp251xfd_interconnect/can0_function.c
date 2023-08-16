@@ -142,7 +142,7 @@ eERRORRESULT
         break;
     case MCP251XFD_NORMAL_CANFD_MODE:
         // ToDo you need to add some flags to the config to work in CANFD mode
-        //can0_config.NominalBitrate = ....;
+        // can0_config.NominalBitrate = ....;
         // can0_config.ControlFlags = 0;
         // can0_config.ControlFlags = .....;
         break;

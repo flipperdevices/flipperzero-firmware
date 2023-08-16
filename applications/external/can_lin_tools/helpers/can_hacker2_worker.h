@@ -2,9 +2,16 @@
 
 #include <furi_hal.h>
 
+
 typedef struct CanChacker2Worker CanChacker2Worker;
 
-typedef void (*CanChacker2WorkerCallback)(void* context, bool connect_usb);
+typedef enum {
+    CanChacker2WorkerStatusModuleDisconnect,
+    CanChacker2WorkerStatusProcDisconnected,
+    CanChacker2WorkerStatusProcConnected,
+} CanChacker2WorkerStatus;
+
+typedef void (*CanChacker2WorkerCallback)(void* context, CanChacker2WorkerStatus status);
 
 /** Allocate CanChacker2Worker
  * 

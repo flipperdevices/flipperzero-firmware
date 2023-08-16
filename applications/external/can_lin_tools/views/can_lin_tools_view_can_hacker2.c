@@ -6,7 +6,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
-struct CanLinToolsCanHacker2 {
+struct CanLinToolsCanHacker2View {
     View* view;
     CanChacker2Worker* worker;
     CanLinToolsCanHacker2ViewCallback callback;
@@ -14,23 +14,51 @@ struct CanLinToolsCanHacker2 {
 };
 
 typedef struct {
-    CanLinToolsCanHacker2ViewStatus status;
+    CanChacker2WorkerStatus status;
 } CanLinToolsCanHacker2Model;
 
+void can_lin_tools_view_can_hacker2_set_callback(
+    CanLinToolsCanHacker2View* instance,
+    CanLinToolsCanHacker2ViewCallback callback,
+    void* context) {
+    furi_assert(instance);
+    furi_assert(callback);
+
+    instance->callback = callback;
+    instance->context = context;
+}
 
 void can_lin_tools_view_can_hacker2_draw(Canvas* canvas, CanLinToolsCanHacker2Model* model) {
     canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontPrimary);
 
-    canvas_draw_str(canvas, 56, 36, "Touch the reader");
+    switch(model->status) {
+    case CanChacker2WorkerStatusModuleDisconnect:
+        canvas_draw_icon(canvas, 8, 2, &I_Attach_module_can_53x60);
+        canvas_set_font(canvas, FontSecondary);
+        elements_multiline_text(canvas, 80, 25, "Attach\nCAN\nModule");
+        break;
+    case CanChacker2WorkerStatusProcDisconnected:
+        canvas_draw_icon(canvas, 0, 39, &I_waiting_for_can_software_127x24);
+        elements_multiline_text(canvas, 13, 10, "Waiting for software");
+        elements_multiline_text(canvas, 38, 20, "connection");
+        break;
+    case CanChacker2WorkerStatusProcConnected:
+        canvas_draw_icon(canvas, 0, 40, &I_can_module_ready_127x24);
+        elements_multiline_text(canvas, 13, 10, "Software connected!");
+        canvas_set_font(canvas, FontSecondary);
+        elements_multiline_text(canvas, 20, 20, "Module is ready to use");
+        break;
 
-    UNUSED(model);
-
+    default:
+        furi_crash("unknown status");
+        break;
+    }
 }
 
 bool can_lin_tools_view_can_hacker2_input(InputEvent* event, void* context) {
     furi_assert(context);
-    CanLinToolsCanHacker2* instance = context;
+    CanLinToolsCanHacker2View* instance = context;
     UNUSED(instance);
 
     if(event->key == InputKeyBack) {
@@ -40,32 +68,24 @@ bool can_lin_tools_view_can_hacker2_input(InputEvent* event, void* context) {
     return true;
 }
 
-static void
-    can_lin_tools_view_can_hacker2_usb_connect_callback(void* context, bool status_connect) {
+static void can_lin_tools_view_can_hacker2_usb_connect_callback(
+    void* context,
+    CanChacker2WorkerStatus status) {
     furi_assert(context);
-    CanLinToolsCanHacker2* instance = context;
+    CanLinToolsCanHacker2View* instance = context;
 
     with_view_model(
-        instance->view,
-        CanLinToolsCanHacker2Model * model,
-        {
-            if(status_connect) {
-                model->status = CanLinToolsCanHacker2ViewStatusUSBConnect;
-            } else {
-                model->status = CanLinToolsCanHacker2ViewStatusNoUSBConnect;
-            }
-        },
-        true);
+        instance->view, CanLinToolsCanHacker2Model * model, { model->status = status; }, true);
 }
 
 void can_lin_tools_view_can_hacker2_enter(void* context) {
     furi_assert(context);
-    CanLinToolsCanHacker2* instance = context;
+    CanLinToolsCanHacker2View* instance = context;
 
     with_view_model(
         instance->view,
         CanLinToolsCanHacker2Model * model,
-        { model->status = CanLinToolsCanHacker2ViewStatusNoUSBConnect; },
+        { model->status = CanChacker2WorkerStatusModuleDisconnect; },
         true);
 
     //Start worker
@@ -79,7 +99,7 @@ void can_lin_tools_view_can_hacker2_enter(void* context) {
 
 void can_lin_tools_view_can_hacker2_exit(void* context) {
     furi_assert(context);
-    CanLinToolsCanHacker2* instance = context;
+    CanLinToolsCanHacker2View* instance = context;
     //Stop worker
     if(can_hacker2_worker_is_running(instance->worker)) {
         can_hacker2_worker_stop(instance->worker);
@@ -88,8 +108,8 @@ void can_lin_tools_view_can_hacker2_exit(void* context) {
     can_hacker2_worker_free(instance->worker);
 }
 
-CanLinToolsCanHacker2* can_lin_tools_view_can_hacker2_alloc() {
-    CanLinToolsCanHacker2* instance = malloc(sizeof(CanLinToolsCanHacker2));
+CanLinToolsCanHacker2View* can_lin_tools_view_can_hacker2_alloc() {
+    CanLinToolsCanHacker2View* instance = malloc(sizeof(CanLinToolsCanHacker2View));
 
     // View allocation and configuration
     instance->view = view_alloc();
@@ -104,20 +124,20 @@ CanLinToolsCanHacker2* can_lin_tools_view_can_hacker2_alloc() {
     with_view_model(
         instance->view,
         CanLinToolsCanHacker2Model * model,
-        { model->status = CanLinToolsCanHacker2ViewStatusNoUSBConnect; },
+        { model->status = CanChacker2WorkerStatusModuleDisconnect; },
         true);
 
     return instance;
 }
 
-void can_lin_tools_view_can_hacker2_free(CanLinToolsCanHacker2* instance) {
+void can_lin_tools_view_can_hacker2_free(CanLinToolsCanHacker2View* instance) {
     furi_assert(instance);
 
     view_free(instance->view);
     free(instance);
 }
 
-View* can_lin_tools_view_can_hacker2_get_view(CanLinToolsCanHacker2* instance) {
+View* can_lin_tools_view_can_hacker2_get_view(CanLinToolsCanHacker2View* instance) {
     furi_assert(instance);
     return instance->view;
 }

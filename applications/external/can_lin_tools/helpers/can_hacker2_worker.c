@@ -139,6 +139,25 @@ static void can_hacker2_worker_proc_tx_data(void* context) {
     furi_thread_flags_set(furi_thread_get_id(instance->thread), CanChacker2WorkerEvtTx);
 }
 
+static void can_hacker2_worker_proc_connect(void* context, CanHacker2Status status) {
+    furi_assert(context);
+    CanChacker2Worker* instance = context;
+    switch(status) {
+    case CanHacker2Disconnected:
+        if(instance->callback)
+            instance->callback(instance->context, CanChacker2WorkerStatusProcDisconnected);
+        break;
+    case CanHacker2Connected:
+        if(instance->callback)
+            instance->callback(instance->context, CanChacker2WorkerStatusProcConnected);
+        break;
+
+    default:
+        furi_crash("Unknown status");
+        break;
+    }
+}
+
 /** Worker thread
  * 
  * @param context 
@@ -149,7 +168,8 @@ static int32_t can_hacker2_worker_thread(void* context) {
     can_hacker2_worker_vcp_cdc_init(instance);
 
     CanHacker2* can_hacker2 = can_hacker2_alloc();
-    can_hacker2_set_callback(can_hacker2, can_hacker2_worker_proc_tx_data, instance);
+    can_hacker2_set_callback(
+        can_hacker2, can_hacker2_worker_proc_tx_data, can_hacker2_worker_proc_connect, instance);
 
     uint8_t buf[CAN_HACKER2_VCP_UART_RX_BUF_SIZE];
     size_t len = 0;
@@ -160,9 +180,22 @@ static int32_t can_hacker2_worker_thread(void* context) {
 
     FURI_LOG_I(TAG, "Start");
 
-    furi_delay_ms(100);
+    //  Check device connected
     while(instance->worker_running) {
+        uint32_t events =
+            furi_thread_flags_wait(CAN_HACKER2_WORKER_ALL_EVENTS, FuriFlagWaitAny, 250);
+        if(events & CanChacker2WorkerEvtStop) {
+            furi_thread_flags_set(furi_thread_get_id(instance->thread), CanChacker2WorkerEvtStop);
+            break;
+        }
+        if(can_hacker2_is_device_connected(can_hacker2)) {
+            if(instance->callback)
+                instance->callback(instance->context, CanChacker2WorkerStatusProcDisconnected);
+            break;
+        }
+    }
 
+    while(instance->worker_running) {
         uint32_t events = furi_thread_flags_wait(
             CAN_HACKER2_WORKER_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
 
@@ -212,9 +245,13 @@ static int32_t can_hacker2_worker_thread(void* context) {
             break;
         }
 
+        // USB connect event, diconnect CAN
         if(events & CanChacker2WorkerEvtState) {
-            if(instance->callback)
-                instance->callback(instance->context, (bool)instance->connect_usb);
+            if(!instance->connect_usb) {
+                buf[0] = 'C';
+                buf[1] = '\r';
+                can_hacker2_rx(can_hacker2, buf, 2);
+            }
         }
     }
 
@@ -284,4 +321,3 @@ bool can_hacker2_worker_is_running(CanChacker2Worker* instance) {
 
     return instance->worker_running;
 }
-

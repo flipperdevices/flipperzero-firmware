@@ -6,7 +6,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
-struct CanLinToolsLinHacker {
+struct CanLinToolsLinHackerView {
     View* view;
     LinChackerWorker* worker;
     CanLinToolsLinHackerViewCallback callback;
@@ -27,7 +27,7 @@ void can_lin_tools_view_lin_hacker_draw(Canvas* canvas, CanLinToolsLinHackerMode
 
 bool can_lin_tools_view_lin_hacker_input(InputEvent* event, void* context) {
     furi_assert(context);
-    CanLinToolsLinHacker* instance = context;
+    CanLinToolsLinHackerView* instance = context;
     UNUSED(instance);
 
     if(event->key == InputKeyBack) {
@@ -40,7 +40,7 @@ bool can_lin_tools_view_lin_hacker_input(InputEvent* event, void* context) {
 static void
     can_lin_tools_view_lin_hacker_usb_connect_callback(void* context, bool status_connect) {
     furi_assert(context);
-    CanLinToolsLinHacker* instance = context;
+    CanLinToolsLinHackerView* instance = context;
 
     with_view_model(
         instance->view,
@@ -57,7 +57,7 @@ static void
 
 void can_lin_tools_view_lin_hacker_enter(void* context) {
     furi_assert(context);
-    CanLinToolsLinHacker* instance = context;
+    CanLinToolsLinHackerView* instance = context;
 
     with_view_model(
         instance->view,
@@ -76,7 +76,7 @@ void can_lin_tools_view_lin_hacker_enter(void* context) {
 
 void can_lin_tools_view_lin_hacker_exit(void* context) {
     furi_assert(context);
-    CanLinToolsLinHacker* instance = context;
+    CanLinToolsLinHackerView* instance = context;
     //Stop worker
     if(lin_hacker_worker_is_running(instance->worker)) {
         lin_hacker_worker_stop(instance->worker);
@@ -85,8 +85,8 @@ void can_lin_tools_view_lin_hacker_exit(void* context) {
     lin_hacker_worker_free(instance->worker);
 }
 
-CanLinToolsLinHacker* can_lin_tools_view_lin_hacker_alloc() {
-    CanLinToolsLinHacker* instance = malloc(sizeof(CanLinToolsLinHacker));
+CanLinToolsLinHackerView* can_lin_tools_view_lin_hacker_alloc() {
+    CanLinToolsLinHackerView* instance = malloc(sizeof(CanLinToolsLinHackerView));
 
     // View allocation and configuration
     instance->view = view_alloc();
@@ -106,14 +106,14 @@ CanLinToolsLinHacker* can_lin_tools_view_lin_hacker_alloc() {
     return instance;
 }
 
-void can_lin_tools_view_lin_hacker_free(CanLinToolsLinHacker* instance) {
+void can_lin_tools_view_lin_hacker_free(CanLinToolsLinHackerView* instance) {
     furi_assert(instance);
 
     view_free(instance->view);
     free(instance);
 }
 
-View* can_lin_tools_view_lin_hacker_get_view(CanLinToolsLinHacker* instance) {
+View* can_lin_tools_view_lin_hacker_get_view(CanLinToolsLinHackerView* instance) {
     furi_assert(instance);
     return instance->view;
 }

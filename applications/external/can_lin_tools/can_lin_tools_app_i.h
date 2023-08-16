@@ -22,6 +22,6 @@ struct CanLinToolsApp {
     NotificationApp* notifications;
     Submenu* submenu;
     Widget* widget;
-    CanLinToolsCanHacker2* can_lin_tools_can_hacker2;
-    CanLinToolsLinHacker* can_lin_tools_lin_hacker;
+    CanLinToolsCanHacker2View* can_lin_tools_can_hacker2;
+    CanLinToolsLinHackerView* can_lin_tools_lin_hacker;
 };
