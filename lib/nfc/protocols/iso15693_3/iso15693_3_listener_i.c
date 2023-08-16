@@ -137,7 +137,6 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
     const uint8_t* data,
     size_t data_size,
     uint8_t flags) {
-
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
@@ -168,7 +167,8 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
             bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_ERROR_BLOCK_LOCKED);
         } else {
             bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
-            iso15693_3_set_block_data(instance->data, layout->block_num, layout->block_data, block_data_size);
+            iso15693_3_set_block_data(
+                instance->data, layout->block_num, layout->block_data, block_data_size);
         }
 
         if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
@@ -180,6 +180,37 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
     } while(false);
 
     return error;
+}
+
+static Iso15693_3Error
+    iso15693_3_listener_select_handler(Iso15693_3Listener* instance, uint8_t flags) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        if(!(flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED)) {
+            // SELECT is only possible in addressed mode
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        instance->state = Iso15693_3ListenerStateSelected;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+
+        error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error iso15693_3_listener_reset_to_ready_handler(Iso15693_3Listener* instance) {
+    instance->state = Iso15693_3ListenerStateReady;
+
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+
+    return iso15693_3_listener_send_frame(instance, instance->tx_buffer);
 }
 
 static Iso15693_3Error iso15693_3_listener_stay_quiet_handler(Iso15693_3Listener* instance) {
@@ -217,6 +248,10 @@ static inline Iso15693_3Error iso15693_3_listener_handle_request(
         return iso15693_3_listener_read_block_handler(instance, data, data_size, flags);
     case ISO15693_3_CMD_WRITE_BLOCK:
         return iso15693_3_listener_write_block_handler(instance, data, data_size, flags);
+    case ISO15693_3_CMD_SELECT:
+        return iso15693_3_listener_select_handler(instance, flags);
+    case ISO15693_3_CMD_RESET_TO_READY:
+        return iso15693_3_listener_reset_to_ready_handler(instance);
     case ISO15693_3_CMD_GET_SYS_INFO:
         return iso15693_3_listener_get_system_info_handler(instance);
     default:
@@ -310,6 +345,13 @@ Iso15693_3Error
                     break;
                 } else if(!iso15693_3_is_equal_uid(instance->data, layout->data)) {
                     // In addressed mode, ignore all commands with non-matching UID
+                    if(instance->state == Iso15693_3ListenerStateSelected &&
+                       layout->command == ISO15693_3_CMD_SELECT) {
+                        // Special case, reset to ready on reception of a
+                        // SELECT command with non-matching UID
+                        // TODO: Find a neater way to do this?
+                        instance->state = Iso15693_3ListenerStateReady;
+                    }
                     break;
                 }
 

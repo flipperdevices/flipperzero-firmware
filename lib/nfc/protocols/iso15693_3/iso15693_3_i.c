@@ -227,7 +227,11 @@ void iso15693_3_append_block(const Iso15693_3Data* data, uint8_t block_num, BitB
     bit_buffer_append_bytes(buf, block_data, data->system_info.block_size);
 }
 
-void iso15693_3_set_block_data(Iso15693_3Data* data, uint8_t block_num, const uint8_t* block_data, size_t block_data_size) {
+void iso15693_3_set_block_data(
+    Iso15693_3Data* data,
+    uint8_t block_num,
+    const uint8_t* block_data,
+    size_t block_data_size) {
     furi_assert(block_num < data->system_info.block_count);
     furi_assert(block_data_size == data->system_info.block_size);
 
