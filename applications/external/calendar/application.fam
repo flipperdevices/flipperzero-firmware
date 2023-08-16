@@ -1,0 +1,13 @@
+App(
+    appid="calendar",
+    name="Calendar",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="calendar_app",
+    stack_size=1 * 1024,
+    fap_category="Tools",
+    fap_icon="icon.png",
+    fap_author="@Adiras",
+    fap_weburl="https://github.com/Adiras/flipperzero-calendar",
+    fap_version="1.0",
+    fap_description="Simple Flipper Zero calendar application",
+)
