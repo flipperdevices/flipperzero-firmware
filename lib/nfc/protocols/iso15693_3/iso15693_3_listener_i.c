@@ -117,10 +117,13 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
 
         if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
             iso15693_3_append_block_security(
-                instance->data, layout->block_num, instance->tx_buffer); // Block security (optional)
+                instance->data,
+                layout->block_num,
+                instance->tx_buffer); // Block security (optional)
         }
 
-        iso15693_3_append_block(instance->data, layout->block_num, instance->tx_buffer); // Block data
+        iso15693_3_append_block(
+            instance->data, layout->block_num, instance->tx_buffer); // Block data
 
         error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
 
@@ -129,9 +132,57 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
     return error;
 }
 
-static Iso15693_3Error iso15693_3_listener_stay_quiet_handler(
-    Iso15693_3Listener* instance) {
+static Iso15693_3Error iso15693_3_listener_write_block_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
 
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t block_num;
+            uint8_t block_data[];
+        } Iso15693_3WriteBlockRequestLayout;
+
+        const Iso15693_3WriteBlockRequestLayout* layout =
+            (const Iso15693_3WriteBlockRequestLayout*)data;
+
+        if(data_size <= sizeof(Iso15693_3WriteBlockRequestLayout)) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        bit_buffer_reset(instance->tx_buffer);
+
+        const size_t block_data_size = data_size - sizeof(Iso15693_3WriteBlockRequestLayout);
+        if(layout->block_num >= instance->data->system_info.block_count) {
+            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
+            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_ERROR_BLOCK_UNAVAILABLE);
+        } else if(block_data_size != instance->data->system_info.block_size) {
+            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
+            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_ERROR_BLOCK_WRITE);
+        } else if(iso15693_3_is_block_locked(instance->data, layout->block_num)) {
+            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
+            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_ERROR_BLOCK_LOCKED);
+        } else {
+            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+            iso15693_3_set_block_data(instance->data, layout->block_num, layout->block_data, block_data_size);
+        }
+
+        if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
+            // FIXME: This is just a hack to emulate sending the reply after an additional EOF
+            furi_delay_ms(22);
+        }
+
+        error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error iso15693_3_listener_stay_quiet_handler(Iso15693_3Listener* instance) {
     instance->state = Iso15693_3ListenerStateQuiet;
     return Iso15693_3ErrorNone;
 }
@@ -148,6 +199,43 @@ static Iso15693_3Error iso15693_3_listener_process_nfc_error(NfcError error) {
     }
 
     return ret;
+}
+
+static inline Iso15693_3Error iso15693_3_listener_handle_request(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t command,
+    uint8_t flags) {
+    switch(command) {
+    case ISO15693_3_CMD_INVENTORY:
+        // An INVENTORY command is not expected here
+        return Iso15693_3ErrorUnknown;
+    case ISO15693_3_CMD_STAY_QUIET:
+        return iso15693_3_listener_stay_quiet_handler(instance);
+    case ISO15693_3_CMD_READ_BLOCK:
+        return iso15693_3_listener_read_block_handler(instance, data, data_size, flags);
+    case ISO15693_3_CMD_WRITE_BLOCK:
+        return iso15693_3_listener_write_block_handler(instance, data, data_size, flags);
+    case ISO15693_3_CMD_GET_SYS_INFO:
+        return iso15693_3_listener_get_system_info_handler(instance);
+    default:
+        return Iso15693_3ErrorNotSupported;
+    }
+}
+
+static inline Iso15693_3Error iso15693_3_listener_handle_inventory_request(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t command,
+    uint8_t flags) {
+    if(command == ISO15693_3_CMD_INVENTORY) {
+        return iso15693_3_listener_inventory_handler(instance, data, data_size, flags);
+    } else {
+        // A command other than INVENTORY is not expected here
+        return Iso15693_3ErrorUnknown;
+    }
 }
 
 Iso15693_3Error iso15693_3_listener_ready(Iso15693_3Listener* instance) {
@@ -233,25 +321,8 @@ Iso15693_3Error
                 data_size = buf_size - buf_size_min;
             }
 
-            switch(layout->command) {
-            case ISO15693_3_CMD_INVENTORY:
-                // An INVENTORY command is not expected here
-                error = Iso15693_3ErrorUnknown;
-                break;
-            case ISO15693_3_CMD_STAY_QUIET:
-                error = iso15693_3_listener_stay_quiet_handler(instance);
-                break;
-            case ISO15693_3_CMD_READ_BLOCK:
-                error = iso15693_3_listener_read_block_handler(
-                    instance, data, data_size, layout->flags);
-                break;
-            case ISO15693_3_CMD_GET_SYS_INFO:
-                error = iso15693_3_listener_get_system_info_handler(instance);
-                break;
-            default:
-                error = Iso15693_3ErrorNotSupported;
-                break;
-            }
+            error = iso15693_3_listener_handle_request(
+                instance, data, data_size, layout->command, layout->flags);
 
         } else {
             // If the card is quiet, ignore inventory commands
@@ -259,13 +330,9 @@ Iso15693_3Error
                 break;
             }
 
-            // A command other than INVENTORY is not expected here
-            if(layout->command == ISO15693_3_CMD_INVENTORY) {
-                error = iso15693_3_listener_inventory_handler(
-                    instance, layout->data, buf_size - buf_size_min, layout->flags);
-            } else {
-                error = Iso15693_3ErrorUnknown;
-            }
+            // Special case handler when inventory flag is set
+            error = iso15693_3_listener_handle_inventory_request(
+                instance, layout->data, buf_size - buf_size_min, layout->command, layout->flags);
         }
 
     } while(false);

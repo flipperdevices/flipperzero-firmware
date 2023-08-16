@@ -152,6 +152,14 @@ bool iso15693_3_set_uid(Iso15693_3Data* data, const uint8_t* uid, size_t uid_len
 
 const Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data);
 
+// Getters and tests
+
+bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num);
+
+// Setters
+
+void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked);
+
 extern const NfcDeviceBase nfc_device_iso15693_3;
 
 #ifdef __cplusplus

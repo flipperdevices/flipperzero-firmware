@@ -303,3 +303,17 @@ const Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data) {
     UNUSED(data);
     furi_crash("No base data");
 }
+
+bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num) {
+    furi_assert(data);
+    furi_assert(block_num < data->system_info.block_count);
+
+    return *(const uint8_t*)simple_array_cget(data->block_security, block_num);
+}
+
+void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked) {
+    furi_assert(data);
+    furi_assert(block_num < data->system_info.block_count);
+
+    *(uint8_t*)simple_array_get(data->block_security, block_num) = locked ? 1 : 0;
+}
