@@ -95,14 +95,19 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        if(data_size != sizeof(uint8_t)) {
+        typedef struct {
+            uint8_t block_num;
+        } Iso15693_3ReadBlockRequestLayout;
+
+        const Iso15693_3ReadBlockRequestLayout* layout =
+            (const Iso15693_3ReadBlockRequestLayout*)data;
+
+        if(data_size != sizeof(Iso15693_3ReadBlockRequestLayout)) {
             error = Iso15693_3ErrorFormat;
             break;
         }
 
-        const uint8_t block_num = data[0];
-
-        if(block_num >= instance->data->system_info.block_count) {
+        if(layout->block_num >= instance->data->system_info.block_count) {
             error = Iso15693_3ErrorInternal;
             break;
         }
@@ -112,16 +117,23 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
 
         if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
             iso15693_3_append_block_security(
-                instance->data, block_num, instance->tx_buffer); // Block security (optional)
+                instance->data, layout->block_num, instance->tx_buffer); // Block security (optional)
         }
 
-        iso15693_3_append_block(instance->data, block_num, instance->tx_buffer); // Block data
+        iso15693_3_append_block(instance->data, layout->block_num, instance->tx_buffer); // Block data
 
         error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
 
     } while(false);
 
     return error;
+}
+
+static Iso15693_3Error iso15693_3_listener_stay_quiet_handler(
+    Iso15693_3Listener* instance) {
+
+    instance->state = Iso15693_3ListenerStateQuiet;
+    return Iso15693_3ErrorNone;
 }
 
 static Iso15693_3Error iso15693_3_listener_process_nfc_error(NfcError error) {
@@ -225,6 +237,9 @@ Iso15693_3Error
             case ISO15693_3_CMD_INVENTORY:
                 // An INVENTORY command is not expected here
                 error = Iso15693_3ErrorUnknown;
+                break;
+            case ISO15693_3_CMD_STAY_QUIET:
+                error = iso15693_3_listener_stay_quiet_handler(instance);
                 break;
             case ISO15693_3_CMD_READ_BLOCK:
                 error = iso15693_3_listener_read_block_handler(
