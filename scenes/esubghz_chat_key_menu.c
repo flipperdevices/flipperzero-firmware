@@ -18,7 +18,6 @@ static void key_menu_cb(void* context, uint32_t index)
 	switch(index) {
 	case ESubGhzChatKeyMenuItems_NoEncryption:
 		state->encrypted = false;
-		enter_chat(state);
 
 		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyMenuNoEncryption);
@@ -52,7 +51,6 @@ static void key_menu_cb(void* context, uint32_t index)
 
 		/* set encrypted flag and enter the chat */
 		state->encrypted = true;
-		enter_chat(state);
 
 		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyMenuGenKey);
@@ -77,6 +75,10 @@ void scene_on_enter_key_menu(void* context)
 	ESubGhzChatState* state = context;
 
 	menu_reset(state->menu);
+
+	/* clear the crypto CTX in case we got back from password or hex key
+	 * input */
+	crypto_ctx_clear(state->crypto_ctx);
 
 	menu_add_item(
 		state->menu,
@@ -135,11 +137,11 @@ bool scene_on_event_key_menu(void* context, SceneManagerEvent event)
 	switch(event.type) {
 	case SceneManagerEventTypeCustom:
 		switch(event.event) {
-		/* switch to message input scene */
+		/* switch to frequency input scene */
 		case ESubGhzChatEvent_KeyMenuNoEncryption:
 		case ESubGhzChatEvent_KeyMenuGenKey:
 			scene_manager_next_scene(state->scene_manager,
-					ESubGhzChatScene_ChatInput);
+					ESubGhzChatScene_FreqInput);
 			consumed = true;
 			break;
 

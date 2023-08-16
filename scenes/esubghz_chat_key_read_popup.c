@@ -31,9 +31,8 @@ static void key_read_popup_timeout_cb(void* context)
 	if (cur_state == KeyReadPopupState_Fail) {
 		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyReadPopupFailed);
-	/* done displaying our success, enter chat */
+	/* done displaying our success */
 	} else if (cur_state == KeyReadPopupState_Success) {
-		enter_chat(state);
 		view_dispatcher_send_custom_event(state->view_dispatcher,
 				ESubGhzChatEvent_KeyReadPopupSucceeded);
 	}
@@ -247,10 +246,10 @@ bool scene_on_event_key_read_popup(void* context, SceneManagerEvent event)
 			consumed = true;
 			break;
 
-		/* success, go to chat input */
+		/* success, go to frequency input */
 		case ESubGhzChatEvent_KeyReadPopupSucceeded:
 			scene_manager_next_scene(state->scene_manager,
-					ESubGhzChatScene_ChatInput);
+					ESubGhzChatScene_FreqInput);
 			consumed = true;
 			break;
 
