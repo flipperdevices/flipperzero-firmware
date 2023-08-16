@@ -1,4 +1,0 @@
-V	161213070133Z		63	unknown	/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=wolfSSL root CA/emailAddress=info@wolfssl.com
-V	161213070133Z		01	unknown	/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=wolfSSL intermediate CA 1/emailAddress=info@wolfssl.com
-V	161213070133Z		02	unknown	/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=wolfSSL intermediate CA 2/emailAddress=info@wolfssl.com
-R	161213070133Z	151201070133Z	03	unknown	/C=US/ST=Washington/L=Seattle/O=wolfSSL/OU=Engineering/CN=wolfSSL REVOKED intermediate CA/emailAddress=info@wolfssl.com

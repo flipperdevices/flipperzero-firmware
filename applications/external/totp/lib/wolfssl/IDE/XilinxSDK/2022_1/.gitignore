@@ -1,9 +1,0 @@
-.analytics
-.metadata/
-_ide/
-Debug/
-Release/
-*/.gitignore
-
-vmk180/
-*.ld

@@ -1,8 +1,0 @@
-# vim:ft=automake
-# included from Top Level Makefile.am
-# All paths should be given relative to the root
-
-EXTRA_DIST+= IDE/ARDUINO/README.md
-EXTRA_DIST+= IDE/ARDUINO/sketches/wolfssl_client/wolfssl_client.ino
-EXTRA_DIST+= IDE/ARDUINO/sketches/wolfssl_server/wolfssl_server.ino
-EXTRA_DIST+= IDE/ARDUINO/wolfssl-arduino.sh

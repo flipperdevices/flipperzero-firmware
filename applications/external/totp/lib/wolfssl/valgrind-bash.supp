@@ -1,8 +1,0 @@
-{
-  linux_bash_locale_leak
-  Memcheck:Leak
-  fun:malloc
-  fun:xmalloc
-  fun:set_default_locale
-  fun:main
-}

@@ -1,8 +1,0 @@
-# vim:ft=automake
-# included from Top Level Makefile.am
-# All paths should be given relative to the root
-
-EXTRA_DIST += \
-    IDE/Android/Android.bp \
-    IDE/Android/README.md \
-    IDE/Android/user_settings.h

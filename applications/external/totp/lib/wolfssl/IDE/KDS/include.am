@@ -1,7 +1,0 @@
-# vim:ft=automake
-# included from Top Level Makefile.am
-# All paths should be given relative to the root
-
-EXTRA_DIST+= IDE/KDS/.cproject
-EXTRA_DIST+= IDE/KDS/.project
-EXTRA_DIST+= IDE/KDS/config/user_settings.h

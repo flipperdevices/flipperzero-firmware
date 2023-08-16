@@ -298,6 +298,12 @@ bool totp_config_file_update_user_settings(const PluginState* plugin_state) {
 bool totp_config_file_load(PluginState* const plugin_state) {
     Storage* storage = totp_open_storage();
     FlipperFormat* fff_data_file;
+
+    if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
+        if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
+            return;
+        }
+    }
     if(!totp_open_config_file(storage, &fff_data_file)) {
         totp_close_storage();
         return false;

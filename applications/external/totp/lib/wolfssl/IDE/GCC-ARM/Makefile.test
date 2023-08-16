@@ -1,7 +1,0 @@
-# Project name
-BIN = WolfCryptTest
-SRC_C = ./Source/test_main.c
-
-all: build_hex
-
-include Makefile.common

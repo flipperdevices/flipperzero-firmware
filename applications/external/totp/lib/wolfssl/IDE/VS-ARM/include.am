@@ -1,8 +1,0 @@
-# vim:ft=automake
-# included from Top Level Makefile.am
-# All paths should be given relative to the root
-
-EXTRA_DIST+= IDE/VS-ARM/README.md
-EXTRA_DIST+= IDE/VS-ARM/wolfssl.sln
-EXTRA_DIST+= IDE/VS-ARM/wolfssl.vcxproj
-EXTRA_DIST+= IDE/VS-ARM/user_settings.h
