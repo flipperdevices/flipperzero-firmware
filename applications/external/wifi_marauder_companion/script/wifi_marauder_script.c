@@ -244,18 +244,30 @@ WifiMarauderScriptStageSniffPmkid* _wifi_marauder_script_get_stage_sniff_pmkid(c
 
     cJSON* channel_json = cJSON_GetObjectItem(sniffpmkid_stage_json, "channel");
     int channel = channel_json != NULL ? (int)cJSON_GetNumberValue(channel_json) : 0;
+
     cJSON* timeout_json = cJSON_GetObjectItem(sniffpmkid_stage_json, "timeout");
     int timeout = timeout_json != NULL ? (int)cJSON_GetNumberValue(timeout_json) :
                                          WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF;
+
     cJSON* force_deauth_json =
         cJSON_GetObjectItemCaseSensitive(sniffpmkid_stage_json, "forceDeauth");
     bool force_deauth = cJSON_IsBool(force_deauth_json) ? force_deauth_json->valueint : true;
 
+    cJSON* hop_channels_json =
+        cJSON_GetObjectItemCaseSensitive(sniffpmkid_stage_json, "hopChannels");
+    bool hop_channels = cJSON_IsBool(hop_channels_json) ? hop_channels_json->valueint : false;
+
     WifiMarauderScriptStageSniffPmkid* sniff_pmkid_stage =
         (WifiMarauderScriptStageSniffPmkid*)malloc(sizeof(WifiMarauderScriptStageSniffPmkid));
+
+    if(sniff_pmkid_stage == NULL) {
+        // Handle memory allocation error
+        return NULL;
+    }
     sniff_pmkid_stage->channel = channel;
     sniff_pmkid_stage->timeout = timeout;
     sniff_pmkid_stage->force_deauth = force_deauth;
+    sniff_pmkid_stage->hop_channels = hop_channels;
 
     return sniff_pmkid_stage;
 }
@@ -659,6 +671,9 @@ cJSON* _wifi_marauder_script_create_json_sniffpmkid(
     if(sniffpmkid_stage->timeout > 0) {
         cJSON_AddNumberToObject(sniffpmkid_json, "timeout", sniffpmkid_stage->timeout);
     }
+    // Hop channels
+    cJSON_AddBoolToObject(sniffpmkid_json, "hopChannels", sniffpmkid_stage->hop_channels);
+
     return stage_json;
 }
 

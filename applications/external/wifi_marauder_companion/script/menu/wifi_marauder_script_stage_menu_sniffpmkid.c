@@ -1,5 +1,25 @@
 #include "../../wifi_marauder_app_i.h"
 
+static void wifi_marauder_sniffpmkid_stage_hop_channels_setup_callback(VariableItem* item) {
+    WifiMarauderApp* app = variable_item_get_context(item);
+    WifiMarauderScriptStageSniffPmkid* stage = app->script_edit_selected_stage->stage;
+    variable_item_set_current_value_index(item, stage->hop_channels);
+}
+
+static void wifi_marauder_sniffpmkid_stage_hop_channels_change_callback(VariableItem* item) {
+    WifiMarauderApp* app = variable_item_get_context(item);
+
+    uint8_t current_stage_index = variable_item_list_get_selected_item_index(app->var_item_list);
+    const WifiMarauderScriptMenuItem* menu_item =
+        &app->script_stage_menu->items[current_stage_index];
+
+    uint8_t option_index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, menu_item->options[option_index]);
+
+    WifiMarauderScriptStageSniffPmkid* stage = app->script_edit_selected_stage->stage;
+    stage->hop_channels = option_index;
+}
+
 static void wifi_marauder_sniffpmkid_stage_force_deauth_setup_callback(VariableItem* item) {
     WifiMarauderApp* app = variable_item_get_context(item);
     WifiMarauderScriptStageSniffPmkid* stage = app->script_edit_selected_stage->stage;
@@ -65,8 +85,8 @@ static void wifi_marauder_sniffpmkid_stage_timeout_select_callback(void* context
 }
 
 void wifi_marauder_script_stage_menu_sniffpmkid_load(WifiMarauderScriptStageMenu* stage_menu) {
-    stage_menu->num_items = 3;
-    stage_menu->items = malloc(3 * sizeof(WifiMarauderScriptMenuItem));
+    stage_menu->num_items = 4;
+    stage_menu->items = malloc(4 * sizeof(WifiMarauderScriptMenuItem));
 
     stage_menu->items[0] = (WifiMarauderScriptMenuItem){
         .name = strdup("Force deauth"),
@@ -88,4 +108,11 @@ void wifi_marauder_script_stage_menu_sniffpmkid_load(WifiMarauderScriptStageMenu
         .num_options = 1,
         .setup_callback = wifi_marauder_sniffpmkid_stage_timeout_setup_callback,
         .select_callback = wifi_marauder_sniffpmkid_stage_timeout_select_callback};
+    stage_menu->items[3] = (WifiMarauderScriptMenuItem){
+        .name = strdup("Hop Channels"),
+        .type = WifiMarauderScriptMenuItemTypeOptionsString,
+        .num_options = 2,
+        .options = {"no", "yes"},
+        .setup_callback = wifi_marauder_sniffpmkid_stage_hop_channels_setup_callback,
+        .change_callback = wifi_marauder_sniffpmkid_stage_hop_channels_change_callback};
 }

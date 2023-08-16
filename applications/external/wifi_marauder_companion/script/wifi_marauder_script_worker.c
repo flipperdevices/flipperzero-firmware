@@ -39,6 +39,7 @@ int32_t _wifi_marauder_script_worker_task(void* worker) {
     }
 
     script_worker->is_running = false;
+
     return WifiMarauderScriptWorkerStatusSuccess;
 }
 

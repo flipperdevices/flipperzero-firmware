@@ -12,6 +12,6 @@ App(
     fap_icon_assets_symbol="esp32_wifi_marauder",
     fap_author="@0xchocolate & @tcpassos",
     fap_weburl="https://github.com/0xchocolate/flipperzero-wifi-marauder",
-    fap_version=(6, 0),
+    fap_version=(6, 1),
     fap_description="WiFi Marauder companion app for Flipper Zero. Requires a connected dev board running Marauder FW.",
 )
