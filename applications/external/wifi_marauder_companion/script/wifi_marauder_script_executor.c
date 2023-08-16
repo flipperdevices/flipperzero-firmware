@@ -26,10 +26,10 @@ void _send_channel_select(int channel, bool save_pcaps) {
     char command[30];
     snprintf(command, sizeof(command), "channel -s %d\n", channel);
     if(save_pcaps) {
-        _send_line_break();
+        _send_line_break(save_pcaps);
         wifi_marauder_usart_tx((uint8_t*)(command), strlen(command));
     } else {
-        _send_line_break();
+        _send_line_break(save_pcaps);
         wifi_marauder_cfw_uart_tx((uint8_t*)(command), strlen(command));
     }
 }
@@ -210,9 +210,13 @@ void _wifi_marauder_script_execute_sniff_pmkid(
             }
 
             len += snprintf(attack_command + len, sizeof(attack_command) - len, "\n");
-            wifi_marauder_uart_tx((uint8_t*)attack_command, len);
+            if(worker->save_pcaps) {
+                wifi_marauder_usart_tx((uint8_t*)attack_command, len);
+            } else {
+                wifi_marauder_cfw_uart_tx((uint8_t*)attack_command, len);
+            }
             _wifi_marauder_script_delay(worker, stage->timeout);
-            _send_stop();
+            _send_stop(worker->save_pcaps);
         }
     } else {
         char attack_command[50] = "sniffpmkid";
@@ -234,7 +238,7 @@ void _wifi_marauder_script_execute_sniff_pmkid(
             wifi_marauder_cfw_uart_tx((uint8_t*)attack_command, len);
         }
         _wifi_marauder_script_delay(worker, stage->timeout);
-        _send_stop();
+        _send_stop(worker->save_pcaps);
     }
 }
 
@@ -322,10 +326,10 @@ void _wifi_marauder_script_execute_exec(WifiMarauderScriptStageExec* stage, bool
     if(stage->command != NULL) {
         if(save_pcaps) {
             wifi_marauder_usart_tx((uint8_t*)stage->command, strlen(stage->command));
-            _send_line_break();
+            _send_line_break(save_pcaps);
         } else {
             wifi_marauder_cfw_uart_tx((uint8_t*)stage->command, strlen(stage->command));
-            _send_line_break();
+            _send_line_break(save_pcaps);
         }
     }
 }

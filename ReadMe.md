@@ -36,7 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external) for next Patreon release!
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [WiFi (Marauder) v6.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
-- [RGB Updates for Backlight Rainbow effect (By WillyJL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/76d88b29b89bd28f00f0dfd5b9ba0243a9c1f344)
+- [RGB Updates for Backlight Rainbow effect (By WillyJL Tested By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/76d88b29b89bd28f00f0dfd5b9ba0243a9c1f344)
 - UL: Do not crash with fatal error on wrong ir frequency (By xMasterX)
 - OFW: [Improve vscode clangd experience #2431 (By dogtopus)](https://github.com/flipperdevices/flipperzero-firmware/pull/2431)
 - [Eurocorp menu style & exposed 3 more fonts in canvas #732 (By xtruan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/732)
