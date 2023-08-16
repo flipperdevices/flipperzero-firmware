@@ -42,6 +42,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Eurocorp menu style & exposed 3 more fonts in canvas #732 (By xtruan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/732)
 - Updated: [Chess v1.9 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - OFW PR: [fbt: improvements #2982 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2982)
+- Added: [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku)
+- Added: [Calendar (By Adiras)](https://github.com/Adiras/flipperzero-calendar)
+- Updated: [Authenticator/TOTP v4.0.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator) [Removed Bloat (By RogueMaster)]
 
 <a name="release">
 
@@ -251,6 +254,7 @@ $ ./fbt dolphin_ext
 - [Snake (By OlegSchwann)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/829)(With updates from DrZlo13, xMasterX, QtRoS and RogueMaster) [Snake Score Saving (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922) [Turns anywhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/125) [Food Spawns Anywwhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/130)
 - [Snake 2.0 (By Willzvul)](https://github.com/Willzvul/Snake_2.0/)
 - [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
+- [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku)
 - [SUPER-CHIP Emulator (By Milk-Cool)](https://github.com/Milk-Cool/fz-schip)
 - [T-Rex Runner (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
 - [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1) [Original TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) [Mute & Settings (By Round-Pi)](https://github.com/Round-Pi/flipperzero-tamagotch-p1)
@@ -283,6 +287,7 @@ $ ./fbt dolphin_ext
 - [BT Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
+- [Calendar (By Adiras)](https://github.com/Adiras/flipperzero-calendar)
 - [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [CFW Settings - Imported/Modified By RogueMaster (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca)
