@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [RGB Updates for Backlight Rainbow effect (By WillyJL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/76d88b29b89bd28f00f0dfd5b9ba0243a9c1f344)
 - UL: Do not crash with fatal error on wrong ir frequency (By xMasterX)
 - OFW: [Improve vscode clangd experience #2431 (By dogtopus)](https://github.com/flipperdevices/flipperzero-firmware/pull/2431)
+- [Eurocorp menu style & exposed 3 more fonts in canvas #732 (By xtruan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/732)
 
 <a name="release">
 
