@@ -404,15 +404,12 @@ class Main(App):
             return 1
 
         if self.args.interface != self.AUTO_INTERFACE:
-            available_interfaces = [
-                p for p in local_flash_interfaces if p.get_name() == self.args.interface
-            ]
-            if len(available_interfaces) == 0:
-                available_interfaces = [
-                    p
-                    for p in network_flash_interfaces
-                    if p.get_name() == self.args.interface
-                ]
+            available_interfaces = list(
+                filter(
+                    lambda p: p.get_name() == self.args.interface,
+                    all_flash_interfaces,
+                )
+            )
 
         else:
             self.logger.info("Probing for local interfaces...")
