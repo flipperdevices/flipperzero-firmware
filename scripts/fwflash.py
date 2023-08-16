@@ -47,12 +47,10 @@ class OpenOCDProgrammer(Programmer):
         self.serial: typing.Optional[str] = None
 
     def _add_file(self, params: list[str], file: str):
-        params.append("-f")
-        params.append(file)
+        params += ["-f", file]
 
     def _add_command(self, params: list[str], command: str):
-        params.append("-c")
-        params.append(command)
+        params += ["-c", command]
 
     def _add_serial(self, params: list[str], serial: str):
         self._add_command(params, f"{self.interface.serial_cmd} {serial}")
@@ -190,7 +188,7 @@ def _resolve_hostname(hostname):
 
 
 def blackmagic_find_networked(serial: str):
-    if not serial:
+    if not serial or serial == "auto":
         serial = "blackmagic.local"
 
     # remove the tcp: prefix if it's there
@@ -245,7 +243,12 @@ class BlackmagicProgrammer(Programmer):
         # We can convert .bin to .elf with objcopy:
         # arm-none-eabi-objcopy -I binary -O elf32-littlearm --change-section-address=.data=0x8000000 -B arm -S app.bin app.elf
         # But I choose to use the .elf file directly because we are flashing our own firmware and it always has an elf predecessor.
-        elf = bin.replace(".bin", ".elf")
+
+        # Special case for ufbt. TODO: fix!
+        if "full.bin" in bin:
+            bin = bin.replace("full.bin", "firmware.elf")
+
+        elf = bin[:-4] + ".elf"
         if not os.path.exists(elf):
             self.logger.error(
                 f"Sorry, but Blackmagic can't flash .bin file, and {elf} doesn't exist"
@@ -330,7 +333,10 @@ local_flash_interfaces: list[Programmer] = [
     ),
     OpenOCDProgrammer(
         OpenOCDInterface(
-            "stlink", "interface/stlink.cfg", "hla_serial", ["transport select hla_swd"]
+            "stlink",
+            "interface/stlink.cfg",
+            "hla_serial",
+            ["transport select hla_swd"],
         ),
     ),
     BlackmagicProgrammer(blackmagic_find_serial, "blackmagic_usb"),
