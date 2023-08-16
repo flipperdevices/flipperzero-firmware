@@ -211,7 +211,7 @@ static bool infrared_cli_decode_raw_signal(
 
     size_t i;
     for(i = 0; i < raw_signal->timings_size; ++i) {
-        // TODO: Any infrared_check_decoder_ready() magic?
+        // TODO FL-3523: Any infrared_check_decoder_ready() magic?
         const InfraredMessage* message = infrared_decode(decoder, level, raw_signal->timings[i]);
 
         if(message) {

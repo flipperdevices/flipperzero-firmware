@@ -101,7 +101,7 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
     char buffer[20];
     snprintf(buffer, sizeof(buffer), "%02u:%02u", hour, desktop->time_minute);
 
-    // ToDo: never do that, may cause visual glitches
+    // TODO FL-3515: never do that, may cause visual glitches
     view_port_set_width(
         desktop->clock_viewport,
         canvas_string_width(canvas, buffer) - 1 + (desktop->time_minute % 10 == 1));
