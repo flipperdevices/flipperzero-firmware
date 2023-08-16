@@ -40,6 +40,18 @@
             "command": "./fbt FORCE=1 flash"
         },
         {
+            "label": "[Release] Flash (DAP)",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash_dap"
+        },
+        {
+            "label": "[Debug] Flash (DAP)",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt FORCE=1 flash_dap"
+        },
+        {
             "label": "[Release] Flash (blackmagic)",
             "group": "build",
             "type": "shell",
