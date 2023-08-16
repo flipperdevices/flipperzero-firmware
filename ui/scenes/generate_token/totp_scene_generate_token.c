@@ -245,7 +245,7 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
             SCREEN_HEIGHT_CENTER + 10,
             AlignCenter,
             AlignCenter,
-            "Press OK button to access menu");
+            "Press OK button to open menu");
         return;
     }
 
