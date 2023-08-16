@@ -40,6 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Do not crash with fatal error on wrong ir frequency (By xMasterX)
 - OFW: [Improve vscode clangd experience #2431 (By dogtopus)](https://github.com/flipperdevices/flipperzero-firmware/pull/2431)
 - [Eurocorp menu style & exposed 3 more fonts in canvas #732 (By xtruan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/732)
+- Updated: [Chess v1.9 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- OFW PR: [fbt: improvements #2982 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2982)
 
 <a name="release">
 
@@ -173,6 +175,7 @@ $ ./fbt dolphin_ext
 - Settings: [CFW Settings for Dark Mode (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/83e836fc797ce9ce8998a5d9b1fde6a172480bf2)
 - Settings: [CFW Settings Layout options for Commodore 64 for Main Menu (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a47e7a4a8459a32f493b2f2f4c20137e98da1a1)
 - Settings: [CFW Settings Layout options for DSi, PS4, Vertical & Wii for Main Menu (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a47e7a4a8459a32f493b2f2f4c20137e98da1a1)
+- Settings: [CFW Settings Layout options for Eurocorp for Main Menu (By xtruan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/732)
 - Settings: [CFW Settings for Lock Menu Style (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fe3d1ccac0d2058769a0e8f1076b348ef59eaa29)
 - Settings: [CFW Settings for Main Menu Start Point (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2be53b18c8508371c6b7f408c4661c37670c424)
 - Settings: [CFW Settings for More Customizable Main Menu #721 (By Willy-JL, Ported & Improved By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/721)
@@ -213,7 +216,7 @@ $ ./fbt dolphin_ext
 - [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Bomberduck (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
-- [Chess v1.8 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess v1.9 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
