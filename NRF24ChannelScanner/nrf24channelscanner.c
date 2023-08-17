@@ -18,7 +18,7 @@ static bool stopNrfScan = false; //to exit thread
 static bool threadStoppedsoFree = false; //indicate if I can free the thread from ram.
 static uint8_t currCh = 0; //for the progress bar or the channel selector
 
-static int delayPerChan = 10; //can set via up / down.
+static int delayPerChan = 1; //can set via up / down.
 
 bool showFreq = true;
 
