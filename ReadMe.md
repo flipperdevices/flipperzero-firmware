@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Calendar (By Adiras)](https://github.com/Adiras/flipperzero-calendar)
 - Updated: [Authenticator/TOTP v4.0.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator) [Removed Bloat & No Directory Fix (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5da04f29c23f1b96463a38cf19997f81389be603)
 - OFW: [SubGhz: add timeout to subghz_hal_async_tx_test_run #2975 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2975)
+- Updated: [ESP32-C6 Gravity v0.3.2 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 
 <a name="release">
 
@@ -314,7 +315,7 @@ $ ./fbt dolphin_ext
 - [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
-- [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
+- [ESP32-C6 Gravity v0.3.2 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - [ESP Flasher v1.1 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
 - [ESP32 WIFI Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map) `Req: ESP32` & [ESP32 FW](https://github.com/carvilsi/esp32-wifi-map)

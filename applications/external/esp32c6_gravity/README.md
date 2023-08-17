@@ -100,6 +100,12 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
     * Replicate: Start scan, Run help and try to read it
 * Add space to keyboard
 * add channel, mode, count STA+AP on console header
+* Add auth type to AP Clone
+* selecting multiple scan results ^-separated doesn't work
+    * just the first is selected
+    * it should also be ~-separated
+* Paging in homing mode where all targets can't be displayed at the same time
+    * like airline departures - one screen for 3s, another screen for 3s.
 
 ## Menu Structure
 * Beacon: target-ssids, APs, RickRoll, Random, Infinite
@@ -118,6 +124,8 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * mana verbose: on, off
 * mana loud: on, off
 * DOS AP: on, off
+* DOS Clone: on, off
+* Homing: 802.11, any (more options coming soon)
 * help: commands help info
 
 
