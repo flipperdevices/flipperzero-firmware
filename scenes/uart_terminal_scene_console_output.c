@@ -116,4 +116,10 @@ void uart_terminal_scene_console_output_on_exit(void* context) {
 
     // Unregister rx callback
     uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
+
+    /* Instruct ESP32 to halt any UIs that may be drawing */
+    if (!strcmp(app->selected_tx_string, "stalk on")) {
+        uart_terminal_uart_tx(
+                (uint8_t*)"stalk off\n", strlen("stalk off\n"));
+    }
 }
