@@ -149,7 +149,8 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
                     hop = subghz_protocol_keeloq_common_encrypt(decrypt, man);
                     break;
                 case KEELOQ_LEARNING_UNKNOWN:
-                    hop = 0; //todo
+                    //Invalid or missing encoding type in keeloq_mfcodes
+                    hop = 0;
                     break;
                 }
                 break;
