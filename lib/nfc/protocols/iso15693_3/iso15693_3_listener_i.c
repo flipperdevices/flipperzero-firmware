@@ -304,6 +304,50 @@ static Iso15693_3Error iso15693_3_listener_write_multi_blocks_handler(
     return error;
 }
 
+static Iso15693_3Error iso15693_3_listener_lock_block_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t block_num;
+        } Iso15693_3LockBlockRequestLayout;
+
+        const Iso15693_3LockBlockRequestLayout* request =
+            (const Iso15693_3LockBlockRequestLayout*)data;
+
+        if(data_size != sizeof(Iso15693_3LockBlockRequestLayout)) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        const uint32_t block_index = request->block_num;
+        const uint32_t block_count_max = instance->data->system_info.block_count;
+
+        if(block_index >= block_count_max) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        } else if(iso15693_3_is_block_locked(instance->data, block_index)) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        iso15693_3_set_block_locked(instance->data, block_index, true);
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
+
+        if((flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+            error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        }
+
+    } while(false);
+
+    return error;
+}
 static Iso15693_3Error
     iso15693_3_listener_select_handler(Iso15693_3Listener* instance, uint8_t flags) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
@@ -368,10 +412,12 @@ static inline Iso15693_3Error iso15693_3_listener_handle_request(
         return iso15693_3_listener_stay_quiet_handler(instance);
     case ISO15693_3_CMD_READ_BLOCK:
         return iso15693_3_listener_read_block_handler(instance, data, data_size, flags);
-    case ISO15693_3_CMD_READ_MULTI_BLOCKS:
-        return iso15693_3_listener_read_multi_blocks_handler(instance, data, data_size, flags);
     case ISO15693_3_CMD_WRITE_BLOCK:
         return iso15693_3_listener_write_block_handler(instance, data, data_size, flags);
+    case ISO15693_3_CMD_LOCK_BLOCK:
+        return iso15693_3_listener_lock_block_handler(instance, data, data_size, flags);
+    case ISO15693_3_CMD_READ_MULTI_BLOCKS:
+        return iso15693_3_listener_read_multi_blocks_handler(instance, data, data_size, flags);
     case ISO15693_3_CMD_WRITE_MULTI_BLOCKS:
         return iso15693_3_listener_write_multi_blocks_handler(instance, data, data_size, flags);
     case ISO15693_3_CMD_SELECT:
@@ -391,9 +437,10 @@ static inline Iso15693_3Error iso15693_3_listener_handle_inventory_request(
     size_t data_size,
     uint8_t command,
     uint8_t flags) {
-    if(command == ISO15693_3_CMD_INVENTORY) {
+    switch(command) {
+    case ISO15693_3_CMD_INVENTORY:
         return iso15693_3_listener_inventory_handler(instance, data, data_size, flags);
-    } else {
+    default:
         // A command other than INVENTORY is not expected here
         return Iso15693_3ErrorUnknown;
     }
