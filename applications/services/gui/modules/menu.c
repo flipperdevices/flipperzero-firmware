@@ -339,13 +339,13 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         case MenuStyleEurocorp: {
             FuriString* name = furi_string_alloc();
 
+#ifdef CANVAS_HAS_FONT_EUROCORP
+            canvas_set_font(canvas, FontEurocorp);
+#else
+            canvas_set_font(canvas, FontPrimary);
+#endif
             for(uint8_t i = 0; i < 3; i++) {
                 canvas_set_color(canvas, ColorBlack);
-#ifdef CANVAS_HAS_FONT_EUROCORP
-                canvas_set_font(canvas, FontEurocorp);
-#else
-                canvas_set_font(canvas, FontPrimary);
-#endif
                 shift_position = (position + items_count + i - 1) % items_count;
                 item = MenuItemArray_get(model->items, shift_position);
                 menu_short_name(item, name);
