@@ -122,7 +122,7 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
     uint32_t fix = (uint32_t)btn << 28 | instance->generic.serial;
     uint32_t decrypt = (uint32_t)btn << 28 |
                        (instance->generic.serial & 0x3FF)
-                           << 16 | //ToDo in some protocols the discriminator is 0
+                           << 16 | // In some protocols the discriminator is 0
                        instance->generic.cnt;
     uint32_t hop = 0;
     uint64_t man = 0;
