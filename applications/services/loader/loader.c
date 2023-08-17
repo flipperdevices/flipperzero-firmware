@@ -206,7 +206,7 @@ static void loader_make_mainmenu_file(Storage* storage) {
     if(!storage_file_exists(storage, CFW_MENU_PATH)) {
         if(file_stream_open(new, CFW_MENU_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
             stream_write_format(new, "MainMenuList Version %u\n", 0);
-            stream_write_format(new, "Applications\n");
+            stream_write_format(new, "%s\n", LOADER_APPLICATIONS_NAME);
             for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
                 stream_write_format(new, "%s\n", FLIPPER_APPS[i].name);
             }
@@ -328,10 +328,17 @@ static Loader* loader_alloc() {
                 }
             }
 
-            if(!path && strcmp(furi_string_get_cstr(line), "Applications") == 0) {
-                label = "Apps";
+            if(!path && strcmp(furi_string_get_cstr(line), LOADER_APPLICATIONS_NAME) == 0) {
+                label = strdup(LOADER_APPLICATIONS_NAME);
                 icon = &A_Plugins_14;
-                path = "Applications";
+                path = strdup(LOADER_APPLICATIONS_NAME);
+            }
+
+            //Failsafe "Apps" in case of older config
+            if(!path && strcmp(furi_string_get_cstr(line), "Applications") == 0) {
+                label = strdup(LOADER_APPLICATIONS_NAME);
+                icon = &A_Plugins_14;
+                path = strdup(LOADER_APPLICATIONS_NAME);
             }
 
             if(!path && strcmp(furi_string_get_cstr(line), "Settings") == 0) {
