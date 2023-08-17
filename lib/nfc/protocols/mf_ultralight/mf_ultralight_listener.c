@@ -382,21 +382,26 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
     NfcCommand command = NfcCommandContinue;
 
     if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
-        bool cmd_processed = false;
+        MfUltralightCommandStatus status = MfUltralightCommandNotFoundStatus;
+        size_t size = bit_buffer_get_size(rx_buffer);
+        uint8_t cmd = bit_buffer_get_byte(rx_buffer, 0);
+
         for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
-            if(bit_buffer_get_size(rx_buffer) != mf_ultralight_command[i].cmd_len_bits) continue;
-            if(bit_buffer_get_byte(rx_buffer, 0) != mf_ultralight_command[i].cmd) continue;
-            cmd_processed = mf_ultralight_command[i].callback(
-                instance, rx_buffer); //TODO make commands return enumed status, not just bool
-            if(cmd_processed) { //to make immediate NACK response when not processed
-                break;
-            }
+            if(size != mf_ultralight_command[i].cmd_len_bits) continue;
+            if(cmd != mf_ultralight_command[i].cmd) continue;
+            status = mf_ultralight_command[i].callback(instance, rx_buffer);
+
+            if(status != MfUltralightCommandNotFoundStatus) break;
         }
-        if(!cmd_processed) {
-            mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+
+        if(status != MfUltralightCommandProcessed) {
             instance->state = MfUltraligthListenerStateIdle;
             instance->auth_state = MfUltralightListenerAuthStateIdle;
             command = NfcCommandReset;
+
+            if(status == MfUltralightCommandNotProcessedNAK) {
+                mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+            }
         }
     } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData) {
         command = NfcCommandReset;
