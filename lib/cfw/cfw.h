@@ -53,7 +53,7 @@ typedef struct {
     UARTChannel uart_nmea_channel;
     UARTChannel uart_general_channel;
     bool rgb_backlight;
-	uint32_t lcd_style;
+    uint32_t lcd_style;
 } CfwSettings;
 
 void CFW_SETTINGS_SAVE();
