@@ -398,6 +398,50 @@ static Iso15693_3Error iso15693_3_listener_process_nfc_error(NfcError error) {
     return ret;
 }
 
+static Iso15693_3Error iso15693_3_listener_get_multi_blocks_security_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t first_block_num;
+            uint8_t block_count;
+        } Iso15693_3GetMultiBlocksSecurityRequestLayout;
+
+        const Iso15693_3GetMultiBlocksSecurityRequestLayout* request =
+            (const Iso15693_3GetMultiBlocksSecurityRequestLayout*)data;
+
+        if(data_size < sizeof(Iso15693_3GetMultiBlocksSecurityRequestLayout)) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        const uint32_t block_index_start = request->first_block_num;
+        const uint32_t block_index_end = block_index_start + request->block_count;
+
+        const uint32_t block_count_max = instance->data->system_info.block_count;
+
+        if(block_index_end >= block_count_max) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+
+        for(uint32_t i = block_index_start; i <= block_index_end; ++i) {
+            bit_buffer_append_byte(
+                instance->tx_buffer, iso15693_3_is_block_locked(instance->data, i) ? 1 : 0);
+        }
+
+        error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+    } while(false);
+
+    return error;
+}
+
 static inline Iso15693_3Error iso15693_3_listener_handle_request(
     Iso15693_3Listener* instance,
     const uint8_t* data,
@@ -426,6 +470,8 @@ static inline Iso15693_3Error iso15693_3_listener_handle_request(
         return iso15693_3_listener_reset_to_ready_handler(instance);
     case ISO15693_3_CMD_GET_SYS_INFO:
         return iso15693_3_listener_get_system_info_handler(instance);
+    case ISO15693_3_CMD_GET_BLOCKS_SECURITY:
+        return iso15693_3_listener_get_multi_blocks_security_handler(instance, data, data_size);
     default:
         return Iso15693_3ErrorNotSupported;
     }
