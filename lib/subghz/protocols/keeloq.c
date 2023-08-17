@@ -200,9 +200,7 @@ static bool
     furi_assert(instance);
 
     //gen new key
-    if(subghz_protocol_keeloq_gen_data(instance, btn)) {
-        //ToDo if you need to add a callback to automatically update the data on the display
-    } else {
+    if(!subghz_protocol_keeloq_gen_data(instance, btn)) {
         return false;
     }
 
