@@ -28,8 +28,8 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
 
         if(afi_flag) {
             const uint8_t afi = *data++;
-            //TODO: Do the AFI check
-            UNUSED(afi);
+            // When AFI flag is set, ignore non-matching requests
+            if(afi != instance->data->system_info.afi) break;
         }
 
         const uint8_t mask_len = *data++;
@@ -160,6 +160,8 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
         if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
             // If OPTION flag is not set, send the response right away
             error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        } else {
+            // TODO: Wait for EOF
         }
 
     } while(false);
@@ -203,8 +205,11 @@ static Iso15693_3Error iso15693_3_listener_lock_block_handler(
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
 
-        if((flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+        if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+            // If OPTION flag is not set, send the response right away
             error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        } else {
+            // TODO: Wait for EOF
         }
 
     } while(false);
@@ -325,6 +330,8 @@ static Iso15693_3Error iso15693_3_listener_write_multi_blocks_handler(
         if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
             // If OPTION flag is not set, send the response right away
             error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        } else {
+            // TODO: Wait for EOF
         }
 
     } while(false);
@@ -375,6 +382,152 @@ static Iso15693_3Error iso15693_3_listener_reset_to_ready_handler(
     bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
 
     return iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+}
+
+static Iso15693_3Error iso15693_3_listener_write_afi_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t afi;
+        } Iso15693_3WriteAfiRequestLayout;
+
+        const Iso15693_3WriteAfiRequestLayout* request =
+            (const Iso15693_3WriteAfiRequestLayout*)data;
+
+        if(data_size <= sizeof(Iso15693_3WriteAfiRequestLayout)) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        } else if(instance->data->system_info.flags & ISO15693_3_SYSINFO_LOCK_AFI) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        instance->data->system_info.afi = request->afi;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+
+        if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+            // If OPTION flag is not set, send the response right away
+            error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        } else {
+            // TODO: Wait for EOF
+        }
+
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error iso15693_3_listener_lock_afi_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(data);
+    UNUSED(data_size);
+
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        if(instance->data->system_info.flags & ISO15693_3_SYSINFO_LOCK_AFI) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        instance->data->system_info.flags |= ISO15693_3_SYSINFO_LOCK_AFI;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+
+        if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+            // If OPTION flag is not set, send the response right away
+            error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        } else {
+            // TODO: Wait for EOF
+        }
+
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error iso15693_3_listener_write_dsfid_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t dsfid;
+        } Iso15693_3WriteDsfidRequestLayout;
+
+        const Iso15693_3WriteDsfidRequestLayout* request =
+            (const Iso15693_3WriteDsfidRequestLayout*)data;
+
+        if(data_size <= sizeof(Iso15693_3WriteDsfidRequestLayout)) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        } else if(instance->data->system_info.flags & ISO15693_3_SYSINFO_LOCK_DSFID) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        instance->data->system_info.dsfid = request->dsfid;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+
+        if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+            // If OPTION flag is not set, send the response right away
+            error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        } else {
+            // TODO: Wait for EOF
+        }
+
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error iso15693_3_listener_lock_dsfid_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(data);
+    UNUSED(data_size);
+
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        if(instance->data->system_info.flags & ISO15693_3_SYSINFO_LOCK_DSFID) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        instance->data->system_info.flags |= ISO15693_3_SYSINFO_LOCK_DSFID;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+
+        if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+            // If OPTION flag is not set, send the response right away
+            error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        } else {
+            // TODO: Wait for EOF
+        }
+
+    } while(false);
+
+    return error;
 }
 
 static Iso15693_3Error iso15693_3_listener_get_system_info_handler(
@@ -480,10 +633,10 @@ static const Iso15693_3RequestHandler iso15693_3_request_handlers[] = {
     iso15693_3_listener_write_multi_blocks_handler,
     iso15693_3_listener_select_handler,
     iso15693_3_listener_reset_to_ready_handler,
-    NULL, // Write AFI
-    NULL, // Lock AFI
-    NULL, // Write DSFID
-    NULL, // Lock DSFID
+    iso15693_3_listener_write_afi_handler,
+    iso15693_3_listener_lock_afi_handler,
+    iso15693_3_listener_write_dsfid_handler,
+    iso15693_3_listener_lock_dsfid_handler,
     iso15693_3_listener_get_system_info_handler,
     iso15693_3_listener_get_multi_blocks_security_handler,
 };
@@ -496,19 +649,22 @@ static inline Iso15693_3Error iso15693_3_listener_handle_request(
     uint8_t flags) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
-    uint8_t command_index;
-    if(command < ISO15693_3_CMD_MANDATORY_RFU) {
-        command_index = command - ISO15693_3_CMD_MANDATORY_START;
-    } else if(command >= ISO15693_3_CMD_OPTIONAL_START && command < ISO15693_3_CMD_OPTIONAL_RFU) {
-        command_index = command - ISO15693_3_CMD_MANDATORY_START - ISO15693_3_CMD_OPTIONAL_START +
-                        ISO15693_3_CMD_MANDATORY_RFU;
-    } else {
-        return Iso15693_3ErrorNotSupported;
-    }
+    do {
+        uint8_t command_index;
 
-    error = iso15693_3_request_handlers[command_index](instance, data, data_size, flags);
+        if(command < ISO15693_3_CMD_MANDATORY_RFU) {
+            command_index = command - ISO15693_3_CMD_MANDATORY_START;
+        } else if(command >= ISO15693_3_CMD_OPTIONAL_START && command < ISO15693_3_CMD_OPTIONAL_RFU) {
+            command_index = command - ISO15693_3_CMD_MANDATORY_START -
+                            ISO15693_3_CMD_OPTIONAL_START + ISO15693_3_CMD_MANDATORY_RFU;
+        } else {
+            error = Iso15693_3ErrorNotSupported;
+            break;
+        }
 
-    // TODO: Request replies replies
+        error = iso15693_3_request_handlers[command_index](instance, data, data_size, flags);
+
+    } while(false);
 
     return error;
 }
@@ -585,14 +741,14 @@ Iso15693_3Error
             break;
         }
 
-        const Iso15693_3RequestLayout* layout =
+        const Iso15693_3RequestLayout* request =
             (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
-        const bool inventory_flag = layout->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5;
+        const bool inventory_flag = request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5;
 
         if(!inventory_flag) {
-            const bool selected_mode = layout->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
-            const bool addressed_mode = layout->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
+            const bool selected_mode = request->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
+            const bool addressed_mode = request->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
 
             if(instance->state == Iso15693_3ListenerStateSelected) {
                 // If the card is not selected, ignore the command
@@ -612,10 +768,10 @@ Iso15693_3Error
                 if(buf_size < buf_size_min_addr) {
                     error = Iso15693_3ErrorFormat;
                     break;
-                } else if(!iso15693_3_is_equal_uid(instance->data, layout->data)) {
+                } else if(!iso15693_3_is_equal_uid(instance->data, request->data)) {
                     // In addressed mode, ignore all commands with non-matching UID
                     if(instance->state == Iso15693_3ListenerStateSelected &&
-                       layout->command == ISO15693_3_CMD_SELECT) {
+                       request->command == ISO15693_3_CMD_SELECT) {
                         // Special case, reset to ready on reception of a
                         // SELECT command with non-matching UID
                         // TODO: Find a neater way to do this?
@@ -624,16 +780,16 @@ Iso15693_3Error
                     break;
                 }
 
-                data = &layout->data[ISO15693_3_UID_SIZE];
+                data = &request->data[ISO15693_3_UID_SIZE];
                 data_size = buf_size - buf_size_min_addr;
 
             } else {
-                data = layout->data;
+                data = request->data;
                 data_size = buf_size - buf_size_min;
             }
 
             error = iso15693_3_listener_handle_request(
-                instance, data, data_size, layout->command, layout->flags);
+                instance, data, data_size, request->command, request->flags);
 
         } else {
             // If the card is quiet, ignore inventory commands
@@ -643,7 +799,7 @@ Iso15693_3Error
 
             // Special case handler when inventory flag is set
             error = iso15693_3_listener_handle_inventory_request(
-                instance, layout->data, buf_size - buf_size_min, layout->command, layout->flags);
+                instance, request->data, buf_size - buf_size_min, request->command, request->flags);
         }
 
     } while(false);
