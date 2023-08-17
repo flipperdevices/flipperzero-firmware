@@ -1,0 +1,13 @@
+App(
+    appid="pet_a_dolphin",
+    name="Pet a Dolphin",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="pet_a_dolphin",
+    stack_size=1 * 1024,
+    fap_icon="es_10px.png",
+    fap_category="Tools",
+    fap_author="EugeneSmile",
+    fap_weburl="https://github.com/EugeneSmile/PetADolphin",
+    fap_version=(1, 0),
+    fap_description="Flipper app to make your dolphin a little bit happier (Reset mood)",
+)

@@ -8,7 +8,6 @@
 #define CHAT_LEAVE_DELAY 10
 #define TICK_INTERVAL 50
 #define MESSAGE_COMPLETION_TIMEOUT 500
-#define TIMEOUT_BETWEEN_MESSAGES 500
 
 #define KBD_UNLOCK_CNT 3
 #define KBD_UNLOCK_TIMEOUT 1000
@@ -531,6 +530,9 @@ int32_t esubghz_chat(void) {
         goto err_alloc_crypto;
     }
 
+    /* set the default frequency */
+    state->frequency = DEFAULT_FREQ;
+
     /* set the have_read callback of the Sub-GHz worker */
     subghz_tx_rx_worker_set_callback_have_read(state->subghz_worker, have_read_cb, state);
 
@@ -595,8 +597,8 @@ int32_t esubghz_chat(void) {
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(state->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
-    /* switch to the frequency input scene */
-    scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_FreqInput);
+    /* switch to the key menu scene */
+    scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeyMenu);
 
     /* run the view dispatcher, this call only returns when we close the
 	 * application */

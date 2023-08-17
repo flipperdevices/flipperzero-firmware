@@ -129,6 +129,17 @@ static bool totp_open_config_file(Storage* storage, FlipperFormat** file) {
             return false;
         }
     } else {
+        if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
+            FURI_LOG_D(LOGGING_TAG, "Config file directory doesn't exist. Will create new");
+            if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
+                FURI_LOG_E(
+                    LOGGING_TAG,
+                    "Error creating config file directory %s",
+                    CONFIG_FILE_DIRECTORY_PATH);
+                return false;
+            }
+        }
+
         FURI_LOG_D(LOGGING_TAG, "Config file %s is not found. Will create new.", CONFIG_FILE_PATH);
 
         if(!flipper_format_file_open_new(fff_data_file, CONFIG_FILE_PATH)) {
@@ -298,12 +309,6 @@ bool totp_config_file_update_user_settings(const PluginState* plugin_state) {
 bool totp_config_file_load(PluginState* const plugin_state) {
     Storage* storage = totp_open_storage();
     FlipperFormat* fff_data_file;
-
-    if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
-        if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
-            return;
-        }
-    }
     if(!totp_open_config_file(storage, &fff_data_file)) {
         totp_close_storage();
         return false;

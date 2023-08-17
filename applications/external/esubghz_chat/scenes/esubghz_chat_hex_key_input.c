@@ -1,7 +1,7 @@
 #include "../esubghz_chat_i.h"
 
-/* Sets the entered bytes as the key, enters the chat and sends a HexKeyEntered
- * event to the scene manager. */
+/* Sets the entered bytes as the key and sends a HexKeyEntered event to the
+ * scene manager. */
 static void hex_key_input_cb(void* context) {
     furi_assert(context);
     ESubGhzChatState* state = context;
@@ -19,8 +19,6 @@ static void hex_key_input_cb(void* context) {
     }
 
     state->encrypted = true;
-
-    enter_chat(state);
 
     view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_HexKeyEntered);
 }
@@ -55,9 +53,9 @@ bool scene_on_event_hex_key_input(void* context, SceneManagerEvent event) {
     switch(event.type) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
-        /* switch to message input scene */
+        /* switch to frequency input scene */
         case ESubGhzChatEvent_HexKeyEntered:
-            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_ChatInput);
+            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_FreqInput);
             consumed = true;
             break;
         }

@@ -17,7 +17,6 @@ static void key_menu_cb(void* context, uint32_t index) {
     switch(index) {
     case ESubGhzChatKeyMenuItems_NoEncryption:
         state->encrypted = false;
-        enter_chat(state);
 
         view_dispatcher_send_custom_event(
             state->view_dispatcher, ESubGhzChatEvent_KeyMenuNoEncryption);
@@ -49,7 +48,6 @@ static void key_menu_cb(void* context, uint32_t index) {
 
         /* set encrypted flag and enter the chat */
         state->encrypted = true;
-        enter_chat(state);
 
         view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_KeyMenuGenKey);
         break;
@@ -73,33 +71,37 @@ void scene_on_enter_key_menu(void* context) {
 
     menu_reset(state->menu);
 
+    /* clear the crypto CTX in case we got back from password or hex key
+	 * input */
+    crypto_ctx_clear(state->crypto_ctx);
+
     menu_add_item(
         state->menu,
         "No encryption",
-        &I_chat_10px,
+        &I_chat_14px,
         ESubGhzChatKeyMenuItems_NoEncryption,
         key_menu_cb,
         state);
     menu_add_item(
         state->menu,
         "Password",
-        &I_keyboard_10px,
+        &I_keyboard_14px,
         ESubGhzChatKeyMenuItems_Password,
         key_menu_cb,
         state);
     menu_add_item(
-        state->menu, "Hex Key", &I_hex_10px, ESubGhzChatKeyMenuItems_HexKey, key_menu_cb, state);
+        state->menu, "Hex Key", &I_hex_14px, ESubGhzChatKeyMenuItems_HexKey, key_menu_cb, state);
     menu_add_item(
         state->menu,
         "Generate Key",
-        &I_u2f_10px,
+        &I_u2f_14px,
         ESubGhzChatKeyMenuItems_GenKey,
         key_menu_cb,
         state);
     menu_add_item(
         state->menu,
         "Read Key from NFC",
-        &I_Nfc_10px,
+        &I_Nfc_14px,
         ESubGhzChatKeyMenuItems_ReadKeyFromNfc,
         key_menu_cb,
         state);
@@ -119,10 +121,10 @@ bool scene_on_event_key_menu(void* context, SceneManagerEvent event) {
     switch(event.type) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
-        /* switch to message input scene */
+        /* switch to frequency input scene */
         case ESubGhzChatEvent_KeyMenuNoEncryption:
         case ESubGhzChatEvent_KeyMenuGenKey:
-            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_ChatInput);
+            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_FreqInput);
             consumed = true;
             break;
 

@@ -1,13 +1,11 @@
 #include "../esubghz_chat_i.h"
 
-/* Sends PassEntered event to scene manager and enters the chat. */
+/* Sends PassEntered event to scene manager. */
 static void pass_input_cb(void* context) {
     furi_assert(context);
     ESubGhzChatState* state = context;
 
     crypto_explicit_bzero(state->text_input_store, sizeof(state->text_input_store));
-
-    enter_chat(state);
 
     view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_PassEntered);
 }
@@ -83,9 +81,9 @@ bool scene_on_event_pass_input(void* context, SceneManagerEvent event) {
     switch(event.type) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
-        /* switch to message input scene */
+        /* switch to frequency input scene */
         case ESubGhzChatEvent_PassEntered:
-            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_ChatInput);
+            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_FreqInput);
             consumed = true;
             break;
         }
