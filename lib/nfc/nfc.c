@@ -106,12 +106,15 @@ static int32_t nfc_worker_listener(void* context) {
         if(event & FHalNfcEventFieldOff) {
             nfc_event.type = NfcEventTypeFieldOff;
             instance->callback(nfc_event, instance->context);
-            f_hal_nfc_listener_sleep();
+            nfc_listener_sleep(instance);
         }
         if(event & FHalNfcEventListenerActive) {
             f_hal_nfc_listener_disable_auto_col_res();
             nfc_event.type = NfcEventTypeListenerActivated;
             instance->callback(nfc_event, instance->context);
+        }
+        if(event & FHalNfcEventTxEnd) {
+            instance->comm_state = NfcCommStateIdle;
         }
         if(event & FHalNfcEventRxEnd) {
             nfc_event.type = NfcEventTypeRxEnd;
@@ -121,8 +124,8 @@ static int32_t nfc_worker_listener(void* context) {
             command = instance->callback(nfc_event, instance->context);
             if(command == NfcCommandStop) {
                 break;
-            } else if(command == NfcCommandReset) {
-                //f_hal_nfc_listen_reset();
+            } else if(command == NfcCommandReset && instance->comm_state != NfcCommStateWaitTxEnd) {
+                nfc_listener_sleep(instance);
             }
         }
     }
@@ -364,6 +367,8 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     if(error != FHalNfcErrorNone) {
         FURI_LOG_E(TAG, "Failed in listener TX");
         ret = nfc_process_hal_error(error);
+    } else {
+        instance->comm_state = NfcCommStateWaitTxEnd;
     }
 
     return ret;
