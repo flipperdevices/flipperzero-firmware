@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0817-0308-0.89.1-fc13487](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-17 03:08 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-17 03:08 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-17 11:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-17 11:10 EST`
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [WiFi (Marauder) v6.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
@@ -53,6 +53,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP v4.0.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Added: [Pet a Dolphin (By ugeneSmile)](https://github.com/EugeneSmile/PetADolphin)
+- [Fix: set Eurocorp font outside loop #734 (By xtruan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/734)
+- [Fixed Loader issue with Applications being renamed to Apps #735 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/735)
+- [CFW Settings > Misc > Screen updates #736 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/736)
+- UL: Sub-GHz: Check saved file (By Skorpionm)
+- UL: SubGhz: Handle RX buffer overflow with external cc1101 (By Skorpionm)
+- UL: Fix FAAC counter fix seed being not removed from RAM & fix faac add manually cnt (By xMasterX)
 
 <a name="release">
 
