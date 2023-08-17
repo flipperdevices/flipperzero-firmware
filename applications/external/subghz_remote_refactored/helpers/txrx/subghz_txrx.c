@@ -629,9 +629,22 @@ const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance) {
     return subghz_devices_get_name(instance->radio_device);
 }
 
-bool subghz_txrx_radio_device_is_frequecy_valid(SubGhzTxRx* instance, uint32_t frequency) {
+bool subghz_txrx_radio_device_is_frequency_valid(SubGhzTxRx* instance, uint32_t frequency) {
     furi_assert(instance);
     return subghz_devices_is_frequency_valid(instance->radio_device, frequency);
+}
+
+bool subghz_txrx_radio_device_is_tx_allowed(SubGhzTxRx* instance, uint32_t frequency) {
+    furi_assert(instance);
+    furi_assert(instance->txrx_state != SubGhzTxRxStateSleep);
+
+    subghz_devices_idle(instance->radio_device);
+    subghz_devices_set_frequency(instance->radio_device, frequency);
+
+    bool ret = subghz_devices_set_tx(instance->radio_device);
+    subghz_devices_idle(instance->radio_device);
+
+    return ret;
 }
 
 void subghz_txrx_set_debug_pin_state(SubGhzTxRx* instance, bool state) {
