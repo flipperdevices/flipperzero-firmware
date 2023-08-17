@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGhz: Handle RX buffer overflow with external cc1101 (By Skorpionm)
 - UL: Fix FAAC counter fix seed being not removed from RAM & fix faac add manually cnt (By xMasterX)
 - Updated: [ESP32-C6 Gravity v0.3.4 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
+- Updated: [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku) - SAVE STATE ADDED
 
 <a name="release">
 

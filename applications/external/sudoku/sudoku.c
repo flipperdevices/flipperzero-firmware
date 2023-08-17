@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <dolphin/dolphin.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include <dolphin/dolphin.h>
+#include <storage/storage.h>
 
 #define TAG "sudoku"
 
@@ -25,7 +26,8 @@ static_assert(USER_INPUT_FLAG > VALUE_MASK);
 typedef enum {
     GameStateRunning,
     GameStatePaused,
-    GameStateWin,
+    GameStateVictory,
+    GameStateRestart, // util state
 } GameState;
 
 typedef struct {
@@ -46,7 +48,7 @@ const char* MENU_ITEMS[] = {
     "Easy game",
     "Nornal game",
     "Hard game",
-    "Exit",
+    "Save+Exit",
 };
 
 /*
@@ -79,6 +81,47 @@ const uint8_t u8g2_font_tom_thumb_4x6_tr[725] =
     "\25\243\0u\7\223\310$+\11v\10\223\310$\65R\2w\7\223\310\244q\4x\7\223\310\244\62\25"
     "y\11\227\307$\225dJ\0z\7\223\310\254\221\6{\10\227\310\251\32D\1|\6\265\310(\1}\11"
     "\227\310\310\14RR\0~\6\213\313\215\4\0\0\0\4\377\377\0";
+
+#define SAVE_VERSION 1
+#define SAVE_FILE APP_DATA_PATH("save.dat")
+
+bool load_game(SudokuState* state) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+    bool res = false;
+
+    if(storage_file_open(file, SAVE_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        uint16_t version = 0;
+        uint64_t expectedSize = sizeof(version) + sizeof(SudokuState);
+        uint64_t fileSize = storage_file_size(file);
+        if(fileSize >= expectedSize) {
+            storage_file_read(file, &version, sizeof(version));
+            if(version != SAVE_VERSION) {
+                storage_simply_remove(storage, SAVE_FILE);
+            } else {
+                res = storage_file_read(file, state, sizeof(SudokuState)) == sizeof(SudokuState);
+            }
+        }
+    }
+
+    storage_file_free(file); // Closes the file if it was open.
+    furi_record_close(RECORD_STORAGE);
+    return res;
+}
+
+void save_game(SudokuState* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+
+    if(storage_file_open(file, SAVE_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        uint16_t version = SAVE_VERSION;
+        storage_file_write(file, &version, sizeof(version));
+        storage_file_write(file, app, sizeof(SudokuState));
+    }
+
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+}
 
 // inspired by game_2048
 static void gray_canvas(Canvas* const canvas) {
@@ -184,7 +227,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             i * FONT_SIZE * 3 + gapY + yOffset);
     }
 
-    if(state->state == GameStateWin || state->state == GameStatePaused) {
+    if(state->state == GameStateVictory || state->state == GameStatePaused) {
         gray_canvas(canvas);
         canvas_set_color(canvas, ColorWhite);
         int w = canvas_width(canvas);
@@ -214,7 +257,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
                 winY + offY + itemH * i + itemH / 2,
                 AlignCenter,
                 AlignCenter,
-                i == 0 && state->state == GameStateWin ? "VICTORY!" : MENU_ITEMS[i]);
+                i == 0 && state->state == GameStateVictory ? "VICTORY!" : MENU_ITEMS[i]);
         }
     }
     furi_mutex_release(state->mutex);
@@ -372,11 +415,13 @@ int32_t sudoku_main(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     SudokuState* state = malloc(sizeof(SudokuState));
+    if(!load_game(state) || state->state == GameStateRestart) {
+        state->state = GameStateRunning;
+        state->menuCursor = 0;
+        start_game(state, NORMAL_GAPS);
+    }
     state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     furi_check(state->mutex, "mutex alloc failed");
-    state->state = GameStateRunning;
-    state->menuCursor = 0;
-    start_game(state, NORMAL_GAPS);
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, draw_callback, state);
     view_port_input_callback_set(view_port, input_callback, event_queue);
@@ -385,12 +430,14 @@ int32_t sudoku_main(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
+    dolphin_deed(DolphinDeedPluginGameStart);
+
     while(true) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
         furi_mutex_acquire(state->mutex, FuriWaitForever);
 
-        if(state->state == GameStatePaused || state->state == GameStateWin) {
+        if(state->state == GameStatePaused || state->state == GameStateVictory) {
             bool exit = false;
             if(event.type == InputTypePress || event.type == InputTypeLong ||
                event.type == InputTypeRepeat) {
@@ -468,7 +515,7 @@ int32_t sudoku_main(void* p) {
             }
             if(invalidField && validate_board(state)) {
                 dolphin_deed(DolphinDeedPluginGameWin);
-                state->state = GameStateWin;
+                state->state = GameStateVictory;
                 state->menuCursor = 0;
                 for(int i = 0; i != BOARD_SIZE; ++i) {
                     for(int j = 0; j != BOARD_SIZE; ++j) {
@@ -489,6 +536,12 @@ int32_t sudoku_main(void* p) {
     furi_record_close(RECORD_GUI);
 
     furi_mutex_free(state->mutex);
+    if(state->state == GameStateVictory) {
+        state->state = GameStateRestart;
+    }
+    state->menuCursor = 0; // reset menu cursor, because we stand on exit
+    state->mutex = NULL;
+    save_game(state);
     free(state);
 
     return 0;
