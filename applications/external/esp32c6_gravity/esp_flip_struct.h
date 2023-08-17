@@ -16,6 +16,8 @@ enum AttackMode {
     ATTACK_SCAN,
     ATTACK_HANDSHAKE,
     ATTACK_RANDOMISE_MAC, // True
+    ATTACK_BT,
+    ATTACK_STALK,
     ATTACKS_COUNT
 };
 typedef enum AttackMode AttackMode;
@@ -42,6 +44,8 @@ enum GravityCommand {
     GRAVITY_HANDSHAKE,
     GRAVITY_COMMANDS,
     GRAVITY_INFO,
+    GRAVITY_GET_VERSION,
+    GRAVITY_BT,
     GRAVITY_NONE = 99
 };
 typedef enum GravityCommand GravityCommand;

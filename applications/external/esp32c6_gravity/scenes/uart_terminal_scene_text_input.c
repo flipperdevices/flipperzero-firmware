@@ -1,7 +1,7 @@
 #include "../uart_terminal_app_i.h"
 
-/* GRAVITY: Import usage strings */
-#include "../esp_flip_const.h"
+/* GRAVITY: Import ESP32-Gravity usage strings */
+#include "../usage_const.h"
 
 void uart_terminal_scene_text_input_callback(void* context) {
     UART_TerminalApp* app = context;
