@@ -101,9 +101,6 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * Add space to keyboard
 * add channel, mode, count STA+AP on console header
 * Add auth type to AP Clone
-* selecting multiple scan results ^-separated doesn't work
-    * just the first is selected
-    * it should also be ~-separated
 * Paging in homing mode where all targets can't be displayed at the same time
     * like airline departures - one screen for 3s, another screen for 3s.
 
