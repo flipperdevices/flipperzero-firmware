@@ -2,22 +2,28 @@
 
 ## Author: [htotoo](https://github.com/htotoo/NRF24ChannelScanner)
 
-##What is it?
+## What is it?
 This app will scan all the NRF24's frequencies, and shows where it found any traffic. The more traffic, the higher the bars.
 After the scanning finished, you can hit left or right keys, to find what frequency is in use.
 
-# How to use
+## How to use
 - Connect NRF24 to flipper using provided pinouts
 - Open NRF24 Channel scanner, and hit OK
 - Done
 
-##Screenshot
+## Screenshot
+
 <img src="https://raw.githubusercontent.com/htotoo/NRF24ChannelScanner/main/screen1.png">
 
-##Buttons
+## Buttons
+
 OK short: start / stop the scan.
+
 BACK long: exit the app.
+
 LEFT / RIGHT: when not scanning select the channel to see it's frequency. Short press steps 1, long 10.
+
+UP / DOWN: change the time spent in a channel. Suggested: 1ms, but you can play around.
 
 ## Warning
 These apps are for **educational purposes** only. Please use this code responsibly and only use these apps on your own equipment.
