@@ -11,6 +11,13 @@ After the scanning finished, you can hit left or right keys, to find what freque
 - Open NRF24 Channel scanner, and hit OK
 - Done
 
+##Screenshot
+<img src="https://raw.githubusercontent.com/htotoo/NRF24ChannelScanner/main/screen1.png">
+
+##Buttons
+OK short: start / stop the scan.
+BACK long: exit the app.
+LEFT / RIGHT: when not scanning select the channel to see it's frequency. Short press steps 1, long 10.
 
 ## Warning
 These apps are for **educational purposes** only. Please use this code responsibly and only use these apps on your own equipment.
