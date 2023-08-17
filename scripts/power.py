@@ -53,31 +53,31 @@ class Main(App):
 
     def power_off(self):
         if not (flipper := self._get_flipper(retry_count=10)):
-            sys.exit(1)
+            return 1
 
         self.logger.info("Powering off")
         flipper.send("power off" + "\r")
         flipper.stop()
-        sys.exit(0)
+        return 0
 
     def reboot(self):
         if not (flipper := self._get_flipper(retry_count=10)):
-            sys.exit(1)
+            return 1
 
         self.logger.info("Rebooting")
         flipper.send("power reboot" + "\r")
         flipper.stop()
-        sys.exit(0)
+        return 0
 
     def reboot2dfu(self):
         if not (flipper := self._get_flipper(retry_count=10)):
-            sys.exit(1)
+            return 1
 
         self.logger.info("Rebooting to DFU")
         flipper.send("power reboot2dfu" + "\r")
         flipper.stop()
 
-        sys.exit(0)
+        return 0
 
 
 if __name__ == "__main__":
