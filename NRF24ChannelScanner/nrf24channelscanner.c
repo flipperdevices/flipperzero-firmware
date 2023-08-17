@@ -18,6 +18,10 @@ static bool stopNrfScan = false; //to exit thread
 static bool threadStoppedsoFree = false; //indicate if I can free the thread from ram.
 static uint8_t currCh = 0; //for the progress bar or the channel selector
 
+static int delayPerChan = 10; //can set via up / down.
+
+bool showFreq = true;
+
 FuriThread* thread;
 
 typedef enum {
@@ -58,8 +62,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     //draw hello mesage
     if(szuz) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 1, 36, "Left / right to select channel,");
-        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 1, 22, "Up / Down to change channel time.");
+        canvas_draw_str(canvas, 1, 36, "Left / Right to select channel,");
         canvas_draw_str(canvas, 1, 48, "to get it's frequency");
     }
 
@@ -68,15 +72,30 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     if(isScanning) {
         canvas_draw_str(canvas, 37, 8, "scanning");
     } else {
-        int freq = 2400 + currCh;
-        char strfreq[10] = {32};
-        itoa(freq, strfreq, 10);
-        strfreq[4] = ' ';
-        strfreq[5] = 'M';
-        strfreq[6] = 'H';
-        strfreq[7] = 'Z';
-        strfreq[8] = 0;
-        canvas_draw_str(canvas, 40, 8, strfreq);
+        if(showFreq) {
+            int freq = 2400 + currCh;
+            char strfreq[10] = {32};
+            itoa(freq, strfreq, 10);
+            strfreq[4] = ' ';
+            strfreq[5] = 'M';
+            strfreq[6] = 'H';
+            strfreq[7] = 'Z';
+            strfreq[8] = 0;
+            canvas_draw_str(canvas, 40, 8, strfreq);
+        } else {
+            //show delay
+            int dly = delayPerChan;
+            char strdel[10] = {32};
+            itoa(dly, strdel, 10);
+            if(dly < 10) strdel[1] = ' ';
+            if(dly < 100) strdel[2] = ' ';
+            if(dly < 1000) strdel[3] = ' ';
+            strdel[4] = ' ';
+            strdel[5] = 'm';
+            strdel[6] = 's';
+            strdel[7] = 0;
+            canvas_draw_str(canvas, 40, 8, strdel);
+        }
     }
 
     //draw the chart
@@ -104,18 +123,19 @@ static int32_t scanner(void* context) {
     nrf24_set_rx_mode(nrf24_HANDLE, false);
     nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x0);
     nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, 0x0f);
-    for(uint8_t j = 0; j < 10; j++) {
+    for(uint8_t j = 0; j < 15;) { //scan until stopped!
         if(stopNrfScan) break;
         for(uint8_t i = 0; i < num_channels; i++) {
             if(stopNrfScan) break;
             currCh = i;
             nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, i);
             nrf24_set_rx_mode(nrf24_HANDLE, true);
-            for(uint8_t ii = 0; ii < 5; ++ii) {
+            for(uint8_t ii = 0; ii < 3; ++ii) {
                 nrf24_flush_rx(nrf24_HANDLE);
-                furi_delay_ms(5);
+                furi_delay_ms(delayPerChan);
                 tmp = nrf24_get_rdp(nrf24_HANDLE);
                 if(tmp > 0) nrf24values[i]++;
+                if(nrf24values[i] > 50) j = 254; //stop, bc maxed
             }
         }
     }
@@ -124,6 +144,21 @@ static int32_t scanner(void* context) {
     threadStoppedsoFree = true;
     currCh = 0;
     return 0;
+}
+
+void ChangeFreq(int delta) {
+    currCh += delta;
+    if(currCh > num_channels) currCh = 0;
+    showFreq = true;
+}
+
+void ChangeDelay(int delta) {
+    delayPerChan += delta;
+    if(delayPerChan > 100) delayPerChan = 100;
+    if(delayPerChan < 1) delayPerChan = 1;
+    if(delayPerChan == 11) delayPerChan = 10; //to get it rounded :)
+    if(delayPerChan == 6) delayPerChan = 5; //to get it rounded :)
+    showFreq = false;
 }
 
 // Main entry of the application
@@ -182,16 +217,23 @@ int32_t nrf24channelscanner_main(void* p) {
                     notification_message(notification, &sequence_error);
                 }
             }
+            //change the delay
+            if(event.input.type == InputTypeShort && event.input.key == InputKeyUp) {
+                ChangeDelay(5);
+            }
+            if(event.input.type == InputTypeShort && event.input.key == InputKeyDown) {
+                ChangeDelay(-5);
+            }
+
             if(!isScanning) {
-                uint8_t num = 0;
-                if(event.input.type == InputTypeLong) num = 10;
-                if(event.input.type == InputTypeShort) num = 1;
-                if(event.input.key == InputKeyLeft) {
-                    currCh -= num;
-                }
-                if(event.input.key == InputKeyRight) {
-                    currCh += num;
-                }
+                if(event.input.type == InputTypeLong && event.input.key == InputKeyLeft)
+                    ChangeFreq(-10);
+                if(event.input.type == InputTypeShort && event.input.key == InputKeyLeft)
+                    ChangeFreq(-1);
+                if(event.input.type == InputTypeLong && event.input.key == InputKeyRight)
+                    ChangeFreq(10);
+                if(event.input.type == InputTypeShort && event.input.key == InputKeyRight)
+                    ChangeFreq(1);
             }
         }
         if(threadStoppedsoFree) {
