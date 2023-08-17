@@ -99,7 +99,7 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
             uint8_t block_num;
         } Iso15693_3ReadBlockRequestLayout;
 
-        const Iso15693_3ReadBlockRequestLayout* layout =
+        const Iso15693_3ReadBlockRequestLayout* request =
             (const Iso15693_3ReadBlockRequestLayout*)data;
 
         if(data_size != sizeof(Iso15693_3ReadBlockRequestLayout)) {
@@ -107,7 +107,10 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
             break;
         }
 
-        if(layout->block_num >= instance->data->system_info.block_count) {
+        const uint32_t block_index = request->block_num;
+        const uint32_t block_count_max = instance->data->system_info.block_count;
+
+        if(block_index >= block_count_max) {
             error = Iso15693_3ErrorInternal;
             break;
         }
@@ -117,13 +120,62 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
 
         if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
             iso15693_3_append_block_security(
-                instance->data,
-                layout->block_num,
-                instance->tx_buffer); // Block security (optional)
+                instance->data, block_index, instance->tx_buffer); // Block security (optional)
         }
 
-        iso15693_3_append_block(
-            instance->data, layout->block_num, instance->tx_buffer); // Block data
+        iso15693_3_append_block(instance->data, block_index, instance->tx_buffer); // Block data
+
+        error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t first_block_num;
+            uint8_t block_count;
+        } Iso15693_3ReadMultiBlocksRequestLayout;
+
+        const Iso15693_3ReadMultiBlocksRequestLayout* request =
+            (const Iso15693_3ReadMultiBlocksRequestLayout*)data;
+
+        if(data_size != sizeof(Iso15693_3ReadMultiBlocksRequestLayout)) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        const uint32_t block_index_start = request->first_block_num;
+        const uint32_t block_index_end = block_index_start + request->block_count;
+
+        const uint32_t block_count = request->block_count + 1;
+        const uint32_t block_count_max = instance->data->system_info.block_count;
+        const uint32_t block_count_available = block_count_max - block_index_start;
+
+        if(block_count > block_count_available) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE); // Flags
+
+        for(uint32_t i = block_index_start; i <= block_index_end; ++i) {
+            if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
+                iso15693_3_append_block_security(
+                    instance->data, i, instance->tx_buffer); // Block security (optional)
+            }
+
+            iso15693_3_append_block(instance->data, i, instance->tx_buffer); // Block data
+        }
 
         error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
 
@@ -145,7 +197,7 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
             uint8_t block_data[];
         } Iso15693_3WriteBlockRequestLayout;
 
-        const Iso15693_3WriteBlockRequestLayout* layout =
+        const Iso15693_3WriteBlockRequestLayout* request =
             (const Iso15693_3WriteBlockRequestLayout*)data;
 
         if(data_size <= sizeof(Iso15693_3WriteBlockRequestLayout)) {
@@ -153,30 +205,100 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
             break;
         }
 
+        const uint32_t block_index = request->block_num;
+        const uint32_t block_count_max = instance->data->system_info.block_count;
+        const uint32_t block_size_max = instance->data->system_info.block_size;
+        const size_t block_size_received = data_size - sizeof(Iso15693_3WriteBlockRequestLayout);
+
+        if(block_index >= block_count_max) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        } else if(block_size_received != block_size_max) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        } else if(iso15693_3_is_block_locked(instance->data, block_index)) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
         bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+        iso15693_3_set_block_data(
+            instance->data, block_index, request->block_data, block_size_received);
 
-        const size_t block_data_size = data_size - sizeof(Iso15693_3WriteBlockRequestLayout);
-        if(layout->block_num >= instance->data->system_info.block_count) {
-            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
-            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_ERROR_BLOCK_UNAVAILABLE);
-        } else if(block_data_size != instance->data->system_info.block_size) {
-            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
-            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_ERROR_BLOCK_WRITE);
-        } else if(iso15693_3_is_block_locked(instance->data, layout->block_num)) {
-            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
-            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_ERROR_BLOCK_LOCKED);
-        } else {
-            bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
-            iso15693_3_set_block_data(
-                instance->data, layout->block_num, layout->block_data, block_data_size);
+        if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+            // If OPTION flag is not set, send the response right away
+            error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
         }
 
-        if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
-            // FIXME: This is just a hack to emulate sending the reply after an additional EOF
-            furi_delay_ms(22);
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error iso15693_3_listener_write_multi_blocks_handler(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t first_block_num;
+            uint8_t block_count;
+            uint8_t block_data[];
+        } Iso15693_3WriteMultiBlocksRequestLayout;
+
+        const Iso15693_3WriteMultiBlocksRequestLayout* request =
+            (const Iso15693_3WriteMultiBlocksRequestLayout*)data;
+
+        if(data_size <= sizeof(Iso15693_3WriteMultiBlocksRequestLayout)) {
+            error = Iso15693_3ErrorFormat;
+            break;
         }
 
-        error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        const uint32_t block_index_start = request->first_block_num;
+        const uint32_t block_index_end = block_index_start + request->block_count;
+
+        const uint32_t block_count = request->block_count + 1;
+        const uint32_t block_count_max = instance->data->system_info.block_count;
+        const uint32_t block_count_available = block_count_max - block_index_start;
+
+        const size_t block_data_size = data_size - sizeof(Iso15693_3WriteMultiBlocksRequestLayout);
+        const size_t block_size = block_data_size / block_count;
+        const size_t block_size_max = instance->data->system_info.block_size;
+
+        if(block_count > block_count_available) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        } else if(block_size != block_size_max) {
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        for(uint32_t i = block_index_start; i <= block_index_end; ++i) {
+            if(iso15693_3_is_block_locked(instance->data, i)) {
+                error = Iso15693_3ErrorInternal;
+                break;
+            }
+        }
+
+        if(error != Iso15693_3ErrorNone) break;
+
+        for(uint32_t i = block_index_start; i < block_count + request->first_block_num; ++i) {
+            const uint8_t* block_data = &request->block_data[block_size * i];
+            iso15693_3_set_block_data(instance->data, i, block_data, block_size);
+        }
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
+
+        if(!(flags & ISO15693_3_REQ_FLAG_T4_OPTION)) {
+            // If OPTION flag is not set, send the response right away
+            error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+        }
+
     } while(false);
 
     return error;
@@ -246,8 +368,12 @@ static inline Iso15693_3Error iso15693_3_listener_handle_request(
         return iso15693_3_listener_stay_quiet_handler(instance);
     case ISO15693_3_CMD_READ_BLOCK:
         return iso15693_3_listener_read_block_handler(instance, data, data_size, flags);
+    case ISO15693_3_CMD_READ_MULTI_BLOCKS:
+        return iso15693_3_listener_read_multi_blocks_handler(instance, data, data_size, flags);
     case ISO15693_3_CMD_WRITE_BLOCK:
         return iso15693_3_listener_write_block_handler(instance, data, data_size, flags);
+    case ISO15693_3_CMD_WRITE_MULTI_BLOCKS:
+        return iso15693_3_listener_write_multi_blocks_handler(instance, data, data_size, flags);
     case ISO15693_3_CMD_SELECT:
         return iso15693_3_listener_select_handler(instance, flags);
     case ISO15693_3_CMD_RESET_TO_READY:
