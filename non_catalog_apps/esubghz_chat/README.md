@@ -14,14 +14,14 @@ bugs. You have been warned.
 
 ## Usage
 
-Once opened the plugin will ask for a frequency to operate on which must be
-entered in HZ.
-
-On the next screen the plugin will ask for the method of deriving the key. If
+Once opened the plugin will ask for the method of deriving the key. If
 "No encryption" is selected, the encryption is disabled. If "Generate Key" is
 selected, a random key is generated. Otherwise, the plugin will ask for the
 selected input method. Currently a password and a hex key, as well as reading
 the key from another Flipper via NFC are supported.
+
+On the next screen the plugin will ask for a frequency to operate on which must
+be entered in HZ.
 
 Finally the a message can be input. After the message is confirmed, the plugin
 will switch to the chat view, where sent and received messages are displayed.

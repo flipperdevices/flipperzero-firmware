@@ -1,10 +1,12 @@
 #include "../esubghz_chat_i.h"
 
-/* Sends FreqEntered event to scene manager. */
+/* Sends FreqEntered event to scene manager and enters the chat. */
 static void freq_input_cb(void *context)
 {
 	furi_assert(context);
 	ESubGhzChatState* state = context;
+
+	enter_chat(state);
 
 	view_dispatcher_send_custom_event(state->view_dispatcher,
 			ESubGhzChatEvent_FreqEntered);
@@ -55,7 +57,7 @@ void scene_on_enter_freq_input(void* context)
 	ESubGhzChatState* state = context;
 
 	snprintf(state->text_input_store, TEXT_INPUT_STORE_SIZE, "%lu",
-			(uint32_t) DEFAULT_FREQ);
+			state->frequency);
 	text_input_reset(state->text_input);
 	text_input_set_result_callback(
 			state->text_input,
@@ -88,10 +90,10 @@ bool scene_on_event_freq_input(void* context, SceneManagerEvent event)
 	switch(event.type) {
 	case SceneManagerEventTypeCustom:
 		switch(event.event) {
-		/* switch to password input scene */
+		/* switch to message input scene */
 		case ESubGhzChatEvent_FreqEntered:
 			scene_manager_next_scene(state->scene_manager,
-					ESubGhzChatScene_KeyMenu);
+					ESubGhzChatScene_ChatInput);
 			consumed = true;
 			break;
 		}
