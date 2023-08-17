@@ -1,6 +1,6 @@
 #include "uhf_app_i.h"
 
-char* convertToHexString(const uint8_t* array, size_t length) {
+char* convertToHexString(uint8_t* array, size_t length) {
     if(array == NULL || length == 0) {
         return " ";
     }
@@ -62,8 +62,8 @@ UHFApp* uhf_alloc() {
 
     UHFTagWrapper* uhf_tag_wrapper = uhf_tag_wrapper_alloc();
     // point tag object to worker
-    uhf_app->worker->uhf_tag = uhf_tag_wrapper;
-    uhf_app->uhf_device->uhf_tag = uhf_tag_wrapper;
+    uhf_app->worker->uhf_tag_wrapper = uhf_tag_wrapper;
+    uhf_app->uhf_device->uhf_tag_wrapper = uhf_tag_wrapper;
 
     // Open Notification record
     uhf_app->notifications = furi_record_open(RECORD_NOTIFICATION);

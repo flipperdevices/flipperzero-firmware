@@ -16,19 +16,19 @@ typedef struct{
 }M100ModuleInfo;
 
 typedef enum{
-    CHINA_900 = 1,  // Freq_CH-920.125M
-    US,             // Freq_CH-902.25M
-    EU,             // Freq_CH-865.1M
-    CHINA_800,      // Freq_CH-840.125M
-    KOREA = 6       // Freq_CH-917.1M
+    WA_CHINA_900 = 1,  // Freq_CH-920.125M
+    WA_US,             // Freq_CH-902.25M
+    WA_EU,             // Freq_CH-865.1M
+    WA_CHINA_800,      // Freq_CH-840.125M
+    WA_KOREA = 6       // Freq_CH-917.1M
 } WorkingArea;
 
 typedef enum{
-    CHINA_900 = 1,  // CH_Index(CN,900MHz) = (Freq_CH-920.125M)/0.25M
-    US,             // CH_Index(US) = (Freq_CH-902.25M)/0.5M
-    EU,             // CH_Index(EU) = (Freq_CH-865.1M)/0.2M
-    CHINA_800,      // CH_Index(CN,800MHz) = (Freq_CH-840.125M)/0.25M
-    KOREA = 6       // CH_Index(Korea) = (Freq_CH-917.1M)/0.2M
+    WC_CHINA_900 = 1,  // CH_Index(CN,900MHz) = (Freq_CH-920.125M)/0.25M
+    WC_US,             // CH_Index(US) = (Freq_CH-902.25M)/0.5M
+    WC_EU,             // CH_Index(EU) = (Freq_CH-865.1M)/0.2M
+    WC_CHINA_800,      // CH_Index(CN,800MHz) = (Freq_CH-840.125M)/0.25M
+    WC_KOREA = 6       // CH_Index(Korea) = (Freq_CH-917.1M)/0.2M
 } WorkingChannel;
 
 typedef struct{
@@ -64,3 +64,4 @@ bool m100_set_freq_hopping(M100Module* module, bool hopping);
 // gen2 cmds
 UHFTag* m100_send_single_poll(M100Module* module);
 bool m100_set_select(M100Module* module, UHFTag* uhf_tag);
+bool m100_read_label_data_storage(M100Module* module, UHFTag* uhf_tag, BankType bank, uint32_t access_pwd);

@@ -6,10 +6,7 @@
 static void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
     UNUSED(event);
     Buffer* buf = ctx;
-    if(data == FRAME_END) {
-        buffer_append_single(buf, data);
-        buffer_close(buf);
-    }
+    if(data == FRAME_END) buffer_close(buf);
     buffer_append_single(buf, data);
 }
 
@@ -31,6 +28,7 @@ M100Module* m100_module_alloc() {
     M100Module* module = (M100Module*)malloc(sizeof(M100Module));
     module->info = m100_module_info_alloc();
     module->buf = buffer_alloc(128);
+    return module;
 }
 
 void m100_module_free(M100Module* module) {
@@ -68,10 +66,10 @@ uint16_t crc16_genibus(const uint8_t* data, size_t length) {
 }
 
 char* m100_get_hardware_version(M100Module* module) {
-    if(!module->info->hw_version == NULL) return module->info->hw_version;
+    if(!(((void*)module->info->sw_version) == NULL)) return module->info->hw_version;
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_HW_VERSION.cmd, CMD_HW_VERSION.length);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)&CMD_HW_VERSION.cmd[0], CMD_HW_VERSION.length);
     furi_delay_ms(DELAY_MS);
     if(!buffer_get_size(module->buf)) return NULL;
     uint8_t* data = buffer_get_data(module->buf);
@@ -80,13 +78,14 @@ char* m100_get_hardware_version(M100Module* module) {
     char hw_version[payload_len];
     memcpy(hw_version, data + 6, (size_t)payload_len);
     module->info->hw_version = hw_version;
-    return hw_version;
+    free(hw_version);
+    return module->info->hw_version;
 }
 char* m100_get_software_version(M100Module* module) {
-    if(!module->info->sw_version == NULL) return module->info->hw_version;
+    if(!(((void*)module->info->hw_version) == NULL)) return module->info->hw_version;
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SW_VERSION.cmd, CMD_SW_VERSION.length);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)&CMD_SW_VERSION.cmd[0], CMD_SW_VERSION.length);
     furi_delay_ms(DELAY_MS);
     if(!buffer_get_size(module->buf)) return NULL;
     uint8_t* data = buffer_get_data(module->buf);
@@ -95,13 +94,15 @@ char* m100_get_software_version(M100Module* module) {
     char sw_version[payload_len];
     memcpy(sw_version, data + 6, (size_t)payload_len);
     module->info->sw_version = sw_version;
-    return sw_version;
+    free(sw_version);
+    return module->info->sw_version;
 }
 char* m100_get_manufacturers(M100Module* module) {
-    if(!module->info->manufacturer == NULL) return module->info->manufacturer;
+    if(!(((void*)module->info->manufacturer) == NULL)) return module->info->manufacturer;
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_MANUFACTURERS.cmd, CMD_MANUFACTURERS.length);
+    furi_hal_uart_tx(
+        FuriHalUartIdUSART1, (uint8_t*)&CMD_MANUFACTURERS.cmd[0], CMD_MANUFACTURERS.length);
     furi_delay_ms(DELAY_MS);
     if(!buffer_get_size(module->buf)) return NULL;
     uint8_t* data = buffer_get_data(module->buf);
@@ -110,13 +111,15 @@ char* m100_get_manufacturers(M100Module* module) {
     char manufacturer[payload_len];
     memcpy(manufacturer, data + 6, (size_t)payload_len);
     module->info->manufacturer = manufacturer;
-    return manufacturer;
+    free(manufacturer);
+    return module->info->manufacturer;
 }
 
 UHFTag* m100_send_single_poll(M100Module* module) {
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, rx_callback, module->buf);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SINGLE_POLLING.cmd, CMD_SINGLE_POLLING.length);
+    furi_hal_uart_tx(
+        FuriHalUartIdUSART1, (uint8_t*)&CMD_SINGLE_POLLING.cmd[0], CMD_SINGLE_POLLING.length);
     furi_delay_ms(DELAY_MS);
     uint8_t* data = buffer_get_data(module->buf);
     size_t length = buffer_get_size(module->buf);
@@ -148,10 +151,10 @@ bool m100_set_select(M100Module* module, UHFTag* uhf_tag) {
     size_t cmd_length = CMD_SET_SELECT_PARAMETER.length;
     size_t mask_length_bytes = uhf_tag->epc->size;
     size_t mask_length_bits = mask_length_bytes * 8;
+    // payload len = sel param len + ptr len + mask len + epc len
     size_t payload_len = 7 + mask_length_bytes;
     memcpy(cmd, CMD_SET_SELECT_PARAMETER.cmd, cmd_length);
     // set payload length
-    // payload len = sel param len + ptr len + mask len + epc len
     cmd[3] = (payload_len >> 8) & 0xFF;
     cmd[4] = payload_len & 0xFF;
     // set select param
@@ -163,7 +166,7 @@ bool m100_set_select(M100Module* module, UHFTag* uhf_tag) {
     // truncate
     cmd[11] = false;
     // set mask
-    memcpy(cmd[12], uhf_tag->epc->data, mask_length_bytes);
+    memcpy((void*)&cmd[12], uhf_tag->epc->data, mask_length_bytes);
     // set checksum
     cmd[12 + mask_length_bytes + 1] = checksum(cmd + 1, 11 + mask_length_bytes);
     // end frame
@@ -179,7 +182,38 @@ bool m100_set_select(M100Module* module, UHFTag* uhf_tag) {
     return true;
 }
 
+UHFTag* m100_get_select_param(M100Module module) {
+    UNUSED(module);
+    return NULL;
+}
+
+bool m100_read_label_data_storage(
+    M100Module* module,
+    UHFTag* uhf_tag,
+    BankType bank,
+    uint32_t access_pwd) {
+    UNUSED(uhf_tag);
+    buffer_reset(module->buf);
+    uint8_t cmd[MAX_BUFFER_SIZE];
+    size_t length = CMD_READ_LABEL_DATA_STORAGE_AREA.length;
+    memcpy(cmd, CMD_READ_LABEL_DATA_STORAGE_AREA.cmd, length);
+    // set access password
+    cmd[5] = (access_pwd >> 24) & 0xFF;
+    cmd[6] = (access_pwd >> 16) & 0xFF;
+    cmd[7] = (access_pwd >> 8) & 0xFF;
+    cmd[8] = access_pwd & 0xFF;
+    // set mem bank
+    cmd[9] = (uint8_t)bank;
+    // recalc checksum
+    cmd[length - 2] = checksum(cmd + 1, length - 3);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, length);
+    furi_delay_ms(DELAY_MS);
+    return true;
+}
+
 void m100_set_baudrate(M100Module* module, uint16_t baudrate) {
+    // M100Module* this_module = module;
     size_t length = CMD_SET_COMMUNICATION_BAUD_RATE.length;
     uint8_t cmd[length];
     memcpy(cmd, CMD_SET_COMMUNICATION_BAUD_RATE.cmd, length);
@@ -199,14 +233,21 @@ bool m100_set_working_area(M100Module* module, WorkingArea area) {
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, buf);
     furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, length);
     buffer_free(buf);
+    module->area = area;
     return true;
 }
 bool m100_set_working_channel(M100Module* module, WorkingChannel channel) {
+    UNUSED(module);
+    UNUSED(channel);
     return true;
 }
 bool m100_set_transmitting_power(M100Module* module, uint16_t power) {
+    UNUSED(module);
+    UNUSED(power);
     return true;
 }
 bool m100_set_freq_hopping(M100Module* module, bool hopping) {
+    UNUSED(module);
+    UNUSED(hopping);
     return true;
 }

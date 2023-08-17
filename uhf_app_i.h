@@ -99,6 +99,6 @@ void uhf_show_loading_popup(void* context, bool show);
  */
 bool uhf_is_memset(const uint8_t* data, const uint8_t pattern, size_t size);
 
-char* convertToHexString(const uint8_t* array, size_t length);
+char* convertToHexString(uint8_t* array, size_t length);
 
-bool uhf_save_read_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename);
+// bool uhf_save_read_data(UHFResponseData* uhf_response_data, Storage* storage, const char* filename);

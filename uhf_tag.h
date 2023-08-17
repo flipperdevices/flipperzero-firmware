@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+// storage enum
+typedef enum { ReservedBank, EPCBank, TIDBank, UserBank } BankType;
+
 // Reserved Memory Bank
 typedef struct {
     uint8_t kill_password[2]; // 2 bytes (16 bits) for kill password
@@ -38,15 +41,16 @@ typedef struct {
     UserMemoryBank* user;
 } UHFTag;
 
-typedef struct UHFTagWrapper{
+typedef struct UHFTagWrapper {
     UHFTag* uhf_tag;
-}UHFTagWrapper;
+} UHFTagWrapper;
 
 UHFTagWrapper* uhf_tag_wrapper_alloc();
 void uhf_tag_wrapper_set_tag(UHFTagWrapper* uhf_tag_wrapper, UHFTag* uhf_tag);
 void uhf_tag_wrapper_free(UHFTagWrapper* uhf_tag_wrapper);
 
 UHFTag* uhf_tag_alloc();
+void uhf_tag_reset(UHFTag* uhf_tag);
 void uhf_tag_free(UHFTag* uhf_tag);
 
 void uhf_tag_set_kill_pwd(UHFTag* uhf_tag, uint8_t* data_in);

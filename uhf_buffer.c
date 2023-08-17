@@ -1,4 +1,6 @@
 #include "uhf_buffer.h"
+#include <stdlib.h>
+#include <string.h>
 
 Buffer* buffer_alloc(size_t initial_capacity) {
     Buffer* buf = (Buffer*)malloc(sizeof(Buffer));
@@ -39,7 +41,7 @@ bool buffer_append(Buffer* buf, uint8_t* data, size_t data_size) {
         buf->capacity = new_capacity;
     }
 
-    memcpy(buf->data + buf->size, data, data_size);
+    memcpy((void*)&buf->data[buf->size], data, data_size);
     buf->size += data_size;
     return true;
 }
