@@ -27,7 +27,7 @@ FHalNfcError f_hal_nfc_abort() {
     return FHalNfcErrorNone;
 }
 
-FHalNfcEvent f_hal_nfc_event_wait(uint32_t timeout_ms) {
+FHalNfcEvent f_hal_nfc_wait_event_common(uint32_t timeout_ms) {
     furi_assert(f_hal_nfc_event);
     furi_assert(f_hal_nfc_event->thread);
 

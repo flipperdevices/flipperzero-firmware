@@ -58,6 +58,7 @@ bool f_hal_nfc_event_wait_for_specific_irq(
     uint32_t timeout_ms);
 
 // Common technology methods
+FHalNfcEvent f_hal_nfc_wait_event_common(uint32_t timeout_ms);
 FHalNfcError f_hal_nfc_common_listener_rx_start(FuriHalSpiBusHandle* handle);
 FHalNfcError
     f_hal_nfc_common_fifo_tx(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
@@ -76,15 +77,18 @@ typedef FHalNfcError (*FHalNfcChipRx)(
     uint8_t* rx_data,
     size_t rx_data_size,
     size_t* rx_bits);
+typedef FHalNfcEvent (*FHalNfcWaitEvent)(uint32_t timeout_ms);
 
 typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
+    FHalNfcWaitEvent wait_event;
 } FHalNfcTechPollerBase;
 
 typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
+    FHalNfcWaitEvent wait_event;
     FHalNfcChipConfig rx_start;
     FHalNfcChipTx tx;
     FHalNfcChipRx rx;

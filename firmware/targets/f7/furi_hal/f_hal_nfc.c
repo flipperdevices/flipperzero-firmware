@@ -474,6 +474,20 @@ FHalNfcError
     return err;
 }
 
+FHalNfcEvent f_hal_nfc_poller_wait_event(uint32_t timeout_ms) {
+    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
+    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+
+    return f_hal_nfc_tech[f_hal_nfc.tech]->poller.wait_event(timeout_ms);
+}
+
+FHalNfcEvent f_hal_nfc_listener_wait_event(uint32_t timeout_ms) {
+    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
+    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+
+    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.wait_event(timeout_ms);
+}
+
 FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
 
