@@ -14,7 +14,7 @@
 
 #define SIGNAL_READER_DMA DMA2
 
-#define SIGNAL_READER_CAPTURE_TIM (TIM17)
+#define SIGNAL_READER_CAPTURE_TIM (TIM16)
 #define SIGNAL_READER_CAPTURE_TIM_CHANNEL LL_TIM_CHANNEL_CH1
 
 #define SIGNAL_READER_DMA_GPIO LL_DMA_CHANNEL_2
@@ -167,7 +167,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     // EXTI delay compensation
     instance->tim_cnt_compensation = 9;
 
-    furi_hal_bus_enable(FuriHalBusTIM17);
+    furi_hal_bus_enable(FuriHalBusTIM16);
     furi_hal_bus_enable(FuriHalBusDMAMUX1);
 
     // Capture timer config
@@ -231,7 +231,7 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
             LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_HALFWORD | LL_DMA_MDATAALIGN_HALFWORD |
             LL_DMA_PRIORITY_HIGH);
     LL_DMA_SetDataLength(SIGNAL_READER_DMA_GPIO_DEF, instance->buffer_size * 8);
-    LL_DMA_SetPeriphRequest(SIGNAL_READER_DMA_GPIO_DEF, LL_DMAMUX_REQ_TIM17_CH1);
+    LL_DMA_SetPeriphRequest(SIGNAL_READER_DMA_GPIO_DEF, LL_DMAMUX_REQ_TIM16_CH1);
 
     // Configure DMA Channel CC1
     LL_TIM_EnableDMAReq_CC1(SIGNAL_READER_CAPTURE_TIM);
@@ -268,6 +268,6 @@ void signal_reader_stop(SignalReader* instance) {
     // Deinit DMA Sync timer
     LL_DMA_DeInit(SIGNAL_READER_DMA_CNT_SYNC_DEF);
 
-    furi_hal_bus_disable(FuriHalBusTIM17);
+    furi_hal_bus_disable(FuriHalBusTIM16);
     furi_hal_bus_disable(FuriHalBusDMAMUX1);
 }
