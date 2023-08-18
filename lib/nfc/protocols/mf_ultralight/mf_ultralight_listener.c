@@ -14,7 +14,15 @@ typedef enum {
     MfUltralightListenerAccessTypeWrite,
 } MfUltralightListenerAccessType;
 
-typedef bool (*MfUltralightListenerCommandCallback)(MfUltralightListener* instance, BitBuffer* buf);
+typedef enum {
+    MfUltralightCommandNotFound,
+    MfUltralightCommandProcessed,
+    MfUltralightCommandNotProcessedNAK,
+    MfUltralightCommandNotProcessedSilent,
+} MfUltralightCommand;
+
+typedef MfUltralightCommand (
+    *MfUltralightListenerCommandCallback)(MfUltralightListener* instance, BitBuffer* buf);
 
 typedef struct {
     uint8_t cmd;
@@ -61,14 +69,13 @@ static void mf_ultralight_listener_send_short_resp(MfUltralightListener* instanc
     iso14443_3a_listener_tx(instance->iso14443_3a_listener, instance->tx_buffer);
 };
 
-static bool
+static MfUltralightCommand
     mf_ultralight_listener_read_page_handler(MfUltralightListener* instance, BitBuffer* buffer) {
-    bool command_processed = false;
     uint8_t start_page = bit_buffer_get_byte(buffer, 1);
     uint16_t pages_total = instance->data->pages_total;
     MfUltralightPageReadCommandData read_cmd_data = {};
 
-    FURI_LOG_D(TAG, "CMD_READ");
+    FURI_LOG_D(TAG, "CMD_READ: %d", start_page);
 
     if(pages_total < start_page) {
         mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
@@ -97,14 +104,12 @@ static bool
         iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
     }
-    command_processed = true;
 
-    return command_processed;
+    return MfUltralightCommandProcessed;
 }
 
-static bool
+static MfUltralightCommand
     mf_ultralight_listener_write_page_handler(MfUltralightListener* instance, BitBuffer* buffer) {
-    bool command_processed = false;
     uint8_t start_page = bit_buffer_get_byte(buffer, 1);
     uint16_t pages_total = instance->data->pages_total;
 
@@ -124,18 +129,15 @@ static bool
         memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
         mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
     }
-    command_processed = true;
 
-    return command_processed;
+    return MfUltralightCommandProcessed;
 }
 
-static bool
+static MfUltralightCommand
     mf_ultralight_listener_read_version_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     UNUSED(buffer);
 
     FURI_LOG_D(TAG, "CMD_GET_VERSION");
-
-    bool command_processed = false;
 
     if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportReadVersion)) {
         bit_buffer_copy_bytes(
@@ -146,19 +148,16 @@ static bool
         iso14443_3a_listener_sleep(instance->iso14443_3a_listener);
         instance->state = MfUltraligthListenerStateIdle;
     }
-    command_processed = true;
 
-    return command_processed;
+    return MfUltralightCommandProcessed;
 }
 
-static bool mf_ultralight_listener_read_signature_handler(
+static MfUltralightCommand mf_ultralight_listener_read_signature_handler(
     MfUltralightListener* instance,
     BitBuffer* buffer) {
     UNUSED(buffer);
 
     FURI_LOG_D(TAG, "CMD_READ_SIG");
-
-    bool command_processed = false;
 
     if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportReadSignature)) {
         bit_buffer_copy_bytes(
@@ -169,12 +168,11 @@ static bool mf_ultralight_listener_read_signature_handler(
         iso14443_3a_listener_sleep(instance->iso14443_3a_listener);
         instance->state = MfUltraligthListenerStateIdle;
     }
-    command_processed = true;
 
-    return command_processed;
+    return MfUltralightCommandProcessed;
 }
 
-static bool
+static MfUltralightCommand
     mf_ultralight_listener_read_counter_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     bool command_processed = false;
 
@@ -210,14 +208,16 @@ static bool
         command_processed = true;
     } while(false);
 
-    return command_processed;
+    //TODO: Remove command_processed bool and return status directly, but for test it's OK for now
+    return command_processed ? MfUltralightCommandProcessed : MfUltralightCommandNotProcessedNAK;
 }
 
-static bool mf_ultralight_listener_check_tearing_handler(
+static MfUltralightCommand mf_ultralight_listener_check_tearing_handler(
     MfUltralightListener* instance,
     BitBuffer* buffer) {
     bool command_processed = false;
 
+    UNUSED(buffer);
     FURI_LOG_D(TAG, "CMD_CHECK_TEARING");
 
     do {
@@ -243,10 +243,10 @@ static bool mf_ultralight_listener_check_tearing_handler(
 
     } while(false);
 
-    return command_processed;
+    return command_processed ? MfUltralightCommandProcessed : MfUltralightCommandNotProcessedNAK;
 }
 
-static bool
+static MfUltralightCommand
     mf_ultralight_listener_auth_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     bool command_processed = false;
 
@@ -276,7 +276,8 @@ static bool
         command_processed = true;
     } while(false);
 
-    return command_processed;
+    return command_processed ? MfUltralightCommandProcessed :
+                               MfUltralightCommandNotProcessedSilent;
 }
 
 static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
@@ -381,21 +382,26 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
     NfcCommand command = NfcCommandContinue;
 
     if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
-        bool cmd_processed = false;
+        MfUltralightCommand status = MfUltralightCommandNotFound;
+        size_t size = bit_buffer_get_size(rx_buffer);
+        uint8_t cmd = bit_buffer_get_byte(rx_buffer, 0);
+
         for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
-            if(bit_buffer_get_size(rx_buffer) != mf_ultralight_command[i].cmd_len_bits) continue;
-            if(bit_buffer_get_byte(rx_buffer, 0) != mf_ultralight_command[i].cmd) continue;
-            cmd_processed = mf_ultralight_command[i].callback(
-                instance, rx_buffer); //TODO make commands return enumed status, not just bool
-            if(cmd_processed) { //to make immediate NACK response when not processed
-                break;
-            }
+            if(size != mf_ultralight_command[i].cmd_len_bits) continue;
+            if(cmd != mf_ultralight_command[i].cmd) continue;
+            status = mf_ultralight_command[i].callback(instance, rx_buffer);
+
+            if(status != MfUltralightCommandNotFound) break;
         }
-        if(!cmd_processed) {
-            mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+
+        if(status != MfUltralightCommandProcessed) {
             instance->state = MfUltraligthListenerStateIdle;
             instance->auth_state = MfUltralightListenerAuthStateIdle;
             command = NfcCommandReset;
+
+            if(status == MfUltralightCommandNotProcessedNAK) {
+                mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+            }
         }
     } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData) {
         command = NfcCommandReset;

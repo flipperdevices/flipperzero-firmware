@@ -364,7 +364,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
 
             // 1st stage zero = 600kHz, 3rd stage zero = 200 kHz
             st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF1, ST25R3916_REG_RX_CONF1_z600k);
-            // AGC enabled, ratio 3:1, squelch after TX
+            // AGC enabled, ratio 6:1, squelch after TX
             st25r3916_write_reg(
                 handle,
                 ST25R3916_REG_RX_CONF2,
