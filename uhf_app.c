@@ -61,7 +61,8 @@ UHFApp* uhf_alloc() {
     uhf_app->uhf_device = uhf_device_alloc();
 
     UHFTagWrapper* uhf_tag_wrapper = uhf_tag_wrapper_alloc();
-    // point tag object to worker
+
+    // // point tag object to worker
     uhf_app->worker->uhf_tag_wrapper = uhf_tag_wrapper;
     uhf_app->uhf_device->uhf_tag_wrapper = uhf_tag_wrapper;
 
@@ -119,12 +120,15 @@ void uhf_free(UHFApp* uhf_app) {
     view_dispatcher_remove_view(uhf_app->view_dispatcher, UHFViewWidget);
     widget_free(uhf_app->widget);
 
+    // Tag
+    uhf_tag_wrapper_free(uhf_app->worker->uhf_tag_wrapper);
+
     // Worker
     uhf_worker_stop(uhf_app->worker);
     uhf_worker_free(uhf_app->worker);
 
-    // Tag
-    uhf_tag_wrapper_free(uhf_app->worker->uhf_tag_wrapper);
+    // Device
+    uhf_device_free(uhf_app->uhf_device);
 
     // View Dispatcher
     view_dispatcher_free(uhf_app->view_dispatcher);
@@ -135,9 +139,6 @@ void uhf_free(UHFApp* uhf_app) {
     // GUI
     furi_record_close(RECORD_GUI);
     uhf_app->gui = NULL;
-
-    // UHFDevice
-    uhf_device_free(uhf_app->uhf_device);
 
     // Notifications
     furi_record_close(RECORD_NOTIFICATION);

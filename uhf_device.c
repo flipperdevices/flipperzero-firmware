@@ -20,7 +20,6 @@ UHFDevice* uhf_device_alloc() {
 
 void uhf_device_set_name(UHFDevice* dev, const char* name) {
     furi_assert(dev);
-
     strlcpy(dev->dev_name, name, UHF_DEV_NAME_MAX_LEN);
 }
 

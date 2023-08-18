@@ -4,14 +4,11 @@
 
 Buffer* buffer_alloc(size_t initial_capacity) {
     Buffer* buf = (Buffer*)malloc(sizeof(Buffer));
-    if(!buf) return NULL;
-
-    buf->data = (uint8_t*)malloc(initial_capacity);
+    buf->data = (uint8_t*)malloc(sizeof(uint8_t) * initial_capacity);
     if(!buf->data) {
         free(buf);
         return NULL;
     }
-
     buf->size = 0;
     buf->capacity = initial_capacity;
     return buf;
@@ -21,7 +18,7 @@ bool buffer_append_single(Buffer* buf, uint8_t data) {
     if(buf->closed) return false;
     if(buf->size + 1 > buf->capacity) {
         size_t new_capacity = buf->capacity * 2;
-        uint8_t* new_data = (uint8_t*)realloc(buf->data, new_capacity);
+        uint8_t* new_data = (uint8_t*)realloc(buf->data, sizeof(uint8_t) * new_capacity);
         if(!new_data) return false;
         buf->data = new_data;
         buf->capacity = new_capacity;

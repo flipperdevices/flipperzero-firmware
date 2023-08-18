@@ -8,6 +8,7 @@
 #include <furi_hal.h>
 
 #define FRAME_END 0x7E
+#define DEFAULT_BAUDRATE 115200
 
 typedef struct{
     char* hw_version;

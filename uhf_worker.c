@@ -3,15 +3,11 @@
 
 // yrm100 module commands
 UHFWorkerEvent verify_module_connected(UHFWorker* uhf_worker) {
-    // FuriString* ts = furi_string_alloc();
     char* hw_version = m100_get_hardware_version(uhf_worker->module);
     char* sw_version = m100_get_software_version(uhf_worker->module);
     char* manufacturer = m100_get_manufacturers(uhf_worker->module);
     // verify all data exists
     if(hw_version == NULL || sw_version == NULL || manufacturer == NULL) return UHFWorkerEventFail;
-    FURI_LOG_E("TAG", "hw=%s", hw_version);
-    FURI_LOG_E("TAG", "sw=%s", sw_version);
-    FURI_LOG_E("TAG", "mf=%s", manufacturer);
     return UHFWorkerEventSuccess;
 }
 
@@ -65,11 +61,12 @@ UHFTag* send_polling_command(UHFWorker* uhf_worker) {
     UHFTag* uhf_tag;
     while(true) {
         uhf_tag = m100_send_single_poll(uhf_worker->module);
-        furi_delay_ms(100);
+        furi_delay_ms(150);
         if(uhf_worker->state == UHFWorkerStateStop) {
             return NULL;
         }
         if(uhf_tag != NULL) break;
+        FURI_LOG_E("TAG", "NULL");
     }
     return uhf_tag;
 }

@@ -13,7 +13,7 @@ void uhf_tag_wrapper_set_tag(UHFTagWrapper* uhf_tag_wrapper, UHFTag* uhf_tag) {
 }
 
 void uhf_tag_wrapper_free(UHFTagWrapper* uhf_tag_wrapper) {
-    if(uhf_tag_wrapper->uhf_tag != NULL) uhf_tag_free(uhf_tag_wrapper->uhf_tag);
+    uhf_tag_free(uhf_tag_wrapper->uhf_tag);
     free(uhf_tag_wrapper);
 }
 
@@ -35,6 +35,7 @@ void uhf_tag_reset(UHFTag* uhf_tag) {
 }
 
 void uhf_tag_free(UHFTag* uhf_tag) {
+    if(uhf_tag == NULL) return;
     free(uhf_tag->reserved);
     free(uhf_tag->epc);
     free(uhf_tag->tid);
