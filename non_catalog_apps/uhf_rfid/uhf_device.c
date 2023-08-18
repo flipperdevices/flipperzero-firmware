@@ -1,5 +1,4 @@
 #include "uhf_device.h"
-
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 #include <uhf_rfid_icons.h>
@@ -21,7 +20,6 @@ UHFDevice* uhf_device_alloc() {
 
 void uhf_device_set_name(UHFDevice* dev, const char* name) {
     furi_assert(dev);
-
     strlcpy(dev->dev_name, name, UHF_DEV_NAME_MAX_LEN);
 }
 
@@ -33,7 +31,7 @@ static bool uhf_device_save_file(
     bool use_load_path) {
     furi_assert(dev);
 
-    UHFTag* uhf_tag = dev->uhf_tag;
+    UHFTag* uhf_tag = dev->uhf_tag_wrapper->uhf_tag;
     bool saved = false;
     FlipperFormat* file = flipper_format_file_alloc(dev->storage);
     FuriString* temp_str;
@@ -58,20 +56,22 @@ static bool uhf_device_save_file(
         // todo : maybe
         uint32_t temp_arr[1];
         // write epc
-        temp_arr[0] = uhf_tag->epc_length;
+        temp_arr[0] = uhf_tag->epc->size;
         if(!flipper_format_write_uint32(file, UHF_EPC_BANK_LENGTH_LABEL, temp_arr, 1)) break;
-        if(!flipper_format_write_hex(file, UHF_EPC_BANK_LABEL, uhf_tag->epc, uhf_tag->epc_length))
+        if(!flipper_format_write_hex(
+               file, UHF_EPC_BANK_LABEL, uhf_tag->epc->data, uhf_tag->epc->size))
             break;
         // write tid
-        temp_arr[0] = uhf_tag->tid_length;
+        temp_arr[0] = uhf_tag->tid->size;
         if(!flipper_format_write_uint32(file, UHF_TID_BANK_LENGTH_LABEL, temp_arr, 1)) break;
-        if(!flipper_format_write_hex(file, UHF_TID_BANK_LABEL, uhf_tag->tid, uhf_tag->tid_length))
+        if(!flipper_format_write_hex(
+               file, UHF_TID_BANK_LABEL, uhf_tag->tid->data, uhf_tag->tid->size))
             break;
         // write user
-        temp_arr[0] = uhf_tag->user_length;
+        temp_arr[0] = uhf_tag->user->size;
         if(!flipper_format_write_uint32(file, UHF_USER_BANK_LENGTH_LABEL, temp_arr, 1)) break;
         if(!flipper_format_write_hex(
-               file, UHF_USER_BANK_LABEL, uhf_tag->user, uhf_tag->user_length))
+               file, UHF_USER_BANK_LABEL, uhf_tag->user->data, uhf_tag->user->size))
             break;
         saved = true;
     } while(0);
@@ -99,7 +99,7 @@ static bool uhf_device_load_data(UHFDevice* dev, FuriString* path, bool show_dia
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     bool deprecated_version = false;
-    UHFTag* uhf_tag = dev->uhf_tag;
+    UHFTag* uhf_tag = dev->uhf_tag_wrapper->uhf_tag;
     uhf_tag_reset(uhf_tag);
     uint32_t temp_arr[1];
     if(dev->loading_cb) {
@@ -118,20 +118,23 @@ static bool uhf_device_load_data(UHFDevice* dev, FuriString* path, bool show_dia
         }
         // read epc
         if(!flipper_format_read_uint32(file, UHF_EPC_BANK_LENGTH_LABEL, temp_arr, 1)) break;
-        uhf_tag->epc_length = temp_arr[0];
-        if(!flipper_format_read_hex(file, UHF_EPC_BANK_LABEL, uhf_tag->epc, uhf_tag->epc_length))
+        uhf_tag->epc->size = temp_arr[0];
+        if(!flipper_format_read_hex(
+               file, UHF_EPC_BANK_LABEL, uhf_tag->epc->data, uhf_tag->epc->size))
             break;
 
         // read tid
         if(!flipper_format_read_uint32(file, UHF_TID_BANK_LENGTH_LABEL, temp_arr, 1)) break;
-        uhf_tag->tid_length = temp_arr[0];
-        if(!flipper_format_read_hex(file, UHF_TID_BANK_LABEL, uhf_tag->tid, uhf_tag->tid_length))
+        uhf_tag->tid->size = temp_arr[0];
+        if(!flipper_format_read_hex(
+               file, UHF_TID_BANK_LABEL, uhf_tag->tid->data, uhf_tag->tid->size))
             break;
 
         // read user
         if(!flipper_format_read_uint32(file, UHF_USER_BANK_LENGTH_LABEL, temp_arr, 1)) break;
-        uhf_tag->user_length = temp_arr[0];
-        if(!flipper_format_read_hex(file, UHF_USER_BANK_LABEL, uhf_tag->user, uhf_tag->user_length))
+        uhf_tag->user->size = temp_arr[0];
+        if(!flipper_format_read_hex(
+               file, UHF_USER_BANK_LABEL, uhf_tag->user->data, uhf_tag->user->size))
             break;
 
         parsed = true;
