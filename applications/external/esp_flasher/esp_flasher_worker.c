@@ -74,6 +74,85 @@ static esp_loader_error_t _flash_file(EspFlasherApp* app, char* filepath, uint32
     return ESP_LOADER_SUCCESS;
 }
 
+// This in-app FW switch "exploits" the otadata (boot_app0)
+// - the first four bytes of each array are the counter and the last four bytes are just a CRC of that counter
+// - the bootloader will just boot whichever app has the highest counter in the otadata partition
+//   so we'll just pick 1 for A, and then B will use either 0 or 2 depending on whether it's the slot in use
+
+#define MAGIC_PAYLOAD_SIZE (32)
+
+const uint8_t magic_payload_app_a[MAGIC_PAYLOAD_SIZE] = {0x01, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff,
+                                                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                                                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                                                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                                                         0x9a, 0x98, 0x43, 0x47};
+
+const uint8_t magic_payload_app_b_unset[MAGIC_PAYLOAD_SIZE] = {
+    0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
+const uint8_t magic_payload_app_b_set[MAGIC_PAYLOAD_SIZE] = {
+    0x02, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x74, 0x37, 0xf6, 0x55};
+
+// return true if "switching" fw selected instead of flashing new fw
+// (this does not indicate success)
+static bool _switch_fw(EspFlasherApp* app) {
+    if(app->switch_fw == SwitchNotSet) {
+        return false;
+    }
+
+    esp_loader_error_t err;
+    char user_msg[256];
+
+    loader_port_debug_print("Preparing to set flags for firmware A\n");
+    err = esp_loader_flash_start(
+        ESP_ADDR_BOOT_APP0 + ESP_ADDR_OTADATA_OFFSET_APP_A,
+        MAGIC_PAYLOAD_SIZE,
+        MAGIC_PAYLOAD_SIZE);
+    if(err != ESP_LOADER_SUCCESS) {
+        snprintf(user_msg, sizeof(user_msg), "Erasing flash failed with error %d\n", err);
+        loader_port_debug_print(user_msg);
+        return true;
+    }
+
+    loader_port_debug_print("Setting flags for firmware A\n");
+    const uint8_t* which_payload_app_a = magic_payload_app_a;
+    err = esp_loader_flash_write((void*)which_payload_app_a, MAGIC_PAYLOAD_SIZE);
+    if(err != ESP_LOADER_SUCCESS) {
+        snprintf(user_msg, sizeof(user_msg), "Packet could not be written! Error: %u\n", err);
+        loader_port_debug_print(user_msg);
+        return true;
+    }
+
+    loader_port_debug_print("Preparing to set flags for firmware B\n");
+    err = esp_loader_flash_start(
+        ESP_ADDR_BOOT_APP0 + ESP_ADDR_OTADATA_OFFSET_APP_B,
+        MAGIC_PAYLOAD_SIZE,
+        MAGIC_PAYLOAD_SIZE);
+    if(err != ESP_LOADER_SUCCESS) {
+        snprintf(user_msg, sizeof(user_msg), "Erasing flash failed with error %d\n", err);
+        loader_port_debug_print(user_msg);
+        return true;
+    }
+
+    loader_port_debug_print("Setting flags for firmware B\n");
+    const uint8_t* which_payload_app_b =
+        (app->switch_fw == SwitchToFirmwareB ? magic_payload_app_b_set :
+                                               magic_payload_app_b_unset);
+    err = esp_loader_flash_write((void*)which_payload_app_b, MAGIC_PAYLOAD_SIZE);
+    if(err != ESP_LOADER_SUCCESS) {
+        snprintf(user_msg, sizeof(user_msg), "Packet could not be written! Error: %u\n", err);
+        loader_port_debug_print(user_msg);
+        return true;
+    }
+
+    loader_port_debug_print("Finished programming\n");
+    return true;
+}
+
 typedef struct {
     SelectedFlashOptions selected;
     const char* description;
@@ -85,7 +164,7 @@ static void _flash_all_files(EspFlasherApp* app) {
     esp_loader_error_t err;
     const int num_steps = app->num_selected_flash_options;
 
-#define NUM_FLASH_ITEMS 6
+#define NUM_FLASH_ITEMS 7
     FlashItem items[NUM_FLASH_ITEMS] = {
         {SelectedFlashBoot,
          "bootloader",
@@ -94,7 +173,8 @@ static void _flash_all_files(EspFlasherApp* app) {
         {SelectedFlashPart, "partition table", app->bin_file_path_part, ESP_ADDR_PART},
         {SelectedFlashNvs, "NVS", app->bin_file_path_nvs, ESP_ADDR_NVS},
         {SelectedFlashBootApp0, "boot_app0", app->bin_file_path_boot_app0, ESP_ADDR_BOOT_APP0},
-        {SelectedFlashApp, "firmware", app->bin_file_path_app, ESP_ADDR_APP},
+        {SelectedFlashAppA, "firmware A", app->bin_file_path_app_a, ESP_ADDR_APP_A},
+        {SelectedFlashAppB, "firmware B", app->bin_file_path_app_b, ESP_ADDR_APP_B},
         {SelectedFlashCustom, "custom data", app->bin_file_path_custom, 0x0},
         /* if you add more entries, update NUM_FLASH_ITEMS above! */
     };
@@ -167,7 +247,10 @@ static int32_t esp_flasher_flash_bin(void* context) {
 
     if(!err) {
         loader_port_debug_print("Connected\n");
-        _flash_all_files(app);
+        if(!_switch_fw(app)) {
+            _flash_all_files(app);
+        }
+        app->switch_fw = SwitchNotSet;
 #if 0
         loader_port_debug_print("Restoring transmission rate\n");
         furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
@@ -281,6 +364,8 @@ void loader_port_reset_target(void) {
 }
 
 void loader_port_enter_bootloader(void) {
+    // adapted from custom usb-jtag-serial reset in esptool
+    // (works on official wifi dev board)
     _setDTR(true);
     loader_port_delay_ms(SERIAL_FLASHER_RESET_HOLD_TIME_MS);
     _setRTS(true);
