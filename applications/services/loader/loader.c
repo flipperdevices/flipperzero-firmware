@@ -1,4 +1,5 @@
 #include "loader.h"
+#include "core/core_defines.h"
 #include "loader_i.h"
 #include <applications.h>
 #include <storage/storage.h>
@@ -186,18 +187,24 @@ static FlipperInternalApplication const* loader_find_application_by_name_in_list
 }
 
 static const FlipperInternalApplication* loader_find_application_by_name(const char* name) {
-    const FlipperInternalApplication* application = NULL;
-    application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
-    if(!application) {
-        application = loader_find_application_by_name_in_list(
-            name, FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT);
-    }
-    if(!application) {
-        application = loader_find_application_by_name_in_list(
-            name, FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT);
+    const struct {
+        const FlipperInternalApplication* list;
+        const uint32_t count;
+    } lists[] = {
+        {FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT},
+        {FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT},
+        {FLIPPER_DEBUG_APPS, FLIPPER_DEBUG_APPS_COUNT},
+    };
+
+    for(size_t i = 0; i < COUNT_OF(lists); i++) {
+        const FlipperInternalApplication* application =
+            loader_find_application_by_name_in_list(name, lists[i].list, lists[i].count);
+        if(application) {
+            return application;
+        }
     }
 
-    return application;
+    return NULL;
 }
 
 static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFlag flags) {
