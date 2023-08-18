@@ -75,19 +75,28 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
         }
         iso15693_3_listener_sleep(instance);
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
-        if(iso13239_crc_check(Iso13239CrcTypeDefault, nfc_event->data.buffer)) {
-            iso13239_crc_trim(nfc_event->data.buffer);
+        BitBuffer* request_buf = nfc_event->data.buffer;
+        if(iso13239_crc_check(Iso13239CrcTypeDefault, request_buf)) {
+            iso13239_crc_trim(request_buf);
             const Iso15693_3Error error =
-                iso15693_3_listener_process_request(instance, nfc_event->data.buffer);
+                iso15693_3_listener_process_request(instance, request_buf);
             if(error == Iso15693_3ErrorNotSupported) {
                 instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeCustomCommand;
+                command = instance->callback(instance->generic_event, instance->context);
+            }
+        } else if(bit_buffer_get_size(request_buf) == 0) {
+            // Special case: Single EOF
+            if(instance->session_state.wait_for_eof) {
+                iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+                instance->session_state.wait_for_eof = false;
+            } else if(instance->callback) {
+                instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeSingleEof;
                 command = instance->callback(instance->generic_event, instance->context);
             }
         } else {
             FURI_LOG_D(
                 TAG, "Wrong CRC, buffer size: %zu", bit_buffer_get_size(nfc_event->data.buffer));
         }
-        // TODO: Handle single EOF messages
     }
 
     return command;

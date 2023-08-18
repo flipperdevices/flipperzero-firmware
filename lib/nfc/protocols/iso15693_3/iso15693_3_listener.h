@@ -13,7 +13,7 @@ typedef struct Iso15693_3Listener Iso15693_3Listener;
 typedef enum {
     Iso15693_3ListenerEventTypeFieldOff,
     Iso15693_3ListenerEventTypeCustomCommand,
-    // TODO: Other events
+    Iso15693_3ListenerEventTypeSingleEof,
 } Iso15693_3ListenerEventType;
 
 typedef struct {
