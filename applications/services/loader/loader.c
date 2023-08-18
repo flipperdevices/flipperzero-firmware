@@ -497,7 +497,8 @@ int32_t loader_srv(void* p) {
         FLIPPER_ON_SYSTEM_START[i]();
     }
 
-    if(FLIPPER_AUTORUN_APP_NAME && strlen(FLIPPER_AUTORUN_APP_NAME)) {
+    if((furi_hal_rtc_get_boot_mode() == FuriHalRtcBootModeNormal) && FLIPPER_AUTORUN_APP_NAME &&
+       strlen(FLIPPER_AUTORUN_APP_NAME)) {
         FURI_LOG_I(TAG, "Starting autorun app: %s", FLIPPER_AUTORUN_APP_NAME);
         loader_do_start_by_name(loader, FLIPPER_AUTORUN_APP_NAME, NULL, NULL);
     }
