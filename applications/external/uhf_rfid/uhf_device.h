@@ -5,7 +5,7 @@
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 #include <mbedtls/des.h>
-#include "uhf_data.h"
+#include "uhf_tag.h"
 
 // #include "rfal_picopass.h"
 
@@ -28,15 +28,13 @@
 #define UHF_USER_BANK_LABEL "USER"
 
 #define UHF_APP_EXTENSION ".uhf"
-// #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 
 typedef void (*UHFLoadingCallback)(void* context, bool state);
 
 typedef struct {
     Storage* storage;
     DialogsApp* dialogs;
-    // UHFResponseData* dev_data;
-    UHFTag* uhf_tag;
+    UHFTagWrapper* uhf_tag_wrapper;
     char dev_name[UHF_DEV_NAME_MAX_LEN + 1];
     FuriString* load_path;
     UHFLoadingCallback loading_cb;

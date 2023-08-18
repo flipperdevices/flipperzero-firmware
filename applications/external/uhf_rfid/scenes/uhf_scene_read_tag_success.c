@@ -17,7 +17,8 @@ void uhf_scene_read_card_success_widget_callback(GuiButtonType result, InputType
 
 void uhf_scene_read_tag_success_on_enter(void* ctx) {
     UHFApp* uhf_app = ctx;
-    UHFTag* uhf_tag = uhf_app->worker->uhf_tag;
+    UHFTag* uhf_tag = uhf_app->worker->uhf_tag_wrapper->uhf_tag;
+    FuriString* temp_str = furi_string_alloc();
 
     dolphin_deed(DolphinDeedNfcReadSuccess);
 
@@ -35,13 +36,30 @@ void uhf_scene_read_tag_success_on_enter(void* ctx) {
     widget_add_string_element(
         uhf_app->widget, 3, 32, AlignLeft, AlignCenter, FontPrimary, "EPC :");
 
-    char* pc = convertToHexString(uhf_tag->pc, 2);
-    widget_add_string_element(uhf_app->widget, 26, 19, AlignLeft, AlignCenter, FontKeyboard, pc);
-    char* crc = convertToHexString(uhf_tag->crc, 2);
-    widget_add_string_element(uhf_app->widget, 96, 19, AlignLeft, AlignCenter, FontKeyboard, crc);
-    char* epc = convertToHexString(uhf_tag->epc + 2, uhf_tag->epc_length - 2);
-    widget_add_string_multiline_element(
-        uhf_app->widget, 34, 29, AlignLeft, AlignTop, FontKeyboard, epc);
+    furi_string_cat_printf(temp_str, "%04X", uhf_tag->epc->pc);
+    widget_add_string_element(
+        uhf_app->widget,
+        26,
+        19,
+        AlignLeft,
+        AlignCenter,
+        FontKeyboard,
+        furi_string_get_cstr(temp_str));
+    furi_string_reset(temp_str);
+    furi_string_cat_printf(temp_str, "%04X", uhf_tag->epc->crc);
+    widget_add_string_element(
+        uhf_app->widget,
+        96,
+        19,
+        AlignLeft,
+        AlignCenter,
+        FontKeyboard,
+        furi_string_get_cstr(temp_str));
+    char* epc = convertToHexString(uhf_tag->epc->data, uhf_tag->epc->size);
+    if(epc != NULL) {
+        widget_add_string_multiline_element(
+            uhf_app->widget, 34, 29, AlignLeft, AlignTop, FontKeyboard, epc);
+    }
     widget_add_button_element(
         uhf_app->widget,
         GuiButtonTypeRight,
@@ -55,9 +73,8 @@ void uhf_scene_read_tag_success_on_enter(void* ctx) {
         uhf_scene_read_card_success_widget_callback,
         uhf_app);
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewWidget);
-    free(pc);
-    free(crc);
     free(epc);
+    furi_string_free(temp_str);
 }
 
 bool uhf_scene_read_tag_success_on_event(void* ctx, SceneManagerEvent event) {

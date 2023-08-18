@@ -60,11 +60,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Fix FAAC counter fix seed being not removed from RAM & fix faac add manually cnt (By xMasterX)
 - Updated: [ESP32-C6 Gravity v0.3.4 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - Updated: [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku) - SAVE STATE ADDED
-- Temp Fix ESubGHz Chat (By twisted-pear)
 - Updated: [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) - Firmware switching!
 - Evil Portal: [Add a new Twitter X login screen #66 (By VendelinSulak)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/66)
 - UL: SubGhz: fix RXFIFO_OVERFLOW (By Skorpionm)
 - UL: SubGhz: disable 0 seed (By xMasterX)
+- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 
 <a name="release">
 
