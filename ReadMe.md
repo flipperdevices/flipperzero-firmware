@@ -62,6 +62,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku) - SAVE STATE ADDED
 - Temp Fix ESubGHz Chat (By twisted-pear)
 - Updated: [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) - Firmware switching!
+- Evil Portal: [Add a new Twitter X login screen #66 (By VendelinSulak)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/66)
 
 <a name="release">
 
