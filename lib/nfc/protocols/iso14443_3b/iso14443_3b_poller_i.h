@@ -2,8 +2,6 @@
 
 #include "iso14443_3b_poller.h"
 
-#include <nfc/helpers/bit_buffer.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

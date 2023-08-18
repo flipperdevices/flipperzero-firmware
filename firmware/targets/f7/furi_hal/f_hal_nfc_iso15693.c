@@ -2,7 +2,7 @@
 
 #include <digital_signal/presets/nfc/iso15693_signal.h>
 #include <signal_reader/signal_reader.h>
-#include <nfc/helpers/bit_buffer.h>
+#include <toolbox/bit_buffer.h>
 
 #include <furi_hal_resources.h>
 

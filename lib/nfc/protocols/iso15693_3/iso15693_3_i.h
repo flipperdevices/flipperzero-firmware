@@ -2,7 +2,7 @@
 
 #include "iso15693_3.h"
 
-#include <nfc/helpers/bit_buffer.h>
+#include <toolbox/bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {
