@@ -56,8 +56,10 @@ void uhf_scene_read_tag_success_on_enter(void* ctx) {
         FontKeyboard,
         furi_string_get_cstr(temp_str));
     char* epc = convertToHexString(uhf_tag->epc->data, uhf_tag->epc->size);
-    widget_add_string_multiline_element(
-        uhf_app->widget, 34, 29, AlignLeft, AlignTop, FontKeyboard, epc);
+    if(epc != NULL) {
+        widget_add_string_multiline_element(
+            uhf_app->widget, 34, 29, AlignLeft, AlignTop, FontKeyboard, epc);
+    }
     widget_add_button_element(
         uhf_app->widget,
         GuiButtonTypeRight,

@@ -6,8 +6,8 @@
 void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
     UNUSED(event);
     Buffer* buf = ctx;
-    if(data == (u_int8_t)FRAME_END) buffer_close(buf);
     buffer_append_single(buf, data);
+    if(data == FRAME_END) buffer_close(buf);
 }
 
 M100ModuleInfo* m100_module_info_alloc() {
@@ -42,11 +42,11 @@ void m100_module_free(M100Module* module) {
 uint8_t checksum(const uint8_t* data, size_t length) {
     // CheckSum8 Modulo 256
     // Sum of Bytes % 256
-    uint8_t sum_val = 0x00;
-    for(size_t i = 1; i < length; i++) {
+    uint64_t sum_val = 0x00;
+    for(size_t i = 0; i < length; i++) {
         sum_val += data[i];
     }
-    return sum_val % 256;
+    return (uint8_t)(sum_val % 0x100);
 }
 
 uint16_t crc16_genibus(const uint8_t* data, size_t length) {
@@ -135,35 +135,39 @@ UHFTag* m100_send_single_poll(M100Module* module) {
     furi_hal_uart_tx(
         FuriHalUartIdUSART1, (uint8_t*)&CMD_SINGLE_POLLING.cmd[0], CMD_SINGLE_POLLING.length);
     furi_delay_ms(DELAY_MS);
-    for(size_t i = 0; i < buffer_get_size(module->buf); i++) {
-        FURI_LOG_E("M100", "data[%d]=%02X", i, buffer_get_data(module->buf)[i]);
-    }
-    FURI_LOG_E("M100", "END");
     uint8_t* data = buffer_get_data(module->buf);
     size_t length = buffer_get_size(module->buf);
-    if(length <= 7 && data[2] == 0xFF) return NULL;
+    if(length <= 8 && data[2] == 0xFF) return NULL;
     uint16_t pc = data[6];
     uint16_t crc = 0;
     // mask out epc length from protocol control
     size_t epc_len = pc;
-    epc_len <<= 1;
-    epc_len += (data[7] & 0x80) > 0;
+    epc_len >>= 3;
     epc_len *= 2;
     // get protocol control
     pc <<= 8;
     pc += data[7];
-    crc = data[8 + epc_len + 1];
     // get cyclic redundency check
+    crc = data[8 + epc_len];
     crc <<= 8;
-    crc += data[8 + epc_len + 2];
+    crc += data[8 + epc_len + 1];
     // validate checksum
-    if(checksum(data + 1, length - 3) != data[length - 2]) return NULL;
+    uint8_t cs = checksum(data + 1, length - 3);
+    for(size_t i = 0; i < length; i++){
+        FURI_LOG_E("m100", "data[%d]=%02X", i, data[i]);
+    }
+    if(cs != data[length - 2]) return NULL;
+    FURI_LOG_E("m100", "checksum pass");
     // validate crc
-    if(crc16_genibus(data + 6, epc_len + 2) != crc) return NULL;
+    uint16_t ccrc = crc16_genibus(data + 6, epc_len + 2);
+    FURI_LOG_E("m100", "crc found = %04X, calculated crc = %04X", crc, ccrc);
+    if(ccrc != crc) return NULL;
+    FURI_LOG_E("m100", "crc pass");
     UHFTag* uhf_tag = uhf_tag_alloc();
     uhf_tag_set_epc_pc(uhf_tag, pc);
     uhf_tag_set_epc_crc(uhf_tag, crc);
     uhf_tag_set_epc(uhf_tag, data + 8, epc_len);
+    FURI_LOG_E("m100", "returning tag");
     return uhf_tag;
 }
 
@@ -236,15 +240,15 @@ bool m100_read_label_data_storage(
 }
 
 void m100_set_baudrate(M100Module* module, uint16_t baudrate) {
-    // M100Module* this_module = module;
     size_t length = CMD_SET_COMMUNICATION_BAUD_RATE.length;
     uint8_t cmd[length];
     memcpy(cmd, CMD_SET_COMMUNICATION_BAUD_RATE.cmd, length);
-    cmd[6] = 0xFF & baudrate; // pow LSB
-    cmd[5] = 0xFF & (baudrate >> 4); // pow MSB
+    uint16_t br_mod = baudrate / 100; // module format
+    cmd[6] = 0xFF & br_mod; // pow LSB
+    cmd[5] = 0xFF & (br_mod >> 4); // pow MSB
     // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
     furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, length);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, baudrate * 100);
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, baudrate);
     module->baudrate = baudrate;
 }
 bool m100_set_working_area(M100Module* module, WorkingArea area) {

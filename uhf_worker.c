@@ -61,12 +61,12 @@ UHFTag* send_polling_command(UHFWorker* uhf_worker) {
     UHFTag* uhf_tag;
     while(true) {
         uhf_tag = m100_send_single_poll(uhf_worker->module);
-        furi_delay_ms(150);
+        furi_delay_ms(100);
         if(uhf_worker->state == UHFWorkerStateStop) {
             return NULL;
         }
         if(uhf_tag != NULL) break;
-        FURI_LOG_E("TAG", "NULL");
+        FURI_LOG_E("WKR", "null still");
     }
     return uhf_tag;
 }
