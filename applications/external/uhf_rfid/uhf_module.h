@@ -10,29 +10,29 @@
 #define FRAME_END 0x7E
 #define DEFAULT_BAUDRATE 115200
 
-typedef struct{
+typedef struct {
     char* hw_version;
     char* sw_version;
     char* manufacturer;
-}M100ModuleInfo;
+} M100ModuleInfo;
 
-typedef enum{
-    WA_CHINA_900 = 1,  // Freq_CH-920.125M
-    WA_US,             // Freq_CH-902.25M
-    WA_EU,             // Freq_CH-865.1M
-    WA_CHINA_800,      // Freq_CH-840.125M
-    WA_KOREA = 6       // Freq_CH-917.1M
+typedef enum {
+    WA_CHINA_900 = 1, // Freq_CH-920.125M
+    WA_US, // Freq_CH-902.25M
+    WA_EU, // Freq_CH-865.1M
+    WA_CHINA_800, // Freq_CH-840.125M
+    WA_KOREA = 6 // Freq_CH-917.1M
 } WorkingArea;
 
-typedef enum{
-    WC_CHINA_900 = 1,  // CH_Index(CN,900MHz) = (Freq_CH-920.125M)/0.25M
-    WC_US,             // CH_Index(US) = (Freq_CH-902.25M)/0.5M
-    WC_EU,             // CH_Index(EU) = (Freq_CH-865.1M)/0.2M
-    WC_CHINA_800,      // CH_Index(CN,800MHz) = (Freq_CH-840.125M)/0.25M
-    WC_KOREA = 6       // CH_Index(Korea) = (Freq_CH-917.1M)/0.2M
+typedef enum {
+    WC_CHINA_900 = 1, // CH_Index(CN,900MHz) = (Freq_CH-920.125M)/0.25M
+    WC_US, // CH_Index(US) = (Freq_CH-902.25M)/0.5M
+    WC_EU, // CH_Index(EU) = (Freq_CH-865.1M)/0.2M
+    WC_CHINA_800, // CH_Index(CN,800MHz) = (Freq_CH-840.125M)/0.25M
+    WC_KOREA = 6 // CH_Index(Korea) = (Freq_CH-917.1M)/0.2M
 } WorkingChannel;
 
-typedef struct{
+typedef struct {
     M100ModuleInfo* info;
     uint16_t baudrate;
     WorkingArea area;
@@ -65,4 +65,8 @@ bool m100_set_freq_hopping(M100Module* module, bool hopping);
 // gen2 cmds
 UHFTag* m100_send_single_poll(M100Module* module);
 bool m100_set_select(M100Module* module, UHFTag* uhf_tag);
-bool m100_read_label_data_storage(M100Module* module, UHFTag* uhf_tag, BankType bank, uint32_t access_pwd);
+bool m100_read_label_data_storage(
+    M100Module* module,
+    UHFTag* uhf_tag,
+    BankType bank,
+    uint32_t access_pwd);

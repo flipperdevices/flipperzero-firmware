@@ -153,7 +153,7 @@ UHFTag* m100_send_single_poll(M100Module* module) {
     crc += data[8 + epc_len + 1];
     // validate checksum
     uint8_t cs = checksum(data + 1, length - 3);
-    for(size_t i = 0; i < length; i++){
+    for(size_t i = 0; i < length; i++) {
         FURI_LOG_E("m100", "data[%d]=%02X", i, data[i]);
     }
     if(cs != data[length - 2]) return NULL;
