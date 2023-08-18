@@ -168,7 +168,6 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     instance->tim_cnt_compensation = 9;
 
     furi_hal_bus_enable(FuriHalBusTIM16);
-    furi_hal_bus_enable(FuriHalBusDMAMUX1);
 
     // Capture timer config
     LL_TIM_SetPrescaler(SIGNAL_READER_CAPTURE_TIM, 0);
@@ -269,5 +268,4 @@ void signal_reader_stop(SignalReader* instance) {
     LL_DMA_DeInit(SIGNAL_READER_DMA_CNT_SYNC_DEF);
 
     furi_hal_bus_disable(FuriHalBusTIM16);
-    furi_hal_bus_disable(FuriHalBusDMAMUX1);
 }
