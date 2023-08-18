@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#define ESP_FLASHER_APP_VERSION "v1.1"
+#define ESP_FLASHER_APP_VERSION "v1.2"
 
 typedef struct EspFlasherApp EspFlasherApp;
 
