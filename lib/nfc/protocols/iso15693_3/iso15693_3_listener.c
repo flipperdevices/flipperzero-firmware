@@ -17,6 +17,7 @@ Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, const Iso15693_3Data* da
     instance->nfc = nfc;
     instance->data = iso15693_3_alloc();
     iso15693_3_copy(instance->data, data);
+
     instance->tx_buffer = bit_buffer_alloc(ISO15693_3_LISTENER_BUFFER_SIZE);
 
     instance->iso15693_3_event.data = &instance->iso15693_3_event_data;
@@ -86,6 +87,7 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
             FURI_LOG_D(
                 TAG, "Wrong CRC, buffer size: %zu", bit_buffer_get_size(nfc_event->data.buffer));
         }
+        // TODO: Handle single EOF messages
     }
 
     return command;

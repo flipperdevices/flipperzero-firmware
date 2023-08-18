@@ -17,10 +17,16 @@ typedef enum {
     Iso15693_3ListenerStateQuiet,
 } Iso15693_3ListenerState;
 
+typedef struct {
+    bool wait_for_eof;
+    bool no_reply;
+} Iso15693_3ListenerSessionState;
+
 struct Iso15693_3Listener {
     Nfc* nfc;
     Iso15693_3Data* data;
     Iso15693_3ListenerState state;
+    Iso15693_3ListenerSessionState session_state;
 
     BitBuffer* tx_buffer;
 
