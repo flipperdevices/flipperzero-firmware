@@ -7,7 +7,8 @@ enum SubmenuIndex {
     SubmenuIndexPart,
     SubmenuIndexNvs,
     SubmenuIndexBootApp0,
-    SubmenuIndexApp,
+    SubmenuIndexAppA,
+    SubmenuIndexAppB,
     SubmenuIndexCustom,
     SubmenuIndexFlash,
 };
@@ -97,19 +98,35 @@ static void esp_flasher_scene_browse_callback(void* context, uint32_t index) {
         }
         view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
-    case SubmenuIndexApp:
-        app->selected_flash_options[SelectedFlashApp] =
-            !app->selected_flash_options[SelectedFlashApp];
+    case SubmenuIndexAppA:
+        app->selected_flash_options[SelectedFlashAppA] =
+            !app->selected_flash_options[SelectedFlashAppA];
         if(dialog_file_browser_show(
                app->dialogs, selected_filepath, predefined_filepath, &browser_options)) {
             strncpy(
-                app->bin_file_path_app,
+                app->bin_file_path_app_a,
                 furi_string_get_cstr(selected_filepath),
-                sizeof(app->bin_file_path_app));
+                sizeof(app->bin_file_path_app_a));
         }
-        if(app->bin_file_path_app[0] == '\0') {
+        if(app->bin_file_path_app_a[0] == '\0') {
             // if user didn't select a file, leave unselected
-            app->selected_flash_options[SelectedFlashApp] = false;
+            app->selected_flash_options[SelectedFlashAppA] = false;
+        }
+        view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
+        break;
+    case SubmenuIndexAppB:
+        app->selected_flash_options[SelectedFlashAppB] =
+            !app->selected_flash_options[SelectedFlashAppB];
+        if(dialog_file_browser_show(
+               app->dialogs, selected_filepath, predefined_filepath, &browser_options)) {
+            strncpy(
+                app->bin_file_path_app_b,
+                furi_string_get_cstr(selected_filepath),
+                sizeof(app->bin_file_path_app_b));
+        }
+        if(app->bin_file_path_app_b[0] == '\0') {
+            // if user didn't select a file, leave unselected
+            app->selected_flash_options[SelectedFlashAppB] = false;
         }
         view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
@@ -157,7 +174,8 @@ static void esp_flasher_scene_browse_callback(void* context, uint32_t index) {
 #define STR_PART "Part Table (" TOSTRING(ESP_ADDR_PART) ")"
 #define STR_NVS "NVS (" TOSTRING(ESP_ADDR_NVS) ")"
 #define STR_BOOT_APP0 "boot_app0 (" TOSTRING(ESP_ADDR_BOOT_APP0) ")"
-#define STR_APP "Firmware (" TOSTRING(ESP_ADDR_APP) ")"
+#define STR_APP_A "FirmwareA(" TOSTRING(ESP_ADDR_APP_A) ")"
+#define STR_APP_B "FirmwareB(" TOSTRING(ESP_ADDR_APP_B) ")"
 #define STR_CUSTOM "Custom"
 #define STR_FLASH_S3 "[>] FLASH (ESP32-S3)"
 #define STR_FLASH "[>] FLASH"
@@ -213,9 +231,16 @@ static void _refresh_submenu(EspFlasherApp* app) {
         app);
     submenu_add_item(
         submenu,
-        app->selected_flash_options[SelectedFlashApp] ? STR_SELECT " " STR_APP :
-                                                        STR_UNSELECT " " STR_APP,
-        SubmenuIndexApp,
+        app->selected_flash_options[SelectedFlashAppA] ? STR_SELECT " " STR_APP_A :
+                                                         STR_UNSELECT " " STR_APP_A,
+        SubmenuIndexAppA,
+        esp_flasher_scene_browse_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        app->selected_flash_options[SelectedFlashAppB] ? STR_SELECT " " STR_APP_B :
+                                                         STR_UNSELECT " " STR_APP_B,
+        SubmenuIndexAppB,
         esp_flasher_scene_browse_callback,
         app);
     // TODO: custom addr
@@ -241,7 +266,8 @@ void esp_flasher_scene_browse_on_enter(void* context) {
     app->bin_file_path_part[0] = '\0';
     app->bin_file_path_nvs[0] = '\0';
     app->bin_file_path_boot_app0[0] = '\0';
-    app->bin_file_path_app[0] = '\0';
+    app->bin_file_path_app_a[0] = '\0';
+    app->bin_file_path_app_b[0] = '\0';
     app->bin_file_path_custom[0] = '\0';
 
     _refresh_submenu(app);

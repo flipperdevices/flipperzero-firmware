@@ -33,10 +33,17 @@ typedef enum SelectedFlashOptions {
     SelectedFlashPart,
     SelectedFlashNvs,
     SelectedFlashBootApp0,
-    SelectedFlashApp,
+    SelectedFlashAppA,
+    SelectedFlashAppB,
     SelectedFlashCustom,
     NUM_FLASH_OPTIONS
 } SelectedFlashOptions;
+
+typedef enum {
+    SwitchNotSet,
+    SwitchToFirmwareA,
+    SwitchToFirmwareB,
+} SwitchFirmware;
 
 struct EspFlasherApp {
     Gui* gui;
@@ -59,13 +66,16 @@ struct EspFlasherApp {
     bool reset;
     bool boot;
 
+    SwitchFirmware switch_fw;
+
     bool selected_flash_options[NUM_FLASH_OPTIONS];
     int num_selected_flash_options;
     char bin_file_path_boot[100];
     char bin_file_path_part[100];
     char bin_file_path_nvs[100];
     char bin_file_path_boot_app0[100];
-    char bin_file_path_app[100];
+    char bin_file_path_app_a[100];
+    char bin_file_path_app_b[100];
     char bin_file_path_custom[100];
     FuriThread* flash_worker;
     bool flash_worker_busy;
