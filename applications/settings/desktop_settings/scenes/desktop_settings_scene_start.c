@@ -3,15 +3,30 @@
 
 #include "../desktop_settings_app.h"
 #include "desktop_settings_scene.h"
+#include "desktop_settings_scene_i.h"
+#include <power/power_service/power.h>
 
-#define SCENE_EVENT_SELECT_FAVORITE_PRIMARY 0
-#define SCENE_EVENT_SELECT_FAVORITE_SECONDARY 1
-#define SCENE_EVENT_SELECT_FAVORITE_TERTIARY 2
-#define SCENE_EVENT_SELECT_FAVORITE_QUATERNARY 3
-#define SCENE_EVENT_SELECT_PIN_SETUP 4
-#define SCENE_EVENT_SELECT_AUTO_LOCK_DELAY 5
-#define SCENE_EVENT_SELECT_AUTO_LOCK_PIN 6
-#define SCENE_EVENT_SELECT_DUMBMODE 7
+typedef enum {
+    DesktopSettingsPinSetup = 0,
+    DesktopSettingsAutoLockDelay,
+    DesktopSettingsAutoLockPin,
+    DesktopSettingsDumbMode,
+    DesktopSettingsFavoriteDownLong,
+    DesktopSettingsFavoriteLeftShort,
+    DesktopSettingsFavoriteLeftLong,
+    DesktopSettingsFavoriteRightShort,
+    DesktopSettingsFavoriteRightLong,
+    DesktopSettingsFavoriteUpLong,
+    DesktopSettingsDummyLeft,
+    DesktopSettingsDummyLeftLong,
+    DesktopSettingsDummyRight,
+    DesktopSettingsDummyRightLong,
+    DesktopSettingsDummyUpLong,
+    DesktopSettingsDummyDown,
+    DesktopSettingsDummyDownLong,
+    DesktopSettingsDummyOk,
+    DesktopSettingsDummyOkLong,
+} DesktopSettingsEntry;
 
 #define AUTO_LOCK_DELAY_COUNT 9
 const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
@@ -74,14 +89,6 @@ void desktop_settings_scene_start_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    variable_item_list_add(variable_item_list, "Primary Favorite App", 1, NULL, NULL);
-
-    variable_item_list_add(variable_item_list, "Secondary Favorite App", 1, NULL, NULL);
-
-    variable_item_list_add(variable_item_list, "Tertiary Favorite App", 1, NULL, NULL);
-
-    variable_item_list_add(variable_item_list, "Quaternary Favorite App", 1, NULL, NULL);
-
     variable_item_list_add(variable_item_list, "PIN Setup", 1, NULL, NULL);
 
     item = variable_item_list_add(
@@ -118,8 +125,26 @@ void desktop_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, desktop_on_off_text[value_index]);
 
+    variable_item_list_add(variable_item_list, "Favorite App - Down Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite App - Left Short", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite App - Left Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite App - Right Short", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite App - Right Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite App - Up Long", 1, NULL, NULL);
+
+    variable_item_list_add(variable_item_list, "DummyMode App - Left", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode App - Left Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode App - Right", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode App - Right Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode App - Up Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode App - Down", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode App - Down Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode App - Ok", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "DummyMode App - Ok Long", 1, NULL, NULL);
+
     variable_item_list_set_enter_callback(
         variable_item_list, desktop_settings_scene_start_var_list_enter_callback, app);
+
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewVarItemList);
 }
 
@@ -127,44 +152,127 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
     DesktopSettingsApp* app = context;
     bool consumed = false;
 
-    if(sme.type == SceneManagerEventTypeCustom) {
-        switch(sme.event) {
-        case SCENE_EVENT_SELECT_FAVORITE_PRIMARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 0);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
-            consumed = true;
-            break;
-        case SCENE_EVENT_SELECT_FAVORITE_SECONDARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 1);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
-            consumed = true;
-            break;
-        case SCENE_EVENT_SELECT_FAVORITE_TERTIARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 2);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
-            consumed = true;
-            break;
-        case SCENE_EVENT_SELECT_FAVORITE_QUATERNARY:
-            scene_manager_set_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite, 3);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
-            consumed = true;
-            break;
-        case SCENE_EVENT_SELECT_PIN_SETUP:
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+        case DesktopSettingsPinSetup:
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinMenu);
-            consumed = true;
             break;
-        case SCENE_EVENT_SELECT_AUTO_LOCK_DELAY:
-            consumed = true;
+        case DesktopSettingsAutoLockDelay:
             break;
-        case SCENE_EVENT_SELECT_AUTO_LOCK_PIN:
-            consumed = true;
+        case DesktopSettingsAutoLockPin:
             break;
-        case SCENE_EVENT_SELECT_DUMBMODE:
-            consumed = true;
+        case DesktopSettingsDumbMode:
+            break;
+        case DesktopSettingsFavoriteDownLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_FAVORITE_APP | FavoriteAppDownLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsFavoriteLeftShort:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_FAVORITE_APP | FavoriteAppLeftShort);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsFavoriteLeftLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_FAVORITE_APP | FavoriteAppLeftLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsFavoriteRightShort:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_FAVORITE_APP | FavoriteAppRightShort);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsFavoriteRightLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_FAVORITE_APP | FavoriteAppRightLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsFavoriteUpLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_FAVORITE_APP | FavoriteAppUpLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+
+        case DesktopSettingsDummyLeft:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppLeft);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsDummyLeftLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppLeftLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsDummyRight:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppRight);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsDummyRightLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppRightLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsDummyUpLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppUpLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsDummyDown:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppDown);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsDummyDownLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppDownLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsDummyOk:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppOk);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
+            break;
+        case DesktopSettingsDummyOkLong:
+            scene_manager_set_scene_state(
+                app->scene_manager,
+                DesktopSettingsAppSceneFavorite,
+                SCENE_STATE_SET_DUMMY_APP | DummyAppOkLong);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneFavorite);
             break;
         default:
             break;
         }
+        consumed = true;
     }
     return consumed;
 }

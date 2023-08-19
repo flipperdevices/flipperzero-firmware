@@ -61,8 +61,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             } else if(event->key == InputKeyDown) {
                 main_view->callback(DesktopMainEventOpenArchive, main_view->context);
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(
-                    DesktopMainEventOpenFavoritePrimary, main_view->context); // LEFT FOR PRIMARY
+                main_view->callback(DesktopMainEventOpenFavoriteLeftShort, main_view->context);
             } else if(event->key == InputKeyRight) {
                 main_view->callback(DesktopMainEventOpenPassport, main_view->context);
             }
@@ -70,21 +69,13 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             if(event->key == InputKeyOk) {
                 main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
             } else if(event->key == InputKeyUp) {
-                main_view->callback(
-                    DesktopMainEventOpenFavoriteTertiary,
-                    main_view->context); // HOLD UP FOR Tertiary
+                main_view->callback(DesktopMainEventOpenFavoriteUpLong, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(
-                    DesktopMainEventOpenFavoriteQuaternary,
-                    main_view->context); // HOLD DOWN FOR Quaternary
+                main_view->callback(DesktopMainEventOpenFavoriteDownLong, main_view->context);
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(
-                    DesktopMainEventOpenFavoriteSecondary,
-                    main_view->context); // HOLD LEFT FOR SECONDARY
+                main_view->callback(DesktopMainEventOpenFavoriteLeftLong, main_view->context);
             } else if(event->key == InputKeyRight) {
-                Loader* loader = furi_record_open(RECORD_LOADER);
-                loader_start(loader, "Power", "about_battery", NULL);
-                furi_record_close(RECORD_LOADER);
+                main_view->callback(DesktopMainEventOpenFavoriteRightLong, main_view->context);
             }
         }
     } else if(main_view->is_gamemode == true) {
@@ -118,29 +109,25 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
     } else {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                main_view->callback(
-                    DesktopMainEventOpenGamesMenu, main_view->context); // OPENS GamesMenu
+                main_view->callback(DesktopDummyEventOpenOk, main_view->context);
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(
-                    DesktopMainEventOpenTetris, main_view->context); // OPENS Tetris
+                main_view->callback(DesktopDummyEventOpenDown, main_view->context);
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(
-                    DesktopMainEventOpenJetPack, main_view->context); // OPENS JETPACK
+                main_view->callback(DesktopDummyEventOpenLeft, main_view->context);
             }
         } else if(event->type == InputTypeLong) {
             if(event->key == InputKeyOk) {
-                main_view->callback(DesktopAnimationEventNewIdleAnimation, main_view->context);
+                main_view->callback(DesktopDummyEventOpenOkLong, main_view->context);
             } else if(event->key == InputKeyUp) {
-                main_view->callback(DesktopMainEventOpenDOOM, main_view->context); // OPENS DOOM
+                main_view->callback(DesktopDummyEventOpenUpLong, main_view->context);
             } else if(event->key == InputKeyDown) {
-                main_view->callback(
-                    DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
+                main_view->callback(DesktopDummyEventOpenDownLong, main_view->context);
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS Snake
+                main_view->callback(DesktopDummyEventOpenLeftLong, main_view->context);
             } else if(event->key == InputKeyRight) {
-                main_view->callback(DesktopMainEventOpen2048, main_view->context); // OPENS 2048
+                main_view->callback(DesktopDummyEventOpenRightLong, main_view->context);
             }
         }
     }

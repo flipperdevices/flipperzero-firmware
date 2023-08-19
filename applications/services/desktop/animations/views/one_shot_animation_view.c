@@ -65,6 +65,7 @@ static bool one_shot_view_input(InputEvent* event, void* context) {
         if(event->key == InputKeyRight) {
             /* Right button reserved for animation activation, so consume */
             if(event->type == InputTypeShort) {
+                consumed = true;
                 if(view->interact_callback) {
                     consumed = true;
                     view->interact_callback(view->interact_callback_context);

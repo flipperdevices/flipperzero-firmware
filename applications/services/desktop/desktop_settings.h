@@ -8,7 +8,7 @@
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
 
-#define DESKTOP_SETTINGS_VER (12)
+#define DESKTOP_SETTINGS_VER (13)
 
 #define DESKTOP_SETTINGS_OLD_PATH CFG_PATH(DESKTOP_SETTINGS_FILE_NAME)
 #define DESKTOP_SETTINGS_PATH INT_PATH(DESKTOP_SETTINGS_FILE_NAME)
@@ -48,6 +48,31 @@
 #define ICON_STYLE_STOCK 0
 #define ICON_STYLE_SLIM 1
 
+typedef enum {
+    FavoriteAppDownLong = 0,
+    FavoriteAppLeftShort,
+    FavoriteAppLeftLong,
+    FavoriteAppRightShort,
+    FavoriteAppRightLong,
+    FavoriteAppUpLong,
+
+    FavoriteAppNumber,
+} FavoriteAppShortcut;
+
+typedef enum {
+    DummyAppLeft = 0,
+    DummyAppLeftLong,
+    DummyAppRight,
+    DummyAppRightLong,
+    DummyAppUpLong,
+    DummyAppDown,
+    DummyAppDownLong,
+    DummyAppOk,
+    DummyAppOkLong,
+
+    DummyAppNumber,
+} DummyAppShortcut;
+
 typedef struct {
     InputKey data[MAX_PIN_SIZE];
     uint8_t length;
@@ -58,10 +83,6 @@ typedef struct {
 } FavoriteApp;
 
 typedef struct {
-    FavoriteApp favorite_primary;
-    FavoriteApp favorite_secondary;
-    FavoriteApp favorite_tertiary;
-    FavoriteApp favorite_quaternary;
     PinCode pin_code;
     uint32_t auto_lock_delay_ms;
     uint8_t displayBatteryPercentage;
@@ -77,4 +98,6 @@ typedef struct {
     bool dumbmode_icon;
     bool auto_lock_with_pin;
     uint8_t display_clock;
+    FavoriteApp favorite_apps[FavoriteAppNumber];
+    FavoriteApp dummy_apps[DummyAppNumber];
 } DesktopSettings;
