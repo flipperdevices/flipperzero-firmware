@@ -67,6 +67,7 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
 - Import the library:
 ```
     #include <lib/subghz/subghz_tx_rx_worker.h>
+    #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 ```
 
 - Define MESSAGE_MAX_LEN with the maximum size (in bytes) of a message.  Messages are typically UTF-8 encoded, but it is up to the sending application to decide.  I beleive the maximum for the CC1101 chip is in the low-60 bytes.  
@@ -102,9 +103,20 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
       demo_context->subghz_txrx = subghz_tx_rx_worker_alloc();
   ```
 
+  - Initialize the list of devices
+  ```
+      subghz_devices_init();
+  ```
+
+  - Get a device references to the internal CC1101 Sub-GHz radio.
+  ```
+      const SubGhzDevice* device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+      furi_assert(device);
+  ```
+
   - Start the worker.
   ```
-      bool worker_started = subghz_tx_rx_worker_start(demo_context->subghz_txrx, frequency);
+      bool worker_started = subghz_tx_rx_worker_start(demo_context->subghz_txrx, device, frequency);
   ```
 
   - If the worker failed (worker_started == false) then free resources and exit.
@@ -131,6 +143,7 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
         subghz_tx_rx_worker_stop(demo_context->subghz_txrx);
     }
     subghz_tx_rx_worker_free(demo_context->subghz_txrx);
+    subghz_devices_deinit();
     furi_hal_power_suppress_charge_exit();
   ```
 

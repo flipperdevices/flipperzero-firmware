@@ -18,6 +18,7 @@ Long press UP button on Flipper Zero to log and send 880Hz tone to another Flipp
 #include <locale/locale.h>
 
 #include <lib/subghz/subghz_tx_rx_worker.h>
+#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
 // This is sent at the beginning of all RF messages.
 // You should make the SUBGHZ_GAME_NAME short but unique.
@@ -389,10 +390,14 @@ int32_t subghz_demo_app(void* p) {
 
     // Subghz worker.
     demo_context->subghz_txrx = subghz_tx_rx_worker_alloc();
+    subghz_devices_init();
 
     // Try to start the TX/RX on the frequency and configure our callback
     // whenever new data is received.
-    if(subghz_tx_rx_worker_start(demo_context->subghz_txrx, frequency)) {
+    const SubGhzDevice* device =
+        subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME); // Use internal CC1101 radio
+    furi_assert(device);
+    if(subghz_tx_rx_worker_start(demo_context->subghz_txrx, device, frequency)) {
         subghz_tx_rx_worker_set_callback_have_read(
             demo_context->subghz_txrx, subghz_demo_worker_update_rx_event_callback, demo_context);
     } else {
@@ -405,6 +410,7 @@ int32_t subghz_demo_app(void* p) {
             subghz_tx_rx_worker_stop(demo_context->subghz_txrx);
         }
         subghz_tx_rx_worker_free(demo_context->subghz_txrx);
+        subghz_devices_deinit();
         furi_message_queue_free(demo_context->queue);
         furi_mutex_free(demo_context->mutex);
         furi_string_free(demo_context->data->buffer);
@@ -519,6 +525,7 @@ int32_t subghz_demo_app(void* p) {
         subghz_tx_rx_worker_stop(demo_context->subghz_txrx);
     }
     subghz_tx_rx_worker_free(demo_context->subghz_txrx);
+    subghz_devices_deinit();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
