@@ -148,7 +148,7 @@ void desktop_settings_scene_start_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewVarItemList);
 }
 
-bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme) {
+bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
     DesktopSettingsApp* app = context;
     bool consumed = false;
 

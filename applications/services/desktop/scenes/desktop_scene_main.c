@@ -75,7 +75,13 @@ static inline bool desktop_scene_main_check_none(const char* str) {
     return (str[1] == '\0' && str[0] == '?');
 }
 
-static void desktop_scene_main_open_app_or_profile(Desktop* desktop, FavoriteApp* application) {
+static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char* path) {
+    if(loader_start_with_gui_error(desktop->loader, path, NULL) != LoaderStatusOk) {
+        loader_start(desktop->loader, PASSPORT_APP, NULL, NULL);
+    }
+}
+
+static void desktop_scene_main_open_fav_or_profile(Desktop* desktop, FavoriteApp* application) {
     bool load_ok = false;
     if(strlen(application->name_or_path) > 0) {
         if(desktop_scene_main_check_none(application->name_or_path)) {
@@ -223,10 +229,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             if(!animation_manager_interact_process(desktop->animation_manager)) {
                 DESKTOP_SETTINGS_LOAD(&desktop->settings);
                 if(!desktop->settings.dummy_mode) {
-                    desktop_scene_main_open_app_or_profile(
+                    desktop_scene_main_open_fav_or_profile(
                         desktop, &desktop->settings.favorite_apps[FavoriteAppRightShort]);
                 } else {
-                    desktop_scene_main_open_app_or_profile(
+                    desktop_scene_main_open_fav_or_profile(
                         desktop, &desktop->settings.dummy_apps[DummyAppRight]);
                 }
             }
@@ -270,23 +276,23 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
                 consumed = true;
             }
-
+        }
         case DesktopDummyEventOpenLeft:
-            desktop_scene_main_open_app_or_profile(
+            desktop_scene_main_open_fav_or_profile(
                 desktop, &desktop->settings.dummy_apps[DummyAppLeft]);
             break;
         case DesktopDummyEventOpenDown:
-            desktop_scene_main_open_app_or_profile(
+            desktop_scene_main_open_fav_or_profile(
                 desktop, &desktop->settings.dummy_apps[DummyAppDown]);
             break;
         case DesktopDummyEventOpenOk:
-            desktop_scene_main_open_app_or_profile(
+            desktop_scene_main_open_fav_or_profile(
                 desktop, &desktop->settings.dummy_apps[DummyAppOk]);
             break;
         case DesktopDummyEventOpenUpLong:
             if(!desktop_scene_main_check_none(
                    desktop->settings.dummy_apps[DummyAppUpLong].name_or_path)) {
-                desktop_scene_main_open_app_or_profile(
+                desktop_scene_main_open_fav_or_profile(
                     desktop, &desktop->settings.dummy_apps[DummyAppUpLong]);
             } else {
                 scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLockMenu, 0);
@@ -294,19 +300,19 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             }
             break;
         case DesktopDummyEventOpenDownLong:
-            desktop_scene_main_open_app_or_profile(
+            desktop_scene_main_open_fav_or_profile(
                 desktop, &desktop->settings.dummy_apps[DummyAppDownLong]);
             break;
         case DesktopDummyEventOpenLeftLong:
-            desktop_scene_main_open_app_or_profile(
+            desktop_scene_main_open_fav_or_profile(
                 desktop, &desktop->settings.dummy_apps[DummyAppLeftLong]);
             break;
         case DesktopDummyEventOpenRightLong:
-            desktop_scene_main_open_app_or_profile(
+            desktop_scene_main_open_fav_or_profile(
                 desktop, &desktop->settings.dummy_apps[DummyAppRightLong]);
             break;
         case DesktopDummyEventOpenOkLong:
-            desktop_scene_main_open_app_or_profile(
+            desktop_scene_main_open_fav_or_profile(
                 desktop, &desktop->settings.dummy_apps[DummyAppOkLong]);
             break;
 

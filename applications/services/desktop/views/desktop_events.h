@@ -15,6 +15,7 @@ typedef enum {
     DesktopMainEventOpenDebug,
     DesktopMainEventOpenPowerOff,
 
+    DesktopMainEventOpenPassport,
     DesktopMainEventOpenSnake,
     DesktopMainEventOpen2048,
     DesktopMainEventOpenZombiez,
