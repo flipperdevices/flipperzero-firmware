@@ -65,6 +65,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGhz: disable 0 seed (By xMasterX)
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - Temp Fix ESubGHz Chat (By twisted-pear/xMasterX)
+- Updated: [PicoPass (iClass) (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 
 <a name="release">
 

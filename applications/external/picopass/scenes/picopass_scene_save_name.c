@@ -52,8 +52,9 @@ bool picopass_scene_save_name_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == PicopassCustomEventTextInputDone) {
+            // Delete old file if renaming
             if(strcmp(picopass->dev->dev_name, "") != 0) {
-                // picopass_device_delete(picopass->dev, true);
+                picopass_device_delete(picopass->dev, true);
             }
             strlcpy(
                 picopass->dev->dev_name, picopass->text_store, strlen(picopass->text_store) + 1);
