@@ -9,7 +9,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include "applications/settings/desktop_settings/desktop_settings_app.h"
-#include "Dab_Timer_icons.h"
+#include "dab_timer_icons.h"
 
 #define TAG "DabTimer"
 #define CLOCK_ISO_DATE_FORMAT "%.4d-%.2d-%.2d"
@@ -336,21 +336,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_release(state->mutex);
     if(state->faceType == 0 || state->faceType == 4) {
         if(state->faceType == 4) {
-            canvas_set_color(canvas, ColorWhite);
+            canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
                 elements_button_left(canvas, "F5");
             }
-            canvas_set_color(canvas, ColorBlack);
+            canvas_set_color(canvas, ColorWhite);
         } else {
-            canvas_draw_icon(canvas, 0, 0, &I_black);
+            canvas_set_color(canvas, ColorWhite);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
                 elements_button_left(canvas, "F1");
             }
-            canvas_set_color(canvas, ColorWhite);
+            canvas_set_color(canvas, ColorBlack);
         }
         canvas_set_font(canvas, FontBigNumbers);
         int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
@@ -395,21 +395,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     } else if(state->faceType == 1 || state->faceType == 5) {
         canvas_set_font(canvas, FontSecondary);
         if(state->faceType == 5) {
-            canvas_set_color(canvas, ColorWhite);
+            canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
                 elements_button_left(canvas, "F6");
             }
-            canvas_set_color(canvas, ColorBlack);
+            canvas_set_color(canvas, ColorWhite);
         } else {
-            canvas_draw_icon(canvas, 0, 0, &I_black);
+            canvas_set_color(canvas, ColorWhite);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
                 elements_button_left(canvas, "F2");
             }
-            canvas_set_color(canvas, ColorWhite);
+            canvas_set_color(canvas, ColorBlack);
         }
         canvas_set_font(canvas, FontBigNumbers);
         if(timer_start_timestamp != 0 && !state->w_test) {
@@ -462,21 +462,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         }
     } else if(state->faceType == 2 || state->faceType == 6) {
         if(state->faceType == 6) {
-            canvas_set_color(canvas, ColorWhite);
+            canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
                 elements_button_left(canvas, "F7");
             }
-            canvas_set_color(canvas, ColorBlack);
+            canvas_set_color(canvas, ColorWhite);
         } else {
-            canvas_draw_icon(canvas, 0, 0, &I_black);
+            canvas_set_color(canvas, ColorWhite);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
                 elements_button_left(canvas, "F3");
             }
-            canvas_set_color(canvas, ColorWhite);
+            canvas_set_color(canvas, ColorBlack);
         }
         canvas_set_font(canvas, FontBatteryPercent);
         if(timer_start_timestamp != 0) {
@@ -497,21 +497,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
     } else {
         if(state->faceType == 7) {
-            canvas_set_color(canvas, ColorWhite);
+            canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
                 elements_button_left(canvas, "F8");
             }
-            canvas_set_color(canvas, ColorBlack);
+            canvas_set_color(canvas, ColorWhite);
         } else {
-            canvas_draw_icon(canvas, 0, 0, &I_black);
+            canvas_set_color(canvas, ColorWhite);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
                 elements_button_left(canvas, "F4");
             }
-            canvas_set_color(canvas, ColorWhite);
+            canvas_set_color(canvas, ColorBlack);
         }
         uint8_t width = canvas_width(canvas);
         uint8_t height = canvas_height(canvas);
@@ -553,10 +553,10 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         }
     }
     if(state->faceType >= 4) {
-        canvas_set_color(canvas, ColorWhite);
+        canvas_set_color(canvas, ColorBlack);
     }
     if(state->faceType < 4) {
-        canvas_set_color(canvas, ColorBlack);
+        canvas_set_color(canvas, ColorWhite);
     }
     if(!state->desktop_settings->is_dumbmode && !state->w_test) {
         if(timer_running) {
@@ -772,7 +772,7 @@ int32_t clock_app(void* p) {
                             notification_message(notification, &sequence_rainbow);
                             notification_message(notification, &sequence_rainbow);
                         }
-                        DOLPHIN_DEED(DolphinDeedPluginGameWin);
+                        dolphin_deed(getRandomDeed());
                     }
                 } else if(event.input.type == InputTypeLong) {
                     if(event.input.key == InputKeyLeft) {
@@ -811,7 +811,7 @@ int32_t clock_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(DolphinDeedPluginGameWin);
+                                dolphin_deed(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_pr1);
                         }
@@ -831,7 +831,7 @@ int32_t clock_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(DolphinDeedPluginGameWin);
+                                dolphin_deed(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_mario1);
                         }
@@ -851,7 +851,7 @@ int32_t clock_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(DolphinDeedPluginGameWin);
+                                dolphin_deed(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_silent);
                             notification_message(notification, &sequence_rainbow);
