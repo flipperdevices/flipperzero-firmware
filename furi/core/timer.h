@@ -60,6 +60,12 @@ typedef void (*FuriTimerPendigCallback)(void* context, uint32_t arg);
 
 void furi_timer_pending_callback(FuriTimerPendigCallback callback, void* context, uint32_t arg);
 
+/** Get currently executing timer name
+ *
+ * @return     The pointer to the timer name, or NULL
+ */
+const char* furi_timer_get_current_name();
+
 #ifdef __cplusplus
 }
 #endif

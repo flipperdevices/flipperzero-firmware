@@ -1,5 +1,6 @@
 #include "thread.h"
 #include "thread_i.h"
+#include "timer.h"
 #include "kernel.h"
 #include "memmgr.h"
 #include "memmgr_heap.h"
@@ -9,6 +10,7 @@
 #include "string.h"
 
 #include <task.h>
+#include <timers.h>
 #include "log.h"
 #include <furi_hal_rtc.h>
 #include <furi_hal_console.h>
@@ -511,6 +513,11 @@ const char* furi_thread_get_appid(FuriThreadId thread_id) {
         FuriThread* thread = (FuriThread*)pvTaskGetThreadLocalStoragePointer(hTask, 0);
         if(thread) {
             appid = thread->appid;
+        } else if(hTask == xTimerGetTimerDaemonTaskHandle()) {
+            const char* timer = furi_timer_get_current_name();
+            if(timer) {
+                appid = timer;
+            }
         }
     }
 

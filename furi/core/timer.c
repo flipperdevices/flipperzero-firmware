@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "thread.h"
 #include "check.h"
 #include "memmgr.h"
 #include "kernel.h"
@@ -6,10 +7,16 @@
 #include <FreeRTOS.h>
 #include <timers.h>
 
+const char* current_timer_name = NULL;
+
 typedef struct {
     FuriTimerCallback func;
     void* context;
 } TimerCallback_t;
+
+const char* furi_timer_get_current_name() {
+    return current_timer_name;
+}
 
 static void TimerCallback(TimerHandle_t hTimer) {
     TimerCallback_t* callb;
@@ -21,7 +28,9 @@ static void TimerCallback(TimerHandle_t hTimer) {
     callb = (TimerCallback_t*)((uint32_t)callb & ~1U);
 
     if(callb != NULL) {
+        current_timer_name = pcTimerGetName(hTimer);
         callb->func(callb->context);
+        current_timer_name = NULL;
     }
 }
 
@@ -47,11 +56,14 @@ FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* co
         reload = pdTRUE;
     }
 
+    // Timer name so thread appid works in timers, and so does APP_DATA_PATH()
+    const char* name = furi_thread_get_appid(furi_thread_get_current_id());
+
     /* Store callback memory dynamic allocation flag */
     callb = (TimerCallback_t*)((uint32_t)callb | 1U);
     // TimerCallback function is always provided as a callback and is used to call application
     // specified function with its context both stored in structure callb.
-    hTimer = xTimerCreate(NULL, 1, reload, callb, TimerCallback);
+    hTimer = xTimerCreate(name, 1, reload, callb, TimerCallback);
     furi_check(hTimer);
 
     /* Return timer ID */
