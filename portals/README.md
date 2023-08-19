@@ -43,6 +43,7 @@ Thank you so much to the following contributors for providing awesome portals.
 - `Starlink.html` by [roshanravan](https://github.com/roshanravan)
 - `Twitch.html` by [roshanravan](https://github.com/roshanravan)
 - `Twitter.html` by [roshanravan](https://github.com/roshanravan)
+- `Twitter_X.html` by [VendelinSulak](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/66)
 - `T_Mobile.html` by [roshanravan](https://github.com/roshanravan)
 - `United_Airlines.html` by [roshanravan](https://github.com/roshanravan)
 - `Verizon.html` by [roshanravan](https://github.com/roshanravan)
