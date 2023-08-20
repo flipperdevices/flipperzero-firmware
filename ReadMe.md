@@ -65,7 +65,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGhz: disable 0 seed (By xMasterX)
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - Temp Fix ESubGHz Chat (By twisted-pear/xMasterX)
-- Updated: [PicoPass (iClass) (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 - [NEW VIDEO PREVIEW FOR ALL ANIMATIONS](https://www.patreon.com/posts/august-2023-all-87925007)
 - Add error message for out of memory (By Willy-JL)
 - Timer appids (for APP_DATA_PATH() in timers) (By Willy-JL)
@@ -77,6 +76,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [NRF24 Channel Scanner (by Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fd22b22637215022ac839ac5e46fbd4e1e0bd0f6)
 - Updated Power Settings - Battery Info to show alternative view with Up time by default (By RogueMaster)
 - Updated: [Advanced Wifi Sniffer (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c8e5c3bd8b353092c7fd5b7ed0327d044ee53b74)
+- Updated: [PicoPass (iClass) (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 
 <a name="release">
 
