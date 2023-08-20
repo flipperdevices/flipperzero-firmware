@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,36.1,,
+Version,+,36.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2671,6 +2671,7 @@ Function,+,sha256_start,void,sha256_context*
 Function,+,sha256_update,void,"sha256_context*, const unsigned char*, unsigned int"
 Function,+,signal_reader_alloc,SignalReader*,"const GpioPin*, uint32_t"
 Function,+,signal_reader_free,void,SignalReader*
+Function,+,signal_reader_set_polarity,void,"SignalReader*, SignalReaderPolarity"
 Function,+,signal_reader_set_pull,void,"SignalReader*, GpioPull"
 Function,+,signal_reader_set_sample_rate,void,"SignalReader*, SignalReaderTimeUnit, uint32_t"
 Function,+,signal_reader_start,void,"SignalReader*, SignalReaderCallback, void*"
