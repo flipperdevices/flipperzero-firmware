@@ -8,7 +8,7 @@
 #include "helpers/minmea.h"
 #include "wifisniffer_icons.h"
 
-#define appname "wifisniffer"
+#define appname "ll-wifisniffer"
 
 #define RX_BUF_SIZE 2048
 #define MAX_ACCESS_POINTS 2048 // imagine getting this many access points
@@ -98,12 +98,10 @@ static void show_access_point(Canvas* canvas, Context* context) {
 
     AccessPoint ap = ctx->active_access_point;
 
-    // canvas_draw_str_aligned(canvas, 3, 25, AlignLeft, AlignBottom, ap.ssid);
     canvas_draw_str_aligned(canvas, 62, 25, AlignCenter, AlignBottom, ap.ssid);
 
     canvas_set_font(canvas, FontSecondary);
 
-    // canvas_draw_str_aligned(canvas, 43, 12, AlignLeft, AlignBottom, ap.bssid);
     canvas_draw_str_aligned(
         canvas, 38 + (ctx->access_points_count > 99 ? 5 : 0), 12, AlignLeft, AlignBottom, ap.bssid);
 
@@ -145,11 +143,9 @@ static void show_access_point(Canvas* canvas, Context* context) {
 static void render_callback(Canvas* canvas, void* context) {
     Context* ctx = context;
 
-    // hier teken je hoe je projectje eruit ziet
-
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 
-    canvas_set_font(canvas, FontPrimary); // groot
+    canvas_set_font(canvas, FontPrimary);
 
     if(ctx->access_points_count >= MAX_ACCESS_POINTS) {
         canvas_draw_str(canvas, 118, 10, "!");
@@ -160,15 +156,12 @@ static void render_callback(Canvas* canvas, void* context) {
         canvas_draw_str(canvas, 80, 40, "Found!");
         canvas_draw_icon(canvas, 1, 4, &I_DolphinWait_61x59);
     } else {
-        // canvas_draw_frame(canvas, 0, 0, 35, 15);
         canvas_draw_frame(canvas, 0, 0, 35 + (ctx->access_points_count > 99 ? 5 : 0), 15);
 
         furi_string_printf(
             ctx->buffer, "%d/%d", ctx->access_points_index + 1, ctx->access_points_count);
 
         canvas_draw_str(canvas, 3, 12, furi_string_get_cstr(ctx->buffer));
-        // canvas_draw_str_aligned(
-        //     canvas, 20, 12, AlignCenter, AlignBottom, furi_string_get_cstr(ctx->buffer));
 
         show_access_point(canvas, ctx);
     }
@@ -235,7 +228,6 @@ static void parseLine(void* context, char* line) {
     while(token != NULL) {
         switch(i) {
         case 0:
-            // strcpy(ap.ssid, token);
             if(strcmp(token, "AR") == 0) {
                 isAp = true;
                 isValid = true;
@@ -433,8 +425,6 @@ static int32_t uart_worker_esp(void* context) {
                             // put a null terminator in place of the newline, to delimit the line string
                             *newline = '\0';
 
-                            // FURI_LOG_I(appname, "Received line: %s", line_current);
-
                             parseLine(ctx, line_current);
 
                             // move the cursor to the character after the newline
@@ -590,8 +580,25 @@ static int32_t uart_worker_gps(void* context) {
 int32_t wifisniffer_app(void* p) {
     UNUSED(p);
 
-    // alloc everything
+    // if(UART_CH_ESP == UART_CH_GPS) {
+    //     FURI_LOG_I(appname, "ESP and GPS uart can't be the same");
+    //     return -1;
+    // }
 
+    // turn off 5v, so it gets reset on startup
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
+
+    // Enable 5v on startup
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
+
+    // alloc everything
     Context* ctx = malloc(sizeof(Context));
     ctx->queue = furi_message_queue_alloc(8, sizeof(Event));
     ctx->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -605,7 +612,6 @@ int32_t wifisniffer_app(void* p) {
     ctx->pressedButton = false;
 
     //esp uart
-
     ctx->rx_stream_esp = furi_stream_buffer_alloc(RX_BUF_SIZE * 5, 1);
 
     ctx->thread_esp = furi_thread_alloc();
@@ -619,31 +625,34 @@ int32_t wifisniffer_app(void* p) {
     if(UART_CH_ESP == FuriHalUartIdUSART1) {
         furi_hal_console_disable();
     } else if(UART_CH_ESP == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(UART_CH_ESP, 9600);
+        furi_hal_uart_init(UART_CH_ESP, 115200);
     }
-    furi_hal_uart_set_br(UART_CH_ESP, 9600);
+    furi_hal_uart_set_br(UART_CH_ESP, 115200);
     furi_hal_uart_set_irq_cb(UART_CH_ESP, uart_cb_esp, ctx);
+
+    // furi_hal_uart_tx(UART_CH_ESP, (uint8_t*)"CFW#WIFISNIFF=1\r\n", strlen("CFW#WIFISNIFF=1\r\n"));
     //end esp uart
 
     //gps uart
+    if(UART_CH_ESP != UART_CH_GPS) {
+        ctx->rx_stream_gps = furi_stream_buffer_alloc(RX_BUF_SIZE * 5, 1);
 
-    ctx->rx_stream_gps = furi_stream_buffer_alloc(RX_BUF_SIZE * 5, 1);
+        ctx->thread_gps = furi_thread_alloc();
+        furi_thread_set_name(ctx->thread_gps, "LLwifiSnifferUartWorkerGPS");
+        furi_thread_set_stack_size(ctx->thread_gps, 2048);
+        furi_thread_set_context(ctx->thread_gps, ctx);
+        furi_thread_set_callback(ctx->thread_gps, uart_worker_gps);
 
-    ctx->thread_gps = furi_thread_alloc();
-    furi_thread_set_name(ctx->thread_gps, "LLwifiSnifferUartWorkerGPS");
-    furi_thread_set_stack_size(ctx->thread_gps, 2048);
-    furi_thread_set_context(ctx->thread_gps, ctx);
-    furi_thread_set_callback(ctx->thread_gps, uart_worker_gps);
+        furi_thread_start(ctx->thread_gps);
 
-    furi_thread_start(ctx->thread_gps);
-
-    if(UART_CH_GPS == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-    } else if(UART_CH_GPS == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(UART_CH_GPS, 9600);
+        if(UART_CH_GPS == FuriHalUartIdUSART1) {
+            furi_hal_console_disable();
+        } else if(UART_CH_GPS == FuriHalUartIdLPUART1) {
+            furi_hal_uart_init(UART_CH_GPS, 9600);
+        }
+        furi_hal_uart_set_br(UART_CH_GPS, 9600);
+        furi_hal_uart_set_irq_cb(UART_CH_GPS, uart_cb_gps, ctx);
     }
-    furi_hal_uart_set_br(UART_CH_GPS, 9600);
-    furi_hal_uart_set_irq_cb(UART_CH_GPS, uart_cb_gps, ctx);
     //end gps uart
 
     ViewPort* view_port = view_port_alloc();
@@ -789,9 +798,11 @@ int32_t wifisniffer_app(void* p) {
     furi_thread_join(ctx->thread_esp);
     furi_thread_free(ctx->thread_esp);
 
-    furi_thread_flags_set(furi_thread_get_id(ctx->thread_gps), WorkerEvtStop);
-    furi_thread_join(ctx->thread_gps);
-    furi_thread_free(ctx->thread_gps);
+    if(UART_CH_ESP != UART_CH_GPS) {
+        furi_thread_flags_set(furi_thread_get_id(ctx->thread_gps), WorkerEvtStop);
+        furi_thread_join(ctx->thread_gps);
+        furi_thread_free(ctx->thread_gps);
+    }
 
     storage_file_close(ctx->file);
     storage_file_free(ctx->file);
@@ -811,6 +822,10 @@ int32_t wifisniffer_app(void* p) {
         furi_hal_uart_deinit(UART_CH_GPS);
     } else if(UART_CH_GPS == FuriHalUartIdUSART1) {
         furi_hal_console_enable();
+    }
+
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
     }
 
     return 0;

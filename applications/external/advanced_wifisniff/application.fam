@@ -9,7 +9,6 @@ App(
     fap_icon_assets="assets",
     fap_icon_assets_symbol="wifisniffer",
     fap_author="Sil333033",
-    fap_weburl="https://github.com/Sil333033",
     fap_version=(1, 0),
     fap_description="Advanced wifi sniffer for ESP32 GPS",
 )

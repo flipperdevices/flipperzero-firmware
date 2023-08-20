@@ -42,7 +42,7 @@ static Version version = {
     .target = TARGET,
     .build_is_dirty = BUILD_DIRTY,
     .firmware_origin = FIRMWARE_ORIGIN,
-    .git_origin = GIT_ORIGIN,
+    .git_origin = FIRMWARE_ORIGIN, // GIT_ORIGIN (IFYKYK)
     .custom_flipper_name = NULL,
 };
 
