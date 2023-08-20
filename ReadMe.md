@@ -80,6 +80,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Changed SubGHz Test Debug app to be external
 - Added: [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - Updated: [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku)
+- Evil Portal: [Add Discord login screen (best remake) #67 (By JMcrafter26)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/67)
 
 <a name="release">
 

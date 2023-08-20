@@ -26,6 +26,7 @@ Thank you so much to the following contributors for providing awesome portals.
 - `AT&T.html` by [roshanravan](https://github.com/roshanravan)
 - `CoxWifi.html` by [qqmajikpp](https://github.com/qqmajikpp)
 - `Delta_Airlines.html` by [roshanravan](https://github.com/roshanravan)
+- `Discord.html` by [JMcrafter26](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/67)
 - `Facebook.html` by [roshanravan](https://github.com/roshanravan)
 - `FakeHack.html` by [roshanravan](https://github.com/roshanravan)
 - `FakeHack2.html` by [roshanravan](https://github.com/roshanravan)
