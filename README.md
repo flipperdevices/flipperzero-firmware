@@ -3,6 +3,9 @@ This is a simple StepCounter/Pedometer for FlipperZero using a Memsic2125 module
 > Thanks to @jamisonderek for the tutorial on how to implement Memsic2125 module on Flipper Zero, and for the support.
 
 # Links
+
+<img src="https://raw.githubusercontent.com/grugnoymeme/flipperzero-StepCounter-fap/main/images/memsic_2125_chip.jpg" width="200" />
+
 | Mx2125 | Name | Purpose | Flipper |
 |--------|------|---------|---------|
 |Pin 1 | Tout | Temperature Out | not connected|
@@ -13,5 +16,5 @@ This is a simple StepCounter/Pedometer for FlipperZero using a Memsic2125 module
 |Pin 6 | Vdd | Drain voltage (3.3V to 5V DC) | 3v3|
 
 
-![Main screen](https://github.com/grugnoymeme/flipperzero-StepCounter-fap/images/main_screen.png "main screen view")
+![Main screen](https://raw.githubusercontent.com/grugnoymeme/flipperzero-StepCounter-fap/main/images/main_screen.png "main screen view")
 
