@@ -6,16 +6,15 @@
 
 #include <furi_hal_resources.h>
 
+#pragma GCC optimize("O3,unroll-loops,Ofast")
+
 #define ISO15693_FC (13560000.0)
 #define ISO15693_PULSE_DURATION_NS (128.0 * 1000000000.0 / ISO15693_FC)
 
 #define FURI_HAL_ISO15693_BUFFER_SIZE (512U)
 
-#define ISO15693_FRAME_PARSER_BITSTREAM_BUFF_SIZE (32)
+#define ISO15693_FRAME_PARSER_BITSTREAM_BUFF_SIZE (16)
 #define ISO15693_FRAME_PARSER_BITRATE_F64MHZ (603U)
-
-#define ISO15693_FRAME_PARSER_EVENT_FLAG_DATA_RECEIVED (1U << 16)
-#define ISO15693_FRAME_PARSER_EVENT_FLAG_ALL (ISO15693_FRAME_PARSER_EVENT_FLAG_DATA_RECEIVED)
 
 #define BITS_IN_BYTE (8U)
 
@@ -141,7 +140,8 @@ static void signal_reader_callback(SignalReaderEvent event, void* context) {
         instance->bytes_to_process += event.data->len;
     }
     if(instance->bytes_to_process > 5) {
-        furi_thread_flags_set(instance->thread_id, ISO15693_FRAME_PARSER_EVENT_FLAG_DATA_RECEIVED);
+        furi_thread_flags_set(
+            instance->thread_id, FHalNfcEventInternalTypeTransparentDataReceived);
     }
 }
 
@@ -316,7 +316,8 @@ bool iso15693_frame_parser_run(Iso15693FrameParser* instance) {
 
     if(command == Iso15693FrameParserCommandFail) {
         FURI_LOG_D(TAG, "Rx failed");
-        iso15693_frame_parser_reset(instance);
+        iso15693_frame_parser_stop(instance);
+        iso15693_frame_parser_start(instance);
     }
 
     return instance->frame_parsed;
@@ -478,14 +479,16 @@ static FHalNfcEvent f_hal_nfc_iso15693_wait_event(uint32_t timeout_ms) {
 
     while(true) {
         uint32_t flag = furi_thread_flags_wait(
-            ISO15693_FRAME_PARSER_EVENT_FLAG_ALL, FuriFlagWaitAny, timeout_ms);
+            FHalNfcEventInternalTypeAbort | FHalNfcEventInternalTypeTransparentDataReceived,
+            FuriFlagWaitAny,
+            timeout_ms);
         furi_thread_flags_clear(flag);
 
-        if(flag & FHalNfcEventAbortRequest) {
+        if(flag & FHalNfcEventInternalTypeAbort) {
             event = FHalNfcEventAbortRequest;
             break;
         }
-        if(flag & ISO15693_FRAME_PARSER_EVENT_FLAG_DATA_RECEIVED) {
+        if(flag & FHalNfcEventInternalTypeTransparentDataReceived) {
             if(iso15693_frame_parser_run(f_hal_nfc_iso15693_listener->parser)) {
                 event = FHalNfcEventRxEnd;
                 break;

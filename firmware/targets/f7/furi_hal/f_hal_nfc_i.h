@@ -15,15 +15,13 @@ typedef enum {
     FHalNfcEventInternalTypeIrq = (1U << 1),
     FHalNfcEventInternalTypeTimerFwtExpired = (1U << 2),
     FHalNfcEventInternalTypeTimerBlockTxExpired = (1U << 3),
-    FHalNfcEventInternalTypeTransparentFieldOn = (1U << 4),
-    FHalNfcEventInternalTypeTransparentFieldOff = (1U << 5),
-    FHalNfcEventInternalTypeTransparentRxEnd = (1U << 6),
-    FHalNfcEventInternalTypeTransparentTimeout = (1U << 7),
+    FHalNfcEventInternalTypeTransparentDataReceived = (1U << 4),
 } FHalNfcEventInternalType;
 
-#define F_HAL_NFC_EVENT_INTERNAL_ALL                                \
-    ((FHalNfcEventInternalTypeAbort | FHalNfcEventInternalTypeIrq | \
-      FHalNfcEventInternalTypeTimerFwtExpired | FHalNfcEventInternalTypeTimerBlockTxExpired))
+#define F_HAL_NFC_EVENT_INTERNAL_ALL                                                          \
+    ((FHalNfcEventInternalTypeAbort | FHalNfcEventInternalTypeIrq |                           \
+      FHalNfcEventInternalTypeTimerFwtExpired | FHalNfcEventInternalTypeTimerBlockTxExpired | \
+      FHalNfcEventInternalTypeTransparentDataReceived))
 
 typedef struct {
     FuriThreadId thread;
