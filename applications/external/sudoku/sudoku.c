@@ -41,6 +41,7 @@ typedef struct {
     GameState state;
     int8_t menuCursor;
     int8_t lastGameMode;
+    bool blockInputUntilRelease;
 } SudokuState;
 
 #define MENU_ITEMS_COUNT 5
@@ -93,7 +94,7 @@ static int get_mode_gaps(int index) {
     return HARD_GAPS;
 }
 
-#define SAVE_VERSION 1
+#define SAVE_VERSION 2
 #define SAVE_FILE APP_DATA_PATH("save.dat")
 
 static bool load_game(SudokuState* state) {
@@ -414,6 +415,7 @@ static bool start_game(SudokuState* state) {
     state->state = GameStateRunning;
     state->cursorX = 0;
     state->cursorY = 0;
+    state->blockInputUntilRelease = false;
     init_board(state);
     shuffle_board(state, 10);
     add_gaps(state, get_mode_gaps(state->lastGameMode));
@@ -496,23 +498,31 @@ int32_t sudoku_main(void* p) {
                 }
             }
 
+            bool invalidLidAndRow =
+                !(state->horizontalFlags & (1 << state->cursorY) ||
+                  state->vertivalFlags & (1 << state->cursorX));
+
             if(event.type == InputTypePress || event.type == InputTypeLong ||
                event.type == InputTypeRepeat) {
                 switch(event.key) {
                 case InputKeyLeft:
+                    state->blockInputUntilRelease = false;
                     state->cursorX = (state->cursorX + BOARD_SIZE - 1) % BOARD_SIZE;
                     break;
                 case InputKeyRight:
+                    state->blockInputUntilRelease = false;
                     state->cursorX = (state->cursorX + 1) % BOARD_SIZE;
                     break;
                 case InputKeyUp:
+                    state->blockInputUntilRelease = false;
                     state->cursorY = (state->cursorY + BOARD_SIZE - 1) % BOARD_SIZE;
                     break;
                 case InputKeyDown:
+                    state->blockInputUntilRelease = false;
                     state->cursorY = (state->cursorY + 1) % BOARD_SIZE;
                     break;
                 case InputKeyOk:
-                    if(userInput) {
+                    if(userInput && !state->blockInputUntilRelease) {
                         int flags = state->board[state->cursorX][state->cursorY] & FLAGS_MASK;
                         int value = state->board[state->cursorX][state->cursorY] & VALUE_MASK;
                         state->board[state->cursorX][state->cursorY] = flags | ((value + 1) % 10);
@@ -522,14 +532,24 @@ int32_t sudoku_main(void* p) {
                 default:
                     break;
                 }
+            } else if(event.type == InputTypeRelease) {
+                state->blockInputUntilRelease = false;
             }
-            if(invalidField && validate_board(state)) {
-                dolphin_deed(DolphinDeedPluginGameWin);
-                state->state = GameStateVictory;
-                state->menuCursor = 0;
-                for(int i = 0; i != BOARD_SIZE; ++i) {
-                    for(int j = 0; j != BOARD_SIZE; ++j) {
-                        state->board[i][j] &= ~USER_INPUT_FLAG;
+            if(invalidField) {
+                if(validate_board(state)) {
+                    dolphin_deed(DolphinDeedPluginGameWin);
+                    state->state = GameStateVictory;
+                    state->menuCursor = 0;
+                    for(int i = 0; i != BOARD_SIZE; ++i) {
+                        for(int j = 0; j != BOARD_SIZE; ++j) {
+                            state->board[i][j] &= ~USER_INPUT_FLAG;
+                        }
+                    }
+                } else {
+                    bool isValidLineOrRow = state->horizontalFlags & (1 << state->cursorY) ||
+                                            state->vertivalFlags & (1 << state->cursorX);
+                    if(invalidLidAndRow && isValidLineOrRow) {
+                        state->blockInputUntilRelease = true;
                     }
                 }
             }
