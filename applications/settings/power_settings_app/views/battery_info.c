@@ -135,8 +135,8 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
     draw_stat(canvas, 104, h, &I_Health_16x16, health);
 
     if(model->alt) {
-        elements_button_left(canvas, "Back");
-        elements_button_right(canvas, "Next");
+        // elements_button_left(canvas, "Back");
+        // elements_button_right(canvas, "Next");
         char uptime[17];
         uint32_t sec = furi_get_tick() / furi_kernel_get_tick_frequency();
         snprintf(

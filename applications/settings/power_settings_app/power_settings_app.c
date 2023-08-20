@@ -22,7 +22,8 @@ static void power_settings_tick_event_callback(void* context) {
 PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene, ViewDispatcherType type) {
     PowerSettingsApp* app = malloc(sizeof(PowerSettingsApp));
 
-    app->about_battery = first_scene == PowerSettingsAppSceneBatteryInfo;
+    app->about_battery = true;
+    // app->about_battery = first_scene == PowerSettingsAppSceneBatteryInfo;
 
     // Records
     app->gui = furi_record_open(RECORD_GUI);
@@ -97,7 +98,7 @@ void power_settings_app_free(PowerSettingsApp* app) {
 }
 
 int32_t power_settings_app(void* p) {
-    uint32_t first_scene = PowerSettingsAppSceneBatteryInfo;
+    uint32_t first_scene = PowerSettingsAppSceneStart;
     ViewDispatcherType type = ViewDispatcherTypeFullscreen;
     if(p && strlen(p)) {
         if(!strcmp(p, "off")) {
