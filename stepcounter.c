@@ -18,34 +18,49 @@ typedef struct {
     bool counting;
 } StepCounterData;
 
+typedef enum {
+    StepCounterEventTypeStep,
+    StepCounterEventTypeKey,
+} StepCounterEventType;
+
+typedef struct {
+    StepCounterEventType type;
+    InputEvent input_event;
+} StepCounterEvent;
+
 typedef struct {
     FuriMessageQueue* queue;
     StepCounterData* data;
+    ViewPort* view_port;
 } StepCounterContext;
 
-void step_callback(void* data) {
-    StepCounterData* stepData = (StepCounterData*)data;
+// Pin the accelerometer is connected to.
+const GpioPin* const gpio_accelerometer = &gpio_ext_pa7;
 
-    if (stepData->counting) {
+void step_callback(void* ctx) {
+    StepCounterContext* context = (StepCounterContext*)ctx;
+    StepCounterData* stepData = context->data;
+
+    if(stepData->counting) {
         bool currentState = furi_hal_gpio_read(stepData->pin);
 
-        if (currentState != stepData->prevState) {
+        if(currentState != stepData->prevState) {
             stepData->prevState = currentState;
             stepData->stepCount++;
-            // Aggiorna l'interfaccia utente per mostrare il numero di passi.
-            view_port_update(view_port);
+
+            StepCounterEvent event = {.type = StepCounterEventTypeStep};
+            furi_message_queue_put(context->queue, &event, 0);
         }
     }
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* queue) {
-    StepCounterContext* stepContext = furi_message_queue_userdata(queue);
-
-    if (input_event->type == InputTypeShort && input_event->key == InputKeyOk) {
-        stepContext->data->counting = !stepContext->data->counting;
-        // Aggiorna l'interfaccia utente per riflettere il cambio di stato.
-        view_port_update(view_port);
-    }
+    StepCounterEvent event = {
+        .type = StepCounterEventTypeKey,
+        .input_event.key = input_event->key,
+        .input_event.type = input_event->type,
+    };
+    furi_message_queue_put(queue, &event, FuriWaitForever);
 }
 
 static void render_callback(Canvas* canvas, void* ctx) {
@@ -53,12 +68,18 @@ static void render_callback(Canvas* canvas, void* ctx) {
     StepCounterData* stepData = stepContext->data;
 
     char stepText[20];
-    snprintf(stepText, sizeof(stepText), "Steps: %d", stepData->stepCount);
+    snprintf(stepText, sizeof(stepText), "Steps: %ld", stepData->stepCount);
     canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, stepText);
 
     char buttonText[10];
     snprintf(buttonText, sizeof(buttonText), stepData->counting ? "STOP" : "START");
-    canvas_draw_str_aligned(canvas, canvas->width / 2, canvas->height - 1, AlignCenter, AlignBottom, buttonText);
+    canvas_draw_str_aligned(
+        canvas,
+        canvas_width(canvas) / 2,
+        canvas_height(canvas) - 1,
+        AlignCenter,
+        AlignBottom,
+        buttonText);
 }
 
 int32_t step_counter_app(void* p) {
@@ -66,16 +87,16 @@ int32_t step_counter_app(void* p) {
 
     StepCounterContext* stepContext = malloc(sizeof(StepCounterContext));
     stepContext->data = malloc(sizeof(StepCounterData));
-    stepContext->data->pin = &gpio_accelerometer;
+    stepContext->data->pin = gpio_accelerometer;
     stepContext->data->prevState = furi_hal_gpio_read(stepContext->data->pin);
     stepContext->data->stepCount = 0;
     stepContext->data->counting = false;
 
-    stepContext->queue = furi_message_queue_alloc(8, sizeof(DemoEvent));
-    furi_message_queue_set_userdata(stepContext->queue, stepContext);
+    stepContext->queue = furi_message_queue_alloc(8, sizeof(StepCounterEvent));
 
-    furi_hal_gpio_init(stepContext->data->pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedVeryHigh);
-    furi_hal_gpio_add_int_callback(stepContext->data->pin, step_callback, stepContext->data);
+    furi_hal_gpio_init(
+        stepContext->data->pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_add_int_callback(stepContext->data->pin, step_callback, stepContext);
 
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, stepContext);
@@ -84,15 +105,26 @@ int32_t step_counter_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    DemoEvent event;
+    StepCounterEvent event;
     bool processing = true;
     do {
-        if (furi_message_queue_get(stepContext->queue, &event, FuriWaitForever) == FuriStatusOk) {
-            switch (event.type) {
-            case DemoEventTypeKey:
-                if (event.input.type == InputTypeShort && event.input.key == InputKeyBack) {
+        if(furi_message_queue_get(stepContext->queue, &event, FuriWaitForever) == FuriStatusOk) {
+            switch(event.type) {
+            case StepCounterEventTypeKey:
+                if(event.input_event.type == InputTypeShort &&
+                   event.input_event.key == InputKeyBack) {
                     processing = false;
+                } else if(
+                    event.input_event.type == InputTypeShort &&
+                    event.input_event.key == InputKeyOk) {
+                    stepContext->data->counting = !stepContext->data->counting;
+                    // Aggiorna l'interfaccia utente per riflettere il cambio di stato.
+                    view_port_update(view_port);
                 }
+                break;
+            case StepCounterEventTypeStep:
+                // Aggiorna l'interfaccia utente per riflettere il cambio di stato.
+                view_port_update(view_port);
                 break;
             default:
                 break;
@@ -101,7 +133,7 @@ int32_t step_counter_app(void* p) {
         } else {
             processing = false;
         }
-    } while (processing);
+    } while(processing);
 
     furi_hal_gpio_remove_int_callback(stepContext->data->pin);
     view_port_enabled_set(view_port, false);
