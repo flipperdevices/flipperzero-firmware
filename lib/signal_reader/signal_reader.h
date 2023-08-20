@@ -10,8 +10,6 @@
 extern "C" {
 #endif
 
-#define F_TIM2 (64000000UL)
-
 typedef enum {
     SignalReaderEventTypeHalfBufferFilled,
     SignalReaderEventTypeFullBufferFilled,
