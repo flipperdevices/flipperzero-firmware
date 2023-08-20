@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi_hal_spi.h>
-#include <xtreme.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,9 +41,7 @@ extern "C" {
 
 #define nrf24_TIMEOUT 500
 #define nrf24_CE_PIN &gpio_ext_pb2
-#define nrf24_HANDLE                                                                         \
-    (XTREME_SETTINGS()->spi_nrf24_handle == SpiDefault ? &furi_hal_spi_bus_handle_external : \
-                                                         &furi_hal_spi_bus_handle_external_extra)
+#define nrf24_HANDLE &furi_hal_spi_bus_handle_external
 
 /* Low level API */
 
