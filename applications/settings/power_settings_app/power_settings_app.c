@@ -97,7 +97,7 @@ void power_settings_app_free(PowerSettingsApp* app) {
 }
 
 int32_t power_settings_app(void* p) {
-    uint32_t first_scene = PowerSettingsAppSceneStart;
+    uint32_t first_scene = PowerSettingsAppSceneBatteryInfo;
     ViewDispatcherType type = ViewDispatcherTypeFullscreen;
     if(p && strlen(p)) {
         if(!strcmp(p, "off")) {

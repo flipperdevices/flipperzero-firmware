@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0819-0243-0.89.1-fd3326e](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-19 19:34 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-19 19:34 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-20 00:20 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-20 00:20 EST`
 - [New Patreon Animation Set](https://www.patreon.com/RogueMaster/membership): [SQUATCH (From SquatchWare By Kuronons, wrenchathome and OFW)](https://github.com/skizzophrenic/SquachWare-CFW/tree/dev/assets/dolphin/external)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [WiFi (Marauder) v6.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
@@ -70,6 +70,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Add error message for out of memory (By Willy-JL)
 - Timer appids (for APP_DATA_PATH() in timers) (By Willy-JL)
 - UL: [Desktop favorite port #578 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/578) Facorites will need to be re-selected and Passport shortcut re-set if that is desired.
+- UL: [Desktop: Fix lock timer after rebooting (by gid9798 | PR #578)](https://github.com/DarkFlippers/unleashed-firmware/pull/578)
 - Added Favorites for Up Long and Down Long (By RogueMaster)
 - UL: [Updated Infrared Assets Pack #581 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/581)
 - Updated: [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku)

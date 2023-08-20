@@ -125,12 +125,12 @@ void desktop_settings_scene_start_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, desktop_on_off_text[value_index]);
 
-    variable_item_list_add(variable_item_list, "Favorite App - Down Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite App - Left Short", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite App - Left Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite App - Right Short", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite App - Right Long", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Favorite App - Up Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Down Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Left Short", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Left Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Right Short", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Right Long", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Favorite - Up Long", 1, NULL, NULL);
 
     variable_item_list_add(variable_item_list, "DummyMode - Left", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "DummyMode - Left Long", 1, NULL, NULL);
