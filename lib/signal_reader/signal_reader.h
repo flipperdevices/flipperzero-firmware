@@ -31,6 +31,11 @@ typedef enum {
     SignalReaderTimeUnit64Mhz,
 } SignalReaderTimeUnit;
 
+typedef enum {
+    SignalReaderPolarityNormal,
+    SignalReaderPolarityInverted,
+} SignalReaderPolarity;
+
 typedef void (*SignalReaderCallback)(SignalReaderEvent event, void* context);
 
 typedef struct SignalReader SignalReader;
@@ -40,6 +45,8 @@ SignalReader* signal_reader_alloc(const GpioPin* gpio_pin, uint32_t size);
 void signal_reader_free(SignalReader* instance);
 
 void signal_reader_set_pull(SignalReader* instance, GpioPull pull);
+
+void signal_reader_set_polarity(SignalReader* instance, SignalReaderPolarity polarity);
 
 void signal_reader_set_sample_rate(
     SignalReader* instance,

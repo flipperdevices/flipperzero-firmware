@@ -29,6 +29,7 @@ struct SignalReader {
     size_t buffer_size;
     const GpioPin* pin;
     GpioPull pull;
+    SignalReaderPolarity polarity;
     uint16_t* gpio_buffer;
     uint8_t* bitstream_buffer;
 
@@ -93,6 +94,12 @@ void signal_reader_set_pull(SignalReader* instance, GpioPull pull) {
     instance->pull = pull;
 }
 
+void signal_reader_set_polarity(SignalReader* instance, SignalReaderPolarity polarity) {
+    furi_assert(instance);
+
+    instance->polarity = polarity;
+}
+
 void signal_reader_set_sample_rate(
     SignalReader* instance,
     SignalReaderTimeUnit time_unit,
@@ -123,9 +130,13 @@ static void furi_hal_sw_digital_pin_dma_rx_isr(void* context) {
                 if((i % 8) == 0) {
                     bitstream_buff_start[i / 8] = 0;
                 }
-                if((gpio_buff_start[i] & instance->pin->pin) == instance->pin->pin) {
-                    bitstream_buff_start[i / 8] |= 1 << (i % 8);
+                uint8_t bit = 0;
+                if(instance->polarity == SignalReaderPolarityNormal) {
+                    bit = (gpio_buff_start[i] & instance->pin->pin) == instance->pin->pin;
+                } else {
+                    bit = (gpio_buff_start[i] & instance->pin->pin) == 0;
                 }
+                bitstream_buff_start[i / 8] |= bit << (i % 8);
             }
             instance->event_data.data = bitstream_buff_start;
             instance->event_data.len = instance->buffer_size / 2;
@@ -146,9 +157,13 @@ static void furi_hal_sw_digital_pin_dma_rx_isr(void* context) {
                 if((i % 8) == 0) {
                     bitstream_buff_start[i / 8] = 0;
                 }
-                if((gpio_buff_start[i] & instance->pin->pin) == instance->pin->pin) {
-                    bitstream_buff_start[i / 8] |= 1 << (i % 8);
+                uint8_t bit = 0;
+                if(instance->polarity == SignalReaderPolarityNormal) {
+                    bit = (gpio_buff_start[i] & instance->pin->pin) == instance->pin->pin;
+                } else {
+                    bit = (gpio_buff_start[i] & instance->pin->pin) == 0;
                 }
+                bitstream_buff_start[i / 8] |= bit << (i % 8);
             }
             instance->event_data.data = bitstream_buff_start;
             instance->event_data.len = instance->buffer_size / 2;
