@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `19 Aug 02:18 GMT +3`
+### Apps checked & updated at `20 Aug 04:37 GMT +3`
 
 
 # Default pack
@@ -49,9 +49,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - **ProtoView** [(by antirez)](https://github.com/antirez/protoview)
 - **SWD Probe** [(by g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - IR Scope [(by kallanreed)](https://github.com/DarkFlippers/unleashed-firmware/pull/407)
-- **BadBT** plugin (BT version of BadKB) [(by Willy-JL, ClaraCrazy, XFW contributors)](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/dev/applications/main/bad_kb) (See in Applications->Tools) - (aka BadUSB via Bluetooth)
+- **BadBT** plugin (BT version of BadKB) [(by Willy-JL, ClaraCrazy, XFW contributors)](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/main/bad_kb) (See in Applications->Tools) - (aka BadUSB via Bluetooth)
 - **Mifare Nested** [(by AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) - Works with PC and python app `FlipperNested`
-- **NFC Maker** plugin (make tags with URLs, Wifi and other things) [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/dev/applications/external/nfc_maker) 
+- **NFC Maker** plugin (make tags with URLs, Wifi and other things) [(by Willy-JL)](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/nfc_maker) 
 - ESP32-CAM -> Camera Suite [(by CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - USB Mass Storage [(by hedger & nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps)
 
@@ -119,7 +119,7 @@ Games:
 - [RC2014 ColecoVision (by ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
 - [ESP Flasher (by 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP32-C6 Gravity terminal (by chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
-- [IFTTT Virtual Button for ESP8266 (by Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/ae321fb5f4c616d3965546926b1b4b446eef8d86)
+- [IFTTT Virtual Button for ESP8266 (by Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) - Fixes [(by Willy-JL)](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/ae321fb5f4c616d3965546926b1b4b446eef8d86)
 - [Wifi Deauth v2 for ESP8266 (by Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
 - [Evil captive portal (by bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - WIP -> +2 new features [by leedave](https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename)
 - [Flashlight (by xMasterX)](https://github.com/xMasterX/flipper-flashlight)
@@ -151,6 +151,7 @@ Games:
 - [Wii EC Analyser (by csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester (by unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - [Atomic Dice Roller (by nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
+- [NRF24 Channel Scanner (by Sil333033)](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/8015ea29a2d4e788b6dee5f7f967dd001534214c)
 
 ## Infrared
 - [IR Remote (by Hong5489)](https://github.com/Hong5489/ir_remote) - improvements [(by friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [(by d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
@@ -162,8 +163,8 @@ Games:
 - [Flizzer Tracker (by LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [Music Beeper (by qqMajiKpp / Haseo)](https://github.com/qqmajikpp/)
 - [Ocarina (by invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina)
-- [Text 2 SAM (by Round-Pi)](https://github.com/Round-Pi/flipperzero-text2sam) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/e688f81b53b0138d80de4b609daf1f9fca5be647)
-- [Tuning Fork (by besya)](https://github.com/besya/flipperzero-tuning-fork) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/44023851f7349b6ae9ca9f9bd9228d795a7e04c0)
+- [Text 2 SAM (by Round-Pi)](https://github.com/Round-Pi/flipperzero-text2sam) - Fixes [(by Willy-JL)](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/e688f81b53b0138d80de4b609daf1f9fca5be647)
+- [Tuning Fork (by besya)](https://github.com/besya/flipperzero-tuning-fork) - Fixes [(by Willy-JL)](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/44023851f7349b6ae9ca9f9bd9228d795a7e04c0)
 - [USB Midi (by DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
 - [Video Player (by LTVA1)](https://github.com/LTVA1/flipper-zero-video-player) <- Follow link to download examples and learn how to convert videos
 - [Music Tracker (by DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)

@@ -40,6 +40,7 @@ typedef struct {
     uint16_t vertivalFlags;
     GameState state;
     int8_t menuCursor;
+    int8_t lastGameMode;
 } SudokuState;
 
 #define MENU_ITEMS_COUNT 5
@@ -82,10 +83,20 @@ const uint8_t u8g2_font_tom_thumb_4x6_tr[725] =
     "y\11\227\307$\225dJ\0z\7\223\310\254\221\6{\10\227\310\251\32D\1|\6\265\310(\1}\11"
     "\227\310\310\14RR\0~\6\213\313\215\4\0\0\0\4\377\377\0";
 
+static int get_mode_gaps(int index) {
+    if(index <= 0) {
+        return EASY_GAPS;
+    }
+    if(index == 1) {
+        return NORMAL_GAPS;
+    }
+    return HARD_GAPS;
+}
+
 #define SAVE_VERSION 1
 #define SAVE_FILE APP_DATA_PATH("save.dat")
 
-bool load_game(SudokuState* state) {
+static bool load_game(SudokuState* state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
     bool res = false;
@@ -109,7 +120,7 @@ bool load_game(SudokuState* state) {
     return res;
 }
 
-void save_game(SudokuState* app) {
+static void save_game(SudokuState* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
@@ -323,7 +334,7 @@ static void shuffle_board(SudokuState* state, int times) {
 }
 
 static void add_gaps(SudokuState* state, int inputCells) {
-    for(int i = 0; i < inputCells; ++i) {
+    for(int i = 0; i <= inputCells; ++i) {
         int x, y;
         do {
             x = furi_hal_random_get() % BOARD_SIZE;
@@ -399,12 +410,13 @@ static bool validate_board(SudokuState* state) {
     return true;
 }
 
-static bool start_game(SudokuState* state, int inputCells) {
+static bool start_game(SudokuState* state) {
+    state->state = GameStateRunning;
     state->cursorX = 0;
     state->cursorY = 0;
     init_board(state);
     shuffle_board(state, 10);
-    add_gaps(state, inputCells);
+    add_gaps(state, get_mode_gaps(state->lastGameMode));
     return validate_board(state);
 }
 
@@ -416,9 +428,10 @@ int32_t sudoku_main(void* p) {
 
     SudokuState* state = malloc(sizeof(SudokuState));
     if(!load_game(state) || state->state == GameStateRestart) {
-        state->state = GameStateRunning;
         state->menuCursor = 0;
-        start_game(state, NORMAL_GAPS);
+        if(state->state != GameStateRestart)
+            state->lastGameMode = 1; // set normal game mode by default, except restart
+        start_game(state);
     }
     state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     furi_check(state->mutex, "mutex alloc failed");
@@ -455,12 +468,9 @@ int32_t sudoku_main(void* p) {
                     if(state->state == GameStatePaused && state->menuCursor == 0) {
                         state->state = GameStateRunning;
                     } else if(state->menuCursor >= 1 && state->menuCursor <= 3) {
-                        state->state = GameStateRunning;
-                        int gaps = state->menuCursor == 1 ? EASY_GAPS :
-                                   state->menuCursor == 2 ? NORMAL_GAPS :
-                                                            HARD_GAPS;
-                        start_game(state, gaps);
+                        state->lastGameMode = state->menuCursor - 1;
                         state->menuCursor = 0;
+                        start_game(state);
                     } else if(state->menuCursor == 4) {
                         exit = true;
                         break;
