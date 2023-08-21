@@ -38,6 +38,7 @@ typedef enum {
     FHalNfcErrorIsrTimeout,
     FHalNfcErrorCommunicationTimeout,
     FHalNfcErrorBufferOverflow,
+    FHalNfcErrorInvalidData,
 } FHalNfcError;
 
 typedef enum {

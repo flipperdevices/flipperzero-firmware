@@ -6,6 +6,17 @@
 #include <furi_hal_resources.h>
 
 #define F_HAL_NFC_ISO15693_MAX_FRAME_SIZE (1024U)
+#define F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE (64)
+
+#define F_HAL_NFC_ISO15693_RESP_SOF_SIZE (5)
+#define F_HAL_NFC_ISO15693_RESP_EOF_SIZE (5)
+#define F_HAL_NFC_ISO15693_RESP_SOF_MASK (0x1FU)
+#define F_HAL_NFC_ISO15693_RESP_SOF_PATTERN (0x17U)
+#define F_HAL_NFC_ISO15693_RESP_EOF_PATTERN (0x1DU)
+
+#define F_HAL_NFC_ISO15693_RESP_PATTERN_MASK (0x03U)
+#define F_HAL_NFC_ISO15693_RESP_PATTERN_0 (0x01U)
+#define F_HAL_NFC_ISO15693_RESP_PATTERN_1 (0x02U)
 
 #define BITS_IN_BYTE (8U)
 
@@ -16,7 +27,16 @@ typedef struct {
     Iso15693Parser* parser;
 } FHalNfcIso15693Listener;
 
-static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener;
+typedef struct {
+    // 4 bits per data bit on transmit
+    uint8_t fifo_buf[F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE * 4];
+    size_t fifo_buf_bits;
+    uint8_t scratch_buf[F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE * 2];
+    size_t scratch_buf_bits;
+} FHalNfcIso15693Poller;
+
+static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener = NULL;
+static FHalNfcIso15693Poller* f_hal_nfc_iso15693_poller = NULL;
 
 static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener_alloc() {
     FHalNfcIso15693Listener* instance = malloc(sizeof(FHalNfcIso15693Listener));
@@ -32,6 +52,18 @@ static void f_hal_nfc_iso15693_listener_free(FHalNfcIso15693Listener* instance) 
 
     iso15693_signal_free(instance->signal);
     iso15693_parser_free(instance->parser);
+
+    free(instance);
+}
+
+static FHalNfcIso15693Poller* f_hal_nfc_iso15693_poller_alloc() {
+    FHalNfcIso15693Poller* instance = malloc(sizeof(FHalNfcIso15693Poller));
+
+    return instance;
+}
+
+static void f_hal_nfc_iso15693_poller_free(FHalNfcIso15693Poller* instance) {
+    furi_assert(instance);
 
     free(instance);
 }
@@ -75,6 +107,10 @@ static FHalNfcError f_hal_nfc_iso15693_common_init(FuriHalSpiBusHandle* handle) 
 }
 
 static FHalNfcError f_hal_nfc_iso15693_poller_init(FuriHalSpiBusHandle* handle) {
+    furi_assert(f_hal_nfc_iso15693_poller == NULL);
+
+    f_hal_nfc_iso15693_poller = f_hal_nfc_iso15693_poller_alloc();
+
     // Enable Subcarrier Stream mode, OOK modulation
     st25r3916_change_reg_bits(
         handle,
@@ -101,7 +137,140 @@ static FHalNfcError f_hal_nfc_iso15693_poller_init(FuriHalSpiBusHandle* handle) 
 
 static FHalNfcError f_hal_nfc_iso15693_poller_deinit(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
+    furi_assert(f_hal_nfc_iso15693_poller);
+
+    f_hal_nfc_iso15693_poller_free(f_hal_nfc_iso15693_poller);
+    f_hal_nfc_iso15693_poller = NULL;
+
     return FHalNfcErrorNone;
+}
+
+static void iso15693_3_poller_encode_frame(
+    const uint8_t* tx_data,
+    size_t tx_bits,
+    uint8_t* scratch_buf,
+    size_t scratch_buf_size,
+    size_t* scratch_buf_bits) {
+    static const uint8_t bit_patterns_1_out_of_4[] = {0x02, 0x08, 0x20, 0x80};
+    size_t scratch_buf_size_calc = (tx_bits / 2) + 2;
+    furi_assert(scratch_buf_size >= scratch_buf_size_calc);
+
+    // Add SOF 1 out of 4
+    scratch_buf[0] = 0x21;
+
+    size_t byte_pos = 1;
+    for(size_t i = 0; i < tx_bits / BITS_IN_BYTE; ++i) {
+        for(size_t j = 0; j < BITS_IN_BYTE; j += (BITS_IN_BYTE) / 4) {
+            const uint8_t bit_pair = (tx_data[i] >> j) & 0x03;
+            scratch_buf[byte_pos++] = bit_patterns_1_out_of_4[bit_pair];
+        }
+    }
+    // Add EOF
+    scratch_buf[byte_pos++] = 0x04;
+    *scratch_buf_bits = byte_pos * BITS_IN_BYTE;
+}
+
+static bool iso15693_3_poller_decode_frame(
+    const uint8_t* buf,
+    size_t buf_bits,
+    uint8_t* buf_decoded,
+    size_t buf_decoded_size,
+    size_t* buf_decoded_bits) {
+    bool decoded = false;
+    size_t bit_pos = 0;
+    memset(buf_decoded, 0, buf_decoded_size);
+
+    do {
+        if(buf_bits == 0) break;
+        // Check SOF
+        if((buf[0] & F_HAL_NFC_ISO15693_RESP_SOF_MASK) != F_HAL_NFC_ISO15693_RESP_SOF_PATTERN)
+            break;
+
+        // 2 response bits = 1 data bit
+        for(uint32_t i = F_HAL_NFC_ISO15693_RESP_SOF_SIZE;
+            i < buf_bits - F_HAL_NFC_ISO15693_RESP_SOF_SIZE;
+            i += BITS_IN_BYTE / 4) {
+            const size_t byte_index = i / BITS_IN_BYTE;
+            const size_t bit_offset = i % BITS_IN_BYTE;
+            const uint8_t resp_byte = (buf[byte_index] >> bit_offset) |
+                                      (buf[byte_index + 1] << (BITS_IN_BYTE - bit_offset));
+
+            // Check EOF
+            if(resp_byte == F_HAL_NFC_ISO15693_RESP_EOF_PATTERN) {
+                decoded = true;
+                break;
+            }
+
+            const uint8_t bit_pattern = resp_byte & F_HAL_NFC_ISO15693_RESP_PATTERN_MASK;
+
+            if(bit_pattern == F_HAL_NFC_ISO15693_RESP_PATTERN_0) {
+                bit_pos++;
+            } else if(bit_pattern == F_HAL_NFC_ISO15693_RESP_PATTERN_1) {
+                buf_decoded[bit_pos / BITS_IN_BYTE] |= 1 << (bit_pos % BITS_IN_BYTE);
+                bit_pos++;
+            } else {
+                break;
+            }
+            if(bit_pos / BITS_IN_BYTE > buf_decoded_size) {
+                break;
+            }
+        }
+
+    } while(false);
+
+    if(decoded) {
+        *buf_decoded_bits = bit_pos;
+    }
+
+    return decoded;
+}
+
+static FHalNfcError f_hal_nfc_iso15693_poller_tx(
+    FuriHalSpiBusHandle* handle,
+    const uint8_t* tx_data,
+    size_t tx_bits) {
+    FHalNfcIso15693Poller* instance = f_hal_nfc_iso15693_poller;
+    iso15693_3_poller_encode_frame(
+        tx_data,
+        tx_bits,
+        instance->scratch_buf,
+        sizeof(instance->scratch_buf),
+        &instance->scratch_buf_bits);
+    return f_hal_nfc_poller_tx_common(handle, instance->scratch_buf, instance->scratch_buf_bits);
+}
+
+static FHalNfcError f_hal_nfc_iso15693_poller_rx(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* rx_data,
+    size_t rx_data_size,
+    size_t* rx_bits) {
+    FHalNfcError error = FHalNfcErrorNone;
+    FHalNfcIso15693Poller* instance = f_hal_nfc_iso15693_poller;
+
+    do {
+        error = f_hal_nfc_common_fifo_rx(
+            handle, instance->fifo_buf, sizeof(instance->fifo_buf), &instance->fifo_buf_bits);
+        if(error != FHalNfcErrorNone) break;
+
+        if(!iso15693_3_poller_decode_frame(
+               instance->fifo_buf,
+               instance->fifo_buf_bits,
+               instance->scratch_buf,
+               sizeof(instance->scratch_buf),
+               &instance->scratch_buf_bits)) {
+            error = FHalNfcErrorInvalidData;
+            break;
+        }
+        if(rx_data_size < instance->scratch_buf_bits / BITS_IN_BYTE) {
+            error = FHalNfcErrorBufferOverflow;
+            break;
+        }
+
+        memcpy(rx_data, instance->scratch_buf, instance->scratch_buf_bits / BITS_IN_BYTE);
+        *rx_bits = instance->scratch_buf_bits;
+    } while(false);
+
+    return error;
 }
 
 static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle) {
@@ -131,8 +300,10 @@ static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle
 
 static FHalNfcError f_hal_nfc_iso15693_listener_deinit(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
+    furi_assert(f_hal_nfc_iso15693_listener);
 
     f_hal_nfc_iso15693_listener_free(f_hal_nfc_iso15693_listener);
+    f_hal_nfc_iso15693_listener = NULL;
 
     return FHalNfcErrorNone;
 }
@@ -247,6 +418,8 @@ const FHalNfcTechBase f_hal_nfc_iso15693 = {
             .init = f_hal_nfc_iso15693_poller_init,
             .deinit = f_hal_nfc_iso15693_poller_deinit,
             .wait_event = f_hal_nfc_wait_event_common,
+            .tx = f_hal_nfc_iso15693_poller_tx,
+            .rx = f_hal_nfc_iso15693_poller_rx,
         },
 
     .listener =

@@ -66,11 +66,14 @@ FHalNfcError f_hal_nfc_common_fifo_rx(
     size_t rx_data_size,
     size_t* rx_bits);
 
+FHalNfcError
+    f_hal_nfc_poller_tx_common(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
+
 // Technology specific API
 typedef FHalNfcError (*FHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
 typedef FHalNfcError (
-    *FHalNfcChipTx)(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
-typedef FHalNfcError (*FHalNfcChipRx)(
+    *FHalNfcTx)(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
+typedef FHalNfcError (*FHalNfcRx)(
     FuriHalSpiBusHandle* handle,
     uint8_t* rx_data,
     size_t rx_data_size,
@@ -81,6 +84,8 @@ typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
     FHalNfcWaitEvent wait_event;
+    FHalNfcTx tx;
+    FHalNfcRx rx;
 } FHalNfcTechPollerBase;
 
 typedef struct {
@@ -88,8 +93,8 @@ typedef struct {
     FHalNfcChipConfig deinit;
     FHalNfcWaitEvent wait_event;
     FHalNfcChipConfig rx_start;
-    FHalNfcChipTx tx;
-    FHalNfcChipRx rx;
+    FHalNfcTx tx;
+    FHalNfcRx rx;
 } FHalNfcTechListenerBase;
 
 typedef struct {
