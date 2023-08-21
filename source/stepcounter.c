@@ -128,12 +128,10 @@ int32_t step_counter_app(void* p) {
                     event.input_event.type == InputTypeShort &&
                     event.input_event.key == InputKeyOk) {
                     stepContext->data->counting = !stepContext->data->counting;
-                    // Aggiorna l'interfaccia utente per riflettere il cambio di stato.
                     view_port_update(view_port);
                 }
                 break;
             case StepCounterEventTypeStep:
-                // Aggiorna l'interfaccia utente per riflettere il cambio di stato.
                 view_port_update(view_port);
                 break;
             default:
