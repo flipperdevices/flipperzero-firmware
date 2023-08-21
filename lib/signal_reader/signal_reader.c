@@ -283,4 +283,7 @@ void signal_reader_stop(SignalReader* instance) {
     LL_DMA_DeInit(SIGNAL_READER_DMA_CNT_SYNC_DEF);
 
     furi_hal_bus_disable(FuriHalBusTIM16);
+
+    memset(instance->gpio_buffer, 0, sizeof(uint16_t) * instance->buffer_size * 8);
+    memset(instance->bitstream_buffer, 0, instance->buffer_size);
 }

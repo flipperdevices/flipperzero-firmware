@@ -123,7 +123,7 @@ static void signal_reader_callback(SignalReaderEvent event, void* context) {
             event.data->len);
         instance->bytes_to_process += event.data->len;
     }
-    if(instance->bytes_to_process > 5) {
+    if(instance->bytes_to_process >= ISO15693_PARSER_BITSTREAM_BUFF_SIZE / 4) {
         instance->callback(Iso15693ParserEventDataReceived, instance->context);
     }
 }
@@ -296,17 +296,19 @@ static const Iso15693ParserStateHandler iso15693_parser_state_handlers[Iso15693P
 };
 
 bool iso15693_parser_run(Iso15693Parser* instance) {
-    iso15693_parser_prepare_buff(instance);
+    if(instance->bytes_to_process) {
+        iso15693_parser_prepare_buff(instance);
 
-    Iso15693ParserCommand command = Iso15693ParserCommandProcessed;
-    while(command == Iso15693ParserCommandProcessed) {
-        command = iso15693_parser_state_handlers[instance->state](instance);
-    }
+        Iso15693ParserCommand command = Iso15693ParserCommandProcessed;
+        while(command == Iso15693ParserCommandProcessed) {
+            command = iso15693_parser_state_handlers[instance->state](instance);
+        }
 
-    if(command == Iso15693ParserCommandFail) {
-        FURI_LOG_D(TAG, "Rx failed");
-        iso15693_parser_stop(instance);
-        iso15693_parser_start_signal_reader(instance);
+        if(command == Iso15693ParserCommandFail) {
+            FURI_LOG_D(TAG, "Frame parse failed");
+            iso15693_parser_stop(instance);
+            iso15693_parser_start_signal_reader(instance);
+        }
     }
 
     return instance->frame_parsed;
