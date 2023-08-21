@@ -697,7 +697,6 @@ FHalNfcError f_hal_nfc_poller_tx(const uint8_t* tx_data, size_t tx_bits) {
 FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
 
-    FHalNfcError err = FHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
@@ -705,7 +704,8 @@ FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
     st25r3916_write_fifo(handle, tx_data, tx_bits);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSMIT_WITHOUT_CRC);
 
-    return err;
+    bool tx_end = f_hal_nfc_event_wait_for_specific_irq(handle, ST25R3916_IRQ_MASK_TXE, 10);
+    return tx_end ? FHalNfcErrorNone : FHalNfcErrorCommunicationTimeout;
 }
 
 FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
