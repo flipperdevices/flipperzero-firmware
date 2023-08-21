@@ -20,10 +20,6 @@ static Iso15693_3Poller* iso15693_3_poller_alloc(Nfc* nfc) {
     instance->nfc = nfc;
     instance->tx_buffer = bit_buffer_alloc(ISO15693_3_POLLER_MAX_BUFFER_SIZE);
     instance->rx_buffer = bit_buffer_alloc(ISO15693_3_POLLER_MAX_BUFFER_SIZE);
-    // 4 bits per data bit on transmit
-    instance->tx_frame_buffer = bit_buffer_alloc(ISO15693_3_POLLER_MAX_BUFFER_SIZE * 4);
-    // 2 bits per data bit on receive
-    instance->rx_frame_buffer = bit_buffer_alloc(ISO15693_3_POLLER_MAX_BUFFER_SIZE * 2);
 
     nfc_config(instance->nfc, NfcModeIso15693Poller);
     nfc_set_guard_time_us(instance->nfc, ISO15693_3_GUARD_TIME_US);
@@ -44,14 +40,10 @@ static void iso15693_3_poller_free(Iso15693_3Poller* instance) {
 
     furi_assert(instance->tx_buffer);
     furi_assert(instance->rx_buffer);
-    furi_assert(instance->tx_frame_buffer);
-    furi_assert(instance->rx_frame_buffer);
     furi_assert(instance->data);
 
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
-    bit_buffer_free(instance->tx_frame_buffer);
-    bit_buffer_free(instance->rx_frame_buffer);
     iso15693_3_free(instance->data);
     free(instance);
 }

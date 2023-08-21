@@ -2,6 +2,7 @@
 #include "iso15693_3_render.h"
 
 #include <nfc/protocols/iso15693_3/iso15693_3_poller.h>
+#include <nfc/protocols/iso15693_3/iso15693_3_listener.h>
 
 #include "nfc/nfc_app_i.h"
 
@@ -58,6 +59,38 @@ static void nfc_scene_read_success_on_enter_iso15693_3(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
+static NfcCommand
+    nfc_scene_emulate_listener_callback_iso15693_3(NfcGenericEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.protocol == NfcProtocolIso15693_3);
+    furi_assert(event.data);
+
+    NfcApp* nfc = context;
+    Iso15693_3ListenerEvent* iso15693_3_event = event.data;
+
+    if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
+        furi_string_cat_printf(nfc->text_box_store, "R:");
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(iso15693_3_event->data->buffer); i++) {
+            furi_string_cat_printf(
+                nfc->text_box_store,
+                " %02X",
+                bit_buffer_get_byte(iso15693_3_event->data->buffer, i));
+        }
+        furi_string_push_back(nfc->text_box_store, '\n');
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventListenerUpdate);
+    }
+
+    return NfcCommandContinue;
+}
+
+static void nfc_scene_emulate_on_enter_iso15693_3(NfcApp* instance) {
+    const Iso15693_3Data* data = nfc_device_get_data(instance->nfc_device, NfcProtocolIso15693_3);
+
+    instance->listener = nfc_listener_alloc(instance->nfc, NfcProtocolIso15693_3, data);
+    nfc_listener_start(
+        instance->listener, nfc_scene_emulate_listener_callback_iso15693_3, instance);
+}
+
 static bool nfc_scene_info_on_event_iso15693_3(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
@@ -77,7 +110,8 @@ static bool nfc_scene_saved_menu_on_event_iso15693_3(NfcApp* instance, uint32_t 
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
-    .features = NfcProtocolFeatureNone, // TODO: Implement better UID editing,
+    .features =
+        NfcProtocolFeatureEmulateFull, // | NfcProtocolFeatureEditUid, // TODO: Implement better UID editing
 
     .scene_info =
         {
@@ -106,7 +140,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
         },
     .scene_emulate =
         {
-            .on_enter = NULL,
+            .on_enter = nfc_scene_emulate_on_enter_iso15693_3,
             .on_event = NULL,
         },
 };

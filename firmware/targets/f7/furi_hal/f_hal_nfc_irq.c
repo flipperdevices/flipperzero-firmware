@@ -4,7 +4,7 @@
 #include <furi_hal_resources.h>
 
 static void f_hal_nfc_int_callback() {
-    f_hal_nfc_set_event(FHalNfcEventInternalTypeIrq);
+    f_hal_nfc_event_set(FHalNfcEventInternalTypeIrq);
 }
 
 uint32_t f_hal_nfc_get_irq(FuriHalSpiBusHandle* handle) {

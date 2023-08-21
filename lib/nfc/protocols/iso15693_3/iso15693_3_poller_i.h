@@ -4,7 +4,7 @@
 
 #include "iso15693_3_i.h"
 
-#include <nfc/helpers/bit_buffer.h>
+#include <toolbox/bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,8 +25,6 @@ struct Iso15693_3Poller {
     Iso15693_3Data* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
-    BitBuffer* tx_frame_buffer;
-    BitBuffer* rx_frame_buffer;
 
     NfcGenericEvent general_event;
     Iso15693_3PollerEvent iso15693_3_event;

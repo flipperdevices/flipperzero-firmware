@@ -57,7 +57,7 @@ static void f_hal_nfc_timer_irq_callback(void* context) {
     FHalNfcTimerConfig* timer = context;
     if(LL_TIM_IsActiveFlag_UPDATE(timer->timer)) {
         LL_TIM_ClearFlag_UPDATE(timer->timer);
-        f_hal_nfc_set_event(timer->event);
+        f_hal_nfc_event_set(timer->event);
         furi_hal_gpio_write(timer->pin, false);
     }
 }

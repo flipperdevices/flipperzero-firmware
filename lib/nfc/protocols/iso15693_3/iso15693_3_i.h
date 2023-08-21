@@ -2,7 +2,7 @@
 
 #include "iso15693_3.h"
 
-#include <nfc/helpers/bit_buffer.h>
+#include <toolbox/bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +32,24 @@ Iso15693_3Error iso15693_3_get_block_security_response_parse(
     uint8_t* data,
     uint16_t block_count,
     const BitBuffer* buf);
+
+void iso15693_3_append_uid(const Iso15693_3Data* data, BitBuffer* buf);
+
+void iso15693_3_append_block(const Iso15693_3Data* data, uint8_t block_num, BitBuffer* buf);
+
+void iso15693_3_set_block_data(
+    Iso15693_3Data* data,
+    uint8_t block_num,
+    const uint8_t* block_data,
+    size_t block_data_size);
+
+void iso15693_3_append_block_security(
+    const Iso15693_3Data* data,
+    uint8_t block_num,
+    BitBuffer* buf);
+
+// NOTE: the uid parameter has reversed byte order with respect to data
+bool iso15693_3_is_equal_uid(const Iso15693_3Data* data, const uint8_t* uid);
 
 #ifdef __cplusplus
 }

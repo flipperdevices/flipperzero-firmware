@@ -12,6 +12,7 @@ extern "C" {
 
 #define ISO15693_3_GUARD_TIME_US (5000U)
 #define ISO15693_3_FDT_POLL_FC (4202U)
+#define ISO15693_3_FDT_LISTEN_FC (4320U)
 #define ISO15693_3_POLL_POLL_MIN_US (1500U)
 
 /* true: modulating releases load, false: modulating adds load resistor to field coil */
@@ -41,13 +42,14 @@ extern "C" {
 
 #define ISO15693_3_REQ_FLAG_T4_SELECTED (1U << 4)
 #define ISO15693_3_REQ_FLAG_T4_ADDRESSED (1U << 5)
-#define ISO15693_3_REQ_FLAG_T4_CUSTOM (1U << 6)
+#define ISO15693_3_REQ_FLAG_T4_OPTION (1U << 6)
 
 #define ISO15693_3_REQ_FLAG_T5_AFI_PRESENT (1U << 4)
 #define ISO15693_3_REQ_FLAG_T5_N_SLOTS_16 (0U << 5)
 #define ISO15693_3_REQ_FLAG_T5_N_SLOTS_1 (1U << 5)
-#define ISO15693_3_REQ_FLAG_T5_CUSTOM (1U << 6)
+#define ISO15693_3_REQ_FLAG_T5_OPTION (1U << 6)
 
+#define ISO15693_3_RESP_FLAG_NONE (0U)
 #define ISO15693_3_RESP_FLAG_ERROR (1U << 0)
 #define ISO15693_3_RESP_FLAG_EXTENSION (1U << 3)
 
@@ -63,13 +65,16 @@ extern "C" {
 #define ISO15693_3_RESP_ERROR_CUSTOM_START (0xA0U)
 #define ISO15693_3_RESP_ERROR_CUSTOM_END (0xDFU)
 
+#define ISO15693_3_CMD_MANDATORY_START (0x01U)
 #define ISO15693_3_CMD_INVENTORY (0x01U)
 #define ISO15693_3_CMD_STAY_QUIET (0x02U)
+#define ISO15693_3_CMD_MANDATORY_RFU (0x03U)
+#define ISO15693_3_CMD_OPTIONAL_START (0x20U)
 #define ISO15693_3_CMD_READ_BLOCK (0x20U)
 #define ISO15693_3_CMD_WRITE_BLOCK (0x21U)
 #define ISO15693_3_CMD_LOCK_BLOCK (0x22U)
-#define ISO15693_3_CMD_READ_BLOCKS (0x23U)
-#define ISO15693_3_CMD_WRITE_BLOCKS (0x24U)
+#define ISO15693_3_CMD_READ_MULTI_BLOCKS (0x23U)
+#define ISO15693_3_CMD_WRITE_MULTI_BLOCKS (0x24U)
 #define ISO15693_3_CMD_SELECT (0x25U)
 #define ISO15693_3_CMD_RESET_TO_READY (0x26U)
 #define ISO15693_3_CMD_WRITE_AFI (0x27U)
@@ -78,6 +83,7 @@ extern "C" {
 #define ISO15693_3_CMD_LOCK_DSFID (0x2AU)
 #define ISO15693_3_CMD_GET_SYS_INFO (0x2BU)
 #define ISO15693_3_CMD_GET_BLOCKS_SECURITY (0x2CU)
+#define ISO15693_3_CMD_OPTIONAL_RFU (0x2DU)
 
 #define ISO15693_3_SYSINFO_FLAG_DSFID (1U << 0)
 #define ISO15693_3_SYSINFO_FLAG_AFI (1U << 1)
@@ -148,6 +154,14 @@ const uint8_t* iso15693_3_get_uid(const Iso15693_3Data* data, size_t* uid_len);
 bool iso15693_3_set_uid(Iso15693_3Data* data, const uint8_t* uid, size_t uid_len);
 
 const Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data);
+
+// Getters and tests
+
+bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num);
+
+// Setters
+
+void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked);
 
 extern const NfcDeviceBase nfc_device_iso15693_3;
 
