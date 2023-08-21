@@ -14,7 +14,7 @@ typedef struct {
  *                                                      |
  *                             +------------------------+-----------+---------+
  *                             |                        |           |         |
- *                        ISO14443-3A              ISO14443-3B    NFC-F   ISO15693-3
+ *                        ISO14443-3A              ISO14443-3B    Felica  ISO15693-3
  *                             |                                              |
  *             +---------------+-------------+                              SLIX2
  *             |               |             |
@@ -55,6 +55,12 @@ static const NfcProtocolTreeNode nfc_protocol_nodes[NfcProtocolNum] = {
             .children_protocol = nfc_protocol_iso14443_4a_children_protocol,
         },
     [NfcProtocolIso15693_3] =
+        {
+            .parent_protocol = NfcProtocolInvalid,
+            .children_num = 0,
+            .children_protocol = NULL,
+        },
+    [NfcProtocolFelica] =
         {
             .parent_protocol = NfcProtocolInvalid,
             .children_num = 0,

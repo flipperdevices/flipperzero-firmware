@@ -367,7 +367,7 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff) {
             }
             furi_string_printf(temp_str, "%s %d", MF_ULTRALIGHT_TEARING_KEY, i);
             if(!flipper_format_write_hex(
-                   ff, furi_string_get_cstr(temp_str), data->tearing_flag->data, 1)) {
+                   ff, furi_string_get_cstr(temp_str), data->tearing_flag[i].data, 1)) {
                 counters_saved = false;
                 break;
             }
@@ -533,6 +533,10 @@ bool mf_ultralight_detect_protocol(const Iso14443_3aData* iso14443_3a_data) {
 
 uint16_t mf_ultralight_get_config_page_num(MfUltralightType type) {
     return mf_ultralight_features[type].config_page;
+}
+
+bool mf_ultralight_support_feature(const uint32_t feature_set, const uint32_t features_to_check) {
+    return (feature_set & features_to_check) != 0;
 }
 
 bool mf_ultralight_get_config_page(const MfUltralightData* data, MfUltralightConfigPages** config) {

@@ -25,6 +25,7 @@ void nfc_scene_detect_on_enter(void* context) {
 
     nfc_app_reset_detected_protocols(instance);
 
+    instance->scanner = nfc_scanner_alloc(instance->nfc);
     nfc_scanner_start(instance->scanner, nfc_scene_detect_scan_callback, instance);
 
     nfc_blink_detect_start(instance);
@@ -53,6 +54,7 @@ void nfc_scene_detect_on_exit(void* context) {
     NfcApp* instance = context;
 
     nfc_scanner_stop(instance->scanner);
+    nfc_scanner_free(instance->scanner);
     popup_reset(instance->popup);
 
     nfc_blink_stop(instance);

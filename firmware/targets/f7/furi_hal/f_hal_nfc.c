@@ -11,6 +11,7 @@ static const FHalNfcTechBase* f_hal_nfc_tech[FHalNfcTechNum] = {
     [FHalNfcTechIso14443a] = &f_hal_nfc_iso14443a,
     [FHalNfcTechIso14443b] = &f_hal_nfc_iso14443b,
     [FHalNfcTechIso15693] = &f_hal_nfc_iso15693,
+    [FHalNfcTechFelica] = &f_hal_nfc_felica,
 };
 
 FHalNfc f_hal_nfc;
@@ -366,7 +367,27 @@ FHalNfcError f_hal_nfc_reset_mode() {
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
     // Set default value in mode register
     st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om0);
+    st25r3916_write_reg(handle, ST25R3916_REG_STREAM_MODE, 0);
     st25r3916_clear_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
+    st25r3916_clear_reg_bits(
+        handle,
+        ST25R3916_REG_BIT_RATE,
+        ST25R3916_REG_BIT_RATE_txrate_mask | ST25R3916_REG_BIT_RATE_rxrate_mask);
+
+    // Write default values
+    st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF1, 0);
+    st25r3916_write_reg(
+        handle,
+        ST25R3916_REG_RX_CONF2,
+        ST25R3916_REG_RX_CONF2_sqm_dyn | ST25R3916_REG_RX_CONF2_agc_en |
+            ST25R3916_REG_RX_CONF2_agc_m);
+
+    st25r3916_write_reg(
+        handle,
+        ST25R3916_REG_CORR_CONF1,
+        ST25R3916_REG_CORR_CONF1_corr_s7 | ST25R3916_REG_CORR_CONF1_corr_s4 |
+            ST25R3916_REG_CORR_CONF1_corr_s1 | ST25R3916_REG_CORR_CONF1_corr_s0);
+    st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0);
 
     const FHalNfcMode mode = f_hal_nfc.mode;
     const FHalNfcTech tech = f_hal_nfc.tech;

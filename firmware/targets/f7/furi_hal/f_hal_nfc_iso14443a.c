@@ -184,6 +184,27 @@ FHalNfcError
     return error;
 }
 
+FHalNfcError f_hal_iso4443a_listener_tx(
+    FuriHalSpiBusHandle* handle,
+    const uint8_t* tx_data,
+    size_t tx_bits) {
+    FHalNfcError error = FHalNfcErrorNone;
+
+    do {
+        error = f_hal_nfc_common_fifo_tx(handle, tx_data, tx_bits);
+        if(error != FHalNfcErrorNone) break;
+
+        bool tx_end = f_hal_nfc_event_wait_for_specific_irq(handle, ST25R3916_IRQ_MASK_TXE, 10);
+        if(!tx_end) {
+            error = FHalNfcErrorCommunicationTimeout;
+            break;
+        }
+
+    } while(false);
+
+    return error;
+}
+
 FHalNfcError f_hal_nfca_listener_tx_custom_parity(
     const uint8_t* tx_data,
     const bool* tx_parity,
@@ -229,7 +250,7 @@ const FHalNfcTechBase f_hal_nfc_iso14443a = {
             .deinit = f_hal_nfc_iso14443a_listener_deinit,
             .wait_event = f_hal_nfc_wait_event_common,
             .rx_start = f_hal_nfc_common_listener_rx_start,
-            .tx = f_hal_nfc_common_fifo_tx,
+            .tx = f_hal_iso4443a_listener_tx,
             .rx = f_hal_nfc_common_fifo_rx,
         },
 };

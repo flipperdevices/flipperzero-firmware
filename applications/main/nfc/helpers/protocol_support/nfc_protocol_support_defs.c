@@ -4,6 +4,7 @@
 #include "iso14443_3b/iso14443_3b.h"
 #include "iso14443_4a/iso14443_4a.h"
 #include "iso15693_3/iso15693_3.h"
+#include "felica/felica.h"
 #include "mf_ultralight/mf_ultralight.h"
 #include "mf_classic/mf_classic.h"
 #include "mf_desfire/mf_desfire.h"
@@ -13,6 +14,7 @@ const NfcProtocolSupportBase* nfc_protocol_support[NfcProtocolNum] = {
     [NfcProtocolIso14443_3b] = &nfc_protocol_support_iso14443_3b,
     [NfcProtocolIso14443_4a] = &nfc_protocol_support_iso14443_4a,
     [NfcProtocolIso15693_3] = &nfc_protocol_support_iso15693_3,
+    [NfcProtocolFelica] = &nfc_protocol_support_felica,
     [NfcProtocolMfUltralight] = &nfc_protocol_support_mf_ultralight,
     [NfcProtocolMfClassic] = &nfc_protocol_support_mf_classic,
     [NfcProtocolMfDesfire] = &nfc_protocol_support_mf_desfire,

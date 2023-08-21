@@ -105,6 +105,7 @@ typedef struct {
 extern const FHalNfcTechBase f_hal_nfc_iso14443a;
 extern const FHalNfcTechBase f_hal_nfc_iso14443b;
 extern const FHalNfcTechBase f_hal_nfc_iso15693;
+extern const FHalNfcTechBase f_hal_nfc_felica;
 
 #ifdef __cplusplus
 }

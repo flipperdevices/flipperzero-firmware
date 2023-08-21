@@ -52,6 +52,8 @@ typedef enum {
     FHalNfcTechIso14443a,
     FHalNfcTechIso14443b,
     FHalNfcTechIso15693,
+    FHalNfcTechFelica,
+
     FHalNfcTechNum,
 } FHalNfcTech;
 

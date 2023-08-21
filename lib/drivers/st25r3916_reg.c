@@ -133,7 +133,6 @@ void st25r3916_read_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* buff, size_t l
     st25r3916_reg_tx_byte(handle, ST25R3916_PT_MEM_READ);
     furi_hal_spi_bus_rx(handle, tmp_buff, length + 1, 200);
     furi_hal_gpio_write(handle->cs, true);
-    furi_hal_gpio_write(handle->cs, true);
     memcpy(buff, tmp_buff + 1, length);
 }
 
