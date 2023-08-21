@@ -4,7 +4,7 @@
 
 #include <furi/furi.h>
 
-#define ISO15693_PARSER_BITSTREAM_BUFF_SIZE (16)
+#define ISO15693_PARSER_BITSTREAM_BUFF_SIZE (8)
 #define ISO15693_PARSER_BITRATE_F64MHZ (603U)
 
 #define TAG "Iso15693Parser"
