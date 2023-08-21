@@ -194,7 +194,7 @@ static Iso15693ParserCommand iso15693_parser_parse_sof(Iso15693Parser* instance)
     Iso15693ParserCommand command = Iso15693ParserCommandProcessed;
     const uint8_t sof_1_out_of_4 = 0x21;
     const uint8_t sof_1_out_of_256 = 0x81;
-    const uint8_t eof = 0x04;
+    const uint8_t eof = 0x01;
 
     if(instance->bitstream_buff[0] == sof_1_out_of_4) {
         instance->state = Iso15693ParserStateParse1OutOf4;
