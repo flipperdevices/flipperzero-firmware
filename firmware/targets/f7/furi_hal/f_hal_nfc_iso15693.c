@@ -31,8 +31,8 @@ typedef struct {
     // 4 bits per data bit on transmit
     uint8_t fifo_buf[F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE * 4];
     size_t fifo_buf_bits;
-    uint8_t scratch_buf[F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE * 2];
-    size_t scratch_buf_bits;
+    uint8_t frame_buf[F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE * 2];
+    size_t frame_buf_bits;
 } FHalNfcIso15693Poller;
 
 static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener = NULL;
@@ -148,26 +148,26 @@ static FHalNfcError f_hal_nfc_iso15693_poller_deinit(FuriHalSpiBusHandle* handle
 static void iso15693_3_poller_encode_frame(
     const uint8_t* tx_data,
     size_t tx_bits,
-    uint8_t* scratch_buf,
-    size_t scratch_buf_size,
-    size_t* scratch_buf_bits) {
+    uint8_t* frame_buf,
+    size_t frame_buf_size,
+    size_t* frame_buf_bits) {
     static const uint8_t bit_patterns_1_out_of_4[] = {0x02, 0x08, 0x20, 0x80};
-    size_t scratch_buf_size_calc = (tx_bits / 2) + 2;
-    furi_assert(scratch_buf_size >= scratch_buf_size_calc);
+    size_t frame_buf_size_calc = (tx_bits / 2) + 2;
+    furi_assert(frame_buf_size >= frame_buf_size_calc);
 
     // Add SOF 1 out of 4
-    scratch_buf[0] = 0x21;
+    frame_buf[0] = 0x21;
 
     size_t byte_pos = 1;
     for(size_t i = 0; i < tx_bits / BITS_IN_BYTE; ++i) {
         for(size_t j = 0; j < BITS_IN_BYTE; j += (BITS_IN_BYTE) / 4) {
             const uint8_t bit_pair = (tx_data[i] >> j) & 0x03;
-            scratch_buf[byte_pos++] = bit_patterns_1_out_of_4[bit_pair];
+            frame_buf[byte_pos++] = bit_patterns_1_out_of_4[bit_pair];
         }
     }
     // Add EOF
-    scratch_buf[byte_pos++] = 0x04;
-    *scratch_buf_bits = byte_pos * BITS_IN_BYTE;
+    frame_buf[byte_pos++] = 0x04;
+    *frame_buf_bits = byte_pos * BITS_IN_BYTE;
 }
 
 static bool iso15693_3_poller_decode_frame(
@@ -233,10 +233,10 @@ static FHalNfcError f_hal_nfc_iso15693_poller_tx(
     iso15693_3_poller_encode_frame(
         tx_data,
         tx_bits,
-        instance->scratch_buf,
-        sizeof(instance->scratch_buf),
-        &instance->scratch_buf_bits);
-    return f_hal_nfc_poller_tx_common(handle, instance->scratch_buf, instance->scratch_buf_bits);
+        instance->frame_buf,
+        sizeof(instance->frame_buf),
+        &instance->frame_buf_bits);
+    return f_hal_nfc_poller_tx_common(handle, instance->frame_buf, instance->frame_buf_bits);
 }
 
 static FHalNfcError f_hal_nfc_iso15693_poller_rx(
@@ -255,19 +255,19 @@ static FHalNfcError f_hal_nfc_iso15693_poller_rx(
         if(!iso15693_3_poller_decode_frame(
                instance->fifo_buf,
                instance->fifo_buf_bits,
-               instance->scratch_buf,
-               sizeof(instance->scratch_buf),
-               &instance->scratch_buf_bits)) {
-            error = FHalNfcErrorInvalidData;
+               instance->frame_buf,
+               sizeof(instance->frame_buf),
+               &instance->frame_buf_bits)) {
+            error = FHalNfcErrorDataFormat;
             break;
         }
-        if(rx_data_size < instance->scratch_buf_bits / BITS_IN_BYTE) {
+        if(rx_data_size < instance->frame_buf_bits / BITS_IN_BYTE) {
             error = FHalNfcErrorBufferOverflow;
             break;
         }
 
-        memcpy(rx_data, instance->scratch_buf, instance->scratch_buf_bits / BITS_IN_BYTE);
-        *rx_bits = instance->scratch_buf_bits;
+        memcpy(rx_data, instance->frame_buf, instance->frame_buf_bits / BITS_IN_BYTE);
+        *rx_bits = instance->frame_buf_bits;
     } while(false);
 
     return error;
