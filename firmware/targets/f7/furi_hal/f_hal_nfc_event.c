@@ -27,7 +27,7 @@ FHalNfcError f_hal_nfc_abort() {
     return FHalNfcErrorNone;
 }
 
-FHalNfcEvent f_hal_nfc_event_wait(uint32_t timeout_ms) {
+FHalNfcEvent f_hal_nfc_wait_event_common(uint32_t timeout_ms) {
     furi_assert(f_hal_nfc_event);
     furi_assert(f_hal_nfc_event->thread);
 
@@ -80,24 +80,6 @@ FHalNfcEvent f_hal_nfc_event_wait(uint32_t timeout_ms) {
         if(event_flag & FHalNfcEventInternalTypeAbort) {
             event |= FHalNfcEventAbortRequest;
             furi_thread_flags_clear(FHalNfcEventInternalTypeAbort);
-        }
-        // Transparent mode events
-        // TODO: Rework transparent mode
-        if(event_flag & FHalNfcEventInternalTypeTransparentFieldOn) {
-            event |= FHalNfcEventFieldOn;
-            furi_thread_flags_clear(FHalNfcEventInternalTypeTransparentFieldOn);
-        }
-        if(event_flag & FHalNfcEventInternalTypeTransparentFieldOff) {
-            event |= FHalNfcEventFieldOff;
-            furi_thread_flags_clear(FHalNfcEventInternalTypeTransparentFieldOff);
-        }
-        if(event_flag & FHalNfcEventInternalTypeTransparentRxEnd) {
-            event |= FHalNfcEventRxEnd;
-            furi_thread_flags_clear(FHalNfcEventInternalTypeTransparentRxEnd);
-        }
-        if(event_flag & FHalNfcEventInternalTypeTransparentTimeout) {
-            event |= FHalNfcEventTimeout;
-            furi_thread_flags_clear(FHalNfcEventInternalTypeTransparentTimeout);
         }
     } else {
         event = FHalNfcEventTimeout;

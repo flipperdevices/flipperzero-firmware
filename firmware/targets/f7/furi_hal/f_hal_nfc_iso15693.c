@@ -1,47 +1,48 @@
 #include "f_hal_nfc_i.h"
 
-#include <pulse_reader/pulse_reader.h>
 #include <digital_signal/presets/nfc/iso15693_signal.h>
+#include <signal_reader/parsers/iso15693/iso15693_parser.h>
 
 #include <furi_hal_resources.h>
 
-#define ISO15693_FC (13560000.0)
-#define ISO15693_PULSE_DURATION_NS (128.0 * 1000000000.0 / ISO15693_FC)
+#define F_HAL_NFC_ISO15693_MAX_FRAME_SIZE (1024U)
+#define F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE (64)
 
-#define FURI_HAL_ISO15693_BUFFER_SIZE (512U)
+#define F_HAL_NFC_ISO15693_RESP_SOF_SIZE (5)
+#define F_HAL_NFC_ISO15693_RESP_EOF_SIZE (5)
+#define F_HAL_NFC_ISO15693_RESP_SOF_MASK (0x1FU)
+#define F_HAL_NFC_ISO15693_RESP_SOF_PATTERN (0x17U)
+#define F_HAL_NFC_ISO15693_RESP_EOF_PATTERN (0x1DU)
+
+#define F_HAL_NFC_ISO15693_RESP_PATTERN_MASK (0x03U)
+#define F_HAL_NFC_ISO15693_RESP_PATTERN_0 (0x01U)
+#define F_HAL_NFC_ISO15693_RESP_PATTERN_1 (0x02U)
 
 #define BITS_IN_BYTE (8U)
 
 #define TAG "FuriHalIso15693"
 
-typedef enum {
-    FuriHalIso15693FrameStateSof1,
-    FuriHalIso15693FrameStateSof2,
-    FuriHalIso15693FrameStateCoding4,
-    FuriHalIso15693FrameStateCoding256,
-    FuriHalIso15693FrameStateEof,
-    FuriHalIso15693FrameStateReset,
-} FuriHalIso15693FrameState;
-
 typedef struct {
-    uint8_t rx_buf[FURI_HAL_ISO15693_BUFFER_SIZE];
-    size_t rx_bytes;
-    uint32_t timestamp;
-    PulseReader* reader;
     Iso15693Signal* signal;
+    Iso15693Parser* parser;
 } FHalNfcIso15693Listener;
 
-static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener;
+typedef struct {
+    // 4 bits per data bit on transmit
+    uint8_t fifo_buf[F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE * 4];
+    size_t fifo_buf_bits;
+    uint8_t frame_buf[F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE * 2];
+    size_t frame_buf_bits;
+} FHalNfcIso15693Poller;
+
+static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener = NULL;
+static FHalNfcIso15693Poller* f_hal_nfc_iso15693_poller = NULL;
 
 static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener_alloc() {
     FHalNfcIso15693Listener* instance = malloc(sizeof(FHalNfcIso15693Listener));
 
-    instance->reader = pulse_reader_alloc(&gpio_spi_r_miso, FURI_HAL_ISO15693_BUFFER_SIZE);
-    pulse_reader_set_timebase(instance->reader, PulseReaderUnitNanosecond);
-    pulse_reader_set_bittime(instance->reader, ISO15693_PULSE_DURATION_NS);
-    pulse_reader_set_pull(instance->reader, GpioPullDown);
-
     instance->signal = iso15693_signal_alloc(&gpio_spi_r_mosi);
+    instance->parser = iso15693_parser_alloc(&gpio_spi_r_miso, F_HAL_NFC_ISO15693_MAX_FRAME_SIZE);
 
     return instance;
 }
@@ -49,8 +50,20 @@ static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener_alloc() {
 static void f_hal_nfc_iso15693_listener_free(FHalNfcIso15693Listener* instance) {
     furi_assert(instance);
 
-    pulse_reader_free(instance->reader);
     iso15693_signal_free(instance->signal);
+    iso15693_parser_free(instance->parser);
+
+    free(instance);
+}
+
+static FHalNfcIso15693Poller* f_hal_nfc_iso15693_poller_alloc() {
+    FHalNfcIso15693Poller* instance = malloc(sizeof(FHalNfcIso15693Poller));
+
+    return instance;
+}
+
+static void f_hal_nfc_iso15693_poller_free(FHalNfcIso15693Poller* instance) {
+    furi_assert(instance);
 
     free(instance);
 }
@@ -94,6 +107,10 @@ static FHalNfcError f_hal_nfc_iso15693_common_init(FuriHalSpiBusHandle* handle) 
 }
 
 static FHalNfcError f_hal_nfc_iso15693_poller_init(FuriHalSpiBusHandle* handle) {
+    furi_assert(f_hal_nfc_iso15693_poller == NULL);
+
+    f_hal_nfc_iso15693_poller = f_hal_nfc_iso15693_poller_alloc();
+
     // Enable Subcarrier Stream mode, OOK modulation
     st25r3916_change_reg_bits(
         handle,
@@ -120,7 +137,140 @@ static FHalNfcError f_hal_nfc_iso15693_poller_init(FuriHalSpiBusHandle* handle) 
 
 static FHalNfcError f_hal_nfc_iso15693_poller_deinit(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
+    furi_assert(f_hal_nfc_iso15693_poller);
+
+    f_hal_nfc_iso15693_poller_free(f_hal_nfc_iso15693_poller);
+    f_hal_nfc_iso15693_poller = NULL;
+
     return FHalNfcErrorNone;
+}
+
+static void iso15693_3_poller_encode_frame(
+    const uint8_t* tx_data,
+    size_t tx_bits,
+    uint8_t* frame_buf,
+    size_t frame_buf_size,
+    size_t* frame_buf_bits) {
+    static const uint8_t bit_patterns_1_out_of_4[] = {0x02, 0x08, 0x20, 0x80};
+    size_t frame_buf_size_calc = (tx_bits / 2) + 2;
+    furi_assert(frame_buf_size >= frame_buf_size_calc);
+
+    // Add SOF 1 out of 4
+    frame_buf[0] = 0x21;
+
+    size_t byte_pos = 1;
+    for(size_t i = 0; i < tx_bits / BITS_IN_BYTE; ++i) {
+        for(size_t j = 0; j < BITS_IN_BYTE; j += (BITS_IN_BYTE) / 4) {
+            const uint8_t bit_pair = (tx_data[i] >> j) & 0x03;
+            frame_buf[byte_pos++] = bit_patterns_1_out_of_4[bit_pair];
+        }
+    }
+    // Add EOF
+    frame_buf[byte_pos++] = 0x04;
+    *frame_buf_bits = byte_pos * BITS_IN_BYTE;
+}
+
+static bool iso15693_3_poller_decode_frame(
+    const uint8_t* buf,
+    size_t buf_bits,
+    uint8_t* buf_decoded,
+    size_t buf_decoded_size,
+    size_t* buf_decoded_bits) {
+    bool decoded = false;
+    size_t bit_pos = 0;
+    memset(buf_decoded, 0, buf_decoded_size);
+
+    do {
+        if(buf_bits == 0) break;
+        // Check SOF
+        if((buf[0] & F_HAL_NFC_ISO15693_RESP_SOF_MASK) != F_HAL_NFC_ISO15693_RESP_SOF_PATTERN)
+            break;
+
+        // 2 response bits = 1 data bit
+        for(uint32_t i = F_HAL_NFC_ISO15693_RESP_SOF_SIZE;
+            i < buf_bits - F_HAL_NFC_ISO15693_RESP_SOF_SIZE;
+            i += BITS_IN_BYTE / 4) {
+            const size_t byte_index = i / BITS_IN_BYTE;
+            const size_t bit_offset = i % BITS_IN_BYTE;
+            const uint8_t resp_byte = (buf[byte_index] >> bit_offset) |
+                                      (buf[byte_index + 1] << (BITS_IN_BYTE - bit_offset));
+
+            // Check EOF
+            if(resp_byte == F_HAL_NFC_ISO15693_RESP_EOF_PATTERN) {
+                decoded = true;
+                break;
+            }
+
+            const uint8_t bit_pattern = resp_byte & F_HAL_NFC_ISO15693_RESP_PATTERN_MASK;
+
+            if(bit_pattern == F_HAL_NFC_ISO15693_RESP_PATTERN_0) {
+                bit_pos++;
+            } else if(bit_pattern == F_HAL_NFC_ISO15693_RESP_PATTERN_1) {
+                buf_decoded[bit_pos / BITS_IN_BYTE] |= 1 << (bit_pos % BITS_IN_BYTE);
+                bit_pos++;
+            } else {
+                break;
+            }
+            if(bit_pos / BITS_IN_BYTE > buf_decoded_size) {
+                break;
+            }
+        }
+
+    } while(false);
+
+    if(decoded) {
+        *buf_decoded_bits = bit_pos;
+    }
+
+    return decoded;
+}
+
+static FHalNfcError f_hal_nfc_iso15693_poller_tx(
+    FuriHalSpiBusHandle* handle,
+    const uint8_t* tx_data,
+    size_t tx_bits) {
+    FHalNfcIso15693Poller* instance = f_hal_nfc_iso15693_poller;
+    iso15693_3_poller_encode_frame(
+        tx_data,
+        tx_bits,
+        instance->frame_buf,
+        sizeof(instance->frame_buf),
+        &instance->frame_buf_bits);
+    return f_hal_nfc_poller_tx_common(handle, instance->frame_buf, instance->frame_buf_bits);
+}
+
+static FHalNfcError f_hal_nfc_iso15693_poller_rx(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* rx_data,
+    size_t rx_data_size,
+    size_t* rx_bits) {
+    FHalNfcError error = FHalNfcErrorNone;
+    FHalNfcIso15693Poller* instance = f_hal_nfc_iso15693_poller;
+
+    do {
+        error = f_hal_nfc_common_fifo_rx(
+            handle, instance->fifo_buf, sizeof(instance->fifo_buf), &instance->fifo_buf_bits);
+        if(error != FHalNfcErrorNone) break;
+
+        if(!iso15693_3_poller_decode_frame(
+               instance->fifo_buf,
+               instance->fifo_buf_bits,
+               instance->frame_buf,
+               sizeof(instance->frame_buf),
+               &instance->frame_buf_bits)) {
+            error = FHalNfcErrorDataFormat;
+            break;
+        }
+        if(rx_data_size < instance->frame_buf_bits / BITS_IN_BYTE) {
+            error = FHalNfcErrorBufferOverflow;
+            break;
+        }
+
+        memcpy(rx_data, instance->frame_buf, instance->frame_buf_bits / BITS_IN_BYTE);
+        *rx_bits = instance->frame_buf_bits;
+    } while(false);
+
+    return error;
 }
 
 static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle) {
@@ -150,8 +300,10 @@ static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle
 
 static FHalNfcError f_hal_nfc_iso15693_listener_deinit(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
+    furi_assert(f_hal_nfc_iso15693_listener);
 
     f_hal_nfc_iso15693_listener_free(f_hal_nfc_iso15693_listener);
+    f_hal_nfc_iso15693_listener = NULL;
 
     return FHalNfcErrorNone;
 }
@@ -161,8 +313,6 @@ static void f_hal_nfc_iso15693_listener_transparent_mode_enter(FuriHalSpiBusHand
 
     furi_hal_spi_bus_handle_deinit(handle);
     f_hal_nfc_deinit_gpio_isr();
-
-    furi_hal_gpio_init(&gpio_spi_r_miso, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
 }
 
 static void f_hal_nfc_iso15693_listener_transparent_mode_exit(FuriHalSpiBusHandle* handle) {
@@ -181,164 +331,52 @@ static FHalNfcError
     return FHalNfcErrorNone;
 }
 
-static FHalNfcError f_hal_nfc_iso15693_listener_rx_transparent() {
-    uint32_t periods_previous = 0;
-    uint32_t frame_pos = 0;
-    uint32_t byte_value = 0;
-    uint32_t bits_received = 0;
-    bool wait_for_pulse = false;
-
-    const uint32_t timeout = 1000000;
-
-    FuriHalIso15693FrameState frame_state = FuriHalIso15693FrameStateSof1;
-    FHalNfcError ret = FHalNfcErrorNone;
-
-    pulse_reader_start(f_hal_nfc_iso15693_listener->reader);
-
-    for(;;) {
-        uint32_t periods = pulse_reader_receive(f_hal_nfc_iso15693_listener->reader, timeout);
-        const uint32_t timestamp = DWT->CYCCNT;
-
-        /* when timed out, reset to SOF state */
-        if(periods == PULSE_READER_NO_EDGE || periods == PULSE_READER_LOST_EDGE) {
-            ret = FHalNfcErrorCommunicationTimeout;
-            break;
-        }
-
-        /* short helper for detecting a pulse position */
-        if(wait_for_pulse) {
-            wait_for_pulse = false;
-            if(periods != 1) {
-                frame_state = FuriHalIso15693FrameStateReset;
-            }
-            continue;
-        }
-
-        switch(frame_state) {
-        case FuriHalIso15693FrameStateSof1:
-            frame_state = (periods == 1) ? FuriHalIso15693FrameStateSof2 :
-                                           FuriHalIso15693FrameStateSof1;
-            break;
-
-        case FuriHalIso15693FrameStateSof2:
-            /* waiting for the second low period, telling us about coding */
-            if(periods == 6) {
-                frame_state = FuriHalIso15693FrameStateCoding256;
-                periods_previous = 0;
-                wait_for_pulse = true;
-            } else if(periods == 4) {
-                frame_state = FuriHalIso15693FrameStateCoding4;
-                periods_previous = 2;
-                wait_for_pulse = true;
-            } else {
-                frame_state = FuriHalIso15693FrameStateReset;
-            }
-            break;
-
-        case FuriHalIso15693FrameStateCoding256:
-            if(periods_previous > periods) {
-                frame_state = FuriHalIso15693FrameStateReset;
-                break;
-            }
-
-            /* previous symbol left us with some pulse periods */
-            periods -= periods_previous;
-
-            if(periods > 512) {
-                frame_state = FuriHalIso15693FrameStateReset;
-                break;
-            } else if(periods == 2) {
-                frame_state = FuriHalIso15693FrameStateEof;
-                break;
-            }
-
-            periods_previous = 512 - (periods + 1);
-            byte_value = (periods - 1) / 2;
-            if(frame_pos < FURI_HAL_ISO15693_BUFFER_SIZE) {
-                f_hal_nfc_iso15693_listener->rx_buf[frame_pos++] = (uint8_t)byte_value;
-            }
-
-            wait_for_pulse = true;
-            break;
-
-        case FuriHalIso15693FrameStateCoding4:
-            if(periods_previous > periods) {
-                frame_state = FuriHalIso15693FrameStateReset;
-                break;
-            }
-
-            /* previous symbol left us with some pulse periods */
-            periods -= periods_previous;
-            periods_previous = 0;
-
-            byte_value >>= 2;
-            bits_received += 2;
-
-            if(periods == 1) {
-                byte_value |= 0x00 << 6; // -V684
-                periods_previous = 6;
-            } else if(periods == 3) {
-                byte_value |= 0x01 << 6;
-                periods_previous = 4;
-            } else if(periods == 5) {
-                byte_value |= 0x02 << 6;
-                periods_previous = 2;
-            } else if(periods == 7) {
-                byte_value |= 0x03 << 6;
-                periods_previous = 0;
-            } else if(periods == 2) {
-                frame_state = FuriHalIso15693FrameStateEof;
-                break;
-            } else {
-                frame_state = FuriHalIso15693FrameStateReset;
-                break;
-            }
-
-            if(bits_received >= BITS_IN_BYTE) {
-                if(frame_pos < FURI_HAL_ISO15693_BUFFER_SIZE) {
-                    f_hal_nfc_iso15693_listener->rx_buf[frame_pos++] = (uint8_t)byte_value;
-                }
-                bits_received = 0;
-            }
-            wait_for_pulse = true;
-            break;
-
-        default:
-            break;
-        }
-
-        if(frame_state == FuriHalIso15693FrameStateReset) {
-            frame_state = FuriHalIso15693FrameStateSof1;
-        } else if(frame_state == FuriHalIso15693FrameStateEof) {
-            f_hal_nfc_iso15693_listener->rx_bytes = frame_pos;
-            f_hal_nfc_iso15693_listener->timestamp = timestamp;
-            break;
-        }
-    }
-
-    pulse_reader_stop(f_hal_nfc_iso15693_listener->reader);
-
-    if(frame_state != FuriHalIso15693FrameStateEof) {
-        ret = FHalNfcErrorCommunication;
-    }
-
-    return ret;
+static FHalNfcError f_hal_nfc_iso15693_listener_rx_start(FuriHalSpiBusHandle* handle) {
+    UNUSED(handle);
+    return FHalNfcErrorNone;
 }
 
-static FHalNfcError f_hal_nfc_iso15693_listener_rx_start(FuriHalSpiBusHandle* handle) {
-    FHalNfcError error = FHalNfcErrorNone;
+static void f_hal_nfc_iso15693_parser_callback(Iso15693ParserEvent event, void* context) {
+    furi_assert(context);
+
+    if(event == Iso15693ParserEventDataReceived) {
+        FuriThreadId thread_id = context;
+        furi_thread_flags_set(thread_id, FHalNfcEventInternalTypeTransparentDataReceived);
+    }
+}
+
+static FHalNfcEvent f_hal_nfc_iso15693_wait_event(uint32_t timeout_ms) {
+    FHalNfcEvent event = 0;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     f_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
+    FuriThreadId thread_id = furi_thread_get_current_id();
+    iso15693_parser_start(
+        f_hal_nfc_iso15693_listener->parser, f_hal_nfc_iso15693_parser_callback, thread_id);
 
-    error = f_hal_nfc_iso15693_listener_rx_transparent();
+    while(true) {
+        uint32_t flag = furi_thread_flags_wait(
+            FHalNfcEventInternalTypeAbort | FHalNfcEventInternalTypeTransparentDataReceived,
+            FuriFlagWaitAny,
+            timeout_ms);
+        furi_thread_flags_clear(flag);
 
-    f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
-
-    if(error == FHalNfcErrorNone) {
-        f_hal_nfc_event_set(FHalNfcEventInternalTypeTransparentRxEnd);
+        if(flag & FHalNfcEventInternalTypeAbort) {
+            event = FHalNfcEventAbortRequest;
+            break;
+        }
+        if(flag & FHalNfcEventInternalTypeTransparentDataReceived) {
+            if(iso15693_parser_run(f_hal_nfc_iso15693_listener->parser)) {
+                event = FHalNfcEventRxEnd;
+                break;
+            }
+        }
     }
 
-    return error;
+    iso15693_parser_stop(f_hal_nfc_iso15693_listener->parser);
+    f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
+
+    return event;
 }
 
 static FHalNfcError f_hal_nfc_iso15693_listener_tx(
@@ -365,18 +403,11 @@ static FHalNfcError f_hal_nfc_iso15693_listener_rx(
     furi_assert(f_hal_nfc_iso15693_listener);
     UNUSED(handle);
 
-    const size_t rx_bytes_ready = f_hal_nfc_iso15693_listener->rx_bytes;
-    const size_t rx_bits_ready = rx_bytes_ready * BITS_IN_BYTE;
-
-    if(rx_bytes_ready > rx_data_size) {
+    if(rx_data_size < iso15693_parser_get_data_size_bytes(f_hal_nfc_iso15693_listener->parser)) {
         return FHalNfcErrorBufferOverflow;
     }
 
-    memcpy(rx_data, f_hal_nfc_iso15693_listener->rx_buf, rx_bytes_ready);
-    *rx_bits = rx_bits_ready;
-
-    f_hal_nfc_iso15693_listener->rx_bytes = 0;
-    // f_hal_nfc_event_set(FHalNfcEventInternalTypeTransparentFieldOn);
+    iso15693_parser_get_data(f_hal_nfc_iso15693_listener->parser, rx_data, rx_data_size, rx_bits);
 
     return FHalNfcErrorNone;
 }
@@ -386,12 +417,16 @@ const FHalNfcTechBase f_hal_nfc_iso15693 = {
         {
             .init = f_hal_nfc_iso15693_poller_init,
             .deinit = f_hal_nfc_iso15693_poller_deinit,
+            .wait_event = f_hal_nfc_wait_event_common,
+            .tx = f_hal_nfc_iso15693_poller_tx,
+            .rx = f_hal_nfc_iso15693_poller_rx,
         },
 
     .listener =
         {
             .init = f_hal_nfc_iso15693_listener_init,
             .deinit = f_hal_nfc_iso15693_listener_deinit,
+            .wait_event = f_hal_nfc_iso15693_wait_event,
             .rx_start = f_hal_nfc_iso15693_listener_rx_start,
             .tx = f_hal_nfc_iso15693_listener_tx,
             .rx = f_hal_nfc_iso15693_listener_rx,

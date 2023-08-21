@@ -15,15 +15,13 @@ typedef enum {
     FHalNfcEventInternalTypeIrq = (1U << 1),
     FHalNfcEventInternalTypeTimerFwtExpired = (1U << 2),
     FHalNfcEventInternalTypeTimerBlockTxExpired = (1U << 3),
-    FHalNfcEventInternalTypeTransparentFieldOn = (1U << 4),
-    FHalNfcEventInternalTypeTransparentFieldOff = (1U << 5),
-    FHalNfcEventInternalTypeTransparentRxEnd = (1U << 6),
-    FHalNfcEventInternalTypeTransparentTimeout = (1U << 7),
+    FHalNfcEventInternalTypeTransparentDataReceived = (1U << 4),
 } FHalNfcEventInternalType;
 
-#define F_HAL_NFC_EVENT_INTERNAL_ALL                                \
-    ((FHalNfcEventInternalTypeAbort | FHalNfcEventInternalTypeIrq | \
-      FHalNfcEventInternalTypeTimerFwtExpired | FHalNfcEventInternalTypeTimerBlockTxExpired))
+#define F_HAL_NFC_EVENT_INTERNAL_ALL                                                          \
+    ((FHalNfcEventInternalTypeAbort | FHalNfcEventInternalTypeIrq |                           \
+      FHalNfcEventInternalTypeTimerFwtExpired | FHalNfcEventInternalTypeTimerBlockTxExpired | \
+      FHalNfcEventInternalTypeTransparentDataReceived))
 
 typedef struct {
     FuriThreadId thread;
@@ -58,6 +56,7 @@ bool f_hal_nfc_event_wait_for_specific_irq(
     uint32_t timeout_ms);
 
 // Common technology methods
+FHalNfcEvent f_hal_nfc_wait_event_common(uint32_t timeout_ms);
 FHalNfcError f_hal_nfc_common_listener_rx_start(FuriHalSpiBusHandle* handle);
 FHalNfcError
     f_hal_nfc_common_fifo_tx(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
@@ -67,27 +66,35 @@ FHalNfcError f_hal_nfc_common_fifo_rx(
     size_t rx_data_size,
     size_t* rx_bits);
 
+FHalNfcError
+    f_hal_nfc_poller_tx_common(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
+
 // Technology specific API
 typedef FHalNfcError (*FHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
 typedef FHalNfcError (
-    *FHalNfcChipTx)(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
-typedef FHalNfcError (*FHalNfcChipRx)(
+    *FHalNfcTx)(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
+typedef FHalNfcError (*FHalNfcRx)(
     FuriHalSpiBusHandle* handle,
     uint8_t* rx_data,
     size_t rx_data_size,
     size_t* rx_bits);
+typedef FHalNfcEvent (*FHalNfcWaitEvent)(uint32_t timeout_ms);
 
 typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
+    FHalNfcWaitEvent wait_event;
+    FHalNfcTx tx;
+    FHalNfcRx rx;
 } FHalNfcTechPollerBase;
 
 typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
+    FHalNfcWaitEvent wait_event;
     FHalNfcChipConfig rx_start;
-    FHalNfcChipTx tx;
-    FHalNfcChipRx rx;
+    FHalNfcTx tx;
+    FHalNfcRx rx;
 } FHalNfcTechListenerBase;
 
 typedef struct {
