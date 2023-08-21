@@ -187,13 +187,15 @@ int32_t uhf_app_main(void* ctx) {
 
     // enable 5v pin
     furi_hal_power_enable_otg();
+    // init pin a2
+    // furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
 
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneVerify);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
     // disable 5v pin
     furi_hal_power_disable_otg();
-
+    // furi_hal_gpio_disable_int_callback()
     // exit app
     uhf_free(uhf_app);
     return 0;
