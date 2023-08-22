@@ -236,8 +236,9 @@ static MfUltralightCommand mf_ultralight_listener_increase_counter_handler(
             break;
         }
 
-        uint32_t incr_value = *((uint32_t*)(bit_buffer_get_data(buffer) + 2));
-        incr_value &= MF_ULTRALIGHT_MAX_CNTR_VAL;
+        MfUltralightCounter buf_counter = {};
+        bit_buffer_write_bytes_mid(buffer, buf_counter.data, 2, sizeof(buf_counter.data));
+        uint32_t incr_value = buf_counter.counter;
 
         if(instance->data->counter[counter_num].counter + incr_value > MF_ULTRALIGHT_MAX_CNTR_VAL)
             break;
