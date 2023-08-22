@@ -210,3 +210,47 @@ Iso15693_3Error iso15693_3_get_block_security_response_parse(
 
     return ret;
 }
+
+void iso15693_3_append_uid(const Iso15693_3Data* data, BitBuffer* buf) {
+    for(size_t i = 0; i < ISO15693_3_UID_SIZE; ++i) {
+        // Reverse the UID
+        bit_buffer_append_byte(buf, data->uid[ISO15693_3_UID_SIZE - i - 1]);
+    }
+}
+
+void iso15693_3_append_block(const Iso15693_3Data* data, uint8_t block_num, BitBuffer* buf) {
+    furi_assert(block_num < data->system_info.block_count);
+
+    const uint32_t block_offset = block_num * data->system_info.block_size;
+    const uint8_t* block_data = simple_array_cget(data->block_data, block_offset);
+
+    bit_buffer_append_bytes(buf, block_data, data->system_info.block_size);
+}
+
+void iso15693_3_set_block_data(
+    Iso15693_3Data* data,
+    uint8_t block_num,
+    const uint8_t* block_data,
+    size_t block_data_size) {
+    furi_assert(block_num < data->system_info.block_count);
+    furi_assert(block_data_size == data->system_info.block_size);
+
+    const uint32_t block_offset = block_num * data->system_info.block_size;
+    uint8_t* block = simple_array_get(data->block_data, block_offset);
+
+    memcpy(block, block_data, block_data_size);
+}
+
+void iso15693_3_append_block_security(
+    const Iso15693_3Data* data,
+    uint8_t block_num,
+    BitBuffer* buf) {
+    bit_buffer_append_byte(buf, *(uint8_t*)simple_array_cget(data->block_security, block_num));
+}
+
+bool iso15693_3_is_equal_uid(const Iso15693_3Data* data, const uint8_t* uid) {
+    for(size_t i = 0; i < ISO15693_3_UID_SIZE; ++i) {
+        if(data->uid[i] != uid[ISO15693_3_UID_SIZE - i - 1]) return false;
+    }
+    return true;
+}

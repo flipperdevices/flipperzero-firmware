@@ -26,8 +26,6 @@ struct Iso14443_3aListener {
     void* context;
 };
 
-Iso14443_3aError iso14443_3a_listener_sleep(Iso14443_3aListener* instance);
-
 Iso14443_3aError
     iso14443_3a_listener_tx(Iso14443_3aListener* instance, const BitBuffer* tx_buffer);
 

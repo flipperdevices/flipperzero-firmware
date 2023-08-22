@@ -15,7 +15,7 @@ FHalNfcError f_hal_nfc_event_start() {
     return FHalNfcErrorNone;
 }
 
-void f_hal_nfc_set_event(FHalNfcEventInternalType event) {
+void f_hal_nfc_event_set(FHalNfcEventInternalType event) {
     furi_assert(f_hal_nfc_event);
     furi_assert(f_hal_nfc_event->thread);
 
@@ -23,11 +23,11 @@ void f_hal_nfc_set_event(FHalNfcEventInternalType event) {
 }
 
 FHalNfcError f_hal_nfc_abort() {
-    f_hal_nfc_set_event(FHalNfcEventInternalTypeAbort);
+    f_hal_nfc_event_set(FHalNfcEventInternalTypeAbort);
     return FHalNfcErrorNone;
 }
 
-FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms) {
+FHalNfcEvent f_hal_nfc_wait_event_common(uint32_t timeout_ms) {
     furi_assert(f_hal_nfc_event);
     furi_assert(f_hal_nfc_event->thread);
 

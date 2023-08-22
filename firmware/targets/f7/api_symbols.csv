@@ -182,6 +182,7 @@ Header,+,lib/one_wire/one_wire_host.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
 Header,+,lib/print/wrappers.h,,
 Header,+,lib/pulse_reader/pulse_reader.h,,
+Header,+,lib/signal_reader/signal_reader.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_adc.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_bus.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_comp.h,,
@@ -870,24 +871,28 @@ Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
 Function,-,f_hal_nfc_abort,FHalNfcError,
 Function,-,f_hal_nfc_acquire,FHalNfcError,
-Function,-,f_hal_nfc_event_start,FHalNfcError,
+Function,+,f_hal_nfc_event_start,FHalNfcError,
 Function,-,f_hal_nfc_init,FHalNfcError,
 Function,-,f_hal_nfc_is_hal_ready,FHalNfcError,
-Function,-,f_hal_nfc_listen_reset,FHalNfcError,
-Function,-,f_hal_nfc_listen_start,FHalNfcError,
 Function,-,f_hal_nfc_listener_disable_auto_col_res,FHalNfcError,
+Function,+,f_hal_nfc_listener_reset,FHalNfcError,
+Function,+,f_hal_nfc_listener_rx,FHalNfcError,"uint8_t*, size_t, size_t*"
+Function,+,f_hal_nfc_listener_rx_start,FHalNfcError,
 Function,-,f_hal_nfc_listener_sleep,FHalNfcError,
+Function,+,f_hal_nfc_listener_start,FHalNfcError,
 Function,-,f_hal_nfc_listener_tx,FHalNfcError,"const uint8_t*, size_t"
+Function,-,f_hal_nfc_listener_wait_event,FHalNfcEvent,uint32_t
 Function,-,f_hal_nfc_low_power_mode_start,FHalNfcError,
 Function,-,f_hal_nfc_low_power_mode_stop,FHalNfcError,
 Function,-,f_hal_nfc_poller_field_on,FHalNfcError,
 Function,-,f_hal_nfc_poller_rx,FHalNfcError,"uint8_t*, size_t, size_t*"
 Function,-,f_hal_nfc_poller_tx,FHalNfcError,"const uint8_t*, size_t"
 Function,-,f_hal_nfc_poller_tx_custom_parity,FHalNfcError,"const uint8_t*, size_t"
+Function,-,f_hal_nfc_poller_wait_event,FHalNfcEvent,uint32_t
 Function,-,f_hal_nfc_release,FHalNfcError,
 Function,-,f_hal_nfc_reset_mode,FHalNfcError,
 Function,-,f_hal_nfc_set_mask_receive_timer,void,uint32_t
-Function,-,f_hal_nfc_set_mode,FHalNfcError,"FHalNfcMode, FHalNfcBitrate"
+Function,+,f_hal_nfc_set_mode,FHalNfcError,"FHalNfcMode, FHalNfcTech"
 Function,-,f_hal_nfc_timer_block_tx_is_running,_Bool,
 Function,-,f_hal_nfc_timer_block_tx_start,void,uint32_t
 Function,-,f_hal_nfc_timer_block_tx_start_us,void,uint32_t
@@ -895,9 +900,6 @@ Function,-,f_hal_nfc_timer_block_tx_stop,void,
 Function,-,f_hal_nfc_timer_fwt_start,void,uint32_t
 Function,-,f_hal_nfc_timer_fwt_stop,void,
 Function,-,f_hal_nfc_trx_reset,FHalNfcError,
-Function,-,f_hal_nfc_wait_event,FHalNfcEvent,uint32_t
-Function,-,f_hal_nfca_listener_deinit,FHalNfcError,
-Function,-,f_hal_nfca_listener_init,FHalNfcError,
 Function,-,f_hal_nfca_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const _Bool*, size_t"
 Function,-,f_hal_nfca_receive_sdd_frame,FHalNfcError,"uint8_t*, size_t, size_t*"
 Function,-,f_hal_nfca_send_sdd_frame,FHalNfcError,"const uint8_t*, size_t"
@@ -2668,6 +2670,13 @@ Function,+,sha256_finish,void,"sha256_context*, unsigned char[32]"
 Function,+,sha256_process,void,sha256_context*
 Function,+,sha256_start,void,sha256_context*
 Function,+,sha256_update,void,"sha256_context*, const unsigned char*, unsigned int"
+Function,+,signal_reader_alloc,SignalReader*,"const GpioPin*, uint32_t"
+Function,+,signal_reader_free,void,SignalReader*
+Function,+,signal_reader_set_polarity,void,"SignalReader*, SignalReaderPolarity"
+Function,+,signal_reader_set_pull,void,"SignalReader*, GpioPull"
+Function,+,signal_reader_set_sample_rate,void,"SignalReader*, SignalReaderTimeUnit, uint32_t"
+Function,+,signal_reader_start,void,"SignalReader*, SignalReaderCallback, void*"
+Function,+,signal_reader_stop,void,SignalReader*
 Function,+,simple_array_alloc,SimpleArray*,const SimpleArrayConfig*
 Function,+,simple_array_cget,const SimpleArrayElement*,"const SimpleArray*, uint32_t"
 Function,+,simple_array_cget_data,const SimpleArrayData*,const SimpleArray*
