@@ -7,21 +7,12 @@
 #include <mbedtls/des.h>
 #include "uhf_tag.h"
 
-// #include "rfal_picopass.h"
-
 #define UHF_DEV_NAME_MAX_LEN 22
-// #define PICOPASS_READER_DATA_MAX_SIZE 64
-// #define PICOPASS_BLOCK_LEN 8
-// #define PICOPASS_MAX_APP_LIMIT 32
-#define UHF_BANK_DOES_NOT_EXIST                                                                   \
-    (uint8_t[]) {                                                                                 \
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, \
-            0xFF                                                                                  \
-    }
-
 #define UHF_EPC_BANK_LENGTH_LABEL "EPC_LENGTH"
 #define UHF_TID_BANK_LENGTH_LABEL "TID_LENGTH"
 #define UHF_USER_BANK_LENGTH_LABEL "USER_LENGTH"
+#define UHF_EPC_PC_LABEL "PC"
+#define UHF_EPC_CRC_LABEL "CRC"
 #define UHF_RFU_BANK_LABEL "RFU"
 #define UHF_EPC_BANK_LABEL "EPC"
 #define UHF_TID_BANK_LABEL "TID"

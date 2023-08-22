@@ -1,7 +1,7 @@
 #include "uhf_module.h"
 #include "uhf_module_cmd.h"
 
-#define DELAY_MS 50
+#define DELAY_MS 100
 
 void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
     UNUSED(event);
@@ -68,7 +68,10 @@ uint16_t crc16_genibus(const uint8_t* data, size_t length) {
 }
 
 char* m100_get_hardware_version(M100Module* module) {
-    if(module->info->hw_version != NULL) return module->info->hw_version;
+    if(module->info->hw_version != NULL) {
+        free(module->info->hw_version);
+        module->info->hw_version = NULL;
+    }
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
     furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)&CMD_HW_VERSION.cmd[0], CMD_HW_VERSION.length);
@@ -88,7 +91,10 @@ char* m100_get_hardware_version(M100Module* module) {
     return module->info->hw_version;
 }
 char* m100_get_software_version(M100Module* module) {
-    if(module->info->sw_version != NULL) return module->info->sw_version;
+    if(module->info->sw_version != NULL) {
+        free(module->info->sw_version);
+        module->info->sw_version = NULL;
+    }
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
     furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)&CMD_SW_VERSION.cmd[0], CMD_SW_VERSION.length);
@@ -108,7 +114,10 @@ char* m100_get_software_version(M100Module* module) {
     return module->info->sw_version;
 }
 char* m100_get_manufacturers(M100Module* module) {
-    if(module->info->manufacturer != NULL) return module->info->manufacturer;
+    if(module->info->manufacturer != NULL) {
+        free(module->info->manufacturer);
+        module->info->manufacturer = NULL;
+    }
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
     furi_hal_uart_tx(
@@ -129,7 +138,7 @@ char* m100_get_manufacturers(M100Module* module) {
     return module->info->manufacturer;
 }
 
-UHFTag* m100_send_single_poll(M100Module* module) {
+M100ResponseType m100_send_single_poll(M100Module* module, UHFTag* uhf_tag) {
     buffer_reset(module->buf);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
     furi_hal_uart_tx(
@@ -137,7 +146,7 @@ UHFTag* m100_send_single_poll(M100Module* module) {
     furi_delay_ms(DELAY_MS);
     uint8_t* data = buffer_get_data(module->buf);
     size_t length = buffer_get_size(module->buf);
-    if(length <= 8 && data[2] == 0xFF) return NULL;
+    if(length <= 8 && data[2] == 0xFF) return M100NoTagResponse;
     uint16_t pc = data[6];
     uint16_t crc = 0;
     // mask out epc length from protocol control
@@ -152,26 +161,16 @@ UHFTag* m100_send_single_poll(M100Module* module) {
     crc <<= 8;
     crc += data[8 + epc_len + 1];
     // validate checksum
-    uint8_t cs = checksum(data + 1, length - 3);
-    for(size_t i = 0; i < length; i++) {
-        FURI_LOG_E("m100", "data[%d]=%02X", i, data[i]);
-    }
-    if(cs != data[length - 2]) return NULL;
-    FURI_LOG_E("m100", "checksum pass");
+    if(checksum(data + 1, length - 3) != data[length - 2]) return M100ValidationFail;
     // validate crc
-    uint16_t ccrc = crc16_genibus(data + 6, epc_len + 2);
-    FURI_LOG_E("m100", "crc found = %04X, calculated crc = %04X", crc, ccrc);
-    if(ccrc != crc) return NULL;
-    FURI_LOG_E("m100", "crc pass");
-    UHFTag* uhf_tag = uhf_tag_alloc();
+    if(crc16_genibus(data + 6, epc_len + 2) != crc) return M100ValidationFail;
     uhf_tag_set_epc_pc(uhf_tag, pc);
     uhf_tag_set_epc_crc(uhf_tag, crc);
     uhf_tag_set_epc(uhf_tag, data + 8, epc_len);
-    FURI_LOG_E("m100", "returning tag");
-    return uhf_tag;
+    return M100Success;
 }
 
-bool m100_set_select(M100Module* module, UHFTag* uhf_tag) {
+M100ResponseType m100_set_select(M100Module* module, UHFTag* uhf_tag) {
     buffer_reset(module->buf);
     // Set select
     uint8_t cmd[MAX_BUFFER_SIZE];
@@ -203,10 +202,10 @@ bool m100_set_select(M100Module* module, UHFTag* uhf_tag) {
     furi_delay_ms(DELAY_MS);
 
     uint8_t* data = buffer_get_data(module->buf);
-    if(checksum(data + 1, 5) != data[6]) return false; // error in rx
-    if(data[5] != 0x00) return false; // error if not 0
+    if(checksum(data + 1, 5) != data[6]) return M100ValidationFail; // error in rx
+    if(data[5] != 0x00) return M100ValidationFail; // error if not 0
 
-    return true;
+    return M100Success;
 }
 
 UHFTag* m100_get_select_param(M100Module module) {
@@ -214,16 +213,20 @@ UHFTag* m100_get_select_param(M100Module module) {
     return NULL;
 }
 
-bool m100_read_label_data_storage(
+M100ResponseType m100_read_label_data_storage(
     M100Module* module,
     UHFTag* uhf_tag,
     BankType bank,
-    uint32_t access_pwd) {
-    UNUSED(uhf_tag);
+    uint32_t access_pwd,
+    uint16_t word_count) {
+    /*
+    Will probably remove UHFTag as param and get it from get selected tag
+        */
+    if(bank == EPCBank) return M100Success;
     buffer_reset(module->buf);
     uint8_t cmd[MAX_BUFFER_SIZE];
-    size_t length = CMD_READ_LABEL_DATA_STORAGE_AREA.length;
-    memcpy(cmd, CMD_READ_LABEL_DATA_STORAGE_AREA.cmd, length);
+    size_t cmd_length = CMD_READ_LABEL_DATA_STORAGE_AREA.length;
+    memcpy(cmd, CMD_READ_LABEL_DATA_STORAGE_AREA.cmd, cmd_length);
     // set access password
     cmd[5] = (access_pwd >> 24) & 0xFF;
     cmd[6] = (access_pwd >> 16) & 0xFF;
@@ -231,14 +234,114 @@ bool m100_read_label_data_storage(
     cmd[8] = access_pwd & 0xFF;
     // set mem bank
     cmd[9] = (uint8_t)bank;
-    // recalc checksum
-    cmd[length - 2] = checksum(cmd + 1, length - 3);
+    // set word counter
+    cmd[12] = (word_count >> 8) & 0xFF;
+    cmd[13] = word_count & 0xFF;
+    // calc checksum
+    cmd[cmd_length - 2] = checksum(cmd + 1, cmd_length - 3);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, length);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, cmd_length);
     furi_delay_ms(DELAY_MS);
-    return true;
+    uint8_t* data = buffer_get_data(module->buf);
+    uint16_t payload_len = data[3];
+    payload_len = (payload_len << 8) + data[4];
+    size_t ptr_offset = 5 /*<-ptr offset*/ + uhf_tag->epc->size + 3 /*<-pc + ul*/;
+    size_t bank_data_length = payload_len - (ptr_offset - 5 /*dont include the offset*/);
+    if(data[2] == 0xFF) {
+        if(payload_len == 0x0001) return M100NoTagResponse;
+        return M100MemoryOverrun;
+    }
+    switch(bank) {
+    case TIDBank:
+        uhf_tag_set_tid(uhf_tag, data + ptr_offset, bank_data_length);
+        break;
+    case UserBank:
+        uhf_tag_set_user(uhf_tag, data + ptr_offset, bank_data_length);
+        break;
+    default:
+        return M100Success;
+    }
+    return M100Success;
 }
 
+M100ResponseType m100_write_label_data_storage(
+    M100Module* module,
+    UHFTag* uhf_tag,
+    BankType bank,
+    uint16_t source_address,
+    uint32_t access_pwd) {
+    buffer_reset(module->buf);
+    uint8_t cmd[MAX_BUFFER_SIZE];
+    size_t cmd_length = CMD_WRITE_LABEL_DATA_STORE.length;
+    memcpy(cmd, CMD_WRITE_LABEL_DATA_STORE.cmd, cmd_length);
+    uint16_t payload_len = 9;
+    uint16_t data_length;
+    switch(bank) {
+    case ReservedBank:
+        // access pwd len + kill pwd len
+        payload_len += 4;
+        data_length = 4;
+        break;
+    case EPCBank:
+        // epc len + pc len
+        payload_len += 4 + uhf_tag_get_epc_size(uhf_tag);
+        data_length = 4 + uhf_tag_get_epc_size(uhf_tag);
+        // set data
+        uint8_t tmp_arr[4];
+        tmp_arr[0] = (uint8_t)((uhf_tag_get_epc_crc(uhf_tag) >> 8) & 0xFF);
+        tmp_arr[1] = (uint8_t)(uhf_tag_get_epc_crc(uhf_tag) & 0xFF);
+        tmp_arr[2] = (uint8_t)((uhf_tag_get_epc_pc(uhf_tag) >> 8) & 0xFF);
+        tmp_arr[3] = (uint8_t)(uhf_tag_get_epc_pc(uhf_tag) & 0xFF);
+        FURI_LOG_E("wkr", "%04X", uhf_tag_get_epc_pc(uhf_tag));
+        memcpy(cmd + 14, tmp_arr, 4);
+        memcpy(cmd + 18, uhf_tag_get_epc(uhf_tag), uhf_tag_get_epc_size(uhf_tag));
+        break;
+    case UserBank:
+        payload_len += uhf_tag_get_user_size(uhf_tag);
+        data_length = uhf_tag_get_user_size(uhf_tag);
+        // set data
+        memcpy(cmd + 14, uhf_tag_get_user(uhf_tag), uhf_tag_get_user_size(uhf_tag));
+        break;
+    default:
+        return M100MemoryOverrun;
+    }
+    // set payload length
+    cmd[3] = (payload_len >> 8) & 0xFF;
+    cmd[4] = payload_len & 0xFF;
+    // set access password
+    cmd[5] = (access_pwd >> 24) & 0xFF;
+    cmd[6] = (access_pwd >> 16) & 0xFF;
+    cmd[7] = (access_pwd >> 8) & 0xFF;
+    cmd[8] = access_pwd & 0xFF;
+    // set membank
+    cmd[9] = (uint8_t)bank;
+    // set source address
+    cmd[10] = (source_address >> 8) & 0xFF;
+    cmd[11] = source_address & 0xFF;
+    // set data length
+    size_t data_length_words = data_length / 2;
+    cmd[12] = (data_length_words >> 8) & 0xFF;
+    cmd[13] = data_length_words & 0xFF;
+    // update cmd len
+    cmd_length = 5 + payload_len;
+    // calculate checksum
+    cmd[cmd_length - 2] = checksum(cmd + 1, cmd_length - 3);
+    cmd[cmd_length - 1] = FRAME_END;
+    // send cmd
+    for(size_t i = 0; i < cmd_length; i++) {
+        FURI_LOG_E("m100", "cmd[%d]=%02X", i, cmd[i]);
+    }
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, cmd_length);
+    furi_delay_ms(DELAY_MS);
+    uint8_t* buff_data = buffer_get_data(module->buf);
+    size_t buff_length = buffer_get_size(module->buf);
+    if(buff_data[2] == 0xFF && buff_length == 8)
+        return M100NoTagResponse;
+    else if(buff_data[2] == 0xFF)
+        return M100ValidationFail;
+    return M100Success;
+}
 void m100_set_baudrate(M100Module* module, uint16_t baudrate) {
     size_t length = CMD_SET_COMMUNICATION_BAUD_RATE.length;
     uint8_t cmd[length];
@@ -246,7 +349,6 @@ void m100_set_baudrate(M100Module* module, uint16_t baudrate) {
     uint16_t br_mod = baudrate / 100; // module format
     cmd[6] = 0xFF & br_mod; // pow LSB
     cmd[5] = 0xFF & (br_mod >> 4); // pow MSB
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
     furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, length);
     furi_hal_uart_set_br(FuriHalUartIdUSART1, baudrate);
     module->baudrate = baudrate;

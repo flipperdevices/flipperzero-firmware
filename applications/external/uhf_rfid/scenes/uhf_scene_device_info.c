@@ -81,7 +81,7 @@ void change_view_on_event(UHFApp* uhf_app) {
         furi_string_get_cstr(furi_temp_str));
 
     widget_add_string_multiline_element(
-        uhf_app->widget, 3, 24, AlignLeft, AlignTop, FontBatteryPercent, temp_str);
+        uhf_app->widget, 3, 24, AlignLeft, AlignTop, FontKeyboard, temp_str);
 
     widget_add_button_element(
         uhf_app->widget,

@@ -33,8 +33,9 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-22 01:16 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-22 01:16 EST`
-- Updated: [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
+- Updated: [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
+- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 
 <a name="release">
 
@@ -161,6 +162,7 @@ $ ./fbt dolphin_ext
 - Plugins: Icon for Clock [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - Plugins: [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [RFID: 3 new T5577 extra actions: Set/clear custom pw; write block; wipe #678 (By plgcoder)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/678)
+- RFID: [Hitag #2658 (By blackvault88)](https://github.com/flipperdevices/flipperzero-firmware/pull/2658)
 - Settings: OFW PR [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)

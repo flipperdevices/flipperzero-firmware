@@ -46,7 +46,6 @@ void step_callback(void* ctx) {
     uint32_t now = timer.start;
 
     if(furi_hal_gpio_read(stepData->pin)) {
-        // Transition to HIGH.
         if(stepData->time_of_last_high_pulse != 0) {
             stepData->time_of_high_to_high = now - stepData->time_of_last_high_pulse;
         }
@@ -129,12 +128,10 @@ int32_t step_counter_app(void* p) {
                     event.input_event.type == InputTypeShort &&
                     event.input_event.key == InputKeyOk) {
                     stepContext->data->counting = !stepContext->data->counting;
-                    // Aggiorna l'interfaccia utente per riflettere il cambio di stato.
                     view_port_update(view_port);
                 }
                 break;
             case StepCounterEventTypeStep:
-                // Aggiorna l'interfaccia utente per riflettere il cambio di stato.
                 view_port_update(view_port);
                 break;
             default:
