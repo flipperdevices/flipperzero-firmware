@@ -49,6 +49,7 @@ typedef struct {
     InputKey input;
 
     bool started;
+    bool had_change;
     bool processing;
     bool longPress;
     PlayState state;

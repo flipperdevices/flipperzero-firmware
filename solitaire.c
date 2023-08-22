@@ -8,6 +8,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 void init(GameState *game_state);
+
 const NotificationSequence sequence_fail = {
         &message_vibro_on,
         &message_note_c4,
@@ -47,62 +48,69 @@ bool can_place_card(Card where, Card what) {
 }
 
 static void draw_scene(Canvas *const canvas, const GameState *game_state) {
-    int deckIndex = game_state->deck.index;
-    if (game_state->dragging_deck)
-        deckIndex--;
 
-    if ((game_state->deck.index < (game_state->deck.card_count - 1) || game_state->deck.index == -1) && game_state->deck.card_count>0) {
-        draw_card_back_at(columns[0][0], columns[0][1], canvas);
-        if (game_state->selectRow == 0 && game_state->selectColumn == 0) {
-            draw_rounded_box(canvas, columns[0][0] + 1, columns[0][1] + 1, CARD_WIDTH - 2, CARD_HEIGHT - 2,
-                             Inverse);
-        }
-    } else
-        draw_card_space(columns[0][0], columns[0][1],
-                        game_state->selectRow == 0 && game_state->selectColumn == 0,
-                        canvas);
-    //deck side
-    if (deckIndex >= 0) {
-        Card c = game_state->deck.cards[deckIndex];
-        draw_card_at_colored(columns[1][0], columns[1][1], c.pip, c.character,
-                             game_state->selectRow == 0 && game_state->selectColumn == 1, canvas);
-    } else
-        draw_card_space(columns[1][0], columns[1][1],
-                        game_state->selectRow == 0 && game_state->selectColumn == 1,
-                        canvas);
+    if(game_state->had_change){
+        int deckIndex = game_state->deck.index;
+        if (game_state->dragging_deck)
+            deckIndex--;
 
-    for (uint8_t i = 0; i < 4; i++) {
-        Card current = game_state->top_cards[i];
-        bool selected = game_state->selectRow == 0 && game_state->selectColumn == (i + 3);
-        if (current.disabled) {
-            draw_card_space(columns[i + 3][0], columns[i + 3][1], selected, canvas);
-        } else {
-            draw_card_at(columns[i + 3][0], columns[i + 3][1], current.pip, current.character, canvas);
-            if (selected) {
-                draw_rounded_box(canvas, columns[i + 3][0], columns[i + 3][1], CARD_WIDTH, CARD_HEIGHT,
+        if ((game_state->deck.index < (game_state->deck.card_count - 1) || game_state->deck.index == -1) && game_state->deck.card_count>0) {
+            draw_card_back_at(columns[0][0], columns[0][1], canvas);
+            if (game_state->selectRow == 0 && game_state->selectColumn == 0) {
+                draw_rounded_box(canvas, columns[0][0] + 1, columns[0][1] + 1, CARD_WIDTH - 2, CARD_HEIGHT - 2,
                                  Inverse);
             }
+        } else
+            draw_card_space(columns[0][0], columns[0][1],
+                            game_state->selectRow == 0 && game_state->selectColumn == 0,
+                            canvas);
+        //deck side
+        if (deckIndex >= 0) {
+            Card c = game_state->deck.cards[deckIndex];
+            draw_card_at_colored(columns[1][0], columns[1][1], c.pip, c.character,
+                                 game_state->selectRow == 0 && game_state->selectColumn == 1, canvas);
+        } else
+            draw_card_space(columns[1][0], columns[1][1],
+                            game_state->selectRow == 0 && game_state->selectColumn == 1,
+                            canvas);
+
+        for (uint8_t i = 0; i < 4; i++) {
+            Card current = game_state->top_cards[i];
+            bool selected = game_state->selectRow == 0 && game_state->selectColumn == (i + 3);
+            if (current.disabled) {
+                draw_card_space(columns[i + 3][0], columns[i + 3][1], selected, canvas);
+            } else {
+                draw_card_at(columns[i + 3][0], columns[i + 3][1], current.pip, current.character, canvas);
+                if (selected) {
+                    draw_rounded_box(canvas, columns[i + 3][0], columns[i + 3][1], CARD_WIDTH, CARD_HEIGHT,
+                                     Inverse);
+                }
+            }
         }
-    }
 
-    for (uint8_t i = 0; i < 7; i++) {
-        bool selected = game_state->selectRow == 1 && game_state->selectColumn == i;
-        int8_t index= (game_state->bottom_columns[i].index - 1 - game_state->selected_card);
-        if(index<0)index=0;
-        draw_hand_column(game_state->bottom_columns[i], columns[i][0], columns[i][2],
-                         selected ? index : -1, canvas);
-    }
+        for (uint8_t i = 0; i < 7; i++) {
+            bool selected = game_state->selectRow == 1 && game_state->selectColumn == i;
+            int8_t index= (game_state->bottom_columns[i].index - 1 - game_state->selected_card);
+            if(index<0)index=0;
+            draw_hand_column(game_state->bottom_columns[i], columns[i][0], columns[i][2],
+                             selected ? index : -1, canvas);
+        }
 
-    int8_t pos[2] = {columns[game_state->selectColumn][0],
-                     columns[game_state->selectColumn][game_state->selectRow + 1]};
+        int8_t pos[2] = {columns[game_state->selectColumn][0],
+                         columns[game_state->selectColumn][game_state->selectRow + 1]};
 
-    /*     draw_icon_clip(canvas, &I_card_graphics, pos[0] + CARD_HALF_WIDTH, pos[1] + CARD_HALF_HEIGHT, 30, 5, 5, 5,
-                        Filled);*/
+        /*     draw_icon_clip(canvas, &I_card_graphics, pos[0] + CARD_HALF_WIDTH, pos[1] + CARD_HALF_HEIGHT, 30, 5, 5, 5,
+                            Filled);*/
 
-    if (game_state->dragging_hand.index > 0) {
-        draw_hand_column(game_state->dragging_hand,
-                         pos[0] + CARD_HALF_WIDTH + 3, pos[1] + CARD_HALF_HEIGHT + 3,
-                         -1, canvas);
+        if (game_state->dragging_hand.index > 0) {
+            draw_hand_column(game_state->dragging_hand,
+                             pos[0] + CARD_HALF_WIDTH + 3, pos[1] + CARD_HALF_HEIGHT + 3,
+                             -1, canvas);
+        }
+
+        clone_buffer(get_buffer(canvas), game_state->animation.buffer);
+    }else{
+        clone_buffer(game_state->animation.buffer, get_buffer(canvas));
     }
 }
 
@@ -247,6 +255,7 @@ void tick(GameState *game_state, NotificationApp *notification) {
         if (game_state->top_cards[0].character == 11 && game_state->top_cards[1].character == 11 &&
             game_state->top_cards[2].character == 11 && game_state->top_cards[3].character == 11) {
             game_state->state = GameStateAnimate;
+            game_state->had_change=true;
             dolphin_deed(DolphinDeedPluginGameWin);
 
             return;
@@ -473,9 +482,10 @@ int32_t solitaire_app(void *p) {
     for (bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 150);
         furi_mutex_acquire(game_state->mutex, FuriWaitForever);
-        bool hadChange = false;
+        game_state->had_change = false;
         if (event_status == FuriStatusOk) {
             if (event.type == EventTypeKey) {
+                game_state->had_change = true;
                 if (event.input.type == InputTypeLong) {
                     game_state->longPress = true;
                     switch (event.input.key) {
@@ -505,7 +515,6 @@ int32_t solitaire_app(void *p) {
                                 init(game_state);
                             }
                             else {
-                                hadChange = true;
                                 game_state->input = event.input.key;
                             }
                             break;
@@ -527,8 +536,8 @@ int32_t solitaire_app(void *p) {
             FURI_LOG_W(APP_NAME, "osMessageQueue: event timeout");
             // event timeout
         }
-        if (hadChange || game_state->state == GameStateAnimate)
-            view_port_update(view_port);
+
+        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
     }
 
@@ -551,5 +560,6 @@ int32_t solitaire_app(void *p) {
     free(game_state->deck.cards);
     free(game_state);
     furi_message_queue_free(event_queue);
+
     return return_code;
 }
