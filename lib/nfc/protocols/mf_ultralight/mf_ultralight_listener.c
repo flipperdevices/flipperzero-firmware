@@ -214,6 +214,42 @@ static MfUltralightCommand
     return command;
 }
 
+static MfUltralightCommand mf_ultralight_listener_increase_counter_handler(
+    MfUltralightListener* instance,
+    BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
+
+    FURI_LOG_D(TAG, "CMD_INCR_CNT");
+
+    do {
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportIncCounter)) {
+            command = MfUltralightCommandNotProcessedSilent;
+            break;
+        }
+
+        uint8_t counter_num = bit_buffer_get_byte(buffer, 1);
+        if(counter_num > 2) break;
+
+        if(instance->data->counter[counter_num].counter == MF_ULTRALIGHT_MAX_CNTR_VAL) {
+            command = MfUltralightCommandProcessed;
+            break;
+        }
+
+        uint32_t incr_value = *((uint32_t*)(bit_buffer_get_data(buffer) + 2));
+        incr_value &= MF_ULTRALIGHT_MAX_CNTR_VAL;
+
+        if(instance->data->counter[counter_num].counter + incr_value > MF_ULTRALIGHT_MAX_CNTR_VAL)
+            break;
+
+        instance->data->counter[counter_num].counter += incr_value;
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+        command = MfUltralightCommandProcessed;
+    } while(false);
+
+    return command;
+}
+
 static MfUltralightCommand mf_ultralight_listener_check_tearing_handler(
     MfUltralightListener* instance,
     BitBuffer* buffer) {
@@ -315,6 +351,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .cmd = MF_ULTRALIGHT_CMD_AUTH,
         .cmd_len_bits = 5 * 8,
         .callback = mf_ultralight_listener_auth_handler,
+    },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_INCR_CNT,
+        .cmd_len_bits = 6 * 8,
+        .callback = mf_ultralight_listener_increase_counter_handler,
     },
 };
 
