@@ -1,0 +1,14 @@
+App(
+    appid="my_app_id_42",
+    name="[SUBMENU] My App Name",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="my_app_name_app",
+    stack_size=4 * 1024,
+    requires=[
+        "gui",
+    ],
+    order=10,
+    fap_icon="app.png",
+    fap_category="GPIO",
+    fap_icon_assets="assets",
+)
