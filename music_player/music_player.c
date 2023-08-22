@@ -11,6 +11,7 @@
 #define TAG "MusicPlayer"
 
 #define MUSIC_PLAYER_APP_EXTENSION "*"
+#define MUSIC_PLAYER_EXAMPLE_FILE "Marble_Machine.fmf"
 
 #define MUSIC_PLAYER_SEMITONE_HISTORY_SIZE 4
 
@@ -308,6 +309,13 @@ int32_t music_player_app(void* p) {
             Storage* storage = furi_record_open(RECORD_STORAGE);
             storage_common_migrate(
                 storage, EXT_PATH("music_player"), STORAGE_APP_DATA_PATH_PREFIX);
+
+            if(!storage_common_exists(storage, APP_DATA_PATH(MUSIC_PLAYER_EXAMPLE_FILE))) {
+                storage_common_copy(
+                    storage,
+                    APP_ASSETS_PATH(MUSIC_PLAYER_EXAMPLE_FILE),
+                    APP_DATA_PATH(MUSIC_PLAYER_EXAMPLE_FILE));
+            }
             furi_record_close(RECORD_STORAGE);
 
             furi_string_set(file_path, STORAGE_APP_DATA_PATH_PREFIX);

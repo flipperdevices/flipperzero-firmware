@@ -20,4 +20,5 @@ App(
         ),
     ],
     fap_icon_assets="icons",
+    fap_file_assets="files"
 )
