@@ -153,6 +153,21 @@ static void sleep_method_changed(VariableItem* item) {
     }
 }
 
+const char* const filename_mode[] = {
+    "Default",
+    "Detailed",
+};
+
+static void filename_mode_changed(VariableItem* item) {
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, filename_mode[index]);
+    if(index) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagFilenameMode);
+    } else {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagFilenameMode);
+    }
+}
+
 static uint32_t system_settings_exit(void* context) {
     UNUSED(context);
     return VIEW_NONE;
@@ -235,6 +250,12 @@ SystemSettings* system_settings_alloc() {
     value_index = furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep) ? 1 : 0;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, sleep_method[value_index]);
+
+    item = variable_item_list_add(
+        app->var_item_list, "Filename Mode", COUNT_OF(filename_mode), filename_mode_changed, app);
+    value_index = furi_hal_rtc_is_flag_set(FuriHalRtcFlagFilenameMode) ? 1 : 0;
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, filename_mode[value_index]);
 
     view_set_previous_callback(
         variable_item_list_get_view(app->var_item_list), system_settings_exit);

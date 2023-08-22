@@ -31,7 +31,8 @@ typedef enum {
     FuriHalRtcFlagC2Update = (1 << 3),
     FuriHalRtcFlagHandOrient = (1 << 4),
     FuriHalRtcFlagLegacySleep = (1 << 5),
-    FuriHalRtcFlagStealthMode = (1 << 6),
+    FuriHalRtcFlagFilenameMode = (1 << 6),
+    FuriHalRtcFlagStealthMode = (1 << 7),
 } FuriHalRtcFlag;
 
 typedef enum {
