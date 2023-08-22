@@ -187,17 +187,18 @@ static MfUltralightCommand
             break;
 
         if(mf_ultralight_support_feature(
-               instance->features, MfUltralightFeatureSupportSingleCounter) &&
-           (counter_num != 2))
-            break;
+               instance->features, MfUltralightFeatureSupportSingleCounter)) {
+            if(instance->config == NULL) break;
 
-        if(instance->config) {
+            if(!instance->config->access.nfc_cnt_en || counter_num != 2) break;
+
             if(instance->config->access.nfc_cnt_pwd_prot) {
                 if(instance->auth_state != MfUltralightListenerAuthStateSuccess) {
                     break;
                 }
             }
         }
+
         if(counter_num > 2) break;
         uint8_t cnt_value[3] = {
             (instance->data->counter[counter_num].counter >> 0) & 0xff,
