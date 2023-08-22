@@ -44,7 +44,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         char file_name_buf[SUBGHZ_MAX_LEN_NAME] = {0};
 
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagFilenameMode)) {
-            set_name(file_name_buf, SUBGHZ_MAX_LEN_NAME, "SubGhz");
+            set_name(file_name_buf, SUBGHZ_MAX_LEN_NAME, "RAW");
         } else {
             set_random_name(file_name_buf, SUBGHZ_MAX_LEN_NAME);
         }

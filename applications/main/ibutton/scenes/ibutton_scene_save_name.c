@@ -20,7 +20,7 @@ void ibutton_scene_save_name_on_enter(void* context) {
 
     if(is_new_file) {
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagFilenameMode)) {
-            set_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE, "iButton");
+            set_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE, "iBtn");
         } else {
             set_random_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE);
         }
