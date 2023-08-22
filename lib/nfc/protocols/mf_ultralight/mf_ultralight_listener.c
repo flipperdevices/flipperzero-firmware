@@ -187,17 +187,18 @@ static MfUltralightCommand
             break;
 
         if(mf_ultralight_support_feature(
-               instance->features, MfUltralightFeatureSupportSingleCounter) &&
-           (counter_num != 2))
-            break;
+               instance->features, MfUltralightFeatureSupportSingleCounter)) {
+            if(instance->config == NULL) break;
 
-        if(instance->config) {
+            if(!instance->config->access.nfc_cnt_en || counter_num != 2) break;
+
             if(instance->config->access.nfc_cnt_pwd_prot) {
                 if(instance->auth_state != MfUltralightListenerAuthStateSuccess) {
                     break;
                 }
             }
         }
+
         if(counter_num > 2) break;
         uint8_t cnt_value[3] = {
             (instance->data->counter[counter_num].counter >> 0) & 0xff,
@@ -207,6 +208,43 @@ static MfUltralightCommand
         bit_buffer_copy_bytes(instance->tx_buffer, cnt_value, sizeof(cnt_value));
         iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
+        command = MfUltralightCommandProcessed;
+    } while(false);
+
+    return command;
+}
+
+static MfUltralightCommand mf_ultralight_listener_increase_counter_handler(
+    MfUltralightListener* instance,
+    BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
+
+    FURI_LOG_D(TAG, "CMD_INCR_CNT");
+
+    do {
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportIncCounter)) {
+            command = MfUltralightCommandNotProcessedSilent;
+            break;
+        }
+
+        uint8_t counter_num = bit_buffer_get_byte(buffer, 1);
+        if(counter_num > 2) break;
+
+        if(instance->data->counter[counter_num].counter == MF_ULTRALIGHT_MAX_CNTR_VAL) {
+            command = MfUltralightCommandProcessed;
+            break;
+        }
+
+        MfUltralightCounter buf_counter = {};
+        bit_buffer_write_bytes_mid(buffer, buf_counter.data, 2, sizeof(buf_counter.data));
+        uint32_t incr_value = buf_counter.counter;
+
+        if(instance->data->counter[counter_num].counter + incr_value > MF_ULTRALIGHT_MAX_CNTR_VAL)
+            break;
+
+        instance->data->counter[counter_num].counter += incr_value;
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
         command = MfUltralightCommandProcessed;
     } while(false);
 
@@ -314,6 +352,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .cmd = MF_ULTRALIGHT_CMD_AUTH,
         .cmd_len_bits = 5 * 8,
         .callback = mf_ultralight_listener_auth_handler,
+    },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_INCR_CNT,
+        .cmd_len_bits = 6 * 8,
+        .callback = mf_ultralight_listener_increase_counter_handler,
     },
 };
 
