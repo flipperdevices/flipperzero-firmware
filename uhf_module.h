@@ -62,7 +62,6 @@ char* m100_get_hardware_version(M100Module* module);
 char* m100_get_software_version(M100Module* module);
 char* m100_get_manufacturers(M100Module* module);
 
-// set attrs
 void m100_set_baudrate(M100Module* module, uint16_t baudrate);
 bool m100_set_working_area(M100Module* module, WorkingArea area);
 bool m100_set_working_channel(M100Module* module, WorkingChannel channel);
@@ -81,7 +80,8 @@ M100ResponseType m100_read_label_data_storage(
 
 M100ResponseType m100_write_label_data_storage(
     M100Module* module,
-    UHFTag* uhf_tag,
+    UHFTag* saved_tag,
+    UHFTag* selected_tag,
     BankType bank,
     uint16_t source_address,
     uint32_t access_pwd);
