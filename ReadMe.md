@@ -36,7 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
 - Updated: [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
-- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
+- Updated: [Solitaire v1.1.3 (By teeebor)](https://github.com/teeebor/flipper_games)
 
 <a name="release">
 
@@ -246,7 +246,7 @@ $ ./fbt dolphin_ext
 - [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
 - [Snake (By OlegSchwann)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/829)(With updates from DrZlo13, xMasterX, QtRoS and RogueMaster) [Snake Score Saving (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922) [Turns anywhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/125) [Food Spawns Anywwhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/130)
 - [Snake 2.0 (By Willzvul)](https://github.com/Willzvul/Snake_2.0/)
-- [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
+- [Solitaire v1.1.3 (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Sudoku (By profelis)](https://github.com/profelis/fz-sudoku)
 - [SUPER-CHIP Emulator (By Milk-Cool)](https://github.com/Milk-Cool/fz-schip)
 - [T-Rex Runner (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
