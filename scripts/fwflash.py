@@ -250,7 +250,7 @@ class BlackmagicProgrammer(Programmer):
         # But I choose to use the .elf file directly because we are flashing our own firmware and it always has an elf predecessor.
 
         if file_path.endswith(".bin"):
-            file_path = file_path.replace("app.bin", "firmware.elf")
+            file_path = file_path[:-4] + ".elf"
             if not os.path.exists(file_path):
                 self.logger.error(
                     f"Sorry, but Blackmagic can't flash .bin file, and {file_path} doesn't exist"
