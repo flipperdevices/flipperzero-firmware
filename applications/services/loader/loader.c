@@ -260,9 +260,7 @@ static void loader_log_status_error(
         furi_string_vprintf(error_message, format, args);
         FURI_LOG_E(TAG, "Status [%d]: %s", status, furi_string_get_cstr(error_message));
     } else {
-        FuriString* tmp = furi_string_alloc();
-        FURI_LOG_E(TAG, "Status [%d]: %s", status, furi_string_get_cstr(tmp));
-        furi_string_free(tmp);
+        FURI_LOG_E(TAG, "Status [%d]", status);
     }
 }
 
