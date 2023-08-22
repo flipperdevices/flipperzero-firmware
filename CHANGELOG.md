@@ -11,32 +11,9 @@
 
 [-> Download qFlipper (official link)](https://flipperzero.one/update)
 
-### Thanks to our sponsors:
+### Thanks to the UNLEASHED sponsors for our UNLEASHED changes:
 callmezimbra, Quen0n, MERRON, grvpvl (lvpvrg), art_col, ThurstonWaffles, Moneron, UterGrooll, LUCFER, Northpirate, zloepuzo, T.Rat, Alexey B., ionelife, ...
 and all other great people who supported our project and me (xMasterX), thanks to you all!
 
 
-## **Recommended update option - Web Updater**
-
-### What `n`, `r`, `e`, ` `, `c` means? What I need to download if I don't want to use Web updater?
-What build I should download and what this name means - `flipper-z-f7-update-(version)(n / r / e / c).tgz` ? <br>
-`flipper-z` = for Flipper Zero device<br>
-`f7` = Hardware version - same for all flipper zero devices<br>
-`update` = Update package, contains updater, all assets (plugins, IR libs, etc.), and firmware itself<br>
-`(version)` = Firmware version<br>
-| Designation | 3 Custom Animation | [Base Apps](https://github.com/xMasterX/all-the-plugins#default-pack) | [Extra Apps](https://github.com/xMasterX/all-the-plugins#extra-pack) | ⚠️RGB mode* |
-|-----|:---:|:---:|:---:|:---:|
-| ` ` | ✅ | ✅ |  |  |
-| `c` | ✅ |  |  |  |
-| `n` |  | ✅ |  |  |
-| `e` | ✅ | ✅ | ✅ |  |
-| `r` | ✅ | ✅ | ✅ | ✅ |
-
-⚠️This is [hardware mod](https://github.com/quen0n/flipperzero-firmware-rgb#readme), works only on modded flippers! do not install on non modded device!
-
-Firmware Self-update package (update from microSD) - `flipper-z-f7-update-(version).tgz` for mobile app / qFlipper / web<br>
-Archive of `scripts` folder (contains scripts for FW/plugins development) - `flipper-z-any-scripts-(version).tgz`<br>
-SDK files for plugins development and uFBT - `flipper-z-f7-sdk-(version).zip`
-
-
-
+### THANKS TO ALL RM SPONSORS FOR BEING AWESOME! THANK YOU TO THE COMMUNITY THAT KEEPS GROWING OUR PROJECT!
