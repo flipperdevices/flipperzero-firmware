@@ -9,8 +9,16 @@ extern "C" {
 #define SLIX_PASSWORD_SIZE (4U)
 #define SLIX_SIGNATURE_SIZE (32U)
 
+#define SLIX_CMD_GET_NXP_SYSINFO (0xABU)
+#define SLIX_CMD_READ_SIGNATURE (0xBDU)
+
 typedef enum {
     SlixErrorNone,
+    SlixErrorFormat,
+    SlixErrorNotSupported,
+    SlixErrorWrongManufacturer,
+    SlixErrorInternal,
+    SlixErrorUnknown,
 } SlixError;
 
 typedef enum {
@@ -58,9 +66,6 @@ typedef struct {
     SlixPrivacy privacy_mode;
     SlixProtection protection;
 } SlixData;
-
-// TODO: Move this and other NfcDeviceBase definitions to a separate file
-extern const NfcDeviceBase nfc_device_slix;
 
 SlixData* slix_alloc();
 

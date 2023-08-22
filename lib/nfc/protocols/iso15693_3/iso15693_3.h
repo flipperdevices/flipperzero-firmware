@@ -1,7 +1,7 @@
 #pragma once
 
-#include <nfc/protocols/nfc_device_base_i.h>
-
+#include <nfc/protocols/nfc_device_base.h>
+#include <flipper_format/flipper_format.h>
 #include <toolbox/simple_array.h>
 
 #ifdef __cplusplus
@@ -14,23 +14,6 @@ extern "C" {
 #define ISO15693_3_FDT_POLL_FC (4202U)
 #define ISO15693_3_FDT_LISTEN_FC (4320U)
 #define ISO15693_3_POLL_POLL_MIN_US (1500U)
-
-/* true: modulating releases load, false: modulating adds load resistor to field coil */
-#define ISO15693_3_LOAD_MODULATION_POLARITY (false)
-
-#define ISO15693_3_FC (13560000.0f) /* MHz */
-#define ISO15693_3_RESP_SUBC1_PULSE_32 (1.0f / (ISO15693_3_FC / 32) / 2.0f) /*  1.1799 µs */
-#define ISO15693_3_RESP_SUBC1_UNMOD_256 (256.0f / ISO15693_3_FC) /* 18.8791 µs */
-#define ISO15693_3_PULSE_DURATION_NS (128.0f * 1000000000.0f / ISO15693_3_FC)
-
-/* ISO/IEC 15693-3:2019(E) 10.4.12: maximum number of blocks is defined as 256 */
-#define ISO15693_3_BLOCKS_MAX 256
-/* ISO/IEC 15693-3:2019(E) 10.4.12: maximum size of blocks is defined as 32 */
-#define ISO15693_3_BLOCKSIZE_MAX 32
-/* the resulting memory size a card can have */
-#define ISO15693_3_MEMSIZE_MAX (ISO15693_3_BLOCKS_MAX * ISO15693_3_BLOCKSIZE_MAX)
-/* ISO/IEC 15693-3:2019(E) 7.1b: standard allows up to 8192, the maxium frame length that we are expected to receive/send is less */
-#define ISO15693_3_FRAMESIZE_MAX (1 + ISO15693_3_MEMSIZE_MAX + ISO15693_3_BLOCKS_MAX)
 
 #define ISO15693_3_REQ_FLAG_SUBCARRIER_1 (0U << 0)
 #define ISO15693_3_REQ_FLAG_SUBCARRIER_2 (1U << 0)
@@ -159,11 +142,11 @@ const Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data);
 
 bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num);
 
+uint8_t iso15693_3_get_manufacturer_id(const Iso15693_3Data* data);
+
 // Setters
 
 void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked);
-
-extern const NfcDeviceBase nfc_device_iso15693_3;
 
 #ifdef __cplusplus
 }

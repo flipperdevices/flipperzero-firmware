@@ -5,12 +5,12 @@
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_3b/iso14443_3b.h>
 #include <nfc/protocols/iso14443_4a/iso14443_4a.h>
-#include <nfc/protocols/iso15693_3/iso15693_3.h>
+#include <nfc/protocols/iso15693_3/iso15693_3_device_defs.h>
 #include <nfc/protocols/felica/felica.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <nfc/protocols/mf_desfire/mf_desfire.h>
-#include <nfc/protocols/slix/slix.h>
+#include <nfc/protocols/slix/slix_device_defs.h>
 
 const NfcDeviceBase* nfc_devices[NfcProtocolNum] = {
     [NfcProtocolIso14443_3a] = &nfc_device_iso14443_3a,

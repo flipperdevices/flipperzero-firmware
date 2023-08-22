@@ -1,4 +1,5 @@
 #include "slix_i.h"
+#include "slix_device_defs.h"
 
 #include <furi.h>
 #include <nfc/nfc_common.h>

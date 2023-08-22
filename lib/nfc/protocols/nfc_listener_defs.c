@@ -5,6 +5,7 @@
 #include <nfc/protocols/iso15693_3/iso15693_3_listener_defs.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight_listener_defs.h>
 #include <nfc/protocols/mf_classic/mf_classic_listener_defs.h>
+#include <nfc/protocols/slix/slix_listener_defs.h>
 
 const NfcListenerBase* nfc_listeners_api[NfcProtocolNum] = {
     [NfcProtocolIso14443_3a] = &nfc_listener_iso14443_3a,
@@ -14,4 +15,5 @@ const NfcListenerBase* nfc_listeners_api[NfcProtocolNum] = {
     [NfcProtocolMfUltralight] = &mf_ultralight_listener,
     [NfcProtocolMfClassic] = &mf_classic_listener,
     [NfcProtocolMfDesfire] = NULL,
+    [NfcProtocolSlix] = &nfc_listener_slix,
 };

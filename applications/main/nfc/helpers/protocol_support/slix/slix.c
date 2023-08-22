@@ -61,37 +61,32 @@ static void nfc_scene_read_success_on_enter_slix(NfcApp* instance) {
     // furi_string_free(temp_str);
 }
 
-// static NfcCommand
-//     nfc_scene_emulate_listener_callback_slix(NfcGenericEvent event, void* context) {
-//     furi_assert(context);
-//     furi_assert(event.protocol == NfcProtocolSlix);
-//     furi_assert(event.data);
-//
-//     NfcApp* nfc = context;
-//     SlixListenerEvent* slix_event = event.data;
-//
-//     if(slix_event->type == SlixListenerEventTypeCustomCommand) {
-//         furi_string_cat_printf(nfc->text_box_store, "R:");
-//         for(size_t i = 0; i < bit_buffer_get_size_bytes(slix_event->data->buffer); i++) {
-//             furi_string_cat_printf(
-//                 nfc->text_box_store,
-//                 " %02X",
-//                 bit_buffer_get_byte(slix_event->data->buffer, i));
-//         }
-//         furi_string_push_back(nfc->text_box_store, '\n');
-//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventListenerUpdate);
-//     }
-//
-//     return NfcCommandContinue;
-// }
+static NfcCommand nfc_scene_emulate_listener_callback_slix(NfcGenericEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.protocol == NfcProtocolSlix);
+    furi_assert(event.data);
+
+    NfcApp* nfc = context;
+    SlixListenerEvent* slix_event = event.data;
+
+    if(slix_event->type == SlixListenerEventTypeCustomCommand) {
+        furi_string_cat_printf(nfc->text_box_store, "R:");
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(slix_event->data->buffer); i++) {
+            furi_string_cat_printf(
+                nfc->text_box_store, " %02X", bit_buffer_get_byte(slix_event->data->buffer, i));
+        }
+        furi_string_push_back(nfc->text_box_store, '\n');
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventListenerUpdate);
+    }
+
+    return NfcCommandContinue;
+}
 
 static void nfc_scene_emulate_on_enter_slix(NfcApp* instance) {
-    UNUSED(instance);
-    // const SlixData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolSlix);
-    //
-    // instance->listener = nfc_listener_alloc(instance->nfc, NfcProtocolSlix, data);
-    // nfc_listener_start(
-    //     instance->listener, nfc_scene_emulate_listener_callback_slix, instance);
+    const SlixData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolSlix);
+
+    instance->listener = nfc_listener_alloc(instance->nfc, NfcProtocolSlix, data);
+    nfc_listener_start(instance->listener, nfc_scene_emulate_listener_callback_slix, instance);
 }
 
 static bool nfc_scene_info_on_event_slix(NfcApp* instance, uint32_t event) {

@@ -1,4 +1,5 @@
 #include "iso15693_3.h"
+#include "iso15693_3_device_defs.h"
 
 #include <nfc/nfc_common.h>
 
@@ -309,6 +310,10 @@ bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num) {
     furi_assert(block_num < data->system_info.block_count);
 
     return *(const uint8_t*)simple_array_cget(data->block_security, block_num);
+}
+
+uint8_t iso15693_3_get_manufacturer_id(const Iso15693_3Data* data) {
+    return data->uid[1];
 }
 
 void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked) {
