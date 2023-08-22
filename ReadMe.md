@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
 - Updated: [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
+- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
 
 <a name="release">
 

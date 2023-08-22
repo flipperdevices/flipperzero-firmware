@@ -47,86 +47,97 @@ bool can_place_card(Card where, Card what) {
 }
 
 static void draw_scene(Canvas* const canvas, const GameState* game_state) {
-    int deckIndex = game_state->deck.index;
-    if(game_state->dragging_deck) deckIndex--;
+    if(game_state->had_change) {
+        int deckIndex = game_state->deck.index;
+        if(game_state->dragging_deck) deckIndex--;
 
-    if((game_state->deck.index < (game_state->deck.card_count - 1) ||
-        game_state->deck.index == -1) &&
-       game_state->deck.card_count > 0) {
-        draw_card_back_at(columns[0][0], columns[0][1], canvas);
-        if(game_state->selectRow == 0 && game_state->selectColumn == 0) {
-            draw_rounded_box(
-                canvas,
-                columns[0][0] + 1,
-                columns[0][1] + 1,
-                CARD_WIDTH - 2,
-                CARD_HEIGHT - 2,
-                Inverse);
-        }
-    } else
-        draw_card_space(
-            columns[0][0],
-            columns[0][1],
-            game_state->selectRow == 0 && game_state->selectColumn == 0,
-            canvas);
-    //deck side
-    if(deckIndex >= 0) {
-        Card c = game_state->deck.cards[deckIndex];
-        draw_card_at_colored(
-            columns[1][0],
-            columns[1][1],
-            c.pip,
-            c.character,
-            game_state->selectRow == 0 && game_state->selectColumn == 1,
-            canvas);
-    } else
-        draw_card_space(
-            columns[1][0],
-            columns[1][1],
-            game_state->selectRow == 0 && game_state->selectColumn == 1,
-            canvas);
-
-    for(uint8_t i = 0; i < 4; i++) {
-        Card current = game_state->top_cards[i];
-        bool selected = game_state->selectRow == 0 && game_state->selectColumn == (i + 3);
-        if(current.disabled) {
-            draw_card_space(columns[i + 3][0], columns[i + 3][1], selected, canvas);
-        } else {
-            draw_card_at(
-                columns[i + 3][0], columns[i + 3][1], current.pip, current.character, canvas);
-            if(selected) {
+        if((game_state->deck.index < (game_state->deck.card_count - 1) ||
+            game_state->deck.index == -1) &&
+           game_state->deck.card_count > 0) {
+            draw_card_back_at(columns[0][0], columns[0][1], canvas);
+            if(game_state->selectRow == 0 && game_state->selectColumn == 0) {
                 draw_rounded_box(
-                    canvas, columns[i + 3][0], columns[i + 3][1], CARD_WIDTH, CARD_HEIGHT, Inverse);
+                    canvas,
+                    columns[0][0] + 1,
+                    columns[0][1] + 1,
+                    CARD_WIDTH - 2,
+                    CARD_HEIGHT - 2,
+                    Inverse);
+            }
+        } else
+            draw_card_space(
+                columns[0][0],
+                columns[0][1],
+                game_state->selectRow == 0 && game_state->selectColumn == 0,
+                canvas);
+        //deck side
+        if(deckIndex >= 0) {
+            Card c = game_state->deck.cards[deckIndex];
+            draw_card_at_colored(
+                columns[1][0],
+                columns[1][1],
+                c.pip,
+                c.character,
+                game_state->selectRow == 0 && game_state->selectColumn == 1,
+                canvas);
+        } else
+            draw_card_space(
+                columns[1][0],
+                columns[1][1],
+                game_state->selectRow == 0 && game_state->selectColumn == 1,
+                canvas);
+
+        for(uint8_t i = 0; i < 4; i++) {
+            Card current = game_state->top_cards[i];
+            bool selected = game_state->selectRow == 0 && game_state->selectColumn == (i + 3);
+            if(current.disabled) {
+                draw_card_space(columns[i + 3][0], columns[i + 3][1], selected, canvas);
+            } else {
+                draw_card_at(
+                    columns[i + 3][0], columns[i + 3][1], current.pip, current.character, canvas);
+                if(selected) {
+                    draw_rounded_box(
+                        canvas,
+                        columns[i + 3][0],
+                        columns[i + 3][1],
+                        CARD_WIDTH,
+                        CARD_HEIGHT,
+                        Inverse);
+                }
             }
         }
-    }
 
-    for(uint8_t i = 0; i < 7; i++) {
-        bool selected = game_state->selectRow == 1 && game_state->selectColumn == i;
-        int8_t index = (game_state->bottom_columns[i].index - 1 - game_state->selected_card);
-        if(index < 0) index = 0;
-        draw_hand_column(
-            game_state->bottom_columns[i],
-            columns[i][0],
-            columns[i][2],
-            selected ? index : -1,
-            canvas);
-    }
+        for(uint8_t i = 0; i < 7; i++) {
+            bool selected = game_state->selectRow == 1 && game_state->selectColumn == i;
+            int8_t index = (game_state->bottom_columns[i].index - 1 - game_state->selected_card);
+            if(index < 0) index = 0;
+            draw_hand_column(
+                game_state->bottom_columns[i],
+                columns[i][0],
+                columns[i][2],
+                selected ? index : -1,
+                canvas);
+        }
 
-    int8_t pos[2] = {
-        columns[game_state->selectColumn][0],
-        columns[game_state->selectColumn][game_state->selectRow + 1]};
+        int8_t pos[2] = {
+            columns[game_state->selectColumn][0],
+            columns[game_state->selectColumn][game_state->selectRow + 1]};
 
-    /*     draw_icon_clip(canvas, &I_card_graphics, pos[0] + CARD_HALF_WIDTH, pos[1] + CARD_HALF_HEIGHT, 30, 5, 5, 5,
-                        Filled);*/
+        /*     draw_icon_clip(canvas, &I_card_graphics, pos[0] + CARD_HALF_WIDTH, pos[1] + CARD_HALF_HEIGHT, 30, 5, 5, 5,
+                            Filled);*/
 
-    if(game_state->dragging_hand.index > 0) {
-        draw_hand_column(
-            game_state->dragging_hand,
-            pos[0] + CARD_HALF_WIDTH + 3,
-            pos[1] + CARD_HALF_HEIGHT + 3,
-            -1,
-            canvas);
+        if(game_state->dragging_hand.index > 0) {
+            draw_hand_column(
+                game_state->dragging_hand,
+                pos[0] + CARD_HALF_WIDTH + 3,
+                pos[1] + CARD_HALF_HEIGHT + 3,
+                -1,
+                canvas);
+        }
+
+        clone_buffer(get_buffer(canvas), game_state->animation.buffer);
+    } else {
+        clone_buffer(game_state->animation.buffer, get_buffer(canvas));
     }
 }
 
@@ -148,9 +159,11 @@ static void draw_animation(Canvas* const canvas, const GameState* game_state) {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    furi_assert(ctx);
     const GameState* game_state = ctx;
-    furi_mutex_acquire(game_state->mutex, FuriWaitForever);
+    furi_mutex_acquire(game_state->mutex, 25);
+    if(game_state == NULL) {
+        return;
+    }
 
     switch(game_state->state) {
     case GameStateAnimate:
@@ -247,7 +260,6 @@ bool place_on_top(Card* where, Card what) {
         int8_t b_letter = (int8_t)what.character;
         if(a_letter == 12) a_letter = -1;
         if(b_letter == 12) b_letter = -1;
-
         if(where->disabled && b_letter != -1) return false;
 
         if((a_letter + 1) == b_letter) {
@@ -270,6 +282,7 @@ void tick(GameState* game_state, NotificationApp* notification) {
         if(game_state->top_cards[0].character == 11 && game_state->top_cards[1].character == 11 &&
            game_state->top_cards[2].character == 11 && game_state->top_cards[3].character == 11) {
             game_state->state = GameStateAnimate;
+            game_state->had_change = true;
             dolphin_deed(DolphinDeedPluginGameWin);
             return;
         }
@@ -483,12 +496,13 @@ int32_t solitaire_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     AppEvent event;
-
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 150);
         furi_mutex_acquire(game_state->mutex, FuriWaitForever);
+        game_state->had_change = false;
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeKey) {
+                game_state->had_change = true;
                 if(event.input.type == InputTypeLong) {
                     game_state->longPress = true;
                     switch(event.input.key) {
