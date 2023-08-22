@@ -146,7 +146,7 @@ dist_env = env.Clone(
 
 flash_target = dist_env.FwFlash(
     dist_env["UFBT_STATE_DIR"].File("flash"),
-    dist_env["FW_BIN"],
+    dist_env["FW_ELF"],
 )
 dist_env.Alias("firmware_flash", flash_target)
 dist_env.Alias("flash", flash_target)

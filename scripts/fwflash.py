@@ -6,7 +6,7 @@ import subprocess
 import time
 import typing
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from flipper.app import App
 
@@ -16,7 +16,7 @@ from flipper.app import App
 
 class Programmer(ABC):
     @abstractmethod
-    def flash(self, bin: str) -> bool:
+    def flash(self, file_path: str, do_verify: bool) -> bool:
         pass
 
     @abstractmethod
@@ -35,9 +35,9 @@ class Programmer(ABC):
 @dataclass
 class OpenOCDInterface:
     name: str
-    file: str
+    config_file: str
     serial_cmd: str
-    additional_args: typing.Optional[list[str]] = None
+    additional_args: typing.Optional[list[str]] = field(default_factory=list)
 
 
 class OpenOCDProgrammer(Programmer):
@@ -58,22 +58,27 @@ class OpenOCDProgrammer(Programmer):
     def set_serial(self, serial: str):
         self.serial = serial
 
-    def flash(self, bin: str) -> bool:
-        i = self.interface
-
+    def flash(self, file_path: str, do_verify: bool) -> bool:
         if os.altsep:
-            bin = bin.replace(os.sep, os.altsep)
+            file_path = file_path.replace(os.sep, os.altsep)
 
         openocd_launch_params = ["openocd"]
-        self._add_file(openocd_launch_params, i.file)
+        self._add_file(openocd_launch_params, self.interface.config_file)
         if self.serial:
             self._add_serial(openocd_launch_params, self.serial)
-        if i.additional_args:
-            for a in i.additional_args:
-                self._add_command(openocd_launch_params, a)
+        for additional_arg in self.interface.additional_args:
+            self._add_command(openocd_launch_params, additional_arg)
         self._add_file(openocd_launch_params, "target/stm32wbx.cfg")
         self._add_command(openocd_launch_params, "init")
-        self._add_command(openocd_launch_params, f"program {bin} reset exit 0x8000000")
+        program_params = [
+            "program",
+            f'"{file_path}"',
+            "verify" if do_verify else "",
+            "reset",
+            "exit",
+            "0x8000000" if file_path.endswith(".bin") else "",
+        ]
+        self._add_command(openocd_launch_params, " ".join(program_params))
 
         # join the list of parameters into a string, but add quote if there are spaces
         openocd_launch_params_string = " ".join(
@@ -106,7 +111,7 @@ class OpenOCDProgrammer(Programmer):
         i = self.interface
 
         openocd_launch_params = ["openocd"]
-        self._add_file(openocd_launch_params, i.file)
+        self._add_file(openocd_launch_params, i.config_file)
         if self.serial:
             self._add_serial(openocd_launch_params, self.serial)
         if i.additional_args:
@@ -235,7 +240,7 @@ class BlackmagicProgrammer(Programmer):
         else:
             self.port = serial
 
-    def flash(self, bin: str) -> bool:
+    def flash(self, file_path: str, do_verify: bool) -> bool:
         if not self.port:
             if not self.probe():
                 return False
@@ -244,16 +249,13 @@ class BlackmagicProgrammer(Programmer):
         # arm-none-eabi-objcopy -I binary -O elf32-littlearm --change-section-address=.data=0x8000000 -B arm -S app.bin app.elf
         # But I choose to use the .elf file directly because we are flashing our own firmware and it always has an elf predecessor.
 
-        # Special case for ufbt. TODO: fix!
-        if "full.bin" in bin:
-            bin = bin.replace("full.bin", "firmware.elf")
-
-        elf = bin[:-4] + ".elf"
-        if not os.path.exists(elf):
-            self.logger.error(
-                f"Sorry, but Blackmagic can't flash .bin file, and {elf} doesn't exist"
-            )
-            return False
+        if file_path.endswith(".bin"):
+            file_path = file_path.replace("app.bin", "firmware.elf")
+            if not os.path.exists(file_path):
+                self.logger.error(
+                    f"Sorry, but Blackmagic can't flash .bin file, and {file_path} doesn't exist"
+                )
+                return False
 
         # arm-none-eabi-gdb build/f7-firmware-D/firmware.bin
         # -ex 'set pagination off'
@@ -266,7 +268,7 @@ class BlackmagicProgrammer(Programmer):
         # -ex 'compare-sections'
         # -ex 'quit'
 
-        gdb_launch_params = ["arm-none-eabi-gdb", elf]
+        gdb_launch_params = ["arm-none-eabi-gdb", file_path]
         self._add_command(gdb_launch_params, f"target extended-remote {self.port}")
         self._add_command(gdb_launch_params, "set pagination off")
         self._add_command(gdb_launch_params, "set confirm off")
@@ -274,7 +276,8 @@ class BlackmagicProgrammer(Programmer):
         self._add_command(gdb_launch_params, "attach 1")
         self._add_command(gdb_launch_params, "set mem inaccessible-by-default off")
         self._add_command(gdb_launch_params, "load")
-        self._add_command(gdb_launch_params, "compare-sections")
+        if do_verify:
+            self._add_command(gdb_launch_params, "compare-sections")
         self._add_command(gdb_launch_params, "quit")
 
         self.logger.debug(f"Launching: {' '.join(gdb_launch_params)}")
@@ -356,14 +359,23 @@ class Main(App):
 
     def init(self):
         self.parser.add_argument(
-            "bin",
+            "filename",
             type=str,
-            help="Binary to flash",
+            help="File to flash",
         )
-        all_interface_names = [i.get_name() for i in all_flash_interfaces]
+        self.parser.add_argument(
+            "--verify",
+            "-v",
+            action="store_true",
+            help="Verify flash after programming",
+            default=False,
+        )
         self.parser.add_argument(
             "--interface",
-            choices=(self.AUTO_INTERFACE, *all_interface_names),
+            choices=(
+                self.AUTO_INTERFACE,
+                *[i.get_name() for i in all_flash_interfaces],
+            ),
             type=str,
             default=self.AUTO_INTERFACE,
             help="Interface to use",
@@ -397,10 +409,10 @@ class Main(App):
 
     def flash(self):
         start_time = time.time()
-        bin_path = os.path.abspath(self.args.bin)
+        file_path = os.path.abspath(self.args.filename)
 
-        if not os.path.exists(bin_path):
-            self.logger.error(f"Binary file not found: {bin_path}")
+        if not os.path.exists(file_path):
+            self.logger.error(f"Binary file not found: {file_path}")
             return 1
 
         if self.args.interface != self.AUTO_INTERFACE:
@@ -435,19 +447,22 @@ class Main(App):
         if self.args.serial != self.AUTO_INTERFACE:
             interface.set_serial(self.args.serial)
             self.logger.info(
-                f"Flashing {bin_path} via {interface.get_name()} with {self.args.serial}"
+                f"Flashing {file_path} via {interface.get_name()} with {self.args.serial}"
             )
         else:
-            self.logger.info(f"Flashing {bin_path} via {interface.get_name()}")
+            self.logger.info(f"Flashing {file_path} via {interface.get_name()}")
 
-        if not interface.flash(bin_path):
+        if not interface.flash(file_path, self.args.verify):
             self.logger.error(f"Failed to flash via {interface.get_name()}")
             return 1
 
         flash_time = time.time() - start_time
-        bin_size = os.path.getsize(bin_path)
         self.logger.info(f"Flashed successfully in {flash_time:.2f}s")
-        self.logger.info(f"Effective speed: {bin_size / flash_time / 1024:.2f} KiB/s")
+        if file_path.endswith(".bin"):
+            bin_size = os.path.getsize(file_path)
+            self.logger.info(
+                f"Effective speed: {bin_size / flash_time / 1024:.2f} KiB/s"
+            )
         return 0
 
 

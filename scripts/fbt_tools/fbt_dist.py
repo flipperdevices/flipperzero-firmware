@@ -55,7 +55,7 @@ def AddFwProject(env, base_env, fw_type, fw_env_key):
 def AddFwFlashTarget(env, targetenv, **kw):
     fwflash_target = env.FwFlash(
         "#build/flash.flag",
-        targetenv["FW_BIN"],
+        targetenv["FW_ELF"],
         **kw,
     )
     env.Alias(targetenv.subst("${FIRMWARE_BUILD_CFG}_flash"), fwflash_target)
