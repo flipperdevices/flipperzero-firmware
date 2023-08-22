@@ -1,8 +1,8 @@
-#include "fnaf.h"
+#include "../fnaf.h"
 #include "menu.h"
 
-void draw_menu(Canvas* canvas, void* ctx) {
-    Fnaf* fnaf = ctx;
+void draw_menu(Canvas* canvas, Fnaf* fnaf) {
+    if (fnaf->progress > 6) fnaf->progress = 0;
 
     canvas_set_bitmap_mode(canvas, 1);
     canvas_draw_str(canvas, 15, 16, "New Game");
@@ -18,20 +18,19 @@ void draw_menu(Canvas* canvas, void* ctx) {
 
     switch (fnaf->menu_cursor) {
     case 0:
-        canvas_draw_line(canvas, 14, 19, 69, 19);
+        canvas_draw_line(canvas, 14, 19, 59, 19);
         break;
     case 1:
-        if (fnaf->progress > 0) { canvas_draw_line(canvas, 14, 35, 108, 35); } else
-            canvas_draw_line(canvas, 14, 35, 35, 35);
+        if (fnaf->progress > 0) { canvas_draw_line(canvas, 14, 35, 83, 35); } else
+            canvas_draw_line(canvas, 15, 35, 32, 35);
         break;
     case 2:
-        canvas_draw_line(canvas, 14, 51, 35, 51);
+        canvas_draw_line(canvas, 15, 51, 32, 51);
         break;
     }
 }
 
-bool menu_input(void* ctx) {
-    Fnaf* fnaf = ctx;
+bool menu_input(Fnaf* fnaf) {
     if (fnaf->event.type == InputTypePress) {
         switch (fnaf->event.key) {
         case InputKeyLeft:
@@ -53,11 +52,14 @@ bool menu_input(void* ctx) {
         case InputKeyOk:
             switch (fnaf->menu_cursor) {
             case 0:
-                // Do thing
+
+                // TESTING
+                fnaf->current_view = cameras;
+
+                // fnaf->current_view = office;
                 break;
             case 1:
-                // Do thing
-                if (fnaf->progress == 0) return 0;
+                if (fnaf->progress == 0) { return 0; } else fnaf->current_view = office;
                 break;
             case 2:
                 return false;
@@ -73,6 +75,7 @@ bool menu_input(void* ctx) {
             fnaf->menu_cursor = 0;
         } else if (fnaf->menu_cursor < 0) {
             fnaf->menu_cursor = 2;
+            if (fnaf->progress == 0) fnaf->menu_cursor = 1;
         }
         if (fnaf->menu_cursor > 1 && fnaf->progress == 0) fnaf->menu_cursor = 0;
     }

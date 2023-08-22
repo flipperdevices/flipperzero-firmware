@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gui/gui.h>
+#include "../fnaf.h"
 
 typedef enum {
     NewGame,
@@ -11,9 +12,9 @@ typedef enum {
 /// @brief Draw main menu
 /// @param canvas Canvas instance
 /// @param ctx Context
-void draw_menu(Canvas* canvas, void* ctx);
+void draw_menu(Canvas* canvas, Fnaf* fnaf);
 
 /// @brief Input handling
 /// @param ctx Context
 /// @return running bool
-bool menu_input(void* ctx);
+bool menu_input(Fnaf* fnaf);
