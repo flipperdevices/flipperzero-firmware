@@ -2,7 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include "uhf_data.h"
+#include "uhf_module.h"
 
 typedef enum {
     // Init states
@@ -30,10 +30,10 @@ typedef void (*UHFWorkerCallback)(UHFWorkerEvent event, void* ctx);
 
 typedef struct UHFWorker {
     FuriThread* thread;
-    UHFResponseData* response_data;
-    UHFTag* uhf_tag;
+    M100Module* module;
     UHFWorkerCallback callback;
     UHFWorkerState state;
+    UHFTagWrapper* uhf_tag_wrapper;
     void* ctx;
 } UHFWorker;
 

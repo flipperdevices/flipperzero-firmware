@@ -42,6 +42,10 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                 widget_reset(uhf_app->widget);
                 furi_string_reset(temp_str);
                 uhf_worker_stop(uhf_app->worker);
+                // furi_hal_gpio_write(&gpio_ext, false);
+                // furi_delay_ms(50);
+                // furi_hal_gpio_write(&gpio_ext_pa7, true);
+                // furi_delay_ms(50);
                 uhf_worker_start(
                     uhf_app->worker,
                     UHFWorkerStateVerify,
@@ -52,18 +56,12 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
             if(verify_success) {
                 widget_reset(uhf_app->widget);
                 furi_string_reset(temp_str);
-                UHFResponseData* uhf_response_data = uhf_app->worker->response_data;
-                UHFData* hardware_version = uhf_response_data_get_uhf_data(uhf_response_data, 0);
-                UHFData* software_version = uhf_response_data_get_uhf_data(uhf_response_data, 1);
-                UHFData* manufacturer = uhf_response_data_get_uhf_data(uhf_response_data, 2);
-                uint offset = 6;
+                M100Module* module = uhf_app->worker->module;
                 widget_add_string_element(
                     uhf_app->widget, 64, 5, AlignCenter, AlignCenter, FontPrimary, "Module Info");
                 // hardware info
                 furi_string_cat_str(temp_str, "HW Version: ");
-                for(int i = 0; i < (int)hardware_version->data[4]; i++) {
-                    furi_string_cat_printf(temp_str, "%c", hardware_version->data[offset + i]);
-                }
+                furi_string_cat_str(temp_str, module->info->hw_version);
                 widget_add_string_element(
                     uhf_app->widget,
                     1,
@@ -75,9 +73,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                 furi_string_reset(temp_str);
                 // software info
                 furi_string_cat_str(temp_str, "SW Version: ");
-                for(int i = 0; i < (int)software_version->data[4]; i++) {
-                    furi_string_cat_printf(temp_str, "%c", software_version->data[offset + i]);
-                }
+                furi_string_cat_str(temp_str, module->info->sw_version);
                 widget_add_string_element(
                     uhf_app->widget,
                     1,
@@ -89,9 +85,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                 furi_string_reset(temp_str);
                 // manufacturer info
                 furi_string_cat_str(temp_str, "Manufacturer: ");
-                for(int i = 0; i < (int)manufacturer->data[4]; i++) {
-                    furi_string_cat_printf(temp_str, "%c", manufacturer->data[offset + i]);
-                }
+                furi_string_cat_str(temp_str, module->info->manufacturer);
                 widget_add_string_element(
                     uhf_app->widget,
                     1,
@@ -123,7 +117,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     AlignCenter,
                     AlignCenter,
                     FontSecondary,
-                    "Please connect your module.\nPlease refer to the frux-c/uhf_rfid for help.");
+                    "Please refer to the git@frux-c/uhf_rfid for help.");
                 widget_add_button_element(
                     uhf_app->widget,
                     GuiButtonTypeLeft,
@@ -148,8 +142,6 @@ void uhf_scene_verify_on_exit(void* ctx) {
     furi_string_free(temp_str);
     // Stop worker
     uhf_worker_stop(uhf_app->worker);
-    // Clear view
-    // popup_reset(uhf_app->popup);
     // clear widget
     widget_reset(uhf_app->widget);
 }

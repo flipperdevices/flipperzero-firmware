@@ -1,6 +1,6 @@
 #include "uhf_app_i.h"
 
-char* convertToHexString(const uint8_t* array, size_t length) {
+char* convertToHexString(uint8_t* array, size_t length) {
     if(array == NULL || length == 0) {
         return " ";
     }
@@ -60,10 +60,11 @@ UHFApp* uhf_alloc() {
     // device
     uhf_app->uhf_device = uhf_device_alloc();
 
-    UHFTag* uhf_tag = uhf_tag_alloc();
-    // point tag object to worker
-    uhf_app->worker->uhf_tag = uhf_tag;
-    uhf_app->uhf_device->uhf_tag = uhf_tag;
+    UHFTagWrapper* uhf_tag_wrapper = uhf_tag_wrapper_alloc();
+
+    // // point tag object to worker
+    uhf_app->worker->uhf_tag_wrapper = uhf_tag_wrapper;
+    uhf_app->uhf_device->uhf_tag_wrapper = uhf_tag_wrapper;
 
     // Open Notification record
     uhf_app->notifications = furi_record_open(RECORD_NOTIFICATION);
@@ -119,12 +120,15 @@ void uhf_free(UHFApp* uhf_app) {
     view_dispatcher_remove_view(uhf_app->view_dispatcher, UHFViewWidget);
     widget_free(uhf_app->widget);
 
+    // Tag
+    uhf_tag_wrapper_free(uhf_app->worker->uhf_tag_wrapper);
+
     // Worker
     uhf_worker_stop(uhf_app->worker);
     uhf_worker_free(uhf_app->worker);
 
-    // Tag
-    uhf_tag_free(uhf_app->worker->uhf_tag);
+    // Device
+    uhf_device_free(uhf_app->uhf_device);
 
     // View Dispatcher
     view_dispatcher_free(uhf_app->view_dispatcher);
@@ -135,9 +139,6 @@ void uhf_free(UHFApp* uhf_app) {
     // GUI
     furi_record_close(RECORD_GUI);
     uhf_app->gui = NULL;
-
-    // UHFDevice
-    uhf_device_free(uhf_app->uhf_device);
 
     // Notifications
     furi_record_close(RECORD_NOTIFICATION);
@@ -184,19 +185,17 @@ int32_t uhf_app_main(void* ctx) {
     UNUSED(ctx);
     UHFApp* uhf_app = uhf_alloc();
 
-    furi_hal_uart_resume(FuriHalUartIdUSART1);
-
     // enable 5v pin
     furi_hal_power_enable_otg();
+    // init pin a2
+    // furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
 
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneVerify);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
     // disable 5v pin
     furi_hal_power_disable_otg();
-
-    furi_hal_uart_suspend(FuriHalUartIdUSART1);
-
+    // furi_hal_gpio_disable_int_callback()
     // exit app
     uhf_free(uhf_app);
     return 0;

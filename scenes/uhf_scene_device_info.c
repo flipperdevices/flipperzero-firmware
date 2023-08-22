@@ -40,7 +40,7 @@ void uhf_scene_device_info_widget_callback(GuiButtonType result, InputType type,
 }
 
 void change_view_on_event(UHFApp* uhf_app) {
-    UHFTag* uhf_tag = uhf_app->uhf_device->uhf_tag;
+    UHFTag* uhf_tag = uhf_app->uhf_device->uhf_tag_wrapper->uhf_tag;
     FuriString* furi_temp_str;
     furi_temp_str = furi_string_alloc();
     char* temp_str;
@@ -52,16 +52,16 @@ void change_view_on_event(UHFApp* uhf_app) {
 
     switch(current_info) {
     case EPC_INFO:
-        temp_str = convertToHexString(uhf_tag->epc, uhf_tag->epc_length);
-        length = uhf_tag->epc_length;
+        temp_str = convertToHexString(uhf_tag->epc->data, uhf_tag->epc->size);
+        length = uhf_tag->epc->size;
         break;
     case TID_INFO:
-        temp_str = convertToHexString(uhf_tag->tid, uhf_tag->tid_length);
-        length = uhf_tag->tid_length;
+        temp_str = convertToHexString(uhf_tag->tid->data, uhf_tag->tid->size);
+        length = uhf_tag->tid->size;
         break;
     case USER_INFO:
-        temp_str = convertToHexString(uhf_tag->user, uhf_tag->user_length);
-        length = uhf_tag->user_length;
+        temp_str = convertToHexString(uhf_tag->user->data, uhf_tag->user->size);
+        length = uhf_tag->user->size;
         break;
     default:
         temp_str = NULL;
@@ -81,7 +81,7 @@ void change_view_on_event(UHFApp* uhf_app) {
         furi_string_get_cstr(furi_temp_str));
 
     widget_add_string_multiline_element(
-        uhf_app->widget, 3, 24, AlignLeft, AlignTop, FontBatteryPercent, temp_str);
+        uhf_app->widget, 3, 24, AlignLeft, AlignTop, FontKeyboard, temp_str);
 
     widget_add_button_element(
         uhf_app->widget,
