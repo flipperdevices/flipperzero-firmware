@@ -1,6 +1,8 @@
 #include <lib/toolbox/random_name.h>
 #include "../lfrfid_i.h"
 #include <dolphin/dolphin.h>
+#include <furi_hal_rtc.h>
+#include <toolbox/set_name.h>
 
 void lfrfid_scene_save_name_on_enter(void* context) {
     LfRfid* app = context;
@@ -11,7 +13,13 @@ void lfrfid_scene_save_name_on_enter(void* context) {
     bool key_name_is_empty = furi_string_empty(app->file_name);
     if(key_name_is_empty) {
         furi_string_set(app->file_path, LFRFID_APP_FOLDER);
-        set_random_name(app->text_store, LFRFID_TEXT_STORE_SIZE);
+
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagFilenameMode)) {
+            set_name(app->text_store, LFRFID_TEXT_STORE_SIZE, "LFRFID");
+        } else {
+            set_random_name(app->text_store, LFRFID_TEXT_STORE_SIZE);
+        }
+
         furi_string_set(folder_path, LFRFID_APP_FOLDER);
     } else {
         lfrfid_text_store_set(app, "%s", furi_string_get_cstr(app->file_name));
