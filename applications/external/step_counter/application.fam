@@ -8,6 +8,6 @@ App(
     fap_category="GPIO",
     fap_author="47lecoste a.k.a. grugnoymeme",
     fap_weburl="https://github.com/grugnoymeme/flipperzero-stepcounter-fap",
-    fap_version=(1,0),
+    fap_version=(1, 0),
     fap_description="Step Counter/Pedometer using Memsic2125 module.",
 )
