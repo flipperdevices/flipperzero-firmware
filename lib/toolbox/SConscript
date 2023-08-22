@@ -13,7 +13,6 @@ env.Append(
         File("manchester_decoder.h"),
         File("manchester_encoder.h"),
         File("path.h"),
-        File("random_name.h"),
         File("set_name.h"),
         File("sha256.h"),
         File("crc32_calc.h"),

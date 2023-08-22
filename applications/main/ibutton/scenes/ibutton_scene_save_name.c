@@ -1,6 +1,5 @@
 #include "../ibutton_i.h"
 
-#include <toolbox/random_name.h>
 #include <toolbox/set_name.h>
 #include <toolbox/path.h>
 
@@ -19,11 +18,7 @@ void ibutton_scene_save_name_on_enter(void* context) {
     const bool is_new_file = furi_string_empty(ibutton->file_path);
 
     if(is_new_file) {
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagFilenameMode)) {
-            set_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE, "iBtn");
-        } else {
-            set_random_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE);
-        }
+        set_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE, IBUTTON_APP_EXTENSION);
     }
 
     text_input_set_header_text(text_input, "Name the key");

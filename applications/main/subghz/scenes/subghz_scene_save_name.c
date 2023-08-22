@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "subghz/types.h"
-#include <lib/toolbox/random_name.h>
 #include "../helpers/subghz_custom_event.h"
 #include <lib/subghz/protocols/raw.h>
 #include <gui/modules/validators.h>
@@ -43,11 +42,7 @@ void subghz_scene_save_name_on_enter(void* context) {
     if(!subghz_path_is_file(subghz->file_path)) {
         char file_name_buf[SUBGHZ_MAX_LEN_NAME] = {0};
 
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagFilenameMode)) {
-            set_name(file_name_buf, SUBGHZ_MAX_LEN_NAME, "RAW");
-        } else {
-            set_random_name(file_name_buf, SUBGHZ_MAX_LEN_NAME);
-        }
+        set_name(file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_EXTENSION);
 
         furi_string_set(file_name, file_name_buf);
         furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);
