@@ -12,22 +12,23 @@ This repository contains a UHF RFID application developed for FlipperZero, a ver
 - Reading bank now can automatically detect bank size, for cases that PC(protocol control) bits aren't properly written to tag.
 - Can now view tag from saved.
 - Can now write tags from saved.
+- Icon added by [@xMasterX](https://github.com/xMasterX)
+- App is now named `[(Q)M100] UHF RFID`, meaning for M100 and QM100 modules
 
 ## Features
 
 - [x] Read Single UHF RFID tag.
 - [x] View saved UHF RFID tag.
 - [x] Write Single UHF RFID tag.
-- [ ] Change Module setting parameters. __(In Progress)__
-    - [ ] Set/Reset Access Password
-    - [ ] Set Kill Password
-    - [ ] Kill Tag
-    - [ ] TBD
+- [ ] Change Module setting parameters. **(In Progress)**
+  - [ ] Set/Reset Access Password
+  - [ ] Set Kill Password
+  - [ ] Kill Tag
+  - [ ] TBD
 - [ ] Edit/Create new data to write.
 - Extras
-    - [ ] Read multiple tags at once
-    - [ ] View multiple on a list view
-
+  - [ ] Read multiple tags at once
+  - [ ] View multiple on a list view
 
 ## Requirements
 
@@ -55,7 +56,7 @@ To run this application on FlipperZero, you will need:
 2. Connect the uhf module to the flipper via gpio.
 3. Navigate to the UHF RFID app on FlipperZero's menu.
 4. Currently Reading the EPC tag is the only usable option
-... will further update this page as it development goes
+   ... will further update this page as it development goes
 
 ## Contributions
 
@@ -72,6 +73,7 @@ As this app is still in the development stage, I welcome contributions to this p
 - [MagicRF M100&QM100_Firmware_manual_en.pdf](assets/res/MagicRF_M100&QM100_Firmware_manual_en.pdf)
 - [TDS_1_9_Standard.pdf](assets/res/TDS_1_9_Standard.pdf)
 - [M5Stack Docs](https://docs.m5stack.com/en/unit/uhf_rfid)
+- [MagicRF Chip DS](http://www.magicrf.com/product_en.htm)
 
 ## Contact
 
