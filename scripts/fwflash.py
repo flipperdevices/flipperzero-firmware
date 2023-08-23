@@ -470,11 +470,10 @@ class Main(App):
 
         if self.args.serial != self.AUTO_INTERFACE:
             interface.set_serial(self.args.serial)
-            self.logger.info(
-                f"Flashing {file_path} via {interface.get_name()} with {self.args.serial}"
-            )
+            self.logger.info(f"Using {interface.get_name()} with {self.args.serial}")
         else:
-            self.logger.info(f"Flashing {file_path} via {interface.get_name()}")
+            self.logger.info(f"Using {interface.get_name()}")
+        self.logger.info(f"Flashing {file_path}")
 
         if not interface.flash(file_path, self.args.verify):
             self.logger.error(f"Failed to flash via {interface.get_name()}")
