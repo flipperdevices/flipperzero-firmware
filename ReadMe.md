@@ -46,6 +46,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [loader: restored support for debug apps #2993 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2993)
 - OFW: [Removed explicit dependency on scons for external scripting #2999 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2999)
 - Updated Patreon SD Card Assets with additional ESP Flasher assets
+- Updated: [PicoPass (iClass) v1.2 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
+- UL: Fix SubGHz Loading (By xMasterX)
+- OFW: [Unit bench: multiple attempts to find flipper #2960 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2960)
+- OFW: [FuriHal: explicitly pull display pins at early init stage, move PUPD config to early stage #3004 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3004)
 
 <a name="release">
 
@@ -387,7 +391,7 @@ $ ./fbt dolphin_ext
 - [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [Pet a Dolphin (By ugeneSmile)](https://github.com/EugeneSmile/PetADolphin)
-- [PicoPass (iClass) (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
+- [PicoPass (iClass) v1.2 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pokemon Trading (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
