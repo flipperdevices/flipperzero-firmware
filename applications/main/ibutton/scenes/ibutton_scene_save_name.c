@@ -1,6 +1,6 @@
 #include "../ibutton_i.h"
 
-#include <toolbox/set_name.h>
+#include <toolbox/name_generator.h>
 #include <toolbox/path.h>
 
 #include <dolphin/dolphin.h>
@@ -18,7 +18,7 @@ void ibutton_scene_save_name_on_enter(void* context) {
     const bool is_new_file = furi_string_empty(ibutton->file_path);
 
     if(is_new_file) {
-        set_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE, IBUTTON_APP_EXTENSION);
+        name_generator_set(ibutton->key_name, IBUTTON_KEY_NAME_SIZE, IBUTTON_APP_EXTENSION);
     }
 
     text_input_set_header_text(text_input, "Name the key");

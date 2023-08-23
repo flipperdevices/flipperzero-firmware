@@ -162,9 +162,9 @@ static void filename_scheme_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, filename_scheme[index]);
     if(index) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagFilenameScheme);
+        furi_hal_rtc_set_flag(FuriHalRtcFlagDetailedFilename);
     } else {
-        furi_hal_rtc_reset_flag(FuriHalRtcFlagFilenameScheme);
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagDetailedFilename);
     }
 }
 
@@ -253,7 +253,7 @@ SystemSettings* system_settings_alloc() {
 
     item = variable_item_list_add(
         app->var_item_list, "File Naming", COUNT_OF(filename_scheme), filename_scheme_changed, app);
-    value_index = furi_hal_rtc_is_flag_set(FuriHalRtcFlagFilenameScheme) ? 1 : 0;
+    value_index = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDetailedFilename) ? 1 : 0;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, filename_scheme[value_index]);
 

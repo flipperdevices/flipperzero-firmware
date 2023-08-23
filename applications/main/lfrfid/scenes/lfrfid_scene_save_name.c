@@ -2,7 +2,7 @@
 #include "../lfrfid_i.h"
 #include <dolphin/dolphin.h>
 #include <furi_hal_rtc.h>
-#include <toolbox/set_name.h>
+#include <toolbox/name_generator.h>
 
 void lfrfid_scene_save_name_on_enter(void* context) {
     LfRfid* app = context;
@@ -14,7 +14,7 @@ void lfrfid_scene_save_name_on_enter(void* context) {
     if(key_name_is_empty) {
         furi_string_set(app->file_path, LFRFID_APP_FOLDER);
 
-        set_name(app->text_store, LFRFID_TEXT_STORE_SIZE, LFRFID_APP_EXTENSION);
+        name_generator_set(app->text_store, LFRFID_TEXT_STORE_SIZE, LFRFID_APP_EXTENSION);
 
         furi_string_set(folder_path, LFRFID_APP_FOLDER);
     } else {

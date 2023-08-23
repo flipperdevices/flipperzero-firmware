@@ -1,4 +1,5 @@
-#include "set_name.h"
+#include "name_generator.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <furi_hal_rtc.h>
@@ -8,10 +9,10 @@
 
 void set_random_name(char* name, uint8_t max_name_size) {
     const char* prefix[] = {
-        "ancient",     "hollow",    "strange",    "disappeared", "unknown",
-        "unthinkable", "unnamable", "nameless",   "my",          "concealed",
-        "forgotten",   "hidden",    "mysterious", "obscure",     "random",
-        "remote",      "uncharted", "undefined",  "untravelled", "untold",
+        "ancient",     "hollow",     "strange",    "disappeared", "unknown",
+        "unthinkable", "unnameable", "nameless",   "my",          "concealed",
+        "forgotten",   "hidden",     "mysterious", "obscure",     "random",
+        "remote",      "uncharted",  "undefined",  "untraveled",  "untold",
     };
 
     const char* suffix[] = {
@@ -59,8 +60,8 @@ const char* convert_app_extension_to_name(char* app_name) {
     return converted_name;
 }
 
-void set_name(char* name, uint8_t max_name_size, char* app_name) {
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagFilenameScheme)) {
+void name_generator_set(char* name, uint8_t max_name_size, char* app_name) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDetailedFilename)) {
         FuriHalRtcDateTime dateTime;
         furi_hal_rtc_get_datetime(&dateTime);
 

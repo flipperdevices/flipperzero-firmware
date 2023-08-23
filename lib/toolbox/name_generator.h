@@ -10,7 +10,7 @@ extern "C" {
  * @param name buffer to write random name
  * @param max_name_size length of given buffer
  */
-void set_name(char* name, uint8_t max_name_size, char* app_name);
+void name_generator_set(char* name, uint8_t max_name_size, char* app_name);
 
 #ifdef __cplusplus
 }
