@@ -28,6 +28,7 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardLost);
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
         mfc_event->data->poller_mode.mode = MfClassicPollerModeDictAttack;
+        
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestKey) {
         MfClassicKey key = {};
         if(mf_dict_get_next_key(instance->mf_dict_context.dict, &key)) {

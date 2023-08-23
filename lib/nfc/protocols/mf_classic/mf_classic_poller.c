@@ -358,8 +358,7 @@ NfcCommand mf_classic_poller_handler_auth_a(MfClassicPoller* instance) {
 
             command = mf_classic_poller_handle_data_update(instance);
             dict_attack_ctx->current_key_type = MfClassicKeyTypeA;
-            dict_attack_ctx->current_block =
-                mf_classic_get_first_block_num_of_sector(dict_attack_ctx->current_sector);
+            dict_attack_ctx->current_block = block;
             dict_attack_ctx->auth_passed = true;
             instance->state = MfClassicPollerStateReadSector;
         } else {
@@ -392,8 +391,7 @@ NfcCommand mf_classic_poller_handler_auth_b(MfClassicPoller* instance) {
 
             command = mf_classic_poller_handle_data_update(instance);
             dict_attack_ctx->current_key_type = MfClassicKeyTypeB;
-            dict_attack_ctx->current_block =
-                mf_classic_get_first_block_num_of_sector(dict_attack_ctx->current_sector);
+            dict_attack_ctx->current_block = block;
 
             dict_attack_ctx->auth_passed = true;
             instance->state = MfClassicPollerStateReadSector;
@@ -443,6 +441,7 @@ NfcCommand mf_classic_poller_handler_read_sector(MfClassicPoller* instance) {
                 NULL);
             if(error != MfClassicErrorNone) {
                 instance->state = MfClassicPollerStateNextSector;
+                FURI_LOG_W(TAG, "Failed to re-auth. Go to next sector");
                 break;
             }
         }
@@ -532,8 +531,7 @@ NfcCommand mf_classic_poller_handler_key_reuse_auth_key_a(MfClassicPoller* insta
 
             command = mf_classic_poller_handle_data_update(instance);
             dict_attack_ctx->current_key_type = MfClassicKeyTypeA;
-            dict_attack_ctx->current_block =
-                mf_classic_get_first_block_num_of_sector(dict_attack_ctx->reuse_key_sector);
+            dict_attack_ctx->current_block = block;
             dict_attack_ctx->auth_passed = true;
             instance->state = MfClassicPollerStateKeyReuseReadSector;
         } else {
@@ -568,8 +566,7 @@ NfcCommand mf_classic_poller_handler_key_reuse_auth_key_b(MfClassicPoller* insta
 
             command = mf_classic_poller_handle_data_update(instance);
             dict_attack_ctx->current_key_type = MfClassicKeyTypeB;
-            dict_attack_ctx->current_block =
-                mf_classic_get_first_block_num_of_sector(dict_attack_ctx->reuse_key_sector);
+            dict_attack_ctx->current_block = block;
 
             dict_attack_ctx->auth_passed = true;
             instance->state = MfClassicPollerStateKeyReuseReadSector;
