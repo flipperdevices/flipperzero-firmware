@@ -19,3 +19,5 @@ This is a simple StepCounter/Pedometer for FlipperZero using a Memsic2125 module
 
 ![Main screen](https://raw.githubusercontent.com/grugnoymeme/flipperzero-StepCounter-fap/main/images/main_screen.png "main screen view")
 
+
+* to do: add the possibility to save the day result in files at the path: apps_data/stepcounter
