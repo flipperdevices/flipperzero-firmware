@@ -29,10 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0822-0304-0.89.1-c53c125](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0823-0147-0.89.1-288ffc8](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-22 03:04 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-22 03:04 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-23 01:47 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-23 01:47 EST`
 - Updated: [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - Updated: [Solitaire v1.1.3 (By teeebor)](https://github.com/teeebor/flipper_games)
 - Updated: UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Assign tickets to all TODO items #2988 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2988)
 - OFW: [loader: restored support for debug apps #2993 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2993)
 - OFW: [Removed explicit dependency on scons for external scripting #2999 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2999)
+- Updated Patreon SD Card Assets with additional ESP Flasher assets
 
 <a name="release">
 
