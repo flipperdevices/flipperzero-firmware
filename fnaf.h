@@ -33,6 +33,7 @@ typedef struct {
     uint8_t power_draw;
 
     uint16_t counter;
+    uint8_t kitchen_counter;
     short int menu_cursor;
     uint8_t current_view;
     uint8_t progress; // Last completed night

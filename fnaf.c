@@ -66,6 +66,7 @@ void fnaf_alloc(Fnaf* fnaf) {
     UNUSED(fnaf->timer_freddy);
     UNUSED(fnaf->timer_foxy);
 
+    fnaf->power_left = 100;
     fnaf->current_view = main_menu;
     fnaf->menu_cursor = NewGame;
     fnaf->camera_cursor = cam1A;
@@ -93,8 +94,10 @@ int32_t flipperzero_fnaf(void* p) {
     bool running = true;
     while (running) {
         if (furi_message_queue_get(fnaf->event_queue, &fnaf->event, 100) == FuriStatusOk) {
-            if (fnaf->event.key == InputKeyBack && fnaf->event.type == InputTypeShort)
-                running = false;
+            if (fnaf->event.key == InputKeyBack && fnaf->event.type == InputTypeShort) {
+                if (fnaf->current_view != main_menu) fnaf->current_view = main_menu; else
+                    running = false;
+            }
             switch (fnaf->current_view) {
             case main_menu:
                 running = menu_input(fnaf);

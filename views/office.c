@@ -4,7 +4,15 @@ void office_draw() {
 
 }
 
-void night_start() {
+void night_start(Fnaf* fnaf) {
+
+    if (fnaf->progress > 6) {
+        fnaf->progress = 0;
+        fnaf->current_view = main_menu;
+    }
+    reset_animatronic_positions(fnaf);
+    fnaf->power_left = 100;
+    // What else?
 
 }
 
