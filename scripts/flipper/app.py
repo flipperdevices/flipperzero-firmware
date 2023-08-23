@@ -50,7 +50,7 @@ class App:
     def _exit(self, code):
         if self.no_exit:
             return code
-        sys.exit(code)
+        exit(code)
 
     def call(self):
         if "func" not in self.args:
