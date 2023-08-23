@@ -162,13 +162,7 @@ static ButtonItem** button_panel_get_item(ButtonPanelModel* model, size_t x, siz
     furi_check(x < model->reserve_x);
     furi_check(y < model->reserve_y);
     ButtonArray_t* button_array = ButtonMatrix_safe_get(model->button_matrix, x);
-    if(button_array == NULL) {
-        return false;
-    }
     ButtonItem** button_item = ButtonArray_safe_get(*button_array, y);
-    if(!button_item) {
-        return false;
-    }
     return button_item;
 }
 
