@@ -111,7 +111,9 @@ void subghz_protocol_encoder_faac_slh_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_faac_slh_gen_data(SubGhzProtocolEncoderFaacSLH* instance, FlipperFormat* flipper_format) {
+static bool subghz_protocol_faac_slh_gen_data(
+    SubGhzProtocolEncoderFaacSLH* instance,
+    FlipperFormat* flipper_format) {
     FuriString* valid = furi_string_alloc();
     if(flipper_format_read_string(flipper_format, "Valid", valid)) {
         bvalid = true;
@@ -198,7 +200,9 @@ bool subghz_protocol_faac_slh_create_data(
  * @param instance Pointer to a SubGhzProtocolEncoderFaacSLH instance
  * @return true On success
  */
-static bool subghz_protocol_encoder_faac_slh_get_upload(SubGhzProtocolEncoderFaacSLH* instance, FlipperFormat* flipper_format) {
+static bool subghz_protocol_encoder_faac_slh_get_upload(
+    SubGhzProtocolEncoderFaacSLH* instance,
+    FlipperFormat* flipper_format) {
     furi_assert(instance);
 
     subghz_protocol_faac_slh_gen_data(instance, flipper_format);

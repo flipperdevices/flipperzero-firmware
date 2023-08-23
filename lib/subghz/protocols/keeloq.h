@@ -15,7 +15,7 @@ extern const SubGhzProtocol subghz_protocol_keeloq;
  * Edit counter function
  * @param context Pointer to a SubGhzProtocolEncoderKeeloq instance
  * @param cnt Counter
- */ 
+ */
 bool subghz_protocol_keeloq_edit_cnt(void* context, uint32_t cnt);
 
 /**

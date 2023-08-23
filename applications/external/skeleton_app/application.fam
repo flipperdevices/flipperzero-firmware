@@ -1,0 +1,15 @@
+App(
+    appid="skeleton_app",
+    name="Skeleton App",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="my_app_name_app",
+    stack_size=4 * 1024,
+    fap_icon="app.png",
+    fap_category="Tools",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="my_app_id_42",
+    fap_author="jamisonderek",
+    fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app",
+    fap_version=(1, 0),
+    fap_description="You can use this application as a starting point for creating your own application.",
+)

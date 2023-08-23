@@ -26,62 +26,57 @@ UHFTag* send_polling_command(UHFWorker* uhf_worker) {
     return uhf_tag;
 }
 
+static UHFWorkerEvent
+    read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag, BankType bank) {
+    unsigned int retry = 3, word_low = 5, word_high = 100;
+    unsigned int word_size;
+    M100ResponseType status;
+    do {
+        if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
+        if(word_low >= word_high) return UHFWorkerEventSuccess;
+        word_size = (word_low + word_high) / 2;
+        status = m100_read_label_data_storage(uhf_worker->module, uhf_tag, bank, 0, word_size);
+        if(status == M100Success) {
+            word_low = word_size + 1;
+        } else if(status == M100MemoryOverrun) {
+            word_high = word_size - 1;
+        } else if(status == M100NoTagResponse) {
+            retry--;
+        }
+    } while(retry);
+    return UHFWorkerEventSuccess;
+}
+
 UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
     UHFTag* uhf_tag = send_polling_command(uhf_worker);
     if(uhf_tag == NULL) return UHFWorkerEventAborted;
     uhf_tag_wrapper_set_tag(uhf_worker->uhf_tag_wrapper, uhf_tag);
     // Todo : set select here
-    if(!m100_set_select(uhf_worker->module, uhf_tag)) return UHFWorkerEventFail;
-    // Todo : read tid
-    int retry = 3, word_count = 5;
-    do {
-        if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
-        M100ResponseType status =
-            m100_read_label_data_storage(uhf_worker->module, uhf_tag, TIDBank, 0, word_count);
-        switch(status) {
-        case M100Success:
-            word_count++;
-            break;
-        case M100NoTagResponse:
-            retry--;
-            break;
-        default:
-            retry = 0;
-            break;
-        }
-    } while(retry);
-    retry = 3;
-    word_count = 5;
-    do {
-        if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
-        M100ResponseType status =
-            m100_read_label_data_storage(uhf_worker->module, uhf_tag, UserBank, 0, word_count);
-        switch(status) {
-        case M100Success:
-            word_count++;
-            break;
-        case M100NoTagResponse:
-            retry--;
-            break;
-        default:
-            retry = 0;
-            break;
-        }
-    } while(retry);
+    if(m100_set_select(uhf_worker->module, uhf_tag) != M100Success) return UHFWorkerEventFail;
+    // read tid
+    UHFWorkerEvent event;
+    event = read_bank_till_max_length(uhf_worker, uhf_tag, TIDBank);
+    if(event != UHFWorkerEventSuccess) return event;
+    // read user
+    event = read_bank_till_max_length(uhf_worker, uhf_tag, UserBank);
+    if(event != UHFWorkerEventSuccess) return event;
     return UHFWorkerEventSuccess;
 }
 
 UHFWorkerEvent write_single_card(UHFWorker* uhf_worker) {
     UHFTag* uhf_tag_des = send_polling_command(uhf_worker);
     if(uhf_tag_des == NULL) return UHFWorkerEventAborted;
-    FURI_LOG_E("wkr", "read success");
     UHFTag* uhf_tag_from = uhf_worker->uhf_tag_wrapper->uhf_tag;
     if(m100_set_select(uhf_worker->module, uhf_tag_des) != M100Success) return UHFWorkerEventFail;
-    FURI_LOG_E("wkr", "set select success");
     do {
-        M100ResponseType rp_type =
-            m100_write_label_data_storage(uhf_worker->module, uhf_tag_from, EPCBank, 0, 0);
-        FURI_LOG_E("wkr", "try to write %d", rp_type);
+        M100ResponseType rp_type = m100_write_label_data_storage(
+            uhf_worker->module, uhf_tag_from, uhf_tag_des, UserBank, 0, 0);
+        if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
+        if(rp_type == M100Success) break;
+    } while(true);
+    do {
+        M100ResponseType rp_type = m100_write_label_data_storage(
+            uhf_worker->module, uhf_tag_from, uhf_tag_des, EPCBank, 0, 0);
         if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
         if(rp_type == M100Success) break;
     } while(true);

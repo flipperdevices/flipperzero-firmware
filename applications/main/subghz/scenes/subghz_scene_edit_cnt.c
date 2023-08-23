@@ -15,14 +15,14 @@ void subghz_scene_edit_cnt_on_enter(void* context) {
     // Setup view
     ByteInput* byte_input = subghz->byte_input;
 
-        byte_input_set_header_text(byte_input, "Enter COUNTER in hex");
-        byte_input_set_result_callback(
-            byte_input,
-            subghz_scene_edit_cnt_byte_input_callback,
-            NULL,
-            subghz,
-            subghz->secure_data->cnt,
-            4);
+    byte_input_set_header_text(byte_input, "Enter COUNTER in hex");
+    byte_input_set_result_callback(
+        byte_input,
+        subghz_scene_edit_cnt_byte_input_callback,
+        NULL,
+        subghz,
+        subghz->secure_data->cnt,
+        4);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdByteInput);
 }
 
@@ -34,12 +34,12 @@ bool subghz_scene_edit_cnt_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventByteInputDone) {
             cnt = subghz->secure_data->cnt[0] << 24 | subghz->secure_data->cnt[1] << 16 |
-                           subghz->secure_data->cnt[2] << 8 | subghz->secure_data->cnt[3];
+                  subghz->secure_data->cnt[2] << 8 | subghz->secure_data->cnt[3];
             FURI_LOG_I(TAG, "cnt = %08lX", cnt);
             if(subghz_protocol_keeloq_edit_cnt(subghz->txrx, cnt)) {
                 FURI_LOG_I(TAG, "Hook func from scene to protocol OK");
             };
-            
+
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
             consumed = true;
         }

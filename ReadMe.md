@@ -33,10 +33,18 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-22 03:04 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-22 03:04 EST`
-- UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
 - Updated: [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
-- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - Updated: [Solitaire v1.1.3 (By teeebor)](https://github.com/teeebor/flipper_games)
+- Updated: UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
+- Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid)
+- Added: [Skeleton App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
+- OFW: [Fix display last symbol in multiline text #2967 (By Programistich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2967)
+- OFW: [Properly reset the NFC device data #2980 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2980)
+- OFW: [fbt: various improvements and bug fixes #2982 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2982)
+- OFW: [littlefs update #2986 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2986)
+- OFW: [Assign tickets to all TODO items #2988 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2988)
+- OFW: [loader: restored support for debug apps #2993 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2993)
+- OFW: [Removed explicit dependency on scons for external scripting #2999 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2999)
 
 <a name="release">
 
@@ -401,6 +409,7 @@ $ ./fbt dolphin_ext
 - [Servotester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)
 - [ServoTester (2) (By mhasbini)](https://github.com/mhasbini/ServoTesterApp/tree/master)
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
+- [Skeleton App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Sub-GHz Bruteforcer v3.7 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
@@ -429,7 +438,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
+- [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
 
