@@ -29,7 +29,7 @@ def flp_serial_by_name(flp_name):
             return ""
 
 
-UPDATE_TIMEOUT = 3 * 4  # 4 minutes
+UPDATE_TIMEOUT = 30 * 4  # 4 minutes
 
 
 def main():
