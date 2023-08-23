@@ -18,60 +18,91 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 
 # Default pack
 
-- **RFID Fuzzer** [(by @gid9798)](https://github.com/DarkFlippers/Multi_Fuzzer) (original by Ganapati & xMasterX)
-- **iButton Fuzzer** [(by @gid9798)](https://github.com/DarkFlippers/Multi_Fuzzer) (original by xMasterX)
-- **Sub-GHz bruteforcer** [(by @derskythe & xMasterX)](https://github.com/derskythe/flipperzero-subbrute) [(original by Ganapati & xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/pull/57)
-- **Sub-GHz playlist** [(by darmiel)](https://github.com/DarkFlippers/unleashed-firmware/pull/62)
-- ESP8266 Deauther plugin [(by SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module)
-- WiFi Scanner plugin [(by SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module)
-- MultiConverter plugin [(by theisolinearchip)](https://github.com/theisolinearchip/flipperzero_stuff)
-- WAV Player [(OFW: DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) - Fixed and improved by [LTVA1](https://github.com/LTVA1/wav_player) -> Also outputs audio on `PA6` - `3(A6)` pin
-- Barcode Generator [(by Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
-- GPIO: Sentry Safe plugin [(by H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin)
-- ESP32: WiFi Marauder companion plugin [(by 0xchocolate)](https://github.com/0xchocolate/flipperzero-wifi-marauder) - Saving .pcap on flipper microSD [by tcpassos](https://github.com/tcpassos/flipperzero-firmware-with-wifi-marauder-companion) -> Only with custom marauder build (It is necessary to uncomment "#define WRITE_PACKETS_SERIAL" in configs.h (in marauder fw) and compile the firmware for the wifi board.) Or download precompiled build -> [Download esp32_marauder_ver_flipper_sd_serial.bin](https://github.com/justcallmekoko/ESP32Marauder/releases/latest)
-- NRF24: Sniffer & MouseJacker (with changes) [(by mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker)
-- Simple Clock (timer by GMMan) [(original by CompaqDisc)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61)
-- **Sub-GHz Remote** [(by @gid9798)](https://github.com/gid9798)
-- Spectrum Analyzer (with changes) [(by jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) - [Ultra Narrow mode & scan channels non-consecutively](https://github.com/theY4Kman/flipperzero-firmware/commits?author=theY4Kman)
-- Metronome [(by panki27)](https://github.com/panki27/Metronome)
-- DTMF Dolphin [(by litui)](https://github.com/litui/dtmf_dolphin)
-- **TOTP (Authenticator)** [(by akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- GPS [(by ezod)](https://github.com/ezod/flipperzero-gps) works with module `NMEA 0183` via UART (13TX, 14RX, GND pins on Flipper)
-- i2c Tools [(by NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools) - C0 -> SCL / C1 -> SDA / GND -> GND | 3v3 logic levels only!
-- HC-SR04 Distance sensor - Ported and modified by @xMasterX [(original by Sanqui)](https://github.com/Sanqui/flipperzero-firmware/tree/hc_sr04) - How to connect -> (5V -> VCC) / (GND -> GND) / (13|TX -> Trig) / (14|RX -> Echo)
-- Morse Code [(by wh00hw)](https://github.com/wh00hw/MorseCodeFAP)
-- **Unitemp - Temperature sensors reader** (DHT11/22, DS18B20, BMP280, HTU21x and more) [(by quen0n)](https://github.com/quen0n/unitemp-flipperzero)
-- Lightmeter [(by oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter)
-- HEX Viewer [(by QtRoS)](https://github.com/QtRoS/flipper-zero-hex-viewer)
-- POCSAG Pager [(by xMasterX & Shmuma)](https://github.com/xMasterX/flipper-pager)
-- Text Viewer [(by Willy-JL)](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/text_viewer) (original by kowalski7cc & kyhwana)
-- **UART Terminal** [(by cool4uma)](https://github.com/cool4uma/UART_Terminal/tree/main)
-- **ProtoView** [(by antirez)](https://github.com/antirez/protoview)
-- **SWD Probe** [(by g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
-- IR Scope [(by kallanreed)](https://github.com/DarkFlippers/unleashed-firmware/pull/407)
-- **BadBT** plugin (BT version of BadKB) [(by Willy-JL, ClaraCrazy, XFW contributors)](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/main/bad_kb) (See in Applications->Tools) - (aka BadUSB via Bluetooth)
-- **Mifare Nested** [(by AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) - Works with PC and python app `FlipperNested`
-- **NFC Maker** plugin (make tags with URLs, Wifi and other things) [(by Willy-JL)](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/nfc_maker) 
-- ESP32-CAM -> Camera Suite [(by CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- USB Mass Storage [(by hedger & nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps)
+<details>
+ <summary>Legend</summary>
+  <img src="https://img.shields.io/badge/by_UFW-%2314D411?style=flat-square"> - published by Unleashed team <br>
+  <img src="https://img.shields.io/badge/by_OFW-%23FF8200?style=flat-square"> - published by OFW developers <br>
+  <img src="https://img.shields.io/badge/by_author-%23FFFF00?style=flat-square"> - published by original Author <br>
+  <img src="https://img.shields.io/badge/None-%23FF0000?style=flat-square"> - not in the catalog
+</details>
 
-Games:
-- DOOM (ported and fixed by @xMasterX & @Svarich & @hedger) [(original by p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
-- Zombiez [(Reworked by DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/240) [(Original by Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
-- Flappy Bird [(by DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird)
-- Arkanoid (refactored by xMasterX) [(by gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
-- Tic Tac Toe (refactored by xMasterX) [(by gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
-- Tetris (with fixes) [(by jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
-- Minesweeper [(by panki27)](https://github.com/panki27/minesweeper)
-- Heap Defence (aka Stack Attack) - Ported to latest firmware by @xMasterX - [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
-- Game15 [(by x27)](https://github.com/x27/flipperzero-game15)
-- Solitaire [(by teeebor)](https://github.com/teeebor/flipper_games)
-- BlackJack [(by teeebor)](https://github.com/teeebor/flipper_games)
-- 2048 game [(by eugene-kirzhanov)](https://github.com/eugene-kirzhanov/flipper-zero-2048-game)
-- Bomberduck [(by leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
-- JetPack Joyride [(by timstrasser)](https://github.com/timstrasser)
+### The default package includes all applications from [official](https://github.com/flipperdevices/flipperzero-good-faps) developers
 
+| Name | <div style="width:100px">Category</div> | Remark | Catalog |
+|---|:---:|---|:---:|
+| AVR Flasher | ![GPIO Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/avr_isp) |
+| DAP Link | ![GPIO Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/dap_link) |
+| SPI Mem Manager | ![GPIO Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/spi_mem_manager) |
+| Signal Generator | ![GPIO Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/signal_generator) |
+| Mfkey32 | ![NFC Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/mfkey32) |
+| PicoPass | ![NFC Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/picopass) |
+| Nfc Magic | ![NFC Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/nfc_magic) |
+| NFC/RFID detector | ![Tools Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/nfc_rfid_detector) |
+| Simple Clock | ![Tools Badge] | [original by CompaqDisc](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61), timer by GMMan, included in OFW | [![Official Badge]](https://lab.flipper.net/apps/clock) |
+| Weather Station | ![SubGhz Badge] | added External Radio Support | [![Official Badge]](https://lab.flipper.net/apps/weather_station) |
+| USB Keyboard & Mouse | ![USB Badge] | Renamed, added Mouse `Clicker`/`Jiggler` | [![Official Badge]](https://lab.flipper.net/apps/hid_usb) |
+| Bluetooth Remote | ![BT Badge] | Renamed, added Mouse `Clicker`/`Jiggler` & `Tikshorts` | [![Official Badge]](https://lab.flipper.net/apps/hid_ble) |
+| USB Mass Storage | ![USB Badge] | [by hedger & nminaylov](https://github.com/flipperdevices/flipperzero-good-faps) | [![Official Badge]](https://lab.flipper.net/apps/mass_storage) |
+| Snake Game | ![Games Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/snake_game) |
+| Music Player | ![Media Badge] |  | [![Official Badge]](https://lab.flipper.net/apps/music_player) |
 
+| Name | <div style="width:100px">Category</div> | Author | Remark | Catalog |
+|---|:---:|---|---|:---:|
+| **Sub-GHz bruteforcer** | ![SubGhz Badge] | [by @derskythe & xMasterX](https://github.com/derskythe/flipperzero-subbrute) | [original by Ganapati & xMasterX](https://github.com/DarkFlippers/unleashed-firmware/pull/57) | ![None Badge] |
+| **Sub-GHz playlist** | ![SubGhz Badge] | [by darmiel](https://github.com/DarkFlippers/unleashed-firmware/pull/62) |  | ![None Badge] |
+| **Sub-GHz Remote** | ![SubGhz Badge] | [by @gid9798](https://github.com/gid9798) |  | ![None Badge] |
+| Spectrum Analyzer (with changes) | ![SubGhz Badge] | [by jolcese](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) | [Ultra Narrow mode & scan channels non-consecutively](https://github.com/theY4Kman/flipperzero-firmware/commits?author=theY4Kman) | [![UFW Badge]](https://lab.flipper.net/apps/spectrum_analyzer) |
+| POCSAG Pager | ![SubGhz Badge] | [by xMasterX & Shmuma](https://github.com/xMasterX/flipper-pager) |  | [![UFW Badge]](https://lab.flipper.net/apps/pocsag_pager) |
+| **ProtoView** | ![SubGhz Badge] | [by antirez](https://github.com/antirez/protoview) |  | [![UFW Badge]](https://lab.flipper.net/apps/protoview) |
+| **Mifare Nested** | ![NFC Badge] | [by AloneLiberty](https://github.com/AloneLiberty/FlipperNested) | Works with PC and python app `FlipperNested` | [![Author Badge]](https://lab.flipper.net/apps/mifare_nested) |
+| **NFC Maker** plugin | ![NFC Badge] | [by Willy-JL](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/dev/applications/external/nfc_maker) | make tags with URLs, Wifi and other things | ![None Badge] |
+| **RFID Fuzzer** | ![RFID Badge] | [by @gid9798](https://github.com/DarkFlippers/Multi_Fuzzer) | original by Ganapati & xMasterX | [![UFW Badge]](https://lab.flipper.net/apps/fuzzer_rfid) |
+| **iButton Fuzzer** | ![iButton Badge] | [by @gid9798](https://github.com/DarkFlippers/Multi_Fuzzer) | original by xMasterX | [![UFW Badge]](https://lab.flipper.net/apps/fuzzer_ibtn) |
+| IR Scope | ![IR Badge] | [by kallanreed](https://github.com/DarkFlippers/unleashed-firmware/pull/407) |  | [![UFW Badge]](https://lab.flipper.net/apps/ir_scope) |
+| MultiConverter plugin | ![Tools Badge] | [by theisolinearchip](https://github.com/theisolinearchip/flipperzero_stuff) |  | [![UFW Badge]](https://lab.flipper.net/apps/multi_converter) |
+| Barcode Generator | ![Tools Badge] | [by Kingal1337](https://github.com/Kingal1337/flipper-barcode-generator) |  | [![UFW Badge]](https://lab.flipper.net/apps/barcode_app) |
+| **TOTP (Authenticator)** | ![Tools Badge] | [by akopachov](https://github.com/akopachov/flipper-zero_authenticator) |  | [![Author Badge]](https://lab.flipper.net/apps/totp) |
+| HEX Viewer | ![Tools Badge] | [by QtRoS](https://github.com/QtRoS/flipper-zero-hex-viewer) |  | [![UFW Badge]](https://lab.flipper.net/apps/hex_viewer) |
+| Text Viewer | ![Tools Badge] | [by Willy-JL](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/text_viewer) | original by kowalski7cc & kyhwana | [![UFW Badge]](https://lab.flipper.net/apps/text_viewer) |
+| DTMF Dolphin | ![Tools Badge] | [by litui](https://github.com/litui/dtmf_dolphin) |  | [![UFW Badge]](https://lab.flipper.net/apps/dtmf_dolphin) |
+| ESP8266 Deauther plugin | ![GPIO Badge] | [by SequoiaSan](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module) |  | ![None Badge] |
+| WiFi Scanner plugin | ![GPIO Badge] | [by SequoiaSan](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module) |  | ![None Badge] |
+| GPIO: Sentry Safe plugin | ![GPIO Badge] | [by H4ckd4ddy](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) |  | [![UFW Badge]](https://lab.flipper.net/apps/gpio_sentry_safe) |
+| ESP32: WiFi Marauder companion plugin | ![GPIO Badge] | [by 0xchocolate](https://github.com/0xchocolate/flipperzero-wifi-marauder) | Saving .pcap on flipper microSD [by tcpassos](https://github.com/tcpassos/flipperzero-firmware-with-wifi-marauder-companion) -> Only with custom marauder build (It is necessary to uncomment "#define WRITE_PACKETS_SERIAL" in configs.h (in marauder fw) and compile the firmware for the wifi board.) Or download precompiled build -> [Download esp32_marauder_ver_flipper_sd_serial.bin](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) | [![Author Badge]](https://lab.flipper.net/apps/esp32_wifi_marauder) |
+| NRF24: Sniffer & MouseJacker (with changes) | ![GPIO Badge] | [by mothball187](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) |  | ![None Badge] |
+| [NMEA] GPS | ![GPIO Badge] | [by ezod](https://github.com/ezod/flipperzero-gps) | works with module `NMEA 0183` via UART (13TX, 14RX, GND pins on Flipper) | [![UFW Badge]](https://lab.flipper.net/apps/gps_nmea) |
+| i2c Tools | ![GPIO Badge] | [by NaejEL](https://github.com/NaejEL/flipperzero-i2ctools) | C0 -> SCL / C1 -> SDA / GND -> GND | [![Author Badge]](https://lab.flipper.net/apps/i2ctools) |
+| HC-SR04 Distance sensor | ![GPIO Badge] | Ported and modified by @xMasterX | [(original by Sanqui)](https://github.com/Sanqui/flipperzero-firmware/tree/hc_sr04) - How to connect -> (5V -> VCC) / (GND -> GND) / (13\|TX -> Trig) / (14\|RX -> Echo) | ![None Badge] |
+| **Unitemp Temperature sensors reader** | ![GPIO Badge] | [by quen0n](https://github.com/quen0n/unitemp-flipperzero) | DHT11/22, DS18B20, BMP280, HTU21x and more | [![Author Badge]](https://lab.flipper.net/apps/unitemp) |
+| Lightmeter | ![GPIO Badge] | [by oleksiikutuzov](https://github.com/oleksiikutuzov/flipperzero-lightmeter) |  | [![Author Badge]](https://lab.flipper.net/apps/lightmeter) |
+| **UART Terminal** | ![GPIO Badge] | [by cool4uma](https://github.com/cool4uma/UART_Terminal/tree/main) |  | [![UFW Badge]](https://lab.flipper.net/apps/uart_terminal) |
+| **SWD Probe** | ![GPIO Badge] | [by g3gg0](https://github.com/g3gg0/flipper-swd_probe) |  | [![UFW Badge]](https://lab.flipper.net/apps/swd_probe) |
+| ESP32-CAM -> Camera Suite | ![GPIO Badge] | [by CodyTolene](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite) |  | [![Author Badge]](https://lab.flipper.net/apps/camera_suite) |
+| WAV Player | ![Media Badge] | [OFW: DrZlo13](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) | Fixed and improved by [LTVA1](https://github.com/LTVA1/wav_player) -> Also outputs audio on `PA6` `3(A6)` pin | [![UFW Badge]](https://lab.flipper.net/apps/wav_player) |
+| Metronome | ![Media Badge] | [by panki27](https://github.com/panki27/Metronome) |  | [![UFW Badge]](https://lab.flipper.net/apps/metronome) |
+| Morse Code | ![Media Badge] | [by wh00hw](https://github.com/wh00hw/MorseCodeFAP) |  | [![UFW Badge]](https://lab.flipper.net/apps/morse_code) |
+| **BadBT** plugin | ![BT Badge] | [by Willy-JL, ClaraCrazy, XFW contributors](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/dev/applications/main/bad_kb) | BT version of BadKB (aka BadUSB via Bluetooth) | ![None Badge] |
+
+## Games
+
+| Name | <div style="width:100px">Category</div> | Author | Remark | Catalog |
+|---|:---:|---|---|---:|
+| DOOM | ![Games Badge] | ported and fixed by @xMasterX & @Svarich & @hedger | [original by p4nic4ttack](https://github.com/p4nic4ttack/doomflipperzero/) | [![UFW Badge]](https://lab.flipper.net/apps/doom) |
+| Zombiez | ![Games Badge] | [Reworked by DevMilanIan](https://github.com/RogueMaster/flipperzerofirmwarewPlugins/pull/240) | [original by Dooskington](https://github.com/Dooskington/flipperzerozombiez) | [![UFW Badge]](https://lab.flipper.net/apps/zombiez) |
+| Flappy Bird | ![Games Badge] | [by DroomOne](https://github.com/DroomOne/flipperzerofirmware/tree/dev/applications/flappy_bird) |  | [![UFW Badge]](https://lab.flipper.net/apps/flappy_bird) |
+| Arkanoid | ![Games Badge] | by xMasterX | refactored by xMasterX, [original by gotnull](https://github.com/gotnull/flipperzerofirmwarewPlugins) | [![UFW Badge]](https://lab.flipper.net/apps/arkanoid) |
+| Tic Tac Toe | ![Games Badge] | by xMasterX | refactored by xMasterX, [original by gotnull](https://github.com/gotnull/flipperzerofirmwarewPlugins) | [![UFW Badge]](https://lab.flipper.net/apps/tictactoe) |
+| Tetris (with fixes) | ![Games Badge] | [by jeffplang](https://github.com/jeffplang/flipperzerofirmware/tree/tetris_game/applications/tetris) |  | [![UFW Badge]](https://lab.flipper.net/apps/tetris_game) |
+| Minesweeper | ![Games Badge] | [by panki27](https://github.com/panki27/minesweeper) |  | [![UFW Badge]](https://lab.flipper.net/apps/minesweeper) |
+| Heap Defence (aka Stack Attack) | ![Games Badge] | by xMasterX | ported to latest firmware by xMasterX, [original by wquinoa & Vedmein](https://github.com/Vedmein/flipperzerofirmware/tree/hd/svistoperdelki) | [![UFW Badge]](https://lab.flipper.net/apps/heap_defence) |
+| Game15 | ![Games Badge] | [by x27](https://github.com/x27/flipperzerogame15) |  | [![UFW Badge]](https://lab.flipper.net/apps/game15) |
+| Solitaire | ![Games Badge] | [by teeebor](https://github.com/teeebor/flipper_games) |  | ![None Badge] |
+| BlackJack | ![Games Badge] | [by teeebor](https://github.com/teeebor/flipper_games) |  | ![None Badge] |
+| 2048 game | ![Games Badge] | [by eugenekirzhanov](https://github.com/eugenekirzhanov/flipperzero2048game) |  | [![UFW Badge]](https://lab.flipper.net/apps/game_2048) |
+| Bomberduck | ![Games Badge] | [by leoneedmorecoffee](https://github.com/leoneedmorecoffee/flipperzerobomberduck) |  | ![None Badge] |
+| JetPack Joyride | ![Games Badge] | [by timstrasser](https://github.com/timstrasser) |  | ![None Badge] |
+
+---
 # Extra pack
 ## Bluetooth
 - [BT Camera Trigger (by Nem0oo)](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger)
@@ -212,3 +243,20 @@ Games:
 
 Useful source of files for flipper, also has apps pack:
 ## [UberGuidoZ Playground - Large collection of files - Github](https://github.com/UberGuidoZ/Flipper)
+
+[RFID Badge]: https://custom-icon-badges.demolab.com/badge/-RFID-rgb(255,244,147)?style=for-the-badge&logo=fz-rfid&logoColor=black
+[iButton Badge]: https://custom-icon-badges.demolab.com/badge/-iButton-rgb(225,187,166)?style=for-the-badge&logo=fz-ibutton&logoColor=black
+[SubGhz Badge]: https://custom-icon-badges.demolab.com/badge/-Sub--GHz-rgb(165,244,190)?style=for-the-badge&logo=fz-subghz&logoColor=black
+[GPIO Badge]: https://custom-icon-badges.demolab.com/badge/-GPIO-rgb(167,242,234)?style=for-the-badge&logo=fz-gpio&logoColor=black
+[Tools Badge]: https://custom-icon-badges.demolab.com/badge/-Tools-rgb(223,241,89)?style=for-the-badge&logo=fz-tools&logoColor=black
+[Media Badge]: https://custom-icon-badges.demolab.com/badge/-Media-rgb(223,181,255)?style=for-the-badge&logo=fz-media&logoColor=black
+[BT Badge]: https://custom-icon-badges.demolab.com/badge/-BlueTooth-rgb(139,172,255)?style=for-the-badge&logo=fz-bluetooth&logoColor=black
+[NFC Badge]: https://custom-icon-badges.demolab.com/badge/-NFC-rgb(152,206,254)?style=for-the-badge&logo=fz-nfc&logoColor=black
+[USB Badge]: https://custom-icon-badges.demolab.com/badge/-USB-rgb(255,190,233)?style=for-the-badge&logo=fz-badusb&logoColor=black
+[IR Badge]: https://custom-icon-badges.demolab.com/badge/-Infrared-rgb(254,147,140)?style=for-the-badge&logo=fz-infrared&logoColor=black
+[Games Badge]: https://custom-icon-badges.demolab.com/badge/-Games-rgb(255,196,134)?style=for-the-badge&logo=fz-games&logoColor=black
+
+[UFW Badge]: https://img.shields.io/badge/by_UFW-%2314D411?style=flat-square
+[Official Badge]: https://img.shields.io/badge/by_OFW-%23FF8200?style=flat-square
+[Author Badge]: https://img.shields.io/badge/by_author-%23FFFF00?style=flat-square
+[None Badge]: https://img.shields.io/badge/None-%23FF0000?style=flat-square
