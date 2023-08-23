@@ -29,7 +29,7 @@ def flp_serial_by_name(flp_name):
             return ""
 
 
-UPDATE_TIMEOUT = 60 * 4  # 4 minutes
+UPDATE_TIMEOUT = 3 * 4  # 4 minutes
 
 
 def main():
@@ -50,7 +50,7 @@ def main():
 
     if flipper == "":
         logging.error("Flipper not found!")
-        sys.exit(1)
+        exit(1)
 
     logging.info(f"Found Flipper at {flipper}")
 

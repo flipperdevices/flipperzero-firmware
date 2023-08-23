@@ -26,8 +26,6 @@ def main():
         flipper.flushOutput()
         flipper.flushInput()
 
-        flipper.timeout = 300
-
         flipper.read_until(b">: ").decode("utf-8")
         flipper.write(b"unit_tests\r")
         data = flipper.read_until(b">: ").decode("utf-8")
