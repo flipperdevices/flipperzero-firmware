@@ -57,7 +57,8 @@ LinBus* lin_bus_init(LinBusMode mode, uint32_t baudrate) {
     lin_uart_init(baudrate, instance);
 
     lin_uart_break_irq_enable();
-    lin_uart_rx_irq_enable();
+    //lin_uart_rx_irq_enable();
+    lin_uart_rx_irq_disable();
     lin_uart_tx_irq_disable();
     lin_bus_reset_satate_machihe(instance);
 
@@ -130,6 +131,7 @@ bool lin_bus_tx_async(LinBus* instance, LinBusFrame* lin_frame) {
         instance->tx_state = LinBusStateSyncBreak;
         instance->is_tx = true; /* Transmission in progress */
         instance->only_rx = false;
+        lin_uart_rx_irq_disable();
         lin_uart_tx_irq_enable();
         ret = true;
     }
@@ -157,6 +159,8 @@ void lin_bus_break_callback(void* context) {
 
 void lin_uart_rx_callback(uint8_t data, void* context) {
     LinBus* instance = (LinBus*)context;
+    UNUSED(instance);
+    UNUSED(data);
 
     instance->rx_buf[instance->rx_buf_index++] = data;
     instance->rx_buf_index %= LIN_BUS_RX_BUFFER_LENGTH;
@@ -210,6 +214,7 @@ void lin_uart_tx_callback(void* context) {
             instance->is_rx = true;
             instance->is_tx = false;
             responseTimeoutMax = lin_bus_response_timeout(instance->frame.response_length);
+            lin_uart_rx_irq_enable();
             lin_uart_timeout_start();
             /* Disable the tx interrupt */
             lin_uart_tx_irq_disable();

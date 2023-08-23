@@ -3,6 +3,7 @@
 typedef enum {
     SubmenuIndexCanLinToolsCanHacker20,
     SubmenuIndexCanLinToolsLinHacker,
+    SubmenuIndexCanLinToolsCarBusAnalyzer,
     SubmenuIndexCanLinToolsAbout,
 } SubmenuIndex;
 
@@ -30,6 +31,12 @@ void can_lin_tools_scene_start_on_enter(void* context) {
         app);
     submenu_add_item(
         submenu,
+        "CarBus Analyzer",
+        SubmenuIndexCanLinToolsCarBusAnalyzer,
+        can_lin_tools_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
         "About",
         SubmenuIndexCanLinToolsAbout,
         can_lin_tools_scene_start_submenu_callback,
@@ -52,8 +59,11 @@ bool can_lin_tools_scene_start_on_event(void* context, SceneManagerEvent event) 
         } else if(event.event == SubmenuIndexCanLinToolsCanHacker20) {
             scene_manager_next_scene(app->scene_manager, CanLinToolsSceneCanHacker2);
             consumed = true;
-        }else if(event.event == SubmenuIndexCanLinToolsLinHacker) {
+        } else if(event.event == SubmenuIndexCanLinToolsLinHacker) {
             scene_manager_next_scene(app->scene_manager, CanLinToolsSceneLinHacker);
+            consumed = true;
+        } else if(event.event == SubmenuIndexCanLinToolsCarBusAnalyzer) {
+            scene_manager_next_scene(app->scene_manager, CanLinToolsSceneCarBusAnalyzer);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, CanLinToolsSceneStart, event.event);

@@ -36,8 +36,10 @@ static void lin_uart_irq_callback(void* context) {
 
     if(LL_USART_IsActiveFlag_TXE_TXFNF(USART1) && LL_USART_IsEnabledIT_TXE_TXFNF(USART1)) {
         /* Txe interrupt flag cleared by writing to the buffer */
-        while(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1))
-            ;
+        // while(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1))
+        //     ;
+        // if (LL_USART_IsActiveFlag_RXNE_RXFNE(USART1))
+        //     while (1){};
 
         lin_uart_tx_callback(context);
     }

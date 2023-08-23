@@ -12,5 +12,6 @@ typedef enum {
     CanLinToolsViewSubmenu,
     CanLinToolsViewCanHacker2,
     CanLinToolsViewLinHacker,
+    CanLinToolsViewCarBusAnalyzer,
     CanLinToolsViewWidget,
 } CanLinToolsView;

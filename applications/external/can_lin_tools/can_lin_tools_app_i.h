@@ -12,6 +12,7 @@
 #include <notification/notification_messages.h>
 #include "views/can_lin_tools_view_can_hacker2.h"
 #include "views/can_lin_tools_view_lin_hacker.h"
+#include "views/can_lin_tools_view_carbus_analyzer.h"
 
 typedef struct CanLinToolsApp CanLinToolsApp;
 
@@ -24,4 +25,5 @@ struct CanLinToolsApp {
     Widget* widget;
     CanLinToolsCanHacker2View* can_lin_tools_can_hacker2_view;
     CanLinToolsLinHackerView* can_lin_tools_lin_hacker_view;
+    CanLinToolsCarBusAnalyzerView* can_lin_tools_carbus_analyzer_view;
 };

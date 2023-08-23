@@ -69,6 +69,13 @@ CanLinToolsApp* can_lin_tools_app_alloc() {
         CanLinToolsViewLinHacker,
         can_lin_tools_view_lin_hacker_get_view(app->can_lin_tools_lin_hacker_view));
 
+    // CarBus Analyzer
+    app->can_lin_tools_carbus_analyzer_view = can_lin_tools_view_carbus_analyzer_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        CanLinToolsViewCarBusAnalyzer,
+        can_lin_tools_view_carbus_analyzer_get_view(app->can_lin_tools_carbus_analyzer_view));
+
     scene_manager_next_scene(app->scene_manager, CanLinToolsSceneStart);
 
     return app;
@@ -89,9 +96,13 @@ void can_lin_tools_app_free(CanLinToolsApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, CanLinToolsViewCanHacker2);
     can_lin_tools_view_can_hacker2_free(app->can_lin_tools_can_hacker2_view);
 
-    // Lin Hacker 2
+    // Lin Hacker
     view_dispatcher_remove_view(app->view_dispatcher, CanLinToolsViewLinHacker);
     can_lin_tools_view_lin_hacker_free(app->can_lin_tools_lin_hacker_view);
+
+    // CarBus Analyzer
+    view_dispatcher_remove_view(app->view_dispatcher, CanLinToolsViewCarBusAnalyzer);
+    can_lin_tools_view_carbus_analyzer_free(app->can_lin_tools_carbus_analyzer_view);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

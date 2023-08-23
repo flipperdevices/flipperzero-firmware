@@ -173,16 +173,28 @@ static int32_t lin_hacker_worker_thread(void* context) {
     //uint8_t temp = 0;
 
     LinBusFrame frame = {
+        .id = 0x03,
+        .data = {0x01, 0x02, 0x03, 0x04, 0x05},
+        .length = 5,
+        .crc_type = LinBusChecksumTypeClassic,
+        //.response_length = 2,
+        .frame_type = LinBusMasterResponse,
+    };
+
+    LinBusFrame frame1 = {
         .id = 0x01,
         .data = {0x01, 0x02, 0x03, 0x04, 0x05},
         .length = 5,
+        .crc_type = LinBusChecksumTypeClassic,
         .response_length = 2,
         .frame_type = LinBusMasterRequest,
     };
 
     while(instance->worker_running) {
         if(lin_bus_tx_async(lin_bus, &frame)) {
-            frame.data[0]++;
+            //frame.data[0]++;
+            furi_delay_ms(100);
+            lin_bus_tx_async(lin_bus, &frame1);
             furi_delay_ms(100);
         }
         // uint32_t events = furi_thread_flags_wait(
