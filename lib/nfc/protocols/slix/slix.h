@@ -9,6 +9,7 @@ extern "C" {
 #define SLIX_PASSWORD_SIZE (4U)
 #define SLIX_SIGNATURE_SIZE (32U)
 
+#define SLIX_CMD_EAS_ALARM (0xA5U)
 #define SLIX_CMD_GET_NXP_SYSINFO (0xABU)
 #define SLIX_CMD_READ_SIGNATURE (0xBDU)
 
@@ -16,7 +17,6 @@ typedef enum {
     SlixErrorNone,
     SlixErrorFormat,
     SlixErrorNotSupported,
-    SlixErrorWrongManufacturer,
     SlixErrorInternal,
     SlixErrorUnknown,
 } SlixError;

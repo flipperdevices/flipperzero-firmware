@@ -543,7 +543,7 @@ static const Iso15693_3RequestHandler iso15693_3_request_handlers[] = {
     iso15693_3_listener_get_multi_blocks_security_handler,
 };
 
-static inline Iso15693_3Error iso15693_3_listener_handle_request(
+static Iso15693_3Error iso15693_3_listener_handle_request(
     Iso15693_3Listener* instance,
     const uint8_t* data,
     size_t data_size,
@@ -589,6 +589,39 @@ static inline Iso15693_3Error iso15693_3_listener_handle_request(
             error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
         }
 
+    } while(false);
+
+    return error;
+}
+
+static inline Iso15693_3Error iso15693_3_listener_handle_custom_request(
+    Iso15693_3Listener* instance,
+    const uint8_t* data,
+    size_t data_size) {
+    Iso15693_3Error error;
+
+    do {
+        typedef struct {
+            uint8_t manufacturer;
+            uint8_t data[];
+        } Iso15693_3CustomRequestLayout;
+
+        if(data_size < sizeof(Iso15693_3CustomRequestLayout)) {
+            error = Iso15693_3ErrorFormat;
+            break;
+        }
+
+        const Iso15693_3CustomRequestLayout* custom_request =
+            (const Iso15693_3CustomRequestLayout*)data;
+
+        if(custom_request->manufacturer != iso15693_3_get_manufacturer_id(instance->data)) {
+            // TODO: Add a separate error code for this case?
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        // This error code will trigger the CustomCommand listener event
+        error = Iso15693_3ErrorNotSupported;
     } while(false);
 
     return error;
@@ -653,6 +686,13 @@ Iso15693_3Error
 
         const Iso15693_3RequestLayout* request =
             (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
+
+        if(request->command >= ISO15693_3_CMD_CUSTOM_START) {
+            // Custom commands are properly handled in the protocol-specific top-level poller
+            error = iso15693_3_listener_handle_custom_request(
+                instance, request->data, buf_size - buf_size_min);
+            break;
+        }
 
         const bool inventory_flag = request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5;
 

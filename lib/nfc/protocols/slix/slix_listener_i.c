@@ -38,13 +38,14 @@ static SlixError slix_read_signature_handler(
     const uint8_t* data,
     size_t data_size,
     uint8_t flags) {
-    UNUSED(instance);
     UNUSED(data);
     UNUSED(data_size);
     UNUSED(flags);
     SlixError error = SlixErrorNone;
 
     do {
+        const SlixData* slix_data = instance->data;
+        bit_buffer_append_bytes(instance->tx_buffer, slix_data->signature.data, SLIX_SIGNATURE_SIZE);
     } while(false);
 
     return error;
@@ -81,12 +82,6 @@ SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer*
 
         const SlixRequestLayout* request =
             (const SlixRequestLayout*)bit_buffer_get_data(rx_buffer);
-
-        if(request->manufacturer !=
-           iso15693_3_get_manufacturer_id(instance->data->iso15693_3_data)) {
-            error = SlixErrorWrongManufacturer;
-            break;
-        }
 
         SlixRequestHandler handler;
 

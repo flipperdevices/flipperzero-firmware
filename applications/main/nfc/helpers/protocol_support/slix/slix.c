@@ -24,19 +24,17 @@ static void nfc_scene_info_on_enter_slix(NfcApp* instance) {
 }
 
 static NfcCommand nfc_scene_read_poller_callback_slix(NfcGenericEvent event, void* context) {
-    UNUSED(event);
-    UNUSED(context);
-    // furi_assert(event.protocol == NfcProtocolSlix);
-    //
-    // NfcApp* instance = context;
-    // const SlixPollerEvent* slix_event = event.data;
-    //
-    // if(slix_event->type == SlixPollerEventTypeReady) {
-    //     nfc_device_set_data(
-    //         instance->nfc_device, NfcProtocolSlix, nfc_poller_get_data(instance->poller));
-    //     view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
-    //     return NfcCommandStop;
-    // }
+    furi_assert(event.protocol == NfcProtocolSlix);
+
+    NfcApp* instance = context;
+    const SlixPollerEvent* slix_event = event.data;
+
+    if(slix_event->type == SlixPollerEventTypeReady) {
+        nfc_device_set_data(
+            instance->nfc_device, NfcProtocolSlix, nfc_poller_get_data(instance->poller));
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
+        return NfcCommandStop;
+    }
 
     return NfcCommandContinue;
 }
@@ -46,19 +44,18 @@ static void nfc_scene_read_on_enter_slix(NfcApp* instance) {
 }
 
 static void nfc_scene_read_success_on_enter_slix(NfcApp* instance) {
-    UNUSED(instance);
-    // const NfcDevice* device = instance->nfc_device;
-    // const SlixData* data = nfc_device_get_data(device, NfcProtocolSlix);
-    //
-    // FuriString* temp_str = furi_string_alloc();
-    // furi_string_cat_printf(
-    //     temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
-    // nfc_render_slix_info(data, NfcProtocolFormatTypeShort, temp_str);
-    //
-    // widget_add_text_scroll_element(
-    //     instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
-    //
-    // furi_string_free(temp_str);
+    const NfcDevice* device = instance->nfc_device;
+    const SlixData* data = nfc_device_get_data(device, NfcProtocolSlix);
+
+    FuriString* temp_str = furi_string_alloc();
+    furi_string_cat_printf(
+        temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    nfc_render_slix_info(data, NfcProtocolFormatTypeShort, temp_str);
+
+    widget_add_text_scroll_element(
+        instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+
+    furi_string_free(temp_str);
 }
 
 static NfcCommand nfc_scene_emulate_listener_callback_slix(NfcGenericEvent event, void* context) {

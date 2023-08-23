@@ -82,6 +82,7 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
                 iso15693_3_listener_process_request(instance, request_buf);
             if(error == Iso15693_3ErrorNotSupported) {
                 instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeCustomCommand;
+                instance->iso15693_3_event.data->buffer = request_buf;
                 command = instance->callback(instance->generic_event, instance->context);
             }
         } else if(bit_buffer_get_size(request_buf) == 0) {
