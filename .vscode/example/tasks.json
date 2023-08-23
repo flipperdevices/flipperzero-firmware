@@ -28,13 +28,13 @@
             "command": "./fbt -c"
         },
         {
-            "label": "[Release] Flash (SWD)",
+            "label": "[Release] Flash (ST-Link)",
             "group": "build",
             "type": "shell",
             "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash"
         },
         {
-            "label": "[Debug] Flash (SWD)",
+            "label": "[Debug] Flash (ST-Link)",
             "group": "build",
             "type": "shell",
             "command": "./fbt FORCE=1 flash"
