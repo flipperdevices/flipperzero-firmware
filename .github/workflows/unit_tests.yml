@@ -31,7 +31,7 @@ jobs:
         if: success()
         timeout-minutes: 10
         run: |
-          ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt flash SWD_TRANSPORT_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
 
       - name: 'Wait for flipper and format ext'
         id: format_ext
@@ -45,9 +45,10 @@ jobs:
       - name: 'Copy assets and unit data, reboot and wait for flipper'
         id: copy
         if: steps.format_ext.outcome == 'success'
-        timeout-minutes: 5
+        timeout-minutes: 7
         run: |
           source scripts/toolchain/fbtenv.sh
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/resources /ext
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/unit_tests /ext/unit_tests
           python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
@@ -64,4 +65,4 @@ jobs:
       - name: 'Check GDB output'
         if: failure()
         run: |
-          ./fbt gdb_trace_all OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt gdb_trace_all SWD_TRANSPORT_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
