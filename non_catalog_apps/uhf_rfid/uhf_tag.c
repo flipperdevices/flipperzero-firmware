@@ -9,6 +9,9 @@ UHFTagWrapper* uhf_tag_wrapper_alloc() {
 }
 
 void uhf_tag_wrapper_set_tag(UHFTagWrapper* uhf_tag_wrapper, UHFTag* uhf_tag) {
+    if(uhf_tag_wrapper->uhf_tag != NULL) {
+        uhf_tag_free(uhf_tag_wrapper->uhf_tag);
+    }
     uhf_tag_wrapper->uhf_tag = uhf_tag;
 }
 
@@ -54,4 +57,60 @@ void uhf_tag_set_epc_crc(UHFTag* uhf_tag, uint16_t crc) {
 void uhf_tag_set_epc(UHFTag* uhf_tag, uint8_t* data_in, size_t size) {
     memcpy(uhf_tag->epc->data, data_in, size);
     uhf_tag->epc->size = size;
+}
+
+void uhf_tag_set_epc_size(UHFTag* uhf_tag, size_t size) {
+    uhf_tag->epc->size = size;
+}
+
+void uhf_tag_set_tid(UHFTag* uhf_tag, uint8_t* data_in, size_t size) {
+    memcpy(uhf_tag->tid->data, data_in, size);
+    uhf_tag->tid->size = size;
+}
+
+void uhf_tag_set_tid_size(UHFTag* uhf_tag, size_t size) {
+    uhf_tag->tid->size = size;
+}
+
+void uhf_tag_set_user(UHFTag* uhf_tag, uint8_t* data_in, size_t size) {
+    memcpy(uhf_tag->user->data, data_in, size);
+    uhf_tag->user->size = size;
+}
+
+void uhf_tag_set_user_size(UHFTag* uhf_tag, size_t size) {
+    uhf_tag->user->size = size;
+}
+
+// getters
+
+uint8_t* uhf_tag_get_epc(UHFTag* uhf_tag) {
+    return uhf_tag->epc->data;
+}
+
+size_t uhf_tag_get_epc_size(UHFTag* uhf_tag) {
+    return uhf_tag->epc->size;
+}
+
+uint16_t uhf_tag_get_epc_pc(UHFTag* uhf_tag) {
+    return uhf_tag->epc->pc;
+}
+
+uint16_t uhf_tag_get_epc_crc(UHFTag* uhf_tag) {
+    return uhf_tag->epc->crc;
+}
+
+uint8_t* uhf_tag_get_tid(UHFTag* uhf_tag) {
+    return uhf_tag->tid->data;
+}
+
+size_t uhf_tag_get_tid_size(UHFTag* uhf_tag) {
+    return uhf_tag->tid->size;
+}
+
+uint8_t* uhf_tag_get_user(UHFTag* uhf_tag) {
+    return uhf_tag->user->data;
+}
+
+size_t uhf_tag_get_user_size(UHFTag* uhf_tag) {
+    return uhf_tag->user->size;
 }

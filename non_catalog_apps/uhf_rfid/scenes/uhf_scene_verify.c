@@ -42,6 +42,10 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                 widget_reset(uhf_app->widget);
                 furi_string_reset(temp_str);
                 uhf_worker_stop(uhf_app->worker);
+                // furi_hal_gpio_write(&gpio_ext, false);
+                // furi_delay_ms(50);
+                // furi_hal_gpio_write(&gpio_ext_pa7, true);
+                // furi_delay_ms(50);
                 uhf_worker_start(
                     uhf_app->worker,
                     UHFWorkerStateVerify,
@@ -113,7 +117,7 @@ bool uhf_scene_verify_on_event(void* ctx, SceneManagerEvent event) {
                     AlignCenter,
                     AlignCenter,
                     FontSecondary,
-                    "Please connect your module.\nPlease refer to the git@frux-c/uhf_rfid for help.");
+                    "Please refer to the git@frux-c/uhf_rfid for help.");
                 widget_add_button_element(
                     uhf_app->widget,
                     GuiButtonTypeLeft,
@@ -138,8 +142,6 @@ void uhf_scene_verify_on_exit(void* ctx) {
     furi_string_free(temp_str);
     // Stop worker
     uhf_worker_stop(uhf_app->worker);
-    // Clear view
-    // popup_reset(uhf_app->popup);
     // clear widget
     widget_reset(uhf_app->widget);
 }

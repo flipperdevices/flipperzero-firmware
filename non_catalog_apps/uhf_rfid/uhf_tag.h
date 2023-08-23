@@ -58,12 +58,17 @@ void uhf_tag_set_access_pwd(UHFTag* uhf_tag, uint8_t* data_in);
 void uhf_tag_set_epc_pc(UHFTag* uhf_tag, uint16_t pc);
 void uhf_tag_set_epc_crc(UHFTag* uhf_tag, uint16_t crc);
 void uhf_tag_set_epc(UHFTag* uhf_tag, uint8_t* data_in, size_t size);
+void uhf_tag_set_epc_size(UHFTag* uhf_tag, size_t size);
 void uhf_tag_set_tid(UHFTag* uhf_tag, uint8_t* data_in, size_t size);
+void uhf_tag_set_tid_size(UHFTag* uhf_tag, size_t size);
 void uhf_tag_set_user(UHFTag* uhf_tag, uint8_t* data_in, size_t size);
+void uhf_tag_set_user_size(UHFTag* uhf_tag, size_t size);
 
 uint8_t* uhf_tag_get_kill_pwd(UHFTag* uhf_tag);
 uint8_t* uhf_tag_get_access_pwd(UHFTag* uhf_tag);
 uint8_t* uhf_tag_get_epc(UHFTag* uhf_tag);
+uint16_t uhf_tag_get_epc_pc(UHFTag* uhf_tag);
+uint16_t uhf_tag_get_epc_crc(UHFTag* uhf_tag);
 size_t uhf_tag_get_epc_size(UHFTag* uhf_tag);
 uint8_t* uhf_tag_get_tid(UHFTag* uhf_tag);
 size_t uhf_tag_get_tid_size(UHFTag* uhf_tag);
