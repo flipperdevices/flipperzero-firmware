@@ -50,7 +50,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Fix SubGHz Loading (By xMasterX)
 - OFW: [Unit bench: multiple attempts to find flipper #2960 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2960)
 - OFW: [FuriHal: explicitly pull display pins at early init stage, move PUPD config to early stage #3004 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3004)
-- OFW: [Intelligent probing with warnings for fwflash.py #3005 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3005)
 
 <a name="release">
 

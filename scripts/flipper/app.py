@@ -15,9 +15,10 @@ class App:
         # Application specific initialization
         self.init()
 
-    def __call__(self, args=None):
+    def __call__(self, args=None, skip_logger_init=False):
         self.args, self.other_args = self.parser.parse_known_args(args=args)
         # configure log output
+        # if skip_logger_init:
         self.log_level = logging.DEBUG if self.args.debug else logging.INFO
         self.logger.setLevel(self.log_level)
         if not self.logger.hasHandlers():
