@@ -13,9 +13,10 @@ App(
         ),
     ],
     fap_icon_assets="icons",
+    fap_file_assets="files"
     fap_icon_assets_symbol="picopass",
     fap_author="bettse",
     fap_weburl="https://github.com/bettse/flipperzero-good-faps/tree/dev/picopass",
-    fap_version=(1, 0),
+    fap_version=(1, 2),
     fap_description="App to communicate with NFC tags using the PicoPass format",
 )
