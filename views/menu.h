@@ -3,12 +3,6 @@
 #include <gui/gui.h>
 #include "../fnaf.h"
 
-typedef enum {
-    NewGame,
-    Continue,
-    Exit,
-}MenuItems;
-
 /// @brief Draw main menu
 /// @param canvas Canvas instance
 /// @param ctx Context

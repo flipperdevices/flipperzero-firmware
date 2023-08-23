@@ -65,12 +65,12 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
     canvas_set_color(canvas, 1);
 
     char power[7];
-    snprintf(power, 7, "%u%%", fnaf->power_left);
+    snprintf(power, 7, "%u%%", fnaf->electricity->power_left);
     canvas_draw_str(canvas, 104, 62, power);
 
     uint8_t x = 98;
-    if (fnaf->power_draw < 6) {
-        for (uint8_t i = 0; i < fnaf->power_draw; i++) {
+    if (fnaf->electricity->power_left < 6) {
+        for (uint8_t i = 0; i < fnaf->electricity->power_left; i++) {
             canvas_draw_box(canvas, x, 55, 4, 7);
             x -= 5;
         }
@@ -160,7 +160,7 @@ void cameras_switching(Fnaf* fnaf) {
             fnaf->camera_cursor_y += 1;
             break;
         case InputKeyOk:
-            fnaf->current_view = office;
+            SWITCH_VIEW(office);
             break;
         default:
             break;

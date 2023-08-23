@@ -52,14 +52,11 @@ bool menu_input(Fnaf* fnaf) {
         case InputKeyOk:
             switch (fnaf->menu_cursor) {
             case 0:
-
-                // TESTING
-                fnaf->current_view = cameras;
-
-                // fnaf->current_view = office;
+                fnaf->progress = 0;
+                SWITCH_VIEW(office);
                 break;
             case 1:
-                if (fnaf->progress == 0) { return 0; } else fnaf->current_view = office;
+                if (fnaf->progress == 0) { return 0; } else SWITCH_VIEW(office);
                 break;
             case 2:
                 return false;

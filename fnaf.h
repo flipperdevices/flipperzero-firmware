@@ -10,6 +10,8 @@
 
 #include "flipperzero_fnaf_icons.h"
 
+#define SWITCH_VIEW(view) switch_view(fnaf, view)
+
 typedef struct {
     uint8_t AI[4];
     uint8_t location[4];
@@ -17,6 +19,17 @@ typedef struct {
     uint8_t freddy_position;
     uint8_t freddy_timer;
 }Animatronics;
+
+typedef struct {
+    uint8_t left_door;
+    uint8_t right_door;
+    uint8_t left_light;
+    uint8_t right_light;
+    uint8_t monitor;
+
+    uint8_t power_left;
+    uint8_t power_draw;
+}Electricity;
 
 typedef struct {
     ViewPort* view_port;
@@ -29,8 +42,7 @@ typedef struct {
     short int camera_cursor;
     short int camera_cursor_x;
     short int camera_cursor_y;
-    uint8_t power_left;
-    uint8_t power_draw;
+    Electricity* electricity;
 
     uint16_t counter;
     uint8_t kitchen_counter;
@@ -68,6 +80,8 @@ typedef struct {
     uint8_t Freddy;
     uint8_t Foxy;
 }NightDifficulty;
+
+void switch_view(Fnaf* fnaf, Views view);
 
 // Array for difficulties. Night 7 is custom remember
 // NightDifficulty night_difficulty = {};

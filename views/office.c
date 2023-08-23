@@ -5,15 +5,14 @@ void office_draw() {
 }
 
 void night_start(Fnaf* fnaf) {
-
     if (fnaf->progress > 6) {
         fnaf->progress = 0;
-        fnaf->current_view = main_menu;
+        SWITCH_VIEW(main_menu);
     }
     reset_animatronic_positions(fnaf);
-    fnaf->power_left = 100;
+    fnaf->electricity->power_left = 100;
+    fnaf->camera_cursor = cam1A;
     // What else?
-
 }
 
 void reset_animatronic_positions(Fnaf* fnaf) {

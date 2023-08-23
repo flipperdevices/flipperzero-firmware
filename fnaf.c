@@ -66,14 +66,26 @@ void fnaf_alloc(Fnaf* fnaf) {
     UNUSED(fnaf->timer_freddy);
     UNUSED(fnaf->timer_foxy);
 
-    fnaf->power_left = 100;
-    fnaf->current_view = main_menu;
-    fnaf->menu_cursor = NewGame;
-    fnaf->camera_cursor = cam1A;
+    fnaf->electricity = malloc(sizeof(*fnaf->electricity));
+
+    SWITCH_VIEW(main_menu);
+    fnaf->menu_cursor = 0;
+}
+
+void switch_view(Fnaf* fnaf, Views view) {
+    fnaf->counter = 0;
+    fnaf->current_view = view;
 }
 
 void fnaf_free(Fnaf* fnaf) {
     free(fnaf->animatronics);
+    free(fnaf->electricity);
+
+    free(fnaf->timer_bonnie);
+    free(fnaf->timer_chica);
+    free(fnaf->timer_freddy);
+    free(fnaf->timer_foxy);
+
     view_port_enabled_set(fnaf->view_port, false);
     gui_remove_view_port(fnaf->gui, fnaf->view_port);
     view_port_free(fnaf->view_port);
@@ -104,7 +116,7 @@ int32_t flipperzero_fnaf(void* p) {
                 break;
             case night_number:
                 if (fnaf->event.key == InputKeyOk && fnaf->event.type == InputTypeShort) {
-                    fnaf->current_view = office;
+                    switch_view(fnaf, office);
                 }
 
                 // TESTING ONLY
