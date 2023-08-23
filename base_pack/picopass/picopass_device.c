@@ -356,8 +356,8 @@ ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pa
     return ERR_NONE;
 }
 
-ReturnCode picopass_device_parse_wiegand(uint8_t* data, PicopassWiegandRecord* record) {
-    uint32_t* halves = (uint32_t*)data;
+ReturnCode picopass_device_parse_wiegand(uint8_t* credential, PicopassWiegandRecord* record) {
+    uint32_t* halves = (uint32_t*)credential;
     if(halves[0] == 0) {
         uint8_t leading0s = __builtin_clz(REVERSE_BYTES_U32(halves[1]));
         record->bitLength = 31 - leading0s;
@@ -367,8 +367,16 @@ ReturnCode picopass_device_parse_wiegand(uint8_t* data, PicopassWiegandRecord* r
     }
     FURI_LOG_D(TAG, "bitLength: %d", record->bitLength);
 
+    // Remove sentinel bit from credential.  Byteswapping to handle array of bytes vs 64bit value
+    uint64_t sentinel = __builtin_bswap64(1ULL << record->bitLength);
+    uint64_t swapped = 0;
+    memcpy(&swapped, credential, sizeof(uint64_t));
+    swapped = swapped ^ sentinel;
+    memcpy(credential, &swapped, sizeof(uint64_t));
+    FURI_LOG_D(TAG, "PACS: (%d) %016llx", record->bitLength, swapped);
+
     if(record->bitLength == 26) {
-        uint8_t* v4 = data + 4;
+        uint8_t* v4 = credential + 4;
         uint32_t bot = v4[3] | (v4[2] << 8) | (v4[1] << 16) | (v4[0] << 24);
 
         record->CardNumber = (bot >> 1) & 0xFFFF;

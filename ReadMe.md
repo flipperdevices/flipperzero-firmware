@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `20 Aug 04:37 GMT +3`
+### Apps checked & updated at `23 Aug 19:40 GMT +3`
 
 
 # Default pack
@@ -151,7 +151,8 @@ Games:
 - [Wii EC Analyser (by csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester (by unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - [Atomic Dice Roller (by nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
-- [NRF24 Channel Scanner (by Sil333033)](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/8015ea29a2d4e788b6dee5f7f967dd001534214c)
+- [NRF24 Channel Scanner (by htotoo)](https://github.com/htotoo/NRF24ChannelScanner)
+- [Mx2125 - Step Counter (by grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 
 ## Infrared
 - [IR Remote (by Hong5489)](https://github.com/Hong5489/ir_remote) - improvements [(by friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [(by d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
