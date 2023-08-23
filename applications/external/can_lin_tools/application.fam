@@ -1,0 +1,18 @@
+App(
+    appid="can_lin_tools",
+    name="CAN-FD/LIN Tools",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="can_lin_tools_app",
+    requires=["gui"],
+    stack_size=4 * 1024,
+    order=50,
+    fap_icon="can_lin_tools_icon_10x10.png",
+    fap_category="Tools",
+    fap_icon_assets="images",
+    fap_private_libs=[
+        Lib(
+            name="driver",
+        ),
+    ],
+)
