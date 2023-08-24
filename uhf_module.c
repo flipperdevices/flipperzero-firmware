@@ -332,10 +332,11 @@ M100ResponseType m100_write_label_data_storage(
     // send cmd
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
     furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, cmd_length);
-    uint8_t max_wait = 25;
+    unsigned int delay = DELAY_MS / 2;
+    unsigned int timeout = 15;
     while(!buffer_get_size(module->buf)) {
-        furi_delay_ms(DELAY_MS);
-        if(!max_wait--) break;
+        furi_delay_ms(delay);
+        if(!timeout--) break;
     }
     uint8_t* buff_data = buffer_get_data(module->buf);
     size_t buff_length = buffer_get_size(module->buf);
