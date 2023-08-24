@@ -29,7 +29,7 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
     char time[11];
     snprintf(time, 11, "0%u:00 AM", fnaf->hour);
     canvas_draw_str(canvas, 85, 52, time);
-    if (fnaf->camera_cursor != cam6) {
+    if (fnaf->camera_cursor != cam6 && fnaf->camera_cursor != cam5) {
         uint8_t y = 20;
         if (fnaf->animatronics->location[Bonnie] == fnaf->camera_cursor) {
             canvas_draw_str(canvas, 85, y, "Bonnie");
@@ -43,7 +43,11 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
             canvas_draw_str(canvas, 85, y, "Freddy");
             y += 9;
         }
-    } else {
+        if (fnaf->animatronics->location[Foxy] == 4 && fnaf->camera_cursor == cam2A) {
+            canvas_draw_str(canvas, 85, y, "Foxy runs");
+            y += 9;
+        }
+    } else if (fnaf->camera_cursor == cam6) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 85, 20, "Audio only");
 
@@ -59,6 +63,32 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
         } else {
             canvas_set_color(canvas, 0);
             canvas_draw_box(canvas, 106, 23, 10, 19);
+        }
+    } else if (fnaf->camera_cursor == cam5) {
+        switch (fnaf->animatronics->location[Foxy]) {
+        case 0:
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str(canvas, 85, 20, "Curtains");
+            canvas_draw_str(canvas, 85, 29, "are closed");
+            break;
+        case 1:
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str(canvas, 85, 20, "Curtains");
+            canvas_draw_str(canvas, 85, 29, "are open");
+            canvas_draw_str(canvas, 85, 38, "a bit");
+            break;
+        case 2:
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str(canvas, 85, 20, "Curtains");
+            canvas_draw_str(canvas, 85, 29, "are open");
+            canvas_draw_str(canvas, 85, 38, "fully");
+            break;
+        case 3:
+        case 4:
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str(canvas, 85, 20, "No one");
+            canvas_draw_str(canvas, 85, 29, "is here");
+            break;
         }
     }
 

@@ -74,13 +74,14 @@ void office_input(Fnaf* fnaf) {
 }
 
 void set_difficulty(Fnaf* fnaf) {
+    // Do random 1 or 2 for freddy for night 4
     uint8_t difficulties[7][4] = {
         {0, 0, 0, 0},
         {0, 3, 1, 1},
         {1, 0, 5, 2},
         {1, 2, 4, 6},
         {3, 5, 7, 9},
-        {4, 10, 12, 6},
+        {4, 10, 12, 16},
         {0, 0, 0, 0},
     };
     // CUSTOM NIGHT INTERFACE WHEN
@@ -144,7 +145,17 @@ void hourly_timer_callback(void* ctx) {
     }
     FURI_LOG_D(TAG, "Hour is %u", fnaf->hour);
     fnaf->hour += 1;
-    if (fnaf->hour == 6) {
+    switch (fnaf->hour) {
+    case 2:
+        fnaf->animatronics->AI[Bonnie] += 1;
+        break;
+    case 3:
+    case 4:
+        fnaf->animatronics->AI[Bonnie] += 1;
+        fnaf->animatronics->AI[Chica] += 1;
+        fnaf->animatronics->AI[Foxy] += 1;
+        break;
+    case 6:
         fnaf->progress += 1;
         dolphin_deed(DolphinDeedPluginGameWin);
         SWITCH_VIEW(night_complete);
