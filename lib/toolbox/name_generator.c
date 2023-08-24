@@ -44,7 +44,7 @@ const char* convert_app_extension_to_name(char* app_name) {
     };
 
     struct NameConversion conversions[] = {
-        {".ibtn", "iBtn"}, {".nfc", "NFC"}, {".rfid", "RFID"}, {".sub", "RAW"}};
+        {".ibtn", "iBtn"}, {".nfc", "NFC"}, {".rfid", "RFID"}, {".sub", "SubGhz"}};
 
     const int numConversions =
         sizeof(conversions) / sizeof(conversions[0]); // gets the number of potential conversions
@@ -65,12 +65,11 @@ void name_generator_set(char* name, uint8_t max_name_size, char* app_name) {
         FuriHalRtcDateTime dateTime;
         furi_hal_rtc_get_datetime(&dateTime);
 
-        const char* converted_appname = convert_app_extension_to_name(app_name);
         snprintf(
             name,
             max_name_size,
             "%s-%.4d_%.2d_%.2d-%.2d_%.2d",
-            converted_appname,
+            app_name,
             dateTime.year,
             dateTime.month,
             dateTime.day,
