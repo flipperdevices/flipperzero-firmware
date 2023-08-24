@@ -583,6 +583,7 @@ ThrowCode pfDoForth( const char *DicFileName, const char *SourceName, cell_t IfI
             }
         }
         if( dic == NULL ) goto error2;
+        if( CompileCustomFunctions() < 0 ) goto error2; /* Call custom 'C' call builder. */
 
         if( !gVarQuiet )
         {

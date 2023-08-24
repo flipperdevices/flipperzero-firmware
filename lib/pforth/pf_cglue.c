@@ -81,7 +81,7 @@ DBUG(("CallUserFunction: Index = %d, ReturnMode = %d, NumParams = %d\n",
     return Result;
 }
 
-#if (!defined(PF_NO_INIT)) && (!defined(PF_NO_SHELL))
+#if (!defined(PF_NO_SHELL))
 /***************************************************************/
 Err CreateGlueToC( const char *CName, ucell_t Index, cell_t ReturnMode, int32_t NumParams )
 {
