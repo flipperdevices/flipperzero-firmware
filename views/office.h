@@ -2,7 +2,6 @@
 
 #include <gui/gui.h>
 #include <dolphin/dolphin.h>
-#include "../fnaf.h"
 #include "cameras.h"
 
 #define SET_DIFFICULTY(difficulties)  \
@@ -11,13 +10,26 @@
         fnaf->animatronics->AI[Freddy] = difficulties[Freddy];\
         fnaf->animatronics->AI[Foxy] = difficulties[Foxy]
 
-void office_draw(Canvas* canvas, Fnaf* fnaf);
+typedef enum {
+    left,
+    none,
+    right,
+}CameraMovement;
 
-void office_input(Fnaf* fnaf);
+typedef struct {
+    uint8_t camera_x; // coordinate for drawing
+    signed char location; // left, center or right
+    CameraMovement camera_moving_direction; // for office view
+}Office;
 
-void night_start(Fnaf* fnaf);
 
-void reset_animatronic_positions(Fnaf* fnaf);
+void office_draw(Canvas* canvas, void* ctx);
+
+void office_input(void* ctx);
+
+void night_start(void* ctx);
+
+void reset_animatronic_positions(void* ctx);
 
 void timer_callback_bonnie(void* ctx);
 

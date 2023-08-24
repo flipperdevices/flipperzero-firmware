@@ -9,6 +9,8 @@
 #define TAG "flipperzero_fnaf"
 
 #include "flipperzero_fnaf_icons.h"
+#include "views/cameras.h"
+#include "views/office.h"
 
 #define bonnie_time 4970
 #define chica_time 4980
@@ -21,7 +23,6 @@
 typedef struct {
     uint8_t AI[4];
     uint8_t location[4];
-
     FuriTimer* timer[4];
 }Animatronics;
 
@@ -31,16 +32,9 @@ typedef struct {
     bool left_light;
     bool right_light;
     bool monitor;
-
     uint16_t power_left;
     uint8_t power_draw;
 }Electricity;
-
-typedef enum {
-    left,
-    none,
-    right,
-}CameraMovement;
 
 typedef struct {
     ViewPort* view_port;
@@ -49,16 +43,12 @@ typedef struct {
     InputEvent event;
 
     Animatronics* animatronics;
-    uint8_t camera_cursor;   // current camera
-    signed char camera_cursor_x; // for camera navigation
-    signed char camera_cursor_y; // for camera navigation too
     uint8_t hour;
+    Cameras* cameras;
+    Office* office;
     Electricity* electricity;
-    uint8_t office_camera_x; // coordinate for drawing
 
     uint16_t counter; // general purpose
-    signed char office_location; // left, center or right
-    CameraMovement camera_moving_direction; // for office view
     uint8_t counter_secondary; // for speaker animation on cam6 and fan
     signed char menu_cursor; // for the main menu
     uint8_t current_view;
@@ -75,6 +65,7 @@ typedef enum {
 
 typedef enum {
     main_menu,
+    custom_night,
     night_number,
     office,
     cameras,
@@ -91,6 +82,3 @@ typedef struct {
 }NightDifficulty;
 
 void switch_view(Fnaf* fnaf, Views view);
-
-// Array for difficulties. Night 7 is custom remember
-// NightDifficulty night_difficulty = {};

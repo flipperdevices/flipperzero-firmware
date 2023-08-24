@@ -2,22 +2,22 @@
 #include "../fnaf.h"
 
 static void moving_animation(Fnaf* fnaf) {
-    switch (fnaf->camera_moving_direction) {
+    switch (fnaf->office->camera_moving_direction) {
     case left:
         if (fnaf->counter < 24) {
-            fnaf->office_camera_x += 6;
+            fnaf->office->camera_x += 6;
             fnaf->counter += 6;
         } else {
-            fnaf->camera_moving_direction = none;
+            fnaf->office->camera_moving_direction = none;
             fnaf->counter = 0;
         }
         break;
     case right:
         if (fnaf->counter < 24) {
-            fnaf->office_camera_x -= 6;
+            fnaf->office->camera_x -= 6;
             fnaf->counter += 6;
         } else {
-            fnaf->camera_moving_direction = none;
+            fnaf->office->camera_moving_direction = none;
             fnaf->counter = 0;
         }
         break;
@@ -27,52 +27,102 @@ static void moving_animation(Fnaf* fnaf) {
     }
 }
 
-void office_draw(Canvas* canvas, Fnaf* fnaf) {
+void office_draw(Canvas* canvas, void* ctx) {
+    Fnaf* fnaf = ctx;
+    char time[8];
+    snprintf(time, 11, "0%u:00", fnaf->hour);
+    char power[7];
+    snprintf(power, 7, "%u%%", fnaf->electricity->power_left / 10);
+
     canvas_set_color(canvas, 1);
-    if (fnaf->camera_moving_direction == none) {
+    if (fnaf->office->camera_moving_direction == none) {
         signed char position[3] = { 24, 0, -24 };
-        fnaf->office_camera_x = position[fnaf->office_location + 1];
+        fnaf->office->camera_x = position[fnaf->office->location + 1];
     }
-    if (fnaf->camera_moving_direction != none) moving_animation(fnaf);
-    canvas_draw_icon(canvas, fnaf->office_camera_x, 0, &I_office_128x64);
-    if (fnaf->counter_secondary <= 2) {
+    if (fnaf->office->camera_moving_direction != none) moving_animation(fnaf);
+    canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_office_128x64);
+    // fan animation:
+    if (fnaf->counter_secondary < 3) {
         canvas_set_color(canvas, 0);
-        canvas_draw_box(canvas, fnaf->office_camera_x + 67, 26, 11, 11);
+        canvas_draw_box(canvas, fnaf->office->camera_x + 67, 26, 11, 11);
         canvas_set_color(canvas, 1);
-        canvas_draw_icon(canvas, fnaf->office_camera_x + 67, 26, &I_fan_11x11);
+        canvas_draw_icon(canvas, fnaf->office->camera_x + 67, 26, &I_fan_11x11);
         fnaf->counter_secondary += 1;
     } else {
         fnaf->counter_secondary += 1;
-        if (fnaf->counter_secondary > 2) fnaf->counter_secondary = 0;
+        if (fnaf->counter_secondary > 6) fnaf->counter_secondary = 0;
     }
+
+    if (!fnaf->electricity->left_light) {
+        canvas_set_color(canvas, 1);
+        canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_left_door_dark_28x64);
+        canvas_draw_icon(canvas, fnaf->office->camera_x + 29, 15, &I_left_window_dark_13x25);
+    }
+    if (!fnaf->electricity->right_light) {
+        canvas_set_color(canvas, 1);
+        canvas_draw_icon(canvas, fnaf->office->camera_x + 100, 0, &I_right_door_dark_28x64);
+        canvas_draw_icon(canvas, fnaf->office->camera_x + 85, 15, &I_right_window_dark_13x25);
+    }
+    // UI:
     canvas_set_color(canvas, 0);
-    canvas_draw_box(canvas, 0, 0, 24, 64);
-    canvas_draw_box(canvas, 104, 0, 24, 64);
+    canvas_draw_box(canvas, 0, 0, 23, 64);
+    canvas_draw_box(canvas, 105, 0, 23, 64);
     canvas_set_color(canvas, 1);
-    // 24*64 rectangles
+    canvas_draw_str(canvas, fnaf->office->camera_x + 52, 10, time);
+    canvas_draw_str(canvas, 107, 62, power);
+    uint8_t x = 17;
+    if (fnaf->electricity->power_draw < 5) {
+        for (uint8_t i = 0; i < fnaf->electricity->power_draw; i++) {
+            canvas_draw_box(canvas, x, 55, 4, 7);
+            x -= 5;
+        }
+    }
 }
 
-void office_input(Fnaf* fnaf) {
+void office_input(void* ctx) {
+    Fnaf* fnaf = ctx;
     if (fnaf->event.type == InputTypePress) {
         switch (fnaf->event.key) {
         case InputKeyLeft:
-            if (fnaf->office_location != -1 && fnaf->camera_moving_direction == none) {
-                fnaf->office_location -= 1;
-                fnaf->camera_moving_direction = left;
+            if (fnaf->office->location != -1 && fnaf->office->camera_moving_direction == none) {
+                fnaf->office->location -= 1;
+                fnaf->office->camera_moving_direction = left;
             }
             break;
         case InputKeyRight:
-            if (fnaf->office_location != 1 && fnaf->camera_moving_direction == none) {
-                fnaf->office_location += 1;
-                fnaf->camera_moving_direction = right;
+            if (fnaf->office->location != 1 && fnaf->office->camera_moving_direction == none) {
+                fnaf->office->location += 1;
+                fnaf->office->camera_moving_direction = right;
             }
             break;
         case InputKeyUp:
+            switch (fnaf->office->location) {
+            case -1:
+                fnaf->electricity->left_door = !fnaf->electricity->left_door;
+                break;
+            case 0:
+                break;
+            case 1:
+                fnaf->electricity->right_door = !fnaf->electricity->right_door;
+                break;
+            }
             break;
         case InputKeyDown:
+            switch (fnaf->office->location) {
+            case -1:
+                fnaf->electricity->left_light = !fnaf->electricity->left_light;
+                break;
+            case 0:
+                break;
+            case 1:
+                fnaf->electricity->right_light = !fnaf->electricity->right_light;
+                break;
+            }
             break;
         case InputKeyOk:
-            fnaf->camera_moving_direction = none;
+            fnaf->office->camera_moving_direction = none;
+            fnaf->electricity->left_light = false;
+            fnaf->electricity->right_light = false;
             SWITCH_VIEW(cameras);
             break;
         case InputKeyBack:
@@ -84,7 +134,6 @@ void office_input(Fnaf* fnaf) {
 }
 
 void set_difficulty(Fnaf* fnaf) {
-    // Do random 1 or 2 for freddy for night 4
     uint8_t difficulties[7][4] = {
         {0, 0, 0, 0},
         {0, 3, 1, 1},
@@ -94,11 +143,14 @@ void set_difficulty(Fnaf* fnaf) {
         {4, 10, 12, 16},
         {0, 0, 0, 0},
     };
+    // Freddy has AI of random 1 or 2 for the 4th night
+    difficulties[3][Freddy] = furi_get_tick() % 2 + 1;
     // CUSTOM NIGHT INTERFACE WHEN
     SET_DIFFICULTY(difficulties[fnaf->progress]);
 }
 
-void night_start(Fnaf* fnaf) {
+void night_start(void* ctx) {
+    Fnaf* fnaf = ctx;
     FURI_LOG_D(TAG, "night_start");
     FURI_LOG_D(TAG, "progress = %u", fnaf->progress);
     if (fnaf->progress > 6) {
@@ -110,12 +162,13 @@ void night_start(Fnaf* fnaf) {
         reset_animatronic_positions(fnaf);
         set_difficulty(fnaf);
         fnaf->electricity->power_left = 999;
-        fnaf->camera_cursor = cam1A;
+        fnaf->electricity->power_draw = 4;
+        fnaf->cameras->cursor = cam1A;
         fnaf->hour = 0;
         fnaf->counter = 0;
-        fnaf->office_camera_x = 0;
-        fnaf->office_location = 0;
-        fnaf->camera_moving_direction = none;
+        fnaf->office->camera_x = 0;
+        fnaf->office->location = 0;
+        fnaf->office->camera_moving_direction = none;
         SWITCH_VIEW(night_number);
         FURI_LOG_D(TAG, "Night started thing 2");
         // What else?
@@ -123,11 +176,12 @@ void night_start(Fnaf* fnaf) {
     }
 }
 
-void reset_animatronic_positions(Fnaf* fnaf) {
+void reset_animatronic_positions(void* ctx) {
+    Fnaf* fnaf = ctx;
     fnaf->animatronics->location[Bonnie] = cam1A;
     fnaf->animatronics->location[Chica] = cam1A;
     fnaf->animatronics->location[Freddy] = cam1A;
-    fnaf->animatronics->location[Foxy] = cam1C;
+    fnaf->animatronics->location[Foxy] = 0;
 }
 
 void timer_callback_bonnie(void* ctx) {

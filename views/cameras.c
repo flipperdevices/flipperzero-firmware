@@ -2,8 +2,8 @@
 #include "../fnaf.h"
 #include "cameras.h"
 
-void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
-
+void draw_cameras(Canvas* canvas, void* ctx) {
+    Fnaf* fnaf = ctx;
     uint8_t camera_coordinates[22] = { 26, 3,
                                     23, 13,
                                     17, 28,
@@ -20,34 +20,34 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
     char camera_names[11][7] = { "Cam 1A", "Cam 1B", "Cam 1C", "Cam 2A", "Cam 2B", "Cam 3", "Cam 4A", "Cam 4B", "Cam 5", "Cam 6", "Cam 7" };
 
     canvas_draw_icon(canvas, -1, 0, &I_cameras_78x64);
-    canvas_draw_box(canvas, camX(fnaf->camera_cursor), camY(fnaf->camera_cursor), 7, 4);
+    canvas_draw_box(canvas, camX(fnaf->cameras->cursor), camY(fnaf->cameras->cursor), 7, 4);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 84, 10, camera_names[fnaf->camera_cursor]);
+    canvas_draw_str(canvas, 84, 10, camera_names[fnaf->cameras->cursor]);
     canvas_set_font(canvas, FontSecondary);
 
     char time[11];
     snprintf(time, 11, "0%u:00 AM", fnaf->hour);
     canvas_draw_str(canvas, 85, 52, time);
-    if (fnaf->camera_cursor != cam6 && fnaf->camera_cursor != cam5) {
+    if (fnaf->cameras->cursor != cam6 && fnaf->cameras->cursor != cam5) {
         uint8_t y = 20;
-        if (fnaf->animatronics->location[Bonnie] == fnaf->camera_cursor) {
+        if (fnaf->animatronics->location[Bonnie] == fnaf->cameras->cursor) {
             canvas_draw_str(canvas, 85, y, "Bonnie");
             y += 9;
         }
-        if (fnaf->animatronics->location[Chica] == fnaf->camera_cursor) {
+        if (fnaf->animatronics->location[Chica] == fnaf->cameras->cursor) {
             canvas_draw_str(canvas, 85, y, "Chica");
             y += 9;
         }
-        if (fnaf->animatronics->location[Freddy] == fnaf->camera_cursor) {
+        if (fnaf->animatronics->location[Freddy] == fnaf->cameras->cursor) {
             canvas_draw_str(canvas, 85, y, "Freddy");
             y += 9;
         }
-        if (fnaf->animatronics->location[Foxy] == 4 && fnaf->camera_cursor == cam2A) {
+        if (fnaf->animatronics->location[Foxy] == 3 && fnaf->cameras->cursor == cam2A) {
             canvas_draw_str(canvas, 85, y, "Foxy runs");
             y += 9;
         }
-    } else if (fnaf->camera_cursor == cam6) {
+    } else if (fnaf->cameras->cursor == cam6) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 85, 20, "Audio only");
 
@@ -64,7 +64,7 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
             canvas_set_color(canvas, 0);
             canvas_draw_box(canvas, 106, 23, 10, 19);
         }
-    } else if (fnaf->camera_cursor == cam5) {
+    } else if (fnaf->cameras->cursor == cam5) {
         switch (fnaf->animatronics->location[Foxy]) {
         case 0:
             canvas_set_font(canvas, FontSecondary);
@@ -96,10 +96,10 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
 
     char power[7];
     snprintf(power, 7, "%u%%", fnaf->electricity->power_left / 10);
-    canvas_draw_str(canvas, 104, 62, power);
+    canvas_draw_str(canvas, 107, 62, power);
 
     uint8_t x = 98;
-    if (fnaf->electricity->power_draw < 6) {
+    if (fnaf->electricity->power_draw < 5) {
         for (uint8_t i = 0; i < fnaf->electricity->power_draw; i++) {
             canvas_draw_box(canvas, x, 55, 4, 7);
             x -= 5;
@@ -111,12 +111,13 @@ static void set_cursor(Fnaf* fnaf) {
 
     uint8_t cursors_x[11] = { 1, 1, 1, 1, 1, 0, 2, 2, 0, 3, 3 };
     uint8_t cursors_y[11] = { 0, 1, 2, 4, 5, 4, 4, 5, 1, 4, 0 };
-    fnaf->camera_cursor_x = cursors_x[fnaf->camera_cursor];
-    fnaf->camera_cursor_y = cursors_y[fnaf->camera_cursor];
+    fnaf->cameras->cursor_x = cursors_x[fnaf->cameras->cursor];
+    fnaf->cameras->cursor_y = cursors_y[fnaf->cameras->cursor];
 
 }
 
-void cameras_input(Fnaf* fnaf) {
+void cameras_input(void* ctx) {
+    Fnaf* fnaf = ctx;
 
     set_cursor(fnaf);
 
@@ -131,63 +132,63 @@ void cameras_input(Fnaf* fnaf) {
     if (fnaf->event.type == InputTypePress) {
         switch (fnaf->event.key) {
         case InputKeyLeft:
-            if (fnaf->camera_cursor_x == 0) break;
-            if (fnaf->camera_cursor == cam7) {
-                fnaf->camera_cursor_x = 1;
-                fnaf->camera_cursor_y = 1;
+            if (fnaf->cameras->cursor_x == 0) break;
+            if (fnaf->cameras->cursor == cam7) {
+                fnaf->cameras->cursor_x = 1;
+                fnaf->cameras->cursor_y = 1;
                 break;
             }
-            fnaf->camera_cursor_x -= 1;
+            fnaf->cameras->cursor_x -= 1;
             break;
         case InputKeyRight:
-            if (fnaf->camera_cursor_x == 3) break;
-            fnaf->camera_cursor_x += 1;
+            if (fnaf->cameras->cursor_x == 3) break;
+            fnaf->cameras->cursor_x += 1;
             break;
         case InputKeyUp:
-            if (fnaf->camera_cursor_y == 0 && (fnaf->camera_cursor != cam5 && fnaf->camera_cursor != cam7)) break;
-            if (fnaf->camera_cursor == cam2A) {
-                fnaf->camera_cursor_x = 1;
-                fnaf->camera_cursor_y = 2;
+            if (fnaf->cameras->cursor_y == 0 && (fnaf->cameras->cursor != cam5 && fnaf->cameras->cursor != cam7)) break;
+            if (fnaf->cameras->cursor == cam2A) {
+                fnaf->cameras->cursor_x = 1;
+                fnaf->cameras->cursor_y = 2;
                 break;
-            } else if (fnaf->camera_cursor == cam4A) {
-                fnaf->camera_cursor_x = 1;
-                fnaf->camera_cursor_y = 2;
+            } else if (fnaf->cameras->cursor == cam4A) {
+                fnaf->cameras->cursor_x = 1;
+                fnaf->cameras->cursor_y = 2;
                 break;
-            } else if (fnaf->camera_cursor == cam7) {
-                fnaf->camera_cursor_x = 1;
-                fnaf->camera_cursor_y = 0;
+            } else if (fnaf->cameras->cursor == cam7) {
+                fnaf->cameras->cursor_x = 1;
+                fnaf->cameras->cursor_y = 0;
                 break;
-            } else if (fnaf->camera_cursor == cam5) {
-                fnaf->camera_cursor_x = 1;
-                fnaf->camera_cursor_y = 0;
+            } else if (fnaf->cameras->cursor == cam5) {
+                fnaf->cameras->cursor_x = 1;
+                fnaf->cameras->cursor_y = 0;
                 break;
             }
-            fnaf->camera_cursor_y -= 1;
+            fnaf->cameras->cursor_y -= 1;
             break;
         case InputKeyDown:
-            if (fnaf->camera_cursor_y == 5) break;
-            if (fnaf->camera_cursor == cam7) {
-                fnaf->camera_cursor_x = 3;
-                fnaf->camera_cursor_y = 4;
+            if (fnaf->cameras->cursor_y == 5) break;
+            if (fnaf->cameras->cursor == cam7) {
+                fnaf->cameras->cursor_x = 3;
+                fnaf->cameras->cursor_y = 4;
                 break;
-            } else if (fnaf->camera_cursor == cam5) {
-                fnaf->camera_cursor_x = 1;
-                fnaf->camera_cursor_y = 2;
+            } else if (fnaf->cameras->cursor == cam5) {
+                fnaf->cameras->cursor_x = 1;
+                fnaf->cameras->cursor_y = 2;
                 break;
-            } else if (fnaf->camera_cursor == cam3) {
-                fnaf->camera_cursor_x = 1;
-                fnaf->camera_cursor_y = 5;
+            } else if (fnaf->cameras->cursor == cam3) {
+                fnaf->cameras->cursor_x = 1;
+                fnaf->cameras->cursor_y = 5;
                 break;
-            } else if (fnaf->camera_cursor == cam6) {
-                fnaf->camera_cursor_x = 2;
-                fnaf->camera_cursor_y = 5;
+            } else if (fnaf->cameras->cursor == cam6) {
+                fnaf->cameras->cursor_x = 2;
+                fnaf->cameras->cursor_y = 5;
                 break;
-            } else if (fnaf->camera_cursor == cam1C) {
-                fnaf->camera_cursor_x = 0;
-                fnaf->camera_cursor_y = 4;
+            } else if (fnaf->cameras->cursor == cam1C) {
+                fnaf->cameras->cursor_x = 0;
+                fnaf->cameras->cursor_y = 4;
                 break;
             }
-            fnaf->camera_cursor_y += 1;
+            fnaf->cameras->cursor_y += 1;
             break;
         case InputKeyOk:
             SWITCH_VIEW(office);
@@ -197,12 +198,17 @@ void cameras_input(Fnaf* fnaf) {
         }
     }
 
-    fnaf->camera_cursor = cameras_map[fnaf->camera_cursor_y][fnaf->camera_cursor_x];
+    fnaf->cameras->cursor = cameras_map[fnaf->cameras->cursor_y][fnaf->cameras->cursor_x];
 
     // Extra check just in case
-    if (fnaf->camera_cursor_x < 0) fnaf->camera_cursor_x = 0;
-    else if (fnaf->camera_cursor_x > 3) fnaf->camera_cursor_x = 3;
-    if (fnaf->camera_cursor_y < 0) fnaf->camera_cursor_y = 0;
-    else if (fnaf->camera_cursor_y > 5) fnaf->camera_cursor_y = 5;
+    if (fnaf->cameras->cursor_x < 0) fnaf->cameras->cursor_x = 0;
+    else if (fnaf->cameras->cursor_x > 3) fnaf->cameras->cursor_x = 3;
+    if (fnaf->cameras->cursor_y < 0) fnaf->cameras->cursor_y = 0;
+    else if (fnaf->cameras->cursor_y > 5) fnaf->cameras->cursor_y = 5;
 
+}
+
+void noise_callback(void* ctx) {
+    Fnaf* fnaf = ctx;
+    fnaf->cameras->noise = false;
 }

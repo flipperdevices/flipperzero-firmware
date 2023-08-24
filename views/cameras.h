@@ -1,7 +1,6 @@
 #pragma once
 
 #include <gui/gui.h>
-#include "../fnaf.h"
 
 #define camX(camera) camera_coordinates[camera*2]
 #define camY(camera) camera_coordinates[camera*2 + 1]
@@ -23,6 +22,16 @@ typedef enum {
     office_but_another_name,
 }Locations;
 
-void draw_cameras(Canvas* canvas, Fnaf* fnaf);
+typedef struct {
+    Locations cursor;   // current camera
+    signed char cursor_x; // for camera navigation
+    signed char cursor_y; // for camera navigation too
+    bool noise; // for when animatronics move
+    FuriTimer* noise_timer;
+}Cameras;
 
-void cameras_input(Fnaf* fnaf);
+void draw_cameras(Canvas* canvas, void* ctx);
+
+void cameras_input(void* ctx);
+
+void noise_callback(void* ctx);
