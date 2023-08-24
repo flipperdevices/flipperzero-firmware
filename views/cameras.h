@@ -18,8 +18,11 @@ typedef enum {
     cam5,
     cam6,
     cam7,
-}Cameras;
+    left_entrance,
+    right_entrance,
+    office_but_another_name,
+}Locations;
 
 void draw_cameras(Canvas* canvas, Fnaf* fnaf);
 
-void cameras_switching(Fnaf* fnaf);
+void cameras_input(Fnaf* fnaf);

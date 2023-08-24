@@ -27,7 +27,7 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
     canvas_set_font(canvas, FontSecondary);
 
     char time[11];
-    snprintf(time, 11, "0%u:00 AM", fnaf->time);
+    snprintf(time, 11, "0%u:00 AM", fnaf->hour);
     canvas_draw_str(canvas, 85, 52, time);
     if (fnaf->camera_cursor != cam6) {
         uint8_t y = 20;
@@ -65,19 +65,19 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
     canvas_set_color(canvas, 1);
 
     char power[7];
-    snprintf(power, 7, "%u%%", fnaf->electricity->power_left);
+    snprintf(power, 7, "%u%%", fnaf->electricity->power_left / 10);
     canvas_draw_str(canvas, 104, 62, power);
 
     uint8_t x = 98;
-    if (fnaf->electricity->power_left < 6) {
-        for (uint8_t i = 0; i < fnaf->electricity->power_left; i++) {
+    if (fnaf->electricity->power_draw < 6) {
+        for (uint8_t i = 0; i < fnaf->electricity->power_draw; i++) {
             canvas_draw_box(canvas, x, 55, 4, 7);
             x -= 5;
         }
     }
 }
 
-void set_cursor(Fnaf* fnaf) {
+static void set_cursor(Fnaf* fnaf) {
 
     uint8_t cursors_x[11] = { 1, 1, 1, 1, 1, 0, 2, 2, 0, 3, 3 };
     uint8_t cursors_y[11] = { 0, 1, 2, 4, 5, 4, 4, 5, 1, 4, 0 };
@@ -86,14 +86,14 @@ void set_cursor(Fnaf* fnaf) {
 
 }
 
-void cameras_switching(Fnaf* fnaf) {
+void cameras_input(Fnaf* fnaf) {
 
     set_cursor(fnaf);
 
     uint8_t cameras_map[6][4] = { {cam5, cam1A, cam7, cam7},
-                                    {cam5, cam1B, cam7, 0xFF},
-                                    {cam5, cam1C, cam7, 0xFF},
-                                    {cam1C, 0xFF, 0xFF, cam7},
+                                    {cam5, cam1B, cam7, 127},
+                                    {cam5, cam1C, cam7, 127},
+                                    {cam1C, 127, 127, cam7},
                                     {cam3, cam2A, cam4A, cam6},
                                     {cam3, cam2B, cam4B, cam6}
     };
@@ -114,7 +114,7 @@ void cameras_switching(Fnaf* fnaf) {
             fnaf->camera_cursor_x += 1;
             break;
         case InputKeyUp:
-            if (fnaf->camera_cursor_y == 0 && fnaf->camera_cursor != (cam7 | cam5)) break;
+            if (fnaf->camera_cursor_y == 0 && (fnaf->camera_cursor != cam5 && fnaf->camera_cursor != cam7)) break;
             if (fnaf->camera_cursor == cam2A) {
                 fnaf->camera_cursor_x = 1;
                 fnaf->camera_cursor_y = 2;

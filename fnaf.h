@@ -10,26 +10,37 @@
 
 #include "flipperzero_fnaf_icons.h"
 
+#define bonnie_time 4970
+#define chica_time 4980
+#define freddy_time 3020
+#define foxy_time 5010
+#define hour_time 1000 // for tests, actually 90000
+
 #define SWITCH_VIEW(view) switch_view(fnaf, view)
 
 typedef struct {
     uint8_t AI[4];
     uint8_t location[4];
-    uint8_t foxy_timer;
-    uint8_t freddy_position;
-    uint8_t freddy_timer;
+
+    FuriTimer* timer[4];
 }Animatronics;
 
 typedef struct {
-    uint8_t left_door;
-    uint8_t right_door;
-    uint8_t left_light;
-    uint8_t right_light;
-    uint8_t monitor;
+    bool left_door;
+    bool right_door;
+    bool left_light;
+    bool right_light;
+    bool monitor;
 
-    uint8_t power_left;
+    uint16_t power_left;
     uint8_t power_draw;
 }Electricity;
+
+typedef enum {
+    left,
+    none,
+    right,
+}CameraMovement;
 
 typedef struct {
     ViewPort* view_port;
@@ -37,29 +48,28 @@ typedef struct {
     Gui* gui;
     InputEvent event;
 
-    uint8_t time;
     Animatronics* animatronics;
-    short int camera_cursor;
-    short int camera_cursor_x;
-    short int camera_cursor_y;
+    signed char camera_cursor;
+    signed char camera_cursor_x;
+    signed char camera_cursor_y;
+    uint8_t hour;
     Electricity* electricity;
+    uint8_t office_camera_x; // coordinate for drawing
 
-    uint16_t counter;
-    uint8_t kitchen_counter;
-    short int menu_cursor;
+    uint16_t counter; // general purpose
+    signed char office_location; // left, center or right
+    CameraMovement camera_moving_direction;
+    uint8_t kitchen_counter; // for speaker animation on cam6
+    signed char menu_cursor; // for the main menu
     uint8_t current_view;
-    uint8_t progress; // Last completed night
-
-    FuriTimer* timer_bonnie;
-    FuriTimer* timer_chica;
-    FuriTimer* timer_freddy;
-    FuriTimer* timer_foxy;
+    uint8_t progress; // Last completed nights
+    FuriTimer* hourly_timer;
 } Fnaf;
 
 typedef enum {
+    Freddy,
     Bonnie,
     Chica,
-    Freddy,
     Foxy,
 }Names;
 
@@ -72,7 +82,6 @@ typedef enum {
     screamer,
     game_over,
 }Views;
-
 
 typedef struct {
     uint8_t Bonnie;

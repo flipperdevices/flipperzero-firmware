@@ -1,5 +1,6 @@
 #include "../fnaf.h"
 #include "menu.h"
+#include "office.h"
 
 void draw_menu(Canvas* canvas, Fnaf* fnaf) {
     if (fnaf->progress > 6) fnaf->progress = 0;
@@ -30,6 +31,17 @@ void draw_menu(Canvas* canvas, Fnaf* fnaf) {
     }
 }
 
+static void new_game(Fnaf* fnaf) {
+    FURI_LOG_D(TAG, "new_game");
+    fnaf->progress = 0;
+    night_start(fnaf);
+}
+
+static void continue_game(Fnaf* fnaf) {
+    FURI_LOG_D(TAG, "continue_game");
+    night_start(fnaf);
+}
+
 bool menu_input(Fnaf* fnaf) {
     if (fnaf->event.type == InputTypePress) {
         switch (fnaf->event.key) {
@@ -52,11 +64,10 @@ bool menu_input(Fnaf* fnaf) {
         case InputKeyOk:
             switch (fnaf->menu_cursor) {
             case 0:
-                fnaf->progress = 0;
-                SWITCH_VIEW(office);
+                new_game(fnaf);
                 break;
             case 1:
-                if (fnaf->progress == 0) { return 0; } else SWITCH_VIEW(office);
+                if (fnaf->progress == 0) { return false; } else continue_game(fnaf);
                 break;
             case 2:
                 return false;
