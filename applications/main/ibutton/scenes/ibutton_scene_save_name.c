@@ -18,7 +18,8 @@ void ibutton_scene_save_name_on_enter(void* context) {
     const bool is_new_file = furi_string_empty(ibutton->file_path);
 
     if(is_new_file) {
-        name_generator_set(ibutton->key_name, IBUTTON_KEY_NAME_SIZE, IBUTTON_APP_EXTENSION);
+        const char* converted_appname = convert_app_extension_to_name(IBUTTON_APP_EXTENSION);
+        name_generator_set(ibutton->key_name, IBUTTON_KEY_NAME_SIZE, converted_appname);
     }
 
     text_input_set_header_text(text_input, "Name the key");

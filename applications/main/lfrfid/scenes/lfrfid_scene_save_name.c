@@ -14,7 +14,9 @@ void lfrfid_scene_save_name_on_enter(void* context) {
     if(key_name_is_empty) {
         furi_string_set(app->file_path, LFRFID_APP_FOLDER);
 
-        name_generator_set(app->text_store, LFRFID_TEXT_STORE_SIZE, LFRFID_APP_EXTENSION);
+        const char* converted_appname = convert_app_extension_to_name(LFRFID_APP_EXTENSION);
+
+        name_generator_set(app->text_store, LFRFID_TEXT_STORE_SIZE, converted_appname);
 
         furi_string_set(folder_path, LFRFID_APP_FOLDER);
     } else {
