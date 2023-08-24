@@ -60,7 +60,7 @@ const char* convert_app_extension_to_name(char* app_name) {
     return converted_name;
 }
 
-void name_generator_set(char* name, uint8_t max_name_size, char* app_name) {
+void name_generator_set(char* name, uint8_t max_name_size, const char* app_name) {
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDetailedFilename)) {
         FuriHalRtcDateTime dateTime;
         furi_hal_rtc_get_datetime(&dateTime);

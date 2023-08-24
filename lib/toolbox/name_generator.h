@@ -11,7 +11,7 @@ extern "C" {
  * @param max_name_size length of given buffer
  * @param app_name name of the application
  */
-void name_generator_set(char* name, uint8_t max_name_size, char* app_name);
+void name_generator_set(char* name, uint8_t max_name_size, const char* app_name);
 
 /** Converts application extension to app_name
  * @param app_name name of the application
