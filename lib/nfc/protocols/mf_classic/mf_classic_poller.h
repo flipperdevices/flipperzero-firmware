@@ -46,6 +46,7 @@ typedef enum {
 
 typedef struct {
     MfClassicPollerMode mode;
+    const MfClassicData* data;
 } MfClassicPollerEventDataRequestMode;
 
 typedef struct {
@@ -54,9 +55,9 @@ typedef struct {
 } MfClassicPollerEventDataDictAttackNextSector;
 
 typedef struct {
-    uint8_t sectors_total;
     uint8_t sectors_read;
-    uint8_t keys_read;
+    uint8_t keys_found;
+    uint8_t current_sector;
 } MfClassicPollerEventDataUpdate;
 
 typedef struct {

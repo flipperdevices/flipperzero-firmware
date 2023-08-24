@@ -108,6 +108,7 @@ NfcApp* nfc_app_alloc() {
         instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
 
     // Dict attack
+
     instance->dict_attack = dict_attack_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewDictAttack, dict_attack_get_view(instance->dict_attack));

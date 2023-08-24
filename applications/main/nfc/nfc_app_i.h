@@ -23,6 +23,7 @@
 #include <gui/modules/widget.h>
 #include "views/dict_attack.h"
 #include "views/detect_reader.h"
+#include "views/dict_attack.h"
 
 #include <nfc/scenes/nfc_scene.h>
 #include "helpers/nfc_custom_event.h"
@@ -73,10 +74,14 @@ typedef enum {
 
 typedef struct {
     MfDict* dict;
-    uint32_t total_keys;
-    uint32_t current_key;
-    uint8_t total_sectors;
+    uint8_t sectors_total;
+    uint8_t sectors_read;
     uint8_t current_sector;
+    uint8_t keys_found;
+    size_t dict_keys_total;
+    size_t dict_keys_current;
+    bool is_key_attack;
+    uint8_t key_attack_current_sector;
 } NfcMfClassicDictAttackContext;
 
 struct NfcApp {
@@ -107,8 +112,8 @@ struct NfcApp {
     ByteInput* byte_input;
     TextBox* text_box;
     Widget* widget;
-    DictAttack* dict_attack;
     DetectReader* detect_reader;
+    DictAttack* dict_attack;
 
     Nfc* nfc;
     NfcPoller* poller;

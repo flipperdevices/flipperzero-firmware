@@ -54,8 +54,8 @@ static NfcCommand mf_classic_poller_handle_data_update(MfClassicPoller* instance
     MfClassicPollerEventDataUpdate* data_update = &instance->mfc_event_data.data_update;
 
     mf_classic_get_read_sectors_and_keys(
-        instance->data, &data_update->sectors_read, &data_update->keys_read);
-    data_update->sectors_total = instance->sectors_total;
+        instance->data, &data_update->sectors_read, &data_update->keys_found);
+    data_update->current_sector = instance->mode_ctx.dict_attack_ctx.current_sector;
     instance->mfc_event.type = MfClassicPollerEventTypeDataUpdate;
     return instance->callback(instance->general_event, instance->context);
 }
@@ -75,6 +75,7 @@ NfcCommand mf_classic_poller_handler_start(MfClassicPoller* instance) {
     command = instance->callback(instance->general_event, instance->context);
 
     if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeDictAttack) {
+        mf_classic_copy(instance->data, instance->mfc_event_data.poller_mode.data);
         instance->state = MfClassicPollerStateRequestKey;
     } else if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeRead) {
         instance->state = MfClassicPollerStateRequestReadSector;
@@ -376,7 +377,12 @@ NfcCommand mf_classic_poller_handler_auth_b(MfClassicPoller* instance) {
 
     if(mf_classic_is_key_found(
            instance->data, dict_attack_ctx->current_sector, MfClassicKeyTypeB)) {
-        instance->state = MfClassicPollerStateNextSector;
+        if(mf_classic_is_key_found(
+               instance->data, dict_attack_ctx->current_sector, MfClassicKeyTypeA)) {
+            instance->state = MfClassicPollerStateNextSector;
+        } else {
+            instance->state = MfClassicPollerStateRequestKey;
+        }
     } else {
         uint8_t block = mf_classic_get_first_block_num_of_sector(dict_attack_ctx->current_sector);
         uint64_t key = nfc_util_bytes2num(dict_attack_ctx->current_key.data, sizeof(MfClassicKey));
@@ -634,15 +640,6 @@ NfcCommand mf_classic_poller_handler_success(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
     instance->mfc_event.type = MfClassicPollerEventTypeSuccess;
     command = instance->callback(instance->general_event, instance->context);
-
-    for(size_t i = 0; i < mf_classic_get_total_sectors_num(instance->data->type); i++) {
-        if(!mf_classic_is_key_found(instance->data, i, MfClassicKeyTypeA)) {
-            FURI_LOG_E(TAG, "%d key A not found", i);
-        }
-        if(!mf_classic_is_key_found(instance->data, i, MfClassicKeyTypeB)) {
-            FURI_LOG_E(TAG, "%d key B not found", i);
-        }
-    }
 
     return command;
 }
