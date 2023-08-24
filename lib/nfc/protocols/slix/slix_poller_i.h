@@ -10,6 +10,8 @@ extern "C" {
 
 typedef enum {
     SlixPollerStateIdle,
+    SlixPollerStateGetNxpSysInfo,
+    SlixPollerStateReadSignature,
     SlixPollerStateReady,
     SlixPollerStateError,
     SlixPollerStateNum,
@@ -19,6 +21,7 @@ struct SlixPoller {
     Iso15693_3Poller* iso15693_3_poller;
     SlixData* data;
     SlixPollerState poller_state;
+    SlixError error;
 
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
@@ -29,6 +32,16 @@ struct SlixPoller {
     NfcGenericCallback callback;
     void* context;
 };
+
+SlixError slix_poller_send_frame(
+    SlixPoller* instance,
+    const BitBuffer* tx_data,
+    BitBuffer* rx_data,
+    uint32_t fwt);
+
+SlixError slix_poller_async_get_nxp_system_info(SlixPoller* instance, SlixSystemInfo* data);
+
+SlixError slix_poller_async_read_signature(SlixPoller* instance, SlixSignature* data);
 
 #ifdef __cplusplus
 }

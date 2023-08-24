@@ -52,16 +52,6 @@ static SlixError slix_read_signature_handler(
     return error;
 }
 
-static SlixError slix_process_iso15693_3_error(Iso15693_3Error iso15693_3_error) {
-    // TODO: Handle more error types?
-    switch(iso15693_3_error) {
-    case Iso15693_3ErrorNone:
-        return SlixErrorNone;
-    default:
-        return SlixErrorUnknown;
-    }
-}
-
 SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer* rx_buffer) {
     SlixError error = SlixErrorNone;
 

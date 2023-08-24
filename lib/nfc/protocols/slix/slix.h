@@ -9,12 +9,9 @@ extern "C" {
 #define SLIX_PASSWORD_SIZE (4U)
 #define SLIX_SIGNATURE_SIZE (32U)
 
-#define SLIX_CMD_EAS_ALARM (0xA5U)
-#define SLIX_CMD_GET_NXP_SYSINFO (0xABU)
-#define SLIX_CMD_READ_SIGNATURE (0xBDU)
-
 typedef enum {
     SlixErrorNone,
+    SlixErrorTimeout,
     SlixErrorFormat,
     SlixErrorNotSupported,
     SlixErrorInternal,
@@ -59,9 +56,22 @@ typedef struct {
 } SlixProtection;
 
 typedef struct {
+    struct {
+        uint8_t pointer;
+        uint8_t condition;
+    } protection;
+    uint8_t unknown_byte_0;
+    uint8_t unknown_byte_1;
+    uint8_t unknown_byte_2;
+    uint8_t unknown_byte_3;
+    uint8_t unknown_byte_4;
+} SlixSystemInfo;
+
+typedef struct {
     Iso15693_3Data* iso15693_3_data;
-    SlixPasswords passwords;
+    SlixSystemInfo system_info;
     SlixSignature signature;
+    SlixPasswords passwords;
     SlixPrivacy privacy_mode;
     SlixProtection protection;
 } SlixData;

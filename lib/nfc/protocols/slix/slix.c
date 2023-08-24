@@ -7,7 +7,6 @@
 #define SLIX_PROTOCOL_NAME "SLIX"
 #define SLIX_DEVICE_NAME "SLIX"
 
-#define SLIX_NXP_MANUFACTURER_CODE (0x04U)
 #define SLIX_TYPE_SLIX_SLIX2 (0x01U)
 #define SLIX_TYPE_SLIX_S (0x02U)
 #define SLIX_TYPE_SLIX_L (0x03U)
@@ -24,6 +23,19 @@
 #define SLIX_PRIVACY_MODE_KEY "Privacy Mode"
 #define SLIX_PROTECTION_POINTER_KEY "Protection Pointer"
 #define SLIX_PROTECTION_CONDITION_KEY "Protection Condition"
+
+typedef struct {
+    uint8_t iso15693_3[2];
+    uint8_t icode_type;
+    union {
+        struct {
+            uint8_t unused_1 : 3;
+            uint8_t type_indicator : 2;
+            uint8_t unused_2 : 3;
+        };
+        uint8_t serial_num[5];
+    };
+} SlixUidLayout;
 
 const NfcDeviceBase nfc_device_slix = {
     .protocol_name = SLIX_PROTOCOL_NAME,
@@ -295,19 +307,6 @@ SlixType slix_get_type(const SlixData* data) {
     do {
         if(iso15693_3_get_manufacturer_id(data->iso15693_3_data) != SLIX_NXP_MANUFACTURER_CODE)
             break;
-
-        typedef struct {
-            uint8_t iso15693_3[2];
-            uint8_t icode_type;
-            union {
-                struct {
-                    uint8_t unused_1 : 3;
-                    uint8_t type_indicator : 2;
-                    uint8_t unused_2 : 3;
-                };
-                uint8_t serial_num[5];
-            };
-        } SlixUidLayout;
 
         const SlixUidLayout* uid = (const SlixUidLayout*)data->iso15693_3_data->uid;
 

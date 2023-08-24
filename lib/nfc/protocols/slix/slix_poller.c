@@ -45,13 +45,36 @@ static NfcCommand slix_poller_handler_idle(SlixPoller* instance) {
     iso15693_3_copy(
         instance->data->iso15693_3_data, iso15693_3_poller_get_data(instance->iso15693_3_poller));
 
-    instance->poller_state = SlixPollerStateReady;
+    instance->poller_state = SlixPollerStateGetNxpSysInfo;
+    return NfcCommandContinue;
+}
+
+static NfcCommand slix_poller_handler_get_nfc_system_info(SlixPoller* instance) {
+    instance->error =
+        slix_poller_async_get_nxp_system_info(instance, &instance->data->system_info);
+    if(instance->error == SlixErrorNone) {
+        instance->poller_state = SlixPollerStateReadSignature;
+    } else {
+        instance->poller_state = SlixPollerStateError;
+    }
+
+    return NfcCommandContinue;
+}
+
+static NfcCommand slix_poller_handler_read_signature(SlixPoller* instance) {
+    instance->error = slix_poller_async_read_signature(instance, &instance->data->signature);
+    if(instance->error == SlixErrorNone) {
+        instance->poller_state = SlixPollerStateReady;
+    } else {
+        instance->poller_state = SlixPollerStateError;
+    }
+
     return NfcCommandContinue;
 }
 
 static NfcCommand slix_poller_handler_error(SlixPoller* instance) {
     // iso15693_3_poller_halt(instance->iso15693_3_poller);
-    // instance->slix_event_data.error = instance->error;
+    instance->slix_event_data.error = instance->error;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
     instance->poller_state = SlixPollerStateIdle;
     return command;
@@ -66,6 +89,8 @@ static NfcCommand slix_poller_handler_ready(SlixPoller* instance) {
 static const SlixPollerStateHandler slix_poller_state_handler[SlixPollerStateNum] = {
     [SlixPollerStateIdle] = slix_poller_handler_idle,
     [SlixPollerStateError] = slix_poller_handler_error,
+    [SlixPollerStateGetNxpSysInfo] = slix_poller_handler_get_nfc_system_info,
+    [SlixPollerStateReadSignature] = slix_poller_handler_read_signature,
     [SlixPollerStateReady] = slix_poller_handler_ready,
 };
 
