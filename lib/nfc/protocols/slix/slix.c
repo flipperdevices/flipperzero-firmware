@@ -7,8 +7,14 @@
 #define SLIX_PROTOCOL_NAME "SLIX"
 #define SLIX_DEVICE_NAME "SLIX"
 
-#define SLIX_TYPE_LEGACY_KEY "Subtype"
-#define SLIX_TYPE_KEY "SLIX Type"
+#define SLIX_NXP_MANUFACTURER_CODE (0x04U)
+#define SLIX_TYPE_SLIX_SLIX2 (0x01U)
+#define SLIX_TYPE_SLIX_S (0x02U)
+#define SLIX_TYPE_SLIX_L (0x03U)
+
+#define SLIX_TYPE_INDICATOR_SLIX (0x02U)
+#define SLIX_TYPE_INDICATOR_SLIX2 (0x01U)
+
 #define SLIX_PASSWORD_READ_KEY "Password Read"
 #define SLIX_PASSWORD_WRITE_KEY "Password Write"
 #define SLIX_PASSWORD_PRIVACY_KEY "Password Privacy"
@@ -63,8 +69,6 @@ void slix_reset(SlixData* data) {
 
     iso15693_3_reset(data->iso15693_3_data);
 
-    data->type = SlixTypeSlix;
-
     memset(&data->passwords, 0, sizeof(SlixPasswords));
     memset(&data->signature, 0, sizeof(SlixSignature));
     memset(&data->privacy_mode, 0, sizeof(SlixPrivacy));
@@ -77,7 +81,6 @@ void slix_copy(SlixData* data, const SlixData* other) {
 
     iso15693_3_copy(data->iso15693_3_data, other->iso15693_3_data);
 
-    data->type = other->type;
     data->passwords = other->passwords;
     data->signature = other->signature;
     data->privacy_mode = other->privacy_mode;
@@ -98,17 +101,6 @@ bool slix_load(SlixData* data, FlipperFormat* ff, uint32_t version) {
 
     do {
         if(!iso15693_3_load(data->iso15693_3_data, ff, version)) break;
-
-        uint8_t type;
-        const char* type_key = (version < NFC_UNIFIED_FORMAT_VERSION) ? SLIX_TYPE_LEGACY_KEY :
-                                                                        SLIX_TYPE_KEY;
-        if(!flipper_format_read_hex(ff, type_key, &type, sizeof(uint8_t))) break;
-
-        // Legacy type includes plain ISO15693-3 as 0th enumeration
-        type -= (version < NFC_UNIFIED_FORMAT_VERSION) ? 1 : 0;
-
-        if(type >= SlixTypeMax) break;
-        data->type = type;
 
         SlixPasswords* passwords = &data->passwords;
 
@@ -190,24 +182,10 @@ bool slix_save(const SlixData* data, FlipperFormat* ff) {
     furi_assert(data);
 
     bool saved = false;
-    FuriString* tmp_str = furi_string_alloc();
 
     do {
         if(!iso15693_3_save(data->iso15693_3_data, ff)) break;
         if(!flipper_format_write_comment_cstr(ff, SLIX_PROTOCOL_NAME " specific data")) break;
-
-        furi_string_set(tmp_str, "Type of this card (");
-        for(SlixType i = 0; i < SlixTypeMax; ++i) {
-            furi_string_cat_printf(tmp_str, "%02x = %s", i, slix_nfc_device_name[i]);
-            if(i != SlixTypeMax - 1) {
-                furi_string_cat(tmp_str, ", ");
-            }
-        }
-        furi_string_push_back(tmp_str, ')');
-
-        if(!flipper_format_write_comment(ff, tmp_str)) break;
-
-        if(!flipper_format_write_hex(ff, SLIX_TYPE_KEY, (const uint8_t*)&data->type, 1)) break;
 
         if(!flipper_format_write_comment_cstr(
                ff, "Passwords are optional. If a password is omitted, any password is accepted"))
@@ -275,14 +253,11 @@ bool slix_save(const SlixData* data, FlipperFormat* ff) {
         saved = true;
     } while(false);
 
-    furi_string_free(tmp_str);
-
     return saved;
 }
 
 bool slix_is_equal(const SlixData* data, const SlixData* other) {
     return iso15693_3_is_equal(data->iso15693_3_data, other->iso15693_3_data) &&
-           data->type == other->type &&
            memcmp(&data->passwords, &other->passwords, sizeof(SlixPasswords)) == 0 &&
            memcmp(&data->signature, &other->signature, sizeof(SlixSignature)) == 0 &&
            memcmp(&data->privacy_mode, &other->privacy_mode, sizeof(SlixPrivacy)) == 0 &&
@@ -291,8 +266,11 @@ bool slix_is_equal(const SlixData* data, const SlixData* other) {
 
 const char* slix_get_device_name(const SlixData* data, NfcDeviceNameType name_type) {
     UNUSED(name_type);
-    furi_assert(data->type < SlixTypeMax);
-    return slix_nfc_device_name[data->type];
+
+    const SlixType slix_type = slix_get_type(data);
+    furi_assert(slix_type < SlixTypeNum);
+
+    return slix_nfc_device_name[slix_type];
 }
 
 const uint8_t* slix_get_uid(const SlixData* data, size_t* uid_len) {
@@ -309,4 +287,43 @@ const Iso15693_3Data* slix_get_base_data(const SlixData* data) {
     furi_assert(data);
 
     return data->iso15693_3_data;
+}
+
+SlixType slix_get_type(const SlixData* data) {
+    SlixType type = SlixTypeNum;
+
+    do {
+        if(iso15693_3_get_manufacturer_id(data->iso15693_3_data) != SLIX_NXP_MANUFACTURER_CODE)
+            break;
+
+        typedef struct {
+            uint8_t iso15693_3[2];
+            uint8_t icode_type;
+            union {
+                struct {
+                    uint8_t unused_1 : 3;
+                    uint8_t type_indicator : 2;
+                    uint8_t unused_2 : 3;
+                };
+                uint8_t serial_num[5];
+            };
+        } SlixUidLayout;
+
+        const SlixUidLayout* uid = (const SlixUidLayout*)data->iso15693_3_data->uid;
+
+        if(uid->icode_type == SLIX_TYPE_SLIX_SLIX2) {
+            if(uid->type_indicator == SLIX_TYPE_INDICATOR_SLIX) {
+                type = SlixTypeSlix;
+            } else if(uid->type_indicator == SLIX_TYPE_INDICATOR_SLIX2) {
+                type = SlixTypeSlix2;
+            }
+        } else if(uid->icode_type == SLIX_TYPE_SLIX_S) {
+            type = SlixTypeSlixS;
+        } else if(uid->icode_type == SLIX_TYPE_SLIX_L) {
+            type = SlixTypeSlixL;
+        }
+
+    } while(false);
+
+    return type;
 }

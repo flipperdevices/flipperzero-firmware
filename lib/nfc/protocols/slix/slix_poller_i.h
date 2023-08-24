@@ -8,6 +8,28 @@
 extern "C" {
 #endif
 
+typedef enum {
+    SlixPollerStateIdle,
+    SlixPollerStateReady,
+    SlixPollerStateError,
+    SlixPollerStateNum,
+} SlixPollerState;
+
+struct SlixPoller {
+    Iso15693_3Poller* iso15693_3_poller;
+    SlixData* data;
+    SlixPollerState poller_state;
+
+    BitBuffer* tx_buffer;
+    BitBuffer* rx_buffer;
+
+    SlixPollerEventData slix_event_data;
+    SlixPollerEvent slix_event;
+    NfcGenericEvent general_event;
+    NfcGenericCallback callback;
+    void* context;
+};
+
 #ifdef __cplusplus
 }
 #endif

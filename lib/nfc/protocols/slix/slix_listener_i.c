@@ -45,7 +45,8 @@ static SlixError slix_read_signature_handler(
 
     do {
         const SlixData* slix_data = instance->data;
-        bit_buffer_append_bytes(instance->tx_buffer, slix_data->signature.data, SLIX_SIGNATURE_SIZE);
+        bit_buffer_append_bytes(
+            instance->tx_buffer, slix_data->signature.data, SLIX_SIGNATURE_SIZE);
     } while(false);
 
     return error;

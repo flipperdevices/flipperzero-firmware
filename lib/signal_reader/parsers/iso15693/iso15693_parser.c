@@ -305,9 +305,9 @@ bool iso15693_parser_run(Iso15693Parser* instance) {
         }
 
         if(command == Iso15693ParserCommandFail) {
-            FURI_LOG_D(TAG, "Frame parse failed");
             iso15693_parser_stop(instance);
             iso15693_parser_start_signal_reader(instance);
+            FURI_LOG_D(TAG, "Frame parse failed");
         }
     }
 
