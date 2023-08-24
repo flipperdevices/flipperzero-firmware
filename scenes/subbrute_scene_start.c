@@ -7,9 +7,6 @@ void subbrute_scene_start_callback(SubBruteCustomEvent event, void* context) {
     furi_assert(context);
 
     SubBruteState* instance = (SubBruteState*)context;
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_scene_start_callback");
-#endif
     view_dispatcher_send_custom_event(instance->view_dispatcher, event);
 }
 
@@ -27,18 +24,10 @@ void subbrute_scene_start_on_enter(void* context) {
         view, instance->device->attack, false, instance->device->two_bytes, 0);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, instance->current_view);
-
-    // TODO: DELETE IT
-#ifdef SUBBRUTE_FAST_TRACK
-    scene_manager_next_scene(instance->scene_manager, SubBruteSceneLoadFile);
-#endif
 }
 
 void subbrute_scene_start_on_exit(void* context) {
-    UNUSED(context);
-#ifdef FURI_DEBUG
-    FURI_LOG_I(TAG, "subbrute_scene_start_on_exit");
-#endif
+    furi_assert(context);
 }
 
 bool subbrute_scene_start_on_event(void* context, SceneManagerEvent event) {

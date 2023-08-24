@@ -1,11 +1,9 @@
 #include "subbrute_main_view.h"
 #include "../subbrute_i.h"
-#include "../subbrute_protocols.h"
 #include "../helpers/gui_top_buttons.h"
 
 #include <input/input.h>
 #include <gui/elements.h>
-#include <gui/icon.h>
 
 #define STATUS_BAR_Y_SHIFT 14
 #define TAG "SubBruteMainView"
@@ -244,7 +242,6 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
     uint8_t max_repeats = 14 - subbrute_protocol_repeats_count(instance->index);
 
     bool updated = false;
-    bool consumed = false;
     bool is_short = (event->type == InputTypeShort) || (event->type == InputTypeRepeat);
 
     if(!instance->is_select_byte) {
@@ -256,7 +253,6 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
             }
             instance->extra_repeats = 0;
             updated = true;
-            consumed = true;
         } else if(event->key == InputKeyDown && is_short) {
             if(instance->index == correct_total) {
                 instance->index = min_value;
@@ -265,24 +261,20 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
             }
             instance->extra_repeats = 0;
             updated = true;
-            consumed = true;
         } else if(event->key == InputKeyLeft && is_short) {
             instance->extra_repeats = CLAMP(instance->extra_repeats - 1, max_repeats, 0);
 
             updated = true;
-            consumed = true;
         } else if(event->key == InputKeyRight && is_short) {
             instance->extra_repeats = CLAMP(instance->extra_repeats + 1, max_repeats, 0);
 
             updated = true;
-            consumed = true;
         } else if(event->key == InputKeyOk && is_short) {
             if(instance->index == SubBruteAttackLoadFile) {
                 instance->callback(SubBruteCustomEventTypeLoadFile, instance->context);
             } else {
                 instance->callback(SubBruteCustomEventTypeMenuSelected, instance->context);
             }
-            consumed = true;
             updated = true;
         }
         if(updated) {
@@ -306,13 +298,11 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
                 instance->index--;
             }
             updated = true;
-            consumed = true;
         } else if(event->key == InputKeyRight) {
             if(instance->index < 7) {
                 instance->index++;
             }
             updated = true;
-            consumed = true;
         } else if(event->key == InputKeyUp) {
             instance->two_bytes = !instance->two_bytes;
             // Because index is changing
@@ -325,10 +315,8 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
             //     instance->context);
 
             updated = true;
-            consumed = true;
         } else if(event->key == InputKeyOk) {
             instance->callback(SubBruteCustomEventTypeIndexSelected, instance->context);
-            consumed = true;
             updated = true;
         }
     }
@@ -348,23 +336,15 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
             true);
     }
 
-    return consumed;
+    return updated;
 }
 
 void subbrute_main_view_enter(void* context) {
     furi_assert(context);
-
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_main_view_enter");
-#endif
 }
 
 void subbrute_main_view_exit(void* context) {
     furi_assert(context);
-
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_main_view_exit");
-#endif
 }
 
 SubBruteMainView* subbrute_main_view_alloc() {

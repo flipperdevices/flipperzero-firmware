@@ -1,5 +1,4 @@
 #include "subbrute_i.h"
-#include "subbrute_custom_event.h"
 #include "scenes/subbrute_scene.h"
 
 #define TAG "SubBruteApp"
@@ -51,8 +50,8 @@ SubBruteState* subbrute_alloc() {
     subghz_devices_init();
 
     // init radio device
-    instance->radio_device =
-        radio_device_loader_set(instance->radio_device, SubGhzRadioDeviceTypeExternalCC1101);
+    instance->radio_device = subbrute_radio_device_loader_set(
+        instance->radio_device, SubGhzRadioDeviceTypeExternalCC1101);
 
     subghz_devices_reset(instance->radio_device);
     subghz_devices_idle(instance->radio_device);

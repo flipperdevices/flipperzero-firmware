@@ -30,7 +30,7 @@
 #include "views/subbrute_attack_view.h"
 #include "views/subbrute_main_view.h"
 
-#define SUBBRUTEFORCER_VER "Sub-GHz BruteForcer 3.7"
+#define SUBBRUTEFORCER_VER "Sub-GHz BruteForcer 3.8"
 
 #ifdef FURI_DEBUG
 //#define SUBBRUTE_FAST_TRACK false

@@ -1,11 +1,9 @@
 #include "subbrute_attack_view.h"
 #include "../subbrute_i.h"
-#include "../subbrute_protocols.h"
 #include "../helpers/gui_top_buttons.h"
 
 #include <input/input.h>
 #include <gui/elements.h>
-#include <gui/icon.h>
 #include <gui/icon_animation.h>
 #include <subghz_bruteforcer_icons.h>
 
@@ -126,10 +124,10 @@ bool subbrute_attack_view_input(InputEvent* event, void* context) {
                 model->current_step = instance->current_step;
                 model->is_attacking = instance->is_attacking;
             },
-            true);
+            update);
     }
 
-    return true;
+    return update;
 }
 
 SubBruteAttackView* subbrute_attack_view_alloc() {
