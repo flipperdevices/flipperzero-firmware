@@ -93,6 +93,7 @@ static void stop_all_timers(Fnaf* fnaf) {
 void switch_view(Fnaf* fnaf, Views view) {
     FURI_LOG_D(TAG, "switch_view to %u", view);
     fnaf->counter = 0;
+    fnaf->counter_secondary = 0;
     fnaf->current_view = view;
     if (fnaf->current_view != cameras && fnaf->current_view != office) {
         stop_all_timers(fnaf);
@@ -101,12 +102,13 @@ void switch_view(Fnaf* fnaf, Views view) {
 }
 
 void fnaf_free(Fnaf* fnaf) {
-    free(fnaf->animatronics);
     free(fnaf->electricity);
 
     for (uint8_t i = 0; i < 4; i++) {
         free(fnaf->animatronics->timer[i]);
     }
+    free(fnaf->animatronics);
+    free(fnaf->hourly_timer);
 
     view_port_enabled_set(fnaf->view_port, false);
     gui_remove_view_port(fnaf->gui, fnaf->view_port);
@@ -129,8 +131,9 @@ int32_t flipperzero_fnaf(void* p) {
     while (running) {
         if (furi_message_queue_get(fnaf->event_queue, &fnaf->event, 100) == FuriStatusOk) {
             if (fnaf->event.key == InputKeyBack && fnaf->event.type == InputTypeShort) {
-                if (fnaf->current_view != main_menu) fnaf->current_view = main_menu; else
+                if (fnaf->current_view != main_menu) SWITCH_VIEW(main_menu); else {
                     running = false;
+                }
             }
             switch (fnaf->current_view) {
             case main_menu:
@@ -160,6 +163,7 @@ int32_t flipperzero_fnaf(void* p) {
         // view_port_update(fnaf->view_port);
     }
 
+    stop_all_timers(fnaf); // Just in case
     fnaf_free(fnaf);
     free(fnaf);
     return 0;

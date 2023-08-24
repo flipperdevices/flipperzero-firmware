@@ -14,7 +14,7 @@
 #define chica_time 4980
 #define freddy_time 3020
 #define foxy_time 5010
-#define hour_time 90000 // for tests, actually 90000
+#define hour_time 9000 // for tests, actually 90000
 
 #define SWITCH_VIEW(view) switch_view(fnaf, view)
 
@@ -49,17 +49,17 @@ typedef struct {
     InputEvent event;
 
     Animatronics* animatronics;
-    signed char camera_cursor;
-    signed char camera_cursor_x;
-    signed char camera_cursor_y;
+    uint8_t camera_cursor;   // current camera
+    signed char camera_cursor_x; // for camera navigation
+    signed char camera_cursor_y; // for camera navigation too
     uint8_t hour;
     Electricity* electricity;
     uint8_t office_camera_x; // coordinate for drawing
 
     uint16_t counter; // general purpose
     signed char office_location; // left, center or right
-    CameraMovement camera_moving_direction;
-    uint8_t kitchen_counter; // for speaker animation on cam6
+    CameraMovement camera_moving_direction; // for office view
+    uint8_t counter_secondary; // for speaker animation on cam6 and fan
     signed char menu_cursor; // for the main menu
     uint8_t current_view;
     uint8_t progress; // Last completed nights

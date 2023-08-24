@@ -54,12 +54,12 @@ void draw_cameras(Canvas* canvas, Fnaf* fnaf) {
         canvas_draw_icon(canvas, 94, 23, &I_speaker_22x19);
 
         if (fnaf->animatronics->location[Chica] == cam6) {
-            if (fnaf->kitchen_counter > 7) {
+            if (fnaf->counter_secondary > 7) {
                 canvas_set_color(canvas, 0);
                 canvas_draw_box(canvas, 106, 23, 10, 19);
             }
-            fnaf->kitchen_counter += 1;
-            if (fnaf->kitchen_counter > 14) fnaf->kitchen_counter = 0;
+            fnaf->counter_secondary += 1;
+            if (fnaf->counter_secondary > 14) fnaf->counter_secondary = 0;
         } else {
             canvas_set_color(canvas, 0);
             canvas_draw_box(canvas, 106, 23, 10, 19);

@@ -27,7 +27,7 @@ void text_view(Canvas* canvas, Fnaf* fnaf) {
     FURI_LOG_D(TAG, "text_view");
     switch (fnaf->current_view) {
     case night_number:
-        if (fnaf->counter > 15) {
+        if (fnaf->counter > 7) {
             FURI_LOG_D(TAG, "text_view is over");
             SWITCH_VIEW(office);
             FURI_LOG_D(TAG, "Timer starts here:");

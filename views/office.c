@@ -33,8 +33,18 @@ void office_draw(Canvas* canvas, Fnaf* fnaf) {
         signed char position[3] = { 24, 0, -24 };
         fnaf->office_camera_x = position[fnaf->office_location + 1];
     }
-    canvas_draw_icon(canvas, fnaf->office_camera_x, 0, &I_office_128x64);
     if (fnaf->camera_moving_direction != none) moving_animation(fnaf);
+    canvas_draw_icon(canvas, fnaf->office_camera_x, 0, &I_office_128x64);
+    if (fnaf->counter_secondary <= 2) {
+        canvas_set_color(canvas, 0);
+        canvas_draw_box(canvas, fnaf->office_camera_x + 67, 26, 11, 11);
+        canvas_set_color(canvas, 1);
+        canvas_draw_icon(canvas, fnaf->office_camera_x + 67, 26, &I_fan_11x11);
+        fnaf->counter_secondary += 1;
+    } else {
+        fnaf->counter_secondary += 1;
+        if (fnaf->counter_secondary > 2) fnaf->counter_secondary = 0;
+    }
     canvas_set_color(canvas, 0);
     canvas_draw_box(canvas, 0, 0, 24, 64);
     canvas_draw_box(canvas, 104, 0, 24, 64);
@@ -141,9 +151,10 @@ void hourly_timer_callback(void* ctx) {
     if (fnaf->current_view == main_menu) {
         furi_timer_stop(fnaf->hourly_timer);
         FURI_LOG_D(TAG, "Error kekx in hourly callback");
+        furi_delay_ms(10);
         return;
     }
-    FURI_LOG_D(TAG, "Hour is %u", fnaf->hour);
+    FURI_LOG_D(TAG, "Hour was %u", fnaf->hour);
     fnaf->hour += 1;
     switch (fnaf->hour) {
     case 2:
@@ -161,4 +172,5 @@ void hourly_timer_callback(void* ctx) {
         SWITCH_VIEW(night_complete);
         furi_timer_stop(fnaf->hourly_timer);
     }
+    FURI_LOG_D(TAG, "Hour is %u", fnaf->hour);
 }

@@ -1,3 +1,5 @@
+#pragma once 
+
 #include <gui/gui.h>
 #include <dolphin/dolphin.h>
 #include "../fnaf.h"
