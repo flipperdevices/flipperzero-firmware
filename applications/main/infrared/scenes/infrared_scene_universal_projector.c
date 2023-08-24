@@ -51,6 +51,7 @@ void infrared_scene_universal_projector_on_enter(void* context) {
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "Vol_up");
+
     button_panel_add_item(
         button_panel,
         i,
