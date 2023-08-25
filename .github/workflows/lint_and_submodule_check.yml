@@ -23,9 +23,7 @@ jobs:
       - name: 'Checkout code'
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1
-          ref: ${{ github.event.pull_request.head.sha }}
-
+          fetch-depth: 2
 
       - name: 'Check protobuf branch'
         run: |
@@ -48,6 +46,19 @@ jobs:
             exit 1;
           fi
 
+      - name: 'Check for new TODOs'
+        id: check_todos
+        if: github.event_name == 'pull_request'
+        run: |
+          set +e;
+          git diff --unified=0 --no-color ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '^\+' | grep -i -E '(TODO|FIXME|HACK|XXX)' | tee todos.log;
+          MISSING_TICKETS=$( grep -E '\[FL-[0-9]+\]' todos.log );
+          if [ -n "$MISSING_TICKETS" ]; then
+            echo "Error: Missing ticket number in TODO comment" >> $GITHUB_STEP_SUMMARY;
+            echo "$MISSING_TICKETS" >> $GITHUB_STEP_SUMMARY;
+            exit 1;
+          fi
+
       - name: 'Check Python code formatting'
         id: syntax_check_py
         run: |
@@ -62,19 +73,6 @@ jobs:
             exit 1;
           else
             echo "Python Lint: all good ✨" >> $GITHUB_STEP_SUMMARY;
-          fi
-
-      - name: 'Check for new TODOs'
-        id: check_todos
-        if: github.event_name == 'pull_request'
-        run: |
-          set +e;
-          git diff --unified=0 --no-color ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '^\+' | grep -i -E '(TODO|FIXME|HACK|XXX)' | tee todos.log;
-          MISSING_TICKETS=$( grep -E '\[FL-[0-9]+\]' todos.log );
-          if [ -n "$MISSING_TICKETS" ]; then
-            echo "Error: Missing ticket number in TODO comment" >> $GITHUB_STEP_SUMMARY;
-            echo "$MISSING_TICKETS" >> $GITHUB_STEP_SUMMARY;
-            exit 1;
           fi
 
       - name: 'Check C++ code formatting'
