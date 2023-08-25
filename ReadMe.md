@@ -58,6 +58,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
 - Updated: UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
 - [Add auto 5V on NRF24 apps (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c10eb5df8be026aa871140b3c3b62afa86d3fdb)
+- Added: [Ultimate Tic-Tac-Toe (By Racso)](https://github.com/Racso/fzero-apps)
+- Added: [Zero v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
 
 <a name="release">
 
@@ -276,8 +278,10 @@ $ ./fbt dolphin_ext
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
 - [Tic-Tac-Toe Multi (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 - [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
+- [Ultimate Tic-Tac-Toe (By Racso)](https://github.com/Racso/fzero-apps)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
+- [Zero v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Zombiez (Reworked By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/240) [(Original By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
 
 ## Plugins
