@@ -50,10 +50,7 @@ jobs:
       RELATIVE_PATH: "applications/external/subbrute"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
-      ZIP_NAME: ''
-      ZIP_TAG: ''
-      TGZ_NAME: ''
-      TGZ_TAG: ''
+      TOKEN: ${{ secrets.DEPENDABOT }}
       
     steps:
     - name: Checkout Firmware Files
@@ -63,6 +60,7 @@ jobs:
         clean: "true"
         submodules: "true"
         ref: "dev"
+        fetch-depth: '0'
     
     - name: Checkout Repo Files
       uses: actions/checkout@v3
@@ -71,7 +69,7 @@ jobs:
         clean: "true"
         submodules: "true"
         path: "${{ env.OFW_PATH }}"
-
+        fetch-depth: '0'
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -119,5 +117,5 @@ jobs:
       uses: github/codeql-action/analyze@v2
       with:
         category: "/language:${{matrix.language}}"
-        token: ${{ github.token }}
+        token: ${{ secrets.DEPENDABOT }}
         
