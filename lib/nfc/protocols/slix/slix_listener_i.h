@@ -9,9 +9,14 @@
 extern "C" {
 #endif
 
+typedef struct {
+    uint16_t random;
+} SlixListenerSessionState;
+
 struct SlixListener {
     Iso15693_3Listener* iso15693_3_listener;
     SlixData* data;
+    SlixListenerSessionState session_state;
 
     BitBuffer* tx_buffer;
 

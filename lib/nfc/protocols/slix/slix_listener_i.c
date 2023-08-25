@@ -2,6 +2,8 @@
 
 #include <nfc/protocols/iso15693_3/iso15693_3_listener_i.h>
 
+#include <furi_hal_random.h>
+
 typedef SlixError (*SlixRequestHandler)(
     SlixListener* instance,
     const uint8_t* data,
@@ -34,6 +36,29 @@ static SlixError slix_get_nxp_system_info_handler(
     } while(false);
 
     return error;
+}
+
+static SlixError slix_get_random_number_handler(
+    SlixListener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(data);
+    UNUSED(data_size);
+    UNUSED(flags);
+
+    union {
+        uint16_t value;
+        uint8_t bytes[sizeof(uint16_t)];
+    } random_value;
+
+    random_value.bytes[0] = furi_hal_random_get();
+    random_value.bytes[1] = furi_hal_random_get();
+
+    bit_buffer_append_bytes(instance->tx_buffer, random_value.bytes, sizeof(random_value));
+    instance->session_state.random = random_value.value;
+
+    return SlixErrorNone;
 }
 
 static SlixError slix_read_signature_handler(
@@ -82,6 +107,9 @@ SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer*
         switch(request->command) {
         case SLIX_CMD_GET_NXP_SYSTEM_INFORMATION:
             handler = slix_get_nxp_system_info_handler;
+            break;
+        case SLIX_CMD_GET_RANDOM_NUMBER:
+            handler = slix_get_random_number_handler;
             break;
         case SLIX_CMD_READ_SIGNATURE:
             handler = slix_read_signature_handler;
