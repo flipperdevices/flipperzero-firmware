@@ -76,7 +76,11 @@ FIRMWARE_APPS = {
     ],
 }
 
+# FIXME this is a test
+
 FIRMWARE_APP_SET = "default"
+
+# TODO: [FL-12311] don't fail here please
 
 custom_options_fn = "fbt_options_local.py"
 
