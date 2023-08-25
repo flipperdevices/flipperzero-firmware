@@ -160,34 +160,36 @@ jobs:
       uses: github/codeql-action/analyze@v2
       env:
         REF_NAME: ${{ env.REF_NAME }}
+        CHECKOUT_PATH: ${{ env.OFW_PATH }}
       with:
         category: "/language:${{matrix.language}}"
         token: ${{ secrets.DEPENDABOT }}
         # Must be used only with sha
         #ref: ${{ env.REF_NAME }}
         #sha: ${{ github.sha }}
-        output: "../results"
+        output: "a${{ env.CHECKOUT_PATH }}/.github/results.sarif"
         check_name: "_"
         upload-database: false
         upload: 'failure-only'
-        checkout_path: ${{ github.workspace }}
+        checkout_path: "${{ github.workspace }}/${{ env.CHECKOUT_PATH }}"
 
     - name: List output
       env:
           REF_NAME: ${{ env.REF_NAME }}
       shell: pwsh
       run: |
-          ls "../results"
+          ls "applications_user/subbrute/.github/results.sarif"
 
     - name: Upload CodeQL SARIF
       uses: github/codeql-action/upload-sarif@v2
       env:
         REF_NAME: ${{ env.REF_NAME }}
+        CHECKOUT_PATH: ${{ env.OFW_PATH }}
       with:
         category: "/language:${{matrix.language}}"
         #token: ${{ secrets.DEPENDABOT }}
         # Must be used only with sha
         #ref: ${{ env.REF_NAME }}
         #sha: ${{ github.sha }}
-        sarif_file: "../results"
-        checkout_path: ${{ github.workspace }}
+        sarif_file: "a${{ env.CHECKOUT_PATH }}/.github/results.sarif"
+        checkout_path: "${{ github.workspace }}/${{ env.CHECKOUT_PATH }}"
