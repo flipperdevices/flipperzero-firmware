@@ -33,9 +33,7 @@ bool nfc_scene_mf_classic_keys_add_on_event(void* context, SceneManagerEvent eve
             furi_assert(dict);
 
             MfClassicKey key = {};
-            for(size_t i = 0; i < sizeof(MfClassicKey); i++) {
-                key.data[i] = instance->byte_input_store[sizeof(MfClassicKey) - 1 - i];
-            }
+            memcpy(key.data, instance->byte_input_store, sizeof(MfClassicKey));
             if(mf_dict_is_key_present(dict, &key)) {
                 scene_manager_next_scene(
                     instance->scene_manager, NfcSceneMfClassicKeysWarnDuplicate);

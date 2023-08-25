@@ -137,6 +137,7 @@ bool mf_classic_key_cache_load(MfClassicKeyCache* instance, const uint8_t* uid, 
         load_success = true;
     } while(false);
 
+    flipper_format_buffered_file_close(ff);
     flipper_format_free(ff);
     furi_string_free(temp_str);
     furi_string_free(file_path);

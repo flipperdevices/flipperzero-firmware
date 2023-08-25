@@ -178,11 +178,13 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
         if(event.event == NfcCustomEventDictAttackComplete) {
             if(state == DictAttackStateUserDictInProgress) {
                 nfc_poller_stop(instance->poller);
+                nfc_poller_free(instance->poller);
                 scene_manager_set_scene_state(
                     instance->scene_manager,
                     NfcSceneMfClassicDictAttack,
                     DictAttackStateSystemDictInProgress);
                 nfc_scene_mf_classic_dict_attack_prepare_view(instance);
+                instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfClassic);
                 nfc_poller_start(instance->poller, nfc_dict_attack_worker_callback, instance);
                 consumed = true;
             } else {
@@ -200,13 +202,17 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
         } else if(event.event == NfcCustomEventDictAttackDataUpdate) {
             nfc_scene_mf_classic_dict_attack_update_view(instance);
         } else if(event.event == NfcCustomEventDictAttackSkip) {
+            const MfClassicData* mfc_data = nfc_poller_get_data(instance->poller);
+            nfc_device_set_data(instance->nfc_device, NfcProtocolMfClassic, mfc_data);
             if(state == DictAttackStateUserDictInProgress) {
                 nfc_poller_stop(instance->poller);
+                nfc_poller_free(instance->poller);
                 scene_manager_set_scene_state(
                     instance->scene_manager,
                     NfcSceneMfClassicDictAttack,
                     DictAttackStateSystemDictInProgress);
                 nfc_scene_mf_classic_dict_attack_prepare_view(instance);
+                instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfClassic);
                 nfc_poller_start(instance->poller, nfc_dict_attack_worker_callback, instance);
                 consumed = true;
             } else if(state == DictAttackStateSystemDictInProgress) {

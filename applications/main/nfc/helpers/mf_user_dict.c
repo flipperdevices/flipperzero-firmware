@@ -51,8 +51,7 @@ void mf_user_dict_get_key_str(MfUserDict* instance, uint32_t index, FuriString* 
 
     furi_string_reset(str);
     for(size_t i = 0; i < sizeof(MfClassicKey); i++) {
-        furi_string_cat_printf(
-            str, "%02X", instance->keys_arr[index].data[sizeof(MfClassicKey) - 1 - i]);
+        furi_string_cat_printf(str, "%02X", instance->keys_arr[index].data[i]);
     }
 }
 
