@@ -29,12 +29,15 @@ typedef enum {
     MfClassicPollerStateWriteBlock,
 
     // Read states
+    MfClassicPollerStateRequestReadSector,
+    MfClassicPollerStateReadSectorBlocks,
+
+    // Dict attack states
     MfClassicPollerStateNextSector,
     MfClassicPollerStateRequestKey,
-    MfClassicPollerStateRequestReadSector,
+    MfClassicPollerStateReadSector,
     MfClassicPollerStateAuthKeyA,
     MfClassicPollerStateAuthKeyB,
-    MfClassicPollerStateReadSector,
     MfClassicPollerStateKeyReuseStart,
     MfClassicPollerStateKeyReuseAuthKeyA,
     MfClassicPollerStateKeyReuseAuthKeyB,
@@ -64,9 +67,19 @@ typedef struct {
     uint8_t reuse_key_sector;
 } MfClassicPollerDictAttackContext;
 
+typedef struct {
+    uint8_t current_sector;
+    uint8_t current_block;
+    MfClassicKeyType key_type;
+    MfClassicKey key;
+    bool auth_passed;
+} MfClassicPollerReadContext;
+
 typedef union {
     MfClassicPollerWriteContext write_ctx;
     MfClassicPollerDictAttackContext dict_attack_ctx;
+    MfClassicPollerReadContext read_ctx;
+
 } MfClassicPollerModeContext;
 
 struct MfClassicPoller {
