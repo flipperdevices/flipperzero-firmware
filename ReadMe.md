@@ -55,7 +55,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: OFW: [SubGhz: fix todo #2984 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2984)
 - UL: Updated: [Sub-GHz Bruteforcer v3.8 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
- 
+- Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) - Memory Leak Fix (By falcoger)
+
 <a name="release">
 
 ## Install Latest Release
