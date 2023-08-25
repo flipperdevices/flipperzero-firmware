@@ -9,7 +9,7 @@ on:
         required: false
         type: string
   release:
-    types: [created,prereleased]
+    types: [ created,prereleased ]
   push:
     paths:
       - .github/workflows/build-with-firmware.yml
@@ -37,15 +37,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        firmware: [unlshd]
+        firmware: [ unlshd ]
         include:
           - firmware: unlshd
             url: ${{ vars.REPO_UNLEASHED }}
             version: ${{ vars.FIRMWARE_VERSION }}
-            src-included: 1
+            src-included: 0
           - firmware: official
             url: ${{ vars.REPO_OFFICIAL }}
             version: "official"
+            src-included: 0
     steps:
       - name: Set version
         env:
@@ -136,17 +137,17 @@ jobs:
       #        key: 'fbt=${{ env.FIRMWARE_VERSION }}'
       #
       - name: Remove other apps
-        shell: bash
+        shell: pwsh
         if: ${{ success() }}
-        # rm to remove problem FAP which includes non existent files
+        # rm to remove problem FAP which includes non-existent files
         run: |
-          rm -Rf ./applications/debug ./applications/examples
-          mkdir ./tmp
-          mv ./applications/external/application.fam ./tmp/
-          mv -fv ./applications/external/subbrute/ ./tmp/
-          rm -Rf ./applications/external/*
-          mv -f ./tmp/* ./applications/external/
-          rm -Rf ./tmp/
+          Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
+          Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
+#          New-Item -Force ./tmp -ItemType Directory -ErrorAction SilentlyContinue
+#          Copy-Item -Force -Recurse ./applications/external/subbrute/ ./tmp/ -ErrorAction SilentlyContinue
+#          Remove-Item -Force -Recurse ./applications/external/* -ErrorAction SilentlyContinue
+#          Copy-Item -Force -Recurse /tmp/* ./applications/external/ -ErrorAction SilentlyContinue
+#          Remove-Item -Force -Recurse ./tmp -ErrorAction SilentlyContinue
 
       - name: Build Firmware
         shell: bash
