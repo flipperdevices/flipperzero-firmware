@@ -21,7 +21,12 @@ void subbrute_scene_load_select_on_enter(void* context) {
     instance->current_view = SubBruteViewMain;
     subbrute_main_view_set_callback(view, subbrute_scene_load_select_callback, instance);
     subbrute_main_view_set_index(
-        view, 7, true, instance->device->two_bytes, instance->device->key_from_file);
+        view,
+        7,
+        instance->settings->repeat_values,
+        true,
+        instance->device->two_bytes,
+        instance->device->key_from_file);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, instance->current_view);
 }
@@ -46,7 +51,12 @@ bool subbrute_scene_load_select_on_event(void* context, SceneManagerEvent event)
             instance->device->current_step = 0;
             instance->device->bit_index = subbrute_main_view_get_index(instance->view_main);
             instance->device->two_bytes = subbrute_main_view_get_two_bytes(instance->view_main);
-            uint8_t extra_repeats = subbrute_main_view_get_extra_repeats(instance->view_main);
+
+            instance->settings->last_index = instance->device->attack;
+            subbrute_settings_set_repeats(
+                instance->settings, subbrute_main_view_get_extra_repeats(instance->view_main));
+            uint8_t total_repeats = subbrute_settings_get_current_repeats(instance->settings);
+
             instance->device->max_value = subbrute_protocol_calc_max_value(
                 instance->device->attack,
                 instance->device->bit_index,
@@ -58,10 +68,11 @@ bool subbrute_scene_load_select_on_event(void* context, SceneManagerEvent event)
                    instance->device->bit_index,
                    instance->device->key_from_file,
                    instance->device->file_protocol_info,
-                   extra_repeats,
+                   total_repeats,
                    instance->device->two_bytes)) {
                 furi_crash("Invalid attack set!");
             }
+            subbrute_settings_save(instance->settings);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneSetupAttack);
             /*#endif*/
             consumed = true;

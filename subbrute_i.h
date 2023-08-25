@@ -26,11 +26,12 @@
 
 #include "subbrute.h"
 #include "subbrute_device.h"
+#include "subbrute_settings.h"
 #include "helpers/subbrute_worker.h"
 #include "views/subbrute_attack_view.h"
 #include "views/subbrute_main_view.h"
 
-#define SUBBRUTEFORCER_VER "Sub-GHz BruteForcer 3.8"
+#define SUBBRUTEFORCER_VER "Sub-GHz BruteForcer 3.9"
 
 #ifdef FURI_DEBUG
 //#define SUBBRUTE_FAST_TRACK false
@@ -77,6 +78,8 @@ struct SubBruteState {
     SubBruteDevice* device;
     // SubBruteWorker
     SubBruteWorker* worker;
+    // Last used settings
+    SubBruteSettings* settings;
 };
 
 void subbrute_show_loading_popup(void* context, bool show);

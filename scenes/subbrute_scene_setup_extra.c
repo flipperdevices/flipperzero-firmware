@@ -12,7 +12,7 @@
 
 enum SubBruteVarListIndex {
     SubBruteVarListIndexTimeDelay,
-    SubBruteVarListIndexRepeat_or_OnExtra,
+    SubBruteVarListIndexRepeatOrOnExtra,
     SubBruteVarListIndexTe,
 };
 
@@ -255,7 +255,7 @@ static void setup_extra_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     SubBruteState* instance = context;
 
-    if(index == SubBruteVarListIndexRepeat_or_OnExtra) {
+    if(index == SubBruteVarListIndexRepeatOrOnExtra) {
         subbrute_scene_setup_extra_init_var_list(instance, true);
     }
 }

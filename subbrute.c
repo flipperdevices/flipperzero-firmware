@@ -105,6 +105,8 @@ SubBruteState* subbrute_alloc() {
         SubBruteViewAttack,
         subbrute_attack_view_get_view(instance->view_attack));
 
+    instance->settings = subbrute_settings_alloc();
+    subbrute_settings_load(instance->settings);
     //instance->flipper_format = flipper_format_string_alloc();
     //instance->environment = subghz_environment_alloc();
 
@@ -126,8 +128,10 @@ void subbrute_free(SubBruteState* instance) {
 
     // SubBruteDevice
     subbrute_device_free(instance->device);
-
     subghz_devices_deinit();
+
+    //subbrute_settings_save(instance->settings);
+    subbrute_settings_free(instance->settings);
 
     // Notifications
     notification_message(instance->notifications, &sequence_blink_stop);
