@@ -36,7 +36,7 @@ SlixError slix_poller_async_get_nxp_system_info(SlixPoller* instance, SlixSystem
     furi_assert(instance);
     furi_assert(data);
 
-    slix_poller_prepare_request(instance, SLIX_CMD_GET_NXP_SYSINFO);
+    slix_poller_prepare_request(instance, SLIX_CMD_GET_NXP_SYSTEM_INFORMATION);
 
     SlixError error = SlixErrorNone;
 

@@ -80,7 +80,7 @@ SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer*
         SlixRequestHandler handler;
 
         switch(request->command) {
-        case SLIX_CMD_GET_NXP_SYSINFO:
+        case SLIX_CMD_GET_NXP_SYSTEM_INFORMATION:
             handler = slix_get_nxp_system_info_handler;
             break;
         case SLIX_CMD_READ_SIGNATURE:
