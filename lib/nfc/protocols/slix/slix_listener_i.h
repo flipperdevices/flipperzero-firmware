@@ -9,8 +9,10 @@
 extern "C" {
 #endif
 
+#define SLIX_LISTENER_RANDOM_SIZE (2U)
+
 typedef struct {
-    uint16_t random;
+    uint8_t random[SLIX_LISTENER_RANDOM_SIZE];
 } SlixListenerSessionState;
 
 struct SlixListener {

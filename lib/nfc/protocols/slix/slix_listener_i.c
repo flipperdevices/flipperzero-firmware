@@ -44,16 +44,12 @@ static SlixError slix_get_random_number_handler(
     UNUSED(data_size);
     UNUSED(flags);
 
-    union {
-        uint16_t value;
-        uint8_t bytes[sizeof(uint16_t)];
-    } random_value;
+    uint8_t* random = instance->session_state.random;
 
-    random_value.bytes[0] = furi_hal_random_get();
-    random_value.bytes[1] = furi_hal_random_get();
+    random[0] = furi_hal_random_get();
+    random[1] = furi_hal_random_get();
 
-    bit_buffer_append_bytes(instance->tx_buffer, random_value.bytes, sizeof(random_value));
-    instance->session_state.random = random_value.value;
+    bit_buffer_append_bytes(instance->tx_buffer, random, SLIX_LISTENER_RANDOM_SIZE);
 
     return SlixErrorNone;
 }
@@ -68,7 +64,7 @@ static SlixError slix_enable_privacy_handler(
     UNUSED(flags);
 
     SlixData* slix_data = instance->data;
-    // TODO: Is "is_present necessary?"
+    // TODO: Is "is_present" necessary?
     slix_data->privacy.is_present = true;
     slix_data->privacy.mode = true;
 
