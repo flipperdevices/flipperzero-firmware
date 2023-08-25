@@ -76,15 +76,9 @@ FIRMWARE_APPS = {
     ],
 }
 
-# FIXME this is a test
-
 FIRMWARE_APP_SET = "default"
-
-# TODO: [FL-12311] don't fail here please
 
 custom_options_fn = "fbt_options_local.py"
 
 if Path(custom_options_fn).exists():
     exec(compile(Path(custom_options_fn).read_text(), custom_options_fn, "exec"))
-
-# TODO: fail here please
