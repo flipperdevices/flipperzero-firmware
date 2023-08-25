@@ -42,6 +42,23 @@ To recreate the dictionary you will need a pForth, that has been compiled as a
 - Copy the modifed `pfdicdat.h` into `lib/pforth/` in the plugin's source code
   directory.
 
+## Custom Words
+
+Flipper specific words are defined in `pfcustom_f0.c`. These include words to
+access the flipper's API. To add a new word follow these steps:
+
+- If necessary, write a glue routine in C that encapsulates the code you want
+  to execute via your custom word. Most Flipper API functions will not require
+  such a wrapper routine. But, for example, to make a global variable
+  accessible, you will want to write a wrapper that returns that variable's
+  address.
+- Insert either your wrapper routine or the C function you want to execute into
+  the `CustomFunctionTable`.
+- Add your new function to `CompileCustomFunctions`. Copy the two lines for an
+  already existing function and modify the name, the return type
+  (`C_RETURNS_VOID` or `C_RETURNS_VALUE`), and the number of parameters. Make
+  sure that the order is the same as in the `CustomFunctionTable`.
+
 ## Acknowledgements
 
 The code in `lib/pforth/` has been taken from Phil Burk's pForth, which can be
