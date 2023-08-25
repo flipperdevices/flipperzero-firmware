@@ -58,6 +58,23 @@ static SlixError slix_get_random_number_handler(
     return SlixErrorNone;
 }
 
+static SlixError slix_enable_privacy_handler(
+    SlixListener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(data);
+    UNUSED(data_size);
+    UNUSED(flags);
+
+    SlixData* slix_data = instance->data;
+    // TODO: Is "is_present necessary?"
+    slix_data->privacy.is_present = true;
+    slix_data->privacy.mode = true;
+
+    return SlixErrorNone;
+}
+
 static SlixError slix_read_signature_handler(
     SlixListener* instance,
     const uint8_t* data,
@@ -103,6 +120,9 @@ SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer*
             break;
         case SLIX_CMD_GET_RANDOM_NUMBER:
             handler = slix_get_random_number_handler;
+            break;
+        case SLIX_CMD_ENABLE_PRIVACY:
+            handler = slix_enable_privacy_handler;
             break;
         case SLIX_CMD_READ_SIGNATURE:
             handler = slix_read_signature_handler;

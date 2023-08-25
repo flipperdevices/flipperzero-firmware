@@ -105,7 +105,7 @@ typedef struct {
     SlixSystemInfo system_info;
     SlixSignature signature;
     SlixPasswords passwords;
-    SlixPrivacy privacy_mode;
+    SlixPrivacy privacy;
 } SlixData;
 
 SlixData* slix_alloc();

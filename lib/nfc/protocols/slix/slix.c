@@ -92,7 +92,7 @@ void slix_reset(SlixData* data) {
     memset(&data->system_info, 0, sizeof(SlixSystemInfo));
     memset(&data->passwords, 0, sizeof(SlixPasswords));
     memset(&data->signature, 0, sizeof(SlixSignature));
-    memset(&data->privacy_mode, 0, sizeof(SlixPrivacy));
+    memset(&data->privacy, 0, sizeof(SlixPrivacy));
 }
 
 void slix_copy(SlixData* data, const SlixData* other) {
@@ -104,7 +104,7 @@ void slix_copy(SlixData* data, const SlixData* other) {
     data->system_info = other->system_info;
     data->passwords = other->passwords;
     data->signature = other->signature;
-    data->privacy_mode = other->privacy_mode;
+    data->privacy = other->privacy;
 }
 
 bool slix_verify(SlixData* data, const FuriString* device_type) {
@@ -183,7 +183,7 @@ bool slix_load(SlixData* data, FlipperFormat* ff, uint32_t version) {
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PRIVACY)) {
-            SlixPrivacy* privacy_mode = &data->privacy_mode;
+            SlixPrivacy* privacy_mode = &data->privacy;
             if(flipper_format_key_exist(ff, SLIX_PRIVACY_MODE_KEY)) {
                 if(!flipper_format_read_bool(ff, SLIX_PRIVACY_MODE_KEY, &privacy_mode->mode, 1))
                     break;
@@ -291,7 +291,7 @@ bool slix_save(const SlixData* data, FlipperFormat* ff) {
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PRIVACY)) {
-            const SlixPrivacy* privacy_mode = &data->privacy_mode;
+            const SlixPrivacy* privacy_mode = &data->privacy;
             if(privacy_mode->is_present) {
                 if(!flipper_format_write_bool(ff, SLIX_PRIVACY_MODE_KEY, &privacy_mode->mode, 1))
                     break;
@@ -333,7 +333,7 @@ bool slix_is_equal(const SlixData* data, const SlixData* other) {
            memcmp(&data->system_info, &other->system_info, sizeof(SlixSystemInfo)) == 0 &&
            memcmp(&data->passwords, &other->passwords, sizeof(SlixPasswords)) == 0 &&
            memcmp(&data->signature, &other->signature, sizeof(SlixSignature)) == 0 &&
-           memcmp(&data->privacy_mode, &other->privacy_mode, sizeof(SlixPrivacy)) == 0;
+           memcmp(&data->privacy, &other->privacy, sizeof(SlixPrivacy)) == 0;
 }
 
 const char* slix_get_device_name(const SlixData* data, NfcDeviceNameType name_type) {
