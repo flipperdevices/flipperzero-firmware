@@ -114,11 +114,11 @@ void subghz_protocol_encoder_faac_slh_free(void* context) {
 static bool subghz_protocol_faac_slh_gen_data(SubGhzProtocolEncoderFaacSLH* instance) {
     //FuriString* valid = furi_string_alloc();
     //if(flipper_format_read_string(flipper_format, "Valid", valid)) {
-        //bvalid = true;
-        //FURI_LOG_I(TAG, "[gen_data] is valid ? : %i", bvalid);
+    //bvalid = true;
+    //FURI_LOG_I(TAG, "[gen_data] is valid ? : %i", bvalid);
     //} else {
-        //bvalid = false;
-        //FURI_LOG_I(TAG, "[gen_data] is valid ? : %i", bvalid);
+    //bvalid = false;
+    //FURI_LOG_I(TAG, "[gen_data] is valid ? : %i", bvalid);
     //}
     //furi_string_free(valid);
     if(bvalid) {

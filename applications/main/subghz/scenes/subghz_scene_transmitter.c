@@ -26,7 +26,7 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
             FURI_LOG_I(TAG, "<transmitter> has previous scene <EditCnt>");
             uint32_t cnt_temp;
             cnt_temp = subghz->secure_data->cnt[0] << 24 | subghz->secure_data->cnt[1] << 16 |
-                            subghz->secure_data->cnt[2] << 8 | subghz->secure_data->cnt[3];
+                       subghz->secure_data->cnt[2] << 8 | subghz->secure_data->cnt[3];
             FURI_LOG_I(TAG, "cnt = %08lX", cnt_temp);
             furi_hal_subghz_set_rolling_counter_value(cnt_temp);
             FURI_LOG_I(TAG, "furi_hal_subghz.rolling_counter_value == %08lX", cnt_temp);

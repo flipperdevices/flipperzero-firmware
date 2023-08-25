@@ -55,10 +55,6 @@ void furi_hal_subghz_set_rolling_counter_value(uint32_t value) {
     furi_hal_subghz.rolling_counter_value = value;
 }
 
-void furi_hal_subghz_set_dangerous_frequency(bool state_i) {
-    furi_hal_subghz.dangerous_frequency_i = state_i;
-}
-
 void furi_hal_subghz_set_ext_power_amp(bool enabled) {
     furi_hal_subghz.ext_power_amp = enabled;
 }
