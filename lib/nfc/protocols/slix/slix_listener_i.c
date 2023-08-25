@@ -18,24 +18,21 @@ static SlixError slix_get_nxp_system_info_handler(
     UNUSED(data);
     UNUSED(data_size);
     UNUSED(flags);
-    SlixError error = SlixErrorNone;
 
-    do {
-        const SlixData* slix_data = instance->data;
+    const SlixData* slix_data = instance->data;
 
-        const SlixProtection* protection = &slix_data->system_info.protection;
-        bit_buffer_append_byte(instance->tx_buffer, protection->pointer);
-        bit_buffer_append_byte(instance->tx_buffer, protection->condition);
+    const SlixProtection* protection = &slix_data->system_info.protection;
+    bit_buffer_append_byte(instance->tx_buffer, protection->pointer);
+    bit_buffer_append_byte(instance->tx_buffer, protection->condition);
 
-        const SlixLockBits* lock_bits = &slix_data->system_info.lock_bits;
-        bit_buffer_append_byte(instance->tx_buffer, lock_bits->data);
+    const SlixLockBits* lock_bits = &slix_data->system_info.lock_bits;
+    bit_buffer_append_byte(instance->tx_buffer, lock_bits->data);
 
-        const uint32_t feature_flags = SLIX2_FEATURE_FLAGS;
-        bit_buffer_append_bytes(
-            instance->tx_buffer, (const uint8_t*)&feature_flags, sizeof(feature_flags));
-    } while(false);
+    const uint32_t feature_flags = SLIX2_FEATURE_FLAGS;
+    bit_buffer_append_bytes(
+        instance->tx_buffer, (const uint8_t*)&feature_flags, sizeof(feature_flags));
 
-    return error;
+    return SlixErrorNone;
 }
 
 static SlixError slix_get_random_number_handler(
@@ -69,15 +66,11 @@ static SlixError slix_read_signature_handler(
     UNUSED(data);
     UNUSED(data_size);
     UNUSED(flags);
-    SlixError error = SlixErrorNone;
 
-    do {
-        const SlixData* slix_data = instance->data;
-        bit_buffer_append_bytes(
-            instance->tx_buffer, slix_data->signature.data, SLIX_SIGNATURE_SIZE);
-    } while(false);
+    const SlixData* slix_data = instance->data;
+    bit_buffer_append_bytes(instance->tx_buffer, slix_data->signature.data, SLIX_SIGNATURE_SIZE);
 
-    return error;
+    return SlixErrorNone;
 }
 
 SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer* rx_buffer) {
