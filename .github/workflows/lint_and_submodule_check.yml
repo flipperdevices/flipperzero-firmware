@@ -50,17 +50,19 @@ jobs:
         id: check_todos
         if: github.event_name == 'pull_request'
         run: |
-          set +e;
           git diff --unified=0 --no-color ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '^\+' | grep -i -E '(TODO|FIXME|HACK|XXX)' | tee todos.log;
           MISSING_TICKETS=$( grep -E '\[FL-[0-9]+\]' todos.log );
           if [ -n "$MISSING_TICKETS" ]; then
             echo "Error: Missing ticket number in TODO comment" >> $GITHUB_STEP_SUMMARY;
             echo "$MISSING_TICKETS" >> $GITHUB_STEP_SUMMARY;
             exit 1;
+          else
+            echo "No new TODOs without tickets found" >> $GITHUB_STEP_SUMMARY;
           fi
 
       - name: 'Check Python code formatting'
         id: syntax_check_py
+        if: always()
         run: |
           set +e;
           ./fbt -s lint_py 2>&1 | tee lint-py.log;
