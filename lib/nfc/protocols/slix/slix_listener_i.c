@@ -44,12 +44,9 @@ static SlixError slix_get_random_number_handler(
     UNUSED(data_size);
     UNUSED(flags);
 
-    uint8_t* random = instance->session_state.random;
-
-    random[0] = furi_hal_random_get();
-    random[1] = furi_hal_random_get();
-
-    bit_buffer_append_bytes(instance->tx_buffer, random, SLIX_LISTENER_RANDOM_SIZE);
+    SlixListenerSessionState* session_state = &instance->session_state;
+    furi_hal_random_fill_buf(session_state->random, SLIX_LISTENER_RANDOM_SIZE);
+    bit_buffer_append_bytes(instance->tx_buffer, session_state->random, SLIX_LISTENER_RANDOM_SIZE);
 
     return SlixErrorNone;
 }
