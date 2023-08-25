@@ -12,7 +12,10 @@
 
 typedef void (*TOTP_CLI_DETAILS_HEADER_FORMATTER)();
 typedef void (*TOTP_CLI_DETAILS_FOOTER_FORMATTER)();
-typedef void (*TOTP_CLI_DETAILS_AUTOMATION_FEATURE_ITEM_FORMATTER)(const char* key, const char* feature, bool* header_printed);
+typedef void (*TOTP_CLI_DETAILS_AUTOMATION_FEATURE_ITEM_FORMATTER)(
+    const char* key,
+    const char* feature,
+    bool* header_printed);
 typedef void (*TOTP_CLI_DETAILS_CSTR_FORMATTER)(const char* key, const char* value);
 typedef void (*TOTP_CLI_DETAILS_UINT8T_FORMATTER)(const char* key, uint8_t value);
 typedef void (*TOTP_CLI_DETAILS_SIZET_FORMATTER)(const char* key, size_t value);
@@ -42,24 +45,30 @@ static const TotpCliDetailsFormatter available_formatters[] = {
      .sizet_formatter = &details_output_formatter_print_sizet_tsv},
 };
 
-static void print_automation_features(const TokenInfo* token_info, const TotpCliDetailsFormatter* formatter) {
+static void print_automation_features(
+    const TokenInfo* token_info,
+    const TotpCliDetailsFormatter* formatter) {
     bool header_printed = false;
     const char* AUTOMATION_FEATURES_PRINT_KEY = "Automation features";
     if(token_info->automation_features == TokenAutomationFeatureNone) {
-        (*formatter->automation_feature_item_formatter)(AUTOMATION_FEATURES_PRINT_KEY, "None", &header_printed);
+        (*formatter->automation_feature_item_formatter)(
+            AUTOMATION_FEATURES_PRINT_KEY, "None", &header_printed);
         return;
     }
-    
+
     if(token_info->automation_features & TokenAutomationFeatureEnterAtTheEnd) {
-        (*formatter->automation_feature_item_formatter)(AUTOMATION_FEATURES_PRINT_KEY, "Type <Enter> key at the end", &header_printed);
+        (*formatter->automation_feature_item_formatter)(
+            AUTOMATION_FEATURES_PRINT_KEY, "Type <Enter> key at the end", &header_printed);
     }
 
     if(token_info->automation_features & TokenAutomationFeatureTabAtTheEnd) {
-        (*formatter->automation_feature_item_formatter)(AUTOMATION_FEATURES_PRINT_KEY, "Type <Tab> key at the end", &header_printed);
+        (*formatter->automation_feature_item_formatter)(
+            AUTOMATION_FEATURES_PRINT_KEY, "Type <Tab> key at the end", &header_printed);
     }
 
     if(token_info->automation_features & TokenAutomationFeatureTypeSlower) {
-        (*formatter->automation_feature_item_formatter)(AUTOMATION_FEATURES_PRINT_KEY, "Type slower", &header_printed);
+        (*formatter->automation_feature_item_formatter)(
+            AUTOMATION_FEATURES_PRINT_KEY, "Type slower", &header_printed);
     }
 }
 
