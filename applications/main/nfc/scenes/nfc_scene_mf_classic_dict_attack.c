@@ -180,6 +180,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             if(state == DictAttackStateUserDictInProgress) {
                 nfc_poller_stop(instance->poller);
                 nfc_poller_free(instance->poller);
+                mf_dict_free(instance->mf_dict_context.dict);
                 scene_manager_set_scene_state(
                     instance->scene_manager,
                     NfcSceneMfClassicDictAttack,
@@ -208,6 +209,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             if(state == DictAttackStateUserDictInProgress) {
                 nfc_poller_stop(instance->poller);
                 nfc_poller_free(instance->poller);
+                mf_dict_free(instance->mf_dict_context.dict);
                 scene_manager_set_scene_state(
                     instance->scene_manager,
                     NfcSceneMfClassicDictAttack,
@@ -241,6 +243,7 @@ void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
         instance->scene_manager, NfcSceneMfClassicDictAttack, DictAttackStateUserDictInProgress);
 
     mf_dict_free(instance->mf_dict_context.dict);
+
     instance->mf_dict_context.current_sector = 0;
     instance->mf_dict_context.sectors_total = 0;
     instance->mf_dict_context.sectors_read = 0;
