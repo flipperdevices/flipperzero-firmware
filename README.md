@@ -6,6 +6,13 @@ This is a plugin for the Flipper Zero that ports
 Once started the plugin will add a `forth` command to the CLI that can be used
 to call up a basic forth shell.
 
+Calling the `forth` command with a file path as parameter will cause that file
+to be executed as a forth script. Examples are provided under `forth_scripts`.
+
+To use one of the provided scripts (for example `notif_success.fth`), copy it
+to your SD card. Then run the plugin and execute `forth /ext/<path to your
+file>` (for example `forth /ext/notif_success.fth`) on the CLI.
+
 ## Warning
 
 This plugin is in the early stages of development. It will inevitably have
