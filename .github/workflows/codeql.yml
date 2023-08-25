@@ -67,6 +67,7 @@ jobs:
     - name: Autobuild
       run: |
          echo "Run, Build Application using script"
+         ls -lha
          ./fbt
     # uses: github/codeql-action/autobuild@v2
 
