@@ -38,6 +38,13 @@ App(
     requires=["nfc"],
 )
 
+App(
+    appid="plaintain_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="plaintain_plugin_ep",
+    requires=["nfc"],
+)
+
 # App(
 #     appid="nfc_start",
 #     apptype=FlipperAppType.STARTUP,

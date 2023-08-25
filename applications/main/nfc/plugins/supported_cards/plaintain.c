@@ -80,7 +80,7 @@ static bool plaintain_verify_type(Nfc* nfc, MfClassicType type) {
     bool verified = false;
 
     do {
-        PlaintainCardConfig cfg;
+        PlaintainCardConfig cfg = {};
         if(!plaintain_get_card_config(&cfg, type)) break;
 
         const uint8_t block_num = mf_classic_get_first_block_num_of_sector(cfg.data_sector);
@@ -120,34 +120,25 @@ static bool plaintain_read(Nfc* nfc, NfcDevice* device) {
     do {
         if(!mf_classic_detect_protocol(data->iso14443_3a_data, &data->type)) break;
 
-        PlaintainCardConfig cfg;
+        PlaintainCardConfig cfg = {};
         if(!plaintain_get_card_config(&cfg, data->type)) break;
+        FURI_LOG_W("Plaintain", "Type: %d", data->type);
+        data->type = MfClassicType4k;
 
-        MfClassicKey key = {0};
-        nfc_util_num2bytes(cfg.keys[cfg.data_sector].a, COUNT_OF(key.data), key.data);
+        MfClassicDeviceKeys keys = {};
+        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+            nfc_util_num2bytes(cfg.keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
+            nfc_util_num2bytes(cfg.keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
+        }
+        keys.key_a_mask = 0xFFFFFFFFFFFFFFFFU;
+        keys.key_b_mask = 0xFFFFFFFFFFFFFFFFU;
 
-        const uint8_t block_num_start = mf_classic_get_first_block_num_of_sector(cfg.data_sector);
-        const uint8_t block_num_end = block_num_start + 2;
-
-        uint8_t block_num;
-        for(block_num = block_num_start; block_num < block_num_end; ++block_num) {
-            MfClassicBlock block;
-            MfClassicError error;
-
-            error = mf_classic_poller_read_block(nfc, block_num, &key, MfClassicKeyTypeA, &block);
-
-            if(error != MfClassicErrorNone) {
-                FURI_LOG_D(TAG, "Failed to read block %u: %d", block_num, error);
-                break;
-            }
-
-            mf_classic_set_block_read(data, block_num, &block);
+        MfClassicError error = mf_classic_poller_read(nfc, &keys, data);
+        if(error != MfClassicErrorNone) {
+            FURI_LOG_W(TAG, "Failed to read data");
+            break;
         }
 
-        if(block_num != block_num_end) break;
-
-        mf_classic_set_key_found(
-            data, cfg.data_sector, MfClassicKeyTypeA, cfg.keys[cfg.data_sector].a);
         nfc_device_set_data(device, NfcProtocolMfClassic, data);
 
         is_read = true;
@@ -167,7 +158,7 @@ static bool plaintain_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     do {
         // Verify card type
-        PlaintainCardConfig cfg;
+        PlaintainCardConfig cfg = {};
         if(!plaintain_get_card_config(&cfg, data->type)) break;
 
         // Verify key
@@ -177,23 +168,29 @@ static bool plaintain_parse(const NfcDevice* device, FuriString* parsed_data) {
         const uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, COUNT_OF(sec_tr->key_a.data));
         if(key != cfg.keys[cfg.data_sector].a) break;
 
-        // Parse data
-        const uint8_t start_block_num = mf_classic_get_first_block_num_of_sector(cfg.data_sector);
-
-        const uint8_t* temp_ptr = &data->block[start_block_num + 1].data[5];
-        uint16_t balance = ((temp_ptr[0] << 8) | temp_ptr[1]) / 25;
-        temp_ptr = &data->block[start_block_num].data[2];
-
-        uint32_t number = 0;
-        for(size_t i = 1; i < 5; i++) {
-            number <<= 8;
-            number |= temp_ptr[i];
+        // Point to block 0 of sector 4, value 0
+        const uint8_t* temp_ptr = data->block[16].data;
+        // Read first 4 bytes of block 0 of sector 4 from last to first and convert them to uint32_t
+        // 38 18 00 00 becomes 00 00 18 38, and equals to 6200 decimal
+        uint32_t balance =
+            ((temp_ptr[3] << 24) | (temp_ptr[2] << 16) | (temp_ptr[1] << 8) | temp_ptr[0]) / 100;
+        // Read card number
+        // Point to block 0 of sector 0, value 0
+        temp_ptr = data->block[0].data;
+        // Read first 7 bytes of block 0 of sector 0 from last to first and convert them to uint64_t
+        // 04 31 16 8A 23 5C 80 becomes 80 5C 23 8A 16 31 04, and equals to 36130104729284868 decimal
+        uint8_t card_number_arr[7];
+        for(size_t i = 0; i < 7; i++) {
+            card_number_arr[i] = temp_ptr[6 - i];
         }
-        number >>= 4;
-        number |= (temp_ptr[0] & 0xf) << 28;
+        // Copy card number to uint64_t
+        uint64_t card_number = 0;
+        for(size_t i = 0; i < 7; i++) {
+            card_number = (card_number << 8) | card_number_arr[i];
+        }
 
         furi_string_printf(
-            parsed_data, "\e#Plaintain\nNum: %lu\nBalance: %u RUR", number, balance);
+            parsed_data, "\e#Plantain\nN:%llu-\nBalance:%lu\n", card_number, balance);
         parsed = true;
     } while(false);
 
