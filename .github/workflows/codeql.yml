@@ -102,8 +102,8 @@ jobs:
         FBT_NO_SYNC: 0
         DIST_SUFFIX: 'codeql'
         WORKFLOW_BRANCH_OR_TAG: release-cfw
-        # rm to remove problem FAP which includes non-existent files
-        run: |
+      # rm to remove problem FAP which includes non-existent files
+      run: |
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
