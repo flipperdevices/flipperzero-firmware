@@ -51,6 +51,7 @@ jobs:
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
       TOKEN: ${{ secrets.DEPENDABOT }}
+      REF_NAME: ${{ github.ref_name }}
       
     steps:
     - name: Checkout Firmware Files
@@ -71,11 +72,29 @@ jobs:
         path: "${{ env.OFW_PATH }}"
         fetch-depth: '0'
 
+    - name: Remove other apps
+      shell: pwsh
+      if: ${{ success() }}
+      # rm to remove problem FAP which includes non-existent files
+      run: |
+        Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
+        Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
+
+    - name: Set version
+      env:
+        REF_NAME: ${{ env.REF_NAME }}
+      shell: pwsh
+      run: |
+        $ReleaseVersion = ([string]::IsNullOrWhitespace($env:REF_NAME) ? 'dev' : $env:REF_NAME)
+        Write-Output ('REF_NAME={0}' -f $ReleaseVersion) >> $env:GITHUB_ENV
+        
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
+        setup-python-dependencies: true
+        debug: true
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
@@ -112,10 +131,39 @@ jobs:
     #     ls -lha
     #     ./fbt
     # uses: github/codeql-action/autobuild@v2
+    - name: Resolve CodeQL Build Env
+      uses: github/codeql-action/resolve-environment@v2
+      with:
+        language: ${{ matrix.language }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
+      env:
+        REF_NAME: ${{ env.REF_NAME }}
       with:
         category: "/language:${{matrix.language}}"
         token: ${{ secrets.DEPENDABOT }}
-        
+        ref: ${{ env.REF_NAME }}
+        output: "../results"
+        check_name: "_"
+        upload-database: true
+        upload: 'failure-only'
+        checkout_path: ${{ github.workspace }}
+
+    - name: List output
+      env:
+          REF_NAME: ${{ env.REF_NAME }}
+      shell: pwsh
+      run: |
+          ls "../results"
+
+    - name: Upload CodeQL SARIF
+      uses: github/codeql-action/upload-sarif@v2
+      env:
+        REF_NAME: ${{ env.REF_NAME }}
+      with:
+        category: "/language:${{matrix.language}}"
+        token: ${{ secrets.DEPENDABOT }}
+        ref: ${{ env.REF_NAME }}
+        sarif_file: "../results"
+        checkout_path: ${{ github.workspace }}
