@@ -311,6 +311,7 @@ static FuriHalUartId cdc_init_uart(
     case DapUartTypeUSART1:
         uart_id = FuriHalUartIdUSART1;
         furi_hal_console_disable();
+        furi_hal_console_deinit();
         furi_hal_uart_deinit(uart_id);
         if(swap == DapUartTXRXSwap) {
             LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_SWAPPED);
@@ -341,7 +342,7 @@ static void cdc_deinit_uart(DapUartType type) {
     case DapUartTypeUSART1:
         furi_hal_uart_deinit(FuriHalUartIdUSART1);
         LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_STANDARD);
-        furi_hal_console_init();
+        furi_hal_console_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
         break;
     case DapUartTypeLPUART1:
         furi_hal_uart_deinit(FuriHalUartIdLPUART1);

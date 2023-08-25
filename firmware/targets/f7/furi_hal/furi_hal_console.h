@@ -4,13 +4,23 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <furi_hal_uart.h>
+
+#ifdef HEAP_PRINT_DEBUG
+#define CONSOLE_BAUDRATE 1843200
+#else
+#define CONSOLE_BAUDRATE 230400
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef void (*FuriHalConsoleTxCallback)(const uint8_t* buffer, size_t size, void* context);
 
-void furi_hal_console_init();
+void furi_hal_console_init(FuriHalUartId channel, uint32_t baudrate);
+
+void furi_hal_console_deinit();
 
 void furi_hal_console_enable();
 

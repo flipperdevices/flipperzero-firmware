@@ -14,6 +14,16 @@ static bool furi_hal_usart_prev_enabled[2];
 static void (*irq_cb[2])(uint8_t ev, uint8_t data, void* context);
 static void* irq_ctx[2];
 
+inline void furi_hal_uart_wait_tx_complete(FuriHalUartId ch) {
+    if(ch == FuriHalUartIdUSART1) {
+        while(!LL_USART_IsActiveFlag_TC(USART1))
+            ;
+    } else if(ch == FuriHalUartIdLPUART1) {
+        while(!LL_LPUART_IsActiveFlag_TC(LPUART1))
+            ;
+    }
+}
+
 static void furi_hal_uart_irq_callback() {
     if(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1)) {
         uint8_t data = LL_USART_ReceiveData8(USART1);

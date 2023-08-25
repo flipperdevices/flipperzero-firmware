@@ -30,6 +30,12 @@ typedef enum {
 } UartIrqEvent;
 
 /**
+ * Uart wait tx complete
+ * @param ch UART channel
+ */
+void furi_hal_uart_wait_tx_complete(FuriHalUartId ch); 
+
+/**
  * Init UART
  * Configures GPIO to UART function, сonfigures UART hardware, enables UART hardware
  * @param channel UART channel
