@@ -1,5 +1,8 @@
 # SubGHz Bruteforcer Application for Flipper Zero
 
+![image](https://github.com/DarkFlippers/flipperzero-subbrute/assets/31771569/0a952559-94c0-40b7-8b9c-9ee4e37c6cd6)
+
+
 SubGhz Bruteforcer from [Unleashed Firmware](https://github.com/DarkFlippers/unleashed-firmware)
 
 ## Disclaimer
@@ -25,7 +28,7 @@ You can also download the [release](https://github.com/derskythe/flipperzero-sub
 
 ### Main Menu
 
-> Image 
+![image](https://github.com/DarkFlippers/flipperzero-subbrute/assets/31771569/9f428d6e-59fd-4517-895d-fb185f8d884f)
 
 Here you can select the protocol and frequency that will be used for bruteforce. 
 According to our observations, `CAME 12bit 433MHz` is the most protocol, so it is selected by default.
@@ -34,6 +37,8 @@ According to the protocol, when probe a key, each value is sent 3 times.
 Most of the devices this works but there are devices that don't work and more repetitions are needed. 
 The number of repetitions can be increased with the right button, the left button decreases the value.
 The negative side of increasing the number of repetitions will be a longer key find time.
+
+![image](https://github.com/DarkFlippers/flipperzero-subbrute/assets/31771569/a17695d0-833d-44ce-a0d0-ead8366cb4fe)
 
 #### Buttons
 
@@ -46,11 +51,10 @@ The negative side of increasing the number of repetitions will be a longer key f
 |       :record_button:       |    Select protocol    |
 | :leftwards_arrow_with_hook: |   Close application   |
 
-### Main Menu
-
-> Image 
-
 ## Supported Protocols
+
+![image](https://github.com/DarkFlippers/flipperzero-subbrute/assets/31771569/1f14b5eb-7e66-4b37-b816-34fab63db70c)
+
 
 ### CAME
 
