@@ -52,6 +52,8 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           set +e;
+          git diff --unified=0 --no-color ${{ github.event.pull_request.base.sha }} ${{ github.sha }}
+          echo "------------------"
           git diff --unified=0 --no-color ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E '^\+' | grep -i -E '(TODO|FIXME|HACK|XXX) ' | grep -v -- '-nofl' > lines.log;
           cat lines.log;
           MISSING_TICKETS=$( grep -v -E '\[FL-[0-9]+\]' lines.log );
