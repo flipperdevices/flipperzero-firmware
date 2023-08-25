@@ -1,9 +1,6 @@
 #include "subbrute_device.h"
 
-#include <stdint.h>
 #include <storage/storage.h>
-#include <lib/toolbox/stream/stream.h>
-#include <lib/flipper_format/flipper_format.h>
 #include <lib/flipper_format/flipper_format_i.h>
 #include <lib/subghz/subghz_protocol_registry.h>
 
@@ -24,11 +21,11 @@ SubBruteDevice* subbrute_device_alloc(const SubGhzDevice* radio_device) {
 
     instance->radio_device = radio_device;
 
-#ifdef FURI_DEBUG
-    subbrute_device_attack_set_default_values(instance, SubBruteAttackLoadFile);
-#else
+//#ifdef FURI_DEBUG
+//    subbrute_device_attack_set_default_values(instance, SubBruteAttackLoadFile);
+//#else
     subbrute_device_attack_set_default_values(instance, SubBruteAttackCAME12bit433);
-#endif
+//#endif
     return instance;
 }
 
@@ -386,6 +383,7 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
         FURI_LOG_D(TAG, "Loaded successfully");
 #endif
     } else {
+        FURI_LOG_E(TAG, "Load failed!");
         subbrute_device_free_protocol_info(instance);
     }
 

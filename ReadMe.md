@@ -53,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Intelligent probing with warnings for fwflash.py #3005 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3005)
 - UL: OFW: [New IR universal remote graphics #3006 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3006)
 - UL: OFW: [SubGhz: fix todo #2984 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2984)
+- UL: Updated: [Sub-GHz Bruteforcer v3.8 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 
 <a name="release">
 
@@ -419,7 +420,7 @@ $ ./fbt dolphin_ext
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Skeleton App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
-- [Sub-GHz Bruteforcer v3.7 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- [Sub-GHz Bruteforcer v3.8 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
