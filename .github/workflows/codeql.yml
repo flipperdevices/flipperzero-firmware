@@ -44,10 +44,34 @@ jobs:
         # Use only 'java' to analyze code written in Java, Kotlin or both
         # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
-
+    env:
+      REPO_SELF: ${{ vars.REPO_SELF }}
+      OFW_PATH: "applications_user/subbrute"
+      RELATIVE_PATH: "applications/external/subbrute"
+      CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
+      ZIP_NAME: ''
+      ZIP_TAG: ''
+      TGZ_NAME: ''
+      TGZ_TAG: ''
+      
     steps:
-    - name: Checkout repository
+    - name: Checkout Firmware Files
       uses: actions/checkout@v3
+      with:
+        repository: "${{ vars.REPO_UNLEASHED }}"
+        clean: "true"
+        submodules: "true"
+        ref: "dev"
+    
+    - name: Checkout Repo Files
+      uses: actions/checkout@v3
+      with:
+        repository: "${{ vars.REPO_SELF }}"
+        clean: "true"
+        submodules: "true"
+        path: "${{ env.OFW_PATH }}"
+
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -61,14 +85,34 @@ jobs:
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
 
+    - name: Build Firmware
+      shell: bash
+      if: ${{ success() }}
+      env:
+        FBT_NO_SYNC: 0
+        DIST_SUFFIX: 'codeql'
+        WORKFLOW_BRANCH_OR_TAG: release-cfw
+      run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
+      
+    - name: Build FAPs
+      shell: bash
+      if: ${{ success() }}
+      env:
+        FBT_NO_SYNC: 0
+        DIST_SUFFIX: 'codeql'
+        WORKFLOW_BRANCH_OR_TAG: release-cfw
+        # rm to remove problem FAP which includes non-existent files
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
     # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      run: |
-         echo "Run, Build Application using script"
-         ls -lha
-         ./fbt
+    #- name: Autobuild
+    #  run: |
+    #     echo "Run, Build Application using script"
+    #     ls -lha
+    #     ./fbt
     # uses: github/codeql-action/autobuild@v2
 
     - name: Perform CodeQL Analysis
