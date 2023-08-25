@@ -8,12 +8,12 @@ void details_output_formatter_print_header_tsv() {
 void details_output_formatter_print_footer_tsv() {
 }
 
-void details_output_formatter_print_automation_feature_tsv(const char* key, const char* feature, bool* header_printed) {
-    TOTP_CLI_PRINTF(
-            "%s\t%s\r\n",
-            *header_printed ? "" : key,
-            feature);
-        *header_printed = true;
+void details_output_formatter_print_automation_feature_tsv(
+    const char* key,
+    const char* feature,
+    bool* header_printed) {
+    TOTP_CLI_PRINTF("%s\t%s\r\n", *header_printed ? "" : key, feature);
+    *header_printed = true;
 }
 
 void details_output_formatter_print_cstr_tsv(const char* key, const char* value) {

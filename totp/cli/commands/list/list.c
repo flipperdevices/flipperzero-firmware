@@ -26,8 +26,7 @@ static const TotpCliListFormatter available_formatters[] = {
 
     {.header_formatter = &list_output_formatter_print_header_tsv,
      .body_item_formatter = &list_output_formatter_print_body_item_tsv,
-     .footer_formatter = &list_output_formatter_print_footer_tsv}
-};
+     .footer_formatter = &list_output_formatter_print_footer_tsv}};
 
 #ifdef TOTP_CLI_RICH_HELP_ENABLED
 void totp_cli_command_list_docopt_commands() {
