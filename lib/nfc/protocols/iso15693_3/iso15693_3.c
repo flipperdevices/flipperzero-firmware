@@ -203,6 +203,9 @@ bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
     bool saved = false;
 
     do {
+        if(!flipper_format_write_comment_cstr(ff, ISO15693_3_PROTOCOL_NAME " specific data"))
+            break;
+
         if(data->system_info.flags & ISO15693_3_SYSINFO_FLAG_DSFID) {
             if(!flipper_format_write_comment_cstr(ff, "Data Storage Format Identifier")) break;
             if(!flipper_format_write_hex(ff, ISO15693_3_DSFID_KEY, &data->system_info.dsfid, 1))

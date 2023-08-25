@@ -73,7 +73,6 @@ static NfcCommand slix_poller_handler_read_signature(SlixPoller* instance) {
 }
 
 static NfcCommand slix_poller_handler_error(SlixPoller* instance) {
-    // iso15693_3_poller_halt(instance->iso15693_3_poller);
     instance->slix_event_data.error = instance->error;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
     instance->poller_state = SlixPollerStateIdle;

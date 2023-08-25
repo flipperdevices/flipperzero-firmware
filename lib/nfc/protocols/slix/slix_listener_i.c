@@ -19,15 +19,18 @@ static SlixError slix_get_nxp_system_info_handler(
     SlixError error = SlixErrorNone;
 
     do {
-        // TODO: Do not hardcode the response
         const SlixData* slix_data = instance->data;
-        bit_buffer_append_byte(instance->tx_buffer, slix_data->protection.pointer);
-        bit_buffer_append_byte(instance->tx_buffer, slix_data->protection.condition);
-        bit_buffer_append_byte(instance->tx_buffer, 0x00);
-        bit_buffer_append_byte(instance->tx_buffer, 0x7F);
-        bit_buffer_append_byte(instance->tx_buffer, 0x35);
-        bit_buffer_append_byte(instance->tx_buffer, 0x00);
-        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+
+        const SlixProtection* protection = &slix_data->system_info.protection;
+        bit_buffer_append_byte(instance->tx_buffer, protection->pointer);
+        bit_buffer_append_byte(instance->tx_buffer, protection->condition);
+
+        const SlixLockBits* lock_bits = &slix_data->system_info.lock_bits;
+        bit_buffer_append_byte(instance->tx_buffer, lock_bits->data);
+
+        const uint32_t feature_flags = SLIX2_FEATURE_FLAGS;
+        bit_buffer_append_bytes(
+            instance->tx_buffer, (const uint8_t*)&feature_flags, sizeof(feature_flags));
     } while(false);
 
     return error;
