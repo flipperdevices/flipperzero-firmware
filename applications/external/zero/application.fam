@@ -3,7 +3,7 @@ App(
     name="ZERO!",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="racso_zero_app_main",
-    stack_size=8*1024,
+    stack_size=8 * 1024,
     fap_category="Games",
     fap_icon="zero.png",
     fap_icon_assets="images",
