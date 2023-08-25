@@ -80,7 +80,7 @@ jobs:
         Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
         Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
 
-    - name: Set version
+    - name: Set refname
       env:
         REF_NAME: ${{ env.REF_NAME }}
       shell: pwsh
@@ -143,7 +143,9 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
         token: ${{ secrets.DEPENDABOT }}
-        ref: ${{ env.REF_NAME }}
+        # Must be used only with sha
+        #ref: ${{ env.REF_NAME }}
+        #sha: ${{ github.sha }}
         output: "../results"
         check_name: "_"
         upload-database: true
@@ -164,6 +166,8 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
         token: ${{ secrets.DEPENDABOT }}
-        ref: ${{ env.REF_NAME }}
+        # Must be used only with sha
+        #ref: ${{ env.REF_NAME }}
+        #sha: ${{ github.sha }}
         sarif_file: "../results"
         checkout_path: ${{ github.workspace }}
