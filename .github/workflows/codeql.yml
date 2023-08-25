@@ -120,7 +120,7 @@ jobs:
         DIST_SUFFIX: 'codeql'
         WORKFLOW_BRANCH_OR_TAG: release-cfw
       run: |
-          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=${{ env.FBT_NO_SYNC }}
       
     - name: Build FAPs
       shell: bash
@@ -131,7 +131,7 @@ jobs:
         WORKFLOW_BRANCH_OR_TAG: release-cfw
       # rm to remove problem FAP which includes non-existent files
       run: |
-          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=${{ env.FBT_NO_SYNC }} fap_dist
 
     
     - name: Save cached FW
@@ -172,13 +172,6 @@ jobs:
         upload-database: false
         upload: 'failure-only'
         checkout_path: "${{ github.workspace }}/${{ env.CHECKOUT_PATH }}"
-
-    - name: List output
-      env:
-          REF_NAME: ${{ env.REF_NAME }}
-      shell: pwsh
-      run: |
-          ls "applications_user/subbrute/.github/results.sarif"
 
     - name: Upload CodeQL SARIF
       uses: github/codeql-action/upload-sarif@v2
