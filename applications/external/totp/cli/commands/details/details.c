@@ -7,33 +7,68 @@
 #include "../../../ui/scene_director.h"
 #include "../../cli_helpers.h"
 #include "../../common_command_arguments.h"
+#include "formatters/table/details_output_formatter_table.h"
+#include "formatters/tsv/details_output_formatter_tsv.h"
 
-#define TOTP_CLI_PRINTF_AUTOMATION_FEATURE(description, header_printed) \
-    do {                                                                \
-        TOTP_CLI_PRINTF(                                                \
-            "| %-20s | %-28.28s |\r\n",                                 \
-            header_printed ? "" : "Automation features",                \
-            description);                                               \
-        header_printed = true;                                          \
-    } while(false)
+typedef void (*TOTP_CLI_DETAILS_HEADER_FORMATTER)();
+typedef void (*TOTP_CLI_DETAILS_FOOTER_FORMATTER)();
+typedef void (*TOTP_CLI_DETAILS_AUTOMATION_FEATURE_ITEM_FORMATTER)(
+    const char* key,
+    const char* feature,
+    bool* header_printed);
+typedef void (*TOTP_CLI_DETAILS_CSTR_FORMATTER)(const char* key, const char* value);
+typedef void (*TOTP_CLI_DETAILS_UINT8T_FORMATTER)(const char* key, uint8_t value);
+typedef void (*TOTP_CLI_DETAILS_SIZET_FORMATTER)(const char* key, size_t value);
 
-static void print_automation_features(const TokenInfo* token_info) {
+typedef struct {
+    const TOTP_CLI_DETAILS_HEADER_FORMATTER header_formatter;
+    const TOTP_CLI_DETAILS_FOOTER_FORMATTER footer_formatter;
+    const TOTP_CLI_DETAILS_AUTOMATION_FEATURE_ITEM_FORMATTER automation_feature_item_formatter;
+    const TOTP_CLI_DETAILS_CSTR_FORMATTER cstr_formatter;
+    const TOTP_CLI_DETAILS_UINT8T_FORMATTER uint8t_formatter;
+    const TOTP_CLI_DETAILS_SIZET_FORMATTER sizet_formatter;
+} TotpCliDetailsFormatter;
+
+static const TotpCliDetailsFormatter available_formatters[] = {
+    {.header_formatter = &details_output_formatter_print_header_table,
+     .footer_formatter = &details_output_formatter_print_footer_table,
+     .automation_feature_item_formatter = &details_output_formatter_print_automation_feature_table,
+     .cstr_formatter = &details_output_formatter_print_cstr_table,
+     .uint8t_formatter = &details_output_formatter_print_uint8t_table,
+     .sizet_formatter = &details_output_formatter_print_sizet_table},
+
+    {.header_formatter = &details_output_formatter_print_header_tsv,
+     .footer_formatter = &details_output_formatter_print_footer_tsv,
+     .automation_feature_item_formatter = &details_output_formatter_print_automation_feature_tsv,
+     .cstr_formatter = &details_output_formatter_print_cstr_tsv,
+     .uint8t_formatter = &details_output_formatter_print_uint8t_tsv,
+     .sizet_formatter = &details_output_formatter_print_sizet_tsv},
+};
+
+static void print_automation_features(
+    const TokenInfo* token_info,
+    const TotpCliDetailsFormatter* formatter) {
+    bool header_printed = false;
+    const char* AUTOMATION_FEATURES_PRINT_KEY = "Automation features";
     if(token_info->automation_features == TokenAutomationFeatureNone) {
-        TOTP_CLI_PRINTF("| %-20s | %-28.28s |\r\n", "Automation features", "None");
+        (*formatter->automation_feature_item_formatter)(
+            AUTOMATION_FEATURES_PRINT_KEY, "None", &header_printed);
         return;
     }
 
-    bool header_printed = false;
     if(token_info->automation_features & TokenAutomationFeatureEnterAtTheEnd) {
-        TOTP_CLI_PRINTF_AUTOMATION_FEATURE("Type <Enter> key at the end", header_printed);
+        (*formatter->automation_feature_item_formatter)(
+            AUTOMATION_FEATURES_PRINT_KEY, "Type <Enter> key at the end", &header_printed);
     }
 
     if(token_info->automation_features & TokenAutomationFeatureTabAtTheEnd) {
-        TOTP_CLI_PRINTF_AUTOMATION_FEATURE("Type <Tab> key at the end", header_printed);
+        (*formatter->automation_feature_item_formatter)(
+            AUTOMATION_FEATURES_PRINT_KEY, "Type <Tab> key at the end", &header_printed);
     }
 
     if(token_info->automation_features & TokenAutomationFeatureTypeSlower) {
-        TOTP_CLI_PRINTF_AUTOMATION_FEATURE("Type slower", header_printed);
+        (*formatter->automation_feature_item_formatter)(
+            AUTOMATION_FEATURES_PRINT_KEY, "Type slower", &header_printed);
     }
 }
 
@@ -64,6 +99,14 @@ void totp_cli_command_details_handle(PluginState* plugin_state, FuriString* args
         return;
     }
 
+    const TotpCliDetailsFormatter* formatter = &available_formatters[0];
+    FuriString* arg = furi_string_alloc();
+    if(args_read_string_and_trim(args, arg) && furi_string_cmpi_str(arg, "--tsv") == 0) {
+        formatter = &available_formatters[1];
+    }
+
+    furi_string_free(arg);
+
     TOTP_CLI_LOCK_UI(plugin_state);
 
     size_t original_token_index =
@@ -71,19 +114,14 @@ void totp_cli_command_details_handle(PluginState* plugin_state, FuriString* args
     if(totp_token_info_iterator_go_to(iterator_context, token_number - 1)) {
         const TokenInfo* token_info = totp_token_info_iterator_get_current_token(iterator_context);
 
-        TOTP_CLI_PRINTF("+----------------------+------------------------------+\r\n");
-        TOTP_CLI_PRINTF("| %-20s | %-28s |\r\n", "Property", "Value");
-        TOTP_CLI_PRINTF("+----------------------+------------------------------+\r\n");
-        TOTP_CLI_PRINTF("| %-20s | %-28d |\r\n", "Index", token_number);
-        TOTP_CLI_PRINTF(
-            "| %-20s | %-28.28s |\r\n", "Name", furi_string_get_cstr(token_info->name));
-        TOTP_CLI_PRINTF(
-            "| %-20s | %-28s |\r\n", "Hashing algorithm", token_info_get_algo_as_cstr(token_info));
-        TOTP_CLI_PRINTF("| %-20s | %-28" PRIu8 " |\r\n", "Number of digits", token_info->digits);
-        TOTP_CLI_PRINTF(
-            "| %-20s | %" PRIu8 " sec.%-21s |\r\n", "Token lifetime", token_info->duration, " ");
-        print_automation_features(token_info);
-        TOTP_CLI_PRINTF("+----------------------+------------------------------+\r\n");
+        (*formatter->header_formatter)();
+        (*formatter->sizet_formatter)("Index", token_number);
+        (*formatter->cstr_formatter)("Name", furi_string_get_cstr(token_info->name));
+        (*formatter->cstr_formatter)("Hashing algorithm", token_info_get_algo_as_cstr(token_info));
+        (*formatter->uint8t_formatter)("Number of digits", token_info->digits);
+        (*formatter->uint8t_formatter)("Token lifetime", token_info->duration);
+        print_automation_features(token_info, formatter);
+        (*formatter->footer_formatter)();
     } else {
         totp_cli_print_error_loading_token_info();
     }

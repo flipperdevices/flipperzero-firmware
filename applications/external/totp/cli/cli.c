@@ -47,7 +47,7 @@ static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
     } else if(
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST) == 0 ||
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST_ALT) == 0) {
-        totp_cli_command_list_handle(plugin_state, cli);
+        totp_cli_command_list_handle(plugin_state, args, cli);
     } else if(
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE) == 0 ||
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE_ALT) == 0) {

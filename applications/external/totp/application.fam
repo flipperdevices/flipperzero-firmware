@@ -44,6 +44,6 @@ App(
     ],
     fap_author="Alexander Kopachov (@akopachov)",
     fap_weburl="https://github.com/akopachov/flipper-zero_authenticator",
-    fap_version="4.0.2",
+    fap_version="4.0.3",
     fap_description="Software-based TOTP authenticator for Flipper Zero device",
 )

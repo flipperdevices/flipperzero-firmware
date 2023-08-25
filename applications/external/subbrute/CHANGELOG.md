@@ -1,6 +1,13 @@
 # Changelog
 
-## [v3.7.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/HEAD)
+## [v3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.8.0) (2023-08-25)
+
+[Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.7.0...v.3.8.0)
+
+**Merged pull requests:**
+* Feat/ofw by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/33
+
+## [v3.7.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.7.0) (2023-08-04)
 
 [Full Changelog](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.6.0...v3.7.0)
 
