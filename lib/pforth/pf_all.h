@@ -48,9 +48,6 @@
     #include "pf_inc1.h"
 #endif
 
-void *malloc(size_t size);
-void free(void *ptr);
-
 #include "pforth.h"
 #include "pf_types.h"
 #include "pf_io.h"

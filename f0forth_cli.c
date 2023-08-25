@@ -10,10 +10,10 @@ void f0forth_cmd(Cli *cli, FuriString *args, void *context)
 	furi_assert(context);
 	F0ForthState *f0f_state = context;
 
+	const char *source_name = NULL;
+
 	if (furi_string_size(args) > 0) {
-		cli_print_usage(F0FORTH_CMD, "Forth takes no arguments!",
-				furi_string_get_cstr(args));
-		return;
+		source_name = furi_string_get_cstr(args);
 	}
 
 	if (furi_mutex_acquire(f0f_state->cli_running_mutex, FuriWaitForever)
@@ -26,7 +26,7 @@ void f0forth_cmd(Cli *cli, FuriString *args, void *context)
 	f0f_cli_state = malloc(sizeof(F0ForthCliState));
 	f0f_cli_state->cli = cli;
 
-	pfDoForth(NULL, NULL, 0);
+	pfDoForth(NULL, source_name, 0);
 
 	free(f0f_cli_state);
 	f0f_cli_state = NULL;
