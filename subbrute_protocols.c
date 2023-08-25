@@ -1,6 +1,5 @@
 #include "subbrute_protocols.h"
 #include "math.h"
-#include <string.h>
 
 #define TAG "SubBruteProtocols"
 

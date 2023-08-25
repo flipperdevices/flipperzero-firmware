@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../subbrute_protocols.h"
-#include "radio_device_loader.h"
+#include "subbrute_radio_device_loader.h"
 
 typedef enum {
     SubBruteWorkerStateIDLE,

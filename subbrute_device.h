@@ -5,15 +5,11 @@
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/environment.h>
-#include "helpers/radio_device_loader.h"
-
-#define SUBBRUTE_TEXT_STORE_SIZE 256
+#include "helpers/subbrute_radio_device_loader.h"
 
 #define SUBBRUTE_MAX_LEN_NAME 64
 #define SUBBRUTE_PATH EXT_PATH("subghz")
 #define SUBBRUTE_FILE_EXT ".sub"
-
-#define SUBBRUTE_PAYLOAD_SIZE 16
 
 typedef enum {
     SubBruteFileResultUnknown,
@@ -54,6 +50,7 @@ typedef struct {
     uint64_t key_from_file;
     uint64_t current_key_from_file;
     bool two_bytes;
+
     // Index of group to bruteforce in loaded file
     uint8_t bit_index;
 } SubBruteDevice;

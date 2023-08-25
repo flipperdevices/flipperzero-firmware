@@ -59,7 +59,7 @@ void subbrute_worker_free(SubBruteWorker* instance) {
     furi_thread_free(instance->thread);
 
     subghz_devices_sleep(instance->radio_device);
-    radio_device_loader_end(instance->radio_device);
+    subbrute_radio_device_loader_end(instance->radio_device);
 
     free(instance);
 }
@@ -490,6 +490,7 @@ bool subbrute_worker_is_tx_allowed(SubBruteWorker* instance, uint32_t value) {
     bool res = false;
 
     if(!subghz_devices_is_frequency_valid(instance->radio_device, value)) {
+        return false;
     } else {
         subghz_devices_set_frequency(instance->radio_device, value);
         res = subghz_devices_set_tx(instance->radio_device);
