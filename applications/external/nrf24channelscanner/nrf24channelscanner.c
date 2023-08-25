@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <furi.h>
+#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <gui/elements.h>
@@ -168,6 +169,12 @@ int32_t nrf24channelscanner_main(void* p) {
     Event event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
 
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+
     nrf24_init();
 
     ViewPort* view_port = view_port_alloc();
@@ -247,5 +254,10 @@ int32_t nrf24channelscanner_main(void* p) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
+
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
+
     return 0;
 }

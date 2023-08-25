@@ -299,6 +299,12 @@ int32_t mousejacker_app_azerty(void* p) {
         return 255;
     }
 
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, plugin_state);
@@ -395,6 +401,10 @@ int32_t mousejacker_app_azerty(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
+
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }

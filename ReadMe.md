@@ -57,6 +57,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) - Memory Leak Fix (By falcoger)
 - Updated: UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
 - Updated: UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
+- [Add auto 5V on NRF24 apps (By Sil333033)]
 
 <a name="release">
 

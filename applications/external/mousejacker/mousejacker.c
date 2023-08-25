@@ -8,8 +8,8 @@
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
-#include <nrf24.h>
 #include <notification/notification_messages.h>
+#include <nrf24.h>
 #include "mousejacker_ducky.h"
 #include <dolphin/dolphin.h>
 #include "nrf24_mouse_jacker_icons.h"
@@ -65,7 +65,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         }
     } else if(plugin_state->addr_err) {
         canvas_draw_str_aligned(
-            canvas, 10, 10, AlignLeft, AlignBottom, "Error: No nrfsniff folder");
+            canvas, 10, 10, AlignLeft, AlignBottom, "Error: No nrf24sniff folder");
         canvas_draw_str_aligned(canvas, 10, 20, AlignLeft, AlignBottom, "or addresses.txt file");
         canvas_draw_str_aligned(
             canvas, 10, 30, AlignLeft, AlignBottom, "loading error / empty file");
@@ -291,6 +291,12 @@ int32_t mousejacker_app(void* p) {
         return 255;
     }
 
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     // Set system callbacks
@@ -386,13 +392,17 @@ int32_t mousejacker_app(void* p) {
     nrf24_deinit();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
-    furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_STORAGE);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
+
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }
