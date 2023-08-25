@@ -94,13 +94,23 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         setup-python-dependencies: true
-        debug: true
+        #debug: true
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
 
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
+
+    - name: Restore cached FW
+      id: cache-fw-restore
+      uses: actions/cache/restore@v3
+      with:
+        path: |
+          ./build
+          ./dist
+          ./firmware
+        key: ${{ runner.os }}-fw
 
     - name: Build Firmware
       shell: bash
@@ -123,6 +133,16 @@ jobs:
       run: |
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 
+    
+    - name: Save cached FW
+      id: cache-primes-save
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          ./build
+          ./dist
+          ./firmware
+        key: ${{ steps.cache-fw-restore.outputs.cache-primary-key }}
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
     # If this step fails, then you should remove it and run the build manually (see below)
     #- name: Autobuild
@@ -148,7 +168,7 @@ jobs:
         #sha: ${{ github.sha }}
         output: "../results"
         check_name: "_"
-        upload-database: true
+        upload-database: false
         upload: 'failure-only'
         checkout_path: ${{ github.workspace }}
 
@@ -165,7 +185,7 @@ jobs:
         REF_NAME: ${{ env.REF_NAME }}
       with:
         category: "/language:${{matrix.language}}"
-        token: ${{ secrets.DEPENDABOT }}
+        #token: ${{ secrets.DEPENDABOT }}
         # Must be used only with sha
         #ref: ${{ env.REF_NAME }}
         #sha: ${{ github.sha }}
