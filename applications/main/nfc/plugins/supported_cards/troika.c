@@ -80,7 +80,7 @@ static bool troika_verify_type(Nfc* nfc, MfClassicType type) {
     bool verified = false;
 
     do {
-        TroikaCardConfig cfg;
+        TroikaCardConfig cfg = {};
         if(!troika_get_card_config(&cfg, type)) break;
 
         const uint8_t block_num = mf_classic_get_first_block_num_of_sector(cfg.data_sector);
@@ -119,34 +119,23 @@ static bool troika_read(Nfc* nfc, NfcDevice* device) {
     do {
         if(!mf_classic_detect_protocol(data->iso14443_3a_data, &data->type)) break;
 
-        TroikaCardConfig cfg;
+        TroikaCardConfig cfg = {};
         if(!troika_get_card_config(&cfg, data->type)) break;
 
-        MfClassicKey key = {0};
-        nfc_util_num2bytes(cfg.keys[cfg.data_sector].a, COUNT_OF(key.data), key.data);
+        MfClassicDeviceKeys keys = {};
+        for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
+            nfc_util_num2bytes(cfg.keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
+            nfc_util_num2bytes(cfg.keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
+        }
+        keys.key_a_mask = 0xFFFFFFFFFFFFFFFFU;
+        keys.key_b_mask = 0xFFFFFFFFFFFFFFFFU;
 
-        const uint8_t block_num_start = mf_classic_get_first_block_num_of_sector(cfg.data_sector);
-        const uint8_t block_num_end = block_num_start + 2;
-
-        uint8_t block_num;
-        for(block_num = block_num_start; block_num < block_num_end; ++block_num) {
-            MfClassicBlock block;
-            MfClassicError error;
-
-            error = mf_classic_poller_read_block(nfc, block_num, &key, MfClassicKeyTypeA, &block);
-
-            if(error != MfClassicErrorNone) {
-                FURI_LOG_D(TAG, "Failed to read block %u: %d", block_num, error);
-                break;
-            }
-
-            mf_classic_set_block_read(data, block_num, &block);
+        MfClassicError error = mf_classic_poller_read(nfc, &keys, data);
+        if(error != MfClassicErrorNone) {
+            FURI_LOG_W(TAG, "Failed to read data");
+            break;
         }
 
-        if(block_num != block_num_end) break;
-
-        mf_classic_set_key_found(
-            data, cfg.data_sector, MfClassicKeyTypeA, cfg.keys[cfg.data_sector].a);
         nfc_device_set_data(device, NfcProtocolMfClassic, data);
 
         is_read = true;
@@ -166,7 +155,7 @@ static bool troika_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     do {
         // Verify card type
-        TroikaCardConfig cfg;
+        TroikaCardConfig cfg = {};
         if(!troika_get_card_config(&cfg, data->type)) break;
 
         // Verify key
