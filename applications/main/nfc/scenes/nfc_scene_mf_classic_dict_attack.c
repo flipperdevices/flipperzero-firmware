@@ -21,8 +21,7 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
 
     NfcApp* instance = context;
     if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventDictAttackCardDetected);
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardDetected);
     } else if(mfc_event->type == MfClassicPollerEventTypeCardLost) {
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardLost);
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
@@ -60,6 +59,8 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
     } else if(mfc_event->type == MfClassicPollerEventTypeNextSector) {
         mf_dict_rewind(instance->mf_dict_context.dict);
         instance->mf_dict_context.dict_keys_current = 0;
+        instance->mf_dict_context.current_sector =
+            mfc_event->data->next_sector_data.current_sector;
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
     } else if(mfc_event->type == MfClassicPollerEventTypeFoundKeyA) {
@@ -193,10 +194,10 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 dolphin_deed(DolphinDeedNfcReadSuccess);
                 consumed = true;
             }
-        } else if(event.event == NfcCustomEventDictAttackCardDetected) {
+        } else if(event.event == NfcCustomEventCardDetected) {
             dict_attack_set_card_state(instance->dict_attack, true);
             consumed = true;
-        } else if(event.event == NfcCustomEventDictAttackCardNotDetected) {
+        } else if(event.event == NfcCustomEventCardLost) {
             dict_attack_set_card_state(instance->dict_attack, false);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackDataUpdate) {

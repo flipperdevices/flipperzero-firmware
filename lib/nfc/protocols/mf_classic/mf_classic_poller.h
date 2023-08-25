@@ -51,7 +51,6 @@ typedef struct {
 
 typedef struct {
     uint8_t current_sector;
-    uint8_t total_sectors;
 } MfClassicPollerEventDataDictAttackNextSector;
 
 typedef struct {

@@ -7,16 +7,6 @@ typedef enum {
     // Mf classic dict attack events
     NfcCustomEventDictAttackComplete,
     NfcCustomEventDictAttackSkip,
-    NfcCustomEventDictAttackCardDetected,
-    NfcCustomEventDictAttackCardNotDetected,
-    NfcCustomEventDictAttackFoundKeyA,
-    NfcCustomEventDictAttackFoundKeyB,
-    NfcCustomEventDictAttackNewSector,
-    NfcCustomEventDictAttackNewKeyBatch,
-    NfcCustomEventDictAttackKeyAttackStart,
-    NfcCustomEventDictAttackKeyAttackStop,
-    NfcCustomEventDictAttackKeyAttackNextSector,
-
     NfcCustomEventDictAttackDataUpdate,
 
     NfcCustomEventCardDetected,
