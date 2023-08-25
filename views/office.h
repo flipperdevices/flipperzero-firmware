@@ -17,9 +17,15 @@ typedef enum {
 }CameraMovement;
 
 typedef struct {
-    uint8_t camera_x; // coordinate for drawing
-    signed char location; // left, center or right
+    uint8_t camera_x;                       // coordinate for drawing
+    signed char location;                   // left, center or right
     CameraMovement camera_moving_direction; // for office view
+    signed char left_door_y;                // for door animation
+    signed char right_door_y;               // for door animation
+    uint8_t left_door_counter;              // for door animation
+    uint8_t right_door_counter;             // for door animation
+    signed char left_door_state;    // -1 is up, 1 is down, 0 is static
+    signed char right_door_state;   // -1 is up, 1 is down, 0 is static
 }Office;
 
 

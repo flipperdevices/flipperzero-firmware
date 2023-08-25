@@ -26,8 +26,7 @@ typedef struct {
     Locations cursor;   // current camera
     signed char cursor_x; // for camera navigation
     signed char cursor_y; // for camera navigation too
-    bool noise; // for when animatronics move
-    FuriTimer* noise_timer;
+    FuriTimer* noise_timer; // Noise when animatronics move
 }Cameras;
 
 void draw_cameras(Canvas* canvas, void* ctx);

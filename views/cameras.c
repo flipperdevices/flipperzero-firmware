@@ -30,22 +30,24 @@ void draw_cameras(Canvas* canvas, void* ctx) {
     snprintf(time, 11, "0%u:00 AM", fnaf->hour);
     canvas_draw_str(canvas, 85, 52, time);
     if (fnaf->cameras->cursor != cam6 && fnaf->cameras->cursor != cam5) {
-        uint8_t y = 20;
-        if (fnaf->animatronics->location[Bonnie] == fnaf->cameras->cursor) {
-            canvas_draw_str(canvas, 85, y, "Bonnie");
-            y += 9;
-        }
-        if (fnaf->animatronics->location[Chica] == fnaf->cameras->cursor) {
-            canvas_draw_str(canvas, 85, y, "Chica");
-            y += 9;
-        }
-        if (fnaf->animatronics->location[Freddy] == fnaf->cameras->cursor) {
-            canvas_draw_str(canvas, 85, y, "Freddy");
-            y += 9;
-        }
-        if (fnaf->animatronics->location[Foxy] == 3 && fnaf->cameras->cursor == cam2A) {
-            canvas_draw_str(canvas, 85, y, "Foxy runs");
-            y += 9;
+        if (!furi_timer_is_running(fnaf->cameras->noise_timer)) {
+            uint8_t y = 20;
+            if (fnaf->animatronics->location[Bonnie] == fnaf->cameras->cursor) {
+                canvas_draw_str(canvas, 85, y, "Bonnie");
+                y += 9;
+            }
+            if (fnaf->animatronics->location[Chica] == fnaf->cameras->cursor) {
+                canvas_draw_str(canvas, 85, y, "Chica");
+                y += 9;
+            }
+            if (fnaf->animatronics->location[Freddy] == fnaf->cameras->cursor) {
+                canvas_draw_str(canvas, 85, y, "Freddy");
+                y += 9;
+            }
+            if (fnaf->animatronics->location[Foxy] == 3 && fnaf->cameras->cursor == cam2A) {
+                canvas_draw_str(canvas, 85, y, "Foxy runs");
+                y += 9;
+            }
         }
     } else if (fnaf->cameras->cursor == cam6) {
         canvas_set_font(canvas, FontSecondary);
@@ -209,6 +211,5 @@ void cameras_input(void* ctx) {
 }
 
 void noise_callback(void* ctx) {
-    Fnaf* fnaf = ctx;
-    fnaf->cameras->noise = false;
+    UNUSED(ctx);
 }

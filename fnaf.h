@@ -16,7 +16,8 @@
 #define chica_time 4980
 #define freddy_time 3020
 #define foxy_time 5010
-#define hour_time 9000 // for tests, actually 90000
+#define hour_time 9000  // for tests, actually 90000
+#define noise_time 4500 // something around this idk
 
 #define SWITCH_VIEW(view) switch_view(fnaf, view)
 
