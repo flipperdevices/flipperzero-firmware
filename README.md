@@ -25,5 +25,9 @@ Flipper Zero  | SD Card
 ## Usage ##
 
 Whenever an sd card is connected it is required make a "Init", if the operation is successul in the "status" tab R1 is "NO ERROR" and it is possible execute other commands.
+
 "Lock" and "Unlock" work with password set in namesake tab.
+
 Force Erase allow the removal of unknown password from SD but erases all content.
+
+After the first save, the password is stored in apps_data/sdspi/pwd.txt. you can change it to use characters not found on the flipper keyboard.
