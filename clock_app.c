@@ -551,6 +551,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(
                 canvas, 15, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         }
+        furi_string_free(str);
     }
     if(state->faceType >= 4) {
         canvas_set_color(canvas, ColorBlack);
