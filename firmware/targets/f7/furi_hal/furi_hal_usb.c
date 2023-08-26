@@ -17,6 +17,7 @@
 typedef enum {
     UsbApiEventTypeSetConfig,
     UsbApiEventTypeGetConfig,
+    UsbApiEventTypeGetConfigContext,
     UsbApiEventTypeLock,
     UsbApiEventTypeUnlock,
     UsbApiEventTypeIsLocked,
@@ -161,6 +162,21 @@ FuriHalUsbInterface* furi_hal_usb_get_config() {
     UsbApiEventMessage msg = {
         .lock = api_lock_alloc_locked(),
         .type = UsbApiEventTypeGetConfig,
+        .return_data = &return_data,
+    };
+
+    furi_hal_usb_send_message(&msg);
+    return return_data.void_value;
+}
+
+void* furi_hal_usb_get_config_context() {
+    UsbApiEventReturnData return_data = {
+        .void_value = NULL,
+    };
+
+    UsbApiEventMessage msg = {
+        .lock = api_lock_alloc_locked(),
+        .type = UsbApiEventTypeGetConfigContext,
         .return_data = &return_data,
     };
 
@@ -410,6 +426,9 @@ static void usb_process_message(UsbApiEventMessage* message) {
         break;
     case UsbApiEventTypeGetConfig:
         message->return_data->void_value = usb.interface;
+        break;
+    case UsbApiEventTypeGetConfigContext:
+        message->return_data->void_value = usb.interface_context;
         break;
     case UsbApiEventTypeLock:
         FURI_LOG_I(TAG, "Mode lock");

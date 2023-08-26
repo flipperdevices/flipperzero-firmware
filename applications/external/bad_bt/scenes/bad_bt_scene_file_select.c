@@ -1,5 +1,4 @@
 #include "../bad_bt_app.h"
-#include <furi_hal_power.h>
 #include <storage/storage.h>
 
 static bool bad_bt_file_select(BadBtApp* bad_bt) {

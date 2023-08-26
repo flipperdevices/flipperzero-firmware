@@ -25,11 +25,11 @@ uint8_t BAD_BT_BOUND_MAC[BAD_BT_MAC_LEN] = FURI_HAL_BT_EMPTY_MAC_ADDR;
 
 // Delays for waiting between HID key press and key release
 const uint8_t bt_hid_delays[LevelRssiNum] = {
-    60, // LevelRssi122_100
-    55, // LevelRssi99_80
-    50, // LevelRssi79_60
-    47, // LevelRssi59_40
-    34, // LevelRssi39_0
+    45, // LevelRssi122_100
+    38, // LevelRssi99_80
+    30, // LevelRssi79_60
+    26, // LevelRssi59_40
+    21, // LevelRssi39_0
 };
 
 uint8_t bt_timeout = 0;
@@ -284,6 +284,7 @@ static bool ducky_set_bt_id(BadBtScript* bad_bt, const char* line) {
             return false;
         }
     }
+    furi_hal_bt_reverse_mac_addr(cfg->bt_mac);
 
     strlcpy(cfg->bt_name, line + mac_len, BAD_BT_NAME_LEN);
     FURI_LOG_D(WORKER_TAG, "set bt id: %s", line);
