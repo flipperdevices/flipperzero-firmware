@@ -24,9 +24,32 @@ cell_t sdInputChar(FileStream *Stream)
 
 FileStream *sdOpenFile(const char *FileName, const char *Mode)
 {
-	if (strcmp(Mode, "r") != 0 && strcmp(Mode, "rb") != 0) {
-		/* we only support reading */
-    		UNIMPLEMENTED("sdOpenFile for writing");
+	FS_AccessMode am = FSAM_READ;
+	FS_OpenMode om = FSOM_OPEN_EXISTING;
+
+	if (strcmp(Mode, "r") == 0 || strcmp(Mode, "rb") == 0) {
+		am = FSAM_READ;
+		om = FSOM_OPEN_EXISTING;
+	} else if (strcmp(Mode, "r+") == 0 || strcmp(Mode, "r+b") == 0 ||
+			strcmp(Mode, "rb+") == 0) {
+		am = FSAM_READ_WRITE;
+		om = FSOM_OPEN_EXISTING;
+	} else if (strcmp(Mode, "w") == 0 || strcmp(Mode, "wb") == 0) {
+		am = FSAM_WRITE;
+		om = FSOM_CREATE_ALWAYS;
+	} else if (strcmp(Mode, "w+") == 0 || strcmp(Mode, "w+b") == 0 ||
+			strcmp(Mode, "wb+") == 0) {
+		am = FSAM_READ_WRITE;
+		om = FSOM_CREATE_ALWAYS;
+	} else if (strcmp(Mode, "a") == 0 || strcmp(Mode, "ab") == 0) {
+		am = FSAM_READ_WRITE;
+		om = FSOM_OPEN_APPEND;
+	} else if (strcmp(Mode, "a+") == 0 || strcmp(Mode, "a+b") == 0 ||
+			strcmp(Mode, "ab+") == 0) {
+		am = FSAM_READ_WRITE;
+		om = FSOM_OPEN_APPEND;
+	} else {
+		UNIMPLEMENTED("sdOpenFile unsupported mode");
 		return NULL;
 	}
 
@@ -35,7 +58,7 @@ FileStream *sdOpenFile(const char *FileName, const char *Mode)
 		return NULL;
 	}
 
-	if (!storage_file_open(ret, FileName, FSAM_READ, FSOM_OPEN_EXISTING)) {
+	if (!storage_file_open(ret, FileName, am, om)) {
 		storage_file_close(ret);
 		storage_file_free(ret);
 		return NULL;
@@ -47,6 +70,10 @@ FileStream *sdOpenFile(const char *FileName, const char *Mode)
 cell_t sdFlushFile(FileStream *Stream)
 {
 	TOUCH(Stream);
+	/*if (!storage_file_sync(Stream)) {
+		return EOF;
+	}*/
+
 	return 0;
 }
 
@@ -63,12 +90,13 @@ cell_t sdReadFile(void *ptr, cell_t Size, int32_t nItems, FileStream *Stream)
 
 cell_t sdWriteFile(void *ptr, cell_t Size, int32_t nItems, FileStream *Stream)
 {
-	UNIMPLEMENTED("sdWriteFile");
-	TOUCH(ptr);
-	TOUCH(Size);
-	TOUCH(nItems);
-	TOUCH(Stream);
-	return 0;
+	if (Size != 1) {
+		// unsupported
+		UNIMPLEMENTED("sdWriteFile with Size != 1");
+		return 0;
+	}
+
+	return storage_file_write(Stream, ptr, nItems);
 }
 
 cell_t sdSeekFile(FileStream *Stream, file_offset_t Position, int32_t Mode)
@@ -82,8 +110,12 @@ cell_t sdSeekFile(FileStream *Stream, file_offset_t Position, int32_t Mode)
 	case PF_SEEK_CUR:
 		from_start = false;
 		break;
+	case PF_SEEK_END:
+		from_start = true;
+		Position += storage_file_size(Stream);
+		break;
 	default:
-		UNIMPLEMENTED("sdSeekFile with given mode");
+		UNIMPLEMENTED("sdSeekFile unsupported mode");
 		return -1;
 	}
 
@@ -109,23 +141,33 @@ cell_t sdCloseFile(FileStream *Stream)
 
 cell_t sdDeleteFile(const char *FileName)
 {
-	UNIMPLEMENTED("sdDeleteFile");
-	TOUCH(FileName);
-	return -1;
+	if (storage_common_remove(furi_record_open(RECORD_STORAGE), FileName)
+			!= FSE_OK) {
+		return -1;
+	}
+
+	return 0;
 }
 
 cell_t sdRenameFile(const char *OldName, const char *NewName)
 {
-	UNIMPLEMENTED("sdRenameFile");
-	TOUCH(OldName);
-	TOUCH(NewName);
-	return -1;
+	if (storage_common_rename(furi_record_open(RECORD_STORAGE), OldName,
+				NewName) != FSE_OK) {
+		return -1;
+	}
+
+	return 0;
 }
 
 ThrowCode sdResizeFile(FileStream *File, uint64_t NewSize)
 {
-	UNIMPLEMENTED("sdResizeFile");
-	TOUCH(File);
-	TOUCH(NewSize);
-	return THROW_RESIZE_FILE;
+	if (sdSeekFile(File, NewSize, PF_SEEK_SET) != 0) {
+		return THROW_RESIZE_FILE;
+	}
+
+	if (!storage_file_truncate(File)) {
+		return THROW_RESIZE_FILE;
+	}
+
+	return 0;
 }
