@@ -1,10 +1,9 @@
 # flipper-zero-mh-z19
 Application for measuring carbon dioxide (CO2) with mh-z19 sensor and Flipper zero
 
-![Ok ppm](.github/assets/Ok.png)
-![Bad ppm](.github/assets/bad.png)
-![Very bad ppm](.github/assets/Very.png)
-![Setup](.github/assets/setup.png)
+![Ok ppm](assets/Ok.png)
+![Very bad ppm](assets/Very.png)
+![Setup](assets/setup.png)
 
 
 
@@ -19,7 +18,7 @@ git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
 ```
 - Move mh_z19 folder to flipperzero-firmware/application_user folder
 ```bash
-mv flipper-zero-mh-z19/mh_z19 flipperzero-firmware/application_user
+mkdir -p flipperzero-firmware/application_user/mh_z19 && mv flipper-zero-mh-z19/* flipperzero-firmware/application_user/mh_z19
 ```
 - Connect flipper zero via USB to your computer
 - Build and flash to device firmware
@@ -37,6 +36,6 @@ sensor <-> flipper zero
 GND <-> GND (8 pin)
 PWM <-> A6 (3 pin)
 ```
-![setup](.github/assets/setup2.jpeg)
+![setup](assets/setup2.jpeg)
 - Open in flipper zero:
 Applications -> GPIO -> [MH-Z19] CO2 sensor

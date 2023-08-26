@@ -3,8 +3,8 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <gui/gui.h>
 #include <gui/elements.h>
+#include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
 
@@ -90,7 +90,8 @@ void mh_z19app_draw_callback(Canvas* canvas, void* ctx) {
             1,
             AlignLeft,
             AlignTop,
-            "Connect sensor MH-Z19 to pins:\n5V -> 1\nGND -> 8\nPWM -> 3\nPress center button...");
+            "Connect sensor MH-Z19 to pins:\n5V -> 1\nGND -> 8\nPWM -> 3\nPress "
+            "center button...");
         return;
     } else if(app->current_page == 1) {
         canvas_set_font(canvas, FontPrimary);
@@ -100,7 +101,8 @@ void mh_z19app_draw_callback(Canvas* canvas, void* ctx) {
             1,
             AlignLeft,
             AlignTop,
-            "Select sensor measuring range by arrows.\nAvailable:\n\t- 0-2000ppm\n\t- 0-5000ppm\nPress center button...");
+            "Select sensor measuring range by arrows.\nAvailable:\n\t- "
+            "0-2000ppm\n\t- 0-5000ppm\nPress center button...");
         return;
     }
 
@@ -178,7 +180,8 @@ MHZ19App* mh_z19app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
-    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
+    // Enable 5v power, multiple attempts to avoid issues with power chip
+    // protection false triggering
     uint8_t attempts = 0;
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();

@@ -29,10 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0825-0216-0.90.1-80794c3](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0826-0139-0.90.1-bb5de53](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-26 01:25 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-26 01:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-26 01:39 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-26 01:39 EST`
 - Updated: [Authenticator/TOTP v4.0.3 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - OFW: [Rfid: fix crash on broken key launch from archive #3012 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3012)
 - OFW: [AC OFF button #3010 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3010)
