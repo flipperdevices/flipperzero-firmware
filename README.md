@@ -177,8 +177,8 @@ Cody
 
 <!-- LINKS -->
 
-[amazon-esp32-cam-link-1]: https://amzn.to/3ODsCOZ
-[amazon-esp32-cam-link-2]: https://amzn.to/3OllPIE
+[amazon-esp32-cam-link-1]: https://amzn.to/44rBFrb
+[amazon-esp32-cam-link-2]: https://amzn.to/45nDR45
 [arduino-ide]: https://www.arduino.cc/en/software
 [flipper-zero-camera-suite-releases]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/releases
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
