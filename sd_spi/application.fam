@@ -9,7 +9,6 @@ App(
     # fap_version=(0, 1),  # (major, minor)
     fap_icon="sd_spi_app_10px.png",  # 10x10 1-bit PNG
     fap_description="SD SPI Lock Management",
-    # fap_author=" ",
-    # fap_weburl="https://github.com/",
+    # fap_weburl="https://github.com/Gl1tchub/Flipperzero-SD-SPI",
     # fap_icon_assets="images",  # Image assets to compile for this application
 )
