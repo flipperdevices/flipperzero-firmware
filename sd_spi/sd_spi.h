@@ -9,7 +9,7 @@
 
 #define VERSION_APP "0.1"
 #define DEVELOPED " "
-#define GITHUB "https://github.com/"
+#define GITHUB "github.com/Gl1tchub/Flipperzero-SD-SPI"
 
 
 typedef enum {
