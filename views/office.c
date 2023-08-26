@@ -125,8 +125,9 @@ static void draw_sides(Canvas* canvas, Fnaf* fnaf) {
 
 void office_draw(Canvas* canvas, void* ctx) {
     Fnaf* fnaf = ctx;
-    char time[8];
-    snprintf(time, 11, "0%u:00", fnaf->hour);
+    char time[7];
+    if (fnaf->hour != 0)snprintf(time, 7, "%u AM", fnaf->hour); else
+        snprintf(time, 7, "12 AM");
     char power[7];
     snprintf(power, 7, "%u%%", fnaf->electricity->power_left / 10);
 
@@ -156,11 +157,12 @@ void office_draw(Canvas* canvas, void* ctx) {
     canvas_draw_box(canvas, 0, 0, 23, 64);
     canvas_draw_box(canvas, 105, 0, 23, 64);
     canvas_set_color(canvas, 1);
-    canvas_draw_str(canvas, fnaf->office->camera_x + 52, 10, time);
+    canvas_draw_str_aligned(canvas, fnaf->office->camera_x + 64, 10, AlignCenter, AlignBottom, time);
     canvas_draw_str(canvas, 107, 62, power);
     uint8_t x = 17;
-    if (fnaf->electricity->power_draw < 5) {
-        for (uint8_t i = 0; i < fnaf->electricity->power_draw; i++) {
+    uint8_t power_usage = power_draw(fnaf);
+    if (power_usage < 5) {
+        for (uint8_t i = 0; i < power_usage; i++) {
             canvas_draw_box(canvas, x, 55, 4, 7);
             x -= 5;
         }
@@ -224,11 +226,13 @@ void office_input(void* ctx) {
             switch (fnaf->office->location) {
             case -1:
                 fnaf->electricity->left_light = !fnaf->electricity->left_light;
+                fnaf->electricity->right_light = false;
                 break;
             case 0:
                 break;
             case 1:
                 fnaf->electricity->right_light = !fnaf->electricity->right_light;
+                fnaf->electricity->left_light = false;
                 break;
             }
             break;
@@ -236,6 +240,7 @@ void office_input(void* ctx) {
             fnaf->office->camera_moving_direction = none;
             fnaf->electricity->left_light = false;
             fnaf->electricity->right_light = false;
+            fnaf->electricity->monitor = true;
             SWITCH_VIEW(cameras);
             break;
         case InputKeyBack:
@@ -285,7 +290,6 @@ void night_start(void* ctx) {
         fnaf->electricity->right_light = false;
         fnaf->electricity->monitor = false;
         fnaf->electricity->power_left = 999;
-        fnaf->electricity->power_draw = 1;
         fnaf->office->camera_moving_direction = none;
         fnaf->office->left_door_state = 0;
         fnaf->office->right_door_state = 0;
@@ -324,6 +328,50 @@ void timer_callback_foxy(void* ctx) {
     UNUSED(ctx);
 }
 
+void power_timer_callback(void* ctx) {
+    Fnaf* fnaf = ctx;
+    fnaf->electricity->power_left -= power_draw(fnaf);
+
+    switch (fnaf->progress) {
+    case 1:
+        if (fnaf->electricity->counter == 5) {
+            fnaf->electricity->power_left -= 1;
+            fnaf->electricity->counter = 0;
+        } else {
+            fnaf->electricity->counter += 1;
+        }
+        break;
+    case 2:
+        if (fnaf->electricity->counter == 4) {
+            fnaf->electricity->power_left -= 1;
+            fnaf->electricity->counter = 0;
+        } else {
+            fnaf->electricity->counter += 1;
+        }
+        break;
+    case 3:
+        if (fnaf->electricity->counter == 3) {
+            fnaf->electricity->power_left -= 1;
+            fnaf->electricity->counter = 0;
+        } else {
+            fnaf->electricity->counter += 1;
+        }
+        break;
+    case 4:
+    case 5:
+    case 6:
+        if (fnaf->electricity->counter == 2) {
+            fnaf->electricity->power_left -= 1;
+            fnaf->electricity->counter = 0;
+        } else {
+            fnaf->electricity->counter += 1;
+        }
+        break;
+    }
+
+    fnaf->electricity->counter += 1;
+}
+
 void hourly_timer_callback(void* ctx) {
     Fnaf* fnaf = ctx;
     if (fnaf->current_view == main_menu) {
@@ -349,6 +397,7 @@ void hourly_timer_callback(void* ctx) {
         dolphin_deed(DolphinDeedPluginGameWin);
         SWITCH_VIEW(night_complete);
         furi_timer_stop(fnaf->hourly_timer);
+        furi_timer_stop(fnaf->electricity->timer);
     }
     FURI_LOG_D(TAG, "Hour is %u", fnaf->hour);
 }

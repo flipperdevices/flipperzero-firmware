@@ -45,4 +45,6 @@ void timer_callback_freddy(void* ctx);
 
 void timer_callback_foxy(void* ctx);
 
+void power_timer_callback(void* ctx);
+
 void hourly_timer_callback(void* ctx);

@@ -18,6 +18,7 @@
 #define foxy_time 5010
 #define hour_time 9000  // for tests, actually 90000
 #define noise_time 4500 // something around this idk
+#define power_time 1000
 
 #define SWITCH_VIEW(view) switch_view(fnaf, view)
 
@@ -34,7 +35,8 @@ typedef struct {
     bool right_light;
     bool monitor;
     uint16_t power_left;
-    uint8_t power_draw;
+    uint8_t counter;
+    FuriTimer* timer;
 }Electricity;
 
 typedef struct {
@@ -83,3 +85,5 @@ typedef struct {
 }NightDifficulty;
 
 void switch_view(Fnaf* fnaf, Views view);
+
+uint8_t power_draw(Fnaf* fnaf);

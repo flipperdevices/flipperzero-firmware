@@ -57,6 +57,10 @@ static void stop_all_timers(Fnaf* fnaf) {
         FURI_LOG_D(TAG, "Hourly timer stopped");
         furi_timer_stop(fnaf->hourly_timer);
     }
+    if (furi_timer_is_running(fnaf->electricity->timer)) {
+        FURI_LOG_D(TAG, "Electricity timer stopped");
+        furi_timer_stop(fnaf->electricity->timer);
+    }
 }
 
 void switch_view(Fnaf* fnaf, Views view) {
@@ -73,6 +77,11 @@ void switch_view(Fnaf* fnaf, Views view) {
         stop_all_timers(fnaf);
         fnaf->hour = 0;
     }
+}
+
+uint8_t power_draw(Fnaf* fnaf) {
+    return (1 + fnaf->electricity->left_door + fnaf->electricity->left_light + fnaf->electricity->monitor + fnaf->electricity->right_door + fnaf->electricity->right_light);
+
 }
 
 void save_progress(Fnaf* fnaf) {
@@ -109,6 +118,7 @@ void fnaf_alloc(Fnaf* fnaf) {
     fnaf->cameras = malloc(sizeof(*fnaf->cameras));
     fnaf->hourly_timer = furi_timer_alloc(hourly_timer_callback, FuriTimerTypePeriodic, fnaf);
     fnaf->cameras->noise_timer = furi_timer_alloc(noise_callback, FuriTimerTypeOnce, fnaf);
+    fnaf->electricity->timer = furi_timer_alloc(power_timer_callback, FuriTimerTypePeriodic, fnaf);
     UNUSED(fnaf->hourly_timer);
 
     SWITCH_VIEW(main_menu);
@@ -117,6 +127,8 @@ void fnaf_alloc(Fnaf* fnaf) {
 }
 
 void fnaf_free(Fnaf* fnaf) {
+
+    free(fnaf->electricity->timer);
     free(fnaf->electricity);
 
     for (uint8_t i = 0; i < 4; i++) {

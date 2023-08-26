@@ -26,9 +26,10 @@ void draw_cameras(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 84, 10, camera_names[fnaf->cameras->cursor]);
     canvas_set_font(canvas, FontSecondary);
 
-    char time[11];
-    snprintf(time, 11, "0%u:00 AM", fnaf->hour);
-    canvas_draw_str(canvas, 85, 52, time);
+    char time[7];
+    if (fnaf->hour != 0)snprintf(time, 7, "%u AM", fnaf->hour); else
+        snprintf(time, 7, "12 AM");
+    canvas_draw_str_aligned(canvas, 125, 52, AlignRight, AlignBottom, time);
     if (fnaf->cameras->cursor != cam6 && fnaf->cameras->cursor != cam5) {
         if (!furi_timer_is_running(fnaf->cameras->noise_timer)) {
             uint8_t y = 20;
@@ -98,11 +99,12 @@ void draw_cameras(Canvas* canvas, void* ctx) {
 
     char power[7];
     snprintf(power, 7, "%u%%", fnaf->electricity->power_left / 10);
-    canvas_draw_str(canvas, 107, 62, power);
+    canvas_draw_str_aligned(canvas, 125, 62, AlignRight, AlignBottom, power);
 
     uint8_t x = 98;
-    if (fnaf->electricity->power_draw < 5) {
-        for (uint8_t i = 0; i < fnaf->electricity->power_draw; i++) {
+    uint8_t power_usage = power_draw(fnaf);
+    if (power_usage < 5) {
+        for (uint8_t i = 0; i < power_usage; i++) {
             canvas_draw_box(canvas, x, 55, 4, 7);
             x -= 5;
         }
@@ -193,6 +195,7 @@ void cameras_input(void* ctx) {
             fnaf->cameras->cursor_y += 1;
             break;
         case InputKeyOk:
+            fnaf->electricity->monitor = false;
             SWITCH_VIEW(office);
             break;
         default:
