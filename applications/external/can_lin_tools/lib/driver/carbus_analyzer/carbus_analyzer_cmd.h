@@ -1,7 +1,33 @@
 #pragma once
 
+
+// Device name CH-ODB-FD 
+// Device type 0x14
+// Device MCU stm32G431
+
+// Device name CH-P.FD-L2
+// Device type 0x06
+// Device MCU stm32G473
+
+// Device name CH-P.M03
+// Device type 0x13
+// Device MCU stm32F407
+
+// Device name Coder
+// Device type 0xF2
+// Device MCU stm32G473
+
+// Device name Coder
+// Device type 0xF0
+// Device MCU stm32F105
+
+// Device name Coder
+// Device type 0xF3
+// Device MCU stm32F407
+
+
 #define CBA_CMD_GET_PROTOCOL_TYPE_RESPONSE 0x5A
-#define CBA_CMD_GET_DEVICE_TYPE_RESPONSE 0x14
+#define CBA_CMD_GET_DEVICE_TYPE_RESPONSE 0x14 
 #define CBA_CMD_GET_DEVICE_NAME_RESPONSE "CH-ODB-FD\0"
 #define CBA_CMD_GET_DEVICE_VERSION_RESPONSE "2.1.1.13\0"
 #define CBA_CMD_GET_DEVICE_SERIAL_RESPONSE \
@@ -29,17 +55,27 @@
 #define CBA_CMD_UNKNOW_0x4A 0x4A
 #define CBA_CMD_UNKNOW_0x4B 0x4B
 
-#define CBA_CHANNEL_0 1<<4
-#define CBA_CHANNEL_1 1<<5
-#define CBA_CHANNEL_2 1<<6
-#define CBA_CHANNEL_3 1<<7
+#define CBA_CHANNEL_0 0b1<<4 //0bF000 DDDD channel_0 - ?
+#define CBA_CHANNEL_1 0b1<<5 //0bF010 DDDD channel_1
+#define CBA_CHANNEL_2 0b1<<6 //0bF100 DDDD channel_2
+#define CBA_CHANNEL_3 0b11<<7 //0bF110 DDDD channel_3
 
 // Config LIN bus | CBA_CHANNEL
 #define CBA_CMD_CONFIG_LIN_BUS_BAUDRATE 0x2
+#define CBA_CMD_CONFIG_LIN_BUS_PULLUP_DATA_LINE 0x6
 #define CBA_CMD_CONFIG_LIN_BUS_CHECKSUM_TYPE 0x7
-#define CBA_CMD_CONFIG_LIN_BUS_CHECKSUM_TYPE_CLASSIC 0x01
-#define CBA_CMD_CONFIG_LIN_BUS_CHECKSUM_TYPE_ENHANCED 0x02
 #define CBA_CMD_CONFIG_LIN_BUS_IDLE_DELAY 0x8
+
+typedef enum {
+    CBA_CONFIG_LIN_BUS_CHECKSUM_TYPE_CLASSIC = 0x01,
+    CBA_CONFIG_LIN_BUS_CHECKSUM_TYPE_ENHANCED = 0x02,
+} CBA_CONFIG_LIN_BUS_CHECKSUM_TYPE;
+
+typedef enum {
+    CBA_CONFIG_LIN_BUS_PULLUP_DATA_LINE_OFF = 0x00,
+    CBA_CONFIG_LIN_BUS_PULLUP_DATA_LINE_ON = 0x02,
+} CBA_CONFIG_LIN_BUS_PULLUP_DATA_LINE;
+
 
 typedef enum {
     CBA_CONFIG_LIN_BUS_IDLE_DELAY_0 = 0x00,
@@ -55,6 +91,7 @@ typedef enum {
 
 //Config CAN bus | CBA_CHANNEL
 #define CBA_CMD_CONFIG_CAN_BUS_BAUDRATE_NORMAL 0x2
+#define CBA_CMD_CONFIG_CAN_BUS_TERM_120_HOM 0x5
 #define CBA_CMD_CONFIG_CAN_BUS_BAUDRATE_FD 0x03
 #define CBA_CMD_CONFIG_CAN_LISNEN_ONLY 0x9
 #define CBA_CMD_CONFIG_CAN_BUS_MODE 0x0A
@@ -69,6 +106,11 @@ typedef enum {
     CBA_CONFIG_CAN_BUS_MODE_CANFD = 0x01,
     CBA_CONFIG_CAN_BUS_MODE_CANFD_BAUDRATE = 0x02,
 } CBA_CONFIG_CAN_BUS_MODE;
+
+typedef enum {
+    CBA_CONFIG_CAN_BUS_TERM_120_HOM_OFF = 0x00,
+    CBA_CONFIG_CAN_BUS_TERM_120_ON = 0x01,
+} CBA_CONFIG_CAN_BUS_TERM_120_HOM;
 
 typedef enum {
     CarBusAnalyzerBitrateOff = 0,

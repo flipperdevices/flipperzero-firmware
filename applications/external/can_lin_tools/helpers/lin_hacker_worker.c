@@ -161,42 +161,68 @@ static int32_t lin_hacker_worker_thread(void* context) {
 
     FURI_LOG_I(TAG, "Start");
 
-    furi_hal_console_disable();
+    //furi_hal_console_disable();
+    furi_hal_console_deinit();
+
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
     furi_hal_uart_deinit(FuriHalUartIdUSART1);
+
+    furi_hal_console_init(FuriHalUartIdLPUART1, CONSOLE_BAUDRATE);
+    furi_hal_console_enable();
+
     //furi_hal_uart_set_br(FuriHalUartIdUSART1, 9600);
     //furi_hal_uart_set_irq_cb(uart_ch, usb_uart_on_irq_cb, usb_uart);
 
-    LinBus* lin_bus = lin_bus_init(LinBusModeMaster, 9600);
+    //LinBus* lin_bus = lin_bus_init(LinBusModeMaster, 9600);
+    LinBus* lin_bus = lin_bus_init(LinBusModeSlave, 9600);
 
     furi_delay_ms(100);
     //uint8_t temp = 0;
 
-    LinBusFrame frame = {
-        .id = 0x03,
-        .data = {0x01, 0x02, 0x03, 0x04, 0x05},
-        .length = 5,
-        .crc_type = LinBusChecksumTypeClassic,
-        //.response_length = 2,
-        .frame_type = LinBusMasterResponse,
-    };
+    // LinBusFrame frame = {
+    //     .id = 0x03,
+    //     .data = {0x01, 0x02, 0x03, 0x04, 0x05},
+    //     .length = 5,
+    //     .crc_type = LinBusChecksumTypeClassic,
+    //     //.response_length = 2,
+    //     .frame_type = LinBusMasterResponse,
+    // };
 
-    LinBusFrame frame1 = {
-        .id = 0x01,
-        .data = {0x01, 0x02, 0x03, 0x04, 0x05},
-        .length = 5,
-        .crc_type = LinBusChecksumTypeClassic,
-        .response_length = 2,
-        .frame_type = LinBusMasterRequest,
-    };
-
+    // LinBusFrame frame1 = {
+    //     .id = 0x01,
+    //     .data = {0x01, 0x02, 0x03, 0x04, 0x05},
+    //     .length = 5,
+    //     .crc_type = LinBusChecksumTypeClassic,
+    //     .response_length = 2,
+    //     .frame_type = LinBusMasterRequest,
+    // };
+    size_t count_frame = 0;
     while(instance->worker_running) {
-        if(lin_bus_tx_async(lin_bus, &frame)) {
-            //frame.data[0]++;
-            furi_delay_ms(100);
-            lin_bus_tx_async(lin_bus, &frame1);
-            furi_delay_ms(100);
+        size_t len = lin_bus_get_rx_frame_available(lin_bus);
+        if(len > 0) {
+            LinBusFrame frame = lin_bus_get_rx_frame_read(lin_bus);
+            count_frame++;
+            FURI_LOG_I(TAG, "count_frame: %d", count_frame);
+            FURI_LOG_I(TAG, "len: %d", len);
+            FURI_LOG_I(TAG, "id: %02X", frame.id);
+            FURI_LOG_I(TAG, "length: %d", frame.length);
+            FURI_LOG_RAW_I("--> ");
+            for(uint8_t i = 0; i < frame.length; i++) {
+                
+                    FURI_LOG_RAW_I("%02X", frame.data[i]);
+            }
+            FURI_LOG_RAW_I("\r\n");
+            FURI_LOG_I(TAG, "crc: %02X", frame.crc);
         }
+        //furi_delay_ms(250);
+        
+        // if(lin_bus_tx_async(lin_bus, &frame)) {
+        //     //frame.data[0]++;
+        //     furi_delay_ms(100);
+        //     lin_bus_tx_async(lin_bus, &frame1);
+        //     furi_delay_ms(100);
+        // }
+
         // uint32_t events = furi_thread_flags_wait(
         //     LIN_HACKER_WORKER_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
 
@@ -254,8 +280,6 @@ static int32_t lin_hacker_worker_thread(void* context) {
         // }
     }
 
-    FURI_LOG_I(TAG, "Stop");
-
     lin_bus_deinit(lin_bus);
 
     //furi_hal_uart_set_irq_cb(uart_ch, NULL, NULL);
@@ -269,9 +293,13 @@ static int32_t lin_hacker_worker_thread(void* context) {
 
     //lin_hacker_free(can_hacker2);
 
-    furi_hal_uart_init(FuriHalUartIdUSART1, 9600);
-    furi_hal_console_enable();
+    //furi_hal_uart_init(FuriHalUartIdUSART1, 9600);
+    furi_hal_console_deinit();
+    furi_hal_console_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
+    //furi_hal_console_enable();
     lin_hacker_worker_vcp_cdc_deinit();
+
+    FURI_LOG_I(TAG, "Stop");
     return 0;
 }
 

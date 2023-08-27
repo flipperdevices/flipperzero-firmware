@@ -57,7 +57,7 @@ void furi_hal_console_enable() {
 }
 
 void furi_hal_console_disable() {
-    furi_checkkjkjk(furi_hal_console.initialized);
+    furi_check(furi_hal_console.initialized);
     furi_hal_uart_wait_tx_complete(furi_hal_console.channel);
     furi_hal_console.alive = false;
 }
