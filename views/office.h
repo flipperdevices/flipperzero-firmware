@@ -26,6 +26,12 @@ typedef struct {
     uint8_t right_door_counter;             // for door animation
     signed char left_door_state;    // -1 is up, 1 is down, 0 is static
     signed char right_door_state;   // -1 is up, 1 is down, 0 is static
+    FuriTimer* left_door_sound_timer;       // for icon
+    FuriTimer* right_door_sound_timer;      // for icon
+    FuriTimer* freddy_laugh_timer;          // for icon
+    FuriTimer* power_out_timer;             // for when power goes out
+    FuriTimer* power_out_max_timer;         // for when power goes out
+    bool is_light_on;                       // used when power goes out
 }Office;
 
 
@@ -48,3 +54,7 @@ void timer_callback_foxy(void* ctx);
 void power_timer_callback(void* ctx);
 
 void hourly_timer_callback(void* ctx);
+
+void power_out_callback(void* ctx);
+
+void power_out_max_callback(void* ctx);

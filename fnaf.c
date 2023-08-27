@@ -8,7 +8,6 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     Fnaf* fnaf = ctx;
 
     canvas_clear(canvas);
-    canvas_set_bitmap_mode(canvas, 1);
 
     switch (fnaf->current_view) {
     case main_menu:
@@ -26,7 +25,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     case night_complete:
         text_view(canvas, fnaf);
         break;
-    case screamer:
+    case jumpscare:
         canvas_draw_str(canvas, 33, 34, "Scary image");
         break;
     case game_over:
@@ -45,6 +44,13 @@ static void app_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(fnaf->event_queue, input_event, FuriWaitForever);
 }
 
+void stop_hourly_timer(Fnaf* fnaf) {
+    if (furi_timer_is_running(fnaf->hourly_timer)) {
+        FURI_LOG_D(TAG, "Hourly timer stopped");
+        furi_timer_stop(fnaf->hourly_timer);
+    }
+}
+
 void stop_all_timers(Fnaf* fnaf) {
     FURI_LOG_D(TAG, "stop_all_timers");
     for (uint8_t i = 0; i < 4; i++) {
@@ -53,10 +59,6 @@ void stop_all_timers(Fnaf* fnaf) {
             furi_timer_stop(fnaf->animatronics->timer[i]);
         }
     }
-    if (furi_timer_is_running(fnaf->hourly_timer)) {
-        FURI_LOG_D(TAG, "Hourly timer stopped");
-        furi_timer_stop(fnaf->hourly_timer);
-    }
     if (furi_timer_is_running(fnaf->electricity->timer)) {
         FURI_LOG_D(TAG, "Electricity timer stopped");
         furi_timer_stop(fnaf->electricity->timer);
@@ -64,6 +66,26 @@ void stop_all_timers(Fnaf* fnaf) {
     if (furi_timer_is_running(fnaf->cameras->noise_timer)) {
         FURI_LOG_D(TAG, "Noise timer stopped");
         furi_timer_stop(fnaf->cameras->noise_timer);
+    }
+    if (furi_timer_is_running(fnaf->office->left_door_sound_timer)) {
+        FURI_LOG_D(TAG, "Left door sound timer stopped");
+        furi_timer_stop(fnaf->office->left_door_sound_timer);
+    }
+    if (furi_timer_is_running(fnaf->office->right_door_sound_timer)) {
+        FURI_LOG_D(TAG, "Right door sound timer stopped");
+        furi_timer_stop(fnaf->office->right_door_sound_timer);
+    }
+    if (furi_timer_is_running(fnaf->office->freddy_laugh_timer)) {
+        FURI_LOG_D(TAG, "Freddy laugh timer stopped");
+        furi_timer_stop(fnaf->office->freddy_laugh_timer);
+    }
+    if (furi_timer_is_running(fnaf->office->power_out_timer)) {
+        FURI_LOG_D(TAG, "Power out timer stopped");
+        furi_timer_stop(fnaf->office->power_out_timer);
+    }
+    if (furi_timer_is_running(fnaf->office->power_out_max_timer)) {
+        FURI_LOG_D(TAG, "Power out max timer stopped");
+        furi_timer_stop(fnaf->office->power_out_max_timer);
     }
 }
 
@@ -76,11 +98,12 @@ void switch_view(Fnaf* fnaf, Views view) {
     } else if (fnaf->current_view == office && view == cameras) {
         // stop Foxy timer if running
     }
-    fnaf->current_view = view;
-    if (fnaf->current_view != cameras && fnaf->current_view != office) {
+    if (view != cameras && view != office) {
+        stop_hourly_timer(fnaf);
         stop_all_timers(fnaf);
         fnaf->hour = 0;
     }
+    fnaf->current_view = view;
 }
 
 uint8_t power_draw(Fnaf* fnaf) {
@@ -96,6 +119,11 @@ void load_progress(Fnaf* fnaf) {
     UNUSED(fnaf);
 }
 
+void empty_callback(void* ctx) {
+    UNUSED(ctx);
+    // Do nothing
+}
+
 void fnaf_alloc(Fnaf* fnaf) {
     fnaf->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
@@ -107,24 +135,26 @@ void fnaf_alloc(Fnaf* fnaf) {
     gui_add_view_port(fnaf->gui, fnaf->view_port, GuiLayerFullscreen);
 
     fnaf->animatronics = malloc(sizeof(*fnaf->animatronics));
+    fnaf->electricity = malloc(sizeof(*fnaf->electricity));
+    fnaf->office = malloc(sizeof(*fnaf->office));
+    fnaf->cameras = malloc(sizeof(*fnaf->cameras));
 
     fnaf->animatronics->timer[Bonnie] = furi_timer_alloc(timer_callback_bonnie, FuriTimerTypePeriodic, fnaf);
     fnaf->animatronics->timer[Chica] = furi_timer_alloc(timer_callback_chica, FuriTimerTypePeriodic, fnaf);
     fnaf->animatronics->timer[Freddy] = furi_timer_alloc(timer_callback_freddy, FuriTimerTypePeriodic, fnaf);
     fnaf->animatronics->timer[Foxy] = furi_timer_alloc(timer_callback_foxy, FuriTimerTypePeriodic, fnaf);
+    fnaf->office->right_door_sound_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
+    fnaf->office->left_door_sound_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
+    fnaf->office->freddy_laugh_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
+    fnaf->hourly_timer = furi_timer_alloc(hourly_timer_callback, FuriTimerTypePeriodic, fnaf);
+    fnaf->cameras->noise_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
+    fnaf->electricity->timer = furi_timer_alloc(power_timer_callback, FuriTimerTypePeriodic, fnaf);
+    fnaf->office->power_out_timer = furi_timer_alloc(power_out_callback, FuriTimerTypePeriodic, fnaf);
+    fnaf->office->power_out_max_timer = furi_timer_alloc(power_out_max_callback, FuriTimerTypeOnce, fnaf);
     UNUSED(fnaf->animatronics->timer[Bonnie]);
     UNUSED(fnaf->animatronics->timer[Chica]);
     UNUSED(fnaf->animatronics->timer[Freddy]);
     UNUSED(fnaf->animatronics->timer[Foxy]);
-
-    fnaf->electricity = malloc(sizeof(*fnaf->electricity));
-    fnaf->office = malloc(sizeof(*fnaf->office));
-    fnaf->cameras = malloc(sizeof(*fnaf->cameras));
-    fnaf->hourly_timer = furi_timer_alloc(hourly_timer_callback, FuriTimerTypePeriodic, fnaf);
-    fnaf->cameras->noise_timer = furi_timer_alloc(noise_callback, FuriTimerTypeOnce, fnaf);
-    fnaf->electricity->timer = furi_timer_alloc(power_timer_callback, FuriTimerTypePeriodic, fnaf);
-    UNUSED(fnaf->hourly_timer);
-
     SWITCH_VIEW(main_menu);
     fnaf->menu_cursor = 0;
     fnaf->electricity->power_left = 999;
@@ -132,16 +162,24 @@ void fnaf_alloc(Fnaf* fnaf) {
 
 void fnaf_free(Fnaf* fnaf) {
 
-    free(fnaf->electricity->timer);
-    free(fnaf->electricity);
-
     for (uint8_t i = 0; i < 4; i++) {
         free(fnaf->animatronics->timer[i]);
     }
     free(fnaf->animatronics);
+
+    free(fnaf->electricity->timer);
+    free(fnaf->electricity);
+
+    free(fnaf->office->left_door_sound_timer);
+    free(fnaf->office->right_door_sound_timer);
+    free(fnaf->office->freddy_laugh_timer);
+    free(fnaf->office->power_out_timer);
+    free(fnaf->office->power_out_max_timer);
     free(fnaf->office);
+
     free(fnaf->cameras->noise_timer);
     free(fnaf->cameras);
+
     free(fnaf->hourly_timer);
 
     view_port_enabled_set(fnaf->view_port, false);
@@ -183,7 +221,7 @@ int32_t flipperzero_fnaf(void* p) {
                 break;
             case night_complete:
                 break;
-            case screamer:
+            case jumpscare:
                 break;
             case game_over:
                 if (fnaf->event.key == InputKeyBack && fnaf->event.type == InputTypeShort) {
@@ -197,6 +235,7 @@ int32_t flipperzero_fnaf(void* p) {
         // view_port_update(fnaf->view_port);
     }
 
+    stop_hourly_timer(fnaf); // Just in case
     stop_all_timers(fnaf); // Just in case
     fnaf_free(fnaf);
     free(fnaf);

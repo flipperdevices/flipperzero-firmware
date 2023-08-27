@@ -108,20 +108,26 @@ static void power_out(Canvas* canvas, Fnaf* fnaf) {
         furi_crash("");
     }
     if (fnaf->office->camera_moving_direction != none) moving_animation(fnaf);
-    canvas_set_color(canvas, 1);
-    canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_office_128x64);
-    if (fnaf->counter_secondary > furi_get_tick() % 7 + 1) {
-        canvas_draw_icon(canvas, fnaf->office->camera_x + 11, 23, &I_power_out_freddy_8x7);
-        if (fnaf->counter_secondary > furi_get_tick() % 15 + 1) {
-            fnaf->counter_secondary = 0;
+    if (fnaf->office->is_light_on) {
+        canvas_set_color(canvas, 1);
+        canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_office_128x64);
+        if (fnaf->counter_secondary > furi_get_tick() % 7 + 1) {
+            canvas_draw_icon(canvas, fnaf->office->camera_x + 11, 23, &I_power_out_freddy_8x7);
+            if (fnaf->counter_secondary > furi_get_tick() % 15 + 1) {
+                fnaf->counter_secondary = 0;
+            }
+        } else {
+            fnaf->counter_secondary += 1;
         }
+        draw_doors(canvas, fnaf);
+        canvas_set_color(canvas, 0);
+        canvas_draw_box(canvas, fnaf->office->camera_x + 4, 47, 22, 15);
+        canvas_draw_box(canvas, fnaf->office->camera_x + 101, 28, 23, 31);
     } else {
-        fnaf->counter_secondary += 1;
+        canvas_set_color(canvas, 1);
+        canvas_draw_line(canvas, fnaf->office->camera_x + 26, 15, fnaf->office->camera_x + 26, 53);
+        canvas_draw_line(canvas, fnaf->office->camera_x + 100, 15, fnaf->office->camera_x + 100, 53);
     }
-    draw_doors(canvas, fnaf);
-    canvas_set_color(canvas, 0);
-    canvas_draw_box(canvas, fnaf->office->camera_x + 4, 47, 22, 15);
-    canvas_draw_box(canvas, fnaf->office->camera_x + 101, 28, 23, 31);
     canvas_set_color(canvas, 2);
     canvas_draw_box(canvas, 0, 0, 128, 64);
 
@@ -200,6 +206,15 @@ void office_draw(Canvas* canvas, void* ctx) {
             x -= 5;
         }
     }
+
+    // make a timer (one-time) for left and right sound 
+    // and draw if the correct one is running
+    if (furi_timer_is_running(fnaf->office->left_door_sound_timer))
+        canvas_draw_icon(canvas, 3, 3, &I_speaker_17x17);
+    if (furi_timer_is_running(fnaf->office->right_door_sound_timer))
+        canvas_draw_icon(canvas, 108, 3, &I_speaker_17x17);
+    if (furi_timer_is_running(fnaf->office->freddy_laugh_timer))
+        canvas_draw_icon(canvas, 108, 23, &I_freddy_17x17);
 }
 
 static void close_door(Fnaf* fnaf, uint8_t door) {
@@ -343,6 +358,8 @@ void night_start(void* ctx) {
         fnaf->cameras->cursor = cam1A;
         fnaf->hour = 0;
         fnaf->counter = 0;
+        fnaf->counter_secondary = 0;
+        fnaf->counter_music_box = 1;
         fnaf->office->camera_x = 0;
         fnaf->office->location = 0;
         fnaf->electricity->left_door = false;
@@ -358,6 +375,7 @@ void night_start(void* ctx) {
         fnaf->office->right_door_counter = 0;
         fnaf->office->left_door_y = -54;
         fnaf->office->right_door_y = -54;
+        fnaf->office->is_light_on = true;
         SWITCH_VIEW(night_number);
         FURI_LOG_D(TAG, "Night started thing 2");
         // What else?
@@ -399,6 +417,9 @@ void power_timer_callback(void* ctx) {
         open_door(fnaf, 0);
         open_door(fnaf, 1);
         fnaf->counter_secondary = 0;
+        fnaf->office->is_light_on = true;
+        furi_timer_start(fnaf->office->power_out_timer, power_out_time_period);
+        furi_timer_start(fnaf->office->power_out_max_timer, power_out_max_time);
         return;
     }
     switch (fnaf->progress) {
@@ -444,7 +465,8 @@ void power_timer_callback(void* ctx) {
 void hourly_timer_callback(void* ctx) {
     Fnaf* fnaf = ctx;
     if (fnaf->current_view == main_menu) {
-        furi_timer_stop(fnaf->hourly_timer);
+        stop_all_timers(fnaf);
+        stop_hourly_timer(fnaf);
         FURI_LOG_D(TAG, "Error kekx in hourly callback");
         furi_delay_ms(10);
         return;
@@ -466,6 +488,56 @@ void hourly_timer_callback(void* ctx) {
         dolphin_deed(DolphinDeedPluginGameWin);
         SWITCH_VIEW(night_complete);
         stop_all_timers(fnaf);
+        stop_hourly_timer(fnaf);
     }
     FURI_LOG_D(TAG, "Hour is %u", fnaf->hour);
+}
+
+void power_out_callback(void* ctx) {
+    Fnaf* fnaf = ctx;
+    FURI_LOG_D(TAG, "WORKING");
+    if (furi_get_tick() % 5 + 1 == 1) {
+        FURI_LOG_D(TAG, "DEF WORKING");
+        // I'm sleepy and tired so a lot of comments
+        if (fnaf->office->is_light_on) {
+            // stop max timer
+            if (furi_timer_is_running(fnaf->office->power_out_max_timer)) {
+                FURI_LOG_D(TAG, "Power out timer took less than 20 seconds");
+                furi_timer_stop(fnaf->office->power_out_max_timer);
+            }
+            // start max timer again
+            furi_timer_start(fnaf->office->power_out_max_timer, power_out_max_time);
+            // set is_light_on to false
+            fnaf->office->is_light_on = false;
+        } else {
+            // stop all timers
+            stop_all_timers(fnaf);
+            // jumpscare
+            SWITCH_VIEW(jumpscare);
+        }
+
+    }
+}
+
+void power_out_max_callback(void* ctx) {
+    Fnaf* fnaf = ctx;
+
+    if (fnaf->office->is_light_on) {
+        // light off
+        fnaf->office->is_light_on = false;
+        // stop that timer and start it again
+        if (furi_timer_is_running(fnaf->office->power_out_timer)) {
+            FURI_LOG_D(TAG, "Power out timer took more than 20 seconds");
+            furi_timer_stop(fnaf->office->power_out_timer);
+        }
+        furi_timer_start(fnaf->office->power_out_timer, power_out_time_period);
+        furi_timer_start(fnaf->office->power_out_max_timer, power_out_max_time);
+    } else {
+        // Stop all timers
+        stop_all_timers(fnaf);
+        // Jumpscare
+        SWITCH_VIEW(jumpscare);
+    }
+
+
 }

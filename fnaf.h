@@ -19,6 +19,8 @@
 #define hour_time 90000  // for tests, actually 90000
 #define noise_time 4500 // something around this idk
 #define power_time 1000
+#define power_out_time_period 5000
+#define power_out_max_time 20000
 
 #define SWITCH_VIEW(view) switch_view(fnaf, view)
 
@@ -53,6 +55,7 @@ typedef struct {
     uint8_t hour; // current time
     uint16_t counter; // general purpose
     uint8_t counter_secondary; // for speaker animation on cam6 and fan
+    uint8_t counter_music_box; // for music box 
     signed char menu_cursor; // for the main menu
     uint8_t current_view;
     uint8_t progress; // Last completed nights
@@ -73,7 +76,7 @@ typedef enum {
     office,
     cameras,
     night_complete,
-    screamer,
+    jumpscare,
     game_over,
 }Views;
 
@@ -83,6 +86,8 @@ typedef struct {
     uint8_t Freddy;
     uint8_t Foxy;
 }NightDifficulty;
+
+void stop_hourly_timer(Fnaf* fnaf);
 
 void stop_all_timers(Fnaf* fnaf);
 

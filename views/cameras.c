@@ -54,18 +54,27 @@ void draw_cameras(Canvas* canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 85, 20, "Audio only");
 
-        canvas_draw_icon(canvas, 94, 23, &I_speaker_22x19);
+        canvas_draw_icon(canvas, 87, 23, &I_speaker_22x19);
 
         if (fnaf->animatronics->location[Chica] == cam6) {
-            if (fnaf->counter_secondary > 7) {
+            if (fnaf->counter_secondary > 5) {
                 canvas_set_color(canvas, 0);
-                canvas_draw_box(canvas, 106, 23, 10, 19);
+                canvas_draw_box(canvas, 99, 23, 10, 19);
+                if (fnaf->counter_secondary > 10) fnaf->counter_secondary = 0;
             }
             fnaf->counter_secondary += 1;
-            if (fnaf->counter_secondary > 14) fnaf->counter_secondary = 0;
         } else {
             canvas_set_color(canvas, 0);
-            canvas_draw_box(canvas, 106, 23, 10, 19);
+            canvas_draw_box(canvas, 99, 23, 10, 19);
+        }
+        if (fnaf->animatronics->location[Freddy] == cam6) {
+            if (fnaf->counter_music_box < 6) {
+                canvas_set_color(canvas, 1);
+                canvas_draw_icon(canvas, 110, 24, &I_music_box_17x17);
+
+            }
+            if (fnaf->counter_music_box > 11) fnaf->counter_music_box = 1;
+            fnaf->counter_music_box += 1;
         }
     } else if (fnaf->cameras->cursor == cam5) {
         switch (fnaf->animatronics->location[Foxy]) {
@@ -211,8 +220,4 @@ void cameras_input(void* ctx) {
     if (fnaf->cameras->cursor_y < 0) fnaf->cameras->cursor_y = 0;
     else if (fnaf->cameras->cursor_y > 5) fnaf->cameras->cursor_y = 5;
 
-}
-
-void noise_callback(void* ctx) {
-    UNUSED(ctx);
 }
