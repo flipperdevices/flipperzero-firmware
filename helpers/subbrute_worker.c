@@ -85,7 +85,7 @@ bool subbrute_worker_init_default_attack(
     SubBruteAttacks attack_type,
     uint64_t step,
     const SubBruteProtocol* protocol,
-    uint8_t extra_repeats) {
+    uint8_t repeats) {
     furi_assert(instance);
 
     if(instance->worker_running) {
@@ -100,7 +100,7 @@ bool subbrute_worker_init_default_attack(
     instance->step = step;
     instance->bits = protocol->bits;
     instance->te = protocol->te;
-    instance->repeat = protocol->repeat + extra_repeats;
+    instance->repeat = repeats;
     instance->load_index = 0;
     instance->file_key = 0;
     instance->two_bytes = false;
@@ -133,7 +133,7 @@ bool subbrute_worker_init_file_attack(
     uint8_t load_index,
     uint64_t file_key,
     SubBruteProtocol* protocol,
-    uint8_t extra_repeats,
+    uint8_t repeats,
     bool two_bytes) {
     furi_assert(instance);
 
@@ -150,7 +150,7 @@ bool subbrute_worker_init_file_attack(
     instance->bits = protocol->bits;
     instance->te = protocol->te;
     instance->load_index = load_index;
-    instance->repeat = protocol->repeat + extra_repeats;
+    instance->repeat = repeats;
     instance->file_key = file_key;
     instance->two_bytes = two_bytes;
 
