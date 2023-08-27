@@ -197,8 +197,20 @@ static int32_t lin_hacker_worker_thread(void* context) {
     //     .frame_type = LinBusMasterRequest,
     // };
     size_t count_frame = 0;
+    LinBusFrame frame_resp = {
+        .id = 0x23,
+        .data = {0x01, 0x02, 0x03, 0x04, 0x05},
+        .length = 5,
+        .crc_type = LinBusChecksumTypeClassic,
+        .response_length = 0,
+        .frame_type = LinBusSlaveResponse,
+    };
+    if(lin_bus_slave_mode_add_or_update_response_id(lin_bus, &frame_resp)) {
+        //frame_resp.data[0]++;
+    }
     while(instance->worker_running) {
         size_t len = lin_bus_get_rx_frame_available(lin_bus);
+
         if(len > 0) {
             LinBusFrame frame = lin_bus_get_rx_frame_read(lin_bus);
             count_frame++;
@@ -208,14 +220,13 @@ static int32_t lin_hacker_worker_thread(void* context) {
             FURI_LOG_I(TAG, "length: %d", frame.length);
             FURI_LOG_RAW_I("--> ");
             for(uint8_t i = 0; i < frame.length; i++) {
-                
-                    FURI_LOG_RAW_I("%02X", frame.data[i]);
+                FURI_LOG_RAW_I("%02X", frame.data[i]);
             }
             FURI_LOG_RAW_I("\r\n");
             FURI_LOG_I(TAG, "crc: %02X", frame.crc);
         }
         //furi_delay_ms(250);
-        
+
         // if(lin_bus_tx_async(lin_bus, &frame)) {
         //     //frame.data[0]++;
         //     furi_delay_ms(100);

@@ -8,15 +8,22 @@
 #define LIN_BUS_BREAK_TIMEOUT_MAX 1000 //symbol time
 #define LIN_BUS_RX_BUFFER_LENGTH 32
 #define LIN_BUS_RX_FRAME_BUFFER_LENGTH 32
+#define LIN_BUS_SLAVE_MODE_MAX_RESPONSE_ID 8
 
 typedef enum {
     LinBusStateSyncBreak,
     LinBusStateSyncField,
     LinBusStateId,
     LinBusStateData,
+    LinBusStateResponse,
     LinBusStateCrc,
     LinBusStateEnd,
 } LinBusState;
+
+typedef struct {
+    LinBusFrame rx_frame[LIN_BUS_SLAVE_MODE_MAX_RESPONSE_ID];
+    uint8_t rx_frame_active;
+} LinBusSlaveModeResponseId;
 
 struct LinBus {
     LinBusMode mode;
@@ -34,6 +41,7 @@ struct LinBus {
 
     uint8_t rx_buf_index;
     uint8_t rx_buf[LIN_BUS_RX_BUFFER_LENGTH];
+    LinBusSlaveModeResponseId* slave_mode_response_id;
 };
 
 /* Response timeout counter variables */
@@ -74,6 +82,8 @@ LinBus* lin_bus_init(LinBusMode mode, uint32_t baudrate) {
         lin_uart_tx_irq_disable();
         break;
     case LinBusModeSlave:
+        instance->slave_mode_response_id =
+            (LinBusSlaveModeResponseId*)malloc(sizeof(LinBusSlaveModeResponseId));
         lin_uart_break_irq_enable();
         //lin_uart_rx_irq_enable();
         lin_uart_rx_irq_disable();
@@ -95,6 +105,7 @@ void lin_bus_deinit(LinBus* instance) {
     lin_uart_tx_irq_disable();
 
     lin_uart_deinit();
+    if(instance->slave_mode_response_id != NULL) free(instance->slave_mode_response_id);
     furi_stream_buffer_free(instance->stream_rx);
     free(instance);
 }
@@ -187,7 +198,7 @@ bool lin_bus_tx_async(LinBus* instance, LinBusFrame* lin_frame) {
         instance->is_tx = true; /* Transmission in progress */
         instance->only_rx = false;
         lin_uart_rx_irq_disable();
-        lin_uart_tx_irq_enable();
+        //lin_uart_tx_irq_enable();
         ret = true;
     }
     return ret;
@@ -219,6 +230,9 @@ void lin_bus_break_callback(void* context) {
             //since there is an intensive exchange, the timer waiting for a response does not have time to work, we accept an extra break frame
             instance->rx_buf_index--;
             lin_bus_add_rx_frame_to_stream(context);
+        }
+        if(instance->rx_state == LinBusStateResponse) {
+            lin_bus_reset(context);
         }
         responseTimeoutValue = 0;
         responseTimeoutMax = lin_bus_response_timeout(8);
@@ -283,7 +297,26 @@ void lin_uart_rx_callback(uint8_t data, void* context) {
                 lin_bus_reset(context);
             }
         } else if(instance->rx_state == LinBusStateData) {
-            //FURI_LOG_I("TAG", "ID: %02X", data);
+            if(instance->slave_mode_response_id->rx_frame_active) {
+                for(size_t i = 0; i < instance->slave_mode_response_id->rx_frame_active; i++) {
+                    if(instance->slave_mode_response_id->rx_frame[i].id ==
+                       (instance->rx_buf[1] & 0x3Fu)) {
+                        instance->rx_state = LinBusStateResponse;
+
+                        instance->frame = instance->slave_mode_response_id->rx_frame[i];
+
+                        /* Reset the index for receiving the data */
+                        instance->rx_buf_index = 0;
+                        instance->tx_state = LinBusStateData;
+                        instance->is_tx = true; /* Transmission in progress */
+                        instance->only_rx = false;
+                        lin_uart_rx_irq_disable();
+                        lin_uart_tx_irq_enable();
+                        lin_uart_put_char(instance->frame.data[instance->rx_buf_index++]);
+                        break;
+                    }
+                }
+            }
         }
         break;
     default:
@@ -303,15 +336,15 @@ LinBusFrame lin_bus_get_rx_frame_read(LinBus* instance) {
     return frame;
 }
 
-void print_buf(void* context) {
-    LinBus* instance = (LinBus*)context;
-    if(instance->rx_buf_index != 0) {
-        for(uint8_t i = 0; i < instance->rx_buf_index; i++) {
-            FURI_LOG_RAW_I("%02X ", instance->rx_buf[i]);
-        }
-        FURI_LOG_RAW_I("\n");
-    }
-}
+// void print_buf(void* context) {
+//     LinBus* instance = (LinBus*)context;
+//     if(instance->rx_buf_index != 0) {
+//         for(uint8_t i = 0; i < instance->rx_buf_index; i++) {
+//             FURI_LOG_RAW_I("%02X ", instance->rx_buf[i]);
+//         }
+//         FURI_LOG_RAW_I("\n");
+//     }
+// }
 
 void lin_bus_timeout_start(void) {
     responseTimeoutValue = 0;
@@ -436,4 +469,30 @@ void lin_bus_timeout_callback(void* context) {
         lin_bus_reset_satate_machihe(context);
         break;
     }
+}
+
+bool lin_bus_slave_mode_add_or_update_response_id(LinBus* instance, LinBusFrame* frame) {
+    furi_check(instance->slave_mode_response_id);
+    bool ret = false;
+    FURI_CRITICAL_ENTER();
+    //found frame if it exists
+    for(size_t i = 0; i < instance->slave_mode_response_id->rx_frame_active; i++) {
+        if(instance->slave_mode_response_id->rx_frame[i].id == frame->id) {
+            instance->slave_mode_response_id->rx_frame[i] = *frame;
+            ret = true;
+            break;
+        }
+    }
+    if(!ret) {
+        if(instance->slave_mode_response_id->rx_frame_active <
+           LIN_BUS_SLAVE_MODE_MAX_RESPONSE_ID) {
+            instance->slave_mode_response_id
+                ->rx_frame[instance->slave_mode_response_id->rx_frame_active++] = *frame;
+            instance->frame.crc =
+                lin_bus_get_crc(frame->id, frame->data, frame->length, frame->crc_type);
+            ret = true;
+        }
+    }
+    FURI_CRITICAL_EXIT();
+    return ret;
 }
