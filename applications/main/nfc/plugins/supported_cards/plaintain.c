@@ -122,8 +122,6 @@ static bool plaintain_read(Nfc* nfc, NfcDevice* device) {
 
         PlaintainCardConfig cfg = {};
         if(!plaintain_get_card_config(&cfg, data->type)) break;
-        FURI_LOG_W("Plaintain", "Type: %d", data->type);
-        data->type = MfClassicType4k;
 
         MfClassicDeviceKeys keys = {};
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {

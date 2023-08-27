@@ -69,7 +69,7 @@ typedef struct {
 
 typedef struct {
     uint8_t current_sector;
-    uint8_t current_block;
+    uint16_t current_block;
     MfClassicKeyType key_type;
     MfClassicKey key;
     bool auth_passed;

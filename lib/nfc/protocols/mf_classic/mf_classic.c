@@ -370,30 +370,27 @@ bool mf_classic_detect_protocol(Iso14443_3aData* data, MfClassicType* type) {
     uint8_t atqa1 = data->atqa[1];
     uint8_t sak = data->sak;
     bool mf_classic_detected = false;
+    MfClassicType tmp_type = MfClassicTypeMini;
 
-    if((atqa0 = 0x44) || (atqa0 = 0x44)) {
-        if((sak == 0x08) || (sak = 0x88)) {
-            if(type) {
-                *type = MfClassicType1k;
-            }
+    if((atqa0 == 0x44) || (atqa0 == 0x04)) {
+        if((sak == 0x08) || (sak == 0x88)) {
+            tmp_type = MfClassicType1k;
             mf_classic_detected = true;
         } else if(sak == 0x09) {
-            if(type) {
-                *type = MfClassicTypeMini;
-            }
+            tmp_type = MfClassicTypeMini;
             mf_classic_detected = true;
         }
     } else if((atqa0 == 0x01) && (atqa1 == 0x0f) && (sak == 0x01)) {
         // Skylender support
-        if(type) {
-            *type = MfClassicType1k;
-        }
+        tmp_type = MfClassicType1k;
         mf_classic_detected = true;
     } else if(((atqa0 == 0x42) || (atqa0 == 0x02)) && (sak == 0x18)) {
-        if(*type) {
-            *type = MfClassicType4k;
-        }
+        tmp_type = MfClassicType4k;
         mf_classic_detected = true;
+    }
+
+    if(type) {
+        *type = tmp_type;
     }
 
     return mf_classic_detected;
