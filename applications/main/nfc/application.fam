@@ -39,9 +39,16 @@ App(
 )
 
 App(
-    appid="plaintain_parser",
+    appid="plantain_parser",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="plaintain_plugin_ep",
+    entry_point="plantain_plugin_ep",
+    requires=["nfc"],
+)
+
+App(
+    appid="two_cities_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="two_cities_plugin_ep",
     requires=["nfc"],
 )
 

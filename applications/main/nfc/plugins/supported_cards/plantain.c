@@ -6,7 +6,7 @@
 #include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
 
-#define TAG "Plaintain"
+#define TAG "Plantain"
 
 typedef struct {
     uint64_t a;
@@ -16,9 +16,9 @@ typedef struct {
 typedef struct {
     const MfClassicKeyPair* keys;
     uint32_t data_sector;
-} PlaintainCardConfig;
+} PlantainCardConfig;
 
-static const MfClassicKeyPair plaintain_1k_keys[] = {
+static const MfClassicKeyPair plantain_1k_keys[] = {
     {.a = 0xffffffffffff, .b = 0xffffffffffff},
     {.a = 0xffffffffffff, .b = 0xffffffffffff},
     {.a = 0xffffffffffff, .b = 0xffffffffffff},
@@ -37,7 +37,7 @@ static const MfClassicKeyPair plaintain_1k_keys[] = {
     {.a = 0xffffffffffff, .b = 0xffffffffffff},
 };
 
-static const MfClassicKeyPair plaintain_4k_keys[] = {
+static const MfClassicKeyPair plantain_4k_keys[] = {
     {.a = 0xffffffffffff, .b = 0xffffffffffff}, {.a = 0xffffffffffff, .b = 0xffffffffffff},
     {.a = 0xffffffffffff, .b = 0xffffffffffff}, {.a = 0xffffffffffff, .b = 0xffffffffffff},
     {.a = 0xe56ac127dd45, .b = 0x19fc84a3784b}, {.a = 0x77dabc9825e1, .b = 0x9764fec3154a},
@@ -60,15 +60,15 @@ static const MfClassicKeyPair plaintain_4k_keys[] = {
     {.a = 0xb27addfb64b0, .b = 0x152fd0c420a7}, {.a = 0x7259fa0197c6, .b = 0x5583698df085},
 };
 
-static bool plaintain_get_card_config(PlaintainCardConfig* config, MfClassicType type) {
+static bool plantain_get_card_config(PlantainCardConfig* config, MfClassicType type) {
     bool success = true;
 
     if(type == MfClassicType1k) {
         config->data_sector = 8;
-        config->keys = plaintain_1k_keys;
+        config->keys = plantain_1k_keys;
     } else if(type == MfClassicType4k) {
         config->data_sector = 8;
-        config->keys = plaintain_4k_keys;
+        config->keys = plantain_4k_keys;
     } else {
         success = false;
     }
@@ -76,12 +76,12 @@ static bool plaintain_get_card_config(PlaintainCardConfig* config, MfClassicType
     return success;
 }
 
-static bool plaintain_verify_type(Nfc* nfc, MfClassicType type) {
+static bool plantain_verify_type(Nfc* nfc, MfClassicType type) {
     bool verified = false;
 
     do {
-        PlaintainCardConfig cfg = {};
-        if(!plaintain_get_card_config(&cfg, type)) break;
+        PlantainCardConfig cfg = {};
+        if(!plantain_get_card_config(&cfg, type)) break;
 
         const uint8_t block_num = mf_classic_get_first_block_num_of_sector(cfg.data_sector);
         FURI_LOG_D(TAG, "Verifying sector %lu", cfg.data_sector);
@@ -103,12 +103,12 @@ static bool plaintain_verify_type(Nfc* nfc, MfClassicType type) {
     return verified;
 }
 
-static bool plaintain_verify(Nfc* nfc) {
-    return plaintain_verify_type(nfc, MfClassicType1k) ||
-           plaintain_verify_type(nfc, MfClassicType4k);
+static bool plantain_verify(Nfc* nfc) {
+    return plantain_verify_type(nfc, MfClassicType1k) ||
+           plantain_verify_type(nfc, MfClassicType4k);
 }
 
-static bool plaintain_read(Nfc* nfc, NfcDevice* device) {
+static bool plantain_read(Nfc* nfc, NfcDevice* device) {
     furi_assert(nfc);
     furi_assert(device);
 
@@ -120,8 +120,8 @@ static bool plaintain_read(Nfc* nfc, NfcDevice* device) {
     do {
         if(!mf_classic_detect_protocol(data->iso14443_3a_data, &data->type)) break;
 
-        PlaintainCardConfig cfg = {};
-        if(!plaintain_get_card_config(&cfg, data->type)) break;
+        PlantainCardConfig cfg = {};
+        if(!plantain_get_card_config(&cfg, data->type)) break;
 
         MfClassicDeviceKeys keys = {};
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
@@ -147,7 +147,7 @@ static bool plaintain_read(Nfc* nfc, NfcDevice* device) {
     return is_read;
 }
 
-static bool plaintain_parse(const NfcDevice* device, FuriString* parsed_data) {
+static bool plantain_parse(const NfcDevice* device, FuriString* parsed_data) {
     furi_assert(device);
 
     const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
@@ -156,8 +156,8 @@ static bool plaintain_parse(const NfcDevice* device, FuriString* parsed_data) {
 
     do {
         // Verify card type
-        PlaintainCardConfig cfg = {};
-        if(!plaintain_get_card_config(&cfg, data->type)) break;
+        PlantainCardConfig cfg = {};
+        if(!plantain_get_card_config(&cfg, data->type)) break;
 
         // Verify key
         const MfClassicSectorTrailer* sec_tr =
@@ -196,21 +196,21 @@ static bool plaintain_parse(const NfcDevice* device, FuriString* parsed_data) {
 }
 
 /* Actual implementation of app<>plugin interface */
-static const NfcSupportedCardsPlugin plaintain_plugin = {
+static const NfcSupportedCardsPlugin plantain_plugin = {
     .protocol = NfcProtocolMfClassic,
-    .verify = plaintain_verify,
-    .read = plaintain_read,
-    .parse = plaintain_parse,
+    .verify = plantain_verify,
+    .read = plantain_read,
+    .parse = plantain_parse,
 };
 
 /* Plugin descriptor to comply with basic plugin specification */
-static const FlipperAppPluginDescriptor plaintain_plugin_descriptor = {
+static const FlipperAppPluginDescriptor plantain_plugin_descriptor = {
     .appid = NFC_SUPPORTED_CARD_PLUGIN_APP_ID,
     .ep_api_version = NFC_SUPPORTED_CARD_PLUGIN_API_VERSION,
-    .entry_point = &plaintain_plugin,
+    .entry_point = &plantain_plugin,
 };
 
 /* Plugin entry point - must return a pointer to const descriptor  */
-const FlipperAppPluginDescriptor* plaintain_plugin_ep() {
-    return &plaintain_plugin_descriptor;
+const FlipperAppPluginDescriptor* plantain_plugin_ep() {
+    return &plantain_plugin_descriptor;
 }
