@@ -555,7 +555,10 @@ void game_transition_callback(int from, int to, void* context) {
     AppContext* app = (AppContext*)context;
     UNUSED(from);
 
-    if(to == SceneType_Game) gameplay_reset(app->gameplay);
+    if(to == SceneType_Game) {
+        gameplay_reset(app->gameplay);
+        suit_selector_set_enabled(&suitSelector, false);
+    }
 }
 
 void game_render_callback(Canvas* const canvas, void* context) {
