@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [github: Check for todos #3011 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3011)
 - [BadKB (Modified PR#738 from pengu1ndev - Original from WillyJL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)
 - Updated: UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
+- Updated: [SD Card Assets](https://www.patreon.com/RogueMaster/membership) to have [Dual Boot BINs (By TalkingSasquach)](https://github.com/skizzophrenic/Talking-Sasquach/tree/main/Single%20File%20WiFi%20Board%20Bins)
 
 <a name="release">
 
