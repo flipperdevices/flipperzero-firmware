@@ -16,7 +16,7 @@
 #define chica_time 4980
 #define freddy_time 3020
 #define foxy_time 5010
-#define hour_time 9000  // for tests, actually 90000
+#define hour_time 90000  // for tests, actually 90000
 #define noise_time 4500 // something around this idk
 #define power_time 1000
 
@@ -35,7 +35,7 @@ typedef struct {
     bool right_light;
     bool monitor;
     uint16_t power_left;
-    uint8_t counter;
+    uint8_t counter; // for extra drain on nights 2-7
     FuriTimer* timer;
 }Electricity;
 
@@ -46,11 +46,11 @@ typedef struct {
     InputEvent event;
 
     Animatronics* animatronics;
-    uint8_t hour;
     Cameras* cameras;
     Office* office;
     Electricity* electricity;
 
+    uint8_t hour; // current time
     uint16_t counter; // general purpose
     uint8_t counter_secondary; // for speaker animation on cam6 and fan
     signed char menu_cursor; // for the main menu
@@ -83,6 +83,8 @@ typedef struct {
     uint8_t Freddy;
     uint8_t Foxy;
 }NightDifficulty;
+
+void stop_all_timers(Fnaf* fnaf);
 
 void switch_view(Fnaf* fnaf, Views view);
 

@@ -45,7 +45,7 @@ static void app_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(fnaf->event_queue, input_event, FuriWaitForever);
 }
 
-static void stop_all_timers(Fnaf* fnaf) {
+void stop_all_timers(Fnaf* fnaf) {
     FURI_LOG_D(TAG, "stop_all_timers");
     for (uint8_t i = 0; i < 4; i++) {
         if (furi_timer_is_running(fnaf->animatronics->timer[i])) {
@@ -60,6 +60,10 @@ static void stop_all_timers(Fnaf* fnaf) {
     if (furi_timer_is_running(fnaf->electricity->timer)) {
         FURI_LOG_D(TAG, "Electricity timer stopped");
         furi_timer_stop(fnaf->electricity->timer);
+    }
+    if (furi_timer_is_running(fnaf->cameras->noise_timer)) {
+        FURI_LOG_D(TAG, "Noise timer stopped");
+        furi_timer_stop(fnaf->cameras->noise_timer);
     }
 }
 

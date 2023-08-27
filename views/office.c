@@ -1,31 +1,6 @@
 #include "office.h"
 #include "../fnaf.h"
 
-static void moving_animation(Fnaf* fnaf) {
-    switch (fnaf->office->camera_moving_direction) {
-    case left:
-        if (fnaf->counter < 24) {
-            fnaf->office->camera_x += 6;
-            fnaf->counter += 6;
-        } else {
-            fnaf->office->camera_moving_direction = none;
-            fnaf->counter = 0;
-        }
-        break;
-    case right:
-        if (fnaf->counter < 24) {
-            fnaf->office->camera_x -= 6;
-            fnaf->counter += 6;
-        } else {
-            fnaf->office->camera_moving_direction = none;
-            fnaf->counter = 0;
-        }
-        break;
-    default:
-        // What
-        break;
-    }
-}
 
 static void draw_doors(Canvas* canvas, Fnaf* fnaf) {
 
@@ -101,6 +76,60 @@ static void draw_doors(Canvas* canvas, Fnaf* fnaf) {
     // Thing for door animation
 }
 
+static void moving_animation(Fnaf* fnaf) {
+    switch (fnaf->office->camera_moving_direction) {
+    case left:
+        if (fnaf->counter < 24) {
+            fnaf->office->camera_x += 6;
+            fnaf->counter += 6;
+        } else {
+            fnaf->office->camera_moving_direction = none;
+            fnaf->counter = 0;
+        }
+        break;
+    case right:
+        if (fnaf->counter < 24) {
+            fnaf->office->camera_x -= 6;
+            fnaf->counter += 6;
+        } else {
+            fnaf->office->camera_moving_direction = none;
+            fnaf->counter = 0;
+        }
+        break;
+    default:
+        // What
+        break;
+    }
+}
+
+static void power_out(Canvas* canvas, Fnaf* fnaf) {
+    if (fnaf->electricity->power_left != 0) {
+        FURI_LOG_D(TAG, "power_out called, power: %u", fnaf->electricity->power_left);
+        furi_crash("");
+    }
+    if (fnaf->office->camera_moving_direction != none) moving_animation(fnaf);
+    canvas_set_color(canvas, 1);
+    canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_office_128x64);
+    if (fnaf->counter_secondary > furi_get_tick() % 7 + 1) {
+        canvas_draw_icon(canvas, fnaf->office->camera_x + 11, 23, &I_power_out_freddy_8x7);
+        if (fnaf->counter_secondary > furi_get_tick() % 15 + 1) {
+            fnaf->counter_secondary = 0;
+        }
+    } else {
+        fnaf->counter_secondary += 1;
+    }
+    draw_doors(canvas, fnaf);
+    canvas_set_color(canvas, 0);
+    canvas_draw_box(canvas, fnaf->office->camera_x + 4, 47, 22, 15);
+    canvas_draw_box(canvas, fnaf->office->camera_x + 101, 28, 23, 31);
+    canvas_set_color(canvas, 2);
+    canvas_draw_box(canvas, 0, 0, 128, 64);
+
+    canvas_set_color(canvas, 0);
+    canvas_draw_box(canvas, 0, 0, 23, 64);
+    canvas_draw_box(canvas, 105, 0, 23, 64);
+}
+
 static void draw_sides(Canvas* canvas, Fnaf* fnaf) {
     if (!fnaf->electricity->left_light) {
         canvas_set_color(canvas, 1);
@@ -125,6 +154,10 @@ static void draw_sides(Canvas* canvas, Fnaf* fnaf) {
 
 void office_draw(Canvas* canvas, void* ctx) {
     Fnaf* fnaf = ctx;
+    if (fnaf->electricity->power_left == 0) {
+        power_out(canvas, fnaf);
+        return;
+    }
     char time[7];
     if (fnaf->hour != 0)snprintf(time, 7, "%u AM", fnaf->hour); else
         snprintf(time, 7, "12 AM");
@@ -158,7 +191,7 @@ void office_draw(Canvas* canvas, void* ctx) {
     canvas_draw_box(canvas, 105, 0, 23, 64);
     canvas_set_color(canvas, 1);
     canvas_draw_str_aligned(canvas, fnaf->office->camera_x + 64, 10, AlignCenter, AlignBottom, time);
-    canvas_draw_str(canvas, 107, 62, power);
+    canvas_draw_str_aligned(canvas, 125, 62, AlignRight, AlignBottom, power);
     uint8_t x = 17;
     uint8_t power_usage = power_draw(fnaf);
     if (power_usage < 5) {
@@ -169,16 +202,44 @@ void office_draw(Canvas* canvas, void* ctx) {
     }
 }
 
+static void close_door(Fnaf* fnaf, uint8_t door) {
+    switch (door) {
+    case 0: // left door
+        if (fnaf->electricity->left_door) break;
+        fnaf->office->left_door_state = 1;
+        fnaf->office->left_door_y = -54;
+        break;
+    case 1: // right door
+        if (fnaf->electricity->right_door) break;
+        fnaf->office->right_door_state = 1;
+        fnaf->office->right_door_y = -54;
+        break;
+    }
+}
+
+static void open_door(Fnaf* fnaf, uint8_t door) {
+    switch (door) {
+    case 0: // left door
+        if (!fnaf->electricity->left_door) break;
+        fnaf->office->left_door_state = -1;
+        fnaf->office->left_door_y = 10;
+        break;
+    case 1: // right door
+        if (!fnaf->electricity->right_door) break;
+        fnaf->office->right_door_state = -1;
+        fnaf->office->right_door_y = 10;
+        break;
+    }
+}
+
 static void door_input(Fnaf* fnaf) {
     switch (fnaf->office->location) {
     case -1:
         if (!fnaf->office->left_door_state) {
             if (fnaf->electricity->left_door) {
-                fnaf->office->left_door_state = -1;
-                fnaf->office->left_door_y = 10;
+                open_door(fnaf, 0);
             } else {
-                fnaf->office->left_door_state = 1;
-                fnaf->office->left_door_y = -54;
+                close_door(fnaf, 0);
             }
             fnaf->electricity->left_door = !fnaf->electricity->left_door;
             fnaf->office->left_door_counter = 0;
@@ -189,11 +250,9 @@ static void door_input(Fnaf* fnaf) {
     case 1:
         if (!fnaf->office->right_door_state) {
             if (fnaf->electricity->right_door) {
-                fnaf->office->right_door_state = -1;
-                fnaf->office->right_door_y = 10;
+                open_door(fnaf, 1);
             } else {
-                fnaf->office->right_door_state = 1;
-                fnaf->office->right_door_y = -54;
+                close_door(fnaf, 1);
             }
             fnaf->electricity->right_door = !fnaf->electricity->right_door;
             fnaf->office->right_door_counter = 0;
@@ -220,23 +279,25 @@ void office_input(void* ctx) {
             }
             break;
         case InputKeyUp:
-            door_input(fnaf);
+            if (fnaf->electricity->power_left > 0) door_input(fnaf);
             break;
         case InputKeyDown:
-            switch (fnaf->office->location) {
-            case -1:
-                fnaf->electricity->left_light = !fnaf->electricity->left_light;
-                fnaf->electricity->right_light = false;
-                break;
-            case 0:
-                break;
-            case 1:
-                fnaf->electricity->right_light = !fnaf->electricity->right_light;
-                fnaf->electricity->left_light = false;
-                break;
-            }
+            if (fnaf->electricity->power_left > 0)
+                switch (fnaf->office->location) {
+                case -1:
+                    fnaf->electricity->left_light = !fnaf->electricity->left_light;
+                    fnaf->electricity->right_light = false;
+                    break;
+                case 0:
+                    break;
+                case 1:
+                    fnaf->electricity->right_light = !fnaf->electricity->right_light;
+                    fnaf->electricity->left_light = false;
+                    break;
+                }
             break;
         case InputKeyOk:
+            if (fnaf->electricity->power_left == 0) break;
             fnaf->office->camera_moving_direction = none;
             fnaf->electricity->left_light = false;
             fnaf->electricity->right_light = false;
@@ -289,7 +350,7 @@ void night_start(void* ctx) {
         fnaf->electricity->left_light = false;
         fnaf->electricity->right_light = false;
         fnaf->electricity->monitor = false;
-        fnaf->electricity->power_left = 999;
+        fnaf->electricity->power_left = 9; // 999
         fnaf->office->camera_moving_direction = none;
         fnaf->office->left_door_state = 0;
         fnaf->office->right_door_state = 0;
@@ -331,7 +392,15 @@ void timer_callback_foxy(void* ctx) {
 void power_timer_callback(void* ctx) {
     Fnaf* fnaf = ctx;
     fnaf->electricity->power_left -= power_draw(fnaf);
-
+    if (fnaf->electricity->power_left > 999 || fnaf->electricity->power_left == 0) {
+        fnaf->electricity->power_left = 0;
+        stop_all_timers(fnaf);
+        if (fnaf->current_view != office) SWITCH_VIEW(office);
+        open_door(fnaf, 0);
+        open_door(fnaf, 1);
+        fnaf->counter_secondary = 0;
+        return;
+    }
     switch (fnaf->progress) {
     case 1:
         if (fnaf->electricity->counter == 5) {
@@ -396,8 +465,7 @@ void hourly_timer_callback(void* ctx) {
         fnaf->progress += 1;
         dolphin_deed(DolphinDeedPluginGameWin);
         SWITCH_VIEW(night_complete);
-        furi_timer_stop(fnaf->hourly_timer);
-        furi_timer_stop(fnaf->electricity->timer);
+        stop_all_timers(fnaf);
     }
     FURI_LOG_D(TAG, "Hour is %u", fnaf->hour);
 }
