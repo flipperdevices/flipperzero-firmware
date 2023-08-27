@@ -5,6 +5,8 @@
 #include <core/string.h>
 #include <toolbox/stream/stream.h>
 
+#define SUBBRUTE_PROTOCOL_MAX_REPEATS 9
+
 typedef enum {
     CAMEFileProtocol,
     NICEFileProtocol,

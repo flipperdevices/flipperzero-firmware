@@ -36,10 +36,13 @@ void subbrute_scene_load_file_on_enter(void* context) {
         load_result =
             subbrute_device_load_from_file(instance->device, furi_string_get_cstr(load_path));
         if(load_result == SubBruteFileResultOk) {
-            uint8_t extra_repeats = subbrute_main_view_get_extra_repeats(instance->view_main);
+            instance->settings->last_index = SubBruteAttackLoadFile;
+            subbrute_settings_set_repeats(
+                instance->settings, subbrute_main_view_get_extra_repeats(instance->view_main));
+            uint8_t extra_repeats = subbrute_settings_get_current_repeats(instance->settings);
 
             load_result = subbrute_device_attack_set(
-                instance->device, SubBruteAttackLoadFile, extra_repeats);
+                instance->device, instance->settings->last_index, extra_repeats);
             if(load_result == SubBruteFileResultOk) {
                 if(!subbrute_worker_init_file_attack(
                        instance->worker,
@@ -58,6 +61,7 @@ void subbrute_scene_load_file_on_enter(void* context) {
         }
 
         if(load_result == SubBruteFileResultOk) {
+            subbrute_settings_save(instance->settings);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneLoadSelect);
         } else {
             FURI_LOG_E(TAG, "Returned error: %d", load_result);
