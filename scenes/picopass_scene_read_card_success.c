@@ -19,7 +19,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     FuriString* csn_str = furi_string_alloc_set("CSN:");
     FuriString* credential_str = furi_string_alloc();
     FuriString* wiegand_str = furi_string_alloc();
-    FuriString* sio_str = furi_string_alloc();
+    FuriString* key_str = furi_string_alloc();
 
     dolphin_deed(DolphinDeedNfcReadSuccess);
 
@@ -79,7 +79,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
         size_t bytesLength = 1 + pacs->record.bitLength / 8;
         furi_string_set(credential_str, "");
         for(uint8_t i = RFAL_PICOPASS_BLOCK_LEN - bytesLength; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
-            furi_string_cat_printf(credential_str, " %02X", pacs->credential[i]);
+            furi_string_cat_printf(credential_str, "%02X", pacs->credential[i]);
         }
 
         if(pacs->record.valid) {
@@ -90,19 +90,16 @@ void picopass_scene_read_card_success_on_enter(void* context) {
         }
 
         if(pacs->sio) {
-            furi_string_cat_printf(sio_str, "+SIO");
+            furi_string_cat_printf(credential_str, " +SIO");
         }
 
         if(pacs->key) {
-            if(pacs->sio) {
-                furi_string_cat_printf(sio_str, " ");
-            }
-            furi_string_cat_printf(sio_str, "Key: ");
+            furi_string_cat_printf(key_str, "Key: ");
 
             uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
             memcpy(key, &pacs->key, RFAL_PICOPASS_BLOCK_LEN);
             for(uint8_t i = 0; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
-                furi_string_cat_printf(sio_str, "%02X", key[i]);
+                furi_string_cat_printf(key_str, "%02X", key[i]);
             }
         }
 
@@ -134,12 +131,12 @@ void picopass_scene_read_card_success_on_enter(void* context) {
         FontSecondary,
         furi_string_get_cstr(credential_str));
     widget_add_string_element(
-        widget, 64, 46, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(sio_str));
+        widget, 64, 46, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(key_str));
 
     furi_string_free(csn_str);
     furi_string_free(credential_str);
     furi_string_free(wiegand_str);
-    furi_string_free(sio_str);
+    furi_string_free(key_str);
 
     view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewWidget);
 }
