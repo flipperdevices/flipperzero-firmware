@@ -138,7 +138,7 @@ static bool slix_poller_detect(NfcGenericEvent event, void* context) {
     bool protocol_detected = false;
 
     if(iso15693_3_event->type == Iso15693_3PollerEventTypeReady) {
-        protocol_detected = slix_get_type(instance->data) < SlixTypeNum;
+        protocol_detected = slix_get_type(instance->data) < SlixTypeCount;
     }
 
     return protocol_detected;

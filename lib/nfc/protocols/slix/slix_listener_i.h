@@ -9,10 +9,9 @@
 extern "C" {
 #endif
 
-#define SLIX_LISTENER_RANDOM_SIZE (2U)
-
 typedef struct {
-    uint8_t random[SLIX_LISTENER_RANDOM_SIZE];
+    uint16_t random;
+    bool is_password_valid[SlixPasswordTypeCount];
 } SlixListenerSessionState;
 
 struct SlixListener {
@@ -28,6 +27,11 @@ struct SlixListener {
     NfcGenericCallback callback;
     void* context;
 };
+
+SlixError slix_listener_set_password(
+    SlixListener* instance,
+    SlixPasswordType password_type,
+    SlixPasswordValue password);
 
 SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer* rx_buffer);
 

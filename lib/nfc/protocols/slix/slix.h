@@ -6,7 +6,6 @@
 extern "C" {
 #endif
 
-#define SLIX_PASSWORD_SIZE (4U)
 #define SLIX_SIGNATURE_SIZE (32U)
 
 #define SLIX_PP_CONDITION_RL (1U << 0)
@@ -48,6 +47,7 @@ typedef enum {
     SlixErrorFormat,
     SlixErrorNotSupported,
     SlixErrorInternal,
+    SlixErrorWrongPassword,
     SlixErrorUnknown,
 } SlixError;
 
@@ -56,28 +56,26 @@ typedef enum {
     SlixTypeSlixS,
     SlixTypeSlixL,
     SlixTypeSlix2,
-    SlixTypeNum,
+    SlixTypeCount,
 } SlixType;
+
+typedef enum {
+    SlixPasswordTypeRead,
+    SlixPasswordTypeWrite,
+    SlixPasswordTypePrivacy,
+    SlixPasswordTypeDestroy,
+    SlixPasswordTypeEas,
+    SlixPasswordTypeCount,
+} SlixPasswordType;
 
 typedef uint32_t SlixTypeFeatures;
 
+typedef uint32_t SlixPasswordValue;
+
 typedef struct {
-    bool is_present;
-    uint8_t data[SLIX_PASSWORD_SIZE];
+    bool is_set;
+    SlixPasswordValue value;
 } SlixPassword;
-
-typedef struct {
-    SlixPassword read;
-    SlixPassword write;
-    SlixPassword privacy;
-    SlixPassword destroy;
-    SlixPassword eas;
-} SlixPasswords;
-
-typedef struct {
-    bool is_present;
-    bool mode;
-} SlixPrivacy;
 
 typedef struct {
     bool is_present;
@@ -104,8 +102,8 @@ typedef struct {
     Iso15693_3Data* iso15693_3_data;
     SlixSystemInfo system_info;
     SlixSignature signature;
-    SlixPasswords passwords;
-    SlixPrivacy privacy;
+    SlixPassword passwords[SlixPasswordTypeCount];
+    bool is_privacy_mode;
 } SlixData;
 
 SlixData* slix_alloc();
@@ -136,8 +134,21 @@ const Iso15693_3Data* slix_get_base_data(const SlixData* data);
 
 SlixType slix_get_type(const SlixData* data);
 
+bool slix_is_password_set(const SlixData* data, SlixPasswordType password_type);
+
+SlixPasswordValue slix_get_password(const SlixData* data, SlixPasswordType password_type);
+
+bool slix_is_privacy_mode(const SlixData* data);
+
+// Setters
+void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPasswordValue password);
+
+void slix_set_privacy_mode(SlixData* data, bool set);
+
 // Static methods
 bool slix_type_has_features(SlixType slix_type, SlixTypeFeatures features);
+
+bool slix_type_supports_password(SlixType slix_type, SlixPasswordType password_type);
 
 #ifdef __cplusplus
 }
