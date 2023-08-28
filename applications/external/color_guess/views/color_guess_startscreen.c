@@ -4,6 +4,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
+#include "color_guess_icons.h"
 
 struct ColorGuessStartscreen {
     View* view;
@@ -30,10 +31,11 @@ void color_guess_startscreen_draw(Canvas* canvas, ColorGuessStartscreenModel* mo
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
+    canvas_draw_icon(canvas, 0, 9, &I_start_dolph_49x55);
     canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Color Guess");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Guess the color");
-    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, "on Flipper's LED");
+    canvas_draw_str_aligned(canvas, 54, 22, AlignLeft, AlignTop, "Guess the color");
+    canvas_draw_str_aligned(canvas, 54, 32, AlignLeft, AlignTop, "on Flipper's LED");
     elements_button_center(canvas, "Start");
 }
 

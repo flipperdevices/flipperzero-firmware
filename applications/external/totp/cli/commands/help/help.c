@@ -11,6 +11,7 @@
 #include "../reset/reset.h"
 #include "../automation/automation.h"
 #include "../details/details.h"
+#include "../version/version.h"
 
 #ifdef TOTP_CLI_RICH_HELP_ENABLED
 void totp_cli_command_help_docopt_commands() {
@@ -29,6 +30,7 @@ void totp_cli_command_help_handle() {
 #ifdef TOTP_CLI_RICH_HELP_ENABLED
     TOTP_CLI_PRINTF("Usage:\r\n");
     totp_cli_command_help_docopt_usage();
+    totp_cli_command_version_docopt_usage();
     totp_cli_command_list_docopt_usage();
     totp_cli_command_details_docopt_usage();
     totp_cli_command_add_docopt_usage();
@@ -43,6 +45,7 @@ void totp_cli_command_help_handle() {
     cli_nl();
     TOTP_CLI_PRINTF("Commands:\r\n");
     totp_cli_command_help_docopt_commands();
+    totp_cli_command_version_docopt_commands();
     totp_cli_command_list_docopt_commands();
     totp_cli_command_details_docopt_commands();
     totp_cli_command_add_docopt_commands();

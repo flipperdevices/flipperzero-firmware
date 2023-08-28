@@ -33,7 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-28 11:11 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-28 11:11 EST`
-- Updated: [Authenticator/TOTP v4.0.3 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - OFW: [Rfid: fix crash on broken key launch from archive #3012 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3012)
 - OFW: [AC OFF button #3010 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3010)
 - OFW: [github: Check for todos #3011 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3011)
@@ -51,6 +50,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
 - UL: fix timer icons in ir remote (By Svaarich)
 - Updated: [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro) [(Fixes By gid9798)](https://github.com/xMasterX/all-the-plugins/commit/83e7b7219ccd515f1eead30f834efaf8273b0d9a)
+- Updated: [Authenticator/TOTP v4.1.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [Color Guess v1.1 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 
 <a name="release">
 
@@ -228,7 +229,7 @@ $ ./fbt dolphin_ext
 - [Bomberduck (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
 - [Chess v1.9 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
-- [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- [Color Guess v1.1 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 - [DnD Dice v1.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
@@ -282,7 +283,7 @@ $ ./fbt dolphin_ext
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
-- [Authenticator/TOTP v4.0.3 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- [Authenticator/TOTP v4.1.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad KB (Modified PR#738 from pengu1ndev - Original from WillyJL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)

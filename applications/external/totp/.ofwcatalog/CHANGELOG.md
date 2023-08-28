@@ -1,5 +1,10 @@
 # Changelog
 
+## v4.1.0 - 28 Aug 2023
+
+* Implemented [#195](https://github.com/akopachov/flipper-zero_authenticator/releases/tag/v4.1.0)
+* Added `totp version` CLI command
+
 ## v4.0.0 - 9 Aug 2023
 
 * Dropped homebrew hashing algo implementations and replaced them with [WolfSSL](https://github.com/wolfSSL/wolfssl/) library ([#185](https://github.com/akopachov/flipper-zero_authenticator/issues/185))
