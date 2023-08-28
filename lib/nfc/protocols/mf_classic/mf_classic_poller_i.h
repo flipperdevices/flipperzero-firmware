@@ -15,41 +15,83 @@ typedef enum {
 } MfClassicAuthState;
 
 typedef enum {
-    MfClassicCardStateNotDetected,
     MfClassicCardStateDetected,
+    MfClassicCardStateLost,
 } MfClassicCardState;
 
 typedef enum {
-    MfClassicReadModeDictAttack,
-    MfClassicReadModeKeyReuse,
-} MfClassicReadMode;
-
-typedef enum {
     MfClassicPollerStateStart,
-    MfClassicPollerStateIdle,
-    MfClassicPollerStateNewSector,
+
+    // Write states
+    MfClassicPollerStateRequestSectorTrailer,
+    MfClassicPollerStateCheckWriteConditions,
+    MfClassicPollerStateReadBlock,
+    MfClassicPollerStateWriteBlock,
+
+    // Read states
+    MfClassicPollerStateRequestReadSector,
+    MfClassicPollerStateReadSectorBlocks,
+
+    // Dict attack states
+    MfClassicPollerStateNextSector,
     MfClassicPollerStateRequestKey,
+    MfClassicPollerStateReadSector,
     MfClassicPollerStateAuthKeyA,
     MfClassicPollerStateAuthKeyB,
-    MfClassicPollerStateReadSector,
-    MfClassicPollerStateReadComplete,
+    MfClassicPollerStateKeyReuseStart,
+    MfClassicPollerStateKeyReuseAuthKeyA,
+    MfClassicPollerStateKeyReuseAuthKeyB,
+    MfClassicPollerStateKeyReuseReadSector,
+    MfClassicPollerStateSuccess,
+    MfClassicPollerStateFail,
 
     MfClassicPollerStateNum,
 } MfClassicPollerState;
+
+typedef struct {
+    uint8_t current_sector;
+    MfClassicSectorTrailer sec_tr;
+    uint8_t current_block;
+    MfClassicKeyType key_type_read;
+    MfClassicKeyType key_type_write;
+    bool need_halt_before_write;
+    MfClassicBlock tag_block;
+} MfClassicPollerWriteContext;
+
+typedef struct {
+    uint8_t current_sector;
+    MfClassicKey current_key;
+    MfClassicKeyType current_key_type;
+    bool auth_passed;
+    uint8_t current_block;
+    uint8_t reuse_key_sector;
+} MfClassicPollerDictAttackContext;
+
+typedef struct {
+    uint8_t current_sector;
+    uint16_t current_block;
+    MfClassicKeyType key_type;
+    MfClassicKey key;
+    bool auth_passed;
+} MfClassicPollerReadContext;
+
+typedef union {
+    MfClassicPollerWriteContext write_ctx;
+    MfClassicPollerDictAttackContext dict_attack_ctx;
+    MfClassicPollerReadContext read_ctx;
+
+} MfClassicPollerModeContext;
 
 struct MfClassicPoller {
     Iso14443_3aPoller* iso14443_3a_poller;
 
     MfClassicPollerState state;
-    MfClassicPollerState prev_state;
     MfClassicAuthState auth_state;
     MfClassicCardState card_state;
 
-    MfClassicReadMode read_mode;
-    MfClassicKey current_key;
-    uint8_t sectors_read;
-    uint8_t key_reuse_sector;
     uint8_t sectors_total;
+    MfClassicPollerModeContext mode_ctx;
+
     Crypto1* crypto;
     BitBuffer* tx_plain_buffer;
     BitBuffer* tx_encrypted_buffer;
@@ -94,12 +136,18 @@ typedef struct {
     int32_t new_value;
 } MfClassicChangeValueContext;
 
+typedef struct {
+    MfClassicDeviceKeys keys;
+    uint8_t current_sector;
+} MfClassicReadContext;
+
 typedef union {
     MfClassicAuthContext auth_context;
     MfClassicReadBlockContext read_block_context;
     MfClassicWriteBlockContext write_block_context;
     MfClassicReadValueContext read_value_context;
     MfClassicChangeValueContext change_value_context;
+    MfClassicReadContext read_context;
 } MfClassicPollerContextData;
 
 MfClassicError mf_classic_process_error(Iso14443_3aError error);
@@ -115,7 +163,7 @@ MfClassicError mf_classic_async_auth(
     MfClassicKeyType key_type,
     MfClassicAuthContext* data);
 
-MfClassicError mf_classic_aync_halt(MfClassicPoller* instance);
+MfClassicError mf_classic_async_halt(MfClassicPoller* instance);
 
 MfClassicError
     mf_classic_async_read_block(MfClassicPoller* instance, uint8_t block_num, MfClassicBlock* data);

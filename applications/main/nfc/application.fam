@@ -38,6 +38,20 @@ App(
     requires=["nfc"],
 )
 
+App(
+    appid="plantain_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="plantain_plugin_ep",
+    requires=["nfc"],
+)
+
+App(
+    appid="two_cities_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="two_cities_plugin_ep",
+    requires=["nfc"],
+)
+
 # App(
 #     appid="nfc_start",
 #     apptype=FlipperAppType.STARTUP,

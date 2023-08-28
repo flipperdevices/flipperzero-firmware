@@ -12,6 +12,8 @@
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync_api.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
 
+#include <applications/main/nfc/helpers/mf_dict.h>
+
 #include <lib/nfc/nfc.h>
 
 #include "../minunit.h"
@@ -19,18 +21,7 @@
 #define TAG "NfcTest"
 
 #define NFC_TEST_NFC_DEV_PATH EXT_PATH("unit_tests/nfc/nfc_device_test.nfc")
-
-// Maximum allowed time for buffer preparation to fit 500us nt message timeout
-#define NFC_TEST_4_BYTE_BUILD_BUFFER_TIM_MAX (150)
-#define NFC_TEST_16_BYTE_BUILD_BUFFER_TIM_MAX (640)
-#define NFC_TEST_4_BYTE_BUILD_SIGNAL_TIM_MAX (110)
-#define NFC_TEST_16_BYTE_BUILD_SIGNAL_TIM_MAX (440)
-
-// Maximum allowed time for buffer preparation to fit 500us nt message timeout
-#define NFC_TEST_4_BYTE_BUILD_BUFFER_TIM_MAX (150)
-#define NFC_TEST_16_BYTE_BUILD_BUFFER_TIM_MAX (640)
-#define NFC_TEST_4_BYTE_BUILD_SIGNAL_TIM_MAX (110)
-#define NFC_TEST_16_BYTE_BUILD_SIGNAL_TIM_MAX (440)
+#define MF_CLASSIC_DICT_UNIT_TEST_PATH EXT_PATH("unit_tests/mf_dict.nfc")
 
 typedef struct {
     Storage* storage;
@@ -432,6 +423,67 @@ static void mf_classic_value_block() {
     nfc_free(poller);
 }
 
+MU_TEST(mf_classic_dict_test) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    if(storage_common_stat(storage, MF_CLASSIC_DICT_UNIT_TEST_PATH, NULL) == FSE_OK) {
+        mu_assert(
+            storage_simply_remove(storage, MF_CLASSIC_DICT_UNIT_TEST_PATH),
+            "Remove test dict failed");
+    }
+
+    MfDict* dict = mf_dict_alloc(MfDictTypeUnitTest);
+    mu_assert(dict != NULL, "mf_dict_alloc() failed");
+
+    size_t dict_keys_total = mf_dict_get_total_keys(dict);
+    mu_assert(dict_keys_total == 0, "mf_dict_keys_total() failed");
+
+    const uint32_t test_key_num = 30;
+    MfClassicKey* key_arr_ref = malloc(test_key_num * sizeof(MfClassicKey));
+    for(size_t i = 0; i < test_key_num; i++) {
+        furi_hal_random_fill_buf(key_arr_ref[i].data, sizeof(MfClassicKey));
+        mu_assert(mf_dict_add_key(dict, &key_arr_ref[i]), "add key failed");
+
+        size_t dict_keys_total = mf_dict_get_total_keys(dict);
+        mu_assert(dict_keys_total == (i + 1), "mf_dict_keys_total() failed");
+    }
+
+    mf_dict_free(dict);
+
+    dict = mf_dict_alloc(MfDictTypeUnitTest);
+    mu_assert(dict != NULL, "mf_dict_alloc() failed");
+
+    dict_keys_total = mf_dict_get_total_keys(dict);
+    mu_assert(dict_keys_total == test_key_num, "mf_dict_keys_total() failed");
+
+    MfClassicKey key_dut = {};
+    size_t key_idx = 0;
+    while(mf_dict_get_next_key(dict, &key_dut)) {
+        mu_assert(
+            memcmp(key_arr_ref[key_idx].data, key_dut.data, sizeof(MfClassicKey)) == 0,
+            "Loaded key data mismatch");
+        key_idx++;
+    }
+
+    uint32_t delete_keys_idx[] = {1, 3, 9, 11, 19, 27};
+
+    for(size_t i = 0; i < COUNT_OF(delete_keys_idx); i++) {
+        MfClassicKey* key = &key_arr_ref[delete_keys_idx[i]];
+        mu_assert(mf_dict_is_key_present(dict, key), "mf_dict_is_key_present() failed");
+        mu_assert(mf_dict_delete_key(dict, key), "mf_dict_delete_key() failed");
+    }
+
+    dict_keys_total = mf_dict_get_total_keys(dict);
+    mu_assert(
+        dict_keys_total == test_key_num - COUNT_OF(delete_keys_idx),
+        "mf_dict_keys_total() failed");
+
+    mf_dict_free(dict);
+    free(key_arr_ref);
+
+    mu_assert(
+        storage_simply_remove(storage, MF_CLASSIC_DICT_UNIT_TEST_PATH), "Remove test dict failed");
+}
+
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
@@ -470,6 +522,8 @@ MU_TEST_SUITE(nfc) {
 
     MU_RUN_TEST(mf_classic_write);
     MU_RUN_TEST(mf_classic_value_block);
+
+    MU_RUN_TEST(mf_classic_dict_test);
 
     nfc_test_free();
 }

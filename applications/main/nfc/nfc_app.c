@@ -48,6 +48,7 @@ NfcApp* nfc_app_alloc() {
     instance->nfc = nfc_alloc();
 
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
+    instance->mfc_key_cache = mf_classic_key_cache_alloc();
 
     // Nfc device
     instance->nfc_device = nfc_device_alloc();
@@ -107,6 +108,7 @@ NfcApp* nfc_app_alloc() {
         instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
 
     // Dict attack
+
     instance->dict_attack = dict_attack_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewDictAttack, dict_attack_get_view(instance->dict_attack));
@@ -148,6 +150,7 @@ void nfc_app_free(NfcApp* instance) {
     nfc_free(instance->nfc);
 
     mf_ultralight_auth_free(instance->mf_ul_auth);
+    mf_classic_key_cache_free(instance->mfc_key_cache);
 
     // Nfc device
     nfc_device_free(instance->nfc_device);
@@ -244,7 +247,7 @@ void nfc_blink_stop(NfcApp* nfc) {
     notification_message(nfc->notifications, &sequence_blink_stop);
 }
 
-void nfc_make_app_folder(NfcApp* instance) {
+void nfc_make_app_folders(NfcApp* instance) {
     furi_assert(instance);
 
     if(!storage_simply_mkdir(instance->storage, NFC_APP_FOLDER)) {
@@ -260,6 +263,13 @@ bool nfc_save_file(NfcApp* instance, FuriString* path) {
 
     if(!result) {
         dialog_message_show_storage_error(instance->dialogs, "Cannot save\nkey file");
+    }
+
+    // TODO move this to protocol support save scene
+    if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
+        mf_classic_key_cache_save(
+            instance->mfc_key_cache,
+            nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic));
     }
 
     return result;
@@ -313,9 +323,10 @@ static bool nfc_save_internal(NfcApp* instance, const char* extension) {
 
     bool result = false;
 
-    nfc_make_app_folder(instance);
+    nfc_make_app_folders(instance);
 
-    if(furi_string_end_with(instance->file_path, NFC_APP_EXTENSION)) {
+    if(furi_string_end_with(instance->file_path, NFC_APP_EXTENSION) ||
+       (furi_string_end_with(instance->file_path, NFC_APP_SHADOW_EXTENSION))) {
         size_t filename_start = furi_string_search_rchar(instance->file_path, '/');
         furi_string_left(instance->file_path, filename_start);
     }
