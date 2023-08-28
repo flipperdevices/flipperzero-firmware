@@ -35,6 +35,9 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#define DEFAULT_RETURN_DEPTH (512)
+#define DEFAULT_USER_DEPTH (512)
+
 struct thread_callback_ctx {
 	ExecToken XT;
 	void *actual_ctx;
@@ -55,7 +58,8 @@ static int32_t ThreadCallbackDispatcher(void* context)
 {
 	struct thread_callback_ctx *cb_ctx = context;
 
-	pfTaskData_t *gCurrentTask = pfCreateTask(512, 512);
+	pfTaskData_t *gCurrentTask = pfCreateTask(DEFAULT_USER_DEPTH,
+			DEFAULT_RETURN_DEPTH);
 
 	PUSH_DATA_STACK(cb_ctx->actual_ctx);
 	pfCatch(cb_ctx->XT, gCurrentTask);
