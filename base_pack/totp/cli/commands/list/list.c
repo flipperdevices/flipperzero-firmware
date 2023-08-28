@@ -1,10 +1,32 @@
 #include "list.h"
 #include <stdlib.h>
+#include <lib/toolbox/args.h>
 #include "../../../types/token_info.h"
 #include "../../../services/config/constants.h"
 #include "../../../services/config/config.h"
 #include "../../../ui/scene_director.h"
 #include "../../cli_helpers.h"
+#include "formatters/table/list_output_formatter_table.h"
+#include "formatters/tsv/list_output_formatter_tsv.h"
+
+typedef void (*TOTP_CLI_LIST_HEADER_FORMATTER)();
+typedef void (*TOTP_CLI_LIST_FOOTER_FORMATTER)();
+typedef void (*TOTP_CLI_LIST_BODY_ITEM_FORMATTER)(size_t index, const TokenInfo* token_info);
+
+typedef struct {
+    const TOTP_CLI_LIST_HEADER_FORMATTER header_formatter;
+    const TOTP_CLI_LIST_FOOTER_FORMATTER footer_formatter;
+    const TOTP_CLI_LIST_BODY_ITEM_FORMATTER body_item_formatter;
+} TotpCliListFormatter;
+
+static const TotpCliListFormatter available_formatters[] = {
+    {.header_formatter = &list_output_formatter_print_header_table,
+     .body_item_formatter = &list_output_formatter_print_body_item_table,
+     .footer_formatter = &list_output_formatter_print_footer_table},
+
+    {.header_formatter = &list_output_formatter_print_header_tsv,
+     .body_item_formatter = &list_output_formatter_print_body_item_tsv,
+     .footer_formatter = &list_output_formatter_print_footer_tsv}};
 
 #ifdef TOTP_CLI_RICH_HELP_ENABLED
 void totp_cli_command_list_docopt_commands() {
@@ -18,7 +40,7 @@ void totp_cli_command_list_docopt_usage() {
 }
 #endif
 
-void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
+void totp_cli_command_list_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
     if(!totp_cli_ensure_authenticated(plugin_state, cli)) {
         return;
     }
@@ -31,26 +53,26 @@ void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
         return;
     }
 
+    const TotpCliListFormatter* formatter = &available_formatters[0];
+    FuriString* arg = furi_string_alloc();
+    if(args_read_string_and_trim(args, arg) && furi_string_cmpi_str(arg, "--tsv") == 0) {
+        formatter = &available_formatters[1];
+    }
+
+    furi_string_free(arg);
+
     TOTP_CLI_LOCK_UI(plugin_state);
 
     size_t original_index = totp_token_info_iterator_get_current_token_index(iterator_context);
 
-    TOTP_CLI_PRINTF("+-----+---------------------------+--------+----+-----+\r\n");
-    TOTP_CLI_PRINTF("| %-3s | %-25s | %-6s | %-s | %-s |\r\n", "#", "Name", "Algo", "Ln", "Dur");
-    TOTP_CLI_PRINTF("+-----+---------------------------+--------+----+-----+\r\n");
+    (*formatter->header_formatter)();
     for(size_t i = 0; i < total_count; i++) {
         totp_token_info_iterator_go_to(iterator_context, i);
         const TokenInfo* token_info = totp_token_info_iterator_get_current_token(iterator_context);
-        TOTP_CLI_PRINTF(
-            "| %-3" PRIu16 " | %-25.25s | %-6s | %-2" PRIu8 " | %-3" PRIu8 " |\r\n",
-            i + 1,
-            furi_string_get_cstr(token_info->name),
-            token_info_get_algo_as_cstr(token_info),
-            token_info->digits,
-            token_info->duration);
+        (*formatter->body_item_formatter)(i, token_info);
     }
 
-    TOTP_CLI_PRINTF("+-----+---------------------------+--------+----+-----+\r\n");
+    (*formatter->footer_formatter)();
 
     totp_token_info_iterator_go_to(iterator_context, original_index);
 
