@@ -30,6 +30,8 @@ struct SignalReader {
     const GpioPin* pin;
     GpioPull pull;
     SignalReaderPolarity polarity;
+    SignalReaderTrigger trigger;
+
     uint16_t* gpio_buffer;
     uint8_t* bitstream_buffer;
 
@@ -108,6 +110,12 @@ void signal_reader_set_sample_rate(
     UNUSED(time_unit);
 
     instance->tim_arr = time;
+}
+
+void signal_reader_set_trigger(SignalReader* instance, SignalReaderTrigger trigger) {
+    furi_assert(instance);
+
+    instance->trigger = trigger;
 }
 
 static void furi_hal_sw_digital_pin_dma_rx_isr(void* context) {
