@@ -34,6 +34,8 @@
 #include <furi.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <lib/subghz/subghz_tx_rx_worker.h>
+#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
 #define DEFAULT_RETURN_DEPTH (512)
 #define DEFAULT_USER_DEPTH (512)
@@ -69,6 +71,21 @@ static int32_t ThreadCallbackDispatcher(void* context)
 
 	free(cb_ctx);
 	return ret;
+}
+
+static void HaveReadCallbackDispatcher(void* context)
+{
+	struct thread_callback_ctx *cb_ctx = context;
+
+	pfTaskData_t *gCurrentTask = pfCreateTask(DEFAULT_USER_DEPTH,
+			DEFAULT_RETURN_DEPTH);
+
+	PUSH_DATA_STACK(cb_ctx->actual_ctx);
+	pfCatch(cb_ctx->XT, gCurrentTask);
+
+	pfDeleteTask(gCurrentTask);
+
+	free(cb_ctx);
 }
 
 /****************************************************************
@@ -114,6 +131,21 @@ static FuriThread *FuriThreadAllocExWrapper(const char *name, uint32_t
 	return furi_thread_alloc_ex(name, stack_size, cb, ctx);
 }
 
+static void SubghzTxRxWorkerSetCallbackHaveReadWrapper(SubGhzTxRxWorker*
+		instance, SubGhzTxRxWorkerCallbackHaveRead callback, void*
+		context)
+{
+	void *ctx = ThreadContextAlloc((ExecToken) callback, context);
+	SubGhzTxRxWorkerCallbackHaveRead cb = HaveReadCallbackDispatcher;
+
+	subghz_tx_rx_worker_set_callback_have_read(instance, cb, ctx);
+}
+
+static const char *SubghzDeviceCC1101IntNameWrapper(void)
+{
+	return SUBGHZ_DEVICE_CC1101_INT_NAME;
+}
+
 /****************************************************************
 ** Step 2: Create CustomFunctionTable.
 **     Do not change the name of CustomFunctionTable!
@@ -139,6 +171,18 @@ CFunc0 CustomFunctionTable[] =
 	(CFunc0) furi_thread_free,
 	(CFunc0) furi_thread_start,
 	(CFunc0) furi_thread_join,
+	(CFunc0) subghz_tx_rx_worker_available,
+	(CFunc0) subghz_tx_rx_worker_read,
+	(CFunc0) subghz_tx_rx_worker_alloc,
+	(CFunc0) subghz_tx_rx_worker_free,
+	(CFunc0) subghz_tx_rx_worker_start,
+	(CFunc0) subghz_tx_rx_worker_stop,
+	(CFunc0) subghz_tx_rx_worker_is_running,
+	(CFunc0) SubghzTxRxWorkerSetCallbackHaveReadWrapper,
+	(CFunc0) subghz_devices_init,
+	(CFunc0) subghz_devices_deinit,
+	(CFunc0) subghz_devices_get_by_name,
+	(CFunc0) SubghzDeviceCC1101IntNameWrapper,
 };
 #pragma GCC diagnostic pop
 
@@ -185,6 +229,30 @@ Err CompileCustomFunctions(void)
 	err = CreateGlueToC( "FURI_THREAD_START", i++, C_RETURNS_VOID, 1 );
 	if( err < 0 ) return err;
 	err = CreateGlueToC( "FURI_THREAD_JOIN", i++, C_RETURNS_VALUE, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_AVAILABLE", i++, C_RETURNS_VALUE, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_READ", i++, C_RETURNS_VALUE, 3 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_ALLOC", i++, C_RETURNS_VALUE, 0 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_FREE", i++, C_RETURNS_VOID, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_START", i++, C_RETURNS_VALUE, 3 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_STOP", i++, C_RETURNS_VOID, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_IS_RUNNING", i++, C_RETURNS_VALUE, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_SET_CALLBACK", i++, C_RETURNS_VOID, 3 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_DEVICES_INIT", i++, C_RETURNS_VOID, 0 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_DEVICES_DEINIT", i++, C_RETURNS_VOID, 0 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_DEVICES_GET_BY_NAME", i++, C_RETURNS_VALUE, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_DEVICE_CC1101_INT_NAME", i++, C_RETURNS_VALUE, 0 );
 	if( err < 0 ) return err;
 
 	return 0;
