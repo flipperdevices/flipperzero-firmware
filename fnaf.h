@@ -12,10 +12,10 @@
 #include "views/cameras.h"
 #include "views/office.h"
 
-#define bonnie_time 4970
-#define chica_time 4980
-#define freddy_time 3020
-#define foxy_time 5010
+#define blipper_time 4970
+#define chipper_time 4980
+#define flipper_time 3020
+#define fopper_time 5010
 #define first_hour_time 90000
 #define hour_time 89000
 #define noise_time 4500 // something around this idk
@@ -29,7 +29,7 @@ typedef struct {
     uint8_t AI[4];
     uint8_t location[4];
     FuriTimer* timer[4];
-}Animatronics;
+}Dolphins;
 
 typedef struct {
     bool left_door;
@@ -48,7 +48,7 @@ typedef struct {
     Gui* gui;
     InputEvent event;
 
-    Animatronics* animatronics;
+    Dolphins* dolphins;
     Cameras* cameras;
     Office* office;
     Electricity* electricity;
@@ -58,16 +58,17 @@ typedef struct {
     uint8_t counter_secondary; // for speaker animation on cam6 and fan
     uint8_t counter_music_box; // for music box 
     signed char menu_cursor; // for the main menu
+    uint8_t custom_menu_cursor; // for custom night menu
     uint8_t current_view;
     uint8_t progress; // Last completed nights
     FuriTimer* hourly_timer;
 } Fnaf;
 
 typedef enum {
-    Freddy,
-    Bonnie,
-    Chica,
-    Foxy,
+    Flipper,
+    Blipper,
+    Chipper,
+    Fopper,
 }Names;
 
 typedef enum {
@@ -80,13 +81,6 @@ typedef enum {
     jumpscare,
     game_over,
 }Views;
-
-typedef struct {
-    uint8_t Bonnie;
-    uint8_t Chika;
-    uint8_t Freddy;
-    uint8_t Foxy;
-}NightDifficulty;
 
 void stop_hourly_timer(Fnaf* fnaf);
 

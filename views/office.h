@@ -5,10 +5,10 @@
 #include "cameras.h"
 
 #define SET_DIFFICULTY(difficulties)  \
-        fnaf->animatronics->AI[Bonnie] = difficulties[Bonnie];\
-        fnaf->animatronics->AI[Chica] = difficulties[Chica];\
-        fnaf->animatronics->AI[Freddy] = difficulties[Freddy];\
-        fnaf->animatronics->AI[Foxy] = difficulties[Foxy]
+        fnaf->dolphins->AI[Blipper] = difficulties[Blipper];\
+        fnaf->dolphins->AI[Chipper] = difficulties[Chipper];\
+        fnaf->dolphins->AI[Flipper] = difficulties[Flipper];\
+        fnaf->dolphins->AI[Fopper] = difficulties[Fopper]
 
 typedef enum {
     left,
@@ -28,7 +28,7 @@ typedef struct {
     signed char right_door_state;   // -1 is up, 1 is down, 0 is static
     FuriTimer* left_door_sound_timer;       // for icon
     FuriTimer* right_door_sound_timer;      // for icon
-    FuriTimer* freddy_laugh_timer;          // for icon
+    FuriTimer* flipper_laugh_timer;          // for icon
     FuriTimer* power_out_timer;             // for when power goes out
     FuriTimer* power_out_max_timer;         // for when power goes out
     bool is_light_on;                       // used when power goes out
@@ -43,13 +43,13 @@ void night_start(void* ctx);
 
 void reset_animatronic_positions(void* ctx);
 
-void timer_callback_bonnie(void* ctx);
+void timer_callback_blipper(void* ctx);
 
-void timer_callback_chica(void* ctx);
+void timer_callback_chipper(void* ctx);
 
-void timer_callback_freddy(void* ctx);
+void timer_callback_flipper(void* ctx);
 
-void timer_callback_foxy(void* ctx);
+void timer_callback_fopper(void* ctx);
 
 void power_timer_callback(void* ctx);
 

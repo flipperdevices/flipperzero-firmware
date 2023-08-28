@@ -3,7 +3,7 @@
 #include "office.h"
 
 void draw_menu(Canvas* canvas, Fnaf* fnaf) {
-    if (fnaf->progress > 6) fnaf->progress = 0;
+    if (fnaf->progress > 6) fnaf->progress = 6;
 
     canvas_set_bitmap_mode(canvas, 1);
     canvas_draw_str(canvas, 15, 16, "New Game");
@@ -39,7 +39,8 @@ static void new_game(Fnaf* fnaf) {
 
 static void continue_game(Fnaf* fnaf) {
     FURI_LOG_D(TAG, "continue_game");
-    night_start(fnaf);
+    if (fnaf->progress != 6) night_start(fnaf);
+    else SWITCH_VIEW(custom_night);
 }
 
 bool menu_input(Fnaf* fnaf) {
@@ -51,9 +52,9 @@ bool menu_input(Fnaf* fnaf) {
 
             // REMOVE FOR RELEASE
             fnaf->progress += 1;
+            if (fnaf->progress > 6) fnaf->progress = 0;
             // REMOVE FOR RELEASE
 
-            if (fnaf->progress > 6) fnaf->progress = 0;
             break;
         case InputKeyUp:
             fnaf->menu_cursor -= 1;

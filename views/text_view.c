@@ -7,7 +7,10 @@
 static void animation(Canvas* canvas, Fnaf* fnaf) {
     if (fnaf->counter > animation_speed * 10) {
         fnaf->counter = 0;
-        if (fnaf->progress > 6) SWITCH_VIEW(main_menu); else night_start(fnaf);
+        if (fnaf->progress > 6) {
+            fnaf->progress = 6;
+            SWITCH_VIEW(main_menu);
+        } else night_start(fnaf);
     } else {
         canvas_set_color(canvas, 1);
         uint8_t y = 35 - fnaf->counter / animation_speed;

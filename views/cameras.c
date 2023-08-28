@@ -33,20 +33,20 @@ void draw_cameras(Canvas* canvas, void* ctx) {
     if (fnaf->cameras->cursor != cam6 && fnaf->cameras->cursor != cam5) {
         if (!furi_timer_is_running(fnaf->cameras->noise_timer)) {
             uint8_t y = 20;
-            if (fnaf->animatronics->location[Bonnie] == fnaf->cameras->cursor) {
-                canvas_draw_str(canvas, 85, y, "Bonnie");
+            if (fnaf->dolphins->location[Blipper] == fnaf->cameras->cursor) {
+                canvas_draw_str(canvas, 85, y, "Blipper");
                 y += 9;
             }
-            if (fnaf->animatronics->location[Chica] == fnaf->cameras->cursor) {
-                canvas_draw_str(canvas, 85, y, "Chica");
+            if (fnaf->dolphins->location[Chipper] == fnaf->cameras->cursor) {
+                canvas_draw_str(canvas, 85, y, "Chipper");
                 y += 9;
             }
-            if (fnaf->animatronics->location[Freddy] == fnaf->cameras->cursor) {
-                canvas_draw_str(canvas, 85, y, "Freddy");
+            if (fnaf->dolphins->location[Flipper] == fnaf->cameras->cursor) {
+                canvas_draw_str(canvas, 85, y, "Flipper");
                 y += 9;
             }
-            if (fnaf->animatronics->location[Foxy] == 3 && fnaf->cameras->cursor == cam2A) {
-                canvas_draw_str(canvas, 85, y, "Foxy runs");
+            if (fnaf->dolphins->location[Fopper] == 3 && fnaf->cameras->cursor == cam2A) {
+                canvas_draw_str(canvas, 85, y, "Fopper runs");
                 y += 9;
             }
         }
@@ -56,7 +56,7 @@ void draw_cameras(Canvas* canvas, void* ctx) {
 
         canvas_draw_icon(canvas, 87, 23, &I_speaker_22x19);
 
-        if (fnaf->animatronics->location[Chica] == cam6) {
+        if (fnaf->dolphins->location[Chipper] == cam6) {
             if (fnaf->counter_secondary > 5) {
                 canvas_set_color(canvas, 0);
                 canvas_draw_box(canvas, 99, 23, 10, 19);
@@ -67,7 +67,7 @@ void draw_cameras(Canvas* canvas, void* ctx) {
             canvas_set_color(canvas, 0);
             canvas_draw_box(canvas, 99, 23, 10, 19);
         }
-        if (fnaf->animatronics->location[Freddy] == cam6) {
+        if (fnaf->dolphins->location[Flipper] == cam6) {
             if (fnaf->counter_music_box < 6) {
                 canvas_set_color(canvas, 1);
                 canvas_draw_icon(canvas, 110, 24, &I_music_box_17x17);
@@ -77,7 +77,7 @@ void draw_cameras(Canvas* canvas, void* ctx) {
             fnaf->counter_music_box += 1;
         }
     } else if (fnaf->cameras->cursor == cam5) {
-        switch (fnaf->animatronics->location[Foxy]) {
+        switch (fnaf->dolphins->location[Fopper]) {
         case 0:
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_str(canvas, 85, 20, "Curtains");

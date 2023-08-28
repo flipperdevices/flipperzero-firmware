@@ -114,7 +114,7 @@ static void power_out(Canvas* canvas, Fnaf* fnaf) {
         canvas_set_color(canvas, 1);
         canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_office_128x64);
         if (fnaf->counter_secondary > furi_get_tick() % 7 + 1) {
-            canvas_draw_icon(canvas, fnaf->office->camera_x + 11, 23, &I_power_out_freddy_8x7);
+            canvas_draw_icon(canvas, fnaf->office->camera_x + 11, 23, &I_power_out_flipper_8x7);
             if (fnaf->counter_secondary > furi_get_tick() % 15 + 1) {
                 fnaf->counter_secondary = 0;
             }
@@ -152,17 +152,17 @@ static void draw_sides(Canvas* canvas, Fnaf* fnaf) {
         canvas_set_color(canvas, 1);
         canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_left_door_dark_28x64);
         canvas_draw_icon(canvas, fnaf->office->camera_x + 29, 15, &I_left_window_dark_13x25);
-    } else if (fnaf->animatronics->location[Bonnie] == left_entrance) {
+    } else if (fnaf->dolphins->location[Blipper] == left_entrance) {
         canvas_set_color(canvas, 1);
-        canvas_draw_icon(canvas, fnaf->office->camera_x + 4, 20, &I_bonnie_office_37x39);
+        canvas_draw_icon(canvas, fnaf->office->camera_x + 4, 21, &I_blipper_office_36x39);
     }
     if (!fnaf->electricity->right_light) {
         canvas_set_color(canvas, 1);
         canvas_draw_icon(canvas, fnaf->office->camera_x + 100, 0, &I_right_door_dark_28x64);
         canvas_draw_icon(canvas, fnaf->office->camera_x + 85, 15, &I_right_window_dark_13x25);
-    } else if (fnaf->animatronics->location[Chica] == right_entrance) {
+    } else if (fnaf->dolphins->location[Chipper] == right_entrance) {
         canvas_set_color(canvas, 1);
-        canvas_draw_icon(canvas, fnaf->office->camera_x + 87, 20, &I_chica_window_9x16);
+        canvas_draw_icon(canvas, fnaf->office->camera_x + 87, 24, &I_chipper_window_9x12);
     }
 
     draw_doors(canvas, fnaf);
@@ -224,8 +224,8 @@ void office_draw(Canvas* canvas, void* ctx) {
         canvas_draw_icon(canvas, 3, 3, &I_speaker_17x17);
     if (furi_timer_is_running(fnaf->office->right_door_sound_timer))
         canvas_draw_icon(canvas, 108, 3, &I_speaker_17x17);
-    if (furi_timer_is_running(fnaf->office->freddy_laugh_timer))
-        canvas_draw_icon(canvas, 108, 23, &I_freddy_17x17);
+    if (furi_timer_is_running(fnaf->office->flipper_laugh_timer))
+        canvas_draw_icon(canvas, 108, 23, &I_flipper_17x17);
 }
 
 static void close_door(Fnaf* fnaf, uint8_t door) {
@@ -352,10 +352,18 @@ void set_difficulty(Fnaf* fnaf) {
         {4, 10, 12, 16},
         {0, 0, 0, 0},
     };
-    // Freddy has AI of random 1 or 2 for the 4th night
-    difficulties[3][Freddy] = furi_get_tick() % 2 + 1;
+    // Flipper has AI of random 1 or 2 for the 4th night
+    difficulties[3][Flipper] = rand() % 2 + 1;
     // CUSTOM NIGHT INTERFACE WHEN
-    SET_DIFFICULTY(difficulties[fnaf->progress]);
+    if (fnaf->progress != 6) { SET_DIFFICULTY(difficulties[fnaf->progress]); }
+}
+
+void reset_animatronic_positions(void* ctx) {
+    Fnaf* fnaf = ctx;
+    fnaf->dolphins->location[Blipper] = cam1A;
+    fnaf->dolphins->location[Chipper] = cam1A;
+    fnaf->dolphins->location[Flipper] = cam1A;
+    fnaf->dolphins->location[Fopper] = 0;
 }
 
 void night_start(void* ctx) {
@@ -363,7 +371,7 @@ void night_start(void* ctx) {
     FURI_LOG_D(TAG, "night_start");
     FURI_LOG_D(TAG, "progress = %u", fnaf->progress);
     if (fnaf->progress > 6) {
-        fnaf->progress = 0;
+        fnaf->progress = 6;
         SWITCH_VIEW(main_menu);
     } else {
         FURI_LOG_D(TAG, "Night started thing");
@@ -398,27 +406,19 @@ void night_start(void* ctx) {
     }
 }
 
-void reset_animatronic_positions(void* ctx) {
-    Fnaf* fnaf = ctx;
-    fnaf->animatronics->location[Bonnie] = cam1A;
-    fnaf->animatronics->location[Chica] = cam1A;
-    fnaf->animatronics->location[Freddy] = cam1A;
-    fnaf->animatronics->location[Foxy] = 0;
-}
-
-void timer_callback_bonnie(void* ctx) {
+void timer_callback_blipper(void* ctx) {
     UNUSED(ctx);
 }
 
-void timer_callback_chica(void* ctx) {
+void timer_callback_chipper(void* ctx) {
     UNUSED(ctx);
 }
 
-void timer_callback_freddy(void* ctx) {
+void timer_callback_flipper(void* ctx) {
     UNUSED(ctx);
 }
 
-void timer_callback_foxy(void* ctx) {
+void timer_callback_fopper(void* ctx) {
     UNUSED(ctx);
 }
 
@@ -498,16 +498,17 @@ void hourly_timer_callback(void* ctx) {
         FURI_LOG_D(TAG, "Hourly timer started (89s)");
         break;
     case 2:
-        fnaf->animatronics->AI[Bonnie] += 1;
+        fnaf->dolphins->AI[Blipper] += 1;
         break;
     case 3:
     case 4:
-        fnaf->animatronics->AI[Bonnie] += 1;
-        fnaf->animatronics->AI[Chica] += 1;
-        fnaf->animatronics->AI[Foxy] += 1;
+        fnaf->dolphins->AI[Blipper] += 1;
+        fnaf->dolphins->AI[Chipper] += 1;
+        fnaf->dolphins->AI[Fopper] += 1;
         break;
     case 6:
         fnaf->progress += 1;
+        if (fnaf->progress > 6) fnaf->progress = 6;
         dolphin_deed(DolphinDeedPluginGameWin);
         SWITCH_VIEW(night_complete);
         stop_all_timers(fnaf);
