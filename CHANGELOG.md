@@ -11,7 +11,7 @@
 * Feat/ci by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/14
 * Feat/ci by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/15
 
-**Full Changelog**: [v3.7.0...v.3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.7.0...v.3.8.0)
+**Full Changelog**: [v3.8.0...v.3.9.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.8.0...v.3.9.0)
 
 ## [v3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.8.0) (2023-08-25)
 
