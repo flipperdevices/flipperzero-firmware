@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
 - Updated: [SD Card Assets](https://www.patreon.com/RogueMaster/membership) to have [Dual Boot BINs (By TalkingSasquach)](https://github.com/skizzophrenic/Talking-Sasquach/tree/main/Single%20File%20WiFi%20Board%20Bins)
 - Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- Fix LCD Colors order/sides (By WillyJL)
 
 <a name="release">
 

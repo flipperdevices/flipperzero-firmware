@@ -226,9 +226,9 @@ void cfw_app_scene_misc_screen_on_enter(void* context) {
             const char* str;
             VariableItemChangeCallback cb;
         } lcd_cols[] = {
-            {2, "LCD Left", cfw_app_scene_misc_screen_lcd_color_0_changed},
+            {2, "LCD Left", cfw_app_scene_misc_screen_lcd_color_2_changed},
             {1, "LCD Middle", cfw_app_scene_misc_screen_lcd_color_1_changed},
-            {0, "LCD Right", cfw_app_scene_misc_screen_lcd_color_2_changed},
+            {0, "LCD Right", cfw_app_scene_misc_screen_lcd_color_0_changed},
         };
 
         switch(cfw_settings->lcd_style) {
