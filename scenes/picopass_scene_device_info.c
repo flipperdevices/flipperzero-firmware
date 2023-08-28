@@ -17,7 +17,6 @@ void picopass_scene_device_info_on_enter(void* context) {
     FuriString* csn_str = furi_string_alloc_set("CSN:");
     FuriString* credential_str = furi_string_alloc();
     FuriString* wiegand_str = furi_string_alloc();
-    FuriString* sio_str = furi_string_alloc();
 
     dolphin_deed(DolphinDeedNfcReadSuccess);
 
@@ -43,7 +42,7 @@ void picopass_scene_device_info_on_enter(void* context) {
         }
         furi_string_set(credential_str, "");
         for(uint8_t i = RFAL_PICOPASS_BLOCK_LEN - bytesLength; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
-            furi_string_cat_printf(credential_str, " %02X", pacs->credential[i]);
+            furi_string_cat_printf(credential_str, "%02X", pacs->credential[i]);
         }
 
         if(pacs->record.valid) {
@@ -54,7 +53,7 @@ void picopass_scene_device_info_on_enter(void* context) {
         }
 
         if(pacs->sio) {
-            furi_string_cat_printf(sio_str, "+SIO");
+            furi_string_cat_printf(credential_str, " +SIO");
         }
     }
 
@@ -70,13 +69,10 @@ void picopass_scene_device_info_on_enter(void* context) {
         AlignCenter,
         FontSecondary,
         furi_string_get_cstr(credential_str));
-    widget_add_string_element(
-        widget, 64, 46, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(sio_str));
 
     furi_string_free(csn_str);
     furi_string_free(credential_str);
     furi_string_free(wiegand_str);
-    furi_string_free(sio_str);
 
     widget_add_button_element(
         picopass->widget,
