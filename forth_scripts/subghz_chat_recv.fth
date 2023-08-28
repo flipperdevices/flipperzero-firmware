@@ -1,0 +1,71 @@
+433920000 Constant DEFAULT_FREQ
+1024 chars Constant RX_BUFFER_SIZE
+50 Constant TICK_INTERVAL
+500 Constant MSG_COMPLETION_TIMEOUT
+4096 Constant RX_TASK_STACK_SIZE
+
+0 cells Constant OFS_RX_TASK
+1 cells Constant OFS_FREQ
+2 cells Constant OFS_SUBGHZ_WORKER
+3 cells Constant OFS_SUBGHZ_DEVICE
+4 cells Constant OFS_LAST_TIME_RX_DATA
+5 cells Constant OFS_RX_BUFFER
+6 cells Constant OFS_RUNNING
+6 cells RX_BUFFER_SIZE + Constant RX_STRUCT_SIZE
+
+: RX_NOTIF ( -- )
+	RECORD_NOTIFICATION FURI_RECORD_OPEN
+	dup SEQUENCE_SINGLE_VIBRO NOTIFICATION_MESSAGE
+	drop
+	RECORD_NOTIFICATION FURI_RECORD_CLOSE
+;
+
+: POST_RX ( c-addr u -- )
+	TYPE
+	RX_NOTIF
+;
+
+: HAVE_READ_CB ( addr -- )
+	FURI_GET_TICK swap OFS_LAST_TIME_RX_DATA + !
+;
+
+: DO_RX ( addr -- )
+	\ TODO
+	drop
+	s" testout" POST_RX
+	10000 FURI_DELAY_MS
+;
+
+: RX_TASK ( addr -- n )
+	BEGIN
+		dup OFS_RUNNING + @ while
+			dup DO_RX
+			TICK_INTERVAL FURI_DELAY_MS
+	REPEAT
+	drop 0
+;
+
+: RX_STRUCT_ALLOC ( freq worker device -- addr )
+	RX_STRUCT_SIZE allocate throw >r
+	r@ OFS_SUBGHZ_DEVICE + !
+	r@ OFS_SUBGHZ_WORKER + !
+	r@ OFS_FREQ + !
+	0 r@ OFS_LAST_TIME_RX_DATA + !
+	1 r@ OFS_RUNNING + !
+	0 RX_TASK_STACK_SIZE ['] RX_TASK r@ FURI_THREAD_ALLOC_EX r@ OFS_RX_TASK + !
+	r>
+;
+
+: RX_STRUCT_FREE ( addr -- )
+	dup OFS_RX_TASK + @ FURI_THREAD_FREE
+	free throw
+;
+
+: START_RX_TASK ( addr -- )
+	OFS_RX_TASK + @ FURI_THREAD_START
+;
+
+: STOP_RX_TASK ( addr -- )
+	0 over OFS_RUNNING + !
+	OFS_RX_TASK + @ FURI_THREAD_JOIN drop
+;
