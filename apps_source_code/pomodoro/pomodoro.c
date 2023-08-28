@@ -9,6 +9,26 @@ enum PomodoroDebugSubmenuIndex {
     PomodoroSubmenuIndex50,
 };
 
+static void pomodoro_view_dispatcher_update_callback(void* context) {
+    furi_assert(context);
+    Pomodoro* app = (Pomodoro*)context;
+    switch(app->view_id) {
+    case PomodoroView10:
+        pomodoro_timer_update(app->pomodoro_10);
+        break;
+    case PomodoroView25:
+        pomodoro_timer_update(app->pomodoro_25);
+        break;
+    case PomodoroView50:
+        pomodoro_timer_update(app->pomodoro_50);
+        break;
+
+    default:
+        break;
+    }
+    pomodoro_timer_update(app->pomodoro_25);
+}
+
 void pomodoro_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
     Pomodoro* app = context;
@@ -59,6 +79,9 @@ Pomodoro* pomodoro_app_alloc() {
 
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, pomodoro_view_dispatcher_update_callback, 1000);
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
