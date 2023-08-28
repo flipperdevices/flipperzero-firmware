@@ -46,12 +46,14 @@ jobs:
           doxyfile-path: './Doxyfile-awesome.cfg'
 
       - name: 'Upload documentation'
-        uses: prewk/s3-cp-action@v2
+        uses: jakejarvis/s3-sync-action@0.5.1
+        env:
+          AWS_S3_BUCKET: "${{ secrets.FW_DOCS_AWS_BUCKET }}"
+          AWS_ACCESS_KEY_ID: "${{ secrets.FW_DOCS_AWS_ACCESS_KEY }}"
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
+          AWS_REGION: "${{ secrets.FW_DOCS_AWS_REGION }}"
+          SOURCE_DIR: "./documentation/build/html"
+          DEST_DIR: "${{steps.names.outputs.branch_name}}"
         with:
-          aws_s3_endpoint: "${{ secrets.FW_DOCS_AWS_ENDPOINT }}"
-          aws_access_key_id: "${{ secrets.FW_DOCS_AWS_ACCESS_KEY }}"
-          aws_secret_access_key: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
-          source: "./documentation/build/html"
-          dest: "s3://${{ secrets.FW_DOCS_AWS_BUCKET }}/${{steps.names.outputs.branch_name}}"
-          flags: "--recursive --acl public-read --delete"
+          args: "--recursive --delete"
 
