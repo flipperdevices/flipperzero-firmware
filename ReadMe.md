@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [Add support for Mifare Classic 4K SAK 0x38 ATQA 0x02, 0x04 and 0x08 #3009 (By suaveolent)](https://github.com/flipperdevices/flipperzero-firmware/pull/3009)
 - Updated: [PicoPass (iClass) v1.2 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 - Updated extra IR Remotes with new styles (By Willy-JL)
+- Added: [Radio WIP (By victormico)](https://github.com/victormico/flipperzero-radio) `Req: TEA5767`
 
 <a name="release">
 
@@ -400,6 +401,7 @@ $ ./fbt dolphin_ext
 - [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [Radiation Sensor (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
+- [Radio WIP (By victormico)](https://github.com/victormico/flipperzero-radio) `Req: TEA5767`
 - [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
