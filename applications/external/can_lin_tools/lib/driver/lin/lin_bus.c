@@ -231,9 +231,9 @@ void lin_bus_break_callback(void* context) {
             instance->rx_buf_index--;
             lin_bus_add_rx_frame_to_stream(context);
         }
-        if(instance->rx_state == LinBusStateResponse) {
-            lin_bus_reset(context);
-        }
+        // if(instance->rx_state == LinBusStateResponse) {
+        //     lin_bus_reset(context);
+        // }
         responseTimeoutValue = 0;
         responseTimeoutMax = lin_bus_response_timeout(8);
         lin_uart_timeout_start();
@@ -417,6 +417,7 @@ void lin_uart_tx_callback(void* context) {
 
         case LinBusStateCrc:
             instance->tx_state = LinBusStateSyncBreak;
+            instance->rx_state = LinBusStateSyncBreak;
             instance->only_rx = true; /* Last byte will be sent */
             lin_uart_put_char(instance->frame.crc);
             break;
@@ -487,9 +488,10 @@ bool lin_bus_slave_mode_add_or_update_response_id(LinBus* instance, LinBusFrame*
         if(instance->slave_mode_response_id->rx_frame_active <
            LIN_BUS_SLAVE_MODE_MAX_RESPONSE_ID) {
             instance->slave_mode_response_id
-                ->rx_frame[instance->slave_mode_response_id->rx_frame_active++] = *frame;
-            instance->frame.crc =
-                lin_bus_get_crc(frame->id, frame->data, frame->length, frame->crc_type);
+                ->rx_frame[instance->slave_mode_response_id->rx_frame_active] = *frame;
+            instance->slave_mode_response_id
+                ->rx_frame[instance->slave_mode_response_id->rx_frame_active++]
+                .crc = lin_bus_get_crc(frame->id, frame->data, frame->length, frame->crc_type);
             ret = true;
         }
     }

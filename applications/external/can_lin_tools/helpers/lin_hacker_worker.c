@@ -205,7 +205,29 @@ static int32_t lin_hacker_worker_thread(void* context) {
         .response_length = 0,
         .frame_type = LinBusSlaveResponse,
     };
+    LinBusFrame frame_resp1 = {
+        .id = 0x24,
+        .data = {0xFF, 0xEE, 0xDD, 0x11, 0x05, 0x06, 0x07, 0x08},
+        .length = 8,
+        .crc_type = LinBusChecksumTypeClassic,
+        .response_length = 0,
+        .frame_type = LinBusSlaveResponse,
+    };
+    LinBusFrame frame_resp2 = {
+        .id = 0x25,
+        .data = {0xAA, 0xBB, 0x03},
+        .length = 3,
+        .crc_type = LinBusChecksumTypeClassic,
+        .response_length = 0,
+        .frame_type = LinBusSlaveResponse,
+    };
     if(lin_bus_slave_mode_add_or_update_response_id(lin_bus, &frame_resp)) {
+        //frame_resp.data[0]++;
+    }
+    if(lin_bus_slave_mode_add_or_update_response_id(lin_bus, &frame_resp1)) {
+        //frame_resp.data[0]++;
+    }
+    if(lin_bus_slave_mode_add_or_update_response_id(lin_bus, &frame_resp2)) {
         //frame_resp.data[0]++;
     }
     while(instance->worker_running) {
