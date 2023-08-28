@@ -43,6 +43,9 @@ MfClassicError mf_classic_poller_change_value(
     int32_t data,
     int32_t* new_value);
 
+MfClassicError
+    mf_classic_poller_read(Nfc* nfc, const MfClassicDeviceKeys* keys, MfClassicData* data);
+
 #ifdef __cplusplus
 }
 #endif

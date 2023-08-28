@@ -120,10 +120,10 @@ typedef struct {
 } MfClassicSectorTrailer;
 
 typedef struct {
-    MfClassicKey key_a[MF_CLASSIC_TOTAL_SECTORS_MAX];
-    MfClassicKey key_b[MF_CLASSIC_TOTAL_SECTORS_MAX];
     uint64_t key_a_mask;
+    MfClassicKey key_a[MF_CLASSIC_TOTAL_SECTORS_MAX];
     uint64_t key_b_mask;
+    MfClassicKey key_b[MF_CLASSIC_TOTAL_SECTORS_MAX];
 } MfClassicDeviceKeys;
 
 typedef struct {
@@ -216,6 +216,12 @@ void mf_classic_get_read_sectors_and_keys(
     uint8_t* keys_found);
 
 bool mf_classic_is_card_read(const MfClassicData* data);
+
+bool mf_classic_is_allowed_access_data_block(
+    MfClassicSectorTrailer* sec_tr,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicAction action);
 
 bool mf_classic_is_allowed_access(
     MfClassicData* data,
