@@ -46,7 +46,7 @@ jobs:
           doxyfile-path: './Doxyfile-awesome.cfg'
 
       - name: 'Upload documentation'
-        uses: jakejarvis/s3-sync-action@0.5.1
+        uses: jakejarvis/s3-sync-action@v0.5.1
         env:
           AWS_S3_BUCKET: "${{ secrets.FW_DOCS_AWS_BUCKET }}"
           AWS_ACCESS_KEY_ID: "${{ secrets.FW_DOCS_AWS_ACCESS_KEY }}"
