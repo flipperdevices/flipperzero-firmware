@@ -1,9 +1,23 @@
 # Changelog
 
+
 ## [v3.9.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.9.0) (2023-08-27)
 
 **Merged pull requests:**
 
+* Sync working tree by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/11
+* Sync branch by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/24
+* Sync by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/27
+* Sync from master by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/35
+* Create codeql.yml by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/36
+* Feat/codeql by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/37
+* Feat/save settings by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/38
+
+**Full Changelog**: [v3.8.0...v.3.9.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.8.0...v.3.9.0)
+
+## [v3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.8.0) (2023-08-25)
+
+* Feat/ofw by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/33
 * Feat/save settings by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/38
 * Sync by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/12
 * feat: ci was added by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/10
@@ -11,17 +25,9 @@
 * Feat/ci by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/14
 * Feat/ci by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/15
 
-**Full Changelog**: [v3.8.0...v.3.9.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.8.0...v.3.9.0)
-
-## [v3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.8.0) (2023-08-25)
-
-**Merged pull requests:**
-
-* Feat/ofw by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/33
-
 **Full Changelog**: [v3.7.0...v.3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.7.0...v.3.8.0)
 
-## [v3.7.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.7.0) (2023-08-04)
+## [v3.7.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.7.0) (2023-08-25)
 
 **Closed issues:**
 
@@ -36,21 +42,7 @@
 - Feat/ci [\#26](https://github.com/DarkFlippers/flipperzero-subbrute/pull/26) ([derskythe](https://github.com/derskythe))
 - Sync [\#25](https://github.com/DarkFlippers/flipperzero-subbrute/pull/25) ([derskythe](https://github.com/derskythe))
 
-**Full Changelog**: [v3.6.0...v3.7.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.6.0...v3.7.0)
-
-## [v3.6.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.6.0) (2023-06-09)
-
-**Closed issues:**
-
-- Why it say Preload failed API version mismatch? Pls help! I'm using latest release here. [\#21](https://github.com/DarkFlippers/flipperzero-subbrute/issues/21)
-- Protocole princeton [\#19](https://github.com/DarkFlippers/flipperzero-subbrute/issues/19)
-
-**Merged pull requests:**
-
-- fix update new version of firmware [\#17](https://github.com/DarkFlippers/flipperzero-subbrute/pull/17) ([derskythe](https://github.com/derskythe))
-- Feat/ci [\#16](https://github.com/DarkFlippers/flipperzero-subbrute/pull/16) ([derskythe](https://github.com/derskythe))
-
-**Full Changelog**: [v3.2.2...v3.6.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.2...v3.6.0)
+**Full Changelog**: [v3.2.3...v3.7.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.3...v3.7.0)
 
 ## [v3.2.3](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.2.3) (2023-03-31)
 
@@ -62,7 +54,7 @@
 - Sync [\#12](https://github.com/DarkFlippers/flipperzero-subbrute/pull/12) ([derskythe](https://github.com/derskythe))
 - feat: ci was added [\#10](https://github.com/DarkFlippers/flipperzero-subbrute/pull/10) ([derskythe](https://github.com/derskythe))
 
-**Full Changelog**: [v3.1.0...v3.2.3](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.1.0...v3.2.3)
+**Full Changelog**: [v3.2.1...v3.2.3](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.1...v3.2.3)
 
 ## [v3.2.1](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.2.1) (2023-03-16)
 
@@ -78,18 +70,18 @@
 - Feat/existing file two bytes [\#3](https://github.com/DarkFlippers/flipperzero-subbrute/pull/3) ([derskythe](https://github.com/derskythe))
 - Feat/more repeats [\#1](https://github.com/DarkFlippers/flipperzero-subbrute/pull/1) ([derskythe](https://github.com/derskythe))
 
-**Full Changelog**: [aa8001e6237804771738ce557039d1bf206aa7d1...v3.2.1](https://github.com/DarkFlippers/flipperzero-subbrute/compare/aa8001e6237804771738ce557039d1bf206aa7d1...v3.2.1)
+**Full Changelog**: [v3.1.0...v3.2.1](https://github.com/DarkFlippers/flipperzero-subbrute/compare/aa8001e6237804771738ce557039d1bf206aa7d1...v3.2.1)
 
 ## [v3.1.1](https://github.com/DarkFlippers/flipperzero-subbrute/releases/tag/v3.1.1) (2022-10-23)
 
 Added Chamberlain 7bit 390MHz and Chamberlain 8bit 390MHz
 
-## What's Changed
+**Merged pull requests:**
 * Feat/more repeats by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/1
 * Feat/existing file two bytes by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/3
 * add honeywell protocol by @s0u7f1r3 in https://github.com/derskythe/flipperzero-subbrute/pull/4
 
-## New Contributors
+**New contributors**
 * @s0u7f1r3 made their first contribution in https://github.com/derskythe/flipperzero-subbrute/pull/4
 
 **Full Changelog**: [v3.1.0...3.1.1](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.1.0...3.1.1)
