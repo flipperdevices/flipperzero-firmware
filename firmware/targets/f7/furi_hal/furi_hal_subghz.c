@@ -35,24 +35,15 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .regulation = SubGhzRegulationTxRx,
     .async_mirror_pin = NULL,
     .rolling_counter_mult = 1,
-    .rolling_counter_value = 0x0,
     .ext_power_amp = false,
 };
 
-uint8_t furi_hal_subghz_get_rolling_counter_mult(void) {
+int8_t furi_hal_subghz_get_rolling_counter_mult(void) {
     return furi_hal_subghz.rolling_counter_mult;
 }
 
-void furi_hal_subghz_set_rolling_counter_mult(uint8_t mult) {
+void furi_hal_subghz_set_rolling_counter_mult(int8_t mult) {
     furi_hal_subghz.rolling_counter_mult = mult;
-}
-
-uint32_t furi_hal_subghz_get_rolling_counter_value(void) {
-    return furi_hal_subghz.rolling_counter_value;
-}
-
-void furi_hal_subghz_set_rolling_counter_value(uint32_t value) {
-    furi_hal_subghz.rolling_counter_value = value;
 }
 
 void furi_hal_subghz_set_ext_power_amp(bool enabled) {
