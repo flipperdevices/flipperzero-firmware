@@ -36,11 +36,6 @@ typedef enum {
 
 typedef enum { CardDrawAlign_TopLeft, CardDrawAlign_Center } CardDrawAlign;
 
-typedef enum {
-    CardCountBoxOrder_NameCount,
-    CardCountBoxOrder_CountName,
-} CardCountBoxOrder;
-
 // Suit selector component.
 typedef struct SuitSelector {
     int selectedSuitIndex;
@@ -145,11 +140,12 @@ void screen_printer_print(char* string, Canvas* canvas, int x, int y) {
     }
 }
 
-char* get_player_name(int playerIndex) {
+const Icon* get_player_icon(int playerIndex) {
     throw_exception_if(playerIndex < 1 || playerIndex > NUMBER_OF_PLAYERS, "Invalid player index");
 
-    static char* playerNames[NUMBER_OF_PLAYERS] = {"A", "B", "C", "D"};
-    return playerNames[playerIndex - 1];
+    static const Icon* playerIcons[NUMBER_OF_PLAYERS] = {
+        &I_player1, &I_player2, &I_player3, &I_player4};
+    return playerIcons[playerIndex - 1];
 }
 
 char* get_card_suit_name(CardSuit suit) {
@@ -366,9 +362,7 @@ void draw_player_card_count(
     int playerIndex,
     int x,
     int y,
-    CardCountBoxOrder order,
     bool isCurrentTurn) {
-    char* playerName = get_player_name(playerIndex);
     int cardCount = 0;
     for(int i = 0; i < NUMBER_OF_CARDS; i++)
         if(game_get_card_location(game, i) == playerIndex) cardCount++;
@@ -381,19 +375,12 @@ void draw_player_card_count(
 
     int boxX = x, boxY = y;
 
-    if(order == CardCountBoxOrder_NameCount) {
-        canvas_draw_str_aligned(
-            canvas, x, y + VISUAL_CARD_HEIGHT / 2, AlignLeft, AlignCenter, playerName);
-        boxX += 10;
-    } else {
-        canvas_draw_str_aligned(
-            canvas,
-            x + 5 + VISUAL_CARD_WIDTH,
-            y + VISUAL_CARD_HEIGHT / 2,
-            AlignCenter,
-            AlignCenter,
-            playerName);
-    }
+    const Icon* playerIcon = get_player_icon(playerIndex);
+    canvas_draw_icon(
+        canvas,
+        x + VISUAL_CARD_WIDTH + 1,
+        y + (VISUAL_CARD_HEIGHT - VISUAL_ICON_HEIGHT) / 2,
+        playerIcon);
 
     canvas_set_font(canvas, FontPrimary);
 
@@ -446,7 +433,7 @@ void draw_forced_suit(Canvas* canvas, CardSuit suit, int x, int y, CardDrawMode 
 void draw_winner_screen(Canvas* canvas, int winner) {
     if(winner == 0) return;
 
-    int w = 61, h = 31;
+    int w = 91, h = 31;
     int x = 64 - w / 2, y = 32 - h / 2;
 
     // draw a black border with a 1px white margin
@@ -455,13 +442,11 @@ void draw_winner_screen(Canvas* canvas, int winner) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_frame(canvas, x + 1, y + 1, w - 2, h - 2);
 
-    char* winnerName = get_player_name(winner);
-    char winnerStr[32];
-    snprintf(winnerStr, 32, "%s wins!", winnerName);
-
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, winnerStr);
+    char* winnerStr = winner == PLAYER_NUMBER ? "You win!" : "Opponent wins!";
+    canvas_draw_str_aligned(canvas, 64, 28, AlignCenter, AlignCenter, winnerStr);
+    canvas_draw_icon(canvas, 64 - VISUAL_ICON_WIDTH / 2, 34, get_player_icon(winner));
 }
 
 void draw_game(Canvas* canvas, AppContext* context) {
@@ -470,38 +455,13 @@ void draw_game(Canvas* canvas, AppContext* context) {
     int topCard = game_get_top_card(game);
     int currentTurn = game_get_player_turn(game);
 
+    draw_player_card_count(canvas, game, 2, 128 - VISUAL_CARD_WIDTH - 10, 1, currentTurn == 2);
     draw_player_card_count(
-        canvas,
-        game,
-        2,
-        128 - VISUAL_CARD_WIDTH - 10,
-        1,
-        CardCountBoxOrder_CountName,
-        currentTurn == 2);
+        canvas, game, 3, 128 - VISUAL_CARD_WIDTH - 10, 1 + 12, currentTurn == 3);
     draw_player_card_count(
-        canvas,
-        game,
-        3,
-        128 - VISUAL_CARD_WIDTH - 10,
-        1 + 12,
-        CardCountBoxOrder_CountName,
-        currentTurn == 3);
+        canvas, game, 4, 128 - VISUAL_CARD_WIDTH - 10, 1 + 24, currentTurn == 4);
     draw_player_card_count(
-        canvas,
-        game,
-        4,
-        128 - VISUAL_CARD_WIDTH - 10,
-        1 + 24,
-        CardCountBoxOrder_CountName,
-        currentTurn == 4);
-    draw_player_card_count(
-        canvas,
-        game,
-        1,
-        128 - VISUAL_CARD_WIDTH - 10,
-        63 - VISUAL_CARD_HEIGHT,
-        CardCountBoxOrder_CountName,
-        currentTurn == 1);
+        canvas, game, 1, 128 - VISUAL_CARD_WIDTH - 10, 63 - VISUAL_CARD_HEIGHT, currentTurn == 1);
     const Icon* directionIcon = game_get_direction(game) == 1 ? &I_arrow_cw : &I_arrow_ccw;
     canvas_draw_icon(canvas, 84, 1, directionIcon);
 
@@ -555,7 +515,10 @@ void game_transition_callback(int from, int to, void* context) {
     AppContext* app = (AppContext*)context;
     UNUSED(from);
 
-    if(to == SceneType_Game) gameplay_reset(app->gameplay);
+    if(to == SceneType_Game) {
+        gameplay_reset(app->gameplay);
+        suit_selector_set_enabled(&suitSelector, false);
+    }
 }
 
 void game_render_callback(Canvas* const canvas, void* context) {
@@ -696,5 +659,4 @@ void game_handle_input(InputKey key, InputType type, void* context) {
 void game_tick_callback(void* context) {
     AppContext* app = (AppContext*)context;
     UNUSED(app);
-    //game_ai_run(app->gameplay);
 }

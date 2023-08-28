@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Fix LCD Colors order/sides (By WillyJL)
 - Updated: UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
+- Updated: [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
 
 <a name="release">
 
@@ -264,7 +265,7 @@ $ ./fbt dolphin_ext
 - [Ultimate Tic-Tac-Toe (By Racso)](https://github.com/Racso/fzero-apps)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
-- [Zero v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
+- [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Zombiez (Reworked By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/240) [(Original By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
 
 ## Plugins
