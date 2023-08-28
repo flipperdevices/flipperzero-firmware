@@ -102,7 +102,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | BlackJack | ![Games Badge] | [by teeebor](https://github.com/teeebor/flipper_games) |  | ![None Badge] |
 | 2048 game | ![Games Badge] | [by eugenekirzhanov](https://github.com/eugenekirzhanov/flipperzero2048game) |  | [![UFW Badge]](https://lab.flipper.net/apps/game_2048) |
 | Bomberduck | ![Games Badge] | [by leoneedmorecoffee](https://github.com/leoneedmorecoffee/flipperzerobomberduck) |  | ![None Badge] |
-| JetPack Joyride | ![Games Badge] | [by timstrasser](https://github.com/timstrasser) |  | ![None Badge] |
+| JetPack Joyride | ![Games Badge] | [by timstrasser](https://github.com/timstrasser) |  | [![Author Badge]](https://lab.flipper.net/apps/jetpack_game) |
 
 ---
 # Extra pack
@@ -167,7 +167,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | LORA Terminal | ![GPIO Badge] | [by aafksab](https://github.com/aafksab/LORA-Term) |  | ![None Badge] |
 | MagSpoof (WIP) | ![GPIO Badge] | [by zacharyweiss](https://github.com/zacharyweiss/magspoof_flipper) | Read mode [by hummusec](https://github.com/hummusec/magspoof_flipper) - + GPIO & Power fixes | ![None Badge] |
 | Mx2125 Dual-Axis Accelerometer | ![GPIO Badge] | [by jamisonderek](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio) |  | ![None Badge] |
-| MH-Z19 - CO2 sensor | ![GPIO Badge] | [by meshchaninov](https://github.com/meshchaninov/flipper-zero-mh-z19) |  | ![None Badge] |
+| MH-Z19 - CO2 sensor | ![GPIO Badge] | [by meshchaninov](https://github.com/meshchaninov/flipper-zero-mh-z19) |  | [![Author Badge]](https://lab.flipper.net/apps/mh_z19) |
 | NRF24 Batch Read/Send (WIP) | ![GPIO Badge] | [by vad7](https://github.com/vad7/nRF24-Batch) |  | ![None Badge] |
 | NRF24 Scanner | ![GPIO Badge] | [by vad7](https://github.com/vad7/nrf24scan) |  | ![None Badge] |
 | Pokemon Trading (for GameBoy) | ![GPIO Badge] | [by EstebanFuentealba](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) |  | [![Author Badge]](https://lab.flipper.net/apps/pokemon) |
