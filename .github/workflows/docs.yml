@@ -55,5 +55,5 @@ jobs:
           SOURCE_DIR: "./documentation/build/html"
           DEST_DIR: "${{steps.names.outputs.branch_name}}"
         with:
-          args: "--acl public-read --delete"
+          args: "--delete"
 
