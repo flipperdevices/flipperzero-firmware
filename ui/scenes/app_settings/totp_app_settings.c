@@ -20,7 +20,7 @@
 #else
 #define AUTOMATION_LIST_MAX_INDEX (1)
 #endif
-#define BAD_KB_LAYOUT_LIST_MAX_INDEX (1)
+#define BAD_KB_LAYOUT_LIST_MAX_INDEX (2)
 #define FONT_TEST_STR_LENGTH (7)
 
 static const char* YES_NO_LIST[] = {"NO", "YES"};
@@ -33,7 +33,7 @@ static const char* AUTOMATION_LIST[] = {
     "BT and USB"
 #endif
 };
-static const char* BAD_KB_LAYOUT_LIST[] = {"QWERTY", "AZERTY"};
+static const char* BAD_KB_LAYOUT_LIST[] = {"QWERTY", "AZERTY", "QWERTZ"};
 static const char* FONT_TEST_STR = "0123BCD";
 
 typedef enum {
