@@ -31,3 +31,5 @@ struct PomodoroTimerModel {
 void pomodoro_timer_process(PomodoroTimer* pomodoro_timer, InputEvent* event);
 
 void pomodoro_draw_callback(Canvas* canvas, void* context, int max_seconds, int max_seconds_rest);
+
+void pomodoro_timer_update(PomodoroTimer* pomodoro_timer);

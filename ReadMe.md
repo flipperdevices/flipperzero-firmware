@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0827-2353-0.90.1-955c4b9](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-27 23:53 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-27 23:53 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-28 11:11 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-28 11:11 EST`
 - Updated: [Authenticator/TOTP v4.0.3 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - OFW: [Rfid: fix crash on broken key launch from archive #3012 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3012)
 - OFW: [AC OFF button #3010 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3010)
@@ -49,6 +49,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated extra IR Remotes with new styles (By Willy-JL)
 - Added: [Radio WIP (By victormico)](https://github.com/victormico/flipperzero-radio) `Req: TEA5767`
 - Added: [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
+- UL: fix timer icons in ir remote (By Svaarich)
+- Updated: [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro) [(Fixes By gid9798)](https://github.com/xMasterX/all-the-plugins/commit/83e7b7219ccd515f1eead30f834efaf8273b0d9a)
 
 <a name="release">
 
