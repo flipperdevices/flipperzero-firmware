@@ -47,6 +47,7 @@ void custom_night_input(void* ctx) {
             if (fnaf->custom_menu_cursor < 3) fnaf->custom_menu_cursor += 1;
             break;
         case InputKeyOk:
+            night_start(fnaf);
             break;
         case InputKeyBack:
             break;

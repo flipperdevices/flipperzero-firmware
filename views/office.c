@@ -509,6 +509,7 @@ void hourly_timer_callback(void* ctx) {
     case 6:
         fnaf->progress += 1;
         if (fnaf->progress > 6) fnaf->progress = 6;
+        save_progress(fnaf);
         dolphin_deed(DolphinDeedPluginGameWin);
         SWITCH_VIEW(night_complete);
         stop_all_timers(fnaf);

@@ -5,6 +5,7 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <storage/storage.h>
 
 #define TAG "flipperzero_fnaf"
 
@@ -47,6 +48,7 @@ typedef struct {
     FuriMessageQueue* event_queue;
     Gui* gui;
     InputEvent event;
+    File* save_data;
 
     Dolphins* dolphins;
     Cameras* cameras;
@@ -89,3 +91,7 @@ void stop_all_timers(Fnaf* fnaf);
 void switch_view(Fnaf* fnaf, Views view);
 
 uint8_t power_draw(Fnaf* fnaf);
+
+void save_progress(Fnaf* fnaf);
+
+void load_progress(Fnaf* fnaf);

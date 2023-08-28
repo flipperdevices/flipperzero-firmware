@@ -134,11 +134,26 @@ uint8_t power_draw(Fnaf* fnaf) {
 }
 
 void save_progress(Fnaf* fnaf) {
-    UNUSED(fnaf);
+    FURI_LOG_D(TAG, "save_progress called");
+    if (storage_file_open(fnaf->save_data, EXT_PATH("apps_data/flipperzero_fnaf/save.txt"), FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
+        FURI_LOG_D(TAG, "Saving... Progress = %u", fnaf->progress);
+        char buff[1] = { fnaf->progress };
+        // buff[0] = fnaf->progress;
+        uint16_t res = storage_file_write(fnaf->save_data, buff, 1);
+        FURI_LOG_D(TAG, "Written %u bytes", res);
+        storage_file_close(fnaf->save_data);
+    }
 }
 
 void load_progress(Fnaf* fnaf) {
-    UNUSED(fnaf);
+    if (storage_file_open(fnaf->save_data, EXT_PATH("apps_data/flipperzero_fnaf/save.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        char read[1] = { 101 };
+        storage_file_seek(fnaf->save_data, 0, true);
+        storage_file_read(fnaf->save_data, read, 1);
+        FURI_LOG_D(TAG, "Read %u", read[0]);
+        if (read[0] < 7) fnaf->progress = read[0];
+        storage_file_close(fnaf->save_data);
+    }
 }
 
 void empty_callback(void* ctx) {
@@ -148,13 +163,13 @@ void empty_callback(void* ctx) {
 
 void fnaf_alloc(Fnaf* fnaf) {
     fnaf->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
-
     fnaf->view_port = view_port_alloc();
     view_port_draw_callback_set(fnaf->view_port, app_draw_callback, fnaf);
     view_port_input_callback_set(fnaf->view_port, app_input_callback, fnaf);
-
     fnaf->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(fnaf->gui, fnaf->view_port, GuiLayerFullscreen);
+    fnaf->save_data = storage_file_alloc(furi_record_open(RECORD_STORAGE));
+
 
     fnaf->dolphins = malloc(sizeof(*fnaf->dolphins));
     fnaf->electricity = malloc(sizeof(*fnaf->electricity));
@@ -182,30 +197,32 @@ void fnaf_alloc(Fnaf* fnaf) {
 void fnaf_free(Fnaf* fnaf) {
 
     for (uint8_t i = 0; i < 4; i++) {
-        free(fnaf->dolphins->timer[i]);
+        furi_timer_free(fnaf->dolphins->timer[i]);
     }
     free(fnaf->dolphins);
 
-    free(fnaf->electricity->timer);
+    furi_timer_free(fnaf->electricity->timer);
     free(fnaf->electricity);
 
-    free(fnaf->office->left_door_sound_timer);
-    free(fnaf->office->right_door_sound_timer);
-    free(fnaf->office->flipper_laugh_timer);
-    free(fnaf->office->power_out_timer);
-    free(fnaf->office->power_out_max_timer);
+    furi_timer_free(fnaf->office->left_door_sound_timer);
+    furi_timer_free(fnaf->office->right_door_sound_timer);
+    furi_timer_free(fnaf->office->flipper_laugh_timer);
+    furi_timer_free(fnaf->office->power_out_timer);
+    furi_timer_free(fnaf->office->power_out_max_timer);
     free(fnaf->office);
 
-    free(fnaf->cameras->noise_timer);
+    furi_timer_free(fnaf->cameras->noise_timer);
     free(fnaf->cameras);
 
-    free(fnaf->hourly_timer);
+    furi_timer_free(fnaf->hourly_timer);
 
     view_port_enabled_set(fnaf->view_port, false);
     gui_remove_view_port(fnaf->gui, fnaf->view_port);
     view_port_free(fnaf->view_port);
     furi_message_queue_free(fnaf->event_queue);
+    storage_file_free(fnaf->save_data);
 
+    furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_GUI);
 }
 
@@ -214,8 +231,7 @@ int32_t flipperzero_fnaf(void* p) {
     Fnaf* fnaf = malloc(sizeof(*fnaf));
     fnaf_alloc(fnaf);
 
-    // Make saves later
-    fnaf->progress = 0;
+    load_progress(fnaf);
     reset_animatronic_positions(fnaf);
     srand(furi_get_tick());
 
