@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
 - Updated: [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
 - OFW PR: [Add support for Mifare Classic 4K SAK 0x38 ATQA 0x02, 0x04 and 0x08 #3009 (By suaveolent)](https://github.com/flipperdevices/flipperzero-firmware/pull/3009)
+- Updated: [PicoPass (iClass) v1.2 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 
 <a name="release">
 
