@@ -125,6 +125,7 @@ static FuriThread *FuriThreadAllocExWrapper(const char *name, uint32_t
 CFunc0 CustomFunctionTable[] =
 {
 	(CFunc0) furi_delay_ms,
+	(CFunc0) furi_get_tick,
 	(CFunc0) furi_record_open,
 	(CFunc0) furi_record_close,
 	(CFunc0) RecordNotificationWrapper,
@@ -156,6 +157,8 @@ Err CompileCustomFunctions(void)
 ** Parameters are: Name in UPPER CASE, Function, Index, Mode, NumParams
 */
 	err = CreateGlueToC( "FURI_DELAY_MS", i++, C_RETURNS_VOID, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "FURI_GET_TICK", i++, C_RETURNS_VALUE, 0 );
 	if( err < 0 ) return err;
 	err = CreateGlueToC( "FURI_RECORD_OPEN", i++, C_RETURNS_VALUE, 1 );
 	if( err < 0 ) return err;
