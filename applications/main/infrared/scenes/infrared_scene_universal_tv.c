@@ -93,7 +93,7 @@ void infrared_scene_universal_tv_on_enter(void* context) {
         context);
     infrared_brute_force_add_record(brute_force, i++, "Ch_prev");
 
-    button_panel_add_label(button_panel, 5, 10, FontPrimary, "TV remote");
+    button_panel_add_label(button_panel, 22, 10, FontPrimary, "TVs");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);

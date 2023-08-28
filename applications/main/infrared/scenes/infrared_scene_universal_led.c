@@ -18,52 +18,58 @@ void infrared_scene_universal_led_on_enter(void* context) {
         i,
         0,
         0,
-        3,
-        19,
-        &I_Power_25x27,
-        &I_Power_hvr_25x27,
+        6,
+        24,
+        &I_power_19x20,
+        &I_power_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 4, 46, &I_power_text_24x5);
     infrared_brute_force_add_record(brute_force, i++, "POWER");
+
     button_panel_add_item(
         button_panel,
         i,
         1,
         0,
-        36,
-        19,
-        &I_Flash_25x27,
-        &I_Flash_hvr_25x27,
-        infrared_scene_universal_common_item_callback,
-        context);
-    infrared_brute_force_add_record(brute_force, i++, "FLASH");
-    button_panel_add_item(
-        button_panel,
-        i,
-        0,
-        1,
-        3,
-        64,
-        &I_Vol_up_25x27,
-        &I_Vol_up_hvr_25x27,
+        37,
+        21,
+        &I_volup_24x21,
+        &I_volup_hover_24x21,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "BRIGHTNESS+");
+
     button_panel_add_item(
         button_panel,
         i,
         1,
         1,
-        36,
-        64,
-        &I_Vol_down_25x27,
-        &I_Vol_down_hvr_25x27,
+        37,
+        55,
+        &I_voldown_24x21,
+        &I_voldown_hover_24x21,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "BRIGHTNESS-");
 
-    button_panel_add_label(button_panel, 5, 11, FontPrimary, "LED Remote");
-    button_panel_add_label(button_panel, 13, 60, FontSecondary, "Brightness");
+    button_panel_add_icon(button_panel, 34, 34, &I_bright_text_30x30);
+
+    button_panel_add_item(
+        button_panel,
+        i,
+        0,
+        1,
+        6,
+        53,
+        &I_flash_19x20,
+        &I_flash_hover_19x20,
+        infrared_scene_universal_common_item_callback,
+        context);
+    button_panel_add_icon(button_panel, 6, 75, &I_flash_text_21x5);
+    infrared_brute_force_add_record(brute_force, i++, "FLASH");
+
+    button_panel_add_label(button_panel, 21, 11, FontPrimary, "LEDs");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);

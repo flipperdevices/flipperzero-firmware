@@ -18,52 +18,58 @@ void infrared_scene_universal_digital_sign_on_enter(void* context) {
         i,
         0,
         0,
-        3,
-        19,
-        &I_Power_25x27,
-        &I_Power_hvr_25x27,
+        6,
+        24,
+        &I_power_19x20,
+        &I_power_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 4, 46, &I_power_text_24x5);
     infrared_brute_force_add_record(brute_force, i++, "POWER");
+
     button_panel_add_item(
         button_panel,
         i,
         1,
         0,
-        36,
-        19,
-        &I_Input_25x27,
-        &I_Input_hvr_25x27,
+        38,
+        24,
+        &I_input_19x20,
+        &I_input_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 36, 46, &I_input_text_24x5);
     infrared_brute_force_add_record(brute_force, i++, "SOURCE");
+
     button_panel_add_item(
         button_panel,
         i,
         0,
         1,
-        3,
-        64,
-        &I_Play_25x27,
-        &I_Play_hvr_25x27,
+        6,
+        58,
+        &I_play_19x20,
+        &I_play_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 6, 80, &I_play_text_19x5);
     infrared_brute_force_add_record(brute_force, i++, "PLAY");
+
     button_panel_add_item(
         button_panel,
         i,
         1,
         1,
-        36,
-        64,
-        &I_Stop_25x27,
-        &I_Stop_hvr_25x27,
+        38,
+        58,
+        &I_stop_19x20,
+        &I_stop_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 38, 80, &I_stop_text_19x5);
     infrared_brute_force_add_record(brute_force, i++, "STOP");
 
-    button_panel_add_label(button_panel, 6, 11, FontPrimary, "Digital Sign");
-    button_panel_add_label(button_panel, 17, 60, FontSecondary, "Control");
+    button_panel_add_label(button_panel, 1, 11, FontPrimary, "Digital Signs");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);

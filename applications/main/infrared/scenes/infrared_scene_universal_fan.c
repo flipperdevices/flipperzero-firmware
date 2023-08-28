@@ -94,7 +94,7 @@ void infrared_scene_universal_fan_on_enter(void* context) {
     infrared_brute_force_add_record(brute_force, i++, "Timer");
     button_panel_add_icon(button_panel, 4, 109, &I_timer_text_23x5);
 
-    button_panel_add_label(button_panel, 5, 11, FontPrimary, "Fan remote");
+    button_panel_add_label(button_panel, 20, 11, FontPrimary, "Fans");
     button_panel_add_icon(button_panel, 34, 68, &I_speed_text_30x30);
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);

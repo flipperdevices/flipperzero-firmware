@@ -21,11 +21,11 @@ void infrared_scene_universal_ac_on_enter(void* context) {
         0,
         6,
         15,
-        &I_off_19x20,
-        &I_off_hover_19x20,
+        &I_power_19x20,
+        &I_power_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
-    button_panel_add_icon(button_panel, 10, 37, &I_off_text_12x5);
+    button_panel_add_icon(button_panel, 4, 37, &I_power_text_24x5);
     infrared_brute_force_add_record(brute_force, i++, "Off");
     button_panel_add_item(
         button_panel,
@@ -121,7 +121,7 @@ void infrared_scene_universal_ac_on_enter(void* context) {
     button_panel_add_icon(button_panel, 0, 60, &I_cool_30x51);
     button_panel_add_icon(button_panel, 34, 60, &I_heat_30x51);
 
-    button_panel_add_label(button_panel, 4, 10, FontPrimary, "AC remote");
+    button_panel_add_label(button_panel, 22, 10, FontPrimary, "ACs");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);

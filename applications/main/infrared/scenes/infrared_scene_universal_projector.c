@@ -91,7 +91,7 @@ void infrared_scene_universal_projector_on_enter(void* context) {
     infrared_brute_force_add_record(brute_force, i++, "Pause");
     button_panel_add_icon(button_panel, 4, 109, &I_pause_text_23x5);
 
-    button_panel_add_label(button_panel, 3, 11, FontPrimary, "Proj. remote");
+    button_panel_add_label(button_panel, 7, 11, FontPrimary, "Projectors");
     button_panel_add_icon(button_panel, 34, 68, &I_vol_ac_text_30x30);
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);

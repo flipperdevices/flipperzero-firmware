@@ -41,11 +41,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
 - Updated: [SD Card Assets](https://www.patreon.com/RogueMaster/membership) to have [Dual Boot BINs (By TalkingSasquach)](https://github.com/skizzophrenic/Talking-Sasquach/tree/main/Single%20File%20WiFi%20Board%20Bins)
 - Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- Fix LCD Colors order/sides (By WillyJL)
+- Fix LCD Colors order/sides (By Willy-JL)
 - Updated: UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
 - Updated: [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
 - OFW PR: [Add support for Mifare Classic 4K SAK 0x38 ATQA 0x02, 0x04 and 0x08 #3009 (By suaveolent)](https://github.com/flipperdevices/flipperzero-firmware/pull/3009)
 - Updated: [PicoPass (iClass) v1.2 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
+- Updated extra IR Remotes with new styles (By Willy-JL)
 
 <a name="release">
 

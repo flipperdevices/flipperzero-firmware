@@ -19,52 +19,58 @@ void infrared_scene_universal_monitor_on_enter(void* context) {
         i,
         0,
         0,
-        3,
+        6,
         24,
-        &I_Power_25x27,
-        &I_Power_hvr_25x27,
+        &I_power_19x20,
+        &I_power_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 4, 46, &I_power_text_24x5);
     infrared_brute_force_add_record(brute_force, i++, "POWER");
+
     button_panel_add_item(
         button_panel,
         i,
         1,
         0,
-        36,
+        38,
         24,
-        &I_Input_25x27,
-        &I_Input_hvr_25x27,
+        &I_input_19x20,
+        &I_input_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 36, 46, &I_input_text_24x5);
     infrared_brute_force_add_record(brute_force, i++, "SOURCE");
+
     button_panel_add_item(
         button_panel,
         i,
         0,
         1,
-        3,
-        66,
-        &I_Mode_25x27,
-        &I_Mode_hvr_25x27,
+        6,
+        58,
+        &I_mode_19x20,
+        &I_mode_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 6, 80, &I_menu_text_20x5);
     infrared_brute_force_add_record(brute_force, i++, "MENU");
+
     button_panel_add_item(
         button_panel,
         i,
         1,
         1,
-        36,
-        66,
-        &I_Exit_25x27,
-        &I_Exit_hvr_25x27,
+        38,
+        58,
+        &I_exit_19x20,
+        &I_exit_hover_19x20,
         infrared_scene_universal_common_item_callback,
         context);
+    button_panel_add_icon(button_panel, 39, 80, &I_exit_text_18x5);
     infrared_brute_force_add_record(brute_force, i++, "EXIT");
 
-    button_panel_add_label(button_panel, 11, 11, FontPrimary, "Monitor");
-    button_panel_add_label(button_panel, 19, 60, FontSecondary, "Menu");
+    button_panel_add_label(button_panel, 10, 11, FontPrimary, "Monitors");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
