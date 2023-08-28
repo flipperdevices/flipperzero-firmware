@@ -108,6 +108,8 @@ static void power_out(Canvas* canvas, Fnaf* fnaf) {
         furi_crash("");
     }
     if (fnaf->office->camera_moving_direction != none) moving_animation(fnaf);
+    if (fnaf->office->left_door_state == 0) fnaf->office->left_door_y = -54;
+    if (fnaf->office->right_door_state == 0) fnaf->office->right_door_y = -54;
     if (fnaf->office->is_light_on) {
         canvas_set_color(canvas, 1);
         canvas_draw_icon(canvas, fnaf->office->camera_x, 0, &I_office_128x64);
@@ -134,6 +136,15 @@ static void power_out(Canvas* canvas, Fnaf* fnaf) {
     canvas_set_color(canvas, 0);
     canvas_draw_box(canvas, 0, 0, 23, 64);
     canvas_draw_box(canvas, 105, 0, 23, 64);
+
+    canvas_set_color(canvas, 1);
+    fnaf->counter_music_box += 1;
+    if (fnaf->counter_music_box > 3) {
+        canvas_draw_icon(canvas, 108, 3, &I_music_box_17x17);
+        if (fnaf->counter_music_box > 6) {
+            fnaf->counter_music_box = 0;
+        }
+    }
 }
 
 static void draw_sides(Canvas* canvas, Fnaf* fnaf) {
@@ -218,6 +229,7 @@ void office_draw(Canvas* canvas, void* ctx) {
 }
 
 static void close_door(Fnaf* fnaf, uint8_t door) {
+    if (fnaf->electricity->power_left == 0) return;
     switch (door) {
     case 0: // left door
         if (fnaf->electricity->left_door) break;
@@ -233,14 +245,17 @@ static void close_door(Fnaf* fnaf, uint8_t door) {
 }
 
 static void open_door(Fnaf* fnaf, uint8_t door) {
+    FURI_LOG_D(TAG, "Opening door %u", door);
     switch (door) {
     case 0: // left door
-        if (!fnaf->electricity->left_door) break;
+        if (!fnaf->electricity->left_door) return;
+        // if (!fnaf->office->left_door_state) break;
         fnaf->office->left_door_state = -1;
         fnaf->office->left_door_y = 10;
         break;
     case 1: // right door
-        if (!fnaf->electricity->right_door) break;
+        if (!fnaf->electricity->right_door) return;
+        // if (!fnaf->office->right_door_state) break;
         fnaf->office->right_door_state = -1;
         fnaf->office->right_door_y = 10;
         break;
@@ -367,7 +382,7 @@ void night_start(void* ctx) {
         fnaf->electricity->left_light = false;
         fnaf->electricity->right_light = false;
         fnaf->electricity->monitor = false;
-        fnaf->electricity->power_left = 9; // 999
+        fnaf->electricity->power_left = 999; // 999
         fnaf->office->camera_moving_direction = none;
         fnaf->office->left_door_state = 0;
         fnaf->office->right_door_state = 0;
@@ -414,8 +429,8 @@ void power_timer_callback(void* ctx) {
         fnaf->electricity->power_left = 0;
         stop_all_timers(fnaf);
         if (fnaf->current_view != office) SWITCH_VIEW(office);
-        open_door(fnaf, 0);
-        open_door(fnaf, 1);
+        if (fnaf->electricity->left_door) open_door(fnaf, 0);
+        if (fnaf->electricity->right_door) open_door(fnaf, 1);
         fnaf->counter_secondary = 0;
         fnaf->office->is_light_on = true;
         furi_timer_start(fnaf->office->power_out_timer, power_out_time_period);
@@ -474,6 +489,14 @@ void hourly_timer_callback(void* ctx) {
     FURI_LOG_D(TAG, "Hour was %u", fnaf->hour);
     fnaf->hour += 1;
     switch (fnaf->hour) {
+    case 1:
+        if (furi_timer_is_running(fnaf->hourly_timer)) {
+            FURI_LOG_D(TAG, "Hourly timer stopped (90s)");
+            furi_timer_stop(fnaf->hourly_timer);
+        }
+        furi_timer_start(fnaf->hourly_timer, hour_time);
+        FURI_LOG_D(TAG, "Hourly timer started (89s)");
+        break;
     case 2:
         fnaf->animatronics->AI[Bonnie] += 1;
         break;
@@ -496,7 +519,7 @@ void hourly_timer_callback(void* ctx) {
 void power_out_callback(void* ctx) {
     Fnaf* fnaf = ctx;
     FURI_LOG_D(TAG, "WORKING");
-    if (furi_get_tick() % 5 + 1 == 1) {
+    if (rand() % 5 + 1 == 1) {
         FURI_LOG_D(TAG, "DEF WORKING");
         // I'm sleepy and tired so a lot of comments
         if (fnaf->office->is_light_on) {
@@ -533,6 +556,7 @@ void power_out_max_callback(void* ctx) {
         furi_timer_start(fnaf->office->power_out_timer, power_out_time_period);
         furi_timer_start(fnaf->office->power_out_max_timer, power_out_max_time);
     } else {
+        FURI_LOG_D(TAG, "Power out timer 2 took more than 20 seconds");
         // Stop all timers
         stop_all_timers(fnaf);
         // Jumpscare

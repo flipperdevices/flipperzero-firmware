@@ -16,7 +16,8 @@
 #define chica_time 4980
 #define freddy_time 3020
 #define foxy_time 5010
-#define hour_time 90000  // for tests, actually 90000
+#define first_hour_time 90000
+#define hour_time 89000
 #define noise_time 4500 // something around this idk
 #define power_time 1000
 #define power_out_time_period 5000

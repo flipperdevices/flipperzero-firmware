@@ -26,10 +26,23 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
         text_view(canvas, fnaf);
         break;
     case jumpscare:
-        canvas_draw_str(canvas, 33, 34, "Scary image");
+        if (fnaf->counter % 4 + 1 > 2) {
+            canvas_draw_str(canvas, 33, 34, "Scary image 2");
+            // draw second frame
+            fnaf->counter += 1;
+        } else {
+            canvas_draw_str(canvas, 33, 34, "Scary image 1");
+            // draw firsr frame
+            fnaf->counter += 1;
+        }
+        if (fnaf->counter == 14) {
+            SWITCH_VIEW(game_over);
+        }
         break;
     case game_over:
         text_view(canvas, fnaf);
+        fnaf->counter += 1;
+        if (fnaf->counter > 10) SWITCH_VIEW(main_menu);
         break;
     default:
         furi_crash("Something unexpected happened just now");
@@ -198,6 +211,7 @@ int32_t flipperzero_fnaf(void* p) {
     // Make saves later
     fnaf->progress = 0;
     reset_animatronic_positions(fnaf);
+    srand(furi_get_tick());
 
     bool running = true;
     while (running) {

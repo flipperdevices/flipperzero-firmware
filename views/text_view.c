@@ -29,7 +29,7 @@ void text_view(Canvas* canvas, Fnaf* fnaf) {
         if (fnaf->counter > 7) {
             FURI_LOG_D(TAG, "text_view is over");
             SWITCH_VIEW(office);
-            furi_timer_start(fnaf->hourly_timer, hour_time);
+            furi_timer_start(fnaf->hourly_timer, first_hour_time);
             furi_timer_start(fnaf->electricity->timer, power_time);
         } else {
             FURI_LOG_D(TAG, "Night number, counter = %u", fnaf->counter);
