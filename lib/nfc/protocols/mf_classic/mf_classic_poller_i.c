@@ -112,7 +112,7 @@ MfClassicError mf_classic_async_auth(
     return ret;
 }
 
-MfClassicError mf_classic_aync_halt(MfClassicPoller* instance) {
+MfClassicError mf_classic_async_halt(MfClassicPoller* instance) {
     MfClassicError ret = MfClassicErrorNone;
     Iso14443_3aError error = Iso14443_3aErrorNone;
 
