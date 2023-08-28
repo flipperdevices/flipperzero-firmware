@@ -22,7 +22,7 @@ You can also download the [release](https://github.com/derskythe/flipperzero-sub
 > **Warning**
 > 
 > The application is not compatible with the official firmware version.
-> Also, it has not been tested on other firmware versions other than [Unleashed Firmware](https://github.com/DarkFlippers/unleashed-firmware).
+> Also, it has not been tested on other firmware versions other than [Unleashed Firmware](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware).
 
 ## User Guide
 
