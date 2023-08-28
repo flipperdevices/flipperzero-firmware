@@ -18,7 +18,7 @@ static bool stopNrfScan = false; //to exit thread
 static bool threadStoppedsoFree = false; //indicate if I can free the thread from ram.
 static uint8_t currCh = 0; //for the progress bar or the channel selector
 
-static int delayPerChan = 1; //can set via up / down.
+static int delayPerChan = 150; //can set via up / down.
 
 bool showFreq = true;
 
@@ -91,7 +91,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             if(dly < 100) strdel[2] = ' ';
             if(dly < 1000) strdel[3] = ' ';
             strdel[4] = ' ';
-            strdel[5] = 'm';
+            strdel[5] = 'u';
             strdel[6] = 's';
             strdel[7] = 0;
             canvas_draw_str(canvas, 40, 8, strdel);
@@ -132,12 +132,13 @@ static int32_t scanner(void* context) {
             nrf24_set_rx_mode(nrf24_HANDLE, true);
             for(uint8_t ii = 0; ii < 3; ++ii) {
                 nrf24_flush_rx(nrf24_HANDLE);
-                furi_delay_ms(delayPerChan);
+                furi_delay_us(delayPerChan);
                 tmp = nrf24_get_rdp(nrf24_HANDLE);
                 if(tmp > 0) nrf24values[i]++;
                 if(nrf24values[i] > 50) j = 254; //stop, bc maxed
             }
         }
+        furi_delay_ms(1);
     }
     nrf24_set_idle(nrf24_HANDLE);
     isScanning = false;
@@ -154,10 +155,9 @@ void ChangeFreq(int delta) {
 
 void ChangeDelay(int delta) {
     delayPerChan += delta;
-    if(delayPerChan > 100) delayPerChan = 100;
-    if(delayPerChan < 1) delayPerChan = 1;
-    if(delayPerChan == 11) delayPerChan = 10; //to get it rounded :)
-    if(delayPerChan == 6) delayPerChan = 5; //to get it rounded :)
+    if(delayPerChan > 4000) delayPerChan = 4000;
+    if(delayPerChan < 120) delayPerChan = 120;
+
     showFreq = false;
 }
 
@@ -219,10 +219,10 @@ int32_t nrf24channelscanner_main(void* p) {
             }
             //change the delay
             if(event.input.type == InputTypeShort && event.input.key == InputKeyUp) {
-                ChangeDelay(5);
+                ChangeDelay(50);
             }
             if(event.input.type == InputTypeShort && event.input.key == InputKeyDown) {
-                ChangeDelay(-5);
+                ChangeDelay(-50);
             }
 
             if(!isScanning) {
