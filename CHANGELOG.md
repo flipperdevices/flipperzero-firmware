@@ -13,18 +13,11 @@
 * Feat/codeql by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/37
 * Feat/save settings by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/38
 
-**Full Changelog**: [v3.8.1...v.3.9.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.8.1...v.3.9.0)
-
-## [v3.8.1](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.8.1) (2023-08-25)
-
-**Merged pull requests:**
-
-* Feat/ofw by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/33
-
-**Full Changelog**: [v3.8.0...v.3.8.1](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.8.0...v.3.8.1)
+**Full Changelog**: [v3.8.0...v.3.9.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.8.0...v.3.9.0)
 
 ## [v3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.8.0) (2023-08-25)
 
+* Feat/ofw by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/33
 * Feat/save settings by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/38
 * Sync by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/12
 * feat: ci was added by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/10
@@ -32,13 +25,7 @@
 * Feat/ci by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/14
 * Feat/ci by @derskythe in https://github.com/derskythe/flipperzero-subbrute/pull/15
 
-**Full Changelog**: [v3.8.0...v.3.9.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.8.0...v.3.9.0)
-
-## [v3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.8.0) (2023-08-25)
-
-**Merged pull requests:**
-
-* Feat/ofw by @derskythe in https://github.com/DarkFlippers/flipperzero-subbrute/pull/33
+**Full Changelog**: [v3.7.0...v.3.8.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.7.0...v.3.8.0)
 
 ## [v3.7.0](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.7.0) (2023-08-25)
 
@@ -55,6 +42,8 @@
 - Feat/ci [\#26](https://github.com/DarkFlippers/flipperzero-subbrute/pull/26) ([derskythe](https://github.com/derskythe))
 - Sync [\#25](https://github.com/DarkFlippers/flipperzero-subbrute/pull/25) ([derskythe](https://github.com/derskythe))
 
+**Full Changelog**: [v3.2.3...v3.7.0](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.3...v3.7.0)
+
 ## [v3.2.3](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.2.3) (2023-03-31)
 
 **Merged pull requests:**
@@ -65,7 +54,7 @@
 - Sync [\#12](https://github.com/DarkFlippers/flipperzero-subbrute/pull/12) ([derskythe](https://github.com/derskythe))
 - feat: ci was added [\#10](https://github.com/DarkFlippers/flipperzero-subbrute/pull/10) ([derskythe](https://github.com/derskythe))
 
-**Full Changelog**: [v3.1.0...v3.2.3](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.1.0...v3.2.3)
+**Full Changelog**: [v3.2.1...v3.2.3](https://github.com/DarkFlippers/flipperzero-subbrute/compare/v3.2.1...v3.2.3)
 
 ## [v3.2.1](https://github.com/DarkFlippers/flipperzero-subbrute/tree/v3.2.1) (2023-03-16)
 
@@ -81,7 +70,7 @@
 - Feat/existing file two bytes [\#3](https://github.com/DarkFlippers/flipperzero-subbrute/pull/3) ([derskythe](https://github.com/derskythe))
 - Feat/more repeats [\#1](https://github.com/DarkFlippers/flipperzero-subbrute/pull/1) ([derskythe](https://github.com/derskythe))
 
-**Full Changelog**: [aa8001e6237804771738ce557039d1bf206aa7d1...v3.2.1](https://github.com/DarkFlippers/flipperzero-subbrute/compare/aa8001e6237804771738ce557039d1bf206aa7d1...v3.2.1)
+**Full Changelog**: [v3.1.0...v3.2.1](https://github.com/DarkFlippers/flipperzero-subbrute/compare/aa8001e6237804771738ce557039d1bf206aa7d1...v3.2.1)
 
 ## [v3.1.1](https://github.com/DarkFlippers/flipperzero-subbrute/releases/tag/v3.1.1) (2022-10-23)
 
