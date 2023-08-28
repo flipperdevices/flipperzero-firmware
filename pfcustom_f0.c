@@ -101,6 +101,15 @@ static void *SequenceAudiovisualAlertWrapper(void)
 	return (void*) &sequence_audiovisual_alert;
 }
 
+static FuriThread *FuriThreadAllocExWrapper(const char *name, uint32_t
+		stack_size, FuriThreadCallback callback, void *context)
+{
+	void *ctx = ThreadContextAlloc((ExecToken) callback, context);
+	FuriThreadCallback cb = ThreadCallbackDispatcher;
+
+	return furi_thread_alloc_ex(name, stack_size, cb, ctx);
+}
+
 /****************************************************************
 ** Step 2: Create CustomFunctionTable.
 **     Do not change the name of CustomFunctionTable!
@@ -121,8 +130,10 @@ CFunc0 CustomFunctionTable[] =
 	(CFunc0) SequenceSuccessWrapper,
 	(CFunc0) SequenceErrorWrapper,
 	(CFunc0) SequenceAudiovisualAlertWrapper,
-	(CFunc0) ThreadContextAlloc,
-	(CFunc0) ThreadCallbackDispatcher,
+	(CFunc0) FuriThreadAllocExWrapper,
+	(CFunc0) furi_thread_free,
+	(CFunc0) furi_thread_start,
+	(CFunc0) furi_thread_join,
 };
 #pragma GCC diagnostic pop
 
@@ -160,9 +171,13 @@ Err CompileCustomFunctions(void)
 	if( err < 0 ) return err;
 	err = CreateGlueToC( "SEQUENCE_AUDIOVISUAL_ALERT", i++, C_RETURNS_VALUE, 0 );
 	if( err < 0 ) return err;
-	err = CreateGlueToC( "THREAD_CONTEXT_ALLOC", i++, C_RETURNS_VALUE, 2 );
+	err = CreateGlueToC( "FURI_THREAD_ALLOC_EX", i++, C_RETURNS_VALUE, 4 );
 	if( err < 0 ) return err;
-	err = CreateGlueToC( "THREAD_CALLBACK_DISPATCHER", i++, C_RETURNS_VALUE, 1 );
+	err = CreateGlueToC( "FURI_THREAD_FREE", i++, C_RETURNS_VOID, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "FURI_THREAD_START", i++, C_RETURNS_VOID, 1 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "FURI_THREAD_JOIN", i++, C_RETURNS_VALUE, 1 );
 	if( err < 0 ) return err;
 
 	return 0;
