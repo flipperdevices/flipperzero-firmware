@@ -46,7 +46,7 @@ void ffDotHex( cell_t n )
 }
 
 /* ( ... --- ... , print stack ) */
-void ffDotS( void )
+void ffDotS( pfTaskData_t *gCurrentTask )
 {
     cell_t *sp;
     cell_t i, Depth;
@@ -210,7 +210,7 @@ cell_t ffNumberQ( const char *FWord, cell_t *Num )
  * convert the word to upper case.  The result is stored in
  * gScratch.
  */
-static char * Word ( char c, int Upcase )
+static char * Word ( char c, int Upcase, pfTaskData_t *gCurrentTask )
 {
     char *s1,*s2,*s3;
     cell_t n1, n2, n3;
@@ -241,13 +241,13 @@ DBUGX(("Word: s3=%c, %d\n", *s3, n3 ));
 }
 
 /* ( char -- c-addr , parse word ) */
-char * ffWord( char c )
+char * ffWord( char c, pfTaskData_t *gCurrentTask )
 {
-  return Word( c, TRUE );
+  return Word( c, TRUE, gCurrentTask );
 }
 
 /* ( char -- c-addr , parse word, preserving case ) */
-char * ffLWord( char c )
+char * ffLWord( char c, pfTaskData_t *gCurrentTask )
 {
-  return Word( c, FALSE );
+  return Word( c, FALSE, gCurrentTask );
 }

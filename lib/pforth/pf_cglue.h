@@ -36,7 +36,7 @@ extern "C" {
 Err   CreateGlueToC( const char *CName, ucell_t Index, cell_t ReturnMode, int32_t NumParams );
 Err   CompileCustomFunctions( void );
 Err   LoadCustomFunctionTable( void );
-cell_t CallUserFunction( cell_t Index, int32_t ReturnMode, int32_t NumParams );
+cell_t CallUserFunction( cell_t Index, int32_t ReturnMode, int32_t NumParams, pfTaskData_t *gCurrentTask );
 
 #ifdef __cplusplus
 }

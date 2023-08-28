@@ -42,8 +42,8 @@
 ** Global Data
 ***************************************************************/
 
-char            gScratch[TIB_SIZE];
-pfTaskData_t   *gCurrentTask = NULL;
+//char            gScratch[TIB_SIZE];
+//pfTaskData_t   *gCurrentTask = NULL;
 pfDictionary_t *gCurrentDictionary;
 cell_t          gNumPrimitives;
 
@@ -73,7 +73,7 @@ cell_t          gVarReturnCode;   /* Returned to caller of Forth, eg. UNIX shell
 IncludeFrame    gIncludeStack[MAX_INCLUDE_DEPTH];
 cell_t          gIncludeIndex;
 
-static void pfResetForthTask( void );
+static void pfResetForthTask( pfTaskData_t *gCurrentTask );
 static void pfInit( void );
 static void pfTerm( void );
 
@@ -94,7 +94,7 @@ static void pfTerm( void );
 static void pfInit( void )
 {
 /* all zero */
-    gCurrentTask = NULL;
+    //gCurrentTask = NULL;
     gCurrentDictionary = NULL;
     gNumPrimitives = 0;
     gLocalCompiler_XT = 0;
@@ -182,15 +182,15 @@ nomem:
 ** Dictionary Management
 ***************************************************************/
 
-ThrowCode pfExecIfDefined( const char *CString )
+ThrowCode pfExecIfDefined( const char *CString, pfTaskData_t *gCurrentTask )
 {
     ThrowCode result = 0;
     if( NAME_BASE != (cell_t)NULL)
     {
         ExecToken  XT;
-        if( ffFindC( CString, &XT ) )
+        if( ffFindC( CString, &XT, gCurrentTask ) )
         {
-            result = pfCatch( XT );
+            result = pfCatch( XT, gCurrentTask );
         }
     }
     return result;
@@ -329,7 +329,7 @@ nomem:
 ** Used by Quit and other routines to restore system.
 ***************************************************************/
 
-static void pfResetForthTask( void )
+static void pfResetForthTask( pfTaskData_t *gCurrentTask )
 {
 /* Go back to terminal input. */
     gCurrentTask->td_InputStream = PF_STDIN;
@@ -350,10 +350,10 @@ static void pfResetForthTask( void )
 ** Set current task context.
 ***************************************************************/
 
-void pfSetCurrentTask( PForthTask task )
+/*void pfSetCurrentTask( PForthTask task )
 {
     gCurrentTask = (pfTaskData_t *) task;
-}
+}*/
 
 /***************************************************************
 ** Set Quiet Flag.
@@ -376,17 +376,17 @@ cell_t  pfQueryQuiet( void )
 /***************************************************************
 ** Top level interpreter.
 ***************************************************************/
-ThrowCode pfQuit( void )
+ThrowCode pfQuit( pfTaskData_t *gCurrentTask )
 {
     ThrowCode exception;
     int go = 1;
 
     while(go)
     {
-        exception = ffOuterInterpreterLoop();
+        exception = ffOuterInterpreterLoop(gCurrentTask);
         if( exception == 0 )
         {
-            exception = ffOK();
+            exception = ffOK(gCurrentTask);
         }
 
         switch( exception )
@@ -400,10 +400,10 @@ ThrowCode pfQuit( void )
 
         case THROW_ABORT:
         default:
-            ffDotS();
+            ffDotS(gCurrentTask);
             pfReportThrow( exception );
-            pfHandleIncludeError();
-            pfResetForthTask();
+            pfHandleIncludeError(gCurrentTask);
+            pfResetForthTask(gCurrentTask);
             break;
         }
     }
@@ -415,7 +415,7 @@ ThrowCode pfQuit( void )
 ** Include file based on 'C' name.
 ***************************************************************/
 
-cell_t pfIncludeFile( const char *FileName )
+cell_t pfIncludeFile( const char *FileName, pfTaskData_t *gCurrentTask )
 {
     FileStream *fid;
     cell_t Result;
@@ -439,7 +439,7 @@ cell_t pfIncludeFile( const char *FileName )
     pfCopyMemory( &buffer[4], &FileName[len-numChars], numChars+1 );
     CreateDicEntryC( ID_NOOP, buffer, 0 );
 
-    Result = ffIncludeFile( fid ); /* Also close the file. */
+    Result = ffIncludeFile( fid, gCurrentTask ); /* Also close the file. */
 
 /* Create a dictionary word named ;;;; for FILE? */
     CreateDicEntryC( ID_NOOP, ";;;;", 0 );
@@ -516,7 +516,7 @@ ThrowCode pfDoForth( const char *DicFileName, const char *SourceName, cell_t IfI
 
     if( cftd )
     {
-        pfSetCurrentTask( cftd );
+        //pfSetCurrentTask( cftd );
 
         if( !gVarQuiet )
         {
@@ -570,7 +570,7 @@ ThrowCode pfDoForth( const char *DicFileName, const char *SourceName, cell_t IfI
                 {
                     EMIT_CR;
                 }
-                dic = pfLoadDictionary( DicFileName, &EntryPoint );
+                dic = pfLoadDictionary( DicFileName, &EntryPoint, cftd );
             }
             else
             {
@@ -579,7 +579,7 @@ ThrowCode pfDoForth( const char *DicFileName, const char *SourceName, cell_t IfI
                     MSG(" (static)");
                     EMIT_CR;
                 }
-                dic = pfLoadStaticDictionary();
+                dic = pfLoadStaticDictionary(cftd);
             }
         }
         if( dic == NULL ) goto error2;
@@ -591,7 +591,7 @@ ThrowCode pfDoForth( const char *DicFileName, const char *SourceName, cell_t IfI
         }
 
         pfDebugMessage("pfDoForth: try AUTO.INIT\n");
-        Result = pfExecIfDefined("AUTO.INIT");
+        Result = pfExecIfDefined("AUTO.INIT", cftd);
         if( Result != 0 )
         {
             MSG("Error in AUTO.INIT");
@@ -600,7 +600,7 @@ ThrowCode pfDoForth( const char *DicFileName, const char *SourceName, cell_t IfI
 
         if( EntryPoint != 0 )
         {
-            Result = pfCatch( EntryPoint );
+            Result = pfCatch( EntryPoint, cftd );
         }
 #ifndef PF_NO_SHELL
         else
@@ -608,7 +608,7 @@ ThrowCode pfDoForth( const char *DicFileName, const char *SourceName, cell_t IfI
             if( SourceName == NULL )
             {
                 pfDebugMessage("pfDoForth: pfQuit\n");
-                Result = pfQuit();
+                Result = pfQuit(cftd);
             }
             else
             {
@@ -618,13 +618,13 @@ ThrowCode pfDoForth( const char *DicFileName, const char *SourceName, cell_t IfI
                     MSG(SourceName);
                     MSG("\n");
                 }
-                Result = pfIncludeFile( SourceName );
+                Result = pfIncludeFile( SourceName, cftd );
             }
         }
 #endif /* PF_NO_SHELL */
 
     /* Clean up after running Forth. */
-        pfExecIfDefined("AUTO.TERM");
+        pfExecIfDefined("AUTO.TERM", cftd);
         pfDeleteDictionary( dic );
         pfDeleteTask( cftd );
     }

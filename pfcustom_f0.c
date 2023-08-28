@@ -26,11 +26,46 @@
 
 #include "pforth.h"
 #include "pf_types.h"
+#define PF_USER_FILEIO "pf_fileio_f0.h"
+#include "pf_io.h"
+#include "pf_guts.h"
 #include "pf_cglue.h"
 
 #include <furi.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+
+struct thread_callback_ctx {
+	ExecToken XT;
+	void *actual_ctx;
+};
+
+static void *ThreadContextAlloc(ExecToken XT, void *actual_ctx)
+{
+	struct thread_callback_ctx *cb_ctx = malloc(sizeof(struct
+				thread_callback_ctx));
+
+	cb_ctx->XT = XT;
+	cb_ctx->actual_ctx = actual_ctx;
+
+	return cb_ctx;
+}
+
+static int32_t ThreadCallbackDispatcher(void* context)
+{
+	struct thread_callback_ctx *cb_ctx = context;
+
+	pfTaskData_t *gCurrentTask = pfCreateTask(512, 512);
+
+	PUSH_DATA_STACK(cb_ctx->actual_ctx);
+	pfCatch(cb_ctx->XT, gCurrentTask);
+	cell_t ret = POP_DATA_STACK;
+
+	pfDeleteTask(gCurrentTask);
+
+	free(cb_ctx);
+	return ret;
+}
 
 /****************************************************************
 ** Step 1: Put your own special glue routines here
@@ -86,6 +121,8 @@ CFunc0 CustomFunctionTable[] =
 	(CFunc0) SequenceSuccessWrapper,
 	(CFunc0) SequenceErrorWrapper,
 	(CFunc0) SequenceAudiovisualAlertWrapper,
+	(CFunc0) ThreadContextAlloc,
+	(CFunc0) ThreadCallbackDispatcher,
 };
 #pragma GCC diagnostic pop
 
@@ -122,6 +159,10 @@ Err CompileCustomFunctions(void)
 	err = CreateGlueToC( "SEQUENCE_ERROR", i++, C_RETURNS_VALUE, 0 );
 	if( err < 0 ) return err;
 	err = CreateGlueToC( "SEQUENCE_AUDIOVISUAL_ALERT", i++, C_RETURNS_VALUE, 0 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "THREAD_CONTEXT_ALLOC", i++, C_RETURNS_VALUE, 2 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "THREAD_CALLBACK_DISPATCHER", i++, C_RETURNS_VALUE, 1 );
 	if( err < 0 ) return err;
 
 	return 0;

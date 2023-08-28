@@ -27,44 +27,44 @@
 extern "C" {
 #endif
 
-Err   ffPushInputStream( FileStream *InputFile );
+Err   ffPushInputStream( FileStream *InputFile, pfTaskData_t *gCurrentTask );
 ExecToken NameToToken( const ForthString *NFA );
 FileStream * ffConvertSourceIDToStream( cell_t id );
-FileStream *ffPopInputStream( void );
+FileStream *ffPopInputStream( pfTaskData_t *gCurrentTask );
 cell_t  ffConvertStreamToSourceID( FileStream *Stream );
 cell_t  ffFind( const ForthString *WordName, ExecToken *pXT );
-cell_t  ffFindC( const char *WordName, ExecToken *pXT );
+cell_t  ffFindC( const char *WordName, ExecToken *pXT, pfTaskData_t *gCurrentTask );
 cell_t  ffFindNFA( const ForthString *WordName, const ForthString **NFAPtr );
 cell_t  ffNumberQ( const char *FWord, cell_t *Num );
-cell_t  ffRefill( void );
+cell_t  ffRefill( pfTaskData_t *gCurrentTask );
 cell_t  ffTokenToName( ExecToken XT, const ForthString **NFAPtr );
 cell_t *NameToCode( ForthString *NFA );
 PForthDictionary pfBuildDictionary( cell_t HeaderSize, cell_t CodeSize );
-char *ffWord( char c );
-char *ffLWord( char c );
+char *ffWord( char c, pfTaskData_t *gCurrentTask );
+char *ffLWord( char c, pfTaskData_t *gCurrentTask );
 const ForthString *NameToPrevious( const ForthString *NFA );
 cell_t FindSpecialCFAs( void );
-cell_t FindSpecialXTs( void );
+cell_t FindSpecialXTs( pfTaskData_t *gCurrentTask );
 cell_t NotCompiled( const char *FunctionName );
 void  CreateDicEntry( ExecToken XT, const ForthStringPtr FName, ucell_t Flags );
 void  CreateDicEntryC( ExecToken XT, const char *CName, ucell_t Flags );
 void  ff2Literal( cell_t dHi, cell_t dLo );
 void  ffALiteral( cell_t Num );
-void  ffColon( void );
-void  ffCreate( void );
+void  ffColon( pfTaskData_t *gCurrentTask );
+void  ffCreate( pfTaskData_t *gCurrentTask );
 void  ffCreateSecondaryHeader( const ForthStringPtr FName);
-void  ffDefer( void );
+void  ffDefer( pfTaskData_t *gCurrentTask );
 void  ffFinishSecondary( void );
 void  ffLiteral( cell_t Num );
 void  ffStringCreate( ForthStringPtr FName);
 void  ffStringDefer( const ForthStringPtr FName, ExecToken DefaultXT );
-void  pfHandleIncludeError( void );
+void  pfHandleIncludeError( pfTaskData_t *gCurrentTask );
 
-ThrowCode ffSemiColon( void );
-ThrowCode ffOK( void );
-ThrowCode ffInterpret( void );
-ThrowCode ffOuterInterpreterLoop( void );
-ThrowCode ffIncludeFile( FileStream *InputFile );
+ThrowCode ffSemiColon( pfTaskData_t *gCurrentTask );
+ThrowCode ffOK( pfTaskData_t *gCurrentTask );
+ThrowCode ffInterpret( pfTaskData_t *gCurrentTask );
+ThrowCode ffOuterInterpreterLoop( pfTaskData_t *gCurrentTask );
+ThrowCode ffIncludeFile( FileStream *InputFile, pfTaskData_t *gCurrentTask );
 
 #ifdef PF_SUPPORT_FP
 void ffFPLiteral( PF_FLOAT fnum );

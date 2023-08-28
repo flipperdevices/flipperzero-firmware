@@ -407,6 +407,7 @@ typedef struct pfTaskData_s
     char   *td_SourcePtr;       /* Pointer to TIB or other source. */
     cell_t   td_LineNumber;      /* Incremented on every refill. */
     cell_t    td_OUT;             /* Current output column. */
+    char    scratch[TIB_SIZE];
 } pfTaskData_t;
 
 typedef struct pfNode
@@ -467,7 +468,7 @@ typedef struct IncludeFrame
 extern "C" {
 #endif
 
-ThrowCode pfCatch( ExecToken XT );
+ThrowCode pfCatch( ExecToken XT, pfTaskData_t *gCurrentTask );
 
 #ifdef __cplusplus
 }
@@ -476,9 +477,10 @@ ThrowCode pfCatch( ExecToken XT );
 /***************************************************************
 ** External Globals
 ***************************************************************/
-extern pfTaskData_t *gCurrentTask;
+//extern pfTaskData_t *gCurrentTask;
 extern pfDictionary_t *gCurrentDictionary;
-extern char          gScratch[TIB_SIZE];
+//extern char          gScratch[TIB_SIZE];
+#define gScratch (gCurrentTask->scratch)
 extern cell_t         gNumPrimitives;
 
 extern ExecToken     gLocalCompiler_XT;      /* CFA of (LOCAL) compiler. */

@@ -37,7 +37,7 @@
 static void  ffStringColon( const ForthStringPtr FName );
 static cell_t CheckRedefinition( const ForthStringPtr FName );
 static void  ffUnSmudge( void );
-static cell_t FindAndCompile( const char *theWord );
+static cell_t FindAndCompile( const char *theWord, pfTaskData_t *gCurrentTask );
 static cell_t ffCheckDicRoom( void );
 
 #ifndef PF_NO_INIT
@@ -143,11 +143,11 @@ ExecToken NameToToken( const ForthString *NFA )
 /***************************************************************
 ** Find XTs needed by compiler.
 */
-cell_t FindSpecialXTs( void )
+cell_t FindSpecialXTs( pfTaskData_t *gCurrentTask )
 {
-    if( ffFindC( "(QUIT)", &gQuitP_XT ) == 0) goto nofind;
-    if( ffFindC( "NUMBER?", &gNumberQ_XT ) == 0) goto nofind;
-    if( ffFindC( "ACCEPT", &gAcceptP_XT ) == 0) goto nofind;
+    if( ffFindC( "(QUIT)", &gQuitP_XT, gCurrentTask ) == 0) goto nofind;
+    if( ffFindC( "NUMBER?", &gNumberQ_XT, gCurrentTask ) == 0) goto nofind;
+    if( ffFindC( "ACCEPT", &gAcceptP_XT, gCurrentTask ) == 0) goto nofind;
 DBUG(("gNumberQ_XT = 0x%x\n", (unsigned int)gNumberQ_XT ));
     return 0;
 
@@ -521,7 +521,7 @@ DBUG(("ffFind: %8s at 0x%x\n", WordName+1, NFA)); /* WARNING, not NUL terminated
 /****************************************************************
 ** Find name when passed 'C' string.
 */
-cell_t ffFindC( const char *WordName, ExecToken *pXT )
+cell_t ffFindC( const char *WordName, ExecToken *pXT, pfTaskData_t *gCurrentTask )
 {
 DBUG(("ffFindC: %s\n", WordName ));
     CStringToForth( gScratch, WordName, sizeof(gScratch) );
@@ -586,13 +586,13 @@ static void ffStringColon( const ForthStringPtr FName)
 /*************************************************************
 ** Read the next ExecToken from the Source and create a word.
 */
-void ffColon( void )
+void ffColon( pfTaskData_t *gCurrentTask )
 {
     char *FName;
 
     gDepthAtColon = DATA_STACK_DEPTH;
 
-    FName = ffWord( BLANK );
+    FName = ffWord( BLANK, gCurrentTask );
     if( *FName > 0 )
     {
         ffStringColon( FName );
@@ -627,11 +627,11 @@ void ffStringCreate( char *FName)
 }
 
 /* Read the next ExecToken from the Source and create a word. */
-void ffCreate( void )
+void ffCreate( pfTaskData_t *gCurrentTask )
 {
     char *FName;
 
-    FName = ffWord( BLANK );
+    FName = ffWord( BLANK, gCurrentTask );
     if( *FName > 0 )
     {
         ffStringCreate( FName );
@@ -660,11 +660,11 @@ static void CreateDeferredC( ExecToken DefaultXT, const char *CName )
 #endif
 
 /* Read the next token from the Source and create a word. */
-void ffDefer( void )
+void ffDefer( pfTaskData_t *gCurrentTask )
 {
     char *FName;
 
-    FName = ffWord( BLANK );
+    FName = ffWord( BLANK, gCurrentTask );
     if( *FName > 0 )
     {
         ffStringDefer( FName, ID_QUIT_P );
@@ -678,7 +678,7 @@ static void ffUnSmudge( void )
 }
 
 /* Implement ; */
-ThrowCode ffSemiColon( void )
+ThrowCode ffSemiColon( pfTaskData_t *gCurrentTask )
 {
     ThrowCode exception = 0;
     gVarState = 0;
@@ -748,7 +748,7 @@ void ffFPLiteral( PF_FLOAT fnum )
 #endif /* PF_SUPPORT_FP */
 
 /**************************************************************/
-static ThrowCode FindAndCompile( const char *theWord )
+static ThrowCode FindAndCompile( const char *theWord, pfTaskData_t *gCurrentTask )
 {
     cell_t Flag;
     ExecToken XT;
@@ -767,13 +767,13 @@ DBUG(("FindAndCompile: theWord = %8s, XT = 0x%x, Flag = %d\n", theWord, XT, Flag
         }
         else
         {
-            exception = pfCatch( XT );
+            exception = pfCatch( XT, gCurrentTask );
         }
     }
     else if ( Flag == 1 ) /* or is it IMMEDIATE ? */
     {
 DBUG(("FindAndCompile: IMMEDIATE, theWord = 0x%x\n", theWord ));
-        exception = pfCatch( XT );
+        exception = pfCatch( XT, gCurrentTask );
     }
     else /* try to interpret it as a number. */
     {
@@ -782,7 +782,7 @@ DBUG(("FindAndCompile: IMMEDIATE, theWord = 0x%x\n", theWord ));
 
 DBUG(("FindAndCompile: not found, try number?\n" ));
         PUSH_DATA_STACK( theWord );   /* Push text of number */
-        exception = pfCatch( gNumberQ_XT );
+        exception = pfCatch( gNumberQ_XT, gCurrentTask );
         if( exception ) goto error;
 
 DBUG(("FindAndCompile: after number?\n" ));
@@ -831,7 +831,7 @@ error:
 ** Forth outer interpreter.  Parses words from Source.
 ** Executes them or compiles them based on STATE.
 */
-ThrowCode ffInterpret( void )
+ThrowCode ffInterpret( pfTaskData_t *gCurrentTask )
 {
     cell_t flag;
     char *theWord;
@@ -842,7 +842,7 @@ ThrowCode ffInterpret( void )
     {
 
         pfDebugMessage("ffInterpret: calling ffWord(()\n");
-        theWord = ffLWord( BLANK );
+        theWord = ffLWord( BLANK, gCurrentTask );
         DBUG(("ffInterpret: theWord = 0x%x, Len = %d\n", theWord, *theWord ));
 
         if( *theWord > 0 )
@@ -851,13 +851,13 @@ ThrowCode ffInterpret( void )
             if( gLocalCompiler_XT )
             {
                 PUSH_DATA_STACK( theWord );   /* Push word. */
-                exception = pfCatch( gLocalCompiler_XT );
+                exception = pfCatch( gLocalCompiler_XT, gCurrentTask );
                 if( exception ) goto error;
                 flag = POP_DATA_STACK;  /* Compiled local? */
             }
             if( flag == 0 )
             {
-                exception = FindAndCompile( theWord );
+                exception = FindAndCompile( theWord, gCurrentTask );
                 if( exception ) goto error;
             }
         }
@@ -870,7 +870,7 @@ error:
 }
 
 /**************************************************************/
-ThrowCode ffOK( void )
+ThrowCode ffOK( pfTaskData_t *gCurrentTask )
 {
     cell_t exception = 0;
 /* Check for stack underflow.   %Q what about overflows? */
@@ -891,7 +891,7 @@ ThrowCode ffOK( void )
             if( !gVarQuiet )
             {
                 MSG( "   ok\n" );
-                if(gVarTraceStack) ffDotS();
+                if(gVarTraceStack) ffDotS(gCurrentTask);
             }
             else
             {
@@ -905,11 +905,11 @@ ThrowCode ffOK( void )
 /***************************************************************
 ** Cleanup Include stack by popping and closing files.
 ***************************************************************/
-void pfHandleIncludeError( void )
+void pfHandleIncludeError( pfTaskData_t *gCurrentTask )
 {
     FileStream *cur;
 
-    while( (cur = ffPopInputStream()) != PF_STDIN)
+    while( (cur = ffPopInputStream(gCurrentTask)) != PF_STDIN)
     {
         DBUG(("ffCleanIncludeStack: closing 0x%x\n", cur ));
         sdCloseFile(cur);
@@ -919,18 +919,18 @@ void pfHandleIncludeError( void )
 /***************************************************************
 ** Interpret input in a loop.
 ***************************************************************/
-ThrowCode ffOuterInterpreterLoop( void )
+ThrowCode ffOuterInterpreterLoop( pfTaskData_t *gCurrentTask )
 {
     cell_t exception = 0;
     do
     {
-        exception = ffRefill();
+        exception = ffRefill(gCurrentTask);
         if(exception <= 0) break;
 
-        exception = ffInterpret();
+        exception = ffInterpret(gCurrentTask);
         if( exception == 0 )
         {
-            exception = ffOK();
+            exception = ffOK(gCurrentTask);
         }
 
     } while( exception == 0 );
@@ -941,16 +941,16 @@ ThrowCode ffOuterInterpreterLoop( void )
 ** Include then close a file
 ***************************************************************/
 
-ThrowCode ffIncludeFile( FileStream *InputFile )
+ThrowCode ffIncludeFile( FileStream *InputFile, pfTaskData_t *gCurrentTask )
 {
     ThrowCode exception;
 
 /* Push file stream. */
-    exception = ffPushInputStream( InputFile );
+    exception = ffPushInputStream( InputFile, gCurrentTask );
     if( exception < 0 ) return exception;
 
 /* Run outer interpreter for stream. */
-    exception = ffOuterInterpreterLoop();
+    exception = ffOuterInterpreterLoop(gCurrentTask);
     if( exception )
     {
         int i;
@@ -972,7 +972,7 @@ ThrowCode ffIncludeFile( FileStream *InputFile )
     }
 
 /* Pop file stream. */
-    ffPopInputStream();
+    ffPopInputStream(gCurrentTask);
 
 /* ANSI spec specifies that this should also close the file. */
     sdCloseFile(InputFile);
@@ -985,7 +985,7 @@ ThrowCode ffIncludeFile( FileStream *InputFile )
 /***************************************************************
 ** Save current input stream on stack, use this new one.
 ***************************************************************/
-Err ffPushInputStream( FileStream *InputFile )
+Err ffPushInputStream( FileStream *InputFile, pfTaskData_t *gCurrentTask )
 {
     Err Result = 0;
     IncludeFrame *inf;
@@ -1023,7 +1023,7 @@ Err ffPushInputStream( FileStream *InputFile )
 ** Go back to reading previous stream.
 ** Just return gCurrentTask->td_InputStream upon underflow.
 ***************************************************************/
-FileStream *ffPopInputStream( void )
+FileStream *ffPopInputStream( pfTaskData_t *gCurrentTask )
 {
     IncludeFrame *inf;
     FileStream *Result;
@@ -1150,7 +1150,7 @@ DBUGX(("readLineFromStream(0x%x, 0x%x, 0x%x)\n", buffer, len, stream ));
 ** ( -- , fill Source from current stream )
 ** Return 1 if successful, 0 for EOF, or a negative error.
 */
-cell_t ffRefill( void )
+cell_t ffRefill( pfTaskData_t *gCurrentTask )
 {
     cell_t Num;
     cell_t Result = 1;
@@ -1165,7 +1165,7 @@ cell_t ffRefill( void )
         ThrowCode throwCode;
         PUSH_DATA_STACK( gCurrentTask->td_SourcePtr );
         PUSH_DATA_STACK( TIB_SIZE );
-        throwCode = pfCatch( gAcceptP_XT );
+        throwCode = pfCatch( gAcceptP_XT, gCurrentTask );
         if (throwCode) {
             Result = throwCode;
             goto error;

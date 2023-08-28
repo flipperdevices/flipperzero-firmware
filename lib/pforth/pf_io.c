@@ -47,7 +47,7 @@ void ioEmit( char c )
     Result = sdTerminalOut(c);
     if( Result < 0 ) EXIT(1);
 
-    if( gCurrentTask )
+    /*if( gCurrentTask )
     {
         if(c == '\n')
         {
@@ -58,7 +58,7 @@ void ioEmit( char c )
         {
             gCurrentTask->td_OUT++;
         }
-    }
+    }*/
 }
 
 /***************************************************************

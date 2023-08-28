@@ -24,7 +24,7 @@
 extern CFunc0 CustomFunctionTable[];
 
 /***************************************************************/
-cell_t CallUserFunction( cell_t Index, int32_t ReturnMode, int32_t NumParams )
+cell_t CallUserFunction( cell_t Index, int32_t ReturnMode, int32_t NumParams, pfTaskData_t *gCurrentTask )
 {
     cell_t P1, P2, P3, P4, P5;
     cell_t Result = 0;

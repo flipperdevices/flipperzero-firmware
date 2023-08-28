@@ -41,6 +41,8 @@ typedef cell_t ThrowCode;
 extern "C" {
 #endif
 
+typedef struct pfTaskData_s pfTaskData_t;
+
 /* Main entry point to pForth. */
 ThrowCode pfDoForth( const char *DicName, const char *SourceName, cell_t IfInit );
 
@@ -71,25 +73,25 @@ PForthDictionary pfCreateStaticDictionary( uint8_t *Header, uint8_t *Code,
         cell_t HeaderSize, cell_t CodeSize );
 
 /* Load dictionary from a file. */
-PForthDictionary pfLoadDictionary( const char *FileName, ExecToken *EntryPointPtr );
+PForthDictionary pfLoadDictionary( const char *FileName, ExecToken *EntryPointPtr, pfTaskData_t *gCurrentTask );
 
 /* Load dictionary from static array in "pfdicdat.h". */
-PForthDictionary pfLoadStaticDictionary( void );
+PForthDictionary pfLoadStaticDictionary( pfTaskData_t *gCurrentTask );
 
 /* Delete dictionary data. */
 void  pfDeleteDictionary( PForthDictionary dict );
 
 /* Execute the pForth interpreter. Yes, QUIT is an odd name but it has historical meaning. */
-ThrowCode pfQuit( void );
+ThrowCode pfQuit( pfTaskData_t *gCurrentTask );
 
 /* Execute a single execution token in the current task and return 0 or an error code. */
-ThrowCode pfCatch( ExecToken XT );
+ThrowCode pfCatch( ExecToken XT, pfTaskData_t *gCurrentTask );
 
 /* Include the given pForth source code file. */
-ThrowCode pfIncludeFile( const char *FileName );
+ThrowCode pfIncludeFile( const char *FileName, pfTaskData_t *gCurrentTask );
 
 /* Execute a Forth word by name. */
-ThrowCode  pfExecIfDefined( const char *CString );
+ThrowCode  pfExecIfDefined( const char *CString, pfTaskData_t *gCurrentTask );
 
 #ifdef __cplusplus
 }

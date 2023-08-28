@@ -28,7 +28,7 @@ extern "C" {
 
 void ffDot( cell_t n );
 void ffDotHex( cell_t n );
-void ffDotS( void );
+void ffDotS( pfTaskData_t *gCurrentTask );
 cell_t ffSkip( char *AddrIn, cell_t Cnt, char c, char **AddrOut );
 cell_t ffScan( char *AddrIn, cell_t Cnt, char c, char **AddrOut );
 

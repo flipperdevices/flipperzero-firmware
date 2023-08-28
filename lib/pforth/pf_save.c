@@ -302,7 +302,7 @@ int IsHostLittleEndian( void )
 
 #if defined(PF_NO_FILEIO) || defined(PF_NO_SHELL)
 
-cell_t ffSaveForth( const char *FileName, ExecToken EntryPoint, cell_t NameSize, cell_t CodeSize)
+cell_t ffSaveForth( const char *FileName, ExecToken EntryPoint, cell_t NameSize, cell_t CodeSize, pfTaskData_t *gCurrentTask)
 {
     TOUCH(FileName);
     TOUCH(EntryPoint);
@@ -380,7 +380,7 @@ convertDictionaryInfoRead (DictionaryInfoChunk *sd)
 ** If EntryPoint is NULL, save as development environment.
 ** If EntryPoint is non-NULL, save as turnKey environment with no names.
 */
-cell_t ffSaveForth( const char *FileName, ExecToken EntryPoint, cell_t NameSize, cell_t CodeSize)
+cell_t ffSaveForth( const char *FileName, ExecToken EntryPoint, cell_t NameSize, cell_t CodeSize, pfTaskData_t *gCurrentTask)
 {
     FileStream *fid;
     DictionaryInfoChunk SD;
@@ -397,7 +397,7 @@ cell_t ffSaveForth( const char *FileName, ExecToken EntryPoint, cell_t NameSize,
     }
 
 /* Save in uninitialized form. */
-    pfExecIfDefined("AUTO.TERM");
+    pfExecIfDefined("AUTO.TERM", gCurrentTask);
 
 /* Write FORM Header ---------------------------- */
     if( Write32ToFile( fid, ID_FORM ) < 0 ) goto error;
@@ -498,7 +498,7 @@ cell_t ffSaveForth( const char *FileName, ExecToken EntryPoint, cell_t NameSize,
     sdCloseFile( fid );
 
 /* Restore initialization. */
-    pfExecIfDefined("AUTO.INIT");
+    pfExecIfDefined("AUTO.INIT", gCurrentTask);
     return 0;
 
 error:
@@ -507,7 +507,7 @@ error:
     sdCloseFile( fid );
 
 /* Restore initialization. */
-    pfExecIfDefined("AUTO.INIT");
+    pfExecIfDefined("AUTO.INIT", gCurrentTask);
 
     return -1;
 }
@@ -529,7 +529,7 @@ static int32_t Read32FromFile( FileStream *fid, uint32_t *ValPtr )
 }
 
 /***************************************************************/
-PForthDictionary pfLoadDictionary( const char *FileName, ExecToken *EntryPointPtr )
+PForthDictionary pfLoadDictionary( const char *FileName, ExecToken *EntryPointPtr, pfTaskData_t *gCurrentTask )
 {
     pfDictionary_t *dic = NULL;
     FileStream *fid;
@@ -729,7 +729,7 @@ DBUG(("pfLoadDictionary( %s )\n", FileName ));
     {
         cell_t Result;
 /* Find special words in dictionary for global XTs. */
-        if( (Result = FindSpecialXTs()) < 0 )
+        if( (Result = FindSpecialXTs(gCurrentTask)) < 0 )
         {
             pfReportError("pfLoadDictionary: FindSpecialXTs", (Err)Result);
             goto error;
@@ -847,7 +847,7 @@ PForthDictionary pfLoadDictionary( const char *FileName, ExecToken *EntryPointPt
 //    return NULL;
 //}
 
-PForthDictionary pfLoadStaticDictionary( void )
+PForthDictionary pfLoadStaticDictionary( pfTaskData_t *gCurrentTask )
 {
 #ifdef PF_STATIC_DIC
     cell_t Result;
@@ -898,7 +898,7 @@ PForthDictionary pfLoadStaticDictionary( void )
         gVarContext = NAMEREL_TO_ABS(RELCONTEXT); /* Restore context. */
 
 /* Find special words in dictionary for global XTs. */
-        if( (Result = FindSpecialXTs()) < 0 )
+        if( (Result = FindSpecialXTs(gCurrentTask)) < 0 )
         {
             pfReportError("pfLoadStaticDictionary: FindSpecialXTs", Result);
             goto error;

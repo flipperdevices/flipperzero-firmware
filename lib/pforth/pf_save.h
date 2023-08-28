@@ -68,7 +68,7 @@ typedef struct DictionaryInfoChunk
 extern "C" {
 #endif
 
-cell_t ffSaveForth( const char *FileName, ExecToken EntryPoint, cell_t NameSize, cell_t CodeSize );
+cell_t ffSaveForth( const char *FileName, ExecToken EntryPoint, cell_t NameSize, cell_t CodeSize, pfTaskData_t *gCurrentTask );
 
 /* Endian-ness tools. */
 int    IsHostLittleEndian( void );
