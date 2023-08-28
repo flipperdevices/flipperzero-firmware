@@ -265,6 +265,7 @@ bool nfc_save_file(NfcApp* instance, FuriString* path) {
         dialog_message_show_storage_error(instance->dialogs, "Cannot save\nkey file");
     }
 
+    // TODO move this to protocol support save scene
     if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolMfClassic) {
         mf_classic_key_cache_save(
             instance->mfc_key_cache,
