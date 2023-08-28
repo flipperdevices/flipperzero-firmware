@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0826-0139-0.90.1-bb5de53](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-27 01:35 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-27 01:35 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-27 22:27 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-27 22:27 EST`
 - Updated: [Authenticator/TOTP v4.0.3 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - OFW: [Rfid: fix crash on broken key launch from archive #3012 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3012)
 - OFW: [AC OFF button #3010 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3010)
@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [SD Card Assets](https://www.patreon.com/RogueMaster/membership) to have [Dual Boot BINs (By TalkingSasquach)](https://github.com/skizzophrenic/Talking-Sasquach/tree/main/Single%20File%20WiFi%20Board%20Bins)
 - Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Fix LCD Colors order/sides (By WillyJL)
+- Updated: UL PR: [FAAC SLH 0x0-seed case new better logic for UI/UX #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
 
 <a name="release">
 

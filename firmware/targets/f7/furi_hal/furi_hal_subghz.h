@@ -66,7 +66,6 @@ typedef struct {
     const GpioPin* async_mirror_pin;
 
     uint8_t rolling_counter_mult;
-    uint32_t rolling_counter_value;
     bool ext_power_amp : 1;
 } FuriHalSubGhz;
 
