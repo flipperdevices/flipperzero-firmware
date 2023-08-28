@@ -23,7 +23,7 @@ BACK long: exit the app.
 
 LEFT / RIGHT: when not scanning select the channel to see it's frequency. Short press steps 1, long 10.
 
-UP / DOWN: change the time spent in a channel. Suggested: 1ms, but you can play around.
+UP / DOWN: change the time spent in a channel. Suggested: 150 us, but you can play around.
 
 ## Warning
 These apps are for **educational purposes** only. Please use this code responsibly and only use these apps on your own equipment.
@@ -53,7 +53,7 @@ The 3.3 uF to 10 uF will respond to slow freq changes while the 0.1 uF will resp
 
 ![NRF_Capacitor](https://user-images.githubusercontent.com/57457139/178169959-d030f9a6-d2ac-46af-af8b-470ff092c8a7.jpg)
 
-##Disclaimer
+## Disclaimer
 Used images and some text from this repo: https://raw.githubusercontent.com/RogueMaster/flipperzero-firmware-wPlugins/420/documentation/NRF24.md
 Used some code from this repo: https://github.com/Flipper-XFW/Xtreme-Firmware
 Thanks for them for their work!
