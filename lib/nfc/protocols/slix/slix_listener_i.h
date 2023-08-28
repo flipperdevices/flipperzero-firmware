@@ -33,6 +33,11 @@ SlixError slix_listener_set_password(
     SlixPasswordType password_type,
     SlixPasswordValue password);
 
+SlixError slix_listener_write_password(
+    SlixListener* instance,
+    SlixPasswordType password_type,
+    SlixPasswordValue password);
+
 SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer* rx_buffer);
 
 #ifdef __cplusplus

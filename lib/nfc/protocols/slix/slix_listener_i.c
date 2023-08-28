@@ -123,6 +123,33 @@ static SlixError slix_write_password_handler(
     SlixError error = SlixErrorNone;
 
     do {
+#pragma pack(push, 1)
+        typedef struct {
+            uint8_t password_id;
+            SlixPasswordValue password_xored;
+        } SlixWritePasswordRequestLayout;
+#pragma pack(pop)
+
+        if(data_size != sizeof(SlixWritePasswordRequestLayout)) {
+            error = SlixErrorFormat;
+            break;
+        }
+
+        const SlixWritePasswordRequestLayout* request =
+            (const SlixWritePasswordRequestLayout*)data;
+        const SlixPasswordType password_type = slix_get_password_type_by_id(request->password_id);
+
+        if(password_type >= SlixPasswordTypeCount) {
+            error = SlixErrorInternal;
+            break;
+        }
+
+        const SlixPasswordValue password_received =
+            slix_unxor_password(request->password_xored, instance->session_state.random);
+
+        error = slix_listener_write_password(instance, password_type, password_received);
+        if(error != SlixErrorNone) break;
+
     } while(false);
 
     return error;
@@ -208,6 +235,41 @@ SlixError slix_listener_set_password(
         session_state->is_password_valid[password_type] = is_valid;
 
         if(!is_valid) {
+            error = SlixErrorWrongPassword;
+            break;
+        }
+    } while(false);
+
+    return error;
+}
+
+SlixError slix_listener_write_password(
+    SlixListener* instance,
+    SlixPasswordType password_type,
+    SlixPasswordValue password) {
+    SlixError error = SlixErrorNone;
+
+    do {
+        if(password_type >= SlixPasswordTypeCount) {
+            error = SlixErrorInternal;
+            break;
+        }
+
+        SlixData* slix_data = instance->data;
+
+        if(!slix_type_supports_password(slix_get_type(slix_data), password_type)) {
+            error = SlixErrorNotSupported;
+            break;
+        }
+
+        SlixListenerSessionState* session_state = &instance->session_state;
+
+        if(session_state->is_password_valid[password_type]) {
+            // TODO: check for password lock
+            slix_set_password(slix_data, password_type, password);
+            // Require another SET_PASSWORD command with the new password
+            session_state->is_password_valid[password_type] = false;
+        } else {
             error = SlixErrorWrongPassword;
             break;
         }
