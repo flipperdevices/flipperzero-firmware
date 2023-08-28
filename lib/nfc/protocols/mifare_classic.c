@@ -384,7 +384,9 @@ bool mf_classic_check_card_type(FuriHalNfcADevData* data) {
     } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
         //skylanders support
         return true;
-    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
+    } else if(
+        ((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) ||
+        ((ATQA0 == 0x02 || ATQA0 == 0x04 || ATQA0 == 0x08) && (SAK == 0x38))) {
         return true;
     } else {
         return false;
@@ -398,13 +400,17 @@ MfClassicType mf_classic_get_classic_type(FuriHalNfcADevData* data) {
     if((ATQA0 == 0x44 || ATQA0 == 0x04)) {
         if((SAK == 0x08 || SAK == 0x88)) {
             return MfClassicType1k;
-        } else if((SAK == 0x09 || SAK == 0x89)) {
+        } else if((SAK == 0x38)) {
+            return MfClassicType4k;
+        } else if(SAK == 0x09) {
             return MfClassicTypeMini;
         }
     } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
         //skylanders support
         return MfClassicType1k;
-    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
+    } else if(
+        ((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) ||
+        ((ATQA0 == 0x02 || ATQA0 == 0x08) && (SAK == 0x38))) {
         return MfClassicType4k;
     }
     return MfClassicType1k;
