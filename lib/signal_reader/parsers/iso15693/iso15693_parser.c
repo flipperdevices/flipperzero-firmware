@@ -150,45 +150,46 @@ void iso15693_parser_stop(Iso15693Parser* instance) {
 
     signal_reader_stop(instance->signal_reader);
 }
-static void iso15693_parser_prepare_buff(Iso15693Parser* instance) {
-    if(!instance->bit_offset_calculated) {
-        for(size_t i = 0; i < 8; i++) {
-            if(FURI_BIT(instance->bitstream_buff[0], i)) {
-                instance->bit_offset = i;
-                break;
-            }
-        }
-        if(instance->bit_offset == 7) {
-            if(FURI_BIT(instance->bitstream_buff[1], 0) == 1) {
-                instance->bit_offset = 0;
-                for(size_t i = 0; i < instance->bytes_to_process - 1; i++) {
-                    instance->bitstream_buff[i] = instance->bitstream_buff[i + 1];
-                    instance->bytes_to_process--;
-                }
-            }
-        } else {
-            if(FURI_BIT(instance->bitstream_buff[0], instance->bit_offset + 1) == 1) {
-                instance->bit_offset++;
-            }
-        }
 
-        for(size_t i = 0; i < instance->bytes_to_process - 1; i++) {
-            instance->bitstream_buff[i] =
-                (instance->bitstream_buff[i] >> instance->bit_offset) |
-                (instance->bitstream_buff[i + 1] << (8 - instance->bit_offset));
-        }
-        instance->last_byte = instance->bitstream_buff[instance->bytes_to_process - 1];
-        instance->bytes_to_process--;
-        instance->bit_offset_calculated = true;
-    } else {
-        for(size_t i = 0; i < instance->bytes_to_process; i++) {
-            uint8_t next_byte = instance->bitstream_buff[i];
-            instance->bitstream_buff[i] = (instance->last_byte >> instance->bit_offset) |
-                                          (next_byte << (8 - instance->bit_offset));
-            instance->last_byte = next_byte;
-        }
-    }
-}
+// static void iso15693_parser_prepare_buff(Iso15693Parser* instance) {
+//     if(!instance->bit_offset_calculated) {
+//         for(size_t i = 0; i < 8; i++) {
+//             if(FURI_BIT(instance->bitstream_buff[0], i)) {
+//                 instance->bit_offset = i;
+//                 break;
+//             }
+//         }
+//         if(instance->bit_offset == 7) {
+//             if(FURI_BIT(instance->bitstream_buff[1], 0) == 1) {
+//                 instance->bit_offset = 0;
+//                 for(size_t i = 0; i < instance->bytes_to_process - 1; i++) {
+//                     instance->bitstream_buff[i] = instance->bitstream_buff[i + 1];
+//                     instance->bytes_to_process--;
+//                 }
+//             }
+//         } else {
+//             if(FURI_BIT(instance->bitstream_buff[0], instance->bit_offset + 1) == 1) {
+//                 instance->bit_offset++;
+//             }
+//         }
+
+//         for(size_t i = 0; i < instance->bytes_to_process - 1; i++) {
+//             instance->bitstream_buff[i] =
+//                 (instance->bitstream_buff[i] >> instance->bit_offset) |
+//                 (instance->bitstream_buff[i + 1] << (8 - instance->bit_offset));
+//         }
+//         instance->last_byte = instance->bitstream_buff[instance->bytes_to_process - 1];
+//         instance->bytes_to_process--;
+//         instance->bit_offset_calculated = true;
+//     } else {
+//         for(size_t i = 0; i < instance->bytes_to_process; i++) {
+//             uint8_t next_byte = instance->bitstream_buff[i];
+//             instance->bitstream_buff[i] = (instance->last_byte >> instance->bit_offset) |
+//                                           (next_byte << (8 - instance->bit_offset));
+//             instance->last_byte = next_byte;
+//         }
+//     }
+// }
 
 static Iso15693ParserCommand iso15693_parser_parse_sof(Iso15693Parser* instance) {
     Iso15693ParserCommand command = Iso15693ParserCommandProcessed;
@@ -297,7 +298,7 @@ static const Iso15693ParserStateHandler iso15693_parser_state_handlers[Iso15693P
 
 bool iso15693_parser_run(Iso15693Parser* instance) {
     if(instance->bytes_to_process) {
-        iso15693_parser_prepare_buff(instance);
+        // iso15693_parser_prepare_buff(instance);
 
         Iso15693ParserCommand command = Iso15693ParserCommandProcessed;
         while(command == Iso15693ParserCommandProcessed) {
