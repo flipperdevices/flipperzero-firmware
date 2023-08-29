@@ -401,8 +401,11 @@ void night_start(void* ctx) {
         fnaf->office->is_light_on = true;
         SWITCH_VIEW(night_number);
         FURI_LOG_D(TAG, "Night started thing 2");
-        // What else?
-        // Aninatronics actions/timers? Probs
+
+        // Aninatronics timers
+        for (uint i = 0; i < 4; i++) {
+            furi_timer_start(fnaf->dolphins->timer[i]);
+        }
     }
 }
 
@@ -559,6 +562,8 @@ void power_out_max_callback(void* ctx) {
         furi_timer_start(fnaf->office->power_out_max_timer, power_out_max_time);
     } else {
         FURI_LOG_D(TAG, "Power out timer 2 took more than 20 seconds");
+        // Save progress
+        save_progress(fnaf);
         // Stop all timers
         stop_all_timers(fnaf);
         // Jumpscare

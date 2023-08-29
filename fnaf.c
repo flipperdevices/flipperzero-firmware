@@ -30,16 +30,14 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
         text_view(canvas, fnaf);
         break;
     case jumpscare:
-        if (fnaf->counter % 4 + 1 > 2) {
-            canvas_draw_str(canvas, 33, 34, "Scary image 2");
-            // draw second frame
+        if (fnaf->counter % 2 + 1 > 1) {
+            canvas_draw_icon(canvas, 43, 8, &I_jumpscare_frame_2_42x56);
             fnaf->counter += 1;
         } else {
-            canvas_draw_str(canvas, 33, 34, "Scary image 1");
-            // draw firsr frame
+            canvas_draw_icon(canvas, 43, 8, &I_jumpscare_frame_1_42x56);
             fnaf->counter += 1;
         }
-        if (fnaf->counter == 14) {
+        if (fnaf->counter == 7) {
             SWITCH_VIEW(game_over);
         }
         break;
