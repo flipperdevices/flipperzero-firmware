@@ -252,15 +252,13 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     LL_DMA_SetPeriphRequest(SIGNAL_READER_DMA_CNT_SYNC_DEF, LL_DMAMUX_REQ_GENERATOR0);
 
     // Configure DMA Sync
-    LL_DMA_SetMemoryAddress(
-        SIGNAL_READER_DMA_TRIGGER_DEF, (uint32_t)&instance->cnt_en);
+    LL_DMA_SetMemoryAddress(SIGNAL_READER_DMA_TRIGGER_DEF, (uint32_t)&instance->cnt_en);
     LL_DMA_SetPeriphAddress(
         SIGNAL_READER_DMA_TRIGGER_DEF, (uint32_t) & (SIGNAL_READER_CAPTURE_TIM->CR1));
     LL_DMA_ConfigTransfer(
         SIGNAL_READER_DMA_TRIGGER_DEF,
-        LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_PERIPH_NOINCREMENT |
-            LL_DMA_MEMORY_NOINCREMENT | LL_DMA_PDATAALIGN_HALFWORD | LL_DMA_MDATAALIGN_HALFWORD |
-            LL_DMA_PRIORITY_VERYHIGH);
+        LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_PERIPH_NOINCREMENT | LL_DMA_MEMORY_NOINCREMENT |
+            LL_DMA_PDATAALIGN_HALFWORD | LL_DMA_MDATAALIGN_HALFWORD | LL_DMA_PRIORITY_VERYHIGH);
     LL_DMA_SetDataLength(SIGNAL_READER_DMA_TRIGGER_DEF, 1);
     LL_DMA_SetPeriphRequest(SIGNAL_READER_DMA_TRIGGER_DEF, LL_DMAMUX_REQ_GENERATOR0);
 
@@ -286,16 +284,17 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     // Start DMA Sync timer
     LL_DMA_EnableChannel(SIGNAL_READER_DMA_CNT_SYNC_DEF);
 
-    // Start DMA trigget
-    LL_DMA_EnableChannel(SIGNAL_READER_DMA_TRIGGER_DEF);
-    LL_DMAMUX_EnableRequestGen(DMAMUX1, LL_DMAMUX_REQ_GEN_0);
-
     // Start DMA Rx pin
     LL_DMA_EnableChannel(SIGNAL_READER_DMA_GPIO_DEF);
     // Strat timer
     LL_TIM_SetCounter(SIGNAL_READER_CAPTURE_TIM, 0);
-    // LL_TIM_EnableCounter(SIGNAL_READER_CAPTURE_TIM);
+    if(instance->trigger == SignalReaderTriggerNone) {
+        LL_TIM_EnableCounter(SIGNAL_READER_CAPTURE_TIM);
+    } else {
+        LL_DMA_EnableChannel(SIGNAL_READER_DMA_TRIGGER_DEF);
+    }
 
+    LL_DMAMUX_EnableRequestGen(DMAMUX1, LL_DMAMUX_REQ_GEN_0);
     // Need to clear flags before enabling DMA !!!!
     if(LL_DMA_IsActiveFlag_TC2(SIGNAL_READER_DMA)) LL_DMA_ClearFlag_TC1(SIGNAL_READER_DMA);
     if(LL_DMA_IsActiveFlag_TE2(SIGNAL_READER_DMA)) LL_DMA_ClearFlag_TE1(SIGNAL_READER_DMA);

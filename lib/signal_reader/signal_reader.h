@@ -36,8 +36,7 @@ typedef enum {
 
 typedef enum {
     SignalReaderTriggerNone,
-    SignalReaderTriggerRisingEdge,
-    SignalReaderTriggerFallingEdge,
+    SignalReaderTriggerRisingFallingEdge,
 } SignalReaderTrigger;
 
 typedef void (*SignalReaderCallback)(SignalReaderEvent event, void* context);
