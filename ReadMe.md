@@ -52,6 +52,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro) [(Fixes By gid9798)](https://github.com/xMasterX/all-the-plugins/commit/83e7b7219ccd515f1eead30f834efaf8273b0d9a)
 - Updated: [Authenticator/TOTP v4.1.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Color Guess v1.1 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- OFW: [Remove the TODO for GPIO settings save/load #3015 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3015)
+- OFW: [NFC: fix ISO14443-4A cards emulation #3017 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3017)
 
 <a name="release">
 
