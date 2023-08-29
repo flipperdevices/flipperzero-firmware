@@ -13,14 +13,17 @@
 
 #define TAG "FuriHalClock"
 
-#define CPU_CLOCK_HZ_EARLY 4000000
-#define CPU_CLOCK_HZ_MAIN 64000000
+#define CPU_CLOCK_EARLY_HZ 4000000
+#define CPU_CLOCK_HSI16_HZ 16000000
+#define CPU_CLOCK_HSE_HZ 32000000
+#define CPU_CLOCK_PLL_HZ 64000000
+
 #define TICK_INT_PRIORITY 15U
 #define HS_CLOCK_IS_READY() (LL_RCC_HSE_IsReady() && LL_RCC_HSI_IsReady())
 #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
 void furi_hal_clock_init_early() {
-    LL_SetSystemCoreClock(CPU_CLOCK_HZ_EARLY);
+    LL_SetSystemCoreClock(CPU_CLOCK_EARLY_HZ);
     LL_Init1msTick(SystemCoreClock);
 }
 
@@ -28,9 +31,9 @@ void furi_hal_clock_deinit_early() {
 }
 
 void furi_hal_clock_init() {
-    /* Prepare Flash memory for 64MHz system clock */
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
+    /* Prepare Flash memory for 32MHz system clock */
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_1)
         ;
 
     /* HSE and HSI configuration and activation */
@@ -108,7 +111,7 @@ void furi_hal_clock_init() {
         ;
 
     /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
-    LL_SetSystemCoreClock(CPU_CLOCK_HZ_MAIN);
+    LL_SetSystemCoreClock(CPU_CLOCK_HSE_HZ);
 
     /* Update the time base */
     LL_Init1msTick(SystemCoreClock);
@@ -159,8 +162,8 @@ void furi_hal_clock_switch_hsi2hse() {
     while(!LL_RCC_PLLSAI1_IsReady())
         ;
 
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_1)
         ;
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSE);
@@ -179,24 +182,26 @@ void furi_hal_clock_switch_hsi2hse() {
 void furi_hal_clock_switch_hse2pll() {
     furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
 
-    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
+    // while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
 
     SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL);
-    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+        ;
 
-    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
+    // LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
 
 void furi_hal_clock_switch_pll2hse() {
     furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
-    while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
+    // while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
 
     SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE);
 
-    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE)
+        ;
 
-    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
+    // LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
 
 void furi_hal_clock_suspend_tick() {

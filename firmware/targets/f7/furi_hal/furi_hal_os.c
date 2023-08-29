@@ -177,20 +177,19 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
 
     // Stop IRQ handling, no one should disturb us till we finish
     __disable_irq();
+    do {
+        // Confirm OS that sleep is still possible
+        if(eTaskConfirmSleepModeStatus() == eAbortSleep || furi_hal_os_is_pending_irq()) {
+            break;
+        }
 
-    // Confirm OS that sleep is still possible
-    if(eTaskConfirmSleepModeStatus() == eAbortSleep || furi_hal_os_is_pending_irq()) {
-        __enable_irq();
-        return;
-    }
-
-    // Sleep and track how much ticks we spent sleeping
-    uint32_t completed_ticks = furi_hal_os_sleep(expected_idle_ticks);
-    // Notify system about time spent in sleep
-    if(completed_ticks > 0) {
-        vTaskStepTick(MIN(completed_ticks, expected_idle_ticks));
-    }
-
+        // Sleep and track how much ticks we spent sleeping
+        uint32_t completed_ticks = furi_hal_os_sleep(expected_idle_ticks);
+        // Notify system about time spent in sleep
+        if(completed_ticks > 0) {
+            vTaskStepTick(MIN(completed_ticks, expected_idle_ticks));
+        }
+    } while(0);
     // Reenable IRQ
     __enable_irq();
 }
