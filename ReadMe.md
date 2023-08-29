@@ -57,6 +57,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [Disconnect from BLE on protobuf error #2955 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2955)
 - OFW PR: [StorageListRequest: size filter #3018 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3018)
 - Code & Services Cleanup (By Willy-JL)
+- OFW: [SubGhz: heap overflow text error #3021 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3021)
 
 <a name="release">
 
