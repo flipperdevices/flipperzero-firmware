@@ -28,10 +28,11 @@ static bool mf_ultralight_mirror_check_boundaries(MfUltralightListener* instance
 
     MfUltralightMirrorConf mode = mf_ultralight_mirror_check_mode(conf, instance->auth_state);
 
+    bool result = false;
     bool again = false;
     do {
         if(mode == MfUltralightMirrorNone) {
-            return false;
+            break;
         } else if(mode == MfUltralightMirrorUid) {
             max_page_offset = 3;
         } else if(mode == MfUltralightMirrorCounter) {
@@ -43,10 +44,15 @@ static bool mf_ultralight_mirror_check_boundaries(MfUltralightListener* instance
 
         instance->mirror.actual_mode = mode;
 
-        if(conf->mirror_page <= 3) return false;
-        if(conf->mirror_page < last_user_page - max_page_offset) return true;
-        if(conf->mirror_page == last_user_page - max_page_offset)
-            return (conf->mirror.mirror_byte <= max_byte_offset);
+        if(conf->mirror_page <= 3) break;
+        if(conf->mirror_page < last_user_page - max_page_offset) {
+            result = true;
+            break;
+        }
+        if(conf->mirror_page == last_user_page - max_page_offset) {
+            result = (conf->mirror.mirror_byte <= max_byte_offset);
+            break;
+        }
 
         if(conf->mirror_page > last_user_page - max_page_offset &&
            mode == MfUltralightMirrorUidCounter) {
@@ -55,7 +61,7 @@ static bool mf_ultralight_mirror_check_boundaries(MfUltralightListener* instance
         }
     } while(again);
 
-    return false;
+    return result;
 }
 
 static bool mf_ultralight_mirror_enabled(MfUltralightListener* instance) {
