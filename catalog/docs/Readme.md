@@ -19,5 +19,6 @@ After launching the application, you will see the MAP file selection screen (fil
     - Enter a name
     - The rest is similar to map file editor
 # About map file
-Map file - FlipperFormat .txt file.<br>
+Map file - FlipperFormat .txt file.
+
 Stores custom names, and paths to used .sub files.
