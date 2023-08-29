@@ -4,7 +4,7 @@
 
 #include <furi/furi.h>
 
-#define ISO15693_PARSER_BITSTREAM_BUFF_SIZE (8)
+#define ISO15693_PARSER_BITSTREAM_BUFF_SIZE (2)
 #define ISO15693_PARSER_BITRATE_F64MHZ (603U)
 
 #define TAG "Iso15693Parser"
@@ -22,7 +22,7 @@ struct Iso15693Parser {
 
     SignalReader* signal_reader;
 
-    uint8_t bitstream_buff[ISO15693_PARSER_BITSTREAM_BUFF_SIZE];
+    uint8_t bitstream_buff[32];
     size_t bitstream_idx;
     uint8_t last_byte;
 
@@ -37,6 +37,7 @@ struct Iso15693Parser {
     bool zero_found;
 
     BitBuffer* parsed_frame;
+    bool eof_received;
     bool frame_parsed;
 
     Iso15693ParserCallback callback;
@@ -91,6 +92,7 @@ void iso15693_parser_reset(Iso15693Parser* instance) {
 
     instance->last_byte = 0x00;
     instance->zero_found = false;
+    instance->eof_received = false;
 
     bit_buffer_reset(instance->parsed_frame);
     instance->frame_parsed = false;
@@ -104,28 +106,61 @@ static void signal_reader_callback(SignalReaderEvent event, void* context) {
     Iso15693Parser* instance = context;
     furi_assert(instance->callback);
 
-    if(!instance->signal_detected) {
-        size_t i = 0;
-        for(i = 0; i < event.data->len; i++) {
-            if(event.data->data[i] != 0x00) {
-                break;
+    const uint8_t sof_1_out_of_4 = 0x21;
+    const uint8_t sof_1_out_of_256 = 0x81;
+    const uint8_t eof_single = 0x01;
+    const uint8_t eof = 0x04;
+
+    if(instance->state == Iso15693ParserStateParseSoF) {
+        if(event.data->data[0] == sof_1_out_of_4) {
+            instance->state = Iso15693ParserStateParse1OutOf4;
+        } else if(event.data->data[0] == sof_1_out_of_256) {
+            instance->state = Iso15693ParserStateParse1OutOf256;
+        } else if(event.data->data[0] == eof_single) {
+            instance->eof_received = true;
+            instance->callback(Iso15693ParserEventDataReceived, instance->context);
+        }
+    } else if(instance->state == Iso15693ParserStateParse1OutOf4) {
+        if(event.data->data[0] == eof) {
+            instance->eof_received = true;
+            instance->callback(Iso15693ParserEventDataReceived, instance->context);
+        } else {
+            instance->bitstream_buff[instance->bytes_to_process] = event.data->data[0];
+            instance->bytes_to_process++;
+            if(instance->bytes_to_process == 16) {
+                instance->callback(Iso15693ParserEventDataReceived, instance->context);
             }
         }
-        if(i != event.data->len) {
-            memcpy(instance->bitstream_buff, &event.data->data[i], event.data->len - i);
-            instance->bytes_to_process = event.data->len - i;
-            instance->signal_detected = true;
-        }
     } else {
-        memcpy(
-            &instance->bitstream_buff[instance->bytes_to_process],
-            event.data->data,
-            event.data->len);
-        instance->bytes_to_process += event.data->len;
+        instance->bitstream_buff[instance->bytes_to_process] = event.data->data[0];
+        instance->bytes_to_process++;
+        if(instance->bytes_to_process > 4) {
+            instance->callback(Iso15693ParserEventDataReceived, instance->context);
+        }
     }
-    if(instance->bytes_to_process >= ISO15693_PARSER_BITSTREAM_BUFF_SIZE / 4) {
-        instance->callback(Iso15693ParserEventDataReceived, instance->context);
-    }
+
+    // if(!instance->signal_detected) {
+    //     size_t i = 0;
+    //     for(i = 0; i < event.data->len; i++) {
+    //         if(event.data->data[i] != 0x00) {
+    //             break;
+    //         }
+    //     }
+    //     if(i != event.data->len) {
+    //         memcpy(instance->bitstream_buff, &event.data->data[i], event.data->len - i);
+    //         instance->bytes_to_process = event.data->len - i;
+    //         instance->signal_detected = true;
+    //     }
+    // } else {
+    //     memcpy(
+    //         &instance->bitstream_buff[instance->bytes_to_process],
+    //         event.data->data,
+    //         event.data->len);
+    //     instance->bytes_to_process += event.data->len;
+    // }
+    // if(instance->bytes_to_process >= ISO15693_PARSER_BITSTREAM_BUFF_SIZE / 4) {
+    //     instance->callback(Iso15693ParserEventDataReceived, instance->context);
+    // }
 }
 
 static void iso15693_parser_start_signal_reader(Iso15693Parser* instance) {
@@ -216,18 +251,8 @@ static Iso15693ParserCommand iso15693_parser_parse_sof(Iso15693Parser* instance)
 static Iso15693ParserCommand iso15693_parser_parse_1_out_of_4(Iso15693Parser* instance) {
     Iso15693ParserCommand command = Iso15693ParserCommandWaitData;
     const uint8_t bit_patterns_1_out_of_4[] = {0x02, 0x08, 0x20, 0x80};
-    const uint8_t eof = 0x04;
 
-    for(size_t i = instance->byte_idx; i < instance->bytes_to_process; i++) {
-        // Check EoF
-        if(instance->next_byte_part == 0) {
-            if(instance->bitstream_buff[i] == eof) {
-                instance->frame_parsed = true;
-                command = Iso15693ParserCommandSuccess;
-                break;
-            }
-        }
-
+    for(size_t i = 0; i < instance->bytes_to_process; i++) {
         // Check next pattern
         size_t j = 0;
         for(j = 0; j < COUNT_OF(bit_patterns_1_out_of_4); j++) {
@@ -247,8 +272,15 @@ static Iso15693ParserCommand iso15693_parser_parse_1_out_of_4(Iso15693Parser* in
             break;
         }
     }
+
+    if(command != Iso15693ParserCommandFail) {
+        if(instance->eof_received) {
+            command = Iso15693ParserCommandSuccess;
+            instance->frame_parsed = true;
+        }
+    }
+
     instance->bytes_to_process = 0;
-    instance->byte_idx = 0;
 
     return command;
 }
