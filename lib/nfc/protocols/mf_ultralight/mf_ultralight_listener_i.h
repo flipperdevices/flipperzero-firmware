@@ -44,6 +44,12 @@ struct MfUltralightListener {
     void* context;
 };
 
+void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance);
+void mf_ultralight_mirror_read_prepare(uint8_t start_page, MfUltralightListener* instance);
+void mf_ultralight_mirror_read_handler(
+    uint8_t mirror_page_num,
+    uint8_t* dest,
+    MfUltralightListener* instance);
 #ifdef __cplusplus
 }
 #endif
