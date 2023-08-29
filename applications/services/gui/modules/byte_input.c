@@ -524,7 +524,7 @@ static void byte_input_handle_down(ByteInputModel* model) {
  *
  * @param      model  The model
  */
-static void byte_input_handle_left(ByteInputModel* model) { // XXX
+static void byte_input_handle_left(ByteInputModel* model) {
     if(byte_input_keyboard_selected(model)) {
         if(model->selected_column > 0) {
             model->selected_column -= 1;
@@ -544,7 +544,7 @@ static void byte_input_handle_left(ByteInputModel* model) { // XXX
  *
  * @param      model  The model
  */
-static void byte_input_handle_right(ByteInputModel* model) { // XXX
+static void byte_input_handle_right(ByteInputModel* model) {
     if(byte_input_keyboard_selected(model)) {
         if(model->selected_column < byte_input_get_row_size(model->selected_row) - 1) {
             model->selected_column += 1;

@@ -13,7 +13,7 @@ App(
     provides=["desktop_settings"],
     conflicts=["updater"],
     stack_size=2 * 1024,
-    order=50,
+    order=60,
     sdk_headers=[
         "desktop_settings.h",
         "helpers/pin.h",

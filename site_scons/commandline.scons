@@ -101,11 +101,6 @@ vars.AddVariables(
         "${DIST_SUFFIX}",
     ),
     (
-        "FORCE_NO_DIRTY",
-        "Force disable dirty status of the build",
-        "",
-    ),
-    (
         "COPRO_CUBE_VERSION",
         "Cube version",
         "",

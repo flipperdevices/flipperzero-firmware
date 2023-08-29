@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0828-1705-0.90.1-8a81389](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-28 17:05 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-28 17:05 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-08-29 02:58 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-08-29 02:58 EST`
 - OFW: [Rfid: fix crash on broken key launch from archive #3012 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3012)
 - OFW: [AC OFF button #3010 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3010)
 - OFW: [github: Check for todos #3011 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3011)
@@ -56,6 +56,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: fix ISO14443-4A cards emulation #3017 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3017)
 - OFW PR: [Disconnect from BLE on protobuf error #2955 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2955)
 - OFW PR: [StorageListRequest: size filter #3018 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3018)
+- Code & Services Cleanup (By Willy-JL)
 
 <a name="release">
 

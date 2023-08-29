@@ -229,24 +229,7 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         BtMessage message = {.type = BtMessageTypeUpdateStatus};
         furi_check(
             furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
-        // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
-        furi_event_flag_clear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
-        if(bt->profile == BtProfileSerial) {
-            // Open RPC session
-            bt->rpc_session = rpc_session_open(bt->rpc, RpcOwnerBle);
-            if(bt->rpc_session) {
-                FURI_LOG_I(TAG, "Open RPC connection");
-                rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
-                rpc_session_set_buffer_is_empty_callback(
-                    bt->rpc_session, furi_hal_bt_serial_notify_buffer_is_empty);
-                rpc_session_set_context(bt->rpc_session, bt);
-                furi_hal_bt_serial_set_event_callback(
-                    RPC_BUFFER_SIZE, bt_serial_event_callback, bt);
-                furi_hal_bt_serial_set_rpc_status(FuriHalBtSerialRpcStatusActive);
-            } else {
-                FURI_LOG_W(TAG, "RPC is busy, failed to open new session");
-            }
-        }
+        bt_open_rpc_connection(bt);
         // Update battery level
         PowerInfo info;
         power_get_info(bt->power, &info);
@@ -325,7 +308,30 @@ static void bt_show_warning(Bt* bt, const char* text) {
     dialog_message_show(bt->dialogs, bt->dialog_message);
 }
 
-static void bt_close_rpc_connection(Bt* bt) {
+void bt_open_rpc_connection(Bt* bt) {
+    if(!bt->rpc_session && bt->status == BtStatusConnected) {
+        // Clear BT_RPC_EVENT_DISCONNECTED because it might be set from previous session
+        furi_event_flag_clear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
+        if(bt->profile == BtProfileSerial) {
+            // Open RPC session
+            bt->rpc_session = rpc_session_open(bt->rpc, RpcOwnerBle);
+            if(bt->rpc_session) {
+                FURI_LOG_I(TAG, "Open RPC connection");
+                rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
+                rpc_session_set_buffer_is_empty_callback(
+                    bt->rpc_session, furi_hal_bt_serial_notify_buffer_is_empty);
+                rpc_session_set_context(bt->rpc_session, bt);
+                furi_hal_bt_serial_set_event_callback(
+                    RPC_BUFFER_SIZE, bt_serial_event_callback, bt);
+                furi_hal_bt_serial_set_rpc_status(FuriHalBtSerialRpcStatusActive);
+            } else {
+                FURI_LOG_W(TAG, "RPC is busy, failed to open new session");
+            }
+        }
+    }
+}
+
+void bt_close_rpc_connection(Bt* bt) {
     if(bt->profile == BtProfileSerial && bt->rpc_session) {
         FURI_LOG_I(TAG, "Close RPC connection");
         furi_event_flag_set(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);

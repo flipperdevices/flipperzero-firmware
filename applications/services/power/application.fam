@@ -13,7 +13,7 @@ App(
         "power_start",
     ],
     stack_size=1 * 1024,
-    order=100,
+    order=110,
     sdk_headers=["power_service/power.h"],
 )
 

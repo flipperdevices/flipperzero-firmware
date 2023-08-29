@@ -7,6 +7,6 @@ App(
     requires=["input"],
     provides=["notification_settings"],
     stack_size=int(1.5 * 1024),
-    order=90,
+    order=100,
     sdk_headers=["notification.h", "notification_messages.h"],
 )

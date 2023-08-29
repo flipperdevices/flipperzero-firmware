@@ -37,10 +37,6 @@ class GitVersion:
 
         version = os.environ.get("DIST_SUFFIX", None) or "0.90.1"
 
-        force_no_dirty = os.environ.get("FORCE_NO_DIRTY", None) or ""
-        if force_no_dirty != "":
-            dirty = False
-
         if "SOURCE_DATE_EPOCH" in os.environ:
             commit_date = datetime.utcfromtimestamp(
                 int(os.environ["SOURCE_DATE_EPOCH"])

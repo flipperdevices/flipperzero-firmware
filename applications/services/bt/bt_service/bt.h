@@ -111,6 +111,19 @@ void bt_disable_peer_key_update(Bt* bt);
 */
 void bt_enable_peer_key_update(Bt* bt);
 
+/**
+ * 
+ * (Probably bad) way of opening the RPC connection, everywhereTM
+*/
+
+void bt_open_rpc_connection(Bt* bt);
+
+/**
+ * 
+ * Closing the RPC connection, everywhereTM
+*/
+void bt_close_rpc_connection(Bt* bt);
+
 #ifdef __cplusplus
 }
 #endif
