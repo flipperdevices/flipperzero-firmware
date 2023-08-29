@@ -38,23 +38,23 @@ typedef struct {
 static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener = NULL;
 static FHalNfcIso15693Poller* f_hal_nfc_iso15693_poller = NULL;
 
-static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener_alloc() {
-    FHalNfcIso15693Listener* instance = malloc(sizeof(FHalNfcIso15693Listener));
+// static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener_alloc() {
+//     FHalNfcIso15693Listener* instance = malloc(sizeof(FHalNfcIso15693Listener));
 
-    instance->signal = iso15693_signal_alloc(&gpio_spi_r_mosi);
-    instance->parser = iso15693_parser_alloc(&gpio_spi_r_miso, F_HAL_NFC_ISO15693_MAX_FRAME_SIZE);
+//     instance->signal = iso15693_signal_alloc(&gpio_spi_r_mosi);
+//     instance->parser = iso15693_parser_alloc(&gpio_spi_r_miso, F_HAL_NFC_ISO15693_MAX_FRAME_SIZE);
 
-    return instance;
-}
+//     return instance;
+// }
 
-static void f_hal_nfc_iso15693_listener_free(FHalNfcIso15693Listener* instance) {
-    furi_assert(instance);
+// static void f_hal_nfc_iso15693_listener_free(FHalNfcIso15693Listener* instance) {
+//     furi_assert(instance);
 
-    iso15693_signal_free(instance->signal);
-    iso15693_parser_free(instance->parser);
+//     iso15693_signal_free(instance->signal);
+//     iso15693_parser_free(instance->parser);
 
-    free(instance);
-}
+//     free(instance);
+// }
 
 static FHalNfcIso15693Poller* f_hal_nfc_iso15693_poller_alloc() {
     FHalNfcIso15693Poller* instance = malloc(sizeof(FHalNfcIso15693Poller));
@@ -276,7 +276,7 @@ static FHalNfcError f_hal_nfc_iso15693_poller_rx(
 static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle) {
     furi_assert(f_hal_nfc_iso15693_listener == NULL);
 
-    f_hal_nfc_iso15693_listener = f_hal_nfc_iso15693_listener_alloc();
+    // f_hal_nfc_iso15693_listener = f_hal_nfc_iso15693_listener_alloc();
 
     // Set default operation mode
     st25r3916_change_reg_bits(
@@ -302,7 +302,7 @@ static FHalNfcError f_hal_nfc_iso15693_listener_deinit(FuriHalSpiBusHandle* hand
     UNUSED(handle);
     furi_assert(f_hal_nfc_iso15693_listener);
 
-    f_hal_nfc_iso15693_listener_free(f_hal_nfc_iso15693_listener);
+    // f_hal_nfc_iso15693_listener_free(f_hal_nfc_iso15693_listener);
     f_hal_nfc_iso15693_listener = NULL;
 
     return FHalNfcErrorNone;
