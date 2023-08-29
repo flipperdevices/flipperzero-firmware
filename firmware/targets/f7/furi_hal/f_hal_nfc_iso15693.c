@@ -4,6 +4,7 @@
 #include <signal_reader/parsers/iso15693/iso15693_parser.h>
 
 #include <furi_hal_resources.h>
+#include <furi_hal_gpio.h>
 
 #define F_HAL_NFC_ISO15693_MAX_FRAME_SIZE (1024U)
 #define F_HAL_NFC_ISO15693_POLLER_MAX_BUFFER_SIZE (64)
@@ -44,6 +45,11 @@ static FHalNfcIso15693Listener* f_hal_nfc_iso15693_listener_alloc() {
     instance->signal = iso15693_signal_alloc(&gpio_spi_r_mosi);
     instance->parser = iso15693_parser_alloc(&gpio_spi_r_miso, F_HAL_NFC_ISO15693_MAX_FRAME_SIZE);
 
+    furi_hal_gpio_init(&gpio_ext_pa6, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_write(&gpio_ext_pa6, false);
+    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_write(&gpio_ext_pa7, false);
+
     return instance;
 }
 
@@ -52,6 +58,9 @@ static void f_hal_nfc_iso15693_listener_free(FHalNfcIso15693Listener* instance) 
 
     iso15693_signal_free(instance->signal);
     iso15693_parser_free(instance->parser);
+
+    furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeAnalog);
+    furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeAnalog);
 
     free(instance);
 }
@@ -340,6 +349,7 @@ static void f_hal_nfc_iso15693_parser_callback(Iso15693ParserEvent event, void* 
     furi_assert(context);
 
     if(event == Iso15693ParserEventDataReceived) {
+        furi_hal_gpio_write(&gpio_ext_pa6, true);
         FuriThreadId thread_id = context;
         furi_thread_flags_set(thread_id, FHalNfcEventInternalTypeTransparentDataReceived);
     }
@@ -363,18 +373,26 @@ static FHalNfcEvent f_hal_nfc_iso15693_wait_event(uint32_t timeout_ms) {
 
         if(flag & FHalNfcEventInternalTypeAbort) {
             event = FHalNfcEventAbortRequest;
+            f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
             break;
         }
         if(flag & FHalNfcEventInternalTypeTransparentDataReceived) {
+            furi_hal_gpio_write(&gpio_ext_pa6, false);
+            furi_hal_gpio_write(&gpio_ext_pa7, true);
             if(iso15693_parser_run(f_hal_nfc_iso15693_listener->parser)) {
                 event = FHalNfcEventRxEnd;
+                furi_hal_gpio_write(&gpio_ext_pa7, false);
                 break;
             }
         }
     }
-
+    furi_hal_gpio_write(&gpio_ext_pa6, true);
     iso15693_parser_stop(f_hal_nfc_iso15693_listener->parser);
-    f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
+    furi_hal_gpio_write(&gpio_ext_pa6, false);
+
+    // furi_hal_gpio_write(&gpio_ext_pa7, true);
+    // f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
+    // furi_hal_gpio_write(&gpio_ext_pa7, false);
 
     return event;
 }
@@ -386,9 +404,13 @@ static FHalNfcError f_hal_nfc_iso15693_listener_tx(
     furi_assert(f_hal_nfc_iso15693_listener);
 
     FHalNfcError error = FHalNfcErrorNone;
-    f_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
+    // furi_hal_gpio_write(&gpio_ext_pa7, true);
+    // f_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
+    // furi_hal_gpio_write(&gpio_ext_pa7, false);
 
+    furi_hal_gpio_write(&gpio_ext_pa6, true);
     error = f_hal_nfc_iso15693_listener_tx_transparent(tx_data, tx_bits / BITS_IN_BYTE);
+    furi_hal_gpio_write(&gpio_ext_pa6, false);
 
     f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
 

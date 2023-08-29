@@ -41,7 +41,7 @@ static FHalNfcTimerConfig f_hal_nfc_timers[FHalNfcTimerCount] = {
         },
     [FHalNfcTimerBlockTx] =
         {
-            .pin = &gpio_ext_pa6,
+            .pin = &gpio_ext_pa4,
             .timer = TIM17,
             .bus = FuriHalBusTIM17,
             .prescaler = 31,
