@@ -83,7 +83,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         if(showFreq) {
             int freq = 2400 + currCh;
             char strfreq[10] = {32};
-            itoa(freq, strfreq, 10);
+            snprintf(strfreq, sizeof(strfreq), "%d", freq);
+
             strfreq[4] = ' ';
             strfreq[5] = 'M';
             strfreq[6] = 'H';
@@ -94,7 +95,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             //show delay
             int dly = delayPerChan;
             char strdel[10] = {32};
-            itoa(dly, strdel, 10);
+            snprintf(strdel, sizeof(strdel), "%d", dly);
             if(dly < 10) strdel[1] = ' ';
             if(dly < 100) strdel[2] = ' ';
             if(dly < 1000) strdel[3] = ' ';
@@ -214,6 +215,7 @@ int32_t nrf24channelscanner_main(void* p) {
                 }
                 break;
             }
+            //isInfiniteScan
             if((event.input.type == InputTypeShort || event.input.type == InputTypeLong) &&
                event.input.key == InputKeyOk) {
                 if(isScanning) {
