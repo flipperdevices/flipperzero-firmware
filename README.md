@@ -13,11 +13,13 @@ After the scanning finished, you can hit left or right keys, to find what freque
 
 ## Screenshot
 
-<img src="https://raw.githubusercontent.com/htotoo/NRF24ChannelScanner/main/screen1.png">
+<img src="https://raw.githubusercontent.com/htotoo/NRF24ChannelScanner/main/NRF24ChannelScanner/.flipcorg/gallery/screen1.png">
 
 ## Buttons
 
 OK short: start / stop the scan.
+
+OK long: start an infinite scan, that scans until stopped.
 
 BACK long: exit the app.
 

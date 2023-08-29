@@ -1,0 +1,1 @@
+v1.3: added infinite scan and auto turn on 5V for some modules.

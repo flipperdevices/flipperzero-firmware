@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <furi.h>
+#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <gui/elements.h>
@@ -14,6 +15,8 @@ bool ifNotFoundNrf = false; //to show error message
 bool szuz = true; //to show welcome screen
 static bool isScanning = false; //to track the progress
 static bool stopNrfScan = false; //to exit thread
+
+static bool isInfiniteScan = false; //to prevent stop scan when OK long pressed
 
 static bool threadStoppedsoFree = false; //indicate if I can free the thread from ram.
 static uint8_t currCh = 0; //for the progress bar or the channel selector
@@ -62,15 +65,20 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     //draw hello mesage
     if(szuz) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 1, 22, "Up / Down to change channel time.");
-        canvas_draw_str(canvas, 1, 36, "Left / Right to select channel,");
-        canvas_draw_str(canvas, 1, 48, "to get it's frequency");
+        canvas_draw_str(canvas, 1, 22, "OK: scan / stop. Long: infinite.");
+        canvas_draw_str(canvas, 1, 33, "Up / Down to change channel time.");
+        canvas_draw_str(canvas, 1, 44, "Left / Right to select channel");
+        canvas_draw_str(canvas, 1, 56, "  to get it's frequency");
     }
 
     //draw freq ir the progress
     canvas_set_font(canvas, FontSecondary);
     if(isScanning) {
-        canvas_draw_str(canvas, 37, 8, "scanning");
+        if(isInfiniteScan)
+            canvas_draw_str(canvas, 37, 8, "scanning...");
+        else
+            canvas_draw_str(canvas, 37, 8, "scanning");
+
     } else {
         if(showFreq) {
             int freq = 2400 + currCh;
@@ -123,7 +131,7 @@ static int32_t scanner(void* context) {
     nrf24_set_rx_mode(nrf24_HANDLE, false);
     nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x0);
     nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, 0x0f);
-    for(uint8_t j = 0; j < 15;) { //scan until stopped!
+    while(true) { //scan until stopped somehow
         if(stopNrfScan) break;
         for(uint8_t i = 0; i < num_channels; i++) {
             if(stopNrfScan) break;
@@ -134,12 +142,18 @@ static int32_t scanner(void* context) {
                 nrf24_flush_rx(nrf24_HANDLE);
                 furi_delay_us(delayPerChan);
                 tmp = nrf24_get_rdp(nrf24_HANDLE);
-                if(tmp > 0) nrf24values[i]++;
-                if(nrf24values[i] > 50) j = 254; //stop, bc maxed
+                if(tmp > 0 && nrf24values[i] < 65) {
+                    nrf24values[i]++; //don't overrun it
+                }
+                if(nrf24values[i] > 50 && !isInfiniteScan) {
+                    stopNrfScan = true; //stop, bc maxed, but only when not infinite
+                }
             }
         }
         furi_delay_ms(1);
+        //for screen refresh.
     }
+    //cleanup
     nrf24_set_idle(nrf24_HANDLE);
     isScanning = false;
     threadStoppedsoFree = true;
@@ -157,7 +171,7 @@ void ChangeDelay(int delta) {
     delayPerChan += delta;
     if(delayPerChan > 4000) delayPerChan = 4000;
     if(delayPerChan < 120) delayPerChan = 120;
-
+    if(delayPerChan == 170) delayPerChan = 150; //rounding for the next
     showFreq = false;
 }
 
@@ -167,6 +181,13 @@ int32_t nrf24channelscanner_main(void* p) {
 
     Event event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
+
+    //turn on 5v for some modules
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
 
     nrf24_init();
 
@@ -193,7 +214,8 @@ int32_t nrf24channelscanner_main(void* p) {
                 }
                 break;
             }
-            if(event.input.type == InputTypeShort && event.input.key == InputKeyOk) {
+            if((event.input.type == InputTypeShort || event.input.type == InputTypeLong) &&
+               event.input.key == InputKeyOk) {
                 if(isScanning) {
                     notification_message(notification, &sequence_blink_yellow_100);
                     stopNrfScan = true;
@@ -207,6 +229,7 @@ int32_t nrf24channelscanner_main(void* p) {
                     threadStoppedsoFree = false;
                     ifNotFoundNrf = false;
                     notification_message(notification, &sequence_blink_green_100);
+                    isInfiniteScan = (event.input.type == InputTypeLong);
                     thread = furi_thread_alloc();
                     furi_thread_set_name(thread, "nrfscannerth");
                     furi_thread_set_stack_size(thread, 1024);
@@ -247,5 +270,9 @@ int32_t nrf24channelscanner_main(void* p) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
+    //turn off 5v
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
     return 0;
 }
