@@ -16,7 +16,7 @@
 #     fap_icon_assets="icons",
 #     fap_icon_assets_symbol="subghz_remote",
 #     fap_version="1.2",
-#     # fap_weburl="https://github.com/DarkFlippers/SubGHz_Remote",
+#     fap_weburl="https://github.com/DarkFlippers/SubGHz_Remote",
 # )
 
 App(
@@ -39,5 +39,5 @@ App(
     fap_icon_assets="icons",
     fap_icon_assets_symbol="subghz_remote",
     fap_version="1.2",
-    # fap_weburl="https://github.com/DarkFlippers/SubGHz_Remote",
+    fap_weburl="https://github.com/DarkFlippers/SubGHz_Remote",
 )
