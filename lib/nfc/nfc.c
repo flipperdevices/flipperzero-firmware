@@ -600,7 +600,7 @@ NfcError nfc_iso14443_3a_listener_tx_custom_parity(Nfc* instance, const BitBuffe
     FHalNfcError error = FHalNfcErrorNone;
 
     const uint8_t* tx_data = bit_buffer_get_data(tx_buffer);
-    const bool* tx_parity = bit_buffer_get_parity(tx_buffer);
+    const uint8_t* tx_parity = bit_buffer_get_parity(tx_buffer);
     size_t tx_bits = bit_buffer_get_size(tx_buffer);
 
     error = f_hal_nfca_listener_tx_custom_parity(tx_data, tx_parity, tx_bits);

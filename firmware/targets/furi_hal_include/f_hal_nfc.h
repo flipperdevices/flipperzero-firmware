@@ -165,7 +165,7 @@ FHalNfcError
 
 FHalNfcError f_hal_nfca_listener_tx_custom_parity(
     const uint8_t* tx_data,
-    const bool* tx_parity,
+    const uint8_t* tx_parity,
     size_t tx_bits);
 
 #ifdef __cplusplus
