@@ -128,7 +128,6 @@ static void signal_reader_callback(SignalReaderEvent event, void* context) {
             instance->state = Iso15693ParserStateParseFrame;
         } else if(event.data->data[0] == eof_single) {
             instance->eof_received = true;
-            instance->state = Iso15693ParserStateParseFrame;
             instance->callback(Iso15693ParserEventDataReceived, instance->context);
         }
     } else {
@@ -256,7 +255,9 @@ static const Iso15693ParserStateHandler iso15693_parser_state_handlers[Iso15693P
 };
 
 bool iso15693_parser_run(Iso15693Parser* instance) {
-    if(instance->bytes_to_process) {
+    if((instance->state == Iso15693ParserStateParseSoF) && (instance->eof_received)) {
+        instance->frame_parsed = true;
+    } else if(instance->bytes_to_process) {
         Iso15693ParserCommand command = Iso15693ParserCommandProcessed;
         while(command == Iso15693ParserCommandProcessed) {
             command = iso15693_parser_state_handlers[instance->mode](instance);

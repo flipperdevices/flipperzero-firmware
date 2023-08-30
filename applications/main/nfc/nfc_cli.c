@@ -50,6 +50,7 @@ static void f_hal_nfc_iso15693_parser_callback(Iso15693ParserEvent event, void* 
     }
 }
 
+// TODO remove this test command
 static void nfc_cli_check(Cli* cli, FuriString* args) {
     UNUSED(args);
     UNUSED(cli);
