@@ -363,6 +363,7 @@ static FHalNfcEvent f_hal_nfc_iso15693_wait_event(uint32_t timeout_ms) {
 
         if(flag & FHalNfcEventInternalTypeAbort) {
             event = FHalNfcEventAbortRequest;
+            f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
             break;
         }
         if(flag & FHalNfcEventInternalTypeTransparentDataReceived) {
@@ -372,9 +373,7 @@ static FHalNfcEvent f_hal_nfc_iso15693_wait_event(uint32_t timeout_ms) {
             }
         }
     }
-
     iso15693_parser_stop(f_hal_nfc_iso15693_listener->parser);
-    f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
 
     return event;
 }
@@ -386,7 +385,6 @@ static FHalNfcError f_hal_nfc_iso15693_listener_tx(
     furi_assert(f_hal_nfc_iso15693_listener);
 
     FHalNfcError error = FHalNfcErrorNone;
-    f_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
 
     error = f_hal_nfc_iso15693_listener_tx_transparent(tx_data, tx_bits / BITS_IN_BYTE);
 

@@ -17,6 +17,15 @@ typedef enum {
     MfUltraligthListenerStateIdle,
 } MfUltraligthListenerState;
 
+typedef struct {
+    uint8_t enabled;
+    uint8_t ascii_offset;
+    uint8_t ascii_end;
+    uint8_t mirror_last_page;
+    MfUltralightMirrorConf actual_mode;
+    FuriString* ascii_mirror_data;
+} MfUltralightMirrorMode;
+
 struct MfUltralightListener {
     Iso14443_3aListener* iso14443_3a_listener;
     MfUltralightListenerAuthState auth_state;
@@ -31,9 +40,16 @@ struct MfUltralightListener {
     MfUltralightListenerEvent mfu_event;
     MfUltralightListenerEventData mfu_event_data;
     NfcGenericCallback callback;
+    MfUltralightMirrorMode mirror;
     void* context;
 };
 
+void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance);
+void mf_ultralight_mirror_read_prepare(uint8_t start_page, MfUltralightListener* instance);
+void mf_ultralight_mirror_read_handler(
+    uint8_t mirror_page_num,
+    uint8_t* dest,
+    MfUltralightListener* instance);
 #ifdef __cplusplus
 }
 #endif
