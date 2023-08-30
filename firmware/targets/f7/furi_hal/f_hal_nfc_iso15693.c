@@ -369,7 +369,6 @@ static FHalNfcEvent f_hal_nfc_iso15693_wait_event(uint32_t timeout_ms) {
         if(flag & FHalNfcEventInternalTypeTransparentDataReceived) {
             if(iso15693_parser_run(f_hal_nfc_iso15693_listener->parser)) {
                 event = FHalNfcEventRxEnd;
-                furi_hal_gpio_write(&gpio_ext_pa7, false);
                 break;
             }
         }
