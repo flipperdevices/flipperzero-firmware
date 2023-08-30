@@ -58,6 +58,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [StorageListRequest: size filter #3018 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3018)
 - Code & Services Cleanup (By Willy-JL)
 - OFW: [SubGhz: heap overflow text error #3021 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3021)
+- Out of town for the weekend. New Public Relase for September 5th. Will update with latest updates September 5th as well.
 
 <a name="release">
 
