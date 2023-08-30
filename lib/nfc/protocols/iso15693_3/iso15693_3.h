@@ -69,6 +69,9 @@ extern "C" {
 #define ISO15693_3_CMD_OPTIONAL_RFU (0x2DU)
 #define ISO15693_3_CMD_CUSTOM_START (0xA0U)
 
+#define ISO15693_3_MANDATORY_COUNT (ISO15693_3_CMD_MANDATORY_RFU - ISO15693_3_CMD_MANDATORY_START)
+#define ISO15693_3_OPTIONAL_COUNT (ISO15693_3_CMD_OPTIONAL_RFU - ISO15693_3_CMD_OPTIONAL_START)
+
 #define ISO15693_3_SYSINFO_FLAG_DSFID (1U << 0)
 #define ISO15693_3_SYSINFO_FLAG_AFI (1U << 1)
 #define ISO15693_3_SYSINFO_FLAG_MEMORY (1U << 2)
@@ -82,12 +85,12 @@ typedef enum {
     Iso15693_3ErrorNotPresent,
     Iso15693_3ErrorBufferEmpty,
     Iso15693_3ErrorBufferOverflow,
-    Iso15693_3ErrorFraming,
     Iso15693_3ErrorFieldOff,
     Iso15693_3ErrorWrongCrc,
     Iso15693_3ErrorTimeout,
     Iso15693_3ErrorFormat,
     Iso15693_3ErrorNotSupported,
+    Iso15693_3ErrorUnhandledOverride,
     Iso15693_3ErrorUnexpectedResponse,
     Iso15693_3ErrorInternal,
     Iso15693_3ErrorCustom,
