@@ -82,27 +82,14 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     } else {
         if(showFreq) {
             int freq = 2400 + currCh;
-            char strfreq[10] = {32};
-            snprintf(strfreq, sizeof(strfreq), "%d", freq);
-
-            strfreq[4] = ' ';
-            strfreq[5] = 'M';
-            strfreq[6] = 'H';
-            strfreq[7] = 'Z';
-            strfreq[8] = 0;
+            char strfreq[10] = {0};
+            snprintf(strfreq, sizeof(strfreq), "%d MHZ", freq);
             canvas_draw_str(canvas, 40, 8, strfreq);
         } else {
             //show delay
             int dly = delayPerChan;
-            char strdel[10] = {32};
-            snprintf(strdel, sizeof(strdel), "%d", dly);
-            if(dly < 10) strdel[1] = ' ';
-            if(dly < 100) strdel[2] = ' ';
-            if(dly < 1000) strdel[3] = ' ';
-            strdel[4] = ' ';
-            strdel[5] = 'u';
-            strdel[6] = 's';
-            strdel[7] = 0;
+            char strdel[10] = {0};
+            snprintf(strdel, sizeof(strdel), "%d us", dly);
             canvas_draw_str(canvas, 40, 8, strdel);
         }
     }
