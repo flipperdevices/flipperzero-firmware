@@ -86,6 +86,8 @@ static MfUltralightCommand
         instance->state = MfUltraligthListenerStateIdle;
         instance->auth_state = MfUltralightListenerAuthStateIdle;
     } else {
+        mf_ultralight_mirror_read_prepare(start_page, instance);
+
         uint16_t config_page = mf_ultralight_get_config_page_num(instance->data->type);
         for(size_t i = 0; i < 4; i++) {
             bool hide_data =
@@ -93,9 +95,14 @@ static MfUltralightCommand
             if(hide_data) {
                 memset(read_cmd_data.page[i].data, 0, sizeof(MfUltralightPage));
             } else {
-                read_cmd_data.page[i] = instance->data->page[(start_page + i) % pages_total];
+                uint8_t current_page = start_page + i;
+                read_cmd_data.page[i] = instance->data->page[current_page % pages_total];
+
+                mf_ultralight_mirror_read_handler(
+                    current_page, read_cmd_data.page[i].data, instance);
             }
         }
+
         bit_buffer_copy_bytes(
             instance->tx_buffer,
             (uint8_t*)&read_cmd_data,
@@ -364,6 +371,7 @@ static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* insta
     MfUltralightData* data = instance->data;
     instance->features = mf_ultralight_get_feature_support_set(data->type);
     mf_ultralight_get_config_page(data, &instance->config);
+    mf_ultraligt_mirror_prepare_emulation(instance);
 }
 
 MfUltralightListener* mf_ultralight_listener_alloc(
@@ -372,6 +380,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(
     furi_assert(iso14443_3a_listener);
 
     MfUltralightListener* instance = malloc(sizeof(MfUltralightListener));
+    instance->mirror.ascii_mirror_data = furi_string_alloc();
     instance->iso14443_3a_listener = iso14443_3a_listener;
     instance->data = mf_ultralight_alloc();
     mf_ultralight_copy(instance->data, data);
@@ -392,6 +401,7 @@ void mf_ultralight_listener_free(MfUltralightListener* instance) {
     furi_assert(instance->tx_buffer);
 
     bit_buffer_free(instance->tx_buffer);
+    furi_string_free(instance->mirror.ascii_mirror_data);
     mf_ultralight_free(instance->data);
     free(instance);
 }
