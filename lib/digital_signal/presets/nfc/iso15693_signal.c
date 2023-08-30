@@ -1,8 +1,6 @@
 #include "iso15693_signal.h"
 
 #include <digital_signal/digital_signal.h>
-#include <furi_hal_gpio.h>
-#include <furi_hal_resources.h>
 
 #define BITS_IN_BYTE (8U)
 
@@ -193,8 +191,6 @@ void iso15693_signal_tx(
     FURI_CRITICAL_ENTER();
     digital_sequence_clear(instance->tx_sequence);
     iso15693_signal_encode(instance, data_rate, tx_data, tx_data_size);
-    furi_hal_gpio_write(&gpio_ext_pa7, true);
     digital_sequence_send(instance->tx_sequence);
-    furi_hal_gpio_write(&gpio_ext_pa7, false);
     FURI_CRITICAL_EXIT();
 }
