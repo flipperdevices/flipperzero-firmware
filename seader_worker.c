@@ -1,6 +1,8 @@
 #include "seader_worker_i.h"
 
 #include <flipper_format/flipper_format.h>
+#include <lib/nfc/protocols/nfc_util.h>
+#include <lib/lfrfid/tools/bit_lib.h>
 
 #define TAG "SeaderWorker"
 
@@ -230,8 +232,6 @@ bool seader_read_nfc(SeaderUartBridge* seader_uart) {
             } else if(seader_mf_classic_check_card_type(
                           nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak)) {
                 FURI_LOG_D(TAG, "MFC");
-                OCTET_STRING_t atqa = {.buf = nfc_data.atqa, .size = sizeof(nfc_data.atqa)};
-                cardDetails->atqa = &atqa;
                 seader_send_card_detected(seader_uart, cardDetails);
                 rtn = true;
             } else if(nfc_data.interface == FuriHalNfcInterfaceIsoDep) {
@@ -550,20 +550,100 @@ void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t l
     ASN_STRUCT_FREE(asn_DEF_Response, response);
 }
 
-bool seader_iso14443a_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) {
+bool seader_iso14443a_transmit(
+    SeaderWorker* seader_worker,
+    uint8_t* buffer,
+    size_t len,
+    uint16_t timeout,
+    uint8_t format[3]) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
     FuriHalNfcTxRxContext tx_rx = {.tx_rx_type = FuriHalNfcTxRxTypeDefault};
+
     memcpy(&tx_rx.tx_data, buffer, len);
     tx_rx.tx_bits = len * 8;
 
-    if(furi_hal_nfc_tx_rx_full(&tx_rx)) {
+    if(format[0] == 0x00 && format[1] == 0xC0 && format[2] == 0x00) {
+        tx_rx.tx_rx_type = FuriHalNfcTxRxTypeRxNoCrc;
+        tx_rx.tx_bits -= 16;
+    } else if(
+        (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x40) ||
+        (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x24) ||
+        (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x44)) {
+        tx_rx.tx_rx_type = FuriHalNfcTxRxTypeRaw;
+        tx_rx.tx_bits -= 8;
+        tx_rx.tx_parity[0] = 0;
+
+        // Don't forget to swap the bits of buffer[8]
+        for(size_t i = 0; i < 8 + 1; i++) {
+            bit_lib_reverse_bits(buffer + i, 0, 8);
+        }
+
+        // Pull out parity bits
+        for(size_t i = 0; i < 8; i++) {
+            bool val = bit_lib_get_bit(buffer + i + 1, i);
+            bit_lib_set_bit(tx_rx.tx_parity, i, val);
+        }
+
+        for(size_t i = 0; i < 8; i++) {
+            buffer[i] = (buffer[i] << i) | (buffer[i + 1] >> (8 - i));
+        }
+
+        for(size_t i = 0; i < 8; i++) {
+            bit_lib_reverse_bits(buffer + i, 0, 8);
+            tx_rx.tx_data[i] = buffer[i];
+        }
+    }
+
+    if(furi_hal_nfc_tx_rx(&tx_rx, timeout)) {
         furi_delay_ms(1);
         size_t length = tx_rx.rx_bits / 8;
         memset(display, 0, sizeof(display));
         for(uint8_t i = 0; i < length; i++) {
             snprintf(display + (i * 2), sizeof(display), "%02x", tx_rx.rx_data[i]);
         }
-        // FURI_LOG_D(TAG, "NFC Response %d: %s", length, display);
+        FURI_LOG_D(TAG, "NFC Response %d: %s [%02x]", length, display, tx_rx.rx_parity[0]);
+
+        if(tx_rx.tx_rx_type == FuriHalNfcTxRxTypeRaw) {
+            for(size_t i = 0; i < length; i++) {
+                bit_lib_reverse_bits(tx_rx.rx_data + i, 0, 8);
+            }
+
+            uint8_t with_parity[FURI_HAL_NFC_DATA_BUFF_SIZE];
+            memset(with_parity, 0, sizeof(with_parity));
+            length = length + (length / 8) + 1;
+
+            uint8_t parts = 1 + length / 9;
+            for(size_t p = 0; p < parts; p++) {
+                uint8_t doffset = p * 9;
+                uint8_t soffset = p * 8;
+
+                for(size_t i = 0; i < 9; i++) {
+                    with_parity[i + doffset] = tx_rx.rx_data[i + soffset] >> i;
+                    if(i > 0) {
+                        with_parity[i + doffset] |= tx_rx.rx_data[i + soffset - 1] << (9 - i);
+                    }
+
+                    if(i > 0) {
+                        bool val = bit_lib_get_bit(tx_rx.rx_parity, i - 1);
+                        bit_lib_set_bit(with_parity + i, i - 1, val);
+                    }
+                }
+            }
+
+            memcpy(tx_rx.rx_data, with_parity, length);
+
+            for(size_t i = 0; i < length; i++) {
+                bit_lib_reverse_bits(tx_rx.rx_data + i, 0, 8);
+            }
+        }
+
+        memset(display, 0, sizeof(display));
+
+        for(uint8_t i = 0; i < length; i++) {
+            snprintf(display + (i * 2), sizeof(display), "%02x", tx_rx.rx_data[i]);
+        }
+        FURI_LOG_D(TAG, "NFC Response %d: %s [%02x]", length, display, tx_rx.rx_parity[0]);
+
         seader_send_nfc_rx(seader_uart, tx_rx.rx_data, length);
     } else {
         FURI_LOG_W(TAG, "Bad exchange");
@@ -689,14 +769,17 @@ bool seader_parse_nfc_command_transmit(SeaderWorker* seader_worker, NFCSend_t* n
         nfcSend->data.size,
         display,
         protocolName);
-#else
-    UNUSED(timeOut);
 #endif
 
     if(frameProtocol == FrameProtocol_iclass) {
         return seader_iso15693_transmit(seader_worker, nfcSend->data.buf, nfcSend->data.size);
     } else if(frameProtocol == FrameProtocol_nfc) {
-        return seader_iso14443a_transmit(seader_worker, nfcSend->data.buf, nfcSend->data.size);
+        return seader_iso14443a_transmit(
+            seader_worker,
+            nfcSend->data.buf,
+            nfcSend->data.size,
+            (uint16_t)timeOut,
+            nfcSend->format->buf);
     }
     return false;
 }
