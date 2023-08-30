@@ -189,7 +189,7 @@ void furi_hal_clock_switch_hse2pll() {
         ;
 
     LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
-    SysTick->LOAD  = (uint32_t)((SystemCoreClock / 1000) - 1UL);
+    SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
 
     // LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
@@ -205,7 +205,7 @@ void furi_hal_clock_switch_pll2hse() {
         ;
 
     LL_SetSystemCoreClock(CPU_CLOCK_HSE_HZ);
-    SysTick->LOAD  = (uint32_t)((SystemCoreClock / 1000) - 1UL);
+    SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
 
     // LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
