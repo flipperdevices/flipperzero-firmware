@@ -53,7 +53,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
           AWS_REGION: "${{ secrets.FW_DOCS_AWS_REGION }}"
           SOURCE_DIR: "./documentation/build/html"
-          DEST_DIR: "dev"
+          DEST_DIR: "0.89.0"
         with:
           args: "--delete"
 
