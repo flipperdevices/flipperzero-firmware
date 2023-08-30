@@ -17,15 +17,17 @@
 #define chipper_time 4980
 #define flipper_time 3020
 #define fopper_time 5010
-#define fopper_wait_time 15000
+#define fopper_wait_time 25000
 #define fopper_run_time 2000 // not sure
+#define blipper_chipper_wait_time 30000
 #define first_hour_time 90000
 #define hour_time 89000
 #define noise_time 4500 // something around this idk
-#define sound_time 2000
+#define sound_time 1000
 #define power_time 1000
 #define power_out_time_period 5000
 #define power_out_max_time 20000
+#define move_rand_time 1000
 
 #define SWITCH_VIEW(view) switch_view(fnaf, view)
 
@@ -33,9 +35,13 @@ typedef struct {
     uint8_t AI[4];
     uint8_t location[4];
     FuriTimer* timer[4];
+
     FuriTimer* fopper_inactivity;
     uint8_t fopper_times_blocked;
     signed char fopper_counter;
+
+    FuriTimer* move_rand_timer;
+    uint8_t move_rand_value;
 }Dolphins;
 
 typedef struct {
@@ -83,7 +89,7 @@ typedef enum {
     main_menu,
     custom_night,
     night_number,
-    office,
+    office_view,
     cameras,
     night_complete,
     jumpscare,

@@ -30,7 +30,7 @@ void text_view(Canvas* canvas, Fnaf* fnaf) {
     case night_number:
         if (fnaf->counter > 7) {
             FURI_LOG_D(TAG, "text_view is over");
-            SWITCH_VIEW(office);
+            SWITCH_VIEW(office_view);
             // Timers
             furi_timer_start(fnaf->hourly_timer, first_hour_time);
             furi_timer_start(fnaf->electricity->timer, power_time);
@@ -39,6 +39,7 @@ void text_view(Canvas* canvas, Fnaf* fnaf) {
             furi_timer_start(fnaf->dolphins->timer[Blipper], blipper_time);
             furi_timer_start(fnaf->dolphins->timer[Chipper], chipper_time);
             furi_timer_start(fnaf->dolphins->timer[Fopper], fopper_time);
+            furi_timer_start(fnaf->dolphins->move_rand_timer, move_rand_time);
         } else {
             canvas_set_bitmap_mode(canvas, 1);
             canvas_set_color(canvas, 1);

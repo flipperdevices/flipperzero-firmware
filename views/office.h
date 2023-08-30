@@ -51,6 +51,8 @@ void timer_callback_flipper(void* ctx);
 
 void timer_callback_fopper(void* ctx);
 
+void move_rand_callback(void* ctx);
+
 void power_timer_callback(void* ctx);
 
 void hourly_timer_callback(void* ctx);

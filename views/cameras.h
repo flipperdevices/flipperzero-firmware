@@ -19,14 +19,15 @@ typedef enum {
     cam7,
     left_entrance,
     right_entrance,
-    office_but_another_name,
+    office_location,
+
+    error = 0xF,
 }Locations;
 
 typedef struct {
     Locations cursor;   // current camera
     signed char cursor_x; // for camera navigation
     signed char cursor_y; // for camera navigation too
-    FuriTimer* noise_timer; // Noise when animatronics move
 }Cameras;
 
 void draw_cameras(Canvas* canvas, void* ctx);

@@ -31,31 +31,29 @@ void draw_cameras(Canvas* canvas, void* ctx) {
         snprintf(time, 7, "12 AM");
     canvas_draw_str_aligned(canvas, 125, 52, AlignRight, AlignBottom, time);
     if (fnaf->cameras->cursor != cam6 && fnaf->cameras->cursor != cam5) {
-        if (!furi_timer_is_running(fnaf->cameras->noise_timer)) {
-            uint8_t y = 20;
-            if (fnaf->dolphins->location[Blipper] == fnaf->cameras->cursor) {
-                canvas_draw_str(canvas, 85, y, "Blipper");
-                y += 9;
+        uint8_t y = 20;
+        if (fnaf->dolphins->location[Blipper] == fnaf->cameras->cursor) {
+            canvas_draw_str(canvas, 85, y, "Blipper");
+            y += 9;
+        }
+        if (fnaf->dolphins->location[Chipper] == fnaf->cameras->cursor) {
+            canvas_draw_str(canvas, 85, y, "Chipper");
+            y += 9;
+        }
+        if (fnaf->dolphins->location[Flipper] == fnaf->cameras->cursor) {
+            canvas_draw_str(canvas, 85, y, "Flipper");
+            y += 9;
+        }
+        if ((fnaf->dolphins->location[Fopper] == 3) && fnaf->cameras->cursor == cam2A) {
+            if (fnaf->dolphins->fopper_counter < 5) {
+                canvas_draw_str(canvas, 85, y, "Fopper");
+                fnaf->dolphins->fopper_counter += 1;
+            } else {
+                FURI_LOG_D(TAG, "Fopper state is 4");
+                fnaf->dolphins->location[Fopper] = 4;
+                fnaf->dolphins->fopper_counter = 0;
             }
-            if (fnaf->dolphins->location[Chipper] == fnaf->cameras->cursor) {
-                canvas_draw_str(canvas, 85, y, "Chipper");
-                y += 9;
-            }
-            if (fnaf->dolphins->location[Flipper] == fnaf->cameras->cursor) {
-                canvas_draw_str(canvas, 85, y, "Flipper");
-                y += 9;
-            }
-            if ((fnaf->dolphins->location[Fopper] == 3) && fnaf->cameras->cursor == cam2A) {
-                if (fnaf->dolphins->fopper_counter < 5) {
-                    canvas_draw_str(canvas, 85, y, "Fopper");
-                    fnaf->dolphins->fopper_counter += 1;
-                } else {
-                    FURI_LOG_D(TAG, "Fopper state is 4");
-                    fnaf->dolphins->location[Fopper] = 4;
-                    fnaf->dolphins->fopper_counter = 0;
-                }
-                y += 9;
-            }
+            y += 9;
         }
     } else if (fnaf->cameras->cursor == cam6) {
         canvas_set_font(canvas, FontSecondary);
@@ -211,6 +209,7 @@ void cameras_input(void* ctx) {
             fnaf->cameras->cursor_y += 1;
             break;
         case InputKeyOk:
+            SWITCH_VIEW(office_view);
             fnaf->electricity->monitor = false;
             if (furi_timer_is_running(fnaf->dolphins->fopper_inactivity))
                 furi_timer_stop(fnaf->dolphins->fopper_inactivity);
@@ -219,7 +218,20 @@ void cameras_input(void* ctx) {
                 furi_timer_start(fnaf->dolphins->fopper_inactivity, time);
                 FURI_LOG_D(TAG, "Fopper inactivity timer is set to %lu ms", time);
             }
-            SWITCH_VIEW(office);
+            if (fnaf->dolphins->location[Blipper] == office_location) {
+                FURI_LOG_D(TAG, "Blipper got you");
+                stop_all_timers(fnaf);
+                stop_hourly_timer(fnaf);
+                save_progress(fnaf);
+                SWITCH_VIEW(jumpscare);
+            }
+            if (fnaf->dolphins->location[Chipper] == office_location) {
+                FURI_LOG_D(TAG, "Chipper got you");
+                stop_all_timers(fnaf);
+                stop_hourly_timer(fnaf);
+                save_progress(fnaf);
+                SWITCH_VIEW(jumpscare);
+            }
             break;
         default:
             break;

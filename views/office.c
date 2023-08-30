@@ -80,8 +80,8 @@ static void moving_animation(Fnaf* fnaf) {
     switch (fnaf->office->camera_moving_direction) {
     case left:
         if (fnaf->counter < 24) {
-            fnaf->office->camera_x += 6;
-            fnaf->counter += 6;
+            fnaf->office->camera_x += 8;
+            fnaf->counter += 8;
         } else {
             fnaf->office->camera_moving_direction = none;
             fnaf->counter = 0;
@@ -89,8 +89,8 @@ static void moving_animation(Fnaf* fnaf) {
         break;
     case right:
         if (fnaf->counter < 24) {
-            fnaf->office->camera_x -= 6;
-            fnaf->counter += 6;
+            fnaf->office->camera_x -= 8;
+            fnaf->counter += 8;
         } else {
             fnaf->office->camera_moving_direction = none;
             fnaf->counter = 0;
@@ -248,6 +248,7 @@ void office_draw(Canvas* canvas, void* ctx) {
 }
 
 static void close_door(Fnaf* fnaf, uint8_t door) {
+    FURI_LOG_D(TAG, "Closing door %u", door);
     if (fnaf->electricity->power_left == 0) return;
     switch (door) {
     case 0: // left door
@@ -284,6 +285,9 @@ static void open_door(Fnaf* fnaf, uint8_t door) {
 static void door_input(Fnaf* fnaf) {
     switch (fnaf->office->location) {
     case -1:
+        // Doesn't work if Blipper is inside
+        if (fnaf->dolphins->location[Blipper] == office_location) break;
+
         if (!fnaf->office->left_door_state) {
             if (fnaf->electricity->left_door) {
                 open_door(fnaf, 0);
@@ -297,6 +301,9 @@ static void door_input(Fnaf* fnaf) {
     case 0:
         break;
     case 1:
+        // Doesn't work if Chipper is inside
+        if (fnaf->dolphins->location[Chipper] == office_location) break;
+
         if (!fnaf->office->right_door_state) {
             if (fnaf->electricity->right_door) {
                 open_door(fnaf, 1);
@@ -334,12 +341,18 @@ void office_input(void* ctx) {
             if (fnaf->electricity->power_left > 0)
                 switch (fnaf->office->location) {
                 case -1:
+                    // Doesn't work if Blipper is inside
+                    if (fnaf->dolphins->location[Blipper] == office_location) break;
+
                     fnaf->electricity->left_light = !fnaf->electricity->left_light;
                     fnaf->electricity->right_light = false;
                     break;
                 case 0:
                     break;
                 case 1:
+                    // Doesn't work if Chipper is inside
+                    if (fnaf->dolphins->location[Chipper] == office_location) break;
+
                     fnaf->electricity->right_light = !fnaf->electricity->right_light;
                     fnaf->electricity->left_light = false;
                     break;
@@ -428,16 +441,102 @@ void night_start(void* ctx) {
 }
 
 void timer_callback_blipper(void* ctx) {
-    UNUSED(ctx);
+    Fnaf* fnaf = ctx;
+    switch (fnaf->dolphins->location[Blipper]) {
+    case office_location:
+        // Death
+        FURI_LOG_D(TAG, "Blipper got you");
+        stop_all_timers(fnaf);
+        stop_hourly_timer(fnaf);
+        save_progress(fnaf);
+        SWITCH_VIEW(jumpscare);
+        break;
+    case left_entrance:
+        if (rand() % 20 + 1 > fnaf->dolphins->AI[Blipper]) return;
+        // If left door is closed reset do dining area
+        if (fnaf->electricity->left_door) {
+            FURI_LOG_D(TAG, "Blipper is back to Dining Area!");
+            fnaf->dolphins->location[Blipper] = cam1B;
+            return;
+        }
+        // If moves go to office
+        fnaf->dolphins->location[Blipper] = office_location;
+        FURI_LOG_D(TAG, "Blipper is in the office!");
+        // Restart timer for office wait time
+        if (furi_timer_is_running(fnaf->dolphins->timer[Blipper])) {
+            furi_timer_stop(fnaf->dolphins->timer[Blipper]);
+        }
+        furi_timer_start(fnaf->dolphins->timer[Blipper], blipper_chipper_wait_time);
+        // turn off the light and open left door just in case
+        fnaf->electricity->left_light = false;
+        if (fnaf->electricity->left_door) open_door(fnaf, 0);
+        break;
+    default:
+        if (rand() % 20 + 1 > fnaf->dolphins->AI[Blipper]) return;
+        Locations move[2][9] = {
+            {cam5, cam5, 0xF, cam3, cam3, left_entrance, 0xF, 0xF, cam1B},
+            {cam1B, cam2A, 0xF, cam2B, left_entrance, cam2A, 0xF, 0xF, cam2A}
+        };
+        uint8_t location = move[fnaf->dolphins->move_rand_value][fnaf->dolphins->location[Blipper]];
+        FURI_LOG_D(TAG, "Blipper moved from %u to %u", fnaf->dolphins->location[Blipper], location);
+        fnaf->dolphins->location[Blipper] = location;
+        if (location == cam2B || location == left_entrance)
+            furi_timer_start(fnaf->office->left_door_sound_timer, sound_time);
+        break;
+    }
 }
 
+
 void timer_callback_chipper(void* ctx) {
-    UNUSED(ctx);
+    Fnaf* fnaf = ctx;
+    switch (fnaf->dolphins->location[Chipper]) {
+    case office_location:
+        // Death
+        FURI_LOG_D(TAG, "Chipper got you");
+        stop_all_timers(fnaf);
+        stop_hourly_timer(fnaf);
+        save_progress(fnaf);
+        SWITCH_VIEW(jumpscare);
+        break;
+    case right_entrance:
+        if (rand() % 20 + 1 > fnaf->dolphins->AI[Chipper]) return;
+        // If left door is closed step back to east hall
+        if (fnaf->electricity->right_door) {
+            FURI_LOG_D(TAG, "Chipper is back to east hall!");
+            fnaf->dolphins->location[Chipper] = cam4A;
+            return;
+        }
+        // If moves go to office
+        fnaf->dolphins->location[Chipper] = office_location;
+        FURI_LOG_D(TAG, "Chipper is in the office!");
+        // Restart timer for office wait time
+        if (furi_timer_is_running(fnaf->dolphins->timer[Chipper])) {
+            furi_timer_stop(fnaf->dolphins->timer[Chipper]);
+        }
+        furi_timer_start(fnaf->dolphins->timer[Chipper], blipper_chipper_wait_time);
+        // turn off the light and open right door just in case
+        fnaf->electricity->right_light = false;
+        if (fnaf->electricity->right_door) open_door(fnaf, 1);
+        break;
+    default:
+        if (rand() % 20 + 1 > fnaf->dolphins->AI[Chipper]) return;
+        Locations move[2][11] = {
+            {cam1B, cam7, 0xF, 0xF, 0xF, 0xF, cam1B, cam4A, 0xF, cam7, cam6},
+            {cam1B, cam6, 0xF, 0xF, 0xF, 0xF, cam4B, right_entrance, 0xF, cam4A, cam4A}
+        };
+        uint8_t location = move[fnaf->dolphins->move_rand_value][fnaf->dolphins->location[Chipper]];
+        FURI_LOG_D(TAG, "Chipper moved from %u to %u", fnaf->dolphins->location[Chipper], location);
+        fnaf->dolphins->location[Chipper] = location;
+        if (location == cam4B || location == right_entrance)
+            furi_timer_start(fnaf->office->right_door_sound_timer, sound_time);
+        break;
+    }
 }
 
 void timer_callback_flipper(void* ctx) {
     UNUSED(ctx);
 }
+
 
 void timer_callback_fopper(void* ctx) {
     Fnaf* fnaf = ctx;
@@ -470,7 +569,7 @@ void timer_callback_fopper(void* ctx) {
             }
             furi_timer_start(fnaf->dolphins->timer[Fopper], fopper_time);
         } else {
-            if (fnaf->current_view == cameras) SWITCH_VIEW(office);
+            if (fnaf->current_view == cameras) SWITCH_VIEW(office_view);
             FURI_LOG_D(TAG, "Fopper got you");
             stop_all_timers(fnaf);
             stop_hourly_timer(fnaf);
@@ -479,13 +578,18 @@ void timer_callback_fopper(void* ctx) {
     }
 }
 
+void move_rand_callback(void* ctx) {
+    Fnaf* fnaf = ctx;
+    fnaf->dolphins->move_rand_value = rand() % 2;
+}
+
 void power_timer_callback(void* ctx) {
     Fnaf* fnaf = ctx;
     fnaf->electricity->power_left -= power_draw(fnaf);
     if (fnaf->electricity->power_left > 999 || fnaf->electricity->power_left == 0) {
         fnaf->electricity->power_left = 0;
         stop_all_timers(fnaf);
-        if (fnaf->current_view != office) SWITCH_VIEW(office);
+        if (fnaf->current_view != office_view) SWITCH_VIEW(office_view);
         if (fnaf->electricity->left_door) open_door(fnaf, 0);
         if (fnaf->electricity->right_door) open_door(fnaf, 1);
         fnaf->counter_secondary = 0;
@@ -594,6 +698,8 @@ void power_out_callback(void* ctx) {
         } else {
             // stop all timers
             stop_all_timers(fnaf);
+            // save progress
+            save_progress(fnaf);
             // jumpscare
             SWITCH_VIEW(jumpscare);
         }

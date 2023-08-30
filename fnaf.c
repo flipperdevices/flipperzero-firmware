@@ -20,7 +20,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     case night_number:
         text_view(canvas, fnaf);
         break;
-    case office:
+    case office_view:
         office_draw(canvas, fnaf);
         break;
     case cameras:
@@ -78,10 +78,6 @@ void stop_all_timers(Fnaf* fnaf) {
         FURI_LOG_D(TAG, "Electricity timer stopped");
         furi_timer_stop(fnaf->electricity->timer);
     }
-    if (furi_timer_is_running(fnaf->cameras->noise_timer)) {
-        FURI_LOG_D(TAG, "Noise timer stopped");
-        furi_timer_stop(fnaf->cameras->noise_timer);
-    }
     if (furi_timer_is_running(fnaf->office->left_door_sound_timer)) {
         FURI_LOG_D(TAG, "Left door sound timer stopped");
         furi_timer_stop(fnaf->office->left_door_sound_timer);
@@ -102,18 +98,22 @@ void stop_all_timers(Fnaf* fnaf) {
         FURI_LOG_D(TAG, "Power out max timer stopped");
         furi_timer_stop(fnaf->office->power_out_max_timer);
     }
+    if (furi_timer_is_running(fnaf->dolphins->move_rand_timer)) {
+        FURI_LOG_D(TAG, "Move rand timer stopped");
+        furi_timer_stop(fnaf->dolphins->move_rand_timer);
+    }
 }
 
 void switch_view(Fnaf* fnaf, Views view) {
     FURI_LOG_D(TAG, "switch_view to %u", view);
     fnaf->counter = 0;
     fnaf->counter_secondary = 0;
-    if (fnaf->current_view == cameras && view == office) {
+    if (fnaf->current_view == cameras && view == office_view) {
         // start Fopper timer
-    } else if (fnaf->current_view == office && view == cameras) {
+    } else if (fnaf->current_view == office_view && view == cameras) {
         // stop Fopper timer if running
     }
-    if (view != cameras && view != office) {
+    if (view != cameras && view != office_view) {
         stop_hourly_timer(fnaf);
         stop_all_timers(fnaf);
         fnaf->hour = 0;
@@ -179,14 +179,14 @@ void fnaf_alloc(Fnaf* fnaf) {
     fnaf->dolphins->timer[Flipper] = furi_timer_alloc(timer_callback_flipper, FuriTimerTypePeriodic, fnaf);
     fnaf->dolphins->timer[Fopper] = furi_timer_alloc(timer_callback_fopper, FuriTimerTypePeriodic, fnaf);
     fnaf->dolphins->fopper_inactivity = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
+    fnaf->dolphins->move_rand_timer = furi_timer_alloc(move_rand_callback, FuriTimerTypePeriodic, fnaf);
     fnaf->office->right_door_sound_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
     fnaf->office->left_door_sound_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
     fnaf->office->flipper_laugh_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
-    fnaf->hourly_timer = furi_timer_alloc(hourly_timer_callback, FuriTimerTypePeriodic, fnaf);
-    fnaf->cameras->noise_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
-    fnaf->electricity->timer = furi_timer_alloc(power_timer_callback, FuriTimerTypePeriodic, fnaf);
     fnaf->office->power_out_timer = furi_timer_alloc(power_out_callback, FuriTimerTypePeriodic, fnaf);
     fnaf->office->power_out_max_timer = furi_timer_alloc(power_out_max_callback, FuriTimerTypeOnce, fnaf);
+    fnaf->hourly_timer = furi_timer_alloc(hourly_timer_callback, FuriTimerTypePeriodic, fnaf);
+    fnaf->electricity->timer = furi_timer_alloc(power_timer_callback, FuriTimerTypePeriodic, fnaf);
     UNUSED(fnaf->dolphins->timer[Blipper]);
     UNUSED(fnaf->dolphins->timer[Chipper]);
     UNUSED(fnaf->dolphins->timer[Flipper]);
@@ -199,6 +199,7 @@ void fnaf_free(Fnaf* fnaf) {
         furi_timer_free(fnaf->dolphins->timer[i]);
     }
     furi_timer_free(fnaf->dolphins->fopper_inactivity);
+    furi_timer_free(fnaf->dolphins->move_rand_timer);
     free(fnaf->dolphins);
 
     furi_timer_free(fnaf->electricity->timer);
@@ -211,7 +212,6 @@ void fnaf_free(Fnaf* fnaf) {
     furi_timer_free(fnaf->office->power_out_max_timer);
     free(fnaf->office);
 
-    furi_timer_free(fnaf->cameras->noise_timer);
     free(fnaf->cameras);
 
     furi_timer_free(fnaf->hourly_timer);
@@ -255,7 +255,7 @@ int32_t flipperzero_fnaf(void* p) {
                 break;
             case night_number:
                 break;
-            case office:
+            case office_view:
                 office_input(fnaf);
                 break;
             case cameras:
