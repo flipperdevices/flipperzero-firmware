@@ -126,8 +126,6 @@ static bool desktop_custom_event_callback(void* context, uint32_t event) {
         return true;
     case DesktopGlobalAfterAppFinished:
         animation_manager_load_and_continue_animation(desktop->animation_manager);
-        // TODO FL-3497: Implement a message mechanism for loading settings and (optionally)
-        // locking and unlocking
         DESKTOP_SETTINGS_LOAD(&desktop->settings);
 
         desktop_clock_reconfigure(desktop);
