@@ -178,6 +178,7 @@ void fnaf_alloc(Fnaf* fnaf) {
     fnaf->dolphins->timer[Chipper] = furi_timer_alloc(timer_callback_chipper, FuriTimerTypePeriodic, fnaf);
     fnaf->dolphins->timer[Flipper] = furi_timer_alloc(timer_callback_flipper, FuriTimerTypePeriodic, fnaf);
     fnaf->dolphins->timer[Fopper] = furi_timer_alloc(timer_callback_fopper, FuriTimerTypePeriodic, fnaf);
+    fnaf->dolphins->fopper_inactivity = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
     fnaf->office->right_door_sound_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
     fnaf->office->left_door_sound_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
     fnaf->office->flipper_laugh_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
@@ -197,6 +198,7 @@ void fnaf_free(Fnaf* fnaf) {
     for (uint8_t i = 0; i < 4; i++) {
         furi_timer_free(fnaf->dolphins->timer[i]);
     }
+    furi_timer_free(fnaf->dolphins->fopper_inactivity);
     free(fnaf->dolphins);
 
     furi_timer_free(fnaf->electricity->timer);

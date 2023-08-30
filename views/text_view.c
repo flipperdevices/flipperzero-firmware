@@ -26,16 +26,20 @@ static void animation(Canvas* canvas, Fnaf* fnaf) {
 }
 
 void text_view(Canvas* canvas, Fnaf* fnaf) {
-    FURI_LOG_D(TAG, "text_view");
     switch (fnaf->current_view) {
     case night_number:
         if (fnaf->counter > 7) {
             FURI_LOG_D(TAG, "text_view is over");
             SWITCH_VIEW(office);
+            // Timers
             furi_timer_start(fnaf->hourly_timer, first_hour_time);
             furi_timer_start(fnaf->electricity->timer, power_time);
+            // Aninatronics timers
+            furi_timer_start(fnaf->dolphins->timer[Flipper], flipper_time);
+            furi_timer_start(fnaf->dolphins->timer[Blipper], blipper_time);
+            furi_timer_start(fnaf->dolphins->timer[Chipper], chipper_time);
+            furi_timer_start(fnaf->dolphins->timer[Fopper], fopper_time);
         } else {
-            FURI_LOG_D(TAG, "Night number, counter = %u", fnaf->counter);
             canvas_set_bitmap_mode(canvas, 1);
             canvas_set_color(canvas, 1);
             char messages[7][10] = { "1st Night", "2nd Night", "3rd Night", "4th Night", "5th Night", "6th Night", "7th Night" };

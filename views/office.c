@@ -202,6 +202,25 @@ void office_draw(Canvas* canvas, void* ctx) {
 
     draw_sides(canvas, fnaf);
 
+    if (fnaf->dolphins->location[Fopper] == 4 && !fnaf->electricity->left_door) {
+        if (fnaf->dolphins->fopper_counter < 4) {
+            if (fnaf->dolphins->fopper_counter == 0) {
+                fnaf->dolphins->fopper_counter = -8;
+            }
+            fnaf->dolphins->fopper_counter += 3;
+        } else {
+            SWITCH_VIEW(game_over);
+        }
+        canvas_set_color(canvas, 0);
+        canvas_draw_box(canvas, fnaf->office->camera_x + fnaf->dolphins->fopper_counter + 4, 60, 2, 2);
+        canvas_set_color(canvas, 2);
+        canvas_draw_icon(canvas, fnaf->office->camera_x + fnaf->dolphins->fopper_counter, 21, &I_fopper_doorway_12x43);
+        canvas_set_color(canvas, 0);
+        canvas_draw_box(canvas, fnaf->office->camera_x, 0, 3, 64);
+        canvas_set_color(canvas, 1);
+        canvas_draw_line(canvas, fnaf->office->camera_x + 3, 18, fnaf->office->camera_x + 3, 64);
+    }
+
     // UI:
     canvas_set_color(canvas, 0);
     canvas_draw_box(canvas, 0, 0, 23, 64);
@@ -332,6 +351,8 @@ void office_input(void* ctx) {
             fnaf->electricity->left_light = false;
             fnaf->electricity->right_light = false;
             fnaf->electricity->monitor = true;
+            if (furi_timer_is_running(fnaf->dolphins->fopper_inactivity))
+                furi_timer_stop(fnaf->dolphins->fopper_inactivity);
             SWITCH_VIEW(cameras);
             break;
         case InputKeyBack:
@@ -383,6 +404,8 @@ void night_start(void* ctx) {
         fnaf->counter = 0;
         fnaf->counter_secondary = 0;
         fnaf->counter_music_box = 1;
+        fnaf->dolphins->fopper_times_blocked = 0;
+        fnaf->dolphins->fopper_counter = 0;
         fnaf->office->camera_x = 0;
         fnaf->office->location = 0;
         fnaf->electricity->left_door = false;
@@ -401,11 +424,6 @@ void night_start(void* ctx) {
         fnaf->office->is_light_on = true;
         SWITCH_VIEW(night_number);
         FURI_LOG_D(TAG, "Night started thing 2");
-
-        // Aninatronics timers
-        for (uint i = 0; i < 4; i++) {
-            furi_timer_start(fnaf->dolphins->timer[i]);
-        }
     }
 }
 
@@ -422,7 +440,43 @@ void timer_callback_flipper(void* ctx) {
 }
 
 void timer_callback_fopper(void* ctx) {
-    UNUSED(ctx);
+    Fnaf* fnaf = ctx;
+    if (!furi_timer_is_running(fnaf->dolphins->fopper_inactivity) && fnaf->current_view != cameras) {
+        if (rand() % 20 + 1 > fnaf->dolphins->AI[Fopper]) return;
+        fnaf->dolphins->location[Fopper] += 1;
+        FURI_LOG_D(TAG, "Fopper state is %u", fnaf->dolphins->location[Fopper]);
+        if (fnaf->dolphins->location[Fopper] == 3) {
+            // If Fopper is now waiting at cam2A
+            // Restart his timer but with wait time instead
+            if (furi_timer_is_running(fnaf->dolphins->timer[Fopper])) {
+                furi_timer_stop(fnaf->dolphins->timer[Fopper]);
+            }
+            furi_timer_start(fnaf->dolphins->timer[Fopper], fopper_wait_time);
+        }
+    }
+    if (fnaf->dolphins->location[Fopper] == 4) {
+        if (fnaf->electricity->left_door) {
+            // Start timer for noise icon
+            furi_timer_start(fnaf->office->left_door_sound_timer, sound_time);
+            FURI_LOG_D(TAG, "Fopper blocked");
+            // Reduce electricity by 1 + 5 * (times blocked)
+            fnaf->electricity->power_left -= 10 + fnaf->dolphins->fopper_times_blocked * 5;
+            // Reset Fopperm increment attack counter
+            fnaf->dolphins->location[Fopper] = 0;
+            fnaf->dolphins->fopper_times_blocked += 1;
+            // Restart timer
+            if (furi_timer_is_running(fnaf->dolphins->timer[Fopper])) {
+                furi_timer_stop(fnaf->dolphins->timer[Fopper]);
+            }
+            furi_timer_start(fnaf->dolphins->timer[Fopper], fopper_time);
+        } else {
+            if (fnaf->current_view == cameras) SWITCH_VIEW(office);
+            FURI_LOG_D(TAG, "Fopper got you");
+            stop_all_timers(fnaf);
+            stop_hourly_timer(fnaf);
+            save_progress(fnaf);
+        }
+    }
 }
 
 void power_timer_callback(void* ctx) {

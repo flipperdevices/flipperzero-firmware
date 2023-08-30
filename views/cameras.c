@@ -27,7 +27,7 @@ void draw_cameras(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
 
     char time[7];
-    if (fnaf->hour != 0)snprintf(time, 7, "%u AM", fnaf->hour); else
+    if (fnaf->hour != 0) snprintf(time, 7, "%u AM", fnaf->hour); else
         snprintf(time, 7, "12 AM");
     canvas_draw_str_aligned(canvas, 125, 52, AlignRight, AlignBottom, time);
     if (fnaf->cameras->cursor != cam6 && fnaf->cameras->cursor != cam5) {
@@ -45,8 +45,15 @@ void draw_cameras(Canvas* canvas, void* ctx) {
                 canvas_draw_str(canvas, 85, y, "Flipper");
                 y += 9;
             }
-            if (fnaf->dolphins->location[Fopper] == 3 && fnaf->cameras->cursor == cam2A) {
-                canvas_draw_str(canvas, 85, y, "Fopper runs");
+            if ((fnaf->dolphins->location[Fopper] == 3) && fnaf->cameras->cursor == cam2A) {
+                if (fnaf->dolphins->fopper_counter < 5) {
+                    canvas_draw_str(canvas, 85, y, "Fopper");
+                    fnaf->dolphins->fopper_counter += 1;
+                } else {
+                    FURI_LOG_D(TAG, "Fopper state is 4");
+                    fnaf->dolphins->location[Fopper] = 4;
+                    fnaf->dolphins->fopper_counter = 0;
+                }
                 y += 9;
             }
         }
@@ -205,6 +212,13 @@ void cameras_input(void* ctx) {
             break;
         case InputKeyOk:
             fnaf->electricity->monitor = false;
+            if (furi_timer_is_running(fnaf->dolphins->fopper_inactivity))
+                furi_timer_stop(fnaf->dolphins->fopper_inactivity);
+            if (fnaf->dolphins->location[Fopper] < 3) {
+                uint32_t time = (rand() % 951 + 50) * 1000 / 60;
+                furi_timer_start(fnaf->dolphins->fopper_inactivity, time);
+                FURI_LOG_D(TAG, "Fopper inactivity timer is set to %lu ms", time);
+            }
             SWITCH_VIEW(office);
             break;
         default:
