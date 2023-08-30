@@ -6,7 +6,6 @@ on:
       - dev
     tags:
       - '*'
-  pull_request:
 
 env:
   TARGETS: f7
@@ -53,7 +52,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
           AWS_REGION: "${{ secrets.FW_DOCS_AWS_REGION }}"
           SOURCE_DIR: "./documentation/build/html"
-          DEST_DIR: "0.89.0"
+          DEST_DIR: "${{steps.names.outputs.branch_name}}"
         with:
           args: "--delete"
 
