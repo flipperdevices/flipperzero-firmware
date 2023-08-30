@@ -11,15 +11,15 @@ extern "C" {
 #endif
 
 typedef enum {
-    Iso15693_3ListenerStateIdle,
     Iso15693_3ListenerStateReady,
     Iso15693_3ListenerStateSelected,
     Iso15693_3ListenerStateQuiet,
 } Iso15693_3ListenerState;
 
 typedef struct {
+    bool selected;
+    bool addressed;
     bool wait_for_eof;
-    bool no_reply;
 } Iso15693_3ListenerSessionState;
 
 typedef Iso15693_3Error (*Iso15693_3RequestHandler)(
@@ -80,13 +80,17 @@ Iso15693_3Error iso15693_3_listener_set_handler_table(
 
 Iso15693_3Error iso15693_3_listener_ready(Iso15693_3Listener* instance);
 
-Iso15693_3Error iso15693_3_listener_sleep(Iso15693_3Listener* instance);
-
 Iso15693_3Error
     iso15693_3_listener_send_frame(Iso15693_3Listener* instance, const BitBuffer* tx_buffer);
 
 Iso15693_3Error
     iso15693_3_listener_process_request(Iso15693_3Listener* instance, const BitBuffer* rx_buffer);
+
+Iso15693_3Error iso15693_3_listener_process_single_eof(Iso15693_3Listener* instance);
+
+Iso15693_3Error iso15693_3_listener_process_uid_mismatch(
+    Iso15693_3Listener* instance,
+    const BitBuffer* rx_buffer);
 
 #ifdef __cplusplus
 }

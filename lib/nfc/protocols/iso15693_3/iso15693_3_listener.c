@@ -67,33 +67,33 @@ NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
     NfcEvent* nfc_event = event.data;
     NfcCommand command = NfcCommandContinue;
 
-    if(nfc_event->type == NfcEventTypeFieldOn) {
-        iso15693_3_listener_ready(instance);
-    } else if(nfc_event->type == NfcEventTypeFieldOff) {
-        if(instance->callback) {
-            instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeFieldOff;
-            command = instance->callback(instance->generic_event, instance->context);
-        }
-        iso15693_3_listener_sleep(instance);
-    } else if(nfc_event->type == NfcEventTypeRxEnd) {
-        BitBuffer* request_buf = nfc_event->data.buffer;
-        if(iso13239_crc_check(Iso13239CrcTypeDefault, request_buf)) {
-            iso13239_crc_trim(request_buf);
-            const Iso15693_3Error error =
-                iso15693_3_listener_process_request(instance, request_buf);
+    if(nfc_event->type == NfcEventTypeRxEnd) {
+        BitBuffer* rx_buffer = nfc_event->data.buffer;
+
+        if(iso13239_crc_check(Iso13239CrcTypeDefault, rx_buffer)) {
+            iso13239_crc_trim(rx_buffer);
+
+            const Iso15693_3Error error = iso15693_3_listener_process_request(instance, rx_buffer);
+
             if(error == Iso15693_3ErrorNotSupported) {
-                instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeCustomCommand;
-                instance->iso15693_3_event.data->buffer = request_buf;
-                command = instance->callback(instance->generic_event, instance->context);
+                if(instance->callback) {
+                    instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeCustomCommand;
+                    instance->iso15693_3_event.data->buffer = rx_buffer;
+                    command = instance->callback(instance->generic_event, instance->context);
+                }
+
+            } else if(error == Iso15693_3ErrorUidMismatch) {
+                iso15693_3_listener_process_uid_mismatch(instance, rx_buffer);
             }
-        } else if(bit_buffer_get_size(request_buf) == 0) {
+
+        } else if(bit_buffer_get_size(rx_buffer) == 0) {
             // Special case: Single EOF
-            if(instance->session_state.wait_for_eof) {
-                iso15693_3_listener_send_frame(instance, instance->tx_buffer);
-                instance->session_state.wait_for_eof = false;
-            } else if(instance->callback) {
-                instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeSingleEof;
-                command = instance->callback(instance->generic_event, instance->context);
+            const Iso15693_3Error error = iso15693_3_listener_process_single_eof(instance);
+            if(error == Iso15693_3ErrorUnexpectedResponse) {
+                if(instance->callback) {
+                    instance->iso15693_3_event.type = Iso15693_3ListenerEventTypeSingleEof;
+                    command = instance->callback(instance->generic_event, instance->context);
+                }
             }
         } else {
             FURI_LOG_D(

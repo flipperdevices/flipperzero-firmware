@@ -42,7 +42,6 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
         iso15693_3_append_uid(instance->data, instance->tx_buffer); // UID
     } while(false);
 
-    instance->session_state.no_reply = (error != Iso15693_3ErrorNone);
     return error;
 }
 
@@ -56,8 +55,7 @@ static Iso15693_3Error iso15693_3_listener_stay_quiet_handler(
     UNUSED(flags);
 
     instance->state = Iso15693_3ListenerStateQuiet;
-    instance->session_state.no_reply = true;
-    return Iso15693_3ErrorNone;
+    return Iso15693_3ErrorIgnore;
 }
 
 static Iso15693_3Error iso15693_3_listener_read_block_handler(
@@ -302,8 +300,7 @@ static Iso15693_3Error iso15693_3_listener_select_handler(
 
     do {
         if(!(flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED)) {
-            instance->session_state.no_reply = true;
-            error = Iso15693_3ErrorUnknown;
+            error = Iso15693_3ErrorFormat;
             break;
         }
 
@@ -588,14 +585,8 @@ static Iso15693_3Error iso15693_3_listener_handle_standard_request(
             error = default_handler(instance, data, data_size, flags);
         }
 
-        Iso15693_3ListenerSessionState* session_state = &instance->session_state;
-
         // Several commands may not require an answer
-        if(session_state->no_reply) {
-            session_state->no_reply = false;
-            error = Iso15693_3ErrorNone;
-            break;
-        }
+        if(error == Iso15693_3ErrorFormat || error == Iso15693_3ErrorIgnore) break;
 
         // TODO: Move it to a separate function
         if(error != Iso15693_3ErrorNone) {
@@ -603,6 +594,8 @@ static Iso15693_3Error iso15693_3_listener_handle_standard_request(
             bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
             bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_ERROR_UNKNOWN);
         }
+
+        Iso15693_3ListenerSessionState* session_state = &instance->session_state;
 
         if(!session_state->wait_for_eof) {
             error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
@@ -622,7 +615,7 @@ static inline Iso15693_3Error iso15693_3_listener_handle_custom_request(
     do {
         typedef struct {
             uint8_t manufacturer;
-            uint8_t data[];
+            uint8_t extra[];
         } Iso15693_3CustomRequestLayout;
 
         if(data_size < sizeof(Iso15693_3CustomRequestLayout)) {
@@ -630,12 +623,10 @@ static inline Iso15693_3Error iso15693_3_listener_handle_custom_request(
             break;
         }
 
-        const Iso15693_3CustomRequestLayout* custom_request =
-            (const Iso15693_3CustomRequestLayout*)data;
+        const Iso15693_3CustomRequestLayout* request = (const Iso15693_3CustomRequestLayout*)data;
 
-        if(custom_request->manufacturer != iso15693_3_get_manufacturer_id(instance->data)) {
-            // TODO: Add a separate error code for this case?
-            error = Iso15693_3ErrorInternal;
+        if(request->manufacturer != iso15693_3_get_manufacturer_id(instance->data)) {
+            error = Iso15693_3ErrorIgnore;
             break;
         }
 
@@ -659,12 +650,6 @@ Iso15693_3Error iso15693_3_listener_set_handler_table(
 Iso15693_3Error iso15693_3_listener_ready(Iso15693_3Listener* instance) {
     furi_assert(instance);
     instance->state = Iso15693_3ListenerStateReady;
-    return Iso15693_3ErrorNone;
-}
-
-Iso15693_3Error iso15693_3_listener_sleep(Iso15693_3Listener* instance) {
-    furi_assert(instance);
-    instance->state = Iso15693_3ListenerStateIdle;
     return Iso15693_3ErrorNone;
 }
 
@@ -716,6 +701,40 @@ Iso15693_3Error
         const Iso15693_3RequestLayout* request =
             (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
 
+        Iso15693_3ListenerSessionState* session_state = &instance->session_state;
+
+        if((request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5) == 0) {
+            session_state->selected = request->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
+            session_state->addressed = request->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
+
+            if(session_state->selected && session_state->addressed) {
+                // A request mode can be either addressed or selected, but not both
+                error = Iso15693_3ErrorUnknown;
+                break;
+            } else if(instance->state == Iso15693_3ListenerStateQuiet) {
+                // If the card is quiet, ignore non-addressed commands
+                if(session_state->addressed) {
+                    error = Iso15693_3ErrorIgnore;
+                    break;
+                }
+            } else if(instance->state != Iso15693_3ListenerStateSelected) {
+                // If the card is not selected, ignore selected commands
+                if(session_state->selected) {
+                    error = Iso15693_3ErrorIgnore;
+                    break;
+                }
+            }
+        } else {
+            // If the card is quiet, ignore inventory commands
+            if(instance->state == Iso15693_3ListenerStateQuiet) {
+                error = Iso15693_3ErrorIgnore;
+                break;
+            }
+
+            session_state->selected = false;
+            session_state->addressed = false;
+        }
+
         if(request->command >= ISO15693_3_CMD_CUSTOM_START) {
             // Custom commands are properly handled in the protocol-specific top-level poller
             error = iso15693_3_listener_handle_custom_request(
@@ -723,73 +742,73 @@ Iso15693_3Error
             break;
         }
 
-        const bool inventory_flag = request->flags & ISO15693_3_REQ_FLAG_INVENTORY_T5;
+        const uint8_t* data;
+        size_t data_size;
 
-        if(!inventory_flag) {
-            const bool selected_mode = request->flags & ISO15693_3_REQ_FLAG_T4_SELECTED;
-            const bool addressed_mode = request->flags & ISO15693_3_REQ_FLAG_T4_ADDRESSED;
+        if(session_state->addressed) {
+            // In addressed mode, UID must be included in each command
+            const size_t buf_size_min_addr = buf_size_min + ISO15693_3_UID_SIZE;
 
-            if(selected_mode && addressed_mode) {
-                // A request mode can be either addressed or selected, but not both
+            if(buf_size < buf_size_min_addr) {
+                error = Iso15693_3ErrorFormat;
                 break;
-            } else if(instance->state == Iso15693_3ListenerStateQuiet) {
-                // If the card is quiet, ignore non-addressed commands
-                if(!addressed_mode) break;
-            } else if(instance->state != Iso15693_3ListenerStateSelected) {
-                // If the card is not selected, ignore selected commands
-                if(selected_mode) break;
+            } else if(!iso15693_3_is_equal_uid(instance->data, request->data)) {
+                error = Iso15693_3ErrorUidMismatch;
+                break;
             }
 
-            const uint8_t* data;
-            size_t data_size;
-
-            if(addressed_mode) {
-                // In addressed mode, UID must be included in each command
-                const size_t buf_size_min_addr = buf_size_min + ISO15693_3_UID_SIZE;
-
-                if(buf_size < buf_size_min_addr) {
-                    error = Iso15693_3ErrorFormat;
-                    break;
-                } else if(!iso15693_3_is_equal_uid(instance->data, request->data)) {
-                    // In addressed mode, ignore all commands with non-matching UID
-                    if(instance->state == Iso15693_3ListenerStateSelected &&
-                       request->command == ISO15693_3_CMD_SELECT) {
-                        // Special case, reset to ready on reception of a
-                        // SELECT command with non-matching UID
-                        // TODO: Find a neater way to do this?
-                        instance->state = Iso15693_3ListenerStateReady;
-                    }
-                    break;
-                }
-
-                data = &request->data[ISO15693_3_UID_SIZE];
-                data_size = buf_size - buf_size_min_addr;
-
-            } else {
-                data = request->data;
-                data_size = buf_size - buf_size_min;
-            }
-
-            error = iso15693_3_listener_handle_standard_request(
-                instance, data, data_size, request->command, request->flags);
+            data = &request->data[ISO15693_3_UID_SIZE];
+            data_size = buf_size - buf_size_min_addr;
 
         } else {
-            // If the card is quiet, ignore INVENTORY commands
-            if(instance->state == Iso15693_3ListenerStateQuiet) {
-                break;
-            }
-
-            // Only the INVENTORY command is allowed with this flag set
-            if(request->command != ISO15693_3_CMD_INVENTORY) {
-                error = Iso15693_3ErrorUnknown;
-                break;
-            }
-
-            error = iso15693_3_listener_handle_standard_request(
-                instance, request->data, buf_size - buf_size_min, request->command, request->flags);
+            data = request->data;
+            data_size = buf_size - buf_size_min;
         }
 
+        error = iso15693_3_listener_handle_standard_request(
+            instance, data, data_size, request->command, request->flags);
+
     } while(false);
+
+    return error;
+}
+
+Iso15693_3Error iso15693_3_listener_process_single_eof(Iso15693_3Listener* instance) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        if(!instance->session_state.wait_for_eof) {
+            error = Iso15693_3ErrorUnexpectedResponse;
+            break;
+        }
+
+        instance->session_state.wait_for_eof = false;
+
+        error = iso15693_3_listener_send_frame(instance, instance->tx_buffer);
+    } while(false);
+
+    return error;
+}
+
+Iso15693_3Error iso15693_3_listener_process_uid_mismatch(
+    Iso15693_3Listener* instance,
+    const BitBuffer* rx_buffer) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    // No checks, assuming they have been made beforehand
+    typedef struct {
+        uint8_t flags;
+        uint8_t command;
+    } Iso15693_3RequestLayout;
+
+    const Iso15693_3RequestLayout* request =
+        (const Iso15693_3RequestLayout*)bit_buffer_get_data(rx_buffer);
+
+    if(request->command == ISO15693_3_CMD_SELECT) {
+        if(instance->state == Iso15693_3ListenerStateSelected) {
+            error = iso15693_3_listener_ready(instance);
+        }
+    }
 
     return error;
 }
