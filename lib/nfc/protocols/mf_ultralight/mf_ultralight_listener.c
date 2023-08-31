@@ -505,7 +505,9 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData ||
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff ||
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
+        // TODO generic state reset ?
         mf_ultralight_composite_command_reset(instance);
+        instance->auth_state = MfUltralightListenerAuthStateIdle;
         command = NfcCommandReset;
     }
 
