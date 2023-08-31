@@ -34,6 +34,11 @@ typedef enum {
     SignalReaderPolarityInverted,
 } SignalReaderPolarity;
 
+typedef enum {
+    SignalReaderTriggerNone,
+    SignalReaderTriggerRisingFallingEdge,
+} SignalReaderTrigger;
+
 typedef void (*SignalReaderCallback)(SignalReaderEvent event, void* context);
 
 typedef struct SignalReader SignalReader;
@@ -50,6 +55,8 @@ void signal_reader_set_sample_rate(
     SignalReader* instance,
     SignalReaderTimeUnit time_unit,
     uint32_t time);
+
+void signal_reader_set_trigger(SignalReader* instance, SignalReaderTrigger trigger);
 
 void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, void* context);
 

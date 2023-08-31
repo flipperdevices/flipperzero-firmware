@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,36.1,,
+Version,+,35.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2677,6 +2677,7 @@ Function,+,signal_reader_free,void,SignalReader*
 Function,+,signal_reader_set_polarity,void,"SignalReader*, SignalReaderPolarity"
 Function,+,signal_reader_set_pull,void,"SignalReader*, GpioPull"
 Function,+,signal_reader_set_sample_rate,void,"SignalReader*, SignalReaderTimeUnit, uint32_t"
+Function,+,signal_reader_set_trigger,void,"SignalReader*, SignalReaderTrigger"
 Function,+,signal_reader_start,void,"SignalReader*, SignalReaderCallback, void*"
 Function,+,signal_reader_stop,void,SignalReader*
 Function,+,simple_array_alloc,SimpleArray*,const SimpleArrayConfig*

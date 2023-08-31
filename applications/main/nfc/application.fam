@@ -9,7 +9,7 @@ App(
         "gui",
         "dialogs",
     ],
-    # provides=["nfc_start"],
+    provides=["nfc_start"],
     icon="A_NFC_14",
     stack_size=5 * 1024,
     order=30,
@@ -52,10 +52,10 @@ App(
     requires=["nfc"],
 )
 
-# App(
-#     appid="nfc_start",
-#     apptype=FlipperAppType.STARTUP,
-#     entry_point="nfc_on_system_start",
-#     requires=["nfc"],
-#     order=30,
-# )
+App(
+    appid="nfc_start",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="nfc_on_system_start",
+    requires=["nfc"],
+    order=30,
+)
