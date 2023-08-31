@@ -5,12 +5,13 @@
 #define animation_speed 1
 
 static void animation(Canvas* canvas, Fnaf* fnaf) {
-    if (fnaf->counter > animation_speed * 10) {
+    if(fnaf->counter > animation_speed * 10) {
         fnaf->counter = 0;
-        if (fnaf->progress > 5 || fnaf->custom_night) {
+        if(fnaf->progress > 5 || fnaf->custom_night) {
             fnaf->progress = 5;
             SWITCH_VIEW(main_menu);
-        } else night_start(fnaf);
+        } else
+            night_start(fnaf);
     } else {
         canvas_set_color(canvas, 1);
         uint8_t y = 35 - fnaf->counter / animation_speed;
@@ -26,9 +27,9 @@ static void animation(Canvas* canvas, Fnaf* fnaf) {
 }
 
 void text_view(Canvas* canvas, Fnaf* fnaf) {
-    switch (fnaf->current_view) {
+    switch(fnaf->current_view) {
     case night_number:
-        if (fnaf->counter > 7) {
+        if(fnaf->counter > 7) {
             FURI_LOG_D(TAG, "text_view is over");
             SWITCH_VIEW(office_view);
             // Timers
@@ -43,11 +44,18 @@ void text_view(Canvas* canvas, Fnaf* fnaf) {
         } else {
             canvas_set_bitmap_mode(canvas, 1);
             canvas_set_color(canvas, 1);
-            char messages[7][10] = { "1st Night", "2nd Night", "3rd Night", "4th Night", "5th Night", "6th Night", "7th Night" };
+            char messages[7][10] = {
+                "1st Night",
+                "2nd Night",
+                "3rd Night",
+                "4th Night",
+                "5th Night",
+                "6th Night",
+                "7th Night"};
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 46, 28, "12 AM");
             char* message = malloc(sizeof(char) * 10);
-            if (!fnaf->custom_night)
+            if(!fnaf->custom_night)
                 snprintf(message, 10, messages[fnaf->progress]);
             else
                 snprintf(message, 10, messages[6]);

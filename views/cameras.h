@@ -2,8 +2,8 @@
 
 #include <gui/gui.h>
 
-#define camX(camera) camera_coordinates[camera*2]
-#define camY(camera) camera_coordinates[camera*2 + 1]
+#define camX(camera) camera_coordinates[camera * 2]
+#define camY(camera) camera_coordinates[camera * 2 + 1]
 
 typedef enum {
     cam1A,
@@ -22,13 +22,13 @@ typedef enum {
     office_location,
 
     error = 0xF,
-}Locations;
+} Locations;
 
 typedef struct {
-    Locations cursor;   // current camera
+    Locations cursor; // current camera
     signed char cursor_x; // for camera navigation
     signed char cursor_y; // for camera navigation too
-}Cameras;
+} Cameras;
 
 void draw_cameras(Canvas* canvas, void* ctx);
 

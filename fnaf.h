@@ -46,7 +46,7 @@ typedef struct {
 
     FuriTimer* move_rand_timer;
     uint8_t move_rand_value;
-}Dolphins;
+} Dolphins;
 
 typedef struct {
     bool left_door;
@@ -57,7 +57,7 @@ typedef struct {
     uint16_t power_left;
     uint8_t counter; // for extra drain on nights 2-7
     FuriTimer* timer;
-}Electricity;
+} Electricity;
 
 typedef struct {
     ViewPort* view_port;
@@ -75,7 +75,7 @@ typedef struct {
     uint8_t hour; // current time
     uint16_t counter; // general purpose
     uint8_t counter_secondary; // for speaker animation on cam6 and fan
-    uint8_t counter_music_box; // for music box 
+    uint8_t counter_music_box; // for music box
     signed char menu_cursor; // for the main menu
     uint8_t custom_menu_cursor; // for custom night menu
     uint8_t current_view;
@@ -89,7 +89,7 @@ typedef enum {
     Blipper,
     Chipper,
     Fopper,
-}Names;
+} Names;
 
 typedef enum {
     main_menu,
@@ -100,7 +100,7 @@ typedef enum {
     night_complete,
     jumpscare,
     game_over,
-}Views;
+} Views;
 
 void stop_hourly_timer(Fnaf* fnaf);
 
