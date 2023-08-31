@@ -24,13 +24,12 @@ static bool iso14443_3a_listener_halt_received(BitBuffer* buf) {
     return halt_cmd_received;
 }
 
-Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, const Iso14443_3aData* data) {
+Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, Iso14443_3aData* data) {
     furi_assert(nfc);
 
     Iso14443_3aListener* instance = malloc(sizeof(Iso14443_3aListener));
     instance->nfc = nfc;
-    instance->data = iso14443_3a_alloc();
-    iso14443_3a_copy(instance->data, data);
+    instance->data = data;
     instance->tx_buffer = bit_buffer_alloc(ISO14443_3A_LISTENER_MAX_BUFFER_SIZE);
 
     instance->iso14443_3a_event.data = &instance->iso14443_3a_event_data;
@@ -56,7 +55,6 @@ void iso14443_3a_listener_free(Iso14443_3aListener* instance) {
     furi_assert(instance->tx_buffer);
 
     bit_buffer_free(instance->tx_buffer);
-    iso14443_3a_free(instance->data);
     free(instance);
 }
 

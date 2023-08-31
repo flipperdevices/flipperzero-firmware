@@ -136,7 +136,7 @@ bool iso14443_3a_set_uid(Iso14443_3aData* data, const uint8_t* uid, size_t uid_l
     return uid_valid;
 }
 
-const Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data) {
+Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data) {
     UNUSED(data);
     furi_crash("No base data");
 }

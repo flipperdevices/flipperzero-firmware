@@ -69,7 +69,7 @@ const uint8_t* felica_get_uid(const FelicaData* data, size_t* uid_len);
 
 bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len);
 
-const FelicaData* felica_get_base_data(const FelicaData* data);
+FelicaData* felica_get_base_data(const FelicaData* data);
 
 #ifdef __cplusplus
 }

@@ -7,7 +7,7 @@
 
 typedef struct NfcListenerListElement {
     NfcProtocol protocol;
-    const NfcDeviceData* data;
+    NfcDeviceData* data;
     NfcGenericInstance* listener;
     const NfcListenerBase* listener_api;
     struct NfcListenerListElement* child;
@@ -27,7 +27,11 @@ struct NfcListener {
 static void nfc_listener_list_alloc(NfcListener* instance, const NfcDeviceData* data) {
     instance->list.head = malloc(sizeof(NfcListenerListElement));
     instance->list.head->protocol = instance->protocol;
-    instance->list.head->data = data;
+
+    // Allocate and copy data to emulate
+    instance->list.head->data = nfc_devices[instance->protocol]->alloc();
+    nfc_devices[instance->protocol]->copy(instance->list.head->data, data);
+
     instance->list.head->listener_api = nfc_listeners_api[instance->protocol];
     instance->list.head->child = NULL;
     instance->list.tail = instance->list.head;
@@ -63,6 +67,10 @@ static void nfc_listener_list_alloc(NfcListener* instance, const NfcDeviceData* 
 }
 
 static void nfc_listener_list_free(NfcListener* instance) {
+    // Free protocol data
+    nfc_devices[instance->protocol]->free(instance->list.tail->data);
+
+    // Free listener instances
     do {
         instance->list.head->listener_api->free(instance->list.head->listener);
         NfcListenerListElement* child = instance->list.head->child;

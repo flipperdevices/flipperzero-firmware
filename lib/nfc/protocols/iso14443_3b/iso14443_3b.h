@@ -74,7 +74,7 @@ const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len)
 
 bool iso14443_3b_set_uid(Iso14443_3bData* data, const uint8_t* uid, size_t uid_len);
 
-const Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data);
+Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data);
 
 #ifdef __cplusplus
 }

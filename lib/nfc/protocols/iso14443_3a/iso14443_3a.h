@@ -86,7 +86,7 @@ const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len)
 
 bool iso14443_3a_set_uid(Iso14443_3aData* data, const uint8_t* uid, size_t uid_len);
 
-const Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data);
+Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data);
 
 uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* iso14443_3a_data);
 
