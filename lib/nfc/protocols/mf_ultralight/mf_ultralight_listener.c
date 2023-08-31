@@ -375,6 +375,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(
     instance->data = mf_ultralight_alloc();
     mf_ultralight_copy(instance->data, data);
     mf_ultralight_listener_prepare_emulation(instance);
+    mf_ultralight_composite_command_reset(instance);
     instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE);
 
     instance->mfu_event.data = &instance->mfu_event_data;
@@ -428,14 +429,17 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         size_t size = bit_buffer_get_size(rx_buffer);
         uint8_t cmd = bit_buffer_get_byte(rx_buffer, 0);
 
-        for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
-            if(size != mf_ultralight_command[i].cmd_len_bits) continue;
-            if(cmd != mf_ultralight_command[i].cmd) continue;
-            mfu_command = mf_ultralight_command[i].callback(instance, rx_buffer);
+        if(mf_ultralight_composite_command_in_progress(instance)) {
+            mfu_command = mf_ultralight_composite_command_run(instance, rx_buffer);
+        } else {
+            for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
+                if(size != mf_ultralight_command[i].cmd_len_bits) continue;
+                if(cmd != mf_ultralight_command[i].cmd) continue;
+                mfu_command = mf_ultralight_command[i].callback(instance, rx_buffer);
 
-            if(mfu_command != MfUltralightCommandNotFound) break;
+                if(mfu_command != MfUltralightCommandNotFound) break;
+            }
         }
-
         if(mfu_command != MfUltralightCommandProcessed) {
             instance->state = MfUltraligthListenerStateIdle;
             instance->auth_state = MfUltralightListenerAuthStateIdle;
@@ -445,11 +449,11 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
                 mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
             }
         }
-    } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData) {
-        command = NfcCommandReset;
-    } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff) {
-        command = NfcCommandReset;
-    } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
+    } else if(
+        iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData ||
+        iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff ||
+        iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
+        mf_ultralight_composite_command_reset(instance);
         command = NfcCommandReset;
     }
 
