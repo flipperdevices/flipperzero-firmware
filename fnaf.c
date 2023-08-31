@@ -320,7 +320,6 @@ int32_t flipperzero_fnaf(void* p) {
                 break;
             }
         }
-        // view_port_update(fnaf->view_port);
     }
 
     stop_hourly_timer(fnaf); // Just in case

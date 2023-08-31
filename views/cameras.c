@@ -49,14 +49,6 @@ void draw_cameras(Canvas* canvas, void* ctx) {
             y += 9;
         }
         if((fnaf->dolphins->location[Fopper] == 3) && fnaf->cameras->cursor == cam2A) {
-            // if (fnaf->dolphins->fopper_counter < 5) {
-            //     canvas_draw_str(canvas, 85, y, "Fopper");
-            //     fnaf->dolphins->fopper_counter += 1;
-            // } else {
-            //     FURI_LOG_D(TAG, "Fopper state is 4");
-            //     fnaf->dolphins->location[Fopper] = 4;
-            //     fnaf->dolphins->fopper_counter = 0;
-            // }
             FURI_LOG_D(TAG, "Fopper runs");
             canvas_draw_str(canvas, 85, y, "Fopper");
             if(furi_timer_is_running(fnaf->dolphins->timer[Fopper])) {
