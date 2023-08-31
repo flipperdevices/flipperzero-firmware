@@ -65,7 +65,7 @@ class Main(App):
         data = flipper.read.until(">: ")
         self.logger.info("Parsing result")
 
-        lines = data.split("\r\n")
+        lines = data.decode().split("\r\n")
 
         tests_re = r"Failed tests: \d{0,}"
         time_re = r"Consumed: \d{0,}"
@@ -87,7 +87,7 @@ class Main(App):
 
             if not tests:
                 tests = re.match(tests_pattern, line)
-            if not time:
+            if not elapsed_time:
                 elapsed_time = re.match(time_pattern, line)
             if not leak:
                 leak = re.match(leak_pattern, line)
@@ -96,7 +96,7 @@ class Main(App):
 
         if None in (tests, elapsed_time, leak, status):
             self.logger.error(
-                f"Failed to parse output: {leak} {elapsed_time} {leak} {status}"
+                f"Failed to parse output: {tests} {elapsed_time} {leak} {status}"
             )
             sys.exit(1)
 
