@@ -58,6 +58,7 @@ struct MfUltralightListener {
     MfUltralightListenerEventData mfu_event_data;
     NfcGenericCallback callback;
     MfUltralightMirrorMode mirror;
+    MfUltralightListenerCompositeCommandContext composite_cmd;
     void* context;
 };
 
