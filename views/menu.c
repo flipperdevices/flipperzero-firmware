@@ -3,7 +3,7 @@
 #include "office.h"
 
 void draw_menu(Canvas* canvas, Fnaf* fnaf) {
-    if (fnaf->progress > 6) fnaf->progress = 6;
+    if (fnaf->progress > 5) fnaf->progress = 5;
 
     canvas_set_bitmap_mode(canvas, 1);
     canvas_draw_str(canvas, 15, 16, "New Game");
@@ -29,18 +29,23 @@ void draw_menu(Canvas* canvas, Fnaf* fnaf) {
         canvas_draw_line(canvas, 15, 51, 32, 51);
         break;
     }
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 62, 62, "Custom night");
+    canvas_draw_circle(canvas, 122, 58, 4);
+    canvas_draw_icon(canvas, 122, 56, &I_right_arrow_3x5);
 }
 
 static void new_game(Fnaf* fnaf) {
     FURI_LOG_D(TAG, "new_game");
     fnaf->progress = 0;
+    fnaf->custom_night = false;
     night_start(fnaf);
 }
 
 static void continue_game(Fnaf* fnaf) {
     FURI_LOG_D(TAG, "continue_game");
-    if (fnaf->progress != 6) night_start(fnaf);
-    else SWITCH_VIEW(custom_night);
+    fnaf->custom_night = false;
+    night_start(fnaf);
 }
 
 bool menu_input(Fnaf* fnaf) {
@@ -49,12 +54,8 @@ bool menu_input(Fnaf* fnaf) {
         case InputKeyLeft:
             break;
         case InputKeyRight:
-
-            // REMOVE FOR RELEASE
-            fnaf->progress += 1;
-            if (fnaf->progress > 6) fnaf->progress = 0;
-            // REMOVE FOR RELEASE
-
+            fnaf->custom_night = true;
+            SWITCH_VIEW(custom_night);
             break;
         case InputKeyUp:
             fnaf->menu_cursor -= 1;

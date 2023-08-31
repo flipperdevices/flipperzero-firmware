@@ -232,6 +232,13 @@ void cameras_input(void* ctx) {
                 save_progress(fnaf);
                 SWITCH_VIEW(jumpscare);
             }
+            if (fnaf->dolphins->flipper_move_state == 2) {
+                if (fnaf->dolphins->location[Flipper] != cam4B) {
+                    flipper_move(fnaf);
+                } else if (fnaf->cameras->cursor != cam4B) {
+                    flipper_move(fnaf);
+                }
+            }
             break;
         default:
             break;

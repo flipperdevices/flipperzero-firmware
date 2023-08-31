@@ -55,4 +55,6 @@ void custom_night_input(void* ctx) {
             break;
         }
     }
+    if (fnaf->dolphins->AI[fnaf->custom_menu_cursor] > 20)
+        fnaf->dolphins->AI[fnaf->custom_menu_cursor] = 20;
 }

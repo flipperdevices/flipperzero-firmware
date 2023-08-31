@@ -7,8 +7,8 @@
 static void animation(Canvas* canvas, Fnaf* fnaf) {
     if (fnaf->counter > animation_speed * 10) {
         fnaf->counter = 0;
-        if (fnaf->progress > 6) {
-            fnaf->progress = 6;
+        if (fnaf->progress > 5) {
+            fnaf->progress = 5;
             SWITCH_VIEW(main_menu);
         } else night_start(fnaf);
     } else {

@@ -367,6 +367,10 @@ void office_input(void* ctx) {
             if (furi_timer_is_running(fnaf->dolphins->fopper_inactivity))
                 furi_timer_stop(fnaf->dolphins->fopper_inactivity);
             SWITCH_VIEW(cameras);
+
+            if (fnaf->dolphins->flipper_move_state == 2 && fnaf->dolphins->location[Flipper] == cam4B && fnaf->cameras->cursor != cam4B) {
+                flipper_move(fnaf);
+            }
             break;
         case InputKeyBack:
             break;
@@ -389,7 +393,7 @@ void set_difficulty(Fnaf* fnaf) {
     // Flipper has AI of random 1 or 2 for the 4th night
     difficulties[3][Flipper] = rand() % 2 + 1;
     // CUSTOM NIGHT INTERFACE WHEN
-    if (fnaf->progress != 6) { SET_DIFFICULTY(difficulties[fnaf->progress]); }
+    if (!fnaf->custom_night) { SET_DIFFICULTY(difficulties[fnaf->progress]); }
 }
 
 void reset_animatronic_positions(void* ctx) {
@@ -404,8 +408,8 @@ void night_start(void* ctx) {
     Fnaf* fnaf = ctx;
     FURI_LOG_D(TAG, "night_start");
     FURI_LOG_D(TAG, "progress = %u", fnaf->progress);
-    if (fnaf->progress > 6) {
-        fnaf->progress = 6;
+    if (fnaf->progress > 5) {
+        fnaf->progress = 5;
         SWITCH_VIEW(main_menu);
     } else {
         FURI_LOG_D(TAG, "Night started thing");
@@ -419,6 +423,8 @@ void night_start(void* ctx) {
         fnaf->counter_music_box = 1;
         fnaf->dolphins->fopper_times_blocked = 0;
         fnaf->dolphins->fopper_counter = 0;
+        fnaf->dolphins->flipper_move_state = 0;
+        fnaf->dolphins->flipper_might_move_counter = 0;
         fnaf->office->camera_x = 0;
         fnaf->office->location = 0;
         fnaf->electricity->left_door = false;
@@ -534,7 +540,105 @@ void timer_callback_chipper(void* ctx) {
 }
 
 void timer_callback_flipper(void* ctx) {
-    UNUSED(ctx);
+    Fnaf* fnaf = ctx;
+    if (fnaf->dolphins->location[Flipper] == office_location) {
+        if (fnaf->current_view == cameras) return;
+        if (rand() % 4 == 0) {
+            save_progress(fnaf);
+            stop_all_timers(fnaf);
+            stop_hourly_timer(fnaf);
+            SWITCH_VIEW(jumpscare);
+        }
+        return;
+    }
+    if (fnaf->current_view == cameras) {
+        if (fnaf->dolphins->location[Flipper] != cam4B) return;
+        if (fnaf->cameras->cursor == cam4B && fnaf->dolphins->location[Flipper] == cam4B) return;
+    }
+    if (rand() % 20 + 1 > fnaf->dolphins->AI[Flipper]) return;
+    if (fnaf->dolphins->flipper_move_state != 0) return;
+    // Start move timer
+    FURI_LOG_D(TAG, "Flipper might move! State = 1");
+    fnaf->dolphins->flipper_move_state = 1;
+    fnaf->dolphins->flipper_might_move_counter = 0;
+    furi_timer_start(fnaf->dolphins->flipper_might_move_timer, flipper_might_move_time);
+}
+
+void flipper_might_move_callback(void* ctx) {
+    Fnaf* fnaf = ctx;
+    if (fnaf->dolphins->flipper_move_state == 1) {
+        fnaf->dolphins->flipper_might_move_counter += 10;
+    }
+    if (fnaf->dolphins->flipper_might_move_counter > 1000 - (100 * fnaf->dolphins->AI[Flipper])) {
+        if (furi_timer_is_running(fnaf->dolphins->flipper_might_move_timer))
+            furi_timer_stop(fnaf->dolphins->flipper_might_move_timer);
+        FURI_LOG_D(TAG, "Flipper is ready to move!");
+        fnaf->dolphins->flipper_move_state = 2;
+        fnaf->dolphins->flipper_might_move_counter = 0;
+        switch (fnaf->current_view) {
+        case office_view:
+            /* Flipper can't move if at cam4B unless
+                we're looking at camera (not cam4B) */
+            if (fnaf->dolphins->location[Flipper] != cam4B) {
+                flipper_move(fnaf);
+            }
+            break;
+        case cameras:
+            /* Flipper can't move if player's
+                watching cam4B */
+            if (fnaf->dolphins->location[Flipper] == cam4B && fnaf->cameras->cursor != cam4B) {
+                flipper_move(fnaf);
+            }
+            break;
+        }
+    }
+}
+
+void flipper_move(void* ctx) {
+    Fnaf* fnaf = ctx;
+    // A check
+    if (fnaf->dolphins->flipper_move_state != 2) {
+        FURI_LOG_D(TAG, "Something happened?? flipper_move but state = %u", fnaf->dolphins->flipper_move_state);
+        return;
+    }
+    // Move location
+    switch (fnaf->dolphins->location[Flipper]) {
+    case cam1A:
+        fnaf->dolphins->location[Flipper] = cam1B;
+        break;
+    case cam1B:
+        fnaf->dolphins->location[Flipper] = cam7;
+        break;
+    case cam7:
+        fnaf->dolphins->location[Flipper] = cam6;
+        break;
+    case cam6:
+        fnaf->dolphins->location[Flipper] = cam4A;
+        break;
+    case cam4A:
+        fnaf->dolphins->location[Flipper] = cam4B;
+        break;
+    case cam4B:
+        if (fnaf->electricity->right_door)
+            fnaf->dolphins->location[Flipper] = cam4A;
+        else
+            fnaf->dolphins->location[Flipper] = office_location;
+        break;
+    }
+
+    if (fnaf->dolphins->location[Flipper] == office_location) {
+        if (furi_timer_is_running(fnaf->dolphins->timer[Flipper]))
+            furi_timer_stop(fnaf->dolphins->timer[Flipper]);
+        furi_timer_start(fnaf->dolphins->timer[Flipper], flipper_office_time);
+    } else {
+        furi_timer_start(fnaf->office->flipper_laugh_timer, sound_time);
+    }
+
+    FURI_LOG_D(TAG, "Flipper moved to %u", fnaf->dolphins->location[Flipper]);
+    // Reset things
+    fnaf->dolphins->flipper_might_move_counter = 0;
+    fnaf->dolphins->flipper_move_state = 0;
+    furi_timer_stop(fnaf->dolphins->flipper_might_move_timer);
 }
 
 
@@ -669,7 +773,7 @@ void hourly_timer_callback(void* ctx) {
         break;
     case 6:
         fnaf->progress += 1;
-        if (fnaf->progress > 6) fnaf->progress = 6;
+        if (fnaf->progress > 5) fnaf->progress = 5;
         save_progress(fnaf);
         dolphin_deed(DolphinDeedPluginGameWin);
         SWITCH_VIEW(night_complete);

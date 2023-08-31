@@ -16,14 +16,15 @@
 #define blipper_time 4970
 #define chipper_time 4980
 #define flipper_time 3020
+#define flipper_might_move_time 167
+#define flipper_office_time 1000
 #define fopper_time 5010
 #define fopper_wait_time 25000
 #define fopper_run_time 2000 // not sure
 #define blipper_chipper_wait_time 30000
 #define first_hour_time 90000
 #define hour_time 89000
-#define noise_time 4500 // something around this idk
-#define sound_time 1000
+#define sound_time 1500
 #define power_time 1000
 #define power_out_time_period 5000
 #define power_out_max_time 20000
@@ -39,6 +40,9 @@ typedef struct {
     FuriTimer* fopper_inactivity;
     uint8_t fopper_times_blocked;
     signed char fopper_counter;
+    uint8_t flipper_move_state;
+    uint16_t flipper_might_move_counter;
+    FuriTimer* flipper_might_move_timer;
 
     FuriTimer* move_rand_timer;
     uint8_t move_rand_value;
@@ -75,6 +79,7 @@ typedef struct {
     uint8_t custom_menu_cursor; // for custom night menu
     uint8_t current_view;
     uint8_t progress; // Last completed nights
+    bool custom_night;
     FuriTimer* hourly_timer;
 } Fnaf;
 

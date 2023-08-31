@@ -39,6 +39,9 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
         }
         if (fnaf->counter == 7) {
             SWITCH_VIEW(game_over);
+        } else if (fnaf->counter == 0) {
+            // Just in case it broke somewhere else
+            save_progress(fnaf);
         }
         break;
     case game_over:
@@ -102,6 +105,10 @@ void stop_all_timers(Fnaf* fnaf) {
         FURI_LOG_D(TAG, "Move rand timer stopped");
         furi_timer_stop(fnaf->dolphins->move_rand_timer);
     }
+    if (furi_timer_is_running(fnaf->dolphins->flipper_might_move_timer)) {
+        FURI_LOG_D(TAG, "Flipper might move timer stopped");
+        furi_timer_stop(fnaf->dolphins->flipper_might_move_timer);
+    }
 }
 
 void switch_view(Fnaf* fnaf, Views view) {
@@ -128,7 +135,6 @@ void switch_view(Fnaf* fnaf, Views view) {
 
 uint8_t power_draw(Fnaf* fnaf) {
     return (1 + fnaf->electricity->left_door + fnaf->electricity->left_light + fnaf->electricity->monitor + fnaf->electricity->right_door + fnaf->electricity->right_light);
-
 }
 
 void save_progress(Fnaf* fnaf) {
@@ -136,7 +142,6 @@ void save_progress(Fnaf* fnaf) {
     if (storage_file_open(fnaf->save_data, EXT_PATH("apps_data/flipperzero_fnaf/save.txt"), FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
         FURI_LOG_D(TAG, "Saving... Progress = %u", fnaf->progress);
         char buff[1] = { fnaf->progress };
-        // buff[0] = fnaf->progress;
         uint16_t res = storage_file_write(fnaf->save_data, buff, 1);
         FURI_LOG_D(TAG, "Written %u bytes", res);
         storage_file_close(fnaf->save_data);
@@ -149,7 +154,7 @@ void load_progress(Fnaf* fnaf) {
         storage_file_seek(fnaf->save_data, 0, true);
         storage_file_read(fnaf->save_data, read, 1);
         FURI_LOG_D(TAG, "Read %u", read[0]);
-        if (read[0] < 7) fnaf->progress = read[0];
+        if (read[0] < 6) fnaf->progress = read[0];
         storage_file_close(fnaf->save_data);
     }
 }
@@ -180,6 +185,7 @@ void fnaf_alloc(Fnaf* fnaf) {
     fnaf->dolphins->timer[Fopper] = furi_timer_alloc(timer_callback_fopper, FuriTimerTypePeriodic, fnaf);
     fnaf->dolphins->fopper_inactivity = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
     fnaf->dolphins->move_rand_timer = furi_timer_alloc(move_rand_callback, FuriTimerTypePeriodic, fnaf);
+    fnaf->dolphins->flipper_might_move_timer = furi_timer_alloc(flipper_might_move_callback, FuriTimerTypePeriodic, fnaf);
     fnaf->office->right_door_sound_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
     fnaf->office->left_door_sound_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
     fnaf->office->flipper_laugh_timer = furi_timer_alloc(empty_callback, FuriTimerTypeOnce, fnaf);
@@ -200,6 +206,7 @@ void fnaf_free(Fnaf* fnaf) {
     }
     furi_timer_free(fnaf->dolphins->fopper_inactivity);
     furi_timer_free(fnaf->dolphins->move_rand_timer);
+    furi_timer_free(fnaf->dolphins->flipper_might_move_timer);
     free(fnaf->dolphins);
 
     furi_timer_free(fnaf->electricity->timer);

@@ -49,6 +49,10 @@ void timer_callback_chipper(void* ctx);
 
 void timer_callback_flipper(void* ctx);
 
+void flipper_might_move_callback(void* ctx);
+
+void flipper_move(void* ctx);
+
 void timer_callback_fopper(void* ctx);
 
 void move_rand_callback(void* ctx);
