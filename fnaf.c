@@ -124,6 +124,7 @@ void switch_view(Fnaf* fnaf, Views view) {
         stop_hourly_timer(fnaf);
         stop_all_timers(fnaf);
         fnaf->hour = 0;
+        if (view == main_menu) load_progress(fnaf);
     }
     if (view == custom_night)
         for (uint8_t i = 0; i < 4; i++) {
@@ -139,16 +140,31 @@ uint8_t power_draw(Fnaf* fnaf) {
 
 void save_progress(Fnaf* fnaf) {
     FURI_LOG_D(TAG, "save_progress called");
+    if (fnaf->progress > 5) {
+        FURI_LOG_D(TAG, "Progress is %u, wtf", fnaf->progress);
+        fnaf->progress = 5;
+    }
+    if (fnaf->custom_night) {
+        FURI_LOG_D(TAG, "Custom night, no need to save.");
+        return;
+    }
     if (storage_file_open(fnaf->save_data, EXT_PATH("apps_data/flipperzero_fnaf/save.txt"), FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
         FURI_LOG_D(TAG, "Saving... Progress = %u", fnaf->progress);
         char buff[1] = { fnaf->progress };
         uint16_t res = storage_file_write(fnaf->save_data, buff, 1);
         FURI_LOG_D(TAG, "Written %u bytes", res);
         storage_file_close(fnaf->save_data);
+    } else {
+        FURI_LOG_D(TAG, "Wtf just happened (file not open?)");
     }
 }
 
 void load_progress(Fnaf* fnaf) {
+
+    if (!storage_file_exists(fnaf->storage, EXT_PATH("apps_data/flipperzero_fnaf/save.txt"))) {
+        FURI_LOG_D(TAG, "No save data!");
+        return;
+    }
     if (storage_file_open(fnaf->save_data, EXT_PATH("apps_data/flipperzero_fnaf/save.txt"), FSAM_READ, FSOM_OPEN_EXISTING)) {
         char read[1] = { 101 };
         storage_file_seek(fnaf->save_data, 0, true);
@@ -156,6 +172,8 @@ void load_progress(Fnaf* fnaf) {
         FURI_LOG_D(TAG, "Read %u", read[0]);
         if (read[0] < 6) fnaf->progress = read[0];
         storage_file_close(fnaf->save_data);
+    } else {
+        FURI_LOG_D(TAG, "Wtf just happened (file not open?)");
     }
 }
 
@@ -171,7 +189,8 @@ void fnaf_alloc(Fnaf* fnaf) {
     view_port_input_callback_set(fnaf->view_port, app_input_callback, fnaf);
     fnaf->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(fnaf->gui, fnaf->view_port, GuiLayerFullscreen);
-    fnaf->save_data = storage_file_alloc(furi_record_open(RECORD_STORAGE));
+    fnaf->storage = furi_record_open(RECORD_STORAGE);
+    fnaf->save_data = storage_file_alloc(fnaf->storage);
 
 
     fnaf->dolphins = malloc(sizeof(*fnaf->dolphins));

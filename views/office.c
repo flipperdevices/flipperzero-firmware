@@ -432,7 +432,7 @@ void night_start(void* ctx) {
         fnaf->electricity->left_light = false;
         fnaf->electricity->right_light = false;
         fnaf->electricity->monitor = false;
-        fnaf->electricity->power_left = 999; // 999
+        fnaf->electricity->power_left = 999;
         fnaf->office->camera_moving_direction = none;
         fnaf->office->left_door_state = 0;
         fnaf->office->right_door_state = 0;
@@ -442,7 +442,7 @@ void night_start(void* ctx) {
         fnaf->office->right_door_y = -54;
         fnaf->office->is_light_on = true;
         SWITCH_VIEW(night_number);
-        FURI_LOG_D(TAG, "Night started thing 2");
+        FURI_LOG_D(TAG, "Night started thing end");
     }
 }
 
@@ -644,7 +644,7 @@ void flipper_move(void* ctx) {
 
 void timer_callback_fopper(void* ctx) {
     Fnaf* fnaf = ctx;
-    if (!furi_timer_is_running(fnaf->dolphins->fopper_inactivity) && fnaf->current_view != cameras) {
+    if (!furi_timer_is_running(fnaf->dolphins->fopper_inactivity) && fnaf->current_view != cameras && fnaf->dolphins->location[Fopper] < 3) {
         if (rand() % 20 + 1 > fnaf->dolphins->AI[Fopper]) return;
         fnaf->dolphins->location[Fopper] += 1;
         FURI_LOG_D(TAG, "Fopper state is %u", fnaf->dolphins->location[Fopper]);
@@ -655,7 +655,13 @@ void timer_callback_fopper(void* ctx) {
                 furi_timer_stop(fnaf->dolphins->timer[Fopper]);
             }
             furi_timer_start(fnaf->dolphins->timer[Fopper], fopper_wait_time);
+            FURI_LOG_D(TAG, "Fopper's waiting...");
+            return;
         }
+    }
+    if (fnaf->dolphins->location[Fopper] == 3) {
+        FURI_LOG_D(TAG, "Fopper finished running!");
+        fnaf->dolphins->location[Fopper] = 4;
     }
     if (fnaf->dolphins->location[Fopper] == 4) {
         if (fnaf->electricity->left_door) {

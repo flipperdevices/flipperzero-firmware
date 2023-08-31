@@ -9,5 +9,5 @@ App(
     fap_category="Games",
     fap_icon_assets="images",
     fap_author="sillygir1",
-    fap_version="0.9",
+    fap_version="1.0",
 )

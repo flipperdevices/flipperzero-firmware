@@ -64,6 +64,7 @@ typedef struct {
     FuriMessageQueue* event_queue;
     Gui* gui;
     InputEvent event;
+    Storage* storage;
     File* save_data;
 
     Dolphins* dolphins;

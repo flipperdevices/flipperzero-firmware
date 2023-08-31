@@ -30,7 +30,7 @@ void draw_cameras(Canvas* canvas, void* ctx) {
     if (fnaf->hour != 0) snprintf(time, 7, "%u AM", fnaf->hour); else
         snprintf(time, 7, "12 AM");
     canvas_draw_str_aligned(canvas, 125, 52, AlignRight, AlignBottom, time);
-    if (fnaf->cameras->cursor != cam6 && fnaf->cameras->cursor != cam5) {
+    if (fnaf->cameras->cursor != cam6 && fnaf->cameras->cursor != cam1C) {
         uint8_t y = 20;
         if (fnaf->dolphins->location[Blipper] == fnaf->cameras->cursor) {
             canvas_draw_str(canvas, 85, y, "Blipper");
@@ -45,14 +45,20 @@ void draw_cameras(Canvas* canvas, void* ctx) {
             y += 9;
         }
         if ((fnaf->dolphins->location[Fopper] == 3) && fnaf->cameras->cursor == cam2A) {
-            if (fnaf->dolphins->fopper_counter < 5) {
-                canvas_draw_str(canvas, 85, y, "Fopper");
-                fnaf->dolphins->fopper_counter += 1;
-            } else {
-                FURI_LOG_D(TAG, "Fopper state is 4");
-                fnaf->dolphins->location[Fopper] = 4;
-                fnaf->dolphins->fopper_counter = 0;
+            // if (fnaf->dolphins->fopper_counter < 5) {
+            //     canvas_draw_str(canvas, 85, y, "Fopper");
+            //     fnaf->dolphins->fopper_counter += 1;
+            // } else {
+            //     FURI_LOG_D(TAG, "Fopper state is 4");
+            //     fnaf->dolphins->location[Fopper] = 4;
+            //     fnaf->dolphins->fopper_counter = 0;
+            // }
+            FURI_LOG_D(TAG, "Fopper runs");
+            canvas_draw_str(canvas, 85, y, "Fopper");
+            if (furi_timer_is_running(fnaf->dolphins->timer[Fopper])) {
+                furi_timer_stop(fnaf->dolphins->timer[Fopper]);
             }
+            furi_timer_start(fnaf->dolphins->timer[Fopper], fopper_run_time);
             y += 9;
         }
     } else if (fnaf->cameras->cursor == cam6) {
@@ -81,7 +87,7 @@ void draw_cameras(Canvas* canvas, void* ctx) {
             if (fnaf->counter_music_box > 11) fnaf->counter_music_box = 1;
             fnaf->counter_music_box += 1;
         }
-    } else if (fnaf->cameras->cursor == cam5) {
+    } else if (fnaf->cameras->cursor == cam1C) {
         switch (fnaf->dolphins->location[Fopper]) {
         case 0:
             canvas_set_font(canvas, FontSecondary);
