@@ -645,6 +645,9 @@ bool digital_sequence_send(DigitalSequence* sequence) {
     FURI_CRITICAL_EXIT();
     digital_sequence_finish(sequence);
 
+    // TODO reconfig GPIO to initial state
+    furi_hal_gpio_write(sequence->gpio, false);
+
     return true;
 }
 
