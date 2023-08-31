@@ -273,6 +273,21 @@ static FHalNfcError f_hal_nfc_iso15693_poller_rx(
     return error;
 }
 
+static void f_hal_nfc_iso15693_listener_transparent_mode_enter(FuriHalSpiBusHandle* handle) {
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
+
+    furi_hal_spi_bus_handle_deinit(handle);
+    f_hal_nfc_deinit_gpio_isr();
+}
+
+static void f_hal_nfc_iso15693_listener_transparent_mode_exit(FuriHalSpiBusHandle* handle) {
+    // Configure gpio back to SPI and exit transparent mode
+    f_hal_nfc_init_gpio_isr();
+    furi_hal_spi_bus_handle_init(handle);
+
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
+}
+
 static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle) {
     furi_assert(f_hal_nfc_iso15693_listener == NULL);
 
@@ -295,32 +310,22 @@ static FHalNfcError f_hal_nfc_iso15693_listener_init(FuriHalSpiBusHandle* handle
     st25r3916_change_reg_bits(
         handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ, ST25R3916_REG_MODE_targ_targ);
 
-    return f_hal_nfc_iso15693_common_init(handle);
+    FHalNfcError error = f_hal_nfc_iso15693_common_init(handle);
+
+    f_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
+
+    return error;
 }
 
 static FHalNfcError f_hal_nfc_iso15693_listener_deinit(FuriHalSpiBusHandle* handle) {
-    UNUSED(handle);
     furi_assert(f_hal_nfc_iso15693_listener);
+
+    f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
 
     f_hal_nfc_iso15693_listener_free(f_hal_nfc_iso15693_listener);
     f_hal_nfc_iso15693_listener = NULL;
 
     return FHalNfcErrorNone;
-}
-
-static void f_hal_nfc_iso15693_listener_transparent_mode_enter(FuriHalSpiBusHandle* handle) {
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
-
-    furi_hal_spi_bus_handle_deinit(handle);
-    f_hal_nfc_deinit_gpio_isr();
-}
-
-static void f_hal_nfc_iso15693_listener_transparent_mode_exit(FuriHalSpiBusHandle* handle) {
-    // Configure gpio back to SPI and exit transparent mode
-    f_hal_nfc_init_gpio_isr();
-    furi_hal_spi_bus_handle_init(handle);
-
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 }
 
 static FHalNfcError
@@ -347,9 +352,7 @@ static void f_hal_nfc_iso15693_parser_callback(Iso15693ParserEvent event, void* 
 
 static FHalNfcEvent f_hal_nfc_iso15693_wait_event(uint32_t timeout_ms) {
     FHalNfcEvent event = 0;
-    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    f_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
     FuriThreadId thread_id = furi_thread_get_current_id();
     iso15693_parser_start(
         f_hal_nfc_iso15693_listener->parser, f_hal_nfc_iso15693_parser_callback, thread_id);
@@ -363,7 +366,6 @@ static FHalNfcEvent f_hal_nfc_iso15693_wait_event(uint32_t timeout_ms) {
 
         if(flag & FHalNfcEventInternalTypeAbort) {
             event = FHalNfcEventAbortRequest;
-            f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
             break;
         }
         if(flag & FHalNfcEventInternalTypeTransparentDataReceived) {
@@ -382,13 +384,12 @@ static FHalNfcError f_hal_nfc_iso15693_listener_tx(
     FuriHalSpiBusHandle* handle,
     const uint8_t* tx_data,
     size_t tx_bits) {
+    UNUSED(handle);
     furi_assert(f_hal_nfc_iso15693_listener);
 
     FHalNfcError error = FHalNfcErrorNone;
 
     error = f_hal_nfc_iso15693_listener_tx_transparent(tx_data, tx_bits / BITS_IN_BYTE);
-
-    f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
 
     return error;
 }

@@ -228,7 +228,6 @@ void signal_reader_start(SignalReader* instance, SignalReaderCallback callback, 
     /* We need the EXTI to be configured as interrupt generating line, but no ISR registered */
     furi_hal_gpio_init(
         instance->pin, GpioModeInterruptRiseFall, instance->pull, GpioSpeedVeryHigh);
-    furi_delay_ms(10);
 
     /* Set DMAMUX request generation signal ID on specified DMAMUX channel */
     LL_DMAMUX_SetRequestSignalID(
