@@ -361,17 +361,42 @@ SlixPassword slix_get_password(const SlixData* data, SlixPasswordType password_t
     return data->passwords[password_type];
 }
 
+void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password) {
+    furi_assert(data);
+    furi_assert(password_type < SlixPasswordTypeCount);
+
+    data->passwords[password_type] = password;
+}
+
 bool slix_is_privacy_mode(const SlixData* data) {
     furi_assert(data);
 
     return data->is_privacy_mode;
 }
 
-void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password) {
+bool slix_is_block_protected(
+    const SlixData* data,
+    SlixPasswordType password_type,
+    uint8_t block_num) {
     furi_assert(data);
     furi_assert(password_type < SlixPasswordTypeCount);
 
-    data->passwords[password_type] = password;
+    bool ret = false;
+
+    do {
+        if(password_type != SlixPasswordTypeRead && password_type != SlixPasswordTypeWrite) break;
+        if(block_num >= iso15693_3_get_block_count(data->iso15693_3_data)) break;
+
+        const bool high = block_num >= data->system_info.protection.pointer;
+        const bool read = password_type == SlixPasswordTypeRead;
+
+        const uint8_t condition = high ? (read ? SLIX_PP_CONDITION_RH : SLIX_PP_CONDITION_WH) :
+                                         (read ? SLIX_PP_CONDITION_RL : SLIX_PP_CONDITION_WL);
+
+        ret = data->system_info.protection.condition & condition;
+    } while(false);
+
+    return ret;
 }
 
 void slix_set_privacy_mode(SlixData* data, bool set) {

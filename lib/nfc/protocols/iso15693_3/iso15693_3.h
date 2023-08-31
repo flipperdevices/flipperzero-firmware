@@ -150,6 +150,8 @@ bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num);
 
 uint8_t iso15693_3_get_manufacturer_id(const Iso15693_3Data* data);
 
+uint16_t iso15693_3_get_block_count(const Iso15693_3Data* data);
+
 // Setters
 
 void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked);

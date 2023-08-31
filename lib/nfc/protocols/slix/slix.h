@@ -133,6 +133,11 @@ SlixPassword slix_get_password(const SlixData* data, SlixPasswordType password_t
 
 bool slix_is_privacy_mode(const SlixData* data);
 
+bool slix_is_block_protected(
+    const SlixData* data,
+    SlixPasswordType password_type,
+    uint8_t block_num);
+
 // Setters
 void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password);
 

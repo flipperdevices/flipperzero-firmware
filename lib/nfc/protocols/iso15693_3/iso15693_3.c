@@ -316,7 +316,15 @@ bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num) {
 }
 
 uint8_t iso15693_3_get_manufacturer_id(const Iso15693_3Data* data) {
+    furi_assert(data);
+
     return data->uid[1];
+}
+
+uint16_t iso15693_3_get_block_count(const Iso15693_3Data* data) {
+    furi_assert(data);
+
+    return data->system_info.block_count;
 }
 
 void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked) {
