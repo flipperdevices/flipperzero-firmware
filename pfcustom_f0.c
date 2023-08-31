@@ -158,6 +158,7 @@ CFunc0 CustomFunctionTable[] =
 {
 	(CFunc0) furi_delay_ms,
 	(CFunc0) furi_get_tick,
+	(CFunc0) furi_hal_version_get_name_ptr,
 	(CFunc0) furi_record_open,
 	(CFunc0) furi_record_close,
 	(CFunc0) RecordNotificationWrapper,
@@ -173,6 +174,7 @@ CFunc0 CustomFunctionTable[] =
 	(CFunc0) furi_thread_join,
 	(CFunc0) subghz_tx_rx_worker_available,
 	(CFunc0) subghz_tx_rx_worker_read,
+	(CFunc0) subghz_tx_rx_worker_write,
 	(CFunc0) subghz_tx_rx_worker_alloc,
 	(CFunc0) subghz_tx_rx_worker_free,
 	(CFunc0) subghz_tx_rx_worker_start,
@@ -204,6 +206,8 @@ Err CompileCustomFunctions(void)
 	if( err < 0 ) return err;
 	err = CreateGlueToC( "FURI_GET_TICK", i++, C_RETURNS_VALUE, 0 );
 	if( err < 0 ) return err;
+	err = CreateGlueToC( "FURI_HAL_VERSION_GET_NAME_PTR", i++, C_RETURNS_VALUE, 0 );
+	if( err < 0 ) return err;
 	err = CreateGlueToC( "FURI_RECORD_OPEN", i++, C_RETURNS_VALUE, 1 );
 	if( err < 0 ) return err;
 	err = CreateGlueToC( "FURI_RECORD_CLOSE", i++, C_RETURNS_VOID, 1 );
@@ -233,6 +237,8 @@ Err CompileCustomFunctions(void)
 	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_AVAILABLE", i++, C_RETURNS_VALUE, 1 );
 	if( err < 0 ) return err;
 	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_READ", i++, C_RETURNS_VALUE, 3 );
+	if( err < 0 ) return err;
+	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_WRITE", i++, C_RETURNS_VALUE, 3 );
 	if( err < 0 ) return err;
 	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_ALLOC", i++, C_RETURNS_VALUE, 0 );
 	if( err < 0 ) return err;
