@@ -52,7 +52,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 |---|:---:|---|---|:---:|
 | **Sub-GHz bruteforcer** | ![SubGhz Badge] | [by @derskythe & xMasterX](https://github.com/derskythe/flipperzero-subbrute) | [original by Ganapati & xMasterX](https://github.com/DarkFlippers/unleashed-firmware/pull/57) | ![None Badge] |
 | **Sub-GHz playlist** | ![SubGhz Badge] | [by darmiel](https://github.com/DarkFlippers/unleashed-firmware/pull/62) |  | ![None Badge] |
-| **Sub-GHz Remote** | ![SubGhz Badge] | [by @gid9798](https://github.com/gid9798) | Part of UFW as main app [sources](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/main/subghz_remote) | ![None Badge] |
+| **Sub-GHz Remote** | ![SubGhz Badge] | [by @gid9798](https://github.com/gid9798) | Part of UFW as main app [sources](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/main/subghz_remote)<br>Using version from flipper catalog on CFW can break your .sub files | [![UFW Badge]](https://lab.flipper.net/apps/subghz_remote_ofw) |
 | Spectrum Analyzer (with changes) | ![SubGhz Badge] | [by jolcese](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) | [Ultra Narrow mode & scan channels non-consecutively](https://github.com/theY4Kman/flipperzero-firmware/commits?author=theY4Kman) | [![UFW Badge]](https://lab.flipper.net/apps/spectrum_analyzer) |
 | POCSAG Pager | ![SubGhz Badge] | [by xMasterX & Shmuma](https://github.com/xMasterX/flipper-pager) |  | [![UFW Badge]](https://lab.flipper.net/apps/pocsag_pager) |
 | **ProtoView** | ![SubGhz Badge] | [by antirez](https://github.com/antirez/protoview) |  | [![UFW Badge]](https://lab.flipper.net/apps/protoview) |
