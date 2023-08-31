@@ -65,8 +65,6 @@ static NfcCommand slix_listener_run(NfcGenericEvent event, void* context) {
         const SlixError error = slix_listener_process_request(instance, rx_buffer);
         // TODO: Handle error code?
         UNUSED(error);
-    } else if(iso15693_3_event->type == Iso15693_3ListenerEventTypeFieldOff) {
-        // TODO: Handle FieldOff?
     }
 
     return command;
