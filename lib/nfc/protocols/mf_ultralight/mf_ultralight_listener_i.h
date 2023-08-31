@@ -68,6 +68,14 @@ void mf_ultralight_mirror_read_handler(
     uint8_t mirror_page_num,
     uint8_t* dest,
     MfUltralightListener* instance);
+
+void mf_ultralight_composite_command_set_next(
+    MfUltralightListener* instance,
+    const MfUltralightListenerCommandCallback handler);
+void mf_ultralight_composite_command_reset(MfUltralightListener* instance);
+bool mf_ultralight_composite_command_in_progress(MfUltralightListener* instance);
+MfUltralightCommand
+    mf_ultralight_composite_command_run(MfUltralightListener* instance, BitBuffer* buffer);
 #ifdef __cplusplus
 }
 #endif
