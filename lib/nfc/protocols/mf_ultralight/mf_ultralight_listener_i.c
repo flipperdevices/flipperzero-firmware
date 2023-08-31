@@ -162,3 +162,25 @@ void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance) {
         instance->data->counter[2].data,
         sizeof(instance->data->counter[2].data));
 }
+
+bool mf_ultralight_composite_command_in_progress(MfUltralightListener* instance) {
+    return (instance->composite_cmd.callback != NULL);
+}
+
+MfUltralightCommand
+    mf_ultralight_composite_command_run(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = (instance->composite_cmd.callback)(instance, buffer);
+    mf_ultralight_composite_command_reset(instance);
+    return command;
+}
+
+void mf_ultralight_composite_command_reset(MfUltralightListener* instance) {
+    instance->composite_cmd.callback = NULL;
+    instance->composite_cmd.data = 0;
+}
+
+void mf_ultralight_composite_command_set_next(
+    MfUltralightListener* instance,
+    const MfUltralightListenerCommandCallback handler) {
+    instance->composite_cmd.callback = handler;
+}
