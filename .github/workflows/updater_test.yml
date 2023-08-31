@@ -10,7 +10,7 @@ env:
 
 jobs:
   test_updater_on_bench:
-    runs-on: [self-hosted, FlipperZeroUpdaterTest]
+    runs-on: [self-hosted, FlipperZeroIntegrationTest]
     steps:
       - name: 'Wipe workspace'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
@@ -22,19 +22,13 @@ jobs:
           submodules: false
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Get flipper from device manager (mock)'
-        id: device
-        run: |
-          echo "flipper=Rekigyn" >> $GITHUB_OUTPUT
-          echo "stlink=0F020D026415303030303032" >> $GITHUB_OUTPUT
-
       - name: 'Flashing target firmware'
         id: first_full_flash
         timeout-minutes: 10
         run: |
           source scripts/toolchain/fbtenv.sh
-          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
-          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          ./fbt flash_usb_full FORCE=1
+          python3 scripts/testops.py await_flipper
 
       - name: 'Validating updater'
         id: second_full_flash
@@ -42,8 +36,8 @@ jobs:
         if: success()
         run: |
           source scripts/toolchain/fbtenv.sh
-          ./fbt flash_usb PORT=${{steps.device.outputs.flipper}} FORCE=1
-          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          ./fbt flash_usb FORCE=1
+          python3 scripts/testops.py await_flipper
 
       - name: 'Get last release tag'
         id: release_tag
@@ -64,11 +58,11 @@ jobs:
       - name: 'Flash last release'
         if: failure()
         run: |
-          ./fbt flash SWD_TRANSPORT_SERIAL=${{steps.device.outputs.stlink}} FORCE=1
+          ./fbt flash FORCE=1
 
       - name: 'Wait for flipper and format ext'
         if: failure()
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+          python3 scripts/testops.py await_flipper
+          python3 scripts/storage.py format_ext
