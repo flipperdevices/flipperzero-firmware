@@ -63,9 +63,40 @@ static SlixPasswordType slix_get_password_type_by_id(uint8_t id) {
     return type;
 }
 
-static SlixPasswordValue
-    slix_unxor_password(const SlixPasswordValue password_xored, uint16_t random) {
-    return password_xored ^ ((SlixPasswordValue)random << 16 | random);
+static SlixPassword slix_unxor_password(const SlixPassword password_xored, uint16_t random) {
+    return password_xored ^ ((SlixPassword)random << 16 | random);
+}
+
+static SlixError slix_listener_set_password(
+    SlixListener* instance,
+    SlixPasswordType password_type,
+    SlixPassword password) {
+    SlixError error = SlixErrorNone;
+
+    do {
+        if(password_type >= SlixPasswordTypeCount) {
+            error = SlixErrorInternal;
+            break;
+        }
+
+        SlixData* slix_data = instance->data;
+
+        if(!slix_type_supports_password(slix_get_type(slix_data), password_type)) {
+            error = SlixErrorNotSupported;
+            break;
+        }
+
+        SlixListenerSessionState* session_state = &instance->session_state;
+        session_state->password_match[password_type] =
+            (password == slix_get_password(slix_data, password_type));
+
+        if(!session_state->password_match[password_type]) {
+            error = SlixErrorWrongPassword;
+            break;
+        }
+    } while(false);
+
+    return error;
 }
 
 static SlixError slix_set_password_handler(
@@ -80,7 +111,7 @@ static SlixError slix_set_password_handler(
 #pragma pack(push, 1)
         typedef struct {
             uint8_t password_id;
-            SlixPasswordValue password_xored;
+            SlixPassword password_xored;
         } SlixSetPasswordRequestLayout;
 #pragma pack(pop)
 
@@ -91,13 +122,7 @@ static SlixError slix_set_password_handler(
 
         const SlixSetPasswordRequestLayout* request = (const SlixSetPasswordRequestLayout*)data;
         const SlixPasswordType password_type = slix_get_password_type_by_id(request->password_id);
-
-        if(password_type >= SlixPasswordTypeCount) {
-            error = SlixErrorInternal;
-            break;
-        }
-
-        const SlixPasswordValue password_received =
+        const SlixPassword password_received =
             slix_unxor_password(request->password_xored, instance->session_state.random);
 
         error = slix_listener_set_password(instance, password_type, password_received);
@@ -111,14 +136,46 @@ static SlixError slix_set_password_handler(
     return error;
 }
 
+static SlixError slix_listener_write_password(
+    SlixListener* instance,
+    SlixPasswordType password_type,
+    SlixPassword password) {
+    SlixError error = SlixErrorNone;
+
+    do {
+        if(password_type >= SlixPasswordTypeCount) {
+            error = SlixErrorInternal;
+            break;
+        }
+
+        SlixData* slix_data = instance->data;
+
+        if(!slix_type_supports_password(slix_get_type(slix_data), password_type)) {
+            error = SlixErrorNotSupported;
+            break;
+        }
+
+        SlixListenerSessionState* session_state = &instance->session_state;
+
+        if(session_state->password_match[password_type]) {
+            // TODO: check for password lock
+            slix_set_password(slix_data, password_type, password);
+            // Require another SET_PASSWORD command with the new password
+            session_state->password_match[password_type] = false;
+        } else {
+            error = SlixErrorWrongPassword;
+            break;
+        }
+    } while(false);
+
+    return error;
+}
+
 static SlixError slix_write_password_handler(
     SlixListener* instance,
     const uint8_t* data,
     size_t data_size,
     uint8_t flags) {
-    UNUSED(instance);
-    UNUSED(data);
-    UNUSED(data_size);
     UNUSED(flags);
     SlixError error = SlixErrorNone;
 
@@ -126,7 +183,7 @@ static SlixError slix_write_password_handler(
 #pragma pack(push, 1)
         typedef struct {
             uint8_t password_id;
-            SlixPasswordValue password_xored;
+            SlixPassword password;
         } SlixWritePasswordRequestLayout;
 #pragma pack(pop)
 
@@ -139,15 +196,7 @@ static SlixError slix_write_password_handler(
             (const SlixWritePasswordRequestLayout*)data;
         const SlixPasswordType password_type = slix_get_password_type_by_id(request->password_id);
 
-        if(password_type >= SlixPasswordTypeCount) {
-            error = SlixErrorInternal;
-            break;
-        }
-
-        const SlixPasswordValue password_received =
-            slix_unxor_password(request->password_xored, instance->session_state.random);
-
-        error = slix_listener_write_password(instance, password_type, password_received);
+        error = slix_listener_write_password(instance, password_type, request->password);
         if(error != SlixErrorNone) break;
 
     } while(false);
@@ -165,7 +214,7 @@ static SlixError slix_enable_privacy_handler(
 
     do {
         typedef struct {
-            SlixPasswordValue password_xored;
+            SlixPassword password_xored;
         } SlixEnablePrivacyRequestLayout;
 
         if(data_size != sizeof(SlixEnablePrivacyRequestLayout)) {
@@ -176,7 +225,7 @@ static SlixError slix_enable_privacy_handler(
         const SlixEnablePrivacyRequestLayout* request =
             (const SlixEnablePrivacyRequestLayout*)data;
 
-        const SlixPasswordValue password_received =
+        const SlixPassword password_received =
             slix_unxor_password(request->password_xored, instance->session_state.random);
 
         error = slix_listener_set_password(instance, SlixPasswordTypePrivacy, password_received);
@@ -203,79 +252,8 @@ static SlixError slix_read_signature_handler(
     return SlixErrorNone;
 }
 
-SlixError slix_listener_set_password(
-    SlixListener* instance,
-    SlixPasswordType password_type,
-    SlixPasswordValue password) {
-    SlixError error = SlixErrorNone;
-
-    do {
-        if(password_type >= SlixPasswordTypeCount) {
-            error = SlixErrorInternal;
-            break;
-        }
-
-        SlixData* slix_data = instance->data;
-
-        if(!slix_type_supports_password(slix_get_type(slix_data), password_type)) {
-            error = SlixErrorNotSupported;
-            break;
-        }
-
-        SlixListenerSessionState* session_state = &instance->session_state;
-
-        bool is_valid;
-        if(slix_is_password_set(slix_data, password_type)) {
-            is_valid = (password == slix_get_password(slix_data, password_type));
-        } else {
-            slix_set_password(slix_data, password_type, password);
-            is_valid = true;
-        }
-
-        session_state->is_password_valid[password_type] = is_valid;
-
-        if(!is_valid) {
-            error = SlixErrorWrongPassword;
-            break;
-        }
-    } while(false);
-
-    return error;
-}
-
-SlixError slix_listener_write_password(
-    SlixListener* instance,
-    SlixPasswordType password_type,
-    SlixPasswordValue password) {
-    SlixError error = SlixErrorNone;
-
-    do {
-        if(password_type >= SlixPasswordTypeCount) {
-            error = SlixErrorInternal;
-            break;
-        }
-
-        SlixData* slix_data = instance->data;
-
-        if(!slix_type_supports_password(slix_get_type(slix_data), password_type)) {
-            error = SlixErrorNotSupported;
-            break;
-        }
-
-        SlixListenerSessionState* session_state = &instance->session_state;
-
-        if(session_state->is_password_valid[password_type]) {
-            // TODO: check for password lock
-            slix_set_password(slix_data, password_type, password);
-            // Require another SET_PASSWORD command with the new password
-            session_state->is_password_valid[password_type] = false;
-        } else {
-            error = SlixErrorWrongPassword;
-            break;
-        }
-    } while(false);
-
-    return error;
+bool slix_listener_is_password_valid(SlixListener* instance, SlixPasswordType password_type) {
+    return instance->session_state.password_match[password_type];
 }
 
 SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer* rx_buffer) {

@@ -41,6 +41,8 @@ extern "C" {
 #define SLIX_TYPE_FEATURE_PROTECTION (1U << 6)
 #define SLIX_TYPE_FEATURE_LOCK_BITS (1U << 7)
 
+typedef uint32_t SlixTypeFeatures;
+
 typedef enum {
     SlixErrorNone,
     SlixErrorTimeout,
@@ -68,14 +70,7 @@ typedef enum {
     SlixPasswordTypeCount,
 } SlixPasswordType;
 
-typedef uint32_t SlixTypeFeatures;
-
-typedef uint32_t SlixPasswordValue;
-
-typedef struct {
-    bool is_set;
-    SlixPasswordValue value;
-} SlixPassword;
+typedef uint32_t SlixPassword;
 
 typedef struct {
     bool is_present;
@@ -134,14 +129,12 @@ const Iso15693_3Data* slix_get_base_data(const SlixData* data);
 
 SlixType slix_get_type(const SlixData* data);
 
-bool slix_is_password_set(const SlixData* data, SlixPasswordType password_type);
-
-SlixPasswordValue slix_get_password(const SlixData* data, SlixPasswordType password_type);
+SlixPassword slix_get_password(const SlixData* data, SlixPasswordType password_type);
 
 bool slix_is_privacy_mode(const SlixData* data);
 
 // Setters
-void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPasswordValue password);
+void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password);
 
 void slix_set_privacy_mode(SlixData* data, bool set);
 

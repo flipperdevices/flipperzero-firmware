@@ -11,7 +11,7 @@ extern "C" {
 
 typedef struct {
     uint16_t random;
-    bool is_password_valid[SlixPasswordTypeCount];
+    bool password_match[SlixPasswordTypeCount];
 } SlixListenerSessionState;
 
 struct SlixListener {
@@ -27,16 +27,6 @@ struct SlixListener {
     NfcGenericCallback callback;
     void* context;
 };
-
-SlixError slix_listener_set_password(
-    SlixListener* instance,
-    SlixPasswordType password_type,
-    SlixPasswordValue password);
-
-SlixError slix_listener_write_password(
-    SlixListener* instance,
-    SlixPasswordType password_type,
-    SlixPasswordValue password);
 
 SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer* rx_buffer);
 
