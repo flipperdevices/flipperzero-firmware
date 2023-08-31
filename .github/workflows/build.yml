@@ -17,3 +17,9 @@ jobs:
         with:
           name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
           path: dist/flipperzero_fnaf.fap
+      - name: Lint sources
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        with:
+          # skip SDK setup, we already did it in previous step
+          skip-setup: true
+          task: lint
