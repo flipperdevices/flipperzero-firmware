@@ -75,7 +75,7 @@ static bool bq27220_parameter_check(
             uint8_t checksum = bq27220_get_checksum(buffer, size + 2);
             // 4. Write the check sum to 0x60 and the total length of (address + parameter data + check sum + length) to 0x61
             buffer[0] = checksum;
-            // 2 bytes address, `size` bytes data, 1 byte check sum, 1 byte length = 6
+            // 2 bytes address, `size` bytes data, 1 byte check sum, 1 byte length
             buffer[1] = 2 + size + 1 + 1;
             if(!furi_hal_i2c_write_mem(
                    handle, BQ27220_ADDRESS, CommandMACDataSum, buffer, 2, BQ27220_I2C_TIMEOUT)) {
