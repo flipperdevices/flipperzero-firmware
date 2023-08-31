@@ -2,11 +2,11 @@ name: 'Generate documentation with Doxygen'
 
 on:
   push:
-    pull_request:
     branches:
       - dev
     tags:
       - '*'
+  pull_request:
 
 env:
   TARGETS: f7
