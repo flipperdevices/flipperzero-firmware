@@ -61,3 +61,8 @@ jobs:
         if: failure()
         run: |
           ./fbt gdb_trace_all FIRMWARE_APP_SET=unit_tests FORCE=1
+
+      - name: 'Create notification'
+        if: steps.copy.outcome == 'success' && steps.run_units.outcome == 'failure'
+        run: |
+          echo "::Unit tests failed, check that step for details"

@@ -32,7 +32,7 @@ jobs:
 
       - name: 'Validating updater'
         id: second_full_flash
-        timeout-minutes: 10
+        timeout-minutes: 5
         if: success()
         run: |
           source scripts/toolchain/fbtenv.sh
@@ -41,24 +41,29 @@ jobs:
 
       - name: 'Get last release tag'
         id: release_tag
-        if: failure()
+        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         run: |
           echo "tag=$(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)" >> $GITHUB_OUTPUT
 
       - name: 'Wipe workspace'
+        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout latest release'
         uses: actions/checkout@v3
-        if: failure()
+        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         with:
           fetch-depth: 1
           ref: ${{ steps.release_tag.outputs.tag }}
 
       - name: 'Flash last release'
-        if: failure()
+        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         run: |
-          ./fbt flash FORCE=1
+          source scripts/toolchain/fbtenv.sh
+          openocd -f interface/stlink.cfg -c "transport select hla_swd" -f ./scripts/debug/stm32wbx.cfg \
+            -c "stm32wbx.cpu configure -rtos auto" -c "reset_config srst_only srst_nogate connect_assert_srst" \
+            -c init -c "program build/f7-firmware-D/firmware.bin reset exit 0x8000000" \
+            -c "reset_config srst_only srst_nogate connect_assert_srst"
 
       - name: 'Wait for flipper and format ext'
         if: failure()
@@ -66,3 +71,9 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testops.py await_flipper
           python3 scripts/storage.py format_ext
+
+      - name: 'Create notification'
+        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
+        run: |
+          echo "::Error Flipper updater failure"
+
