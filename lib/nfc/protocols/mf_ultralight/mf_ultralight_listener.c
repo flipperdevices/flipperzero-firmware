@@ -314,6 +314,53 @@ static MfUltralightCommand
     return command;
 }
 
+static MfUltralightCommand
+    mf_ultralight_comp_write_handler_p2(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
+    FURI_LOG_D(TAG, "CMD_CM_WR_2");
+
+    do {
+        if(bit_buffer_get_size_bytes(buffer) != 16) break;
+
+        const uint8_t* rx_data = bit_buffer_get_data(buffer);
+        uint8_t start_page = instance->composite_cmd.data;
+        memcpy(instance->data->page[start_page].data, &rx_data[0], sizeof(MfUltralightPage));
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+
+        command = MfUltralightCommandProcessed;
+    } while(false);
+
+    return command;
+}
+
+static MfUltralightCommand
+    mf_ultralight_comp_write_handler_p1(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedSilent;
+
+    FURI_LOG_D(TAG, "CMD_CM_WR_1");
+
+    do {
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportCompatibleWrite))
+            break;
+
+        uint8_t start_page = bit_buffer_get_byte(buffer, 1);
+        uint16_t pages_total = instance->data->pages_total;
+
+        if(start_page < 2 || start_page > pages_total) {
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
+        instance->composite_cmd.data = start_page;
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+        command = MfUltralightCommandProcessed;
+        mf_ultralight_composite_command_set_next(instance, mf_ultralight_comp_write_handler_p2);
+    } while(false);
+
+    return command;
+}
+
 static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
     {
         .cmd = MF_ULTRALIGHT_CMD_READ_PAGE,
@@ -354,6 +401,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .cmd = MF_ULTRALIGHT_CMD_INCR_CNT,
         .cmd_len_bits = 6 * 8,
         .callback = mf_ultralight_listener_increase_counter_handler,
+    },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_COMP_WRITE,
+        .cmd_len_bits = 2 * 8,
+        .callback = mf_ultralight_comp_write_handler_p1,
     },
 };
 
