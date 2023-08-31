@@ -1,6 +1,6 @@
 App(
     appid="flipperzero_fnaf",
-    name="FNAF",
+    name="Five Nights at Flipper's",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipperzero_fnaf",
     stack_size= 1 * 1024,
