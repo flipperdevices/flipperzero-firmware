@@ -41,23 +41,23 @@ jobs:
 
       - name: 'Get last release tag'
         id: release_tag
-        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
+        if: failure() && steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         run: |
           echo "tag=$(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)" >> $GITHUB_OUTPUT
 
       - name: 'Wipe workspace'
-        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
+        if: failure() && steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout latest release'
         uses: actions/checkout@v3
-        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
+        if: failure() && steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         with:
           fetch-depth: 1
           ref: ${{ steps.release_tag.outputs.tag }}
 
       - name: 'Flash last release'
-        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
+        if: failure() && steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         run: |
           source scripts/toolchain/fbtenv.sh
           openocd -f interface/stlink.cfg -c "transport select hla_swd" -f ./scripts/debug/stm32wbx.cfg \
@@ -73,7 +73,7 @@ jobs:
           python3 scripts/storage.py format_ext
 
       - name: 'Create notification'
-        if: steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
+        if: failure() && steps.first_full_flash.outcome == 'success' && steps.second_full_flash.outcome == 'failure'
         run: |
           echo "::Error Flipper updater failure"
 
