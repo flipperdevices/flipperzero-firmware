@@ -14,16 +14,6 @@ typedef enum {
     MfUltralightListenerAccessTypeWrite,
 } MfUltralightListenerAccessType;
 
-typedef enum {
-    MfUltralightCommandNotFound,
-    MfUltralightCommandProcessed,
-    MfUltralightCommandNotProcessedNAK,
-    MfUltralightCommandNotProcessedSilent,
-} MfUltralightCommand;
-
-typedef MfUltralightCommand (
-    *MfUltralightListenerCommandCallback)(MfUltralightListener* instance, BitBuffer* buf);
-
 typedef struct {
     uint8_t cmd;
     size_t cmd_len_bits;

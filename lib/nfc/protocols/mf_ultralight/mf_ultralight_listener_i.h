@@ -17,6 +17,23 @@ typedef enum {
     MfUltraligthListenerStateIdle,
 } MfUltraligthListenerState;
 
+typedef enum {
+    MfUltralightCommandNotFound,
+    MfUltralightCommandProcessed,
+    MfUltralightCommandNotProcessedNAK,
+    MfUltralightCommandNotProcessedSilent,
+} MfUltralightCommand;
+
+typedef MfUltralightCommand (
+    *MfUltralightListenerCommandCallback)(MfUltralightListener* instance, BitBuffer* buf);
+
+typedef uint8_t MfUltralightListenerCompositeCommandData;
+
+typedef struct {
+    MfUltralightListenerCompositeCommandData data;
+    MfUltralightListenerCommandCallback callback;
+} MfUltralightListenerCompositeCommandContext;
+
 typedef struct {
     uint8_t enabled;
     uint8_t ascii_offset;
