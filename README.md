@@ -1,4 +1,4 @@
-# flipperzero-nrf24 channel scanner
+# Flipperzero -NRF24 channel scanner
 
 ## Author: [htotoo](https://github.com/htotoo/NRF24ChannelScanner)
 
@@ -29,6 +29,13 @@ UP / DOWN: change the time spent in a channel. Suggested: 150 us, but you can pl
 
 ## Warning
 These apps are for **educational purposes** only. Please use this code responsibly and only use these apps on your own equipment.
+
+
+## Compared to HackRf
+
+<img src="https://raw.githubusercontent.com/htotoo/NRF24ChannelScanner/main/NRF24ChannelScanner/.flipcorg/banner.png">
+
+Thanks for the image: [Sil333033](https://github.com/Sil333033)
 
 
 # Pinout from from NoComp/Frog
