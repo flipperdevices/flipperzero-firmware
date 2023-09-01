@@ -223,7 +223,7 @@ FHalNfcError f_hal_iso4443a_listener_tx(
 
 FHalNfcError f_hal_nfca_listener_tx_custom_parity(
     const uint8_t* tx_data,
-    const bool* tx_parity,
+    const uint8_t* tx_parity,
     size_t tx_bits) {
     furi_assert(tx_data);
     furi_assert(tx_parity);

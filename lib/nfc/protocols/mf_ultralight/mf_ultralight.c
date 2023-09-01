@@ -474,7 +474,7 @@ bool mf_ultralight_set_uid(MfUltralightData* data, const uint8_t* uid, size_t ui
     return iso14443_3a_set_uid(data->iso14443_3a_data, uid, uid_len);
 }
 
-const Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data) {
+Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data) {
     furi_assert(data);
 
     return data->iso14443_3a_data;

@@ -418,14 +418,13 @@ static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* insta
 
 MfUltralightListener* mf_ultralight_listener_alloc(
     Iso14443_3aListener* iso14443_3a_listener,
-    const MfUltralightData* data) {
+    MfUltralightData* data) {
     furi_assert(iso14443_3a_listener);
 
     MfUltralightListener* instance = malloc(sizeof(MfUltralightListener));
     instance->mirror.ascii_mirror_data = furi_string_alloc();
     instance->iso14443_3a_listener = iso14443_3a_listener;
-    instance->data = mf_ultralight_alloc();
-    mf_ultralight_copy(instance->data, data);
+    instance->data = data;
     mf_ultralight_listener_prepare_emulation(instance);
     mf_ultralight_composite_command_reset(instance);
     instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE);
@@ -445,7 +444,6 @@ void mf_ultralight_listener_free(MfUltralightListener* instance) {
 
     bit_buffer_free(instance->tx_buffer);
     furi_string_free(instance->mirror.ascii_mirror_data);
-    mf_ultralight_free(instance->data);
     free(instance);
 }
 

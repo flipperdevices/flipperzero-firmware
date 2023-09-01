@@ -141,7 +141,7 @@ bool felica_set_uid(FelicaData* data, const uint8_t* uid, size_t uid_len) {
     return uid_valid;
 }
 
-const FelicaData* felica_get_base_data(const FelicaData* data) {
+FelicaData* felica_get_base_data(const FelicaData* data) {
     UNUSED(data);
     furi_crash("No base data");
 }

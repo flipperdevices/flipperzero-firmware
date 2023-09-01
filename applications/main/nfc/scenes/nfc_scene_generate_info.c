@@ -17,7 +17,7 @@ void nfc_scene_generate_info_on_enter(void* context) {
     furi_assert((protocol == NfcProtocolMfUltralight) || (protocol == NfcProtocolMfClassic));
 
     const Iso14443_3aData* iso14443_3a_data =
-        nfc_device_get_base_data(instance->nfc_device, protocol);
+        nfc_device_get_data(instance->nfc_device, NfcProtocolIso14443_3a);
 
     // Setup dialog view
     Widget* widget = instance->widget;

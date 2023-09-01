@@ -227,7 +227,7 @@ const uint8_t* bit_buffer_get_data(const BitBuffer* buf);
  * @param [in] buf pointer to a BitBuffer instance to be queried
  * @return pointer to the underlying data
  */
-const bool* bit_buffer_get_parity(const BitBuffer* buf);
+const uint8_t* bit_buffer_get_parity(const BitBuffer* buf);
 
 // Setters
 

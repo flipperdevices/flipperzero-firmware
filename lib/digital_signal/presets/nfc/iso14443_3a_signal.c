@@ -54,7 +54,7 @@ static void iso14443_3a_add_byte(Iso14443_3aSignal* instance, uint8_t byte, bool
 static void iso14443_3a_signal_encode(
     Iso14443_3aSignal* instance,
     const uint8_t* tx_data,
-    const bool* tx_parity,
+    const uint8_t* tx_parity,
     size_t tx_bits) {
     furi_assert(instance);
     furi_assert(tx_data);
@@ -75,7 +75,8 @@ static void iso14443_3a_signal_encode(
         }
     } else {
         for(size_t i = 0; i < tx_bits / 8; i++) {
-            iso14443_3a_add_byte(instance, tx_data[i], tx_parity[i]);
+            bool parity = FURI_BIT(tx_parity[i / 8], i % 8);
+            iso14443_3a_add_byte(instance, tx_data[i], parity);
         }
     }
 }
@@ -109,7 +110,7 @@ void iso14443_3a_signal_free(Iso14443_3aSignal* instance) {
 void iso14443_3a_signal_tx(
     Iso14443_3aSignal* instance,
     const uint8_t* tx_data,
-    const bool* tx_parity,
+    const uint8_t* tx_parity,
     size_t tx_bits) {
     furi_assert(instance);
     furi_assert(tx_data);

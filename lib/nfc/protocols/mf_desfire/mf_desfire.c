@@ -233,7 +233,7 @@ bool mf_desfire_set_uid(MfDesfireData* data, const uint8_t* uid, size_t uid_len)
     return iso14443_4a_set_uid(data->iso14443_4a_data, uid, uid_len);
 }
 
-const Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data) {
+Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data) {
     furi_assert(data);
 
     return data->iso14443_4a_data;
