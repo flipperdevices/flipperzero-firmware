@@ -183,7 +183,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Wii EC Analyser | ![GPIO Badge] | [by csBlueChip](https://github.com/csBlueChip/FlipperZero_WiiEC) |  | ![None Badge] |
 | Wire Tester | ![GPIO Badge] | [by unixispower](https://gitlab.com/unixispower/flipper-wire-tester) |  | ![None Badge] |
 | Atomic Dice Roller | ![GPIO Badge] | [by nmrr](https://github.com/nmrr/flipperzero-atomicdiceroller) |  | ![None Badge] |
-| NRF24 Channel Scanner | ![GPIO Badge] | [by htotoo](https://github.com/htotoo/NRF24ChannelScanner) |  | ![None Badge] |
+| NRF24 Channel Scanner | ![GPIO Badge] | [by htotoo](https://github.com/htotoo/NRF24ChannelScanner) |  | [![Author Badge]](https://lab.flipper.net/apps/nrf24channelscanner) |
 | Mx2125 - Step Counter | ![GPIO Badge] | [by grugnoymeme](https://github.com/grugnoymeme/flipperzero-stepcounter-fap) |  | ![None Badge] |
 | IR Remote | ![IR Badge] | [by Hong5489](https://github.com/Hong5489/ir_remote) | improvements [by friebel](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [by d4ve10](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option) | ![None Badge] |
 | IR Intervalometer for Sony Cameras | ![IR Badge] | [by Nitepone](https://github.com/Nitepone/flipper-intervalometer) |  | [![UFW Badge]](https://lab.flipper.net/apps/sony_intervalometer) |
@@ -225,6 +225,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | VB Lab Migration Assistant | ![Tools Badge] | [by GMMan (cyanic)](https://github.com/GMMan/flipperzero-vb-migrate) |  | [![Author Badge]](https://lab.flipper.net/apps/vb_migrate) |
 | Simple calendar app | ![Tools Badge] | [by Adiras](https://github.com/Adiras/flipperzero-calendar) |  | ![None Badge] |
 | USB HID Autofire | ![USB Badge] | [by pbek](https://github.com/pbek/usb_hid_autofire) |  | ![None Badge] |
+
+
+#### Catalog links checked at `01 Sep 16:24 GMT +3`
 
 --- 
 
