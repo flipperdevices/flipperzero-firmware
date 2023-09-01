@@ -41,7 +41,7 @@ static bool select_move1_input_callback(InputEvent* event, void* context) {
         view_dispatcher_switch_to_view(select_move1->app->view_dispatcher, AppViewSelectMove2);
         consumed = true;
     } else if(event->type == InputTypePress && event->key == InputKeyBack) {
-        view_dispatcher_switch_to_view(select_move1->app->view_dispatcher, AppViewSelectLevel);
+        view_dispatcher_switch_to_view(select_move1->app->view_dispatcher, AppViewSelectStats);
         consumed = true;
     } else if(event->type == InputTypePress && event->key == InputKeyLeft) {
         with_view_model_cpp(
@@ -116,6 +116,7 @@ void select_move1_enter_callback(void* context) {
             model->current_pokemon = select_move1->app->current_pokemon;
             model->pokemon_hex_code = select_move1->app->pokemon_hex_code;
             model->current_level = select_move1->app->current_level;
+            model->current_stats = select_move1->app->current_stats;
             model->move1_hex_code = select_move1->app->move1_hex_code;
         },
         true);

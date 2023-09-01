@@ -12,6 +12,7 @@
 
 #include "views/select_pokemon.hpp"
 #include "views/select_level.hpp"
+#include "views/select_stats.hpp"
 #include "views/select_move1.hpp"
 #include "views/select_move2.hpp"
 #include "views/select_move3.hpp"
@@ -55,6 +56,7 @@ struct App {
     ViewDispatcher* view_dispatcher;
     SelectPokemon* select_pokemon;
     SelectLevel* select_level;
+    SelectStats* select_stats;
     SelectMove1* select_move1;
     SelectMove2* select_move2;
     SelectMove3* select_move3;
@@ -64,6 +66,7 @@ struct App {
 
     int current_pokemon = 0;
     int current_level = 3;
+    int current_stats = 0;
     int current_move = 0;
     char pokemon_hex_code = ' ';
     char move1_hex_code = ' ';
@@ -75,6 +78,7 @@ struct App {
 typedef enum {
     AppViewSelectPokemon,
     AppViewSelectLevel,
+    AppViewSelectStats,
     AppViewSelectMove1,
     AppViewSelectMove2,
     AppViewSelectMove3,
@@ -87,6 +91,7 @@ typedef void (*SelectPokemonCallback)(void* context, uint32_t index);
 typedef struct SelectPokemonModel {
     int current_pokemon = 0;
     int current_level = 3;
+    int current_stats = 0;
     int current_move = 0;
     char pokemon_hex_code = ' ';
     char move1_hex_code = ' ';

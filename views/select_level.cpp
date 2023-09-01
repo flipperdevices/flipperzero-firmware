@@ -39,7 +39,7 @@ static bool select_level_input_callback(InputEvent* event, void* context) {
             },
             false);
         
-        view_dispatcher_switch_to_view(select_level->app->view_dispatcher, AppViewSelectMove1);
+        view_dispatcher_switch_to_view(select_level->app->view_dispatcher, AppViewSelectStats);
         consumed = true;
     } else if(event->type == InputTypePress && event->key == InputKeyBack) {
         view_dispatcher_switch_to_view(select_level->app->view_dispatcher, AppViewSelectPokemon);

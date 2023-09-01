@@ -116,6 +116,7 @@ void select_move2_enter_callback(void* context) {
             model->current_pokemon = select_move2->app->current_pokemon;
             model->pokemon_hex_code = select_move2->app->pokemon_hex_code;
             model->current_level = select_move2->app->current_level;
+            model->current_stats = select_move2->app->current_stats;
             model->move1_hex_code = select_move2->app->move1_hex_code;
             model->move2_hex_code = select_move2->app->move2_hex_code;
         },

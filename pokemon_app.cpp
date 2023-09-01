@@ -356,6 +356,14 @@ App* pokemon_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, AppViewSelectLevel, select_level_get_view(app));
 
+    //  Start Index first stat
+    app->current_stats = 0;
+    // Select Level View
+    app->select_stats = select_stats_alloc(app);
+    view_set_previous_callback(select_stats_get_view(app), pokemon_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, AppViewSelectStats, select_stats_get_view(app));
+
     //  Start Index first move
     app->current_move = 0;
     // Select Move View
@@ -406,6 +414,8 @@ void free_app(App* app) {
     select_pokemon_free(app);
     view_dispatcher_remove_view(app->view_dispatcher, AppViewSelectLevel);
     select_level_free(app);
+    view_dispatcher_remove_view(app->view_dispatcher, AppViewSelectStats);
+    select_stats_free(app);
     view_dispatcher_remove_view(app->view_dispatcher, AppViewSelectMove1);
     select_move1_free(app);
     view_dispatcher_remove_view(app->view_dispatcher, AppViewSelectMove2);
