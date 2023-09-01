@@ -24,17 +24,10 @@ typedef struct {
 
 typedef Iso15693_3Error (*Iso15693_3ListenerOverrideHandler)(void* context, va_list args);
 
-typedef enum {
-    Iso15693_3ListenerOverrideCommandReadBlock,
-    Iso15693_3ListenerOverrideCommandWriteBlock,
-    Iso15693_3ListenerOverrideCommandLockBlock,
-    Iso15693_3ListenerOverrideCommandReadMultiBlock,
-    Iso15693_3ListenerOverrideCommandWriteMultiBlock,
-    Iso15693_3ListenerOverrideCommandResetToReady,
-    Iso15693_3ListenerOverrideCommandWriteAfi,
-    Iso15693_3ListenerOverrideCommandLockAfi,
-    Iso15693_3ListenerOverrideCommandCount,
-} Iso15693_3ListenerOverrideCommand;
+typedef struct {
+    Iso15693_3ListenerOverrideHandler mandatory[ISO15693_3_MANDATORY_COUNT];
+    Iso15693_3ListenerOverrideHandler optional[ISO15693_3_OPTIONAL_COUNT];
+} Iso15693_3ListenerOverrideTable;
 
 struct Iso15693_3Listener {
     Nfc* nfc;
@@ -49,13 +42,13 @@ struct Iso15693_3Listener {
     NfcGenericCallback callback;
     void* context;
 
-    const Iso15693_3ListenerOverrideHandler* override_table;
+    const Iso15693_3ListenerOverrideTable* override_table;
     void* override_context;
 };
 
 Iso15693_3Error iso15693_3_listener_set_override_table(
     Iso15693_3Listener* instance,
-    const Iso15693_3ListenerOverrideHandler* table,
+    const Iso15693_3ListenerOverrideTable* table,
     void* context);
 
 Iso15693_3Error iso15693_3_listener_ready(Iso15693_3Listener* instance);

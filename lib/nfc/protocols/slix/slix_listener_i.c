@@ -278,6 +278,12 @@ static Iso15693_3Error slix_iso15693_3_read_block_override(SlixListener* instanc
     return error;
 }
 
+static Iso15693_3Error slix_iso15693_3_inventory_override(SlixListener* instance, va_list args) {
+    UNUSED(args);
+
+    return instance->data->is_privacy_mode ? Iso15693_3ErrorIgnore : Iso15693_3ErrorNone;
+}
+
 static Iso15693_3Error
     slix_iso15693_3_write_lock_block_override(SlixListener* instance, va_list args) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
@@ -346,21 +352,33 @@ static Iso15693_3Error
                Iso15693_3ErrorNone;
 }
 
-Iso15693_3ListenerOverrideHandler
-    slix_iso15693_override_table[Iso15693_3ListenerOverrideCommandCount] = {
-        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_read_block_override,
-        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_block_override,
-        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_block_override,
-        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_read_multi_block_override,
-        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_multi_block_override,
-        (Iso15693_3ListenerOverrideHandler)NULL,
-        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_afi_override,
-        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_afi_override,
+static const Iso15693_3ListenerOverrideTable slix_iso15693_override_table = {
+    .mandatory =
+        {
+            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_inventory_override,
+            (Iso15693_3ListenerOverrideHandler)NULL // Stay quiet,
+        },
+    .optional =
+        {
+            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_read_block_override,
+            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_block_override,
+            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_block_override,
+            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_read_multi_block_override,
+            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_multi_block_override,
+            (Iso15693_3ListenerOverrideHandler)NULL, // Select
+            (Iso15693_3ListenerOverrideHandler)NULL, // Reset to ready
+            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_afi_override,
+            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_afi_override,
+            (Iso15693_3ListenerOverrideHandler)NULL, // Write DSFID
+            (Iso15693_3ListenerOverrideHandler)NULL, // Lock DSFID
+            (Iso15693_3ListenerOverrideHandler)NULL, // Get system info
+            (Iso15693_3ListenerOverrideHandler)NULL, // Get multi block security
+        },
 };
 
 SlixError slix_listener_init_overrides(SlixListener* instance) {
     iso15693_3_listener_set_override_table(
-        instance->iso15693_3_listener, slix_iso15693_override_table, instance);
+        instance->iso15693_3_listener, &slix_iso15693_override_table, instance);
     return SlixErrorNone;
 }
 

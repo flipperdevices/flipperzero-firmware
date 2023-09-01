@@ -15,16 +15,24 @@ typedef struct {
     Iso15693_3RequestHandler optional[ISO15693_3_OPTIONAL_COUNT];
 } Iso15693_3ListenerHandlerTable;
 
-static Iso15693_3Error iso15693_3_listener_handle_override(
-    Iso15693_3Listener* instance,
-    Iso15693_3ListenerOverrideCommand command,
-    ...) {
+static Iso15693_3Error
+    iso15693_3_listener_handle_override(Iso15693_3Listener* instance, uint32_t command, ...) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
         if(instance->override_table == NULL) break;
 
-        Iso15693_3ListenerOverrideHandler handler = instance->override_table[command];
+        Iso15693_3ListenerOverrideHandler handler = NULL;
+
+        if(command < ISO15693_3_CMD_MANDATORY_RFU) {
+            const Iso15693_3ListenerOverrideHandler* mandatory =
+                instance->override_table->mandatory;
+            handler = mandatory[command - ISO15693_3_CMD_MANDATORY_START];
+        } else if(command >= ISO15693_3_CMD_OPTIONAL_START && command < ISO15693_3_CMD_OPTIONAL_RFU) {
+            const Iso15693_3ListenerOverrideHandler* optional = instance->override_table->optional;
+            handler = optional[command - ISO15693_3_CMD_OPTIONAL_START];
+        }
+
         if(handler == NULL) break;
 
         va_list args;
@@ -71,6 +79,9 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
         if(mask_len != 0) {
             // TODO: Take mask_len and mask_value into account (if present)
         }
+
+        error = iso15693_3_listener_handle_override(instance, ISO15693_3_CMD_INVENTORY);
+        if(error != Iso15693_3ErrorNone) break;
 
         bit_buffer_append_byte(instance->tx_buffer, instance->data->system_info.dsfid); // DSFID
         iso15693_3_append_uid(instance->data, instance->tx_buffer); // UID
@@ -121,7 +132,7 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
         }
 
         error = iso15693_3_listener_handle_override(
-            instance, Iso15693_3ListenerOverrideCommandReadBlock, (uint32_t)block_index);
+            instance, ISO15693_3_CMD_READ_BLOCK, (uint32_t)block_index);
         if(error != Iso15693_3ErrorNone) break;
 
         if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
@@ -175,7 +186,7 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
         }
 
         error = iso15693_3_listener_handle_override(
-            instance, Iso15693_3ListenerOverrideCommandWriteBlock, (uint32_t)block_index);
+            instance, ISO15693_3_CMD_WRITE_BLOCK, (uint32_t)block_index);
         if(error != Iso15693_3ErrorNone) break;
 
         iso15693_3_set_block_data(
@@ -219,7 +230,7 @@ static Iso15693_3Error iso15693_3_listener_lock_block_handler(
         }
 
         error = iso15693_3_listener_handle_override(
-            instance, Iso15693_3ListenerOverrideCommandLockBlock, (uint32_t)block_index);
+            instance, ISO15693_3_CMD_LOCK_BLOCK, (uint32_t)block_index);
         if(error != Iso15693_3ErrorNone) break;
 
         iso15693_3_set_block_locked(instance->data, block_index, true);
@@ -263,7 +274,7 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
 
         error = iso15693_3_listener_handle_override(
             instance,
-            Iso15693_3ListenerOverrideCommandReadMultiBlock,
+            ISO15693_3_CMD_READ_MULTI_BLOCKS,
             (uint32_t)block_index_start,
             (uint32_t)block_index_end);
         if(error != Iso15693_3ErrorNone) break;
@@ -325,7 +336,7 @@ static Iso15693_3Error iso15693_3_listener_write_multi_blocks_handler(
 
         error = iso15693_3_listener_handle_override(
             instance,
-            Iso15693_3ListenerOverrideCommandWriteMultiBlock,
+            ISO15693_3_CMD_WRITE_MULTI_BLOCKS,
             (uint32_t)block_index_start,
             (uint32_t)block_index_end);
         if(error != Iso15693_3ErrorNone) break;
@@ -408,8 +419,7 @@ static Iso15693_3Error iso15693_3_listener_write_afi_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(
-            instance, Iso15693_3ListenerOverrideCommandWriteAfi);
+        error = iso15693_3_listener_handle_override(instance, ISO15693_3_CMD_WRITE_AFI);
         if(error != Iso15693_3ErrorNone) break;
 
         instance->data->system_info.afi = request->afi;
@@ -436,8 +446,7 @@ static Iso15693_3Error iso15693_3_listener_lock_afi_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(
-            instance, Iso15693_3ListenerOverrideCommandLockAfi);
+        error = iso15693_3_listener_handle_override(instance, ISO15693_3_CMD_LOCK_AFI);
         if(error != Iso15693_3ErrorNone) break;
 
         instance->data->system_info.flags |= ISO15693_3_SYSINFO_LOCK_AFI;
@@ -687,7 +696,7 @@ static inline Iso15693_3Error iso15693_3_listener_handle_custom_request(
 
 Iso15693_3Error iso15693_3_listener_set_override_table(
     Iso15693_3Listener* instance,
-    const Iso15693_3ListenerOverrideHandler* table,
+    const Iso15693_3ListenerOverrideTable* table,
     void* context) {
     furi_assert(instance);
     furi_assert(context);
