@@ -52,6 +52,7 @@ typedef enum {
     SlixErrorNotSupported,
     SlixErrorInternal,
     SlixErrorWrongPassword,
+    SlixErrorUidMismatch,
     SlixErrorUnknown,
 } SlixError;
 
