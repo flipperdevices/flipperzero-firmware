@@ -75,6 +75,13 @@ static NfcError nfc_process_hal_error(FHalNfcError error) {
     return err;
 }
 
+static void nfc_listener_sleep(Nfc* instance) {
+    furi_assert(instance);
+    furi_assert(instance->state == NfcStateListenerStarted);
+
+    f_hal_nfc_listener_sleep();
+}
+
 static int32_t nfc_worker_listener(void* context) {
     furi_assert(context);
 
@@ -121,9 +128,9 @@ static int32_t nfc_worker_listener(void* context) {
             if(command == NfcCommandStop) {
                 break;
             } else if(command == NfcCommandReset) {
-                nfc_listener_reset(instance);
+                f_hal_listener_reset(instance);
             } else if(command == NfcCommandSleep) {
-                nfc_listener_sleep(instance);
+                f_hal_nfc_listener_sleep(instance);
             }
         }
     }
@@ -344,24 +351,6 @@ void nfc_listener_abort(Nfc* instance) {
 void nfc_stop(Nfc* instance) {
     furi_assert(instance);
     furi_thread_join(instance->worker_thread);
-}
-
-NfcError nfc_listener_reset(Nfc* instance) {
-    furi_assert(instance);
-    furi_assert(instance->state == NfcStateListenerStarted);
-
-    f_hal_nfc_listener_sleep();
-
-    return NfcErrorNone;
-}
-
-NfcError nfc_listener_sleep(Nfc* instance) {
-    furi_assert(instance);
-    furi_assert(instance->state == NfcStateListenerStarted);
-
-    f_hal_nfc_listener_reset();
-
-    return NfcErrorNone;
 }
 
 NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {

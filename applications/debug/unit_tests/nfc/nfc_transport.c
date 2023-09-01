@@ -334,17 +334,6 @@ void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context)
     furi_thread_start(instance->worker_thread);
 }
 
-NfcError nfc_listener_reset(Nfc* instance) {
-    furi_assert(instance);
-    furi_assert(poller_queue);
-
-    instance->col_res_status = Iso14443_3aColResStatusIdle;
-    NfcMessage message = {.type = NfcMessageTypeTimeout};
-    furi_message_queue_put(poller_queue, &message, FuriWaitForever);
-
-    return NfcErrorNone;
-}
-
 void nfc_listener_abort(Nfc* instance) {
     furi_assert(instance);
 

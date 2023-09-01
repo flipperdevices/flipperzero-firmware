@@ -82,20 +82,9 @@ void nfc_set_fdt_poll_poll_us(Nfc* instance, uint32_t fdt_poll_poll_us);
 
 void nfc_set_guard_time_us(Nfc* instance, uint32_t guard_time_us);
 
-NfcError nfc_listener_set_col_res_data(
-    Nfc* instance,
-    uint8_t* uid,
-    uint8_t uid_len,
-    uint8_t* atqa,
-    uint8_t sak);
-
 void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context);
 
 void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context);
-
-NfcError nfc_listener_reset(Nfc* instance);
-
-NfcError nfc_listener_sleep(Nfc* instance);
 
 void nfc_listener_abort(Nfc* instance);
 
@@ -114,6 +103,13 @@ NfcError nfc_trx_custom_parity(
 NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt);
 
 // Technology specific API
+
+NfcError nfc_listener_set_col_res_data(
+    Nfc* instance,
+    uint8_t* uid,
+    uint8_t uid_len,
+    uint8_t* atqa,
+    uint8_t sak);
 
 NfcError nfc_iso14443_3a_short_frame(
     Nfc* instance,
