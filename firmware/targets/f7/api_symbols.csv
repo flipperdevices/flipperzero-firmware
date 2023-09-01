@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,37.0,,
+Version,+,38.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2185,7 +2185,6 @@ Function,+,nfc_device_alloc,NfcDevice*,
 Function,+,nfc_device_clear,void,NfcDevice*
 Function,+,nfc_device_copy_data,void,"const NfcDevice*, NfcProtocol, NfcDeviceData*"
 Function,+,nfc_device_free,void,NfcDevice*
-Function,+,nfc_device_get_base_data,const NfcDeviceData*,"const NfcDevice*, NfcProtocol"
 Function,+,nfc_device_get_data,const NfcDeviceData*,"const NfcDevice*, NfcProtocol"
 Function,+,nfc_device_get_name,const char*,"const NfcDevice*, NfcDeviceNameType"
 Function,+,nfc_device_get_protocol,NfcProtocol,const NfcDevice*

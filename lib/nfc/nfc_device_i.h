@@ -14,7 +14,7 @@ struct NfcDevice {
     void* loading_callback_context;
 };
 
-NfcDeviceData* nfc_device_get_data_ptr(NfcDevice* instance, NfcProtocol protocol);
+NfcDeviceData* nfc_device_get_data_ptr(const NfcDevice* instance, NfcProtocol protocol);
 
 #ifdef __cplusplus
 }
