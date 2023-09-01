@@ -73,9 +73,13 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - Press the `LEFT`/`RIGHT` buttons to paginate the selection of the Pokemon's level by 1.
 - Press the `UP`/`DOWN` buttons to paginate the selection of the Pokemon's level by 10.
 - Press the `OK` button to select the Pokemon's level to trade.
-- The Flipper Zero should show the selection for the Pokemon's moves that you want to trade, this will happen 4 times. The default is `No Move`.
+- The Flipper Zero should show the selection for the Pokemon's moves that you want to trade, this will happen 4 times with default bing no move.
 - Press the `LEFT`/`RIGHT` buttons to paginate the selection of the Pokemon's current move selection by 1.
 - Press the `UP`/`DOWN` buttons to paginate the selection of the Pokemon's current move selection by 10.
+- Press the `OK` button to select the Pokemon's current move selection to trade.
+- The Flipper Zero should show the selection for the Pokemon's stats that you want to trade, and by default, it appears as random IV and zero EV.
+- Press the `RIGHT`/`UP` buttons to paginate the selection of the Pokemon's stats selection by 1 positively.
+- Press the `LEFT`/`DOWN` buttons to paginate the selection of the Pokemon's stats selection by 1 negatively.
 - Press the `OK` button to select the Pokemon's current move selection to trade.
 - The Flipper Zero will display the view to connect the Game Boy.
 
