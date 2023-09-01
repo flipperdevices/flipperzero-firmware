@@ -16,9 +16,9 @@
 
 ## Introduction
 
-This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generación I)](https://bulbapedia.bulbagarden.net/wiki/Generation_I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
+This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generaction I)](https://bulbapedia.bulbagarden.net/wiki/Generation_I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
 
-It currently trades a Pokemon based on your choice of Pokemon, Level, and 4 Moves. It assumes a perfect IV and sets the EV for each stat to 0 (captured Pokemon) and calculates the Pokemon's Stats.
+It currently trades a Pokemon based on your choice of Pokemon, Level, Stats and 4 Moves.
 
 ## Installation Directions
 
@@ -260,16 +260,17 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - Game Boy Advance (GBA)
 
 ## Implemented by
-<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a>
+<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a><br />
 <a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a>
 
 ## TODO
-- [ ] Refactor the code
-- [x] The OK button stops working when exiting the app, so it needs to be restarted 🤔
-- [x] Set each Pokemon's characteristics, attacks, and default levels
-- [ ] Improve animations
-- [ ] Add images for the level selction screen and the move selection screens as per the original README
-- [ ] Add an option to enable EV to be set to the maximum as per level ((65535 / 100) * level), or to the utmost maximum (65535)
+- [ ] Change the default traded Pokemon's naming to be no nickname (current nickname is the Pokemon's name)
+- [x] Add view to allow the traded Pokemon's level to be chosen between 3 and 100
+- [x] Add view to allow the traded Pokemon's hidden stats to be chosen (IV and EV) from some options
+- [x] Add view to allow the traded Pokemon's moveset to be chosen (all 4 moves) allowing no move as an option
+- [ ] Add images for the level selection screen, stats selection screen, and move selection screens as per the original README
+- [ ] Optimise the level selection screen to be a number slider input instead of the current slideshow still selector
+- [ ] Add a view to allow for a custom Pokemon nickname
 
 ## Links
 
