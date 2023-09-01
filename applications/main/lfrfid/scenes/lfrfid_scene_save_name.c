@@ -1,4 +1,3 @@
-
 #include "../lfrfid_i.h"
 #include <dolphin/dolphin.h>
 #include <furi_hal_rtc.h>

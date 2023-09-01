@@ -7,13 +7,13 @@
 #include <stdbool.h>
 #include <furi.h>
 
-const char* name_generator_left[] = {
+const char* const name_generator_left[] = {
     "ancient",  "hollow", "strange",   "disappeared", "unknown",    "unthinkable", "unnameable",
     "nameless", "my",     "concealed", "forgotten",   "hidden",     "mysterious",  "obscure",
     "random",   "remote", "uncharted", "undefined",   "untraveled", "untold",
 };
 
-const char* name_generator_right[] = {
+const char* const name_generator_right[] = {
     "door",
     "entrance",
     "doorway",
@@ -28,7 +28,7 @@ const char* name_generator_right[] = {
     "port",
 };
 
-void name_generator_make_auto(char* name, uint8_t max_name_size, const char* prefix) {
+void name_generator_make_auto(char* name, size_t max_name_size, const char* prefix) {
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDetailedFilename)) {
         name_generator_make_detailed(name, max_name_size, prefix);
     } else {
@@ -36,7 +36,7 @@ void name_generator_make_auto(char* name, uint8_t max_name_size, const char* pre
     }
 }
 
-void name_generator_make_random(char* name, uint8_t max_name_size) {
+void name_generator_make_random(char* name, size_t max_name_size) {
     furi_assert(name);
     furi_assert(max_name_size);
 
@@ -54,7 +54,7 @@ void name_generator_make_random(char* name, uint8_t max_name_size) {
     name[0] = name[0] - 0x20;
 }
 
-void name_generator_make_detailed(char* name, uint8_t max_name_size, const char* prefix) {
+void name_generator_make_detailed(char* name, size_t max_name_size, const char* prefix) {
     furi_assert(name);
     furi_assert(max_name_size);
     furi_assert(prefix);
