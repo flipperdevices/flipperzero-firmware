@@ -1,13 +1,12 @@
 #include "nfc_listener.h"
 
 #include <nfc/protocols/nfc_listener_defs.h>
-#include <nfc/protocols/nfc_device_defs.h>
+#include <nfc/nfc_device_i.h>
 
 #include <furi.h>
 
 typedef struct NfcListenerListElement {
     NfcProtocol protocol;
-    NfcDeviceData* data;
     NfcGenericInstance* listener;
     const NfcListenerBase* listener_api;
     struct NfcListenerListElement* child;
@@ -22,15 +21,12 @@ struct NfcListener {
     NfcProtocol protocol;
     Nfc* nfc;
     NfcListenerList list;
+    NfcDevice* nfc_dev;
 };
 
-static void nfc_listener_list_alloc(NfcListener* instance, const NfcDeviceData* data) {
+static void nfc_listener_list_alloc(NfcListener* instance) {
     instance->list.head = malloc(sizeof(NfcListenerListElement));
     instance->list.head->protocol = instance->protocol;
-
-    // Allocate and copy data to emulate
-    instance->list.head->data = nfc_devices[instance->protocol]->alloc();
-    nfc_devices[instance->protocol]->copy(instance->list.head->data, data);
 
     instance->list.head->listener_api = nfc_listeners_api[instance->protocol];
     instance->list.head->child = NULL;
@@ -43,8 +39,6 @@ static void nfc_listener_list_alloc(NfcListener* instance, const NfcDeviceData* 
 
         NfcListenerListElement* parent = malloc(sizeof(NfcListenerListElement));
         parent->protocol = parent_protocol;
-        parent->data =
-            nfc_devices[instance->list.head->protocol]->get_base_data(instance->list.head->data);
         parent->listener_api = nfc_listeners_api[parent_protocol];
         parent->child = instance->list.head;
 
@@ -53,12 +47,13 @@ static void nfc_listener_list_alloc(NfcListener* instance, const NfcDeviceData* 
 
     // Allocate listener instances
     NfcListenerListElement* iter = instance->list.head;
-    iter->listener = iter->listener_api->alloc(instance->nfc, iter->data);
+    NfcDeviceData* data_tmp = nfc_device_get_data_ptr(instance->nfc_dev, iter->protocol);
+    iter->listener = iter->listener_api->alloc(instance->nfc, data_tmp);
 
     do {
         if(iter->child == NULL) break;
-        iter->child->listener =
-            iter->child->listener_api->alloc(iter->listener, iter->child->data);
+        data_tmp = nfc_device_get_data_ptr(instance->nfc_dev, iter->child->protocol);
+        iter->child->listener = iter->child->listener_api->alloc(iter->listener, data_tmp);
         iter->listener_api->set_callback(
             iter->listener, iter->child->listener_api->run, iter->child->listener);
 
@@ -67,9 +62,6 @@ static void nfc_listener_list_alloc(NfcListener* instance, const NfcDeviceData* 
 }
 
 static void nfc_listener_list_free(NfcListener* instance) {
-    // Free protocol data
-    nfc_devices[instance->protocol]->free(instance->list.tail->data);
-
     // Free listener instances
     do {
         instance->list.head->listener_api->free(instance->list.head->listener);
@@ -89,7 +81,9 @@ NfcListener* nfc_listener_alloc(Nfc* nfc, NfcProtocol protocol, const NfcDeviceD
     NfcListener* instance = malloc(sizeof(NfcListener));
     instance->nfc = nfc;
     instance->protocol = protocol;
-    nfc_listener_list_alloc(instance, data);
+    instance->nfc_dev = nfc_device_alloc();
+    nfc_device_set_data(instance->nfc_dev, protocol, data);
+    nfc_listener_list_alloc(instance);
 
     return instance;
 }
@@ -98,6 +92,7 @@ void nfc_listener_free(NfcListener* instance) {
     furi_assert(instance);
 
     nfc_listener_list_free(instance);
+    nfc_device_free(instance->nfc_dev);
     free(instance);
 }
 

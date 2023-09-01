@@ -1,4 +1,4 @@
-#include "nfc_device.h"
+#include "nfc_device_i.h"
 
 #include <storage/storage.h>
 #include <flipper_format/flipper_format.h>
@@ -13,14 +13,6 @@
 #define NFC_DEVICE_TYPE_KEY "Device type"
 
 #define NFC_DEVICE_UID_MAX_LEN (10U)
-
-struct NfcDevice {
-    NfcProtocol protocol;
-    NfcDeviceData* protocol_data;
-
-    NfcLoadingCallback loading_callback;
-    void* loading_callback_context;
-};
 
 NfcDevice* nfc_device_alloc() {
     NfcDevice* instance = malloc(sizeof(NfcDevice));
