@@ -4,7 +4,6 @@
 #include <toolbox/path.h>
 
 #include <dolphin/dolphin.h>
-#include <furi_hal_rtc.h>
 
 static void ibutton_scene_save_name_text_input_callback(void* context) {
     iButton* ibutton = context;

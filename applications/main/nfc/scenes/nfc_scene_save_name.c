@@ -3,7 +3,6 @@
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 #include <dolphin/dolphin.h>
-#include <furi_hal_rtc.h>
 
 void nfc_scene_save_name_text_input_callback(void* context) {
     Nfc* nfc = context;
