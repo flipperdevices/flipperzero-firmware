@@ -265,7 +265,6 @@ const FHalNfcTechBase f_hal_nfc_iso14443a = {
             .init = f_hal_nfc_iso14443a_listener_init,
             .deinit = f_hal_nfc_iso14443a_listener_deinit,
             .wait_event = f_hal_nfc_wait_event_common,
-            .rx_start = f_hal_nfc_common_listener_rx_start,
             .tx = f_hal_iso4443a_listener_tx,
             .rx = f_hal_nfc_common_fifo_rx,
         },

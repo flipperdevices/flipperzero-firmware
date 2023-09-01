@@ -92,7 +92,6 @@ typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
     FHalNfcWaitEvent wait_event;
-    FHalNfcChipConfig rx_start;
     FHalNfcTx tx;
     FHalNfcRx rx;
 } FHalNfcTechListenerBase;

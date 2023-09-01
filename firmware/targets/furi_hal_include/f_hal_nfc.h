@@ -120,13 +120,7 @@ FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* 
 
 FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits);
 
-FHalNfcError f_hal_nfc_listener_rx_start();
-
 FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
-
-FHalNfcError f_hal_nfc_listener_start();
-
-FHalNfcError f_hal_nfc_listener_reset();
 
 FHalNfcError f_hal_nfc_listener_sleep();
 
@@ -149,8 +143,6 @@ void f_hal_nfc_timer_block_tx_start_us(uint32_t time_us);
 void f_hal_nfc_timer_block_tx_stop();
 
 bool f_hal_nfc_timer_block_tx_is_running();
-
-void f_hal_nfc_set_mask_receive_timer(uint32_t time_fc);
 
 /******************* NFCA specific API *******************/
 

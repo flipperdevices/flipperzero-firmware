@@ -336,11 +336,6 @@ static FHalNfcError
     return FHalNfcErrorNone;
 }
 
-static FHalNfcError f_hal_nfc_iso15693_listener_rx_start(FuriHalSpiBusHandle* handle) {
-    UNUSED(handle);
-    return FHalNfcErrorNone;
-}
-
 static void f_hal_nfc_iso15693_parser_callback(Iso15693ParserEvent event, void* context) {
     furi_assert(context);
 
@@ -426,7 +421,6 @@ const FHalNfcTechBase f_hal_nfc_iso15693 = {
             .init = f_hal_nfc_iso15693_listener_init,
             .deinit = f_hal_nfc_iso15693_listener_deinit,
             .wait_event = f_hal_nfc_iso15693_wait_event,
-            .rx_start = f_hal_nfc_iso15693_listener_rx_start,
             .tx = f_hal_nfc_iso15693_listener_tx,
             .rx = f_hal_nfc_iso15693_listener_rx,
         },

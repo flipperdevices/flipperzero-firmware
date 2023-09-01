@@ -82,7 +82,6 @@ static int32_t nfc_worker_listener(void* context) {
     furi_assert(instance->callback);
     furi_assert(instance->config_state == NfcConfigurationStateDone);
 
-    f_hal_nfc_listener_start();
     instance->state = NfcStateListenerStarted;
 
     f_hal_nfc_event_start();
@@ -100,10 +99,8 @@ static int32_t nfc_worker_listener(void* context) {
             break;
         }
         if(event & FHalNfcEventFieldOn) {
-            // FURI_LOG_D(TAG, "Field ON");
             nfc_event.type = NfcEventTypeFieldOn;
             instance->callback(nfc_event, instance->context);
-            f_hal_nfc_listener_rx_start();
         }
         if(event & FHalNfcEventFieldOff) {
             nfc_event.type = NfcEventTypeFieldOff;
