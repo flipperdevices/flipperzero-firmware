@@ -18,7 +18,7 @@
 
 This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generación I)](https://bulbapedia.bulbagarden.net/wiki/Generation_I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
 
-It is a Proof of Concept (POC) for using views, GPIO, and FURI (Flipper Universal Registry Implementation).
+It currently trades a Pokemon based on your choice of Pokemon, Level, and 4 Moves. It assumes a perfect IV and sets the EV for each stat to 0 (captured Pokemon) and calculates the Pokemon's Stats.
 
 ## Installation Directions
 
@@ -49,7 +49,7 @@ And use [**qFlipper**](https://flipperzero.one/update) to copy the generated **p
 These instructions assume that you are starting at the Flipper Zero desktop. Otherwise, press the Back button until you are at the desktop.
 
 - Press the `OK` button on the Flipper to open the main menu.
-- Choose `Aplicaciones` from the menu.
+- Choose `Applications` from the menu.
 - Choose `Game Boy` from the submenu.
 - Choose `Pokemon Trading`
 - The Flipper Zero should show the selection of Pokemon that you want to trade, and by default, it appears as bulbasaur.
@@ -63,69 +63,99 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - Press the `LEFT`/`RIGHT` buttons to paginate the selection of Pokemon by 1.
 - Press the `UP`/`DOWN` buttons to paginate the selection of Pokemon by 10.
 - Press the `OK` button to select the Pokemon to trade.
+
     <p align='center'>
          <br />
         <img src="./docs/images/flipper-zero-flat-2.png" width="400" /><br />
     </p>
+
+- The Flipper Zero should show the selection of the Pokemon's level that you want to trade, and by default, it appears as level 1.
+- Press the `LEFT`/`RIGHT` buttons to paginate the selection of the Pokemon's level by 1.
+- Press the `UP`/`DOWN` buttons to paginate the selection of the Pokemon's level by 10.
+- Press the `OK` button to select the Pokemon's level to trade.
+- The Flipper Zero should show the selection for the Pokemon's moves that you want to trade, this will happen 4 times. The default is `No Move`.
+- Press the `LEFT`/`RIGHT` buttons to paginate the selection of the Pokemon's current move selection by 1.
+- Press the `UP`/`DOWN` buttons to paginate the selection of the Pokemon's current move selection by 10.
+- Press the `OK` button to select the Pokemon's current move selection to trade.
 - The Flipper Zero will display the view to connect the Game Boy.
+
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-3.png" width="400" /><br />
     </p>
+
 - On your Game Boy, you should connect the  **Game Link Cable** to the Game Boy and in the game, go to the nearest  **Pokemon Center**.
+
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_pokemon_center.png" width="400" /><br />
     </p>
+
 - Talk to the girl at the counter on the right. The girl will tell us that we have to save the game before playing, we will answer **YES** by pressing the **A** button.
 
-.
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_save.png" width="400" /><br />
     </p>
+
 - The Flipper Zero will show that we are connected.
+
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-4.png" width="400" /><br />
     </p>
+
 - On the Game Boy, we will be asked which option we want, and we select **TRADE CENTER**.
+
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_save_trade.png" width="400" /><br />
     </p>
+
 - You will enter the Trade Center where you must press the A button on the Game Boy on your side of the table.
+
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_trade_room_2.png" width="400" /><br />
     </p>
+
 - Flipper Zero will remain on a waiting screen with the Pokemon you selected.
+
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-5.png" width="400" /><br />
     </p>
+
 - You will see your Pokemon and the Pokemon you selected on the Flipper Zero, in this case, `Mew`. You must select the Pokemon you want to trade and press **TRADE**.
+
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_trade_list_select_trade.png" width="400" /><br />
     </p>
+
 - You must confirm the selected trade by selecting **TRADE**.
+
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_trade_list_select_trade_confirm.png" width="400" /><br />
     </p>
+
 - Flipper Zero will remain on a waiting screen with the Pokemon you selected.
+
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-6.png" width="400" /><br />
     </p>
+
 - Finally, the Pokemon exchange will start from **Flipper Zero** to the **Game Boy**.
+
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-7.png" width="400" /><br />
     </p>
 
     If the Flipper Zero gets stuck at the end of the exchange, you must reboot it by pressing the <img src="./docs/images/left.png" /> LEFT + <img src="./docs/images/back.png" /> BACK key combination.
+
     <p align='center'>
         <br />
         <img src="./docs/images/reboot.png" width="400" /><br />
@@ -226,13 +256,16 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - Game Boy Advance (GBA)
 
 ## Implemented by
-<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/issues?q=is%3Aissue+label%3AImplemented+is%3Aclosed+is%3Aopen+" target="_blank"><img src="./docs/images/implemented.svg" /></a>
+<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a>
+<a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a>
 
 ## TODO
 - [ ] Refactor the code
 - [x] The OK button stops working when exiting the app, so it needs to be restarted 🤔
-- [ ] Set each Pokemon's characteristics, attacks, and default levels
+- [x] Set each Pokemon's characteristics, attacks, and default levels
 - [ ] Improve animations
+- [ ] Add images for the level selction screen and the move selection screens as per the original README
+- [ ] Add an option to enable EV to be set to the maximum as per level ((65535 / 100) * level), or to the utmost maximum (65535)
 
 ## Links
 
