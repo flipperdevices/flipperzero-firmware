@@ -12,67 +12,14 @@ typedef SlixError (*SlixRequestHandler)(
     size_t data_size,
     uint8_t flags);
 
+// Helper functions
+
 static bool
     slix_listener_is_password_lock_enabled(SlixListener* instance, SlixPasswordType password_type) {
     return !instance->session_state.password_match[password_type];
 }
 
-static SlixError slix_default_handler(
-    SlixListener* instance,
-    const uint8_t* data,
-    size_t data_size,
-    uint8_t flags) {
-    UNUSED(instance);
-    UNUSED(data);
-    UNUSED(data_size);
-    UNUSED(flags);
-
-    // Empty placeholder handler
-    return SlixErrorNotSupported;
-}
-
-static SlixError slix_get_nxp_system_info_handler(
-    SlixListener* instance,
-    const uint8_t* data,
-    size_t data_size,
-    uint8_t flags) {
-    UNUSED(data);
-    UNUSED(data_size);
-    UNUSED(flags);
-
-    const SlixData* slix_data = instance->data;
-
-    const SlixProtection* protection = &slix_data->system_info.protection;
-    bit_buffer_append_byte(instance->tx_buffer, protection->pointer);
-    bit_buffer_append_byte(instance->tx_buffer, protection->condition);
-
-    const SlixLockBits* lock_bits = &slix_data->system_info.lock_bits;
-    bit_buffer_append_byte(instance->tx_buffer, lock_bits->data);
-
-    const uint32_t feature_flags = SLIX2_FEATURE_FLAGS;
-    bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&feature_flags, sizeof(uint32_t));
-
-    return SlixErrorNone;
-}
-
-static SlixError slix_get_random_number_handler(
-    SlixListener* instance,
-    const uint8_t* data,
-    size_t data_size,
-    uint8_t flags) {
-    UNUSED(data);
-    UNUSED(data_size);
-    UNUSED(flags);
-
-    SlixListenerSessionState* session_state = &instance->session_state;
-    session_state->random = furi_hal_random_get();
-    bit_buffer_append_bytes(
-        instance->tx_buffer, (uint8_t*)&session_state->random, sizeof(uint16_t));
-
-    return SlixErrorNone;
-}
-
-static SlixPasswordType slix_get_password_type_by_id(uint8_t id) {
+static SlixPasswordType slix_listener_get_password_type_by_id(uint8_t id) {
     uint32_t type;
 
     for(type = 0; type < SlixPasswordTypeCount; ++type) {
@@ -82,7 +29,8 @@ static SlixPasswordType slix_get_password_type_by_id(uint8_t id) {
     return type;
 }
 
-static SlixPassword slix_unxor_password(const SlixPassword password_xored, uint16_t random) {
+static SlixPassword
+    slix_listener_unxor_password(const SlixPassword password_xored, uint16_t random) {
     return password_xored ^ ((SlixPassword)random << 16 | random);
 }
 
@@ -112,43 +60,6 @@ static SlixError slix_listener_set_password(
         if(!session_state->password_match[password_type]) {
             error = SlixErrorWrongPassword;
             break;
-        }
-    } while(false);
-
-    return error;
-}
-
-static SlixError slix_set_password_handler(
-    SlixListener* instance,
-    const uint8_t* data,
-    size_t data_size,
-    uint8_t flags) {
-    UNUSED(flags);
-    SlixError error = SlixErrorNone;
-
-    do {
-#pragma pack(push, 1)
-        typedef struct {
-            uint8_t password_id;
-            SlixPassword password_xored;
-        } SlixSetPasswordRequestLayout;
-#pragma pack(pop)
-
-        if(data_size != sizeof(SlixSetPasswordRequestLayout)) {
-            error = SlixErrorFormat;
-            break;
-        }
-
-        const SlixSetPasswordRequestLayout* request = (const SlixSetPasswordRequestLayout*)data;
-        const SlixPasswordType password_type = slix_get_password_type_by_id(request->password_id);
-        const SlixPassword password_received =
-            slix_unxor_password(request->password_xored, instance->session_state.random);
-
-        error = slix_listener_set_password(instance, password_type, password_received);
-        if(error != SlixErrorNone) break;
-
-        if(password_type == SlixPasswordTypePrivacy) {
-            slix_set_privacy_mode(instance->data, false);
         }
     } while(false);
 
@@ -190,7 +101,101 @@ static SlixError slix_listener_write_password(
     return error;
 }
 
-static SlixError slix_write_password_handler(
+// Custom SLIX request handlers
+static SlixError slix_listener_default_handler(
+    SlixListener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(instance);
+    UNUSED(data);
+    UNUSED(data_size);
+    UNUSED(flags);
+
+    // Empty placeholder handler
+    return SlixErrorNotSupported;
+}
+
+static SlixError slix_listener_get_nxp_system_info_handler(
+    SlixListener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(data);
+    UNUSED(data_size);
+    UNUSED(flags);
+
+    const SlixData* slix_data = instance->data;
+
+    const SlixProtection* protection = &slix_data->system_info.protection;
+    bit_buffer_append_byte(instance->tx_buffer, protection->pointer);
+    bit_buffer_append_byte(instance->tx_buffer, protection->condition);
+
+    const SlixLockBits* lock_bits = &slix_data->system_info.lock_bits;
+    bit_buffer_append_byte(instance->tx_buffer, lock_bits->data);
+
+    const uint32_t feature_flags = SLIX2_FEATURE_FLAGS;
+    bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&feature_flags, sizeof(uint32_t));
+
+    return SlixErrorNone;
+}
+
+static SlixError slix_listener_get_random_number_handler(
+    SlixListener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(data);
+    UNUSED(data_size);
+    UNUSED(flags);
+
+    SlixListenerSessionState* session_state = &instance->session_state;
+    session_state->random = furi_hal_random_get();
+    bit_buffer_append_bytes(
+        instance->tx_buffer, (uint8_t*)&session_state->random, sizeof(uint16_t));
+
+    return SlixErrorNone;
+}
+
+static SlixError slix_listener_set_password_handler(
+    SlixListener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(flags);
+    SlixError error = SlixErrorNone;
+
+    do {
+#pragma pack(push, 1)
+        typedef struct {
+            uint8_t password_id;
+            SlixPassword password_xored;
+        } SlixSetPasswordRequestLayout;
+#pragma pack(pop)
+
+        if(data_size != sizeof(SlixSetPasswordRequestLayout)) {
+            error = SlixErrorFormat;
+            break;
+        }
+
+        const SlixSetPasswordRequestLayout* request = (const SlixSetPasswordRequestLayout*)data;
+        const SlixPasswordType password_type =
+            slix_listener_get_password_type_by_id(request->password_id);
+        const SlixPassword password_received =
+            slix_listener_unxor_password(request->password_xored, instance->session_state.random);
+
+        error = slix_listener_set_password(instance, password_type, password_received);
+        if(error != SlixErrorNone) break;
+
+        if(password_type == SlixPasswordTypePrivacy) {
+            slix_set_privacy_mode(instance->data, false);
+        }
+    } while(false);
+
+    return error;
+}
+
+static SlixError slix_listener_write_password_handler(
     SlixListener* instance,
     const uint8_t* data,
     size_t data_size,
@@ -213,7 +218,8 @@ static SlixError slix_write_password_handler(
 
         const SlixWritePasswordRequestLayout* request =
             (const SlixWritePasswordRequestLayout*)data;
-        const SlixPasswordType password_type = slix_get_password_type_by_id(request->password_id);
+        const SlixPasswordType password_type =
+            slix_listener_get_password_type_by_id(request->password_id);
 
         error = slix_listener_write_password(instance, password_type, request->password);
         if(error != SlixErrorNone) break;
@@ -223,7 +229,7 @@ static SlixError slix_write_password_handler(
     return error;
 }
 
-static SlixError slix_enable_privacy_handler(
+static SlixError slix_listener_enable_privacy_handler(
     SlixListener* instance,
     const uint8_t* data,
     size_t data_size,
@@ -245,7 +251,7 @@ static SlixError slix_enable_privacy_handler(
             (const SlixEnablePrivacyRequestLayout*)data;
 
         const SlixPassword password_received =
-            slix_unxor_password(request->password_xored, instance->session_state.random);
+            slix_listener_unxor_password(request->password_xored, instance->session_state.random);
 
         error = slix_listener_set_password(instance, SlixPasswordTypePrivacy, password_received);
         if(error != SlixErrorNone) break;
@@ -256,7 +262,7 @@ static SlixError slix_enable_privacy_handler(
     return error;
 }
 
-static SlixError slix_read_signature_handler(
+static SlixError slix_listener_read_signature_handler(
     SlixListener* instance,
     const uint8_t* data,
     size_t data_size,
@@ -271,7 +277,49 @@ static SlixError slix_read_signature_handler(
     return SlixErrorNone;
 }
 
-static Iso15693_3Error slix_iso15693_3_read_block_override(SlixListener* instance, va_list args) {
+// Custom SLIX commands handler table
+static const SlixRequestHandler slix_request_handler_table[SLIX_CMD_CUSTOM_COUNT] = {
+    slix_listener_default_handler, // SLIX_CMD_SET_EAS (0xA2U)
+    slix_listener_default_handler, // SLIX_CMD_RESET_EAS (0xA3U)
+    slix_listener_default_handler, // SLIX_CMD_LOCK_EAS (0xA4U)
+    slix_listener_default_handler, // SLIX_CMD_EAS_ALARM (0xA5U)
+    slix_listener_default_handler, // SLIX_CMD_PASSWORD_PROTECT_EAS_AFI (0xA6U)
+    slix_listener_default_handler, // SLIX_CMD_WRITE_EAS_ID (0xA7U)
+    slix_listener_default_handler, // UNUSED (0xA8U)
+    slix_listener_default_handler, // UNUSED (0xA9U)
+    slix_listener_default_handler, // UNUSED (0xAAU)
+    slix_listener_get_nxp_system_info_handler,
+    slix_listener_default_handler, // UNUSED (0xACU)
+    slix_listener_default_handler, // UNUSED (0xADU)
+    slix_listener_default_handler, // UNUSED (0xAEU)
+    slix_listener_default_handler, // UNUSED (0xAFU)
+    slix_listener_default_handler, // SLIX_CMD_INVENTORY_PAGE_READ (0xB0U)
+    slix_listener_default_handler, // SLIX_CMD_INVENTORY_PAGE_READ_FAST (0xB1U)
+    slix_listener_get_random_number_handler,
+    slix_listener_set_password_handler,
+    slix_listener_write_password_handler,
+    slix_listener_default_handler, // SLIX_CMD_64_BIT_PASSWORD_PROTECTION (0xB5U)
+    slix_listener_default_handler, // SLIX_CMD_PROTECT_PAGE (0xB6U)
+    slix_listener_default_handler, // SLIX_CMD_LOCK_PAGE_PROTECTION_CONDITION (0xB7U)
+    slix_listener_default_handler, // UNUSED (0xB8U)
+    slix_listener_default_handler, // SLIX_CMD_DESTROY (0xB9U)
+    slix_listener_enable_privacy_handler,
+    slix_listener_default_handler, // UNUSED (0xBBU)
+    slix_listener_default_handler, // SLIX_CMD_STAY_QUIET_PERSISTENT (0xBCU)
+    slix_listener_read_signature_handler,
+};
+
+// ISO15693-3 Protocol extension handlers
+
+static Iso15693_3Error
+    slix_listener_iso15693_3_inventory_extension_handler(SlixListener* instance, va_list args) {
+    UNUSED(args);
+
+    return instance->data->is_privacy_mode ? Iso15693_3ErrorIgnore : Iso15693_3ErrorNone;
+}
+
+static Iso15693_3Error
+    slix_iso15693_3_read_block_extension_handler(SlixListener* instance, va_list args) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     const uint32_t block_num = va_arg(args, uint32_t);
@@ -292,48 +340,9 @@ static Iso15693_3Error slix_iso15693_3_read_block_override(SlixListener* instanc
     return error;
 }
 
-// Custom SLIX commands handler table
-static const SlixRequestHandler slix_request_handler_table[SLIX_CMD_CUSTOM_COUNT] = {
-    slix_default_handler, // SLIX_CMD_SET_EAS (0xA2U)
-    slix_default_handler, // SLIX_CMD_RESET_EAS (0xA3U)
-    slix_default_handler, // SLIX_CMD_LOCK_EAS (0xA4U)
-    slix_default_handler, // SLIX_CMD_EAS_ALARM (0xA5U)
-    slix_default_handler, // SLIX_CMD_PASSWORD_PROTECT_EAS_AFI (0xA6U)
-    slix_default_handler, // SLIX_CMD_WRITE_EAS_ID (0xA7U)
-    slix_default_handler, // UNUSED (0xA8U)
-    slix_default_handler, // UNUSED (0xA9U)
-    slix_default_handler, // UNUSED (0xAAU)
-    slix_get_nxp_system_info_handler,
-    slix_default_handler, // UNUSED (0xACU)
-    slix_default_handler, // UNUSED (0xADU)
-    slix_default_handler, // UNUSED (0xAEU)
-    slix_default_handler, // UNUSED (0xAFU)
-    slix_default_handler, // SLIX_CMD_INVENTORY_PAGE_READ (0xB0U)
-    slix_default_handler, // SLIX_CMD_INVENTORY_PAGE_READ_FAST (0xB1U)
-    slix_get_random_number_handler,
-    slix_set_password_handler,
-    slix_write_password_handler,
-    slix_default_handler, // SLIX_CMD_64_BIT_PASSWORD_PROTECTION (0xB5U)
-    slix_default_handler, // SLIX_CMD_PROTECT_PAGE (0xB6U)
-    slix_default_handler, // SLIX_CMD_LOCK_PAGE_PROTECTION_CONDITION (0xB7U)
-    slix_default_handler, // UNUSED (0xB8U)
-    slix_default_handler, // SLIX_CMD_DESTROY (0xB9U)
-    slix_enable_privacy_handler,
-    slix_default_handler, // UNUSED (0xBBU)
-    slix_default_handler, // SLIX_CMD_STAY_QUIET_PERSISTENT (0xBCU)
-    slix_read_signature_handler,
-};
-
-// ISO15693-3 Protocol extensions start here
-
-static Iso15693_3Error slix_iso15693_3_inventory_override(SlixListener* instance, va_list args) {
-    UNUSED(args);
-
-    return instance->data->is_privacy_mode ? Iso15693_3ErrorIgnore : Iso15693_3ErrorNone;
-}
-
-static Iso15693_3Error
-    slix_iso15693_3_write_lock_block_override(SlixListener* instance, va_list args) {
+static Iso15693_3Error slix_listener_iso15693_3_write_lock_block_extension_handler(
+    SlixListener* instance,
+    va_list args) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     const uint32_t block_num = va_arg(args, uint32_t);
@@ -362,8 +371,9 @@ static Iso15693_3Error
     return error;
 }
 
-static Iso15693_3Error
-    slix_iso15693_3_read_multi_block_override(SlixListener* instance, va_list args) {
+static Iso15693_3Error slix_listener_iso15693_3_read_multi_block_extension_handler(
+    SlixListener* instance,
+    va_list args) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     const uint32_t block_index_start = va_arg(args, uint32_t);
@@ -383,16 +393,18 @@ static Iso15693_3Error
     return error;
 }
 
-static Iso15693_3Error
-    slix_iso15693_3_write_multi_block_override(SlixListener* instance, va_list args) {
+static Iso15693_3Error slix_listener_iso15693_3_write_multi_block_extension_handler(
+    SlixListener* instance,
+    va_list args) {
     UNUSED(instance);
     UNUSED(args);
     // No mention of this command in SLIX docs, assuming not supported
     return Iso15693_3ErrorNotSupported;
 }
 
-static Iso15693_3Error
-    slix_iso15693_3_write_lock_afi_override(SlixListener* instance, va_list args) {
+static Iso15693_3Error slix_listener_iso15693_3_write_lock_afi_extension_handler(
+    SlixListener* instance,
+    va_list args) {
     UNUSED(args);
 
     return slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeEasAfi) ?
@@ -400,34 +412,35 @@ static Iso15693_3Error
                Iso15693_3ErrorNone;
 }
 
-// Overridden ISO15693-3 standard commands handler table (NULL = no override)
-static const Iso15693_3ListenerOverrideTable slix_iso15693_override_table = {
+// Extended ISO15693-3 standard commands handler table (NULL = no extension)
+static const Iso15693_3ExtensionHandlerTable slix_iso15693_extension_handler_table = {
     .mandatory =
         {
-            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_inventory_override,
-            (Iso15693_3ListenerOverrideHandler)NULL // ISO15693_3_CMD_STAY_QUIET (0x02U)
+            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_inventory_extension_handler,
+            (Iso15693_3ExtensionHandler)NULL // ISO15693_3_CMD_STAY_QUIET (0x02U)
         },
     .optional =
         {
-            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_read_block_override,
-            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_block_override,
-            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_block_override,
-            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_read_multi_block_override,
-            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_multi_block_override,
-            (Iso15693_3ListenerOverrideHandler)NULL, // ISO15693_3_CMD_SELECT (0x25U)
-            (Iso15693_3ListenerOverrideHandler)NULL, // ISO15693_3_CMD_RESET_TO_READY (0x26U)
-            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_afi_override,
-            (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_afi_override,
-            (Iso15693_3ListenerOverrideHandler)NULL, // ISO15693_3_CMD_WRITE_DSFID (0x29U)
-            (Iso15693_3ListenerOverrideHandler)NULL, // ISO15693_3_CMD_LOCK_DSFID (0x2AU)
-            (Iso15693_3ListenerOverrideHandler)NULL, // ISO15693_3_CMD_GET_SYS_INFO (0x2BU)
-            (Iso15693_3ListenerOverrideHandler)NULL, // ISO15693_3_CMD_GET_BLOCKS_SECURITY (0x2CU)
+            (Iso15693_3ExtensionHandler)slix_iso15693_3_read_block_extension_handler,
+            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_write_lock_block_extension_handler,
+            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_write_lock_block_extension_handler,
+            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_read_multi_block_extension_handler,
+            (Iso15693_3ExtensionHandler)
+                slix_listener_iso15693_3_write_multi_block_extension_handler,
+            (Iso15693_3ExtensionHandler)NULL, // ISO15693_3_CMD_SELECT (0x25U)
+            (Iso15693_3ExtensionHandler)NULL, // ISO15693_3_CMD_RESET_TO_READY (0x26U)
+            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_write_lock_afi_extension_handler,
+            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_write_lock_afi_extension_handler,
+            (Iso15693_3ExtensionHandler)NULL, // ISO15693_3_CMD_WRITE_DSFID (0x29U)
+            (Iso15693_3ExtensionHandler)NULL, // ISO15693_3_CMD_LOCK_DSFID (0x2AU)
+            (Iso15693_3ExtensionHandler)NULL, // ISO15693_3_CMD_GET_SYS_INFO (0x2BU)
+            (Iso15693_3ExtensionHandler)NULL, // ISO15693_3_CMD_GET_BLOCKS_SECURITY (0x2CU)
         },
 };
 
-SlixError slix_listener_init_overrides(SlixListener* instance) {
-    iso15693_3_listener_set_override_table(
-        instance->iso15693_3_listener, &slix_iso15693_override_table, instance);
+SlixError slix_listener_init_iso15693_3_extensions(SlixListener* instance) {
+    iso15693_3_listener_set_extension_handler_table(
+        instance->iso15693_3_listener, &slix_iso15693_extension_handler_table, instance);
     return SlixErrorNone;
 }
 

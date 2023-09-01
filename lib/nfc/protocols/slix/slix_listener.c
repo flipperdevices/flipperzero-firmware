@@ -7,8 +7,7 @@
 
 #define SLIX_LISTENER_BUF_SIZE (64U)
 
-static SlixListener*
-    slix_listener_alloc(Iso15693_3Listener* iso15693_3_listener, SlixData* data) {
+static SlixListener* slix_listener_alloc(Iso15693_3Listener* iso15693_3_listener, SlixData* data) {
     furi_assert(iso15693_3_listener);
 
     SlixListener* instance = malloc(sizeof(SlixListener));
@@ -22,7 +21,7 @@ static SlixListener*
     instance->generic_event.instance = instance;
     instance->generic_event.data = &instance->slix_event;
 
-    slix_listener_init_overrides(instance);
+    slix_listener_init_iso15693_3_extensions(instance);
 
     return instance;
 }

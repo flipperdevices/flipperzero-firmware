@@ -16,20 +16,19 @@ typedef struct {
 } Iso15693_3ListenerHandlerTable;
 
 static Iso15693_3Error
-    iso15693_3_listener_handle_override(Iso15693_3Listener* instance, uint32_t command, ...) {
+    iso15693_3_listener_extension_handler(Iso15693_3Listener* instance, uint32_t command, ...) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
     do {
-        if(instance->override_table == NULL) break;
+        if(instance->extension_table == NULL) break;
 
-        Iso15693_3ListenerOverrideHandler handler = NULL;
+        Iso15693_3ExtensionHandler handler = NULL;
 
         if(command < ISO15693_3_CMD_MANDATORY_RFU) {
-            const Iso15693_3ListenerOverrideHandler* mandatory =
-                instance->override_table->mandatory;
+            const Iso15693_3ExtensionHandler* mandatory = instance->extension_table->mandatory;
             handler = mandatory[command - ISO15693_3_CMD_MANDATORY_START];
         } else if(command >= ISO15693_3_CMD_OPTIONAL_START && command < ISO15693_3_CMD_OPTIONAL_RFU) {
-            const Iso15693_3ListenerOverrideHandler* optional = instance->override_table->optional;
+            const Iso15693_3ExtensionHandler* optional = instance->extension_table->optional;
             handler = optional[command - ISO15693_3_CMD_OPTIONAL_START];
         }
 
@@ -38,7 +37,7 @@ static Iso15693_3Error
         va_list args;
         va_start(args, command);
 
-        error = handler(instance->override_context, args);
+        error = handler(instance->extension_context, args);
 
         va_end(args);
 
@@ -80,7 +79,7 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
             // TODO: Take mask_len and mask_value into account (if present)
         }
 
-        error = iso15693_3_listener_handle_override(instance, ISO15693_3_CMD_INVENTORY);
+        error = iso15693_3_listener_extension_handler(instance, ISO15693_3_CMD_INVENTORY);
         if(error != Iso15693_3ErrorNone) break;
 
         bit_buffer_append_byte(instance->tx_buffer, instance->data->system_info.dsfid); // DSFID
@@ -131,7 +130,7 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(
+        error = iso15693_3_listener_extension_handler(
             instance, ISO15693_3_CMD_READ_BLOCK, (uint32_t)block_index);
         if(error != Iso15693_3ErrorNone) break;
 
@@ -185,7 +184,7 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(
+        error = iso15693_3_listener_extension_handler(
             instance, ISO15693_3_CMD_WRITE_BLOCK, (uint32_t)block_index);
         if(error != Iso15693_3ErrorNone) break;
 
@@ -229,7 +228,7 @@ static Iso15693_3Error iso15693_3_listener_lock_block_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(
+        error = iso15693_3_listener_extension_handler(
             instance, ISO15693_3_CMD_LOCK_BLOCK, (uint32_t)block_index);
         if(error != Iso15693_3ErrorNone) break;
 
@@ -272,7 +271,7 @@ static Iso15693_3Error iso15693_3_listener_read_multi_blocks_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(
+        error = iso15693_3_listener_extension_handler(
             instance,
             ISO15693_3_CMD_READ_MULTI_BLOCKS,
             (uint32_t)block_index_start,
@@ -334,7 +333,7 @@ static Iso15693_3Error iso15693_3_listener_write_multi_blocks_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(
+        error = iso15693_3_listener_extension_handler(
             instance,
             ISO15693_3_CMD_WRITE_MULTI_BLOCKS,
             (uint32_t)block_index_start,
@@ -419,7 +418,7 @@ static Iso15693_3Error iso15693_3_listener_write_afi_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(instance, ISO15693_3_CMD_WRITE_AFI);
+        error = iso15693_3_listener_extension_handler(instance, ISO15693_3_CMD_WRITE_AFI);
         if(error != Iso15693_3ErrorNone) break;
 
         instance->data->system_info.afi = request->afi;
@@ -446,7 +445,7 @@ static Iso15693_3Error iso15693_3_listener_lock_afi_handler(
             break;
         }
 
-        error = iso15693_3_listener_handle_override(instance, ISO15693_3_CMD_LOCK_AFI);
+        error = iso15693_3_listener_extension_handler(instance, ISO15693_3_CMD_LOCK_AFI);
         if(error != Iso15693_3ErrorNone) break;
 
         instance->data->system_info.flags |= ISO15693_3_SYSINFO_LOCK_AFI;
@@ -694,15 +693,15 @@ static inline Iso15693_3Error iso15693_3_listener_handle_custom_request(
     return error;
 }
 
-Iso15693_3Error iso15693_3_listener_set_override_table(
+Iso15693_3Error iso15693_3_listener_set_extension_handler_table(
     Iso15693_3Listener* instance,
-    const Iso15693_3ListenerOverrideTable* table,
+    const Iso15693_3ExtensionHandlerTable* table,
     void* context) {
     furi_assert(instance);
     furi_assert(context);
 
-    instance->override_table = table;
-    instance->override_context = context;
+    instance->extension_table = table;
+    instance->extension_context = context;
     return Iso15693_3ErrorNone;
 }
 

@@ -22,12 +22,12 @@ typedef struct {
     bool wait_for_eof;
 } Iso15693_3ListenerSessionState;
 
-typedef Iso15693_3Error (*Iso15693_3ListenerOverrideHandler)(void* context, va_list args);
+typedef Iso15693_3Error (*Iso15693_3ExtensionHandler)(void* context, va_list args);
 
 typedef struct {
-    Iso15693_3ListenerOverrideHandler mandatory[ISO15693_3_MANDATORY_COUNT];
-    Iso15693_3ListenerOverrideHandler optional[ISO15693_3_OPTIONAL_COUNT];
-} Iso15693_3ListenerOverrideTable;
+    Iso15693_3ExtensionHandler mandatory[ISO15693_3_MANDATORY_COUNT];
+    Iso15693_3ExtensionHandler optional[ISO15693_3_OPTIONAL_COUNT];
+} Iso15693_3ExtensionHandlerTable;
 
 struct Iso15693_3Listener {
     Nfc* nfc;
@@ -42,13 +42,13 @@ struct Iso15693_3Listener {
     NfcGenericCallback callback;
     void* context;
 
-    const Iso15693_3ListenerOverrideTable* override_table;
-    void* override_context;
+    const Iso15693_3ExtensionHandlerTable* extension_table;
+    void* extension_context;
 };
 
-Iso15693_3Error iso15693_3_listener_set_override_table(
+Iso15693_3Error iso15693_3_listener_set_extension_handler_table(
     Iso15693_3Listener* instance,
-    const Iso15693_3ListenerOverrideTable* table,
+    const Iso15693_3ExtensionHandlerTable* table,
     void* context);
 
 Iso15693_3Error iso15693_3_listener_ready(Iso15693_3Listener* instance);

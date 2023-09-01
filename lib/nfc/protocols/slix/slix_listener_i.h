@@ -28,7 +28,7 @@ struct SlixListener {
     void* context;
 };
 
-SlixError slix_listener_init_overrides(SlixListener* instance);
+SlixError slix_listener_init_iso15693_3_extensions(SlixListener* instance);
 
 SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer* rx_buffer);
 
