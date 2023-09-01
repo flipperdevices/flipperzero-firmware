@@ -12,7 +12,7 @@ App(
     ],
     stack_size=2 * 1024,
     order=20,
-    fap_version=(0, 1), # major, minor
+    fap_version=(0, 2), # major, minor
     fap_description="App to display and log data from u-blox GPS modules over I2C",
     fap_author="liamur",
     fap_icon="ublox_app_icon.png",
