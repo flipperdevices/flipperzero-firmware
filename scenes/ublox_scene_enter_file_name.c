@@ -18,7 +18,7 @@ FuriString* ublox_scene_enter_file_name_get_timename() {
     // YMD sorts better
     furi_string_printf(
         s,
-        "gps-%.4d%.2d%.2d-%.2d%.2d%.2d.kml",
+        "ublox-%.4d%.2d%.2d-%.2d%.2d%.2d.kml",
         datetime.year,
         datetime.month,
         datetime.day,
@@ -39,8 +39,6 @@ void ublox_scene_enter_file_name_on_enter(void* context) {
     FuriString* fname = ublox_scene_enter_file_name_get_timename();
     strcpy(ublox->text_store, furi_string_get_cstr(fname));
 
-    //FuriString* full_fname = furi_string_alloc_set(folder_path);
-
     ValidatorIsFile* validator_is_file =
         // app path folder, app extension, current file name
         validator_is_file_alloc_init(
@@ -58,10 +56,8 @@ bool ublox_scene_enter_file_name_on_event(void* context, SceneManagerEvent event
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UbloxCustomEventTextInputDone) {
-            //FuriString* fullname;
             FURI_LOG_I(TAG, "text: %s", ublox->text_store);
             ublox->log_state = UbloxLogStateStartLogging;
-            //scene_manager_next_scene(ublox->scene_manager, UbloxSceneDataDisplay);
             // don't add data_display as the next scene, instead go back to the last scene
             scene_manager_previous_scene(ublox->scene_manager);
             consumed = true;
