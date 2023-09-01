@@ -4,7 +4,7 @@ Rolling Flaws by [@CodeAllNight](https://twitter.com/codeallnight).
 - Discord invite: [https://discord.com/invite/NsjCvqwPAd](https://discord.com/invite/NsjCvqwPAd)
 - YouTube: [https://youtube.com/@MrDerekJamison](https://youtube.com/@MrDerekJamison)
 - GitHub: [https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws)
-
+- Support my work: [ko-fi.com/codeallnight](ko-fi.com/codeallnight)
 
 This application is intended to help you learn about rolling code flaws.  
 
@@ -897,6 +897,8 @@ Flipper #1: **Opened!**
 Congratulations!  You have successfully opened a gate by using a different serial number.  This attack worked because the receiver didn't check the serial number ending of the remote when the decoded serial number was "00".
 
 ### Scenario 12: test transmitter
+<img src="./docs/test-attack.png" width="50%" />
+
 "The HCS512 decoder will automatically add a test transmitter each time an Erase All Function is done. A test transmitter is defined as a transmitter with a serial number of zero. After an Erase All, the test transmitter will always work without learning and will not check the
 synchronization counter of the transmitter. Learning of any new transmitters will erase the test transmitter." -- [HCS512 datasheet](https://www.microchip.com/content/dam/mchp/documents/MCU08/ProductDocuments/DataSheets/40151E.pdf)
 
@@ -926,3 +928,9 @@ Flipper #1: **Opened!**
 - Flipper #1 has new "Count".
 - Flipper #1 (bottom right) has reason as "TEST".
 
+## Contact info
+Rolling Flaws by [@CodeAllNight](https://twitter.com/codeallnight).
+- Discord invite: [https://discord.com/invite/NsjCvqwPAd](https://discord.com/invite/NsjCvqwPAd)
+- YouTube: [https://youtube.com/@MrDerekJamison](https://youtube.com/@MrDerekJamison)
+- GitHub: [https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws)
+- Support my work: [ko-fi.com/codeallnight](ko-fi.com/codeallnight)
