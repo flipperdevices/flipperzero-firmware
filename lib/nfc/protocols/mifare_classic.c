@@ -381,7 +381,9 @@ bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
         //skylanders support
         return true;
-    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
+    } else if(
+        ((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) ||
+        ((ATQA0 == 0x02 || ATQA0 == 0x04 || ATQA0 == 0x08) && (SAK == 0x38))) {
         return true;
     } else {
         return false;
@@ -393,13 +395,17 @@ MfClassicType mf_classic_get_classic_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t 
     if((ATQA0 == 0x44 || ATQA0 == 0x04)) {
         if((SAK == 0x08 || SAK == 0x88)) {
             return MfClassicType1k;
+        } else if((SAK == 0x38)) {
+            return MfClassicType4k;
         } else if(SAK == 0x09) {
             return MfClassicTypeMini;
         }
     } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
         //skylanders support
         return MfClassicType1k;
-    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
+    } else if(
+        ((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) ||
+        ((ATQA0 == 0x02 || ATQA0 == 0x08) && (SAK == 0x38))) {
         return MfClassicType4k;
     }
     return MfClassicType1k;
@@ -651,7 +657,12 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
         if(!key_a_found) break;
         FURI_LOG_D(TAG, "Try to read blocks with key A");
         key = nfc_util_bytes2num(sec_tr->key_a, sizeof(sec_tr->key_a));
-        if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyA, &crypto, false, 0)) break;
+        if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyA, &crypto, false, 0)) {
+            mf_classic_set_key_not_found(data, sec_num, MfClassicKeyA);
+            FURI_LOG_D(TAG, "Key %dA not found in read", sec_num);
+            break;
+        }
+
         for(size_t i = start_block; i < start_block + total_blocks; i++) {
             if(!mf_classic_is_block_read(data, i)) {
                 if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
@@ -660,7 +671,11 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
                 } else if(i > start_block) {
                     // Try to re-auth to read block in case prevous block was protected from read
                     furi_hal_nfc_sleep();
-                    if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyA, &crypto, false, 0)) break;
+                    if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyA, &crypto, false, 0)) {
+                        mf_classic_set_key_not_found(data, sec_num, MfClassicKeyA);
+                        FURI_LOG_D(TAG, "Key %dA not found in read", sec_num);
+                        break;
+                    }
                     if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                         mf_classic_set_block_read(data, i, &block_tmp);
                         blocks_read++;
@@ -680,7 +695,12 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
         }
         FURI_LOG_D(TAG, "Try to read blocks with key B");
         key = nfc_util_bytes2num(sec_tr->key_b, sizeof(sec_tr->key_b));
-        if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyB, &crypto, false, 0)) break;
+        if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyB, &crypto, false, 0)) {
+            mf_classic_set_key_not_found(data, sec_num, MfClassicKeyB);
+            FURI_LOG_D(TAG, "Key %dB not found in read", sec_num);
+            break;
+        }
+
         for(size_t i = start_block; i < start_block + total_blocks; i++) {
             if(!mf_classic_is_block_read(data, i)) {
                 if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
@@ -689,7 +709,11 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
                 } else if(i > start_block) {
                     // Try to re-auth to read block in case prevous block was protected from read
                     furi_hal_nfc_sleep();
-                    if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyB, &crypto, false, 0)) break;
+                    if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyB, &crypto, false, 0)) {
+                        mf_classic_set_key_not_found(data, sec_num, MfClassicKeyB);
+                        FURI_LOG_D(TAG, "Key %dB not found in read", sec_num);
+                        break;
+                    }
                     if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                         mf_classic_set_block_read(data, i, &block_tmp);
                         blocks_read++;
@@ -827,19 +851,26 @@ uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data
     return sectors_read;
 }
 
-bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx) {
+bool mf_classic_emulator(
+    MfClassicEmulator* emulator,
+    FuriHalNfcTxRxContext* tx_rx,
+    bool is_reader_analyzer) {
     furi_assert(emulator);
     furi_assert(tx_rx);
-    bool command_processed = false;
-    bool is_encrypted = false;
     uint8_t plain_data[MF_CLASSIC_MAX_DATA_SIZE];
     MfClassicKey access_key = MfClassicKeyA;
+    bool need_reset = false;
+    bool need_nack = false;
+    bool is_encrypted = false;
+    uint8_t sector = 0;
+
     // Used for decrement and increment - copy to block on transfer
-    uint8_t transfer_buf[MF_CLASSIC_BLOCK_SIZE] = {};
+    uint8_t transfer_buf[MF_CLASSIC_BLOCK_SIZE];
     bool transfer_buf_valid = false;
 
-    // Read command
-    while(!command_processed) { //-V654
+    // Process commands
+    while(!need_reset && !need_nack) { //-V654
+        memset(plain_data, 0, MF_CLASSIC_MAX_DATA_SIZE);
         if(!is_encrypted) {
             crypto1_reset(&emulator->crypto);
             memcpy(plain_data, tx_rx->rx_data, tx_rx->rx_bits / 8);
@@ -847,9 +878,10 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
                 FURI_LOG_D(
                     TAG,
-                    "Error in tx rx. Tx :%d bits, Rx: %d bits",
+                    "Error in tx rx. Tx: %d bits, Rx: %d bits",
                     tx_rx->tx_bits,
                     tx_rx->rx_bits);
+                need_reset = true;
                 break;
             }
             crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
@@ -858,27 +890,52 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
         // After increment, decrement or restore the only allowed command is transfer
         uint8_t cmd = plain_data[0];
         if(transfer_buf_valid && cmd != MF_CLASSIC_TRANSFER_CMD) {
+            need_nack = true;
             break;
         }
 
-        if(cmd == 0x50 && plain_data[1] == 0x00) {
+        if(cmd == NFCA_CMD_HALT && plain_data[1] == 0x00) {
             FURI_LOG_T(TAG, "Halt received");
-            furi_hal_nfc_listen_sleep();
-            command_processed = true;
+            need_reset = true;
             break;
         }
+
+        if(cmd == NFCA_CMD_RATS) {
+            // Mifare Classic doesn't support ATS, NACK it and start listening again
+            FURI_LOG_T(TAG, "RATS received");
+            need_nack = true;
+            break;
+        }
+
         if(cmd == MF_CLASSIC_AUTH_KEY_A_CMD || cmd == MF_CLASSIC_AUTH_KEY_B_CMD) {
             uint8_t block = plain_data[1];
             uint64_t key = 0;
             uint8_t sector_trailer_block = mf_classic_get_sector_trailer_num_by_block(block);
+            sector = mf_classic_get_sector_by_block(block);
             MfClassicSectorTrailer* sector_trailer =
                 (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
             if(cmd == MF_CLASSIC_AUTH_KEY_A_CMD) {
-                key = nfc_util_bytes2num(sector_trailer->key_a, 6);
-                access_key = MfClassicKeyA;
+                if(mf_classic_is_key_found(
+                       &emulator->data, mf_classic_get_sector_by_block(block), MfClassicKeyA) ||
+                   is_reader_analyzer) {
+                    key = nfc_util_bytes2num(sector_trailer->key_a, 6);
+                    access_key = MfClassicKeyA;
+                } else {
+                    FURI_LOG_D(TAG, "Key not known");
+                    need_nack = true;
+                    break;
+                }
             } else {
-                key = nfc_util_bytes2num(sector_trailer->key_b, 6);
-                access_key = MfClassicKeyB;
+                if(mf_classic_is_key_found(
+                       &emulator->data, mf_classic_get_sector_by_block(block), MfClassicKeyB) ||
+                   is_reader_analyzer) {
+                    key = nfc_util_bytes2num(sector_trailer->key_b, 6);
+                    access_key = MfClassicKeyB;
+                } else {
+                    FURI_LOG_D(TAG, "Key not known");
+                    need_nack = true;
+                    break;
+                }
             }
 
             uint32_t nonce = prng_successor(DWT->CYCCNT, 32) ^ 0xAA;
@@ -905,15 +962,15 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 tx_rx->tx_bits = sizeof(nt) * 8;
                 tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             }
+
             if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
                 FURI_LOG_E(TAG, "Error in NT exchange");
-                command_processed = true;
+                need_reset = true;
                 break;
             }
 
             if(tx_rx->rx_bits != 64) {
-                FURI_LOG_W(TAG, "Incorrect nr + ar length: %d", tx_rx->rx_bits);
-                command_processed = true;
+                need_reset = true;
                 break;
             }
 
@@ -923,9 +980,14 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             crypto1_word(&emulator->crypto, nr, 1);
             uint32_t cardRr = ar ^ crypto1_word(&emulator->crypto, 0, 0);
             if(cardRr != prng_successor(nonce, 64)) {
-                FURI_LOG_T(TAG, "Wrong AUTH! %08lX != %08lX", cardRr, prng_successor(nonce, 64));
+                FURI_LOG_T(
+                    TAG,
+                    "Wrong AUTH on block %u! %08lX != %08lX",
+                    block,
+                    cardRr,
+                    prng_successor(nonce, 64));
                 // Don't send NACK, as the tag doesn't send it
-                command_processed = true;
+                need_reset = true;
                 break;
             }
 
@@ -948,11 +1010,25 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
 
         if(!is_encrypted) {
             FURI_LOG_T(TAG, "Invalid command before auth session established: %02X", cmd);
+            need_nack = true;
             break;
         }
 
-        if(cmd == MF_CLASSIC_READ_BLOCK_CMD) {
-            uint8_t block = plain_data[1];
+        // Mifare Classic commands always have block number after command
+        uint8_t block = plain_data[1];
+        if(mf_classic_get_sector_by_block(block) != sector) {
+            // Don't allow access to sectors other than authorized
+            FURI_LOG_T(
+                TAG,
+                "Trying to access block %u from not authorized sector (command: %02X)",
+                block,
+                cmd);
+            need_nack = true;
+            break;
+        }
+
+        switch(cmd) {
+        case MF_CLASSIC_READ_BLOCK_CMD: {
             uint8_t block_data[MF_CLASSIC_BLOCK_SIZE + 2] = {};
             memcpy(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE);
             if(mf_classic_is_sector_trailer(block)) {
@@ -968,17 +1044,14 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                        emulator, block, access_key, MfClassicActionACRead)) {
                     memset(&block_data[6], 0, 4);
                 }
-            } else if(!mf_classic_is_allowed_access(
-                          emulator, block, access_key, MfClassicActionDataRead)) {
-                // Send NACK
-                uint8_t nack = 0x04;
-                crypto1_encrypt(
-                    &emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
-                tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
-                tx_rx->tx_bits = 4;
-                furi_hal_nfc_tx_rx(tx_rx, 300);
+            } else if(
+                !mf_classic_is_allowed_access(
+                    emulator, block, access_key, MfClassicActionDataRead) ||
+                !mf_classic_is_block_read(&emulator->data, block)) {
+                need_nack = true;
                 break;
             }
+
             nfca_append_crc16(block_data, 16);
 
             crypto1_encrypt(
@@ -990,23 +1063,36 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 tx_rx->tx_parity);
             tx_rx->tx_bits = (MF_CLASSIC_BLOCK_SIZE + 2) * 8;
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
-        } else if(cmd == MF_CLASSIC_WRITE_BLOCK_CMD) {
-            uint8_t block = plain_data[1];
-            if(block > mf_classic_get_total_block_num(emulator->data.type)) {
-                break;
-            }
+            break;
+        }
+
+        case MF_CLASSIC_WRITE_BLOCK_CMD: {
             // Send ACK
             uint8_t ack = MF_CLASSIC_ACK_CMD;
             crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
 
-            if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
-            if(tx_rx->rx_bits != (MF_CLASSIC_BLOCK_SIZE + 2) * 8) break;
+            if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
+                need_reset = true;
+                break;
+            }
+
+            if(tx_rx->rx_bits != (MF_CLASSIC_BLOCK_SIZE + 2) * 8) {
+                need_reset = true;
+                break;
+            }
 
             crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
             uint8_t block_data[MF_CLASSIC_BLOCK_SIZE] = {};
             memcpy(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE);
+
+            if(!mf_classic_is_block_read(&emulator->data, block)) {
+                // Don't allow writing to the block for which we haven't read data yet
+                need_nack = true;
+                break;
+            }
+
             if(mf_classic_is_sector_trailer(block)) {
                 if(mf_classic_is_allowed_access(
                        emulator, block, access_key, MfClassicActionKeyAWrite)) {
@@ -1025,38 +1111,39 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                        emulator, block, access_key, MfClassicActionDataWrite)) {
                     memcpy(block_data, plain_data, MF_CLASSIC_BLOCK_SIZE);
                 } else {
+                    need_nack = true;
                     break;
                 }
             }
+
             if(memcmp(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE) != 0) {
                 memcpy(emulator->data.block[block].value, block_data, MF_CLASSIC_BLOCK_SIZE);
                 emulator->data_changed = true;
             }
+
             // Send ACK
             ack = MF_CLASSIC_ACK_CMD;
             crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
-        } else if(
-            cmd == MF_CLASSIC_DECREMENT_CMD || cmd == MF_CLASSIC_INCREMENT_CMD ||
-            cmd == MF_CLASSIC_RESTORE_CMD) {
-            uint8_t block = plain_data[1];
+            break;
+        }
 
-            if(block > mf_classic_get_total_block_num(emulator->data.type)) {
-                break;
-            }
+        case MF_CLASSIC_DECREMENT_CMD:
+        case MF_CLASSIC_INCREMENT_CMD:
+        case MF_CLASSIC_RESTORE_CMD: {
+            MfClassicAction action = (cmd == MF_CLASSIC_INCREMENT_CMD) ? MfClassicActionDataInc :
+                                                                         MfClassicActionDataDec;
 
-            MfClassicAction action = MfClassicActionDataDec;
-            if(cmd == MF_CLASSIC_INCREMENT_CMD) {
-                action = MfClassicActionDataInc;
-            }
             if(!mf_classic_is_allowed_access(emulator, block, access_key, action)) {
+                need_nack = true;
                 break;
             }
 
             int32_t prev_value;
             uint8_t addr;
             if(!mf_classic_block_to_value(emulator->data.block[block].value, &prev_value, &addr)) {
+                need_nack = true;
                 break;
             }
 
@@ -1066,8 +1153,15 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
 
-            if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
-            if(tx_rx->rx_bits != (sizeof(int32_t) + 2) * 8) break;
+            if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
+                need_reset = true;
+                break;
+            }
+
+            if(tx_rx->rx_bits != (sizeof(int32_t) + 2) * 8) {
+                need_reset = true;
+                break;
+            }
 
             crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
             int32_t value = *(int32_t*)&plain_data[0];
@@ -1084,9 +1178,12 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             transfer_buf_valid = true;
             // Commands do not ACK
             tx_rx->tx_bits = 0;
-        } else if(cmd == MF_CLASSIC_TRANSFER_CMD) {
-            uint8_t block = plain_data[1];
+            break;
+        }
+
+        case MF_CLASSIC_TRANSFER_CMD: {
             if(!mf_classic_is_allowed_access(emulator, block, access_key, MfClassicActionDataDec)) {
+                need_nack = true;
                 break;
             }
             if(memcmp(transfer_buf, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE) !=
@@ -1100,13 +1197,17 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
-        } else {
+            break;
+        }
+
+        default:
             FURI_LOG_T(TAG, "Unknown command: %02X", cmd);
+            need_nack = true;
             break;
         }
     }
 
-    if(!command_processed) {
+    if(need_nack && !need_reset) {
         // Send NACK
         uint8_t nack = transfer_buf_valid ? MF_CLASSIC_NACK_BUF_VALID_CMD :
                                             MF_CLASSIC_NACK_BUF_INVALID_CMD;
@@ -1118,15 +1219,16 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
         tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
         tx_rx->tx_bits = 4;
         furi_hal_nfc_tx_rx(tx_rx, 300);
+        need_reset = true;
     }
 
-    return true;
+    return !need_reset;
 }
 
 void mf_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
     furi_assert(tx_rx);
 
-    uint8_t plain_data[4] = {0x50, 0x00, 0x00, 0x00};
+    uint8_t plain_data[4] = {NFCA_CMD_HALT, 0x00, 0x00, 0x00};
 
     nfca_append_crc16(plain_data, 2);
     if(crypto) {

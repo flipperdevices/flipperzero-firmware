@@ -20,13 +20,11 @@ def main():
         logging.error("Flipper not found!")
         sys.exit(1)
 
-    with serial.Serial(flp_serial, timeout=1) as flipper:
+    with serial.Serial(flp_serial, timeout=150) as flipper:
         logging.info(f"Found Flipper at {flp_serial}")
         flipper.baudrate = 230400
         flipper.flushOutput()
         flipper.flushInput()
-
-        flipper.timeout = 180
 
         flipper.read_until(b">: ").decode("utf-8")
         flipper.write(b"unit_tests\r")

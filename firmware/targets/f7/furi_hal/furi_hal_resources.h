@@ -41,6 +41,7 @@ typedef struct {
 typedef struct {
     const GpioPin* pin;
     const char* name;
+    const uint8_t number;
     const bool debug;
 } GpioPinRecord;
 
@@ -50,8 +51,11 @@ extern const size_t input_pins_count;
 extern const GpioPinRecord gpio_pins[];
 extern const size_t gpio_pins_count;
 
-extern const GpioPin vibro_gpio;
-extern const GpioPin ibutton_gpio;
+extern const GpioPin gpio_swdio;
+extern const GpioPin gpio_swclk;
+
+extern const GpioPin gpio_vibro;
+extern const GpioPin gpio_ibutton;
 
 extern const GpioPin gpio_cc1101_g0;
 extern const GpioPin gpio_rf_sw_0;
@@ -102,7 +106,7 @@ extern const GpioPin gpio_i2c_power_scl;
 
 extern const GpioPin gpio_speaker;
 
-extern const GpioPin periph_power;
+extern const GpioPin gpio_periph_power;
 
 extern const GpioPin gpio_usb_dm;
 extern const GpioPin gpio_usb_dp;

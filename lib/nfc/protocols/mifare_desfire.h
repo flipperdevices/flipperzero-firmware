@@ -5,6 +5,10 @@
 
 #include <furi_hal_nfc.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MF_DF_GET_VERSION (0x60)
 #define MF_DF_GET_FREE_MEMORY (0x6E)
 #define MF_DF_GET_KEY_SETTINGS (0x45)
@@ -130,6 +134,9 @@ void mf_df_cat_file(MifareDesfireFile* file, FuriString* out);
 
 bool mf_df_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
+MifareDesfireApplication* mf_df_get_application(MifareDesfireData* data, const uint8_t (*aid)[3]);
+MifareDesfireFile* mf_df_get_file(MifareDesfireApplication* app, uint8_t id);
+
 uint16_t mf_df_prepare_get_version(uint8_t* dest);
 bool mf_df_parse_get_version_response(uint8_t* buf, uint16_t len, MifareDesfireVersion* out);
 
@@ -166,3 +173,7 @@ uint16_t mf_df_prepare_read_records(uint8_t* dest, uint8_t file_id, uint32_t off
 bool mf_df_parse_read_data_response(uint8_t* buf, uint16_t len, MifareDesfireFile* out);
 
 bool mf_df_read_card(FuriHalNfcTxRxContext* tx_rx, MifareDesfireData* data);
+
+#ifdef __cplusplus
+}
+#endif

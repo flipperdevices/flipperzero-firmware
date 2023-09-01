@@ -1,10 +1,9 @@
-import SCons
-from SCons.Subst import quote_spaces
-from SCons.Errors import StopError
-
-import re
 import os
+import re
 
+import SCons
+from SCons.Errors import StopError
+from SCons.Subst import quote_spaces
 
 WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
 
@@ -46,7 +45,7 @@ def single_quote(arg_list):
     return " ".join(f"'{arg}'" if " " in arg else str(arg) for arg in arg_list)
 
 
-def extract_abs_dir(node):
+def resolve_real_dir_node(node):
     if isinstance(node, SCons.Node.FS.EntryProxy):
         node = node.get()
 
@@ -54,13 +53,7 @@ def extract_abs_dir(node):
         if os.path.exists(repo_dir.abspath):
             return repo_dir
 
-
-def extract_abs_dir_path(node):
-    abs_dir_node = extract_abs_dir(node)
-    if abs_dir_node is None:
-        raise StopError(f"Can't find absolute path for {node.name}")
-
-    return abs_dir_node.abspath
+    raise StopError(f"Can't find absolute path for {node.name} ({node})")
 
 
 def path_as_posix(path):

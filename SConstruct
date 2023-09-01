@@ -45,6 +45,7 @@ distenv = coreenv.Clone(
     ],
     ENV=os.environ,
     UPDATE_BUNDLE_DIR="dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}",
+    VSCODE_LANG_SERVER=ARGUMENTS.get("LANG_SERVER", "cpptools"),
 )
 
 firmware_env = distenv.AddFwProject(
@@ -139,40 +140,39 @@ if GetOption("fullenv") or any(
 basic_dist = distenv.DistCommand("fw_dist", distenv["DIST_DEPENDS"])
 distenv.Default(basic_dist)
 
-dist_dir = distenv.GetProjetDirName()
+dist_dir_name = distenv.GetProjetDirName()
+dist_dir = distenv.Dir(f"#/dist/{dist_dir_name}")
+external_apps_artifacts = firmware_env["FW_EXTAPPS"]
+external_app_list = external_apps_artifacts.application_map.values()
+
 fap_dist = [
     distenv.Install(
-        distenv.Dir(f"#/dist/{dist_dir}/apps/debug_elf"),
-        list(
-            app_artifact.debug
-            for app_artifact in firmware_env["FW_EXTAPPS"].applications.values()
-        ),
+        dist_dir.Dir("debug_elf"),
+        list(app_artifact.debug for app_artifact in external_app_list),
     ),
     *(
         distenv.Install(
-            f"#/dist/{dist_dir}/apps/{app_artifact.app.fap_category}",
-            app_artifact.compact[0],
+            dist_dir.File(dist_entry[1]).dir,
+            app_artifact.compact,
         )
-        for app_artifact in firmware_env["FW_EXTAPPS"].applications.values()
+        for app_artifact in external_app_list
+        for dist_entry in app_artifact.dist_entries
     ),
 ]
 Depends(
     fap_dist,
-    list(
-        app_artifact.validator
-        for app_artifact in firmware_env["FW_EXTAPPS"].applications.values()
-    ),
+    list(app_artifact.validator for app_artifact in external_app_list),
 )
 Alias("fap_dist", fap_dist)
 # distenv.Default(fap_dist)
 
-distenv.Depends(firmware_env["FW_RESOURCES"], firmware_env["FW_EXTAPPS"].resources_dist)
+distenv.Depends(firmware_env["FW_RESOURCES"], external_apps_artifacts.resources_dist)
 
 # Copy all faps to device
 
 fap_deploy = distenv.PhonyTarget(
     "fap_deploy",
-    "${PYTHON3} ${ROOT_DIR}/scripts/storage.py send ${SOURCE} /ext/apps",
+    "${PYTHON3} ${FBT_SCRIPT_DIR}/storage.py -p ${FLIP_PORT} send ${SOURCE} /ext/apps",
     source=Dir("#/assets/resources/apps"),
 )
 
@@ -185,27 +185,15 @@ copro_dist = distenv.CoproBuilder(
 distenv.AlwaysBuild(copro_dist)
 distenv.Alias("copro_dist", copro_dist)
 
-firmware_flash = distenv.AddOpenOCDFlashTarget(firmware_env)
+
+firmware_flash = distenv.AddFwFlashTarget(firmware_env)
 distenv.Alias("flash", firmware_flash)
 
+# To be implemented in fwflash.py
 firmware_jflash = distenv.AddJFlashTarget(firmware_env)
 distenv.Alias("jflash", firmware_jflash)
 
-firmware_bm_flash = distenv.PhonyTarget(
-    "flash_blackmagic",
-    "$GDB $GDBOPTS $SOURCES $GDBFLASH",
-    source=firmware_env["FW_ELF"],
-    GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
-    GDBREMOTE="${BLACKMAGIC_ADDR}",
-    GDBFLASH=[
-        "-ex",
-        "load",
-        "-ex",
-        "quit",
-    ],
-)
-
-gdb_backtrace_all_threads = distenv.PhonyTarget(
+distenv.PhonyTarget(
     "gdb_trace_all",
     "$GDB $GDBOPTS $SOURCES $GDBFLASH",
     source=firmware_env["FW_ELF"],
@@ -240,19 +228,31 @@ distenv.PhonyTarget(
 )
 
 # Debug alien elf
+debug_other_opts = [
+    "-ex",
+    "source ${FBT_DEBUG_DIR}/PyCortexMDebug/PyCortexMDebug.py",
+    # "-ex",
+    # "source ${FBT_DEBUG_DIR}/FreeRTOS/FreeRTOS.py",
+    "-ex",
+    "source ${FBT_DEBUG_DIR}/flipperversion.py",
+    "-ex",
+    "fw-version",
+]
+
 distenv.PhonyTarget(
     "debug_other",
     "${GDBPYCOM}",
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
-    GDBPYOPTS='-ex "source ${FBT_DEBUG_DIR}/PyCortexMDebug/PyCortexMDebug.py" ',
+    GDBPYOPTS=debug_other_opts,
 )
 
 distenv.PhonyTarget(
     "debug_other_blackmagic",
     "${GDBPYCOM}",
     GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
-    GDBREMOTE="$${BLACKMAGIC_ADDR}",
+    GDBREMOTE="${BLACKMAGIC_ADDR}",
+    GDBPYOPTS=debug_other_opts,
 )
 
 
@@ -312,7 +312,12 @@ distenv.PhonyTarget(
 )
 
 # Start Flipper CLI via PySerial's miniterm
-distenv.PhonyTarget("cli", "${PYTHON3} ${FBT_SCRIPT_DIR}/serial_cli.py")
+distenv.PhonyTarget(
+    "cli", "${PYTHON3} ${FBT_SCRIPT_DIR}/serial_cli.py  -p ${FLIP_PORT}"
+)
+
+# Update WiFi devboard firmware
+distenv.PhonyTarget("devboard_flash", "${PYTHON3} ${FBT_SCRIPT_DIR}/wifi_board.py")
 
 
 # Find blackmagic probe
@@ -332,7 +337,20 @@ distenv.PhonyTarget(
 )
 
 # Prepare vscode environment
-vscode_dist = distenv.Install("#.vscode", distenv.Glob("#.vscode/example/*"))
+VSCODE_LANG_SERVER = cmd_environment["LANG_SERVER"]
+vscode_dist = distenv.Install(
+    "#.vscode",
+    [
+        distenv.Glob("#.vscode/example/*.json"),
+        distenv.Glob(f"#.vscode/example/{VSCODE_LANG_SERVER}/*.json"),
+    ],
+)
 distenv.Precious(vscode_dist)
 distenv.NoClean(vscode_dist)
 distenv.Alias("vscode_dist", vscode_dist)
+
+# Configure shell with build tools
+distenv.PhonyTarget(
+    "env",
+    "@echo $( ${FBT_SCRIPT_DIR}/toolchain/fbtenv.sh $)",
+)

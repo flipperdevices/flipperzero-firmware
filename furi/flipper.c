@@ -33,7 +33,7 @@ void flipper_init() {
     FURI_LOG_I(TAG, "Boot mode %d, starting services", furi_hal_rtc_get_boot_mode());
 
     for(size_t i = 0; i < FLIPPER_SERVICES_COUNT; i++) {
-        FURI_LOG_I(TAG, "Starting service %s", FLIPPER_SERVICES[i].name);
+        FURI_LOG_D(TAG, "Starting service %s", FLIPPER_SERVICES[i].name);
 
         FuriThread* thread = furi_thread_alloc_ex(
             FLIPPER_SERVICES[i].name,
@@ -54,8 +54,8 @@ void vApplicationGetIdleTaskMemory(
     StackType_t** stack_ptr,
     uint32_t* stack_size) {
     *tcb_ptr = memmgr_alloc_from_pool(sizeof(StaticTask_t));
-    *stack_ptr = memmgr_alloc_from_pool(sizeof(StackType_t) * configMINIMAL_STACK_SIZE);
-    *stack_size = configMINIMAL_STACK_SIZE;
+    *stack_ptr = memmgr_alloc_from_pool(sizeof(StackType_t) * configIDLE_TASK_STACK_DEPTH);
+    *stack_size = configIDLE_TASK_STACK_DEPTH;
 }
 
 void vApplicationGetTimerTaskMemory(

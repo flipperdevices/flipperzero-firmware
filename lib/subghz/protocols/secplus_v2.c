@@ -380,7 +380,6 @@ static void subghz_protocol_secplus_v2_encode(SubGhzProtocolEncoderSecPlus_v2* i
     uint8_t roll_2[9] = {0};
 
     instance->generic.cnt++;
-    //ToDo it is not known what value the counter starts
     if(instance->generic.cnt > 0xFFFFFFF) instance->generic.cnt = 0xE500000;
     uint32_t rolling = subghz_protocol_blocks_reverse_key(instance->generic.cnt, 28);
 
@@ -599,19 +598,20 @@ bool subghz_protocol_secplus_v2_create_data(
     instance->generic.data_count_bit =
         (uint8_t)subghz_protocol_secplus_v2_const.min_count_bit_for_found;
     subghz_protocol_secplus_v2_encode(instance);
-    bool res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+    SubGhzProtocolStatus res =
+        subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 
     uint8_t key_data[sizeof(uint64_t)] = {0};
     for(size_t i = 0; i < sizeof(uint64_t); i++) {
         key_data[sizeof(uint64_t) - i - 1] = (instance->secplus_packet_1 >> (i * 8)) & 0xFF;
     }
 
-    if(res &&
+    if((res == SubGhzProtocolStatusOk) &&
        !flipper_format_write_hex(flipper_format, "Secplus_packet_1", key_data, sizeof(uint64_t))) {
         FURI_LOG_E(TAG, "Unable to add Secplus_packet_1");
-        res = false;
+        res = SubGhzProtocolStatusErrorParserOthers;
     }
-    return res;
+    return res == SubGhzProtocolStatusOk;
 }
 
 void* subghz_protocol_decoder_secplus_v2_alloc(SubGhzEnvironment* environment) {

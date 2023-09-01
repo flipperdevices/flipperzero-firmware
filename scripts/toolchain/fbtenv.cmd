@@ -13,11 +13,13 @@ if not ["%FBT_NOENV%"] == [""] (
     exit /b 0
 )
 
-set "FLIPPER_TOOLCHAIN_VERSION=21"
+set "FLIPPER_TOOLCHAIN_VERSION=23"
 
-if ["%FBT_TOOLCHAIN_ROOT%"] == [""] (
-    set "FBT_TOOLCHAIN_ROOT=%FBT_ROOT%\toolchain\x86_64-windows"
+if ["%FBT_TOOLCHAIN_PATH%"] == [""] (
+    set "FBT_TOOLCHAIN_PATH=%FBT_ROOT%"
 )
+
+set "FBT_TOOLCHAIN_ROOT=%FBT_TOOLCHAIN_PATH%\toolchain\x86_64-windows"
 
 set "FBT_TOOLCHAIN_VERSION_FILE=%FBT_TOOLCHAIN_ROOT%\VERSION"
 

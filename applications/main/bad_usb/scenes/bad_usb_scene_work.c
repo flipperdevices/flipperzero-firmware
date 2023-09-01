@@ -1,4 +1,4 @@
-#include "../bad_usb_script.h"
+#include "../helpers/ducky_script.h"
 #include "../bad_usb_app_i.h"
 #include "../views/bad_usb_view.h"
 #include <furi_hal.h>
@@ -21,7 +21,10 @@ bool bad_usb_scene_work_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
         } else if(event.event == InputKeyOk) {
-            bad_usb_script_toggle(app->bad_usb_script);
+            bad_usb_script_start_stop(app->bad_usb_script);
+            consumed = true;
+        } else if(event.event == InputKeyRight) {
+            bad_usb_script_pause_resume(app->bad_usb_script);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {

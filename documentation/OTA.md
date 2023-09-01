@@ -87,9 +87,12 @@ Even if something goes wrong, updater allows you to retry failed operations and 
 |  Uninstalling radio FW  |  **4** | **0**      | SHCI Delete command error                  |
 |                         |        | **80**     | Error awaiting command status              |
 |    Writing radio FW     |  **5** | **0-100**  | Block read/write error                     |
-|   Installing radio FW   |  **6** | **0**      | SHCI Install command error                 |
+|   Installing radio FW   |  **6** | **10**     | SHCI Install command error                 |
 |                         |        | **80**     | Error awaiting command status              |
-|    Radio is updating    |  **7** | **10**     | Error waiting for operation completion     |
+|      Core2 is busy      |  **7** | **10**     | Couldn't start C2                          |
+|                         |        | **20**     | Failed to switch C2 to FUS mode            |
+|                         |        | **30**     | Error in FUS operation                     |
+|                         |        | **50**     | Failed to switch C2 to stack mode          |
 |  Validating opt. bytes  |  **8** | **yy**     | Option byte code                           |
 |    Checking DFU file    |  **9** | **0**      | Error opening DFU file                     |
 |                         |        | **1-98**   | Error reading DFU file                     |
@@ -133,7 +136,7 @@ For example, to build a package only for installing BLE FULL stack:
 scripts/update.py generate \
   -t f7 -d r13.3_full -v "BLE FULL 13.3" \
   --stage dist/f7/flipper-z-f7-updater-*.bin \
-  --radio lib/STM32CubeWB/Projects/STM32WB_Copro_Wireless_Binaries/STM32WB5x/stm32wb5x_BLE_Stack_full_fw.bin \
+  --radio lib/stm32wb_copro/firmware/stm32wb5x_BLE_Stack_full_fw.bin \
   --radiotype ble_full
 ```
 

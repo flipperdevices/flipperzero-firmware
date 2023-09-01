@@ -26,7 +26,7 @@ If you've found an issue and want to report it, please check our [Issues](https:
 
 ## I want to contribute code
 
-Before opening a PR, please confirm that your changes must be contained in the firmware. Many ideas can easily be implemented as external applications and published in the Flipper Application Catalog (coming soon). If you are unsure, reach out to us on the [Discord Server](https://flipp.dev/discord) or the [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) page, and we'll help you find the right place for your code.
+Before opening a PR, please confirm that your changes must be contained in the firmware. Many ideas can easily be implemented as external applications and published in the [Flipper Application Catalog](https://github.com/flipperdevices/flipper-application-catalog). If you are unsure, reach out to us on the [Discord Server](https://flipp.dev/discord) or the [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) page, and we'll help you find the right place for your code.
 
 Also, please read our [Contribution Guide](/CONTRIBUTING.md) and our [Coding Style](/CODING_STYLE.md), and make sure your code is compatible with our [Project License](/LICENSE).
 
@@ -35,6 +35,10 @@ Finally, open a [Pull Request](https://github.com/flipperdevices/flipperzero-fir
 # Development
 
 Flipper Zero Firmware is written in C, with some bits and pieces written in C++ and armv7m assembly languages. An intermediate level of C knowledge is recommended for comfortable programming. C, C++, and armv7m assembly languages are supported for Flipper applications.
+
+# Firmware RoadMap
+
+[Firmware RoadMap Miro Board](https://miro.com/app/board/uXjVO_3D6xU=/)
 
 ## Requirements
 
@@ -99,7 +103,6 @@ Make sure your Flipper is on, and your firmware is functioning. Connect your Fli
 - `applications`    - applications and services used in firmware
 - `assets`          - assets used by applications and services
 - `furi`            - Furi Core: OS-level primitives and helpers
-- `debug`           - debug tool: GDB plugins, an SVD file, etc.
 - `documentation`   - documentation generation system configs and input files
 - `firmware`        - firmware source code
 - `lib`             - our and 3rd party libraries, drivers, etc.

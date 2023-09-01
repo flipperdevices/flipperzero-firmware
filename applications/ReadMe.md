@@ -26,7 +26,6 @@ Applications for main Flipper menu.
 
 - `archive`             - Archive and file manager 
 - `bad_usb`             - Bad USB application
-- `fap_loader`          - External applications loader
 - `gpio`                - GPIO application: includes USART bridge and GPIO control
 - `ibutton`             - iButton application, onewire keys and more
 - `infrared`            - Infrared application, controls your IR devices
@@ -34,16 +33,6 @@ Applications for main Flipper menu.
 - `nfc`                 - NFC application, HF rfid, EMV and etc
 - `subghz`              - SubGhz application, 433 fobs and etc
 - `u2f`                 - U2F Application
-
-
-## plugins
-
-Extra apps for Plugins & App Loader menus.
-
-- `bt_hid_app`          - BT Remote controller
-- `music_player`        - Music player app (demo)
-- `picopass`            - Picopass tool
-- `snake_game`          - Snake game application
 
 
 ## services

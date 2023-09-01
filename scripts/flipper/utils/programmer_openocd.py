@@ -1,11 +1,20 @@
 import logging
 import os
 import typing
+from enum import Enum
 
 from flipper.utils.programmer import Programmer
 from flipper.utils.openocd import OpenOCD
 from flipper.utils.stm32wb55 import STM32WB55
 from flipper.assets.obdata import OptionBytesData
+
+
+class OpenOCDProgrammerResult(Enum):
+    Success = 0
+    ErrorGeneric = 1
+    ErrorAlignment = 2
+    ErrorAlreadyWritten = 3
+    ErrorValidation = 4
 
 
 class OpenOCDProgrammer(Programmer):
@@ -22,24 +31,24 @@ class OpenOCDProgrammer(Programmer):
         config["interface"] = interface
         config["target"] = "target/stm32wbx.cfg"
 
-        if not serial is None:
+        if serial is not None:
             if interface == "interface/cmsis-dap.cfg":
                 config["serial"] = f"cmsis_dap_serial {serial}"
             elif "stlink" in interface:
                 config["serial"] = f"stlink_serial {serial}"
 
-        if not port_base is None:
+        if port_base is not None:
             config["port_base"] = port_base
 
         self.openocd = OpenOCD(config)
         self.logger = logging.getLogger()
 
     def reset(self, mode: Programmer.RunMode = Programmer.RunMode.Run) -> bool:
-        stm32 = STM32WB55()
+        stm32 = STM32WB55(self.openocd)
         if mode == Programmer.RunMode.Run:
-            stm32.reset(self.openocd, stm32.RunMode.Run)
+            stm32.reset(stm32.RunMode.Run)
         elif mode == Programmer.RunMode.Stop:
-            stm32.reset(self.openocd, stm32.RunMode.Init)
+            stm32.reset(stm32.RunMode.Init)
         else:
             raise Exception("Unknown mode")
 
@@ -50,7 +59,7 @@ class OpenOCDProgrammer(Programmer):
             raise Exception(f"File {file_path} not found")
 
         self.openocd.start()
-        self.openocd.send_tcl(f"init")
+        self.openocd.send_tcl("init")
         self.openocd.send_tcl(
             f"program {file_path} 0x{address:08x}{' verify' if verify else ''} reset exit"
         )
@@ -87,11 +96,11 @@ class OpenOCDProgrammer(Programmer):
 
     def option_bytes_validate(self, file_path: str) -> bool:
         # Registers
-        stm32 = STM32WB55()
+        stm32 = STM32WB55(self.openocd)
 
         # OpenOCD
         self.openocd.start()
-        stm32.reset(self.openocd, stm32.RunMode.Init)
+        stm32.reset(stm32.RunMode.Init)
 
         # Generate Option Bytes data
         ob_data = OptionBytesData(file_path)
@@ -124,7 +133,7 @@ class OpenOCDProgrammer(Programmer):
             self._ob_print_diff_table(ob_reference, ob_compare, self.logger.error)
 
         # Stop OpenOCD
-        stm32.reset(self.openocd, stm32.RunMode.Run)
+        stm32.reset(stm32.RunMode.Run)
         self.openocd.stop()
 
         return return_code
@@ -134,11 +143,11 @@ class OpenOCDProgrammer(Programmer):
 
     def option_bytes_set(self, file_path: str) -> bool:
         # Registers
-        stm32 = STM32WB55()
+        stm32 = STM32WB55(self.openocd)
 
         # OpenOCD
         self.openocd.start()
-        stm32.reset(self.openocd, stm32.RunMode.Init)
+        stm32.reset(stm32.RunMode.Init)
 
         # Generate Option Bytes data
         ob_data = OptionBytesData(file_path)
@@ -150,11 +159,11 @@ class OpenOCDProgrammer(Programmer):
         ob_dwords = int(ob_length / 8)
 
         # Clear flash errors
-        stm32.clear_flash_errors(self.openocd)
+        stm32.clear_flash_errors()
 
         # Unlock Flash and Option Bytes
-        stm32.flash_unlock(self.openocd)
-        stm32.option_bytes_unlock(self.openocd)
+        stm32.flash_unlock()
+        stm32.option_bytes_unlock()
 
         ob_need_to_apply = False
 
@@ -185,32 +194,32 @@ class OpenOCDProgrammer(Programmer):
                 self.openocd.write_32(device_reg_addr, ob_value)
 
         if ob_need_to_apply:
-            stm32.option_bytes_apply(self.openocd)
+            stm32.option_bytes_apply()
         else:
-            self.logger.info(f"Option Bytes are already correct")
+            self.logger.info("Option Bytes are already correct")
 
         # Load Option Bytes
         # That will reset and also lock the Option Bytes and the Flash
-        stm32.option_bytes_load(self.openocd)
+        stm32.option_bytes_load()
 
         # Stop OpenOCD
-        stm32.reset(self.openocd, stm32.RunMode.Run)
+        stm32.reset(stm32.RunMode.Run)
         self.openocd.stop()
 
         return True
 
-    def otp_write(self, address: int, file_path: str) -> bool:
+    def otp_write(self, address: int, file_path: str) -> OpenOCDProgrammerResult:
         # Open file, check that it aligned to 8 bytes
         with open(file_path, "rb") as f:
             data = f.read()
             if len(data) % 8 != 0:
                 self.logger.error(f"File {file_path} is not aligned to 8 bytes")
-                return False
+                return OpenOCDProgrammerResult.ErrorAlignment
 
         # Check that address is aligned to 8 bytes
         if address % 8 != 0:
             self.logger.error(f"Address {address} is not aligned to 8 bytes")
-            return False
+            return OpenOCDProgrammerResult.ErrorAlignment
 
         # Get size of data
         data_size = len(data)
@@ -218,17 +227,16 @@ class OpenOCDProgrammer(Programmer):
         # Check that data size is aligned to 8 bytes
         if data_size % 8 != 0:
             self.logger.error(f"Data size {data_size} is not aligned to 8 bytes")
-            return False
+            return OpenOCDProgrammerResult.ErrorAlignment
 
         self.logger.debug(f"Writing {data_size} bytes to OTP at {address:08X}")
         self.logger.debug(f"Data: {data.hex().upper()}")
 
         # Start OpenOCD
-        oocd = self.openocd
-        oocd.start()
+        self.openocd.start()
 
         # Registers
-        stm32 = STM32WB55()
+        stm32 = STM32WB55(self.openocd)
 
         try:
             # Check that OTP is empty for the given address
@@ -236,22 +244,22 @@ class OpenOCDProgrammer(Programmer):
             already_written = True
             for i in range(0, data_size, 4):
                 file_word = int.from_bytes(data[i : i + 4], "little")
-                device_word = oocd.read_32(address + i)
+                device_word = self.openocd.read_32(address + i)
                 if device_word != 0xFFFFFFFF and device_word != file_word:
                     self.logger.error(
                         f"OTP memory at {address + i:08X} is not empty: {device_word:08X}"
                     )
-                    raise Exception("OTP memory is not empty")
+                    return OpenOCDProgrammerResult.ErrorAlreadyWritten
 
                 if device_word != file_word:
                     already_written = False
 
             if already_written:
-                self.logger.info(f"OTP memory is already written with the given data")
-                return True
+                self.logger.info("OTP memory is already written with the given data")
+                return OpenOCDProgrammerResult.Success
 
             self.reset(self.RunMode.Stop)
-            stm32.clear_flash_errors(oocd)
+            stm32.clear_flash_errors()
 
             # Write OTP memory by 8 bytes
             for i in range(0, data_size, 8):
@@ -260,14 +268,14 @@ class OpenOCDProgrammer(Programmer):
                 self.logger.debug(
                     f"Writing {word_1:08X} {word_2:08X} to {address + i:08X}"
                 )
-                stm32.write_flash_64(oocd, address + i, word_1, word_2)
+                stm32.write_flash_64(address + i, word_1, word_2)
 
             # Validate OTP memory
             validation_result = True
 
             for i in range(0, data_size, 4):
                 file_word = int.from_bytes(data[i : i + 4], "little")
-                device_word = oocd.read_32(address + i)
+                device_word = self.openocd.read_32(address + i)
                 if file_word != device_word:
                     self.logger.error(
                         f"Validation failed: {file_word:08X} != {device_word:08X} at {address + i:08X}"
@@ -275,7 +283,21 @@ class OpenOCDProgrammer(Programmer):
                     validation_result = False
         finally:
             # Stop OpenOCD
-            stm32.reset(oocd, stm32.RunMode.Run)
-            oocd.stop()
+            stm32.reset(stm32.RunMode.Run)
+            self.openocd.stop()
 
-        return validation_result
+        return (
+            OpenOCDProgrammerResult.Success
+            if validation_result
+            else OpenOCDProgrammerResult.ErrorValidation
+        )
+
+    def option_bytes_recover(self) -> bool:
+        try:
+            self.openocd.start()
+            stm32 = STM32WB55(self.openocd)
+            stm32.reset(stm32.RunMode.Halt)
+            stm32.option_bytes_recover()
+            return True
+        finally:
+            self.openocd.stop()

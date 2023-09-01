@@ -34,6 +34,12 @@ void furi_hal_power_init();
  */
 bool furi_hal_power_gauge_is_ok();
 
+/** Check if gauge requests system shutdown
+ * 
+ * @return true if system shutdown requested
+ */
+bool furi_hal_power_is_shutdown_requested();
+
 /** Get current insomnia level
  *
  * @return     insomnia level: 0 - no insomnia, >0 - insomnia, bearer count.
@@ -57,12 +63,6 @@ void furi_hal_power_insomnia_exit();
  * @return     true if available
  */
 bool furi_hal_power_sleep_available();
-
-/** Check if deep sleep availble
- *
- * @return     true if available
- */
-bool furi_hal_power_deep_sleep_available();
 
 /** Go to sleep
  */
@@ -105,11 +105,15 @@ void furi_hal_power_reset();
 
 /** OTG enable
  */
-void furi_hal_power_enable_otg();
+bool furi_hal_power_enable_otg();
 
 /** OTG disable
  */
 void furi_hal_power_disable_otg();
+
+/** Check OTG status fault
+ */
+bool furi_hal_power_check_otg_fault();
 
 /** Check OTG status and disable it if falt happened
  */

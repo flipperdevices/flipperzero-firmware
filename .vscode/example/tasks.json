@@ -4,40 +4,28 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "[Release] Build",
+            "label": "[Release] Build Firmware",
             "group": "build",
             "type": "shell",
             "command": "./fbt COMPACT=1 DEBUG=0"
         },
         {
-            "label": "[Debug] Build",
+            "label": "[Debug] Build Firmware",
             "group": "build",
             "type": "shell",
             "command": "./fbt"
         },
         {
-            "label": "[Release] Flash (ST-Link)",
+            "label": "[Release] Flash (SWD)",
             "group": "build",
             "type": "shell",
             "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash"
         },
         {
-            "label": "[Debug] Flash (ST-Link)",
+            "label": "[Debug] Flash (SWD)",
             "group": "build",
             "type": "shell",
             "command": "./fbt FORCE=1 flash"
-        },
-        {
-            "label": "[Release] Flash (blackmagic)",
-            "group": "build",
-            "type": "shell",
-            "command": "./fbt COMPACT=1 DEBUG=0 FORCE=1 flash_blackmagic"
-        },
-        {
-            "label": "[Debug] Flash (blackmagic)",
-            "group": "build",
-            "type": "shell",
-            "command": "./fbt FORCE=1 flash_blackmagic"
         },
         {
             "label": "[Release] Flash (JLink)",
@@ -124,16 +112,28 @@
             "command": "./fbt COMPACT=1 DEBUG=0 fap_dist"
         },
         {
+            "label": "[Debug] Build App",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt build APPSRC=${relativeFileDirname}"
+        },
+        {
+            "label": "[Release] Build App",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 build APPSRC=${relativeFileDirname}"
+        },
+        {
             "label": "[Debug] Launch App on Flipper",
             "group": "build",
             "type": "shell",
-            "command": "./fbt launch_app APPSRC=${relativeFileDirname}"
+            "command": "./fbt launch APPSRC=${relativeFileDirname}"
         },
         {
             "label": "[Release] Launch App on Flipper",
             "group": "build",
             "type": "shell",
-            "command": "./fbt COMPACT=1 DEBUG=0 launch_app APPSRC=${relativeFileDirname}"
+            "command": "./fbt COMPACT=1 DEBUG=0 launch APPSRC=${relativeFileDirname}"
         },
         {
             "label": "[Debug] Launch App on Flipper with Serial Console",

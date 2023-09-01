@@ -6,12 +6,13 @@
 #include <lib/toolbox/stream/file_stream.h>
 
 #include <lib/nfc/protocols/nfc_util.h>
-#include <lib/nfc/protocols/emv.h>
 #include <lib/nfc/protocols/mifare_common.h>
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
 #include <lib/nfc/protocols/nfca.h>
+#include <lib/nfc/protocols/nfcv.h>
+#include <lib/nfc/protocols/slix.h>
 #include <lib/nfc/helpers/reader_analyzer.h>
 
 struct NfcWorker {

@@ -15,10 +15,9 @@ class App:
         # Application specific initialization
         self.init()
 
-    def __call__(self, args=None, skip_logger_init=False):
+    def __call__(self, args=None):
         self.args, self.other_args = self.parser.parse_known_args(args=args)
         # configure log output
-        # if skip_logger_init:
         self.log_level = logging.DEBUG if self.args.debug else logging.INFO
         self.logger.setLevel(self.log_level)
         if not self.logger.hasHandlers():
@@ -44,7 +43,7 @@ class App:
         if isinstance(return_code, int):
             return self._exit(return_code)
         else:
-            self.logger.error(f"Missing return code")
+            self.logger.error("Missing return code")
             return self._exit(255)
 
     def _exit(self, code):

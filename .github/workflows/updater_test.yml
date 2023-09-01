@@ -12,16 +12,14 @@ jobs:
   test_updater_on_bench:
     runs-on: [self-hosted, FlipperZeroUpdaterTest]
     steps:
-      - name: 'Decontaminate previous build leftovers'
-        run: |
-          if [ -d .git ]; then
-            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
+          submodules: false
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Get flipper from device manager (mock)'
@@ -32,6 +30,7 @@ jobs:
 
       - name: 'Flashing target firmware'
         id: first_full_flash
+        timeout-minutes: 10
         run: |
           source scripts/toolchain/fbtenv.sh
           ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
@@ -39,6 +38,7 @@ jobs:
 
       - name: 'Validating updater'
         id: second_full_flash
+        timeout-minutes: 10
         if: success()
         run: |
           source scripts/toolchain/fbtenv.sh
@@ -51,24 +51,20 @@ jobs:
         run: |
           echo "tag=$(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)" >> $GITHUB_OUTPUT
 
-      - name: 'Decontaminate previous build leftovers'
-        if: failure()
-        run: |
-          if [ -d .git ]; then
-            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout latest release'
         uses: actions/checkout@v3
         if: failure()
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ steps.release_tag.outputs.tag }}
 
       - name: 'Flash last release'
         if: failure()
         run: |
-          ./fbt flash OPENOCD_ADAPTER_SERIAL=${{steps.device.outputs.stlink}} FORCE=1
+          ./fbt flash SWD_TRANSPORT_SERIAL=${{steps.device.outputs.stlink}} FORCE=1
 
       - name: 'Wait for flipper and format ext'
         if: failure()

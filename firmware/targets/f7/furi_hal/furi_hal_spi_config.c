@@ -1,6 +1,7 @@
 #include <furi_hal_spi_config.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_spi.h>
+#include <furi_hal_bus.h>
 #include <furi.h>
 
 #define TAG "FuriHalSpiConfig"
@@ -100,28 +101,17 @@ void furi_hal_spi_config_init() {
 static void furi_hal_spi_bus_r_event_callback(FuriHalSpiBus* bus, FuriHalSpiBusEvent event) {
     if(event == FuriHalSpiBusEventInit) {
         furi_hal_spi_bus_r_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-        FURI_CRITICAL_ENTER();
-        LL_APB2_GRP1_ForceReset(LL_APB2_GRP1_PERIPH_SPI1);
-        FURI_CRITICAL_EXIT();
         bus->current_handle = NULL;
     } else if(event == FuriHalSpiBusEventDeinit) {
         furi_mutex_free(furi_hal_spi_bus_r_mutex);
-        FURI_CRITICAL_ENTER();
-        LL_APB2_GRP1_ForceReset(LL_APB2_GRP1_PERIPH_SPI1);
-        LL_APB2_GRP1_ReleaseReset(LL_APB2_GRP1_PERIPH_SPI1);
-        FURI_CRITICAL_EXIT();
     } else if(event == FuriHalSpiBusEventLock) {
         furi_check(furi_mutex_acquire(furi_hal_spi_bus_r_mutex, FuriWaitForever) == FuriStatusOk);
     } else if(event == FuriHalSpiBusEventUnlock) {
         furi_check(furi_mutex_release(furi_hal_spi_bus_r_mutex) == FuriStatusOk);
     } else if(event == FuriHalSpiBusEventActivate) {
-        FURI_CRITICAL_ENTER();
-        LL_APB2_GRP1_ReleaseReset(LL_APB2_GRP1_PERIPH_SPI1);
-        FURI_CRITICAL_EXIT();
+        furi_hal_bus_enable(FuriHalBusSPI1);
     } else if(event == FuriHalSpiBusEventDeactivate) {
-        FURI_CRITICAL_ENTER();
-        LL_APB2_GRP1_ForceReset(LL_APB2_GRP1_PERIPH_SPI1);
-        FURI_CRITICAL_EXIT();
+        furi_hal_bus_disable(FuriHalBusSPI1);
     }
 }
 
@@ -135,28 +125,17 @@ FuriMutex* furi_hal_spi_bus_d_mutex = NULL;
 static void furi_hal_spi_bus_d_event_callback(FuriHalSpiBus* bus, FuriHalSpiBusEvent event) {
     if(event == FuriHalSpiBusEventInit) {
         furi_hal_spi_bus_d_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-        FURI_CRITICAL_ENTER();
-        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_SPI2);
-        FURI_CRITICAL_EXIT();
         bus->current_handle = NULL;
     } else if(event == FuriHalSpiBusEventDeinit) {
         furi_mutex_free(furi_hal_spi_bus_d_mutex);
-        FURI_CRITICAL_ENTER();
-        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_SPI2);
-        LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_SPI2);
-        FURI_CRITICAL_EXIT();
     } else if(event == FuriHalSpiBusEventLock) {
         furi_check(furi_mutex_acquire(furi_hal_spi_bus_d_mutex, FuriWaitForever) == FuriStatusOk);
     } else if(event == FuriHalSpiBusEventUnlock) {
         furi_check(furi_mutex_release(furi_hal_spi_bus_d_mutex) == FuriStatusOk);
     } else if(event == FuriHalSpiBusEventActivate) {
-        FURI_CRITICAL_ENTER();
-        LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_SPI2);
-        FURI_CRITICAL_EXIT();
+        furi_hal_bus_enable(FuriHalBusSPI2);
     } else if(event == FuriHalSpiBusEventDeactivate) {
-        FURI_CRITICAL_ENTER();
-        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_SPI2);
-        FURI_CRITICAL_EXIT();
+        furi_hal_bus_disable(FuriHalBusSPI2);
     }
 }
 
@@ -198,6 +177,52 @@ inline static void furi_hal_spi_bus_r_handle_event_callback(
             handle->sck,
             GpioModeAltFunctionPushPull,
             GpioPullNo,
+            GpioSpeedVeryHigh,
+            GpioAltFn5SPI1);
+
+        furi_hal_gpio_write(handle->cs, false);
+    } else if(event == FuriHalSpiBusHandleEventDeactivate) {
+        furi_hal_gpio_write(handle->cs, true);
+
+        furi_hal_gpio_init(handle->miso, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(handle->mosi, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(handle->sck, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+
+        LL_SPI_Disable(handle->bus->spi);
+    }
+}
+
+inline static void furi_hal_spi_bus_external_handle_event_callback(
+    FuriHalSpiBusHandle* handle,
+    FuriHalSpiBusHandleEvent event,
+    const LL_SPI_InitTypeDef* preset) {
+    if(event == FuriHalSpiBusHandleEventInit) {
+        furi_hal_gpio_write(handle->cs, true);
+        furi_hal_gpio_init(handle->cs, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
+    } else if(event == FuriHalSpiBusHandleEventDeinit) {
+        furi_hal_gpio_write(handle->cs, true);
+        furi_hal_gpio_init(handle->cs, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    } else if(event == FuriHalSpiBusHandleEventActivate) {
+        LL_SPI_Init(handle->bus->spi, (LL_SPI_InitTypeDef*)preset);
+        LL_SPI_SetRxFIFOThreshold(handle->bus->spi, LL_SPI_RX_FIFO_TH_QUARTER);
+        LL_SPI_Enable(handle->bus->spi);
+
+        furi_hal_gpio_init_ex(
+            handle->miso,
+            GpioModeAltFunctionPushPull,
+            GpioPullDown,
+            GpioSpeedVeryHigh,
+            GpioAltFn5SPI1);
+        furi_hal_gpio_init_ex(
+            handle->mosi,
+            GpioModeAltFunctionPushPull,
+            GpioPullDown,
+            GpioSpeedVeryHigh,
+            GpioAltFn5SPI1);
+        furi_hal_gpio_init_ex(
+            handle->sck,
+            GpioModeAltFunctionPushPull,
+            GpioPullDown,
             GpioSpeedVeryHigh,
             GpioAltFn5SPI1);
 
@@ -312,7 +337,8 @@ FuriHalSpiBusHandle furi_hal_spi_bus_handle_nfc = {
 static void furi_hal_spi_bus_handle_external_event_callback(
     FuriHalSpiBusHandle* handle,
     FuriHalSpiBusHandleEvent event) {
-    furi_hal_spi_bus_r_handle_event_callback(handle, event, &furi_hal_spi_preset_1edge_low_2m);
+    furi_hal_spi_bus_external_handle_event_callback(
+        handle, event, &furi_hal_spi_preset_1edge_low_2m);
 }
 
 FuriHalSpiBusHandle furi_hal_spi_bus_handle_external = {

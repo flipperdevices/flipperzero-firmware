@@ -24,6 +24,10 @@ extern "C" {
     })
 #endif
 
+#ifndef ABS
+#define ABS(a) ({ (a) < 0 ? -(a) : (a); })
+#endif
+
 #ifndef ROUND_UP_TO
 #define ROUND_UP_TO(a, b)       \
     ({                          \
@@ -72,6 +76,11 @@ extern "C" {
 
 #ifndef TOSTRING
 #define TOSTRING(x) STRINGIFY(x)
+#endif
+
+#ifndef CONCATENATE
+#define CONCATENATE(a, b) CONCATENATE_(a, b)
+#define CONCATENATE_(a, b) a##b
 #endif
 
 #ifndef REVERSE_BYTES_U32

@@ -5,6 +5,7 @@
 set -eu;
 
 # private variables
+N_GIT_THREADS="$(getconf _NPROCESSORS_ONLN)";
 SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd -P)";
 SCONS_DEFAULT_FLAGS="--warn=target-not-built";
 SCONS_EP="python3 -m SCons";
@@ -25,10 +26,10 @@ fi
 
 if [ -z "$FBT_NO_SYNC" ]; then
     if [ ! -d "$SCRIPT_PATH/.git" ]; then
-        echo "\".git\" directory not found, please clone repo via \"git clone --recursive\"";
+        echo "\".git\" directory not found, please clone repo via \"git clone\"";
         exit 1;
     fi
-    git submodule update --init;
+    git submodule update --init --jobs "$N_GIT_THREADS";
 fi
 
 $SCONS_EP $SCONS_DEFAULT_FLAGS "$@"

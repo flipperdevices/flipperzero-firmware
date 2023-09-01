@@ -1,18 +1,20 @@
-Import("env")
-
 from fbt.version import get_fast_git_version_id
 
+
+Import("env")
 
 env.Append(
     CPPPATH=[
         "#/lib/toolbox",
     ],
     SDK_HEADERS=[
+        File("api_lock.h"),
+        File("compress.h"),
         File("manchester_decoder.h"),
         File("manchester_encoder.h"),
         File("path.h"),
-        File("random_name.h"),
-        File("hmac_sha256.h"),
+        File("name_generator.h"),
+        File("sha256.h"),
         File("crc32_calc.h"),
         File("dir_walk.h"),
         File("md5.h"),
@@ -28,6 +30,7 @@ env.Append(
         File("stream/buffered_file_stream.h"),
         File("protocols/protocol_dict.h"),
         File("pretty_format.h"),
+        File("hex.h"),
     ],
 )
 

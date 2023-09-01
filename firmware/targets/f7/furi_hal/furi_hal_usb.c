@@ -2,7 +2,9 @@
 #include <furi_hal_usb_i.h>
 #include <furi_hal_usb.h>
 #include <furi_hal_power.h>
+
 #include <stm32wbxx_ll_pwr.h>
+#include <stm32wbxx_ll_rcc.h>
 #include <furi.h>
 #include <toolbox/api_lock.h>
 
@@ -73,11 +75,10 @@ typedef enum {
 #define USB_SRV_ALL_EVENTS (UsbEventReset | UsbEventRequest | UsbEventMessage)
 
 PLACE_IN_SECTION("MB_MEM2") static UsbSrv usb = {0};
+PLACE_IN_SECTION("MB_MEM2") static uint32_t ubuf[0x20];
+PLACE_IN_SECTION("MB_MEM2") usbd_device udev;
 
 static const struct usb_string_descriptor dev_lang_desc = USB_ARRAY_DESC(USB_LANGID_ENG_US);
-
-static uint32_t ubuf[0x20];
-usbd_device udev;
 
 static int32_t furi_hal_usb_thread(void* context);
 static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_t* length);
@@ -87,6 +88,8 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep);
 
 /* Low-level init */
 void furi_hal_usb_init(void) {
+    LL_RCC_SetUSBClockSource(LL_RCC_USB_CLKSOURCE_PLLSAI1);
+
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
     LL_PWR_EnableVddUSB();
 
@@ -99,7 +102,10 @@ void furi_hal_usb_init(void) {
     LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     usbd_init(&udev, &usbd_hw, USB_EP0_SIZE, ubuf, sizeof(ubuf));
+
+    FURI_CRITICAL_ENTER();
     usbd_enable(&udev, true);
+    FURI_CRITICAL_EXIT();
 
     usbd_reg_descr(&udev, usb_descriptor_get);
     usbd_reg_event(&udev, usbd_evt_susp, susp_evt);
@@ -360,8 +366,10 @@ static void usb_process_mode_reinit() {
     usbd_connect(&udev, false);
     usb.enabled = false;
 
+    FURI_CRITICAL_ENTER();
     usbd_enable(&udev, false);
     usbd_enable(&udev, true);
+    FURI_CRITICAL_EXIT();
 
     furi_delay_ms(USB_RECONNECT_DELAY);
     usb_process_mode_start(usb.interface, usb.interface_context);

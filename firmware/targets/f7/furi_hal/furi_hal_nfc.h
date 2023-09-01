@@ -402,7 +402,6 @@ void furi_hal_nfc_ll_txrx_on();
 
 void furi_hal_nfc_ll_txrx_off();
 
-// TODO rework all pollers with furi_hal_nfc_ll_txrx_bits
 FuriHalNfcReturn furi_hal_nfc_ll_txrx(
     uint8_t* txBuf,
     uint16_t txBufLen,
@@ -422,6 +421,10 @@ FuriHalNfcReturn furi_hal_nfc_ll_txrx_bits(
     uint32_t fwt);
 
 void furi_hal_nfc_ll_poll();
+
+void furi_hal_nfc_field_detect_start();
+
+bool furi_hal_nfc_field_is_present();
 
 #ifdef __cplusplus
 }

@@ -11,6 +11,7 @@
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
+#include <lib/nfc/protocols/nfcv.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +21,8 @@ extern "C" {
 #define NFC_READER_DATA_MAX_SIZE 64
 #define NFC_DICT_KEY_BATCH_SIZE 10
 
-#define NFC_APP_EXTENSION ".nfc"
+#define NFC_APP_FILENAME_PREFIX "NFC"
+#define NFC_APP_FILENAME_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
 
 typedef void (*NfcLoadingCallback)(void* context, bool state);
@@ -31,6 +33,7 @@ typedef enum {
     NfcDeviceProtocolMifareUl,
     NfcDeviceProtocolMifareClassic,
     NfcDeviceProtocolMifareDesfire,
+    NfcDeviceProtocolNfcV
 } NfcProtocol;
 
 typedef enum {
@@ -39,6 +42,7 @@ typedef enum {
     NfcDeviceSaveFormatMifareUl,
     NfcDeviceSaveFormatMifareClassic,
     NfcDeviceSaveFormatMifareDesfire,
+    NfcDeviceSaveFormatNfcV,
 } NfcDeviceSaveFormat;
 
 typedef struct {
@@ -56,7 +60,6 @@ typedef enum {
     NfcReadModeMfClassic,
     NfcReadModeMfUltralight,
     NfcReadModeMfDesfire,
-    NfcReadModeEMV,
     NfcReadModeNFCA,
 } NfcReadMode;
 
@@ -74,6 +77,7 @@ typedef struct {
         MfUltralightData mf_ul_data;
         MfClassicData mf_classic_data;
         MifareDesfireData mf_df_data;
+        NfcVData nfcv_data;
     };
     FuriString* parsed_data;
 } NfcDeviceData;

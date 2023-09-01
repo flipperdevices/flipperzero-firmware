@@ -1,9 +1,6 @@
 /* Abandon hope, all ye who enter here. */
 
-#include "subghz/types.h"
 #include "subghz_i.h"
-#include <lib/toolbox/path.h>
-#include <lib/subghz/protocols/protocol_items.h>
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -47,16 +44,6 @@ static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) 
     } else {
         rpc_system_app_confirm(subghz->rpc_ctx, event, false);
     }
-}
-
-void subghz_blink_start(SubGhz* instance) {
-    furi_assert(instance);
-    notification_message(instance->notifications, &sequence_blink_start_magenta);
-}
-
-void subghz_blink_stop(SubGhz* instance) {
-    furi_assert(instance);
-    notification_message(instance->notifications, &sequence_blink_stop);
 }
 
 SubGhz* subghz_alloc() {
@@ -142,66 +129,18 @@ SubGhz* subghz_alloc() {
         SubGhzViewIdReadRAW,
         subghz_read_raw_get_view(subghz->subghz_read_raw));
 
-    // Carrier Test Module
-    subghz->subghz_test_carrier = subghz_test_carrier_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher,
-        SubGhzViewIdTestCarrier,
-        subghz_test_carrier_get_view(subghz->subghz_test_carrier));
+    //init threshold rssi
+    subghz->threshold_rssi = subghz_threshold_rssi_alloc();
 
-    // Packet Test
-    subghz->subghz_test_packet = subghz_test_packet_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher,
-        SubGhzViewIdTestPacket,
-        subghz_test_packet_get_view(subghz->subghz_test_packet));
+    subghz_unlock(subghz);
+    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
+    subghz->history = subghz_history_alloc();
+    subghz->filter = SubGhzProtocolFlag_Decodable;
 
-    // Static send
-    subghz->subghz_test_static = subghz_test_static_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher,
-        SubGhzViewIdStatic,
-        subghz_test_static_get_view(subghz->subghz_test_static));
-
-    //init setting
-    subghz->setting = subghz_setting_alloc();
-    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user"));
-
-    //init Worker & Protocol & History & KeyBoard
-    subghz->lock = SubGhzLockOff;
-    subghz->txrx = malloc(sizeof(SubGhzTxRx));
-    subghz->txrx->preset = malloc(sizeof(SubGhzRadioPreset));
-    subghz->txrx->preset->name = furi_string_alloc();
-    subghz_preset_init(
-        subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
-
-    subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
-    subghz->txrx->hopper_state = SubGhzHopperStateOFF;
-    subghz->txrx->speaker_state = SubGhzSpeakerStateDisable;
-    subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
-    subghz->txrx->raw_threshold_rssi = SUBGHZ_RAW_TRESHOLD_MIN;
-    subghz->txrx->history = subghz_history_alloc();
-    subghz->txrx->worker = subghz_worker_alloc();
-    subghz->txrx->fff_data = flipper_format_string_alloc();
-
-    subghz->txrx->environment = subghz_environment_alloc();
-    subghz_environment_set_came_atomo_rainbow_table_file_name(
-        subghz->txrx->environment, EXT_PATH("subghz/assets/came_atomo"));
-    subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
-        subghz->txrx->environment, EXT_PATH("subghz/assets/alutech_at_4n"));
-    subghz_environment_set_nice_flor_s_rainbow_table_file_name(
-        subghz->txrx->environment, EXT_PATH("subghz/assets/nice_flor_s"));
-    subghz_environment_set_protocol_registry(
-        subghz->txrx->environment, (void*)&subghz_protocol_registry);
-    subghz->txrx->receiver = subghz_receiver_alloc_init(subghz->txrx->environment);
-    subghz->txrx->filter = SubGhzProtocolFlag_Decodable;
-    subghz_receiver_set_filter(subghz->txrx->receiver, subghz->txrx->filter);
-
-    subghz_worker_set_overrun_callback(
-        subghz->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
-    subghz_worker_set_pair_callback(
-        subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
-    subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->receiver);
+    //init TxRx & History & KeyBoard
+    subghz->txrx = subghz_txrx_alloc();
+    subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
+    subghz_txrx_set_need_save_callback(subghz->txrx, subghz_save_to_file, subghz);
 
     //Init Error_str
     subghz->error_str = furi_string_alloc();
@@ -219,19 +158,9 @@ void subghz_free(SubGhz* subghz) {
         subghz->rpc_ctx = NULL;
     }
 
-    subghz_speaker_off(subghz);
-
-    // Packet Test
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestPacket);
-    subghz_test_packet_free(subghz->subghz_test_packet);
-
-    // Carrier Test
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestCarrier);
-    subghz_test_carrier_free(subghz->subghz_test_carrier);
-
-    // Static
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdStatic);
-    subghz_test_static_free(subghz->subghz_test_static);
+    subghz_txrx_speaker_off(subghz->txrx);
+    subghz_txrx_stop(subghz->txrx);
+    subghz_txrx_sleep(subghz->txrx);
 
     // Receiver
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
@@ -282,18 +211,14 @@ void subghz_free(SubGhz* subghz) {
     furi_record_close(RECORD_GUI);
     subghz->gui = NULL;
 
-    //setting
-    subghz_setting_free(subghz->setting);
+    // threshold rssi
+    subghz_threshold_rssi_free(subghz->threshold_rssi);
 
     //Worker & Protocol & History
-    subghz_receiver_free(subghz->txrx->receiver);
-    subghz_environment_free(subghz->txrx->environment);
-    subghz_worker_free(subghz->txrx->worker);
-    flipper_format_free(subghz->txrx->fff_data);
-    subghz_history_free(subghz->txrx->history);
-    furi_string_free(subghz->txrx->preset->name);
-    free(subghz->txrx->preset);
-    free(subghz->txrx);
+    subghz_history_free(subghz->history);
+
+    //TxRx
+    subghz_txrx_free(subghz->txrx);
 
     //Error string
     furi_string_free(subghz->error_str);
@@ -319,11 +244,6 @@ int32_t subghz_app(void* p) {
         return 1;
     }
 
-    //Load database
-    bool load_database = subghz_environment_load_keystore(
-        subghz->txrx->environment, EXT_PATH("subghz/assets/keeloq_mfcodes"));
-    subghz_environment_load_keystore(
-        subghz->txrx->environment, EXT_PATH("subghz/assets/keeloq_mfcodes_user"));
     // Check argument and run corresponding scene
     if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
@@ -340,9 +260,9 @@ int32_t subghz_app(void* p) {
             if(subghz_key_load(subghz, p, true)) {
                 furi_string_set(subghz->file_path, (const char*)p);
 
-                if((!strcmp(subghz->txrx->decoder_result->protocol->name, "RAW"))) {
+                if(subghz_get_load_type_file(subghz) == SubGhzLoadTypeFileRaw) {
                     //Load Raw TX
-                    subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
+                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWLoad);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
                 } else {
                     //Load transmitter TX
@@ -358,7 +278,7 @@ int32_t subghz_app(void* p) {
         view_dispatcher_attach_to_gui(
             subghz->view_dispatcher, subghz->gui, ViewDispatcherTypeFullscreen);
         furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);
-        if(load_database) {
+        if(subghz_txrx_is_database_loaded(subghz->txrx)) {
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
         } else {
             scene_manager_set_scene_state(

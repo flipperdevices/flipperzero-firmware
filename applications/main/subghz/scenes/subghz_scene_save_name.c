@@ -1,10 +1,10 @@
 #include "../subghz_i.h"
 #include "subghz/types.h"
-#include <lib/toolbox/random_name.h>
 #include "../helpers/subghz_custom_event.h"
 #include <lib/subghz/protocols/raw.h>
 #include <gui/modules/validators.h>
 #include <dolphin/dolphin.h>
+#include <toolbox/name_generator.h>
 
 #define MAX_TEXT_INPUT_LEN 22
 
@@ -35,14 +35,14 @@ void subghz_scene_save_name_on_enter(void* context) {
     TextInput* text_input = subghz->text_input;
     bool dev_name_empty = false;
 
-    FuriString* file_name;
-    FuriString* dir_name;
-    file_name = furi_string_alloc();
-    dir_name = furi_string_alloc();
+    FuriString* file_name = furi_string_alloc();
+    FuriString* dir_name = furi_string_alloc();
 
     if(!subghz_path_is_file(subghz->file_path)) {
         char file_name_buf[SUBGHZ_MAX_LEN_NAME] = {0};
-        set_random_name(file_name_buf, SUBGHZ_MAX_LEN_NAME);
+
+        name_generator_make_auto(file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_FILENAME_PREFIX);
+
         furi_string_set(file_name, file_name_buf);
         furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);
         //highlighting the entire filename by default
@@ -69,11 +69,11 @@ void subghz_scene_save_name_on_enter(void* context) {
         subghz_scene_save_name_text_input_callback,
         subghz,
         subghz->file_name_tmp,
-        MAX_TEXT_INPUT_LEN, // buffer size
+        MAX_TEXT_INPUT_LEN,
         dev_name_empty);
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
-        furi_string_get_cstr(subghz->file_path), SUBGHZ_APP_EXTENSION, "");
+        furi_string_get_cstr(subghz->file_path), SUBGHZ_APP_FILENAME_EXTENSION, "");
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     furi_string_free(file_name);
@@ -96,7 +96,10 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubGhzCustomEventSceneSaveName) {
             if(strcmp(subghz->file_name_tmp, "") != 0) {
                 furi_string_cat_printf(
-                    subghz->file_path, "/%s%s", subghz->file_name_tmp, SUBGHZ_APP_EXTENSION);
+                    subghz->file_path,
+                    "/%s%s",
+                    subghz->file_name_tmp,
+                    SUBGHZ_APP_FILENAME_EXTENSION);
                 if(subghz_path_is_file(subghz->file_path_tmp)) {
                     if(!subghz_rename_file(subghz)) {
                         return false;
@@ -106,7 +109,7 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                        SubGhzCustomEventManagerNoSet) {
                         subghz_save_protocol_to_file(
                             subghz,
-                            subghz->txrx->fff_data,
+                            subghz_txrx_get_fff_data(subghz->txrx),
                             furi_string_get_cstr(subghz->file_path));
                         scene_manager_set_scene_state(
                             subghz->scene_manager,
@@ -115,8 +118,7 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                     } else {
                         subghz_save_protocol_to_file(
                             subghz,
-                            subghz_history_get_raw_data(
-                                subghz->txrx->history, subghz->txrx->idx_menu_chosen),
+                            subghz_history_get_raw_data(subghz->history, subghz->idx_menu_chosen),
                             furi_string_get_cstr(subghz->file_path));
                     }
                 }
@@ -124,7 +126,9 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
                    SubGhzCustomEventManagerNoSet) {
                     subghz_protocol_raw_gen_fff_data(
-                        subghz->txrx->fff_data, furi_string_get_cstr(subghz->file_path));
+                        subghz_txrx_get_fff_data(subghz->txrx),
+                        furi_string_get_cstr(subghz->file_path),
+                        subghz_txrx_radio_device_get_name(subghz->txrx));
                     scene_manager_set_scene_state(
                         subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerNoSet);
                 } else {
@@ -139,9 +143,9 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                     // Ditto, for RAW signals
                 } else if(scene_manager_has_previous_scene(
                               subghz->scene_manager, SubGhzSceneSetType)) {
-                    DOLPHIN_DEED(DolphinDeedSubGhzAddManually);
+                    dolphin_deed(DolphinDeedSubGhzAddManually);
                 } else {
-                    DOLPHIN_DEED(DolphinDeedSubGhzSave);
+                    dolphin_deed(DolphinDeedSubGhzSave);
                 }
                 return true;
             } else {

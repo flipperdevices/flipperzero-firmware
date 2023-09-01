@@ -7,8 +7,9 @@ on:
 jobs:
   reindex:
     name: 'Reindex updates'
-    runs-on: [self-hosted,FlipperZeroShell]
+    runs-on: [self-hosted, FlipperZeroShell]
     steps:
       - name: Trigger reindex
         run: |
-          curl -X POST -F 'key=${{ secrets.REINDEX_KEY }}' ${{ secrets.REINDEX_URL }}
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              "${{ secrets.INDEXER_URL }}"/firmware/reindex

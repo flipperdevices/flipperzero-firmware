@@ -47,7 +47,7 @@ Only two parameters are mandatory: **_appid_** and **_apptype_**. Others are opt
 The following parameters are used only for [FAPs](./AppsOnSDCard.md):
 
 - **sources**: list of strings, file name masks used for gathering sources within the app folder. The default value of `["*.c*"]` includes C and C++ source files. Applications cannot use the `"lib"` folder for their own source code, as it is reserved for **fap_private_libs**.
-- **fap_version**: tuple, 2 numbers in the form of (x,y): application version to be embedded within .fap file. The default value is (0,1), meaning version "0.1".
+- **fap_version**: string, application version. The default value is "0.1". You can also use a tuple of 2 numbers in the form of (x,y) to specify the version. It is also possible to add more dot-separated parts to the version, like patch number, but only major and minor version numbers are stored in the built .fap.
 - **fap_icon**: name of a `.png` file, 1-bit color depth, 10x10px, to be embedded within `.fap` file.
 - **fap_libs**: list of extra libraries to link the application against. Provides access to extra functions that are not exported as a part of main firmware at the expense of increased `.fap` file size and RAM consumption.
 - **fap_category**: string, may be empty. App subcategory, also determines the path of the FAP within the apps folder in the file system.
@@ -75,12 +75,12 @@ Example for building an app from Rust sources:
   Library sources must be placed in a subfolder of the `lib` folder within the application's source folder.
   Each library is defined as a call to the `Lib()` function, accepting the following parameters:
 
-      - **name**: name of the library's folder. Required.
-      - **fap_include_paths**: list of the library's relative paths to add to the parent fap's include path list. The default value is `["."]`, meaning the library's source root.
-      - **sources**: list of filename masks to be used for gathering include files for this library. Paths are relative to the library's source root. The default value is `["*.c*"]`.
-      - **cflags**: list of additional compiler flags to be used for building this library. The default value is `[]`.
-      - **cdefines**: list of additional preprocessor definitions to be used for building this library. The default value is `[]`.
-      - **cincludes**: list of additional include paths to be used for building this library. Paths are relative to the application's root. This can be used for providing external search paths for this library's code — for configuration headers. The default value is `[]`.
+    - **name**: name of the library's folder. Required.
+    - **fap_include_paths**: list of the library's relative paths to add to the parent fap's include path list. The default value is `["."]`, meaning the library's source root.
+    - **sources**: list of filename masks to be used for gathering include files for this library. Paths are relative to the library's source root. The default value is `["*.c*"]`.
+    - **cflags**: list of additional compiler flags to be used for building this library. The default value is `[]`.
+    - **cdefines**: list of additional preprocessor definitions to be used for building this library. The default value is `[]`.
+    - **cincludes**: list of additional include paths to be used for building this library. Paths are relative to the application's root. This can be used for providing external search paths for this library's code — for configuration headers. The default value is `[]`.
 
 Example for building an app with a private library:
 

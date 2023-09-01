@@ -13,13 +13,23 @@
 
 #define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
 #define SUBGHZ_RAW_FOLDER EXT_PATH("subghz")
-#define SUBGHZ_APP_EXTENSION ".sub"
+#define SUBGHZ_APP_FILENAME_PREFIX "SubGHz"
+#define SUBGHZ_APP_FILENAME_EXTENSION ".sub"
 
 #define SUBGHZ_KEY_FILE_VERSION 1
 #define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
 
 #define SUBGHZ_RAW_FILE_VERSION 1
 #define SUBGHZ_RAW_FILE_TYPE "Flipper SubGhz RAW File"
+
+#define SUBGHZ_KEYSTORE_DIR_NAME EXT_PATH("subghz/assets/keeloq_mfcodes")
+#define SUBGHZ_KEYSTORE_DIR_USER_NAME EXT_PATH("subghz/assets/keeloq_mfcodes_user")
+#define SUBGHZ_CAME_ATOMO_DIR_NAME EXT_PATH("subghz/assets/came_atomo")
+#define SUBGHZ_NICE_FLOR_S_DIR_NAME EXT_PATH("subghz/assets/nice_flor_s")
+#define SUBGHZ_ALUTECH_AT_4N_DIR_NAME EXT_PATH("subghz/assets/alutech_at_4n")
+
+typedef struct SubGhzProtocolRegistry SubGhzProtocolRegistry;
+typedef struct SubGhzEnvironment SubGhzEnvironment;
 
 // Radio Preset
 typedef struct {
@@ -48,6 +58,7 @@ typedef enum {
     // Encoder issue
     SubGhzProtocolStatusErrorEncoderGetUpload = (-12), ///< Payload encoder failure
     // Special Values
+    SubGhzProtocolStatusErrorProtocolNotFound = (-13), ///< Protocol not found
     SubGhzProtocolStatusReserved = 0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
 } SubGhzProtocolStatus;
 
@@ -115,11 +126,11 @@ typedef enum {
     SubGhzProtocolFlag_BinRAW = (1 << 10),
 } SubGhzProtocolFlag;
 
-typedef struct {
+struct SubGhzProtocol {
     const char* name;
     SubGhzProtocolType type;
     SubGhzProtocolFlag flag;
 
     const SubGhzProtocolEncoder* encoder;
     const SubGhzProtocolDecoder* decoder;
-} SubGhzProtocol;
+};

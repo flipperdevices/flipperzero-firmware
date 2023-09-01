@@ -32,7 +32,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         if(power->state == PowerStateCharging) {
             canvas_set_bitmap_mode(canvas, 1);
             canvas_set_color(canvas, ColorWhite);
-            // TODO: replace -1 magic for uint8_t with re-framing
+            // -1 used here to overflow u8 number and render is outside of the area
             canvas_draw_icon(canvas, 8, -1, &I_Charging_lightning_mask_9x10);
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_icon(canvas, 8, -1, &I_Charging_lightning_9x10);
@@ -177,48 +177,6 @@ Power* power_alloc() {
     return power;
 }
 
-void power_free(Power* power) {
-    furi_assert(power);
-
-    // Gui
-    view_dispatcher_remove_view(power->view_dispatcher, PowerViewOff);
-    power_off_free(power->power_off);
-    view_dispatcher_remove_view(power->view_dispatcher, PowerViewUnplugUsb);
-    power_unplug_usb_free(power->power_unplug_usb);
-
-    view_port_free(power->battery_view_port);
-
-    // State
-    furi_mutex_free(power->api_mtx);
-
-    // FuriPubSub
-    furi_pubsub_unsubscribe(power->settings_events, power->settings_events_subscription);
-    if(power->input_events_subscription) {
-        furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
-        power->input_events_subscription = NULL;
-    }
-    if(power->app_start_stop_subscription) {
-        furi_pubsub_unsubscribe(
-            loader_get_pubsub(power->loader), power->app_start_stop_subscription);
-    }
-
-    furi_pubsub_free(power->event_pubsub);
-    furi_pubsub_free(power->settings_events);
-    power->loader = NULL;
-    power->input_events_pubsub = NULL;
-
-    //Auto shutdown timer
-    furi_timer_free(power->auto_shutdown_timer);
-
-    // Records
-    furi_record_close(RECORD_NOTIFICATION);
-    furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_LOADER);
-    furi_record_close(RECORD_INPUT_EVENTS);
-
-    free(power);
-}
-
 static void power_check_charging_state(Power* power) {
     if(furi_hal_power_is_charging()) {
         if((power->info.charge == 100) || (furi_hal_power_is_charging_done())) {
@@ -251,6 +209,7 @@ static bool power_update_info(Power* power) {
 
     info.is_charging = furi_hal_power_is_charging();
     info.gauge_is_ok = furi_hal_power_gauge_is_ok();
+    info.is_shutdown_requested = furi_hal_power_is_shutdown_requested();
     info.charge = furi_hal_power_get_pct();
     info.health = furi_hal_power_get_bat_health_pct();
     info.capacity_remaining = furi_hal_power_get_battery_remaining_capacity();
@@ -279,7 +238,7 @@ static void power_check_low_battery(Power* power) {
     }
 
     // Check battery charge and vbus voltage
-    if((power->info.charge == 0) && (power->info.voltage_vbus < 4.0f) &&
+    if((power->info.is_shutdown_requested) && (power->info.voltage_vbus < 4.0f) &&
        power->show_low_bat_level_message) {
         if(!power->battery_low) {
             view_dispatcher_send_to_front(power->view_dispatcher);
@@ -366,8 +325,8 @@ int32_t power_srv(void* p) {
 
         furi_delay_ms(1000);
     }
-    power_auto_shutdown_inhibit(power);
-    power_free(power);
+
+    furi_crash("That was unexpected");
 
     return 0;
 }

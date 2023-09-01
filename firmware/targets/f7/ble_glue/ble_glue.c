@@ -2,6 +2,7 @@
 #include "app_common.h"
 #include "ble_app.h"
 #include <ble/ble.h>
+#include <hci_tl.h>
 
 #include <interface/patterns/ble_thread/tl/tl.h>
 #include <interface/patterns/ble_thread/shci/shci.h>
@@ -54,15 +55,43 @@ void ble_glue_set_key_storage_changed_callback(
     ble_glue->context = context;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+/* TL hook to catch hardfaults */
+
+int32_t ble_glue_TL_SYS_SendCmd(uint8_t* buffer, uint16_t size) {
+    if(furi_hal_bt_get_hardfault_info()) {
+        furi_crash("ST(R) Copro(R) HardFault");
+    }
+
+    return TL_SYS_SendCmd(buffer, size);
+}
+
+void shci_register_io_bus(tSHciIO* fops) {
+    /* Register IO bus services */
+    fops->Init = TL_SYS_Init;
+    fops->Send = ble_glue_TL_SYS_SendCmd;
+}
+
+static int32_t ble_glue_TL_BLE_SendCmd(uint8_t* buffer, uint16_t size) {
+    if(furi_hal_bt_get_hardfault_info()) {
+        furi_crash("ST(R) Copro(R) HardFault");
+    }
+
+    return TL_BLE_SendCmd(buffer, size);
+}
+
+void hci_register_io_bus(tHciIO* fops) {
+    /* Register IO bus services */
+    fops->Init = TL_BLE_Init;
+    fops->Send = ble_glue_TL_BLE_SendCmd;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void ble_glue_init() {
     ble_glue = malloc(sizeof(BleGlue));
     ble_glue->status = BleGlueStatusStartup;
-
-    // Configure the system Power Mode
-    // Select HSI as system clock source after Wake Up from Stop mode
-    LL_RCC_SetClkAfterWakeFromStop(LL_RCC_STOP_WAKEUPCLOCK_HSI);
-    /* Initialize the CPU2 reset value before starting CPU2 with C2BOOT */
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
 
 #ifdef BLE_GLUE_DEBUG
     APPD_Init();
@@ -193,7 +222,6 @@ bool ble_glue_wait_for_c2_start(int32_t timeout) {
     bool started = false;
 
     do {
-        // TODO: use mutex?
         started = ble_glue->status == BleGlueStatusC2Started;
         if(!started) {
             timeout--;
@@ -409,7 +437,9 @@ void shci_cmd_resp_release(uint32_t flag) {
 void shci_cmd_resp_wait(uint32_t timeout) {
     UNUSED(timeout);
     if(ble_glue) {
+        furi_hal_power_insomnia_enter();
         furi_semaphore_acquire(ble_glue->shci_sem, FuriWaitForever);
+        furi_hal_power_insomnia_exit();
     }
 }
 

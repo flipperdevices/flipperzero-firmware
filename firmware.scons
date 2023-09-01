@@ -1,5 +1,3 @@
-Import("ENV", "fw_build_meta")
-
 from SCons.Errors import UserError
 from SCons.Node import FS
 
@@ -10,6 +8,8 @@ from fbt_extra.util import (
     link_elf_dir_as_latest,
 )
 
+Import("ENV", "fw_build_meta")
+
 # Building initial C environment for libs
 env = ENV.Clone(
     tools=[
@@ -18,6 +18,7 @@ env = ENV.Clone(
         "fbt_apps",
         "pvsstudio",
         "fbt_hwtarget",
+        "fbt_envhooks",
     ],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
@@ -68,9 +69,11 @@ env = ENV.Clone(
             ],
         },
     },
-    SDK_APISYMS=None,
+    FW_API_TABLE=None,
     _APP_ICONS=None,
 )
+
+env.PreConfigureFwEnvionment()
 
 if env["IS_BASE_FIRMWARE"]:
     env.Append(
@@ -98,6 +101,13 @@ lib_targets = env.BuildModules(
         "firmware",
         "furi",
     ],
+)
+
+# Configure firmware origin definitions
+env.Append(
+    CPPDEFINES=[
+        env.subst("FW_ORIGIN_${FIRMWARE_ORIGIN}"),
+    ]
 )
 
 
@@ -241,7 +251,7 @@ Depends(
     [
         fwenv["FW_VERSION_JSON"],
         fwenv["FW_ASSETS_HEADERS"],
-        fwenv["SDK_APISYMS"],
+        fwenv["FW_API_TABLE"],
         fwenv["_APP_ICONS"],
     ],
 )
@@ -271,5 +281,6 @@ if should_gen_cdb_and_link_dir(fwenv, BUILD_TARGETS):
 
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_artifacts)
 
+env.PostConfigureFwEnvionment()
 
 Return("fwenv")

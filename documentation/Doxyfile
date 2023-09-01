@@ -929,7 +929,9 @@ RECURSIVE              = YES
 
 EXCLUDE = \
     lib/mlib \
-    lib/STM32CubeWB \
+    lib/stm32wb_cmsis \
+    lib/stm32wb_copro \
+    lib/stm32wb_hal_driver \
     lib/littlefs \
     lib/nanopb \
     assets/protobuf \
@@ -937,8 +939,7 @@ EXCLUDE = \
     lib/FreeRTOS-Kernel \
     lib/microtar \
     lib/mbedtls \
-    lib/cxxheaderparser \
-    applications/plugins/dap_link/lib/free-dap
+    lib/cxxheaderparser
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded

@@ -2,8 +2,8 @@
 #include <furi_hal_light.h>
 #include <furi_hal_debug.h>
 
-#include <stm32wbxx_ll_bus.h>
 #include <stm32wbxx_ll_pwr.h>
+#include <stm32wbxx_ll_bus.h>
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_rtc.h>
 #include <stm32wbxx_ll_utils.h>
@@ -44,10 +44,8 @@ _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");
 #define FURI_HAL_RTC_SECONDS_PER_DAY (FURI_HAL_RTC_SECONDS_PER_HOUR * 24)
 #define FURI_HAL_RTC_MONTHS_COUNT 12
 #define FURI_HAL_RTC_EPOCH_START_YEAR 1970
-#define FURI_HAL_RTC_IS_LEAP_YEAR(year) \
-    ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
 
-static const uint8_t furi_hal_rtc_days_per_month[][FURI_HAL_RTC_MONTHS_COUNT] = {
+static const uint8_t furi_hal_rtc_days_per_month[2][FURI_HAL_RTC_MONTHS_COUNT] = {
     {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
     {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
 
@@ -163,6 +161,14 @@ void furi_hal_rtc_init() {
     furi_log_set_level(furi_hal_rtc_get_log_level());
 
     FURI_LOG_I(TAG, "Init OK");
+}
+
+void furi_hal_rtc_sync_shadow() {
+    if(!LL_RTC_IsShadowRegBypassEnabled(RTC)) {
+        LL_RTC_ClearFlag_RS(RTC);
+        while(!LL_RTC_IsActiveFlag_RS(RTC)) {
+        };
+    }
 }
 
 uint32_t furi_hal_rtc_get_register(FuriHalRtcRegister reg) {
@@ -281,8 +287,10 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat() {
 }
 
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
+    furi_check(!FURI_IS_IRQ_MODE());
     furi_assert(datetime);
 
+    FURI_CRITICAL_ENTER();
     /* Disable write protection */
     LL_RTC_DisableWriteProtection(RTC);
 
@@ -310,22 +318,21 @@ void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
     /* Exit Initialization mode */
     LL_RTC_DisableInitMode(RTC);
 
-    /* If RTC_CR_BYPSHAD bit = 0, wait for synchro else this check is not needed */
-    if(!LL_RTC_IsShadowRegBypassEnabled(RTC)) {
-        LL_RTC_ClearFlag_RS(RTC);
-        while(!LL_RTC_IsActiveFlag_RS(RTC)) {
-        };
-    }
+    furi_hal_rtc_sync_shadow();
 
     /* Enable write protection */
     LL_RTC_EnableWriteProtection(RTC);
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_rtc_get_datetime(FuriHalRtcDateTime* datetime) {
+    furi_check(!FURI_IS_IRQ_MODE());
     furi_assert(datetime);
 
+    FURI_CRITICAL_ENTER();
     uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
     uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
+    FURI_CRITICAL_EXIT();
 
     datetime->second = __LL_RTC_CONVERT_BCD2BIN((time >> 0) & 0xFF);
     datetime->minute = __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF);
@@ -386,7 +393,7 @@ uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime) {
     uint8_t leap_years = 0;
 
     for(uint16_t y = FURI_HAL_RTC_EPOCH_START_YEAR; y < datetime->year; y++) {
-        if(FURI_HAL_RTC_IS_LEAP_YEAR(y)) {
+        if(furi_hal_rtc_is_leap_year(y)) {
             leap_years++;
         } else {
             years++;
@@ -397,10 +404,10 @@ uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime) {
         ((years * furi_hal_rtc_days_per_year[0]) + (leap_years * furi_hal_rtc_days_per_year[1])) *
         FURI_HAL_RTC_SECONDS_PER_DAY;
 
-    uint8_t year_index = (FURI_HAL_RTC_IS_LEAP_YEAR(datetime->year)) ? 1 : 0;
+    bool leap_year = furi_hal_rtc_is_leap_year(datetime->year);
 
-    for(uint8_t m = 0; m < (datetime->month - 1); m++) {
-        timestamp += furi_hal_rtc_days_per_month[year_index][m] * FURI_HAL_RTC_SECONDS_PER_DAY;
+    for(uint8_t m = 1; m < datetime->month; m++) {
+        timestamp += furi_hal_rtc_get_days_per_month(leap_year, m) * FURI_HAL_RTC_SECONDS_PER_DAY;
     }
 
     timestamp += (datetime->day - 1) * FURI_HAL_RTC_SECONDS_PER_DAY;
@@ -409,4 +416,16 @@ uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime) {
     timestamp += datetime->second;
 
     return timestamp;
+}
+
+uint16_t furi_hal_rtc_get_days_per_year(uint16_t year) {
+    return furi_hal_rtc_days_per_year[furi_hal_rtc_is_leap_year(year) ? 1 : 0];
+}
+
+bool furi_hal_rtc_is_leap_year(uint16_t year) {
+    return (((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0);
+}
+
+uint8_t furi_hal_rtc_get_days_per_month(bool leap_year, uint8_t month) {
+    return furi_hal_rtc_days_per_month[leap_year ? 1 : 0][month - 1];
 }

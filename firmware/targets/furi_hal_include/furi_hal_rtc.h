@@ -30,6 +30,9 @@ typedef enum {
     FuriHalRtcFlagLock = (1 << 2),
     FuriHalRtcFlagC2Update = (1 << 3),
     FuriHalRtcFlagHandOrient = (1 << 4),
+    FuriHalRtcFlagLegacySleep = (1 << 5),
+    FuriHalRtcFlagStealthMode = (1 << 6),
+    FuriHalRtcFlagDetailedFilename = (1 << 7),
 } FuriHalRtcFlag;
 
 typedef enum {
@@ -84,6 +87,9 @@ void furi_hal_rtc_deinit_early();
 
 /** Initialize RTC subsystem */
 void furi_hal_rtc_init();
+
+/** Force sync shadow registers */
+void furi_hal_rtc_sync_shadow();
 
 /** Get RTC register content
  *
@@ -249,6 +255,30 @@ uint32_t furi_hal_rtc_get_timestamp();
  * @return     UNIX Timestamp in seconds from UNIX epoch start
  */
 uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime);
+
+/** Gets the number of days in the year according to the Gregorian calendar.
+ *
+ * @param year Input year.
+ *
+ * @return number of days in `year`.
+ */
+uint16_t furi_hal_rtc_get_days_per_year(uint16_t year);
+
+/** Check if a year a leap year in the Gregorian calendar.
+ *
+ * @param year Input year.
+ *
+ * @return true if `year` is a leap year.
+ */
+bool furi_hal_rtc_is_leap_year(uint16_t year);
+
+/** Get the number of days in the month.
+ *
+ * @param leap_year true to calculate based on leap years
+ * @param month month to check, where 1 = January
+ * @return the number of days in the month
+ */
+uint8_t furi_hal_rtc_get_days_per_month(bool leap_year, uint8_t month);
 
 #ifdef __cplusplus
 }

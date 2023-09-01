@@ -27,10 +27,15 @@ TUPLE_DEF2(
     (rssi_max, uint8_t))
 /* Register globally the oplist */
 #define M_OPL_SubGhzFrequencyAnalyzerLogItem_t() \
-    TUPLE_OPLIST(SubGhzFrequencyAnalyzerLogItem, M_POD_OPLIST, M_DEFAULT_OPLIST, M_DEFAULT_OPLIST)
+    TUPLE_OPLIST(                                \
+        SubGhzFrequencyAnalyzerLogItem,          \
+        M_DEFAULT_OPLIST,                        \
+        M_DEFAULT_OPLIST,                        \
+        M_DEFAULT_OPLIST,                        \
+        M_DEFAULT_OPLIST)
 
 /* Define the array, register the oplist and define further algorithms on it */
-ARRAY_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItem_t)
+ARRAY_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItem_t) //-V779
 #define M_OPL_SubGhzFrequencyAnalyzerLogItemArray_t() \
     ARRAY_OPLIST(SubGhzFrequencyAnalyzerLogItemArray, M_OPL_SubGhzFrequencyAnalyzerLogItem_t())
 ALGO_DEF(SubGhzFrequencyAnalyzerLogItemArray, SubGhzFrequencyAnalyzerLogItemArray_t)

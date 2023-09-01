@@ -10,18 +10,15 @@ env:
 
 jobs:
   merge_report:
-    runs-on: [self-hosted,FlipperZeroShell]
+    runs-on: [self-hosted, FlipperZeroShell]
     steps:
-      - name: 'Decontaminate previous build leftovers'
-        run: |
-          if [ -d .git ]; then
-            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout code'
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Get commit details'
@@ -33,7 +30,7 @@ jobs:
           else
             TYPE="other"
           fi
-          python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
+          python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE" || cat "${{ github.event_path }}"
 
       - name: 'Check ticket and report'
         run: |

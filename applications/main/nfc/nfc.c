@@ -223,7 +223,11 @@ void nfc_blink_stop(Nfc* nfc) {
 
 bool nfc_save_file(Nfc* nfc) {
     furi_string_printf(
-        nfc->dev->load_path, "%s/%s%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
+        nfc->dev->load_path,
+        "%s/%s%s",
+        NFC_APP_FOLDER,
+        nfc->dev->dev_name,
+        NFC_APP_FILENAME_EXTENSION);
     bool file_saved = nfc_device_save(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
     return file_saved;
 }
@@ -286,15 +290,18 @@ int32_t nfc_app(void* p) {
             if(nfc_device_load(nfc->dev, p, true)) {
                 if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
+                    dolphin_deed(DolphinDeedNfcEmulate);
                 } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
-                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
+                    dolphin_deed(DolphinDeedNfcEmulate);
+                } else if(nfc->dev->format == NfcDeviceSaveFormatNfcV) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVEmulate);
+                    dolphin_deed(DolphinDeedNfcEmulate);
                 } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
                 } else {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
+                    dolphin_deed(DolphinDeedNfcEmulate);
                 }
             } else {
                 // Exit app

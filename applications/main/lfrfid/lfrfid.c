@@ -183,16 +183,18 @@ int32_t lfrfid_app(void* p) {
             view_dispatcher_attach_to_gui(
                 app->view_dispatcher, app->gui, ViewDispatcherTypeDesktop);
             scene_manager_next_scene(app->scene_manager, LfRfidSceneRpc);
-            DOLPHIN_DEED(DolphinDeedRfidEmulate);
+            dolphin_deed(DolphinDeedRfidEmulate);
         } else {
             furi_string_set(app->file_path, args);
-            lfrfid_load_key_data(app, app->file_path, true);
-            view_dispatcher_attach_to_gui(
-                app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-            scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
-            DOLPHIN_DEED(DolphinDeedRfidEmulate);
+            if(lfrfid_load_key_data(app, app->file_path, true)) {
+                view_dispatcher_attach_to_gui(
+                    app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+                scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
+                dolphin_deed(DolphinDeedRfidEmulate);
+            } else {
+                view_dispatcher_stop(app->view_dispatcher);
+            }
         }
-
     } else {
         view_dispatcher_attach_to_gui(
             app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
@@ -213,13 +215,16 @@ bool lfrfid_save_key(LfRfid* app) {
 
     lfrfid_make_app_folder(app);
 
-    if(furi_string_end_with(app->file_path, LFRFID_APP_EXTENSION)) {
+    if(furi_string_end_with(app->file_path, LFRFID_APP_FILENAME_EXTENSION)) {
         size_t filename_start = furi_string_search_rchar(app->file_path, '/');
         furi_string_left(app->file_path, filename_start);
     }
 
     furi_string_cat_printf(
-        app->file_path, "/%s%s", furi_string_get_cstr(app->file_name), LFRFID_APP_EXTENSION);
+        app->file_path,
+        "/%s%s",
+        furi_string_get_cstr(app->file_name),
+        LFRFID_APP_FILENAME_EXTENSION);
 
     result = lfrfid_save_key_data(app, app->file_path);
     return result;
@@ -229,7 +234,8 @@ bool lfrfid_load_key_from_file_select(LfRfid* app) {
     furi_assert(app);
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, LFRFID_APP_EXTENSION, &I_125_10px);
+    dialog_file_browser_set_basic_options(
+        &browser_options, LFRFID_APP_FILENAME_EXTENSION, &I_125_10px);
     browser_options.base_path = LFRFID_APP_FOLDER;
 
     // Input events and views are managed by file_browser

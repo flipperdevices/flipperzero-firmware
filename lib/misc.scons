@@ -1,10 +1,9 @@
-Import("env")
-
 from fbt.util import GLOB_FILE_EXCLUSION
+
+Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/digital_signal",
         "#/lib/fnv1a_hash",
         "#/lib/heatshrink",
         "#/lib/micro-ecc",
@@ -26,7 +25,6 @@ libenv.ApplyLibFlags()
 sources = []
 
 libs_recurse = [
-    "digital_signal",
     "micro-ecc",
     "u8g2",
     "update_util",
@@ -36,7 +34,6 @@ for lib in libs_recurse:
     sources += libenv.GlobRecursive("*.c*", lib)
 
 libs_plain = [
-    "heatshrink",
     "nanopb",
 ]
 
@@ -46,6 +43,12 @@ for lib in libs_plain:
         exclude=GLOB_FILE_EXCLUSION,
         source=True,
     )
+
+sources += Glob(
+    "heatshrink/heatshrink_*.c*",
+    exclude=GLOB_FILE_EXCLUSION,
+    source=True,
+)
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

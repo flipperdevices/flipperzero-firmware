@@ -195,7 +195,8 @@ bool ibutton_load_key(iButton* ibutton) {
 
 bool ibutton_select_and_load_key(iButton* ibutton) {
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, IBUTTON_APP_EXTENSION, &I_ibutt_10px);
+    dialog_file_browser_set_basic_options(
+        &browser_options, IBUTTON_APP_FILENAME_EXTENSION, &I_ibutt_10px);
     browser_options.base_path = IBUTTON_APP_FOLDER;
 
     if(furi_string_empty(ibutton->file_path)) {
@@ -282,14 +283,14 @@ int32_t ibutton_app(void* arg) {
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeDesktop);
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneRpc);
-        DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
+        dolphin_deed(DolphinDeedIbuttonEmulate);
 
     } else {
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeFullscreen);
         if(key_loaded) { //-V547
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
-            DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
+            dolphin_deed(DolphinDeedIbuttonEmulate);
         } else {
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneStart);
         }
