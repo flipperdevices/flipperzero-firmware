@@ -77,6 +77,22 @@ static FHalNfcError f_hal_nfc_iso14443a_listener_init(FuriHalSpiBusHandle* handl
 
     st25r3916_write_reg(handle, ST25R3916_REG_MASK_RX_TIMER, 0x02);
 
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
+    uint32_t interrupts =
+        (/*ST25R3916_IRQ_MASK_FWL | ST25R3916_IRQ_MASK_TXE |*/ ST25R3916_IRQ_MASK_RXS /*|
+         ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_PAR | ST25R3916_IRQ_MASK_CRC |
+         ST25R3916_IRQ_MASK_ERR1 | ST25R3916_IRQ_MASK_ERR2 | ST25R3916_IRQ_MASK_EON |
+         ST25R3916_IRQ_MASK_EOF | ST25R3916_IRQ_MASK_WU_A_X | ST25R3916_IRQ_MASK_WU_A*/);
+    // Clear interrupts
+    // FURI_LOG_I("LISTEN START", "%lX", interrupts);
+    st25r3916_get_irq(handle);
+    // Enable interrupts
+    st25r3916_mask_irq(handle, interrupts);
+    // Enable auto collision resolution
+    st25r3916_clear_reg_bits(
+        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SENSE);
+
     return f_hal_nfc_iso14443a_common_init(handle);
 }
 

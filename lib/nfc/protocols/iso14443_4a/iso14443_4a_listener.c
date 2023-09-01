@@ -67,7 +67,7 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
                bit_buffer_get_byte(rx_buffer, 0) == ISO14443_4A_CMD_READ_ATS) {
                 if(iso14443_4a_listener_send_ats(instance, instance->data->ats_data) !=
                    Iso14443_4aErrorNone) {
-                    command = NfcCommandStop;
+                    command = NfcCommandContinue;
                 } else {
                     instance->state = Iso14443_4aListenerStateActive;
                 }
@@ -84,7 +84,7 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted ||
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff) {
         instance->state = Iso14443_4aListenerStateIdle;
-        command = NfcCommandStop;
+        command = NfcCommandContinue;
     }
 
     return command;

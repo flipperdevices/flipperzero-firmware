@@ -14,16 +14,6 @@ typedef enum {
     MfUltralightListenerAccessTypeWrite,
 } MfUltralightListenerAccessType;
 
-typedef enum {
-    MfUltralightCommandNotFound,
-    MfUltralightCommandProcessed,
-    MfUltralightCommandNotProcessedNAK,
-    MfUltralightCommandNotProcessedSilent,
-} MfUltralightCommand;
-
-typedef MfUltralightCommand (
-    *MfUltralightListenerCommandCallback)(MfUltralightListener* instance, BitBuffer* buf);
-
 typedef struct {
     uint8_t cmd;
     size_t cmd_len_bits;
@@ -324,6 +314,53 @@ static MfUltralightCommand
     return command;
 }
 
+static MfUltralightCommand
+    mf_ultralight_comp_write_handler_p2(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
+    FURI_LOG_D(TAG, "CMD_CM_WR_2");
+
+    do {
+        if(bit_buffer_get_size_bytes(buffer) != 16) break;
+
+        const uint8_t* rx_data = bit_buffer_get_data(buffer);
+        uint8_t start_page = instance->composite_cmd.data;
+        memcpy(instance->data->page[start_page].data, &rx_data[0], sizeof(MfUltralightPage));
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+
+        command = MfUltralightCommandProcessed;
+    } while(false);
+
+    return command;
+}
+
+static MfUltralightCommand
+    mf_ultralight_comp_write_handler_p1(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedSilent;
+
+    FURI_LOG_D(TAG, "CMD_CM_WR_1");
+
+    do {
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportCompatibleWrite))
+            break;
+
+        uint8_t start_page = bit_buffer_get_byte(buffer, 1);
+        uint16_t pages_total = instance->data->pages_total;
+
+        if(start_page < 2 || start_page > pages_total) {
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
+        instance->composite_cmd.data = start_page;
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+        command = MfUltralightCommandProcessed;
+        mf_ultralight_composite_command_set_next(instance, mf_ultralight_comp_write_handler_p2);
+    } while(false);
+
+    return command;
+}
+
 static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
     {
         .cmd = MF_ULTRALIGHT_CMD_READ_PAGE,
@@ -365,6 +402,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .cmd_len_bits = 6 * 8,
         .callback = mf_ultralight_listener_increase_counter_handler,
     },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_COMP_WRITE,
+        .cmd_len_bits = 2 * 8,
+        .callback = mf_ultralight_comp_write_handler_p1,
+    },
 };
 
 static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
@@ -384,6 +426,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(
     instance->iso14443_3a_listener = iso14443_3a_listener;
     instance->data = data;
     mf_ultralight_listener_prepare_emulation(instance);
+    mf_ultralight_composite_command_reset(instance);
     instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE);
 
     instance->mfu_event.data = &instance->mfu_event_data;
@@ -436,14 +479,17 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         size_t size = bit_buffer_get_size(rx_buffer);
         uint8_t cmd = bit_buffer_get_byte(rx_buffer, 0);
 
-        for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
-            if(size != mf_ultralight_command[i].cmd_len_bits) continue;
-            if(cmd != mf_ultralight_command[i].cmd) continue;
-            mfu_command = mf_ultralight_command[i].callback(instance, rx_buffer);
+        if(mf_ultralight_composite_command_in_progress(instance)) {
+            mfu_command = mf_ultralight_composite_command_run(instance, rx_buffer);
+        } else {
+            for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
+                if(size != mf_ultralight_command[i].cmd_len_bits) continue;
+                if(cmd != mf_ultralight_command[i].cmd) continue;
+                mfu_command = mf_ultralight_command[i].callback(instance, rx_buffer);
 
-            if(mfu_command != MfUltralightCommandNotFound) break;
+                if(mfu_command != MfUltralightCommandNotFound) break;
+            }
         }
-
         if(mfu_command != MfUltralightCommandProcessed) {
             instance->state = MfUltraligthListenerStateIdle;
             instance->auth_state = MfUltralightListenerAuthStateIdle;
@@ -453,11 +499,13 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
                 mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
             }
         }
-    } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData) {
-        command = NfcCommandReset;
-    } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff) {
-        command = NfcCommandReset;
-    } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
+    } else if(
+        iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData ||
+        iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff ||
+        iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
+        // TODO generic state reset ?
+        mf_ultralight_composite_command_reset(instance);
+        instance->auth_state = MfUltralightListenerAuthStateIdle;
         command = NfcCommandReset;
     }
 

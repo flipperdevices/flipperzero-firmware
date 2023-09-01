@@ -533,6 +533,7 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
 
     if(iso3_event->type == Iso14443_3aListenerEventTypeFieldOff) {
         mf_classic_listener_reset_state(instance);
+        command = NfcCommandReset;
     } else if(
         (iso3_event->type == Iso14443_3aListenerEventTypeReceivedData) ||
         (iso3_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame)) {

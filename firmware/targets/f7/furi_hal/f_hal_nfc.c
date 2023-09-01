@@ -365,6 +365,14 @@ FHalNfcError f_hal_nfc_reset_mode() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
+
+    const FHalNfcMode mode = f_hal_nfc.mode;
+    const FHalNfcTech tech = f_hal_nfc.tech;
+    if(mode == FHalNfcModePoller) {
+        error = f_hal_nfc_tech[tech]->poller.deinit(handle);
+    } else if(mode == FHalNfcModeListener) {
+        error = f_hal_nfc_tech[tech]->listener.deinit(handle);
+    }
     // Set default value in mode register
     st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om0);
     st25r3916_write_reg(handle, ST25R3916_REG_STREAM_MODE, 0);
@@ -388,15 +396,6 @@ FHalNfcError f_hal_nfc_reset_mode() {
         ST25R3916_REG_CORR_CONF1_corr_s7 | ST25R3916_REG_CORR_CONF1_corr_s4 |
             ST25R3916_REG_CORR_CONF1_corr_s1 | ST25R3916_REG_CORR_CONF1_corr_s0);
     st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0);
-
-    const FHalNfcMode mode = f_hal_nfc.mode;
-    const FHalNfcTech tech = f_hal_nfc.tech;
-
-    if(mode == FHalNfcModePoller) {
-        error = f_hal_nfc_tech[tech]->poller.deinit(handle);
-    } else if(mode == FHalNfcModeListener) {
-        error = f_hal_nfc_tech[tech]->listener.deinit(handle);
-    }
 
     return error;
 }
@@ -585,24 +584,6 @@ FHalNfcError f_hal_nfc_trx_reset() {
 }
 
 FHalNfcError f_hal_nfc_listener_start() {
-    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
-    uint32_t interrupts =
-        (/*ST25R3916_IRQ_MASK_FWL | ST25R3916_IRQ_MASK_TXE |*/ ST25R3916_IRQ_MASK_RXS /*|
-         ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_PAR | ST25R3916_IRQ_MASK_CRC |
-         ST25R3916_IRQ_MASK_ERR1 | ST25R3916_IRQ_MASK_ERR2 | ST25R3916_IRQ_MASK_EON |
-         ST25R3916_IRQ_MASK_EOF | ST25R3916_IRQ_MASK_WU_A_X | ST25R3916_IRQ_MASK_WU_A*/);
-    // Clear interrupts
-    // FURI_LOG_I("LISTEN START", "%lX", interrupts);
-    st25r3916_get_irq(handle);
-    // Enable interrupts
-    st25r3916_mask_irq(handle, interrupts);
-    // Enable auto collision resolution
-    st25r3916_clear_reg_bits(
-        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SENSE);
-
     return FHalNfcErrorNone;
 }
 
