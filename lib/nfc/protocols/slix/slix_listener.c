@@ -23,6 +23,8 @@ static SlixListener*
     instance->generic_event.instance = instance;
     instance->generic_event.data = &instance->slix_event;
 
+    slix_listener_init_overrides(instance);
+
     return instance;
 }
 

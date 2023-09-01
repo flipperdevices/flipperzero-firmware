@@ -12,6 +12,11 @@ typedef SlixError (*SlixRequestHandler)(
     size_t data_size,
     uint8_t flags);
 
+static bool
+    slix_listener_is_password_lock_enabled(SlixListener* instance, SlixPasswordType password_type) {
+    return !instance->session_state.password_match[password_type];
+}
+
 static SlixError slix_get_nxp_system_info_handler(
     SlixListener* instance,
     const uint8_t* data,
@@ -252,8 +257,111 @@ static SlixError slix_read_signature_handler(
     return SlixErrorNone;
 }
 
-bool slix_listener_is_password_valid(SlixListener* instance, SlixPasswordType password_type) {
-    return instance->session_state.password_match[password_type];
+static Iso15693_3Error slix_iso15693_3_read_block_override(SlixListener* instance, va_list args) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    const uint32_t block_num = va_arg(args, uint32_t);
+
+    do {
+        if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, block_num)) {
+            if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeRead)) {
+                error = Iso15693_3ErrorInternal;
+                break;
+            }
+        }
+
+        if(block_num == SLIX_COUNTER_BLOCK_NUM) {
+            // TODO: Implement special behaviour for block 79
+        }
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error
+    slix_iso15693_3_write_lock_block_override(SlixListener* instance, va_list args) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    const uint32_t block_num = va_arg(args, uint32_t);
+
+    do {
+        if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, block_num)) {
+            if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeRead)) {
+                error = Iso15693_3ErrorInternal;
+                break;
+            }
+        }
+
+        if(slix_is_block_protected(instance->data, SlixPasswordTypeWrite, block_num)) {
+            if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeWrite)) {
+                error = Iso15693_3ErrorInternal;
+                break;
+            }
+        }
+
+        if(block_num == SLIX_COUNTER_BLOCK_NUM) {
+            // TODO: Implement special behaviour for block 79
+        }
+
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error
+    slix_iso15693_3_read_multi_block_override(SlixListener* instance, va_list args) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    const uint32_t block_index_start = va_arg(args, uint32_t);
+    const uint32_t block_index_end = va_arg(args, uint32_t);
+
+    for(uint32_t i = block_index_start; i <= block_index_end; ++i) {
+        if(i == SLIX_COUNTER_BLOCK_NUM) {
+            // TODO: Implement special behaviour for block 79
+        } else if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, i)) {
+            if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeRead)) {
+                error = Iso15693_3ErrorInternal;
+                break;
+            }
+        }
+    }
+
+    return error;
+}
+
+static Iso15693_3Error
+    slix_iso15693_3_write_multi_block_override(SlixListener* instance, va_list args) {
+    UNUSED(instance);
+    UNUSED(args);
+    // No mention of this command in SLIX manuals, assuming not supported
+    return Iso15693_3ErrorNotSupported;
+}
+
+static Iso15693_3Error
+    slix_iso15693_3_write_lock_afi_override(SlixListener* instance, va_list args) {
+    UNUSED(args);
+
+    return slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeEasAfi) ?
+               Iso15693_3ErrorInternal :
+               Iso15693_3ErrorNone;
+}
+
+Iso15693_3ListenerOverrideHandler
+    slix_iso15693_override_table[Iso15693_3ListenerOverrideCommandCount] = {
+        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_read_block_override,
+        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_block_override,
+        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_block_override,
+        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_read_multi_block_override,
+        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_multi_block_override,
+        (Iso15693_3ListenerOverrideHandler)NULL,
+        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_afi_override,
+        (Iso15693_3ListenerOverrideHandler)slix_iso15693_3_write_lock_afi_override,
+};
+
+SlixError slix_listener_init_overrides(SlixListener* instance) {
+    iso15693_3_listener_set_override_table(
+        instance->iso15693_3_listener, slix_iso15693_override_table, instance);
+    return SlixErrorNone;
 }
 
 SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer* rx_buffer) {
@@ -329,8 +437,7 @@ SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer*
         error = handler(instance, request_data, request_data_size, request->flags);
 
         // It's a trick! Send no reply.
-        if(error == SlixErrorFormat || error == SlixErrorWrongPassword)
-            break;
+        if(error == SlixErrorFormat || error == SlixErrorWrongPassword) break;
 
         if(error != SlixErrorNone) {
             bit_buffer_reset(instance->tx_buffer);

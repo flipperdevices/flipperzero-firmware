@@ -8,6 +8,8 @@ extern "C" {
 
 #define SLIX_SIGNATURE_SIZE (32U)
 
+#define SLIX_COUNTER_BLOCK_NUM (79U)
+
 #define SLIX_PP_CONDITION_RL (1U << 0)
 #define SLIX_PP_CONDITION_WL (1U << 1)
 #define SLIX_PP_CONDITION_RH (1U << 4)
@@ -66,7 +68,7 @@ typedef enum {
     SlixPasswordTypeWrite,
     SlixPasswordTypePrivacy,
     SlixPasswordTypeDestroy,
-    SlixPasswordTypeEas,
+    SlixPasswordTypeEasAfi,
     SlixPasswordTypeCount,
 } SlixPasswordType;
 

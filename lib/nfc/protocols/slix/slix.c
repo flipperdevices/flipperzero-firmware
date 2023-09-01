@@ -386,6 +386,7 @@ bool slix_is_block_protected(
     do {
         if(password_type != SlixPasswordTypeRead && password_type != SlixPasswordTypeWrite) break;
         if(block_num >= iso15693_3_get_block_count(data->iso15693_3_data)) break;
+        if(block_num == SLIX_COUNTER_BLOCK_NUM) break;
 
         const bool high = block_num >= data->system_info.protection.pointer;
         const bool read = password_type == SlixPasswordTypeRead;

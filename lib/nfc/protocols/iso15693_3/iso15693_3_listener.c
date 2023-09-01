@@ -18,7 +18,6 @@ Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, const Iso15693_3Data* da
     instance->data = iso15693_3_alloc();
     iso15693_3_copy(instance->data, data);
 
-    instance->handler_table = &iso15693_3_handler_table;
     instance->tx_buffer = bit_buffer_alloc(ISO15693_3_LISTENER_BUFFER_SIZE);
 
     instance->iso15693_3_event.data = &instance->iso15693_3_event_data;
