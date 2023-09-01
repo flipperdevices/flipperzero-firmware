@@ -5,7 +5,7 @@
 #define TAG "FuriHalMemory"
 
 // STM(TM) Copro(TM) bug(TM) workaround size
-#define RAM2B_COPRO_GAP_SIZE_KB 2
+#define RAM2B_COPRO_GAP_SIZE_KB 0
 
 typedef enum {
     SRAM_A,
