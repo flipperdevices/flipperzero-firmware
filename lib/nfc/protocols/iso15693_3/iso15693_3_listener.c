@@ -10,13 +10,12 @@
 
 #define ISO15693_3_LISTENER_BUFFER_SIZE (64U)
 
-Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, const Iso15693_3Data* data) {
+Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, Iso15693_3Data* data) {
     furi_assert(nfc);
 
     Iso15693_3Listener* instance = malloc(sizeof(Iso15693_3Listener));
     instance->nfc = nfc;
-    instance->data = iso15693_3_alloc();
-    iso15693_3_copy(instance->data, data);
+    instance->data = data;
 
     instance->tx_buffer = bit_buffer_alloc(ISO15693_3_LISTENER_BUFFER_SIZE);
 
@@ -35,7 +34,6 @@ void iso15693_3_listener_free(Iso15693_3Listener* instance) {
     furi_assert(instance);
 
     bit_buffer_free(instance->tx_buffer);
-    iso15693_3_free(instance->data);
 
     free(instance);
 }

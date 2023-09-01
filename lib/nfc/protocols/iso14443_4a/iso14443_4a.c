@@ -132,7 +132,7 @@ bool iso14443_4a_set_uid(Iso14443_4aData* data, const uint8_t* uid, size_t uid_l
     return iso14443_3a_set_uid(data->iso14443_3a_data, uid, uid_len);
 }
 
-const Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data) {
+Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data) {
     furi_assert(data);
 
     return data->iso14443_3a_data;

@@ -24,13 +24,12 @@ static bool iso14443_3a_listener_halt_received(BitBuffer* buf) {
     return halt_cmd_received;
 }
 
-Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, const Iso14443_3aData* data) {
+Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, Iso14443_3aData* data) {
     furi_assert(nfc);
 
     Iso14443_3aListener* instance = malloc(sizeof(Iso14443_3aListener));
     instance->nfc = nfc;
-    instance->data = iso14443_3a_alloc();
-    iso14443_3a_copy(instance->data, data);
+    instance->data = data;
     instance->tx_buffer = bit_buffer_alloc(ISO14443_3A_LISTENER_MAX_BUFFER_SIZE);
 
     instance->iso14443_3a_event.data = &instance->iso14443_3a_event_data;
@@ -56,7 +55,6 @@ void iso14443_3a_listener_free(Iso14443_3aListener* instance) {
     furi_assert(instance->tx_buffer);
 
     bit_buffer_free(instance->tx_buffer);
-    iso14443_3a_free(instance->data);
     free(instance);
 }
 
@@ -89,10 +87,18 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
     if(nfc_event->type == NfcEventTypeListenerActivated) {
         instance->state = Iso14443_3aListenerStateActive;
     } else if(nfc_event->type == NfcEventTypeFieldOff) {
-        command = NfcCommandReset;
         instance->state = Iso14443_3aListenerStateIdle;
+        if(instance->callback) {
+            instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeFieldOff;
+            instance->callback(instance->generic_event, instance->context);
+        }
+        command = NfcCommandReset;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         if(iso14443_3a_listener_halt_received(nfc_event->data.buffer)) {
+            if(instance->callback) {
+                instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeHalted;
+                instance->callback(instance->generic_event, instance->context);
+            }
             command = NfcCommandReset;
         } else {
             if(iso14443_crc_check(Iso14443CrcTypeA, nfc_event->data.buffer)) {

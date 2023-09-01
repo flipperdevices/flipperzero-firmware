@@ -27,8 +27,6 @@ NfcProtocol nfc_device_get_protocol(const NfcDevice* instance);
 
 const NfcDeviceData* nfc_device_get_data(const NfcDevice* instance, NfcProtocol protocol);
 
-const NfcDeviceData* nfc_device_get_base_data(const NfcDevice* instance, NfcProtocol protocol);
-
 const char* nfc_device_get_protocol_name(NfcProtocol protocol);
 
 const char* nfc_device_get_name(const NfcDevice* instance, NfcDeviceNameType name_type);

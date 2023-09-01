@@ -1,4 +1,4 @@
-#include "nfc_device.h"
+#include "nfc_device_i.h"
 
 #include <storage/storage.h>
 #include <flipper_format/flipper_format.h>
@@ -13,14 +13,6 @@
 #define NFC_DEVICE_TYPE_KEY "Device type"
 
 #define NFC_DEVICE_UID_MAX_LEN (10U)
-
-struct NfcDevice {
-    NfcProtocol protocol;
-    NfcDeviceData* protocol_data;
-
-    NfcLoadingCallback loading_callback;
-    void* loading_callback_context;
-};
 
 NfcDevice* nfc_device_alloc() {
     NfcDevice* instance = malloc(sizeof(NfcDevice));
@@ -65,25 +57,7 @@ NfcProtocol nfc_device_get_protocol(const NfcDevice* instance) {
 }
 
 const NfcDeviceData* nfc_device_get_data(const NfcDevice* instance, NfcProtocol protocol) {
-    furi_assert(instance);
-    furi_assert(protocol < NfcProtocolNum);
-
-    if(instance->protocol != protocol) {
-        furi_crash(NFC_DEV_TYPE_ERROR);
-    }
-
-    return instance->protocol_data;
-}
-
-const NfcDeviceData* nfc_device_get_base_data(const NfcDevice* instance, NfcProtocol protocol) {
-    furi_assert(instance);
-    furi_assert(protocol < NfcProtocolNum);
-
-    if(instance->protocol != protocol) {
-        furi_crash(NFC_DEV_TYPE_ERROR);
-    }
-
-    return nfc_devices[protocol]->get_base_data(instance->protocol_data);
+    return nfc_device_get_data_ptr(instance, protocol);
 }
 
 const char* nfc_device_get_protocol_name(NfcProtocol protocol) {

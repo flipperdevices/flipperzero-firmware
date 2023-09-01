@@ -7,15 +7,13 @@
 
 #define ISO14443_4A_LISTENER_BUF_SIZE (256U)
 
-static Iso14443_4aListener* iso14443_4a_listener_alloc(
-    Iso14443_3aListener* iso14443_3a_listener,
-    const Iso14443_4aData* data) {
+static Iso14443_4aListener*
+    iso14443_4a_listener_alloc(Iso14443_3aListener* iso14443_3a_listener, Iso14443_4aData* data) {
     furi_assert(iso14443_3a_listener);
 
     Iso14443_4aListener* instance = malloc(sizeof(Iso14443_4aListener));
     instance->iso14443_3a_listener = iso14443_3a_listener;
-    instance->data = iso14443_4a_alloc();
-    iso14443_4a_copy(instance->data, data);
+    instance->data = data;
 
     instance->tx_buffer = bit_buffer_alloc(ISO14443_4A_LISTENER_BUF_SIZE);
 
@@ -33,7 +31,6 @@ static void iso14443_4a_listener_free(Iso14443_4aListener* instance) {
     furi_assert(instance->tx_buffer);
 
     bit_buffer_free(instance->tx_buffer);
-    iso14443_4a_free(instance->data);
     free(instance);
 }
 
@@ -70,7 +67,7 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
                bit_buffer_get_byte(rx_buffer, 0) == ISO14443_4A_CMD_READ_ATS) {
                 if(iso14443_4a_listener_send_ats(instance, instance->data->ats_data) !=
                    Iso14443_4aErrorNone) {
-                    command = NfcCommandStop;
+                    command = NfcCommandContinue;
                 } else {
                     instance->state = Iso14443_4aListenerStateActive;
                 }
@@ -87,7 +84,7 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted ||
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff) {
         instance->state = Iso14443_4aListenerStateIdle;
-        command = NfcCommandStop;
+        command = NfcCommandContinue;
     }
 
     return command;

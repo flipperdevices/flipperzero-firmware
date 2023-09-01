@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,35.3,,
+Version,+,38.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -601,7 +601,7 @@ Function,+,bit_buffer_get_byte,uint8_t,"const BitBuffer*, size_t"
 Function,+,bit_buffer_get_byte_from_bit,uint8_t,"const BitBuffer*, size_t"
 Function,+,bit_buffer_get_capacity_bytes,size_t,const BitBuffer*
 Function,+,bit_buffer_get_data,const uint8_t*,const BitBuffer*
-Function,+,bit_buffer_get_parity,const _Bool*,const BitBuffer*
+Function,+,bit_buffer_get_parity,const uint8_t*,const BitBuffer*
 Function,+,bit_buffer_get_size,size_t,const BitBuffer*
 Function,+,bit_buffer_get_size_bytes,size_t,const BitBuffer*
 Function,+,bit_buffer_has_partial_byte,_Bool,const BitBuffer*
@@ -900,7 +900,7 @@ Function,-,f_hal_nfc_timer_block_tx_stop,void,
 Function,-,f_hal_nfc_timer_fwt_start,void,uint32_t
 Function,-,f_hal_nfc_timer_fwt_stop,void,
 Function,-,f_hal_nfc_trx_reset,FHalNfcError,
-Function,-,f_hal_nfca_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const _Bool*, size_t"
+Function,-,f_hal_nfca_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const uint8_t*, size_t"
 Function,-,f_hal_nfca_receive_sdd_frame,FHalNfcError,"uint8_t*, size_t, size_t*"
 Function,-,f_hal_nfca_send_sdd_frame,FHalNfcError,"const uint8_t*, size_t"
 Function,-,f_hal_nfca_send_short_frame,FHalNfcError,FHalNfcaShortFrame
@@ -1844,7 +1844,7 @@ Function,-,isnanf,int,float
 Function,+,iso14443_3a_alloc,Iso14443_3aData*,
 Function,+,iso14443_3a_copy,void,"Iso14443_3aData*, const Iso14443_3aData*"
 Function,+,iso14443_3a_free,void,Iso14443_3aData*
-Function,+,iso14443_3a_get_base_data,const Iso14443_3aData*,const Iso14443_3aData*
+Function,+,iso14443_3a_get_base_data,Iso14443_3aData*,const Iso14443_3aData*
 Function,+,iso14443_3a_get_cuid,uint32_t,const Iso14443_3aData*
 Function,+,iso14443_3a_get_device_name,const char*,"const Iso14443_3aData*, NfcDeviceNameType"
 Function,+,iso14443_3a_get_uid,const uint8_t*,"const Iso14443_3aData*, size_t*"
@@ -1858,7 +1858,7 @@ Function,+,iso14443_3a_verify,_Bool,"Iso14443_3aData*, const FuriString*"
 Function,+,iso14443_3b_alloc,Iso14443_3bData*,
 Function,+,iso14443_3b_copy,void,"Iso14443_3bData*, const Iso14443_3bData*"
 Function,+,iso14443_3b_free,void,Iso14443_3bData*
-Function,+,iso14443_3b_get_base_data,const Iso14443_3bData*,const Iso14443_3bData*
+Function,+,iso14443_3b_get_base_data,Iso14443_3bData*,const Iso14443_3bData*
 Function,+,iso14443_3b_get_device_name,const char*,"const Iso14443_3bData*, NfcDeviceNameType"
 Function,+,iso14443_3b_get_uid,const uint8_t*,"const Iso14443_3bData*, size_t*"
 Function,+,iso14443_3b_is_equal,_Bool,"const Iso14443_3bData*, const Iso14443_3bData*"
@@ -1870,7 +1870,7 @@ Function,+,iso14443_3b_verify,_Bool,"Iso14443_3bData*, const FuriString*"
 Function,+,iso14443_4a_alloc,Iso14443_4aData*,
 Function,+,iso14443_4a_copy,void,"Iso14443_4aData*, const Iso14443_4aData*"
 Function,+,iso14443_4a_free,void,Iso14443_4aData*
-Function,+,iso14443_4a_get_base_data,const Iso14443_3aData*,const Iso14443_4aData*
+Function,+,iso14443_4a_get_base_data,Iso14443_3aData*,const Iso14443_4aData*
 Function,+,iso14443_4a_get_device_name,const char*,"const Iso14443_4aData*, NfcDeviceNameType"
 Function,+,iso14443_4a_get_uid,const uint8_t*,"const Iso14443_4aData*, size_t*"
 Function,+,iso14443_4a_is_ats_supported,_Bool,const Iso14443_4aData*
@@ -2065,7 +2065,7 @@ Function,+,mf_classic_block_to_value,_Bool,"const MfClassicBlock*, int32_t*, uin
 Function,+,mf_classic_copy,void,"MfClassicData*, const MfClassicData*"
 Function,+,mf_classic_detect_protocol,_Bool,"Iso14443_3aData*, MfClassicType*"
 Function,+,mf_classic_free,void,MfClassicData*
-Function,+,mf_classic_get_base_data,const Iso14443_3aData*,const MfClassicData*
+Function,+,mf_classic_get_base_data,Iso14443_3aData*,const MfClassicData*
 Function,+,mf_classic_get_blocks_num_in_sector,uint8_t,uint8_t
 Function,+,mf_classic_get_device_name,const char*,"const MfClassicData*, NfcDeviceNameType"
 Function,+,mf_classic_get_first_block_num_of_sector,uint8_t,uint8_t
@@ -2105,7 +2105,7 @@ Function,+,mf_desfire_alloc,MfDesfireData*,
 Function,+,mf_desfire_copy,void,"MfDesfireData*, const MfDesfireData*"
 Function,+,mf_desfire_free,void,MfDesfireData*
 Function,+,mf_desfire_get_application,const MfDesfireApplication*,"const MfDesfireData*, const MfDesfireApplicationId*"
-Function,+,mf_desfire_get_base_data,const Iso14443_4aData*,const MfDesfireData*
+Function,+,mf_desfire_get_base_data,Iso14443_4aData*,const MfDesfireData*
 Function,+,mf_desfire_get_device_name,const char*,"const MfDesfireData*, NfcDeviceNameType"
 Function,+,mf_desfire_get_file_data,const MfDesfireFileData*,"const MfDesfireApplication*, const MfDesfireFileId*"
 Function,+,mf_desfire_get_file_settings,const MfDesfireFileSettings*,"const MfDesfireApplication*, const MfDesfireFileId*"
@@ -2120,7 +2120,7 @@ Function,+,mf_ultralight_alloc,MfUltralightData*,
 Function,+,mf_ultralight_copy,void,"MfUltralightData*, const MfUltralightData*"
 Function,+,mf_ultralight_detect_protocol,_Bool,const Iso14443_3aData*
 Function,+,mf_ultralight_free,void,MfUltralightData*
-Function,+,mf_ultralight_get_base_data,const Iso14443_3aData*,const MfUltralightData*
+Function,+,mf_ultralight_get_base_data,Iso14443_3aData*,const MfUltralightData*
 Function,+,mf_ultralight_get_config_page,_Bool,"const MfUltralightData*, MfUltralightConfigPages**"
 Function,+,mf_ultralight_get_config_page_num,uint16_t,MfUltralightType
 Function,+,mf_ultralight_get_device_name,const char*,"const MfUltralightData*, NfcDeviceNameType"
@@ -2185,7 +2185,6 @@ Function,+,nfc_device_alloc,NfcDevice*,
 Function,+,nfc_device_clear,void,NfcDevice*
 Function,+,nfc_device_copy_data,void,"const NfcDevice*, NfcProtocol, NfcDeviceData*"
 Function,+,nfc_device_free,void,NfcDevice*
-Function,+,nfc_device_get_base_data,const NfcDeviceData*,"const NfcDevice*, NfcProtocol"
 Function,+,nfc_device_get_data,const NfcDeviceData*,"const NfcDevice*, NfcProtocol"
 Function,+,nfc_device_get_name,const char*,"const NfcDevice*, NfcDeviceNameType"
 Function,+,nfc_device_get_protocol,NfcProtocol,const NfcDevice*

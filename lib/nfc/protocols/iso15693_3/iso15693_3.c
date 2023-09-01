@@ -303,7 +303,7 @@ bool iso15693_3_set_uid(Iso15693_3Data* data, const uint8_t* uid, size_t uid_len
     return uid_valid;
 }
 
-const Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data) {
+Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data) {
     UNUSED(data);
     furi_crash("No base data");
 }

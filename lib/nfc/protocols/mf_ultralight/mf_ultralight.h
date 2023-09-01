@@ -11,6 +11,7 @@ extern "C" {
 #define MF_ULTRALIGHT_CMD_GET_VERSION (0x60)
 #define MF_ULTRALIGHT_CMD_READ_PAGE (0x30)
 #define MF_ULTRALIGHT_CMD_SECTOR_SELECT (0xC2)
+#define MF_ULTRALIGHT_CMD_COMP_WRITE (0xA0)
 #define MF_ULTRALIGHT_CMD_WRITE_PAGE (0xA2)
 #define MF_ULTRALIGTH_CMD_READ_SIG (0x3C)
 #define MF_ULTRALIGHT_CMD_READ_CNT (0x39)
@@ -192,7 +193,7 @@ const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_l
 
 bool mf_ultralight_set_uid(MfUltralightData* data, const uint8_t* uid, size_t uid_len);
 
-const Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data);
+Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data);
 
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version);
 
