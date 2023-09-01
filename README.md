@@ -1,7 +1,10 @@
 # Rolling Flaws
 
-Rolling Flaws by @CodeAllNight.
-Discord invite: https://discord.com/invite/NsjCvqwPAd 
+Rolling Flaws by [@CodeAllNight](https://twitter.com/codeallnight).
+- Discord invite: [https://discord.com/invite/NsjCvqwPAd](https://discord.com/invite/NsjCvqwPAd)
+- YouTube: [https://youtube.com/@MrDerekJamison](https://youtube.com/@MrDerekJamison)
+- GitHub: [https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws)
+
 
 This application is intended to help you learn about rolling code flaws.  
 
