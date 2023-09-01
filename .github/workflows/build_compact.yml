@@ -73,3 +73,11 @@ jobs:
               popd
             done
           done
+
+  report-status:
+    name: Report status
+    needs: [compact]
+    if: always() && !contains(needs.*.result, 'failure')
+    runs-on: [self-hosted, FlipperZeroShell]
+    steps:
+      - run: echo "All good ✨" ;
