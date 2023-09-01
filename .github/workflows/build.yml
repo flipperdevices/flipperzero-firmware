@@ -9,13 +9,15 @@ on:
   pull_request:
 
 env:
-  TARGETS: f7 f18
   DEFAULT_TARGET: f7
   FBT_TOOLCHAIN_PATH: /runner/_work
 
 jobs:
   main:
     runs-on: [self-hosted, FlipperZeroShell]
+    strategy:
+      matrix:
+        target: [f7, f18]    
     steps:
       - name: 'Wipe workspace'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
@@ -38,6 +40,9 @@ jobs:
           fi
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE" || cat "${{ github.event_path }}"
           echo "event_type=$TYPE" >> $GITHUB_OUTPUT
+          echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
+          echo "TARGET_HW=$(echo "${{ matrix.target }}" | sed 's/f//')" >> $GITHUB_ENV
+          
 
       - name: 'Check API versions'
         run: |
@@ -55,45 +60,42 @@ jobs:
           mkdir artifacts map_analyser_files
 
       - name: 'Bundle scripts'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
+        if: !github.event.pull_request.head.repo.fork
         run: |
           tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
 
       - name: 'Build the firmware'
         run: |
           set -e
-          for TARGET in ${TARGETS}; do
-            TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package \
-              ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
-            mv dist/${TARGET}-*/* artifacts/
-            tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
-              -C assets resources
-            ./fbt TARGET_HW=$TARGET_HW fap_dist
-            tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
-              -C dist/${TARGET}-*/apps/Debug .
-            tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \
-              -C dist/${TARGET}-*/debug_elf .
-          done
+          ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package \
+            ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
+          mv dist/${TARGET}-*/* artifacts/
+          tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
+            -C assets resources
+          ./fbt TARGET_HW=$TARGET_HW fap_dist
+          tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
+            -C dist/${TARGET}-*/apps/Debug .
+          tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \
+            -C dist/${TARGET}-*/debug_elf .
 
       - name: "Check for uncommitted changes"
         run: |
           git diff --exit-code
 
       - name: 'Bundle core2 firmware'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
+        if: !github.event.pull_request.head.repo.fork && ${{ matrix.target }} == env.DEFAULT_TARGET
         run: |
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
 
       - name: 'Copy map analyser files'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
+        if: !github.event.pull_request.head.repo.fork && ${{ matrix.target }} == env.DEFAULT_TARGET
         run: |
           cp build/${DEFAULT_TARGET}-firmware-*/firmware.elf.map map_analyser_files/firmware.elf.map
           cp build/${DEFAULT_TARGET}-firmware-*/firmware.elf map_analyser_files/firmware.elf
           cp ${{ github.event_path }} map_analyser_files/event.json
 
       - name: 'Analyse map file'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
+        if: !github.event.pull_request.head.repo.fork && ${{ matrix.target }} == env.DEFAULT_TARGET
         run: |
           source scripts/toolchain/fbtenv.sh
           get_size()
@@ -119,16 +121,16 @@ jobs:
               map_analyser_files/firmware.elf.map.all
 
       - name: 'Upload artifacts to update server'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
+        if: !github.event.pull_request.head.repo.fork && ${{ matrix.target }} == env.DEFAULT_TARGET
         run: |
-          FILES=$(for CUR in $(ls artifacts/); do echo "-F files=@artifacts/$CUR"; done)
+          FILES=$(for CUR in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@artifacts/$CUR"; done)
           curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
               -F "branch=${BRANCH_NAME}" \
               ${FILES[@]} \
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: 'Find Previous Comment'
-        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
+        if: !github.event.pull_request.head.repo.fork && github.event.pull_request
         uses: peter-evans/find-comment@v2
         id: fc
         with:
@@ -137,7 +139,7 @@ jobs:
           body-includes: 'Compiled firmware for commit'
 
       - name: 'Create or update comment'
-        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request}}
+        if: !github.event.pull_request.head.repo.fork && github.event.pull_request
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
