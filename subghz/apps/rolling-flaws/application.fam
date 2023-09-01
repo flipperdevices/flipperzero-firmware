@@ -1,0 +1,11 @@
+App(
+    appid="rolling_flaws",
+    name="Subghz Rolling Receiver",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rolling_flaws_app",
+    requires=["gui", "subghz"],
+    stack_size=2 * 1024,
+    fap_icon="rolling_flaws.png",
+    fap_category="Sub-GHz",
+    fap_icon_assets="assets",
+)
