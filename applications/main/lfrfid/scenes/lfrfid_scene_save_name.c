@@ -14,9 +14,8 @@ void lfrfid_scene_save_name_on_enter(void* context) {
     if(key_name_is_empty) {
         furi_string_set(app->file_path, LFRFID_APP_FOLDER);
 
-        const char* converted_appname = convert_app_extension_to_name(LFRFID_APP_EXTENSION);
-
-        name_generator_set(app->text_store, LFRFID_TEXT_STORE_SIZE, converted_appname);
+        name_generator_make_auto(
+            app->text_store, LFRFID_TEXT_STORE_SIZE, LFRFID_APP_FILENAME_PREFIX);
 
         furi_string_set(folder_path, LFRFID_APP_FOLDER);
     } else {
@@ -37,7 +36,7 @@ void lfrfid_scene_save_name_on_enter(void* context) {
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
         furi_string_get_cstr(folder_path),
-        LFRFID_APP_EXTENSION,
+        LFRFID_APP_FILENAME_EXTENSION,
         furi_string_get_cstr(app->file_name));
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 

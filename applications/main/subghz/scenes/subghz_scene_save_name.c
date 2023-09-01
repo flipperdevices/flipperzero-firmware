@@ -41,9 +41,8 @@ void subghz_scene_save_name_on_enter(void* context) {
 
     if(!subghz_path_is_file(subghz->file_path)) {
         char file_name_buf[SUBGHZ_MAX_LEN_NAME] = {0};
-        const char* converted_appname = convert_app_extension_to_name(SUBGHZ_APP_EXTENSION);
 
-        name_generator_set(file_name_buf, SUBGHZ_MAX_LEN_NAME, converted_appname);
+        name_generator_make_auto(file_name_buf, SUBGHZ_MAX_LEN_NAME, SUBGHZ_APP_FILENAME_PREFIX);
 
         furi_string_set(file_name, file_name_buf);
         furi_string_set(subghz->file_path, SUBGHZ_APP_FOLDER);
@@ -75,7 +74,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         dev_name_empty);
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
-        furi_string_get_cstr(subghz->file_path), SUBGHZ_APP_EXTENSION, "");
+        furi_string_get_cstr(subghz->file_path), SUBGHZ_APP_FILENAME_EXTENSION, "");
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     furi_string_free(file_name);
@@ -98,7 +97,10 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubGhzCustomEventSceneSaveName) {
             if(strcmp(subghz->file_name_tmp, "") != 0) {
                 furi_string_cat_printf(
-                    subghz->file_path, "/%s%s", subghz->file_name_tmp, SUBGHZ_APP_EXTENSION);
+                    subghz->file_path,
+                    "/%s%s",
+                    subghz->file_name_tmp,
+                    SUBGHZ_APP_FILENAME_EXTENSION);
                 if(subghz_path_is_file(subghz->file_path_tmp)) {
                     if(!subghz_rename_file(subghz)) {
                         return false;

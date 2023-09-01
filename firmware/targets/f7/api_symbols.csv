@@ -698,7 +698,6 @@ Function,+,compress_free,void,Compress*
 Function,+,compress_icon_alloc,CompressIcon*,
 Function,+,compress_icon_decode,void,"CompressIcon*, const uint8_t*, uint8_t**"
 Function,+,compress_icon_free,void,CompressIcon*
-Function,+,convert_app_extension_to_name,const char*,char*
 Function,-,copysign,double,"double, double"
 Function,-,copysignf,float,"float, float"
 Function,-,copysignl,long double,"long double, long double"
@@ -2091,7 +2090,9 @@ Function,-,music_worker_set_callback,void,"MusicWorker*, MusicWorkerCallback, vo
 Function,-,music_worker_set_volume,void,"MusicWorker*, float"
 Function,-,music_worker_start,void,MusicWorker*
 Function,-,music_worker_stop,void,MusicWorker*
-Function,+,name_generator_set,void,"char*, uint8_t, const char*"
+Function,+,name_generator_make_auto,void,"char*, uint8_t, const char*"
+Function,+,name_generator_make_detailed,void,"char*, uint8_t, const char*"
+Function,+,name_generator_make_random,void,"char*, uint8_t"
 Function,-,nan,double,const char*
 Function,-,nanf,float,const char*
 Function,-,nanl,long double,const char*
@@ -2537,7 +2538,6 @@ Function,-,serial_svc_set_rpc_status,void,SerialServiceRpcStatus
 Function,-,serial_svc_start,void,
 Function,-,serial_svc_stop,void,
 Function,-,serial_svc_update_tx,_Bool,"uint8_t*, uint16_t"
-Function,+,set_random_name,void,"char*, uint8_t"
 Function,-,setbuf,void,"FILE*, char*"
 Function,-,setbuffer,void,"FILE*, char*, int"
 Function,-,setenv,int,"const char*, const char*, int"

@@ -7,75 +7,69 @@
 #include <stdbool.h>
 #include <furi.h>
 
-void set_random_name(char* name, uint8_t max_name_size) {
-    const char* prefix[] = {
-        "ancient",     "hollow",     "strange",    "disappeared", "unknown",
-        "unthinkable", "unnameable", "nameless",   "my",          "concealed",
-        "forgotten",   "hidden",     "mysterious", "obscure",     "random",
-        "remote",      "uncharted",  "undefined",  "untraveled",  "untold",
-    };
+const char* name_generator_left[] = {
+    "ancient",  "hollow", "strange",   "disappeared", "unknown",    "unthinkable", "unnameable",
+    "nameless", "my",     "concealed", "forgotten",   "hidden",     "mysterious",  "obscure",
+    "random",   "remote", "uncharted", "undefined",   "untraveled", "untold",
+};
 
-    const char* suffix[] = {
-        "door",
-        "entrance",
-        "doorway",
-        "entry",
-        "portal",
-        "entree",
-        "opening",
-        "crack",
-        "access",
-        "corridor",
-        "passage",
-        "port",
-    };
-    uint8_t prefix_i = rand() % COUNT_OF(prefix);
-    uint8_t suffix_i = rand() % COUNT_OF(suffix);
+const char* name_generator_right[] = {
+    "door",
+    "entrance",
+    "doorway",
+    "entry",
+    "portal",
+    "entree",
+    "opening",
+    "crack",
+    "access",
+    "corridor",
+    "passage",
+    "port",
+};
 
-    snprintf(name, max_name_size, "%s_%s", prefix[prefix_i], suffix[suffix_i]);
+void name_generator_make_auto(char* name, uint8_t max_name_size, const char* prefix) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDetailedFilename)) {
+        name_generator_make_detailed(name, max_name_size, prefix);
+    } else {
+        name_generator_make_random(name, max_name_size);
+    }
+}
+
+void name_generator_make_random(char* name, uint8_t max_name_size) {
+    furi_assert(name);
+    furi_assert(max_name_size);
+
+    uint8_t name_generator_left_i = rand() % COUNT_OF(name_generator_left);
+    uint8_t name_generator_right_i = rand() % COUNT_OF(name_generator_right);
+
+    snprintf(
+        name,
+        max_name_size,
+        "%s_%s",
+        name_generator_left[name_generator_left_i],
+        name_generator_right[name_generator_right_i]);
+
     // Set first symbol to upper case
     name[0] = name[0] - 0x20;
 }
 
-const char* convert_app_extension_to_name(char* app_name) {
-    struct NameConversion {
-        const char* original;
-        const char* converted;
-    };
+void name_generator_make_detailed(char* name, uint8_t max_name_size, const char* prefix) {
+    furi_assert(name);
+    furi_assert(max_name_size);
+    furi_assert(prefix);
 
-    struct NameConversion conversions[] = {
-        {".ibtn", "iBtn"}, {".nfc", "NFC"}, {".rfid", "RFID"}, {".sub", "SubGhz"}};
+    FuriHalRtcDateTime dateTime;
+    furi_hal_rtc_get_datetime(&dateTime);
 
-    const int numConversions =
-        sizeof(conversions) / sizeof(conversions[0]); // gets the number of potential conversions
-    const char* converted_name = app_name;
-
-    for(int i = 0; i < numConversions; ++i) {
-        if(!strcmp(app_name, conversions[i].original)) {
-            converted_name = conversions[i].converted;
-            break;
-        }
-    }
-
-    return converted_name;
-}
-
-void name_generator_set(char* name, uint8_t max_name_size, const char* app_name) {
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDetailedFilename)) {
-        FuriHalRtcDateTime dateTime;
-        furi_hal_rtc_get_datetime(&dateTime);
-
-        snprintf(
-            name,
-            max_name_size,
-            "%s-%.4d_%.2d_%.2d-%.2d_%.2d",
-            app_name,
-            dateTime.year,
-            dateTime.month,
-            dateTime.day,
-            dateTime.hour,
-            dateTime.minute);
-    } else {
-        set_random_name(name, max_name_size);
-    }
+    snprintf(
+        name,
+        max_name_size,
+        "%s-%.4d_%.2d_%.2d-%.2d_%.2d",
+        prefix,
+        dateTime.year,
+        dateTime.month,
+        dateTime.day,
+        dateTime.hour,
+        dateTime.minute);
 }

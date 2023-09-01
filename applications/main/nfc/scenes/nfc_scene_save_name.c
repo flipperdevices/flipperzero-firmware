@@ -18,9 +18,7 @@ void nfc_scene_save_name_on_enter(void* context) {
     TextInput* text_input = nfc->text_input;
     bool dev_name_empty = false;
     if(!strcmp(nfc->dev->dev_name, "")) {
-        const char* converted_appname = convert_app_extension_to_name(NFC_APP_EXTENSION);
-
-        name_generator_set(nfc->text_store, NFC_DEV_NAME_MAX_LEN, converted_appname);
+        name_generator_make_auto(nfc->text_store, NFC_DEV_NAME_MAX_LEN, NFC_APP_FILENAME_PREFIX);
         dev_name_empty = true;
     } else {
         nfc_text_store_set(nfc, nfc->dev->dev_name);
@@ -37,14 +35,14 @@ void nfc_scene_save_name_on_enter(void* context) {
     FuriString* folder_path;
     folder_path = furi_string_alloc();
 
-    if(furi_string_end_with(nfc->dev->load_path, NFC_APP_EXTENSION)) {
+    if(furi_string_end_with(nfc->dev->load_path, NFC_APP_FILENAME_EXTENSION)) {
         path_extract_dirname(furi_string_get_cstr(nfc->dev->load_path), folder_path);
     } else {
         furi_string_set(folder_path, NFC_APP_FOLDER);
     }
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
-        furi_string_get_cstr(folder_path), NFC_APP_EXTENSION, nfc->dev->dev_name);
+        furi_string_get_cstr(folder_path), NFC_APP_FILENAME_EXTENSION, nfc->dev->dev_name);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextInput);

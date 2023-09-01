@@ -7,23 +7,27 @@ extern "C" {
 #endif
 
 /** Generates detailed/random name based on furi_hal flags
- * @param name buffer to write random name
- * @param max_name_size length of given buffer
- * @param app_name name of the application
+ *
+ * @param      name           buffer to write random name
+ * @param      max_name_size  length of given buffer
+ * @param[in]  prefix         The prefix of the name
  */
-void name_generator_set(char* name, uint8_t max_name_size, const char* app_name);
-
-/** Converts application extension to app_name
- * @param app_name name of the application
- * @return converted name
- */
-const char* convert_app_extension_to_name(char* app_name);
+void name_generator_make_auto(char* name, uint8_t max_name_size, const char* prefix);
 
 /** Generates random name
- * @param name buffer to write random name
- * @param max_name_size length of given buffer
+ *
+ * @param      name           buffer to write random name
+ * @param      max_name_size  length of given buffer
  */
-void set_random_name(char* name, uint8_t max_name_size);
+void name_generator_make_random(char* name, uint8_t max_name_size);
+
+/** Generates detailed name
+ *
+ * @param      name           buffer to write random name
+ * @param      max_name_size  length of given buffer
+ * @param[in]  prefix         The prefix of the name
+ */
+void name_generator_make_detailed(char* name, uint8_t max_name_size, const char* prefix);
 
 #ifdef __cplusplus
 }
