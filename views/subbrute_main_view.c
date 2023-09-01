@@ -477,7 +477,7 @@ SubBruteAttacks subbrute_main_view_get_index(SubBruteMainView* instance) {
     return instance->index;
 }
 
-const uint8_t* subbrute_main_view_get_extra_repeats(SubBruteMainView* instance) {
+const uint8_t* subbrute_main_view_get_repeats(SubBruteMainView* instance) {
     furi_assert(instance);
     return instance->repeat_values;
 }

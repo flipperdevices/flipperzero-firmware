@@ -25,7 +25,7 @@ void subbrute_main_view_set_index(
     bool two_bytes,
     uint64_t key_from_file);
 SubBruteAttacks subbrute_main_view_get_index(SubBruteMainView* instance);
-const uint8_t* subbrute_main_view_get_extra_repeats(SubBruteMainView* instance);
+const uint8_t* subbrute_main_view_get_repeats(SubBruteMainView* instance);
 bool subbrute_main_view_get_two_bytes(SubBruteMainView* instance);
 void subbrute_attack_view_enter(void* context);
 void subbrute_attack_view_exit(void* context);
