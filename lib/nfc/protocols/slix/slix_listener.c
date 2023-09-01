@@ -63,8 +63,9 @@ static NfcCommand slix_listener_run(NfcGenericEvent event, void* context) {
 
     if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
         const SlixError error = slix_listener_process_request(instance, rx_buffer);
-        // TODO: Handle error code?
-        UNUSED(error);
+        if(error == SlixErrorWrongPassword) {
+            command = NfcCommandStop;
+        }
     }
 
     return command;

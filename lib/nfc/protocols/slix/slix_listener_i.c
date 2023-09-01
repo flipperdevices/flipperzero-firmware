@@ -328,6 +328,10 @@ SlixError slix_listener_process_request(SlixListener* instance, const BitBuffer*
 
         error = handler(instance, request_data, request_data_size, request->flags);
 
+        // It's a trick! Send no reply.
+        if(error == SlixErrorFormat || error == SlixErrorWrongPassword)
+            break;
+
         if(error != SlixErrorNone) {
             bit_buffer_reset(instance->tx_buffer);
             bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
