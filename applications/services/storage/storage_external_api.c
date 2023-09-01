@@ -781,6 +781,14 @@ FS_Error storage_sd_unmount(Storage* storage) {
     return S_RETURN_ERROR;
 }
 
+FS_Error storage_sd_mount(Storage* storage) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandSDMount);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
 FS_Error storage_sd_info(Storage* storage, SDInfo* info) {
     S_API_PROLOGUE;
     SAData data = {
