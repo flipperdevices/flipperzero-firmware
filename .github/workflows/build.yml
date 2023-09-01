@@ -42,7 +42,6 @@ jobs:
           echo "event_type=$TYPE" >> $GITHUB_OUTPUT
           echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_HW=$(echo "${{ matrix.target }}" | sed 's/f//')" >> $GITHUB_ENV
-          
 
       - name: 'Check API versions'
         run: |
@@ -60,7 +59,7 @@ jobs:
           mkdir artifacts map_analyser_files
 
       - name: 'Bundle scripts'
-        if: !github.event.pull_request.head.repo.fork
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
         run: |
           tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
 
@@ -78,24 +77,24 @@ jobs:
           tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \
             -C dist/${TARGET}-*/debug_elf .
 
-      - name: "Check for uncommitted changes"
+      - name: 'Check for uncommitted changes'
         run: |
           git diff --exit-code
 
       - name: 'Bundle core2 firmware'
-        if: !github.event.pull_request.head.repo.fork && ${{ matrix.target }} == env.DEFAULT_TARGET
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
         run: |
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
 
       - name: 'Copy map analyser files'
-        if: !github.event.pull_request.head.repo.fork && ${{ matrix.target }} == env.DEFAULT_TARGET
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
         run: |
           cp build/${DEFAULT_TARGET}-firmware-*/firmware.elf.map map_analyser_files/firmware.elf.map
           cp build/${DEFAULT_TARGET}-firmware-*/firmware.elf map_analyser_files/firmware.elf
           cp ${{ github.event_path }} map_analyser_files/event.json
 
       - name: 'Analyse map file'
-        if: !github.event.pull_request.head.repo.fork && ${{ matrix.target }} == env.DEFAULT_TARGET
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
         run: |
           source scripts/toolchain/fbtenv.sh
           get_size()
@@ -121,16 +120,16 @@ jobs:
               map_analyser_files/firmware.elf.map.all
 
       - name: 'Upload artifacts to update server'
-        if: !github.event.pull_request.head.repo.fork && ${{ matrix.target }} == env.DEFAULT_TARGET
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
-          FILES=$(for CUR in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@artifacts/$CUR"; done)
+          FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
           curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
               -F "branch=${BRANCH_NAME}" \
               ${FILES[@]} \
               "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: 'Find Previous Comment'
-        if: !github.event.pull_request.head.repo.fork && github.event.pull_request
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
         uses: peter-evans/find-comment@v2
         id: fc
         with:
@@ -139,7 +138,7 @@ jobs:
           body-includes: 'Compiled firmware for commit'
 
       - name: 'Create or update comment'
-        if: !github.event.pull_request.head.repo.fork && github.event.pull_request
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
