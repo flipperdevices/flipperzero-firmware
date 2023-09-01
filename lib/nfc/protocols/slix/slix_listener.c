@@ -8,13 +8,12 @@
 #define SLIX_LISTENER_BUF_SIZE (64U)
 
 static SlixListener*
-    slix_listener_alloc(Iso15693_3Listener* iso15693_3_listener, const SlixData* data) {
+    slix_listener_alloc(Iso15693_3Listener* iso15693_3_listener, SlixData* data) {
     furi_assert(iso15693_3_listener);
 
     SlixListener* instance = malloc(sizeof(SlixListener));
     instance->iso15693_3_listener = iso15693_3_listener;
-    instance->data = slix_alloc();
-    slix_copy(instance->data, data);
+    instance->data = data;
 
     instance->tx_buffer = bit_buffer_alloc(SLIX_LISTENER_BUF_SIZE);
 
@@ -34,7 +33,6 @@ static void slix_listener_free(SlixListener* instance) {
     furi_assert(instance->tx_buffer);
 
     bit_buffer_free(instance->tx_buffer);
-    slix_free(instance->data);
     free(instance);
 }
 
