@@ -287,7 +287,7 @@ NfcError nfc_listener_set_col_res_data(
     uint8_t sak) {
     furi_assert(instance);
 
-    FHalNfcError error = furi_hal_nfca_set_col_res_data(uid, uid_len, atqa, sak);
+    FHalNfcError error = furi_hal_iso14443_3a_set_col_res_data(uid, uid_len, atqa, sak);
     instance->comm_state = NfcCommStateIdle;
     return nfc_process_hal_error(error);
 }
@@ -418,7 +418,7 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
     return error;
 }
 
-NfcError nfc_trx_custom_parity(
+NfcError nfc_iso14443_3a_poller_trx_custom_parity(
     Nfc* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
@@ -435,7 +435,7 @@ NfcError nfc_trx_custom_parity(
         f_hal_nfc_trx_reset();
         bit_buffer_write_bytes_with_parity(
             tx_buffer, instance->tx_buffer, sizeof(instance->tx_buffer), &instance->tx_bits);
-        error = f_hal_nfc_poller_tx_custom_parity(instance->tx_buffer, instance->tx_bits);
+        error = f_hal_iso14443_3a_poller_tx_custom_parity(instance->tx_buffer, instance->tx_bits);
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller TX");
             ret = nfc_process_hal_error(error);
@@ -462,7 +462,8 @@ NfcError nfc_trx_custom_parity(
     return ret;
 }
 
-NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt) {
+NfcError
+    nfc_poller_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt) {
     furi_assert(instance);
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
@@ -600,7 +601,7 @@ NfcError nfc_iso14443_3a_listener_tx_custom_parity(Nfc* instance, const BitBuffe
     const uint8_t* tx_parity = bit_buffer_get_parity(tx_buffer);
     size_t tx_bits = bit_buffer_get_size(tx_buffer);
 
-    error = f_hal_nfca_listener_tx_custom_parity(tx_data, tx_parity, tx_bits);
+    error = f_hal_iso14443_3a_listener_tx_custom_parity(tx_data, tx_parity, tx_bits);
     ret = nfc_process_hal_error(error);
 
     return ret;

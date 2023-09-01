@@ -422,7 +422,7 @@ FHalNfcError f_hal_nfc_poller_field_on() {
     return error;
 }
 
-FHalNfcError f_hal_nfc_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits) {
+FHalNfcError f_hal_iso14443_3a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
 
     // TODO common code for f_hal_nfc_poller_tx
@@ -569,6 +569,7 @@ FHalNfcError f_hal_nfc_trx_reset() {
     return FHalNfcErrorNone;
 }
 
+// TODO make virtual
 FHalNfcError f_hal_nfc_listener_sleep() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 

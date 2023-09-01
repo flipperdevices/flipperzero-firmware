@@ -158,8 +158,11 @@ FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size,
     return error;
 }
 
-FHalNfcError
-    furi_hal_nfca_set_col_res_data(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t sak) {
+FHalNfcError furi_hal_iso14443_3a_set_col_res_data(
+    uint8_t* uid,
+    uint8_t uid_len,
+    uint8_t* atqa,
+    uint8_t sak) {
     furi_assert(uid);
     furi_assert(atqa);
     UNUSED(uid_len);
@@ -221,7 +224,7 @@ FHalNfcError f_hal_iso4443a_listener_tx(
     return error;
 }
 
-FHalNfcError f_hal_nfca_listener_tx_custom_parity(
+FHalNfcError f_hal_iso14443_3a_listener_tx_custom_parity(
     const uint8_t* tx_data,
     const uint8_t* tx_parity,
     size_t tx_bits) {

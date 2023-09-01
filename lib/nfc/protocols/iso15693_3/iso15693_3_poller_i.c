@@ -61,7 +61,8 @@ static Iso15693_3Error iso15693_3_poller_frame_exchange(
         bit_buffer_copy(instance->tx_buffer, tx_buffer);
         iso13239_crc_append(Iso13239CrcTypeDefault, instance->tx_buffer);
 
-        NfcError error = nfc_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+        NfcError error =
+            nfc_poller_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
         if(error != NfcErrorNone) {
             ret = iso15693_3_poller_process_nfc_error(error);
             break;

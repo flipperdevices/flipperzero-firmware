@@ -30,7 +30,8 @@ static FelicaError felica_poller_frame_exchange(
     FelicaError ret = FelicaErrorNone;
 
     do {
-        NfcError error = nfc_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+        NfcError error =
+            nfc_poller_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
         if(error != NfcErrorNone) {
             ret = felica_poller_process_error(error);
             break;

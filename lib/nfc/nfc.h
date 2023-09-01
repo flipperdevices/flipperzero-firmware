@@ -94,13 +94,8 @@ void nfc_stop(Nfc* instance);
 
 NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer);
 
-NfcError nfc_trx_custom_parity(
-    Nfc* instance,
-    const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt);
-
-NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt);
+NfcError
+    nfc_poller_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt);
 
 // Technology specific API
 
@@ -124,6 +119,12 @@ NfcError nfc_iso14443_3a_sdd_frame(
     uint32_t fwt);
 
 NfcError nfc_iso14443_3a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer);
+
+NfcError nfc_iso14443_3a_poller_trx_custom_parity(
+    Nfc* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt);
 
 #ifdef __cplusplus
 }
