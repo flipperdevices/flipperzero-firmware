@@ -292,6 +292,7 @@ void ehternet_save_process_print(EthernetSaveConfig* config, const char* str) {
 }
 
 void ehternet_save_process_free(EthernetSaveConfig* config) {
+    FURI_LOG_E(TAG, "ehternet_save_process_free");
     ethernet_save_process_write(config);
     storage_file_close(config->log_file);
     storage_file_free(config->log_file);

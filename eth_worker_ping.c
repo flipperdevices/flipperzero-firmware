@@ -11,5 +11,6 @@ void ping_wait_ms(int ms) {
 }
 
 uint8_t ping_auto_interface(uint8_t* adress) {
-    return ping_count(PING_SOCKET, 20, adress);
+    return ping_auto(PING_SOCKET, adress);
+    //    return ping_count(PING_SOCKET, 20, adress);
 }

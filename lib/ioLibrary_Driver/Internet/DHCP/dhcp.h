@@ -16,30 +16,30 @@
 //!
 //! Copyright (c)  2013, WIZnet Co., LTD.
 //! All rights reserved.
-//! 
-//! Redistribution and use in source and binary forms, with or without 
-//! modification, are permitted provided that the following conditions 
-//! are met: 
-//! 
-//!     * Redistributions of source code must retain the above copyright 
-//! notice, this list of conditions and the following disclaimer. 
+//!
+//! Redistribution and use in source and binary forms, with or without
+//! modification, are permitted provided that the following conditions
+//! are met:
+//!
+//!     * Redistributions of source code must retain the above copyright
+//! notice, this list of conditions and the following disclaimer.
 //!     * Redistributions in binary form must reproduce the above copyright
 //! notice, this list of conditions and the following disclaimer in the
-//! documentation and/or other materials provided with the distribution. 
-//!     * Neither the name of the <ORGANIZATION> nor the names of its 
-//! contributors may be used to endorse or promote products derived 
-//! from this software without specific prior written permission. 
-//! 
+//! documentation and/or other materials provided with the distribution.
+//!     * Neither the name of the <ORGANIZATION> nor the names of its
+//! contributors may be used to endorse or promote products derived
+//! from this software without specific prior written permission.
+//!
 //! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-//! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+//! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 //! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-//! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
-//! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-//! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+//! ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+//! LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 //! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-//! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-//! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF 
+//! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 //! THE POSSIBILITY OF SUCH DAMAGE.
 //
 //*****************************************************************************
@@ -57,32 +57,28 @@ extern "C" {
  */
 #define _DHCP_DEBUG_
 
-
 /* Retry to processing DHCP */
-#define	MAX_DHCP_RETRY          2        ///< Maximum retry count
-#define	DHCP_WAIT_TIME          10       ///< Wait Time 10s
-
+#define MAX_DHCP_RETRY 2 ///< Maximum retry count
+#define DHCP_WAIT_TIME 10 ///< Wait Time 10s
 
 /* UDP port numbers for DHCP */
-#define DHCP_SERVER_PORT      	67	      ///< DHCP server port number
-#define DHCP_CLIENT_PORT         68	      ///< DHCP client port number
+#define DHCP_SERVER_PORT 67 ///< DHCP server port number
+#define DHCP_CLIENT_PORT 68 ///< DHCP client port number
 
+#define MAGIC_COOKIE 0x63825363 ///< You should not modify it number.
 
-#define MAGIC_COOKIE             0x63825363  ///< You should not modify it number.
-
-#define DCHP_HOST_NAME           "WIZnet\0"
+#define DCHP_HOST_NAME "WIZnet\0"
 
 /* 
  * @brief return value of @ref DHCP_run()
  */
-enum
-{
-   DHCP_FAILED = 0,  ///< Processing Fail
-   DHCP_RUNNING,     ///< Processing DHCP protocol
-   DHCP_IP_ASSIGN,   ///< First Occupy IP from DHPC server      (if cbfunc == null, act as default default_ip_assign)
-   DHCP_IP_CHANGED,  ///< Change IP address by new ip from DHCP (if cbfunc == null, act as default default_ip_update)
-   DHCP_IP_LEASED,   ///< Stand by 
-   DHCP_STOPPED      ///< Stop processing DHCP protocol
+enum {
+    DHCP_FAILED = 0, ///< Processing Fail
+    DHCP_RUNNING, ///< Processing DHCP protocol
+    DHCP_IP_ASSIGN, ///< First Occupy IP from DHPC server      (if cbfunc == null, act as default default_ip_assign)
+    DHCP_IP_CHANGED, ///< Change IP address by new ip from DHCP (if cbfunc == null, act as default default_ip_update)
+    DHCP_IP_LEASED, ///< Stand by
+    DHCP_STOPPED ///< Stop processing DHCP protocol
 };
 
 /*
@@ -90,7 +86,7 @@ enum
  * @param s   - socket number
  * @param buf - buffer for processing DHCP message
  */
-void DHCP_init(uint8_t s, uint8_t * buf);
+void DHCP_init(uint8_t s, uint8_t* buf);
 
 /*
  * @brief DHCP 1s Tick Timer handler
@@ -104,7 +100,7 @@ void DHCP_time_handler(void);
  * @param ip_update   - callback func when IP is changed
  * @param ip_conflict - callback func when the assigned IP is conflict with others.
  */
-void reg_dhcp_cbfunc(void(*ip_assign)(void), void(*ip_update)(void), void(*ip_conflict)(void));
+void reg_dhcp_cbfunc(void (*ip_assign)(void), void (*ip_update)(void), void (*ip_conflict)(void));
 
 /*
  * @brief DHCP client in the main loop
@@ -117,14 +113,14 @@ void reg_dhcp_cbfunc(void(*ip_assign)(void), void(*ip_update)(void), void(*ip_co
  *            @ref DHCP_STOPPED    \n
  *
  * @note This function is always called by you main task.
- */ 
+ */
 uint8_t DHCP_run(void);
 
 /*
  * @brief Stop DHCP processing
  * @note If you want to restart. call DHCP_init() and DHCP_run()
- */ 
-void    DHCP_stop(void);
+ */
+void DHCP_stop(void);
 
 /* Get Network information assigned from DHCP server */
 /*
@@ -154,8 +150,10 @@ void getDNSfromDHCP(uint8_t* ip);
  */
 uint32_t getDHCPLeasetime(void);
 
+void eth_printf(const char* format, ...);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif	/* _DHCP_H_ */
+#endif /* _DHCP_H_ */

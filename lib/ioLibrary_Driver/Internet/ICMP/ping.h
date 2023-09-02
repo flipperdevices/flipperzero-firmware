@@ -33,4 +33,6 @@ uint16_t htons(
     uint16_t
         hostshort); /* htons function converts a unsigned short from host to TCP/IP network byte order (which is big-endian).*/
 
+void eth_printf(const char* format, ...);
+
 #endif /* PING_H */

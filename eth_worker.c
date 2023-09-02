@@ -119,6 +119,19 @@ void eth_log(EthWorkerProcess process, const char* format, ...) {
     furi_string_free(fstring);
 }
 
+void eth_printf(const char* format, ...) {
+    furi_assert(static_worker);
+    va_list args;
+    va_start(args, format);
+    FuriString* fstring = furi_string_alloc_vprintf(format, args);
+    const char* string = furi_string_get_cstr(fstring);
+    va_end(args);
+
+    FURI_LOG_I(TAG, "%s", string);
+    //ehternet_save_process_print(static_worker->config, string);
+    furi_string_free(fstring);
+}
+
 static void eth_set_force_state(EthWorkerState state) {
     EthWorker* worker = static_worker;
     furi_assert(worker);
@@ -338,7 +351,7 @@ int32_t eth_worker_task(void* context) {
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
     uint8_t W5500FifoSize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
-    uint8_t dhcp_buffer[2000];
+    uint8_t dhcp_buffer[2048];
 
     reg_wizchip_spi_cbfunc(W5500_ReadByte, W5500_WriteByte);
     reg_wizchip_spiburst_cbfunc(W5500_ReadBuff, W5500_WriteBuff);
@@ -417,8 +430,14 @@ int32_t eth_worker_task(void* context) {
             }
             reg_dhcp_cbfunc(Callback_IPAssigned, Callback_IPAssigned, Callback_IPConflict);
             DHCP_init(DHCP_SOCKET, dhcp_buffer);
+            {
+                // DHCP_run();
+                // eth_log(EthWorkerProcessDHCP, "DHCP Send Discover");
+                // furi_delay_ms(1000);
+                // DHCP_stop();
+            }
             uint8_t next_cycle = 1;
-            uint8_t divider = 0;
+            uint16_t divider = 0;
             while(next_cycle && worker->state == EthWorkerStateDHCP) {
                 uint8_t dhcp_ret = DHCP_run();
                 switch(dhcp_ret) {
@@ -438,10 +457,10 @@ int32_t eth_worker_task(void* context) {
                     eth_log(EthWorkerProcessDHCP, "DHCP Failed");
                     break;
                 }
-                furi_delay_ms(100);
-                if(divider++ % 10 == 0) {
-                    eth_log(EthWorkerProcessDHCP, "DHCP process %d", divider / 10);
-                    if(divider > 250) {
+                furi_delay_ms(10);
+                if(divider++ % 100 == 0) {
+                    eth_log(EthWorkerProcessDHCP, "DHCP process %d", divider / 100);
+                    if(divider > 400) {
                         DHCP_stop();
                         eth_log(EthWorkerProcessDHCP, "DHCP Stop by timer");
                         eth_set_force_state(EthWorkerStateInited);

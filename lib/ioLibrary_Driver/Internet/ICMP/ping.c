@@ -17,16 +17,17 @@ uint8_t ping_auto(uint8_t s, uint8_t* addr) {
     int32_t len = 0;
     uint8_t cnt = 0;
     int ret = 0;
+    rep = req = 0;
     for(i = 0; i <= 3; i++) {
         uint8_t sr = getSn_SR(s);
-        //logger("SR: %02X\r\n", sr);
+        eth_printf("SR: %02X", sr);
         switch(sr) {
         case SOCK_CLOSED:
             close(s);
             IINCHIP_WRITE(Sn_PROTO(s), IPPROTO_ICMP); // set ICMP Protocol
             if((ret = socket(s, Sn_MR_IPRAW, 3000, 0)) !=
                s) { // open the SOCKET with IPRAW mode, if fail then Error
-                //logger( "\r\n socket %d fail %d\r\n", s, ret);
+                eth_printf("  socket %d fail %d", s, ret);
 #ifdef PING_DEBUG
                 return SOCKET_ERROR;
 #endif
@@ -46,7 +47,7 @@ uint8_t ping_auto(uint8_t s, uint8_t* addr) {
                     rep++;
                     break;
                 } else if(cnt > 100) {
-                    //logger("Request Time out. \r\n");
+                    eth_printf("Request Time out.");
                     cnt = 0;
                     break;
                 } else {
@@ -61,7 +62,7 @@ uint8_t ping_auto(uint8_t s, uint8_t* addr) {
         }
 #ifdef PING_DEBUG
         if(req >= 3) {
-            //logger("Ping Request = %d, PING_Reply = %d\r\n", req, rep);
+            eth_printf("Ping Request = %d, PING_Reply = %d", req, rep);
 
             if(rep == req)
                 return PING_SUCCESS;
@@ -80,11 +81,11 @@ uint8_t ping_count(uint8_t s, uint16_t pCount, uint8_t* addr) {
     for(i = 0; i < pCount + 1; i++) {
         if(i != 0) {
             /* Output count number */
-            //logger( "\r\nNo.%d\r\n", (i-1));
+            eth_printf("No.%d", (i - 1));
         }
 
         uint8_t sr = getSn_SR(s);
-        //logger("SR: %d\r\n", sr);
+        eth_printf("SR: %d", sr);
         switch(sr) {
         case SOCK_CLOSED:
             close(s);
@@ -93,7 +94,7 @@ uint8_t ping_count(uint8_t s, uint16_t pCount, uint8_t* addr) {
             IINCHIP_WRITE(Sn_PROTO(s), IPPROTO_ICMP); // set ICMP Protocol
             if(socket(s, Sn_MR_IPRAW, 3000, 0) !=
                s) { // open the SOCKET with IPRAW mode, if fail then Error
-                //logger( "\r\n socket %d fail r\n", (s));
+                eth_printf(" socket %d fail ", (s));
 #ifdef PING_DEBUG
                 return SOCKET_ERROR;
 #endif
@@ -114,7 +115,7 @@ uint8_t ping_count(uint8_t s, uint16_t pCount, uint8_t* addr) {
                 }
                 /* wait_time for 2 seconds, Break on fail*/
                 if((cnt > 100)) {
-                    //logger( "\r\nRequest Time out. \r\n") ;
+                    eth_printf("Request Time out.");
                     cnt = 0;
                     break;
                 } else {
@@ -128,7 +129,7 @@ uint8_t ping_count(uint8_t s, uint16_t pCount, uint8_t* addr) {
         }
 #ifdef PING_DEBUG
         if(req >= pCount) {
-            //logger("Ping Request = %d, PING_Reply = %d\r\n", req, rep);
+            eth_printf("Ping Request = %d, PING_Reply = %d", req, rep);
             if(rep == req)
                 return PING_SUCCESS;
             else
@@ -165,11 +166,19 @@ uint8_t ping_request(uint8_t s, uint8_t* addr) {
     /* sendto ping_request to destination */
     if(sendto(s, (uint8_t*)&PingRequest, sizeof(PingRequest), addr, 3000) ==
        0) { // Send Ping-Request to the specified peer.
-        //logger( "\r\n Fail to send ping-reply packet  r\n") ;
+        eth_printf(" Fail to send ping-reply packet ");
     } else {
-        //logger( "Send Ping Request  to Destination (") ;
-        //logger( "%d.%d.%d.%d )",   (addr[0]),  (addr[1]),  (addr[2]),  (addr[3])) ;
-        //logger( " ID:%x  SeqNum:%x CheckSum:%x\r\n",   htons(PingRequest.ID),  htons(PingRequest.SeqNum),  htons(PingRequest.CheckSum)) ;
+        eth_printf(
+            "Send Ping Request  to Destination (%d.%d.%d.%d )",
+            (addr[0]),
+            (addr[1]),
+            (addr[2]),
+            (addr[3]));
+        eth_printf(
+            " ID:%x  SeqNum:%x CheckSum:%x",
+            htons(PingRequest.ID),
+            htons(PingRequest.SeqNum),
+            htons(PingRequest.CheckSum));
     }
     return 0;
 } // ping request
@@ -196,12 +205,18 @@ uint8_t ping_reply(uint8_t s, uint8_t* addr, uint16_t rlen) {
         /* check Checksum of Ping Reply */
         tmp_checksum = ~checksum(data_buf, len);
         if(tmp_checksum != 0xffff) {
-            //logger("tmp_checksum = %x\r\n",tmp_checksum);
+            eth_printf("tmp_checksum = %x", tmp_checksum);
         } else {
             /*  Output the Destination IP and the size of the Ping Reply Message*/
-            //logger("Reply from %d.%d.%d.%d  ID:%x SeqNum:%x  :data size %d bytes\r\n",
-            //  (addr[0]),  (addr[1]),  (addr[2]),  (addr[3]),  htons(PingReply.ID),  htons(PingReply.SeqNum),  (rlen+6) );
-            //logger("\r\n");
+            eth_printf(
+                "Reply from %d.%d.%d.%d  ID:%x SeqNum:%x  :data size %d bytes",
+                (addr[0]),
+                (addr[1]),
+                (addr[2]),
+                (addr[3]),
+                htons(PingReply.ID),
+                htons(PingReply.SeqNum),
+                (rlen + 6));
             /*  SET ping_reply_receiver to '1' and go out the while_loop (waitting for ping reply)*/
             ping_reply_received = 1;
         }
@@ -221,18 +236,28 @@ uint8_t ping_reply(uint8_t s, uint8_t* addr, uint16_t rlen) {
         PingReply.CheckSum = htons(checksum((uint8_t*)&PingReply, len));
 
         if(tmp_checksum != PingReply.CheckSum) {
-            //logger( " \n CheckSum is in correct %x shold be %x \n", (tmp_checksum), htons(PingReply.CheckSum));
+            eth_printf(
+                "CheckSum is in correct %x shold be %x",
+                (tmp_checksum),
+                htons(PingReply.CheckSum));
         } else {
-            //logger( "\r\n Checksum is correct  \r\n") ;
+            eth_printf("Checksum is correct");
         }
 
         /*  Output the Destination IP and the size of the Ping Reply Message*/
-        //logger("Request from %d.%d.%d.%d  ID:%x SeqNum:%x  :data size %d bytes\r\n",
-        //    (addr[0]),  (addr[1]),  (addr[2]),  (addr[3]),  (PingReply.ID),  (PingReply.SeqNum),  (rlen+6) );
+        eth_printf(
+            "Request from %d.%d.%d.%d  ID:%x SeqNum:%x  :data size %d bytes",
+            (addr[0]),
+            (addr[1]),
+            (addr[2]),
+            (addr[3]),
+            (PingReply.ID),
+            (PingReply.SeqNum),
+            (rlen + 6));
         /*  SET ping_reply_receiver to '1' and go out the while_loop (waitting for ping reply)*/
         ping_reply_received = 1;
     } else {
-        //logger(" Unkonwn msg. \n");
+        eth_printf(" Unkonwn msg.");
     }
 
     return 0;
