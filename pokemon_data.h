@@ -143,7 +143,7 @@ struct __attribute__((__packed__)) trade_data_block {
 };
 
 struct trade_data_block DATA_BLOCK2 =
-    {.trainer_name = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00, 0x00},
+    {.trainer_name = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_},
      .party_cnt = 1,
      .party_members = {0x15, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
      .party =
@@ -281,23 +281,22 @@ struct trade_data_block DATA_BLOCK2 =
               .spd = 0x9800,
               .special = 0x9900},
          },
-     /* NOTE: I think this shouldn't exceed 7 chars */
      .ot_name =
          {
-             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00}},
-             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00}},
-             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00}},
-             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00}},
-             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00}},
-             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00}},
+             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+             {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
          },
      .nickname = {
-         {.str = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
-         {.str = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
-         {.str = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
-         {.str = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
-         {.str = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
-         {.str = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}},
+         {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+         {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+         {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+         {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+         {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
+         {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
      }};
 
 unsigned char INPUT_BLOCK[405];

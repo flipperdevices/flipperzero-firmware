@@ -391,21 +391,15 @@ void trade_enter_callback(void* context) {
     
     unsigned char nickname[11];
     for (size_t i = 0; i < 11; ++i) {
-        nickname[i] = 0x00;
+        nickname[i] = 0x50;
     }
     for (size_t i = 0; i < strlen(pokemon_table[trade->app->current_pokemon].name); ++i) {
         nickname[i] = convertCharToTagHex(pokemon_table[trade->app->current_pokemon].name[i]);
     }
-    for (size_t i = 0; i < 11; ++i) {
-        if(nickname[i] == 0x00) {
-            nickname[i] = 0x50;
-        }
-        break;
-    }
 
     memcpy(DATA_BLOCK2.nickname[0].str, nickname, sizeof(nickname));
 
-    FURI_LOG_D(TAG, "[Trade] Pokemon Name: %s", nickname);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Name: %s", pokemon_table[trade->app->current_pokemon].name);
 
     // Set the Pokemon hex code
 
@@ -417,7 +411,7 @@ void trade_enter_callback(void* context) {
 
     FURI_LOG_D(TAG, "[Trade] Current Level: %d", trade->app->current_level);
 
-    int level = trade->app->current_level;
+    uint8_t level = trade->app->current_level;
     DATA_BLOCK2.party[0].level = level & 0xFF;
     DATA_BLOCK2.party[0].level_again = level & 0xFF;
 
@@ -425,7 +419,7 @@ void trade_enter_callback(void* context) {
 
     // Set the Pokemon experience
 
-    int exp = 0;
+    int32_t exp = 0;
     if(pokemon_table[trade->app->current_pokemon].xp_group == 0) {
         exp = 1.25 * level * level * level;
     } else if(pokemon_table[trade->app->current_pokemon].xp_group == 1) {
@@ -435,6 +429,7 @@ void trade_enter_callback(void* context) {
     } else if(pokemon_table[trade->app->current_pokemon].xp_group == 3) {
         exp = 0.8 * level * level * level;
     }
+
     DATA_BLOCK2.party[0].exp[0] = (exp >> 16) & 0xFF;
     DATA_BLOCK2.party[0].exp[1] = (exp >> 8) & 0xFF;
     DATA_BLOCK2.party[0].exp[2] = exp & 0xFF;
@@ -509,7 +504,11 @@ void trade_enter_callback(void* context) {
     // Set the Pokemon types
 
     DATA_BLOCK2.party[0].type[0] = pokemon_table[trade->app->current_pokemon].type1;
-    DATA_BLOCK2.party[0].type[1] = pokemon_table[trade->app->current_pokemon].type2;
+    if(pokemon_table[trade->app->current_pokemon].type2 == 0xFF) {
+        DATA_BLOCK2.party[0].type[1] = pokemon_table[trade->app->current_pokemon].type1;
+    } else {
+        DATA_BLOCK2.party[0].type[1] = pokemon_table[trade->app->current_pokemon].type2;
+    }
 
     FURI_LOG_D(TAG, "[Trade] Type 1: %x", DATA_BLOCK2.party[0].type[0]);
     FURI_LOG_D(TAG, "[Trade] Type 2: %x", DATA_BLOCK2.party[0].type[1]);
