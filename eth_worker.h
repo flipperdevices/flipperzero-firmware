@@ -75,3 +75,4 @@ void eth_worker_init_process(EthWorker* eth_worker);
 
 #define PING_SOCKET 1
 uint8_t ping_auto_interface(uint8_t* adress);
+void dhcp_timer_callback(void* context);

@@ -58,8 +58,8 @@ extern "C" {
 #define _DHCP_DEBUG_
 
 /* Retry to processing DHCP */
-#define MAX_DHCP_RETRY 2 ///< Maximum retry count
-#define DHCP_WAIT_TIME 10 ///< Wait Time 10s
+#define MAX_DHCP_RETRY 3 ///< Maximum retry count
+#define DHCP_WAIT_TIME 7 ///< Wait Time 10s
 
 /* UDP port numbers for DHCP */
 #define DHCP_SERVER_PORT 67 ///< DHCP server port number

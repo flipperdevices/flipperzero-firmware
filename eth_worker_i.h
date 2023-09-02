@@ -20,6 +20,7 @@ struct EthWorker {
     EthWorkerState next_state;
     EthWorkerSubState sub_state;
     EthWorkerCallback callback;
+    FuriTimer* timer;
 };
 
 void eth_worker_change_state(EthWorker* eth_worker, EthWorkerState state);

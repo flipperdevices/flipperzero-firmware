@@ -29,6 +29,9 @@ EthWorker* eth_worker_alloc() {
 
     worker->state = worker->next_state = EthWorkerStateNotAllocated;
 
+    worker->timer = furi_timer_alloc(dhcp_timer_callback, FuriTimerTypePeriodic, NULL);
+    furi_timer_start(worker->timer, 1000);
+
     eth_log(EthWorkerProcessReset, "Finik Ethernet [START]");
 
     return worker;
@@ -48,6 +51,10 @@ void eth_worker_free(EthWorker* worker) {
     ethernet_view_process_free(worker->ping_process);
     ethernet_view_process_free(worker->reset_process);
     ehternet_save_process_free(worker->config);
+
+    furi_timer_stop(worker->timer);
+    furi_timer_free(worker->timer);
+
     free(worker);
 }
 
@@ -460,7 +467,7 @@ int32_t eth_worker_task(void* context) {
                 furi_delay_ms(10);
                 if(divider++ % 100 == 0) {
                     eth_log(EthWorkerProcessDHCP, "DHCP process %d", divider / 100);
-                    if(divider > 400) {
+                    if(divider > 2000) {
                         DHCP_stop();
                         eth_log(EthWorkerProcessDHCP, "DHCP Stop by timer");
                         eth_set_force_state(EthWorkerStateInited);

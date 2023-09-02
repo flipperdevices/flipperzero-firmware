@@ -239,8 +239,6 @@ void (*dhcp_ip_update)(void) =
 void (*dhcp_ip_conflict)(void) =
     default_ip_conflict; /* handler to be called when the IP address from DHCP server is conflict */
 
-void reg_dhcp_cbfunc(void (*ip_assign)(void), void (*ip_update)(void), void (*ip_conflict)(void));
-
 char NibbleToHex(uint8_t nibble);
 
 /* send DISCOVER message to DHCP server */

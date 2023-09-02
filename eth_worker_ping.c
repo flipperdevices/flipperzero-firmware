@@ -1,7 +1,5 @@
 #include "eth_worker.h"
 #include <furi_hal.h>
-#include <socket.h>
-#include <dhcp.h>
 #include <ping.h>
 
 uint8_t ping_count(uint8_t s, uint16_t pCount, uint8_t* addr);
