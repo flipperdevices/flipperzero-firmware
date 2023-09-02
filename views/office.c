@@ -380,7 +380,7 @@ void office_input(void* ctx) {
             fnaf->electricity->monitor = true;
             if(furi_timer_is_running(fnaf->dolphins->fopper_inactivity))
                 furi_timer_stop(fnaf->dolphins->fopper_inactivity);
-            SWITCH_VIEW(cameras);
+            SWITCH_VIEW(cameras_view);
 
             if(fnaf->dolphins->flipper_move_state == 2 &&
                fnaf->dolphins->location[Flipper] == cam4B && fnaf->cameras->cursor != cam4B) {
@@ -560,7 +560,7 @@ void timer_callback_chipper(void* ctx) {
 void timer_callback_flipper(void* ctx) {
     Fnaf* fnaf = ctx;
     if(fnaf->dolphins->location[Flipper] == office_location) {
-        if(fnaf->current_view == cameras) return;
+        if(fnaf->current_view == cameras_view) return;
         if(rand() % 4 == 0) {
             save_progress(fnaf);
             stop_all_timers(fnaf);
@@ -569,7 +569,7 @@ void timer_callback_flipper(void* ctx) {
         }
         return;
     }
-    if(fnaf->current_view == cameras) {
+    if(fnaf->current_view == cameras_view) {
         if(fnaf->dolphins->location[Flipper] != cam4B) return;
         if(fnaf->cameras->cursor == cam4B && fnaf->dolphins->location[Flipper] == cam4B) return;
     }
@@ -601,7 +601,7 @@ void flipper_might_move_callback(void* ctx) {
                 flipper_move(fnaf);
             }
             break;
-        case cameras:
+        case cameras_view:
             /* Flipper can't move if player's
                 watching cam4B */
             if(fnaf->dolphins->location[Flipper] == cam4B && fnaf->cameras->cursor != cam4B) {
@@ -665,7 +665,7 @@ void flipper_move(void* ctx) {
 void timer_callback_fopper(void* ctx) {
     Fnaf* fnaf = ctx;
     if(!furi_timer_is_running(fnaf->dolphins->fopper_inactivity) &&
-       fnaf->current_view != cameras && fnaf->dolphins->location[Fopper] < 3) {
+       fnaf->current_view != cameras_view && fnaf->dolphins->location[Fopper] < 3) {
         if(rand() % 20 + 1 > fnaf->dolphins->AI[Fopper]) return;
         fnaf->dolphins->location[Fopper] += 1;
         FURI_LOG_D(TAG, "Fopper state is %u", fnaf->dolphins->location[Fopper]);
@@ -700,7 +700,7 @@ void timer_callback_fopper(void* ctx) {
             }
             furi_timer_start(fnaf->dolphins->timer[Fopper], fopper_time);
         } else {
-            if(fnaf->current_view == cameras) SWITCH_VIEW(office_view);
+            if(fnaf->current_view == cameras_view) SWITCH_VIEW(office_view);
             FURI_LOG_D(TAG, "Fopper got you");
             stop_all_timers(fnaf);
             stop_hourly_timer(fnaf);

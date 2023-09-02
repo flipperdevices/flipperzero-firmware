@@ -23,7 +23,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     case office_view:
         office_draw(canvas, fnaf);
         break;
-    case cameras:
+    case cameras_view:
         draw_cameras(canvas, fnaf);
         break;
     case night_complete:
@@ -115,12 +115,12 @@ void switch_view(Fnaf* fnaf, Views view) {
     FURI_LOG_D(TAG, "switch_view to %u", view);
     fnaf->counter = 0;
     fnaf->counter_secondary = 0;
-    if(fnaf->current_view == cameras && view == office_view) {
+    if(fnaf->current_view == cameras_view && view == office_view) {
         // start Fopper timer
-    } else if(fnaf->current_view == office_view && view == cameras) {
+    } else if(fnaf->current_view == office_view && view == cameras_view) {
         // stop Fopper timer if running
     }
-    if(view != cameras && view != office_view) {
+    if(view != cameras_view && view != office_view) {
         stop_hourly_timer(fnaf);
         stop_all_timers(fnaf);
         fnaf->hour = 0;
@@ -231,10 +231,6 @@ void fnaf_alloc(Fnaf* fnaf) {
         furi_timer_alloc(power_out_max_callback, FuriTimerTypeOnce, fnaf);
     fnaf->hourly_timer = furi_timer_alloc(hourly_timer_callback, FuriTimerTypePeriodic, fnaf);
     fnaf->electricity->timer = furi_timer_alloc(power_timer_callback, FuriTimerTypePeriodic, fnaf);
-    UNUSED(fnaf->dolphins->timer[Blipper]);
-    UNUSED(fnaf->dolphins->timer[Chipper]);
-    UNUSED(fnaf->dolphins->timer[Flipper]);
-    UNUSED(fnaf->dolphins->timer[Fopper]);
 }
 
 void fnaf_free(Fnaf* fnaf) {
@@ -285,12 +281,14 @@ int32_t flipperzero_fnaf(void* p) {
     bool running = true;
     while(running) {
         if(furi_message_queue_get(fnaf->event_queue, &fnaf->event, 100) == FuriStatusOk) {
-            if(fnaf->event.key == InputKeyBack && fnaf->event.type == InputTypeShort) {
+            if(fnaf->event.key == InputKeyBack && fnaf->event.type == InputTypeLong) {
                 if(fnaf->current_view != main_menu)
                     SWITCH_VIEW(main_menu);
-                else {
+                else
                     running = false;
-                }
+            }
+            if(fnaf->event.key == InputKeyBack && fnaf->event.type == InputTypeShort) {
+                if(fnaf->current_view == main_menu) running = false;
             }
             switch(fnaf->current_view) {
             case main_menu:
@@ -304,7 +302,7 @@ int32_t flipperzero_fnaf(void* p) {
             case office_view:
                 office_input(fnaf);
                 break;
-            case cameras:
+            case cameras_view:
                 cameras_input(fnaf);
                 break;
             case night_complete:

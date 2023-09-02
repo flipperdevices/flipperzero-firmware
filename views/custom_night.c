@@ -3,7 +3,6 @@
 
 void draw_custom_night_menu(Canvas* canvas, void* ctx) {
     Fnaf* fnaf = ctx;
-    UNUSED(fnaf);
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 22, 11, "Customize Night");
@@ -54,6 +53,8 @@ void custom_night_input(void* ctx) {
             night_start(fnaf);
             break;
         case InputKeyBack:
+            fnaf->custom_night = false;
+            SWITCH_VIEW(main_menu);
             break;
         default:
             break;

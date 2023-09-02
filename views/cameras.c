@@ -133,6 +133,39 @@ static void set_cursor(Fnaf* fnaf) {
     fnaf->cameras->cursor_y = cursors_y[fnaf->cameras->cursor];
 }
 
+static void switch_to_office(Fnaf* fnaf) {
+    SWITCH_VIEW(office_view);
+    fnaf->electricity->monitor = false;
+    if(furi_timer_is_running(fnaf->dolphins->fopper_inactivity))
+        furi_timer_stop(fnaf->dolphins->fopper_inactivity);
+    if(fnaf->dolphins->location[Fopper] < 3) {
+        uint32_t time = (rand() % 951 + 50) * 1000 / 60;
+        furi_timer_start(fnaf->dolphins->fopper_inactivity, time);
+        FURI_LOG_D(TAG, "Fopper inactivity timer is set to %lu ms", time);
+    }
+    if(fnaf->dolphins->location[Blipper] == office_location) {
+        FURI_LOG_D(TAG, "Blipper got you");
+        stop_all_timers(fnaf);
+        stop_hourly_timer(fnaf);
+        save_progress(fnaf);
+        SWITCH_VIEW(jumpscare);
+    }
+    if(fnaf->dolphins->location[Chipper] == office_location) {
+        FURI_LOG_D(TAG, "Chipper got you");
+        stop_all_timers(fnaf);
+        stop_hourly_timer(fnaf);
+        save_progress(fnaf);
+        SWITCH_VIEW(jumpscare);
+    }
+    if(fnaf->dolphins->flipper_move_state == 2) {
+        if(fnaf->dolphins->location[Flipper] != cam4B) {
+            flipper_move(fnaf);
+        } else if(fnaf->cameras->cursor != cam4B) {
+            flipper_move(fnaf);
+        }
+    }
+}
+
 void cameras_input(void* ctx) {
     Fnaf* fnaf = ctx;
 
@@ -210,36 +243,8 @@ void cameras_input(void* ctx) {
             fnaf->cameras->cursor_y += 1;
             break;
         case InputKeyOk:
-            SWITCH_VIEW(office_view);
-            fnaf->electricity->monitor = false;
-            if(furi_timer_is_running(fnaf->dolphins->fopper_inactivity))
-                furi_timer_stop(fnaf->dolphins->fopper_inactivity);
-            if(fnaf->dolphins->location[Fopper] < 3) {
-                uint32_t time = (rand() % 951 + 50) * 1000 / 60;
-                furi_timer_start(fnaf->dolphins->fopper_inactivity, time);
-                FURI_LOG_D(TAG, "Fopper inactivity timer is set to %lu ms", time);
-            }
-            if(fnaf->dolphins->location[Blipper] == office_location) {
-                FURI_LOG_D(TAG, "Blipper got you");
-                stop_all_timers(fnaf);
-                stop_hourly_timer(fnaf);
-                save_progress(fnaf);
-                SWITCH_VIEW(jumpscare);
-            }
-            if(fnaf->dolphins->location[Chipper] == office_location) {
-                FURI_LOG_D(TAG, "Chipper got you");
-                stop_all_timers(fnaf);
-                stop_hourly_timer(fnaf);
-                save_progress(fnaf);
-                SWITCH_VIEW(jumpscare);
-            }
-            if(fnaf->dolphins->flipper_move_state == 2) {
-                if(fnaf->dolphins->location[Flipper] != cam4B) {
-                    flipper_move(fnaf);
-                } else if(fnaf->cameras->cursor != cam4B) {
-                    flipper_move(fnaf);
-                }
-            }
+        case InputKeyBack:
+            switch_to_office(fnaf);
             break;
         default:
             break;

@@ -96,7 +96,7 @@ typedef enum {
     custom_night,
     night_number,
     office_view,
-    cameras,
+    cameras_view,
     night_complete,
     jumpscare,
     game_over,
