@@ -581,12 +581,3 @@ FHalNfcError f_hal_nfc_listener_sleep() {
 
     return FHalNfcErrorNone;
 }
-
-FHalNfcError f_hal_nfc_listener_disable_auto_col_res() {
-    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-
-    st25r3916_set_reg_bits(
-        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
-
-    return FHalNfcErrorNone;
-}

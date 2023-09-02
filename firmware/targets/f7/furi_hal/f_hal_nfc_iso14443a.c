@@ -107,6 +107,18 @@ static FHalNfcError f_hal_nfc_iso14443a_listener_deinit(FuriHalSpiBusHandle* han
     return FHalNfcErrorNone;
 }
 
+static FHalNfcEvent f_hal_nfc_iso14443_3a_listener_wait_event(uint32_t timeout_ms) {
+    FHalNfcEvent event = f_hal_nfc_wait_event_common(timeout_ms);
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    if(event == FHalNfcEventListenerActive) {
+        st25r3916_set_reg_bits(
+            handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
+    }
+
+    return event;
+}
+
 FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
     FHalNfcError error = FHalNfcErrorNone;
 
@@ -267,7 +279,7 @@ const FHalNfcTechBase f_hal_nfc_iso14443a = {
         {
             .init = f_hal_nfc_iso14443a_listener_init,
             .deinit = f_hal_nfc_iso14443a_listener_deinit,
-            .wait_event = f_hal_nfc_wait_event_common,
+            .wait_event = f_hal_nfc_iso14443_3a_listener_wait_event,
             .tx = f_hal_iso4443a_listener_tx,
             .rx = f_hal_nfc_common_fifo_rx,
         },

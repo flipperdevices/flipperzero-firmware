@@ -114,8 +114,8 @@ static int32_t nfc_worker_listener(void* context) {
             instance->callback(nfc_event, instance->context);
             nfc_listener_reset(instance);
         }
+        // TODO maybe remove?
         if(event & FHalNfcEventListenerActive) {
-            f_hal_nfc_listener_disable_auto_col_res();
             nfc_event.type = NfcEventTypeListenerActivated;
             instance->callback(nfc_event, instance->context);
         }

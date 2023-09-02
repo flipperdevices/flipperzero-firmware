@@ -116,13 +116,21 @@ FHalNfcError f_hal_nfc_poller_tx(const uint8_t* tx_data, size_t tx_bits);
 
 FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
+// FHalNfcError
+//     f_hal_nfc_tx(FHalNfcMode mode, FHalNfcTech tech, const uint8_t* tx_data, size_t tx_bits);
+
+// FHalNfcError f_hal_nfc_rx(
+//     FHalNfcMode mode,
+//     FHalNfcTech tech,
+//     uint8_t* rx_data,
+//     size_t rx_data_size,
+//     size_t* rx_bits);
+
 FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits);
 
 FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
 FHalNfcError f_hal_nfc_listener_sleep();
-
-FHalNfcError f_hal_nfc_listener_disable_auto_col_res();
 
 FHalNfcError f_hal_nfc_trx_reset();
 
