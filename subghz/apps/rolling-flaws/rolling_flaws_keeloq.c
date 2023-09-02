@@ -29,7 +29,7 @@ static uint32_t get_forward_distance(uint32_t current_count, uint32_t new_count)
     if(new_count >= current_count) {
         distance = new_count - current_count;
     } else {
-        distance = (0xFFFFFFFF - current_count) + new_count;
+        distance = (0xFFFF - current_count) + new_count;
     }
 
     return distance;
