@@ -215,7 +215,7 @@ int8_t dhcp_state = STATE_DHCP_INIT; // DHCP state
 int8_t dhcp_retry_count = 0;
 
 uint32_t dhcp_lease_time = INFINITE_LEASETIME;
-volatile int32_t dhcp_tick_1s = 0; // unit 1 second
+volatile uint32_t dhcp_tick_1s = 0; // unit 1 second
 uint32_t dhcp_tick_next = DHCP_WAIT_TIME;
 
 uint32_t DHCP_XID; // Any number

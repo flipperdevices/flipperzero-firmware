@@ -81,6 +81,8 @@ void eth_worker_set_active_process(EthWorker* worker, EthWorkerProcess state) {
     case EthWorkerProcessReset:
         worker->active_process = worker->reset_process;
         break;
+    default:
+        break;
     }
 }
 
@@ -105,7 +107,7 @@ static EthViewProcess* get_process(EthWorker* worker, EthWorkerProcess process) 
     case EthWorkerProcessActive:
         return worker->active_process;
     default:
-        NULL;
+        return NULL;
     }
 }
 
@@ -261,10 +263,6 @@ static uint8_t W5500_ReadByte(void) {
 
 static void W5500_WriteByte(uint8_t byte) {
     W5500_WriteBuff(&byte, sizeof(byte));
-}
-
-static void wait_ms(int ms) {
-    furi_delay_ms(ms);
 }
 
 static wiz_NetInfo gWIZNETINFO;

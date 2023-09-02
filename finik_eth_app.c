@@ -61,7 +61,6 @@ static void finik_eth_app_draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
 
-    DrawMode mode = app->draw_mode;
     DrawProcess process = app->draw_process;
     CursorPosition cursor = app->cursor_position;
     float consumption = app->info.current_gauge;

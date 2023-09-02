@@ -3,5 +3,6 @@
 #include <dhcp.h>
 
 void dhcp_timer_callback(void* context) {
+    UNUSED(context);
     DHCP_time_handler();
 }
