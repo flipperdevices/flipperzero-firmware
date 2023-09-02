@@ -1,6 +1,9 @@
 # Rolling Flaws
 
 Rolling Flaws by [@CodeAllNight](https://twitter.com/codeallnight).
+
+[YouTube demo](https://youtu.be/gMnGuDC9EQo?si=4HLZpkC4XWhh97uQ) of using Rolling Flaws application.  The video shows how to use the application to simulate a receiver that has a Replay attack flaw, Pairing FZ to a receiver, Cloning sequence attack, Future attack, Rollback attack & KGB attack.  The Rolling Flaws application also supports things like "ENC00" attack & window-next attacks, which are described in scenarios below but was not in video.  Rolljam is discussed in document, but discouraged to test since it is [illegal to jam signals](https://www.fcc.gov/general/jammer-enforcement) in the US.  If you have additional ideas, please let me know!
+
 - Discord invite: [https://discord.com/invite/NsjCvqwPAd](https://discord.com/invite/NsjCvqwPAd)
 - YouTube: [https://youtube.com/@MrDerekJamison](https://youtube.com/@MrDerekJamison)
 - GitHub: [https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws)
@@ -26,6 +29,8 @@ This application is intended to help you learn about rolling code flaws.
   - [Scenario 10: unknown MF attack](#scenario-10-unknown-mf-attack)
   - [Scenario 11: enc00 attack](#scenario-11-enc00-attack)
   - [Scenario 12: test transmitter](#scenario-12-test-transmitter)
+- [Contact info](#contact-info)
+- [Future features](#future-features)
 
 ## Introduction
 **Educational use only.** This application is intended to be used for educational purposes only.  It is intended to help you learn about rolling code flaws.  IIf you use this information to attack devices, you are responsible for any damage you cause.
@@ -939,3 +944,11 @@ Rolling Flaws by [@CodeAllNight](https://twitter.com/codeallnight).
 - YouTube: [https://youtube.com/@MrDerekJamison](https://youtube.com/@MrDerekJamison)
 - GitHub: [https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws](https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/apps/rolling-flaws)
 - Support my work: [ko-fi.com/codeallnight](ko-fi.com/codeallnight)
+
+## Future features
+- Add GPIO feature to Flipper app so you can program an HCS301/HCS512 chip to have your own MF code and settings. This would help you secure your KeeLoq devices, since the MF code would only be known to you. 
+- Toggle a GPIO pin when Open is displayed. 
+- Send IR signal when Open is displayed. 
+- Make it "painful" to reset the device when it gets out of sync (so people understand getting things out of sync can end up costing money or time).
+- Additional support for more rolling-code protocols.
+- Porting the application to ESP32+CC1101, so it doesn't require a second Flipper Zero to use.
