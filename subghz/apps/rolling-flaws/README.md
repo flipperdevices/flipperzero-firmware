@@ -30,11 +30,16 @@ This application is intended to help you learn about rolling code flaws.
 ## Introduction
 **Educational use only.** This application is intended to be used for educational purposes only.  It is intended to help you learn about rolling code flaws.  IIf you use this information to attack devices, you are responsible for any damage you cause.
 
+<img src="./docs/keeloq-codes.png" width="50%" />
+
+The Keeloq protocol has a FIX (button + serial number) and a HOP (encrypted data that can be decrypted into a count + some validation information, such as the end of the serial number). The receiver has a current count for the serial number, like 0x1E00 in the diagram above.  There are a set of "Next" codes that will Open the device.  When one of those codes is received, the beginning of the Next block will start with the received code.  There are also a set of "Future" codes.  When two adjacent codes are received, then typically the Next block will start with the second received code.  The remaining set of codes are considered "Past" codes.  Different manufacturers handle past codes differently. As a new count is accepted, the door opens and the location of the Next, Future and Past codes change.  For more details, see [this video](https://youtu.be/x4ml1JAH1q0) along with the [rolling code playlist](https://www.youtube.com/playlist?list=PLM1cyTMe-PYJfnlDk3NjM85kU5VyCViNp).
+
 Sending signals to a real receiver has the potential to desync the remote and can even cause the remote to no longer be valid.  The reason this application was built was so that you DO NOT mess with equipment, unless you are pen testing it with permission.  Even then, you can still mess things up & require service or replacement (for example, HCS300 overflow bits get cleared and you reach 0xFFFF count then bad things may happen).  Please use this application instead of an actual device.
 
 This application is intended to simulate various KeeLoq receivers that you may encounter.  You can configure the receiver to simulate the device you want to practice on.  Use a second Flipper Zero or HackRF or whatever to try to get the "Opened!" message.
 
 In the future, I hope to offload this application to an ESP32+CC1101 so that you can use a single Flipper to practice rolling codes.
+
 
 ## Helpful hints
 You can rename the file ``SD Card\subghz\assets\keeloq_mfcodes``, so that a .sub file with KeeLoq protocol will be sent **without incrementing** counts.  This will also cause all signals to be decoded as "KL Unknown".  Be sure to rename it back when you are done.
