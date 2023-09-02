@@ -8,4 +8,5 @@ App(
     fap_icon="rolling_flaws.png",
     fap_category="Sub-GHz",
     fap_icon_assets="assets",
+    fap_description="Rolling code receiver, used to learn about rolling code flaws.  Watch video at https://youtu.be/gMnGuDC9EQo",
 )
