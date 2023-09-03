@@ -5,6 +5,7 @@ App(
     entry_point="rolling_flaws_app",
     requires=["gui", "subghz"],
     stack_size=2 * 1024,
+    fap_version=(1, 4),
     fap_icon="rolling_flaws.png",
     fap_category="Sub-GHz",
     fap_icon_assets="assets",
