@@ -20,7 +20,7 @@ typedef enum {
     /*! Begin the transaction by sending a START condition followed by the address */
     I2CBeginStart,
     /*! Begin the transaction by sending a RESTART condition followed by the address
-     * @note Must follow a transaction ended with I2CEndClockStretch */
+     * @note Must follow a transaction ended with I2CEndAwaitRestart */
     I2CBeginRestart,
     /*! Continue the previous transaction with new data
      * @note Must follow a transaction ended with I2CEndPause and be of the same type (RX/TX) */
@@ -33,7 +33,7 @@ typedef enum {
     I2CEndStop,
     /*! End the transaction by clock stretching
      *  @note Must be followed by a transaction using I2CBeginRestart */
-    I2CEndClockStretch,
+    I2CEndAwaitRestart,
     /*! Pauses the transaction by clock stretching
      *  @note Must be followed by a transaction using I2CBeginResume */
     I2CEndPause,

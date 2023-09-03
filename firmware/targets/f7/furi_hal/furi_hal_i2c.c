@@ -96,7 +96,7 @@ static uint32_t get_start_signal(I2CBegin begin, bool ten_bit_address, bool read
 
 static uint32_t get_end_signal(I2CEnd end) {
     switch(end) {
-    case I2CEndClockStretch:
+    case I2CEndAwaitRestart:
         return LL_I2C_MODE_SOFTEND;
     case I2CEndPause:
         return LL_I2C_MODE_RELOAD;
