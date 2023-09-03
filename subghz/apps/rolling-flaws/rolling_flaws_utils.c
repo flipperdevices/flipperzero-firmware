@@ -27,6 +27,36 @@ size_t __furi_string_extract_string(
     return term;
 }
 
+size_t __furi_string_extract_string_until(
+    FuriString* buffer,
+    size_t start_index,
+    char* text,
+    char delim,
+    FuriString* result) {
+    size_t len = strlen(text);
+    size_t valid_index = furi_string_size(buffer) - 1;
+    size_t field = furi_string_search_str(buffer, text, start_index) + len;
+    size_t term = -1;
+    if(field < valid_index) {
+        term = furi_string_search_char(buffer, delim, field);
+        if(term < valid_index) {
+            furi_string_reset(result);
+            furi_string_set_n(result, buffer, field, term - field);
+            FURI_LOG_I(TAG, "%s data is >>%s<<", text, furi_string_get_cstr(result));
+        } else {
+            term = furi_string_size(buffer);
+            furi_string_reset(result);
+            furi_string_set_n(result, buffer, field, term - field);
+            FURI_LOG_E(TAG, "Failed to find terminator for >>%s<<, using end of string", text);
+            FURI_LOG_I(TAG, "%s data is >>%s<<", text, furi_string_get_cstr(result));
+        }
+    } else {
+        FURI_LOG_E(TAG, "Failed to find >>%s<<", text);
+    }
+
+    return term;
+}
+
 uint32_t
     __furi_string_extract_int(FuriString* buffer, char* text, char delim, uint32_t default_value) {
     uint32_t value = default_value;

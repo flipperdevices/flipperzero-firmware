@@ -1,7 +1,7 @@
 #pragma once
 
 #define ROLLING_FLAWS_ABOUT_TEXT                                \
-    "Rolling code receiver\n version 1.3\n"                     \
+    "Rolling code receiver\n version 1.4\n"                     \
     "---\n"                                                     \
     "Practice rolling code attacks without risking a desync!\n" \
     "This app is for educational\n"                             \
