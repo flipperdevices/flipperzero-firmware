@@ -35,6 +35,7 @@ jobs:
             TYPE="pull"
           elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
             TYPE="tag"
+            echo 'FBT_BUILD_TYPE="DEBUG=0 COMPACT=1"' >> $GITHUB_ENV
           else
             TYPE="other"
           fi
@@ -49,42 +50,51 @@ jobs:
           N_API_HEADER_SIGNATURES=`ls -1 firmware/targets/f*/api_symbols.csv | xargs -I {} sh -c "head -n2 {} | md5sum" | sort -u | wc -l`
           if [ $N_API_HEADER_SIGNATURES != 1 ] ; then
             echo API versions aren\'t matching for available targets. Please update!
+            echo API versions are:
             head -n2 firmware/targets/f*/api_symbols.csv
             exit 1
           fi
 
-      - name: 'Make artifacts directory'
-        run: |
-          rm -rf artifacts map_analyser_files
-          mkdir artifacts map_analyser_files
-
-      - name: 'Bundle scripts'
-        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
-        run: |
-          tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
-
       - name: 'Build the firmware'
         run: |
-          set -e
-          ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package \
-            ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
-          mv dist/${TARGET}-*/* artifacts/
-          tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
-            -C assets resources
-          ./fbt TARGET_HW=$TARGET_HW fap_dist
-          tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
-            -C dist/${TARGET}-*/apps/Debug .
-          tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \
-            -C dist/${TARGET}-*/debug_elf .
+          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE copro_dist updater_package
 
       - name: 'Check for uncommitted changes'
         run: |
           git diff --exit-code
 
-      - name: 'Bundle core2 firmware'
+      - name: 'Copy build output'
+        run: |
+          set -e
+          rm -rf artifacts map_analyser_files
+          mkdir artifacts map_analyser_files
+          cp dist/${TARGET}-*/* artifacts/
+          tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
+            -C assets resources
+
+      - name: 'Build & copy apps artifacts'
+        run: |
+          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE fap_dist
+          tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
+            -C dist/${TARGET}-*/apps/Debug .
+          tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \
+            -C dist/${TARGET}-*/debug_elf .
+
+      - name: 'Copy universal artifacts'
         if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
         run: |
+          tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
+
+      - name: 'Upload artifacts to update server'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              -F "branch=${BRANCH_NAME}" \
+              -F "version_token=${COMMIT_SHA}" \
+              ${FILES[@]} \
+              "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: 'Copy map analyser files'
         if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
@@ -119,18 +129,8 @@ jobs:
               ${{ secrets.AMAP_MARIADB_DATABASE }} \
               map_analyser_files/firmware.elf.map.all
 
-      - name: 'Upload artifacts to update server'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        run: |
-          FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
-          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
-              -F "branch=${BRANCH_NAME}" \
-              -F "version_token=${COMMIT_SHA}" \
-              ${FILES[@]} \
-              "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
-
       - name: 'Find Previous Comment'
-        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
         uses: peter-evans/find-comment@v2
         id: fc
         with:
@@ -139,13 +139,13 @@ jobs:
           body-includes: 'Compiled firmware for commit'
 
       - name: 'Create or update comment'
-        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
         uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            **Compiled firmware for commit `${{steps.names.outputs.commit_sha}}`:**
+            **Compiled ${{ matrix.target }} firmware for commit `${{steps.names.outputs.commit_sha}}`:**
             - [📦 Update package](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
             - [📥 DFU file](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-full-${{steps.names.outputs.suffix}}.dfu)
             - [☁️ Web/App updater](https://lab.flipper.net/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
