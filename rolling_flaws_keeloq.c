@@ -169,16 +169,28 @@ static bool is_open(RollingFlawsModel* model, KeeLoqData* data) {
     return false;
 }
 
+uint32_t last_decode = 0;
 void decode_keeloq(RollingFlawsModel* model, FuriString* buffer, bool sync) {
     FURI_LOG_T(TAG, "Decoding KeeLoq 64bit");
+    uint32_t now = furi_get_tick();
+    if(now - last_decode < furi_ms_to_ticks(500)) {
+        FURI_LOG_D(TAG, "Ignoring decode.  Too soon.");
+        last_decode = now;
+        return;
+    }
+    last_decode = now;
 
     KeeLoqData* data = keeloq_data_alloc();
-    __furi_string_extract_string(buffer, 0, "MF:", '\r', data->mf);
+    __furi_string_extract_string_until(buffer, 0, "MF:", '\r', data->mf);
     __furi_string_extract_string(buffer, 0, "Key:", '\r', model->key);
 
     data->fix = __furi_string_extract_int(buffer, "Fix:0x", ' ', FAILED_TO_PARSE);
     data->hop = __furi_string_extract_int(buffer, "Hop:0x", ' ', FAILED_TO_PARSE);
     data->sn = __furi_string_extract_int(buffer, "Sn:0x", ' ', FAILED_TO_PARSE);
+    if(data->sn == FAILED_TO_PARSE) {
+        FURI_LOG_I(TAG, "Sn:0x not found.  Using Fix data.");
+        data->sn = data->fix & 0x0FFFFFFF;
+    }
     data->btn = __furi_string_extract_int(buffer, "Btn:", '\r', FAILED_TO_PARSE);
     data->cnt = __furi_string_extract_int(buffer, "Cnt:", '\r', FAILED_TO_PARSE);
     // NOTE: "Enc:" needs to be added to "keeloq.c" subghz_protocol_decoder_keeloq_get_string() method.
