@@ -19,7 +19,7 @@ static FelicaPoller* felica_poller_alloc(Nfc* nfc) {
     instance->tx_buffer = bit_buffer_alloc(FELICA_POLLER_MAX_BUFFER_SIZE);
     instance->rx_buffer = bit_buffer_alloc(FELICA_POLLER_MAX_BUFFER_SIZE);
 
-    nfc_config(instance->nfc, NfcModeFelicaPoller);
+    nfc_config(instance->nfc, NfcModePoller, NfcTechFelica);
     nfc_set_guard_time_us(instance->nfc, FELICA_GUARD_TIME_US);
     nfc_set_fdt_poll_fc(instance->nfc, FELICA_FDT_POLL_FC);
     nfc_set_fdt_poll_poll_us(instance->nfc, FELICA_POLL_POLL_MIN_US);

@@ -55,6 +55,7 @@ typedef enum {
     FHalNfcTechFelica,
 
     FHalNfcTechNum,
+    FHalNfcTechInvalid,
 } FHalNfcTech;
 
 typedef enum {

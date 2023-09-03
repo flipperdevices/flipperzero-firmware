@@ -40,16 +40,20 @@ typedef enum {
 typedef NfcCommand (*NfcEventCallback)(NfcEvent event, void* context);
 
 typedef enum {
-    NfcModeIdle,
-    NfcModeIso14443aPoller,
-    NfcModeIso14443aListener,
-    NfcModeIso14443bPoller,
-    NfcModeIso14443bListener,
-    NfcModeFelicaPoller,
-    NfcModeNfcfListener,
-    NfcModeIso15693Poller,
-    NfcModeIso15693Listener,
+    NfcModePoller,
+    NfcModeListener,
+
+    NfcModeNum,
 } NfcMode;
+
+typedef enum {
+    NfcTechIso14443a,
+    NfcTechIso14443b,
+    NfcTechIso15693,
+    NfcTechFelica,
+
+    NfcTechNum,
+} NfcTech;
 
 typedef enum {
     NfcErrorNone,
@@ -70,7 +74,7 @@ Nfc* nfc_alloc();
 
 void nfc_free(Nfc* instance);
 
-void nfc_config(Nfc* instance, NfcMode mode);
+void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech);
 
 void nfc_set_fdt_poll_fc(Nfc* instance, uint32_t fdt_poll_fc);
 

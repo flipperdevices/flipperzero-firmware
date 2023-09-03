@@ -25,7 +25,7 @@ Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, Iso15693_3Data* data) {
     instance->generic_event.data = &instance->iso15693_3_event;
 
     nfc_set_fdt_listen_fc(instance->nfc, ISO15693_3_FDT_LISTEN_FC);
-    nfc_config(instance->nfc, NfcModeIso15693Listener);
+    nfc_config(instance->nfc, NfcModeListener, NfcTechIso15693);
 
     return instance;
 }
