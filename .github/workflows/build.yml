@@ -68,7 +68,7 @@ jobs:
           set -e
           rm -rf artifacts map_analyser_files
           mkdir artifacts map_analyser_files
-          cp dist/${TARGET}-*/* artifacts/
+          cp dist/${TARGET}-*/* artifacts/ || true
           tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
             -C assets resources
 
