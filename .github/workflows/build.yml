@@ -44,7 +44,7 @@ jobs:
           echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_HW=$(echo "${{ matrix.target }}" | sed 's/f//')" >> $GITHUB_ENV
 
-      - name: 'Check API versions'
+      - name: 'Check API versions for consistency between targets'
         run: |
           set -e
           N_API_HEADER_SIGNATURES=`ls -1 firmware/targets/f*/api_symbols.csv | xargs -I {} sh -c "head -n2 {} | md5sum" | sort -u | wc -l`
@@ -55,9 +55,9 @@ jobs:
             exit 1
           fi
 
-      - name: 'Build the firmware'
+      - name: 'Build the firmware and apps'
         run: |
-          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE copro_dist updater_package
+          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE copro_dist updater_package fap_dist
 
       - name: 'Check for uncommitted changes'
         run: |
@@ -66,15 +66,11 @@ jobs:
       - name: 'Copy build output'
         run: |
           set -e
-          rm -rf artifacts map_analyser_files
+          rm -rf artifacts map_analyser_files || true
           mkdir artifacts map_analyser_files
           cp dist/${TARGET}-*/* artifacts/ || true
           tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
             -C assets resources
-
-      - name: 'Build & copy apps artifacts'
-        run: |
-          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE fap_dist
           tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
             -C dist/${TARGET}-*/apps/Debug .
           tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \
@@ -136,7 +132,7 @@ jobs:
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: 'Compiled firmware for commit'
+          body-includes: 'Compiled ${{ matrix.target }} firmware for commit'
 
       - name: 'Create or update comment'
         if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
