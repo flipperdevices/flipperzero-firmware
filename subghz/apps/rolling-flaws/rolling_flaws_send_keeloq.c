@@ -60,14 +60,11 @@ static void send_keeloq(
     preset->data = NULL;
     preset->data_size = 0;
 
+    SubGhzProtocolEncoderBase* encoder = subghz_transmitter_get_protocol_instance(transmitter);
+    // sadly, in some firmware this has a Repeat of 100, which is too much for our purposes.
+
     subghz_protocol_keeloq_create_data(
-        subghz_transmitter_get_protocol_instance(transmitter),
-        flipper_format,
-        serial,
-        btn,
-        cnt,
-        name_sysmem,
-        preset);
+        encoder, flipper_format, serial, btn, cnt, name_sysmem, preset);
 
     // Fill out the SubGhzProtocolDecoderPrinceton (which includes SubGhzBlockGeneric data) in our transmitter based on parsing flipper_format.
     // initance->encoder.upload[] gets filled out with duration and level information (You can think of this as the RAW data).
@@ -92,8 +89,10 @@ static void send_keeloq(
 
     // Start transmitting (keeps the DMA buffer filled with the encoder.upload[] data)
     if(subghz_devices_start_async_tx(device, subghz_transmitter_yield, transmitter)) {
-        // Wait for the transmission to complete.
-        while(!(subghz_devices_is_async_complete_tx(device))) {
+        int max_counter = 10;
+
+        // Wait for the transmission to complete, or counter to expire (1 second).
+        while(max_counter-- && !(subghz_devices_is_async_complete_tx(device))) {
             furi_delay_ms(100);
         }
 

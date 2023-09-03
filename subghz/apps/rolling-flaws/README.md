@@ -1,6 +1,6 @@
 # Rolling Flaws
 
-Rolling Flaws (version 1.2) by [@CodeAllNight](https://twitter.com/codeallnight).
+Rolling Flaws (version 1.3) by [@CodeAllNight](https://twitter.com/codeallnight).
 
 [YouTube demo](https://youtu.be/gMnGuDC9EQo?si=4HLZpkC4XWhh97uQ) of using Rolling Flaws application.  The video shows how to use the application to simulate a receiver that has a Replay attack flaw, Pairing FZ to a receiver, Cloning sequence attack, Future attack, Rollback attack & KGB attack.  The Rolling Flaws application also supports things like "ENC00" attack & window-next attacks, which are described in scenarios below but was not in video.  Rolljam is discussed in document, but discouraged to test since it is [illegal to jam signals](https://www.fcc.gov/general/jammer-enforcement) in the US.  If you have additional ideas, please let me know!
 
