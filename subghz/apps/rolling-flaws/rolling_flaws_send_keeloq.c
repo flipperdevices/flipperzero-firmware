@@ -91,7 +91,7 @@ static void send_keeloq(
     if(subghz_devices_start_async_tx(device, subghz_transmitter_yield, transmitter)) {
         int max_counter = 10;
 
-        // Wait for the transmission to complete, or counter to expire (1 second).
+        // Wait for the transmission to complete, or counter to expire (about 1 second).
         while(max_counter-- && !(subghz_devices_is_async_complete_tx(device))) {
             furi_delay_ms(100);
         }
