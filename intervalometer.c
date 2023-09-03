@@ -26,6 +26,20 @@ enum flipvalo_ui_scene {
     FVSceneConfig,
 };
 
+// defines a flipvalo camera trigger
+struct flipvalo_trigger {
+    const char* display_name;
+    int (*send)(void* output_config);
+};
+
+enum flipvalo_trigger_variants {
+    FvTrigMin = 0,
+    FvTrigSony = 0,
+    FvTrigCanon = 1,
+    FvTrigNikon = 2,
+    FvTrigMax = 2,
+};
+
 // run config for intervalometer
 struct flipvalo_config {
     int init_delay_msec;          // initial delay to start capture
@@ -34,11 +48,8 @@ struct flipvalo_config {
     int burst_count;              // number of triggers in a shot
     int burst_delay_msec;         // time between triggers in a shot
     int tickrate;                 // tick rate in "ticks per second"
+    enum flipvalo_trigger_variants trigger; // current trigger
 
-    // camera control functions.
-    // a bit overkill atm, but this will allow us to drop in support
-    // for other cameras, bluetooth, and more adv. functions later.
-    int (*send_trigger_fn)(void* output_config);
     void* output_config;
 };
 
@@ -67,7 +78,8 @@ enum flipvalo_config_edit_lines {
     FvConfigEditShotDelay,
     FvConfigEditBurstCount,
     FvConfigEditBurstDelay,
-    FvConfigEditMAX = FvConfigEditBurstDelay,
+    FvConfigEditTrigger,
+    FvConfigEditMAX = FvConfigEditTrigger,
 };
 
 struct flipvalo_config_edit_view {
@@ -108,11 +120,10 @@ struct plugin_event {
 };
 
 
-// XXX(luna) settings experimental ui kludge
-
 enum flipvalo_config_edit_line_type {
     FvConfigEditTypeTimer,
     FvConfigEditTypeCount,
+    FvConfigEditTypeEnum,
 };
 
 static void flipvalo_config_edit_view_init(struct flipvalo_config_edit_view* view) {
@@ -123,6 +134,65 @@ static void flipvalo_config_edit_view_init(struct flipvalo_config_edit_view* vie
     view->edit_mode = false;
 }
 
+static int sony_ir_trigger_send(void* ctx) {
+    UNUSED(ctx);
+    InfraredMessage message = {
+        .address = 0x1E3A,
+        .command = 0x2D,
+        .protocol = InfraredProtocolSIRC20,
+    };
+    infrared_send(&message, 1);
+    return 0;
+}
+
+uint32_t canon_ir_timings[] = {
+    594, 7182, 593
+};
+static int canon_ir_trigger_send(void* ctx) {
+    UNUSED(ctx);
+    infrared_send_raw_ext(canon_ir_timings, 3, true, 38000, 0.33);
+    return 0;
+}
+
+uint32_t nikon_ir_timings[] = {
+    1945, 28253, 404, 1513, 410, 3611, 460, 70144, 1974,
+    28213, 455, 1493, 461, 3591, 409
+};
+static int nikon_ir_trigger_send(void* ctx) {
+    UNUSED(ctx);
+    infrared_send_raw_ext(nikon_ir_timings, 15, true, 38000, 0.33);
+    return 0;
+}
+
+struct flipvalo_trigger sony_ir_trigger = {
+    .send = sony_ir_trigger_send,
+    .display_name = "Sony IR"
+};
+
+struct flipvalo_trigger canon_ir_trigger = {
+    .send = canon_ir_trigger_send,
+    .display_name = "Canon IR"
+};
+
+struct flipvalo_trigger nikon_ir_trigger = {
+    .send = nikon_ir_trigger_send,
+    .display_name = "Nikon IR"
+};
+
+static struct flipvalo_trigger* flipvalo_get_trigger(
+        enum flipvalo_trigger_variants variant
+) {
+    switch (variant) {
+        case FvTrigSony:
+            return &sony_ir_trigger;
+        case FvTrigCanon:
+            return &canon_ir_trigger;
+        case FvTrigNikon:
+            return &nikon_ir_trigger;
+    }
+    return NULL;
+}
+
 #define ITEM_H 64 / 3
 #define ITEM_W 128
 #define VALUE_X 100
@@ -130,6 +200,7 @@ static void flipvalo_config_edit_view_init(struct flipvalo_config_edit_view* vie
 static void flipvalo_config_edit_draw(Canvas* canvas, struct flipvalo_config_edit_view* view) {
     int* line_value;
     char* line_label = NULL;
+    const char* line_disp_str = "";
     FuriString* temp_str = furi_string_alloc();
     enum flipvalo_config_edit_line_type line_type;
     enum flipvalo_config_edit_lines selected_line;
@@ -161,6 +232,13 @@ static void flipvalo_config_edit_draw(Canvas* canvas, struct flipvalo_config_edi
                 line_value = &view->config->burst_count;
                 line_type = FvConfigEditTypeCount;
                 line_label = "Brst Count";
+                break;
+            case FvConfigEditTrigger:
+                line_value = NULL;
+                line_type = FvConfigEditTypeEnum;
+                line_label = "Trig Type";
+                line_disp_str = flipvalo_get_trigger(view->config->trigger)
+                                                    ->display_name;
                 break;
             default:
                 continue;
@@ -234,6 +312,16 @@ static void flipvalo_config_edit_draw(Canvas* canvas, struct flipvalo_config_edi
                 canvas_draw_str_aligned(
                     canvas, VALUE_X + VALUE_W / 2, text_y, AlignCenter, AlignCenter, ">");
                 break;
+            case FvConfigEditTypeEnum:
+                furi_string_printf(temp_str, "%s", line_disp_str);
+                canvas_draw_str_aligned(
+                        canvas, VALUE_X, text_y, AlignCenter, AlignCenter,
+                        furi_string_get_cstr(temp_str));
+                canvas_draw_str_aligned(
+                    canvas, VALUE_X - VALUE_W / 2, text_y, AlignCenter, AlignCenter, "<");
+                canvas_draw_str_aligned(
+                    canvas, VALUE_X + VALUE_W / 2, text_y, AlignCenter, AlignCenter, ">");
+                break;
         }
     }
 
@@ -243,8 +331,11 @@ static void flipvalo_config_edit_draw(Canvas* canvas, struct flipvalo_config_edi
 static void flipvalo_config_edit_input_move_cursor(struct flipvalo_config_edit_view* view, int dx, int dy) {
     enum flipvalo_config_edit_lines new_line = 0;
 
-    int* line_value;
+    int* line_value = NULL;
     enum flipvalo_config_edit_line_type line_type;
+    // only used for enum type
+    int max_value;
+    int min_value;
 
     switch (view->cur_line) {
         case FvConfigEditInitDelay:
@@ -266,6 +357,12 @@ static void flipvalo_config_edit_input_move_cursor(struct flipvalo_config_edit_v
         case FvConfigEditBurstCount:
             line_value = &view->config->burst_count;
             line_type = FvConfigEditTypeCount;
+            break;
+        case FvConfigEditTrigger:
+            line_value = (int*)(&view->config->trigger);
+            line_type = FvConfigEditTypeEnum;
+            min_value = FvTrigMin;
+            max_value = FvTrigMax;
             break;
         default:
             return;
@@ -290,19 +387,26 @@ static void flipvalo_config_edit_input_move_cursor(struct flipvalo_config_edit_v
 
         // Do `dx` behavior
         switch (line_type) {
-            case FvConfigEditTypeCount:
-                if (*line_value + dx >= 0) {
-                    *line_value += dx;
-                }
-                break;
             case FvConfigEditTypeTimer:
                 // no-op unless edit mode
+                break;
+            case FvConfigEditTypeCount:
+                min_value = 0;
+                max_value = INT_MAX;
+                // fall through.
+            case FvConfigEditTypeEnum:
+                if ((*line_value + dx) >= min_value
+                    && (*line_value + dx) <= max_value)
+                {
+                    *line_value += dx;
+                }
                 break;
         }
     }
     else /* edit mode */ {
         switch (line_type) {
             case FvConfigEditTypeCount:
+            case FvConfigEditTypeEnum:
                 // If current line does not edit mode.. why are we in edit mode?
                 // Reaching this would be a bug, so lets go back to normal mode.
                 view->edit_mode = false;
@@ -390,17 +494,6 @@ static void flipvalo_run_state_init(struct flipvalo_run_state* fv_run_state) {
     fv_run_state->tick_cur = 0;
 }
 
-static int sony_ir_trigger(void* ctx) {
-    UNUSED(ctx);
-    InfraredMessage message = {
-        .address = 0x1E3A,
-        .command = 0x2D,
-        .protocol = InfraredProtocolSIRC20,
-    };
-    infrared_send(&message, 1);
-    return 0;
-}
-
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
     struct plugin_event event = {.type = EventTypeKey, .input = *input_event };
@@ -417,7 +510,7 @@ static void flipvalo_intv_tick(struct flipvalo_priv* fv_priv) {
     // check if action required
     if (run->tick_cur++ >= run->tick_next) {
         // call trigger function
-        conf->send_trigger_fn(conf->output_config);
+        flipvalo_get_trigger(conf->trigger)->send(conf->output_config);
         fv_priv->gui_shutter_blink = 3;
         // end of burst, prepare next shot
         if (run->burst_cur >= conf->burst_count) {
@@ -534,7 +627,7 @@ static void flipvalo_config_init(struct flipvalo_config* fv_conf) {
     fv_conf->burst_count = 1;
     fv_conf->burst_delay_msec = 0;
     fv_conf->tickrate = 125;
-    fv_conf->send_trigger_fn = sony_ir_trigger;
+    fv_conf->trigger = FvTrigSony;
     fv_conf->output_config = NULL;
 }
 
@@ -620,7 +713,8 @@ int32_t flipvalo_app() {
                                 break;
                             case InputKeyRight:
                                 fv_priv->gui_shutter_blink = 3;
-                                fv_priv->config.send_trigger_fn(fv_priv->config.output_config);
+                                flipvalo_get_trigger(fv_priv->config.trigger)
+                                    ->send(fv_priv->config.output_config);
                                 break;
                             case InputKeyOk:
                                 if (flipvalo_intv_running(fv_priv)) {
