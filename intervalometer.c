@@ -700,7 +700,8 @@ int32_t flipvalo_app() {
             case FVSceneMain:
                 // TODO(luna) Maybe give this a function.. look howl clean FVSceneConfig is...
                 if (event.type == EventTypeKey) {
-                    if (event.input.type == InputTypeShort) {
+                    if (event.input.type == InputTypeShort ||
+                            event.input.type == InputTypeLong) {
                         switch (event.input.key) {
                             case InputKeyUp:
                                 break;
