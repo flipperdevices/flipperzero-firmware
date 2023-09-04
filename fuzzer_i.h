@@ -24,7 +24,7 @@
 #include "fuzzer_icons.h"
 
 #define FUZZ_TIME_DELAY_MAX (80)
-#define KEY_NAME_SIZE 22
+#define KEY_NAME_SIZE 24
 
 typedef struct {
     const char* custom_dict_extension;
