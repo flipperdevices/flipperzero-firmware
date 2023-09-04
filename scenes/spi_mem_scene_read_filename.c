@@ -11,7 +11,7 @@ void spi_mem_scene_read_set_random_filename(SPIMemApp* app) {
         size_t filename_start = furi_string_search_rchar(app->file_path, '/');
         furi_string_left(app->file_path, filename_start);
     }
-    set_random_name(app->text_buffer, SPI_MEM_TEXT_BUFFER_SIZE);
+    name_generator_make_auto(app->text_buffer, SPI_MEM_TEXT_BUFFER_SIZE, TAG);
 }
 
 void spi_mem_scene_read_filename_on_enter(void* context) {
