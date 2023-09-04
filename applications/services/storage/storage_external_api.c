@@ -11,7 +11,7 @@
 #define MAX_EXT_LEN 16
 #define FILE_BUFFER_SIZE 512
 
-#define TAG "StorageAPI"
+#define TAG "StorageApi"
 
 #define S_API_PROLOGUE FuriApiLock lock = api_lock_alloc_locked();
 

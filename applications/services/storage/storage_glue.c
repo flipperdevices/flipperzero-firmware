@@ -1,7 +1,7 @@
 #include "storage_glue.h"
 #include <furi_hal.h>
 
-#define TAG "storage_glue"
+#define TAG "StorageGlue"
 
 /****************** storage file ******************/
 
