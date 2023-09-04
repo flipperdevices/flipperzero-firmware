@@ -130,9 +130,7 @@ static SlixError slix_listener_get_nxp_system_info_handler(
     const SlixProtection* protection = &slix_data->system_info.protection;
     bit_buffer_append_byte(instance->tx_buffer, protection->pointer);
     bit_buffer_append_byte(instance->tx_buffer, protection->condition);
-
-    const SlixLockBits* lock_bits = &slix_data->system_info.lock_bits;
-    bit_buffer_append_byte(instance->tx_buffer, lock_bits->data);
+    bit_buffer_append_byte(instance->tx_buffer, slix_data->system_info.lock_bits);
 
     const uint32_t feature_flags = SLIX2_FEATURE_FLAGS;
     bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&feature_flags, sizeof(uint32_t));
@@ -271,9 +269,7 @@ static SlixError slix_listener_read_signature_handler(
     UNUSED(data_size);
     UNUSED(flags);
 
-    const SlixSignature* signature = &instance->data->signature;
-    bit_buffer_append_bytes(instance->tx_buffer, signature->data, SLIX_SIGNATURE_SIZE);
-
+    bit_buffer_append_bytes(instance->tx_buffer, instance->data->signature, sizeof(SlixSignature));
     return SlixErrorNone;
 }
 
@@ -315,7 +311,7 @@ static Iso15693_3Error
     slix_listener_iso15693_3_inventory_extension_handler(SlixListener* instance, va_list args) {
     UNUSED(args);
 
-    return instance->data->is_privacy_mode ? Iso15693_3ErrorIgnore : Iso15693_3ErrorNone;
+    return instance->data->privacy ? Iso15693_3ErrorIgnore : Iso15693_3ErrorNone;
 }
 
 static Iso15693_3Error

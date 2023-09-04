@@ -74,26 +74,17 @@ typedef enum {
 } SlixPasswordType;
 
 typedef uint32_t SlixPassword;
+typedef uint8_t SlixSignature[SLIX_SIGNATURE_SIZE];
+typedef bool SlixPrivacy;
 
 typedef struct {
-    bool is_present;
-    uint8_t data[SLIX_SIGNATURE_SIZE];
-} SlixSignature;
-
-typedef struct {
-    bool is_present;
     uint8_t pointer;
     uint8_t condition;
 } SlixProtection;
 
 typedef struct {
-    bool is_present;
-    uint8_t data;
-} SlixLockBits;
-
-typedef struct {
     SlixProtection protection;
-    SlixLockBits lock_bits;
+    uint8_t lock_bits;
 } SlixSystemInfo;
 
 typedef struct {
@@ -101,7 +92,7 @@ typedef struct {
     SlixSystemInfo system_info;
     SlixSignature signature;
     SlixPassword passwords[SlixPasswordTypeCount];
-    bool is_privacy_mode;
+    SlixPrivacy privacy;
 } SlixData;
 
 SlixData* slix_alloc();

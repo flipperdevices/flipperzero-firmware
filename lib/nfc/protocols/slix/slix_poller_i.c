@@ -63,8 +63,7 @@ SlixError slix_poller_async_read_signature(SlixPoller* instance, SlixSignature* 
         error = slix_poller_send_frame(
             instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC * 2);
         if(error != SlixErrorNone) break;
-        error =
-            slix_read_signature_response_parse(&instance->data->signature, instance->rx_buffer);
+        error = slix_read_signature_response_parse(instance->data->signature, instance->rx_buffer);
     } while(false);
 
     return error;

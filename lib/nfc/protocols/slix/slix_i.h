@@ -57,7 +57,7 @@ SlixError slix_process_iso15693_3_error(Iso15693_3Error iso15693_3_error);
 
 SlixError slix_get_nxp_system_info_response_parse(SlixSystemInfo* data, const BitBuffer* buf);
 
-SlixError slix_read_signature_response_parse(SlixSignature* data, const BitBuffer* buf);
+SlixError slix_read_signature_response_parse(SlixSignature data, const BitBuffer* buf);
 
 #ifdef __cplusplus
 }

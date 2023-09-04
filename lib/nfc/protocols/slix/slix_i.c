@@ -51,22 +51,19 @@ SlixError slix_get_nxp_system_info_response_parse(SlixSystemInfo* data, const Bi
             break;
         }
 
-        data->protection.is_present = true;
-        data->lock_bits.is_present = true;
-
         const SlixGetNxpSystemInfoResponseLayout* response =
             (const SlixGetNxpSystemInfoResponseLayout*)bit_buffer_get_data(buf);
 
         data->protection.pointer = response->pp_pointer;
         data->protection.condition = response->pp_condition;
-        data->lock_bits.data = response->lock_bits;
+        data->lock_bits = response->lock_bits;
 
     } while(false);
 
     return error;
 }
 
-SlixError slix_read_signature_response_parse(SlixSignature* data, const BitBuffer* buf) {
+SlixError slix_read_signature_response_parse(SlixSignature data, const BitBuffer* buf) {
     SlixError error = SlixErrorNone;
 
     do {
@@ -85,12 +82,10 @@ SlixError slix_read_signature_response_parse(SlixSignature* data, const BitBuffe
             break;
         }
 
-        data->is_present = true;
-
         const SlixReadSignatureResponseLayout* response =
             (const SlixReadSignatureResponseLayout*)bit_buffer_get_data(buf);
 
-        memcpy(data->data, response->signature, SLIX_SIGNATURE_SIZE);
+        memcpy(data, response->signature, sizeof(SlixSignature));
     } while(false);
 
     return error;

@@ -107,7 +107,7 @@ void slix_reset(SlixData* data) {
     memset(data->passwords, 0, sizeof(SlixPassword) * SlixPasswordTypeCount);
     memset(&data->signature, 0, sizeof(SlixSignature));
 
-    data->is_privacy_mode = false;
+    data->privacy = false;
 }
 
 void slix_copy(SlixData* data, const SlixData* other) {
@@ -115,11 +115,12 @@ void slix_copy(SlixData* data, const SlixData* other) {
     furi_assert(other);
 
     iso15693_3_copy(data->iso15693_3_data, other->iso15693_3_data);
+
     memcpy(data->passwords, other->passwords, sizeof(SlixPassword) * SlixPasswordTypeCount);
+    memcpy(data->signature, other->signature, sizeof(SlixSignature));
 
     data->system_info = other->system_info;
-    data->signature = other->signature;
-    data->is_privacy_mode = other->is_privacy_mode;
+    data->privacy = other->privacy;
 }
 
 bool slix_verify(SlixData* data, const FuriString* device_type) {
@@ -164,23 +165,20 @@ bool slix_load(SlixData* data, FlipperFormat* ff, uint32_t version) {
         if(!slix_load_passwords(data->passwords, slix_type, ff)) break;
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_SIGNATURE)) {
-            SlixSignature* signature = &data->signature;
             if(flipper_format_key_exist(ff, SLIX_SIGNATURE_KEY)) {
                 if(!flipper_format_read_hex(
-                       ff, SLIX_SIGNATURE_KEY, signature->data, SLIX_SIGNATURE_SIZE))
+                       ff, SLIX_SIGNATURE_KEY, data->signature, SLIX_SIGNATURE_SIZE))
                     break;
-                signature->is_present = true;
             }
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PRIVACY)) {
             if(flipper_format_key_exist(ff, SLIX_PRIVACY_MODE_KEY)) {
-                if(!flipper_format_read_bool(ff, SLIX_PRIVACY_MODE_KEY, &data->is_privacy_mode, 1))
-                    break;
+                if(!flipper_format_read_bool(ff, SLIX_PRIVACY_MODE_KEY, &data->privacy, 1)) break;
             }
         }
 
-        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_SIGNATURE)) {
+        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PROTECTION)) {
             SlixProtection* protection = &data->system_info.protection;
             if(flipper_format_key_exist(ff, SLIX_PROTECTION_POINTER_KEY) &&
                flipper_format_key_exist(ff, SLIX_PROTECTION_CONDITION_KEY)) {
@@ -190,15 +188,14 @@ bool slix_load(SlixData* data, FlipperFormat* ff, uint32_t version) {
                 if(!flipper_format_read_hex(
                        ff, SLIX_PROTECTION_CONDITION_KEY, &protection->condition, 1))
                     break;
-                protection->is_present = true;
             }
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_LOCK_BITS)) {
-            SlixLockBits* lock_bits = &data->system_info.lock_bits;
             if(flipper_format_key_exist(ff, SLIX_LOCK_BITS_KEY)) {
-                if(!flipper_format_read_hex(ff, SLIX_LOCK_BITS_KEY, &lock_bits->data, 1)) break;
-                lock_bits->is_present = true;
+                if(!flipper_format_read_hex(
+                       ff, SLIX_LOCK_BITS_KEY, &data->system_info.lock_bits, 1))
+                    break;
             }
         }
 
@@ -246,45 +243,36 @@ bool slix_save(const SlixData* data, FlipperFormat* ff) {
         if(!slix_save_passwords(data->passwords, slix_type, ff)) break;
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_SIGNATURE)) {
-            const SlixSignature* signature = &data->signature;
-            if(signature->is_present) {
-                if(!flipper_format_write_comment_cstr(
-                       ff,
-                       "This is the card's secp128r1 elliptic curve signature. It can not be calculated without knowing NXP's private key."))
-                    break;
-                if(!flipper_format_write_hex(
-                       ff, SLIX_SIGNATURE_KEY, signature->data, SLIX_SIGNATURE_SIZE))
-                    break;
-            }
+            if(!flipper_format_write_comment_cstr(
+                   ff,
+                   "This is the card's secp128r1 elliptic curve signature. It can not be calculated without knowing NXP's private key."))
+                break;
+            if(!flipper_format_write_hex(
+                   ff, SLIX_SIGNATURE_KEY, data->signature, SLIX_SIGNATURE_SIZE))
+                break;
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PRIVACY)) {
-            if(!flipper_format_write_bool(ff, SLIX_PRIVACY_MODE_KEY, &data->is_privacy_mode, 1))
-                break;
+            if(!flipper_format_write_bool(ff, SLIX_PRIVACY_MODE_KEY, &data->privacy, 1)) break;
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PROTECTION)) {
             const SlixProtection* protection = &data->system_info.protection;
-            if(protection->is_present) {
-                if(!flipper_format_write_comment_cstr(ff, "Protection pointer configuration"))
-                    break;
-                if(!flipper_format_write_hex(
-                       ff, SLIX_PROTECTION_POINTER_KEY, &protection->pointer, sizeof(uint8_t)))
-                    break;
-                if(!flipper_format_write_hex(
-                       ff, SLIX_PROTECTION_CONDITION_KEY, &protection->condition, sizeof(uint8_t)))
-                    break;
-            }
+            if(!flipper_format_write_comment_cstr(ff, "Protection pointer configuration")) break;
+            if(!flipper_format_write_hex(
+                   ff, SLIX_PROTECTION_POINTER_KEY, &protection->pointer, sizeof(uint8_t)))
+                break;
+            if(!flipper_format_write_hex(
+                   ff, SLIX_PROTECTION_CONDITION_KEY, &protection->condition, sizeof(uint8_t)))
+                break;
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_LOCK_BITS)) {
-            const SlixLockBits* lock_bits = &data->system_info.lock_bits;
-            if(lock_bits->is_present) {
-                if(!flipper_format_write_comment_cstr(
-                       ff, "SLIX Lock Bits: AFI = 0x01, EAS = 0x02, DSFID = 0x04, PPL = 0x08"))
-                    break;
-                if(!flipper_format_write_hex(ff, SLIX_LOCK_BITS_KEY, &lock_bits->data, 1)) break;
-            }
+            if(!flipper_format_write_comment_cstr(
+                   ff, "SLIX Lock Bits: AFI = 0x01, EAS = 0x02, DSFID = 0x04, PPL = 0x08"))
+                break;
+            if(!flipper_format_write_hex(ff, SLIX_LOCK_BITS_KEY, &data->system_info.lock_bits, 1))
+                break;
         }
 
         saved = true;
@@ -300,7 +288,7 @@ bool slix_is_equal(const SlixData* data, const SlixData* other) {
                data->passwords, other->passwords, sizeof(SlixPassword) * SlixPasswordTypeCount) ==
                0 &&
            memcmp(&data->signature, &other->signature, sizeof(SlixSignature)) == 0 &&
-           data->is_privacy_mode == other->is_privacy_mode;
+           data->privacy == other->privacy;
 }
 
 const char* slix_get_device_name(const SlixData* data, NfcDeviceNameType name_type) {
@@ -371,7 +359,7 @@ void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassw
 bool slix_is_privacy_mode(const SlixData* data) {
     furi_assert(data);
 
-    return data->is_privacy_mode;
+    return data->privacy;
 }
 
 bool slix_is_block_protected(
@@ -403,7 +391,7 @@ bool slix_is_block_protected(
 void slix_set_privacy_mode(SlixData* data, bool set) {
     furi_assert(data);
 
-    data->is_privacy_mode = set;
+    data->privacy = set;
 }
 
 bool slix_type_has_features(SlixType slix_type, SlixTypeFeatures features) {
