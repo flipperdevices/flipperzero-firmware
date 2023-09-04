@@ -54,7 +54,7 @@ bool subbrute_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubBruteCustomEventTypeMenuSelected) {
             instance->settings->last_index = subbrute_main_view_get_index(instance->view_main);
             subbrute_settings_set_repeats(
-                instance->settings, subbrute_main_view_get_extra_repeats(instance->view_main));
+                instance->settings, subbrute_main_view_get_repeats(instance->view_main));
             uint8_t total_repeats = subbrute_settings_get_current_repeats(instance->settings);
 
             if((subbrute_device_attack_set(
@@ -83,7 +83,7 @@ bool subbrute_scene_start_on_event(void* context, SceneManagerEvent event) {
         //exit app
         instance->settings->last_index = subbrute_main_view_get_index(instance->view_main);
         subbrute_settings_set_repeats(
-            instance->settings, subbrute_main_view_get_extra_repeats(instance->view_main));
+            instance->settings, subbrute_main_view_get_repeats(instance->view_main));
         subbrute_settings_save(instance->settings);
 
         scene_manager_stop(instance->scene_manager);
