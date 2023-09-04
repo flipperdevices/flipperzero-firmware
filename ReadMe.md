@@ -52,7 +52,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 |---|:---:|---|---|:---:|
 | **Sub-GHz bruteforcer** | ![SubGhz Badge] | [by @derskythe & xMasterX](https://github.com/derskythe/flipperzero-subbrute) | [original by Ganapati & xMasterX](https://github.com/DarkFlippers/unleashed-firmware/pull/57) | ![None Badge] |
 | **Sub-GHz playlist** | ![SubGhz Badge] | [by darmiel](https://github.com/DarkFlippers/unleashed-firmware/pull/62) |  | ![None Badge] |
-| **Sub-GHz Remote** | ![SubGhz Badge] | [by @gid9798](https://github.com/gid9798) | Part of UFW as main app [sources](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/main/subghz_remote) | ![None Badge] |
+| **Sub-GHz Remote** | ![SubGhz Badge] | [by @gid9798](https://github.com/gid9798) | Part of UFW as main app [sources](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/main/subghz_remote)<br>Using version from flipper catalog on CFW can break your .sub files | [![UFW Badge]](https://lab.flipper.net/apps/subghz_remote_ofw) |
 | Spectrum Analyzer (with changes) | ![SubGhz Badge] | [by jolcese](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) | [Ultra Narrow mode & scan channels non-consecutively](https://github.com/theY4Kman/flipperzero-firmware/commits?author=theY4Kman) | [![UFW Badge]](https://lab.flipper.net/apps/spectrum_analyzer) |
 | POCSAG Pager | ![SubGhz Badge] | [by xMasterX & Shmuma](https://github.com/xMasterX/flipper-pager) |  | [![UFW Badge]](https://lab.flipper.net/apps/pocsag_pager) |
 | **ProtoView** | ![SubGhz Badge] | [by antirez](https://github.com/antirez/protoview) |  | [![UFW Badge]](https://lab.flipper.net/apps/protoview) |
@@ -102,7 +102,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | BlackJack | ![Games Badge] | [by teeebor](https://github.com/teeebor/flipper_games) |  | ![None Badge] |
 | 2048 game | ![Games Badge] | [by eugenekirzhanov](https://github.com/eugenekirzhanov/flipperzero2048game) |  | [![UFW Badge]](https://lab.flipper.net/apps/game_2048) |
 | Bomberduck | ![Games Badge] | [by leoneedmorecoffee](https://github.com/leoneedmorecoffee/flipperzerobomberduck) |  | ![None Badge] |
-| JetPack Joyride | ![Games Badge] | [by timstrasser](https://github.com/timstrasser) |  | ![None Badge] |
+| JetPack Joyride | ![Games Badge] | [by timstrasser](https://github.com/timstrasser) |  | [![Author Badge]](https://lab.flipper.net/apps/jetpack_game) |
 
 ---
 # Extra pack
@@ -167,7 +167,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | LORA Terminal | ![GPIO Badge] | [by aafksab](https://github.com/aafksab/LORA-Term) |  | ![None Badge] |
 | MagSpoof (WIP) | ![GPIO Badge] | [by zacharyweiss](https://github.com/zacharyweiss/magspoof_flipper) | Read mode [by hummusec](https://github.com/hummusec/magspoof_flipper) - + GPIO & Power fixes | ![None Badge] |
 | Mx2125 Dual-Axis Accelerometer | ![GPIO Badge] | [by jamisonderek](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio) |  | ![None Badge] |
-| MH-Z19 - CO2 sensor | ![GPIO Badge] | [by meshchaninov](https://github.com/meshchaninov/flipper-zero-mh-z19) |  | ![None Badge] |
+| MH-Z19 - CO2 sensor | ![GPIO Badge] | [by meshchaninov](https://github.com/meshchaninov/flipper-zero-mh-z19) |  | [![Author Badge]](https://lab.flipper.net/apps/mh_z19) |
 | NRF24 Batch Read/Send (WIP) | ![GPIO Badge] | [by vad7](https://github.com/vad7/nRF24-Batch) |  | ![None Badge] |
 | NRF24 Scanner | ![GPIO Badge] | [by vad7](https://github.com/vad7/nrf24scan) |  | ![None Badge] |
 | Pokemon Trading (for GameBoy) | ![GPIO Badge] | [by EstebanFuentealba](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) |  | [![Author Badge]](https://lab.flipper.net/apps/pokemon) |
@@ -183,7 +183,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Wii EC Analyser | ![GPIO Badge] | [by csBlueChip](https://github.com/csBlueChip/FlipperZero_WiiEC) |  | ![None Badge] |
 | Wire Tester | ![GPIO Badge] | [by unixispower](https://gitlab.com/unixispower/flipper-wire-tester) |  | ![None Badge] |
 | Atomic Dice Roller | ![GPIO Badge] | [by nmrr](https://github.com/nmrr/flipperzero-atomicdiceroller) |  | ![None Badge] |
-| NRF24 Channel Scanner | ![GPIO Badge] | [by htotoo](https://github.com/htotoo/NRF24ChannelScanner) |  | ![None Badge] |
+| NRF24 Channel Scanner | ![GPIO Badge] | [by htotoo](https://github.com/htotoo/NRF24ChannelScanner) |  | [![Author Badge]](https://lab.flipper.net/apps/nrf24channelscanner) |
 | Mx2125 - Step Counter | ![GPIO Badge] | [by grugnoymeme](https://github.com/grugnoymeme/flipperzero-stepcounter-fap) |  | ![None Badge] |
 | IR Remote | ![IR Badge] | [by Hong5489](https://github.com/Hong5489/ir_remote) | improvements [by friebel](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [by d4ve10](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option) | ![None Badge] |
 | IR Intervalometer for Sony Cameras | ![IR Badge] | [by Nitepone](https://github.com/Nitepone/flipper-intervalometer) |  | [![UFW Badge]](https://lab.flipper.net/apps/sony_intervalometer) |
@@ -225,6 +225,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | VB Lab Migration Assistant | ![Tools Badge] | [by GMMan (cyanic)](https://github.com/GMMan/flipperzero-vb-migrate) |  | [![Author Badge]](https://lab.flipper.net/apps/vb_migrate) |
 | Simple calendar app | ![Tools Badge] | [by Adiras](https://github.com/Adiras/flipperzero-calendar) |  | ![None Badge] |
 | USB HID Autofire | ![USB Badge] | [by pbek](https://github.com/pbek/usb_hid_autofire) |  | ![None Badge] |
+
+
+#### Catalog links checked at `01 Sep 16:24 GMT +3`
 
 --- 
 
