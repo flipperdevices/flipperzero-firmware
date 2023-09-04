@@ -160,15 +160,15 @@ I maintain another application that uses the **geiger board** to roll dice by us
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/IMG-1552.jpg" width=50% height=50%>
 
-[Seanclark2409 [YouTube]](https://www.youtube.com/@seanclark2409): 
+[Seanclark2409 [YouTube]](https://www.youtube.com/@seanclark2409) (click on the picture to see the video): 
 
 [![Watch the video](https://img.youtube.com/vi/JQB2jvY1oZ0/maxresdefault.jpg)](https://youtu.be/JQB2jvY1oZ0)
 
-[Boboso5676 [YouTube]](https://www.youtube.com/@boboso5676):
+[Boboso5676 [YouTube]](https://www.youtube.com/@boboso5676) (click on the picture to see the video):
 
 [![Watch the video](https://img.youtube.com/vi/jYQlC2NJScQ/maxresdefault.jpg)](https://youtu.be/jYQlC2NJScQ)
 
-[Talking Sasquach [YouTube]](https://www.youtube.com/@boboso5676):
+[Talking Sasquach [YouTube]](https://www.youtube.com/@TalkingSasquach) (click on the picture to see the video):
 
 [![Watch the video](https://img.youtube.com/vi/-I57_S_AXYY/maxresdefault.jpg)](https://youtu.be/-I57_S_AXYY)
 
