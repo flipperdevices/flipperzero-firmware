@@ -110,12 +110,7 @@ static void init_opt_select_LUT(void) {
 }
 ***********************************************************************************/
 
-#define loclass_opt__select(x, y, r)                                                        \
-    (4 & ((((r) & ((r) << 2)) >> 5) ^ (((r) & ~((r) << 2)) >> 4) ^ (((r) | (r) << 2) >> 3))) |          \
-        (2 & ((((r) | (r) << 2) >> 6) ^ (((r) | (r) << 2) >> 1) ^ ((r) >> 5) ^ (r) ^ (((x) ^ (y)) << 1))) | \
-        (1 & ((((r) & ~((r) << 2)) >> 4) ^ (((r) & ((r) << 2)) >> 3) ^ (r) ^ (x)))
-
-static void loclass_opt_successor(const uint8_t* k, LoclassState_t* s, uint8_t y) {
+static inline void loclass_opt_successor(const uint8_t* k, LoclassState_t* s, uint8_t y) {
     uint16_t Tt = s->t & 0xc533;
     Tt = Tt ^ (Tt >> 1);
     Tt = Tt ^ (Tt >> 4);
@@ -133,16 +128,15 @@ static void loclass_opt_successor(const uint8_t* k, LoclassState_t* s, uint8_t y
     s->b = s->b >> 1;
     s->b |= (opt_B ^ s->r) << 7;
 
-    uint8_t opt_select = loclass_opt_select_LUT[s->r] & 0x04;
-    opt_select |= (loclass_opt_select_LUT[s->r] ^ ((Tt ^ y) << 1)) & 0x02;
-    opt_select |= (loclass_opt_select_LUT[s->r] ^ Tt) & 0x01;
+    uint8_t Tt1 = Tt & 0x01;
+    uint8_t opt_select = loclass_opt_select_LUT[s->r] ^ Tt1 ^ ((Tt1 ^ (y & 0x01)) << 1);
 
     uint8_t r = s->r;
     s->r = (k[opt_select] ^ s->b) + s->l;
     s->l = s->r + r;
 }
 
-static void loclass_opt_suc(
+static inline void loclass_opt_suc(
     const uint8_t* k,
     LoclassState_t* s,
     const uint8_t* in,
@@ -150,21 +144,22 @@ static void loclass_opt_suc(
     bool add32Zeroes) {
     for(int i = 0; i < length; i++) {
         uint8_t head = in[i];
+#pragma GCC unroll 8
         for(int j = 0; j < 8; j++) {
             loclass_opt_successor(k, s, head);
             head >>= 1;
         }
     }
-    //For tag MAC, an additional 32 zeroes
+    // For tag MAC, an additional 32 zeroes
     if(add32Zeroes) {
-        for(int i = 0; i < 16; i++) {
-            loclass_opt_successor(k, s, 0);
+        for(int i = 0; i < 32; i++) {
             loclass_opt_successor(k, s, 0);
         }
     }
 }
 
-static void loclass_opt_output(const uint8_t* k, LoclassState_t* s, uint8_t* buffer) {
+static inline void loclass_opt_output(const uint8_t* k, LoclassState_t* s, uint8_t* buffer) {
+#pragma GCC unroll 4
     for(uint8_t times = 0; times < 4; times++) {
         uint8_t bout = 0;
         bout |= (s->r & 0x4) >> 2;
@@ -280,19 +275,25 @@ void loclass_opt_doTagMAC_2(
     loclass_opt_output(div_key_p, &_init, mac);
 }
 
+/**
+ * The second part of the tag MAC calculation, since the CC is already calculated into the state,
+ * this function is fed only the NR, and generates both the reader and tag MACs.
+ * @param _init - precalculated cipher state
+ * @param nr - the reader challenge
+ * @param rmac - where to store the reader MAC
+ * @param tmac - where to store the tag MAC
+ * @param div_key_p - the key to use
+ */
 void loclass_opt_doBothMAC_2(
     LoclassState_t _init,
     uint8_t* nr,
     uint8_t rmac[4],
     uint8_t tmac[4],
     const uint8_t* div_key_p) {
-    loclass_opt_suc(div_key_p, &_init, nr, 4, false);
-    // Save internal state for reuse before outputting
-    LoclassState_t nr_state = _init;
-    loclass_opt_output(div_key_p, &_init, rmac);
-    // Feed the 32 0 bits for the tag mac
-    loclass_opt_suc(div_key_p, &nr_state, NULL, 0, true);
-    loclass_opt_output(div_key_p, &nr_state, tmac);
+    LoclassState_t* s = &_init;
+    loclass_opt_suc(div_key_p, s, nr, 4, false);
+    loclass_opt_output(div_key_p, s, rmac);
+    loclass_opt_output(div_key_p, s, tmac);
 }
 
 void loclass_iclass_calc_div_key(uint8_t* csn, const uint8_t* key, uint8_t* div_key, bool elite) {
