@@ -168,6 +168,7 @@ int32_t nrf24channelscanner_main(void* p) {
     Event event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
 
+    uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
