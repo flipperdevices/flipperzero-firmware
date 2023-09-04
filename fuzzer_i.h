@@ -32,6 +32,7 @@ typedef struct {
     const char* key_extension;
     const char* path_key_folder;
     const Icon* key_icon;
+    const char* file_prefix;
 } FuzzerConsts;
 
 typedef struct {

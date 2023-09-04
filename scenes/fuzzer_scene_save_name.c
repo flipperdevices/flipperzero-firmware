@@ -1,6 +1,6 @@
 #include "../fuzzer_i.h"
 
-#include <toolbox/random_name.h>
+#include <toolbox/name_generator.h>
 #include <toolbox/path.h>
 
 static void fuzzer_scene_save_name_text_input_callback(void* context) {
@@ -12,7 +12,7 @@ void fuzzer_scene_save_name_on_enter(void* context) {
     PacsFuzzerApp* app = context;
     TextInput* text_input = app->text_input;
 
-    set_random_name(app->key_name, KEY_NAME_SIZE);
+    name_generator_make_auto(app->key_name, KEY_NAME_SIZE, app->fuzzer_const->file_prefix);
 
     text_input_set_header_text(text_input, "Name the key");
     text_input_set_result_callback(
@@ -21,7 +21,7 @@ void fuzzer_scene_save_name_on_enter(void* context) {
         app,
         app->key_name,
         KEY_NAME_SIZE,
-        false);
+        true);
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
         app->fuzzer_const->path_key_folder, app->fuzzer_const->key_extension, app->key_name);
