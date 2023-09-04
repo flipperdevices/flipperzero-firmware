@@ -244,7 +244,7 @@ class AppBuildset:
     ):
         self.appmgr = appmgr
         self.appnames = set(appnames)
-        self.extapps = []
+        self.incompatible_extapps, self.extapps = [], []
         self._extra_ext_appnames = extra_ext_appnames
         self._orig_appnames = appnames
         self.hw_target = hw_target
@@ -301,14 +301,12 @@ class AppBuildset:
         ]
         extapps.extend(map(self.appmgr.get, self._extra_ext_appnames))
 
-        incompatible = []
-        self.extapps = []
         for app in extapps:
-            if not app.supports_hardware_target(self.hw_target):
-                incompatible.append(app)
-                continue
-            self.extapps.append(app)
-        self.incompatible_extapps = incompatible
+            (
+                self.extapps
+                if app.supports_hardware_target(self.hw_target)
+                else self.incompatible_extapps
+            ).append(app)
 
     def get_ext_apps(self):
         return self.extapps
