@@ -12,6 +12,7 @@
 #endif
 #define TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTY "QWERTY"
 #define TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_AZERTY "AZERTY"
+#define TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTZ "QWERTZ"
 #define TOTP_CLI_COMMAND_AUTOMATION_ARG_KB_LAYOUT_PREFIX "-k"
 #define TOTP_CLI_COMMAND_AUTOMATION_ARG_KB_LAYOUT "layout"
 
@@ -44,6 +45,7 @@ void totp_cli_command_automation_docopt_options() {
         DOCOPT_ARGUMENT(
             TOTP_CLI_COMMAND_AUTOMATION_ARG_KB_LAYOUT)) "    Automation keyboard layout. Must be one of: " TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTY
                                                         ", " TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_AZERTY
+                                                        ", " TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTZ
                                                         "\r\n");
 }
 #endif
@@ -83,6 +85,9 @@ static void print_kb_layout(AutomationKeyboardLayout layout, const char* color) 
     case AutomationKeyboardLayoutAZERTY:
         layoutToPrint = TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_AZERTY;
         break;
+    case AutomationKeyboardLayoutQWERTZ:
+        layoutToPrint = TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTZ;
+        break;
     default:
         furi_crash("Unknown automation keyboard layout");
         break;
@@ -98,6 +103,8 @@ static bool
         *out = AutomationKeyboardLayoutQWERTY;
     } else if(furi_string_cmpi_str(str, TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_AZERTY) == 0) {
         *out = AutomationKeyboardLayoutAZERTY;
+    } else if(furi_string_cmpi_str(str, TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTZ) == 0) {
+        *out = AutomationKeyboardLayoutQWERTZ;
     } else {
         result = false;
     }

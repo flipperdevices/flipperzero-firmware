@@ -15,6 +15,7 @@
 #include "commands/reset/reset.h"
 #include "commands/automation/automation.h"
 #include "commands/details/details.h"
+#include "commands/version/version.h"
 
 struct TotpCliContext {
     PluginState* plugin_state;
@@ -74,6 +75,8 @@ static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DETAILS) == 0 ||
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DETAILS_ALT) == 0) {
         totp_cli_command_details_handle(plugin_state, args, cli);
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_VERSION) == 0) {
+        totp_cli_command_version_handle();
     } else {
         totp_cli_print_unknown_command(cmd);
     }
