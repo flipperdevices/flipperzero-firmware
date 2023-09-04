@@ -28,7 +28,7 @@ SlixError slix_process_iso15693_3_error(Iso15693_3Error iso15693_3_error) {
     }
 }
 
-SlixError slix_get_nxp_system_info_response_parse(SlixSystemInfo* data, const BitBuffer* buf) {
+SlixError slix_get_nxp_system_info_response_parse(SlixData* data, const BitBuffer* buf) {
     furi_assert(data);
     SlixError error = SlixErrorNone;
 
@@ -54,9 +54,17 @@ SlixError slix_get_nxp_system_info_response_parse(SlixSystemInfo* data, const Bi
         const SlixGetNxpSystemInfoResponseLayout* response =
             (const SlixGetNxpSystemInfoResponseLayout*)bit_buffer_get_data(buf);
 
-        data->protection.pointer = response->pp_pointer;
-        data->protection.condition = response->pp_condition;
-        data->lock_bits = response->lock_bits;
+        SlixProtection* protection = &data->system_info.protection;
+        protection->pointer = response->pp_pointer;
+        protection->condition = response->pp_condition;
+
+        Iso15693_3LockBits* iso15693_3_lock_bits = &data->iso15693_3_data->settings.lock_bits;
+        iso15693_3_lock_bits->dsfid = response->lock_bits & SLIX_LOCK_BITS_DSFID;
+        iso15693_3_lock_bits->afi = response->lock_bits & SLIX_LOCK_BITS_AFI;
+
+        SlixLockBits* slix_lock_bits = &data->system_info.lock_bits;
+        slix_lock_bits->eas = response->lock_bits & SLIX_LOCK_BITS_EAS;
+        slix_lock_bits->ppl = response->lock_bits & SLIX_LOCK_BITS_PPL;
 
     } while(false);
 

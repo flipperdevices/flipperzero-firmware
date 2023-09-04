@@ -15,11 +15,6 @@ extern "C" {
 #define SLIX_PP_CONDITION_RH (1U << 4)
 #define SLIX_PP_CONDITION_WH (1U << 5)
 
-#define SLIX_LOCK_BITS_AFI (1U << 0)
-#define SLIX_LOCK_BITS_EAS (1U << 1)
-#define SLIX_LOCK_BITS_DSFID (1U << 2)
-#define SLIX_LOCK_BITS_PPL (1U << 3)
-
 #define SLIX_FEATURE_FLAG_UM_PP (1UL << 0)
 #define SLIX_FEATURE_FLAG_COUNTER (1UL << 1)
 #define SLIX_FEATURE_FLAG_EAS_ID (1UL << 2)
@@ -83,8 +78,13 @@ typedef struct {
 } SlixProtection;
 
 typedef struct {
+    bool eas;
+    bool ppl;
+} SlixLockBits;
+
+typedef struct {
     SlixProtection protection;
-    uint8_t lock_bits;
+    SlixLockBits lock_bits;
 } SlixSystemInfo;
 
 typedef struct {

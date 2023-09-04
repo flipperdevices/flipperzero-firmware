@@ -126,11 +126,26 @@ static SlixError slix_listener_get_nxp_system_info_handler(
     UNUSED(flags);
 
     const SlixData* slix_data = instance->data;
+    const Iso15693_3Data* iso15693_data = instance->data->iso15693_3_data;
 
     const SlixProtection* protection = &slix_data->system_info.protection;
     bit_buffer_append_byte(instance->tx_buffer, protection->pointer);
     bit_buffer_append_byte(instance->tx_buffer, protection->condition);
-    bit_buffer_append_byte(instance->tx_buffer, slix_data->system_info.lock_bits);
+
+    uint8_t lock_bits = 0;
+    if(iso15693_data->settings.lock_bits.dsfid) {
+        lock_bits |= SLIX_LOCK_BITS_DSFID;
+    }
+    if(iso15693_data->settings.lock_bits.afi) {
+        lock_bits |= SLIX_LOCK_BITS_AFI;
+    }
+    if(slix_data->system_info.lock_bits.eas) {
+        lock_bits |= SLIX_LOCK_BITS_EAS;
+    }
+    if(slix_data->system_info.lock_bits.ppl) {
+        lock_bits |= SLIX_LOCK_BITS_PPL;
+    }
+    bit_buffer_append_byte(instance->tx_buffer, lock_bits);
 
     const uint32_t feature_flags = SLIX2_FEATURE_FLAGS;
     bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&feature_flags, sizeof(uint32_t));

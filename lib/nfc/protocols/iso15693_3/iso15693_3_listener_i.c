@@ -413,7 +413,7 @@ static Iso15693_3Error iso15693_3_listener_write_afi_handler(
         if(data_size <= sizeof(Iso15693_3WriteAfiRequestLayout)) {
             error = Iso15693_3ErrorFormat;
             break;
-        } else if(instance->data->system_info.flags & ISO15693_3_SYSINFO_LOCK_AFI) {
+        } else if(instance->data->settings.lock_bits.afi) {
             error = Iso15693_3ErrorInternal;
             break;
         }
@@ -440,7 +440,9 @@ static Iso15693_3Error iso15693_3_listener_lock_afi_handler(
     do {
         instance->session_state.wait_for_eof = flags & ISO15693_3_REQ_FLAG_T4_OPTION;
 
-        if(instance->data->system_info.flags & ISO15693_3_SYSINFO_LOCK_AFI) {
+        Iso15693_3LockBits* lock_bits = &instance->data->settings.lock_bits;
+
+        if(lock_bits->afi) {
             error = Iso15693_3ErrorInternal;
             break;
         }
@@ -448,7 +450,7 @@ static Iso15693_3Error iso15693_3_listener_lock_afi_handler(
         error = iso15693_3_listener_extension_handler(instance, ISO15693_3_CMD_LOCK_AFI);
         if(error != Iso15693_3ErrorNone) break;
 
-        instance->data->system_info.flags |= ISO15693_3_SYSINFO_LOCK_AFI;
+        lock_bits->afi = true;
     } while(false);
 
     return error;
@@ -474,10 +476,13 @@ static Iso15693_3Error iso15693_3_listener_write_dsfid_handler(
         if(data_size <= sizeof(Iso15693_3WriteDsfidRequestLayout)) {
             error = Iso15693_3ErrorFormat;
             break;
-        } else if(instance->data->system_info.flags & ISO15693_3_SYSINFO_LOCK_DSFID) {
+        } else if(instance->data->settings.lock_bits.dsfid) {
             error = Iso15693_3ErrorInternal;
             break;
         }
+
+        error = iso15693_3_listener_extension_handler(instance, ISO15693_3_CMD_WRITE_DSFID);
+        if(error != Iso15693_3ErrorNone) break;
 
         instance->data->system_info.dsfid = request->dsfid;
     } while(false);
@@ -498,12 +503,17 @@ static Iso15693_3Error iso15693_3_listener_lock_dsfid_handler(
     do {
         instance->session_state.wait_for_eof = flags & ISO15693_3_REQ_FLAG_T4_OPTION;
 
-        if(instance->data->system_info.flags & ISO15693_3_SYSINFO_LOCK_DSFID) {
+        Iso15693_3LockBits* lock_bits = &instance->data->settings.lock_bits;
+
+        if(lock_bits->dsfid) {
             error = Iso15693_3ErrorInternal;
             break;
         }
 
-        instance->data->system_info.flags |= ISO15693_3_SYSINFO_LOCK_DSFID;
+        error = iso15693_3_listener_extension_handler(instance, ISO15693_3_CMD_LOCK_DSFID);
+        if(error != Iso15693_3ErrorNone) break;
+
+        lock_bits->dsfid = true;
     } while(false);
 
     return error;

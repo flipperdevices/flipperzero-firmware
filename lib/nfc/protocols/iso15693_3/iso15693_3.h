@@ -77,9 +77,6 @@ extern "C" {
 #define ISO15693_3_SYSINFO_FLAG_MEMORY (1U << 2)
 #define ISO15693_3_SYSINFO_FLAG_IC_REF (1U << 3)
 
-#define ISO15693_3_SYSINFO_LOCK_DSFID (1U << 0)
-#define ISO15693_3_SYSINFO_LOCK_AFI (1U << 1)
-
 typedef enum {
     Iso15693_3ErrorNone,
     Iso15693_3ErrorNotPresent,
@@ -109,7 +106,12 @@ typedef struct {
 } Iso15693_3SystemInfo;
 
 typedef struct {
-    uint8_t lock_bits;
+    bool dsfid;
+    bool afi;
+} Iso15693_3LockBits;
+
+typedef struct {
+    Iso15693_3LockBits lock_bits;
 } Iso15693_3Settings;
 
 typedef struct {

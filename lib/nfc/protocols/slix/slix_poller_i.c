@@ -44,8 +44,7 @@ SlixError slix_poller_async_get_nxp_system_info(SlixPoller* instance, SlixSystem
         error = slix_poller_send_frame(
             instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
         if(error != SlixErrorNone) break;
-        error = slix_get_nxp_system_info_response_parse(
-            &instance->data->system_info, instance->rx_buffer);
+        error = slix_get_nxp_system_info_response_parse(instance->data, instance->rx_buffer);
     } while(false);
 
     return error;

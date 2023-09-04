@@ -23,7 +23,8 @@
 #define SLIX_PRIVACY_MODE_KEY "Privacy Mode"
 #define SLIX_PROTECTION_POINTER_KEY "Protection Pointer"
 #define SLIX_PROTECTION_CONDITION_KEY "Protection Condition"
-#define SLIX_LOCK_BITS_KEY "SLIX Lock Bits"
+#define SLIX_LOCK_EAS_KEY "Lock EAS"
+#define SLIX_LOCK_PPL_KEY "Lock PPL"
 
 typedef struct {
     uint8_t iso15693_3[2];
@@ -70,22 +71,29 @@ static const SlixTypeFeatures slix_type_features[] = {
 
 typedef struct {
     const char* key;
-    uint32_t feature_flag;
-    uint32_t default_value;
+    SlixTypeFeatures feature_flag;
+    SlixPassword default_value;
 } SlixPasswordConfig;
 
-static const SlixPasswordConfig slix_password_configs[SlixPasswordTypeCount] = {
-    {SLIX_PASSWORD_READ_KEY, SLIX_TYPE_FEATURE_READ, 0x00000000U},
-    {SLIX_PASSWORD_WRITE_KEY, SLIX_TYPE_FEATURE_WRITE, 0x00000000U},
-    {SLIX_PASSWORD_PRIVACY_KEY, SLIX_TYPE_FEATURE_PRIVACY, 0xFFFFFFFFU},
-    {SLIX_PASSWORD_DESTROY_KEY, SLIX_TYPE_FEATURE_DESTROY, 0xFFFFFFFFU},
-    {SLIX_PASSWORD_EAS_KEY, SLIX_TYPE_FEATURE_EAS, 0x00000000U},
+static const SlixPasswordConfig slix_password_configs[] = {
+    [SlixPasswordTypeRead] = {SLIX_PASSWORD_READ_KEY, SLIX_TYPE_FEATURE_READ, 0x00000000U},
+    [SlixPasswordTypeWrite] = {SLIX_PASSWORD_WRITE_KEY, SLIX_TYPE_FEATURE_WRITE, 0x00000000U},
+    [SlixPasswordTypePrivacy] = {SLIX_PASSWORD_PRIVACY_KEY, SLIX_TYPE_FEATURE_PRIVACY, 0xFFFFFFFFU},
+    [SlixPasswordTypeDestroy] = {SLIX_PASSWORD_DESTROY_KEY, SLIX_TYPE_FEATURE_DESTROY, 0xFFFFFFFFU},
+    [SlixPasswordTypeEasAfi] = {SLIX_PASSWORD_EAS_KEY, SLIX_TYPE_FEATURE_EAS, 0x00000000U},
 };
+
+static void slix_password_set_defaults(SlixPassword* passwords) {
+    for(uint32_t i = 0; i < COUNT_OF(slix_password_configs); ++i) {
+        passwords[i] = slix_password_configs[i].default_value;
+    }
+}
 
 SlixData* slix_alloc() {
     SlixData* data = malloc(sizeof(SlixData));
 
     data->iso15693_3_data = iso15693_3_alloc();
+    slix_password_set_defaults(data->passwords);
 
     return data;
 }
@@ -102,9 +110,9 @@ void slix_reset(SlixData* data) {
     furi_assert(data);
 
     iso15693_3_reset(data->iso15693_3_data);
+    slix_password_set_defaults(data->passwords);
 
     memset(&data->system_info, 0, sizeof(SlixSystemInfo));
-    memset(data->passwords, 0, sizeof(SlixPassword) * SlixPasswordTypeCount);
     memset(data->signature, 0, sizeof(SlixSignature));
 
     data->privacy = false;
@@ -133,7 +141,7 @@ bool slix_verify(SlixData* data, const FuriString* device_type) {
 static bool slix_load_passwords(SlixPassword* passwords, SlixType slix_type, FlipperFormat* ff) {
     bool ret = true;
 
-    for(uint32_t i = 0; i < SlixPasswordTypeCount; ++i) {
+    for(uint32_t i = 0; i < COUNT_OF(slix_password_configs); ++i) {
         const SlixPasswordConfig* password_config = &slix_password_configs[i];
 
         if(!slix_type_has_features(slix_type, password_config->feature_flag)) continue;
@@ -192,10 +200,12 @@ bool slix_load(SlixData* data, FlipperFormat* ff, uint32_t version) {
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_LOCK_BITS)) {
-            if(flipper_format_key_exist(ff, SLIX_LOCK_BITS_KEY)) {
-                if(!flipper_format_read_hex(
-                       ff, SLIX_LOCK_BITS_KEY, &data->system_info.lock_bits, 1))
-                    break;
+            const bool has_lock_bits = flipper_format_key_exist(ff, SLIX_LOCK_EAS_KEY) &&
+                                       flipper_format_key_exist(ff, SLIX_LOCK_PPL_KEY);
+            if(has_lock_bits) {
+                SlixLockBits* lock_bits = &data->system_info.lock_bits;
+                if(!flipper_format_read_bool(ff, SLIX_LOCK_EAS_KEY, &lock_bits->eas, 1)) break;
+                if(!flipper_format_read_bool(ff, SLIX_LOCK_PPL_KEY, &lock_bits->ppl, 1)) break;
             }
         }
 
@@ -209,7 +219,7 @@ static bool
     slix_save_passwords(const SlixPassword* passwords, SlixType slix_type, FlipperFormat* ff) {
     bool ret = true;
 
-    for(uint32_t i = 0; i < SlixPasswordTypeCount; ++i) {
+    for(uint32_t i = 0; i < COUNT_OF(slix_password_configs); ++i) {
         const SlixPasswordConfig* password_config = &slix_password_configs[i];
 
         if(!slix_type_has_features(slix_type, password_config->feature_flag)) continue;
@@ -268,11 +278,10 @@ bool slix_save(const SlixData* data, FlipperFormat* ff) {
         }
 
         if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_LOCK_BITS)) {
-            if(!flipper_format_write_comment_cstr(
-                   ff, "SLIX Lock Bits: AFI = 0x01, EAS = 0x02, DSFID = 0x04, PPL = 0x08"))
-                break;
-            if(!flipper_format_write_hex(ff, SLIX_LOCK_BITS_KEY, &data->system_info.lock_bits, 1))
-                break;
+            const SlixLockBits* lock_bits = &data->system_info.lock_bits;
+            if(!flipper_format_write_comment_cstr(ff, "SLIX Lock Bits")) break;
+            if(!flipper_format_write_bool(ff, SLIX_LOCK_EAS_KEY, &lock_bits->eas, 1)) break;
+            if(!flipper_format_write_bool(ff, SLIX_LOCK_PPL_KEY, &lock_bits->ppl, 1)) break;
         }
 
         saved = true;

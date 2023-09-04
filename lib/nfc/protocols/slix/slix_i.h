@@ -10,6 +10,11 @@ extern "C" {
 
 #define SLIX_NXP_MANUFACTURER_CODE (0x04U)
 
+#define SLIX_LOCK_BITS_AFI (1U << 0)
+#define SLIX_LOCK_BITS_EAS (1U << 1)
+#define SLIX_LOCK_BITS_DSFID (1U << 2)
+#define SLIX_LOCK_BITS_PPL (1U << 3)
+
 #define SLIX_CMD_CUSTOM_START (0xA2U)
 #define SLIX_CMD_SET_EAS (0xA2U)
 #define SLIX_CMD_RESET_EAS (0xA3U)
@@ -55,7 +60,7 @@ bool slix_error_response_parse(SlixError* error, const BitBuffer* buf);
 
 SlixError slix_process_iso15693_3_error(Iso15693_3Error iso15693_3_error);
 
-SlixError slix_get_nxp_system_info_response_parse(SlixSystemInfo* data, const BitBuffer* buf);
+SlixError slix_get_nxp_system_info_response_parse(SlixData* data, const BitBuffer* buf);
 
 SlixError slix_read_signature_response_parse(SlixSignature data, const BitBuffer* buf);
 
