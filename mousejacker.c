@@ -319,6 +319,7 @@ int32_t mousejacker_app(void* p) {
     }
     stream_free(plugin_state->file_stream);
 
+    uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
