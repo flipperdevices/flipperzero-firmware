@@ -15,7 +15,7 @@
 #include <gui/modules/text_input.h>
 #include <storage/storage.h>
 #include <toolbox/path.h>
-#include <toolbox/random_name.h>
+#include <toolbox/name_generator.h>
 #include "scenes/spi_mem_scene.h"
 #include "lib/spi/spi_mem_worker.h"
 #include "spi_mem_manager_icons.h"
