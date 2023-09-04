@@ -425,7 +425,7 @@ static FS_Error storage_process_sd_unmount(Storage* app) {
             break;
         }
 
-        if(storage_files_count(storage)) {
+        if(storage_open_files_count(storage)) {
             ret = FSE_DENIED;
             break;
         }
