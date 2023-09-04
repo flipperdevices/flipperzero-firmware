@@ -327,6 +327,7 @@ int32_t nrfsniff_app(void* p) {
         return 255;
     }
 
+    uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
