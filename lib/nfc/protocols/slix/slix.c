@@ -105,7 +105,7 @@ void slix_reset(SlixData* data) {
 
     memset(&data->system_info, 0, sizeof(SlixSystemInfo));
     memset(data->passwords, 0, sizeof(SlixPassword) * SlixPasswordTypeCount);
-    memset(&data->signature, 0, sizeof(SlixSignature));
+    memset(data->signature, 0, sizeof(SlixSignature));
 
     data->privacy = false;
 }
