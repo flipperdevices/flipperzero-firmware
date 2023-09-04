@@ -60,17 +60,8 @@ class FlipperExtAppBuildArtifacts:
     sdk_tree: NodeList = field(default_factory=NodeList)
 
 
-print(appenv["APPBUILD"])
 for app in appenv["APPBUILD"].get_ext_apps():
     appenv.BuildAppElf(app)
-
-if incompatible := appenv["APPBUILD"].get_incompatible_ext_apps():
-    warn(
-        WarningOnByDefault,
-        f"Skipping build of {len(incompatible)} incompatible app(s): "
-        + ", ".join(f"'{app.name}' (id '{app.appid}')" for app in incompatible),
-    )
-
 
 extapps = FlipperExtAppBuildArtifacts()
 extapps.application_map = appenv["EXT_APPS"]

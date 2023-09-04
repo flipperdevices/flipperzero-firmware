@@ -58,6 +58,11 @@ def DumpApplicationConfig(target, source, env):
                 fg.green(f"{apptype.value}:\n\t"),
                 ", ".join(app.appid for app in app_sublist),
             )
+    if incompatible_ext_apps := env["APPBUILD"].get_incompatible_ext_apps():
+        print(
+            fg.blue("Incompatible apps (skipped):\n\t"),
+            ", ".join(app.appid for app in incompatible_ext_apps),
+        )
 
 
 def build_apps_c(target, source, env):
