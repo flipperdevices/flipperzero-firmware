@@ -36,7 +36,9 @@ def LoadAppManifest(env, entry):
 def PrepareApplicationsBuild(env):
     try:
         appbuild = env["APPBUILD"] = env["APPMGR"].filter_apps(
-            env["APPS"], env.subst("f${TARGET_HW}")
+            applist=env["APPS"],
+            ext_applist=env["EXTRA_EXT_APPS"],
+            hw_target=env.subst("f${TARGET_HW}"),
         )
     except Exception as e:
         raise StopError(e)
