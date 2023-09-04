@@ -1,7 +1,7 @@
 #include "color_guess_led.h"
 #include "../color_guess.h"
 
-void led_set_rgb(void* context, int red, int green, int blue) {
+void color_guess_led_set_rgb(void* context, int red, int green, int blue) {
     ColorGuess* app = context;
     if(app->led != 1) {
         return;
@@ -28,7 +28,7 @@ void led_set_rgb(void* context, int red, int green, int blue) {
         0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
 }
 
-void led_reset(void* context) {
+void color_guess_led_reset(void* context) {
     ColorGuess* app = context;
     notification_message(app->notification, &sequence_reset_red);
     notification_message(app->notification, &sequence_reset_green);

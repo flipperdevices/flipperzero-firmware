@@ -15,6 +15,9 @@
 #include "views/color_guess_color_set.h"
 #include "views/color_guess_play.h"
 #include "views/color_guess_startscreen.h"
+#include "helpers/color_guess_storage.h"
+
+#define TAG "Color_Guess"
 
 typedef struct {
     Gui* gui;
@@ -29,9 +32,10 @@ typedef struct {
     ColorGuessStartscreen* color_guess_startscreen;
     Submenu* color_guess_settings;
     bool error;
-    int haptic;
-    //int speaker;
-    int led;
+    uint32_t haptic;
+    //uint32_t speaker;
+    uint32_t led;
+    uint32_t save_settings;
 } ColorGuess;
 
 typedef enum {

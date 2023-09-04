@@ -1,7 +1,7 @@
 #include "color_guess_haptic.h"
 #include "../color_guess.h"
 
-void play_happy_bump(void* context) {
+void color_guess_play_happy_bump(void* context) {
     ColorGuess* app = context;
     if(app->haptic != 1) {
         return;
@@ -11,7 +11,7 @@ void play_happy_bump(void* context) {
     notification_message(app->notification, &sequence_reset_vibro);
 }
 
-void play_bad_bump(void* context) {
+void color_guess_play_bad_bump(void* context) {
     ColorGuess* app = context;
     if(app->haptic != 1) {
         return;
@@ -21,7 +21,7 @@ void play_bad_bump(void* context) {
     notification_message(app->notification, &sequence_reset_vibro);
 }
 
-void play_long_bump(void* context) {
+void color_guess_play_long_bump(void* context) {
     ColorGuess* app = context;
     if(app->haptic != 1) {
         return;

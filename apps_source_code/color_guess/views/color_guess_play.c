@@ -43,11 +43,11 @@ void color_guess_play_set_callback(
 void play_haptic(void* context, ColorGuessPlayModel* model) {
     ColorGuess* app = context;
     if(model->success == 1) {
-        play_long_bump(app);
+        color_guess_play_long_bump(app);
     } else if(model->closeness > model->prev_closeness) {
-        play_happy_bump(app);
+        color_guess_play_happy_bump(app);
     } else if(model->closeness < model->prev_closeness) {
-        play_bad_bump(app);
+        color_guess_play_bad_bump(app);
     }
 }
 
@@ -70,7 +70,7 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
         model->color = colorsHard[rand() % ARR_SIZE(colorsHard)];
     }
 
-    led_set_rgb(
+    color_guess_led_set_rgb(
         app, ((model->color >> 16) & 0xFF), ((model->color >> 8) & 0xFF), ((model->color) & 0xFF));
 }
 
