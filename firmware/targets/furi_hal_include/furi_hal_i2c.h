@@ -18,26 +18,27 @@ extern "C" {
 /** Transaction beginning signal */
 typedef enum {
     /*! Begin the transaction by sending a START condition followed by the address */
-    I2CBeginStart,
+    FuriHalI2cBeginStart,
     /*! Begin the transaction by sending a RESTART condition followed by the address
-     * @note Must follow a transaction ended with I2CEndAwaitRestart */
-    I2CBeginRestart,
+     * @note Must follow a transaction ended with FuriHalI2cEndAwaitRestart */
+    FuriHalI2cBeginRestart,
     /*! Continue the previous transaction with new data
-     * @note Must follow a transaction ended with I2CEndPause and be of the same type (RX/TX) */
-    I2CBeginResume,
-} I2CBegin;
+     * @note Must follow a transaction ended with FuriHalI2cEndPause and be of
+     * the same type (RX/TX) */
+    FuriHalI2cBeginResume,
+} FuriHalI2cBegin;
 
 /** Transaction end signal */
 typedef enum {
     /*! End the transaction by sending a STOP condition */
-    I2CEndStop,
+    FuriHalI2cEndStop,
     /*! End the transaction by clock stretching
-     *  @note Must be followed by a transaction using I2CBeginRestart */
-    I2CEndAwaitRestart,
+     *  @note Must be followed by a transaction using FuriHalI2cBeginRestart */
+    FuriHalI2cEndAwaitRestart,
     /*! Pauses the transaction by clock stretching
-     *  @note Must be followed by a transaction using I2CBeginResume */
-    I2CEndPause,
-} I2CEnd;
+     *  @note Must be followed by a transaction using FuriHalI2cBeginResume */
+    FuriHalI2cEndPause,
+} FuriHalI2cEnd;
 
 /** Early Init I2C */
 void furi_hal_i2c_init_early();
@@ -96,8 +97,8 @@ bool furi_hal_i2c_tx_ext(
     bool ten_bit,
     uint8_t const* data,
     size_t size,
-    I2CBegin begin,
-    I2CEnd end,
+    FuriHalI2cBegin begin,
+    FuriHalI2cEnd end,
     FuriHalCortexTimer timer);
 
 /** Perform I2C rx transfer
@@ -136,8 +137,8 @@ bool furi_hal_i2c_rx_ext(
     bool ten_bit,
     uint8_t* data,
     size_t size,
-    I2CBegin begin,
-    I2CEnd end,
+    FuriHalI2cBegin begin,
+    FuriHalI2cEnd end,
     FuriHalCortexTimer timer);
 
 /** Perform I2C tx and rx transfers

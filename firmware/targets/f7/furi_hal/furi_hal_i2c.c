@@ -51,20 +51,22 @@ void furi_hal_i2c_release(FuriHalI2cBusHandle* handle) {
     furi_hal_power_insomnia_exit();
 }
 
-static bool wait_for_idle(I2C_TypeDef* i2c, I2CBegin begin, FuriHalCortexTimer timer) {
+static bool
+    furi_hal_i2c_wait_for_idle(I2C_TypeDef* i2c, FuriHalI2cBegin begin, FuriHalCortexTimer timer) {
     do {
         if(furi_hal_cortex_timer_is_expired(timer)) {
             return false;
         }
-    } while(begin == I2CBeginStart && LL_I2C_IsActiveFlag_BUSY(i2c));
+    } while(begin == FuriHalI2cBeginStart && LL_I2C_IsActiveFlag_BUSY(i2c));
     // Only check if the bus is busy if starting a new transaction, if not we already control the bus
 
     return true;
 }
 
-static bool wait_for_end(I2C_TypeDef* i2c, I2CEnd end, FuriHalCortexTimer timer) {
+static bool
+    furi_hal_i2c_wait_for_end(I2C_TypeDef* i2c, FuriHalI2cEnd end, FuriHalCortexTimer timer) {
     // If ending the transaction with a stop condition, wait for it to be detected, otherwise wait for a transfer complete flag
-    bool wait_for_stop = end == I2CEndStop;
+    bool wait_for_stop = end == FuriHalI2cEndStop;
     uint32_t end_mask = (wait_for_stop) ? I2C_ISR_STOPF : (I2C_ISR_TC | I2C_ISR_TCR);
 
     while((i2c->ISR & end_mask) == 0) {
@@ -76,9 +78,10 @@ static bool wait_for_end(I2C_TypeDef* i2c, I2CEnd end, FuriHalCortexTimer timer)
     return true;
 }
 
-static uint32_t get_start_signal(I2CBegin begin, bool ten_bit_address, bool read) {
+static uint32_t
+    furi_hal_i2c_get_start_signal(FuriHalI2cBegin begin, bool ten_bit_address, bool read) {
     switch(begin) {
-    case I2CBeginRestart:
+    case FuriHalI2cBeginRestart:
         if(read) {
             return ten_bit_address ? LL_I2C_GENERATE_RESTART_10BIT_READ :
                                      LL_I2C_GENERATE_RESTART_7BIT_READ;
@@ -86,21 +89,21 @@ static uint32_t get_start_signal(I2CBegin begin, bool ten_bit_address, bool read
             return ten_bit_address ? LL_I2C_GENERATE_RESTART_10BIT_WRITE :
                                      LL_I2C_GENERATE_RESTART_7BIT_WRITE;
         }
-    case I2CBeginResume:
+    case FuriHalI2cBeginResume:
         return LL_I2C_GENERATE_NOSTARTSTOP;
-    case I2CBeginStart:
+    case FuriHalI2cBeginStart:
     default:
         return read ? LL_I2C_GENERATE_START_READ : LL_I2C_GENERATE_START_WRITE;
     }
 }
 
-static uint32_t get_end_signal(I2CEnd end) {
+static uint32_t furi_hal_i2c_get_end_signal(FuriHalI2cEnd end) {
     switch(end) {
-    case I2CEndAwaitRestart:
+    case FuriHalI2cEndAwaitRestart:
         return LL_I2C_MODE_SOFTEND;
-    case I2CEndPause:
+    case FuriHalI2cEndPause:
         return LL_I2C_MODE_RELOAD;
-    case I2CEndStop:
+    case FuriHalI2cEndStop:
     default:
         return LL_I2C_MODE_AUTOEND;
     }
@@ -111,11 +114,11 @@ static bool is_transfer_aborted(I2C_TypeDef* i2c) {
            !(LL_I2C_IsActiveFlag_TC(i2c) || LL_I2C_IsActiveFlag_TCR(i2c));
 }
 
-static bool transfer(
+static bool furi_hal_i2c_transfer(
     I2C_TypeDef* i2c,
     uint8_t* data,
     uint32_t size,
-    I2CEnd end,
+    FuriHalI2cEnd end,
     bool read,
     FuriHalCortexTimer timer) {
     bool ret = true;
@@ -142,7 +145,7 @@ static bool transfer(
     }
 
     if(ret) {
-        ret = wait_for_end(i2c, end, timer);
+        ret = furi_hal_i2c_wait_for_end(i2c, end, timer);
     }
 
     LL_I2C_ClearFlag_STOP(i2c);
@@ -150,37 +153,37 @@ static bool transfer(
     return ret;
 }
 
-static bool transaction(
+static bool furi_hal_i2c_transaction(
     I2C_TypeDef* i2c,
     uint16_t address,
     bool ten_bit,
     uint8_t* data,
     size_t size,
-    I2CBegin begin,
-    I2CEnd end,
+    FuriHalI2cBegin begin,
+    FuriHalI2cEnd end,
     bool read,
     FuriHalCortexTimer timer) {
     uint32_t addr_size = ten_bit ? LL_I2C_ADDRSLAVE_10BIT : LL_I2C_ADDRSLAVE_7BIT;
-    uint32_t start_signal = get_start_signal(begin, ten_bit, read);
+    uint32_t start_signal = furi_hal_i2c_get_start_signal(begin, ten_bit, read);
 
-    if(!wait_for_idle(i2c, begin, timer)) {
+    if(!furi_hal_i2c_wait_for_idle(i2c, begin, timer)) {
         return false;
     }
 
     do {
         uint8_t transfer_size = size;
-        I2CEnd transfer_end = end;
+        FuriHalI2cEnd transfer_end = end;
 
         if(size > 255) {
             transfer_size = 255;
-            transfer_end = I2CEndPause;
+            transfer_end = FuriHalI2cEndPause;
         }
 
-        uint32_t end_signal = get_end_signal(transfer_end);
+        uint32_t end_signal = furi_hal_i2c_get_end_signal(transfer_end);
 
         LL_I2C_HandleTransfer(i2c, address, addr_size, transfer_size, end_signal, start_signal);
 
-        if(!transfer(i2c, data, transfer_size, transfer_end, read, timer)) {
+        if(!furi_hal_i2c_transfer(i2c, data, transfer_size, transfer_end, read, timer)) {
             return false;
         }
 
@@ -198,12 +201,13 @@ bool furi_hal_i2c_rx_ext(
     bool ten_bit,
     uint8_t* data,
     size_t size,
-    I2CBegin begin,
-    I2CEnd end,
+    FuriHalI2cBegin begin,
+    FuriHalI2cEnd end,
     FuriHalCortexTimer timer) {
     furi_check(handle->bus->current_handle == handle);
 
-    return transaction(handle->bus->i2c, address, ten_bit, data, size, begin, end, true, timer);
+    return furi_hal_i2c_transaction(
+        handle->bus->i2c, address, ten_bit, data, size, begin, end, true, timer);
 }
 
 bool furi_hal_i2c_tx_ext(
@@ -212,12 +216,12 @@ bool furi_hal_i2c_tx_ext(
     bool ten_bit,
     uint8_t const* data,
     size_t size,
-    I2CBegin begin,
-    I2CEnd end,
+    FuriHalI2cBegin begin,
+    FuriHalI2cEnd end,
     FuriHalCortexTimer timer) {
     furi_check(handle->bus->current_handle == handle);
 
-    return transaction(
+    return furi_hal_i2c_transaction(
         handle->bus->i2c, address, ten_bit, (uint8_t*)data, size, begin, end, false, timer);
 }
 
@@ -232,7 +236,7 @@ bool furi_hal_i2c_tx(
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
 
     return furi_hal_i2c_tx_ext(
-        handle, address, false, data, size, I2CBeginStart, I2CEndStop, timer);
+        handle, address, false, data, size, FuriHalI2cBeginStart, FuriHalI2cEndStop, timer);
 }
 
 bool furi_hal_i2c_rx(
@@ -246,7 +250,7 @@ bool furi_hal_i2c_rx(
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
 
     return furi_hal_i2c_rx_ext(
-        handle, address, false, data, size, I2CBeginStart, I2CEndStop, timer);
+        handle, address, false, data, size, FuriHalI2cBeginStart, FuriHalI2cEndStop, timer);
 }
 
 bool furi_hal_i2c_trx(
@@ -260,9 +264,23 @@ bool furi_hal_i2c_trx(
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
 
     return furi_hal_i2c_tx_ext(
-               handle, address, false, tx_data, tx_size, I2CBeginStart, I2CEndStop, timer) &&
+               handle,
+               address,
+               false,
+               tx_data,
+               tx_size,
+               FuriHalI2cBeginStart,
+               FuriHalI2cEndStop,
+               timer) &&
            furi_hal_i2c_rx_ext(
-               handle, address, false, rx_data, rx_size, I2CBeginStart, I2CEndStop, timer);
+               handle,
+               address,
+               false,
+               rx_data,
+               rx_size,
+               FuriHalI2cBeginStart,
+               FuriHalI2cEndStop,
+               timer);
 }
 
 bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr, uint32_t timeout) {
@@ -273,7 +291,7 @@ bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr,
     bool ret = true;
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
 
-    if(!wait_for_idle(handle->bus->i2c, I2CBeginStart, timer)) {
+    if(!furi_hal_i2c_wait_for_idle(handle->bus->i2c, FuriHalI2cBeginStart, timer)) {
         return false;
     }
 
@@ -285,7 +303,7 @@ bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr,
         LL_I2C_MODE_AUTOEND,
         LL_I2C_GENERATE_START_WRITE);
 
-    if(!wait_for_end(handle->bus->i2c, I2CEndStop, timer)) {
+    if(!furi_hal_i2c_wait_for_end(handle->bus->i2c, FuriHalI2cEndStop, timer)) {
         return false;
     }
 
@@ -380,7 +398,14 @@ bool furi_hal_i2c_write_mem(
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
 
     return furi_hal_i2c_tx_ext(
-               handle, i2c_addr, false, &mem_addr, 1, I2CBeginStart, I2CEndPause, timer) &&
+               handle,
+               i2c_addr,
+               false,
+               &mem_addr,
+               1,
+               FuriHalI2cBeginStart,
+               FuriHalI2cEndPause,
+               timer) &&
            furi_hal_i2c_tx_ext(
-               handle, i2c_addr, false, data, len, I2CBeginResume, I2CEndStop, timer);
+               handle, i2c_addr, false, data, len, FuriHalI2cBeginResume, FuriHalI2cEndStop, timer);
 }
