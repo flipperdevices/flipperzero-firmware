@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+#define MF_CLASSIC_FWT_FC (60000)
+
 typedef enum {
     MfClassicAuthStateIdle,
     MfClassicAuthStatePassed,
