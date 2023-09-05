@@ -36,6 +36,7 @@ typedef enum {
     PicopassWorkerEventNoDictFound,
     PicopassWorkerEventLoclassGotMac,
     PicopassWorkerEventLoclassGotStandardKey,
+    PicopassWorkerEventLoclassFileError,
 } PicopassWorkerEvent;
 
 typedef void (*PicopassWorkerCallback)(PicopassWorkerEvent event, void* context);

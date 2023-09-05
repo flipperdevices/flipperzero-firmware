@@ -77,12 +77,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NRF24 Channel Scanner v1.3 (by htotoo)](https://github.com/htotoo/NRF24ChannelScanner)
 - Added: [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - Added: [Sokoban (By Racso)](https://github.com/Racso/fzero-apps)
-- Updated: [PicoPass (iClass) v1.3 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster & [Standard Key Changes (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/commit/48558863c7148473795aadb3856920c229e02cf7)
 - Random Name to Name Generator Fixes (By xMasterX)
 - Updated: [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) - Fixes By xMasterX
 - Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) - Fixes By xMasterX
 - Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) - Fixes By xMasterX
 - Added: [Sub-GHz Rolling Flaws (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
+- Updated: [PicoPass (iClass) v1.4 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster & [Standard Key Changes (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/commit/48558863c7148473795aadb3856920c229e02cf7) & [Optimise picopass crypto to fix timing issues with newer readers. #34](https://github.com/flipperdevices/flipperzero-good-faps/pull/34)
 
 <a name="release">
 
@@ -429,7 +429,7 @@ $ ./fbt dolphin_ext
 - [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [Pet a Dolphin (By ugeneSmile)](https://github.com/EugeneSmile/PetADolphin)
-- [PicoPass (iClass) v1.3 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
+- [PicoPass (iClass) v1.4 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pokemon Trading (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
