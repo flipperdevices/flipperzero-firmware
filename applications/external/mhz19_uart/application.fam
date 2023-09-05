@@ -1,0 +1,13 @@
+App(
+    appid="mhz19_uart",
+    name="MH-Z19 UART",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="mhz19_uart_app",
+    stack_size=2 * 1024,
+    fap_category="GPIO/Sensors",
+    fap_icon="mhz19_uart.png",
+    fap_author="Aku",
+    fap_weburl="https://github.com/skotopes/flipperzero_mhz19_uart",
+    fap_version="0.1",
+    fap_description="MH-Z19 UART",
+)
