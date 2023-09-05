@@ -68,12 +68,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Various New SubGHz Tweaks and Bonus Fixes (By xMasterX)
 - Updated: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - Fixes By RogueMaster
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - Fixes By RogueMaster
-- Updated: [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware) - Fixes By RogueMaster
-- Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) - Fixes By RogueMaster
 - Updated: [SPI Mem Manager (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) - Fixes By RogueMaster
 - Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) - Fixes By RogueMaster
 - Updated: [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio) - Fixes By RogueMaster
-- Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) - Fixes By RogueMaster
 - Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader) - Fixes By RogueMaster
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview) - Fixes By RogueMaster
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) - Fixes By RogueMaster
@@ -82,6 +79,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Sokoban (By Racso)](https://github.com/Racso/fzero-apps)
 - Updated: [PicoPass (iClass) v1.3 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster & [Standard Key Changes (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/commit/48558863c7148473795aadb3856920c229e02cf7)
 - Random Name to Name Generator Fixes (By xMasterX)
+- Updated: [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) - Fixes By xMasterX
+- Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) - Fixes By xMasterX
+- Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) - Fixes By xMasterX
 
 <a name="release">
 

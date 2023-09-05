@@ -54,7 +54,7 @@ bool subbrute_scene_load_select_on_event(void* context, SceneManagerEvent event)
 
             instance->settings->last_index = instance->device->attack;
             subbrute_settings_set_repeats(
-                instance->settings, subbrute_main_view_get_extra_repeats(instance->view_main));
+                instance->settings, subbrute_main_view_get_repeats(instance->view_main));
             uint8_t total_repeats = subbrute_settings_get_current_repeats(instance->settings);
 
             instance->device->max_value = subbrute_protocol_calc_max_value(

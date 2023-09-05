@@ -1,3 +1,5 @@
+## v1.2
+- Fixes for new auto-naming system
 ## v1.1
 - Improved pause during attack
     - Added the ability to switch UID
