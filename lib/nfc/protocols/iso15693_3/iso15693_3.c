@@ -249,7 +249,7 @@ bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
             if(!flipper_format_write_uint32(ff, ISO15693_3_BLOCK_COUNT_KEY, &block_count, 1))
                 break;
 
-            if(!flipper_format_write_comment_cstr(ff, "Size of a single memory block, valid range = 0x1...0x20"))
+            if(!flipper_format_write_comment_cstr(ff, "Size of a single memory block, valid range = 01...20 (hex)"))
                 break;
             if(!flipper_format_write_hex(
                    ff, ISO15693_3_BLOCK_SIZE_KEY, &data->system_info.block_size, 1))
