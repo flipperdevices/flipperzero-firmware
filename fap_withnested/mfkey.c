@@ -14,7 +14,6 @@
 // 3. Pass: lfsr_recovery32(ks2, nt_enc ^ cuid)
 // 4. Use key_matches_ks1 in Nested mode of recovery to validate keys (making sure it has all of the Crypto1Params)
 
-
 #include <furi.h>
 #include <furi_hal.h>
 #include "time.h"
