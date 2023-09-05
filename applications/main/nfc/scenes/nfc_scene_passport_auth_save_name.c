@@ -18,8 +18,16 @@ void nfc_scene_passport_auth_save_name_on_enter(void* context) {
     TextInput* text_input = nfc->text_input;
     bool docnr_empty = false;
     if(!strcmp(mrtd_data->auth.doc_number, "")) {
+        FuriString* prefix = furi_string_alloc();
+        nfc_device_prepare_format_string(nfc->dev, prefix);
+        furi_string_replace(prefix, "Mifare", "MF");
+        furi_string_replace(prefix, "Ultralight", "UL");
+        furi_string_replace(prefix, " Plus", "+");
+        furi_string_replace_all(prefix, " ", "_");
+        furi_string_left(prefix, 12);
         name_generator_make_auto(
-            nfc->text_store, sizeof(nfc->text_store), NFC_APP_FILENAME_PREFIX);
+            nfc->text_store, sizeof(nfc->text_store), furi_string_get_cstr(prefix));
+        furi_string_free(prefix);
         docnr_empty = true;
     } else {
         nfc_text_store_set(nfc, mrtd_data->auth.doc_number);
@@ -30,7 +38,7 @@ void nfc_scene_passport_auth_save_name_on_enter(void* context) {
         nfc_scene_passport_auth_save_name_text_input_callback,
         nfc,
         nfc->text_store,
-        NFC_DEV_NAME_MAX_LEN,
+        sizeof(nfc->text_store),
         docnr_empty);
 
     FuriString* folder_path;

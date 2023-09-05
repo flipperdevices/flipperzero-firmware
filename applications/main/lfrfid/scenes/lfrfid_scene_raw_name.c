@@ -20,7 +20,7 @@ void lfrfid_scene_raw_name_on_enter(void* context) {
         lfrfid_text_input_callback,
         app,
         app->text_store,
-        LFRFID_KEY_NAME_SIZE,
+        LFRFID_TEXT_STORE_SIZE,
         key_name_is_empty);
 
     ValidatorIsFile* validator_is_file =

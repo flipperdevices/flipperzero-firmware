@@ -45,7 +45,7 @@ const char* const name_generator_right[] = {
 };
 
 void name_generator_make_auto(char* name, size_t max_name_size, const char* prefix) {
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDetailedFilename)) {
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagRandomFilename)) {
         name_generator_make_detailed(name, max_name_size, prefix);
     } else {
         name_generator_make_random(name, max_name_size);

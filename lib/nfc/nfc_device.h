@@ -111,6 +111,8 @@ NfcDevice* nfc_device_alloc();
 
 void nfc_device_free(NfcDevice* nfc_dev);
 
+void nfc_device_prepare_format_string(NfcDevice* dev, FuriString* format_string);
+
 void nfc_device_set_name(NfcDevice* dev, const char* name);
 
 bool nfc_device_save(NfcDevice* dev, const char* dev_name);

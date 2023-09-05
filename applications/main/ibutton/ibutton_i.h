@@ -32,7 +32,7 @@
 #define IBUTTON_APP_FILENAME_PREFIX "iBtn"
 #define IBUTTON_APP_FILENAME_EXTENSION ".ibtn"
 
-#define IBUTTON_KEY_NAME_SIZE 22
+#define IBUTTON_KEY_NAME_SIZE 29
 
 typedef enum {
     iButtonWriteModeInvalid,

@@ -18,7 +18,10 @@ void ibutton_scene_save_name_on_enter(void* context) {
 
     if(is_new_file) {
         name_generator_make_auto(
-            ibutton->key_name, IBUTTON_KEY_NAME_SIZE, IBUTTON_APP_FILENAME_PREFIX);
+            ibutton->key_name,
+            IBUTTON_KEY_NAME_SIZE,
+            ibutton_protocols_get_name(
+                ibutton->protocols, ibutton_key_get_protocol_id(ibutton->key)));
     }
 
     text_input_set_header_text(text_input, "Name the key");

@@ -48,7 +48,7 @@ void nfc_device_free(NfcDevice* nfc_dev) {
     free(nfc_dev);
 }
 
-static void nfc_device_prepare_format_string(NfcDevice* dev, FuriString* format_string) {
+void nfc_device_prepare_format_string(NfcDevice* dev, FuriString* format_string) {
     if(dev->format == NfcDeviceSaveFormatUid) {
         furi_string_set(format_string, "UID");
     } else if(dev->format == NfcDeviceSaveFormatBankCard) {

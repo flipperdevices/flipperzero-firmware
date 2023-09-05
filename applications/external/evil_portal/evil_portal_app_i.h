@@ -28,9 +28,6 @@
 #define SET_AP_CMD "setap"
 #define RESET_CMD "reset"
 
-#define HTML_EXTENSION ".html"
-#define HTML_FOLDER ANY_PATH("apps_data/evil_portal/html")
-
 struct Evil_PortalApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
