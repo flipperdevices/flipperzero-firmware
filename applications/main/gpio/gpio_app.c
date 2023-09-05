@@ -21,6 +21,21 @@ static void gpio_app_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
+static void gpio_app_dialog_callback(DialogExResult result, void* context) {
+    furi_assert(context);
+    GpioApp* app = context;
+    if(result == DialogExResultLeft) {
+        scene_manager_handle_back_event(app->scene_manager);
+    } else if(result == DialogExResultRight) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewUsbUart);
+    }
+}
+
+static uint32_t gpio_app_exit_confirm_view(void* context) {
+    UNUSED(context);
+    return GpioAppViewExitConfirm;
+}
+
 GpioApp* gpio_app_alloc() {
     GpioApp* app = malloc(sizeof(GpioApp));
 
@@ -43,6 +58,16 @@ GpioApp* gpio_app_alloc() {
 
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
+    // Dialog view
+    app->dialog = dialog_ex_alloc();
+    dialog_ex_set_result_callback(app->dialog, gpio_app_dialog_callback);
+    dialog_ex_set_context(app->dialog, app);
+    dialog_ex_set_left_button_text(app->dialog, "Exit");
+    dialog_ex_set_right_button_text(app->dialog, "Stay");
+    dialog_ex_set_header(app->dialog, "Stop the USB-UART mode?", 16, 12, AlignLeft, AlignTop);
+    view_dispatcher_add_view(
+        app->view_dispatcher, GpioAppViewExitConfirm, dialog_ex_get_view(app->dialog));
+
     app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -59,6 +84,8 @@ GpioApp* gpio_app_alloc() {
     app->gpio_usb_uart = gpio_usb_uart_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, GpioAppViewUsbUart, gpio_usb_uart_get_view(app->gpio_usb_uart));
+    view_set_previous_callback(
+        gpio_usb_uart_get_view(app->gpio_usb_uart), gpio_app_exit_confirm_view);
 
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -79,10 +106,12 @@ void gpio_app_free(GpioApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewUsbUart);
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewUsbUartCfg);
     view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewUsbUartCloseRpc);
+    view_dispatcher_remove_view(app->view_dispatcher, GpioAppViewExitConfirm);
     variable_item_list_free(app->var_item_list);
     widget_free(app->widget);
     gpio_test_free(app->gpio_test);
     gpio_usb_uart_free(app->gpio_usb_uart);
+    dialog_ex_free(app->dialog);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
