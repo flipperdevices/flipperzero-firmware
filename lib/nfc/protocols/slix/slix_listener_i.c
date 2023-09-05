@@ -242,6 +242,55 @@ static SlixError slix_listener_write_password_handler(
     return error;
 }
 
+static SlixError slix_listener_protect_page_handler(
+    SlixListener* instance,
+    const uint8_t* data,
+    size_t data_size,
+    uint8_t flags) {
+    UNUSED(flags);
+    SlixError error = SlixErrorNone;
+
+    do {
+        typedef struct {
+            uint8_t pointer;
+            uint8_t condition;
+        } SlixProtectPageRequestLayout;
+
+        if(data_size != sizeof(SlixProtectPageRequestLayout)) {
+            error = SlixErrorFormat;
+            break;
+        }
+
+        SlixData* slix_data = instance->data;
+
+        if(slix_data->system_info.lock_bits.ppl) {
+            error = SlixErrorInternal;
+            break;
+        }
+
+        const SlixListenerSessionState* session_state = &instance->session_state;
+        if(!session_state->password_match[SlixPasswordTypeRead] ||
+           !session_state->password_match[SlixPasswordTypeWrite]) {
+            error = SlixErrorInternal;
+            break;
+        }
+
+        const SlixProtectPageRequestLayout* request = (const SlixProtectPageRequestLayout*)data;
+
+        if(request->pointer >= SLIX_COUNTER_BLOCK_NUM) {
+            error = SlixErrorInternal;
+            break;
+        }
+
+        SlixProtection* protection = &slix_data->system_info.protection;
+
+        protection->pointer = request->pointer;
+        protection->condition = request->condition;
+    } while(false);
+
+    return error;
+}
+
 static SlixError slix_listener_enable_privacy_handler(
     SlixListener* instance,
     const uint8_t* data,
@@ -310,7 +359,7 @@ static const SlixRequestHandler slix_request_handler_table[SLIX_CMD_CUSTOM_COUNT
     slix_listener_set_password_handler,
     slix_listener_write_password_handler,
     slix_listener_default_handler, // SLIX_CMD_64_BIT_PASSWORD_PROTECTION (0xB5U)
-    slix_listener_default_handler, // SLIX_CMD_PROTECT_PAGE (0xB6U)
+    slix_listener_protect_page_handler,
     slix_listener_default_handler, // SLIX_CMD_LOCK_PAGE_PROTECTION_CONDITION (0xB7U)
     slix_listener_default_handler, // UNUSED (0xB8U)
     slix_listener_default_handler, // SLIX_CMD_DESTROY (0xB9U)
