@@ -5,7 +5,7 @@
 #include <furi_hal_random.h>
 #include <flipper_format/flipper_format.h>
 
-#define TAG "U2F"
+#define TAG "U2f"
 
 #define U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_FACTORY 2
 #define U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_UNIQUE FURI_HAL_CRYPTO_ENCLAVE_UNIQUE_KEY_SLOT

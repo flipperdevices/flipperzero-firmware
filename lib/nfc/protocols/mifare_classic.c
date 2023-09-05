@@ -402,7 +402,7 @@ MfClassicType mf_classic_get_classic_type(FuriHalNfcADevData* data) {
             return MfClassicType1k;
         } else if((SAK == 0x38)) {
             return MfClassicType4k;
-        } else if(SAK == 0x09) {
+        } else if((SAK == 0x09 || SAK == 0x89)) {
             return MfClassicTypeMini;
         }
     } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {

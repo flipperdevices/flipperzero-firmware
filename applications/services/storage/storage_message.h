@@ -148,6 +148,7 @@ typedef enum {
     StorageCommandSDInfo,
     StorageCommandSDStatus,
     StorageCommandCommonResolvePath,
+    StorageCommandSDMount,
 } StorageCommand;
 
 typedef struct {
