@@ -1155,6 +1155,7 @@ Function,+,furi_hal_bt_serial_set_rpc_status,void,FuriHalBtSerialRpcStatus
 Function,+,furi_hal_bt_serial_start,void,
 Function,+,furi_hal_bt_serial_stop,void,
 Function,+,furi_hal_bt_serial_tx,_Bool,"uint8_t*, uint16_t"
+Function,+,furi_hal_bt_set_custom_adv_data,void,"const uint8_t*, size_t"
 Function,+,furi_hal_bt_set_key_storage_change_callback,void,"BleGlueKeyStorageChangedCallback, void*"
 Function,+,furi_hal_bt_set_profile_adv_name,void,"FuriHalBtProfile, const char[( 18 + 1 )]"
 Function,+,furi_hal_bt_set_profile_mac_addr,void,"FuriHalBtProfile, const uint8_t[( 6 )]"
@@ -1745,6 +1746,7 @@ Function,-,gammaf_r,float,"float, int*"
 Function,-,gap_get_remote_conn_rssi,uint32_t,int8_t*
 Function,-,gap_get_state,GapState,
 Function,-,gap_init,_Bool,"GapConfig*, GapEventCallback, void*"
+Function,-,gap_set_custom_adv_data,void,"size_t, const uint8_t*"
 Function,-,gap_start_advertising,void,
 Function,-,gap_stop_advertising,void,
 Function,-,gap_thread_stop,void,
@@ -2269,6 +2271,7 @@ Function,+,nfc_device_delete,_Bool,"NfcDevice*, _Bool"
 Function,+,nfc_device_free,void,NfcDevice*
 Function,+,nfc_device_load,_Bool,"NfcDevice*, const char*, _Bool"
 Function,+,nfc_device_load_key_cache,_Bool,NfcDevice*
+Function,+,nfc_device_prepare_format_string,void,"NfcDevice*, FuriString*"
 Function,+,nfc_device_restore,_Bool,"NfcDevice*, _Bool"
 Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_save_shadow,_Bool,"NfcDevice*, const char*"
