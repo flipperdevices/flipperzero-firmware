@@ -39,6 +39,12 @@ bool uhf_scene_start_on_event(void* ctx, SceneManagerEvent event) {
             scene_manager_next_scene(uhf_app->scene_manager, UHFSceneFileSelect);
             consumed = true;
         }
+        // else if(event.event == SubmenuIndexSettings) {
+        //     scene_manager_set_scene_state(
+        //         uhf_app->scene_manager, UHFSceneStart, SubmenuIndexSettings);
+        //     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneSettings);
+        //     consumed = true;
+        // }
         // } else if(event.event == SubmenuIndexEliteDictAttack) {
         //     scene_manager_set_scene_state(
         //         uhf_app->scene_manager, UHFSceneStart, SubmenuIndexEliteDictAttack);

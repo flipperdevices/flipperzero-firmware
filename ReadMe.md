@@ -69,7 +69,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - Fixes By RogueMaster
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - Fixes By RogueMaster
 - Updated: [SPI Mem Manager (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) - Fixes By RogueMaster
-- Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) - Fixes By RogueMaster
 - Updated: [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio) - Fixes By RogueMaster
 - Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader) - Fixes By RogueMaster
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview) - Fixes By RogueMaster
@@ -83,6 +82,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) - Fixes By xMasterX
 - Added: [Sub-GHz Rolling Flaws (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - Updated: [PicoPass (iClass) v1.4 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster & [Standard Key Changes (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/commit/48558863c7148473795aadb3856920c229e02cf7) & [Optimise picopass crypto to fix timing issues with newer readers. #34](https://github.com/flipperdevices/flipperzero-good-faps/pull/34)
+- Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) - Fixes By RogueMaster & From Source
+- Updated: [u-blox GPS v0.2 (By liamhays)](https://github.com/liamhays/ublox)
 
 <a name="release">
 
@@ -470,7 +471,7 @@ $ ./fbt dolphin_ext
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
-- [u-blox GPS (By liamhays)](https://github.com/liamhays/ublox)
+- [u-blox GPS v0.2 (By liamhays)](https://github.com/liamhays/ublox)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Mass Storage v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)

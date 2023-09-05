@@ -260,6 +260,13 @@ M100ResponseType m100_read_label_data_storage(
     payload_len = (payload_len << 8) + data[4];
     size_t ptr_offset = 5 /*<-ptr offset*/ + uhf_tag->epc->size + 3 /*<-pc + ul*/;
     size_t bank_data_length = payload_len - (ptr_offset - 5 /*dont include the offset*/);
+    // print paylod length ptr offset and bank data length
+    FURI_LOG_E(
+        "TAG",
+        "payload_len: %d, ptr_offset: %d, bank_data_length: %d",
+        payload_len,
+        ptr_offset,
+        bank_data_length);
     if(data[2] == 0xFF) {
         if(payload_len == 0x0001) return M100NoTagResponse;
         return M100MemoryOverrun;
@@ -332,10 +339,11 @@ M100ResponseType m100_write_label_data_storage(
     // send cmd
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
     furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, cmd_length);
-    uint8_t max_wait = 25;
+    unsigned int delay = DELAY_MS / 2;
+    unsigned int timeout = 15;
     while(!buffer_get_size(module->buf)) {
-        furi_delay_ms(DELAY_MS);
-        if(!max_wait--) break;
+        furi_delay_ms(delay);
+        if(!timeout--) break;
     }
     uint8_t* buff_data = buffer_get_data(module->buf);
     size_t buff_length = buffer_get_size(module->buf);
