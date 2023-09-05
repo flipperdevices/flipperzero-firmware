@@ -15,7 +15,7 @@ const char* continuity_get_type_name(ContinuityType type) {
 }
 
 static size_t continuity_packet_sizes[ContinuityTypeCount] = {
-    [ContinuityTypeNearbyAction] = 23,
+    [ContinuityTypeNearbyAction] = 17,
     [ContinuityTypeProximityPair] = 31,
 };
 size_t continuity_get_packet_size(ContinuityType type) {
@@ -30,12 +30,6 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
     packet[i++] = 0x00;
     switch(msg->type) {
     case ContinuityTypeNearbyAction:
-        packet[i++] = 0x04;
-        packet[i++] = 0x04;
-        packet[i++] = 0x2a;
-        packet[i++] = 0x00;
-        packet[i++] = 0x00;
-        packet[i++] = 0x00;
         packet[i++] = 0x0f; // Type (Nearby Action)
         packet[i++] = 0x05; // Length
         packet[i++] = 0xc1; // Action Flags

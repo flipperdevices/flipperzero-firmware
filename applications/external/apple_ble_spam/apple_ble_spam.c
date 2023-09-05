@@ -208,7 +208,7 @@ static Payload
                      .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0C20}},
                  }},
             {.title = "Beats Studio Buds",
-             .text = "",
+             .text = "Modal, spammy (auto close)",
              .random = false,
              .msg =
                  {
@@ -240,7 +240,7 @@ static Payload
                      .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1720}},
                  }},
             {.title = "Beats Fit Pro",
-             .text = "",
+             .text = "Modal, spammy (auto close)",
              .random = false,
              .msg =
                  {
@@ -248,7 +248,7 @@ static Payload
                      .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1220}},
                  }},
             {.title = "Beats Studio Buds+",
-             .text = "",
+             .text = "Modal, spammy (auto close)",
              .random = false,
              .msg =
                  {
