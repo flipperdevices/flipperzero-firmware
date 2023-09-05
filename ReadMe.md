@@ -70,7 +70,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - Fixes By RogueMaster
 - Updated: [SPI Mem Manager (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) - Fixes By RogueMaster
 - Updated: [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio) - Fixes By RogueMaster
-- Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader) - Fixes By RogueMaster
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview) - Fixes By RogueMaster
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) - Fixes By RogueMaster
 - Updated: [NRF24 Channel Scanner v1.3 (by htotoo)](https://github.com/htotoo/NRF24ChannelScanner)
@@ -86,6 +85,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [u-blox GPS v0.2 (By liamhays)](https://github.com/liamhays/ublox)
 - Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 - Updated: [15 (By x27)](https://github.com/x27/flipperzero-game15) - [Start timer on first move instead of game start #2 (By FeyXieXzf)](https://github.com/x27/flipperzero-game15/pull/2)
+- Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader) - Fixes By RogueMaster & From Source
+- Updated: [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer)
 
 <a name="release">
 
