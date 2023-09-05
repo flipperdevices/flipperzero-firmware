@@ -28,18 +28,24 @@ static void mhz19_uart_render_callback(Canvas* canvas, void* ctx) {
 
     furi_mutex_acquire(state->mutex, FuriWaitForever);
 
-    snprintf(buffer, sizeof(buffer), "Status: %s", state->is_connected ? "Online" : "Offline");
+    canvas_set_font(canvas, FontSecondary);
+    if(state->is_connected) {
+        snprintf(buffer, sizeof(buffer), "Status: Online, %lus", state->counter);
+    } else {
+        snprintf(buffer, sizeof(buffer), "Status: Offline");
+    }
     canvas_draw_str(canvas, 10, 10, buffer);
 
-    if(state->is_connected) {
-        snprintf(buffer, sizeof(buffer), "Counter: %lu", state->counter);
-        canvas_draw_str(canvas, 10, 30, buffer);
-    }
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 10, 40, "CO2 PPM:");
 
-    snprintf(buffer, sizeof(buffer), "CO2 PPM: %lu", state->co2_ppm);
-    canvas_draw_str(canvas, 10, 44, buffer);
+    canvas_set_font(canvas, FontBigNumbers);
+    snprintf(buffer, sizeof(buffer), "%lu", state->co2_ppm);
+    canvas_draw_str(canvas, 70, 40, buffer);
 
+    canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 10, 63, "[back] - to exit");
+
     furi_mutex_release(state->mutex);
 }
 
