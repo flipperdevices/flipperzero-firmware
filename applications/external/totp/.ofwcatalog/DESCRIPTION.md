@@ -2,6 +2,10 @@ Flipper Authenticator is a software-based authenticator that implements two-step
 
 It is like [Google Authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2), but for [Flipper Zero](https://flipperzero.one/) device.
 
+## Companion app
+
+There is a companion app for desktop allowing you to interract with Flipper Authenticator in a more user-friendly way. Latest builds as well as all the information about it can be found in its official repo [here](https://github.com/akopachov/flipper-zero_authenticator-companion)
+
 ## Have questions?
 
 Checkout [Wiki](https://github.com/akopachov/flipper-zero_authenticator/wiki) or ask in [Discord channel](https://discord.gg/flipper-xtreme)

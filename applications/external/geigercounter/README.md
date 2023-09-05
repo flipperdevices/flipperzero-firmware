@@ -20,7 +20,7 @@ You also need jumper wires to connect the board on the **Flipper Zero**.
 - cobalt-60 (beta & gamma)
 - iodine-131 (beta & gamma)
 
-**Not really usable** radioactive sources: 
+**Not really usable** radioactive sources (must be in contact with the geiger tube to be detected): 
 - americium-241 (alpha & low gamma, some strong beta/gamma rays are emitted during radioactive cascade or due to the presence of radioisotope impurities)
 - high purity metallic uranium/thorium (same as am241)
 
@@ -94,11 +94,11 @@ Measure of uranium ore piece inside a lead container:
 
 **Note:** measures in **Sv** or **Rad** are not precise
 
-Measure of uranium ore piece (the most radioactive part) in contact with the geiger tube:
+Measure of uranium ore piece (the most radioactive part):
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper4.png" width=25% height=25%>
 
-Measure of radium dial pointers in contact with the geiger tube:
+Measure of radium dial pointers:
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper5.png" width=25% height=25%>
 
@@ -146,7 +146,7 @@ epoch  | cps
 
 I maintain another application that uses the **geiger board** to roll dice by using radioactivity: https://github.com/nmrr/flipperzero-atomicdiceroller
 
-## User gallery & video
+## Gallery/video of the community
 
 [BRD8 [Reddit]](https://www.reddit.com/user/BRD8/) - https://www.reddit.com/r/flipperzero/comments/110062z/am_i_a_hacker_now_mom/: 
 
@@ -156,13 +156,21 @@ I maintain another application that uses the **geiger board** to roll dice by us
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/testing-of-the-geiger-counter-v0-3zv9gdq4nt0b1.jpg" width=50% height=50%>
 
-[Seanclark2409 [YouTube]](https://www.youtube.com/@seanclark2409): 
+[Axewarior [Reddit]](https://www.reddit.com/user/axewarior/) - https://www.reddit.com/r/flipperzero/comments/14krjs2/gieger_counter/
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/IMG-1552.jpg" width=50% height=50%>
+
+[Seanclark2409 [YouTube]](https://www.youtube.com/@seanclark2409) (click on the picture to see the video): 
 
 [![Watch the video](https://img.youtube.com/vi/JQB2jvY1oZ0/maxresdefault.jpg)](https://youtu.be/JQB2jvY1oZ0)
 
-[Boboso5676 [YouTube]](https://www.youtube.com/@boboso5676): 
+[Boboso5676 [YouTube]](https://www.youtube.com/@boboso5676) (click on the picture to see the video):
 
 [![Watch the video](https://img.youtube.com/vi/jYQlC2NJScQ/maxresdefault.jpg)](https://youtu.be/jYQlC2NJScQ)
+
+[Talking Sasquach [YouTube]](https://www.youtube.com/@TalkingSasquach) (click on the picture to see the video):
+
+[![Watch the video](https://img.youtube.com/vi/-I57_S_AXYY/maxresdefault.jpg)](https://youtu.be/-I57_S_AXYY)
 
 ## What's next ?
 
