@@ -70,7 +70,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - Fixes By RogueMaster
 - Updated: [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware) - Fixes By RogueMaster
 - Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) - Fixes By RogueMaster
-- Updated: [PicoPass (iClass) v1.2 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster
 - Updated: [SPI Mem Manager (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) - Fixes By RogueMaster
 - Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) - Fixes By RogueMaster
 - Updated: [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio) - Fixes By RogueMaster
@@ -80,6 +79,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) - Fixes By RogueMaster
 - Updated: [NRF24 Channel Scanner v1.3 (by htotoo)](https://github.com/htotoo/NRF24ChannelScanner)
 - Added: [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
+- Added: [Sokoban (By Racso)](https://github.com/Racso/fzero-apps)
+- Updated: [PicoPass (iClass) v1.3 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster & [Standard Key Changes (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/commit/48558863c7148473795aadb3856920c229e02cf7)
 
 <a name="release">
 
@@ -425,7 +426,7 @@ $ ./fbt dolphin_ext
 - [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [Pet a Dolphin (By ugeneSmile)](https://github.com/EugeneSmile/PetADolphin)
-- [PicoPass (iClass) v1.2 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
+- [PicoPass (iClass) v1.3 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pokemon Trading (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)

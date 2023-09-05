@@ -95,11 +95,24 @@ void picopass_scene_read_card_success_on_enter(void* context) {
 
         if(pacs->key) {
             furi_string_cat_printf(key_str, "Key: ");
-
             uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
             memcpy(key, &pacs->key, RFAL_PICOPASS_BLOCK_LEN);
+
+            bool standard_key = true;
+            // Handle DES key being 56bits with parity in LSB
             for(uint8_t i = 0; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
-                furi_string_cat_printf(key_str, "%02X", key[i]);
+                if((key[i] & 0xFE) != (picopass_iclass_key[i] & 0xFE)) {
+                    standard_key = false;
+                    break;
+                }
+            }
+
+            if(standard_key) {
+                furi_string_cat_printf(key_str, "Standard");
+            } else {
+                for(uint8_t i = 0; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
+                    furi_string_cat_printf(key_str, "%02X", key[i]);
+                }
             }
         }
 
