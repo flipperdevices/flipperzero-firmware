@@ -62,6 +62,8 @@ struct Nfc {
     FuriThread* worker_thread;
 };
 
+typedef bool (*NfcWorkerPollerStateHandler)(Nfc* instance);
+
 static const FHalNfcTech nfc_tech_table[NfcModeNum][NfcTechNum] = {
     [NfcModePoller] =
         {
@@ -152,10 +154,7 @@ static int32_t nfc_worker_listener(void* context) {
     return 0;
 }
 
-typedef bool (*NfcWorkerPollerStateHandler)(Nfc* instance);
-
 bool nfc_worker_poller_idle_handler(Nfc* instance) {
-    f_hal_nfc_low_power_mode_stop();
     instance->poller_state = NfcPollerStateStart;
 
     return false;
@@ -190,6 +189,7 @@ bool nfc_worker_poller_ready_handler(Nfc* instance) {
 bool nfc_worker_poller_reset_handler(Nfc* instance) {
     f_hal_nfc_low_power_mode_start();
     furi_delay_ms(100);
+    f_hal_nfc_low_power_mode_stop();
     instance->poller_state = NfcPollerStateIdle;
 
     return false;
@@ -270,26 +270,11 @@ void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech) {
         furi_crash("Unsupported mode for given tech");
     }
     FHalNfcMode hal_mode = (mode == NfcModePoller) ? FHalNfcModePoller : FHalNfcModeListener;
-    if(mode == NfcModeListener) {
-        f_hal_nfc_low_power_mode_stop();
-    }
+    f_hal_nfc_low_power_mode_stop();
     f_hal_nfc_set_mode(hal_mode, hal_tech);
 
     instance->mode = mode;
     instance->config_state = NfcConfigurationStateDone;
-}
-
-NfcError nfc_listener_set_col_res_data(
-    Nfc* instance,
-    uint8_t* uid,
-    uint8_t uid_len,
-    uint8_t* atqa,
-    uint8_t sak) {
-    furi_assert(instance);
-
-    FHalNfcError error = furi_hal_iso14443_3a_set_col_res_data(uid, uid_len, atqa, sak);
-    instance->comm_state = NfcCommStateIdle;
-    return nfc_process_hal_error(error);
 }
 
 void nfc_set_fdt_poll_fc(Nfc* instance, uint32_t fdt_poll_fc) {
@@ -317,7 +302,7 @@ void nfc_set_mask_receive_time_fc(Nfc* instance, uint32_t mask_rx_time_fc) {
     instance->mask_rx_time_fc = mask_rx_time_fc;
 }
 
-void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context) {
+void nfc_start(Nfc* instance, NfcEventCallback callback, void* context) {
     furi_assert(instance);
     furi_assert(instance->worker_thread);
     furi_assert(callback);
@@ -325,37 +310,22 @@ void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context) {
 
     instance->callback = callback;
     instance->context = context;
-    furi_thread_set_callback(instance->worker_thread, nfc_worker_poller);
+    if(instance->mode == NfcModePoller) {
+        furi_thread_set_callback(instance->worker_thread, nfc_worker_poller);
+    } else {
+        furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
+    }
     furi_thread_start(instance->worker_thread);
     instance->comm_state = NfcCommStateIdle;
-}
-
-void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context) {
-    furi_assert(instance);
-    furi_assert(instance->worker_thread);
-    furi_assert(callback);
-
-    instance->callback = callback;
-    instance->context = context;
-    furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
-    furi_thread_start(instance->worker_thread);
-    instance->comm_state = NfcCommStateIdle;
-}
-
-void nfc_listener_abort(Nfc* instance) {
-    furi_assert(instance);
-    furi_assert(instance->state == NfcStateRunning);
-
-    f_hal_nfc_abort();
-    furi_thread_join(instance->worker_thread);
-
-    instance->state = NfcStateIdle;
 }
 
 void nfc_stop(Nfc* instance) {
     furi_assert(instance);
     furi_assert(instance->state == NfcStateRunning);
 
+    if(instance->mode == NfcModeListener) {
+        f_hal_nfc_abort();
+    }
     furi_thread_join(instance->worker_thread);
 
     instance->state = NfcStateIdle;
@@ -508,6 +478,19 @@ NfcError
     } while(false);
 
     return ret;
+}
+
+NfcError nfc_listener_set_col_res_data(
+    Nfc* instance,
+    uint8_t* uid,
+    uint8_t uid_len,
+    uint8_t* atqa,
+    uint8_t sak) {
+    furi_assert(instance);
+
+    FHalNfcError error = furi_hal_iso14443_3a_set_col_res_data(uid, uid_len, atqa, sak);
+    instance->comm_state = NfcCommStateIdle;
+    return nfc_process_hal_error(error);
 }
 
 NfcError nfc_iso14443_3a_short_frame(

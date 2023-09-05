@@ -411,7 +411,6 @@ FHalNfcError f_hal_nfc_poller_field_on() {
            ST25R3916_REG_OP_CONTROL_tx_en)) {
         // Set min guard time
         st25r3916_write_reg(handle, ST25R3916_REG_FIELD_ON_GT, 0);
-        // st25r3916_direct_cmd(handle, ST25R3916_CMD_INITIAL_RF_COLLISION);
         // Enable tx rx
         st25r3916_set_reg_bits(
             handle,

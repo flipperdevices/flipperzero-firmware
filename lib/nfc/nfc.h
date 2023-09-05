@@ -86,11 +86,7 @@ void nfc_set_fdt_poll_poll_us(Nfc* instance, uint32_t fdt_poll_poll_us);
 
 void nfc_set_guard_time_us(Nfc* instance, uint32_t guard_time_us);
 
-void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context);
-
-void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context);
-
-void nfc_listener_abort(Nfc* instance);
+void nfc_start(Nfc* instance, NfcEventCallback callback, void* context);
 
 void nfc_stop(Nfc* instance);
 

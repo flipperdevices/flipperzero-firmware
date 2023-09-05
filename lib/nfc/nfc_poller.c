@@ -124,7 +124,7 @@ void nfc_poller_start(NfcPoller* instance, NfcGenericCallback callback, void* co
     tail_poller->poller_api->set_callback(tail_poller->poller, callback, context);
 
     instance->session_state = NfcPollerSessionStateActive;
-    nfc_start_poller(instance->nfc, nfc_poller_start_callback, instance);
+    nfc_start(instance->nfc, nfc_poller_start_callback, instance);
 }
 
 void nfc_poller_stop(NfcPoller* instance) {
@@ -189,7 +189,7 @@ bool nfc_poller_detect(NfcPoller* instance) {
         iter->poller_api->set_callback(iter->poller, nfc_poller_detect_tail_callback, instance);
     }
 
-    nfc_start_poller(instance->nfc, nfc_poller_detect_callback, instance);
+    nfc_start(instance->nfc, nfc_poller_detect_callback, instance);
     nfc_stop(instance->nfc);
 
     // TODO hard to understand
