@@ -36,7 +36,6 @@ extern "C" {
 #define SLIX_TYPE_FEATURE_EAS (1U << 4)
 #define SLIX_TYPE_FEATURE_SIGNATURE (1U << 5)
 #define SLIX_TYPE_FEATURE_PROTECTION (1U << 6)
-#define SLIX_TYPE_FEATURE_LOCK_BITS (1U << 7)
 
 typedef uint32_t SlixTypeFeatures;
 

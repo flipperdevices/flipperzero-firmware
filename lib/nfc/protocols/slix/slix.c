@@ -199,12 +199,16 @@ bool slix_load(SlixData* data, FlipperFormat* ff, uint32_t version) {
             }
         }
 
-        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_LOCK_BITS)) {
-            const bool has_lock_bits = flipper_format_key_exist(ff, SLIX_LOCK_EAS_KEY) &&
-                                       flipper_format_key_exist(ff, SLIX_LOCK_PPL_KEY);
-            if(has_lock_bits) {
+        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_EAS)) {
+            if(flipper_format_key_exist(ff, SLIX_LOCK_EAS_KEY)) {
                 SlixLockBits* lock_bits = &data->system_info.lock_bits;
                 if(!flipper_format_read_bool(ff, SLIX_LOCK_EAS_KEY, &lock_bits->eas, 1)) break;
+            }
+        }
+
+        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PROTECTION)) {
+            if(flipper_format_key_exist(ff, SLIX_LOCK_PPL_KEY)) {
+                SlixLockBits* lock_bits = &data->system_info.lock_bits;
                 if(!flipper_format_read_bool(ff, SLIX_LOCK_PPL_KEY, &lock_bits->ppl, 1)) break;
             }
         }
@@ -277,10 +281,18 @@ bool slix_save(const SlixData* data, FlipperFormat* ff) {
                 break;
         }
 
-        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_LOCK_BITS)) {
-            const SlixLockBits* lock_bits = &data->system_info.lock_bits;
+        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_EAS) ||
+           slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PROTECTION)) {
             if(!flipper_format_write_comment_cstr(ff, "SLIX Lock Bits")) break;
+        }
+
+        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_EAS)) {
+            const SlixLockBits* lock_bits = &data->system_info.lock_bits;
             if(!flipper_format_write_bool(ff, SLIX_LOCK_EAS_KEY, &lock_bits->eas, 1)) break;
+        }
+
+        if(slix_type_has_features(slix_type, SLIX_TYPE_FEATURE_PROTECTION)) {
+            const SlixLockBits* lock_bits = &data->system_info.lock_bits;
             if(!flipper_format_write_bool(ff, SLIX_LOCK_PPL_KEY, &lock_bits->ppl, 1)) break;
         }
 
