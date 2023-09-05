@@ -82,6 +82,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) - Fixes By xMasterX
 - Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) - Fixes By xMasterX
 - Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) - Fixes By xMasterX
+- Added: [Sub-GHz Rolling Flaws (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 
 <a name="release">
 
@@ -459,6 +460,7 @@ $ ./fbt dolphin_ext
 - [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
+- [Sub-GHz Rolling Flaws (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
