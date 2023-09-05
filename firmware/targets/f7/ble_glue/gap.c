@@ -37,7 +37,7 @@ typedef struct {
     FuriThread* thread;
     FuriMessageQueue* command_queue;
     bool enable_adv;
-
+    // API for BLE beacon plugin
     size_t custom_adv_len;
     const uint8_t* custom_adv_data;
 } Gap;
@@ -433,6 +433,7 @@ static void gap_advertise_start(GapState new_state) {
         }
     }
     // Configure advertising
+    // API For BLE beacon plugin
     if(gap->custom_adv_data) {
         // Custom adv logic from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
         static const uint16_t gap_appearance = 0x0000; //GAP_APPEARANCE_UNKNOWN
@@ -448,6 +449,7 @@ static void gap_advertise_start(GapState new_state) {
         status = aci_gap_delete_ad_type(AD_TYPE_TX_POWER_LEVEL);
         status = aci_gap_update_adv_data(gap->custom_adv_len, gap->custom_adv_data);
     } else {
+        // Default adv logic
         status = aci_gap_set_discoverable(
             ADV_IND,
             min_interval,
@@ -580,6 +582,7 @@ uint32_t gap_get_remote_conn_rssi(int8_t* rssi) {
     return 0;
 }
 
+// API For BLE beacon plugin
 void gap_set_custom_adv_data(size_t adv_len, const uint8_t* adv_data) {
     gap->custom_adv_len = adv_len;
     gap->custom_adv_data = adv_data;

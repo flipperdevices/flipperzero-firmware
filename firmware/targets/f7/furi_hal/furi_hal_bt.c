@@ -483,6 +483,7 @@ uint32_t furi_hal_bt_get_conn_rssi(uint8_t* rssi) {
     return since;
 }
 
+// API for BLE beacon plugin
 void furi_hal_bt_set_custom_adv_data(const uint8_t* adv_data, size_t adv_len) {
     gap_set_custom_adv_data(adv_len, adv_data);
     furi_hal_bt_stop_advertising();
