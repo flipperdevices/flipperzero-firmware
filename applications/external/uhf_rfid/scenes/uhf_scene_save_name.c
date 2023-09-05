@@ -1,5 +1,5 @@
 #include "../uhf_app_i.h"
-#include <lib/toolbox/name_generator.h>
+#include <toolbox/name_generator.h>
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 

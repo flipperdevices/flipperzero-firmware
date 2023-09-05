@@ -7,7 +7,7 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
-#include <lib/toolbox/name_generator.h>
+#include <toolbox/name_generator.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>

@@ -13,7 +13,7 @@
 #include <gui/modules/popup.h>
 #include "scenes/nfc_maker_scene.h"
 #include <lib/flipper_format/flipper_format.h>
-#include <lib/toolbox/name_generator.h>
+#include <toolbox/name_generator.h>
 #include <applications/main/nfc/nfc_i.h>
 #include <furi_hal_bt.h>
 #include "strnlen.h"

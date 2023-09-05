@@ -81,6 +81,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - Added: [Sokoban (By Racso)](https://github.com/Racso/fzero-apps)
 - Updated: [PicoPass (iClass) v1.3 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster & [Standard Key Changes (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/commit/48558863c7148473795aadb3856920c229e02cf7)
+- Random Name to Name Generator Fixes (By xMasterX)
 
 <a name="release">
 

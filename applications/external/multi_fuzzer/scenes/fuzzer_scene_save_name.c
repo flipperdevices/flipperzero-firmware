@@ -12,7 +12,7 @@ void fuzzer_scene_save_name_on_enter(void* context) {
     PacsFuzzerApp* app = context;
     TextInput* text_input = app->text_input;
 
-    name_generator_make_auto(app->key_name, KEY_NAME_SIZE, "KEY");
+    name_generator_make_auto(app->key_name, KEY_NAME_SIZE, "Fuzzer");
 
     text_input_set_header_text(text_input, "Name the key");
     text_input_set_result_callback(
