@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [github: workflow improvements #3032 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3032)
 - OFW: [Account for the - in line carry-over #3038 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3038)
 - OFW: [iButton: Return to the file selection if file is corrupted #3040 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3040)
+- UL: [Subghz fix path reset on save name exit (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/45fd5ef9d88efe36d9b0445b460c17492a870281)
 
 <a name="release">
 
