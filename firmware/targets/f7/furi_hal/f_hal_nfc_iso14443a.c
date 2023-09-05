@@ -54,7 +54,12 @@ static FHalNfcError f_hal_nfc_iso14443a_poller_init(FuriHalSpiBusHandle* handle)
 }
 
 static FHalNfcError f_hal_nfc_iso14443a_poller_deinit(FuriHalSpiBusHandle* handle) {
-    UNUSED(handle);
+    st25r3916_change_reg_bits(
+        handle,
+        ST25R3916_REG_ISO14443A_NFC,
+        (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par),
+        (ST25R3916_REG_ISO14443A_NFC_no_tx_par_off | ST25R3916_REG_ISO14443A_NFC_no_rx_par_off));
+
     return FHalNfcErrorNone;
 }
 
@@ -168,6 +173,37 @@ FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size,
     // TODO reset anticollision parameters here
 
     return error;
+}
+
+FHalNfcError f_hal_iso14443_3a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits) {
+    furi_assert(tx_data);
+
+    // TODO common code for f_hal_nfc_poller_tx
+
+    FHalNfcError err = FHalNfcErrorNone;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    // Prepare tx
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
+    st25r3916_clear_reg_bits(
+        handle, ST25R3916_REG_TIMER_EMV_CONTROL, ST25R3916_REG_TIMER_EMV_CONTROL_nrt_emv);
+    st25r3916_change_reg_bits(
+        handle,
+        ST25R3916_REG_ISO14443A_NFC,
+        (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par),
+        (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par));
+    uint32_t interrupts =
+        (ST25R3916_IRQ_MASK_FWL | ST25R3916_IRQ_MASK_TXE | ST25R3916_IRQ_MASK_RXS |
+         ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_PAR | ST25R3916_IRQ_MASK_CRC |
+         ST25R3916_IRQ_MASK_ERR1 | ST25R3916_IRQ_MASK_ERR2 | ST25R3916_IRQ_MASK_NRE);
+    // Clear interrupts
+    st25r3916_get_irq(handle);
+    // Enable interrupts
+    st25r3916_mask_irq(handle, ~interrupts);
+
+    st25r3916_write_fifo(handle, tx_data, tx_bits);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSMIT_WITHOUT_CRC);
+    return err;
 }
 
 FHalNfcError furi_hal_iso14443_3a_set_col_res_data(
