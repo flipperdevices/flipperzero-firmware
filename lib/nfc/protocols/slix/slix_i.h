@@ -2,6 +2,7 @@
 
 #include "slix.h"
 
+#include <nfc/protocols/iso15693_3/iso15693_3_i.h>
 #include <toolbox/bit_buffer.h>
 
 #ifdef __cplusplus
@@ -55,6 +56,15 @@ extern "C" {
      SLIX_FEATURE_FLAG_EAS_IR | SLIX_FEATURE_FLAG_ORIGINALITY_SIG |                               \
      SLIX_FEATURE_FLAG_PERSISTENT_QUIET | SLIX_FEATURE_FLAG_PRIVACY | SLIX_FEATURE_FLAG_DESTROY)
 
+typedef union {
+    struct {
+        uint16_t value;
+        uint8_t reserved;
+        uint8_t protection;
+    };
+    uint8_t bytes[SLIX_BLOCK_SIZE];
+} SlixCounter;
+
 // Same behaviour as iso15693_3_error_response_parse
 bool slix_error_response_parse(SlixError* error, const BitBuffer* buf);
 
@@ -63,6 +73,18 @@ SlixError slix_process_iso15693_3_error(Iso15693_3Error iso15693_3_error);
 SlixError slix_get_nxp_system_info_response_parse(SlixData* data, const BitBuffer* buf);
 
 SlixError slix_read_signature_response_parse(SlixSignature data, const BitBuffer* buf);
+
+// Setters
+void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password);
+
+void slix_set_privacy_mode(SlixData* data, bool set);
+
+void slix_increment_counter(SlixData* data);
+
+// Static methods
+bool slix_type_has_features(SlixType slix_type, SlixTypeFeatures features);
+
+bool slix_type_supports_password(SlixType slix_type, SlixPasswordType password_type);
 
 #ifdef __cplusplus
 }

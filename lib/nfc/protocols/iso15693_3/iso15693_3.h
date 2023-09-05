@@ -89,7 +89,7 @@ typedef enum {
     Iso15693_3ErrorIgnore,
     Iso15693_3ErrorNotSupported,
     Iso15693_3ErrorUidMismatch,
-    Iso15693_3ErrorUnhandledOverride,
+    Iso15693_3ErrorFullyHandled,
     Iso15693_3ErrorUnexpectedResponse,
     Iso15693_3ErrorInternal,
     Iso15693_3ErrorCustom,
@@ -148,15 +148,15 @@ Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data);
 
 // Getters and tests
 
-bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num);
+bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_index);
 
 uint8_t iso15693_3_get_manufacturer_id(const Iso15693_3Data* data);
 
 uint16_t iso15693_3_get_block_count(const Iso15693_3Data* data);
 
-// Setters
+uint8_t iso15693_3_get_block_size(const Iso15693_3Data* data);
 
-void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked);
+const uint8_t* iso15693_3_get_block_data(const Iso15693_3Data* data, uint8_t block_index);
 
 #ifdef __cplusplus
 }

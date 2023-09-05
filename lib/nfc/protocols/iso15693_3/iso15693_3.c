@@ -321,11 +321,11 @@ Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data) {
     furi_crash("No base data");
 }
 
-bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num) {
+bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_index) {
     furi_assert(data);
-    furi_assert(block_num < data->system_info.block_count);
+    furi_assert(block_index < data->system_info.block_count);
 
-    return *(const uint8_t*)simple_array_cget(data->block_security, block_num);
+    return *(const uint8_t*)simple_array_cget(data->block_security, block_index);
 }
 
 uint8_t iso15693_3_get_manufacturer_id(const Iso15693_3Data* data) {
@@ -340,9 +340,16 @@ uint16_t iso15693_3_get_block_count(const Iso15693_3Data* data) {
     return data->system_info.block_count;
 }
 
-void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked) {
+uint8_t iso15693_3_get_block_size(const Iso15693_3Data* data) {
     furi_assert(data);
-    furi_assert(block_num < data->system_info.block_count);
 
-    *(uint8_t*)simple_array_get(data->block_security, block_num) = locked ? 1 : 0;
+    return data->system_info.block_size;
+}
+
+const uint8_t* iso15693_3_get_block_data(const Iso15693_3Data* data, uint8_t block_index) {
+    furi_assert(data);
+    furi_assert(data->system_info.block_count > block_index);
+
+    return (const uint8_t*)simple_array_cget(
+        data->block_data, block_index * data->system_info.block_size);
 }

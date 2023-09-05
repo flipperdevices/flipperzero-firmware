@@ -382,33 +382,42 @@ static Iso15693_3Error
     slix_iso15693_3_read_block_extension_handler(SlixListener* instance, va_list args) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
-    const uint32_t block_num = va_arg(args, uint32_t);
-
     do {
+        const uint32_t block_num = va_arg(args, uint32_t);
+        // SLIX Counter has no read protection
+        if(block_num == SLIX_COUNTER_BLOCK_NUM) break;
+
         if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, block_num)) {
             if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeRead)) {
                 error = Iso15693_3ErrorInternal;
                 break;
             }
         }
-
-        if(block_num == SLIX_COUNTER_BLOCK_NUM) {
-            // TODO: Implement special behaviour for block 79
-        }
     } while(false);
 
     return error;
 }
 
-static Iso15693_3Error slix_listener_iso15693_3_write_lock_block_extension_handler(
-    SlixListener* instance,
-    va_list args) {
+static Iso15693_3Error
+    slix_listener_iso15693_3_write_block_extension_handler(SlixListener* instance, va_list args) {
     Iso15693_3Error error = Iso15693_3ErrorNone;
 
-    const uint32_t block_num = va_arg(args, uint32_t);
-
     do {
-        if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, block_num)) {
+        const uint32_t block_num = va_arg(args, uint32_t);
+
+        if(block_num == SLIX_COUNTER_BLOCK_NUM) {
+            const uint32_t counter = *(va_arg(args, uint32_t*));
+            if(counter == 0x00000001U) {
+                if(slix_is_counter_increment_protected(instance->data) &&
+                   slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeRead)) {
+                    error = Iso15693_3ErrorInternal;
+                    break;
+                }
+                slix_increment_counter(instance->data);
+                error = Iso15693_3ErrorFullyHandled;
+                break;
+            }
+        } else if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, block_num)) {
             if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeRead)) {
                 error = Iso15693_3ErrorInternal;
                 break;
@@ -422,8 +431,36 @@ static Iso15693_3Error slix_listener_iso15693_3_write_lock_block_extension_handl
             }
         }
 
+    } while(false);
+
+    return error;
+}
+
+static Iso15693_3Error
+    slix_listener_iso15693_3_lock_block_extension_handler(SlixListener* instance, va_list args) {
+    Iso15693_3Error error = Iso15693_3ErrorNone;
+
+    do {
+        const uint32_t block_num = va_arg(args, uint32_t);
+
+        // SLIX counter cannot be locked
         if(block_num == SLIX_COUNTER_BLOCK_NUM) {
-            // TODO: Implement special behaviour for block 79
+            error = Iso15693_3ErrorInternal;
+            break;
+        }
+
+        if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, block_num)) {
+            if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeRead)) {
+                error = Iso15693_3ErrorInternal;
+                break;
+            }
+        }
+
+        if(slix_is_block_protected(instance->data, SlixPasswordTypeWrite, block_num)) {
+            if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeWrite)) {
+                error = Iso15693_3ErrorInternal;
+                break;
+            }
         }
 
     } while(false);
@@ -440,9 +477,10 @@ static Iso15693_3Error slix_listener_iso15693_3_read_multi_block_extension_handl
     const uint32_t block_index_end = va_arg(args, uint32_t);
 
     for(uint32_t i = block_index_start; i <= block_index_end; ++i) {
-        if(i == SLIX_COUNTER_BLOCK_NUM) {
-            // TODO: Implement special behaviour for block 79
-        } else if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, i)) {
+        // SLIX Counter has no read protection
+        if(i == SLIX_COUNTER_BLOCK_NUM) continue;
+
+        if(slix_is_block_protected(instance->data, SlixPasswordTypeRead, i)) {
             if(slix_listener_is_password_lock_enabled(instance, SlixPasswordTypeRead)) {
                 error = Iso15693_3ErrorInternal;
                 break;
@@ -482,8 +520,8 @@ static const Iso15693_3ExtensionHandlerTable slix_iso15693_extension_handler_tab
     .optional =
         {
             (Iso15693_3ExtensionHandler)slix_iso15693_3_read_block_extension_handler,
-            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_write_lock_block_extension_handler,
-            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_write_lock_block_extension_handler,
+            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_write_block_extension_handler,
+            (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_lock_block_extension_handler,
             (Iso15693_3ExtensionHandler)slix_listener_iso15693_3_read_multi_block_extension_handler,
             (Iso15693_3ExtensionHandler)
                 slix_listener_iso15693_3_write_multi_block_extension_handler,

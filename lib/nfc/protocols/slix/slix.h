@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 
+#define SLIX_BLOCK_SIZE (4U)
 #define SLIX_SIGNATURE_SIZE (32U)
 
 #define SLIX_COUNTER_BLOCK_NUM (79U)
@@ -124,6 +125,8 @@ SlixType slix_get_type(const SlixData* data);
 
 SlixPassword slix_get_password(const SlixData* data, SlixPasswordType password_type);
 
+uint16_t slix_get_counter(const SlixData* data);
+
 bool slix_is_privacy_mode(const SlixData* data);
 
 bool slix_is_block_protected(
@@ -131,15 +134,7 @@ bool slix_is_block_protected(
     SlixPasswordType password_type,
     uint8_t block_num);
 
-// Setters
-void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password);
-
-void slix_set_privacy_mode(SlixData* data, bool set);
-
-// Static methods
-bool slix_type_has_features(SlixType slix_type, SlixTypeFeatures features);
-
-bool slix_type_supports_password(SlixType slix_type, SlixPasswordType password_type);
+bool slix_is_counter_increment_protected(const SlixData* data);
 
 #ifdef __cplusplus
 }

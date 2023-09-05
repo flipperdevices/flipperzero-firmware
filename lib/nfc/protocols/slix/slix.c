@@ -370,11 +370,12 @@ SlixPassword slix_get_password(const SlixData* data, SlixPasswordType password_t
     return data->passwords[password_type];
 }
 
-void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password) {
+uint16_t slix_get_counter(const SlixData* data) {
     furi_assert(data);
-    furi_assert(password_type < SlixPasswordTypeCount);
+    const SlixCounter* counter = (const SlixCounter*)iso15693_3_get_block_data(
+        data->iso15693_3_data, SLIX_COUNTER_BLOCK_NUM);
 
-    data->passwords[password_type] = password;
+    return counter->value;
 }
 
 bool slix_is_privacy_mode(const SlixData* data) {
@@ -409,10 +410,13 @@ bool slix_is_block_protected(
     return ret;
 }
 
-void slix_set_privacy_mode(SlixData* data, bool set) {
+bool slix_is_counter_increment_protected(const SlixData* data) {
     furi_assert(data);
 
-    data->privacy = set;
+    const SlixCounter* counter = (const SlixCounter*)iso15693_3_get_block_data(
+        data->iso15693_3_data, SLIX_COUNTER_BLOCK_NUM);
+
+    return counter->protection != 0;
 }
 
 bool slix_type_has_features(SlixType slix_type, SlixTypeFeatures features) {

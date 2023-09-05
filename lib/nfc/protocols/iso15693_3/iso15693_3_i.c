@@ -227,6 +227,13 @@ void iso15693_3_append_block(const Iso15693_3Data* data, uint8_t block_num, BitB
     bit_buffer_append_bytes(buf, block_data, data->system_info.block_size);
 }
 
+void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_index, bool locked) {
+    furi_assert(data);
+    furi_assert(block_index < data->system_info.block_count);
+
+    *(uint8_t*)simple_array_get(data->block_security, block_index) = locked ? 1 : 0;
+}
+
 void iso15693_3_set_block_data(
     Iso15693_3Data* data,
     uint8_t block_num,

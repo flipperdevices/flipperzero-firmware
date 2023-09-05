@@ -98,3 +98,30 @@ SlixError slix_read_signature_response_parse(SlixSignature data, const BitBuffer
 
     return error;
 }
+
+void slix_set_password(SlixData* data, SlixPasswordType password_type, SlixPassword password) {
+    furi_assert(data);
+    furi_assert(password_type < SlixPasswordTypeCount);
+
+    data->passwords[password_type] = password;
+}
+
+void slix_set_privacy_mode(SlixData* data, bool set) {
+    furi_assert(data);
+
+    data->privacy = set;
+}
+
+void slix_increment_counter(SlixData* data) {
+    furi_assert(data);
+
+    const uint8_t* block_data =
+        iso15693_3_get_block_data(data->iso15693_3_data, SLIX_COUNTER_BLOCK_NUM);
+
+    SlixCounter counter;
+    memcpy(counter.bytes, block_data, SLIX_BLOCK_SIZE);
+    counter.value += 1;
+
+    iso15693_3_set_block_data(
+        data->iso15693_3_data, SLIX_COUNTER_BLOCK_NUM, counter.bytes, sizeof(SlixCounter));
+}

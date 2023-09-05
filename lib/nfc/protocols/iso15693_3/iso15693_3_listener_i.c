@@ -131,7 +131,7 @@ static Iso15693_3Error iso15693_3_listener_read_block_handler(
         }
 
         error = iso15693_3_listener_extension_handler(
-            instance, ISO15693_3_CMD_READ_BLOCK, (uint32_t)block_index);
+            instance, ISO15693_3_CMD_READ_BLOCK, block_index);
         if(error != Iso15693_3ErrorNone) break;
 
         if(flags & ISO15693_3_REQ_FLAG_T4_OPTION) {
@@ -185,7 +185,7 @@ static Iso15693_3Error iso15693_3_listener_write_block_handler(
         }
 
         error = iso15693_3_listener_extension_handler(
-            instance, ISO15693_3_CMD_WRITE_BLOCK, (uint32_t)block_index);
+            instance, ISO15693_3_CMD_WRITE_BLOCK, block_index, request->block_data);
         if(error != Iso15693_3ErrorNone) break;
 
         iso15693_3_set_block_data(
@@ -229,7 +229,7 @@ static Iso15693_3Error iso15693_3_listener_lock_block_handler(
         }
 
         error = iso15693_3_listener_extension_handler(
-            instance, ISO15693_3_CMD_LOCK_BLOCK, (uint32_t)block_index);
+            instance, ISO15693_3_CMD_LOCK_BLOCK, block_index);
         if(error != Iso15693_3ErrorNone) break;
 
         iso15693_3_set_block_locked(instance->data, block_index, true);
@@ -334,10 +334,7 @@ static Iso15693_3Error iso15693_3_listener_write_multi_blocks_handler(
         }
 
         error = iso15693_3_listener_extension_handler(
-            instance,
-            ISO15693_3_CMD_WRITE_MULTI_BLOCKS,
-            (uint32_t)block_index_start,
-            (uint32_t)block_index_end);
+            instance, ISO15693_3_CMD_WRITE_MULTI_BLOCKS, block_index_start, block_index_end);
         if(error != Iso15693_3ErrorNone) break;
 
         for(uint32_t i = block_index_start; i <= block_index_end; ++i) {
@@ -650,6 +647,11 @@ static Iso15693_3Error iso15693_3_listener_handle_standard_request(
         bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_NONE);
 
         error = handler(instance, data, data_size, flags);
+
+        // The request was fully handled in the protocol extension, no further action necessary
+        if(error == Iso15693_3ErrorFullyHandled) {
+            error = Iso15693_3ErrorNone;
+        }
 
         // Several commands may not require an answer
         if(error == Iso15693_3ErrorFormat || error == Iso15693_3ErrorIgnore) break;
