@@ -1,0 +1,14 @@
+App(
+    appid="five_nights_at_flippers",
+    name="Five Nights at Flipper's",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipperzero_fnaf",
+    stack_size=1 * 1024,
+    fap_icon="icon.png",
+    fap_category="Games",
+    fap_icon_assets_symbol="flipperzero_fnaf",
+    fap_icon_assets="images",
+    fap_author="sillygir1",
+    fap_weburl="https://github.com/sillygir1/flipperzero-fnaf",
+    fap_version="1.1",
+)

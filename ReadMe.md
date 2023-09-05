@@ -79,6 +79,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview) - Fixes By RogueMaster
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) - Fixes By RogueMaster
 - Updated: [NRF24 Channel Scanner v1.3 (by htotoo)](https://github.com/htotoo/NRF24ChannelScanner)
+- Added: [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 
 <a name="release">
 
@@ -262,6 +263,7 @@ $ ./fbt dolphin_ext
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
+- [Five Nights at Flipper's (By sillygir1)](https://github.com/sillygir1/flipperzero-fnaf)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Heap Defence (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc776446de9fdd553b221c02668b925b689378d8) [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
