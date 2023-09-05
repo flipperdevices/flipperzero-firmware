@@ -242,12 +242,8 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
                     2 + 4; // ":" + 4 separators
 
     // further away from the battery charge indicator, if the smallest minute is 1
-    // view_port_set_width(desktop->clock_viewport, new_w - !(d[0] == 1));
-    view_port_set_width(
-        desktop->clock_viewport,
-        canvas_string_width(canvas, buffer) - 1 + (desktop->time_minute % 10 == 1));
+    view_port_set_width(desktop->clock_viewport, new_w - !(d[0] == 1));
     view_port_set_width(desktop->clock_slim_viewport, new_w - !(d[0] == 1));
-
 
     uint8_t x = new_w;
     uint8_t y = 8;

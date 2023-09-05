@@ -194,8 +194,8 @@ static void vb_migrate_scene_to_app_load_capture(VbMigrate* inst, bool go_next) 
     } else {
         uint32_t state = scene_manager_get_scene_state(inst->scene_manager, VbMigrateSceneToApp);
         inst->next_id = vb_migrate_get_next_id(inst, inst->text_store, inst->next_id, true);
-        FuriString* temp_str =
-            furi_string_alloc_printf(VB_MIGRATE_CAPTURE_FORMAT, inst->next_id, NFC_APP_EXTENSION);
+        FuriString* temp_str = furi_string_alloc_printf(
+            VB_MIGRATE_CAPTURE_FORMAT, inst->next_id, NFC_APP_FILENAME_EXTENSION);
 
         vb_migrate_show_loading_popup(inst, true);
         if(vb_migrate_load_nfc(inst, inst->text_store, furi_string_get_cstr(temp_str))) {

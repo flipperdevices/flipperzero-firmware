@@ -17,7 +17,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
 
     FlipperFormat* file = flipper_format_file_alloc(furi_record_open(RECORD_STORAGE));
     FuriString* path = furi_string_alloc();
-    furi_string_printf(path, NFC_APP_FOLDER "/%s" NFC_APP_EXTENSION, app->name_buf);
+    furi_string_printf(path, NFC_APP_FOLDER "/%s" NFC_APP_FILENAME_EXTENSION, app->name_buf);
     do {
         if(!flipper_format_file_open_new(file, furi_string_get_cstr(path))) break;
 

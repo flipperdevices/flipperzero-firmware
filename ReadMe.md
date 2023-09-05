@@ -54,11 +54,30 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Color Guess v1.1 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - OFW: [Remove the TODO for GPIO settings save/load #3015 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3015)
 - OFW: [NFC: fix ISO14443-4A cards emulation #3017 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3017)
-- OFW PR: [Disconnect from BLE on protobuf error #2955 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2955)
-- OFW PR: [StorageListRequest: size filter #3018 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3018)
 - Code & Services Cleanup (By Willy-JL)
 - OFW: [SubGhz: heap overflow text error #3021 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3021)
-- Out of town for the weekend. New Public Relase for September 5th. Will update with latest updates September 5th as well.
+- UL: OFW: [StorageListRequest: size filter #3018 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3018)
+- UL: OFW: [Check the filetype of the update manifest #3025 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3025)
+- UL: OFW: [Undo some TODO #3024 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3024)
+- UL: OFW: [Add support for Mifare Classic 4K SAK 0x38 ATQA 0x02, 0x04 and 0x08 #3009 (By suaveolent)](https://github.com/flipperdevices/flipperzero-firmware/pull/3009)
+- UL: OFW: [Disconnect from BLE on protobuf error #2955 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2955)
+- UL: OFW: [Add File Naming setting for more detailed naming #3002 (By m1-ins)](https://github.com/flipperdevices/flipperzero-firmware/pull/3002)
+- UL: OFW: [Storage: force mount #3033 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3033)
+- UL: [Updated Infrared Assets #594 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/594)
+- UL: [FAAC SLH better UI/UX. #585 (By Eng1n33r)](https://github.com/DarkFlippers/unleashed-firmware/pull/585)
+- UL: Various New SubGHz Tweaks and Bonus Fixes (By xMasterX)
+- Updated: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - Fixes By RogueMaster
+- Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) - Fixes By RogueMaster
+- Updated: [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware) - Fixes By RogueMaster
+- Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) - Fixes By RogueMaster
+- Updated: [PicoPass (iClass) v1.2 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster
+- Updated: [SPI Mem Manager (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) - Fixes By RogueMaster
+- Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) - Fixes By RogueMaster
+- Updated: [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio) - Fixes By RogueMaster
+- Updated: [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) - Fixes By RogueMaster
+- Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader) - Fixes By RogueMaster
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview) - Fixes By RogueMaster
+- Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) - Fixes By RogueMaster
 
 <a name="release">
 
@@ -430,6 +449,7 @@ $ ./fbt dolphin_ext
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Skeleton App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
+- [SPI Mem Manager (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager)
 - [Sub-GHz Bruteforcer v3.9 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)

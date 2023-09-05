@@ -16,7 +16,7 @@ void nfc_maker_scene_name_on_enter(void* context) {
 
     nfc_maker_text_input_set_header_text(text_input, "Name the NFC tag:");
 
-    set_random_name(app->name_buf, TEXT_INPUT_LEN);
+    name_generator_make_auto(app->name_buf, TEXT_INPUT_LEN, NFC_APP_FILENAME_PREFIX);
 
     nfc_maker_text_input_set_result_callback(
         text_input,
@@ -27,7 +27,7 @@ void nfc_maker_scene_name_on_enter(void* context) {
         true);
 
     ValidatorIsFile* validator_is_file =
-        validator_is_file_alloc_init(NFC_APP_FOLDER, NFC_APP_EXTENSION, NULL);
+        validator_is_file_alloc_init(NFC_APP_FOLDER, NFC_APP_FILENAME_EXTENSION, NULL);
     nfc_maker_text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, NfcMakerViewTextInput);

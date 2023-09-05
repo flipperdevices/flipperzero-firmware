@@ -1264,7 +1264,7 @@ void subghz_protocol_decoder_keeloq_get_string(void* context, FuriString* output
             code_found_reverse_hi,
             code_found_reverse_lo,
             instance->generic.btn,
-            instance->manufacture_name);   
+            instance->manufacture_name);
     } else {
         furi_string_cat_printf(
             output,
