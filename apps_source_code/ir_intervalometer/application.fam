@@ -1,6 +1,6 @@
 App(
-    appid="sony_intervalometer",
-    name="[Sony] Intervalometer",
+    appid="ir_intervalometer",
+    name="[IR] Intervalometer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipvalo_app",
     requires=["gui"],
@@ -12,5 +12,5 @@ App(
     fap_author="@Nitepone",
     fap_weburl="https://github.com/Nitepone/flipper-intervalometer",
     fap_version="1.1",
-    fap_description="This is a simple configurable valometer app for Sony cameras. Works via Infrared port.",
+    fap_description="This is a simple configurable valometer app for DSLR cameras. Works via Infrared port.",
 )
