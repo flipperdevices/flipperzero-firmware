@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `4 Sep 20:11 GMT +3`
+### Apps checked & updated at `5 Sep 16:53 GMT +3`
 
 
 # Default pack
@@ -110,6 +110,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 |---|:---:|---|---|:---:|
 | BT Camera Trigger | ![BT Badge] | [by Nem0oo](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger) |  | [![UFW Badge]](https://lab.flipper.net/apps/bt_trigger) |
 | BT Serial Example | ![BT Badge] | [by maybe-hello-world](https://github.com/maybe-hello-world/fbs) |  | ![None Badge] |
+| Apple BLE Spam | ![BT Badge] | [by @Willy-JL & @techryptic](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/apple_ble_spam) |  | ![None Badge] |
 | 4 in row | ![Games Badge] | [by leo-need-more-coffee](https://github.com/leo-need-more-coffee/flipperzero-4inrow) |  | [![UFW Badge]](https://lab.flipper.net/apps/4inrow) |
 | Asteroids | ![Games Badge] | [by antirez & SimplyMinimal](https://github.com/antirez/flipper-asteroids) | Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Asteroids) all changes can be found by clicking on [this link](https://github.com/SimplyMinimal/FlipperZero-Asteroids) | [![UFW Badge]](https://lab.flipper.net/apps/asteroids) |
 | Chess Clock | ![Games Badge] | [by ihatecsv](https://github.com/ihatecsv/flipper_chess_clock) |  | ![None Badge] |
@@ -187,8 +188,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | NRF24 Channel Scanner | ![GPIO Badge] | [by htotoo](https://github.com/htotoo/NRF24ChannelScanner) |  | [![Author Badge]](https://lab.flipper.net/apps/nrf24channelscanner) |
 | Mx2125 - Step Counter | ![GPIO Badge] | [by grugnoymeme](https://github.com/grugnoymeme/flipperzero-stepcounter-fap) |  | ![None Badge] |
 | SD SPI | ![GPIO Badge] | [by Gl1tchub](https://github.com/Gl1tchub/Flipperzero-SD-SPI) |  | ![None Badge] |
+| TEA5767 Radio control | ![GPIO Badge] | [by victormico](https://github.com/victormico/flipperzero-radio/tree/main) |  | ![None Badge] |
 | IR Remote | ![IR Badge] | [by Hong5489](https://github.com/Hong5489/ir_remote) | improvements [by friebel](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [by d4ve10](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option) | ![None Badge] |
-| IR Intervalometer for Sony Cameras | ![IR Badge] | [by Nitepone](https://github.com/Nitepone/flipper-intervalometer) |  | [![UFW Badge]](https://lab.flipper.net/apps/sony_intervalometer) |
+| IR Intervalometer | ![IR Badge] | [by Nitepone](https://github.com/Nitepone/flipper-intervalometer) |  | [![UFW Badge]](https://lab.flipper.net/apps/sony_intervalometer) |
 | IR Xbox Controller | ![IR Badge] | [by gebeto](https://github.com/gebeto/flipper-xbox-controller) |  | [![Author Badge]](https://lab.flipper.net/apps/xbox_controller) |
 | BPM Tapper | ![Media Badge] | [by panki27](https://github.com/panki27/bpm-tapper) |  | [![UFW Badge]](https://lab.flipper.net/apps/bpm_tapper) |
 | Flizzer Tracker | ![Media Badge] | [by LTVA1](https://github.com/LTVA1/flizzer_tracker) |  | [![Author Badge]](https://lab.flipper.net/apps/flizzer_tracker) |
