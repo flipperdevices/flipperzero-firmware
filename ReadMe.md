@@ -85,6 +85,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) - Fixes By RogueMaster & From Source
 - Updated: [u-blox GPS v0.2 (By liamhays)](https://github.com/liamhays/ublox)
 - Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
+- Updated: [15 (By x27)](https://github.com/x27/flipperzero-game15) - [Start timer on first move instead of game start #2 (By FeyXieXzf)](https://github.com/x27/flipperzero-game15/pull/2)
 
 <a name="release">
 

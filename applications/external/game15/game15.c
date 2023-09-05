@@ -226,7 +226,7 @@ static bool is_board_solved() {
 static void game_tick() {
     switch(game_state.scene) {
     case ScenePlay:
-        game_state.tick_count++;
+        if(game_state.move_count >= 1) game_state.tick_count++;
         if(loaded_saving_ticks) loaded_saving_ticks--;
         if(moving_cell.move_direction == DirectionNone && !key_stack_is_empty()) {
             set_moving_cell_by_direction(key_stack_pop());
@@ -365,7 +365,8 @@ static void render_callback(Canvas* const canvas) {
             canvas_draw_rbox(canvas, 20, 24, 88, 16, 4);
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_rframe(canvas, 20, 24, 88, 16, 4);
-            canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "Restore game ...");
+            canvas_draw_str_aligned(
+                canvas, 64, 32, AlignCenter, AlignCenter, "Restoring game ...");
         }
     }
 
