@@ -42,7 +42,7 @@ bool nfc_scene_mf_classic_mfkey_complete_on_event(void* context, SceneManagerEve
             consumed = scene_manager_search_and_switch_to_previous_scene(
                 instance->scene_manager, NfcSceneStart);
         }
-    } else if(event.event == SceneManagerEventTypeBack) {
+    } else if(event.type == SceneManagerEventTypeBack) {
         const uint32_t prev_scenes[] = {NfcSceneSavedMenu, NfcSceneStart};
         consumed = scene_manager_search_and_switch_to_previous_scene_one_of(
             instance->scene_manager, prev_scenes, COUNT_OF(prev_scenes));
