@@ -291,12 +291,6 @@ int32_t mousejacker_app(void* p) {
         return 255;
     }
 
-    uint8_t attempts = 0;
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        furi_delay_ms(10);
-    }
-
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     // Set system callbacks
@@ -326,6 +320,14 @@ int32_t mousejacker_app(void* p) {
         plugin_state->addr_err = true;
     }
     stream_free(plugin_state->file_stream);
+
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+
     nrf24_init();
 
     PluginEvent event;
@@ -400,7 +402,7 @@ int32_t mousejacker_app(void* p) {
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
 
-    if(furi_hal_power_is_otg_enabled()) {
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
 
