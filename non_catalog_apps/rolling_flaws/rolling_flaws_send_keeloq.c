@@ -14,8 +14,6 @@ static SubGhzEnvironment* load_environment() {
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_NAME);
     subghz_environment_load_keystore(environment, SUBGHZ_KEYSTORE_DIR_USER_NAME);
-    subghz_environment_set_came_atomo_rainbow_table_file_name(
-        environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
     subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
         environment, SUBGHZ_ALUTECH_AT_4N_DIR_NAME);
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
