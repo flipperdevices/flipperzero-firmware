@@ -87,7 +87,7 @@ bool mhz19_read_gas_concentration(Mhz19* instance, uint32_t* value) {
         *value = (uint32_t)buffer[2] * 256 + buffer[3];
 
         ret = true;
-    } while(true);
+    } while(false);
 
     return ret;
 }
