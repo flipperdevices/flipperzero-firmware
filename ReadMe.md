@@ -87,7 +87,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [15 (By x27)](https://github.com/x27/flipperzero-game15) - [Start timer on first move instead of game start #2 (By FeyXieXzf)](https://github.com/x27/flipperzero-game15/pull/2)
 - Updated: [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader) - Fixes By RogueMaster & From Source
 - Updated: [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer)
-- ESP Quick Flash + Some Code Cleanup + Default To Detailed/Timestamp Naming (By Willy-JL)
+- [ESP Quick Flash + Some Code Cleanup + Default To Detailed/Timestamp Naming (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2a487df46117ffb800e4426e480404b59311e25)
+- Added: [Apple BLE Spam (By Willy-JL & techryptic)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 
 <a name="release">
 
@@ -319,6 +320,7 @@ $ ./fbt dolphin_ext
 - [Advanced Wifi Sniffer (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c8e5c3bd8b353092c7fd5b7ed0327d044ee53b74)
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
+- [Apple BLE Spam (By Willy-JL & techryptic)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - [Authenticator/TOTP v4.1.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
