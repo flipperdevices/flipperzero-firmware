@@ -84,6 +84,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.4 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) - Fixes By RogueMaster & [Standard Key Changes (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/commit/48558863c7148473795aadb3856920c229e02cf7) & [Optimise picopass crypto to fix timing issues with newer readers. #34](https://github.com/flipperdevices/flipperzero-good-faps/pull/34)
 - Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) - Fixes By RogueMaster & From Source
 - Updated: [u-blox GPS v0.2 (By liamhays)](https://github.com/liamhays/ublox)
+- Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 
 <a name="release">
 
