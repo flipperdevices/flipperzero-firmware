@@ -40,9 +40,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [iButton: Return to the file selection if file is corrupted #3040 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3040)
 - UL: [Subghz fix path reset on save name exit (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/45fd5ef9d88efe36d9b0445b460c17492a870281)
 - Added: [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
-- Updated: [Apple BLE Spam (By Willy-JL & techryptic)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - Updated: [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [Additional Frequencies for Sub-GHz Rolling Flaws app (Idea by arkanet)](https://github.com/arkanet/FlipperZero/commit/11b791f683166c9bf87866b9630491995b8feffd)
+- Updated: [Apple BLE Spam (By Willy-JL & techryptic)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 
 <a name="release">
 
