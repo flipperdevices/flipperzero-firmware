@@ -123,7 +123,7 @@ bool furi_hal_i2c_rx(
     size_t size,
     uint32_t timeout);
 
-/** Perform I2C xx transfer, with additional settings.
+/** Perform I2C RX transfer, with additional settings.
  *
  * @param      handle   Pointer to FuriHalI2cBusHandle instance
  * @param      address  I2C slave address
