@@ -28,7 +28,13 @@ The Flipper Zero Radar Scanner is an application designed for the Flipper Zeros 
 
 ## Getting Started
 1. Install the app by moving ```radar_scanner.fap``` into Applications/external
-1. Ensure you have the Flipper Zero hardware with the RCWL-0516 module connected as described above.
+
+**Download the version for your firmware:**
+
+OFW_radar_scanner.fap -> Official
+radar_scanner.fap -> Xtreme
+UL_radar_scanner.fap -> Unleashed
+RM_radar_scanner.fap -> Rogue Master
 
 2. Power on the Flipper Zero and navigate to GPIO to enable 5V.
 
