@@ -1,0 +1,21 @@
+App(
+    appid="js",
+    name="JavaScript",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="js_app",
+    stack_size=4 * 1024,
+    requires=["gui"],
+    fap_private_libs=[
+        Lib(
+            name="microvium",
+            cflags=["-Wno-implicit-function-declaration", "-Wno-unused-parameter", "-Wno-char-subscripts", "-Wno-double-promotion", "-Wno-redundant-decls"],
+        ),
+    ],
+    fap_icon="js.png",
+    fap_category="Tools",
+    fap_icon_assets_symbol="js",
+    fap_author="zap8600",
+    fap_weburl="https://github.com/zap8600/js-f0",
+    fap_version=(1, 0),
+    fap_description="JavaScript... on the Flipper Zero?",
+)

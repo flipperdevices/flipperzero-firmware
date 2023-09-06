@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [iButton: Return to the file selection if file is corrupted #3040 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3040)
 - UL: [Subghz fix path reset on save name exit (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/45fd5ef9d88efe36d9b0445b460c17492a870281)
 - Updated: [Apple BLE Spam (By Willy-JL & techryptic)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
+- Added: [JavaScript (By zap8600)[(https://github.com/zap8600/js-f0)
 
 <a name="release">
 
@@ -348,6 +349,7 @@ $ ./fbt dolphin_ext
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [IR Scope (By kallanreed)](https://github.com/kallanreed/unleashed-firmware/tree/dev/applications/external/ir_scope)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
+- [JavaScript (By zap8600)[(https://github.com/zap8600/js-f0)
 - [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Lightmeter v1.2 (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`
