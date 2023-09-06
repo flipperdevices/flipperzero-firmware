@@ -213,7 +213,7 @@ bool furi_hal_i2c_tx_ext(
     FuriHalI2cBusHandle* handle,
     uint16_t address,
     bool ten_bit,
-    uint8_t const* data,
+    const uint8_t* data,
     size_t size,
     FuriHalI2cBegin begin,
     FuriHalI2cEnd end,
@@ -389,7 +389,7 @@ bool furi_hal_i2c_write_mem(
     FuriHalI2cBusHandle* handle,
     uint8_t i2c_addr,
     uint8_t mem_addr,
-    uint8_t const* data,
+    const uint8_t* data,
     size_t len,
     uint32_t timeout) {
     furi_check(handle);

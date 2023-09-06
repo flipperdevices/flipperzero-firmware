@@ -1106,10 +1106,10 @@ Function,+,furi_hal_i2c_read_mem,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, 
 Function,+,furi_hal_i2c_read_reg_16,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint16_t*, uint32_t"
 Function,+,furi_hal_i2c_read_reg_8,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t*, uint32_t"
 Function,+,furi_hal_i2c_release,void,FuriHalI2cBusHandle*
-Function,+,furi_hal_i2c_rx,_Bool,"FuriHalI2cBusHandle*, const uint8_t, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_i2c_rx,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t*, size_t, uint32_t"
 Function,+,furi_hal_i2c_rx_ext,_Bool,"FuriHalI2cBusHandle*, uint16_t, _Bool, uint8_t*, size_t, FuriHalI2cBegin, FuriHalI2cEnd, FuriHalCortexTimer"
-Function,+,furi_hal_i2c_trx,_Bool,"FuriHalI2cBusHandle*, const uint8_t, const uint8_t*, size_t, uint8_t*, size_t, uint32_t"
-Function,+,furi_hal_i2c_tx,_Bool,"FuriHalI2cBusHandle*, const uint8_t, const uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_i2c_trx,_Bool,"FuriHalI2cBusHandle*, uint8_t, const uint8_t*, size_t, uint8_t*, size_t, uint32_t"
+Function,+,furi_hal_i2c_tx,_Bool,"FuriHalI2cBusHandle*, uint8_t, const uint8_t*, size_t, uint32_t"
 Function,+,furi_hal_i2c_tx_ext,_Bool,"FuriHalI2cBusHandle*, uint16_t, _Bool, const uint8_t*, size_t, FuriHalI2cBegin, FuriHalI2cEnd, FuriHalCortexTimer"
 Function,+,furi_hal_i2c_write_mem,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, const uint8_t*, size_t, uint32_t"
 Function,+,furi_hal_i2c_write_reg_16,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint16_t, uint32_t"

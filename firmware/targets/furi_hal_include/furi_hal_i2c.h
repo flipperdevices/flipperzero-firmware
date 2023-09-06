@@ -77,7 +77,7 @@ void furi_hal_i2c_release(FuriHalI2cBusHandle* handle);
  */
 bool furi_hal_i2c_tx(
     FuriHalI2cBusHandle* handle,
-    const uint8_t address,
+    uint8_t address,
     const uint8_t* data,
     size_t size,
     uint32_t timeout);
@@ -100,7 +100,7 @@ bool furi_hal_i2c_tx_ext(
     FuriHalI2cBusHandle* handle,
     uint16_t address,
     bool ten_bit,
-    uint8_t const* data,
+    const uint8_t* data,
     size_t size,
     FuriHalI2cBegin begin,
     FuriHalI2cEnd end,
@@ -118,7 +118,7 @@ bool furi_hal_i2c_tx_ext(
  */
 bool furi_hal_i2c_rx(
     FuriHalI2cBusHandle* handle,
-    const uint8_t address,
+    uint8_t address,
     uint8_t* data,
     size_t size,
     uint32_t timeout);
@@ -160,7 +160,7 @@ bool furi_hal_i2c_rx_ext(
  */
 bool furi_hal_i2c_trx(
     FuriHalI2cBusHandle* handle,
-    const uint8_t address,
+    uint8_t address,
     const uint8_t* tx_data,
     size_t tx_size,
     uint8_t* rx_data,
@@ -279,7 +279,7 @@ bool furi_hal_i2c_write_mem(
     FuriHalI2cBusHandle* handle,
     uint8_t i2c_addr,
     uint8_t mem_addr,
-    uint8_t const* data,
+    const uint8_t* data,
     size_t len,
     uint32_t timeout);
 
