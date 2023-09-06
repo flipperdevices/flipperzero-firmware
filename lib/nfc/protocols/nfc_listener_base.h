@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 typedef NfcGenericInstance* (
-    *NfcListenerAlloc)(NfcGenericInstance* base_listener, const NfcDeviceData* data);
+    *NfcListenerAlloc)(NfcGenericInstance* base_listener, NfcDeviceData* data);
 typedef void (*NfcListenerFree)(NfcGenericInstance* instance);
 
 typedef void (*NfcListenerSetCallback)(

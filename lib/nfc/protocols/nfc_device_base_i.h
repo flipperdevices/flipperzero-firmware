@@ -19,7 +19,7 @@ typedef bool (*NfcDeviceEqual)(const NfcDeviceData* data, const NfcDeviceData* o
 typedef const char* (*NfcDeviceGetName)(const NfcDeviceData* data, NfcDeviceNameType name_type);
 typedef const uint8_t* (*NfcDeviceGetUid)(const NfcDeviceData* data, size_t* uid_len);
 typedef bool (*NfcDeviceSetUid)(NfcDeviceData* data, const uint8_t* uid, size_t uid_len);
-typedef const NfcDeviceData* (*NfcDeviceGetBaseData)(const NfcDeviceData* data);
+typedef NfcDeviceData* (*NfcDeviceGetBaseData)(const NfcDeviceData* data);
 
 typedef struct {
     const char* protocol_name;

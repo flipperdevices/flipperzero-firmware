@@ -585,8 +585,7 @@ MfClassicListener*
     mf_classic_listener_alloc(Iso14443_3aListener* iso14443_3a_listener, MfClassicData* data) {
     MfClassicListener* instance = malloc(sizeof(MfClassicListener));
     instance->iso14443_3a_listener = iso14443_3a_listener;
-    instance->data = mf_classic_alloc();
-    mf_classic_copy(instance->data, data);
+    instance->data = data;
     mf_classic_listener_prepare_emulation(instance);
 
     instance->crypto = crypto1_alloc();
@@ -610,7 +609,6 @@ void mf_classic_listener_free(MfClassicListener* instance) {
     furi_assert(instance->tx_encrypted_buffer);
     furi_assert(instance->tx_plain_buffer);
 
-    mf_classic_free(instance->data);
     crypto1_free(instance->crypto);
     bit_buffer_free(instance->rx_plain_buffer);
     bit_buffer_free(instance->tx_encrypted_buffer);

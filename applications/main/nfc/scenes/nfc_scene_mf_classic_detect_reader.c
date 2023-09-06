@@ -61,7 +61,7 @@ void nfc_scene_mf_classic_detect_reader_on_enter(void* context) {
     }
 
     const Iso14443_3aData* iso3_data =
-        nfc_device_get_base_data(instance->nfc_device, NfcProtocolMfClassic);
+        nfc_device_get_data(instance->nfc_device, NfcProtocolIso14443_3a);
     uint32_t cuid = iso14443_3a_get_cuid(iso3_data);
 
     instance->mfkey32_logger = mfkey32_logger_alloc(cuid);

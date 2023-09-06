@@ -349,7 +349,7 @@ bool mf_classic_set_uid(MfClassicData* data, const uint8_t* uid, size_t uid_len)
     return iso14443_3a_set_uid(data->iso14443_3a_data, uid, uid_len);
 }
 
-const Iso14443_3aData* mf_classic_get_base_data(const MfClassicData* data) {
+Iso14443_3aData* mf_classic_get_base_data(const MfClassicData* data) {
     furi_assert(data);
 
     return data->iso14443_3a_data;

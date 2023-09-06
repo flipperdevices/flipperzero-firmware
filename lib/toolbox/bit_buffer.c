@@ -6,7 +6,7 @@
 
 struct BitBuffer {
     uint8_t* data;
-    bool* parity;
+    uint8_t* parity;
     size_t capacity_bytes;
     size_t size_bits;
 };
@@ -17,7 +17,8 @@ BitBuffer* bit_buffer_alloc(size_t capacity_bytes) {
     BitBuffer* buf = malloc(sizeof(BitBuffer));
 
     buf->data = malloc(capacity_bytes);
-    buf->parity = malloc(capacity_bytes);
+    size_t parity_buf_size = (capacity_bytes + BITS_IN_BYTE - 1) / BITS_IN_BYTE;
+    buf->parity = malloc(parity_buf_size);
     buf->capacity_bytes = capacity_bytes;
     buf->size_bits = 0;
 
@@ -36,7 +37,8 @@ void bit_buffer_reset(BitBuffer* buf) {
     furi_assert(buf);
 
     memset(buf->data, 0, buf->capacity_bytes);
-    memset(buf->parity, 0, buf->capacity_bytes);
+    size_t parity_buf_size = (buf->capacity_bytes + BITS_IN_BYTE - 1) / BITS_IN_BYTE;
+    memset(buf->parity, 0, parity_buf_size);
     buf->size_bits = 0;
 }
 
@@ -109,8 +111,14 @@ void bit_buffer_copy_bytes_with_parity(BitBuffer* buf, const uint8_t* data, size
                                    (bit_processed % BITS_IN_BYTE);
             buf->data[curr_byte] |= data[bit_processed / BITS_IN_BYTE + 1]
                                     << (BITS_IN_BYTE - bit_processed % BITS_IN_BYTE);
-            buf->parity[curr_byte] =
+            uint8_t bit =
                 FURI_BIT(data[bit_processed / BITS_IN_BYTE + 1], bit_processed % BITS_IN_BYTE);
+
+            if(bit_processed % BITS_IN_BYTE) {
+                buf->parity[curr_byte / BITS_IN_BYTE] = bit;
+            } else {
+                buf->parity[curr_byte / BITS_IN_BYTE] |= bit << (bit_processed % BITS_IN_BYTE);
+            }
             bit_processed += BITS_IN_BYTE + 1;
             curr_byte++;
         }
@@ -145,7 +153,7 @@ void bit_buffer_write_bytes_with_parity(
     uint8_t* bitstream = dest;
 
     for(size_t i = 0; i < buf_size_bytes; i++) {
-        next_par_bit = buf->parity[i];
+        next_par_bit = FURI_BIT(buf->parity[i / BITS_IN_BYTE], i % BITS_IN_BYTE);
         if(curr_bit_pos % BITS_IN_BYTE == 0) {
             bitstream[curr_bit_pos / BITS_IN_BYTE] = buf->data[i];
             curr_bit_pos += BITS_IN_BYTE;
@@ -233,7 +241,7 @@ const uint8_t* bit_buffer_get_data(const BitBuffer* buf) {
     return buf->data;
 }
 
-const bool* bit_buffer_get_parity(const BitBuffer* buf) {
+const uint8_t* bit_buffer_get_parity(const BitBuffer* buf) {
     furi_assert(buf);
 
     return buf->parity;
@@ -253,7 +261,11 @@ void bit_buffer_set_byte_with_parity(BitBuffer* buff, size_t index, uint8_t byte
     furi_assert(buff->size_bits / BITS_IN_BYTE > index);
 
     buff->data[index] = byte;
-    buff->parity[index] = parity;
+    if((index % BITS_IN_BYTE) == 0) {
+        buff->parity[index / BITS_IN_BYTE] = parity;
+    } else {
+        buff->parity[index / BITS_IN_BYTE] |= parity << (index % BITS_IN_BYTE);
+    }
 }
 
 void bit_buffer_set_size(BitBuffer* buf, size_t new_size) {
