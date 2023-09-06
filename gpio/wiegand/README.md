@@ -47,6 +47,10 @@ This is a 26-bit format used by many readers. The first bit is an even parity bi
 
 This is similar to W26, but without the leading and trailing parity bits. The first 8 bits are the facility code. The next 16 bits are the card number. The application will display the facility code and card number.
 
+## W48: 48-bit Wiegand
+
+This is HID 48 bit Corporate 1000 - H2004064 format.  The first bit is odd parity 2 (based on bits 2-48).  The next bit is even parity (based on 4-5,7-8,10-11,...,46-47).  Then 22 bit company code.  Then 23 bit card id. Then odd parity 1 (based on 3-4,6-7,9-10,...,45-46).  
+
 ## W32/W34/W37/W40: 32/34/37/40-bit Wiegand
 
 These formats are not very standardized, so the application will not try to interpret the data. You can modify the wiegand_data.c file to add your own interpretation.
