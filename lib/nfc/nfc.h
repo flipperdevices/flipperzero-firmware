@@ -34,7 +34,7 @@ typedef enum {
     NfcCommandContinue,
     NfcCommandReset,
     NfcCommandStop,
-    NfcCommandResetContinue
+    NfcCommandSleep,
 } NfcCommand;
 
 typedef NfcCommand (*NfcEventCallback)(NfcEvent event, void* context);
@@ -92,6 +92,8 @@ NfcError nfc_listener_set_col_res_data(
 void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context);
 
 void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context);
+
+NfcError nfc_listener_reset(Nfc* instance);
 
 NfcError nfc_listener_sleep(Nfc* instance);
 
