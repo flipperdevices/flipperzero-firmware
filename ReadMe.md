@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `5 Sep 16:53 GMT +3`
+### Apps checked & updated at `6 Sep 14:55 GMT +3`
 
 
 # Default pack
@@ -229,6 +229,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Resistance calculator | ![Tools Badge] | [by instantiator](https://github.com/instantiator/flipper-zero-experimental-apps) |  | [![UFW Badge]](https://lab.flipper.net/apps/resistors) |
 | VB Lab Migration Assistant | ![Tools Badge] | [by GMMan (cyanic)](https://github.com/GMMan/flipperzero-vb-migrate) |  | [![Author Badge]](https://lab.flipper.net/apps/vb_migrate) |
 | Simple calendar app | ![Tools Badge] | [by Adiras](https://github.com/Adiras/flipperzero-calendar) |  | ![None Badge] |
+| JavaScript | ![Tools Badge] | [by zap8600](https://github.com/zap8600/js-f0) |  | ![None Badge] |
 | USB HID Autofire | ![USB Badge] | [by pbek](https://github.com/pbek/usb_hid_autofire) |  | ![None Badge] |
 
 
