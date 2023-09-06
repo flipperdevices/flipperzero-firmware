@@ -1,6 +1,6 @@
 # Wiegand
 
-This application supports W4, W8, W24, W26, W32, W34, W37 and W40 formats.
+This application supports W4, W8, W24, W26, W32, W34, W37, W40 and W48 formats.
 
 This application can be used to test Wiegand readers and keypads. It can save the data to a file, and can load and replay the data. Timings are measured and displayed; which can be used to help debug Wiegand readers.
 
