@@ -537,15 +537,11 @@ FHalNfcError f_hal_nfc_trx_reset() {
     return FHalNfcErrorNone;
 }
 
-// TODO make virtual
 FHalNfcError f_hal_nfc_listener_sleep() {
+    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
+    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    // Enable auto collision resolution
-    st25r3916_clear_reg_bits(
-        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
-    st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SLEEP);
-
-    return FHalNfcErrorNone;
+    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.sleep(handle);
 }

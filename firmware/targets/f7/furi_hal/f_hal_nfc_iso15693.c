@@ -406,6 +406,12 @@ static FHalNfcError f_hal_nfc_iso15693_listener_rx(
     return FHalNfcErrorNone;
 }
 
+FHalNfcError f_hal_iso15693_listener_sleep(FuriHalSpiBusHandle* handle) {
+    UNUSED(handle);
+
+    return FHalNfcErrorNone;
+}
+
 const FHalNfcTechBase f_hal_nfc_iso15693 = {
     .poller =
         {
@@ -423,5 +429,6 @@ const FHalNfcTechBase f_hal_nfc_iso15693 = {
             .wait_event = f_hal_nfc_iso15693_wait_event,
             .tx = f_hal_nfc_iso15693_listener_tx,
             .rx = f_hal_nfc_iso15693_listener_rx,
+            .sleep = f_hal_iso15693_listener_sleep,
         },
 };

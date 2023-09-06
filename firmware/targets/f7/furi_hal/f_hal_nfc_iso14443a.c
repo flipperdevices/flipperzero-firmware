@@ -301,6 +301,16 @@ FHalNfcError f_hal_iso14443_3a_listener_tx_custom_parity(
     return FHalNfcErrorNone;
 }
 
+FHalNfcError f_hal_iso14443_3a_listener_sleep(FuriHalSpiBusHandle* handle) {
+    // Enable auto collision resolution
+    st25r3916_clear_reg_bits(
+        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SLEEP);
+
+    return FHalNfcErrorNone;
+}
+
 const FHalNfcTechBase f_hal_nfc_iso14443a = {
     .poller =
         {
@@ -318,5 +328,6 @@ const FHalNfcTechBase f_hal_nfc_iso14443a = {
             .wait_event = f_hal_nfc_iso14443_3a_listener_wait_event,
             .tx = f_hal_iso4443a_listener_tx,
             .rx = f_hal_nfc_common_fifo_rx,
+            .sleep = f_hal_iso14443_3a_listener_sleep,
         },
 };
