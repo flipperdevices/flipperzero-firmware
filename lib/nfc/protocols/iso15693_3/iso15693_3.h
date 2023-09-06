@@ -1,7 +1,7 @@
 #pragma once
 
-#include <nfc/protocols/nfc_device_base_i.h>
-
+#include <nfc/protocols/nfc_device_base.h>
+#include <flipper_format/flipper_format.h>
 #include <toolbox/simple_array.h>
 
 #ifdef __cplusplus
@@ -14,23 +14,6 @@ extern "C" {
 #define ISO15693_3_FDT_POLL_FC (4202U)
 #define ISO15693_3_FDT_LISTEN_FC (4320U)
 #define ISO15693_3_POLL_POLL_MIN_US (1500U)
-
-/* true: modulating releases load, false: modulating adds load resistor to field coil */
-#define ISO15693_3_LOAD_MODULATION_POLARITY (false)
-
-#define ISO15693_3_FC (13560000.0f) /* MHz */
-#define ISO15693_3_RESP_SUBC1_PULSE_32 (1.0f / (ISO15693_3_FC / 32) / 2.0f) /*  1.1799 µs */
-#define ISO15693_3_RESP_SUBC1_UNMOD_256 (256.0f / ISO15693_3_FC) /* 18.8791 µs */
-#define ISO15693_3_PULSE_DURATION_NS (128.0f * 1000000000.0f / ISO15693_3_FC)
-
-/* ISO/IEC 15693-3:2019(E) 10.4.12: maximum number of blocks is defined as 256 */
-#define ISO15693_3_BLOCKS_MAX 256
-/* ISO/IEC 15693-3:2019(E) 10.4.12: maximum size of blocks is defined as 32 */
-#define ISO15693_3_BLOCKSIZE_MAX 32
-/* the resulting memory size a card can have */
-#define ISO15693_3_MEMSIZE_MAX (ISO15693_3_BLOCKS_MAX * ISO15693_3_BLOCKSIZE_MAX)
-/* ISO/IEC 15693-3:2019(E) 7.1b: standard allows up to 8192, the maxium frame length that we are expected to receive/send is less */
-#define ISO15693_3_FRAMESIZE_MAX (1 + ISO15693_3_MEMSIZE_MAX + ISO15693_3_BLOCKS_MAX)
 
 #define ISO15693_3_REQ_FLAG_SUBCARRIER_1 (0U << 0)
 #define ISO15693_3_REQ_FLAG_SUBCARRIER_2 (1U << 0)
@@ -84,26 +67,29 @@ extern "C" {
 #define ISO15693_3_CMD_GET_SYS_INFO (0x2BU)
 #define ISO15693_3_CMD_GET_BLOCKS_SECURITY (0x2CU)
 #define ISO15693_3_CMD_OPTIONAL_RFU (0x2DU)
+#define ISO15693_3_CMD_CUSTOM_START (0xA0U)
+
+#define ISO15693_3_MANDATORY_COUNT (ISO15693_3_CMD_MANDATORY_RFU - ISO15693_3_CMD_MANDATORY_START)
+#define ISO15693_3_OPTIONAL_COUNT (ISO15693_3_CMD_OPTIONAL_RFU - ISO15693_3_CMD_OPTIONAL_START)
 
 #define ISO15693_3_SYSINFO_FLAG_DSFID (1U << 0)
 #define ISO15693_3_SYSINFO_FLAG_AFI (1U << 1)
 #define ISO15693_3_SYSINFO_FLAG_MEMORY (1U << 2)
 #define ISO15693_3_SYSINFO_FLAG_IC_REF (1U << 3)
 
-#define ISO15693_3_SYSINFO_LOCK_DSFID (1U << 0)
-#define ISO15693_3_SYSINFO_LOCK_AFI (1U << 1)
-
 typedef enum {
     Iso15693_3ErrorNone,
     Iso15693_3ErrorNotPresent,
     Iso15693_3ErrorBufferEmpty,
     Iso15693_3ErrorBufferOverflow,
-    Iso15693_3ErrorFraming,
     Iso15693_3ErrorFieldOff,
     Iso15693_3ErrorWrongCrc,
     Iso15693_3ErrorTimeout,
     Iso15693_3ErrorFormat,
+    Iso15693_3ErrorIgnore,
     Iso15693_3ErrorNotSupported,
+    Iso15693_3ErrorUidMismatch,
+    Iso15693_3ErrorFullyHandled,
     Iso15693_3ErrorUnexpectedResponse,
     Iso15693_3ErrorInternal,
     Iso15693_3ErrorCustom,
@@ -120,7 +106,12 @@ typedef struct {
 } Iso15693_3SystemInfo;
 
 typedef struct {
-    uint8_t lock_bits;
+    bool dsfid;
+    bool afi;
+} Iso15693_3LockBits;
+
+typedef struct {
+    Iso15693_3LockBits lock_bits;
 } Iso15693_3Settings;
 
 typedef struct {
@@ -157,13 +148,15 @@ Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data);
 
 // Getters and tests
 
-bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num);
+bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_index);
 
-// Setters
+uint8_t iso15693_3_get_manufacturer_id(const Iso15693_3Data* data);
 
-void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked);
+uint16_t iso15693_3_get_block_count(const Iso15693_3Data* data);
 
-extern const NfcDeviceBase nfc_device_iso15693_3;
+uint8_t iso15693_3_get_block_size(const Iso15693_3Data* data);
+
+const uint8_t* iso15693_3_get_block_data(const Iso15693_3Data* data, uint8_t block_index);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,5 @@
 #include "iso15693_3.h"
+#include "iso15693_3_device_defs.h"
 
 #include <nfc/nfc_common.h>
 
@@ -6,13 +7,17 @@
 #define ISO15693_3_PROTOCOL_NAME_LEGACY "ISO15693"
 #define ISO15693_3_DEVICE_NAME "ISO15693-3 (Unknown)"
 
+#define ISO15693_3_LOCK_DSFID_LEGACY (1U << 0)
+#define ISO15693_3_LOCK_AFI_LEGACY (1U << 1)
+
 #define ISO15693_3_DSFID_KEY "DSFID"
 #define ISO15693_3_AFI_KEY "AFI"
 #define ISO15693_3_IC_REF_KEY "IC Reference"
 #define ISO15693_3_BLOCK_COUNT_KEY "Block Count"
 #define ISO15693_3_BLOCK_SIZE_KEY "Block Size"
 #define ISO15693_3_DATA_CONTENT_KEY "Data Content"
-#define ISO15693_3_LOCK_BITS_KEY "Lock Bits"
+#define ISO15693_3_LOCK_DSFID_KEY "Lock DSFID"
+#define ISO15693_3_LOCK_AFI_KEY "Lock AFI"
 #define ISO15693_3_SECURITY_STATUS_KEY "Security Status"
 
 const NfcDeviceBase nfc_device_iso15693_3 = {
@@ -92,7 +97,9 @@ static inline bool iso15693_3_load_security_legacy(Iso15693_3Data* data, Flipper
             break;
 
         // First legacy data byte is lock bits
-        data->settings.lock_bits = legacy_data[0];
+        data->settings.lock_bits.dsfid = legacy_data[0] & ISO15693_3_LOCK_DSFID_LEGACY;
+        data->settings.lock_bits.afi = legacy_data[0] & ISO15693_3_LOCK_AFI_LEGACY;
+
         // The rest are block security
         memcpy(
             &legacy_data[1],
@@ -152,10 +159,13 @@ bool iso15693_3_load(Iso15693_3Data* data, FlipperFormat* ff, uint32_t version) 
             data->system_info.flags |= ISO15693_3_SYSINFO_FLAG_IC_REF;
         }
 
-        const bool has_lock_bits = flipper_format_key_exist(ff, ISO15693_3_LOCK_BITS_KEY);
+        const bool has_lock_bits = flipper_format_key_exist(ff, ISO15693_3_LOCK_DSFID_KEY) &&
+                                   flipper_format_key_exist(ff, ISO15693_3_LOCK_AFI_KEY);
         if(has_lock_bits) {
-            if(!flipper_format_read_hex(ff, ISO15693_3_LOCK_BITS_KEY, &data->settings.lock_bits, 1))
+            Iso15693_3LockBits* lock_bits = &data->settings.lock_bits;
+            if(!flipper_format_read_bool(ff, ISO15693_3_LOCK_DSFID_KEY, &lock_bits->dsfid, 1))
                 break;
+            if(!flipper_format_read_bool(ff, ISO15693_3_LOCK_AFI_KEY, &lock_bits->afi, 1)) break;
         }
 
         if(flipper_format_key_exist(ff, ISO15693_3_BLOCK_COUNT_KEY) &&
@@ -202,6 +212,9 @@ bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
     bool saved = false;
 
     do {
+        if(!flipper_format_write_comment_cstr(ff, ISO15693_3_PROTOCOL_NAME " specific data"))
+            break;
+
         if(data->system_info.flags & ISO15693_3_SYSINFO_FLAG_DSFID) {
             if(!flipper_format_write_comment_cstr(ff, "Data Storage Format Identifier")) break;
             if(!flipper_format_write_hex(ff, ISO15693_3_DSFID_KEY, &data->system_info.dsfid, 1))
@@ -220,8 +233,12 @@ bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
                 break;
         }
 
-        if(!flipper_format_write_comment_cstr(ff, "Lock Bits: 0x01 = DSFID, 0x02 = AFI")) break;
-        if(!flipper_format_write_hex(ff, ISO15693_3_LOCK_BITS_KEY, &data->settings.lock_bits, 1))
+        if(!flipper_format_write_comment_cstr(ff, "Lock Bits")) break;
+        if(!flipper_format_write_bool(
+               ff, ISO15693_3_LOCK_DSFID_KEY, &data->settings.lock_bits.dsfid, 1))
+            break;
+        if(!flipper_format_write_bool(
+               ff, ISO15693_3_LOCK_AFI_KEY, &data->settings.lock_bits.afi, 1))
             break;
 
         if(data->system_info.flags & ISO15693_3_SYSINFO_FLAG_MEMORY) {
@@ -232,7 +249,8 @@ bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
             if(!flipper_format_write_uint32(ff, ISO15693_3_BLOCK_COUNT_KEY, &block_count, 1))
                 break;
 
-            if(!flipper_format_write_comment_cstr(ff, "Size of a single memory block, usually 4"))
+            if(!flipper_format_write_comment_cstr(
+                   ff, "Size of a single memory block, valid range = 01...20 (hex)"))
                 break;
             if(!flipper_format_write_hex(
                    ff, ISO15693_3_BLOCK_SIZE_KEY, &data->system_info.block_size, 1))
@@ -246,7 +264,7 @@ bool iso15693_3_save(const Iso15693_3Data* data, FlipperFormat* ff) {
                 break;
 
             if(!flipper_format_write_comment_cstr(
-                   ff, "Block Security Status: 0x01 = locked, 0x00 = not locked"))
+                   ff, "Block Security Status: 01 = locked, 00 = not locked"))
                 break;
             if(!flipper_format_write_hex(
                    ff,
@@ -304,16 +322,35 @@ Iso15693_3Data* iso15693_3_get_base_data(const Iso15693_3Data* data) {
     furi_crash("No base data");
 }
 
-bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_num) {
+bool iso15693_3_is_block_locked(const Iso15693_3Data* data, uint8_t block_index) {
     furi_assert(data);
-    furi_assert(block_num < data->system_info.block_count);
+    furi_assert(block_index < data->system_info.block_count);
 
-    return *(const uint8_t*)simple_array_cget(data->block_security, block_num);
+    return *(const uint8_t*)simple_array_cget(data->block_security, block_index);
 }
 
-void iso15693_3_set_block_locked(Iso15693_3Data* data, uint8_t block_num, bool locked) {
+uint8_t iso15693_3_get_manufacturer_id(const Iso15693_3Data* data) {
     furi_assert(data);
-    furi_assert(block_num < data->system_info.block_count);
 
-    *(uint8_t*)simple_array_get(data->block_security, block_num) = locked ? 1 : 0;
+    return data->uid[1];
+}
+
+uint16_t iso15693_3_get_block_count(const Iso15693_3Data* data) {
+    furi_assert(data);
+
+    return data->system_info.block_count;
+}
+
+uint8_t iso15693_3_get_block_size(const Iso15693_3Data* data) {
+    furi_assert(data);
+
+    return data->system_info.block_size;
+}
+
+const uint8_t* iso15693_3_get_block_data(const Iso15693_3Data* data, uint8_t block_index) {
+    furi_assert(data);
+    furi_assert(data->system_info.block_count > block_index);
+
+    return (const uint8_t*)simple_array_cget(
+        data->block_data, block_index * data->system_info.block_size);
 }
