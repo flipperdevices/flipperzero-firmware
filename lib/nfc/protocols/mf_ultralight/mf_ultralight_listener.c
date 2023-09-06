@@ -361,6 +361,45 @@ static MfUltralightCommand
     return command;
 }
 
+static MfUltralightCommand
+    mf_ultralight_sector_select_handler_p2(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
+    UNUSED(instance);
+    UNUSED(buffer);
+    FURI_LOG_D(TAG, "CMD_SEC_SEL_2");
+
+    do {
+        if(bit_buffer_get_size_bytes(buffer) != 4) break;
+        uint8_t sector = bit_buffer_get_byte(buffer, 0);
+        if(sector == 0xFF) break;
+
+        instance->sector = sector;
+        command = MfUltralightCommandProcessedSilent;
+    } while(false);
+
+    return command;
+}
+
+static MfUltralightCommand
+    mf_ultralight_sector_select_handler_p1(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
+    UNUSED(buffer);
+    FURI_LOG_D(TAG, "CMD_SEC_SEL_1");
+
+    do {
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportSectorSelect) &&
+           bit_buffer_get_byte(buffer, 1) == 0xFF)
+            break;
+
+        command = MfUltralightCommandProcessed;
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+        mf_ultralight_composite_command_set_next(instance, mf_ultralight_sector_select_handler_p2);
+    } while(false);
+
+    return command;
+}
+
 static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
     {
         .cmd = MF_ULTRALIGHT_CMD_READ_PAGE,
@@ -403,6 +442,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .callback = mf_ultralight_listener_increase_counter_handler,
     },
     {
+        .cmd = MF_ULTRALIGHT_CMD_SECTOR_SELECT,
+        .cmd_len_bits = 2 * 8,
+        .callback = mf_ultralight_sector_select_handler_p1,
+    },
+    {
         .cmd = MF_ULTRALIGHT_CMD_COMP_WRITE,
         .cmd_len_bits = 2 * 8,
         .callback = mf_ultralight_comp_write_handler_p1,
@@ -428,6 +472,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(
     mf_ultralight_copy(instance->data, data);
     mf_ultralight_listener_prepare_emulation(instance);
     mf_ultralight_composite_command_reset(instance);
+    instance->sector = 0;
     instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE);
 
     instance->mfu_event.data = &instance->mfu_event_data;
@@ -509,6 +554,7 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
         // TODO generic state reset ?
         mf_ultralight_composite_command_reset(instance);
+        instance->sector = 0;
         instance->auth_state = MfUltralightListenerAuthStateIdle;
         command = NfcCommandReset;
     }
