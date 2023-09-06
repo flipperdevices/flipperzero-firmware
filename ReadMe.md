@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0906-0026-0.90.2-e8ba730](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-06 00:26 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-06 00:26 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-06 12:32 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-06 12:32 EST`
 - UL: [Some faac fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b3cce2351a704fa70b6f348e92612b5d05462d32)
 - Added: [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
 - OFW: [github: workflow improvements #3032 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3032)
@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Subghz fix path reset on save name exit (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/45fd5ef9d88efe36d9b0445b460c17492a870281)
 - Added: [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
 - Updated: [Apple BLE Spam (By Willy-JL & techryptic)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
+- Updated: [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 
 <a name="release">
 
@@ -275,7 +276,7 @@ $ ./fbt dolphin_ext
 - [Apple BLE Spam (By Willy-JL & techryptic)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
-- [Authenticator/TOTP v4.1.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- [Authenticator/TOTP v4.1.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad KB (Modified PR#738 from pengu1ndev - Original from WillyJL) #739 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/739)

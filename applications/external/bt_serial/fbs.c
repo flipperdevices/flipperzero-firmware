@@ -6,7 +6,9 @@ void draw_callback(Canvas* canvas, void* ctx) {
     FBS* app = ctx;
     furi_check(furi_mutex_acquire(app->app_mutex, FuriWaitForever) == FuriStatusOk);
 
-    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, (char*)app->display_text);
+    canvas_draw_str_aligned(canvas, 64, 17, AlignCenter, AlignCenter, "App is running");
+    canvas_draw_str_aligned(canvas, 64, 27, AlignCenter, AlignCenter, "Please open CLI");
+    canvas_draw_str_aligned(canvas, 64, 37, AlignCenter, AlignCenter, "and type: log info");
 
     furi_mutex_release(app->app_mutex);
 }
@@ -38,7 +40,6 @@ void fbs_free(FBS* app) {
     furi_record_close(RECORD_GUI);
     app->gui = NULL;
     view_port_free(app->view_port);
-    free(app->display_text);
 
     furi_mutex_free(app->app_mutex);
     furi_message_queue_free(app->event_queue);
@@ -56,17 +57,17 @@ static uint16_t bt_serial_event_callback(SerialServiceEvent event, void* context
     uint16_t ret = 0;
 
     if(event.event == SerialServiceEventTypeDataReceived) {
-        FURI_LOG_D(TAG, "SerialServiceEventTypeDataReceived");
-        FURI_LOG_D(TAG, "Size: %u", event.data.size);
-        FURI_LOG_D(TAG, "Data: ");
+        FURI_LOG_I(TAG, "SerialServiceEventTypeDataReceived");
+        FURI_LOG_I(TAG, "Size: %u", event.data.size);
+        FURI_LOG_I(TAG, "Data: ");
         for(size_t i = 0; i < event.data.size; i++) {
             printf("%X ", event.data.buffer[i]);
         }
         printf("\r\n");
     } else if(event.event == SerialServiceEventTypeDataSent) {
-        FURI_LOG_D(TAG, "SerialServiceEventTypeDataSent");
-        FURI_LOG_D(TAG, "Size: %u", event.data.size);
-        FURI_LOG_D(TAG, "Data: ");
+        FURI_LOG_I(TAG, "SerialServiceEventTypeDataSent");
+        FURI_LOG_I(TAG, "Size: %u", event.data.size);
+        FURI_LOG_I(TAG, "Data: ");
         for(size_t i = 0; i < event.data.size; i++) {
             printf("%X ", event.data.buffer[i]);
         }
@@ -80,12 +81,12 @@ int32_t fbs_app(void* p) {
     FBS* app = fbs_alloc();
 
     if(furi_hal_bt_is_active()) {
-        FURI_LOG_D(TAG, "BT is working, hijacking the serial connection...");
+        FURI_LOG_I(TAG, "BT is working, hijacking the serial connection...");
         furi_hal_bt_serial_set_event_callback(
             BT_SERIAL_BUFFER_SIZE, bt_serial_event_callback, app);
         furi_hal_bt_start_advertising();
     } else {
-        FURI_LOG_D(TAG, "Please, enable the Bluetooth and restart the app");
+        FURI_LOG_I(TAG, "Please, enable the Bluetooth and restart the app");
     }
 
     InputEvent event;
@@ -102,6 +103,6 @@ int32_t fbs_app(void* p) {
     furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
 
     fbs_free(app);
-    FURI_LOG_D(TAG, "Released everything");
+    FURI_LOG_I(TAG, "Released everything");
     return 0;
 }

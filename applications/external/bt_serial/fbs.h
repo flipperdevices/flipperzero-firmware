@@ -13,8 +13,6 @@ typedef struct {
     Bt* bt;
     bool bt_connected;
 
-    char* display_text;
-
     ViewPort* view_port;
     Gui* gui;
 
