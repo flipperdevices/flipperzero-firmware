@@ -36,6 +36,7 @@ void nfc_render_iso15693_3_header(const Iso15693_3Data* data, FuriString* str) {
 }
 
 void nfc_render_iso15693_3_main_info(const Iso15693_3Data* data, FuriString* str) {
+    furi_string_cat(str, "\e#General info\n");
     if(data->system_info.flags & ISO15693_3_SYSINFO_FLAG_DSFID) {
         furi_string_cat_printf(str, "DSFID: %02X\n", data->system_info.ic_ref);
     }
@@ -67,6 +68,7 @@ void nfc_render_iso15693_3_main_info(const Iso15693_3Data* data, FuriString* str
         const uint32_t display_data_size = MIN(block_data_size, NFC_RENDER_ISO15693_3_MAX_BYTES);
         const uint32_t block_count = display_data_size / data->system_info.block_size;
 
+        // TODO: Improve hex data display
         for(uint32_t i = 0; i < block_count; ++i) {
             furi_string_cat(str, "\e*");
 
