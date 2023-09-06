@@ -123,7 +123,8 @@ static bool furi_hal_i2c_transfer(
     bool ret = true;
 
     while(size > 0) {
-        bool should_stop = furi_hal_cortex_timer_is_expired(timer) || furi_hal_i2c_transfer_is_aborted(i2c);
+        bool should_stop = furi_hal_cortex_timer_is_expired(timer) ||
+                           furi_hal_i2c_transfer_is_aborted(i2c);
 
         // Modifying the data pointer's data is UB if read is true
         if(read && LL_I2C_IsActiveFlag_RXNE(i2c)) {
