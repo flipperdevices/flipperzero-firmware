@@ -16,7 +16,7 @@
 extern const GpioPin* const pinD0;
 extern const GpioPin* const pinD1;
 extern volatile int bit_count;
-#define MAX_BITS 42
+#define MAX_BITS 48
 extern volatile bool data[];
 extern volatile uint32_t data_fall[];
 extern volatile uint32_t data_rise[];
