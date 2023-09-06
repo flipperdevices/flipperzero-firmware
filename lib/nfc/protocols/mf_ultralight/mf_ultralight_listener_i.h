@@ -20,6 +20,7 @@ typedef enum {
 typedef enum {
     MfUltralightCommandNotFound,
     MfUltralightCommandProcessed,
+    MfUltralightCommandProcessedSilent,
     MfUltralightCommandNotProcessedNAK,
     MfUltralightCommandNotProcessedSilent,
 } MfUltralightCommand;
@@ -57,6 +58,7 @@ struct MfUltralightListener {
     MfUltralightListenerEvent mfu_event;
     MfUltralightListenerEventData mfu_event_data;
     NfcGenericCallback callback;
+    uint8_t sector;
     MfUltralightMirrorMode mirror;
     MfUltralightListenerCompositeCommandContext composite_cmd;
     void* context;

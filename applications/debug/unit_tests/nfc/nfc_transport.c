@@ -334,7 +334,7 @@ void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context)
     furi_thread_start(instance->worker_thread);
 }
 
-NfcError nfc_listener_sleep(Nfc* instance) {
+NfcError nfc_listener_reset(Nfc* instance) {
     furi_assert(instance);
     furi_assert(poller_queue);
 
