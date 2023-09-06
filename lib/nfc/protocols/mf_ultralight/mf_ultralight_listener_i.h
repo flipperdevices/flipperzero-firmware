@@ -20,6 +20,7 @@ typedef enum {
 typedef enum {
     MfUltralightCommandNotFound,
     MfUltralightCommandProcessed,
+    MfUltralightCommandProcessedSilent,
     MfUltralightCommandNotProcessedNAK,
     MfUltralightCommandNotProcessedSilent,
 } MfUltralightCommand;
