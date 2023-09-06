@@ -5,7 +5,6 @@
 
 #include <stm32wbxx_ll_i2c.h>
 #include <stm32wbxx_ll_gpio.h>
-#include <stm32wbxx_ll_cortex.h>
 #include <furi.h>
 
 #define TAG "FuriHalI2c"
@@ -27,7 +26,7 @@ void furi_hal_i2c_acquire(FuriHalI2cBusHandle* handle) {
     furi_hal_power_insomnia_enter();
     // Lock bus access
     handle->bus->callback(handle->bus, FuriHalI2cBusEventLock);
-    // Ensuree that no active handle set
+    // Ensure that no active handle set
     furi_check(handle->bus->current_handle == NULL);
     // Set current handle
     handle->bus->current_handle = handle;
@@ -109,7 +108,7 @@ static uint32_t furi_hal_i2c_get_end_signal(FuriHalI2cEnd end) {
     }
 }
 
-static bool is_transfer_aborted(I2C_TypeDef* i2c) {
+static bool furi_hal_i2c_transfer_is_aborted(I2C_TypeDef* i2c) {
     return LL_I2C_IsActiveFlag_STOP(i2c) &&
            !(LL_I2C_IsActiveFlag_TC(i2c) || LL_I2C_IsActiveFlag_TCR(i2c));
 }
@@ -124,7 +123,7 @@ static bool furi_hal_i2c_transfer(
     bool ret = true;
 
     while(size > 0) {
-        bool should_stop = furi_hal_cortex_timer_is_expired(timer) || is_transfer_aborted(i2c);
+        bool should_stop = furi_hal_cortex_timer_is_expired(timer) || furi_hal_i2c_transfer_is_aborted(i2c);
 
         // Modifying the data pointer's data is UB if read is true
         if(read && LL_I2C_IsActiveFlag_RXNE(i2c)) {
@@ -361,11 +360,12 @@ bool furi_hal_i2c_write_reg_8(
     uint32_t timeout) {
     furi_check(handle);
 
-    uint8_t tx_data[2];
-    tx_data[0] = reg_addr;
-    tx_data[1] = data;
+    const uint8_t tx_data[2] = {
+        reg_addr,
+        data,
+    };
 
-    return furi_hal_i2c_tx(handle, i2c_addr, (const uint8_t*)&tx_data, 2, timeout);
+    return furi_hal_i2c_tx(handle, i2c_addr, tx_data, 2, timeout);
 }
 
 bool furi_hal_i2c_write_reg_16(
@@ -376,12 +376,13 @@ bool furi_hal_i2c_write_reg_16(
     uint32_t timeout) {
     furi_check(handle);
 
-    uint8_t tx_data[3];
-    tx_data[0] = reg_addr;
-    tx_data[1] = (data >> 8) & 0xFF;
-    tx_data[2] = data & 0xFF;
+    const uint8_t tx_data[3] = {
+        reg_addr,
+        (data >> 8) & 0xFF,
+        data & 0xFF,
+    };
 
-    return furi_hal_i2c_tx(handle, i2c_addr, (const uint8_t*)&tx_data, 3, timeout);
+    return furi_hal_i2c_tx(handle, i2c_addr, tx_data, 3, timeout);
 }
 
 bool furi_hal_i2c_write_mem(
