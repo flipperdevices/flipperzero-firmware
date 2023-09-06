@@ -31,10 +31,10 @@ The Flipper Zero Radar Scanner is an application designed for the Flipper Zeros 
 
 **Download the version for your firmware:**
 
-OFW_radar_scanner.fap -> Official
-radar_scanner.fap -> Xtreme
-UL_radar_scanner.fap -> Unleashed
-RM_radar_scanner.fap -> Rogue Master
+```OFW_radar_scanner.fap -> Official```
+```radar_scanner.fap -> Xtreme```
+```UL_radar_scanner.fap -> Unleashed```
+```RM_radar_scanner.fap -> Rogue Master```
 
 2. Power on the Flipper Zero and navigate to GPIO to enable 5V.
 
