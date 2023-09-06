@@ -136,6 +136,11 @@ bool slix_is_block_protected(
 
 bool slix_is_counter_increment_protected(const SlixData* data);
 
+// Static methods
+bool slix_type_has_features(SlixType slix_type, SlixTypeFeatures features);
+
+bool slix_type_supports_password(SlixType slix_type, SlixPasswordType password_type);
+
 #ifdef __cplusplus
 }
 #endif

@@ -8,3 +8,7 @@ void nfc_render_iso15693_3_info(
     const Iso15693_3Data* data,
     NfcProtocolFormatType format_type,
     FuriString* str);
+
+void nfc_render_iso15693_3_header(const Iso15693_3Data* data, FuriString* str);
+
+void nfc_render_iso15693_3_main_info(const Iso15693_3Data* data, FuriString* str);

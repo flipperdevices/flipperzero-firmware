@@ -81,11 +81,6 @@ void slix_set_privacy_mode(SlixData* data, bool set);
 
 void slix_increment_counter(SlixData* data);
 
-// Static methods
-bool slix_type_has_features(SlixType slix_type, SlixTypeFeatures features);
-
-bool slix_type_supports_password(SlixType slix_type, SlixPasswordType password_type);
-
 #ifdef __cplusplus
 }
 #endif
