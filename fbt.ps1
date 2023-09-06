@@ -57,7 +57,7 @@ if ($cpp_defines.Length -gt 0) {
 
 $builtin_totp_path = "$firmware_path/applications/external/totp"
 if ((Test-Path -Path $builtin_totp_path) -eq $True) {
-    Remove-Item $builtin_totp_path -Recurse
+    Remove-Item $builtin_totp_path -Recurse -Force
 }
 
 Push-Location $firmware_path
