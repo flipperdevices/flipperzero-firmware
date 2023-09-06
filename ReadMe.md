@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
 - Updated: [Apple BLE Spam (By Willy-JL & techryptic)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - Updated: [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
+- [Additional Frequencies for Sub-GHz Rolling Flaws app (Idea by arkanet)](https://github.com/arkanet/FlipperZero/commit/11b791f683166c9bf87866b9630491995b8feffd)
 
 <a name="release">
 
