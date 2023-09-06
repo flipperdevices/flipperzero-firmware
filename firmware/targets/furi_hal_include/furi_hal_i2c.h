@@ -1,6 +1,5 @@
 /**
- * @file furi_hal_i2c.h
- * I2C HAL API
+ * @file furi_hal_i2c.h I2C HAL API
  */
 
 #pragma once
@@ -17,26 +16,30 @@ extern "C" {
 
 /** Transaction beginning signal */
 typedef enum {
-    /*! Begin the transaction by sending a START condition followed by the address */
+    /*!Begin the transaction by sending a START condition followed by the
+     * address */
     FuriHalI2cBeginStart,
-    /*! Begin the transaction by sending a RESTART condition followed by the address
-     * @note Must follow a transaction ended with FuriHalI2cEndAwaitRestart */
+    /*!Begin the transaction by sending a RESTART condition followed by the
+     * address
+     * @note       Must follow a transaction ended with
+     *             FuriHalI2cEndAwaitRestart */
     FuriHalI2cBeginRestart,
-    /*! Continue the previous transaction with new data
-     * @note Must follow a transaction ended with FuriHalI2cEndPause and be of
-     * the same type (RX/TX) */
+    /*!Continue the previous transaction with new data
+     * @note       Must follow a transaction ended with FuriHalI2cEndPause and
+     *             be of the same type (RX/TX) */
     FuriHalI2cBeginResume,
 } FuriHalI2cBegin;
 
 /** Transaction end signal */
 typedef enum {
-    /*! End the transaction by sending a STOP condition */
+    /*!End the transaction by sending a STOP condition */
     FuriHalI2cEndStop,
-    /*! End the transaction by clock stretching
-     *  @note Must be followed by a transaction using FuriHalI2cBeginRestart */
+    /*!End the transaction by clock stretching
+     * @note       Must be followed by a transaction using
+     *             FuriHalI2cBeginRestart */
     FuriHalI2cEndAwaitRestart,
-    /*! Pauses the transaction by clock stretching
-     *  @note Must be followed by a transaction using FuriHalI2cBeginResume */
+    /*!Pauses the transaction by clock stretching
+     * @note       Must be followed by a transaction using FuriHalI2cBeginResume */
     FuriHalI2cEndPause,
 } FuriHalI2cEnd;
 
@@ -49,25 +52,26 @@ void furi_hal_i2c_deinit_early();
 /** Init I2C */
 void furi_hal_i2c_init();
 
-/** Acquire i2c bus handle
+/** Acquire I2C bus handle
  *
- * @return     Instance of FuriHalI2cBus
+ * @param      handle  Pointer to FuriHalI2cBusHandle instance
  */
 void furi_hal_i2c_acquire(FuriHalI2cBusHandle* handle);
 
-/** Release i2c bus handle
- *
- * @param      bus   instance of FuriHalI2cBus aquired in `furi_hal_i2c_acquire`
+/** Release I2C bus handle
+ * 
+ * @param      handle  Pointer to FuriHalI2cBusHandle instance acquired in
+ *                     `furi_hal_i2c_acquire`
  */
 void furi_hal_i2c_release(FuriHalI2cBusHandle* handle);
 
-/** Perform I2C tx transfer
+/** Perform I2C TX transfer
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
+ * @param      handle   Pointer to FuriHalI2cBusHandle instance
  * @param      address  I2C slave address
- * @param      data     pointer to data buffer
- * @param      size     size of data buffer
- * @param      timeout  timeout in milliseconds
+ * @param      data     Pointer to data buffer
+ * @param      size     Size of data buffer
+ * @param      timeout  Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -78,16 +82,17 @@ bool furi_hal_i2c_tx(
     size_t size,
     uint32_t timeout);
 
-/** Perform I2C tx transfer, with additional settings.
+/**
+ * Perform I2C TX transfer, with additional settings.
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
+ * @param      handle   Pointer to FuriHalI2cBusHandle instance
  * @param      address  I2C slave address
- * @param      ten_bit  whether the address is 10 bits wide
- * @param      data     pointer to data buffer
- * @param      size     size of data buffer
- * @param      begin    how to begin the transaction
- * @param      end      how to end the transaction
- * @param      timeout  timeout in milliseconds
+ * @param      ten_bit  Whether the address is 10 bits wide
+ * @param      data     Pointer to data buffer
+ * @param      size     Size of data buffer
+ * @param      begin    How to begin the transaction
+ * @param      end      How to end the transaction
+ * @param      timer    Timeout timer
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -101,13 +106,13 @@ bool furi_hal_i2c_tx_ext(
     FuriHalI2cEnd end,
     FuriHalCortexTimer timer);
 
-/** Perform I2C rx transfer
+/** Perform I2C RX transfer
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
+ * @param      handle   Pointer to FuriHalI2cBusHandle instance
  * @param      address  I2C slave address
- * @param      data     pointer to data buffer
- * @param      size     size of data buffer
- * @param      timeout  timeout in milliseconds
+ * @param      data     Pointer to data buffer
+ * @param      size     Size of data buffer
+ * @param      timeout  Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -120,14 +125,14 @@ bool furi_hal_i2c_rx(
 
 /** Perform I2C xx transfer, with additional settings.
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
+ * @param      handle   Pointer to FuriHalI2cBusHandle instance
  * @param      address  I2C slave address
- * @param      ten_bit  whether the address is 10 bits wide
- * @param      data     pointer to data buffer
- * @param      size     size of data buffer
- * @param      begin    how to begin the transaction
- * @param      end      how to end the transaction
- * @param      timeout  timeout in milliseconds
+ * @param      ten_bit  Whether the address is 10 bits wide
+ * @param      data     Pointer to data buffer
+ * @param      size     Size of data buffer
+ * @param      begin    How to begin the transaction
+ * @param      end      How to end the transaction
+ * @param      timer    Timeout timer
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -141,15 +146,15 @@ bool furi_hal_i2c_rx_ext(
     FuriHalI2cEnd end,
     FuriHalCortexTimer timer);
 
-/** Perform I2C tx and rx transfers
+/** Perform I2C TX and RX transfers
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
+ * @param      handle   Pointer to FuriHalI2cBusHandle instance
  * @param      address  I2C slave address
- * @param      tx_data  pointer to tx data buffer
- * @param      tx_size  size of tx data buffer
- * @param      rx_data  pointer to rx data buffer
- * @param      rx_size  size of rx data buffer
- * @param      timeout  timeout in milliseconds
+ * @param      tx_data  Pointer to TX data buffer
+ * @param      tx_size  Size of TX data buffer
+ * @param      rx_data  Pointer to RX data buffer
+ * @param      rx_size  Size of RX data buffer
+ * @param      timeout  Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -164,9 +169,9 @@ bool furi_hal_i2c_trx(
 
 /** Check if I2C device presents on bus
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
- * @param      i2c_addr I2C slave address
- * @param      timeout  timeout in milliseconds
+ * @param      handle    Pointer to FuriHalI2cBusHandle instance
+ * @param      i2c_addr  I2C slave address
+ * @param      timeout   Timeout in milliseconds
  *
  * @return     true if device present and is ready, false otherwise
  */
@@ -174,11 +179,11 @@ bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr,
 
 /** Perform I2C device register read (8-bit)
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
- * @param      i2c_addr I2C slave address
- * @param      reg_addr register address
- * @param      data     pointer to register value
- * @param      timeout  timeout in milliseconds
+ * @param      handle    Pointer to FuriHalI2cBusHandle instance
+ * @param      i2c_addr  I2C slave address
+ * @param      reg_addr  Register address
+ * @param      data      Pointer to register value
+ * @param      timeout   Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -191,11 +196,11 @@ bool furi_hal_i2c_read_reg_8(
 
 /** Perform I2C device register read (16-bit)
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
- * @param      i2c_addr I2C slave address
- * @param      reg_addr register address
- * @param      data     pointer to register value
- * @param      timeout  timeout in milliseconds
+ * @param      handle    Pointer to FuriHalI2cBusHandle instance
+ * @param      i2c_addr  I2C slave address
+ * @param      reg_addr  Register address
+ * @param      data      Pointer to register value
+ * @param      timeout   Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -208,12 +213,12 @@ bool furi_hal_i2c_read_reg_16(
 
 /** Perform I2C device memory read
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
- * @param      i2c_addr I2C slave address
- * @param      mem_addr memory start address
- * @param      data     pointer to data buffer
- * @param      len      size of data buffer
- * @param      timeout  timeout in milliseconds
+ * @param      handle    Pointer to FuriHalI2cBusHandle instance
+ * @param      i2c_addr  I2C slave address
+ * @param      mem_addr  Memory start address
+ * @param      data      Pointer to data buffer
+ * @param      len       Size of data buffer
+ * @param      timeout   Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -227,11 +232,11 @@ bool furi_hal_i2c_read_mem(
 
 /** Perform I2C device register write (8-bit)
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
- * @param      i2c_addr I2C slave address
- * @param      reg_addr register address
- * @param      data     register value
- * @param      timeout  timeout in milliseconds
+ * @param      handle    Pointer to FuriHalI2cBusHandle instance
+ * @param      i2c_addr  I2C slave address
+ * @param      reg_addr  Register address
+ * @param      data      Register value
+ * @param      timeout   Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -244,11 +249,11 @@ bool furi_hal_i2c_write_reg_8(
 
 /** Perform I2C device register write (16-bit)
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
- * @param      i2c_addr I2C slave address
- * @param      reg_addr register address
- * @param      data     register value
- * @param      timeout  timeout in milliseconds
+ * @param      handle    Pointer to FuriHalI2cBusHandle instance
+ * @param      i2c_addr  I2C slave address
+ * @param      reg_addr  Register address
+ * @param      data      Register value
+ * @param      timeout   Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
@@ -261,12 +266,12 @@ bool furi_hal_i2c_write_reg_16(
 
 /** Perform I2C device memory
  *
- * @param      handle   pointer to FuriHalI2cBusHandle instance
- * @param      i2c_addr I2C slave address
- * @param      mem_addr memory start address
- * @param      data     pointer to data buffer
- * @param      len      size of data buffer
- * @param      timeout  timeout in milliseconds
+ * @param      handle    Pointer to FuriHalI2cBusHandle instance
+ * @param      i2c_addr  I2C slave address
+ * @param      mem_addr  Memory start address
+ * @param      data      Pointer to data buffer
+ * @param      len       Size of data buffer
+ * @param      timeout   Timeout in milliseconds
  *
  * @return     true on successful transfer, false otherwise
  */
