@@ -27,14 +27,14 @@ The Flipper Zero Radar Scanner is an application designed for the Flipper Zeros 
 - **Exit the App**: Use the Back key to exit the app and return to the Flipper Zero's main menu.
 
 ## Getting Started
-
+1. Install the app by moving ```radar_scanner.fap``` into Applications/external
 1. Ensure you have the Flipper Zero hardware with the RCWL-0516 module connected as described above.
 
-2. Power on the Flipper Zero and navigate to the app in the GPIO section.
+2. Power on the Flipper Zero and navigate to GPIO to enable 5V.
 
-3. Press the OK button to activate the radar scanner.
+3. Navigate to the GPIO applications folder and launch ```[GPIO] Radar Scanner```
 
-4. Monitor for real-time feedback and respond accordingly.
+4. Press Ok to start and monitor for real-time feedback and respond accordingly.
 
 5. Use the Down button to toggle "muted" mode on and off.
 
