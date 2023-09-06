@@ -139,9 +139,9 @@ static int32_t nfc_worker_listener(void* context) {
             if(command == NfcCommandStop) {
                 break;
             } else if(command == NfcCommandReset) {
-                f_hal_listener_reset(instance);
+                f_hal_listener_reset();
             } else if(command == NfcCommandSleep) {
-                f_hal_nfc_listener_sleep(instance);
+                f_hal_nfc_listener_sleep();
             }
         }
     }

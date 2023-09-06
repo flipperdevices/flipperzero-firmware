@@ -162,6 +162,8 @@ FHalNfcError f_hal_iso14443_3a_listener_tx_custom_parity(
     const uint8_t* tx_parity,
     size_t tx_bits);
 
+void f_hal_listener_reset();
+
 #ifdef __cplusplus
 }
 #endif
