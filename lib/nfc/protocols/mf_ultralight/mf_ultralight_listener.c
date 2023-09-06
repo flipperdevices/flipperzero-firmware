@@ -492,7 +492,9 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
                 if(mfu_command != MfUltralightCommandNotFound) break;
             }
         }
-        if(mfu_command != MfUltralightCommandProcessed) {
+        if(mfu_command == MfUltralightCommandProcessedSilent) {
+            command = NfcCommandResetContinue;
+        } else if(mfu_command != MfUltralightCommandProcessed) {
             instance->state = MfUltraligthListenerStateIdle;
             instance->auth_state = MfUltralightListenerAuthStateIdle;
             command = NfcCommandReset;

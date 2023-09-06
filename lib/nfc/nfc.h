@@ -34,6 +34,7 @@ typedef enum {
     NfcCommandContinue,
     NfcCommandReset,
     NfcCommandStop,
+    NfcCommandResetContinue
 } NfcCommand;
 
 typedef NfcCommand (*NfcEventCallback)(NfcEvent event, void* context);

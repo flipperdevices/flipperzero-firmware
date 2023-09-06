@@ -125,6 +125,8 @@ static int32_t nfc_worker_listener(void* context) {
                 break;
             } else if(command == NfcCommandReset) {
                 nfc_listener_sleep(instance);
+            } else if(command == NfcCommandResetContinue) {
+                f_hal_nfc_listener_reset();
             }
         }
     }
