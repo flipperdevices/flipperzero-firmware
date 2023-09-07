@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <stdlib.h>
+#include <storage/storage.h>
 #include <stdio.h>
 #include <input/input.h>
 #include <furi_hal.h>
@@ -27,19 +28,53 @@ typedef struct {
     uint16_t bet;
     double money, winamount;
     SlotColumn* columns[4];
-    bool winview;
+    bool winview, loseview;
 } SlotMachineApp;
+
+typedef struct {
+    int highscore;
+} SlotsHighscore;
 
 #define START_MONEY 1500;
 #define START_BET 300;
-#define SSRAND_MAX 5;
+#define SLOTS_RAND_MAX 5;
 #define DEFAULT_SPEED 16;
+#define HIGHSCORES_FILENAME EXT_PATH("apps_data/slotmachine/game.save")
 
 uint8_t DEFAULT_SPINNING_TIMES = 10;
+static SlotsHighscore highscore;
+
+static bool highscores_load() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+
+    uint16_t bytes_readed = 0;
+
+    if(storage_file_open(file, HIGHSCORES_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        bytes_readed = storage_file_read(file, &highscore, sizeof(SlotsHighscore));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+
+    return bytes_readed == sizeof(SlotsHighscore);
+}
+
+static void highscores_save() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    File* file = storage_file_alloc(storage);
+
+    if(storage_file_open(file, HIGHSCORES_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_write(file, &highscore, sizeof(SlotsHighscore));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+}
 
 void game_results(SlotMachineApp* app) {
     int matches[] = {0, 0, 0, 0, 0};
-
     double total = 0;
 
     for(int i = 0; i < COLUMNS_COUNT; i++) {
@@ -56,6 +91,15 @@ void game_results(SlotMachineApp* app) {
         app->money += total;
         app->winamount = total;
         app->winview = true;
+
+        if(total > highscore.highscore) {
+            highscore.highscore = total;
+            highscores_save();
+        }
+    }
+
+    if(app->money < 10) {
+        app->loseview = true;
     }
 }
 
@@ -101,18 +145,23 @@ void slotmachine_draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "Slots");
-    canvas_draw_icon(canvas, 30, 3, &I_little_coin);
+    const Icon* litl_icon = &I_little_coin;
+    canvas_draw_icon(canvas, 30, 3, litl_icon);
 
     char moneyStr[15];
     snprintf(moneyStr, sizeof(moneyStr), "$%.0f", slotmachine->money);
+
+    char highscoresStr[25];
+    snprintf(highscoresStr, sizeof(highscoresStr), "HS:$%d", highscore.highscore);
 
     char betStr[7];
     snprintf(betStr, sizeof(betStr), "$%d", slotmachine->bet);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 45, 10, moneyStr);
+    canvas_draw_str(canvas, 40, 10, moneyStr);
     canvas_draw_str(canvas, 2, canvas_height(canvas) - 3, "Bet:");
     canvas_draw_str(canvas, 20, canvas_height(canvas) - 3, betStr);
+    canvas_draw_str(canvas, 75, 10, highscoresStr);
 
     if(slotmachine->winview) {
         char winamountStr[30];
@@ -120,6 +169,13 @@ void slotmachine_draw_callback(Canvas* canvas, void* ctx) {
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 2, 35, winamountStr);
+        drawButton(canvas, 95, 52, "Ok", false);
+
+        furi_mutex_release(slotmachine->model_mutex);
+        return;
+    } else if(slotmachine->loseview) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 2, 35, "You lose ;(");
         drawButton(canvas, 95, 52, "Ok", false);
 
         furi_mutex_release(slotmachine->model_mutex);
@@ -134,7 +190,7 @@ void slotmachine_draw_callback(Canvas* canvas, void* ctx) {
                 slotmachine->columns[i]->y = 13;
                 slotmachine->columns[i]->times--;
                 slotmachine->columns[i]->speed--;
-                slotmachine->columns[i]->value = rand() % SSRAND_MAX;
+                slotmachine->columns[i]->value = rand() % SLOTS_RAND_MAX;
 
                 if(slotmachine->columns[i]->times == 0) {
                     slotmachine->columns[i]->y = 23;
@@ -184,6 +240,7 @@ SlotMachineApp* slotmachine_app_alloc() {
     app->money = START_MONEY;
     app->bet = START_BET;
     app->winview = false;
+    app->loseview = false;
     app->winamount = 0;
 
     int x = 7;
@@ -221,47 +278,49 @@ int32_t slotmachine_app(void* p) {
     SlotMachineApp* slotmachine = slotmachine_app_alloc();
     InputEvent input;
 
+    if(!highscores_load()) {
+        memset(&highscore, 0, sizeof(highscore));
+    }
     // endless input cycle
-    while(1) {
-        if(furi_message_queue_get(slotmachine->input_queue, &input, 100) == FuriStatusOk) {
-            // if thread idle - take it
-            furi_check(
-                furi_mutex_acquire(slotmachine->model_mutex, FuriWaitForever) == FuriStatusOk);
+    while(furi_message_queue_get(slotmachine->input_queue, &input, FuriWaitForever) ==
+          FuriStatusOk) {
+        // if thread idle - take it
+        furi_check(furi_mutex_acquire(slotmachine->model_mutex, FuriWaitForever) == FuriStatusOk);
 
-            if(!checkIsSpinning(slotmachine)) {
-                if(input.key == InputKeyBack) {
-                    // exit on back button
-                    furi_mutex_release(slotmachine->model_mutex);
-                    break;
-                } else if(
-                    input.key == InputKeyOk && input.type == InputTypeShort &&
-                    slotmachine->winview) {
-                    slotmachine->winview = false;
-                } else if(
-                    input.key == InputKeyOk && input.type == InputTypeShort &&
-                    slotmachine->bet <= slotmachine->money) {
-                    COLUMNS_COUNT = rand() % 3 + 2;
-                    slotmachine->money -= slotmachine->bet;
-                    slotmachine->columns[0]->spining = true;
+        if(!checkIsSpinning(slotmachine)) {
+            if(input.key == InputKeyBack) {
+                // exit on back button
+                furi_mutex_release(slotmachine->model_mutex);
+                break;
+            } else if(
+                input.key == InputKeyOk && input.type == InputTypeShort &&
+                (slotmachine->winview || slotmachine->loseview)) {
+                slotmachine->winview = false;
+                slotmachine->loseview = false;
+            } else if(
+                input.key == InputKeyOk && input.type == InputTypeShort &&
+                slotmachine->bet <= slotmachine->money) {
+                COLUMNS_COUNT = rand() % 3 + 2;
+                slotmachine->money -= slotmachine->bet;
+                slotmachine->columns[0]->spining = true;
 
-                    for(int i = 0; i < COLUMNS_COUNT; i++) {
-                        slotmachine->columns[i]->times = DEFAULT_SPINNING_TIMES;
-                        slotmachine->columns[i]->speed = DEFAULT_SPEED;
-                    }
-                } else if(input.key == InputKeyUp) {
-                    if(slotmachine->bet + 10 < slotmachine->money) {
-                        slotmachine->bet += 10;
-                    }
-                } else if(input.key == InputKeyDown) {
-                    if(slotmachine->bet - 10 > 0) {
-                        slotmachine->bet -= 10;
-                    }
+                for(int i = 0; i < COLUMNS_COUNT; i++) {
+                    slotmachine->columns[i]->times = DEFAULT_SPINNING_TIMES;
+                    slotmachine->columns[i]->speed = DEFAULT_SPEED;
+                }
+            } else if(input.key == InputKeyUp) {
+                if(slotmachine->bet + 10 <= slotmachine->money) {
+                    slotmachine->bet += 10;
+                }
+            } else if(input.key == InputKeyDown) {
+                if(slotmachine->bet - 10 > 0) {
+                    slotmachine->bet -= 10;
                 }
             }
-
-            // release thread
-            furi_mutex_release(slotmachine->model_mutex);
         }
+
+        // release thread
+        furi_mutex_release(slotmachine->model_mutex);
         // redraw viewport
         view_port_update(slotmachine->view_port);
     }
