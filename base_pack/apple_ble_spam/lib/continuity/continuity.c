@@ -2,9 +2,11 @@
 #include <furi_hal_random.h>
 
 // Hacked together by @Willy-JL
+// Custom adv logic by @Willy-JL and @xMasterX
+// Extensive testing and research on behavior and parameters by @Willy-JL and @ECTO-1A
 // Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
-// Custom adv logic and Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
+// Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 static const char* continuity_type_names[ContinuityTypeCount] = {
     [ContinuityTypeAirDrop] = "AirDrop",
@@ -18,7 +20,7 @@ const char* continuity_get_type_name(ContinuityType type) {
     return continuity_type_names[type];
 }
 
-static size_t continuity_packet_sizes[ContinuityTypeCount] = {
+static uint8_t continuity_packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeAirDrop] = 24,
     [ContinuityTypeProximityPair] = 31,
     [ContinuityTypeAirplayTarget] = 12,
@@ -26,18 +28,17 @@ static size_t continuity_packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeTetheringSource] = 12,
     [ContinuityTypeNearbyAction] = 11,
 };
-size_t continuity_get_packet_size(ContinuityType type) {
+uint8_t continuity_get_packet_size(ContinuityType type) {
     return continuity_packet_sizes[type];
 }
 
 void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
-    size_t size = continuity_get_packet_size(msg->type);
-    size_t i = 0;
+    uint8_t size = continuity_get_packet_size(msg->type);
+    uint8_t i = 0;
 
-    packet[i] = size - i - 1; // Packet Length
-    i++;
-    packet[i++] = 0xff; // Packet Header
-    packet[i++] = 0x4c; // ...
+    packet[i++] = size - 1; // Packet Length
+    packet[i++] = 0xFF; // Packet Header
+    packet[i++] = 0x4C; // ...
     packet[i++] = 0x00; // ...
     packet[i++] = msg->type; // Type
     packet[i] = size - i - 1; // Message Length
@@ -75,22 +76,8 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
         packet[i++] = (rand() % 256); // Lid Open Counter
         packet[i++] = 0x00; // Device Color
         packet[i++] = 0x00;
-        packet[i++] = (rand() % 256); // Encrypted Payload
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
+        furi_hal_random_fill_buf(&packet[i], 16); // Encrypted Payload
+        i += 16;
         break;
 
     case ContinuityTypeAirplayTarget:
@@ -133,9 +120,8 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
         if(packet[i] == 0xBF && rand() % 2) packet[i]++; // Ugly hack to shift 0xBF-0xC0 for spam
         i++;
         packet[i++] = msg->data.nearby_action.type;
-        packet[i++] = (rand() % 256); // Authentication Tag
-        packet[i++] = (rand() % 256); // ...
-        packet[i++] = (rand() % 256); // ...
+        furi_hal_random_fill_buf(&packet[i], 3); // Authentication Tag
+        i += 3;
         break;
 
     default:

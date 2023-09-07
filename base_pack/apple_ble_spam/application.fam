@@ -13,7 +13,7 @@ App(
             name="continuity",
         ),
     ],
-    fap_author="@Willy-JL & @techryptic",
+    fap_author="@Willy-JL",  # Plus research from @ECTO-1A @xMasterX and @techryptic
     fap_version="1.0",
     fap_description="Spam Apple devices with annoying popups and notifications via BLE packets",
 )
