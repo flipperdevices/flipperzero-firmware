@@ -152,6 +152,7 @@ Header,+,lib/nanopb/pb.h,,
 Header,+,lib/nanopb/pb_decode.h,,
 Header,+,lib/nanopb/pb_encode.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
+Header,+,lib/nfc/helpers/nfc_data_generator.h,,
 Header,+,lib/nfc/helpers/nfc_util.h,,
 Header,+,lib/nfc/nfc.h,,
 Header,+,lib/nfc/nfc_device.h,,
@@ -177,6 +178,7 @@ Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight.h,,
 Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h,,
 Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h,,
 Header,+,lib/nfc/protocols/mf_ultralight/mf_ultralight_poller_sync_api.h,,
+Header,+,lib/nfc/protocols/slix/slix.h,,
 Header,+,lib/one_wire/maxim_crc.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
@@ -1864,6 +1866,23 @@ Function,+,iso14443_4a_verify,_Bool,"Iso14443_4aData*, const FuriString*"
 Function,+,iso14443_crc_append,void,"Iso14443CrcType, BitBuffer*"
 Function,+,iso14443_crc_check,_Bool,"Iso14443CrcType, const BitBuffer*"
 Function,+,iso14443_crc_trim,void,BitBuffer*
+Function,+,iso15693_3_alloc,Iso15693_3Data*,
+Function,+,iso15693_3_copy,void,"Iso15693_3Data*, const Iso15693_3Data*"
+Function,+,iso15693_3_free,void,Iso15693_3Data*
+Function,+,iso15693_3_get_base_data,Iso15693_3Data*,const Iso15693_3Data*
+Function,+,iso15693_3_get_block_count,uint16_t,const Iso15693_3Data*
+Function,+,iso15693_3_get_block_data,const uint8_t*,"const Iso15693_3Data*, uint8_t"
+Function,+,iso15693_3_get_block_size,uint8_t,const Iso15693_3Data*
+Function,+,iso15693_3_get_device_name,const char*,"const Iso15693_3Data*, NfcDeviceNameType"
+Function,+,iso15693_3_get_manufacturer_id,uint8_t,const Iso15693_3Data*
+Function,+,iso15693_3_get_uid,const uint8_t*,"const Iso15693_3Data*, size_t*"
+Function,+,iso15693_3_is_block_locked,_Bool,"const Iso15693_3Data*, uint8_t"
+Function,+,iso15693_3_is_equal,_Bool,"const Iso15693_3Data*, const Iso15693_3Data*"
+Function,+,iso15693_3_load,_Bool,"Iso15693_3Data*, FlipperFormat*, uint32_t"
+Function,+,iso15693_3_reset,void,Iso15693_3Data*
+Function,+,iso15693_3_save,_Bool,"const Iso15693_3Data*, FlipperFormat*"
+Function,+,iso15693_3_set_uid,_Bool,"Iso15693_3Data*, const uint8_t*, size_t"
+Function,+,iso15693_3_verify,_Bool,"Iso15693_3Data*, const FuriString*"
 Function,-,isprint,int,int
 Function,-,isprint_l,int,"int, locale_t"
 Function,-,ispunct,int,int
@@ -1999,7 +2018,7 @@ Function,-,mbedtls_des_setkey_enc,int,"mbedtls_des_context*, const unsigned char
 Function,-,mbedtls_internal_sha1_process,int,"mbedtls_sha1_context*, const unsigned char[64]"
 Function,-,mbedtls_platform_gmtime_r,tm*,"const mbedtls_time_t*, tm*"
 Function,-,mbedtls_platform_zeroize,void,"void*, size_t"
-Function,-,mbedtls_sha1,int,"const unsigned char*, size_t, unsigned char[20]"
+Function,+,mbedtls_sha1,int,"const unsigned char*, size_t, unsigned char[20]"
 Function,-,mbedtls_sha1_clone,void,"mbedtls_sha1_context*, const mbedtls_sha1_context*"
 Function,-,mbedtls_sha1_finish,int,"mbedtls_sha1_context*, unsigned char[20]"
 Function,-,mbedtls_sha1_free,void,mbedtls_sha1_context*
@@ -2165,6 +2184,8 @@ Function,-,nexttowardf,float,"float, long double"
 Function,-,nexttowardl,long double,"long double, long double"
 Function,+,nfc_alloc,Nfc*,
 Function,+,nfc_config,void,"Nfc*, NfcMode, NfcTech"
+Function,+,nfc_data_generator_fill_data,void,"NfcDataGeneratorType, NfcDevice*"
+Function,+,nfc_data_generator_get_name,const char*,NfcDataGeneratorType
 Function,+,nfc_device_alloc,NfcDevice*,
 Function,+,nfc_device_clear,void,NfcDevice*
 Function,+,nfc_device_copy_data,void,"const NfcDevice*, NfcProtocol, NfcDeviceData*"
@@ -2181,18 +2202,18 @@ Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_data,void,"NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_uid,_Bool,"NfcDevice*, const uint8_t*, size_t"
-Function,-,nfc_free,void,Nfc*
-Function,-,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
-Function,-,nfc_iso14443a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBuffer*"
-Function,-,nfc_iso14443a_poller_trx_custom_parity,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
-Function,-,nfc_iso14443a_poller_trx_sdd_frame,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
-Function,-,nfc_iso14443a_poller_trx_short_frame,NfcError,"Nfc*, NfcIso14443aShortFrame, BitBuffer*, uint32_t"
-Function,-,nfc_listener_alloc,NfcListener*,"Nfc*, NfcProtocol, const NfcDeviceData*"
-Function,-,nfc_listener_free,void,NfcListener*
-Function,-,nfc_listener_get_data,const NfcDeviceData*,"NfcListener*, NfcProtocol"
-Function,-,nfc_listener_start,void,"NfcListener*, NfcGenericCallback, void*"
-Function,-,nfc_listener_stop,void,NfcListener*
-Function,-,nfc_listener_tx,NfcError,"Nfc*, const BitBuffer*"
+Function,+,nfc_free,void,Nfc*
+Function,+,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
+Function,+,nfc_iso14443a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBuffer*"
+Function,+,nfc_iso14443a_poller_trx_custom_parity,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,nfc_iso14443a_poller_trx_sdd_frame,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,nfc_iso14443a_poller_trx_short_frame,NfcError,"Nfc*, NfcIso14443aShortFrame, BitBuffer*, uint32_t"
+Function,+,nfc_listener_alloc,NfcListener*,"Nfc*, NfcProtocol, const NfcDeviceData*"
+Function,+,nfc_listener_free,void,NfcListener*
+Function,+,nfc_listener_get_data,const NfcDeviceData*,"NfcListener*, NfcProtocol"
+Function,+,nfc_listener_start,void,"NfcListener*, NfcGenericCallback, void*"
+Function,+,nfc_listener_stop,void,NfcListener*
+Function,+,nfc_listener_tx,NfcError,"Nfc*, const BitBuffer*"
 Function,+,nfc_poller_alloc,NfcPoller*,"Nfc*, NfcProtocol"
 Function,+,nfc_poller_detect,_Bool,NfcPoller*
 Function,+,nfc_poller_free,void,NfcPoller*
@@ -2496,6 +2517,26 @@ Function,-,sinhl,long double,long double
 Function,-,sinl,long double,long double
 Function,-,siprintf,int,"char*, const char*, ..."
 Function,-,siscanf,int,"const char*, const char*, ..."
+Function,+,slix_alloc,SlixData*,
+Function,+,slix_copy,void,"SlixData*, const SlixData*"
+Function,+,slix_free,void,SlixData*
+Function,+,slix_get_base_data,const Iso15693_3Data*,const SlixData*
+Function,+,slix_get_counter,uint16_t,const SlixData*
+Function,+,slix_get_device_name,const char*,"const SlixData*, NfcDeviceNameType"
+Function,+,slix_get_password,SlixPassword,"const SlixData*, SlixPasswordType"
+Function,+,slix_get_type,SlixType,const SlixData*
+Function,+,slix_get_uid,const uint8_t*,"const SlixData*, size_t*"
+Function,+,slix_is_block_protected,_Bool,"const SlixData*, SlixPasswordType, uint8_t"
+Function,+,slix_is_counter_increment_protected,_Bool,const SlixData*
+Function,+,slix_is_equal,_Bool,"const SlixData*, const SlixData*"
+Function,+,slix_is_privacy_mode,_Bool,const SlixData*
+Function,+,slix_load,_Bool,"SlixData*, FlipperFormat*, uint32_t"
+Function,+,slix_reset,void,SlixData*
+Function,+,slix_save,_Bool,"const SlixData*, FlipperFormat*"
+Function,+,slix_set_uid,_Bool,"SlixData*, const uint8_t*, size_t"
+Function,+,slix_type_has_features,_Bool,"SlixType, SlixTypeFeatures"
+Function,+,slix_type_supports_password,_Bool,"SlixType, SlixPasswordType"
+Function,+,slix_verify,_Bool,"SlixData*, const FuriString*"
 Function,-,sniprintf,int,"char*, size_t, const char*, ..."
 Function,+,snprintf,int,"char*, size_t, const char*, ..."
 Function,-,sprintf,int,"char*, const char*, ..."

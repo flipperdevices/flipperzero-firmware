@@ -5,7 +5,6 @@ App(
     cdefines=["APP_UNIT_TESTS"],
     requires=["system_settings"],
     provides=["delay_test"],
-    requires=["nfc"],
     order=100,
 )
 

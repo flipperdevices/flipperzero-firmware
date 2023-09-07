@@ -18,6 +18,7 @@ env.Append(
         File("protocols/mf_ultralight/mf_ultralight.h"),
         File("protocols/mf_classic/mf_classic.h"),
         File("protocols/mf_desfire/mf_desfire.h"),
+        File("protocols/slix/slix.h"),
         # Pollers
         File("protocols/iso14443_3a/iso14443_3a_poller.h"),
         File("protocols/iso14443_3b/iso14443_3b_poller.h"),
@@ -37,6 +38,7 @@ env.Append(
         # Misc
         File("helpers/nfc_util.h"),
         File("helpers/iso14443_crc.h"),
+        File("helpers/nfc_data_generator.h")
     ],
 )
 
