@@ -3,8 +3,8 @@
 void nfc_scene_field_on_enter(void* context) {
     NfcApp* nfc = context;
 
-    f_hal_nfc_low_power_mode_stop();
-    f_hal_nfc_poller_field_on();
+    furi_hal_nfc_low_power_mode_stop();
+    furi_hal_nfc_poller_field_on();
     Popup* popup = nfc->popup;
     popup_set_header(
         popup,
@@ -27,7 +27,7 @@ bool nfc_scene_field_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_field_on_exit(void* context) {
     NfcApp* nfc = context;
 
-    f_hal_nfc_low_power_mode_start();
+    furi_hal_nfc_low_power_mode_start();
     notification_internal_message(nfc->notifications, &sequence_reset_blue);
     popup_reset(nfc->popup);
 }

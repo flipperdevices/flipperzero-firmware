@@ -1,23 +1,23 @@
-#include "f_hal_nfc_i.h"
+#include "furi_hal_nfc_i.h"
 
 #include <lib/drivers/st25r3916.h>
 
 #include <furi.h>
 #include <furi_hal_spi.h>
 
-#define TAG "FHalNfc"
+#define TAG "FuriHalNfc"
 
-static const FHalNfcTechBase* f_hal_nfc_tech[FHalNfcTechNum] = {
-    [FHalNfcTechIso14443a] = &f_hal_nfc_iso14443a,
-    [FHalNfcTechIso14443b] = &f_hal_nfc_iso14443b,
-    [FHalNfcTechIso15693] = &f_hal_nfc_iso15693,
-    [FHalNfcTechFelica] = &f_hal_nfc_felica,
+static const FuriHalNfcTechBase* furi_hal_nfc_tech[FuriHalNfcTechNum] = {
+    [FuriHalNfcTechIso14443a] = &furi_hal_nfc_iso14443a,
+    [FuriHalNfcTechIso14443b] = &furi_hal_nfc_iso14443b,
+    [FuriHalNfcTechIso15693] = &furi_hal_nfc_iso15693,
+    [FuriHalNfcTechFelica] = &furi_hal_nfc_felica,
 };
 
-FHalNfc f_hal_nfc;
+FuriHalNfc furi_hal_nfc;
 
-static FHalNfcError f_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
-    FHalNfcError error = FHalNfcErrorNone;
+static FuriHalNfcError furi_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
 
     if(!st25r3916_check_reg(
            handle,
@@ -26,7 +26,7 @@ static FHalNfcError f_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
            ST25R3916_REG_OP_CONTROL_en)) {
         st25r3916_mask_irq(handle, ~ST25R3916_IRQ_MASK_OSC);
         st25r3916_set_reg_bits(handle, ST25R3916_REG_OP_CONTROL, ST25R3916_REG_OP_CONTROL_en);
-        f_hal_nfc_event_wait_for_specific_irq(handle, ST25R3916_IRQ_MASK_OSC, 10);
+        furi_hal_nfc_event_wait_for_specific_irq(handle, ST25R3916_IRQ_MASK_OSC, 10);
     }
     // Disable IRQs
     st25r3916_mask_irq(handle, ST25R3916_IRQ_MASK_ALL);
@@ -37,18 +37,18 @@ static FHalNfcError f_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
         ST25R3916_REG_AUX_DISPLAY_osc_ok,
         ST25R3916_REG_AUX_DISPLAY_osc_ok);
     if(!osc_on) {
-        error = FHalNfcErrorOscillator;
+        error = FuriHalNfcErrorOscillator;
     }
 
     return error;
 }
 
-FHalNfcError f_hal_nfc_is_hal_ready() {
-    FHalNfcError error = FHalNfcErrorNone;
+FuriHalNfcError furi_hal_nfc_is_hal_ready() {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
 
     do {
-        error = f_hal_nfc_acquire();
-        if(error != FHalNfcErrorNone) break;
+        error = furi_hal_nfc_acquire();
+        if(error != FuriHalNfcErrorNone) break;
 
         FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
         uint8_t chip_id = 0;
@@ -56,27 +56,27 @@ FHalNfcError f_hal_nfc_is_hal_ready() {
         if((chip_id & ST25R3916_REG_IC_IDENTITY_ic_type_mask) !=
            ST25R3916_REG_IC_IDENTITY_ic_type_st25r3916) {
             FURI_LOG_E(TAG, "Wrong chip id");
-            error = FHalNfcErrorCommunication;
+            error = FuriHalNfcErrorCommunication;
         }
 
-        f_hal_nfc_release();
+        furi_hal_nfc_release();
     } while(false);
 
     return error;
 }
 
-FHalNfcError f_hal_nfc_init() {
-    furi_assert(f_hal_nfc.mutex == NULL);
+FuriHalNfcError furi_hal_nfc_init() {
+    furi_assert(furi_hal_nfc.mutex == NULL);
 
-    f_hal_nfc.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    FHalNfcError error = FHalNfcErrorNone;
+    furi_hal_nfc.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    FuriHalNfcError error = FuriHalNfcErrorNone;
 
-    f_hal_nfc_event_init();
-    f_hal_nfc_event_start();
+    furi_hal_nfc_event_init();
+    furi_hal_nfc_event_start();
 
     do {
-        error = f_hal_nfc_acquire();
-        if(error != FHalNfcErrorNone) break;
+        error = furi_hal_nfc_acquire();
+        if(error != FuriHalNfcErrorNone) break;
 
         FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
         // Set default state
@@ -89,19 +89,19 @@ FHalNfcError f_hal_nfc_init() {
         if((chip_id & ST25R3916_REG_IC_IDENTITY_ic_type_mask) !=
            ST25R3916_REG_IC_IDENTITY_ic_type_st25r3916) {
             FURI_LOG_E(TAG, "Wrong chip id");
-            error = FHalNfcErrorCommunication;
+            error = FuriHalNfcErrorCommunication;
         }
         // Clear interrupts
         st25r3916_get_irq(handle);
         // Mask all interrupts
         st25r3916_mask_irq(handle, ST25R3916_IRQ_MASK_ALL);
         // Enable interrupts
-        f_hal_nfc_init_gpio_isr();
+        furi_hal_nfc_init_gpio_isr();
         // Disable internal overheat protection
         st25r3916_change_test_reg_bits(handle, 0x04, 0x10, 0x10);
 
-        error = f_hal_nfc_turn_on_osc(handle);
-        if(error != FHalNfcErrorNone) break;
+        error = furi_hal_nfc_turn_on_osc(handle);
+        if(error != FuriHalNfcErrorNone) break;
 
         // Measure voltage
         // Set measure power supply voltage source
@@ -113,7 +113,7 @@ FHalNfcError f_hal_nfc_init() {
         // Enable timer and interrupt register
         st25r3916_mask_irq(handle, ~ST25R3916_IRQ_MASK_DCT);
         st25r3916_direct_cmd(handle, ST25R3916_CMD_MEASURE_VDD);
-        f_hal_nfc_event_wait_for_specific_irq(handle, ST25R3916_IRQ_MASK_DCT, 100);
+        furi_hal_nfc_event_wait_for_specific_irq(handle, ST25R3916_IRQ_MASK_DCT, 100);
         st25r3916_mask_irq(handle, ST25R3916_IRQ_MASK_ALL);
         uint8_t ad_res = 0;
         st25r3916_read_reg(handle, ST25R3916_REG_AD_RESULT, &ad_res);
@@ -233,43 +233,43 @@ FHalNfcError f_hal_nfc_init() {
             furi_delay_ms(6);
         }
 
-        f_hal_nfc_low_power_mode_start();
-        f_hal_nfc_release();
+        furi_hal_nfc_low_power_mode_start();
+        furi_hal_nfc_release();
     } while(false);
 
     return error;
 }
 
-static bool f_hal_nfc_is_mine() {
-    return (furi_mutex_get_owner(f_hal_nfc.mutex) == furi_thread_get_current_id());
+static bool furi_hal_nfc_is_mine() {
+    return (furi_mutex_get_owner(furi_hal_nfc.mutex) == furi_thread_get_current_id());
 }
 
-FHalNfcError f_hal_nfc_acquire() {
-    furi_check(f_hal_nfc.mutex);
+FuriHalNfcError furi_hal_nfc_acquire() {
+    furi_check(furi_hal_nfc.mutex);
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
 
-    FHalNfcError error = FHalNfcErrorNone;
-    if(furi_mutex_acquire(f_hal_nfc.mutex, 100) != FuriStatusOk) {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
+    if(furi_mutex_acquire(furi_hal_nfc.mutex, 100) != FuriStatusOk) {
         furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
-        error = FHalNfcErrorBusy;
+        error = FuriHalNfcErrorBusy;
     }
 
     return error;
 }
 
-FHalNfcError f_hal_nfc_release() {
-    furi_check(f_hal_nfc.mutex);
-    furi_check(f_hal_nfc_is_mine());
-    furi_check(furi_mutex_release(f_hal_nfc.mutex) == FuriStatusOk);
+FuriHalNfcError furi_hal_nfc_release() {
+    furi_check(furi_hal_nfc.mutex);
+    furi_check(furi_hal_nfc_is_mine());
+    furi_check(furi_mutex_release(furi_hal_nfc.mutex) == FuriStatusOk);
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 
-    return FHalNfcErrorNone;
+    return FuriHalNfcErrorNone;
 }
 
-FHalNfcError f_hal_nfc_low_power_mode_start() {
-    FHalNfcError error = FHalNfcErrorNone;
+FuriHalNfcError furi_hal_nfc_low_power_mode_start() {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
@@ -279,21 +279,21 @@ FHalNfcError f_hal_nfc_low_power_mode_start() {
         (ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
          ST25R3916_REG_OP_CONTROL_wu | ST25R3916_REG_OP_CONTROL_tx_en |
          ST25R3916_REG_OP_CONTROL_en_fd_mask));
-    f_hal_nfc_deinit_gpio_isr();
-    f_hal_nfc_timers_deinit();
+    furi_hal_nfc_deinit_gpio_isr();
+    furi_hal_nfc_timers_deinit();
 
     return error;
 }
 
-FHalNfcError f_hal_nfc_low_power_mode_stop() {
-    FHalNfcError error = FHalNfcErrorNone;
+FuriHalNfcError furi_hal_nfc_low_power_mode_stop() {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     do {
-        f_hal_nfc_init_gpio_isr();
-        f_hal_nfc_timers_init();
-        error = f_hal_nfc_turn_on_osc(handle);
-        if(error != FHalNfcErrorNone) break;
+        furi_hal_nfc_init_gpio_isr();
+        furi_hal_nfc_timers_init();
+        error = furi_hal_nfc_turn_on_osc(handle);
+        if(error != FuriHalNfcErrorNone) break;
         st25r3916_change_reg_bits(
             handle,
             ST25R3916_REG_OP_CONTROL,
@@ -305,7 +305,7 @@ FHalNfcError f_hal_nfc_low_power_mode_stop() {
     return error;
 }
 
-static FHalNfcError f_hal_nfc_poller_init_common(FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_poller_init_common(FuriHalSpiBusHandle* handle) {
     // Disable wake up
     st25r3916_clear_reg_bits(handle, ST25R3916_REG_OP_CONTROL, ST25R3916_REG_OP_CONTROL_wu);
     // Enable correlator
@@ -323,55 +323,55 @@ static FHalNfcError f_hal_nfc_poller_init_common(FuriHalSpiBusHandle* handle) {
     st25r3916_write_reg(handle, ST25R3916_REG_UNDERSHOOT_CONF1, 0x00);
     st25r3916_write_reg(handle, ST25R3916_REG_UNDERSHOOT_CONF2, 0x00);
 
-    return FHalNfcErrorNone;
+    return FuriHalNfcErrorNone;
 }
 
-static FHalNfcError f_hal_nfc_listener_init_common(FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_listener_init_common(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
     // TODO: Common listener configuration
-    return FHalNfcErrorNone;
+    return FuriHalNfcErrorNone;
 }
 
-FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcTech tech) {
-    furi_assert(mode < FHalNfcModeNum);
-    furi_assert(tech < FHalNfcTechNum);
+FuriHalNfcError furi_hal_nfc_set_mode(FuriHalNfcMode mode, FuriHalNfcTech tech) {
+    furi_assert(mode < FuriHalNfcModeNum);
+    furi_assert(tech < FuriHalNfcTechNum);
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    FHalNfcError error = FHalNfcErrorNone;
+    FuriHalNfcError error = FuriHalNfcErrorNone;
 
-    if(mode == FHalNfcModePoller) {
+    if(mode == FuriHalNfcModePoller) {
         do {
-            error = f_hal_nfc_poller_init_common(handle);
-            if(error != FHalNfcErrorNone) break;
-            error = f_hal_nfc_tech[tech]->poller.init(handle);
+            error = furi_hal_nfc_poller_init_common(handle);
+            if(error != FuriHalNfcErrorNone) break;
+            error = furi_hal_nfc_tech[tech]->poller.init(handle);
         } while(false);
 
-    } else if(mode == FHalNfcModeListener) {
+    } else if(mode == FuriHalNfcModeListener) {
         do {
-            error = f_hal_nfc_listener_init_common(handle);
-            if(error != FHalNfcErrorNone) break;
-            error = f_hal_nfc_tech[tech]->listener.init(handle);
+            error = furi_hal_nfc_listener_init_common(handle);
+            if(error != FuriHalNfcErrorNone) break;
+            error = furi_hal_nfc_tech[tech]->listener.init(handle);
         } while(false);
     }
 
-    f_hal_nfc.mode = mode;
-    f_hal_nfc.tech = tech;
+    furi_hal_nfc.mode = mode;
+    furi_hal_nfc.tech = tech;
     return error;
 }
 
-FHalNfcError f_hal_nfc_reset_mode() {
-    FHalNfcError error = FHalNfcErrorNone;
+FuriHalNfcError furi_hal_nfc_reset_mode() {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
 
-    const FHalNfcMode mode = f_hal_nfc.mode;
-    const FHalNfcTech tech = f_hal_nfc.tech;
-    if(mode == FHalNfcModePoller) {
-        error = f_hal_nfc_tech[tech]->poller.deinit(handle);
-    } else if(mode == FHalNfcModeListener) {
-        error = f_hal_nfc_tech[tech]->listener.deinit(handle);
+    const FuriHalNfcMode mode = furi_hal_nfc.mode;
+    const FuriHalNfcTech tech = furi_hal_nfc.tech;
+    if(mode == FuriHalNfcModePoller) {
+        error = furi_hal_nfc_tech[tech]->poller.deinit(handle);
+    } else if(mode == FuriHalNfcModeListener) {
+        error = furi_hal_nfc_tech[tech]->listener.deinit(handle);
     }
     // Set default value in mode register
     st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om0);
@@ -400,8 +400,8 @@ FHalNfcError f_hal_nfc_reset_mode() {
     return error;
 }
 
-FHalNfcError f_hal_nfc_poller_field_on() {
-    FHalNfcError error = FHalNfcErrorNone;
+FuriHalNfcError furi_hal_nfc_poller_field_on() {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     if(!st25r3916_check_reg(
@@ -421,13 +421,13 @@ FHalNfcError f_hal_nfc_poller_field_on() {
     return error;
 }
 
-FHalNfcError f_hal_nfc_poller_tx_common(
+FuriHalNfcError furi_hal_nfc_poller_tx_common(
     FuriHalSpiBusHandle* handle,
     const uint8_t* tx_data,
     size_t tx_bits) {
     furi_assert(tx_data);
 
-    FHalNfcError err = FHalNfcErrorNone;
+    FuriHalNfcError err = FuriHalNfcErrorNone;
 
     // Prepare tx
     st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
@@ -453,9 +453,11 @@ FHalNfcError f_hal_nfc_poller_tx_common(
     return err;
 }
 
-FHalNfcError
-    f_hal_nfc_common_fifo_tx(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits) {
-    FHalNfcError err = FHalNfcErrorNone;
+FuriHalNfcError furi_hal_nfc_common_fifo_tx(
+    FuriHalSpiBusHandle* handle,
+    const uint8_t* tx_data,
+    size_t tx_bits) {
+    FuriHalNfcError err = FuriHalNfcErrorNone;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
     st25r3916_write_fifo(handle, tx_data, tx_bits);
@@ -464,101 +466,102 @@ FHalNfcError
     return err;
 }
 
-FHalNfcError f_hal_nfc_poller_tx(const uint8_t* tx_data, size_t tx_bits) {
-    furi_assert(f_hal_nfc.mode == FHalNfcModePoller);
-    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+FuriHalNfcError furi_hal_nfc_poller_tx(const uint8_t* tx_data, size_t tx_bits) {
+    furi_assert(furi_hal_nfc.mode == FuriHalNfcModePoller);
+    furi_assert(furi_hal_nfc.tech < FuriHalNfcTechNum);
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    return f_hal_nfc_tech[f_hal_nfc.tech]->poller.tx(handle, tx_data, tx_bits);
+    return furi_hal_nfc_tech[furi_hal_nfc.tech]->poller.tx(handle, tx_data, tx_bits);
 }
 
-FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
-    furi_assert(f_hal_nfc.mode == FHalNfcModePoller);
-    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+FuriHalNfcError furi_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
+    furi_assert(furi_hal_nfc.mode == FuriHalNfcModePoller);
+    furi_assert(furi_hal_nfc.tech < FuriHalNfcTechNum);
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    return f_hal_nfc_tech[f_hal_nfc.tech]->poller.rx(handle, rx_data, rx_data_size, rx_bits);
+    return furi_hal_nfc_tech[furi_hal_nfc.tech]->poller.rx(handle, rx_data, rx_data_size, rx_bits);
 }
 
-FHalNfcEvent f_hal_nfc_poller_wait_event(uint32_t timeout_ms) {
-    furi_assert(f_hal_nfc.mode == FHalNfcModePoller);
-    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+FuriHalNfcEvent furi_hal_nfc_poller_wait_event(uint32_t timeout_ms) {
+    furi_assert(furi_hal_nfc.mode == FuriHalNfcModePoller);
+    furi_assert(furi_hal_nfc.tech < FuriHalNfcTechNum);
 
-    return f_hal_nfc_tech[f_hal_nfc.tech]->poller.wait_event(timeout_ms);
+    return furi_hal_nfc_tech[furi_hal_nfc.tech]->poller.wait_event(timeout_ms);
 }
 
-FHalNfcEvent f_hal_nfc_listener_wait_event(uint32_t timeout_ms) {
-    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
-    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+FuriHalNfcEvent furi_hal_nfc_listener_wait_event(uint32_t timeout_ms) {
+    furi_assert(furi_hal_nfc.mode == FuriHalNfcModeListener);
+    furi_assert(furi_hal_nfc.tech < FuriHalNfcTechNum);
 
-    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.wait_event(timeout_ms);
+    return furi_hal_nfc_tech[furi_hal_nfc.tech]->listener.wait_event(timeout_ms);
 }
 
-FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
+FuriHalNfcError furi_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
 
-    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
-    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+    furi_assert(furi_hal_nfc.mode == FuriHalNfcModeListener);
+    furi_assert(furi_hal_nfc.tech < FuriHalNfcTechNum);
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.tx(handle, tx_data, tx_bits);
+    return furi_hal_nfc_tech[furi_hal_nfc.tech]->listener.tx(handle, tx_data, tx_bits);
 }
 
-FHalNfcError f_hal_nfc_common_fifo_rx(
+FuriHalNfcError furi_hal_nfc_common_fifo_rx(
     FuriHalSpiBusHandle* handle,
     uint8_t* rx_data,
     size_t rx_data_size,
     size_t* rx_bits) {
-    FHalNfcError error = FHalNfcErrorNone;
+    FuriHalNfcError error = FuriHalNfcErrorNone;
 
     if(!st25r3916_read_fifo(handle, rx_data, rx_data_size, rx_bits)) {
-        error = FHalNfcErrorBufferOverflow;
+        error = FuriHalNfcErrorBufferOverflow;
     }
 
     return error;
 }
 
-FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
+FuriHalNfcError furi_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
     furi_assert(rx_data);
     furi_assert(rx_bits);
 
-    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
-    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+    furi_assert(furi_hal_nfc.mode == FuriHalNfcModeListener);
+    furi_assert(furi_hal_nfc.tech < FuriHalNfcTechNum);
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.rx(handle, rx_data, rx_data_size, rx_bits);
+    return furi_hal_nfc_tech[furi_hal_nfc.tech]->listener.rx(
+        handle, rx_data, rx_data_size, rx_bits);
 }
 
-FHalNfcError f_hal_nfc_trx_reset() {
+FuriHalNfcError furi_hal_nfc_trx_reset() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
 
-    return FHalNfcErrorNone;
+    return FuriHalNfcErrorNone;
 }
 
-FHalNfcError f_hal_nfc_listener_sleep() {
-    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
-    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+FuriHalNfcError furi_hal_nfc_listener_sleep() {
+    furi_assert(furi_hal_nfc.mode == FuriHalNfcModeListener);
+    furi_assert(furi_hal_nfc.tech < FuriHalNfcTechNum);
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.sleep(handle);
+    return furi_hal_nfc_tech[furi_hal_nfc.tech]->listener.sleep(handle);
 }
 
-FHalNfcError f_hal_nfc_listener_idle() {
-    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
-    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+FuriHalNfcError furi_hal_nfc_listener_idle() {
+    furi_assert(furi_hal_nfc.mode == FuriHalNfcModeListener);
+    furi_assert(furi_hal_nfc.tech < FuriHalNfcTechNum);
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.idle(handle);
+    return furi_hal_nfc_tech[furi_hal_nfc.tech]->listener.idle(handle);
 }
 
-FHalNfcError f_hal_nfc_listener_enable_rx() {
+FuriHalNfcError furi_hal_nfc_listener_enable_rx() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 
-    return FHalNfcErrorNone;
+    return FuriHalNfcErrorNone;
 }

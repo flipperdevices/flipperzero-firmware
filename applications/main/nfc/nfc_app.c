@@ -455,7 +455,7 @@ void nfc_app_reset_detected_protocols(NfcApp* instance) {
 }
 
 static bool nfc_is_hal_ready() {
-    if(f_hal_nfc_is_hal_ready() != FHalNfcErrorNone) {
+    if(furi_hal_nfc_is_hal_ready() != FuriHalNfcErrorNone) {
         // No connection to the chip, show an error screen
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();

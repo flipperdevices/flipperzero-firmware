@@ -6,8 +6,8 @@
 
 #include <drivers/st25r3916.h>
 #include <nfc/nfc.h>
-#include <f_hal_nfc.h>
-#include <f_hal_nfc_i.h>
+#include <furi_hal_nfc.h>
+#include <furi_hal_nfc_i.h>
 
 #include <furi_hal_resources.h>
 #include <signal_reader/parsers/iso15693/iso15693_parser.h>
@@ -26,22 +26,22 @@ static void nfc_cli_print_usage() {
     }
 }
 
-static void f_hal_nfc_iso15693_listener_transparent_mode_enter(FuriHalSpiBusHandle* handle) {
+static void furi_hal_nfc_iso15693_listener_transparent_mode_enter(FuriHalSpiBusHandle* handle) {
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
 
     furi_hal_spi_bus_handle_deinit(handle);
-    f_hal_nfc_deinit_gpio_isr();
+    furi_hal_nfc_deinit_gpio_isr();
 }
 
-static void f_hal_nfc_iso15693_listener_transparent_mode_exit(FuriHalSpiBusHandle* handle) {
+static void furi_hal_nfc_iso15693_listener_transparent_mode_exit(FuriHalSpiBusHandle* handle) {
     // Configure gpio back to SPI and exit transparent mode
-    f_hal_nfc_init_gpio_isr();
+    furi_hal_nfc_init_gpio_isr();
     furi_hal_spi_bus_handle_init(handle);
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 }
 
-static void f_hal_nfc_iso15693_parser_callback(Iso15693ParserEvent event, void* context) {
+static void furi_hal_nfc_iso15693_parser_callback(Iso15693ParserEvent event, void* context) {
     furi_assert(context);
 
     if(event == Iso15693ParserEventDataReceived) {
@@ -59,14 +59,14 @@ static void nfc_cli_check(Cli* cli, FuriString* args) {
     size_t bits = 0;
 
     Nfc* nfc = nfc_alloc();
-    f_hal_nfc_low_power_mode_stop();
-    f_hal_nfc_set_mode(FHalNfcModeListener, FHalNfcTechIso15693);
-    f_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
+    furi_hal_nfc_low_power_mode_stop();
+    furi_hal_nfc_set_mode(FuriHalNfcModeListener, FuriHalNfcTechIso15693);
+    furi_hal_nfc_iso15693_listener_transparent_mode_enter(handle);
     Iso15693Parser* instance = iso15693_parser_alloc(&gpio_spi_r_miso, 1024);
 
     FuriThreadId thread_id = furi_thread_get_current_id();
     furi_thread_set_current_priority(FuriThreadPriorityHighest);
-    iso15693_parser_start(instance, f_hal_nfc_iso15693_parser_callback, thread_id);
+    iso15693_parser_start(instance, furi_hal_nfc_iso15693_parser_callback, thread_id);
 
     while(true) {
         uint32_t flag = furi_thread_flags_wait(FLAG_EVENT, FuriFlagWaitAny, FuriWaitForever);
@@ -86,11 +86,11 @@ static void nfc_cli_check(Cli* cli, FuriString* args) {
     printf("\r\n");
 
     iso15693_parser_stop(instance);
-    f_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
+    furi_hal_nfc_iso15693_listener_transparent_mode_exit(handle);
 
     iso15693_parser_free(instance);
-    f_hal_nfc_reset_mode();
-    f_hal_nfc_low_power_mode_start();
+    furi_hal_nfc_reset_mode();
+    furi_hal_nfc_low_power_mode_start();
     nfc_free(nfc);
 }
 

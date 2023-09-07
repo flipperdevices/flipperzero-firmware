@@ -34,17 +34,17 @@
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",
-        "f_hal_nfc.c",
-        "f_hal_nfca.c",
-        "f_hal_nfc_event.c",
-        "f_hal_nfc_irq.c",
-        "f_hal_nfc_timer.c",
+        "furi_hal_nfc.c",
+        "furi_hal_nfca.c",
+        "furi_hal_nfc_event.c",
+        "furi_hal_nfc_irq.c",
+        "furi_hal_nfc_timer.c",
         "furi_hal_rfid.c",
         "furi_hal_subghz.c"
     ],
     "excluded_headers": [
         "furi_hal_infrared.h",
-        "f_hal_nfc.h",
+        "furi_hal_nfc.h",
         "furi_hal_rfid.h",
         "furi_hal_subghz.h",
         "furi_hal_ibutton.h",

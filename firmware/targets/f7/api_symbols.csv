@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,39.0,,
+Version,+,37.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -60,7 +60,6 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_uart.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_usb_cdc.h,,
 Header,+,firmware/targets/f7/platform_specific/intrinsic_export.h,,
 Header,+,firmware/targets/f7/platform_specific/math_wrapper.h,,
-Header,+,firmware/targets/furi_hal_include/f_hal_nfc.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt_hid.h,,
@@ -74,6 +73,7 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_infrared.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_light.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_memory.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_mpu.h,,
+Header,+,firmware/targets/furi_hal_include/furi_hal_nfc.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_power.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_random.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_region.h,,
@@ -879,39 +879,6 @@ Function,-,explicit_bzero,void,"void*, size_t"
 Function,-,expm1,double,double
 Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
-Function,-,f_hal_nfc_abort,FHalNfcError,
-Function,-,f_hal_nfc_acquire,FHalNfcError,
-Function,+,f_hal_nfc_event_start,FHalNfcError,
-Function,-,f_hal_nfc_init,FHalNfcError,
-Function,-,f_hal_nfc_is_hal_ready,FHalNfcError,
-Function,-,f_hal_nfc_iso14443a_listener_set_col_res_data,FHalNfcError,"uint8_t*, uint8_t, uint8_t*, uint8_t"
-Function,-,f_hal_nfc_iso14443a_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const uint8_t*, size_t"
-Function,-,f_hal_nfc_iso14443a_poller_trx_short_frame,FHalNfcError,FHalNfcaShortFrame
-Function,-,f_hal_nfc_iso14443a_poller_tx_custom_parity,FHalNfcError,"const uint8_t*, size_t"
-Function,-,f_hal_nfc_iso14443a_rx_sdd_frame,FHalNfcError,"uint8_t*, size_t, size_t*"
-Function,-,f_hal_nfc_iso14443a_tx_sdd_frame,FHalNfcError,"const uint8_t*, size_t"
-Function,-,f_hal_nfc_listener_enable_rx,FHalNfcError,
-Function,-,f_hal_nfc_listener_idle,FHalNfcError,
-Function,+,f_hal_nfc_listener_rx,FHalNfcError,"uint8_t*, size_t, size_t*"
-Function,-,f_hal_nfc_listener_sleep,FHalNfcError,
-Function,-,f_hal_nfc_listener_tx,FHalNfcError,"const uint8_t*, size_t"
-Function,-,f_hal_nfc_listener_wait_event,FHalNfcEvent,uint32_t
-Function,-,f_hal_nfc_low_power_mode_start,FHalNfcError,
-Function,-,f_hal_nfc_low_power_mode_stop,FHalNfcError,
-Function,-,f_hal_nfc_poller_field_on,FHalNfcError,
-Function,-,f_hal_nfc_poller_rx,FHalNfcError,"uint8_t*, size_t, size_t*"
-Function,-,f_hal_nfc_poller_tx,FHalNfcError,"const uint8_t*, size_t"
-Function,-,f_hal_nfc_poller_wait_event,FHalNfcEvent,uint32_t
-Function,-,f_hal_nfc_release,FHalNfcError,
-Function,-,f_hal_nfc_reset_mode,FHalNfcError,
-Function,+,f_hal_nfc_set_mode,FHalNfcError,"FHalNfcMode, FHalNfcTech"
-Function,-,f_hal_nfc_timer_block_tx_is_running,_Bool,
-Function,-,f_hal_nfc_timer_block_tx_start,void,uint32_t
-Function,-,f_hal_nfc_timer_block_tx_start_us,void,uint32_t
-Function,-,f_hal_nfc_timer_block_tx_stop,void,
-Function,-,f_hal_nfc_timer_fwt_start,void,uint32_t
-Function,-,f_hal_nfc_timer_fwt_stop,void,
-Function,-,f_hal_nfc_trx_reset,FHalNfcError,
 Function,-,fabs,double,double
 Function,-,fabsf,float,float
 Function,-,fabsl,long double,long double
@@ -1302,6 +1269,39 @@ Function,-,furi_hal_mpu_init,void,
 Function,+,furi_hal_mpu_protect_disable,void,FuriHalMpuRegion
 Function,+,furi_hal_mpu_protect_no_access,void,"FuriHalMpuRegion, uint32_t, FuriHalMPURegionSize"
 Function,+,furi_hal_mpu_protect_read_only,void,"FuriHalMpuRegion, uint32_t, FuriHalMPURegionSize"
+Function,+,furi_hal_nfc_abort,FuriHalNfcError,
+Function,+,furi_hal_nfc_acquire,FuriHalNfcError,
+Function,+,furi_hal_nfc_event_start,FuriHalNfcError,
+Function,+,furi_hal_nfc_init,FuriHalNfcError,
+Function,+,furi_hal_nfc_is_hal_ready,FuriHalNfcError,
+Function,+,furi_hal_nfc_iso14443a_listener_set_col_res_data,FuriHalNfcError,"uint8_t*, uint8_t, uint8_t*, uint8_t"
+Function,+,furi_hal_nfc_iso14443a_listener_tx_custom_parity,FuriHalNfcError,"const uint8_t*, const uint8_t*, size_t"
+Function,+,furi_hal_nfc_iso14443a_poller_trx_short_frame,FuriHalNfcError,FuriHalNfcaShortFrame
+Function,+,furi_hal_nfc_iso14443a_poller_tx_custom_parity,FuriHalNfcError,"const uint8_t*, size_t"
+Function,+,furi_hal_nfc_iso14443a_rx_sdd_frame,FuriHalNfcError,"uint8_t*, size_t, size_t*"
+Function,+,furi_hal_nfc_iso14443a_tx_sdd_frame,FuriHalNfcError,"const uint8_t*, size_t"
+Function,+,furi_hal_nfc_listener_enable_rx,FuriHalNfcError,
+Function,+,furi_hal_nfc_listener_idle,FuriHalNfcError,
+Function,+,furi_hal_nfc_listener_rx,FuriHalNfcError,"uint8_t*, size_t, size_t*"
+Function,+,furi_hal_nfc_listener_sleep,FuriHalNfcError,
+Function,+,furi_hal_nfc_listener_tx,FuriHalNfcError,"const uint8_t*, size_t"
+Function,+,furi_hal_nfc_listener_wait_event,FuriHalNfcEvent,uint32_t
+Function,+,furi_hal_nfc_low_power_mode_start,FuriHalNfcError,
+Function,+,furi_hal_nfc_low_power_mode_stop,FuriHalNfcError,
+Function,+,furi_hal_nfc_poller_field_on,FuriHalNfcError,
+Function,+,furi_hal_nfc_poller_rx,FuriHalNfcError,"uint8_t*, size_t, size_t*"
+Function,+,furi_hal_nfc_poller_tx,FuriHalNfcError,"const uint8_t*, size_t"
+Function,+,furi_hal_nfc_poller_wait_event,FuriHalNfcEvent,uint32_t
+Function,+,furi_hal_nfc_release,FuriHalNfcError,
+Function,+,furi_hal_nfc_reset_mode,FuriHalNfcError,
+Function,+,furi_hal_nfc_set_mode,FuriHalNfcError,"FuriHalNfcMode, FuriHalNfcTech"
+Function,+,furi_hal_nfc_timer_block_tx_is_running,_Bool,
+Function,+,furi_hal_nfc_timer_block_tx_start,void,uint32_t
+Function,+,furi_hal_nfc_timer_block_tx_start_us,void,uint32_t
+Function,+,furi_hal_nfc_timer_block_tx_stop,void,
+Function,+,furi_hal_nfc_timer_fwt_start,void,uint32_t
+Function,+,furi_hal_nfc_timer_fwt_stop,void,
+Function,+,furi_hal_nfc_trx_reset,FuriHalNfcError,
 Function,-,furi_hal_os_init,void,
 Function,+,furi_hal_os_tick,void,
 Function,+,furi_hal_power_check_otg_fault,_Bool,

@@ -1,6 +1,6 @@
-#include "f_hal_nfc_i.h"
+#include "furi_hal_nfc_i.h"
 
-static FHalNfcError f_hal_nfc_felica_poller_init(FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_felica_poller_init(FuriHalSpiBusHandle* handle) {
     // Enable Felica mode, AM modulation
     st25r3916_change_reg_bits(
         handle,
@@ -40,23 +40,23 @@ static FHalNfcError f_hal_nfc_felica_poller_init(FuriHalSpiBusHandle* handle) {
         ST25R3916_REG_CORR_CONF1_corr_s6 | ST25R3916_REG_CORR_CONF1_corr_s4 |
             ST25R3916_REG_CORR_CONF1_corr_s3);
 
-    return FHalNfcErrorNone;
+    return FuriHalNfcErrorNone;
 }
 
-static FHalNfcError f_hal_nfc_felica_poller_deinit(FuriHalSpiBusHandle* handle) {
+static FuriHalNfcError furi_hal_nfc_felica_poller_deinit(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
 
-    return FHalNfcErrorNone;
+    return FuriHalNfcErrorNone;
 }
 
-const FHalNfcTechBase f_hal_nfc_felica = {
+const FuriHalNfcTechBase furi_hal_nfc_felica = {
     .poller =
         {
-            .init = f_hal_nfc_felica_poller_init,
-            .deinit = f_hal_nfc_felica_poller_deinit,
-            .wait_event = f_hal_nfc_wait_event_common,
-            .tx = f_hal_nfc_poller_tx_common,
-            .rx = f_hal_nfc_common_fifo_rx,
+            .init = furi_hal_nfc_felica_poller_init,
+            .deinit = furi_hal_nfc_felica_poller_deinit,
+            .wait_event = furi_hal_nfc_wait_event_common,
+            .tx = furi_hal_nfc_poller_tx_common,
+            .rx = furi_hal_nfc_common_fifo_rx,
         },
 
     .listener = {0},
