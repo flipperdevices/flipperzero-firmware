@@ -7,8 +7,8 @@ void rolling_flaws_setting_change(VariableItem *item, char **names, uint8_t *new
     *new_index = index;
 }
 
-uint32_t setting_frequency_values[] = {315000000, 390000000, 433920000};
-char *setting_frequency_names[] = {"315.00", "390.00", "433.92"};
+uint32_t setting_frequency_values[] = {310000000, 315000000, 390000000, 433420000, 433920000, 868350000, 868800000};
+char *setting_frequency_names[] = {"310.00", "315.00", "390.00", "433.42", "433.92", "868.35", "868.80"};
 void rolling_flaws_setting_frequency_change(VariableItem *item)
 {
     RollingFlaws *app = variable_item_get_context(item);
@@ -182,7 +182,7 @@ void rolling_flaw_populate_variable_item_list(RollingFlaws *app)
         COUNT_OF(setting_frequency_names),
         rolling_flaws_setting_frequency_change,
         app);
-    app->model->frequency_index = 2; // 433.92
+    app->model->frequency_index = 4; // 433.92
     variable_item_set_current_value_index(item, app->model->frequency_index);
     variable_item_set_current_value_text(
         item, setting_frequency_names[app->model->frequency_index]);

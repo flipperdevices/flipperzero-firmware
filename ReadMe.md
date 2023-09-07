@@ -56,6 +56,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Spectrum Analyzer (with changes) | ![SubGhz Badge] | [by jolcese](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) | [Ultra Narrow mode & scan channels non-consecutively](https://github.com/theY4Kman/flipperzero-firmware/commits?author=theY4Kman) | [![UFW Badge]](https://lab.flipper.net/apps/spectrum_analyzer) |
 | POCSAG Pager | ![SubGhz Badge] | [by xMasterX & Shmuma](https://github.com/xMasterX/flipper-pager) |  | [![UFW Badge]](https://lab.flipper.net/apps/pocsag_pager) |
 | **ProtoView** | ![SubGhz Badge] | [by antirez](https://github.com/antirez/protoview) |  | [![UFW Badge]](https://lab.flipper.net/apps/protoview) |
+| Rolling Flaws | ![SubGhz Badge] | [by CodeAllNight & jamisonderek](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/rolling-flaws) |  | ![None Badge] |
 | **Mifare Nested** | ![NFC Badge] | [by AloneLiberty](https://github.com/AloneLiberty/FlipperNested) | Works with PC and python app `FlipperNested` | [![Author Badge]](https://lab.flipper.net/apps/mifare_nested) |
 | **NFC Maker** plugin | ![NFC Badge] | [by Willy-JL](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/dev/applications/external/nfc_maker) | make tags with URLs, Wifi and other things | ![None Badge] |
 | **RFID Fuzzer** | ![RFID Badge] | [by @gid9798](https://github.com/DarkFlippers/Multi_Fuzzer) | original by Ganapati & xMasterX | [![UFW Badge]](https://lab.flipper.net/apps/fuzzer_rfid) |
@@ -208,7 +209,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | (Q)M100 UHF RFID | ![RFID Badge] | [by frux-c](https://github.com/frux-c/uhf_rfid) | WIP -> (+Added icon by @xMasterX) | ![None Badge] |
 | Enhanced Sub-GHz Chat | ![SubGhz Badge] | [by twisted-pear](https://github.com/twisted-pear/esubghz_chat) |  | ![None Badge] |
 | TPMS Reader | ![SubGhz Badge] | [by wosk](https://github.com/wosk/flipperzero-tpms/tree/main) |  | ![None Badge] |
-| Rolling Flaws | ![SubGhz Badge] | [by CodeAllNight & jamisonderek](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/rolling-flaws) |  | ![None Badge] |
 | Analog Clock | ![Tools Badge] | [by scrolltex](https://github.com/scrolltex/flipper_analog_clock) |  | [![UFW Badge]](https://lab.flipper.net/apps/analog_clock) |
 | Brainfuck interpreter | ![Tools Badge] | [by nymda](https://github.com/nymda/FlipperZeroBrainfuck) |  | [![UFW Badge]](https://lab.flipper.net/apps/brainfuck) |
 | Ceasar Cipher | ![Tools Badge] | [by panki27](https://github.com/panki27/caesar-cipher) |  | [![UFW Badge]](https://lab.flipper.net/apps/caesar_cipher) |
