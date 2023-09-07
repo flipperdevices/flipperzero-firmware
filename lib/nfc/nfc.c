@@ -123,7 +123,7 @@ static int32_t nfc_worker_listener(void* context) {
         if(event & FHalNfcEventFieldOff) {
             nfc_event.type = NfcEventTypeFieldOff;
             instance->callback(nfc_event, instance->context);
-            f_hal_nfc_listener_sleep();
+            f_hal_nfc_listener_idle();
         }
         // TODO maybe remove?
         if(event & FHalNfcEventListenerActive) {
@@ -139,7 +139,7 @@ static int32_t nfc_worker_listener(void* context) {
             if(command == NfcCommandStop) {
                 break;
             } else if(command == NfcCommandReset) {
-                f_hal_listener_reset();
+                f_hal_nfc_listener_enable_rx();
             } else if(command == NfcCommandSleep) {
                 f_hal_nfc_listener_sleep();
             }

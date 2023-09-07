@@ -123,6 +123,10 @@ FHalNfcError f_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t
 
 FHalNfcError f_hal_nfc_listener_sleep();
 
+FHalNfcError f_hal_nfc_listener_idle();
+
+FHalNfcError f_hal_nfc_listener_enable_rx();
+
 FHalNfcError f_hal_nfc_trx_reset();
 
 FHalNfcError f_hal_nfc_abort();
@@ -161,8 +165,6 @@ FHalNfcError f_hal_iso14443_3a_listener_tx_custom_parity(
     const uint8_t* tx_data,
     const uint8_t* tx_parity,
     size_t tx_bits);
-
-void f_hal_listener_reset();
 
 #ifdef __cplusplus
 }

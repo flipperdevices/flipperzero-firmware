@@ -44,7 +44,7 @@ static MfClassicListenerCommand
 
     if(bit_buffer_get_byte(buff, 1) == MF_CLASSIC_CMD_HALT_LSB) {
         mf_classic_listener_reset_state(instance);
-        command = MfClassicListenerCommandSilent;
+        command = MfClassicListenerCommandSleep;
     }
 
     return command;
@@ -533,7 +533,7 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
 
     if(iso3_event->type == Iso14443_3aListenerEventTypeFieldOff) {
         mf_classic_listener_reset_state(instance);
-        command = NfcCommandReset;
+        command = NfcCommandSleep;
     } else if(
         (iso3_event->type == Iso14443_3aListenerEventTypeReceivedData) ||
         (iso3_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame)) {
@@ -573,6 +573,8 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
             mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_NACK);
         } else if(mfc_command == MfClassicListenerCommandSilent) {
             command = NfcCommandReset;
+        } else if(mfc_command == MfClassicListenerCommandSleep) {
+            command = NfcCommandSleep;
         }
     } else if(iso3_event->type == Iso14443_3aListenerEventTypeHalted) {
         mf_classic_listener_reset_state(instance);

@@ -66,7 +66,7 @@ FHalNfcEvent f_hal_nfc_wait_event_common(uint32_t timeout_ms) {
                 event |= FHalNfcEventListenerActive;
             }
             if(irq & ST25R3916_IRQ_MASK_WU_A_X) {
-                event |= FHalNfcEventListenerActiveA;
+                event |= FHalNfcEventListenerActive;
             }
         }
         if(event_flag & FHalNfcEventInternalTypeTimerFwtExpired) {

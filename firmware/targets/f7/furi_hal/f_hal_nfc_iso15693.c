@@ -430,5 +430,6 @@ const FHalNfcTechBase f_hal_nfc_iso15693 = {
             .tx = f_hal_nfc_iso15693_listener_tx,
             .rx = f_hal_nfc_iso15693_listener_rx,
             .sleep = f_hal_iso15693_listener_sleep,
+            .idle = f_hal_iso15693_listener_sleep,
         },
 };

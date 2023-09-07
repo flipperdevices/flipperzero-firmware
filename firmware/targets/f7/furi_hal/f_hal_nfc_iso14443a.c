@@ -84,15 +84,15 @@ static FHalNfcError f_hal_nfc_iso14443a_listener_init(FuriHalSpiBusHandle* handl
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
     uint32_t interrupts =
-        (/*ST25R3916_IRQ_MASK_FWL | ST25R3916_IRQ_MASK_TXE |*/ ST25R3916_IRQ_MASK_RXS /*|
+        (ST25R3916_IRQ_MASK_FWL | ST25R3916_IRQ_MASK_TXE | ST25R3916_IRQ_MASK_RXS |
          ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_PAR | ST25R3916_IRQ_MASK_CRC |
-         ST25R3916_IRQ_MASK_ERR1 | ST25R3916_IRQ_MASK_ERR2 | ST25R3916_IRQ_MASK_EON |
-         ST25R3916_IRQ_MASK_EOF | ST25R3916_IRQ_MASK_WU_A_X | ST25R3916_IRQ_MASK_WU_A*/);
+         ST25R3916_IRQ_MASK_ERR1 | ST25R3916_IRQ_MASK_ERR2 | ST25R3916_IRQ_MASK_NRE |
+         ST25R3916_IRQ_MASK_EON | ST25R3916_IRQ_MASK_EOF | ST25R3916_IRQ_MASK_WU_A_X |
+         ST25R3916_IRQ_MASK_WU_A);
     // Clear interrupts
-    // FURI_LOG_I("LISTEN START", "%lX", interrupts);
     st25r3916_get_irq(handle);
     // Enable interrupts
-    st25r3916_mask_irq(handle, interrupts);
+    st25r3916_mask_irq(handle, ~interrupts);
     // Enable auto collision resolution
     st25r3916_clear_reg_bits(
         handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
@@ -116,7 +116,7 @@ static FHalNfcEvent f_hal_nfc_iso14443_3a_listener_wait_event(uint32_t timeout_m
     FHalNfcEvent event = f_hal_nfc_wait_event_common(timeout_ms);
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    if(event == FHalNfcEventListenerActive) {
+    if(event & FHalNfcEventListenerActive) {
         st25r3916_set_reg_bits(
             handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
     }
@@ -311,6 +311,16 @@ FHalNfcError f_hal_iso14443_3a_listener_sleep(FuriHalSpiBusHandle* handle) {
     return FHalNfcErrorNone;
 }
 
+FHalNfcError f_hal_iso14443_3a_listener_idle(FuriHalSpiBusHandle* handle) {
+    // Enable auto collision resolution
+    st25r3916_clear_reg_bits(
+        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SENSE);
+
+    return FHalNfcErrorNone;
+}
+
 const FHalNfcTechBase f_hal_nfc_iso14443a = {
     .poller =
         {
@@ -329,5 +339,6 @@ const FHalNfcTechBase f_hal_nfc_iso14443a = {
             .tx = f_hal_iso4443a_listener_tx,
             .rx = f_hal_nfc_common_fifo_rx,
             .sleep = f_hal_iso14443_3a_listener_sleep,
+            .idle = f_hal_iso14443_3a_listener_idle,
         },
 };

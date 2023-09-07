@@ -546,8 +546,19 @@ FHalNfcError f_hal_nfc_listener_sleep() {
     return f_hal_nfc_tech[f_hal_nfc.tech]->listener.sleep(handle);
 }
 
-void f_hal_listener_reset() {
+FHalNfcError f_hal_nfc_listener_idle() {
+    furi_assert(f_hal_nfc.mode == FHalNfcModeListener);
+    furi_assert(f_hal_nfc.tech < FHalNfcTechNum);
+
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    return f_hal_nfc_tech[f_hal_nfc.tech]->listener.idle(handle);
+}
+
+FHalNfcError f_hal_nfc_listener_enable_rx() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
+
+    return FHalNfcErrorNone;
 }

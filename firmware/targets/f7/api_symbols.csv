@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,41.4,,
+Version,+,41.7,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -871,12 +871,13 @@ Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
 Function,-,f_hal_iso14443_3a_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const uint8_t*, size_t"
 Function,-,f_hal_iso14443_3a_poller_tx_custom_parity,FHalNfcError,"const uint8_t*, size_t"
-Function,-,f_hal_listener_reset,void,
 Function,-,f_hal_nfc_abort,FHalNfcError,
 Function,-,f_hal_nfc_acquire,FHalNfcError,
 Function,+,f_hal_nfc_event_start,FHalNfcError,
 Function,-,f_hal_nfc_init,FHalNfcError,
 Function,-,f_hal_nfc_is_hal_ready,FHalNfcError,
+Function,-,f_hal_nfc_listener_enable_rx,FHalNfcError,
+Function,-,f_hal_nfc_listener_idle,FHalNfcError,
 Function,+,f_hal_nfc_listener_rx,FHalNfcError,"uint8_t*, size_t, size_t*"
 Function,-,f_hal_nfc_listener_sleep,FHalNfcError,
 Function,-,f_hal_nfc_listener_tx,FHalNfcError,"const uint8_t*, size_t"

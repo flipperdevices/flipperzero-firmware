@@ -92,14 +92,14 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
             instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeFieldOff;
             instance->callback(instance->generic_event, instance->context);
         }
-        command = NfcCommandReset;
+        command = NfcCommandSleep;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         if(iso14443_3a_listener_halt_received(nfc_event->data.buffer)) {
             if(instance->callback) {
                 instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeHalted;
                 instance->callback(instance->generic_event, instance->context);
             }
-            command = NfcCommandReset;
+            command = NfcCommandSleep;
         } else {
             if(iso14443_crc_check(Iso14443CrcTypeA, nfc_event->data.buffer)) {
                 instance->iso14443_3a_event.type =
