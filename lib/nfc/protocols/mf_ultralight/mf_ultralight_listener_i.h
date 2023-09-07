@@ -78,6 +78,15 @@ void mf_ultralight_composite_command_reset(MfUltralightListener* instance);
 bool mf_ultralight_composite_command_in_progress(MfUltralightListener* instance);
 MfUltralightCommand
     mf_ultralight_composite_command_run(MfUltralightListener* instance, BitBuffer* buffer);
+
+bool mf_ultralight_is_i2c_tag(MfUltralightType type);
+bool mf_ultralight_i2c_validate_pages(
+    uint16_t start_page,
+    uint16_t end_page,
+    MfUltralightListener* instance);
+
+uint16_t
+    mf_ultralight_i2c_provide_page_by_requested(uint16_t page, MfUltralightListener* instance);
 #ifdef __cplusplus
 }
 #endif
