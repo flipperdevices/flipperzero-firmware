@@ -47,8 +47,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Apple BLE Spam v1.0.4 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - Updated: [Sub-GHz Rolling Flaws v1.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - Updated: [Slot Machine v1.2 (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Extended Functionality #17 (By R4g3D)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/17)
 - Updated: [Radar Scanner (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
+- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Extended Functionality #17 (By R4g3D)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/17)
 
 <a name="release">
 

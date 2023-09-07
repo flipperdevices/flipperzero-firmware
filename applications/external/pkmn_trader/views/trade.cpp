@@ -411,9 +411,9 @@ unsigned char convertCharToTagHex(char c) {
         return PERIOD_;
     case '\'':
         return S_QUOTE_;
-    case '♂':
+    case '\u2642':
         return MALE_;
-    case '♀':
+    case '\u2640':
         return FEMALE_;
     default:
         return 0x00;
