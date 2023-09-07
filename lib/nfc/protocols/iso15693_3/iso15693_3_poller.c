@@ -21,7 +21,7 @@ static Iso15693_3Poller* iso15693_3_poller_alloc(Nfc* nfc) {
     instance->tx_buffer = bit_buffer_alloc(ISO15693_3_POLLER_MAX_BUFFER_SIZE);
     instance->rx_buffer = bit_buffer_alloc(ISO15693_3_POLLER_MAX_BUFFER_SIZE);
 
-    nfc_config(instance->nfc, NfcModeIso15693Poller);
+    nfc_config(instance->nfc, NfcModePoller, NfcTechIso15693);
     nfc_set_guard_time_us(instance->nfc, ISO15693_3_GUARD_TIME_US);
     nfc_set_fdt_poll_fc(instance->nfc, ISO15693_3_FDT_POLL_FC);
     nfc_set_fdt_poll_poll_us(instance->nfc, ISO15693_3_POLL_POLL_MIN_US);

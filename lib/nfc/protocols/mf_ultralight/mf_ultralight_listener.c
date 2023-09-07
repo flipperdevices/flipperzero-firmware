@@ -536,11 +536,11 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
             }
         }
         if(mfu_command == MfUltralightCommandProcessedSilent) {
-            command = NfcCommandSleep;
+            command = NfcCommandReset;
         } else if(mfu_command != MfUltralightCommandProcessed) {
             instance->state = MfUltraligthListenerStateIdle;
             instance->auth_state = MfUltralightListenerAuthStateIdle;
-            command = NfcCommandReset;
+            command = NfcCommandSleep;
 
             if(mfu_command == MfUltralightCommandNotProcessedNAK) {
                 mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
@@ -554,7 +554,7 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         mf_ultralight_composite_command_reset(instance);
         instance->sector = 0;
         instance->auth_state = MfUltralightListenerAuthStateIdle;
-        command = NfcCommandReset;
+        command = NfcCommandSleep;
     }
 
     return command;

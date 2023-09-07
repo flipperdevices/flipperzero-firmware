@@ -14,6 +14,7 @@ typedef enum {
     MfClassicListenerCommandAck,
     MfClassicListenerCommandNack,
     MfClassicListenerCommandSilent,
+    MfClassicListenerCommandSleep,
 } MfClassicListenerCommand;
 
 typedef enum {

@@ -738,19 +738,18 @@ bool mf_classic_poller_detect(NfcGenericEvent event, void* context) {
     Iso14443_3aPoller* iso3_poller = event.instance;
     Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
     bool detected = false;
+    const uint8_t auth_cmd[] = {MF_CLASSIC_CMD_AUTH_KEY_A, 0};
+    BitBuffer* tx_buffer = bit_buffer_alloc(COUNT_OF(auth_cmd));
+    bit_buffer_copy_bytes(tx_buffer, auth_cmd, COUNT_OF(auth_cmd));
+    BitBuffer* rx_buffer = bit_buffer_alloc(sizeof(MfClassicNt));
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
-        const Iso14443_3aData* iso3_data = iso14443_3a_poller_get_data(iso3_poller);
-        uint8_t atqa0 = iso3_data->atqa[0];
-        uint8_t atqa1 = iso3_data->atqa[1];
-        uint8_t sak = iso3_data->sak;
-        if((atqa0 == 0x44 || atqa0 == 0x04) && (sak == 0x08 || sak == 0x88 || sak == 0x09)) {
-            detected = true;
-        } else if((atqa0 == 0x01) && (atqa1 == 0x0F) && (sak == 0x01)) {
-            //skylanders support
-            detected = true;
-        } else if((atqa0 == 0x42 || atqa0 == 0x02) && (sak == 0x18)) {
-            detected = true;
+        Iso14443_3aError error = iso14443_3a_poller_send_standard_frame(
+            iso3_poller, tx_buffer, rx_buffer, MF_CLASSIC_FWT_FC);
+        if(error == Iso14443_3aErrorWrongCrc) {
+            if(bit_buffer_get_size_bytes(rx_buffer) == sizeof(MfClassicNt)) {
+                detected = true;
+            }
         }
     }
 

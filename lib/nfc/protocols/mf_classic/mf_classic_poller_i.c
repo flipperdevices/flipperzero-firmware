@@ -7,8 +7,6 @@
 
 #define TAG "MfCLassicPoller"
 
-#define MF_CLASSIC_FWT_FC (60000)
-
 MfClassicError mf_classic_process_error(Iso14443_3aError error) {
     MfClassicError ret = MfClassicErrorNone;
 

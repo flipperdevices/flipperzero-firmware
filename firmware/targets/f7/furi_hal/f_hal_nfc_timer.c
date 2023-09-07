@@ -87,6 +87,7 @@ static void f_hal_nfc_timer_init(FHalNfcTimer timer) {
 }
 
 static void f_hal_nfc_timer_deinit(FHalNfcTimer timer) {
+    LL_TIM_ClearFlag_UPDATE(f_hal_nfc_timers[timer].timer);
     furi_hal_interrupt_set_isr(f_hal_nfc_timers[timer].irq_id, NULL, NULL);
     NVIC_DisableIRQ(f_hal_nfc_timers[timer].irq_type);
     f_hal_nfc_timers[timer].is_configured = false;

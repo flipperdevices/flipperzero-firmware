@@ -79,6 +79,8 @@ typedef FHalNfcError (*FHalNfcRx)(
     size_t rx_data_size,
     size_t* rx_bits);
 typedef FHalNfcEvent (*FHalNfcWaitEvent)(uint32_t timeout_ms);
+typedef FHalNfcError (*FHalNfcSleep)(FuriHalSpiBusHandle* handle);
+typedef FHalNfcError (*FHalNfcIdle)(FuriHalSpiBusHandle* handle);
 
 typedef struct {
     FHalNfcChipConfig init;
@@ -92,9 +94,10 @@ typedef struct {
     FHalNfcChipConfig init;
     FHalNfcChipConfig deinit;
     FHalNfcWaitEvent wait_event;
-    FHalNfcChipConfig rx_start;
     FHalNfcTx tx;
     FHalNfcRx rx;
+    FHalNfcSleep sleep;
+    FHalNfcIdle idle;
 } FHalNfcTechListenerBase;
 
 typedef struct {

@@ -42,7 +42,8 @@ static Iso14443_3bError iso14443_3b_poller_frame_exchange(
     Iso14443_3bError ret = Iso14443_3bErrorNone;
 
     do {
-        NfcError error = nfc_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+        NfcError error =
+            nfc_poller_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
         if(error != NfcErrorNone) {
             ret = iso14443_3b_poller_process_error(error);
             break;
