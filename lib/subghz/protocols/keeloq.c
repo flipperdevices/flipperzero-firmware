@@ -122,7 +122,7 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
     uint32_t fix = (uint32_t)btn << 28 | instance->generic.serial;
     uint32_t decrypt = (uint32_t)btn << 28 |
                        (instance->generic.serial & 0x3FF)
-                           << 16 | //ToDo in some protocols the discriminator is 0
+                           << 16 | // In some protocols the discriminator is 0
                        instance->generic.cnt;
     uint32_t hop = 0;
     uint64_t man = 0;
@@ -149,7 +149,8 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
                     hop = subghz_protocol_keeloq_common_encrypt(decrypt, man);
                     break;
                 case KEELOQ_LEARNING_UNKNOWN:
-                    hop = 0; //todo
+                    //Invalid or missing encoding type in keeloq_mfcodes
+                    hop = 0;
                     break;
                 }
                 break;
@@ -199,9 +200,7 @@ static bool
     furi_assert(instance);
 
     //gen new key
-    if(subghz_protocol_keeloq_gen_data(instance, btn)) {
-        //ToDo if you need to add a callback to automatically update the data on the display
-    } else {
+    if(!subghz_protocol_keeloq_gen_data(instance, btn)) {
         return false;
     }
 
@@ -467,6 +466,19 @@ static inline bool subghz_protocol_keeloq_check_decrypt(
     }
     return false;
 }
+// Centurion specific check
+static inline bool subghz_protocol_keeloq_check_decrypt_centurion(
+    SubGhzBlockGeneric* instance,
+    uint32_t decrypt,
+    uint8_t btn) {
+    furi_assert(instance);
+
+    if((decrypt >> 28 == btn) && (((((uint16_t)(decrypt >> 16)) & 0x3FF) == 0x1CE))) {
+        instance->cnt = decrypt & 0x0000FFFF;
+        return true;
+    }
+    return false;
+}
 
 /** 
  * Checking the accepted code against the database manafacture key
@@ -509,9 +521,16 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                 // https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
                 man = subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
-                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
-                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
-                    return 1;
+                if((strcmp(furi_string_get_cstr(manufacture_code->name), "Centurion") == 0)) {
+                    if(subghz_protocol_keeloq_check_decrypt_centurion(instance, decrypt, btn)) {
+                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        return 1;
+                    }
+                } else {
+                    if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                        *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                        return 1;
+                    }
                 }
                 break;
             case KEELOQ_LEARNING_SECURE:

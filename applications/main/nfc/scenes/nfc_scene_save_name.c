@@ -1,5 +1,5 @@
 #include "../nfc_app_i.h"
-#include <lib/toolbox/random_name.h>
+#include <toolbox/name_generator.h>
 
 void nfc_scene_save_name_text_input_callback(void* context) {
     NfcApp* nfc = context;
@@ -15,7 +15,7 @@ void nfc_scene_save_name_on_enter(void* context) {
     bool name_is_empty = furi_string_empty(nfc->file_name);
     if(name_is_empty) {
         furi_string_set(nfc->file_path, NFC_APP_FOLDER);
-        set_random_name(nfc->text_store, NFC_TEXT_STORE_SIZE);
+        name_generator_make_auto(nfc->text_store, NFC_TEXT_STORE_SIZE, NFC_APP_FILENAME_PREFIX);
         furi_string_set(folder_path, NFC_APP_FOLDER);
     } else {
         nfc_text_store_set(nfc, "%s", furi_string_get_cstr(nfc->file_name));

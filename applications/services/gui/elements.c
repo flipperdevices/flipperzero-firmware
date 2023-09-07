@@ -236,11 +236,11 @@ static size_t
     }
 
     if(len_px > px_left) {
-        uint8_t excess_symbols_approximately =
-            roundf((float)(len_px - px_left) / ((float)len_px / (float)text_size));
+        size_t excess_symbols_approximately =
+            ceilf((float)(len_px - px_left) / ((float)len_px / (float)text_size));
         // reduce to 5 to be sure dash fit, and next line will be at least 5 symbols long
         if(excess_symbols_approximately > 0) {
-            excess_symbols_approximately = MAX(excess_symbols_approximately, 5);
+            excess_symbols_approximately = MAX(excess_symbols_approximately, 5u);
             result = text_size - excess_symbols_approximately - 1;
         } else {
             result = text_size;
@@ -290,7 +290,8 @@ void elements_multiline_text_aligned(
         } else if((y + font_height) > canvas_height(canvas)) {
             line = furi_string_alloc_printf("%.*s...\n", chars_fit, start);
         } else {
-            line = furi_string_alloc_printf("%.*s-\n", chars_fit, start);
+            // Account for the added "-" in length
+            line = furi_string_alloc_printf("%.*s-\n", chars_fit - 1, start);
         }
         canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, furi_string_get_cstr(line));
         furi_string_free(line);

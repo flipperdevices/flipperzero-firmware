@@ -17,6 +17,26 @@ ViewPort* gui_view_port_find_enabled(ViewPortArray_t array) {
     return NULL;
 }
 
+size_t gui_active_view_port_count(Gui* gui, GuiLayer layer) {
+    furi_assert(gui);
+    furi_check(layer < GuiLayerMAX);
+    size_t ret = 0;
+
+    gui_lock(gui);
+    ViewPortArray_it_t it;
+    ViewPortArray_it_last(it, gui->layers[layer]);
+    while(!ViewPortArray_end_p(it)) {
+        ViewPort* view_port = *ViewPortArray_ref(it);
+        if(view_port_is_enabled(view_port)) {
+            ret++;
+        }
+        ViewPortArray_previous(it);
+    }
+    gui_unlock(gui);
+
+    return ret;
+}
+
 void gui_update(Gui* gui) {
     furi_assert(gui);
     if(!gui->direct_draw) furi_thread_flags_set(gui->thread_id, GUI_THREAD_FLAG_DRAW);
@@ -341,10 +361,11 @@ void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {
     furi_assert(view_port);
     furi_check(layer < GuiLayerMAX);
     // Only fullscreen supports Vertical orientation for now
-    furi_assert(
+    ViewPortOrientation view_port_orientation = view_port_get_orientation(view_port);
+    furi_check(
         (layer == GuiLayerFullscreen) ||
-        ((view_port->orientation != ViewPortOrientationVertical) &&
-         (view_port->orientation != ViewPortOrientationVerticalFlip)));
+        ((view_port_orientation != ViewPortOrientationVertical) &&
+         (view_port_orientation != ViewPortOrientationVerticalFlip)));
 
     gui_lock(gui);
     // Verify that view port is not yet added

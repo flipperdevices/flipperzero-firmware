@@ -4,6 +4,13 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable, ClassVar, List, Optional, Tuple, Union
 
+try:
+    from fbt.util import resolve_real_dir_node
+except ImportError:
+    # When running outside of SCons, we don't have access to SCons.Node
+    def resolve_real_dir_node(node):
+        return node
+
 
 class FlipperManifestException(Exception):
     pass
@@ -152,7 +159,7 @@ class AppManager:
                 FlipperApplication(
                     *args,
                     **kw,
-                    _appdir=app_dir_node,
+                    _appdir=resolve_real_dir_node(app_dir_node),
                     _apppath=os.path.dirname(app_manifest_path),
                     _appmanager=self,
                 ),
@@ -186,8 +193,19 @@ class AppManager:
             raise FlipperManifestException(f"Duplicate app declaration: {app.appid}")
         self.known_apps[app.appid] = app
 
-    def filter_apps(self, applist: List[str], hw_target: str):
-        return AppBuildset(self, applist, hw_target)
+    def filter_apps(
+        self,
+        *,
+        applist: List[str],
+        ext_applist: List[str],
+        hw_target: str,
+    ):
+        return AppBuildset(
+            self,
+            hw_target=hw_target,
+            appnames=applist,
+            extra_ext_appnames=ext_applist,
+        )
 
 
 class AppBuilderException(Exception):
@@ -204,6 +222,12 @@ class AppBuildset:
         FlipperAppType.SETTINGS,
         FlipperAppType.STARTUP,
     )
+    EXTERNAL_APP_TYPES = (
+        FlipperAppType.EXTERNAL,
+        FlipperAppType.MENUEXTERNAL,
+        FlipperAppType.PLUGIN,
+        FlipperAppType.DEBUG,
+    )
 
     @staticmethod
     def print_writer(message):
@@ -212,16 +236,21 @@ class AppBuildset:
     def __init__(
         self,
         appmgr: AppManager,
-        appnames: List[str],
         hw_target: str,
+        appnames: List[str],
+        *,
+        extra_ext_appnames: List[str],
         message_writer: Callable | None = None,
     ):
         self.appmgr = appmgr
         self.appnames = set(appnames)
+        self.incompatible_extapps, self.extapps = [], []
+        self._extra_ext_appnames = extra_ext_appnames
         self._orig_appnames = appnames
         self.hw_target = hw_target
         self._writer = message_writer if message_writer else self.print_writer
         self._process_deps()
+        self._process_ext_apps()
         self._check_conflicts()
         self._check_unsatisfied()  # unneeded?
         self._check_target_match()
@@ -263,6 +292,27 @@ class AppBuildset:
             if len(provided) == 0:
                 break
             self.appnames.update(provided)
+
+    def _process_ext_apps(self):
+        extapps = [
+            app
+            for apptype in self.EXTERNAL_APP_TYPES
+            for app in self.get_apps_of_type(apptype, True)
+        ]
+        extapps.extend(map(self.appmgr.get, self._extra_ext_appnames))
+
+        for app in extapps:
+            (
+                self.extapps
+                if app.supports_hardware_target(self.hw_target)
+                else self.incompatible_extapps
+            ).append(app)
+
+    def get_ext_apps(self):
+        return self.extapps
+
+    def get_incompatible_ext_apps(self):
+        return self.incompatible_extapps
 
     def _check_conflicts(self):
         conflicts = []
