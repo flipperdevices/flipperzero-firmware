@@ -39,9 +39,6 @@ class Main(App):
         # Skipping 3rd-party code - usually resides in subfolder "lib"
         if "lib" in dirnames:
             dirnames.remove("lib")
-        if "compiled" in dirnames:
-            dirnames.remove("compiled")
-
         # Skipping hidden folders
         for dirname in dirnames.copy():
             if dirname.startswith("."):
