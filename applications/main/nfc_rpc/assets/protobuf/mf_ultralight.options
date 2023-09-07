@@ -1,9 +1,0 @@
-PB_MfUltralight.ReadPageRequest.page            int_size:IS_16
-PB_MfUltralight.ReadPageResponse.page           int_size:IS_16
-PB_MfUltralight.ReadPageResponse.data           max_size: 4
-PB_MfUltralight.WritePageRequest.page           int_size:IS_16
-PB_MfUltralight.WritePageRequest.data           max_size: 4
-PB_MfUltralight.ReadSignatureResponse.data      max_size: 32
-PB_MfUltralight.ReadCounterResponse.data        max_size: 3
-PB_MfUltralight.ReadTearingFlagResponse.data    max_size: 1
-PB_MfUltralight.EmulateStartRequest.data        max_size: 2048
