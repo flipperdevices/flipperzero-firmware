@@ -68,7 +68,8 @@ void wiegand_timer_callback(void* context) {
     FURI_CRITICAL_ENTER();
     if(duration > 25 * one_millisecond) {
         if(bit_count == 4 || bit_count == 8 || bit_count == 24 || bit_count == 26 ||
-           bit_count == 32 || bit_count == 34 || bit_count == 37 || bit_count == 40) {
+           bit_count == 32 || bit_count == 34 || bit_count == 37 || bit_count == 40 ||
+           bit_count == 48) {
             wiegand_stop_read(app);
             scene_manager_next_scene(app->scene_manager, WiegandDataScene);
         } else {

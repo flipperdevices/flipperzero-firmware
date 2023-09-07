@@ -24,8 +24,12 @@ void wiegand_play() {
 
     furi_hal_gpio_write(pinD0, true);
     furi_hal_gpio_init(pinD0, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_write(pinD0mosfet, false);
+    furi_hal_gpio_init(pinD0mosfet, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_write(pinD1, true);
     furi_hal_gpio_init(pinD1, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_write(pinD1mosfet, false);
+    furi_hal_gpio_init(pinD1mosfet, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
     single_vibro();
     furi_delay_ms(500);
@@ -33,18 +37,24 @@ void wiegand_play() {
     int j = 0;
     for(int i = 0; i < bit_count; i++) {
         if(data[i]) {
-            furi_hal_gpio_write(pinD1, false);
+            furi_hal_gpio_write(pinD1mosfet, true); // Activate the mosfet to ground wire
+            furi_hal_gpio_write(pinD1, false); // Ground the open-drain wire
             furi_delay_us(delays[j++]);
-            furi_hal_gpio_write(pinD1, true);
+            furi_hal_gpio_write(pinD1, true); // Float the wire
+            furi_hal_gpio_write(pinD1mosfet, false); // Deactivate the mosfet
             furi_delay_us(delays[j++]);
         } else {
-            furi_hal_gpio_write(pinD0, false);
+            furi_hal_gpio_write(pinD0mosfet, true); // Activate the mosfet to ground wire
+            furi_hal_gpio_write(pinD0, false); // Ground the open-drain wire
             furi_delay_us(delays[j++]);
-            furi_hal_gpio_write(pinD0, true);
+            furi_hal_gpio_write(pinD0, true); // Float the wire
+            furi_hal_gpio_write(pinD0mosfet, false); // Deactivate the mosfet
             furi_delay_us(delays[j++]);
         }
     }
 
     furi_hal_gpio_init_simple(pinD0, GpioModeAnalog);
     furi_hal_gpio_init_simple(pinD1, GpioModeAnalog);
+    furi_hal_gpio_init_simple(pinD0mosfet, GpioModeAnalog);
+    furi_hal_gpio_init_simple(pinD1mosfet, GpioModeAnalog);
 }

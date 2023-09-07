@@ -53,18 +53,27 @@ void wiegand_add_info_26bit(FuriString* buffer) {
     furi_string_cat_printf(buffer, "\nFacility: 0x");
     int code = 0;
     int count = 0;
+    uint32_t dec = 0;
     for(int i = 1; i < 25; i++) {
         code = code << 1;
+        dec = dec << 1;
         code |= data[i] ? 1 : 0;
+        dec |= data[i] ? 1 : 0;
         if(++count % 4 == 0) {
             furi_string_cat_printf(buffer, "%X", code);
             code = 0;
+        }
+
+        if(i == 8) {
+            furi_string_cat_printf(buffer, " (%ld)", dec);
+            dec = 0;
         }
         // Parity, then 8 bit facility code, then id.
         if(i == 9) {
             furi_string_cat_printf(buffer, "\nId: 0x");
         }
     }
+    furi_string_cat_printf(buffer, " (%ld)", dec);
 
     if(data[13]) {
         parity = 1;
@@ -91,18 +100,51 @@ void wiegand_add_info_24bit(FuriString* buffer) {
     furi_string_cat_printf(buffer, "\nFacility: 0x");
     int code = 0;
     int count = 0;
+    uint32_t dec = 0;
     for(int i = 0; i < 24; i++) {
         code = code << 1;
+        dec = dec << 1;
         code |= data[i] ? 1 : 0;
+        dec |= data[i] ? 1 : 0;
         if(++count % 4 == 0) {
             furi_string_cat_printf(buffer, "%X", code);
             code = 0;
         }
         // The first 8 bits are facility code, then comes id.
         if(i == 8) {
+            furi_string_cat_printf(buffer, " (%ld)", dec);
+            dec = 0;
             furi_string_cat_printf(buffer, "\nId: 0x");
         }
     }
+    furi_string_cat_printf(buffer, " (%ld)", dec);
+}
+
+void wiegand_add_info_48bit(FuriString* buffer) {
+    // We assume this is HID 48 bit Corporate 1000 - H2004064 format.
+    // The first bit is odd parity 2 (based on bits 2-48).
+    // The next bit is even parity (based on 4-5,7-8,10-11,...,46-47).
+    // Then 22 bit company code.
+    // Then 23 bit card id.
+    /// Then odd parity 1 (based on 3-4,6-7,9-10,...,45-46).
+
+    // 22 bits company code (bits 3-24; data[2..23])
+    uint32_t code = 0;
+    for(int i = 2; i <= 23; i++) {
+        code = code << 1;
+        code |= data[i] ? 1 : 0;
+    }
+    furi_string_cat_printf(buffer, "\nCompany: %lX (%ld)", code, code);
+
+    // 23 bit card id (bits 25-47; data[24..46]).
+    code = 0;
+    for(int i = 24; i <= 46; i++) {
+        code = code << 1;
+        code |= data[i] ? 1 : 0;
+    }
+    furi_string_cat_printf(buffer, "\nCard: %lX (%ld)", code, code);
+
+    // TODO: Add the 3 parity checks.
 }
 
 void wiegand_add_info(FuriString* buffer) {
@@ -113,6 +155,8 @@ void wiegand_add_info(FuriString* buffer) {
         wiegand_add_info_26bit(buffer);
     } else if(bit_count == 24) {
         wiegand_add_info_24bit(buffer);
+    } else if(bit_count == 48) {
+        wiegand_add_info_48bit(buffer);
     }
     furi_string_push_back(buffer, '\n');
 }
