@@ -34,7 +34,6 @@
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",
-        "furi_hal_nfc.c",
         "f_hal_nfc.c",
         "f_hal_nfca.c",
         "f_hal_nfc_event.c",
@@ -45,7 +44,6 @@
     ],
     "excluded_headers": [
         "furi_hal_infrared.h",
-        "furi_hal_nfc.h",
         "f_hal_nfc.h",
         "furi_hal_rfid.h",
         "furi_hal_subghz.h",
