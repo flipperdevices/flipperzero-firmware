@@ -357,7 +357,7 @@ $ ./fbt dolphin_ext
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [IR Scope (By kallanreed)](https://github.com/kallanreed/unleashed-firmware/tree/dev/applications/external/ir_scope)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
-- [JavaScript (By zap8600)[(https://github.com/zap8600/js-f0)
+- [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
 - [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Lightmeter v1.2 (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`
@@ -457,14 +457,9 @@ $ ./fbt dolphin_ext
 - [Wire Tester (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 
-## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
-
-- If you can fix any of these, DM me on Discord for a surprise reward.
-- [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple)
-- Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
-
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
 
+- Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 - [IR Remote (5V/External GPIO Settings in App Like Infrared) ($25 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/641)
 - [Notepad FAP ($25 ETH or BTC BOUNTY)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/694)
 - [Air Tag for FZ ($50 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/696)
