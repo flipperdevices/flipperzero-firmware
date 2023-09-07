@@ -9,7 +9,6 @@ extern "C" {
 
 #define ISO14443_3B_UID_SIZE (4U)
 #define ISO14443_3B_APP_DATA_SIZE (4U)
-#define ISO14443_3B_PROTOCOL_INFO_SIZE (3U)
 
 #define ISO14443_3B_GUARD_TIME_US (5000U)
 #define ISO14443_3B_FDT_POLL_FC (9000U)
@@ -38,19 +37,19 @@ typedef enum {
 } Iso14443_3bError;
 
 typedef struct {
-    uint8_t flag;
-    uint8_t uid[ISO14443_3B_UID_SIZE];
-    uint8_t app_data[ISO14443_3B_APP_DATA_SIZE];
-    uint8_t protocol_info[ISO14443_3B_PROTOCOL_INFO_SIZE];
-} Iso14443_3bAtqB;
+    uint8_t bit_rate_capability;
+    uint8_t max_frame_size : 4;
+    uint8_t protocol_type : 4;
+    uint8_t fwi : 4;
+    uint8_t rfu : 2;
+    uint8_t fo : 2;
+} Iso14443_3bProtocolInfo;
 
 typedef struct {
     uint8_t uid[ISO14443_3B_UID_SIZE];
     uint8_t app_data[ISO14443_3B_APP_DATA_SIZE];
-    uint8_t protocol_info[ISO14443_3B_PROTOCOL_INFO_SIZE];
+    Iso14443_3bProtocolInfo protocol_info;
 } Iso14443_3bData;
-
-extern const NfcDeviceBase nfc_device_iso14443_3b;
 
 Iso14443_3bData* iso14443_3b_alloc();
 
@@ -75,6 +74,10 @@ const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len)
 bool iso14443_3b_set_uid(Iso14443_3bData* data, const uint8_t* uid, size_t uid_len);
 
 Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data);
+
+// Getters and tests
+
+bool iso14443_3b_supports_iso14443_4(const Iso14443_3bData* data);
 
 #ifdef __cplusplus
 }

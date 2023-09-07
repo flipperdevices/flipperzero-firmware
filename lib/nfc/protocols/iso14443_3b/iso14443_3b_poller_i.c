@@ -88,7 +88,14 @@ Iso14443_3bError
             break;
         }
 
-        if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(Iso14443_3bAtqB)) {
+        typedef struct {
+            uint8_t flag;
+            uint8_t uid[ISO14443_3B_UID_SIZE];
+            uint8_t app_data[ISO14443_3B_APP_DATA_SIZE];
+            Iso14443_3bProtocolInfo protocol_info;
+        } Iso14443_3bAtqBLayout;
+
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(Iso14443_3bAtqBLayout)) {
             FURI_LOG_D(TAG, "Unexpected REQB response");
             instance->state = Iso14443_3bPollerStateColResFailed;
             ret = Iso14443_3bErrorCommunication;
@@ -97,12 +104,13 @@ Iso14443_3bError
 
         instance->state = Iso14443_3bPollerStateActivationInProgress;
 
-        const Iso14443_3bAtqB* atqb =
-            (const Iso14443_3bAtqB*)bit_buffer_get_data(instance->rx_buffer);
+        const Iso14443_3bAtqBLayout* atqb =
+            (const Iso14443_3bAtqBLayout*)bit_buffer_get_data(instance->rx_buffer);
 
         memcpy(data->uid, atqb->uid, ISO14443_3B_UID_SIZE);
         memcpy(data->app_data, atqb->app_data, ISO14443_3B_APP_DATA_SIZE);
-        memcpy(data->protocol_info, atqb->protocol_info, ISO14443_3B_PROTOCOL_INFO_SIZE);
+
+        data->protocol_info = atqb->protocol_info;
 
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_reset(instance->rx_buffer);

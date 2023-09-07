@@ -1849,6 +1849,7 @@ Function,+,iso14443_3b_load,_Bool,"Iso14443_3bData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_3b_reset,void,Iso14443_3bData*
 Function,+,iso14443_3b_save,_Bool,"const Iso14443_3bData*, FlipperFormat*"
 Function,+,iso14443_3b_set_uid,_Bool,"Iso14443_3bData*, const uint8_t*, size_t"
+Function,+,iso14443_3b_supports_iso14443_4,_Bool,const Iso14443_3bData*
 Function,+,iso14443_3b_verify,_Bool,"Iso14443_3bData*, const FuriString*"
 Function,+,iso14443_4a_alloc,Iso14443_4aData*,
 Function,+,iso14443_4a_copy,void,"Iso14443_4aData*, const Iso14443_4aData*"
@@ -3379,7 +3380,6 @@ Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
 Variable,-,nfc_device_iso14443_3a,const NfcDeviceBase,
-Variable,+,nfc_device_iso14443_3b,const NfcDeviceBase,
 Variable,-,nfc_device_iso14443_4a,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
 Variable,-,nfc_device_mf_desfire,const NfcDeviceBase,

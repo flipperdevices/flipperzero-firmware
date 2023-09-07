@@ -15,8 +15,8 @@ typedef struct {
  *                             +------------------------+-----------+---------+
  *                             |                        |           |         |
  *                        ISO14443-3A              ISO14443-3B    Felica  ISO15693-3
- *                             |                                              |
- *             +---------------+-------------+                              SLIX
+ *                             |                        |                     |
+ *             +---------------+-------------+     ISO14443-4B              SLIX
  *             |               |             |
  *        ISO14443-4A   Mf Ultralight   Mf Classic
  *             |
@@ -29,6 +29,10 @@ typedef struct {
 static const NfcProtocol nfc_protocol_iso14443_3a_children_protocol[] = {
     NfcProtocolIso14443_4a,
     NfcProtocolMfUltralight,
+};
+
+static const NfcProtocol nfc_protocol_iso14443_3b_children_protocol[] = {
+    NfcProtocolIso14443_4b,
 };
 
 static const NfcProtocol nfc_protocol_iso14443_4a_children_protocol[] = {
@@ -50,13 +54,19 @@ static const NfcProtocolTreeNode nfc_protocol_nodes[NfcProtocolNum] = {
         {
             .parent_protocol = NfcProtocolInvalid,
             .children_num = 0,
-            .children_protocol = NULL,
+            .children_protocol = nfc_protocol_iso14443_3b_children_protocol,
         },
     [NfcProtocolIso14443_4a] =
         {
             .parent_protocol = NfcProtocolIso14443_3a,
             .children_num = COUNT_OF(nfc_protocol_iso14443_4a_children_protocol),
             .children_protocol = nfc_protocol_iso14443_4a_children_protocol,
+        },
+    [NfcProtocolIso14443_4b] =
+        {
+            .parent_protocol = NfcProtocolIso14443_3b,
+            .children_num = 0,
+            .children_protocol = NULL,
         },
     [NfcProtocolIso15693_3] =
         {

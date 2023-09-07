@@ -70,8 +70,8 @@ bool iso14443_3b_load(Iso14443_3bData* data, FlipperFormat* ff, uint32_t version
         if(!flipper_format_read_hex(
                ff,
                ISO14443_3B_PROTOCOL_INFO_KEY,
-               data->protocol_info,
-               ISO14443_3B_PROTOCOL_INFO_SIZE))
+               (uint8_t*)&data->protocol_info,
+               sizeof(Iso14443_3bProtocolInfo)))
             break;
 
         parsed = true;
@@ -94,8 +94,8 @@ bool iso14443_3b_save(const Iso14443_3bData* data, FlipperFormat* ff) {
         if(!flipper_format_write_hex(
                ff,
                ISO14443_3B_PROTOCOL_INFO_KEY,
-               data->protocol_info,
-               ISO14443_3B_PROTOCOL_INFO_SIZE))
+               (uint8_t*)&data->protocol_info,
+               sizeof(Iso14443_3bProtocolInfo)))
             break;
         saved = true;
     } while(false);
@@ -142,4 +142,10 @@ bool iso14443_3b_set_uid(Iso14443_3bData* data, const uint8_t* uid, size_t uid_l
 Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data) {
     UNUSED(data);
     furi_crash("No base data");
+}
+
+bool iso14443_3b_supports_iso14443_4(const Iso14443_3bData* data) {
+    furi_assert(data);
+
+    return data->protocol_info.protocol_type == 0x01;
 }
