@@ -11,10 +11,7 @@
 
 typedef enum {
     NfcStateIdle,
-    NfcStateFieldOn,
-    NfcStateListenerStarted,
-    NfcStatePollerReady,
-    NfcStatePollerReset,
+    NfcStateRunning,
 } NfcState;
 
 typedef enum {
@@ -47,6 +44,8 @@ struct Nfc {
     NfcPollerState poller_state;
     NfcCommState comm_state;
     NfcConfigurationState config_state;
+    NfcMode mode;
+
     uint32_t fdt_listen_fc;
     uint32_t mask_rx_time_fc;
     uint32_t fdt_poll_fc;
@@ -61,6 +60,25 @@ struct Nfc {
     size_t rx_bits;
 
     FuriThread* worker_thread;
+};
+
+typedef bool (*NfcWorkerPollerStateHandler)(Nfc* instance);
+
+static const FHalNfcTech nfc_tech_table[NfcModeNum][NfcTechNum] = {
+    [NfcModePoller] =
+        {
+            [NfcTechIso14443a] = FHalNfcTechIso14443a,
+            [NfcTechIso14443b] = FHalNfcTechIso14443b,
+            [NfcTechIso15693] = FHalNfcTechIso15693,
+            [NfcTechFelica] = FHalNfcTechFelica,
+        },
+    [NfcModeListener] =
+        {
+            [NfcTechIso14443a] = FHalNfcTechIso14443a,
+            [NfcTechIso14443b] = FHalNfcTechInvalid,
+            [NfcTechIso15693] = FHalNfcTechIso15693,
+            [NfcTechFelica] = FHalNfcTechInvalid,
+        },
 };
 
 static NfcError nfc_process_hal_error(FHalNfcError error) {
@@ -82,8 +100,7 @@ static int32_t nfc_worker_listener(void* context) {
     furi_assert(instance->callback);
     furi_assert(instance->config_state == NfcConfigurationStateDone);
 
-    f_hal_nfc_listener_start();
-    instance->state = NfcStateListenerStarted;
+    instance->state = NfcStateRunning;
 
     f_hal_nfc_event_start();
 
@@ -100,18 +117,16 @@ static int32_t nfc_worker_listener(void* context) {
             break;
         }
         if(event & FHalNfcEventFieldOn) {
-            // FURI_LOG_D(TAG, "Field ON");
             nfc_event.type = NfcEventTypeFieldOn;
             instance->callback(nfc_event, instance->context);
-            f_hal_nfc_listener_rx_start();
         }
         if(event & FHalNfcEventFieldOff) {
             nfc_event.type = NfcEventTypeFieldOff;
             instance->callback(nfc_event, instance->context);
-            nfc_listener_reset(instance);
+            f_hal_nfc_listener_idle();
         }
+        // TODO maybe remove?
         if(event & FHalNfcEventListenerActive) {
-            f_hal_nfc_listener_disable_auto_col_res();
             nfc_event.type = NfcEventTypeListenerActivated;
             instance->callback(nfc_event, instance->context);
         }
@@ -124,24 +139,22 @@ static int32_t nfc_worker_listener(void* context) {
             if(command == NfcCommandStop) {
                 break;
             } else if(command == NfcCommandReset) {
-                nfc_listener_reset(instance);
+                f_hal_nfc_listener_enable_rx();
             } else if(command == NfcCommandSleep) {
-                nfc_listener_sleep(instance);
+                f_hal_nfc_listener_sleep();
             }
         }
     }
 
-    nfc_config(instance, NfcModeIdle);
+    f_hal_nfc_reset_mode();
+    instance->config_state = NfcConfigurationStateIdle;
+
     bit_buffer_free(event_data.buffer);
     f_hal_nfc_low_power_mode_start();
-
     return 0;
 }
 
-typedef bool (*NfcWorkerPollerStateHandler)(Nfc* instance);
-
 bool nfc_worker_poller_idle_handler(Nfc* instance) {
-    f_hal_nfc_low_power_mode_stop();
     instance->poller_state = NfcPollerStateStart;
 
     return false;
@@ -176,13 +189,16 @@ bool nfc_worker_poller_ready_handler(Nfc* instance) {
 bool nfc_worker_poller_reset_handler(Nfc* instance) {
     f_hal_nfc_low_power_mode_start();
     furi_delay_ms(100);
+    f_hal_nfc_low_power_mode_stop();
     instance->poller_state = NfcPollerStateIdle;
 
     return false;
 }
 
 bool nfc_worker_poller_stop_handler(Nfc* instance) {
-    nfc_config(instance, NfcModeIdle);
+    f_hal_nfc_reset_mode();
+    instance->config_state = NfcConfigurationStateIdle;
+
     f_hal_nfc_low_power_mode_start();
     instance->poller_state = NfcPollerStateIdle;
 
@@ -202,6 +218,7 @@ static int32_t nfc_worker_poller(void* context) {
 
     Nfc* instance = context;
     furi_assert(instance->callback);
+    instance->state = NfcStateRunning;
     instance->poller_state = NfcPollerStateIdle;
 
     f_hal_nfc_event_start();
@@ -215,7 +232,7 @@ static int32_t nfc_worker_poller(void* context) {
 }
 
 Nfc* nfc_alloc() {
-    furi_assert(f_hal_nfc_acquire() == FHalNfcErrorNone);
+    furi_check(f_hal_nfc_acquire() == FHalNfcErrorNone);
 
     Nfc* instance = malloc(sizeof(Nfc));
     instance->state = NfcStateIdle;
@@ -234,58 +251,30 @@ Nfc* nfc_alloc() {
 
 void nfc_free(Nfc* instance) {
     furi_assert(instance);
-    // TODO REWORK!!!
-    if(instance->state == NfcStateListenerStarted) {
-        f_hal_nfc_abort();
-        furi_thread_join(instance->worker_thread);
-    }
-    furi_thread_free(instance->worker_thread);
-    f_hal_nfc_low_power_mode_start();
+    furi_assert(instance->state == NfcStateIdle);
 
+    furi_thread_free(instance->worker_thread);
     free(instance);
+
     f_hal_nfc_release();
 }
 
-// TODO: refactor this function (use 2 parameters for mode?)
-void nfc_config(Nfc* instance, NfcMode mode) {
+void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech) {
     furi_assert(instance);
-    if(mode == NfcModeIdle) {
-        f_hal_nfc_reset_mode();
-        instance->config_state = NfcConfigurationStateIdle;
-    } else if(mode == NfcModeIso14443aPoller) {
-        f_hal_nfc_set_mode(FHalNfcModePoller, FHalNfcTechIso14443a);
-        instance->config_state = NfcConfigurationStateDone;
-    } else if(mode == NfcModeIso14443aListener) {
-        f_hal_nfc_low_power_mode_stop();
-        f_hal_nfc_set_mode(FHalNfcModeListener, FHalNfcTechIso14443a);
-        instance->config_state = NfcConfigurationStateDone;
-    } else if(mode == NfcModeIso14443bPoller) {
-        f_hal_nfc_set_mode(FHalNfcModePoller, FHalNfcTechIso14443b);
-        instance->config_state = NfcConfigurationStateDone;
-    } else if(mode == NfcModeIso15693Poller) {
-        f_hal_nfc_set_mode(FHalNfcModePoller, FHalNfcTechIso15693);
-        instance->config_state = NfcConfigurationStateDone;
-    } else if(mode == NfcModeIso15693Listener) {
-        f_hal_nfc_low_power_mode_stop();
-        f_hal_nfc_set_mode(FHalNfcModeListener, FHalNfcTechIso15693);
-        instance->config_state = NfcConfigurationStateDone;
-    } else if(mode == NfcModeFelicaPoller) {
-        f_hal_nfc_set_mode(FHalNfcModePoller, FHalNfcTechFelica);
-        instance->config_state = NfcConfigurationStateDone;
+    furi_assert(mode < NfcModeNum);
+    furi_assert(tech < NfcTechNum);
+    furi_assert(instance->config_state == NfcConfigurationStateIdle);
+
+    FHalNfcTech hal_tech = nfc_tech_table[mode][tech];
+    if(hal_tech == FHalNfcTechInvalid) {
+        furi_crash("Unsupported mode for given tech");
     }
-}
+    FHalNfcMode hal_mode = (mode == NfcModePoller) ? FHalNfcModePoller : FHalNfcModeListener;
+    f_hal_nfc_low_power_mode_stop();
+    f_hal_nfc_set_mode(hal_mode, hal_tech);
 
-NfcError nfc_listener_set_col_res_data(
-    Nfc* instance,
-    uint8_t* uid,
-    uint8_t uid_len,
-    uint8_t* atqa,
-    uint8_t sak) {
-    furi_assert(instance);
-
-    FHalNfcError error = furi_hal_nfca_set_col_res_data(uid, uid_len, atqa, sak);
-    instance->comm_state = NfcCommStateIdle;
-    return nfc_process_hal_error(error);
+    instance->mode = mode;
+    instance->config_state = NfcConfigurationStateDone;
 }
 
 void nfc_set_fdt_poll_fc(Nfc* instance, uint32_t fdt_poll_fc) {
@@ -313,7 +302,7 @@ void nfc_set_mask_receive_time_fc(Nfc* instance, uint32_t mask_rx_time_fc) {
     instance->mask_rx_time_fc = mask_rx_time_fc;
 }
 
-void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context) {
+void nfc_start(Nfc* instance, NfcEventCallback callback, void* context) {
     furi_assert(instance);
     furi_assert(instance->worker_thread);
     furi_assert(callback);
@@ -321,50 +310,25 @@ void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context) {
 
     instance->callback = callback;
     instance->context = context;
-    furi_thread_set_callback(instance->worker_thread, nfc_worker_poller);
+    if(instance->mode == NfcModePoller) {
+        furi_thread_set_callback(instance->worker_thread, nfc_worker_poller);
+    } else {
+        furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
+    }
     furi_thread_start(instance->worker_thread);
     instance->comm_state = NfcCommStateIdle;
-}
-
-void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context) {
-    furi_assert(instance);
-    furi_assert(instance->worker_thread);
-    furi_assert(callback);
-
-    instance->callback = callback;
-    instance->context = context;
-    furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
-    furi_thread_start(instance->worker_thread);
-    instance->comm_state = NfcCommStateIdle;
-}
-
-void nfc_listener_abort(Nfc* instance) {
-    furi_assert(instance);
-    f_hal_nfc_abort();
-    furi_thread_join(instance->worker_thread);
 }
 
 void nfc_stop(Nfc* instance) {
     furi_assert(instance);
+    furi_assert(instance->state == NfcStateRunning);
+
+    if(instance->mode == NfcModeListener) {
+        f_hal_nfc_abort();
+    }
     furi_thread_join(instance->worker_thread);
-}
 
-NfcError nfc_listener_reset(Nfc* instance) {
-    furi_assert(instance);
-    furi_assert(instance->state == NfcStateListenerStarted);
-
-    f_hal_nfc_listener_sleep();
-
-    return NfcErrorNone;
-}
-
-NfcError nfc_listener_sleep(Nfc* instance) {
-    furi_assert(instance);
-    furi_assert(instance->state == NfcStateListenerStarted);
-
-    f_hal_nfc_listener_reset();
-
-    return NfcErrorNone;
+    instance->state = NfcStateIdle;
 }
 
 NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
@@ -387,6 +351,7 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
     NfcError error = NfcErrorNone;
 
     while(true) {
+        // TODO sanity timeout check
         event = f_hal_nfc_poller_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
         if(event & FHalNfcEventTimerBlockTxExpired) {
             if(instance->comm_state == NfcCommStateWaitBlockTxTimer) {
@@ -432,7 +397,7 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
     return error;
 }
 
-NfcError nfc_trx_custom_parity(
+NfcError nfc_iso14443a_poller_trx_custom_parity(
     Nfc* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
@@ -449,7 +414,8 @@ NfcError nfc_trx_custom_parity(
         f_hal_nfc_trx_reset();
         bit_buffer_write_bytes_with_parity(
             tx_buffer, instance->tx_buffer, sizeof(instance->tx_buffer), &instance->tx_bits);
-        error = f_hal_nfc_poller_tx_custom_parity(instance->tx_buffer, instance->tx_bits);
+        error =
+            f_hal_nfc_iso14443a_poller_tx_custom_parity(instance->tx_buffer, instance->tx_bits);
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller TX");
             ret = nfc_process_hal_error(error);
@@ -476,7 +442,8 @@ NfcError nfc_trx_custom_parity(
     return ret;
 }
 
-NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt) {
+NfcError
+    nfc_poller_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt) {
     furi_assert(instance);
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
@@ -515,7 +482,20 @@ NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer
     return ret;
 }
 
-NfcError nfc_iso14443_3a_short_frame(
+NfcError nfc_iso14443a_listener_set_col_res_data(
+    Nfc* instance,
+    uint8_t* uid,
+    uint8_t uid_len,
+    uint8_t* atqa,
+    uint8_t sak) {
+    furi_assert(instance);
+
+    FHalNfcError error = f_hal_nfc_iso14443a_listener_set_col_res_data(uid, uid_len, atqa, sak);
+    instance->comm_state = NfcCommStateIdle;
+    return nfc_process_hal_error(error);
+}
+
+NfcError nfc_iso14443a_poller_trx_short_frame(
     Nfc* instance,
     NfcIso14443aShortFrame frame,
     BitBuffer* rx_buffer,
@@ -533,7 +513,7 @@ NfcError nfc_iso14443_3a_short_frame(
     FHalNfcError error = FHalNfcErrorNone;
     do {
         f_hal_nfc_trx_reset();
-        error = f_hal_nfca_send_short_frame(short_frame);
+        error = f_hal_nfc_iso14443a_poller_trx_short_frame(short_frame);
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller TX");
             ret = nfc_process_hal_error(error);
@@ -560,7 +540,7 @@ NfcError nfc_iso14443_3a_short_frame(
     return ret;
 }
 
-NfcError nfc_iso14443_3a_sdd_frame(
+NfcError nfc_iso14443a_poller_trx_sdd_frame(
     Nfc* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
@@ -575,7 +555,7 @@ NfcError nfc_iso14443_3a_sdd_frame(
     FHalNfcError error = FHalNfcErrorNone;
     do {
         f_hal_nfc_trx_reset();
-        error = f_hal_nfca_send_sdd_frame(
+        error = f_hal_nfc_iso14443a_tx_sdd_frame(
             bit_buffer_get_data(tx_buffer), bit_buffer_get_size(tx_buffer));
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller TX");
@@ -603,7 +583,7 @@ NfcError nfc_iso14443_3a_sdd_frame(
     return ret;
 }
 
-NfcError nfc_iso14443_3a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
+NfcError nfc_iso14443a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
     furi_assert(instance);
     furi_assert(tx_buffer);
 
@@ -614,7 +594,7 @@ NfcError nfc_iso14443_3a_listener_tx_custom_parity(Nfc* instance, const BitBuffe
     const uint8_t* tx_parity = bit_buffer_get_parity(tx_buffer);
     size_t tx_bits = bit_buffer_get_size(tx_buffer);
 
-    error = f_hal_nfca_listener_tx_custom_parity(tx_data, tx_parity, tx_bits);
+    error = f_hal_nfc_iso14443a_listener_tx_custom_parity(tx_data, tx_parity, tx_bits);
     ret = nfc_process_hal_error(error);
 
     return ret;

@@ -38,8 +38,8 @@ Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, Iso14443_3aData* data)
     instance->generic_event.data = &instance->iso14443_3a_event;
 
     nfc_set_fdt_listen_fc(instance->nfc, ISO14443_3A_FDT_LISTEN_FC);
-    nfc_config(instance->nfc, NfcModeIso14443aListener);
-    nfc_listener_set_col_res_data(
+    nfc_config(instance->nfc, NfcModeListener, NfcTechIso14443a);
+    nfc_iso14443a_listener_set_col_res_data(
         instance->nfc,
         instance->data->uid,
         instance->data->uid_len,
@@ -92,14 +92,14 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
             instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeFieldOff;
             instance->callback(instance->generic_event, instance->context);
         }
-        command = NfcCommandReset;
+        command = NfcCommandSleep;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         if(iso14443_3a_listener_halt_received(nfc_event->data.buffer)) {
             if(instance->callback) {
                 instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeHalted;
                 instance->callback(instance->generic_event, instance->context);
             }
-            command = NfcCommandReset;
+            command = NfcCommandSleep;
         } else {
             if(iso14443_crc_check(Iso14443CrcTypeA, nfc_event->data.buffer)) {
                 instance->iso14443_3a_event.type =

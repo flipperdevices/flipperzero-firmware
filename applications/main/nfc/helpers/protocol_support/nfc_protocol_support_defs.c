@@ -8,6 +8,7 @@
 #include "mf_ultralight/mf_ultralight.h"
 #include "mf_classic/mf_classic.h"
 #include "mf_desfire/mf_desfire.h"
+#include "slix/slix.h"
 
 const NfcProtocolSupportBase* nfc_protocol_support[NfcProtocolNum] = {
     [NfcProtocolIso14443_3a] = &nfc_protocol_support_iso14443_3a,
@@ -18,5 +19,6 @@ const NfcProtocolSupportBase* nfc_protocol_support[NfcProtocolNum] = {
     [NfcProtocolMfUltralight] = &nfc_protocol_support_mf_ultralight,
     [NfcProtocolMfClassic] = &nfc_protocol_support_mf_classic,
     [NfcProtocolMfDesfire] = &nfc_protocol_support_mf_desfire,
+    [NfcProtocolSlix] = &nfc_protocol_support_slix,
     /* Add new protocols here */
 };

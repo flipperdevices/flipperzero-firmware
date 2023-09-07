@@ -13,6 +13,7 @@
 typedef enum {
     Iso15693ParserStateParseSoF,
     Iso15693ParserStateParseFrame,
+    Iso15693ParserStateFail,
 } Iso15693ParserState;
 
 typedef enum {
@@ -128,6 +129,10 @@ static void signal_reader_callback(SignalReaderEvent event, void* context) {
             instance->state = Iso15693ParserStateParseFrame;
         } else if(event.data->data[0] == eof_single) {
             instance->eof_received = true;
+            instance->callback(Iso15693ParserEventDataReceived, instance->context);
+        } else {
+            // TODO: Better garbage input handling
+            instance->state = Iso15693ParserStateFail;
             instance->callback(Iso15693ParserEventDataReceived, instance->context);
         }
     } else {
@@ -255,7 +260,10 @@ static const Iso15693ParserStateHandler iso15693_parser_state_handlers[Iso15693P
 };
 
 bool iso15693_parser_run(Iso15693Parser* instance) {
-    if((instance->state == Iso15693ParserStateParseSoF) && (instance->eof_received)) {
+    if(instance->state == Iso15693ParserStateFail) {
+        iso15693_parser_stop(instance);
+        iso15693_parser_start_signal_reader(instance);
+    } else if((instance->state == Iso15693ParserStateParseSoF) && (instance->eof_received)) {
         instance->frame_parsed = true;
     } else if(instance->bytes_to_process) {
         Iso15693ParserCommand command = Iso15693ParserCommandProcessed;
@@ -264,9 +272,9 @@ bool iso15693_parser_run(Iso15693Parser* instance) {
         }
 
         if(command == Iso15693ParserCommandFail) {
-            FURI_LOG_D(TAG, "Frame parse failed");
             iso15693_parser_stop(instance);
             iso15693_parser_start_signal_reader(instance);
+            FURI_LOG_D(TAG, "Frame parse failed");
         }
     }
 

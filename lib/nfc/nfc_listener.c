@@ -120,13 +120,13 @@ void nfc_listener_start(NfcListener* instance, NfcGenericCallback callback, void
 
     NfcListenerListElement* tail_element = instance->list.tail;
     tail_element->listener_api->set_callback(tail_element->listener, callback, context);
-    nfc_start_listener(instance->nfc, nfc_listener_start_callback, instance);
+    nfc_start(instance->nfc, nfc_listener_start_callback, instance);
 }
 
 void nfc_listener_stop(NfcListener* instance) {
     furi_assert(instance);
 
-    nfc_listener_abort(instance->nfc);
+    nfc_stop(instance->nfc);
 }
 
 const NfcDeviceData* nfc_listener_get_data(NfcListener* instance, NfcProtocol protocol) {

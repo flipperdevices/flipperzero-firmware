@@ -116,8 +116,11 @@ bool nfc_scene_mf_classic_detect_reader_on_event(void* context, SceneManagerEven
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        nfc_listener_stop(instance->listener);
-        nfc_listener_free(instance->listener);
+        size_t nonces_pairs = 2 * mfkey32_logger_get_params_num(instance->mfkey32_logger);
+        if(nonces_pairs < NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
+            nfc_listener_stop(instance->listener);
+            nfc_listener_free(instance->listener);
+        }
         mfkey32_logger_free(instance->mfkey32_logger);
     }
 

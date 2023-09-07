@@ -125,9 +125,10 @@ void nfc_free(Nfc* instance) {
     free(instance);
 }
 
-void nfc_config(Nfc* instance, NfcMode mode) {
+void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech) {
     UNUSED(instance);
     UNUSED(mode);
+    UNUSED(tech);
 }
 
 void nfc_set_fdt_poll_fc(Nfc* instance, uint32_t fdt_poll_fc) {
@@ -155,7 +156,7 @@ void nfc_set_guard_time_us(Nfc* instance, uint32_t guard_time_us) {
     UNUSED(guard_time_us);
 }
 
-NfcError nfc_listener_set_col_res_data(
+NfcError nfc_iso14443a_listener_set_col_res_data(
     Nfc* instance,
     uint8_t* uid,
     uint8_t uid_len,
@@ -334,17 +335,6 @@ void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context)
     furi_thread_start(instance->worker_thread);
 }
 
-NfcError nfc_listener_reset(Nfc* instance) {
-    furi_assert(instance);
-    furi_assert(poller_queue);
-
-    instance->col_res_status = Iso14443_3aColResStatusIdle;
-    NfcMessage message = {.type = NfcMessageTypeTimeout};
-    furi_message_queue_put(poller_queue, &message, FuriWaitForever);
-
-    return NfcErrorNone;
-}
-
 void nfc_listener_abort(Nfc* instance) {
     furi_assert(instance);
 
@@ -391,11 +381,12 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     return NfcErrorNone;
 }
 
-NfcError nfc_iso14443_3a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
+NfcError nfc_iso14443a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
     return nfc_listener_tx(instance, tx_buffer);
 }
 
-NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt) {
+NfcError
+    nfc_poller_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt) {
     furi_assert(instance);
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
@@ -427,17 +418,17 @@ NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer
     return error;
 }
 
-NfcError nfc_trx_custom_parity(
+NfcError nfc_iso14443a_poller_trx_custom_parity(
     Nfc* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
-    return nfc_trx(instance, tx_buffer, rx_buffer, fwt);
+    return nfc_poller_trx(instance, tx_buffer, rx_buffer, fwt);
 }
 
 // Technology specific API
 
-NfcError nfc_iso14443_3a_short_frame(
+NfcError nfc_iso14443a_poller_trx_short_frame(
     Nfc* instance,
     NfcIso14443aShortFrame frame,
     BitBuffer* rx_buffer,
@@ -448,19 +439,19 @@ NfcError nfc_iso14443_3a_short_frame(
     bit_buffer_set_size(tx_buffer, 7);
     bit_buffer_set_byte(tx_buffer, 0, 0x52);
 
-    NfcError error = nfc_trx(instance, tx_buffer, rx_buffer, fwt);
+    NfcError error = nfc_poller_trx(instance, tx_buffer, rx_buffer, fwt);
 
     bit_buffer_free(tx_buffer);
 
     return error;
 }
 
-NfcError nfc_iso14443_3a_sdd_frame(
+NfcError nfc_iso14443a_poller_trx_sdd_frame(
     Nfc* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
-    return nfc_trx(instance, tx_buffer, rx_buffer, fwt);
+    return nfc_poller_trx(instance, tx_buffer, rx_buffer, fwt);
 }
 
 #endif
