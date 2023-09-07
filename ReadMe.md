@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `6 Sep 14:55 GMT +3`
+### Apps checked & updated at `7 Sep 14:08 GMT +3`
 
 
 # Default pack
@@ -85,6 +85,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Metronome | ![Media Badge] | [by panki27](https://github.com/panki27/Metronome) |  | [![UFW Badge]](https://lab.flipper.net/apps/metronome) |
 | Morse Code | ![Media Badge] | [by wh00hw](https://github.com/wh00hw/MorseCodeFAP) |  | [![UFW Badge]](https://lab.flipper.net/apps/morse_code) |
 | **BadBT** plugin | ![BT Badge] | [by Willy-JL, ClaraCrazy, XFW contributors](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/dev/applications/main/bad_kb) | BT version of BadKB (aka BadUSB via Bluetooth) | ![None Badge] |
+| Apple BLE Spam | ![BT Badge] | [by @Willy-JL & @techryptic](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/apple_ble_spam) |  | ![None Badge] |
 
 ### Games
 
@@ -111,7 +112,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 |---|:---:|---|---|:---:|
 | BT Camera Trigger | ![BT Badge] | [by Nem0oo](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger) |  | [![UFW Badge]](https://lab.flipper.net/apps/bt_trigger) |
 | BT Serial Example | ![BT Badge] | [by maybe-hello-world](https://github.com/maybe-hello-world/fbs) |  | ![None Badge] |
-| Apple BLE Spam | ![BT Badge] | [by @Willy-JL & @techryptic](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/apple_ble_spam) |  | ![None Badge] |
 | 4 in row | ![Games Badge] | [by leo-need-more-coffee](https://github.com/leo-need-more-coffee/flipperzero-4inrow) |  | [![UFW Badge]](https://lab.flipper.net/apps/4inrow) |
 | Asteroids | ![Games Badge] | [by antirez & SimplyMinimal](https://github.com/antirez/flipper-asteroids) | Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Asteroids) all changes can be found by clicking on [this link](https://github.com/SimplyMinimal/FlipperZero-Asteroids) | [![UFW Badge]](https://lab.flipper.net/apps/asteroids) |
 | Chess Clock | ![Games Badge] | [by ihatecsv](https://github.com/ihatecsv/flipper_chess_clock) |  | ![None Badge] |
