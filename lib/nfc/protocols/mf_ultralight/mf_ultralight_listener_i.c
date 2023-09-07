@@ -2,6 +2,14 @@
 
 #include <furi.h>
 
+#define MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, start, end) (page >= start && page <= end)
+
+#define MF_ULTRALIGHT_I2C_PAGE_ON_SESSION_REG(page) \
+    MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, 0x00EC, 0x00ED)
+
+#define MF_ULTRALIGHT_I2C_PAGE_ON_MIRRORED_SESSION_REG(page) \
+    MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, 0x00F8, 0x00F9)
+
 static MfUltralightMirrorConf mf_ultralight_mirror_check_mode(
     const MfUltralightConfigPages* const config,
     const MfUltralightListenerAuthState auth_state) {
@@ -186,14 +194,6 @@ void mf_ultralight_composite_command_set_next(
     instance->composite_cmd.callback = handler;
 }
 
-static bool mf_ultralight_i2c_is_page_on_session_registers(uint16_t page) {
-    return page >= 0x00EC && page <= 0x00ED;
-}
-
-static bool mf_ultralight_i2c_is_page_on_mirrored_session_registers(uint16_t page) {
-    return page >= 0x00F8 && page <= 0x00F9;
-}
-
 static bool mf_ultralight_i2c_page_validator_for_sector0(
     uint16_t start_page,
     uint16_t end_page,
@@ -204,12 +204,12 @@ static bool mf_ultralight_i2c_page_validator_for_sector0(
         if(start_page <= 0xE9 && end_page <= 0xE9) {
             valid = true;
         } else if(
-            mf_ultralight_i2c_is_page_on_session_registers(start_page) &&
-            mf_ultralight_i2c_is_page_on_session_registers(end_page)) {
+            MF_ULTRALIGHT_I2C_PAGE_ON_SESSION_REG(start_page) &&
+            MF_ULTRALIGHT_I2C_PAGE_ON_SESSION_REG(end_page)) {
             valid = true;
         }
     } else if(type == MfUltralightTypeNTAGI2C1K) {
-        if((start_page <= 0xE2) || (start_page >= 0xE8 && start_page <= 0xE9)) {
+        if((start_page <= 0xE2) || MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(start_page, 0x00E8, 0x00E9)) {
             valid = true;
         }
     } else if(type == MfUltralightTypeNTAGI2C2K) {
@@ -227,7 +227,8 @@ static bool mf_ultralight_i2c_page_validator_for_sector1(
     if(type == MfUltralightTypeNTAGI2CPlus2K) {
         valid = (start_page <= 0xFF && end_page <= 0xFF);
     } else if(type == MfUltralightTypeNTAGI2C2K) {
-        valid = ((start_page >= 0xE8 && start_page <= 0xE9) || (start_page <= 0xE0));
+        valid =
+            (MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(start_page, 0x00E8, 0x00E9) || (start_page <= 0xE0));
     } else if(type == MfUltralightTypeNTAGI2C1K || type == MfUltralightTypeNTAGI2CPlus1K) {
         valid = false;
     }
@@ -251,13 +252,7 @@ static bool mf_ultralight_i2c_page_validator_for_sector3(
     MfUltralightType type) {
     UNUSED(type);
     UNUSED(end_page);
-    bool valid = false;
-
-    if(mf_ultralight_i2c_is_page_on_mirrored_session_registers(start_page)) {
-        valid = true;
-    }
-
-    return valid;
+    return MF_ULTRALIGHT_I2C_PAGE_ON_MIRRORED_SESSION_REG(start_page);
 }
 
 typedef bool (
