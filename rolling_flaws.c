@@ -58,10 +58,15 @@ typedef enum {
 
 typedef enum {
     RollingFlawsEventIdReceivedSignal,
+    RollingFlawsEventIdCycleSignal,
 } RollingFlawsEventId;
 
 static bool decode_packet(FuriString* buffer, void* ctx) {
     RollingFlaws* context = ctx;
+    furi_hal_vibro_on(true);
+    furi_delay_ms(50);
+    furi_hal_vibro_on(false);
+
     if(furi_string_start_with_str(buffer, "KeeLoq 64bit")) {
         if(!furi_string_start_with_str(
                buffer, rolling_flaws_setting_protocol_base_name_get(context->model))) {
@@ -158,6 +163,14 @@ bool rolling_flaws_view_dispatcher_custom_event_callback(void* context, uint32_t
 
         view_dispatcher_switch_to_view(app->view_dispatcher, RollingFlawsViewSubmenu);
         return true;
+    }
+
+    if(event == RollingFlawsEventIdCycleSignal) {
+        RollingFlaws* app = (RollingFlaws*)context;
+        stop_listening(app->subghz);
+        uint32_t frequency = rolling_flaws_setting_frequency_get(app->model);
+        app->model->opened = false;
+        start_listening(app->subghz, frequency, decode_packet, app);
     }
 
     return false;
@@ -267,9 +280,47 @@ void rolling_flaws_receive_signal_draw_callback(Canvas* canvas, void* model) {
     furi_string_free(str);
 }
 
-bool rolling_flaws_view_input_callback(InputEvent* event, void* context) {
-    UNUSED(context);
+bool rolling_flaws_view_input_ignore_callback(InputEvent* event, void* context) {
     UNUSED(event);
+    UNUSED(context);
+
+    return false;
+}
+
+bool rolling_flaws_view_input_callback(InputEvent* event, void* context) {
+    RollingFlaws* app = (RollingFlaws*)context;
+    RollingFlawsModel* my_model = app->model;
+
+    FURI_LOG_I(TAG, "Input event received: %d", event->type);
+    if(event->type == InputTypeShort) {
+        FURI_LOG_I(TAG, "Input key: %d", event->key);
+        if(event->key == InputKeyLeft) {
+            if(my_model->count == 0) {
+                my_model->count = 0xFFFF;
+            } else {
+                my_model->count--;
+            }
+            __gui_redraw();
+            return true;
+        }
+        if(event->key == InputKeyRight) {
+            if(my_model->count == 0xFFFF) {
+                my_model->count = 0;
+            } else {
+                my_model->count++;
+            }
+            __gui_redraw();
+            return true;
+        }
+        if(event->key == InputKeyOk) {
+            my_model->opened = false;
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, RollingFlawsEventIdCycleSignal);
+            __gui_redraw();
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -360,7 +411,7 @@ RollingFlaws* rolling_flaws_alloc() {
     app->view_receive_sync = view_alloc();
     view_set_context(app->view_receive_sync, app);
     view_set_draw_callback(app->view_receive_sync, rolling_flaws_receive_sync_draw_callback);
-    view_set_input_callback(app->view_receive_sync, rolling_flaws_view_input_callback);
+    view_set_input_callback(app->view_receive_sync, rolling_flaws_view_input_ignore_callback);
     view_set_previous_callback(
         app->view_receive_sync, rolling_flaws_navigation_submenu_stop_sync_callback);
     view_allocate_model(

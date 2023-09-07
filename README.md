@@ -1,6 +1,6 @@
 # Rolling Flaws
 
-Rolling Flaws (version 1.4) by [@CodeAllNight](https://twitter.com/codeallnight).
+Rolling Flaws (version 1.5) by [@CodeAllNight](https://twitter.com/codeallnight).
 
 [YouTube demo](https://youtu.be/gMnGuDC9EQo?si=4HLZpkC4XWhh97uQ) of using Rolling Flaws application.  The video shows how to use the application to simulate a receiver that has a Replay attack flaw, Pairing FZ to a receiver, Cloning sequence attack, Future attack, Rollback attack & KGB attack.  The Rolling Flaws application also supports things like "ENC00" attack & window-next attacks, which are described in scenarios below but was not in video.  Rolljam is discussed in document, but discouraged to test since it is [illegal to jam signals](https://www.fcc.gov/general/jammer-enforcement) in the US.  If you have additional ideas, please let me know!
 
@@ -70,7 +70,7 @@ If you want to generate a custom SUB file for a specific key and count, you can 
             break;
 ```
 
-If you want the Flipper Zero to be able to decode the same signal multiple times, in ``.\lib\subghz\protocols\protocol_items.c`` after the two occurances of ``instance->decoder.decode_count_bit = 0;`` add the line ``instance->generic.data = 0;``.  This will cause the Flipper Zero to forget the previous data, so it will decode the same signal multiple times.  Be sure to edit the file back when you are done.
+If you press the "OK" button when reading, it will flush the radio and set the current status to CLOSED.  This means you can attempt a replay attack without having to have custom firmware.  If you don't want to have to press the OK button try attempt a replay, then you need to make the following change:  If you want the Flipper Zero to be able to decode the same signal multiple times, in ``.\lib\subghz\protocols\protocol_items.c`` after the two occurances of ``instance->decoder.decode_count_bit = 0;`` add the line ``instance->generic.data = 0;``.  This will cause the Flipper Zero to forget the previous data, so it will decode the same signal multiple times.  Be sure to edit the file back when you are done.
 
 To scan for more interesting sequences, make this breaking change to keeloq.c file that will keep incrementing the key until it finds a DoorHan code (but it leaves the FIX value the same).  This is one technique to search for ENC00 sequences.  Be sure to edit the file back when you are done.
 ```c
