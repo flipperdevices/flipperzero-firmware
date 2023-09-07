@@ -2,6 +2,17 @@
 
 This file contains all changelogs for latest releases, from 1.3 onward.
 
+## v1.5
+
+### Added
+When in "Receive Signals" you can now use LEFT/RIGHT arrows to decrease/increase the current count.
+
+When in "Receive Signals" you can now use OK to force a CLOSED.  
+
+When in "Receive Signals" you can now use OK to flush the radio.  So the next signal it detects can be a repeat of the previous signal, without needed custom firmware!  (Press "OK" again to flush the radio again.)
+
+When in "Receive Signals" the Flipper Zero now does a brief vibrate when it receives a signal.
+
 ## v1.4
 
 ### Fixed
