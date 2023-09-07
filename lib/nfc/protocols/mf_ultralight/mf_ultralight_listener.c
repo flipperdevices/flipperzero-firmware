@@ -22,7 +22,7 @@ typedef struct {
 
 static bool mf_ultralight_listener_check_access(
     MfUltralightListener* instance,
-    uint8_t start_page,
+    uint16_t start_page,
     MfUltralightListenerAccessType access_type) {
     bool access_success = false;
     bool is_write_op = (access_type == MfUltralightListenerAccessTypeWrite);
@@ -59,48 +59,119 @@ static void mf_ultralight_listener_send_short_resp(MfUltralightListener* instanc
     iso14443_3a_listener_tx(instance->iso14443_3a_listener, instance->tx_buffer);
 };
 
+static void mf_ultralight_listener_perform_read(
+    MfUltralightPage* pages,
+    MfUltralightListener* instance,
+    uint16_t start_page,
+    uint8_t page_cnt,
+    bool do_i2c_page_check) {
+    uint16_t pages_total = instance->data->pages_total;
+    mf_ultralight_mirror_read_prepare(start_page, instance);
+    for(uint8_t i = 0; i < page_cnt; i++) {
+        uint16_t page = start_page + i;
+
+        if(do_i2c_page_check && !mf_ultralight_i2c_validate_pages(page, page, instance))
+            memset(pages[i].data, 0, sizeof(MfUltralightPage));
+        else if(mf_ultralight_is_page_pwd_or_pack(instance->data->type, page))
+            memset(pages[i].data, 0, sizeof(MfUltralightPage));
+        else {
+            if(do_i2c_page_check)
+                page = mf_ultralight_i2c_provide_page_by_requested(page, instance);
+
+            pages[i] = instance->data->page[page % pages_total];
+            mf_ultralight_mirror_read_handler(page, pages[i].data, instance);
+        }
+    }
+}
+
 static MfUltralightCommand
     mf_ultralight_listener_read_page_handler(MfUltralightListener* instance, BitBuffer* buffer) {
-    uint8_t start_page = bit_buffer_get_byte(buffer, 1);
+    uint16_t start_page = bit_buffer_get_byte(buffer, 1);
     uint16_t pages_total = instance->data->pages_total;
-    MfUltralightPageReadCommandData read_cmd_data = {};
     MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
 
     FURI_LOG_D(TAG, "CMD_READ: %d", start_page);
 
-    if(pages_total < start_page) {
-        instance->state = MfUltraligthListenerStateIdle;
-        instance->auth_state = MfUltralightListenerAuthStateIdle;
-    } else if(!mf_ultralight_listener_check_access(
-                  instance, start_page, MfUltralightListenerAccessTypeRead)) {
-        instance->state = MfUltraligthListenerStateIdle;
-        instance->auth_state = MfUltralightListenerAuthStateIdle;
-    } else {
-        mf_ultralight_mirror_read_prepare(start_page, instance);
+    do {
+        bool do_i2c_page_check = mf_ultralight_is_i2c_tag(instance->data->type);
 
-        uint16_t config_page = mf_ultralight_get_config_page_num(instance->data->type);
-        for(size_t i = 0; i < 4; i++) {
-            bool hide_data =
-                ((config_page != 0) && ((i == config_page + 1U) || (i == config_page + 2U)));
-            if(hide_data) {
-                memset(read_cmd_data.page[i].data, 0, sizeof(MfUltralightPage));
-            } else {
-                uint8_t current_page = start_page + i;
-                read_cmd_data.page[i] = instance->data->page[current_page % pages_total];
-
-                mf_ultralight_mirror_read_handler(
-                    current_page, read_cmd_data.page[i].data, instance);
-            }
+        if(do_i2c_page_check) {
+            if(!mf_ultralight_i2c_validate_pages(start_page, start_page, instance)) break;
+        } else if(pages_total < start_page) {
+            instance->state = MfUltraligthListenerStateIdle;
+            instance->auth_state = MfUltralightListenerAuthStateIdle;
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
         }
 
-        bit_buffer_copy_bytes(
-            instance->tx_buffer,
-            (uint8_t*)&read_cmd_data,
-            sizeof(MfUltralightPageReadCommandData));
+        if(!mf_ultralight_listener_check_access(
+               instance, start_page, MfUltralightListenerAccessTypeRead)) {
+            instance->state = MfUltraligthListenerStateIdle;
+            instance->auth_state = MfUltralightListenerAuthStateIdle;
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
+        MfUltralightPage pages[4] = {};
+        mf_ultralight_listener_perform_read(pages, instance, start_page, 4, do_i2c_page_check);
+
+        bit_buffer_copy_bytes(instance->tx_buffer, (uint8_t*)pages, sizeof(pages));
         iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
         command = MfUltralightCommandProcessed;
-    }
+
+    } while(false);
+
+    return command;
+}
+
+static MfUltralightCommand
+    mf_ultralight_listener_fast_read_handler(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedSilent;
+    FURI_LOG_D(TAG, "CMD_FAST_READ");
+
+    do {
+        if(!mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportFastRead))
+            break;
+        uint16_t pages_total = instance->data->pages_total;
+        uint16_t start_page = bit_buffer_get_byte(buffer, 1);
+        uint16_t end_page = bit_buffer_get_byte(buffer, 2);
+        bool i2c_tag = mf_ultralight_is_i2c_tag(instance->data->type);
+
+        if(i2c_tag) {
+            if(!mf_ultralight_i2c_validate_pages(start_page, end_page, instance)) {
+                command = MfUltralightCommandNotProcessedNAK;
+                break;
+            }
+        } else if(end_page > pages_total - 1) {
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
+        if(end_page < start_page) {
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
+        if(!mf_ultralight_listener_check_access(
+               instance, start_page, MfUltralightListenerAccessTypeRead) ||
+           !mf_ultralight_listener_check_access(
+               instance, end_page, MfUltralightListenerAccessTypeRead)) {
+            instance->state = MfUltraligthListenerStateIdle;
+            instance->auth_state = MfUltralightListenerAuthStateIdle;
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
+        MfUltralightPage pages[64] = {};
+        uint8_t page_cnt = (end_page - start_page) + 1;
+        mf_ultralight_listener_perform_read(pages, instance, start_page, page_cnt, true);
+
+        bit_buffer_copy_bytes(instance->tx_buffer, (uint8_t*)pages, page_cnt * 4);
+        iso14443_3a_listener_send_standard_frame(
+            instance->iso14443_3a_listener, instance->tx_buffer);
+        command = MfUltralightCommandProcessed;
+    } while(false);
 
     return command;
 }
@@ -405,6 +476,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .cmd = MF_ULTRALIGHT_CMD_READ_PAGE,
         .cmd_len_bits = 2 * 8,
         .callback = mf_ultralight_listener_read_page_handler,
+    },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_FAST_READ,
+        .cmd_len_bits = 3 * 8,
+        .callback = mf_ultralight_listener_fast_read_handler,
     },
     {
         .cmd = MF_ULTRALIGHT_CMD_WRITE_PAGE,
