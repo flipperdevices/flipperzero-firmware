@@ -7,7 +7,7 @@
 
 #define TAG "MfUltralightListener"
 
-#define MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE (32)
+#define MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE (256)
 
 typedef enum {
     MfUltralightListenerAccessTypeRead,
