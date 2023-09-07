@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,41.7,,
+Version,+,41.8,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -869,13 +869,17 @@ Function,-,explicit_bzero,void,"void*, size_t"
 Function,-,expm1,double,double
 Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
-Function,-,f_hal_iso14443_3a_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const uint8_t*, size_t"
-Function,-,f_hal_iso14443_3a_poller_tx_custom_parity,FHalNfcError,"const uint8_t*, size_t"
 Function,-,f_hal_nfc_abort,FHalNfcError,
 Function,-,f_hal_nfc_acquire,FHalNfcError,
 Function,+,f_hal_nfc_event_start,FHalNfcError,
 Function,-,f_hal_nfc_init,FHalNfcError,
 Function,-,f_hal_nfc_is_hal_ready,FHalNfcError,
+Function,-,f_hal_nfc_iso14443a_listener_set_col_res_data,FHalNfcError,"uint8_t*, uint8_t, uint8_t*, uint8_t"
+Function,-,f_hal_nfc_iso14443a_listener_tx_custom_parity,FHalNfcError,"const uint8_t*, const uint8_t*, size_t"
+Function,-,f_hal_nfc_iso14443a_poller_trx_short_frame,FHalNfcError,FHalNfcaShortFrame
+Function,-,f_hal_nfc_iso14443a_poller_tx_custom_parity,FHalNfcError,"const uint8_t*, size_t"
+Function,-,f_hal_nfc_iso14443a_rx_sdd_frame,FHalNfcError,"uint8_t*, size_t, size_t*"
+Function,-,f_hal_nfc_iso14443a_tx_sdd_frame,FHalNfcError,"const uint8_t*, size_t"
 Function,-,f_hal_nfc_listener_enable_rx,FHalNfcError,
 Function,-,f_hal_nfc_listener_idle,FHalNfcError,
 Function,+,f_hal_nfc_listener_rx,FHalNfcError,"uint8_t*, size_t, size_t*"
@@ -898,9 +902,6 @@ Function,-,f_hal_nfc_timer_block_tx_stop,void,
 Function,-,f_hal_nfc_timer_fwt_start,void,uint32_t
 Function,-,f_hal_nfc_timer_fwt_stop,void,
 Function,-,f_hal_nfc_trx_reset,FHalNfcError,
-Function,-,f_hal_nfca_receive_sdd_frame,FHalNfcError,"uint8_t*, size_t, size_t*"
-Function,-,f_hal_nfca_send_sdd_frame,FHalNfcError,"const uint8_t*, size_t"
-Function,-,f_hal_nfca_send_short_frame,FHalNfcError,FHalNfcaShortFrame
 Function,-,fabs,double,double
 Function,-,fabsf,float,float
 Function,-,fabsl,long double,long double
@@ -1269,7 +1270,6 @@ Function,-,furi_hal_init_early,void,
 Function,-,furi_hal_interrupt_init,void,
 Function,+,furi_hal_interrupt_set_isr,void,"FuriHalInterruptId, FuriHalInterruptISR, void*"
 Function,+,furi_hal_interrupt_set_isr_ex,void,"FuriHalInterruptId, uint16_t, FuriHalInterruptISR, void*"
-Function,-,furi_hal_iso14443_3a_set_col_res_data,FHalNfcError,"uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,+,furi_hal_light_blink_set_color,void,Light
 Function,+,furi_hal_light_blink_start,void,"Light, uint8_t, uint16_t, uint16_t"
 Function,+,furi_hal_light_blink_stop,void,
@@ -2195,14 +2195,14 @@ Function,+,nfc_device_set_data,void,"NfcDevice*, NfcProtocol, const NfcDeviceDat
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_uid,_Bool,"NfcDevice*, const uint8_t*, size_t"
 Function,-,nfc_free,void,Nfc*
-Function,-,nfc_iso14443_3a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBuffer*"
-Function,-,nfc_iso14443_3a_poller_trx_custom_parity,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
-Function,-,nfc_iso14443_3a_sdd_frame,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
-Function,-,nfc_iso14443_3a_short_frame,NfcError,"Nfc*, NfcIso14443aShortFrame, BitBuffer*, uint32_t"
+Function,-,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
+Function,-,nfc_iso14443a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBuffer*"
+Function,-,nfc_iso14443a_poller_trx_custom_parity,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,-,nfc_iso14443a_poller_trx_sdd_frame,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,-,nfc_iso14443a_poller_trx_short_frame,NfcError,"Nfc*, NfcIso14443aShortFrame, BitBuffer*, uint32_t"
 Function,-,nfc_listener_alloc,NfcListener*,"Nfc*, NfcProtocol, const NfcDeviceData*"
 Function,-,nfc_listener_free,void,NfcListener*
 Function,-,nfc_listener_get_data,const NfcDeviceData*,"NfcListener*, NfcProtocol"
-Function,-,nfc_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,-,nfc_listener_start,void,"NfcListener*, NfcGenericCallback, void*"
 Function,-,nfc_listener_stop,void,NfcListener*
 Function,-,nfc_listener_tx,NfcError,"Nfc*, const BitBuffer*"

@@ -40,7 +40,7 @@ Iso14443_3aError iso14443_3a_listener_tx_with_custom_parity(
     furi_assert(tx_buffer);
 
     Iso14443_3aError ret = Iso14443_3aErrorNone;
-    NfcError error = nfc_iso14443_3a_listener_tx_custom_parity(instance->nfc, tx_buffer);
+    NfcError error = nfc_iso14443a_listener_tx_custom_parity(instance->nfc, tx_buffer);
     if(error != NfcErrorNone) {
         FURI_LOG_W(TAG, "Tx error: %d", error);
         ret = iso14443_3a_listener_process_nfc_error(error);

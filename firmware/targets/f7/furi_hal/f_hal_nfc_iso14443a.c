@@ -124,7 +124,7 @@ static FHalNfcEvent f_hal_nfc_iso14443_3a_listener_wait_event(uint32_t timeout_m
     return event;
 }
 
-FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
+FHalNfcError f_hal_nfc_iso14443a_poller_trx_short_frame(FHalNfcaShortFrame frame) {
     FHalNfcError error = FHalNfcErrorNone;
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
@@ -155,7 +155,7 @@ FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
     return error;
 }
 
-FHalNfcError f_hal_nfca_send_sdd_frame(const uint8_t* tx_data, size_t tx_bits) {
+FHalNfcError f_hal_nfc_iso14443a_tx_sdd_frame(const uint8_t* tx_data, size_t tx_bits) {
     FHalNfcError error = FHalNfcErrorNone;
     // TODO Set anticollision parameters
     error = f_hal_nfc_poller_tx(tx_data, tx_bits);
@@ -163,7 +163,8 @@ FHalNfcError f_hal_nfca_send_sdd_frame(const uint8_t* tx_data, size_t tx_bits) {
     return error;
 }
 
-FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
+FHalNfcError
+    f_hal_nfc_iso14443a_rx_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
     FHalNfcError error = FHalNfcErrorNone;
     UNUSED(rx_data);
     UNUSED(rx_bits);
@@ -175,7 +176,7 @@ FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size,
     return error;
 }
 
-FHalNfcError f_hal_iso14443_3a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits) {
+FHalNfcError f_hal_nfc_iso14443a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
 
     // TODO common code for f_hal_nfc_poller_tx
@@ -206,7 +207,7 @@ FHalNfcError f_hal_iso14443_3a_poller_tx_custom_parity(const uint8_t* tx_data, s
     return err;
 }
 
-FHalNfcError furi_hal_iso14443_3a_set_col_res_data(
+FHalNfcError f_hal_nfc_iso14443a_listener_set_col_res_data(
     uint8_t* uid,
     uint8_t uid_len,
     uint8_t* atqa,
@@ -272,7 +273,7 @@ FHalNfcError f_hal_iso4443a_listener_tx(
     return error;
 }
 
-FHalNfcError f_hal_iso14443_3a_listener_tx_custom_parity(
+FHalNfcError f_hal_nfc_iso14443a_listener_tx_custom_parity(
     const uint8_t* tx_data,
     const uint8_t* tx_parity,
     size_t tx_bits) {

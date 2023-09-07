@@ -156,7 +156,7 @@ void nfc_set_guard_time_us(Nfc* instance, uint32_t guard_time_us) {
     UNUSED(guard_time_us);
 }
 
-NfcError nfc_listener_set_col_res_data(
+NfcError nfc_iso14443a_listener_set_col_res_data(
     Nfc* instance,
     uint8_t* uid,
     uint8_t uid_len,
@@ -381,7 +381,7 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     return NfcErrorNone;
 }
 
-NfcError nfc_iso14443_3a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
+NfcError nfc_iso14443a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
     return nfc_listener_tx(instance, tx_buffer);
 }
 
@@ -418,7 +418,7 @@ NfcError
     return error;
 }
 
-NfcError nfc_iso14443_3a_poller_trx_custom_parity(
+NfcError nfc_iso14443a_poller_trx_custom_parity(
     Nfc* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
@@ -428,7 +428,7 @@ NfcError nfc_iso14443_3a_poller_trx_custom_parity(
 
 // Technology specific API
 
-NfcError nfc_iso14443_3a_short_frame(
+NfcError nfc_iso14443a_poller_trx_short_frame(
     Nfc* instance,
     NfcIso14443aShortFrame frame,
     BitBuffer* rx_buffer,
@@ -446,7 +446,7 @@ NfcError nfc_iso14443_3a_short_frame(
     return error;
 }
 
-NfcError nfc_iso14443_3a_sdd_frame(
+NfcError nfc_iso14443a_poller_trx_sdd_frame(
     Nfc* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,

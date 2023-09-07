@@ -71,7 +71,7 @@ Iso14443_3aError iso14443_3a_poller_check_presence(Iso14443_3aPoller* instance) 
     NfcError error = NfcErrorNone;
     Iso14443_3aError ret = Iso14443_3aErrorNone;
     do {
-        error = nfc_iso14443_3a_short_frame(
+        error = nfc_iso14443a_poller_trx_short_frame(
             instance->nfc,
             NfcIso14443aShortFrameSensReq,
             instance->rx_buffer,
@@ -129,7 +129,7 @@ Iso14443_3aError iso14443_3a_poller_async_activate(
 
     bool activated = false;
     do {
-        error = nfc_iso14443_3a_short_frame(
+        error = nfc_iso14443a_poller_trx_short_frame(
             instance->nfc,
             NfcIso14443aShortFrameSensReq,
             instance->rx_buffer,
@@ -164,7 +164,7 @@ Iso14443_3aError iso14443_3a_poller_async_activate(
                     0,
                     ISO14443_3A_POLLER_SEL_CMD(instance->col_res.cascade_level));
                 bit_buffer_set_byte(instance->tx_buffer, 1, ISO14443_3A_POLLER_SEL_PAR(2, 0));
-                error = nfc_iso14443_3a_sdd_frame(
+                error = nfc_iso14443a_poller_trx_sdd_frame(
                     instance->nfc,
                     instance->tx_buffer,
                     instance->rx_buffer,
@@ -267,7 +267,7 @@ Iso14443_3aError iso14443_3a_poller_txrx_custom_parity(
         ret = iso14443_3a_poller_prepare_trx(instance);
         if(ret != Iso14443_3aErrorNone) break;
 
-        error = nfc_iso14443_3a_poller_trx_custom_parity(instance->nfc, tx_buffer, rx_buffer, fwt);
+        error = nfc_iso14443a_poller_trx_custom_parity(instance->nfc, tx_buffer, rx_buffer, fwt);
         if(error != NfcErrorNone) {
             ret = iso14443_3a_poller_process_error(error);
             break;

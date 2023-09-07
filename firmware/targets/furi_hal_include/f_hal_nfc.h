@@ -147,21 +147,22 @@ bool f_hal_nfc_timer_block_tx_is_running();
 
 /******************* NFCA specific API *******************/
 
-FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame);
+FHalNfcError f_hal_nfc_iso14443a_poller_trx_short_frame(FHalNfcaShortFrame frame);
 
-FHalNfcError f_hal_nfca_send_sdd_frame(const uint8_t* tx_data, size_t tx_bits);
+FHalNfcError f_hal_nfc_iso14443a_tx_sdd_frame(const uint8_t* tx_data, size_t tx_bits);
 
-FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
+FHalNfcError
+    f_hal_nfc_iso14443a_rx_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
-FHalNfcError furi_hal_iso14443_3a_set_col_res_data(
+FHalNfcError f_hal_nfc_iso14443a_listener_set_col_res_data(
     uint8_t* uid,
     uint8_t uid_len,
     uint8_t* atqa,
     uint8_t sak);
 
-FHalNfcError f_hal_iso14443_3a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits);
+FHalNfcError f_hal_nfc_iso14443a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits);
 
-FHalNfcError f_hal_iso14443_3a_listener_tx_custom_parity(
+FHalNfcError f_hal_nfc_iso14443a_listener_tx_custom_parity(
     const uint8_t* tx_data,
     const uint8_t* tx_parity,
     size_t tx_bits);

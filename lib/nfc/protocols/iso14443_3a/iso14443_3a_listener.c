@@ -39,7 +39,7 @@ Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, Iso14443_3aData* data)
 
     nfc_set_fdt_listen_fc(instance->nfc, ISO14443_3A_FDT_LISTEN_FC);
     nfc_config(instance->nfc, NfcModeListener, NfcTechIso14443a);
-    nfc_listener_set_col_res_data(
+    nfc_iso14443a_listener_set_col_res_data(
         instance->nfc,
         instance->data->uid,
         instance->data->uid_len,
