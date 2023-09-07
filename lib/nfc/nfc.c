@@ -232,7 +232,7 @@ static int32_t nfc_worker_poller(void* context) {
 }
 
 Nfc* nfc_alloc() {
-    furi_assert(f_hal_nfc_acquire() == FHalNfcErrorNone);
+    furi_check(f_hal_nfc_acquire() == FHalNfcErrorNone);
 
     Nfc* instance = malloc(sizeof(Nfc));
     instance->state = NfcStateIdle;
