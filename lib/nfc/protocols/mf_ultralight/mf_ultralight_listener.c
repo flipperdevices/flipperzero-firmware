@@ -93,9 +93,9 @@ static MfUltralightCommand
     FURI_LOG_D(TAG, "CMD_READ: %d", start_page);
 
     do {
-        bool do_i2c_page_check = mf_ultralight_is_i2c_tag(instance->data->type);
+        bool do_i2c_check = mf_ultralight_is_i2c_tag(instance->data->type);
 
-        if(do_i2c_page_check) {
+        if(do_i2c_check) {
             if(!mf_ultralight_i2c_validate_pages(start_page, start_page, instance)) break;
         } else if(pages_total < start_page) {
             instance->state = MfUltraligthListenerStateIdle;
@@ -113,7 +113,7 @@ static MfUltralightCommand
         }
 
         MfUltralightPage pages[4] = {};
-        mf_ultralight_listener_perform_read(pages, instance, start_page, 4, do_i2c_page_check);
+        mf_ultralight_listener_perform_read(pages, instance, start_page, 4, do_i2c_check);
 
         bit_buffer_copy_bytes(instance->tx_buffer, (uint8_t*)pages, sizeof(pages));
         iso14443_3a_listener_send_standard_frame(
@@ -136,9 +136,9 @@ static MfUltralightCommand
         uint16_t pages_total = instance->data->pages_total;
         uint16_t start_page = bit_buffer_get_byte(buffer, 1);
         uint16_t end_page = bit_buffer_get_byte(buffer, 2);
-        bool i2c_tag = mf_ultralight_is_i2c_tag(instance->data->type);
+        bool do_i2c_check = mf_ultralight_is_i2c_tag(instance->data->type);
 
-        if(i2c_tag) {
+        if(do_i2c_check) {
             if(!mf_ultralight_i2c_validate_pages(start_page, end_page, instance)) {
                 command = MfUltralightCommandNotProcessedNAK;
                 break;
@@ -165,7 +165,7 @@ static MfUltralightCommand
 
         MfUltralightPage pages[64] = {};
         uint8_t page_cnt = (end_page - start_page) + 1;
-        mf_ultralight_listener_perform_read(pages, instance, start_page, page_cnt, true);
+        mf_ultralight_listener_perform_read(pages, instance, start_page, page_cnt, do_i2c_check);
 
         bit_buffer_copy_bytes(instance->tx_buffer, (uint8_t*)pages, page_cnt * 4);
         iso14443_3a_listener_send_standard_frame(
