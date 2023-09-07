@@ -53,7 +53,7 @@ static const NfcProtocolTreeNode nfc_protocol_nodes[NfcProtocolNum] = {
     [NfcProtocolIso14443_3b] =
         {
             .parent_protocol = NfcProtocolInvalid,
-            .children_num = 0,
+            .children_num = COUNT_OF(nfc_protocol_iso14443_3b_children_protocol),
             .children_protocol = nfc_protocol_iso14443_3b_children_protocol,
         },
     [NfcProtocolIso14443_4a] =
