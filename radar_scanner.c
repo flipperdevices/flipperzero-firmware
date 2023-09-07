@@ -11,7 +11,6 @@
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
 #include <stdlib.h>
-#include <assets_icons.h>
 
 static const uint32_t EVENT_PERIOD_MS = 10;
 static const float BEEP_FREQ = 1000.0f;
