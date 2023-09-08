@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Apple BLE Spam v1.0.5 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - Renamed a few apps for better visibility, organization and sorting (By RogueMaster and Willy-JL)
 - Updated: [Sokoban v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
+- Updated: [ESP32-C6 Gravity v0.5.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 
 <a name="release">
 
@@ -326,7 +327,7 @@ $ ./fbt dolphin_ext
 - [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
-- [ESP32-C6 Gravity v0.3.4 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
+- [ESP32-C6 Gravity v0.5.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
 - [ESP32 WIFI Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map) `Req: ESP32` & [ESP32 FW](https://github.com/carvilsi/esp32-wifi-map)

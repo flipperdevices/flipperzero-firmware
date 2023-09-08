@@ -108,20 +108,21 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * Probe: Any, target-ssids, APs
 * Sniff: On, Off
 * target-ssids: add, remove, list
-* scan: on, off
+* scan: <ssid> WiFi BT BLE OFF
 * hop: on, off, sequential, random, default, set
-* view: sta, ap, sta+ap
-* select: sta, ap
-* selected: sta, ap, sta+ap
-* clear: sta, ap
-* get/set: <variables>
+* view: sta, ap, bt, sta+ap+bt, sta+ap
+* select: sta, ap, bt
+* selected: sta, ap, bt, sta+ap+bt
+* clear: sta, ap, bt
+* purge: WiFi, BT, BLE
+* get/set: <variables> BLE_PURGE_STRAT _MIN_AGE _MAX_RSSI
 * deauth: off, frame STA, device STA, spoof STA, frame APs, device APs, spoof APs, frame broadcast, device broadcast, spoof broadcast
 * mana: on, off, clear
 * mana verbose: on, off
 * mana loud: on, off
 * DOS AP: on, off
 * DOS Clone: status, off, Open, WEP, WPA, Open+WEP, Open+WPA, WEP+WPA, Open+WEP+WPA
-* Homing: 802.11, any (more options coming soon)
+* Homing: 802.11, Bluetooth, any (more options coming soon)
 * help: commands help info
 
 
