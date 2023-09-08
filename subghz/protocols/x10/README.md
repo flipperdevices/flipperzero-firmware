@@ -6,7 +6,7 @@ This is a protocol decoder for the Flipper Zero to decode the X10 series of devi
 ![Details of x10 code](./x10-details.png)
 
 ## Validation
-NOTE: As an Amazon Associate I (CodeAllNight) earn from qualifying purchases from the amzn.to links below. 
+NOTE: As an Amazon affiliate I (CodeAllNight) earn from qualifying purchases from the amzn.to links below. 
 
 The code was tested with the "X10 Camera Control System Remote Control Model CR12A" which you can purchase from
 https://amzn.to/3issZPs and should also be compatible with signals from https://amzn.to/3QEF7cM 
