@@ -12,6 +12,6 @@ App(
     fap_icon_assets_symbol="uart_terminal",
     fap_author="https://github.com/chris-bc",
     fap_weburl="https://github.com/chris-bc/Flipper-Gravity",
-    fap_version="0.3.4",
+    fap_version="0.5.0",
     fap_description="App to control ESP32 Gravity wireless exploration platform.",
 )
