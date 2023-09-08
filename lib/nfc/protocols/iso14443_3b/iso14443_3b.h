@@ -25,6 +25,8 @@ extern "C" {
 #define ISO14443_3B_ATTRIB_FRAME_SIZE_128 (0x07)
 #define ISO14443_3B_ATTRIB_FRAME_SIZE_256 (0x08)
 
+#define ISO14443_3B_FRAME_SIZE_MAX (256U)
+
 typedef enum {
     Iso14443_3bErrorNone,
     Iso14443_3bErrorNotPresent,
@@ -36,13 +38,28 @@ typedef enum {
     Iso14443_3bErrorTimeout,
 } Iso14443_3bError;
 
+typedef enum {
+    Iso14443_3bBitRateBoth106Kbit,
+    Iso14443_3bBitRatePiccToPcd212Kbit,
+    Iso14443_3bBitRatePiccToPcd424Kbit,
+    Iso14443_3bBitRatePiccToPcd847Kbit,
+    Iso14443_3bBitRatePcdToPicc212Kbit,
+    Iso14443_3bBitRatePcdToPicc424Kbit,
+    Iso14443_3bBitRatePcdToPicc847Kbit,
+} Iso14443_3bBitRate;
+
+typedef enum {
+    Iso14443_3bFrameOptionNad,
+    Iso14443_3bFrameOptionCid,
+} Iso14443_3bFrameOption;
+
 typedef struct {
     uint8_t bit_rate_capability;
-    uint8_t max_frame_size : 4;
     uint8_t protocol_type : 4;
-    uint8_t fwi : 4;
-    uint8_t rfu : 2;
+    uint8_t max_frame_size : 4;
     uint8_t fo : 2;
+    uint8_t rfu : 2;
+    uint8_t fwi : 4;
 } Iso14443_3bProtocolInfo;
 
 typedef struct {
@@ -78,6 +95,14 @@ Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data);
 // Getters and tests
 
 bool iso14443_3b_supports_iso14443_4(const Iso14443_3bData* data);
+
+bool iso14443_3b_supports_bit_rate(const Iso14443_3bData* data, Iso14443_3bBitRate bit_rate);
+
+bool iso14443_3b_supports_frame_option(const Iso14443_3bData* data, Iso14443_3bFrameOption option);
+
+uint16_t iso14443_3b_get_frame_size_max(const Iso14443_3bData* data);
+
+uint32_t iso14443_3b_get_fwt_fc_max(const Iso14443_3bData* data);
 
 #ifdef __cplusplus
 }

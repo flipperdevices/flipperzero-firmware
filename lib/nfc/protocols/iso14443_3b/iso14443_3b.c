@@ -1,4 +1,4 @@
-#include "iso14443_3b.h"
+#include "iso14443_3b_i.h"
 
 #include <furi.h>
 
@@ -147,5 +147,60 @@ Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data) {
 bool iso14443_3b_supports_iso14443_4(const Iso14443_3bData* data) {
     furi_assert(data);
 
-    return data->protocol_info.protocol_type == 0x08;
+    return data->protocol_info.protocol_type == 0x01;
+}
+
+bool iso14443_3b_supports_bit_rate(const Iso14443_3bData* data, Iso14443_3bBitRate bit_rate) {
+    furi_assert(data);
+
+    const uint8_t capability = data->protocol_info.bit_rate_capability;
+
+    switch(bit_rate) {
+    case Iso14443_3bBitRateBoth106Kbit:
+        return capability == ISO14443_3B_BIT_RATE_BOTH_106KBIT;
+    case Iso14443_3bBitRatePiccToPcd212Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_212KBIT;
+    case Iso14443_3bBitRatePiccToPcd424Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_424KBIT;
+    case Iso14443_3bBitRatePiccToPcd847Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_847KBIT;
+    case Iso14443_3bBitRatePcdToPicc212Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_212KBIT;
+    case Iso14443_3bBitRatePcdToPicc424Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_424KBIT;
+    case Iso14443_3bBitRatePcdToPicc847Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_847KBIT;
+    default:
+        return false;
+    }
+}
+
+bool iso14443_3b_supports_frame_option(const Iso14443_3bData* data, Iso14443_3bFrameOption option) {
+    furi_assert(data);
+
+    switch(option) {
+    case Iso14443_3bFrameOptionNad:
+        return data->protocol_info.fo & ISO14443_3B_FRAME_OPTION_NAD;
+    case Iso14443_3bFrameOptionCid:
+        return data->protocol_info.fo & ISO14443_3B_FRAME_OPTION_CID;
+    default:
+        return false;
+    }
+}
+
+uint16_t iso14443_3b_get_frame_size_max(const Iso14443_3bData* data) {
+    furi_assert(data);
+
+    static const uint16_t max_frame_sizes[] = {16, 24, 32, 40, 48, 64, 96, 128, 256, 0xFFFF};
+
+    const size_t fs_index =
+        MIN((size_t)data->protocol_info.max_frame_size, COUNT_OF(max_frame_sizes));
+    return max_frame_sizes[fs_index];
+}
+
+uint32_t iso14443_3b_get_fwt_fc_max(const Iso14443_3bData* data) {
+    furi_assert(data);
+
+    const uint8_t fwi = data->protocol_info.fwi;
+    return fwi < 15 ? 4096UL << fwi : 0;
 }

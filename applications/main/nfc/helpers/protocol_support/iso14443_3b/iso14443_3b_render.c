@@ -11,22 +11,61 @@ void nfc_render_iso14443_3b_info(
 
     furi_string_cat_printf(str, "UID:");
 
-    for(size_t i = 0; i < ISO14443_3B_UID_SIZE; i++) {
-        furi_string_cat_printf(str, " %02X", data->uid[i]);
+    size_t uid_size;
+    const uint8_t* uid = iso14443_3b_get_uid(data, &uid_size);
+
+    for(size_t i = 0; i < uid_size; i++) {
+        furi_string_cat_printf(str, " %02X", uid[i]);
     }
 
-    if(format_type == NfcProtocolFormatTypeFull) {
-        furi_string_cat_printf(str, "\nApp. data:");
-        for(size_t i = 0; i < ISO14443_3B_APP_DATA_SIZE; ++i) {
-            furi_string_cat_printf(str, " %02X", data->app_data[i]);
+    if(format_type != NfcProtocolFormatTypeFull) return;
+
+    furi_string_cat_printf(str, "\n\e#Protocol info\n");
+
+    if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRateBoth106Kbit)) {
+        furi_string_cat_printf(str, "106 kBit/s both directions\n");
+    } else {
+        furi_string_cat(str, "Bit rate PICC -> PCD:\n");
+        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePiccToPcd212Kbit)) {
+            furi_string_cat(str, "  212 kBit/s supported\n");
+        }
+        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePiccToPcd424Kbit)) {
+            furi_string_cat(str, "  424 kBit/s supported\n");
+        }
+        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePiccToPcd847Kbit)) {
+            furi_string_cat(str, "  847 kBit/s supported\n");
         }
 
-        furi_string_cat_printf(str, "\n\e#Protocol info\n");
-        furi_string_cat_printf(
-            str, "Bit rate capability: %02X\n", data->protocol_info.bit_rate_capability);
-        furi_string_cat_printf(
-            str, "Maximum frame size: %02X\n", data->protocol_info.max_frame_size);
-        furi_string_cat_printf(str, "Frame waiting integer: %02X\n", data->protocol_info.fwi);
-        furi_string_cat_printf(str, "Frame option: %02X", data->protocol_info.fwi);
+        furi_string_cat(str, "Bit rate PICC <- PCD:\n");
+        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePcdToPicc212Kbit)) {
+            furi_string_cat(str, "  212 kBit/s supported\n");
+        }
+        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePcdToPicc424Kbit)) {
+            furi_string_cat(str, "  424 kBit/s supported\n");
+        }
+        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePcdToPicc847Kbit)) {
+            furi_string_cat(str, "  847 kBit/s supported\n");
+        }
+    }
+
+    const uint16_t max_frame_size = iso14443_3b_get_frame_size_max(data);
+    const uint16_t max_frame_size_clamped = MIN(max_frame_size, ISO14443_3B_FRAME_SIZE_MAX);
+    const char* ovf_sign = max_frame_size != max_frame_size_clamped ? "+" : "";
+    furi_string_cat_printf(str, "Max frame size: %u%s bytes\n", max_frame_size_clamped, ovf_sign);
+
+    const double fwt = iso14443_3b_get_fwt_fc_max(data) / 13.56e6;
+    furi_string_cat_printf(str, "Max waiting time: %.6g s\n", fwt);
+
+    const char* nad_support_str =
+        iso14443_3b_supports_frame_option(data, Iso14443_3bFrameOptionNad) ? "" : "not ";
+    furi_string_cat_printf(str, "NAD: %ssupported\n", nad_support_str);
+
+    const char* cid_support_str =
+        iso14443_3b_supports_frame_option(data, Iso14443_3bFrameOptionCid) ? "" : "not ";
+    furi_string_cat_printf(str, "CID: %ssupported", cid_support_str);
+
+    furi_string_cat_printf(str, "\n\e#Application data\n");
+    for(size_t i = 0; i < ISO14443_3B_APP_DATA_SIZE; ++i) {
+        furi_string_cat_printf(str, "%02X ", data->app_data[i]);
     }
 }
