@@ -1075,10 +1075,10 @@ FuriHalSdStatus furi_hal_sd_info(FuriHalSdInfo* info) {
 
         info->manufacturer_id = cid.ManufacturerID;
 
-        memcpy(info->oem_id, cid.OEM_AppliID, sizeof(info->oem_id - 1));
+        memcpy(info->oem_id, cid.OEM_AppliID, sizeof(info->oem_id) - 1);
         info->oem_id[sizeof(info->oem_id) - 1] = '\0';
 
-        memcpy(info->product_name, cid.ProdName, sizeof(info->product_name - 1));
+        memcpy(info->product_name, cid.ProdName, sizeof(info->product_name) - 1);
         info->product_name[sizeof(info->product_name) - 1] = '\0';
 
         info->product_revision_major = cid.ProdRev >> 4;
