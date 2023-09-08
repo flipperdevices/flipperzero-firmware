@@ -10,7 +10,7 @@
 
 #define LOGITECH_MAX_CHANNEL 85
 #define COUNT_THRESHOLD 2
-#define DEFAULT_SAMPLE_TIME 4000
+#define DEFAULT_SAMPLE_TIME 8000
 #define MAX_ADDRS 100
 #define MAX_CONFIRMED 32
 
@@ -334,7 +334,17 @@ int32_t nrfsniff_app(void* p) {
         furi_delay_ms(10);
     }
 
+    furi_delay_ms(100);
+
     nrf24_init();
+
+    bool nrf_ready = false;
+    if(nrf24_check_connected(nrf24_HANDLE)) {
+        nrf_ready = true;
+    } else {
+        nrf_ready = false;
+        FURI_LOG_E(TAG, "NRF24 not connected");
+    }
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
@@ -395,7 +405,7 @@ int32_t nrfsniff_app(void* p) {
                         break;
                     case InputKeyOk:
                         // toggle sniffing
-                        if(nrf24_check_connected(nrf24_HANDLE)) {
+                        if(nrf_ready) {
                             sniffing_state = !sniffing_state;
                             if(sniffing_state) {
                                 clear_cache();
@@ -406,11 +416,31 @@ int32_t nrfsniff_app(void* p) {
                             }
                         } else {
                             notification_message(notification, &sequence_error);
+                            if(nrf24_check_connected(nrf24_HANDLE)) {
+                                nrf_ready = true;
+                            } else {
+                                nrf_ready = false;
+                                FURI_LOG_E(TAG, "NRF24 not connected");
+                            }
                         }
 
                         break;
                     case InputKeyBack:
-                        if(event.input.type == InputTypeLong) processing = false;
+                        if(event.input.type == InputTypeLong) {
+                            if(nrf_ready) {
+                                if(sniffing_state) {
+                                    wrap_up(storage, notification);
+                                }
+                            } else {
+                                if(nrf24_check_connected(nrf24_HANDLE)) {
+                                    nrf_ready = true;
+                                } else {
+                                    nrf_ready = false;
+                                    FURI_LOG_E(TAG, "NRF24 not connected");
+                                }
+                            }
+                            processing = false;
+                        }
                         break;
                     default:
                         break;
