@@ -1,11 +1,9 @@
 App(
-    appid="esp32cam_morse_flasher",
-    name="[ESP32CAM] Morse Flasher",
+    appid="cam_morse_flasher",
+    name="[CAM] Morse Flash",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_terminal_app",
-    requires=["gui"],
     stack_size=1 * 1024,
-    order=90,
     fap_icon_assets="assets",
     fap_icon="icon.png",
     fap_category="GPIO/ESP32",

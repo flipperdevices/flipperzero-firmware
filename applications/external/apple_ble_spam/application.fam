@@ -13,6 +13,6 @@ App(
         ),
     ],
     fap_author="@Willy-JL",  # Plus research from @ECTO-1A @xMasterX and @techryptic
-    fap_version="1.0.4",
+    fap_version="1.0.5",
     fap_description="Spam Apple devices with annoying popups and notifications via BLE packets",
 )

@@ -1,6 +1,6 @@
 App(
     appid="gps_adv_wifi_sniffer",
-    name="[GPS] Advanced Wifi Sniffer",
+    name="[GPS] Adv Wifi Sniff",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifisniffer_app",
     stack_size=2 * 1024,

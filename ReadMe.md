@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0907-1544-0.90.2-095cc22](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-07 15:44 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-07 15:44 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-08 01:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-08 01:50 EST`
 - UL: [Some faac fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b3cce2351a704fa70b6f348e92612b5d05462d32)
 - Added: [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
 - OFW: [github: workflow improvements #3032 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3032)
@@ -44,11 +44,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Additional Frequencies for Sub-GHz Rolling Flaws v1.5 app (Idea by arkanet)](https://github.com/arkanet/FlipperZero/commit/11b791f683166c9bf87866b9630491995b8feffd)
 - Added: [Radar Scanner (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 - Updated: [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
-- Updated: [Apple BLE Spam v1.0.4 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - Updated: [Sub-GHz Rolling Flaws v1.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - Updated: [Slot Machine v1.2 (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
 - Updated: [Radar Scanner (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Extended Functionality #17 (By R4g3D)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/17)
+- Updated: [Apple BLE Spam v1.0.5 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
+- Renamed a few apps for better visibility, organization and sorting (By RogueMaster and Willy-JL)
 
 <a name="release">
 
@@ -280,7 +281,7 @@ $ ./fbt dolphin_ext
 - [Advanced Wifi Sniffer (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c8e5c3bd8b353092c7fd5b7ed0327d044ee53b74)
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
-- [Apple BLE Spam v1.0.4 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
+- [Apple BLE Spam v1.0.5 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - [Authenticator/TOTP v4.1.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)

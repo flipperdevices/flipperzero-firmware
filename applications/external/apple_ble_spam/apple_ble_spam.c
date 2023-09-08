@@ -330,6 +330,8 @@ static Payload payloads[] = {
          }},
 };
 
+#define PAYLOAD_COUNT ((signed)COUNT_OF(payloads))
+
 struct {
     uint8_t count;
     ContinuityData** datas;
@@ -363,7 +365,7 @@ typedef struct {
     Payload* payload;
     FuriThread* thread;
     uint8_t mac[GAP_MAC_ADDR_SIZE];
-    uint8_t index;
+    int8_t index;
 } State;
 
 static int32_t adv_thread(void* ctx) {
@@ -418,36 +420,178 @@ static void toggle_adv(State* state, Payload* payload) {
     }
 }
 
+#define PAGE_MIN (-5)
+#define PAGE_MAX PAYLOAD_COUNT
+enum {
+    PageApps = PAGE_MIN,
+    PageDelay,
+    PageDistance,
+    PageProximityPair,
+    PageNearbyAction,
+    PageStart = 0,
+    PageEnd = PAYLOAD_COUNT - 1,
+    PageAbout = PAGE_MAX,
+};
+
 static void draw_callback(Canvas* canvas, void* ctx) {
     State* state = ctx;
-    const Payload* payload = &payloads[state->index];
+    const char* back = "Back";
+    const char* next = "Next";
+    switch(state->index) {
+    case PageStart - 1:
+        next = "Spam";
+        break;
+    case PageStart:
+        back = "Help";
+        break;
+    case PageEnd:
+        next = "About";
+        break;
+    case PageEnd + 1:
+        back = "Spam";
+        break;
+    }
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_icon(canvas, 3, 4, &I_apple_10px);
     canvas_draw_str(canvas, 14, 12, "Apple BLE Spam");
-    canvas_set_font(canvas, FontBatteryPercent);
-    char delay[14];
-    snprintf(delay, sizeof(delay), "%ims", delays[state->delay]);
-    canvas_draw_str_aligned(canvas, 116, 12, AlignRight, AlignBottom, delay);
-    canvas_draw_icon(canvas, 119, 6, &I_SmallArrowUp_3x5);
-    canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
 
-    canvas_set_font(canvas, FontBatteryPercent);
-    canvas_draw_str(canvas, 4, 21, continuity_get_type_name(payload->msg.type));
+    switch(state->index) {
+    case PageApps:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "\e#Some Apps\e# interfere\n"
+            "with the attacks, stay on\n"
+            "homescreen for best results",
+            false);
+        break;
+    case PageDelay:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "\e#Delay\e# is time between\n"
+            "attack attempts (top right),\n"
+            "keep 20ms for best results",
+            false);
+        break;
+    case PageDistance:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "\e#Distance\e# is limited, attacks\n"
+            "work under 1 meter but a\n"
+            "few are marked 'long range'",
+            false);
+        break;
+    case PageProximityPair:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "\e#Proximity Pair\e# attacks\n"
+            "keep spamming but work at\n"
+            "very close range",
+            false);
+        break;
+    case PageNearbyAction:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "\e#Nearby Actions\e# work one\n"
+            "time then need to lock and\n"
+            "unlock the phone",
+            false);
+        break;
+    case PageAbout:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "About");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            122,
+            48,
+            AlignLeft,
+            AlignTop,
+            "App+spam by \e#WillyJL\e# XFW\n"
+            "Pair codes by \e#ECTO-1A\e#\n"
+            "BLE docs by \e#furiousMAC\e#\n"
+            "                   Airtag \e#Techryptic\e#",
+            false);
+        break;
+    default: {
+        if(state->index < 0 || state->index > PAYLOAD_COUNT - 1) break;
+        const Payload* payload = &payloads[state->index];
+        char str[32];
 
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 4, 32, payload->title);
+        canvas_set_font(canvas, FontBatteryPercent);
+        snprintf(str, sizeof(str), "%ims", delays[state->delay]);
+        canvas_draw_str_aligned(canvas, 116, 12, AlignRight, AlignBottom, str);
+        canvas_draw_icon(canvas, 119, 6, &I_SmallArrowUp_3x5);
+        canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
 
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 4, 46, payload->text);
+        canvas_set_font(canvas, FontBatteryPercent);
+        snprintf(
+            str,
+            sizeof(str),
+            "%02i/%02i: %s",
+            state->index + 1,
+            PAYLOAD_COUNT,
+            continuity_get_type_name(payload->msg.type));
+        canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 21, str);
 
-    if(state->index > 0) {
-        elements_button_left(canvas, "Back");
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 4, 32, payload->title);
+
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 4, 46, payload->text);
+
+        elements_button_center(canvas, state->advertising ? "Stop" : "Start");
+        break;
     }
-    if(state->index < COUNT_OF(payloads) - 1) {
-        elements_button_right(canvas, "Next");
     }
-    elements_button_center(canvas, state->advertising ? "Stop" : "Start");
+
+    if(state->index > PAGE_MIN) {
+        elements_button_left(canvas, back);
+    }
+    if(state->index < PAGE_MAX) {
+        elements_button_right(canvas, next);
+    }
 }
 
 static void input_callback(InputEvent* input, void* ctx) {
@@ -494,34 +638,36 @@ int32_t apple_ble_spam(void* p) {
         InputEvent input;
         furi_check(furi_message_queue_get(input_queue, &input, FuriWaitForever) == FuriStatusOk);
 
-        Payload* payload = &payloads[state->index];
+        Payload* payload = (state->index >= 0 && state->index <= PAYLOAD_COUNT - 1) ?
+                               &payloads[state->index] :
+                               NULL;
         bool advertising = state->advertising;
         switch(input.key) {
         case InputKeyOk:
-            toggle_adv(state, payload);
+            if(payload) toggle_adv(state, payload);
             break;
         case InputKeyUp:
-            if(state->delay < COUNT_OF(delays) - 1) {
+            if(payload && state->delay < COUNT_OF(delays) - 1) {
                 if(advertising) stop_adv(state);
                 state->delay++;
                 if(advertising) start_adv(state);
             }
             break;
         case InputKeyDown:
-            if(state->delay > 0) {
+            if(payload && state->delay > 0) {
                 if(advertising) stop_adv(state);
                 state->delay--;
                 if(advertising) start_adv(state);
             }
             break;
         case InputKeyLeft:
-            if(state->index > 0) {
+            if(state->index > PAGE_MIN) {
                 if(advertising) toggle_adv(state, payload);
                 state->index--;
             }
             break;
         case InputKeyRight:
-            if(state->index < COUNT_OF(payloads) - 1) {
+            if(state->index < PAGE_MAX) {
                 if(advertising) toggle_adv(state, payload);
                 state->index++;
             }

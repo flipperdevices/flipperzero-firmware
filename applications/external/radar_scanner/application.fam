@@ -1,6 +1,6 @@
 App(
     appid="radar_scanner",
-    name="Radar Scanner",
+    name="[RCWL0516] Radar Scan",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="app_radar_scanner",
     stack_size=1 * 1024,
