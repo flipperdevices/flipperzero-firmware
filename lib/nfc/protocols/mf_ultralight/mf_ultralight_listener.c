@@ -353,6 +353,15 @@ static MfUltralightCommand mf_ultralight_listener_check_tearing_handler(
 }
 
 static MfUltralightCommand
+    mf_ultralight_listener_vcsl_handler(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedSilent;
+    UNUSED(instance);
+    UNUSED(buffer);
+    FURI_LOG_D(TAG, "CMD_VCSL");
+    return command;
+}
+
+static MfUltralightCommand
     mf_ultralight_listener_auth_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     MfUltralightCommand command = MfUltralightCommandNotProcessedSilent;
 
@@ -526,6 +535,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .cmd = MF_ULTRALIGHT_CMD_COMP_WRITE,
         .cmd_len_bits = 2 * 8,
         .callback = mf_ultralight_comp_write_handler_p1,
+    },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_VCSL,
+        .cmd_len_bits = 21 * 8,
+        .callback = mf_ultralight_listener_vcsl_handler,
     },
 };
 
