@@ -125,7 +125,6 @@ static int32_t nfc_worker_listener(void* context) {
             instance->callback(nfc_event, instance->context);
             furi_hal_nfc_listener_idle();
         }
-        // TODO maybe remove?
         if(event & FuriHalNfcEventListenerActive) {
             nfc_event.type = NfcEventTypeListenerActivated;
             instance->callback(nfc_event, instance->context);
@@ -362,7 +361,7 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
         if(event & FuriHalNfcEventTxEnd) {
             if(instance->comm_state == NfcCommStateWaitTxEnd) {
                 if(fwt_fc) {
-                    furi_hal_nfc_timer_fwt_start(fwt_fc + FURI_HAL_NFC_TIMER_OFFSET_FC);
+                    furi_hal_nfc_timer_fwt_start(fwt_fc + FURI_HAL_NFC_TIMER_COMPENSATION_FC);
                 }
                 furi_hal_nfc_timer_block_tx_start_us(instance->fdt_poll_poll_us);
                 instance->comm_state = NfcCommStateWaitRxStart;

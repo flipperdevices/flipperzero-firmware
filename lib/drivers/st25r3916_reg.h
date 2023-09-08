@@ -966,7 +966,7 @@ extern "C" {
  * @param   handle      - pointer t FuriHalSpiBusHandle instance
  * @param   reg         - register address
  * @param   val         - pointer to the variable to store the read value
-*/
+ */
 void st25r3916_read_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* val);
 
 /** Read multiple registers
@@ -975,7 +975,7 @@ void st25r3916_read_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* val);
  * @param   reg_start   - start register address
  * @param   values      - pointer to the buffer to store the read values
  * @param   length      - number of registers to read
-*/
+ */
 void st25r3916_read_burst_regs(
     FuriHalSpiBusHandle* handle,
     uint8_t reg_start,
@@ -1024,7 +1024,7 @@ void st25r3916_reg_read_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, size_t 
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   values      - pointer to buffer to write
  * @param   length      - number of bytes to write
-*/
+ */
 void st25r3916_write_pta_mem(FuriHalSpiBusHandle* handle, const uint8_t* values, size_t length);
 
 /** Read PTA memory register
@@ -1032,7 +1032,7 @@ void st25r3916_write_pta_mem(FuriHalSpiBusHandle* handle, const uint8_t* values,
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   values      - buffer to store the read values
  * @param   length      - number of bytes to read
-*/
+ */
 void st25r3916_read_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* values, size_t length);
 
 /** Write PTF memory register
@@ -1040,7 +1040,7 @@ void st25r3916_read_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* values, size_t
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   values      - pointer to buffer to write
  * @param   length      - number of bytes to write
-*/
+ */
 void st25r3916_write_ptf_mem(FuriHalSpiBusHandle* handle, const uint8_t* values, size_t length);
 
 /** Read PTTSN memory register
@@ -1048,21 +1048,21 @@ void st25r3916_write_ptf_mem(FuriHalSpiBusHandle* handle, const uint8_t* values,
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   values      - pointer to buffer to write
  * @param   length      - number of bytes to write
-*/
+ */
 void st25r3916_write_pttsn_mem(FuriHalSpiBusHandle* handle, uint8_t* values, size_t length);
 
 /** Send Direct command
  *
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   cmd         - direct command
-*/
+ */
 void st25r3916_direct_cmd(FuriHalSpiBusHandle* handle, uint8_t cmd);
 
 /** Read test register
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   reg         - register address
  * @param   val         - pointer to the variable to store the read value
-*/
+ */
 void st25r3916_read_test_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* val);
 
 /** Write test register
@@ -1070,7 +1070,7 @@ void st25r3916_read_test_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* 
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   reg         - register address
  * @param   val         - value to write
-*/
+ */
 void st25r3916_write_test_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t val);
 
 /** Clear register bits
@@ -1078,7 +1078,7 @@ void st25r3916_write_test_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t 
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   reg         - register address
  * @param   clr_mask    - bit mask to clear
-*/
+ */
 void st25r3916_clear_reg_bits(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t clr_mask);
 
 /** Set register bits
@@ -1086,7 +1086,7 @@ void st25r3916_clear_reg_bits(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t 
  * @param   handle      - pointer to FuriHalSpiBusHandle instance
  * @param   reg         - register address
  * @param   set_mask    - bit mask to set
-*/
+ */
 void st25r3916_set_reg_bits(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t set_mask);
 
 /** Change register bits
@@ -1095,7 +1095,7 @@ void st25r3916_set_reg_bits(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t se
  * @param   reg         - register address
  * @param   mask        - bit mask to change
  * @param   value       - new register value to write
-*/
+ */
 void st25r3916_change_reg_bits(
     FuriHalSpiBusHandle* handle,
     uint8_t reg,
@@ -1108,7 +1108,7 @@ void st25r3916_change_reg_bits(
  * @param   reg         - register address
  * @param   clr_mask    - bit mask to clear
  * @param   set_mask    - bit mask to set
-*/
+ */
 void st25r3916_modify_reg(
     FuriHalSpiBusHandle* handle,
     uint8_t reg,
@@ -1121,7 +1121,7 @@ void st25r3916_modify_reg(
  * @param   reg         - register address
  * @param   mask        - bit mask to change
  * @param   value       - new register value to write
-*/
+ */
 void st25r3916_change_test_reg_bits(
     FuriHalSpiBusHandle* handle,
     uint8_t reg,
@@ -1136,7 +1136,7 @@ void st25r3916_change_test_reg_bits(
  * @param   val         - expected register value
  *
  * @return  true if register value matches the expected value, false otherwise
-*/
+ */
 bool st25r3916_check_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t mask, uint8_t val);
 
 #ifdef __cplusplus

@@ -74,7 +74,7 @@ extern "C" {
  *
  * @param   handle  - pointer to FuriHalSpiBusHandle instance
  * @param   mask    - mask of interrupts to be disabled
-*/
+ */
 void st25r3916_mask_irq(FuriHalSpiBusHandle* handle, uint32_t mask);
 
 /** Get st25r3916 interrupts
@@ -90,7 +90,7 @@ uint32_t st25r3916_get_irq(FuriHalSpiBusHandle* handle);
  * @param   handle  - pointer to FuriHalSpiBusHandle instance
  * @param   buff    - buffer to write to FIFO
  * @param   bits    - number of bits to write
-*/
+ */
 void st25r3916_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* buff, size_t bits);
 
 /** Read FIFO
