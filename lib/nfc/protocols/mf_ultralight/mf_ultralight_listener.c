@@ -358,6 +358,20 @@ static MfUltralightCommand
     UNUSED(instance);
     UNUSED(buffer);
     FURI_LOG_D(TAG, "CMD_VCSL");
+    do {
+        if(!mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportVcsl))
+            break;
+
+        MfUltralightConfigPages* config;
+        if(!mf_ultralight_get_config_page(instance->data, &config)) break;
+
+        bit_buffer_set_size_bytes(instance->tx_buffer, 1);
+        bit_buffer_set_byte(instance->tx_buffer, 0, config->vctid);
+        iso14443_3a_listener_send_standard_frame(
+            instance->iso14443_3a_listener, instance->tx_buffer);
+        command = MfUltralightCommandProcessed;
+    } while(false);
+
     return command;
 }
 
