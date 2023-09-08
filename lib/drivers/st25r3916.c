@@ -2,10 +2,6 @@
 
 #include <furi.h>
 
-bool st25r3916_init(void) {
-    return true;
-}
-
 void st25r3916_mask_irq(FuriHalSpiBusHandle* handle, uint32_t mask) {
     furi_assert(handle);
 
