@@ -21,9 +21,11 @@ void nfc_render_iso14443_3b_info(
             furi_string_cat_printf(str, " %02X", data->app_data[i]);
         }
 
-        furi_string_cat_printf(str, "\nProtocol info:\n");
-        furi_string_cat_printf(str, "Bit rate capability: %02X\n", data->protocol_info.bit_rate_capability);
-        furi_string_cat_printf(str, "Maximum frame size: %02X\n", data->protocol_info.max_frame_size);
+        furi_string_cat_printf(str, "\n\e#Protocol info\n");
+        furi_string_cat_printf(
+            str, "Bit rate capability: %02X\n", data->protocol_info.bit_rate_capability);
+        furi_string_cat_printf(
+            str, "Maximum frame size: %02X\n", data->protocol_info.max_frame_size);
         furi_string_cat_printf(str, "Frame waiting integer: %02X\n", data->protocol_info.fwi);
         furi_string_cat_printf(str, "Frame option: %02X", data->protocol_info.fwi);
     }

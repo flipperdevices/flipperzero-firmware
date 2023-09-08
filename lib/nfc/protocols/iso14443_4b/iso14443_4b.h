@@ -17,7 +17,6 @@ typedef enum {
 
 typedef struct {
     Iso14443_3bData* iso14443_3b_data;
-    SimpleArray* ats_data;
 } Iso14443_4bData;
 
 // Virtual methods

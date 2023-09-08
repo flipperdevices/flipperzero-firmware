@@ -46,21 +46,8 @@ static NfcCommand iso14443_4b_poller_handler_idle(Iso14443_4bPoller* instance) {
         instance->data->iso14443_3b_data,
         iso14443_3b_poller_get_data(instance->iso14443_3b_poller));
 
-    instance->poller_state = Iso14443_4bPollerStateReadAts;
+    instance->poller_state = Iso14443_4bPollerStateReady;
     instance->protocol_state.block_number = 0;
-    return NfcCommandContinue;
-}
-
-static NfcCommand iso14443_4b_poller_handler_read_ats(Iso14443_4bPoller* instance) {
-    Iso14443_4bError error = iso14443_4b_poller_async_read_ats(instance, instance->data->ats_data);
-    if(error == Iso14443_4bErrorNone) {
-        FURI_LOG_D(TAG, "Read ATS success");
-        instance->poller_state = Iso14443_4bPollerStateReady;
-    } else {
-        FURI_LOG_D(TAG, "Failed to read ATS");
-        instance->poller_state = Iso14443_4bPollerStateError;
-    }
-
     return NfcCommandContinue;
 }
 
@@ -81,7 +68,6 @@ static NfcCommand iso14443_4b_poller_handler_ready(Iso14443_4bPoller* instance) 
 static const Iso14443_4bPollerStateHandler
     iso14443_4b_poller_state_handler[Iso14443_4bPollerStateNum] = {
         [Iso14443_4bPollerStateIdle] = iso14443_4b_poller_handler_idle,
-        [Iso14443_4bPollerStateReadAts] = iso14443_4b_poller_handler_read_ats,
         [Iso14443_4bPollerStateError] = iso14443_4b_poller_handler_error,
         [Iso14443_4bPollerStateReady] = iso14443_4b_poller_handler_ready,
 };

@@ -147,5 +147,5 @@ Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data) {
 bool iso14443_3b_supports_iso14443_4(const Iso14443_3bData* data) {
     furi_assert(data);
 
-    return data->protocol_info.protocol_type == 0x01;
+    return data->protocol_info.protocol_type == 0x08;
 }

@@ -2,8 +2,6 @@
 
 #include "iso14443_4b.h"
 
-#define ISO14443_4B_CMD_READ_ATS (0xE0)
-
 #define ISO14443_4B_FSDI_16 (0x00)
 #define ISO14443_4B_FSDI_24 (0x01)
 #define ISO14443_4B_FSDI_32 (0x02)
@@ -28,18 +26,5 @@
 #define ISO14443_4B_BLOCK_PCB_I (0U)
 #define ISO14443_4B_BLOCK_PCB_R (5U << 5)
 #define ISO14443_4B_BLOCK_PCB_S (3U << 6)
-
-typedef struct {
-    uint8_t tl;
-    uint8_t t0;
-    uint8_t ta_1;
-    uint8_t tb_1;
-    uint8_t tc_1;
-    uint8_t t1_tk[];
-} Iso14443_4bAtsData;
-
-bool iso14443_4b_ats_parse(SimpleArray* data, const BitBuffer* buf);
-
-void iso14443_4b_ats_fill_default(SimpleArray* data);
 
 Iso14443_4bError iso14443_4b_process_error(Iso14443_3bError error);

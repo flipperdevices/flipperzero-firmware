@@ -7,5 +7,4 @@ void nfc_render_iso14443_4b_info(
     NfcProtocolFormatType format_type,
     FuriString* str) {
     nfc_render_iso14443_3b_info(data->iso14443_3b_data, format_type, str);
-    // TODO: Add RATS info?
 }
