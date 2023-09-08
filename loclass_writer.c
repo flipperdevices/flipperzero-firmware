@@ -38,6 +38,8 @@ void loclass_writer_free(LoclassWriter* instance) {
 }
 
 bool loclass_writer_write_start_stop(LoclassWriter* instance, bool start) {
+    furi_assert(instance != NULL);
+
     FuriHalRtcDateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
     uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
