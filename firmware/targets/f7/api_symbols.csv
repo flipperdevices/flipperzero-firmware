@@ -1841,6 +1841,7 @@ Function,+,iso14443_3a_verify,_Bool,"Iso14443_3aData*, const FuriString*"
 Function,+,iso14443_3b_alloc,Iso14443_3bData*,
 Function,+,iso14443_3b_copy,void,"Iso14443_3bData*, const Iso14443_3bData*"
 Function,+,iso14443_3b_free,void,Iso14443_3bData*
+Function,+,iso14443_3b_get_application_data,const uint8_t*,"const Iso14443_3bData*, size_t*"
 Function,+,iso14443_3b_get_base_data,Iso14443_3bData*,const Iso14443_3bData*
 Function,+,iso14443_3b_get_device_name,const char*,"const Iso14443_3bData*, NfcDeviceNameType"
 Function,+,iso14443_3b_get_frame_size_max,uint16_t,const Iso14443_3bData*

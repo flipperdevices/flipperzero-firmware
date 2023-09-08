@@ -119,11 +119,9 @@ const char* iso14443_3b_get_device_name(const Iso14443_3bData* data, NfcDeviceNa
 
 const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len) {
     furi_assert(data);
+    furi_assert(uid_len);
 
-    if(uid_len) {
-        *uid_len = ISO14443_3B_UID_SIZE;
-    }
-
+    *uid_len = ISO14443_3B_UID_SIZE;
     return data->uid;
 }
 
@@ -188,14 +186,30 @@ bool iso14443_3b_supports_frame_option(const Iso14443_3bData* data, Iso14443_3bF
     }
 }
 
+const uint8_t* iso14443_3b_get_application_data(const Iso14443_3bData* data, size_t* data_size) {
+    furi_assert(data);
+    furi_assert(data_size);
+
+    *data_size = ISO14443_3B_APP_DATA_SIZE;
+    return data->app_data;
+}
+
 uint16_t iso14443_3b_get_frame_size_max(const Iso14443_3bData* data) {
     furi_assert(data);
 
-    static const uint16_t max_frame_sizes[] = {16, 24, 32, 40, 48, 64, 96, 128, 256, 0xFFFF};
+    const uint8_t fs_bits = data->protocol_info.max_frame_size;
 
-    const size_t fs_index =
-        MIN((size_t)data->protocol_info.max_frame_size, COUNT_OF(max_frame_sizes));
-    return max_frame_sizes[fs_index];
+    if(fs_bits < 5) {
+        return fs_bits * 8 + 16;
+    } else if(fs_bits == 5) {
+        return 64;
+    } else if(fs_bits == 6) {
+        return 96;
+    } else if(fs_bits < 13) {
+        return 128U << (fs_bits - 7);
+    } else {
+        return 0;
+    }
 }
 
 uint32_t iso14443_3b_get_fwt_fc_max(const Iso14443_3bData* data) {

@@ -48,10 +48,14 @@ void nfc_render_iso14443_3b_info(
         }
     }
 
+    furi_string_cat(str, "Max frame size: ");
+
     const uint16_t max_frame_size = iso14443_3b_get_frame_size_max(data);
-    const uint16_t max_frame_size_clamped = MIN(max_frame_size, ISO14443_3B_FRAME_SIZE_MAX);
-    const char* ovf_sign = max_frame_size != max_frame_size_clamped ? "+" : "";
-    furi_string_cat_printf(str, "Max frame size: %u%s bytes\n", max_frame_size_clamped, ovf_sign);
+    if(max_frame_size != 0) {
+        furi_string_cat_printf(str, "%u bytes\n", max_frame_size);
+    } else {
+        furi_string_cat(str, "? (RFU)\n");
+    }
 
     const double fwt = iso14443_3b_get_fwt_fc_max(data) / 13.56e6;
     furi_string_cat_printf(str, "Max waiting time: %.6g s\n", fwt);
@@ -64,8 +68,11 @@ void nfc_render_iso14443_3b_info(
         iso14443_3b_supports_frame_option(data, Iso14443_3bFrameOptionCid) ? "" : "not ";
     furi_string_cat_printf(str, "CID: %ssupported", cid_support_str);
 
-    furi_string_cat_printf(str, "\n\e#Application data\n");
-    for(size_t i = 0; i < ISO14443_3B_APP_DATA_SIZE; ++i) {
-        furi_string_cat_printf(str, "%02X ", data->app_data[i]);
+    furi_string_cat_printf(str, "\n\e#Application data\nRaw:");
+
+    size_t app_data_size;
+    const uint8_t* app_data = iso14443_3b_get_application_data(data, &app_data_size);
+    for(size_t i = 0; i < app_data_size; ++i) {
+        furi_string_cat_printf(str, " %02X", app_data[i]);
     }
 }

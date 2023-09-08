@@ -7,26 +7,6 @@
 extern "C" {
 #endif
 
-#define ISO14443_3B_UID_SIZE (4U)
-#define ISO14443_3B_APP_DATA_SIZE (4U)
-
-#define ISO14443_3B_GUARD_TIME_US (5000U)
-#define ISO14443_3B_FDT_POLL_FC (9000U)
-#define ISO14443_3B_FDT_ATTRIB_FC (42000U)
-#define ISO14443_3B_POLL_POLL_MIN_US (1280U)
-
-#define ISO14443_3B_REQB_ALL (1U << 3)
-
-#define ISO14443_3B_ATTRIB_FRAME_SIZE_32 (0x02)
-#define ISO14443_3B_ATTRIB_FRAME_SIZE_40 (0x03)
-#define ISO14443_3B_ATTRIB_FRAME_SIZE_48 (0x04)
-#define ISO14443_3B_ATTRIB_FRAME_SIZE_64 (0x05)
-#define ISO14443_3B_ATTRIB_FRAME_SIZE_96 (0x06)
-#define ISO14443_3B_ATTRIB_FRAME_SIZE_128 (0x07)
-#define ISO14443_3B_ATTRIB_FRAME_SIZE_256 (0x08)
-
-#define ISO14443_3B_FRAME_SIZE_MAX (256U)
-
 typedef enum {
     Iso14443_3bErrorNone,
     Iso14443_3bErrorNotPresent,
@@ -53,20 +33,9 @@ typedef enum {
     Iso14443_3bFrameOptionCid,
 } Iso14443_3bFrameOption;
 
-typedef struct {
-    uint8_t bit_rate_capability;
-    uint8_t protocol_type : 4;
-    uint8_t max_frame_size : 4;
-    uint8_t fo : 2;
-    uint8_t rfu : 2;
-    uint8_t fwi : 4;
-} Iso14443_3bProtocolInfo;
+typedef struct Iso14443_3bData Iso14443_3bData;
 
-typedef struct {
-    uint8_t uid[ISO14443_3B_UID_SIZE];
-    uint8_t app_data[ISO14443_3B_APP_DATA_SIZE];
-    Iso14443_3bProtocolInfo protocol_info;
-} Iso14443_3bData;
+// Virtual methods
 
 Iso14443_3bData* iso14443_3b_alloc();
 
@@ -99,6 +68,8 @@ bool iso14443_3b_supports_iso14443_4(const Iso14443_3bData* data);
 bool iso14443_3b_supports_bit_rate(const Iso14443_3bData* data, Iso14443_3bBitRate bit_rate);
 
 bool iso14443_3b_supports_frame_option(const Iso14443_3bData* data, Iso14443_3bFrameOption option);
+
+const uint8_t* iso14443_3b_get_application_data(const Iso14443_3bData* data, size_t* data_size);
 
 uint16_t iso14443_3b_get_frame_size_max(const Iso14443_3bData* data);
 
