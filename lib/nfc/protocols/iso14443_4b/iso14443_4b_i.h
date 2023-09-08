@@ -27,4 +27,8 @@
 #define ISO14443_4B_BLOCK_PCB_R (5U << 5)
 #define ISO14443_4B_BLOCK_PCB_S (3U << 6)
 
+struct Iso14443_4bData {
+    Iso14443_3bData* iso14443_3b_data;
+};
+
 Iso14443_4bError iso14443_4b_process_error(Iso14443_3bError error);

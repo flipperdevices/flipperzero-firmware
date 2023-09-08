@@ -1,6 +1,7 @@
 #include "iso14443_3b_i.h"
 
 #include <furi.h>
+#include <nfc/protocols/nfc_device_base_i.h>
 
 #include <nfc/nfc_common.h>
 #include <nfc/helpers/iso14443_crc.h>

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <nfc/protocols/nfc_device_base.h>
+
+#include <core/string.h>
 #include <toolbox/bit_buffer.h>
-#include <nfc/protocols/nfc_device_base_i.h>
+#include <flipper_format/flipper_format.h>
 
 #ifdef __cplusplus
 extern "C" {

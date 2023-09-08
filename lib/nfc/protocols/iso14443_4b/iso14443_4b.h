@@ -2,8 +2,6 @@
 
 #include <nfc/protocols/iso14443_3b/iso14443_3b.h>
 
-#include <lib/toolbox/simple_array.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,9 +13,7 @@ typedef enum {
     Iso14443_4bErrorTimeout,
 } Iso14443_4bError;
 
-typedef struct {
-    Iso14443_3bData* iso14443_3b_data;
-} Iso14443_4bData;
+typedef struct Iso14443_4bData Iso14443_4bData;
 
 // Virtual methods
 

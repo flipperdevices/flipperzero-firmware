@@ -3,6 +3,7 @@
 #include <lib/nfc/protocols/iso14443_3b/iso14443_3b_poller_i.h>
 
 #include "iso14443_4b_poller.h"
+#include "iso14443_4b_i.h"
 
 #ifdef __cplusplus
 extern "C" {
