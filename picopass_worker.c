@@ -1054,13 +1054,15 @@ static void picopass_emu_handle_packet(
         uint8_t rmac[4];
         loclass_opt_doBothMAC_2(ctx->cipher_state, nfcv_data->frame + 1, rmac, response, key);
 
+#ifndef PICOPASS_DEBUG_IGNORE_BAD_RMAC
         if(memcmp(nfcv_data->frame + 5, rmac, 4)) {
             // Bad MAC from reader, do not send a response.
             FURI_LOG_I(TAG, "Got bad MAC from reader");
-#ifndef PICOPASS_DEBUG_IGNORE_BAD_RMAC
+            // Reset the cipher state since we don't do it in READCHECK
+            picopass_init_cipher_state(nfcv_data, ctx);
             return;
-#endif
         }
+#endif
 
         // CHIPRESPONSE(4)
         response_length = 4;
@@ -1220,6 +1222,21 @@ void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode)
     PicopassBlock* blocks = dev_data->AA1;
 
     if(loclass_mode) {
+        emu_ctx.loclass_writer = loclass_writer_alloc();
+        if(emu_ctx.loclass_writer == NULL) {
+            picopass_worker->callback(
+                PicopassWorkerEventLoclassFileError, picopass_worker->context);
+
+            while(picopass_worker->state == PicopassWorkerStateEmulate ||
+                  picopass_worker->state == PicopassWorkerStateLoclass) {
+                furi_delay_ms(1);
+            }
+
+            free(nfcv_data);
+
+            return;
+        }
+
         // Setup blocks for loclass attack
         emu_ctx.key_block_num = 0;
         loclass_update_csn(&nfc_data, nfcv_data, &emu_ctx);
@@ -1233,7 +1250,6 @@ void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode)
         uint8_t aia[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         picopass_emu_write_blocks(nfcv_data, aia, PICOPASS_SECURE_AIA_BLOCK_INDEX, 1);
 
-        emu_ctx.loclass_writer = loclass_writer_alloc();
         loclass_writer_write_start_stop(emu_ctx.loclass_writer, true);
     } else {
         memcpy(nfc_data.uid, blocks[PICOPASS_CSN_BLOCK_INDEX].data, RFAL_PICOPASS_BLOCK_LEN);
@@ -1263,6 +1279,7 @@ void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode)
                 }
             }
         }
+        furi_delay_us(1);
     }
 
     if(emu_ctx.loclass_writer) {

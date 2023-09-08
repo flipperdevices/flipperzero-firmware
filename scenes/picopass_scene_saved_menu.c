@@ -1,11 +1,11 @@
 #include "../picopass_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexDelete,
     SubmenuIndexInfo,
     SubmenuIndexWrite,
     SubmenuIndexEmulate,
     SubmenuIndexRename,
+    SubmenuIndexDelete,
 };
 
 void picopass_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
