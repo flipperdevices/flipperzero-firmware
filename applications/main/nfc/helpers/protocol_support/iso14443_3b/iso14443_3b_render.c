@@ -23,7 +23,7 @@ void nfc_render_iso14443_3b_info(
     furi_string_cat_printf(str, "\n\e#Protocol info\n");
 
     if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRateBoth106Kbit)) {
-        furi_string_cat_printf(str, "106 kBit/s both directions\n");
+        furi_string_cat(str, "Bit rate PICC <-> PCD:\n  106 kBit/s supported\n");
     } else {
         furi_string_cat(str, "Bit rate PICC -> PCD:\n");
         if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePiccToPcd212Kbit)) {
@@ -58,7 +58,7 @@ void nfc_render_iso14443_3b_info(
     }
 
     const double fwt = iso14443_3b_get_fwt_fc_max(data) / 13.56e6;
-    furi_string_cat_printf(str, "Max waiting time: %.6g s\n", fwt);
+    furi_string_cat_printf(str, "Max waiting time: %4.2g s\n", fwt);
 
     const char* nad_support_str =
         iso14443_3b_supports_frame_option(data, Iso14443_3bFrameOptionNad) ? "" : "not ";
