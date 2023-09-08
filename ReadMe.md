@@ -173,7 +173,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | MH-Z19 - CO2 sensor | ![GPIO Badge] | [by meshchaninov](https://github.com/meshchaninov/flipper-zero-mh-z19) |  | [![Author Badge]](https://lab.flipper.net/apps/mh_z19) |
 | NRF24 Batch Read/Send (WIP) | ![GPIO Badge] | [by vad7](https://github.com/vad7/nRF24-Batch) |  | ![None Badge] |
 | NRF24 Scanner | ![GPIO Badge] | [by vad7](https://github.com/vad7/nrf24scan) |  | ![None Badge] |
-| Pokemon Trading (for GameBoy) | ![GPIO Badge] | [by EstebanFuentealba](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) |  | [![Author Badge]](https://lab.flipper.net/apps/pokemon) |
+| Pokemon Trading (for GameBoy) | ![GPIO Badge] | [by EstebanFuentealba](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) | Updates [by R4g3D](https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading) | [![Author Badge]](https://lab.flipper.net/apps/pokemon) |
 | Radiation Sensor | ![GPIO Badge] | [by sionyx](https://github.com/sionyx/flipper_radsens) | works with RadSens module | ![None Badge] |
 | RCWL-516 Motion Sensor | ![GPIO Badge] | [by ahmedafe1](https://github.com/ahmedafe1/rcwl_0516-Flipperzero) |  | ![None Badge] |
 | ServoTester | ![GPIO Badge] | [by spin7ion](https://github.com/spin7ion/flipper-servotester) |  | [![UFW Badge]](https://lab.flipper.net/apps/servotester) |
