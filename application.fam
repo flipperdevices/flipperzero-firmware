@@ -26,7 +26,6 @@ App(
                 "wpan/utilities",
                 "wpan/ble_lld/lld",
             ],
-            #sources=["lhci.c"],
             #sources=["advanced_memory_manager.c","bas.c","ble_events.c","ble_gap_aci.c","ble_gatt_aci.c","ble_hal_aci.c","ble_hal.c","ble_hci_le.c","ble_l2cap_aci.c","ble_lld.c","bls.c","bvopus_service_stm.c","crs_stm.c","dbg_trace.c","dis.c","DispTools.c","eds_stm.c","hci_tl.c","hci_tl_if.c","hids.c","hids_menu.c","hids_mouse_menu.c","hrs.c","hts.c","ias.c","lhci.c","lls.c","mac_802_15_4_core_wb.c","mesh.c","motenv_stm.c","opus_interface_stm.c","osal.c","otas_stm.c","otp.c","p2p_stm.c","shci.c","shci_tl.c","shci_tl_if.c","stm32_mm.c","stm_list.c","stm_queue.c","svc_ctl.c","template_stm.c","tl_mbox.c","tl_thread_hci.c","tl_zigbee_hci.c","tps.c","usbd_conf.c","usbd_desc.c","vcp.c","zdd_stm.c"],
             sources=["advanced_memory_manager.c","ble_events.c","ble_gap_aci.c","ble_gatt_aci.c","ble_hal_aci.c","ble_hal.c","ble_hci_le.c","ble_l2cap_aci.c","bls.c","dbg_trace.c","dis.c","DispTools.c","hci_tl.c","hci_tl_if.c","hids_menu.c","hids_mouse_menu.c","hrs.c","hts.c","ias.c","lhci.c","lls.c","motenv_stm.c","osal.c","otp.c","shci.c","shci_tl.c","shci_tl_if.c","stm32_mm.c","stm_list.c","stm_queue.c","svc_ctl.c","template_stm.c","tps.c"],
         ),
