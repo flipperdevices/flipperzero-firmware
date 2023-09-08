@@ -126,6 +126,9 @@ bool level_reader_parse_symbol(char ch, CellType* cellType) {
     case '@':
         *cellType = CellType_Player;
         return true;
+    case '+':
+        *cellType = CellType_PlayerOnTarget;
+        return true;
     case '$':
         *cellType = CellType_Box;
         return true;
@@ -186,25 +189,9 @@ void level_reader_load_level(Level* ret_level, FileLinesReader* reader, int leve
             if(lineLen > ret_level->level_width) ret_level->level_width = lineLen;
 
             for(int j = 0; j < lineLen; j++) {
-                switch(line[j]) {
-                case '#':
-                    ret_level->board[i][j] = CellType_Wall;
-                    break;
-                case '*':
-                    ret_level->board[i][j] = CellType_BoxOnTarget;
-                    break;
-                case '.':
-                    ret_level->board[i][j] = CellType_Target;
-                    break;
-                case '@':
-                    ret_level->board[i][j] = CellType_Player;
-                    break;
-                case '$':
-                    ret_level->board[i][j] = CellType_Box;
-                    break;
-                default:
-                    ret_level->board[i][j] = CellType_Empty;
-                }
+                CellType cellType;
+                if(level_reader_parse_symbol(line[j], &cellType))
+                    ret_level->board[i][j] = cellType;
             }
         }
 
