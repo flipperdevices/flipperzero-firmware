@@ -8,7 +8,7 @@
 #include <math.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
-#include <lib/toolbox/random_name.h>
+#include <lib/toolbox/name_generator.h>
 
 #define TAG "COFFEE EEPROM"
 #define MAX_CREDIT 655.35
@@ -126,10 +126,11 @@ void load_file_dump(){
 
 FuriString* save_file_dump(float credit){
     char file_name_buf[64];
-    set_random_name(file_name_buf, 64);
+    name_generator_make_random(file_name_buf, 64);
+        // Open storag
     char* file_path = APP_DATA_PATH("Dump");
-        // Open storage
-    FuriString* file_name = furi_string_alloc_printf("%s_%s_%d.bin", file_path, file_name_buf, (int) credit * 100);
+
+    FuriString* file_name = furi_string_alloc_printf("%s_%s_%d.bin", file_path, file_name_buf, (int) (credit * 100));
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     // Allocate file
