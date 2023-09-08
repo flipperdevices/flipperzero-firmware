@@ -1,0 +1,8 @@
+App(
+    appid="bgloader",
+    name="BG Loader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bgloader",
+    stack_size=2 * 1024,
+    requires=["dialogs", "gui"],
+)
