@@ -7,8 +7,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/loading.h>
 
-#define APP_ARGS "run_in_background"
-#define APP_EXIT_FLAG 0x01
+#include "bgloader_api.h"
 
 #define TAG "BG Loader"
 
@@ -20,18 +19,58 @@ struct FlipperApplication {
 	void* ep_thread_args;
 };
 
-typedef struct {
-	FlipperApplication *fap;
-	FuriThread *thread;
-} BGLoaderApp;
-
 typedef enum {
 	BGLoaderView_Loading,
 } BGLoaderView;
 
 static BGLoaderApp *bgloader_app_alloc(void)
 {
-	return malloc(sizeof(BGLoaderApp));
+	BGLoaderApp *app = malloc(sizeof(BGLoaderApp));
+
+	app->fap = NULL;
+	app->thread = NULL;
+	app->to_app = NULL;
+	app->to_loader = NULL;
+
+	return app;
+}
+
+static void bgloader_app_init(BGLoaderApp *app, FlipperApplication *fap,
+		FuriThread *thread)
+{
+	app->fap = fap;
+	app->thread = thread;
+	app->to_app = furi_message_queue_alloc(1, sizeof(BGLoaderMessage));
+	app->to_loader = furi_message_queue_alloc(1, sizeof(BGLoaderMessage));
+}
+
+static void bgloader_app_deinit(BGLoaderApp *app)
+{
+	// this frees the thread too
+	flipper_application_free(app->fap);
+	furi_message_queue_free(app->to_app);
+	furi_message_queue_free(app->to_loader);
+
+	app->fap = NULL;
+	app->thread = NULL;
+	app->to_app = NULL;
+	app->to_loader = NULL;
+}
+
+static void bgloader_check_app_dead(BGLoaderApp *app)
+{
+	furi_check(app->fap == NULL);
+	furi_check(app->thread == NULL);
+	furi_check(app->to_app == NULL);
+	furi_check(app->to_loader == NULL);
+}
+
+static void bgloader_check_app_alive(BGLoaderApp *app)
+{
+	furi_check(app->fap != NULL);
+	furi_check(app->thread != NULL);
+	furi_check(app->to_app != NULL);
+	furi_check(app->to_loader != NULL);
 }
 
 static bool bgloader_start_external_app(BGLoaderApp *app, Storage *storage,
@@ -71,7 +110,6 @@ static bool bgloader_start_external_app(BGLoaderApp *app, Storage *storage,
 		furi_thread_set_appid(thread, furi_string_get_cstr(app_name));
 		furi_string_free(app_name);
 
-		furi_thread_start(thread);
 		success = true;
 	} while (0);
 
@@ -80,8 +118,8 @@ static bool bgloader_start_external_app(BGLoaderApp *app, Storage *storage,
 		return false;
 	}
 
-	app->fap = fap;
-	app->thread = thread;
+	bgloader_app_init(app, fap, thread);
+	furi_thread_start(thread);
 
 	return true;
 }
@@ -93,8 +131,6 @@ static BGLoaderApp *bgloader_take_app(const char *path)
 	}
 
 	BGLoaderApp *app = bgloader_app_alloc();
-	app->fap = NULL;
-	app->thread = NULL;
 
 	furi_record_create(path, app);
 
@@ -113,8 +149,7 @@ static bool bgloader_app_is_loaded(BGLoaderApp *app)
 
 static bool bgloader_load_app(BGLoaderApp *app, const char *path)
 {
-	furi_check(app->fap == NULL);
-	furi_check(app->thread == NULL);
+	bgloader_check_app_dead(app);
 
 	Storage *storage = furi_record_open(RECORD_STORAGE);
 	if (!storage_file_exists(storage, path)) {
@@ -123,16 +158,17 @@ static bool bgloader_load_app(BGLoaderApp *app, const char *path)
 		return false;
 	}
 
+	FuriString *args = furi_string_alloc();
+	furi_string_printf(args, "%s:%s", APP_BASE_ARGS, path);
 	bool status = bgloader_start_external_app(app, storage, path,
-			APP_ARGS);
+			furi_string_get_cstr(args));
+	furi_string_free(args);
 
 	if (status) {
-		furi_check(app->fap != NULL);
-		furi_check(app->thread != NULL);
+		bgloader_check_app_alive(app);
 		storage_file_close(app->fap->elf->fd);
 	} else {
-		furi_check(app->fap == NULL);
-		furi_check(app->thread == NULL);
+		bgloader_check_app_dead(app);
 	}
 
 	furi_record_close(RECORD_STORAGE);
@@ -140,43 +176,86 @@ static bool bgloader_load_app(BGLoaderApp *app, const char *path)
 	return status;
 }
 
-static bool bgloader_unload_app(BGLoaderApp *app)
+static bool bgloader_continue_app(BGLoaderApp *app)
 {
-	furi_check(app->fap != NULL);
-	furi_check(app->thread != NULL);
+	bgloader_check_app_alive(app);
 
-	furi_thread_flags_set(furi_thread_get_id(app->thread), APP_EXIT_FLAG);
-	furi_thread_join(app->thread);
-	FURI_LOG_I(TAG, "App returned: %li",
-			furi_thread_get_return_code(app->thread));
-
-	// this frees the thread too
-	flipper_application_free(app->fap);
-
-	app->fap = NULL;
-	app->thread = NULL;
+	BGLoaderMessage msg;
+	msg.type = BGLoaderMessageType_AppReattached;
+	furi_check(furi_message_queue_put(app->to_app, &msg, FuriWaitForever)
+			== FuriStatusOk);
 
 	return true;
 }
 
-static void bgloader_load_unload_app(const char* path)
+static bool bgloader_check_app_termination(BGLoaderApp *app)
+{
+	bgloader_check_app_alive(app);
+
+	BGLoaderMessage msg;
+	furi_check(furi_message_queue_get(app->to_loader, &msg,
+				FuriWaitForever) == FuriStatusOk);
+	switch(msg.type) {
+	case BGLoaderMessageType_LoaderBackground:
+		return false;
+	case BGLoaderMessageType_LoaderExit:
+		return true;
+	default:
+		furi_check(0);
+	}
+
+	return false;
+}
+
+static bool bgloader_unload_app(BGLoaderApp *app)
+{
+	bgloader_check_app_alive(app);
+
+	furi_thread_join(app->thread);
+	FURI_LOG_I(TAG, "App returned: %li",
+			furi_thread_get_return_code(app->thread));
+
+	bgloader_app_deinit(app);
+
+	return true;
+}
+
+static void bgloader_handle_app(const char *path)
 {
 	BGLoaderApp *app = bgloader_take_app(path);
 
 	if (!bgloader_app_is_loaded(app)) {
+		// load app
 		if (!bgloader_load_app(app, path)) {
 			FURI_LOG_W(TAG, "Failed to load application \"%s\"",
 					path);
+			bgloader_put_app(path);
+			return;
 		} else {
 			FURI_LOG_I(TAG, "Application loaded");
 		}
 	} else {
+		// continue app
+		if (!bgloader_continue_app(app)) {
+			FURI_LOG_W(TAG, "Failed to continue application "
+					"\"%s\"", path);
+			bgloader_put_app(path);
+			return;
+		} else {
+			FURI_LOG_I(TAG, "Application continued");
+		}
+	}
+
+	if (bgloader_check_app_termination(app)) {
+		// unload app
 		if (!bgloader_unload_app(app)) {
 			FURI_LOG_W(TAG, "Failed to unload application \"%s\"",
 					path);
 		} else {
 			FURI_LOG_I(TAG, "Application unloaded");
 		}
+	} else {
+		FURI_LOG_I(TAG, "Application continuing in background");
 	}
 
 	bgloader_put_app(path);
@@ -217,7 +296,7 @@ int32_t bgloader(const char *args)
 	if (fap_selected) {
 		FURI_LOG_I(TAG, "Selected fap \"%s\"",
 				furi_string_get_cstr(fap_path));
-		bgloader_load_unload_app(furi_string_get_cstr(fap_path));
+		bgloader_handle_app(furi_string_get_cstr(fap_path));
 	} else {
 		FURI_LOG_I(TAG, "No fap selected");
 	}
