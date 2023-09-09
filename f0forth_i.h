@@ -9,6 +9,8 @@ typedef struct {
 	TextBox *text_box;
 	FuriString *text_box_store;
 	FuriMutex *cli_running_mutex;
+	ViewPortInputCallback orig_input_cb;
+	bool exit_for_real;
 } F0ForthState;
 
 typedef enum {
