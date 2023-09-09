@@ -52,7 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Renamed a few apps for better visibility, organization and sorting (By RogueMaster and Willy-JL)
 - Updated: [Sokoban v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
 - Updated: [ESP32-C6 Gravity v0.5.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
-- Updated: [WiFi (Marauder) v6.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add GPS and Wardrive commands #29 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/29)
+- Updated: [WiFi (Marauder) v6.2 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add GPS and Wardrive commands #29 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/29)
 
 <a name="release">
 
@@ -455,7 +455,7 @@ $ ./fbt dolphin_ext
 - [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266`
-- [WiFi (Marauder) v6.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
+- [WiFi (Marauder) v6.2 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
