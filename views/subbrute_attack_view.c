@@ -144,7 +144,7 @@ SubBruteAttackView* subbrute_attack_view_alloc() {
             model->icon = icon_animation_alloc(&A_Sub1ghz_14);
             view_tie_icon_animation(instance->view, model->icon);
         },
-        true);
+        false);
 
     view_set_draw_callback(instance->view, (ViewDrawCallback)subbrute_attack_view_draw);
     view_set_input_callback(instance->view, subbrute_attack_view_input);
@@ -161,18 +161,20 @@ SubBruteAttackView* subbrute_attack_view_alloc() {
 
 void subbrute_attack_view_enter(void* context) {
     furi_assert(context);
-
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_attack_view_enter");
-#endif
+    SubBruteAttackView* instance = context;
+    with_view_model(
+        instance->view,
+        SubBruteAttackViewModel * model,
+        {
+            if(model->is_attacking) {
+                icon_animation_start(model->icon);
+            }
+        },
+        true);
 }
 
 void subbrute_attack_view_free(SubBruteAttackView* instance) {
     furi_assert(instance);
-
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_attack_view_free");
-#endif
 
     with_view_model(
         instance->view,
