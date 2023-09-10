@@ -1,0 +1,16 @@
+App(
+    appid="flipboard",
+    name="FlipBoard",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipboard_app",
+    stack_size=4 * 1024,
+    requires=[
+        "gui",
+    ],
+    order=10,
+    fap_icon="flipboard.png",
+    fap_category="GPIO",
+    fap_icon_assets="assets",
+    fap_description="FlipBoard is a GPIO control application. It allows you to control the GPIO pins on the Flipper Zero device.",
+
+)

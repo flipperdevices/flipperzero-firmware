@@ -1,0 +1,4 @@
+Filetype: Flipper Flipboard File
+Version: 1
+# Just test file
+Key1: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
