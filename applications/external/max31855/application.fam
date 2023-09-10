@@ -1,0 +1,13 @@
+App(
+    appid="max31855",
+    name="MAX31855",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="max31855_app",
+    stack_size=2 * 1024,
+    fap_category="GPIO/Sensors",
+    fap_icon="max31855.png",
+    fap_author="skotopes",
+    fap_weburl="https://github.com/skotopes/flipperzero_max31855",
+    fap_version="0.1",
+    fap_description="MAX31855 Thermocouple Sensor Application",
+)

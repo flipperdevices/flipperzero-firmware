@@ -1,0 +1,13 @@
+App(
+    appid="bgloader",
+    name="BG Loader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bgloader",
+    stack_size=2 * 1024,
+    fap_category="Tools",
+    fap_icon="icon.png",
+    fap_author="twisted-pear",
+    fap_weburl="https://github.com/twisted-pear/bgloader",
+    fap_version=(1, 0),
+    fap_description="This plugin allows compatible apps to be loaded and to remain running in the background.",
+)
