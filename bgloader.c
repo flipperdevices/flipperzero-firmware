@@ -6,10 +6,13 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/loading.h>
+#include <gui/modules/popup.h>
 
 #include "bgloader_api.h"
 
 #define TAG "BG Loader"
+
+#define APP_TERMINATED_DISPLAY_DELAY 2000
 
 struct FlipperApplication {
 	ELFDebugInfo state;
@@ -21,7 +24,21 @@ struct FlipperApplication {
 
 typedef enum {
 	BGLoaderView_Loading,
+	BGLoaderView_AppTerminated,
 } BGLoaderView;
+
+static void bgloader_thread_state_callback(FuriThreadState state, void*
+		context)
+{
+	BGLoaderApp *app = context;
+
+	if (state == FuriThreadStateStopped) {
+		BGLoaderMessage msg;
+		msg.type = BGLoaderMessageType_LoaderExit;
+		furi_check(furi_message_queue_put(app->to_loader, &msg,
+					FuriWaitForever) == FuriStatusOk);
+	}
+}
 
 static BGLoaderApp *bgloader_app_alloc(void)
 {
@@ -119,6 +136,8 @@ static bool bgloader_start_external_app(BGLoaderApp *app, Storage *storage,
 	}
 
 	bgloader_app_init(app, fap, thread);
+	furi_thread_set_state_callback(thread, bgloader_thread_state_callback);
+	furi_thread_set_state_context(thread, app);
 	furi_thread_start(thread);
 
 	return true;
@@ -180,6 +199,10 @@ static bool bgloader_continue_app(BGLoaderApp *app)
 {
 	bgloader_check_app_alive(app);
 
+	furi_thread_set_state_callback(app->thread,
+			bgloader_thread_state_callback);
+	furi_thread_set_state_context(app->thread, app);
+
 	BGLoaderMessage msg;
 	msg.type = BGLoaderMessageType_AppReattached;
 	furi_check(furi_message_queue_put(app->to_app, &msg, FuriWaitForever)
@@ -220,7 +243,7 @@ static bool bgloader_unload_app(BGLoaderApp *app)
 	return true;
 }
 
-static void bgloader_handle_app(const char *path)
+static bool bgloader_handle_app(const char *path)
 {
 	BGLoaderApp *app = bgloader_take_app(path);
 
@@ -230,7 +253,7 @@ static void bgloader_handle_app(const char *path)
 			FURI_LOG_W(TAG, "Failed to load application \"%s\"",
 					path);
 			bgloader_put_app(path);
-			return;
+			return false;
 		} else {
 			FURI_LOG_I(TAG, "Application loaded");
 		}
@@ -240,25 +263,32 @@ static void bgloader_handle_app(const char *path)
 			FURI_LOG_W(TAG, "Failed to continue application "
 					"\"%s\"", path);
 			bgloader_put_app(path);
-			return;
+			return false;
 		} else {
 			FURI_LOG_I(TAG, "Application continued");
 		}
 	}
 
-	if (bgloader_check_app_termination(app)) {
+	bool app_terminated = bgloader_check_app_termination(app);
+	furi_thread_set_state_callback(app->thread, NULL);
+	furi_thread_set_state_context(app->thread, NULL);
+	if (app_terminated) {
 		// unload app
 		if (!bgloader_unload_app(app)) {
 			FURI_LOG_W(TAG, "Failed to unload application \"%s\"",
 					path);
 		} else {
 			FURI_LOG_I(TAG, "Application unloaded");
+			bgloader_put_app(path);
+			return true;
 		}
 	} else {
 		FURI_LOG_I(TAG, "Application continuing in background");
 	}
 
 	bgloader_put_app(path);
+
+	return false;
 }
 
 int32_t bgloader(const char *args)
@@ -269,10 +299,16 @@ int32_t bgloader(const char *args)
 	DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
 	Gui *gui = furi_record_open(RECORD_GUI);
 	Loading *loading = loading_alloc();
+	Popup *term_popup = popup_alloc();
 	ViewDispatcher *view_dispatcher = view_dispatcher_alloc();
+
+	popup_set_header(term_popup, "Terminated", 64, 24, AlignCenter,
+			AlignTop);
 
 	view_dispatcher_add_view(view_dispatcher, BGLoaderView_Loading,
 			loading_get_view(loading));
+	view_dispatcher_add_view(view_dispatcher, BGLoaderView_AppTerminated,
+			popup_get_view(term_popup));
 	view_dispatcher_attach_to_gui(view_dispatcher, gui,
 			ViewDispatcherTypeFullscreen);
 	view_dispatcher_switch_to_view(view_dispatcher, BGLoaderView_Loading);
@@ -296,7 +332,11 @@ int32_t bgloader(const char *args)
 	if (fap_selected) {
 		FURI_LOG_I(TAG, "Selected fap \"%s\"",
 				furi_string_get_cstr(fap_path));
-		bgloader_handle_app(furi_string_get_cstr(fap_path));
+		if (bgloader_handle_app(furi_string_get_cstr(fap_path))) {
+			view_dispatcher_switch_to_view(view_dispatcher,
+					BGLoaderView_AppTerminated);
+			furi_delay_ms(APP_TERMINATED_DISPLAY_DELAY);
+		}
 	} else {
 		FURI_LOG_I(TAG, "No fap selected");
 	}
@@ -305,8 +345,10 @@ int32_t bgloader(const char *args)
 	furi_record_close(RECORD_DIALOGS);
 
 	view_dispatcher_remove_view(view_dispatcher, BGLoaderView_Loading);
+	view_dispatcher_remove_view(view_dispatcher, BGLoaderView_AppTerminated);
 
 	view_dispatcher_free(view_dispatcher);
+	popup_free(term_popup);
 	loading_free(loading);
 	furi_string_free(fap_path);
 

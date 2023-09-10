@@ -28,10 +28,10 @@ bugs. You have been warned.
 
 An application needs to be compatible with this loader. Compatible apps must
 check their startup parameters to determine if they have been launched via the
-background loader. If so, they must inform the loader whether they are
-terminating or whether they wish to keep running in the background. If they
-decide to keep running in the background, they must listen for the loader's
-signal that they are being reopened and thus allowed to use the GUI again.
+background loader. If so, they must inform the loader when they wish to keep
+running in the background. If they decide to keep running in the background,
+they must listen for the loader's signal that they are being reopened and thus
+allowed to use the GUI again.
 
 The loader's API can be found in `bgloader_api.h`. In the simplest case, the
 app will need to do the following:
@@ -49,9 +49,7 @@ app will need to do the following:
    `BGLoaderApp` structure for a message of the type
    `BGLoaderMessageType_AppReattached`. This message informs the app that it is
    being reattached and can attach itself to the GUI again.
-5. Once the app is ready to terminate it needs to send a message with type
-   `BGLoaderMessageType_LoaderExit` to the `to_loader` queue.
-
+5. To terminate, the app just exits normally.
 
 An example of what a compatible app might look like is given below:
 
@@ -95,23 +93,18 @@ static void bgloader_loop(AppState *state, const char *bg_app_path)
 		// 2.
 		BGLoaderApp *bg_app = furi_record_open(bg_app_path);
 
-		BGLoaderMessage msg;
-
 		// exit_for_real is set elsewhere to indicate the app is ready
 		// to terminate
 		if (state->exit_for_real) {
 			// 5.
-			// signal loader that we're ready to exit
-			msg.type = BGLoaderMessageType_LoaderExit;
-			furi_check(furi_message_queue_put(bg_app->to_loader,
-						&msg, FuriWaitForever) ==
-					FuriStatusOk);
+			// exit normally
 			furi_record_close(bg_app_path);
 			break;
 		}
 
 		// 3.
 		// signal loader that we're ready to go to background
+		BGLoaderMessage msg;
 		msg.type = BGLoaderMessageType_LoaderBackground;
 		furi_check(furi_message_queue_put(bg_app->to_loader, &msg,
 					FuriWaitForever) == FuriStatusOk);
