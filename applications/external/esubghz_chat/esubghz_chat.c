@@ -5,6 +5,8 @@
 #include "helpers/radio_device_loader.h"
 #include "esubghz_chat_i.h"
 
+#include "bgloader_api.h"
+
 #define CHAT_LEAVE_DELAY 10
 #define TICK_INTERVAL 50
 #define MESSAGE_COMPLETION_TIMEOUT 500
@@ -225,20 +227,7 @@ static bool esubghz_chat_navigation_event_callback(void* context) {
     return scene_manager_handle_back_event(state->scene_manager);
 }
 
-/* Tick event callback for view dispatcher. Called every TICK_INTERVAL. Resets
- * the locked message if necessary. Retrieves a received message from the
- * Sub-GHz worker and calls post_rx(). Then calls the scene manager. */
-static void esubghz_chat_tick_event_callback(void* context) {
-    FURI_LOG_T(APPLICATION_NAME, "esubghz_chat_tick_event_callback");
-
-    furi_assert(context);
-    ESubGhzChatState* state = context;
-
-    /* reset locked message if necessary */
-    if(kbd_lock_msg_reset_timeout(state)) {
-        kbd_lock_msg_reset(state, true);
-    }
-
+static void esubghz_chat_check_messages(ESubGhzChatState* state) {
     /* if the maximum message size was reached or the
 	 * MESSAGE_COMPLETION_TIMEOUT has expired, retrieve a message and call
 	 * post_rx() */
@@ -253,6 +242,23 @@ static void esubghz_chat_tick_event_callback(void* context) {
             subghz_tx_rx_worker_read(state->subghz_worker, state->rx_buffer, RX_TX_BUFFER_SIZE);
         post_rx(state, rx_size);
     }
+}
+
+/* Tick event callback for view dispatcher. Called every TICK_INTERVAL. Resets
+ * the locked message if necessary. Retrieves a received message from the
+ * Sub-GHz worker and calls post_rx(). Then calls the scene manager. */
+static void esubghz_chat_tick_event_callback(void* context) {
+    FURI_LOG_T(APPLICATION_NAME, "esubghz_chat_tick_event_callback");
+
+    furi_assert(context);
+    ESubGhzChatState* state = context;
+
+    /* reset locked message if necessary */
+    if(kbd_lock_msg_reset_timeout(state)) {
+        kbd_lock_msg_reset(state, true);
+    }
+
+    esubghz_chat_check_messages(state);
 
     /* call scene manager */
     scene_manager_handle_tick_event(state->scene_manager);
@@ -319,6 +325,17 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context) {
 
         /* do not handle the event */
         return;
+    }
+
+    /* handle long press of back key to exit for real */
+    if(event->key == InputKeyBack) {
+        if(state->view_dispatcher->current_view == text_input_get_view(state->text_input)) {
+            if(event->type == InputTypeLong) {
+                state->exit_for_real = true;
+                view_dispatcher_stop(state->view_dispatcher);
+                return;
+            }
+        }
     }
 
     if(event->key == InputKeyOk) {
@@ -397,6 +414,85 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context) {
     state->orig_input_cb(event, state->view_dispatcher);
 }
 
+static const char* esubghz_get_bgloader_app_path(const char* args) {
+    size_t base_args_len = strlen(APP_BASE_ARGS);
+
+    return (args + base_args_len + 1);
+}
+
+static bool esubghz_run_with_bgloader(const char* args) {
+    size_t base_args_len = strlen(APP_BASE_ARGS);
+
+    if(args == NULL) {
+        return false;
+    }
+
+    if(strncmp(args, APP_BASE_ARGS, base_args_len) != 0) {
+        return false;
+    }
+
+    if(strlen(args) < base_args_len + 2) {
+        return false;
+    }
+
+    if(args[base_args_len] != ':') {
+        return false;
+    }
+
+    const char* app_path = esubghz_get_bgloader_app_path(args);
+    return furi_record_exists(app_path);
+}
+
+static void esubghz_attach_to_gui(ESubGhzChatState* state) {
+    Gui* gui = furi_record_open(RECORD_GUI);
+    view_dispatcher_attach_to_gui(state->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+}
+
+static void esubghz_detach_from_gui(ESubGhzChatState* state) {
+    gui_remove_view_port(state->view_dispatcher->gui, state->view_dispatcher->view_port);
+    state->view_dispatcher->gui = NULL;
+    furi_record_close(RECORD_GUI);
+}
+
+static void esubghz_bgloader_loop(ESubGhzChatState* state, const char* bg_app_path) {
+    while(true) {
+        view_dispatcher_run(state->view_dispatcher);
+
+        if(state->exit_for_real) {
+            /* exit for real */
+            break;
+        }
+
+        BGLoaderApp* bg_app = furi_record_open(bg_app_path);
+
+        /* signal loader that we're ready to go to background */
+        BGLoaderMessage msg;
+        msg.type = BGLoaderMessageType_LoaderBackground;
+        furi_check(
+            furi_message_queue_put(bg_app->to_loader, &msg, FuriWaitForever) == FuriStatusOk);
+
+        esubghz_detach_from_gui(state);
+
+        while(true) {
+            /* wait for loader to wake us up again */
+            if(furi_message_queue_get(bg_app->to_app, &msg, TICK_INTERVAL) != FuriStatusOk) {
+                /* check for messages on timeout */
+                esubghz_chat_check_messages(state);
+                continue;
+            }
+            if(msg.type == BGLoaderMessageType_AppReattached) {
+                break;
+            } else {
+                furi_check(0);
+            }
+        }
+
+        furi_record_close(bg_app_path);
+
+        esubghz_attach_to_gui(state);
+    }
+}
+
 static bool helper_strings_alloc(ESubGhzChatState* state) {
     furi_assert(state);
 
@@ -450,7 +546,7 @@ static void chat_box_free(ESubGhzChatState* state) {
     furi_string_free(state->chat_box_store);
 }
 
-int32_t esubghz_chat(void) {
+int32_t esubghz_chat(const char* args) {
     /* init the crypto system */
     crypto_init();
 
@@ -533,6 +629,9 @@ int32_t esubghz_chat(void) {
     /* set the default frequency */
     state->frequency = DEFAULT_FREQ;
 
+    /* in the first few views there is no background support */
+    state->exit_for_real = true;
+
     /* set the have_read callback of the Sub-GHz worker */
     subghz_tx_rx_worker_set_callback_have_read(state->subghz_worker, have_read_cb, state);
 
@@ -602,7 +701,12 @@ int32_t esubghz_chat(void) {
 
     /* run the view dispatcher, this call only returns when we close the
 	 * application */
-    view_dispatcher_run(state->view_dispatcher);
+    if(!esubghz_run_with_bgloader(args)) {
+        view_dispatcher_run(state->view_dispatcher);
+    } else {
+        const char* bg_app_path = esubghz_get_bgloader_app_path(args);
+        esubghz_bgloader_loop(state, bg_app_path);
+    }
 
     /* if it is running, stop the Sub-GHz worker */
     if(subghz_tx_rx_worker_is_running(state->subghz_worker)) {

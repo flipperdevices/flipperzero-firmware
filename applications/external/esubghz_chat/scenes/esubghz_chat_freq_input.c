@@ -7,6 +7,9 @@ static void freq_input_cb(void* context) {
 
     enter_chat(state);
 
+    /* starting from here running in background is supported */
+    state->exit_for_real = false;
+
     view_dispatcher_send_custom_event(state->view_dispatcher, ESubGhzChatEvent_FreqEntered);
 }
 

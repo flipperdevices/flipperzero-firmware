@@ -112,6 +112,8 @@ bool scene_on_event_key_display(void* context, SceneManagerEvent event) {
         /* switch to message input scene */
         case ESubGhzChatEvent_KeyDisplayBack:
             if(!scene_manager_previous_scene(state->scene_manager)) {
+                /* error condition, exit for real */
+                state->exit_for_real = true;
                 view_dispatcher_stop(state->view_dispatcher);
             }
             consumed = true;
