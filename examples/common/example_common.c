@@ -46,6 +46,15 @@ extern const uint32_t ESP32_S2_hello_world_bin_size;
 extern const uint8_t  ESP32_S2_partition_table_bin[];
 extern const uint32_t ESP32_S2_partition_table_bin_size;
 
+extern const uint8_t  ESP32_S3_bootloader_bin[];
+extern const uint32_t ESP32_S3_bootloader_bin_size;
+extern const uint8_t  ESP32_S3_hello_world_bin[];
+extern const uint32_t ESP32_S3_hello_world_bin_size;
+extern const uint8_t  ESP32_S3_partition_table_bin[];
+extern const uint32_t ESP32_S3_partition_table_bin_size;
+
+
+
 extern const uint8_t  ESP8266_bootloader_bin[];
 extern const uint32_t ESP8266_bootloader_bin_size;
 extern const uint8_t  ESP8266_hello_world_bin[];
@@ -136,7 +145,19 @@ void get_example_binaries(target_chip_t target, example_binaries_t *bins)
         bins->app.data  = ESP32_C6_hello_world_bin;
         bins->app.size  = ESP32_C6_hello_world_bin_size;
         bins->app.addr  = APPLICATION_ADDRESS;
-    } else {
+
+    } else if (target == ESP32S3_CHIP){
+        bins->boot.data = ESP32_S3_bootloader_bin;
+        bins->boot.size = ESP32_S3_bootloader_bin_size;
+        bins->boot.addr = BOOTLOADER_ADDRESS_V1;
+        bins->part.data = ESP32_S3_partition_table_bin;
+        bins->part.size = ESP32_S3_partition_table_bin_size;
+        bins->part.addr = PARTITION_ADDRESS;
+        bins->app.data  = ESP32_S3_hello_world_bin;
+        bins->app.size  = ESP32_S3_hello_world_bin_size;
+        bins->app.addr  = APPLICATION_ADDRESS;
+    }
+    else {
         abort();
     }
 }
