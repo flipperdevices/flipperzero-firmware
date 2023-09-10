@@ -7,6 +7,8 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#include <locale/locale.h>
+
 #include "max31855.h"
 
 typedef struct {
@@ -23,21 +25,25 @@ static void max31855_render_callback(Canvas* canvas, void* ctx) {
     Max31855App* state = ctx;
     char buffer[64];
 
+    float tc_temp = max31855_unpack_temp(state->data);
+    float chip_temp = max31855_unpack_internal_temp(state->data);
+
+    if(locale_get_measurement_unit() == LocaleMeasurementUnitsImperial) {
+        tc_temp = locale_celsius_to_fahrenheit(tc_temp);
+        chip_temp = locale_celsius_to_fahrenheit(chip_temp);
+    }
+
     furi_mutex_acquire(state->mutex, FuriWaitForever);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 15, "Ext temp:");
+    canvas_draw_str(canvas, 0, 15, "TC temp:");
 
     canvas_set_font(canvas, FontBigNumbers);
-    snprintf(buffer, sizeof(buffer), "%0.2f", (double)max31855_unpack_temp(state->data));
+    snprintf(buffer, sizeof(buffer), "%0.2f", (double)tc_temp);
     canvas_draw_str(canvas, 50, 15, buffer);
 
     canvas_set_font(canvas, FontSecondary);
-    snprintf(
-        buffer,
-        sizeof(buffer),
-        "Int temp: %0.2f",
-        (double)max31855_unpack_internal_temp(state->data));
+    snprintf(buffer, sizeof(buffer), "Chip temp: %0.2f", (double)chip_temp);
     canvas_draw_str(canvas, 0, 28, buffer);
 
     if(max31855_unpack_fault(state->data)) {
