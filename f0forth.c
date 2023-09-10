@@ -84,19 +84,15 @@ static void f0forth_bgloader_loop(F0ForthState *f0f_state, const char
 
 		BGLoaderApp *bg_app = furi_record_open(bg_app_path);
 
-		BGLoaderMessage msg;
 
 		if (f0f_state->exit_for_real) {
-			// signal loader that we're ready to exit
-			msg.type = BGLoaderMessageType_LoaderExit;
-			furi_check(furi_message_queue_put(bg_app->to_loader,
-						&msg, FuriWaitForever) ==
-					FuriStatusOk);
+			// exit for real
 			furi_record_close(bg_app_path);
 			break;
 		}
 
 		// signal loader that we're ready to go to background
+		BGLoaderMessage msg;
 		msg.type = BGLoaderMessageType_LoaderBackground;
 		furi_check(furi_message_queue_put(bg_app->to_loader, &msg,
 					FuriWaitForever) == FuriStatusOk);
