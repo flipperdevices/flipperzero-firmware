@@ -151,7 +151,7 @@ int32_t app_entry_point(const char *args)
 
 For examples of compatible apps check out
 [f0forth](https://github.com/twisted-pear/f0forth) or
-[ESugGhz Chat](https://github.com/twisted-pear/esubghz_chat).
+[ESubGhz Chat](https://github.com/twisted-pear/esubghz_chat).
 
 ## Acknowledgements
 
