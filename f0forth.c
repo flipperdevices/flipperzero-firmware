@@ -18,8 +18,8 @@ static void f0forth_hooked_input_callback(InputEvent* event, void* context)
 
 	if (event->key == InputKeyBack) {
 		if (event->type == InputTypeLong) {
-			view_dispatcher_stop(f0f_state->view_dispatcher);
 			f0f_state->exit_for_real = true;
+			view_dispatcher_stop(f0f_state->view_dispatcher);
 			return;
 		}
         }
@@ -82,14 +82,12 @@ static void f0forth_bgloader_loop(F0ForthState *f0f_state, const char
 	while (true) {
 		view_dispatcher_run(f0f_state->view_dispatcher);
 
-		BGLoaderApp *bg_app = furi_record_open(bg_app_path);
-
-
 		if (f0f_state->exit_for_real) {
 			// exit for real
-			furi_record_close(bg_app_path);
 			break;
 		}
+
+		BGLoaderApp *bg_app = furi_record_open(bg_app_path);
 
 		// signal loader that we're ready to go to background
 		BGLoaderMessage msg;
