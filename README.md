@@ -97,7 +97,7 @@ As this app is still in the development stage, I welcome contributions to this p
 - [MagicRF M100&QM100_Firmware_manual_en.pdf](assets/res/MagicRF_M100&QM100_Firmware_manual_en.pdf)
 - [TDS_1_9_Standard.pdf](assets/res/TDS_1_9_Standard.pdf)
 - [M5Stack Docs](https://docs.m5stack.com/en/unit/uhf_rfid)
-- [MagicRF Chip DS](http://www.magicrf.com/product_en.htm)
+- [MagicRF Chip Datasheet](http://www.magicrf.com/product_en.htm)
 
 ## Contact
 
