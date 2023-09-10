@@ -9,7 +9,7 @@ on:
         required: false
         type: string
   release:
-    types: [ created,prereleased ]
+    types: [created, prereleased]
   push:
     paths:
       - .github/workflows/build-with-firmware.yml
@@ -18,26 +18,27 @@ permissions:
   contents: write
   packages: write
 
+concurrency:
+  group: firmware-build-${{ vars.FIRMWARE_VERSION }}-${{ vars.RELEASE_VERSION }}
+  cancel-in-progress: false
+
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
-    concurrency:
-      group: firmware-build-${{ vars.FIRMWARE_VERSION }}-${{ vars.RELEASE_VERSION }}
-      cancel-in-progress: false
     env:
       REPO_SELF: ${{ vars.REPO_SELF }}
       OFW_PATH: "applications_user/subbrute"
       RELATIVE_PATH: "applications/external/subbrute"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
-      ZIP_NAME: ''
-      ZIP_TAG: ''
-      TGZ_NAME: ''
-      TGZ_TAG: ''
+      ZIP_NAME: ""
+      ZIP_TAG: ""
+      TGZ_NAME: ""
+      TGZ_TAG: ""
     strategy:
       fail-fast: false
       matrix:
-        firmware: [ unlshd ]
+        firmware: [unlshd, official]
         include:
           - firmware: unlshd
             url: ${{ vars.REPO_UNLEASHED }}
@@ -143,11 +144,11 @@ jobs:
         run: |
           Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
           Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
-#          New-Item -Force ./tmp -ItemType Directory -ErrorAction SilentlyContinue
-#          Copy-Item -Force -Recurse ./applications/external/subbrute/ ./tmp/ -ErrorAction SilentlyContinue
-#          Remove-Item -Force -Recurse ./applications/external/* -ErrorAction SilentlyContinue
-#          Copy-Item -Force -Recurse /tmp/* ./applications/external/ -ErrorAction SilentlyContinue
-#          Remove-Item -Force -Recurse ./tmp -ErrorAction SilentlyContinue
+      #          New-Item -Force ./tmp -ItemType Directory -ErrorAction SilentlyContinue
+      #          Copy-Item -Force -Recurse ./applications/external/subbrute/ ./tmp/ -ErrorAction SilentlyContinue
+      #          Remove-Item -Force -Recurse ./applications/external/* -ErrorAction SilentlyContinue
+      #          Copy-Item -Force -Recurse /tmp/* ./applications/external/ -ErrorAction SilentlyContinue
+      #          Remove-Item -Force -Recurse ./tmp -ErrorAction SilentlyContinue
 
       - name: Build Firmware
         shell: bash
