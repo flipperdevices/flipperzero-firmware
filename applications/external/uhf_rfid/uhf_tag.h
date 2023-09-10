@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define MAX_BANK_SIZE 256
 // storage enum
 typedef enum { ReservedBank, EPCBank, TIDBank, UserBank } BankType;
 
@@ -17,7 +16,7 @@ typedef struct {
 // EPC Memory Bank
 typedef struct {
     size_t size; // Size of EPC memory data
-    uint8_t data[MAX_BANK_SIZE]; // 2 bytes for CRC16, 2 bytes for PC, and max 14 bytes for EPC
+    uint8_t data[18]; // 2 bytes for CRC16, 2 bytes for PC, and max 14 bytes for EPC
     uint16_t pc;
     uint16_t crc;
 } EPCMemoryBank;
@@ -25,13 +24,13 @@ typedef struct {
 // TID Memory Bank
 typedef struct {
     size_t size; // Size of TID memory data
-    uint8_t data[MAX_BANK_SIZE]; // 4 bytes for Class ID
+    uint8_t data[16]; // 4 bytes for Class ID and max 12 bytes for TID data
 } TIDMemoryBank;
 
 // User Memory Bank
 typedef struct {
     size_t size; // Size of user memory data
-    uint8_t data[MAX_BANK_SIZE]; // Assuming max 512 bits (64 bytes) for User Memory
+    uint8_t data[64]; // Assuming max 512 bits (64 bytes) for User Memory
 } UserMemoryBank;
 
 // EPC Gen 2 Tag containing all memory banks

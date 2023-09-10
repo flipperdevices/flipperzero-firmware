@@ -1,10 +1,34 @@
 # [UHF]RFID App for FlipperZero
 
-![FlipperZero](assets/img/uhf_demo_app2.jpg)
+<div style="
+display: flex;
+flex-direction: row;
+justify-content: space-evenly;
+align-items: center;
+">
+  <img style="
+  border-radius: 10px;
+  margin: 10px;
+  width: 350px;
+  height: 350px;
+  object-fit: cover;"
+  src="assets/img/uhf_demo_app2.jpg">
+  <img style="border-radius: 10px;
+  margin: 10px;
+  width: 350px;
+  height: 350px;
+  object-fit: cover;"
+  src="assets/img/uhf_demo_app.jpg">
+</div>
 
 ## Overview
 
 This repository contains a UHF RFID application developed for FlipperZero, a versatile multi-tool device. The app leverages the YRM100 module to enable UHF RFID functionality.
+
+## What's Ongoing
+
+Working on the settings page to allow for changing of the module's settings.
+Adding options like settings the access password, baud rate, rf power, channel, etc.
 
 ## What's Changed
 

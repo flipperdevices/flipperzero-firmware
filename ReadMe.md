@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32-C6 Gravity v0.5.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - Updated: [WiFi (Marauder) v6.2 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add GPS and Wardrive commands #29 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/29)
 - UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
+- Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 
 <a name="release">
 
