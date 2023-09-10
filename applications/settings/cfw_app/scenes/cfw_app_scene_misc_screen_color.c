@@ -32,16 +32,31 @@ void cfw_app_scene_misc_screen_color_on_enter(void* context) {
 
 bool cfw_app_scene_misc_screen_color_on_event(void* context, SceneManagerEvent event) {
     CfwApp* app = context;
+    CfwSettings* cfw_settings = CFW_SETTINGS();
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         switch(event.event) {
         case ByteInputResultOk:
-            rgb_backlight_set_color(
-                scene_manager_get_scene_state(app->scene_manager, CfwAppSceneMiscScreenColor),
-                app->lcd_color);
-            app->save_backlight = true;
+            switch(cfw_settings->lcd_style) {
+            case 0:
+                notification_message(app->notification, &sequence_display_backlight_off);
+                rgb_backlight_set_color(0, app->lcd_color);
+                rgb_backlight_set_color(1, app->lcd_color);
+                rgb_backlight_set_color(2, app->lcd_color);
+                notification_message(app->notification, &sequence_display_backlight_on);
+                app->save_backlight = true;
+                break;
+            case 1:
+                notification_message(app->notification, &sequence_display_backlight_off);
+                rgb_backlight_set_color(
+                    scene_manager_get_scene_state(app->scene_manager, CfwAppSceneMiscScreenColor),
+                    app->lcd_color);
+                notification_message(app->notification, &sequence_display_backlight_on);
+                app->save_backlight = true;
+                break;
+            }
             scene_manager_previous_scene(app->scene_manager);
             break;
         default:
