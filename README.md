@@ -149,8 +149,9 @@ int32_t app_entry_point(const char *args)
 }
 ```
 
-For an example of a compatible app check out
-[f0forth](https://github.com/twisted-pear/f0forth).
+For examples of compatible apps check out
+[f0forth](https://github.com/twisted-pear/f0forth) or
+[ESugGhz Chat](https://github.com/twisted-pear/esubghz_chat).
 
 ## Acknowledgements
 
