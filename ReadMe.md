@@ -48,13 +48,15 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Slot Machine v1.2 (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
 - Updated: [Radar Scanner (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Extended Functionality #17 (By R4g3D)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/17)
-- Updated: [Apple BLE Spam v1.0.5 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - Renamed a few apps for better visibility, organization and sorting (By RogueMaster and Willy-JL)
 - Updated: [Sokoban v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
 - Updated: [ESP32-C6 Gravity v0.5.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - Updated: [WiFi (Marauder) v6.2 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add GPS and Wardrive commands #29 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/29)
 - UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
 - Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
+- Updated: [Apple BLE Spam v1.0.6 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
+- Settings: [CFW Settings Layout options for Compact for Main Menu (By MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a7208b228bd9eba465f162962b9385d02d28e68c)
+- [Fix view_port_update() apps random deadlocks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f927eb2349aa0de7cb607b90b5b981ee5fa0f824)
 
 <a name="release">
 
@@ -188,6 +190,7 @@ $ ./fbt dolphin_ext
 - Settings: [CFW Settings for Desktop Settings & Passport Settings (By ESurge)]
 - Settings: [CFW Settings for Dark Mode (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/83e836fc797ce9ce8998a5d9b1fde6a172480bf2)
 - Settings: [CFW Settings Layout options for Commodore 64 for Main Menu (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a47e7a4a8459a32f493b2f2f4c20137e98da1a1)
+- Settings: [CFW Settings Layout options for Compact for Main Menu (By MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a7208b228bd9eba465f162962b9385d02d28e68c)
 - Settings: [CFW Settings Layout options for DSi, PS4, Vertical & Wii for Main Menu (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a47e7a4a8459a32f493b2f2f4c20137e98da1a1)
 - Settings: [CFW Settings Layout options for Eurocorp for Main Menu (By xtruan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/732)
 - Settings: [CFW Settings for Lock Menu Style (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fe3d1ccac0d2058769a0e8f1076b348ef59eaa29)
@@ -286,7 +289,7 @@ $ ./fbt dolphin_ext
 - [Advanced Wifi Sniffer (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c8e5c3bd8b353092c7fd5b7ed0327d044ee53b74)
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
-- [Apple BLE Spam v1.0.5 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
+- [Apple BLE Spam v1.0.6 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - [Authenticator/TOTP v4.1.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
