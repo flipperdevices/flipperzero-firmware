@@ -16,7 +16,7 @@ void subbrute_scene_load_file_on_enter(void* context) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, SUBBRUTE_FILE_EXT, &I_sub1_10px);
 
-    SubBruteFileResult load_result = SubBruteFileResultUnknown;
+    SubBruteFileResult load_result;
     // TODO: DELETE IT
 #ifdef SUBBRUTE_FAST_TRACK
     bool res = true;
