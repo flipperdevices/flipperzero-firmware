@@ -1019,8 +1019,8 @@ int32_t wifi_scanner_app(void* p) {
         }
 #endif
 
-        view_port_update(view_port);
         furi_mutex_release(app->mutex);
+        view_port_update(view_port);
     }
 
     WIFI_APP_LOG_I("Start exit app");
