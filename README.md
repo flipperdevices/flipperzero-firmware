@@ -158,3 +158,5 @@ For examples of compatible apps check out
 Thanks to [Willy-JL](https://github.com/Willy-JL) for coming up with an idea
 for how to store the pointers to an application's data structures and for how
 to signal an application's thread to terminate.
+
+The app icon was made by [xMasterX](https://github.com/xMasterX).

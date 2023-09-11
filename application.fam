@@ -5,4 +5,5 @@ App(
     entry_point="bgloader",
     stack_size=2 * 1024,
     requires=["dialogs", "gui"],
+    fap_icon="bg10px.png",
 )
