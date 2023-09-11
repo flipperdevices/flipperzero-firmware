@@ -103,10 +103,65 @@ MU_TEST(furi_hal_i2c_int_1b_fail) {
     mu_assert(data_one != 0, "9 invalid data");
 }
 
+MU_TEST(furi_hal_i2c_int_ext_3b) {
+    bool ret = false;
+    uint8_t data_many[DATA_SIZE] = {0};
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(LP5562_I2C_TIMEOUT * 1000);
+
+    // 3 byte: read
+    data_many[0] = LP5562_CHANNEL_BLUE_CURRENT_REGISTER;
+    ret = furi_hal_i2c_tx_ext(
+        &furi_hal_i2c_handle_power,
+        LP5562_ADDRESS,
+        false,
+        data_many,
+        1,
+        FuriHalI2cBeginStart,
+        FuriHalI2cEndAwaitRestart,
+        timer);
+    mu_assert(ret, "3 tx failed");
+
+    // Send a RESTART condition, then read the 3 bytes one after the other
+    ret = furi_hal_i2c_rx_ext(
+        &furi_hal_i2c_handle_power,
+        LP5562_ADDRESS,
+        false,
+        data_many + 1,
+        1,
+        FuriHalI2cBeginRestart,
+        FuriHalI2cEndPause,
+        timer);
+    mu_assert(ret, "4 rx failed");
+    mu_assert(data_many[1] != 0, "4 invalid data");
+    ret = furi_hal_i2c_rx_ext(
+        &furi_hal_i2c_handle_power,
+        LP5562_ADDRESS,
+        false,
+        data_many + 2,
+        1,
+        FuriHalI2cBeginResume,
+        FuriHalI2cEndPause,
+        timer);
+    mu_assert(ret, "5 rx failed");
+    mu_assert(data_many[2] != 0, "5 invalid data");
+    ret = furi_hal_i2c_rx_ext(
+        &furi_hal_i2c_handle_power,
+        LP5562_ADDRESS,
+        false,
+        data_many + 3,
+        1,
+        FuriHalI2cBeginResume,
+        FuriHalI2cEndStop,
+        timer);
+    mu_assert(ret, "6 rx failed");
+    mu_assert(data_many[3] != 0, "6 invalid data");
+}
+
 MU_TEST_SUITE(furi_hal_i2c_int_suite) {
     MU_SUITE_CONFIGURE(&furi_hal_i2c_int_setup, &furi_hal_i2c_int_teardown);
     MU_RUN_TEST(furi_hal_i2c_int_1b);
     MU_RUN_TEST(furi_hal_i2c_int_3b);
+    MU_RUN_TEST(furi_hal_i2c_int_ext_3b);
     MU_RUN_TEST(furi_hal_i2c_int_1b_fail);
 }
 
