@@ -202,6 +202,31 @@ static MfUltralightCommand
 }
 
 static MfUltralightCommand
+    mf_ultralight_listener_fast_write_handler(MfUltralightListener* instance, BitBuffer* buffer) {
+    MfUltralightCommand command = MfUltralightCommandNotProcessedSilent;
+    FURI_LOG_D(TAG, "CMD_FAST_WRITE");
+
+    do {
+        if(!mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportFastWrite))
+            break;
+
+        uint8_t start_page = bit_buffer_get_byte(buffer, 1);
+        uint8_t end_page = bit_buffer_get_byte(buffer, 2);
+        if(start_page != 0xF0 || end_page != 0xFF) {
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
+        // TODO: update when SRAM emulation implemented
+
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+        command = MfUltralightCommandProcessed;
+    } while(false);
+
+    return command;
+}
+
+static MfUltralightCommand
     mf_ultralight_listener_read_version_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     UNUSED(buffer);
     MfUltralightCommand command = MfUltralightCommandNotProcessedSilent;
@@ -509,6 +534,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .cmd = MF_ULTRALIGHT_CMD_WRITE_PAGE,
         .cmd_len_bits = 6 * 8,
         .callback = mf_ultralight_listener_write_page_handler,
+    },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_FAST_WRITE,
+        .cmd_len_bits = 67 * 8,
+        .callback = mf_ultralight_listener_fast_write_handler,
     },
     {
         .cmd = MF_ULTRALIGHT_CMD_GET_VERSION,
