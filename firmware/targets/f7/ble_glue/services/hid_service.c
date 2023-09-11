@@ -172,10 +172,10 @@ void hid_svc_start() {
     }
 
     // Maintain previously defined characteristic order
-    for(size_t i = 0; i < HidSvcGattCharacteristicCount; i++) {
-        flipper_gatt_characteristic_init(
-            hid_svc->svc_handle, &hid_svc_chars[i], &hid_svc->chars[i]);
-    }
+    flipper_gatt_characteristic_init(
+        hid_svc->svc_handle,
+        &hid_svc_chars[HidSvcGattCharacteristicProtocolMode],
+        &hid_svc->chars[HidSvcGattCharacteristicProtocolMode]);
 
     uint8_t protocol_mode = 1;
     flipper_gatt_characteristic_update(
@@ -217,6 +217,12 @@ void hid_svc_start() {
                 &report_char,
                 &hid_report_chars[report_type_idx].chars[report_idx]);
         }
+    }
+
+    // Setup remaining characteristics
+    for(size_t i = HidSvcGattCharacteristicReportMap; i < HidSvcGattCharacteristicCount; i++) {
+        flipper_gatt_characteristic_init(
+            hid_svc->svc_handle, &hid_svc_chars[i], &hid_svc->chars[i]);
     }
 }
 
