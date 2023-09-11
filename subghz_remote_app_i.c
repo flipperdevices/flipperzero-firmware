@@ -196,7 +196,7 @@ void subrem_save_active_sub(void* context) {
     furi_assert(context);
     SubGhzRemoteApp* app = context;
 
-    SubRemSubFilePreset* sub_preset = app->map_preset->subs_preset[app->chusen_sub];
+    SubRemSubFilePreset* sub_preset = app->map_preset->subs_preset[app->chosen_sub];
     subrem_save_protocol_to_file(
         sub_preset->fff_data, furi_string_get_cstr(sub_preset->file_path));
 }
@@ -235,7 +235,7 @@ bool subrem_tx_start_sub(SubGhzRemoteApp* app, SubRemSubFilePreset* sub_preset) 
 
 bool subrem_tx_stop_sub(SubGhzRemoteApp* app, bool forced) {
     furi_assert(app);
-    SubRemSubFilePreset* sub_preset = app->map_preset->subs_preset[app->chusen_sub];
+    SubRemSubFilePreset* sub_preset = app->map_preset->subs_preset[app->chosen_sub];
 
     if(forced || (sub_preset->type != SubGhzProtocolTypeRAW)) {
         subghz_txrx_stop(app->txrx);

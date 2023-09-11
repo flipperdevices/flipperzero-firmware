@@ -66,19 +66,19 @@ bool subrem_scene_remote_on_event(void* context, SceneManagerEvent event) {
             // Start sending sub
             subrem_tx_stop_sub(app, true);
 
-            uint8_t chusen_sub = subrem_scene_remote_event_to_index(event.event);
-            app->chusen_sub = chusen_sub;
+            uint8_t chosen_sub = subrem_scene_remote_event_to_index(event.event);
+            app->chosen_sub = chosen_sub;
 
             subrem_view_remote_set_state(
-                app->subrem_remote_view, SubRemViewRemoteStateLoading, chusen_sub);
+                app->subrem_remote_view, SubRemViewRemoteStateLoading, chosen_sub);
 
-            if(subrem_tx_start_sub(app, app->map_preset->subs_preset[chusen_sub])) {
-                if(app->map_preset->subs_preset[chusen_sub]->type == SubGhzProtocolTypeRAW) {
+            if(subrem_tx_start_sub(app, app->map_preset->subs_preset[chosen_sub])) {
+                if(app->map_preset->subs_preset[chosen_sub]->type == SubGhzProtocolTypeRAW) {
                     subghz_txrx_set_raw_file_encoder_worker_callback_end(
                         app->txrx, subrem_scene_remote_raw_callback_end_tx, app);
                 }
                 subrem_view_remote_set_state(
-                    app->subrem_remote_view, SubRemViewRemoteStateSending, chusen_sub);
+                    app->subrem_remote_view, SubRemViewRemoteStateSending, chosen_sub);
                 notification_message(app->notifications, &sequence_blink_start_magenta);
             } else {
                 subrem_view_remote_set_state(
