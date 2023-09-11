@@ -4,19 +4,11 @@
  * SD Card HAL API
  */
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <furi_hal_spi_types.h>
+#include <furi.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    FuriHalSdStatusOK, /*!< OK */
-    FuriHalSdStatusError, /*!< generic error */
-    FuriHalSdStatusTimeout, /*!< timeout */
-} FuriHalSdStatus;
 
 typedef struct {
     uint64_t capacity; /*!< total capacity in bytes */
@@ -54,40 +46,40 @@ uint8_t furi_hal_sd_max_mount_retry_count();
 /**
  * @brief Init SD card
  * @param power_reset reset card power
- * @return FuriHalSdStatus 
+ * @return FuriStatus 
  */
-FuriHalSdStatus furi_hal_sd_init(bool power_reset);
+FuriStatus furi_hal_sd_init(bool power_reset);
 
 /**
  * @brief Read blocks from SD card
  * @param buff 
  * @param sector 
  * @param count 
- * @return FuriHalSdStatus 
+ * @return FuriStatus 
  */
-FuriHalSdStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_t count);
+FuriStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_t count);
 
 /**
  * @brief Write blocks to SD card
  * @param buff 
  * @param sector 
  * @param count 
- * @return FuriHalSdStatus 
+ * @return FuriStatus 
  */
-FuriHalSdStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, uint32_t count);
+FuriStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, uint32_t count);
 
 /**
  * @brief Get SD card info
  * @param info 
- * @return FuriHalSdStatus 
+ * @return FuriStatus 
  */
-FuriHalSdStatus furi_hal_sd_info(FuriHalSdInfo* info);
+FuriStatus furi_hal_sd_info(FuriHalSdInfo* info);
 
 /**
  * @brief Get SD card state
- * @return FuriHalSdStatus 
+ * @return FuriStatus 
  */
-FuriHalSdStatus furi_hal_sd_get_card_state();
+FuriStatus furi_hal_sd_get_card_state();
 
 #ifdef __cplusplus
 }

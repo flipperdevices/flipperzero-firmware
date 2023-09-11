@@ -319,18 +319,18 @@ static uint8_t sd_spi_wait_for_data_and_read(void) {
     return responce;
 }
 
-static FuriHalSdStatus sd_spi_wait_for_data(uint8_t data, uint32_t timeout_ms) {
+static FuriStatus sd_spi_wait_for_data(uint8_t data, uint32_t timeout_ms) {
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     uint8_t byte;
 
     do {
         byte = sd_spi_read_byte();
         if(furi_hal_cortex_timer_is_expired(timer)) {
-            return FuriHalSdStatusTimeout;
+            return FuriStatusErrorTimeout;
         }
     } while((byte != data));
 
-    return FuriHalSdStatusOK;
+    return FuriStatusOk;
 }
 
 static inline void sd_spi_deselect_card_and_purge() {
@@ -417,7 +417,7 @@ static SdSpiDataResponce sd_spi_get_data_response(uint32_t timeout_ms) {
         sd_spi_select_card();
 
         // wait for 0xFF
-        if(sd_spi_wait_for_data(0xFF, timeout_ms) == FuriHalSdStatusOK) {
+        if(sd_spi_wait_for_data(0xFF, timeout_ms) == FuriStatusOk) {
             return SdSpiDataResponceOK;
         } else {
             return SdSpiDataResponceOtherError;
@@ -431,7 +431,7 @@ static SdSpiDataResponce sd_spi_get_data_response(uint32_t timeout_ms) {
     }
 }
 
-static FuriHalSdStatus sd_spi_init_spi_mode_v1(void) {
+static FuriStatus sd_spi_init_spi_mode_v1(void) {
     SdSpiCmdAnswer response;
     uint8_t retry_count = 0;
 
@@ -449,16 +449,16 @@ static FuriHalSdStatus sd_spi_init_spi_mode_v1(void) {
         sd_spi_deselect_card_and_purge();
 
         if(retry_count >= SD_IDLE_RETRY_COUNT) {
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
     } while(response.r1 == SdSpi_R1_IN_IDLE_STATE);
 
     sd_spi_debug("Init SD card in SPI mode v1 done");
 
-    return FuriHalSdStatusOK;
+    return FuriStatusOk;
 }
 
-static FuriHalSdStatus sd_spi_init_spi_mode_v2(void) {
+static FuriStatus sd_spi_init_spi_mode_v2(void) {
     SdSpiCmdAnswer response;
     uint8_t retry_count = 0;
 
@@ -477,7 +477,7 @@ static FuriHalSdStatus sd_spi_init_spi_mode_v2(void) {
 
         if(retry_count >= SD_IDLE_RETRY_COUNT) {
             sd_spi_debug("ACMD41 failed");
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
     } while(response.r1 == SdSpi_R1_IN_IDLE_STATE);
 
@@ -492,7 +492,7 @@ static FuriHalSdStatus sd_spi_init_spi_mode_v2(void) {
 
             if(response.r1 != SdSpi_R1_IN_IDLE_STATE) {
                 sd_spi_debug("CMD55 failed");
-                return FuriHalSdStatusError;
+                return FuriStatusError;
             }
             // ACMD41 (SD_APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors)
             response = sd_spi_send_cmd(SD_CMD41_SD_APP_OP_COND, 0, 0xFF, SdSpiCmdAnswerTypeR1);
@@ -500,17 +500,17 @@ static FuriHalSdStatus sd_spi_init_spi_mode_v2(void) {
 
             if(retry_count >= SD_IDLE_RETRY_COUNT) {
                 sd_spi_debug("ACMD41 failed");
-                return FuriHalSdStatusError;
+                return FuriStatusError;
             }
         } while(response.r1 == SdSpi_R1_IN_IDLE_STATE);
     }
 
     sd_spi_debug("Init SD card in SPI mode v2 done");
 
-    return FuriHalSdStatusOK;
+    return FuriStatusOk;
 }
 
-static FuriHalSdStatus sd_spi_init_spi_mode(void) {
+static FuriStatus sd_spi_init_spi_mode(void) {
     SdSpiCmdAnswer response;
     uint8_t retry_count;
 
@@ -524,7 +524,7 @@ static FuriHalSdStatus sd_spi_init_spi_mode(void) {
 
         if(retry_count >= SD_IDLE_RETRY_COUNT) {
             sd_spi_debug("CMD0 failed");
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
     } while(response.r1 != SdSpi_R1_IN_IDLE_STATE);
 
@@ -534,15 +534,15 @@ static FuriHalSdStatus sd_spi_init_spi_mode(void) {
     sd_spi_deselect_card_and_purge();
 
     if(FLAG_SET(response.r1, SdSpi_R1_ILLEGAL_COMMAND)) {
-        if(sd_spi_init_spi_mode_v1() != FuriHalSdStatusOK) {
+        if(sd_spi_init_spi_mode_v1() != FuriStatusOk) {
             sd_spi_debug("Init mode v1 failed");
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
         sd_high_capacity = 0;
     } else if(response.r1 == SdSpi_R1_IN_IDLE_STATE) {
-        if(sd_spi_init_spi_mode_v2() != FuriHalSdStatusOK) {
+        if(sd_spi_init_spi_mode_v2() != FuriStatusOk) {
             sd_spi_debug("Init mode v2 failed");
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
 
         // CMD58 (READ_OCR) to initialize SDHC or SDXC cards: R3 response
@@ -551,21 +551,21 @@ static FuriHalSdStatus sd_spi_init_spi_mode(void) {
 
         if(response.r1 != SdSpi_R1_NO_ERROR) {
             sd_spi_debug("CMD58 failed");
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
         sd_high_capacity = (response.r2 & 0x40) >> 6;
     } else {
-        return FuriHalSdStatusError;
+        return FuriStatusError;
     }
 
     sd_spi_debug("SD card is %s", sd_high_capacity ? "SDHC or SDXC" : "SDSC");
-    return FuriHalSdStatusOK;
+    return FuriStatusOk;
 }
 
-static FuriHalSdStatus sd_spi_get_csd(SD_CSD* csd) {
+static FuriStatus sd_spi_get_csd(SD_CSD* csd) {
     uint16_t counter = 0;
     uint8_t csd_data[16];
-    FuriHalSdStatus ret = FuriHalSdStatusError;
+    FuriStatus ret = FuriStatusError;
     SdSpiCmdAnswer response;
 
     // CMD9 (SEND_CSD): R1 format (0x00 is no errors)
@@ -573,7 +573,7 @@ static FuriHalSdStatus sd_spi_get_csd(SD_CSD* csd) {
 
     if(response.r1 == SdSpi_R1_NO_ERROR) {
         if(sd_spi_wait_for_data(SD_TOKEN_START_DATA_SINGLE_BLOCK_READ, SD_TIMEOUT_MS) ==
-           FuriHalSdStatusOK) {
+           FuriStatusOk) {
             // read CSD data
             for(counter = 0; counter < 16; counter++) {
                 csd_data[counter] = sd_spi_read_byte();
@@ -637,7 +637,7 @@ static FuriHalSdStatus sd_spi_get_csd(SD_CSD* csd) {
             csd->crc = (csd_data[15] & 0xFE) >> 1;
             csd->Reserved5 = (csd_data[15] & 0x01);
 
-            ret = FuriHalSdStatusOK;
+            ret = FuriStatusOk;
         }
     }
 
@@ -646,10 +646,10 @@ static FuriHalSdStatus sd_spi_get_csd(SD_CSD* csd) {
     return ret;
 }
 
-static FuriHalSdStatus sd_spi_get_cid(SD_CID* Cid) {
+static FuriStatus sd_spi_get_cid(SD_CID* Cid) {
     uint16_t counter = 0;
     uint8_t cid_data[16];
-    FuriHalSdStatus ret = FuriHalSdStatusError;
+    FuriStatus ret = FuriStatusError;
     SdSpiCmdAnswer response;
 
     // CMD10 (SEND_CID): R1 format (0x00 is no errors)
@@ -657,7 +657,7 @@ static FuriHalSdStatus sd_spi_get_cid(SD_CID* Cid) {
 
     if(response.r1 == SdSpi_R1_NO_ERROR) {
         if(sd_spi_wait_for_data(SD_TOKEN_START_DATA_SINGLE_BLOCK_READ, SD_TIMEOUT_MS) ==
-           FuriHalSdStatusOK) {
+           FuriStatusOk) {
             // read CID data
             for(counter = 0; counter < 16; counter++) {
                 cid_data[counter] = sd_spi_read_byte();
@@ -680,7 +680,7 @@ static FuriHalSdStatus sd_spi_get_cid(SD_CID* Cid) {
             Cid->CID_CRC = (cid_data[15] & 0xFE) >> 1;
             Cid->Reserved2 = 1;
 
-            ret = FuriHalSdStatusOK;
+            ret = FuriStatusOk;
         }
     }
 
@@ -689,7 +689,7 @@ static FuriHalSdStatus sd_spi_get_cid(SD_CID* Cid) {
     return ret;
 }
 
-static FuriHalSdStatus
+static FuriStatus
     sd_spi_cmd_read_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms) {
     uint32_t block_address = address;
     uint32_t offset = 0;
@@ -700,7 +700,7 @@ static FuriHalSdStatus
     sd_spi_deselect_card_and_purge();
 
     if(response.r1 != SdSpi_R1_NO_ERROR) {
-        return FuriHalSdStatusError;
+        return FuriStatusError;
     }
 
     if(!sd_high_capacity) {
@@ -713,12 +713,12 @@ static FuriHalSdStatus
             sd_spi_send_cmd(SD_CMD17_READ_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
         if(response.r1 != SdSpi_R1_NO_ERROR) {
             sd_spi_deselect_card_and_purge();
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
 
         // Wait for the data start token
         if(sd_spi_wait_for_data(SD_TOKEN_START_DATA_SINGLE_BLOCK_READ, timeout_ms) ==
-           FuriHalSdStatusOK) {
+           FuriStatusOk) {
             // Read the data block
             sd_spi_read_bytes_dma((uint8_t*)data + offset, SD_BLOCK_SIZE);
             sd_spi_purge_crc();
@@ -734,16 +734,16 @@ static FuriHalSdStatus
             }
         } else {
             sd_spi_deselect_card_and_purge();
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
 
         sd_spi_deselect_card_and_purge();
     }
 
-    return FuriHalSdStatusOK;
+    return FuriStatusOk;
 }
 
-static FuriHalSdStatus sd_spi_cmd_write_blocks(
+static FuriStatus sd_spi_cmd_write_blocks(
     const uint32_t* data,
     uint32_t address,
     uint32_t blocks,
@@ -757,7 +757,7 @@ static FuriHalSdStatus sd_spi_cmd_write_blocks(
     sd_spi_deselect_card_and_purge();
 
     if(response.r1 != SdSpi_R1_NO_ERROR) {
-        return FuriHalSdStatusError;
+        return FuriStatusError;
     }
 
     if(!sd_high_capacity) {
@@ -770,7 +770,7 @@ static FuriHalSdStatus sd_spi_cmd_write_blocks(
             SD_CMD24_WRITE_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
         if(response.r1 != SdSpi_R1_NO_ERROR) {
             sd_spi_deselect_card_and_purge();
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
 
         // Send dummy byte for NWR timing : one byte between CMD_WRITE and TOKEN
@@ -788,7 +788,7 @@ static FuriHalSdStatus sd_spi_cmd_write_blocks(
         sd_spi_deselect_card_and_purge();
 
         if(data_responce != SdSpiDataResponceOK) {
-            return FuriHalSdStatusError;
+            return FuriStatusError;
         }
 
         // increase offset
@@ -802,10 +802,10 @@ static FuriHalSdStatus sd_spi_cmd_write_blocks(
         }
     }
 
-    return FuriHalSdStatusOK;
+    return FuriStatusOk;
 }
 
-static FuriHalSdStatus sd_spi_get_card_state(void) {
+static FuriStatus sd_spi_get_card_state(void) {
     SdSpiCmdAnswer response;
 
     // Send CMD13 (SEND_STATUS) to get SD status
@@ -814,10 +814,10 @@ static FuriHalSdStatus sd_spi_get_card_state(void) {
 
     // Return status OK if response is valid
     if((response.r1 == SdSpi_R1_NO_ERROR) && (response.r2 == SdSpi_R2_NO_ERROR)) {
-        return FuriHalSdStatusOK;
+        return FuriStatusOk;
     }
 
-    return FuriHalSdStatusError;
+    return FuriStatusError;
 }
 
 static inline bool sd_cache_get(uint32_t address, uint32_t* data) {
@@ -841,13 +841,13 @@ static inline void sd_cache_invalidate_all() {
     sector_cache_init();
 }
 
-static FuriHalSdStatus sd_device_read(uint32_t* buff, uint32_t sector, uint32_t count) {
-    FuriHalSdStatus status = FuriHalSdStatusError;
+static FuriStatus sd_device_read(uint32_t* buff, uint32_t sector, uint32_t count) {
+    FuriStatus status = FuriStatusError;
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
-    if(sd_spi_cmd_read_blocks(buff, sector, count, SD_TIMEOUT_MS) == FuriHalSdStatusOK) {
+    if(sd_spi_cmd_read_blocks(buff, sector, count, SD_TIMEOUT_MS) == FuriStatusOk) {
         FuriHalCortexTimer timer = furi_hal_cortex_timer_get(SD_TIMEOUT_MS * 1000);
 
         /* wait until the read operation is finished */
@@ -855,10 +855,10 @@ static FuriHalSdStatus sd_device_read(uint32_t* buff, uint32_t sector, uint32_t 
             status = sd_spi_get_card_state();
 
             if(furi_hal_cortex_timer_is_expired(timer)) {
-                status = FuriHalSdStatusTimeout;
+                status = FuriStatusErrorTimeout;
                 break;
             }
-        } while(status != FuriHalSdStatusOK);
+        } while(status != FuriStatusOk);
     }
 
     furi_hal_sd_spi_handle = NULL;
@@ -867,13 +867,13 @@ static FuriHalSdStatus sd_device_read(uint32_t* buff, uint32_t sector, uint32_t 
     return status;
 }
 
-static FuriHalSdStatus sd_device_write(const uint32_t* buff, uint32_t sector, uint32_t count) {
-    FuriHalSdStatus status = FuriHalSdStatusError;
+static FuriStatus sd_device_write(const uint32_t* buff, uint32_t sector, uint32_t count) {
+    FuriStatus status = FuriStatusError;
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
-    if(sd_spi_cmd_write_blocks(buff, sector, count, SD_TIMEOUT_MS) == FuriHalSdStatusOK) {
+    if(sd_spi_cmd_write_blocks(buff, sector, count, SD_TIMEOUT_MS) == FuriStatusOk) {
         FuriHalCortexTimer timer = furi_hal_cortex_timer_get(SD_TIMEOUT_MS * 1000);
 
         /* wait until the Write operation is finished */
@@ -883,10 +883,10 @@ static FuriHalSdStatus sd_device_write(const uint32_t* buff, uint32_t sector, ui
             if(furi_hal_cortex_timer_is_expired(timer)) {
                 sd_cache_invalidate_all();
 
-                status = FuriHalSdStatusTimeout;
+                status = FuriStatusErrorTimeout;
                 break;
             }
-        } while(status != FuriHalSdStatusOK);
+        } while(status != FuriStatusOk);
     }
 
     furi_hal_sd_spi_handle = NULL;
@@ -915,7 +915,7 @@ uint8_t furi_hal_sd_max_mount_retry_count() {
     return 10;
 }
 
-FuriHalSdStatus furi_hal_sd_init(bool power_reset) {
+FuriStatus furi_hal_sd_init(bool power_reset) {
     // Slow speed init
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_slow);
     furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_slow;
@@ -937,7 +937,7 @@ FuriHalSdStatus furi_hal_sd_init(bool power_reset) {
         furi_delay_ms(100);
     }
 
-    FuriHalSdStatus status = FuriHalSdStatusError;
+    FuriStatus status = FuriStatusError;
 
     // Send 80 dummy clocks with CS high
     sd_spi_deselect_card();
@@ -947,7 +947,7 @@ FuriHalSdStatus furi_hal_sd_init(bool power_reset) {
 
     for(uint8_t i = 0; i < 128; i++) {
         status = sd_spi_init_spi_mode();
-        if(status == FuriHalSdStatusOK) {
+        if(status == FuriStatusOk) {
             // SD initialized and init to SPI mode properly
             sd_spi_debug("SD init OK after %d retries", i);
             break;
@@ -963,11 +963,11 @@ FuriHalSdStatus furi_hal_sd_init(bool power_reset) {
     return status;
 }
 
-FuriHalSdStatus furi_hal_sd_get_card_state(void) {
+FuriStatus furi_hal_sd_get_card_state(void) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
-    FuriHalSdStatus status = sd_spi_get_card_state();
+    FuriStatus status = sd_spi_get_card_state();
 
     furi_hal_sd_spi_handle = NULL;
     furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
@@ -975,22 +975,22 @@ FuriHalSdStatus furi_hal_sd_get_card_state(void) {
     return status;
 }
 
-FuriHalSdStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_t count) {
-    FuriHalSdStatus status;
+FuriStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_t count) {
+    FuriStatus status;
     bool single_sector = count == 1;
 
     if(single_sector) {
         if(sd_cache_get(sector, buff)) {
-            return FuriHalSdStatusOK;
+            return FuriStatusOk;
         }
     }
 
     status = sd_device_read(buff, sector, count);
 
-    if(status != FuriHalSdStatusOK) {
+    if(status != FuriStatusOk) {
         uint8_t counter = furi_hal_sd_max_mount_retry_count();
 
-        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_is_present()) {
+        while(status != FuriStatusOk && counter > 0 && furi_hal_sd_is_present()) {
             if((counter % 2) == 0) {
                 // power reset sd card
                 status = furi_hal_sd_init(true);
@@ -998,31 +998,31 @@ FuriHalSdStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_
                 status = furi_hal_sd_init(false);
             }
 
-            if(status == FuriHalSdStatusOK) {
+            if(status == FuriStatusOk) {
                 status = sd_device_read(buff, sector, count);
             }
             counter--;
         }
     }
 
-    if(single_sector && status == FuriHalSdStatusOK) {
+    if(single_sector && status == FuriStatusOk) {
         sd_cache_put(sector, buff);
     }
 
     return status;
 }
 
-FuriHalSdStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, uint32_t count) {
-    FuriHalSdStatus status;
+FuriStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, uint32_t count) {
+    FuriStatus status;
 
     sd_cache_invalidate_range(sector, sector + count);
 
     status = sd_device_write(buff, sector, count);
 
-    if(status != FuriHalSdStatusOK) {
+    if(status != FuriStatusOk) {
         uint8_t counter = furi_hal_sd_max_mount_retry_count();
 
-        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_is_present()) {
+        while(status != FuriStatusOk && counter > 0 && furi_hal_sd_is_present()) {
             if((counter % 2) == 0) {
                 // power reset sd card
                 status = furi_hal_sd_init(true);
@@ -1030,7 +1030,7 @@ FuriHalSdStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, 
                 status = furi_hal_sd_init(false);
             }
 
-            if(status == FuriHalSdStatusOK) {
+            if(status == FuriStatusOk) {
                 status = sd_device_write(buff, sector, count);
             }
             counter--;
@@ -1040,8 +1040,8 @@ FuriHalSdStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, 
     return status;
 }
 
-FuriHalSdStatus furi_hal_sd_info(FuriHalSdInfo* info) {
-    FuriHalSdStatus status;
+FuriStatus furi_hal_sd_info(FuriHalSdInfo* info) {
+    FuriStatus status;
     SD_CSD csd;
     SD_CID cid;
 
@@ -1051,13 +1051,13 @@ FuriHalSdStatus furi_hal_sd_info(FuriHalSdInfo* info) {
     do {
         status = sd_spi_get_csd(&csd);
 
-        if(status != FuriHalSdStatusOK) {
+        if(status != FuriStatusOk) {
             break;
         }
 
         status = sd_spi_get_cid(&cid);
 
-        if(status != FuriHalSdStatusOK) {
+        if(status != FuriStatusOk) {
             break;
         }
 

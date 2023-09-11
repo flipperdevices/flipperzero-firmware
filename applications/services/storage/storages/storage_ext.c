@@ -226,9 +226,9 @@ FS_Error sd_card_info(StorageData* storage, SDInfo* sd_info) {
     }
 
     FuriHalSdInfo info;
-    FuriHalSdStatus status = furi_hal_sd_info(&info);
+    FuriStatus status = furi_hal_sd_info(&info);
 
-    if(status == FuriHalSdStatusOK) {
+    if(status == FuriStatusOk) {
         sd_info->manufacturer_id = info.manufacturer_id;
         memcpy(sd_info->oem_id, info.oem_id, sizeof(info.oem_id));
         memcpy(sd_info->product_name, info.product_name, sizeof(info.product_name));

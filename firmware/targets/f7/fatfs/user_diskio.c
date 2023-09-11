@@ -35,7 +35,7 @@ static DSTATUS driver_initialize(BYTE pdrv) {
 static DSTATUS driver_status(BYTE pdrv) {
     UNUSED(pdrv);
     DSTATUS status = 0;
-    if(furi_hal_sd_get_card_state() != FuriHalSdStatusOK) {
+    if(furi_hal_sd_get_card_state() != FuriStatusOk) {
         status = STA_NOINIT;
     }
 
@@ -52,8 +52,8 @@ static DSTATUS driver_status(BYTE pdrv) {
   */
 static DRESULT driver_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
     UNUSED(pdrv);
-    FuriHalSdStatus status = furi_hal_sd_read_blocks((uint32_t*)buff, (uint32_t)(sector), count);
-    return status == FuriHalSdStatusOK ? RES_OK : RES_ERROR;
+    FuriStatus status = furi_hal_sd_read_blocks((uint32_t*)buff, (uint32_t)(sector), count);
+    return status == FuriStatusOk ? RES_OK : RES_ERROR;
 }
 
 /**
@@ -66,8 +66,8 @@ static DRESULT driver_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
   */
 static DRESULT driver_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
     UNUSED(pdrv);
-    FuriHalSdStatus status = furi_hal_sd_write_blocks((uint32_t*)buff, (uint32_t)(sector), count);
-    return status == FuriHalSdStatusOK ? RES_OK : RES_ERROR;
+    FuriStatus status = furi_hal_sd_write_blocks((uint32_t*)buff, (uint32_t)(sector), count);
+    return status == FuriStatusOk ? RES_OK : RES_ERROR;
 }
 
 /**

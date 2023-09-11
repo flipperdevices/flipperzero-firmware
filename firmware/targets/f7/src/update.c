@@ -24,7 +24,7 @@ static FATFS* pfs = NULL;
 
 static bool flipper_update_mount_sd() {
     for(int i = 0; i < furi_hal_sd_max_mount_retry_count(); ++i) {
-        if(furi_hal_sd_init((i % 2) == 0) != FuriHalSdStatusOK) {
+        if(furi_hal_sd_init((i % 2) == 0) != FuriStatusOk) {
             /* Next attempt will be without card reset, let it settle */
             furi_delay_ms(1000);
             continue;
