@@ -611,8 +611,9 @@ int32_t blackjack_app(void* p) {
                 processing = game_state->processing;
             }
         }
-        view_port_update(view_port);
+
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);
