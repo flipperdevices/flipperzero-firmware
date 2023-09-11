@@ -457,8 +457,8 @@ View* trade_alloc(PokemonFap* pokemon_fap) {
 
     view_set_context(view, pokemon_fap);
     view_allocate_model(view, ViewModelTypeLockFree, sizeof(PokemonFap**));
-    with_view_model_cpp(
-        view, PokemonFap**, model_fap, { *model_fap = pokemon_fap; }, false);
+    with_view_model(
+        view, PokemonFap** model_fap, { *model_fap = pokemon_fap; }, false);
 
     view_set_draw_callback(view, trade_draw_callback);
     view_set_input_callback(view, trade_input_callback);

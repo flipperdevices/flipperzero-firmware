@@ -1,8 +1,8 @@
 #include <furi_hal_light.h>
 #include <pokemon_icons.h>
 
-#include "views/trade.hpp"
-#include "views/select_pokemon.hpp"
+#include "views/trade.h"
+#include "views/select_pokemon.h"
 #include "pokemon_app.h"
 
 const PokemonTable pokemon_table[] = {
@@ -265,7 +265,7 @@ void free_app(PokemonFap* pokemon_fap) {
     pokemon_fap = NULL;
 }
 
-extern "C" int32_t pokemon_app(void* p) {
+int32_t pokemon_app(void* p) {
     UNUSED(p);
     //App* app = (App*)pokemon_alloc();
     PokemonFap* pokemon_fap = pokemon_alloc();
