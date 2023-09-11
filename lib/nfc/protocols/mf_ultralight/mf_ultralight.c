@@ -105,18 +105,18 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .device_name = "NTAG I2C 1K",
             .total_pages = 231,
             .config_page = 0,
-            .feature_set =
-                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportFastRead |
-                MfUltralightFeatureSupportFastWrite | MfUltralightFeatureSupportSectorSelect,
+            .feature_set = MfUltralightFeatureSupportReadVersion |
+                           MfUltralightFeatureSupportFastRead |
+                           MfUltralightFeatureSupportSectorSelect,
         },
     [MfUltralightTypeNTAGI2C2K] =
         {
             .device_name = "NTAG I2C 2K",
             .total_pages = 485,
             .config_page = 0,
-            .feature_set =
-                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportFastRead |
-                MfUltralightFeatureSupportFastWrite | MfUltralightFeatureSupportSectorSelect,
+            .feature_set = MfUltralightFeatureSupportReadVersion |
+                           MfUltralightFeatureSupportFastRead |
+                           MfUltralightFeatureSupportSectorSelect,
         },
     [MfUltralightTypeNTAGI2CPlus1K] =
         {
@@ -126,7 +126,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .feature_set =
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
                 MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
-                MfUltralightFeatureSupportSectorSelect,
+                MfUltralightFeatureSupportSectorSelect | MfUltralightFeatureSupportFastWrite,
         },
     [MfUltralightTypeNTAGI2CPlus2K] =
         {
@@ -136,7 +136,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .feature_set =
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
                 MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
-                MfUltralightFeatureSupportSectorSelect,
+                MfUltralightFeatureSupportSectorSelect | MfUltralightFeatureSupportFastWrite,
         },
 };
 
