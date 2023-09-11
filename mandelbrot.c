@@ -155,8 +155,9 @@ int32_t mandelbrot_app(void* p) {
                 }
             }
         }
-        view_port_update(view_port);
+
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);
