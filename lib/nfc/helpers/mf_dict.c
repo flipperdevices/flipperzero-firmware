@@ -1,9 +1,9 @@
 #include "mf_dict.h"
 
-#include <lib/toolbox/args.h>
-#include <lib/flipper_format/flipper_format.h>
+#include <toolbox/args.h>
+#include <flipper_format/flipper_format.h>
 
-#include <lib/nfc/helpers/nfc_util.h>
+#include <nfc/helpers/nfc_util.h>
 
 #define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
 #define MF_CLASSIC_DICT_SYSTEM_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")

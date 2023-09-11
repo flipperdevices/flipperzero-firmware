@@ -12,9 +12,8 @@
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync_api.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
 
-#include <applications/main/nfc/helpers/mf_dict.h>
-
-#include <lib/nfc/nfc.h>
+#include <nfc/helpers/mf_dict.h>
+#include <nfc/nfc.h>
 
 #include "../minunit.h"
 

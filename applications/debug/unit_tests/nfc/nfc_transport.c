@@ -59,6 +59,8 @@ struct Nfc {
     NfcEventCallback callback;
     void* context;
 
+    NfcMode mode;
+
     FuriThread* worker_thread;
 };
 
@@ -127,8 +129,9 @@ void nfc_free(Nfc* instance) {
 
 void nfc_config(Nfc* instance, NfcMode mode, NfcTech tech) {
     UNUSED(instance);
-    UNUSED(mode);
     UNUSED(tech);
+
+    instance->mode = mode;
 }
 
 void nfc_set_fdt_poll_fc(Nfc* instance, uint32_t fdt_poll_fc) {
@@ -190,28 +193,6 @@ static int32_t nfc_worker_poller(void* context) {
     instance->state = NfcStateIdle;
 
     return 0;
-}
-
-void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context) {
-    furi_assert(instance);
-    furi_assert(instance->worker_thread == NULL);
-
-    furi_assert(poller_queue == NULL);
-    // Check that poller is started after listener
-    furi_assert(listener_queue);
-
-    instance->callback = callback;
-    instance->context = context;
-
-    poller_queue = furi_message_queue_alloc(4, sizeof(NfcMessage));
-
-    instance->worker_thread = furi_thread_alloc();
-    furi_thread_set_name(instance->worker_thread, "NfcWorkerPoller");
-    furi_thread_set_context(instance->worker_thread, instance);
-    furi_thread_set_priority(instance->worker_thread, FuriThreadPriorityHigh);
-    furi_thread_set_stack_size(instance->worker_thread, 8 * 1024);
-    furi_thread_set_callback(instance->worker_thread, nfc_worker_poller);
-    furi_thread_start(instance->worker_thread);
 }
 
 static void nfc_worker_listener_pass_col_res(Nfc* instance, uint8_t* rx_data, uint16_t rx_bits) {
@@ -313,54 +294,68 @@ static int32_t nfc_worker_listener(void* context) {
     return 0;
 }
 
-void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context) {
+void nfc_start(Nfc* instance, NfcEventCallback callback, void* context) {
     furi_assert(instance);
     furi_assert(instance->worker_thread == NULL);
 
-    furi_assert(listener_queue == NULL);
-    // Check that poller didn't start
-    furi_assert(poller_queue == NULL);
+    if(instance->mode == NfcModeListener) {
+        furi_assert(listener_queue == NULL);
+        // Check that poller didn't start
+        furi_assert(poller_queue == NULL);
+    } else {
+        furi_assert(poller_queue == NULL);
+        // Check that poller is started after listener
+        furi_assert(listener_queue);
+    }
 
     instance->callback = callback;
     instance->context = context;
 
-    listener_queue = furi_message_queue_alloc(4, sizeof(NfcMessage));
+    if(instance->mode == NfcModeListener) {
+        listener_queue = furi_message_queue_alloc(4, sizeof(NfcMessage));
+    } else {
+        poller_queue = furi_message_queue_alloc(4, sizeof(NfcMessage));
+    }
 
     instance->worker_thread = furi_thread_alloc();
-    furi_thread_set_name(instance->worker_thread, "NfcWorkerListener");
     furi_thread_set_context(instance->worker_thread, instance);
     furi_thread_set_priority(instance->worker_thread, FuriThreadPriorityHigh);
     furi_thread_set_stack_size(instance->worker_thread, 8 * 1024);
-    furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
+
+    if(instance->mode == NfcModeListener) {
+        furi_thread_set_name(instance->worker_thread, "NfcWorkerListener");
+        furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
+    } else {
+        furi_thread_set_name(instance->worker_thread, "NfcWorkerPoller");
+        furi_thread_set_callback(instance->worker_thread, nfc_worker_poller);
+    }
+
     furi_thread_start(instance->worker_thread);
-}
-
-void nfc_listener_abort(Nfc* instance) {
-    furi_assert(instance);
-
-    NfcMessage message = {.type = NfcMessageTypeAbort};
-    furi_message_queue_put(listener_queue, &message, FuriWaitForever);
-
-    furi_thread_join(instance->worker_thread);
-
-    furi_message_queue_free(listener_queue);
-    listener_queue = NULL;
-
-    furi_thread_free(instance->worker_thread);
-    instance->worker_thread = NULL;
 }
 
 void nfc_stop(Nfc* instance) {
     furi_assert(instance);
     furi_assert(instance->worker_thread);
 
-    furi_thread_join(instance->worker_thread);
+    if(instance->mode == NfcModeListener) {
+        NfcMessage message = {.type = NfcMessageTypeAbort};
+        furi_message_queue_put(listener_queue, &message, FuriWaitForever);
+        furi_thread_join(instance->worker_thread);
 
-    furi_message_queue_free(poller_queue);
-    poller_queue = NULL;
+        furi_message_queue_free(listener_queue);
+        listener_queue = NULL;
 
-    furi_thread_free(instance->worker_thread);
-    instance->worker_thread = NULL;
+        furi_thread_free(instance->worker_thread);
+        instance->worker_thread = NULL;
+    } else {
+        furi_thread_join(instance->worker_thread);
+
+        furi_message_queue_free(poller_queue);
+        poller_queue = NULL;
+
+        furi_thread_free(instance->worker_thread);
+        instance->worker_thread = NULL;
+    }
 }
 
 // Called from worker thread

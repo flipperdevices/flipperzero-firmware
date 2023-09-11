@@ -2,10 +2,10 @@
 
 #include <stdbool.h>
 #include <storage/storage.h>
-#include <lib/flipper_format/flipper_format.h>
-#include <lib/toolbox/stream/file_stream.h>
-#include <lib/toolbox/stream/buffered_file_stream.h>
-#include <lib/nfc/protocols/mf_classic/mf_classic.h>
+#include <flipper_format/flipper_format.h>
+#include <toolbox/stream/file_stream.h>
+#include <toolbox/stream/buffered_file_stream.h>
+#include <nfc/protocols/mf_classic/mf_classic.h>
 
 #ifdef __cplusplus
 extern "C" {

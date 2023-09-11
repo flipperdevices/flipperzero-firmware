@@ -1,5 +1,6 @@
 #include "mf_user_dict.h"
 
+#include <nfc/helpers/mf_dict.h>
 #include <furi/furi.h>
 
 struct MfUserDict {

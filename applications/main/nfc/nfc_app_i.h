@@ -28,9 +28,8 @@
 #include <nfc/scenes/nfc_scene.h>
 #include "helpers/nfc_custom_event.h"
 #include "helpers/mf_ultralight_auth.h"
-#include "helpers/mf_dict.h"
-#include "helpers/mfkey32_logger.h"
 #include "helpers/mf_user_dict.h"
+#include "helpers/mfkey32_logger.h"
 #include "helpers/mf_classic_key_cache.h"
 
 #include <dialogs/dialogs.h>
@@ -50,8 +49,9 @@
 #include <nfc/nfc_scanner.h>
 #include <nfc/nfc_listener.h>
 
-#include <lib/nfc/nfc_device.h>
-#include <lib/nfc/helpers/nfc_data_generator.h>
+#include <nfc/nfc_device.h>
+#include <nfc/helpers/nfc_data_generator.h>
+#include <nfc/helpers/mf_dict.h>
 
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
