@@ -51,7 +51,7 @@
 
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_data_generator.h>
-#include <nfc/helpers/mf_dict.h>
+#include <nfc/helpers/nfc_dict.h>
 
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
@@ -74,7 +74,7 @@ typedef enum {
 } NfcRpcState;
 
 typedef struct {
-    MfDict* dict;
+    NfcDict* dict;
     uint8_t sectors_total;
     uint8_t sectors_read;
     uint8_t current_sector;
@@ -122,7 +122,7 @@ struct NfcApp {
     NfcListener* listener;
 
     MfUltralightAuth* mf_ul_auth;
-    NfcMfClassicDictAttackContext mf_dict_context;
+    NfcMfClassicDictAttackContext nfc_dict_context;
     Mfkey32Logger* mfkey32_logger;
     MfUserDict* mf_user_dict;
     MfClassicKeyCache* mfc_key_cache;

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,38.1,,
+Version,+,39.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -152,8 +152,8 @@ Header,+,lib/nanopb/pb.h,,
 Header,+,lib/nanopb/pb_decode.h,,
 Header,+,lib/nanopb/pb_encode.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
-Header,+,lib/nfc/helpers/mf_dict.h,,
 Header,+,lib/nfc/helpers/nfc_data_generator.h,,
+Header,+,lib/nfc/helpers/nfc_dict.h,,
 Header,+,lib/nfc/helpers/nfc_util.h,,
 Header,+,lib/nfc/nfc.h,,
 Header,+,lib/nfc/nfc_device.h,,
@@ -2123,15 +2123,6 @@ Function,+,mf_desfire_reset,void,MfDesfireData*
 Function,+,mf_desfire_save,_Bool,"const MfDesfireData*, FlipperFormat*"
 Function,+,mf_desfire_set_uid,_Bool,"MfDesfireData*, const uint8_t*, size_t"
 Function,+,mf_desfire_verify,_Bool,"MfDesfireData*, const FuriString*"
-Function,+,mf_dict_add_key,_Bool,"MfDict*, const MfClassicKey*"
-Function,+,mf_dict_alloc,MfDict*,MfDictType
-Function,+,mf_dict_check_presence,_Bool,MfDictType
-Function,+,mf_dict_delete_key,_Bool,"MfDict*, const MfClassicKey*"
-Function,+,mf_dict_free,void,MfDict*
-Function,+,mf_dict_get_next_key,_Bool,"MfDict*, MfClassicKey*"
-Function,+,mf_dict_get_total_keys,uint32_t,MfDict*
-Function,+,mf_dict_is_key_present,_Bool,"MfDict*, const MfClassicKey*"
-Function,+,mf_dict_rewind,_Bool,MfDict*
 Function,+,mf_ultralight_alloc,MfUltralightData*,
 Function,+,mf_ultralight_copy,void,"MfUltralightData*, const MfUltralightData*"
 Function,+,mf_ultralight_detect_protocol,_Bool,const Iso14443_3aData*
@@ -2220,6 +2211,15 @@ Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_data,void,"NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_uid,_Bool,"NfcDevice*, const uint8_t*, size_t"
+Function,+,nfc_dict_add_key,_Bool,"NfcDict*, const MfClassicKey*"
+Function,+,nfc_dict_alloc,NfcDict*,NfcDictType
+Function,+,nfc_dict_check_presence,_Bool,NfcDictType
+Function,+,nfc_dict_delete_key,_Bool,"NfcDict*, const MfClassicKey*"
+Function,+,nfc_dict_free,void,NfcDict*
+Function,+,nfc_dict_get_next_key,_Bool,"NfcDict*, MfClassicKey*"
+Function,+,nfc_dict_get_total_keys,uint32_t,NfcDict*
+Function,+,nfc_dict_is_key_present,_Bool,"NfcDict*, const MfClassicKey*"
+Function,+,nfc_dict_rewind,_Bool,NfcDict*
 Function,+,nfc_free,void,Nfc*
 Function,+,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,+,nfc_iso14443a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBuffer*"

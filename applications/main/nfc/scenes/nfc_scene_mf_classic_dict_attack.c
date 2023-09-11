@@ -29,20 +29,20 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
             nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
         mfc_event->data->poller_mode.mode = MfClassicPollerModeDictAttack;
         mfc_event->data->poller_mode.data = mfc_data;
-        instance->mf_dict_context.sectors_total = mf_classic_get_total_sectors_num(mfc_data->type);
+        instance->nfc_dict_context.sectors_total = mf_classic_get_total_sectors_num(mfc_data->type);
         mf_classic_get_read_sectors_and_keys(
             mfc_data,
-            &instance->mf_dict_context.sectors_read,
-            &instance->mf_dict_context.keys_found);
+            &instance->nfc_dict_context.sectors_read,
+            &instance->nfc_dict_context.keys_found);
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestKey) {
         MfClassicKey key = {};
-        if(mf_dict_get_next_key(instance->mf_dict_context.dict, &key)) {
+        if(nfc_dict_get_next_key(instance->nfc_dict_context.dict, &key)) {
             mfc_event->data->key_request_data.key = key;
             mfc_event->data->key_request_data.key_provided = true;
-            instance->mf_dict_context.dict_keys_current++;
-            if(instance->mf_dict_context.dict_keys_current % 10 == 0) {
+            instance->nfc_dict_context.dict_keys_current++;
+            if(instance->nfc_dict_context.dict_keys_current % 10 == 0) {
                 view_dispatcher_send_custom_event(
                     instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
             }
@@ -51,15 +51,15 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
         }
     } else if(mfc_event->type == MfClassicPollerEventTypeDataUpdate) {
         MfClassicPollerEventDataUpdate* data_update = &mfc_event->data->data_update;
-        instance->mf_dict_context.sectors_read = data_update->sectors_read;
-        instance->mf_dict_context.keys_found = data_update->keys_found;
-        instance->mf_dict_context.current_sector = data_update->current_sector;
+        instance->nfc_dict_context.sectors_read = data_update->sectors_read;
+        instance->nfc_dict_context.keys_found = data_update->keys_found;
+        instance->nfc_dict_context.current_sector = data_update->current_sector;
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
     } else if(mfc_event->type == MfClassicPollerEventTypeNextSector) {
-        mf_dict_rewind(instance->mf_dict_context.dict);
-        instance->mf_dict_context.dict_keys_current = 0;
-        instance->mf_dict_context.current_sector =
+        nfc_dict_rewind(instance->nfc_dict_context.dict);
+        instance->nfc_dict_context.dict_keys_current = 0;
+        instance->nfc_dict_context.current_sector =
             mfc_event->data->next_sector_data.current_sector;
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
@@ -70,15 +70,15 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
     } else if(mfc_event->type == MfClassicPollerEventTypeKeyAttackStart) {
-        instance->mf_dict_context.key_attack_current_sector =
+        instance->nfc_dict_context.key_attack_current_sector =
             mfc_event->data->key_attack_data.current_sector;
-        instance->mf_dict_context.is_key_attack = true;
+        instance->nfc_dict_context.is_key_attack = true;
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
     } else if(mfc_event->type == MfClassicPollerEventTypeKeyAttackStop) {
-        mf_dict_rewind(instance->mf_dict_context.dict);
-        instance->mf_dict_context.is_key_attack = false;
-        instance->mf_dict_context.dict_keys_current = 0;
+        nfc_dict_rewind(instance->nfc_dict_context.dict);
+        instance->nfc_dict_context.is_key_attack = false;
+        instance->nfc_dict_context.dict_keys_current = 0;
         view_dispatcher_send_custom_event(
             instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
     } else if(mfc_event->type == MfClassicPollerEventTypeSuccess) {
@@ -102,7 +102,7 @@ void nfc_dict_attack_dict_attack_result_callback(DictAttackEvent event, void* co
 }
 
 static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* instance) {
-    NfcMfClassicDictAttackContext* mfc_dict = &instance->mf_dict_context;
+    NfcMfClassicDictAttackContext* mfc_dict = &instance->nfc_dict_context;
 
     if(mfc_dict->is_key_attack) {
         dict_attack_set_key_attack(instance->dict_attack, mfc_dict->key_attack_current_sector);
@@ -121,14 +121,14 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* instance) {
         scene_manager_get_scene_state(instance->scene_manager, NfcSceneMfClassicDictAttack);
     if(state == DictAttackStateUserDictInProgress) {
         do {
-            if(!mf_dict_check_presence(MfDictTypeUser)) {
+            if(!nfc_dict_check_presence(NfcDictTypeUser)) {
                 state = DictAttackStateSystemDictInProgress;
                 break;
             }
 
-            instance->mf_dict_context.dict = mf_dict_alloc(MfDictTypeUser);
-            if(mf_dict_get_total_keys(instance->mf_dict_context.dict) == 0) {
-                mf_dict_free(instance->mf_dict_context.dict);
+            instance->nfc_dict_context.dict = nfc_dict_alloc(NfcDictTypeUser);
+            if(nfc_dict_get_total_keys(instance->nfc_dict_context.dict) == 0) {
+                nfc_dict_free(instance->nfc_dict_context.dict);
                 state = DictAttackStateSystemDictInProgress;
                 break;
             }
@@ -137,15 +137,15 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* instance) {
         } while(false);
     }
     if(state == DictAttackStateSystemDictInProgress) {
-        instance->mf_dict_context.dict = mf_dict_alloc(MfDictTypeSystem);
+        instance->nfc_dict_context.dict = nfc_dict_alloc(NfcDictTypeSystem);
         dict_attack_set_header(instance->dict_attack, "MF Classic System Dictionary");
     }
 
-    instance->mf_dict_context.dict_keys_total =
-        mf_dict_get_total_keys(instance->mf_dict_context.dict);
+    instance->nfc_dict_context.dict_keys_total =
+        nfc_dict_get_total_keys(instance->nfc_dict_context.dict);
     dict_attack_set_total_dict_keys(
-        instance->dict_attack, instance->mf_dict_context.dict_keys_total);
-    instance->mf_dict_context.dict_keys_current = 0;
+        instance->dict_attack, instance->nfc_dict_context.dict_keys_total);
+    instance->nfc_dict_context.dict_keys_current = 0;
 
     dict_attack_set_callback(
         instance->dict_attack, nfc_dict_attack_dict_attack_result_callback, instance);
@@ -180,7 +180,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             if(state == DictAttackStateUserDictInProgress) {
                 nfc_poller_stop(instance->poller);
                 nfc_poller_free(instance->poller);
-                mf_dict_free(instance->mf_dict_context.dict);
+                nfc_dict_free(instance->nfc_dict_context.dict);
                 scene_manager_set_scene_state(
                     instance->scene_manager,
                     NfcSceneMfClassicDictAttack,
@@ -209,7 +209,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             if(state == DictAttackStateUserDictInProgress) {
                 nfc_poller_stop(instance->poller);
                 nfc_poller_free(instance->poller);
-                mf_dict_free(instance->mf_dict_context.dict);
+                nfc_dict_free(instance->nfc_dict_context.dict);
                 scene_manager_set_scene_state(
                     instance->scene_manager,
                     NfcSceneMfClassicDictAttack,
@@ -242,17 +242,17 @@ void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     scene_manager_set_scene_state(
         instance->scene_manager, NfcSceneMfClassicDictAttack, DictAttackStateUserDictInProgress);
 
-    mf_dict_free(instance->mf_dict_context.dict);
+    nfc_dict_free(instance->nfc_dict_context.dict);
 
-    instance->mf_dict_context.current_sector = 0;
-    instance->mf_dict_context.sectors_total = 0;
-    instance->mf_dict_context.sectors_read = 0;
-    instance->mf_dict_context.current_sector = 0;
-    instance->mf_dict_context.keys_found = 0;
-    instance->mf_dict_context.dict_keys_total = 0;
-    instance->mf_dict_context.dict_keys_current = 0;
-    instance->mf_dict_context.is_key_attack = false;
-    instance->mf_dict_context.key_attack_current_sector = 0;
+    instance->nfc_dict_context.current_sector = 0;
+    instance->nfc_dict_context.sectors_total = 0;
+    instance->nfc_dict_context.sectors_read = 0;
+    instance->nfc_dict_context.current_sector = 0;
+    instance->nfc_dict_context.keys_found = 0;
+    instance->nfc_dict_context.dict_keys_total = 0;
+    instance->nfc_dict_context.dict_keys_current = 0;
+    instance->nfc_dict_context.is_key_attack = false;
+    instance->nfc_dict_context.key_attack_current_sector = 0;
 
     nfc_blink_stop(instance);
     notification_message(instance->notifications, &sequence_display_backlight_enforce_auto);

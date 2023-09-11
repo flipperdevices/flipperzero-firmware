@@ -13,17 +13,17 @@ void nfc_scene_mf_classic_keys_on_enter(void* context) {
     NfcApp* instance = context;
 
     // Load flipper dict keys total
-    MfDict* dict = mf_dict_alloc(MfDictTypeSystem);
+    NfcDict* dict = nfc_dict_alloc(NfcDictTypeSystem);
     furi_assert(dict);
-    uint32_t flipper_dict_keys_total = mf_dict_get_total_keys(dict);
-    mf_dict_free(dict);
+    uint32_t flipper_dict_keys_total = nfc_dict_get_total_keys(dict);
+    nfc_dict_free(dict);
 
     // Load user dict keys total
     uint32_t user_dict_keys_total = 0;
-    dict = mf_dict_alloc(MfDictTypeUser);
+    dict = nfc_dict_alloc(NfcDictTypeUser);
     furi_assert(dict);
-    user_dict_keys_total = mf_dict_get_total_keys(dict);
-    mf_dict_free(dict);
+    user_dict_keys_total = nfc_dict_get_total_keys(dict);
+    nfc_dict_free(dict);
 
     FuriString* temp_str = furi_string_alloc();
     widget_add_string_element(

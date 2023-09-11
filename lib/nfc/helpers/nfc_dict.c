@@ -1,4 +1,4 @@
-#include "mf_dict.h"
+#include "nfc_dict.h"
 
 #include <toolbox/args.h>
 #include <flipper_format/flipper_format.h>
@@ -9,11 +9,11 @@
 #define MF_CLASSIC_DICT_SYSTEM_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
 #define MF_CLASSIC_DICT_UNIT_TEST_PATH EXT_PATH("unit_tests/mf_dict.nfc")
 
-#define TAG "MfDict"
+#define TAG "NfcDict"
 
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
-struct MfDict {
+struct NfcDict {
     Stream* stream;
     uint32_t total_keys;
 };
@@ -21,32 +21,32 @@ struct MfDict {
 typedef struct {
     const char* path;
     FS_OpenMode open_mode;
-} MfDictFile;
+} NfcDictFile;
 
-static const MfDictFile mf_dict_file[MfDictTypeNum] = {
-    [MfDictTypeUser] =
+static const NfcDictFile nfc_dict_file[NfcDictTypeNum] = {
+    [NfcDictTypeUser] =
         {
             .path = MF_CLASSIC_DICT_USER_PATH,
             .open_mode = FSOM_OPEN_ALWAYS,
         },
-    [MfDictTypeSystem] =
+    [NfcDictTypeSystem] =
         {
             .path = MF_CLASSIC_DICT_SYSTEM_PATH,
             .open_mode = FSOM_OPEN_EXISTING,
         },
-    [MfDictTypeUnitTest] =
+    [NfcDictTypeUnitTest] =
         {
             .path = MF_CLASSIC_DICT_UNIT_TEST_PATH,
             .open_mode = FSOM_OPEN_ALWAYS,
         },
 };
 
-bool mf_dict_check_presence(MfDictType dict_type) {
-    furi_assert(dict_type < MfDictTypeNum);
+bool nfc_dict_check_presence(NfcDictType dict_type) {
+    furi_assert(dict_type < NfcDictTypeNum);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    const char* path = mf_dict_file[dict_type].path;
+    const char* path = nfc_dict_file[dict_type].path;
     bool dict_present = storage_common_stat(storage, path, NULL) == FSE_OK;
 
     furi_record_close(RECORD_STORAGE);
@@ -54,10 +54,10 @@ bool mf_dict_check_presence(MfDictType dict_type) {
     return dict_present;
 }
 
-MfDict* mf_dict_alloc(MfDictType dict_type) {
-    furi_assert(dict_type < MfDictTypeNum);
+NfcDict* nfc_dict_alloc(NfcDictType dict_type) {
+    furi_assert(dict_type < NfcDictTypeNum);
 
-    MfDict* dict = malloc(sizeof(MfDict));
+    NfcDict* dict = malloc(sizeof(NfcDict));
     Storage* storage = furi_record_open(RECORD_STORAGE);
     dict->stream = buffered_file_stream_alloc(storage);
     furi_record_close(RECORD_STORAGE);
@@ -66,9 +66,9 @@ MfDict* mf_dict_alloc(MfDictType dict_type) {
     do {
         if(!buffered_file_stream_open(
                dict->stream,
-               mf_dict_file[dict_type].path,
+               nfc_dict_file[dict_type].path,
                FSAM_READ_WRITE,
-               mf_dict_file[dict_type].open_mode)) {
+               nfc_dict_file[dict_type].open_mode)) {
             buffered_file_stream_close(dict->stream);
             break;
         }
@@ -118,7 +118,7 @@ MfDict* mf_dict_alloc(MfDictType dict_type) {
     return dict;
 }
 
-void mf_dict_free(MfDict* dict) {
+void nfc_dict_free(NfcDict* dict) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
@@ -127,14 +127,14 @@ void mf_dict_free(MfDict* dict) {
     free(dict);
 }
 
-static void mf_dict_int_to_str(const uint8_t* key_int, FuriString* key_str) {
+static void nfc_dict_int_to_str(const uint8_t* key_int, FuriString* key_str) {
     furi_string_reset(key_str);
     for(size_t i = 0; i < 6; i++) {
         furi_string_cat_printf(key_str, "%02X", key_int[i]);
     }
 }
 
-static void mf_dict_str_to_int(FuriString* key_str, uint64_t* key_int) {
+static void nfc_dict_str_to_int(FuriString* key_str, uint64_t* key_int) {
     uint8_t key_byte_tmp;
 
     *key_int = 0ULL;
@@ -145,20 +145,20 @@ static void mf_dict_str_to_int(FuriString* key_str, uint64_t* key_int) {
     }
 }
 
-uint32_t mf_dict_get_total_keys(MfDict* dict) {
+uint32_t nfc_dict_get_total_keys(NfcDict* dict) {
     furi_assert(dict);
 
     return dict->total_keys;
 }
 
-bool mf_dict_rewind(MfDict* dict) {
+bool nfc_dict_rewind(NfcDict* dict) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
     return stream_rewind(dict->stream);
 }
 
-static bool mf_dict_get_next_key_str(MfDict* dict, FuriString* key) {
+static bool nfc_dict_get_next_key_str(NfcDict* dict, FuriString* key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
@@ -175,23 +175,23 @@ static bool mf_dict_get_next_key_str(MfDict* dict, FuriString* key) {
     return key_read;
 }
 
-bool mf_dict_get_next_key(MfDict* dict, MfClassicKey* key) {
+bool nfc_dict_get_next_key(NfcDict* dict, MfClassicKey* key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
     FuriString* temp_key;
     uint64_t key_int = 0;
     temp_key = furi_string_alloc();
-    bool key_read = mf_dict_get_next_key_str(dict, temp_key);
+    bool key_read = nfc_dict_get_next_key_str(dict, temp_key);
     if(key_read) {
-        mf_dict_str_to_int(temp_key, &key_int);
+        nfc_dict_str_to_int(temp_key, &key_int);
         nfc_util_num2bytes(key_int, 6, key->data);
     }
     furi_string_free(temp_key);
     return key_read;
 }
 
-static bool mf_dict_is_key_present_str(MfDict* dict, FuriString* key) {
+static bool nfc_dict_is_key_present_str(NfcDict* dict, FuriString* key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
@@ -213,17 +213,17 @@ static bool mf_dict_is_key_present_str(MfDict* dict, FuriString* key) {
     return key_found;
 }
 
-bool mf_dict_is_key_present(MfDict* dict, const MfClassicKey* key) {
+bool nfc_dict_is_key_present(NfcDict* dict, const MfClassicKey* key) {
     FuriString* temp_key;
 
     temp_key = furi_string_alloc();
-    mf_dict_int_to_str(key->data, temp_key);
-    bool key_found = mf_dict_is_key_present_str(dict, temp_key);
+    nfc_dict_int_to_str(key->data, temp_key);
+    bool key_found = nfc_dict_is_key_present_str(dict, temp_key);
     furi_string_free(temp_key);
     return key_found;
 }
 
-static bool mf_dict_add_key_str(MfDict* dict, FuriString* key) {
+static bool nfc_dict_add_key_str(NfcDict* dict, FuriString* key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
@@ -241,29 +241,29 @@ static bool mf_dict_add_key_str(MfDict* dict, FuriString* key) {
     return key_added;
 }
 
-bool mf_dict_add_key(MfDict* dict, const MfClassicKey* key) {
+bool nfc_dict_add_key(NfcDict* dict, const MfClassicKey* key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
     FuriString* temp_key;
     temp_key = furi_string_alloc();
-    mf_dict_int_to_str(key->data, temp_key);
-    bool key_added = mf_dict_add_key_str(dict, temp_key);
+    nfc_dict_int_to_str(key->data, temp_key);
+    bool key_added = nfc_dict_add_key_str(dict, temp_key);
 
     furi_string_free(temp_key);
     return key_added;
 }
 
-bool mf_dict_delete_key(MfDict* dict, const MfClassicKey* key) {
+bool nfc_dict_delete_key(NfcDict* dict, const MfClassicKey* key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
     bool key_removed = false;
     MfClassicKey temp_key = {};
 
-    mf_dict_rewind(dict);
+    nfc_dict_rewind(dict);
     while(!key_removed) {
-        if(!mf_dict_get_next_key(dict, &temp_key)) break;
+        if(!nfc_dict_get_next_key(dict, &temp_key)) break;
         if(memcmp(temp_key.data, key->data, sizeof(MfClassicKey)) == 0) {
             stream_seek(dict->stream, -NFC_MF_CLASSIC_KEY_LEN, StreamOffsetFromCurrent);
             if(!stream_delete(dict->stream, NFC_MF_CLASSIC_KEY_LEN)) break;
@@ -271,7 +271,7 @@ bool mf_dict_delete_key(MfDict* dict, const MfClassicKey* key) {
             key_removed = true;
         }
     }
-    mf_dict_rewind(dict);
+    nfc_dict_rewind(dict);
 
     return key_removed;
 }
