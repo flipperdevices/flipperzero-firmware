@@ -11,16 +11,20 @@
 
 #define TAG "PCMonitor"
 #define BT_SERIAL_BUFFER_SIZE 128
+#define BAR_X 30
+#define BAR_MARGIN 14
+#define BAR_WIDTH 98
 
 typedef enum {
     BtStateChecking,
     BtStateInactive,
     BtStateWaiting,
     BtStateRecieving,
-    BtSateLost
+    BtStateLost
 } BtState;
 
-typedef struct __attribute__((packed)) {
+#pragma pack(push,1)
+typedef struct {
     uint8_t cpu_usage;
     uint16_t ram_max;
     uint8_t ram_usage;
@@ -30,6 +34,7 @@ typedef struct __attribute__((packed)) {
     uint8_t vram_usage;
     char vram_unit[4];
 } DataStruct;
+#pragma pack(pop)
 
 typedef struct {
     Bt* bt;

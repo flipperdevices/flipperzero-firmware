@@ -12,39 +12,52 @@ static void render_callback(Canvas* canvas, void* ctx) {
         uint8_t line = 0;
         char str[32];
 
-        canvas_draw_str(canvas, 0, 10, "CPU");
-        snprintf(str, 32, "%d%%", app->data.cpu_usage);
-        elements_progress_bar_with_text(canvas, 20, 1, 108, app->data.cpu_usage / 100.0f, str);
+		if (app->data.cpu_usage != UINT8_MAX) {
+			canvas_draw_str(canvas, 0, 10, "CPU");
+			snprintf(str, 32, "%d%%", app->data.cpu_usage);
+			elements_progress_bar_with_text(canvas, BAR_X, 1, BAR_WIDTH, app->data.cpu_usage / 100.0f, str);
+			
+			line++;
+		}
 
-        line = 1;
-        canvas_draw_str(canvas, 0, 10 + 14 * line, "RAM");
-        snprintf(
-            str,
-            32,
-            "%.1f/%.1f %s",
-            (double)(app->data.ram_max * 0.1f * app->data.ram_usage * 0.01f),
-            (double)(app->data.ram_max * 0.1f),
-            app->data.ram_unit);
-        elements_progress_bar_with_text(
-            canvas, 20, 1 + 14 * line, 108, app->data.ram_usage * 0.01f, str);
+		if (app->data.ram_usage != UINT8_MAX) {
+			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "RAM");
+			snprintf(
+				str,
+				32,
+				"%.1f/%.1f %s",
+				(double)(app->data.ram_max * 0.1f * app->data.ram_usage * 0.01f),
+				(double)(app->data.ram_max * 0.1f),
+				app->data.ram_unit);
+			elements_progress_bar_with_text(
+				canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.ram_usage * 0.01f, str);
+			
+			line++;
+		}
 
-        line = 2;
-        canvas_draw_str(canvas, 0, 10 + 14 * line, "GPU");
-        snprintf(str, 32, "%d%%", app->data.gpu_usage);
-        elements_progress_bar_with_text(
-            canvas, 20, 1 + 14 * line, 108, app->data.gpu_usage / 100.0f, str);
+		if (app->data.gpu_usage != UINT8_MAX) {
+			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "GPU");
+			snprintf(str, 32, "%d%%", app->data.gpu_usage);
+			elements_progress_bar_with_text(
+				canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.gpu_usage / 100.0f, str);
+			
+			line++;
+		}
 
-        line = 3;
-        canvas_draw_str(canvas, 0, 10 + 14 * line, "VRAM");
-        snprintf(
-            str,
-            32,
-            "%.1f/%.1f %s",
-            (double)(app->data.vram_max * 0.1f * app->data.vram_usage * 0.01f),
-            (double)(app->data.vram_max * 0.1f),
-            app->data.vram_unit);
-        elements_progress_bar_with_text(
-            canvas, 20, 1 + 14 * line, 108, app->data.vram_usage * 0.01f, str);
+		if (app->data.vram_usage != UINT8_MAX) {
+			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "VRAM");
+			snprintf(
+				str,
+				32,
+				"%.1f/%.1f %s",
+				(double)(app->data.vram_max * 0.1f * app->data.vram_usage * 0.01f),
+				(double)(app->data.vram_max * 0.1f),
+				app->data.vram_unit); 
+			elements_progress_bar_with_text(
+				canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.vram_usage * 0.01f, str);
+			
+			line++;
+		}
     } else {
         canvas_draw_str_aligned(
             canvas,
@@ -78,8 +91,8 @@ static uint16_t bt_serial_callback(SerialServiceEvent event, void* ctx) {
             (char*)event.data.buffer);
 
         if(event.data.size == sizeof(DataStruct)) {
-            app->bt_state = BtStateRecieving;
             memcpy(&app->data, event.data.buffer, sizeof(DataStruct));
+            app->bt_state = BtStateRecieving;
         }
     }
 
@@ -93,6 +106,12 @@ static PcMonitorApp* pc_monitor_alloc() {
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->gui = furi_record_open(RECORD_GUI);
     app->bt = furi_record_open(RECORD_BT);
+
+	app->data.cpu_usage = UINT8_MAX;
+	app->data.ram_usage = UINT8_MAX;
+	app->data.gpu_usage = UINT8_MAX;
+	app->data.vram_usage = UINT8_MAX;
+
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     view_port_draw_callback_set(app->view_port, render_callback, app);
     view_port_input_callback_set(app->view_port, input_callback, app->event_queue);
