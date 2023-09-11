@@ -5,11 +5,7 @@
 #include "../fatfs/sector_cache.h"
 #define TAG "SdSpi"
 
-#ifndef FURI_HAL_SD_SPI_DEBUG
-#define FURI_HAL_SD_SPI_DEBUG 0
-#endif
-
-#if FURI_HAL_SD_SPI_DEBUG == 1
+#ifdef FURI_HAL_SD_SPI_DEBUG
 #define sd_spi_debug(...) FURI_LOG_I(TAG, __VA_ARGS__)
 #else
 #define sd_spi_debug(...)
