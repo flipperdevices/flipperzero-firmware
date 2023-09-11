@@ -366,8 +366,8 @@ int32_t tictactoe_game_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(tictactoe_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(tictactoe_state->timer);

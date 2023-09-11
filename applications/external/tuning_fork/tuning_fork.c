@@ -388,8 +388,8 @@ int32_t tuning_fork_app() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(tuning_fork_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);

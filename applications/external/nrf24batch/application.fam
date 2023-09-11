@@ -15,4 +15,7 @@ App(
         ),
     ],
     fap_icon_assets_symbol="nrf24_batch",
+    fap_author="vad7",
+    fap_weburl="https://github.com/vad7/nrf24scan",
+    fap_version=(2, 3),
 )

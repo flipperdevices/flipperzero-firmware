@@ -15,4 +15,7 @@ App(
             ],
         ),
     ],
+    fap_author="vad7",
+    fap_weburl="https://github.com/vad7/nRF24-Batch",
+    fap_version=(1, 1),
 )

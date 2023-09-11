@@ -478,8 +478,8 @@ int32_t game_2048_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);

@@ -3,14 +3,12 @@ App(
     name="Tanks",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tanks_game_app",
-    requires=["gui", "subghz"],
     stack_size=4 * 1024,
-    order=730,
     fap_icon="tanksIcon.png",
     fap_category="Games",
     fap_icon_assets="images",
     fap_author="@alexgr13 & @b1rd & @lagoushque & @Kolobamanacas",  # I THINK
     fap_weburl="https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game",
-    fap_version=(1, 0),
+    fap_version=(1, 4),
     fap_description="A simplified version of the Battle city game",
 )

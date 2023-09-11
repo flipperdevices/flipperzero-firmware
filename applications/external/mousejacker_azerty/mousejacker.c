@@ -387,8 +387,8 @@ int32_t mousejacker_app_azerty(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_thread_free(plugin_state->mjthread);

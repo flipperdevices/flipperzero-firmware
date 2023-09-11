@@ -46,8 +46,8 @@ void sandbox_loop() {
 
         if(sandbox_user_event_handler) sandbox_user_event_handler(event);
 
-        view_port_update(sandbox_view_port);
         furi_mutex_release(sandbox_mutex);
+        view_port_update(sandbox_view_port);
     }
 }
 

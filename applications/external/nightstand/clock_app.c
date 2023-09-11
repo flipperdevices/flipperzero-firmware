@@ -346,8 +346,8 @@ int32_t clock_app(void* p) {
             furi_hal_rtc_get_datetime(&plugin_state->datetime);
         }*/
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);

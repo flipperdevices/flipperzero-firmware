@@ -1944,8 +1944,8 @@ int32_t nrf24batch_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(APP->plugin_state->mutex);
+        view_port_update(view_port);
     }
     nrf24_set_idle(nrf24_HANDLE);
     nrf24_deinit();

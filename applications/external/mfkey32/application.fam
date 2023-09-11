@@ -2,7 +2,6 @@ App(
     appid="mfkey32",
     name="Mfkey32",
     apptype=FlipperAppType.EXTERNAL,
-    targets=["f7"],
     entry_point="mfkey32_main",
     stack_size=1 * 1024,
     fap_icon="mfkey.png",
@@ -11,6 +10,6 @@ App(
     fap_icon_assets_symbol="mfkey32",
     fap_author="@noproto",
     fap_weburl="https://github.com/noproto/FlipperMfkey",
-    fap_version="1.0",
+    fap_version="1.1",
     fap_description="Mf Classic key finder",
 )

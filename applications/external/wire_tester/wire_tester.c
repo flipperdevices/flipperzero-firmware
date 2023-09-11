@@ -90,6 +90,7 @@ int32_t app_main(void* p) {
                 running = false;
             }
         }
+        view_port_update(view_port);
     }
 
     // return control of the LED, beeper, and backlight

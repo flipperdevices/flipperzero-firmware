@@ -450,8 +450,8 @@ int32_t nrfsniff_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     clear_cache();

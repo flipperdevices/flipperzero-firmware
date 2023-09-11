@@ -124,8 +124,8 @@ int32_t mouse_jiggler_app(void* p) {
             furi_delay_ms(500);
         }
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
     furi_hal_usb_set_config(usb_mode_prev, NULL);
     // remove & free all stuff created by app

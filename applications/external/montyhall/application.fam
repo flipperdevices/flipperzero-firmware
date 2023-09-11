@@ -3,12 +3,10 @@ App(
     name="Monty Hall",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="montyhall_game_app",
-    requires=["gui"],
     stack_size=1 * 1024,
-    order=185,
     fap_icon="Monty.png",
     fap_category="Games",
     fap_author="@DevMilanIan",
-    fap_version=(1, 0),
+    fap_version=(1, 1),
     fap_description="Monty Hall asks you to guess which closed door a prize is behind.",
 )
