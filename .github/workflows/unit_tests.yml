@@ -37,8 +37,6 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           python3 scripts/storage.py -f send assets/resources /ext
           python3 scripts/storage.py -f send assets/unit_tests /ext/unit_tests
-          python3 scripts/power.py reboot
-          python3 scripts/testops.py await_flipper
 
       - name: 'Run units and validate results'
         id: run_units
