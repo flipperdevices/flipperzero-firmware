@@ -9,6 +9,6 @@ App(
     fap_icon="gps_10px.png",
     fap_category="GPIO",
     fap_author="@ezod & @xMasterX",
-    fap_version="1.0",
+    fap_version="1.1",
     fap_description="Works with GPS modules via UART, using NMEA protocol.",
 )
