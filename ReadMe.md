@@ -70,6 +70,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Temp Removal: [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board` due to API changes
 - OFW: [SD-Card: proper HAL #3058 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3058)
 - OFW: [Snake: fix deadlock caused by use of view_port_update while locking model #3063 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3063)
+- OFW: [fbt: added FW_CFG_<name> with build configuration #3062 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3062)
+- OFW: [Sub-GHz: incorrect key parsing crash #3066 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3066)
 
 <a name="release">
 
