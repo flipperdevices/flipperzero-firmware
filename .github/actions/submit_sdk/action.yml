@@ -26,7 +26,7 @@ runs:
     - name: Submit SDK
       run: |
         curl -sX 'GET' \
-          '${{ inputs.catalog-url }}/api/v0/0/sdk?length=200' \
+          '${{ inputs.catalog-url }}/api/v0/0/sdk?length=500' \
           -H 'Accept: application/json' > sdk_versions.json
         if jq -r -e ".[] | select((.api == \"${{ inputs.firmware-api }}\") and .target == \"${{ inputs.firmware-target }}\")" sdk_versions.json > found_sdk.json ; then
           echo "API version ${{ inputs.firmware-api }} already exists in catalog"
