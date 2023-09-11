@@ -4,8 +4,9 @@ This is a plugin for the Flipper Zero that reimplements the Sub-GHz chat
 feature that is available on the CLI. In addition it allows for basic
 encryption of messages.
 
-The plugin has been tested on the official firmware (version 0.87.0) and on
-Unleashed (version unlshd-060).
+The plugin has been tested on the official firmware (version 0.89.0) and on
+Unleashed (version unlshd-062). Currently it does not work properly on
+unlshd-061.
 
 ## Warning
 
