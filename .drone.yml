@@ -36,7 +36,7 @@ steps:
       - rm -f artifacts-base/Infrared/infrared.fap
       - rm -f artifacts-base/NFC/nfc.fap
       - rm -f artifacts-base/RFID/lfrfid.fap
-      - rm -f artifacts-base/Sub-Ghz/subghz_remote.fap
+      - rm -f artifacts-base/Sub-GHz/subghz_remote.fap
       - rm -f artifacts-base/Tools/clock.fap
       - rm -f artifacts-base/USB/bad_usb.fap
       - rm -f artifacts-base/USB/u2f.fap
@@ -68,7 +68,7 @@ steps:
       - rm -f artifacts-extra/Infrared/infrared.fap
       - rm -f artifacts-extra/NFC/nfc.fap
       - rm -f artifacts-extra/RFID/lfrfid.fap
-      - rm -f artifacts-extra/Sub-Ghz/subghz_remote.fap
+      - rm -f artifacts-extra/Sub-GHz/subghz_remote.fap
       - rm -f artifacts-extra/Tools/clock.fap
       - rm -f artifacts-extra/USB/bad_usb.fap
       - rm -f artifacts-extra/USB/u2f.fap
