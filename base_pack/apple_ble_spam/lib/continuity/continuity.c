@@ -67,7 +67,7 @@ void continuity_generate_packet(const ContinuityMsg* msg, uint8_t* packet) {
         break;
 
     case ContinuityTypeProximityPair:
-        packet[i++] = msg->data.proximity_pair.prefix; // Prefix (paired 0x01 new0x07 airtag 0x05)
+        packet[i++] = msg->data.proximity_pair.prefix; // Prefix (paired 0x01 new 0x07 airtag 0x05)
         packet[i++] = msg->data.proximity_pair.model >> 8;
         packet[i++] = msg->data.proximity_pair.model & 0xFF;
         packet[i++] = 0x55; // Status
