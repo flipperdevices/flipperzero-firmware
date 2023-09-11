@@ -572,7 +572,7 @@ SubBruteFileProtocol subbrute_protocol_file_protocol_name(FuriString* name) {
 void subbrute_protocol_create_candidate_for_existing_file(
     FuriString* candidate,
     uint64_t step,
-    uint8_t bit_index,
+    size_t bit_index,
     uint64_t file_key,
     bool two_bytes) {
     uint8_t p[8];
