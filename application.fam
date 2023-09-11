@@ -1,16 +1,14 @@
 App(
-    appid="flipboard",
-    name="FlipBoard",
+    appid="flipboard_sound",
+    name="FlipBoard Sound",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="flipboard_app",
+    sources=["flipsound/*.c", "common/*.c", "flipboard_sound_*.c*"],
+    entry_point="flipboard_sound_app",
     stack_size=4 * 1024,
-    requires=[
-        "gui",
-    ],
+    requires=["gui"],
     order=10,
-    fap_icon="flipboard.png",
+    fap_icon="flipsound/flipboard.png",
     fap_category="GPIO",
-    fap_icon_assets="assets",
+    fap_icon_assets="flipsound/assets",
     fap_description="FlipBoard is a GPIO control application. It allows you to control the GPIO pins on the Flipper Zero device.",
-
 )

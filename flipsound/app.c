@@ -8,13 +8,13 @@
 #include <gui/modules/variable_item_list.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include "flipboard_icons.h"
+#include "flipboard_sound_icons.h"
 
-#include "model.h"
-#include "keyboard.h"
-#include "leds.h"
-#include "key_monitor.h"
-#include "flipboard_file.h"
+#include "../common/model.h"
+#include "../common/keyboard.h"
+#include "../common/leds.h"
+#include "../common/key_monitor.h"
+#include "../common/flipboard_file.h"
 
 #define TAG "FlipboardId"
 
@@ -672,7 +672,7 @@ void flipboard_free(Flipboard* app) {
     free(app);
 }
 
-int32_t flipboard_app(void* p) {
+int32_t flipboard_sound_app(void* p) {
     UNUSED(p);
 
     Flipboard* app = flipboard_alloc();
