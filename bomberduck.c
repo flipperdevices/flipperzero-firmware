@@ -625,8 +625,8 @@ int32_t bomberduck_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(bomber_state->mutex);
+        view_port_update(view_port);
     }
 
     // Return to normal backlight settings
