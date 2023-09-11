@@ -88,6 +88,9 @@ typedef struct {
 	bool kbd_ok_input_ongoing;
 	bool kbd_left_input_ongoing;
 	bool kbd_right_input_ongoing;
+
+	// for background support
+	bool exit_for_real;
 } ESubGhzChatState;
 
 typedef enum {
