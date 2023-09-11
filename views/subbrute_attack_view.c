@@ -328,7 +328,7 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
             canvas, x - icon_width_with_offset, y - icon_v_offset, model->icon);
         // Progress bar
         // Resolution: 128x64 px
-        float progress_value = (float)model->current_step / model->max_value;
+        float progress_value = (float)model->current_step / (float)model->max_value;
         elements_progress_bar(canvas, 8, 37, 110, progress_value > 1 ? 1 : progress_value);
 
         snprintf(
