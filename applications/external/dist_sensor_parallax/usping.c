@@ -240,8 +240,8 @@ int32_t usping_app() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     if(furi_hal_power_is_otg_enabled()) {

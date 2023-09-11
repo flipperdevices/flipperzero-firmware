@@ -862,8 +862,8 @@ int32_t clock_app(void* p) {
                 }
             }
         }
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);

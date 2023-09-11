@@ -391,8 +391,8 @@ int32_t dcf77_app_main(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(app_fsm->mutex);
+        view_port_update(view_port);
     }
     furi_hal_speaker_release();
     notification_message_block(notification, &seq_c_minor);

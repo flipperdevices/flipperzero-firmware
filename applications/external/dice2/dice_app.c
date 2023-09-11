@@ -407,8 +407,8 @@ int32_t dice_dnd_app(void* p) {
             FURI_LOG_D(TAG, "osMessageQueue: event timeout");
         }
 
-        view_port_update(view_port);
         furi_mutex_release(state->mutex);
+        view_port_update(view_port);
     }
 
     // Clear

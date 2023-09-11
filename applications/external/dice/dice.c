@@ -592,8 +592,8 @@ int32_t dice_app(void* p) {
             } else if(event.type == EventTypeTick) {
                 // furi_hal_rtc_get_datetime(&plugin_state->datetime);
             }
-            view_port_update(view_port);
             furi_mutex_release(plugin_state->mutex);
+            view_port_update(view_port);
         } else {
             // FURI_LOG_D(TAG, "osMessageQueue: event timeout");
         }
