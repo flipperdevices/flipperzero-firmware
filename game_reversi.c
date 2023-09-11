@@ -330,16 +330,18 @@ int32_t game_reversi_app() {
                 furi_mutex_acquire(app_state.mutex, FuriWaitForever);
                 app_state.selected_menu_item = 0;
                 app_state.screen = AppScreenMenu;
-                view_port_update(view_port);
+                
                 furi_mutex_release(app_state.mutex);
+                view_port_update(view_port);
                 continue;
             }
             if(input.type != InputTypePress) continue;
 
             furi_mutex_acquire(app_state.mutex, FuriWaitForever);
             is_finished = !handle_key(&app_state, input.key);
-            view_port_update(view_port);
+
             furi_mutex_release(app_state.mutex);
+            view_port_update(view_port);
         }
         view_port_update(view_port);
     }
