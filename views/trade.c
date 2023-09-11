@@ -155,20 +155,6 @@ static void trade_draw_callback(Canvas* canvas, void* model) {
     }
 }
 
-static bool trade_input_callback(InputEvent* event, void* context) {
-    bool consumed = false;
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
-
-    furi_assert(context);
-
-    if(event->type == InputTypePress && event->key == InputKeyBack) {
-        view_dispatcher_switch_to_view(pokemon_fap->view_dispatcher, AppViewSelectPokemon);
-        consumed = true;
-    }
-
-    return consumed;
-}
-
 uint32_t micros() {
     return DWT->CYCCNT / 64;
 }
@@ -230,7 +216,7 @@ byte getMenuResponse(byte in) {
 
 byte getTradeCentreResponse(byte in, void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
-    uint8_t* trade_party_flat = (uint8_t*)pokemon_fap->trade_party;
+    uint8_t* trade_block_flat = (uint8_t*)pokemon_fap->trade_block;
     byte send = in;
 
     furi_assert(context);
@@ -274,7 +260,7 @@ byte getTradeCentreResponse(byte in, void* context) {
         if((in & 0xF0) != 0xF0) {
             counter = 0;
             INPUT_BLOCK[counter] = in;
-            send = trade_party_flat[counter];
+            send = trade_block_flat[counter];
             counter++;
             trade_centre_state = SENDING_DATA;
         }
@@ -282,7 +268,7 @@ byte getTradeCentreResponse(byte in, void* context) {
 
     case SENDING_DATA:
         INPUT_BLOCK[counter] = in;
-        send = trade_party_flat[counter];
+        send = trade_block_flat[counter];
         counter++;
         if(counter == 405) //TODO: replace with sizeof struct rather than static number
             trade_centre_state = SENDING_PATCH_DATA;
@@ -404,9 +390,6 @@ void trade_enter_callback(void* context) {
     pokemon_fap->connected = false;
     pokemon_fap->gameboy_status = GAMEBOY_INITIAL;
 
-    pokemon_fap->trade_party->party_members[0] =
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].species;
-
     // B3 (Pin6) / SO (2)
     furi_hal_gpio_write(&GAME_BOY_SO, false);
     furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
@@ -426,14 +409,6 @@ void trade_enter_callback(void* context) {
     // furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
     // Reset GPIO pins to default state
     // furi_hal_gpio_init(&GAME_BOY_CLK, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-}
-
-bool trade_custom_callback(uint32_t event, void* context) {
-    UNUSED(event);
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
-    furi_assert(context);
-    view_dispatcher_send_custom_event(pokemon_fap->view_dispatcher, 0);
-    return true;
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -461,9 +436,7 @@ View* trade_alloc(PokemonFap* pokemon_fap) {
         view, PokemonFap** model_fap, { *model_fap = pokemon_fap; }, false);
 
     view_set_draw_callback(view, trade_draw_callback);
-    view_set_input_callback(view, trade_input_callback);
     view_set_enter_callback(view, trade_enter_callback);
-    view_set_custom_callback(view, trade_custom_callback);
     view_set_exit_callback(view, trade_exit_callback);
 
     return view;
@@ -476,5 +449,7 @@ void trade_free(PokemonFap* pokemon_fap) {
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
 
     disconnect_pin(&GAME_BOY_CLK);
+
+    view_free_model(pokemon_fap->trade_view);
     view_free(pokemon_fap->trade_view);
 }
