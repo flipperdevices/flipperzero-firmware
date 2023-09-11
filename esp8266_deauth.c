@@ -486,8 +486,8 @@ int32_t esp8266_deauth_app(void* p) {
         }
 #endif
 
-        view_port_update(view_port);
         furi_mutex_release(app->mutex);
+        view_port_update(view_port);
     }
 
     DEAUTH_APP_LOG_I("Start exit app");
