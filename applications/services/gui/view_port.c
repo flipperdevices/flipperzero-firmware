@@ -174,23 +174,10 @@ void view_port_input_callback_set(
 
 void view_port_update(ViewPort* view_port) {
     furi_assert(view_port);
-    // view_port_update() does not modify viewport memory
-    // nor does it need time sensitive data in order to work
-    // but when used in apps in a input loop it can cause deadlocks with draw() being called by other means
-    // example:
-    // - app selector keeps loading animation in background, keeps drawing
-    // - because of this gui starts draw and locks viewport mutex, not in app render callback yet
-    // - app gets input, locks app mutex
-    // - app input handler calls view_port_update() which needs viewport mutex
-    // - viewport mutex already locked by draw previously
-    // - but app mutex locked by input so draw cannot complete
-    // - DEADLOCK => mutex removed from view_port_update()
-    // this is just one example, there may be many more edge cases
-    // point is, this view_port_update() has no need at all for mutex
-    // dont copy paste mutex into all functions to close jira tasks please :)
-    // furi_check(furi_mutex_acquire(view_port->mutex, FuriWaitForever) == FuriStatusOk);
+    // TODO: Uncomment when all apps are verified to be fixed !!!!!!!!!!!!!!!!!!!!!!!
+    //furi_check(furi_mutex_acquire(view_port->mutex, FuriWaitForever) == FuriStatusOk);
     if(view_port->gui && view_port->is_enabled) gui_update(view_port->gui);
-    // furi_check(furi_mutex_release(view_port->mutex) == FuriStatusOk);
+    //furi_check(furi_mutex_release(view_port->mutex) == FuriStatusOk);
 }
 
 void view_port_gui_set(ViewPort* view_port, Gui* gui) {
