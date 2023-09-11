@@ -149,13 +149,14 @@ jobs:
           edit-mode: replace
 
       - name: 'SDK submission to dev catalog'
-        if: ${{ steps.names.outputs.event_type == 'tag' && matrix.target == env.DEFAULT_TARGET }}
+        # if: ${{ steps.names.outputs.event_type == 'tag' && matrix.target == env.DEFAULT_TARGET }}
+        if: ${{ matrix.target == env.DEFAULT_TARGET }}
         uses: ./.github/actions/submit_sdk
         with:
           catalog-url: ${{ secrets.CATALOG_STAGING_URL }}
           catalog-api-token: ${{ secrets.CATALOG_STAGING_API_TOKEN }}
           firmware-api: ${{ steps.build-fw.outputs.firmware_api }}
-          firwmare-target: ${{ matrix.target }}
+          firmware-target: ${{ matrix.target }}
           firmware-version: ${{ steps.names.outputs.suffix }}
 
       - name: 'SDK submission to prod catalog'
