@@ -1227,8 +1227,8 @@ Function,+,furi_hal_rtc_validate_datetime,_Bool,FuriHalRtcDateTime*
 Function,+,furi_hal_sd_get_card_state,FuriHalSdStatus,
 Function,+,furi_hal_sd_info,FuriHalSdStatus,FuriHalSdInfo*
 Function,+,furi_hal_sd_init,FuriHalSdStatus,_Bool
+Function,+,furi_hal_sd_is_present,_Bool,
 Function,+,furi_hal_sd_max_mount_retry_count,uint8_t,
-Function,+,furi_hal_sd_present,_Bool,
 Function,+,furi_hal_sd_present_pin_init,void,
 Function,+,furi_hal_sd_read_blocks,FuriHalSdStatus,"uint32_t*, uint32_t, uint32_t"
 Function,+,furi_hal_sd_write_blocks,FuriHalSdStatus,"const uint32_t*, uint32_t, uint32_t"

@@ -37,13 +37,13 @@ typedef struct {
 /** 
  * @brief Init SD card present pin
  */
-void furi_hal_sd_present_pin_init(void);
+void furi_hal_sd_present_pin_init();
 
 /** 
  * @brief Get SD card status
  * @return true if SD card is present
  */
-bool furi_hal_sd_present(void);
+bool furi_hal_sd_is_present();
 
 /**
  * @brief SD card max mount retry count

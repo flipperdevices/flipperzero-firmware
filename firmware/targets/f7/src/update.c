@@ -51,7 +51,7 @@ static bool flipper_update_init() {
     furi_hal_spi_config_init();
 
     fatfs_init();
-    if(!furi_hal_sd_present()) {
+    if(!furi_hal_sd_is_present()) {
         return false;
     }
 

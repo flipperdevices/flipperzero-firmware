@@ -3,10 +3,13 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include "../fatfs/sector_cache.h"
-// #define SD_SPI_DEBUG 1
 #define TAG "SdSpi"
 
-#ifdef SD_SPI_DEBUG
+#ifndef FURI_HAL_SD_SPI_DEBUG
+#define FURI_HAL_SD_SPI_DEBUG 0
+#endif
+
+#if FURI_HAL_SD_SPI_DEBUG == 1
 #define sd_spi_debug(...) FURI_LOG_I(TAG, __VA_ARGS__)
 #else
 #define sd_spi_debug(...)
@@ -130,7 +133,7 @@ typedef struct {
     uint8_t Reserved1 : 6; /* Reserved */
     uint8_t TAAC : 8; /* Data read access-time 1 */
     uint8_t NSAC : 8; /* Data read access-time 2 in CLK cycles */
-    uint8_t MaxBusClkFrec : 8; /* Max. bus clock frequency */
+    uint8_t MaxBusClkFreq : 8; /* Max. bus clock frequency */
     uint16_t CardComdClasses : 12; /* Card command classes */
     uint8_t RdBlockLen : 4; /* Max. read data block length */
     uint8_t PartBlockRead : 1; /* Partial blocks for read allowed */
@@ -586,7 +589,7 @@ static FuriHalSdStatus sd_spi_get_csd(SD_CSD* csd) {
             csd->Reserved1 = csd_data[0] & 0x3F;
             csd->TAAC = csd_data[1];
             csd->NSAC = csd_data[2];
-            csd->MaxBusClkFrec = csd_data[3];
+            csd->MaxBusClkFreq = csd_data[3];
             csd->CardComdClasses = (csd_data[4] << 4) | ((csd_data[5] & 0xF0) >> 4);
             csd->RdBlockLen = csd_data[5] & 0x0F;
             csd->PartBlockRead = (csd_data[6] & 0x80) >> 7;
@@ -903,7 +906,7 @@ static void furi_hal_sd_present_pin_set_low(void) {
     furi_hal_gpio_write(&gpio_sdcard_cd, 0);
 }
 
-bool furi_hal_sd_present(void) {
+bool furi_hal_sd_is_present(void) {
     bool result = !furi_hal_gpio_read(&gpio_sdcard_cd);
     return result;
 }
@@ -987,7 +990,7 @@ FuriHalSdStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_
     if(status != FuriHalSdStatusOK) {
         uint8_t counter = furi_hal_sd_max_mount_retry_count();
 
-        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_present()) {
+        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_is_present()) {
             if((counter % 2) == 0) {
                 // power reset sd card
                 status = furi_hal_sd_init(true);
@@ -1019,7 +1022,7 @@ FuriHalSdStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, 
     if(status != FuriHalSdStatusOK) {
         uint8_t counter = furi_hal_sd_max_mount_retry_count();
 
-        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_present()) {
+        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_is_present()) {
             if((counter % 2) == 0) {
                 // power reset sd card
                 status = furi_hal_sd_init(true);

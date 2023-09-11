@@ -30,7 +30,7 @@ static bool sd_mount_card_internal(StorageData* storage, bool notify) {
     uint8_t bsp_result;
     SDData* sd_data = storage->data;
 
-    while(result == false && counter > 0 && furi_hal_sd_present()) {
+    while(result == false && counter > 0 && furi_hal_sd_is_present()) {
         if(notify) {
             NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
             sd_notify_wait(notification);
@@ -246,19 +246,19 @@ static void storage_ext_tick_internal(StorageData* storage, bool notify) {
     SDData* sd_data = storage->data;
 
     if(sd_data->sd_was_present) {
-        if(furi_hal_sd_present()) {
+        if(furi_hal_sd_is_present()) {
             FURI_LOG_I(TAG, "card detected");
             sd_data->sd_was_present = false;
             sd_mount_card(storage, notify);
 
-            if(!furi_hal_sd_present()) {
+            if(!furi_hal_sd_is_present()) {
                 FURI_LOG_I(TAG, "card removed while mounting");
                 sd_unmount_card(storage);
                 sd_data->sd_was_present = true;
             }
         }
     } else {
-        if(!furi_hal_sd_present()) {
+        if(!furi_hal_sd_is_present()) {
             FURI_LOG_I(TAG, "card removed");
             sd_data->sd_was_present = true;
 
