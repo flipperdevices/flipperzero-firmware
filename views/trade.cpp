@@ -34,6 +34,7 @@ int time_in_seconds = 0;
 static void trade_draw_callback(Canvas* canvas, void* context) {
     canvas_clear(canvas);
     SelectPokemonModel* model = (SelectPokemonModel*)context;
+
     if(!model->trading) {
         if(!model->connected) {
             furi_hal_light_set(LightGreen, 0x00);
@@ -298,6 +299,69 @@ void input_clk_gameboy(void* context) {
     transferBit(context);
     time = micros();
 }
+unsigned char convertCharToTagHex(char c) {
+    switch (c) {
+        case 'A': return A_;
+        case 'B': return B_;
+        case 'C': return C_;
+        case 'D': return D_;
+        case 'E': return E_;
+        case 'F': return F_;
+        case 'G': return G_;
+        case 'H': return H_;
+        case 'I': return I_;
+        case 'J': return J_;
+        case 'K': return K_;
+        case 'L': return L_;
+        case 'M': return M_;
+        case 'N': return N_;
+        case 'O': return O_;
+        case 'P': return P_;
+        case 'Q': return Q_;
+        case 'R': return R_;
+        case 'S': return S_;
+        case 'T': return T_;
+        case 'U': return U_;
+        case 'V': return V_;
+        case 'W': return W_;
+        case 'X': return X_;
+        case 'Y': return Y_;
+        case 'Z': return Z_;
+        case 'a': return A_;
+        case 'b': return B_;
+        case 'c': return C_;
+        case 'd': return D_;
+        case 'e': return E_;
+        case 'f': return F_;
+        case 'g': return G_;
+        case 'h': return H_;
+        case 'i': return I_;
+        case 'j': return J_;
+        case 'k': return K_;
+        case 'l': return L_;
+        case 'm': return M_;
+        case 'n': return N_;
+        case 'o': return O_;
+        case 'p': return P_;
+        case 'q': return Q_;
+        case 'r': return R_;
+        case 's': return S_;
+        case 't': return T_;
+        case 'u': return U_;
+        case 'v': return V_;
+        case 'w': return W_;
+        case 'x': return X_;
+        case 'y': return Y_;
+        case 'z': return Z_;
+        case ' ': return SPACE_;
+        case '.': return PERIOD_;
+        case '\'': return S_QUOTE_;
+        case '\u2642': return MALE_;
+        case '\u2640': return FEMALE_;
+        default:  return 0x00;
+    }
+
+}
 void trade_enter_callback(void* context) {
     furi_assert(context);
     Trade* trade = (Trade*)context;
@@ -308,13 +372,159 @@ void trade_enter_callback(void* context) {
         {
             model->current_pokemon = trade->app->current_pokemon;
             model->pokemon_hex_code = trade->app->pokemon_hex_code;
+            model->current_level = trade->app->current_level;
+            model->current_stats = trade->app->current_stats;
+            model->current_move = trade->app->current_move;
+            model->move1_hex_code = trade->app->move1_hex_code;
+            model->move2_hex_code = trade->app->move2_hex_code;
+            model->move3_hex_code = trade->app->move3_hex_code;
+            model->move4_hex_code = trade->app->move4_hex_code;
             model->trading = false;
             model->connected = false;
             model->gameboy_status = GAMEBOY_INITIAL;
         },
         true);
 
+    FURI_LOG_D(TAG, "[Trade] Current Pokemon: %d", trade->app->current_pokemon);
+    
+    // Set the Pokemon name
+    
+    unsigned char nickname[11];
+    for (size_t i = 0; i < 11; ++i) {
+        nickname[i] = 0x50;
+    }
+    for (size_t i = 0; i < strlen(pokemon_table[trade->app->current_pokemon].name); ++i) {
+        nickname[i] = convertCharToTagHex(pokemon_table[trade->app->current_pokemon].name[i]);
+    }
+
+    memcpy(DATA_BLOCK2.nickname[0].str, nickname, sizeof(nickname));
+
+    FURI_LOG_D(TAG, "[Trade] Pokemon Name: %s", pokemon_table[trade->app->current_pokemon].name);
+
+    // Set the Pokemon hex code
+
     DATA_BLOCK[12] = trade->app->pokemon_hex_code;
+
+    FURI_LOG_D(TAG, "[Trade] Pokemon Hex Code: %x", trade->app->pokemon_hex_code);
+
+    // Set the Pokemon level
+
+    FURI_LOG_D(TAG, "[Trade] Current Level: %d", trade->app->current_level);
+
+    uint8_t level = trade->app->current_level;
+    DATA_BLOCK2.party[0].level = level & 0xFF;
+    DATA_BLOCK2.party[0].level_again = level & 0xFF;
+
+    FURI_LOG_D(TAG, "[Trade] Level Hex Code: %x", DATA_BLOCK2.party[0].level);
+
+    // Set the Pokemon experience
+
+    int32_t exp = 0;
+    if(pokemon_table[trade->app->current_pokemon].xp_group == 0) {
+        exp = 1.25 * level * level * level;
+    } else if(pokemon_table[trade->app->current_pokemon].xp_group == 1) {
+        exp = (1.2 * level * level * level) - (15 * level * level) + (100 * level) - 140;
+    } else if(pokemon_table[trade->app->current_pokemon].xp_group == 2) {
+        exp = level * level * level;
+    } else if(pokemon_table[trade->app->current_pokemon].xp_group == 3) {
+        exp = 0.8 * level * level * level;
+    }
+
+    DATA_BLOCK2.party[0].exp[0] = (exp >> 16) & 0xFF;
+    DATA_BLOCK2.party[0].exp[1] = (exp >> 8) & 0xFF;
+    DATA_BLOCK2.party[0].exp[2] = exp & 0xFF;
+
+    FURI_LOG_D(TAG, "[Trade] XP 1: %x", DATA_BLOCK2.party[0].exp[0]);
+    FURI_LOG_D(TAG, "[Trade] XP 2: %x", DATA_BLOCK2.party[0].exp[1]);
+    FURI_LOG_D(TAG, "[Trade] XP 3: %x", DATA_BLOCK2.party[0].exp[2]);
+
+    // Set the Pokemon stat experience
+
+    uint16_t statexp = 0x0000;
+    if(trade->app->current_stats == 1 || trade->app->current_stats == 4) {
+        statexp = (65535 / 100) * level;
+    } else if(trade->app->current_stats == 2 || trade->app->current_stats == 5) {
+        statexp = 65535;
+    }
+
+    DATA_BLOCK2.party[0].hp_ev = ((statexp >> 8) & 0x00FF) | ((statexp << 8) & 0xFF00);
+    DATA_BLOCK2.party[0].atk_ev = ((statexp >> 8) & 0x00FF) | ((statexp << 8) & 0xFF00);
+    DATA_BLOCK2.party[0].def_ev = ((statexp >> 8) & 0x00FF) | ((statexp << 8) & 0xFF00);
+    DATA_BLOCK2.party[0].spd_ev = ((statexp >> 8) & 0x00FF) | ((statexp << 8) & 0xFF00);
+    DATA_BLOCK2.party[0].special_ev = ((statexp >> 8) & 0x00FF) | ((statexp << 8) & 0xFF00);
+
+    FURI_LOG_D(TAG, "[Trade] Pokemon Stat EXP: %d", statexp);
+    FURI_LOG_D(TAG, "[Trade] Pokemon HP EV: %x", DATA_BLOCK2.party[0].hp_ev);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Attack EV: %x", DATA_BLOCK2.party[0].atk_ev);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Defence EV: %x", DATA_BLOCK2.party[0].def_ev);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Speed EV: %x", DATA_BLOCK2.party[0].spd_ev);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Special EV: %x", DATA_BLOCK2.party[0].special_ev);
+
+    // Set the Pokemon stats
+
+    uint8_t atk_iv = 15;
+    uint8_t def_iv = 15;
+    uint8_t spd_iv = 15;
+    uint8_t special_iv = 15;
+    uint8_t hp_iv = 15;
+    if(trade->app->current_stats <= 2) {
+        atk_iv = rand() % 15;
+        def_iv = rand() % 15;
+        spd_iv = rand() % 15;
+        special_iv = rand() % 15;
+        DATA_BLOCK2.party[0].iv = ((atk_iv & 0b00001111) << 12) | ((def_iv & 0b00001111) << 8) | ((spd_iv & 0b00001111) << 4) | ((special_iv & 0b00001111));
+        hp_iv = (DATA_BLOCK2.party[0].iv & 0xAA) >> 4;
+    }
+
+    FURI_LOG_D(TAG, "[Trade] Pokemon IV: %x", DATA_BLOCK2.party[0].iv);
+    FURI_LOG_D(TAG, "[Trade] Pokemon HP IV: %x", hp_iv);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Attack IV: %x", atk_iv);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Defence IV: %x", def_iv);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Speed IV: %x", spd_iv);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Special IV: %x", special_iv);
+
+    uint16_t max_hp = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_hp + hp_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + (level + 10);
+    DATA_BLOCK2.party[0].max_hp = ((max_hp >> 8) & 0x00FF) | ((max_hp << 8) & 0xFF00);
+    DATA_BLOCK2.party[0].hp = ((max_hp >> 8) & 0x00FF) | ((max_hp << 8) & 0xFF00);
+    uint16_t attack = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_atk + atk_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
+    DATA_BLOCK2.party[0].atk = ((attack >> 8) & 0x00FF) | ((attack << 8) & 0xFF00);
+    uint16_t defence = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_def + def_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
+    DATA_BLOCK2.party[0].def = ((defence >> 8) & 0x00FF) | ((defence << 8) & 0xFF00);
+    uint16_t speed = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_spd + spd_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
+    DATA_BLOCK2.party[0].spd = ((speed >> 8) & 0x00FF) | ((speed << 8) & 0xFF00);
+    uint16_t special = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_special + special_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
+    DATA_BLOCK2.party[0].special = ((special >> 8) & 0x00FF) | ((special << 8) & 0xFF00);
+
+    FURI_LOG_D(TAG, "[Trade] Pokemon Max HP: %x", DATA_BLOCK2.party[0].max_hp);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Attack: %x", DATA_BLOCK2.party[0].atk);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Defence: %x", DATA_BLOCK2.party[0].def);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Speed: %x", DATA_BLOCK2.party[0].spd);
+    FURI_LOG_D(TAG, "[Trade] Pokemon Special: %x", DATA_BLOCK2.party[0].special);
+
+    // Set the Pokemon types
+
+    DATA_BLOCK2.party[0].type[0] = pokemon_table[trade->app->current_pokemon].type1;
+    if(pokemon_table[trade->app->current_pokemon].type2 == 0xFF) {
+        DATA_BLOCK2.party[0].type[1] = pokemon_table[trade->app->current_pokemon].type1;
+    } else {
+        DATA_BLOCK2.party[0].type[1] = pokemon_table[trade->app->current_pokemon].type2;
+    }
+
+    FURI_LOG_D(TAG, "[Trade] Type 1: %x", DATA_BLOCK2.party[0].type[0]);
+    FURI_LOG_D(TAG, "[Trade] Type 2: %x", DATA_BLOCK2.party[0].type[1]);
+
+    // Set the Pokemon moves
+    
+    DATA_BLOCK2.party[0].move[0] = trade->app->move1_hex_code;
+    DATA_BLOCK2.party[0].move[1] = trade->app->move2_hex_code;
+    DATA_BLOCK2.party[0].move[2] = trade->app->move3_hex_code;
+    DATA_BLOCK2.party[0].move[3] = trade->app->move4_hex_code;
+
+    FURI_LOG_D(TAG, "[Trade] Move 1 Hex Code: %x", trade->app->move1_hex_code);
+    FURI_LOG_D(TAG, "[Trade] Move 2 Hex Code: %x", trade->app->move2_hex_code);
+    FURI_LOG_D(TAG, "[Trade] Move 3 Hex Code: %x", trade->app->move3_hex_code);
+    FURI_LOG_D(TAG, "[Trade] Move 4 Hex Code: %x", trade->app->move4_hex_code);
+
     // B3 (Pin6) / SO (2)
     furi_hal_gpio_write(&GAME_BOY_SO, false);
     furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
