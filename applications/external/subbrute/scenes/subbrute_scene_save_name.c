@@ -47,7 +47,7 @@ bool subbrute_scene_save_name_on_event(void* context, SceneManagerEvent event) {
         FURI_LOG_D(TAG, "Saving: %s", instance->text_store);
 #endif
         bool success = false;
-        if(strcmp(instance->text_store, "")) {
+        if(strcmp(instance->text_store, "") != 0) {
             furi_string_reset(instance->file_path);
             furi_string_cat_printf(
                 instance->file_path,

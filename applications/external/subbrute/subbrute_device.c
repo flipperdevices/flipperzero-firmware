@@ -226,7 +226,7 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
 #ifdef FURI_DEBUG
     FURI_LOG_D(TAG, "subbrute_device_load_from_file: %s", file_path);
 #endif
-    SubBruteFileResult result = SubBruteFileResultUnknown;
+    SubBruteFileResult result;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
@@ -335,7 +335,7 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
             break;
         }
         uint64_t data = 0;
-        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+        for(size_t i = 0; i < sizeof(uint64_t); i++) {
             data = (data << 8) | key_data[i];
         }
 #if FURI_DEBUG

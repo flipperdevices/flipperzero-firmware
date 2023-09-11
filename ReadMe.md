@@ -59,9 +59,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix view_port_update() apps random deadlocks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f927eb2349aa0de7cb607b90b5b981ee5fa0f824)
 - [RGB Settings Menu Fix #745 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/745)
 - Updated: [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
-- Updated: [Sub-GHz Bruteforcer v3.9.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Added: [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
 - Added: [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader)
+- Updated: [Sub-GHz Bruteforcer v3.9.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 
 <a name="release">
 
