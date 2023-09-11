@@ -76,6 +76,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [add workflow to automatic CodeQL Code scanning #599 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/599)
 - Many apps versions incremented with fix deadlock caused by use of view_port_update while locking model (By RogueMaster & xMasterX)
 - Updated: [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader) - New App Icon (By xMasterX)
+- Many apps renamed or re-categorized. Please delete your apps folder before install to prevent duplicates.
 
 <a name="release">
 
@@ -486,6 +487,12 @@ $ ./fbt dolphin_ext
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
+
+## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
+
+- If you can fix any of these, DM me on Discord for a surprise reward.
+- [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
+- Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
 

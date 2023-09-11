@@ -1,15 +1,14 @@
 App(
-    appid="esp32cam_qrcode",
-    name="[ESP32CAM] QR Code",
+    appid="cam_qrcode",
+    name="[CAM] QR Code",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",
-    requires=["gui"],
     stack_size=8 * 1024,
-    order=1,
     fap_icon="icon.png",
     fap_category="GPIO/ESP32",
     fap_author="eried",
     fap_weburl="https://github.com/eried/flipperzero-mayhem",
     fap_version=(1, 0),
     fap_description="ESP32-CAM simple app to show a payload from QR codes. Can be extended to trigger more stuff in the code. [Unplug the USB cable to test with Mayhem]",
+    fap_icon_assets_symbol="esp32cam_qrcode",
 )

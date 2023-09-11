@@ -1,15 +1,14 @@
 App(
-    appid="esp32cam_marauder",
-    name="[ESP32CAM] Marauder",
+    appid="cam_marauder",
+    name="[CAM] Marauder",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_marauder_app",
-    requires=["gui"],
     stack_size=4 * 1024,
-    order=2,
     fap_icon="wifi_10px.png",
     fap_category="GPIO/ESP32",
     fap_author="0xchocolate & eried",
     fap_weburl="https://github.com/eried/flipperzero-mayhem",
     fap_version=(1, 0),
     fap_description="ESP32-CAM version of Marauder. Includes all functionality from the original plus some options to trigger the camera and flashlight. [Unplug the USB cable to test with Mayhem]",
+    fap_icon_assets_symbol="esp32cam_marauder",
 )

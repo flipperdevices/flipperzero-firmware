@@ -1,11 +1,9 @@
 App(
-    appid="esp32cam_evil_portal",
-    name="[ESP32CAM] Evil Portal",
+    appid="cam_evil_portal",
+    name="[CAM] Evil Portal",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="evil_portal_app",
-    requires=["gui"],
     stack_size=1 * 1024,
-    order=90,
     fap_icon="icons/evil_portal_10px.png",
     fap_icon_assets_symbol="mayhem_evil_portal",
     fap_category="GPIO/ESP32",

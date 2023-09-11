@@ -1,6 +1,6 @@
 App(
-    appid="esp_wifi_scanner",
-    name="[ESP] WiFi Scanner",
+    appid="wifi_scanner",
+    name="WiFi Scanner",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_scanner_app",
     stack_size=2 * 1024,
@@ -9,4 +9,5 @@ App(
     fap_author="@SequoiaSan & @xMasterX",
     fap_version=(1, 1),
     fap_description="WiFi scanner module interface, based on ESP8266",
+    fap_icon_assets_symbol="esp_wifi_scanner",
 )

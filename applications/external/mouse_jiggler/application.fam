@@ -5,7 +5,7 @@ App(
     entry_point="mouse_jiggler_app",
     stack_size=1 * 1024,
     fap_icon="mouse_10px.png",
-    fap_category="Tools",
+    fap_category="USB",
     fap_author="Jacob-Tate",
     fap_weburl="https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c",
     fap_version="1.1",

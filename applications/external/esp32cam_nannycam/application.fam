@@ -1,11 +1,9 @@
 App(
-    appid="esp32cam_nannycam",
-    name="[ESP32CAM] Nanny Cam",
+    appid="cam_nannycam",
+    name="[CAM] Nanny Cam",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",
-    requires=["gui"],
     stack_size=8 * 1024,
-    order=1,
     fap_icon="icon.png",
     fap_category="GPIO/ESP32",
     fap_author="eried",

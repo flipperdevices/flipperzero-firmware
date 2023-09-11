@@ -1,6 +1,6 @@
 App(
-    appid="nrf24_azerty_mouse_jacker",
-    name="[NRF24] AZERTY Mouse Jacker",
+    appid="azerty_mouse_jacker",
+    name="AZERTY Mouse Jacker",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mousejacker_app_azerty",
     stack_size=2 * 1024,
