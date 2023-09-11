@@ -648,8 +648,8 @@ int32_t simon_says_app_entry(void* p) {
         //     simon_state->set_board_neutral = !simon_state->set_board_neutral;
         // }
 
-        view_port_update(view_port);
         furi_mutex_release(simon_state->mutex);
+        view_port_update(view_port);
     }
 
     stop_sound();
