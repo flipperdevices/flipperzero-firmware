@@ -10,7 +10,6 @@ env.Append(
         Dir("flipper_format"),
         Dir("infrared"),
         Dir("nfc"),
-        Dir("ST25RFAL002"),
         Dir("subghz"),
         Dir("toolbox"),
         Dir("u8g2"),
@@ -24,7 +23,7 @@ env.Append(
 env.Append(
     CPPPATH=[
         "#/",
-        "#/lib",  # TODO: remove!
+        "#/lib",  # TODO FL-3553: remove!
         "#/lib/mlib",
         # Ugly hack
         Dir("../assets/compiled"),
@@ -84,7 +83,6 @@ libs = env.BuildModules(
         "print",
         "microtar",
         "toolbox",
-        "ST25RFAL002",
         "libusb_stm32",
         "drivers",
         "fatfs",

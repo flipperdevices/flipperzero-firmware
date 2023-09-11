@@ -11,7 +11,7 @@
 
 #include <math.h>
 
-#define TAG "SubGhzProtocolBinRAW"
+#define TAG "SubGhzProtocolBinRaw"
 
 //change very carefully, RAM ends at the most inopportune moment
 #define BIN_RAW_BUF_RAW_SIZE 2048
@@ -746,7 +746,6 @@ static bool
 
                             bin_raw_debug("\r\n\r\n");
 #endif
-                            //todo can be optimized
                             BinRAW_Markup markup_temp[BIN_RAW_MAX_MARKUP_COUNT];
                             memcpy(
                                 markup_temp,
@@ -772,7 +771,6 @@ static bool
                 }
             }
         }
-        //todo can be optimized
         if(bin_raw_type == BinRAWTypeGap) {
             if(data_temp != 0) { //there are sequences with the same number of bits
 

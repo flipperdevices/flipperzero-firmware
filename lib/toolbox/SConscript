@@ -9,10 +9,11 @@ env.Append(
     ],
     SDK_HEADERS=[
         File("api_lock.h"),
+        File("compress.h"),
         File("manchester_decoder.h"),
         File("manchester_encoder.h"),
         File("path.h"),
-        File("random_name.h"),
+        File("name_generator.h"),
         File("sha256.h"),
         File("crc32_calc.h"),
         File("dir_walk.h"),
@@ -31,6 +32,7 @@ env.Append(
         File("pretty_format.h"),
         File("hex.h"),
         File("simple_array.h"),
+        File("bit_buffer.h"),
     ],
 )
 

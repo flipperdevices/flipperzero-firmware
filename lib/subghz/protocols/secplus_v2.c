@@ -13,7 +13,7 @@
 * https://github.com/merbanan/rtl_433/blob/master/src/devices/secplus_v2.c
 */
 
-#define TAG "SubGhzProtocoSecPlus_v2"
+#define TAG "SubGhzProtocoSecPlusV2"
 
 #define SECPLUS_V2_HEADER 0x3C0000000000
 #define SECPLUS_V2_HEADER_MASK 0xFFFF3C0000000000
@@ -380,7 +380,6 @@ static void subghz_protocol_secplus_v2_encode(SubGhzProtocolEncoderSecPlus_v2* i
     uint8_t roll_2[9] = {0};
 
     instance->generic.cnt++;
-    //ToDo it is not known what value the counter starts
     if(instance->generic.cnt > 0xFFFFFFF) instance->generic.cnt = 0xE500000;
     uint32_t rolling = subghz_protocol_blocks_reverse_key(instance->generic.cnt, 28);
 

@@ -13,7 +13,8 @@
 
 #define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
 #define SUBGHZ_RAW_FOLDER EXT_PATH("subghz")
-#define SUBGHZ_APP_EXTENSION ".sub"
+#define SUBGHZ_APP_FILENAME_PREFIX "SubGHz"
+#define SUBGHZ_APP_FILENAME_EXTENSION ".sub"
 
 #define SUBGHZ_KEY_FILE_VERSION 1
 #define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
@@ -57,6 +58,7 @@ typedef enum {
     // Encoder issue
     SubGhzProtocolStatusErrorEncoderGetUpload = (-12), ///< Payload encoder failure
     // Special Values
+    SubGhzProtocolStatusErrorProtocolNotFound = (-13), ///< Protocol not found
     SubGhzProtocolStatusReserved = 0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
 } SubGhzProtocolStatus;
 

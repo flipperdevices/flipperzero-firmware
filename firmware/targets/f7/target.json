@@ -33,7 +33,6 @@
         "signal_reader",
         "microtar",
         "usb_stm32",
-        "st25rfal002",
         "infrared",
         "appframe",
         "assets",

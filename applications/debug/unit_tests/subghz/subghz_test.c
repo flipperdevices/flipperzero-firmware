@@ -10,7 +10,7 @@
 #include <lib/subghz/devices/devices.h>
 #include <lib/subghz/devices/cc1101_configs.h>
 
-#define TAG "SubGhz TEST"
+#define TAG "SubGhzTest"
 #define KEYSTORE_DIR_NAME EXT_PATH("subghz/assets/keeloq_mfcodes")
 #define CAME_ATOMO_DIR_NAME EXT_PATH("subghz/assets/came_atomo")
 #define NICE_FLOR_S_DIR_NAME EXT_PATH("subghz/assets/nice_flor_s")
@@ -330,7 +330,12 @@ bool subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestType type) {
         return false;
     }
 
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(30000000);
+
     while(!furi_hal_subghz_is_async_tx_complete()) {
+        if(furi_hal_cortex_timer_is_expired(timer)) {
+            return false;
+        }
         furi_delay_ms(10);
     }
     furi_hal_subghz_stop_async_tx();

@@ -1,6 +1,0 @@
-PB_Nfca.ReadResponse.uid            max_size: 10
-PB_Nfca.ReadResponse.sak            max_size: 1
-PB_Nfca.ReadResponse.atqa           max_size: 2
-PB_Nfca.EmulateStartRequest.uid     max_size: 10
-PB_Nfca.EmulateStartRequest.sak     max_size: 1
-PB_Nfca.EmulateStartRequest.atqa    max_size: 2
