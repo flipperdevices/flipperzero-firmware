@@ -461,8 +461,8 @@ int32_t tetris_game_app() {
 
         tetris_game_process_step(tetris_state, newPiece, wasDownMove);
 
-        view_port_update(view_port);
         furi_mutex_release(tetris_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(tetris_state->timer);
