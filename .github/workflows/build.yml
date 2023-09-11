@@ -36,7 +36,7 @@ jobs:
             TYPE="pull"
           elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
             TYPE="tag"
-            echo 'FBT_BUILD_TYPE="DEBUG=0 COMPACT=1"' >> $GITHUB_ENV
+            echo "FBT_BUILD_TYPE=DEBUG=0 COMPACT=1" >> $GITHUB_ENV
           else
             TYPE="other"
           fi
