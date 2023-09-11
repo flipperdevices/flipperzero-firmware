@@ -63,3 +63,5 @@ access the flipper's API. To add a new word follow these steps:
 
 The code in `lib/pforth/` has been taken from Phil Burk's pForth, which can be
 found here: https://github.com/philburk/pforth.
+
+The app icon was made by [xMasterX](https://github.com/xMasterX).
