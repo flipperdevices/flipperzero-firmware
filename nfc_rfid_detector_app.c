@@ -62,7 +62,7 @@ NfcRfidDetectorApp* nfc_rfid_detector_app_alloc() {
         NfcRfidDetectorViewFieldPresence,
         nfc_rfid_detector_view_field_presence_get_view(app->nfc_rfid_detector_field_presence));
 
-    scene_manager_next_scene(app->scene_manager, NfcRfidDetectorSceneStart);
+    scene_manager_next_scene(app->scene_manager, NfcRfidDetectorSceneFieldPresence);
 
     return app;
 }
