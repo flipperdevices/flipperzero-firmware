@@ -7,6 +7,7 @@ def resolve_port(logger, portname: str = "auto"):
         return portname
     # Try guessing
     flippers = list(list_ports.grep("flip_"))
+    logger.debug(f"Found following ports {list_ports}")
     if len(flippers) == 1:
         flipper = flippers[0]
         logger.info(f"Using {flipper.serial_number} on {flipper.device}")
