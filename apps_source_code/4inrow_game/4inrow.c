@@ -299,8 +299,9 @@ int32_t four_in_row_app(void* p) {
                 break;
             }
         }
-        view_port_update(view_port);
+
         furi_mutex_release(fourinrow_state->mutex);
+        view_port_update(view_port);
     }
 
     // Clear notification

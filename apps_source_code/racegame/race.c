@@ -342,8 +342,9 @@ int32_t race_app(void* p) {
             moveRoad = true;
         }
         race_game_process_step(race_state, moveRoad);
-        view_port_update(view_port);
+
         furi_mutex_release(state_mutex);
+        view_port_update(view_port);
     }
     // clearing everything on game exit
 

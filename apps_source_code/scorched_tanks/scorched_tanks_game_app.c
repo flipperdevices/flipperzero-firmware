@@ -529,8 +529,8 @@ int32_t scorched_tanks_game_app(void* p) {
             scorched_tanks_calculate_trajectory(game_state);
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);

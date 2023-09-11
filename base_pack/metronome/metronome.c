@@ -380,8 +380,8 @@ int32_t metronome_app() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(metronome_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);

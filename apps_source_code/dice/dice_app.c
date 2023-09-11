@@ -387,8 +387,8 @@ int32_t dice_dnd_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(state->mutex);
+        view_port_update(view_port);
     }
 
     // Clear

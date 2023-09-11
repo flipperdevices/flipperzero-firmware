@@ -534,8 +534,8 @@ int32_t solitaire_app(void *p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
 

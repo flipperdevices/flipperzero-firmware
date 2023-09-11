@@ -360,8 +360,8 @@ int32_t jetpack_game_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);

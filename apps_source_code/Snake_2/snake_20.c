@@ -507,8 +507,8 @@ int32_t snake_20_app(void* p) {
             // event timeout
         }
 
-        view_port_update(view_port);
         furi_mutex_release(snake_state->mutex);
+        view_port_update(view_port);
     }
 
     // Wait for all notifications to be played and return backlight to normal state
