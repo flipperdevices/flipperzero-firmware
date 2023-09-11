@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Un-did duplicate HID App & Snake "Special request from (OFW) marketing team" (By RogueMaster)
 - Updated: [RFID Detector (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - Move [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon) to RFID folder.
+- Temp Removal: [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board` due to API changes
 
 <a name="release">
 
