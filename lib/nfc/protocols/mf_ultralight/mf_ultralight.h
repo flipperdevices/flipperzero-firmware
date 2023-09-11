@@ -10,14 +10,17 @@ extern "C" {
 
 #define MF_ULTRALIGHT_CMD_GET_VERSION (0x60)
 #define MF_ULTRALIGHT_CMD_READ_PAGE (0x30)
+#define MF_ULTRALIGHT_CMD_FAST_READ (0x3A)
 #define MF_ULTRALIGHT_CMD_SECTOR_SELECT (0xC2)
 #define MF_ULTRALIGHT_CMD_COMP_WRITE (0xA0)
 #define MF_ULTRALIGHT_CMD_WRITE_PAGE (0xA2)
+#define MF_ULTRALIGHT_CMD_FAST_WRITE (0xA6)
 #define MF_ULTRALIGTH_CMD_READ_SIG (0x3C)
 #define MF_ULTRALIGHT_CMD_READ_CNT (0x39)
 #define MF_ULTRALIGHT_CMD_INCR_CNT (0xA5)
 #define MF_ULTRALIGHT_CMD_CHECK_TEARING (0x3E)
 #define MF_ULTRALIGHT_CMD_AUTH (0x1B)
+#define MF_ULTRALIGHT_CMD_VCSL (0x4B)
 
 #define MF_ULTRALIGHT_CMD_ACK (0x0A)
 #define MF_ULTRALIGHT_CMD_NACK (0x00)
@@ -202,6 +205,10 @@ uint16_t mf_ultralight_get_pages_total(MfUltralightType type);
 uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type);
 
 uint16_t mf_ultralight_get_config_page_num(MfUltralightType type);
+
+uint8_t mf_ultralight_get_pwd_page_num(MfUltralightType type);
+
+bool mf_ultralight_is_page_pwd_or_pack(MfUltralightType type, uint16_t page_num);
 
 bool mf_ultralight_support_feature(const uint32_t feature_set, const uint32_t features_to_check);
 
