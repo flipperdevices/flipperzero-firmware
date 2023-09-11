@@ -891,7 +891,7 @@ static FuriStatus sd_device_write(const uint32_t* buff, uint32_t sector, uint32_
     return status;
 }
 
-void furi_hal_sd_present_pin_init(void) {
+void furi_hal_sd_presence_init(void) {
     // low speed input with pullup
     furi_hal_gpio_init(&gpio_sdcard_cd, GpioModeInput, GpioPullUp, GpioSpeedLow);
 }
@@ -928,7 +928,7 @@ FuriStatus furi_hal_sd_init(bool power_reset) {
 
         // reinit bus and enable power
         sd_spi_bus_rise_up();
-        furi_hal_sd_present_pin_init();
+        furi_hal_sd_presence_init();
         furi_hal_power_enable_external_3_3v();
         furi_delay_ms(100);
     }

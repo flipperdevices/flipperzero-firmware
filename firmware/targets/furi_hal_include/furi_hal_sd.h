@@ -27,9 +27,9 @@ typedef struct {
 } FuriHalSdInfo;
 
 /** 
- * @brief Init SD card present pin
+ * @brief Init SD card presence detection
  */
-void furi_hal_sd_present_pin_init();
+void furi_hal_sd_presence_init();
 
 /** 
  * @brief Get SD card status

@@ -1229,7 +1229,7 @@ Function,+,furi_hal_sd_info,FuriStatus,FuriHalSdInfo*
 Function,+,furi_hal_sd_init,FuriStatus,_Bool
 Function,+,furi_hal_sd_is_present,_Bool,
 Function,+,furi_hal_sd_max_mount_retry_count,uint8_t,
-Function,+,furi_hal_sd_present_pin_init,void,
+Function,+,furi_hal_sd_presence_init,void,
 Function,+,furi_hal_sd_read_blocks,FuriStatus,"uint32_t*, uint32_t, uint32_t"
 Function,+,furi_hal_sd_write_blocks,FuriStatus,"const uint32_t*, uint32_t, uint32_t"
 Function,+,furi_hal_speaker_acquire,_Bool,uint32_t

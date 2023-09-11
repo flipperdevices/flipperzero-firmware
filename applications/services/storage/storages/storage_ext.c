@@ -639,7 +639,7 @@ void storage_ext_init(StorageData* storage) {
     storage->api.tick = storage_ext_tick;
     storage->fs_api = &fs_api;
 
-    furi_hal_sd_present_pin_init();
+    furi_hal_sd_presence_init();
 
     // do not notify on first launch, notifications app is waiting for our thread to read settings
     storage_ext_tick_internal(storage, false);
