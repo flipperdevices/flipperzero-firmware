@@ -1,4 +1,4 @@
-#ifdef APP_UNIT_TESTS
+#ifdef FW_CFG_unit_tests
 
 #include <lib/nfc/nfc.h>
 #include <lib/nfc/helpers/iso14443_crc.h>
