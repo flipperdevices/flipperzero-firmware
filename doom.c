@@ -1082,8 +1082,9 @@ int32_t doom_app() {
 #ifdef SOUND
         furi_mutex_release(plugin_state->music_instance->model_mutex);
 #endif
-        view_port_update(view_port);
+
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 #ifdef SOUND
     music_player_worker_free(plugin_state->music_instance->worker);
