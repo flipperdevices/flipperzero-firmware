@@ -892,18 +892,18 @@ static FuriHalSdStatus sd_device_write(const uint32_t* buff, uint32_t sector, ui
     return status;
 }
 
-void furi_hal_sd_detect_init(void) {
+void furi_hal_sd_present_pin_init(void) {
     // low speed input with pullup
     furi_hal_gpio_init(&gpio_sdcard_cd, GpioModeInput, GpioPullUp, GpioSpeedLow);
 }
 
-void furi_hal_sd_detect_set_low(void) {
+static void furi_hal_sd_present_pin_set_low(void) {
     // low speed input with pullup
     furi_hal_gpio_init_simple(&gpio_sdcard_cd, GpioModeOutputOpenDrain);
     furi_hal_gpio_write(&gpio_sdcard_cd, 0);
 }
 
-bool furi_hal_sd_detect(void) {
+bool furi_hal_sd_present(void) {
     bool result = !furi_hal_gpio_read(&gpio_sdcard_cd);
     return result;
 }
@@ -924,12 +924,12 @@ FuriHalSdStatus furi_hal_sd_init(bool power_reset) {
         // disable power and set low on all bus pins
         furi_hal_power_disable_external_3_3v();
         sd_spi_bus_to_ground();
-        furi_hal_sd_detect_set_low();
+        furi_hal_sd_present_pin_set_low();
         furi_delay_ms(250);
 
         // reinit bus and enable power
         sd_spi_bus_rise_up();
-        furi_hal_sd_detect_init();
+        furi_hal_sd_present_pin_init();
         furi_hal_power_enable_external_3_3v();
         furi_delay_ms(100);
     }
@@ -987,7 +987,7 @@ FuriHalSdStatus furi_hal_sd_read_blocks(uint32_t* buff, uint32_t sector, uint32_
     if(status != FuriHalSdStatusOK) {
         uint8_t counter = furi_hal_sd_max_mount_retry_count();
 
-        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_detect()) {
+        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_present()) {
             if((counter % 2) == 0) {
                 // power reset sd card
                 status = furi_hal_sd_init(true);
@@ -1019,7 +1019,7 @@ FuriHalSdStatus furi_hal_sd_write_blocks(const uint32_t* buff, uint32_t sector, 
     if(status != FuriHalSdStatusOK) {
         uint8_t counter = furi_hal_sd_max_mount_retry_count();
 
-        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_detect()) {
+        while(status != FuriHalSdStatusOK && counter > 0 && furi_hal_sd_present()) {
             if((counter % 2) == 0) {
                 // power reset sd card
                 status = furi_hal_sd_init(true);

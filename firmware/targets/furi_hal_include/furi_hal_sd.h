@@ -35,20 +35,15 @@ typedef struct {
 } FuriHalSdInfo;
 
 /** 
- * @brief Init SD card detection pin
+ * @brief Init SD card present pin
  */
-void furi_hal_sd_detect_init(void);
-
-/** 
- * @brief Set SD card detect pin to low
- */
-void furi_hal_sd_detect_set_low(void);
+void furi_hal_sd_present_pin_init(void);
 
 /** 
  * @brief Get SD card status
- * @return true if SD card present, false if SD card not present
+ * @return true if SD card is present
  */
-bool furi_hal_sd_detect(void);
+bool furi_hal_sd_present(void);
 
 /**
  * @brief SD card max mount retry count
