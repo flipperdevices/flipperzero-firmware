@@ -82,6 +82,7 @@ static void mf_ultralight_listener_perform_read(
             mf_ultralight_mirror_read_handler(page, pages[i].data, instance);
         }
     }
+    mf_ultralight_single_counter_try_increase(instance);
 }
 
 static MfUltralightCommand
@@ -686,6 +687,7 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
         // TODO generic state reset ?
         mf_ultralight_composite_command_reset(instance);
+        mf_ultralight_single_counter_try_to_unlock(instance, iso14443_3a_event->type);
         instance->sector = 0;
         instance->auth_state = MfUltralightListenerAuthStateIdle;
         command = NfcCommandSleep;
