@@ -1,6 +1,7 @@
 #pragma once
 
-#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
+#include <nfc/helpers/iso14443_4_layer.h>
 
 #include "iso14443_4a_poller.h"
 
@@ -25,17 +26,13 @@ typedef enum {
     Iso14443_4aPollerSessionStateStopRequest,
 } Iso14443_4aPollerSessionState;
 
-typedef struct {
-    uint32_t block_number;
-} Iso14443_4aPollerProtocolState;
-
 struct Iso14443_4aPoller {
     Iso14443_3aPoller* iso14443_3a_poller;
     Iso14443_4aPollerState poller_state;
     Iso14443_4aPollerSessionState session_state;
-    Iso14443_4aPollerProtocolState protocol_state;
     Iso14443_4aError error;
     Iso14443_4aData* data;
+    Iso14443_4Layer* iso14443_4_layer;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
     Iso14443_4aPollerEventData iso14443_4a_event_data;

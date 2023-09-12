@@ -20,6 +20,7 @@ static Iso14443_4aPoller* iso14443_4a_poller_alloc(Iso14443_3aPoller* iso14443_3
     Iso14443_4aPoller* instance = malloc(sizeof(Iso14443_4aPoller));
     instance->iso14443_3a_poller = iso14443_3a_poller;
     instance->data = iso14443_4a_alloc();
+    instance->iso14443_4_layer = iso14443_4_layer_alloc();
     instance->tx_buffer = bit_buffer_alloc(ISO14443_4A_POLLER_BUF_SIZE);
     instance->rx_buffer = bit_buffer_alloc(ISO14443_4A_POLLER_BUF_SIZE);
 
@@ -36,6 +37,7 @@ static void iso14443_4a_poller_free(Iso14443_4aPoller* instance) {
     furi_assert(instance);
 
     iso14443_4a_free(instance->data);
+    iso14443_4_layer_free(instance->iso14443_4_layer);
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
     free(instance);
@@ -46,8 +48,9 @@ static NfcCommand iso14443_4a_poller_handler_idle(Iso14443_4aPoller* instance) {
         instance->data->iso14443_3a_data,
         iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
 
+    iso14443_4_layer_reset(instance->iso14443_4_layer);
+
     instance->poller_state = Iso14443_4aPollerStateReadAts;
-    instance->protocol_state.block_number = 0;
     return NfcCommandContinue;
 }
 

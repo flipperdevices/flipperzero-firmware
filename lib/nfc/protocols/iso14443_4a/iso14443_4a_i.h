@@ -24,11 +24,6 @@
 #define ISO14443_4A_FSCI_128 ISO14443_4A_FSDI_128
 #define ISO14443_4A_FSCI_256 ISO14443_4A_FSDI_256
 
-#define ISO14443_4A_BLOCK_PCB (1U << 1)
-#define ISO14443_4A_BLOCK_PCB_I (0U)
-#define ISO14443_4A_BLOCK_PCB_R (5U << 5)
-#define ISO14443_4A_BLOCK_PCB_S (3U << 6)
-
 typedef struct {
     uint8_t tl;
     uint8_t t0;
