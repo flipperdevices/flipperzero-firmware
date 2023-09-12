@@ -1,13 +1,13 @@
 App(
-    appid="authenticator",
+    appid="totp",
     name="Authenticator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="totp_app",
     stack_size=2 * 1024,
     fap_category="Tools",
-    fap_icon="totp_10px.png",
     fap_icon_assets="images",
-    fap_icon_assets_symbol="totp",
+    fap_icon="totp_10px.png",
+    fap_file_assets="assets",
     fap_private_libs=[
         Lib(
             name="base32",
@@ -46,4 +46,136 @@ App(
     fap_weburl="https://github.com/akopachov/flipper-zero_authenticator",
     fap_version="4.11",
     fap_description="Software-based TOTP authenticator for Flipper Zero device",
+)
+
+App(
+    appid="totp_cli_timezone_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_timezone_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/timezone/timezone.c",
+        "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_version_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_version_plugin_ep",
+    requires=["totp"],
+    sources=["cli/plugins/version/version.c"],
+)
+
+App(
+    appid="totp_cli_help_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_help_plugin_ep",
+    requires=["totp"],
+    sources=["cli/plugins/help/help.c"],
+)
+
+App(
+    appid="totp_cli_list_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_list_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/list/list.c",
+        "cli/cli_shared_methods.c",
+        "cli/plugins/list/formatters/table/list_output_formatter_table.c",
+        "cli/plugins/list/formatters/tsv/list_output_formatter_tsv.c"],
+)
+
+App(
+    appid="totp_cli_details_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_details_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/details/details.c",
+        "cli/cli_shared_methods.c",
+        "cli/plugins/details/formatters/table/details_output_formatter_table.c",
+        "cli/plugins/details/formatters/tsv/details_output_formatter_tsv.c"],
+)
+
+App(
+    appid="totp_cli_add_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_add_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/modify/add/add.c",
+        "cli/plugins/modify/common.c",
+        "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_update_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_update_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/modify/update/update.c",
+        "cli/plugins/modify/common.c",
+        "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_delete_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_delete_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/delete/delete.c",
+        "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_move_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_move_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/move/move.c",
+        "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_reset_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_reset_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/reset/reset.c",
+        "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_pin_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_pin_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/pin/pin.c",
+        "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_automation_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_automation_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/automation/automation.c",
+        "cli/cli_shared_methods.c"],
+)
+
+App(
+    appid="totp_cli_notification_plugin",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="totp_cli_notification_plugin_ep",
+    requires=["totp"],
+    sources=[
+        "cli/plugins/notification/notification.c",
+        "cli/cli_shared_methods.c"],
 )
