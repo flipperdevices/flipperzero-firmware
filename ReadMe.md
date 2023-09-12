@@ -29,10 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0911-1343-0.90.2-ba54af3](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
+## Latest Updates - [PATREON: Latest Release RM0912-1531-0.90.2-feb7d81](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-12 13:01 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-12 13:01 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-12 15:31 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-12 15:31 EST`
 - UL: [Some faac fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b3cce2351a704fa70b6f348e92612b5d05462d32)
 - Added: [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
 - OFW: [github: workflow improvements #3032 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3032)
@@ -75,7 +75,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
 - UL: [add workflow to automatic CodeQL Code scanning #599 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/599)
 - Many apps versions incremented with fix deadlock caused by use of view_port_update while locking model (By RogueMaster & xMasterX)
-- Updated: [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader) - New App Icon (By xMasterX)
 - Many apps renamed or re-categorized. Please delete your apps folder before install to prevent duplicates.
 - UL: princeton and varitemlist ui fixes (By xMasterX)
 - Removed: [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
