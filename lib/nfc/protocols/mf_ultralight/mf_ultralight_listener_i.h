@@ -59,10 +59,16 @@ struct MfUltralightListener {
     MfUltralightListenerEventData mfu_event_data;
     NfcGenericCallback callback;
     uint8_t sector;
+    bool single_counter_increased;
     MfUltralightMirrorMode mirror;
     MfUltralightListenerCompositeCommandContext composite_cmd;
     void* context;
 };
+
+void mf_ultralight_single_counter_try_increase(MfUltralightListener* instance);
+void mf_ultralight_single_counter_try_to_unlock(
+    MfUltralightListener* instance,
+    Iso14443_3aListenerEventType type);
 
 void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance);
 void mf_ultralight_mirror_read_prepare(uint8_t start_page, MfUltralightListener* instance);
@@ -78,6 +84,15 @@ void mf_ultralight_composite_command_reset(MfUltralightListener* instance);
 bool mf_ultralight_composite_command_in_progress(MfUltralightListener* instance);
 MfUltralightCommand
     mf_ultralight_composite_command_run(MfUltralightListener* instance, BitBuffer* buffer);
+
+bool mf_ultralight_is_i2c_tag(MfUltralightType type);
+bool mf_ultralight_i2c_validate_pages(
+    uint16_t start_page,
+    uint16_t end_page,
+    MfUltralightListener* instance);
+
+uint16_t
+    mf_ultralight_i2c_provide_page_by_requested(uint16_t page, MfUltralightListener* instance);
 #ifdef __cplusplus
 }
 #endif

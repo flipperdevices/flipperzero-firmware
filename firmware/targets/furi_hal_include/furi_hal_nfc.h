@@ -8,8 +8,7 @@
 extern "C" {
 #endif
 
-#define FURI_HAL_NFC_TIMER_OFFSET_FC (500)
-
+#define FURI_HAL_NFC_TIMER_COMPENSATION_FC (500)
 #define FURI_HAL_NFC_EVENT_WAIT_FOREVER (0xFFFFFFFFU)
 
 typedef enum {
@@ -63,106 +62,246 @@ typedef enum {
     FuriHalNfcaShortFrameSensReq,
 } FuriHalNfcaShortFrame;
 
-/**
- * @brief Nfc HAL initialization
+/** Nfc HAL initialization
  * 
  * @return FuriHalNfcError 
  */
 FuriHalNfcError furi_hal_nfc_init();
 
+/** Check if Nfc HAL is ready
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_is_hal_ready();
 
-/**
- * @brief Start Nfc hardware low power mode
- * 
+/** Acquire Nfc HAL
+ *
  * @return FuriHalNfcError 
+ */
+FuriHalNfcError furi_hal_nfc_acquire();
+
+/** Release Nfc HAL
+ *
+ * @return FuriHalNfcError 
+ */
+FuriHalNfcError furi_hal_nfc_release();
+
+/** Enter low power mode
+ *
+ * @return FuriHalNfcError
  */
 FuriHalNfcError furi_hal_nfc_low_power_mode_start();
 
-/**
- * @brief Stop Nfc hardware low power mode
- * 
- * @return FuriHalNfcError 
+/** Exit low power mode
+ *
+ * @return FuriHalNfcError
  */
 FuriHalNfcError furi_hal_nfc_low_power_mode_stop();
 
-/**
- * @brief Configure Nfc HAL mode
- * 
- * @param mode          FuriHalNfcMode instance
- * @param bitrate       FuriHalNfcBitrate instance
- * 
- * @return FuriHalNfcError 
+/** Set NFC mode
+ *
+ * @param mode  - FuriHalNfcMode value
+ * @param tech  - FuriHalNfcTech value
+ *
+ * @return FuriHalNfcError
  */
 FuriHalNfcError furi_hal_nfc_set_mode(FuriHalNfcMode mode, FuriHalNfcTech tech);
 
+/** Reset mode
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_reset_mode();
 
-/**
- * @brief Turn on field in poller mode
- * 
- * @return FuriHalNfcError 
+/** Turn on field
+ *
+ * @return FuriHalNfcError
  */
 FuriHalNfcError furi_hal_nfc_poller_field_on();
 
-FuriHalNfcError furi_hal_nfc_acquire();
-
-FuriHalNfcError furi_hal_nfc_release();
-
+/** Wait for Nfc HAL event in poller mode
+ *
+ * @param timeout_ms    - timeout in milliseconds
+ * 
+ * @return FuriHalNfcEvent value
+ */
 FuriHalNfcEvent furi_hal_nfc_poller_wait_event(uint32_t timeout_ms);
 
+/** Wait for Nfc HAL event in listener mode
+ *
+ * @param timeout_ms    - timeout in milliseconds
+ * 
+ * @return FuriHalNfcEvent value
+ */
 FuriHalNfcEvent furi_hal_nfc_listener_wait_event(uint32_t timeout_ms);
 
+/** Transmit data in poller mode
+ *
+ * @param tx_data       - buffer to transmit
+ * @param tx_bits       - number of bits to transmit
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_poller_tx(const uint8_t* tx_data, size_t tx_bits);
 
+/** Receive data in poller mode
+ *
+ * @param rx_data       - buffer to receive
+ * @param rx_data_size  - size of receive buffer in bytes
+ * @param rx_bits       - number of bits received
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
+/** Tranmit data in listener mode
+ *
+ * @param tx_data       - buffer to transmit
+ * @param tx_bits       - number of bits to transmit
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits);
 
+/** Receive data in listener mode
+ *
+ * @param rx_data       - buffer to receive
+ * @param rx_data_size  - size of receive buffer in bytes
+ * @param rx_bits       - number of bits received
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_listener_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
+/** Go to sleep in listener mode
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_listener_sleep();
 
+/** Go to idle in listener mode
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_listener_idle();
 
+/** Enable receive in listener mode
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_listener_enable_rx();
 
+/** Reset communication
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_trx_reset();
 
-FuriHalNfcError furi_hal_nfc_abort();
-
+/** Start Nfc HAL events
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_event_start();
 
+/** Emit Abort event
+ *
+ * @return FuriHalNfcError
+*/
+FuriHalNfcError furi_hal_nfc_abort();
+
+/** Start Frame Wait Timeout timer
+ *
+ * @param time_fc   - time in NFC frequency clock
+ */
 void furi_hal_nfc_timer_fwt_start(uint32_t time_fc);
 
+/** Stop Frame Wait Timeout timer */
 void furi_hal_nfc_timer_fwt_stop();
 
+/** Start block transmit timer
+ *
+ * @param time_fc   - time in NFC frequency clock
+*/
 void furi_hal_nfc_timer_block_tx_start(uint32_t time_fc);
 
+/** Start block transmit timer
+ *
+ * @param time_us   - time in microseconds
+ */
 void furi_hal_nfc_timer_block_tx_start_us(uint32_t time_us);
 
+/** Stop block transmit timer */
 void furi_hal_nfc_timer_block_tx_stop();
 
+/** Check if block transmit timer is running
+ *
+ * @return true if timer is running
+ */
 bool furi_hal_nfc_timer_block_tx_is_running();
 
-/******************* NFCA specific API *******************/
+/******************* Iso14443a specific API *******************/
 
+/** Send Iso14443a Short frame in poller mode
+ *
+ * @param frame     - FuriHalNfcaShortFrame value
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_iso14443a_poller_trx_short_frame(FuriHalNfcaShortFrame frame);
 
+/** Send Iso14443a SDD frame in poller mode
+ *
+ * @param tx_data   - buffer to transmit
+ * @param tx_bits   - number of bits to transmit
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_iso14443a_tx_sdd_frame(const uint8_t* tx_data, size_t tx_bits);
 
+/** Receive Iso14443a SDD frame in poller mode
+ *
+ * @param rx_data       - buffer to receive
+ * @param rx_data_size  - size of receive buffer in bytes
+ * @param rx_bits       - number of bits received
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError
     furi_hal_nfc_iso14443a_rx_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
+/** Send Iso14443a frame with custom parity bits in poller mode
+ *
+ * @param tx_data   - buffer to transmit
+ * @param tx_bits   - number of bits to transmit
+ *
+ * @return FuriHalNfcError
+ */
+FuriHalNfcError
+    furi_hal_nfc_iso14443a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits);
+
+/** Set Iso14443a collision resolution data in listener mode
+ *
+ * @param uid       - pointer to UID buffer
+ * @param uid_len   - UID length in bytes
+ * @param atqa      - pointer to ATQA buffer
+ * @param sak       - SAK value
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_iso14443a_listener_set_col_res_data(
     uint8_t* uid,
     uint8_t uid_len,
     uint8_t* atqa,
     uint8_t sak);
 
-FuriHalNfcError
-    furi_hal_nfc_iso14443a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits);
-
+/** Send ISO14443a frame with custom parity bits in listener mode
+ *
+ * @param tx_data   - buffer to transmit
+ * @param tx_parity - buffer with parity bits
+ * @param tx_bits   - number of bits to transmit
+ *
+ * @return FuriHalNfcError
+ */
 FuriHalNfcError furi_hal_nfc_iso14443a_listener_tx_custom_parity(
     const uint8_t* tx_data,
     const uint8_t* tx_parity,

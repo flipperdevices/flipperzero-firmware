@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mf_dict.h"
+#include <furi/core/string.h>
 
 #ifdef __cplusplus
 extern "C" {

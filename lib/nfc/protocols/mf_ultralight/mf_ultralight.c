@@ -105,18 +105,18 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .device_name = "NTAG I2C 1K",
             .total_pages = 231,
             .config_page = 0,
-            .feature_set =
-                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportFastRead |
-                MfUltralightFeatureSupportFastWrite | MfUltralightFeatureSupportSectorSelect,
+            .feature_set = MfUltralightFeatureSupportReadVersion |
+                           MfUltralightFeatureSupportFastRead |
+                           MfUltralightFeatureSupportSectorSelect,
         },
     [MfUltralightTypeNTAGI2C2K] =
         {
             .device_name = "NTAG I2C 2K",
             .total_pages = 485,
             .config_page = 0,
-            .feature_set =
-                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportFastRead |
-                MfUltralightFeatureSupportFastWrite | MfUltralightFeatureSupportSectorSelect,
+            .feature_set = MfUltralightFeatureSupportReadVersion |
+                           MfUltralightFeatureSupportFastRead |
+                           MfUltralightFeatureSupportSectorSelect,
         },
     [MfUltralightTypeNTAGI2CPlus1K] =
         {
@@ -126,7 +126,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .feature_set =
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
                 MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
-                MfUltralightFeatureSupportSectorSelect,
+                MfUltralightFeatureSupportSectorSelect | MfUltralightFeatureSupportFastWrite,
         },
     [MfUltralightTypeNTAGI2CPlus2K] =
         {
@@ -136,7 +136,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .feature_set =
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
                 MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
-                MfUltralightFeatureSupportSectorSelect,
+                MfUltralightFeatureSupportSectorSelect | MfUltralightFeatureSupportFastWrite,
         },
 };
 
@@ -533,6 +533,17 @@ bool mf_ultralight_detect_protocol(const Iso14443_3aData* iso14443_3a_data) {
 
 uint16_t mf_ultralight_get_config_page_num(MfUltralightType type) {
     return mf_ultralight_features[type].config_page;
+}
+
+uint8_t mf_ultralight_get_pwd_page_num(MfUltralightType type) {
+    uint8_t config_page = mf_ultralight_features[type].config_page;
+    return (config_page != 0) ? config_page + 2 : 0;
+}
+
+bool mf_ultralight_is_page_pwd_or_pack(MfUltralightType type, uint16_t page) {
+    uint8_t pwd_page = mf_ultralight_get_pwd_page_num(type);
+    uint8_t pack_page = pwd_page + 1;
+    return ((pwd_page != 0) && (page == pwd_page || page == pack_page));
 }
 
 bool mf_ultralight_support_feature(const uint32_t feature_set, const uint32_t features_to_check) {
