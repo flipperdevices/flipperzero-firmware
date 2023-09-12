@@ -2,9 +2,9 @@
 
 #include "nfc_protocol.h"
 
-#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a_device_defs.h>
 #include <nfc/protocols/iso14443_3b/iso14443_3b_device_defs.h>
-#include <nfc/protocols/iso14443_4a/iso14443_4a.h>
+#include <nfc/protocols/iso14443_4a/iso14443_4a_device_defs.h>
 #include <nfc/protocols/iso14443_4b/iso14443_4b_device_defs.h>
 #include <nfc/protocols/iso15693_3/iso15693_3_device_defs.h>
 #include <nfc/protocols/felica/felica.h>

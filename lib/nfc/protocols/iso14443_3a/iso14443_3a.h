@@ -62,8 +62,6 @@ typedef struct {
     uint8_t sak;
 } Iso14443_3aData;
 
-extern const NfcDeviceBase nfc_device_iso14443_3a;
-
 Iso14443_3aData* iso14443_3a_alloc();
 
 void iso14443_3a_free(Iso14443_3aData* data);

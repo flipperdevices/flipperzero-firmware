@@ -20,8 +20,6 @@ typedef struct {
     SimpleArray* ats_data;
 } Iso14443_4aData;
 
-extern const NfcDeviceBase nfc_device_iso14443_4a;
-
 // Virtual methods
 
 Iso14443_4aData* iso14443_4a_alloc();
