@@ -3,6 +3,10 @@
 #include <errno.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef _RSIZE_T_DECLARED
 typedef uint64_t rsize_t;
 #define _RSIZE_T_DECLARED
@@ -21,3 +25,7 @@ typedef int16_t errno_t; //-V677
  * @return \c 0 on success; non-zero otherwise
  */
 errno_t memset_s(void* s, rsize_t smax, int c, rsize_t n);
+
+#ifdef __cplusplus
+}
+#endif

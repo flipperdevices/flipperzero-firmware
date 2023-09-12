@@ -18,12 +18,6 @@
 #define TOTP_OBSOLETE_CRYPTO_V2_COMPATIBILITY_ENABLED
 #endif
 
-// Enables\disables userfriendly TOTP CLI help text
-// If disabled, it will print a link to a wiki page
-#ifndef TOTP_CLI_NO_RICH_HELP
-#define TOTP_CLI_RICH_HELP_ENABLED
-#endif
-
 // Enables\disables "Add new token" UI
 // If disabled it will print a link to wiki page
 #ifndef TOTP_UI_NO_ADD_NEW_TOKEN

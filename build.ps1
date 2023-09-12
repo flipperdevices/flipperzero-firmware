@@ -15,19 +15,19 @@ $build_commands = @(
         Name = "Official Dev";
         FbtSwitch = "od";
         FirmwarePath = "flipperzero-firmware_official_dev";
-        ArtifactName = "totp_official-dev_fw{FEATURES_SUFFIX}.fap";
+        ArtifactName = "totp_official-dev_fw{FEATURES_SUFFIX}.zip";
     }
     [PSCustomObject]@{
         Name = "Official Stable";
         FbtSwitch = "os";
         FirmwarePath = "flipperzero-firmware_official_stable";
-        ArtifactName = "totp_official-stable_fw{FEATURES_SUFFIX}.fap";
+        ArtifactName = "totp_official-stable_fw{FEATURES_SUFFIX}.zip";
     }
     [PSCustomObject]@{
         Name = "Xtreme \ Unleashed";
         FbtSwitch = "x";
         FirmwarePath = "flipperzero-firmware_xtreme";
-        ArtifactName = "totp_xtreme_unleashed_fw{FEATURES_SUFFIX}.fap";
+        ArtifactName = "totp_xtreme_unleashed_fw{FEATURES_SUFFIX}.zip";
     }
 )
 
@@ -71,7 +71,26 @@ function Build-Run {
 
         $build_output_artifact = Join-Path $build_output_folder "$($build_command.ArtifactName -replace '{FEATURES_SUFFIX}',$FeaturesSuffix)"
 
-        Copy-Item "$build_path/$latest_dir/.extapps/totp.fap" -Destination $build_output_artifact
+        $zip_folder = Join-Path $build_output_folder ".zip"
+        if (!(Test-Path -PathType Container $zip_folder)) {
+            New-Item -ItemType Directory -Path $zip_folder
+        } elseif (!$doNotClearBuildFolder) {
+            Remove-Item "$zip_folder/*" -Recurse -Force
+        }
+
+        $zip_app_folder = Join-Path $zip_folder "apps/Tools"
+        New-Item $zip_app_folder -ItemType Directory -Force
+
+        Copy-Item "$build_path/$latest_dir/.extapps/totp.fap" -Destination $zip_app_folder
+
+        $zip_plugins_folder = Join-Path $zip_folder "apps_data/totp/plugins"
+        New-Item $zip_plugins_folder -ItemType Directory -Force
+
+        Copy-Item "$build_path/$latest_dir/.extapps/*.fal" -Destination $zip_plugins_folder
+
+        Compress-Archive -Path "$zip_folder/*" -DestinationPath $build_output_artifact
+
+        Remove-Item $zip_folder -Recurse -Force
 
         Write-Host "Artifacts for $($build_command.Name) stored at $build_output_artifact"
     }
@@ -85,7 +104,7 @@ Build-Run -FeaturesSuffix '_no-badbt' -CppDefine TOTP_NO_BADBT_AUTOMATION
 
 $checksum_file = 'build/checksums.sha256'
 New-Item $checksum_file -ItemType File -Force
-Get-ChildItem -Path 'build/*.fap' | ForEach-Object {
+Get-ChildItem -Path 'build/*.zip' | ForEach-Object {
     $checksum = (Get-FileHash $_ -Algorithm SHA256).Hash.ToLower()
     $filename = $_.Name
     "$checksum  $filename" >> $checksum_file

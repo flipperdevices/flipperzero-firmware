@@ -16,6 +16,10 @@
 #define TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME "tab"
 #define TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER_NAME "slower"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint8_t TokenHashAlgo;
 typedef uint8_t TokenDigitsCount;
 typedef uint8_t TokenDuration;
@@ -270,3 +274,7 @@ TokenInfo* token_info_clone(const TokenInfo* src);
  * @param token_info instance to set defaults to
  */
 void token_info_set_defaults(TokenInfo* token_info);
+
+#ifdef __cplusplus
+}
+#endif
