@@ -58,6 +58,7 @@ typedef struct {
 
 typedef struct {
     Gui* gui;
+    FuriMutex* mutex;
     bool is_enabled;
     ViewPortOrientation orientation;
 
