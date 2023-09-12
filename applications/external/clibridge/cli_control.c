@@ -3,7 +3,6 @@
 #include <cli/cli.h>
 #include <cli/cli_i.h>
 #include <cli/cli_vcp.h>
-#include <furi/core/thread_i.h>
 #include "cligui_main_i.h"
 #include <FreeRTOS.h>
 
@@ -34,10 +33,11 @@ static size_t real_rx_handler(uint8_t* buffer, size_t size, uint32_t timeout) {
     return rx_cnt;
 }
 
-static CliCommand* getCliCommand(Cli* cli, const char* name) {
+static CliCommand_internal* getInternalCliCommand(Cli* cli, const char* name) {
     FuriString* target_command = furi_string_alloc();
     furi_string_set_str(target_command, name);
-    CliCommand* command = CliCommandTree_get(cli->commands, target_command);
+    CliCommand_internal* command =
+        CliCommandTree_internal_get(((Cli_internal*)cli)->commands, target_command);
     furi_string_free(target_command);
     return command;
 }
@@ -53,12 +53,12 @@ static CliSession session;
 void latch_tx_handler() {
     Cli* global_cli = furi_record_open(RECORD_CLI);
 
-    CliCommand* help_command = getCliCommand(global_cli, "help");
+    CliCommand_internal* help_command = getInternalCliCommand(global_cli, "help");
     cliThread = help_command->context;
 
     furi_thread_set_stdout_callback(tx_handler_stdout);
     if(cliThread != NULL) {
-        cliThread->output.write_callback = &tx_handler_stdout;
+        ((FuriThread_internal*)cliThread)->output.write_callback = &tx_handler_stdout;
     }
 
     rx_stream = furi_stream_buffer_alloc(128, 1);
@@ -78,7 +78,7 @@ void unlatch_tx_handler(bool persist) {
     Cli* global_cli = furi_record_open(RECORD_CLI);
     // Stash cliThread if not null
     if(cliThread != NULL) {
-        CliCommand* help_command = getCliCommand(global_cli, "help");
+        CliCommand_internal* help_command = getInternalCliCommand(global_cli, "help");
         help_command->context = cliThread;
     }
     // Switch to new session
@@ -96,7 +96,7 @@ void unlatch_tx_handler(bool persist) {
     furi_stream_buffer_send(rx_stream, "_", 1, FuriWaitForever);
     // Reconfigure stdout_callback to cli_vcp
     if(cliThread != NULL) {
-        cliThread->output.write_callback = cli_vcp.tx_stdout;
+        ((FuriThread_internal*)cliThread)->output.write_callback = cli_vcp.tx_stdout;
     }
     // At this point, all cli_vcp functions should be back.
     furi_stream_buffer_free(rx_stream);

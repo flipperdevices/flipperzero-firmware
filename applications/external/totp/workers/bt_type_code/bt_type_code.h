@@ -7,6 +7,10 @@
 
 #define TOTP_BT_KEYS_STORAGE_PATH EXT_PATH("apps_data/authenticator/.bt_hid.keys")
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint8_t TotpBtTypeCodeWorkerEvent;
 
 typedef struct TotpBtTypeCodeWorkerContext TotpBtTypeCodeWorkerContext;
@@ -82,3 +86,7 @@ void totp_bt_type_code_worker_notify(
  * @return \c true if Bluetooth is advertising now; \c false otherwise
  */
 bool totp_bt_type_code_worker_is_advertising(const TotpBtTypeCodeWorkerContext* context);
+
+#ifdef __cplusplus
+}
+#endif

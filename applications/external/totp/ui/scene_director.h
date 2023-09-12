@@ -5,6 +5,10 @@
 #include "../types/plugin_event.h"
 #include "totp_scenes_enum.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Activates scene
  * @param plugin_state application state
@@ -39,3 +43,7 @@ bool totp_scene_director_handle_event(PluginEvent* const event, PluginState* con
  * @param plugin_state application state
  */
 void totp_scene_director_force_redraw(PluginState* const plugin_state);
+
+#ifdef __cplusplus
+}
+#endif

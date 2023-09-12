@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0911-1343-0.90.2-ba54af3](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-11 23:35 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-11 23:35 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-12 13:01 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-12 13:01 EST`
 - UL: [Some faac fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b3cce2351a704fa70b6f348e92612b5d05462d32)
 - Added: [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
 - OFW: [github: workflow improvements #3032 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3032)
@@ -78,6 +78,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader) - New App Icon (By xMasterX)
 - Many apps renamed or re-categorized. Please delete your apps folder before install to prevent duplicates.
 - UL: princeton and varitemlist ui fixes (By xMasterX)
+- Removed: [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
+- Updated: [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader)
+- Updated: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
+- Updated: [Authenticator/TOTP v4.1.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 <a name="release">
 
@@ -388,7 +392,6 @@ $ ./fbt dolphin_ext
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [IR Scope (By kallanreed)](https://github.com/kallanreed/unleashed-firmware/tree/dev/applications/external/ir_scope)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
-- [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
 - [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Lightmeter v1.2 (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`

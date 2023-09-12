@@ -36,6 +36,8 @@
 #define TOTP_FIRMWARE_CFW (3)
 // End of list
 
+// If target firmware is not yet set, default it to OFW because there is no chance to force Flipper Devices to update their build pipelines :angry:.
+// Xtreme sucks, don't use it
 #ifndef TOTP_TARGET_FIRMWARE
 #define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_CFW
 #endif

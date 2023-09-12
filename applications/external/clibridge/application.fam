@@ -1,5 +1,5 @@
 App(
-    appid="cligui",
+    appid="cli_gui",
     name="CLI-GUI Bridge",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="cligui_main",
