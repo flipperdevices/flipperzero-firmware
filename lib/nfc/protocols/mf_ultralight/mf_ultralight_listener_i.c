@@ -194,6 +194,23 @@ void mf_ultralight_composite_command_set_next(
     instance->composite_cmd.callback = handler;
 }
 
+void mf_ultralight_single_counter_try_increase(MfUltralightListener* instance) {
+    if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportSingleCounter) &&
+       instance->config->access.nfc_cnt_en && !instance->single_counter_increased) {
+        instance->data->counter[2].counter++;
+        instance->single_counter_increased = true;
+    }
+}
+
+void mf_ultralight_single_counter_try_to_unlock(
+    MfUltralightListener* instance,
+    Iso14443_3aListenerEventType type) {
+    if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportSingleCounter) &&
+       type == Iso14443_3aListenerEventTypeFieldOff) {
+        instance->single_counter_increased = false;
+    }
+}
+
 static bool mf_ultralight_i2c_page_validator_for_sector0(
     uint16_t start_page,
     uint16_t end_page,

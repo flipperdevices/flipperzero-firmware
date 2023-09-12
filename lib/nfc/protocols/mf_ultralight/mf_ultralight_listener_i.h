@@ -59,10 +59,16 @@ struct MfUltralightListener {
     MfUltralightListenerEventData mfu_event_data;
     NfcGenericCallback callback;
     uint8_t sector;
+    bool single_counter_increased;
     MfUltralightMirrorMode mirror;
     MfUltralightListenerCompositeCommandContext composite_cmd;
     void* context;
 };
+
+void mf_ultralight_single_counter_try_increase(MfUltralightListener* instance);
+void mf_ultralight_single_counter_try_to_unlock(
+    MfUltralightListener* instance,
+    Iso14443_3aListenerEventType type);
 
 void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance);
 void mf_ultralight_mirror_read_prepare(uint8_t start_page, MfUltralightListener* instance);
