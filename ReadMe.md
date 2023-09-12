@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0905-0900-0.90.2-95c6220.tgz&channel=RM0905-0900-0.90.2-95c6220&version=0.90.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0905-0900-0.90.2-95c6220-NoAnim.tgz&channel=RM0905-0900-0.90.2-95c6220-NoAnim&version=0.90.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0912-1627-0.90.2-feb7d81.tgz&channel=RM0912-1627-0.90.2-feb7d81&version=0.90.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0912-1627-0.90.2-feb7d81-NoAnim.tgz&channel=RM0912-1627-0.90.2-feb7d81-NoAnim&version=0.90.2)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,56 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0912-1531-0.90.2-feb7d81](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-12 15:31 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-12 15:31 EST`
-- UL: [Some faac fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b3cce2351a704fa70b6f348e92612b5d05462d32)
-- Added: [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
-- OFW: [github: workflow improvements #3032 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3032)
-- OFW: [Account for the - in line carry-over #3038 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3038)
-- OFW: [iButton: Return to the file selection if file is corrupted #3040 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3040)
-- UL: [Subghz fix path reset on save name exit (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/45fd5ef9d88efe36d9b0445b460c17492a870281)
-- Added: [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
-- Updated: [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
-- [Additional Frequencies for Sub-GHz Rolling Flaws v1.5 app (Idea by arkanet)](https://github.com/arkanet/FlipperZero/commit/11b791f683166c9bf87866b9630491995b8feffd)
-- Added: [Radar Scanner (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
-- Updated: [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
-- Updated: [Sub-GHz Rolling Flaws v1.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
-- Updated: [Slot Machine v1.2 (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
-- Updated: [Radar Scanner (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Extended Functionality #17 (By R4g3D)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/17)
-- Renamed a few apps for better visibility, organization and sorting (By RogueMaster and Willy-JL)
-- Updated: [Sokoban v1.1 (By Racso)](https://github.com/Racso/fzero-apps)
-- Updated: [ESP32-C6 Gravity v0.5.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
-- Updated: [WiFi (Marauder) v6.2 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add GPS and Wardrive commands #29 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/29)
-- UL PR: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
-- Updated: [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
-- Updated: [Apple BLE Spam v1.0.6 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
-- Settings: [CFW Settings Layout options for Compact for Main Menu (By MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a7208b228bd9eba465f162962b9385d02d28e68c)
-- [Fix view_port_update() apps random deadlocks (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f927eb2349aa0de7cb607b90b5b981ee5fa0f824)
-- [RGB Settings Menu Fix #745 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/745)
-- Updated: [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
-- Added: [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
-- Added: [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader)
-- Updated: [Sub-GHz Bruteforcer v3.9.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- OFW: [Various Fixes and Improvements #3059 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3059)
-- Fix Loader Mismatch issue due to OFW PR #3059 (By RogueMaster)
-- Un-did duplicate HID App & Snake "Special request from (OFW) marketing team" (By RogueMaster)
-- Updated: [RFID Detector (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
-- Move [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon) to RFID folder.
-- Temp Removal: [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board` due to API changes
-- OFW: [SD-Card: proper HAL #3058 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3058)
-- OFW: [Snake: fix deadlock caused by use of view_port_update while locking model #3063 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3063)
-- OFW: [fbt: added FW_CFG_<name> with build configuration #3062 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3062)
-- OFW: [Sub-GHz: incorrect key parsing crash #3066 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3066)
-- UL: [Save hopping state in SubGHz #590 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/590)
-- UL: [add workflow to automatic CodeQL Code scanning #599 (By derskythe)](https://github.com/DarkFlippers/unleashed-firmware/pull/599)
-- Many apps versions incremented with fix deadlock caused by use of view_port_update while locking model (By RogueMaster & xMasterX)
-- Many apps renamed or re-categorized. Please delete your apps folder before install to prevent duplicates.
-- UL: princeton and varitemlist ui fixes (By xMasterX)
-- Removed: [JavaScript (By zap8600)](https://github.com/zap8600/js-f0)
-- Updated: [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader)
-- Updated: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
-- Updated: [Authenticator/TOTP v4.1.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-12 16:31 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-12 16:31 EST`
 
 <a name="release">
 
@@ -505,4 +457,4 @@ $ ./fbt dolphin_ext
 - [Air Tag for FZ ($50 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/696)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0905-0900-0.90.2-95c6220.tgz&channel=RM0905-0900-0.90.2-95c6220&version=0.90.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0905-0900-0.90.2-95c6220-NoAnim.tgz&channel=RM0905-0900-0.90.2-95c6220-NoAnim&version=0.90.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0912-1627-0.90.2-feb7d81.tgz&channel=RM0912-1627-0.90.2-feb7d81&version=0.90.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0912-1627-0.90.2-feb7d81-NoAnim.tgz&channel=RM0912-1627-0.90.2-feb7d81-NoAnim&version=0.90.2)
