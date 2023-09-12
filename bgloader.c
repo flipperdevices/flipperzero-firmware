@@ -185,7 +185,9 @@ static bool bgloader_load_app(BGLoaderApp *app, const char *path)
 
 	if (status) {
 		bgloader_check_app_alive(app);
-		storage_file_close(app->fap->elf->fd);
+		if (app->fap->elf->fd != NULL) {
+			storage_file_close(app->fap->elf->fd);
+		}
 	} else {
 		bgloader_check_app_dead(app);
 	}
