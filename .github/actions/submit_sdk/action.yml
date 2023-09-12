@@ -42,7 +42,7 @@ runs:
           echo "Invalid firmware-target: ${{ inputs.firmware-target }}"
           exit 1
         fi
-        if ! echo "${{ inputs.firmware-version }}" | grep -q "^[0-9]\+\.[0-9]\+\.[0-9]\+\(-rc\)\?[0-9]\?$" ; then
+        if ! echo "${{ inputs.firmware-version }}" | grep -q "^[0-9]\+\.[0-9]\+\.[0-9]\+\(-rc\)\?\([0-9]\+\)\?$" ; then
           echo "Invalid firmware-version: ${{ inputs.firmware-version }}"
           exit 1
         fi
