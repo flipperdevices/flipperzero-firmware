@@ -29,7 +29,8 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
             nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
         mfc_event->data->poller_mode.mode = MfClassicPollerModeDictAttack;
         mfc_event->data->poller_mode.data = mfc_data;
-        instance->nfc_dict_context.sectors_total = mf_classic_get_total_sectors_num(mfc_data->type);
+        instance->nfc_dict_context.sectors_total =
+            mf_classic_get_total_sectors_num(mfc_data->type);
         mf_classic_get_read_sectors_and_keys(
             mfc_data,
             &instance->nfc_dict_context.sectors_read,
@@ -38,7 +39,7 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
             instance->view_dispatcher, NfcCustomEventDictAttackDataUpdate);
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestKey) {
         MfClassicKey key = {};
-        if(nfc_dict_get_next_key(instance->nfc_dict_context.dict, &key)) {
+        if(nfc_dict_get_next_key(instance->nfc_dict_context.dict, key.data, sizeof(MfClassicKey))) {
             mfc_event->data->key_request_data.key = key;
             mfc_event->data->key_request_data.key_provided = true;
             instance->nfc_dict_context.dict_keys_current++;
@@ -121,12 +122,13 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* instance) {
         scene_manager_get_scene_state(instance->scene_manager, NfcSceneMfClassicDictAttack);
     if(state == DictAttackStateUserDictInProgress) {
         do {
-            if(!nfc_dict_check_presence(NfcDictTypeUser)) {
+            if(!nfc_dict_check_presence(NFC_APP_MF_CLASSIC_DICT_USER_PATH)) {
                 state = DictAttackStateSystemDictInProgress;
                 break;
             }
 
-            instance->nfc_dict_context.dict = nfc_dict_alloc(NfcDictTypeUser);
+            instance->nfc_dict_context.dict = nfc_dict_alloc(
+                NFC_APP_MF_CLASSIC_DICT_USER_PATH, NfcDictModeOpenAlways, sizeof(MfClassicKey));
             if(nfc_dict_get_total_keys(instance->nfc_dict_context.dict) == 0) {
                 nfc_dict_free(instance->nfc_dict_context.dict);
                 state = DictAttackStateSystemDictInProgress;
@@ -137,7 +139,8 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* instance) {
         } while(false);
     }
     if(state == DictAttackStateSystemDictInProgress) {
-        instance->nfc_dict_context.dict = nfc_dict_alloc(NfcDictTypeSystem);
+        instance->nfc_dict_context.dict = nfc_dict_alloc(
+            NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH, NfcDictModeOpenExisting, sizeof(MfClassicKey));
         dict_attack_set_header(instance->dict_attack, "MF Classic System Dictionary");
     }
 

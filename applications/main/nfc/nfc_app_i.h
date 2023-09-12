@@ -67,6 +67,9 @@
 #define NFC_APP_MFKEY32_LOGS_FILE_NAME ".mfkey32.log"
 #define NFC_APP_MFKEY32_LOGS_FILE_PATH (NFC_APP_FOLDER "/" NFC_APP_MFKEY32_LOGS_FILE_NAME)
 
+#define NFC_APP_MF_CLASSIC_DICT_USER_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict_user.nfc")
+#define NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict.nfc")
+
 typedef enum {
     NfcRpcStateIdle,
     NfcRpcStateEmulating,

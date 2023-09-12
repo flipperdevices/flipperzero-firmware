@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,39.0,,
+Version,+,41.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -2211,14 +2211,14 @@ Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_data,void,"NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_uid,_Bool,"NfcDevice*, const uint8_t*, size_t"
-Function,+,nfc_dict_add_key,_Bool,"NfcDict*, const MfClassicKey*"
-Function,+,nfc_dict_alloc,NfcDict*,NfcDictType
-Function,+,nfc_dict_check_presence,_Bool,NfcDictType
-Function,+,nfc_dict_delete_key,_Bool,"NfcDict*, const MfClassicKey*"
+Function,+,nfc_dict_add_key,_Bool,"NfcDict*, const uint8_t*, size_t"
+Function,+,nfc_dict_alloc,NfcDict*,"const char*, NfcDictMode, size_t"
+Function,+,nfc_dict_check_presence,_Bool,const char*
+Function,+,nfc_dict_delete_key,_Bool,"NfcDict*, const uint8_t*, size_t"
 Function,+,nfc_dict_free,void,NfcDict*
-Function,+,nfc_dict_get_next_key,_Bool,"NfcDict*, MfClassicKey*"
+Function,+,nfc_dict_get_next_key,_Bool,"NfcDict*, uint8_t*, size_t"
 Function,+,nfc_dict_get_total_keys,uint32_t,NfcDict*
-Function,+,nfc_dict_is_key_present,_Bool,"NfcDict*, const MfClassicKey*"
+Function,+,nfc_dict_is_key_present,_Bool,"NfcDict*, const uint8_t*, size_t"
 Function,+,nfc_dict_rewind,_Bool,NfcDict*
 Function,+,nfc_free,void,Nfc*
 Function,+,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
