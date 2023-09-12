@@ -5,6 +5,10 @@
 #include <furi/core/mutex.h>
 #include "../../types/automation_kb_layout.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint8_t TotpBtTypeCodeWorkerEvent;
 
 typedef struct TotpBtTypeCodeWorkerContext TotpBtTypeCodeWorkerContext;
@@ -80,3 +84,7 @@ void totp_bt_type_code_worker_notify(
  * @return \c true if Bluetooth is advertising now; \c false otherwise
  */
 bool totp_bt_type_code_worker_is_advertising(const TotpBtTypeCodeWorkerContext* context);
+
+#ifdef __cplusplus
+}
+#endif
