@@ -28,9 +28,8 @@
 #include <nfc/scenes/nfc_scene.h>
 #include "helpers/nfc_custom_event.h"
 #include "helpers/mf_ultralight_auth.h"
-#include "helpers/mf_dict.h"
-#include "helpers/mfkey32_logger.h"
 #include "helpers/mf_user_dict.h"
+#include "helpers/mfkey32_logger.h"
 #include "helpers/mf_classic_key_cache.h"
 
 #include <dialogs/dialogs.h>
@@ -50,8 +49,9 @@
 #include <nfc/nfc_scanner.h>
 #include <nfc/nfc_listener.h>
 
-#include <lib/nfc/nfc_device.h>
-#include <lib/nfc/helpers/nfc_data_generator.h>
+#include <nfc/nfc_device.h>
+#include <nfc/helpers/nfc_data_generator.h>
+#include <nfc/helpers/nfc_dict.h>
 
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
@@ -67,6 +67,9 @@
 #define NFC_APP_MFKEY32_LOGS_FILE_NAME ".mfkey32.log"
 #define NFC_APP_MFKEY32_LOGS_FILE_PATH (NFC_APP_FOLDER "/" NFC_APP_MFKEY32_LOGS_FILE_NAME)
 
+#define NFC_APP_MF_CLASSIC_DICT_USER_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict_user.nfc")
+#define NFC_APP_MF_CLASSIC_DICT_SYSTEM_PATH (NFC_APP_FOLDER "/assets/mf_classic_dict.nfc")
+
 typedef enum {
     NfcRpcStateIdle,
     NfcRpcStateEmulating,
@@ -74,7 +77,7 @@ typedef enum {
 } NfcRpcState;
 
 typedef struct {
-    MfDict* dict;
+    NfcDict* dict;
     uint8_t sectors_total;
     uint8_t sectors_read;
     uint8_t current_sector;
@@ -122,7 +125,7 @@ struct NfcApp {
     NfcListener* listener;
 
     MfUltralightAuth* mf_ul_auth;
-    NfcMfClassicDictAttackContext mf_dict_context;
+    NfcMfClassicDictAttackContext nfc_dict_context;
     Mfkey32Logger* mfkey32_logger;
     MfUserDict* mf_user_dict;
     MfClassicKeyCache* mfc_key_cache;

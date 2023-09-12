@@ -153,6 +153,7 @@ Header,+,lib/nanopb/pb_decode.h,,
 Header,+,lib/nanopb/pb_encode.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
 Header,+,lib/nfc/helpers/nfc_data_generator.h,,
+Header,+,lib/nfc/helpers/nfc_dict.h,,
 Header,+,lib/nfc/helpers/nfc_util.h,,
 Header,+,lib/nfc/nfc.h,,
 Header,+,lib/nfc/nfc_device.h,,
@@ -2210,6 +2211,15 @@ Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_data,void,"NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_uid,_Bool,"NfcDevice*, const uint8_t*, size_t"
+Function,+,nfc_dict_add_key,_Bool,"NfcDict*, const uint8_t*, size_t"
+Function,+,nfc_dict_alloc,NfcDict*,"const char*, NfcDictMode, size_t"
+Function,+,nfc_dict_check_presence,_Bool,const char*
+Function,+,nfc_dict_delete_key,_Bool,"NfcDict*, const uint8_t*, size_t"
+Function,+,nfc_dict_free,void,NfcDict*
+Function,+,nfc_dict_get_next_key,_Bool,"NfcDict*, uint8_t*, size_t"
+Function,+,nfc_dict_get_total_keys,uint32_t,NfcDict*
+Function,+,nfc_dict_is_key_present,_Bool,"NfcDict*, const uint8_t*, size_t"
+Function,+,nfc_dict_rewind,_Bool,NfcDict*
 Function,+,nfc_free,void,Nfc*
 Function,+,nfc_iso14443a_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,+,nfc_iso14443a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBuffer*"
