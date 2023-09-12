@@ -137,7 +137,7 @@ static bool iso14443_4a_poller_detect(NfcGenericEvent event, void* context) {
     bool protocol_detected = false;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
-        protocol_detected = iso14443_4a_is_ats_supported(instance->data);
+        protocol_detected = iso14443_3a_supports_iso14443_4(instance->data->iso14443_3a_data);
     }
 
     return protocol_detected;

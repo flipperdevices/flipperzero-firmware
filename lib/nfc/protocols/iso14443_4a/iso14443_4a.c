@@ -4,7 +4,6 @@
 
 #define ISO14443_4A_PROTOCOL_NAME "ISO14443-4A"
 #define ISO14443_4A_DEVICE_NAME "ISO14443-4A (Unknown)"
-#define ISO14443_4A_ATS_BIT (1U << 5)
 
 #define ISO14443_4A_ATS_KEY "ATS"
 
@@ -136,9 +135,4 @@ Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data) {
     furi_assert(data);
 
     return data->iso14443_3a_data;
-}
-
-bool iso14443_4a_is_ats_supported(const Iso14443_4aData* data) {
-    const Iso14443_3aData* iso14443_3a_data = data->iso14443_3a_data;
-    return iso14443_3a_data->sak & ISO14443_4A_ATS_BIT;
 }

@@ -48,8 +48,6 @@ Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data);
 
 // Getters & Tests
 
-bool iso14443_4a_is_ats_supported(const Iso14443_4aData* data);
-
 #ifdef __cplusplus
 }
 #endif
