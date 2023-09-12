@@ -2,12 +2,6 @@
 #include <gui/elements.h>
 #include <furi_hal_bt.h>
 
-#include "lib/stm32wb_copro/wpan/ble/ble.h"
-#include "lib/stm32wb_copro/wpan/ble/core/auto/ble_gap_aci.h"
-#include "lib/stm32wb_copro/wpan/ble/core/auto/ble_types.h"
-#include "lib/stm32wb_copro/wpan/interface/patterns/ble_thread/shci/shci.h"
-#include <stm32wbxx.h>
-
 #include <furi_hal_random.h>
 //#include <assets_icons.h>
 #include "apple_ble_spam_icons.h"
@@ -22,8 +16,124 @@ typedef struct {
 } Payload;
 
 // NAPI
+// TODO: Use __attribute__((aligned(2))) instead?
+// TODO: Use an offset of the base address?
+
+// hci_send_req address for 0.90.1 firmware
+// Use a tool like radare2 to get this address from firmware.elf
+#define HCI_SEND_REQ_ADDR 0x08015eb4
 
 #define TAG "FuriHalBt"
+#define BLE_STATUS_TIMEOUT 0xFFU
+#define BLE_CMD_MAX_PARAM_LEN 255
+
+typedef uint8_t tBleStatus;
+
+typedef __PACKED_STRUCT {
+    uint8_t Adv_Data_Length;
+    uint8_t Adv_Data[BLE_CMD_MAX_PARAM_LEN - 1];
+}
+aci_gap_additional_beacon_set_data_cp0;
+
+typedef __PACKED_STRUCT {
+    uint16_t Adv_Interval_Min;
+    uint16_t Adv_Interval_Max;
+    uint8_t Adv_Channel_Map;
+    uint8_t Own_Address_Type;
+    uint8_t Own_Address[6];
+    uint8_t PA_Level;
+}
+aci_gap_additional_beacon_start_cp0;
+
+struct hci_request {
+    uint16_t ogf;
+    uint16_t ocf;
+    int event;
+    void* cparam;
+    int clen;
+    void* rparam;
+    int rlen;
+};
+
+int (*napi_hci_send_req)(struct hci_request* p_cmd, uint8_t async) =
+    (int (*)(struct hci_request*, uint8_t))(HCI_SEND_REQ_ADDR | 0x01);
+
+void* Osal_MemCpy(void* dest, const void* src, unsigned int size) {
+    return memcpy(dest, src, size);
+}
+
+void* Osal_MemSet(void* ptr, int value, unsigned int size) {
+    return memset(ptr, value, size);
+}
+
+tBleStatus aci_gap_additional_beacon_start(
+    uint16_t Adv_Interval_Min,
+    uint16_t Adv_Interval_Max,
+    uint8_t Adv_Channel_Map,
+    uint8_t Own_Address_Type,
+    const uint8_t* Own_Address,
+    uint8_t PA_Level) {
+    struct hci_request rq;
+    uint8_t cmd_buffer[BLE_CMD_MAX_PARAM_LEN];
+    aci_gap_additional_beacon_start_cp0* cp0 = (aci_gap_additional_beacon_start_cp0*)(cmd_buffer);
+    tBleStatus status = 0;
+    int index_input = 0;
+    cp0->Adv_Interval_Min = Adv_Interval_Min;
+    index_input += 2;
+    cp0->Adv_Interval_Max = Adv_Interval_Max;
+    index_input += 2;
+    cp0->Adv_Channel_Map = Adv_Channel_Map;
+    index_input += 1;
+    cp0->Own_Address_Type = Own_Address_Type;
+    index_input += 1;
+    Osal_MemCpy((void*)&cp0->Own_Address, (const void*)Own_Address, 6);
+    index_input += 6;
+    cp0->PA_Level = PA_Level;
+    index_input += 1;
+    Osal_MemSet(&rq, 0, sizeof(rq));
+    rq.ogf = 0x3f;
+    rq.ocf = 0x0b0;
+    rq.cparam = cmd_buffer;
+    rq.clen = index_input;
+    rq.rparam = &status;
+    rq.rlen = 1;
+    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
+    return status;
+}
+
+tBleStatus aci_gap_additional_beacon_stop(void) {
+    struct hci_request rq;
+    tBleStatus status = 0;
+    Osal_MemSet(&rq, 0, sizeof(rq));
+    rq.ogf = 0x3f;
+    rq.ocf = 0x0b1;
+    rq.rparam = &status;
+    rq.rlen = 1;
+    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
+    return status;
+}
+
+tBleStatus aci_gap_additional_beacon_set_data(uint8_t Adv_Data_Length, const uint8_t* Adv_Data) {
+    struct hci_request rq;
+    uint8_t cmd_buffer[BLE_CMD_MAX_PARAM_LEN];
+    aci_gap_additional_beacon_set_data_cp0* cp0 =
+        (aci_gap_additional_beacon_set_data_cp0*)(cmd_buffer);
+    tBleStatus status = 0;
+    int index_input = 0;
+    cp0->Adv_Data_Length = Adv_Data_Length;
+    index_input += 1;
+    Osal_MemCpy((void*)&cp0->Adv_Data, (const void*)Adv_Data, Adv_Data_Length);
+    index_input += Adv_Data_Length;
+    Osal_MemSet(&rq, 0, sizeof(rq));
+    rq.ogf = 0x3f;
+    rq.ocf = 0x0b2;
+    rq.cparam = cmd_buffer;
+    rq.clen = index_input;
+    rq.rparam = &status;
+    rq.rlen = 1;
+    if(napi_hci_send_req(&rq, 0) < 0) return BLE_STATUS_TIMEOUT;
+    return status;
+}
 
 bool napi_furi_hal_bt_custom_adv_set(const uint8_t* adv_data, size_t adv_len) {
     tBleStatus status = aci_gap_additional_beacon_set_data(adv_len, adv_data);
