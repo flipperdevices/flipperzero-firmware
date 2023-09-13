@@ -12,52 +12,55 @@ static void render_callback(Canvas* canvas, void* ctx) {
         uint8_t line = 0;
         char str[32];
 
-		if (app->data.cpu_usage <= 100) {
-			canvas_draw_str(canvas, 0, 10, "CPU");
-			snprintf(str, 32, "%d%%", app->data.cpu_usage);
-			elements_progress_bar_with_text(canvas, BAR_X, 1, BAR_WIDTH, app->data.cpu_usage / 100.0f, str);
-			
-			line++;
-		}
+        if(app->data.cpu_usage <= 100) {
+            canvas_draw_str(canvas, 0, 10, "CPU");
+            snprintf(str, 32, "%d%%", app->data.cpu_usage);
+            elements_progress_bar_with_text(
+                canvas, BAR_X, 1, BAR_WIDTH, app->data.cpu_usage / 100.0f, str);
 
-		if (app->data.ram_usage <= 100) {
-			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "RAM");
-			snprintf(
-				str,
-				32,
-				"%.1f/%.1f %s",
-				(double)(app->data.ram_max * 0.1f * app->data.ram_usage * 0.01f),
-				(double)(app->data.ram_max * 0.1f),
-				app->data.ram_unit);
-			elements_progress_bar_with_text(
-				canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.ram_usage * 0.01f, str);
-			
-			line++;
-		}
+            line++;
+        }
 
-		if (app->data.gpu_usage <= 100) {
-			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "GPU");
-			snprintf(str, 32, "%d%%", app->data.gpu_usage);
-			elements_progress_bar_with_text(
-				canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.gpu_usage / 100.0f, str);
-			
-			line++;
-		}
+        if(app->data.ram_usage <= 100) {
+            canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "RAM");
+            snprintf(
+                str,
+                32,
+                "%.1f/%.1f %s",
+                (double)(app->data.ram_max * 0.1f * app->data.ram_usage * 0.01f),
+                (double)(app->data.ram_max * 0.1f),
+                app->data.ram_unit);
+            elements_progress_bar_with_text(
+                canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.ram_usage * 0.01f, str);
 
-		if (app->data.vram_usage <= 100) {
-			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "VRAM");
-			snprintf(
-				str,
-				32,
-				"%.1f/%.1f %s",
-				(double)(app->data.vram_max * 0.1f * app->data.vram_usage * 0.01f),
-				(double)(app->data.vram_max * 0.1f),
-				app->data.vram_unit); 
-			elements_progress_bar_with_text(
-				canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.vram_usage * 0.01f, str);
-			
-			line++;
-		}
+            line++;
+        }
+
+        if(app->data.gpu_usage <= 100) {
+            canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "GPU");
+            snprintf(str, 32, "%d%%", app->data.gpu_usage);
+            elements_progress_bar_with_text(
+                canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.gpu_usage / 100.0f, str);
+
+            line++;
+        }
+
+        if(app->data.vram_usage <= 100) {
+            canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "VRAM");
+            snprintf(
+                str,
+                32,
+                "%.1f/%.1f %s",
+                (double)(app->data.vram_max * 0.1f * app->data.vram_usage * 0.01f),
+                (double)(app->data.vram_max * 0.1f),
+                app->data.vram_unit);
+            elements_progress_bar_with_text(
+                canvas, BAR_X, 1 + BAR_MARGIN * line, BAR_WIDTH, app->data.vram_usage * 0.01f, str);
+
+            line++;
+        }
+
+        if(line == 0) app->bt_state = BtStateNoData;
     } else {
         canvas_draw_str_aligned(
             canvas,
@@ -68,7 +71,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
             app->bt_state == BtStateChecking ? "Checking BLE..." :
             app->bt_state == BtStateInactive ? "BLE inactive!" :
             app->bt_state == BtStateWaiting  ? "Waiting for data..." :
-                                               "Connection lost!");
+            app->bt_state == BtStateLost     ? "Connection lost!" :
+                                               "No data!");
     }
 }
 
@@ -93,7 +97,7 @@ static uint16_t bt_serial_callback(SerialServiceEvent event, void* ctx) {
         if(event.data.size == sizeof(DataStruct)) {
             memcpy(&app->data, event.data.buffer, sizeof(DataStruct));
             app->bt_state = BtStateRecieving;
-			app->last_packet = furi_hal_rtc_get_timestamp();
+            app->last_packet = furi_hal_rtc_get_timestamp();
         }
     }
 
@@ -108,10 +112,10 @@ static PcMonitorApp* pc_monitor_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->bt = furi_record_open(RECORD_BT);
 
-	app->data.cpu_usage = UINT8_MAX;
-	app->data.ram_usage = UINT8_MAX;
-	app->data.gpu_usage = UINT8_MAX;
-	app->data.vram_usage = UINT8_MAX;
+    app->data.cpu_usage = UINT8_MAX;
+    app->data.ram_usage = UINT8_MAX;
+    app->data.gpu_usage = UINT8_MAX;
+    app->data.vram_usage = UINT8_MAX;
 
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     view_port_draw_callback_set(app->view_port, render_callback, app);
@@ -144,14 +148,16 @@ int32_t pc_monitor_app(void* p) {
         FURI_LOG_W(TAG, "Please, enable the Bluetooth and restart the app");
     }
 
-	// Main loop
+    // Main loop
     InputEvent event;
     while(true) {
-		if (furi_message_queue_get(app->event_queue, &event, 1) == FuriStatusOk) {
-        	if(event.type == InputTypeShort && event.key == InputKeyBack) break;
-		}
-		
-		if(app->bt_state == BtStateRecieving && (furi_hal_rtc_get_timestamp() - app->last_packet > 5)) app->bt_state = BtStateLost; 
+        if(furi_message_queue_get(app->event_queue, &event, 1) == FuriStatusOk) {
+            if(event.type == InputTypeShort && event.key == InputKeyBack) break;
+        }
+
+        if(app->bt_state == BtStateRecieving &&
+           (furi_hal_rtc_get_timestamp() - app->last_packet > 5))
+            app->bt_state = BtStateLost;
     }
 
     furi_hal_bt_serial_set_event_callback(0, NULL, NULL);

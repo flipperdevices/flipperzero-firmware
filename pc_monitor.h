@@ -21,10 +21,11 @@ typedef enum {
     BtStateInactive,
     BtStateWaiting,
     BtStateRecieving,
+    BtStateNoData,
     BtStateLost
 } BtState;
 
-#pragma pack(push,1)
+#pragma pack(push, 1)
 typedef struct {
     uint8_t cpu_usage;
     uint16_t ram_max;
@@ -47,5 +48,5 @@ typedef struct {
 
     BtState bt_state;
     DataStruct data;
-	uint32_t last_packet;
+    uint32_t last_packet;
 } PcMonitorApp;
