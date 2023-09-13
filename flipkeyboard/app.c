@@ -1,5 +1,14 @@
 #include "app_i.h"
 
+static void play_tone(FlipboardModel* model, KeySettingModel* ksm);
+static void set_colors(FlipboardModel* model, KeySettingModel* ksm, uint8_t new_key);
+static void send_keystrokes(FlipboardModel* model, KeySettingModel* ksm);
+static uint8_t reduce(uint8_t new_key, bool left_wins);
+
+// -----------------------------------------------------------
+//            THIS IS YOUR MAIN APPLICATION CODE
+// -----------------------------------------------------------
+
 bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
     UNUSED(event);
     UNUSED(context);
@@ -27,6 +36,73 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     }
 
     // canvas_draw_icon(canvas, 64, 42, &I_glyph_1_7x9);
+}
+
+bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key) {
+    Flipboard* app = (Flipboard*)context;
+    FlipboardModel* model = flipboard_get_model(app);
+    uint8_t reduced_new_key = new_key;
+
+    if(flipboard_model_get_single_button_mode(model)) {
+        reduced_new_key = reduce(new_key, false);
+    }
+
+    FURI_LOG_D(TAG, "SW EVENT: old=%d new=%d reduced=%d", old_key, new_key, reduced_new_key);
+
+    KeySettingModel* ksm = flipboard_model_get_key_setting_model(model, reduced_new_key);
+    send_keystrokes(model, ksm);
+    play_tone(model, ksm);
+    set_colors(model, ksm, new_key);
+
+    return true;
+}
+
+void flipboard_enter_callback(void* context) {
+    FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
+    flipboard_model_set_key_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
+    set_colors(fm, NULL, 0x0);
+    flipboard_model_set_gui_refresh_speed_ms(fm, 100);
+}
+
+void flipboard_exit_callback(void* context) {
+    FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
+    set_colors(fm, NULL, 0x0);
+    flipboard_model_set_key_monitor(fm, NULL, NULL);
+    flipboard_model_set_gui_refresh_speed_ms(fm, 0);
+}
+
+// -----------------------------------------------------------
+//            BELOW HERE ARE JUST HELPER METHODS
+// -----------------------------------------------------------
+
+View* get_primary_view(void* context) {
+    FlipboardModel* model = flipboard_get_model((Flipboard*)context);
+    View* view_primary = view_alloc();
+    view_set_draw_callback(view_primary, flipboard_view_flip_keyboard_draw);
+    view_set_input_callback(view_primary, flipboard_view_flip_keyboard_input);
+    view_set_previous_callback(view_primary, flipboard_navigation_show_app_menu);
+    view_set_enter_callback(view_primary, flipboard_enter_callback);
+    view_set_exit_callback(view_primary, flipboard_exit_callback);
+    view_set_context(view_primary, context);
+    view_allocate_model(view_primary, ViewModelTypeLockFree, sizeof(FlipboardModelRef));
+    FlipboardModelRef* ref = (FlipboardModelRef*)view_get_model(view_primary);
+    ref->model = model;
+    return view_primary;
+}
+
+int32_t flipboard_keyboard_app(void* p) {
+    UNUSED(p);
+
+    KeySettingModelFields fields = KeySettingModelFieldAll;
+    bool single_mode_button = true;
+    bool attach_keyboard = false;
+
+    Flipboard* app =
+        flipboard_alloc(fields, single_mode_button, attach_keyboard, get_primary_view);
+    view_dispatcher_run(flipboard_get_view_dispatcher(app));
+    flipboard_free(app);
+
+    return 0;
 }
 
 static void play_tone(FlipboardModel* model, KeySettingModel* ksm) {
@@ -91,66 +167,4 @@ static uint8_t reduce(uint8_t new_key, bool left_wins) {
     }
 
     return mask;
-}
-
-bool flipboard_debounced_sw_callback(void* context, uint8_t old_key, uint8_t new_key) {
-    Flipboard* app = (Flipboard*)context;
-    FlipboardModel* model = flipboard_get_model(app);
-    uint8_t reduced_new_key = new_key;
-
-    FURI_LOG_D(TAG, "SW EVENT: old=%d new=%d", old_key, new_key);
-    if(flipboard_model_get_single_button_mode(model)) {
-        reduced_new_key = reduce(new_key, false);
-    }
-
-    KeySettingModel* ksm = flipboard_model_get_key_setting_model(model, reduced_new_key);
-    send_keystrokes(model, ksm);
-    play_tone(model, ksm);
-    set_colors(model, ksm, new_key);
-
-    return true;
-}
-
-void flipboard_enter_callback(void* context) {
-    FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
-    flipboard_model_set_key_monitor(fm, flipboard_debounced_sw_callback, (Flipboard*)context);
-    set_colors(fm, NULL, 0x0);
-    flipboard_model_set_gui_refresh_speed_ms(fm, 100);
-}
-
-void flipboard_exit_callback(void* context) {
-    FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
-    set_colors(fm, NULL, 0x0);
-    flipboard_model_set_key_monitor(fm, NULL, NULL);
-    flipboard_model_set_gui_refresh_speed_ms(fm, 0);
-}
-
-View* get_primary_view(void* context) {
-    FlipboardModel* model = flipboard_get_model((Flipboard*)context);
-    View* view_primary = view_alloc();
-    view_set_draw_callback(view_primary, flipboard_view_flip_keyboard_draw);
-    view_set_input_callback(view_primary, flipboard_view_flip_keyboard_input);
-    view_set_previous_callback(view_primary, flipboard_navigation_show_app_menu);
-    view_set_enter_callback(view_primary, flipboard_enter_callback);
-    view_set_exit_callback(view_primary, flipboard_exit_callback);
-    view_set_context(view_primary, context);
-    view_allocate_model(view_primary, ViewModelTypeLockFree, sizeof(FlipboardModelRef));
-    FlipboardModelRef* ref = (FlipboardModelRef*)view_get_model(view_primary);
-    ref->model = model;
-    return view_primary;
-}
-
-int32_t flipboard_keyboard_app(void* p) {
-    UNUSED(p);
-
-    KeySettingModelFields fields = KeySettingModelFieldAll;
-    bool single_mode_button = true;
-    bool attach_keyboard = false;
-
-    Flipboard* app =
-        flipboard_alloc(fields, single_mode_button, attach_keyboard, get_primary_view);
-    view_dispatcher_run(flipboard_get_view_dispatcher(app));
-    flipboard_free(app);
-
-    return 0;
 }
