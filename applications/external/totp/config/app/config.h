@@ -9,9 +9,7 @@
 #endif
 
 // Enables\disables backward compatibility with crypto algorithms v1
-#ifndef TOTP_NO_OBSOLETE_CRYPTO_V1_COMPATIBILITY
-#define TOTP_OBSOLETE_CRYPTO_V1_COMPATIBILITY_ENABLED
-#endif
+// #define TOTP_OBSOLETE_CRYPTO_V1_COMPATIBILITY_ENABLED
 
 // Enables\disables backward compatibility with crypto algorithms v2
 #ifndef TOTP_NO_OBSOLETE_CRYPTO_V2_COMPATIBILITY
