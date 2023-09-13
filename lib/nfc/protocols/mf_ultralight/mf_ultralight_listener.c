@@ -99,16 +99,12 @@ static MfUltralightCommand
         if(do_i2c_check) {
             if(!mf_ultralight_i2c_validate_pages(start_page, start_page, instance)) break;
         } else if(pages_total < start_page) {
-            instance->state = MfUltraligthListenerStateIdle;
-            instance->auth_state = MfUltralightListenerAuthStateIdle;
             command = MfUltralightCommandNotProcessedNAK;
             break;
         }
 
         if(!mf_ultralight_listener_check_access(
                instance, start_page, MfUltralightListenerAccessTypeRead)) {
-            instance->state = MfUltraligthListenerStateIdle;
-            instance->auth_state = MfUltralightListenerAuthStateIdle;
             command = MfUltralightCommandNotProcessedNAK;
             break;
         }
@@ -158,8 +154,6 @@ static MfUltralightCommand
                instance, start_page, MfUltralightListenerAccessTypeRead) ||
            !mf_ultralight_listener_check_access(
                instance, end_page, MfUltralightListenerAccessTypeRead)) {
-            instance->state = MfUltraligthListenerStateIdle;
-            instance->auth_state = MfUltralightListenerAuthStateIdle;
             command = MfUltralightCommandNotProcessedNAK;
             break;
         }
@@ -185,13 +179,10 @@ static MfUltralightCommand
 
     FURI_LOG_D(TAG, "CMD_WRITE");
 
-    if(pages_total < start_page) {
-        instance->state = MfUltraligthListenerStateIdle;
-        instance->auth_state = MfUltralightListenerAuthStateIdle;
-    } else if(!mf_ultralight_listener_check_access(
-                  instance, start_page, MfUltralightListenerAccessTypeWrite)) {
-        instance->state = MfUltraligthListenerStateIdle;
-        instance->auth_state = MfUltralightListenerAuthStateIdle;
+    if(pages_total < start_page ||
+       !mf_ultralight_listener_check_access(
+           instance, start_page, MfUltralightListenerAccessTypeWrite)) {
+        command = MfUltralightCommandNotProcessedNAK;
     } else {
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
         memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
@@ -240,8 +231,6 @@ static MfUltralightCommand
         iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
         command = MfUltralightCommandProcessed;
-    } else {
-        instance->state = MfUltraligthListenerStateIdle;
     }
 
     return command;
@@ -261,8 +250,6 @@ static MfUltralightCommand mf_ultralight_listener_read_signature_handler(
         iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
         command = MfUltralightCommandProcessed;
-    } else {
-        instance->state = MfUltraligthListenerStateIdle;
     }
 
     return command;
@@ -673,7 +660,6 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
         if(mfu_command == MfUltralightCommandProcessedSilent) {
             command = NfcCommandReset;
         } else if(mfu_command != MfUltralightCommandProcessed) {
-            instance->state = MfUltraligthListenerStateIdle;
             instance->auth_state = MfUltralightListenerAuthStateIdle;
             command = NfcCommandSleep;
 
