@@ -1,4 +1,4 @@
-#ifndef APP_UNIT_TESTS
+#ifndef FW_CFG_unit_tests
 
 #include "nfc.h"
 
