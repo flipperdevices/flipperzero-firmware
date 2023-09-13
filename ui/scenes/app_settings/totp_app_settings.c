@@ -1,7 +1,7 @@
 #include "totp_app_settings.h"
 #include <math.h>
 #include <totp_icons.h>
-#include <available_fonts.h>
+#include "../../../services/fonts/font_provider.h"
 #include "../../canvas_extensions.h"
 #include "../../ui_controls.h"
 #include "../../common_dialogs.h"
@@ -56,7 +56,9 @@ typedef struct {
     uint16_t y_offset;
     AutomationKeyboardLayout automation_kb_layout;
     Control selected_control;
-    uint8_t active_font;
+    uint8_t active_font_index;
+    FontInfo* active_font;
+    uint8_t total_fonts_count;
 } SceneState;
 
 void totp_scene_app_settings_activate(PluginState* plugin_state) {
@@ -75,7 +77,13 @@ void totp_scene_app_settings_activate(PluginState* plugin_state) {
     scene_state->automation_kb_layout =
         MIN(plugin_state->automation_kb_layout, BAD_KB_LAYOUT_LIST_MAX_INDEX);
 
-    scene_state->active_font = plugin_state->active_font_index;
+    scene_state->total_fonts_count = totp_font_provider_get_fonts_count();
+    scene_state->active_font_index = plugin_state->active_font_index;
+    scene_state->active_font = totp_font_info_alloc();
+    if(!totp_font_provider_get_font(scene_state->active_font_index, scene_state->active_font)) {
+        scene_state->active_font_index = 0;
+        totp_font_provider_get_font(scene_state->active_font_index, scene_state->active_font);
+    }
 }
 
 static void two_digit_to_str(int8_t num, char* str) {
@@ -129,7 +137,7 @@ void totp_scene_app_settings_render(Canvas* const canvas, const PluginState* plu
             canvas, 0, 64 - scene_state->y_offset, AlignLeft, AlignTop, "Font");
         canvas_set_font(canvas, FontSecondary);
 
-        const FONT_INFO* const font = available_fonts[scene_state->active_font];
+        const FontInfo* const font = scene_state->active_font;
         ui_control_select_render(
             canvas,
             0,
@@ -140,7 +148,7 @@ void totp_scene_app_settings_render(Canvas* const canvas, const PluginState* plu
 
         uint8_t font_x_offset =
             SCREEN_WIDTH_CENTER -
-            (((font->charInfo[0].width + font->spacePixels) * FONT_TEST_STR_LENGTH) >> 1);
+            (((font->char_info[0].width + font->space_width) * FONT_TEST_STR_LENGTH) >> 1);
         uint8_t font_y_offset = 108 - scene_state->y_offset - (font->height >> 1);
         canvas_draw_str_ex(
             canvas, font_x_offset, font_y_offset, FONT_TEST_STR, FONT_TEST_STR_LENGTH, font);
@@ -264,11 +272,13 @@ bool totp_scene_app_settings_handle_event(
                     &scene_state->tz_offset_minutes, 15, 0, 45, RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == FontSelect) {
                 totp_roll_value_uint8_t(
-                    &scene_state->active_font,
+                    &scene_state->active_font_index,
                     1,
                     0,
-                    AVAILABLE_FONTS_COUNT - 1,
+                    scene_state->total_fonts_count - 1,
                     RollOverflowBehaviorRoll);
+                totp_font_provider_get_font(
+                    scene_state->active_font_index, scene_state->active_font);
             } else if(scene_state->selected_control == SoundSwitch) {
                 scene_state->notification_sound = !scene_state->notification_sound;
             } else if(scene_state->selected_control == VibroSwitch) {
@@ -298,11 +308,13 @@ bool totp_scene_app_settings_handle_event(
                     &scene_state->tz_offset_minutes, -15, 0, 45, RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == FontSelect) {
                 totp_roll_value_uint8_t(
-                    &scene_state->active_font,
+                    &scene_state->active_font_index,
                     -1,
                     0,
-                    AVAILABLE_FONTS_COUNT - 1,
+                    scene_state->total_fonts_count - 1,
                     RollOverflowBehaviorRoll);
+                totp_font_provider_get_font(
+                    scene_state->active_font_index, scene_state->active_font);
             } else if(scene_state->selected_control == SoundSwitch) {
                 scene_state->notification_sound = !scene_state->notification_sound;
             } else if(scene_state->selected_control == VibroSwitch) {
@@ -343,7 +355,7 @@ bool totp_scene_app_settings_handle_event(
             (scene_state->notification_vibro ? NotificationMethodVibro : NotificationMethodNone);
 
         plugin_state->automation_method = scene_state->automation_method;
-        plugin_state->active_font_index = scene_state->active_font;
+        plugin_state->active_font_index = scene_state->active_font_index;
         plugin_state->automation_kb_layout = scene_state->automation_kb_layout;
 
         if(!totp_config_file_update_user_settings(plugin_state)) {
@@ -368,6 +380,9 @@ bool totp_scene_app_settings_handle_event(
 void totp_scene_app_settings_deactivate(PluginState* plugin_state) {
     if(plugin_state->current_scene_state == NULL) return;
 
-    free(plugin_state->current_scene_state);
+    SceneState* scene_state = plugin_state->current_scene_state;
+    totp_font_info_free(scene_state->active_font);
+
+    free(scene_state);
     plugin_state->current_scene_state = NULL;
 }

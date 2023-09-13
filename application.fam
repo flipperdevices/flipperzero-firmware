@@ -40,9 +40,6 @@ App(
             name="roll_value",
         ),
         Lib(
-            name="fonts",
-        ),
-        Lib(
             name="wolfssl",
             sources=[
                 "wolfcrypt/src/pwdbased.c",
