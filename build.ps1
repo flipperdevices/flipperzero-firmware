@@ -50,7 +50,7 @@ function Build-Run {
         Write-Host "Building $($build_command.Name)"
         $build_path = Join-Path -Path $build_command.FirmwarePath -ChildPath "build"
 
-        $fbt_args = @($build_command.FbtSwitch, "COMPACT=1", "DEBUG=0", "VERBOSE=0", "fap_totp", "--clean")
+        $fbt_args = @($build_command.FbtSwitch, "COMPACT=1", "DEBUG=0", "VERBOSE=0", "build", "APPSRC=totp", "--clean")
         if ($CppDefine.Length -gt 0) {
             $CppDefine | ForEach-Object {
                 $fbt_args += '-D'
