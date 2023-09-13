@@ -67,6 +67,10 @@ static St25tbError st25tb_poller_frame_exchange(
 
 St25tbType st25tb_get_type_from_uid(const uint8_t uid[ST25TB_UID_SIZE]) {
     switch(uid[2] >> 2) {
+    case 0x3:
+        return St25tbTypeX4k;
+    case 0x4:
+        return St25tbTypeX512;
     case 0x6:
         return St25tbType512Ac;
     case 0x7:

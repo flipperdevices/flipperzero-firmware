@@ -24,29 +24,43 @@ static const St25tbFeatures st25tb_features[St25tbTypeNum] = {
         {
             .blocks_total = 16,
             .has_otp = false,
-            .full_name = "ST25TB512-AT",
+            .full_name = "ST25TB512-AT/SRI512",
             .type_name = "512AT",
         },
     [St25tbType512Ac] =
         {
             .blocks_total = 16,
             .has_otp = true,
-            .full_name = "ST25TB512-AC",
+            .full_name = "ST25TB512-AC/SRT512",
             .type_name = "512AC",
+        },
+    [St25tbTypeX512] =
+        {
+            .blocks_total = 16,
+            .has_otp = true,
+            .full_name = "SRIX512",
+            .type_name = "X512",
         },
     [St25tbType02k] =
         {
             .blocks_total = 64,
             .has_otp = true,
-            .full_name = "ST25TB02K",
+            .full_name = "ST25TB02K/SRI2K",
             .type_name = "2K",
         },
     [St25tbType04k] =
         {
             .blocks_total = 128,
             .has_otp = true,
-            .full_name = "ST25TB04K",
+            .full_name = "ST25TB04K/SRI4K",
             .type_name = "4K",
+        },
+    [St25tbTypeX4k] =
+        {
+            .blocks_total = 128,
+            .has_otp = true,
+            .full_name = "SRIX4K",
+            .type_name = "X4K",
         },
 };
 

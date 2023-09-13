@@ -32,8 +32,10 @@ typedef enum {
 typedef enum {
     St25tbType512At,
     St25tbType512Ac,
+    St25tbTypeX512,
     St25tbType02k,
     St25tbType04k,
+    St25tbTypeX4k,
     St25tbTypeNum,
 } St25tbType;
 
