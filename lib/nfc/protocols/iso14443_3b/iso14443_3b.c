@@ -161,14 +161,14 @@ bool iso14443_3b_supports_bit_rate(const Iso14443_3bData* data, Iso14443_3bBitRa
         return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_212KBIT;
     case Iso14443_3bBitRatePiccToPcd424Kbit:
         return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_424KBIT;
-    case Iso14443_3bBitRatePiccToPcd847Kbit:
-        return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_847KBIT;
+    case Iso14443_3bBitRatePiccToPcd848Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_848KBIT;
     case Iso14443_3bBitRatePcdToPicc212Kbit:
         return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_212KBIT;
     case Iso14443_3bBitRatePcdToPicc424Kbit:
         return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_424KBIT;
-    case Iso14443_3bBitRatePcdToPicc847Kbit:
-        return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_847KBIT;
+    case Iso14443_3bBitRatePcdToPicc848Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_848KBIT;
     default:
         return false;
     }

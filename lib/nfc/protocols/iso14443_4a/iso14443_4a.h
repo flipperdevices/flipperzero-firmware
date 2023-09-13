@@ -15,9 +15,33 @@ typedef enum {
     Iso14443_4aErrorTimeout,
 } Iso14443_4aError;
 
+typedef enum {
+    Iso14443_4aBitRateBoth106Kbit,
+    Iso14443_4aBitRatePiccToPcd212Kbit,
+    Iso14443_4aBitRatePiccToPcd424Kbit,
+    Iso14443_4aBitRatePiccToPcd848Kbit,
+    Iso14443_4aBitRatePcdToPicc212Kbit,
+    Iso14443_4aBitRatePcdToPicc424Kbit,
+    Iso14443_4aBitRatePcdToPicc848Kbit,
+} Iso14443_4aBitRate;
+
+typedef enum {
+    Iso14443_4aFrameOptionNad,
+    Iso14443_4aFrameOptionCid,
+} Iso14443_4aFrameOption;
+
+typedef struct {
+    uint8_t tl;
+    uint8_t t0;
+    uint8_t ta_1;
+    uint8_t tb_1;
+    uint8_t tc_1;
+    SimpleArray* t1_tk;
+} Iso14443_4aAtsData;
+
 typedef struct {
     Iso14443_3aData* iso14443_3a_data;
-    SimpleArray* ats_data;
+    Iso14443_4aAtsData ats_data;
 } Iso14443_4aData;
 
 // Virtual methods
@@ -47,6 +71,16 @@ bool iso14443_4a_set_uid(Iso14443_4aData* data, const uint8_t* uid, size_t uid_l
 Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data);
 
 // Getters & Tests
+
+uint16_t iso14443_4a_get_frame_size_max(const Iso14443_4aData* data);
+
+uint32_t iso14443_4a_get_fwt_fc_max(const Iso14443_4aData* data);
+
+const uint8_t* iso14443_4a_get_historical_bytes(const Iso14443_4aData* data, uint32_t* count);
+
+bool iso14443_4a_supports_bit_rate(const Iso14443_4aData* data, Iso14443_4aBitRate bit_rate);
+
+bool iso14443_4a_supports_frame_option(const Iso14443_4aData* data, Iso14443_4aFrameOption option);
 
 #ifdef __cplusplus
 }

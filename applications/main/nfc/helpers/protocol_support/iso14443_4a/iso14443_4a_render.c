@@ -7,5 +7,62 @@ void nfc_render_iso14443_4a_info(
     NfcProtocolFormatType format_type,
     FuriString* str) {
     nfc_render_iso14443_3a_info(data->iso14443_3a_data, format_type, str);
-    // TODO: Add RATS info?
+
+    if(format_type != NfcProtocolFormatTypeFull) return;
+
+    furi_string_cat_printf(str, "\n\e#Protocol info\n");
+
+    if(iso14443_4a_supports_bit_rate(data, Iso14443_4aBitRateBoth106Kbit)) {
+        furi_string_cat(str, "Bit rate PICC <-> PCD:\n  106 kBit/s supported\n");
+    } else {
+        furi_string_cat(str, "Bit rate PICC -> PCD:\n");
+        if(iso14443_4a_supports_bit_rate(data, Iso14443_4aBitRatePiccToPcd212Kbit)) {
+            furi_string_cat(str, "  212 kBit/s supported\n");
+        }
+        if(iso14443_4a_supports_bit_rate(data, Iso14443_4aBitRatePiccToPcd424Kbit)) {
+            furi_string_cat(str, "  424 kBit/s supported\n");
+        }
+        if(iso14443_4a_supports_bit_rate(data, Iso14443_4aBitRatePiccToPcd848Kbit)) {
+            furi_string_cat(str, "  848 kBit/s supported\n");
+        }
+
+        furi_string_cat(str, "Bit rate PICC <- PCD:\n");
+        if(iso14443_4a_supports_bit_rate(data, Iso14443_4aBitRatePcdToPicc212Kbit)) {
+            furi_string_cat(str, "  212 kBit/s supported\n");
+        }
+        if(iso14443_4a_supports_bit_rate(data, Iso14443_4aBitRatePcdToPicc424Kbit)) {
+            furi_string_cat(str, "  424 kBit/s supported\n");
+        }
+        if(iso14443_4a_supports_bit_rate(data, Iso14443_4aBitRatePcdToPicc848Kbit)) {
+            furi_string_cat(str, "  848 kBit/s supported\n");
+        }
+    }
+
+    furi_string_cat(str, "Max frame size: ");
+
+    const uint16_t max_frame_size = iso14443_4a_get_frame_size_max(data);
+    if(max_frame_size != 0) {
+        furi_string_cat_printf(str, "%u bytes\n", max_frame_size);
+    } else {
+        furi_string_cat(str, "? (RFU)\n");
+    }
+
+    const double fwt = iso14443_4a_get_fwt_fc_max(data) / 13.56e6;
+    furi_string_cat_printf(str, "Max waiting time: %4.2g s\n", fwt);
+
+    const char* nad_support_str =
+        iso14443_4a_supports_frame_option(data, Iso14443_4aFrameOptionNad) ? "" : "not ";
+    furi_string_cat_printf(str, "NAD: %ssupported\n", nad_support_str);
+
+    const char* cid_support_str =
+        iso14443_4a_supports_frame_option(data, Iso14443_4aFrameOptionCid) ? "" : "not ";
+    furi_string_cat_printf(str, "CID: %ssupported", cid_support_str);
+
+    furi_string_cat_printf(str, "\n\e#Historical bytes\nRaw:");
+
+    uint32_t hist_bytes_count;
+    const uint8_t* hist_bytes = iso14443_4a_get_historical_bytes(data, &hist_bytes_count);
+    for(size_t i = 0; i < hist_bytes_count; ++i) {
+        furi_string_cat_printf(str, " %02X", hist_bytes[i]);
+    }
 }

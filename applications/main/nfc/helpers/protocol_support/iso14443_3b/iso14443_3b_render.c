@@ -32,8 +32,8 @@ void nfc_render_iso14443_3b_info(
         if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePiccToPcd424Kbit)) {
             furi_string_cat(str, "  424 kBit/s supported\n");
         }
-        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePiccToPcd847Kbit)) {
-            furi_string_cat(str, "  847 kBit/s supported\n");
+        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePiccToPcd848Kbit)) {
+            furi_string_cat(str, "  848 kBit/s supported\n");
         }
 
         furi_string_cat(str, "Bit rate PICC <- PCD:\n");
@@ -43,8 +43,8 @@ void nfc_render_iso14443_3b_info(
         if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePcdToPicc424Kbit)) {
             furi_string_cat(str, "  424 kBit/s supported\n");
         }
-        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePcdToPicc847Kbit)) {
-            furi_string_cat(str, "  847 kBit/s supported\n");
+        if(iso14443_3b_supports_bit_rate(data, Iso14443_3bBitRatePcdToPicc848Kbit)) {
+            furi_string_cat(str, "  848 kBit/s supported\n");
         }
     }
 

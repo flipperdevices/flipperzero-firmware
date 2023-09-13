@@ -25,10 +25,10 @@ typedef enum {
     Iso14443_3bBitRateBoth106Kbit,
     Iso14443_3bBitRatePiccToPcd212Kbit,
     Iso14443_3bBitRatePiccToPcd424Kbit,
-    Iso14443_3bBitRatePiccToPcd847Kbit,
+    Iso14443_3bBitRatePiccToPcd848Kbit,
     Iso14443_3bBitRatePcdToPicc212Kbit,
     Iso14443_3bBitRatePcdToPicc424Kbit,
-    Iso14443_3bBitRatePcdToPicc847Kbit,
+    Iso14443_3bBitRatePcdToPicc848Kbit,
 } Iso14443_3bBitRate;
 
 typedef enum {
