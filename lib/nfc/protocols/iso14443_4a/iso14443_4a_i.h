@@ -2,6 +2,8 @@
 
 #include "iso14443_4a.h"
 
+#include <lib/toolbox/simple_array.h>
+
 #define ISO14443_4A_CMD_READ_ATS (0xE0)
 
 // ATS bit definitions
