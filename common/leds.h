@@ -1,13 +1,19 @@
 #pragma once
 
 #include <furi.h>
-#include <furi_hal.h>
-#include <gui/gui.h>
-#include <furi_hal_usb.h>
-#include <furi_hal_usb_hid.h>
 
-void* flipboard_leds_alloc();
-void flipboard_leds_reset(void* leds);
-void flipboard_leds_free(void* leds);
-void flipboard_leds_set(void* leds, uint32_t led, uint32_t color);
-void flipboard_leds_update(void* leds);
+typedef struct FlipboardLeds FlipboardLeds;
+
+typedef enum {
+    LedId1 = 1,
+    LedId2 = 1 << 1,
+    LedId3 = 1 << 2,
+    LedId4 = 1 << 3,
+} LedIds;
+
+FlipboardLeds* flipboard_leds_alloc();
+void flipboard_leds_reset(FlipboardLeds* leds);
+void flipboard_leds_free(FlipboardLeds* leds);
+void flipboard_leds_set(FlipboardLeds* leds, LedIds led, uint32_t color);
+void flipboard_leds_update(FlipboardLeds* leds);
+void flipboard_status_led(FlipboardLeds* leds, bool glow);

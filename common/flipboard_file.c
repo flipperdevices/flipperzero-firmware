@@ -2,7 +2,10 @@
 #include <storage/storage.h>
 #include <flipper_format.h>
 
-#define TAG "FlipboardFile"
+#include "key_setting_model.h"
+
+#define FLIPBOARD_URL "https://tindie.com/stores/MakeItHackin"
+
 #define FLIPBOARD_KEY_NAME_SIZE 25
 #define FLIPBOARD_APPS_DATA_FOLDER EXT_PATH("apps_data")
 #define FLIPBOARD_SAVE_FOLDER      \
@@ -13,32 +16,35 @@
 #define FLIPBOARD_HEADER "Flipper Flipboard File"
 #define FLIPBOARD_VERSION 1
 
-void ensure_dir_exists(Storage* storage) {
-    // If apps_data directory doesn't exist, create it.
-    if(!storage_dir_exists(storage, FLIPBOARD_APPS_DATA_FOLDER)) {
-        FURI_LOG_I(TAG, "Creating directory: %s", FLIPBOARD_APPS_DATA_FOLDER);
-        storage_simply_mkdir(storage, FLIPBOARD_APPS_DATA_FOLDER);
-    } else {
-        FURI_LOG_I(TAG, "Directory exists: %s", FLIPBOARD_APPS_DATA_FOLDER);
-    }
+#define TAG "FlipboardFile"
 
-    // If wiegand directory doesn't exist, create it.
-    if(!storage_dir_exists(storage, FLIPBOARD_SAVE_FOLDER)) {
-        FURI_LOG_I(TAG, "Creating directory: %s", FLIPBOARD_SAVE_FOLDER);
-        storage_simply_mkdir(storage, FLIPBOARD_SAVE_FOLDER);
+static void ensure_dir_exists(Storage* storage, char* dir) {
+    if(!storage_dir_exists(storage, dir)) {
+        FURI_LOG_I(TAG, "Creating directory: %s", dir);
+        storage_simply_mkdir(storage, dir);
     } else {
-        FURI_LOG_I(TAG, "Directory exists: %s", FLIPBOARD_SAVE_FOLDER);
+        FURI_LOG_I(TAG, "Directory exists: %s", dir);
     }
 }
 
-bool flipboard_save(FlipboardModel* model) {
+static void ensure_save_folder_exists(Storage* storage) {
+    ensure_dir_exists(storage, FLIPBOARD_APPS_DATA_FOLDER);
+    ensure_dir_exists(storage, FLIPBOARD_SAVE_FOLDER);
+}
+
+bool flipboard_save(FlipboardModel* model, KeySettingModelFields fields) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* file_path = furi_string_alloc();
     FuriString* buffer = furi_string_alloc();
+
     furi_string_printf(
-        file_path, "%s/%s%s", FLIPBOARD_SAVE_FOLDER, "flipboard", FLIPBOARD_SAVE_EXTENSION);
-    ensure_dir_exists(storage);
+        file_path,
+        "%s/%s%s",
+        FLIPBOARD_SAVE_FOLDER,
+        flipboard_model_get_name(model),
+        FLIPBOARD_SAVE_EXTENSION);
+
     FlipperFormat* format = flipper_format_file_alloc(storage);
 
     do {
@@ -47,20 +53,27 @@ bool flipboard_save(FlipboardModel* model) {
             break;
         }
 
+        ensure_save_folder_exists(storage);
+
         if(!flipper_format_file_open_always(format, furi_string_get_cstr(file_path))) {
             printf("Failed to open file for writing: \"%s\"\r\n", furi_string_get_cstr(file_path));
             break;
         }
-        if(!flipper_format_write_header_cstr(format, FLIPBOARD_HEADER, FLIPBOARD_VERSION)) break;
-        if(!flipper_format_write_comment_cstr(format, "Just test file")) break;
-        for(int i = 0; i < 10; i++) {
-            furi_string_cat_printf(
-                buffer,
-                "%d %d ",
-                model->setting_key1_key_index[i],
-                model->setting_key1_count_index[i]);
+
+        if(!flipper_format_write_header_cstr(format, FLIPBOARD_HEADER, FLIPBOARD_VERSION)) {
+            break;
         }
-        if(!flipper_format_write_string_cstr(format, "Key1", furi_string_get_cstr(buffer))) break;
+
+        if(!flipper_format_write_comment_cstr(format, "Buy your flipboard at " FLIPBOARD_URL)) {
+            break;
+        }
+
+        for(int i = 0; i < 16; i++) {
+            if(flipboard_model_get_key_setting_model(model, i) != NULL) {
+                key_setting_model_save(
+                    flipboard_model_get_key_setting_model(model, i), format, fields);
+            }
+        }
 
         success = true;
     } while(false);
@@ -80,12 +93,15 @@ bool flipboard_load(FlipboardModel* model) {
     FuriString* file_path = furi_string_alloc();
     FuriString* buffer = furi_string_alloc();
     furi_string_printf(
-        file_path, "%s/%s%s", FLIPBOARD_SAVE_FOLDER, "flipboard", FLIPBOARD_SAVE_EXTENSION);
+        file_path,
+        "%s/%s%s",
+        FLIPBOARD_SAVE_FOLDER,
+        flipboard_model_get_name(model),
+        FLIPBOARD_SAVE_EXTENSION);
     FlipperFormat* format = flipper_format_file_alloc(storage);
 
-    for(size_t i = 0; i < COUNT_OF(model->setting_key1_key_index); i++) {
-        model->setting_key1_key_index[i] = 0;
-        model->setting_key1_count_index[i] = 0;
+    for(size_t i = 0; i < 16; i++) {
+        flipboard_model_set_key_setting_model(model, i, NULL);
     }
 
     do {
@@ -109,42 +125,27 @@ bool flipboard_load(FlipboardModel* model) {
             FURI_LOG_E(TAG, "Type or version mismatch");
             break;
         }
-
-        if(flipper_format_read_string(format, "Key1", buffer)) {
-            size_t begin = 0;
-            for(size_t i = 0; i < COUNT_OF(model->setting_key1_key_index); i++) {
-                size_t delim = furi_string_search_char(buffer, ' ', begin);
-                if(delim != (size_t)-1) {
-                    sscanf(
-                        furi_string_get_cstr(buffer) + begin,
-                        "%hhd",
-                        &model->setting_key1_key_index[i]);
-                    begin = delim + 1;
-
-                    delim = furi_string_search_char(buffer, ' ', begin);
-                    if(delim == (size_t)-1) {
-                        delim = furi_string_size(buffer) - 1;
-                    }
-                    if(delim != (size_t)-1) {
-                        sscanf(
-                            furi_string_get_cstr(buffer) + begin,
-                            "%hhd",
-                            &model->setting_key1_count_index[i]);
-                        begin = delim + 1;
-                    } else {
-                        model->setting_key1_count_index[i] = 0;
-                    }
-                } else {
-                    model->setting_key1_key_index[i] = 0;
-                    model->setting_key1_count_index[i] = 0;
-                }
-            }
+        for(size_t i = 0; i < 16; i++) {
+            flipboard_model_set_key_setting_model(
+                model, i, key_setting_model_alloc_from_ff(i, format));
         }
 
         success = true;
     } while(false);
 
     FURI_LOG_D(TAG, "Load %s.", success ? "successful" : "failed");
+
+    for(size_t i = 1; i < 16;) {
+        if(flipboard_model_get_key_setting_model(model, i) == NULL) {
+            flipboard_model_set_key_setting_model(model, i, key_setting_model_alloc(i));
+        }
+
+        if(flipboard_model_get_single_button_mode(model)) {
+            i = i << 1;
+        } else {
+            i++;
+        }
+    }
 
     flipper_format_free(format);
     furi_string_free(file_path);

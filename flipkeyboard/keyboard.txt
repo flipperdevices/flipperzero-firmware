@@ -1,0 +1,31 @@
+Filetype: Flipper Flipboard File
+Version: 1
+# Buy your flipboard at https://tindie.com/stores/MakeItHackin
+# 
+KeyId: 1
+Fields: 31
+ColorUp: 255
+ColorDown: 65280
+Frequency: 0.000000
+KeystrokeCount: 0
+# 
+KeyId: 2
+Fields: 31
+ColorUp: 0
+ColorDown: 0
+Frequency: 0.000000
+KeystrokeCount: 0
+# 
+KeyId: 4
+Fields: 31
+ColorUp: 0
+ColorDown: 0
+Frequency: 0.000000
+KeystrokeCount: 0
+# 
+KeyId: 8
+Fields: 31
+ColorUp: 0
+ColorDown: 0
+Frequency: 0.000000
+KeystrokeCount: 0

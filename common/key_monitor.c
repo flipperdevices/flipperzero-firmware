@@ -1,4 +1,4 @@
-#include "key_monitor.h"
+#include "key_monitor_i.h"
 
 const GpioPin* const pin_sw1 = &gpio_ext_pb2;
 const GpioPin* const pin_sw2 = &gpio_ext_pb3;
@@ -67,8 +67,6 @@ void key_monitor_switch_callback(void* context) {
 }
 
 int32_t key_monitor_worker(void* context) {
-    bool has_speaker = furi_hal_speaker_acquire(100);
-
     KeyMonitor* key_monitor = context;
     while(key_monitor->running) {
         uint8_t pins = key_monitor_get_pin_status();
@@ -83,10 +81,6 @@ int32_t key_monitor_worker(void* context) {
             }
         }
         furi_delay_ms(1);
-    }
-
-    if(has_speaker) {
-        furi_hal_speaker_release();
     }
 
     return 0;

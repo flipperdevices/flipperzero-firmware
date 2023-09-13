@@ -1,7 +1,10 @@
 #pragma once
 
+#include <furi.h>
 #include <furi_hal.h>
-#include "model.h"
+
+typedef struct KeyMonitor KeyMonitor;
+typedef bool (*KeyMonitorEventCallback)(void* context, uint8_t old_key, uint8_t new_key);
 
 typedef enum {
     SwitchId1 = 1,
