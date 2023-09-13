@@ -4,7 +4,6 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="xremote_app",
     stack_size=3 * 1024,
-    order=10,
     fap_icon="icons/xr_10px.png",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="xremote",

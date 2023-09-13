@@ -3,12 +3,7 @@ App(
     name="Reaction Time",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="reaction_time_app",
-    # cdefines=["APP_REACTION_TIME"],
-    requires=[
-        "gui",
-    ],
     stack_size=1 * 1024,
-    order=20,
     fap_category="Games",
     fap_icon="box.png",
     fap_author="ihatecsv",

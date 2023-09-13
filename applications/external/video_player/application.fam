@@ -4,7 +4,6 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="video_player_app",
     stack_size=2 * 1024,
-    order=90,
     fap_version=(0, 1),
     fap_description="An app that plays video along with sound on Flipper Zero.",
     fap_author="LTVA",

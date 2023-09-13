@@ -5,7 +5,6 @@ App(
     entry_point="bad_kb_app",
     stack_size=2 * 1024,
     icon="A_BadKb_14",
-    order=70,
     fap_category="USB",
     fap_icon="images/badkb_10px.png",
     fap_icon_assets="images",

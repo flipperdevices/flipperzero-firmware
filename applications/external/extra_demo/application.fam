@@ -3,11 +3,7 @@ App(
     name="Extra Demo",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="extra_demo",
-    requires=[
-        "gui",
-    ],
     stack_size=2 * 1024,
-    order=20,
     fap_icon="icon.png",
     fap_category="Tools",
 )

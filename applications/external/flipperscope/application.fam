@@ -3,7 +3,6 @@ App(
     name="Scope",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="scope_main",
-    requires=["gui"],
     stack_size=1 * 1024,
     fap_category="GPIO",
     fap_icon="scope_10px.png",

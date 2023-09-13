@@ -8,7 +8,7 @@ App(
     fap_icon="secret_toggle_icon.png",
     fap_icon_assets="images",
     fap_weburl="https://github.com/nostrumuva/secret_toggle.git",
-    fap_author="@nostrumuva",
+    fap_author="nostrumuva",
     fap_version=(0, 1),
     fap_description="A game that toggles squares.",
 )

@@ -3,13 +3,7 @@ App(
     name="Seader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="seader_app",
-    requires=[
-        "gui",
-        "storage",
-        "nfc",
-    ],
     stack_size=7 * 1024,
-    order=20,
     sources=[
         "seader.c",
         "bsearch.c",

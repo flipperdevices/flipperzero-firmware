@@ -3,7 +3,6 @@ App(
     name="Rock Paper Scissors",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rock_paper_scissors_app",
-    requires=["gui", "subghz"],
     stack_size=2 * 1024,
     fap_version=(1, 4),
     fap_icon="rock_paper_scissors.png",

@@ -8,10 +8,6 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="qrcode_app",
     stack_size=2 * 1024,
-    requires=[
-        "gui",
-        "dialogs",
-    ],
     fap_category="Tools",
     fap_icon="icons/qrcode_10px.png",
     fap_icon_assets="icons",

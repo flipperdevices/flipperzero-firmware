@@ -3,11 +3,7 @@ App(
     name="FlipBIP Crypto Wallet",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipbip_app",
-    requires=[
-        "gui",
-    ],
     stack_size=3 * 1024,
-    order=10,
     fap_icon="flipbip_10px.png",
     fap_private_libs=[
         Lib(

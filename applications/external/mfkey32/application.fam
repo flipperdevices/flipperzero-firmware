@@ -8,7 +8,7 @@ App(
     fap_category="NFC",
     fap_icon_assets="images",
     fap_icon_assets_symbol="mfkey32",
-    fap_author="@noproto",
+    fap_author="noproto",
     fap_weburl="https://github.com/noproto/FlipperMfkey",
     fap_version="1.1",
     fap_description="Mf Classic key finder",

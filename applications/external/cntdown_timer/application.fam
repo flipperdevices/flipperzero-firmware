@@ -3,15 +3,11 @@ App(
     name="Count Down Timer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="app_main",
-    requires=[
-        "gui",
-    ],
     stack_size=2 * 1024,
-    order=20,
     fap_icon="cntdown_timer.png",
     fap_category="Tools",
-    fap_author="@0w0mewo",
+    fap_author="0w0mewo",
     fap_weburl="https://github.com/0w0mewo/fpz_cntdown_timer",
-    fap_version=(1, 1),
+    fap_version=(1, 2),
     fap_description="Simple count down timer",
 )

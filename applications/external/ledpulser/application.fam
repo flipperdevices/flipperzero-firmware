@@ -3,11 +3,7 @@ App(
     name="LED Pulsator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ledpulser_app",
-    requires=[
-        "gui",
-    ],
     stack_size=2 * 1024,
-    order=30,
     fap_icon_assets="icons",
     fap_icon="ledpulser_10px.png",
     fap_category="Tools",

@@ -3,11 +3,7 @@ App(
     name="Color Guess",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="color_guess_app",
-    requires=[
-        "gui",
-    ],
     stack_size=2 * 1024,
-    order=10,
     fap_icon="color_guess_10px.png",
     fap_icon_assets="icons",
     fap_category="Games",

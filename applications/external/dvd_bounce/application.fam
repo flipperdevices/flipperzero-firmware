@@ -3,9 +3,6 @@ App(
     name="DVD Bouncer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bounce_moment",
-    requires=[
-        "gui",
-    ],
     stack_size=1 * 1024,
     fap_icon="iconimage.png",
     fap_category="Games",

@@ -3,7 +3,6 @@ App(
     name="Wiegand Reader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wiegand_app",
-    requires=["gui"],
     stack_size=2 * 1024,
     fap_icon="wiegand.png",
     fap_category="GPIO",

@@ -3,15 +3,11 @@ App(
     name="Caesar Cipher",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="caesar_cipher_app",
-    requires=[
-        "gui",
-    ],
     stack_size=2 * 1024,
     fap_icon="caesar_cipher_icon.png",
     fap_category="Tools",
-    order=20,
-    fap_author="@panki27",
+    fap_author="panki27",
     fap_weburl="https://github.com/panki27/caesar-cipher",
-    fap_version=(1, 0),
+    fap_version=(1, 1),
     fap_description="Encrypt and decrypt text using Caesar Cipher",
 )

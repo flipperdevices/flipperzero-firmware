@@ -3,11 +3,7 @@ App(
     name="[BH1750] Lightmeter",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="lightmeter_app",
-    requires=[
-        "gui",
-    ],
     stack_size=4 * 1024,
-    order=90,
     fap_icon="lightmeter.png",
     fap_category="GPIO/Sensors",
     fap_private_libs=[

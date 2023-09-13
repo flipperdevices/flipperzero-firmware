@@ -16,7 +16,7 @@ App(
     fap_category="GPIO",
     fap_icon="radio.png",
     fap_icon_assets="images",
-    fap_author="@victormico",
+    fap_author="victormico",
     fap_weburl="https://github.com/victormico/flipperzero-radio",
     fap_version="0.1",
     fap_description="Radio App",

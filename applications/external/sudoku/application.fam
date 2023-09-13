@@ -6,7 +6,7 @@ App(
     stack_size=1 * 1024,
     fap_category="Games",
     fap_icon="sudoku.png",
-    fap_author="@profelis",
+    fap_author="profelis",
     fap_weburl="https://github.com/profelis/fz-sudoku",
     fap_version="0.1",
     fap_description="Sudoku game",
