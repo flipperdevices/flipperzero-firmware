@@ -197,7 +197,8 @@ void mf_ultralight_composite_command_set_next(
 void mf_ultralight_single_counter_try_increase(MfUltralightListener* instance) {
     if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportSingleCounter) &&
        instance->config->access.nfc_cnt_en && !instance->single_counter_increased) {
-        instance->data->counter[2].counter++;
+        if(instance->data->counter[2].counter < MF_ULTRALIGHT_MAX_CNTR_VAL)
+            instance->data->counter[2].counter++;
         instance->single_counter_increased = true;
     }
 }
