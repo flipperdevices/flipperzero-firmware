@@ -12,7 +12,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
         uint8_t line = 0;
         char str[32];
 
-		if (app->data.cpu_usage != UINT8_MAX) {
+		if (app->data.cpu_usage <= 100) {
 			canvas_draw_str(canvas, 0, 10, "CPU");
 			snprintf(str, 32, "%d%%", app->data.cpu_usage);
 			elements_progress_bar_with_text(canvas, BAR_X, 1, BAR_WIDTH, app->data.cpu_usage / 100.0f, str);
@@ -20,7 +20,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 			line++;
 		}
 
-		if (app->data.ram_usage != UINT8_MAX) {
+		if (app->data.ram_usage <= 100) {
 			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "RAM");
 			snprintf(
 				str,
@@ -35,7 +35,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 			line++;
 		}
 
-		if (app->data.gpu_usage != UINT8_MAX) {
+		if (app->data.gpu_usage <= 100) {
 			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "GPU");
 			snprintf(str, 32, "%d%%", app->data.gpu_usage);
 			elements_progress_bar_with_text(
@@ -44,7 +44,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 			line++;
 		}
 
-		if (app->data.vram_usage != UINT8_MAX) {
+		if (app->data.vram_usage <= 100) {
 			canvas_draw_str(canvas, 0, 10 + BAR_MARGIN * line, "VRAM");
 			snprintf(
 				str,
@@ -93,6 +93,7 @@ static uint16_t bt_serial_callback(SerialServiceEvent event, void* ctx) {
         if(event.data.size == sizeof(DataStruct)) {
             memcpy(&app->data, event.data.buffer, sizeof(DataStruct));
             app->bt_state = BtStateRecieving;
+			app->last_packet = furi_hal_rtc_get_timestamp();
         }
     }
 
@@ -143,9 +144,14 @@ int32_t pc_monitor_app(void* p) {
         FURI_LOG_W(TAG, "Please, enable the Bluetooth and restart the app");
     }
 
+	// Main loop
     InputEvent event;
-    while(furi_message_queue_get(app->event_queue, &event, FuriWaitForever) == FuriStatusOk) {
-        if(event.type == InputTypeShort && event.key == InputKeyBack) break;
+    while(true) {
+		if (furi_message_queue_get(app->event_queue, &event, 1) == FuriStatusOk) {
+        	if(event.type == InputTypeShort && event.key == InputKeyBack) break;
+		}
+		
+		if(app->bt_state == BtStateRecieving && (furi_hal_rtc_get_timestamp() - app->last_packet > 5)) app->bt_state = BtStateLost; 
     }
 
     furi_hal_bt_serial_set_event_callback(0, NULL, NULL);

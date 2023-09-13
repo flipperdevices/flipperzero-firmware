@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi.h>
+#include <furi_hal.h>
 #include <furi_hal_bt.h>
 #include <furi_hal_bt_serial.h>
 #include <bt/bt_service/bt.h>
@@ -46,4 +47,5 @@ typedef struct {
 
     BtState bt_state;
     DataStruct data;
+	uint32_t last_packet;
 } PcMonitorApp;
