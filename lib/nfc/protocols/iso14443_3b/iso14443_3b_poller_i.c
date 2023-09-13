@@ -4,6 +4,8 @@
 
 #define TAG "Iso14443_3bPoller"
 
+#define ISO14443_3B_ATTRIB_FRAME_SIZE_256 (0x08)
+
 static Iso14443_3bError iso14443_3b_poller_process_error(NfcError error) {
     switch(error) {
     case NfcErrorNone:
