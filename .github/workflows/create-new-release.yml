@@ -66,7 +66,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1.12.0
         with:
-          artifacts: "build/*.fap,build/checksums.sha256"
+          artifacts: "build/*.zip,build/checksums.sha256"
           bodyFile: ".github/release-body.md"
           artifactErrorsFailBuild: true
           updateOnlyUnreleased: true
