@@ -21,6 +21,20 @@
 #define ISO14443_4A_ATS_TC1_NAD (1U << 0)
 #define ISO14443_4A_ATS_TC1_CID (1U << 1)
 
+typedef struct {
+    uint8_t tl;
+    uint8_t t0;
+    uint8_t ta_1;
+    uint8_t tb_1;
+    uint8_t tc_1;
+    SimpleArray* t1_tk;
+} Iso14443_4aAtsData;
+
+struct Iso14443_4aData {
+    Iso14443_3aData* iso14443_3a_data;
+    Iso14443_4aAtsData ats_data;
+};
+
 bool iso14443_4a_ats_parse(Iso14443_4aAtsData* data, const BitBuffer* buf);
 
 Iso14443_4aError iso14443_4a_process_error(Iso14443_3aError error);

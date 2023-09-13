@@ -55,6 +55,13 @@ void iso14443_4a_reset(Iso14443_4aData* data) {
     furi_assert(data);
 
     iso14443_3a_reset(data->iso14443_3a_data);
+
+    data->ats_data.tl = 1;
+    data->ats_data.t0 = 0;
+    data->ats_data.ta_1 = 0;
+    data->ats_data.tb_1 = 0;
+    data->ats_data.tc_1 = 0;
+
     simple_array_reset(data->ats_data.t1_tk);
 }
 

@@ -4,6 +4,7 @@
 #include <nfc/helpers/iso14443_4_layer.h>
 
 #include "iso14443_4a_poller.h"
+#include "iso14443_4a_i.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,12 +1,12 @@
 #include "mf_desfire_render.h"
 
-#include "../iso14443_3a/iso14443_3a_render.h"
+#include "../iso14443_4a/iso14443_4a_render.h"
 
 void nfc_render_mf_desfire_info(
     const MfDesfireData* data,
     NfcProtocolFormatType format_type,
     FuriString* str) {
-    nfc_render_iso14443_3a_info(data->iso14443_4a_data->iso14443_3a_data, format_type, str);
+    nfc_render_iso14443_4a_info(mf_desfire_get_base_data(data), format_type, str);
 
     const uint32_t bytes_total = 1UL << (data->version.sw_storage >> 1);
     const uint32_t bytes_free = data->free_memory.is_present ? data->free_memory.bytes_free : 0;
