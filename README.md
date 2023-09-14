@@ -2,8 +2,6 @@
 
 ![](https://thumb.tildacdn.com/tild3332-3839-4061-b663-363464303432/-/resize/214x/-/format/webp/noroot.png)
 
-**IMPORTANT**: This Flipper application currently only works on release 0.90.1 of the official firmware (at the time this repository was made, that is the latest). I provide NO support for earlier firmware or custom firmware, but this may change soon.
-
 ## What
 This Flipper application ("FAP") spams broadcast packets to Apple devices, which may be up to 5 meters away.
 
