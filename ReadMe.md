@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed: [ESP32CAM Evil Portal (By bigbrodude6119 & eried)](https://github.com/eried/flipperzero-mayhem) - Since its in Marauder and they removed it.
 - Updated: [ESP32CAM Marauder v0.6.2 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 - Updated: [Sudoku v1.1 (By profelis)](https://github.com/profelis/fz-sudoku)
+- UL PR: [Updated infrared assets #607 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/607)
 
 <a name="release">
 
