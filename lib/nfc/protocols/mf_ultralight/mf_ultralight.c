@@ -587,7 +587,7 @@ bool mf_ultralight_is_all_data_read(const MfUltralightData* data) {
     return all_read;
 }
 
-bool mf_ultralight_is_counter_configured(const MfUltralightData* data, bool auth_success) {
+bool mf_ultralight_is_counter_configured(const MfUltralightData* data) {
     furi_assert(data);
 
     MfUltralightConfigPages* config = NULL;
@@ -599,8 +599,6 @@ bool mf_ultralight_is_counter_configured(const MfUltralightData* data, bool auth
     case MfUltralightTypeNTAG216:
         if(mf_ultralight_get_config_page(data, &config)) {
             configured = config->access.nfc_cnt_en;
-
-            if(config->access.nfc_cnt_pwd_prot) configured &= auth_success;
         }
         break;
 
