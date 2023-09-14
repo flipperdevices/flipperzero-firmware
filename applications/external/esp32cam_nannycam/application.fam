@@ -1,6 +1,6 @@
 App(
     appid="cam_nannycam",
-    name="[CAM] Nanny Cam",
+    name="[CAM] Nanny Cam v0.1",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",
     stack_size=8 * 1024,
@@ -8,7 +8,7 @@ App(
     fap_category="GPIO/ESP32",
     fap_author="eried",
     fap_weburl="https://github.com/eried/flipperzero-mayhem",
-    fap_version=(1, 0),
+    fap_version=(0, 1),
     fap_description="ESP32-CAM simple app to start a remote camera. [Unplug the USB cable to test with Mayhem]",
     fap_icon_assets_symbol="mayhem_nannycam",
 )

@@ -40,6 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [SubGhz: Fix CLI subghz chat #3073 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3073) - Changes were already in RM
 - OFW: [Fix DMA SPI memory increment define #3075 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3075)
 - Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from techryptic & xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
+- Removed: [ESP32CAM Evil Portal (By bigbrodude6119 & eried)](https://github.com/eried/flipperzero-mayhem) - Since its in Marauder and they removed it.
+- Updated: [ESP32CAM Marauder v0.6.2 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 
 <a name="release">
 
@@ -321,13 +323,12 @@ $ ./fbt dolphin_ext
 - [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP WiFi Scanner v1.1 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
 - [ESP32 WIFI Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map) `Req: ESP32` & [ESP32 FW](https://github.com/carvilsi/esp32-wifi-map)
-- [ESP32CAM Camera (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Evil Portal (By bigbrodude6119 & eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Morse Flasher (By eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Motion Detection (By eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Nanny Cam (By eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Camera v1.0.0 (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Marauder v0.6.2 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Morse Flasher v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Motion Detection v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Nanny Cam v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM QR Code v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)

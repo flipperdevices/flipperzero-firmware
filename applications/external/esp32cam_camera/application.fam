@@ -1,6 +1,6 @@
 App(
     appid="cam_camera",
-    name="[CAM] Camera",
+    name="[CAM] Camera v1.0",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="camera_app",
     stack_size=8 * 1024,
