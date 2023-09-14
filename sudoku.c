@@ -10,7 +10,7 @@
 #define TAG "sudoku"
 
 #define BOARD_SIZE 9
-#define BOARD_SIZE_3 BOARD_SIZE / 3
+#define BOARD_SIZE_3 3
 #define FONT_SIZE 6
 
 #define VALUE_MASK 0x0F
@@ -281,10 +281,24 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
+// static void print_board(SudokuState* state) {
+//     char buf[BOARD_SIZE * 2 + 1];
+//     for(int i = 0; i < BOARD_SIZE * 2; ++i) {
+//         buf[i] = ' ';
+//     }
+//     buf[BOARD_SIZE * 2] = 0;
+//     for(int i = 0; i != BOARD_SIZE; ++i) {
+//         for(int j = 0; j != BOARD_SIZE; ++j) {
+//             buf[j * 2] = state->board[j][i] == 0 ? '_' : '0' + state->board[j][i];
+//         }
+//         FURI_LOG_D(TAG, "%s", buf);
+//     }
+// }
+
 static void init_board(SudokuState* state) {
     for(int i = 0; i != BOARD_SIZE; ++i) {
         for(int j = 0; j != BOARD_SIZE; ++j) {
-            state->board[i][j] = 1 + (i * BOARD_SIZE_3 + i % BOARD_SIZE_3 + j) % 9;
+            state->board[i][j] = 1 + (i * BOARD_SIZE_3 + i / 3 + j) % 9;
         }
     }
 }
@@ -411,13 +425,110 @@ static bool validate_board(SudokuState* state) {
     return true;
 }
 
+// fast validation, checks only one given cell
+static bool board_cell_is_valid(SudokuState* state, int x, int y) {
+    // check vertical lines for duplicates
+    {
+        uint flags = 0;
+        for(int j = 0; j != BOARD_SIZE; ++j) {
+            int value = state->board[x][j];
+            if(value == 0) {
+                continue;
+            }
+            if(flags & (1 << value)) {
+                return false;
+            }
+            flags |= 1 << value;
+        }
+    }
+    // check horizontal lines for duplicates
+    {
+        uint flags = 0;
+        for(int j = 0; j != BOARD_SIZE; ++j) {
+            int value = state->board[j][y];
+            if(value == 0) {
+                continue;
+            }
+            if(flags & (1 << value)) {
+                return false;
+            }
+            flags |= 1 << value;
+        }
+    }
+    // check 3x3 squares for duplicates
+    {
+        {
+            int p = x - x % BOARD_SIZE_3;
+            int q = y - y % BOARD_SIZE_3;
+            uint flags = 0;
+            for(int k = 0; k != BOARD_SIZE_3; ++k) {
+                for(int l = 0; l != BOARD_SIZE_3; ++l) {
+                    int value = state->board[p + k][q + l];
+                    if(value == 0) {
+                        continue;
+                    }
+                    if(flags & (1 << value)) {
+                        return false;
+                    }
+                    flags |= 1 << value;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+static bool solve_board(SudokuState* state, int x, int y) {
+    if(x == BOARD_SIZE) {
+        x = 0;
+        if(++y == BOARD_SIZE) {
+            return true;
+        }
+    }
+    while(state->board[x][y] != 0) {
+        ++x;
+        if(x == BOARD_SIZE) {
+            x = 0;
+            if(++y == BOARD_SIZE) {
+                return true;
+            }
+        }
+    }
+    int offset = furi_hal_random_get() % BOARD_SIZE;
+    for(int val = 1; val <= BOARD_SIZE; ++val) {
+        state->board[x][y] = (val + offset) % BOARD_SIZE + 1;
+        if(board_cell_is_valid(state, x, y) && solve_board(state, x + 1, y)) {
+            return true;
+        }
+    }
+    state->board[x][y] = 0;
+    return false;
+}
+
+static bool generate_board(SudokuState* state) {
+    memset(state->board, 0, sizeof(state->board));
+    return solve_board(state, 0, 0);
+}
+
 static bool start_game(SudokuState* state) {
     state->state = GameStateRunning;
     state->cursorX = 0;
     state->cursorY = 0;
     state->blockInputUntilRelease = false;
-    init_board(state);
-    shuffle_board(state, 10);
+    bool generated = false;
+    for(int i = 0; i != 3; i++) {
+        if(generate_board(state)) {
+            FURI_LOG_D(TAG, "generate_board success on %d iteration", i);
+            generated = true;
+            break;
+        }
+    }
+    if(!generated) {
+        // fallback to init_board
+        FURI_LOG_D(TAG, "board not generated, fallback to init_board");
+        init_board(state);
+        shuffle_board(state, 100);
+    }
     add_gaps(state, get_mode_gaps(state->lastGameMode));
     return validate_board(state);
 }
