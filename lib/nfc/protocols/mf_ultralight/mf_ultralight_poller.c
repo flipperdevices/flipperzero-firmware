@@ -297,7 +297,8 @@ static NfcCommand mf_ultralight_poller_handler_read_counters(MfUltralightPoller*
     do {
         if(!mf_ultralight_support_feature(
                instance->feature_set, MfUltralightFeatureSupportReadCounter) ||
-           !mf_ultralight_is_counter_configured(instance->data)) {
+           !mf_ultralight_is_counter_configured(
+               instance->data, instance->auth_context.auth_success)) {
             FURI_LOG_D(TAG, "Skip reading counters");
             instance->state = MfUltralightPollerStateReadTearingFlags;
             break;

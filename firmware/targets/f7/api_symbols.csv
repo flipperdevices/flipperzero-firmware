@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,38.0,,
+Version,+,39.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -2137,7 +2137,7 @@ Function,+,mf_ultralight_get_pwd_page_num,uint8_t,MfUltralightType
 Function,+,mf_ultralight_get_type_by_version,MfUltralightType,MfUltralightVersion*
 Function,+,mf_ultralight_get_uid,const uint8_t*,"const MfUltralightData*, size_t*"
 Function,+,mf_ultralight_is_all_data_read,_Bool,const MfUltralightData*
-Function,+,mf_ultralight_is_counter_configured,_Bool,const MfUltralightData*
+Function,+,mf_ultralight_is_counter_configured,_Bool,"const MfUltralightData*, _Bool"
 Function,+,mf_ultralight_is_equal,_Bool,"const MfUltralightData*, const MfUltralightData*"
 Function,+,mf_ultralight_is_page_pwd_or_pack,_Bool,"MfUltralightType, uint16_t"
 Function,+,mf_ultralight_load,_Bool,"MfUltralightData*, FlipperFormat*, uint32_t"
