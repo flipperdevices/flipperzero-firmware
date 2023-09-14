@@ -181,10 +181,6 @@ St25tbError st25tb_poller_async_activate(St25tbPoller* instance, St25tbData* dat
         }
         ret = st25tb_poller_async_read_block(
             instance, &data->system_otp_block, ST25TB_SYSTEM_OTP_BLOCK);
-        if(ret != St25tbErrorNone) {
-            read_blocks = false;
-            break;
-        }
     } while(false);
 
     return ret;
