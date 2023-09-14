@@ -16,6 +16,7 @@ typedef enum {
 typedef enum {
     MfUltralightCommandNotFound,
     MfUltralightCommandProcessed,
+    MfUltralightCommandProcessedACK,
     MfUltralightCommandProcessedSilent,
     MfUltralightCommandNotProcessedNAK,
     MfUltralightCommandNotProcessedSilent,

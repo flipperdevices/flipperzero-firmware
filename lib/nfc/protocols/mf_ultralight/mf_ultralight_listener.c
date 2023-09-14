@@ -186,8 +186,7 @@ static MfUltralightCommand
     } else {
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
         memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
-        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
-        command = MfUltralightCommandProcessed;
+        command = MfUltralightCommandProcessedACK;
     }
 
     return command;
@@ -211,8 +210,7 @@ static MfUltralightCommand
 
         // TODO: update when SRAM emulation implemented
 
-        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
-        command = MfUltralightCommandProcessed;
+        command = MfUltralightCommandProcessedACK;
     } while(false);
 
     return command;
@@ -325,8 +323,7 @@ static MfUltralightCommand mf_ultralight_listener_increase_counter_handler(
             break;
 
         instance->data->counter[counter_num].counter += incr_value;
-        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
-        command = MfUltralightCommandProcessed;
+        command = MfUltralightCommandProcessedACK;
     } while(false);
 
     return command;
@@ -432,9 +429,7 @@ static MfUltralightCommand
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
         uint8_t start_page = instance->composite_cmd.data;
         memcpy(instance->data->page[start_page].data, &rx_data[0], sizeof(MfUltralightPage));
-        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
-
-        command = MfUltralightCommandProcessed;
+        command = MfUltralightCommandProcessedACK;
     } while(false);
 
     return command;
@@ -460,8 +455,7 @@ static MfUltralightCommand
         }
 
         instance->composite_cmd.data = start_page;
-        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
-        command = MfUltralightCommandProcessed;
+        command = MfUltralightCommandProcessedACK;
         mf_ultralight_composite_command_set_next(instance, mf_ultralight_comp_write_handler_p2);
     } while(false);
 
@@ -499,8 +493,7 @@ static MfUltralightCommand
            bit_buffer_get_byte(buffer, 1) == 0xFF)
             break;
 
-        command = MfUltralightCommandProcessed;
-        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+        command = MfUltralightCommandProcessedACK;
         mf_ultralight_composite_command_set_next(instance, mf_ultralight_sector_select_handler_p2);
     } while(false);
 
