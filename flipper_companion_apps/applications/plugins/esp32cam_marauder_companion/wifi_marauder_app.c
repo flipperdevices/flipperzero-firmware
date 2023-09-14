@@ -64,9 +64,11 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->text_box_store = furi_string_alloc();
     furi_string_reserve(app->text_box_store, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE);
 
-    app->text_input = text_input_alloc();
+    app->text_input = wifi_text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, WifiMarauderAppViewTextInput, text_input_get_view(app->text_input));
+        app->view_dispatcher,
+        WifiMarauderAppViewTextInput,
+        wifi_text_input_get_view(app->text_input));
 
     app->widget = widget_alloc();
     view_dispatcher_add_view(
@@ -78,6 +80,11 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->need_to_prompt_settings_init =
         (!storage_file_exists(app->storage, SAVE_PCAP_SETTING_FILEPATH) ||
          !storage_file_exists(app->storage, SAVE_LOGS_SETTING_FILEPATH));
+
+    // Submenu
+    app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, WifiMarauderAppViewSubmenu, submenu_get_view(app->submenu));
 
     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneStart);
 
@@ -97,6 +104,10 @@ void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
 
     if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_LOGS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
+    }
+
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_SCRIPTS)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\nscripts folder");
     }
 }
 
@@ -132,10 +143,14 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewWidget);
+    view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewSubmenu);
+
     widget_free(app->widget);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
-    text_input_free(app->text_input);
+    wifi_text_input_free(app->text_input);
+    submenu_free(app->submenu);
+    variable_item_list_free(app->var_item_list);
     storage_file_free(app->capture_file);
     storage_file_free(app->log_file);
     storage_file_free(app->save_pcap_setting_file);
@@ -182,7 +197,9 @@ int32_t wifi_marauder_app(void* p) {
 
     wifi_marauder_app_free(wifi_marauder_app);
 
-    furi_hal_power_disable_otg();
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }

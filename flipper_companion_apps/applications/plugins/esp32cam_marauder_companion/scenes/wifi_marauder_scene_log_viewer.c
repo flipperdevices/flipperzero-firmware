@@ -112,18 +112,23 @@ void wifi_marauder_scene_log_viewer_on_enter(void* context) {
     app->open_log_file_page = 0;
     app->open_log_file_num_pages = 0;
     bool saved_logs_exist = false;
-    if (!app->has_saved_logs_this_session && furi_string_empty(app->text_box_store)) {
+    if(!app->has_saved_logs_this_session && furi_string_empty(app->text_box_store)) {
         // no commands sent yet this session, find last saved log
-        if (storage_dir_open(app->log_file, MARAUDER_APP_FOLDER_LOGS)) {
+        if(storage_dir_open(app->log_file, MARAUDER_APP_FOLDER_LOGS)) {
             char name[70];
             char lastname[70];
-            while (storage_dir_read(app->log_file, NULL, name, sizeof(name))) {
+            while(storage_dir_read(app->log_file, NULL, name, sizeof(name))) {
                 // keep reading directory until last file is reached
                 strlcpy(lastname, name, sizeof(lastname));
                 saved_logs_exist = true;
             }
-            if (saved_logs_exist) {
-                snprintf(app->log_file_path, sizeof(app->log_file_path), "%s/%s", MARAUDER_APP_FOLDER_LOGS, lastname);
+            if(saved_logs_exist) {
+                snprintf(
+                    app->log_file_path,
+                    sizeof(app->log_file_path),
+                    "%s/%s",
+                    MARAUDER_APP_FOLDER_LOGS,
+                    lastname);
             }
         }
         storage_dir_close(app->log_file);
@@ -143,8 +148,10 @@ bool wifi_marauder_scene_log_viewer_on_event(void* context, SceneManagerEvent ev
             // Browse
             FuriString* predefined_filepath = furi_string_alloc_set_str(MARAUDER_APP_FOLDER_LOGS);
             FuriString* selected_filepath = furi_string_alloc();
+            DialogsFileBrowserOptions browser_options;
+            dialog_file_browser_set_basic_options(&browser_options, ".log", &I_Text_10x10);
             if(dialog_file_browser_show(
-                   app->dialogs, selected_filepath, predefined_filepath, NULL)) {
+                   app->dialogs, selected_filepath, predefined_filepath, &browser_options)) {
                 strncpy(
                     app->log_file_path,
                     furi_string_get_cstr(selected_filepath),
