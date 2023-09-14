@@ -10,16 +10,14 @@ void nfc_render_iso15693_3_info(
         furi_string_cat(str, "ISO15693-3 (NFC-V)\n");
     }
 
-    nfc_render_iso15693_3_header(data, str);
+    nfc_render_iso15693_3_brief(data, str);
 
-    if(format_type != NfcProtocolFormatTypeFull) return;
-
-    furi_string_push_back(str, '\n');
-
-    nfc_render_iso15693_3_main_info(data, str);
+    if(format_type == NfcProtocolFormatTypeFull) {
+        nfc_render_iso15693_3_extra(data, str);
+    }
 }
 
-void nfc_render_iso15693_3_header(const Iso15693_3Data* data, FuriString* str) {
+void nfc_render_iso15693_3_brief(const Iso15693_3Data* data, FuriString* str) {
     furi_string_cat_printf(str, "UID:");
 
     for(size_t i = 0; i < ISO15693_3_UID_SIZE; i++) {
@@ -35,8 +33,8 @@ void nfc_render_iso15693_3_header(const Iso15693_3Data* data, FuriString* str) {
     }
 }
 
-void nfc_render_iso15693_3_main_info(const Iso15693_3Data* data, FuriString* str) {
-    furi_string_cat(str, "\e#General info\n");
+void nfc_render_iso15693_3_extra(const Iso15693_3Data* data, FuriString* str) {
+    furi_string_cat(str, "\n\e#General info\n");
     if(data->system_info.flags & ISO15693_3_SYSINFO_FLAG_DSFID) {
         furi_string_cat_printf(str, "DSFID: %02X\n", data->system_info.ic_ref);
     }
