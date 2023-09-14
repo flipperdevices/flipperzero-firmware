@@ -1,11 +1,9 @@
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <furi_hal_bt.h>
-
+#include <stdint.h>
 #include <furi_hal_random.h>
-//#include <assets_icons.h>
 #include "apple_ble_spam_icons.h"
-
 #include "lib/continuity/continuity.h"
 
 typedef struct {
@@ -18,10 +16,6 @@ typedef struct {
 // NAPI
 // TODO: Use __attribute__((aligned(2))) instead?
 // TODO: Use an offset of the base address?
-
-// hci_send_req address for 0.90.1 firmware
-// Use a tool like radare2 to get this address from firmware.elf
-#define HCI_SEND_REQ_ADDR 0x08015eb4
 
 #define TAG "FuriHalBt"
 #define BLE_STATUS_TIMEOUT 0xFFU
@@ -55,8 +49,26 @@ struct hci_request {
     int rlen;
 };
 
-int (*napi_hci_send_req)(struct hci_request* p_cmd, uint8_t async) =
-    (int (*)(struct hci_request*, uint8_t))(HCI_SEND_REQ_ADDR | 0x01);
+#define HCI_SEND_REQ_ADDR 0x08015eb4
+#define TARGET_SEQUENCE 0x48f2e800
+#define SEQUENCE_OFFSET 70
+#define START_ADDR 0x8000140
+#define END_ADDR 0x80800ec
+
+uintptr_t* scan_memory_for_sequence(uint32_t sequence) {
+    uint8_t* addr;
+    uint8_t* target_bytes = (uint8_t*)&sequence;
+
+    for(addr = (uint8_t*)START_ADDR; addr < (uint8_t*)END_ADDR - 3; addr++) {
+        if(addr[0] == target_bytes[3] && addr[1] == target_bytes[2] &&
+           addr[2] == target_bytes[1] && addr[3] == target_bytes[0]) {
+            return (uintptr_t*)(addr - SEQUENCE_OFFSET);
+        }
+    }
+    return (uintptr_t*)HCI_SEND_REQ_ADDR; // If not found, default to 0.90.1 OFW offset
+}
+
+int (*napi_hci_send_req)(struct hci_request* p_cmd, uint8_t async) = NULL;
 
 void* Osal_MemCpy(void* dest, const void* src, unsigned int size) {
     return memcpy(dest, src, size);
@@ -799,6 +811,8 @@ int32_t apple_ble_spam(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     bool running = true;
+    napi_hci_send_req = (int (*)(struct hci_request*, uint8_t))(
+        (uintptr_t)(scan_memory_for_sequence(TARGET_SEQUENCE)) | 0x01);
     while(running) {
         InputEvent input;
         furi_check(furi_message_queue_get(input_queue, &input, FuriWaitForever) == FuriStatusOk);
