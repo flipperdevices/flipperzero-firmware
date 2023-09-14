@@ -31,14 +31,15 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0914-0327-0.90.2-c861db6](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-14 11:49 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-14 11:49 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-14 12:40 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-14 12:40 EST`
 - Updated: [Authenticator/TOTP v5.0.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Fix app versions to match OFW catalog/UL and .FAM cleanup
 - Added: [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth)
 - Updated: [Wiegand Reader v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - OFW: [SubGhz: Fix CLI subghz chat #3073 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3073) - Changes were already in RM
 - OFW: [Fix DMA SPI memory increment define #3075 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3075)
+- Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from techryptic & xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 
 <a name="release">
 
@@ -271,7 +272,7 @@ $ ./fbt dolphin_ext
 - [Advanced Wifi Sniffer (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c8e5c3bd8b353092c7fd5b7ed0327d044ee53b74)
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Analog Clock v1.1 (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
-- [Apple BLE Spam v1.1 (By Willy-JL & ECTO-1A with research from techryptic & xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/70b43369f0195fc5a86c7abe3652911792ba0627)
+- [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from techryptic & xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Atomic Dice Roller (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - [Authenticator/TOTP v5.0.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
