@@ -1,7 +1,7 @@
 #include "LedInterface.h"
 
 LedInterface::LedInterface() {
-  
+
 }
 
 void LedInterface::RunSetup() {
@@ -33,6 +33,9 @@ void LedInterface::main(uint32_t currentTime) {
   else if (this->current_mode == MODE_SNIFF) {
     this->sniffLed();
   }
+  else if (this->current_mode == MODE_CUSTOM) {
+    return;
+  }
   else {
     this->ledOff();
   }
@@ -46,25 +49,27 @@ uint8_t LedInterface::getMode() {
   return this->current_mode;
 }
 
+void LedInterface::setColor(int r, int g, int b) {
+  strip.setPixelColor(0, strip.Color(r, g, b));
+  strip.show();  
+}
+
 void LedInterface::sniffLed() {
-  strip.setPixelColor(0, strip.Color(0, 0, 255));
-  strip.show();
+  this->setColor(0, 0, 255);
 }
 
 void LedInterface::attackLed() {
-  strip.setPixelColor(0, strip.Color(255, 0, 0));
-  strip.show();
+  this->setColor(255, 0, 0);
 }
 
 void LedInterface::ledOff() {
-  strip.setPixelColor(0, strip.Color(0, 0, 0));
-  strip.show();
+  this->setColor(0, 0, 0);
 }
 
 void LedInterface::rainbow() {
   strip.setPixelColor(0, this->Wheel((0 * 256 / 100 + this->wheel_pos) % 256));
   strip.show();
-    
+
   this->current_fade_itter++;
 
   this->wheel_pos = this->wheel_pos - this->wheel_speed;

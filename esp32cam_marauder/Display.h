@@ -8,12 +8,10 @@
 #include <FS.h>
 #include <functional>
 #include <JPEGDecoder.h>
-//#include <SimpleList.h>
 #include <LinkedList.h>
 #include <SPI.h>
 #include <lvgl.h>
 #include <Ticker.h>
-//#include <M5Stack.h>
 #include "SPIFFS.h"
 #include "Assets.h"
 
@@ -39,23 +37,6 @@
 #define LV_ADD_SSID 14
 #define WIFI_ATTACK_BEACON_LIST 15
 
-/*
-PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
-PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
-
-PROGMEM static lv_disp_buf_t disp_buf;
-PROGMEM static lv_color_t buf[LV_HOR_RES_MAX * 10];
-
-PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
-PROGMEM static void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
-
-// lvgl stuff
-PROGMEM static lv_obj_t *kb;
-*/
-
-// #define KIT
-// #define TFT_DIY
-
 class Display
 {
   private:
@@ -76,16 +57,9 @@ class Display
       void scrollScreenBuffer(bool down = false);
     #endif
 
-    //void addNodes(Menu* menu, String name, Menu* child, std::function<void()> callable);
-    //void changeMenu(Menu* menu);
-    //void showMenuList(Menu* menu, int layer);
-    //static void lv_tick_handler();
-
   public:
     Display();
-    //Ticker tick;
     TFT_eSPI tft = TFT_eSPI();
-    TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
     const String PROGMEM version_number = MARAUDER_VERSION;
 
@@ -95,15 +69,9 @@ class Display
     bool draw_tft = false;
     bool exit_draw = false;
 
-    int TOP_FIXED_AREA_2 = 48;
-    int print_delay_1, print_delay_2 = 10;
-    int current_banner_pos = SCREEN_WIDTH;
-
-    //Menu* current_menu;
-    
-    //Menu mainMenu;
-    //Menu wifiMenu;
-    //Menu bluetoothMenu;
+    uint8_t TOP_FIXED_AREA_2 = 48;
+    uint8_t print_delay_1, print_delay_2 = 10;
+    uint8_t current_banner_pos = SCREEN_WIDTH;
 
     LinkedList<String>* display_buffer;
 
@@ -127,9 +95,6 @@ class Display
     // We can speed up scrolling of short text lines by just blanking the character we drew
     int blank[19]; // We keep all the strings pixel lengths to optimise the speed of the top line blanking
 
-    //void initLVGL();
-    //void deinitLVGL();
-    //void joinWiFiGFX();
     void tftDrawRedOnOffButton();
     void tftDrawGreenOnOffButton();
     void tftDrawGraphObjects(byte x_scale);
@@ -143,8 +108,6 @@ class Display
     void clearScreen();
     void displayBuffer(bool do_clear = false);
     void drawJpeg(const char *filename, int xpos, int ypos);
-    void setupDraw();
-    void drawStylus();
     void getTouchWhileFunction(bool pressed);
     void initScrollValues(bool tte = false);
     void jpegInfo();
