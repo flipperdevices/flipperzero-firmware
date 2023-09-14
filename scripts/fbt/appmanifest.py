@@ -114,8 +114,6 @@ class FlipperApplication:
                 raise FlipperManifestException(
                     f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
                 )
-        if self.fap_file_assets:
-            self._assets_dirs.append(self.fap_file_assets)
 
 
 class AppManager:

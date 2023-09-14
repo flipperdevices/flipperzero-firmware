@@ -141,6 +141,9 @@ class AppBuilder:
         )
 
     def _build_app(self):
+        if self.app.fap_file_assets:
+            self.app._assets_dirs = [self.app._appdir.Dir(self.app.fap_file_assets)]
+
         self.app_env.Append(
             LIBS=[*self.app.fap_libs, *self.private_libs],
             CPPPATH=[self.app_env.Dir(self.app_work_dir), self.app._appdir],
@@ -238,9 +241,9 @@ class AppBuilder:
 
         # Add dependencies on file assets
         for assets_dir in self.app._assets_dirs:
-            self.app_env.Depends(app_artifacts.compact, assets_dir)
-
-        self.app_env.Depends(app_artifacts.compact, self.app._assets_dirs)
+            self.app_env.Depends(
+                app_artifacts.compact, self.app_env.GlobRecursive("*", assets_dir)
+            )
 
         # Always run the validator for the app's binary when building the app
         self.app_env.AlwaysBuild(app_artifacts.validator)
