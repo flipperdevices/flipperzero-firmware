@@ -162,6 +162,8 @@ static inline void furi_hal_power_resume_aux_periphs() {
 static inline void furi_hal_power_deep_sleep() {
     furi_hal_power_suspend_aux_periphs();
 
+    furi_hal_clock_switch_pll2hse();
+
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
         ;
 
@@ -206,6 +208,8 @@ static inline void furi_hal_power_deep_sleep() {
     }
 
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
+
+    furi_hal_clock_switch_hse2pll();
 
     furi_hal_power_resume_aux_periphs();
     furi_hal_rtc_sync_shadow();

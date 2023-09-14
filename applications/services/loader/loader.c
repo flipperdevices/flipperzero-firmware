@@ -219,7 +219,6 @@ static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFl
     // setup insomnia
     if(!(flags & FlipperInternalApplicationFlagInsomniaSafe)) {
         furi_hal_power_insomnia_enter();
-        furi_hal_clock_switch_hse2pll();
         loader->app.insomniac = true;
     } else {
         loader->app.insomniac = false;
@@ -465,7 +464,6 @@ static void loader_do_app_closed(Loader* loader) {
     }
 
     if(loader->app.insomniac) {
-        furi_hal_clock_switch_pll2hse();
         furi_hal_power_insomnia_exit();
     }
 

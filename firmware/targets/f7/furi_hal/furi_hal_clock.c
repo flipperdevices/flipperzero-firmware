@@ -32,8 +32,8 @@ void furi_hal_clock_deinit_early() {
 
 void furi_hal_clock_init() {
     /* Prepare Flash memory for 32MHz system clock */
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_1)
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
         ;
 
     /* HSE and HSI configuration and activation */
@@ -90,10 +90,10 @@ void furi_hal_clock_init() {
     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
     /* Set CPU2 prescaler, from this point we are not allowed to touch it. */
-    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
 
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSE);
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE)
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
         ;
 
     /* Set AHB SHARED prescaler*/
@@ -111,7 +111,7 @@ void furi_hal_clock_init() {
         ;
 
     /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
-    LL_SetSystemCoreClock(CPU_CLOCK_HSE_HZ);
+    LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
 
     /* Update the time base */
     LL_Init1msTick(SystemCoreClock);
@@ -182,22 +182,16 @@ void furi_hal_clock_switch_hsi2hse() {
 void furi_hal_clock_switch_hse2pll() {
     furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
 
-    // while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
-
     SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL);
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
         ;
 
     LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
     SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
-
-    // LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
 
 void furi_hal_clock_switch_pll2hse() {
     furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
-
-    // while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
 
     SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE);
 
@@ -206,8 +200,6 @@ void furi_hal_clock_switch_pll2hse() {
 
     LL_SetSystemCoreClock(CPU_CLOCK_HSE_HZ);
     SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
-
-    // LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
 
 void furi_hal_clock_suspend_tick() {
