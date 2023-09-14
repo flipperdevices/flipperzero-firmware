@@ -1,51 +1,56 @@
 #include "iso14443_4a_i.h"
 
-// T0 bits
-#define ISO14443_4A_ATS_T0_TA1_FLAG (1U << 4)
-#define ISO14443_4A_ATS_T0_TB1_FLAG (1U << 5)
-#define ISO14443_4A_ATS_T0_TC1_FLAG (1U << 6)
-
-// TA_1 bits
-#define ISO14443_4A_ATS_TA1_SAME_D (1U << 7)
-
-// TB_1 bits
-#define ISO14443_4A_ATS_TB1_SFGI (0U << 0)
-#define ISO14443_4A_ATS_TB1_FWI (14U << 4)
-
-// TC_1 bits
-#define ISO14443_4A_ATS_TC1_NAD_FLAG (1U << 0)
-#define ISO14443_4A_ATS_TC1_CID_FLAG (1U << 1)
-
-bool iso14443_4a_ats_parse(SimpleArray* data, const BitBuffer* buf) {
+bool iso14443_4a_ats_parse(Iso14443_4aAtsData* data, const BitBuffer* buf) {
     bool can_parse = false;
 
     do {
         const size_t buf_size = bit_buffer_get_size_bytes(buf);
-        if(buf_size < sizeof(Iso14443_4aAtsData)) break;
+        if(buf_size == 0) break;
 
-        const size_t ats_size = bit_buffer_get_byte(buf, 0);
-        if(ats_size != buf_size) break;
+        size_t current_index = 0;
 
-        simple_array_init(data, ats_size);
-        bit_buffer_write_bytes(buf, simple_array_get_data(data), ats_size);
+        const uint8_t tl = bit_buffer_get_byte(buf, current_index++);
+        if(tl != buf_size) break;
+
+        data->tl = tl;
+
+        if(tl > 1) {
+            const uint8_t t0 = bit_buffer_get_byte(buf, current_index++);
+
+            const bool has_ta_1 = t0 & ISO14443_4A_ATS_T0_TA1;
+            const bool has_tb_1 = t0 & ISO14443_4A_ATS_T0_TB1;
+            const bool has_tc_1 = t0 & ISO14443_4A_ATS_T0_TC1;
+
+            const uint8_t buf_size_min =
+                2 + (has_ta_1 ? 1 : 0) + (has_tb_1 ? 1 : 0) + (has_tc_1 ? 1 : 0);
+
+            if(buf_size < buf_size_min) break;
+
+            data->t0 = t0;
+
+            if(has_ta_1) {
+                data->ta_1 = bit_buffer_get_byte(buf, current_index++);
+            }
+            if(has_tb_1) {
+                data->tb_1 = bit_buffer_get_byte(buf, current_index++);
+            }
+            if(has_tc_1) {
+                data->tc_1 = bit_buffer_get_byte(buf, current_index++);
+            }
+
+            const uint8_t t1_tk_size = buf_size - buf_size_min;
+
+            if(t1_tk_size > 0) {
+                simple_array_init(data->t1_tk, t1_tk_size);
+                bit_buffer_write_bytes_mid(
+                    buf, simple_array_get_data(data->t1_tk), current_index, t1_tk_size);
+            }
+        }
 
         can_parse = true;
     } while(false);
 
     return can_parse;
-}
-
-void iso14443_4a_ats_fill_default(SimpleArray* data) {
-    simple_array_init(data, sizeof(Iso14443_4aAtsData));
-
-    Iso14443_4aAtsData* ats_data = simple_array_get_data(data);
-
-    ats_data->tl = sizeof(Iso14443_4aAtsData);
-    ats_data->t0 = ISO14443_4A_ATS_T0_TA1_FLAG | ISO14443_4A_ATS_T0_TB1_FLAG |
-                   ISO14443_4A_ATS_T0_TC1_FLAG | ISO14443_4A_FSCI_256;
-    ats_data->ta_1 = ISO14443_4A_ATS_TA1_SAME_D;
-    ats_data->tb_1 = ISO14443_4A_ATS_TB1_FWI | ISO14443_4A_ATS_TB1_SFGI;
-    ats_data->tc_1 = ISO14443_4A_ATS_TC1_CID_FLAG;
 }
 
 Iso14443_4aError iso14443_4a_process_error(Iso14443_3aError error) {

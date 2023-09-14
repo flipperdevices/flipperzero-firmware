@@ -2,32 +2,26 @@
 
 #include "iso14443_4a.h"
 
+#include <lib/toolbox/simple_array.h>
+
 #define ISO14443_4A_CMD_READ_ATS (0xE0)
 
-#define ISO14443_4A_FSDI_16 (0x00)
-#define ISO14443_4A_FSDI_24 (0x01)
-#define ISO14443_4A_FSDI_32 (0x02)
-#define ISO14443_4A_FSDI_40 (0x03)
-#define ISO14443_4A_FSDI_48 (0x04)
-#define ISO14443_4A_FSDI_64 (0x05)
-#define ISO14443_4A_FSDI_96 (0x06)
-#define ISO14443_4A_FSDI_128 (0x07)
-#define ISO14443_4A_FSDI_256 (0x08)
+// ATS bit definitions
+#define ISO14443_4A_ATS_T0_TA1 (1U << 4)
+#define ISO14443_4A_ATS_T0_TB1 (1U << 5)
+#define ISO14443_4A_ATS_T0_TC1 (1U << 6)
 
-#define ISO14443_4A_FSCI_16 ISO14443_4A_FSDI_16
-#define ISO14443_4A_FSCI_24 ISO14443_4A_FSDI_24
-#define ISO14443_4A_FSCI_32 ISO14443_4A_FSDI_32
-#define ISO14443_4A_FSCI_40 ISO14443_4A_FSDI_40
-#define ISO14443_4A_FSCI_48 ISO14443_4A_FSDI_48
-#define ISO14443_4A_FSCI_64 ISO14443_4A_FSDI_64
-#define ISO14443_4A_FSCI_96 ISO14443_4A_FSDI_96
-#define ISO14443_4A_FSCI_128 ISO14443_4A_FSDI_128
-#define ISO14443_4A_FSCI_256 ISO14443_4A_FSDI_256
+#define ISO14443_4A_ATS_TA1_BOTH_106KBIT (0U << 0)
+#define ISO14443_4A_ATS_TA1_PCD_TO_PICC_212KBIT (1U << 0)
+#define ISO14443_4A_ATS_TA1_PCD_TO_PICC_424KBIT (1U << 1)
+#define ISO14443_4A_ATS_TA1_PCD_TO_PICC_848KBIT (1U << 2)
+#define ISO14443_4A_ATS_TA1_PICC_TO_PCD_212KBIT (1U << 4)
+#define ISO14443_4A_ATS_TA1_PICC_TO_PCD_424KBIT (1U << 5)
+#define ISO14443_4A_ATS_TA1_PICC_TO_PCD_848KBIT (1U << 6)
+#define ISO14443_4A_ATS_TA1_BOTH_SAME_COMPULSORY (1U << 7)
 
-#define ISO14443_4A_BLOCK_PCB (1U << 1)
-#define ISO14443_4A_BLOCK_PCB_I (0U)
-#define ISO14443_4A_BLOCK_PCB_R (5U << 5)
-#define ISO14443_4A_BLOCK_PCB_S (3U << 6)
+#define ISO14443_4A_ATS_TC1_NAD (1U << 0)
+#define ISO14443_4A_ATS_TC1_CID (1U << 1)
 
 typedef struct {
     uint8_t tl;
@@ -35,11 +29,14 @@ typedef struct {
     uint8_t ta_1;
     uint8_t tb_1;
     uint8_t tc_1;
-    uint8_t t1_tk[];
+    SimpleArray* t1_tk;
 } Iso14443_4aAtsData;
 
-bool iso14443_4a_ats_parse(SimpleArray* data, const BitBuffer* buf);
+struct Iso14443_4aData {
+    Iso14443_3aData* iso14443_3a_data;
+    Iso14443_4aAtsData ats_data;
+};
 
-void iso14443_4a_ats_fill_default(SimpleArray* data);
+bool iso14443_4a_ats_parse(Iso14443_4aAtsData* data, const BitBuffer* buf);
 
 Iso14443_4aError iso14443_4a_process_error(Iso14443_3aError error);

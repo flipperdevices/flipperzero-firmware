@@ -67,13 +67,17 @@ static bool nfc_scene_info_on_event_iso14443_3b(NfcApp* instance, uint32_t event
     return false;
 }
 
-static bool nfc_scene_saved_menu_on_event_iso14443_3b(NfcApp* instance, uint32_t event) {
+bool nfc_scene_saved_menu_on_event_iso14443_3b_common(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEdit) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
         return true;
     }
 
     return false;
+}
+
+static bool nfc_scene_saved_menu_on_event_iso14443_3b(NfcApp* instance, uint32_t event) {
+    return nfc_scene_saved_menu_on_event_iso14443_3b_common(instance, event);
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_3b = {

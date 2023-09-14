@@ -65,7 +65,7 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
         if(instance->state == Iso14443_4aListenerStateIdle) {
             if(bit_buffer_get_size_bytes(rx_buffer) == 2 &&
                bit_buffer_get_byte(rx_buffer, 0) == ISO14443_4A_CMD_READ_ATS) {
-                if(iso14443_4a_listener_send_ats(instance, instance->data->ats_data) !=
+                if(iso14443_4a_listener_send_ats(instance, &instance->data->ats_data) !=
                    Iso14443_4aErrorNone) {
                     command = NfcCommandContinue;
                 } else {
