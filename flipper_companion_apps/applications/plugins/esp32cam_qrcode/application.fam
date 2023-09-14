@@ -1,6 +1,6 @@
 App(
     appid="mayhem_qrcode",
-    name="[MAYHEM] QR Code",
+    name="[MAYHEM] QR Code v0.1",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",
     cdefines=["APP_QRCODE"],
