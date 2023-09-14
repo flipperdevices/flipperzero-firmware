@@ -11,40 +11,55 @@
 
 #define TAG "FuriHalConsole"
 
-#ifdef HEAP_PRINT_DEBUG
-#define CONSOLE_BAUDRATE 1843200
-#else
-#define CONSOLE_BAUDRATE 230400
-#endif
-
 typedef struct {
     bool alive;
+    bool initialized;
+    FuriHalUartId channel;
+    uint32_t baudrate;
     FuriHalConsoleTxCallback tx_callback;
     void* tx_callback_context;
 } FuriHalConsole;
 
 FuriHalConsole furi_hal_console = {
+    .initialized = false,
     .alive = false,
+    .channel = FuriHalUartIdUSART1,
     .tx_callback = NULL,
+    .baudrate = CONSOLE_BAUDRATE,
     .tx_callback_context = NULL,
 };
 
-void furi_hal_console_init() {
-    furi_hal_uart_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
+void furi_hal_console_init(FuriHalUartId channel, uint32_t baudrate) {
+    furi_check(!furi_hal_console.initialized);
+
+    furi_hal_console.channel = channel;
+    furi_hal_console.baudrate = baudrate;
+    furi_hal_uart_init(channel, baudrate);
     furi_hal_console.alive = true;
+    furi_hal_console.initialized = true;
+}
+
+void furi_hal_console_deinit() {
+    furi_check(furi_hal_console.initialized);
+    furi_hal_uart_deinit(furi_hal_console.channel);
+    furi_hal_console.channel = FuriHalUartIdUSART1;
+    furi_hal_console.baudrate = CONSOLE_BAUDRATE;
+    furi_hal_console.alive = false;
+    furi_hal_console.initialized = false;
 }
 
 void furi_hal_console_enable() {
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    while(!LL_USART_IsActiveFlag_TC(USART1))
-        ;
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
+    furi_check(furi_hal_console.initialized);
+    furi_hal_uart_set_irq_cb(furi_hal_console.channel, NULL, NULL);
+    furi_hal_uart_wait_tx_complete(furi_hal_console.channel);
+
+    furi_hal_uart_set_br(furi_hal_console.channel, furi_hal_console.baudrate);
     furi_hal_console.alive = true;
 }
 
 void furi_hal_console_disable() {
-    while(!LL_USART_IsActiveFlag_TC(USART1))
-        ;
+    furi_check(furi_hal_console.initialized);
+    furi_hal_uart_wait_tx_complete(furi_hal_console.channel);
     furi_hal_console.alive = false;
 }
 
@@ -65,10 +80,9 @@ void furi_hal_console_tx(const uint8_t* buffer, size_t buffer_size) {
         furi_hal_console.tx_callback(buffer, buffer_size, furi_hal_console.tx_callback_context);
     }
 
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)buffer, buffer_size);
+    furi_hal_uart_tx(furi_hal_console.channel, (uint8_t*)buffer, buffer_size);
     // Wait for TC flag to be raised for last char
-    while(!LL_USART_IsActiveFlag_TC(USART1))
-        ;
+    furi_hal_uart_wait_tx_complete(furi_hal_console.channel);
     FURI_CRITICAL_EXIT();
 }
 
@@ -81,8 +95,7 @@ void furi_hal_console_tx_with_new_line(const uint8_t* buffer, size_t buffer_size
     // Transmit new line symbols
     furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)"\r\n", 2);
     // Wait for TC flag to be raised for last char
-    while(!LL_USART_IsActiveFlag_TC(USART1))
-        ;
+    furi_hal_uart_wait_tx_complete(furi_hal_console.channel);
     FURI_CRITICAL_EXIT();
 }
 
