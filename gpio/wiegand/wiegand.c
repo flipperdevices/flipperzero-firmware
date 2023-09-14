@@ -23,6 +23,7 @@ void (*const basic_scenes_scene_on_enter_handlers[])(void*) = {
     wiegand_main_menu_scene_on_enter,
     wiegand_instructions_scene_on_enter,
     wiegand_read_scene_on_enter,
+    wiegand_scan_scene_on_enter,
     wiegand_data_scene_on_enter,
     wiegand_save_scene_on_enter,
     wiegand_load_scene_on_enter,
@@ -32,6 +33,7 @@ bool (*const basic_scenes_scene_on_event_handlers[])(void*, SceneManagerEvent) =
     wiegand_main_menu_scene_on_event,
     wiegand_empty_scene_on_event, // instructions
     wiegand_empty_scene_on_event, // read
+    wiegand_empty_scene_on_event, // scan
     wiegand_data_scene_on_event,
     wiegand_save_scene_on_event,
     wiegand_empty_scene_on_event, // load
@@ -41,6 +43,7 @@ void (*const basic_scenes_scene_on_exit_handlers[])(void*) = {
     wiegand_empty_scene_on_exit, // main_menu
     wiegand_empty_scene_on_exit, // instructions
     wiegand_read_scene_on_exit,
+    wiegand_scan_scene_on_exit,
     wiegand_empty_scene_on_exit, // data
     wiegand_empty_scene_on_exit, // save
     wiegand_empty_scene_on_exit, // load

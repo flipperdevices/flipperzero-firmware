@@ -15,6 +15,9 @@ void wiegand_menu_callback(void* context, uint32_t index) {
     case WiegandMainMenuRead:
         event = WiegandMainMenuReadEvent;
         break;
+    case WiegandMainMenuScan:
+        event = WiegandMainMenuScanEvent;
+        break;
     case WiegandMainMenuLoad:
         event = WiegandMainMenuLoadEvent;
         break;
@@ -36,6 +39,8 @@ void wiegand_main_menu_scene_on_enter(void* context) {
     submenu_add_item(
         app->submenu, "Instructions", WiegandMainMenuInstructions, wiegand_menu_callback, app);
     submenu_add_item(app->submenu, "Read", WiegandMainMenuRead, wiegand_menu_callback, app);
+    submenu_add_item(
+        app->submenu, "Scan w/AutoSave", WiegandMainMenuScan, wiegand_menu_callback, app);
     submenu_add_item(app->submenu, "Load", WiegandMainMenuLoad, wiegand_menu_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, WiegandSubmenuView);
 }
@@ -51,6 +56,10 @@ bool wiegand_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
             break;
         case WiegandMainMenuReadEvent:
             scene_manager_next_scene(app->scene_manager, WiegandReadScene);
+            consumed = true;
+            break;
+        case WiegandMainMenuScanEvent:
+            scene_manager_next_scene(app->scene_manager, WiegandScanScene);
             consumed = true;
             break;
         case WiegandMainMenuLoadEvent:
