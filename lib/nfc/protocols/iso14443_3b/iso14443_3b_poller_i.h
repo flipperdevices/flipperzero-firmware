@@ -1,6 +1,7 @@
 #pragma once
 
 #include "iso14443_3b_poller.h"
+#include "iso14443_3b_i.h"
 
 #ifdef __cplusplus
 extern "C" {

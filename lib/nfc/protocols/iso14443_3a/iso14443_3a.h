@@ -62,8 +62,6 @@ typedef struct {
     uint8_t sak;
 } Iso14443_3aData;
 
-extern const NfcDeviceBase nfc_device_iso14443_3a;
-
 Iso14443_3aData* iso14443_3a_alloc();
 
 void iso14443_3a_free(Iso14443_3aData* data);
@@ -88,7 +86,11 @@ bool iso14443_3a_set_uid(Iso14443_3aData* data, const uint8_t* uid, size_t uid_l
 
 Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data);
 
-uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* iso14443_3a_data);
+uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* data);
+
+// Getters and tests
+
+bool iso14443_3a_supports_iso14443_4(const Iso14443_3aData* data);
 
 #ifdef __cplusplus
 }

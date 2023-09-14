@@ -169,6 +169,8 @@ Header,+,lib/nfc/protocols/iso14443_3b/iso14443_3b_poller.h,,
 Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a.h,,
 Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a_listener.h,,
 Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a_poller.h,,
+Header,+,lib/nfc/protocols/iso14443_4b/iso14443_4b.h,,
+Header,+,lib/nfc/protocols/iso14443_4b/iso14443_4b_poller.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_listener.h,,
 Header,+,lib/nfc/protocols/mf_classic/mf_classic_poller.h,,
@@ -1844,32 +1846,55 @@ Function,+,iso14443_3a_poller_read,Iso14443_3aError,"Nfc*, Iso14443_3aData*"
 Function,+,iso14443_3a_reset,void,Iso14443_3aData*
 Function,+,iso14443_3a_save,_Bool,"const Iso14443_3aData*, FlipperFormat*"
 Function,+,iso14443_3a_set_uid,_Bool,"Iso14443_3aData*, const uint8_t*, size_t"
+Function,+,iso14443_3a_supports_iso14443_4,_Bool,const Iso14443_3aData*
 Function,+,iso14443_3a_verify,_Bool,"Iso14443_3aData*, const FuriString*"
 Function,+,iso14443_3b_alloc,Iso14443_3bData*,
 Function,+,iso14443_3b_copy,void,"Iso14443_3bData*, const Iso14443_3bData*"
 Function,+,iso14443_3b_free,void,Iso14443_3bData*
+Function,+,iso14443_3b_get_application_data,const uint8_t*,"const Iso14443_3bData*, size_t*"
 Function,+,iso14443_3b_get_base_data,Iso14443_3bData*,const Iso14443_3bData*
 Function,+,iso14443_3b_get_device_name,const char*,"const Iso14443_3bData*, NfcDeviceNameType"
+Function,+,iso14443_3b_get_frame_size_max,uint16_t,const Iso14443_3bData*
+Function,+,iso14443_3b_get_fwt_fc_max,uint32_t,const Iso14443_3bData*
 Function,+,iso14443_3b_get_uid,const uint8_t*,"const Iso14443_3bData*, size_t*"
 Function,+,iso14443_3b_is_equal,_Bool,"const Iso14443_3bData*, const Iso14443_3bData*"
 Function,+,iso14443_3b_load,_Bool,"Iso14443_3bData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_3b_reset,void,Iso14443_3bData*
 Function,+,iso14443_3b_save,_Bool,"const Iso14443_3bData*, FlipperFormat*"
 Function,+,iso14443_3b_set_uid,_Bool,"Iso14443_3bData*, const uint8_t*, size_t"
+Function,+,iso14443_3b_supports_bit_rate,_Bool,"const Iso14443_3bData*, Iso14443_3bBitRate"
+Function,+,iso14443_3b_supports_frame_option,_Bool,"const Iso14443_3bData*, Iso14443_3bFrameOption"
+Function,+,iso14443_3b_supports_iso14443_4,_Bool,const Iso14443_3bData*
 Function,+,iso14443_3b_verify,_Bool,"Iso14443_3bData*, const FuriString*"
 Function,+,iso14443_4a_alloc,Iso14443_4aData*,
 Function,+,iso14443_4a_copy,void,"Iso14443_4aData*, const Iso14443_4aData*"
 Function,+,iso14443_4a_free,void,Iso14443_4aData*
 Function,+,iso14443_4a_get_base_data,Iso14443_3aData*,const Iso14443_4aData*
 Function,+,iso14443_4a_get_device_name,const char*,"const Iso14443_4aData*, NfcDeviceNameType"
+Function,+,iso14443_4a_get_frame_size_max,uint16_t,const Iso14443_4aData*
+Function,+,iso14443_4a_get_fwt_fc_max,uint32_t,const Iso14443_4aData*
+Function,+,iso14443_4a_get_historical_bytes,const uint8_t*,"const Iso14443_4aData*, uint32_t*"
 Function,+,iso14443_4a_get_uid,const uint8_t*,"const Iso14443_4aData*, size_t*"
-Function,+,iso14443_4a_is_ats_supported,_Bool,const Iso14443_4aData*
 Function,+,iso14443_4a_is_equal,_Bool,"const Iso14443_4aData*, const Iso14443_4aData*"
 Function,+,iso14443_4a_load,_Bool,"Iso14443_4aData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_4a_reset,void,Iso14443_4aData*
 Function,+,iso14443_4a_save,_Bool,"const Iso14443_4aData*, FlipperFormat*"
 Function,+,iso14443_4a_set_uid,_Bool,"Iso14443_4aData*, const uint8_t*, size_t"
+Function,+,iso14443_4a_supports_bit_rate,_Bool,"const Iso14443_4aData*, Iso14443_4aBitRate"
+Function,+,iso14443_4a_supports_frame_option,_Bool,"const Iso14443_4aData*, Iso14443_4aFrameOption"
 Function,+,iso14443_4a_verify,_Bool,"Iso14443_4aData*, const FuriString*"
+Function,+,iso14443_4b_alloc,Iso14443_4bData*,
+Function,+,iso14443_4b_copy,void,"Iso14443_4bData*, const Iso14443_4bData*"
+Function,+,iso14443_4b_free,void,Iso14443_4bData*
+Function,+,iso14443_4b_get_base_data,Iso14443_3bData*,const Iso14443_4bData*
+Function,+,iso14443_4b_get_device_name,const char*,"const Iso14443_4bData*, NfcDeviceNameType"
+Function,+,iso14443_4b_get_uid,const uint8_t*,"const Iso14443_4bData*, size_t*"
+Function,+,iso14443_4b_is_equal,_Bool,"const Iso14443_4bData*, const Iso14443_4bData*"
+Function,+,iso14443_4b_load,_Bool,"Iso14443_4bData*, FlipperFormat*, uint32_t"
+Function,+,iso14443_4b_reset,void,Iso14443_4bData*
+Function,+,iso14443_4b_save,_Bool,"const Iso14443_4bData*, FlipperFormat*"
+Function,+,iso14443_4b_set_uid,_Bool,"Iso14443_4bData*, const uint8_t*, size_t"
+Function,+,iso14443_4b_verify,_Bool,"Iso14443_4bData*, const FuriString*"
 Function,+,iso14443_crc_append,void,"Iso14443CrcType, BitBuffer*"
 Function,+,iso14443_crc_check,_Bool,"Iso14443CrcType, const BitBuffer*"
 Function,+,iso14443_crc_trim,void,BitBuffer*
@@ -3395,9 +3420,6 @@ Variable,+,message_red_255,const NotificationMessage,
 Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
-Variable,-,nfc_device_iso14443_3a,const NfcDeviceBase,
-Variable,+,nfc_device_iso14443_3b,const NfcDeviceBase,
-Variable,-,nfc_device_iso14443_4a,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
 Variable,-,nfc_device_mf_desfire,const NfcDeviceBase,
 Variable,-,nfc_device_mf_ultralight,const NfcDeviceBase,

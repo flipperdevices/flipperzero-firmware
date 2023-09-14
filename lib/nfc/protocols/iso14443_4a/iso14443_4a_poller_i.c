@@ -6,6 +6,8 @@
 
 #define TAG "Iso14443_4aPoller"
 
+#define ISO14443_4A_FSDI_256 (0x8U)
+
 Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
     furi_assert(instance);
 
@@ -16,7 +18,7 @@ Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
 }
 
 Iso14443_4aError
-    iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance, SimpleArray* data) {
+    iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance, Iso14443_4aAtsData* data) {
     furi_assert(instance);
 
     bit_buffer_reset(instance->tx_buffer);
@@ -55,13 +57,8 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     uint32_t fwt) {
     furi_assert(instance);
 
-    const uint8_t pcb = ISO14443_4A_BLOCK_PCB_I | ISO14443_4A_BLOCK_PCB |
-                        instance->protocol_state.block_number;
-    instance->protocol_state.block_number ^= 1;
-
     bit_buffer_reset(instance->tx_buffer);
-    bit_buffer_append_byte(instance->tx_buffer, pcb);
-    bit_buffer_append(instance->tx_buffer, tx_buffer);
+    iso14443_4_layer_encode_block(instance->iso14443_4_layer, tx_buffer, instance->tx_buffer);
 
     Iso14443_4aError error = Iso14443_4aErrorNone;
 
@@ -73,12 +70,11 @@ Iso14443_4aError iso14443_4a_poller_send_block(
             error = iso14443_4a_process_error(iso14443_3a_error);
             break;
 
-        } else if(!bit_buffer_starts_with_byte(instance->rx_buffer, pcb)) {
+        } else if(!iso14443_4_layer_decode_block(
+                      instance->iso14443_4_layer, rx_buffer, instance->rx_buffer)) {
             error = Iso14443_4aErrorProtocol;
             break;
         }
-
-        bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(pcb));
     } while(false);
 
     return error;
