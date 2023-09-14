@@ -12,8 +12,8 @@ App(
             name="continuity",
         ),
     ],
-    fap_author="Willy-JL & ECTO-1A",  # Plus research from ECTO-1A, techryptic & xMasterX
+    fap_author="Willy-JL & ECTO-1A",  # Plus research from ECTO-1A, xMasterX & techryptic
     fap_weburl="https://github.com/ECTO-1A/AppleJuice",
-    fap_version="1.0.6",
+    fap_version=(1, 1),
     fap_description="Spam Apple devices with annoying popups and notifications via BLE packets",
 )

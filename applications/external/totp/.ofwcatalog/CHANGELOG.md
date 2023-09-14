@@ -1,8 +1,13 @@
 # Changelog
 
+## v5.0.0 - 13 Sep 2023
+
+* Implemented [#198](https://github.com/akopachov/flipper-zero_authenticator/issues/198)
+* Implemented [#200](https://github.com/akopachov/flipper-zero_authenticator/issues/200)
+
 ## v4.1.0 - 28 Aug 2023
 
-* Implemented [#195](https://github.com/akopachov/flipper-zero_authenticator/releases/tag/v4.1.0)
+* Implemented [#195](https://github.com/akopachov/flipper-zero_authenticator/issues/195)
 * Added `totp version` CLI command
 
 ## v4.0.0 - 9 Aug 2023
