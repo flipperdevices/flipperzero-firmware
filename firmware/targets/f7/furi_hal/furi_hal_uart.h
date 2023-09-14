@@ -33,7 +33,7 @@ typedef enum {
  * Uart wait tx complete
  * @param ch UART channel
  */
-void furi_hal_uart_wait_tx_complete(FuriHalUartId ch); 
+void furi_hal_uart_wait_tx_complete(FuriHalUartId ch);
 
 /**
  * Init UART

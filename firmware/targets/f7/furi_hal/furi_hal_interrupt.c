@@ -341,6 +341,6 @@ void USART1_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdUart1);
 }
 
-void LPUART1_IRQHandler(void){
+void LPUART1_IRQHandler(void) {
     furi_hal_interrupt_call(FuriHalInterruptIdLpUart1);
 }
