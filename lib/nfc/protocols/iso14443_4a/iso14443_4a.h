@@ -2,8 +2,6 @@
 
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 
-#include <lib/toolbox/simple_array.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,12 +13,22 @@ typedef enum {
     Iso14443_4aErrorTimeout,
 } Iso14443_4aError;
 
-typedef struct {
-    Iso14443_3aData* iso14443_3a_data;
-    SimpleArray* ats_data;
-} Iso14443_4aData;
+typedef enum {
+    Iso14443_4aBitRateBoth106Kbit,
+    Iso14443_4aBitRatePiccToPcd212Kbit,
+    Iso14443_4aBitRatePiccToPcd424Kbit,
+    Iso14443_4aBitRatePiccToPcd848Kbit,
+    Iso14443_4aBitRatePcdToPicc212Kbit,
+    Iso14443_4aBitRatePcdToPicc424Kbit,
+    Iso14443_4aBitRatePcdToPicc848Kbit,
+} Iso14443_4aBitRate;
 
-extern const NfcDeviceBase nfc_device_iso14443_4a;
+typedef enum {
+    Iso14443_4aFrameOptionNad,
+    Iso14443_4aFrameOptionCid,
+} Iso14443_4aFrameOption;
+
+typedef struct Iso14443_4aData Iso14443_4aData;
 
 // Virtual methods
 
@@ -50,7 +58,15 @@ Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data);
 
 // Getters & Tests
 
-bool iso14443_4a_is_ats_supported(const Iso14443_4aData* data);
+uint16_t iso14443_4a_get_frame_size_max(const Iso14443_4aData* data);
+
+uint32_t iso14443_4a_get_fwt_fc_max(const Iso14443_4aData* data);
+
+const uint8_t* iso14443_4a_get_historical_bytes(const Iso14443_4aData* data, uint32_t* count);
+
+bool iso14443_4a_supports_bit_rate(const Iso14443_4aData* data, Iso14443_4aBitRate bit_rate);
+
+bool iso14443_4a_supports_frame_option(const Iso14443_4aData* data, Iso14443_4aFrameOption option);
 
 #ifdef __cplusplus
 }

@@ -14,12 +14,9 @@ typedef enum {
 } MfUltralightListenerAuthState;
 
 typedef enum {
-    MfUltraligthListenerStateIdle,
-} MfUltraligthListenerState;
-
-typedef enum {
     MfUltralightCommandNotFound,
     MfUltralightCommandProcessed,
+    MfUltralightCommandProcessedACK,
     MfUltralightCommandProcessedSilent,
     MfUltralightCommandNotProcessedNAK,
     MfUltralightCommandNotProcessedSilent,
@@ -47,8 +44,6 @@ typedef struct {
 struct MfUltralightListener {
     Iso14443_3aListener* iso14443_3a_listener;
     MfUltralightListenerAuthState auth_state;
-    MfUltraligthListenerState state;
-
     MfUltralightData* data;
     BitBuffer* tx_buffer;
     MfUltralightFeatureSupport features;

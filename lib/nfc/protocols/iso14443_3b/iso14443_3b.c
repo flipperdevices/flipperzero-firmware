@@ -1,6 +1,7 @@
-#include "iso14443_3b.h"
+#include "iso14443_3b_i.h"
 
 #include <furi.h>
+#include <nfc/protocols/nfc_device_base_i.h>
 
 #include <nfc/nfc_common.h>
 #include <nfc/helpers/iso14443_crc.h>
@@ -70,8 +71,8 @@ bool iso14443_3b_load(Iso14443_3bData* data, FlipperFormat* ff, uint32_t version
         if(!flipper_format_read_hex(
                ff,
                ISO14443_3B_PROTOCOL_INFO_KEY,
-               data->protocol_info,
-               ISO14443_3B_PROTOCOL_INFO_SIZE))
+               (uint8_t*)&data->protocol_info,
+               sizeof(Iso14443_3bProtocolInfo)))
             break;
 
         parsed = true;
@@ -94,8 +95,8 @@ bool iso14443_3b_save(const Iso14443_3bData* data, FlipperFormat* ff) {
         if(!flipper_format_write_hex(
                ff,
                ISO14443_3B_PROTOCOL_INFO_KEY,
-               data->protocol_info,
-               ISO14443_3B_PROTOCOL_INFO_SIZE))
+               (uint8_t*)&data->protocol_info,
+               sizeof(Iso14443_3bProtocolInfo)))
             break;
         saved = true;
     } while(false);
@@ -119,11 +120,9 @@ const char* iso14443_3b_get_device_name(const Iso14443_3bData* data, NfcDeviceNa
 
 const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len) {
     furi_assert(data);
+    furi_assert(uid_len);
 
-    if(uid_len) {
-        *uid_len = ISO14443_3B_UID_SIZE;
-    }
-
+    *uid_len = ISO14443_3B_UID_SIZE;
     return data->uid;
 }
 
@@ -142,4 +141,81 @@ bool iso14443_3b_set_uid(Iso14443_3bData* data, const uint8_t* uid, size_t uid_l
 Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data) {
     UNUSED(data);
     furi_crash("No base data");
+}
+
+bool iso14443_3b_supports_iso14443_4(const Iso14443_3bData* data) {
+    furi_assert(data);
+
+    return data->protocol_info.protocol_type == 0x01;
+}
+
+bool iso14443_3b_supports_bit_rate(const Iso14443_3bData* data, Iso14443_3bBitRate bit_rate) {
+    furi_assert(data);
+
+    const uint8_t capability = data->protocol_info.bit_rate_capability;
+
+    switch(bit_rate) {
+    case Iso14443_3bBitRateBoth106Kbit:
+        return capability == ISO14443_3B_BIT_RATE_BOTH_106KBIT;
+    case Iso14443_3bBitRatePiccToPcd212Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_212KBIT;
+    case Iso14443_3bBitRatePiccToPcd424Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_424KBIT;
+    case Iso14443_3bBitRatePiccToPcd848Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PICC_TO_PCD_848KBIT;
+    case Iso14443_3bBitRatePcdToPicc212Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_212KBIT;
+    case Iso14443_3bBitRatePcdToPicc424Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_424KBIT;
+    case Iso14443_3bBitRatePcdToPicc848Kbit:
+        return capability & ISO14443_3B_BIT_RATE_PCD_TO_PICC_848KBIT;
+    default:
+        return false;
+    }
+}
+
+bool iso14443_3b_supports_frame_option(const Iso14443_3bData* data, Iso14443_3bFrameOption option) {
+    furi_assert(data);
+
+    switch(option) {
+    case Iso14443_3bFrameOptionNad:
+        return data->protocol_info.fo & ISO14443_3B_FRAME_OPTION_NAD;
+    case Iso14443_3bFrameOptionCid:
+        return data->protocol_info.fo & ISO14443_3B_FRAME_OPTION_CID;
+    default:
+        return false;
+    }
+}
+
+const uint8_t* iso14443_3b_get_application_data(const Iso14443_3bData* data, size_t* data_size) {
+    furi_assert(data);
+    furi_assert(data_size);
+
+    *data_size = ISO14443_3B_APP_DATA_SIZE;
+    return data->app_data;
+}
+
+uint16_t iso14443_3b_get_frame_size_max(const Iso14443_3bData* data) {
+    furi_assert(data);
+
+    const uint8_t fs_bits = data->protocol_info.max_frame_size;
+
+    if(fs_bits < 5) {
+        return fs_bits * 8 + 16;
+    } else if(fs_bits == 5) {
+        return 64;
+    } else if(fs_bits == 6) {
+        return 96;
+    } else if(fs_bits < 13) {
+        return 128U << (fs_bits - 7);
+    } else {
+        return 0;
+    }
+}
+
+uint32_t iso14443_3b_get_fwt_fc_max(const Iso14443_3bData* data) {
+    furi_assert(data);
+
+    const uint8_t fwi = data->protocol_info.fwi;
+    return fwi < 15 ? 4096UL << fwi : 0;
 }

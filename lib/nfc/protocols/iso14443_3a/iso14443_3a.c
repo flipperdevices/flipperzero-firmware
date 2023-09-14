@@ -3,6 +3,8 @@
 #include <furi.h>
 #include <nfc/nfc_common.h>
 
+#define ISO14443A_ATS_BIT (1U << 5)
+
 #define ISO14443_3A_PROTOCOL_NAME_LEGACY "UID"
 #define ISO14443_3A_PROTOCOL_NAME "ISO14443-3A"
 #define ISO14443_3A_DEVICE_NAME "ISO14443-3A (Unknown)"
@@ -141,15 +143,21 @@ Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data) {
     furi_crash("No base data");
 }
 
-uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* iso14443_3a_data) {
-    furi_assert(iso14443_3a_data);
+uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* data) {
+    furi_assert(data);
 
     uint32_t cuid = 0;
-    const uint8_t* cuid_start = iso14443_3a_data->uid;
-    if(iso14443_3a_data->uid_len == 7) {
-        cuid_start = &iso14443_3a_data->uid[3];
+    const uint8_t* cuid_start = data->uid;
+    if(data->uid_len == 7) {
+        cuid_start = &data->uid[3];
     }
     cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) | (cuid_start[3]);
 
     return cuid;
+}
+
+bool iso14443_3a_supports_iso14443_4(const Iso14443_3aData* data) {
+    furi_assert(data);
+
+    return data->sak & ISO14443A_ATS_BIT;
 }
