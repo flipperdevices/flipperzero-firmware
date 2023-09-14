@@ -575,6 +575,38 @@ static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* insta
     mf_ultraligt_mirror_prepare_emulation(instance);
 }
 
+static NfcCommand mf_ultralight_command_postprocess(
+    MfUltralightCommand mfu_command,
+    MfUltralightListener* instance) {
+    NfcCommand command = NfcCommandContinue;
+
+    if(mfu_command == MfUltralightCommandProcessedACK) {
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+        command = NfcCommandContinue;
+    } else if(mfu_command == MfUltralightCommandProcessedSilent) {
+        command = NfcCommandReset;
+    } else if(mfu_command != MfUltralightCommandProcessed) {
+        instance->auth_state = MfUltralightListenerAuthStateIdle;
+        command = NfcCommandSleep;
+
+        if(mfu_command == MfUltralightCommandNotProcessedNAK) {
+            mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+        }
+    }
+
+    return command;
+}
+
+static NfcCommand mf_ultralight_reset_listener_state(
+    MfUltralightListener* instance,
+    Iso14443_3aListenerEventType event_type) {
+    mf_ultralight_composite_command_reset(instance);
+    mf_ultralight_single_counter_try_to_unlock(instance, event_type);
+    instance->sector = 0;
+    instance->auth_state = MfUltralightListenerAuthStateIdle;
+    return NfcCommandSleep;
+}
+
 MfUltralightListener* mf_ultralight_listener_alloc(
     Iso14443_3aListener* iso14443_3a_listener,
     MfUltralightData* data) {
@@ -650,26 +682,12 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
                 if(mfu_command != MfUltralightCommandNotFound) break;
             }
         }
-        if(mfu_command == MfUltralightCommandProcessedSilent) {
-            command = NfcCommandReset;
-        } else if(mfu_command != MfUltralightCommandProcessed) {
-            instance->auth_state = MfUltralightListenerAuthStateIdle;
-            command = NfcCommandSleep;
-
-            if(mfu_command == MfUltralightCommandNotProcessedNAK) {
-                mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
-            }
-        }
+        command = mf_ultralight_command_postprocess(mfu_command, instance);
     } else if(
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedData ||
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeFieldOff ||
         iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
-        // TODO generic state reset ?
-        mf_ultralight_composite_command_reset(instance);
-        mf_ultralight_single_counter_try_to_unlock(instance, iso14443_3a_event->type);
-        instance->sector = 0;
-        instance->auth_state = MfUltralightListenerAuthStateIdle;
-        command = NfcCommandSleep;
+        command = mf_ultralight_reset_listener_state(instance, iso14443_3a_event->type);
     }
 
     return command;
