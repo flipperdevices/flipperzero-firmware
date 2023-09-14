@@ -10,7 +10,7 @@ void wiegand_instructions_scene_on_enter(void* context) {
         15,
         128,
         40,
-        "Version 1.1\n"
+        "Version 1.2\n"
         "Only use on devices you own!\n"
         "Connect D0 (Green) to pin A4\n"
         "Connect D1 (White) to pin A7\n"

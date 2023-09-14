@@ -1,13 +1,14 @@
 #pragma once
 
 #include <furi.h>
+#include <furi_hal.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/widget.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
-#include <lib/toolbox/random_name.h>
+// #include <lib/toolbox/random_name.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>

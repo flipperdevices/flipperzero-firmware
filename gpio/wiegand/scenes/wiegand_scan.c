@@ -1,5 +1,4 @@
 #include "../wiegand.h"
-#include <furi_hal.h>
 
 FuriTimer* timer = NULL;
 
