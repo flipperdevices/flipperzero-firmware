@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0914-1718-0.90.2-215b031](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-15 10:36 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-15 10:36 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-15 13:57 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-15 13:57 EST`
 - Updated: [Authenticator/TOTP v5.0.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Fix app versions to match OFW catalog/UL and .FAM cleanup
 - Added: [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth)
@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL PR: [Updated infrared assets #607 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/607)
 - App versions incremented for some apps due to [New random file name API fix #40 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/40)
 - [ESP32CAM Mayhem Marauder: Removing GPS and LED menus (By eried)](https://github.com/eried/flipperzero-mayhem/commit/c532e4b3e143c93786db74157b8009f607de0140#diff-d30f083f00277de44d820def2f298f3651f2bf10e5f6336cb0ed5482e9ea58d3)
+- Will be away till Monday, Sep 18th.
 
 <a name="release">
 
