@@ -19,6 +19,12 @@ void nfc_protocol_support_common_widget_callback(
     }
 }
 
+void nfc_protocol_support_common_byte_input_done_callback(void* context) {
+    furi_assert(context);
+    NfcApp* instance = context;
+    view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventByteInputDone);
+}
+
 void nfc_protocol_support_common_on_enter_empty(NfcApp* instance) {
     UNUSED(instance);
 }
