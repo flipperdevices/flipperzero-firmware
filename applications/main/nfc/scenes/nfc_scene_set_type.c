@@ -8,7 +8,7 @@ enum SubmenuIndex {
     SubmenuIndexNFCA7,
 };
 
-static void nfc_scene_set_type_set_uid_len(Iso14443_3aData* data, size_t uid_len) {
+static void nfc_scene_set_type_init_edit_data(Iso14443_3aData* data, size_t uid_len) {
     // Easiest way to create a zero'd buffer of given length
     uint8_t* uid = malloc(uid_len);
     iso14443_3a_set_uid(data, uid, uid_len);
@@ -46,11 +46,11 @@ bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexNFCA7) {
-            nfc_scene_set_type_set_uid_len(instance->iso14443_3a_edit_data, 7);
+            nfc_scene_set_type_init_edit_data(instance->iso14443_3a_edit_data, 7);
             scene_manager_next_scene(instance->scene_manager, NfcSceneSetSak);
             consumed = true;
         } else if(event.event == SubmenuIndexNFCA4) {
-            nfc_scene_set_type_set_uid_len(instance->iso14443_3a_edit_data, 4);
+            nfc_scene_set_type_init_edit_data(instance->iso14443_3a_edit_data, 4);
             scene_manager_next_scene(instance->scene_manager, NfcSceneSetSak);
             consumed = true;
         } else {

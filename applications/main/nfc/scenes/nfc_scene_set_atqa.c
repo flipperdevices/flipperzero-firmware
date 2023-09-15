@@ -2,7 +2,7 @@
 
 void nfc_scene_set_atqa_byte_input_changed_callback(void* context) {
     NfcApp* instance = context;
-    memcpy(instance->iso14443_3a_edit_data->atqa, instance->byte_input_store, 2);
+    iso14443_3a_set_atqa(instance->iso14443_3a_edit_data, instance->byte_input_store);
 }
 
 void nfc_scene_set_atqa_byte_input_done_callback(void* context) {
@@ -14,7 +14,7 @@ void nfc_scene_set_atqa_byte_input_done_callback(void* context) {
 void nfc_scene_set_atqa_on_enter(void* context) {
     NfcApp* instance = context;
 
-    memcpy(instance->byte_input_store, instance->iso14443_3a_edit_data->atqa, 2);
+    iso14443_3a_get_atqa(instance->iso14443_3a_edit_data, instance->byte_input_store);
 
     // Setup view
     ByteInput* byte_input = instance->byte_input;

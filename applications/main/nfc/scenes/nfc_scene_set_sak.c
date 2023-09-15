@@ -2,7 +2,7 @@
 
 void nfc_scene_set_sak_byte_input_changed_callback(void* context) {
     NfcApp* instance = context;
-    instance->iso14443_3a_edit_data->sak = instance->byte_input_store[0];
+    iso14443_3a_set_sak(instance->iso14443_3a_edit_data, instance->byte_input_store[0]);
 }
 
 void nfc_scene_set_sak_byte_input_done_callback(void* context) {
@@ -14,7 +14,7 @@ void nfc_scene_set_sak_byte_input_done_callback(void* context) {
 void nfc_scene_set_sak_on_enter(void* context) {
     NfcApp* instance = context;
 
-    instance->byte_input_store[0] = instance->iso14443_3a_edit_data->sak;
+    instance->byte_input_store[0] = iso14443_3a_get_sak(instance->iso14443_3a_edit_data);
 
     // Setup view
     ByteInput* byte_input = instance->byte_input;
