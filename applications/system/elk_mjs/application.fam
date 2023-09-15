@@ -1,0 +1,23 @@
+App(
+    appid="m_js",
+    name="MJS",
+    fap_category="Tools",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="m_js_app",
+    stack_size=8 * 1024,
+    cdefines=[
+        ("CS_PLATFORM", "CS_P_STM32"),
+        "MJS_EXPOSE_PRIVATE",
+    ],
+    fap_private_libs=[
+        Lib(
+            name="mjs",
+            cflags=[
+                "-Wno-redundant-decls",
+                "-Wno-unused-function",
+            ],
+        ),
+    ],
+    fap_libs=["gcc"],
+    order=0,
+)
