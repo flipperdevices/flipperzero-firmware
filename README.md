@@ -311,7 +311,7 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - [x] Add view to allow the traded Pokemon's hidden stats to be chosen (IV and EV) from some options
 - [x] Add view to allow the traded Pokemon's moveset to be chosen (all 4 moves) allowing no move as an option
 - [ ] Debug traded Pokemon level issue where after a battle the Pokemon's level drops (doesn't affect all traded Pokemon)
-- [x] Add images for the level selection screen, stats selection screen, and move selection screens as per the original README
+- [ ] Add images for the level selection screen, stats selection screen, and move selection screens as per the original README
 - [ ] Optimise the level selection screen to be a number slider input instead of the current slideshow style selector
 - [ ] Add a view to allow for a custom Pokemon nickname (11 chars, 10 chars max used, fill and terminate with TERM_)
 
