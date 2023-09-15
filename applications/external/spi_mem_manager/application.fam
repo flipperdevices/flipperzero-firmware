@@ -12,6 +12,6 @@ App(
             name="spi",
         ),
     ],
-    fap_version="1.0",
+    fap_version=(1, 1),
     fap_description="Application for reading and writing 25-series SPI memory chips",
 )

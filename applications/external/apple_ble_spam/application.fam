@@ -12,8 +12,8 @@ App(
             name="continuity",
         ),
     ],
-    fap_author="Willy-JL & ECTO-1A",  # Plus research from ECTO-1A, xMasterX & techryptic; Working on OFW API thanks to noproto
-    fap_weburl="https://github.com/ECTO-1A/AppleJuice",
+    fap_author="Willy-JL & ECTO-1A",  # Plus research from xMasterX; Working on OFW API thanks to noproto
+    fap_weburl="https://github.com/noproto/apple_ble_spam_ofw",
     fap_version=(1, 2),
     fap_description="Spam Apple devices with annoying popups and notifications via BLE packets",
 )
