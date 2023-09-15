@@ -1,0 +1,10 @@
+print(led);
+print('RED');
+led.red();
+delay(500);
+print("GREEN");
+led.green();
+delay(500);
+print("BLUE");
+led.blue();
+delay(500);

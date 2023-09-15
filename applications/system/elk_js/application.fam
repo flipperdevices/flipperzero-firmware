@@ -1,0 +1,9 @@
+App(
+    appid="elk_js",
+    name="Elk JS",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="elk_js_app",
+    stack_size=4 * 1024,
+    sources=["*.c", "*.S"],
+    order=1,
+)
