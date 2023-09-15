@@ -18,7 +18,7 @@ App(
             ],
         ),
     ],
-    fap_libs=["gcc"],
+    fap_libs=["gcc", "assets"],
     fap_file_assets="assets",
     order=0,
 )

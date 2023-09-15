@@ -14,8 +14,12 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/loading.h>
 #include <flipper_application/api_hashtable/api_hashtable.h>
+#include <flipper_application/plugins/composite_resolver.h>
+#include "addon_api/app_api_interface.h"
 
 #define TAG "MJS"
+
+static CompositeApiResolver* resolver;
 
 // TODO: mjs fix
 void cs_log_printf(const char* fmt, ...) {
@@ -106,7 +110,9 @@ static void* my_dlsym(void* handle, const char* name) {
     UNUSED(handle);
     Elf32_Addr addr = 0;
     uint32_t hash = elf_symbolname_hash(name);
-    if(!firmware_api_interface->resolver_callback(firmware_api_interface, hash, &addr)) {
+    const ElfApiInterface* api = composite_api_resolver_get(resolver);
+
+    if(!api->resolver_callback(api, hash, &addr)) {
         FURI_LOG_E(TAG, "FFI: cannot find \"%s\"", name);
         return NULL;
     }
@@ -170,6 +176,9 @@ int32_t m_js_app(void* arg) {
 
     ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
     Loading* loading = loading_alloc();
+    resolver = composite_api_resolver_alloc();
+    composite_api_resolver_add(resolver, firmware_api_interface);
+    composite_api_resolver_add(resolver, application_api_interface);
 
     Gui* gui = furi_record_open("gui");
     view_dispatcher_enable_queue(view_dispatcher);
@@ -195,6 +204,8 @@ int32_t m_js_app(void* arg) {
     loading_free(loading);
     view_dispatcher_free(view_dispatcher);
     furi_record_close("gui");
+
+    composite_api_resolver_free(resolver);
 
     furi_string_free(name);
     return 0;
