@@ -3,13 +3,7 @@
 #include "../iso15693_3/iso15693_3_render.h"
 
 void nfc_render_slix_info(const SlixData* data, NfcProtocolFormatType format_type, FuriString* str) {
-    if(format_type == NfcProtocolFormatTypeFull) {
-        furi_string_cat_printf(str, "%s\n", slix_get_device_name(data, NfcDeviceNameTypeFull));
-    }
-
-    const Iso15693_3Data* iso15693_3_data = slix_get_base_data(data);
-
-    nfc_render_iso15693_3_header(iso15693_3_data, str);
+    nfc_render_iso15693_3_brief(slix_get_base_data(data), str);
 
     if(format_type != NfcProtocolFormatTypeFull) return;
     const SlixType slix_type = slix_get_type(data);
@@ -75,7 +69,6 @@ void nfc_render_slix_info(const SlixData* data, NfcProtocolFormatType format_typ
         }
     }
 
-    furi_string_cat(str, "\n\e#ISO15693-3 data\n");
-
-    nfc_render_iso15693_3_main_info(iso15693_3_data, str);
+    furi_string_cat(str, "\n\e#ISO15693-3 data");
+    nfc_render_iso15693_3_extra(slix_get_base_data(data), str);
 }
