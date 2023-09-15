@@ -3,7 +3,7 @@ import os
 import pathlib
 import shutil
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List
+from typing import Dict, List, Optional
 
 import SCons.Warnings
 from ansi.color import fg
@@ -146,7 +146,7 @@ class AppBuilder:
 
         self.app_env.Append(
             LIBS=[*self.app.fap_libs, *self.private_libs],
-            CPPPATH=[self.app_env.Dir(self.app_work_dir), self.app._appdir],
+            CPPPATH=[self.app_work_dir, self.app._appdir],
         )
 
         app_sources = list(
@@ -215,7 +215,7 @@ class AppBuilder:
         # Extra things to clean up along with the app
         self.app_env.Clean(
             app_artifacts.debug,
-            [*self.externally_built_files, self.app_env.Dir(self.app_work_dir)],
+            [*self.externally_built_files, self.app_work_dir],
         )
 
         # Create listing of the app
