@@ -70,64 +70,22 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
     </p>
 
 - The Flipper Zero should show the selection of the Pokemon's level that you want to trade, and by default, it appears as level 1.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-3.png" width="400" />
-        <br />
-    </p>
-
 - Press the `LEFT`/`RIGHT` buttons to paginate the selection of the Pokemon's level by 1.
 - Press the `UP`/`DOWN` buttons to paginate the selection of the Pokemon's level by 10.
 - Press the `OK` button to select the Pokemon's level to trade.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-4.png" width="400" />
-        <br />
-    </p>
-
 - The Flipper Zero should show the selection for the Pokemon's moves that you want to trade, this will happen 4 times with default bing no move.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-5.png" width="400" />
-        <br />
-    </p>
-
 - Press the `LEFT`/`RIGHT` buttons to paginate the selection of the Pokemon's current move selection by 1.
 - Press the `UP`/`DOWN` buttons to paginate the selection of the Pokemon's current move selection by 10.
 - Press the `OK` button to select the Pokemon's current move selection to trade.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-6.png" width="400" />
-        <br />
-    </p>
-
 - The Flipper Zero should show the selection for the Pokemon's stats that you want to trade, and by default, it appears as random IV and zero EV.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-7.png" width="400" />
-        <br />
-    </p>
-
 - Press the `RIGHT`/`UP` buttons to paginate the selection of the Pokemon's stats selection by 1 positively.
 - Press the `LEFT`/`DOWN` buttons to paginate the selection of the Pokemon's stats selection by 1 negatively.
 - Press the `OK` button to select the Pokemon's current move selection to trade.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-8.png" width="400" />
-        <br />
-    </p>
-
 - The Flipper Zero will display the view to connect the Game Boy.
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-9.png" width="400" /><br />
+        <img src="./docs/images/flipper-zero-flat-3.png" width="400" /><br />
     </p>
 
 - On your Game Boy, you should connect the  **Game Link Cable** to the Game Boy and in the game, go to the nearest  **Pokemon Center**.
@@ -148,7 +106,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-10.png" width="400" /><br />
+        <img src="./docs/images/flipper-zero-flat-4.png" width="400" /><br />
     </p>
 
 - On the Game Boy, we will be asked which option we want, and we select **TRADE CENTER**.
@@ -169,7 +127,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-10.png" width="400" /><br />
+        <img src="./docs/images/flipper-zero-flat-5.png" width="400" /><br />
     </p>
 
 - You will see your Pokemon and the Pokemon you selected on the Flipper Zero, in this case, `Mew`. You must select the Pokemon you want to trade and press **TRADE**.
@@ -190,14 +148,14 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-11.png" width="400" /><br />
+        <img src="./docs/images/flipper-zero-flat-6.png" width="400" /><br />
     </p>
 
 - Finally, the Pokemon exchange will start from **Flipper Zero** to the **Game Boy**.
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-12.png" width="400" /><br />
+        <img src="./docs/images/flipper-zero-flat-7.png" width="400" /><br />
     </p>
 
     If the Flipper Zero gets stuck at the end of the exchange, you must reboot it by pressing the <img src="./docs/images/left.png" /> LEFT + <img src="./docs/images/back.png" /> BACK key combination.
