@@ -1,6 +1,6 @@
 {
-  "name": "ESP32CAMMarauder",
-  "version": "2023.01.31",
+  "name": "MayhemFirmware",
+  "version": "v0.12.0",
   "builds": [
     {
       "chipFamily": "ESP32",
