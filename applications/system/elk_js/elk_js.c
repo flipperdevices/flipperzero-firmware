@@ -369,7 +369,7 @@ static bool js_do(const char* text) {
 int32_t elk_js_app(void* arg) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
-    FuriString* name = furi_string_alloc_set(EXT_PATH("scripts"));
+    FuriString* name = furi_string_alloc_set(APP_ASSETS_PATH());
     File* file = storage_file_alloc(storage);
     char* data = NULL;
 

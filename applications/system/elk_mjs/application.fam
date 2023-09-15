@@ -19,5 +19,6 @@ App(
         ),
     ],
     fap_libs=["gcc"],
+    fap_file_assets="assets",
     order=0,
 )

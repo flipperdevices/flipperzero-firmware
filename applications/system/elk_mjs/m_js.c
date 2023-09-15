@@ -166,7 +166,7 @@ static int js_do(const char* path) {
 
 int32_t m_js_app(void* arg) {
     UNUSED(arg);
-    FuriString* name = furi_string_alloc_set(EXT_PATH("scripts/mjs"));
+    FuriString* name = furi_string_alloc_set(APP_ASSETS_PATH());
 
     ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
     Loading* loading = loading_alloc();
