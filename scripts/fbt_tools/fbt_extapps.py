@@ -55,7 +55,8 @@ class AppBuilder:
         )
         self.app_env.Append(
             CPPDEFINES=[
-                ("FAP_VERSION", f'"{".".join(map(str, self.app.fap_version))}"')
+                ("FAP_VERSION", f'"{".".join(map(str, self.app.fap_version))}"'),
+                *self.app.cdefines,
             ],
         )
         self.app_env.VariantDir(self.app_work_dir, self.app._appdir, duplicate=False)
@@ -138,7 +139,7 @@ class AppBuilder:
 
     def _build_app(self):
         self.app_env.Append(
-            LIBS=[*self.app.fap_libs, *self.private_libs],
+            LIBS=[*self.app.fap_libs, *self.private_libs, *self.app.fap_libs],
             CPPPATH=[self.app_env.Dir(self.app_work_dir), self.app._appdir],
         )
 
