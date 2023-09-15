@@ -373,7 +373,6 @@ void trade_enter_callback(void* context) {
             model->current_pokemon = trade->app->current_pokemon;
             model->pokemon_hex_code = trade->app->pokemon_hex_code;
             model->current_level = trade->app->current_level;
-            model->current_stats = trade->app->current_stats;
             model->current_move = trade->app->current_move;
             model->move1_hex_code = trade->app->move1_hex_code;
             model->move2_hex_code = trade->app->move2_hex_code;
@@ -446,12 +445,7 @@ void trade_enter_callback(void* context) {
     // Set the Pokemon stat experience
 
     uint16_t statexp = 0x0000;
-    if(trade->app->current_stats == 1 || trade->app->current_stats == 4) {
-        statexp = (65535 / 100) * level;
-    } else if(trade->app->current_stats == 2 || trade->app->current_stats == 5) {
-        statexp = 65535;
-    }
-
+    // uint16_t statexp = (65535 / 100) * level;
     DATA_BLOCK2.party[0].hp_ev = ((statexp >> 8) & 0x00FF) | ((statexp << 8) & 0xFF00);
     DATA_BLOCK2.party[0].atk_ev = ((statexp >> 8) & 0x00FF) | ((statexp << 8) & 0xFF00);
     DATA_BLOCK2.party[0].def_ev = ((statexp >> 8) & 0x00FF) | ((statexp << 8) & 0xFF00);
@@ -465,42 +459,30 @@ void trade_enter_callback(void* context) {
     FURI_LOG_D(TAG, "[Trade] Pokemon Speed EV: %x", DATA_BLOCK2.party[0].spd_ev);
     FURI_LOG_D(TAG, "[Trade] Pokemon Special EV: %x", DATA_BLOCK2.party[0].special_ev);
 
-    // Set the Pokemon stats
+    // Set the Pokemon max hp
 
-    uint8_t atk_iv = 15;
-    uint8_t def_iv = 15;
-    uint8_t spd_iv = 15;
-    uint8_t special_iv = 15;
-    uint8_t hp_iv = 15;
-    if(trade->app->current_stats <= 2) {
-        atk_iv = rand() % 15;
-        def_iv = rand() % 15;
-        spd_iv = rand() % 15;
-        special_iv = rand() % 15;
-        DATA_BLOCK2.party[0].iv = ((atk_iv & 0b00001111) << 12) | ((def_iv & 0b00001111) << 8) | ((spd_iv & 0b00001111) << 4) | ((special_iv & 0b00001111));
-        hp_iv = (DATA_BLOCK2.party[0].iv & 0xAA) >> 4;
-    }
-
-    FURI_LOG_D(TAG, "[Trade] Pokemon IV: %x", DATA_BLOCK2.party[0].iv);
-    FURI_LOG_D(TAG, "[Trade] Pokemon HP IV: %x", hp_iv);
-    FURI_LOG_D(TAG, "[Trade] Pokemon Attack IV: %x", atk_iv);
-    FURI_LOG_D(TAG, "[Trade] Pokemon Defence IV: %x", def_iv);
-    FURI_LOG_D(TAG, "[Trade] Pokemon Speed IV: %x", spd_iv);
-    FURI_LOG_D(TAG, "[Trade] Pokemon Special IV: %x", special_iv);
-
-    uint16_t max_hp = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_hp + hp_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + (level + 10);
+    // uint16_t max_hp = (0.01 * (2 * pokemon_table[trade->app->current_pokemon].base_hp + 15 + (0.25 * statexp)) * level) + level + 10;
+    uint16_t max_hp = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_hp + 15)) + floor(sqrt(statexp) / 4)) * level) / 100) + (level + 10);
     DATA_BLOCK2.party[0].max_hp = ((max_hp >> 8) & 0x00FF) | ((max_hp << 8) & 0xFF00);
     DATA_BLOCK2.party[0].hp = ((max_hp >> 8) & 0x00FF) | ((max_hp << 8) & 0xFF00);
-    uint16_t attack = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_atk + atk_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
-    DATA_BLOCK2.party[0].atk = ((attack >> 8) & 0x00FF) | ((attack << 8) & 0xFF00);
-    uint16_t defence = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_def + def_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
-    DATA_BLOCK2.party[0].def = ((defence >> 8) & 0x00FF) | ((defence << 8) & 0xFF00);
-    uint16_t speed = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_spd + spd_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
-    DATA_BLOCK2.party[0].spd = ((speed >> 8) & 0x00FF) | ((speed << 8) & 0xFF00);
-    uint16_t special = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_special + special_iv)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
-    DATA_BLOCK2.party[0].special = ((special >> 8) & 0x00FF) | ((special << 8) & 0xFF00);
 
     FURI_LOG_D(TAG, "[Trade] Pokemon Max HP: %x", DATA_BLOCK2.party[0].max_hp);
+
+    // Set the Pokemon stats
+
+    // uint8_t attack = (0.01 * (2 * pokemon_table[trade->app->current_pokemon].base_atk + 15 + (0.25 * statexp)) * level) + 5;
+    uint16_t attack = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_atk + 15)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
+    DATA_BLOCK2.party[0].atk = ((attack >> 8) & 0x00FF) | ((attack << 8) & 0xFF00);
+    // uint8_t defence = (0.01 * (2 * pokemon_table[trade->app->current_pokemon].base_def + 15 + (0.25 * statexp)) * level) + 5;
+    uint16_t defence = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_def + 15)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
+    DATA_BLOCK2.party[0].def = ((defence >> 8) & 0x00FF) | ((defence << 8) & 0xFF00);
+    // uint8_t speed = (0.01 * (2 * pokemon_table[trade->app->current_pokemon].base_spd + 15 + (0.25 * statexp)) * level) + 5;
+    uint16_t speed = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_spd + 15)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
+    DATA_BLOCK2.party[0].spd = ((speed >> 8) & 0x00FF) | ((speed << 8) & 0xFF00);
+    // uint8_t special = (0.01 * (2 * pokemon_table[trade->app->current_pokemon].base_special + 15 + (0.25 * statexp)) * level) + 5;
+    uint16_t special = floor((((2 * (pokemon_table[trade->app->current_pokemon].base_special + 15)) + floor(sqrt(statexp) / 4)) * level) / 100) + 5;
+    DATA_BLOCK2.party[0].special = ((special >> 8) & 0x00FF) | ((special << 8) & 0xFF00);
+
     FURI_LOG_D(TAG, "[Trade] Pokemon Attack: %x", DATA_BLOCK2.party[0].atk);
     FURI_LOG_D(TAG, "[Trade] Pokemon Defence: %x", DATA_BLOCK2.party[0].def);
     FURI_LOG_D(TAG, "[Trade] Pokemon Speed: %x", DATA_BLOCK2.party[0].spd);
