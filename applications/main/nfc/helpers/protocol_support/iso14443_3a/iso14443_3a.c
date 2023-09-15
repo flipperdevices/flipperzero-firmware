@@ -1,4 +1,4 @@
-#include "iso14443_3a_i.h"
+#include "iso14443_3a.h"
 #include "iso14443_3a_render.h"
 
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
@@ -109,19 +109,6 @@ static bool nfc_scene_read_menu_on_event_iso14443_3a(NfcApp* instance, uint32_t 
     return false;
 }
 
-bool nfc_scene_saved_menu_on_event_iso14443_3a_common(NfcApp* instance, uint32_t event) {
-    if(event == SubmenuIndexCommonEdit) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
-        return true;
-    }
-
-    return false;
-}
-
-static bool nfc_scene_saved_menu_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
-    return nfc_scene_saved_menu_on_event_iso14443_3a_common(instance, event);
-}
-
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
     .features = NfcProtocolFeatureEmulateUid | NfcProtocolFeatureEditUid,
 
@@ -148,7 +135,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
     .scene_saved_menu =
         {
             .on_enter = nfc_protocol_support_common_on_enter_empty,
-            .on_event = nfc_scene_saved_menu_on_event_iso14443_3a,
+            .on_event = NULL,
         },
     .scene_emulate =
         {

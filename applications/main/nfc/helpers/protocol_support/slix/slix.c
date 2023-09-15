@@ -105,8 +105,7 @@ static bool nfc_scene_saved_menu_on_event_slix(NfcApp* instance, uint32_t event)
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_slix = {
-    .features =
-        NfcProtocolFeatureEmulateFull, // | NfcProtocolFeatureEditUid, // TODO: Implement better UID editing
+    .features = NfcProtocolFeatureEmulateFull,
 
     .scene_info =
         {
