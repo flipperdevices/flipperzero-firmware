@@ -89,7 +89,7 @@ class AppBuilder:
         fap_icons = self.app_env.CompileIcons(
             self.app_work_dir,
             self.app._appdir.Dir(self.app.fap_icon_assets),
-            icon_bundle_name=f"{self.app.fap_icon_assets_symbol if self.app.fap_icon_assets_symbol else self.app.appid }_icons",
+            icon_bundle_name=f"{self.app.fap_icon_assets_symbol or self.app.appid }_icons",
         )
         self.app_env.Alias("_fap_icons", fap_icons)
         self.fw_env.Append(_APP_ICONS=[fap_icons])
@@ -123,9 +123,7 @@ class AppBuilder:
 
         private_lib_env = self.app_env.Clone()
         private_lib_env.AppendUnique(
-            CCFLAGS=[
-                *lib_def.cflags,
-            ],
+            CCFLAGS=lib_def.cflags,
             CPPDEFINES=lib_def.cdefines,
             CPPPATH=list(
                 map(
