@@ -1,8 +1,6 @@
 /* FLASH SETTINGS
-Board: LOLIN D32
-Flash Frequency: 80MHz
-Partition Scheme: Minimal SPIFFS
-https://www.online-utility.org/image/convert/to/XBM
+Board: ESP32 Dev Module
+Check: https://github.com/eried/flipperzero-mayhem/wiki/Compilation-of-the-firmware#board-settings
 */
 
 #include "configs.h"
