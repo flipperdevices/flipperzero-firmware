@@ -38,8 +38,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
                 select_pokemon->app->pokemon_hex_code = pokemon_table[model->current_pokemon].hex;
             },
             false);
-
-        view_dispatcher_switch_to_view(select_pokemon->app->view_dispatcher, AppViewSelectLevel);
+        view_dispatcher_switch_to_view(select_pokemon->app->view_dispatcher, AppViewTrade);
         consumed = true;
     } else if(event->type == InputTypePress && event->key == InputKeyBack) {
         view_dispatcher_switch_to_view(select_pokemon->app->view_dispatcher, VIEW_NONE);
