@@ -3,7 +3,7 @@
 
 #include "configs.h"
 
-//#include "SD.h"
+#include "settings.h"
 #include "FS.h"                // SD Card ESP32
 #include "SD_MMC.h"            // SD Card ESP32
 #include "Buffer.h"
@@ -13,6 +13,7 @@
 #include <Update.h>
 
 extern Buffer buffer_obj;
+extern Settings settings_obj;
 #ifdef HAS_SCREEN
   extern Display display_obj;
 #endif
@@ -39,8 +40,11 @@ class SDInterface {
   
     bool initSD();
 
-    void addPacket(uint8_t* buf, uint32_t len);
+    void listDir(String str_dir);
+    File getFile(String path);
+    void addPacket(uint8_t* buf, uint32_t len, bool log = false);
     void openCapture(String file_name = "");
+    void openLog(String file_name = "");
     void runUpdate();
     void performUpdate(Stream &updateSource, size_t updateSize);
     void main();

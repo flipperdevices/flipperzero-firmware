@@ -2,23 +2,23 @@
 #include "lang_var.h"
 
 bool SDInterface::initSD() {
-  String display_string = "";
+    String display_string = "";
 
-  /*#ifdef KIT
-    pinMode(SD_DET, INPUT);
-    if (digitalRead(SD_DET) == LOW) {
-      Serial.println(F("SD Card Detect Pin Detected"));
-    }
-    else {
-      Serial.println(F("SD Card Detect Pin Not Detected"));
-      this->supported = false;
-      return false;
-    }
-  #endif
+    /*#ifdef KIT
+      pinMode(SD_DET, INPUT);
+      if (digitalRead(SD_DET) == LOW) {
+        Serial.println(F("SD Card Detect Pin Detected"));
+      }
+      else {
+        Serial.println(F("SD Card Detect Pin Not Detected"));
+        this->supported = false;
+        return false;
+      }
+    #endif
 
-  pinMode(SD_CS, OUTPUT);
+    pinMode(SD_CS, OUTPUT);
 
-  delay(10);*/
+    delay(10);*/
 
   if (!SD_MMC.begin("/sdcard", true, false, SDMMC_FREQ_DEFAULT)) {
     Serial.println(F("Failed to mount SD Card"));
@@ -33,57 +33,98 @@ bool SDInterface::initSD() {
   } else {
     this->supported = true;
     this->cardType = cardType;
-    //if (cardType == CARD_MMC)
-    //  Serial.println(F("SD: MMC Mounted"));
-    //else if(cardType == CARD_SD)
-    //    Serial.println(F("SD: SDSC Mounted"));
-    //else if(cardType == CARD_SDHC)
-    //    Serial.println(F("SD: SDHC Mounted"));
-    //else
-    //    Serial.println(F("SD: UNKNOWN Card Mounted"));
+      //if (cardType == CARD_MMC)
+      //  Serial.println(F("SD: MMC Mounted"));
+      //else if(cardType == CARD_SD)
+      //    Serial.println(F("SD: SDSC Mounted"));
+      //else if(cardType == CARD_SDHC)
+      //    Serial.println(F("SD: SDHC Mounted"));
+      //else
+      //    Serial.println(F("SD: UNKNOWN Card Mounted"));
 
     this->cardSizeMB = SD_MMC.cardSize() / (1024 * 1024);
     
-    //Serial.printf("SD Card Size: %lluMB\n", this->cardSizeMB);
+      //Serial.printf("SD Card Size: %lluMB\n", this->cardSizeMB);
 
-    if (this->supported) {
-      const int NUM_DIGITS = log10(this->cardSizeMB) + 1;
-    
-      char sz[NUM_DIGITS + 1];
-     
-      sz[NUM_DIGITS] =  0;
-      for ( size_t i = NUM_DIGITS; i--; this->cardSizeMB /= 10)
-      {
-          sz[i] = '0' + (this->cardSizeMB % 10);
-          display_string.concat((String)sz[i]);
-      }
+      if (this->supported) {
+        const int NUM_DIGITS = log10(this->cardSizeMB) + 1;
+
+        char sz[NUM_DIGITS + 1];
+
+        sz[NUM_DIGITS] =  0;
+        for ( size_t i = NUM_DIGITS; i--; this->cardSizeMB /= 10)
+        {
+            sz[i] = '0' + (this->cardSizeMB % 10);
+            display_string.concat((String)sz[i]);
+        }
   
-      this->card_sz = sz;
-    }
+        this->card_sz = sz;
+      }
 
-    buffer_obj = Buffer();
+      buffer_obj = Buffer();
     
-    if (!SD_MMC.exists("/SCRIPTS")) {
-      Serial.println("/SCRIPTS does not exist. Creating...");
+      if (!SD_MMC.exists("/SCRIPTS")) {
+        Serial.println("/SCRIPTS does not exist. Creating...");
 
-      SD_MMC.mkdir("/SCRIPTS");
-      Serial.println("/SCRIPTS created");
-    }
+        SD_MMC.mkdir("/SCRIPTS");
+        Serial.println("/SCRIPTS created");
+      }
     
-    return true;
+      return true;
   }
 }
 
-void SDInterface::addPacket(uint8_t* buf, uint32_t len) {
+File SDInterface::getFile(String path) {
+  if (this->supported) {
+    File file = SD_MMC.open(path, FILE_READ);
+
+    //if (file)
+    return file;
+  }
+}
+
+void SDInterface::listDir(String str_dir){
+  if (this->supported) {
+    File dir = SD_MMC.open(str_dir);
+    while (true)
+    {
+      File entry =  dir.openNextFile();
+      if (! entry)
+      {
+        break;
+      }
+      //for (uint8_t i = 0; i < numTabs; i++)
+      //{
+      //  Serial.print('\t');
+      //}
+      Serial.print(entry.name());
+      Serial.print("\t");
+      Serial.println(entry.size());
+      entry.close();
+    }
+  }
+}
+
+void SDInterface::addPacket(uint8_t* buf, uint32_t len, bool log) {
   if ((this->supported) && (this->do_save)) {
-    buffer_obj.addPacket(buf, len);
+    buffer_obj.addPacket(buf, len, log);
   }
 }
 
 void SDInterface::openCapture(String file_name) {
-  if (this->supported)
+  bool save_pcap = settings_obj.loadSetting<bool>("SavePCAP");
+  if ((this->supported) && (save_pcap)) {
     buffer_obj.createPcapFile(&SD_MMC, file_name);
     buffer_obj.open();
+  }
+}
+
+void SDInterface::openLog(String file_name) {
+  bool save_pcap = settings_obj.loadSetting<bool>("SavePCAP");
+  if ((this->supported) && (save_pcap)) {
+    buffer_obj.createPcapFile(&SD_MMC, file_name, true);
+    buffer_obj.open(true);
+  }
 }
 
 void SDInterface::runUpdate() {
