@@ -247,13 +247,14 @@ const uint8_t* iso14443_4a_get_historical_bytes(const Iso14443_4aData* data, uin
 bool iso14443_4a_supports_bit_rate(const Iso14443_4aData* data, Iso14443_4aBitRate bit_rate) {
     furi_assert(data);
 
-    if(!(data->ats_data.t0 & ISO14443_4A_ATS_T0_TA1)) return false;
+    if(!(data->ats_data.t0 & ISO14443_4A_ATS_T0_TA1))
+        return bit_rate == Iso14443_4aBitRateBoth106Kbit;
 
     const uint8_t ta_1 = data->ats_data.ta_1;
 
     switch(bit_rate) {
     case Iso14443_4aBitRateBoth106Kbit:
-        return ta_1 == ISO14443_4A_ATS_TA1_BOTH_106KBIT;
+        return ta_1 == ISO14443_4A_ATS_TA1_BOTH_SAME_COMPULSORY;
     case Iso14443_4aBitRatePiccToPcd212Kbit:
         return ta_1 & ISO14443_4A_ATS_TA1_PCD_TO_PICC_212KBIT;
     case Iso14443_4aBitRatePiccToPcd424Kbit:

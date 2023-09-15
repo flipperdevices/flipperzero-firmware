@@ -6,10 +6,18 @@ void nfc_render_iso14443_4a_info(
     const Iso14443_4aData* data,
     NfcProtocolFormatType format_type,
     FuriString* str) {
-    nfc_render_iso14443_3a_info(iso14443_4a_get_base_data(data), format_type, str);
+    nfc_render_iso14443_4a_brief(data, str);
 
     if(format_type != NfcProtocolFormatTypeFull) return;
 
+    nfc_render_iso14443_4a_extra(data, str);
+}
+
+void nfc_render_iso14443_4a_brief(const Iso14443_4aData* data, FuriString* str) {
+    nfc_render_iso14443_3a_brief(iso14443_4a_get_base_data(data), str);
+}
+
+void nfc_render_iso14443_4a_extra(const Iso14443_4aData* data, FuriString* str) {
     furi_string_cat_printf(str, "\n\e#Protocol info\n");
 
     if(iso14443_4a_supports_bit_rate(data, Iso14443_4aBitRateBoth106Kbit)) {
@@ -47,8 +55,10 @@ void nfc_render_iso14443_4a_info(
         furi_string_cat(str, "? (RFU)\n");
     }
 
-    const double fwt = iso14443_4a_get_fwt_fc_max(data) / 13.56e6;
-    furi_string_cat_printf(str, "Max waiting time: %4.2g s\n", fwt);
+    const uint32_t fwt_fc = iso14443_4a_get_fwt_fc_max(data);
+    if(fwt_fc != 0) {
+        furi_string_cat_printf(str, "Max waiting time: %4.2g s\n", (double)(fwt_fc / 13.56e6));
+    }
 
     const char* nad_support_str =
         iso14443_4a_supports_frame_option(data, Iso14443_4aFrameOptionNad) ? "" : "not ";
@@ -58,11 +68,17 @@ void nfc_render_iso14443_4a_info(
         iso14443_4a_supports_frame_option(data, Iso14443_4aFrameOptionCid) ? "" : "not ";
     furi_string_cat_printf(str, "CID: %ssupported", cid_support_str);
 
-    furi_string_cat_printf(str, "\n\e#Historical bytes\nRaw:");
-
     uint32_t hist_bytes_count;
     const uint8_t* hist_bytes = iso14443_4a_get_historical_bytes(data, &hist_bytes_count);
-    for(size_t i = 0; i < hist_bytes_count; ++i) {
-        furi_string_cat_printf(str, " %02X", hist_bytes[i]);
+
+    if(hist_bytes_count > 0) {
+        furi_string_cat_printf(str, "\n\e#Historical bytes\nRaw:");
+
+        for(size_t i = 0; i < hist_bytes_count; ++i) {
+            furi_string_cat_printf(str, " %02X", hist_bytes[i]);
+        }
     }
+
+    furi_string_cat(str, "\n\e#ISO14444-3A data");
+    nfc_render_iso14443_3a_extra(iso14443_4a_get_base_data(data), str);
 }
