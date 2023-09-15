@@ -277,3 +277,9 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - [Disassembly of Pokemon Yellow](https://github.com/pret/pokeyellow)
 - [Arduino-Spoofing-Gameboy-Pokemon-Trades](https://github.com/EstebanFuentealba/Arduino-Spoofing-Gameboy-Pokemon-Trades)
 - [🎮 Gameboy link cable breakout PCB](https://github.com/Palmr/gb-link-cable)
+
+<p align='center'>
+<br />
+<br />
+From Talcahuano 🇨🇱 with ❤ 
+</p>
