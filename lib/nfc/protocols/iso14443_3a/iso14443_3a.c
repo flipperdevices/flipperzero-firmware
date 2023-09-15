@@ -41,8 +41,7 @@ void iso14443_3a_free(Iso14443_3aData* data) {
 
 void iso14443_3a_reset(Iso14443_3aData* data) {
     furi_assert(data);
-
-    UNUSED(data);
+    memset(data, 0, sizeof(Iso14443_3aData));
 }
 
 void iso14443_3a_copy(Iso14443_3aData* data, const Iso14443_3aData* other) {
