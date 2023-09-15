@@ -160,9 +160,9 @@ static int js_do(const char* path) {
     mjs_err_t err = mjs_exec_file(mjs, path, NULL);
 
     if(err != MJS_OK) {
-        FURI_LOG_E(TAG, "mjs_exec_file: %s", mjs_strerror(mjs, err));
+        FURI_LOG_E(TAG, "Exec error: %s", mjs_strerror(mjs, err));
         if(mjs->stack_trace != NULL) {
-            FURI_LOG_E(TAG, "stack: %s", mjs->stack_trace);
+            FURI_LOG_E(TAG, "Stack trace:\n%s", mjs->stack_trace);
         }
     }
 
