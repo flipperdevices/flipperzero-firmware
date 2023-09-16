@@ -12,9 +12,12 @@
 
 #define TAG "PCMonitor"
 #define BT_SERIAL_BUFFER_SIZE 128
+
+#define SCREEN_HEIGHT 64
+#define LINE_HEIGHT 11
+
 #define BAR_X 30
-#define BAR_MARGIN 14
-#define BAR_WIDTH 98
+#define BAR_WIDTH 97
 
 typedef enum {
     BtStateChecking,
@@ -48,5 +51,6 @@ typedef struct {
 
     BtState bt_state;
     DataStruct data;
+    uint8_t lines_count;
     uint32_t last_packet;
 } PcMonitorApp;
