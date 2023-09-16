@@ -26,6 +26,7 @@ jobs:
   build-and-upload:
     runs-on: ubuntu-latest
     env:
+      FAP_INCLUDED_IN_FW: 0
       REPO_SELF: ${{ vars.REPO_SELF }}
       OFW_PATH: "applications_user/${{ vars.FAP_NAME }}"
       RELATIVE_PATH: "applications/external/${{ vars.FAP_NAME }}"
@@ -80,8 +81,10 @@ jobs:
         shell: pwsh
         run: |
           git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1
-          git submodule set-branch --branch master '${{ env.RELATIVE_PATH }}'
-          git submodule sync '${{ env.RELATIVE_PATH }}'
+          if( ${{ env.FAP_INCLUDED_IN_FW }} -eq 1 ) {
+            git submodule set-branch --branch master '${{ env.RELATIVE_PATH }}'
+            git submodule sync '${{ env.RELATIVE_PATH }}'
+          }
           cd '${{ env.OFW_PATH }}'
           if ( '${{ env.CURRENT_VERSION }}' -ne '${{ env.RELEASE_VERSION }}' ) {
             Write-Output '::warning title=Different version::Current version is ${{ env.CURRENT_VERSION }} but we trying to build ${{ env.RELEASE_VERSION }}'
