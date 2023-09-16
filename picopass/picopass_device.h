@@ -40,6 +40,7 @@
 
 #define PICOPASS_APP_FOLDER ANY_PATH("picopass")
 #define PICOPASS_APP_EXTENSION ".picopass"
+#define PICOPASS_APP_FILE_PREFIX "Picopass"
 #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 
 #define PICOPASS_DICT_KEY_BATCH_SIZE 10
