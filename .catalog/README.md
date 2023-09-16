@@ -11,7 +11,7 @@ The loclass attack emulates specific CSN and collects responses from the reader 
 
 ## Online part
 
-1. Run `loclass` from the picopass main menu
+1. Run _loclass_ from the picopass main menu
 2. Present the flipper to the reader.
 3. Collect responses until the progress bar is full.
 
@@ -19,8 +19,8 @@ NOTE: If the screen says “Got std key” AND stays on 0/18, the reader is not 
 
 ## Offline part
 
-1. Download the loclass log (`sdcard/apps_data/picopass/.loclass.log`) from your Flipper Zero.
+1. Download the loclass log (_sdcard/apps_data/picopass/.loclass.log_) from your Flipper Zero.
 2. Use [loclass.ericbetts.dev](https://loclass.ericbetts.dev/) or a tool of your choice to calculate the key
-3. Copy the key to `iclass_elite_dict_user.txt` and place in `sdcard/apps_data/picopass/`
-4. Run `Elite Dict. Attack` from the picopass main menu
+3. Copy the key to _iclass_elite_dict_user.txt_ and place in _sdcard/apps_data/picopass/_
+4. Run _Elite Dict. Attack_ from the picopass main menu
 5. Present card to the back of the Flipper Zero.
