@@ -80,8 +80,10 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
     furi_assert(context);
     bool consumed = false;
 
-    if(event->key == InputKeyBack && event->type == InputTypeShort) {
-    return consumed;
+    // TODO: Check behavior of this situation
+    if(event->key == InputKeyBack && event->type == InputTypeLong) {
+    // Consumed
+    return true;
     }
 
     ShapShupMainView* instance = context;
@@ -449,7 +451,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     canvas_draw_str(
         canvas, width - last_value_width, SHAPSHUP_BOTTOM_SCALE + font_height + 1, buffer);
 
-    if(model->raw_file != NULL) {
+    // if(model->raw_file != NULL) {
     //         uint64_t current_offset = 0;
     //         uint64_t current_x = 0;
     //         bool is_negative = false;
@@ -558,7 +560,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     //             //     current_x);
     // #endif
     //         }
-    }
+    // }
 }
 
 bool shapshup_main_view_no_file(ShapShupMainView* instance) {
@@ -581,11 +583,11 @@ void format_number(uint64_t number_to_format, char* output_buffer) {
     snprintf(buf, sizeof(buf), "%lld", number_to_format);
     c = 2 - strlen(buf) % 3;
     for(p = buf; *p != 0; p++) {
-    *output_buffer++ = *p;
-    if(c == 1) {
-        *output_buffer++ = ',';
-    }
-    c = (c + 1) % 3;
+        *output_buffer++ = *p;
+        if(c == 1) {
+            *output_buffer++ = ',';
+        }
+        c = (c + 1) % 3;
     }
     *--output_buffer = 0;
 }

@@ -1,11 +1,11 @@
 #include "../shapshup_i.h"
 #include "../shapshup_custom_event.h"
 #include "../views/shapshup_main_view.h"
-#include "../shapshup_files.h"
+#include "../helpers/shapshup_files.h"
 
 #define TAG "ShapShupSceneStart"
 
-void shapshup_scene_start_callback(shapshupCustomEvent event, void* context) {
+void shapshup_scene_start_callback(ShapshupCustomEvent event, void* context) {
     furi_assert(context);
 
     ShapShupState* instance = (ShapShupState*)context;
@@ -18,6 +18,7 @@ void shapshup_scene_start_on_enter(void* context) {
     ShapShupState* instance = (ShapShupState*)context;
     ShapShupMainView* view = instance->view_main;
     instance->current_view = ShapShupViewMain;
+
     shapshup_main_view_set_callback(view, shapshup_scene_start_callback, instance);
     view_dispatcher_switch_to_view(instance->view_dispatcher, instance->current_view);
 

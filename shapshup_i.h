@@ -80,6 +80,24 @@ struct ShapShupState {
     Storage* storage;
 };
 
+/**
+ * @brief shapshup_show_loading_popup
+ * 
+ * @param context 
+ * @param show 
+ */
 void shapshup_show_loading_popup(void* context, bool show);
+
+/**
+ * @brief shapshup_text_input_callback
+ * 
+ * @param context 
+ */
 void shapshup_text_input_callback(void* context);
+
+/**
+ * @brief shapshup_popup_closed_callback
+ * 
+ * @param context 
+ */
 void shapshup_popup_closed_callback(void* context);
