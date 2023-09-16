@@ -2254,14 +2254,16 @@ Function,+,nfc_iso14443a_poller_trx_sdd_frame,NfcError,"Nfc*, const BitBuffer*, 
 Function,+,nfc_iso14443a_poller_trx_short_frame,NfcError,"Nfc*, NfcIso14443aShortFrame, BitBuffer*, uint32_t"
 Function,+,nfc_listener_alloc,NfcListener*,"Nfc*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_listener_free,void,NfcListener*
-Function,+,nfc_listener_get_data,const NfcDeviceData*,"NfcListener*, NfcProtocol"
+Function,+,nfc_listener_get_data,const NfcDeviceData*,"const NfcListener*, NfcProtocol"
+Function,+,nfc_listener_get_protocol,NfcProtocol,const NfcListener*
 Function,+,nfc_listener_start,void,"NfcListener*, NfcGenericCallback, void*"
 Function,+,nfc_listener_stop,void,NfcListener*
 Function,+,nfc_listener_tx,NfcError,"Nfc*, const BitBuffer*"
 Function,+,nfc_poller_alloc,NfcPoller*,"Nfc*, NfcProtocol"
 Function,+,nfc_poller_detect,_Bool,NfcPoller*
 Function,+,nfc_poller_free,void,NfcPoller*
-Function,+,nfc_poller_get_data,const NfcDeviceData*,NfcPoller*
+Function,+,nfc_poller_get_data,const NfcDeviceData*,const NfcPoller*
+Function,+,nfc_poller_get_protocol,NfcProtocol,const NfcPoller*
 Function,+,nfc_poller_start,void,"NfcPoller*, NfcGenericCallback, void*"
 Function,+,nfc_poller_stop,void,NfcPoller*
 Function,+,nfc_poller_trx,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
