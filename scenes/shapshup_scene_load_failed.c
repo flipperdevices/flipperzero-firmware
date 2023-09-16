@@ -1,5 +1,4 @@
 #include "../shapshup_i.h"
-#include "../shapshup_custom_event.h"
 
 void shapshup_scene_load_failed_on_enter(void* context) {
     furi_assert(context);

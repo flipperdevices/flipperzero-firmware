@@ -8,14 +8,14 @@
 
 /**
  * Thanks to the author of metronome
- * @param canvas
- * @param str
+ * @param canvas Canvas* 
+ * @param str const char*
  */
 void elements_button_top_left(Canvas* canvas, const char* str);
 
 /**
  * Thanks to the author of metronome
- * @param canvas
- * @param str
+ * @param canvas Canvas*
+ * @param str const char*
  */
 void elements_button_top_right(Canvas* canvas, const char* str);
