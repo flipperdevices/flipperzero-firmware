@@ -1,5 +1,4 @@
 #include "../shapshup_i.h"
-#include "../shapshup_custom_event.h"
 
 #define TAG "ShapShupSceneLoadFile"
 

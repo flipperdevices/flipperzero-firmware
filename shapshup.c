@@ -1,5 +1,4 @@
 #include <furi.h>
-#include <furi_hal.h>
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -11,7 +10,6 @@
 
 #include <dialogs/dialogs.h>
 
-#include "shapshup.h"
 #include "shapshup_i.h"
 #include "shapshup_custom_event.h"
 

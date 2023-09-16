@@ -55,6 +55,13 @@ void shapshup_main_view_free(ShapShupMainView* instance);
 View* shapshup_main_view_get_view(ShapShupMainView* instance);
 
 /**
+ * @brief shapshup_main_view_check_alert
+ * 
+ * @param instance 
+ */
+void shapshup_main_view_check_alert(ShapShupMainView* instance);
+
+/**
  * @brief shapshup_main_view_load_file
  * 
  * @param instance ShapShupMainView*

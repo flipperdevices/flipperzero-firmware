@@ -1,11 +1,20 @@
-#include "shapshup_files.h"
-#include <furi.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <stdbool.h>
 #include <inttypes.h>
-#include <toolbox/stream/stream.h>
-#include <toolbox/path.h>
-#include "flipper_format_stream_i.h"
-
-#include <subghz/types.h>
+//#include "../../../lib/toolbox/path.h"
+//#include "../../../lib/toolbox/stream/stream.h"
+//#include "../../../furi/core/string.h"
+//#include "../../../furi/furi.h"
+//#include "../../../lib/flipper_format/flipper_format_stream_i.h"
+//#include "../../../applications/services/storage/storage.h"
+//#include "../../../furi/core/check.h"
+//#include "../../../furi/core/record.h"
+//#include "../../../lib/flipper_format/flipper_format.h"
+//#include "../../../furi/core/log.h"
+//#include "../../../lib/flipper_format/flipper_format_i.h"
+//#include "../../../lib/subghz/types.h"
+#include "shapshup_files.h"
 
 #define TAG "ShapShupFiles"
 #define RAW_KEY_NAME "RAW_Data"
@@ -175,7 +184,7 @@ static bool stream_read_value_shapshup(Stream* stream, FuriString* value, bool* 
     return result;
 }
 
-bool read_int32_shapshup(Stream* stream, int32_t* _data, const uint16_t data_size) {
+bool read_int32_shapshup(Stream* stream, int32_t* _data, uint16_t data_size) {
     bool result = false;
     result = true;
     FuriString* value;

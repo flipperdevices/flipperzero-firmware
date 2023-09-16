@@ -1,7 +1,4 @@
 #include "../shapshup_i.h"
-#include "../shapshup_custom_event.h"
-#include "../views/shapshup_main_view.h"
-#include "../helpers/shapshup_files.h"
 
 #define TAG "ShapShupSceneStart"
 
@@ -70,6 +67,9 @@ bool shapshup_scene_start_on_event(void* context, SceneManagerEvent event) {
         //exit app
         scene_manager_stop(instance->scene_manager);
         view_dispatcher_stop(instance->view_dispatcher);
+        consumed = true;
+    } else if(event.type == SceneManagerEventTypeTick) {
+        shapshup_main_view_check_alert(instance->view_main);
         consumed = true;
     }
 

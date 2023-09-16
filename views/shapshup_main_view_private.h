@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shapshup_main_view.h"
+#include "../shapshup_i.h"
 #include <input/input.h>
 #include <gui/elements.h>
 #include "assets_icons.h"
@@ -9,12 +10,12 @@
 
 #define STATUS_BAR_Y_SHIFT 11
 #define STATUS_BAR_INFO_SHIFT 9
-#define SCALE_STEP 0.2
-#define SHAPSHUP_DEFAULT_SCALE_STEP 1.00
+#define SCALE_STEP 0.2f
+#define SHAPSHUP_DEFAULT_SCALE_STEP 1.00f
 #define SHAPSHUP_TOP_SCALE 13
 #define SHAPSHUP_BOTTOM_SCALE 42
 #define SHAPSHUP_CHART_LOWEST_POINT 40
-#define SHAPSHUP_CHART_HIGHTEST_POINT 20
+#define SHAPSHUP_CHART_HIGHEST_POINT 20
 #define SCREEN_WIDTH 128
 
 /**
@@ -64,6 +65,7 @@ struct ShapShupMainView {
     float scale;
     ShapShupShapeStruct* shape_list;
     uint8_t count_shapes;
+    uint64_t alert_dismiss_time;
     void* context;
 };
 
@@ -90,7 +92,13 @@ typedef struct {
     ShapShupRawFile* raw_file;
     ShapShupShapeStruct* shape_list;
     uint8_t count_shapes;
+    uint64_t alert_dismiss_time;
+    char alert_text[SHAPSHUP_TEXT_STORE_SIZE];
 } ShapShupMainViewModel;
+
+void shapshup_main_view_show_alert(ShapShupMainView* instance, const char* text, uint32_t ttl);
+void shapshup_main_view_reset_alert(ShapShupMainView* instance);
+void shapshup_main_view_draw_alert_if_needed(Canvas* canvas, ShapShupMainViewModel* model);
 
 /**
  * @brief shapshup_main_view_draw
