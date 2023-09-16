@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,39.0,,
+Version,+,39.1,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1427,9 +1427,11 @@ Function,+,furi_hal_subghz_stop_async_tx,void,
 Function,+,furi_hal_subghz_tx,_Bool,
 Function,+,furi_hal_subghz_write_packet,void,"const uint8_t*, uint8_t"
 Function,+,furi_hal_switch,void,void*
+Function,+,furi_hal_uart_available,size_t,FuriHalUartId
 Function,+,furi_hal_uart_deinit,void,FuriHalUartId
 Function,+,furi_hal_uart_init,void,"FuriHalUartId, uint32_t"
 Function,+,furi_hal_uart_resume,void,FuriHalUartId
+Function,+,furi_hal_uart_rx,size_t,"FuriHalUartId, uint8_t*, size_t"
 Function,+,furi_hal_uart_set_br,void,"FuriHalUartId, uint32_t"
 Function,+,furi_hal_uart_set_irq_cb,void,"FuriHalUartId, void (*)(UartIrqEvent, uint8_t, void*), void*"
 Function,+,furi_hal_uart_suspend,void,FuriHalUartId

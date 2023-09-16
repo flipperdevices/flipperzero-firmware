@@ -20,6 +20,8 @@ extern "C" {
 typedef enum {
     FuriHalUartIdUSART1,
     FuriHalUartIdLPUART1,
+    // Service value
+    FuriHalUartIdMAX,
 } FuriHalUartId;
 
 /**
@@ -27,6 +29,8 @@ typedef enum {
  */
 typedef enum {
     UartIrqEventRXNE,
+    UartIrqEventRXIDLE,
+    UartIrqEventRXDMA,
 } UartIrqEvent;
 
 /**
@@ -89,6 +93,10 @@ void furi_hal_uart_set_irq_cb(
     FuriHalUartId channel,
     void (*callback)(UartIrqEvent event, uint8_t data, void* context),
     void* context);
+
+size_t furi_hal_uart_rx(FuriHalUartId ch, uint8_t* data, size_t len);
+
+size_t furi_hal_uart_available(FuriHalUartId ch);
 
 #ifdef __cplusplus
 }

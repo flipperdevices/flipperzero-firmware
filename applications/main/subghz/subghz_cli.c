@@ -880,6 +880,64 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     printf("\r\nExit chat\r\n");
 }
 
+static size_t index_write = 0;
+uint8_t buff[2048] = {0};
+
+static void irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+    UNUSED(context);
+    UNUSED(data);
+
+    if(ev == UartIrqEventRXIDLE) {
+        //uint8_t buffer[2048]={"\r\nUartIrqEventRXIDLE\r\n\0"};
+        //furi_hal_console_tx(buffer,23);
+        size_t len = furi_hal_uart_available(FuriHalUartIdLPUART1);
+        if(len) {
+            furi_hal_uart_rx(FuriHalUartIdLPUART1, &buff[index_write], len);
+            //furi_hal_console_tx(buffer, len);
+            index_write += len;
+        }
+    }
+    if(ev == UartIrqEventRXDMA) {
+        //uint8_t buffer1[2048] = {"\r\nUartIrqEventRXDMA\r\n\0"};
+        //furi_hal_console_tx(buffer1,22);
+        size_t len1 = furi_hal_uart_available(FuriHalUartIdLPUART1);
+        if(len1) {
+            //furi_hal_uart_rx(FuriHalUartIdLPUART1, buffer1, len1);
+            //furi_hal_console_tx(buffer1, len1);
+            furi_hal_uart_rx(FuriHalUartIdLPUART1, &buff[index_write], len1);
+            //furi_hal_console_tx(buffer, len);
+            index_write += len1;
+        }
+    }
+    // if((index_write > 1) && (buff[index_write-2] == '\n')) {
+    //     furi_hal_console_tx(buff, index_write);
+    //     index_write =0;
+    // }
+
+    if(index_write>=1707){
+        furi_hal_console_tx(buff, index_write);
+        memset(buff,0,index_write);
+        index_write =0;
+    }
+}
+
+void subghz_cli_command_us(Cli* cli, FuriString* args) {
+    // UNUSED(context);
+    //UNUSED(cli);
+    UNUSED(args);
+
+    furi_hal_uart_init(FuriHalUartIdLPUART1, 3300000);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, irq_cb, NULL);
+    // Wait for packets to arrive
+    printf("Listening at. Press CTRL+C to stop\r\n");
+    //uint8_t buffer[1707]={"0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX\r\n\0"};
+    while(!cli_cmd_interrupt_received(cli)) {
+        furi_delay_ms(1000);
+       // furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)buffer, 1707);
+    }
+    furi_hal_uart_deinit(FuriHalUartIdLPUART1);
+}
+
 static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     FuriString* cmd;
     cmd = furi_string_alloc();
@@ -892,6 +950,11 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "chat") == 0) {
             subghz_cli_command_chat(cli, args);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "us") == 0) {
+            subghz_cli_command_us(cli, args);
             break;
         }
 
