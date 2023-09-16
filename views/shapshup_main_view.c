@@ -227,6 +227,7 @@ void shapshup_main_view_exit(void* context) {
 ShapShupMainView* shapshup_main_view_alloc() {
     ShapShupMainView* instance = malloc(sizeof(ShapShupMainView));
     instance->view = view_alloc();
+
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(ShapShupMainViewModel));
     view_set_context(instance->view, instance);
     view_set_draw_callback(instance->view, (ViewDrawCallback)shapshup_main_view_draw);
@@ -572,19 +573,19 @@ uint64_t calc_offset_per_page(uint64_t total, uint64_t min_len, float scale) {
     return result;
 }
 
-void format_number(uint64_t n, char* out) {
+void format_number(uint64_t number_to_format, char* output_buffer) {
     int c;
     char buf[32];
     char* p;
 
-    snprintf(buf, sizeof(buf), "%lld", n);
+    snprintf(buf, sizeof(buf), "%lld", number_to_format);
     c = 2 - strlen(buf) % 3;
     for(p = buf; *p != 0; p++) {
-    *out++ = *p;
+    *output_buffer++ = *p;
     if(c == 1) {
-        *out++ = ',';
+        *output_buffer++ = ',';
     }
     c = (c + 1) % 3;
     }
-    *--out = 0;
+    *--output_buffer = 0;
 }
