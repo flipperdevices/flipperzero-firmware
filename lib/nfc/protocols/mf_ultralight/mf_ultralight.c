@@ -417,11 +417,11 @@ bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData
         if(data->pages_total != other->pages_total) break;
         if(data->auth_attempts != other->auth_attempts) break;
 
-        if(memcmp(&data->version, &other->version, sizeof(data->version))) break;
-        if(memcmp(&data->signature, &other->signature, sizeof(data->signature))) break;
+        if(memcmp(&data->version, &other->version, sizeof(data->version)) != 0) break;
+        if(memcmp(&data->signature, &other->signature, sizeof(data->signature)) != 0) break;
 
         for(size_t i = 0; i < COUNT_OF(data->counter); i++) {
-            if(memcmp(&data->counter[i], &other->counter[i], sizeof(data->counter[i]))) {
+            if(memcmp(&data->counter[i], &other->counter[i], sizeof(data->counter[i])) != 0) {
                 data_array_is_equal = false;
                 break;
             }
@@ -432,7 +432,7 @@ bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData
             if(memcmp(
                    &data->tearing_flag[i],
                    &other->tearing_flag[i],
-                   sizeof(data->tearing_flag[i]))) {
+                   sizeof(data->tearing_flag[i])) != 0) {
                 data_array_is_equal = false;
                 break;
             }
@@ -440,7 +440,7 @@ bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData
         if(!data_array_is_equal) break;
 
         for(size_t i = 0; i < COUNT_OF(data->page); i++) {
-            if(memcmp(&data->page[i], &other->page[i], sizeof(data->page[i]))) {
+            if(memcmp(&data->page[i], &other->page[i], sizeof(data->page[i])) != 0) {
                 data_array_is_equal = false;
                 break;
             }
@@ -558,7 +558,7 @@ bool mf_ultralight_get_config_page(const MfUltralightData* data, MfUltralightCon
 
     uint16_t config_page = mf_ultralight_features[data->type].config_page;
     if(config_page != 0) {
-        *config = (MfUltralightConfigPages*)&data->page[config_page];
+        *config = (MfUltralightConfigPages*)&data->page[config_page]; //-V1027
         config_pages_found = true;
     }
 
