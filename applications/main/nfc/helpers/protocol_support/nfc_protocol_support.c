@@ -242,7 +242,8 @@ static bool
     return consumed;
 }
 
-static void nfc_protocol_support_scene_read_menu_on_exit(NfcApp* instance) {
+// Same for read_menu and saved_menu
+static void nfc_protocol_support_scene_read_saved_menu_on_exit(NfcApp* instance) {
     submenu_reset(instance->submenu);
 }
 
@@ -407,10 +408,6 @@ static bool
     return consumed;
 }
 
-static void nfc_protocol_support_scene_saved_menu_on_exit(NfcApp* instance) {
-    submenu_reset(instance->submenu);
-}
-
 // SceneEmulate
 enum {
     NfcSceneEmulateStateWidget,
@@ -553,7 +550,7 @@ static const NfcProtocolSupportCommonSceneBase
             {
                 .on_enter = nfc_protocol_support_scene_read_menu_on_enter,
                 .on_event = nfc_protocol_support_scene_read_menu_on_event,
-                .on_exit = nfc_protocol_support_scene_read_menu_on_exit,
+                .on_exit = nfc_protocol_support_scene_read_saved_menu_on_exit,
             },
         [NfcProtocolSupportSceneReadSuccess] =
             {
@@ -565,7 +562,7 @@ static const NfcProtocolSupportCommonSceneBase
             {
                 .on_enter = nfc_protocol_support_scene_saved_menu_on_enter,
                 .on_event = nfc_protocol_support_scene_saved_menu_on_event,
-                .on_exit = nfc_protocol_support_scene_saved_menu_on_exit,
+                .on_exit = nfc_protocol_support_scene_read_saved_menu_on_exit,
             },
         [NfcProtocolSupportSceneEmulate] =
             {
