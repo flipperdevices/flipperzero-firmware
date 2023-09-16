@@ -135,8 +135,7 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
                 dolphin_deed(DolphinDeedNfcReadSuccess);
                 consumed = true;
             } else {
-                const NfcProtocol protocol =
-                    instance->protocols_detected[instance->protocols_detected_selected_idx];
+                const NfcProtocol protocol = nfc_poller_get_protocol(instance->poller);
                 if(nfc_protocol_support[protocol]->scene_read.on_event) {
                     consumed =
                         nfc_protocol_support[protocol]->scene_read.on_event(instance, event.event);
