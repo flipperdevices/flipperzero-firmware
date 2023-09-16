@@ -107,7 +107,7 @@ static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
-    const NfcProtocol protocol = instance->protocols_detected[instance->protocols_detected_idx];
+    const NfcProtocol protocol = instance->protocols_detected[instance->protocols_detected_selected_idx];
     instance->poller = nfc_poller_alloc(instance->nfc, protocol);
 
     // Start poller with the appropriate callback
@@ -135,7 +135,7 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
                 consumed = true;
             } else {
                 const NfcProtocol protocol =
-                    instance->protocols_detected[instance->protocols_detected_idx];
+                    instance->protocols_detected[instance->protocols_detected_selected_idx];
                 if(nfc_protocol_support[protocol]->scene_read.on_event) {
                     consumed =
                         nfc_protocol_support[protocol]->scene_read.on_event(instance, event.event);

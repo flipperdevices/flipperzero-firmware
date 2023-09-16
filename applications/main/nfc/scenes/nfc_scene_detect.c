@@ -39,7 +39,6 @@ bool nfc_scene_detect_on_event(void* context, SceneManagerEvent event) {
             if(instance->protocols_detected_num > 1) {
                 scene_manager_next_scene(instance->scene_manager, NfcSceneSelectProtocol);
             } else {
-                instance->protocols_detected_idx = 0;
                 scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
             }
             consumed = true;

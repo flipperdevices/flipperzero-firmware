@@ -100,9 +100,9 @@ struct NfcApp {
     FuriString* text_box_store;
     uint8_t byte_input_store[6];
 
-    size_t protocols_detected_num;
-    size_t protocols_detected_idx;
+    uint32_t protocols_detected_num;
     NfcProtocol protocols_detected[NfcProtocolNum];
+    uint32_t protocols_detected_selected_idx;
 
     void* rpc_ctx;
     NfcRpcState rpc_state;
