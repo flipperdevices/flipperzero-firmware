@@ -50,15 +50,15 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         float progress = m->sectors_total == 0 ? 0 :
                                                  ((float)(m->current_sector) + dict_progress) /
                                                      (float)(m->sectors_total);
-        if(progress > 1.0) {
-            progress = 1.0;
+        if(progress > 1.0f) {
+            progress = 1.0f;
         }
         if(m->dict_keys_current == 0) {
             // Cause when people see 0 they think it's broken
-            snprintf(draw_str, sizeof(draw_str), "%d/%d", 1, m->dict_keys_total);
+            snprintf(draw_str, sizeof(draw_str), "%d/%zu", 1, m->dict_keys_total);
         } else {
             snprintf(
-                draw_str, sizeof(draw_str), "%d/%d", m->dict_keys_current, m->dict_keys_total);
+                draw_str, sizeof(draw_str), "%zu/%zu", m->dict_keys_current, m->dict_keys_total);
         }
         elements_progress_bar_with_text(canvas, 0, 20, 128, dict_progress, draw_str);
         canvas_set_font(canvas, FontSecondary);
