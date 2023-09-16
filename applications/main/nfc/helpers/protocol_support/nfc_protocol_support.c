@@ -507,17 +507,13 @@ static bool
 static void nfc_protocol_support_scene_emulate_on_exit(NfcApp* instance) {
     nfc_listener_stop(instance->listener);
 
-    NfcDevice* nfc_stub = nfc_device_alloc();
-    NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
     const NfcDeviceData* data = nfc_listener_get_data(instance->listener, protocol);
-    nfc_device_set_data(nfc_stub, protocol, data);
 
-    //TODO: think about nfc_device_is_equal(NfcDevice*,NfcDeviceData*);
-    if(!nfc_device_is_equal(nfc_stub, instance->nfc_device)) {
+    if(!nfc_device_contains_data(instance->nfc_device, protocol, data)) {
         nfc_device_set_data(instance->nfc_device, protocol, data);
         nfc_save_shadow_file(instance);
     }
-    nfc_device_free(nfc_stub);
 
     nfc_listener_free(instance->listener);
 
