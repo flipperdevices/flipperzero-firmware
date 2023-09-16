@@ -27,8 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO_SELF: ${{ vars.REPO_SELF }}
-      OFW_PATH: "applications_user/subbrute"
-      RELATIVE_PATH: "applications/external/subbrute"
+      OFW_PATH: "applications_user/${{ vars.FAP_NAME }}"
+      RELATIVE_PATH: "applications/external/${{ vars.FAP_NAME }}"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
       ZIP_NAME: ""
@@ -126,17 +126,6 @@ jobs:
             Write-Output ('::notice title=Git output::{0}' -f $Output)
           }
 
-      #    - name: Restore FBT
-      #      id: cache-restore
-      #      if: ${{ success() }}
-      #      uses: actions/cache/restore@v3
-      #      with:
-      #        path: |
-      #          build/**
-      #          debug/**
-      #        # An explicit key for restoring and saving the cache
-      #        key: 'fbt=${{ env.FIRMWARE_VERSION }}'
-      #
       - name: Remove other apps
         shell: pwsh
         if: ${{ success() }}
@@ -144,11 +133,6 @@ jobs:
         run: |
           Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
           Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
-      #          New-Item -Force ./tmp -ItemType Directory -ErrorAction SilentlyContinue
-      #          Copy-Item -Force -Recurse ./applications/external/subbrute/ ./tmp/ -ErrorAction SilentlyContinue
-      #          Remove-Item -Force -Recurse ./applications/external/* -ErrorAction SilentlyContinue
-      #          Copy-Item -Force -Recurse /tmp/* ./applications/external/ -ErrorAction SilentlyContinue
-      #          Remove-Item -Force -Recurse ./tmp -ErrorAction SilentlyContinue
 
       - name: Build Firmware
         shell: bash
@@ -171,23 +155,12 @@ jobs:
         run: |
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 
-      #    - name: Save FBT
-      #      id: cache-save
-      #      if: ${{ success() }}
-      #      uses: actions/cache/save@v3
-      #      with:
-      #        path: |
-      #          build/**
-      #          debug/**
-      #        # An explicit key for restoring and saving the cache
-      #        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-
       - name: Create assets
         if: ${{ success() }}
         shell: pwsh
         env:
-          ZIP_NAME: "subghz_bruteforcer_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.zip"
-          TGZ_NAME: "subghz_bruteforcer_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.tgz"
+          ZIP_NAME: "${{ vars.FAP_NAME }}_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.zip"
+          TGZ_NAME: "${{ vars.FAP_NAME }}_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.tgz"
         run: |
           function Format-Bytes {
             param(
@@ -209,7 +182,7 @@ jobs:
           }
           $ZipName = $env:ZIP_NAME
           $TgzName = $env:TGZ_NAME
-          $FapNamme = 'shapshup.fap'
+          $FapNamme = '${{ vars.FAP_NAME }}.fap'
           $DstFap = "./$FapNamme"
           $AppDir = "dist/f7-C/apps/Sub-GHz"
 
