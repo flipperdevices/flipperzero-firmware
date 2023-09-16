@@ -33,7 +33,7 @@
 #include "shapshup.h"
 #include "scenes/shapshup_scene.h"
 #include "views/shapshup_main_view.h"
-#include "shapshup_files.h"
+#include "helpers/shapshup_files.h"
 
 #define SHAPSHUP_TEXT_STORE_SIZE 256
 
