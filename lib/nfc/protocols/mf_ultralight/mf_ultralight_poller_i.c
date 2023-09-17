@@ -33,7 +33,7 @@ MfUltralightError mf_ultralight_process_error(Iso14443_3aError error) {
 MfUltralightError mf_ultralight_poller_async_auth(
     MfUltralightPoller* instance,
     MfUltralightPollerAuthContext* data) {
-    uint8_t auth_cmd[5] = {MF_ULTRALIGHT_CMD_AUTH};
+    uint8_t auth_cmd[5] = {MF_ULTRALIGHT_CMD_AUTH}; //-V1009
     nfc_util_num2bytes(data->password.pass, MF_ULTRALIGHT_AUTH_PASSWORD_SIZE, &auth_cmd[1]);
     bit_buffer_copy_bytes(instance->tx_buffer, auth_cmd, sizeof(auth_cmd));
 
@@ -184,7 +184,7 @@ MfUltralightError mf_ultralight_poller_async_read_version(
         }
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(MfUltralightVersion)) {
             FURI_LOG_I(
-                TAG, "Read Version failed: %d", bit_buffer_get_size_bytes(instance->rx_buffer));
+                TAG, "Read Version failed: %zu", bit_buffer_get_size_bytes(instance->rx_buffer));
             ret = MfUltralightErrorProtocol;
             break;
         }
