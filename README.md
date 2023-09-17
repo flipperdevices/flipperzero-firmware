@@ -305,16 +305,6 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 <a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a><br />
 <a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a>
 
-## TODO
-- [x] Change the default traded Pokemon's naming to be no nickname
-- [x] Add view to allow the traded Pokemon's level to be chosen between 3 and 100
-- [x] Add view to allow the traded Pokemon's hidden stats to be chosen (IV and EV) from some options
-- [x] Add view to allow the traded Pokemon's moveset to be chosen (all 4 moves) allowing no move as an option
-- [ ] Debug traded Pokemon level issue where after a battle the Pokemon's level drops (doesn't affect all traded Pokemon)
-- [x] Add images for the level selection screen, stats selection screen, and move selection screens as per the original README
-- [ ] Optimise the level selection screen to be a number slider input instead of the current slideshow style selector
-- [ ] Add a view to allow for a custom Pokemon nickname (11 chars, 10 chars max used, fill and terminate with TERM_)
-
 ## Links
 
 - [Flipper Zero firmware source code](https://github.com/flipperdevices/flipperzero-firmware)
