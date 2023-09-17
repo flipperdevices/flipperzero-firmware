@@ -67,6 +67,10 @@ uint16_t crc16_genibus(const uint8_t* data, size_t length) {
     return crc ^ 0xFFFF; // Post-inversion
 }
 
+uint8_t get_baudrate_count() {
+    return sizeof(BAUD_RATES);
+}
+
 char* m100_get_hardware_version(M100Module* module) {
     if(module->info->hw_version != NULL) {
         free(module->info->hw_version);
@@ -223,6 +227,7 @@ UHFTag* m100_get_select_param(M100Module* module) {
     // uint8_t* data = buffer_get_data(module->buf);
     // size_t mask_length =
     // uhf_tag_set_epc(uhf_tag, data + 12, )
+    // TODO : implement
     return NULL;
 }
 

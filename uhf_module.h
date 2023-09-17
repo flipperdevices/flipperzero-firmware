@@ -1,11 +1,12 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stddef.h>
-#include "uhf_buffer.h"
-#include "uhf_tag.h"
 #include <furi_hal.h>
+#include "uhf_tag.h"
+#include "uhf_buffer.h"
+#include "uhf_module_settings.h"
 
 #define FRAME_END 0x7E
 #define DEFAULT_BAUDRATE 115200
@@ -15,22 +16,6 @@ typedef struct {
     char* sw_version;
     char* manufacturer;
 } M100ModuleInfo;
-
-typedef enum {
-    WA_CHINA_900 = 1,   // Freq_CH-920.125M
-    WA_US,              // Freq_CH-902.25M
-    WA_EU,              // Freq_CH-865.1M
-    WA_CHINA_800,       // Freq_CH-840.125M
-    WA_KOREA = 6        // Freq_CH-917.1M
-} WorkingArea;
-
-typedef enum {
-    WC_CHINA_900 = 1,   // CH_Index(CN,900MHz) = (Freq_CH-920.125M)/0.25M
-    WC_US,              // CH_Index(US) = (Freq_CH-902.25M)/0.5M
-    WC_EU,              // CH_Index(EU) = (Freq_CH-865.1M)/0.2M
-    WC_CHINA_800,       // CH_Index(CN,800MHz) = (Freq_CH-840.125M)/0.25M
-    WC_KOREA = 6        // CH_Index(Korea) = (Freq_CH-917.1M)/0.2M
-} WorkingChannel;
 
 typedef enum {
     M100Success,
@@ -56,6 +41,7 @@ M100Module* m100_module_alloc();
 void m100_module_free(M100Module* module);
 uint16_t crc16_genibus(const uint8_t* data, size_t length);
 uint8_t checksum(const uint8_t* data, size_t length);
+uint8_t get_baudrate_count();
 
 // Function prototypes
 char* m100_get_hardware_version(M100Module* module);

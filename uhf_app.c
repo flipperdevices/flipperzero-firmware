@@ -54,6 +54,9 @@ UHFApp* uhf_alloc() {
     view_dispatcher_attach_to_gui(
         uhf_app->view_dispatcher, uhf_app->gui, ViewDispatcherTypeFullscreen);
 
+    // Variable Item List
+    uhf_app->variable_item_list = variable_item_list_alloc();
+
     //worker
     uhf_app->worker = uhf_worker_alloc();
 
@@ -111,6 +114,9 @@ void uhf_free(UHFApp* uhf_app) {
     // Loading
     view_dispatcher_remove_view(uhf_app->view_dispatcher, UHFViewLoading);
     loading_free(uhf_app->loading);
+
+    // Variable Item List
+    variable_item_list_free(uhf_app->variable_item_list);
 
     // TextInput
     view_dispatcher_remove_view(uhf_app->view_dispatcher, UHFViewTextInput);
