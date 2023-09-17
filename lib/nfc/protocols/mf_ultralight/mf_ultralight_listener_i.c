@@ -2,7 +2,7 @@
 
 #include <furi.h>
 
-#define MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, start, end) (page >= start && page <= end)
+#define MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, start, end) (((page) >= (start)) && ((page) <= (end)))
 
 #define MF_ULTRALIGHT_I2C_PAGE_ON_SESSION_REG(page) \
     MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, 0x00EC, 0x00ED)
@@ -290,7 +290,7 @@ bool mf_ultralight_i2c_validate_pages(
     uint16_t end_page,
     MfUltralightListener* instance) {
     bool valid = false;
-    if(instance->sector < sizeof(validation_methods)) {
+    if(instance->sector < COUNT_OF(validation_methods)) {
         MfUltralightI2CValidator validate = validation_methods[instance->sector];
         valid = validate(start_page, end_page, instance->data->type);
     }
@@ -311,8 +311,11 @@ static uint16_t mf_ultralight_i2c_page_provider_for_sector0(uint16_t page, MfUlt
             new_page = 235;
         }
     } else if(type == MfUltralightTypeNTAGI2C1K) {
-        new_page = (page == 0x00E8) ? 232 : page;
-        new_page = (page == 0x00E9) ? 233 : page;
+        if(page == 0x00E8) {
+            new_page = 232;
+        } else if(page == 0x00E9) {
+            new_page = 233;
+        }
     } else if(type == MfUltralightTypeNTAGI2C2K) {
         new_page = page;
     }
@@ -336,10 +339,10 @@ static uint16_t mf_ultralight_i2c_page_provider_for_sector3(uint16_t page, MfUlt
     uint16_t new_page = page;
     if(type == MfUltralightTypeNTAGI2CPlus1K || type == MfUltralightTypeNTAGI2CPlus2K) {
         if(page == 0x00F8) new_page = 234;
-        if(page == 0x00F9) new_page = 235;
+        else if(page == 0x00F9) new_page = 235;
     } else if(type == MfUltralightTypeNTAGI2C1K || type == MfUltralightTypeNTAGI2C2K) {
         if(page == 0x00F8) new_page = (type == MfUltralightTypeNTAGI2C1K) ? 227 : 481;
-        if(page == 0x00F9) new_page = (type == MfUltralightTypeNTAGI2C1K) ? 228 : 482;
+        else if(page == 0x00F9) new_page = (type == MfUltralightTypeNTAGI2C1K) ? 228 : 482;
     }
     return new_page;
 }
@@ -354,7 +357,7 @@ const MfUltralightI2CPageProvider provider_methods[] = {
 uint16_t
     mf_ultralight_i2c_provide_page_by_requested(uint16_t page, MfUltralightListener* instance) {
     uint16_t result = page;
-    if(instance->sector < sizeof(provider_methods)) {
+    if(instance->sector < COUNT_OF(provider_methods)) {
         MfUltralightI2CPageProvider provider = provider_methods[instance->sector];
         result = provider(page, instance->data->type);
     }
