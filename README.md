@@ -17,9 +17,7 @@ These are the general steps:
 All cracked nonces are automatically added to your user dictionary, allowing you to clone Mifare Classic 1K/4K cards upon re-scanning them.
 
 ## Builds
-OFW: Included in 0.83.0-rc and up https://github.com/flipperdevices/flipperzero-firmware/releases/tag/0.83.0-rc (if your firmware is at least newer than the May release, you already have it under your NFC menu!)
-
-Currently being migrated to the App Hub and distributed by Flipper Devices (https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/mfkey32)
+OFW: Available in the App Hub ([Download](https://lab.flipper.net/apps/mfkey32)) and distributed by Flipper Devices (https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/mfkey32).
 
 Published (options):
 * [Unleashed repository](https://github.com/xMasterX/all-the-plugins/tree/main/apps/Tools_Extra)
