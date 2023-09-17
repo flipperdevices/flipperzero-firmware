@@ -324,10 +324,12 @@ BleGlueCommandResult ble_glue_force_c2_mode(BleGlueC2Mode desired_mode) {
 static void ble_glue_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
     switch(status) {
     case SHCI_TL_CmdBusy:
+        furi_hal_power_insomnia_enter();
         furi_mutex_acquire(ble_glue->shci_mtx, FuriWaitForever);
         break;
     case SHCI_TL_CmdAvailable:
         furi_mutex_release(ble_glue->shci_mtx);
+        furi_hal_power_insomnia_exit();
         break;
     default:
         break;
@@ -429,18 +431,14 @@ void shci_notify_asynch_evt(void* pdata) {
 
 void shci_cmd_resp_release(uint32_t flag) {
     UNUSED(flag);
-    if(ble_glue) {
-        furi_semaphore_release(ble_glue->shci_sem);
-    }
+    furi_assert(ble_glue);
+    furi_semaphore_release(ble_glue->shci_sem);
 }
 
 void shci_cmd_resp_wait(uint32_t timeout) {
     UNUSED(timeout);
-    if(ble_glue) {
-        furi_hal_power_insomnia_enter();
-        furi_semaphore_acquire(ble_glue->shci_sem, FuriWaitForever);
-        furi_hal_power_insomnia_exit();
-    }
+    furi_assert(ble_glue);
+    furi_semaphore_acquire(ble_glue->shci_sem, FuriWaitForever);
 }
 
 bool ble_glue_reinit_c2() {
