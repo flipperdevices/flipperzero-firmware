@@ -99,13 +99,11 @@ static MfUltralightCommand
         if(do_i2c_check) {
             if(!mf_ultralight_i2c_validate_pages(start_page, start_page, instance)) break;
         } else if(pages_total < start_page) {
-            command = MfUltralightCommandNotProcessedNAK;
             break;
         }
 
         if(!mf_ultralight_listener_check_access(
                instance, start_page, MfUltralightListenerAccessTypeRead)) {
-            command = MfUltralightCommandNotProcessedNAK;
             break;
         }
 
@@ -182,7 +180,6 @@ static MfUltralightCommand
     if(pages_total < start_page ||
        !mf_ultralight_listener_check_access(
            instance, start_page, MfUltralightListenerAccessTypeWrite)) {
-        command = MfUltralightCommandNotProcessedNAK;
     } else {
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
         memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
@@ -396,9 +393,9 @@ static MfUltralightCommand
                instance->features, MfUltralightFeatureSupportAuthentication))
             break;
 
-        const uint8_t* rx_data = bit_buffer_get_data(buffer);
-        MfUltralightAuthPassword password = {};
-        memcpy(password.data, &rx_data[1], sizeof(MfUltralightAuthPassword));
+        MfUltralightAuthPassword password;
+        bit_buffer_write_bytes_mid(buffer, password.data, 1, sizeof(password.data));
+
         if(instance->callback) {
             instance->mfu_event_data.password = password;
             instance->mfu_event.type = MfUltralightListenerEventTypeAuth;
