@@ -250,7 +250,6 @@ void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     instance->nfc_dict_context.current_sector = 0;
     instance->nfc_dict_context.sectors_total = 0;
     instance->nfc_dict_context.sectors_read = 0;
-    instance->nfc_dict_context.current_sector = 0;
     instance->nfc_dict_context.keys_found = 0;
     instance->nfc_dict_context.dict_keys_total = 0;
     instance->nfc_dict_context.dict_keys_current = 0;
