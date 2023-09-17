@@ -1,11 +1,11 @@
 #pragma once
 
+#include "app_conf.h" /* required as some configuration used in dbg_trace.h are set there */
+#include "dbg_trace.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "app_conf.h" /* required as some configuration used in dbg_trace.h are set there */
-#include "dbg_trace.h"
 
 /**
  * Enable or Disable traces
@@ -96,7 +96,6 @@ extern "C" {
 #else
 #define TL_MM_DBG_MSG(...)
 #endif
-
 
 #ifdef __cplusplus
 }

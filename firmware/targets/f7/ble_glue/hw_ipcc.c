@@ -1,23 +1,3 @@
-/**
- ******************************************************************************
-  * File Name          : Target/hw_ipcc.c
-  * Description        : Hardware IPCC source file for STM32WPAN Middleware.
-  *
- ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "app_common.h"
 #include <interface/patterns/ble_thread/tl/mbox_def.h>
 #include <interface/patterns/ble_thread/hw.h>
@@ -28,10 +8,12 @@
 
 #include <hsem_map.h>
 
-#define HW_IPCC_TX_PENDING(channel) \
-    (!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && LL_C1_IPCC_IsEnabledTransmitChannel(IPCC, channel)
-#define HW_IPCC_RX_PENDING(channel) \
-    (LL_C2_IPCC_IsActiveFlag_CHx(IPCC, channel)) && LL_C1_IPCC_IsEnabledReceiveChannel(IPCC, channel)
+#define HW_IPCC_TX_PENDING(channel)                     \
+    ((!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && \
+     LL_C1_IPCC_IsEnabledTransmitChannel(IPCC, channel))
+#define HW_IPCC_RX_PENDING(channel)                \
+    (LL_C2_IPCC_IsActiveFlag_CHx(IPCC, channel) && \
+     LL_C1_IPCC_IsEnabledReceiveChannel(IPCC, channel))
 
 static void (*FreeBufCb)();
 
@@ -124,9 +106,6 @@ static void HW_IPCC_BLE_AclDataEvtHandler() {
     HW_IPCC_BLE_AclDataAckNot();
 }
 
-__weak void HW_IPCC_BLE_AclDataAckNot(){};
-__weak void HW_IPCC_BLE_RxEvtNot(){};
-
 void HW_IPCC_SYS_Init() {
     LL_C1_IPCC_EnableReceiveChannel(IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL);
 }
@@ -154,9 +133,6 @@ static void HW_IPCC_SYS_EvtHandler() {
 
     LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_SYSTEM_EVENT_CHANNEL);
 }
-
-__weak void HW_IPCC_SYS_CmdEvtNot(){};
-__weak void HW_IPCC_SYS_EvtNot(){};
 
 void HW_IPCC_MM_SendFreeBuf(void (*cb)()) {
     if(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, HW_IPCC_MM_RELEASE_BUFFER_CHANNEL)) {
@@ -186,5 +162,3 @@ static void HW_IPCC_TRACES_EvtHandler() {
 
     LL_C1_IPCC_ClearFlag_CHx(IPCC, HW_IPCC_TRACES_CHANNEL);
 }
-
-__weak void HW_IPCC_TRACES_EvtNot(){};
