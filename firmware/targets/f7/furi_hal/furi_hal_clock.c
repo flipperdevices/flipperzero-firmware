@@ -179,27 +179,34 @@ void furi_hal_clock_switch_hsi2hse() {
 #endif
 }
 
-void furi_hal_clock_switch_hse2pll() {
+bool furi_hal_clock_switch_hse2pll() {
     furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
 
-    SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL);
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
-        ;
+    if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL) != SHCI_Success) {
+        return false;
+    }
+
+    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
     LL_SetSystemCoreClock(CPU_CLOCK_PLL_HZ);
     SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
+
+    return true;
 }
 
-void furi_hal_clock_switch_pll2hse() {
+bool furi_hal_clock_switch_pll2hse() {
     furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
-    SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE);
+    if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE) != SHCI_Success) {
+        return false;
+    }
 
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE)
-        ;
+    furi_check(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
 
     LL_SetSystemCoreClock(CPU_CLOCK_HSE_HZ);
     SysTick->LOAD = (uint32_t)((SystemCoreClock / 1000) - 1UL);
+
+    return true;
 }
 
 void furi_hal_clock_suspend_tick() {

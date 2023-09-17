@@ -32,7 +32,6 @@ static uint8_t ble_glue_ble_spare_event_buff[sizeof(TL_PacketHeader_t) + TL_EVT_
 
 typedef struct {
     FuriMutex* shci_mtx;
-    FuriSemaphore* shci_sem;
     FuriThread* thread;
     BleGlueStatus status;
     BleGlueKeyStorageChangedCallback callback;
@@ -104,7 +103,6 @@ void ble_glue_init() {
     TL_Init();
 
     ble_glue->shci_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
-    ble_glue->shci_sem = furi_semaphore_alloc(1, 0);
 
     // FreeRTOS system task creation
     ble_glue->thread = furi_thread_alloc_ex("BleShciDriver", 1024, ble_glue_shci_thread, ble_glue);
@@ -324,12 +322,10 @@ BleGlueCommandResult ble_glue_force_c2_mode(BleGlueC2Mode desired_mode) {
 static void ble_glue_sys_status_not_callback(SHCI_TL_CmdStatus_t status) {
     switch(status) {
     case SHCI_TL_CmdBusy:
-        furi_hal_power_insomnia_enter();
         furi_mutex_acquire(ble_glue->shci_mtx, FuriWaitForever);
         break;
     case SHCI_TL_CmdAvailable:
         furi_mutex_release(ble_glue->shci_mtx);
-        furi_hal_power_insomnia_exit();
         break;
     default:
         break;
@@ -395,7 +391,6 @@ void ble_glue_thread_stop() {
         furi_thread_free(ble_glue->thread);
         // Free resources
         furi_mutex_free(ble_glue->shci_mtx);
-        furi_semaphore_free(ble_glue->shci_sem);
         ble_glue_clear_shared_memory();
         free(ble_glue);
         ble_glue = NULL;
@@ -427,18 +422,6 @@ void shci_notify_asynch_evt(void* pdata) {
         furi_assert(thread_id);
         furi_thread_flags_set(thread_id, BLE_GLUE_FLAG_SHCI_EVENT);
     }
-}
-
-void shci_cmd_resp_release(uint32_t flag) {
-    UNUSED(flag);
-    furi_assert(ble_glue);
-    furi_semaphore_release(ble_glue->shci_sem);
-}
-
-void shci_cmd_resp_wait(uint32_t timeout) {
-    UNUSED(timeout);
-    furi_assert(ble_glue);
-    furi_semaphore_acquire(ble_glue->shci_sem, FuriWaitForever);
 }
 
 bool ble_glue_reinit_c2() {

@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "app_common.h"
 #include <interface/patterns/ble_thread/tl/mbox_def.h>
+#include <furi_hal.h>
 
 #define HW_IPCC_TX_PENDING(channel) \
     (!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && (((~(IPCC->C1MR)) & ((channel) << 16U)))
@@ -38,7 +39,7 @@ static void HW_IPCC_TRACES_EvtHandler();
 void HW_IPCC_Rx_Handler() {
     if(HW_IPCC_RX_PENDING(HW_IPCC_SYSTEM_EVENT_CHANNEL)) {
         HW_IPCC_SYS_EvtHandler();
-    }else if(HW_IPCC_RX_PENDING(HW_IPCC_BLE_EVENT_CHANNEL)) {
+    } else if(HW_IPCC_RX_PENDING(HW_IPCC_BLE_EVENT_CHANNEL)) {
         HW_IPCC_BLE_EvtHandler();
     } else if(HW_IPCC_RX_PENDING(HW_IPCC_TRACES_CHANNEL)) {
         HW_IPCC_TRACES_EvtHandler();
@@ -48,7 +49,7 @@ void HW_IPCC_Rx_Handler() {
 void HW_IPCC_Tx_Handler() {
     if(HW_IPCC_TX_PENDING(HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
         HW_IPCC_SYS_CmdEvtHandler();
-    }else if(HW_IPCC_TX_PENDING(HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
+    } else if(HW_IPCC_TX_PENDING(HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
         HW_IPCC_SYS_CmdEvtHandler();
     } else if(HW_IPCC_TX_PENDING(HW_IPCC_MM_RELEASE_BUFFER_CHANNEL)) {
         HW_IPCC_MM_FreeBufHandler();
@@ -126,7 +127,14 @@ void HW_IPCC_SYS_Init() {
 
 void HW_IPCC_SYS_SendCmd() {
     LL_C1_IPCC_SetFlag_CHx(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL);
-    LL_C1_IPCC_EnableTransmitChannel(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL);
+
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(33000000);
+
+    while(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, HW_IPCC_SYSTEM_CMD_RSP_CHANNEL)) {
+        furi_check(!furi_hal_cortex_timer_is_expired(timer), "HW_IPCC_SYS_SendCmd timeout");
+    }
+
+    HW_IPCC_SYS_CmdEvtHandler();
 }
 
 static void HW_IPCC_SYS_CmdEvtHandler() {

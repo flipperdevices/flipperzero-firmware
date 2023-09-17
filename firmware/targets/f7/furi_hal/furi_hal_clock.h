@@ -1,10 +1,11 @@
 #pragma once
 
+#include <stm32wbxx_ll_rcc.h>
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stm32wbxx_ll_rcc.h>
 
 typedef enum {
     FuriHalClockMcoLse,
@@ -47,16 +48,20 @@ void furi_hal_clock_switch_hse2hsi();
 void furi_hal_clock_switch_hsi2hse();
 
 /** Switch clock from HSE to PLL
- * 
+ *
  * @warning    can not be used in ISR or critical section
+ *
+ * @return     true if changed, false if not possible at this moment
  */
-void furi_hal_clock_switch_hse2pll();
+bool furi_hal_clock_switch_hse2pll();
 
 /** Switch clock from PLL to HSE
  *
  * @warning    can not be used in ISR or critical section
+ *
+ * @return     true if changed, false if not possible at this moment
  */
-void furi_hal_clock_switch_pll2hse();
+bool furi_hal_clock_switch_pll2hse();
 
 /** Stop SysTick counter without resetting */
 void furi_hal_clock_suspend_tick();
