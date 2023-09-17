@@ -191,7 +191,9 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         // Notify system about time spent in sleep
         if(completed_ticks > 0) {
             if(completed_ticks > expected_idle_ticks) {
+#ifdef FURI_HAL_OS_DEBUG
                 furi_hal_console_printf(">%lu\r\n", completed_ticks - expected_idle_ticks);
+#endif
                 completed_ticks = expected_idle_ticks;
             }
             vTaskStepTick(completed_ticks);
