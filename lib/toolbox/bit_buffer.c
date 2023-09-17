@@ -97,7 +97,7 @@ void bit_buffer_copy_bytes_with_parity(BitBuffer* buf, const uint8_t* data, size
     furi_assert(buf);
     furi_assert(data);
 
-    size_t bit_processed = 0;
+    size_t bits_processed = 0;
     size_t curr_byte = 0;
 
     if(size_bits < BITS_IN_BYTE + 1) {
@@ -106,20 +106,20 @@ void bit_buffer_copy_bytes_with_parity(BitBuffer* buf, const uint8_t* data, size
     } else {
         furi_assert(size_bits % (BITS_IN_BYTE + 1) == 0);
         buf->size_bits = size_bits / (BITS_IN_BYTE + 1) * BITS_IN_BYTE;
-        while(bit_processed < size_bits) {
-            buf->data[curr_byte] = data[bit_processed / BITS_IN_BYTE] >>
-                                   (bit_processed % BITS_IN_BYTE);
-            buf->data[curr_byte] |= data[bit_processed / BITS_IN_BYTE + 1]
-                                    << (BITS_IN_BYTE - bit_processed % BITS_IN_BYTE);
+        while(bits_processed < size_bits) {
+            buf->data[curr_byte] = data[bits_processed / BITS_IN_BYTE] >>
+                                   (bits_processed % BITS_IN_BYTE);
+            buf->data[curr_byte] |= data[bits_processed / BITS_IN_BYTE + 1]
+                                    << (BITS_IN_BYTE - bits_processed % BITS_IN_BYTE);
             uint8_t bit =
-                FURI_BIT(data[bit_processed / BITS_IN_BYTE + 1], bit_processed % BITS_IN_BYTE);
+                FURI_BIT(data[bits_processed / BITS_IN_BYTE + 1], bits_processed % BITS_IN_BYTE);
 
-            if(bit_processed % BITS_IN_BYTE) {
+            if(bits_processed % BITS_IN_BYTE) {
                 buf->parity[curr_byte / BITS_IN_BYTE] = bit;
             } else {
-                buf->parity[curr_byte / BITS_IN_BYTE] |= bit << (bit_processed % BITS_IN_BYTE);
+                buf->parity[curr_byte / BITS_IN_BYTE] |= bit << (bits_processed % BITS_IN_BYTE);
             }
-            bit_processed += BITS_IN_BYTE + 1;
+            bits_processed += BITS_IN_BYTE + 1;
             curr_byte++;
         }
         buf->size_bits = curr_byte * BITS_IN_BYTE;
