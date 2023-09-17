@@ -8,7 +8,7 @@
 #include <stm32wbxx_ll_utils.h>
 #include <stm32wbxx_ll_cortex.h>
 
-#include <hw_conf.h>
+#include <hsem_map.h>
 #include <interface/patterns/ble_thread/shci/shci.h>
 
 #define TAG "FuriHalClock"

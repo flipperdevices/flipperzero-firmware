@@ -6,6 +6,9 @@
 #include <utilities/dbg_trace.h>
 #include <utilities/utilities_common.h>
 
+#include "stm32wbxx_ll_bus.h"
+#include "stm32wbxx_ll_pwr.h"
+
 #include <furi_hal.h>
 
 typedef PACKED_STRUCT {

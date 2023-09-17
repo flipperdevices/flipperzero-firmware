@@ -20,12 +20,18 @@
 /* Includes ------------------------------------------------------------------*/
 #include "app_common.h"
 #include <interface/patterns/ble_thread/tl/mbox_def.h>
+#include <interface/patterns/ble_thread/hw.h>
 #include <furi_hal.h>
 
+#include <stm32wbxx_ll_ipcc.h>
+#include <stm32wbxx_ll_pwr.h>
+
+#include <hsem_map.h>
+
 #define HW_IPCC_TX_PENDING(channel) \
-    (!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && (((~(IPCC->C1MR)) & ((channel) << 16U)))
+    (!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && LL_C1_IPCC_IsEnabledTransmitChannel(IPCC, channel)
 #define HW_IPCC_RX_PENDING(channel) \
-    (LL_C2_IPCC_IsActiveFlag_CHx(IPCC, channel)) && (((~(IPCC->C1MR)) & ((channel) << 0U)))
+    (LL_C2_IPCC_IsActiveFlag_CHx(IPCC, channel)) && LL_C1_IPCC_IsEnabledReceiveChannel(IPCC, channel)
 
 static void (*FreeBufCb)();
 
