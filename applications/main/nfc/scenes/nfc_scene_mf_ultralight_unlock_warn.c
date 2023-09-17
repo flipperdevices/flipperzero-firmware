@@ -19,7 +19,7 @@ void nfc_scene_mf_ultralight_unlock_warn_on_enter(void* context) {
         // Build dialog text
         FuriString* password_str =
             furi_string_alloc_set_str("Try to unlock the card with\npassword: ");
-        for(size_t i = 0; i < sizeof(nfc->mf_ul_auth->password); i++) {
+        for(size_t i = 0; i < sizeof(nfc->mf_ul_auth->password.data); i++) {
             furi_string_cat_printf(password_str, "%02X ", nfc->mf_ul_auth->password.data[i]);
         }
         furi_string_cat_str(password_str, "?\nCaution, a wrong password\ncan block the card!");
