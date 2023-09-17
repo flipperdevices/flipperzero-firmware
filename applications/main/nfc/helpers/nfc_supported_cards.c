@@ -85,7 +85,7 @@ static const NfcSupportedCardsPlugin*
         if(descriptor->ep_api_version != NFC_SUPPORTED_CARD_PLUGIN_API_VERSION) continue;
 
         plugin = descriptor->entry_point;
-    } while(plugin == NULL);
+    } while(plugin == NULL); //-V654
 
     return plugin;
 }
@@ -101,9 +101,9 @@ bool nfc_supported_cards_read(NfcDevice* device, Nfc* nfc) {
     do {
         const NfcSupportedCardsPlugin* plugin =
             nfc_supported_cards_get_next_plugin(supported_cards);
-        if(plugin == NULL) break;
+        if(plugin == NULL) break; //-V547
 
-        const NfcProtocol protocol = nfc_device_get_protocol(device);
+        const NfcProtocol protocol = nfc_device_get_protocol(device); //-V779
         if(plugin->protocol != protocol) continue;
 
         if(plugin->verify) {
@@ -131,9 +131,9 @@ bool nfc_supported_cards_parse(const NfcDevice* device, FuriString* parsed_data)
     do {
         const NfcSupportedCardsPlugin* plugin =
             nfc_supported_cards_get_next_plugin(supported_cards);
-        if(plugin == NULL) break;
+        if(plugin == NULL) break; //-V547
 
-        const NfcProtocol protocol = nfc_device_get_protocol(device);
+        const NfcProtocol protocol = nfc_device_get_protocol(device); //-V779
         if(plugin->protocol != protocol) continue;
 
         if(plugin->parse) {
