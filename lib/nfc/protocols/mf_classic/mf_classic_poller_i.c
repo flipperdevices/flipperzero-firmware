@@ -302,9 +302,7 @@ MfClassicError mf_classic_async_value_cmd(
             break;
         }
 
-        uint8_t data_arr[4] = {};
-        memcpy(data_arr, &data, sizeof(int32_t));
-        bit_buffer_copy_bytes(instance->tx_plain_buffer, data_arr, sizeof(data_arr));
+        bit_buffer_copy_bytes(instance->tx_plain_buffer, (uint8_t*)&data, sizeof(data));
         iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
         crypto1_encrypt(
