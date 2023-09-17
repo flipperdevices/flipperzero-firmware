@@ -10,6 +10,7 @@ jobs:
   compact:
     runs-on: [self-hosted, FlipperZeroShell]
     strategy:
+      fail-fast: false
       matrix:
         target: [f7, f18]
     steps:
@@ -73,3 +74,12 @@ jobs:
               popd
             done
           done
+
+## Uncomment this for a single job that will run only if all targets are built successfully          
+#  report-status:
+#    name: Report status
+#    needs: [compact]
+#    if: always() && !contains(needs.*.result, 'failure')
+#    runs-on: [self-hosted, FlipperZeroShell]
+#    steps:
+#      - run: echo "All good ✨" ;
