@@ -346,10 +346,13 @@ static MfUltralightCommand mf_ultralight_listener_check_tearing_handler(
            (tearing_flag_num != 2)) {
             break;
         }
+        if(tearing_flag_num >= MF_ULTRALIGHT_TEARING_FLAG_NUM) {
+            break;
+        }
 
         bit_buffer_set_size_bytes(instance->tx_buffer, 1);
         bit_buffer_set_byte(
-            instance->tx_buffer, 0, instance->data->tearing_flag->data[tearing_flag_num]);
+            instance->tx_buffer, 0, instance->data->tearing_flag[tearing_flag_num].data);
         iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
         command = MfUltralightCommandProcessed;
