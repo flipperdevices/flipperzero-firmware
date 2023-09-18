@@ -15,7 +15,7 @@ void nfc_scene_select_protocol_on_enter(void* context) {
     if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneExtraActions)) {
         prefix = "Read";
         instance->protocols_detected_num = NfcProtocolNum;
-        for(size_t i = 0; i < NfcProtocolNum; i++) {
+        for(uint32_t i = 0; i < NfcProtocolNum; i++) {
             instance->protocols_detected[i] = i;
         }
     } else {
@@ -24,7 +24,7 @@ void nfc_scene_select_protocol_on_enter(void* context) {
         notification_message(instance->notifications, &sequence_single_vibro);
     }
 
-    for(size_t i = 0; i < instance->protocols_detected_num; i++) {
+    for(uint32_t i = 0; i < instance->protocols_detected_num; i++) {
         furi_string_printf(
             temp_str,
             "%s %s",
@@ -39,7 +39,7 @@ void nfc_scene_select_protocol_on_enter(void* context) {
     }
     furi_string_free(temp_str);
 
-    uint32_t state =
+    const uint32_t state =
         scene_manager_get_scene_state(instance->scene_manager, NfcSceneSelectProtocol);
     submenu_set_selected_item(submenu, state);
 
@@ -51,7 +51,7 @@ bool nfc_scene_select_protocol_on_event(void* context, SceneManagerEvent event) 
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        instance->protocols_detected_idx = event.event;
+        instance->protocols_detected_selected_idx = event.event;
         scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
         scene_manager_set_scene_state(
             instance->scene_manager, NfcSceneSelectProtocol, event.event);

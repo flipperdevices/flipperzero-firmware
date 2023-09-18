@@ -66,8 +66,8 @@ static void nfc_scene_read_success_on_enter_mf_desfire(NfcApp* instance) {
 }
 
 static void nfc_scene_emulate_on_enter_mf_desfire(NfcApp* instance) {
-    const MfDesfireData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolMfDesfire);
-    const Iso14443_4aData* iso14443_4a_data = data->iso14443_4a_data;
+    const Iso14443_4aData* iso14443_4a_data =
+        nfc_device_get_data(instance->nfc_device, NfcProtocolIso14443_4a);
 
     instance->listener =
         nfc_listener_alloc(instance->nfc, NfcProtocolIso14443_4a, iso14443_4a_data);
