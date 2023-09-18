@@ -5,7 +5,6 @@ Flipper Application for monitoring PC state
 
 ### Screenshots
 
-<img src="screenshots/qFlipper.png" alt="app" width="600px"/>
-<br>
-<img src="screenshots/1.png" alt="app" width="300px"/>
-<img src="screenshots/2.png" alt="app" width="300px"/>
+![app](screenshots/qFlipper.png)  
+![app](screenshots/1.png)
+![app](screenshots/2.png)
