@@ -1,15 +1,18 @@
 #include "../nfc_app_i.h"
 
+#include "../helpers/protocol_support/nfc_protocol_support_gui_common.h"
+
 enum SubmenuIndex {
     SubmenuIndexGeneratorsStart,
     SubmenuIndexNFCA4 = NfcDataGeneratorTypeNum,
     SubmenuIndexNFCA7,
 };
 
-void nfc_scene_set_type_submenu_callback(void* context, uint32_t index) {
-    NfcApp* instance = context;
-
-    view_dispatcher_send_custom_event(instance->view_dispatcher, index);
+static void nfc_scene_set_type_init_edit_data(Iso14443_3aData* data, size_t uid_len) {
+    // Easiest way to create a zero'd buffer of given length
+    uint8_t* uid = malloc(uid_len);
+    iso14443_3a_set_uid(data, uid, uid_len);
+    free(uid);
 }
 
 void nfc_scene_set_type_on_enter(void* context) {
@@ -20,18 +23,18 @@ void nfc_scene_set_type_on_enter(void* context) {
         submenu,
         "NFC-A 7-bytes UID",
         SubmenuIndexNFCA7,
-        nfc_scene_set_type_submenu_callback,
+        nfc_protocol_support_common_submenu_callback,
         instance);
     submenu_add_item(
         submenu,
         "NFC-A 4-bytes UID",
         SubmenuIndexNFCA4,
-        nfc_scene_set_type_submenu_callback,
+        nfc_protocol_support_common_submenu_callback,
         instance);
 
     for(size_t i = 0; i < NfcDataGeneratorTypeNum; i++) {
         const char* name = nfc_data_generator_get_name(i);
-        submenu_add_item(submenu, name, i, nfc_scene_set_type_submenu_callback, instance);
+        submenu_add_item(submenu, name, i, nfc_protocol_support_common_submenu_callback, instance);
     }
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewMenu);
@@ -43,11 +46,11 @@ bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexNFCA7) {
-            instance->iso14443_3a_edit_data->uid_len = 7;
+            nfc_scene_set_type_init_edit_data(instance->iso14443_3a_edit_data, 7);
             scene_manager_next_scene(instance->scene_manager, NfcSceneSetSak);
             consumed = true;
         } else if(event.event == SubmenuIndexNFCA4) {
-            instance->iso14443_3a_edit_data->uid_len = 4;
+            nfc_scene_set_type_init_edit_data(instance->iso14443_3a_edit_data, 4);
             scene_manager_next_scene(instance->scene_manager, NfcSceneSetSak);
             consumed = true;
         } else {

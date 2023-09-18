@@ -312,6 +312,8 @@ bool iso15693_3_set_uid(Iso15693_3Data* data, const uint8_t* uid, size_t uid_len
 
     if(uid_valid) {
         memcpy(data->uid, uid, uid_len);
+        // All ISO15693-3 cards must have this as first UID byte
+        data->uid[0] = 0xe0;
     }
 
     return uid_valid;

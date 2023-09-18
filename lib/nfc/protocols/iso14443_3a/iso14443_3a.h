@@ -92,6 +92,16 @@ uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* data);
 
 bool iso14443_3a_supports_iso14443_4(const Iso14443_3aData* data);
 
+uint8_t iso14443_3a_get_sak(const Iso14443_3aData* data);
+
+void iso14443_3a_get_atqa(const Iso14443_3aData* data, uint8_t atqa[2]);
+
+// Setters
+
+void iso14443_3a_set_sak(Iso14443_3aData* data, uint8_t sak);
+
+void iso14443_3a_set_atqa(Iso14443_3aData* data, const uint8_t atqa[2]);
+
 #ifdef __cplusplus
 }
 #endif
