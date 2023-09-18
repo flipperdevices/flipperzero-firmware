@@ -143,11 +143,6 @@ static PcMonitorApp* pc_monitor_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->bt = furi_record_open(RECORD_BT);
 
-    app->data.cpu_usage = UINT8_MAX;
-    app->data.ram_usage = UINT8_MAX;
-    app->data.gpu_usage = UINT8_MAX;
-    app->data.vram_usage = UINT8_MAX;
-
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     view_port_draw_callback_set(app->view_port, render_callback, app);
     view_port_input_callback_set(app->view_port, input_callback, app->event_queue);
