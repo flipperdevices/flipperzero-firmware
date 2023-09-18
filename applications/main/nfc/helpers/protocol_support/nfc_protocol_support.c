@@ -512,7 +512,6 @@ static void nfc_protocol_support_scene_emulate_on_exit(NfcApp* instance) {
 
     const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
 
-    // TODO: What are shadow files for partial emulation?
     if(protocol == nfc_listener_get_protocol(instance->listener)) {
         const NfcDeviceData* data = nfc_listener_get_data(instance->listener, protocol);
 
