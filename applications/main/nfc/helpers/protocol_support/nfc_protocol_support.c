@@ -107,7 +107,8 @@ static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
-    const NfcProtocol protocol = instance->protocols_detected[instance->protocols_detected_idx];
+    const NfcProtocol protocol =
+        instance->protocols_detected[instance->protocols_detected_selected_idx];
     instance->poller = nfc_poller_alloc(instance->nfc, protocol);
 
     // Start poller with the appropriate callback
@@ -134,8 +135,7 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
                 dolphin_deed(DolphinDeedNfcReadSuccess);
                 consumed = true;
             } else {
-                const NfcProtocol protocol =
-                    instance->protocols_detected[instance->protocols_detected_idx];
+                const NfcProtocol protocol = nfc_poller_get_protocol(instance->poller);
                 if(nfc_protocol_support[protocol]->scene_read.on_event) {
                     consumed =
                         nfc_protocol_support[protocol]->scene_read.on_event(instance, event.event);
@@ -395,6 +395,9 @@ static bool
             dolphin_deed(is_added ? DolphinDeedNfcAddEmulate : DolphinDeedNfcEmulate);
             scene_manager_next_scene(instance->scene_manager, NfcSceneEmulate);
             consumed = true;
+        } else if(event.event == SubmenuIndexCommonEdit) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
+            consumed = true;
         } else {
             const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
             consumed =
@@ -504,17 +507,16 @@ static bool
 static void nfc_protocol_support_scene_emulate_on_exit(NfcApp* instance) {
     nfc_listener_stop(instance->listener);
 
-    NfcDevice* nfc_stub = nfc_device_alloc();
-    NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
-    const NfcDeviceData* data = nfc_listener_get_data(instance->listener, protocol);
-    nfc_device_set_data(nfc_stub, protocol, data);
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
 
-    //TODO: think about nfc_device_is_equal(NfcDevice*,NfcDeviceData*);
-    if(!nfc_device_is_equal(nfc_stub, instance->nfc_device)) {
-        nfc_device_set_data(instance->nfc_device, protocol, data);
-        nfc_save_shadow_file(instance);
+    if(protocol == nfc_listener_get_protocol(instance->listener)) {
+        const NfcDeviceData* data = nfc_listener_get_data(instance->listener, protocol);
+
+        if(!nfc_device_is_equal_data(instance->nfc_device, protocol, data)) {
+            nfc_device_set_data(instance->nfc_device, protocol, data);
+            nfc_save_shadow_file(instance);
+        }
     }
-    nfc_device_free(nfc_stub);
 
     nfc_listener_free(instance->listener);
 

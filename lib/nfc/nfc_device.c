@@ -117,17 +117,23 @@ void nfc_device_copy_data(
     nfc_devices[protocol]->copy(protocol_data, instance->protocol_data);
 }
 
+bool nfc_device_is_equal_data(
+    const NfcDevice* instance,
+    NfcProtocol protocol,
+    const NfcDeviceData* protocol_data) {
+    furi_assert(instance);
+    furi_assert(protocol < NfcProtocolNum);
+    furi_assert(protocol_data);
+
+    return instance->protocol == protocol &&
+           nfc_devices[protocol]->is_equal(instance->protocol_data, protocol_data);
+}
+
 bool nfc_device_is_equal(const NfcDevice* instance, const NfcDevice* other) {
     furi_assert(instance);
     furi_assert(other);
 
-    bool is_equal = false;
-    if(instance->protocol == other->protocol) {
-        is_equal = nfc_devices[instance->protocol]->is_equal(
-            instance->protocol_data, other->protocol_data);
-    }
-
-    return is_equal;
+    return nfc_device_is_equal_data(instance, other->protocol, other->protocol_data);
 }
 
 void nfc_device_set_loading_callback(

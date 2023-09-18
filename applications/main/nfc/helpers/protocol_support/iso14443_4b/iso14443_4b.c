@@ -86,7 +86,7 @@ static bool nfc_scene_saved_menu_on_event_iso14443_4b(NfcApp* instance, uint32_t
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_4b = {
-    .features = NfcProtocolFeatureEmulateUid | NfcProtocolFeatureEditUid,
+    .features = NfcProtocolFeatureNone,
 
     .scene_info =
         {

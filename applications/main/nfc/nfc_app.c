@@ -444,13 +444,13 @@ void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocol* types, 
 
     memcpy(instance->protocols_detected, types, count);
     instance->protocols_detected_num = count;
-    instance->protocols_detected_idx = 0;
+    instance->protocols_detected_selected_idx = 0;
 }
 
 void nfc_app_reset_detected_protocols(NfcApp* instance) {
     furi_assert(instance);
 
-    instance->protocols_detected_idx = 0;
+    instance->protocols_detected_selected_idx = 0;
     instance->protocols_detected_num = 0;
 }
 

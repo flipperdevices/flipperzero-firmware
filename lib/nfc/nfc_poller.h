@@ -19,7 +19,9 @@ void nfc_poller_stop(NfcPoller* instance);
 
 bool nfc_poller_detect(NfcPoller* instance);
 
-const NfcDeviceData* nfc_poller_get_data(NfcPoller* instance);
+NfcProtocol nfc_poller_get_protocol(const NfcPoller* instance);
+
+const NfcDeviceData* nfc_poller_get_data(const NfcPoller* instance);
 
 #ifdef __cplusplus
 }

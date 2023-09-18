@@ -59,6 +59,7 @@
 
 #define NFC_NAME_SIZE 22
 #define NFC_TEXT_STORE_SIZE 128
+#define NFC_BYTE_INPUT_STORE_SIZE 10
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
@@ -98,11 +99,11 @@ struct NfcApp {
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
-    uint8_t byte_input_store[6];
+    uint8_t byte_input_store[NFC_BYTE_INPUT_STORE_SIZE];
 
-    size_t protocols_detected_num;
-    size_t protocols_detected_idx;
+    uint32_t protocols_detected_num;
     NfcProtocol protocols_detected[NfcProtocolNum];
+    uint32_t protocols_detected_selected_idx;
 
     void* rpc_ctx;
     NfcRpcState rpc_state;

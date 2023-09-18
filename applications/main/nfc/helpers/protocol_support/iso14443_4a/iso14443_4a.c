@@ -7,7 +7,6 @@
 #include "nfc/nfc_app_i.h"
 
 #include "../nfc_protocol_support_gui_common.h"
-#include "../iso14443_3a/iso14443_3a_i.h"
 
 static void nfc_scene_info_on_enter_iso14443_4a(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
@@ -114,10 +113,6 @@ static bool nfc_scene_read_menu_on_event_iso14443_4a(NfcApp* instance, uint32_t 
     return false;
 }
 
-static bool nfc_scene_saved_menu_on_event_iso14443_4a(NfcApp* instance, uint32_t event) {
-    return nfc_scene_saved_menu_on_event_iso14443_3a_common(instance, event);
-}
-
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_4a = {
     .features = NfcProtocolFeatureEmulateUid | NfcProtocolFeatureEditUid,
 
@@ -144,7 +139,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_4a = {
     .scene_saved_menu =
         {
             .on_enter = nfc_scene_saved_menu_on_enter_iso14443_4a,
-            .on_event = nfc_scene_saved_menu_on_event_iso14443_4a,
+            .on_event = NULL,
         },
     .scene_emulate =
         {

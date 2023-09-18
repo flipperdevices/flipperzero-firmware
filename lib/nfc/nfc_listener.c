@@ -129,7 +129,13 @@ void nfc_listener_stop(NfcListener* instance) {
     nfc_stop(instance->nfc);
 }
 
-const NfcDeviceData* nfc_listener_get_data(NfcListener* instance, NfcProtocol protocol) {
+NfcProtocol nfc_listener_get_protocol(const NfcListener* instance) {
+    furi_assert(instance);
+
+    return instance->protocol;
+}
+
+const NfcDeviceData* nfc_listener_get_data(const NfcListener* instance, NfcProtocol protocol) {
     furi_assert(instance);
     furi_assert(instance->protocol == protocol);
 

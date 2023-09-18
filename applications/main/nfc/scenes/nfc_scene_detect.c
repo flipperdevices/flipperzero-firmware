@@ -7,8 +7,7 @@ void nfc_scene_detect_scan_callback(NfcScannerEvent event, void* context) {
     NfcApp* instance = context;
 
     if(event.type == NfcScannerEventTypeDetected) {
-        instance->protocols_detected_num = event.data.protocol_num;
-        memcpy(instance->protocols_detected, event.data.protocols, event.data.protocol_num);
+        nfc_app_set_detected_protocols(instance, event.data.protocols, event.data.protocol_num);
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventWorkerExit);
     }
 }
@@ -40,7 +39,6 @@ bool nfc_scene_detect_on_event(void* context, SceneManagerEvent event) {
             if(instance->protocols_detected_num > 1) {
                 scene_manager_next_scene(instance->scene_manager, NfcSceneSelectProtocol);
             } else {
-                instance->protocols_detected_idx = 0;
                 scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
             }
             consumed = true;
