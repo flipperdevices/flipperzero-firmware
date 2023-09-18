@@ -89,7 +89,7 @@ static void nfc_generate_mf_ul_ev1_common(MfUltralightData* mfu_data, uint8_t nu
     nfc_generate_mf_ul_with_config_common(mfu_data, num_pages);
     memcpy(&mfu_data->version, version_bytes_mf0ulx1, sizeof(MfUltralightVersion));
     for(size_t i = 0; i < 3; ++i) {
-        mfu_data->tearing_flag[i].data[0] = MF_ULTRALIGHT_TEARING_FLAG_DEFAULT;
+        mfu_data->tearing_flag[i].data = MF_ULTRALIGHT_TEARING_FLAG_DEFAULT;
     }
     // TODO: what's internal byte on page 2?
 }
