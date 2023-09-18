@@ -2,7 +2,8 @@
 
 #include <furi.h>
 
-#define MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, start, end) (((page) >= (start)) && ((page) <= (end)))
+#define MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, start, end) \
+    (((page) >= (start)) && ((page) <= (end)))
 
 #define MF_ULTRALIGHT_I2C_PAGE_ON_SESSION_REG(page) \
     MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, 0x00EC, 0x00ED)
@@ -338,11 +339,15 @@ static uint16_t mf_ultralight_i2c_page_provider_for_sector2(uint16_t page, MfUlt
 static uint16_t mf_ultralight_i2c_page_provider_for_sector3(uint16_t page, MfUltralightType type) {
     uint16_t new_page = page;
     if(type == MfUltralightTypeNTAGI2CPlus1K || type == MfUltralightTypeNTAGI2CPlus2K) {
-        if(page == 0x00F8) new_page = 234;
-        else if(page == 0x00F9) new_page = 235;
+        if(page == 0x00F8)
+            new_page = 234;
+        else if(page == 0x00F9)
+            new_page = 235;
     } else if(type == MfUltralightTypeNTAGI2C1K || type == MfUltralightTypeNTAGI2C2K) {
-        if(page == 0x00F8) new_page = (type == MfUltralightTypeNTAGI2C1K) ? 227 : 481;
-        else if(page == 0x00F9) new_page = (type == MfUltralightTypeNTAGI2C1K) ? 228 : 482;
+        if(page == 0x00F8)
+            new_page = (type == MfUltralightTypeNTAGI2C1K) ? 227 : 481;
+        else if(page == 0x00F9)
+            new_page = (type == MfUltralightTypeNTAGI2C1K) ? 228 : 482;
     }
     return new_page;
 }

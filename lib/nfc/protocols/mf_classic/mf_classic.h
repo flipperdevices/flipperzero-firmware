@@ -113,10 +113,13 @@ typedef struct {
     MfClassicAt at;
 } MfClassicAuthContext;
 
-typedef struct {
-    MfClassicKey key_a;
-    MfClassicAccessBits access_bits;
-    MfClassicKey key_b;
+typedef union {
+    MfClassicBlock block;
+    struct {
+        MfClassicKey key_a;
+        MfClassicAccessBits access_bits;
+        MfClassicKey key_b;
+    };
 } MfClassicSectorTrailer;
 
 typedef struct {
