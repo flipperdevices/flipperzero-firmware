@@ -515,7 +515,7 @@ static void nfc_protocol_support_scene_emulate_on_exit(NfcApp* instance) {
     if(protocol == nfc_listener_get_protocol(instance->listener)) {
         const NfcDeviceData* data = nfc_listener_get_data(instance->listener, protocol);
 
-        if(!nfc_device_contains_data(instance->nfc_device, protocol, data)) {
+        if(!nfc_device_is_equal_data(instance->nfc_device, protocol, data)) {
             nfc_device_set_data(instance->nfc_device, protocol, data);
             nfc_save_shadow_file(instance);
         }

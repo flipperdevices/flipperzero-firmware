@@ -2226,7 +2226,7 @@ Function,+,nfc_data_generator_fill_data,void,"NfcDataGeneratorType, NfcDevice*"
 Function,+,nfc_data_generator_get_name,const char*,NfcDataGeneratorType
 Function,+,nfc_device_alloc,NfcDevice*,
 Function,+,nfc_device_clear,void,NfcDevice*
-Function,+,nfc_device_contains_data,_Bool,"const NfcDevice*, NfcProtocol, const NfcDeviceData*"
+Function,+,nfc_device_is_equal_data,_Bool,"const NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_copy_data,void,"const NfcDevice*, NfcProtocol, NfcDeviceData*"
 Function,+,nfc_device_free,void,NfcDevice*
 Function,+,nfc_device_get_data,const NfcDeviceData*,"const NfcDevice*, NfcProtocol"

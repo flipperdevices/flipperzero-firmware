@@ -45,7 +45,7 @@ void nfc_device_copy_data(
     NfcProtocol protocol,
     NfcDeviceData* protocol_data);
 
-bool nfc_device_contains_data(
+bool nfc_device_is_equal_data(
     const NfcDevice* instance,
     NfcProtocol protocol,
     const NfcDeviceData* protocol_data);
