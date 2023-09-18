@@ -17,7 +17,7 @@ void nfc_scene_mf_classic_mfkey_nonces_info_on_enter(void* context) {
     FuriString* temp_str = furi_string_alloc();
 
     size_t mfkey_params_saved = mfkey32_logger_get_params_num(instance->mfkey32_logger);
-    furi_string_printf(temp_str, "Nonce pairs saved: %d\n", mfkey_params_saved);
+    furi_string_printf(temp_str, "Nonce pairs saved: %zu\n", mfkey_params_saved);
     widget_add_string_element(
         instance->widget, 0, 0, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(temp_str));
     widget_add_string_element(

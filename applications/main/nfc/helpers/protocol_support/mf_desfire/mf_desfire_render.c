@@ -6,7 +6,7 @@ void nfc_render_mf_desfire_info(
     const MfDesfireData* data,
     NfcProtocolFormatType format_type,
     FuriString* str) {
-    nfc_render_iso14443_4a_info(mf_desfire_get_base_data(data), format_type, str);
+    nfc_render_iso14443_4a_brief(mf_desfire_get_base_data(data), str);
 
     const uint32_t bytes_total = 1UL << (data->version.sw_storage >> 1);
     const uint32_t bytes_free = data->free_memory.is_present ? data->free_memory.bytes_free : 0;
@@ -29,6 +29,11 @@ void nfc_render_mf_desfire_info(
 
     furi_string_cat_printf(str, "%lu Application%s", app_count, app_count != 1 ? "s" : "");
     furi_string_cat_printf(str, ", %lu File%s", file_count, file_count != 1 ? "s" : "");
+
+    if(format_type != NfcProtocolFormatTypeFull) return;
+
+    furi_string_cat(str, "\n\e#ISO144443-4 data");
+    nfc_render_iso14443_4a_extra(mf_desfire_get_base_data(data), str);
 }
 
 void nfc_render_mf_desfire_data(const MfDesfireData* data, FuriString* str) {

@@ -96,7 +96,7 @@ static bool iso15693_3_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.instance);
-    furi_assert(event.protocol = NfcProtocolInvalid);
+    furi_assert(event.protocol == NfcProtocolInvalid);
 
     bool protocol_detected = false;
     Iso15693_3Poller* instance = context;

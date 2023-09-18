@@ -17,7 +17,9 @@ void nfc_listener_start(NfcListener* instance, NfcGenericCallback callback, void
 
 void nfc_listener_stop(NfcListener* instance);
 
-const NfcDeviceData* nfc_listener_get_data(NfcListener* instance, NfcProtocol protocol);
+NfcProtocol nfc_listener_get_protocol(const NfcListener* instance);
+
+const NfcDeviceData* nfc_listener_get_data(const NfcListener* instance, NfcProtocol protocol);
 
 #ifdef __cplusplus
 }

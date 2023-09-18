@@ -78,7 +78,7 @@ void nfc_scanner_state_handler_idle(NfcScanner* instance) {
             instance->base_protocols_num++;
         }
     }
-    FURI_LOG_D(TAG, "Found %d base protocols", instance->base_protocols_num);
+    FURI_LOG_D(TAG, "Found %zu base protocols", instance->base_protocols_num);
 
     instance->first_detected_protocol = NfcProtocolInvalid;
     instance->state = NfcScannerStateTryBasePollers;
@@ -132,7 +132,7 @@ void nfc_scanner_state_handler_find_children_protocols(NfcScanner* instance) {
     } else {
         instance->state = NfcScannerStateComplete;
     }
-    FURI_LOG_D(TAG, "Found %d children", instance->children_protocols_num);
+    FURI_LOG_D(TAG, "Found %zu children", instance->children_protocols_num);
 }
 
 void nfc_scanner_state_handler_detect_children_protocols(NfcScanner* instance) {
@@ -181,7 +181,7 @@ void nfc_scanner_state_handler_complete(NfcScanner* instance) {
     if(instance->detected_protocols_num > 1) {
         nfc_scanner_filter_detected_protocols(instance);
     }
-    FURI_LOG_I(TAG, "Detected %d protocols", instance->detected_protocols_num);
+    FURI_LOG_I(TAG, "Detected %zu protocols", instance->detected_protocols_num);
 
     NfcScannerEvent event = {
         .type = NfcScannerEventTypeDetected,

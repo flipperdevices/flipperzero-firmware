@@ -201,7 +201,13 @@ bool nfc_poller_detect(NfcPoller* instance) {
     return instance->protocol_detected;
 }
 
-const NfcDeviceData* nfc_poller_get_data(NfcPoller* instance) {
+NfcProtocol nfc_poller_get_protocol(const NfcPoller* instance) {
+    furi_assert(instance);
+
+    return instance->protocol;
+}
+
+const NfcDeviceData* nfc_poller_get_data(const NfcPoller* instance) {
     furi_assert(instance);
 
     NfcPollerListElement* tail_poller = instance->list.tail;

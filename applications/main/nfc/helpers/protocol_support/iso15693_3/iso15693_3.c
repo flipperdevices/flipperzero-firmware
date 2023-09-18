@@ -110,8 +110,7 @@ static bool nfc_scene_saved_menu_on_event_iso15693_3(NfcApp* instance, uint32_t 
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
-    .features =
-        NfcProtocolFeatureEmulateFull, // | NfcProtocolFeatureEditUid, // TODO: Implement better UID editing
+    .features = NfcProtocolFeatureEmulateFull | NfcProtocolFeatureEditUid,
 
     .scene_info =
         {

@@ -317,7 +317,6 @@ static MfClassicListenerCommand
         MfClassicAction action = MfClassicActionDataDec;
         if(cmd == MF_CLASSIC_CMD_VALUE_DEC) {
             instance->value_cmd = MfClassicValueCommandDecrement;
-            action = MfClassicActionDataDec;
         } else if(cmd == MF_CLASSIC_CMD_VALUE_INC) {
             instance->value_cmd = MfClassicValueCommandIncrement;
             action = MfClassicActionDataInc;
@@ -365,9 +364,10 @@ static MfClassicListenerCommand
 
     do {
         if(bit_buffer_get_size_bytes(buff) != 6) break;
-        uint8_t data_arr[4] = {};
-        bit_buffer_write_bytes_mid(buff, data_arr, 0, sizeof(data_arr));
-        int32_t data = *(int32_t*)data_arr;
+
+        int32_t data;
+        bit_buffer_write_bytes_mid(buff, &data, 0, sizeof(data));
+
         if(data < 0) {
             data = -data;
         }

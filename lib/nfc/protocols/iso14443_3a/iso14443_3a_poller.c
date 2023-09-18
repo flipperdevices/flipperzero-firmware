@@ -99,7 +99,7 @@ static bool iso14443_3a_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.instance);
-    furi_assert(event.protocol = NfcProtocolInvalid);
+    furi_assert(event.protocol == NfcProtocolInvalid);
 
     bool protocol_detected = false;
     Iso14443_3aPoller* instance = context;

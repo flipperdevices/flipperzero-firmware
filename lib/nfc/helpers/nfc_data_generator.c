@@ -89,7 +89,7 @@ static void nfc_generate_mf_ul_ev1_common(MfUltralightData* mfu_data, uint8_t nu
     nfc_generate_mf_ul_with_config_common(mfu_data, num_pages);
     memcpy(&mfu_data->version, version_bytes_mf0ulx1, sizeof(MfUltralightVersion));
     for(size_t i = 0; i < 3; ++i) {
-        mfu_data->tearing_flag[i].data[0] = MF_ULTRALIGHT_TEARING_FLAG_DEFAULT;
+        mfu_data->tearing_flag[i].data = MF_ULTRALIGHT_TEARING_FLAG_DEFAULT;
     }
     // TODO: what's internal byte on page 2?
 }
@@ -153,7 +153,7 @@ static void nfc_generate_ntag203(NfcDevice* nfc_device) {
     mfu_data->pages_read = 42;
     nfc_generate_mf_ul_copy_uid_with_bcc(mfu_data);
     mfu_data->page[2].data[1] = 0x48; // Internal byte
-    memcpy(&mfu_data->page[3], default_data_ntag203, sizeof(MfUltralightPage));
+    memcpy(&mfu_data->page[3], default_data_ntag203, sizeof(MfUltralightPage)); //-V1086
 
     nfc_device_set_data(nfc_device, NfcProtocolMfUltralight, mfu_data);
     mf_ultralight_free(mfu_data);

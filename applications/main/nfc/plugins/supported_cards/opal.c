@@ -149,7 +149,7 @@ static bool opal_parse(const NfcDevice* device, FuriString* parsed_data) {
         // zero value.
         const bool is_negative_balance = (opal_file->balance < 0);
         const char* sign = is_negative_balance ? "-" : "";
-        const int32_t balance = is_negative_balance ? labs(opal_file->balance) :
+        const int32_t balance = is_negative_balance ? labs(opal_file->balance) : //-V1081
                                                       opal_file->balance;
         const uint8_t balance_cents = balance % 100;
         const int32_t balance_dollars = balance / 100;
@@ -162,7 +162,7 @@ static bool opal_parse(const NfcDevice* device, FuriString* parsed_data) {
         const bool is_manly_ferry = (opal_file->usage >= 4) && (opal_file->usage <= 6);
 
         // 3..7 are "reserved", but we use 4 to indicate the Manly Ferry.
-        const uint8_t mode = is_manly_ferry ? 4 : (opal_file->mode > 3 ? 3 : opal_file->mode);
+        const uint8_t mode = is_manly_ferry ? 4 : opal_file->mode;
         const uint8_t usage = is_manly_ferry ? opal_file->usage - 3 : opal_file->usage;
 
         const char* mode_str = opal_modes[mode > 4 ? 3 : mode];
