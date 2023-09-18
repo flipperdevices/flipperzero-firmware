@@ -260,6 +260,8 @@ M100ResponseType m100_read_label_data_storage(
     payload_len = (payload_len << 8) + data[4];
     size_t ptr_offset = 5 /*<-ptr offset*/ + uhf_tag->epc->size + 3 /*<-pc + ul*/;
     size_t bank_data_length = payload_len - (ptr_offset - 5 /*dont include the offset*/);
+    // print paylod length ptr offset and bank data length
+    FURI_LOG_E("TAG", "payload_len: %d, ptr_offset: %d, bank_data_length: %d", payload_len, ptr_offset, bank_data_length);
     if(data[2] == 0xFF) {
         if(payload_len == 0x0001) return M100NoTagResponse;
         return M100MemoryOverrun;
