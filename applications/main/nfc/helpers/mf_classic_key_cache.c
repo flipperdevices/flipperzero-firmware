@@ -134,7 +134,6 @@ bool mf_classic_key_cache_load(MfClassicKeyCache* instance, const uint8_t* uid, 
             }
         }
         load_success = key_read_success;
-        load_success = true;
     } while(false);
 
     flipper_format_buffered_file_close(ff);

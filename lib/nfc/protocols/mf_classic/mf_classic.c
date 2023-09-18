@@ -313,7 +313,7 @@ bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other) 
         if(!data_array_is_equal) break;
 
         for(size_t i = 0; i < COUNT_OF(data->block); i++) {
-            if(memcmp(&data->block[i], &other->block[i], sizeof(data->block[i]))) {
+            if(memcmp(&data->block[i], &other->block[i], sizeof(data->block[i])) != 0) {
                 data_array_is_equal = false;
                 break;
             }
@@ -450,11 +450,10 @@ uint8_t mf_classic_get_sector_by_block(uint8_t block) {
 
 bool mf_classic_block_to_value(const MfClassicBlock* block, int32_t* value, uint8_t* addr) {
     furi_assert(block);
-    furi_assert(value);
 
     uint32_t v = *(uint32_t*)&block->data[0];
-    uint32_t v_inv = *(uint32_t*)&block->data[4];
-    uint32_t v1 = *(uint32_t*)&block->data[8];
+    uint32_t v_inv = *(uint32_t*)&block->data[sizeof(uint32_t)];
+    uint32_t v1 = *(uint32_t*)&block->data[sizeof(uint32_t) * 2];
 
     bool val_checks =
         ((v == v1) && (v == ~v_inv) && (block->data[12] == (~block->data[13] & 0xFF)) &&

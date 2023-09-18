@@ -106,7 +106,7 @@ typedef union {
 } MfUltralightCounter;
 
 typedef struct {
-    uint8_t data[MF_ULTRALIGHT_TEARING_FLAG_SIZE];
+    uint8_t data;
 } MfUltralightTearingFlag;
 
 typedef union {

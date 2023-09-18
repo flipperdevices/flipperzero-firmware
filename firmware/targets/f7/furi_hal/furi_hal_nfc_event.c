@@ -36,7 +36,7 @@ FuriHalNfcEvent furi_hal_nfc_wait_event_common(uint32_t timeout_ms) {
                                                                              timeout_ms;
     uint32_t event_flag =
         furi_thread_flags_wait(FURI_HAL_NFC_EVENT_INTERNAL_ALL, FuriFlagWaitAny, event_timeout);
-    if(event_flag != FuriFlagErrorTimeout) {
+    if(event_flag != (unsigned)FuriFlagErrorTimeout) {
         if(event_flag & FuriHalNfcEventInternalTypeIrq) {
             furi_thread_flags_clear(FuriHalNfcEventInternalTypeIrq);
             FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;

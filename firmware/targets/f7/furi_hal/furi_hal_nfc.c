@@ -90,6 +90,7 @@ FuriHalNfcError furi_hal_nfc_init() {
            ST25R3916_REG_IC_IDENTITY_ic_type_st25r3916) {
             FURI_LOG_E(TAG, "Wrong chip id");
             error = FuriHalNfcErrorCommunication;
+            break;
         }
         // Clear interrupts
         st25r3916_get_irq(handle);
