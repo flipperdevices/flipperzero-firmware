@@ -41,8 +41,7 @@ void iso14443_3a_free(Iso14443_3aData* data) {
 
 void iso14443_3a_reset(Iso14443_3aData* data) {
     furi_assert(data);
-
-    UNUSED(data);
+    memset(data, 0, sizeof(Iso14443_3aData));
 }
 
 void iso14443_3a_copy(Iso14443_3aData* data, const Iso14443_3aData* other) {
@@ -69,9 +68,7 @@ bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version
 
         if(version > NFC_LSB_ATQA_FORMAT_VERSION) {
             // Swap ATQA bytes for newer versions
-            const uint8_t tmp = data->atqa[0];
-            data->atqa[0] = data->atqa[1];
-            data->atqa[1] = tmp;
+            FURI_SWAP(data->atqa[0], data->atqa[1]);
         }
 
         parsed = true;
@@ -160,4 +157,30 @@ bool iso14443_3a_supports_iso14443_4(const Iso14443_3aData* data) {
     furi_assert(data);
 
     return data->sak & ISO14443A_ATS_BIT;
+}
+
+uint8_t iso14443_3a_get_sak(const Iso14443_3aData* data) {
+    furi_assert(data);
+
+    return data->sak;
+}
+
+void iso14443_3a_get_atqa(const Iso14443_3aData* data, uint8_t atqa[2]) {
+    furi_assert(data);
+    furi_assert(atqa);
+
+    memcpy(atqa, data->atqa, sizeof(data->atqa));
+}
+
+void iso14443_3a_set_sak(Iso14443_3aData* data, uint8_t sak) {
+    furi_assert(data);
+
+    data->sak = sak;
+}
+
+void iso14443_3a_set_atqa(Iso14443_3aData* data, const uint8_t atqa[2]) {
+    furi_assert(data);
+    furi_assert(atqa);
+
+    memcpy(data->atqa, atqa, sizeof(data->atqa));
 }

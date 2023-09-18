@@ -394,6 +394,9 @@ static bool
             dolphin_deed(is_added ? DolphinDeedNfcAddEmulate : DolphinDeedNfcEmulate);
             scene_manager_next_scene(instance->scene_manager, NfcSceneEmulate);
             consumed = true;
+        } else if(event.event == SubmenuIndexCommonEdit) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
+            consumed = true;
         } else {
             const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
             consumed =
