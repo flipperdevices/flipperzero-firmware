@@ -184,15 +184,18 @@ void hid_svc_start() {
         &protocol_mode);
 
     // reports
-    FlipperGattCharacteristicDescriptorParams hid_svc_char_descr;
+    FlipperGattCharacteristicDescriptorParams hid_svc_char_descr_params;
     FlipperGattCharacteristicParams report_char;
     HidSvcReportId report_id;
 
-    memcpy(&hid_svc_char_descr, &hid_svc_char_descr_template, sizeof(hid_svc_char_descr));
+    memcpy(
+        &hid_svc_char_descr_params,
+        &hid_svc_char_descr_template,
+        sizeof(hid_svc_char_descr_params));
     memcpy(&report_char, &hid_svc_report_template, sizeof(report_char));
 
-    hid_svc_char_descr.data_callback.context = &report_id;
-    report_char.descriptor_params = &hid_svc_char_descr;
+    hid_svc_char_descr_params.data_callback.context = &report_id;
+    report_char.descriptor_params = &hid_svc_char_descr_params;
 
     typedef struct {
         uint8_t report_type;
