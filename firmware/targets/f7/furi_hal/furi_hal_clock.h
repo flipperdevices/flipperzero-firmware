@@ -49,17 +49,13 @@ void furi_hal_clock_switch_hsi2hse();
 
 /** Switch clock from HSE to PLL
  *
- * @warning    can not be used in ISR or critical section
- *
- * @return     true if changed, false if not possible at this moment
+ * @return     true if changed, false if failed or not possible at this moment
  */
 bool furi_hal_clock_switch_hse2pll();
 
 /** Switch clock from PLL to HSE
  *
- * @warning    can not be used in ISR or critical section
- *
- * @return     true if changed, false if not possible at this moment
+ * @return     true if changed, false if failed or not possible at this moment
  */
 bool furi_hal_clock_switch_pll2hse();
 
