@@ -12,10 +12,10 @@
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
 
 // Static Nested TODO:
-// 1. Check for known keys
+// 1. Fix Nested dictionary attack (was working previously, so it must have to do with replacing Crypto1Params with MfClassicNonce)
 // 2. Add "in" parameter back into recovery process (from lfsr_recovery32)
 // 3. Pass: lfsr_recovery32(ks2, nt_enc ^ cuid)
-// 4. Use key_matches_ks1 in Nested mode of recovery to validate keys (making sure it has all of the Crypto1Params)
+// 4. Use key_matches_ks1 in Nested mode of recovery to validate keys (making sure it has all of the MfClassicNonce)
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -66,10 +66,6 @@ static int MSB_LIMIT = 16;
 
 struct Crypto1State {
     uint32_t odd, even;
-};
-struct Crypto1Params {
-    uint64_t key;
-    uint32_t nr0_enc, uid_xor_nt0, uid_xor_nt1, nr1_enc, p64b, ar1_enc;
 };
 struct Msb {
     int tail;
@@ -124,13 +120,17 @@ typedef struct {
 
 typedef enum { mfkey32, static_nested } AttackType;
 
-// TODO: Merge this with Crypto1Params?
 typedef struct {
     AttackType attack;
+    uint64_t key; // key
     uint32_t uid; // serial number
     uint32_t nt0; // tag challenge first
     uint32_t nt1; // tag challenge second
+    uint32_t uid_xor_nt0; // uid ^ nt0
+    uint32_t uid_xor_nt1; // uid ^ nt1
     // Mfkey32
+    uint32_t p64; // 64th successor of nt0
+    uint32_t p64b; // 64th successor of nt1
     uint32_t nr0_enc; // first encrypted reader challenge
     uint32_t ar0_enc; // first encrypted reader response
     uint32_t nr1_enc; // second encrypted reader challenge
@@ -293,13 +293,7 @@ static inline void rollback_word_noret(struct Crypto1State* s, uint32_t in, int 
     return;
 }
 
-int key_already_found_for_nonce(
-    uint64_t* keyarray,
-    int keyarray_size,
-    uint32_t uid_xor_nt1,
-    uint32_t nr1_enc,
-    uint32_t p64b,
-    uint32_t ar1_enc) {
+bool key_already_found_for_nonce(uint64_t* keyarray, int keyarray_size, MfClassicNonce* nonce) {
     for(int k = 0; k < keyarray_size; k++) {
         struct Crypto1State temp = {0, 0};
 
@@ -308,26 +302,34 @@ int key_already_found_for_nonce(
             (&temp)->even |= (BIT(keyarray[k], 2 * i) << (i ^ 3));
         }
 
-        crypt_word_noret(&temp, uid_xor_nt1, 0);
-        crypt_word_noret(&temp, nr1_enc, 1);
+        if(nonce->attack == mfkey32) {
+            crypt_word_noret(&temp, nonce->uid_xor_nt1, 0);
+            crypt_word_noret(&temp, nonce->nr1_enc, 1);
 
-        if(ar1_enc == (crypt_word(&temp) ^ p64b)) {
-            return 1;
+            if(nonce->ar1_enc == (crypt_word(&temp) ^ nonce->p64b)) {
+                return true;
+            }
+        } else if(nonce->attack == static_nested) {
+            uint32_t expected_ks1 = crypt_word_ret(&temp, nonce->uid_xor_nt0, 0);
+
+            if(nonce->ks1_1_enc == expected_ks1) {
+                return true;
+            }
         }
     }
-    return 0;
+    return false;
 }
 
-int check_state(struct Crypto1State* t, struct Crypto1Params* p) {
+int check_state(struct Crypto1State* t, MfClassicNonce* n) {
     if(!(t->odd | t->even)) return 0;
     rollback_word_noret(t, 0, 0);
-    rollback_word_noret(t, p->nr0_enc, 1);
-    rollback_word_noret(t, p->uid_xor_nt0, 0);
+    rollback_word_noret(t, n->nr0_enc, 1);
+    rollback_word_noret(t, n->uid_xor_nt0, 0);
     struct Crypto1State temp = {t->odd, t->even};
-    crypt_word_noret(t, p->uid_xor_nt1, 0);
-    crypt_word_noret(t, p->nr1_enc, 1);
-    if(p->ar1_enc == (crypt_word(t) ^ p->p64b)) {
-        crypto1_get_lfsr(&temp, &(p->key));
+    crypt_word_noret(t, n->uid_xor_nt1, 0);
+    crypt_word_noret(t, n->nr1_enc, 1);
+    if(n->ar1_enc == (crypt_word(t) ^ n->p64b)) {
+        crypto1_get_lfsr(&temp, &(n->key));
         return 1;
     }
     return 0;
@@ -444,7 +446,7 @@ int old_recover(
     int eks,
     int rem,
     int s,
-    struct Crypto1Params* p,
+    MfClassicNonce* n,
     int first_run) {
     int o, e, i;
     if(rem == -1) {
@@ -454,7 +456,7 @@ int old_recover(
                 struct Crypto1State temp = {0, 0};
                 temp.even = odd[o];
                 temp.odd = even[e] ^ evenparity32(odd[o] & LF_POLY_ODD);
-                if(check_state(&temp, p)) {
+                if(check_state(&temp, n)) {
                     return -1;
                 }
             }
@@ -480,7 +482,7 @@ int old_recover(
         if(((odd[o_tail] ^ even[e_tail]) >> 24) == 0) {
             o_tail = binsearch(odd, o_head, o = o_tail);
             e_tail = binsearch(even, e_head, e = e_tail);
-            s = old_recover(odd, o_tail--, o, oks, even, e_tail--, e, eks, rem, s, p, first_run);
+            s = old_recover(odd, o_tail--, o, oks, even, e_tail--, e, eks, rem, s, n, first_run);
             if(s == -1) {
                 break;
             }
@@ -508,7 +510,7 @@ int calculate_msb_tables(
     int oks,
     int eks,
     int msb_round,
-    struct Crypto1Params* p,
+    MfClassicNonce* n,
     unsigned int* states_buffer,
     struct Msb* odd_msbs,
     struct Msb* even_msbs,
@@ -603,7 +605,7 @@ int calculate_msb_tables(
             eks,
             3,
             0,
-            p,
+            n,
             1);
         if(res == -1) {
             return 1;
@@ -615,7 +617,8 @@ int calculate_msb_tables(
     return 0;
 }
 
-bool recover(struct Crypto1Params* p, int ks2, ProgramState* program_state) {
+bool recover(MfClassicNonce* n, int ks2, int in, ProgramState* program_state) {
+    FURI_LOG_I(TAG, "in: %i", in); // DEBUG
     bool found = false;
     unsigned int* states_buffer = malloc(sizeof(unsigned int) * (2 << 9));
     struct Msb* odd_msbs = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
@@ -641,7 +644,7 @@ bool recover(struct Crypto1Params* p, int ks2, ProgramState* program_state) {
                oks,
                eks,
                msb,
-               p,
+               n,
                states_buffer,
                odd_msbs,
                even_msbs,
@@ -878,9 +881,6 @@ bool napi_mf_classic_dict_is_key_present(MfClassicDict* dict, uint8_t* key) {
 bool napi_key_already_found_for_nonce(MfClassicDict* dict, MfClassicNonce* nonce) {
     bool found = false;
     uint64_t k = 0;
-    uint32_t uid_xor_nt0 = nonce->uid ^ nonce->nt0;
-    uint32_t uid_xor_nt1 = nonce->uid ^ nonce->nt1;
-    uint32_t p64b = prng_successor(nonce->nt1, 64);
     napi_mf_classic_dict_rewind(dict);
     while(napi_mf_classic_dict_get_next_key(dict, &k)) {
         struct Crypto1State temp = {0, 0};
@@ -890,14 +890,14 @@ bool napi_key_already_found_for_nonce(MfClassicDict* dict, MfClassicNonce* nonce
             (&temp)->even |= (BIT(k, 2 * i) << (i ^ 3));
         }
         if(nonce->attack == mfkey32) {
-            crypt_word_noret(&temp, uid_xor_nt1, 0);
+            crypt_word_noret(&temp, nonce->uid_xor_nt1, 0);
             crypt_word_noret(&temp, nonce->nr1_enc, 1);
-            if(nonce->ar1_enc == (crypt_word(&temp) ^ p64b)) {
+            if(nonce->ar1_enc == (crypt_word(&temp) ^ nonce->p64b)) {
                 found = true;
                 break;
             }
         } else if(nonce->attack == static_nested) {
-            uint32_t expected_ks1 = crypt_word_ret(&temp, uid_xor_nt0, 0);
+            uint32_t expected_ks1 = crypt_word_ret(&temp, nonce->uid_xor_nt0, 0);
             if(nonce->ks1_1_enc == expected_ks1) {
                 found = true;
                 break;
@@ -1059,6 +1059,9 @@ bool load_mfkey32_nonces(
                 }
                 next_line_cstr = endptr;
             }
+            res.p64 = prng_successor(res.nt0, 64);
+            res.p64b = prng_successor(res.nt1, 64);
+
             (program_state->total)++;
             if((system_dict_exists && napi_key_already_found_for_nonce(system_dict, &res)) ||
                (napi_key_already_found_for_nonce(user_dict, &res))) {
@@ -1142,7 +1145,7 @@ bool load_nested_nonces(
                     res.attack = static_nested;
                     int parsed = sscanf(
                         furi_string_get_cstr(next_line),
-                        "Nested: %*s cuid 0x%" PRIx32 " nt0 0x%" PRIx32 " ks0 0x%" PRIx32
+                        "Nested: %*s %*s cuid 0x%" PRIx32 " nt0 0x%" PRIx32 " ks0 0x%" PRIx32
                         " par0 %4[01] nt1 0x%" PRIx32 " ks1 0x%" PRIx32 " par1 %4[01]",
                         &res.uid,
                         &res.nt0,
@@ -1284,13 +1287,6 @@ void mfkey(ProgramState* program_state) {
         free(keyarray);
         return;
     }
-    // XXX JMP: Stop here if this is a Nested attack
-    if(program_state->nested_present) {
-        program_state->err = ZeroNonces;
-        program_state->mfkey_state = Error;
-        free(keyarray);
-        return;
-    }
     if(memmgr_get_free_heap() < MIN_RAM) {
         // System has less than the guaranteed amount of RAM (140 KB) - adjust some parameters to run anyway at half speed
         eta_round_time *= 2;
@@ -1301,40 +1297,40 @@ void mfkey(ProgramState* program_state) {
     // TODO: Work backwards on this array and free memory
     for(i = 0; i < nonce_arr->total_nonces; i++) {
         MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
-        uint32_t p64 = prng_successor(next_nonce.nt0, 64);
-        uint32_t p64b = prng_successor(next_nonce.nt1, 64);
-        if(key_already_found_for_nonce(
-               keyarray,
-               keyarray_size,
-               next_nonce.uid ^ next_nonce.nt1,
-               next_nonce.nr1_enc,
-               p64b,
-               next_nonce.ar1_enc)) {
+        if(key_already_found_for_nonce(keyarray, keyarray_size, &next_nonce)) {
             nonce_arr->remaining_nonces--;
             (program_state->cracked)++;
             (program_state->num_completed)++;
             continue;
         }
-        FURI_LOG_I(TAG, "Cracking %8lx %8lx", next_nonce.uid, next_nonce.ar1_enc);
-        struct Crypto1Params p = {
-            0,
-            next_nonce.nr0_enc,
-            next_nonce.uid ^ next_nonce.nt0,
-            next_nonce.uid ^ next_nonce.nt1,
-            next_nonce.nr1_enc,
-            p64b,
-            next_nonce.ar1_enc};
-        if(!recover(&p, next_nonce.ar0_enc ^ p64, program_state)) {
-            if(program_state->close_thread_please) {
-                break;
+        FURI_LOG_I(TAG, "Beginning recovery for %8lx", next_nonce.uid);
+        // XXX FIXME
+        if(next_nonce.attack == mfkey32) {
+            if(!recover(&next_nonce, next_nonce.ar0_enc ^ next_nonce.p64, 0, program_state)) {
+                if(program_state->close_thread_please) {
+                    break;
+                }
+                // No key found in recover()
+                (program_state->num_completed)++;
+                continue;
             }
-            // No key found in recover()
-            (program_state->num_completed)++;
-            continue;
+        } else if(next_nonce.attack == static_nested) {
+            if(!recover(
+                   &next_nonce,
+                   next_nonce.ks1_2_enc,
+                   next_nonce.nt1 ^ next_nonce.uid,
+                   program_state)) {
+                if(program_state->close_thread_please) {
+                    break;
+                }
+                // No key found in recover()
+                (program_state->num_completed)++;
+                continue;
+            }
         }
         (program_state->cracked)++;
         (program_state->num_completed)++;
-        found_key = p.key;
+        found_key = next_nonce.key;
         bool already_found = false;
         for(j = 0; j < keyarray_size; j++) {
             if(keyarray[j] == found_key) {
