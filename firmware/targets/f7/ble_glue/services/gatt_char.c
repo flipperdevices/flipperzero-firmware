@@ -1,4 +1,5 @@
 #include "gatt_char.h"
+#include "gatt_wrap.h"
 
 #include <furi.h>
 
@@ -28,7 +29,7 @@ void flipper_gatt_characteristic_init(
             char_descriptor->data.callback.context, NULL, &char_data_size);
     }
 
-    tBleStatus status = aci_gatt_add_char(
+    tBleStatus status = aci_gatt_add_char_(
         svc_handle,
         char_descriptor->uuid_type,
         &char_descriptor->uuid,
@@ -51,7 +52,7 @@ void flipper_gatt_characteristic_init(
         bool release_data = char_data_descriptor->data_callback.fn(
             char_data_descriptor->data_callback.context, &char_data, &char_data_size);
 
-        status = aci_gatt_add_char_desc(
+        status = aci_gatt_add_char_desc_(
             svc_handle,
             char_instance->handle,
             char_data_descriptor->uuid_type,
@@ -110,7 +111,7 @@ bool flipper_gatt_characteristic_update(
         release_data = char_descriptor->data.callback.fn(context, &char_data, &char_data_size);
     }
 
-    tBleStatus result = aci_gatt_update_char_value(
+    tBleStatus result = aci_gatt_update_char_value_(
         svc_handle, char_instance->handle, 0, char_data_size, char_data);
     if(result) {
         FURI_LOG_E(TAG, "Failed updating %s characteristic: %d", char_descriptor->name, result);
