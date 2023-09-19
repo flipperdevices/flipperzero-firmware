@@ -177,14 +177,24 @@ static MfUltralightCommand
 
     FURI_LOG_D(TAG, "CMD_WRITE");
 
-    if(pages_total < start_page ||
-       !mf_ultralight_listener_check_access(
-           instance, start_page, MfUltralightListenerAccessTypeWrite)) {
-    } else {
+    do {
+        if(pages_total < start_page ||
+           !mf_ultralight_listener_check_access(
+               instance, start_page, MfUltralightListenerAccessTypeWrite))
+            break;
+
+        if(mf_ultralight_static_lock_check_page(instance->static_lock, start_page)) break;
+
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
-        memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
+
+        if(start_page == 2)
+            mf_ultralight_static_lock_bytes_write(
+                instance->static_lock, *((uint16_t*)&rx_data[4]));
+        else
+            memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
         command = MfUltralightCommandProcessedACK;
-    }
+
+    } while(false);
 
     return command;
 }
@@ -616,6 +626,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(
     instance->mirror.ascii_mirror_data = furi_string_alloc();
     instance->iso14443_3a_listener = iso14443_3a_listener;
     instance->data = data;
+    mf_ultralight_static_lock_bytes_prepare(instance);
     mf_ultralight_listener_prepare_emulation(instance);
     mf_ultralight_composite_command_reset(instance);
     instance->sector = 0;
