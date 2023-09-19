@@ -6,6 +6,8 @@ Flipper Zero is a portable Tamagotchi-like multi-functional device developed for
 
 ## Pomodoro timer application for Flipper Zero
 
+Now available in Flipper Apps: https://lab.flipper.net/apps/pomodoro_timer
+
 Three timers available:
 
 - classic 25 min work, 5 min rest
