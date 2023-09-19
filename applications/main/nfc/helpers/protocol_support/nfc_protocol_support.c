@@ -504,7 +504,7 @@ static bool
     return consumed;
 }
 
-static void nfc_protocol_support_scene_emulate_on_exit(NfcApp* instance) {
+static void nfc_protocol_support_scene_emulate_stop_listener(NfcApp* instance) {
     nfc_listener_stop(instance->listener);
 
     const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
@@ -519,9 +519,72 @@ static void nfc_protocol_support_scene_emulate_on_exit(NfcApp* instance) {
     }
 
     nfc_listener_free(instance->listener);
+}
+
+static void nfc_protocol_support_scene_emulate_on_exit(NfcApp* instance) {
+    nfc_protocol_support_scene_emulate_stop_listener(instance);
 
     // Clear view
     widget_reset(instance->widget);
+    text_box_reset(instance->text_box);
+    furi_string_reset(instance->text_box_store);
+
+    nfc_blink_stop(instance);
+}
+
+static void nfc_protocol_support_scene_rpc_on_enter(NfcApp* instance) {
+    UNUSED(instance);
+}
+
+static void nfc_protocol_support_scene_rpc_setup_ui_and_emulate(NfcApp* instance) {
+    nfc_text_store_set(instance, "emulating\n%s", furi_string_get_cstr(instance->file_name));
+
+    popup_set_header(instance->popup, "NFC", 89, 42, AlignCenter, AlignBottom);
+    popup_set_text(instance->popup, instance->text_store, 89, 44, AlignCenter, AlignTop);
+    popup_set_icon(instance->popup, 0, 12, &I_RFIDDolphinSend_97x61);
+
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
+
+    notification_message(instance->notifications, &sequence_display_backlight_on);
+    nfc_blink_emulate_start(instance);
+
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+    nfc_protocol_support[protocol]->scene_emulate.on_enter(instance);
+
+    instance->rpc_state = NfcRpcStateEmulating;
+}
+
+static bool nfc_protocol_support_scene_rpc_on_event(NfcApp* instance, SceneManagerEvent event) {
+    bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == NfcCustomEventRpcLoad && instance->rpc_state == NfcRpcStateIdle) {
+            furi_string_set(instance->file_path, rpc_system_app_get_data(instance->rpc_ctx));
+            const bool load_success = nfc_load_file(instance, instance->file_path, false);
+            if(load_success) {
+                nfc_protocol_support_scene_rpc_setup_ui_and_emulate(instance);
+            }
+            rpc_system_app_confirm(instance->rpc_ctx, RpcAppEventLoadFile, load_success);
+        } else if(event.event == NfcCustomEventRpcExit) {
+            rpc_system_app_confirm(instance->rpc_ctx, RpcAppEventAppExit, true);
+            scene_manager_stop(instance->scene_manager);
+            view_dispatcher_stop(instance->view_dispatcher);
+        } else if(event.event == NfcCustomEventRpcSessionClose) {
+            scene_manager_stop(instance->scene_manager);
+            view_dispatcher_stop(instance->view_dispatcher);
+        }
+        consumed = true;
+    }
+
+    return consumed;
+}
+
+static void nfc_protocol_support_scene_rpc_on_exit(NfcApp* instance) {
+    if(instance->rpc_state == NfcRpcStateEmulating) {
+        nfc_protocol_support_scene_emulate_stop_listener(instance);
+    }
+
+    popup_reset(instance->popup);
     text_box_reset(instance->text_box);
     furi_string_reset(instance->text_box_store);
 
@@ -571,5 +634,11 @@ static const NfcProtocolSupportCommonSceneBase
                 .on_enter = nfc_protocol_support_scene_emulate_on_enter,
                 .on_event = nfc_protocol_support_scene_emulate_on_event,
                 .on_exit = nfc_protocol_support_scene_emulate_on_exit,
+            },
+        [NfcProtocolSupportSceneRpc] =
+            {
+                .on_enter = nfc_protocol_support_scene_rpc_on_enter,
+                .on_event = nfc_protocol_support_scene_rpc_on_event,
+                .on_exit = nfc_protocol_support_scene_rpc_on_exit,
             },
 };

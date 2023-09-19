@@ -24,6 +24,7 @@ typedef enum {
     NfcProtocolSupportSceneSavedMenu,
     NfcProtocolSupportSceneEmulate,
     NfcProtocolSupportSceneCardDump,
+    NfcProtocolSupportSceneRpc,
 
     NfcProtocolSupportSceneCount,
 } NfcProtocolSupportScene;
