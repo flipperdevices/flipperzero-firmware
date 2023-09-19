@@ -31,11 +31,6 @@ void furi_hal_clock_deinit_early() {
 }
 
 void furi_hal_clock_init() {
-    /* Prepare Flash memory for 32MHz system clock */
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
-    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
-        ;
-
     /* HSE and HSI configuration and activation */
     LL_RCC_HSE_SetCapacitorTuning(0x26);
     LL_RCC_HSE_Enable();
@@ -55,9 +50,6 @@ void furi_hal_clock_init() {
     LL_RCC_LSI1_Enable();
     while(!LS_CLOCK_IS_READY())
         ;
-
-    /* RF wakeup */
-    LL_RCC_SetRFWKPClockSource(LL_RCC_RFWKP_CLKSOURCE_LSE);
 
     LL_EXTI_EnableIT_0_31(
         LL_EXTI_LINE_18); /* Why? Because that's why. See RM0434, Table 61. CPU1 vector table. */
@@ -91,6 +83,11 @@ void furi_hal_clock_init() {
 
     /* Set CPU2 prescaler, from this point we are not allowed to touch it. */
     LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
+
+    /* Prepare Flash memory for work on 64MHz system clock */
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
+        ;
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
