@@ -42,11 +42,14 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Removed: [ESP32CAM Evil Portal (By bigbrodude6119 & eried)](https://github.com/eried/flipperzero-mayhem) - Since its in Marauder and they removed it.
 - Updated: [ESP32CAM Marauder v0.6.2 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- Updated: [Sudoku v1.1 (By profelis)](https://github.com/profelis/fz-sudoku)
 - UL PR: [Updated infrared assets #607 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/607)
 - App versions incremented for some apps due to [New random file name API fix #40 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/40)
 - [ESP32CAM Mayhem Marauder: Removing GPS and LED menus (By eried)](https://github.com/eried/flipperzero-mayhem/commit/c532e4b3e143c93786db74157b8009f607de0140#diff-d30f083f00277de44d820def2f298f3651f2bf10e5f6336cb0ed5482e9ea58d3)
-- Will be away till Monday, Sep 18th.
+- UL OFW: [New clock switch schema, fixes random core2 crashes #3008 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3008)
+- Updated: [Sudoku v1.1 (By profelis)](https://github.com/profelis/fz-sudoku)
+- Updated: [NFC Seader v1.2 (By bettse)](https://github.com/bettse/seader)
+- Added: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
+- Added: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 
 <a name="release">
 
@@ -365,6 +368,7 @@ $ ./fbt dolphin_ext
 - [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
 - [Metronome v1.1 (By panki27)](https://github.com/panki27/Metronome)
 - [Mfkey32 v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
+- [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
 - [Mifare Fuzzer v1.1 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
@@ -385,7 +389,7 @@ $ ./fbt dolphin_ext
 - [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
-- [NFC Seader v1.1 (By bettse)](https://github.com/bettse/seader)
+- [NFC Seader v1.2 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
@@ -422,6 +426,7 @@ $ ./fbt dolphin_ext
 - [Sentry Safe v1.1 (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Servotester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)
 - [ServoTester (2) (By mhasbini)](https://github.com/mhasbini/ServoTesterApp/tree/master)
+- [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Skeleton App (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Spectrum Analyzer v1.2 (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)

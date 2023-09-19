@@ -1,0 +1,15 @@
+App(
+    appid="mfkey32_wnested",
+    name="Mfkey32 With Nested",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="mfkey_main",
+    stack_size=1 * 1024,
+    fap_icon="mfkey.png",
+    fap_category="NFC",
+    fap_icon_assets="images",
+    fap_icon_assets_symbol="mfkey32_wnested",
+    fap_author="noproto",
+    fap_weburl="https://github.com/noproto/FlipperMfkey",
+    fap_version="1.1",
+    fap_description="Mf Classic key finder",
+)
