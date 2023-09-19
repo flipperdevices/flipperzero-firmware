@@ -2,14 +2,38 @@
 
 #include <furi.h>
 
-#define MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, start, end) \
-    (((page) >= (start)) && ((page) <= (end)))
+#define MF_ULTRALIGHT_STATIC_BIT_LOCK_OTP_CC 0
+#define MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_9_4 1
+#define MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_15_10 2
+
+#define MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, bit) ((lock_bits & (1U << bit)) != 0)
+#define MF_ULTRALIGHT_STATIC_BITS_SET(lock_bits, mask) (lock_bits |= mask)
+#define MF_ULTRALIGHT_STATIC_BITS_CLR(lock_bits, mask) (lock_bits &= ~mask)
+
+#define MF_ULTRALIGHT_PAGE_LOCKED(lock_bits, page) MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, page)
+
+#define MF_ULTRALIGHT_STATIC_BIT_OTP_CC_LOCKED(lock_bits) \
+    MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_OTP_CC)
+
+#define MF_ULTRALIGHT_STATIC_BITS_9_4_LOCKED(lock_bits) \
+    MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_9_4)
+
+#define MF_ULTRALIGHT_STATIC_BITS_15_10_LOCKED(lock_bits) \
+    MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_15_10)
+
+#define MF_ULTRALIGHT_STATIC_LOCK_L_OTP_CC_MASK (1U << 3)
+#define MF_ULTRALIGHT_STATIC_LOCK_L_9_4_MASK \
+    ((1U << 9) | (1U << 8) | (1U << 7) | (1U << 6) | (1U << 5) | (1U << 4))
+#define MF_ULTRALIGHT_STATIC_LOCK_L_15_10_MASK \
+    ((1U << 15) | (1U << 14) | (1U << 13) | (1U << 12) | (1U << 11) | (1U << 10))
+
+#define MF_ULTRALIGHT_PAGE_IN_BOUNDS(page, start, end) (((page) >= (start)) && ((page) <= (end)))
 
 #define MF_ULTRALIGHT_I2C_PAGE_ON_SESSION_REG(page) \
-    MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, 0x00EC, 0x00ED)
+    MF_ULTRALIGHT_PAGE_IN_BOUNDS(page, 0x00EC, 0x00ED)
 
 #define MF_ULTRALIGHT_I2C_PAGE_ON_MIRRORED_SESSION_REG(page) \
-    MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(page, 0x00F8, 0x00F9)
+    MF_ULTRALIGHT_PAGE_IN_BOUNDS(page, 0x00F8, 0x00F9)
 
 static MfUltralightMirrorConf mf_ultralight_mirror_check_mode(
     const MfUltralightConfigPages* const config,
@@ -228,7 +252,7 @@ static bool mf_ultralight_i2c_page_validator_for_sector0(
             valid = true;
         }
     } else if(type == MfUltralightTypeNTAGI2C1K) {
-        if((start_page <= 0xE2) || MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(start_page, 0x00E8, 0x00E9)) {
+        if((start_page <= 0xE2) || MF_ULTRALIGHT_PAGE_IN_BOUNDS(start_page, 0x00E8, 0x00E9)) {
             valid = true;
         }
     } else if(type == MfUltralightTypeNTAGI2C2K) {
@@ -246,8 +270,7 @@ static bool mf_ultralight_i2c_page_validator_for_sector1(
     if(type == MfUltralightTypeNTAGI2CPlus2K) {
         valid = (start_page <= 0xFF && end_page <= 0xFF);
     } else if(type == MfUltralightTypeNTAGI2C2K) {
-        valid =
-            (MF_ULTRALIGHT_I2C_PAGE_IN_BOUNDS(start_page, 0x00E8, 0x00E9) || (start_page <= 0xE0));
+        valid = (MF_ULTRALIGHT_PAGE_IN_BOUNDS(start_page, 0x00E8, 0x00E9) || (start_page <= 0xE0));
     } else if(type == MfUltralightTypeNTAGI2C1K || type == MfUltralightTypeNTAGI2CPlus1K) {
         valid = false;
     }
@@ -367,4 +390,37 @@ uint16_t
         result = provider(page, instance->data->type);
     }
     return result;
+}
+
+void mf_ultralight_static_lock_bytes_prepare(MfUltralightListener* instance) {
+    instance->static_lock = (uint16_t*)&instance->data->page[2].data[2];
+}
+
+void mf_ultralight_static_lock_bytes_write(
+    MfUltralightStaticLockData* const lock_bits,
+    uint16_t new_bits) {
+    uint16_t current_locks = *lock_bits;
+
+    if(MF_ULTRALIGHT_STATIC_BIT_OTP_CC_LOCKED(current_locks))
+        MF_ULTRALIGHT_STATIC_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_OTP_CC_MASK);
+
+    if(MF_ULTRALIGHT_STATIC_BITS_9_4_LOCKED(current_locks))
+        MF_ULTRALIGHT_STATIC_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_9_4_MASK);
+
+    if(MF_ULTRALIGHT_STATIC_BITS_15_10_LOCKED(current_locks))
+        MF_ULTRALIGHT_STATIC_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_15_10_MASK);
+
+    MF_ULTRALIGHT_STATIC_BITS_SET(current_locks, new_bits);
+    *lock_bits = current_locks;
+}
+
+bool mf_ultralight_static_lock_check_page(
+    const MfUltralightStaticLockData* const lock_bits,
+    uint16_t page) {
+    bool locked = false;
+    if(MF_ULTRALIGHT_PAGE_IN_BOUNDS(page, 0x0003, 0x000F)) {
+        uint16_t current_locks = *lock_bits;
+        locked = MF_ULTRALIGHT_PAGE_LOCKED(current_locks, page);
+    }
+    return locked;
 }
