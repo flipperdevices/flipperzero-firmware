@@ -1019,7 +1019,6 @@ int32_t seader_worker_task(void* context) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
 
     if(seader_worker->state == SeaderWorkerStateCheckSam) {
-        furi_delay_ms(1000);
         seader_ccid_check_for_sam(seader_uart);
     } else if(seader_worker->state == SeaderWorkerStateReadPicopass) {
         FURI_LOG_D(TAG, "Read Picopass");
