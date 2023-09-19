@@ -170,7 +170,7 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
         return;
     }
 
-    // Core2 shenanigans takes extra time, so we want to
+    // Core2 shenanigans takes extra time, so we want to compensate tick skew by reducing sleep duration by 1 tick
     TickType_t unexpected_idle_ticks = expected_idle_ticks - 1;
 
     // Limit amount of ticks to maximum that timer can count
