@@ -7,17 +7,11 @@ justify-content: space-evenly;
 align-items: center;
 ">
   <img style="
-  border-radius: 10px;
-  margin: 10px;
-  width: 350px;
-  height: 350px;
-  object-fit: cover;"
-  src="assets/img/uhf_demo_app2.jpg">
-  <img style="border-radius: 10px;
-  margin: 10px;
-  width: 350px;
-  height: 350px;
-  object-fit: cover;"
+    width: 350px;"
+    src="assets/img/uhf_demo_app2.jpg">
+  <img style="
+    border-radius: 10px;
+    width: 400px;"
   src="assets/img/uhf_demo_app.jpg">
 </div>
 
@@ -45,6 +39,7 @@ Adding options like settings the access password, baud rate, rf power, channel, 
 - [x] View saved UHF RFID tag.
 - [x] Write Single UHF RFID tag.
 - [ ] Change Module setting parameters. **(In Progress)**
+  - [ ] Different Baudrates 
   - [ ] Set/Reset Access Password
   - [ ] Set Kill Password
   - [ ] Kill Tag
