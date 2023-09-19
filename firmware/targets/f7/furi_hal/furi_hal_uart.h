@@ -13,6 +13,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/**
+ * UART events
+ */
+typedef enum {
+    UartIrqEventRxByte,
+    UartIrqEventRxDMAEnd,
+    UartIrqEventRxDMA,
+} UartIrqEvent;
+
+typedef void (*FuriHalUartRxByteCallback)(UartIrqEvent ev, uint8_t data, void* context);
+typedef void (*FuriHalUartRxDMACallback)(UartIrqEvent ev, size_t data_len, void* context);
 
 /**
  * UART channels
@@ -23,15 +34,6 @@ typedef enum {
     // Service value
     FuriHalUartIdMAX,
 } FuriHalUartId;
-
-/**
- * UART events
- */
-typedef enum {
-    UartIrqEventRXNE,
-    UartIrqEventRXIDLE,
-    UartIrqEventRXDMA,
-} UartIrqEvent;
 
 /**
  * Uart wait tx complete
@@ -89,14 +91,16 @@ void furi_hal_uart_tx(FuriHalUartId channel, uint8_t* buffer, size_t buffer_size
  * @param callback callback pointer
  * @param context callback context
  */
-void furi_hal_uart_set_irq_cb(
-    FuriHalUartId channel,
-    void (*callback)(UartIrqEvent event, uint8_t data, void* context),
+void furi_hal_uart_set_irq_cb(FuriHalUartId ch, FuriHalUartRxByteCallback callback, void* context);
+
+void furi_hal_uart_set_dma_callback(
+    FuriHalUartId ch,
+    FuriHalUartRxDMACallback callback,
     void* context);
 
-size_t furi_hal_uart_rx(FuriHalUartId ch, uint8_t* data, size_t len);
+size_t furi_hal_uart_rx_dma(FuriHalUartId ch, uint8_t* data, size_t len);
 
-size_t furi_hal_uart_available(FuriHalUartId ch);
+size_t furi_hal_uart_dma_available(FuriHalUartId ch);
 
 #ifdef __cplusplus
 }

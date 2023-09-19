@@ -95,7 +95,7 @@ static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     furi_assert(context);
     UartEchoApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
+    if(ev == UartIrqEventRxByte) {
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
     }

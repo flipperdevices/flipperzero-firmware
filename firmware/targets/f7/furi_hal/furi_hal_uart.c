@@ -10,20 +10,19 @@
 
 #include <furi.h>
 
-#define FURI_HAL_UART_DMA_RX_BUFFER_SIZE 128
-
-static bool furi_hal_usart_prev_enabled[FuriHalUartIdMAX];
-
-static void (*irq_cb[FuriHalUartIdMAX])(uint8_t ev, uint8_t data, void* context);
-static void* irq_ctx[FuriHalUartIdMAX];
+#define FURI_HAL_UART_DMA_RX_BUFFER_SIZE 256
 
 typedef struct {
     uint8_t* buffer_rx_ptr;
     size_t buffer_rx_index_write;
     size_t buffer_rx_index_read;
+    bool enabled;
+    FuriHalUartRxByteCallback rx_byte_callback;
+    FuriHalUartRxDMACallback rx_dma_callback;
+    void* rx_callback_context;
 } FuriHalUart;
 
-static FuriHalUart* usart[FuriHalUartIdMAX];
+static FuriHalUart* uart[FuriHalUartIdMAX];
 
 inline void furi_hal_uart_wait_tx_complete(FuriHalUartId ch) {
     if(ch == FuriHalUartIdUSART1) {
@@ -37,15 +36,22 @@ inline void furi_hal_uart_wait_tx_complete(FuriHalUartId ch) {
 
 static void furi_hal_uart_irq_callback() {
     if(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1)) {
-        uint8_t data = LL_USART_ReceiveData8(USART1);
-        irq_cb[FuriHalUartIdUSART1](UartIrqEventRXNE, data, irq_ctx[FuriHalUartIdUSART1]);
+        if(uart[FuriHalUartIdUSART1]->rx_byte_callback) {
+            uart[FuriHalUartIdUSART1]->rx_byte_callback(
+                UartIrqEventRxByte,
+                LL_LPUART_ReceiveData8(USART1),
+                uart[FuriHalUartIdUSART1]->rx_callback_context);
+        }
     } else if(LL_USART_IsActiveFlag_ORE(USART1)) {
         LL_USART_ClearFlag_ORE(USART1);
     }
 }
 
 static void furi_hal_usart_init(uint32_t baud) {
+    furi_assert(uart[FuriHalUartIdUSART1] == NULL);
     furi_hal_bus_enable(FuriHalBusUSART1);
+    uart[FuriHalUartIdUSART1] = malloc(sizeof(FuriHalUart));
+
     LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
 
     furi_hal_gpio_init_ex(
@@ -80,17 +86,27 @@ static void furi_hal_usart_init(uint32_t baud) {
         ;
 
     LL_USART_DisableIT_ERROR(USART1);
+    uart[FuriHalUartIdUSART1]->enabled = true;
 }
 
 static void furi_hal_lpuart_irq_callback() {
     if(LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)) {
-        uint8_t data = LL_LPUART_ReceiveData8(LPUART1);
-        irq_cb[FuriHalUartIdLPUART1](UartIrqEventRXNE, data, irq_ctx[FuriHalUartIdLPUART1]);
+        if(uart[FuriHalUartIdLPUART1]->rx_byte_callback) {
+            uart[FuriHalUartIdLPUART1]->rx_byte_callback(
+                UartIrqEventRxByte,
+                LL_LPUART_ReceiveData8(LPUART1),
+                uart[FuriHalUartIdLPUART1]->rx_callback_context);
+        }
     } else if(LL_LPUART_IsActiveFlag_ORE(LPUART1)) {
         LL_LPUART_ClearFlag_ORE(LPUART1);
     } else if(LL_LPUART_IsActiveFlag_IDLE(LPUART1)) {
         LL_LPUART_ClearFlag_IDLE(LPUART1);
-        irq_cb[FuriHalUartIdLPUART1](UartIrqEventRXIDLE, 0, irq_ctx[FuriHalUartIdLPUART1]);
+        if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
+            uart[FuriHalUartIdLPUART1]->rx_dma_callback(
+                UartIrqEventRxDMAEnd,
+                furi_hal_uart_dma_available(FuriHalUartIdLPUART1),
+                uart[FuriHalUartIdLPUART1]->rx_callback_context);
+        }
     }
 }
 
@@ -98,22 +114,32 @@ static void furi_hal_lpuart_dma_rx_isr() {
 #if LL_DMA_CHANNEL_7 == LL_DMA_CHANNEL_7
     if(LL_DMA_IsActiveFlag_HT7(DMA1)) {
         LL_DMA_ClearFlag_HT7(DMA1);
-        usart[FuriHalUartIdLPUART1]->buffer_rx_index_write =
+        uart[FuriHalUartIdLPUART1]->buffer_rx_index_write =
             FURI_HAL_UART_DMA_RX_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_7);
-        if((usart[FuriHalUartIdLPUART1]->buffer_rx_index_read >
-            usart[FuriHalUartIdLPUART1]->buffer_rx_index_write) ||
-           (usart[FuriHalUartIdLPUART1]->buffer_rx_index_read <
+        if((uart[FuriHalUartIdLPUART1]->buffer_rx_index_read >
+            uart[FuriHalUartIdLPUART1]->buffer_rx_index_write) ||
+           (uart[FuriHalUartIdLPUART1]->buffer_rx_index_read <
             FURI_HAL_UART_DMA_RX_BUFFER_SIZE / 4)) {
-            irq_cb[FuriHalUartIdLPUART1](UartIrqEventRXDMA, 0, irq_ctx[FuriHalUartIdLPUART1]);
+            if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
+                uart[FuriHalUartIdLPUART1]->rx_dma_callback(
+                    UartIrqEventRxDMA,
+                    furi_hal_uart_dma_available(FuriHalUartIdLPUART1),
+                    uart[FuriHalUartIdLPUART1]->rx_callback_context);
+            }
         }
 
     } else if(LL_DMA_IsActiveFlag_TC7(DMA1)) {
         LL_DMA_ClearFlag_TC7(DMA1);
-        usart[FuriHalUartIdLPUART1]->buffer_rx_index_write =
+        uart[FuriHalUartIdLPUART1]->buffer_rx_index_write =
             FURI_HAL_UART_DMA_RX_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_7);
-        if(usart[FuriHalUartIdLPUART1]->buffer_rx_index_read <
+        if(uart[FuriHalUartIdLPUART1]->buffer_rx_index_read <
            FURI_HAL_UART_DMA_RX_BUFFER_SIZE * 3 / 4) {
-            irq_cb[FuriHalUartIdLPUART1](UartIrqEventRXDMA, 0, irq_ctx[FuriHalUartIdLPUART1]);
+            if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
+                uart[FuriHalUartIdLPUART1]->rx_dma_callback(
+                    UartIrqEventRxDMA,
+                    furi_hal_uart_dma_available(FuriHalUartIdLPUART1),
+                    uart[FuriHalUartIdLPUART1]->rx_callback_context);
+            }
         }
     }
 #else
@@ -123,10 +149,9 @@ static void furi_hal_lpuart_dma_rx_isr() {
 
 static void furi_hal_lpuart_init_dma_rx(void) {
     /* LPUART1_RX_DMA Init */
-    usart[FuriHalUartIdLPUART1] = malloc(sizeof(FuriHalUart));
-    usart[FuriHalUartIdLPUART1]->buffer_rx_ptr = malloc(FURI_HAL_UART_DMA_RX_BUFFER_SIZE);
+    uart[FuriHalUartIdLPUART1]->buffer_rx_ptr = malloc(FURI_HAL_UART_DMA_RX_BUFFER_SIZE);
     LL_DMA_SetMemoryAddress(
-        DMA1, LL_DMA_CHANNEL_7, (uint32_t)usart[FuriHalUartIdLPUART1]->buffer_rx_ptr);
+        DMA1, LL_DMA_CHANNEL_7, (uint32_t)uart[FuriHalUartIdLPUART1]->buffer_rx_ptr);
     LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_7, (uint32_t) & (LPUART1->RDR));
 
     LL_DMA_ConfigTransfer(
@@ -151,38 +176,36 @@ static void furi_hal_lpuart_init_dma_rx(void) {
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_7);
     LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_7);
 
-    //LL_DMA_EnableIT_TE(DMA1, LL_DMA_CHANNEL_7);
-
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_7);
     LL_USART_EnableDMAReq_RX(LPUART1);
 
     LL_USART_EnableIT_IDLE(LPUART1);
-    // furi_hal_interrupt_set_isr(
-    //             FuriHalInterruptIdLpUart1, furi_hal_lpuart_irq_callback, NULL);
 }
 
 static void furi_hal_lpuart_deinit_dma_rx(void) {
-    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_7);
-    LL_USART_DisableDMAReq_RX(LPUART1);
+    if(uart[FuriHalUartIdLPUART1]->buffer_rx_ptr) {
+        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_7);
+        LL_USART_DisableDMAReq_RX(LPUART1);
 
-    LL_USART_DisableIT_IDLE(LPUART1);
-    LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_7);
-    LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_7);
-    // LL_DMA_DisableIT_TE(DMA1, LL_DMA_CHANNEL_7);
+        LL_USART_DisableIT_IDLE(LPUART1);
+        LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_7);
+        LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_7);
 
-    LL_DMA_ClearFlag_TC7(DMA1);
-    LL_DMA_ClearFlag_HT7(DMA1);
-    // LL_DMA_ClearFlag_TE7(DMA1);
+        LL_DMA_ClearFlag_TC7(DMA1);
+        LL_DMA_ClearFlag_HT7(DMA1);
 
-    LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_7);
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch7, NULL, NULL);
-    free(usart[FuriHalUartIdLPUART1]->buffer_rx_ptr);
-    free(usart[FuriHalUartIdLPUART1]);
-    usart[FuriHalUartIdLPUART1] = NULL;
+        LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_7);
+        furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch7, NULL, NULL);
+        free(uart[FuriHalUartIdLPUART1]->buffer_rx_ptr);
+    }
 }
 
 static void furi_hal_lpuart_init(uint32_t baud) {
+    furi_assert(uart[FuriHalUartIdLPUART1] == NULL);
+
     furi_hal_bus_enable(FuriHalBusLPUART1);
+    uart[FuriHalUartIdLPUART1] = malloc(sizeof(FuriHalUart));
+
     LL_RCC_SetLPUARTClockSource(LL_RCC_LPUART1_CLKSOURCE_PCLK1);
 
     furi_hal_gpio_init_ex(
@@ -209,8 +232,6 @@ static void furi_hal_lpuart_init(uint32_t baud) {
     LL_LPUART_Init(LPUART1, &LPUART_InitStruct);
     LL_LPUART_EnableFIFO(LPUART1);
 
-    furi_hal_lpuart_init_dma_rx();
-
     LL_LPUART_Enable(LPUART1);
 
     while(!LL_LPUART_IsActiveFlag_TEACK(LPUART1) || !LL_LPUART_IsActiveFlag_REACK(LPUART1))
@@ -218,6 +239,7 @@ static void furi_hal_lpuart_init(uint32_t baud) {
 
     furi_hal_uart_set_br(FuriHalUartIdLPUART1, baud);
     LL_LPUART_DisableIT_ERROR(LPUART1);
+    uart[FuriHalUartIdLPUART1]->enabled = true;
 }
 
 void furi_hal_uart_init(FuriHalUartId ch, uint32_t baud) {
@@ -263,7 +285,10 @@ void furi_hal_uart_deinit(FuriHalUartId ch) {
     furi_hal_uart_set_irq_cb(ch, NULL, NULL);
     if(ch == FuriHalUartIdUSART1) {
         if(furi_hal_bus_is_enabled(FuriHalBusUSART1)) {
+            //add deinit DMA USART1_RX
             furi_hal_bus_disable(FuriHalBusUSART1);
+            free(uart[FuriHalUartIdUSART1]);
+            uart[FuriHalUartIdUSART1] = NULL;
         }
         if(LL_USART_IsEnabled(USART1)) {
             LL_USART_Disable(USART1);
@@ -272,37 +297,42 @@ void furi_hal_uart_deinit(FuriHalUartId ch) {
         furi_hal_gpio_init(&gpio_usart_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     } else if(ch == FuriHalUartIdLPUART1) {
         if(furi_hal_bus_is_enabled(FuriHalBusLPUART1)) {
+            furi_assert(uart[FuriHalUartIdLPUART1] != NULL);
             furi_hal_bus_disable(FuriHalBusLPUART1);
+
+            furi_hal_lpuart_deinit_dma_rx();
+            free(uart[FuriHalUartIdLPUART1]);
+            uart[FuriHalUartIdLPUART1] = NULL;
         }
         if(LL_LPUART_IsEnabled(LPUART1)) {
             LL_LPUART_Disable(LPUART1);
         }
-        furi_hal_lpuart_deinit_dma_rx();
+
         furi_hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
 }
 
 void furi_hal_uart_suspend(FuriHalUartId channel) {
+    furi_assert(uart[channel] != NULL);
     if(channel == FuriHalUartIdLPUART1 && LL_LPUART_IsEnabled(LPUART1)) {
         LL_LPUART_Disable(LPUART1);
-        furi_hal_usart_prev_enabled[channel] = true;
     } else if(channel == FuriHalUartIdUSART1 && LL_USART_IsEnabled(USART1)) {
         LL_USART_Disable(USART1);
-        furi_hal_usart_prev_enabled[channel] = true;
     }
+    uart[channel]->enabled = false;
 }
 
 void furi_hal_uart_resume(FuriHalUartId channel) {
-    if(!furi_hal_usart_prev_enabled[channel]) {
-        return;
-    } else if(channel == FuriHalUartIdLPUART1) {
-        LL_LPUART_Enable(LPUART1);
-    } else if(channel == FuriHalUartIdUSART1) {
-        LL_USART_Enable(USART1);
+    furi_assert(uart[channel] != NULL);
+    if(!uart[channel]->enabled) {
+        if(channel == FuriHalUartIdLPUART1) {
+            LL_LPUART_Enable(LPUART1);
+        } else if(channel == FuriHalUartIdUSART1) {
+            LL_USART_Enable(USART1);
+        }
+        uart[channel]->enabled = true;
     }
-
-    furi_hal_usart_prev_enabled[channel] = false;
 }
 
 void furi_hal_uart_tx(FuriHalUartId ch, uint8_t* buffer, size_t buffer_size) {
@@ -319,8 +349,6 @@ void furi_hal_uart_tx(FuriHalUartId ch, uint8_t* buffer, size_t buffer_size) {
         }
 
     } else if(ch == FuriHalUartIdLPUART1) {
-        volatile uint8_t r = usart[FuriHalUartIdLPUART1]->buffer_rx_ptr[0];
-        UNUSED(r);
         if(LL_LPUART_IsEnabled(LPUART1) == 0) return;
 
         while(buffer_size > 0) {
@@ -335,76 +363,108 @@ void furi_hal_uart_tx(FuriHalUartId ch, uint8_t* buffer, size_t buffer_size) {
     }
 }
 
-size_t furi_hal_uart_available(FuriHalUartId ch) {
+size_t furi_hal_uart_dma_available(FuriHalUartId ch) {
     if(ch == FuriHalUartIdUSART1) {
-        return LL_USART_IsActiveFlag_RXNE_RXFNE(USART1);
+        return LL_USART_IsActiveFlag_RXNE_RXFNE(USART1) ? 1 : 0;
     } else if(ch == FuriHalUartIdLPUART1) {
-        usart[FuriHalUartIdLPUART1]->buffer_rx_index_write =
+        uart[FuriHalUartIdLPUART1]->buffer_rx_index_write =
             FURI_HAL_UART_DMA_RX_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_7);
-        if(usart[FuriHalUartIdLPUART1]->buffer_rx_index_write >=
-           usart[FuriHalUartIdLPUART1]->buffer_rx_index_read) {
-            return usart[FuriHalUartIdLPUART1]->buffer_rx_index_write -
-                   usart[FuriHalUartIdLPUART1]->buffer_rx_index_read;
+        if(uart[FuriHalUartIdLPUART1]->buffer_rx_index_write >=
+           uart[FuriHalUartIdLPUART1]->buffer_rx_index_read) {
+            return uart[FuriHalUartIdLPUART1]->buffer_rx_index_write -
+                   uart[FuriHalUartIdLPUART1]->buffer_rx_index_read;
         } else {
             return FURI_HAL_UART_DMA_RX_BUFFER_SIZE -
-                   usart[FuriHalUartIdLPUART1]->buffer_rx_index_read +
-                   usart[FuriHalUartIdLPUART1]->buffer_rx_index_write;
+                   uart[FuriHalUartIdLPUART1]->buffer_rx_index_read +
+                   uart[FuriHalUartIdLPUART1]->buffer_rx_index_write;
         }
     }
     return 0;
 }
 
-static uint8_t furi_hal_uart_rx_read_byte(FuriHalUartId ch) {
+static uint8_t furi_hal_uart_rx_dma_read_byte(FuriHalUartId ch) {
     uint8_t data = 0;
     if(ch == FuriHalUartIdUSART1) {
         data = LL_USART_ReceiveData8(USART1);
     } else if(ch == FuriHalUartIdLPUART1) {
-        data = usart[FuriHalUartIdLPUART1]
-                   ->buffer_rx_ptr[usart[FuriHalUartIdLPUART1]->buffer_rx_index_read];
-        usart[FuriHalUartIdLPUART1]->buffer_rx_index_read++;
-        if(usart[FuriHalUartIdLPUART1]->buffer_rx_index_read >= FURI_HAL_UART_DMA_RX_BUFFER_SIZE) {
-            usart[FuriHalUartIdLPUART1]->buffer_rx_index_read = 0;
+        data = uart[FuriHalUartIdLPUART1]
+                   ->buffer_rx_ptr[uart[FuriHalUartIdLPUART1]->buffer_rx_index_read];
+        uart[FuriHalUartIdLPUART1]->buffer_rx_index_read++;
+        if(uart[FuriHalUartIdLPUART1]->buffer_rx_index_read >= FURI_HAL_UART_DMA_RX_BUFFER_SIZE) {
+            uart[FuriHalUartIdLPUART1]->buffer_rx_index_read = 0;
         }
     }
     return data;
 }
 
-size_t furi_hal_uart_rx(FuriHalUartId ch, uint8_t* data, size_t len) {
+size_t furi_hal_uart_rx_dma(FuriHalUartId ch, uint8_t* data, size_t len) {
     size_t i = 0;
-    size_t available = furi_hal_uart_available(ch);
+    size_t available = furi_hal_uart_dma_available(ch);
     if(available < len) {
         len = available;
     }
     for(i = 0; i < len; i++) {
-        data[i] = furi_hal_uart_rx_read_byte(ch);
+        data[i] = furi_hal_uart_rx_dma_read_byte(ch);
     }
     return i;
 }
 
-void furi_hal_uart_set_irq_cb(
-    FuriHalUartId ch,
-    void (*cb)(UartIrqEvent ev, uint8_t data, void* ctx),
-    void* ctx) {
-    if(cb == NULL) {
-        if(ch == FuriHalUartIdUSART1) {
+void furi_hal_uart_set_irq_cb(FuriHalUartId ch, FuriHalUartRxByteCallback callback, void* context) {
+    furi_assert(uart[ch] != NULL);
+    if(ch == FuriHalUartIdUSART1) {
+        if(callback == NULL) {
             furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);
+            // add if init DMA -> deinit DMA
+            //disable IRQ RX byte
             LL_USART_DisableIT_RXNE_RXFNE(USART1);
-        } else if(ch == FuriHalUartIdLPUART1) {
-            furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
-            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
-        }
-        irq_cb[ch] = cb;
-        irq_ctx[ch] = ctx;
-    } else {
-        irq_ctx[ch] = ctx;
-        irq_cb[ch] = cb;
-        if(ch == FuriHalUartIdUSART1) {
+        } else {
+            //if init DMA -> deinit DMA
+
             furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, furi_hal_uart_irq_callback, NULL);
             LL_USART_EnableIT_RXNE_RXFNE(USART1);
-        } else if(ch == FuriHalUartIdLPUART1) {
+        }
+    } else if(ch == FuriHalUartIdLPUART1) {
+        if(callback == NULL) {
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
+            //if init DMA -> deinit DMA
+            furi_hal_lpuart_deinit_dma_rx();
+            //disable IRQ RX byte
+            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
+        } else {
+            //if init DMA -> deinit DMA
+            furi_hal_lpuart_deinit_dma_rx();
             furi_hal_interrupt_set_isr(
                 FuriHalInterruptIdLpUart1, furi_hal_lpuart_irq_callback, NULL);
-            //LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
+            LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
         }
     }
+    uart[ch]->rx_byte_callback = callback;
+    uart[ch]->rx_dma_callback = NULL;
+    uart[ch]->rx_callback_context = context;
+}
+
+void furi_hal_uart_set_dma_callback(
+    FuriHalUartId ch,
+    FuriHalUartRxDMACallback callback,
+    void* context) {
+    furi_assert(uart[ch] != NULL);
+
+    if(ch == FuriHalUartIdUSART1) {
+        //add Init / Deinit DMA
+    } else if(ch == FuriHalUartIdLPUART1) {
+        if(callback == NULL) {
+            furi_hal_interrupt_set_isr(FuriHalInterruptIdLpUart1, NULL, NULL);
+            //deinit DMA
+            furi_hal_lpuart_deinit_dma_rx();
+            //disable IRQ RX byte
+            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
+        } else {
+            furi_hal_lpuart_init_dma_rx();
+            furi_hal_interrupt_set_isr(
+                FuriHalInterruptIdLpUart1, furi_hal_lpuart_irq_callback, NULL);
+        }
+    }
+    uart[ch]->rx_byte_callback = NULL;
+    uart[ch]->rx_dma_callback = callback;
+    uart[ch]->rx_callback_context = context;
 }
