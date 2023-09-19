@@ -198,6 +198,10 @@ bool furi_hal_clock_switch_hse2pll() {
 bool furi_hal_clock_switch_pll2hse() {
     furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
+    LL_RCC_HSE_Enable();
+    while(!LL_RCC_HSE_IsReady())
+        ;
+
     if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_PLL_ON_TO_HSE) != SHCI_Success) {
         return false;
     }
