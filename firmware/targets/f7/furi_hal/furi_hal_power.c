@@ -206,7 +206,7 @@ static inline void furi_hal_power_deep_sleep() {
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
         ;
 
-    if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
+    if(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSE) {
         furi_hal_clock_switch_hsi2hse();
     }
 
