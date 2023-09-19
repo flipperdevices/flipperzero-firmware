@@ -53,7 +53,7 @@ static bool
     return false;
 }
 
-static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteristicCount] = {
+static const FlipperGattCharacteristicParams hid_svc_char_descr[HidSvcGattCharacteristicCount] = {
     [HidSvcGattCharacteristicProtocolMode] =
         {.name = "Protocol Mode",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
@@ -165,7 +165,7 @@ void hid_svc_start() {
         2 + /* protocol mode */
             (4 * HID_SVC_INPUT_REPORT_COUNT) + (3 * HID_SVC_OUTPUT_REPORT_COUNT) +
             (3 * HID_SVC_FEATURE_REPORT_COUNT) + 1 + 2 + 2 +
-            2, /* Service + Report Map + HID Information + HID Control Point */
+            4, /* Service + Report Map + HID Information + HID Control Point + LED */
         &hid_svc->svc_handle);
     if(status) {
         FURI_LOG_E(TAG, "Failed to add HID service: %d", status);
@@ -174,7 +174,7 @@ void hid_svc_start() {
     // Maintain previously defined characteristic order
     flipper_gatt_characteristic_init(
         hid_svc->svc_handle,
-        &hid_svc_chars[HidSvcGattCharacteristicProtocolMode],
+        &hid_svc_char_descr[HidSvcGattCharacteristicProtocolMode],
         &hid_svc->chars[HidSvcGattCharacteristicProtocolMode]);
 
     uint8_t protocol_mode = 1;
@@ -222,7 +222,7 @@ void hid_svc_start() {
     // Setup remaining characteristics
     for(size_t i = HidSvcGattCharacteristicReportMap; i < HidSvcGattCharacteristicCount; i++) {
         flipper_gatt_characteristic_init(
-            hid_svc->svc_handle, &hid_svc_chars[i], &hid_svc->chars[i]);
+            hid_svc->svc_handle, &hid_svc_char_descr[i], &hid_svc->chars[i]);
     }
 }
 
