@@ -26,8 +26,7 @@ UHFTag* send_polling_command(UHFWorker* uhf_worker) {
     return uhf_tag;
 }
 
-static UHFWorkerEvent
-    read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag, BankType bank) {
+UHFWorkerEvent read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag, BankType bank) {
     unsigned int retry = 3, word_low = 5, word_high = 100;
     unsigned int word_size;
     M100ResponseType status;
@@ -51,7 +50,7 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
     UHFTag* uhf_tag = send_polling_command(uhf_worker);
     if(uhf_tag == NULL) return UHFWorkerEventAborted;
     uhf_tag_wrapper_set_tag(uhf_worker->uhf_tag_wrapper, uhf_tag);
-    // Todo : set select here
+    // set select
     if(m100_set_select(uhf_worker->module, uhf_tag) != M100Success) return UHFWorkerEventFail;
     // read tid
     UHFWorkerEvent event;
@@ -90,7 +89,9 @@ int32_t uhf_worker_task(void* ctx) {
         uhf_worker->callback(event, uhf_worker->ctx);
     } else if(uhf_worker->state == UHFWorkerStateDetectSingle) {
         UHFWorkerEvent event = read_single_card(uhf_worker);
+        FURI_LOG_E("TAG", "read single card success");
         uhf_worker->callback(event, uhf_worker->ctx);
+        FURI_LOG_E("TAG", "read single card callback success %d", event);
     } else if(uhf_worker->state == UHFWorkerStateWriteSingle) {
         UHFWorkerEvent event = write_single_card(uhf_worker);
         uhf_worker->callback(event, uhf_worker->ctx);

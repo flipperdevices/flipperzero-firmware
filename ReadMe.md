@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Seader v1.2 (By bettse)](https://github.com/bettse/seader)
 - Added: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Added: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
+- Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 
 <a name="release">
 
@@ -459,7 +460,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- [(Q)M100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
+- [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
 
