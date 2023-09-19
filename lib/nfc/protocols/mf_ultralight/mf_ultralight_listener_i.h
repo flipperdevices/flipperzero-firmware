@@ -100,6 +100,9 @@ bool mf_ultralight_static_lock_check_page(
     const MfUltralightStaticLockData* const lock_bits,
     uint16_t page);
 
+void mf_ultralight_capability_container_write(
+    MfUltralightPage* const current_page,
+    const uint8_t* const new_data);
 #ifdef __cplusplus
 }
 #endif

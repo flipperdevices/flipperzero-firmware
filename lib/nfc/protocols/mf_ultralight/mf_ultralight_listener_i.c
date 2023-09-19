@@ -424,3 +424,11 @@ bool mf_ultralight_static_lock_check_page(
     }
     return locked;
 }
+
+void mf_ultralight_capability_container_write(
+    MfUltralightPage* const current_page,
+    const uint8_t* const new_data) {
+    for(uint8_t i = 0; i < MF_ULTRALIGHT_PAGE_SIZE; i++) {
+        current_page->data[i] |= new_data[i];
+    }
+}

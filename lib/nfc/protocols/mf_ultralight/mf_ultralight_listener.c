@@ -190,6 +190,9 @@ static MfUltralightCommand
         if(start_page == 2)
             mf_ultralight_static_lock_bytes_write(
                 instance->static_lock, *((uint16_t*)&rx_data[4]));
+        else if(start_page == 3)
+            mf_ultralight_capability_container_write(
+                &instance->data->page[start_page], &rx_data[2]);
         else
             memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
         command = MfUltralightCommandProcessedACK;
@@ -442,6 +445,9 @@ static MfUltralightCommand
         if(start_page == 2)
             mf_ultralight_static_lock_bytes_write(
                 instance->static_lock, *((uint16_t*)&rx_data[2]));
+        else if(start_page == 3)
+            mf_ultralight_capability_container_write(
+                &instance->data->page[start_page], &rx_data[0]);
         else
             memcpy(instance->data->page[start_page].data, &rx_data[0], sizeof(MfUltralightPage));
         command = MfUltralightCommandProcessedACK;
