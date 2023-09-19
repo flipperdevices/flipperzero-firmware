@@ -401,6 +401,47 @@ FuriHalNfcError furi_hal_nfc_reset_mode() {
     return error;
 }
 
+FuriHalNfcError furi_hal_nfc_field_detect_start() {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    st25r3916_write_reg(
+        handle,
+        ST25R3916_REG_OP_CONTROL,
+        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_en_fd_mask);
+    st25r3916_write_reg(
+        handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ | ST25R3916_REG_MODE_om0);
+
+    return error;
+}
+
+FuriHalNfcError furi_hal_nfc_field_detect_stop() {
+    FuriHalNfcError error = FuriHalNfcErrorNone;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    st25r3916_clear_reg_bits(
+        handle,
+        ST25R3916_REG_OP_CONTROL,
+        (ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_en_fd_mask));
+
+    return error;
+}
+
+bool furi_hal_nfc_field_is_present() {
+    bool is_present = false;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    if(st25r3916_check_reg(
+           handle,
+           ST25R3916_REG_AUX_DISPLAY,
+           ST25R3916_REG_AUX_DISPLAY_efd_o,
+           ST25R3916_REG_AUX_DISPLAY_efd_o)) {
+        is_present = true;
+    }
+
+    return is_present;
+}
+
 FuriHalNfcError furi_hal_nfc_poller_field_on() {
     FuriHalNfcError error = FuriHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
