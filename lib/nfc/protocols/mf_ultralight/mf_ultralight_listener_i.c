@@ -6,9 +6,9 @@
 #define MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_9_4 1
 #define MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_15_10 2
 
-#define MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, bit) ((lock_bits & (1U << bit)) != 0)
+#define MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, bit) (((lock_bits) & (1U << (bit))) != 0)
 #define MF_ULTRALIGHT_STATIC_BITS_SET(lock_bits, mask) (lock_bits |= mask)
-#define MF_ULTRALIGHT_STATIC_BITS_CLR(lock_bits, mask) (lock_bits &= ~mask)
+#define MF_ULTRALIGHT_STATIC_BITS_CLR(lock_bits, mask) (lock_bits &= ~(mask))
 
 #define MF_ULTRALIGHT_PAGE_LOCKED(lock_bits, page) MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, page)
 
