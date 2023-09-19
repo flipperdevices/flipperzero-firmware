@@ -152,14 +152,7 @@ void furi_hal_clock_switch_hsi2hse() {
 #endif
 
     LL_RCC_HSE_Enable();
-    LL_RCC_PLL_Enable();
-    LL_RCC_PLLSAI1_Enable();
-
     while(!LL_RCC_HSE_IsReady())
-        ;
-    while(!LL_RCC_PLL_IsReady())
-        ;
-    while(!LL_RCC_PLLSAI1_IsReady())
         ;
 
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
@@ -181,6 +174,14 @@ void furi_hal_clock_switch_hsi2hse() {
 
 bool furi_hal_clock_switch_hse2pll() {
     furi_assert(LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_HSE);
+
+    LL_RCC_PLL_Enable();
+    LL_RCC_PLLSAI1_Enable();
+
+    while(!LL_RCC_PLL_IsReady())
+        ;
+    while(!LL_RCC_PLLSAI1_IsReady())
+        ;
 
     if(SHCI_C2_SetSystemClock(SET_SYSTEM_CLOCK_HSE_TO_PLL) != SHCI_Success) {
         return false;
