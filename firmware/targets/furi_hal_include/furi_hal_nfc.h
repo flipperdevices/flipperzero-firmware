@@ -113,6 +113,24 @@ FuriHalNfcError furi_hal_nfc_set_mode(FuriHalNfcMode mode, FuriHalNfcTech tech);
  */
 FuriHalNfcError furi_hal_nfc_reset_mode();
 
+/** Start field detection
+ *
+ * @return FuriHalNfcError
+ */
+FuriHalNfcError furi_hal_nfc_field_detect_start();
+
+/** Stop field detection
+ *
+ * @return FuriHalNfcError
+ */
+FuriHalNfcError furi_hal_nfc_field_detect_stop();
+
+/** Check if external NFC field is present
+ *
+ * @return FuriHalNfcError
+ */
+bool furi_hal_nfc_field_is_present();
+
 /** Turn on field
  *
  * @return FuriHalNfcError

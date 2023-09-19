@@ -41,6 +41,8 @@ typedef struct {
     FuriString* ascii_mirror_data;
 } MfUltralightMirrorMode;
 
+typedef uint16_t MfUltralightStaticLockData;
+
 struct MfUltralightListener {
     Iso14443_3aListener* iso14443_3a_listener;
     MfUltralightListenerAuthState auth_state;
@@ -48,6 +50,7 @@ struct MfUltralightListener {
     BitBuffer* tx_buffer;
     MfUltralightFeatureSupport features;
     MfUltralightConfigPages* config;
+    MfUltralightStaticLockData* static_lock;
 
     NfcGenericEvent generic_event;
     MfUltralightListenerEvent mfu_event;
@@ -88,6 +91,15 @@ bool mf_ultralight_i2c_validate_pages(
 
 uint16_t
     mf_ultralight_i2c_provide_page_by_requested(uint16_t page, MfUltralightListener* instance);
+
+void mf_ultralight_static_lock_bytes_prepare(MfUltralightListener* instance);
+void mf_ultralight_static_lock_bytes_write(
+    MfUltralightStaticLockData* const lock_bits,
+    uint16_t new_bits);
+bool mf_ultralight_static_lock_check_page(
+    const MfUltralightStaticLockData* const lock_bits,
+    uint16_t page);
+
 #ifdef __cplusplus
 }
 #endif
