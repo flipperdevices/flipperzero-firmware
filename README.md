@@ -1,10 +1,4 @@
-# flipper-pc-monitor
-Flipper Application for monitoring PC state
+# PC Monitor
+Flipper Application for monitoring PC resources
 
-**[A backend running on your computer is required to work](https://github.com/TheSainEyereg/flipper-pc-monitor-backend)**
-
-### Screenshots
-
-![app](screenshots/qFlipper.png)  
-![app](screenshots/1.png)
-![app](screenshots/2.png)
+**[A backend running on your PC is required](https://github.com/TheSainEyereg/flipper-pc-monitor-backend/releases)**
