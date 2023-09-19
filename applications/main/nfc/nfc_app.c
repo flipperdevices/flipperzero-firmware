@@ -14,24 +14,24 @@ bool nfc_back_event_callback(void* context) {
     return scene_manager_handle_back_event(nfc->scene_manager);
 }
 
-// static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
-//     furi_assert(context);
-//     NfcApp* nfc = context;
+static void nfc_app_rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
+    furi_assert(context);
+    NfcApp* nfc = (NfcApp*)context;
 
-//     furi_assert(nfc->rpc_ctx);
+    furi_assert(nfc->rpc_ctx);
 
-//     if(event == RpcAppEventSessionClose) {
-//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcSessionClose);
-//         rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
-//         nfc->rpc_ctx = NULL;
-//     } else if(event == RpcAppEventAppExit) {
-//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
-//     } else if(event == RpcAppEventLoadFile) {
-//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoad);
-//     } else {
-//         rpc_system_app_confirm(nfc->rpc_ctx, event, false);
-//     }
-// }
+    if(rpc_event == RpcAppEventSessionClose) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcSessionClose);
+        rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
+        nfc->rpc_ctx = NULL;
+    } else if(rpc_event == RpcAppEventAppExit) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcExit);
+    } else if(rpc_event == RpcAppEventLoadFile) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoad);
+    } else {
+        rpc_system_app_confirm(nfc->rpc_ctx, rpc_event, false);
+    }
+}
 
 NfcApp* nfc_app_alloc() {
     NfcApp* instance = malloc(sizeof(NfcApp));
@@ -130,21 +130,9 @@ NfcApp* nfc_app_alloc() {
 void nfc_app_free(NfcApp* instance) {
     furi_assert(instance);
 
-    // if(instance->rpc_state == NfcRpcStateEmulating) {
-    //     // Stop worker
-    //     nfc_worker_stop(instance->worker);
-    // } else if(instance->rpc_state == NfcRpcStateEmulated) {
-    //     // Stop worker
-    //     nfc_worker_stop(instance->worker);
-    //     // Save data in shadow file
-    //     if(furi_string_size(instance->dev->load_path)) {
-    //         nfc_device_save_shadow(instance->dev, furi_string_get_cstr(instance->dev->load_path));
-    //     }
-    // }
     if(instance->rpc_ctx) {
         rpc_system_app_send_exited(instance->rpc_ctx);
         rpc_system_app_set_callback(instance->rpc_ctx, NULL, NULL);
-        instance->rpc_ctx = NULL;
     }
 
     nfc_free(instance->nfc);
@@ -476,24 +464,28 @@ static bool nfc_is_hal_ready() {
 }
 
 int32_t nfc_app(void* p) {
-    UNUSED(p);
     if(!nfc_is_hal_ready()) return 0;
 
     NfcApp* nfc = nfc_app_alloc();
-    char* args = p;
-    // const char* args = "/ext/nfc/4.nfc";
+    const char* args = p;
 
-    // Check argument and run corresponding scene
     if(args && strlen(args)) {
-        nfc_device_set_loading_callback(nfc->nfc_device, nfc_show_loading_popup, nfc);
-        view_dispatcher_attach_to_gui(
-            nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
-        if(nfc_device_load(nfc->nfc_device, args)) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulate);
-
+        if(sscanf(args, "RPC %p", &nfc->rpc_ctx) == 1) {
+            rpc_system_app_set_callback(nfc->rpc_ctx, nfc_app_rpc_command_callback, nfc);
+            rpc_system_app_send_started(nfc->rpc_ctx);
+            view_dispatcher_attach_to_gui(
+                nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeDesktop);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRpc);
         } else {
-            // Exit app
-            view_dispatcher_stop(nfc->view_dispatcher);
+            view_dispatcher_attach_to_gui(
+                nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
+
+            furi_string_set(nfc->file_path, args);
+            if(nfc_load_file(nfc, nfc->file_path, false)) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulate);
+            } else {
+                view_dispatcher_stop(nfc->view_dispatcher);
+            }
         }
     } else {
         view_dispatcher_attach_to_gui(

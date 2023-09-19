@@ -74,7 +74,6 @@
 typedef enum {
     NfcRpcStateIdle,
     NfcRpcStateEmulating,
-    NfcRpcStateEmulated,
 } NfcRpcState;
 
 typedef struct {
@@ -105,7 +104,7 @@ struct NfcApp {
     NfcProtocol protocols_detected[NfcProtocolNum];
     uint32_t protocols_detected_selected_idx;
 
-    void* rpc_ctx;
+    RpcAppSystem* rpc_ctx;
     NfcRpcState rpc_state;
 
     // Common Views

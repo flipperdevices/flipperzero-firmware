@@ -22,6 +22,7 @@ typedef enum {
     NfcCustomEventDictAttackDone,
 
     NfcCustomEventRpcLoad,
+    NfcCustomEventRpcExit,
     NfcCustomEventRpcSessionClose,
 
     NfcCustomEventPollerSuccess,
