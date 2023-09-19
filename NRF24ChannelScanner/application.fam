@@ -1,6 +1,6 @@
 App(
     appid="nrf24channelscanner",
-    name="[NRF24] Channel scanner",
+    name="[NRF24] Channel Scan",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="nrf24channelscanner_main",
     fap_author="HTotoo",
