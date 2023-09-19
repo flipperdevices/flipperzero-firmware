@@ -438,7 +438,12 @@ static MfUltralightCommand
 
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
         uint8_t start_page = instance->composite_cmd.data;
-        memcpy(instance->data->page[start_page].data, &rx_data[0], sizeof(MfUltralightPage));
+
+        if(start_page == 2)
+            mf_ultralight_static_lock_bytes_write(
+                instance->static_lock, *((uint16_t*)&rx_data[2]));
+        else
+            memcpy(instance->data->page[start_page].data, &rx_data[0], sizeof(MfUltralightPage));
         command = MfUltralightCommandProcessedACK;
     } while(false);
 
@@ -460,6 +465,11 @@ static MfUltralightCommand
         uint16_t pages_total = instance->data->pages_total;
 
         if(start_page < 2 || start_page > pages_total) {
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
+        if(mf_ultralight_static_lock_check_page(instance->static_lock, start_page)) {
             command = MfUltralightCommandNotProcessedNAK;
             break;
         }
