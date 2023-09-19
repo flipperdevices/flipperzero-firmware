@@ -32,16 +32,18 @@ jobs:
       - name: 'Get commit details'
         id: names
         run: |
+          BUILD_TYPE='DEBUG=1 COMPACT=0'
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
             TYPE="pull"
           elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
             TYPE="tag"
-            echo 'FBT_BUILD_TYPE="DEBUG=0 COMPACT=1"' >> $GITHUB_ENV
+            BUILD_TYPE='DEBUG=0 COMPACT=1'
           else
             TYPE="other"
           fi
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE" || cat "${{ github.event_path }}"
           echo "event_type=$TYPE" >> $GITHUB_OUTPUT
+          echo "FBT_BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
           echo "TARGET_HW=$(echo "${{ matrix.target }}" | sed 's/f//')" >> $GITHUB_ENV
 
@@ -146,14 +148,14 @@ jobs:
             - [☁️ Web/App updater](https://lab.flipper.net/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
           edit-mode: replace
 
-      - name: 'SDK submission to dev catalog'
+      - name: 'SDK submission to staging catalog'
         if: ${{ steps.names.outputs.event_type == 'tag' && matrix.target == env.DEFAULT_TARGET }}
         uses: ./.github/actions/submit_sdk
         with:
           catalog-url: ${{ secrets.CATALOG_STAGING_URL }}
           catalog-api-token: ${{ secrets.CATALOG_STAGING_API_TOKEN }}
           firmware-api: ${{ steps.build-fw.outputs.firmware_api }}
-          firwmare-target: ${{ matrix.target }}
+          firmware-target: ${{ matrix.target }}
           firmware-version: ${{ steps.names.outputs.suffix }}
 
       - name: 'SDK submission to prod catalog'
@@ -163,5 +165,5 @@ jobs:
           catalog-url: ${{ secrets.CATALOG_URL }}
           catalog-api-token: ${{ secrets.CATALOG_API_TOKEN }}
           firmware-api: ${{ steps.build-fw.outputs.firmware_api }}
-          firwmare-target: ${{ matrix.target }}
+          firmware-target: ${{ matrix.target }}
           firmware-version: ${{ steps.names.outputs.suffix }}
