@@ -119,7 +119,9 @@
  *  1 : external high speed crystal HSE/32/32
  *  0 : external low speed crystal ( no calibration )
  */
-#define CFG_BLE_LSE_SOURCE 0
+#define CFG_BLE_LSE_SOURCE                                                        \
+    SHCI_C2_BLE_INIT_CFG_BLE_LS_CLK_LSE | SHCI_C2_BLE_INIT_CFG_BLE_LS_OTHER_DEV | \
+        SHCI_C2_BLE_INIT_CFG_BLE_LS_CALIB
 
 /**
  * Start up time of the high speed (16 or 32 MHz) crystal oscillator in units of 625/256 us (~2.44 us)
@@ -169,8 +171,8 @@
  */
 #define CFG_BLE_OPTIONS                                                                 \
     (SHCI_C2_BLE_INIT_OPTIONS_LL_HOST | SHCI_C2_BLE_INIT_OPTIONS_WITH_SVC_CHANGE_DESC | \
-     SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO | SHCI_C2_BLE_INIT_OPTIONS_NO_EXT_ADV |    \
-     SHCI_C2_BLE_INIT_OPTIONS_NO_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
+     SHCI_C2_BLE_INIT_OPTIONS_DEVICE_NAME_RO | SHCI_C2_BLE_INIT_OPTIONS_EXT_ADV |       \
+     SHCI_C2_BLE_INIT_OPTIONS_CS_ALGO2 | SHCI_C2_BLE_INIT_OPTIONS_POWER_CLASS_2_3)
 
 /**
  * Queue length of BLE Event
