@@ -12,10 +12,9 @@
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
 
 // Static Nested TODO:
-// 1. Fix Nested dictionary attack (was working previously, so it must have to do with replacing Crypto1Params with MfClassicNonce)
-// 2. Add "in" parameter back into recovery process (from lfsr_recovery32)
-// 3. Pass: lfsr_recovery32(ks2, nt_enc ^ cuid)
-// 4. Use key_matches_ks1 in Nested mode of recovery to validate keys (making sure it has all of the MfClassicNonce)
+// 1. Add "in" parameter back into recovery process (from lfsr_recovery32)
+// 2. Pass: lfsr_recovery32(ks2, nt_enc ^ cuid)
+// 3. Use key_matches_ks1 in Nested mode of recovery to validate keys (making sure it has all of the MfClassicNonce)
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -46,7 +45,7 @@
 #define MAX_NAME_LEN 32
 #define MAX_PATH_LEN 64
 
-#define MIN_RAM 115632
+#define MIN_RAM 115632 // TODO: May no longer be accurate, crashes are getting frequent
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define CONST_M1_1 (LF_POLY_EVEN << 1 | 1)
@@ -618,6 +617,7 @@ int calculate_msb_tables(
 }
 
 bool recover(MfClassicNonce* n, int ks2, int in, ProgramState* program_state) {
+    // XXX FIXME
     FURI_LOG_I(TAG, "in: %i", in); // DEBUG
     bool found = false;
     unsigned int* states_buffer = malloc(sizeof(unsigned int) * (2 << 9));
@@ -1061,6 +1061,8 @@ bool load_mfkey32_nonces(
             }
             res.p64 = prng_successor(res.nt0, 64);
             res.p64b = prng_successor(res.nt1, 64);
+            res.uid_xor_nt0 = res.uid ^ res.nt0;
+            res.uid_xor_nt1 = res.uid ^ res.nt1;
 
             (program_state->total)++;
             if((system_dict_exists && napi_key_already_found_for_nonce(system_dict, &res)) ||
@@ -1158,6 +1160,8 @@ bool load_nested_nonces(
                     if(parsed != 7) continue;
                     res.par_1 = binaryStringToInt(res.par_1_str);
                     res.par_2 = binaryStringToInt(res.par_2_str);
+                    res.uid_xor_nt0 = res.uid ^ res.nt0;
+                    res.uid_xor_nt1 = res.uid ^ res.nt1;
 
                     (program_state->total)++;
                     if((system_dict_exists &&
@@ -1304,7 +1308,6 @@ void mfkey(ProgramState* program_state) {
             continue;
         }
         FURI_LOG_I(TAG, "Beginning recovery for %8lx", next_nonce.uid);
-        // XXX FIXME
         if(next_nonce.attack == mfkey32) {
             if(!recover(&next_nonce, next_nonce.ar0_enc ^ next_nonce.p64, 0, program_state)) {
                 if(program_state->close_thread_please) {
