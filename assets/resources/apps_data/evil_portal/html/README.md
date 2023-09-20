@@ -33,6 +33,7 @@ Thank you so much to the following contributors for providing awesome portals.
 - `Google_Mobile.html` by [breaching](https://github.com/breaching)
 - `Google_Modern.html` by [roshanravan](https://github.com/roshanravan)
 - `Instagram.html` by [grugnoymeme](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/713)
+- `Instagram_Realistic.html` by [JMcrafter26](https://github.com/JM26NET/flipper-zero-evil-portal/commit/663975b441bc5ace4d47457d8826a4a181701fd2)
 - `Jet_Blue.html` by [roshanravan](https://github.com/roshanravan)
 - `Matrix.html` by [roshanravan](https://github.com/roshanravan)
 - `Microsoft.html` by [roshanravan](https://github.com/roshanravan)

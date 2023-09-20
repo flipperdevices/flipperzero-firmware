@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - REVERT: UL OFW: [New clock switch schema, fixes random core2 crashes #3008 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3008)
 - REVERT: UL: experimental BLE key size change (By xMasterX)
 - REVERT: UL: Testing hid without LED descr (By xMasterX)
+- Added: [New Evil Portal page Instagram_Realistic.html (By JMcrafter26)](https://github.com/JM26NET/flipper-zero-evil-portal/commit/663975b441bc5ace4d47457d8826a4a181701fd2)
 
 <a name="release">
 
