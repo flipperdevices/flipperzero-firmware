@@ -12,6 +12,7 @@
           {
             "properties": {
               "alias": {
+                "description": "Firmware alias(-es)",
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -20,9 +21,11 @@
                 "uniqueItems": true
               },
               "description": {
+                "description": "User-friendly description explaining firmware details",
                 "type": "string"
               },
               "type": {
+                "description": "Type of firmware reference. `index` - firmware from index; `git-release` - firmware from gir releases",
                 "enum": [
                   "index",
                   "git-release"
@@ -51,9 +54,11 @@
                 "then": {
                   "properties": {
                     "index_url": {
+                      "description": "Index URL to look for firmware",
                       "type": "string"
                     },
                     "channel": {
+                      "description": "Index channel to pull firmware from",
                       "type": "string"
                     }
                   },
@@ -79,9 +84,11 @@
                 "then": {
                   "properties": {
                     "git_repo": {
+                      "description": "Firmware Github repo in format `author/repo_name`",
                       "type": "string"
                     },
                     "git_release": {
+                      "description": "Github release name to pull firmware from",
                       "type": "string"
                     }
                   },
