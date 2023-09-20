@@ -21,7 +21,6 @@ struct ReloadBuffer {
 
 struct DigitalSequence {
     uint8_t signals_size;
-    bool bake;
     uint32_t sequence_used;
     uint32_t sequence_size;
     DigitalSignal** signals;
@@ -340,7 +339,6 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
     sequence->gpio = gpio;
-    sequence->bake = false;
 
     sequence->dma_buffer = malloc(sizeof(struct ReloadBuffer));
     sequence->dma_buffer->size = RINGBUFFER_SIZE;
@@ -438,30 +436,6 @@ static bool digital_sequence_setup_dma(DigitalSequence* sequence) {
     return true;
 }
 
-static DigitalSignal* digital_sequence_bake(DigitalSequence* sequence) {
-    furi_assert(sequence);
-
-    uint32_t edges = 0;
-
-    for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
-        uint8_t signal_index = sequence->sequence[pos];
-        DigitalSignal* sig = sequence->signals[signal_index];
-
-        edges += sig->edge_cnt;
-    }
-
-    DigitalSignal* ret = digital_signal_alloc(edges);
-
-    for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
-        uint8_t signal_index = sequence->sequence[pos];
-        DigitalSignal* sig = sequence->signals[signal_index];
-
-        digital_signal_append(ret, sig);
-    }
-
-    return ret;
-}
-
 static void digital_sequence_finish(DigitalSequence* sequence) {
     struct ReloadBuffer* dma_buffer = sequence->dma_buffer;
 
@@ -544,14 +518,6 @@ bool digital_sequence_send(DigitalSequence* sequence) {
     furi_hal_gpio_init(
         &DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 #endif
-
-    if(sequence->bake) {
-        DigitalSignal* sig = digital_sequence_bake(sequence);
-
-        digital_signal_send(sig, sequence->gpio);
-        digital_signal_free(sig);
-        return true;
-    }
 
     if(!sequence->sequence_used) {
         return false;
