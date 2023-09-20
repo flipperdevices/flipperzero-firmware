@@ -31,6 +31,9 @@ void subbrute_settings_load(SubBruteSettings* instance) {
     bool was_read_last_index = false;
     bool was_read_repeat_values = false;
 
+    storage_common_migrate(
+        storage, EXT_PATH("subghz-bruteforcer.settings"), SUBBRUTE_SETTINGS_PATH);
+
     if(FSE_OK == storage_sd_status(storage) && SUBBRUTE_SETTINGS_PATH &&
        flipper_format_file_open_existing(fff_data_file, SUBBRUTE_SETTINGS_PATH)) {
         was_read_last_index = flipper_format_read_uint32(

@@ -125,12 +125,11 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
 
     struct {
         uint8_t led;
-        const char* str;
         VariableItemChangeCallback cb;
     } lcd_cols[] = {
-        {0, "LCD Right", cfw_app_scene_misc_screen_lcd_color_0_changed},
-        {1, "LCD Middle", cfw_app_scene_misc_screen_lcd_color_1_changed},
-        {2, "LCD Left", cfw_app_scene_misc_screen_lcd_color_2_changed},
+        {0, cfw_app_scene_misc_screen_lcd_color_0_changed},
+        {1, cfw_app_scene_misc_screen_lcd_color_1_changed},
+        {2, cfw_app_scene_misc_screen_lcd_color_2_changed},
     };
 
     switch(cfw_settings->lcd_style) {
@@ -161,8 +160,9 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
         break;
     case 1:
         for(size_t i = 0; i < COUNT_OF(lcd_cols); i++) {
-            item = variable_item_list_add(
-                var_item_list, lcd_cols[i].str, lcd_sz, lcd_cols[i].cb, app);
+            char name[12];
+            snprintf(name, sizeof(name), "LCD LED %u", lcd_cols[i].led + 1);
+            item = variable_item_list_add(var_item_list, name, lcd_sz, lcd_cols[i].cb, app);
             RgbColor color = rgb_backlight_get_color(lcd_cols[i].led);
             bool found = false;
             for(size_t i = 0; i < lcd_sz; i++) {

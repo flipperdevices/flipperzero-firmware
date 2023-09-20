@@ -6,7 +6,7 @@ App(
     stack_size=1 * 1024,
     fap_category="Bluetooth",
     fap_icon="icons/icon_10px.png",
-    fap_author="Olejka", # A.K.A. TheSainEyereg
+    fap_author="Olejka",  # A.K.A. TheSainEyereg
     fap_weburl="https://github.com/TheSainEyereg/flipper-pc-monitor",
     # fap_weburl="https://github.com/TheSainEyereg/flipper-pc-monitor-backend",
     fap_version=(1, 0),
