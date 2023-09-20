@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL OFW: [New clock switch schema, fixes random core2 crashes #3008 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3008)
 - UL: experimental BLE key size change (By xMasterX)
 - UL: Testing hid without LED descr (By xMasterX)
+- Updated: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 
