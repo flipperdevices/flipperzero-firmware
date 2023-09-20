@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0912-1627-0.90.2-feb7d81.tgz&channel=RM0912-1627-0.90.2-feb7d81&version=0.90.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0912-1627-0.90.2-feb7d81-NoAnim.tgz&channel=RM0912-1627-0.90.2-feb7d81-NoAnim&version=0.90.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0919-2137-0.91.5-0c9aea3.tgz&channel=RM0919-2137-0.91.5-0c9aea3&version=0.91.5) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0919-2137-0.91.5-0c9aea3-NoAnim.tgz&channel=RM0919-2137-0.91.5-0c9aea3-NoAnim&version=0.91.5)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -29,33 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0914-1718-0.90.2-215b031](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0919-2114-0.91.5-0c9aea3](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-19 21:11 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-19 21:11 EST`
-- Updated: [Authenticator/TOTP v5.0.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Fix app versions to match OFW catalog/UL and .FAM cleanup
-- Added: [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth)
-- Updated: [Wiegand Reader v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
-- OFW: [SubGhz: Fix CLI subghz chat #3073 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3073) - Changes were already in RM
-- OFW: [Fix DMA SPI memory increment define #3075 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3075)
-- Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
-- Removed: [ESP32CAM Evil Portal (By bigbrodude6119 & eried)](https://github.com/eried/flipperzero-mayhem) - Since its in Marauder and they removed it.
-- Updated: [ESP32CAM Marauder v0.6.2 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- UL PR: [Updated infrared assets #607 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/607)
-- App versions incremented for some apps due to [New random file name API fix #40 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/pull/40)
-- [ESP32CAM Mayhem Marauder: Removing GPS and LED menus (By eried)](https://github.com/eried/flipperzero-mayhem/commit/c532e4b3e143c93786db74157b8009f607de0140#diff-d30f083f00277de44d820def2f298f3651f2bf10e5f6336cb0ed5482e9ea58d3)
-- UL OFW: [New clock switch schema, fixes random core2 crashes #3008 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3008)
-- UL: experimental BLE key size change (By xMasterX)
-- UL: Testing hid without LED descr (By xMasterX)
-- Updated: [Sudoku v1.1 (By profelis)](https://github.com/profelis/fz-sudoku)
-- Updated: [NFC Seader v1.2 (By bettse)](https://github.com/bettse/seader)
-- Added: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Added: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
-- Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
-- Updated: [PicoPass (iClass) v1.5 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
-- Added: [PC Monitor v1.0 (By TheSainEyereg)](https://github.com/TheSainEyereg/flipper-pc-monitor) _Req: [Backend](https://github.com/TheSainEyereg/flipper-pc-monitor-backend)_
-- CFW Settings RGB Use LED 1/2/3 Instead of Right/Middle/Left & SubBrute settings move if present (By Willy-JL)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-19 21:35 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-19 21:35 EST`
 
 <a name="release">
 
@@ -482,4 +459,4 @@ $ ./fbt dolphin_ext
 - [Air Tag for FZ ($50 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/696)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0912-1627-0.90.2-feb7d81.tgz&channel=RM0912-1627-0.90.2-feb7d81&version=0.90.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0912-1627-0.90.2-feb7d81-NoAnim.tgz&channel=RM0912-1627-0.90.2-feb7d81-NoAnim&version=0.90.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0919-2137-0.91.5-0c9aea3.tgz&channel=RM0919-2137-0.91.5-0c9aea3&version=0.91.5) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0919-2137-0.91.5-0c9aea3-NoAnim.tgz&channel=RM0919-2137-0.91.5-0c9aea3-NoAnim&version=0.91.5)
