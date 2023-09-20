@@ -261,7 +261,12 @@ M100ResponseType m100_read_label_data_storage(
     size_t ptr_offset = 5 /*<-ptr offset*/ + uhf_tag->epc->size + 3 /*<-pc + ul*/;
     size_t bank_data_length = payload_len - (ptr_offset - 5 /*dont include the offset*/);
     // print paylod length ptr offset and bank data length
-    FURI_LOG_E("TAG", "payload_len: %d, ptr_offset: %d, bank_data_length: %d", payload_len, ptr_offset, bank_data_length);
+    FURI_LOG_E(
+        "TAG",
+        "payload_len: %d, ptr_offset: %d, bank_data_length: %d",
+        payload_len,
+        ptr_offset,
+        bank_data_length);
     if(data[2] == 0xFF) {
         if(payload_len == 0x0001) return M100NoTagResponse;
         return M100MemoryOverrun;
@@ -348,7 +353,7 @@ M100ResponseType m100_write_label_data_storage(
         return M100ValidationFail;
     return M100Success;
 }
-void m100_set_baudrate(M100Module* module, uint16_t baudrate) {
+void m100_set_baudrate(M100Module* module, uint32_t baudrate) {
     size_t length = CMD_SET_COMMUNICATION_BAUD_RATE.length;
     uint8_t cmd[length];
     memcpy(cmd, CMD_SET_COMMUNICATION_BAUD_RATE.cmd, length);
@@ -385,4 +390,8 @@ bool m100_set_freq_hopping(M100Module* module, bool hopping) {
     UNUSED(module);
     UNUSED(hopping);
     return true;
+}
+
+uint32_t m100_get_baudrate(M100Module* module) {
+    return module->baudrate;
 }
