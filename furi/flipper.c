@@ -48,10 +48,10 @@ void flipper_init() {
     for(size_t i = 0; i < FLIPPER_SERVICES_COUNT; i++) {
         flipper_start_service(&FLIPPER_SERVICES[i]);
     }
-	if(furi_hal_is_normal_boot()) {
-		NAMESPOOF_INIT();
-		CFW_SETTINGS_LOAD();
-	}
+    if(furi_hal_is_normal_boot()) {
+        NAMESPOOF_INIT();
+        CFW_SETTINGS_LOAD();
+    }
 
     FURI_LOG_I(TAG, "Startup complete");
 }
