@@ -60,9 +60,7 @@ static void iso15693_add_bit(DigitalSignal* signal, Iso15693SignalDataRate data_
 }
 
 static inline void iso15693_add_sof(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
-    for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
-        iso15693_add_silence(signal, data_rate);
-    }
+    // Not adding silence since it only increases response time
 
     for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
         iso15693_add_subcarrier(signal, data_rate);
@@ -78,9 +76,7 @@ static inline void iso15693_add_eof(DigitalSignal* signal, Iso15693SignalDataRat
         iso15693_add_subcarrier(signal, data_rate);
     }
 
-    for(uint32_t i = 0; i < ISO15693_SIGNAL_FC_768 / ISO15693_SIGNAL_FC_256; ++i) {
-        iso15693_add_silence(signal, data_rate);
-    }
+    // Not adding silence since it does nothing here
 }
 
 static inline uint32_t
