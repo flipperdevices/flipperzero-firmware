@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Added: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
+- Updated: [PicoPass (iClass) v1.5 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 
 <a name="release">
 
