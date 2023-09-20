@@ -10,11 +10,12 @@
 // TODO: Investigate collecting the parity during Mfkey32 attacks to further optimize the attack
 // TODO: Why different sscanf between Mfkey32 and Nested?
 // TODO: "Read tag again with NFC app" message upon completion, "Complete. Keys added: <n>"
+// TODO: Separate Mfkey32 and Nested functions where possible to reduce branch statements
+// TODO: More accurate timing for Nested
+// TODO: Eliminate OOM crashes (updated application is larger)
 
 // Static Nested TODO:
-// 1. Add "in" parameter back into recovery process (from lfsr_recovery32)
-// 2. Pass: lfsr_recovery32(ks2, nt_enc ^ cuid)
-// 3. Use key_matches_ks1 in Nested mode of recovery to validate keys (making sure it has all of the MfClassicNonce)
+// 1. Find bug which causes keys to not be found (most likely cause: in parameter)
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -321,31 +322,39 @@ bool key_already_found_for_nonce(uint64_t* keyarray, int keyarray_size, MfClassi
 
 int check_state(struct Crypto1State* t, MfClassicNonce* n) {
     if(!(t->odd | t->even)) return 0;
-    rollback_word_noret(t, 0, 0);
-    rollback_word_noret(t, n->nr0_enc, 1);
-    rollback_word_noret(t, n->uid_xor_nt0, 0);
-    struct Crypto1State temp = {t->odd, t->even};
-    crypt_word_noret(t, n->uid_xor_nt1, 0);
-    crypt_word_noret(t, n->nr1_enc, 1);
-    if(n->ar1_enc == (crypt_word(t) ^ n->p64b)) {
-        crypto1_get_lfsr(&temp, &(n->key));
-        return 1;
+    if(n->attack == mfkey32) {
+        rollback_word_noret(t, 0, 0);
+        rollback_word_noret(t, n->nr0_enc, 1);
+        rollback_word_noret(t, n->uid_xor_nt0, 0);
+        struct Crypto1State temp = {t->odd, t->even};
+        crypt_word_noret(t, n->uid_xor_nt1, 0);
+        crypt_word_noret(t, n->nr1_enc, 1);
+        if(n->ar1_enc == (crypt_word(t) ^ n->p64b)) {
+            crypto1_get_lfsr(&temp, &(n->key));
+            return 1;
+        }
+        return 0;
+    } else if(n->attack == static_nested) {
+        struct Crypto1State temp = {t->odd, t->even};
+        if(n->ks1_1_enc == crypt_word_ret(t, n->uid_xor_nt0, 0)) {
+            crypto1_get_lfsr(&temp, &(n->key));
+            return 1;
+        }
+        return 0;
     }
     return 0;
 }
 
-int key_matches_ks1(uint32_t odd, uint32_t even, uint32_t uid, uint32_t nt0, uint32_t ks1) {
-    struct Crypto1State temp = {odd, even};
-    uint32_t expected_ks1 = crypt_word_ret(&temp, uid ^ nt0, 0);
-    return ks1 == expected_ks1;
-}
-
-static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m2) {
+static inline int
+    state_loop(unsigned int* states_buffer, int xks, int m1, int m2, unsigned int in) {
     int states_tail = 0;
-    int round = 0, s = 0, xks_bit = 0;
+    int round = 0, s = 0, xks_bit = 0, round_in = 0;
 
     for(round = 1; round <= 12; round++) {
         xks_bit = BIT(xks, round);
+        if(round > 4) {
+            round_in = (in >> (2 * round)) << 24;
+        }
 
         for(s = 0; s <= states_tail; s++) {
             states_buffer[s] <<= 1;
@@ -354,6 +363,7 @@ static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m
                 states_buffer[s] |= filter(states_buffer[s]) ^ xks_bit;
                 if(round > 4) {
                     update_contribution(states_buffer, s, m1, m2);
+                    states_buffer[s] ^= round_in;
                 }
             } else if(filter(states_buffer[s]) == xks_bit) {
                 // TODO: Refactor
@@ -361,8 +371,9 @@ static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m
                     states_buffer[++states_tail] = states_buffer[s + 1];
                     states_buffer[s + 1] = states_buffer[s] | 1;
                     update_contribution(states_buffer, s, m1, m2);
-                    s++;
+                    states_buffer[s++] ^= round_in;
                     update_contribution(states_buffer, s, m1, m2);
+                    states_buffer[s] ^= round_in;
                 } else {
                     states_buffer[++states_tail] = states_buffer[++s];
                     states_buffer[s] = states_buffer[s - 1] | 1;
@@ -416,17 +427,20 @@ void quicksort(unsigned int array[], int low, int high) {
         quicksort(array, i, high);
     }
 }
-int extend_table(unsigned int data[], int tbl, int end, int bit, int m1, int m2) {
+int extend_table(unsigned int data[], int tbl, int end, int bit, int m1, int m2, unsigned int in) {
+    in <<= 24;
     for(data[tbl] <<= 1; tbl <= end; data[++tbl] <<= 1) {
         if((filter(data[tbl]) ^ filter(data[tbl] | 1)) != 0) {
             data[tbl] |= filter(data[tbl]) ^ bit;
             update_contribution(data, tbl, m1, m2);
+            data[tbl] ^= in;
         } else if(filter(data[tbl]) == bit) {
             data[++end] = data[tbl + 1];
             data[tbl + 1] = data[tbl] | 1;
             update_contribution(data, tbl, m1, m2);
-            tbl++;
+            data[tbl++] ^= in;
             update_contribution(data, tbl, m1, m2);
+            data[tbl] ^= in;
         } else {
             data[tbl--] = data[end--];
         }
@@ -446,11 +460,12 @@ int old_recover(
     int rem,
     int s,
     MfClassicNonce* n,
+    unsigned int in,
     int first_run) {
     int o, e, i;
     if(rem == -1) {
         for(e = e_head; e <= e_tail; ++e) {
-            even[e] = (even[e] << 1) ^ evenparity32(even[e] & LF_POLY_EVEN);
+            even[e] = (even[e] << 1) ^ evenparity32(even[e] & LF_POLY_EVEN) ^ (!!(in & 4));
             for(o = o_head; o <= o_tail; ++o, ++s) {
                 struct Crypto1State temp = {0, 0};
                 temp.even = odd[o];
@@ -466,11 +481,12 @@ int old_recover(
         for(i = 0; (i < 4) && (rem-- != 0); i++) {
             oks >>= 1;
             eks >>= 1;
+            in >>= 2;
             o_tail = extend_table(
-                odd, o_head, o_tail, oks & 1, LF_POLY_EVEN << 1 | 1, LF_POLY_ODD << 1);
+                odd, o_head, o_tail, oks & 1, LF_POLY_EVEN << 1 | 1, LF_POLY_ODD << 1, 0);
             if(o_head > o_tail) return s;
-            e_tail =
-                extend_table(even, e_head, e_tail, eks & 1, LF_POLY_ODD, LF_POLY_EVEN << 1 | 1);
+            e_tail = extend_table(
+                even, e_head, e_tail, eks & 1, LF_POLY_ODD, LF_POLY_EVEN << 1 | 1, in & 3);
             if(e_head > e_tail) return s;
         }
     }
@@ -481,7 +497,8 @@ int old_recover(
         if(((odd[o_tail] ^ even[e_tail]) >> 24) == 0) {
             o_tail = binsearch(odd, o_head, o = o_tail);
             e_tail = binsearch(even, e_head, e = e_tail);
-            s = old_recover(odd, o_tail--, o, oks, even, e_tail--, e, eks, rem, s, n, first_run);
+            s = old_recover(
+                odd, o_tail--, o, oks, even, e_tail--, e, eks, rem, s, n, in, first_run);
             if(s == -1) {
                 break;
             }
@@ -515,6 +532,7 @@ int calculate_msb_tables(
     struct Msb* even_msbs,
     unsigned int* temp_states_odd,
     unsigned int* temp_states_even,
+    unsigned int in,
     ProgramState* program_state) {
     //FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
     unsigned int msb_head = (MSB_LIMIT * msb_round); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
@@ -522,6 +540,7 @@ int calculate_msb_tables(
     int states_tail = 0, tail = 0;
     int i = 0, j = 0, semi_state = 0, found = 0;
     unsigned int msb = 0;
+    in = ((in >> 16 & 0xff) | (in << 16) | (in & 0xff00)) << 1;
     // TODO: Why is this necessary?
     memset(odd_msbs, 0, MSB_LIMIT * sizeof(struct Msb));
     memset(even_msbs, 0, MSB_LIMIT * sizeof(struct Msb));
@@ -535,7 +554,7 @@ int calculate_msb_tables(
 
         if(filter(semi_state) == (oks & 1)) { //-V547
             states_buffer[0] = semi_state;
-            states_tail = state_loop(states_buffer, oks, CONST_M1_1, CONST_M2_1);
+            states_tail = state_loop(states_buffer, oks, CONST_M1_1, CONST_M2_1, 0);
 
             for(i = states_tail; i >= 0; i--) {
                 msb = states_buffer[i] >> 24;
@@ -558,7 +577,7 @@ int calculate_msb_tables(
 
         if(filter(semi_state) == (eks & 1)) { //-V547
             states_buffer[0] = semi_state;
-            states_tail = state_loop(states_buffer, eks, CONST_M1_2, CONST_M2_2);
+            states_tail = state_loop(states_buffer, eks, CONST_M1_2, CONST_M2_2, in & 3);
 
             for(i = 0; i <= states_tail; i++) {
                 msb = states_buffer[i] >> 24;
@@ -605,6 +624,7 @@ int calculate_msb_tables(
             3,
             0,
             n,
+            in >> 16,
             1);
         if(res == -1) {
             return 1;
@@ -616,9 +636,7 @@ int calculate_msb_tables(
     return 0;
 }
 
-bool recover(MfClassicNonce* n, int ks2, int in, ProgramState* program_state) {
-    // XXX FIXME
-    FURI_LOG_I(TAG, "in: %i", in); // DEBUG
+bool recover(MfClassicNonce* n, int ks2, unsigned int in, ProgramState* program_state) {
     bool found = false;
     unsigned int* states_buffer = malloc(sizeof(unsigned int) * (2 << 9));
     struct Msb* odd_msbs = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
@@ -650,6 +668,7 @@ bool recover(MfClassicNonce* n, int ks2, int in, ProgramState* program_state) {
                even_msbs,
                temp_states_odd,
                temp_states_even,
+               in,
                program_state)) {
             int bench_stop = furi_hal_rtc_get_timestamp();
             FURI_LOG_I(TAG, "Cracked in %i seconds", bench_stop - bench_start);
