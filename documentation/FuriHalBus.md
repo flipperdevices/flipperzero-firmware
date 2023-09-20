@@ -102,8 +102,8 @@ Below is the list of DMA channels and their usage by the system.
 |  --   | 3         |           |                           |
 |  --   | 4         | yes       | pulse reader              |
 |  --   | 5         |           |                           |
-|  --   | 6         |           |                           |
-|  --   | 7         |           |                           |
+|  --   | 6         | yes       | USART1_Rx                 |
+|  --   | 7         | yes       | LPUART1_Rx                |
 | DMA2  | 1         | yes       | infrared, lfrfid, subghz, |
 |  --   | 2         | yes       | --                        |
 |  --   | 3         | yes       | cc1101_ext                |
