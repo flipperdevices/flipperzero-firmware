@@ -2,31 +2,20 @@ param (
     [switch]$doNotClearBuildFolder = $false
 )
 
-function Get-LatestDirectory {
-    param (
-        $Path
-    )
-
-    Get-ChildItem -Path $Path | Where-Object {$_.PSIsContainer} | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-}
-
 $build_commands = @(
     [PSCustomObject]@{
-        Name = "Official Dev";
-        FbtSwitch = "od";
-        FirmwarePath = "flipperzero-firmware_official_dev";
+        Name         = "Official Dev";
+        FbtSwitch    = "od";
         ArtifactName = "totp_official-dev_fw{FEATURES_SUFFIX}.zip";
     }
     [PSCustomObject]@{
-        Name = "Official Stable";
-        FbtSwitch = "os";
-        FirmwarePath = "flipperzero-firmware_official_stable";
+        Name         = "Official Stable";
+        FbtSwitch    = "os";
         ArtifactName = "totp_official-stable_fw{FEATURES_SUFFIX}.zip";
     }
     [PSCustomObject]@{
-        Name = "Xtreme \ Unleashed";
-        FbtSwitch = "x";
-        FirmwarePath = "flipperzero-firmware_xtreme";
+        Name         = "Xtreme \ Unleashed";
+        FbtSwitch    = "x";
         ArtifactName = "totp_xtreme_unleashed_fw{FEATURES_SUFFIX}.zip";
     }
 )
@@ -35,7 +24,8 @@ Push-Location $PSScriptRoot
 
 if (!(Test-Path -PathType Container "build")) {
     New-Item -ItemType Directory -Path "build"
-} elseif (!$doNotClearBuildFolder) {
+}
+elseif (!$doNotClearBuildFolder) {
     Remove-Item "build/*" -Recurse -Force
 }
 
@@ -48,9 +38,9 @@ function Build-Run {
 
     foreach ($build_command in $build_commands) {
         Write-Host "Building $($build_command.Name)"
-        $build_path = Join-Path -Path $build_command.FirmwarePath -ChildPath "build"
+        $build_path = Join-Path -Path $PSScriptRoot -ChildPath "totp/dist"
 
-        $fbt_args = @($build_command.FbtSwitch, "COMPACT=1", "DEBUG=0", "VERBOSE=0", "build", "APPSRC=totp", "--clean")
+        $fbt_args = @($build_command.FbtSwitch, "--clean")
         if ($CppDefine.Length -gt 0) {
             $CppDefine | ForEach-Object {
                 $fbt_args += '-D'
@@ -58,9 +48,8 @@ function Build-Run {
             }
         }
 
-        Invoke-Expression -Command "./fbt.ps1 $fbt_args"
+        Invoke-Expression -Command "./ufbt.ps1 $fbt_args"
 
-        $latest_dir = (Get-LatestDirectory -Path $build_path).Name
         $build_output_folder = "build"
         if ($Subfolder -ne $null -and $Subfolder -ne '') {
             $build_output_folder = Join-Path $build_output_folder $Subfolder
@@ -74,25 +63,26 @@ function Build-Run {
         $zip_folder = Join-Path $build_output_folder ".zip"
         if (!(Test-Path -PathType Container $zip_folder)) {
             New-Item -ItemType Directory -Path $zip_folder
-        } elseif (!$doNotClearBuildFolder) {
+        }
+        elseif (!$doNotClearBuildFolder) {
             Remove-Item "$zip_folder/*" -Recurse -Force
         }
 
         $zip_app_folder = Join-Path $zip_folder "apps/Tools"
         New-Item $zip_app_folder -ItemType Directory -Force
 
-        Copy-Item "$build_path/$latest_dir/.extapps/totp.fap" -Destination $zip_app_folder
+        Copy-Item "$build_path/totp.fap" -Destination $zip_app_folder
 
         $zip_plugins_folder = Join-Path $zip_folder "apps_data/totp/plugins"
         New-Item $zip_plugins_folder -ItemType Directory -Force
 
-        Copy-Item "$build_path/$latest_dir/.extapps/*.fal" -Destination $zip_plugins_folder
+        Copy-Item "$build_path/*.fal" -Destination $zip_plugins_folder
 
         Compress-Archive -Path "$zip_folder/*" -DestinationPath $build_output_artifact
 
         Remove-Item $zip_folder -Recurse -Force
 
-        Write-Host "Artifacts for $($build_command.Name) stored at $build_output_artifact"
+        Write-Host "Artifacts for `"$($build_command.Name)`" stored at `"$build_output_artifact`""
     }
 }
 

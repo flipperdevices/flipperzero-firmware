@@ -1,3 +1,25 @@
+// List of compatible firmwares
+#define TOTP_FIRMWARE_OFFICIAL_STABLE (1)
+#define TOTP_FIRMWARE_OFFICIAL_DEV (2)
+#define TOTP_FIRMWARE_XTREME_UL (3)
+// End of list
+
+#if __has_include("ufbt_def.h")
+#include "ufbt_def.h"
+#endif
+
+#ifndef TOTP_TARGET_FIRMWARE
+#if defined(TARGET_FIRMWARE_OFFICIAL) || defined(FW_ORIGIN_Official)
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
+#elif defined(TARGET_FIRMWARE_UNLEASHED) || defined(FW_ORIGIN_Unleashed)
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_XTREME_UL
+#elif defined(TARGET_FIRMWARE_XTREME) || defined(FW_ORIGIN_Xtreme)
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_XTREME_UL
+#else
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
+#endif
+#endif
+
 // Application automatic lock timeout if user IDLE. (ticks)
 #ifndef TOTP_AUTO_LOCK_IDLE_TIMEOUT_SEC
 #define TOTP_AUTO_LOCK_IDLE_TIMEOUT_SEC (60)
@@ -20,26 +42,4 @@
 // If disabled it will print a link to wiki page
 #ifndef TOTP_UI_NO_ADD_NEW_TOKEN
 #define TOTP_UI_ADD_NEW_TOKEN_ENABLED
-#endif
-
-// List of compatible firmwares
-#define TOTP_FIRMWARE_OFFICIAL_STABLE (1)
-#define TOTP_FIRMWARE_OFFICIAL_DEV (2)
-#define TOTP_FIRMWARE_XTREME_UL (3)
-// End of list
-
-// Checking FlipC.org definitions (https://github.com/playmean/fap-list/issues/9)
-#if defined(TARGET_FIRMWARE_OFFICIAL)
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
-#elif defined(TARGET_FIRMWARE_UNLEASHED)
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_XTREME_UL
-#elif defined(TARGET_FIRMWARE_XTREME)
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_XTREME_UL
-#endif
-// End of FlipC.org definition checks
-
-// If target firmware is not yet set, default it to OFW because there is no chance to force Flipper Devices to update their build pipelines :angry:.
-// I'm still using Xtreme firmware, it is still the best one and I highly recommend it to everybody.
-#ifndef TOTP_TARGET_FIRMWARE
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
 #endif

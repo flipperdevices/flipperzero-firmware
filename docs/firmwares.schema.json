@@ -1,0 +1,106 @@
+{
+  "description": "Schema file for uFBT-FirmwareManager firmwares.json file",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "firmwares": {
+      "description": "Available firmwares",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "alias": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "description": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "index",
+                  "git-release"
+                ]
+              }
+            },
+            "required": [
+              "alias",
+              "description"
+            ],
+            "unevaluatedProperties ": false
+          },
+          {
+            "oneOf": [
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "index"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "index_url": {
+                      "type": "string"
+                    },
+                    "channel": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "index_url",
+                    "channel"
+                  ],
+                  "unevaluatedProperties ": false
+                },
+                "else": false
+              },
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "git-release"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "git_repo": {
+                      "type": "string"
+                    },
+                    "git_release": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "git_repo",
+                    "git_release"
+                  ],
+                  "unevaluatedProperties ": false
+                },
+                "else": false
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "firmwares"
+  ],
+  "unevaluatedProperties ": false
+}

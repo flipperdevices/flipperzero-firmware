@@ -1,7 +1,0 @@
-#!/bin/bash
-
-pushd flipperzero-firmware_xtreme
-rm -rf applications/external/totp
-sed -i 's/applications_user/../' site_scons/commandline.scons
-./fbt fap_totp
-popd

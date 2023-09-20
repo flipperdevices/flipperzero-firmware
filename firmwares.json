@@ -1,0 +1,38 @@
+{
+  "$schema": "docs/firmwares.schema.json",
+  "firmwares": [
+    {
+      "alias": [
+        "od",
+        "official-dev",
+        "off-dev"
+      ],
+      "description": "Official Dev",
+      "type": "index",
+      "index_url": "https://update.flipperzero.one/firmware/directory.json",
+      "channel": "dev"
+    },
+    {
+      "alias": [
+        "os",
+        "official-stable",
+        "off-stbl"
+      ],
+      "description": "Official Stable",
+      "type": "index",
+      "index_url": "https://update.flipperzero.one/firmware/directory.json",
+      "channel": "release"
+    },
+    {
+      "alias": [
+        "x",
+        "xtreme",
+        "xt"
+      ],
+      "description": "Xtreme",
+      "type": "git-release",
+      "git_repo": "Flipper-XFW/Xtreme-Firmware",
+      "git_release": "latest"
+    }
+  ]
+}

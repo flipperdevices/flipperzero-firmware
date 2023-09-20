@@ -1,18 +1,3 @@
-[submodule "flipperzero-firmware_official_dev"]
-	path = flipperzero-firmware_official_dev
-	url = https://github.com/flipperdevices/flipperzero-firmware.git
-	branch = dev
-	ignore = dirty
-[submodule "flipperzero-firmware_official_stable"]
-	path = flipperzero-firmware_official_stable
-	url = https://github.com/flipperdevices/flipperzero-firmware.git
-	branch = release
-	ignore = dirty
-[submodule "flipperzero-firmware_xtreme"]
-	path = flipperzero-firmware_xtreme
-	url = https://github.com/ClaraCrazy/Flipper-Xtreme
-	branch = main
-	ignore = dirty
 [submodule "totp/lib/wolfssl"]
 	path = totp/lib/wolfssl
 	url = https://github.com/wolfSSL/wolfssl.git
