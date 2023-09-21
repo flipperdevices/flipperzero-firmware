@@ -657,6 +657,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(
     instance->mirror.ascii_mirror_data = furi_string_alloc();
     instance->iso14443_3a_listener = iso14443_3a_listener;
     instance->data = data;
+    mf_ultralight_static_lock_bytes_prepare(instance);
     mf_ultralight_listener_prepare_emulation(instance);
     mf_ultralight_composite_command_reset(instance);
     instance->sector = 0;
