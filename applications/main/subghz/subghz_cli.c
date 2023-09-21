@@ -880,97 +880,6 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     printf("\r\nExit chat\r\n");
 }
 
-static size_t index_write = 0;
-uint8_t buff[2048] = {0};
-
-static void irq_rx_byte_cb(UartIrqEvent ev, uint8_t data, void* context) {
-    UNUSED(context);
-    UNUSED(data);
-
-    if(ev == UartIrqEventRxByte) {
-        buff[index_write++] = data;
-    }
-    if(index_write >= 1707) {
-        furi_hal_console_tx(buff, index_write);
-        memset(buff, 0, index_write);
-        index_write = 0;
-    }
-}
-
-static void irq_rx_dma_cb(UartIrqEvent ev, FuriHalUartId id_uart, size_t data_len, void* context) {
-    UNUSED(context);
-
-    if(ev == UartIrqEventRxDMAEnd) {
-        if(data_len) {
-            furi_hal_uart_rx_dma(id_uart, &buff[index_write], data_len);
-            index_write += data_len;
-        }
-    }
-    if(ev == UartIrqEventRxDMA) {
-        if(data_len) {
-            furi_hal_uart_rx_dma(id_uart, &buff[index_write], data_len);
-            index_write += data_len;
-        }
-    }
-
-    if(index_write >= 1707) {
-        furi_hal_console_tx(buff, index_write);
-        memset(buff, 0, index_write);
-        index_write = 0;
-    }
-}
-
-void subghz_cli_command_us(Cli* cli, FuriString* args) {
-    UNUSED(args);
-
-    // furi_hal_uart_init(FuriHalUartIdLPUART1, 3300000);
-    // bool isr_rx_dma = true;
-    // if(isr_rx_dma) {
-    //     furi_hal_uart_set_dma_callback(FuriHalUartIdLPUART1, irq_rx_dma_cb, NULL);
-    //     printf("Listening at Rx DMA. Press CTRL+C to stop\r\n");
-    // } else {
-    //     printf("Listening at Rx 1 byte. Press CTRL+C to stop\r\n");
-    //     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, irq_rx_byte_cb, NULL);
-    // }
-    // uint8_t buffer[1707] = {
-    //     "IRQ3456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX\r\n\0"};
-    // while(!cli_cmd_interrupt_received(cli)) {
-    //     furi_delay_ms(500);
-    //     furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)buffer, 1707);
-    // }
-    // furi_hal_uart_deinit(FuriHalUartIdLPUART1);
-
-    furi_hal_console_deinit();
-    //furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    //furi_hal_uart_deinit(FuriHalUartIdUSART1);
-
-
-    furi_hal_console_init(FuriHalUartIdLPUART1, 115200);
-    furi_hal_console_enable();
-
-    FURI_LOG_I(TAG, "CONSOLE ENABLED");
-
-    furi_hal_uart_init(FuriHalUartIdUSART1, 4000000);
-    bool isr_rx_dma = true;
-    if(isr_rx_dma) {
-        printf("Listening at Rx DMA. Press CTRL+C to stop\r\n");
-        furi_hal_uart_set_dma_callback(FuriHalUartIdUSART1, irq_rx_dma_cb, NULL);
-    } else {
-        printf("Listening at Rx 1 byte. Press CTRL+C to stop\r\n");
-        furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, irq_rx_byte_cb, NULL);
-    }
-    uint8_t buffer[1707] = {
-        "IRQ3456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcv0123456789ABCDEFzxcvXX\r\n\0"};
-    while(!cli_cmd_interrupt_received(cli)) {
-        furi_delay_ms(500);
-        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)buffer, 1707);
-    }
-    furi_hal_uart_deinit(FuriHalUartIdUSART1);
-
-    furi_hal_console_deinit();
-    furi_hal_console_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
-}
-
 static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     FuriString* cmd;
     cmd = furi_string_alloc();
@@ -983,11 +892,6 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "chat") == 0) {
             subghz_cli_command_chat(cli, args);
-            break;
-        }
-
-        if(furi_string_cmp_str(cmd, "us") == 0) {
-            subghz_cli_command_us(cli, args);
             break;
         }
 
