@@ -20,6 +20,9 @@
       - Hide all moves beyond the first No Moves?  
       - Promote moves? e.g. if move 1 is set, 2 unset, if user sets move 3 then promote it to move 2  
       - Automatically clear moves beyond the first no move? surprising but that is what the game does  
+  - Types  
+    - [x] Support setting pokemon type(s)  
+    - [ ] Implement a save/revert to default workflow on the select types scene  
   - Trade  
     - [ ] Investigate Trade screens not always blinking  
   - UI  

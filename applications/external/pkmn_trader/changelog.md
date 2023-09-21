@@ -1,8 +1,8 @@
 # Changelog - Patch Notes
 
 ## Version 1.2.3
-- **Refactor and UI cleanup:** Convert to Flipper Zero UI modules for simpler interface, reduce binary by ~10 kbyte.
-- **Add Features:** Add ability to set custom pokemon nickname or default, add ability to set OT name and ID.
+- **Refactor and UI cleanup:** Convert to Flipper Zero UI modules for simpler interface, reduce binary size.
+- **Add Features:** Add ability to set custom pokemon nickname or default, add ability to set OT name and ID, add ability to select pokemon type(s). Note that, an evolution as well as a couple of different attacks will cause this to be overwritten with the pokemon's default values.
 - **Bug Fixes:** Fix strange issue with exp gain causing traded pokemon to de-level and result in incorrect stats.
 
 ## Version 1.2.2
