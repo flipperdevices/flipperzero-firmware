@@ -33,13 +33,13 @@ typedef enum {
     CcidTestSubmenuIndexInsertSmartcardReader
 } SubmenuIndex;
 
-void icc_power_on_callback(uint8_t *atrBuffer, uint32_t *atrlen, void* context) {
+void icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen, void* context) {
     UNUSED(context);
 
     iso7816_answer_to_reset(atrBuffer, atrlen);
 }
 
-void xfr_datablock_callback(uint8_t *dataBlock, uint32_t *dataBlockLen, void* context){
+void xfr_datablock_callback(uint8_t* dataBlock, uint32_t* dataBlockLen, void* context) {
     UNUSED(context);
 
     struct ISO7816_Response_APDU responseAPDU;
@@ -81,7 +81,6 @@ uint32_t ccid_test_exit(void* context) {
 }
 
 CcidTestApp* ccid_test_app_alloc() {
-
     CcidTestApp* app = malloc(sizeof(CcidTestApp));
 
     // Gui
@@ -95,7 +94,7 @@ CcidTestApp* ccid_test_app_alloc() {
     //message queue
     app->event_queue = furi_message_queue_alloc(8, sizeof(CcidTestAppEvent));
     furi_check(app->event_queue);
-    view_port_input_callback_set(app->view_port , ccid_test_app__input_callback, app->event_queue);
+    view_port_input_callback_set(app->view_port, ccid_test_app__input_callback, app->event_queue);
 
     return app;
 }
@@ -131,13 +130,14 @@ int32_t ccid_test_app(void* p) {
 
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
-    furi_hal_ccid_set_callbacks((CcidCallbacks*) &ccid_cb);
+    furi_hal_ccid_set_callbacks((CcidCallbacks*)&ccid_cb);
     furi_check(furi_hal_usb_set_config(&usb_ccid, &app->ccid_cfg) == true);
 
     //handle button events
     CcidTestAppEvent event;
     while(1) {
-        FuriStatus event_status = furi_message_queue_get(app->event_queue, &event, FuriWaitForever);
+        FuriStatus event_status =
+            furi_message_queue_get(app->event_queue, &event, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeInput) {
