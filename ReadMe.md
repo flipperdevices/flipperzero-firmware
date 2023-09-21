@@ -35,12 +35,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-20 16:30 EST`
 - [NameChanger/NameSpoof changes to fix Radio FW 0.17.2 issues #751 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/751)
 - Updated: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- REVERT: UL OFW: [New clock switch schema, fixes random core2 crashes #3008 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3008)
-- REVERT: UL: experimental BLE key size change (By xMasterX)
-- REVERT: UL: Testing hid without LED descr (By xMasterX)
 - Added: [New Evil Portal page Instagram_Realistic.html (By JMcrafter26)](https://github.com/JM26NET/flipper-zero-evil-portal/commit/663975b441bc5ace4d47457d8826a4a181701fd2)
 - Updated: [Authenticator/TOTP v5.0.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Pokemon Trading v1.2.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
+- UL OFW: [New clock switch schema, fixes random core2 crashes #3008 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3008)
+- UL: experimental BLE key size change (By xMasterX)
+- UL: Testing hid without LED descr (By xMasterX)
 
 <a name="release">
 
