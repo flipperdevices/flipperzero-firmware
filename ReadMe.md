@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: experimental BLE key size change (By xMasterX)
 - UL: Testing hid without LED descr (By xMasterX)
 - Temp Revert: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; TEMP REVERT: OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
+- Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 
 <a name="release">
 

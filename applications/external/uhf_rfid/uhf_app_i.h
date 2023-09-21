@@ -76,6 +76,7 @@ typedef enum {
     UHFViewLoading,
     UHFViewTextInput,
     UHFViewWidget,
+    UHFViewVariableItemList,
 } UHFView;
 
 UHFApp* uhf_app_alloc();

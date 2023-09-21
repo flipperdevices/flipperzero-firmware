@@ -71,6 +71,10 @@ UHFApp* uhf_alloc() {
 
     // Variable Item List
     uhf_app->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        uhf_app->view_dispatcher,
+        UHFViewVariableItemList,
+        variable_item_list_get_view(uhf_app->variable_item_list));
 
     // Submenu
     uhf_app->submenu = submenu_alloc();

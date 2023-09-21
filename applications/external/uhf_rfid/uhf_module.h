@@ -26,7 +26,7 @@ typedef enum {
 
 typedef struct {
     M100ModuleInfo* info;
-    uint16_t baudrate;
+    uint32_t baudrate;
     WorkingArea area;
     WorkingChannel channel;
     uint16_t transmitting_power;
@@ -47,7 +47,7 @@ char* m100_get_hardware_version(M100Module* module);
 char* m100_get_software_version(M100Module* module);
 char* m100_get_manufacturers(M100Module* module);
 
-void m100_set_baudrate(M100Module* module, uint16_t baudrate);
+void m100_set_baudrate(M100Module* module, uint32_t baudrate);
 bool m100_set_working_area(M100Module* module, WorkingArea area);
 bool m100_set_working_channel(M100Module* module, WorkingChannel channel);
 bool m100_set_transmitting_power(M100Module* module, uint16_t power);
@@ -70,3 +70,5 @@ M100ResponseType m100_write_label_data_storage(
     BankType bank,
     uint16_t source_address,
     uint32_t access_pwd);
+
+uint32_t m100_get_baudrate(M100Module* module);
