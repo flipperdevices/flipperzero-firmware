@@ -47,8 +47,9 @@ bool two_cities_verify(Nfc* nfc) {
         MfClassicKey key = {};
         nfc_util_num2bytes(two_cities_4k_keys[verify_sector].a, COUNT_OF(key.data), key.data);
 
+        MfClassicAuthContext auth_ctx = {};
         MfClassicError error =
-            mf_classic_poller_auth(nfc, block_num, &key, MfClassicKeyTypeA, NULL);
+            mf_classic_poller_auth(nfc, block_num, &key, MfClassicKeyTypeA, &auth_ctx);
         if(error != MfClassicErrorNone) {
             FURI_LOG_D(TAG, "Failed to read block %u: %d", block_num, error);
             break;
