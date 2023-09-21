@@ -171,6 +171,11 @@ MU_TEST(furi_hal_i2c_int_ext_3b) {
 }
 
 MU_TEST(furi_hal_i2c_ext_eeprom) {
+    if(!furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_ADDRESS, 100)) {
+        printf("no device connected, skipping\r\n");
+        return;
+    }
+
     bool ret = false;
     uint8_t buffer[EEPROM_SIZE] = {0};
 
