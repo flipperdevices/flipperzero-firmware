@@ -29,23 +29,7 @@ struct Iso14443_3aSignal {
     Iso14443_3aSignalBank signals;
 };
 
-static void iso14443_3a_add_bit(DigitalSignal* signal, bool bit) {
-    digital_signal_set_start_level(signal, bit);
-
-    if(bit) {
-        for(uint32_t i = 0; i < 7; ++i) {
-            digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
-        }
-        digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X9);
-    } else {
-        digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X8);
-        for(uint32_t i = 0; i < 8; ++i) {
-            digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
-        }
-    }
-}
-
-static void iso14443_3a_add_byte(Iso14443_3aSignal* instance, uint8_t byte, bool parity) {
+static void iso14443_3a_signal_add_byte(Iso14443_3aSignal* instance, uint8_t byte, bool parity) {
     for(size_t i = 0; i < BITS_IN_BYTE; i++) {
         digital_sequence_add(
             instance->tx_sequence,
@@ -76,7 +60,23 @@ static void iso14443_3a_signal_encode(
     } else {
         for(size_t i = 0; i < tx_bits / BITS_IN_BYTE; i++) {
             bool parity = FURI_BIT(tx_parity[i / BITS_IN_BYTE], i % BITS_IN_BYTE);
-            iso14443_3a_add_byte(instance, tx_data[i], parity);
+            iso14443_3a_signal_add_byte(instance, tx_data[i], parity);
+        }
+    }
+}
+
+static inline void iso14443_3a_signal_set_bit(DigitalSignal* signal, bool bit) {
+    digital_signal_set_start_level(signal, bit);
+
+    if(bit) {
+        for(uint32_t i = 0; i < 7; ++i) {
+            digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
+        }
+        digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X9);
+    } else {
+        digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X8);
+        for(uint32_t i = 0; i < 8; ++i) {
+            digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
         }
     }
 }
@@ -84,7 +84,7 @@ static void iso14443_3a_signal_encode(
 static inline void iso14443_3a_signal_bank_fill(Iso14443_3aSignalBank bank) {
     for(uint32_t i = 0; i < Iso14443_3aSignalIndexCount; ++i) {
         bank[i] = digital_signal_alloc(ISO14443_3A_SIGNAL_BIT_MAX_EDGES);
-        iso14443_3a_add_bit(bank[i], i % Iso14443_3aSignalIndexCount != 0);
+        iso14443_3a_signal_set_bit(bank[i], i % Iso14443_3aSignalIndexCount != 0);
     }
 }
 
