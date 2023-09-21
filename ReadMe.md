@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Temp Revert: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; TEMP REVERT: OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [Small fix to flipper.c #753 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/753) & Removed Unused Namechanger service
+- [Added 7 New Games to Games Menu (with alphabetical ordering) (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2551db724b371b64f0567170a98b53a855283bff)
 
 <a name="release">
 
