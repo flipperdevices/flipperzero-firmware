@@ -77,8 +77,7 @@ static void furi_hal_usart_dma_rx_isr() {
 
     } else if(LL_DMA_IsActiveFlag_TC6(DMA1)) {
         LL_DMA_ClearFlag_TC6(DMA1);
-        uart[FuriHalUartIdUSART1]->buffer_rx_index_write =
-            FURI_HAL_UART_DMA_RX_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_6);
+
         if(uart[FuriHalUartIdUSART1]->buffer_rx_index_read <
            FURI_HAL_UART_DMA_RX_BUFFER_SIZE * 3 / 4) {
             if(uart[FuriHalUartIdUSART1]->rx_dma_callback) {
@@ -233,8 +232,7 @@ static void furi_hal_lpuart_dma_rx_isr() {
 
     } else if(LL_DMA_IsActiveFlag_TC7(DMA1)) {
         LL_DMA_ClearFlag_TC7(DMA1);
-        uart[FuriHalUartIdLPUART1]->buffer_rx_index_write =
-            FURI_HAL_UART_DMA_RX_BUFFER_SIZE - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_7);
+
         if(uart[FuriHalUartIdLPUART1]->buffer_rx_index_read <
            FURI_HAL_UART_DMA_RX_BUFFER_SIZE * 3 / 4) {
             if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
