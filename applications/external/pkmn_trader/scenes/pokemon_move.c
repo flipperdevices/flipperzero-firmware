@@ -10,10 +10,10 @@ static void select_move_selected_callback(void* context, uint32_t index) {
     uint32_t move = scene_manager_get_scene_state(pokemon_fap->scene_manager, SelectMoveScene);
 
     if(index == UINT32_MAX) {
-        pokemon_fap->trade_party->party[0].move[move] =
+        pokemon_fap->trade_block->party[0].move[move] =
             pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].move[move];
     } else {
-        pokemon_fap->trade_party->party[0].move[move] = (uint8_t)index;
+        pokemon_fap->trade_block->party[0].move[move] = (uint8_t)index;
     }
 
     /* Move back to move menu */
@@ -40,7 +40,7 @@ static void select_move_number_callback(void* context, uint32_t index) {
 
 void select_move_scene_on_enter(void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
-    uint8_t* pkmn_move = pokemon_fap->trade_party->party[0].move;
+    uint8_t* pkmn_move = pokemon_fap->trade_block->party[0].move;
     char buf[64];
 
     submenu_reset(pokemon_fap->submenu);

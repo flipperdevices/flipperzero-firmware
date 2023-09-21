@@ -7,7 +7,7 @@
  * require a "save" button to save them. This would require tracking of
  * the two different VariableItems in a way that I don't know how to do
  * yet with this interface.
- * For now, selecting a type immediately updates the trade_party struct,
+ * For now, selecting a type immediately updates the trade_block struct,
  * requiring the user to press Back to go back. I would like to implement
  * an OK press or something to save both. But thats a problem for another
  * day.
@@ -17,7 +17,7 @@ static void select_type_1_callback(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, pokemon_fap->type_list[index].name);
-    pokemon_fap->trade_party->party[0].type[0] = pokemon_fap->type_list[index].index;
+    pokemon_fap->trade_block->party[0].type[0] = pokemon_fap->type_list[index].index;
 }
 
 static void select_type_2_callback(VariableItem* item) {
@@ -25,7 +25,7 @@ static void select_type_2_callback(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, pokemon_fap->type_list[index].name);
-    pokemon_fap->trade_party->party[0].type[1] = pokemon_fap->type_list[index].index;
+    pokemon_fap->trade_block->party[0].type[1] = pokemon_fap->type_list[index].index;
 }
 
 void select_type_scene_on_exit(void* context) {
@@ -39,8 +39,8 @@ void select_type_scene_on_enter(void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     VariableItem* type1;
     VariableItem* type2;
-    int curr_pokemon_type1 = pokemon_fap->trade_party->party[0].type[0];
-    int curr_pokemon_type2 = pokemon_fap->trade_party->party[0].type[1];
+    int curr_pokemon_type1 = pokemon_fap->trade_block->party[0].type[0];
+    int curr_pokemon_type2 = pokemon_fap->trade_block->party[0].type[1];
     int num_types = pokemon_named_list_get_num_elements(pokemon_fap->type_list);
     const NamedList* type_list = pokemon_fap->type_list;
 

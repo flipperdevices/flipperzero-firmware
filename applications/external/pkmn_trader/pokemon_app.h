@@ -83,7 +83,7 @@ struct pokemon_fap {
      * to views/trade and slimming down this struct to only contain the single
      * pokemon data rather than the full 6 member party data.
      */
-    TradeBlock* trade_party;
+    TradeBlock* trade_block;
 
     /* The currently selected pokemon */
     int curr_pokemon;
@@ -119,10 +119,10 @@ int pokemon_named_list_get_list_pos_from_index(const NamedList* list, uint8_t in
 
 const char* pokemon_named_list_get_name_from_index(const NamedList* list, uint8_t index);
 
-void pokemon_trade_party_set_default_name(char* dest, PokemonFap* pokemon_fap, size_t n);
+void pokemon_trade_block_set_default_name(char* dest, PokemonFap* pokemon_fap, size_t n);
 
-void pokemon_trade_party_recalculate(PokemonFap* pokemon_fap);
+void pokemon_trade_block_recalculate(PokemonFap* pokemon_fap);
 
-void pokemon_trade_party_recalculate_stats_from_level(PokemonFap* pokemon_fap);
+void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap);
 
 #endif /* POKEMON_APP_H */

@@ -33,7 +33,7 @@ static bool select_ot_id_input_validator(const char* text, FuriString* error, vo
         rc = false;
     } else {
         ot_id_16 = __builtin_bswap16((uint16_t)ot_id);
-        pokemon_fap->trade_party->party[0].orig_trainer = ot_id_16;
+        pokemon_fap->trade_block->party[0].ot_id = ot_id_16;
     }
 
     return rc;

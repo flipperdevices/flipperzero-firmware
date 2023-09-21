@@ -141,9 +141,9 @@ char pokemon_char_to_encoded(int byte) {
      * the traded pokemon would have this symbol in their name.
      */
 
-    case L'\u2642':
+    case '\201':
         return MALE_;
-    case L'\u2640':
+    case '\200':
         return FEMALE_;
     default:
         return TERM_;
@@ -287,9 +287,9 @@ int pokemon_encoded_to_char(char byte) {
      * the traded pokemon would have this symbol in their name.
      */
     case MALE_:
-        return L'\u2642';
+        return '\201';
     case FEMALE_:
-        return L'\u2640';
+        return '\200';
     default:
         return '\0';
     }

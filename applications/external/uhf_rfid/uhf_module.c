@@ -353,7 +353,7 @@ M100ResponseType m100_write_label_data_storage(
         return M100ValidationFail;
     return M100Success;
 }
-void m100_set_baudrate(M100Module* module, uint16_t baudrate) {
+void m100_set_baudrate(M100Module* module, uint32_t baudrate) {
     size_t length = CMD_SET_COMMUNICATION_BAUD_RATE.length;
     uint8_t cmd[length];
     memcpy(cmd, CMD_SET_COMMUNICATION_BAUD_RATE.cmd, length);
@@ -390,4 +390,8 @@ bool m100_set_freq_hopping(M100Module* module, bool hopping) {
     UNUSED(module);
     UNUSED(hopping);
     return true;
+}
+
+uint32_t m100_get_baudrate(M100Module* module) {
+    return module->baudrate;
 }
