@@ -6,20 +6,20 @@
 #define MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_9_4 1
 #define MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_15_10 2
 
-#define MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, bit) ((lock_bits & (1U << bit)) != 0)
-#define MF_ULTRALIGHT_STATIC_BITS_SET(lock_bits, mask) (lock_bits |= mask)
-#define MF_ULTRALIGHT_STATIC_BITS_CLR(lock_bits, mask) (lock_bits &= ~mask)
+#define MF_ULTRALIGHT_BIT_ACTIVE(lock_bits, bit) ((lock_bits & (1U << bit)) != 0)
+#define MF_ULTRALIGHT_BITS_SET(lock_bits, mask) (lock_bits |= mask)
+#define MF_ULTRALIGHT_BITS_CLR(lock_bits, mask) (lock_bits &= ~mask)
 
-#define MF_ULTRALIGHT_PAGE_LOCKED(lock_bits, page) MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, page)
+#define MF_ULTRALIGHT_PAGE_LOCKED(lock_bits, page) MF_ULTRALIGHT_BIT_ACTIVE(lock_bits, page)
 
 #define MF_ULTRALIGHT_STATIC_BIT_OTP_CC_LOCKED(lock_bits) \
-    MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_OTP_CC)
+    MF_ULTRALIGHT_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_OTP_CC)
 
 #define MF_ULTRALIGHT_STATIC_BITS_9_4_LOCKED(lock_bits) \
-    MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_9_4)
+    MF_ULTRALIGHT_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_9_4)
 
 #define MF_ULTRALIGHT_STATIC_BITS_15_10_LOCKED(lock_bits) \
-    MF_ULTRALIGHT_STATIC_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_15_10)
+    MF_ULTRALIGHT_BIT_ACTIVE(lock_bits, MF_ULTRALIGHT_STATIC_BIT_LOCK_BL_15_10)
 
 #define MF_ULTRALIGHT_STATIC_LOCK_L_OTP_CC_MASK (1U << 3)
 #define MF_ULTRALIGHT_STATIC_LOCK_L_9_4_MASK \
@@ -350,7 +350,7 @@ static uint16_t mf_ultralight_i2c_page_provider_for_sector1(uint16_t page, MfUlt
     UNUSED(type);
     uint16_t new_page = page;
     if(type == MfUltralightTypeNTAGI2CPlus2K) new_page = page + 236;
-    if(type == MfUltralightTypeNTAGI2C2K) new_page = page + 255;
+    if(type == MfUltralightTypeNTAGI2C2K) new_page = page + 256;
     return new_page;
 }
 
@@ -402,15 +402,15 @@ void mf_ultralight_static_lock_bytes_write(
     uint16_t current_locks = *lock_bits;
 
     if(MF_ULTRALIGHT_STATIC_BIT_OTP_CC_LOCKED(current_locks))
-        MF_ULTRALIGHT_STATIC_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_OTP_CC_MASK);
+        MF_ULTRALIGHT_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_OTP_CC_MASK);
 
     if(MF_ULTRALIGHT_STATIC_BITS_9_4_LOCKED(current_locks))
-        MF_ULTRALIGHT_STATIC_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_9_4_MASK);
+        MF_ULTRALIGHT_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_9_4_MASK);
 
     if(MF_ULTRALIGHT_STATIC_BITS_15_10_LOCKED(current_locks))
-        MF_ULTRALIGHT_STATIC_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_15_10_MASK);
+        MF_ULTRALIGHT_BITS_CLR(new_bits, MF_ULTRALIGHT_STATIC_LOCK_L_15_10_MASK);
 
-    MF_ULTRALIGHT_STATIC_BITS_SET(current_locks, new_bits);
+    MF_ULTRALIGHT_BITS_SET(current_locks, new_bits);
     *lock_bits = current_locks;
 }
 
@@ -431,4 +431,102 @@ void mf_ultralight_capability_container_write(
     for(uint8_t i = 0; i < MF_ULTRALIGHT_PAGE_SIZE; i++) {
         current_page->data[i] |= new_data[i];
     }
+}
+
+static uint16_t mf_ultralight_dynamic_lock_page_num(const MfUltralightData* data) {
+    uint16_t lock_page;
+    if(data->type == MfUltralightTypeNTAGI2C1K)
+        lock_page = 226;
+    else if(data->type == MfUltralightTypeNTAGI2C2K)
+        lock_page = 480;
+    else
+        lock_page = mf_ultralight_get_config_page_num(data->type) - 1;
+    return lock_page;
+}
+
+void mf_ultralight_dynamic_lock_bytes_prepare(MfUltralightListener* instance) {
+    if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportDynamicLock)) {
+        uint16_t lock_page = mf_ultralight_dynamic_lock_page_num(instance->data);
+        instance->dynamic_lock = (uint32_t*)instance->data->page[lock_page].data;
+    } else {
+        instance->dynamic_lock = NULL;
+    }
+}
+
+bool mf_ultralight_is_page_dynamic_lock(const MfUltralightListener* instance, uint16_t page) {
+    bool is_lock = false;
+    if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportDynamicLock)) {
+        uint16_t linear_page = page + instance->sector * 256;
+
+        uint16_t lock_page = mf_ultralight_dynamic_lock_page_num(instance->data);
+        is_lock = linear_page == lock_page;
+    }
+    return is_lock;
+}
+
+void mf_ultralight_dynamic_lock_bytes_write(
+    MfUltralightDynamicLockData* const lock_bits,
+    uint32_t new_bits) {
+    furi_assert(lock_bits != NULL);
+    new_bits &= 0x00FFFFFF;
+    uint32_t current_lock = *lock_bits;
+    for(uint8_t i = 0; i < 8; i++) {
+        uint8_t bl_bit = i + 16;
+
+        if(MF_ULTRALIGHT_BIT_ACTIVE(current_lock, bl_bit)) {
+            uint8_t lock_bit = i * 2;
+            uint32_t mask = (1U << lock_bit) | (1U << (lock_bit + 1));
+            MF_ULTRALIGHT_BITS_CLR(new_bits, mask);
+        }
+    }
+    MF_ULTRALIGHT_BITS_SET(current_lock, new_bits);
+    *lock_bits = current_lock;
+}
+
+static uint8_t mf_ultralight_dynamic_lock_granularity(MfUltralightType type) {
+    switch(type) {
+    case MfUltralightTypeUL21:
+    case MfUltralightTypeNTAG213:
+        return 2;
+    case MfUltralightTypeNTAG215:
+    case MfUltralightTypeNTAG216:
+    case MfUltralightTypeNTAGI2C1K:
+    case MfUltralightTypeNTAGI2CPlus1K:
+        return 16;
+    case MfUltralightTypeNTAGI2C2K:
+    case MfUltralightTypeNTAGI2CPlus2K:
+        return 32;
+    default:
+        return 1;
+    }
+}
+
+static uint16_t mf_ultralight_get_upper_page_bound(MfUltralightType type) {
+    uint16_t upper_page_bound;
+
+    if(type == MfUltralightTypeNTAGI2CPlus2K)
+        upper_page_bound = 511;
+    else if(type == MfUltralightTypeNTAGI2C2K)
+        upper_page_bound = 479;
+    else {
+        upper_page_bound = mf_ultralight_get_config_page_num(type) - 2;
+    }
+
+    return upper_page_bound;
+}
+
+bool mf_ultralight_dynamic_lock_check_page(const MfUltralightListener* instance, uint16_t page) {
+    UNUSED(page);
+    bool locked = false;
+    uint16_t upper_page_bound = mf_ultralight_get_upper_page_bound(instance->data->type);
+    uint16_t linear_page = page + instance->sector * 256;
+
+    if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportDynamicLock) &&
+       MF_ULTRALIGHT_PAGE_IN_BOUNDS(linear_page, 0x0010, upper_page_bound)) {
+        uint8_t granularity = mf_ultralight_dynamic_lock_granularity(instance->data->type);
+        uint8_t bit = (linear_page - 16) / granularity;
+        uint16_t current_locks = *instance->dynamic_lock;
+        locked = MF_ULTRALIGHT_PAGE_LOCKED(current_locks, bit);
+    }
+    return locked;
 }
