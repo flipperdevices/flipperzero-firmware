@@ -1141,8 +1141,10 @@ Function,+,furi_hal_clock_mco_disable,void,
 Function,+,furi_hal_clock_mco_enable,void,"FuriHalClockMcoSourceId, FuriHalClockMcoDivisorId"
 Function,-,furi_hal_clock_resume_tick,void,
 Function,-,furi_hal_clock_suspend_tick,void,
-Function,-,furi_hal_clock_switch_to_hsi,void,
-Function,-,furi_hal_clock_switch_to_pll,void,
+Function,-,furi_hal_clock_switch_hse2hsi,void,
+Function,-,furi_hal_clock_switch_hse2pll,_Bool,
+Function,-,furi_hal_clock_switch_hsi2hse,void,
+Function,-,furi_hal_clock_switch_pll2hse,_Bool,
 Function,+,furi_hal_console_disable,void,
 Function,+,furi_hal_console_enable,void,
 Function,+,furi_hal_console_init,void,
@@ -1278,6 +1280,9 @@ Function,+,furi_hal_mpu_protect_read_only,void,"FuriHalMpuRegion, uint32_t, Furi
 Function,+,furi_hal_nfc_abort,FuriHalNfcError,
 Function,+,furi_hal_nfc_acquire,FuriHalNfcError,
 Function,+,furi_hal_nfc_event_start,FuriHalNfcError,
+Function,+,furi_hal_nfc_field_detect_start,FuriHalNfcError,
+Function,+,furi_hal_nfc_field_detect_stop,FuriHalNfcError,
+Function,+,furi_hal_nfc_field_is_present,_Bool,
 Function,+,furi_hal_nfc_init,FuriHalNfcError,
 Function,+,furi_hal_nfc_is_hal_ready,FuriHalNfcError,
 Function,+,furi_hal_nfc_iso14443a_listener_set_col_res_data,FuriHalNfcError,"uint8_t*, uint8_t, uint8_t*, uint8_t"
@@ -2226,7 +2231,6 @@ Function,+,nfc_data_generator_fill_data,void,"NfcDataGeneratorType, NfcDevice*"
 Function,+,nfc_data_generator_get_name,const char*,NfcDataGeneratorType
 Function,+,nfc_device_alloc,NfcDevice*,
 Function,+,nfc_device_clear,void,NfcDevice*
-Function,+,nfc_device_is_equal_data,_Bool,"const NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_copy_data,void,"const NfcDevice*, NfcProtocol, NfcDeviceData*"
 Function,+,nfc_device_free,void,NfcDevice*
 Function,+,nfc_device_get_data,const NfcDeviceData*,"const NfcDevice*, NfcProtocol"
@@ -2235,6 +2239,7 @@ Function,+,nfc_device_get_protocol,NfcProtocol,const NfcDevice*
 Function,+,nfc_device_get_protocol_name,const char*,NfcProtocol
 Function,+,nfc_device_get_uid,const uint8_t*,"const NfcDevice*, size_t*"
 Function,+,nfc_device_is_equal,_Bool,"const NfcDevice*, const NfcDevice*"
+Function,+,nfc_device_is_equal_data,_Bool,"const NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_load,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_reset,void,NfcDevice*
 Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
