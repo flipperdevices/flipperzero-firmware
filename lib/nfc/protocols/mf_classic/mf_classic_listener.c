@@ -31,7 +31,6 @@ static void mf_classic_listener_reset_state(MfClassicListener* instance) {
     memset(&instance->auth_context, 0, sizeof(MfClassicAuthContext));
     instance->comm_state = MfClassicListenerCommStatePlain;
     instance->state = MfClassicListenerStateIdle;
-    instance->auth_state = MfClassicListenerAuthStateIdle;
     instance->cmd_in_progress = false;
     instance->current_cmd_handler_idx = 0;
     instance->transfer_value = 0;
@@ -55,7 +54,10 @@ static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
     MfClassicKeyType key_type,
     uint8_t block_num) {
     MfClassicListenerCommand command = MfClassicListenerCommandNack;
+
     do {
+        instance->state = MfClassicListenerStateIdle;
+
         if(block_num >= instance->total_block_num) {
             mf_classic_listener_reset_state(instance);
             break;
@@ -95,14 +97,14 @@ static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
                 instance->tx_plain_buffer,
                 instance->tx_encrypted_buffer);
 
-            iso14443_3a_listener_tx(instance->iso14443_3a_listener, instance->tx_encrypted_buffer);
+            iso14443_3a_listener_tx_with_custom_parity(
+                instance->iso14443_3a_listener, instance->tx_encrypted_buffer);
 
             command = MfClassicListenerCommandProcessed;
         }
 
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
-        instance->auth_state = MfClassicListenerAuthStateStarted;
     } while(false);
 
     return command;
@@ -167,7 +169,6 @@ static MfClassicListenerCommand
         iso14443_3a_listener_tx_with_custom_parity(
             instance->iso14443_3a_listener, instance->tx_encrypted_buffer);
 
-        instance->auth_state = MfClassicListenerAuthStateIdle;
         instance->state = MfClassicListenerStateAuthComplete;
         instance->comm_state = MfClassicListenerCommStateEncrypted;
         command = MfClassicListenerCommandProcessed;
@@ -263,7 +264,7 @@ static MfClassicListenerCommand mf_classic_listener_write_block_second_part_hand
         instance->cmd_in_progress = false;
 
         size_t buff_size = bit_buffer_get_size_bytes(buff);
-        if(buff_size != sizeof(MfClassicBlock) + sizeof(uint16_t)) break;
+        if(buff_size != sizeof(MfClassicBlock)) break;
 
         uint8_t block_num = auth_ctx->block_num;
         MfClassicKeyType key_type = auth_ctx->key_type;
@@ -363,7 +364,7 @@ static MfClassicListenerCommand
     MfClassicListenerCommand command = MfClassicListenerCommandNack;
 
     do {
-        if(bit_buffer_get_size_bytes(buff) != 6) break;
+        if(bit_buffer_get_size_bytes(buff) != 4) break;
 
         int32_t data;
         bit_buffer_write_bytes_mid(buff, &data, 0, sizeof(data));
@@ -396,7 +397,7 @@ static MfClassicListenerCommand
     do {
         instance->cmd_in_progress = false;
 
-        if(bit_buffer_get_size_bytes(buff) != 4) break;
+        if(bit_buffer_get_size_bytes(buff) != 2) break;
         if(bit_buffer_get_byte(buff, 0) != MF_CLASSIC_CMD_VALUE_TRANSFER) break;
 
         uint8_t block_num = bit_buffer_get_byte(buff, 1);
@@ -459,7 +460,7 @@ static MfClassicListenerCommandHandler mf_classic_listener_value_restore_handler
 static const MfClassicListenerCmd mf_classic_listener_cmd_handlers[] = {
     {
         .cmd_start_byte = MF_CLASSIC_CMD_HALT_MSB,
-        .cmd_len_bits = 4 * 8,
+        .cmd_len_bits = 2 * 8,
         .command_num = COUNT_OF(mf_classic_listener_halt_handlers),
         .handler = mf_classic_listener_halt_handlers,
     },
@@ -477,31 +478,31 @@ static const MfClassicListenerCmd mf_classic_listener_cmd_handlers[] = {
     },
     {
         .cmd_start_byte = MF_CLASSIC_CMD_READ_BLOCK,
-        .cmd_len_bits = 4 * 8,
+        .cmd_len_bits = 2 * 8,
         .command_num = COUNT_OF(mf_classic_listener_read_block_handlers),
         .handler = mf_classic_listener_read_block_handlers,
     },
     {
         .cmd_start_byte = MF_CLASSIC_CMD_WRITE_BLOCK,
-        .cmd_len_bits = 4 * 8,
+        .cmd_len_bits = 2 * 8,
         .command_num = COUNT_OF(mf_classic_listener_write_block_handlers),
         .handler = mf_classic_listener_write_block_handlers,
     },
     {
         .cmd_start_byte = MF_CLASSIC_CMD_VALUE_DEC,
-        .cmd_len_bits = 4 * 8,
+        .cmd_len_bits = 2 * 8,
         .command_num = COUNT_OF(mf_classic_listener_value_dec_handlers),
         .handler = mf_classic_listener_value_dec_handlers,
     },
     {
         .cmd_start_byte = MF_CLASSIC_CMD_VALUE_INC,
-        .cmd_len_bits = 4 * 8,
+        .cmd_len_bits = 2 * 8,
         .command_num = COUNT_OF(mf_classic_listener_value_inc_handlers),
         .handler = mf_classic_listener_value_inc_handlers,
     },
     {
         .cmd_start_byte = MF_CLASSIC_CMD_VALUE_RESTORE,
-        .cmd_len_bits = 4 * 8,
+        .cmd_len_bits = 2 * 8,
         .command_num = COUNT_OF(mf_classic_listener_value_restore_handlers),
         .handler = mf_classic_listener_value_restore_handlers,
     },
@@ -538,8 +539,16 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
         (iso3_event->type == Iso14443_3aListenerEventTypeReceivedData) ||
         (iso3_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame)) {
         if(instance->comm_state == MfClassicListenerCommStateEncrypted) {
-            crypto1_decrypt(instance->crypto, iso3_event->data->buffer, instance->rx_plain_buffer);
-            rx_buffer_plain = instance->rx_plain_buffer;
+            if(instance->state == MfClassicListenerStateAuthComplete) {
+                crypto1_decrypt(
+                    instance->crypto, iso3_event->data->buffer, instance->rx_plain_buffer);
+                rx_buffer_plain = instance->rx_plain_buffer;
+                if(iso14443_crc_check(Iso14443CrcTypeA, rx_buffer_plain)) {
+                    iso14443_crc_trim(rx_buffer_plain);
+                }
+            } else {
+                rx_buffer_plain = iso3_event->data->buffer;
+            }
         } else {
             rx_buffer_plain = iso3_event->data->buffer;
         }
