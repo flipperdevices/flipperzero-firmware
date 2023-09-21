@@ -1,9 +1,8 @@
 #include "digital_signal.h"
 
 #include <furi.h>
-#include <furi_hal.h>
+#include <furi_hal_bus.h>
 #include <furi_hal_resources.h>
-#include <math.h>
 
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_tim.h>
@@ -559,20 +558,25 @@ bool digital_sequence_send(DigitalSequence* sequence) {
                 pulse_length += 1;
             }
 
-            /* last pulse in current signal and have a next signal? */
-            if(last_pulse && sig_next) {
-                /* when a signal ends with the same level as the next signal begins, let the next signal generate the whole pulse.
-                   beware, we do not want the level after the last edge, but the last level before that edge */
-                bool end_level = sig->start_level ^ ((sig->edge_cnt % 2) == 0);
+            if(last_pulse) {
+                /* next signal is present */
+                if(sig_next) {
+                    /* when a signal ends with the same level as the next signal begins, let the next signal generate the whole pulse.
+                    beware, we do not want the level after the last edge, but the last level before that edge */
+                    bool end_level = sig->start_level ^ ((sig->edge_cnt % 2) == 0);
 
-                /* if they have the same level, pass the duration to the next pulse(s) */
-                if(end_level == sig_next->start_level) {
-                    trade_for_next = pulse_length;
+                    /* if they have the same level, pass the duration to the next pulse(s) */
+                    if(end_level == sig_next->start_level) {
+                        trade_for_next = pulse_length;
+                    }
+                } else {
+                    /* if this is the last pulse of the last signal, ignore it */
+                    trade_for_next = 1;
                 }
             }
 
             /* if it was decided, that the next signal's first pulse shall also handle our "length", then do not queue here */
-            if(!trade_for_next) {
+            if(trade_for_next == 0) {
                 digital_sequence_queue_pulse(sequence, pulse_length);
 
                 if(!dma_buffer->dma_active) {
@@ -610,9 +614,6 @@ bool digital_sequence_send(DigitalSequence* sequence) {
     /* wait until last dma transaction was finished */
     FURI_CRITICAL_EXIT();
     digital_sequence_finish(sequence);
-
-    // TODO reconfig GPIO to initial state
-    furi_hal_gpio_write(sequence->gpio, false);
 
     return true;
 }
