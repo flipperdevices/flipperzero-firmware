@@ -34,11 +34,10 @@ class FileBundler:
 
     def __init__(self, assets_dirs: List[object]):
         self.src_dirs = list(assets_dirs)
-        for src_dir in self.src_dirs:
-            if not os.path.isdir(src_dir):
-                raise Exception(f"Assets directory {src_dir} does not exist")
 
     def _gather(self, directory_path: str):
+        if not os.path.isdir(directory_path):
+            raise Exception(f"Assets directory {directory_path} does not exist")
         for root, dirs, files in os.walk(directory_path):
             for file_info in files:
                 file_path = os.path.join(root, file_info)

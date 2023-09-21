@@ -240,7 +240,8 @@ class AppBuilder:
         # Add dependencies on file assets
         for assets_dir in self.app._assets_dirs:
             self.app_env.Depends(
-                app_artifacts.compact, self.app_env.GlobRecursive("*", assets_dir)
+                app_artifacts.compact,
+                (assets_dir, self.app_env.GlobRecursive("*", assets_dir)),
             )
 
         # Always run the validator for the app's binary when building the app
