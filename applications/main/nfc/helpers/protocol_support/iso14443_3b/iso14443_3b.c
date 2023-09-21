@@ -58,15 +58,6 @@ static void nfc_scene_read_success_on_enter_iso14443_3b(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static bool nfc_scene_info_on_event_iso14443_3b(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    }
-
-    return false;
-}
-
 bool nfc_scene_saved_menu_on_event_iso14443_3b_common(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEdit) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
@@ -86,7 +77,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3b = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_iso14443_3b,
-            .on_event = nfc_scene_info_on_event_iso14443_3b,
+            .on_event = NULL,
         },
     .scene_read =
         {

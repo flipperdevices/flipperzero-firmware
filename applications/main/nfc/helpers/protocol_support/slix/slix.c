@@ -86,15 +86,6 @@ static void nfc_scene_emulate_on_enter_slix(NfcApp* instance) {
     nfc_listener_start(instance->listener, nfc_scene_emulate_listener_callback_slix, instance);
 }
 
-static bool nfc_scene_info_on_event_slix(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    }
-
-    return false;
-}
-
 static bool nfc_scene_saved_menu_on_event_slix(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEdit) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
@@ -110,7 +101,7 @@ const NfcProtocolSupportBase nfc_protocol_support_slix = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_slix,
-            .on_event = nfc_scene_info_on_event_slix,
+            .on_event = NULL,
         },
     .scene_read =
         {

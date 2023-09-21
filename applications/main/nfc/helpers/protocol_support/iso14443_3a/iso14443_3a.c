@@ -91,15 +91,6 @@ static void nfc_scene_emulate_on_enter_iso14443_3a(NfcApp* instance) {
         instance->listener, nfc_scene_emulate_listener_callback_iso14443_3a, instance);
 }
 
-static bool nfc_scene_info_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    }
-
-    return false;
-}
-
 static bool nfc_scene_read_menu_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEmulate) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneEmulate);
@@ -115,7 +106,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_iso14443_3a,
-            .on_event = nfc_scene_info_on_event_iso14443_3a,
+            .on_event = NULL,
         },
     .scene_read =
         {
