@@ -37,7 +37,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Added: [New Evil Portal page Instagram_Realistic.html (By JMcrafter26)](https://github.com/JM26NET/flipper-zero-evil-portal/commit/663975b441bc5ace4d47457d8826a4a181701fd2)
 - Updated: [Authenticator/TOTP v5.0.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [Pokemon Trading v1.2.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
 - UL OFW: [New clock switch schema, fixes random core2 crashes #3008 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3008)
 - UL: experimental BLE key size change (By xMasterX)
 - UL: Testing hid without LED descr (By xMasterX)
@@ -45,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [Small fix to flipper.c #753 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/753) & Removed Unused Namechanger service
 - [Added 7 New Games to Games Menu (with alphabetical ordering) (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2551db724b371b64f0567170a98b53a855283bff)
+- Updated: [Pokemon Trading v1.2.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
 
 <a name="release">
 

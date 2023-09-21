@@ -48,11 +48,11 @@ void main_menu_scene_on_enter(void* context) {
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectPokemonScene, scene_change_from_main_cb, pokemon_fap);
     pokemon_encoded_array_to_str(
-        name_buf, (uint8_t*)pokemon_fap->trade_party->nickname, sizeof(name_buf));
+        name_buf, (uint8_t*)pokemon_fap->trade_block->nickname, sizeof(name_buf));
     snprintf(buf, sizeof(buf), "Nickname:  %s", name_buf);
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectNicknameScene, scene_change_from_main_cb, pokemon_fap);
-    snprintf(buf, sizeof(buf), "Level:           %d", pokemon_fap->trade_party->party[0].level);
+    snprintf(buf, sizeof(buf), "Level:           %d", pokemon_fap->trade_block->party[0].level);
     submenu_add_item(
         pokemon_fap->submenu,
         "Select Moves",
@@ -75,11 +75,11 @@ void main_menu_scene_on_enter(void* context) {
         buf,
         sizeof(buf),
         "OT ID#:          %05d",
-        __builtin_bswap16(pokemon_fap->trade_party->party[0].orig_trainer));
+        __builtin_bswap16(pokemon_fap->trade_block->party[0].ot_id));
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectOTIDScene, scene_change_from_main_cb, pokemon_fap);
     pokemon_encoded_array_to_str(
-        name_buf, (uint8_t*)pokemon_fap->trade_party->ot_name, sizeof(name_buf));
+        name_buf, (uint8_t*)pokemon_fap->trade_block->ot_name, sizeof(name_buf));
     snprintf(buf, sizeof(buf), "OT Name:      %s", name_buf);
     submenu_add_item(
         pokemon_fap->submenu, buf, SelectOTNameScene, scene_change_from_main_cb, pokemon_fap);

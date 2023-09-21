@@ -18,7 +18,7 @@ static bool select_level_input_validator(const char* text, FuriString* error, vo
         furi_string_printf(error, "Level must\nbe a number\nbetween\n2-100!\n");
         rc = false;
     } else {
-        pokemon_fap->trade_party->party[0].level = level_val;
+        pokemon_fap->trade_block->party[0].level = level_val;
         /* XXX: Need to recalculate other stats with level updated! */
     }
 
@@ -28,7 +28,7 @@ static bool select_level_input_validator(const char* text, FuriString* error, vo
 static void select_level_input_callback(void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
 
-    pokemon_trade_party_recalculate_stats_from_level(pokemon_fap);
+    pokemon_trade_block_recalculate_stats_from_level(pokemon_fap);
     scene_manager_previous_scene(pokemon_fap->scene_manager);
 }
 

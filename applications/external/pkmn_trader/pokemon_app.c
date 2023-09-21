@@ -318,7 +318,7 @@ const PokemonTable pokemon_table[] = {
      {0x04, 0x04},
      {0x0A, 0x1C, 0x00, 0x00},
      GROWTH_MEDIUM_FAST},
-    {"Nidoran♀",
+    {"Nidoran\200",
      &I_nidoranf,
      0x0F,
      0x37,
@@ -351,7 +351,7 @@ const PokemonTable pokemon_table[] = {
      {0x03, 0x04},
      {0x21, 0x0A, 0x27, 0x22},
      GROWTH_MEDIUM_SLOW},
-    {"Nidoran♂",
+    {"Nidoran\201",
      &I_nidoranm,
      0x03,
      0x2E,
@@ -1905,18 +1905,18 @@ const char* pokemon_named_list_get_name_from_index(const NamedList* list, uint8_
 }
 
 /* If dest is not NULL, a copy of the default name is written to it as well */
-void pokemon_trade_party_set_default_name(char* dest, PokemonFap* pokemon_fap, size_t n) {
+void pokemon_trade_block_set_default_name(char* dest, PokemonFap* pokemon_fap, size_t n) {
     int i;
     char buf[11];
 
     /* Walk through the default name, toupper() each character, encode it, and
-     * then write that to the same position in the trade_party.
+     * then write that to the same position in the trade_block.
      */
     /* XXX: The limit of this is hard-coded to a length of 11 at most. This may
      * be a problem down the road!
      */
     for(i = 0; i < 11; i++) {
-        pokemon_fap->trade_party->nickname[0].str[i] = pokemon_char_to_encoded(
+        pokemon_fap->trade_block->nickname[0].str[i] = pokemon_char_to_encoded(
             toupper(pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].name[i]));
         buf[i] = toupper(pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].name[i]);
     }
@@ -1933,10 +1933,10 @@ void pokemon_trade_party_set_default_name(char* dest, PokemonFap* pokemon_fap, s
         (output_array)[0] = (uint8_t)(((input) >> 16) & 0xFF); \
     } while(0)
 
-void pokemon_trade_party_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
-    struct pokemon_structure* pkmn = pokemon_fap->trade_party->party;
-    const PokemonTable* table = pokemon_fap->pokemon_table;
-    int curr_pokemon = pokemon_fap->curr_pokemon;
+void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
+    struct pokemon_structure* pkmn = &pokemon_fap->trade_block->party[0];
+    const PokemonTable* table = &pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon];
+    int curr_stats = pokemon_fap->curr_stats;
     uint32_t experience;
     int level = pkmn->level;
     uint16_t stat;
@@ -1947,7 +1947,7 @@ void pokemon_trade_party_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
     uint8_t special_iv = 0xf;
 
     /* Calculate exp */
-    switch(table[curr_pokemon].growth) {
+    switch(table->growth) {
     case GROWTH_FAST:
         // https://bulbapedia.bulbagarden.net/wiki/Experience#Fast
         experience = (4 * level * level * level) / 5;
@@ -1974,7 +1974,7 @@ void pokemon_trade_party_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
     UINT32_TO_EXP(experience, pkmn->exp);
 
     /* Generate STATEXP */
-    switch(pokemon_fap->curr_stats) {
+    switch(curr_stats) {
     case 1:
     case 4:
         stat = (0xffff / 100) * level;
@@ -1997,7 +1997,7 @@ void pokemon_trade_party_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
     pkmn->special_ev = stat;
 
     /* Set up IVs */
-    if(pokemon_fap->curr_stats <= 2) {
+    if(curr_stats <= 2) {
         atk_iv = rand() % 15;
         def_iv = rand() % 15;
         spd_iv = rand() % 15;
@@ -2009,37 +2009,27 @@ void pokemon_trade_party_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
 
     /* Calculate HP */
     // https://bulbapedia.bulbagarden.net/wiki/Stat#Generations_I_and_II
-    stat = floor(
-               (((2 * (table[curr_pokemon].base_hp + hp_iv)) + floor(sqrt(pkmn->hp_ev) / 4)) *
-                level) /
-               100) +
+    stat = floor((((2 * (table->base_hp + hp_iv)) + floor(sqrt(pkmn->hp_ev) / 4)) * level) / 100) +
            (level + 10);
     pkmn->hp = __builtin_bswap16(stat);
     pkmn->max_hp = pkmn->hp;
 
     /* Calculate ATK, DEF, SPD, SP */
     // https://bulbapedia.bulbagarden.net/wiki/Stat#Generations_I_and_II
-    stat = floor(
-               (((2 * (table[curr_pokemon].base_atk + atk_iv)) + floor(sqrt(pkmn->atk_ev) / 4)) *
-                level) /
-               100) +
-           5;
+    stat =
+        floor((((2 * (table->base_atk + atk_iv)) + floor(sqrt(pkmn->atk_ev) / 4)) * level) / 100) +
+        5;
     pkmn->atk = __builtin_bswap16(stat);
-    stat = floor(
-               (((2 * (table[curr_pokemon].base_def + def_iv)) + floor(sqrt(pkmn->def_ev) / 4)) *
-                level) /
-               100) +
-           5;
+    stat =
+        floor((((2 * (table->base_def + def_iv)) + floor(sqrt(pkmn->def_ev) / 4)) * level) / 100) +
+        5;
     pkmn->def = __builtin_bswap16(stat);
-    stat = floor(
-               (((2 * (table[curr_pokemon].base_spd + spd_iv)) + floor(sqrt(pkmn->spd_ev) / 4)) *
-                level) /
-               100) +
-           5;
+    stat =
+        floor((((2 * (table->base_spd + spd_iv)) + floor(sqrt(pkmn->spd_ev) / 4)) * level) / 100) +
+        5;
     pkmn->spd = __builtin_bswap16(stat);
     stat = floor(
-               (((2 * (table[curr_pokemon].base_special + special_iv)) +
-                 floor(sqrt(pkmn->special_ev) / 4)) *
+               (((2 * (table->base_special + special_iv)) + floor(sqrt(pkmn->special_ev) / 4)) *
                 level) /
                100) +
            5;
@@ -2047,70 +2037,69 @@ void pokemon_trade_party_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
 }
 
 /* Rebuild the current trade block's variables based on curr_pokemon */
-void pokemon_trade_party_recalculate(PokemonFap* pokemon_fap) {
-    pokemon_fap->trade_party->party[0].index =
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].index;
-    pokemon_fap->trade_party->party[0].move[0] =
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].move[0];
-    pokemon_fap->trade_party->party[0].move[1] =
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].move[1];
-    pokemon_fap->trade_party->party[0].move[2] =
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].move[2];
-    pokemon_fap->trade_party->party[0].move[3] =
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].move[3];
+void pokemon_trade_block_recalculate(PokemonFap* pokemon_fap) {
+    struct pokemon_structure* pkmn = &pokemon_fap->trade_block->party[0];
+    const PokemonTable* table = &pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon];
+    int i;
 
-    pokemon_fap->trade_party->party[0].type[0] =
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].type[0];
-    pokemon_fap->trade_party->party[0].type[1] =
-        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].type[1];
+    /* Set current pokemon to the trade structure */
+    pkmn->index = table->index;
+    pokemon_fap->trade_block->party_members[0] = table->index;
 
-    pokemon_trade_party_recalculate_stats_from_level(pokemon_fap);
-    pokemon_trade_party_set_default_name(NULL, pokemon_fap, 0);
+    /* Set current pokemon's moves to the trade structure */
+    for(i = 0; i < 4; i++) {
+        pkmn->move[i] = table->move[i];
+    }
+
+    /* Set current pokemon's types to the trade structure */
+    for(i = 0; i < 2; i++) {
+        pkmn->type[i] = table->type[i];
+    }
+
+    pokemon_trade_block_recalculate_stats_from_level(pokemon_fap);
+    pokemon_trade_block_set_default_name(NULL, pokemon_fap, 0);
 }
 
-TradeBlock OUTPUT_BLOCK = {
-    .trainer_name = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_},
-    .party_cnt = 1,
-    /* Only the first pokemon is ever used even though there are 7 bytes here.
-     * If the remaining 6 bytes are _not_ 0xff, then the trade window renders
-     * garbage for the Flipper's party.
-     */
-    .party_members = {0x15, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
-    /* Only the first pokemon is set up, even though there are 6 total party members */
-    .party =
-        {
-            {.index = 0x4a,
-             .hp = 0x2c01,
-             .level = 0x4a,
-             .status_condition = 0x0,
-             .type = {0x14, 0x08},
-             .catch_held = 0x1f,
-             .move = {0x7e, 0x38, 0x09, 0x19},
-             .orig_trainer = 0x55a4,
-             .exp = {0x3, 0xd, 0x40},
-             .hp_ev = 0xffff,
-             .atk_ev = 0xffff,
-             .def_ev = 0xffff,
-             .spd_ev = 0xffff,
-             .special_ev = 0xffff,
-             .iv = 0xffff,
-             .move_pp = {0xc0, 0xc0, 0xc0, 0xc0},
-             .level_again = 0x4a,
-             .max_hp = 0x2c01,
-             .atk = 0x9600,
-             .def = 0x9700,
-             .spd = 0x9800,
-             .special = 0x9900},
-        },
-    /* Only the first pokemon has an OT name and nickname even though there are 6 members */
-    /* NOTE: I think this shouldn't exceed 7 chars */
-    .ot_name =
-        {
-            {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
-        },
-    .nickname = {
-        {.str = {F_, l_, o_, p_, p_, e_, r_, TERM_, TERM_, TERM_, TERM_}},
-    }};
+/* Allocates a chunk of memory for the trade data block and sets up some
+ * default values.
+ */
+static TradeBlock* trade_block_alloc(void) {
+    TradeBlock* trade;
+
+    trade = malloc(sizeof(TradeBlock));
+
+    /* Clear struct to be all TERM_ bytes as the various name strings need this */
+    memset(trade, TERM_, sizeof(TradeBlock));
+
+    /* The party_members element needs to be 0xff for unused */
+    memset(trade->party_members, 0xFF, sizeof(trade->party_members));
+
+    /* Zero the main party data, TERM_ in there can cause weirdness */
+    memset(trade->party, 0x00, sizeof(trade->party));
+
+    /* Set our Name, the pokemon's default OT name and ID */
+    trade->party_cnt = 1;
+
+    /* Trainer/OT name, not to exceed 7 characters! */
+    pokemon_str_to_encoded_array(trade->trainer_name, "Flipper", sizeof(trade->trainer_name));
+    pokemon_str_to_encoded_array(trade->ot_name[0].str, "Flipper", sizeof(trade->ot_name[0].str));
+
+    /* OT trainer ID# */
+    trade->party[0].ot_id = __builtin_bswap16(42069);
+
+    /* XXX: move pp isn't explicitly set up, should be fine */
+    /* XXX: catch/held isn't explicitly set up, should be okay for only Gen I support now */
+    /* XXX: Status condition isn't explicity let up, would you ever want to? */
+
+    /* Set up initial level */
+    trade->party[0].level = 2;
+
+    return trade;
+}
+
+static void trade_block_free(TradeBlock* trade) {
+    free(trade);
+}
 
 PokemonFap* pokemon_alloc() {
     PokemonFap* pokemon_fap = (PokemonFap*)malloc(sizeof(PokemonFap));
@@ -2125,24 +2114,20 @@ PokemonFap* pokemon_alloc() {
         (Gui*)furi_record_open(RECORD_GUI),
         ViewDispatcherTypeFullscreen);
 
-    //  Start Index first pokemon
-    pokemon_fap->curr_pokemon = 0;
-
-    // Set up pointer to pokemon table
+    /* Set up pointers to const data tables for reference elsewhere */
     pokemon_fap->pokemon_table = pokemon_table;
-
-    // Set up pointer to move list
     pokemon_fap->move_list = move_list;
-
-    // Set up pointer to type list
     pokemon_fap->type_list = type_list;
 
-    // Set up trade party struct
+    // Set up defaults
+    pokemon_fap->curr_pokemon = 0;
     pokemon_fap->curr_stats = 0;
-    pokemon_fap->trade_party = &OUTPUT_BLOCK;
-    pokemon_trade_party_recalculate(pokemon_fap);
-    pokemon_fap->trade_party->party[0].level = 2;
-    pokemon_trade_party_recalculate_stats_from_level(pokemon_fap);
+
+    // Set up trade party struct
+    pokemon_fap->trade_block = trade_block_alloc();
+
+    /* Update trade block struct with calculated details from initial values from trade_block_alloc() */
+    pokemon_trade_block_recalculate(pokemon_fap);
 
     /* Set up gui modules used. It would be nice if these could be allocated and
      * freed as needed, however, the scene manager still requires pointers that
@@ -2194,6 +2179,9 @@ void free_app(PokemonFap* pokemon_fap) {
 
     // Close records
     furi_record_close(RECORD_GUI);
+
+    // Free trade block
+    trade_block_free(pokemon_fap->trade_block);
 
     // Free rest
     free(pokemon_fap);

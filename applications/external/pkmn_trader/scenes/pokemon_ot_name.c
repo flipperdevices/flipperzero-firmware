@@ -30,11 +30,11 @@ static bool select_ot_name_input_validator(const char* text, FuriString* error, 
         furi_string_printf(error, "Some error?");
     } else {
         /* Clear existing OT Name in trade block*/
-        memset(pokemon_fap->trade_party->ot_name, TERM_, sizeof(struct name));
+        memset(pokemon_fap->trade_block->ot_name, TERM_, sizeof(struct name));
 
         /* Encode string to OT Name */
         pokemon_str_to_encoded_array(
-            (uint8_t*)pokemon_fap->trade_party->ot_name, (char*)text, strlen(text));
+            (uint8_t*)pokemon_fap->trade_block->ot_name, (char*)text, strlen(text));
     }
 
     return rc;

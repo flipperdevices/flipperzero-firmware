@@ -17,7 +17,7 @@ static void select_stats_selected_callback(void* context, uint32_t index) {
 
     pokemon_fap->curr_stats = index;
 
-    pokemon_trade_party_recalculate_stats_from_level(pokemon_fap);
+    pokemon_trade_block_recalculate_stats_from_level(pokemon_fap);
 
     scene_manager_previous_scene(pokemon_fap->scene_manager);
 }

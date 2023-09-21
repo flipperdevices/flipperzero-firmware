@@ -26,7 +26,7 @@ static bool select_nickname_input_validator(const char* text, FuriString* error,
     if(text[0] == '\0') {
         /* Get the pokemon's name and populate our buffer with it */
         /* XXX: Nidoran M/F are still a problem with this. */
-        pokemon_trade_party_set_default_name(name_buf, pokemon_fap, sizeof(name_buf));
+        pokemon_trade_block_set_default_name(name_buf, pokemon_fap, sizeof(name_buf));
         return true;
     }
 
@@ -34,11 +34,11 @@ static bool select_nickname_input_validator(const char* text, FuriString* error,
         furi_string_printf(error, "Some error?");
     } else {
         /* Clear existing nickname in trade block*/
-        memset(pokemon_fap->trade_party->nickname, TERM_, sizeof(struct name));
+        memset(pokemon_fap->trade_block->nickname, TERM_, sizeof(struct name));
 
         /* Encode string to nickname */
         pokemon_str_to_encoded_array(
-            (uint8_t*)pokemon_fap->trade_party->nickname, (char*)text, strlen(text));
+            (uint8_t*)pokemon_fap->trade_block->nickname, (char*)text, strlen(text));
     }
 
     return rc;
