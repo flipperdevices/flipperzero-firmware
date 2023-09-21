@@ -518,7 +518,7 @@ static uint16_t mf_ultralight_get_upper_page_bound(MfUltralightType type) {
 bool mf_ultralight_dynamic_lock_check_page(const MfUltralightListener* instance, uint16_t page) {
     UNUSED(page);
     bool locked = false;
-    uint16_t upper_page_bound = get_upper_page_bound(instance->data->type);
+    uint16_t upper_page_bound = mf_ultralight_get_upper_page_bound(instance->data->type);
     uint16_t linear_page = page + instance->sector * 256;
 
     if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportDynamicLock) &&
