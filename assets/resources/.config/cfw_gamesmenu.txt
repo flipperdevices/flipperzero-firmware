@@ -14,6 +14,7 @@ GamesMenuList Version 0
 /ext/apps/Games/doom.fap
 /ext/apps/Games/dvd_bouncer.fap
 /ext/apps/Games/etchasketch.fap
+/ext/apps/Games/five_nights_at_flippers.fap
 /ext/apps/Games/flappybird.fap
 /ext/apps/Games/game15.fap
 /ext/apps/Games/gameoflife.fap
@@ -32,14 +33,18 @@ GamesMenuList Version 0
 /ext/apps/Games/reaction_time.fap
 /ext/apps/Games/reversi.fap
 /ext/apps/Games/rock_paper_scissors.fap
+/ext/apps/Games/rock_paper_scissors_2.fap
 /ext/apps/Games/roots_of_life.fap
 /ext/apps/Games/rubiks_cube_scrambler.fap
 /ext/apps/Games/scorched_tanks.fap
+/ext/apps/Games/secret_toggle.fap
 /ext/apps/Games/simon_says.fap
 /ext/apps/Games/slotmachine.fap
 /ext/apps/Games/snake.fap
 /ext/apps/Games/snake20.fap
+/ext/apps/Games/sokoban.fap
 /ext/apps/Games/solitaire.fap
+/ext/apps/Games/sudoku.fap
 /ext/apps/Games/super_chip.fap
 /ext/apps/Games/tama_p1.fap
 /ext/apps/Games/tanks.fap
@@ -47,6 +52,8 @@ GamesMenuList Version 0
 /ext/apps/Games/tictactoe.fap
 /ext/apps/Games/tic_tac_toe_multi.fap
 /ext/apps/Games/trex_runner.fap
+/ext/apps/Games/ultimate_tic_tac_toe.fap
 /ext/apps/Games/videopoker.fap
 /ext/apps/Games/yatzee.fap
+/ext/apps/Games/zero.fap
 /ext/apps/Games/zombiez.fap
