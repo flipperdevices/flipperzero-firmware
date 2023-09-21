@@ -8,3 +8,5 @@ void nfc_render_mf_classic_info(
     const MfClassicData* data,
     NfcProtocolFormatType format_type,
     FuriString* str);
+
+void nfc_render_mf_classic_dump(const MfClassicData* data, FuriString* str);
