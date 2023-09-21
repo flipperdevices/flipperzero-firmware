@@ -1,10 +1,3 @@
-/**
- * @file furi_hal_uart.h
- * @version 1.0
- * @date 2021-11-19
- * 
- * UART HAL api interface
- */
 #pragma once
 
 #include <stddef.h>
@@ -90,20 +83,38 @@ void furi_hal_uart_set_br(FuriHalUartId channel, uint32_t baud);
 void furi_hal_uart_tx(FuriHalUartId channel, uint8_t* buffer, size_t buffer_size);
 
 /**
- * Sets UART event callback
+ * Sets UART event callback receive 1 byte
  * @param channel UART channel
  * @param callback callback pointer
  * @param context callback context
  */
 void furi_hal_uart_set_irq_cb(FuriHalUartId ch, FuriHalUartRxByteCallback callback, void* context);
 
+/**
+ * Sets UART event callback receive DMA
+ * @param channel UART channel
+ * @param callback callback pointer
+ * @param context callback context
+ */
 void furi_hal_uart_set_dma_callback(
     FuriHalUartId ch,
     FuriHalUartRxDMACallback callback,
     void* context);
 
+/**
+ * Get data UART receive DMA
+ * @param channel UART channel
+ * @param data pointer data receive
+ * @param len get data size (in bytes)
+ * @return size actual data receive (in bytes)
+ */
 size_t furi_hal_uart_rx_dma(FuriHalUartId ch, uint8_t* data, size_t len);
 
+/**
+ * Get data UART receive DMA available
+ * @param channel UART channel
+ * @return size actual data receive (in bytes)
+ */
 size_t furi_hal_uart_dma_available(FuriHalUartId ch);
 
 #ifdef __cplusplus
