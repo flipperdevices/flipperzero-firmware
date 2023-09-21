@@ -13,7 +13,6 @@ App(
         "infrared_srv",
         "lfrfid_srv",
         "nfc_srv",
-        #"namechanger_srv",
         "onewire_srv",
         "subghz_srv",
     ],
