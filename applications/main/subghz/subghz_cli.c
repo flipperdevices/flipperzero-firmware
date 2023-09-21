@@ -897,20 +897,18 @@ static void irq_rx_byte_cb(UartIrqEvent ev, uint8_t data, void* context) {
     }
 }
 
-static void irq_rx_dma_cb(UartIrqEvent ev, size_t data_len, void* context) {
+static void irq_rx_dma_cb(UartIrqEvent ev, FuriHalUartId id_uart, size_t data_len, void* context) {
     UNUSED(context);
 
     if(ev == UartIrqEventRxDMAEnd) {
         if(data_len) {
-            //furi_hal_uart_rx_dma(FuriHalUartIdLPUART1, &buff[index_write], data_len);
-            furi_hal_uart_rx_dma(FuriHalUartIdUSART1, &buff[index_write], data_len);
+            furi_hal_uart_rx_dma(id_uart, &buff[index_write], data_len);
             index_write += data_len;
         }
     }
     if(ev == UartIrqEventRxDMA) {
         if(data_len) {
-            //furi_hal_uart_rx_dma(FuriHalUartIdLPUART1, &buff[index_write], data_len);
-            furi_hal_uart_rx_dma(FuriHalUartIdUSART1, &buff[index_write], data_len);
+            furi_hal_uart_rx_dma(id_uart, &buff[index_write], data_len);
             index_write += data_len;
         }
     }

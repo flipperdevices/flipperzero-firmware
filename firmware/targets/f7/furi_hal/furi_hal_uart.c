@@ -47,6 +47,7 @@ static void furi_hal_usart_irq_callback() {
         if(uart[FuriHalUartIdUSART1]->rx_dma_callback) {
             uart[FuriHalUartIdUSART1]->rx_dma_callback(
                 UartIrqEventRxDMAEnd,
+                FuriHalUartIdUSART1,
                 furi_hal_uart_dma_available(FuriHalUartIdUSART1),
                 uart[FuriHalUartIdUSART1]->rx_callback_context);
         }
@@ -68,6 +69,7 @@ static void furi_hal_usart_dma_rx_isr() {
             if(uart[FuriHalUartIdUSART1]->rx_dma_callback) {
                 uart[FuriHalUartIdUSART1]->rx_dma_callback(
                     UartIrqEventRxDMA,
+                    FuriHalUartIdUSART1,
                     furi_hal_uart_dma_available(FuriHalUartIdUSART1),
                     uart[FuriHalUartIdUSART1]->rx_callback_context);
             }
@@ -82,6 +84,7 @@ static void furi_hal_usart_dma_rx_isr() {
             if(uart[FuriHalUartIdUSART1]->rx_dma_callback) {
                 uart[FuriHalUartIdUSART1]->rx_dma_callback(
                     UartIrqEventRxDMA,
+                    FuriHalUartIdUSART1,
                     furi_hal_uart_dma_available(FuriHalUartIdUSART1),
                     uart[FuriHalUartIdUSART1]->rx_callback_context);
             }
@@ -200,6 +203,7 @@ static void furi_hal_lpuart_irq_callback() {
         if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
             uart[FuriHalUartIdLPUART1]->rx_dma_callback(
                 UartIrqEventRxDMAEnd,
+                FuriHalUartIdLPUART1,
                 furi_hal_uart_dma_available(FuriHalUartIdLPUART1),
                 uart[FuriHalUartIdLPUART1]->rx_callback_context);
         }
@@ -221,6 +225,7 @@ static void furi_hal_lpuart_dma_rx_isr() {
             if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
                 uart[FuriHalUartIdLPUART1]->rx_dma_callback(
                     UartIrqEventRxDMA,
+                    FuriHalUartIdLPUART1,
                     furi_hal_uart_dma_available(FuriHalUartIdLPUART1),
                     uart[FuriHalUartIdLPUART1]->rx_callback_context);
             }
@@ -235,6 +240,7 @@ static void furi_hal_lpuart_dma_rx_isr() {
             if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
                 uart[FuriHalUartIdLPUART1]->rx_dma_callback(
                     UartIrqEventRxDMA,
+                    FuriHalUartIdLPUART1,
                     furi_hal_uart_dma_available(FuriHalUartIdLPUART1),
                     uart[FuriHalUartIdLPUART1]->rx_callback_context);
             }

@@ -22,9 +22,6 @@ typedef enum {
     UartIrqEventRxDMA,
 } UartIrqEvent;
 
-typedef void (*FuriHalUartRxByteCallback)(UartIrqEvent ev, uint8_t data, void* context);
-typedef void (*FuriHalUartRxDMACallback)(UartIrqEvent ev, size_t data_len, void* context);
-
 /**
  * UART channels
  */
@@ -34,6 +31,11 @@ typedef enum {
     // Service value
     FuriHalUartIdMAX,
 } FuriHalUartId;
+
+typedef void (*FuriHalUartRxByteCallback)(UartIrqEvent ev, uint8_t data, void* context);
+typedef void (*FuriHalUartRxDMACallback)(UartIrqEvent ev, FuriHalUartId id_uart, size_t data_len, void* context);
+
+
 
 /**
  * Uart wait tx complete

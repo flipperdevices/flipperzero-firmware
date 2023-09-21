@@ -24,17 +24,18 @@ typedef enum {
 
     WorkerEvtTxStop = (1 << 2),
     WorkerEvtCdcRx = (1 << 3),
+    WorkerEvtCdcTxComplete = (1 << 4),
 
-    WorkerEvtCfgChange = (1 << 4),
+    WorkerEvtCfgChange = (1 << 5),
 
-    WorkerEvtLineCfgSet = (1 << 5),
-    WorkerEvtCtrlLineSet = (1 << 6),
+    WorkerEvtLineCfgSet = (1 << 6),
+    WorkerEvtCtrlLineSet = (1 << 7),
 
 } WorkerEvtFlags;
 
 #define WORKER_ALL_RX_EVENTS                                                      \
     (WorkerEvtStop | WorkerEvtRxDone | WorkerEvtCfgChange | WorkerEvtLineCfgSet | \
-     WorkerEvtCtrlLineSet)
+     WorkerEvtCtrlLineSet | WorkerEvtCdcTxComplete)
 #define WORKER_ALL_TX_EVENTS (WorkerEvtTxStop | WorkerEvtCdcRx)
 
 struct UsbUartBridge {
@@ -75,13 +76,18 @@ static const CdcCallbacks cdc_cb = {
 
 static int32_t usb_uart_tx_thread(void* context);
 
-static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void usb_uart_on_irq_rx_dma_cb(
+    UartIrqEvent ev,
+    FuriHalUartId id_uart,
+    size_t data_len,
+    void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
 
-    if(ev == UartIrqEventRxByte) {
-        furi_stream_buffer_send(usb_uart->rx_stream, &data, 1, 0);
-        furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
-    }
+    UNUSED(ev);
+    uint8_t data[data_len];
+    furi_hal_uart_rx_dma(id_uart, data, data_len);
+    furi_stream_buffer_send(usb_uart->rx_stream, data, data_len, 100);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
 }
 
 static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
@@ -112,20 +118,17 @@ static void usb_uart_vcp_deinit(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
 
 static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     if(uart_ch == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
-    } else if(uart_ch == FuriHalUartIdLPUART1) {
-        furi_hal_uart_init(uart_ch, 115200);
+        furi_hal_console_deinit();
     }
-    furi_hal_uart_set_irq_cb(uart_ch, usb_uart_on_irq_cb, usb_uart);
+    furi_hal_uart_init(uart_ch, 115200);
+    furi_hal_uart_set_dma_callback(uart_ch, usb_uart_on_irq_rx_dma_cb, usb_uart);
 }
 
 static void usb_uart_serial_deinit(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     UNUSED(usb_uart);
-    furi_hal_uart_set_irq_cb(uart_ch, NULL, NULL);
+    furi_hal_uart_deinit(uart_ch);
     if(uart_ch == FuriHalUartIdUSART1)
-        furi_hal_console_enable();
-    else if(uart_ch == FuriHalUartIdLPUART1)
-        furi_hal_uart_deinit(uart_ch);
+        furi_hal_console_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
 }
 
 static void usb_uart_set_baudrate(UsbUartBridge* usb_uart, uint32_t baudrate) {
@@ -186,7 +189,7 @@ static int32_t usb_uart_worker(void* context) {
             furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check(!(events & FuriFlagError));
         if(events & WorkerEvtStop) break;
-        if(events & WorkerEvtRxDone) {
+        if(events & WorkerEvtRxDone || events & WorkerEvtCdcTxComplete) {
             size_t len = furi_stream_buffer_receive(
                 usb_uart->rx_stream, usb_uart->rx_buf, USB_CDC_PKT_LEN, 0);
             if(len > 0) {
@@ -196,8 +199,6 @@ static int32_t usb_uart_worker(void* context) {
                         furi_mutex_acquire(usb_uart->usb_mutex, FuriWaitForever) == FuriStatusOk);
                     furi_hal_cdc_send(usb_uart->cfg.vcp_ch, usb_uart->rx_buf, len);
                     furi_check(furi_mutex_release(usb_uart->usb_mutex) == FuriStatusOk);
-                } else {
-                    furi_stream_buffer_reset(usb_uart->rx_stream);
                 }
             }
         }
@@ -310,6 +311,7 @@ static int32_t usb_uart_tx_thread(void* context) {
 static void vcp_on_cdc_tx_complete(void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
     furi_semaphore_release(usb_uart->tx_sem);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtCdcTxComplete);
 }
 
 static void vcp_on_cdc_rx(void* context) {
