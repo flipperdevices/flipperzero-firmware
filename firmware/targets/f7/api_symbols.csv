@@ -1114,6 +1114,9 @@ Function,+,furi_event_flag_wait,uint32_t,"FuriEventFlag*, uint32_t, uint32_t, ui
 Function,+,furi_get_tick,uint32_t,
 Function,+,furi_hal_bt_change_app,_Bool,"FuriHalBtProfile, GapEventCallback, void*"
 Function,+,furi_hal_bt_clear_white_list,_Bool,
+Function,+,furi_hal_bt_custom_adv_set,_Bool,"const uint8_t*, size_t"
+Function,+,furi_hal_bt_custom_adv_start,_Bool,"uint16_t, uint16_t, uint8_t, const uint8_t[( 6 )], uint8_t"
+Function,+,furi_hal_bt_custom_adv_stop,_Bool,
 Function,+,furi_hal_bt_dump_state,void,FuriString*
 Function,+,furi_hal_bt_ensure_c2_mode,_Bool,BleGlueC2Mode
 Function,-,furi_hal_bt_get_conn_rssi,uint32_t,uint8_t*
