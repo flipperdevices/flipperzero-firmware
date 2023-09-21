@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0921-0043-0.91.5-92ce345](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-21 00:43 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-21 00:43 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-21 15:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-21 15:10 EST`
 - [NameChanger/NameSpoof changes to fix Radio FW 0.17.2 issues #751 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/751)
 - Updated: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Added: [New Evil Portal page Instagram_Realistic.html (By JMcrafter26)](https://github.com/JM26NET/flipper-zero-evil-portal/commit/663975b441bc5ace4d47457d8826a4a181701fd2)
@@ -45,6 +45,14 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Small fix to flipper.c #753 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/753) & Removed Unused Namechanger service
 - [Added 7 New Games to Games Menu (with alphabetical ordering) (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2551db724b371b64f0567170a98b53a855283bff)
 - Updated: [Pokemon Trading v1.2.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
+- OFW: [Gui: handle view port lockup and notify developer about it #3102 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3102)
+- OFW: [Added fal_embedded parameter for PLUGIN apps #3083 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3083)
+- OFW: [github: fixed grep arg for RC builds #3093 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3093)
+- OFW: [IR Universal Audio Remote: add NAD C316BEE #2954 (By x42)](https://github.com/flipperdevices/flipperzero-firmware/pull/2954)
+- OFW: [Fix multiline aligned text going out of bounds (again) #3084 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3084)
+- OFW: [Add Initial CCID support #3048 (By kidbomb)](https://github.com/flipperdevices/flipperzero-firmware/pull/3048)
+- OFW: [Add confirmation before exiting USB-UART #3043 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3043)
+- OFW: [Add extended I2C HAL functions #3037 (By agarof)](https://github.com/flipperdevices/flipperzero-firmware/pull/3037)
 
 <a name="release">
 
