@@ -13,6 +13,7 @@ class App:
         self._name = name
 
     def go_into(self):
+        sleep(1)
         self._navi.go_to_main_screen()
         sleep(1)
         self._navi.press_ok()
