@@ -30,20 +30,18 @@ struct Iso14443_3aSignal {
 };
 
 static void iso14443_3a_add_bit(DigitalSignal* signal, bool bit) {
+    digital_signal_set_start_level(signal, bit);
+
     if(bit) {
-        signal->start_level = true;
-        for(size_t i = 0; i < 7; i++) {
-            signal->edge_timings[i] = ISO14443_3A_SIGNAL_T_SIG_X8;
+        for(uint32_t i = 0; i < 7; ++i) {
+            digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
         }
-        signal->edge_timings[7] = ISO14443_3A_SIGNAL_T_SIG_X8_X9;
-        signal->edge_cnt = 8;
+        digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X9);
     } else {
-        signal->start_level = false;
-        signal->edge_timings[0] = ISO14443_3A_SIGNAL_T_SIG_X8_X8;
-        for(size_t i = 1; i < 9; i++) {
-            signal->edge_timings[i] = ISO14443_3A_SIGNAL_T_SIG_X8;
+        digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X8);
+        for(uint32_t i = 0; i < 8; ++i) {
+            digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
         }
-        signal->edge_cnt = 9;
     }
 }
 

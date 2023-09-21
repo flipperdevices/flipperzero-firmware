@@ -145,19 +145,25 @@ bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b) {
     return true;
 }
 
-bool digital_signal_get_start_level(DigitalSignal* signal) {
+bool digital_signal_get_start_level(const DigitalSignal* signal) {
     furi_assert(signal);
 
     return signal->start_level;
 }
 
-uint32_t digital_signal_get_edges_cnt(DigitalSignal* signal) {
+void digital_signal_set_start_level(DigitalSignal* signal, bool level) {
+    furi_assert(signal);
+
+    signal->start_level = level;
+}
+
+uint32_t digital_signal_get_edges_cnt(const DigitalSignal* signal) {
     furi_assert(signal);
 
     return signal->edge_cnt;
 }
 
-void digital_signal_add(DigitalSignal* signal, uint32_t ticks) {
+void digital_signal_add_edge(DigitalSignal* signal, uint32_t ticks) {
     furi_assert(signal);
     furi_assert(signal->edge_cnt < signal->edges_max_cnt);
 
@@ -183,7 +189,7 @@ void digital_signal_add_pulse(DigitalSignal* signal, uint32_t ticks, bool level)
     }
 }
 
-uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num) {
+uint32_t digital_signal_get_edge(const DigitalSignal* signal, uint32_t edge_num) {
     furi_assert(signal);
     furi_assert(edge_num < signal->edge_cnt);
 
