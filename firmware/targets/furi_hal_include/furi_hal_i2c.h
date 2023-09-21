@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <furi_hal_cortex.h>
 #include <furi_hal_i2c_config.h>
 
 #ifdef __cplusplus
@@ -104,7 +103,7 @@ bool furi_hal_i2c_tx_ext(
     size_t size,
     FuriHalI2cBegin begin,
     FuriHalI2cEnd end,
-    FuriHalCortexTimer timer);
+    uint32_t timeout);
 
 /** Perform I2C RX transfer
  *
@@ -144,7 +143,7 @@ bool furi_hal_i2c_rx_ext(
     size_t size,
     FuriHalI2cBegin begin,
     FuriHalI2cEnd end,
-    FuriHalCortexTimer timer);
+    uint32_t timeout);
 
 /** Perform I2C TX and RX transfers
  *

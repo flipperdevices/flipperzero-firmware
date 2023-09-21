@@ -203,8 +203,10 @@ bool furi_hal_i2c_rx_ext(
     size_t size,
     FuriHalI2cBegin begin,
     FuriHalI2cEnd end,
-    FuriHalCortexTimer timer) {
+    uint32_t timeout) {
     furi_check(handle->bus->current_handle == handle);
+
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
 
     return furi_hal_i2c_transaction(
         handle->bus->i2c, address, ten_bit, data, size, begin, end, true, timer);
@@ -218,8 +220,10 @@ bool furi_hal_i2c_tx_ext(
     size_t size,
     FuriHalI2cBegin begin,
     FuriHalI2cEnd end,
-    FuriHalCortexTimer timer) {
+    uint32_t timeout) {
     furi_check(handle->bus->current_handle == handle);
+
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
 
     return furi_hal_i2c_transaction(
         handle->bus->i2c, address, ten_bit, (uint8_t*)data, size, begin, end, false, timer);
@@ -233,10 +237,8 @@ bool furi_hal_i2c_tx(
     uint32_t timeout) {
     furi_assert(timeout > 0);
 
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
-
     return furi_hal_i2c_tx_ext(
-        handle, address, false, data, size, FuriHalI2cBeginStart, FuriHalI2cEndStop, timer);
+        handle, address, false, data, size, FuriHalI2cBeginStart, FuriHalI2cEndStop, timeout);
 }
 
 bool furi_hal_i2c_rx(
@@ -247,10 +249,8 @@ bool furi_hal_i2c_rx(
     uint32_t timeout) {
     furi_assert(timeout > 0);
 
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
-
     return furi_hal_i2c_rx_ext(
-        handle, address, false, data, size, FuriHalI2cBeginStart, FuriHalI2cEndStop, timer);
+        handle, address, false, data, size, FuriHalI2cBeginStart, FuriHalI2cEndStop, timeout);
 }
 
 bool furi_hal_i2c_trx(
@@ -261,8 +261,6 @@ bool furi_hal_i2c_trx(
     uint8_t* rx_data,
     size_t rx_size,
     uint32_t timeout) {
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
-
     return furi_hal_i2c_tx_ext(
                handle,
                address,
@@ -271,7 +269,7 @@ bool furi_hal_i2c_trx(
                tx_size,
                FuriHalI2cBeginStart,
                FuriHalI2cEndStop,
-               timer) &&
+               timeout) &&
            furi_hal_i2c_rx_ext(
                handle,
                address,
@@ -280,7 +278,7 @@ bool furi_hal_i2c_trx(
                rx_size,
                FuriHalI2cBeginStart,
                FuriHalI2cEndStop,
-               timer);
+               timeout);
 }
 
 bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr, uint32_t timeout) {
@@ -397,8 +395,6 @@ bool furi_hal_i2c_write_mem(
     furi_check(handle->bus->current_handle == handle);
     furi_assert(timeout > 0);
 
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
-
     return furi_hal_i2c_tx_ext(
                handle,
                i2c_addr,
@@ -407,7 +403,14 @@ bool furi_hal_i2c_write_mem(
                1,
                FuriHalI2cBeginStart,
                FuriHalI2cEndPause,
-               timer) &&
+               timeout) &&
            furi_hal_i2c_tx_ext(
-               handle, i2c_addr, false, data, len, FuriHalI2cBeginResume, FuriHalI2cEndStop, timer);
+               handle,
+               i2c_addr,
+               false,
+               data,
+               len,
+               FuriHalI2cBeginResume,
+               FuriHalI2cEndStop,
+               timeout);
 }
