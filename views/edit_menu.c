@@ -19,7 +19,7 @@ typedef struct {
     FuriString* file_path;
     SubRemLoadSubState sub_state;
 
-    uint8_t chusen;
+    uint8_t chosen;
 } SubRemViewEditMenuModel;
 
 void subrem_view_edit_menu_set_callback(
@@ -44,7 +44,7 @@ void subrem_view_edit_menu_add_data_to_show(
         subrem_view_edit_remote->view,
         SubRemViewEditMenuModel * model,
         {
-            model->chusen = index;
+            model->chosen = index;
             if(!furi_string_empty(label)) {
                 furi_string_set(model->label, label);
             } else {
@@ -63,7 +63,7 @@ uint8_t subrem_view_edit_menu_get_index(SubRemViewEditMenu* subrem_view_edit_rem
     with_view_model(
         subrem_view_edit_remote->view,
         SubRemViewEditMenuModel * model,
-        { index = model->chusen; },
+        { index = model->chosen; },
         true);
     return index;
 }
@@ -89,7 +89,7 @@ void subrem_view_edit_menu_draw(Canvas* canvas, SubRemViewEditMenuModel* model) 
 
     // Draw btn name
     canvas_set_font(canvas, FontPrimary);
-    switch(model->chusen) {
+    switch(model->chosen) {
     case SubRemSubKeyNameUp:
         canvas_draw_str(canvas, 3, FRAME_HEIGHT - 2, "UP");
         break;
@@ -129,10 +129,10 @@ void subrem_view_edit_menu_draw(Canvas* canvas, SubRemViewEditMenuModel* model) 
 
     // Draw arrow
     canvas_set_color(canvas, ColorBlack);
-    if(model->chusen != 0) {
+    if(model->chosen != 0) {
         canvas_draw_icon(canvas, 119, 13, &I_Pin_arrow_up_7x9);
     }
-    if(model->chusen != 4) {
+    if(model->chosen != 4) {
         canvas_draw_icon_ex(canvas, 119, 42, &I_Pin_arrow_up_7x9, IconRotation180);
     }
 
@@ -200,8 +200,8 @@ bool subrem_view_edit_menu_input(InputEvent* event, void* context) {
             subrem_view_edit_menu->view,
             SubRemViewEditMenuModel * model,
             {
-                if(model->chusen > 0) {
-                    model->chusen -= 1;
+                if(model->chosen > 0) {
+                    model->chosen -= 1;
                 };
             },
             true);
@@ -213,8 +213,8 @@ bool subrem_view_edit_menu_input(InputEvent* event, void* context) {
             subrem_view_edit_menu->view,
             SubRemViewEditMenuModel * model,
             {
-                if(model->chusen < 4) {
-                    model->chusen += 1;
+                if(model->chosen < 4) {
+                    model->chosen += 1;
                 };
             },
             true);
@@ -263,7 +263,7 @@ SubRemViewEditMenu* subrem_view_edit_menu_alloc() {
             model->label = furi_string_alloc(); // furi_string_alloc_set_str("LABEL");
             model->file_path = furi_string_alloc(); // furi_string_alloc_set_str("FILE_PATH");
 
-            model->chusen = 0;
+            model->chosen = 0;
         },
         true);
     return subrem_view_edit_menu;
