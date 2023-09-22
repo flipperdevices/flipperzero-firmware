@@ -9,9 +9,9 @@
 
 <div align="center">
 
-**FW Official** | **FW Unleashed** | **FW RogueMaster**
-:- | :- | :- 
-[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main)|[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main&firmware=unleashed)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main&firmware=unleashed)|[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main&firmware=roguemaster)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main&firmware=roguemaster)
+**FW Official** | **FW Unleashed** | **FW RogueMaster** | **FW Xtreme**
+:- | :- | :- | :- 
+[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main)|[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main&firmware=unleashed)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main&firmware=unleashed)|[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main&firmware=roguemaster)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main&firmware=roguemaster)|[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main&firmware=xtreme)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main&firmware=xtreme)
 </div>
 
 ## Introduction
@@ -26,10 +26,10 @@ This project is intended to be overlayed on top of an existing firmware repo,  i
 
 - Clone the [Flipper Zero firmware repository](https://github.com/flipperdevices/flipperzero-firmware). Refer to [this tutorial](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/firmware/updating/README.md) for updating the firmware.
 - Copy the "pokemon" folder into the `/applications_user/pokemon` folder in your firmware.
-- Run the command `fbt launch_app` to run it on your Flipper Zero.
+- Run the command `fbt launch` to run it on your Flipper Zero.
 
 ```bash
-./fbt launch_app APPSRC=pokemon
+./fbt launch APPSRC=pokemon
 ```
 
 - NOTE: If you only want to generate the fap file, you must run the following command.
@@ -321,9 +321,10 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - Game Boy Color (GBC)
 - Game Boy Advance (GBA)
 
-## Implemented by
+## Contributors
 <a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a><br />
-<a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a>
+<a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a><br />
+<a href="https://github.com/kbembedded/Flipper-Zero-Game-Boy-Pokemon-Trading/">kbembedded</a>
 
 ## Links
 
