@@ -105,13 +105,7 @@ static void nfc_scene_read_on_enter_mf_classic(NfcApp* instance) {
 
 static bool nfc_scene_read_on_event_mf_classic(NfcApp* instance, uint32_t event) {
     if(event == NfcCustomEventPollerIncomplete) {
-        const MfClassicData* mfc_data = nfc_poller_get_data(instance->poller);
-        if(mf_classic_is_card_read(mfc_data)) {
-            view_dispatcher_send_custom_event(
-                instance->view_dispatcher, NfcCustomEventPollerSuccess);
-        } else {
-            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicDictAttack);
-        }
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicDictAttack);
     }
 
     return true;
