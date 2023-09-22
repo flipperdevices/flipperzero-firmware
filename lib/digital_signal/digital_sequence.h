@@ -26,8 +26,6 @@ bool digital_sequence_send(DigitalSequence* sequence);
 
 void digital_sequence_clear(DigitalSequence* sequence);
 
-void digital_sequence_timebase_correction(DigitalSequence* sequence, float factor);
-
 #ifdef __cplusplus
 }
 #endif
