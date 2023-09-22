@@ -397,7 +397,7 @@ static MfUltralightCommand
 
 static MfUltralightCommand
     mf_ultralight_listener_auth_handler(MfUltralightListener* instance, BitBuffer* buffer) {
-    MfUltralightCommand command = MfUltralightCommandNotProcessedSilent;
+    MfUltralightCommand command = MfUltralightCommandNotProcessedNAK;
 
     FURI_LOG_D(TAG, "CMD_AUTH");
 
