@@ -4,7 +4,7 @@
 #include <notification/notification_messages.h>
 #include <totp_icons.h>
 #include <roll_value.h>
-#include <available_fonts.h>
+#include "../../../services/fonts/font_provider.h"
 #include "../../canvas_extensions.h"
 #include "../../../types/token_info.h"
 #include "../../../types/common.h"
@@ -37,7 +37,7 @@ typedef struct {
     FuriMutex* last_code_update_sync;
     TotpGenerateCodeWorkerContext* generate_code_worker_context;
     UiPrecalculatedDimensions ui_precalculated_dimensions;
-    const FONT_INFO* active_font;
+    FontInfo* active_font;
     NotificationApp* notification_app;
 } SceneState;
 
@@ -140,15 +140,14 @@ static void on_new_token_code_generated(bool time_left, void* context) {
 
     SceneState* scene_state = plugin_state->current_scene_state;
     const TokenInfo* current_token = totp_token_info_iterator_get_current_token(iterator_context);
-    const FONT_INFO* const font = scene_state->active_font;
 
-    uint8_t char_width = font->charInfo[0].width;
+    uint8_t char_width = scene_state->active_font->char_info[0].width;
     scene_state->ui_precalculated_dimensions.code_total_length =
-        current_token->digits * (char_width + font->spacePixels);
+        current_token->digits * (char_width + scene_state->active_font->space_width);
     scene_state->ui_precalculated_dimensions.code_offset_x =
         (SCREEN_WIDTH - scene_state->ui_precalculated_dimensions.code_total_length) >> 1;
     scene_state->ui_precalculated_dimensions.code_offset_y =
-        SCREEN_HEIGHT_CENTER - (font->height >> 1);
+        SCREEN_HEIGHT_CENTER - (scene_state->active_font->height >> 1);
 
     if(time_left) {
         notification_message(
@@ -188,7 +187,11 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
             plugin_state->automation_kb_layout);
     }
 
-    scene_state->active_font = available_fonts[plugin_state->active_font_index];
+    scene_state->active_font = totp_font_info_alloc();
+
+    if(!totp_font_provider_get_font(plugin_state->active_font_index, scene_state->active_font)) {
+        totp_font_provider_get_font(0, scene_state->active_font);
+    }
     scene_state->notification_app = furi_record_open(RECORD_NOTIFICATION);
     scene_state->notification_sequence_automation[0] = NULL;
     scene_state->notification_sequence_new_token[0] = NULL;
@@ -426,6 +429,8 @@ void totp_scene_generate_token_deactivate(PluginState* plugin_state) {
 #endif
 
     furi_mutex_free(scene_state->last_code_update_sync);
+
+    totp_font_info_free(scene_state->active_font);
 
     free(scene_state);
     plugin_state->current_scene_state = NULL;

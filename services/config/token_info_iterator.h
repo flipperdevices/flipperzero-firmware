@@ -4,6 +4,10 @@
 #include <flipper_format/flipper_format.h>
 #include "constants.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int TotpIteratorUpdateTokenResult;
 
 typedef TotpIteratorUpdateTokenResult (
@@ -121,3 +125,7 @@ size_t totp_token_info_iterator_get_total_count(const TokenInfoIteratorContext* 
 void totp_token_info_iterator_attach_to_config_file(
     TokenInfoIteratorContext* context,
     FlipperFormat* config_file);
+
+#ifdef __cplusplus
+}
+#endif
