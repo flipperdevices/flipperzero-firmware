@@ -29,8 +29,11 @@ steps:
       - cd unleashed-firmware
       - ./fbt COMPACT=1 DEBUG=0 updater_package
       - mkdir artifacts-base
+      - mkdir artifacts-totp
       - mv assets/resources/apps/* artifacts-base/
+      - mv assets/resources/apps_data/totp/* artifacts-totp/
       - ls -laS artifacts-base
+      - ls -laS artifacts-totp
       - rm -f artifacts-base/GPIO/gpio.fap
       - rm -f artifacts-base/iButton/ibutton.fap
       - rm -f artifacts-base/Infrared/infrared.fap
@@ -43,6 +46,8 @@ steps:
       - cd ..
       - mkdir base_pack_build
       - mv unleashed-firmware/artifacts-base/ base_pack_build
+      - mkdir -p base_pack_build/apps_data/totp
+      - mv unleashed-firmware/artifacts-totp/* base_pack_build/apps_data/totp/
     environment:
       FBT_TOOLS_CUSTOM_LINK:
         from_secret: fbt_link

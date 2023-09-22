@@ -230,13 +230,13 @@ int32_t totp_app() {
         return 254;
     }
 
-    TotpCliContext* cli_context = totp_cli_register_command_handler(plugin_state);
-
     if(!totp_activate_initial_scene(plugin_state)) {
         FURI_LOG_E(LOGGING_TAG, "An error ocurred during activating initial scene\r\n");
         totp_plugin_state_free(plugin_state);
         return 253;
     }
+
+    TotpCliContext* cli_context = totp_cli_register_command_handler(plugin_state);
 
     // Affecting dolphin level
     dolphin_deed(DolphinDeedPluginStart);

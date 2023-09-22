@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 #include <gui/gui.h>
-#include <font_info.h>
+#include "../services/fonts/font_info.h"
 
 /**
  * @brief Draw string using given font
@@ -19,4 +19,4 @@ void canvas_draw_str_ex(
     uint8_t y,
     const char* text,
     size_t text_length,
-    const FONT_INFO* const font);
+    const FontInfo* const font);

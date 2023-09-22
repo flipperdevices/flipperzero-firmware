@@ -6,6 +6,10 @@
 #include "../../types/crypto_settings.h"
 #include "common_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Checks whether key slot can be used for encryption purposes
  * @param key_slot key slot index
@@ -57,3 +61,7 @@ CryptoSeedIVResult
  * @return \c true if cryptographic information is valid; \c false otherwise
  */
 bool totp_crypto_verify_key(const CryptoSettings* crypto_settings);
+
+#ifdef __cplusplus
+}
+#endif

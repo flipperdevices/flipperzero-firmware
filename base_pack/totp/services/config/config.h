@@ -6,6 +6,10 @@
 #include "constants.h"
 #include "token_info_iterator.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint8_t TotpConfigFileOpenResult;
 typedef uint8_t TotpConfigFileUpdateResult;
 
@@ -102,3 +106,7 @@ bool totp_config_file_ensure_latest_encryption(
  * @return token info iterator context
  */
 TokenInfoIteratorContext* totp_config_get_token_iterator_context(const PluginState* plugin_state);
+
+#ifdef __cplusplus
+}
+#endif
