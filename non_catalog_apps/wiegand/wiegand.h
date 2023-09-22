@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi.h>
+#include <furi_hal.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
@@ -37,6 +38,7 @@ typedef enum {
     WiegandMainMenuScene,
     WiegandInstructionsScene,
     WiegandReadScene,
+    WiegandScanScene,
     WiegandDataScene,
     WiegandSaveScene,
     WiegandLoadScene,
@@ -64,6 +66,7 @@ typedef struct App {
 typedef enum {
     WiegandMainMenuInstructions,
     WiegandMainMenuRead,
+    WiegandMainMenuScan,
     WiegandMainMenuLoad,
 } WiegandMainMenuSceneIndex;
 
@@ -71,6 +74,7 @@ typedef enum {
     WiegandMainMenuUnknownEvent,
     WiegandMainMenuInstructionsEvent,
     WiegandMainMenuReadEvent,
+    WiegandMainMenuScanEvent,
     WiegandMainMenuLoadEvent,
 } WiegandMainMenuEvent;
 
@@ -118,6 +122,10 @@ void wiegand_load_scene_on_enter(void* context);
 // void wiegand_load_scene_on_exit(void* context);
 bool wiegand_custom_callback(void* context, uint32_t custom_event);
 bool wiegand_back_event_callback(void* context);
+
+void wiegand_scan_scene_on_enter(void* context);
+//bool wiegand_scan_scene_on_event(void* context, SceneManagerEvent event);
+void wiegand_scan_scene_on_exit(void* context);
 
 // Methods with no implementation.
 bool wiegand_empty_scene_on_event(void* context, SceneManagerEvent event);

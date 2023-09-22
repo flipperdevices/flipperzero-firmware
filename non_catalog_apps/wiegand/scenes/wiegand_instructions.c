@@ -10,6 +10,7 @@ void wiegand_instructions_scene_on_enter(void* context) {
         15,
         128,
         40,
+        "Version 1.2\n"
         "Only use on devices you own!\n"
         "Connect D0 (Green) to pin A4\n"
         "Connect D1 (White) to pin A7\n"
@@ -37,7 +38,6 @@ void wiegand_instructions_scene_on_enter(void* context) {
         "Connect pin A4 to drain of\n"
         "mosfet for D0. Connect\n"
         "source of mosfet for D0 to\n"
-        "GND.\n"
-        );
+        "GND.\n");
     view_dispatcher_switch_to_view(app->view_dispatcher, WiegandWidgetView);
 }
