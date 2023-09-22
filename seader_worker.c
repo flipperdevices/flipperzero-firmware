@@ -635,14 +635,15 @@ bool seader_iso14443a_transmit(
             for(size_t i = 0; i < length; i++) {
                 bit_lib_reverse_bits(tx_rx.rx_data + i, 0, 8);
             }
-        }
 
-        memset(display, 0, sizeof(display));
+            memset(display, 0, sizeof(display));
 
-        for(uint8_t i = 0; i < length; i++) {
-            snprintf(display + (i * 2), sizeof(display), "%02x", tx_rx.rx_data[i]);
+            for(uint8_t i = 0; i < length; i++) {
+                snprintf(display + (i * 2), sizeof(display), "%02x", tx_rx.rx_data[i]);
+            }
+            FURI_LOG_D(
+                TAG, "Mutated NFC Response %d: %s [%02x]", length, display, tx_rx.rx_parity[0]);
         }
-        FURI_LOG_D(TAG, "NFC Response %d: %s [%02x]", length, display, tx_rx.rx_parity[0]);
 
         seader_send_nfc_rx(seader_uart, tx_rx.rx_data, length);
     } else {
@@ -1018,7 +1019,6 @@ int32_t seader_worker_task(void* context) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
 
     if(seader_worker->state == SeaderWorkerStateCheckSam) {
-        furi_delay_ms(1000);
         seader_ccid_check_for_sam(seader_uart);
     } else if(seader_worker->state == SeaderWorkerStateReadPicopass) {
         FURI_LOG_D(TAG, "Read Picopass");
