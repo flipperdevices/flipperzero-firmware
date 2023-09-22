@@ -86,6 +86,7 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_usb_hid.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_usb_hid_u2f.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_version.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_vibro.h,,
+Header,+,lib/digital_signal/digital_sequence.h,,
 Header,+,lib/digital_signal/digital_signal.h,,
 Header,+,lib/drivers/cc1101_regs.h,,
 Header,+,lib/flipper_application/api_hashtable/api_hashtable.h,,
@@ -814,8 +815,6 @@ Function,-,digital_signal_free,void,DigitalSignal*
 Function,+,digital_signal_get_edge,uint32_t,"const DigitalSignal*, uint32_t"
 Function,+,digital_signal_get_edges_cnt,uint32_t,const DigitalSignal*
 Function,+,digital_signal_get_start_level,_Bool,const DigitalSignal*
-Function,-,digital_signal_prepare_arr,void,DigitalSignal*
-Function,-,digital_signal_send,void,"DigitalSignal*, const GpioPin*"
 Function,+,digital_signal_set_start_level,void,"DigitalSignal*, _Bool"
 Function,-,diprintf,int,"int, const char*, ..."
 Function,+,dir_walk_alloc,DirWalk*,Storage*

@@ -1,6 +1,6 @@
 #include "iso15693_signal.h"
 
-#include <digital_signal/digital_signal.h>
+#include <digital_signal/digital_sequence.h>
 
 #define BITS_IN_BYTE (8U)
 
