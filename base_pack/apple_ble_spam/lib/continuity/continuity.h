@@ -4,11 +4,11 @@
 #include <stdlib.h>
 
 // Hacked together by @Willy-JL
-// Custom adv logic by @Willy-JL and @xMasterX
+// Custom adv logic by @Willy-JL (idea by @xMasterX)
 // Extensive testing and research on behavior and parameters by @Willy-JL and @ECTO-1A
 // Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
-// Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
+// Controversy explained at https://willyjl.dev/blog/the-controversy-behind-apple-ble-spam
 
 typedef enum {
     ContinuityTypeAirDrop = 0x05,
