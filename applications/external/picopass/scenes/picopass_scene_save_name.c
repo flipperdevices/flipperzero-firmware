@@ -1,5 +1,5 @@
 #include "../picopass_i.h"
-#include <toolbox/name_generator.h>
+#include <lib/toolbox/name_generator.h>
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 

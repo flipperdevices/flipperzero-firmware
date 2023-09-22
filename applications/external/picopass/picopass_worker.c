@@ -606,7 +606,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
                 break;
             }
 
-            err = picopass_device_parse_wiegand(pacs->credential, &pacs->record);
+            err = picopass_device_parse_wiegand(pacs->credential, pacs);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_device_parse_wiegand error %d", err);
                 picopass_worker->callback(PicopassWorkerEventFail, picopass_worker->context);
@@ -715,7 +715,7 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
             }
 
             if(nextState == PicopassWorkerEventSuccess) {
-                err = picopass_device_parse_wiegand(pacs->credential, &pacs->record);
+                err = picopass_device_parse_wiegand(pacs->credential, pacs);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(TAG, "picopass_device_parse_wiegand error %d", err);
                     nextState = PicopassWorkerEventFail;

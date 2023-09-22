@@ -31,12 +31,12 @@ void picopass_scene_device_info_on_enter(void* context) {
         furi_string_cat_printf(csn_str, "%02X ", csn[i]);
     }
 
-    if(pacs->record.bitLength == 0 || pacs->record.bitLength == 255) {
+    if(pacs->bitLength == 0 || pacs->bitLength == 255) {
         // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
         furi_string_cat_printf(wiegand_str, "Invalid PACS");
     } else {
-        size_t bytesLength = pacs->record.bitLength / 8;
-        if(pacs->record.bitLength % 8 > 0) {
+        size_t bytesLength = pacs->bitLength / 8;
+        if(pacs->bitLength % 8 > 0) {
             // Add extra byte if there are bits remaining
             bytesLength++;
         }
@@ -44,13 +44,7 @@ void picopass_scene_device_info_on_enter(void* context) {
         for(uint8_t i = RFAL_PICOPASS_BLOCK_LEN - bytesLength; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
             furi_string_cat_printf(credential_str, "%02X", pacs->credential[i]);
         }
-
-        if(pacs->record.valid) {
-            furi_string_cat_printf(
-                wiegand_str, "FC: %u CN: %u", pacs->record.FacilityCode, pacs->record.CardNumber);
-        } else {
-            furi_string_cat_printf(wiegand_str, "%d bits", pacs->record.bitLength);
-        }
+        furi_string_cat_printf(wiegand_str, "%d bits", pacs->bitLength);
 
         if(pacs->sio) {
             furi_string_cat_printf(credential_str, " +SIO");
