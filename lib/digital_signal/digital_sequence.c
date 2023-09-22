@@ -54,22 +54,18 @@ struct DigitalSequence {
     bool send_time_active;
 };
 
-static void digital_sequence_alloc_signals(DigitalSequence* sequence, uint32_t size) {
-    sequence->signals_size = size;
-    sequence->signals = malloc(sequence->signals_size * sizeof(DigitalSignal*));
-}
-
-static void digital_sequence_alloc_sequence(DigitalSequence* sequence, uint32_t size) {
-    sequence->sequence_size = size;
-    sequence->sequence = malloc(sequence->sequence_size);
-}
-
 DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     furi_assert(gpio);
 
     DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
     sequence->gpio = gpio;
+
+    sequence->signals_size = SEQUENCE_SIGNALS_SIZE;
+    sequence->signals = malloc(sequence->signals_size * sizeof(DigitalSignal*));
+
+    sequence->sequence_size = size;
+    sequence->sequence = malloc(sequence->sequence_size);
 
     sequence->dma_buffer.buffer = malloc(RINGBUFFER_SIZE * sizeof(uint32_t));
 
@@ -94,9 +90,6 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     sequence->dma_config_timer.NbData = RINGBUFFER_SIZE;
     sequence->dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     sequence->dma_config_timer.Priority = LL_DMA_PRIORITY_HIGH;
-
-    digital_sequence_alloc_signals(sequence, SEQUENCE_SIGNALS_SIZE);
-    digital_sequence_alloc_sequence(sequence, size);
 
     return sequence;
 }
