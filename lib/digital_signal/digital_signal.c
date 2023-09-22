@@ -25,39 +25,6 @@ void digital_signal_free(DigitalSignal* signal) {
     free(signal);
 }
 
-// bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b) {
-//     furi_assert(signal_a);
-//     furi_assert(signal_b);
-//
-//     if(signal_a->edges_max_cnt < signal_a->edge_cnt + signal_b->edge_cnt) {
-//         return false;
-//     }
-//     /* in case there are no edges in our target signal, the signal to append makes the rules */
-//     if(!signal_a->edge_cnt) {
-//         signal_a->start_level = signal_b->start_level;
-//     }
-//     bool end_level = signal_a->start_level;
-//     if(signal_a->edge_cnt) {
-//         end_level = signal_a->start_level ^ !(signal_a->edge_cnt % 2);
-//     }
-//     uint8_t start_copy = 0;
-//     if(end_level == signal_b->start_level) {
-//         if(signal_a->edge_cnt) {
-//             signal_a->edge_timings[signal_a->edge_cnt - 1] += signal_b->edge_timings[0];
-//             start_copy += 1;
-//         } else {
-//             signal_a->edge_timings[signal_a->edge_cnt] += signal_b->edge_timings[0];
-//         }
-//     }
-//
-//     for(size_t i = 0; i < signal_b->edge_cnt - start_copy; i++) {
-//         signal_a->edge_timings[signal_a->edge_cnt + i] = signal_b->edge_timings[start_copy + i];
-//     }
-//     signal_a->edge_cnt += signal_b->edge_cnt - start_copy;
-//
-//     return true;
-// }
-
 bool digital_signal_get_start_level(const DigitalSignal* signal) {
     furi_assert(signal);
 

@@ -26,8 +26,6 @@ void digital_signal_add_edge(DigitalSignal* signal, uint32_t ticks);
 
 void digital_signal_add_pulse(DigitalSignal* signal, uint32_t ticks, bool level);
 
-// bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b);
-
 bool digital_signal_get_start_level(const DigitalSignal* signal);
 
 void digital_signal_set_start_level(DigitalSignal* signal, bool level);
