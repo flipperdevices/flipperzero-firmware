@@ -2176,6 +2176,7 @@ void free_app(PokemonFap* pokemon_fap) {
     // Free gui modules
     submenu_free(pokemon_fap->submenu);
     text_input_free(pokemon_fap->text_input);
+    variable_item_list_free(pokemon_fap->variable_item_list);
 
     // Close records
     furi_record_close(RECORD_GUI);
@@ -2190,7 +2191,6 @@ void free_app(PokemonFap* pokemon_fap) {
 
 int32_t pokemon_app(void* p) {
     UNUSED(p);
-    //App* app = (App*)pokemon_alloc();
     PokemonFap* pokemon_fap = pokemon_alloc();
 
     furi_hal_light_set(LightRed, 0x00);

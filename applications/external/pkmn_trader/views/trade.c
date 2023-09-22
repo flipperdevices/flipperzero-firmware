@@ -449,5 +449,7 @@ void trade_free(PokemonFap* pokemon_fap) {
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
 
     disconnect_pin(&GAME_BOY_CLK);
+
+    view_free_model(pokemon_fap->trade_view);
     view_free(pokemon_fap->trade_view);
 }
