@@ -12,8 +12,9 @@ File issues in [GitHub](https://github.com/bettse/seader/issues).
 
 Buy it assembled at [Red Team Tools](https://www.redteamtools.com/nard-sam-expansion-board-for-flipper-zero-with-hid-seos-iclass-sam/), with or without SAM.
 
-
 Or build it yourself from the files in the [NARD repo](https://github.com/killergeek/nard).
+
+Optionally 3d print a [case designed by Antiklesys](https://www.printables.com/model/576735-flipper-zero-samnard-protecting-cover).
 
 ### Option 2: Smart Card 2 Click
 
