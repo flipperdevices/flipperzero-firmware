@@ -574,7 +574,7 @@ bool mf_ultralight_is_all_data_read(const MfUltralightData* data) {
         // By default PWD is 0xFFFFFFFF, but if read back it is always 0x00000000,
         // so a default read on an auth-supported NTAG is never complete.
         uint32_t feature_set = mf_ultralight_get_feature_support_set(data->type);
-        if(feature_set & MfUltralightFeatureSupportAuthentication) {
+        if(!mf_ultralight_support_feature(feature_set, MfUltralightFeatureSupportAuthentication)) {
             all_read = true;
         } else {
             MfUltralightConfigPages* config = NULL;
