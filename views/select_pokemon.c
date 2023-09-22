@@ -87,7 +87,13 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
         // Do Nothing
         break;
     }
-
+    with_view_model(
+        pokemon_fap->select_view,
+        PokemonFap* model,
+        {
+            model->curr_pokemon = selected_pokemon;
+        },
+        true);
     return consumed;
 }
 
