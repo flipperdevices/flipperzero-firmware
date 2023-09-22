@@ -34,6 +34,7 @@ steps:
       - mv assets/resources/apps_data/totp/* artifacts-totp/
       - ls -laS artifacts-base
       - ls -laS artifacts-totp
+      - ls -laS artifacts-totp/plugins
       - rm -f artifacts-base/GPIO/gpio.fap
       - rm -f artifacts-base/iButton/ibutton.fap
       - rm -f artifacts-base/Infrared/infrared.fap
