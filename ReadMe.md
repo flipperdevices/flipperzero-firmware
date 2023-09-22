@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0919-2257-0.91.5-b4e9035.tgz&channel=RM0919-2257-0.91.5-b4e9035&version=0.91.5) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0919-2257-0.91.5-b4e9035-NoAnim.tgz&channel=RM0919-2257-0.91.5-b4e9035-NoAnim&version=0.91.5)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0921-1647-0.92.1-7b26847.tgz&channel=RM0921-1647-0.92.1-7b26847&version=0.92.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0921-1647-0.92.1-7b26847-NoAnim.tgz&channel=RM0921-1647-0.92.1-7b26847-NoAnim&version=0.92.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,27 +31,9 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0921-1535-0.92.1-94c410d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-21 15:35 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-21 15:35 EST`
-- [NameChanger/NameSpoof changes to fix Radio FW 0.17.2 issues #751 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/751)
-- Updated: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Added: [New Evil Portal page Instagram_Realistic.html (By JMcrafter26)](https://github.com/JM26NET/flipper-zero-evil-portal/commit/663975b441bc5ace4d47457d8826a4a181701fd2)
-- Updated: [Authenticator/TOTP v5.0.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- UL OFW: [New clock switch schema, fixes random core2 crashes #3008 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3008)
-- UL: experimental BLE key size change (By xMasterX)
-- UL: Testing hid without LED descr (By xMasterX)
-- Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
-- [Small fix to flipper.c #753 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/753) & Removed Unused Namechanger service
-- [Added 7 New Games to Games Menu (with alphabetical ordering) (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2551db724b371b64f0567170a98b53a855283bff)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-21 16:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-21 16:50 EST`
 - Updated: [Pokemon Trading v1.2.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
-- OFW: [Gui: handle view port lockup and notify developer about it #3102 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3102)
-- OFW: [Added fal_embedded parameter for PLUGIN apps #3083 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3083)
-- OFW: [github: fixed grep arg for RC builds #3093 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3093)
-- OFW: [IR Universal Audio Remote: add NAD C316BEE #2954 (By x42)](https://github.com/flipperdevices/flipperzero-firmware/pull/2954)
-- OFW: [Fix multiline aligned text going out of bounds (again) #3084 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3084)
-- OFW: [Add Initial CCID support #3048 (By kidbomb)](https://github.com/flipperdevices/flipperzero-firmware/pull/3048)
-- OFW: [Add confirmation before exiting USB-UART #3043 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3043)
-- OFW: [Add extended I2C HAL functions #3037 (By agarof)](https://github.com/flipperdevices/flipperzero-firmware/pull/3037)
 
 <a name="release">
 
@@ -478,4 +460,4 @@ $ ./fbt dolphin_ext
 - [Air Tag for FZ ($50 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/696)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0919-2257-0.91.5-b4e9035.tgz&channel=RM0919-2257-0.91.5-b4e9035&version=0.91.5) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0919-2257-0.91.5-b4e9035-NoAnim.tgz&channel=RM0919-2257-0.91.5-b4e9035-NoAnim&version=0.91.5)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0921-1647-0.92.1-7b26847.tgz&channel=RM0921-1647-0.92.1-7b26847&version=0.92.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0921-1647-0.92.1-7b26847-NoAnim.tgz&channel=RM0921-1647-0.92.1-7b26847-NoAnim&version=0.92.1)

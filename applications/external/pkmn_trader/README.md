@@ -26,10 +26,10 @@ This project is intended to be overlayed on top of an existing firmware repo,  i
 
 - Clone the [Flipper Zero firmware repository](https://github.com/flipperdevices/flipperzero-firmware). Refer to [this tutorial](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/firmware/updating/README.md) for updating the firmware.
 - Copy the "pokemon" folder into the `/applications_user/pokemon` folder in your firmware.
-- Run the command `fbt launch_app` to run it on your Flipper Zero.
+- Run the command `fbt launch` to run it on your Flipper Zero.
 
 ```bash
-./fbt launch_app APPSRC=pokemon
+./fbt launch APPSRC=pokemon
 ```
 
 - NOTE: If you only want to generate the fap file, you must run the following command.
@@ -50,9 +50,9 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 
 - Press the `OK` button on the Flipper to open the main menu.
 - Choose `Applications` from the menu.
-- Choose `Game Boy` from the submenu.
+- Choose `GPIO` from the submenu.
 - Choose `Pokemon Trading`
-- The Flipper Zero should show the selection of Pokemon that you want to trade, and by default, it appears as bulbasaur.
+- The Flipper Zero will show the main menu of the application. The first option is to select the Pokemon to trade.
 
     <p align='center'>
         <br />
@@ -62,50 +62,32 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 
 - Press the `LEFT`/`RIGHT` buttons to paginate the selection of Pokemon by 1.
 - Press the `UP`/`DOWN` buttons to paginate the selection of Pokemon by 10.
-- Press the `OK` button to select the Pokemon to trade.
+- Press the `OK` button to select the Pokemon to trade and return to the main menu
 
     <p align='center'>
          <br />
         <img src="./docs/images/flipper-zero-flat-2.png" width="400" /><br />
     </p>
 
-- The Flipper Zero should show the selection of the Pokemon's level that you want to trade, and by default, it appears as level 1.
+- The traded Pokemon's nickname can be set. When a Pokemon is selected, the nickname defaults to the species name in all caps. This mimics a Pokemon without a customized nickname. In order to reset this nickname to its default, clear the text entry field, press `OK` on the `Save` button. This will fill the text box with the default name. Press `Save` again to set this name.
+  - **Note:** The Nidoran♀ and Nidoran♂ names will not properly render. This is because the Flipper currently cannot print unicode characters to screen. Following the above instructions will fill the text entry field with `NIDORAN ` with a space after it. This space is the unrenderable ♀/♂ symbol. Once traded, it will be correctly named.
+  - **Note:** Only alphanumeric characters are supported in the Pokemon's nickname at this time.
 
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-1-1.png" width="400" />
+        <br />
+    </p>
+
+- The Pokemon's level can be adjusted as well by hitting `OK` on the level option. The minimum level is `2` and the maximum is `100`. The level is input via a text box. (Levels below 2 cause an underflow glitch in Gen I games that would cause the level to jump to 100, so if you want this just set the Pokemon's level to 100)
+    
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-3.png" width="400" />
         <br />
     </p>
 
-- Press the `LEFT`/`RIGHT` buttons to paginate the selection of the Pokemon's level by 1.
-- Press the `UP`/`DOWN` buttons to paginate the selection of the Pokemon's level by 10.
-- Press the `OK` button to select the Pokemon's level to trade.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-4.png" width="400" />
-        <br />
-    </p>
-
-- The Flipper Zero should show the selection for the Pokemon's moves that you want to trade, this will happen 4 times with default bing no move.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-5.png" width="400" />
-        <br />
-    </p>
-
-- Press the `LEFT`/`RIGHT` buttons to paginate the selection of the Pokemon's current move selection by 1.
-- Press the `UP`/`DOWN` buttons to paginate the selection of the Pokemon's current move selection by 10.
-- Press the `OK` button to select the Pokemon's current move selection to trade.
-
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-6.png" width="400" />
-        <br />
-    </p>
-
-- The Flipper Zero should show the selection for the Pokemon's stats that you want to trade, and by default, it appears as random IV and zero EV.
+- The `Select Moves` menu is used to pick the set the traded Pokemon's moves. They are pre-populated with the moveset that the Pokemon would know at level 1. Selecting a move slot will bring up an alphabetical index of moves. Additionally, `No Move` and `Default` can be quickliy selected. Note that any move after the first `No Move` is ignored. 
 
     <p align='center'>
         <br />
@@ -113,23 +95,61 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <br />
     </p>
 
-- Press the `RIGHT`/`UP` buttons to paginate the selection of the Pokemon's stats selection by 1 positively.
-- Press the `LEFT`/`DOWN` buttons to paginate the selection of the Pokemon's stats selection by 1 negatively.
-- Press the `OK` button to select the Pokemon's current move selection to trade.
-
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-8.png" width="400" />
         <br />
     </p>
 
-- The Flipper Zero will display the view to connect the Game Boy.
+- The `Select Types` menu can change the traded Pokemon's types. The type(s) are pre-set to what the selected Pokemon normally is.
+  - Pokemon with a single type will have the same type set for both types.
+  - **Note:** Unlike other menus, changing either type immediately saves it. Pressing `Back` will keep any changes. This will be addressed in a later version. If you need to revert to the default types, a different Pokemon can be selected and the desired Pokemon re-selected.
+  - **Note:** When changing the type(s), the Pokemon's in-game stats will _NOT_ reflect the chosen type(s). Additionally, these may be overwritten back to default in-game if the Pokemon uses a move that affects types (e.g. `Transform`) or the Pokemon evolves.
+
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-8-1.png" width="400" />
+        <br />
+    </p>
+
+- The Pokemon's stats can also be influenced. The current settings are:
+  - `Random IV, Zero EV` Mimics stats of a caught wild Pokemon.
+  - `Random IV, Max EV / Level` IV is randomized, but EV is set to the maximum a trained Pokemon could be for its current level.
+  - `Randon IV, Max EV` IV is randomized, EV is set to the abosolute max for a perfectly trained Pokemon.
+  - `Max IV, Zero EV` Mimics stats of a caught wild Pokemon, but with the maximum IV possible.
+  - `Max IV, Max EV / Level` IV is max, EV is set to the maximum a trained Pokemon could be for its current level.
+  - `Max IV, Max EV` Absolutely perfect and overly powerful Pokemon.
+ 
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-5.png" width="400" />
+        <br />
+    </p>
+
+- The `OT ID#` and `OT Name` of the Pokemon can also be set. The `OT ID#` must be between `0` and `65535`. Setting the `OT ID#` and `OT Name` to the same as your current trainer's causes the game to believe it was a wild caught Pokemon and not one that was traded. This means high level Pokmon will still obey you without badges, but, will not get the experience boost of a traded Pokemon.
+
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-6.png" width="400" /><br />
+    </p>
+
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-6-1.png" width="400" /><br />
+    </p>
+
+- Finally, select `Trade PKMN` to start the trade process.
+
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-6-2.png" width="400" /><br />
+    </p>
 
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-9.png" width="400" /><br />
     </p>
-
+    
 - On your Game Boy, you should connect the  **Game Link Cable** to the Game Boy and in the game, go to the nearest  **Pokemon Center**.
 
     <p align='center'>
@@ -301,9 +321,10 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - Game Boy Color (GBC)
 - Game Boy Advance (GBA)
 
-## Implemented by
+## Contributors
 <a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a><br />
-<a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a>
+<a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a><br />
+<a href="https://github.com/kbembedded/Flipper-Zero-Game-Boy-Pokemon-Trading/">kbembedded</a>
 
 ## Links
 

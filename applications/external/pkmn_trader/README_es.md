@@ -24,10 +24,10 @@ Este proyecto está destinado a ser superpuesto encima de un repositorio de firm
 
 - Clona el [Repositorio del firmware de Flipper Zero](https://github.com/flipperdevices/flipperzero-firmware). Consulta este [tutorial](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/firmware/updating/README.md) para actualizar el firmware.
 - Copia la [carpeta "pokemon"](..) en la carpeta `/applications_user/pokemon` del firmware que clonaste.
-- Corre el comando `fbt launch_app` para correr en tu Flipper Zero.
+- Corre el comando `fbt launch` para correr en tu Flipper Zero.
 
 ```bash
-./fbt launch_app APPSRC=pokemon
+./fbt launch APPSRC=pokemon
 ```
 
 - NOTA: Si sólo quieres generar el archivo `fap` debes correr el siguiente comando.
@@ -44,87 +44,171 @@ y usa [**qFlipper**](https://flipperzero.one/update) para copiar el archivo **po
 
 ## Instrucciones de Uso
 
-Estas instrucciones asumen que está comenzando en el escritorio de Flipper Zero. De lo contrario, presione el botón Atrás hasta que esté en el escritorio.
+Estas instrucciones asumen que estás comenzando desde el escritorio de Flipper Zero. De lo contrario, presiona el botón Atrás hasta que estés en el escritorio.
 
-- Presione el botón `OK` en el flipper para abrir el menú principal.
-- Elija `Aplicaciones` en el menú.
-- Elija `Game Boy` en el submenú.
-- Elija `Pokemon Trading`
-- El Flipper Zero debe mostrar la selección de Pokemon que se desea intercambiar y por defecto parece bulbasaur.
+- Presiona el botón `OK` en Flipper para abrir el menú principal.
+- Elige `Applications` en el menú.
+- Selecciona `GPIO` en el submenú.
+- Selecciona `Pokemon Trading`.
+- Flipper Zero mostrará el menú principal de la aplicación. La primera opción es seleccionar el Pokémon a intercambiar.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-1.png" width="400" />
+      <br />
+  </p>
+- Presiona los botones `IZQUIERDA`/`DERECHA` para paginar la selección de Pokémon de a 1.
+- Presiona los botones `ARRIBA`/`ABAJO` para paginar la selección de Pokémon de a 10.
+- Presiona el botón `OK` para seleccionar el Pokémon a intercambiar y volver al menú principal.
+
+  <p align='center'>
+       <br />
+      <img src="./docs/images/flipper-zero-flat-2.png" width="400" /><br />
+  </p>
+- El nombre del Pokémon intercambiado se puede establecer. Cuando se selecciona un Pokémon, el nombre por defecto es el nombre de la especie en mayúsculas. Esto imita a un Pokémon sin un nombre personalizado. Para restablecer este nombre a su valor predeterminado, borra el campo de entrada de texto, presiona `OK` en el botón `Save`. Esto llenará el cuadro de texto con el nombre predeterminado. Presiona `Save` nuevamente para establecer este nombre.
+
+    - **Nota**: Los nombres de Nidoran♀ y Nidoran♂ no se renderizan correctamente. Esto se debe a que Flipper actualmente no puede imprimir caracteres Unicode en la pantalla. Siguiendo las instrucciones anteriores, se llenará el campo de entrada de texto con `NIDORAN ` con un espacio después. Este espacio es el símbolo no renderizable ♀/♂. Una vez intercambiado, se mostrará correctamente.
+
+    - **Nota**: Solo se admiten caracteres alfanuméricos en el nombre del Pokémon en este momento.
 
     <p align='center'>
         <br />
-        <img src="./docs/images/flipper-zero-flat-1.png" width="400" />
+        <img src="./docs/images/flipper-zero-flat-1-1.png" width="400" />
+        <br />
+    </p>
+- También se puede ajustar el nivel del Pokémon presionando `OK` en la opción de nivel. El nivel mínimo es `2` y el máximo es `100`. El nivel se ingresa a través de un cuadro de texto. (Los niveles por debajo de 2 causan una falla de desbordamiento en los juegos de Gen I que haría que el nivel saltara a 100, así que si deseas esto, simplemente establece el nivel del Pokémon en 100).
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-3.png" width="400" />
+      <br />
+  </p>
+- El menú `Select Moves` se utiliza para elegir los movimientos del Pokémon intercambiado. Están predefinidos con el conjunto de movimientos que el Pokémon conocería al nivel 1. Seleccionar una ranura de movimiento mostrará un índice alfabético de movimientos. Además, se pueden seleccionar rápidamente `No Move` y `Default`. Ten en cuenta que cualquier movimiento después del primer `No Move` se ignora.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-7.png" width="400" />
+      <br />
+  </p>
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-8.png" width="400" />
+      <br />
+  </p>
+- El menú `Select Types` puede cambiar los tipos del Pokémon intercambiado. Los tipos están predefinidos según lo que normalmente es el Pokémon seleccionado.
+
+  - Los Pokémon con un solo tipo tendrán el mismo tipo establecido para ambos tipos.
+
+  - **Nota**: A diferencia de otros menús, cambiar cualquiera de los tipos lo guarda inmediatamente. Presionar `Back` mantendrá los cambios. Esto se abordará en una versión posterior. Si necesitas volver a los tipos predeterminados, puedes seleccionar un Pokémon diferente y luego volver a seleccionar el Pokémon deseado.
+
+  - **Nota**: Al cambiar los tipos, las estadísticas del Pokémon en el juego NO reflejarán los tipos elegidos. Además, estos pueden sobrescribirse de nuevo en el juego si el Pokémon usa un movimiento que afecta a los tipos (por ejemplo, `Transform`) o el Pokémon evoluciona.
+
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-8-1.png" width="400" />
+        <br />
+    </p>
+- Las estadísticas del Pokémon también se pueden influir. Las configuraciones actuales son:
+
+  - `Random IV, Zero EV`  Imita las estadísticas de un Pokémon salvaje atrapado.
+  - `Random IV, Max EV / Level` IV es aleatorio, pero EV se establece en el máximo que un Pokémon entrenado podría tener para su nivel actual.
+  - `Randon IV, Max EV` IV es aleatorio, EV se establece en el máximo absoluto para un Pokémon perfectamente entrenado.
+  - `Max IV, Zero EV` Imita las estadísticas de un Pokémon salvaje atrapado, pero con el IV máximo posible.
+  - `Max IV, Max EV / Level` IV es máximo, EV se establece en el máximo que un Pokémon entrenado podría tener para su nivel actual.
+  - `Max IV, Max EV` Máximo Pokémon absolutamente perfectos y poderosos.
+
+    <p align='center'>
+        <br />
+        <img src="./docs/images/flipper-zero-flat-5.png" width="400" />
         <br />
     </p>
 
-- Pulse los botones `IZQUIERDA`/`DERECHA` para paginar de 1 en 1 la selección de Pokemon.
-- Pulse los botones `ARRIBA`/`ABAJO` para paginar de 10 en 10 la selección de Pokemon.
-- Pulse el botón `OK` para seleccionar el Pokemon a Intercambiar.
-    <p align='center'>
-         <br />
-        <img src="./docs/images/flipper-zero-flat-2.png" width="400" /><br />
-    </p>
-- En el Flipper Zero se muestra la vista para conectar el Game Boy.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-3.png" width="400" /><br />
-    </p>
-- En tu Game Boy debes conectar el **Cable Game Link** al Game Boy, en el juego dirigirte a un **Centro Pokémon** que tengas más cercano.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/game_boy_pokemon_center.png" width="400" /><br />
-    </p>
-- Habla con la chica que está en el mostrador de la derecha. La chica nos dirá que para poder jugar antes tendremos que salvar el juego, le contestaremos que _SI_ pulsando el botón _A_.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/game_boy_save.png" width="400" /><br />
-    </p>
-- El Flipper Zero nos mostrará que estámos conectados.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-4.png" width="400" /><br />
-    </p>
-- En el Game Boy nos preguntará que opción queremos y Seleccionamos **CENT. CAMBIO**.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/game_boy_save_trade.png" width="400" /><br />
-    </p>
-- Entrarás a la sala de Intercambio donde debes presionar el botón A del Game Boy en el lado de tu mesa.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/game_boy_trade_room_2.png" width="400" /><br />
-    </p>
-- Flipper Zero quedará en una pantalla de espera con el Pokemon que seleccionaste.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-5.png" width="400" /><br />
-    </p>
-- Se te mostrarán tus Pokemon y el Pokemon que seleccionaste en el Flipper Zero, en este Caso **Mew**. Debes seleccionar el pokemon que quieres intercambiar y presionar **TRATO**.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/game_boy_trade_list_select_trade.png" width="400" /><br />
-    </p>
-- Debes confirmar el intercambio seleccionado **TRATO**.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/game_boy_trade_list_select_trade_confirm.png" width="400" /><br />
-    </p>
-- Flipper Zero quedará en una pantalla de espera con el Pokemon que seleccionaste.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-6.png" width="400" /><br />
-    </p>
-- Finalmente comenzará el intercambio de Pokemon desde **Flipper Zero** al **Game Boy**.
-    <p align='center'>
-        <br />
-        <img src="./docs/images/flipper-zero-flat-7.png" width="400" /><br />
-    </p>
-- **NOTA**: Si al final del Intercambio se te bloquea el Flipper Zero debes Rebootear presionando la combinación de teclas <img src="./docs/images/left.png" /> IZQUIERDA + <img src="./docs/images/back.png" /> ATRAS
-    <p align='center'>
-        <br />
-        <img src="./docs/images/reboot.png" width="400" /><br />
-    </p>
+- También se puede configurar el `OT ID#` y el `OT Name` del Pokémon. El `OT ID#` debe estar entre `0` y `65535`. Establecer el `OT ID#` y el `OT Name` igual que tu entrenador actual hace que el juego crea que fue un Pokémon capturado en estado salvaje y no uno que se intercambió. Esto significa que los Pokémon de alto nivel seguirán obedeciéndote sin medallas, pero no obtendrán el aumento de experiencia de un Pokémon intercambiado.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-6.png" width="400" /><br />
+  </p>
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-6-1.png" width="400" /><br />
+  </p>
+- Finalmente, selecciona Intercambiar PKMN para iniciar el proceso de intercambio.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-6-2.png" width="400" /><br />
+  </p>
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-9.png" width="400" /><br />
+  </p>
+- En tu Game Boy, debes conectar el **Game Link Cable** a la Game Boy y, en el juego, ve al **Pokemon Center** más cercano.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/game_boy_pokemon_center.png" width="400" /><br />
+  </p>
+- Habla con la chica en el mostrador de la derecha. La chica nos dirá que tenemos que guardar el juego antes de jugar, responderemos **YES** presionando el botón **A**.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/game_boy_save.png" width="400" /><br />
+  </p>
+- Flipper Zero mostrará que estamos conectados.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-10.png" width="400" /><br />
+  </p>
+- En la Game Boy, se nos preguntará qué opción queremos, y seleccionamos **TRADE CENTER**.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/game_boy_save_trade.png" width="400" /><br />
+  </p>
+- Ingresarás al Centro de Intercambio donde debes presionar el botón A en la Game Boy en tu lado de la mesa.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/game_boy_trade_room_2.png" width="400" /><br />
+  </p>
+- Flipper Zero permanecerá en una pantalla de espera con el Pokémon que seleccionaste.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-10.png" width="400" /><br />
+  </p>
+- Verás tu Pokémon y el Pokémon que seleccionaste en Flipper Zero, en este caso, `Mew`. Debes seleccionar el Pokémon que deseas intercambiar y presionar **TRADE**.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/game_boy_trade_list_select_trade.png" width="400" /><br />
+  </p>
+- Debes confirmar el intercambio seleccionando **TRADE**.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/game_boy_trade_list_select_trade_confirm.png" width="400" /><br />
+  </p>
+- Flipper Zero permanecerá en una pantalla de espera con el Pokémon que seleccionaste.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-11.png" width="400" /><br />
+  </p>
+- Finalmente, el intercambio de Pokémon comenzará desde **Flipper Zero** hacia la **Game Boy**.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/flipper-zero-flat-12.png" width="400" /><br />
+  </p>
+- Si Flipper Zero se queda atascado al final del intercambio, debes reiniciarlo presionando la combinación de teclas <img src="./docs/images/left.png" /> `IZQUIERDA` + <img src="./docs/images/back.png" /> `ATRÁS`.
+
+  <p align='center'>
+      <br />
+      <img src="./docs/images/reboot.png" width="400" /><br />
+  </p>
 
 ## ¿Cómo trabaja?
 
@@ -221,15 +305,10 @@ De cada imagen se transformó el color `#aaa` a `#fff` para que Flipper Zero la 
 - Game Boy Color (GBC)
 - Game Boy Advance (GBA)
 
-## Implementado por
-<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/issues?q=is%3Aissue+label%3AImplemented+is%3Aclosed+is%3Aopen+" target="_blank"><img src="./docs/images/implemented.svg" /></a>
-
-## TODO
-
-- [ ] Refactorizar el código
-- [ ] Al salir de la app el botón `OK` deja de funcionar por lo que hay que reiniciarlo 🤔
-- [ ] Setear a cada pokemon sus características, ataques, niveles por defecto
-- [ ] Mejorar animaciones
+## Contribuidores
+<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a><br />
+<a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a><br />
+<a href="https://github.com/kbembedded/Flipper-Zero-Game-Boy-Pokemon-Trading/">kbembedded</a>
 
 ## Links
 
