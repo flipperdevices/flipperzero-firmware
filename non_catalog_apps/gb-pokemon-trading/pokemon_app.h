@@ -2,45 +2,48 @@
 #define POKEMON_APP_H
 
 #pragma once
-#include <furi.h>
-#include <furi_hal_light.h>
-#include <gui/gui.h>
+
+#include <gui/scene_manager.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/icon.h>
-#include <pokemon_icons.h>
+#include <gui/modules/submenu.h>
+#include <gui/modules/text_input.h>
+#include <gui/modules/variable_item_list.h>
 
-#include "views/select_pokemon.hpp"
-#include "views/select_level.hpp"
-#include "views/select_stats.hpp"
-#include "views/select_move1.hpp"
-#include "views/select_move2.hpp"
-#include "views/select_move3.hpp"
-#include "views/select_move4.hpp"
-#include "views/trade.hpp"
+#include "pokemon_data.h"
 
 #define TAG "Pokemon"
 
-struct pokemon_lut {
+/* #defines for the data table entries */
+#define GROWTH_FAST 4
+#define GROWTH_MEDIUM_FAST 0
+#define GROWTH_MEDIUM_SLOW 3
+#define GROWTH_SLOW 5
+
+struct pokemon_data_table {
     const char* name;
     const Icon* icon;
-    const uint8_t hex;
-    const uint8_t type1;
-    const uint8_t type2;
-    const int xp_group;
-    const int base_hp;
-    const int base_atk;
-    const int base_def;
-    const int base_spd;
-    const int base_special;
+    const uint8_t index;
+    const uint8_t base_hp;
+    const uint8_t base_atk;
+    const uint8_t base_def;
+    const uint8_t base_spd;
+    const uint8_t base_special;
+    const uint8_t type[2];
+    const uint8_t move[4];
+    const uint8_t growth;
 };
 
-struct pokemon_mv {
+typedef struct pokemon_data_table PokemonTable;
+
+struct named_list {
     const char* name;
-    const uint8_t hex;
+    const uint8_t index;
 };
 
-typedef struct App App;
+typedef struct named_list NamedList;
+
 typedef enum {
     GAMEBOY_INITIAL,
     GAMEBOY_READY,
@@ -51,61 +54,75 @@ typedef enum {
     GAMEBOY_TRADING
 } render_gameboy_state_t;
 
-struct App {
-    Gui* gui;
+struct pokemon_fap {
     ViewDispatcher* view_dispatcher;
-    SelectPokemon* select_pokemon;
-    SelectLevel* select_level;
-    SelectStats* select_stats;
-    SelectMove1* select_move1;
-    SelectMove2* select_move2;
-    SelectMove3* select_move3;
-    SelectMove4* select_move4;
-    Trade* trade;
-    uint32_t view_id;
 
-    int current_pokemon = 0;
-    int current_level = 3;
-    int current_stats = 0;
-    int current_move = 0;
-    char pokemon_hex_code = ' ';
-    char move1_hex_code = ' ';
-    char move2_hex_code = ' ';
-    char move3_hex_code = ' ';
-    char move4_hex_code = ' ';
+    /* View ports for each of the application's steps */
+    View* select_view;
+    View* trade_view;
+
+    /* Scene manager */
+    SceneManager* scene_manager;
+
+    /* gui modules used in the application lifetime */
+    Submenu* submenu;
+    TextInput* text_input;
+    VariableItemList* variable_item_list;
+
+    /* Table of pokemon data for Gen I */
+    const PokemonTable* pokemon_table;
+
+    /* List of moves, alphabetically ordered */
+    const NamedList* move_list;
+
+    /* List of types, alphabetically ordered */
+    const NamedList* type_list;
+
+    /* Struct for holding trade data */
+    /* NOTE: There may be some runtime memory savings by adding more intelligence
+     * to views/trade and slimming down this struct to only contain the single
+     * pokemon data rather than the full 6 member party data.
+     */
+    TradeBlock* trade_block;
+
+    /* The currently selected pokemon */
+    int curr_pokemon;
+
+    /* Some state tracking */
+    /* This, combined with some globals in trade.cpp, can probably be better
+     * consolidated at some point.
+     */
+    bool trading;
+    bool connected;
+    render_gameboy_state_t gameboy_status;
+
+    /* TODO: Other variables will end up here, like selected level, EV/IV,
+     * moveset, etc. Likely will want to be another sub struct similar to
+     * the actual pokemon data structure.
+     */
+    int curr_stats;
 };
 
+typedef struct pokemon_fap PokemonFap;
+
 typedef enum {
+    AppViewMainMenu,
+    AppViewOpts, // Generic view ID meant for module re-use
     AppViewSelectPokemon,
-    AppViewSelectLevel,
-    AppViewSelectStats,
-    AppViewSelectMove1,
-    AppViewSelectMove2,
-    AppViewSelectMove3,
-    AppViewSelectMove4,
     AppViewTrade,
     AppViewExitConfirm,
 } AppView;
 
-typedef void (*SelectPokemonCallback)(void* context, uint32_t index);
-typedef struct SelectPokemonModel {
-    int current_pokemon = 0;
-    int current_level = 3;
-    int current_stats = 0;
-    int current_move = 0;
-    char pokemon_hex_code = ' ';
-    char move1_hex_code = ' ';
-    char move2_hex_code = ' ';
-    char move3_hex_code = ' ';
-    char move4_hex_code = ' ';
-    bool trading = false;
-    bool connected = false;
-    render_gameboy_state_t gameboy_status = GAMEBOY_INITIAL;
-    SelectPokemonCallback callback;
-    void* callback_context;
-} SelectPokemonModel;
+int pokemon_named_list_get_num_elements(const NamedList* list);
 
-extern struct pokemon_lut pokemon_table[];
-extern struct pokemon_mv move_table[];
+int pokemon_named_list_get_list_pos_from_index(const NamedList* list, uint8_t index);
+
+const char* pokemon_named_list_get_name_from_index(const NamedList* list, uint8_t index);
+
+void pokemon_trade_block_set_default_name(char* dest, PokemonFap* pokemon_fap, size_t n);
+
+void pokemon_trade_block_recalculate(PokemonFap* pokemon_fap);
+
+void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap);
 
 #endif /* POKEMON_APP_H */
