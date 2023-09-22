@@ -1,5 +1,5 @@
 #include "../picopass_i.h"
-#include <toolbox/name_generator.h>
+#include <lib/toolbox/name_generator.h>
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 
@@ -16,7 +16,8 @@ void picopass_scene_save_name_on_enter(void* context) {
     TextInput* text_input = picopass->text_input;
     bool dev_name_empty = false;
     if(!strcmp(picopass->dev->dev_name, "")) {
-        name_generator_make_auto(picopass->text_store, sizeof(picopass->text_store), "PicoPass");
+        name_generator_make_auto(
+            picopass->text_store, sizeof(picopass->text_store), PICOPASS_APP_FILE_PREFIX);
         dev_name_empty = true;
     } else {
         picopass_text_store_set(picopass, picopass->dev->dev_name);

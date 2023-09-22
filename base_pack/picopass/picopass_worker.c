@@ -282,11 +282,10 @@ ReturnCode picopass_auth(PicopassWorker* picopass_worker) {
         return ERR_NONE;
     }
 
-    FURI_LOG_I(TAG, "Starting user dictionary attack [Elite KDF]");
-    err = picopass_auth_dict(picopass_worker, IclassEliteDictTypeUser);
-    if(err == ERR_NONE) {
-        return ERR_NONE;
-    }
+    /* Because size of the user dictionary and could introduce confusing delay
+     * to the read screen (since there is no feedback), we omit checking it.
+     * It will be checked when the user uses Elite Dict. Attack, which has a progress bar
+     */
 
     FURI_LOG_I(TAG, "Starting system dictionary attack [Elite KDF]");
     err = picopass_auth_dict(picopass_worker, IclassEliteDictTypeFlipper);
@@ -579,7 +578,18 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
 
         err = rfalPicoPassPollerCheck(mac, &chkRes);
         if(err == ERR_NONE) {
-            FURI_LOG_I(TAG, "Found key");
+            FURI_LOG_I(
+                TAG,
+                "Found key: %02x%02x%02x%02x%02x%02x%02x%02x",
+                key[0],
+                key[1],
+                key[2],
+                key[3],
+                key[4],
+                key[5],
+                key[6],
+                key[7]);
+
             memcpy(pacs->key, key, RFAL_PICOPASS_BLOCK_LEN);
             pacs->elite_kdf = elite;
             err = picopass_read_card(AA1);
