@@ -10,6 +10,6 @@ typedef struct {
 } Level;
 
 static Level levels[2] = {
-    {0, true, {3, 3}, {10, 2}},
-    {1, false, {3, 6}, {2, 1}},
+    {0, true, {3, 10, 18}, {0, 1, 0}},
+    {1, false, {3, 6}, {1, 0}},
 };

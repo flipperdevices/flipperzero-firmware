@@ -4,7 +4,6 @@
 #include "gui/font.h"
 #include "gui/assets.h"
 #include "data/enemies.h"
-#include "data/weapon.h"
 
 #define FRAMES 25 //12
 
@@ -18,23 +17,13 @@ static void game_update(GameState* game_state) {
         game_state->player.position.y++;
     }
 
-    // update bullets positions
-    weapon_update(game_state);
-
-    // try spawn enemy
-    if(game_state->enemies.current_spawned < ENEMY_PULL) {
-        if(game_state->level.enemySpawDelay[game_state->enemies.current_spawned + 1] >=
-           game_state->level_time / FRAMES) {
-            FURI_LOG_E(TAG, "spawned %d\r\n", game_state->level_time);
-
-            game_state->enemies.current_spawned++;
-            game_state->enemies.spawned[game_state->enemies.current_spawned].points = 1;
-            game_state->enemies.spawned[game_state->enemies.current_spawned].life = 1;
-            game_state->enemies.spawned[game_state->enemies.current_spawned].position.x =
-                50 + game_state->enemies.current_spawned * 10;
-            game_state->enemies.spawned[game_state->enemies.current_spawned].position.y = 35;
-        }
+    // half enemy speed
+    if(game_state->level_time % 2 == 0) {
+        enemy_update(game_state);
     }
+
+    weapon_update(game_state);
+    enemy_try_spawn(game_state);
 
     if(game_state->fire) {
         weapon_try_fire_bullet(game_state);
@@ -71,18 +60,14 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     draw_ui_asset(game_state->player.position.x, game_state->player.position.y, ui_hero);
     // bullets
     for(int i = 0; i < BULLET_PULL; i++) {
-        if(game_state->player.bullets[i].x >= BULLET_X)
-            draw_ui_asset(
-                game_state->player.bullets[i].x, game_state->player.bullets[i].y, ui_bullet);
+        if(game_state->player.bullets[i].x >= BULLET_X) draw_ui_asset(game_state->player.bullets[i].x, game_state->player.bullets[i].y, ui_bullet);
     }
 
     // enemies
     if(game_state->enemies.current_spawned >= 0) {
         for(int i = 0; i <= game_state->enemies.current_spawned; i++) {
             draw_ui_asset(
-                game_state->enemies.spawned[i].position.x,
-                game_state->enemies.spawned[i].position.y,
-                enemies[game_state->level.enemySpawType[i]]);
+                game_state->enemies.spawned[i].position.x, game_state->enemies.spawned[i].position.y, enemies[game_state->level.enemySpawType[i]]);
         }
     }
 

@@ -1,4 +1,5 @@
 #include "levels.h"
+#include <furi.h>
 
 #define TAG "SpaceImpact"
 
@@ -28,6 +29,7 @@ typedef struct {
 } Vector2;
 
 typedef struct {
+    uint8_t id;
     int points;
     int life;
     Vector2 position;
