@@ -9,7 +9,7 @@ void subrem_scene_open_sub_file_error_popup_callback(void* context) {
 SubRemLoadSubState subrem_scene_open_sub_file_dialog(SubGhzRemoteApp* app) {
     furi_assert(app);
 
-    SubRemSubFilePreset* sub = app->map_preset->subs_preset[app->chusen_sub];
+    SubRemSubFilePreset* sub = app->map_preset->subs_preset[app->chosen_sub];
 
     FuriString* temp_file_path = furi_string_alloc();
 
@@ -23,8 +23,7 @@ SubRemLoadSubState subrem_scene_open_sub_file_dialog(SubGhzRemoteApp* app) {
 
     DialogsFileBrowserOptions browser_options;
 
-    dialog_file_browser_set_basic_options(
-        &browser_options, SUBGHZ_APP_FILENAME_EXTENSION, &I_sub1_10px);
+    dialog_file_browser_set_basic_options(&browser_options, SUBGHZ_APP_FILENAME_EXTENSION, &I_sub1_10px);
     browser_options.base_path = SUBGHZ_RAW_FOLDER;
 
     // Input events and views are managed by file_select
@@ -48,8 +47,8 @@ SubRemLoadSubState subrem_scene_open_sub_file_dialog(SubGhzRemoteApp* app) {
         furi_record_close(RECORD_STORAGE);
 
         if(ret == SubRemLoadSubStateOK) {
-            subrem_sub_file_preset_free(app->map_preset->subs_preset[app->chusen_sub]);
-            app->map_preset->subs_preset[app->chusen_sub] = sub_candidate;
+            subrem_sub_file_preset_free(app->map_preset->subs_preset[app->chosen_sub]);
+            app->map_preset->subs_preset[app->chosen_sub] = sub_candidate;
             app->map_not_saved = true;
         } else {
             subrem_sub_file_preset_free(sub_candidate);

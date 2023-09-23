@@ -29,7 +29,7 @@ void subrem_scene_edit_label_widget_callback(GuiButtonType result, InputType typ
 void subrem_scene_edit_label_on_enter(void* context) {
     SubGhzRemoteApp* app = context;
 
-    SubRemSubFilePreset* sub_preset = app->map_preset->subs_preset[app->chusen_sub];
+    SubRemSubFilePreset* sub_preset = app->map_preset->subs_preset[app->chosen_sub];
 
     FuriString* temp_str = furi_string_alloc();
 
@@ -76,7 +76,7 @@ void subrem_scene_edit_label_on_enter(void* context) {
 bool subrem_scene_edit_label_on_event(void* context, SceneManagerEvent event) {
     SubGhzRemoteApp* app = context;
 
-    FuriString* label = app->map_preset->subs_preset[app->chusen_sub]->label;
+    FuriString* label = app->map_preset->subs_preset[app->chosen_sub]->label;
 
     if(event.type == SceneManagerEventTypeBack) {
         if(scene_manager_get_scene_state(app->scene_manager, SubRemSceneEditLabel) ==

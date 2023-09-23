@@ -101,7 +101,7 @@ bool subrem_scene_edit_menu_on_event(void* context, SceneManagerEvent event) {
 
             return true;
         } else if(event.event == SubRemCustomEventViewEditMenuEdit) {
-            app->chusen_sub = subrem_view_edit_menu_get_index(app->subrem_edit_menu);
+            app->chosen_sub = subrem_view_edit_menu_get_index(app->subrem_edit_menu);
             scene_manager_set_scene_state(
                 app->scene_manager, SubRemSceneEditSubMenu, EditSubmenuIndexEditLabel);
             scene_manager_next_scene(app->scene_manager, SubRemSceneEditSubMenu);
