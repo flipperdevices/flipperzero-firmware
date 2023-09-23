@@ -135,7 +135,7 @@ def compilation_db_entry_action(target, source, env, **kw):
     if " " in tool_path:
         tool_path = quote(tool_path)
     # Replacing the executable with the full path
-    command = quote(tool_path) + command[len(executable) :]
+    command = tool_path + command[len(executable) :]
 
     entry = {
         "directory": env.Dir("#").abspath,
