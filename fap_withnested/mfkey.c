@@ -336,6 +336,7 @@ int check_state(struct Crypto1State* t, MfClassicNonce* n) {
         return 0;
     } else if(n->attack == static_nested) {
         struct Crypto1State temp = {t->odd, t->even};
+        rollback_word_noret(t, n->uid_xor_nt1, 0);
         if(n->ks1_1_enc == crypt_word_ret(t, n->uid_xor_nt0, 0)) {
             crypto1_get_lfsr(&temp, &(n->key));
             return 1;
