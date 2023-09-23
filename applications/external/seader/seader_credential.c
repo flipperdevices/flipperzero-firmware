@@ -2,7 +2,7 @@
 
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
-#include "seader_icons.h"
+#include <seader_icons.h>
 
 #include <toolbox/protocols/protocol_dict.h>
 #include <lfrfid/protocols/lfrfid_protocols.h>
@@ -541,6 +541,7 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
         ProtocolDict* dict = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
         ProtocolId protocol = LFRFIDProtocolHidGeneric;
 
+        FURI_LOG_D(TAG, "Original (%d): %016llx", cred->bit_length, cred->credential);
         uint64_t target = 0;
         if(cred->bit_length == 26) {
             //3 bytes
@@ -549,11 +550,22 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
             target = (cred->credential >> 1) & 0xFFFFFF;
             // Reverse order since it'll get reversed again
             target = __builtin_bswap64(target) >> (64 - 24);
-        } else if(cred->bit_length <= 43) {
-            //6 bytes
+        } else if(cred->bit_length < 44) {
+            // https://gist.github.com/blark/e8f125e402f576bdb7e2d7b3428bdba6
             protocol = LFRFIDProtocolHidGeneric;
-            target = cred->credential;
-            target = __builtin_bswap64(target) >> (64 - 48);
+            uint64_t sentinel = 1ULL << cred->bit_length;
+            if(cred->bit_length <= 36) {
+                uint64_t header = 1ULL << 37;
+                FURI_LOG_D(
+                    TAG,
+                    "Prox Format (%d): %011llx",
+                    cred->bit_length,
+                    cred->credential | sentinel | header);
+                target = __builtin_bswap64((cred->credential | sentinel | header) << 4) >>
+                         (64 - 48);
+            } else {
+                target = __builtin_bswap64((cred->credential | sentinel) << 4) >> (64 - 48);
+            }
         } else {
             //8 bytes
             protocol = LFRFIDProtocolHidExGeneric;
@@ -561,6 +573,7 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
             target = __builtin_bswap64(target);
         }
 
+        FURI_LOG_D(TAG, "LFRFID (%d): %016llx", cred->bit_length, target);
         size_t data_size = protocol_dict_get_data_size(dict, protocol);
         uint8_t* data = malloc(data_size);
         if(data_size < 8) {
@@ -573,6 +586,13 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
         free(data);
 
         result = lfrfid_dict_file_save(dict, protocol, furi_string_get_cstr(file_path));
+
+        FuriString* briefStr;
+        briefStr = furi_string_alloc();
+        protocol_dict_render_brief_data(dict, briefStr, protocol);
+        FURI_LOG_D(TAG, "LFRFID Brief: %s", furi_string_get_cstr(briefStr));
+        furi_string_free(briefStr);
+
         if(result) {
             FURI_LOG_D(TAG, "Written: %d", result);
         } else {
