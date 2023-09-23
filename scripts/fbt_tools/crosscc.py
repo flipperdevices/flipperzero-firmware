@@ -2,7 +2,6 @@ import subprocess
 
 import gdb
 import objdump
-import shutil
 
 import strip
 from SCons.Action import _subproc
@@ -13,7 +12,7 @@ from SCons.Tool import ar, asm, gcc, gnulink, gxx
 def prefix_commands(env, command_prefix, cmd_list):
     for command in cmd_list:
         if command in env:
-            env[command] = shutil.which(command_prefix + env[command])
+            env.Replace(**{command: command_prefix + env[command]})
 
 
 def _get_tool_version(env, tool):
