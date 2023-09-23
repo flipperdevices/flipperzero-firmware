@@ -131,6 +131,9 @@ def compilation_db_entry_action(target, source, env, **kw):
     if not (tool_path := _TOOL_PATH_CACHE.get(executable, None)):
         tool_path = env.WhereIs(executable) or executable
         _TOOL_PATH_CACHE[executable] = tool_path
+    # If there are spaces in the executable path, we need to quote it
+    if " " in tool_path:
+        tool_path = quote(tool_path)
     # Replacing the executable with the full path
     command = quote(tool_path) + command[len(executable) :]
 
