@@ -20,7 +20,7 @@
 
 #include <storage/storage.h>
 
-#define VB_MIGRATE_VERSION "1.1"
+#define VB_MIGRATE_VERSION "1.2"
 
 #define VB_MIGRATE_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 
