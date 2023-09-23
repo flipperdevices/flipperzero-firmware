@@ -32,7 +32,7 @@ which is the name that most clang tools search for by default.
 import fnmatch
 import itertools
 import json
-from functools import lru_cache
+from shlex import quote
 
 import SCons
 from SCons.Tool.asm import ASPPSuffixes, ASSuffixes
@@ -45,6 +45,8 @@ from SCons.Tool.cxx import CXXSuffixes
 # access to write all of the files. But it seems clunky. How can the emitter and the scanner
 # communicate more gracefully?
 __COMPILATION_DB_ENTRIES = []
+
+# We cache the tool path lookups to avoid doing them over and over again.
 _TOOL_PATH_CACHE = {}
 
 
@@ -123,6 +125,14 @@ def compilation_db_entry_action(target, source, env, **kw):
         source=env["__COMPILATIONDB_USOURCE"],
         env=env["__COMPILATIONDB_ENV"],
     )
+
+    # We assume first non-space character is the executable
+    executable = command.split(" ", 1)[0]
+    if not (tool_path := _TOOL_PATH_CACHE.get(executable, None)):
+        tool_path = env.WhereIs(executable) or executable
+        _TOOL_PATH_CACHE[executable] = tool_path
+    # Replacing the executable with the full path
+    command = quote(tool_path) + command[len(executable) :]
 
     entry = {
         "directory": env.Dir("#").abspath,
@@ -244,19 +254,13 @@ def generate(env, **kwargs):
     for entry in components_by_suffix:
         suffix = entry[0]
         builder, base_emitter, command = entry[1]
-        if not (tool_path := _TOOL_PATH_CACHE.get(command, None)):
-            tool_path = env.WhereIs(command) or command
-            _TOOL_PATH_CACHE[command] = tool_path
-
-        # Assumes a dictionary emitter
-        emitter = builder.emitter.get(suffix, False)
-        if emitter:
+        if emitter := builder.emitter.get(suffix, False):
             # We may not have tools installed which initialize all or any of
             # cxx, cc, or assembly. If not skip resetting the respective emitter.
             builder.emitter[suffix] = SCons.Builder.ListEmitter(
                 [
                     emitter,
-                    make_emit_compilation_DB_entry(tool_path),
+                    make_emit_compilation_DB_entry(command),
                 ]
             )
 
