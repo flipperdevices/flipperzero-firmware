@@ -8,7 +8,7 @@
 
 #define SUBREM_VIEW_REMOTE_MAX_LABEL_LENGTH 30
 #define SUBREM_VIEW_REMOTE_LEFT_OFFSET 10
-#define SUBREM_VIEW_REMOTE_RIGHT_OFFSET 22
+#define SUBREM_VIEW_REMOTE_RIGHT_OFFSET 0
 
 struct SubRemViewRemote {
     View* view;
@@ -120,26 +120,43 @@ void subrem_view_remote_draw(Canvas* canvas, SubRemViewRemoteModel* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    canvas_clear(canvas);
+    // Statusbar
+    canvas_draw_icon(canvas, 0, 0, &I_status_bar);
+    if(model->state == SubRemViewRemoteStateOFF) {
+        canvas_invert_color(canvas);
+        canvas_draw_rbox(canvas, 12, 0, 52 - 12, 13, 2);
+        canvas_invert_color(canvas);
+        canvas_draw_rframe(canvas, 12, 0, 52 - 12, 13, 2);
+        canvas_draw_str_aligned(canvas, 32, 3, AlignCenter, AlignTop, "Preview");
+    } else {
+        canvas_draw_icon(
+            canvas,
+            0,
+            2,
+            (model->is_external) ? &I_External_antenna_20x12 : &I_Internal_antenna_20x12);
+        canvas_draw_icon(canvas, 50, 0, &I_Status_cube_14x14);
+        if(model->state == SubRemViewRemoteStateSending) {
+            canvas_draw_icon_ex(canvas, 52, 3, &I_Pin_arrow_up_7x9, IconRotation90);
+        }
+    }
 
     //Icons for Labels
-    //canvas_draw_icon(canvas, 0, 0, &I_SubGHzRemote_LeftAlignedButtons_9x64);
-    canvas_draw_icon(canvas, 1, 5, &I_ButtonUp_7x4);
-    canvas_draw_icon(canvas, 1, 15, &I_ButtonDown_7x4);
-    canvas_draw_icon(canvas, 2, 23, &I_ButtonLeft_4x7);
-    canvas_draw_icon(canvas, 2, 33, &I_ButtonRight_4x7);
-    canvas_draw_icon(canvas, 0, 42, &I_Ok_btn_9x9);
-    canvas_draw_icon(canvas, 0, 53, &I_back_10px);
+    const uint8_t list_y = 14;
+    canvas_draw_icon(canvas, 1, list_y + 5, &I_ButtonUp_7x4);
+    canvas_draw_icon(canvas, 1, list_y + 15, &I_ButtonDown_7x4);
+    canvas_draw_icon(canvas, 2, list_y + 23, &I_ButtonLeft_4x7);
+    canvas_draw_icon(canvas, 2, list_y + 33, &I_ButtonRight_4x7);
+    canvas_draw_icon(canvas, 0, list_y + 42, &I_Ok_btn_9x9);
 
     //Labels
     canvas_set_font(canvas, FontSecondary);
-    uint8_t y = 0;
+    uint8_t y = list_y;
     for(uint8_t i = 0; i < SubRemSubKeyNameMaxCount; i++) {
         elements_text_box(
             canvas,
             SUBREM_VIEW_REMOTE_LEFT_OFFSET,
             y + 2,
-            126 - SUBREM_VIEW_REMOTE_LEFT_OFFSET - SUBREM_VIEW_REMOTE_RIGHT_OFFSET,
+            64 - SUBREM_VIEW_REMOTE_LEFT_OFFSET - SUBREM_VIEW_REMOTE_RIGHT_OFFSET,
             12,
             AlignLeft,
             AlignBottom,
@@ -148,52 +165,50 @@ void subrem_view_remote_draw(Canvas* canvas, SubRemViewRemoteModel* model) {
         y += 10;
     }
 
-    if(model->state == SubRemViewRemoteStateOFF) {
-        elements_button_left(canvas, "Back");
-        elements_button_right(canvas, "Save");
-    } else {
-        canvas_draw_str_aligned(canvas, 11, 62, AlignLeft, AlignBottom, "Hold=Exit.");
-        canvas_draw_str_aligned(
-            canvas, 126, 62, AlignRight, AlignBottom, ((model->is_external) ? "Ext" : "Int"));
-    }
+    if(model->state != SubRemViewRemoteStateOFF) {
+        // D-pad 59x62
+        const uint8_t d_pad_x = 3;
+        const uint8_t d_pad_y = 66;
 
-    //Status text and indicator
-    canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
+        canvas_draw_icon(canvas, d_pad_x + 1 * (19 + 1), d_pad_y + 0 * (20 + 1), &I_up);
 
-    if(model->state == SubRemViewRemoteStateIdle || model->state == SubRemViewRemoteStateOFF) {
-        canvas_draw_str_aligned(canvas, 126, 10, AlignRight, AlignBottom, "Idle");
-    } else {
-        switch(model->state) {
-        case SubRemViewRemoteStateSending:
-            canvas_draw_str_aligned(canvas, 126, 10, AlignRight, AlignBottom, "Send");
-            break;
-        case SubRemViewRemoteStateLoading:
-            canvas_draw_str_aligned(canvas, 126, 10, AlignRight, AlignBottom, "Load");
-            break;
-        default:
-#if FURI_DEBUG
-            canvas_draw_str_aligned(canvas, 126, 10, AlignRight, AlignBottom, "Wrong_state");
-#endif
-            break;
+        canvas_draw_icon(canvas, d_pad_x + 0 * (19 + 1), d_pad_y + 1 * (20 + 1), &I_left);
+        canvas_draw_icon(canvas, d_pad_x + 1 * (19 + 1), d_pad_y + 1 * (20 + 1), &I_ok);
+        canvas_draw_icon(canvas, d_pad_x + 2 * (19 + 1), d_pad_y + 1 * (20 + 1), &I_right);
+
+        canvas_draw_icon(canvas, d_pad_x + 1 * (19 + 1), d_pad_y + 2 * (20 + 1), &I_down);
+        if(model->state == SubRemViewRemoteStateSending) {
+            switch(model->pressed_btn) {
+            case SubRemSubKeyNameUp:
+                canvas_draw_icon(
+                    canvas, d_pad_x + 1 * (19 + 1), d_pad_y + 0 * (20 + 1), &I_up_hover);
+                break;
+            case SubRemSubKeyNameDown:
+                canvas_draw_icon(
+                    canvas, d_pad_x + 1 * (19 + 1), d_pad_y + 2 * (20 + 1), &I_down_hover);
+                break;
+            case SubRemSubKeyNameLeft:
+                canvas_draw_icon(
+                    canvas, d_pad_x + 0 * (19 + 1), d_pad_y + 1 * (20 + 1), &I_left_hover);
+                break;
+            case SubRemSubKeyNameRight:
+                canvas_draw_icon(
+                    canvas, d_pad_x + 2 * (19 + 1), d_pad_y + 1 * (20 + 1), &I_right_hover);
+                break;
+            case SubRemSubKeyNameOk:
+                canvas_draw_icon(
+                    canvas, d_pad_x + 1 * (19 + 1), d_pad_y + 1 * (20 + 1), &I_ok_hover);
+                break;
+            default:
+                break;
+            }
         }
+    } else {
+        canvas_draw_icon(canvas, 2, 128 - 11, &I_ButtonLeft_4x7);
+        canvas_draw_str_aligned(canvas, 8, 128 - 4, AlignLeft, AlignBottom, "Back");
 
-        switch(model->pressed_btn) {
-        case SubRemSubKeyNameUp:
-            canvas_draw_icon(canvas, 116, 17, &I_Pin_arrow_up_7x9);
-            break;
-        case SubRemSubKeyNameDown:
-            canvas_draw_icon_ex(canvas, 116, 17, &I_Pin_arrow_up_7x9, IconRotation180);
-            break;
-        case SubRemSubKeyNameLeft:
-            canvas_draw_icon_ex(canvas, 115, 18, &I_Pin_arrow_up_7x9, IconRotation270);
-            break;
-        case SubRemSubKeyNameRight:
-            canvas_draw_icon_ex(canvas, 115, 18, &I_Pin_arrow_up_7x9, IconRotation90);
-            break;
-        case SubRemSubKeyNameOk:
-            canvas_draw_icon(canvas, 116, 18, &I_Pin_star_7x7);
-            break;
-        }
+        canvas_draw_icon(canvas, 58, 128 - 11, &I_ButtonRight_4x7);
+        canvas_draw_str_aligned(canvas, 56, 128 - 4, AlignRight, AlignBottom, "Save");
     }
 }
 
@@ -262,6 +277,7 @@ SubRemViewRemote* subrem_view_remote_alloc() {
     view_allocate_model(
         subrem_view_remote->view, ViewModelTypeLocking, sizeof(SubRemViewRemoteModel));
     view_set_context(subrem_view_remote->view, subrem_view_remote);
+    view_set_orientation(subrem_view_remote->view, ViewOrientationVertical);
     view_set_draw_callback(subrem_view_remote->view, (ViewDrawCallback)subrem_view_remote_draw);
     view_set_input_callback(subrem_view_remote->view, subrem_view_remote_input);
     view_set_enter_callback(subrem_view_remote->view, subrem_view_remote_enter);

@@ -1,3 +1,9 @@
+## v1.3
+- **New UI design**
+- New remote design by @Svaarich
+- Fix defines for new API
+- Fix typo
+
 ## v1.2
 - **Official FirmWare Support**
 - Add warning screen on CustomFW

@@ -29,11 +29,17 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0921-1535-0.92.1-94c410d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0922-2050-0.92.1-d005608](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-21 16:50 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-21 16:50 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-23 15:55 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-23 15:55 EST`
 - Updated: [Pokemon Trading v1.2.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
+- Adjusted/Restored Bruteforcer settings path
+- UL: Many reverts of some older changes with viewport and BLE
+- Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
+- Updated: [NFC Seader v1.2 (By bettse)](https://github.com/bettse/seader)
+- Updated: [PicoPass (iClass) v1.5 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass more bit formats #47 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/47) & [Dictionary format guidelines #45 (By Antiklesys)](https://github.com/flipperdevices/flipperzero-good-faps/pull/45)
+- Updated: [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 
 <a name="release">
 
@@ -418,7 +424,7 @@ $ ./fbt dolphin_ext
 - [SPI Mem Manager v1.1 (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager)
 - [Sub-GHz Bruteforcer v3.9.1 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
-- [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
+- [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [Sub-GHz Rolling Flaws v1.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - [SWD Probe v1.1 (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
@@ -433,7 +439,7 @@ $ ./fbt dolphin_ext
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Mass Storage v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
-- [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
+- [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
 - [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)
 - [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)

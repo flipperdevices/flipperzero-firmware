@@ -5,7 +5,7 @@
 
 #define SUBBRUTE_SETTINGS_FILE_TYPE "Sub-GHz BruteForcer Settings File"
 #define SUBBRUTE_SETTINGS_FILE_VERSION 1
-#define SUBBRUTE_SETTINGS_PATH EXT_PATH("apps_data/subghz_bruteforcer/sbf.settings")
+#define SUBBRUTE_SETTINGS_PATH APP_DATA_PATH("bruteforcer.settings")
 
 #define SUBBRUTE_FIELD_LAST_INDEX "LastIndex"
 #define SUBBRUTE_FIELD_REPEAT_VALUES "RepeatValue"
@@ -30,9 +30,6 @@ void subbrute_settings_load(SubBruteSettings* instance) {
     uint8_t temp_repeat_values[SubBruteAttackTotalCount] = {0};
     bool was_read_last_index = false;
     bool was_read_repeat_values = false;
-
-    storage_common_migrate(
-        storage, EXT_PATH("subghz-bruteforcer.settings"), SUBBRUTE_SETTINGS_PATH);
 
     if(FSE_OK == storage_sd_status(storage) && SUBBRUTE_SETTINGS_PATH &&
        flipper_format_file_open_existing(fff_data_file, SUBBRUTE_SETTINGS_PATH)) {
