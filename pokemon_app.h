@@ -44,16 +44,6 @@ struct named_list {
 
 typedef struct named_list NamedList;
 
-typedef enum {
-    GAMEBOY_INITIAL,
-    GAMEBOY_READY,
-    GAMEBOY_WAITING,
-    GAMEBOY_TRADE_READY,
-    GAMEBOY_SEND,
-    GAMEBOY_PENDING,
-    GAMEBOY_TRADING
-} render_gameboy_state_t;
-
 struct pokemon_fap {
     ViewDispatcher* view_dispatcher;
 
