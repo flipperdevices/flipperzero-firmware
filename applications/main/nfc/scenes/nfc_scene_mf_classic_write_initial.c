@@ -10,12 +10,12 @@ enum {
 NfcCommand
     nfc_scene_mf_classic_write_initial_worker_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcCommand command = NfcCommandContinue;
     NfcApp* instance = context;
-    MfClassicPollerEvent* mfc_event = event.data;
+    MfClassicPollerEvent* mfc_event = event.event_data;
     const MfClassicData* write_data =
         nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
 

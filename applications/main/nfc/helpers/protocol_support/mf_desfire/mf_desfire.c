@@ -34,7 +34,7 @@ static NfcCommand nfc_scene_read_poller_callback_mf_desfire(NfcGenericEvent even
     furi_assert(event.protocol == NfcProtocolMfDesfire);
 
     NfcApp* instance = context;
-    const MfDesfirePollerEvent* mf_desfire_event = event.data;
+    const MfDesfirePollerEvent* mf_desfire_event = event.event_data;
 
     if(mf_desfire_event->type == MfDesfirePollerEventTypeReadSuccess) {
         nfc_device_set_data(

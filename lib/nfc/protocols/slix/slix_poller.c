@@ -26,7 +26,7 @@ static SlixPoller* slix_poller_alloc(Iso15693_3Poller* iso15693_3_poller) {
     instance->slix_event.data = &instance->slix_event_data;
 
     instance->general_event.protocol = NfcProtocolSlix;
-    instance->general_event.data = &instance->slix_event;
+    instance->general_event.event_data = &instance->slix_event;
     instance->general_event.instance = instance;
 
     return instance;
@@ -109,7 +109,7 @@ static NfcCommand slix_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(instance);
     furi_assert(instance->callback);
 
-    Iso15693_3PollerEvent* iso15693_3_event = event.data;
+    Iso15693_3PollerEvent* iso15693_3_event = event.event_data;
     furi_assert(iso15693_3_event);
 
     NfcCommand command = NfcCommandContinue;
@@ -130,7 +130,7 @@ static bool slix_poller_detect(NfcGenericEvent event, void* context) {
     const SlixPoller* instance = context;
     furi_assert(instance);
 
-    const Iso15693_3PollerEvent* iso15693_3_event = event.data;
+    const Iso15693_3PollerEvent* iso15693_3_event = event.event_data;
     furi_assert(iso15693_3_event);
     iso15693_3_copy(
         instance->data->iso15693_3_data, iso15693_3_poller_get_data(instance->iso15693_3_poller));

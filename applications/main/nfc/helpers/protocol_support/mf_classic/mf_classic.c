@@ -53,7 +53,7 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
     furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcApp* instance = context;
-    const MfClassicPollerEvent* mfc_event = event.data;
+    const MfClassicPollerEvent* mfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
     if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {

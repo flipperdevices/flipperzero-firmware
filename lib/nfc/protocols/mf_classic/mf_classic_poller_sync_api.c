@@ -185,11 +185,11 @@ static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicP
 static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcGenericEvent event, void* context) {
     furi_assert(event.instance);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(context);
 
     MfClassicPollerContext* poller_context = context;
-    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
     Iso14443_3aPoller* iso14443_3a_poller = event.instance;
     MfClassicPoller* mfc_poller = mf_classic_poller_alloc(iso14443_3a_poller);
 
@@ -422,12 +422,12 @@ static bool mf_classic_poller_read_get_next_key(
 
 NfcCommand mf_classic_poller_read_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcCommand command = NfcCommandContinue;
     MfClassicPollerContext* poller_context = context;
-    MfClassicPollerEvent* mfc_event = event.data;
+    MfClassicPollerEvent* mfc_event = event.event_data;
 
     if(mfc_event->type == MfClassicPollerEventTypeCardLost) {
         poller_context->error = MfClassicErrorNotPresent;

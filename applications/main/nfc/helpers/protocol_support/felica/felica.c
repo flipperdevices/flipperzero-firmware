@@ -26,7 +26,7 @@ static NfcCommand nfc_scene_read_poller_callback_felica(NfcGenericEvent event, v
     furi_assert(event.protocol == NfcProtocolFelica);
 
     NfcApp* instance = context;
-    const FelicaPollerEvent* felica_event = event.data;
+    const FelicaPollerEvent* felica_event = event.event_data;
 
     if(felica_event->type == FelicaPollerEventTypeReady) {
         nfc_device_set_data(

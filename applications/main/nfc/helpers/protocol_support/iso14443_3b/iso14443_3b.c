@@ -27,7 +27,7 @@ static NfcCommand
     furi_assert(event.protocol == NfcProtocolIso14443_3b);
 
     NfcApp* instance = context;
-    const Iso14443_3bPollerEvent* iso14443_3b_event = event.data;
+    const Iso14443_3bPollerEvent* iso14443_3b_event = event.event_data;
 
     if(iso14443_3b_event->type == Iso14443_3bPollerEventTypeReady) {
         nfc_device_set_data(

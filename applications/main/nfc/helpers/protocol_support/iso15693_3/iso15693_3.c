@@ -27,7 +27,7 @@ static NfcCommand nfc_scene_read_poller_callback_iso15693_3(NfcGenericEvent even
     furi_assert(event.protocol == NfcProtocolIso15693_3);
 
     NfcApp* instance = context;
-    const Iso15693_3PollerEvent* iso15693_3_event = event.data;
+    const Iso15693_3PollerEvent* iso15693_3_event = event.event_data;
 
     if(iso15693_3_event->type == Iso15693_3PollerEventTypeReady) {
         nfc_device_set_data(
@@ -63,10 +63,10 @@ static NfcCommand
     nfc_scene_emulate_listener_callback_iso15693_3(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolIso15693_3);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     NfcApp* nfc = context;
-    Iso15693_3ListenerEvent* iso15693_3_event = event.data;
+    Iso15693_3ListenerEvent* iso15693_3_event = event.event_data;
 
     if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
         furi_string_cat_printf(nfc->text_box_store, "R:");

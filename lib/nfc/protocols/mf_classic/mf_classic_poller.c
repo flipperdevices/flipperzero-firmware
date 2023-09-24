@@ -26,7 +26,7 @@ MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller) 
     instance->mfc_event.data = &instance->mfc_event_data;
 
     instance->general_event.protocol = NfcProtocolMfClassic;
-    instance->general_event.data = &instance->mfc_event;
+    instance->general_event.event_data = &instance->mfc_event;
     instance->general_event.instance = instance;
 
     return instance;
@@ -733,12 +733,12 @@ static const MfClassicPollerReadHandler
 };
 
 NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(context);
 
     MfClassicPoller* instance = context;
-    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
@@ -760,12 +760,12 @@ NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
 }
 
 bool mf_classic_poller_detect(NfcGenericEvent event, void* context) {
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(context);
 
     Iso14443_3aPoller* iso3_poller = event.instance;
-    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
     bool detected = false;
     const uint8_t auth_cmd[] = {MF_CLASSIC_CMD_AUTH_KEY_A, 0};
     BitBuffer* tx_buffer = bit_buffer_alloc(COUNT_OF(auth_cmd));

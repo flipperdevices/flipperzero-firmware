@@ -27,7 +27,7 @@ static NfcCommand nfc_scene_read_poller_callback_slix(NfcGenericEvent event, voi
     furi_assert(event.protocol == NfcProtocolSlix);
 
     NfcApp* instance = context;
-    const SlixPollerEvent* slix_event = event.data;
+    const SlixPollerEvent* slix_event = event.event_data;
 
     if(slix_event->type == SlixPollerEventTypeReady) {
         nfc_device_set_data(
@@ -61,10 +61,10 @@ static void nfc_scene_read_success_on_enter_slix(NfcApp* instance) {
 static NfcCommand nfc_scene_emulate_listener_callback_slix(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolSlix);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     NfcApp* nfc = context;
-    SlixListenerEvent* slix_event = event.data;
+    SlixListenerEvent* slix_event = event.event_data;
 
     if(slix_event->type == SlixListenerEventTypeCustomCommand) {
         furi_string_cat_printf(nfc->text_box_store, "R:");

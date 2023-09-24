@@ -22,7 +22,7 @@ Iso15693_3Listener* iso15693_3_listener_alloc(Nfc* nfc, Iso15693_3Data* data) {
     instance->iso15693_3_event.data = &instance->iso15693_3_event_data;
     instance->generic_event.protocol = NfcProtocolIso15693_3;
     instance->generic_event.instance = instance;
-    instance->generic_event.data = &instance->iso15693_3_event;
+    instance->generic_event.event_data = &instance->iso15693_3_event;
 
     nfc_set_fdt_listen_fc(instance->nfc, ISO15693_3_FDT_LISTEN_FC);
     nfc_config(instance->nfc, NfcModeListener, NfcTechIso15693);
@@ -58,10 +58,10 @@ const Iso15693_3Data* iso15693_3_listener_get_data(Iso15693_3Listener* instance)
 NfcCommand iso15693_3_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolInvalid);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     Iso15693_3Listener* instance = context;
-    NfcEvent* nfc_event = event.data;
+    NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
     if(nfc_event->type == NfcEventTypeRxEnd) {

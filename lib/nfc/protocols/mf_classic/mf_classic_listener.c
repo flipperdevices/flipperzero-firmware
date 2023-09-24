@@ -524,12 +524,12 @@ static void mf_classic_listener_send_short_frame(MfClassicListener* instance, ui
 
 NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     NfcCommand command = NfcCommandContinue;
     MfClassicListener* instance = context;
-    Iso14443_3aListenerEvent* iso3_event = event.data;
+    Iso14443_3aListenerEvent* iso3_event = event.event_data;
     BitBuffer* rx_buffer_plain;
 
     if(iso3_event->type == Iso14443_3aListenerEventTypeFieldOff) {
@@ -606,7 +606,7 @@ MfClassicListener*
 
     instance->mfc_event.data = &instance->mfc_event_data;
     instance->generic_event.protocol = NfcProtocolMfClassic;
-    instance->generic_event.data = &instance->mfc_event;
+    instance->generic_event.event_data = &instance->mfc_event;
     instance->generic_event.instance = instance;
 
     return instance;

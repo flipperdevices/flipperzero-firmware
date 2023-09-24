@@ -27,7 +27,7 @@ static FelicaPoller* felica_poller_alloc(Nfc* nfc) {
 
     instance->felica_event.data = &instance->felica_event_data;
     instance->general_event.protocol = NfcProtocolFelica;
-    instance->general_event.data = &instance->felica_event;
+    instance->general_event.event_data = &instance->felica_event;
     instance->general_event.instance = instance;
 
     return instance;
@@ -58,10 +58,10 @@ static void
 static NfcCommand felica_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolInvalid);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     FelicaPoller* instance = context;
-    NfcEvent* nfc_event = event.data;
+    NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
     if(nfc_event->type == NfcEventTypePollerReady) {
@@ -90,13 +90,13 @@ static NfcCommand felica_poller_run(NfcGenericEvent event, void* context) {
 
 static bool felica_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.instance);
     furi_assert(event.protocol == NfcProtocolInvalid);
 
     bool protocol_detected = false;
     FelicaPoller* instance = context;
-    NfcEvent* nfc_event = event.data;
+    NfcEvent* nfc_event = event.event_data;
     furi_assert(instance->state == FelicaPollerStateIdle);
 
     if(nfc_event->type == NfcEventTypePollerReady) {
