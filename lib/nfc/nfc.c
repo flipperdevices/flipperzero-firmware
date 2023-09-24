@@ -199,7 +199,7 @@ bool nfc_worker_poller_stop_handler(Nfc* instance) {
     instance->config_state = NfcConfigurationStateIdle;
 
     furi_hal_nfc_low_power_mode_start();
-    furi_delay_ms(100);
+    furi_delay_ms(10);
     instance->poller_state = NfcPollerStateIdle;
 
     return true;

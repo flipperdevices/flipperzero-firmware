@@ -551,7 +551,7 @@ NfcCommand mf_classic_poller_handler_key_reuse_start(MfClassicPoller* instance) 
         instance->state = MfClassicPollerStateKeyReuseAuthKeyB;
     } else {
         dict_attack_ctx->reuse_key_sector++;
-        if(dict_attack_ctx->reuse_key_sector > instance->sectors_total) {
+        if(dict_attack_ctx->reuse_key_sector == instance->sectors_total) {
             instance->mfc_event.type = MfClassicPollerEventTypeKeyAttackStop;
             command = instance->callback(instance->general_event, instance->context);
             instance->state = MfClassicPollerStateRequestKey;
