@@ -21,6 +21,7 @@ MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller) 
     instance->tx_encrypted_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
     instance->rx_plain_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
     instance->rx_encrypted_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
+    instance->current_type_check = MfClassicType4k;
 
     instance->mfc_event.data = &instance->mfc_event_data;
 
@@ -60,15 +61,42 @@ static NfcCommand mf_classic_poller_handle_data_update(MfClassicPoller* instance
     return instance->callback(instance->general_event, instance->context);
 }
 
+NfcCommand mf_classic_poller_handler_detect_type(MfClassicPoller* instance) {
+    NfcCommand command = NfcCommandReset;
+
+    if(instance->current_type_check == MfClassicType4k) {
+        iso14443_3a_copy(
+            instance->data->iso14443_3a_data,
+            iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
+        MfClassicError error = mf_classic_async_get_nt(instance, 254, MfClassicKeyTypeA, NULL);
+        if(error == MfClassicErrorNone) {
+            instance->data->type = MfClassicType4k;
+            instance->state = MfClassicPollerStateStart;
+            instance->current_type_check = MfClassicType4k;
+            FURI_LOG_D(TAG, "4K detected");
+        } else {
+            instance->current_type_check = MfClassicType1k;
+        }
+    } else if(instance->current_type_check == MfClassicType1k) {
+        MfClassicError error = mf_classic_async_get_nt(instance, 62, MfClassicKeyTypeA, NULL);
+        if(error == MfClassicErrorNone) {
+            instance->data->type = MfClassicType1k;
+            FURI_LOG_D(TAG, "1K detected");
+        } else {
+            instance->data->type = MfClassicTypeMini;
+            FURI_LOG_D(TAG, "Mini detected");
+        }
+        instance->current_type_check = MfClassicType4k;
+        instance->state = MfClassicPollerStateStart;
+    }
+
+    return command;
+}
+
 NfcCommand mf_classic_poller_handler_start(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
-    iso14443_3a_copy(
-        instance->data->iso14443_3a_data,
-        iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
-    mf_classic_detect_protocol(instance->data->iso14443_3a_data, &instance->data->type);
     instance->sectors_total = mf_classic_get_total_sectors_num(instance->data->type);
-
     memset(&instance->mode_ctx, 0, sizeof(MfClassicPollerModeContext));
 
     instance->mfc_event.type = MfClassicPollerEventTypeRequestMode;
@@ -674,13 +702,14 @@ NfcCommand mf_classic_poller_handler_fail(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
     instance->mfc_event.type = MfClassicPollerEventTypeFail;
     command = instance->callback(instance->general_event, instance->context);
-    instance->state = MfClassicPollerStateStart;
+    instance->state = MfClassicPollerStateDetectType;
 
     return command;
 }
 
 static const MfClassicPollerReadHandler
     mf_classic_poller_dict_attack_handler[MfClassicPollerStateNum] = {
+        [MfClassicPollerStateDetectType] = mf_classic_poller_handler_detect_type,
         [MfClassicPollerStateStart] = mf_classic_poller_handler_start,
         [MfClassicPollerStateRequestSectorTrailer] =
             mf_classic_poller_handler_request_sector_trailer,

@@ -22,6 +22,7 @@ typedef enum {
 } MfClassicCardState;
 
 typedef enum {
+    MfClassicPollerStateDetectType,
     MfClassicPollerStateStart,
 
     // Write states
@@ -91,6 +92,7 @@ struct MfClassicPoller {
     MfClassicAuthState auth_state;
     MfClassicCardState card_state;
 
+    MfClassicType current_type_check;
     uint8_t sectors_total;
     MfClassicPollerModeContext mode_ctx;
 
@@ -157,6 +159,12 @@ MfClassicError mf_classic_process_error(Iso14443_3aError error);
 MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller);
 
 void mf_classic_poller_free(MfClassicPoller* instance);
+
+MfClassicError mf_classic_async_get_nt(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicNt* nt);
 
 MfClassicError mf_classic_async_auth(
     MfClassicPoller* instance,

@@ -92,6 +92,10 @@ static NfcCommand iso14443_3a_poller_run(NfcGenericEvent event, void* context) {
         }
     }
 
+    if(command == NfcCommandReset) {
+        instance->state = Iso14443_3aPollerStateIdle;
+    }
+
     return command;
 }
 

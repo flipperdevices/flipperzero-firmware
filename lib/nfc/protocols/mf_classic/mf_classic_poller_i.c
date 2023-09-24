@@ -33,19 +33,15 @@ MfClassicError mf_classic_process_error(Iso14443_3aError error) {
     return ret;
 }
 
-MfClassicError mf_classic_async_auth(
+MfClassicError mf_classic_async_get_nt(
     MfClassicPoller* instance,
     uint8_t block_num,
-    MfClassicKey* key,
     MfClassicKeyType key_type,
-    MfClassicAuthContext* data) {
+    MfClassicNt* nt) {
     MfClassicError ret = MfClassicErrorNone;
     Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
-        iso14443_3a_copy(
-            instance->data->iso14443_3a_data,
-            iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
         uint8_t auth_type = (key_type == MfClassicKeyTypeB) ? MF_CLASSIC_CMD_AUTH_KEY_B :
                                                               MF_CLASSIC_CMD_AUTH_KEY_A;
         uint8_t auth_cmd[2] = {auth_type, block_num};
@@ -65,11 +61,35 @@ MfClassicError mf_classic_async_auth(
             break;
         }
 
+        if(nt) {
+            bit_buffer_write_bytes(instance->rx_plain_buffer, nt->data, sizeof(MfClassicNt));
+        }
+    } while(false);
+
+    return ret;
+}
+
+MfClassicError mf_classic_async_auth(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    MfClassicAuthContext* data) {
+    MfClassicError ret = MfClassicErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
+
+    do {
+        iso14443_3a_copy(
+            instance->data->iso14443_3a_data,
+            iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
+
         MfClassicNt nt = {};
-        bit_buffer_write_bytes(instance->rx_plain_buffer, nt.data, sizeof(nt.data));
+        ret = mf_classic_async_get_nt(instance, block_num, key_type, &nt);
+        if(ret != MfClassicErrorNone) break;
         if(data) {
             data->nt = nt;
         }
+
         uint32_t cuid = iso14443_3a_get_cuid(instance->data->iso14443_3a_data);
         uint64_t key_num = nfc_util_bytes2num(key->data, sizeof(MfClassicKey));
         MfClassicNr nr = {};
