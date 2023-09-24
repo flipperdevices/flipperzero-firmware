@@ -1,10 +1,16 @@
+#include "gui/canvas.h"
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "id_card_icons.h"
+
 #define NAME "John DOE"
+#define NUMBER "06 12 34 56 78"
+#define EMAIL "john.doe@example.com"
+
 #define TAG "Id Card"
 
 typedef struct {
@@ -18,16 +24,36 @@ void draw_callback(Canvas* canvas, void* context) {
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontPrimary);
+
+    canvas_draw_str_aligned(canvas, 1, 5, AlignLeft, AlignTop, "Name: ");
+
+    canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
 
-    canvas_draw_str_aligned(
-                canvas,
-                1,
-                19,
-                AlignLeft,
-                AlignTop,
-                NAME
-            );
+    canvas_draw_str_aligned(canvas, 33, 5, AlignLeft, AlignTop, NAME);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontPrimary);
+
+    canvas_draw_str_aligned(canvas, 1, 20, AlignLeft, AlignTop, "N: ");
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
+
+    canvas_draw_str_aligned(canvas, 15, 20, AlignLeft, AlignTop, NUMBER);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontPrimary);
+
+    canvas_draw_str_aligned(canvas, 1, 35, AlignLeft, AlignTop, "EMAIL: ");
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
+
+    canvas_draw_str_aligned(canvas, 5, 45, AlignLeft, AlignTop, EMAIL);
+
+    canvas_draw_icon(canvas, 95, 5, &I_icon_30x30);
 }
 
 void input_callback(InputEvent* event, void* context) {
@@ -53,27 +79,27 @@ int32_t id_card_app(void* p) {
 
     // Input handling
     InputEvent input;
+    app.input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     uint8_t exit_loop = 0;
-    while (1) {
-    furi_check(
-            furi_message_queue_get(app.input_queue, &input, FuriWaitForever) == FuriStatusOk
-        );
+    while(1) {
+        furi_check(
+            furi_message_queue_get(app.input_queue, &input, FuriWaitForever) == FuriStatusOk);
         FURI_LOG_D(TAG, "In the while!!!");
 
-        switch (input.key) {
-            case InputKeyLeft:
-            case InputKeyRight:
-            case InputKeyOk:
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyBack:
-                exit_loop = 1;
-                break;
-            default:
-                break;
+        switch(input.key) {
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyOk:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyBack:
+            exit_loop = 1;
+            break;
+        default:
+            break;
         }
 
-        if (exit_loop) {
+        if(exit_loop) {
             break;
         }
 

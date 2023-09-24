@@ -6,6 +6,8 @@ App(
     cdefines=["APP_ID_CARD"],
     requires=["gui"],
     stack_size=1 * 1024,
-    icon="A_Plugins_14",
+    fap_icon_assets="images",
+    fap_icon="images/icon_10x10.png",
+    fap_category="Misc",
     order=10,
 )
