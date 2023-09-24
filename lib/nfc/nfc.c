@@ -15,7 +15,6 @@ typedef enum {
 } NfcState;
 
 typedef enum {
-    NfcPollerStateIdle,
     NfcPollerStateStart,
     NfcPollerStateReady,
     NfcPollerStateReset,
@@ -153,12 +152,6 @@ static int32_t nfc_worker_listener(void* context) {
     return 0;
 }
 
-bool nfc_worker_poller_idle_handler(Nfc* instance) {
-    instance->poller_state = NfcPollerStateStart;
-
-    return false;
-}
-
 bool nfc_worker_poller_start_handler(Nfc* instance) {
     furi_hal_nfc_poller_field_on();
     if(instance->guard_time_us) {
@@ -189,7 +182,7 @@ bool nfc_worker_poller_reset_handler(Nfc* instance) {
     furi_hal_nfc_low_power_mode_start();
     furi_delay_ms(100);
     furi_hal_nfc_low_power_mode_stop();
-    instance->poller_state = NfcPollerStateIdle;
+    instance->poller_state = NfcPollerStateStart;
 
     return false;
 }
@@ -199,14 +192,14 @@ bool nfc_worker_poller_stop_handler(Nfc* instance) {
     instance->config_state = NfcConfigurationStateIdle;
 
     furi_hal_nfc_low_power_mode_start();
+    // Wait after field is off some time to reset tag power
     furi_delay_ms(10);
-    instance->poller_state = NfcPollerStateIdle;
+    instance->poller_state = NfcPollerStateStart;
 
     return true;
 }
 
 static const NfcWorkerPollerStateHandler nfc_worker_poller_state_handlers[NfcPollerStateNum] = {
-    [NfcPollerStateIdle] = nfc_worker_poller_idle_handler,
     [NfcPollerStateStart] = nfc_worker_poller_start_handler,
     [NfcPollerStateReady] = nfc_worker_poller_ready_handler,
     [NfcPollerStateReset] = nfc_worker_poller_reset_handler,
@@ -219,7 +212,7 @@ static int32_t nfc_worker_poller(void* context) {
     Nfc* instance = context;
     furi_assert(instance->callback);
     instance->state = NfcStateRunning;
-    instance->poller_state = NfcPollerStateIdle;
+    instance->poller_state = NfcPollerStateStart;
 
     furi_hal_nfc_event_start();
 
@@ -238,7 +231,6 @@ Nfc* nfc_alloc() {
     instance->state = NfcStateIdle;
     instance->comm_state = NfcCommStateIdle;
     instance->config_state = NfcConfigurationStateIdle;
-    instance->poller_state = NfcPollerStateIdle;
 
     instance->worker_thread = furi_thread_alloc();
     furi_thread_set_name(instance->worker_thread, "NfcWorker");
