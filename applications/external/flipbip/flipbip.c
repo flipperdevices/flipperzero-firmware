@@ -90,6 +90,22 @@ static void text_input_callback(void* context) {
     }
 }
 
+static void flipbip_scene_renew_dialog_callback(DialogExResult result, void* context) {
+    FlipBip* app = context;
+    if(result == DialogExResultRight) {
+        app->wallet_create(app);
+    } else {
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
+    }
+}
+
+static void flipbip_wallet_create(void* context) {
+    FlipBip* app = context;
+    furi_assert(app);
+    scene_manager_set_scene_state(app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1New);
+    scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
+}
+
 FlipBip* flipbip_app_alloc() {
     FlipBip* app = malloc(sizeof(FlipBip));
     app->gui = furi_record_open(RECORD_GUI);
@@ -148,6 +164,17 @@ FlipBip* flipbip_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, FlipBipViewIdTextInput, text_input_get_view(app->text_input));
 
+    app->wallet_create = flipbip_wallet_create;
+    app->renew_dialog = dialog_ex_alloc();
+    dialog_ex_set_result_callback(app->renew_dialog, flipbip_scene_renew_dialog_callback);
+    dialog_ex_set_context(app->renew_dialog, app);
+    dialog_ex_set_left_button_text(app->renew_dialog, "No");
+    dialog_ex_set_right_button_text(app->renew_dialog, "Yes");
+    dialog_ex_set_header(
+        app->renew_dialog, "Current wallet\nWill be lost.\nProceed?", 16, 12, AlignLeft, AlignTop);
+    view_dispatcher_add_view(
+        app->view_dispatcher, FlipBipViewRenewConfirm, dialog_ex_get_view(app->renew_dialog));
+
     // End Scene Additions
 
     return app;
@@ -167,6 +194,9 @@ void flipbip_app_free(FlipBip* app) {
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdSettings);
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdTextInput);
     submenu_free(app->submenu);
+
+    view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewRenewConfirm);
+    dialog_ex_free(app->renew_dialog);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
