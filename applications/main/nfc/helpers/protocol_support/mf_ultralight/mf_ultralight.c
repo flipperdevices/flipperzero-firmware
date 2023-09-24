@@ -222,6 +222,11 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
             .on_enter = nfc_scene_saved_menu_on_enter_mf_ultralight,
             .on_event = nfc_scene_saved_menu_on_event_mf_ultralight,
         },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
+        },
     .scene_emulate =
         {
             .on_enter = nfc_scene_emulate_on_enter_mf_ultralight,

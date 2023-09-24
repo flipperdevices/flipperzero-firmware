@@ -208,6 +208,19 @@ static bool nfc_scene_saved_menu_on_event_mf_classic(NfcApp* instance, uint32_t 
     return consumed;
 }
 
+static bool nfc_scene_save_name_on_event_mf_classic(NfcApp* instance, uint32_t event) {
+    bool consumed = false;
+
+    if(event == NfcCustomEventTextInputDone) {
+        mf_classic_key_cache_save(
+            instance->mfc_key_cache,
+            nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic));
+        consumed = true;
+    }
+
+    return consumed;
+}
+
 const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
     .features = NfcProtocolFeatureEmulateFull,
 
@@ -240,6 +253,11 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
         {
             .on_enter = nfc_scene_saved_menu_on_enter_mf_classic,
             .on_event = nfc_scene_saved_menu_on_event_mf_classic,
+        },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = nfc_scene_save_name_on_event_mf_classic,
         },
     .scene_emulate =
         {

@@ -128,6 +128,11 @@ const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
             .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_scene_saved_menu_on_event_iso15693_3,
         },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
+        },
     .scene_emulate =
         {
             .on_enter = nfc_scene_emulate_on_enter_iso15693_3,

@@ -104,6 +104,11 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_4b = {
             .on_enter = nfc_scene_saved_menu_on_enter_iso14443_4b,
             .on_event = nfc_scene_saved_menu_on_event_iso14443_4b,
         },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
+        },
     .scene_emulate =
         {
             .on_enter = NULL,

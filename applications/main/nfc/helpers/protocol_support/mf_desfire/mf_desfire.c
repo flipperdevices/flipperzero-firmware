@@ -112,6 +112,11 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
             .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_protocol_support_common_on_event_empty,
         },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
+        },
     .scene_emulate =
         {
             .on_enter = nfc_scene_emulate_on_enter_mf_desfire,
