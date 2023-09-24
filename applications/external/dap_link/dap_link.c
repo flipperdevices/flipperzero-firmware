@@ -262,14 +262,8 @@ typedef enum {
     CDCThreadEventCDCRx = (1 << 2),
     CDCThreadEventCDCConfig = (1 << 3),
     CDCThreadEventApplyConfig = (1 << 4),
-    CDCThreadEventCDCConnect = (1 << 5),
-    CDCThreadEventCDCDisconnect = (1 << 6),
-    CDCThreadEventCDCTxComplete = (1 << 7),
-
     CDCThreadEventAll = CDCThreadEventStop | CDCThreadEventUARTRx | CDCThreadEventCDCRx |
-                        CDCThreadEventCDCConfig | CDCThreadEventApplyConfig |
-                        CDCThreadEventCDCConnect | CDCThreadEventCDCDisconnect |
-                        CDCThreadEventCDCTxComplete,
+                        CDCThreadEventCDCConfig | CDCThreadEventApplyConfig,
 } CDCThreadEvent;
 
 typedef struct {
@@ -279,15 +273,13 @@ typedef struct {
     struct usb_cdc_line_coding line_coding;
 } CDCProcess;
 
-static void
-    cdc_uart_irq_rx_dam_cb(UartIrqEvent ev, FuriHalUartId id_uart, size_t data_len, void* ctx) {
+static void cdc_uart_irq_cb(UartIrqEvent ev, uint8_t data, void* ctx) {
     CDCProcess* app = ctx;
 
-    UNUSED(ev);
-    uint8_t data[data_len];
-    furi_hal_uart_rx_dma(id_uart, data, data_len);
-    furi_stream_buffer_send(app->rx_stream, data, data_len, 100);
-    furi_thread_flags_set(app->thread_id, CDCThreadEventUARTRx);
+    if(ev == UartIrqEventRXNE) {
+        furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
+        furi_thread_flags_set(app->thread_id, CDCThreadEventUARTRx);
+    }
 }
 
 static void cdc_usb_rx_callback(void* context) {
@@ -295,21 +287,9 @@ static void cdc_usb_rx_callback(void* context) {
     furi_thread_flags_set(app->thread_id, CDCThreadEventCDCRx);
 }
 
-static void cdc_usb_tx_complete_callback(void* context) {
-    CDCProcess* app = context;
-    furi_thread_flags_set(app->thread_id, CDCThreadEventCDCTxComplete);
-}
-
 static void cdc_usb_control_line_callback(uint8_t state, void* context) {
-    CDCProcess* app = context;
-    // bit 0: DTR state, bit 1: RTS state
-    bool dtr = state & (1 << 0);
-
-    if(dtr == true) {
-        furi_thread_flags_set(app->thread_id, CDCThreadEventCDCConnect);
-    } else {
-        furi_thread_flags_set(app->thread_id, CDCThreadEventCDCDisconnect);
-    }
+    UNUSED(context);
+    UNUSED(state);
 }
 
 static void cdc_usb_config_callback(struct usb_cdc_line_coding* config, void* context) {
@@ -322,7 +302,7 @@ static FuriHalUartId cdc_init_uart(
     DapUartType type,
     DapUartTXRX swap,
     uint32_t baudrate,
-    void (*cb)(UartIrqEvent ev, FuriHalUartId id_uart, size_t data, void* ctx),
+    void (*cb)(UartIrqEvent ev, uint8_t data, void* ctx),
     void* ctx) {
     FuriHalUartId uart_id = FuriHalUartIdUSART1;
     if(baudrate == 0) baudrate = 115200;
@@ -330,7 +310,7 @@ static FuriHalUartId cdc_init_uart(
     switch(type) {
     case DapUartTypeUSART1:
         uart_id = FuriHalUartIdUSART1;
-        furi_hal_console_deinit();
+        furi_hal_console_disable();
         furi_hal_uart_deinit(uart_id);
         if(swap == DapUartTXRXSwap) {
             LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_SWAPPED);
@@ -338,7 +318,7 @@ static FuriHalUartId cdc_init_uart(
             LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_STANDARD);
         }
         furi_hal_uart_init(uart_id, baudrate);
-        furi_hal_uart_set_dma_callback(uart_id, cb, ctx);
+        furi_hal_uart_set_irq_cb(uart_id, cb, ctx);
         break;
     case DapUartTypeLPUART1:
         uart_id = FuriHalUartIdLPUART1;
@@ -349,7 +329,7 @@ static FuriHalUartId cdc_init_uart(
             LL_LPUART_SetTXRXSwap(LPUART1, LL_LPUART_TXRX_STANDARD);
         }
         furi_hal_uart_init(uart_id, baudrate);
-        furi_hal_uart_set_dma_callback(uart_id, cb, ctx);
+        furi_hal_uart_set_irq_cb(uart_id, cb, ctx);
         break;
     }
 
@@ -361,7 +341,7 @@ static void cdc_deinit_uart(DapUartType type) {
     case DapUartTypeUSART1:
         furi_hal_uart_deinit(FuriHalUartIdUSART1);
         LL_USART_SetTXRXSwap(USART1, LL_USART_TXRX_STANDARD);
-        furi_hal_console_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
+        furi_hal_console_init();
         break;
     case DapUartTypeLPUART1:
         furi_hal_uart_deinit(FuriHalUartIdLPUART1);
@@ -388,15 +368,12 @@ static int32_t cdc_process(void* p) {
     uint8_t* rx_buffer = malloc(rx_buffer_size);
 
     app->uart_id = cdc_init_uart(
-        uart_pins_prev, uart_swap_prev, dap_state->cdc_baudrate, cdc_uart_irq_rx_dam_cb, app);
+        uart_pins_prev, uart_swap_prev, dap_state->cdc_baudrate, cdc_uart_irq_cb, app);
 
     dap_cdc_usb_set_context(app);
     dap_cdc_usb_set_rx_callback(cdc_usb_rx_callback);
-    dap_cdc_usb_set_tx_complete_callback(cdc_usb_tx_complete_callback);
     dap_cdc_usb_set_control_line_callback(cdc_usb_control_line_callback);
     dap_cdc_usb_set_config_callback(cdc_usb_config_callback);
-
-    bool cdc_connect = false;
 
     uint32_t events;
     while(1) {
@@ -412,15 +389,14 @@ static int32_t cdc_process(void* p) {
                 }
             }
 
-            if(events & (CDCThreadEventUARTRx | CDCThreadEventCDCTxComplete)) {
+            if(events & CDCThreadEventUARTRx) {
                 size_t len =
                     furi_stream_buffer_receive(app->rx_stream, rx_buffer, rx_buffer_size, 0);
-                if(cdc_connect) {
-                    if(len > 0) {
-                        dap_cdc_usb_tx(rx_buffer, len);
-                    }
-                    dap_state->cdc_rx_counter += len;
+
+                if(len > 0) {
+                    dap_cdc_usb_tx(rx_buffer, len);
                 }
+                dap_state->cdc_rx_counter += len;
             }
 
             if(events & CDCThreadEventCDCRx) {
@@ -441,19 +417,13 @@ static int32_t cdc_process(void* p) {
                         uart_pins_prev,
                         uart_swap_prev,
                         dap_state->cdc_baudrate,
-                        cdc_uart_irq_rx_dam_cb,
+                        cdc_uart_irq_cb,
                         app);
                 }
             }
 
             if(events & CDCThreadEventStop) {
                 break;
-            }
-            if(events & CDCThreadEventCDCConnect) {
-                cdc_connect = true;
-            }
-            if(events & CDCThreadEventCDCDisconnect) {
-                cdc_connect = false;
             }
         }
     }
