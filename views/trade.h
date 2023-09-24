@@ -6,8 +6,12 @@
 #include <gui/view.h>
 #include "../pokemon_app.h"
 
-View* trade_alloc(PokemonFap* pokemon_fap);
+void* trade_alloc(
+    TradeBlock* trade_block,
+    const PokemonTable* table,
+    ViewDispatcher* view_dispatcher,
+    uint32_t view_id);
 
-void trade_free(PokemonFap* pokemon_fap);
+void trade_free(ViewDispatcher* view_dispatcher, uint32_t view_id, void* trade_ctx);
 
 #endif /* TRADE_H */
