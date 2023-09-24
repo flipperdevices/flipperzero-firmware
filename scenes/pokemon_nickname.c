@@ -41,6 +41,8 @@ static bool select_nickname_input_validator(const char* text, FuriString* error,
             (uint8_t*)pokemon_fap->trade_block->nickname, (char*)text, strlen(text));
     }
 
+    FURI_LOG_D(TAG, "[nickname] Set nickname to %s", text);
+
     return rc;
 }
 
