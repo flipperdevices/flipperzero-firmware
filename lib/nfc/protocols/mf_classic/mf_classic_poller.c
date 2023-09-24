@@ -61,6 +61,23 @@ static NfcCommand mf_classic_poller_handle_data_update(MfClassicPoller* instance
     return instance->callback(instance->general_event, instance->context);
 }
 
+static void mf_classic_poller_check_key_b_is_readable(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicBlock* data) {
+    do {
+        if(!mf_classic_is_sector_trailer(block_num)) break;
+        if(!mf_classic_is_allowed_access(
+               instance->data, block_num, MfClassicKeyTypeA, MfClassicActionKeyBRead))
+            break;
+
+        MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)data;
+        uint64_t key_b = nfc_util_bytes2num(sec_tr->key_b.data, sizeof(MfClassicKey));
+        uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+        mf_classic_set_key_found(instance->data, sector_num, MfClassicKeyTypeB, key_b);
+    } while(false);
+}
+
 NfcCommand mf_classic_poller_handler_detect_type(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandReset;
 
@@ -360,6 +377,10 @@ NfcCommand mf_classic_poller_handler_request_read_sector_blocks(MfClassicPoller*
         error = mf_classic_async_read_block(instance, sec_read_ctx->current_block, &read_block);
         if(error == MfClassicErrorNone) {
             mf_classic_set_block_read(instance->data, sec_read_ctx->current_block, &read_block);
+            if(sec_read_ctx->key_type == MfClassicKeyTypeA) {
+                mf_classic_poller_check_key_b_is_readable(
+                    instance, sec_read_ctx->current_block, &read_block);
+            }
         } else {
             mf_classic_async_halt(instance);
             sec_read_ctx->auth_passed = false;
@@ -515,6 +536,9 @@ NfcCommand mf_classic_poller_handler_read_sector(MfClassicPoller* instance) {
             FURI_LOG_D(TAG, "Failed to read block %d", block_num);
         } else {
             mf_classic_set_block_read(instance->data, block_num, &block);
+            if(dict_attack_ctx->current_key_type == MfClassicKeyTypeA) {
+                mf_classic_poller_check_key_b_is_readable(instance, block_num, &block);
+            }
         }
     } while(false);
 
@@ -673,6 +697,9 @@ NfcCommand mf_classic_poller_handler_key_reuse_read_sector(MfClassicPoller* inst
             FURI_LOG_D(TAG, "Failed to read block %d", block_num);
         } else {
             mf_classic_set_block_read(instance->data, block_num, &block);
+            if(dict_attack_ctx->current_key_type == MfClassicKeyTypeA) {
+                mf_classic_poller_check_key_b_is_readable(instance, block_num, &block);
+            }
         }
     } while(false);
 
