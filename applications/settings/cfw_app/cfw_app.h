@@ -75,7 +75,12 @@ typedef struct {
     CharList_t mainmenu_app_paths;
     uint8_t mainmenu_app_index;
 
+    CharList_t gamemenu_app_names;
+    CharList_t gamemenu_app_paths;
+    uint8_t gamemenu_app_index;
+
     uint8_t start_point_index;
+    uint8_t game_start_point_index;
 
     bool subghz_use_defaults;
     FrequencyList_t subghz_static_freqs;
@@ -90,6 +95,7 @@ typedef struct {
     FuriString* version_tag;
 
     bool save_mainmenu_apps;
+    bool save_gamemenu_apps;
     bool save_subghz_frequencies;
     bool save_subghz;
     bool save_name;

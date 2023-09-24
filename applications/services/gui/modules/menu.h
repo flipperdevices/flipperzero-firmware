@@ -25,8 +25,9 @@ Menu* menu_alloc();
  *
  * @return     Menu instance
  * @param      pos  size_t position
+ * @param      gamemode bool gamemode on/off
  */
-Menu* menu_pos_alloc(size_t pos);
+Menu* menu_pos_alloc(size_t pos, bool gamemode);
 
 /** Free menu
  *

@@ -5,6 +5,7 @@ enum VarItemListIndex {
     VarItemListIndexDesktop,
     VarItemListIndexLockmenu,
     VarItemListIndexMainmenu,
+    VarItemListIndexGamemenu,
     VarItemListIndexPassport,
 };
 
@@ -21,6 +22,7 @@ void cfw_app_scene_interface_on_enter(void* context) {
     variable_item_list_add(var_item_list, "Desktop", 0, NULL, app);
     variable_item_list_add(var_item_list, "Lock Menu", 0, NULL, app);
     variable_item_list_add(var_item_list, "Main Menu", 0, NULL, app);
+    variable_item_list_add(var_item_list, "Game Menu", 0, NULL, app);
     variable_item_list_add(var_item_list, "Passport", 0, NULL, app);
 
     variable_item_list_set_enter_callback(
@@ -55,6 +57,10 @@ bool cfw_app_scene_interface_on_event(void* context, SceneManagerEvent event) {
         case VarItemListIndexMainmenu:
             scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceMainmenu, 0);
             scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceMainmenu);
+            break;
+        case VarItemListIndexGamemenu:
+            scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceGamemenu, 0);
+            scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceGamemenu);
             break;
         case VarItemListIndexPassport:
             scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfacePassport, 0);
