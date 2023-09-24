@@ -37,12 +37,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Many reverts of some older changes with viewport and BLE
 - Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
 - Updated: [NFC Seader v1.2 (By bettse)](https://github.com/bettse/seader)
-- Updated: [PicoPass (iClass) v1.5 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass more bit formats #47 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/47) & [Dictionary format guidelines #45 (By Antiklesys)](https://github.com/flipperdevices/flipperzero-good-faps/pull/45)
 - Updated: [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - Updated: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [Customizable Game Mode Menu (By ESurge & RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756) - Sorry this menu will get overwritten on every install. Save your custom cfw_gamesmenu.txt to restore your changes. RM Patreon supporters can request it not be overwritten on their custom builds.
 - Updated: [Pokemon Trading v1.2.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
 - Updated: [FlipBIP Crypto Wallet v1.13 (By xtruan)](https://github.com/xtruan/FlipBIP)
+- Updated: [PicoPass (iClass) v1.5 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass more bit formats #47 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/47) & [Dictionary format guidelines #45 (By Antiklesys)](https://github.com/flipperdevices/flipperzero-good-faps/pull/45) & [Improve loclass logic for readers doing keyrolling. #50 (By nvx)](https://github.com/flipperdevices/flipperzero-good-faps/pull/50)
 
 <a name="release">
 
