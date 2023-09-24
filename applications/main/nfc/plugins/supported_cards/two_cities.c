@@ -71,17 +71,20 @@ static bool two_cities_read(Nfc* nfc, NfcDevice* device) {
     nfc_device_copy_data(device, NfcProtocolMfClassic, data);
 
     do {
-        if(!mf_classic_detect_protocol(data->iso14443_3a_data, &data->type)) break;
+        MfClassicType type = MfClassicTypeMini;
+        MfClassicError error = mf_classic_poller_detect_type(nfc, &type);
+        if(error != MfClassicErrorNone) break;
 
+        data->type = type;
         MfClassicDeviceKeys keys = {};
         for(size_t i = 0; i < mf_classic_get_total_sectors_num(data->type); i++) {
             nfc_util_num2bytes(two_cities_4k_keys[i].a, sizeof(MfClassicKey), keys.key_a[i].data);
+            FURI_BIT_SET(keys.key_a_mask, i);
             nfc_util_num2bytes(two_cities_4k_keys[i].b, sizeof(MfClassicKey), keys.key_b[i].data);
+            FURI_BIT_SET(keys.key_b_mask, i);
         }
-        keys.key_a_mask = 0xFFFFFFFFFFFFFFFFU;
-        keys.key_b_mask = 0xFFFFFFFFFFFFFFFFU;
 
-        MfClassicError error = mf_classic_poller_read(nfc, &keys, data);
+        error = mf_classic_poller_read(nfc, &keys, data);
         if(error != MfClassicErrorNone) {
             FURI_LOG_W(TAG, "Failed to read data");
             break;

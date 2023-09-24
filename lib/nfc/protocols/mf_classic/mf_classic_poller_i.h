@@ -111,6 +111,12 @@ struct MfClassicPoller {
 };
 
 typedef struct {
+    uint8_t block;
+    MfClassicKeyType key_type;
+    MfClassicNt nt;
+} MfClassicCollectNtContext;
+
+typedef struct {
     uint8_t block_num;
     MfClassicKey key;
     MfClassicKeyType key_type;
@@ -146,6 +152,7 @@ typedef struct {
 } MfClassicReadContext;
 
 typedef union {
+    MfClassicCollectNtContext collect_nt_context;
     MfClassicAuthContext auth_context;
     MfClassicReadBlockContext read_block_context;
     MfClassicWriteBlockContext write_block_context;
