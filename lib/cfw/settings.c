@@ -8,7 +8,9 @@
 
 CfwSettings cfw_settings = {
     .menu_style = MenuStyleList, // List
+    .game_menu_style = MenuStyleWii, // List
     .start_point = 0, // First Item
+    .game_start_point = 0, // First Item
     .lock_menu_type = true, // Adv Grid VS FALSE=LIST
     .sort_dirs_first = true, // ON
     .dark_mode = false, // OFF
@@ -32,7 +34,11 @@ void CFW_SETTINGS_LOAD() {
         flipper_format_rewind(file);
         flipper_format_read_uint32(file, "menu_style", (uint32_t*)&x->menu_style, 1);
         flipper_format_rewind(file);
+        flipper_format_read_uint32(file, "game_menu_style", (uint32_t*)&x->game_menu_style, 1);
+        flipper_format_rewind(file);
         flipper_format_read_uint32(file, "start_point", &x->start_point, 1);
+        flipper_format_rewind(file);
+        flipper_format_read_uint32(file, "game_start_point", &x->game_start_point, 1);
         flipper_format_rewind(file);
         flipper_format_read_bool(file, "lock_menu_type", &x->lock_menu_type, 1);
         flipper_format_rewind(file);
@@ -76,7 +82,9 @@ void CFW_SETTINGS_SAVE() {
         // u = x->menu_style;
         // e = CLAMP(u, MenuStyleCount - 1U, 0U);
         flipper_format_write_uint32(file, "menu_style", (uint32_t*)&x->menu_style, 1);
+        flipper_format_write_uint32(file, "game_menu_style", (uint32_t*)&x->game_menu_style, 1);
         flipper_format_write_uint32(file, "start_point", &x->start_point, 1);
+        flipper_format_write_uint32(file, "game_start_point", &x->game_start_point, 1);
         flipper_format_write_bool(file, "lock_menu_type", &x->lock_menu_type, 1);
         flipper_format_write_bool(file, "sort_dirs_first", &x->sort_dirs_first, 1);
         flipper_format_write_bool(file, "dark_mode", &x->dark_mode, 1);

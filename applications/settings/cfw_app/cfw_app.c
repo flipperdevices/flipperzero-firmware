@@ -28,6 +28,20 @@ bool cfw_app_apply(CfwApp* app) {
         stream_free(stream);
     }
 
+    if(app->save_gamemenu_apps) {
+        Stream* stream = file_stream_alloc(storage);
+        if(file_stream_open(stream, CFW_MENU_GAMESMODE_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+            stream_write_format(stream, "GamesMenuList Version %u\n", 0);
+            CharList_it_t it;
+            CharList_it(it, app->gamemenu_app_paths);
+            for(size_t i = 0; i < CharList_size(app->gamemenu_app_paths); i++) {
+                stream_write_format(stream, "%s\n", *CharList_get(app->gamemenu_app_paths, i));
+            }
+        }
+        file_stream_close(stream);
+        stream_free(stream);
+    }
+
     if(app->save_subghz_frequencies) {
         FlipperFormat* file = flipper_format_file_alloc(storage);
         do {
@@ -188,12 +202,25 @@ CfwApp* cfw_app_alloc() {
 
     Loader* loader = furi_record_open(RECORD_LOADER);
     MainMenuList_t* mainmenu_apps = loader_get_mainmenu_apps(loader);
-    furi_record_close(RECORD_LOADER);
 
     for(size_t i = 0; i < MainMenuList_size(*mainmenu_apps); i++) {
         const MainMenuApp* menu_item = MainMenuList_get(*mainmenu_apps, i);
         CharList_push_back(app->mainmenu_app_names, strdup(menu_item->name));
         CharList_push_back(app->mainmenu_app_paths, strdup(menu_item->path));
+    }
+
+    //Game Menu Add/Remove list + Start Point
+
+    CharList_init(app->gamemenu_app_names);
+    CharList_init(app->gamemenu_app_paths);
+
+    GamesMenuList_t* gamemenu_apps = loader_get_gamesmenu_apps(loader);
+    furi_record_close(RECORD_LOADER);
+
+    for(size_t i = 0; i < GamesMenuList_size(*gamemenu_apps); i++) {
+        const GamesMenuApp* game_menu_item = GamesMenuList_get(*gamemenu_apps, i);
+        CharList_push_back(app->gamemenu_app_names, strdup(game_menu_item->name));
+        CharList_push_back(app->gamemenu_app_paths, strdup(game_menu_item->path));
     }
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -268,6 +295,17 @@ void cfw_app_free(CfwApp* app) {
         free(*CharList_cref(it));
     }
     CharList_clear(app->mainmenu_app_paths);
+
+    CharList_it_t it2;
+
+    for(CharList_it(it2, app->gamemenu_app_names); !CharList_end_p(it2); CharList_next(it2)) {
+        free(*CharList_cref(it2));
+    }
+    CharList_clear(app->gamemenu_app_names);
+    for(CharList_it(it2, app->gamemenu_app_paths); !CharList_end_p(it2); CharList_next(it2)) {
+        free(*CharList_cref(it2));
+    }
+    CharList_clear(app->gamemenu_app_paths);
 
     FrequencyList_clear(app->subghz_static_freqs);
     FrequencyList_clear(app->subghz_hopper_freqs);
