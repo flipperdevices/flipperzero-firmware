@@ -9,6 +9,9 @@ KeySettingModel* key_setting_model_alloc(uint8_t key_id) {
     model->keystrokes_count = 0;
     model->keystrokes = NULL;
     model->message = NULL;
+    model->message_index = 0;
+    model->temp_buffer_size = 30;
+    model->temp_buffer = (char*)malloc(sizeof(char) * model->temp_buffer_size);
     return model;
 }
 
@@ -30,6 +33,30 @@ uint32_t key_setting_model_get_color_down(KeySettingModel* model) {
 
 void key_setting_model_set_color_down(KeySettingModel* model, uint32_t color_down) {
     model->color_down = color_down;
+}
+
+void key_setting_model_set_message_index(KeySettingModel* model, uint8_t index) {
+    model->message_index = index;
+}
+
+uint8_t key_setting_model_get_message_index(KeySettingModel* model) {
+    return model->message_index;
+}
+
+char* key_setting_model_get_temp_buffer(KeySettingModel* model) {
+    return model->temp_buffer;
+}
+
+size_t key_setting_model_get_temp_buffer_size(KeySettingModel* model) {
+    return model->temp_buffer_size;
+}
+
+void key_setting_model_set_key_config(KeySettingModel* model, void* key_config) {
+    model->key_config = key_config;
+}
+
+void* key_setting_model_get_key_config(KeySettingModel* model) {
+    return model->key_config;
 }
 
 float key_setting_model_get_frequency(KeySettingModel* model) {
@@ -109,10 +136,14 @@ bool key_setting_model_remove_last_keystroke(KeySettingModel* model) {
 }
 
 FuriString* key_setting_model_get_message(KeySettingModel* model) {
+    if(model == NULL) {
+        return NULL;
+    }
+
     return model->message;
 }
 
-void key_setting_model_set_message(KeySettingModel* model, char* message) {
+void key_setting_model_set_message(KeySettingModel* model, const char* message) {
     if(message == NULL) {
         furi_string_free(model->message);
         model->message = NULL;
@@ -162,9 +193,20 @@ bool key_setting_model_save(
     }
 
     FuriString* str = key_setting_model_get_message(model);
-    if((fields & KeySettingModelFieldMessage) && str &&
-       !flipper_format_write_string(flipper_format, "Message", str)) {
-        return false;
+    if((fields & KeySettingModelFieldMessage)) {
+        FuriString* temp_str = NULL;
+        if(str == NULL) {
+            temp_str = furi_string_alloc();
+        }
+        if(!flipper_format_write_string(flipper_format, "Message", str ? str : temp_str)) {
+            if(temp_str) {
+                furi_string_free(temp_str);
+            }
+            return false;
+        }
+        if(temp_str) {
+            furi_string_free(temp_str);
+        }
     }
 
     uint16_t size = key_setting_model_get_keystrokes_count(model);
@@ -225,7 +267,9 @@ static void key_setting_model_load_fields(KeySettingModel* model, FlipperFormat*
     }
 
     if(flipper_format_read_string(flipper_format, "Message", message)) {
-        furi_string_set(model->message, message);
+        if(furi_string_size(message)) {
+            key_setting_model_set_message(model, furi_string_get_cstr(message));
+        }
     }
 
     if(flipper_format_read_uint32(flipper_format, "KeystrokeCount", &data32, 1)) {
@@ -271,6 +315,9 @@ void key_setting_model_free(KeySettingModel* model) {
     }
     if(model->message) {
         furi_string_free(model->message);
+    }
+    if(model->temp_buffer) {
+        free(model->temp_buffer);
     }
     free(model);
 }

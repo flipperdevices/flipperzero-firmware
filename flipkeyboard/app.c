@@ -3,6 +3,7 @@
 static void play_tone(FlipboardModel* model, KeySettingModel* ksm);
 static void set_colors(FlipboardModel* model, KeySettingModel* ksm, uint8_t new_key);
 static void send_keystrokes(FlipboardModel* model, KeySettingModel* ksm);
+static void send_text(FlipboardModel* model, KeySettingModel* ksm);
 static uint8_t reduce(uint8_t new_key, bool left_wins);
 
 // -----------------------------------------------------------
@@ -51,6 +52,7 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
 
     KeySettingModel* ksm = flipboard_model_get_key_setting_model(model, reduced_new_key);
     send_keystrokes(model, ksm);
+    send_text(model, ksm);
     play_tone(model, ksm);
     set_colors(model, ksm, new_key);
 
@@ -95,7 +97,7 @@ int32_t flipboard_keyboard_app(void* p) {
 
     KeySettingModelFields fields = KeySettingModelFieldAll;
     bool single_mode_button = true;
-    bool attach_keyboard = false;
+    bool attach_keyboard = true;
 
     Flipboard* app =
         flipboard_alloc(fields, single_mode_button, attach_keyboard, get_primary_view);
@@ -149,6 +151,16 @@ static void send_keystrokes(FlipboardModel* model, KeySettingModel* ksm) {
                 flipboard_model_get_keyboard(model), keystroke.key_code);
             flipboard_keyboard_release_all(flipboard_model_get_keyboard(model));
         }
+    }
+}
+
+static void send_text(FlipboardModel* model, KeySettingModel* ksm) {
+    UNUSED(model);
+
+    FuriString* message = key_setting_model_get_message(ksm);
+    if(message) {
+        flipboard_keyboard_send_text(
+            flipboard_model_get_keyboard(model), furi_string_get_cstr(message));
     }
 }
 

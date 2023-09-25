@@ -23,6 +23,7 @@ typedef enum {
     FlipboardViewAppMenuId, // The first entry should be the app menu
     FlipboardViewConfigureId,
     FlipboardViewConfigureSubviewId,
+    FlipboardViewConfigureTextInputId,
 
     FlipboardViewAboutId,
     FlipboardViewPrimaryId,

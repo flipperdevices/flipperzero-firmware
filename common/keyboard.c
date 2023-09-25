@@ -1,7 +1,7 @@
 #include "keyboard_i.h"
 
-#define PRESS_DELAY_MS 1
-#define RELEASE_DELAY_MS 1
+#define PRESS_DELAY_MS 5
+#define RELEASE_DELAY_MS 5
 
 FlipboardKeyboard* flipboard_keyboard_alloc() {
     FlipboardKeyboard* keyboard = malloc(sizeof(FlipboardKeyboard));
@@ -38,7 +38,7 @@ void flipboard_keyboard_send_char(FlipboardKeyboard* keyboard, char ch) {
     }
 }
 
-void flipboard_keyboard_send_text(FlipboardKeyboard* keyboard, char* message) {
+void flipboard_keyboard_send_text(FlipboardKeyboard* keyboard, const char* message) {
     if(message != NULL) {
         for(size_t i = 0; i < strlen(message); i++) {
             flipboard_keyboard_send_char(keyboard, message[i]);

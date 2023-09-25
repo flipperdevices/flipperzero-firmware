@@ -24,4 +24,14 @@ struct KeySettingModel {
 
     // Message to send when this key is pressed
     FuriString* message;
+
+    // Temp buffer for editing message
+    char* temp_buffer;
+    size_t temp_buffer_size;
+
+    // Index of the menu item for editing message
+    uint8_t message_index;
+
+    // KeyConfig associated with this key
+    void* key_config;
 };

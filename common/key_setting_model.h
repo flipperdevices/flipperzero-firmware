@@ -43,6 +43,14 @@ void key_setting_model_set_color_up(KeySettingModel* model, uint32_t color_up);
 uint32_t key_setting_model_get_color_down(KeySettingModel* model);
 void key_setting_model_set_color_down(KeySettingModel* model, uint32_t color_down);
 
+void key_setting_model_set_message_index(KeySettingModel* model, uint8_t index);
+uint8_t key_setting_model_get_message_index(KeySettingModel* model);
+char* key_setting_model_get_temp_buffer(KeySettingModel* model);
+size_t key_setting_model_get_temp_buffer_size(KeySettingModel* model);
+
+void key_setting_model_set_key_config(KeySettingModel* model, void* key_config);
+void* key_setting_model_get_key_config(KeySettingModel* model);
+
 float key_setting_model_get_frequency(KeySettingModel* model);
 void key_setting_model_set_frequency(KeySettingModel* model, float frequency);
 
@@ -57,7 +65,7 @@ void key_setting_model_append_keystroke(KeySettingModel* model, uint16_t key_cod
 bool key_setting_model_remove_last_keystroke(KeySettingModel* model);
 
 FuriString* key_setting_model_get_message(KeySettingModel* model);
-void key_setting_model_set_message(KeySettingModel* model, char* message);
+void key_setting_model_set_message(KeySettingModel* model, const char* message);
 
 #ifdef __cplusplus
 }
