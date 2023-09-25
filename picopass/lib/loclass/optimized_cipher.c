@@ -296,7 +296,11 @@ void loclass_opt_doBothMAC_2(
     loclass_opt_output(div_key_p, s, tmac);
 }
 
-void loclass_iclass_calc_div_key(uint8_t* csn, const uint8_t* key, uint8_t* div_key, bool elite) {
+void loclass_iclass_calc_div_key(
+    const uint8_t* csn,
+    const uint8_t* key,
+    uint8_t* div_key,
+    bool elite) {
     if(elite) {
         uint8_t keytable[128] = {0};
         uint8_t key_index[8] = {0};

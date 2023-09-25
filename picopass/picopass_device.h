@@ -12,6 +12,13 @@
 #include <optimized_cipher.h>
 #include "helpers/iclass_elite_dict.h"
 
+#define LOCLASS_NUM_CSNS 9
+#ifndef LOCLASS_NUM_PER_CSN
+// Collect 2 MACs per CSN to account for keyroll modes by default
+#define LOCLASS_NUM_PER_CSN 2
+#endif
+#define LOCLASS_MACS_TO_COLLECT (LOCLASS_NUM_CSNS * LOCLASS_NUM_PER_CSN)
+
 #define PICOPASS_DEV_NAME_MAX_LEN 22
 #define PICOPASS_READER_DATA_MAX_SIZE 64
 #define PICOPASS_MAX_APP_LIMIT 32
@@ -70,6 +77,7 @@ typedef enum {
     PicopassEmulatorStateIdle,
     PicopassEmulatorStateActive,
     PicopassEmulatorStateSelected,
+    PicopassEmulatorStateStopEmulation,
 } PicopassEmulatorState;
 
 typedef struct {
@@ -110,6 +118,7 @@ typedef struct {
     uint8_t key_block_num; // in loclass mode used to store csn#
     bool loclass_mode;
     bool loclass_got_std_key;
+    uint8_t loclass_mac_buffer[8 * LOCLASS_NUM_PER_CSN];
     LoclassWriter* loclass_writer;
 } PicopassEmulatorCtx;
 

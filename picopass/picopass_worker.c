@@ -835,22 +835,37 @@ static inline void picopass_emu_write_blocks(
         block_count * RFAL_PICOPASS_BLOCK_LEN);
 }
 
-static void picopass_init_cipher_state(NfcVData* nfcv_data, PicopassEmulatorCtx* ctx) {
+static void picopass_init_cipher_state_key(
+    NfcVData* nfcv_data,
+    PicopassEmulatorCtx* ctx,
+    const uint8_t key[RFAL_PICOPASS_BLOCK_LEN]) {
     uint8_t cc[RFAL_PICOPASS_BLOCK_LEN];
-    uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
-
     picopass_emu_read_blocks(nfcv_data, cc, PICOPASS_SECURE_EPURSE_BLOCK_INDEX, 1);
-    picopass_emu_read_blocks(nfcv_data, key, ctx->key_block_num, 1);
 
     ctx->cipher_state = loclass_opt_doTagMAC_1(cc, key);
 }
 
+static void picopass_init_cipher_state(NfcVData* nfcv_data, PicopassEmulatorCtx* ctx) {
+    uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
+
+    picopass_emu_read_blocks(nfcv_data, key, ctx->key_block_num, 1);
+
+    picopass_init_cipher_state_key(nfcv_data, ctx, key);
+}
+
 static void
     loclass_update_csn(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, PicopassEmulatorCtx* ctx) {
-    // collect two nonces in a row for each CSN
-    uint8_t csn_num = (ctx->key_block_num / 2) % LOCLASS_NUM_CSNS;
-    memcpy(nfc_data->uid, loclass_csns[csn_num], RFAL_PICOPASS_BLOCK_LEN);
-    picopass_emu_write_blocks(nfcv_data, loclass_csns[csn_num], PICOPASS_CSN_BLOCK_INDEX, 1);
+    // collect LOCLASS_NUM_PER_CSN nonces in a row for each CSN
+    const uint8_t* csn =
+        loclass_csns[(ctx->key_block_num / LOCLASS_NUM_PER_CSN) % LOCLASS_NUM_CSNS];
+    memcpy(nfc_data->uid, csn, RFAL_PICOPASS_BLOCK_LEN);
+    picopass_emu_write_blocks(nfcv_data, csn, PICOPASS_CSN_BLOCK_INDEX, 1);
+
+    uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
+    loclass_iclass_calc_div_key(csn, picopass_iclass_key, key, false);
+    picopass_emu_write_blocks(nfcv_data, key, PICOPASS_SECURE_KD_BLOCK_INDEX, 1);
+
+    picopass_init_cipher_state_key(nfcv_data, ctx, key);
 }
 
 static void picopass_emu_handle_packet(
@@ -865,7 +880,7 @@ static void picopass_emu_handle_packet(
 
     const uint8_t block_ff[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-    if(nfcv_data->frame_length < 1) {
+    if(nfcv_data->frame_length < 1 || ctx->state == PicopassEmulatorStateStopEmulation) {
         return;
     }
 
@@ -999,6 +1014,8 @@ static void picopass_emu_handle_packet(
             return;
         }
 
+        // loclass mode doesn't do any card side crypto, just logs the readers crypto, so no-op in this mode
+        // we can also no-op if the key block is the same, CHECK re-inits if it failed already
         if(ctx->key_block_num != key_block_num && !ctx->loclass_mode) {
             ctx->key_block_num = key_block_num;
             picopass_init_cipher_state(nfcv_data, ctx);
@@ -1020,13 +1037,13 @@ static void picopass_emu_handle_packet(
             uint8_t cc[RFAL_PICOPASS_BLOCK_LEN];
             picopass_emu_read_blocks(nfcv_data, cc, PICOPASS_SECURE_EPURSE_BLOCK_INDEX, 1);
 
-            // Check if the nonce is from a standard key
+#ifndef PICOPASS_DEBUG_IGNORE_LOCLASS_STD_KEY
             uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
-            loclass_iclass_calc_div_key(nfc_data->uid, picopass_iclass_key, key, false);
-            ctx->cipher_state = loclass_opt_doTagMAC_1(cc, key);
+            // loclass mode stores the derived standard debit key in Kd to check
+            picopass_emu_read_blocks(nfcv_data, key, PICOPASS_SECURE_KD_BLOCK_INDEX, 1);
 
             uint8_t rmac[4];
-            loclass_opt_doBothMAC_2(ctx->cipher_state, nfcv_data->frame + 1, rmac, response, key);
+            loclass_opt_doReaderMAC_2(ctx->cipher_state, nfcv_data->frame + 1, rmac, key);
 
             if(!memcmp(nfcv_data->frame + 5, rmac, 4)) {
                 // MAC from reader matches Standard Key, keyroll mode or non-elite keyed reader.
@@ -1035,25 +1052,46 @@ static void picopass_emu_handle_packet(
                 FURI_LOG_W(TAG, "loclass: standard key detected during collection");
                 ctx->loclass_got_std_key = true;
 
-                ctx->state = PicopassEmulatorStateIdle;
+                // Don't reset the state as the reader may try a different key next without going through anticoll
+                // The reader is always free to redo the anticoll if it wants to anyway
+
                 return;
             }
+#endif
 
-            // Copy CHALLENGE (nr) and READERSIGNATURE (mac) from frame
-            uint8_t nr[4];
-            memcpy(nr, nfcv_data->frame + 1, 4);
-            uint8_t mac[4];
-            memcpy(mac, nfcv_data->frame + 5, 4);
+            // Save to buffer to defer flushing when we rotate CSN
+            memcpy(
+                ctx->loclass_mac_buffer + ((ctx->key_block_num % LOCLASS_NUM_PER_CSN) * 8),
+                nfcv_data->frame + 1,
+                8);
 
-            FURI_LOG_I(TAG, "loclass: got nr/mac pair");
-            loclass_writer_write_params(
-                ctx->loclass_writer, ctx->key_block_num, nfc_data->uid, cc, nr, mac);
+            // Rotate to the next CSN/attempt
+            ctx->key_block_num++;
 
-            // Rotate to the next CSN
-            ctx->key_block_num = (ctx->key_block_num + 1) % (LOCLASS_NUM_CSNS * 2);
-            loclass_update_csn(nfc_data, nfcv_data, ctx);
+            // CSN changed
+            if(ctx->key_block_num % LOCLASS_NUM_PER_CSN == 0) {
+                // Flush NR-MACs for this CSN to SD card
+                uint8_t cc[RFAL_PICOPASS_BLOCK_LEN];
+                picopass_emu_read_blocks(nfcv_data, cc, PICOPASS_SECURE_EPURSE_BLOCK_INDEX, 1);
 
-            ctx->state = PicopassEmulatorStateIdle;
+                for(int i = 0; i < LOCLASS_NUM_PER_CSN; i++) {
+                    loclass_writer_write_params(
+                        ctx->loclass_writer,
+                        ctx->key_block_num + i - LOCLASS_NUM_PER_CSN,
+                        nfc_data->uid,
+                        cc,
+                        ctx->loclass_mac_buffer + (i * 8),
+                        ctx->loclass_mac_buffer + (i * 8) + 4);
+                }
+
+                if(ctx->key_block_num < LOCLASS_NUM_CSNS * LOCLASS_NUM_PER_CSN) {
+                    loclass_update_csn(nfc_data, nfcv_data, ctx);
+                    // Only reset the state when we change to a new CSN for the same reason as when we get a standard key
+                    ctx->state = PicopassEmulatorStateIdle;
+                } else {
+                    ctx->state = PicopassEmulatorStateStopEmulation;
+                }
+            }
 
             return;
         }
@@ -1079,7 +1117,7 @@ static void picopass_emu_handle_packet(
         break;
     case RFAL_PICOPASS_CMD_UPDATE: // ADDRESS(1) DATA(8) SIGN(4)|CRC16(2)
         if((nfcv_data->frame_length != 12 && nfcv_data->frame_length != 14) ||
-           ctx->state != PicopassEmulatorStateSelected) {
+           ctx->state != PicopassEmulatorStateSelected || ctx->loclass_mode) {
             return;
         }
 
@@ -1248,9 +1286,6 @@ void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode)
         }
 
         // Setup blocks for loclass attack
-        emu_ctx.key_block_num = 0;
-        loclass_update_csn(&nfc_data, nfcv_data, &emu_ctx);
-
         uint8_t conf[8] = {0x12, 0xFF, 0xFF, 0xFF, 0x7F, 0x1F, 0xFF, 0x3C};
         picopass_emu_write_blocks(nfcv_data, conf, PICOPASS_CONFIG_BLOCK_INDEX, 1);
 
@@ -1259,6 +1294,9 @@ void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode)
 
         uint8_t aia[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         picopass_emu_write_blocks(nfcv_data, aia, PICOPASS_SECURE_AIA_BLOCK_INDEX, 1);
+
+        emu_ctx.key_block_num = 0;
+        loclass_update_csn(&nfc_data, nfcv_data, &emu_ctx);
 
         loclass_writer_write_start_stop(emu_ctx.loclass_writer, true);
     } else {
