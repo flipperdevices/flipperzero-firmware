@@ -138,15 +138,8 @@ static void nfc_scene_saved_menu_on_enter_mf_ultralight(NfcApp* instance) {
     if(!mf_ultralight_is_all_data_read(data)) {
         submenu_add_item(
             submenu,
-            "Unlock with Reader",
-            SubmenuIndexUnlockByReader,
-            nfc_protocol_support_common_submenu_callback,
-            instance);
-
-        submenu_add_item(
-            submenu,
-            "Unlock with Password",
-            SubmenuIndexUnlockByPassword,
+            "Unlock",
+            SubmenuIndexUnlock,
             nfc_protocol_support_common_submenu_callback,
             instance);
     }
@@ -168,27 +161,20 @@ static bool nfc_scene_info_on_event_mf_ultralight(NfcApp* instance, uint32_t eve
     return false;
 }
 
-static bool nfc_scene_read_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
+static bool nfc_unlock_item_pressed_process(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexUnlock) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
         return true;
     }
-
     return false;
 }
 
+static bool nfc_scene_read_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
+    return nfc_unlock_item_pressed_process(instance, event);
+}
+
 static bool nfc_scene_saved_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
-    bool consumed = false;
-
-    if(event == SubmenuIndexUnlockByReader) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        consumed = true;
-    } else if(event == SubmenuIndexUnlockByPassword) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
-        consumed = true;
-    }
-
-    return consumed;
+    return nfc_unlock_item_pressed_process(instance, event);
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
