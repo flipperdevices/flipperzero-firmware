@@ -799,17 +799,17 @@ Function,+,dialog_message_set_text,void,"DialogMessage*, const char*, uint8_t, u
 Function,+,dialog_message_show,DialogMessageButton,"DialogsApp*, const DialogMessage*"
 Function,+,dialog_message_show_storage_error,void,"DialogsApp*, const char*"
 Function,-,difftime,double,"time_t, time_t"
-Function,-,digital_sequence_add,void,"DigitalSequence*, uint8_t"
+Function,+,digital_sequence_add_signal,void,"DigitalSequence*, uint8_t"
 Function,-,digital_sequence_alloc,DigitalSequence*,"uint32_t, const GpioPin*"
 Function,-,digital_sequence_clear,void,DigitalSequence*
 Function,-,digital_sequence_free,void,DigitalSequence*
 Function,+,digital_sequence_send,void,DigitalSequence*
 Function,-,digital_sequence_set_signal,void,"DigitalSequence*, uint8_t, DigitalSignal*"
-Function,+,digital_signal_add_edge,void,"DigitalSignal*, uint32_t"
-Function,-,digital_signal_add_pulse,void,"DigitalSignal*, uint32_t, _Bool"
+Function,+,digital_signal_add_period,void,"DigitalSignal*, uint32_t"
+Function,+,digital_signal_add_period_with_level,void,"DigitalSignal*, uint32_t, _Bool"
 Function,-,digital_signal_alloc,DigitalSignal*,uint32_t
 Function,-,digital_signal_free,void,DigitalSignal*
-Function,+,digital_signal_get_edges_cnt,uint32_t,const DigitalSignal*
+Function,+,digital_signal_get_size,uint32_t,const DigitalSignal*
 Function,+,digital_signal_get_start_level,_Bool,const DigitalSignal*
 Function,+,digital_signal_set_start_level,void,"DigitalSignal*, _Bool"
 Function,-,diprintf,int,"int, const char*, ..."

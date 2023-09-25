@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <furi_hal_gpio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -18,19 +16,19 @@ extern "C" {
 
 typedef struct DigitalSignal DigitalSignal;
 
-DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt);
+DigitalSignal* digital_signal_alloc(uint32_t max_size);
 
 void digital_signal_free(DigitalSignal* signal);
 
-void digital_signal_add_edge(DigitalSignal* signal, uint32_t ticks);
+void digital_signal_add_period(DigitalSignal* signal, uint32_t ticks);
 
-void digital_signal_add_pulse(DigitalSignal* signal, uint32_t ticks, bool level);
+void digital_signal_add_period_with_level(DigitalSignal* signal, uint32_t ticks, bool level);
 
 bool digital_signal_get_start_level(const DigitalSignal* signal);
 
 void digital_signal_set_start_level(DigitalSignal* signal, bool level);
 
-uint32_t digital_signal_get_edges_cnt(const DigitalSignal* signal);
+uint32_t digital_signal_get_size(const DigitalSignal* signal);
 
 #ifdef __cplusplus
 }

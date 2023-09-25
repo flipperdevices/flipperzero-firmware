@@ -121,7 +121,7 @@ void digital_sequence_set_signal(
     sequence->signals[signal_index] = signal;
 }
 
-void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
+void digital_sequence_add_signal(DigitalSequence* sequence, uint8_t signal_index) {
     furi_assert(sequence);
     furi_assert(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
 
@@ -309,15 +309,15 @@ void digital_sequence_send(DigitalSequence* sequence) {
         const DigitalSignal* signal_next =
             (next_idx < sequence->size) ? sequence->signals[sequence->data[next_idx++]] : NULL;
 
-        for(uint32_t i = 0; i < signal_current->edge_cnt; i++) {
-            const bool is_last_value = (i == signal_current->edge_cnt - 1);
-            uint32_t reload_value = signal_current->reload_reg_buff[i] + reload_value_carry;
+        for(uint32_t i = 0; i < signal_current->size; i++) {
+            const bool is_last_value = (i == signal_current->size - 1);
+            uint32_t reload_value = signal_current->data[i] + reload_value_carry;
 
             reload_value_carry = 0;
 
             /* when we are too late more than half a tick, make the first edge temporarily longer */
-            if(remainder_ticks >= T_TIM_DIV2) {
-                remainder_ticks -= T_TIM;
+            if(remainder_ticks >= DIGITAL_SIGNAL_T_TIM_DIV2) {
+                remainder_ticks -= DIGITAL_SIGNAL_T_TIM;
                 reload_value += 1;
             }
 
@@ -327,7 +327,7 @@ void digital_sequence_send(DigitalSequence* sequence) {
                     /* when a signal ends with the same level as the next signal begins, let the next signal generate the whole pulse.
                     beware, we do not want the level after the last edge, but the last level before that edge */
                     const bool end_level = signal_current->start_level ^
-                                           ((signal_current->edge_cnt % 2) == 0);
+                                           ((signal_current->size % 2) == 0);
 
                     /* if they have the same level, pass the duration to the next pulse(s) */
                     if(end_level == signal_next->start_level) {

@@ -37,7 +37,7 @@ struct Iso15693Signal {
 static void iso15693_add_silence(DigitalSignal* signal, Iso15693SignalDataRate data_rate) {
     const uint32_t k = data_rate == Iso15693SignalDataRateHi ? ISO15693_SIGNAL_COEFF_HI :
                                                                ISO15693_SIGNAL_COEFF_LO;
-    digital_signal_add_pulse(signal, ISO15693_SIGNAL_FC_256 * k, false);
+    digital_signal_add_period_with_level(signal, ISO15693_SIGNAL_FC_256 * k, false);
 }
 
 // Add 8 * k subcarrier pulses of Fc / 16 (where k = 1 or 4)
@@ -45,7 +45,7 @@ static void iso15693_add_subcarrier(DigitalSignal* signal, Iso15693SignalDataRat
     const uint32_t k = data_rate == Iso15693SignalDataRateHi ? ISO15693_SIGNAL_COEFF_HI :
                                                                ISO15693_SIGNAL_COEFF_LO;
     for(uint32_t i = 0; i < ISO15693_SIGNAL_ZERO_EDGES * k; ++i) {
-        digital_signal_add_pulse(signal, ISO15693_SIGNAL_FC_16, !(i % 2));
+        digital_signal_add_period_with_level(signal, ISO15693_SIGNAL_FC_16, !(i % 2));
     }
 }
 
@@ -88,7 +88,7 @@ static inline void
     iso15693_add_byte(Iso15693Signal* instance, Iso15693SignalDataRate data_rate, uint8_t byte) {
     for(size_t i = 0; i < BITS_IN_BYTE; i++) {
         const uint8_t bit = byte & (1U << i);
-        digital_sequence_add(
+        digital_sequence_add_signal(
             instance->tx_sequence,
             iso15693_get_sequence_index(
                 bit ? Iso15693SignalIndexOne : Iso15693SignalIndexZero, data_rate));
@@ -100,14 +100,14 @@ static inline void iso15693_signal_encode(
     Iso15693SignalDataRate data_rate,
     const uint8_t* tx_data,
     size_t tx_data_size) {
-    digital_sequence_add(
+    digital_sequence_add_signal(
         instance->tx_sequence, iso15693_get_sequence_index(Iso15693SignalIndexSof, data_rate));
 
     for(size_t i = 0; i < tx_data_size; i++) {
         iso15693_add_byte(instance, data_rate, tx_data[i]);
     }
 
-    digital_sequence_add(
+    digital_sequence_add_signal(
         instance->tx_sequence, iso15693_get_sequence_index(Iso15693SignalIndexEof, data_rate));
 }
 

@@ -18,7 +18,7 @@ void digital_sequence_set_signal(
     uint8_t signal_index,
     DigitalSignal* signal);
 
-void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index);
+void digital_sequence_add_signal(DigitalSequence* sequence, uint8_t signal_index);
 
 void digital_sequence_send(DigitalSequence* sequence);
 

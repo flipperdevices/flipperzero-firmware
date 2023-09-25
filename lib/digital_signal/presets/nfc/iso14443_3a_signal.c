@@ -31,11 +31,11 @@ struct Iso14443_3aSignal {
 
 static void iso14443_3a_signal_add_byte(Iso14443_3aSignal* instance, uint8_t byte, bool parity) {
     for(size_t i = 0; i < BITS_IN_BYTE; i++) {
-        digital_sequence_add(
+        digital_sequence_add_signal(
             instance->tx_sequence,
             FURI_BIT(byte, i) ? Iso14443_3aSignalIndexOne : Iso14443_3aSignalIndexZero);
     }
-    digital_sequence_add(
+    digital_sequence_add_signal(
         instance->tx_sequence, parity ? Iso14443_3aSignalIndexOne : Iso14443_3aSignalIndexZero);
 }
 
@@ -49,11 +49,11 @@ static void iso14443_3a_signal_encode(
     furi_assert(tx_parity);
 
     // Start of frame
-    digital_sequence_add(instance->tx_sequence, Iso14443_3aSignalIndexOne);
+    digital_sequence_add_signal(instance->tx_sequence, Iso14443_3aSignalIndexOne);
 
     if(tx_bits < BITS_IN_BYTE) {
         for(size_t i = 0; i < tx_bits; i++) {
-            digital_sequence_add(
+            digital_sequence_add_signal(
                 instance->tx_sequence,
                 FURI_BIT(tx_data[0], i) ? Iso14443_3aSignalIndexOne : Iso14443_3aSignalIndexZero);
         }
@@ -70,13 +70,13 @@ static inline void iso14443_3a_signal_set_bit(DigitalSignal* signal, bool bit) {
 
     if(bit) {
         for(uint32_t i = 0; i < 7; ++i) {
-            digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
+            digital_signal_add_period(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
         }
-        digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X9);
+        digital_signal_add_period(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X9);
     } else {
-        digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X8);
+        digital_signal_add_period(signal, ISO14443_3A_SIGNAL_T_SIG_X8_X8);
         for(uint32_t i = 0; i < 8; ++i) {
-            digital_signal_add_edge(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
+            digital_signal_add_period(signal, ISO14443_3A_SIGNAL_T_SIG_X8);
         }
     }
 }
