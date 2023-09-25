@@ -4,6 +4,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <api_lock.h>
 
 #include <gui/gui.h>
 #include <gui/view_port.h>
@@ -20,8 +21,6 @@
 
 #define BT_KEYS_STORAGE_OLD_PATH INT_PATH(".bt.keys")
 #define BT_KEYS_STORAGE_PATH CFG_PATH("bt.keys")
-
-#define BT_API_UNLOCK_EVENT (1UL << 0)
 
 typedef enum {
     BtMessageTypeUpdateStatus,
@@ -47,6 +46,7 @@ typedef union {
 } BtMessageData;
 
 typedef struct {
+    FuriApiLock lock;
     BtMessageType type;
     BtMessageData data;
     bool* result;
