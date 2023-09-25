@@ -97,7 +97,7 @@ static inline void iso14443_3a_signal_bank_clear(Iso14443_3aSignalBank bank) {
 static inline void
     iso14443_3a_signal_bank_register(Iso14443_3aSignalBank bank, DigitalSequence* sequence) {
     for(uint32_t i = 0; i < Iso14443_3aSignalIndexCount; ++i) {
-        digital_sequence_set_signal(sequence, i, bank[i]);
+        digital_sequence_register_signal(sequence, i, bank[i]);
     }
 }
 
@@ -134,6 +134,6 @@ void iso14443_3a_signal_tx(
     FURI_CRITICAL_ENTER();
     digital_sequence_clear(instance->tx_sequence);
     iso14443_3a_signal_encode(instance, tx_data, tx_parity, tx_bits);
-    digital_sequence_send(instance->tx_sequence);
+    digital_sequence_transmit(instance->tx_sequence);
     FURI_CRITICAL_EXIT();
 }

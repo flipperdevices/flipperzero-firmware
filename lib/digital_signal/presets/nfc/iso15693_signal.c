@@ -140,7 +140,7 @@ static void
 static void
     iso15693_signal_bank_register(Iso15693Signal* instance, Iso15693SignalDataRate data_rate) {
     for(uint32_t i = 0; i < Iso15693SignalIndexNum; ++i) {
-        digital_sequence_set_signal(
+        digital_sequence_register_signal(
             instance->tx_sequence,
             iso15693_get_sequence_index(i, data_rate),
             instance->banks[data_rate][i]);
@@ -187,7 +187,7 @@ void iso15693_signal_tx(
     FURI_CRITICAL_ENTER();
     digital_sequence_clear(instance->tx_sequence);
     iso15693_signal_encode(instance, data_rate, tx_data, tx_data_size);
-    digital_sequence_send(instance->tx_sequence);
+    digital_sequence_transmit(instance->tx_sequence);
 
     FURI_CRITICAL_EXIT();
 }

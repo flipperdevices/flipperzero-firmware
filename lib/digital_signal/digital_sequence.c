@@ -105,7 +105,7 @@ void digital_sequence_free(DigitalSequence* sequence) {
     free(sequence);
 }
 
-void digital_sequence_set_signal(
+void digital_sequence_register_signal(
     DigitalSequence* sequence,
     uint8_t signal_index,
     DigitalSignal* signal) {
@@ -275,7 +275,7 @@ static inline void digital_sequence_timer_buffer_reset(DigitalSequence* sequence
     sequence->timer_buf.write_pos = 0;
 }
 
-void digital_sequence_send(DigitalSequence* sequence) {
+void digital_sequence_transmit(DigitalSequence* sequence) {
     furi_assert(sequence);
     furi_assert(sequence->size);
     furi_assert(sequence->state == DigitalSequenceStateIdle);
