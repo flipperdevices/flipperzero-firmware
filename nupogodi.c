@@ -9,6 +9,12 @@
 #include <power/power_service/power.h>
 #include <nupogodi_icons.h>
 #include "notifications.h"
+#include <dolphin/dolphin.h>
+
+#define WIN_SCORES 100
+#define EGGS_2_SCORES 10
+#define EGGS_3_SCORES 20
+#define EGGS_4_SCORES 50
 
 typedef struct NuPogodiModel NuPogodiModel;
 
@@ -139,11 +145,14 @@ static void nupogodi_view_draw_scores(Canvas* canvas, NuPogodiModel* model) {
             canvas_draw_icon(canvas, 106, 0, &I_Chick);
         }
 
-        canvas_draw_icon(canvas, 30, 0, &I_Egg3);
+        canvas_draw_icon(canvas, 22, 0, &I_Egg3);
 
-        FuriString* scores_str = furi_string_alloc_printf("%1d", model->scores);
+        FuriString* scores_str =
+            model->scores < WIN_SCORES ?
+                furi_string_alloc_printf("%1d/%1d", model->scores, WIN_SCORES) :
+                furi_string_alloc_printf("%1d", model->scores);
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 46, 10, furi_string_get_cstr(scores_str));
+        canvas_draw_str(canvas, 38, 10, furi_string_get_cstr(scores_str));
         furi_string_free(scores_str);
     }
 }
@@ -196,7 +205,7 @@ static void nupogodi_view_draw_over(Canvas* canvas, NuPogodiModel* model) {
     canvas_draw_str(canvas, 46, 10, furi_string_get_cstr(scores_str));
     furi_string_free(scores_str);
 
-    if(model->scores >= 10) {
+    if(model->scores >= WIN_SCORES) {
         canvas_draw_icon(canvas, 22, 12, &I_OverWin);
     } else {
         canvas_draw_icon(canvas, 22, 12, &I_OverLose);
@@ -317,6 +326,7 @@ static int32_t nupogodi_worker(void* context) {
                             model->tick--;
                         } else {
                             model->mode = Play;
+                            dolphin_deed(DolphinDeedPluginGameStart);
                         }
                         break;
                     case Ready:
@@ -327,61 +337,79 @@ static int32_t nupogodi_worker(void* context) {
                         model->scores = 0;
                         model->missed = 0;
                         model->mode = Play;
+                        dolphin_deed(DolphinDeedPluginGameStart);
                         break;
                     case Play:
-                        if((model->eggs[0] == 0) && (model->eggs[1] == 0) &&
-                           (model->eggs[2] == 0) && (model->eggs[3] == 0)) {
-                            // Если ни одного яйца нет - создаем
-                            uint32_t rnd = furi_hal_random_get() % 4;
-                            model->eggs[rnd] = 1;
-                            notification_message(app->notification, notification_eggs[rnd][sound]);
-                        } else {
-                            // Прокатываем все яйца на одно деление вперед
-                            for(uint8_t i = 0; i < 4; i++) {
-                                if(model->eggs[i] > 0) {
-                                    model->eggs[i]++;
-                                    if(model->eggs[i] < 6) {
-                                        notification_message(
-                                            app->notification, notification_eggs[i][sound]);
-                                    }
+                        // Прокатываем все яйца на одно деление вперед
+                        for(uint8_t i = 0; i < 4; i++) {
+                            if(model->eggs[i] > 0) {
+                                model->eggs[i]++;
+                                if(model->eggs[i] < 6) {
+                                    notification_message(
+                                        app->notification, notification_eggs[i][sound]);
                                 }
                             }
-                            if((model->eggs[0] == 6) && (model->top) && (!model->left)) {
-                                model->eggs[0] = 0;
-                                model->scores++;
-                                notification_message(app->notification, notification_done[sound]);
-                            } else if((model->eggs[1] == 6) && (!model->top) && (!model->left)) {
-                                model->eggs[1] = 0;
-                                model->scores++;
-                                notification_message(app->notification, notification_done[sound]);
-                            } else if((model->eggs[2] == 6) && (model->top) && (model->left)) {
-                                model->eggs[2] = 0;
-                                model->scores++;
-                                notification_message(app->notification, notification_done[sound]);
-                            } else if((model->eggs[3] == 6) && (!model->top) && (model->left)) {
-                                model->eggs[3] = 0;
-                                model->scores++;
-                                notification_message(app->notification, notification_done[sound]);
-                            } else {
-                                // Если яйцо было не поймано - зануляем все, запускаем анимацию разбития
-                                for(uint8_t i = 0; i < 4; i++) {
-                                    if(model->eggs[i] == 6) {
-                                        model->eggs[0] = 0;
-                                        model->eggs[1] = 0;
-                                        model->eggs[2] = 0;
-                                        model->eggs[3] = 0;
-                                        model->left = i >= 2;
-                                        model->missed++;
-                                        if(model->missed < 4) {
-                                            model->mode = Fail;
-                                            model->tick = 3;
-                                        } else {
-                                            model->mode = Over;
-                                        }
+                        }
 
-                                        notification_message(
-                                            app->notification, notification_fail[sound]);
+                        // Считаем текущее количество яиц
+                        uint8_t eggs_num = 0;
+                        for(uint8_t i = 0; i < 4; i++) {
+                            if(model->eggs[i] > 0) {
+                                eggs_num++;
+                            }
+                        }
+
+                        // В зависимости от количества собраных яиц добавляем новые
+                        if((eggs_num == 0) || (model->scores > EGGS_2_SCORES && eggs_num == 1) ||
+                           (model->scores > EGGS_3_SCORES && eggs_num == 2) ||
+                           (model->scores > EGGS_4_SCORES && eggs_num == 3)) {
+                            uint32_t rnd = furi_hal_random_get() % 4;
+                            if(model->eggs[rnd] == 0) {
+                                model->eggs[rnd] = 1;
+                                notification_message(
+                                    app->notification, notification_eggs[rnd][sound]);
+                            }
+                        }
+
+                        // Проверяем те яйца, которые должны попасть в корзину
+                        if((model->eggs[0] == 6) && (model->top) && (!model->left)) {
+                            model->eggs[0] = 0;
+                            model->scores++;
+                            notification_message(app->notification, notification_done[sound]);
+                        } else if((model->eggs[1] == 6) && (!model->top) && (!model->left)) {
+                            model->eggs[1] = 0;
+                            model->scores++;
+                            notification_message(app->notification, notification_done[sound]);
+                        } else if((model->eggs[2] == 6) && (model->top) && (model->left)) {
+                            model->eggs[2] = 0;
+                            model->scores++;
+                            notification_message(app->notification, notification_done[sound]);
+                        } else if((model->eggs[3] == 6) && (!model->top) && (model->left)) {
+                            model->eggs[3] = 0;
+                            model->scores++;
+                            notification_message(app->notification, notification_done[sound]);
+                        } else {
+                            // Если яйцо было не поймано - зануляем все, запускаем анимацию разбития
+                            for(uint8_t i = 0; i < 4; i++) {
+                                if(model->eggs[i] == 6) {
+                                    model->eggs[0] = 0;
+                                    model->eggs[1] = 0;
+                                    model->eggs[2] = 0;
+                                    model->eggs[3] = 0;
+                                    model->left = i >= 2;
+                                    model->missed++;
+                                    if(model->missed < 4) {
+                                        model->mode = Fail;
+                                        model->tick = 3;
+                                    } else {
+                                        model->mode = Over;
+                                        if(model->scores >= WIN_SCORES) {
+                                            dolphin_deed(DolphinDeedPluginGameWin);
+                                        }
                                     }
+
+                                    notification_message(
+                                        app->notification, notification_fail[sound]);
                                 }
                             }
                         }
@@ -423,7 +451,6 @@ static NuPogodiApp* nupogodi_app_alloc() {
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
-
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Views
@@ -460,11 +487,15 @@ static NuPogodiApp* nupogodi_app_alloc() {
     app->timer = furi_timer_alloc(nupogodi_timer_callback, FuriTimerTypePeriodic, app);
     furi_timer_start(app->timer, furi_ms_to_ticks(1000));
 
+    notification_message(app->notification, &sequence_display_backlight_enforce_on);
+
     return app;
 }
 
 static void nupogodi_app_free(NuPogodiApp* app) {
     furi_assert(app);
+
+    notification_message(app->notification, &sequence_display_backlight_enforce_auto);
 
     furi_timer_stop(app->timer);
     furi_timer_free(app->timer);
