@@ -76,12 +76,17 @@ typedef enum mjs_err {
     MJS_FILE_READ_ERROR,
     MJS_BAD_ARGS_ERROR,
 
+    MJS_NEED_EXIT,
+
     MJS_ERRS_CNT
 } mjs_err_t;
+
+typedef void (*mjs_flags_poller_t)(struct mjs* mjs);
+
 struct mjs;
 
 /* Create MJS instance */
-struct mjs* mjs_create();
+struct mjs* mjs_create(void* context);
 
 struct mjs_create_opts {
     /* use non-default bytecode definition file, testing-only */
@@ -176,6 +181,10 @@ void mjs_own(struct mjs* mjs, mjs_val_t* v);
 int mjs_disown(struct mjs* mjs, mjs_val_t* v);
 
 mjs_err_t mjs_set_errorf(struct mjs* mjs, mjs_err_t err, const char* fmt, ...);
+
+void mjs_exit(struct mjs* mjs);
+
+void mjs_set_flags_poller(struct mjs* mjs, mjs_flags_poller_t poller);
 
 /*
  * If there is no error message already set, then it's equal to

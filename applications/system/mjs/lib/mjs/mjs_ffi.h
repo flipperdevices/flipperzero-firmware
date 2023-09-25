@@ -14,8 +14,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-mjs_ffi_resolver_t dlsym;
-
 #define MJS_CB_ARGS_MAX_CNT 6
 #define MJS_CB_SIGNATURE_MAX_SIZE (MJS_CB_ARGS_MAX_CNT + 1 /* return type */)
 

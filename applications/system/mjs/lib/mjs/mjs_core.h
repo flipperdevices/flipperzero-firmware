@@ -125,8 +125,11 @@ struct mjs {
     char* stack_trace;
     enum mjs_err error;
     mjs_ffi_resolver_t* dlsym; /* Symbol resolver function for FFI */
+    void* dlsym_handle;
     ffi_cb_args_t* ffi_cb_args; /* List of FFI args descriptors */
     size_t cur_bcode_offset;
+    mjs_flags_poller_t flags_poller;
+    void* context;
 
     struct gc_arena object_arena;
     struct gc_arena property_arena;

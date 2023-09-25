@@ -69,9 +69,10 @@ void mjs_destroy(struct mjs* mjs) {
     free(mjs);
 }
 
-struct mjs* mjs_create(void) {
+struct mjs* mjs_create(void* context) {
     mjs_val_t global_object;
     struct mjs* mjs = calloc(1, sizeof(*mjs));
+    mjs->context = context;
     mbuf_init(&mjs->stack, 0);
     mbuf_init(&mjs->call_stack, 0);
     mbuf_init(&mjs->arg_stack, 0);
@@ -114,7 +115,7 @@ struct mjs* mjs_create(void) {
 
     global_object = mjs_mk_object(mjs);
     mjs_init_builtin(mjs, global_object);
-    mjs_set_ffi_resolver(mjs, dlsym);
+    mjs_set_ffi_resolver(mjs, NULL, NULL);
     push_mjs_val(&mjs->scopes, global_object);
     mjs->vals.this_obj = MJS_UNDEFINED;
     mjs->vals.dataview_proto = MJS_UNDEFINED;
@@ -133,6 +134,16 @@ mjs_err_t mjs_set_errorf(struct mjs* mjs, mjs_err_t err, const char* fmt, ...) {
     }
     va_end(ap);
     return err;
+}
+
+void mjs_exit(struct mjs* mjs) {
+    free(mjs->error_msg);
+    mjs->error_msg = NULL;
+    mjs->error = MJS_NEED_EXIT;
+}
+
+void mjs_set_flags_poller(struct mjs* mjs, mjs_flags_poller_t poller) {
+    mjs->flags_poller = poller;
 }
 
 mjs_err_t mjs_prepend_errorf(struct mjs* mjs, mjs_err_t err, const char* fmt, ...) {

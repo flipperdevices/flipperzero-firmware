@@ -29,7 +29,7 @@ enum mjs_ffi_ctype {
 
 typedef void*(mjs_ffi_resolver_t)(void* handle, const char* symbol);
 
-void mjs_set_ffi_resolver(struct mjs* mjs, mjs_ffi_resolver_t* dlsym);
+void mjs_set_ffi_resolver(struct mjs* mjs, mjs_ffi_resolver_t* dlsym, void* handle);
 
 #if defined(__cplusplus)
 }

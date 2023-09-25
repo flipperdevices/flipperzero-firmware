@@ -39,8 +39,9 @@ struct cbdata {
     int8_t userdata_idx;
 };
 
-void mjs_set_ffi_resolver(struct mjs* mjs, mjs_ffi_resolver_t* dlsym) {
+void mjs_set_ffi_resolver(struct mjs* mjs, mjs_ffi_resolver_t* dlsym, void* handle) {
     mjs->dlsym = dlsym;
+    mjs->dlsym_handle = handle;
 }
 
 static mjs_ffi_ctype_t parse_cval_type(struct mjs* mjs, const char* s, const char* e) {
@@ -188,7 +189,7 @@ MJS_PRIVATE mjs_err_t mjs_parse_ffi_signature(
         }
 
         snprintf(buf, sizeof(buf), "%.*s", (int)fn.len, fn.p);
-        sig->fn = (ffi_fn_t*)mjs->dlsym(RTLD_DEFAULT, buf);
+        sig->fn = (ffi_fn_t*)mjs->dlsym(mjs->dlsym_handle, buf);
         if(sig->fn == NULL) {
             ret = MJS_TYPE_ERROR;
             mjs_prepend_errorf(mjs, ret, "dlsym('%s') failed", buf);

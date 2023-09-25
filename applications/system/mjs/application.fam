@@ -4,7 +4,7 @@ App(
     fap_category="Tools",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="m_js_app",
-    stack_size=8 * 1024,
+    stack_size=2 * 1024,
     cdefines=[
         ("CS_PLATFORM", "CS_P_STM32"),
         "MJS_EXPOSE_PRIVATE",

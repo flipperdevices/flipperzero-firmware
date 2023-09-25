@@ -395,13 +395,13 @@ static void exec_expr(struct mjs* mjs, int op) {
         }
         break;
     }
-    /*
+        /*
      * NOTE: TOK_LOGICAL_AND and TOK_LOGICAL_OR don't need to be here, because
      * they are just naturally handled by the short-circuit evaluation.
      * See PARSE_LTR_BINOP() macro in mjs_parser.c.
      */
 
-    /* clang-format off */
+        /* clang-format off */
     case TOK_MINUS_ASSIGN:    op_assign(mjs, TOK_MINUS);    break;
     case TOK_PLUS_ASSIGN:     op_assign(mjs, TOK_PLUS);     break;
     case TOK_MUL_ASSIGN:      op_assign(mjs, TOK_MUL);      break;
@@ -967,7 +967,17 @@ MJS_PRIVATE mjs_err_t mjs_execute(struct mjs* mjs, size_t off, mjs_val_t* res) {
             i = bp.data.len;
             break;
         }
+
+        if(mjs->flags_poller) {
+            mjs->flags_poller(mjs);
+        }
+
         if(mjs->error != MJS_OK) {
+            if(mjs->error == MJS_NEED_EXIT) {
+                mjs->error = MJS_OK;
+                goto clean;
+            }
+
             mjs_gen_stack_trace(mjs, bp.start_idx + i - 1 /* undo the i++ */);
 
             /* restore stack lenghts */
