@@ -134,3 +134,49 @@ bool totp_cli_try_read_plain_token_secret_encoding(
 
     return false;
 }
+
+bool totp_cli_try_read_token_type(
+    TokenInfo* token_info,
+    FuriString* arg,
+    FuriString* args,
+    bool* parsed) {
+    if(furi_string_cmpi_str(arg, TOTP_CLI_COMMAND_ARG_TYPE_PREFIX) == 0) {
+        if(!args_read_string_and_trim(args, arg)) {
+            totp_cli_printf_missed_argument_value(TOTP_CLI_COMMAND_ARG_TYPE_PREFIX);
+        } else if(!token_info_set_token_type_from_str(token_info, arg)) {
+            TOTP_CLI_PRINTF_ERROR(
+                "\"%s\" is incorrect value for argument \"" TOTP_CLI_COMMAND_ARG_TYPE_PREFIX
+                "\"\r\n",
+                furi_string_get_cstr(arg));
+        } else {
+            *parsed = true;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+bool totp_cli_try_read_token_counter(
+    TokenInfo* token_info,
+    FuriString* arg,
+    FuriString* args,
+    bool* parsed) {
+    if(furi_string_cmpi_str(arg, TOTP_CLI_COMMAND_ARG_COUNTER_PREFIX) == 0) {
+        if(!args_read_string_and_trim(args, arg)) {
+            totp_cli_printf_missed_argument_value(TOTP_CLI_COMMAND_ARG_COUNTER_PREFIX);
+        } else if(!token_info_set_token_counter_from_str(token_info, arg)) {
+            TOTP_CLI_PRINTF_ERROR(
+                "\"%s\" is incorrect value for argument \"" TOTP_CLI_COMMAND_ARG_COUNTER_PREFIX
+                "\"\r\n",
+                furi_string_get_cstr(arg));
+        } else {
+            *parsed = true;
+        }
+
+        return true;
+    }
+
+    return false;
+}
