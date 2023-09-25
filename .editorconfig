@@ -15,3 +15,6 @@ indent_size = 2
 
 [{Makefile,*.mk}]
 indent_size = tab
+
+[totp/assets/cli/cli_help.txt]
+end_of_line = crlf

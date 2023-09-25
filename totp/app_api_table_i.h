@@ -62,4 +62,7 @@ static constexpr auto app_api_table = sort(create_array_t<sym_entry>(
         bool,
         (TokenInfo*, const char*, size_t, PlainTokenSecretEncoding, const CryptoSettings*)),
     API_METHOD(totp_crypto_check_key_slot, bool, (uint8_t)),
-    API_METHOD(totp_bt_type_code_worker_free, void, (TotpBtTypeCodeWorkerContext*))));
+    API_METHOD(totp_bt_type_code_worker_free, void, (TotpBtTypeCodeWorkerContext*)),
+    API_METHOD(token_info_set_token_type_from_str, bool, (TokenInfo*, const FuriString*)),
+    API_METHOD(token_info_set_token_counter_from_str, bool, (TokenInfo*, const FuriString*)),
+    API_METHOD(token_info_get_type_as_cstr, const char*, (const TokenInfo*))));

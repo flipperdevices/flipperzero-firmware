@@ -72,6 +72,14 @@ uint64_t totp_at(
         algo, plain_secret, plain_secret_length, totp_timecode(interval, for_time_adjusted));
 }
 
+uint64_t hotp_at(
+    TOTP_ALGO algo,
+    const uint8_t* plain_secret,
+    size_t plain_secret_length,
+    uint64_t counter) {
+    return otp_generate(algo, plain_secret, plain_secret_length, counter);
+}
+
 static int totp_algo_common(
     int type,
     const uint8_t* key,
