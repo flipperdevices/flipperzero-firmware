@@ -7,26 +7,32 @@
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_tim.h>
 
-/* must be on bank B */
-// For debugging purposes use `--extra-define=DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN=gpio_ext_pb3` fbt option
+/**
+ * To enable debug output on an additional pin, set DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN to the required
+ * GpioPin variable. It can be passed at compile time via the --extra-define fbt switch.
+ * NOTE: This pin must be on the same GPIO port as the main pin.
+ *
+ * Example:
+ * ./fbt --extra-define=DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN=gpio_ext_pb3
+ */
 
 #define TAG "DigitalSequence"
 
-/* end marker in DMA ringbuffer, will get written into timer register at the end */
+/* Special value used to indicate the end of DMA ring buffer. */
 #define DIGITAL_SEQUENCE_TIMER_MAX 0xFFFFFFFFUL
 
-/* time to wait in loops before returning */
+/* Time to wait in loops before returning */
 #define DIGITAL_SEQUENCE_LOCK_WAIT_MS 10UL
 #define DIGITAL_SEQUENCE_LOCK_WAIT_TICKS (DIGITAL_SEQUENCE_LOCK_WAIT_MS * 1000 * 64)
 
 #define DIGITAL_SEQUENCE_GPIO_BUFFER_SIZE 2
 
-/* maximum entry count of the sequence dma ring buffer */
+/* Maximum capacity of the DMA ring buffer. */
 #define DIGITAL_SEQUENCE_RING_BUFFER_SIZE 128
 
 #define DIGITAL_SEQUENCE_RING_BUFFER_MIN_FREE_SIZE 2
 
-/* maximum number of DigitalSignals in a sequence */
+/* Maximum amount of registered signals. */
 #define DIGITAL_SEQUENCE_BANK_SIZE 32
 
 typedef enum {
@@ -35,9 +41,9 @@ typedef enum {
 } DigitalSequenceState;
 
 typedef struct {
-    uint32_t data[DIGITAL_SEQUENCE_RING_BUFFER_SIZE]; /* DMA ringbuffer */
-    uint32_t write_pos; /* current buffer write index */
-    uint32_t read_pos; /* current buffer read index */
+    uint32_t data[DIGITAL_SEQUENCE_RING_BUFFER_SIZE];
+    uint32_t write_pos;
+    uint32_t read_pos;
 } DigitalSequenceRingBuffer;
 
 typedef uint32_t DigitalSequenceGpioBuffer[DIGITAL_SEQUENCE_GPIO_BUFFER_SIZE];
@@ -127,11 +133,9 @@ void digital_sequence_add_signal(DigitalSequence* sequence, uint8_t signal_index
 static inline void digital_sequence_start_dma(DigitalSequence* sequence) {
     furi_assert(sequence);
 
-    /* set up DMA channel 1 and 2 for GPIO and timer copy operations */
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &sequence->dma_config_gpio);
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &sequence->dma_config_timer);
 
-    /* enable both DMA channels */
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
 }
@@ -195,7 +199,7 @@ static inline void digital_sequence_finish(DigitalSequence* sequence) {
         const uint32_t prev_timer = DWT->CYCCNT;
 
         do {
-            /* we are finished, when the DMA transferred the DIGITAL_SEQUENCE_TIMER_MAX marker */
+            /* Special value has been loaded into the timer, signaling the end of transmission. */
             if(TIM2->ARR == DIGITAL_SEQUENCE_TIMER_MAX) {
                 break;
             }
@@ -288,7 +292,6 @@ void digital_sequence_transmit(DigitalSequence* sequence) {
         &DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 #endif
 
-    /* already prepare the current signal pointer */
     const DigitalSignal* signal_current = sequence->signals[sequence->data[0]];
 
     digital_sequence_init_gpio_buffer(sequence, signal_current);
@@ -307,31 +310,35 @@ void digital_sequence_transmit(DigitalSequence* sequence) {
 
             reload_value_carry = 0;
 
-            /* when we are too late more than half a tick, make the first period temporarily longer */
+            /* Prevent the rounding error from accumulating by distributing it across multiple periods. */
             if(remainder_ticks >= DIGITAL_SIGNAL_T_TIM_DIV2) {
                 remainder_ticks -= DIGITAL_SIGNAL_T_TIM;
                 reload_value += 1;
             }
 
             if(is_last_value) {
-                /* next signal is present */
                 if(signal_next) {
-                    /* when a signal ends with the same level as the next signal begins, let the next signal generate the whole pulse.
-                    beware, we do not want the level after the last edge, but the last level before that edge */
+                    /* Special case: signal boundary. Depending on whether the adjacent levels are equal or not,
+                     * they will be combined to a single one or handled separately. */
                     const bool end_level = signal_current->start_level ^
                                            ((signal_current->size % 2) == 0);
 
-                    /* if they have the same level, pass the duration to the next pulse(s) */
+                    /* If the adjacent levels are equal, carry the current period duration over to the next signal. */
                     if(end_level == signal_next->start_level) {
                         reload_value_carry = reload_value;
                     }
                 } else {
-                    /* if this is the last pulse of the last signal, ignore it */
+                    /** Special case: during the last period of the last signal, hold the output level indefinitely.
+                     * @see digital_signal.h
+                     *
+                     * Setting reload_value_carry to a non-zero value will prevent the respective period from being
+                     * added to the DMA ring buffer. */
                     reload_value_carry = 1;
                 }
             }
 
-            /* if it was decided, that the next signal's first pulse shall also handle our "length", then do not queue here */
+            /* A non-zero reload_value_carry means that the level was the same on the both sides of the signal boundary
+             * and the two respective periods were combined to one. */
             if(reload_value_carry == 0) {
                 digital_sequence_enqueue_period(sequence, reload_value);
 
