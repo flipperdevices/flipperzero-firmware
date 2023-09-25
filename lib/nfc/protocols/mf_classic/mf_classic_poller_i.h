@@ -30,6 +30,7 @@ typedef enum {
     MfClassicPollerStateCheckWriteConditions,
     MfClassicPollerStateReadBlock,
     MfClassicPollerStateWriteBlock,
+    MfClassicPollerStateWriteValueBlock,
 
     // Read states
     MfClassicPollerStateRequestReadSector,
@@ -55,6 +56,7 @@ typedef struct {
     uint8_t current_sector;
     MfClassicSectorTrailer sec_tr;
     uint8_t current_block;
+    bool is_value_block;
     MfClassicKeyType key_type_read;
     MfClassicKeyType key_type_write;
     bool need_halt_before_write;

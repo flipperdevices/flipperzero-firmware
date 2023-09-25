@@ -727,11 +727,8 @@ bool mf_classic_is_allowed_access(
     return access_allowed;
 }
 
-bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num) {
-    furi_assert(data);
-
-    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
-    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
+bool mf_classic_is_value_block(MfClassicSectorTrailer* sec_tr, uint8_t block_num) {
+    furi_assert(sec_tr);
 
     // Check if key A can write, if it can, it's transport configuration, not data block
     return !mf_classic_is_allowed_access_data_block(

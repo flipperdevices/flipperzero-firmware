@@ -2125,7 +2125,7 @@ Function,+,mf_classic_is_equal,_Bool,"const MfClassicData*, const MfClassicData*
 Function,+,mf_classic_is_key_found,_Bool,"const MfClassicData*, uint8_t, MfClassicKeyType"
 Function,+,mf_classic_is_sector_read,_Bool,"const MfClassicData*, uint8_t"
 Function,+,mf_classic_is_sector_trailer,_Bool,uint8_t
-Function,+,mf_classic_is_value_block,_Bool,"MfClassicData*, uint8_t"
+Function,+,mf_classic_is_value_block,_Bool,"MfClassicSectorTrailer*, uint8_t"
 Function,+,mf_classic_load,_Bool,"MfClassicData*, FlipperFormat*, uint32_t"
 Function,+,mf_classic_poller_auth,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
 Function,+,mf_classic_poller_change_value,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, int32_t, int32_t*"

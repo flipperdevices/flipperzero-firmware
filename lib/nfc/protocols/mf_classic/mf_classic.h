@@ -183,8 +183,6 @@ bool mf_classic_is_sector_trailer(uint8_t block);
 
 uint8_t mf_classic_get_sector_by_block(uint8_t block);
 
-bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num);
-
 bool mf_classic_block_to_value(const MfClassicBlock* block, int32_t* value, uint8_t* addr);
 
 void mf_classic_value_to_block(int32_t value, uint8_t addr, MfClassicBlock* block);
@@ -217,6 +215,8 @@ void mf_classic_get_read_sectors_and_keys(
     uint8_t* keys_found);
 
 bool mf_classic_is_card_read(const MfClassicData* data);
+
+bool mf_classic_is_value_block(MfClassicSectorTrailer* sec_tr, uint8_t block_num);
 
 bool mf_classic_is_allowed_access_data_block(
     MfClassicSectorTrailer* sec_tr,
