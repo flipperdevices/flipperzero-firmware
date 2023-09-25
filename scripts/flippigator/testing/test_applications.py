@@ -22,11 +22,11 @@ class TestApplications(BaseCase):
             "folder_Games",
             "folder_Infrared",
             "folder_Debug",
-#           "folder_Media",
+            "folder_Media",
             "folder_NFC",
             "folder_RFID",
             "folder_Sub-GHz",
-#           "folder_Tools",
+            "folder_Tools",
             "folder_USB",
             "folder_iButton",
         ]

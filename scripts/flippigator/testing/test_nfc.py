@@ -128,7 +128,6 @@ class TestNfc(BaseCase):
             nav.go_to("Mifare Classic Keys")
             nav.press_ok()
             state = nav.get_current_state()
-            state = nav.get_current_state()
             assert (
                 "Mifare Classic Keys Pict" in state
             ), "Can't find Mifare Classic Keys dict"
