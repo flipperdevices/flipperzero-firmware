@@ -9,5 +9,4 @@ App(
     fap_icon_assets="images",
     fap_icon="images/icon_10x10.png",
     fap_category="Misc",
-    order=10,
 )
