@@ -20,14 +20,12 @@ void picopass_scene_card_menu_on_enter(void* context) {
 
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, picopass_scene_card_menu_submenu_callback, picopass);
-    if(picopass->dev->dev_data.pacs.record.valid) {
-        submenu_add_item(
-            submenu,
-            "Save as LF",
-            SubmenuIndexSaveAsLF,
-            picopass_scene_card_menu_submenu_callback,
-            picopass);
-    }
+    submenu_add_item(
+        submenu,
+        "Save as LFRFID",
+        SubmenuIndexSaveAsLF,
+        picopass_scene_card_menu_submenu_callback,
+        picopass);
     submenu_add_item(
         submenu, "Write", SubmenuIndexWrite, picopass_scene_card_menu_submenu_callback, picopass);
     submenu_add_item(
