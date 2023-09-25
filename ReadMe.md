@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FlipBIP Crypto Wallet v1.13 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - Updated: [PicoPass (iClass) v1.5 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass more bit formats #47 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/47) & [Dictionary format guidelines #45 (By Antiklesys)](https://github.com/flipperdevices/flipperzero-good-faps/pull/45) & [Improve loclass logic for readers doing keyrolling. #50 (By nvx)](https://github.com/flipperdevices/flipperzero-good-faps/pull/50)
 - Protobuf fix (Thanks Emilia and ESurge for pointing this out)
+- [Picopass: populate key change input with first key of user dictionary #54 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/50)
 
 <a name="release">
 
