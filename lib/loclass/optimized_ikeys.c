@@ -302,7 +302,7 @@ void loclass_hash0(uint64_t c, uint8_t k[8]) {
  * @param key
  * @param div_key
  */
-void loclass_diversifyKey(uint8_t* csn, const uint8_t* key, uint8_t* div_key) {
+void loclass_diversifyKey(const uint8_t* csn, const uint8_t* key, uint8_t* div_key) {
     mbedtls_des_context loclass_ctx_enc;
 
     // Prepare the DES key
