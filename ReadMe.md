@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [FuriHal, BleGlue: new transport locking, fix random lockups #3107 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3107)
 - Updated: [Nu Pogodi! (Ну, погоди!) v1.1 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
 - Updated: [Authenticator/TOTP v5.0.1 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- OFW: [Add the coding in the shell animation #3106 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3106)
 
 <a name="release">
 
