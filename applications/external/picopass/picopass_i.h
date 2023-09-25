@@ -31,10 +31,6 @@
 
 #define PICOPASS_TEXT_STORE_SIZE 128
 
-#define LOCLASS_NUM_CSNS 9
-// Collect 2 MACs per CSN to account for keyroll modes
-#define LOCLASS_MACS_TO_COLLECT (LOCLASS_NUM_CSNS * 2)
-
 enum PicopassCustomEvent {
     // Reserve first 100 events for button types and indexes, starting from 0
     PicopassCustomEventReserved = 100,

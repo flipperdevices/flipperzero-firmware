@@ -4,21 +4,24 @@
 #include "../scenes/pokemon_menu.h"
 #include "../pokemon_app.h"
 
-int selected_pokemon;
+struct select_model {
+    uint8_t curr_pokemon;
+    const PokemonTable* pokemon_table;
+};
 
 static void select_pokemon_render_callback(Canvas* canvas, void* model) {
-    PokemonFap* pokemon_fap = *(PokemonFap**)model;
-    const uint8_t current_index = selected_pokemon;
+    struct select_model* view_model = model;
+    uint8_t curr_pokemon = view_model->curr_pokemon;
     char pokedex_num[5];
 
-    snprintf(pokedex_num, sizeof(pokedex_num), "#%03d", current_index + 1);
+    snprintf(pokedex_num, sizeof(pokedex_num), "#%03d", curr_pokemon + 1);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(
-        canvas, 55, 54 / 2, AlignLeft, AlignTop, pokemon_fap->pokemon_table[current_index].name);
+        canvas, 55, 54 / 2, AlignLeft, AlignTop, view_model->pokemon_table[curr_pokemon].name);
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 55, 38, AlignLeft, AlignTop, pokedex_num);
-    canvas_draw_icon(canvas, 0, 0, pokemon_fap->pokemon_table[current_index].icon);
+    canvas_draw_icon(canvas, 0, 0, view_model->pokemon_table[curr_pokemon].icon);
     canvas_draw_icon(canvas, 128 - 80, 0, &I_Space_80x18);
     canvas_draw_str_aligned(canvas, (128 - 40), 5, AlignCenter, AlignTop, "Select Pokemon");
 
@@ -29,11 +32,18 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
 static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     bool consumed = false;
+    uint8_t selected_pokemon;
 
     furi_assert(context);
 
     /* We only handle InputTypePress at the moment */
     if(event->type != InputTypePress) return consumed;
+
+    with_view_model(
+        pokemon_fap->select_view,
+        struct select_model * model,
+        { selected_pokemon = model->curr_pokemon; },
+        false);
 
     switch(event->key) {
     /* Advance to next view with the selected pokemon */
@@ -88,12 +98,26 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
         break;
     }
 
+    with_view_model(
+        pokemon_fap->select_view,
+        struct select_model * model,
+        { model->curr_pokemon = selected_pokemon; },
+        true);
+
     return consumed;
 }
 
 void select_pokemon_enter_callback(void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
-    selected_pokemon = pokemon_fap->curr_pokemon;
+
+    with_view_model(
+        pokemon_fap->select_view,
+        struct select_model * model,
+        {
+            model->curr_pokemon = (uint8_t)pokemon_fap->curr_pokemon;
+            model->pokemon_table = pokemon_fap->pokemon_table;
+        },
+        true);
 }
 
 View* select_pokemon_alloc(PokemonFap* pokemon_fap) {
@@ -102,9 +126,7 @@ View* select_pokemon_alloc(PokemonFap* pokemon_fap) {
     view = view_alloc();
 
     view_set_context(view, pokemon_fap);
-    view_allocate_model(view, ViewModelTypeLockFree, sizeof(PokemonFap**));
-    with_view_model(
-        view, PokemonFap * *model_fap, { *model_fap = pokemon_fap; }, false);
+    view_allocate_model(view, ViewModelTypeLockFree, sizeof(struct select_model));
 
     view_set_draw_callback(view, select_pokemon_render_callback);
     view_set_input_callback(view, select_pokemon_input_callback);
