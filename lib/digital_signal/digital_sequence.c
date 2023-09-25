@@ -28,11 +28,6 @@
 
 /* maximum number of DigitalSignals in a sequence */
 #define DIGITAL_SEQUENCE_BANK_SIZE 32
-/*
- * if sequence size runs out from the initial value passed to digital_sequence_alloc
- * the size will be increased by this amount and reallocated
- */
-#define DIGITAL_SEQUENCE_SIZE_REALLOC_INC 256
 
 typedef enum {
     DigitalSequenceStateIdle,
@@ -124,12 +119,7 @@ void digital_sequence_set_signal(
 void digital_sequence_add_signal(DigitalSequence* sequence, uint8_t signal_index) {
     furi_assert(sequence);
     furi_assert(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);
-
-    if(sequence->size >= sequence->max_size) {
-        sequence->max_size += DIGITAL_SEQUENCE_SIZE_REALLOC_INC;
-        sequence->data = realloc(sequence->data, sequence->max_size); //-V701
-        furi_assert(sequence->data);
-    }
+    furi_assert(sequence->size < sequence->max_size);
 
     sequence->data[sequence->size++] = signal_index;
 }
@@ -176,8 +166,9 @@ static void digital_sequence_stop_timer() {
     furi_hal_bus_disable(FuriHalBusTIM2);
 }
 
-static inline void
-    digital_sequence_setup_gpio(DigitalSequence* sequence, const DigitalSignal* first_signal) {
+static inline void digital_sequence_init_gpio_buffer(
+    DigitalSequence* sequence,
+    const DigitalSignal* first_signal) {
     const uint32_t bit_set = sequence->gpio->pin << GPIO_BSRR_BS0_Pos
 #ifdef DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN
                              | DIGITAL_SIGNAL_DEBUG_OUTPUT_PIN.pin << GPIO_BSRR_BS0_Pos
@@ -299,7 +290,8 @@ void digital_sequence_send(DigitalSequence* sequence) {
 
     /* already prepare the current signal pointer */
     const DigitalSignal* signal_current = sequence->signals[sequence->data[0]];
-    digital_sequence_setup_gpio(sequence, signal_current);
+
+    digital_sequence_init_gpio_buffer(sequence, signal_current);
 
     int32_t remainder_ticks = 0;
     uint32_t reload_value_carry = 0;
@@ -315,7 +307,7 @@ void digital_sequence_send(DigitalSequence* sequence) {
 
             reload_value_carry = 0;
 
-            /* when we are too late more than half a tick, make the first edge temporarily longer */
+            /* when we are too late more than half a tick, make the first period temporarily longer */
             if(remainder_ticks >= DIGITAL_SIGNAL_T_TIM_DIV2) {
                 remainder_ticks -= DIGITAL_SIGNAL_T_TIM;
                 reload_value += 1;
