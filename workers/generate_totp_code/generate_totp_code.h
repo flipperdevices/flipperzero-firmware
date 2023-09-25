@@ -27,7 +27,7 @@ enum TotGenerateCodeWorkerEvents {
     TotpGenerateCodeWorkerEventStop = 0b01,
 
     /**
-     * @brief Trigger token input automation
+     * @brief Triggers OTP code generation
      */
     TotpGenerateCodeWorkerEventForceUpdate = 0b10
 };

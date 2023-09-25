@@ -37,7 +37,7 @@ extern const TOTP_ALGO TOTP_ALGO_SHA256;
 extern const TOTP_ALGO TOTP_ALGO_SHA512;
 
 /**
- * @brief Generates a OTP key using the totp algorithm.
+ * @brief Generates a TOTP key using the totp algorithm.
  * @param algo hashing algorithm to be used
  * @param plain_secret plain token secret
  * @param plain_secret_length plain token secret length
@@ -53,3 +53,17 @@ uint64_t totp_at(
     uint64_t for_time,
     float timezone,
     uint8_t interval);
+
+/**
+ * @brief Generates a HOTP key using the hotp algorithm.
+ * @param algo hashing algorithm to be used
+ * @param plain_secret plain token secret
+ * @param plain_secret_length plain token secret length
+ * @param counter the HOTP counter
+ * @return HOTP code if code was successfully generated; 0 otherwise
+ */
+uint64_t hotp_at(
+    TOTP_ALGO algo,
+    const uint8_t* plain_secret,
+    size_t plain_secret_length,
+    uint64_t counter);

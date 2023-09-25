@@ -19,6 +19,7 @@ typedef void (*TOTP_CLI_DETAILS_AUTOMATION_FEATURE_ITEM_FORMATTER)(
 typedef void (*TOTP_CLI_DETAILS_CSTR_FORMATTER)(const char* key, const char* value);
 typedef void (*TOTP_CLI_DETAILS_UINT8T_FORMATTER)(const char* key, uint8_t value);
 typedef void (*TOTP_CLI_DETAILS_SIZET_FORMATTER)(const char* key, size_t value);
+typedef void (*TOTP_CLI_DETAILS_UINT64T_FORMATTER)(const char* key, uint64_t value);
 
 typedef struct {
     const TOTP_CLI_DETAILS_HEADER_FORMATTER header_formatter;
@@ -27,6 +28,7 @@ typedef struct {
     const TOTP_CLI_DETAILS_CSTR_FORMATTER cstr_formatter;
     const TOTP_CLI_DETAILS_UINT8T_FORMATTER uint8t_formatter;
     const TOTP_CLI_DETAILS_SIZET_FORMATTER sizet_formatter;
+    const TOTP_CLI_DETAILS_UINT64T_FORMATTER uint64t_formatter;
 } TotpCliDetailsFormatter;
 
 static const TotpCliDetailsFormatter available_formatters[] = {
@@ -35,14 +37,16 @@ static const TotpCliDetailsFormatter available_formatters[] = {
      .automation_feature_item_formatter = &details_output_formatter_print_automation_feature_table,
      .cstr_formatter = &details_output_formatter_print_cstr_table,
      .uint8t_formatter = &details_output_formatter_print_uint8t_table,
-     .sizet_formatter = &details_output_formatter_print_sizet_table},
+     .sizet_formatter = &details_output_formatter_print_sizet_table,
+     .uint64t_formatter = &details_output_formatter_print_uint64t_table},
 
     {.header_formatter = &details_output_formatter_print_header_tsv,
      .footer_formatter = &details_output_formatter_print_footer_tsv,
      .automation_feature_item_formatter = &details_output_formatter_print_automation_feature_tsv,
      .cstr_formatter = &details_output_formatter_print_cstr_tsv,
      .uint8t_formatter = &details_output_formatter_print_uint8t_tsv,
-     .sizet_formatter = &details_output_formatter_print_sizet_tsv},
+     .sizet_formatter = &details_output_formatter_print_sizet_tsv,
+     .uint64t_formatter = &details_output_formatter_print_uint64t_tsv},
 };
 
 static void print_automation_features(
@@ -103,10 +107,15 @@ static void handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
 
         (*formatter->header_formatter)();
         (*formatter->sizet_formatter)("Index", token_number);
+        (*formatter->cstr_formatter)("Type", token_info_get_type_as_cstr(token_info));
         (*formatter->cstr_formatter)("Name", furi_string_get_cstr(token_info->name));
         (*formatter->cstr_formatter)("Hashing algorithm", token_info_get_algo_as_cstr(token_info));
         (*formatter->uint8t_formatter)("Number of digits", token_info->digits);
-        (*formatter->uint8t_formatter)("Token lifetime", token_info->duration);
+        if(token_info->type == TokenTypeTOTP) {
+            (*formatter->uint8t_formatter)("Token lifetime", token_info->duration);
+        } else if(token_info->type == TokenTypeHOTP) {
+            (*formatter->uint64t_formatter)("Token counter", token_info->counter);
+        }
         print_automation_features(token_info, formatter);
         (*formatter->footer_formatter)();
     } else {

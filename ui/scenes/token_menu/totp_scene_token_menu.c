@@ -125,7 +125,7 @@ bool totp_scene_token_menu_handle_event(const PluginEvent* const event, PluginSt
         default:
             break;
         }
-    } else if(event->input.type == InputTypeRelease && event->input.key == InputKeyOk) {
+    } else if(event->input.type == InputTypeShort && event->input.key == InputKeyOk) {
         switch(scene_state->selected_control) {
         case AddNewToken: {
 #ifdef TOTP_UI_ADD_NEW_TOKEN_ENABLED
