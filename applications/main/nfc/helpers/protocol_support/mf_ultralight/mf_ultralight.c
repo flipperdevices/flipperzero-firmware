@@ -78,7 +78,9 @@ static NfcCommand
                    data->iso14443_3a_data->uid_len)) {
                 mf_ultralight_event->data->auth_context.skip_auth = false;
             }
-        } else if(instance->mf_ul_auth->type == MfUltralightAuthTypeManual) {
+        } else if(
+            instance->mf_ul_auth->type == MfUltralightAuthTypeManual ||
+            instance->mf_ul_auth->type == MfUltralightAuthTypeReader) {
             mf_ultralight_event->data->auth_context.skip_auth = false;
         } else {
             mf_ultralight_event->data->auth_context.skip_auth = true;
