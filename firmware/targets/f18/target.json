@@ -20,6 +20,7 @@
         "littlefs",
         "flipperformat",
         "toolbox",
+        "digital_signal",
         "signal_reader",
         "microtar",
         "usb_stm32",
@@ -28,10 +29,7 @@
         "one_wire",
         "music_worker",
         "misc",
-        "flipper_application",
-        "flipperformat",
-        "toolbox",
-        "flipper18"
+        "flipper_application"
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",
