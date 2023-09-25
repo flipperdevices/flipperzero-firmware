@@ -42,7 +42,7 @@ typedef struct {
 
 typedef uint32_t DigitalSequenceGpioBuffer[DIGITAL_SEQUENCE_GPIO_BUFFER_SIZE];
 
-typedef DigitalSignal* DigitalSequenceSignalBank[DIGITAL_SEQUENCE_BANK_SIZE];
+typedef const DigitalSignal* DigitalSequenceSignalBank[DIGITAL_SEQUENCE_BANK_SIZE];
 
 struct DigitalSequence {
     const GpioPin* gpio;
@@ -108,7 +108,7 @@ void digital_sequence_free(DigitalSequence* sequence) {
 void digital_sequence_register_signal(
     DigitalSequence* sequence,
     uint8_t signal_index,
-    DigitalSignal* signal) {
+    const DigitalSignal* signal) {
     furi_assert(sequence);
     furi_assert(signal);
     furi_assert(signal_index < DIGITAL_SEQUENCE_BANK_SIZE);

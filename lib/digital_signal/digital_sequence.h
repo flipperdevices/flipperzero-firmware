@@ -70,7 +70,7 @@ void digital_sequence_free(DigitalSequence* sequence);
 void digital_sequence_register_signal(
     DigitalSequence* sequence,
     uint8_t signal_index,
-    DigitalSignal* signal);
+    const DigitalSignal* signal);
 
 /**
  * @brief Append a signal index to a DigitalSequence instance.
