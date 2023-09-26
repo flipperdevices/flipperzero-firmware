@@ -51,7 +51,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
                 MfUltralightFeatureSupportReadCounter |
                 MfUltralightFeatureSupportCheckTearingFlag | MfUltralightFeatureSupportFastRead |
                 MfUltralightFeatureSupportIncCounter | MfUltralightFeatureSupportCompatibleWrite |
-                MfUltralightFeatureSupportAuthentication | MfUltralightFeatureSupportVcsl,
+                MfUltralightFeatureSupportPasswordAuth | MfUltralightFeatureSupportVcsl,
         },
     [MfUltralightTypeUL21] =
         {
@@ -63,7 +63,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
                 MfUltralightFeatureSupportReadCounter |
                 MfUltralightFeatureSupportCheckTearingFlag | MfUltralightFeatureSupportFastRead |
                 MfUltralightFeatureSupportIncCounter | MfUltralightFeatureSupportCompatibleWrite |
-                MfUltralightFeatureSupportAuthentication | MfUltralightFeatureSupportVcsl |
+                MfUltralightFeatureSupportPasswordAuth | MfUltralightFeatureSupportVcsl |
                 MfUltralightFeatureSupportDynamicLock,
         },
     [MfUltralightTypeNTAG213] =
@@ -75,9 +75,8 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
                 MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
                 MfUltralightFeatureSupportCompatibleWrite |
-                MfUltralightFeatureSupportAuthentication |
-                MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror |
-                MfUltralightFeatureSupportDynamicLock,
+                MfUltralightFeatureSupportPasswordAuth | MfUltralightFeatureSupportSingleCounter |
+                MfUltralightFeatureSupportAsciiMirror | MfUltralightFeatureSupportDynamicLock,
         },
     [MfUltralightTypeNTAG215] =
         {
@@ -88,9 +87,8 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
                 MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
                 MfUltralightFeatureSupportCompatibleWrite |
-                MfUltralightFeatureSupportAuthentication |
-                MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror |
-                MfUltralightFeatureSupportDynamicLock,
+                MfUltralightFeatureSupportPasswordAuth | MfUltralightFeatureSupportSingleCounter |
+                MfUltralightFeatureSupportAsciiMirror | MfUltralightFeatureSupportDynamicLock,
         },
     [MfUltralightTypeNTAG216] =
         {
@@ -101,9 +99,8 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
                 MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
                 MfUltralightFeatureSupportCompatibleWrite |
-                MfUltralightFeatureSupportAuthentication |
-                MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror |
-                MfUltralightFeatureSupportDynamicLock,
+                MfUltralightFeatureSupportPasswordAuth | MfUltralightFeatureSupportSingleCounter |
+                MfUltralightFeatureSupportAsciiMirror | MfUltralightFeatureSupportDynamicLock,
         },
     [MfUltralightTypeNTAGI2C1K] =
         {
@@ -130,7 +127,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .config_page = 227,
             .feature_set =
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-                MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
+                MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportPasswordAuth |
                 MfUltralightFeatureSupportSectorSelect | MfUltralightFeatureSupportFastWrite |
                 MfUltralightFeatureSupportDynamicLock,
         },
@@ -141,7 +138,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .config_page = 227,
             .feature_set =
                 MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-                MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
+                MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportPasswordAuth |
                 MfUltralightFeatureSupportSectorSelect | MfUltralightFeatureSupportFastWrite |
                 MfUltralightFeatureSupportDynamicLock,
         },
@@ -581,7 +578,7 @@ bool mf_ultralight_is_all_data_read(const MfUltralightData* data) {
         // By default PWD is 0xFFFFFFFF, but if read back it is always 0x00000000,
         // so a default read on an auth-supported NTAG is never complete.
         uint32_t feature_set = mf_ultralight_get_feature_support_set(data->type);
-        if(!mf_ultralight_support_feature(feature_set, MfUltralightFeatureSupportAuthentication)) {
+        if(!mf_ultralight_support_feature(feature_set, MfUltralightFeatureSupportPasswordAuth)) {
             all_read = true;
         } else {
             MfUltralightConfigPages* config = NULL;

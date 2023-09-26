@@ -30,10 +30,10 @@ MfUltralightError mf_ultralight_process_error(Iso14443_3aError error) {
     return ret;
 }
 
-MfUltralightError mf_ultralight_poller_async_auth(
+MfUltralightError mf_ultralight_poller_async_auth_pwd(
     MfUltralightPoller* instance,
     MfUltralightPollerAuthContext* data) {
-    uint8_t auth_cmd[5] = {MF_ULTRALIGHT_CMD_AUTH}; //-V1009
+    uint8_t auth_cmd[5] = {MF_ULTRALIGHT_CMD_PWD_AUTH}; //-V1009
     memccpy(&auth_cmd[1], data->password.data, 0, MF_ULTRALIGHT_AUTH_PASSWORD_SIZE);
     bit_buffer_copy_bytes(instance->tx_buffer, auth_cmd, sizeof(auth_cmd));
 

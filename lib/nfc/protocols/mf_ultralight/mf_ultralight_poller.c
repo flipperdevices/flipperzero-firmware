@@ -373,7 +373,7 @@ static NfcCommand mf_ultralight_poller_handler_read_tearing_flags(MfUltralightPo
 static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance) {
     NfcCommand command = NfcCommandContinue;
     if(mf_ultralight_support_feature(
-           instance->feature_set, MfUltralightFeatureSupportAuthentication)) {
+           instance->feature_set, MfUltralightFeatureSupportPasswordAuth)) {
         instance->mfu_event.type = MfUltralightPollerEventTypeAuthRequest;
 
         command = instance->callback(instance->general_event, instance->context);
@@ -449,7 +449,7 @@ static NfcCommand mf_ultralight_poller_handler_read_pages(MfUltralightPoller* in
 static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoller* instance) {
     do {
         if(!mf_ultralight_support_feature(
-               instance->feature_set, MfUltralightFeatureSupportAuthentication))
+               instance->feature_set, MfUltralightFeatureSupportPasswordAuth))
             break;
 
         MfUltralightConfigPages* config = NULL;
