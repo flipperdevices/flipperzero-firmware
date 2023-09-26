@@ -55,6 +55,7 @@
 
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
+#include <toolbox/name_generator.h>
 #include <dolphin/dolphin.h>
 
 #define NFC_NAME_SIZE 22

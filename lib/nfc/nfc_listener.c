@@ -106,7 +106,7 @@ NfcCommand nfc_listener_start_callback(NfcEvent event, void* context) {
     NfcGenericEvent generic_event = {
         .protocol = NfcProtocolInvalid,
         .instance = instance->nfc,
-        .data = &event,
+        .event_data = &event,
     };
 
     NfcListenerListElement* head_listener = instance->list.head;

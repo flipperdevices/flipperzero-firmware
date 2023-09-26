@@ -25,6 +25,6 @@ typedef struct {
     NfcProtocolSupportSceneBase scene_read_menu;
     NfcProtocolSupportSceneBase scene_read_success;
     NfcProtocolSupportSceneBase scene_saved_menu;
+    NfcProtocolSupportSceneBase scene_save_name;
     NfcProtocolSupportSceneBase scene_emulate;
-    // TODO Add scene save to save mf classic key cache
 } NfcProtocolSupportBase;

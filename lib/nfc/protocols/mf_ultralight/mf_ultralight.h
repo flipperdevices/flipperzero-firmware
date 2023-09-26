@@ -75,6 +75,7 @@ typedef enum {
     MfUltralightFeatureSupportSingleCounter = (1U << 11),
     MfUltralightFeatureSupportAsciiMirror = (1U << 12),
     MfUltralightFeatureSupportCounterInMemory = (1U << 13),
+    MfUltralightFeatureSupportDynamicLock = (1U << 14),
 } MfUltralightFeatureSupport;
 
 typedef struct {

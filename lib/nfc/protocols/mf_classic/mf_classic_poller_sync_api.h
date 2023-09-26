@@ -7,6 +7,12 @@
 extern "C" {
 #endif
 
+MfClassicError mf_classic_poller_collect_nt(
+    Nfc* nfc,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicNt* nt);
+
 MfClassicError mf_classic_poller_auth(
     Nfc* nfc,
     uint8_t block_num,
@@ -42,6 +48,8 @@ MfClassicError mf_classic_poller_change_value(
     MfClassicKeyType key_type,
     int32_t data,
     int32_t* new_value);
+
+MfClassicError mf_classic_poller_detect_type(Nfc* nfc, MfClassicType* type);
 
 MfClassicError
     mf_classic_poller_read(Nfc* nfc, const MfClassicDeviceKeys* keys, MfClassicData* data);

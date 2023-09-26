@@ -19,3 +19,14 @@ void nfc_render_mf_classic_info(
 
     // TODO: Something else?
 }
+
+void nfc_render_mf_classic_dump(const MfClassicData* data, FuriString* str) {
+    uint16_t total_blocks = mf_classic_get_total_block_num(data->type);
+
+    for(size_t i = 0; i < total_blocks; i++) {
+        for(size_t j = 0; j < sizeof(MfClassicBlock); j += 2) {
+            furi_string_cat_printf(
+                str, "%02X%02X ", data->block[i].data[j], data->block[i].data[j + 1]);
+        }
+    }
+}

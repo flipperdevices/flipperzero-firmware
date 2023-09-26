@@ -94,6 +94,8 @@ bool mf_classic_key_cache_load(MfClassicKeyCache* instance, const uint8_t* uid, 
     furi_assert(instance);
     furi_assert(uid);
 
+    mf_classic_key_cache_reset(instance);
+
     FuriString* file_path = furi_string_alloc();
     nfc_get_key_cache_file_path(uid, uid_len, file_path);
 
