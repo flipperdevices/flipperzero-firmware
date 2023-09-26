@@ -20,6 +20,7 @@
         "littlefs",
         "flipperformat",
         "toolbox",
+        "digital_signal",
         "signal_reader",
         "microtar",
         "usb_stm32",
@@ -32,6 +33,7 @@
         "flipperformat",
         "toolbox",
         "flipper18"
+
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",
