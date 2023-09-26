@@ -3,7 +3,7 @@
 NfcCommand
     nfc_scene_mf_ultralight_capture_pass_worker_callback(NfcGenericEvent event, void* context) {
     NfcApp* nfcApp = context;
-    MfUltralightListenerEvent* mfu_event = event.data;
+    MfUltralightListenerEvent* mfu_event = event.event_data;
     MfUltralightAuth* mauth = nfcApp->mf_ul_auth;
 
     if(mfu_event->type == MfUltralightListenerEventTypeAuth) {
