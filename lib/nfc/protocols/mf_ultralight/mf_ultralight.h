@@ -47,6 +47,7 @@ typedef enum {
 typedef enum {
     MfUltralightTypeUnknown,
     MfUltralightTypeNTAG203,
+    MfUltralightTypeMfulC,
     MfUltralightTypeUL11,
     MfUltralightTypeUL21,
     MfUltralightTypeNTAG213,
