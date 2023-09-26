@@ -2100,7 +2100,6 @@ Function,+,menu_set_selected_item,void,"Menu*, uint32_t"
 Function,+,mf_classic_alloc,MfClassicData*,
 Function,+,mf_classic_block_to_value,_Bool,"const MfClassicBlock*, int32_t*, uint8_t*"
 Function,+,mf_classic_copy,void,"MfClassicData*, const MfClassicData*"
-Function,+,mf_classic_detect_protocol,_Bool,"Iso14443_3aData*, MfClassicType*"
 Function,+,mf_classic_free,void,MfClassicData*
 Function,+,mf_classic_get_base_data,Iso14443_3aData*,const MfClassicData*
 Function,+,mf_classic_get_blocks_num_in_sector,uint8_t,uint8_t
@@ -2111,7 +2110,7 @@ Function,+,mf_classic_get_sector_by_block,uint8_t,uint8_t
 Function,+,mf_classic_get_sector_trailer_by_sector,MfClassicSectorTrailer*,"const MfClassicData*, uint8_t"
 Function,+,mf_classic_get_sector_trailer_num_by_block,uint8_t,uint8_t
 Function,+,mf_classic_get_sector_trailer_num_by_sector,uint8_t,uint8_t
-Function,-,mf_classic_get_total_block_num,uint16_t,MfClassicType
+Function,+,mf_classic_get_total_block_num,uint16_t,MfClassicType
 Function,+,mf_classic_get_total_sectors_num,uint8_t,MfClassicType
 Function,+,mf_classic_get_uid,const uint8_t*,"const MfClassicData*, size_t*"
 Function,+,mf_classic_is_allowed_access,_Bool,"MfClassicData*, uint8_t, MfClassicKeyType, MfClassicAction"
@@ -2122,10 +2121,12 @@ Function,+,mf_classic_is_equal,_Bool,"const MfClassicData*, const MfClassicData*
 Function,+,mf_classic_is_key_found,_Bool,"const MfClassicData*, uint8_t, MfClassicKeyType"
 Function,+,mf_classic_is_sector_read,_Bool,"const MfClassicData*, uint8_t"
 Function,+,mf_classic_is_sector_trailer,_Bool,uint8_t
-Function,-,mf_classic_is_value_block,_Bool,"MfClassicData*, uint8_t"
+Function,+,mf_classic_is_value_block,_Bool,"MfClassicSectorTrailer*, uint8_t"
 Function,+,mf_classic_load,_Bool,"MfClassicData*, FlipperFormat*, uint32_t"
 Function,+,mf_classic_poller_auth,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
 Function,+,mf_classic_poller_change_value,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, int32_t, int32_t*"
+Function,+,mf_classic_poller_collect_nt,MfClassicError,"Nfc*, uint8_t, MfClassicKeyType, MfClassicNt*"
+Function,+,mf_classic_poller_detect_type,MfClassicError,"Nfc*, MfClassicType*"
 Function,+,mf_classic_poller_read,MfClassicError,"Nfc*, const MfClassicDeviceKeys*, MfClassicData*"
 Function,+,mf_classic_poller_read_block,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicBlock*"
 Function,+,mf_classic_poller_read_value,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, int32_t*"

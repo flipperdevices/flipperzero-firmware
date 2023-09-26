@@ -178,7 +178,7 @@ MfUltralightPoller* mf_ultralight_poller_alloc(Iso14443_3aPoller* iso14443_3a_po
     instance->mfu_event.data = &instance->mfu_event_data;
 
     instance->general_event.protocol = NfcProtocolMfUltralight;
-    instance->general_event.data = &instance->mfu_event;
+    instance->general_event.event_data = &instance->mfu_event;
     instance->general_event.instance = instance;
 
     return instance;
@@ -519,13 +519,13 @@ static const MfUltralightPollerReadHandler
 
 static NfcCommand mf_ultralight_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     MfUltralightPoller* instance = context;
     furi_assert(instance->callback);
 
-    const Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    const Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
 
     NfcCommand command = NfcCommandContinue;
 
@@ -541,12 +541,12 @@ static NfcCommand mf_ultralight_poller_run(NfcGenericEvent event, void* context)
 
 static bool mf_ultralight_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     bool protocol_detected = false;
     MfUltralightPoller* instance = context;
-    const Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    const Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         MfUltralightPageReadCommandData read_page_cmd_data = {};

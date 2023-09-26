@@ -27,7 +27,7 @@ static NfcCommand nfc_scene_read_poller_callback_iso15693_3(NfcGenericEvent even
     furi_assert(event.protocol == NfcProtocolIso15693_3);
 
     NfcApp* instance = context;
-    const Iso15693_3PollerEvent* iso15693_3_event = event.data;
+    const Iso15693_3PollerEvent* iso15693_3_event = event.event_data;
 
     if(iso15693_3_event->type == Iso15693_3PollerEventTypeReady) {
         nfc_device_set_data(
@@ -63,10 +63,10 @@ static NfcCommand
     nfc_scene_emulate_listener_callback_iso15693_3(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolIso15693_3);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     NfcApp* nfc = context;
-    Iso15693_3ListenerEvent* iso15693_3_event = event.data;
+    Iso15693_3ListenerEvent* iso15693_3_event = event.event_data;
 
     if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
         furi_string_cat_printf(nfc->text_box_store, "R:");
@@ -91,15 +91,6 @@ static void nfc_scene_emulate_on_enter_iso15693_3(NfcApp* instance) {
         instance->listener, nfc_scene_emulate_listener_callback_iso15693_3, instance);
 }
 
-static bool nfc_scene_info_on_event_iso15693_3(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    }
-
-    return false;
-}
-
 static bool nfc_scene_saved_menu_on_event_iso15693_3(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEdit) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
@@ -115,7 +106,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_iso15693_3,
-            .on_event = nfc_scene_info_on_event_iso15693_3,
+            .on_event = NULL,
         },
     .scene_read =
         {
@@ -136,6 +127,11 @@ const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
         {
             .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_scene_saved_menu_on_event_iso15693_3,
+        },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
         },
     .scene_emulate =
         {

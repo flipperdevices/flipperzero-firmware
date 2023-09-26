@@ -27,7 +27,7 @@ static NfcCommand nfc_scene_read_poller_callback_slix(NfcGenericEvent event, voi
     furi_assert(event.protocol == NfcProtocolSlix);
 
     NfcApp* instance = context;
-    const SlixPollerEvent* slix_event = event.data;
+    const SlixPollerEvent* slix_event = event.event_data;
 
     if(slix_event->type == SlixPollerEventTypeReady) {
         nfc_device_set_data(
@@ -61,10 +61,10 @@ static void nfc_scene_read_success_on_enter_slix(NfcApp* instance) {
 static NfcCommand nfc_scene_emulate_listener_callback_slix(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolSlix);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     NfcApp* nfc = context;
-    SlixListenerEvent* slix_event = event.data;
+    SlixListenerEvent* slix_event = event.event_data;
 
     if(slix_event->type == SlixListenerEventTypeCustomCommand) {
         furi_string_cat_printf(nfc->text_box_store, "R:");
@@ -86,15 +86,6 @@ static void nfc_scene_emulate_on_enter_slix(NfcApp* instance) {
     nfc_listener_start(instance->listener, nfc_scene_emulate_listener_callback_slix, instance);
 }
 
-static bool nfc_scene_info_on_event_slix(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    }
-
-    return false;
-}
-
 static bool nfc_scene_saved_menu_on_event_slix(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEdit) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
@@ -110,7 +101,7 @@ const NfcProtocolSupportBase nfc_protocol_support_slix = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_slix,
-            .on_event = nfc_scene_info_on_event_slix,
+            .on_event = NULL,
         },
     .scene_read =
         {
@@ -131,6 +122,11 @@ const NfcProtocolSupportBase nfc_protocol_support_slix = {
         {
             .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_scene_saved_menu_on_event_slix,
+        },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
         },
     .scene_emulate =
         {

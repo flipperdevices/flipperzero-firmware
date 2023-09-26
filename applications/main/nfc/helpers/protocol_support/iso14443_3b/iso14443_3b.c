@@ -27,7 +27,7 @@ static NfcCommand
     furi_assert(event.protocol == NfcProtocolIso14443_3b);
 
     NfcApp* instance = context;
-    const Iso14443_3bPollerEvent* iso14443_3b_event = event.data;
+    const Iso14443_3bPollerEvent* iso14443_3b_event = event.event_data;
 
     if(iso14443_3b_event->type == Iso14443_3bPollerEventTypeReady) {
         nfc_device_set_data(
@@ -58,15 +58,6 @@ static void nfc_scene_read_success_on_enter_iso14443_3b(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static bool nfc_scene_info_on_event_iso14443_3b(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    }
-
-    return false;
-}
-
 bool nfc_scene_saved_menu_on_event_iso14443_3b_common(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEdit) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
@@ -86,7 +77,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3b = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_iso14443_3b,
-            .on_event = nfc_scene_info_on_event_iso14443_3b,
+            .on_event = NULL,
         },
     .scene_read =
         {
@@ -107,6 +98,11 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3b = {
         {
             .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_scene_saved_menu_on_event_iso14443_3b,
+        },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
         },
     .scene_emulate =
         {

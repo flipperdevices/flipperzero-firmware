@@ -35,7 +35,7 @@ Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, Iso14443_3aData* data)
     instance->iso14443_3a_event.data = &instance->iso14443_3a_event_data;
     instance->generic_event.protocol = NfcProtocolIso14443_3a;
     instance->generic_event.instance = instance;
-    instance->generic_event.data = &instance->iso14443_3a_event;
+    instance->generic_event.event_data = &instance->iso14443_3a_event;
 
     nfc_set_fdt_listen_fc(instance->nfc, ISO14443_3A_FDT_LISTEN_FC);
     nfc_config(instance->nfc, NfcModeListener, NfcTechIso14443a);
@@ -78,10 +78,10 @@ const Iso14443_3aData* iso14443_3a_listener_get_data(Iso14443_3aListener* instan
 NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolInvalid);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     Iso14443_3aListener* instance = context;
-    NfcEvent* nfc_event = event.data;
+    NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
     if(nfc_event->type == NfcEventTypeListenerActivated) {

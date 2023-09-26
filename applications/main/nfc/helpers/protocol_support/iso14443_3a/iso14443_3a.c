@@ -27,7 +27,7 @@ static NfcCommand
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     NfcApp* instance = context;
-    const Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    const Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         nfc_device_set_data(
@@ -62,10 +62,10 @@ static NfcCommand
     nfc_scene_emulate_listener_callback_iso14443_3a(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     NfcApp* nfc = context;
-    Iso14443_3aListenerEvent* iso14443_3a_event = event.data;
+    Iso14443_3aListenerEvent* iso14443_3a_event = event.event_data;
 
     if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
         furi_string_cat_printf(nfc->text_box_store, "R:");
@@ -91,15 +91,6 @@ static void nfc_scene_emulate_on_enter_iso14443_3a(NfcApp* instance) {
         instance->listener, nfc_scene_emulate_listener_callback_iso14443_3a, instance);
 }
 
-static bool nfc_scene_info_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    }
-
-    return false;
-}
-
 static bool nfc_scene_read_menu_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEmulate) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneEmulate);
@@ -115,7 +106,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_iso14443_3a,
-            .on_event = nfc_scene_info_on_event_iso14443_3a,
+            .on_event = NULL,
         },
     .scene_read =
         {
@@ -135,6 +126,11 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
     .scene_saved_menu =
         {
             .on_enter = nfc_protocol_support_common_on_enter_empty,
+            .on_event = NULL,
+        },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
             .on_event = NULL,
         },
     .scene_emulate =

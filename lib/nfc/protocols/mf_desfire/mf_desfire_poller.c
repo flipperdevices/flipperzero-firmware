@@ -28,7 +28,7 @@ static MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_p
     instance->mf_desfire_event.data = &instance->mf_desfire_event_data;
 
     instance->general_event.protocol = NfcProtocolMfDesfire;
-    instance->general_event.data = &instance->mf_desfire_event;
+    instance->general_event.event_data = &instance->mf_desfire_event;
     instance->general_event.instance = instance;
 
     return instance;
@@ -198,7 +198,7 @@ static NfcCommand mf_desfire_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(instance);
     furi_assert(instance->callback);
 
-    const Iso14443_4aPollerEvent* iso14443_4a_event = event.data;
+    const Iso14443_4aPollerEvent* iso14443_4a_event = event.event_data;
     furi_assert(iso14443_4a_event);
 
     NfcCommand command = NfcCommandContinue;
@@ -219,7 +219,7 @@ static bool mf_desfire_poller_detect(NfcGenericEvent event, void* context) {
     MfDesfirePoller* instance = context;
     furi_assert(instance);
 
-    const Iso14443_4aPollerEvent* iso14443_4a_event = event.data;
+    const Iso14443_4aPollerEvent* iso14443_4a_event = event.event_data;
     furi_assert(iso14443_4a_event);
 
     bool protocol_detected = false;
