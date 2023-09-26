@@ -1,5 +1,6 @@
 #include "mf_ultralight.h"
 
+#include <nfc/helpers/nfc_util.h>
 #include <furi.h>
 
 #define MF_ULTRALIGHT_PROTOCOL_NAME "NTAG/Ultralight"
@@ -585,7 +586,11 @@ bool mf_ultralight_is_all_data_read(const MfUltralightData* data) {
         } else {
             MfUltralightConfigPages* config = NULL;
             if(mf_ultralight_get_config_page(data, &config)) {
-                all_read = ((config->password.pass != 0) || (config->pack.pack != 0));
+                uint32_t pass =
+                    nfc_util_bytes2num(config->password.data, sizeof(MfUltralightAuthPassword));
+                uint16_t pack =
+                    nfc_util_bytes2num(config->pack.data, sizeof(MfUltralightAuthPack));
+                all_read = ((pass != 0) || (pack != 0));
             }
         }
     }
