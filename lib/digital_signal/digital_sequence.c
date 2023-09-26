@@ -302,7 +302,9 @@ void digital_sequence_transmit(DigitalSequence* sequence) {
 
     for(;;) {
         const DigitalSignal* signal_next =
-            (next_signal_index < sequence->size) ? sequence->signals[sequence->data[next_signal_index++]] : NULL;
+            (next_signal_index < sequence->size) ?
+                sequence->signals[sequence->data[next_signal_index++]] :
+                NULL;
 
         for(uint32_t i = 0; i < signal_current->size; i++) {
             const bool is_last_value = (i == signal_current->size - 1);
