@@ -37,11 +37,23 @@ static void nfc_scene_info_on_enter_mf_classic(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
+static void nfc_scene_card_dump_on_enter_mf_classic(NfcApp* instance) {
+    const NfcDevice* device = instance->nfc_device;
+    const MfClassicData* mfc_data = nfc_device_get_data(device, NfcProtocolMfClassic);
+
+    furi_string_reset(instance->text_box_store);
+    nfc_render_mf_classic_dump(mfc_data, instance->text_box_store);
+
+    text_box_set_font(instance->text_box, TextBoxFontHex);
+    text_box_set_text(instance->text_box, furi_string_get_cstr(instance->text_box_store));
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewTextBox);
+}
+
 static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcApp* instance = context;
-    const MfClassicPollerEvent* mfc_event = event.data;
+    const MfClassicPollerEvent* mfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
     if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
@@ -93,13 +105,7 @@ static void nfc_scene_read_on_enter_mf_classic(NfcApp* instance) {
 
 static bool nfc_scene_read_on_event_mf_classic(NfcApp* instance, uint32_t event) {
     if(event == NfcCustomEventPollerIncomplete) {
-        const MfClassicData* mfc_data = nfc_poller_get_data(instance->poller);
-        if(mf_classic_is_card_read(mfc_data)) {
-            view_dispatcher_send_custom_event(
-                instance->view_dispatcher, NfcCustomEventPollerSuccess);
-        } else {
-            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicDictAttack);
-        }
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicDictAttack);
     }
 
     return true;
@@ -168,7 +174,7 @@ static void nfc_scene_emulate_on_enter_mf_classic(NfcApp* instance) {
 
 static bool nfc_scene_info_on_event_mf_classic(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneCardDump);
         return true;
     }
 
@@ -202,6 +208,19 @@ static bool nfc_scene_saved_menu_on_event_mf_classic(NfcApp* instance, uint32_t 
     return consumed;
 }
 
+static bool nfc_scene_save_name_on_event_mf_classic(NfcApp* instance, uint32_t event) {
+    bool consumed = false;
+
+    if(event == NfcCustomEventTextInputDone) {
+        mf_classic_key_cache_save(
+            instance->mfc_key_cache,
+            nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic));
+        consumed = true;
+    }
+
+    return consumed;
+}
+
 const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
     .features = NfcProtocolFeatureEmulateFull,
 
@@ -209,6 +228,11 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
         {
             .on_enter = nfc_scene_info_on_enter_mf_classic,
             .on_event = nfc_scene_info_on_event_mf_classic,
+        },
+    .scene_card_dump =
+        {
+            .on_enter = nfc_scene_card_dump_on_enter_mf_classic,
+            .on_event = NULL,
         },
     .scene_read =
         {
@@ -229,6 +253,11 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
         {
             .on_enter = nfc_scene_saved_menu_on_enter_mf_classic,
             .on_event = nfc_scene_saved_menu_on_event_mf_classic,
+        },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = nfc_scene_save_name_on_event_mf_classic,
         },
     .scene_emulate =
         {

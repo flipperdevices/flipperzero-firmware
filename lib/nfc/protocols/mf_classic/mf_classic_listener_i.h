@@ -23,12 +23,6 @@ typedef enum {
 } MfClassicListenerState;
 
 typedef enum {
-    MfClassicListenerAuthStateIdle,
-    MfClassicListenerAuthStateStarted,
-    MfClassicListenerAuthStatePollerSecretReceived,
-} MfClassicListenerAuthState;
-
-typedef enum {
     MfClassicListenerCommStatePlain,
     MfClassicListenerCommStateEncrypted,
 } MfClassicListenerCommState;
@@ -36,7 +30,6 @@ typedef enum {
 struct MfClassicListener {
     Iso14443_3aListener* iso14443_3a_listener;
     MfClassicListenerState state;
-    MfClassicListenerAuthState auth_state;
     MfClassicListenerCommState comm_state;
 
     MfClassicData* data;

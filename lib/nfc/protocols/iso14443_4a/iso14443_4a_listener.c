@@ -20,7 +20,7 @@ static Iso14443_4aListener*
     instance->iso14443_4a_event.data = &instance->iso14443_4a_event_data;
     instance->generic_event.protocol = NfcProtocolIso14443_4a;
     instance->generic_event.instance = instance;
-    instance->generic_event.data = &instance->iso14443_4a_event;
+    instance->generic_event.event_data = &instance->iso14443_4a_event;
 
     return instance;
 }
@@ -54,10 +54,10 @@ static const Iso14443_4aData* iso14443_4a_listener_get_data(Iso14443_4aListener*
 static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     Iso14443_4aListener* instance = context;
-    Iso14443_3aListenerEvent* iso14443_3a_event = event.data;
+    Iso14443_3aListenerEvent* iso14443_3a_event = event.event_data;
     BitBuffer* rx_buffer = iso14443_3a_event->data->buffer;
     NfcCommand command = NfcCommandContinue;
 

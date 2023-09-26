@@ -52,7 +52,7 @@ static NfcCommand
     furi_assert(event.protocol == NfcProtocolMfUltralight);
 
     NfcApp* instance = context;
-    const MfUltralightPollerEvent* mf_ultralight_event = event.data;
+    const MfUltralightPollerEvent* mf_ultralight_event = event.event_data;
 
     if(mf_ultralight_event->type == MfUltralightPollerEventTypeReadSuccess) {
         nfc_device_set_data(
@@ -221,6 +221,11 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
         {
             .on_enter = nfc_scene_saved_menu_on_enter_mf_ultralight,
             .on_event = nfc_scene_saved_menu_on_event_mf_ultralight,
+        },
+    .scene_save_name =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
         },
     .scene_emulate =
         {
