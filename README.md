@@ -35,6 +35,7 @@ The Flipper Zero is packaged with several [features](https://docs.flipper.net/).
   access control, meteo measurement...
 - [Bad USB](https://docs.flipper.net/bad-usb): A [rubber ducky](https://shop.hak5.org/products/usb-rubber-ducky) like feature, perform keyboard typing when the device plugged by USB.
 - [U2F](https://docs.flipper.net/u2f): Acting like a USB universal 2nd-factor.
+- [Controler](https://docs.flipper.net/apps/controllers): Can be used as a keynote or a keyboard, it is connected by bluetooth.
 
 ## Firmware and Softwares
 ### Firmware
@@ -92,13 +93,38 @@ Then, to configure your VScode you have to launch this command.
 
 Now if you launch VScode in this directory, it will notify you to install all the needed plugins.
 
+Now you can use the binding  `Ctrl + Shift + B` to get a contextual menu to build and flash the firmware and your applications.
+
+![](screenshoots/build_menu.png)
+
 ### Build and Flash
+
+The first step is to get a recent version of the firmware, so you have to select the version to develop on.
+By default, you are on the `dev` branch which is not the most stable.
+If you want more stability, the `release` branch is better candidate.
+
+Once you selected the vesion, let's plug you flipper zero and flash the firmware by USB:
+
+```
+./fbt flash_usb_full
+```
+
+For VScode users, you need to select `[Release] Flash (USB, with resources)`.
+
+Now, the only command to launch your application on your Flipper Zero is:
+
+```
+./fbt launch APPSRC=applications_user/path/to/app
+```
+
 ## Create your application
 ### Overview
 
 In this tutorial, we will build together a simple id card application with a minimalist icon.
 It is a good first application to learn how to use the GUI with some texts and images and simple inputs.
 The application will display your name, your phone number and your e-mail.
+
+![](screenshoots/Screen_id_card.png)
 
 All the code and resources are available on my [Github](https://github.com/alanretgue/Flipper_Zero-id_card/tree/master).
 
