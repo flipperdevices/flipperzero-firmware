@@ -16,34 +16,45 @@
 #endif
 
 typedef struct {
-    bool alive;
+    bool serial_enabled;
     FuriHalConsoleTxCallback tx_callback;
     void* tx_callback_context;
 } FuriHalConsole;
 
 FuriHalConsole furi_hal_console = {
-    .alive = false,
+    .serial_enabled = false,
     .tx_callback = NULL,
     .tx_callback_context = NULL,
 };
 
-void furi_hal_console_init() {
-    furi_hal_uart_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
-    furi_hal_console.alive = true;
+// Must be called from within a critical section
+static void furi_hal_console_send(const uint8_t* buffer, size_t buffer_size) {
+    if(furi_hal_console.tx_callback) {
+        furi_hal_console.tx_callback(buffer, buffer_size, furi_hal_console.tx_callback_context);
+    }
+
+    if(furi_hal_console.serial_enabled) {
+        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)buffer, buffer_size);
+    }
 }
 
-void furi_hal_console_enable() {
+void furi_hal_console_init() {
+    furi_hal_uart_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
+    furi_hal_console.serial_enabled = true;
+}
+
+void furi_hal_console_enable_serial() {
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
     while(!LL_USART_IsActiveFlag_TC(USART1))
         ;
     furi_hal_uart_set_br(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
-    furi_hal_console.alive = true;
+    furi_hal_console.serial_enabled = true;
 }
 
-void furi_hal_console_disable() {
+void furi_hal_console_disable_serial() {
     while(!LL_USART_IsActiveFlag_TC(USART1))
         ;
-    furi_hal_console.alive = false;
+    furi_hal_console.serial_enabled = false;
 }
 
 void furi_hal_console_set_tx_callback(FuriHalConsoleTxCallback callback, void* context) {
@@ -54,16 +65,14 @@ void furi_hal_console_set_tx_callback(FuriHalConsoleTxCallback callback, void* c
 }
 
 void furi_hal_console_tx(const uint8_t* buffer, size_t buffer_size) {
-    if(!furi_hal_console.alive) return;
+    // Don't enter critical section if no output is enabled
+    if(!furi_hal_console.serial_enabled && !furi_hal_console.tx_callback) return;
 
     FURI_CRITICAL_ENTER();
     // Transmit data
 
-    if(furi_hal_console.tx_callback) {
-        furi_hal_console.tx_callback(buffer, buffer_size, furi_hal_console.tx_callback_context);
-    }
+    furi_hal_console_send(buffer, buffer_size);
 
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)buffer, buffer_size);
     // Wait for TC flag to be raised for last char
     while(!LL_USART_IsActiveFlag_TC(USART1))
         ;
@@ -71,13 +80,14 @@ void furi_hal_console_tx(const uint8_t* buffer, size_t buffer_size) {
 }
 
 void furi_hal_console_tx_with_new_line(const uint8_t* buffer, size_t buffer_size) {
-    if(!furi_hal_console.alive) return;
+    // Don't enter critical section if no output is enabled
+    if(!furi_hal_console.serial_enabled && !furi_hal_console.tx_callback) return;
 
     FURI_CRITICAL_ENTER();
     // Transmit data
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)buffer, buffer_size);
+    furi_hal_console_send(buffer, buffer_size);
     // Transmit new line symbols
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)"\r\n", 2);
+    furi_hal_console_send((uint8_t*)"\r\n", 2);
     // Wait for TC flag to be raised for last char
     while(!LL_USART_IsActiveFlag_TC(USART1))
         ;

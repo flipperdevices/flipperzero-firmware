@@ -12,10 +12,18 @@ typedef void (*FuriHalConsoleTxCallback)(const uint8_t* buffer, size_t size, voi
 
 void furi_hal_console_init();
 
-void furi_hal_console_enable();
+/// Enable the console output through the serial TX pin
+void furi_hal_console_enable_serial();
 
-void furi_hal_console_disable();
+/// Disable the console output through the serial TX pin
+void furi_hal_console_disable_serial();
 
+/**
+ * Add an alternative output to the console
+ * To remove it, call this function again with NULL pointers
+ *
+ * @note Only one callback can be active at a time
+ */
 void furi_hal_console_set_tx_callback(FuriHalConsoleTxCallback callback, void* context);
 
 void furi_hal_console_tx(const uint8_t* buffer, size_t buffer_size);

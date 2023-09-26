@@ -112,7 +112,7 @@ static void usb_uart_vcp_deinit(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
 
 static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     if(uart_ch == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
+        furi_hal_console_disable_serial();
     } else if(uart_ch == FuriHalUartIdLPUART1) {
         furi_hal_uart_init(uart_ch, 115200);
     }
@@ -123,7 +123,7 @@ static void usb_uart_serial_deinit(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     UNUSED(usb_uart);
     furi_hal_uart_set_irq_cb(uart_ch, NULL, NULL);
     if(uart_ch == FuriHalUartIdUSART1)
-        furi_hal_console_enable();
+        furi_hal_console_enable_serial();
     else if(uart_ch == FuriHalUartIdLPUART1)
         furi_hal_uart_deinit(uart_ch);
 }
