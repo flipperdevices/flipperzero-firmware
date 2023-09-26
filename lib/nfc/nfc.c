@@ -405,6 +405,11 @@ NfcError nfc_iso14443a_poller_trx_custom_parity(
     FuriHalNfcError error = FuriHalNfcErrorNone;
     do {
         furi_hal_nfc_trx_reset();
+        while(furi_hal_nfc_timer_block_tx_is_running()) {
+            FuriHalNfcEvent event =
+                furi_hal_nfc_poller_wait_event(FURI_HAL_NFC_EVENT_WAIT_FOREVER);
+            if(event & FuriHalNfcEventTimerBlockTxExpired) break;
+        }
         bit_buffer_write_bytes_with_parity(
             tx_buffer, instance->tx_buffer, sizeof(instance->tx_buffer), &instance->tx_bits);
         error =
@@ -447,6 +452,11 @@ NfcError
     FuriHalNfcError error = FuriHalNfcErrorNone;
     do {
         furi_hal_nfc_trx_reset();
+        while(furi_hal_nfc_timer_block_tx_is_running()) {
+            FuriHalNfcEvent event =
+                furi_hal_nfc_poller_wait_event(FURI_HAL_NFC_EVENT_WAIT_FOREVER);
+            if(event & FuriHalNfcEventTimerBlockTxExpired) break;
+        }
         error =
             furi_hal_nfc_poller_tx(bit_buffer_get_data(tx_buffer), bit_buffer_get_size(tx_buffer));
         if(error != FuriHalNfcErrorNone) {
@@ -507,6 +517,11 @@ NfcError nfc_iso14443a_poller_trx_short_frame(
     FuriHalNfcError error = FuriHalNfcErrorNone;
     do {
         furi_hal_nfc_trx_reset();
+        while(furi_hal_nfc_timer_block_tx_is_running()) {
+            FuriHalNfcEvent event =
+                furi_hal_nfc_poller_wait_event(FURI_HAL_NFC_EVENT_WAIT_FOREVER);
+            if(event & FuriHalNfcEventTimerBlockTxExpired) break;
+        }
         error = furi_hal_nfc_iso14443a_poller_trx_short_frame(short_frame);
         if(error != FuriHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller TX");
@@ -549,6 +564,11 @@ NfcError nfc_iso14443a_poller_trx_sdd_frame(
     FuriHalNfcError error = FuriHalNfcErrorNone;
     do {
         furi_hal_nfc_trx_reset();
+        while(furi_hal_nfc_timer_block_tx_is_running()) {
+            FuriHalNfcEvent event =
+                furi_hal_nfc_poller_wait_event(FURI_HAL_NFC_EVENT_WAIT_FOREVER);
+            if(event & FuriHalNfcEventTimerBlockTxExpired) break;
+        }
         error = furi_hal_nfc_iso14443a_tx_sdd_frame(
             bit_buffer_get_data(tx_buffer), bit_buffer_get_size(tx_buffer));
         if(error != FuriHalNfcErrorNone) {
