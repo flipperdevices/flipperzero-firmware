@@ -341,18 +341,18 @@ void digital_sequence_transmit(DigitalSequence* sequence) {
              * and the two respective periods were combined to one. */
             if(reload_value_carry == 0) {
                 digital_sequence_enqueue_period(sequence, reload_value);
+            }
 
-                if(sequence->state == DigitalSequenceStateIdle) {
-                    const bool is_buffer_filled = sequence->timer_buf.write_pos >=
-                                                  (DIGITAL_SEQUENCE_RING_BUFFER_SIZE -
-                                                   DIGITAL_SEQUENCE_RING_BUFFER_MIN_FREE_SIZE);
-                    const bool can_start = is_buffer_filled || (!signal_next && is_last_value);
+            if(sequence->state == DigitalSequenceStateIdle) {
+                const bool is_buffer_filled = sequence->timer_buf.write_pos >=
+                                              (DIGITAL_SEQUENCE_RING_BUFFER_SIZE -
+                                               DIGITAL_SEQUENCE_RING_BUFFER_MIN_FREE_SIZE);
+                const bool is_end_of_data = (signal_next == NULL) && is_last_value;
 
-                    if(can_start) {
-                        digital_sequence_start_dma(sequence);
-                        digital_sequence_start_timer();
-                        sequence->state = DigitalSequenceStateActive;
-                    }
+                if(is_buffer_filled || is_end_of_data) {
+                    digital_sequence_start_dma(sequence);
+                    digital_sequence_start_timer();
+                    sequence->state = DigitalSequenceStateActive;
                 }
             }
         }
