@@ -2,9 +2,14 @@
 
 #include <ble/ble.h>
 #include <interface/patterns/ble_thread/shci/shci.h>
+
 #include <stm32wbxx.h>
+#include <stm32wbxx_ll_hsem.h>
+
+#include <hsem_map.h>
 
 #include <furi_hal_version.h>
+#include <furi_hal_power.h>
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_bt_serial.h>
 #include <furi_hal_bus.c>
@@ -265,6 +270,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
 }
 
 void furi_hal_bt_reinit() {
+    furi_hal_power_insomnia_enter();
     FURI_LOG_I(TAG, "Disconnect and stop advertising");
     furi_hal_bt_stop_advertising();
 
@@ -294,6 +300,7 @@ void furi_hal_bt_reinit() {
     furi_hal_bt_init();
 
     furi_hal_bt_start_radio_stack();
+    furi_hal_power_insomnia_exit();
 }
 
 bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context) {
