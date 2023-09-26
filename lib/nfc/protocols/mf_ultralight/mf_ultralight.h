@@ -110,14 +110,12 @@ typedef struct {
     uint8_t data;
 } MfUltralightTearingFlag;
 
-typedef union {
+typedef struct {
     uint8_t data[MF_ULTRALIGHT_AUTH_PASSWORD_SIZE];
-    uint32_t pass;
 } MfUltralightAuthPassword;
 
-typedef union {
+typedef struct {
     uint8_t data[MF_ULTRALIGHT_AUTH_PACK_SIZE];
-    uint16_t pack;
 } MfUltralightAuthPack;
 
 typedef enum {
