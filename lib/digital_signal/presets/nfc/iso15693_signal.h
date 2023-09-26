@@ -1,3 +1,8 @@
+/**
+ * @file iso15693_signal.h
+ * @brief A DigitalSequence preset for generating ISO15693-compliant signals.
+ *
+ */
 #pragma once
 
 #include <furi_hal_resources.h>
@@ -17,10 +22,32 @@ typedef enum {
     Iso15693SignalDataRateNum,
 } Iso15693SignalDataRate;
 
+/**
+ * @brief Allocate an Iso15693Signal instance with a set GPIO pin.
+ *
+ * @param[in] pin GPIO pin to use during transmission.
+ * @returns pointer to the allocated instance.
+ */
 Iso15693Signal* iso15693_signal_alloc(const GpioPin* pin);
 
+/**
+ * @brief Delete an Iso15693Signal instance.
+ *
+ * @param[in,out] instance pointer to the instance to be deleted.
+ */
 void iso15693_signal_free(Iso15693Signal* instance);
 
+/**
+ * @brief Transmit arbitrary bytes using an Iso15693Signal instance.
+ * @see Iso15693SignalDataRate
+ *
+ * This function will block until the transmisson has been completed.
+ *
+ * @param[in] instance pointer to the instance used in transmission.
+ * @param[in] data_rate data rate to transmit at.
+ * @param[in] tx_data pointer to the data to be transmitted.
+ * @param[in] tx_data_size size of the data to be transmitted in bytes.
+ */
 void iso15693_signal_tx(
     Iso15693Signal* instance,
     Iso15693SignalDataRate data_rate,
