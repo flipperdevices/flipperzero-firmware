@@ -298,26 +298,20 @@ void digital_sequence_transmit(DigitalSequence* sequence) {
 
     int32_t remainder_ticks = 0;
     uint32_t reload_value_carry = 0;
-    uint32_t next_idx = 1;
+    uint32_t next_signal_index = 1;
 
-    do {
+    for(;;) {
         const DigitalSignal* signal_next =
-            (next_idx < sequence->size) ? sequence->signals[sequence->data[next_idx++]] : NULL;
+            (next_signal_index < sequence->size) ? sequence->signals[sequence->data[next_signal_index++]] : NULL;
 
         for(uint32_t i = 0; i < signal_current->size; i++) {
             const bool is_last_value = (i == signal_current->size - 1);
-            uint32_t reload_value = signal_current->data[i] + reload_value_carry;
+            const uint32_t reload_value = signal_current->data[i] + reload_value_carry;
 
             reload_value_carry = 0;
 
-            /* Prevent the rounding error from accumulating by distributing it across multiple periods. */
-            if(remainder_ticks >= DIGITAL_SIGNAL_T_TIM_DIV2) {
-                remainder_ticks -= DIGITAL_SIGNAL_T_TIM;
-                reload_value += 1;
-            }
-
             if(is_last_value) {
-                if(signal_next) {
+                if(signal_next != NULL) {
                     /* Special case: signal boundary. Depending on whether the adjacent levels are equal or not,
                      * they will be combined to a single one or handled separately. */
                     const bool end_level = signal_current->start_level ^
@@ -357,10 +351,18 @@ void digital_sequence_transmit(DigitalSequence* sequence) {
             }
         }
 
-        remainder_ticks += signal_current->remainder;
-        signal_current = signal_next;
+        /* Exit the loop here when no further signals are available */
+        if(signal_next == NULL) break;
 
-    } while(signal_current);
+        /* Prevent the rounding error from accumulating by distributing it across multiple periods. */
+        remainder_ticks += signal_current->remainder;
+        if(remainder_ticks >= DIGITAL_SIGNAL_T_TIM_DIV2) {
+            remainder_ticks -= DIGITAL_SIGNAL_T_TIM;
+            reload_value_carry += 1;
+        }
+
+        signal_current = signal_next;
+    };
 
     digital_sequence_finish(sequence);
     digital_sequence_timer_buffer_reset(sequence);
