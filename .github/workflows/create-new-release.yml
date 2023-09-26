@@ -48,17 +48,19 @@ jobs:
       DEFAULT_TARGET: f7
     
     steps:
-      - name: 'Decontaminate previous build leftovers'
-        run: |
-          if [ -d .git ]; then
-            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
-          fi
-
       - uses: actions/checkout@v3
         with:
           ref: "${{needs.set-new-version.outputs.commit_hash}}"
           fetch-depth: 0
           submodules: 'recursive'
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install uFBT
+        run: python3 -m pip install --upgrade ufbt
 
       - name: Build
         run: ./build.ps1
