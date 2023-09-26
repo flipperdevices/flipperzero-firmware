@@ -42,6 +42,7 @@ typedef struct {
 } MfUltralightMirrorMode;
 
 typedef uint16_t MfUltralightStaticLockData;
+typedef uint32_t MfUltralightDynamicLockData;
 
 struct MfUltralightListener {
     Iso14443_3aListener* iso14443_3a_listener;
@@ -51,6 +52,7 @@ struct MfUltralightListener {
     MfUltralightFeatureSupport features;
     MfUltralightConfigPages* config;
     MfUltralightStaticLockData* static_lock;
+    MfUltralightDynamicLockData* dynamic_lock;
 
     NfcGenericEvent generic_event;
     MfUltralightListenerEvent mfu_event;
@@ -99,6 +101,17 @@ void mf_ultralight_static_lock_bytes_write(
 bool mf_ultralight_static_lock_check_page(
     const MfUltralightStaticLockData* const lock_bits,
     uint16_t page);
+
+void mf_ultralight_capability_container_write(
+    MfUltralightPage* const current_page,
+    const uint8_t* const new_data);
+
+void mf_ultralight_dynamic_lock_bytes_prepare(MfUltralightListener* instance);
+bool mf_ultralight_is_page_dynamic_lock(const MfUltralightListener* instance, uint16_t start_page);
+void mf_ultralight_dynamic_lock_bytes_write(
+    MfUltralightDynamicLockData* const lock_bits,
+    uint32_t new_bits);
+bool mf_ultralight_dynamic_lock_check_page(const MfUltralightListener* instance, uint16_t page);
 
 #ifdef __cplusplus
 }

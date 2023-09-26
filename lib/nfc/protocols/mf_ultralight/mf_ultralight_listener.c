@@ -85,6 +85,25 @@ static void mf_ultralight_listener_perform_read(
     mf_ultralight_single_counter_try_increase(instance);
 }
 
+static void mf_ultralight_listener_perform_write(
+    MfUltralightListener* instance,
+    const uint8_t* const rx_data,
+    uint16_t start_page,
+    bool do_i2c_check) {
+    if(start_page == 2 && instance->sector == 0)
+        mf_ultralight_static_lock_bytes_write(instance->static_lock, *((uint16_t*)&rx_data[2]));
+    else if(start_page == 3 && instance->sector == 0)
+        mf_ultralight_capability_container_write(&instance->data->page[start_page], rx_data);
+    else if(mf_ultralight_is_page_dynamic_lock(instance, start_page))
+        mf_ultralight_dynamic_lock_bytes_write(instance->dynamic_lock, *((uint32_t*)rx_data));
+    else {
+        uint16_t page = start_page;
+        if(do_i2c_check) page = mf_ultralight_i2c_provide_page_by_requested(start_page, instance);
+
+        memcpy(instance->data->page[page].data, rx_data, sizeof(MfUltralightPage));
+    }
+}
+
 static MfUltralightCommand
     mf_ultralight_listener_read_page_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     uint16_t start_page = bit_buffer_get_byte(buffer, 1);
@@ -178,22 +197,24 @@ static MfUltralightCommand
     FURI_LOG_D(TAG, "CMD_WRITE");
 
     do {
+        bool do_i2c_check = mf_ultralight_is_i2c_tag(instance->data->type);
+
+        if(do_i2c_check) {
+            if(!mf_ultralight_i2c_validate_pages(start_page, start_page, instance)) break;
+        }
+
         if(pages_total < start_page ||
            !mf_ultralight_listener_check_access(
                instance, start_page, MfUltralightListenerAccessTypeWrite))
             break;
 
         if(mf_ultralight_static_lock_check_page(instance->static_lock, start_page)) break;
+        if(mf_ultralight_dynamic_lock_check_page(instance, start_page)) break;
 
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
+        mf_ultralight_listener_perform_write(instance, &rx_data[2], start_page, do_i2c_check);
 
-        if(start_page == 2)
-            mf_ultralight_static_lock_bytes_write(
-                instance->static_lock, *((uint16_t*)&rx_data[4]));
-        else
-            memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
         command = MfUltralightCommandProcessedACK;
-
     } while(false);
 
     return command;
@@ -439,11 +460,8 @@ static MfUltralightCommand
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
         uint8_t start_page = instance->composite_cmd.data;
 
-        if(start_page == 2)
-            mf_ultralight_static_lock_bytes_write(
-                instance->static_lock, *((uint16_t*)&rx_data[2]));
-        else
-            memcpy(instance->data->page[start_page].data, &rx_data[0], sizeof(MfUltralightPage));
+        mf_ultralight_listener_perform_write(instance, rx_data, start_page, false);
+
         command = MfUltralightCommandProcessedACK;
     } while(false);
 
@@ -469,7 +487,8 @@ static MfUltralightCommand
             break;
         }
 
-        if(mf_ultralight_static_lock_check_page(instance->static_lock, start_page)) {
+        if(mf_ultralight_static_lock_check_page(instance->static_lock, start_page) ||
+           mf_ultralight_dynamic_lock_check_page(instance, start_page)) {
             command = MfUltralightCommandNotProcessedNAK;
             break;
         }
@@ -593,6 +612,8 @@ static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* insta
     instance->features = mf_ultralight_get_feature_support_set(data->type);
     mf_ultralight_get_config_page(data, &instance->config);
     mf_ultraligt_mirror_prepare_emulation(instance);
+    mf_ultralight_static_lock_bytes_prepare(instance);
+    mf_ultralight_dynamic_lock_bytes_prepare(instance);
 }
 
 static NfcCommand mf_ultralight_command_postprocess(
