@@ -15,6 +15,7 @@ If you have any problems with the connection between your computer and your devi
 
 You heard about the [Flipper Zero](https://flipperzero.one/) and bought it for fun.
 You played with it and now you want to develop your first application to take the full advantage of the device.
+You are entering in a beautiful world with awesome capabilities.
 
 The Flipper Zero is a device which target cybersecurity enjoyers.
 It is a fully open-source project which is highly inspired by the [pwnagotchi](https://pwnagotchi.ai/).
@@ -22,29 +23,36 @@ You can, with some knowledge, build your own Flipper Zero from scratch.
 All the [hardware schematics](https://docs.flipper.net/development/hardware/schematic), [case](https://docs.flipper.net/development/blueprints/flipper-zero) and [firmware](https://github.com/flipperdevices/flipperzero-firmware) are available.
 Moreover, the community has very important part in the Flipper Zero, for example there are several [awesome lists on Github](https://github.com/djsime1/awesome-flipperzero).
 
-
 ## Features
 
-The Flipper Zero is packaged with several 
-- Radio signal
-- RFID
-- NFC
-- Infrared
-- GPIO
-- Ibutton
-- Bad USB
-- U2F
+The Flipper Zero is packaged with several [features](https://docs.flipper.net/).
+- [Sub-GHz](https://docs.flipper.net/sub-ghz): Interact with devices which communicate with radio signals like key of cars, gates, smart lights...
+- [RFID](https://docs.flipper.net/rfid): Read, save or emulate RFID tag like access cards, animal microchips...
+- [NFC](https://docs.flipper.net/nfc): Read, save or emulate NFC technologies like access cards, phones data transfer...
+- [Infrared](https://docs.flipper.net/infrared): Interact with technologies that use infrared to control it like TV screens, LED stripes, multimedia systems...
+- [GPIO](https://docs.flipper.net/gpio-and-modules): Can be used to develop electronic circuits or use [debug modules](https://docs.flipper.net/development/hardware/wifi-developer-board) and [external modules](https://github.com/eried/flipperzero-mayhem).
+- [Ibutton](https://docs.flipper.net/ibutton): Read, save or emulate Ibutton
+  access control, meteo measurement...
+- [Bad USB](https://docs.flipper.net/bad-usb): A [rubber ducky](https://shop.hak5.org/products/usb-rubber-ducky) like feature, perform keyboard typing when the device plugged by USB.
+- [U2F](https://docs.flipper.net/u2f): Acting like a USB universal 2nd-factor.
 
 ## Firmware and Softwares
 ### Firmware
 
+The [official firmware of the Flipper Zero](https://github.com/flipperdevices/flipperzero-firmware) is fully open-source and starts to be well documented.
+The [documentation](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/documentation) consists in several Markdown files on all the interesting subjects and a doxygen.
+
+There are [other firmwares](https://github.com/djsime1/awesome-flipperzero#firmwares--tweaks) powered by the community which are available on Github. 
+These firmwares aim to add animations, games and more efficient hacking applications.
+
 ### Software
 
 A desktop and a mobile application will help you to interact with your Flipper Zero.
-The QFlipper is the desktop application which let you upgrade the firmware with a USB-C connection.
+
+The [QFlipper](https://flipperzero.one/update) is the desktop application which let you upgrade the firmware with a USB-C connection.
 It is a pretty simple application but it also allow you to debug your applications.
 
-The mobile application is more complete.
+The [mobile application](https://docs.flipper.net/mobile-app) is more complete.
 It has a builtin hub to install applications on your device.
 You can also save your files that you registered on your Flipper Zero. 
 
