@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0921-1647-0.92.1-7b26847.tgz&channel=RM0921-1647-0.92.1-7b26847&version=0.92.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0921-1647-0.92.1-7b26847-NoAnim.tgz&channel=RM0921-1647-0.92.1-7b26847-NoAnim&version=0.92.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0926-1820-0.92.3-55b093a.tgz&channel=RM0926-1820-0.92.3-55b093a&version=0.92.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0926-1820-0.92.3-55b093a-NoAnim.tgz&channel=RM0926-1820-0.92.3-55b093a-NoAnim&version=0.92.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -29,28 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0926-1758-0.92.3-251cb5c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-26 17:58 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-26 17:58 EST`
-- Adjusted/Restored Bruteforcer settings path
-- UL: Many reverts of some older changes with viewport and BLE
-- Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
-- Updated: [NFC Seader v1.2 (By bettse)](https://github.com/bettse/seader)
-- Updated: [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
-- [Customizable Game Mode Menu (By ESurge & RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756) - Sorry this menu will get overwritten on every install. Save your custom cfw_gamesmenu.txt to restore your changes. RM Patreon supporters can request it not be overwritten on their custom builds.
-- Updated: [Pokemon Trading v1.2.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
-- Updated: [FlipBIP Crypto Wallet v1.13 (By xtruan)](https://github.com/xtruan/FlipBIP)
-- Updated: [PicoPass (iClass) v1.5 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass more bit formats #47 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/47) & [Dictionary format guidelines #45 (By Antiklesys)](https://github.com/flipperdevices/flipperzero-good-faps/pull/45) & [Improve loclass logic for readers doing keyrolling. #50 (By nvx)](https://github.com/flipperdevices/flipperzero-good-faps/pull/50)
-- Protobuf fix (Thanks Emilia and ESurge for pointing this out)
-- [Picopass: populate key change input with first key of user dictionary #54 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/50)
-- OFW: [fbt: reworked tool path handling #3105 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3105)
-- OFW: [FuriHal, BleGlue: new transport locking, fix random lockups #3107 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3107)
-- Updated: [Nu Pogodi! (Ну, погоди!) v1.1 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
-- Updated: [Authenticator/TOTP v5.5.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- OFW: [Add the coding in the shell animation #3106 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3106)
-- [Patreon Build Update: ALL, Dolphin, RM Minimal and Stock builds updated with the new Coding In The Shell Animation](https://www.patreon.com/RogueMaster/membership)
-- Updated: [Mfkey32 With Nested v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- OFW: [Ble: fix null-ptr dereference in bt_change_profile #3110 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3110)
-- FW Version Incremented with OFW
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-26 18:20 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-26 18:20 EST`
 
 <a name="release">
 
@@ -478,4 +458,4 @@ $ ./fbt dolphin_ext
 - [Air Tag for FZ ($50 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/696)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0921-1647-0.92.1-7b26847.tgz&channel=RM0921-1647-0.92.1-7b26847&version=0.92.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0921-1647-0.92.1-7b26847-NoAnim.tgz&channel=RM0921-1647-0.92.1-7b26847-NoAnim&version=0.92.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0926-1820-0.92.3-55b093a.tgz&channel=RM0926-1820-0.92.3-55b093a&version=0.92.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0926-1820-0.92.3-55b093a-NoAnim.tgz&channel=RM0926-1820-0.92.3-55b093a-NoAnim&version=0.92.3)
