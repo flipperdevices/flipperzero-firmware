@@ -357,7 +357,7 @@ static NfcCommand mf_ultralight_poller_handler_read_tearing_flags(MfUltralightPo
                 instance->tearing_flag_read++;
             } else if(instance->error != MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Reading tearing flag %d failed", instance->tearing_flag_read);
-                instance->state = MfUltralightPollerStateReadFailed;
+                instance->state = MfUltralightPollerStateTryDefaultPass;
             } else {
                 instance->tearing_flag_read++;
             }
@@ -379,10 +379,9 @@ static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance
         command = instance->callback(instance->general_event, instance->context);
         if(!instance->mfu_event.data->auth_context.skip_auth) {
             instance->auth_context.password = instance->mfu_event.data->auth_context.password;
-            FURI_LOG_D(
-                TAG,
-                "Trying to authenticate with password %08lX",
-                instance->auth_context.password.pass);
+            uint32_t pass = nfc_util_bytes2num(
+                instance->auth_context.password.data, sizeof(MfUltralightAuthPassword));
+            FURI_LOG_D(TAG, "Trying to authenticate with password %08lX", pass);
             instance->error = mf_ultralight_poller_async_auth(instance, &instance->auth_context);
             if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Auth success");
@@ -460,11 +459,17 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
             config->pack = instance->auth_context.pack;
         } else if(config->access.authlim == 0) {
             FURI_LOG_D(TAG, "No limits in authentication. Trying default password");
-            instance->auth_context.password.pass = MF_ULTRALIGHT_DEFAULT_PASSWORD;
+            nfc_util_num2bytes(
+                MF_ULTRALIGHT_DEFAULT_PASSWORD,
+                sizeof(MfUltralightAuthPassword),
+                instance->auth_context.password.data);
             instance->error = mf_ultralight_poller_async_auth(instance, &instance->auth_context);
             if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Default password detected");
-                config->password.pass = MF_ULTRALIGHT_DEFAULT_PASSWORD;
+                nfc_util_num2bytes(
+                    MF_ULTRALIGHT_DEFAULT_PASSWORD,
+                    sizeof(MfUltralightAuthPassword),
+                    config->password.data);
                 config->pack = instance->auth_context.pack;
             }
         }
