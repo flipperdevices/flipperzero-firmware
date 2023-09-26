@@ -71,7 +71,9 @@ static TotpIteratorUpdateTokenResult
            !totp_cli_try_read_change_secret_flag(temp_str, &parsed, &update_token_secret) &&
            !totp_cli_try_read_automation_features(token_info, temp_str, context_t->args, &parsed) &&
            !totp_cli_try_read_plain_token_secret_encoding(
-               temp_str, context_t->args, &parsed, &token_secret_encoding)) {
+               temp_str, context_t->args, &parsed, &token_secret_encoding) &&
+           !totp_cli_try_read_token_type(token_info, temp_str, context_t->args, &parsed) &&
+           !totp_cli_try_read_token_counter(token_info, temp_str, context_t->args, &parsed)) {
             totp_cli_printf_unknown_argument(temp_str);
         }
 

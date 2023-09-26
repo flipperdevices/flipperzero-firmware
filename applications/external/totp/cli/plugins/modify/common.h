@@ -6,20 +6,15 @@
 extern "C" {
 #endif
 
-#define TOTP_CLI_COMMAND_ARG_NAME "name"
 #define TOTP_CLI_COMMAND_ARG_NAME_PREFIX "-n"
-#define TOTP_CLI_COMMAND_ARG_ALGO "algo"
 #define TOTP_CLI_COMMAND_ARG_ALGO_PREFIX "-a"
-#define TOTP_CLI_COMMAND_ARG_DIGITS "digits"
 #define TOTP_CLI_COMMAND_ARG_DIGITS_PREFIX "-d"
 #define TOTP_CLI_COMMAND_ARG_UNSECURE_PREFIX "-u"
-#define TOTP_CLI_COMMAND_ARG_DURATION "duration"
 #define TOTP_CLI_COMMAND_ARG_DURATION_PREFIX "-l"
 #define TOTP_CLI_COMMAND_ARG_AUTOMATION_FEATURE_PREFIX "-b"
-#define TOTP_CLI_COMMAND_ARG_AUTOMATION_FEATURE "feature"
-#define TOTP_CLI_COMMAND_ARG_INDEX "index"
 #define TOTP_CLI_COMMAND_ARG_SECRET_ENCODING_PREFIX "-e"
-#define TOTP_CLI_COMMAND_ARG_SECRET_ENCODING "encoding"
+#define TOTP_CLI_COMMAND_ARG_TYPE_PREFIX "-t"
+#define TOTP_CLI_COMMAND_ARG_COUNTER_PREFIX "-i"
 
 /**
  * @brief Tries to read token hashing algo
@@ -95,6 +90,34 @@ bool totp_cli_try_read_plain_token_secret_encoding(
     FuriString* args,
     bool* parsed,
     PlainTokenSecretEncoding* secret_encoding);
+
+/**
+ * @brief Tries to read token type
+ * @param token_info token info to set parsed token type to if successfully read and parsed
+ * @param arg argument to parse
+ * @param args rest of arguments
+ * @param parsed will be set to \c true if token type sucecssfully read and parsed; \c false otherwise
+ * @return \c true if \c arg represents token type argument; \c false otherwise
+ */
+bool totp_cli_try_read_token_type(
+    TokenInfo* token_info,
+    FuriString* arg,
+    FuriString* args,
+    bool* parsed);
+
+/**
+ * @brief Tries to read token counter
+ * @param token_info token info to set parsed token counter to if successfully read and parsed
+ * @param arg argument to parse
+ * @param args rest of arguments
+ * @param parsed will be set to \c true if token counter sucecssfully read and parsed; \c false otherwise
+ * @return \c true if \c arg represents token counter argument; \c false otherwise
+ */
+bool totp_cli_try_read_token_counter(
+    TokenInfo* token_info,
+    FuriString* arg,
+    FuriString* args,
+    bool* parsed);
 
 #ifdef __cplusplus
 }
