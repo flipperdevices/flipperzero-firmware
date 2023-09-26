@@ -50,6 +50,7 @@ typedef union {
 typedef enum {
     MfUltralightPollerStateIdle,
     MfUltralightPollerStateReadVersion,
+    MfUltralightPollerStateDetectMfulC,
     MfUltralightPollerStateDetectNtag203,
     MfUltralightPollerStateGetFeatureSet,
     MfUltralightPollerStateReadSignature,

@@ -33,6 +33,14 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
             .config_page = 0,
             .feature_set = MfUltralightFeatureSupportCompatibleWrite,
         },
+    [MfUltralightTypeMfulC] =
+        {
+            .device_name = "Mifare Ultralight C",
+            .total_pages = 48,
+            .config_page = 0,
+            .feature_set = MfUltralightFeatureSupportCompatibleWrite |
+                           MfUltralightFeatureSupportAuthenticate,
+        },
     [MfUltralightTypeNTAG203] =
         {
             .device_name = "NTAG203",
