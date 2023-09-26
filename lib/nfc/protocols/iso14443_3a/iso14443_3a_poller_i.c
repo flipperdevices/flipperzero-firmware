@@ -18,16 +18,6 @@ static Iso14443_3aError iso14443_3a_poller_process_error(NfcError error) {
     return ret;
 }
 
-static Iso14443_3aError iso14443_3a_poller_prepare_trx(Iso14443_3aPoller* instance) {
-    Iso14443_3aError ret = Iso14443_3aErrorNone;
-
-    if(instance->state == Iso14443_3aPollerStateIdle) {
-        ret = iso14443_3a_poller_async_activate(instance, NULL);
-    }
-
-    return ret;
-}
-
 static Iso14443_3aError iso14443_3a_poller_standard_frame_exchange(
     Iso14443_3aPoller* instance,
     const BitBuffer* tx_buffer,
@@ -261,18 +251,11 @@ Iso14443_3aError iso14443_3a_poller_txrx_custom_parity(
     furi_assert(rx_buffer);
 
     Iso14443_3aError ret = Iso14443_3aErrorNone;
-    NfcError error = NfcErrorNone;
-
-    do {
-        ret = iso14443_3a_poller_prepare_trx(instance);
-        if(ret != Iso14443_3aErrorNone) break;
-
-        error = nfc_iso14443a_poller_trx_custom_parity(instance->nfc, tx_buffer, rx_buffer, fwt);
-        if(error != NfcErrorNone) {
-            ret = iso14443_3a_poller_process_error(error);
-            break;
-        }
-    } while(false);
+    NfcError error =
+        nfc_iso14443a_poller_trx_custom_parity(instance->nfc, tx_buffer, rx_buffer, fwt);
+    if(error != NfcErrorNone) {
+        ret = iso14443_3a_poller_process_error(error);
+    }
 
     return ret;
 }
@@ -287,18 +270,10 @@ Iso14443_3aError iso14443_3a_poller_txrx(
     furi_assert(rx_buffer);
 
     Iso14443_3aError ret = Iso14443_3aErrorNone;
-    NfcError error = NfcErrorNone;
-
-    do {
-        ret = iso14443_3a_poller_prepare_trx(instance);
-        if(ret != Iso14443_3aErrorNone) break;
-
-        error = nfc_poller_trx(instance->nfc, tx_buffer, rx_buffer, fwt);
-        if(error != NfcErrorNone) {
-            ret = iso14443_3a_poller_process_error(error);
-            break;
-        }
-    } while(false);
+    NfcError error = nfc_poller_trx(instance->nfc, tx_buffer, rx_buffer, fwt);
+    if(error != NfcErrorNone) {
+        ret = iso14443_3a_poller_process_error(error);
+    }
 
     return ret;
 }
@@ -312,15 +287,8 @@ Iso14443_3aError iso14443_3a_poller_send_standard_frame(
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
 
-    Iso14443_3aError ret = Iso14443_3aErrorNone;
-
-    do {
-        ret = iso14443_3a_poller_prepare_trx(instance);
-        if(ret != Iso14443_3aErrorNone) break;
-
-        ret = iso14443_3a_poller_standard_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
-        if(ret != Iso14443_3aErrorNone) break;
-    } while(false);
+    Iso14443_3aError ret =
+        iso14443_3a_poller_standard_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
 
     return ret;
 }

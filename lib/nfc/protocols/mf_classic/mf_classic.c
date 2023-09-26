@@ -363,39 +363,6 @@ uint16_t mf_classic_get_total_block_num(MfClassicType type) {
     return mf_classic_features[type].blocks_total;
 }
 
-bool mf_classic_detect_protocol(Iso14443_3aData* data, MfClassicType* type) {
-    furi_assert(data);
-
-    uint8_t atqa0 = data->atqa[0];
-    uint8_t atqa1 = data->atqa[1];
-    uint8_t sak = data->sak;
-    bool mf_classic_detected = false;
-    MfClassicType tmp_type = MfClassicTypeMini;
-
-    if((atqa0 == 0x44) || (atqa0 == 0x04)) {
-        if((sak == 0x08) || (sak == 0x88)) {
-            tmp_type = MfClassicType1k;
-            mf_classic_detected = true;
-        } else if(sak == 0x09) {
-            tmp_type = MfClassicTypeMini;
-            mf_classic_detected = true;
-        }
-    } else if((atqa0 == 0x01) && (atqa1 == 0x0f) && (sak == 0x01)) {
-        // Skylender support
-        tmp_type = MfClassicType1k;
-        mf_classic_detected = true;
-    } else if(((atqa0 == 0x42) || (atqa0 == 0x02)) && (sak == 0x18)) {
-        tmp_type = MfClassicType4k;
-        mf_classic_detected = true;
-    }
-
-    if(type) {
-        *type = tmp_type;
-    }
-
-    return mf_classic_detected;
-}
-
 uint8_t mf_classic_get_sector_trailer_num_by_sector(uint8_t sector) {
     uint8_t block_num = 0;
 
@@ -760,11 +727,8 @@ bool mf_classic_is_allowed_access(
     return access_allowed;
 }
 
-bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num) {
-    furi_assert(data);
-
-    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
-    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
+bool mf_classic_is_value_block(MfClassicSectorTrailer* sec_tr, uint8_t block_num) {
+    furi_assert(sec_tr);
 
     // Check if key A can write, if it can, it's transport configuration, not data block
     return !mf_classic_is_allowed_access_data_block(

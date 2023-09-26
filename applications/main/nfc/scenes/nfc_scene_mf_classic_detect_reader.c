@@ -20,11 +20,11 @@ void nfc_scene_mf_classic_detect_reader_view_callback(void* context) {
 
 NfcCommand nfc_scene_mf_classic_detect_listener_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcApp* instance = context;
-    MfClassicListenerEvent* mfc_event = event.data;
+    MfClassicListenerEvent* mfc_event = event.event_data;
 
     if(mfc_event->type == MfClassicListenerEventTypeAuthContextPartCollected) {
         MfClassicAuthContext* auth_ctx = &mfc_event->data->auth_context;

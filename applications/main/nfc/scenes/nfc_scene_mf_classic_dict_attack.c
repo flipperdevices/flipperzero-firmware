@@ -12,12 +12,12 @@ typedef enum {
 
 NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.instance);
     furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcCommand command = NfcCommandContinue;
-    MfClassicPollerEvent* mfc_event = event.data;
+    MfClassicPollerEvent* mfc_event = event.event_data;
 
     NfcApp* instance = context;
     if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {

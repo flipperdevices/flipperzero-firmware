@@ -9,11 +9,11 @@ enum {
 
 NfcCommand nfc_mf_classic_update_initial_worker_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcCommand command = NfcCommandContinue;
-    const MfClassicPollerEvent* mfc_event = event.data;
+    const MfClassicPollerEvent* mfc_event = event.event_data;
     NfcApp* instance = context;
 
     if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {
