@@ -16,7 +16,7 @@
 #include <cc1101.h>
 #include <stdio.h>
 
-#define TAG "SubGhz_Device_CC1101_Ext"
+#define TAG "SubGhzDeviceCc1101Ext"
 
 #define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO &gpio_ext_pb2
 
@@ -333,7 +333,6 @@ bool subghz_device_cc1101_ext_rx_pipe_not_empty() {
         (CC1101_STATUS_RXBYTES) | CC1101_BURST,
         (uint8_t*)status);
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
-    // TODO FL-3520: you can add a buffer overflow flag if needed
     if(status->NUM_RXBYTES > 0) {
         return true;
     } else {
