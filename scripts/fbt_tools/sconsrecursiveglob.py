@@ -10,6 +10,7 @@ def GlobRecursive(env, pattern, node=".", exclude=[]):
     results = []
     if isinstance(node, str):
         node = env.Dir(node)
+    # Only initiate actual recursion if special symbols can be found in 'pattern'
     if has_glob_magic(pattern):
         for f in node.glob("*", source=True, exclude=exclude):
             if isinstance(f, SCons.Node.FS.Dir):
@@ -19,6 +20,8 @@ def GlobRecursive(env, pattern, node=".", exclude=[]):
             source=True,
             exclude=exclude,
         )
+    # Otherwise, just check if that's an existing file path
+    # NB: still creates "virtual" nodes as part of existence check
     elif (file_node := node.File(pattern)).exists() or file_node.rexists():
         results.append(file_node)
     # print(f"Glob result for {pattern} from {node}: {results}")

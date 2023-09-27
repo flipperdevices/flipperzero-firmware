@@ -158,8 +158,9 @@ class AppBuilder:
             )
         )
         if not app_sources:
-            raise UserError(f"Source files found for {self.app.appid}")
+            raise UserError(f"No source files found for {self.app.appid}")
 
+        ## Uncomment for debug
         # print(f"App sources for {self.app.appid}: {list(f.path for f in app_sources)}")
 
         app_artifacts = FlipperExternalAppInfo(self.app)
