@@ -128,13 +128,17 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                 }
             } else if(magic_dev->type == MagicTypeGen4) {
                 if(furi_hal_nfc_detect(&nfc_data, 200)) {
-                    uint8_t gen4_config[28];
+                    uint8_t gen4_config[MAGIC_GEN4_CONFIG_LEN];
+                    memcpy(gen4_config, MAGIC_DEFAULT_CONFIG, MAGIC_GEN4_CONFIG_LEN);
                     uint32_t password = magic_dev->password;
-
                     uint32_t cuid;
+                    size_t block_count = 64;
+                    MfClassicData* mfc_data;
                     if(dev_protocol == NfcDeviceProtocolMifareClassic) {
                         gen4_config[0] = 0x00;
                         gen4_config[27] = 0x00;
+                        mfc_data = &dev_data->mf_classic_data;
+                        if(mfc_data->type == MfClassicType4k) block_count = 256;
                     } else if(dev_protocol == NfcDeviceProtocolMifareUl) {
                         MfUltralightData* mf_ul_data = &dev_data->mf_ul_data;
                         gen4_config[0] = 0x01;
@@ -155,6 +159,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                         case MfUltralightTypeNTAGI2CPlus1K:
                         case MfUltralightTypeNTAGI2CPlus2K:
                             gen4_config[27] = MagicGen4UltralightModeNTAG;
+                            block_count = 64 * 2;
                             break;
                         }
                     }
@@ -187,6 +192,9 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     gen4_config[25] = dev_data->nfc_data.atqa[1];
                     gen4_config[26] = dev_data->nfc_data.sak;
 
+                    gen4_config[28] = block_count;
+                    gen4_config[29] = 0x01;
+
                     furi_hal_nfc_sleep();
                     furi_hal_nfc_activate_nfca(200, &cuid);
                     if(!magic_gen4_set_cfg(password, gen4_config, sizeof(gen4_config), false)) {
@@ -196,9 +204,6 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                         break;
                     }
                     if(dev_protocol == NfcDeviceProtocolMifareClassic) {
-                        MfClassicData* mfc_data = &dev_data->mf_classic_data;
-                        size_t block_count = 64;
-                        if(mfc_data->type == MfClassicType4k) block_count = 256;
                         for(size_t i = 0; i < block_count; i++) {
                             FURI_LOG_D(TAG, "Writing block %d", i);
                             if(!magic_gen4_write_blk(password, i, mfc_data->block[i].value)) {
