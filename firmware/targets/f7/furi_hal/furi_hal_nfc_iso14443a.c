@@ -326,6 +326,10 @@ FuriHalNfcError furi_hal_nfc_iso14443_3a_listener_idle(FuriHalSpiBusHandle* hand
 const FuriHalNfcTechBase furi_hal_nfc_iso14443a = {
     .poller =
         {
+            .compensation =
+                {
+                    .fwt = 0,
+                },
             .init = furi_hal_nfc_iso14443a_poller_init,
             .deinit = furi_hal_nfc_iso14443a_poller_deinit,
             .wait_event = furi_hal_nfc_wait_event_common,
@@ -335,6 +339,10 @@ const FuriHalNfcTechBase furi_hal_nfc_iso14443a = {
 
     .listener =
         {
+            .compensation =
+                {
+                    .fdt = 0,
+                },
             .init = furi_hal_nfc_iso14443a_listener_init,
             .deinit = furi_hal_nfc_iso14443a_listener_deinit,
             .wait_event = furi_hal_nfc_iso14443_3a_listener_wait_event,

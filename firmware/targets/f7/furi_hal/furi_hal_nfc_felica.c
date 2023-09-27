@@ -52,6 +52,10 @@ static FuriHalNfcError furi_hal_nfc_felica_poller_deinit(FuriHalSpiBusHandle* ha
 const FuriHalNfcTechBase furi_hal_nfc_felica = {
     .poller =
         {
+            .compensation =
+                {
+                    .fwt = 0,
+                },
             .init = furi_hal_nfc_felica_poller_init,
             .deinit = furi_hal_nfc_felica_poller_deinit,
             .wait_event = furi_hal_nfc_wait_event_common,
@@ -59,5 +63,5 @@ const FuriHalNfcTechBase furi_hal_nfc_felica = {
             .rx = furi_hal_nfc_common_fifo_rx,
         },
 
-    .listener = {0},
+    .listener = {},
 };

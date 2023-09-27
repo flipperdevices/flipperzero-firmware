@@ -7,7 +7,7 @@
 
 #define TAG "FuriHalNfc"
 
-static const FuriHalNfcTechBase* furi_hal_nfc_tech[FuriHalNfcTechNum] = {
+const FuriHalNfcTechBase* furi_hal_nfc_tech[FuriHalNfcTechNum] = {
     [FuriHalNfcTechIso14443a] = &furi_hal_nfc_iso14443a,
     [FuriHalNfcTechIso14443b] = &furi_hal_nfc_iso14443b,
     [FuriHalNfcTechIso15693] = &furi_hal_nfc_iso15693,

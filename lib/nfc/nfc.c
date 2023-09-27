@@ -129,6 +129,8 @@ static int32_t nfc_worker_listener(void* context) {
             instance->callback(nfc_event, instance->context);
         }
         if(event & FuriHalNfcEventRxEnd) {
+            furi_hal_nfc_timer_block_tx_start(instance->fdt_listen_fc);
+
             nfc_event.type = NfcEventTypeRxEnd;
             furi_hal_nfc_listener_rx(
                 instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
@@ -329,6 +331,10 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     furi_assert(tx_buffer);
 
     NfcError ret = NfcErrorNone;
+
+    while(furi_hal_nfc_timer_block_tx_is_running()) {
+    }
+
     FuriHalNfcError error =
         furi_hal_nfc_listener_tx(bit_buffer_get_data(tx_buffer), bit_buffer_get_size(tx_buffer));
     if(error != FuriHalNfcErrorNone) {

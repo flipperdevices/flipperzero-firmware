@@ -1,9 +1,9 @@
 #include "furi_hal_nfc_i.h"
 
-#include <furi_hal_interrupt.h>
 #include <stm32wbxx_ll_tim.h>
+
+#include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
-#include <furi_hal_gpio.h>
 #include <furi_hal_bus.h>
 
 #define FURI_HAL_NFC_FREQ_KHZ (13560U)
@@ -100,8 +100,32 @@ static void furi_hal_nfc_timer_deinit(FuriHalNfcTimer timer) {
     }
 }
 
+static uint32_t furi_hal_nfc_timer_get_compensation(FuriHalNfcTimer timer) {
+    const FuriHalNfcTechBase* current_tech = furi_hal_nfc_tech[furi_hal_nfc.tech];
+
+    if(furi_hal_nfc.mode == FuriHalNfcModePoller) {
+        const FuriHalNfcPollerCompensation* comp = &current_tech->poller.compensation;
+        if(timer == FuriHalNfcTimerFwt)
+            return comp->fwt;
+        else if(timer == FuriHalNfcTimerBlockTx)
+            return comp->fdt;
+
+    } else if(furi_hal_nfc.mode == FuriHalNfcModeListener) {
+        const FuriHalNfcListenerCompensation* comp = &current_tech->listener.compensation;
+        if(timer == FuriHalNfcTimerBlockTx) return comp->fdt;
+    }
+
+    return 0;
+}
+
 static void furi_hal_nfc_timer_start(FuriHalNfcTimer timer, uint32_t time_fc) {
-    uint32_t arr_reg = furi_hal_nfc_timers[timer].freq_khz * time_fc / FURI_HAL_NFC_FREQ_KHZ;
+    const uint32_t comp_fc = furi_hal_nfc_timer_get_compensation(timer);
+
+    // Not starting the timer if the compensation value is greater than the requested delay
+    if(comp_fc >= time_fc) return;
+
+    const uint32_t arr_reg =
+        furi_hal_nfc_timers[timer].freq_khz * (time_fc - comp_fc) / FURI_HAL_NFC_FREQ_KHZ;
     furi_check(arr_reg < UINT16_MAX);
 
     LL_TIM_SetAutoReload(furi_hal_nfc_timers[timer].timer, arr_reg);

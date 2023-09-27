@@ -3,6 +3,7 @@
 #include <furi.h>
 #include <furi_hal_nfc.h>
 #include <furi_hal_spi.h>
+
 #include <drivers/st25r3916.h>
 #include <drivers/st25r3916_reg.h>
 
@@ -35,6 +36,60 @@ typedef struct {
     FuriHalNfcTech tech;
 } FuriHalNfc;
 
+// Technology specific API
+typedef FuriHalNfcError (*FuriHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
+typedef FuriHalNfcError (
+    *FuriHalNfcTx)(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
+typedef FuriHalNfcError (*FuriHalNfcRx)(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* rx_data,
+    size_t rx_data_size,
+    size_t* rx_bits);
+typedef FuriHalNfcEvent (*FuriHalNfcWaitEvent)(uint32_t timeout_ms);
+typedef FuriHalNfcError (*FuriHalNfcSleep)(FuriHalSpiBusHandle* handle);
+typedef FuriHalNfcError (*FuriHalNfcIdle)(FuriHalSpiBusHandle* handle);
+
+typedef struct {
+    uint32_t fdt;
+    uint32_t fwt;
+} FuriHalNfcPollerCompensation;
+
+typedef struct {
+    FuriHalNfcPollerCompensation compensation;
+    FuriHalNfcChipConfig init;
+    FuriHalNfcChipConfig deinit;
+    FuriHalNfcWaitEvent wait_event;
+    FuriHalNfcTx tx;
+    FuriHalNfcRx rx;
+} FuriHalNfcTechPollerBase;
+
+typedef struct {
+    uint32_t fdt;
+} FuriHalNfcListenerCompensation;
+
+typedef struct {
+    FuriHalNfcListenerCompensation compensation;
+    FuriHalNfcChipConfig init;
+    FuriHalNfcChipConfig deinit;
+    FuriHalNfcWaitEvent wait_event;
+    FuriHalNfcTx tx;
+    FuriHalNfcRx rx;
+    FuriHalNfcSleep sleep;
+    FuriHalNfcIdle idle;
+} FuriHalNfcTechListenerBase;
+
+typedef struct {
+    FuriHalNfcTechPollerBase poller;
+    FuriHalNfcTechListenerBase listener;
+} FuriHalNfcTechBase;
+
+extern const FuriHalNfcTechBase furi_hal_nfc_iso14443a;
+extern const FuriHalNfcTechBase furi_hal_nfc_iso14443b;
+extern const FuriHalNfcTechBase furi_hal_nfc_iso15693;
+extern const FuriHalNfcTechBase furi_hal_nfc_felica;
+
+extern const FuriHalNfcTechBase* furi_hal_nfc_tech[];
+
 extern FuriHalNfc furi_hal_nfc;
 
 void furi_hal_nfc_event_init();
@@ -58,11 +113,14 @@ bool furi_hal_nfc_event_wait_for_specific_irq(
 
 // Common technology methods
 FuriHalNfcEvent furi_hal_nfc_wait_event_common(uint32_t timeout_ms);
+
 FuriHalNfcError furi_hal_nfc_common_listener_rx_start(FuriHalSpiBusHandle* handle);
+
 FuriHalNfcError furi_hal_nfc_common_fifo_tx(
     FuriHalSpiBusHandle* handle,
     const uint8_t* tx_data,
     size_t tx_bits);
+
 FuriHalNfcError furi_hal_nfc_common_fifo_rx(
     FuriHalSpiBusHandle* handle,
     uint8_t* rx_data,
@@ -73,47 +131,6 @@ FuriHalNfcError furi_hal_nfc_poller_tx_common(
     FuriHalSpiBusHandle* handle,
     const uint8_t* tx_data,
     size_t tx_bits);
-
-// Technology specific API
-typedef FuriHalNfcError (*FuriHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
-typedef FuriHalNfcError (
-    *FuriHalNfcTx)(FuriHalSpiBusHandle* handle, const uint8_t* tx_data, size_t tx_bits);
-typedef FuriHalNfcError (*FuriHalNfcRx)(
-    FuriHalSpiBusHandle* handle,
-    uint8_t* rx_data,
-    size_t rx_data_size,
-    size_t* rx_bits);
-typedef FuriHalNfcEvent (*FuriHalNfcWaitEvent)(uint32_t timeout_ms);
-typedef FuriHalNfcError (*FuriHalNfcSleep)(FuriHalSpiBusHandle* handle);
-typedef FuriHalNfcError (*FuriHalNfcIdle)(FuriHalSpiBusHandle* handle);
-
-typedef struct {
-    FuriHalNfcChipConfig init;
-    FuriHalNfcChipConfig deinit;
-    FuriHalNfcWaitEvent wait_event;
-    FuriHalNfcTx tx;
-    FuriHalNfcRx rx;
-} FuriHalNfcTechPollerBase;
-
-typedef struct {
-    FuriHalNfcChipConfig init;
-    FuriHalNfcChipConfig deinit;
-    FuriHalNfcWaitEvent wait_event;
-    FuriHalNfcTx tx;
-    FuriHalNfcRx rx;
-    FuriHalNfcSleep sleep;
-    FuriHalNfcIdle idle;
-} FuriHalNfcTechListenerBase;
-
-typedef struct {
-    FuriHalNfcTechPollerBase poller;
-    FuriHalNfcTechListenerBase listener;
-} FuriHalNfcTechBase;
-
-extern const FuriHalNfcTechBase furi_hal_nfc_iso14443a;
-extern const FuriHalNfcTechBase furi_hal_nfc_iso14443b;
-extern const FuriHalNfcTechBase furi_hal_nfc_iso15693;
-extern const FuriHalNfcTechBase furi_hal_nfc_felica;
 
 #ifdef __cplusplus
 }
