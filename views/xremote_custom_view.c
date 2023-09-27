@@ -13,7 +13,7 @@ static void xremote_custom_view_draw_callback(Canvas* canvas, void* context)
     (void)context;
     xremote_canvas_draw_header(canvas, "Custom");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 70, "Comming Soon");
+    canvas_draw_str(canvas, 0, 70, "Coming Soon");
     xremote_canvas_draw_exit_footer(canvas, "Press to exit");
 }
 
