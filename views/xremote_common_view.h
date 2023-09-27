@@ -86,6 +86,7 @@ typedef enum {
     XRemoteViewIRSubmenu,
     XRemoteViewIRGeneral,
     XRemoteViewIRControl,
+    XRemoteViewIRNavigation,
     XRemoteViewIRPlayer,
     XRemoteViewIRCustom
 } XRemoteViewID;

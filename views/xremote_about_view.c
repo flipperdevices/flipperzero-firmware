@@ -21,7 +21,7 @@ static void xremote_about_view_draw_callback(Canvas* canvas, void* context)
     canvas_draw_str_aligned(canvas, 0, 30, AlignLeft, AlignTop, "Version:");
     canvas_draw_str_aligned(canvas, 35, 30, AlignLeft, AlignTop, version);
 
-    canvas_draw_str_aligned(canvas, 0, 40, AlignLeft, AlignTop, "License: MIT");
+    canvas_draw_str_aligned(canvas, 0, 40, AlignLeft, AlignTop, "License: GPLv3");
     canvas_draw_str_aligned(canvas, 0, 50, AlignLeft, AlignTop, "Author: kala13x");
 
     canvas_draw_str_aligned(canvas, 0, 69, AlignLeft, AlignTop, "Contact:");

@@ -10,6 +10,7 @@
 
 #include "views/xremote_general_view.h"
 #include "views/xremote_control_view.h"
+#include "views/xremote_navigation_view.h"
 #include "views/xremote_player_view.h"
 #include "views/xremote_custom_view.h"
 
@@ -24,7 +25,7 @@ static uint32_t xremote_control_submenu_exit_callback(void* context)
     return XRemoteViewSubmenu;
 }
 
-static uint32_t xremote_control_view_exit_callback(void* context)
+static uint32_t xremote_navigation_view_exit_callback(void* context)
 {
     UNUSED(context);
     return XRemoteViewIRSubmenu;
@@ -46,6 +47,8 @@ static void xremote_control_submenu_callback(void* context, uint32_t index)
         xremote_app_view_alloc(app, index, xremote_general_view_alloc);
     else if (index == XRemoteViewIRControl)
         xremote_app_view_alloc(app, index, xremote_control_view_alloc);
+    else if (index == XRemoteViewIRNavigation)
+        xremote_app_view_alloc(app, index, xremote_navigation_view_alloc);
     else if (index == XRemoteViewIRPlayer)
         xremote_app_view_alloc(app, index, xremote_player_view_alloc);
     else if (index == XRemoteViewIRCustom)
@@ -53,7 +56,7 @@ static void xremote_control_submenu_callback(void* context, uint32_t index)
 
     if (app->view_ctx != NULL)
     {
-        xremote_app_view_set_previous_callback(app, xremote_control_view_exit_callback);
+        xremote_app_view_set_previous_callback(app, xremote_navigation_view_exit_callback);
         xremote_app_set_view_context(app, app->context, NULL);
         xremote_app_switch_to_view(app, index);
     }
@@ -111,6 +114,7 @@ XRemoteApp* xremote_control_alloc(XRemoteAppContext* app_ctx)
     xremote_app_submenu_alloc(app, XRemoteViewIRSubmenu, xremote_control_submenu_exit_callback);
     xremote_app_submenu_add(app, "General", XRemoteViewIRGeneral, xremote_control_submenu_callback);
     xremote_app_submenu_add(app, "Control", XRemoteViewIRControl, xremote_control_submenu_callback);
+    xremote_app_submenu_add(app, "Navigation", XRemoteViewIRNavigation, xremote_control_submenu_callback);
     xremote_app_submenu_add(app, "Playback", XRemoteViewIRPlayer, xremote_control_submenu_callback);
     xremote_app_submenu_add(app, "Custom", XRemoteViewIRCustom, xremote_control_submenu_callback);
     xremote_app_set_user_context(app, remote, xremote_ir_clear_callback);

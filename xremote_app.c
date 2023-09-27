@@ -67,7 +67,6 @@ void xremote_app_view_free(XRemoteApp* app)
     }
 }
 
-
 bool xremote_app_has_view(XRemoteApp *app, uint32_t view_id)
 {
     xremote_app_assert(app, false);
