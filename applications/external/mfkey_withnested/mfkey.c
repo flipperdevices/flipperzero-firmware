@@ -14,10 +14,6 @@
 // TODO: More accurate timing for Nested
 // TODO: Eliminate OOM crashes (updated application is larger)
 
-// Static Nested TODO:
-// 1. Find bug which causes keys to not be found (most likely cause: in parameter)
-// 2. Check if rollback of nt is missing from any other verification functions
-
 #include <furi.h>
 #include <furi_hal.h>
 #include "time.h"
@@ -339,6 +335,7 @@ int check_state(struct Crypto1State* t, MfClassicNonce* n) {
         struct Crypto1State temp = {t->odd, t->even};
         rollback_word_noret(t, n->uid_xor_nt1, 0);
         if(n->ks1_1_enc == crypt_word_ret(t, n->uid_xor_nt0, 0)) {
+            rollback_word_noret(&temp, n->uid_xor_nt1, 0);
             crypto1_get_lfsr(&temp, &(n->key));
             return 1;
         }
