@@ -19,7 +19,7 @@ def GlobRecursive(env, pattern, node=".", exclude=[]):
             source=True,
             exclude=exclude,
         )
-    elif (file_node := node.File(pattern)).exists():
+    elif (file_node := node.File(pattern)).rexists():
         results.append(file_node)
     # print(f"Glob result for {pattern} from {node}: {results}")
     return results
