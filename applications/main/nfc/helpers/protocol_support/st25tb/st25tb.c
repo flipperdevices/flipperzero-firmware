@@ -21,12 +21,11 @@ static void nfc_scene_info_on_enter_st25tb(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static NfcCommand
-    nfc_scene_read_poller_callback_st25tb(NfcGenericEvent event, void* context) {
+static NfcCommand nfc_scene_read_poller_callback_st25tb(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolSt25tb);
 
     NfcApp* instance = context;
-    const St25tbPollerEvent* st25tb_event = event.data;
+    const St25tbPollerEvent* st25tb_event = event.event_data;
 
     if(st25tb_event->type == St25tbPollerEventTypeReady) {
         nfc_device_set_data(

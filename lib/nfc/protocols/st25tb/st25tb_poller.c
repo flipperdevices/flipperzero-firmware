@@ -32,7 +32,7 @@ static St25tbPoller* st25tb_poller_alloc(Nfc* nfc) {
 
     instance->st25tb_event.data = &instance->st25tb_event_data;
     instance->general_event.protocol = NfcProtocolSt25tb;
-    instance->general_event.data = &instance->st25tb_event;
+    instance->general_event.event_data = &instance->st25tb_event;
     instance->general_event.instance = instance;
 
     return instance;
@@ -63,10 +63,10 @@ static void
 static NfcCommand st25tb_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolInvalid);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
 
     St25tbPoller* instance = context;
-    NfcEvent* nfc_event = event.data;
+    NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
     if(nfc_event->type == NfcEventTypePollerReady) {
@@ -96,13 +96,13 @@ static NfcCommand st25tb_poller_run(NfcGenericEvent event, void* context) {
 
 static bool st25tb_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.data);
+    furi_assert(event.event_data);
     furi_assert(event.instance);
     furi_assert(event.protocol == NfcProtocolInvalid);
 
     bool protocol_detected = false;
     St25tbPoller* instance = context;
-    NfcEvent* nfc_event = event.data;
+    NfcEvent* nfc_event = event.event_data;
     furi_assert(instance->state == St25tbPollerStateIdle);
 
     if(nfc_event->type == NfcEventTypePollerReady) {
