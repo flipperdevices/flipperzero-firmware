@@ -115,7 +115,7 @@ static void furi_hal_nfc_timer_deinit(FuriHalNfcTimer timer) {
     }
 }
 
-static uint32_t furi_hal_nfc_timer_get_compensation(FuriHalNfcTimer timer) {
+static int32_t furi_hal_nfc_timer_get_compensation(FuriHalNfcTimer timer) {
     const FuriHalNfcTechBase* current_tech = furi_hal_nfc_tech[furi_hal_nfc.tech];
 
     if(furi_hal_nfc.mode == FuriHalNfcModePoller) {
@@ -134,10 +134,10 @@ static uint32_t furi_hal_nfc_timer_get_compensation(FuriHalNfcTimer timer) {
 }
 
 static void furi_hal_nfc_timer_start(FuriHalNfcTimer timer, uint32_t time_fc) {
-    const uint32_t comp_fc = furi_hal_nfc_timer_get_compensation(timer);
+    const int32_t comp_fc = furi_hal_nfc_timer_get_compensation(timer);
 
     // Not starting the timer if the compensation value is greater than the requested delay
-    if(comp_fc >= time_fc) return;
+    if(comp_fc >= (int32_t)time_fc) return;
 
     const uint32_t arr_reg =
         furi_hal_nfc_timers[timer].freq_khz * (time_fc - comp_fc) / FURI_HAL_NFC_FREQ_KHZ;

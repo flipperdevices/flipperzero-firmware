@@ -7,6 +7,9 @@
 
 #define TAG "FuriHalIso14443a"
 
+// Prevent FDT timer from starting
+#define FURI_HAL_NFC_ISO14443A_LISTENER_FDT_COMP_FC (INT32_MAX)
+
 static Iso14443_3aSignal* iso14443_3a_signal = NULL;
 
 static FuriHalNfcError furi_hal_nfc_iso14443a_common_init(FuriHalSpiBusHandle* handle) {
@@ -328,7 +331,8 @@ const FuriHalNfcTechBase furi_hal_nfc_iso14443a = {
         {
             .compensation =
                 {
-                    .fwt = 0,
+                    .fdt = FURI_HAL_NFC_POLLER_FDT_COMP_FC,
+                    .fwt = FURI_HAL_NFC_POLLER_FWT_COMP_FC,
                 },
             .init = furi_hal_nfc_iso14443a_poller_init,
             .deinit = furi_hal_nfc_iso14443a_poller_deinit,
@@ -341,7 +345,7 @@ const FuriHalNfcTechBase furi_hal_nfc_iso14443a = {
         {
             .compensation =
                 {
-                    .fdt = 0,
+                    .fdt = FURI_HAL_NFC_ISO14443A_LISTENER_FDT_COMP_FC,
                 },
             .init = furi_hal_nfc_iso14443a_listener_init,
             .deinit = furi_hal_nfc_iso14443a_listener_deinit,

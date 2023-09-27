@@ -11,6 +11,9 @@
 extern "C" {
 #endif
 
+#define FURI_HAL_NFC_POLLER_FDT_COMP_FC (-500)
+#define FURI_HAL_NFC_POLLER_FWT_COMP_FC (FURI_HAL_NFC_POLLER_FDT_COMP_FC)
+
 typedef enum {
     FuriHalNfcEventInternalTypeAbort = (1U << 0),
     FuriHalNfcEventInternalTypeIrq = (1U << 1),
@@ -50,8 +53,8 @@ typedef FuriHalNfcError (*FuriHalNfcSleep)(FuriHalSpiBusHandle* handle);
 typedef FuriHalNfcError (*FuriHalNfcIdle)(FuriHalSpiBusHandle* handle);
 
 typedef struct {
-    uint32_t fdt;
-    uint32_t fwt;
+    int32_t fdt;
+    int32_t fwt;
 } FuriHalNfcPollerCompensation;
 
 typedef struct {
@@ -64,7 +67,7 @@ typedef struct {
 } FuriHalNfcTechPollerBase;
 
 typedef struct {
-    uint32_t fdt;
+    int32_t fdt;
 } FuriHalNfcListenerCompensation;
 
 typedef struct {
