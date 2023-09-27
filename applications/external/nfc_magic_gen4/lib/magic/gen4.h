@@ -3,7 +3,7 @@
 #include <lib/nfc/protocols/mifare_classic.h>
 
 #define MAGIC_GEN4_DEFAULT_PWD 0x00000000
-#define MAGIC_GEN4_CONFIG_LEN 32
+#define MAGIC_GEN4_CONFIG_LEN 30
 
 #define NFCID1_SINGLE_SIZE 4
 #define NFCID1_DOUBLE_SIZE 7
@@ -32,6 +32,8 @@ typedef enum {
     // apparently for UL?
     MagicGen4ShadowModeHighSpeedIgnore = 0x03
 } MagicGen4ShadowMode;
+
+extern const uint8_t MAGIC_DEFAULT_CONFIG[];
 
 bool magic_gen4_get_cfg(uint32_t pwd, uint8_t* config);
 

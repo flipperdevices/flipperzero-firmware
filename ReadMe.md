@@ -29,9 +29,11 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0926-1758-0.92.3-251cb5c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-26 18:20 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-26 18:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-09-27 13:56 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-09-27 13:56 EST`
 - Custom Game Mode Menu will no longer be overwritten for every install. Update coming to have a correctly generated default when one does not exist.
+- Updated: [NFC Magic v2.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [Updated Gen4 Fast-Configuration command #55 (By jordam)](https://github.com/flipperdevices/flipperzero-good-faps/pull/55)
+- Updated: [NFC Magic Gen4 v1.2 #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack) [Updated Gen4 Fast-Configuration command #55 (By jordam)](https://github.com/flipperdevices/flipperzero-good-faps/pull/55)
 
 <a name="release">
 
@@ -366,9 +368,9 @@ $ ./fbt dolphin_ext
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
-- [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
-- [NFC Magic Gen1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
-- [NFC Magic Gen4 app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack)
+- [NFC Magic v2.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+- [NFC Magic Gen1 v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- [NFC Magic Gen4 v1.2 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack)
 - [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
@@ -388,7 +390,7 @@ $ ./fbt dolphin_ext
 - [PicoPass (iClass) v1.5 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
-- [Pokemon Trading v1.2.4 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Extended Functionality #17 (By R4g3D)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/17) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
+- [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons) [Extended Functionality #17 (By R4g3D)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/17) [Refactor, UI update, Feature add #14 (By kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/pull/14)
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
