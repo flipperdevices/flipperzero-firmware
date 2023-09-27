@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-#define FURI_HAL_NFC_TIMER_COMPENSATION_FC (500)
 #define FURI_HAL_NFC_EVENT_WAIT_FOREVER (0xFFFFFFFFU)
 
 typedef enum {
