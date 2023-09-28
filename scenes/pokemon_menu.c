@@ -54,11 +54,7 @@ void main_menu_scene_on_enter(void* context) {
         pokemon_fap->submenu, buf, SelectNicknameScene, scene_change_from_main_cb, pokemon_fap);
     snprintf(buf, sizeof(buf), "Level:           %d", pokemon_fap->trade_block->party[0].level);
     submenu_add_item(
-        pokemon_fap->submenu,
-        buf,
-        SelectLevelScene,
-        scene_change_from_main_cb,
-        pokemon_fap);
+        pokemon_fap->submenu, buf, SelectLevelScene, scene_change_from_main_cb, pokemon_fap);
     submenu_add_item(
         pokemon_fap->submenu,
         "Select Moves",
