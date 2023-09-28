@@ -63,6 +63,8 @@ typedef enum {
     NfcErrorCollision,
     NfcErrorLinkLoss,
     NfcErrorAbortRequest,
+    NfcErrorIncompleteFrame,
+    NfcErrorDataFormat,
 } NfcError;
 
 typedef enum {
