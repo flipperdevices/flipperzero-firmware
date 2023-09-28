@@ -63,6 +63,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Locate the update folder, and the folder you copied earlier
 - Locate the update file and select it
 - Select Run in App
+### OR
+- Open qFlipper
+- Connect to Flipper Zero
+- Press "Install from file"
+- Navigate to downloaded RM*.TGZ/ZIP
+- Confirm the file and install
 
 ## Build
 
