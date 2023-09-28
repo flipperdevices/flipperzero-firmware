@@ -22,7 +22,7 @@ extern "C" {
 #endif
 
 /**
- * @brief NfcScanner instance opaque definition.
+ * @brief NfcScanner opaque type definition.
  */
 typedef struct NfcScanner NfcScanner;
 
