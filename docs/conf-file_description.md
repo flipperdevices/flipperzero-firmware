@@ -60,7 +60,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Description:** Initialization vector (IV) base seed which is getting generated randomly at first app start. It is used to setup encryption subsytem. Should not be updated manually.
 
-**Important note:** changing or loosing this value will lead to incorrect decryption of all the encrypted data in the application and as a result it will not be possible to generate valid TOTP tokens
+**Important note:** changing or loosing this value will lead to incorrect decryption of all the encrypted data in the application and as a result it will not be possible to generate valid OTP tokens
 
 </p>
 </details>
@@ -136,7 +136,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** `1`
 
-**Description:** Which TOTP code input automation method is enabled for the user. Possible values are:
+**Description:** Which OTP code input automation method is enabled for the user. Possible values are:
 
 * `0` - none
 * `1` - USB - application will represent itself as an USB keyboard and type current code (BadUSB)
@@ -171,6 +171,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 * `0` - QWERTY
 * `1` - AZERTY
+* `3` - QWERTZ
 
 </p>
 </details>
@@ -211,7 +212,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** `0`
 
-**Description:** Token hashing algorithm to be used to generate TOTP code. If you don't know which one to use - use `0`.
+**Description:** Token hashing algorithm to be used to generate OTP code. If you don't know which one to use - use `0`.
 
 * `0` - `SHA1`
 * `1` - `SHA256`
@@ -229,7 +230,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** `6`
 
-**Description:** Defines TOTP code length. If you don't know which to use - use `6` as majority of websites requires 6-digits code.
+**Description:** Defines OTP code length. If you don't know which to use - use `6` as majority of websites requires 6-digits code.
 
 </p>
 </details>
@@ -242,7 +243,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** `30`
 
-**Description:** Token lifetime duration in seconds. Should be between `15` and `255`. Majority websites requires `30`, however some rare websites may require custom lifetime. If you are not sure which one to use - use `30`.
+**Description:** Token lifetime duration in seconds. Applicable for TOTP tokens only. Should be between `15` and `255`. Majority websites requires `30`, however some rare websites may require custom lifetime. If you are not sure which one to use - use `30`.
 
 </p>
 </details>
@@ -264,11 +265,40 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 </p>
 </details>
 
+<details>
+<summary><h3 style="display: inline">TokenType</h3></summary>
+<p>
+
+**Type:** enum (available options are `0` and `1`)
+
+**Default value:** `0` (Time-based token, TOTP)
+
+**Description:** Token type.
+
+* `0` - Time-based (TOTP)
+* `1` - Counter-based (HOTP)
+
+</p>
+</details>
+
+<details>
+<summary><h3 style="display: inline">TokenCounter</h3></summary>
+<p>
+
+**Type:** unsigned int
+
+**Default value:** `0`
+
+**Description:** Token counter. Applicable for HOTP tokens only.
+
+</p>
+</details>
+
 ## Example config file
 
 ```text
 Filetype: Flipper TOTP plugin config file
-Version: 8
+Version: 10
 CryptoVersion: 2
 CryptoKeySlot: 12
 BaseIV: 71 88 EF D4 F0 3E 40 B5 3D 0A 0E 39 C2 AF C5 D6
@@ -285,16 +315,22 @@ TokenAlgo: 3
 TokenDigits: 5
 TokenDuration: 30
 TokenAutomationFeatures: 0
+TokenType: 0
+TokenCounter: 0000000000000000
 TokenName: sha1 token
 TokenSecret: 1F 13 EC CB C7 24 32 BC 48 28 92 BB A6 A2 60 68 D6 DA 74 65 53 08 84 BD 7D 2B 4F FC 17 F1 C8 35 3E B0 37 EA 82 69 95 00 47 5E DA 12 7F 3C 73 05 10 A1 E6 89 1D C0 58 A7 E4 1D 46 B9 28 9E 16 48
 TokenAlgo: 0
 TokenDigits: 6
 TokenDuration: 30
 TokenAutomationFeatures: 0
+TokenType: 0
+TokenCounter: 0000000000000000
 TokenName: sha256 token
 TokenSecret: 80 02 69 36 AC 28 6B 83 08 90 75 81 CA 39 4B 11 C9 69 C7 45 C2 F8 98 14 D7 BB 1E B8 03 BB 52 3E 79 6E 1D F3 A7 E5 89 99 06 4E 08 87 66 9A BD C2 D9 95 65 ED 3A 40 50 F5 D3 2B C4 FE 48 D0 78 4B
 TokenAlgo: 1
 TokenDigits: 6
 TokenDuration: 30
 TokenAutomationFeatures: 0
+TokenType: 0
+TokenCounter: 0000000000000000
 ```
