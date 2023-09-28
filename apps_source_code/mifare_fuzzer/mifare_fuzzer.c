@@ -49,6 +49,9 @@ MifareFuzzerApp* mifare_fuzzer_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
+    // Open Notifications record
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
+
     // view: select card type
     app->submenu_card = submenu_alloc();
     view_dispatcher_add_view(
@@ -115,6 +118,10 @@ void mifare_fuzzer_free(MifareFuzzerApp* app) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_free() :: GUI");
     furi_record_close(RECORD_GUI);
     app->gui = NULL;
+
+    // Notifications
+    furi_record_close(RECORD_NOTIFICATION);
+    app->notifications = NULL;
 
     // Worker
     //FURI_LOG_D(TAG, "mifare_fuzzer_free() :: Worker");
