@@ -3,7 +3,7 @@
  * @brief Abstract interface definitions for the NFC device class.
  *
  * This file is an implementation detail. It must not be included in
- * any API-related headers.
+ * any public API-related headers.
  */
 #pragma once
 
