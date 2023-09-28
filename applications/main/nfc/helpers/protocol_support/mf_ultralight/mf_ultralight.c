@@ -120,9 +120,17 @@ static void nfc_scene_read_success_on_enter_mf_ultralight(NfcApp* instance) {
     const MfUltralightData* data = nfc_device_get_data(device, NfcProtocolMfUltralight);
 
     FuriString* temp_str = furi_string_alloc();
-    furi_string_cat_printf(
-        temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
-    nfc_render_mf_ultralight_info(data, NfcProtocolFormatTypeShort, temp_str);
+
+    bool unlocked =
+        scene_manager_has_previous_scene(instance->scene_manager, NfcSceneMfUltralightUnlockWarn);
+    if(unlocked) {
+        nfc_render_mf_ultralight_pwd_pack(data, temp_str);
+    } else {
+        furi_string_cat_printf(
+            temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+
+        nfc_render_mf_ultralight_info(data, NfcProtocolFormatTypeShort, temp_str);
+    }
 
     widget_add_text_scroll_element(
         instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
