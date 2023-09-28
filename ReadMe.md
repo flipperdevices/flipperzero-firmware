@@ -36,7 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Magic Gen4 v1.2 #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack) [Updated Gen4 Fast-Configuration command #55 (By jordam)](https://github.com/flipperdevices/flipperzero-good-faps/pull/55)
 - [Picopass: Add haptics to loclass #53 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/53)
 - Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Updated: Game Mode Menu Creation When Empty. Custom Game Mode Menu will no longer get reset on new install.
+- Updated: [Game Mode Menu Creation When Empty. Custom Game Mode Menu will no longer get reset on new install.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/de0d47367169a6c94d37ae5575a2170e4eac8a45)
 
 <a name="release">
 
