@@ -6,9 +6,38 @@ Advanced IR Remote App for Flipper Device
 ## Idea
 With the current infrared application, users must navigate through the menu to locate each button individually. This requires scrolling to the desired button and selecting it, which can be uncomfortable. The idea behind `XRemote` is that all physical buttons are pre-mapped to specific category buttons, and pressing a physical button directly sends an infrared signal. This allows the flipper device to be used as a remote rather than as a tool that has a remote.
 
-`XRemote` also introduces a more user-friendly learning approach. Instead of having to manually name each button on the flipper when cloning a remote, the learn tool informs you upfront which buttons it will record. All you need to do is press the corresponding button on your existing remote, eliminating the need to name them individually.
+`XRemote` also introduces a more user-friendly learning approach. Instead of having to manually name each button on the flipper when cloning a remote, the learning tool informs you upfront which buttons it will record. All you need to do is press the corresponding button on your existing remote, eliminating the need to name them individually.
 
-The application is compatible with standard `.ir` files. However, to ensure functionality, button names within these files must align with predefined names. For a list of supported name definitions, please refer to the [views/remote_common_view.h](https://github.com/kala13x/flipper-xremote/blob/main/views/xremote_common_view.h) file.
+The application is compatible with standard `.ir` files. However, to ensure functionality, button names within these files must align with the predefined naming scheme.
+
+Button name | Description
+------------|-------------------
+`Power`     | Power
+`Setup`     | Setup/Settings
+`Input`     | Input/Source
+`Menu`      | Menu
+`List`      | List
+`Info`      | Info
+`Mode`      | Mode
+`Back`      | Back
+`Ok`        | Enter/Ok
+`Up`        | Up
+`Down`      | Down
+`Left`      | Left
+`Right`     | Right
+`Mute`      | Mute
+`Vol_up`    | Volume up
+`Vol_dn`    | Volume down
+`Ch_next`   | Next channel
+`Ch_prev`   | Previous channel
+`Jump_fo`   | Jump forward
+`Jump_ba`   | Jump backward
+`Fast_fo`   | Fast forward
+`Fast_ba`   | Fast backward
+`Play_pa`   | Play/Pause
+`Pause`     | Pause
+`Play`      | Play
+`Stop`      | Stop
 
 ## Progress
 
