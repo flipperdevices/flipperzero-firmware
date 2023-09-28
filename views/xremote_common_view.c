@@ -105,7 +105,20 @@ void xremote_view_send_ir(XRemoteView *rview, const char *name)
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon)
 {
-    if (icon == XRemoteIconArrowUp)
+    if (icon == XRemoteIconEnter)
+    {
+        canvas_draw_circle(canvas, x - 2, y, 4);
+        canvas_draw_disc(canvas, x - 2, y, 2);
+    }
+    else if (icon == XRemoteIconBack)
+    {
+        canvas_draw_triangle(canvas, x - 4, y - 2, 5, 3, CanvasDirectionRightToLeft);
+        canvas_draw_line(canvas, x + 1, y - 2, x - 5, y - 2);
+        canvas_draw_line(canvas, x + 1, y + 3, x - 3, y + 3);
+        canvas_draw_line(canvas, x + 3, y + 1, x + 2, y + 2);
+        canvas_draw_line(canvas, x + 3, y, x + 2, y - 1);
+    }
+    else if (icon == XRemoteIconArrowUp)
     {
         canvas_draw_triangle(canvas, x - 2, y - 2, 5, 3, CanvasDirectionBottomToTop);
         canvas_draw_line(canvas, x - 2, y - 3, x - 2, y + 4);
@@ -182,7 +195,6 @@ void xremote_canvas_draw_header(Canvas* canvas, const char* section)
 {
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 0, 0, AlignLeft, AlignTop, "XRemote");
-
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 20, section);
 }
@@ -190,7 +202,7 @@ void xremote_canvas_draw_header(Canvas* canvas, const char* section)
 void xremote_canvas_draw_exit_footer(Canvas* canvas, char *text)
 {
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_icon(canvas, 0, 120, &I_Back_icon_10x8);
+    xremote_canvas_draw_icon(canvas, 6, 124, XRemoteIconBack);
     canvas_draw_str(canvas, 12, 128, text);
 }
 
@@ -208,17 +220,18 @@ void xremote_canvas_draw_button(Canvas* canvas, bool pressed, uint8_t x, uint8_t
     canvas_set_color(canvas, ColorBlack);
 }
 
-void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, const Icon* icon)
+void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, XRemoteIcon icon)
 {
-    elements_slightly_rounded_frame(canvas, x, y, 64, 17);
+    (void)icon;
+    elements_slightly_rounded_frame(canvas, x + 4, y, 56, 15);
 
     if (pressed)
     {
-        elements_slightly_rounded_box(canvas, x + 2, y + 2, 60, 13);
+        elements_slightly_rounded_box(canvas, x + 6, y + 2, 52, 11);
         canvas_set_color(canvas, ColorWhite);
     }
 
-    canvas_draw_icon(canvas, x + 11, y + 4, icon);
-    elements_multiline_text_aligned(canvas, x + 28, y + 12, AlignLeft, AlignBottom, text);
+    xremote_canvas_draw_icon(canvas, x + 16, y + 7, icon);
+    elements_multiline_text_aligned(canvas, x + 26, y + 10, AlignLeft, AlignBottom, text);
     canvas_set_color(canvas, ColorBlack);
 }

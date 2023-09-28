@@ -19,7 +19,7 @@ static void xremote_navigation_view_draw_callback(Canvas* canvas, void* context)
     xremote_canvas_draw_button(canvas, model->left_pressed, 2, 51, XRemoteIconArrowLeft);
     xremote_canvas_draw_button(canvas, model->right_pressed, 44, 51, XRemoteIconArrowRight);
     xremote_canvas_draw_button(canvas, model->ok_pressed, 23, 51, XRemoteIconOk);
-    xremote_canvas_draw_button_wide(canvas, model->back_pressed, 0, 95, "BACK", &I_Back_icon_10x8);
+    xremote_canvas_draw_button_wide(canvas, model->back_pressed, 0, 95, "Back", XRemoteIconBack);
     xremote_canvas_draw_exit_footer(canvas, "Hold to exit");
 }
 

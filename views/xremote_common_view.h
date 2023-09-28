@@ -19,7 +19,7 @@
 #include <xc_icons.h>
 
 #define XREMOTE_COMMAND_POWER           "Power"
-#define XREMOTE_COMMAND_SETTINGS        "Settings"
+#define XREMOTE_COMMAND_SETUP           "Setup"
 #define XREMOTE_COMMAND_INPUT           "Input"
 #define XREMOTE_COMMAND_MENU            "Menu"
 #define XREMOTE_COMMAND_LIST            "List"
@@ -44,8 +44,10 @@
 #define XREMOTE_COMMAND_PREV_CHAN       "Prev_chan"
 
 typedef enum {
-    /* Controller */
+    /* Navigation */
     XRemoteIconOk,
+    XRemoteIconEnter,
+    XRemoteIconBack,
     XRemoteIconArrowUp,
     XRemoteIconArrowDown,
     XRemoteIconArrowLeft,
@@ -99,7 +101,7 @@ void xremote_canvas_draw_exit_footer(Canvas* canvas, char *text);
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon);
 void xremote_canvas_draw_button(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, XRemoteIcon icon);
-void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, const Icon* icon);
+void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, XRemoteIcon icon);
 
 XRemoteView* xremote_view_alloc(NotificationApp* notifications, ViewInputCallback input_cb, ViewDrawCallback draw_cb);
 void xremote_view_free(XRemoteView* rview);

@@ -7,14 +7,13 @@
  */
 
 #include "xremote_control.h"
+#include "infrared/infrared_remote.h"
 
 #include "views/xremote_general_view.h"
 #include "views/xremote_control_view.h"
 #include "views/xremote_navigation_view.h"
 #include "views/xremote_player_view.h"
 #include "views/xremote_custom_view.h"
-
-#include "infrared/infrared_remote.h"
 
 #define XREMOTE_APP_EXTENSION   ".ir"
 #define XREMOTE_APP_FOLDER      ANY_PATH("infrared")

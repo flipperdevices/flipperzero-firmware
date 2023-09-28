@@ -14,7 +14,7 @@ The application works with standard `.ir` files, but for the buttons to work, th
 
 - [ ] Learn new remote
 - [ ] Use saved remote
-    - [ ] Saved remote general category
+    - [x] Saved remote general category
     - [ ] Saved remote control category
     - [x] Saved remote navigation category
     - [x] Saved remote player category
