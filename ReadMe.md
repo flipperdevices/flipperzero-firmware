@@ -37,7 +37,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Picopass: Add haptics to loclass #53 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/53)
 - Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [Game Mode Menu Creation When Empty. Custom Game Mode Menu will no longer get reset on new install.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/de0d47367169a6c94d37ae5575a2170e4eac8a45)
-- Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - Updated: [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork) [Add Ukulele tuning #2 (By portalsoup)](https://github.com/besya/flipperzero-tuning-fork/pull/2)
 - Added: [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 

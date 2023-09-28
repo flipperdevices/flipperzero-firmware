@@ -392,12 +392,6 @@ bool m100_set_freq_hopping(M100Module* module, bool hopping) {
     return true;
 }
 
-bool m100_set_power(M100Module* module, uint8_t* power) {
-    UNUSED(module);
-    UNUSED(power);
-    return true;
-}
-
 uint32_t m100_get_baudrate(M100Module* module) {
     return module->baudrate;
 }
