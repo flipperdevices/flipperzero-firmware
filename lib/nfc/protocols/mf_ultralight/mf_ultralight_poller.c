@@ -252,9 +252,9 @@ static NfcCommand mf_ultralight_poller_handler_check_ultralight_c(MfUltralightPo
         instance->state = MfUltralightPollerStateGetFeatureSet;
     } else {
         FURI_LOG_D(TAG, "Didn't response. Check NTAG 203");
-        iso14443_3a_poller_halt(instance->iso14443_3a_poller);
         instance->state = MfUltralightPollerStateDetectNtag203;
     }
+    iso14443_3a_poller_halt(instance->iso14443_3a_poller);
     return NfcCommandContinue;
 }
 
