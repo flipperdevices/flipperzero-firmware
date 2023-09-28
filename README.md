@@ -1,7 +1,7 @@
 # Flipper Authenticator
 
 [![GitHub release](https://img.shields.io/github/release/akopachov/flipper-zero_authenticator?include_prereleases=&sort=semver&color=blue)](https://github.com/akopachov/flipper-zero_authenticator/releases/)
-[![License](https://img.shields.io/badge/License-MIT-blue)](/LICENSE)
+[![License](https://img.shields.io/github/license/akopachov/flipper-zero_authenticator)](/LICENSE)
 [![issues - flipper-zero_authenticator](https://img.shields.io/github/issues/akopachov/flipper-zero_authenticator)](https://github.com/akopachov/flipper-zero_authenticator/issues)
 ![maintained - yes](https://img.shields.io/badge/maintained-yes-blue)
 ![contributions - welcome](https://img.shields.io/badge/contributions-welcome-blue)
