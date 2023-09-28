@@ -231,7 +231,21 @@ void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, ui
         canvas_set_color(canvas, ColorWhite);
     }
 
-    xremote_canvas_draw_icon(canvas, x + 16, y + 7, icon);
-    elements_multiline_text_aligned(canvas, x + 26, y + 10, AlignLeft, AlignBottom, text);
+    xremote_canvas_draw_icon(canvas, x + 15, y + 7, icon);
+    elements_multiline_text_aligned(canvas, x + 22, y + 10, AlignLeft, AlignBottom, text);
+    canvas_set_color(canvas, ColorBlack);
+}
+
+void xremote_canvas_draw_frame(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, uint8_t xl, const char *text)
+{
+    elements_slightly_rounded_frame(canvas, x, y, xl, 15);
+
+    if (pressed)
+    {
+        elements_slightly_rounded_box(canvas, x + 2, y + 2, xl - 4, 11);
+        canvas_set_color(canvas, ColorWhite);
+    }
+
+    canvas_draw_str(canvas, x + 3, y + 11, text);
     canvas_set_color(canvas, ColorBlack);
 }

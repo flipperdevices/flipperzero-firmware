@@ -103,12 +103,11 @@ void xremote_app_submenu_alloc(XRemoteApp* app, uint32_t index, ViewNavigationCa
     app->submenu = submenu_alloc();
     app->submenu_id = index;
 
-    View* view = submenu_get_view(app->submenu);
-    view_set_orientation(view, ViewOrientationVertical);
-    view_set_previous_callback(view, prev_cb);
+    submenu_set_orientation(app->submenu, ViewOrientationVertical);
+    view_set_previous_callback(submenu_get_view(app->submenu), prev_cb);
 
     ViewDispatcher* view_disp = app->app_ctx->view_dispatcher;
-    view_dispatcher_add_view(view_disp, app->submenu_id, view);
+    view_dispatcher_add_view(view_disp, app->submenu_id, submenu_get_view(app->submenu));
 }
 
 void xremote_app_submenu_free(XRemoteApp *app)

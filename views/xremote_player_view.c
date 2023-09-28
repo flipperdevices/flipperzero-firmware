@@ -54,7 +54,7 @@ static void xremote_player_view_process(XRemoteView* view, InputEvent* event)
                 else if (event->key == InputKeyOk)
                 {
                     model->ok_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_PAUSE_PLAY);
+                    xremote_view_send_ir(view, XREMOTE_COMMAND_PLAY_PAUSE);
                 }
                 else if (event->key == InputKeyBack)
                 {

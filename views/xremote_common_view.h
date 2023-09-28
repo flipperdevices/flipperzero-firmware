@@ -30,18 +30,20 @@
 #define XREMOTE_COMMAND_DOWN            "Down"
 #define XREMOTE_COMMAND_LEFT            "Left"
 #define XREMOTE_COMMAND_RIGHT           "Right"
-#define XREMOTE_COMMAND_JUMP_FORWARD    "Jump_forward"
-#define XREMOTE_COMMAND_JUMP_BACKWARD   "Jump_backward"
-#define XREMOTE_COMMAND_FAST_FORWARD    "Fast_forward"
-#define XREMOTE_COMMAND_FAST_BACKWARD   "Fast_backward"
-#define XREMOTE_COMMAND_PAUSE_PLAY      "Pause_play"
+#define XREMOTE_COMMAND_JUMP_FORWARD    "Jump_fo"
+#define XREMOTE_COMMAND_JUMP_BACKWARD   "Jump_ba"
+#define XREMOTE_COMMAND_FAST_FORWARD    "Fast_fo"
+#define XREMOTE_COMMAND_FAST_BACKWARD   "Fast_ba"
+#define XREMOTE_COMMAND_PLAY_PAUSE      "Play_pa"
 #define XREMOTE_COMMAND_PAUSE           "Pause"
 #define XREMOTE_COMMAND_PLAY            "Play"
 #define XREMOTE_COMMAND_STOP            "Stop"
+#define XREMOTE_COMMAND_MUTE            "Mute"
+#define XREMOTE_COMMAND_MODE            "Mode"
 #define XREMOTE_COMMAND_VOL_UP          "Vol_up"
-#define XREMOTE_COMMAND_VOL_DOWN        "Vol_down"
-#define XREMOTE_COMMAND_NEXT_CHAN       "Next_chan"
-#define XREMOTE_COMMAND_PREV_CHAN       "Prev_chan"
+#define XREMOTE_COMMAND_VOL_DOWN        "Vol_dn"
+#define XREMOTE_COMMAND_NEXT_CHAN       "Ch_next"
+#define XREMOTE_COMMAND_PREV_CHAN       "Ch_prev"
 
 typedef enum {
     /* Navigation */
@@ -102,6 +104,7 @@ void xremote_canvas_draw_exit_footer(Canvas* canvas, char *text);
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon);
 void xremote_canvas_draw_button(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, XRemoteIcon icon);
 void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, XRemoteIcon icon);
+void xremote_canvas_draw_frame(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, uint8_t xl, const char *text);
 
 XRemoteView* xremote_view_alloc(NotificationApp* notifications, ViewInputCallback input_cb, ViewDrawCallback draw_cb);
 void xremote_view_free(XRemoteView* rview);

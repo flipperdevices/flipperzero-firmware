@@ -17,8 +17,8 @@ static void xremote_general_view_draw_callback(Canvas* canvas, void* context)
     xremote_canvas_draw_button_wide(canvas, model->ok_pressed, 0, 27, "Power", XRemoteIconEnter);
     xremote_canvas_draw_button_wide(canvas, model->up_pressed, 0, 45, "Input", XRemoteIconArrowUp);
     xremote_canvas_draw_button_wide(canvas, model->down_pressed, 0, 63, "Setup", XRemoteIconArrowDown);
-    xremote_canvas_draw_button_wide(canvas, model->left_pressed, 0, 81, "List", XRemoteIconArrowLeft);
-    xremote_canvas_draw_button_wide(canvas, model->right_pressed, 0, 99, "Menu", XRemoteIconArrowRight);
+    xremote_canvas_draw_button_wide(canvas, model->left_pressed, 0, 81, "Menu", XRemoteIconArrowLeft);
+    xremote_canvas_draw_button_wide(canvas, model->right_pressed, 0, 99, "List", XRemoteIconArrowRight);
     xremote_canvas_draw_exit_footer(canvas, "Press to exit");
 }
 
@@ -48,12 +48,12 @@ static void xremote_general_view_process(XRemoteView* view, InputEvent* event)
                 else if (event->key == InputKeyLeft)
                 {
                     model->left_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_LIST);
+                    xremote_view_send_ir(view, XREMOTE_COMMAND_MENU);
                 }
                 else if (event->key == InputKeyRight)
                 {
                     model->right_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_MENU);
+                    xremote_view_send_ir(view, XREMOTE_COMMAND_LIST);
                 }
             }
             else if (event->type == InputTypeRelease)
