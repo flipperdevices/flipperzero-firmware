@@ -29,22 +29,19 @@ The application is compatible with standard `.ir` files. However, to ensure func
 
 ## Screens
 
-<p align="center">
-Main menu
-</p>
-<p align="center">
-    <img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/app_menu.png" alt="XRemote main menu">
-</p>
+<table align="center">
+    <tr>
+        <td align="center">Main menu</td>
+        <td align="center">Saved remote menu</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/app_menu.png" alt="XRemote main menu"></td>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_menu.png" alt="XRemote saved remote menu"></td>
+    </tr>
+</table>
 
 <p align="center">
-Saved remote menu
-</p>
-<p align="center">
-    <img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_menu.png" alt="XRemote main menu">
-</p>
-
-<p align="center">
-Saved remote categorized controllers
+Saved remote control apps
 </p>
 <p align="center">
     <img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_apps.png" alt="XRemote main menu">
