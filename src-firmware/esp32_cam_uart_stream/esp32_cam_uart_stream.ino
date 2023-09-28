@@ -204,13 +204,13 @@ void processImage(camera_fb_t* frameBuffer) {
         for(uint8_t bit = 0; bit < 8; ++bit) {
              // Check the invert flag and pack the pixels accordingly.
             if(invert) {
-                // If invert is true, consider pixel as 1 if it's less than 127.
-                if(frameBuffer->buf[true_y + x + bit] < 127) {
+                // If invert is true, consider pixel as 1 if it's more than 127.
+                if(frameBuffer->buf[true_y + x + bit] > 127) {
                     packed_pixels |= (1 << (7 - bit));
                 }
             } else {
-                // If invert is false, consider pixel as 1 if it's more than 127.
-                if(frameBuffer->buf[true_y + x + bit] > 127) {
+                // If invert is false, consider pixel as 1 if it's less than 127.
+                if(frameBuffer->buf[true_y + x + bit] < 127) {
                     packed_pixels |= (1 << (7 - bit));
                 }
             }
