@@ -19,7 +19,8 @@ extern "C" {
 #define MF_ULTRALIGHT_CMD_READ_CNT (0x39)
 #define MF_ULTRALIGHT_CMD_INCR_CNT (0xA5)
 #define MF_ULTRALIGHT_CMD_CHECK_TEARING (0x3E)
-#define MF_ULTRALIGHT_CMD_AUTH (0x1B)
+#define MF_ULTRALIGHT_CMD_PWD_AUTH (0x1B)
+#define MF_ULTRALIGHT_CMD_AUTH (0x1A)
 #define MF_ULTRALIGHT_CMD_VCSL (0x4B)
 
 #define MF_ULTRALIGHT_CMD_ACK (0x0A)
@@ -35,6 +36,7 @@ extern "C" {
 #define MF_ULTRALIGHT_TEARING_FLAG_NUM (3)
 #define MF_ULTRALIGHT_AUTH_PASSWORD_SIZE (4)
 #define MF_ULTRALIGHT_AUTH_PACK_SIZE (2)
+#define MF_ULTRALIGHT_AUTH_RESPONSE_SIZE (9)
 
 typedef enum {
     MfUltralightErrorNone,
@@ -47,6 +49,7 @@ typedef enum {
 typedef enum {
     MfUltralightTypeUnknown,
     MfUltralightTypeNTAG203,
+    MfUltralightTypeMfulC,
     MfUltralightTypeUL11,
     MfUltralightTypeUL21,
     MfUltralightTypeNTAG213,
@@ -69,13 +72,14 @@ typedef enum {
     MfUltralightFeatureSupportIncCounter = (1U << 5),
     MfUltralightFeatureSupportFastWrite = (1U << 6),
     MfUltralightFeatureSupportCompatibleWrite = (1U << 7),
-    MfUltralightFeatureSupportAuthentication = (1U << 8),
+    MfUltralightFeatureSupportPasswordAuth = (1U << 8),
     MfUltralightFeatureSupportVcsl = (1U << 9),
     MfUltralightFeatureSupportSectorSelect = (1U << 10),
     MfUltralightFeatureSupportSingleCounter = (1U << 11),
     MfUltralightFeatureSupportAsciiMirror = (1U << 12),
     MfUltralightFeatureSupportCounterInMemory = (1U << 13),
     MfUltralightFeatureSupportDynamicLock = (1U << 14),
+    MfUltralightFeatureSupportAuthenticate = (1U << 15),
 } MfUltralightFeatureSupport;
 
 typedef struct {
