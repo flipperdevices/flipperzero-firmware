@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Game Mode Menu Creation When Empty. Custom Game Mode Menu will no longer get reset on new install.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/de0d47367169a6c94d37ae5575a2170e4eac8a45)
 - Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - Updated: [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork) [Add Ukulele tuning #2 (By portalsoup)](https://github.com/besya/flipperzero-tuning-fork/pull/2)
+- Added: [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 
 <a name="release">
 
@@ -340,6 +341,7 @@ $ ./fbt dolphin_ext
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [FlipBIP Crypto Wallet v1.13 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
+- [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - [GPIO Controller (By Lokno)](https://github.com/Lokno/gpio_controller)
 - [GPIO Reader (biotinker) (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [GPIO Reader v1.1 (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
