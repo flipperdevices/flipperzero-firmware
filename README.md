@@ -4,27 +4,28 @@ Advanced IR Remote App for Flipper Device
 ### Currently under development, additional details coming soon..
 
 ## Idea
-Currently, to use the buttons in the infrared application, you have to find all the buttons one by one in the menu, scroll to the button you want, and then click it. This makes using the remote a little uncomfortable. The idea behind XRemote is that all physical buttons are pre-mapped to specific category buttons, and pressing a physical button directly sends an infrared signal. This allows the flipper device to be used as a remote rather than as a tool that has a remote.
+With the current infrared application, users must navigate through the menu to locate each button individually. This requires scrolling to the desired button and selecting it, which can be uncomfortable. The idea behind XRemote is that all physical buttons are pre-mapped to specific category buttons, and pressing a physical button directly sends an infrared signal. This allows the flipper device to be used as a remote rather than as a tool that has a remote.
 
-The learning approach of XRemote is also different from the current application. Now, in order to clone the remote, you have to write the names of all the buttons one by one with a flipper, which is very inconvenient. The idea of XRemote is that it will tell you in advance which button it is going to record, and you only have to press the remote, so you will no longer have to name all the buttons.
+`XRemote` also introduces a more user-friendly learning approach. Instead of having to manually name each button on the flipper when cloning a remote, the learn tool informs you upfront which buttons it will record. All you need to do is press the corresponding button on your existing remote, eliminating the need to name them individually.
 
-The application works with standard `.ir` files, but for the buttons to work, the names in the file must match the predefined names of XRemote. Check out [views/remote_common_view.h](https://github.com/kala13x/flipper-xremote/blob/main/views/xremote_common_view.h) file for supported name definitions.
+The application is compatible with standard `.ir` files. However, to ensure functionality, button names within these files must align with predefined names. For a list of supported name definitions, please refer to the [views/remote_common_view.h](https://github.com/kala13x/flipper-xremote/blob/main/views/xremote_common_view.h) file.
 
-## Process
+## Progress
 
+- [x] Application menu
 - [ ] Learn new remote
 - [ ] Use saved remote
-    - [x] Saved remote general category
-    - [ ] Saved remote control category
-    - [x] Saved remote navigation category
-    - [x] Saved remote player category
-    - [ ] Saved remote custom category
+    - [x] Saved remote general button page 
+    - [ ] Saved remote control buttons page
+    - [x] Saved remote navigation buttons page
+    - [x] Saved remote player buttons page
+    - [ ] Saved remote custom buttons page
     - [ ] Saved remote full button list
     - [ ] Delete saved remote file
     - [ ] Edit saved remote file
 - [ ] Application settings
-    - [ ] Vertical/Horizontal setting
-    - [ ] Command repeat setting
+    - [ ] Vertical/Horizontal menu setting
+    - [ ] Infrared command repeat count
 
 ## Screens
 
