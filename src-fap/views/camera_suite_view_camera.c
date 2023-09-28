@@ -152,7 +152,7 @@ static void save_image(void* _model) {
     // Close the file.
     storage_file_close(file);
 
-    // Freeing up memory.
+    // Free up memory.
     storage_file_free(file);
 }
 
