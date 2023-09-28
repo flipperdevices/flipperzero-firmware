@@ -50,7 +50,7 @@ void nfc_poller_free(NfcPoller* instance);
  *
  * @param[in,out] instance pointer to the instance to be started.
  * @param[in] callback pointer to a user-defined callback function which will receive events.
- * @param[in] context pointer to a user-specific context (will be passed to the callback).j
+ * @param[in] context pointer to a user-specific context (will be passed to the callback).
  */
 void nfc_poller_start(NfcPoller* instance, NfcGenericCallback callback, void* context);
 

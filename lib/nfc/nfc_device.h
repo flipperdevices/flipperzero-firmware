@@ -89,12 +89,26 @@ NfcProtocol nfc_device_get_protocol(const NfcDevice* instance);
 /**
  * @brief Get the protocol-specific data from an NfcDevice instance.
  *
- * The protocol identifier passed as the protocol parameter MUST match the one
- * stored in the instance, otherwise a crash will occur.
- * This is to improve type safety.
+ * The protocol parameter's behaviour is a bit tricky. The function will check
+ * whether there is such a protocol somewhere in the protocol hierarchy and return
+ * the data exactly from that level.
+ *
+ * Example: Call nfc_device_get_data() on an instance with Mf DESFire protocol.
+ * The protocol hierarchy will look like the following:
+ *
+ *            Mf DESFire -> ISO14443-4A -> ISO14443-3A
+ *
+ * Thus, the following values of the protocol parameter are valid:
+ *  - NfcProtocolIso14443_3a
+ *  - NfcProtocolIso14443_4a
+ *  - NfcProtocolMfDesfire
+ * and passing them to the call would result in the respective data being returned.
+ *
+ * However, supplying a protocol identifier which is not in the hierarchy will
+ * result in a crash. This is to improve type safety.
  *
  * @param instance pointer to the instance to be queried
- * @param protocol assumed protocol identifier of the data to be retrieved.
+ * @param protocol protocol identifier of the data to be retrieved.
  * @returns pointer to the instance's data.
  */
 const NfcDeviceData* nfc_device_get_data(const NfcDevice* instance, NfcProtocol protocol);
