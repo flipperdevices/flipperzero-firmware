@@ -30,10 +30,10 @@ MfUltralightError mf_ultralight_process_error(Iso14443_3aError error) {
     return ret;
 }
 
-MfUltralightError mf_ultralight_poller_async_auth(
+MfUltralightError mf_ultralight_poller_async_auth_pwd(
     MfUltralightPoller* instance,
     MfUltralightPollerAuthContext* data) {
-    uint8_t auth_cmd[5] = {MF_ULTRALIGHT_CMD_AUTH}; //-V1009
+    uint8_t auth_cmd[5] = {MF_ULTRALIGHT_CMD_PWD_AUTH}; //-V1009
     memccpy(&auth_cmd[1], data->password.data, 0, MF_ULTRALIGHT_AUTH_PASSWORD_SIZE);
     bit_buffer_copy_bytes(instance->tx_buffer, auth_cmd, sizeof(auth_cmd));
 
@@ -54,6 +54,33 @@ MfUltralightError mf_ultralight_poller_async_auth(
             break;
         }
         bit_buffer_write_bytes(instance->rx_buffer, data->pack.data, MF_ULTRALIGHT_AUTH_PACK_SIZE);
+    } while(false);
+
+    return ret;
+}
+
+MfUltralightError mf_ultralight_poller_async_authenticate(MfUltralightPoller* instance) {
+    uint8_t auth_cmd[2] = {MF_ULTRALIGHT_CMD_AUTH, 0x00};
+    bit_buffer_copy_bytes(instance->tx_buffer, auth_cmd, sizeof(auth_cmd));
+
+    MfUltralightError ret = MfUltralightErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
+    do {
+        error = iso14443_3a_poller_send_standard_frame(
+            instance->iso14443_3a_poller,
+            instance->tx_buffer,
+            instance->rx_buffer,
+            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+        if(error != Iso14443_3aErrorNone) {
+            ret = mf_ultralight_process_error(error);
+            break;
+        }
+        if((bit_buffer_get_size_bytes(instance->rx_buffer) != MF_ULTRALIGHT_AUTH_RESPONSE_SIZE) &&
+           (bit_buffer_get_byte(instance->rx_buffer, 0) != 0xAF)) {
+            ret = MfUltralightErrorAuth;
+            break;
+        }
+        //Save encrypted PICC random number RndB here if needed
     } while(false);
 
     return ret;
