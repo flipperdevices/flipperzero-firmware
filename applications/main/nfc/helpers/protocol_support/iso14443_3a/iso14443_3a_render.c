@@ -11,7 +11,8 @@ void nfc_render_iso14443_3a_info(
 
     nfc_render_iso14443_3a_brief(data, str);
 
-    if(format_type == NfcProtocolFormatTypeFull) {
+    if(format_type == NfcProtocolFormatTypeFull ||
+       format_type == NfcProtocolFormatTypeShortExtra) {
         nfc_render_iso14443_3a_extra(data, str);
     }
 }
