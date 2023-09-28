@@ -43,9 +43,9 @@ Button name | Description
 
 - [x] Application menu
 - [ ] Learn new remote
-- [ ] Use saved remote
+- [x] Use saved remote
     - [x] General button page
-    - [x] Control buttons pag
+    - [x] Control buttons page
     - [x] Navigation buttons page
     - [x] Player buttons page
     - [ ] Custom buttons page
