@@ -10,6 +10,8 @@
 
 static CameraSuiteViewCamera* current_instance = NULL;
 
+bool is_inverted = false;
+
 struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
     FuriStreamBuffer* rx_stream;
@@ -130,11 +132,20 @@ static void save_image(void* _model) {
     if(result) {
         storage_file_write(file, bitmap_header, BITMAP_HEADER_LENGTH);
         int8_t row_buffer[ROW_BUFFER_LENGTH];
-        for(size_t i = 64; i > 0; --i) {
-            for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
-                row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
+        if(is_inverted) {
+            for(size_t i = 64; i > 0; --i) {
+                for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                    row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
+                }
+                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
             }
-            storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
+        } else {
+            for(size_t i = 0; i < 64; ++i) {
+                for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                    row_buffer[j] = model->pixels[i * ROW_BUFFER_LENGTH + j];
+                }
+                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
+            }
         }
     }
 
@@ -186,8 +197,10 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 true);
             break;
         case InputKeyLeft:
-            // Camera: Invert.
+            // Camera: Toggle invert on the ESP32-CAM.
             data[0] = '<';
+            // Toggle invert state locally.
+            is_inverted = !is_inverted;
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
@@ -252,8 +265,8 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 data[0] = 'P';
                 // Initialize the ESP32-CAM onboard torch immediately.
                 furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
-                // Delay for 500ms to make sure flash is on before taking picture.
-                furi_delay_ms(500);
+                // Delay for 25ms to make sure flash is on before taking picture.
+                furi_delay_ms(25);
             }
             // Take picture.
             with_view_model(
@@ -341,41 +354,47 @@ static void camera_on_irq_cb(UartIrqEvent uartIrqEvent, uint8_t data, void* cont
 }
 
 static void process_ringbuffer(UartDumpModel* model, uint8_t byte) {
-    // First char has to be 'Y' in the buffer.
-    if(model->ringbuffer_index == 0 && byte != 'Y') {
+    // The first HEADER_LENGTH bytes are reserved for header information.
+    if(model->ringbuffer_index < HEADER_LENGTH) {
+        // Validate the start of row characters 'Y' and ':'.
+        if(model->ringbuffer_index == 0 && byte != 'Y') {
+            // Incorrect start of frame; reset.
+            return;
+        }
+        if(model->ringbuffer_index == 1 && byte != ':') {
+            // Incorrect start of frame; reset.
+            model->ringbuffer_index = 0;
+            return;
+        }
+        if(model->ringbuffer_index == 2) {
+            // Assign the third byte as the row identifier.
+            model->row_identifier = byte;
+        }
+        model->ringbuffer_index++; // Increment index for the next byte.
         return;
     }
 
-    // Second char has to be ':' in the buffer or reset.
-    if(model->ringbuffer_index == 1 && byte != ':') {
-        model->ringbuffer_index = 0;
-        process_ringbuffer(model, byte);
-        return;
-    }
+    // Store pixel value directly after the header.
+    model->row_ringbuffer[model->ringbuffer_index - HEADER_LENGTH] = byte;
+    model->ringbuffer_index++; // Increment index for the next byte.
 
-    // Assign current byte to the ringbuffer.
-    model->row_ringbuffer[model->ringbuffer_index] = byte;
-    // Increment the ringbuffer index.
-    ++model->ringbuffer_index;
+    // Check whether the ring buffer is filled.
+    if(model->ringbuffer_index >= RING_BUFFER_LENGTH) {
+        model->ringbuffer_index = 0; // Reset the ring buffer index.
+        model->initialized = true; // Set the connection as successfully established.
 
-    // Let's wait 'till the buffer fills.
-    if(model->ringbuffer_index < RING_BUFFER_LENGTH) {
-        return;
-    }
+        // Compute the starting index for the row in the pixel buffer.
+        size_t row_start_index = model->row_identifier * ROW_BUFFER_LENGTH;
 
-    // Flush the ringbuffer to the framebuffer.
-    model->ringbuffer_index = 0; // Reset the ringbuffer
-    model->initialized = true; // Established the connection successfully.
-    size_t row_start_index =
-        model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
+        // Ensure the row start index is within the valid range.
+        if(row_start_index > LAST_ROW_INDEX) {
+            row_start_index = 0; // Reset to a safe value in case of an overflow.
+        }
 
-    if(row_start_index > LAST_ROW_INDEX) { // Failsafe
-        row_start_index = 0;
-    }
-
-    for(size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
-        model->pixels[row_start_index + i] =
-            model->row_ringbuffer[i + 3]; // Writing the remaining 16 bytes into the frame buffer
+        // Flush the contents of the ring buffer to the pixel buffer.
+        for(size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
+            model->pixels[row_start_index + i] = model->row_ringbuffer[i];
+        }
     }
 }
 
@@ -420,27 +439,43 @@ static int32_t camera_worker(void* context) {
 }
 
 CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
+    // Allocate memory for the instance
     CameraSuiteViewCamera* instance = malloc(sizeof(CameraSuiteViewCamera));
 
+    // Allocate the view object
     instance->view = view_alloc();
 
+    // Allocate a stream buffer
     instance->rx_stream = furi_stream_buffer_alloc(2048, 1);
 
-    // Set up views
+    // Allocate model
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(UartDumpModel));
-    view_set_context(instance->view, instance); // furi_assert crashes in events without this
+
+    // Set context
+    view_set_context(instance->view, instance);
+
+    // Set draw callback
     view_set_draw_callback(instance->view, (ViewDrawCallback)camera_suite_view_camera_draw);
+
+    // Set input callback
     view_set_input_callback(instance->view, camera_suite_view_camera_input);
+
+    // Set enter callback
     view_set_enter_callback(instance->view, camera_suite_view_camera_enter);
+
+    // Set exit callback
     view_set_exit_callback(instance->view, camera_suite_view_camera_exit);
 
+    // Initialize camera model
     with_view_model(
         instance->view,
         UartDumpModel * model,
         { camera_suite_view_camera_model_init(model); },
         true);
 
-    instance->worker_thread = furi_thread_alloc_ex("UsbUartWorker", 2048, camera_worker, instance);
+    // Allocate a thread for this camera to run on.
+    FuriThread* thread = furi_thread_alloc_ex("UsbUartWorker", 2048, camera_worker, instance);
+    instance->worker_thread = thread;
     furi_thread_start(instance->worker_thread);
 
     // Enable uart listener

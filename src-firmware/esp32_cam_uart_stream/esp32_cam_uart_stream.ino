@@ -1,6 +1,6 @@
 #include "esp_camera.h"
 
-// Pin definitions
+// Define Pin numbers used by the camera
 #define FLASH_GPIO_NUM    4
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
@@ -20,7 +20,7 @@
 #define Y8_GPIO_NUM       34
 #define Y9_GPIO_NUM       35
 
-// Camera configuration
+// Structure to hold the camera configuration parameters
 camera_config_t config;
 
 // Function prototypes
@@ -28,44 +28,44 @@ void handleSerialInput();
 void initializeCamera();
 void processImage(camera_fb_t* fb);
 void ditherImage(camera_fb_t* fb);
-bool isDarkBit(uint8_t bit);
 
-// Dithering algorithm options
+// Enumeration to represent the available dithering algorithms
 enum DitheringAlgorithm {
   FLOYD_STEINBERG,
   JARVIS_JUDICE_NINKE,
   STUCKI
 };
 
-// Default dithering algorithm
-DitheringAlgorithm ditherAlgorithm = FLOYD_STEINBERG;
-
-// Serial input flags
-bool disableDithering = false;
-bool invert = false;
-bool isFlashOn = false;
-bool rotated = false;
-bool stopStream = false;
+// Variables to hold state and configurations
+DitheringAlgorithm ditherAlgorithm = FLOYD_STEINBERG; // Holds the currently selected dithering algorithm
+bool disableDithering = false; // Flag to enable or disable dithering
+bool invert = false; // Flag to invert pixel colors
+bool isFlashOn = false; // Flag to represent the flash state
+bool rotated = false; // Flag to represent whether the image is rotated
+bool stopStream = false; // Flag to stop or start the stream
 
 void setup() {
+  // Start serial communication at 230400 baud rate
   Serial.begin(230400);
   initializeCamera();
 }
 
 void loop() {
   if (!stopStream) {
-    // Frame buffer capture and processing
-    camera_fb_t* fb = esp_camera_fb_get();
+    // Capture and process the frame buffer if streaming is enabled
+    camera_fb_t* fb = esp_camera_fb_get(); // Get the frame buffer from the camera
     if (fb) {
       processImage(fb);
+      // Return the frame buffer back to the camera driver
       esp_camera_fb_return(fb);
     }
-    delay(50);
+    delay(50); // Delay for 50ms between each frame
   }
 
-  handleSerialInput(); // Process serial input commands
+  handleSerialInput(); // Handle any available serial input commands
 }
 
+// Function to handle the serial input commands and perform the associated actions
 void handleSerialInput() {
   if (Serial.available() > 0) {
     char input = Serial.read();
@@ -129,7 +129,7 @@ void handleSerialInput() {
 }
 
 void initializeCamera() {
-  // Set camera configuration
+  // Set camera configurations
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -167,9 +167,9 @@ void initializeCamera() {
     return;
   }
 
-  // Set high contrast to make dithering easier
+  // Set initial contrast.
   sensor_t* s = esp_camera_sensor_get();
-  s->set_contrast(s, 2);
+  s->set_contrast(s, 0);
 
   // Set rotation
   s->set_vflip(s, true);  // Vertical flip
@@ -177,40 +177,49 @@ void initializeCamera() {
 }
 
 void processImage(camera_fb_t* frameBuffer) {
+  // If dithering is not disabled, perform dithering on the image. Dithering is the 
+  // process of approximating the look of a high-resolution grayscale image in a 
+  // lower resolution by binary values (black & white), thereby representing
+  // different shades of gray.
   if (!disableDithering) {
-    ditherImage(frameBuffer);
+    ditherImage(frameBuffer); // Invokes the dithering process on the frame buffer
   }
 
   uint8_t flipper_y = 0;
+
+  // Iterating over specific rows of the frame buffer.
   for (uint8_t y = 28; y < 92; ++y) {
-    // Print the Y coordinate.
-    Serial.print("Y:");
-    Serial.print((char)flipper_y);
-
-    // Print the character.
-    // The y value to use in the frame buffer array.
+    Serial.print("Y:"); // Print "Y:" for every new row.
+    Serial.write(flipper_y); // Send the row identifier as a byte.
+    
+    // Calculate the actual y index in the frame buffer 1D array by multiplying the 
+    // y value with the width of the frame buffer. This gives the starting index 
+    // of the row in the 1D array.
     size_t true_y = y * frameBuffer->width;
-
-    // For each column of 8 pixels in the current row.
-    for (uint8_t x = 16; x < 144; x += 8) {
-      // The current character being constructed.
-      char c = 0;
-
-      // For each pixel in the current column of 8.
-      for (uint8_t j = 0; j < 8; ++j) {
-        if (isDarkBit(frameBuffer->buf[true_y + x + (7 - j)])) {
-          // Shift the bit into the right position
-          c |= (uint8_t)1 << (uint8_t)j;
+    
+    // Iterating over specific columns of each row in the frame buffer.
+    for (uint8_t x = 16; x < 144; x += 8) { // step by 8 as we're packing 8 pixels per byte
+        uint8_t packed_pixels = 0;
+        // Packing 8 pixel values into one byte.
+        for(uint8_t bit = 0; bit < 8; ++bit) {
+             // Check the invert flag and pack the pixels accordingly.
+            if(invert) {
+                // If invert is true, consider pixel as 1 if it's less than 127.
+                if(frameBuffer->buf[true_y + x + bit] < 127) {
+                    packed_pixels |= (1 << (7 - bit));
+                }
+            } else {
+                // If invert is false, consider pixel as 1 if it's more than 127.
+                if(frameBuffer->buf[true_y + x + bit] > 127) {
+                    packed_pixels |= (1 << (7 - bit));
+                }
+            }
         }
-      }
-
-      // Output the character.
-      Serial.print(c);
+        Serial.write(packed_pixels); // Sending packed pixel byte.
     }
 
-    // Move to the next line.
-    ++flipper_y;
-    Serial.flush();
+    ++flipper_y; // Move to the next row.
+    Serial.flush(); // Ensure all data in the Serial buffer is sent before moving to the next iteration.
   }
 }
 
@@ -263,14 +272,5 @@ void ditherImage(camera_fb_t* fb) {
           break;
       }
     }
-  }
-}
-
-// Returns true if the bit is "dark".
-bool isDarkBit(uint8_t bit) {
-  if (invert) {
-    return bit >= 128;
-  } else {
-    return bit < 128;
   }
 }
