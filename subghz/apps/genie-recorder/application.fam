@@ -1,0 +1,13 @@
+App(
+    appid="genie_record",
+    name="Genie Door Recorder",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="genie_record_app",
+    requires=["gui", "subghz"],
+    stack_size=2 * 1024,
+    fap_version=(1, 1),
+    fap_icon="genie.png",
+    fap_category="Sub-GHz",
+    fap_icon_assets="assets",
+    fap_description="Genie Door Signal w/Recorder",
+)
