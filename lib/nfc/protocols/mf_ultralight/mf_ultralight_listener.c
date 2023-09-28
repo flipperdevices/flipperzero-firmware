@@ -28,7 +28,7 @@ static bool mf_ultralight_listener_check_access(
     bool is_write_op = (access_type == MfUltralightListenerAccessTypeWrite);
 
     do {
-        if((instance->features & MfUltralightFeatureSupportAuthentication) == 0) {
+        if((instance->features & MfUltralightFeatureSupportPasswordAuth) == 0) {
             access_success = true;
             break;
         }
@@ -424,7 +424,7 @@ static MfUltralightCommand
 
     do {
         if(!mf_ultralight_support_feature(
-               instance->features, MfUltralightFeatureSupportAuthentication))
+               instance->features, MfUltralightFeatureSupportPasswordAuth))
             break;
 
         MfUltralightAuthPassword password;
@@ -584,7 +584,7 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .callback = mf_ultralight_listener_check_tearing_handler,
     },
     {
-        .cmd = MF_ULTRALIGHT_CMD_AUTH,
+        .cmd = MF_ULTRALIGHT_CMD_PWD_AUTH,
         .cmd_len_bits = 5 * 8,
         .callback = mf_ultralight_listener_auth_handler,
     },

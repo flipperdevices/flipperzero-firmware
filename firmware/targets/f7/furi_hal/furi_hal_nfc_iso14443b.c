@@ -91,6 +91,11 @@ static FuriHalNfcError furi_hal_nfc_iso14443b_poller_deinit(FuriHalSpiBusHandle*
 const FuriHalNfcTechBase furi_hal_nfc_iso14443b = {
     .poller =
         {
+            .compensation =
+                {
+                    .fdt = FURI_HAL_NFC_POLLER_FDT_COMP_FC,
+                    .fwt = FURI_HAL_NFC_POLLER_FWT_COMP_FC,
+                },
             .init = furi_hal_nfc_iso14443b_poller_init,
             .deinit = furi_hal_nfc_iso14443b_poller_deinit,
             .wait_event = furi_hal_nfc_wait_event_common,
@@ -98,5 +103,5 @@ const FuriHalNfcTechBase furi_hal_nfc_iso14443b = {
             .rx = furi_hal_nfc_common_fifo_rx,
         },
 
-    .listener = {0},
+    .listener = {},
 };
