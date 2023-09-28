@@ -13,16 +13,18 @@ The application works with standard `.ir` files, but for the buttons to work, th
 ## Process
 
 - [ ] Learn new remote
-- [x] Use saved remote
-- [ ] Saved remote general category
-- [ ] Saved remote control category
-- [x] Saved remote navigation category
-- [x] Saved remote player category
-- [ ] Saved remote custom category
-- [ ] Saved remote full button list
-- [ ] Delete saved remote file
-- [ ] Edit saved remote file
+- [ ] Use saved remote
+    - [ ] Saved remote general category
+    - [ ] Saved remote control category
+    - [x] Saved remote navigation category
+    - [x] Saved remote player category
+    - [ ] Saved remote custom category
+    - [ ] Saved remote full button list
+    - [ ] Delete saved remote file
+    - [ ] Edit saved remote file
 - [ ] Application settings
+    - [ ] Vertical/Horizontal setting
+    - [ ] Command repeat setting
 
 ## Screens
 
