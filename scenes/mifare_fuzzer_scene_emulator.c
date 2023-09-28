@@ -1,4 +1,6 @@
 #include "../mifare_fuzzer_i.h"
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 uint8_t tick_counter = 0;
 uint8_t attack_step = 0;
@@ -77,10 +79,12 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
         if(event.event == MifareFuzzerEventStartAttack) {
             NfcDevice* nfc_device = NULL;
             const MfClassicData* mf_classic_data = NULL;
+            bool nfc_device_parsed = false;
             if(app->card_file_path) {
                 nfc_device = app->worker->nfc_device;
                 const char* path = furi_string_get_cstr(app->card_file_path);
                 if(nfc_device_load(nfc_device, path)) {
+                    nfc_device_parsed = true;
                     mf_classic_data = nfc_device_get_data(nfc_device, NfcProtocolMfClassic);
                     if(mf_classic_data->type == MfClassicType1k) {
                         app->card = MifareCardClassic1k;
@@ -203,10 +207,15 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
 
             // Start worker
             mifare_fuzzer_worker_start(app->worker);
+
+            if(nfc_device_parsed) {
+                notification_message(app->notifications, &sequence_blink_start_magenta);
+            }
         } else if(event.event == MifareFuzzerEventStopAttack) {
             //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_event() :: MifareFuzzerEventStopAttack");
             // Stop worker
             mifare_fuzzer_worker_stop(app->worker);
+            notification_message(app->notifications, &sequence_blink_stop);
         } else if(event.event == MifareFuzzerEventIncrementTicks) {
             if(!emulator->is_attacking) {
                 if(emulator->ticks_between_cards < MIFARE_FUZZER_MAX_TICKS_BETWEEN_CARDS) {
@@ -257,6 +266,7 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
 void mifare_fuzzer_scene_emulator_on_exit(void* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_exit()");
     MifareFuzzerApp* app = context;
+    notification_message(app->notifications, &sequence_blink_stop);
     mifare_fuzzer_worker_stop(app->worker);
 
     if(app->attack == MifareFuzzerAttackLoadUidsFromFile) {
