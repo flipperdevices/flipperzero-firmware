@@ -3,7 +3,9 @@
    https://github.com/DarkFlippers/unleashed-firmware
 
    The original project is licensed under the GNU GPLv3
-   No modifications were made to this file.
+
+   Modifications made:
+   - Added function infrared_signal_transmit_times()
 */
 
 #pragma once
@@ -51,3 +53,4 @@ bool infrared_signal_search_and_read(
     const FuriString* name);
 
 void infrared_signal_transmit(InfraredSignal* signal);
+void infrared_signal_transmit_times(InfraredSignal* signal, int times);

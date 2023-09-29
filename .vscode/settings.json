@@ -7,6 +7,7 @@
         "xremote_app.h": "c",
         "xremote_saved_view.h": "c",
         "infrared_remote.h": "c",
-        "xremote_navigation_view.h": "c"
+        "xremote_navigation_view.h": "c",
+        "xremote_settings_view.h": "c"
     }
 }

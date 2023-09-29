@@ -18,6 +18,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#include <flipper_format/flipper_format.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
@@ -28,14 +29,26 @@
 #define xremote_app_assert(cond, var) if (!cond) return var
 
 typedef struct {
+    ViewOrientation orientation;
+    uint32_t repeat_count;
+} XRemoteAppSettings;
+
+XRemoteAppSettings* xremote_app_settings_alloc();
+void xremote_app_settings_free(XRemoteAppSettings* settings);
+
+typedef struct {
+    XRemoteAppSettings* app_settings;
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
+    void* app_argument;
     Gui* gui;
-    void* arg;
 } XRemoteAppContext;
 
 XRemoteAppContext* xremote_app_context_alloc(void* arg);
 void xremote_app_context_free(XRemoteAppContext* ctx);
+
+bool xremote_app_settings_store(XRemoteAppSettings* settings);
+bool xremote_app_settings_load(XRemoteAppSettings* settings);
 
 typedef XRemoteView* (*XRemoteViewAllocator)(NotificationApp* notifications);
 typedef void (*XRemoteAppClearCallback)(void *context);
