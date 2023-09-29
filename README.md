@@ -167,8 +167,91 @@ The [Official documentation](https://github.com/flipperdevices/flipperzero-firmw
 
 ### Source code
 #### Include files
-#### Main function
+##### Regular headers
+##### Image assets
+
+If you want to insert images in your application, you have to specify the directory of your image in the `fap_icon_assets` of your `application.fam`.
+Then, include it as a header file like that: `{app_id}_icon.h`.
+For example, if you want to include an image in your application `example`, you have to put this in your code:
+```c
+#include "example_icons.h"
+```
+
+This line will do some magic for you, generate all necessary variables and initialize it with image's values.
+All you have to do is accessing to your image's variable with this pattern: `I_{image_name}`.
+For istance, if your image is named `icon.png`, the generated variable is `I_icon`.
+
 #### Callbacks
+
+An important part of the application is the implementation of callbacks to let the Flipper Zero know how you want it to behave. 
+Those callbacks are simply functions which are called by an handler.
+In our case, we will use a draw and an input callbacks as specified below.
+
+##### Draw
+
+The goal of this callback is to draw the GUI of your application.
+It will be called each times the GUI needs to be refreshed.
+
+```c
+void draw_callback(Canvas* canvas, void* context);
+```
+
+- `canvas`: An internal variable that you will use to draw on the GUI.
+- `context`: A variable which you can define and use to get some data in your callbacks.
+
+The first step is to clear the screen:
+```c
+canvas_clear(canvas);
+```
+
+Now, you can add everything you want to your GUI.
+###### Texts
+
+There are several given functions to configure and write text.
+For example, you can set the color of the font with the line below.
+
+```c
+canvas_set_color(canvas, ColorBlack);
+```
+
+To set the font of the text, you can do:
+```c
+canvas_set_font(canvas, FontSecondary);
+```
+
+Then, to draw the text the function is:
+```c
+canvas_draw_str_aligned(
+    canvas,     // Callback variable
+    1,          // x coordinate
+    1,          // y coordinate
+    AlignLeft,  // Horizontal alignement
+    AlignTop,   // Vertical alignement
+    "example"   // Text to display
+    );
+```
+
+###### Image
+
+Display images is very simplified by the build system.
+It generate and initialize the variables for you and you only have to give this
+variable to a function.
+
+```c
+canvas_draw_icon(
+    canvas,     // Callback variable
+    10,         // x coordinate
+    10,         // y coordinate
+    &I_icon     // Image to display
+    );
+```
+
 ##### Inputs
-##### GUI
+
+#### Main function
+
+##### Allocations
+##### Input handling
+##### Free the memory
+
 # Going further
