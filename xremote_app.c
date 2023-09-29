@@ -8,7 +8,8 @@
 
 #include "xremote_app.h"
 
-#define XREMOTE_APP_SETTINGS    "infrared/assets/xremote.cfg"
+
+#define XREMOTE_APP_SETTINGS    ANY_PATH("infrared/assets/xremote.cfg")
 #define TAG                     "XRemoteApp"
 
 XRemoteAppSettings* xremote_app_settings_alloc()
@@ -30,19 +31,21 @@ bool xremote_app_settings_store(XRemoteAppSettings* settings)
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_file_alloc(storage);
 
-    FURI_LOG_I(TAG, "store file: \'%s\'", XREMOTE_APP_SETTINGS);
+    FURI_LOG_I(TAG, "store config file: \'%s\'", XREMOTE_APP_SETTINGS);
+    bool vertical = settings->orientation == ViewOrientationVertical;
     bool success = false;
 
     do {
+        /* Write header in config file */
         if (!flipper_format_file_open_always(ff, XREMOTE_APP_SETTINGS)) break;
         if (!flipper_format_write_header_cstr(ff, "XRemote settings file", 1)) break;
+        if (!flipper_format_write_comment_cstr(ff, "")) break;
 
-        if (settings->orientation == ViewOrientationHorizontal &&
-            !flipper_format_write_string_cstr(ff, "orientation", "horizontal")) break;
-        else if (settings->orientation == ViewOrientationVertical &&
-            !flipper_format_write_string_cstr(ff, "orientation", "vertical")) break;
+        /* Write actual configuration to the settings file */
+        const char *orientation = vertical ? "vertical" : "horizontal";
+        if (!flipper_format_write_string_cstr(ff, "orientation", orientation)) break;
+        if (!flipper_format_write_uint32(ff, "cmd_repeat", &settings->repeat_count, 1)) break;
 
-        if (!flipper_format_write_uint32(ff, "repeat", &settings->repeat_count, 1)) break;
         success = true;
     } while(false);
 
@@ -59,22 +62,25 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings)
     FuriString* header = furi_string_alloc();
     FuriString* orient = furi_string_alloc();
 
-    FURI_LOG_I(TAG, "load file: \'%s\'", XREMOTE_APP_SETTINGS);
+    FURI_LOG_I(TAG, "load config file: \'%s\'", XREMOTE_APP_SETTINGS);
     uint32_t version = 0;
     uint32_t repeat = 0;
     bool success = false;
 
     do {
+        /* Open file and read the header */
         if (!flipper_format_buffered_file_open_existing(ff, XREMOTE_APP_SETTINGS)) break;
         if (!flipper_format_read_header(ff, header, &version)) break;
         if (!furi_string_equal(header, "XRemote settings file") || (version != 1)) break;
 
+        /* Read config data from the file */
         if (!flipper_format_read_string(ff, "orientation", orient)) break;
-        if (!flipper_format_read_uint32(ff, "repeat", &repeat, 1)) break;
+        if (!flipper_format_read_uint32(ff, "cmd_repeat", &repeat, 1)) break;
 
-        if (!furi_string_equal(orient, "vertical"))
+        /* Parse config data from the buffer */
+        if (furi_string_equal(orient, "vertical"))
             settings->orientation = ViewOrientationVertical;
-        else if (!furi_string_equal(orient, "horizontal"))
+        else if (furi_string_equal(orient, "horizontal"))
             settings->orientation = ViewOrientationHorizontal;
 
         settings->repeat_count = repeat;
@@ -92,12 +98,18 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings)
 XRemoteAppContext* xremote_app_context_alloc(void *arg)
 {
     XRemoteAppContext* ctx = malloc(sizeof(XRemoteAppContext));
+    ctx->app_argument = arg;
+
+    /* Open GUI and norification records */
     ctx->gui = furi_record_open(RECORD_GUI);
     ctx->notifications = furi_record_open(RECORD_NOTIFICATION);
-    ctx->view_dispatcher = view_dispatcher_alloc();
-    ctx->app_settings = xremote_app_settings_alloc();
-    ctx->arg = arg;
 
+    /* Allocate and load global app settings */
+    ctx->app_settings = xremote_app_settings_alloc();
+    xremote_app_settings_load(ctx->app_settings);
+
+    /* Allocate and setup view dispatcher */
+    ctx->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(ctx->view_dispatcher);
     view_dispatcher_attach_to_gui(ctx->view_dispatcher, ctx->gui, ViewDispatcherTypeFullscreen);
     return ctx;

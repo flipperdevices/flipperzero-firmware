@@ -3,7 +3,7 @@
     @license This project is released under the GNU GPLv3 License
  *  @copyright (c) 2023 Sandro Kalatozishvili (s.kalatoz@gmail.com)
  *
- * @brief Remote controller application menu and view factory.
+ * @brief XRemote settins functionality and menu.
  */
 
 #include "xremote_settings.h"

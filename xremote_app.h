@@ -40,8 +40,8 @@ typedef struct {
     XRemoteAppSettings* app_settings;
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
+    void* app_argument;
     Gui* gui;
-    void* arg;
 } XRemoteAppContext;
 
 XRemoteAppContext* xremote_app_context_alloc(void* arg);
