@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Game Mode Menu Creation When Empty. Custom Game Mode Menu will no longer get reset on new install.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/de0d47367169a6c94d37ae5575a2170e4eac8a45)
 - Updated: [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork) [Add Ukulele tuning #2 (By portalsoup)](https://github.com/besya/flipperzero-tuning-fork/pull/2)
 - Added: [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
+- Added: [XRemote (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 
@@ -406,6 +407,7 @@ $ ./fbt dolphin_ext
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
+- [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [Radar Scanner (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 - [Radiation Sensor (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
@@ -457,7 +459,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
+- [XRemote (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
 
