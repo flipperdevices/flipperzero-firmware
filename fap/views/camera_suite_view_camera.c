@@ -136,19 +136,22 @@ static void save_image(void* _model) {
                 // Turn on local jpeg save. When this is enabled the ESP32-CAM
                 // will save the image to the SD card and saving the image to
                 // the Flipper SD card will be disabled/skipped.
-                furi_hal_uart_tx(FuriHalUartIdUSART1, 'J', 1);
+                unsigned char jpeg_on = 'J';
+                furi_hal_uart_tx(FuriHalUartIdUSART1, &jpeg_on, 1);
             } else {
+                unsigned char jpeg_off = 'j';
                 // Turn off local jpeg save.
-                furi_hal_uart_tx(FuriHalUartIdUSART1, 'j', 1);
+                furi_hal_uart_tx(FuriHalUartIdUSART1, &jpeg_off, 1);
             }
             // Initiate the onboard ESP32-CAM picture sequence. So far this
-            // includes turning on the flash and potentially saving jpeg
-            // locally to the ESP32-CAM SD card.
-            furi_hal_uart_tx(FuriHalUartIdUSART1, 'P', 1);
+            // includes turning on the flash and alternatively saving jpeg
+            // locally to the ESP32-CAM SD card if enabled.
+            unsigned char take_picture = 'P';
+            furi_hal_uart_tx(FuriHalUartIdUSART1, &take_picture, 1);
         }
         // If saving jpeg is enabled locally to the ESP32-CAM SD card, skip
         // writing the image data to the Flipper Zero SD card.
-        if(!app->saveJpeg) {
+        if(!app->jpeg) {
             // Write locally to the Flipper Zero SD card in the DCIM folder.
             int8_t row_buffer[ROW_BUFFER_LENGTH];
             if(is_inverted) {
