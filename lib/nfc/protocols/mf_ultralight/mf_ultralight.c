@@ -581,7 +581,8 @@ bool mf_ultralight_is_all_data_read(const MfUltralightData* data) {
     furi_assert(data);
 
     bool all_read = false;
-    if(data->pages_read == data->pages_total) {
+    if(data->pages_read == data->pages_total ||
+       (data->type == MfUltralightTypeMfulC && data->pages_read == data->pages_total - 4)) {
         // Having read all the pages doesn't mean that we've got everything.
         // By default PWD is 0xFFFFFFFF, but if read back it is always 0x00000000,
         // so a default read on an auth-supported NTAG is never complete.
