@@ -20,7 +20,8 @@ struct NfcDevice {
     NfcProtocol protocol; /**< Numeric identifier of the data's protocol*/
     NfcDeviceData* protocol_data; /**< Pointer to the NFC device data. */
 
-    NfcLoadingCallback loading_callback; /**< Pointer to the function to be called upon loading completion. */
+    NfcLoadingCallback
+        loading_callback; /**< Pointer to the function to be called upon loading completion. */
     void* loading_callback_context; /**< Pointer to the context to be passed to the loading callback. */
 };
 

@@ -68,6 +68,8 @@ static const NfcProtocol nfc_protocol_iso15693_3_children_protocol[] = {
     NfcProtocolSlix,
 };
 
+/* Add new child protocol lists here (if necessary) */
+
 /**
  * @brief Flattened description of the NFC protocol tree.
  *
@@ -138,6 +140,7 @@ static const NfcProtocolTreeNode nfc_protocol_nodes[NfcProtocolNum] = {
             .children_num = 0,
             .children_protocol = NULL,
         },
+    /* Add new protocols here */
 };
 
 NfcProtocol nfc_protocol_get_parent(NfcProtocol protocol) {
