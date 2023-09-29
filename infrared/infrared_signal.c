@@ -3,7 +3,9 @@
    https://github.com/DarkFlippers/unleashed-firmware
 
    The original project is licensed under the GNU GPLv3
-   No modifications were made to this file.
+
+   Modifications made:
+   - Added function infrared_signal_transmit_times()
 */
 
 #include "infrared_signal.h"
@@ -319,5 +321,20 @@ void infrared_signal_transmit(InfraredSignal* signal) {
     } else {
         InfraredMessage* message = &signal->payload.message;
         infrared_send(message, 1);
+    }
+}
+
+void infrared_signal_transmit_times(InfraredSignal* signal, int times) {
+    if(signal->is_raw) {
+        InfraredRawSignal* raw_signal = &signal->payload.raw;
+        infrared_send_raw_ext(
+            raw_signal->timings,
+            raw_signal->timings_size,
+            true,
+            raw_signal->frequency,
+            raw_signal->duty_cycle);
+    } else {
+        InfraredMessage* message = &signal->payload.message;
+        infrared_send(message, times);
     }
 }

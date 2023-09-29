@@ -8,12 +8,94 @@
 
 #include "xremote_app.h"
 
+#define XREMOTE_APP_SETTINGS    "infrared/assets/xremote.cfg"
+#define TAG                     "XRemoteApp"
+
+XRemoteAppSettings* xremote_app_settings_alloc()
+{
+    XRemoteAppSettings* settings = malloc(sizeof(XRemoteAppSettings));
+    settings->orientation = ViewOrientationVertical;
+    settings->repeat_count = 1;
+    return settings;
+}
+
+void xremote_app_settings_free(XRemoteAppSettings* settings)
+{
+    xremote_app_assert_void(settings);
+    free(settings);
+}
+
+bool xremote_app_settings_store(XRemoteAppSettings* settings)
+{
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
+
+    FURI_LOG_I(TAG, "store file: \'%s\'", XREMOTE_APP_SETTINGS);
+    bool success = false;
+
+    do {
+        if (!flipper_format_file_open_always(ff, XREMOTE_APP_SETTINGS)) break;
+        if (!flipper_format_write_header_cstr(ff, "XRemote settings file", 1)) break;
+
+        if (settings->orientation == ViewOrientationHorizontal &&
+            !flipper_format_write_string_cstr(ff, "orientation", "horizontal")) break;
+        else if (settings->orientation == ViewOrientationVertical &&
+            !flipper_format_write_string_cstr(ff, "orientation", "vertical")) break;
+
+        if (!flipper_format_write_uint32(ff, "repeat", &settings->repeat_count, 1)) break;
+        success = true;
+    } while(false);
+
+    furi_record_close(RECORD_STORAGE);
+    flipper_format_free(ff);
+
+    return success;
+}
+
+bool xremote_app_settings_load(XRemoteAppSettings* settings)
+{
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
+    FuriString* header = furi_string_alloc();
+    FuriString* orient = furi_string_alloc();
+
+    FURI_LOG_I(TAG, "load file: \'%s\'", XREMOTE_APP_SETTINGS);
+    uint32_t version = 0;
+    uint32_t repeat = 0;
+    bool success = false;
+
+    do {
+        if (!flipper_format_buffered_file_open_existing(ff, XREMOTE_APP_SETTINGS)) break;
+        if (!flipper_format_read_header(ff, header, &version)) break;
+        if (!furi_string_equal(header, "XRemote settings file") || (version != 1)) break;
+
+        if (!flipper_format_read_string(ff, "orientation", orient)) break;
+        if (!flipper_format_read_uint32(ff, "repeat", &repeat, 1)) break;
+
+        if (!furi_string_equal(orient, "vertical"))
+            settings->orientation = ViewOrientationVertical;
+        else if (!furi_string_equal(orient, "horizontal"))
+            settings->orientation = ViewOrientationHorizontal;
+
+        settings->repeat_count = repeat;
+        success = true;
+    } while(false);
+
+    furi_record_close(RECORD_STORAGE);
+    furi_string_free(orient);
+    furi_string_free(header);
+    flipper_format_free(ff);
+
+    return success;
+}
+
 XRemoteAppContext* xremote_app_context_alloc(void *arg)
 {
     XRemoteAppContext* ctx = malloc(sizeof(XRemoteAppContext));
     ctx->gui = furi_record_open(RECORD_GUI);
     ctx->notifications = furi_record_open(RECORD_NOTIFICATION);
     ctx->view_dispatcher = view_dispatcher_alloc();
+    ctx->app_settings = xremote_app_settings_alloc();
     ctx->arg = arg;
 
     view_dispatcher_enable_queue(ctx->view_dispatcher);
@@ -25,6 +107,7 @@ void xremote_app_context_free(XRemoteAppContext* ctx)
 {
     xremote_app_assert_void(ctx);
     notification_internal_message(ctx->notifications, &sequence_reset_blue);
+    xremote_app_settings_free(ctx->app_settings);
     view_dispatcher_free(ctx->view_dispatcher);
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
@@ -103,7 +186,8 @@ void xremote_app_submenu_alloc(XRemoteApp* app, uint32_t index, ViewNavigationCa
     app->submenu = submenu_alloc();
     app->submenu_id = index;
 
-    submenu_set_orientation(app->submenu, ViewOrientationVertical);
+    XRemoteAppSettings *settings = app->app_ctx->app_settings;
+    submenu_set_orientation(app->submenu, settings->orientation);
     view_set_previous_callback(submenu_get_view(app->submenu), prev_cb);
 
     ViewDispatcher* view_disp = app->app_ctx->view_dispatcher;

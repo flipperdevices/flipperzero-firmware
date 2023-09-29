@@ -30,8 +30,8 @@ Button name | Description
 `Vol_dn`    | Volume down
 `Ch_next`   | Next channel
 `Ch_prev`   | Previous channel
-`Jump_fo`   | Jump forward
-`Jump_ba`   | Jump backward
+`Next`      | Jump forward
+`Prev`      | Jump backward
 `Fast_fo`   | Fast forward
 `Fast_ba`   | Fast backward
 `Play_pa`   | Play/Pause
