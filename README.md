@@ -43,6 +43,7 @@ Button name | Description
 
 - [x] Application menu
 - [ ] Learn new remote
+- [ ] IR signal analyzer
 - [x] Use saved remote
     - [x] General button page
     - [x] Control buttons page
@@ -50,11 +51,14 @@ Button name | Description
     - [x] Player buttons page
     - [ ] Custom buttons page
     - [ ] Full button list
-    - [ ] Delete remote file
     - [ ] Edit remote file
+    - [ ] Delete remote file
 - [ ] Application settings
-    - [ ] Vertical/Horizontal menu
-    - [ ] IR command repeat count
+    - [x] Load settings from the file
+    - [x] Store settings to the file
+    - [x] Vertical/Horizontal menu
+    - [x] IR command repeat count
+    - [ ] GUI to change settings
 
 ## Screens
 
