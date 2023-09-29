@@ -24,7 +24,7 @@ extern "C" {
  * as the base_poller parameter, otherwise it must be a pointer to another poller instance
  * (compare iso14443_3a/iso14443_3a_poller.c and iso14443_4a/iso14443_4a_poller.c).
  *
- * @param[in] base_poller pointer to the base poller instance.
+ * @param[in] base_poller pointer to the parent poller instance.
  * @returns pointer to the allocated poller instance.
  */
 typedef NfcGenericInstance* (*NfcPollerAlloc)(NfcGenericInstance* base_poller);
@@ -39,8 +39,10 @@ typedef void (*NfcPollerFree)(NfcGenericInstance* instance);
 /**
  * @brief Set the callback function to handle events emitted by the poller instance.
  *
- * @param[in,out] poller
- * @param[in] callback pointer to the user-defined
+ * @see nfc_generic_event.h for the callback description.
+ *
+ * @param[in,out] poller pointer to the protocol-specific poller instance.
+ * @param[in] callback pointer to the user-defined callback function which will receive events.
  * @param[in] context pointer to the user-specific context (will be passed to the callback).
  */
 typedef void (
