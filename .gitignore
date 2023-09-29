@@ -1,15 +1,12 @@
-*.zip
 *.exe
+*.zip
 .DS_Store
 .clang-format
 .editorconfig
+.flag
 .idea
 .submodules/*
 .vscode
-/firmware/cli/*
-/firmware/cli/**/*
-!/firmware/cli/cli-install.bat
-!/firmware/cli/arduino-cli.yaml
 /venv
 __pycache__
 dist/*
