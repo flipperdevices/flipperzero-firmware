@@ -130,21 +130,41 @@ static void save_image(void* _model) {
     // If the file was opened successfully, write the bitmap header and the
     // image data.
     if(result) {
-        storage_file_write(file, bitmap_header, BITMAP_HEADER_LENGTH);
-        int8_t row_buffer[ROW_BUFFER_LENGTH];
-        if(is_inverted) {
-            for(size_t i = 64; i > 0; --i) {
-                for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
-                    row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
-                }
-                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
+        CameraSuite* app = current_instance->context;
+        if(app->flash) {
+            if(app->jpeg) {
+                // Turn on local jpeg save. When this is enabled the ESP32-CAM
+                // will save the image to the SD card and saving the image to
+                // the Flipper SD card will be disabled/skipped.
+                furi_hal_uart_tx(FuriHalUartIdUSART1, 'J', 1);
+            } else {
+                // Turn off local jpeg save.
+                furi_hal_uart_tx(FuriHalUartIdUSART1, 'j', 1);
             }
-        } else {
-            for(size_t i = 0; i < 64; ++i) {
-                for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
-                    row_buffer[j] = model->pixels[i * ROW_BUFFER_LENGTH + j];
+            // Initiate the onboard ESP32-CAM picture sequence. So far this
+            // includes turning on the flash and potentially saving jpeg
+            // locally to the ESP32-CAM SD card.
+            furi_hal_uart_tx(FuriHalUartIdUSART1, 'P', 1);
+        }
+        // If saving jpeg is enabled locally to the ESP32-CAM SD card, skip
+        // writing the image data to the Flipper Zero SD card.
+        if(!app->saveJpeg) {
+            // Write locally to the Flipper Zero SD card in the DCIM folder.
+            int8_t row_buffer[ROW_BUFFER_LENGTH];
+            if(is_inverted) {
+                for(size_t i = 64; i > 0; --i) {
+                    for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                        row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
+                    }
+                    storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
                 }
-                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
+            } else {
+                for(size_t i = 0; i < 64; ++i) {
+                    for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                        row_buffer[j] = model->pixels[i * ROW_BUFFER_LENGTH + j];
+                    }
+                    storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
+                }
             }
         }
     }
@@ -259,20 +279,12 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 true);
             break;
         case InputKeyOk: {
-            CameraSuite* app = current_instance->context;
-            // If flash is enabled, flash the onboard ESP32-CAM LED.
-            if(app->flash) {
-                data[0] = 'P';
-                // Initialize the ESP32-CAM onboard torch immediately.
-                furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
-                // Delay for 25ms to make sure flash is on before taking picture.
-                furi_delay_ms(25);
-            }
             // Take picture.
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
+                    // If flash is enabled, flash the onboard ESP32-CAM LED.
                     camera_suite_play_happy_bump(instance->context);
                     camera_suite_play_input_sound(instance->context);
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);

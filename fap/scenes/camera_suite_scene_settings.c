@@ -39,6 +39,16 @@ const uint32_t flash_value[2] = {
     CameraSuiteFlashOn,
 };
 
+const char* const jpeg_text[2] = {
+    "OFF",
+    "ON",
+};
+
+const uint32_t jpeg_value[2] = {
+    CameraSuiteJpegOff,
+    CameraSuiteJpegOn,
+};
+
 const char* const haptic_text[2] = {
     "OFF",
     "ON",
@@ -91,6 +101,14 @@ static void camera_suite_scene_settings_set_flash(VariableItem* item) {
 
     variable_item_set_current_value_text(item, flash_text[index]);
     app->flash = flash_value[index];
+}
+
+static void camera_suite_scene_settings_set_jpeg(VariableItem* item) {
+    CameraSuite* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, jpeg_text[index]);
+    app->jpeg = jpeg_value[index];
 }
 
 static void camera_suite_scene_settings_set_haptic(VariableItem* item) {
@@ -153,6 +171,17 @@ void camera_suite_scene_settings_on_enter(void* context) {
     value_index = value_index_uint32(app->flash, flash_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, flash_text[value_index]);
+
+    // Save JPEG to ESP32-CAM sd-card instead of Flipper Zero sd-card ON/OFF
+    item = variable_item_list_add(
+        app->variable_item_list,
+        "Save as JPEG to ESP32-CAM sd-card:",
+        2,
+        camera_suite_scene_settings_set_jpeg,
+        app);
+    value_index = value_index_uint32(app->jpeg, jpeg_value, 2);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, jpeg_text[value_index]);
 
     // Haptic FX ON/OFF
     item = variable_item_list_add(
