@@ -1,6 +1,6 @@
 /**
  * @file nfc_device_base_i.h
- * @brief Abstract interface definitions for the NFC device class.
+ * @brief Abstract interface definitions for the NFC device system.
  *
  * This file is an implementation detail. It must not be included in
  * any public API-related headers.
