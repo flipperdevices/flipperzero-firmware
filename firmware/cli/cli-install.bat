@@ -6,7 +6,7 @@ set CONFIG_FILE=--config-file .\arduino-cli.yaml
 set DEFAULT_BOARD_FQBN=esp32:esp32:esp32cam
 set SELECTED_BOARD=%DEFAULT_BOARD_FQBN%
 set CLI_FOUND_FOLLOW_UP=0
-set COMPILE_FLAG=..\compile.flag
+set COMPILE_FLAG=compile.flag
 
 echo Initializing...
 
@@ -39,9 +39,16 @@ if not exist "%CLI_TEMP%" (
     echo Assets already installed. Skipping...
 )
 
-echo Ensure your Flipper Zero is plugged in via USB before continuing.
+echo.
+echo -------------------------------------------------------------------------
+echo Make sure your Flipper Zero is plugged in via a transfer capable USB.
+echo Then on your Flipper Zero, open the GPIO menu and select USB-UART Bridge.
+echo If you have already done this, you may skip this step.
+echo -------------------------------------------------------------------------
+echo.
 pause
 
+echo.
 echo Ready for installation...
 
 if not exist "%COMPILE_FLAG%" (

@@ -1,13 +1,12 @@
 #include "esp_camera.h"
-#include "Arduino.h"
 #include "FS.h"
 #include "SD_MMC.h"
-#include "soc/soc.h"
-#include "soc/rtc_cntl_reg.h"
-#include "driver/rtc_io.h"
-#include <vector>
-#include <tuple>
-#include <cstdint>
+
+// Potential future includes for use.
+// #include "Arduino.h"
+// #include "soc/soc.h"
+// #include "soc/rtc_cntl_reg.h"
+// #include "driver/rtc_io.h"
 
 // Define Pin numbers used by the camera.
 #define FLASH_GPIO_NUM 4
@@ -70,9 +69,9 @@ bool storeJpeg = false;
 
 void setup() {
   // Disable the brownout detector.
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
-  // Start serial communication at 115200 baud rate.
-  Serial.begin(115200); // Prev 230400
+  // WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+
+  Serial.begin(230400); // 115200
   initializeCamera();
 }
 

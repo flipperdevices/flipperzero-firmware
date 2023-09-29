@@ -10,7 +10,6 @@
 /firmware/cli/**/*
 !/firmware/cli/cli-install.bat
 !/firmware/cli/arduino-cli.yaml
-/firmware/compile.flag
 /venv
 __pycache__
 dist/*
