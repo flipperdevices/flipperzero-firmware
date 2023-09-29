@@ -28,7 +28,3 @@ typedef enum {
     FlipboardViewAboutId,
     FlipboardViewPrimaryId,
 } FlipboardViewId;
-
-#define TAG "FlipboardKeyboard"
-#define FLIPBOARD_APP_NAME "keyboard"
-#define FLIPBOARD_PRIMARY_ITEM_NAME "Flipboard Keyboard"

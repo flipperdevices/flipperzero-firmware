@@ -1,14 +1,15 @@
 #include "flipboard_i.h"
 
-#include "about.h"
-
 Flipboard* flipboard_alloc(
+    char* app_name,
+    char* primary_item_name,
+    char* about_text,
     KeySettingModelFields fields,
     bool single_mode_button,
     bool attach_keyboard,
     GetPrimaryView get_primary_view) {
     Flipboard* app = (Flipboard*)malloc(sizeof(Flipboard));
-    app->model = flipboard_model_alloc(FLIPBOARD_APP_NAME, single_mode_button, fields);
+    app->model = flipboard_model_alloc(app_name, single_mode_button, fields);
     if(attach_keyboard) {
         flipboard_keyboard_attach(flipboard_model_get_keyboard(app->model));
     }
@@ -33,9 +34,8 @@ Flipboard* flipboard_alloc(
         app->app_menu,
         key_config_get_view(app->key_config),
         key_config_get_view_id(app->key_config));
-    app_menu_add_item(
-        app->app_menu, FLIPBOARD_PRIMARY_ITEM_NAME, app->view_primary, FlipboardViewPrimaryId);
-    app_menu_add_about(app->app_menu, ABOUT_TEXT, FlipboardViewAboutId);
+    app_menu_add_item(app->app_menu, primary_item_name, app->view_primary, FlipboardViewPrimaryId);
+    app_menu_add_about(app->app_menu, about_text, FlipboardViewAboutId);
 
     app_menu_show(app->app_menu);
     flipboard_leds_update(flipboard_model_get_leds(app->model));

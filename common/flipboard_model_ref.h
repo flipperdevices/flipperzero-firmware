@@ -1,7 +1,7 @@
-#include "app.h"
+#pragma once
+
+#include "flipboard_model.h"
 
 typedef struct {
     FlipboardModel* model;
 } FlipboardModelRef;
-
-#define TAG "FlipboardKeyboard"

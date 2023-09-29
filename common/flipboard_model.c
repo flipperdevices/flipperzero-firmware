@@ -131,3 +131,80 @@ void flipboard_model_free(FlipboardModel* model) {
 
     free(model);
 }
+
+void flipboard_model_play_tone(FlipboardModel* model, KeySettingModel* ksm) {
+    Speaker* speaker = flipboard_model_get_speaker(model);
+    speaker_set_frequency(speaker, key_setting_model_get_frequency(ksm));
+}
+
+void flipboard_model_set_colors(FlipboardModel* model, KeySettingModel* ksm, uint8_t new_key) {
+    FlipboardLeds* leds = flipboard_model_get_leds(model);
+    uint32_t color = ksm ? key_setting_model_get_color_down(ksm) : 0xFFFFFF;
+    KeySettingModel* ksm1 = flipboard_model_get_key_setting_model(model, SwitchId1);
+    KeySettingModel* ksm2 = flipboard_model_get_key_setting_model(model, SwitchId2);
+    KeySettingModel* ksm3 = flipboard_model_get_key_setting_model(model, SwitchId3);
+    KeySettingModel* ksm4 = flipboard_model_get_key_setting_model(model, SwitchId4);
+    uint32_t color1 = ksm1 ? key_setting_model_get_color_up(ksm1) : 0x000000;
+    uint32_t color2 = ksm2 ? key_setting_model_get_color_up(ksm2) : 0x000000;
+    uint32_t color3 = ksm3 ? key_setting_model_get_color_up(ksm3) : 0x000000;
+    uint32_t color4 = ksm4 ? key_setting_model_get_color_up(ksm4) : 0x000000;
+    color1 = (new_key & LedId1) ? color : color1;
+    color2 = (new_key & LedId2) ? color : color2;
+    color3 = (new_key & LedId3) ? color : color3;
+    color4 = (new_key & LedId4) ? color : color4;
+    flipboard_leds_set(leds, LedId1, color1);
+    flipboard_leds_set(leds, LedId2, color2);
+    flipboard_leds_set(leds, LedId3, color3);
+    flipboard_leds_set(leds, LedId4, color4);
+    flipboard_leds_update(leds);
+}
+
+void flipboard_model_send_keystrokes(FlipboardModel* model, KeySettingModel* ksm) {
+    uint8_t keystroke_count = key_setting_model_get_keystrokes_count(ksm);
+    for(int i = 0; i < keystroke_count; i++) {
+        Keystroke keystroke = key_setting_model_get_keystroke(ksm, i);
+        if(keystroke.key_code == 0 || keystroke.count == 0) {
+            continue;
+        }
+
+        if(keystroke.key_code == 0) {
+            continue;
+        }
+
+        for(uint8_t count = keystroke.count; count != 0; count--) {
+            flipboard_keyboard_send_keycode(
+                flipboard_model_get_keyboard(model), keystroke.key_code);
+            flipboard_keyboard_release_all(flipboard_model_get_keyboard(model));
+        }
+    }
+}
+
+void flipboard_model_send_text(FlipboardModel* model, KeySettingModel* ksm) {
+    FuriString* message = key_setting_model_get_message(ksm);
+    if(message) {
+        flipboard_keyboard_send_text(
+            flipboard_model_get_keyboard(model), furi_string_get_cstr(message));
+    }
+}
+
+uint8_t flipboard_model_reduce(FlipboardModel* model, uint8_t new_key, bool left_wins) {
+    uint8_t reduced_new_key = new_key;
+
+    if(new_key == 0) {
+        return 0;
+    }
+
+    if(flipboard_model_get_single_button_mode(model)) {
+        uint8_t mask = left_wins ? 0x1 : 0x80;
+        while(((new_key & mask) == 0) && mask) {
+            if(left_wins) {
+                mask = mask << 1;
+            } else {
+                mask = mask >> 1;
+            }
+        }
+        reduced_new_key = mask;
+    }
+
+    return reduced_new_key;
+}

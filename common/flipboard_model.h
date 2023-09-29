@@ -30,3 +30,9 @@ void flipboard_model_set_key_monitor(
     KeyMonitorEventCallback callback,
     void* context);
 void flipboard_model_free(FlipboardModel* model);
+
+void flipboard_model_play_tone(FlipboardModel* model, KeySettingModel* ksm);
+void flipboard_model_set_colors(FlipboardModel* model, KeySettingModel* ksm, uint8_t new_key);
+void flipboard_model_send_keystrokes(FlipboardModel* model, KeySettingModel* ksm);
+void flipboard_model_send_text(FlipboardModel* model, KeySettingModel* ksm);
+uint8_t flipboard_model_reduce(FlipboardModel* model, uint8_t new_key, bool left_wins);

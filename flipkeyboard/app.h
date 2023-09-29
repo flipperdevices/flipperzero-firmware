@@ -12,13 +12,12 @@
 
 #include "../common/app_menu.h"
 #include "../common/backlight.h"
+#include "../common/flipboard.h"
 #include "../common/flipboard_file.h"
 #include "../common/flipboard_model.h"
+#include "../common/flipboard_model_ref.h"
 #include "../common/keyboard.h"
 #include "../common/key_config.h"
 #include "../common/key_monitor.h"
 #include "../common/leds.h"
 #include "../common/speaker.h"
-
-#include "about.h"
-#include "flipboard.h"

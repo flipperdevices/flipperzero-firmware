@@ -10,6 +10,9 @@ typedef struct FlipboardModel FlipboardModel;
 typedef View* (*GetPrimaryView)(void* context);
 
 Flipboard* flipboard_alloc(
+    char* app_name,
+    char* primary_item_name,
+    char* about_text,
     KeySettingModelFields fields,
     bool single_mode_button,
     bool attach_keyboard,
