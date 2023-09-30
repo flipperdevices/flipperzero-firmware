@@ -43,8 +43,9 @@ typedef struct {
     uint32_t file_offset;
     uint32_t file_read_bytes;
     uint32_t file_size;
-    Stream* stream;
     bool mode; // Print address or content
+    
+    Stream* stream;
 } HexViewerModel;
 
 

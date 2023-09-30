@@ -12,7 +12,11 @@ struct HexViewerStartscreen {
 
 
 typedef struct {
-    int some_value;
+    uint8_t file_bytes[HEX_VIEWER_LINES_ON_SCREEN][HEX_VIEWER_BYTES_PER_LINE];
+    uint32_t file_offset;
+    uint32_t file_read_bytes;
+    uint32_t file_size;
+    bool mode; // Print address or content
 } HexViewerStartscreenModel;
 
 void hex_viewer_startscreen_set_callback(
@@ -29,7 +33,7 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
     UNUSED(model);
     canvas_clear(canvas);
 
-    if (!app->model->file_size) {
+    if (!model->file_size) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "HexViewer v2.0"); 
@@ -40,7 +44,7 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
     } else {
         canvas_set_color(canvas, ColorBlack);
 
-        elements_button_left(canvas, app->model->mode ? "Addr" : "Text");
+        elements_button_left(canvas, model->mode ? "Addr" : "Text");
         elements_button_right(canvas, "Info");
         elements_button_center(canvas, "Menu");
 
@@ -48,9 +52,9 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
         int TOP_OFFSET = 10;
         int LEFT_OFFSET = 3;
 
-        uint32_t line_count = app->model->file_size / HEX_VIEWER_BYTES_PER_LINE;
-        if(app->model->file_size % HEX_VIEWER_BYTES_PER_LINE != 0) line_count += 1;
-        uint32_t first_line_on_screen = app->model->file_offset / HEX_VIEWER_BYTES_PER_LINE;
+        uint32_t line_count = model->file_size / HEX_VIEWER_BYTES_PER_LINE;
+        if(model->file_size % HEX_VIEWER_BYTES_PER_LINE != 0) line_count += 1;
+        uint32_t first_line_on_screen = model->file_offset / HEX_VIEWER_BYTES_PER_LINE;
         if(line_count > HEX_VIEWER_LINES_ON_SCREEN) {
             uint8_t width = canvas_width(canvas);
             elements_scrollbar_pos(
@@ -63,16 +67,16 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
         }
 
         char temp_buf[32];
-        uint32_t row_iters = app->model->file_read_bytes / HEX_VIEWER_BYTES_PER_LINE;
-        if(app->model->file_read_bytes % HEX_VIEWER_BYTES_PER_LINE != 0) row_iters += 1;
+        uint32_t row_iters = model->file_read_bytes / HEX_VIEWER_BYTES_PER_LINE;
+        if(model->file_read_bytes % HEX_VIEWER_BYTES_PER_LINE != 0) row_iters += 1;
 
         for(uint32_t i = 0; i < row_iters; ++i) {
             uint32_t bytes_left_per_row =
-                app->model->file_read_bytes - i * HEX_VIEWER_BYTES_PER_LINE;
+                model->file_read_bytes - i * HEX_VIEWER_BYTES_PER_LINE;
             bytes_left_per_row = MIN(bytes_left_per_row, HEX_VIEWER_BYTES_PER_LINE);
 
-            if(app->model->mode) {
-                memcpy(temp_buf, app->model->file_bytes[i], bytes_left_per_row);
+            if(model->mode) {
+                memcpy(temp_buf, model->file_bytes[i], bytes_left_per_row);
                 temp_buf[bytes_left_per_row] = '\0';
                 for(uint32_t j = 0; j < bytes_left_per_row; ++j)
                     if(!isprint((int)temp_buf[j])) temp_buf[j] = '.';
@@ -80,7 +84,7 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
                 canvas_set_font(canvas, FontKeyboard);
                 canvas_draw_str(canvas, LEFT_OFFSET, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
             } else {
-                uint32_t addr = app->model->file_offset + i * HEX_VIEWER_BYTES_PER_LINE;
+                uint32_t addr = model->file_offset + i * HEX_VIEWER_BYTES_PER_LINE;
                 snprintf(temp_buf, 32, "%04lX", addr);
 
                 canvas_set_font(canvas, FontKeyboard);
@@ -89,7 +93,7 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
 
             char* p = temp_buf;
             for(uint32_t j = 0; j < bytes_left_per_row; ++j)
-                p += snprintf(p, 32, "%02X ", app->model->file_bytes[i][j]);
+                p += snprintf(p, 32, "%02X ", model->file_bytes[i][j]);
 
             canvas_set_font(canvas, FontKeyboard);
             canvas_draw_str(canvas, LEFT_OFFSET + 41, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
@@ -99,7 +103,20 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
 }
 
 static void hex_viewer_startscreen_model_init(HexViewerStartscreenModel* const model) {
-    model->some_value = 1;
+    memset(model->file_bytes, 0, sizeof(model->file_bytes));
+    model->file_offset = 0;
+    model->file_read_bytes = 0;
+    model->file_size = 0;
+    model->mode = false;
+}
+
+static void update_local_model_from_app(HexViewer* const app, HexViewerStartscreenModel* const model)
+{
+    memcpy(model->file_bytes, app->model->file_bytes, sizeof(model->file_bytes));
+    model->file_offset = app->model->file_offset;
+    model->file_read_bytes = app->model->file_read_bytes;
+    model->file_size = app->model->file_size;
+    model->mode = app->model->mode;
 }
 
 bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
@@ -112,20 +129,21 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     instance->view,
                     HexViewerStartscreenModel * model,
                     {
-                        UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenBack, instance->context);
+                        update_local_model_from_app(instance->context, model);
                     },
                     true);
                 break;
             case InputKeyLeft:
                 with_view_model(
-                        instance->view,
-                        HexViewerStartscreenModel * model,
-                        {
-                            UNUSED(model);
-                            instance->callback(HexViewerCustomEventStartscreenLeft, instance->context);
-                        },
-                        true);
+                    instance->view,
+                    HexViewerStartscreenModel * model,
+                    {
+                        UNUSED(model);
+                        instance->callback(HexViewerCustomEventStartscreenLeft, instance->context);
+                        update_local_model_from_app(instance->context, model);
+                    },
+                    true);
                     break;
             case InputKeyRight:
                 with_view_model(
@@ -134,6 +152,7 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     {
                         UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenRight, instance->context);
+                        update_local_model_from_app(instance->context, model);
                     },
                     true);
                 break;
@@ -144,6 +163,7 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     {
                         UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenUp, instance->context);
+                        update_local_model_from_app(instance->context, model);
                     },
                     true);
                 break;
@@ -154,6 +174,7 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     {
                         UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenDown, instance->context);
+                        update_local_model_from_app(instance->context, model);
                     },
                     true);
                 break;
@@ -164,6 +185,7 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     {
                         UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenOk, instance->context);
+                        update_local_model_from_app(instance->context, model);
                     },
                     true);
                 break;
@@ -185,7 +207,8 @@ void hex_viewer_startscreen_enter(void* context) {
         instance->view,
         HexViewerStartscreenModel * model,
         {
-            hex_viewer_startscreen_model_init(model);
+            hex_viewer_startscreen_model_init(model); 
+            // TODO update_local_model_from_app(instance->context, model);
         },
         true
     );

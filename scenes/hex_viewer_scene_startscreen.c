@@ -22,7 +22,7 @@ bool hex_viewer_scene_startscreen_on_event(void* context, SceneManagerEvent even
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
             case HexViewerCustomEventStartscreenLeft:
-                app->model->mode = !hex_viewer->model->mode;
+                app->model->mode = !app->model->mode;
                 consumed = true;
                 break;
             case HexViewerCustomEventStartscreenRight:
