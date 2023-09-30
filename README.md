@@ -52,9 +52,10 @@ Button name | Description
     - [ ] Full button list
     - [ ] Delete remote file
     - [ ] Edit remote file
-- [ ] Application settings
-    - [ ] Vertical/Horizontal menu
-    - [ ] IR command repeat count
+- [x] Application settings
+    - [x] Vertical/Horizontal menu
+    - [x] IR command repeat count
+    - [ ] Return button configuration
 
 ## Screens
 

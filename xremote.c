@@ -13,7 +13,6 @@
 
 #include "views/xremote_about_view.h"
 #include "views/xremote_learn_view.h"
-#include "views/xremote_settings_view.h"
 
 #define TAG "XRemote"
 
