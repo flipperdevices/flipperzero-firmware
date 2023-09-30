@@ -8,18 +8,6 @@
 #include "../helpers/camera_suite_speaker.h"
 #include "../helpers/camera_suite_led.h"
 
-static CameraSuiteViewCamera* current_instance = NULL;
-
-bool is_inverted = false;
-
-struct CameraSuiteViewCamera {
-    CameraSuiteViewCameraCallback callback;
-    FuriStreamBuffer* rx_stream;
-    FuriThread* worker_thread;
-    View* view;
-    void* context;
-};
-
 void camera_suite_view_camera_set_callback(
     CameraSuiteViewCamera* instance,
     CameraSuiteViewCameraCallback callback,
@@ -33,20 +21,24 @@ void camera_suite_view_camera_set_callback(
 // Function to draw pixels on the canvas based on camera orientation
 static void draw_pixel_by_orientation(Canvas* canvas, uint8_t x, uint8_t y, uint8_t orientation) {
     switch(orientation) {
-    case 0: // Camera rotated 0 degrees (right side up, default)
+    default:
+    case 0: { // Camera rotated 0 degrees (right side up, default)
         canvas_draw_dot(canvas, x, y);
         break;
-    case 1: // Camera rotated 90 degrees
+    }
+    case 1: { // Camera rotated 90 degrees
+
         canvas_draw_dot(canvas, y, FRAME_WIDTH - 1 - x);
         break;
-    case 2: // Camera rotated 180 degrees (upside down)
+    }
+    case 2: { // Camera rotated 180 degrees (upside down)
         canvas_draw_dot(canvas, FRAME_WIDTH - 1 - x, FRAME_HEIGHT - 1 - y);
         break;
-    case 3: // Camera rotated 270 degrees
+    }
+    case 3: { // Camera rotated 270 degrees
         canvas_draw_dot(canvas, FRAME_HEIGHT - 1 - y, x);
         break;
-    default:
-        break;
+    }
     }
 }
 
@@ -59,15 +51,13 @@ static void camera_suite_view_camera_draw(Canvas* canvas, void* _model) {
     // Draw the frame.
     canvas_draw_frame(canvas, 0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 
-    CameraSuite* app = current_instance->context;
-
     for(size_t p = 0; p < FRAME_BUFFER_LENGTH; ++p) {
         uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
         uint8_t y = p / ROW_BUFFER_LENGTH; // 0 .. 63
 
         for(uint8_t i = 0; i < 8; ++i) {
             if((model->pixels[p] & (1 << (7 - i))) != 0) {
-                draw_pixel_by_orientation(canvas, (x * 8) + i, y, app->orientation);
+                draw_pixel_by_orientation(canvas, (x * 8) + i, y, model->orientation);
             }
         }
     }
@@ -127,6 +117,14 @@ static void save_image(void* _model) {
     // Free the file name after use.
     furi_string_free(file_name);
 
+    // @todo - Add functionaly for saving images inverted if necessary.
+    // Invert pixel values if necessary.
+    // if(!model->inverted) { }
+
+    for(size_t i = 0; i < FRAME_BUFFER_LENGTH; ++i) {
+        model->pixels[i] = ~model->pixels[i];
+    }
+
     // If the file was opened successfully, write the bitmap header and the
     // image data.
     if(result) {
@@ -138,20 +136,13 @@ static void save_image(void* _model) {
 
         // Write locally to the Flipper Zero SD card in the DCIM folder.
         int8_t row_buffer[ROW_BUFFER_LENGTH];
-        if(is_inverted) {
-            for(size_t i = 0; i < 64; ++i) {
-                for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
-                    row_buffer[j] = model->pixels[i * ROW_BUFFER_LENGTH + j];
-                }
-                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
+
+        // @todo - Save image based on orientation.
+        for(size_t i = 64; i > 0; --i) {
+            for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
             }
-        } else {
-            for(size_t i = 64; i > 0; --i) {
-                for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
-                    row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
-                }
-                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
-            }
+            storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
         }
     }
 
@@ -170,7 +161,9 @@ static void camera_suite_view_camera_model_init(UartDumpModel* const model) {
 
 static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
     furi_assert(context);
+
     CameraSuiteViewCamera* instance = context;
+
     if(event->type == InputTypeRelease) {
         switch(event->key) {
         default: // Stop all sounds, reset the LED.
@@ -189,8 +182,8 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
     } else if(event->type == InputTypePress) {
         uint8_t data[1];
         switch(event->key) {
-        case InputKeyBack:
-            // Stop the camera stream.
+        // Camera: Stop stream.
+        case InputKeyBack: {
             data[0] = 's';
             // Go back to the main menu.
             with_view_model(
@@ -202,25 +195,25 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
-        case InputKeyLeft:
-            // Camera: Toggle invert on the ESP32-CAM.
+        }
+        // Camera: Toggle invert on the ESP32-CAM.
+        case InputKeyLeft: {
             data[0] = '<';
-            // Toggle invert state locally.
-            is_inverted = !is_inverted;
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
-                    UNUSED(model);
                     camera_suite_play_happy_bump(instance->context);
                     camera_suite_play_input_sound(instance->context);
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
+                    model->inverted = !model->inverted;
                     instance->callback(CameraSuiteCustomEventSceneCameraLeft, instance->context);
                 },
                 true);
             break;
-        case InputKeyRight:
-            // Camera: Enable/disable dithering.
+        }
+        // Camera: Enable/disable dithering.
+        case InputKeyRight: {
             data[0] = '>';
             with_view_model(
                 instance->view,
@@ -234,8 +227,9 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
-        case InputKeyUp:
-            // Camera: Increase contrast.
+        }
+        // Camera: Increase contrast.
+        case InputKeyUp: {
             data[0] = 'C';
             with_view_model(
                 instance->view,
@@ -249,8 +243,9 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
-        case InputKeyDown:
-            // Camera: Reduce contrast.
+        }
+        // Camera: Reduce contrast.
+        case InputKeyDown: {
             data[0] = 'c';
             with_view_model(
                 instance->view,
@@ -264,26 +259,35 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
+        }
+        // Camera: Take picture.
         case InputKeyOk: {
-            // Take picture.
+            // Set up data to trigger picture sequence on the ESP32-CAM.
+            data[0] = 'P';
+            // Send `data` to the ESP32-CAM.
+            furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
-                    // If flash is enabled, flash the onboard ESP32-CAM LED.
-                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_long_bump(instance->context);
                     camera_suite_play_input_sound(instance->context);
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
+                    // Take a picture if the data is 'P'.
                     save_image(model);
                     instance->callback(CameraSuiteCustomEventSceneCameraOk, instance->context);
                 },
                 true);
             return true;
         }
+        // Camera: Do nothing.
         case InputKeyMAX:
+        default: {
             break;
         }
-        // Send `data` to the ESP32-CAM
+        }
+
+        // Send `data` to the ESP32-CAM.
         furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
     }
     return true;
@@ -299,9 +303,6 @@ static void camera_suite_view_camera_enter(void* context) {
 
     // Cast `context` to `CameraSuiteViewCamera*` and store it in `instance`.
     CameraSuiteViewCamera* instance = (CameraSuiteViewCamera*)context;
-
-    // Assign the current instance to the global variable
-    current_instance = instance;
 
     uint8_t data[1];
     data[0] = 'S'; // Uppercase `S` to start the camera
@@ -344,11 +345,15 @@ static void camera_suite_view_camera_enter(void* context) {
 
     // Send `data` as the flash bool to the ESP32-CAM
     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
-
+    uint32_t orientation = instanceContext->orientation;
     with_view_model(
         instance->view,
         UartDumpModel * model,
-        { camera_suite_view_camera_model_init(model); },
+        {
+            model->inverted = false;
+            model->orientation = orientation;
+            camera_suite_view_camera_model_init(model);
+        },
         true);
 }
 
@@ -465,7 +470,7 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     // Allocate model
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(UartDumpModel));
 
-    // Set context
+    // Set context for the view
     view_set_context(instance->view, instance);
 
     // Set draw callback
@@ -502,6 +507,18 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
 
 void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     furi_assert(instance);
+
+    // Remove the IRQ callback.
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
+
+    // Free the worker thread.
+    furi_thread_free(instance->worker_thread);
+
+    // Free the allocated stream buffer.
+    furi_stream_buffer_free(instance->rx_stream);
+
+    // Re-enable the console.
+    furi_hal_console_enable();
 
     with_view_model(
         instance->view, UartDumpModel * model, { UNUSED(model); }, true);

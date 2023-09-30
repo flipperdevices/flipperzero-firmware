@@ -41,19 +41,27 @@ typedef enum {
 
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
+// Forward declaration
+typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
+
+typedef struct CameraSuiteViewCamera {
+    CameraSuiteViewCameraCallback callback;
+    FuriStreamBuffer* rx_stream;
+    FuriThread* worker_thread;
+    View* view;
+    void* context;
+} CameraSuiteViewCamera;
+
 typedef struct UartDumpModel {
     bool initialized;
+    bool inverted;
     int rotation_angle;
+    uint32_t orientation;
     uint8_t pixels[FRAME_BUFFER_LENGTH];
     uint8_t ringbuffer_index;
-    uint8_t row_ringbuffer[RING_BUFFER_LENGTH];
     uint8_t row_identifier;
+    uint8_t row_ringbuffer[RING_BUFFER_LENGTH];
 } UartDumpModel;
-
-typedef struct CameraSuiteViewCamera CameraSuiteViewCamera;
-
-// Callback
-typedef void (*CameraSuiteViewCameraCallback)(CameraSuiteCustomEvent event, void* context);
 
 // Function Prototypes
 CameraSuiteViewCamera* camera_suite_view_camera_alloc();
