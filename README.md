@@ -53,12 +53,13 @@ Button name | Description
     - [ ] Full button list
     - [ ] Edit remote file
     - [ ] Delete remote file
-- [ ] Application settings
+- [x] Application settings
     - [x] Load settings from the file
     - [x] Store settings to the file
     - [x] Vertical/Horizontal menu
     - [x] IR command repeat count
-    - [ ] GUI to change settings
+    - [x] GUI to change settings
+    - [ ] Return button configuration
 
 ## Screens
 
