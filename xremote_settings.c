@@ -3,7 +3,7 @@
     @license This project is released under the GNU GPLv3 License
  *  @copyright (c) 2023 Sandro Kalatozishvili (s.kalatoz@gmail.com)
  *
- * @brief XRemote settins functionality and menu.
+ * @brief XRemote applications settings menu and functionality.
  */
 
 #include "xremote_settings.h"
@@ -78,7 +78,7 @@ static void infrared_settings_repeat_changed(VariableItem* item)
     xremote_app_settings_store(settings);
 }
 
-XRemoteSettingsContext* xremote_settings_context_alloc(XRemoteAppContext* app_ctx)
+static XRemoteSettingsContext* xremote_settings_context_alloc(XRemoteAppContext* app_ctx)
 {
     XRemoteSettingsContext *context = malloc(sizeof(XRemoteSettingsContext));
     XRemoteAppSettings* settings = app_ctx->app_settings;
