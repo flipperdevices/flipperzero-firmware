@@ -130,6 +130,15 @@ if !ERRORLEVEL! EQU 0 (
 :uploadSuccess
 echo.
 echo Firmware upload was successful.
+echo Cleaning up...
+echo Restoring default configs...
+arduino-cli %CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
+arduino-cli %CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
+arduino-cli %CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
+set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
+if /i "!DELETE_TEMP!"=="Y" (
+    rmdir /s /q %CLI_TEMP%
+)
 echo.
 echo Fin. Happy programming friend.
 echo.
