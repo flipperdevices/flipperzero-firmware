@@ -130,44 +130,27 @@ static void save_image(void* _model) {
     // If the file was opened successfully, write the bitmap header and the
     // image data.
     if(result) {
-        CameraSuite* app = current_instance->context;
-        if(app->flash) {
-            if(app->jpeg) {
-                // Turn on local jpeg save. When this is enabled the ESP32-CAM
-                // will save the image to the SD card and saving the image to
-                // the Flipper SD card will be disabled/skipped.
-                unsigned char jpeg_on = 'J';
-                furi_hal_uart_tx(FuriHalUartIdUSART1, &jpeg_on, 1);
-            } else {
-                unsigned char jpeg_off = 'j';
-                // Turn off local jpeg save.
-                furi_hal_uart_tx(FuriHalUartIdUSART1, &jpeg_off, 1);
+        // Write BMP Header
+        storage_file_write(file, bitmap_header, BITMAP_HEADER_LENGTH);
+
+        // @todo - Add a function for saving the image directly from the
+        // ESP32-CAM to the Flipper Zero SD card.
+
+        // Write locally to the Flipper Zero SD card in the DCIM folder.
+        int8_t row_buffer[ROW_BUFFER_LENGTH];
+        if(is_inverted) {
+            for(size_t i = 0; i < 64; ++i) {
+                for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                    row_buffer[j] = model->pixels[i * ROW_BUFFER_LENGTH + j];
+                }
+                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
             }
-            // Initiate the onboard ESP32-CAM picture sequence. So far this
-            // includes turning on the flash and alternatively saving jpeg
-            // locally to the ESP32-CAM SD card if enabled.
-            unsigned char take_picture = 'P';
-            furi_hal_uart_tx(FuriHalUartIdUSART1, &take_picture, 1);
-        }
-        // If saving jpeg is enabled locally to the ESP32-CAM SD card, skip
-        // writing the image data to the Flipper Zero SD card.
-        if(!app->jpeg) {
-            // Write locally to the Flipper Zero SD card in the DCIM folder.
-            int8_t row_buffer[ROW_BUFFER_LENGTH];
-            if(is_inverted) {
-                for(size_t i = 64; i > 0; --i) {
-                    for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
-                        row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
-                    }
-                    storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
+        } else {
+            for(size_t i = 64; i > 0; --i) {
+                for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                    row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
                 }
-            } else {
-                for(size_t i = 0; i < 64; ++i) {
-                    for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
-                        row_buffer[j] = model->pixels[i * ROW_BUFFER_LENGTH + j];
-                    }
-                    storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
-                }
+                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
             }
         }
     }
@@ -343,7 +326,23 @@ static void camera_suite_view_camera_enter(void* context) {
         break;
     }
 
-    // Send `data` to the ESP32-CAM
+    // Send `data` as the dither type to the ESP32-CAM
+    furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+
+    // Wait for 50ms to make sure dither is set before sending any other commands.
+    furi_delay_ms(50);
+
+    // Initialize the camera with the selected flash option from options.
+    switch(instanceContext->flash) {
+    case 0: // Flash OFF
+        data[0] = 'f';
+        break;
+    case 1: // Flash ON
+        data[0] = 'F';
+        break;
+    }
+
+    // Send `data` as the flash bool to the ESP32-CAM
     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
 
     with_view_model(
