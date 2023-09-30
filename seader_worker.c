@@ -27,13 +27,14 @@ void seader_send_card_detected(SeaderUartBridge* seader_uart, CardDetails_t* car
 
 static void seader_worker_enable_field() {
     furi_hal_nfc_ll_txrx_on();
-    furi_hal_nfc_exit_sleep();
+    furi_hal_nfc_acquire();
     furi_hal_nfc_ll_poll();
 }
 
 static ReturnCode seader_worker_disable_field(ReturnCode rc) {
     furi_hal_nfc_ll_txrx_off();
-    furi_hal_nfc_start_sleep();
+    furi_hal_nfc_field_detect_stop();
+    furi_hal_nfc_release();
     return rc;
 }
 
@@ -139,7 +140,7 @@ void* calloc(size_t count, size_t size) {
 
 void seader_nfc_scene_field_on_enter() {
     furi_hal_nfc_field_on();
-    furi_hal_nfc_exit_sleep();
+    furi_hal_nfc_acquire();
 }
 
 void seader_nfc_scene_field_on_exit() {
