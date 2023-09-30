@@ -47,6 +47,7 @@ CameraSuite* camera_suite_app_alloc() {
     app->dither = 0; // Dither algorithm is "Floyd Steinberg" by default.
     app->flash = 1; // Flash is enabled by default.
     app->haptic = 1; // Haptic is enabled by default
+    app->jpeg = 0; // Save JPEG to ESP32-CAM sd-card is disabled by default.
     app->speaker = 1; // Speaker is enabled by default
     app->led = 1; // LED is enabled by default
 
