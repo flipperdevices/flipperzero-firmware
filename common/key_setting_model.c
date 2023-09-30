@@ -144,8 +144,15 @@ FuriString* key_setting_model_get_message(KeySettingModel* model) {
 }
 
 void key_setting_model_set_message(KeySettingModel* model, const char* message) {
-    if(message == NULL) {
-        furi_string_free(model->message);
+    if(message != NULL && message[0] == ' ') {
+        // Hack since we can't clear the message.
+        message++;
+    }
+
+    if(message == NULL || message[0] == '\0') {
+        if(model->message) {
+            furi_string_free(model->message);
+        }
         model->message = NULL;
         return;
     }
