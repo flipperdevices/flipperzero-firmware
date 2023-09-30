@@ -45,6 +45,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - New Bounty Intro: [ID Card v2.0 - Update v1.0 (By alanretgue) to set and retrieve values from apps_data .txt file and allow for an optional notes field. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/alanretgue/Flipper_Zero-id_card)
 - New Bounty Intro: [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - UL: [nice flor s add button code 0x3 (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/2f44fd6cac47d7a071e86311c4d2bd51f6a84b70)
+- [Rocateq Shopping Cart wav files #758 (By casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/758)
+- Removed Shopping Cart WAV files from firmware to include in SD Card Assets.
 
 <a name="release">
 
