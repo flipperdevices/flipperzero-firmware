@@ -15,8 +15,7 @@ UHFTag* send_polling_command(UHFWorker* uhf_worker) {
     // read epc bank
     UHFTag* uhf_tag = uhf_tag_alloc();
     while(true) {
-        M100ResponseType status = m100_send_single_poll(uhf_worker->module, uhf_tag);
-        furi_delay_ms(100);
+        M100ResponseType status = m100_single_poll(uhf_worker->module, uhf_tag);
         if(uhf_worker->state == UHFWorkerStateStop) {
             uhf_tag_free(uhf_tag);
             return NULL;
@@ -27,7 +26,7 @@ UHFTag* send_polling_command(UHFWorker* uhf_worker) {
 }
 
 UHFWorkerEvent read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag, BankType bank) {
-    unsigned int retry = 3, word_low = 5, word_high = 100;
+    unsigned int retry = 3, word_low = 0, word_high = 64;
     unsigned int word_size;
     M100ResponseType status;
     do {
@@ -42,7 +41,10 @@ UHFWorkerEvent read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag,
         } else if(status == M100NoTagResponse) {
             retry--;
         }
+        FURI_LOG_E("TAG", "read bank %d, word_low %d, word_high %d", bank, word_low, word_high);
     } while(retry);
+    FURI_LOG_E("TAG", "read success; retry = %d", retry);
+    if(!retry) return UHFWorkerEventFail;
     return UHFWorkerEventSuccess;
 }
 
