@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 // UHF module baudrates
-static const uint32_t BAUD_RATES[] = {9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600};
+static const uint32_t BAUD_RATES[] = {9600, 19200, 115200};
 
 // UHF module regions
 typedef enum {

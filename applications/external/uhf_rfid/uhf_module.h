@@ -52,9 +52,10 @@ bool m100_set_working_area(M100Module* module, WorkingArea area);
 bool m100_set_working_channel(M100Module* module, WorkingChannel channel);
 bool m100_set_transmitting_power(M100Module* module, uint16_t power);
 bool m100_set_freq_hopping(M100Module* module, bool hopping);
+bool m100_set_power(M100Module* module, uint8_t* power);
 
 // gen2 cmds
-M100ResponseType m100_send_single_poll(M100Module* module, UHFTag* uhf_tag);
+M100ResponseType m100_single_poll(M100Module* module, UHFTag* uhf_tag);
 M100ResponseType m100_set_select(M100Module* module, UHFTag* uhf_tag);
 M100ResponseType m100_read_label_data_storage(
     M100Module* module,

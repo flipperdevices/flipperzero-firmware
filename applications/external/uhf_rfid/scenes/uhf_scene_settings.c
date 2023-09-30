@@ -11,6 +11,10 @@ void uhf_settings_set_module_baudrate(VariableItem* item) {
     variable_item_set_current_value_text(item, text_buf);
 }
 
+void uhf_settings_set_module_powerdb(VariableItem* item) {
+    UNUSED(item);
+}
+
 uint8_t uhf_settings_get_module_baudrate_index(M100Module* module) {
     uint32_t baudrate = module->baudrate;
     for(uint8_t i = 0; i < sizeof(BAUD_RATES); i++) {
@@ -21,8 +25,17 @@ uint8_t uhf_settings_get_module_baudrate_index(M100Module* module) {
     return 0;
 }
 
+uint8_t uhf_settings_get_module_power_index(M100Module* module) {
+    uint16_t power = module->transmitting_power;
+    for(uint8_t i = 0; i < sizeof(POWER_DBM); i++) {
+        if(POWER_DBM[i] == power) {
+            return i;
+        }
+    }
+    return 0;
+}
+
 void uhf_scene_settings_on_enter(void* ctx) {
-    furi_assert(ctx != NULL, "ctx is NULL in uhf_scene_settings_on_enter");
     UHFApp* uhf_app = ctx;
     M100Module* uhf_module = uhf_app->worker->module;
     VariableItem* item;
@@ -41,6 +54,14 @@ void uhf_scene_settings_on_enter(void* ctx) {
 
     variable_item_set_current_value_text(item, text_buf);
     variable_item_set_current_value_index(item, value_index);
+
+    item = variable_item_list_add(
+        variable_item_list,
+        "Power(DBM):",
+        sizeof(POWER_DBM),
+        uhf_settings_set_module_powerdb,
+        uhf_module);
+
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewVariableItemList);
 }
 
