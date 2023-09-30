@@ -120,9 +120,11 @@ bool hex_viewer_open_file(void* context, const char* file_path) {
     furi_assert(hex_viewer);
     furi_assert(file_path);
 
+    // TODO Separate function?
     if(hex_viewer->model->stream) {
         buffered_file_stream_close(hex_viewer->model->stream);
         stream_free(hex_viewer->model->stream); // TODO Check
+        hex_viewer->model->file_offset = 0;
     }
 
     hex_viewer->model->stream = buffered_file_stream_alloc(hex_viewer->storage);

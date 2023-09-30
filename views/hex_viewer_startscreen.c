@@ -10,13 +10,12 @@ struct HexViewerStartscreen {
     void* context;
 };
 
-
 typedef struct {
     uint8_t file_bytes[HEX_VIEWER_LINES_ON_SCREEN][HEX_VIEWER_BYTES_PER_LINE];
     uint32_t file_offset;
     uint32_t file_read_bytes;
     uint32_t file_size;
-    bool mode; // Print address or content
+    bool mode;
 } HexViewerStartscreenModel;
 
 void hex_viewer_startscreen_set_callback(
@@ -32,12 +31,12 @@ void hex_viewer_startscreen_set_callback(
 void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* model) {
     canvas_clear(canvas);
 
-    if (!model->file_size) {
+    if(!model->file_size) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "HexViewer v2.0"); 
+        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "HexViewer v2.0");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Basic hex viewer"); 
+        canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Basic hex viewer");
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, "for your Flipper");
         elements_button_center(canvas, "Open");
     } else {
@@ -70,8 +69,7 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
         if(model->file_read_bytes % HEX_VIEWER_BYTES_PER_LINE != 0) row_iters += 1;
 
         for(uint32_t i = 0; i < row_iters; ++i) {
-            uint32_t bytes_left_per_row =
-                model->file_read_bytes - i * HEX_VIEWER_BYTES_PER_LINE;
+            uint32_t bytes_left_per_row = model->file_read_bytes - i * HEX_VIEWER_BYTES_PER_LINE;
             bytes_left_per_row = MIN(bytes_left_per_row, HEX_VIEWER_BYTES_PER_LINE);
 
             if(model->mode) {
@@ -98,7 +96,6 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
             canvas_draw_str(canvas, LEFT_OFFSET + 41, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
         }
     }
-    
 }
 
 static void hex_viewer_startscreen_model_init(HexViewerStartscreenModel* const model) {
@@ -109,84 +106,87 @@ static void hex_viewer_startscreen_model_init(HexViewerStartscreenModel* const m
     model->mode = false;
 }
 
-static void update_local_model_from_app(HexViewer* const app, HexViewerStartscreenModel* const model)
-{
+static void
+    update_local_model_from_app(HexViewer* const app, HexViewerStartscreenModel* const model) {
     memcpy(model->file_bytes, app->model->file_bytes, sizeof(model->file_bytes));
     model->file_offset = app->model->file_offset;
     model->file_read_bytes = app->model->file_read_bytes;
     model->file_size = app->model->file_size;
-    model->mode = app->model->mode;
+    //model->mode = app->model->mode;
 }
 
 bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     HexViewerStartscreen* instance = context;
-    if (event->type == InputTypeRelease) {
+    // TODO InputTypeShort?
+    if(event->type == InputTypeRelease || event->type == InputTypeRepeat) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    HexViewerStartscreenModel * model,
-                    {
-                        instance->callback(HexViewerCustomEventStartscreenBack, instance->context);
-                        update_local_model_from_app(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-                with_view_model(
-                    instance->view,
-                    HexViewerStartscreenModel * model,
-                    {
-                        instance->callback(HexViewerCustomEventStartscreenLeft, instance->context);
-                        update_local_model_from_app(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyRight:
-                with_view_model(
-                    instance->view,
-                    HexViewerStartscreenModel * model,
-                    {
-                        instance->callback(HexViewerCustomEventStartscreenRight, instance->context);
-                        update_local_model_from_app(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyUp:
-                with_view_model(
-                    instance->view,
-                    HexViewerStartscreenModel * model,
-                    {
-                        instance->callback(HexViewerCustomEventStartscreenUp, instance->context);
-                        update_local_model_from_app(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyDown:
-                with_view_model(
-                    instance->view,
-                    HexViewerStartscreenModel * model,
-                    {
-                        instance->callback(HexViewerCustomEventStartscreenDown, instance->context);
-                        update_local_model_from_app(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    HexViewerStartscreenModel* model,
-                    {
-                        instance->callback(HexViewerCustomEventStartscreenOk, instance->context);
-                        update_local_model_from_app(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                HexViewerStartscreenModel * model,
+                {
+                    instance->callback(HexViewerCustomEventStartscreenBack, instance->context);
+                    update_local_model_from_app(instance->context, model);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+            with_view_model(
+                instance->view,
+                HexViewerStartscreenModel * model,
+                {
+                    //instance->callback(HexViewerCustomEventStartscreenLeft, instance->context);
+                    //update_local_model_from_app(instance->context, model);
+                    model->mode = !model->mode;
+                },
+                true);
+            break;
+        case InputKeyRight:
+            with_view_model(
+                instance->view,
+                HexViewerStartscreenModel * model,
+                {
+                    instance->callback(HexViewerCustomEventStartscreenRight, instance->context);
+                    update_local_model_from_app(instance->context, model);
+                },
+                true);
+            break;
+        case InputKeyUp:
+            with_view_model(
+                instance->view,
+                HexViewerStartscreenModel * model,
+                {
+                    instance->callback(HexViewerCustomEventStartscreenUp, instance->context);
+                    update_local_model_from_app(instance->context, model);
+                },
+                true);
+            break;
+        case InputKeyDown:
+            with_view_model(
+                instance->view,
+                HexViewerStartscreenModel * model,
+                {
+                    instance->callback(HexViewerCustomEventStartscreenDown, instance->context);
+                    update_local_model_from_app(instance->context, model);
+                },
+                true);
+            break;
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                HexViewerStartscreenModel * model,
+                {
+                    instance->callback(HexViewerCustomEventStartscreenOk, instance->context);
+                    update_local_model_from_app(instance->context, model);
+                },
+                true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
+
     return true;
 }
 
@@ -201,18 +201,17 @@ void hex_viewer_startscreen_enter(void* context) {
         instance->view,
         HexViewerStartscreenModel * model,
         {
-            hex_viewer_startscreen_model_init(model); 
+            //hex_viewer_startscreen_model_init(model);
             update_local_model_from_app(instance->context, model);
         },
-        true
-    );
+        true);
 }
 
 HexViewerStartscreen* hex_viewer_startscreen_alloc() {
     HexViewerStartscreen* instance = malloc(sizeof(HexViewerStartscreen));
     instance->view = view_alloc();
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(HexViewerStartscreenModel));
-    view_set_context(instance->view, instance); // furi_assert crashes in events without this
+    view_set_context(instance->view, instance);
     view_set_draw_callback(instance->view, (ViewDrawCallback)hex_viewer_startscreen_draw);
     view_set_input_callback(instance->view, hex_viewer_startscreen_input);
     view_set_enter_callback(instance->view, hex_viewer_startscreen_enter);
@@ -221,12 +220,9 @@ HexViewerStartscreen* hex_viewer_startscreen_alloc() {
     with_view_model(
         instance->view,
         HexViewerStartscreenModel * model,
-        {
-            hex_viewer_startscreen_model_init(model);
-        },
-        true
-    );
-    
+        { hex_viewer_startscreen_model_init(model); },
+        true);
+
     return instance;
 }
 
@@ -234,12 +230,7 @@ void hex_viewer_startscreen_free(HexViewerStartscreen* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        HexViewerStartscreenModel * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, HexViewerStartscreenModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
@@ -248,4 +239,3 @@ View* hex_viewer_startscreen_get_view(HexViewerStartscreen* instance) {
     furi_assert(instance);
     return instance->view;
 }
-

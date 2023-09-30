@@ -38,7 +38,6 @@
 #define HEX_VIEWER_LINES_ON_SCREEN 4u
 #define HEX_VIEWER_BUF_SIZE (HEX_VIEWER_LINES_ON_SCREEN * HEX_VIEWER_BYTES_PER_LINE)
 
-
 // typedef struct HexViewerModel HexViewerModel;
 // typedef struct HexViewer HexViewer;
 
@@ -47,11 +46,9 @@ typedef struct {
     uint32_t file_offset;
     uint32_t file_read_bytes;
     uint32_t file_size;
-    bool mode; // Print address or content
-    
+
     Stream* stream;
 } HexViewerModel;
-
 
 // TODO Clean
 typedef struct {
@@ -70,13 +67,12 @@ typedef struct {
     HexViewerScene2* hex_viewer_scene_2;
     DialogsApp* dialogs; // File Browser
     FuriString* file_path; // File Browser
-    uint32_t haptic; 
+    uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;
     ButtonMenu* button_menu; // Button Menu
 } HexViewer;
-
 
 typedef enum {
     HexViewerViewIdStartscreen,
