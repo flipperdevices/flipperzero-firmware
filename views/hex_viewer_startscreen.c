@@ -30,7 +30,6 @@ void hex_viewer_startscreen_set_callback(
 }
 
 void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* model) {
-    UNUSED(model);
     canvas_clear(canvas);
 
     if (!model->file_size) {
@@ -139,18 +138,16 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     instance->view,
                     HexViewerStartscreenModel * model,
                     {
-                        UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenLeft, instance->context);
                         update_local_model_from_app(instance->context, model);
                     },
                     true);
-                    break;
+                break;
             case InputKeyRight:
                 with_view_model(
                     instance->view,
                     HexViewerStartscreenModel * model,
                     {
-                        UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenRight, instance->context);
                         update_local_model_from_app(instance->context, model);
                     },
@@ -161,7 +158,6 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     instance->view,
                     HexViewerStartscreenModel * model,
                     {
-                        UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenUp, instance->context);
                         update_local_model_from_app(instance->context, model);
                     },
@@ -172,7 +168,6 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     instance->view,
                     HexViewerStartscreenModel * model,
                     {
-                        UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenDown, instance->context);
                         update_local_model_from_app(instance->context, model);
                     },
@@ -183,7 +178,6 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                     instance->view,
                     HexViewerStartscreenModel* model,
                     {
-                        UNUSED(model);
                         instance->callback(HexViewerCustomEventStartscreenOk, instance->context);
                         update_local_model_from_app(instance->context, model);
                     },

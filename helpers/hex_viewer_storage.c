@@ -120,7 +120,8 @@ void hex_viewer_read_settings(void* context) {
 }
 
 
-bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
+bool hex_viewer_open_file(void* context, const char* file_path) {
+    HexViewer* hex_viewer = context;
     furi_assert(hex_viewer);
     furi_assert(file_path);
 
@@ -141,7 +142,8 @@ bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
     return isOk;
 }
 
-bool hex_viewer_read_file(HexViewer* hex_viewer) {
+bool hex_viewer_read_file(void* context) {
+    HexViewer* hex_viewer = context;
     furi_assert(hex_viewer);
     furi_assert(hex_viewer->model->stream);
     furi_assert(hex_viewer->model->file_offset % HEX_VIEWER_BYTES_PER_LINE == 0);

@@ -4,8 +4,7 @@
 void hex_viewer_scene_scene_4_on_enter(void* context) {
     furi_assert(context);
     HexViewer* app = context;
-    DialogsFileBrowserOptions browser_options;
-    
+    // DialogsFileBrowserOptions browser_options;
     // This will filter the browser to only show one file type and also add an icon
     // dialog_file_browser_set_basic_options(&browser_options, SUBGHZ_APP_EXTENSION, &I_sub1_10px);
     // Get the Folder you want to browse
@@ -23,7 +22,7 @@ void hex_viewer_scene_scene_4_on_enter(void* context) {
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
-        &browser_options, HEX_VIEWER_APP_EXTENSION, &I_hex_10px);
+        &browser_options, HEX_VIEWER_APP_EXTENSION, &I_u2f_10px); // I_u2f_10px I_hex_10px
     browser_options.hide_ext = false;
 
     bool success = dialog_file_browser_show(app->dialogs, app->file_path, initial_path, &browser_options);

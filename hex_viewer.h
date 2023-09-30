@@ -38,6 +38,9 @@
 #define HEX_VIEWER_BUF_SIZE (HEX_VIEWER_LINES_ON_SCREEN * HEX_VIEWER_BYTES_PER_LINE)
 
 
+// typedef struct HexViewerModel HexViewerModel;
+// typedef struct HexViewer HexViewer;
+
 typedef struct {
     uint8_t file_bytes[HEX_VIEWER_LINES_ON_SCREEN][HEX_VIEWER_BYTES_PER_LINE];
     uint32_t file_offset;
@@ -72,6 +75,7 @@ typedef struct {
     uint32_t save_settings;
     ButtonMenu* button_menu; // Button Menu
 } HexViewer;
+
 
 typedef enum {
     HexViewerViewIdStartscreen,

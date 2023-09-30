@@ -1,6 +1,42 @@
 #include "hex_viewer.h"
 
 
+// typedef struct {
+//     uint8_t file_bytes[HEX_VIEWER_LINES_ON_SCREEN][HEX_VIEWER_BYTES_PER_LINE];
+//     uint32_t file_offset;
+//     uint32_t file_read_bytes;
+//     uint32_t file_size;
+//     bool mode; // Print address or content
+    
+//     Stream* stream;
+// } HexViewerModel;
+
+
+// // TODO Clean
+// typedef struct {
+//     HexViewerModel* model;
+//     FuriMutex** mutex; // TODO Don't need?
+
+//     Gui* gui;
+//     Storage* storage;
+//     NotificationApp* notification;
+//     ViewDispatcher* view_dispatcher;
+//     Submenu* submenu;
+//     SceneManager* scene_manager;
+//     VariableItemList* variable_item_list;
+//     HexViewerStartscreen* hex_viewer_startscreen;
+//     HexViewerScene1* hex_viewer_scene_1;
+//     HexViewerScene2* hex_viewer_scene_2;
+//     DialogsApp* dialogs; // File Browser
+//     FuriString* file_path; // File Browser
+//     uint32_t haptic; 
+//     uint32_t speaker;
+//     uint32_t led;
+//     uint32_t save_settings;
+//     ButtonMenu* button_menu; // Button Menu
+// } HexViewer;
+
+
 bool hex_viewer_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     HexViewer* app = context;
@@ -22,6 +58,10 @@ bool hex_viewer_navigation_event_callback(void* context) {
 
 HexViewer* hex_viewer_app_alloc() {
     HexViewer* app = malloc(sizeof(HexViewer));
+
+    app->model = malloc(sizeof(HexViewerModel));
+    memset(app->model, 0, sizeof(HexViewerModel));
+
     app->gui = furi_record_open(RECORD_GUI);
     app->storage = furi_record_open(RECORD_STORAGE);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
@@ -97,6 +137,8 @@ void hex_viewer_app_free(HexViewer* app) {
     // Close File Browser
     furi_record_close(RECORD_DIALOGS);
     furi_string_free(app->file_path);
+
+    free(app->model);
 
     //Remove whatever is left
     free(app);
