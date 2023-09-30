@@ -55,7 +55,7 @@ typedef struct {
 // TODO Clean
 typedef struct {
     HexViewerModel* model;
-    FuriMutex** mutex; // TODO Don't need?
+    //FuriMutex** mutex; // TODO Don't need?
 
     Gui* gui;
     Storage* storage;

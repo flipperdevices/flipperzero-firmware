@@ -202,7 +202,7 @@ void hex_viewer_startscreen_enter(void* context) {
         HexViewerStartscreenModel * model,
         {
             hex_viewer_startscreen_model_init(model); 
-            // TODO update_local_model_from_app(instance->context, model);
+            update_local_model_from_app(instance->context, model);
         },
         true
     );
@@ -215,8 +215,8 @@ HexViewerStartscreen* hex_viewer_startscreen_alloc() {
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
     view_set_draw_callback(instance->view, (ViewDrawCallback)hex_viewer_startscreen_draw);
     view_set_input_callback(instance->view, hex_viewer_startscreen_input);
-    //view_set_enter_callback(instance->view, hex_viewer_startscreen_enter);
-    //view_set_exit_callback(instance->view, hex_viewer_startscreen_exit);
+    view_set_enter_callback(instance->view, hex_viewer_startscreen_enter);
+    view_set_exit_callback(instance->view, hex_viewer_startscreen_exit);
 
     with_view_model(
         instance->view,
