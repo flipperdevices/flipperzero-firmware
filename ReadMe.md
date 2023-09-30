@@ -40,7 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork) [Add Ukulele tuning #2 (By portalsoup)](https://github.com/besya/flipperzero-tuning-fork/pull/2)
 - Added: [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - Added: [XRemote (By kala13x)](https://github.com/kala13x/flipper-xremote)
-- Upadted: [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- Upadted: [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite) [New auto flasher. Improve camera I/O, code, comments, and draw. Resolve bugs. #25 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pull/25)
 
 <a name="release">
 
