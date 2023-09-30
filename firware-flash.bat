@@ -1,13 +1,13 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+set CLI_FOUND_FOLLOW_UP=0
 set CLI_TEMP=%TEMP%\arduino-cli
+set COMPILE_FLAG=firmware\compile.flag
 set CONFIG_FILE=--config-file .\arduino-cli.yaml
 set DEFAULT_BOARD_FQBN=esp32:esp32:esp32cam
-set SELECTED_BOARD=%DEFAULT_BOARD_FQBN%
-set CLI_FOUND_FOLLOW_UP=0
-set COMPILE_FLAG=firmware\compile.flag
 set FIRMWARE_SRC=firmware\firmware.ino
+set SELECTED_BOARD=%DEFAULT_BOARD_FQBN%
 
 chcp 65001 > nul
 echo ┏┓   ┓    ┏┳┓  ┓      
@@ -92,11 +92,12 @@ echo Your ESP32-CAM is ready to be flashed. Please follow the instructions below
 
 :uploadFirmware
 echo.
-echo 1. Make sure you've grounded your IO0 pin on your ESP32-CAM module to the correct GND pin.
-echo 2. Plug in your ESP32-CAM module with the reset button pressed a few seconds before continuing.
-echo 3. When continuing to the next step, simultaneously release the reset button at the same time.
-echo 4. Your ESP32-CAM should now be in flash mode. Allow the firmware to upload, this will take a moment.
-echo 5. It's not uncommon for this to fail many times, keep trying and double check your connections.
+echo 1. Ensure IO0 pin on ESP32-CAM is grounded to the proper GND pin.
+echo 2. Hold reset, and plug in your ESP32-CAM; release reset a few seconds later.
+echo 3. As you proceed, release the reset button simultaneously with the next step.
+echo 4. ESP32-CAM should now be in flash mode; allow some time for firmware upload.
+echo 5. Failure is common; persist and verify all connections if errors persist.
+echo 6. Disconnecting and reconnecting USB between attempts may sometimes work.
 echo.
 pause
 
@@ -114,7 +115,7 @@ if !ERRORLEVEL! EQU 0 (
         goto :uploadLoop
     ) else (
         echo.
-        set /p UPLOAD_TRY_AGAIN="Upload failed after 3 attempts, would you like to retry? (Y/N): "
+        set /p UPLOAD_TRY_AGAIN="Upload failed after 3 attempts, don't give up! Would you like to try again? (Y/N): "
         if /i "!UPLOAD_TRY_AGAIN!"=="Y" (
             set RETRY_COUNT=1
             goto :uploadFirmware

@@ -1,19 +1,13 @@
-#include "esp_camera.h"
 #include "FS.h"
+#include "esp_camera.h"
 #include "SD_MMC.h"
-
-// Potential future includes for use.
-// #include "Arduino.h"
-// #include "soc/soc.h"
-// #include "soc/rtc_cntl_reg.h"
-// #include "driver/rtc_io.h"
 
 // Define Pin numbers used by the camera.
 #define FLASH_GPIO_NUM 4
 #define HREF_GPIO_NUM 23
 #define PCLK_GPIO_NUM 22
 #define PWDN_GPIO_NUM 32
-#define RESET_GPIO_NUM - 1
+#define RESET_GPIO_NUM -1
 #define SIOC_GPIO_NUM 27
 #define SIOD_GPIO_NUM 26
 #define XCLK_GPIO_NUM 0
@@ -34,13 +28,13 @@ camera_config_t config;
 // Function prototypes.
 void handleSerialInput();
 void initializeCamera();
-void processImage(camera_fb_t * frame_buffer);
-void ditherImage(camera_fb_t * frame_buffer);
-void savePictureToSDCard(camera_fb_t * frame_buffer);
-void takePicture();
+void processImage(camera_fb_t *frame_buffer);
+void ditherImage(camera_fb_t *frame_buffer);
+void saveJpegPictureToSDCard();
 
 // Enumeration to represent the available dithering algorithms.
-enum DitheringAlgorithm: uint8_t {
+enum DitheringAlgorithm : uint8_t
+{
   FLOYD_STEINBERG,
   JARVIS_JUDICE_NINKE,
   STUCKI
@@ -67,41 +61,39 @@ bool stopStream = false;
 // Flag to store jpeg images to sd card.
 bool storeJpeg = false;
 
-void setup() {
-  // Disable the brownout detector.
-  // WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
-
+void setup()
+{
   Serial.begin(230400); // 115200
   initializeCamera();
 }
 
-void loop() {
-  if (!stopStream) {
-    // Set pixel format to GRAYSCALE for streaming
-    sensor_t * s = esp_camera_sensor_get();
-    s -> set_framesize(s, FRAMESIZE_QVGA); // Or your preferred resolution
-    s -> set_pixformat(s, PIXFORMAT_GRAYSCALE); // For streaming
-
-    camera_fb_t * frame_buffer = esp_camera_fb_get();
-    if (frame_buffer) {
-      // Process and Send Grayscale image
+void loop()
+{
+  if (!stopStream)
+  {
+    camera_fb_t *frame_buffer = esp_camera_fb_get();
+    if (frame_buffer)
+    {
+      // Process and Send Grayscale image.
       processImage(frame_buffer);
-      // Return the frame buffer back to the camera driver
+      // Return the frame buffer back to the camera driver.
       esp_camera_fb_return(frame_buffer);
     }
-    delay(25); // Adjust delay as necessary
-  } else {
-    // Handle any available serial input commands
-    handleSerialInput();
+    delay(50);
   }
+  // Handle any available serial input commands.
+  handleSerialInput();
 }
 
-void handleSerialInput() {
-  if (Serial.available() > 0) {
+void handleSerialInput()
+{
+  if (Serial.available() > 0)
+  {
     char input = Serial.read();
-    sensor_t * cameraSensor = esp_camera_sensor_get();
+    sensor_t *cameraSensor = esp_camera_sensor_get();
 
-    switch (input) {
+    switch (input)
+    {
     case '>': // Toggle dithering.
       disableDithering = !disableDithering;
       break;
@@ -109,28 +101,24 @@ void handleSerialInput() {
       invert = !invert;
       break;
     case 'B': // Add brightness.
-      cameraSensor -> set_contrast(
-        cameraSensor,
-        cameraSensor -> status.brightness + 1
-      );
+      cameraSensor->set_contrast(
+          cameraSensor,
+          cameraSensor->status.brightness + 1);
       break;
     case 'b': // Remove brightness.
-      cameraSensor -> set_contrast(
-        cameraSensor,
-        cameraSensor -> status.brightness - 1
-      );
+      cameraSensor->set_contrast(
+          cameraSensor,
+          cameraSensor->status.brightness - 1);
       break;
     case 'C': // Add contrast.
-      cameraSensor -> set_contrast(
-        cameraSensor,
-        cameraSensor -> status.contrast + 1
-      );
+      cameraSensor->set_contrast(
+          cameraSensor,
+          cameraSensor->status.contrast + 1);
       break;
     case 'c': // Remove contrast.
-      cameraSensor -> set_contrast(
-        cameraSensor,
-        cameraSensor -> status.contrast - 1
-      );
+      cameraSensor->set_contrast(
+          cameraSensor,
+          cameraSensor->status.contrast - 1);
       break;
     case 'j': // Toggle store jpeg to sd card off.
       storeJpeg = false;
@@ -141,26 +129,28 @@ void handleSerialInput() {
     case 'P': // Picture sequence.
       // Stop the IO stream before taking a picture.
       stopStream = true;
-      if (!isFlashEnabled) {
-        if (storeJpeg) {
-          // Save jpeg image to sd card.
-          takePicture();
-        } else {
-          // Turn on torch.
-          pinMode(FLASH_GPIO_NUM, OUTPUT);
-          digitalWrite(FLASH_GPIO_NUM, HIGH);
-          // Give some time for Flipper to save locally with flash on.
-          delay(50);
-        }
-        // Turn off torch.
+      if (isFlashEnabled)
+      {
+        // Turn on torch.
         pinMode(FLASH_GPIO_NUM, OUTPUT);
-        digitalWrite(FLASH_GPIO_NUM, LOW);
+        digitalWrite(FLASH_GPIO_NUM, HIGH);
       }
+
+      // @todo - Future feature.
+      // if (storeJpeg) { saveJpegPictureToSDCard(); }
+
+      // Give some time (100ms) for Flipper to save locally with flash on.
+      delay(100);
+
+      // Turn off torch.
+      pinMode(FLASH_GPIO_NUM, OUTPUT);
+      digitalWrite(FLASH_GPIO_NUM, LOW);
+
       // Restart the stream after the picture is taken.
       stopStream = false;
       break;
     case 'M': // Toggle Mirror.
-      cameraSensor -> set_hmirror(cameraSensor, !cameraSensor -> status.hmirror);
+      cameraSensor->set_hmirror(cameraSensor, !cameraSensor->status.hmirror);
       break;
     case 'S': // Start stream.
       stopStream = false;
@@ -184,7 +174,8 @@ void handleSerialInput() {
   }
 }
 
-void initializeCamera() {
+void initializeCamera()
+{
   // Set initial camera configurations for grayscale.
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -211,7 +202,8 @@ void initializeCamera() {
 
   // Initialize camera.
   esp_err_t err = esp_camera_init(&config);
-  if (err != ESP_OK) {
+  if (err != ESP_OK)
+  {
     return;
   }
 
@@ -220,49 +212,59 @@ void initializeCamera() {
   digitalWrite(FLASH_GPIO_NUM, LOW);
 
   // Set initial contrast.
-  sensor_t * s = esp_camera_sensor_get();
-  s -> set_contrast(s, 0);
+  sensor_t *s = esp_camera_sensor_get();
+  s->set_contrast(s, 0);
 
-  // Set rotation
-  s -> set_vflip(s, true); // Vertical flip
-  s -> set_hmirror(s, true); // Horizontal mirror
+  // Set rotation.
+  s->set_vflip(s, true);   // Vertical flip.
+  s->set_hmirror(s, true); // Horizontal mirror.
 }
 
-void processImage(camera_fb_t * frame_buffer) {
-  // If dithering is not disabled, perform dithering on the image. Dithering is the 
-  // process of approximating the look of a high-resolution grayscale image in a 
+void processImage(camera_fb_t *frame_buffer)
+{
+  // If dithering is not disabled, perform dithering on the image. Dithering is the
+  // process of approximating the look of a high-resolution grayscale image in a
   // lower resolution by binary values (black & white), thereby representing
   // different shades of gray.
-  if (!disableDithering) {
-    ditherImage(frame_buffer); // Invokes the dithering process on the frame buffer
+  if (!disableDithering)
+  {
+    ditherImage(frame_buffer); // Invokes the dithering process on the frame buffer.
   }
 
   uint8_t flipper_y = 0;
 
   // Iterating over specific rows of the frame buffer.
-  for (uint8_t y = 28; y < 92; ++y) {
-    Serial.print("Y:"); // Print "Y:" for every new row.
+  for (uint8_t y = 28; y < 92; ++y)
+  {
+    Serial.print("Y:");      // Print "Y:" for every new row.
     Serial.write(flipper_y); // Send the row identifier as a byte.
 
-    // Calculate the actual y index in the frame buffer 1D array by multiplying the 
-    // y value with the width of the frame buffer. This gives the starting index 
-    // of the row in the 1D array.
-    size_t true_y = y * frame_buffer -> width;
+    // Calculate the actual y index in the frame buffer 1D array by multiplying the
+    // y value with the width of the frame buffer. This gives the starting index of
+    // the row in the 1D array.
+    size_t true_y = y * frame_buffer->width;
 
     // Iterating over specific columns of each row in the frame buffer.
-    for (uint8_t x = 16; x < 144; x += 8) { // step by 8 as we're packing 8 pixels per byte
+    for (uint8_t x = 16; x < 144; x += 8)
+    { // step by 8 as we're packing 8 pixels per byte.
       uint8_t packed_pixels = 0;
       // Packing 8 pixel values into one byte.
-      for (uint8_t bit = 0; bit < 8; ++bit) {
+      for (uint8_t bit = 0; bit < 8; ++bit)
+      {
         // Check the invert flag and pack the pixels accordingly.
-        if (invert) {
+        if (invert)
+        {
           // If invert is true, consider pixel as 1 if it's more than 127.
-          if (frame_buffer -> buf[true_y + x + bit] > 127) {
+          if (frame_buffer->buf[true_y + x + bit] > 127)
+          {
             packed_pixels |= (1 << (7 - bit));
           }
-        } else {
+        }
+        else
+        {
           // If invert is false, consider pixel as 1 if it's less than 127.
-          if (frame_buffer -> buf[true_y + x + bit] < 127) {
+          if (frame_buffer->buf[true_y + x + bit] < 127)
+          {
             packed_pixels |= (1 << (7 - bit));
           }
         }
@@ -270,14 +272,17 @@ void processImage(camera_fb_t * frame_buffer) {
       Serial.write(packed_pixels); // Sending packed pixel byte.
     }
 
-    ++flipper_y; // Move to the next row.
+    ++flipper_y;    // Move to the next row.
     Serial.flush(); // Ensure all data in the Serial buffer is sent before moving to the next iteration.
   }
 }
 
-void ditherImage(camera_fb_t* frame_buffer) {
-  for (uint8_t y = 0; y < frame_buffer->height; ++y) {
-    for (uint8_t x = 0; x < frame_buffer->width; ++x) {
+void ditherImage(camera_fb_t *frame_buffer)
+{
+  for (uint8_t y = 0; y < frame_buffer->height; ++y)
+  {
+    for (uint8_t x = 0; x < frame_buffer->width; ++x)
+    {
       size_t current = (y * frame_buffer->width) + x;
       uint8_t oldpixel = frame_buffer->buf[current];
       uint8_t newpixel = oldpixel >= 128 ? 255 : 0;
@@ -285,104 +290,115 @@ void ditherImage(camera_fb_t* frame_buffer) {
       int8_t quant_error = oldpixel - newpixel;
 
       // Apply error diffusion based on the selected algorithm
-      switch (ditherAlgorithm) {
-        case JARVIS_JUDICE_NINKE:
-          frame_buffer->buf[(y * frame_buffer->width) + x + 1] += quant_error * 7 / 48;
-          frame_buffer->buf[(y * frame_buffer->width) + x + 2] += quant_error * 5 / 48;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x - 2] += quant_error * 3 / 48;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x - 1] += quant_error * 5 / 48;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x] += quant_error * 7 / 48;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x + 1] += quant_error * 5 / 48;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x + 2] += quant_error * 3 / 48;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x - 2] += quant_error * 1 / 48;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x - 1] += quant_error * 3 / 48;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x] += quant_error * 5 / 48;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x + 1] += quant_error * 3 / 48;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x + 2] += quant_error * 1 / 48;
-          break;
-        case STUCKI:
-          frame_buffer->buf[(y * frame_buffer->width) + x + 1] += quant_error * 8 / 42;
-          frame_buffer->buf[(y * frame_buffer->width) + x + 2] += quant_error * 4 / 42;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x - 2] += quant_error * 2 / 42;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x - 1] += quant_error * 4 / 42;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x] += quant_error * 8 / 42;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x + 1] += quant_error * 4 / 42;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x + 2] += quant_error * 2 / 42;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x - 2] += quant_error * 1 / 42;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x - 1] += quant_error * 2 / 42;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x] += quant_error * 4 / 42;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x + 1] += quant_error * 2 / 42;
-          frame_buffer->buf[(y + 2) * frame_buffer->width + x + 2] += quant_error * 1 / 42;
-          break;
-        case FLOYD_STEINBERG:
-        default:
-          // Default to Floyd-Steinberg dithering if an invalid algorithm is selected
-          frame_buffer->buf[(y * frame_buffer->width) + x + 1] += quant_error * 7 / 16;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x - 1] += quant_error * 3 / 16;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x] += quant_error * 5 / 16;
-          frame_buffer->buf[(y + 1) * frame_buffer->width + x + 1] += quant_error * 1 / 16;
-          break;
+      switch (ditherAlgorithm)
+      {
+      case JARVIS_JUDICE_NINKE:
+        frame_buffer->buf[(y * frame_buffer->width) + x + 1] += quant_error * 7 / 48;
+        frame_buffer->buf[(y * frame_buffer->width) + x + 2] += quant_error * 5 / 48;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x - 2] += quant_error * 3 / 48;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x - 1] += quant_error * 5 / 48;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x] += quant_error * 7 / 48;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x + 1] += quant_error * 5 / 48;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x + 2] += quant_error * 3 / 48;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x - 2] += quant_error * 1 / 48;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x - 1] += quant_error * 3 / 48;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x] += quant_error * 5 / 48;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x + 1] += quant_error * 3 / 48;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x + 2] += quant_error * 1 / 48;
+        break;
+      case STUCKI:
+        frame_buffer->buf[(y * frame_buffer->width) + x + 1] += quant_error * 8 / 42;
+        frame_buffer->buf[(y * frame_buffer->width) + x + 2] += quant_error * 4 / 42;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x - 2] += quant_error * 2 / 42;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x - 1] += quant_error * 4 / 42;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x] += quant_error * 8 / 42;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x + 1] += quant_error * 4 / 42;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x + 2] += quant_error * 2 / 42;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x - 2] += quant_error * 1 / 42;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x - 1] += quant_error * 2 / 42;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x] += quant_error * 4 / 42;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x + 1] += quant_error * 2 / 42;
+        frame_buffer->buf[(y + 2) * frame_buffer->width + x + 2] += quant_error * 1 / 42;
+        break;
+      case FLOYD_STEINBERG:
+      default:
+        // Default to Floyd-Steinberg dithering if an invalid algorithm is selected
+        frame_buffer->buf[(y * frame_buffer->width) + x + 1] += quant_error * 7 / 16;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x - 1] += quant_error * 3 / 16;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x] += quant_error * 5 / 16;
+        frame_buffer->buf[(y + 1) * frame_buffer->width + x + 1] += quant_error * 1 / 16;
+        break;
       }
     }
   }
 }
 
-void takePicture() {
-    // Get camera sensor
-    sensor_t * s = esp_camera_sensor_get();
-    
-    // Check if the sensor is valid
-    if(!s) {
-        Serial.println("Failed to acquire camera sensor");
-        return;
-    }
+// @todo - Future feature.
+void saveJpegPictureToSDCard()
+{
+  // Get camera sensor.
+  sensor_t *s = esp_camera_sensor_get();
 
-    // Set pixel format to JPEG for saving picture
-    s->set_pixformat(s, PIXFORMAT_JPEG);
+  // Check if the sensor is valid.
+  if (!s)
+  {
+    Serial.println("Failed to acquire camera sensor");
+    return;
+  }
 
-    // Set frame size based on available PSRAM
-    if (psramFound()) {
-        s->set_framesize(s, FRAMESIZE_UXGA);
-    } else {
-        s->set_framesize(s, FRAMESIZE_SVGA);
-    }
+  // Set pixel format to JPEG for saving picture.
+  s->set_pixformat(s, PIXFORMAT_JPEG);
 
-    // Get a frame buffer from camera
-    camera_fb_t * frame_buffer = esp_camera_fb_get();
-    if (!frame_buffer) {
-        Serial.println("Camera capture failed");
-        return;
-    }
+  // Set frame size based on available PSRAM.
+  if (psramFound())
+  {
+    s->set_framesize(s, FRAMESIZE_UXGA);
+  }
+  else
+  {
+    s->set_framesize(s, FRAMESIZE_SVGA);
+  }
 
-    // Save the picture to SD card
-    savePictureToSDCard(frame_buffer);
-}
+  // Get a frame buffer from camera.
+  camera_fb_t *frame_buffer = esp_camera_fb_get();
+  if (!frame_buffer)
+  {
+    Serial.println("Camera capture failed");
+    return;
+  }
 
-void savePictureToSDCard(camera_fb_t * frame_buffer) {
-    if (!SD_MMC.begin()) {
-        // SD Card Mount Failed.
-        Serial.println("SD Card Mount Failed");
-        esp_camera_fb_return(frame_buffer);
-        return;
-    }
-
-    // Generate a unique filename
-    String path = "/picture";
-    path += String(millis());
-    path += ".jpg";
-
-    fs::FS & fs = SD_MMC;
-    File file = fs.open(path.c_str(), FILE_WRITE);
-
-    if (!file) {
-        Serial.println("Failed to open file in writing mode");
-    } else {
-        if(file.write(frame_buffer->buf, frame_buffer->len) != frame_buffer->len) {
-            Serial.println("Failed to write the image to the file");
-        }
-        file.close(); // Close the file in any case.
-    }
-
-    // Return the frame buffer back to the camera driver.
+  if (!SD_MMC.begin())
+  {
+    // SD Card Mount Failed.
+    Serial.println("SD Card Mount Failed");
     esp_camera_fb_return(frame_buffer);
+    return;
+  }
+
+  // Generate a unique filename.
+  String path = "/picture";
+  path += String(millis());
+  path += ".jpg";
+
+  fs::FS &fs = SD_MMC;
+  File file = fs.open(path.c_str(), FILE_WRITE);
+
+  if (!file)
+  {
+    Serial.println("Failed to open file in writing mode");
+  }
+  else
+  {
+    if (file.write(frame_buffer->buf, frame_buffer->len) != frame_buffer->len)
+    {
+      Serial.println("Failed to write the image to the file");
+    }
+    file.close(); // Close the file in any case.
+  }
+
+  // Update framesize back to the default.
+  s->set_framesize(s, FRAMESIZE_QQVGA);
+
+  // Return the frame buffer back to the camera driver.
+  esp_camera_fb_return(frame_buffer);
 }

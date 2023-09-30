@@ -3,7 +3,6 @@
 .DS_Store
 .clang-format
 .editorconfig
-.flag
 .idea
 .submodules/*
 .vscode
@@ -14,3 +13,4 @@ fap/.clang-format
 fap/.editorconfig
 fap/.vscode
 fap/dist/*
+firmware/compile.flag
