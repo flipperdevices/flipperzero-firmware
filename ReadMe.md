@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [nice flor s add button code 0x3 (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/2f44fd6cac47d7a071e86311c4d2bd51f6a84b70)
 - [Rocateq Shopping Cart wav files #758 (By casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/758)
 - Removed Shopping Cart WAV files from firmware to include in SD Card Assets.
+- Updated: [XRemote v0.9.19 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 
@@ -467,7 +468,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- [XRemote (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- [XRemote v0.9.19 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
 

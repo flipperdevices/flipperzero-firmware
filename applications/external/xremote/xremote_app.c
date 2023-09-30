@@ -13,7 +13,7 @@
 
 XRemoteAppSettings* xremote_app_settings_alloc() {
     XRemoteAppSettings* settings = malloc(sizeof(XRemoteAppSettings));
-    settings->orientation = ViewOrientationVertical;
+    settings->orientation = ViewOrientationHorizontal;
     settings->repeat_count = 1;
     return settings;
 }
@@ -28,7 +28,6 @@ bool xremote_app_settings_store(XRemoteAppSettings* settings) {
     FlipperFormat* ff = flipper_format_file_alloc(storage);
 
     FURI_LOG_I(TAG, "store config file: \'%s\'", XREMOTE_APP_SETTINGS);
-    bool vertical = settings->orientation == ViewOrientationVertical;
     bool success = false;
 
     do {
@@ -38,9 +37,9 @@ bool xremote_app_settings_store(XRemoteAppSettings* settings) {
         if(!flipper_format_write_comment_cstr(ff, "")) break;
 
         /* Write actual configuration to the settings file */
-        const char* orientation = vertical ? "vertical" : "horizontal";
-        if(!flipper_format_write_string_cstr(ff, "orientation", orientation)) break;
-        if(!flipper_format_write_uint32(ff, "cmd_repeat", &settings->repeat_count, 1)) break;
+        uint32_t orientation = settings->orientation;
+        if(!flipper_format_write_uint32(ff, "orientation", &orientation, 1)) break;
+        if(!flipper_format_write_uint32(ff, "repeat", &settings->repeat_count, 1)) break;
 
         success = true;
     } while(false);
@@ -55,11 +54,9 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
     FuriString* header = furi_string_alloc();
-    FuriString* orient = furi_string_alloc();
 
     FURI_LOG_I(TAG, "load config file: \'%s\'", XREMOTE_APP_SETTINGS);
-    uint32_t version = 0;
-    uint32_t repeat = 0;
+    uint32_t version, orientation, repeat = 0;
     bool success = false;
 
     do {
@@ -68,22 +65,17 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
         if(!flipper_format_read_header(ff, header, &version)) break;
         if(!furi_string_equal(header, "XRemote settings file") || (version != 1)) break;
 
-        /* Read config data from the file */
-        if(!flipper_format_read_string(ff, "orientation", orient)) break;
-        if(!flipper_format_read_uint32(ff, "cmd_repeat", &repeat, 1)) break;
-
         /* Parse config data from the buffer */
-        if(furi_string_equal(orient, "vertical"))
-            settings->orientation = ViewOrientationVertical;
-        else if(furi_string_equal(orient, "horizontal"))
-            settings->orientation = ViewOrientationHorizontal;
+        if(!flipper_format_read_uint32(ff, "orientation", &orientation, 1)) break;
+        if(!flipper_format_read_uint32(ff, "repeat", &repeat, 1)) break;
 
+        settings->orientation = orientation;
         settings->repeat_count = repeat;
+
         success = true;
     } while(false);
 
     furi_record_close(RECORD_STORAGE);
-    furi_string_free(orient);
     furi_string_free(header);
     flipper_format_free(ff);
 
