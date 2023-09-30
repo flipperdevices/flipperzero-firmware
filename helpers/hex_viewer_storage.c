@@ -118,3 +118,50 @@ void hex_viewer_read_settings(void* context) {
     hex_viewer_close_config_file(fff_file);
     hex_viewer_close_storage();
 }
+
+
+bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
+    furi_assert(hex_viewer);
+    furi_assert(file_path);
+
+    hex_viewer->model->stream = buffered_file_stream_alloc(hex_viewer->storage);
+    bool isOk = true;
+
+    do {
+        if(!buffered_file_stream_open(
+               hex_viewer->model->stream, file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            FURI_LOG_E(TAG, "Unable to open stream: %s", file_path);
+            isOk = false;
+            break;
+        };
+
+        hex_viewer->model->file_size = stream_size(hex_viewer->model->stream);
+    } while(false);
+
+    return isOk;
+}
+
+bool hex_viewer_read_file(HexViewer* hex_viewer) {
+    furi_assert(hex_viewer);
+    furi_assert(hex_viewer->model->stream);
+    furi_assert(hex_viewer->model->file_offset % HEX_VIEWER_BYTES_PER_LINE == 0);
+
+    memset(hex_viewer->model->file_bytes, 0x0, HEX_VIEWER_BUF_SIZE);
+    bool isOk = true;
+
+    do {
+        uint32_t offset = hex_viewer->model->file_offset;
+        if(!stream_seek(hex_viewer->model->stream, offset, true)) {
+            FURI_LOG_E(TAG, "Unable to seek stream");
+            isOk = false;
+            break;
+        }
+
+        hex_viewer->model->file_read_bytes = stream_read(
+            hex_viewer->model->stream,
+            (uint8_t*)hex_viewer->model->file_bytes,
+            HEX_VIEWER_BUF_SIZE);
+    } while(false);
+
+    return isOk;
+}

@@ -20,13 +20,41 @@
 #include "views/hex_viewer_scene_2.h"
 #include "helpers/hex_viewer_storage.h"
 
+#include <storage/storage.h>
+#include <stream/stream.h>
+#include <stream/buffered_file_stream.h>
+#include <toolbox/stream/file_stream.h>
+
 #define TAG "HexViewer"
 
-#define SUBGHZ_APP_EXTENSION ".sub"
-#define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
+// #define SUBGHZ_APP_EXTENSION ".sub"
+// #define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
+
+#define HEX_VIEWER_APP_PATH_FOLDER "/any" // TODO ANY_PATH
+#define HEX_VIEWER_APP_EXTENSION "*"
+
+#define HEX_VIEWER_BYTES_PER_LINE 4u
+#define HEX_VIEWER_LINES_ON_SCREEN 4u
+#define HEX_VIEWER_BUF_SIZE (HEX_VIEWER_LINES_ON_SCREEN * HEX_VIEWER_BYTES_PER_LINE)
+
 
 typedef struct {
+    uint8_t file_bytes[HEX_VIEWER_LINES_ON_SCREEN][HEX_VIEWER_BYTES_PER_LINE];
+    uint32_t file_offset;
+    uint32_t file_read_bytes;
+    uint32_t file_size;
+    Stream* stream;
+    bool mode; // Print address or content
+} HexViewerModel;
+
+
+// TODO Clean
+typedef struct {
+    HexViewerModel* model;
+    FuriMutex** mutex; // TODO Don't need?
+
     Gui* gui;
+    Storage* storage;
     NotificationApp* notification;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;

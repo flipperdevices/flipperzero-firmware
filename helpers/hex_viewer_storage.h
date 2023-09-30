@@ -16,3 +16,7 @@
 
 void hex_viewer_save_settings(void* context);
 void hex_viewer_read_settings(void* context);
+
+
+bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path);
+bool hex_viewer_read_file(HexViewer* hex_viewer);

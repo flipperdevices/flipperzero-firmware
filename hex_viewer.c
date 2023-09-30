@@ -1,5 +1,6 @@
 #include "hex_viewer.h"
 
+
 bool hex_viewer_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     HexViewer* app = context;
@@ -22,6 +23,7 @@ bool hex_viewer_navigation_event_callback(void* context) {
 HexViewer* hex_viewer_app_alloc() {
     HexViewer* app = malloc(sizeof(HexViewer));
     app->gui = furi_record_open(RECORD_GUI);
+    app->storage = furi_record_open(RECORD_STORAGE);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     
     //Turn backlight on, believe me this makes testing your app easier
@@ -71,6 +73,8 @@ HexViewer* hex_viewer_app_alloc() {
 
 void hex_viewer_app_free(HexViewer* app) {
     furi_assert(app);
+
+    if(app->model->stream) buffered_file_stream_close(app->model->stream);
     
     // Scene manager
     scene_manager_free(app->scene_manager);
@@ -83,8 +87,10 @@ void hex_viewer_app_free(HexViewer* app) {
     submenu_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
+    furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_GUI);
     
+    app->storage = NULL;
     app->gui = NULL;
     app->notification = NULL;
 
