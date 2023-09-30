@@ -100,25 +100,31 @@ void handleSerialInput()
     case '<': // Toggle invert.
       invert = !invert;
       break;
+    case 'b': // Remove brightness.
+      cameraSensor->set_contrast(
+          cameraSensor,
+          cameraSensor->status.brightness - 1);
+      break;
     case 'B': // Add brightness.
       cameraSensor->set_contrast(
           cameraSensor,
           cameraSensor->status.brightness + 1);
       break;
-    case 'b': // Remove brightness.
+    case 'c': // Remove contrast.
       cameraSensor->set_contrast(
           cameraSensor,
-          cameraSensor->status.brightness - 1);
+          cameraSensor->status.contrast - 1);
       break;
     case 'C': // Add contrast.
       cameraSensor->set_contrast(
           cameraSensor,
           cameraSensor->status.contrast + 1);
       break;
-    case 'c': // Remove contrast.
-      cameraSensor->set_contrast(
-          cameraSensor,
-          cameraSensor->status.contrast - 1);
+    case 'f': // Toggle flash off.
+      isFlashEnabled = false;
+      break;
+    case 'F': // Toggle flash on.
+      isFlashEnabled = true;
       break;
     case 'j': // Toggle store jpeg to sd card off.
       storeJpeg = false;
@@ -127,36 +133,28 @@ void handleSerialInput()
       storeJpeg = true;
       break;
     case 'P': // Picture sequence.
-      // Stop the IO stream before taking a picture.
-      stopStream = true;
       if (isFlashEnabled)
       {
         // Turn on torch.
         pinMode(FLASH_GPIO_NUM, OUTPUT);
         digitalWrite(FLASH_GPIO_NUM, HIGH);
+        // Give some time (500ms) for Flipper to save locally with flash on.
+        delay(500);
+        // Turn off torch.
+        digitalWrite(FLASH_GPIO_NUM, LOW);
       }
 
       // @todo - Future feature.
       // if (storeJpeg) { saveJpegPictureToSDCard(); }
-
-      // Give some time (100ms) for Flipper to save locally with flash on.
-      delay(100);
-
-      // Turn off torch.
-      pinMode(FLASH_GPIO_NUM, OUTPUT);
-      digitalWrite(FLASH_GPIO_NUM, LOW);
-
-      // Restart the stream after the picture is taken.
-      stopStream = false;
       break;
     case 'M': // Toggle Mirror.
       cameraSensor->set_hmirror(cameraSensor, !cameraSensor->status.hmirror);
       break;
-    case 'S': // Start stream.
-      stopStream = false;
-      break;
     case 's': // Stop stream.
       stopStream = true;
+      break;
+    case 'S': // Start stream.
+      stopStream = false;
       break;
     case '0': // Use Floyd Steinberg dithering.
       ditherAlgorithm = FLOYD_STEINBERG;

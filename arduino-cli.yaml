@@ -1,6 +1,6 @@
 board_manager:
   additional_urls:
-    - https://dl.espressif.com/dl/package_esp32_index.json
+  - https://dl.espressif.com/dl/package_esp32_index.json
 build_cache:
   compilations_before_purge: 10
   ttl: 720h0m0s
@@ -8,7 +8,7 @@ daemon:
   port: "50051"
 directories:
   data: C:\temp\arduino-cli\data
-  downloads: C:\temp\arduino-cli\downloads
+  downloads: C:\temp\arduino-cli\staging
   user: C:\temp\arduino-cli\user
 library:
   enable_unsafe_install: false

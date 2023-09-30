@@ -93,10 +93,10 @@ echo Your ESP32-CAM is ready to be flashed. Please follow the instructions below
 :uploadFirmware
 echo.
 echo 1. Ensure IO0 pin on ESP32-CAM is grounded to the proper GND pin.
-echo 2. Hold reset, and plug in your ESP32-CAM; release reset a few seconds later.
-echo 3. As you proceed, release the reset button simultaneously with the next step.
+echo 2. Hold reset, and plug in your ESP32-CAM; hold for a few seconds and release.
+echo 3. Try to time your release simultaneously with continuing to the next step.
 echo 4. ESP32-CAM should now be in flash mode; allow some time for firmware upload.
-echo 5. Failure is common; persist and verify all connections if errors persist.
+echo 5. Failure is common; verify all connections if errors persist and try again.
 echo 6. Disconnecting and reconnecting USB between attempts may sometimes work.
 echo.
 pause
@@ -115,7 +115,7 @@ if !ERRORLEVEL! EQU 0 (
         goto :uploadLoop
     ) else (
         echo.
-        set /p UPLOAD_TRY_AGAIN="Upload failed after 3 attempts, don't give up! Would you like to try again? (Y/N): "
+        set /p UPLOAD_TRY_AGAIN="Upload failed after 3 attempts, dont give up friend. Would you like to try again? (Y/N): "
         if /i "!UPLOAD_TRY_AGAIN!"=="Y" (
             set RETRY_COUNT=1
             goto :uploadFirmware
@@ -140,7 +140,7 @@ if /i "!DELETE_TEMP!"=="Y" (
     rmdir /s /q %CLI_TEMP%
 )
 echo.
-echo Fin. Happy programming friend.
+echo Fin. Happy programming.
 echo.
 pause
 exit /b
