@@ -10,7 +10,9 @@ App(
     ],
     stack_size=2 * 1024,
     order=20,
+    fap_libs=["assets"],
     fap_icon="icons/hex_10px.png",
+	fap_icon_assets="icons",
     fap_category="Misc",
-    fap_icon_assets="icons",
+
 )
