@@ -2,7 +2,7 @@
 
 void hex_viewer_scene_scene_4_on_enter(void* context) {
     furi_assert(context);
-    Boilerplate* app = context;
+    HexViewer* app = context;
     DialogsFileBrowserOptions browser_options;
     
     // This will filter the browser to only show one file type and also add an icon
@@ -23,7 +23,7 @@ void hex_viewer_scene_scene_4_on_enter(void* context) {
 
     if(success) {
         // Load page to do something with result
-        //scene_manager_next_scene(app->scene_manager, BoilerplateViewIdMenu);
+        //scene_manager_next_scene(app->scene_manager, HexViewerViewIdMenu);
         scene_manager_previous_scene(app->scene_manager); // temp for showcase
     } else {
         // This is basically if someone quites the browser

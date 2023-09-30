@@ -5,20 +5,20 @@
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
 
-struct BoilerplateScene1 {
+struct HexViewerScene1 {
     View* view;
-    BoilerplateScene1Callback callback;
+    HexViewerScene1Callback callback;
     void* context;
 };
 
 
 typedef struct {
     int some_value;
-} BoilerplateScene1Model;
+} HexViewerScene1Model;
 
 void hex_viewer_scene_1_set_callback(
-    BoilerplateScene1* instance,
-    BoilerplateScene1Callback callback,
+    HexViewerScene1* instance,
+    HexViewerScene1Callback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -26,7 +26,7 @@ void hex_viewer_scene_1_set_callback(
     instance->context = context;
 }
 
-void hex_viewer_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
+void hex_viewer_scene_1_draw(Canvas* canvas, HexViewerScene1Model* model) {
     UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -37,22 +37,22 @@ void hex_viewer_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
     canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "used as hex_viewer"); 
 }
 
-static void hex_viewer_scene_1_model_init(BoilerplateScene1Model* const model) {
+static void hex_viewer_scene_1_model_init(HexViewerScene1Model* const model) {
     model->some_value = 1;
 }
 
 bool hex_viewer_scene_1_input(InputEvent* event, void* context) {
     furi_assert(context); 
-    BoilerplateScene1* instance = context;
+    HexViewerScene1* instance = context;
     if (event->type == InputTypeRelease) {
         switch(event->key) {
             case InputKeyBack:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene1Model * model,
+                    HexViewerScene1Model * model,
                     {
                         UNUSED(model);
-                        instance->callback(BoilerplateCustomEventScene1Back, instance->context);
+                        instance->callback(HexViewerCustomEventScene1Back, instance->context);
                     },
                     true);
                 break;
@@ -63,7 +63,7 @@ bool hex_viewer_scene_1_input(InputEvent* event, void* context) {
             case InputKeyOk:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene1Model* model,
+                    HexViewerScene1Model* model,
                     {
                         UNUSED(model);
                     },
@@ -82,10 +82,10 @@ void hex_viewer_scene_1_exit(void* context) {
 
 void hex_viewer_scene_1_enter(void* context) {
     furi_assert(context);
-    BoilerplateScene1* instance = (BoilerplateScene1*)context;
+    HexViewerScene1* instance = (HexViewerScene1*)context;
     with_view_model(
         instance->view,
-        BoilerplateScene1Model * model,
+        HexViewerScene1Model * model,
         {
             hex_viewer_scene_1_model_init(model);
         },
@@ -93,10 +93,10 @@ void hex_viewer_scene_1_enter(void* context) {
     );
 }
 
-BoilerplateScene1* hex_viewer_scene_1_alloc() {
-    BoilerplateScene1* instance = malloc(sizeof(BoilerplateScene1));
+HexViewerScene1* hex_viewer_scene_1_alloc() {
+    HexViewerScene1* instance = malloc(sizeof(HexViewerScene1));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(BoilerplateScene1Model));
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(HexViewerScene1Model));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
     view_set_draw_callback(instance->view, (ViewDrawCallback)hex_viewer_scene_1_draw);
     view_set_input_callback(instance->view, hex_viewer_scene_1_input);
@@ -105,7 +105,7 @@ BoilerplateScene1* hex_viewer_scene_1_alloc() {
 
     with_view_model(
         instance->view,
-        BoilerplateScene1Model * model,
+        HexViewerScene1Model * model,
         {
             hex_viewer_scene_1_model_init(model);
         },
@@ -115,12 +115,12 @@ BoilerplateScene1* hex_viewer_scene_1_alloc() {
     return instance;
 }
 
-void hex_viewer_scene_1_free(BoilerplateScene1* instance) {
+void hex_viewer_scene_1_free(HexViewerScene1* instance) {
     furi_assert(instance);
 
     with_view_model(
         instance->view,
-        BoilerplateScene1Model * model,
+        HexViewerScene1Model * model,
         {
             UNUSED(model);
         },
@@ -129,7 +129,7 @@ void hex_viewer_scene_1_free(BoilerplateScene1* instance) {
     free(instance);
 }
 
-View* hex_viewer_scene_1_get_view(BoilerplateScene1* instance) {
+View* hex_viewer_scene_1_get_view(HexViewerScene1* instance) {
     furi_assert(instance);
     return instance->view;
 }

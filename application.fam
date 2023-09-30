@@ -13,6 +13,6 @@ App(
     fap_libs=["assets"],
     fap_icon="icons/hex_10px.png",
 	fap_icon_assets="icons",
-    fap_category="Misc",
+    fap_category="Tools",
 
 )

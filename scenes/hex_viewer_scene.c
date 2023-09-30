@@ -26,5 +26,5 @@ const SceneManagerHandlers hex_viewer_scene_handlers = {
     .on_enter_handlers = hex_viewer_on_enter_handlers,
     .on_event_handlers = hex_viewer_on_event_handlers,
     .on_exit_handlers = hex_viewer_on_exit_handlers,
-    .scene_num = BoilerplateSceneNum,
+    .scene_num = HexViewerSceneNum,
 };

@@ -10,12 +10,12 @@ enum SubmenuIndex {
 };
 
 void hex_viewer_scene_menu_submenu_callback(void* context, uint32_t index) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 void hex_viewer_scene_menu_on_enter(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
 
     submenu_add_item(app->submenu, "Scene 1 (empty)", SubmenuIndexScene1, hex_viewer_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Scene 2 (Inputs/Effects)", SubmenuIndexScene2, hex_viewer_scene_menu_submenu_callback, app);
@@ -23,13 +23,13 @@ void hex_viewer_scene_menu_on_enter(void* context) {
     submenu_add_item(app->submenu, "Scene 4 (File Browser)", SubmenuIndexScene4, hex_viewer_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, hex_viewer_scene_menu_submenu_callback, app);
 
-    submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, BoilerplateSceneMenu));
+    submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, HexViewerSceneMenu));
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, BoilerplateViewIdMenu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, HexViewerViewIdMenu);
 }
 
 bool hex_viewer_scene_menu_on_event(void* context, SceneManagerEvent event) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     UNUSED(app);
     if(event.type == SceneManagerEventTypeBack) {
         //exit app
@@ -39,26 +39,26 @@ bool hex_viewer_scene_menu_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexScene1) {
             scene_manager_set_scene_state(
-                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene1);
-            scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_1);
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene1);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_1);
             return true;
         } else if (event.event == SubmenuIndexScene2) {
             scene_manager_set_scene_state(
-                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene2);
-            scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_2);
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene2);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_2);
             return true;
         } else if (event.event == SubmenuIndexScene3) {
             scene_manager_set_scene_state(
-                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene3);
-            scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_3);
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene3);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_3);
         } else if (event.event == SubmenuIndexScene4) {
             scene_manager_set_scene_state(
-                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene4);
-            scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_4);
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene4);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_4);
         } else if (event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
-                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexSettings);
-            scene_manager_next_scene(app->scene_manager, BoilerplateSceneSettings);
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexSettings);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneSettings);
             return true;
         }
     }
@@ -66,6 +66,6 @@ bool hex_viewer_scene_menu_on_event(void* context, SceneManagerEvent event) {
 }
 
 void hex_viewer_scene_menu_on_exit(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     submenu_reset(app->submenu);
 }

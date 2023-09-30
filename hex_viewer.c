@@ -2,25 +2,25 @@
 
 bool hex_viewer_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
-    Boilerplate* app = context;
+    HexViewer* app = context;
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
 void hex_viewer_tick_event_callback(void* context) {
     furi_assert(context);
-    Boilerplate* app = context;
+    HexViewer* app = context;
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
 //leave app if back button pressed
 bool hex_viewer_navigation_event_callback(void* context) {
     furi_assert(context);
-    Boilerplate* app = context;
+    HexViewer* app = context;
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-Boilerplate* hex_viewer_app_alloc() {
-    Boilerplate* app = malloc(sizeof(Boilerplate));
+HexViewer* hex_viewer_app_alloc() {
+    HexViewer* app = malloc(sizeof(HexViewer));
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     
@@ -51,35 +51,35 @@ Boilerplate* hex_viewer_app_alloc() {
     // Load configs
     hex_viewer_read_settings(app);
 
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdMenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(app->view_dispatcher, HexViewerViewIdMenu, submenu_get_view(app->submenu));
     app->hex_viewer_startscreen = hex_viewer_startscreen_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdStartscreen, hex_viewer_startscreen_get_view(app->hex_viewer_startscreen));
+    view_dispatcher_add_view(app->view_dispatcher, HexViewerViewIdStartscreen, hex_viewer_startscreen_get_view(app->hex_viewer_startscreen));
     app->hex_viewer_scene_1 = hex_viewer_scene_1_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdScene1, hex_viewer_scene_1_get_view(app->hex_viewer_scene_1));
+    view_dispatcher_add_view(app->view_dispatcher, HexViewerViewIdScene1, hex_viewer_scene_1_get_view(app->hex_viewer_scene_1));
     app->hex_viewer_scene_2 = hex_viewer_scene_2_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdScene2, hex_viewer_scene_2_get_view(app->hex_viewer_scene_2));
+    view_dispatcher_add_view(app->view_dispatcher, HexViewerViewIdScene2, hex_viewer_scene_2_get_view(app->hex_viewer_scene_2));
     app->button_menu = button_menu_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdScene3, button_menu_get_view(app->button_menu));
+    view_dispatcher_add_view(app->view_dispatcher, HexViewerViewIdScene3, button_menu_get_view(app->button_menu));
     
     app->variable_item_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdSettings, variable_item_list_get_view(app->variable_item_list));
+    view_dispatcher_add_view(app->view_dispatcher, HexViewerViewIdSettings, variable_item_list_get_view(app->variable_item_list));
 
     //End Scene Additions
 
     return app;
 }
 
-void hex_viewer_app_free(Boilerplate* app) {
+void hex_viewer_app_free(HexViewer* app) {
     furi_assert(app);
     
     // Scene manager
     scene_manager_free(app->scene_manager);
 
     // View Dispatcher
-    view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene1);
-    view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene2);
-    view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdScene1);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdScene2);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdSettings);
     submenu_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
@@ -98,12 +98,12 @@ void hex_viewer_app_free(Boilerplate* app) {
 
 int32_t hex_viewer_app(void* p) {
     UNUSED(p);
-    Boilerplate* app = hex_viewer_app_alloc();
+    HexViewer* app = hex_viewer_app_alloc();
     
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     
-    scene_manager_next_scene(app->scene_manager, BoilerplateSceneStartscreen); //Start with start screen
-    //scene_manager_next_scene(app->scene_manager, BoilerplateSceneMenu); //if you want to directly start with Menu
+    scene_manager_next_scene(app->scene_manager, HexViewerSceneStartscreen); //Start with start screen
+    //scene_manager_next_scene(app->scene_manager, HexViewerSceneMenu); //if you want to directly start with Menu
 
     furi_hal_power_suppress_charge_enter();
 

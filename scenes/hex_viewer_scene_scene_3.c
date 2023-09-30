@@ -13,16 +13,16 @@ typedef enum {
 } ButtonIndex;
 
 static void hex_viewer_scene_3_callback(void* context, int32_t index, InputType type) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
 
     uint16_t custom_type;
     if(type == InputTypePress) {
-        custom_type = BoilerplateCustomEventMenuSelected;
+        custom_type = HexViewerCustomEventMenuSelected;
     } else if(type == InputTypeRelease) {
-        custom_type = BoilerplateCustomEventMenuVoid;
+        custom_type = HexViewerCustomEventMenuVoid;
     } else if(type == InputTypeShort) {
         //somehow ButtonMenuItemTypeCommon uses InputTypeShort
-        custom_type = BoilerplateCustomEventMenuSelected;
+        custom_type = HexViewerCustomEventMenuSelected;
     } else {
         furi_crash("Unexpected Input Type");
     }
@@ -31,7 +31,7 @@ static void hex_viewer_scene_3_callback(void* context, int32_t index, InputType 
 
 void hex_viewer_scene_scene_3_on_enter(void* context) {
     furi_assert(context);
-    Boilerplate* app = context;
+    HexViewer* app = context;
     ButtonMenu* button_menu = app->button_menu;
     SceneManager* scene_manager = app->scene_manager;
 
@@ -83,21 +83,21 @@ void hex_viewer_scene_scene_3_on_enter(void* context) {
 
     button_menu_set_header(button_menu, "Button Menu");
     const int16_t button_index =
-        (signed)scene_manager_get_scene_state(app->scene_manager, BoilerplateViewIdScene3);
+        (signed)scene_manager_get_scene_state(app->scene_manager, HexViewerViewIdScene3);
     button_menu_set_selected_item(button_menu, button_index);
-    scene_manager_set_scene_state(scene_manager, BoilerplateSceneScene_3, ButtonIndexButton1);
+    scene_manager_set_scene_state(scene_manager, HexViewerSceneScene_3, ButtonIndexButton1);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, BoilerplateViewIdScene3);
+    view_dispatcher_switch_to_view(app->view_dispatcher, HexViewerViewIdScene3);
 }
 
 bool hex_viewer_scene_scene_3_on_event(void* context, SceneManagerEvent event) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         const uint16_t custom_type = hex_viewer_custom_menu_event_get_type(event.event);
         const int16_t button_index = hex_viewer_custom_menu_event_get_value(event.event);
-        if (custom_type == BoilerplateCustomEventMenuSelected) {
+        if (custom_type == HexViewerCustomEventMenuSelected) {
             switch(button_index) {
                 case ButtonIndexButton1:
                     hex_viewer_play_happy_bump(app);
@@ -132,7 +132,7 @@ bool hex_viewer_scene_scene_3_on_event(void* context, SceneManagerEvent event) {
 }
 
 void hex_viewer_scene_scene_3_on_exit(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     button_menu_reset(app->button_menu);
     notification_message(app->notification, &sequence_reset_red);
     notification_message(app->notification, &sequence_reset_green);

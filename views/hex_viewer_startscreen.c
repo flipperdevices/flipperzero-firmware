@@ -4,20 +4,20 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
-struct BoilerplateStartscreen {
+struct HexViewerStartscreen {
     View* view;
-    BoilerplateStartscreenCallback callback;
+    HexViewerStartscreenCallback callback;
     void* context;
 };
 
 
 typedef struct {
     int some_value;
-} BoilerplateStartscreenModel;
+} HexViewerStartscreenModel;
 
 void hex_viewer_startscreen_set_callback(
-    BoilerplateStartscreen* instance,
-    BoilerplateStartscreenCallback callback,
+    HexViewerStartscreen* instance,
+    HexViewerStartscreenCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -25,7 +25,7 @@ void hex_viewer_startscreen_set_callback(
     instance->context = context;
 }
 
-void hex_viewer_startscreen_draw(Canvas* canvas, BoilerplateStartscreenModel* model) {
+void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* model) {
     UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -37,22 +37,22 @@ void hex_viewer_startscreen_draw(Canvas* canvas, BoilerplateStartscreenModel* mo
     elements_button_center(canvas, "Start"); 
 }
 
-static void hex_viewer_startscreen_model_init(BoilerplateStartscreenModel* const model) {
+static void hex_viewer_startscreen_model_init(HexViewerStartscreenModel* const model) {
     model->some_value = 1;
 }
 
 bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
     furi_assert(context); 
-    BoilerplateStartscreen* instance = context;
+    HexViewerStartscreen* instance = context;
     if (event->type == InputTypeRelease) {
         switch(event->key) {
             case InputKeyBack:
                 with_view_model(
                     instance->view,
-                    BoilerplateStartscreenModel * model,
+                    HexViewerStartscreenModel * model,
                     {
                         UNUSED(model);
-                        instance->callback(BoilerplateCustomEventStartscreenBack, instance->context);
+                        instance->callback(HexViewerCustomEventStartscreenBack, instance->context);
                     },
                     true);
                 break;
@@ -63,10 +63,10 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
             case InputKeyOk:
                 with_view_model(
                     instance->view,
-                    BoilerplateStartscreenModel* model,
+                    HexViewerStartscreenModel* model,
                     {
                         UNUSED(model);
-                        instance->callback(BoilerplateCustomEventStartscreenOk, instance->context);
+                        instance->callback(HexViewerCustomEventStartscreenOk, instance->context);
                     },
                     true);
                 break;
@@ -83,10 +83,10 @@ void hex_viewer_startscreen_exit(void* context) {
 
 void hex_viewer_startscreen_enter(void* context) {
     furi_assert(context);
-    BoilerplateStartscreen* instance = (BoilerplateStartscreen*)context;
+    HexViewerStartscreen* instance = (HexViewerStartscreen*)context;
     with_view_model(
         instance->view,
-        BoilerplateStartscreenModel * model,
+        HexViewerStartscreenModel * model,
         {
             hex_viewer_startscreen_model_init(model);
         },
@@ -94,10 +94,10 @@ void hex_viewer_startscreen_enter(void* context) {
     );
 }
 
-BoilerplateStartscreen* hex_viewer_startscreen_alloc() {
-    BoilerplateStartscreen* instance = malloc(sizeof(BoilerplateStartscreen));
+HexViewerStartscreen* hex_viewer_startscreen_alloc() {
+    HexViewerStartscreen* instance = malloc(sizeof(HexViewerStartscreen));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(BoilerplateStartscreenModel));
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(HexViewerStartscreenModel));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
     view_set_draw_callback(instance->view, (ViewDrawCallback)hex_viewer_startscreen_draw);
     view_set_input_callback(instance->view, hex_viewer_startscreen_input);
@@ -106,7 +106,7 @@ BoilerplateStartscreen* hex_viewer_startscreen_alloc() {
 
     with_view_model(
         instance->view,
-        BoilerplateStartscreenModel * model,
+        HexViewerStartscreenModel * model,
         {
             hex_viewer_startscreen_model_init(model);
         },
@@ -116,12 +116,12 @@ BoilerplateStartscreen* hex_viewer_startscreen_alloc() {
     return instance;
 }
 
-void hex_viewer_startscreen_free(BoilerplateStartscreen* instance) {
+void hex_viewer_startscreen_free(HexViewerStartscreen* instance) {
     furi_assert(instance);
 
     with_view_model(
         instance->view,
-        BoilerplateStartscreenModel * model,
+        HexViewerStartscreenModel * model,
         {
             UNUSED(model);
         },
@@ -130,7 +130,7 @@ void hex_viewer_startscreen_free(BoilerplateStartscreen* instance) {
     free(instance);
 }
 
-View* hex_viewer_startscreen_get_view(BoilerplateStartscreen* instance) {
+View* hex_viewer_startscreen_get_view(HexViewerStartscreen* instance) {
     furi_assert(instance);
     return instance->view;
 }

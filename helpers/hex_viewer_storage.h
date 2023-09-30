@@ -4,15 +4,15 @@
 #include <flipper_format/flipper_format_i.h>
 #include "../hex_viewer.h"
 
-#define BOILERPLATE_SETTINGS_FILE_VERSION 1
+#define HEX_VIEWER_SETTINGS_FILE_VERSION 1
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/hex_viewer")
-#define BOILERPLATE_SETTINGS_SAVE_PATH CONFIG_FILE_DIRECTORY_PATH "/hex_viewer.conf"
-#define BOILERPLATE_SETTINGS_SAVE_PATH_TMP BOILERPLATE_SETTINGS_SAVE_PATH ".tmp"
-#define BOILERPLATE_SETTINGS_HEADER "Boilerplate Config File"
-#define BOILERPLATE_SETTINGS_KEY_HAPTIC "Haptic"
-#define BOILERPLATE_SETTINGS_KEY_LED "Led"
-#define BOILERPLATE_SETTINGS_KEY_SPEAKER "Speaker"
-#define BOILERPLATE_SETTINGS_KEY_SAVE_SETTINGS "SaveSettings"
+#define HEX_VIEWER_SETTINGS_SAVE_PATH CONFIG_FILE_DIRECTORY_PATH "/hex_viewer.conf"
+#define HEX_VIEWER_SETTINGS_SAVE_PATH_TMP HEX_VIEWER_SETTINGS_SAVE_PATH ".tmp"
+#define HEX_VIEWER_SETTINGS_HEADER "HexViewer Config File"
+#define HEX_VIEWER_SETTINGS_KEY_HAPTIC "Haptic"
+#define HEX_VIEWER_SETTINGS_KEY_LED "Led"
+#define HEX_VIEWER_SETTINGS_KEY_SPEAKER "Speaker"
+#define HEX_VIEWER_SETTINGS_KEY_SAVE_SETTINGS "SaveSettings"
 
 void hex_viewer_save_settings(void* context);
 void hex_viewer_read_settings(void* context);

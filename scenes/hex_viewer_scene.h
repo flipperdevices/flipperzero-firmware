@@ -3,11 +3,11 @@
 #include <gui/scene_manager.h>
 
 // Generate scene id and total number
-#define ADD_SCENE(prefix, name, id) BoilerplateScene##id,
+#define ADD_SCENE(prefix, name, id) HexViewerScene##id,
 typedef enum {
 #include "hex_viewer_scene_config.h"
-    BoilerplateSceneNum,
-} BoilerplateScene;
+    HexViewerSceneNum,
+} HexViewerScene;
 #undef ADD_SCENE
 
 extern const SceneManagerHandlers hex_viewer_scene_handlers;

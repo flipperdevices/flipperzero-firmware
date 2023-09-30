@@ -8,15 +8,15 @@
 #include "../helpers/hex_viewer_speaker.h"
 #include "../helpers/hex_viewer_led.h"
 
-struct BoilerplateScene2 {
+struct HexViewerScene2 {
     View* view;
-    BoilerplateScene2Callback callback;
+    HexViewerScene2Callback callback;
     void* context;
 };
 
 typedef struct {
     int screen_text;
-} BoilerplateScene2Model;
+} HexViewerScene2Model;
 
 char buttonText[11][14] = {
     "",
@@ -33,8 +33,8 @@ char buttonText[11][14] = {
 };
 
 void hex_viewer_scene_2_set_callback(
-    BoilerplateScene2* instance,
-    BoilerplateScene2Callback callback,
+    HexViewerScene2* instance,
+    HexViewerScene2Callback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -42,7 +42,7 @@ void hex_viewer_scene_2_set_callback(
     instance->context = context;
 }
 
-void hex_viewer_scene_2_draw(Canvas* canvas, BoilerplateScene2Model* model) {
+void hex_viewer_scene_2_draw(Canvas* canvas, HexViewerScene2Model* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
@@ -54,23 +54,23 @@ void hex_viewer_scene_2_draw(Canvas* canvas, BoilerplateScene2Model* model) {
     free(strInput);
 }
 
-static void hex_viewer_scene_2_model_init(BoilerplateScene2Model* const model) {
+static void hex_viewer_scene_2_model_init(HexViewerScene2Model* const model) {
     model->screen_text = 0;
 }
 
 bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
     furi_assert(context);
-    BoilerplateScene2* instance = context;
+    HexViewerScene2* instance = context;
     if (event->type == InputTypeRelease) {
         switch(event->key) {
             case InputKeyBack:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         UNUSED(model);
                         hex_viewer_stop_all_sound(instance->context);
-                        instance->callback(BoilerplateCustomEventScene2Back, instance->context);
+                        instance->callback(HexViewerCustomEventScene2Back, instance->context);
                         hex_viewer_play_long_bump(instance->context);
                     },
                     true);
@@ -78,7 +78,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyUp:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 6;
                         hex_viewer_play_bad_bump(instance->context);
@@ -90,7 +90,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyDown:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 7;
                         hex_viewer_play_bad_bump(instance->context);
@@ -102,7 +102,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyLeft:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 8;
                         hex_viewer_play_bad_bump(instance->context);
@@ -114,7 +114,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyRight:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 9;
                         hex_viewer_play_bad_bump(instance->context);
@@ -126,7 +126,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyOk:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 10;
                         hex_viewer_play_bad_bump(instance->context);
@@ -143,7 +143,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyUp:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 1;
                         hex_viewer_play_happy_bump(instance->context);
@@ -154,7 +154,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyDown:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 2;
                         hex_viewer_play_happy_bump(instance->context);
@@ -165,7 +165,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyLeft:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 3;
                         hex_viewer_play_happy_bump(instance->context);
@@ -176,7 +176,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyRight:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 4;
                         hex_viewer_play_happy_bump(instance->context);
@@ -187,7 +187,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
             case InputKeyOk:
                 with_view_model(
                     instance->view,
-                    BoilerplateScene2Model * model,
+                    HexViewerScene2Model * model,
                     {
                         model->screen_text = 5;
                         hex_viewer_play_happy_bump(instance->context);
@@ -206,7 +206,7 @@ bool hex_viewer_scene_2_input(InputEvent* event, void* context) {
 
 void hex_viewer_scene_2_exit(void* context) {
     furi_assert(context);
-    Boilerplate* app = context;
+    HexViewer* app = context;
     hex_viewer_stop_all_sound(app);
     //hex_viewer_led_reset(app);
 }
@@ -216,10 +216,10 @@ void hex_viewer_scene_2_enter(void* context) {
     dolphin_deed(DolphinDeedPluginStart);
 }
 
-BoilerplateScene2* hex_viewer_scene_2_alloc() {
-    BoilerplateScene2* instance = malloc(sizeof(BoilerplateScene2));
+HexViewerScene2* hex_viewer_scene_2_alloc() {
+    HexViewerScene2* instance = malloc(sizeof(HexViewerScene2));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(BoilerplateScene2Model));
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(HexViewerScene2Model));
     view_set_context(instance->view, instance);
     view_set_draw_callback(instance->view, (ViewDrawCallback)hex_viewer_scene_2_draw);
     view_set_input_callback(instance->view, hex_viewer_scene_2_input);
@@ -228,7 +228,7 @@ BoilerplateScene2* hex_viewer_scene_2_alloc() {
 
     with_view_model(
         instance->view,
-        BoilerplateScene2Model * model,
+        HexViewerScene2Model * model,
         {
             hex_viewer_scene_2_model_init(model);
         },
@@ -237,7 +237,7 @@ BoilerplateScene2* hex_viewer_scene_2_alloc() {
     return instance;
 }
 
-void hex_viewer_scene_2_free(BoilerplateScene2* instance) {
+void hex_viewer_scene_2_free(HexViewerScene2* instance) {
     furi_assert(instance);
 
 
@@ -245,7 +245,7 @@ void hex_viewer_scene_2_free(BoilerplateScene2* instance) {
     free(instance);
 }
 
-View* hex_viewer_scene_2_get_view(BoilerplateScene2* instance) {
+View* hex_viewer_scene_2_get_view(HexViewerScene2* instance) {
     furi_assert(instance);
 
 

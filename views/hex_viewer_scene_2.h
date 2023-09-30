@@ -3,17 +3,17 @@
 #include <gui/view.h>
 #include "../helpers/hex_viewer_custom_event.h"
 
-typedef struct BoilerplateScene2 BoilerplateScene2;
+typedef struct HexViewerScene2 HexViewerScene2;
 
-typedef void (*BoilerplateScene2Callback)(BoilerplateCustomEvent event, void* context);
+typedef void (*HexViewerScene2Callback)(HexViewerCustomEvent event, void* context);
 
 void hex_viewer_scene_2_set_callback(
-    BoilerplateScene2* instance,
-    BoilerplateScene2Callback callback,
+    HexViewerScene2* instance,
+    HexViewerScene2Callback callback,
     void * context);
 
-BoilerplateScene2* hex_viewer_scene_2_alloc();
+HexViewerScene2* hex_viewer_scene_2_alloc();
 
-void hex_viewer_scene_2_free(BoilerplateScene2* hex_viewer_static);
+void hex_viewer_scene_2_free(HexViewerScene2* hex_viewer_static);
 
-View* hex_viewer_scene_2_get_view(BoilerplateScene2* boilerpate_static);
+View* hex_viewer_scene_2_get_view(HexViewerScene2* boilerpate_static);

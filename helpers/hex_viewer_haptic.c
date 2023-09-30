@@ -3,7 +3,7 @@
 
 
 void hex_viewer_play_happy_bump(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     if (app->haptic != 1) {
         return;
     }
@@ -13,7 +13,7 @@ void hex_viewer_play_happy_bump(void* context) {
 }
 
 void hex_viewer_play_bad_bump(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     if (app->haptic != 1) {
         return;
     }
@@ -23,7 +23,7 @@ void hex_viewer_play_bad_bump(void* context) {
 }
 
 void hex_viewer_play_long_bump(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     if (app->haptic != 1) {
         return;
     }

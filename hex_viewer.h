@@ -20,7 +20,7 @@
 #include "views/hex_viewer_scene_2.h"
 #include "helpers/hex_viewer_storage.h"
 
-#define TAG "Boilerplate"
+#define TAG "HexViewer"
 
 #define SUBGHZ_APP_EXTENSION ".sub"
 #define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
@@ -32,9 +32,9 @@ typedef struct {
     Submenu* submenu;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
-    BoilerplateStartscreen* hex_viewer_startscreen;
-    BoilerplateScene1* hex_viewer_scene_1;
-    BoilerplateScene2* hex_viewer_scene_2;
+    HexViewerStartscreen* hex_viewer_startscreen;
+    HexViewerScene1* hex_viewer_scene_1;
+    HexViewerScene2* hex_viewer_scene_2;
     DialogsApp* dialogs; // File Browser
     FuriString* file_path; // File Browser
     uint32_t haptic; 
@@ -42,35 +42,35 @@ typedef struct {
     uint32_t led;
     uint32_t save_settings;
     ButtonMenu* button_menu; // Button Menu
-} Boilerplate;
+} HexViewer;
 
 typedef enum {
-    BoilerplateViewIdStartscreen,
-    BoilerplateViewIdMenu,
-    BoilerplateViewIdScene1,
-    BoilerplateViewIdScene2,
-    BoilerplateViewIdScene3,
-    BoilerplateViewIdScene4,
-    BoilerplateViewIdScene5,
-    BoilerplateViewIdSettings,
-} BoilerplateViewId;
+    HexViewerViewIdStartscreen,
+    HexViewerViewIdMenu,
+    HexViewerViewIdScene1,
+    HexViewerViewIdScene2,
+    HexViewerViewIdScene3,
+    HexViewerViewIdScene4,
+    HexViewerViewIdScene5,
+    HexViewerViewIdSettings,
+} HexViewerViewId;
 
 typedef enum {
-    BoilerplateHapticOff,
-    BoilerplateHapticOn,
-} BoilerplateHapticState;
+    HexViewerHapticOff,
+    HexViewerHapticOn,
+} HexViewerHapticState;
 
 typedef enum {
-    BoilerplateSpeakerOff,
-    BoilerplateSpeakerOn,
-} BoilerplateSpeakerState;
+    HexViewerSpeakerOff,
+    HexViewerSpeakerOn,
+} HexViewerSpeakerState;
 
 typedef enum {
-    BoilerplateLedOff,
-    BoilerplateLedOn,
-} BoilerplateLedState;
+    HexViewerLedOff,
+    HexViewerLedOn,
+} HexViewerLedState;
 
 typedef enum {
-    BoilerplateSettingsOff,
-    BoilerplateSettingsOn,
-} BoilerplateSettingsStoreState;
+    HexViewerSettingsOff,
+    HexViewerSettingsOn,
+} HexViewerSettingsStoreState;

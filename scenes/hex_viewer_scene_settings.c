@@ -12,8 +12,8 @@ const char* const haptic_text[2] = {
     "ON",
 };
 const uint32_t haptic_value[2] = {
-    BoilerplateHapticOff,
-    BoilerplateHapticOn,
+    HexViewerHapticOff,
+    HexViewerHapticOn,
 };
 
 const char* const speaker_text[2] = {
@@ -21,8 +21,8 @@ const char* const speaker_text[2] = {
     "ON",
 };
 const uint32_t speaker_value[2] = {
-    BoilerplateSpeakerOff,
-    BoilerplateSpeakerOn,
+    HexViewerSpeakerOff,
+    HexViewerSpeakerOn,
 };
 
 const char* const led_text[2] = {
@@ -30,8 +30,8 @@ const char* const led_text[2] = {
     "ON",
 };
 const uint32_t led_value[2] = {
-    BoilerplateLedOff,
-    BoilerplateLedOn,
+    HexViewerLedOff,
+    HexViewerLedOn,
 };
 
 const char* const settings_text[2] = {
@@ -39,13 +39,13 @@ const char* const settings_text[2] = {
     "ON",
 };
 const uint32_t settings_value[2] = {
-    BoilerplateSettingsOff,
-    BoilerplateSettingsOn,
+    HexViewerSettingsOff,
+    HexViewerSettingsOn,
 };
 
 
 static void hex_viewer_scene_settings_set_haptic(VariableItem* item) {
-    Boilerplate* app = variable_item_get_context(item);
+    HexViewer* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, haptic_text[index]);
@@ -53,33 +53,33 @@ static void hex_viewer_scene_settings_set_haptic(VariableItem* item) {
 }
 
 static void hex_viewer_scene_settings_set_speaker(VariableItem* item) {
-    Boilerplate* app = variable_item_get_context(item);
+    HexViewer* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, speaker_text[index]);
     app->speaker = speaker_value[index];
 }
 
 static void hex_viewer_scene_settings_set_led(VariableItem* item) {
-    Boilerplate* app = variable_item_get_context(item);
+    HexViewer* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, led_text[index]);
     app->led = led_value[index];
 }
 
 static void hex_viewer_scene_settings_set_save_settings(VariableItem* item) {
-    Boilerplate* app = variable_item_get_context(item);
+    HexViewer* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, settings_text[index]);
     app->save_settings = settings_value[index];
 }
 
 void hex_viewer_scene_settings_submenu_callback(void* context, uint32_t index) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 void hex_viewer_scene_settings_on_enter(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     VariableItem* item;
     uint8_t value_index;
 
@@ -127,11 +127,11 @@ void hex_viewer_scene_settings_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, settings_text[value_index]);
     
-    view_dispatcher_switch_to_view(app->view_dispatcher, BoilerplateViewIdSettings);
+    view_dispatcher_switch_to_view(app->view_dispatcher, HexViewerViewIdSettings);
 }
 
 bool hex_viewer_scene_settings_on_event(void* context, SceneManagerEvent event) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     UNUSED(app);
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
@@ -141,7 +141,7 @@ bool hex_viewer_scene_settings_on_event(void* context, SceneManagerEvent event) 
 }
 
 void hex_viewer_scene_settings_on_exit(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     variable_item_list_set_selected_item(app->variable_item_list, 0);
     variable_item_list_reset(app->variable_item_list);
 }

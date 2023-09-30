@@ -1,30 +1,30 @@
 #pragma once
 
 typedef enum {
-    BoilerplateCustomEventStartscreenUp,
-    BoilerplateCustomEventStartscreenDown,
-    BoilerplateCustomEventStartscreenLeft,
-    BoilerplateCustomEventStartscreenRight,
-    BoilerplateCustomEventStartscreenOk,
-    BoilerplateCustomEventStartscreenBack,
-    BoilerplateCustomEventScene1Up,
-    BoilerplateCustomEventScene1Down,
-    BoilerplateCustomEventScene1Left,
-    BoilerplateCustomEventScene1Right,
-    BoilerplateCustomEventScene1Ok,
-    BoilerplateCustomEventScene1Back,
-    BoilerplateCustomEventScene2Up,
-    BoilerplateCustomEventScene2Down,
-    BoilerplateCustomEventScene2Left,
-    BoilerplateCustomEventScene2Right,
-    BoilerplateCustomEventScene2Ok,
-    BoilerplateCustomEventScene2Back,
-} BoilerplateCustomEvent;
+    HexViewerCustomEventStartscreenUp,
+    HexViewerCustomEventStartscreenDown,
+    HexViewerCustomEventStartscreenLeft,
+    HexViewerCustomEventStartscreenRight,
+    HexViewerCustomEventStartscreenOk,
+    HexViewerCustomEventStartscreenBack,
+    HexViewerCustomEventScene1Up,
+    HexViewerCustomEventScene1Down,
+    HexViewerCustomEventScene1Left,
+    HexViewerCustomEventScene1Right,
+    HexViewerCustomEventScene1Ok,
+    HexViewerCustomEventScene1Back,
+    HexViewerCustomEventScene2Up,
+    HexViewerCustomEventScene2Down,
+    HexViewerCustomEventScene2Left,
+    HexViewerCustomEventScene2Right,
+    HexViewerCustomEventScene2Ok,
+    HexViewerCustomEventScene2Back,
+} HexViewerCustomEvent;
 
-enum BoilerplateCustomEventType {
+enum HexViewerCustomEventType {
     // Reserve first 100 events for button types and indexes, starting from 0
-    BoilerplateCustomEventMenuVoid,
-    BoilerplateCustomEventMenuSelected,
+    HexViewerCustomEventMenuVoid,
+    HexViewerCustomEventMenuSelected,
 };
 
 #pragma pack(push, 1)
@@ -34,15 +34,15 @@ typedef union {
         uint16_t type;
         int16_t value;
     } content;
-} BoilerplateCustomEventMenu;
+} HexViewerCustomEventMenu;
 #pragma pack(pop)
 
 static inline uint32_t hex_viewer_custom_menu_event_pack(uint16_t type, int16_t value) {
-    BoilerplateCustomEventMenu event = {.content = {.type = type, .value = value}};
+    HexViewerCustomEventMenu event = {.content = {.type = type, .value = value}};
     return event.packed_value;
 }
 static inline void hex_viewer_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
-    BoilerplateCustomEventMenu event = {.packed_value = packed_value};
+    HexViewerCustomEventMenu event = {.packed_value = packed_value};
     if(type) *type = event.content.type;
     if(value) *value = event.content.value;
 }

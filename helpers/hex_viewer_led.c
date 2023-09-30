@@ -4,7 +4,7 @@
 
 
 void hex_viewer_led_set_rgb(void* context, int red, int green, int blue) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     if (app->led != 1) {
         return;
     }
@@ -30,7 +30,7 @@ void hex_viewer_led_set_rgb(void* context, int red, int green, int blue) {
 }
 
 void hex_viewer_led_reset(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     notification_message(app->notification, &sequence_reset_red);
     notification_message(app->notification, &sequence_reset_green);
     notification_message(app->notification, &sequence_reset_blue);

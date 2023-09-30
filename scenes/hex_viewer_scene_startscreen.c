@@ -2,41 +2,41 @@
 #include "../helpers/hex_viewer_custom_event.h"
 #include "../views/hex_viewer_startscreen.h"
 
-void hex_viewer_scene_startscreen_callback(BoilerplateCustomEvent event, void* context) {
+void hex_viewer_scene_startscreen_callback(HexViewerCustomEvent event, void* context) {
     furi_assert(context);
-    Boilerplate* app = context;
+    HexViewer* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, event);
 }
 
 void hex_viewer_scene_startscreen_on_enter(void* context) {
     furi_assert(context);
-    Boilerplate* app = context;
+    HexViewer* app = context;
     hex_viewer_startscreen_set_callback(app->hex_viewer_startscreen, hex_viewer_scene_startscreen_callback, app);
-    view_dispatcher_switch_to_view(app->view_dispatcher, BoilerplateViewIdStartscreen);
+    view_dispatcher_switch_to_view(app->view_dispatcher, HexViewerViewIdStartscreen);
 }
 
 bool hex_viewer_scene_startscreen_on_event(void* context, SceneManagerEvent event) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     bool consumed = false;
     
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-            case BoilerplateCustomEventStartscreenLeft:
-            case BoilerplateCustomEventStartscreenRight:
+            case HexViewerCustomEventStartscreenLeft:
+            case HexViewerCustomEventStartscreenRight:
                 break;
-            case BoilerplateCustomEventStartscreenUp:
-            case BoilerplateCustomEventStartscreenDown:
+            case HexViewerCustomEventStartscreenUp:
+            case HexViewerCustomEventStartscreenDown:
                 break;
-            case BoilerplateCustomEventStartscreenOk:
-                scene_manager_next_scene(app->scene_manager, BoilerplateSceneMenu);
+            case HexViewerCustomEventStartscreenOk:
+                scene_manager_next_scene(app->scene_manager, HexViewerSceneMenu);
                 consumed = true;
                 break;
-            case BoilerplateCustomEventStartscreenBack:
+            case HexViewerCustomEventStartscreenBack:
                 notification_message(app->notification, &sequence_reset_red);
                 notification_message(app->notification, &sequence_reset_green);
                 notification_message(app->notification, &sequence_reset_blue);
                 if(!scene_manager_search_and_switch_to_previous_scene(
-                    app->scene_manager, BoilerplateSceneStartscreen)) {
+                    app->scene_manager, HexViewerSceneStartscreen)) {
                         scene_manager_stop(app->scene_manager);
                         view_dispatcher_stop(app->view_dispatcher);
                     }
@@ -49,6 +49,6 @@ bool hex_viewer_scene_startscreen_on_event(void* context, SceneManagerEvent even
 }
 
 void hex_viewer_scene_startscreen_on_exit(void* context) {
-    Boilerplate* app = context;
+    HexViewer* app = context;
     UNUSED(app);
 }
