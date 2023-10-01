@@ -14,8 +14,8 @@
 XRemoteAppSettings* xremote_app_settings_alloc() {
     XRemoteAppSettings* settings = malloc(sizeof(XRemoteAppSettings));
     settings->orientation = ViewOrientationHorizontal;
-    settings->exit_behavior = XRemoteAppExitHold;
-    settings->repeat_count = 1;
+    settings->exit_behavior = XRemoteAppExitPress;
+    settings->repeat_count = 2;
     return settings;
 }
 
@@ -60,6 +60,7 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
 
     FURI_LOG_I(TAG, "load config file: \'%s\'", XREMOTE_APP_SETTINGS);
     uint32_t version = 0;
+    uint32_t value = 0;
     bool success = false;
 
     do {
@@ -69,10 +70,12 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
         if(!furi_string_equal(header, "XRemote settings file") || (version != 1)) break;
 
         /* Parse config data from the buffer */
-        if(!flipper_format_read_uint32(ff, "orientation", (uint32_t*)&settings->orientation, 1))
-            break;
-        if(!flipper_format_read_uint32(ff, "repeat", (uint32_t*)&settings->repeat_count, 1)) break;
-        if(!flipper_format_read_uint32(ff, "exit", (uint32_t*)&settings->exit_behavior, 1)) break;
+        if(!flipper_format_read_uint32(ff, "orientation", &value, 1)) break;
+        settings->orientation = value;
+        if(!flipper_format_read_uint32(ff, "repeat", &value, 1)) break;
+        settings->repeat_count = value;
+        if(!flipper_format_read_uint32(ff, "exit", &value, 1)) break;
+        settings->exit_behavior = value;
 
         success = true;
     } while(false);
