@@ -16,6 +16,7 @@ typedef struct {
     uint32_t file_read_bytes;
     uint32_t file_size;
     bool mode;
+    uint32_t dbg;
 } HexViewerStartscreenModel;
 
 void hex_viewer_startscreen_set_callback(
@@ -95,6 +96,10 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
             canvas_set_font(canvas, FontKeyboard);
             canvas_draw_str(canvas, LEFT_OFFSET + 41, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
         }
+
+        // Poor man's debug
+        // snprintf(temp_buf, 32, "D %02lX", model->dbg);
+        // elements_button_right(canvas, temp_buf);
     }
 }
 
@@ -104,6 +109,7 @@ static void hex_viewer_startscreen_model_init(HexViewerStartscreenModel* const m
     model->file_read_bytes = 0;
     model->file_size = 0;
     model->mode = false;
+    model->dbg = 0;
 }
 
 static void
@@ -118,6 +124,7 @@ static void
 bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
     furi_assert(context);
     HexViewerStartscreen* instance = context;
+    HexViewer* app = instance->context; // TO so good, but works
     // TODO InputTypeShort?
     if(event->type == InputTypeRelease || event->type == InputTypeRepeat) {
         switch(event->key) {
@@ -135,11 +142,7 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
             with_view_model(
                 instance->view,
                 HexViewerStartscreenModel * model,
-                {
-                    //instance->callback(HexViewerCustomEventStartscreenLeft, instance->context);
-                    //update_local_model_from_app(instance->context, model);
-                    model->mode = !model->mode;
-                },
+                { model->mode = !model->mode; },
                 true);
             break;
         case InputKeyRight:
@@ -147,8 +150,9 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                 instance->view,
                 HexViewerStartscreenModel * model,
                 {
-                    instance->callback(HexViewerCustomEventStartscreenRight, instance->context);
-                    update_local_model_from_app(instance->context, model);
+                    // instance->callback(HexViewerCustomEventStartscreenRight, instance->context);
+                    // update_local_model_from_app(instance->context, model);
+                    // model->dbg = 0;
                 },
                 true);
             break;
@@ -157,7 +161,11 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                 instance->view,
                 HexViewerStartscreenModel * model,
                 {
-                    instance->callback(HexViewerCustomEventStartscreenUp, instance->context);
+                    if(app->model->file_offset > 0) {
+                        app->model->file_offset -= HEX_VIEWER_BYTES_PER_LINE;
+                        if(!hex_viewer_read_file(app)) break; // TODO Do smth
+                    }
+
                     update_local_model_from_app(instance->context, model);
                 },
                 true);
@@ -167,7 +175,13 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                 instance->view,
                 HexViewerStartscreenModel * model,
                 {
-                    instance->callback(HexViewerCustomEventStartscreenDown, instance->context);
+                    uint32_t last_byte_on_screen =
+                        app->model->file_offset + app->model->file_read_bytes;
+                    if(app->model->file_size > last_byte_on_screen) {
+                        app->model->file_offset += HEX_VIEWER_BYTES_PER_LINE;
+                        if(!hex_viewer_read_file(app)) break; // TODO Do smth
+                    }
+
                     update_local_model_from_app(instance->context, model);
                 },
                 true);

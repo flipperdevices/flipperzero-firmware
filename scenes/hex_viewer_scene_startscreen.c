@@ -19,7 +19,6 @@ void hex_viewer_scene_startscreen_on_enter(void* context) {
 bool hex_viewer_scene_startscreen_on_event(void* context, SceneManagerEvent event) {
     HexViewer* app = context;
     bool consumed = false;
-    uint32_t last_byte_on_screen;
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
@@ -32,27 +31,13 @@ bool hex_viewer_scene_startscreen_on_event(void* context, SceneManagerEvent even
             consumed = true;
             break;
         case HexViewerCustomEventStartscreenUp:
-            //furi_check(furi_mutex_acquire(hex_viewer->mutex, FuriWaitForever) == FuriStatusOk);
-            if(app->model->file_offset > 0) {
-                app->model->file_offset -= HEX_VIEWER_BYTES_PER_LINE;
-                if(!hex_viewer_read_file(app)) break; // TODO Do smth
-            }
             consumed = true;
-            //furi_mutex_release(hex_viewer->mutex);
             break;
         case HexViewerCustomEventStartscreenDown:
-            //furi_check(furi_mutex_acquire(hex_viewer->mutex, FuriWaitForever) == FuriStatusOk);
-            last_byte_on_screen = app->model->file_offset + app->model->file_read_bytes;
-
-            if(app->model->file_size > last_byte_on_screen) {
-                app->model->file_offset += HEX_VIEWER_BYTES_PER_LINE;
-                if(!hex_viewer_read_file(app)) break; // TODO Do smth
-            }
             consumed = true;
-            //furi_mutex_release(hex_viewer->mutex);
             break;
         case HexViewerCustomEventStartscreenOk:
-            if(!app->model->file_size) // TODO
+            if(!app->model->file_size)
                 scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_4);
             else
                 scene_manager_next_scene(app->scene_manager, HexViewerSceneMenu);
