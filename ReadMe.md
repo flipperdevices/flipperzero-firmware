@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed Shopping Cart WAV files from firmware to include in SD Card Assets.
 - Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - Updated: [XRemote v0.9.19 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; TEMP REVERT: OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Now can crash iOS 17
 
 <a name="release">
 
