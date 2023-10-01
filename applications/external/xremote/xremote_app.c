@@ -14,6 +14,7 @@
 XRemoteAppSettings* xremote_app_settings_alloc() {
     XRemoteAppSettings* settings = malloc(sizeof(XRemoteAppSettings));
     settings->orientation = ViewOrientationHorizontal;
+    settings->exit_behavior = XRemoteAppExitHold;
     settings->repeat_count = 1;
     return settings;
 }
@@ -37,9 +38,11 @@ bool xremote_app_settings_store(XRemoteAppSettings* settings) {
         if(!flipper_format_write_comment_cstr(ff, "")) break;
 
         /* Write actual configuration to the settings file */
-        uint32_t orientation = settings->orientation;
-        if(!flipper_format_write_uint32(ff, "orientation", &orientation, 1)) break;
-        if(!flipper_format_write_uint32(ff, "repeat", &settings->repeat_count, 1)) break;
+        if(!flipper_format_write_uint32(ff, "orientation", (uint32_t*)&settings->orientation, 1))
+            break;
+        if(!flipper_format_write_uint32(ff, "repeat", (uint32_t*)&settings->repeat_count, 1))
+            break;
+        if(!flipper_format_write_uint32(ff, "exit", (uint32_t*)&settings->exit_behavior, 1)) break;
 
         success = true;
     } while(false);
@@ -56,7 +59,7 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
     FuriString* header = furi_string_alloc();
 
     FURI_LOG_I(TAG, "load config file: \'%s\'", XREMOTE_APP_SETTINGS);
-    uint32_t version, orientation, repeat = 0;
+    uint32_t version = 0;
     bool success = false;
 
     do {
@@ -66,11 +69,10 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
         if(!furi_string_equal(header, "XRemote settings file") || (version != 1)) break;
 
         /* Parse config data from the buffer */
-        if(!flipper_format_read_uint32(ff, "orientation", &orientation, 1)) break;
-        if(!flipper_format_read_uint32(ff, "repeat", &repeat, 1)) break;
-
-        settings->orientation = orientation;
-        settings->repeat_count = repeat;
+        if(!flipper_format_read_uint32(ff, "orientation", (uint32_t*)&settings->orientation, 1))
+            break;
+        if(!flipper_format_read_uint32(ff, "repeat", (uint32_t*)&settings->repeat_count, 1)) break;
+        if(!flipper_format_read_uint32(ff, "exit", (uint32_t*)&settings->exit_behavior, 1)) break;
 
         success = true;
     } while(false);
@@ -111,6 +113,11 @@ void xremote_app_context_free(XRemoteAppContext* ctx) {
     free(ctx);
 }
 
+const char* xremote_app_context_get_exit_str(XRemoteAppContext* ctx) {
+    XRemoteAppExit exit_behavior = ctx->app_settings->exit_behavior;
+    return exit_behavior == XRemoteAppExitHold ? "Hold to exit" : "Press to exit";
+}
+
 void xremote_app_view_alloc(XRemoteApp* app, uint32_t view_id, XRemoteViewAllocator allocator) {
     furi_assert(app);
     xremote_app_assert_void(app->app_ctx);
@@ -120,7 +127,7 @@ void xremote_app_view_alloc(XRemoteApp* app, uint32_t view_id, XRemoteViewAlloca
     xremote_app_view_free(app);
     app->view_id = view_id;
 
-    app->view_ctx = allocator(app->app_ctx->notifications);
+    app->view_ctx = allocator(app->app_ctx);
     View* app_view = xremote_view_get_view(app->view_ctx);
 
     ViewDispatcher* view_disp = app->app_ctx->view_dispatcher;

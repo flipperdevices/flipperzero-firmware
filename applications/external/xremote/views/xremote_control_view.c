@@ -68,7 +68,7 @@ static bool xremote_control_view_input_callback(InputEvent* event, void* context
     return true;
 }
 
-XRemoteView* xremote_control_view_alloc(NotificationApp* notifications) {
+XRemoteView* xremote_control_view_alloc(void* app_ctx) {
     return xremote_view_alloc(
-        notifications, xremote_control_view_input_callback, xremote_control_view_draw_callback);
+        app_ctx, xremote_control_view_input_callback, xremote_control_view_draw_callback);
 }

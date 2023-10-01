@@ -13,7 +13,7 @@
 
 struct XRemoteView {
     XRemoteViewClearCallback on_clear;
-    NotificationApp* notifications;
+    XRemoteAppContext* app_ctx;
     View* view;
     void* context;
 };
@@ -25,13 +25,11 @@ const NotificationSequence g_sequence_blink_purple_50 = {
     NULL,
 };
 
-XRemoteView* xremote_view_alloc(
-    NotificationApp* notifications,
-    ViewInputCallback input_cb,
-    ViewDrawCallback draw_cb) {
+XRemoteView*
+    xremote_view_alloc(void* app_ctx, ViewInputCallback input_cb, ViewDrawCallback draw_cb) {
     XRemoteView* remote_view = malloc(sizeof(XRemoteView));
+    remote_view->app_ctx = app_ctx;
     remote_view->view = view_alloc();
-    remote_view->notifications = notifications;
 
     remote_view->context = NULL;
     remote_view->on_clear = NULL;
@@ -67,6 +65,11 @@ void* xremote_view_get_context(XRemoteView* rview) {
     return rview->context;
 }
 
+void* xremote_view_get_app_context(XRemoteView* rview) {
+    furi_assert(rview);
+    return rview->app_ctx;
+}
+
 void xremote_view_free(XRemoteView* rview) {
     furi_assert(rview);
     xremote_view_clear_context(rview);
@@ -94,7 +97,8 @@ void xremote_view_send_ir(XRemoteView* rview, const char* name) {
     xremote_app_assert_void(signal);
 
     infrared_signal_transmit(signal);
-    notification_message(rview->notifications, &g_sequence_blink_purple_50);
+    NotificationApp* notifications = rview->app_ctx->notifications;
+    notification_message(notifications, &g_sequence_blink_purple_50);
 }
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon) {
@@ -162,7 +166,7 @@ void xremote_canvas_draw_header(Canvas* canvas, const char* section) {
     canvas_draw_str(canvas, 0, 20, section);
 }
 
-void xremote_canvas_draw_exit_footer(Canvas* canvas, char* text) {
+void xremote_canvas_draw_exit_footer(Canvas* canvas, const char* text) {
     canvas_set_font(canvas, FontSecondary);
     xremote_canvas_draw_icon(canvas, 6, 124, XRemoteIconBack);
     canvas_draw_str(canvas, 12, 128, text);

@@ -16,6 +16,6 @@ static void xremote_learn_view_draw_callback(Canvas* canvas, void* context) {
     xremote_canvas_draw_exit_footer(canvas, "Press to exit");
 }
 
-XRemoteView* xremote_learn_view_alloc(NotificationApp* notifications) {
-    return xremote_view_alloc(notifications, NULL, xremote_learn_view_draw_callback);
+XRemoteView* xremote_learn_view_alloc(void* app_ctx) {
+    return xremote_view_alloc(app_ctx, NULL, xremote_learn_view_draw_callback);
 }

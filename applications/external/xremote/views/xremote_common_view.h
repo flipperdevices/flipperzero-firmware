@@ -73,7 +73,7 @@ typedef struct {
     bool down_pressed;
     bool left_pressed;
     bool right_pressed;
-    uint32_t reserverd;
+    void* context;
 } XRemoteViewModel;
 
 typedef enum {
@@ -99,7 +99,7 @@ typedef struct XRemoteView XRemoteView;
 typedef void (*XRemoteViewClearCallback)(void* context);
 
 void xremote_canvas_draw_header(Canvas* canvas, const char* section);
-void xremote_canvas_draw_exit_footer(Canvas* canvas, char* text);
+void xremote_canvas_draw_exit_footer(Canvas* canvas, const char* text);
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon);
 void xremote_canvas_draw_button(
@@ -123,10 +123,8 @@ void xremote_canvas_draw_frame(
     uint8_t xl,
     const char* text);
 
-XRemoteView* xremote_view_alloc(
-    NotificationApp* notifications,
-    ViewInputCallback input_cb,
-    ViewDrawCallback draw_cb);
+XRemoteView*
+    xremote_view_alloc(void* app_ctx, ViewInputCallback input_cb, ViewDrawCallback draw_cb);
 void xremote_view_free(XRemoteView* rview);
 
 View* xremote_view_get_view(XRemoteView* rview);
@@ -135,3 +133,4 @@ void xremote_view_send_ir(XRemoteView* rview, const char* name);
 void xremote_view_set_context(XRemoteView* rview, void* context, XRemoteViewClearCallback on_clear);
 void* xremote_view_get_context(XRemoteView* rview);
 void xremote_view_clear_context(XRemoteView* rview);
+void* xremote_view_get_app_context(XRemoteView* rview);
