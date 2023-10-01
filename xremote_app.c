@@ -16,7 +16,7 @@ XRemoteAppSettings* xremote_app_settings_alloc()
 {
     XRemoteAppSettings* settings = malloc(sizeof(XRemoteAppSettings));
     settings->orientation = ViewOrientationHorizontal;
-    settings->exit_behavior = XRemoteAppExitHold;
+    settings->exit_behavior = XRemoteAppExitPress;
     settings->repeat_count = 1;
     return settings;
 }

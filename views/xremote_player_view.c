@@ -21,16 +21,10 @@ static void xremote_player_view_draw_callback(Canvas* canvas, void* context)
     xremote_canvas_draw_button(canvas, model->ok_pressed, 23, 51, XRemoteIconPlayPause);
     xremote_canvas_draw_button(canvas, model->left_pressed, 2, 51, XRemoteIconFastBackward);
     xremote_canvas_draw_button(canvas, model->right_pressed, 44, 51, XRemoteIconFastForward);
+    xremote_canvas_draw_button(canvas, model->back_pressed, 2, 95, XRemoteIconStop);
 
-    if (app_ctx->app_settings->exit_behavior == XRemoteAppExitHold)
-    {
-        xremote_canvas_draw_button(canvas, model->back_pressed, 2, 95, XRemoteIconStop);
-    }
-    else
-    {
-        xremote_canvas_draw_button_wide(canvas, model->back_pressed, 2, 95, "Hold", XRemoteIconStop);
-        xremote_canvas_draw_icon(canvas, 50, 102, XRemoteIconBack);
-    }
+    if (app_ctx->app_settings->exit_behavior == XRemoteAppExitPress)
+        canvas_draw_icon(canvas, 22, 107, &I_Hold_Text_17x4);
 
     xremote_canvas_draw_exit_footer(canvas, xremote_app_context_get_exit_str(app_ctx));
 }
@@ -41,7 +35,9 @@ static void xremote_player_view_process(XRemoteView* view, InputEvent* event)
         xremote_view_get_view(view),
         XRemoteViewModel* model,
         {
-            model->context = xremote_view_get_app_context(view);
+            XRemoteAppContext* app_ctx = xremote_view_get_app_context(view);
+            XRemoteAppExit exit = app_ctx->app_settings->exit_behavior;
+            model->context = app_ctx;
 
             if (event->type == InputTypePress)
             {
@@ -70,7 +66,17 @@ static void xremote_player_view_process(XRemoteView* view, InputEvent* event)
                     model->ok_pressed = true;
                     xremote_view_send_ir(view, XREMOTE_COMMAND_PLAY_PAUSE);
                 }
-                else if (event->key == InputKeyBack)
+            }
+            else if (event->type == InputTypeShort &&
+                    event->key == InputKeyBack &&
+                    exit == XRemoteAppExitHold)
+            {
+                model->back_pressed = true;
+                xremote_view_send_ir(view, XREMOTE_COMMAND_STOP);
+            }
+            else if (event->type == InputTypeLong)
+            {
+                if (event->key == InputKeyBack && exit == XRemoteAppExitPress)
                 {
                     model->back_pressed = true;
                     xremote_view_send_ir(view, XREMOTE_COMMAND_STOP);

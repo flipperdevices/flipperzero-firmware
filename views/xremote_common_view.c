@@ -120,10 +120,10 @@ void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon 
     else if (icon == XRemoteIconBack)
     {
         canvas_draw_triangle(canvas, x - 4, y - 2, 5, 3, CanvasDirectionRightToLeft);
-        canvas_draw_line(canvas, x + 1, y - 2, x - 5, y - 2);
-        canvas_draw_line(canvas, x + 1, y + 3, x - 3, y + 3);
-        canvas_draw_line(canvas, x + 3, y + 1, x + 2, y + 2);
-        canvas_draw_line(canvas, x + 3, y, x + 2, y - 1);
+        canvas_draw_line(canvas, x + 2, y + 1, x + 1, y + 2);
+        canvas_draw_line(canvas, x + 2, y, x + 1, y - 1);
+        canvas_draw_line(canvas, x, y - 2, x - 5, y - 2);
+        canvas_draw_line(canvas, x, y + 3, x - 3, y + 3);
     }
     else if (icon == XRemoteIconArrowUp)
     {
