@@ -34,10 +34,9 @@ void hex_viewer_scene_menu_on_enter(void* context) {
 
 bool hex_viewer_scene_menu_on_event(void* context, SceneManagerEvent event) {
     HexViewer* app = context;
-    UNUSED(app);
+
     if(event.type == SceneManagerEventTypeBack) {
         //exit app
-        // TODO Check Return to main view
         // scene_manager_stop(app->scene_manager);
         // view_dispatcher_stop(app->view_dispatcher);
         scene_manager_previous_scene(app->scene_manager);
@@ -68,6 +67,7 @@ bool hex_viewer_scene_menu_on_event(void* context, SceneManagerEvent event) {
             //     return true;
         }
     }
+
     return false;
 }
 

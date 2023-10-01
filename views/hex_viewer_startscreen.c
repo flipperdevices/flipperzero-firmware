@@ -215,7 +215,6 @@ void hex_viewer_startscreen_enter(void* context) {
         instance->view,
         HexViewerStartscreenModel * model,
         {
-            //hex_viewer_startscreen_model_init(model);
             update_local_model_from_app(instance->context, model);
         },
         true);

@@ -11,6 +11,7 @@
 #include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
+#include <gui/modules/text_input.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/button_menu.h>
@@ -33,6 +34,7 @@
 
 #define HEX_VIEWER_APP_PATH_FOLDER "/any" // TODO ANY_PATH
 #define HEX_VIEWER_APP_EXTENSION "*"
+#define HEX_VIEWER_PERCENT_INPUT 16
 
 #define HEX_VIEWER_BYTES_PER_LINE 4u
 #define HEX_VIEWER_LINES_ON_SCREEN 4u
@@ -59,6 +61,7 @@ typedef struct {
     NotificationApp* notification;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
+    TextInput* text_input;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     HexViewerStartscreen* hex_viewer_startscreen;
@@ -71,6 +74,7 @@ typedef struct {
     uint32_t led;
     uint32_t save_settings;
     ButtonMenu* button_menu; // Button Menu
+    char percent_buf[HEX_VIEWER_PERCENT_INPUT];
 } HexViewer;
 
 typedef enum {
