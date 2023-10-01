@@ -103,6 +103,10 @@ XRemoteAppContext* xremote_app_context_alloc(void *arg)
     ctx->app_settings = xremote_app_settings_alloc();
     xremote_app_settings_load(ctx->app_settings);
 
+    /* Last opened file or directory path */
+    ctx->file_path = furi_string_alloc();
+    furi_string_set(ctx->file_path, XREMOTE_APP_FOLDER);
+
     /* Allocate and setup view dispatcher */
     ctx->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(ctx->view_dispatcher);
@@ -118,6 +122,7 @@ void xremote_app_context_free(XRemoteAppContext* ctx)
     view_dispatcher_free(ctx->view_dispatcher);
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
+    furi_string_free(ctx->file_path);
     free(ctx);
 }
 

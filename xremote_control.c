@@ -15,9 +15,6 @@
 #include "views/xremote_player_view.h"
 #include "views/xremote_custom_view.h"
 
-#define XREMOTE_APP_EXTENSION   ".ir"
-#define XREMOTE_APP_FOLDER      ANY_PATH("infrared")
-
 static uint32_t xremote_control_submenu_exit_callback(void* context)
 {
     UNUSED(context);
@@ -61,13 +58,11 @@ static void xremote_control_submenu_callback(void* context, uint32_t index)
     }
 }
 
-InfraredRemote* xremote_load_ir_buttons()
+static InfraredRemote* xremote_load_ir_buttons(XRemoteAppContext* app_ctx)
 {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    FuriString* file_path = furi_string_alloc();
-    furi_string_set(file_path, XREMOTE_APP_FOLDER);
     storage_simply_mkdir(storage, XREMOTE_APP_FOLDER);
 
     /* Open file browser (view and dialogs are managed by the browser itself) */
@@ -76,22 +71,20 @@ InfraredRemote* xremote_load_ir_buttons()
     browser.base_path = XREMOTE_APP_FOLDER;
 
     /* Show file selection dialog (returns selected file path with variable file_path) */
-    if(!dialog_file_browser_show(dialogs, file_path, file_path, &browser))
+    if(!dialog_file_browser_show(dialogs, app_ctx->file_path, app_ctx->file_path, &browser))
     {
         furi_record_close(RECORD_STORAGE);
         furi_record_close(RECORD_DIALOGS);
-        furi_string_free(file_path);
         return NULL;
     }
 
     /* Load buttons from the selected path */
     InfraredRemote* remote = infrared_remote_alloc();
-    bool success = infrared_remote_load(remote, file_path);
+    bool success = infrared_remote_load(remote, app_ctx->file_path);
 
     /* Cleanup file loading context */
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
-    furi_string_free(file_path);
 
     if (!success)
     {
@@ -105,7 +98,7 @@ InfraredRemote* xremote_load_ir_buttons()
 XRemoteApp* xremote_control_alloc(XRemoteAppContext* app_ctx)
 {
     /* Open file browser and load buttons from selected file */
-    InfraredRemote* remote = xremote_load_ir_buttons();
+    InfraredRemote* remote = xremote_load_ir_buttons(app_ctx);
     xremote_app_assert(remote, NULL);
 
     /* Allocate remote controller app with submenu */
