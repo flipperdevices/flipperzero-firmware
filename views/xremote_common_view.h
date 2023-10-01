@@ -97,13 +97,15 @@ typedef enum {
 
 typedef struct XRemoteView XRemoteView;
 typedef void (*XRemoteViewClearCallback)(void *context);
+typedef void (*XRemoteViewDrawFunction)(Canvas*, XRemoteViewModel*);
 
-void xremote_canvas_draw_header(Canvas* canvas, const char* section);
-void xremote_canvas_draw_exit_footer(Canvas* canvas, const char *text);
+void xremote_canvas_draw_header(Canvas* canvas, ViewOrientation orient, const char* section);
+void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, const char *text);
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon);
 void xremote_canvas_draw_button(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, XRemoteIcon icon);
 void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, XRemoteIcon icon);
+void xremote_canvas_draw_button_size(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, uint8_t xy, char* text, XRemoteIcon icon);
 void xremote_canvas_draw_frame(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, uint8_t xl, const char *text);
 
 XRemoteView* xremote_view_alloc(void *app_ctx, ViewInputCallback input_cb, ViewDrawCallback draw_cb);
