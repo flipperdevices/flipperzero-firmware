@@ -28,14 +28,13 @@ void save_picture()
     camera_fb_t *frame_buffer = esp_camera_fb_get();
     if (!frame_buffer)
     {
-        Serial.println("Camera capture failed");
+        // Camera capture failed
         return;
     }
 
     if (!SD_MMC.begin())
     {
         // SD Card Mount Failed.
-        Serial.println("SD Card Mount Failed");
         esp_camera_fb_return(frame_buffer);
         return;
     }
@@ -50,13 +49,13 @@ void save_picture()
 
     if (!file)
     {
-        Serial.println("Failed to open file in writing mode");
+        // Failed to open file in writing mode
     }
     else
     {
         if (file.write(frame_buffer->buf, frame_buffer->len) != frame_buffer->len)
         {
-            Serial.println("Failed to write the image to the file");
+            // Failed to write the image to the file
         }
         file.close(); // Close the file in any case.
     }

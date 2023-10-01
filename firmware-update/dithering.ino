@@ -1,7 +1,10 @@
 #include "dithering.h"
 
-void dither_image(camera_fb_t *frame_buffer, CameraModel *model)
+void dither_image(camera_fb_t *frame_buffer)
 {
+    // Get the camera model reference.
+    CameraModel *model = CameraModel::getInstance();
+
     for (uint8_t y = 0; y < frame_buffer->height; ++y)
     {
         for (uint8_t x = 0; x < frame_buffer->width; ++x)
@@ -13,7 +16,7 @@ void dither_image(camera_fb_t *frame_buffer, CameraModel *model)
             int8_t quant_error = oldpixel - newpixel;
 
             // Apply error diffusion based on the selected algorithm
-            switch (model->ditherAlgorithm)
+            switch (model->getDitherAlgorithm())
             {
             case JARVIS_JUDICE_NINKE:
                 frame_buffer->buf[(y * frame_buffer->width) + x + 1] += quant_error * 7 / 48;

@@ -4,8 +4,6 @@
 #include <esp_camera.h>
 #include <SD_MMC.h>
 
-#include "globals.h"
-
 /**
  * Save the current picture to the onboard SD card.
  * @todo - Future feature.

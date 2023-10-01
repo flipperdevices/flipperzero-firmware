@@ -4,9 +4,10 @@
 #include <esp_camera.h>
 #include <FS.h>
 
-#include "globals.h"
+#include "camera_model.h"
+#include "pins.h"
 
 /** Handle the serial input commands coming from the Flipper Zero. */
-void serial_commands(CameraModel *model);
+void serial_commands();
 
 #endif

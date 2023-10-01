@@ -1,6 +1,8 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+rem λ
+
 set CLI_FOUND_FOLLOW_UP=0
 set CLI_TEMP=%TEMP%\arduino-cli
 set COMPILE_FLAG=firmware\compile.flag
@@ -10,9 +12,9 @@ set FIRMWARE_SRC=firmware\firmware.ino
 set SELECTED_BOARD=%DEFAULT_BOARD_FQBN%
 
 chcp 65001 > nul
-echo ┏┓   ┓    ┏┳┓  ┓      
+echo ┏┓   ┓    ┏┳┓  ┓
 echo ┃ ┏┓┏┫┓┏   ┃ ┏┓┃┏┓┏┓┏┓
-echo ┗┛┗┛┗┻┗┫   ┻ ┗┛┗┗ ┛┗┗ 
+echo ┗┛┗┛┗┻┗┫   ┻ ┗┛┗┗ ┛┗┗
 echo        ┛  https://github.com/CodyTolene
 echo.
 echo Flipper Zero - ESP32-CAM Firmware Flasher - Windows 10+
@@ -110,12 +112,12 @@ arduino-cli %CONFIG_FILE% upload -p %PORT_NUMBER% --fqbn !SELECTED_BOARD! %FIRMW
 if !ERRORLEVEL! EQU 0 (
     goto :uploadSuccess
 ) else (
-    if !RETRY_COUNT! lss 3 (
+    if !RETRY_COUNT! lss 5 (
         set /a RETRY_COUNT+=1
         goto :uploadLoop
     ) else (
         echo.
-        set /p UPLOAD_TRY_AGAIN="Upload failed after 3 attempts, dont give up friend. Would you like to try again? (Y/N): "
+        set /p UPLOAD_TRY_AGAIN="Upload failed after 5 attempts, dont give up friend. Would you like to try again? (Y/N): "
         if /i "!UPLOAD_TRY_AGAIN!"=="Y" (
             set RETRY_COUNT=1
             goto :uploadFirmware
@@ -123,6 +125,14 @@ if !ERRORLEVEL! EQU 0 (
             echo.
             echo If you're still having issues, feel free to open a ticket at the following link:
             echo https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
+            echo.
+            set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
+            if /i "!DELETE_TEMP!"=="Y" (
+                rmdir /s /q %CLI_TEMP%
+            )
+            echo.
+            pause
+            exit /b
         )
     )
 )
@@ -140,7 +150,7 @@ if /i "!DELETE_TEMP!"=="Y" (
     rmdir /s /q %CLI_TEMP%
 )
 echo.
-echo Fin. Happy programming.
+echo Fin. Happy programming friend.
 echo.
 pause
 exit /b

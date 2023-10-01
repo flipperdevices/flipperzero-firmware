@@ -3,8 +3,8 @@
 
 #include <esp_camera.h>
 
-#include "globals.h"
+#include "camera_model.h"
 
-void dither_image(camera_fb_t *frame_buffer, CameraModel *model);
+void dither_image(camera_fb_t *frame_buffer);
 
 #endif

@@ -4,10 +4,9 @@
 #include <esp_camera.h>
 #include <FS.h>
 
-#include "globals.h"
+#include "camera_model.h"
+#include "pins.h"
 
-camera_config_t config;
-
-void initialize(CameraModel *model);
+void initialize(camera_config_t *config);
 
 #endif
