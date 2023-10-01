@@ -1,8 +1,8 @@
 #ifndef PROCESS_IMAGE_H
 #define PROCESS_IMAGE_H
 
-#include <esp_camera.h>
 #include <FS.h>
+#include <esp_camera.h>
 
 #include "camera_model.h"
 #include "dithering.h"

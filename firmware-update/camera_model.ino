@@ -2,8 +2,7 @@
 
 CameraModel *CameraModel::instance = nullptr;
 
-CameraModel::CameraModel()
-{
+CameraModel::CameraModel() {
     // Set up defaults.
     isDitheringDisabled = false;
     isFlashEnabled = false;
@@ -12,63 +11,35 @@ CameraModel::CameraModel()
     ditherAlgorithm = FLOYD_STEINBERG;
 }
 
-CameraModel *CameraModel::getInstance()
-{
-    if (instance == nullptr)
-    {
+CameraModel *CameraModel::getInstance() {
+    if (instance == nullptr) {
         instance = new CameraModel();
     }
     return instance;
 }
 
 // Getter implementations
-bool CameraModel::getIsDitheringDisabled()
-{
-    return isDitheringDisabled;
-}
+bool CameraModel::getIsDitheringDisabled() { return isDitheringDisabled; }
 
-bool CameraModel::getIsFlashEnabled()
-{
-    return isFlashEnabled;
-}
+bool CameraModel::getIsFlashEnabled() { return isFlashEnabled; }
 
-bool CameraModel::getIsInverted()
-{
-    return isInverted;
-}
+bool CameraModel::getIsInverted() { return isInverted; }
 
-bool CameraModel::getIsStreamEnabled()
-{
-    return isStreamEnabled;
-}
+bool CameraModel::getIsStreamEnabled() { return isStreamEnabled; }
 
-DitheringAlgorithm CameraModel::getDitherAlgorithm()
-{
-    return ditherAlgorithm;
-}
+DitheringAlgorithm CameraModel::getDitherAlgorithm() { return ditherAlgorithm; }
 
 // Setter implementations
-void CameraModel::setIsDitheringDisabled(bool value)
-{
+void CameraModel::setIsDitheringDisabled(bool value) {
     isDitheringDisabled = value;
 }
 
-void CameraModel::setIsFlashEnabled(bool value)
-{
-    isFlashEnabled = value;
-}
+void CameraModel::setIsFlashEnabled(bool value) { isFlashEnabled = value; }
 
-void CameraModel::setIsInverted(bool value)
-{
-    isInverted = value;
-}
+void CameraModel::setIsInverted(bool value) { isInverted = value; }
 
-void CameraModel::setIsStreamEnabled(bool value)
-{
-    isStreamEnabled = value;
-}
+void CameraModel::setIsStreamEnabled(bool value) { isStreamEnabled = value; }
 
-void CameraModel::setDitherAlgorithm(DitheringAlgorithm algorithm)
-{
+void CameraModel::setDitherAlgorithm(DitheringAlgorithm algorithm) {
     ditherAlgorithm = algorithm;
 }

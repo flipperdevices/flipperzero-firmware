@@ -6,16 +6,14 @@
 /**
  * The dithering algorithms available.
  */
-enum DitheringAlgorithm : uint8_t
-{
+enum DitheringAlgorithm : uint8_t {
     FLOYD_STEINBERG,
     JARVIS_JUDICE_NINKE,
     STUCKI
 };
 
-class CameraModel
-{
-private:
+class CameraModel {
+   private:
     static CameraModel *instance;
     // Private constructor to prevent instantiation.
     CameraModel();
@@ -40,7 +38,7 @@ private:
      */
     DitheringAlgorithm ditherAlgorithm;
 
-public:
+   public:
     static CameraModel *getInstance();
 
     // Getter functions

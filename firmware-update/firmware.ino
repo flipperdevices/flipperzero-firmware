@@ -8,8 +8,7 @@
 camera_config_t config;
 
 // Entry point of the program.
-void setup()
-{
+void setup() {
     // Set up the camera model.
     CameraModel *model = CameraModel::getInstance();
 
@@ -45,22 +44,19 @@ void setup()
     config.fb_count = 1;
 
     // Begin serial communication.
-    Serial.begin(230400); // 115200
+    Serial.begin(230400);  // 115200
 
     // Initialize the camera.
     initialize(&config);
 }
 
 // Main loop of the program.
-void loop()
-{
+void loop() {
     // Get the camera model reference.
     CameraModel *model = CameraModel::getInstance();
-    if (model->getIsStreamEnabled())
-    {
+    if (model->getIsStreamEnabled()) {
         camera_fb_t *frame_buffer = esp_camera_fb_get();
-        if (frame_buffer)
-        {
+        if (frame_buffer) {
             process_image(frame_buffer);
             // Return the frame buffer back to the camera driver.
             esp_camera_fb_return(frame_buffer);

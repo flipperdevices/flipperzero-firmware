@@ -1,11 +1,9 @@
 #include "initialize.h"
 
-void initialize(camera_config_t *config)
-{
+void initialize(camera_config_t *config) {
     // Initialize camera.
     esp_err_t err = esp_camera_init(config);
-    if (err != ESP_OK)
-    {
+    if (err != ESP_OK) {
         return;
     }
 
@@ -13,8 +11,7 @@ void initialize(camera_config_t *config)
     CameraModel *model = CameraModel::getInstance();
 
     // Check if the flash is already on, if it is turn it off.
-    if (model->getIsFlashEnabled())
-    {
+    if (model->getIsFlashEnabled()) {
         pinMode(FLASH_GPIO_NUM, OUTPUT);
         digitalWrite(FLASH_GPIO_NUM, LOW);
         model->setIsFlashEnabled(false);

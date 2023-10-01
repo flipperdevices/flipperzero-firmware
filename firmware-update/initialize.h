@@ -1,8 +1,8 @@
 #ifndef INITIALIZE_H
 #define INITIALIZE_H
 
-#include <esp_camera.h>
 #include <FS.h>
+#include <esp_camera.h>
 
 #include "camera_model.h"
 #include "pins.h"

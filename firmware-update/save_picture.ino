@@ -1,12 +1,10 @@
 #include "save_picture.h"
 
-void save_picture()
-{
+void save_picture() {
     sensor_t *cam = esp_camera_sensor_get();
 
     // Check if the sensor is valid.
-    if (!cam)
-    {
+    if (!cam) {
         Serial.println("Failed to acquire camera sensor");
         return;
     }
@@ -15,25 +13,20 @@ void save_picture()
     cam->set_pixformat(cam, PIXFORMAT_JPEG);
 
     // Set frame size based on available PSRAM.
-    if (psramFound())
-    {
+    if (psramFound()) {
         cam->set_framesize(cam, FRAMESIZE_UXGA);
-    }
-    else
-    {
+    } else {
         cam->set_framesize(cam, FRAMESIZE_SVGA);
     }
 
     // Get a frame buffer from camera.
     camera_fb_t *frame_buffer = esp_camera_fb_get();
-    if (!frame_buffer)
-    {
+    if (!frame_buffer) {
         // Camera capture failed
         return;
     }
 
-    if (!SD_MMC.begin())
-    {
+    if (!SD_MMC.begin()) {
         // SD Card Mount Failed.
         esp_camera_fb_return(frame_buffer);
         return;
@@ -47,17 +40,14 @@ void save_picture()
     fs::FS &fs = SD_MMC;
     File file = fs.open(path.c_str(), FILE_WRITE);
 
-    if (!file)
-    {
+    if (!file) {
         // Failed to open file in writing mode
-    }
-    else
-    {
-        if (file.write(frame_buffer->buf, frame_buffer->len) != frame_buffer->len)
-        {
+    } else {
+        if (file.write(frame_buffer->buf, frame_buffer->len) !=
+            frame_buffer->len) {
             // Failed to write the image to the file
         }
-        file.close(); // Close the file in any case.
+        file.close();  // Close the file in any case.
     }
 
     // Update framesize back to the default.

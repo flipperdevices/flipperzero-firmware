@@ -1,8 +1,8 @@
 #ifndef SERIAL_COMMANDS_H
 #define SERIAL_COMMANDS_H
 
-#include <esp_camera.h>
 #include <FS.h>
+#include <esp_camera.h>
 
 #include "camera_model.h"
 #include "pins.h"
