@@ -25,6 +25,7 @@ enum HexViewerCustomEventType {
     // Reserve first 100 events for button types and indexes, starting from 0
     HexViewerCustomEventMenuVoid,
     HexViewerCustomEventMenuSelected,
+    HexViewerCustomEventMenuPercentEntered,
 };
 
 #pragma pack(push, 1)
@@ -41,7 +42,8 @@ static inline uint32_t hex_viewer_custom_menu_event_pack(uint16_t type, int16_t 
     HexViewerCustomEventMenu event = {.content = {.type = type, .value = value}};
     return event.packed_value;
 }
-static inline void hex_viewer_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
+static inline void
+    hex_viewer_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
     HexViewerCustomEventMenu event = {.packed_value = packed_value};
     if(type) *type = event.content.type;
     if(value) *value = event.content.value;
