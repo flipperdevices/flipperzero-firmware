@@ -152,7 +152,7 @@ bool hex_viewer_startscreen_input(InputEvent* event, void* context) {
                 {
                     // instance->callback(HexViewerCustomEventStartscreenRight, instance->context);
                     // update_local_model_from_app(instance->context, model);
-                    // model->dbg = 0;
+                    model->dbg = 0;
                 },
                 true);
             break;
