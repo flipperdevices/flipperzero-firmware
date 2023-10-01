@@ -114,8 +114,7 @@ int32_t hex_viewer_app(void* p) {
     
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     
-    scene_manager_next_scene(app->scene_manager, HexViewerSceneStartscreen); //Start with start screen
-    //scene_manager_next_scene(app->scene_manager, HexViewerSceneMenu); //if you want to directly start with Menu
+    scene_manager_next_scene(app->scene_manager, HexViewerSceneStartscreen);
 
     furi_hal_power_suppress_charge_enter();
 
