@@ -29,13 +29,22 @@
 #define xremote_app_assert_void(cond) if (!cond) return
 #define xremote_app_assert(cond, var) if (!cond) return var
 
+typedef enum {
+    XRemoteAppExitPress,
+    XRemoteAppExitHold
+} XRemoteAppExit;
+
 typedef struct {
     ViewOrientation orientation;
+    XRemoteAppExit exit_behavior;
     uint32_t repeat_count;
 } XRemoteAppSettings;
 
 XRemoteAppSettings* xremote_app_settings_alloc();
 void xremote_app_settings_free(XRemoteAppSettings* settings);
+
+bool xremote_app_settings_store(XRemoteAppSettings* settings);
+bool xremote_app_settings_load(XRemoteAppSettings* settings);
 
 typedef struct {
     XRemoteAppSettings* app_settings;
@@ -47,11 +56,9 @@ typedef struct {
 
 XRemoteAppContext* xremote_app_context_alloc(void* arg);
 void xremote_app_context_free(XRemoteAppContext* ctx);
+const char* xremote_app_context_get_exit_str(XRemoteAppContext* ctx);
 
-bool xremote_app_settings_store(XRemoteAppSettings* settings);
-bool xremote_app_settings_load(XRemoteAppSettings* settings);
-
-typedef XRemoteView* (*XRemoteViewAllocator)(NotificationApp* notifications);
+typedef XRemoteView* (*XRemoteViewAllocator)(void* app_ctx);
 typedef void (*XRemoteAppClearCallback)(void *context);
 
 typedef struct {

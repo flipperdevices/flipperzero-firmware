@@ -10,4 +10,4 @@
 
 #include "xremote_common_view.h"
 
-XRemoteView* xremote_custom_view_alloc(NotificationApp* notifications);
+XRemoteView* xremote_custom_view_alloc(void* app_ctx);
