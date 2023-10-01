@@ -165,7 +165,13 @@ if %ERRORLEVEL% EQU 0 (
     echo Firmware compiled successfully.
     type nul > %COMPILE_FLAG%
 ) else (
-    echo Firmware failed to compile. Please see the error log and try again.
+    echo.
+    set /p TRY_COMPILE_AGAIN="Firmware failed to compile. Please see the error log above. Try again? (Y/N): "
+    echo.
+    if /i "!TRY_COMPILE_AGAIN!"=="Y" (
+        goto :compileFirmware
+    )
+    pause
     exit /b
 )
 
