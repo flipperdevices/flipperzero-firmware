@@ -94,6 +94,7 @@ XRemoteAppContext* xremote_app_context_alloc(void *arg)
 {
     XRemoteAppContext* ctx = malloc(sizeof(XRemoteAppContext));
     ctx->app_argument = arg;
+    ctx->file_path = NULL;
 
     /* Open GUI and norification records */
     ctx->gui = furi_record_open(RECORD_GUI);
@@ -102,10 +103,6 @@ XRemoteAppContext* xremote_app_context_alloc(void *arg)
     /* Allocate and load global app settings */
     ctx->app_settings = xremote_app_settings_alloc();
     xremote_app_settings_load(ctx->app_settings);
-
-    /* Last opened file or directory path */
-    ctx->file_path = furi_string_alloc();
-    furi_string_set(ctx->file_path, XREMOTE_APP_FOLDER);
 
     /* Allocate and setup view dispatcher */
     ctx->view_dispatcher = view_dispatcher_alloc();
@@ -118,11 +115,19 @@ void xremote_app_context_free(XRemoteAppContext* ctx)
 {
     xremote_app_assert_void(ctx);
     notification_internal_message(ctx->notifications, &sequence_reset_blue);
+
     xremote_app_settings_free(ctx->app_settings);
     view_dispatcher_free(ctx->view_dispatcher);
+
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
-    furi_string_free(ctx->file_path);
+
+    if (ctx->file_path != NULL)
+    {
+        furi_string_free(ctx->file_path);
+        ctx->file_path = NULL;
+    }
+
     free(ctx);
 }
 

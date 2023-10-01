@@ -55,28 +55,28 @@ static void xremote_general_view_process(XRemoteView* view, InputEvent* event)
 
                 if (event->key == InputKeyOk)
                 {
-                    model->ok_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_POWER);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_POWER))
+                        model->ok_pressed = true;
                 }
                 else if (event->key == InputKeyUp)
                 {
-                    model->up_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_INPUT);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_INPUT))
+                        model->up_pressed = true;
                 }
                 else if (event->key == InputKeyDown)
                 {
-                    model->down_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_SETUP);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_SETUP))
+                        model->down_pressed = true;
                 }
                 else if (event->key == InputKeyLeft)
                 {
-                    model->left_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_MENU);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_MENU))
+                        model->left_pressed = true;
                 }
                 else if (event->key == InputKeyRight)
                 {
-                    model->right_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_LIST);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_LIST))
+                        model->right_pressed = true;
                 }
             }
             else if (event->type == InputTypeRelease)

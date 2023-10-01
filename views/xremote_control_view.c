@@ -55,28 +55,28 @@ static void xremote_control_view_process(XRemoteView* view, InputEvent* event)
             {
                 if (event->key == InputKeyOk)
                 {
-                    model->ok_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_MUTE);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_MUTE))
+                        model->ok_pressed = true;
                 }
                 else if (event->key == InputKeyUp)
                 {
-                    model->up_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_VOL_UP);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_VOL_UP))
+                        model->up_pressed = true;
                 }
                 else if (event->key == InputKeyDown)
                 {
-                    model->down_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_VOL_DOWN);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_VOL_DOWN))
+                        model->down_pressed = true;
                 }
                 else if (event->key == InputKeyLeft)
                 {
-                    model->left_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_PREV_CHAN);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_PREV_CHAN))
+                        model->left_pressed = true;
                 }
                 else if (event->key == InputKeyRight)
                 {
-                    model->right_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_NEXT_CHAN);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_NEXT_CHAN))
+                        model->right_pressed = true;
                 }
             }
             else if (event->type == InputTypeRelease)

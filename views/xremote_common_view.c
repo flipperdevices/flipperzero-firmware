@@ -7,8 +7,6 @@
  */
 
 #include "xremote_common_view.h"
-
-#include "../infrared/infrared_remote.h"
 #include "../xremote_app.h"
 
 struct XRemoteView {
@@ -90,24 +88,40 @@ View* xremote_view_get_view(XRemoteView* rview)
     return rview->view;
 }
 
-static InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView *rview, const char* name)
+InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView *rview, const char* name)
 {
     xremote_app_assert(rview->context, NULL);
     InfraredRemote* remote = (InfraredRemote*)rview->context;
     return infrared_remote_get_button_by_name(remote, name);
 }
 
-void xremote_view_send_ir(XRemoteView *rview, const char *name)
+bool xremote_view_send_ir_by_name(XRemoteView *rview, const char *name)
 {
     InfraredRemoteButton* button = xremote_view_get_button_by_name(rview, name);
-    xremote_app_assert_void(button);
+    xremote_app_assert(button, false);
 
     InfraredSignal* signal = infrared_remote_button_get_signal(button);
-    xremote_app_assert_void(signal);
+    xremote_app_assert(signal, false);
 
     infrared_signal_transmit(signal);
     NotificationApp* notifications = rview->app_ctx->notifications;
     notification_message(notifications, &g_sequence_blink_purple_50);
+
+    return true;
+}
+
+bool xremote_view_press_button(XRemoteView *rview, InfraredRemoteButton* button)
+{
+    xremote_app_assert(button, false);
+
+    InfraredSignal* signal = infrared_remote_button_get_signal(button);
+    xremote_app_assert(signal, false);
+
+    infrared_signal_transmit(signal);
+    NotificationApp* notifications = rview->app_ctx->notifications;
+    notification_message(notifications, &g_sequence_blink_purple_50);
+
+    return true;
 }
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon)

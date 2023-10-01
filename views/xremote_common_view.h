@@ -18,6 +18,8 @@
 #include <infrared_transmit.h>
 #include <xc_icons.h>
 
+#include "../infrared/infrared_remote.h"
+
 #define XREMOTE_COMMAND_POWER           "Power"
 #define XREMOTE_COMMAND_SETUP           "Setup"
 #define XREMOTE_COMMAND_INPUT           "Input"
@@ -112,7 +114,10 @@ XRemoteView* xremote_view_alloc(void *app_ctx, ViewInputCallback input_cb, ViewD
 void xremote_view_free(XRemoteView* rview);
 
 View* xremote_view_get_view(XRemoteView* rview);
-void xremote_view_send_ir(XRemoteView *rview, const char *name);
+bool xremote_view_send_ir_by_name(XRemoteView *rview, const char *name);
+
+InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView *rview, const char* name);
+bool xremote_view_press_button(XRemoteView *rview, InfraredRemoteButton* button);
 
 void xremote_view_set_context(XRemoteView* rview, void *context, XRemoteViewClearCallback on_clear);
 void* xremote_view_get_context(XRemoteView* rview);

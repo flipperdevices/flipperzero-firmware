@@ -8,7 +8,7 @@ With the current infrared application, users must navigate through the menu to l
 
 `XRemote` also introduces a more user-friendly learning approach. Instead of having to manually name each button on the flipper when cloning a remote, the learning tool informs you upfront which buttons it will record. All you need to do is press the corresponding button on your existing remote, eliminating the need to name them individually.
 
-The application is compatible with standard `.ir` files. However, to ensure functionality, button names within these files must align with the predefined naming scheme.
+The application is compatible with standard `.ir` files. However, to ensure functionality, button names within these files must align with the predefined naming scheme. If the button is not highlighted when pressed, and the notification LED does not light up, it means that the button was not found in the file with the appropriate name.
 
 Button name | Description
 ------------|-------------------

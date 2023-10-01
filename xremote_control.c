@@ -62,7 +62,6 @@ static InfraredRemote* xremote_load_ir_buttons(XRemoteAppContext* app_ctx)
 {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-
     storage_simply_mkdir(storage, XREMOTE_APP_FOLDER);
 
     /* Open file browser (view and dialogs are managed by the browser itself) */
@@ -70,8 +69,14 @@ static InfraredRemote* xremote_load_ir_buttons(XRemoteAppContext* app_ctx)
     dialog_file_browser_set_basic_options(&browser, XREMOTE_APP_EXTENSION, &I_IR_Icon_10x10);
     browser.base_path = XREMOTE_APP_FOLDER;
 
+    if (app_ctx->file_path == NULL)
+    {
+        app_ctx->file_path = furi_string_alloc();
+        furi_string_set(app_ctx->file_path, XREMOTE_APP_FOLDER);
+    }
+
     /* Show file selection dialog (returns selected file path with variable file_path) */
-    if(!dialog_file_browser_show(dialogs, app_ctx->file_path, app_ctx->file_path, &browser))
+    if (!dialog_file_browser_show(dialogs, app_ctx->file_path, app_ctx->file_path, &browser))
     {
         furi_record_close(RECORD_STORAGE);
         furi_record_close(RECORD_DIALOGS);

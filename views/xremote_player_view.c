@@ -70,43 +70,43 @@ static void xremote_player_view_process(XRemoteView* view, InputEvent* event)
             {
                 if (event->key == InputKeyUp)
                 {
-                    model->up_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_JUMP_FORWARD);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_JUMP_FORWARD))
+                        model->up_pressed = true;
                 }
                 else if (event->key == InputKeyDown)
                 {
-                    model->down_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_JUMP_BACKWARD);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_JUMP_BACKWARD))
+                        model->down_pressed = true;
                 }
                 else if (event->key == InputKeyLeft)
                 {
-                    model->left_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_FAST_BACKWARD);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_FAST_BACKWARD))
+                        model->left_pressed = true;
                 }
                 else if (event->key == InputKeyRight)
                 {
-                    model->right_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_FAST_FORWARD);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_FAST_FORWARD))
+                        model->right_pressed = true;
                 }
                 else if (event->key == InputKeyOk)
                 {
-                    model->ok_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_PLAY_PAUSE);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_PLAY_PAUSE))
+                        model->ok_pressed = true;
                 }
             }
             else if (event->type == InputTypeShort &&
                     event->key == InputKeyBack &&
                     exit == XRemoteAppExitHold)
             {
-                model->back_pressed = true;
-                xremote_view_send_ir(view, XREMOTE_COMMAND_STOP);
+                if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_STOP))
+                    model->back_pressed = true;
             }
             else if (event->type == InputTypeLong &&
                     event->key == InputKeyBack &&
                     exit == XRemoteAppExitPress)
             {
-                model->back_pressed = true;
-                xremote_view_send_ir(view, XREMOTE_COMMAND_STOP);
+                if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_STOP))
+                    model->back_pressed = true;
             }
             else if (event->type == InputTypeRelease)
             {

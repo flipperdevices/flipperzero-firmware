@@ -71,43 +71,43 @@ static void xremote_navigation_view_process(XRemoteView* view, InputEvent* event
             {
                 if (event->key == InputKeyUp)
                 {
-                    model->up_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_UP);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_UP))
+                        model->up_pressed = true;
                 }
                 else if (event->key == InputKeyDown)
                 {
-                    model->down_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_DOWN);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_DOWN))
+                        model->down_pressed = true;
                 }
                 else if (event->key == InputKeyLeft)
                 {
-                    model->left_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_LEFT);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_LEFT))
+                        model->left_pressed = true;
                 }
                 else if (event->key == InputKeyRight)
                 {
-                    model->right_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_RIGHT);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_RIGHT))
+                        model->right_pressed = true;
                 }
                 else if (event->key == InputKeyOk)
                 {
-                    model->ok_pressed = true;
-                    xremote_view_send_ir(view, XREMOTE_COMMAND_OK);
+                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_OK))
+                        model->ok_pressed = true;
                 }
             }
             else if (event->type == InputTypeShort &&
                     event->key == InputKeyBack &&
                     exit == XRemoteAppExitHold)
             {
-                model->back_pressed = true;
-                xremote_view_send_ir(view, XREMOTE_COMMAND_BACK);
+                if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_BACK))
+                    model->back_pressed = true;
             }
             else if (event->type == InputTypeLong &&
                     event->key == InputKeyBack &&
                     exit == XRemoteAppExitPress)
             {
-                model->back_pressed = true;
-                xremote_view_send_ir(view, XREMOTE_COMMAND_BACK);
+                if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_BACK))
+                    model->back_pressed = true;
             }
             else if (event->type == InputTypeRelease)
             {
