@@ -18,4 +18,5 @@ Bit: 64
 Key: 97 A3 8C 95 00 7F 19 91
 ```
 
-In the future, I'll provide a python script that generates a Bin_RAW file, which will have the TE set to 200 and not require any changes to keeloq.c.
+You can run the genie.py file to generate a genie.sub file that uses the RAW protocol to transmit, so it works without modified firmware.  
+Edit the ``info = 0x0D94C5EC007F1991`` to be the value of the key you wish to use.
