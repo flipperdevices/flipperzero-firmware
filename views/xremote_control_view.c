@@ -44,15 +44,16 @@ static void xremote_control_view_draw_callback(Canvas* canvas, void* context)
     furi_assert(context);
     XRemoteViewModel* model = context;
     XRemoteAppContext *app_ctx = model->context;
-    XRemoteViewDrawFunction xremote_control_view_draw_body;
-
     ViewOrientation orientation = app_ctx->app_settings->orientation;
+    const char *exit_str = xremote_app_context_get_exit_str(app_ctx);
+
+    XRemoteViewDrawFunction xremote_control_view_draw_body;
     xremote_control_view_draw_body = orientation == ViewOrientationVertical ?
         xremote_control_view_draw_vertical : xremote_control_view_draw_horizontal;
 
     xremote_canvas_draw_header(canvas, orientation, "Control");
     xremote_control_view_draw_body(canvas, model);
-    xremote_canvas_draw_exit_footer(canvas, orientation, "Press to exit");
+    xremote_canvas_draw_exit_footer(canvas, orientation, exit_str);
 }
 
 static void xremote_control_view_process(XRemoteView* view, InputEvent* event)

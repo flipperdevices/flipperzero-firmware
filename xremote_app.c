@@ -12,6 +12,13 @@
 #define XREMOTE_APP_SETTINGS    ANY_PATH("infrared/assets/xremote.cfg")
 #define TAG                     "XRemoteApp"
 
+const NotificationSequence g_sequence_blink_purple_50 = {
+    &message_red_255,
+    &message_blue_255,
+    &message_delay_50,
+    NULL,
+};
+
 XRemoteAppSettings* xremote_app_settings_alloc()
 {
     XRemoteAppSettings* settings = malloc(sizeof(XRemoteAppSettings));
@@ -135,6 +142,13 @@ const char* xremote_app_context_get_exit_str(XRemoteAppContext* ctx)
 {
     XRemoteAppExit exit_behavior = ctx->app_settings->exit_behavior;
     return exit_behavior == XRemoteAppExitHold ? "Hold to exit" : "Press to exit";
+}
+
+void xremote_app_context_notify_led(XRemoteAppContext* app_ctx)
+{
+    xremote_app_assert_void(app_ctx);
+    NotificationApp* notifications = app_ctx->notifications;
+    notification_message(notifications, &g_sequence_blink_purple_50);
 }
 
 void xremote_app_view_alloc(XRemoteApp *app, uint32_t view_id, XRemoteViewAllocator allocator)
