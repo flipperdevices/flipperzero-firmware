@@ -26,6 +26,9 @@
 #include "views/xremote_common_view.h"
 #include "xc_icons.h"
 
+#define XREMOTE_APP_EXTENSION ".ir"
+#define XREMOTE_APP_FOLDER ANY_PATH("infrared")
+
 #define xremote_app_assert_void(cond) \
     if(!cond) return
 #define xremote_app_assert(cond, var) \
@@ -49,6 +52,7 @@ typedef struct {
     XRemoteAppSettings* app_settings;
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
+    FuriString* file_path;
     void* app_argument;
     Gui* gui;
 } XRemoteAppContext;

@@ -7,8 +7,6 @@
  */
 
 #include "xremote_common_view.h"
-
-#include "../infrared/infrared_remote.h"
 #include "../xremote_app.h"
 
 struct XRemoteView {
@@ -34,7 +32,8 @@ XRemoteView*
     remote_view->context = NULL;
     remote_view->on_clear = NULL;
 
-    view_set_orientation(remote_view->view, ViewOrientationVertical);
+    view_set_orientation(
+        remote_view->view, ((XRemoteAppContext*)app_ctx)->app_settings->orientation);
     view_allocate_model(remote_view->view, ViewModelTypeLocking, sizeof(XRemoteViewModel));
 
     view_set_input_callback(remote_view->view, input_cb);
@@ -82,23 +81,37 @@ View* xremote_view_get_view(XRemoteView* rview) {
     return rview->view;
 }
 
-static InfraredRemoteButton*
-    xremote_view_get_button_by_name(XRemoteView* rview, const char* name) {
+InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const char* name) {
     xremote_app_assert(rview->context, NULL);
     InfraredRemote* remote = (InfraredRemote*)rview->context;
     return infrared_remote_get_button_by_name(remote, name);
 }
 
-void xremote_view_send_ir(XRemoteView* rview, const char* name) {
+bool xremote_view_send_ir_by_name(XRemoteView* rview, const char* name) {
     InfraredRemoteButton* button = xremote_view_get_button_by_name(rview, name);
-    xremote_app_assert_void(button);
+    xremote_app_assert(button, false);
 
     InfraredSignal* signal = infrared_remote_button_get_signal(button);
-    xremote_app_assert_void(signal);
+    xremote_app_assert(signal, false);
 
     infrared_signal_transmit(signal);
     NotificationApp* notifications = rview->app_ctx->notifications;
     notification_message(notifications, &g_sequence_blink_purple_50);
+
+    return true;
+}
+
+bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button) {
+    xremote_app_assert(button, false);
+
+    InfraredSignal* signal = infrared_remote_button_get_signal(button);
+    xremote_app_assert(signal, false);
+
+    infrared_signal_transmit(signal);
+    NotificationApp* notifications = rview->app_ctx->notifications;
+    notification_message(notifications, &g_sequence_blink_purple_50);
+
+    return true;
 }
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon) {
@@ -107,10 +120,10 @@ void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon 
         canvas_draw_disc(canvas, x - 2, y, 2);
     } else if(icon == XRemoteIconBack) {
         canvas_draw_triangle(canvas, x - 4, y - 2, 5, 3, CanvasDirectionRightToLeft);
-        canvas_draw_line(canvas, x + 1, y - 2, x - 5, y - 2);
-        canvas_draw_line(canvas, x + 1, y + 3, x - 3, y + 3);
-        canvas_draw_line(canvas, x + 3, y + 1, x + 2, y + 2);
-        canvas_draw_line(canvas, x + 3, y, x + 2, y - 1);
+        canvas_draw_line(canvas, x + 2, y + 1, x + 1, y + 2);
+        canvas_draw_line(canvas, x + 2, y, x + 1, y - 1);
+        canvas_draw_line(canvas, x, y - 2, x - 5, y - 2);
+        canvas_draw_line(canvas, x, y + 3, x - 3, y + 3);
     } else if(icon == XRemoteIconArrowUp) {
         canvas_draw_triangle(canvas, x - 2, y - 2, 5, 3, CanvasDirectionBottomToTop);
         canvas_draw_line(canvas, x - 2, y - 3, x - 2, y + 4);
@@ -159,17 +172,32 @@ void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon 
     }
 }
 
-void xremote_canvas_draw_header(Canvas* canvas, const char* section) {
+void xremote_canvas_draw_header(Canvas* canvas, ViewOrientation orient, const char* section) {
+    Align align = AlignLeft;
+    uint8_t x = 0;
+
+    if(orient == ViewOrientationHorizontal) {
+        align = AlignRight;
+        x = 128;
+    }
+
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 0, 0, AlignLeft, AlignTop, "XRemote");
+    elements_multiline_text_aligned(canvas, x, 0, align, AlignTop, "XRemote");
+
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 20, section);
+    elements_multiline_text_aligned(canvas, x, 12, align, AlignTop, section);
 }
 
-void xremote_canvas_draw_exit_footer(Canvas* canvas, const char* text) {
+void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, const char* text) {
     canvas_set_font(canvas, FontSecondary);
-    xremote_canvas_draw_icon(canvas, 6, 124, XRemoteIconBack);
-    canvas_draw_str(canvas, 12, 128, text);
+
+    if(orient == ViewOrientationVertical) {
+        xremote_canvas_draw_icon(canvas, 6, 124, XRemoteIconBack);
+        elements_multiline_text_aligned(canvas, 12, 128, AlignLeft, AlignBottom, text);
+    } else {
+        xremote_canvas_draw_icon(canvas, 71, 60, XRemoteIconBack);
+        elements_multiline_text_aligned(canvas, 128, 64, AlignRight, AlignBottom, text);
+    }
 }
 
 void xremote_canvas_draw_button(
@@ -201,6 +229,27 @@ void xremote_canvas_draw_button_wide(
 
     if(pressed) {
         elements_slightly_rounded_box(canvas, x + 6, y + 2, 52, 11);
+        canvas_set_color(canvas, ColorWhite);
+    }
+
+    xremote_canvas_draw_icon(canvas, x + 15, y + 7, icon);
+    elements_multiline_text_aligned(canvas, x + 22, y + 10, AlignLeft, AlignBottom, text);
+    canvas_set_color(canvas, ColorBlack);
+}
+
+void xremote_canvas_draw_button_size(
+    Canvas* canvas,
+    bool pressed,
+    uint8_t x,
+    uint8_t y,
+    uint8_t xy,
+    char* text,
+    XRemoteIcon icon) {
+    (void)icon;
+    elements_slightly_rounded_frame(canvas, x + 4, y, xy, 15);
+
+    if(pressed) {
+        elements_slightly_rounded_box(canvas, x + 6, y + 2, xy - 4, 11);
         canvas_set_color(canvas, ColorWhite);
     }
 

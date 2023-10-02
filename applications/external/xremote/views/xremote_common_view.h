@@ -18,6 +18,8 @@
 #include <infrared_transmit.h>
 #include <xc_icons.h>
 
+#include "../infrared/infrared_remote.h"
+
 #define XREMOTE_COMMAND_POWER "Power"
 #define XREMOTE_COMMAND_SETUP "Setup"
 #define XREMOTE_COMMAND_INPUT "Input"
@@ -97,9 +99,10 @@ typedef enum {
 
 typedef struct XRemoteView XRemoteView;
 typedef void (*XRemoteViewClearCallback)(void* context);
+typedef void (*XRemoteViewDrawFunction)(Canvas*, XRemoteViewModel*);
 
-void xremote_canvas_draw_header(Canvas* canvas, const char* section);
-void xremote_canvas_draw_exit_footer(Canvas* canvas, const char* text);
+void xremote_canvas_draw_header(Canvas* canvas, ViewOrientation orient, const char* section);
+void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, const char* text);
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon);
 void xremote_canvas_draw_button(
@@ -115,6 +118,14 @@ void xremote_canvas_draw_button_wide(
     uint8_t y,
     char* text,
     XRemoteIcon icon);
+void xremote_canvas_draw_button_size(
+    Canvas* canvas,
+    bool pressed,
+    uint8_t x,
+    uint8_t y,
+    uint8_t xy,
+    char* text,
+    XRemoteIcon icon);
 void xremote_canvas_draw_frame(
     Canvas* canvas,
     bool pressed,
@@ -128,7 +139,10 @@ XRemoteView*
 void xremote_view_free(XRemoteView* rview);
 
 View* xremote_view_get_view(XRemoteView* rview);
-void xremote_view_send_ir(XRemoteView* rview, const char* name);
+bool xremote_view_send_ir_by_name(XRemoteView* rview, const char* name);
+
+InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const char* name);
+bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button);
 
 void xremote_view_set_context(XRemoteView* rview, void* context, XRemoteViewClearCallback on_clear);
 void* xremote_view_get_context(XRemoteView* rview);
