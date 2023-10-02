@@ -7,16 +7,6 @@ uint16_t keystroke_values[] = {
     1, // Delay
 
     // hid_keymap
-    (1 << 8), // KEY_MOD_LEFT_CTRL
-    (1 << 12), // KEY_MOD_RIGHT_CTRL
-    (1 << 9), // KEY_MOD_LEFT_SHIFT
-    (1 << 13), // KEY_MOD_RIGHT_SHIFT
-    (1 << 10), // KEY_MOD_LEFT_ALT
-    (1 << 14), // KEY_MOD_RIGHT_ALT =
-    (1 << 11), // KEY_MOD_LEFT_GUI =
-    (1 << 15), // KEY_MOD_RIGHT_GUI
-
-    /*
     HID_KEYBOARD_L_CTRL, // HID_KEYBOARD_L_CTRL
     HID_KEYBOARD_R_CTRL, // HID_KEYBOARD_R_CTRL
     HID_KEYBOARD_L_SHIFT, // HID_KEYBOARD_L_SHIFT
@@ -25,7 +15,6 @@ uint16_t keystroke_values[] = {
     HID_KEYBOARD_R_ALT, // HID_KEYBOARD_R_ALT
     HID_KEYBOARD_L_GUI, // HID_KEYBOARD_L_GUI
     HID_KEYBOARD_R_GUI, // HID_KEYBOARD_R_GUI
-*/
 
     HID_KEYBOARD_A, // a
     HID_KEYBOARD_B, // b

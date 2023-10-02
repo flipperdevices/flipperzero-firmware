@@ -169,21 +169,34 @@ void flipboard_model_send_keystrokes(FlipboardModel* model, KeySettingModel* ksm
         }
 
         if(keystroke.key_code == 1) {
-            furi_delay_ms(100 * keystroke.count);
+            if(keystroke.count > 0) {
+                furi_delay_ms(100 * keystroke.count);
+            }
+
+            modifiers = 0;
             continue;
         }
 
-        bool is_modifier = false;
-        for(int j = 8; j < 16; j++) {
-            if(keystroke.key_code == (1 << j)) {
-                modifiers |= keystroke.key_code;
-                is_modifier = true;
-                break;
-            }
+        uint16_t send_modifiers = 0;
+        if(keystroke.key_code == HID_KEYBOARD_L_CTRL) {
+            send_modifiers = (1 << 8);
+        } else if(keystroke.key_code == HID_KEYBOARD_L_SHIFT) {
+            send_modifiers = (1 << 9);
+        } else if(keystroke.key_code == HID_KEYBOARD_L_ALT) {
+            send_modifiers = (1 << 10);
+        } else if(keystroke.key_code == HID_KEYBOARD_L_GUI) {
+            send_modifiers = (1 << 11);
+        } else if(keystroke.key_code == HID_KEYBOARD_R_CTRL) {
+            send_modifiers = (1 << 12);
+        } else if(keystroke.key_code == HID_KEYBOARD_R_SHIFT) {
+            send_modifiers = (1 << 13);
+        } else if(keystroke.key_code == HID_KEYBOARD_R_ALT) {
+            send_modifiers = (1 << 14);
+        } else if(keystroke.key_code == HID_KEYBOARD_R_GUI) {
+            send_modifiers = (1 << 15);
         }
-        if(is_modifier) {
-            continue;
-        }
+
+        modifiers |= send_modifiers;
 
         for(uint8_t count = keystroke.count; count != 0; count--) {
             flipboard_keyboard_send_keycode(
@@ -191,7 +204,9 @@ void flipboard_model_send_keystrokes(FlipboardModel* model, KeySettingModel* ksm
             flipboard_keyboard_release_all(flipboard_model_get_keyboard(model));
         }
 
-        modifiers = 0;
+        if(!send_modifiers) {
+            modifiers = 0;
+        }
     }
 }
 
