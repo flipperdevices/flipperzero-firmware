@@ -6,11 +6,7 @@
 /**
  * The dithering algorithms available.
  */
-enum DitheringAlgorithm : uint8_t {
-    FLOYD_STEINBERG,
-    JARVIS_JUDICE_NINKE,
-    STUCKI
-};
+enum DitheringAlgorithm { FLOYD_STEINBERG, JARVIS_JUDICE_NINKE, STUCKI };
 
 class CameraModel {
   private:
