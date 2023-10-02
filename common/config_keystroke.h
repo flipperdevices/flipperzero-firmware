@@ -4,6 +4,7 @@
 
 uint16_t keystroke_values[] = {
     HID_KEYBOARD_NONE, // Not mapped
+    1, // Delay
 
     // hid_keymap
     (1 << 8), // KEY_MOD_LEFT_CTRL
@@ -290,6 +291,7 @@ uint16_t keystroke_values[] = {
 
 char* keystroke_names[] = {
     "None",
+    "Delay",
 
     "LEFT CTRL",
     "RIGHT CTRL",

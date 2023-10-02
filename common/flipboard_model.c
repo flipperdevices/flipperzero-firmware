@@ -168,6 +168,11 @@ void flipboard_model_send_keystrokes(FlipboardModel* model, KeySettingModel* ksm
             continue;
         }
 
+        if(keystroke.key_code == 1) {
+            furi_delay_ms(100 * keystroke.count);
+            continue;
+        }
+
         bool is_modifier = false;
         for(int j = 8; j < 16; j++) {
             if(keystroke.key_code == (1 << j)) {
