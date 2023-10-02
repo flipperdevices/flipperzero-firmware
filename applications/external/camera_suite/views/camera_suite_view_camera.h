@@ -48,11 +48,13 @@ typedef struct CameraSuiteViewCamera {
     CameraSuiteViewCameraCallback callback;
     FuriStreamBuffer* rx_stream;
     FuriThread* worker_thread;
+    NotificationApp* notification;
     View* view;
     void* context;
 } CameraSuiteViewCamera;
 
 typedef struct UartDumpModel {
+    bool flash;
     bool initialized;
     bool inverted;
     int rotation_angle;
@@ -65,8 +67,8 @@ typedef struct UartDumpModel {
 
 // Function Prototypes
 CameraSuiteViewCamera* camera_suite_view_camera_alloc();
-void camera_suite_view_camera_free(CameraSuiteViewCamera* camera_suite_static);
 View* camera_suite_view_camera_get_view(CameraSuiteViewCamera* camera_suite_static);
+void camera_suite_view_camera_free(CameraSuiteViewCamera* camera_suite_static);
 void camera_suite_view_camera_set_callback(
     CameraSuiteViewCamera* camera_suite_view_camera,
     CameraSuiteViewCameraCallback callback,

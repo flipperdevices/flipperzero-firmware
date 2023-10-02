@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1001-0330-0.92.3-39072a5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-01 23:05 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-01 23:05 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-02 03:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-02 03:00 EST`
 - Custom Game Mode Menu will no longer be overwritten for every install. Update coming to have a correctly generated default when one does not exist.
 - Updated: [NFC Magic v2.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [Updated Gen4 Fast-Configuration command #55 (By jordam)](https://github.com/flipperdevices/flipperzero-good-faps/pull/55)
 - Updated: [NFC Magic Gen4 v1.2 #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack) [Updated Gen4 Fast-Configuration command #55 (By jordam)](https://github.com/flipperdevices/flipperzero-good-faps/pull/55)
@@ -40,7 +40,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork) [Add Ukulele tuning #2 (By portalsoup)](https://github.com/besya/flipperzero-tuning-fork/pull/2)
 - Added: [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - Added: [XRemote (By kala13x)](https://github.com/kala13x/flipper-xremote)
-- Updated: [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite) [New auto flasher. Improve camera I/O, code, comments, and draw. Resolve bugs. #25 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pull/25)
 - Added: [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
 - New Bounty Intro: [ID Card v2.0 - Update v1.0 (By alanretgue) to set and retrieve values from apps_data .txt file and allow for an optional notes field. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/alanretgue/Flipper_Zero-id_card)
 - New Bounty Intro: [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
@@ -51,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; TEMP REVERT: OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Now can crash iOS 17
 - UL: [Updated infrared assets #619 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/619)
 - Updated: [XRemote v1.0 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- Updated: [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite) [New auto flasher. Improve camera I/O, code, comments, and draw. Resolve bugs. #25 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pull/25)
 
 <a name="release">
 
@@ -218,7 +218,6 @@ $ ./fbt dolphin_ext
 - SubGHz: New frequency analyzer [(By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501) [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer) [Quiet Mode (by Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1) [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
 - SubGHz: Nicer SubGHz Chat via [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) with "chat" command (Thanks ESurge and qqMajikpp)
 - SubGHz: OFW PR [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
-- SubGHz: [POCSAG protocol decoder for subghz #2055 (By Shuma)](https://github.com/flipperdevices/flipperzero-firmware/pull/2055)
 - SubGHz: Protocols An-Motors, Keeloq BFT Mitto, Came Atomo, FAAC SLH (Spa), HCS101, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware) Check out new [instructions](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/SubGHzRemoteProg.md)
 - SubGHz: Region Locked -  To transmit to outside ranges (Unlock), use the CFW Settings or Extend Range app under Applications=>Settings.
 - SubGHz: USE CFW Settings to use unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
