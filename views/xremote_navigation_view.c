@@ -65,49 +65,50 @@ static void xremote_navigation_view_process(XRemoteView* view, InputEvent* event
         {
             XRemoteAppContext* app_ctx = xremote_view_get_app_context(view);
             XRemoteAppExit exit = app_ctx->app_settings->exit_behavior;
+            InfraredRemoteButton* button = NULL;
             model->context = app_ctx;
 
             if (event->type == InputTypePress)
             {
                 if (event->key == InputKeyUp)
                 {
-                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_UP))
-                        model->up_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_UP);
+                    if (xremote_view_press_button(view, button)) model->up_pressed = true;
                 }
                 else if (event->key == InputKeyDown)
                 {
-                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_DOWN))
-                        model->down_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_DOWN);
+                    if (xremote_view_press_button(view, button)) model->down_pressed = true;
                 }
                 else if (event->key == InputKeyLeft)
                 {
-                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_LEFT))
-                        model->left_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_LEFT);
+                    if (xremote_view_press_button(view, button)) model->left_pressed = true;
                 }
                 else if (event->key == InputKeyRight)
                 {
-                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_RIGHT))
-                        model->right_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_RIGHT);
+                    if (xremote_view_press_button(view, button)) model->right_pressed = true;
                 }
                 else if (event->key == InputKeyOk)
                 {
-                    if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_OK))
-                        model->ok_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_OK);
+                    if (xremote_view_press_button(view, button)) model->ok_pressed = true;
                 }
             }
             else if (event->type == InputTypeShort &&
                     event->key == InputKeyBack &&
                     exit == XRemoteAppExitHold)
             {
-                if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_BACK))
-                    model->back_pressed = true;
+                button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_BACK);
+                if (xremote_view_press_button(view, button)) model->back_pressed = true;
             }
             else if (event->type == InputTypeLong &&
                     event->key == InputKeyBack &&
                     exit == XRemoteAppExitPress)
             {
-                if (xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_BACK))
-                    model->back_pressed = true;
+                button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_BACK);
+                if (xremote_view_press_button(view, button)) model->back_pressed = true;
             }
             else if (event->type == InputTypeRelease)
             {
