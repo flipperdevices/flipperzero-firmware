@@ -127,14 +127,6 @@ static void save_image(void* model) {
     // Free the file name after use.
     furi_string_free(file_name);
 
-    // @todo - Add functionaly for saving images inverted if necessary.
-    // Invert pixel values if necessary.
-    // if(!model->inverted) { }
-
-    for(size_t i = 0; i < FRAME_BUFFER_LENGTH; ++i) {
-        uartDumpModel->pixels[i] = ~uartDumpModel->pixels[i];
-    }
-
     // If the file was opened successfully, write the bitmap header and the
     // image data.
     if(result) {
@@ -218,7 +210,6 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                     camera_suite_play_happy_bump(instance->context);
                     camera_suite_play_input_sound(instance->context);
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
-                    model->inverted = !model->inverted;
                     instance->callback(CameraSuiteCustomEventSceneCameraLeft, instance->context);
                 },
                 true);
@@ -332,15 +323,10 @@ static void camera_suite_view_camera_enter(void* context) {
     furi_hal_uart_tx(FuriHalUartIdUSART1, &dither_type, 1);
     furi_delay_ms(50);
 
-    uint32_t orientation = instance_context->orientation;
     with_view_model(
         instance->view,
         UartDumpModel * model,
-        {
-            model->inverted = false;
-            model->orientation = orientation;
-            camera_suite_view_camera_model_init(model);
-        },
+        { camera_suite_view_camera_model_init(model); },
         true);
 }
 
