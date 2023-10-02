@@ -1,4 +1,6 @@
+#This is the attributes page
 * text=auto eol=lf
 *.bat eol=crlf
 *.ps1 eol=crlf
 *.cmd eol=crlf
+*.txt eol=crlf
