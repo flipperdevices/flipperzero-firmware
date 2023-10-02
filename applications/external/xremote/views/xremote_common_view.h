@@ -111,6 +111,12 @@ void xremote_canvas_draw_button(
     uint8_t x,
     uint8_t y,
     XRemoteIcon icon);
+void xremote_canvas_draw_button_png(
+    Canvas* canvas,
+    bool pressed,
+    uint8_t x,
+    uint8_t y,
+    const Icon* icon);
 void xremote_canvas_draw_button_wide(
     Canvas* canvas,
     bool pressed,

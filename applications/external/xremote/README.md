@@ -1,8 +1,6 @@
 # flipper-xremote
 Advanced IR Remote App for Flipper Device 
 
-### Currently under development, additional details coming soon..
-
 ## Idea
 With the current infrared application, users must navigate through the menu to locate each button individually. This requires scrolling to the desired button and selecting it, which can be uncomfortable. The idea behind `XRemote` is that all physical buttons are pre-mapped to specific category buttons, and pressing a physical button directly sends an infrared signal. This allows the flipper device to be used as a remote rather than as a tool that has a remote.
 
@@ -57,7 +55,7 @@ Button name | Description
     - [x] GUI to change settings
     - [x] Load settings from the file
     - [x] Store settings to the file
-    - [x] Vertical/horizontal view
+    - [x] Vertical/horizontal views
     - [x] IR command repeat count
     - [x] Exit button behavior
 
@@ -74,9 +72,20 @@ Button name | Description
     </tr>
 </table>
 
-<p align="center">
-Saved remote control apps
-</p>
-<p align="center">
-    <img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_apps.png" alt="XRemote main menu">
-</p>
+<table align="center">
+    <tr>
+        <td align="center">Saved remote control apps</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_apps.png" alt="XRemote IR applicatoions"></td>
+    </tr>
+</table>
+
+<table align="center">
+    <tr>
+        <td align="center">Settings</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/settings_menu.png" alt="XRemote settings menu"></td>
+    </tr>
+</table>
