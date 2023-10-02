@@ -161,21 +161,32 @@ void flipboard_model_set_colors(FlipboardModel* model, KeySettingModel* ksm, uin
 
 void flipboard_model_send_keystrokes(FlipboardModel* model, KeySettingModel* ksm) {
     uint8_t keystroke_count = key_setting_model_get_keystrokes_count(ksm);
+    uint16_t modifiers = 0;
     for(int i = 0; i < keystroke_count; i++) {
         Keystroke keystroke = key_setting_model_get_keystroke(ksm, i);
         if(keystroke.key_code == 0 || keystroke.count == 0) {
             continue;
         }
 
-        if(keystroke.key_code == 0) {
+        bool is_modifier = false;
+        for(int j = 8; j < 16; j++) {
+            if(keystroke.key_code == (1 << j)) {
+                modifiers |= keystroke.key_code;
+                is_modifier = true;
+                break;
+            }
+        }
+        if(is_modifier) {
             continue;
         }
 
         for(uint8_t count = keystroke.count; count != 0; count--) {
             flipboard_keyboard_send_keycode(
-                flipboard_model_get_keyboard(model), keystroke.key_code);
+                flipboard_model_get_keyboard(model), keystroke.key_code | modifiers);
             flipboard_keyboard_release_all(flipboard_model_get_keyboard(model));
         }
+
+        modifiers = 0;
     }
 }
 
