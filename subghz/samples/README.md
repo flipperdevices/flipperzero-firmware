@@ -3,6 +3,7 @@ These are samples captured by various remotes I own.
 - [Chevy HHR 2006](./chevy-hhr-2006/README.md) vehicle keyfob.
 - [Quantum Fire](./quantum-fire/README.md) fireworks controller.
 - [X10](./x10/README.md) x10.com controller.
+- [Genie GIRUD-1T](./genie-girud-1t/README.md) garage door opener.
 
 Check out my [YouTube videos](../../youtube/README.md#sub-ghz) for more information on how to use these files.
 
