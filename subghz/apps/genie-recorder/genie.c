@@ -88,13 +88,12 @@ void genie_view_draw_callback(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 5, 15, "Genie Sub-Ghz Recorder!!!");
     canvas_draw_str(canvas, 5, 30, "Make sure A7 is connected");
     canvas_draw_str(canvas, 100, 58, (app->pressed) ? "SEND" : "");
-    FuriString* buffer = furi_string_alloc();
-    furi_string_printf(buffer, "%ld", app->counter);
-    canvas_draw_str(canvas, 50, 45, furi_string_get_cstr(buffer));
-    furi_string_printf(buffer, "%ld", app->save_counter);
-    canvas_draw_str(canvas, 96, 45, furi_string_get_cstr(buffer));
+    char buffer[20] = {0};
+    snprintf(buffer, COUNT_OF(buffer), "%ld", app->counter);
+    canvas_draw_str(canvas, 50, 45, buffer);
+    snprintf(buffer, COUNT_OF(buffer), "%ld", app->save_counter);
+    canvas_draw_str(canvas, 96, 45, buffer);
     canvas_draw_str(canvas, 5, 55, furi_string_get_cstr(app->key));
-    furi_string_free(buffer);
 }
 
 bool genie_view_input_callback(InputEvent* event, void* context) {
@@ -166,6 +165,7 @@ void genie_tick(void* context) {
 
 void genie_enter_callback(void* context) {
     GenieApp* app = (GenieApp*)context;
+    genie_file_init();
     start_listening(app->genie_subghz, FREQUENCY, genie_packet, context);
     furi_timer_start(app->timer, furi_ms_to_ticks(CLICK_SPEED));
 }
@@ -176,6 +176,7 @@ void genie_exit_callback(void* context) {
     release_button(app);
     stop_listening(app->genie_subghz);
     furi_timer_stop(app->timer);
+    genie_file_close();
 }
 
 GenieApp* genie_app_alloc() {
@@ -251,8 +252,32 @@ void genie_app_free(GenieApp* app) {
 
 int32_t genie_record_app(void* p) {
     UNUSED(p);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_simply_remove(storage, "/ext/apps_data/bug.txt");
+    furi_record_close(RECORD_STORAGE);
+
+    storage = furi_record_open(RECORD_STORAGE);
+
+    for(uint32_t i = 0; i < 0x4000; i++) {
+        File* file = storage_file_alloc(storage);
+        if(storage_file_open(file, "/ext/apps_data/bug.txt", FSAM_WRITE, FSOM_OPEN_APPEND)) {
+            if(!storage_file_write(file, "1", 1)) {
+                FURI_LOG_E(TAG, "Failed to write to file");
+            } else {
+                FURI_LOG_E(TAG, "%lX", i);
+            }
+        } else {
+            FURI_LOG_E(TAG, "Failed to open file");
+        }
+        storage_file_close(file);
+    }
+    furi_record_close(RECORD_STORAGE);
+
+    /*
     GenieApp* app = genie_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     genie_app_free(app);
+    */
     return 0;
 }
