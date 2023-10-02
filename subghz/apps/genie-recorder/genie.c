@@ -253,31 +253,8 @@ void genie_app_free(GenieApp* app) {
 int32_t genie_record_app(void* p) {
     UNUSED(p);
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_simply_remove(storage, "/ext/apps_data/bug.txt");
-    furi_record_close(RECORD_STORAGE);
-
-    storage = furi_record_open(RECORD_STORAGE);
-
-    for(uint32_t i = 0; i < 0x4000; i++) {
-        File* file = storage_file_alloc(storage);
-        if(storage_file_open(file, "/ext/apps_data/bug.txt", FSAM_WRITE, FSOM_OPEN_APPEND)) {
-            if(!storage_file_write(file, "1", 1)) {
-                FURI_LOG_E(TAG, "Failed to write to file");
-            } else {
-                FURI_LOG_E(TAG, "%lX", i);
-            }
-        } else {
-            FURI_LOG_E(TAG, "Failed to open file");
-        }
-        storage_file_close(file);
-    }
-    furi_record_close(RECORD_STORAGE);
-
-    /*
     GenieApp* app = genie_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     genie_app_free(app);
-    */
     return 0;
 }
