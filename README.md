@@ -72,12 +72,14 @@ Button name | Description
     </tr>
 </table>
 
-<p align="center">
-Saved remote control apps
-</p>
-<p align="center">
-    <img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_apps.png" alt="XRemote main menu">
-</p>
+<table align="center">
+    <tr>
+        <td align="center">Saved remote control apps</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_apps.png" alt="XRemote IR applicatoions"></td>
+    </tr>
+</table>
 
 <table align="center">
     <tr>
