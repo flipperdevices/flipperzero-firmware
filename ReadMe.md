@@ -48,8 +48,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Rocateq Shopping Cart wav files #758 (By casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/758)
 - Removed Shopping Cart WAV files from firmware to include in SD Card Assets.
 - Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
+- Updated: [XRemote v0.9.19 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; TEMP REVERT: OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Now can crash iOS 17
-- Updated: [XRemote v1.0 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - UL: [Updated infrared assets #619 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/619)
 
 <a name="release">
@@ -471,7 +471,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- [XRemote v1.0 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- [XRemote v0.9.19 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
 
