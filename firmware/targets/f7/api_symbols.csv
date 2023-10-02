@@ -2286,13 +2286,13 @@ Function,+,nfc_scanner_alloc,NfcScanner*,Nfc*
 Function,+,nfc_scanner_free,void,NfcScanner*
 Function,+,nfc_scanner_start,void,"NfcScanner*, NfcScannerCallback, void*"
 Function,+,nfc_scanner_stop,void,NfcScanner*
-Function,-,nfc_set_fdt_listen_fc,void,"Nfc*, uint32_t"
-Function,-,nfc_set_fdt_poll_fc,void,"Nfc*, uint32_t"
-Function,-,nfc_set_fdt_poll_poll_us,void,"Nfc*, uint32_t"
-Function,-,nfc_set_guard_time_us,void,"Nfc*, uint32_t"
-Function,-,nfc_set_mask_receive_time_fc,void,"Nfc*, uint32_t"
+Function,+,nfc_set_fdt_listen_fc,void,"Nfc*, uint32_t"
+Function,+,nfc_set_fdt_poll_fc,void,"Nfc*, uint32_t"
+Function,+,nfc_set_fdt_poll_poll_us,void,"Nfc*, uint32_t"
+Function,+,nfc_set_guard_time_us,void,"Nfc*, uint32_t"
+Function,+,nfc_set_mask_receive_time_fc,void,"Nfc*, uint32_t"
 Function,+,nfc_start,void,"Nfc*, NfcEventCallback, void*"
-Function,-,nfc_stop,void,Nfc*
+Function,+,nfc_stop,void,Nfc*
 Function,+,nfc_util_bytes2num,uint64_t,"const uint8_t*, uint8_t"
 Function,+,nfc_util_even_parity32,uint8_t,uint32_t
 Function,+,nfc_util_num2bytes,void,"uint64_t, uint8_t, uint8_t*"
