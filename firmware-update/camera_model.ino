@@ -1,6 +1,6 @@
 #include "camera_model.h"
 
-CameraModel *CameraModel::instance = nullptr;
+CameraModel* CameraModel::instance = nullptr;
 
 CameraModel::CameraModel() {
     // Set up defaults.
@@ -11,7 +11,7 @@ CameraModel::CameraModel() {
     ditherAlgorithm = FLOYD_STEINBERG;
 }
 
-CameraModel *CameraModel::getInstance() {
+CameraModel* CameraModel::getInstance() {
     if (instance == nullptr) {
         instance = new CameraModel();
     }

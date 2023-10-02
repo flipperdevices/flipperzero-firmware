@@ -8,6 +8,6 @@
 #include "dithering.h"
 
 /** Process and send grayscale images back to the Flipper Zero. */
-void process_image(camera_fb_t *frame_buffer);
+void process_image(camera_fb_t* frame_buffer);
 
 #endif

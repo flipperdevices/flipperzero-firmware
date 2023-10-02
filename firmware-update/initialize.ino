@@ -1,6 +1,6 @@
 #include "initialize.h"
 
-void initialize(camera_config_t *config) {
+void initialize(camera_config_t* config) {
     // Initialize camera.
     esp_err_t err = esp_camera_init(config);
     if (err != ESP_OK) {
@@ -8,7 +8,7 @@ void initialize(camera_config_t *config) {
     }
 
     // Get the camera model reference.
-    CameraModel *model = CameraModel::getInstance();
+    CameraModel* model = CameraModel::getInstance();
 
     // Check if the flash is already on, if it is turn it off.
     if (model->getIsFlashEnabled()) {
@@ -18,10 +18,10 @@ void initialize(camera_config_t *config) {
     }
 
     // Get the camera sensor reference.
-    sensor_t *cam = esp_camera_sensor_get();
+    sensor_t* cam = esp_camera_sensor_get();
 
     // Set up the frame buffer reference.
-    camera_fb_t *frame_buffer = esp_camera_fb_get();
+    camera_fb_t* frame_buffer = esp_camera_fb_get();
 
     // Set initial brightness.
     cam->set_brightness(cam, 0);

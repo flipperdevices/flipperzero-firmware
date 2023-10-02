@@ -7,6 +7,6 @@
 #include "camera_model.h"
 #include "pins.h"
 
-void initialize(camera_config_t *config);
+void initialize(camera_config_t* config);
 
 #endif

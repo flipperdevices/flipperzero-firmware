@@ -169,6 +169,12 @@ by [Dave Lee][github-profile-leedave].
 4. Request PR [here][pull-request-link], introduce work via your branch.
 5. Wait for review and merge. Thank you!
 
+For C development you will need the [clang format tool][clang-format-tool] for linting/formatting.
+
+```json
+FOR /R C:\path-to-repo\Flipper-Zero-Camera-Suite\ %F IN (*.h *.ino *.c *.cpp) DO clang-format -i "%F"
+```
+
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
 Fin. Thanks for looking and happy programming friend!
@@ -180,6 +186,7 @@ Cody
 [amazon-esp32-cam-link-1]: https://amzn.to/44rBFrb
 [amazon-esp32-cam-link-2]: https://amzn.to/45nDR45
 [arduino-ide]: https://www.arduino.cc/en/software
+[clang-format-tool]: https://releases.llvm.org/download.html
 [flipper-zero-camera-suite-releases]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/releases
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera

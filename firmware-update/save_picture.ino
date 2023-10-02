@@ -1,7 +1,7 @@
 #include "save_picture.h"
 
 void save_picture() {
-    sensor_t *cam = esp_camera_sensor_get();
+    sensor_t* cam = esp_camera_sensor_get();
 
     // Check if the sensor is valid.
     if (!cam) {
@@ -20,7 +20,7 @@ void save_picture() {
     }
 
     // Get a frame buffer from camera.
-    camera_fb_t *frame_buffer = esp_camera_fb_get();
+    camera_fb_t* frame_buffer = esp_camera_fb_get();
     if (!frame_buffer) {
         // Camera capture failed
         return;
@@ -37,7 +37,7 @@ void save_picture() {
     path += String(millis());
     path += ".jpg";
 
-    fs::FS &fs = SD_MMC;
+    fs::FS& fs = SD_MMC;
     File file = fs.open(path.c_str(), FILE_WRITE);
 
     if (!file) {
@@ -47,7 +47,7 @@ void save_picture() {
             frame_buffer->len) {
             // Failed to write the image to the file
         }
-        file.close();  // Close the file in any case.
+        file.close(); // Close the file in any case.
     }
 
     // Update framesize back to the default.

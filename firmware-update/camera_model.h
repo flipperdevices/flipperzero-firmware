@@ -13,8 +13,8 @@ enum DitheringAlgorithm : uint8_t {
 };
 
 class CameraModel {
-   private:
-    static CameraModel *instance;
+  private:
+    static CameraModel* instance;
     // Private constructor to prevent instantiation.
     CameraModel();
     /**
@@ -38,8 +38,8 @@ class CameraModel {
      */
     DitheringAlgorithm ditherAlgorithm;
 
-   public:
-    static CameraModel *getInstance();
+  public:
+    static CameraModel* getInstance();
 
     // Getter functions
     bool getIsDitheringDisabled();

@@ -5,6 +5,6 @@
 
 #include "camera_model.h"
 
-void dither_image(camera_fb_t *frame_buffer);
+void dither_image(camera_fb_t* frame_buffer);
 
 #endif
