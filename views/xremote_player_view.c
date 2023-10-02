@@ -17,8 +17,8 @@ static void xremote_player_view_draw_vertical(Canvas* canvas, XRemoteViewModel* 
     xremote_canvas_draw_button(canvas, model->down_pressed, 23, 72, XRemoteIconJumpBackward);
     xremote_canvas_draw_button(canvas, model->left_pressed, 2, 51, XRemoteIconFastBackward);
     xremote_canvas_draw_button(canvas, model->right_pressed, 44, 51, XRemoteIconFastForward);
-    xremote_canvas_draw_button(canvas, model->ok_pressed, 23, 51, XRemoteIconPlayPause);
-    xremote_canvas_draw_button(canvas, model->back_pressed, 2, 95, XRemoteIconStop);
+    xremote_canvas_draw_button(canvas, model->back_pressed, 2, 95, XRemoteIconPause);
+    xremote_canvas_draw_button(canvas, model->ok_pressed, 23, 51, XRemoteIconPlay);
 
     if (app_ctx->app_settings->exit_behavior == XRemoteAppExitPress)
         canvas_draw_icon(canvas, 22, 107, &I_Hold_Text_17x4);
@@ -32,8 +32,8 @@ static void xremote_player_view_draw_horizontal(Canvas* canvas, XRemoteViewModel
     xremote_canvas_draw_button(canvas, model->down_pressed, 23, 44, XRemoteIconJumpBackward);
     xremote_canvas_draw_button(canvas, model->left_pressed, 2, 23, XRemoteIconFastBackward);
     xremote_canvas_draw_button(canvas, model->right_pressed, 44, 23, XRemoteIconFastForward);
-    xremote_canvas_draw_button(canvas, model->ok_pressed, 23, 23, XRemoteIconPlayPause);
-    xremote_canvas_draw_button(canvas, model->back_pressed, 70, 33, XRemoteIconStop);
+    xremote_canvas_draw_button(canvas, model->back_pressed, 70, 33, XRemoteIconPause);
+    xremote_canvas_draw_button(canvas, model->ok_pressed, 23, 23, XRemoteIconPlay);
 
     if (app_ctx->app_settings->exit_behavior == XRemoteAppExitPress)
         canvas_draw_icon(canvas, 90, 45, &I_Hold_Text_17x4);
@@ -91,7 +91,7 @@ static void xremote_player_view_process(XRemoteView* view, InputEvent* event)
                 }
                 else if (event->key == InputKeyOk)
                 {
-                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_PLAY_PAUSE);
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_PLAY);
                     if (xremote_view_press_button(view, button)) model->ok_pressed = true;
                 }
             }
@@ -99,14 +99,14 @@ static void xremote_player_view_process(XRemoteView* view, InputEvent* event)
                     event->key == InputKeyBack &&
                     exit == XRemoteAppExitHold)
             {
-                button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_STOP);
+                button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_PAUSE);
                 if (xremote_view_press_button(view, button)) model->back_pressed = true;
             }
             else if (event->type == InputTypeLong &&
                     event->key == InputKeyBack &&
                     exit == XRemoteAppExitPress)
             {
-                button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_STOP);
+                button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_PAUSE);
                 if (xremote_view_press_button(view, button)) model->back_pressed = true;
             }
             else if (event->type == InputTypeRelease)

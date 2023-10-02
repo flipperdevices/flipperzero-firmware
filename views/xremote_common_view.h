@@ -106,6 +106,7 @@ void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, con
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon);
 void xremote_canvas_draw_button(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, XRemoteIcon icon);
+void xremote_canvas_draw_button_png(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, const Icon* icon);
 void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, XRemoteIcon icon);
 void xremote_canvas_draw_button_size(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, uint8_t xy, char* text, XRemoteIcon icon);
 void xremote_canvas_draw_frame(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, uint8_t xl, const char *text);

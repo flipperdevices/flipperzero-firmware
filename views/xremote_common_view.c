@@ -260,6 +260,20 @@ void xremote_canvas_draw_button(Canvas* canvas, bool pressed, uint8_t x, uint8_t
     canvas_set_color(canvas, ColorBlack);
 }
 
+void xremote_canvas_draw_button_png(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, const Icon* icon)
+{
+    canvas_draw_icon(canvas, x, y, &I_Button_18x18);
+
+    if (pressed)
+    {
+        elements_slightly_rounded_box(canvas, x + 3, y + 2, 13, 13);
+        canvas_set_color(canvas, ColorWhite);
+    }
+
+    canvas_draw_icon(canvas, x + 4, y + 3, icon);
+    canvas_set_color(canvas, ColorBlack);
+}
+
 void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, XRemoteIcon icon)
 {
     (void)icon;
