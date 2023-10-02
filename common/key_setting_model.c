@@ -43,6 +43,14 @@ uint8_t key_setting_model_get_message_index(KeySettingModel* model) {
     return model->message_index;
 }
 
+void key_setting_model_set_keystroke_index(KeySettingModel* model, uint8_t index) {
+    model->keystroke_index = index;
+}
+
+uint8_t key_setting_model_get_keystroke_index(KeySettingModel* model) {
+    return model->keystroke_index;
+}
+
 char* key_setting_model_get_temp_buffer(KeySettingModel* model) {
     return model->temp_buffer;
 }
@@ -280,12 +288,15 @@ static void key_setting_model_load_fields(KeySettingModel* model, FlipperFormat*
     }
 
     if(flipper_format_read_uint32(flipper_format, "KeystrokeCount", &data32, 1)) {
-        uint16_t size = (uint16_t)data32;
-        if(size != 0) {
-            uint32_t* info = malloc(sizeof(uint32_t) * 2 * size);
-            if(flipper_format_read_uint32(flipper_format, "Keystrokes", info, size)) {
-                for(uint8_t i = 0; i < size; i += 2) {
-                    key_setting_model_append_keystroke(model, info[i], info[i + 1]);
+        uint16_t num_entries = (uint16_t)data32;
+        if(num_entries != 0) {
+            uint16_t num_ints = num_entries * 2;
+            uint32_t* info = malloc(sizeof(uint32_t) * num_ints);
+            if(flipper_format_read_uint32(flipper_format, "Keystrokes", info, num_ints)) {
+                for(uint8_t i = 0; i < num_entries; i++) {
+                    if(info[i * 2]) {
+                        key_setting_model_append_keystroke(model, info[i * 2], info[i * 2 + 1]);
+                    }
                 }
             }
             free(info);

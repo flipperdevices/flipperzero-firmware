@@ -100,6 +100,7 @@ int32_t flipboard_keyboard_app(void* p) {
     KeySettingModelFields fields = KeySettingModelFieldAll;
     bool single_mode_button = true;
     bool attach_keyboard = true;
+    //bool attach_keyboard = false;
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,

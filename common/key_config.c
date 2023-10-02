@@ -4,7 +4,7 @@
 #include <furi.h>
 
 #include "config_colors.h"
-#include "config_keys.h"
+#include "config_keystroke.h"
 #include "config_tones.h"
 
 /*
@@ -52,6 +52,8 @@ static void flipboard_setting_keystroke_count_changed(VariableItem* item, int i)
 }
 */
 
+static void populate_variable_item_list(KeyConfig* key_config, KeySettingModel* ksm);
+
 static void color_up_changed(VariableItem* item) {
     KeySettingModel* ksm = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -71,6 +73,45 @@ static void tone_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     key_setting_model_set_frequency(ksm, freqs_values[index]);
     variable_item_set_current_value_text(item, freq_names[index]);
+}
+
+static void keystroke_changed(VariableItem* item) {
+    KeySettingModel* ksm = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    // update model
+    KeyConfig* key_config = (KeyConfig*)key_setting_model_get_key_config(ksm);
+    uint8_t add_item_index = key_setting_model_get_keystroke_index(ksm);
+    uint8_t count = key_setting_model_get_keystrokes_count(ksm);
+    uint8_t offset = add_item_index - (count * 2);
+    uint8_t selected_item_index =
+        variable_item_list_get_selected_item_index(key_config->item_list);
+    uint8_t item_index = (selected_item_index - offset) / 2;
+    FURI_LOG_D("Flipboard", "item_index=%d", item_index);
+    Keystroke ks = key_setting_model_get_keystroke(ksm, item_index);
+    FURI_LOG_D("Flipboard", "ks.key_code=%d .count=%d", ks.key_code, ks.count);
+    key_setting_model_set_keystroke(ksm, item_index, keystroke_values[index], ks.count);
+
+    variable_item_set_current_value_text(item, keystroke_names[index]);
+}
+
+static void keystroke_count_changed(VariableItem* item) {
+    KeySettingModel* ksm = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    // update model
+    KeyConfig* key_config = (KeyConfig*)key_setting_model_get_key_config(ksm);
+    uint8_t add_item_index = key_setting_model_get_keystroke_index(ksm);
+    uint8_t count = key_setting_model_get_keystrokes_count(ksm);
+    uint8_t offset = add_item_index - (count * 2);
+    uint8_t selected_item_index =
+        variable_item_list_get_selected_item_index(key_config->item_list);
+    uint8_t item_index = (selected_item_index - offset) / 2;
+    FURI_LOG_D("Flipboard", "item_index=%d", item_index);
+    Keystroke ks = key_setting_model_get_keystroke(ksm, item_index);
+    FURI_LOG_D("Flipboard", "ks.key_code=%d .count=%d", ks.key_code, ks.count);
+    key_setting_model_set_keystroke(ksm, item_index, ks.key_code, index);
+
+    variable_item_set_current_value_text(item, keystroke_count_names[index]);
 }
 
 static void populate_variable_item_list_color(
@@ -111,6 +152,50 @@ static void populate_variable_item_list_frequency(
     }
     variable_item_set_current_value_index(item, index);
     variable_item_set_current_value_text(item, freq_names[index]);
+}
+
+static uint8_t
+    populate_variable_item_list_keystrokes(KeyConfig* key_config, KeySettingModel* ksm) {
+    uint8_t lines_added = 0;
+
+    uint8_t count = key_setting_model_get_keystrokes_count(ksm);
+
+    for(int j = 0; j < count; j++) {
+        Keystroke ks = key_setting_model_get_keystroke(ksm, j);
+        FURI_LOG_D("Flipboard", "POPULATE ks.key_code=%d .count=%d", ks.key_code, ks.count);
+
+        VariableItem* item = variable_item_list_add(
+            key_config->item_list, "Keystroke", COUNT_OF(keystroke_names), keystroke_changed, ksm);
+        lines_added++;
+        uint8_t index = 0;
+        for(size_t i = 0; i < COUNT_OF(keystroke_names); i++) {
+            if(keystroke_values[i] == ks.key_code) {
+                index = i;
+                break;
+            }
+        }
+        variable_item_set_current_value_index(item, index);
+        variable_item_set_current_value_text(item, keystroke_names[index]);
+
+        item = variable_item_list_add(
+            key_config->item_list,
+            "Count",
+            COUNT_OF(keystroke_count_names),
+            keystroke_count_changed,
+            ksm);
+        lines_added++;
+        index = COUNT_OF(keystroke_count_names) - 1;
+        for(size_t i = 0; i < COUNT_OF(keystroke_count_names); i++) {
+            if(i == ks.count) {
+                index = i;
+                break;
+            }
+        }
+        variable_item_set_current_value_index(item, index);
+        variable_item_set_current_value_text(item, keystroke_count_names[index]);
+    }
+
+    return lines_added;
 }
 
 static void message_updated(void* context) {
@@ -198,6 +283,7 @@ static void item_clicked(void* context, uint32_t index) {
     KeySettingModel* ksm = (KeySettingModel*)context;
     uint8_t message_index = key_setting_model_get_message_index(ksm);
     if(index == message_index) {
+        FURI_LOG_D("Flipboard", "Message index clicked");
         KeyConfig* key_config = (KeyConfig*)key_setting_model_get_key_config(ksm);
         furi_assert(key_config);
 
@@ -224,7 +310,23 @@ static void item_clicked(void* context, uint32_t index) {
 
         view_dispatcher_switch_to_view(
             key_config->view_dispatcher, key_config->view_text_input_id);
+
+        return;
     }
+
+    uint8_t keystroke_index = key_setting_model_get_keystroke_index(ksm);
+    if(index == keystroke_index) {
+        FURI_LOG_D("Flipboard", "Keystroke index clicked");
+        KeyConfig* key_config = (KeyConfig*)key_setting_model_get_key_config(ksm);
+
+        uint16_t keycode = 0;
+        key_setting_model_append_keystroke(ksm, keycode, 1);
+
+        populate_variable_item_list(key_config, ksm);
+        return;
+    }
+
+    FURI_LOG_D("Flipboard", "Unknown index clicked %ld", index);
 }
 
 static void populate_variable_item_list(KeyConfig* key_config, KeySettingModel* ksm) {
@@ -264,8 +366,14 @@ static void populate_variable_item_list(KeyConfig* key_config, KeySettingModel* 
         item_index++;
     }
 
-    if(key_config->view_dispatcher) {
-        view_dispatcher_switch_to_view(key_config->view_dispatcher, key_config->view_item_list_id);
+    if(flipboard_model_get_key_setting_model_fields(key_config->model) &
+       KeySettingModelFieldKeystrokes) {
+        item_index += populate_variable_item_list_keystrokes(key_config, ksm);
+
+        variable_item_list_add(key_config->item_list, "Add Keystroke", 0, NULL, NULL);
+        variable_item_list_set_enter_callback(key_config->item_list, item_clicked, ksm);
+        key_setting_model_set_keystroke_index(ksm, item_index);
+        item_index++;
     }
 }
 
@@ -282,6 +390,11 @@ static void item_callback(void* context, uint32_t index) {
     furi_assert(ksm && key_setting_model_get_key_id(ksm) == index);
     key_setting_model_set_key_config(ksm, key_config);
     populate_variable_item_list(key_config, ksm);
+    variable_item_list_set_selected_item(key_config->item_list, 0);
+
+    if(key_config->view_dispatcher) {
+        view_dispatcher_switch_to_view(key_config->view_dispatcher, key_config->view_item_list_id);
+    }
 }
 
 KeyConfig* key_config_alloc(FlipboardModel* model, uint32_t config_view_id) {

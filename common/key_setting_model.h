@@ -63,6 +63,8 @@ bool key_setting_model_set_keystroke(
     uint8_t count);
 void key_setting_model_append_keystroke(KeySettingModel* model, uint16_t key_code, uint8_t count);
 bool key_setting_model_remove_last_keystroke(KeySettingModel* model);
+void key_setting_model_set_keystroke_index(KeySettingModel* model, uint8_t index);
+uint8_t key_setting_model_get_keystroke_index(KeySettingModel* model);
 
 FuriString* key_setting_model_get_message(KeySettingModel* model);
 void key_setting_model_set_message(KeySettingModel* model, const char* message);
