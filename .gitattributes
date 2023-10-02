@@ -2,3 +2,5 @@
 *.bat eol=crlf
 *.ps1 eol=crlf
 *.cmd eol=crlf
+*.txt eol=crlf
+*.ir eol=crlf
