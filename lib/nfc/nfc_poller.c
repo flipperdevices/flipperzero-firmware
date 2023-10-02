@@ -136,7 +136,6 @@ void nfc_poller_stop(NfcPoller* instance) {
     instance->session_state = NfcPollerSessionStateIdle;
 }
 
-// TODO change name
 static NfcCommand nfc_poller_detect_tail_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
 
@@ -147,7 +146,7 @@ static NfcCommand nfc_poller_detect_tail_callback(NfcGenericEvent event, void* c
     return NfcCommandStop;
 }
 
-static NfcCommand nfc_poller_detect_callback(NfcEvent event, void* context) {
+static NfcCommand nfc_poller_detect_head_callback(NfcEvent event, void* context) {
     furi_assert(context);
 
     NfcPoller* instance = context;
@@ -161,7 +160,6 @@ static NfcCommand nfc_poller_detect_callback(NfcEvent event, void* context) {
         .event_data = &event,
     };
 
-    // TODO hard to understand
     if(event.type == NfcEventTypePollerReady) {
         if(tail_poller == head_poller) {
             instance->protocol_detected =
@@ -183,16 +181,14 @@ bool nfc_poller_detect(NfcPoller* instance) {
     NfcPollerListElement* tail_poller = instance->list.tail;
     NfcPollerListElement* iter = instance->list.head;
 
-    // TODO hard to understand
     if(tail_poller != instance->list.head) {
         while(iter->child != tail_poller) iter = iter->child;
         iter->poller_api->set_callback(iter->poller, nfc_poller_detect_tail_callback, instance);
     }
 
-    nfc_start(instance->nfc, nfc_poller_detect_callback, instance);
+    nfc_start(instance->nfc, nfc_poller_detect_head_callback, instance);
     nfc_stop(instance->nfc);
 
-    // TODO hard to understand
     if(tail_poller != instance->list.head) {
         iter->poller_api->set_callback(
             iter->poller, tail_poller->poller_api->run, tail_poller->poller);
