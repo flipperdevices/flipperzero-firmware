@@ -54,22 +54,23 @@ static void xremote_general_view_process(XRemoteView* view, InputEvent* event) {
         {
             if(event->type == InputTypePress) {
                 model->context = xremote_view_get_app_context(view);
+                InfraredRemoteButton* button = NULL;
 
                 if(event->key == InputKeyOk) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_POWER))
-                        model->ok_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_POWER);
+                    if(xremote_view_press_button(view, button)) model->ok_pressed = true;
                 } else if(event->key == InputKeyUp) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_INPUT))
-                        model->up_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_INPUT);
+                    if(xremote_view_press_button(view, button)) model->up_pressed = true;
                 } else if(event->key == InputKeyDown) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_SETUP))
-                        model->down_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_SETUP);
+                    if(xremote_view_press_button(view, button)) model->down_pressed = true;
                 } else if(event->key == InputKeyLeft) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_MENU))
-                        model->left_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_MENU);
+                    if(xremote_view_press_button(view, button)) model->left_pressed = true;
                 } else if(event->key == InputKeyRight) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_LIST))
-                        model->right_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_LIST);
+                    if(xremote_view_press_button(view, button)) model->right_pressed = true;
                 }
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyOk)

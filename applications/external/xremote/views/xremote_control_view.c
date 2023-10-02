@@ -23,7 +23,7 @@ static void xremote_control_view_draw_horizontal(Canvas* canvas, XRemoteViewMode
     xremote_canvas_draw_frame(canvas, model->right_pressed, 37, 25, 23, "CH >");
     xremote_canvas_draw_frame(canvas, model->down_pressed, 17, 45, 31, "VOL -");
     xremote_canvas_draw_button_size(
-        canvas, model->ok_pressed, 70, 29, 44, "Mute", XRemoteIconEnter);
+        canvas, model->ok_pressed, 70, 30, 44, "Mute", XRemoteIconEnter);
 }
 
 static void xremote_control_view_draw_callback(Canvas* canvas, void* context) {
@@ -48,23 +48,24 @@ static void xremote_control_view_process(XRemoteView* view, InputEvent* event) {
         XRemoteViewModel * model,
         {
             model->context = xremote_view_get_app_context(view);
+            InfraredRemoteButton* button = NULL;
 
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyOk) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_MUTE))
-                        model->ok_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_MUTE);
+                    if(xremote_view_press_button(view, button)) model->ok_pressed = true;
                 } else if(event->key == InputKeyUp) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_VOL_UP))
-                        model->up_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_VOL_UP);
+                    if(xremote_view_press_button(view, button)) model->up_pressed = true;
                 } else if(event->key == InputKeyDown) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_VOL_DOWN))
-                        model->down_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_VOL_DOWN);
+                    if(xremote_view_press_button(view, button)) model->down_pressed = true;
                 } else if(event->key == InputKeyLeft) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_PREV_CHAN))
-                        model->left_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_PREV_CHAN);
+                    if(xremote_view_press_button(view, button)) model->left_pressed = true;
                 } else if(event->key == InputKeyRight) {
-                    if(xremote_view_send_ir_by_name(view, XREMOTE_COMMAND_NEXT_CHAN))
-                        model->right_pressed = true;
+                    button = xremote_view_get_button_by_name(view, XREMOTE_COMMAND_NEXT_CHAN);
+                    if(xremote_view_press_button(view, button)) model->right_pressed = true;
                 }
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyOk)
