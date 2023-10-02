@@ -1,6 +1,6 @@
-#include "save_picture.h"
+#include "save_picture_to_sd_card.h"
 
-void save_picture() {
+void save_picture_to_sd_card() {
     sensor_t* cam = esp_camera_sensor_get();
 
     // Check if the sensor is valid.

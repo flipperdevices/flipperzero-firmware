@@ -1,19 +1,19 @@
-#include "serial_commands.h"
+#include "process_serial_commands.h"
 
-void serial_commands() {
+void process_serial_commands() {
     if (Serial.available() > 0) {
-        // Get the camera model reference.
-        CameraModel* model = CameraModel::getInstance();
-
         char input = Serial.read();
         sensor_t* cam = esp_camera_sensor_get();
 
         switch (input) {
         case '>': // Toggle dithering.
-            model->setIsDitheringDisabled(!model->getIsDitheringDisabled());
+            camera_model.isDitheringEnabled = !camera_model.isDitheringEnabled;
             break;
-        case '<': // Toggle invert.
-            model->setIsInverted(!model->getIsInverted());
+        case 'i': // Turn invert off.
+            camera_model.isInvertEnabled = false;
+            break;
+        case 'I': // Turn invert on.
+            camera_model.isInvertEnabled = true;
             break;
         case 'b': // Remove brightness.
             cam->set_contrast(cam, cam->status.brightness - 1);
@@ -28,36 +28,32 @@ void serial_commands() {
             cam->set_contrast(cam, cam->status.contrast + 1);
             break;
         case 'f': // Turn the flash off.
-            pinMode(FLASH_GPIO_NUM, OUTPUT);
-            digitalWrite(FLASH_GPIO_NUM, LOW);
-            model->setIsFlashEnabled(false);
+            toggle_flash_off();
             break;
         case 'F': // Turn the flash on.
-            pinMode(FLASH_GPIO_NUM, OUTPUT);
-            digitalWrite(FLASH_GPIO_NUM, HIGH);
-            model->setIsFlashEnabled(true);
+            toggle_flash_on();
             break;
         case 'P': // Save image to the onboard SD card.
             // @todo - Future feature.
-            // save_picture();
+            // save_picture_to_sd_card();
             break;
         case 'M': // Toggle Mirror.
             cam->set_hmirror(cam, !cam->status.hmirror);
             break;
         case 's': // Stop stream.
-            model->setIsStreamEnabled(false);
+            camera_model.isStreamEnabled = false;
             break;
         case 'S': // Start stream.
-            model->setIsStreamEnabled(true);
+            camera_model.isStreamEnabled = true;
             break;
         case '0': // Use Floyd Steinberg dithering.
-            model->setDitherAlgorithm(FLOYD_STEINBERG);
+            camera_model.ditherAlgorithm = FLOYD_STEINBERG;
             break;
         case '1': // Use Jarvis Judice dithering.
-            model->setDitherAlgorithm(JARVIS_JUDICE_NINKE);
+            camera_model.ditherAlgorithm = JARVIS_JUDICE_NINKE;
             break;
         case '2': // Use Stucki dithering.
-            model->setDitherAlgorithm(STUCKI);
+            camera_model.ditherAlgorithm = STUCKI;
             break;
         default:
             // Do nothing.

@@ -1,4 +1,5 @@
 *.exe
+*.flag
 *.zip
 .DS_Store
 .clang-format
@@ -13,4 +14,3 @@ fap/.clang-format
 fap/.editorconfig
 fap/.vscode
 fap/dist/*
-firmware/compile.flag

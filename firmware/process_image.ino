@@ -1,16 +1,13 @@
 #include "process_image.h"
 
 void process_image(camera_fb_t* frame_buffer) {
-    // Get the camera model reference.
-    CameraModel* model = CameraModel::getInstance();
-
     // If dithering is not disabled, perform dithering on the image. Dithering
     // is the process of approximating the look of a high-resolution grayscale
     // image in a lower resolution by binary values (black & white), thereby
     // representing different shades of gray.
-    if (!model->getIsDitheringDisabled()) {
-        dither_image(frame_buffer); // Invokes the dithering process on the
-                                    // frame buffer.
+    if (camera_model.isDitheringEnabled) {
+        // Invokes the dithering process on the frame buffer.
+        dither_image(frame_buffer);
     }
 
     uint8_t flipper_y = 0;
@@ -32,7 +29,7 @@ void process_image(camera_fb_t* frame_buffer) {
             // Packing 8 pixel values into one byte.
             for (uint8_t bit = 0; bit < 8; ++bit) {
                 // Check the invert flag and pack the pixels accordingly.
-                if (model->getIsInverted()) {
+                if (camera_model.isInvertEnabled) {
                     // If invert is true, consider pixel as 1 if it's more than
                     // 127.
                     if (frame_buffer->buf[true_y + x + bit] > 127) {
@@ -48,9 +45,10 @@ void process_image(camera_fb_t* frame_buffer) {
             }
             Serial.write(packed_pixels); // Sending packed pixel byte.
         }
-
-        ++flipper_y;    // Move to the next row.
-        Serial.flush(); // Ensure all data in the Serial buffer is sent before
-                        // moving to the next iteration.
+        // Move to the next row.
+        ++flipper_y;
+        // Ensure all data in the Serial buffer is sent before moving to the
+        // next iteration.
+        Serial.flush();
     }
 }

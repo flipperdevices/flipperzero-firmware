@@ -5,7 +5,7 @@ rem λ
 
 set CLI_FOUND_FOLLOW_UP=0
 set CLI_TEMP=%TEMP%\arduino-cli
-set COMPILE_FLAG=firmware\compile.flag
+set COMPILE_FLAG=firmware\.compile.flag
 set CONFIG_FILE=--config-file .\arduino-cli.yaml
 set DEFAULT_BOARD_FQBN=esp32:esp32:esp32cam
 set FIRMWARE_SRC=firmware\firmware.ino

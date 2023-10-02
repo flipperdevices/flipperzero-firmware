@@ -74,6 +74,22 @@ On the ESP32-CAM module itself you'll also need to connect the `IO0` pin to `GND
 
 ## Firmware Installation <a name="firmware-installation"></a>
 
+<details>
+
+<summary>Windows 10+ Script (the new, easy way)</summary>
+
+1. Download/clone this repository to your computer.
+2. Run the script found at the root of this directory: `firmware-flash.bat`.
+3. Follow the on screen instructions to continue.
+
+That's it, let me know if you have any issues!
+
+</details>
+
+<details>
+
+<summary>Arduino IDE (the old, hard way)</summary>
+
 1. Download and install the Arduino IDE from [here][arduino-ide].
 2. Go to the [releases section][flipper-zero-camera-suite-releases] for this repo and download the `esp32_cam_uart_stream.zip` file.
 3. Extract the contents of `esp32_cam_uart_stream.zip` to disk. Be sure to keep the `.ino` file nested in the folder with the same name.
@@ -95,6 +111,8 @@ On the ESP32-CAM module itself you'll also need to connect the `IO0` pin to `GND
 16. Fin! Now you may use the [Software Installation](#software-installation) section to install the software on your Flipper Zero to take advantage of this hardwares firmware.
 
 Note the upload may fail a few times, this is normal, try again. If it still fails, try pressing the RST button on the back of the ESP32-CAM module again or checking your connections.
+
+</details>
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 

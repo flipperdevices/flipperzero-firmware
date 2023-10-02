@@ -1,5 +1,5 @@
-#ifndef GLOBALS_H
-#define GLOBALS_H
+#ifndef PINS_H
+#define PINS_H
 
 // Define Pin numbers used by the camera.
 #define FLASH_GPIO_NUM 4
