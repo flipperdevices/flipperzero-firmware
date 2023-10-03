@@ -1,0 +1,4 @@
+[submodule ".modules/flipperzero-good-faps"]
+	path = .modules/flipperzero-good-faps
+	url = ./
+	branch = flipperzero-good-faps
