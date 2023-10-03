@@ -88,14 +88,6 @@ struct pokemon_fap {
     /* The currently selected pokemon */
     int curr_pokemon;
 
-    /* Some state tracking */
-    /* This, combined with some globals in trade.cpp, can probably be better
-     * consolidated at some point.
-     */
-    bool trading;
-    bool connected;
-    render_gameboy_state_t gameboy_status;
-
     /* TODO: Other variables will end up here, like selected level, EV/IV,
      * moveset, etc. Likely will want to be another sub struct similar to
      * the actual pokemon data structure.

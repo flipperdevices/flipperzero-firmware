@@ -131,7 +131,7 @@ char pokemon_char_to_encoded(int byte) {
     case '9':
         return _9_;
 
-    /* This was previously implemented with unicode escape codes, however, that
+        /* This was previously implemented with unicode escape codes, however, that
      * seemed to cause compilation issues. Which is strange because others reported
      * compilation issues with the actual unicode characters. I'm not sure a good
      * universal way to resolve this.
