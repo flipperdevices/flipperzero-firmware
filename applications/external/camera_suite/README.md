@@ -30,12 +30,14 @@
 
 <img align="center" src=".github/images/preview.png" />
 
-### Welcome to the ESP32-CAM Suite for Flipper Zero!
+### Welcome to the ESP32-CAM Suite for Flipper Zero
 
 Discover a new dimension of possibilities by connecting your ESP32-CAM module with your Flipper Zero device. The ESP32-CAM module, a compact ~~powerful~~ cheap camera module, enables you to capture images and stream a live video to your Flipper Zero. With this suite, your Flipper Zero becomes a hub of creativity and utility.
 
 **What You Can Do:**
+
 - **Capture Moments:** This custom Flipper Zero application empowers you to take pictures effortlessly. View real-time image previews on your Flipper Zero screen while you capture high quality blocky and pixelated memories! Hey it's still a memory and we're at least having fun...
+
 - **Personalize Your Experience:** Tailor your camera settings with ease. Adjust camera orientation, experiment with various dithering options, and toggle flash, haptic feedback, sound effects, and LED effects to match your preferences. Feel free to use this as a flashlight too, it's pretty bright and good at blinding yourself unexpectedly!
 
 There will be many more features added in the future! If you have any ideas or suggestions, please let me know by opening an issue [here][issues-link].
@@ -54,7 +56,7 @@ Requires an ESP32-CAM module (I've personally used these: [Amazon Link 1][amazon
 
 Below is the pinout guide and diagram for the ESP32-CAM module to the Flipper Zero. From the ESP32-CAM module to the Flipper Zero:
 
-```
+```markdown
 VCC to 3V3
 GND to GND (Be sure to use the right GND, see image below.)
 U0R to TX
@@ -98,9 +100,11 @@ That's it, let me know if you have any issues!
 3. Open `flipper-zero-camera-suite\firmware\firmware.ino` with your Arduino IDE.
 4. In the Arduino IDE, go to `File > Preferences`.
 5. In the `Settings` tab, add the following URL to the `Additional Boards Manager URLs` field:
-   ```
+
+   ```markdown
    https://dl.espressif.com/dl/package_esp32_index.json
    ```
+   
 6. In the Arduino IDE, go to `Tools > Board > Boards Manager`.
 7. Search for `esp32` and install `esp32` by `Espressif Systems`.
 8. Plug in your Flipper Zero via USB. Make sure qFlipper or something else isn't connected to it already after doing so.
@@ -124,30 +128,40 @@ On success, your screen should look like this:
 
 ## Software Installation <a name="software-installation"></a>
 
+Simple installation:
+
+This fap app is available on your phones Flipper Zero application catalog! Simply open the Flipper Zero app on your phone, go to the "Applications" tab, and search for "Camera Suite". Install it and you're good to go! More information about Flipper Zero applications can be found [here][flipper-zero-apps].
+
+Manual installation below:
+
 1. Connect your Flipper Zero via USB, or insert your MicroSD.
 2. Navigate to the GitHub actions: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions
 3. Open the most recent action and download the fap zip for either "dev" or "release" build versions of the Flipper Zero firmware.
 4. Move "camera_suite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
-   ```
+
+   ```markdown
    .                            # The Flipper Zero MicroSD root.
    ├── apps                     # The Flipper Zero Applications folder.
    |   ├── gpio                 # The Flipper Zero GPIO folder.
-   |   |   ├── camera_suite.fap  # The Camera Suite application.
+   |   |   ├── camera_suite.fap # The Camera Suite application.
    ```
+
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
 6. Plug in your ESP32-CAM module to your Flipper Zero.
 7. Press the "Power" button on your Flipper Zero to turn it on.
 8. Open the application "[ESP32] Camera Suite":
-   ```
+
+   ```markdown
    Applications > GPIO > [ESP32] Camera Suite
    ```
+
 9. That's it! Follow the on screen instructions to continue.
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
 ## Software Guide <a name="software-guide"></a>
 
-### Flipper Zero button mappings:
+### Flipper Zero button mappings
 
 🔼 = Contrast Up
 
@@ -157,23 +171,23 @@ On success, your screen should look like this:
 
 ▶️ = Toggle dithering on/off.
 
-⚪ = Take a picture and save to the "DCIM" folder at the root of your SD card. Image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp"). If flash is on in the settings (enabled by default) the ESP32-CAM onboard LED will light up when the camera is opened.
-
 ↩️ = Go back.
 
-### Camera Suite settings:
+🔵 = Take a picture and save to the "DCIM" folder at the root of your SD card. Image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp"). If flash is on in the settings (enabled by default) the ESP32-CAM onboard LED will light up when the camera is opened.
 
-**Orientation** = Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
+### Camera Suite settings
 
-**Dithering Type** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
+**Orientation:** Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
 
-**Flash** Toggle the ESP32-CAM onboard LED on/off when using the camera.
+**Dithering Type:** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
 
-**Haptic FX** = Toggle haptic feedback on/off.
+**Flash:** Toggle the ESP32-CAM onboard LED on/off while using the camera.
 
-**Sound FX** = Toggle sound effects on/off.
+**Haptic FX:** Toggle haptic feedback on/off.
 
-**LED FX** = Toggle LED effects on/off.
+**Sound FX:** Toggle sound effects on/off.
+
+**LED FX:** Toggle LED effects on/off.
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -193,7 +207,7 @@ The firmware provided here also works with Z4urce's [Flipper Zero Camera Applica
 2. Create a new branch: `<username>/[<issue-#>]-<feature-or-bug-fix-desc>`
 3. Program. Commit changes, push.
 4. Request PR [here][pull-request-link], introduce work via your branch.
-5. Wait for review and merge. 
+5. Wait for review and merge.
 
 Thank you!
 
@@ -208,11 +222,10 @@ Cody
 [amazon-esp32-cam-link-1]: https://amzn.to/44rBFrb
 [amazon-esp32-cam-link-2]: https://amzn.to/45nDR45
 [arduino-ide]: https://www.arduino.cc/en/software
-[clang-format-tool]: https://releases.llvm.org/download.html
-[flipper-zero-camera-suite-releases]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/releases
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-profile-leedave]: https://github.com/leedave
 [github-profile-z4urce]: https://github.com/Z4urce
 [issues-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
 [pull-request-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pulls
+[flipper-zero-apps]: https://docs.flipper.net/apps
