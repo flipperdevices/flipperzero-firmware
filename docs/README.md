@@ -2,34 +2,36 @@
 
 Software to run an ESP32-CAM module on your Flipper Zero device.
 
-## Software Guide <a name="software-guide"></a>
+Full setup, wiring guide, etc. in the main project README here: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite
 
-### Flipper Zero button mappings:
+Firmware is needed for the ESP32-CAM module, see here for more information: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite#firmware-installation
 
-🔼 = Contrast Up
+## Software Guide
 
-🔽 = Contrast Down
+Button mappings:
 
-◀️ = Toggle invert.
+**Up** = Contrast Up
 
-▶️ = Toggle dithering on/off.
+**Down** = Contrast Down
 
-⚪ = Cycle Floyd–Steinberg/Jarvis-Judice-Ninke/Stucki dithering types.
+**Left** = Toggle invert.
 
-↩️ = Go back.
+**Right** = Toggle dithering on/off.
 
-### Camera Suite settings:
+**Center** = Take a picture and save to the "DCIM" folder at the root of your SD card. Image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp"). If flash is on in the settings (enabled by default) the ESP32-CAM onboard LED will light up when the picture is taken.
+
+**Back** = Go back.
+
+Settings:
 
 **Orientation** = Rotate the camera image 90 degrees counter-clockwise starting at zero by default (0, 90, 180, 270). This is useful if you have your camera module mounted in a different orientation than the default.
+
+**Flash** Toggle the ESP32-CAM onboard LED on/off when taking a picture.
+
+**Dithering Type** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
 
 **Haptic FX** = Toggle haptic feedback on/off.
 
 **Sound FX** = Toggle sound effects on/off.
 
 **LED FX** = Toggle LED effects on/off.
-
-## Links
-
-Full setup, wiring guide, etc. in the main project README here: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite
-
-A firmware is needed for the ESP32-CAM module, see here for more information: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite#firmware-installation
