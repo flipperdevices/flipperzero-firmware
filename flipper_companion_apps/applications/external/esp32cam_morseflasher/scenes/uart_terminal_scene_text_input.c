@@ -23,16 +23,18 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
     }
 
     // Setup view
-    UART_TextInput* text_input = app->text_input;
+    TextInput* text_input = app->text_input;
     // Add help message to header
-    uart_text_input_set_header_text(text_input, "Send new morse message");
-    uart_text_input_set_result_callback(
+    text_input_set_header_text(text_input, "Send new morse message");
+    text_input_set_result_callback(
         text_input,
         uart_terminal_scene_text_input_callback,
         app,
         app->text_input_store,
         UART_TERMINAL_TEXT_INPUT_STORE_SIZE,
         false);
+
+    text_input_add_illegal_symbols(text_input);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewTextInput);
 }
@@ -56,5 +58,5 @@ bool uart_terminal_scene_text_input_on_event(void* context, SceneManagerEvent ev
 void uart_terminal_scene_text_input_on_exit(void* context) {
     UART_TerminalApp* app = context;
 
-    uart_text_input_reset(app->text_input);
+    text_input_reset(app->text_input);
 }
