@@ -51,6 +51,7 @@ struct __attribute__((__packed__)) name {
 };
 
 struct __attribute__((__packed__)) trade_data_block {
+    /* XXX: Change this to use struct name above */
     unsigned char trainer_name[11];
     uint8_t party_cnt;
     /* Only the first pokemon is ever used even though there are 7 bytes here.
