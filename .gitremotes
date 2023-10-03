@@ -1,0 +1,5 @@
+[remote "upstream"]
+    url = https://github.com/0xchocolate/flipperzero-esp-flasher
+    fetch = +refs/heads/*:refs/remotes/esp-flasher/*
+[alias]
+    merge-upstream = pull --no-edit upstream main
