@@ -84,7 +84,7 @@ bool totp_scene_authenticate_handle_event(
     }
 
     SceneState* scene_state = plugin_state->current_scene_state;
-    if(event->input.type == InputTypePress) {
+    if(event->input.type == InputTypeShort) {
         switch(event->input.key) {
         case InputKeyUp:
             if(scene_state->code_length < MAX_CODE_LENGTH) {

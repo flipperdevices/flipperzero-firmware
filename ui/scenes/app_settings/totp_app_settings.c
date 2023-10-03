@@ -345,7 +345,7 @@ bool totp_scene_app_settings_handle_event(
             break;
         }
     } else if(
-        event->input.type == InputTypeRelease && event->input.key == InputKeyOk &&
+        event->input.type == InputTypeShort && event->input.key == InputKeyOk &&
         scene_state->selected_control == ConfirmButton) {
         plugin_state->timezone_offset =
             (float)scene_state->tz_offset_hours + (float)scene_state->tz_offset_minutes / 60.0f;

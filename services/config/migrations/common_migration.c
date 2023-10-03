@@ -182,6 +182,26 @@ bool totp_config_migrate_to_latest(
                     &default_automation_features,
                     1);
             }
+
+            if(current_version > 9) {
+                flipper_format_read_string(
+                    fff_backup_data_file, TOTP_CONFIG_KEY_TOKEN_TYPE, temp_str);
+                flipper_format_write_string(fff_data_file, TOTP_CONFIG_KEY_TOKEN_TYPE, temp_str);
+                flipper_format_read_string(
+                    fff_backup_data_file, TOTP_CONFIG_KEY_TOKEN_COUNTER, temp_str);
+                flipper_format_write_string(
+                    fff_data_file, TOTP_CONFIG_KEY_TOKEN_COUNTER, temp_str);
+            } else {
+                const uint32_t default_token_type = TokenTypeTOTP;
+                flipper_format_write_uint32(
+                    fff_data_file, TOTP_CONFIG_KEY_TOKEN_TYPE, &default_token_type, 1);
+                const uint64_t default_counter = 0;
+                flipper_format_write_hex(
+                    fff_data_file,
+                    TOTP_CONFIG_KEY_TOKEN_COUNTER,
+                    (const uint8_t*)&default_counter,
+                    sizeof(default_counter));
+            }
         }
 
         Stream* stream = flipper_format_get_raw_stream(fff_data_file);

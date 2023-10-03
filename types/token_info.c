@@ -3,6 +3,7 @@
 #include <base32.h>
 #include <base64.h>
 #include <memset_s.h>
+#include <inttypes.h>
 #include "common.h"
 #include "../services/crypto/crypto_facade.h"
 
@@ -183,6 +184,37 @@ bool token_info_set_automation_feature_from_str(TokenInfo* token_info, const Fur
     return false;
 }
 
+bool token_info_set_token_type_from_str(TokenInfo* token_info, const FuriString* str) {
+    if(furi_string_cmpi_str(str, TOKEN_TYPE_TOTP_NAME) == 0) {
+        token_info->type = TokenTypeTOTP;
+        return true;
+    }
+
+    if(furi_string_cmpi_str(str, TOKEN_TYPE_HOTP_NAME) == 0) {
+        token_info->type = TokenTypeHOTP;
+        return true;
+    }
+
+    return false;
+}
+
+const char* token_info_get_type_as_cstr(const TokenInfo* token_info) {
+    switch(token_info->type) {
+    case TokenTypeTOTP:
+        return TOKEN_TYPE_TOTP_NAME;
+    case TokenTypeHOTP:
+        return TOKEN_TYPE_HOTP_NAME;
+    default:
+        break;
+    }
+
+    return NULL;
+}
+
+bool token_info_set_token_counter_from_str(TokenInfo* token_info, const FuriString* str) {
+    return sscanf(furi_string_get_cstr(str), "%" PRIu64, &token_info->counter) == 1;
+}
+
 TokenInfo* token_info_clone(const TokenInfo* src) {
     TokenInfo* clone = token_info_alloc();
     memcpy(clone, src, sizeof(TokenInfo));
@@ -203,5 +235,7 @@ void token_info_set_defaults(TokenInfo* token_info) {
     token_info->digits = TokenDigitsCountDefault;
     token_info->duration = TokenDurationDefault;
     token_info->automation_features = TokenAutomationFeatureNone;
+    token_info->type = TokenTypeTOTP;
+    token_info->counter = 0;
     furi_string_reset(token_info->name);
 }
