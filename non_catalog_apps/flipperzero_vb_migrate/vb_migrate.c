@@ -102,7 +102,8 @@ bool vb_migrate_delete(VbMigrate* inst, const char* dev_name, bool whole_vb) {
             FuriString* file_path = furi_string_alloc();
             while(storage_dir_read(dir_handle, &file_info, name, sizeof(name))) {
                 // Files that is .nfc, but is not template
-                if(!(file_info.flags & FSF_DIRECTORY) && strstr(name, NFC_APP_FILENAME_EXTENSION) &&
+                if(!(file_info.flags & FSF_DIRECTORY) &&
+                   strstr(name, NFC_APP_FILENAME_EXTENSION) &&
                    !strstr(name, VB_MIGRATE_TEMPLATE_NAME)) {
                     furi_string_printf(file_path, "%s/%s", furi_string_get_cstr(dir_path), name);
                     deleted =

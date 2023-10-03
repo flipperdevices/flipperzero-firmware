@@ -203,6 +203,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Music Tracker | ![Media Badge] | [by DrZlo13](https://github.com/DrZlo13/flipper-zero-music-tracker) |  | [![UFW Badge]](https://lab.flipper.net/apps/zero_tracker) |
 | Mifare Fuzzer | ![NFC Badge] | [by spheeere98](https://github.com/spheeere98/mifare_fuzzer) | Fixed crash on exit | [![UFW Badge]](https://lab.flipper.net/apps/mifare_fuzzer) |
 | Seader | ![NFC Badge] | [by bettse](https://github.com/bettse/seader/tree/main) | `Interface with a SAM from the Flipper Zero over UART` | [![Author Badge]](https://lab.flipper.net/apps/seader) |
+| VB Lab Migration Assistant | ![NFC Badge] | [by GMMan (cyanic)](https://github.com/GMMan/flipperzero-vb-migrate) |  | [![Author Badge]](https://lab.flipper.net/apps/vb_migrate) |
 | RFID Beacon | ![RFID Badge] | [by nmrr](https://github.com/nmrr/flipperzero-rfidbeacon)  | `A letter/number Morse beacon on 125 kHz` | ![None Badge] |
 | EM4100 universal keys generator (for RFID Fuzzer) | ![RFID Badge] | [by Milk-Cool](https://github.com/Milk-Cool/fz-em4100-generator) |  | [![Author Badge]](https://lab.flipper.net/apps/key_generator) |
 | (Q)M100 UHF RFID | ![RFID Badge] | [by frux-c](https://github.com/frux-c/uhf_rfid) | WIP -> (+Added icon by @xMasterX) | ![None Badge] |
@@ -226,7 +227,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Pomodoro Timer | ![Tools Badge] | [by sbrin](https://github.com/sbrin/flipperzero_pomodoro) |  | [![UFW Badge]](https://lab.flipper.net/apps/pomodoro_timer) |
 | QR Code | ![Tools Badge] | [by bmatcuk](https://github.com/bmatcuk/flipperzero-qrcode) |  | ![None Badge] |
 | Resistance calculator | ![Tools Badge] | [by instantiator](https://github.com/instantiator/flipper-zero-experimental-apps) |  | [![UFW Badge]](https://lab.flipper.net/apps/resistors) |
-| VB Lab Migration Assistant | ![Tools Badge] | [by GMMan (cyanic)](https://github.com/GMMan/flipperzero-vb-migrate) |  | [![Author Badge]](https://lab.flipper.net/apps/vb_migrate) |
 | Simple calendar app | ![Tools Badge] | [by Adiras](https://github.com/Adiras/flipperzero-calendar) |  | ![None Badge] |
 | USB HID Autofire | ![USB Badge] | [by pbek](https://github.com/pbek/usb_hid_autofire) |  | ![None Badge] |
 
