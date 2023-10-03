@@ -73,11 +73,9 @@ On the ESP32-CAM module itself you'll also need to connect the `IO0` pin to `GND
 
 The firmware is the software that runs on the ESP32-CAM module. It is required to use the camera module with your Flipper Zero. There are two ways to install the firmware, the new, easy way, and the old, hard way. The new way is a script that will do everything for you, the old way is a manual process that requires you to install the Arduino IDE and manually flash the firmware to the ESP32-CAM module. I recommend the new way, but if you have issues with it, try the old way.
 
-Below are the instructions for both ways. Choose one and follow the instructions to continue.
-
 <details>
 
-<summary>Firmware Flashing Utility (easy way)</summary>
+<summary>Simple Installation - Firmware Flashing Utility</summary>
 
 ### Firmware Flashing Utility (Windows 10+ batch script)
 
@@ -91,7 +89,7 @@ That's it, let me know if you have any issues!
 
 <details>
 
-<summary>Arduino IDE (hard way)</summary>
+<summary>Involved Installation - Manually flash with Arduino IDE</summary>
 
 ### Arduino IDE
 
@@ -128,15 +126,27 @@ On success, your screen should look like this:
 
 ## Software Installation <a name="software-installation"></a>
 
-Simple installation:
+Below are two ways to install the software on your Flipper Zero. The first way is the simple way, the second way is the involved way. The simple way is to install the fap file via the Flipper Zero application catalog. The involved way is to manually install the fap file to your Flipper Zero MicroSD card.
+
+<details>
+
+<summary>Simple Installation - Flipper Zero Application Catalog</summary>
+
+### Flipper Zero Application Catalog
 
 This fap app is available on your phones Flipper Zero application catalog! Simply open the Flipper Zero app on your phone, go to the "Applications" tab, and search for "Camera Suite". Install it and you're good to go! More information about Flipper Zero applications can be found [here][flipper-zero-apps].
 
-Manual installation below:
+</details>
+
+<details>
+
+<summary>Involved Installation - Manually Install Files</summary>
+
+### Manually Install Files
 
 1. Connect your Flipper Zero via USB, or insert your MicroSD.
-2. Navigate to the GitHub actions: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions
-3. Open the most recent action and download the fap zip for either "dev" or "release" build versions of the Flipper Zero firmware.
+2. Navigate to the latest GitHub "Build + upload" action [here][github-actions-link].
+3. Open the most recent action on that page (top of the list) and download the fap zip for either "dev" or "release" build versions of the Flipper Zero firmware depending on your usage. Generally you'll want to use the "release" build version.
 4. Move "camera_suite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
 
    ```markdown
@@ -156,6 +166,8 @@ Manual installation below:
    ```
 
 9. That's it! Follow the on screen instructions to continue.
+
+</details>
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -222,10 +234,11 @@ Cody
 [amazon-esp32-cam-link-1]: https://amzn.to/44rBFrb
 [amazon-esp32-cam-link-2]: https://amzn.to/45nDR45
 [arduino-ide]: https://www.arduino.cc/en/software
+[flipper-zero-apps]: https://docs.flipper.net/apps
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
+[github-actions-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions?query=workflow%3A%22Build+%2B+upload.%22
 [github-profile-leedave]: https://github.com/leedave
 [github-profile-z4urce]: https://github.com/Z4urce
 [issues-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
 [pull-request-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pulls
-[flipper-zero-apps]: https://docs.flipper.net/apps
