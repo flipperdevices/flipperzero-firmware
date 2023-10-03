@@ -91,9 +91,16 @@ bool picopass_scene_key_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteKey);
             consumed = true;
         } else if(event.event == SubmenuIndexWriteCustom) {
+            // If user dictionary, prepopulate with the first key
+            if(iclass_elite_dict_check_presence(IclassEliteDictTypeUser)) {
+                IclassEliteDict* dict = iclass_elite_dict_alloc(IclassEliteDictTypeUser);
+                iclass_elite_dict_get_next_key(dict, picopass->byte_input_store);
+                iclass_elite_dict_free(dict);
+            }
+
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneKeyMenu, SubmenuIndexWriteCustom);
-            // Key and elite_kdf = true are both set in key_input scene
+            // Key and elite_kdf = true are both set in key_input scene after the value is input
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneKeyInput);
             consumed = true;
         }
