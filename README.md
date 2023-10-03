@@ -16,7 +16,7 @@
 
 ## Table of Contents <a name="index"></a>
 
-- [Previews](#previews)
+- [Introduction](#intro)
 - [Hardware Requirements](#hardware-requirements)
 - [Hardware Installation](#hardware-installation)
 - [Firmware Installation](#firmware-installation)
@@ -26,23 +26,19 @@
 - [Contributions](#contributions)
 - [Changelog](fap/docs/CHANGELOG.md)
 
-## Previews <a name="previews"></a>
+## Introduction <a name="intro"></a>
 
-Greetings!
+<img align="center" src=".github/images/preview.png" />
 
-- <img align="center" src=".github/images/preview_01.png" />
+### Welcome to the ESP32-CAM Suite for Flipper Zero!
 
-Preview with a camera module attached to the Flipper Zero.
+Discover a new dimension of possibilities by connecting your ESP32-CAM module with your Flipper Zero device. The ESP32-CAM module, a compact ~~powerful~~ cheap camera module, enables you to capture images and stream a live video to your Flipper Zero. With this suite, your Flipper Zero becomes a hub of creativity and utility.
 
-- <img align="center" src=".github/images/preview_02.png" />
+**What You Can Do:**
+- **Capture Moments:** This custom Flipper Zero application empowers you to take pictures effortlessly. View real-time image previews on your Flipper Zero screen while you capture high quality blocky and pixelated memories! Hey it's still a memory and we're at least having fun...
+- **Personalize Your Experience:** Tailor your camera settings with ease. Adjust camera orientation, experiment with various dithering options, and toggle flash, haptic feedback, sound effects, and LED effects to match your preferences. Feel free to use this as a flashlight too, it's pretty bright and good at blinding yourself unexpectedly!
 
-Version 1.1.0 and above now supports new dithering options and bug fixes!
-
-- <img align="center" src=".github/images/v1-1.gif" />
-
-Version 1.2.0 and above now supports taking pictures, configurable dithering, and LED flash!
-
-- <img align="center" src=".github/images/v1-2.gif" />
+There will be many more features added in the future! If you have any ideas or suggestions, please let me know by opening an issue [here][issues-link].
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -50,8 +46,7 @@ Version 1.2.0 and above now supports taking pictures, configurable dithering, an
 
 Requires an ESP32-CAM module (I've personally used these: [Amazon Link 1][amazon-esp32-cam-link-1] | [Amazon Link 2][amazon-esp32-cam-link-2]).
 
-<img src=".github/images/esp32-cam-front.png" />
-<img src=".github/images/esp32-cam-back.png" />
+<img src=".github/images/esp32-cam-front.png" /><img src=".github/images/esp32-cam-back.png" />
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -74,13 +69,19 @@ On the ESP32-CAM module itself you'll also need to connect the `IO0` pin to `GND
 
 ## Firmware Installation <a name="firmware-installation"></a>
 
+The firmware is the software that runs on the ESP32-CAM module. It is required to use the camera module with your Flipper Zero. There are two ways to install the firmware, the new, easy way, and the old, hard way. The new way is a script that will do everything for you, the old way is a manual process that requires you to install the Arduino IDE and manually flash the firmware to the ESP32-CAM module. I recommend the new way, but if you have issues with it, try the old way.
+
+Below are the instructions for both ways. Choose one and follow the instructions to continue.
+
 <details>
 
-<summary>Windows 10+ Script (the new, easy way)</summary>
+<summary>Firmware Flashing Utility (easy way)</summary>
+
+### Firmware Flashing Utility (Windows 10+ batch script)
 
 1. Download/clone this repository to your computer.
 2. Run the script found at the root of this directory: `firmware-flash.bat`.
-3. Follow the on screen instructions to continue.
+3. Follow the on screen instructions to continue to flash the firmware to your ESP32-CAM module.
 
 That's it, let me know if you have any issues!
 
@@ -88,7 +89,9 @@ That's it, let me know if you have any issues!
 
 <details>
 
-<summary>Arduino IDE (the old, hard way)</summary>
+<summary>Arduino IDE (hard way)</summary>
+
+### Arduino IDE
 
 1. Download and install the Arduino IDE from [here][arduino-ide].
 2. Go to the [releases section][flipper-zero-camera-suite-releases] for this repo and download the `esp32_cam_uart_stream.zip` file.
@@ -111,6 +114,10 @@ That's it, let me know if you have any issues!
 16. Fin! Now you may use the [Software Installation](#software-installation) section to install the software on your Flipper Zero to take advantage of this hardwares firmware.
 
 Note the upload may fail a few times, this is normal, try again. If it still fails, try pressing the RST button on the back of the ESP32-CAM module again or checking your connections.
+
+On success, your screen should look like this:
+
+<img align="center" src=".github/images/firmware-build-success.png" />
 
 </details>
 
@@ -151,7 +158,7 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 
 ▶️ = Toggle dithering on/off.
 
-⚪ = Take a picture and save to the "DCIM" folder at the root of your SD card. Image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp"). If flash is on in the settings (enabled by default) the ESP32-CAM onboard LED will light up when the picture is taken.
+⚪ = Take a picture and save to the "DCIM" folder at the root of your SD card. Image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp"). If flash is on in the settings (enabled by default) the ESP32-CAM onboard LED will light up when the camera is opened.
 
 ↩️ = Go back.
 
@@ -161,7 +168,7 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 
 **Dithering Type** Change between the Cycle Floyd–Steinberg, Jarvis-Judice-Ninke, and Stucki dithering types.
 
-**Flash** Toggle the ESP32-CAM onboard LED on/off when taking a picture.
+**Flash** Toggle the ESP32-CAM onboard LED on/off when using the camera.
 
 **Haptic FX** = Toggle haptic feedback on/off.
 
@@ -177,6 +184,8 @@ This project is based on/forked from the [Flipper Zero Camera Application][flipp
 by [Z4urce][github-profile-z4urce] combined with the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate]
 by [Dave Lee][github-profile-leedave].
 
+The firmware provided here also works with Z4urce's [Flipper Zero Camera Application][flipperzero-camera] so if you have their application installed it too should work fine.
+
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
 ## Contributions <a name="contributions"></a>
@@ -185,13 +194,9 @@ by [Dave Lee][github-profile-leedave].
 2. Create a new branch: `<username>/[<issue-#>]-<feature-or-bug-fix-desc>`
 3. Program. Commit changes, push.
 4. Request PR [here][pull-request-link], introduce work via your branch.
-5. Wait for review and merge. Thank you!
+5. Wait for review and merge. 
 
-For C development you will need the [clang format tool][clang-format-tool] for linting/formatting.
-
-```json
-FOR /R C:\path-to-repo\Flipper-Zero-Camera-Suite\ %F IN (*.h *.ino *.c *.cpp) DO clang-format -i "%F"
-```
+Thank you!
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -210,4 +215,5 @@ Cody
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-profile-leedave]: https://github.com/leedave
 [github-profile-z4urce]: https://github.com/Z4urce
+[issues-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/issues
 [pull-request-link]: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pulls

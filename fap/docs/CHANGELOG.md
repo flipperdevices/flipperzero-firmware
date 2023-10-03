@@ -1,9 +1,20 @@
 ## Roadmap
 
-- Full screen 90 degree and 270 degree fill.
-- In-camera GUI.
+- Store images to onboard ESP32-CAM SD card (currently in progress, #24).
+- Camera preview GUI overlay (#21).
+- Full screen 90 degree and 270 degree fill (#6).
 
-## v1.2 (current)
+## v1.3 (current)
+
+- Important: Firmware Update Required! Ensure you update your firmware to fully utilize the new features. Backwards compatibility should be ok.
+- New Feature: Introducing the Firmware Flash utility, simplifying the firmware flashing process. Refer to the project readme for detailed instructions. (Closes #26)
+- Enhancement: Flash functionality now remains active during camera preview, making it easier to take pictures in areas of low light.
+- Bug Fix: Addressed picture inversion issue reported by user leedave. Thanks for your contribution! (Closes #23)
+- Code Refinement: Enhanced firmware code for readability and maintainability. Separated concerns into individual files for a more organized structure.
+- Technical Improvements: Implemented general code enhancements and introduced syntactic sugar for cleaner, more efficient code.
+- Work in Progress: Added a new test function for saving pictures to the onboard ESP32-CAM SD card. This feature is under development and will allow users to save pictures directly to the SD card in the future. Tracked under feature request #24.
+
+## v1.2
 
 - Save image support. When the center button is pressed take a picture and save it to the "DCIM" folder at the root of your SD card. The image will be saved as a bitmap file with a timestamp as the filename ("YYYYMMDD-HHMMSS.bmp").
 - Camera flash support. Flashes the ESP32-CAM onboard LED when a picture is taken if enabled in the settings.
