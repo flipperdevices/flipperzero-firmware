@@ -95,22 +95,22 @@ That's it, let me know if you have any issues!
 
 1. Clone/download this repository to your computer.
 2. Download and install the Arduino IDE from [here][arduino-ide].
-4. Open `flipper-zero-camera-suite\firmware\firmware.ino` with your Arduino IDE.
-5. In the Arduino IDE, go to `File > Preferences`.
-6. In the `Settings` tab, add the following URL to the `Additional Boards Manager URLs` field:
+3. Open `flipper-zero-camera-suite\firmware\firmware.ino` with your Arduino IDE.
+4. In the Arduino IDE, go to `File > Preferences`.
+5. In the `Settings` tab, add the following URL to the `Additional Boards Manager URLs` field:
    ```
    https://dl.espressif.com/dl/package_esp32_index.json
    ```
-7. In the Arduino IDE, go to `Tools > Board > Boards Manager`.
-8. Search for `esp32` and install `esp32` by `Espressif Systems`.
-9. Plug in your Flipper Zero via USB. Make sure qFlipper or something else isn't connected to it already after doing so.
-10. On your Flipper Zero, open `GPIO > USB-UART Bridge`.
-11. In the Arduino IDE, go to `Tools > Board > esp32 > AI Thinker ESP32-CAM`.
-12. In the Arduino IDE, go to `Tools > Port` and select the port that your Flipper Zero is connected to.
-13. Plug in the ESP32-CAM module to your Flipper Zero while connecting the `IO0` pin to `GND`. See [Hardware Installation](#hardware-installation) for more information.
-14. Press the RST button on the back of the ESP32-CAM module to boot it into flash mode.
-15. In the Arduino IDE, go to `Sketch > Upload` to upload the firmware to your ESP32-CAM module. You will see upload progress in % and receive a message on completion if successful.
-16. Fin! Now you may use the [Software Installation](#software-installation) section to install the software on your Flipper Zero to take advantage of this hardwares firmware.
+6. In the Arduino IDE, go to `Tools > Board > Boards Manager`.
+7. Search for `esp32` and install `esp32` by `Espressif Systems`.
+8. Plug in your Flipper Zero via USB. Make sure qFlipper or something else isn't connected to it already after doing so.
+9. On your Flipper Zero, open `GPIO > USB-UART Bridge`.
+10. In the Arduino IDE, go to `Tools > Board > esp32 > AI Thinker ESP32-CAM`.
+11. In the Arduino IDE, go to `Tools > Port` and select the port that your Flipper Zero is connected to.
+12. Plug in the ESP32-CAM module to your Flipper Zero while connecting the `IO0` pin to `GND`. See [Hardware Installation](#hardware-installation) for more information.
+13. Press the RST button on the back of the ESP32-CAM module to boot it into flash mode.
+14. In the Arduino IDE, go to `Sketch > Upload` to upload the firmware to your ESP32-CAM module. You will see upload progress in % and receive a message on completion if successful.
+15. Fin! Now you may use the [Software Installation](#software-installation) section to install the software on your Flipper Zero to take advantage of this hardwares firmware.
 
 Note the upload may fail a few times, this is normal, try again. If it still fails, try pressing the RST button on the back of the ESP32-CAM module again or checking your connections.
 
