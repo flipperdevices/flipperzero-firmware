@@ -8,6 +8,8 @@
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 
+#include <assets_icons.h>
+
 #define TAG "MusicPlayer"
 
 #define MUSIC_PLAYER_APP_EXTENSION "*"

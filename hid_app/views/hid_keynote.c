@@ -4,6 +4,8 @@
 
 #include "hid_icons.h"
 
+#include <assets_icons.h>
+
 #define TAG "HidKeynote"
 
 struct HidKeynote {

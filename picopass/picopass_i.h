@@ -29,6 +29,8 @@
 #include <lib/toolbox/path.h>
 #include <picopass_icons.h>
 
+#include <assets_icons.h>
+
 #define PICOPASS_TEXT_STORE_SIZE 128
 
 enum PicopassCustomEvent {
