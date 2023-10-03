@@ -21,7 +21,7 @@
 #include <gui/elements.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include "mfkey_icons.h"
+#include "mfkeynested_icons.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
