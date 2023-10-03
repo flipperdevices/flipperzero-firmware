@@ -6,3 +6,7 @@
 	path = .modules/mayhem
 	url = ./
 	branch = mayhem
+[submodule "multi_fuzzer"]
+	path = multi_fuzzer
+	url = ./
+	branch = multi-fuzzer
