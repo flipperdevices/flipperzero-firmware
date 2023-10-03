@@ -221,6 +221,8 @@ FuriHalNfcError furi_hal_nfc_trx_reset();
  */
 FuriHalNfcError furi_hal_nfc_event_start();
 
+FuriHalNfcError furi_hal_nfc_event_stop();
+
 /** Emit Abort event
  *
  * @return FuriHalNfcError

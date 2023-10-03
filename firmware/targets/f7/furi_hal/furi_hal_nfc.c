@@ -282,6 +282,7 @@ FuriHalNfcError furi_hal_nfc_low_power_mode_start() {
          ST25R3916_REG_OP_CONTROL_en_fd_mask));
     furi_hal_nfc_deinit_gpio_isr();
     furi_hal_nfc_timers_deinit();
+    furi_hal_nfc_event_stop();
 
     return error;
 }
