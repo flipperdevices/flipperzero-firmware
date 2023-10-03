@@ -1,0 +1,5 @@
+[remote "upstream"]
+    url = https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin
+    fetch = +refs/heads/*:refs/remotes/sentry-safe/*
+[alias]
+    merge-upstream = pull --no-edit upstream master
