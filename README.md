@@ -93,10 +93,9 @@ That's it, let me know if you have any issues!
 
 ### Arduino IDE
 
-1. Download and install the Arduino IDE from [here][arduino-ide].
-2. Go to the [releases section][flipper-zero-camera-suite-releases] for this repo and download the `esp32_cam_uart_stream.zip` file.
-3. Extract the contents of `esp32_cam_uart_stream.zip` to disk. Be sure to keep the `.ino` file nested in the folder with the same name.
-4. Open `~\esp32_cam_uart_stream\esp32_cam_uart_stream.ino` with your Arduino IDE.
+1. Clone/download this repository to your computer.
+2. Download and install the Arduino IDE from [here][arduino-ide].
+4. Open `flipper-zero-camera-suite\firmware\firmware.ino` with your Arduino IDE.
 5. In the Arduino IDE, go to `File > Preferences`.
 6. In the `Settings` tab, add the following URL to the `Additional Boards Manager URLs` field:
    ```
