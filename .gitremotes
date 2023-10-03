@@ -1,0 +1,5 @@
+[remote "upstream"]
+    url = https://github.com/DarkFlippers/flipperzero-subbrute
+    fetch = +refs/heads/*:refs/remotes/subghz-bruteforcer/*
+[alias]
+    merge-upstream = pull --no-edit upstream master
