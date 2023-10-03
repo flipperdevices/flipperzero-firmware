@@ -9,6 +9,7 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexKeynote,
     HidSubmenuIndexKeynoteVertical,
     HidSubmenuIndexKeyboard,
+    HidSubmenuIndexNumpad,
     HidSubmenuIndexMedia,
     HidSubmenuIndexTikTok,
     HidSubmenuIndexMouse,
@@ -30,6 +31,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexKeyboard) {
         app->view_id = HidViewKeyboard;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewKeyboard);
+    } else if(index == HidSubmenuIndexNumpad) {
+        app->view_id = HidViewNumpad;
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewNumpad);
     } else if(index == HidSubmenuIndexMedia) {
         app->view_id = HidViewMedia;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMedia);
@@ -61,6 +65,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     }
     hid_keynote_set_connected_status(hid->hid_keynote, connected);
     hid_keyboard_set_connected_status(hid->hid_keyboard, connected);
+    hid_numpad_set_connected_status(hid->hid_numpad, connected);
     hid_media_set_connected_status(hid->hid_media, connected);
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
     hid_mouse_clicker_set_connected_status(hid->hid_mouse_clicker, connected);
@@ -120,13 +125,15 @@ Hid* hid_alloc(HidTransport transport) {
     submenu_add_item(
         app->device_type_submenu, "Keyboard", HidSubmenuIndexKeyboard, hid_submenu_callback, app);
     submenu_add_item(
+        app->device_type_submenu, "Numpad", HidSubmenuIndexNumpad, hid_submenu_callback, app);
+    submenu_add_item(
         app->device_type_submenu, "Media", HidSubmenuIndexMedia, hid_submenu_callback, app);
     submenu_add_item(
         app->device_type_submenu, "Mouse", HidSubmenuIndexMouse, hid_submenu_callback, app);
     if(app->transport == HidTransportBle) {
         submenu_add_item(
             app->device_type_submenu,
-            "TikTok Controller",
+            "TikTok / YT Shorts",
             HidSubmenuIndexTikTok,
             hid_submenu_callback,
             app);
@@ -176,6 +183,12 @@ Hid* hid_app_alloc_view(void* context) {
     view_set_previous_callback(hid_keyboard_get_view(app->hid_keyboard), hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewKeyboard, hid_keyboard_get_view(app->hid_keyboard));
+
+    //Numpad keyboard view
+    app->hid_numpad = hid_numpad_alloc(app);
+    view_set_previous_callback(hid_numpad_get_view(app->hid_numpad), hid_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, HidViewNumpad, hid_numpad_get_view(app->hid_numpad));
 
     // Media view
     app->hid_media = hid_media_alloc(app);
@@ -233,6 +246,8 @@ void hid_free(Hid* app) {
     hid_keynote_free(app->hid_keynote);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewKeyboard);
     hid_keyboard_free(app->hid_keyboard);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewNumpad);
+    hid_numpad_free(app->hid_numpad);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMedia);
     hid_media_free(app->hid_media);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouse);

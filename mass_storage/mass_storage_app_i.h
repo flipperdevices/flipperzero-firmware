@@ -13,7 +13,7 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/loading.h>
-#include <gui/modules/widget.h>
+#include <gui/modules/popup.h>
 #include <storage/storage.h>
 #include "views/mass_storage_view.h"
 #include <mass_storage_icons.h>
@@ -27,7 +27,7 @@ struct MassStorageApp {
     Storage* fs_api;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
-    Widget* widget;
+    Popup* popup;
     DialogsApp* dialogs;
     TextInput* text_input;
     VariableItemList* variable_item_list;
@@ -40,8 +40,9 @@ struct MassStorageApp {
     FuriMutex* usb_mutex;
     MassStorageUsb* usb;
 
-    char new_file_name[MASS_STORAGE_FILE_NAME_LEN + 1];
-    uint32_t new_file_size;
+    uint64_t create_image_max;
+    uint8_t create_image_size;
+    char create_image_name[MASS_STORAGE_FILE_NAME_LEN];
 
     uint32_t bytes_read, bytes_written;
 };
@@ -51,7 +52,7 @@ typedef enum {
     MassStorageAppViewTextInput,
     MassStorageAppViewWork,
     MassStorageAppViewLoading,
-    MassStorageAppViewWidget,
+    MassStorageAppViewPopup,
 } MassStorageAppView;
 
 enum MassStorageCustomEvent {
@@ -59,9 +60,6 @@ enum MassStorageCustomEvent {
     MassStorageCustomEventReserved = 100,
 
     MassStorageCustomEventEject,
-    MassStorageCustomEventFileSelect,
-    MassStorageCustomEventNewImage,
-    MassStorageCustomEventNameInput,
 };
 
 void mass_storage_app_show_loading_popup(MassStorageApp* app, bool show);

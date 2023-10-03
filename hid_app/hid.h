@@ -18,6 +18,7 @@
 #include <gui/modules/popup.h>
 #include "views/hid_keynote.h"
 #include "views/hid_keyboard.h"
+#include "views/hid_numpad.h"
 #include "views/hid_media.h"
 #include "views/hid_mouse.h"
 #include "views/hid_mouse_clicker.h"
@@ -42,6 +43,7 @@ struct Hid {
     DialogEx* dialog;
     HidKeynote* hid_keynote;
     HidKeyboard* hid_keyboard;
+    HidNumpad* hid_numpad;
     HidMedia* hid_media;
     HidMouse* hid_mouse;
     HidMouseClicker* hid_mouse_clicker;
