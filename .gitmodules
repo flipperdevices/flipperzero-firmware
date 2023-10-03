@@ -18,3 +18,7 @@
 	path = sentry_safe
 	url = ./
 	branch = sentry-safe
+[submodule "esp_flasher"]
+	path = esp_flasher
+	url = ./
+	branch = esp-flasher
