@@ -1,7 +1,6 @@
 import sys
 
 def main():
-    info = 0x0D94C5EC007F1991
     te = 200 #200 is what original remote used.  (How short the pulses are, smaller is faster.)
     hc = 11  #11 is what original remote sent.   (How many pulses in header.  You may be able to reduce this.)
     end = 40 #40 is what original remote sent.   (How long the silence guard is.  You may be able to reduce this.)
@@ -15,26 +14,32 @@ def main():
         f.write("Preset: FuriHalSubGhzPresetOok650Async\n")
         f.write("Protocol: RAW\n")
 
-        for j in range(repeat):
-            f.write(f"RAW_Data: ")
+        numbers = [0x97A38C95007F1991]
 
-            # header
-            for i in range(hc):
-                f.write(f"{te} -{te} ")
-            f.write(f"{te} -{9*te} ")
+        for info in numbers:
 
-            # iterate over each bit
-            for i in range(64):
-                # get bit value
-                bit = (info >> (63 - i)) & 1
+            for j in range(repeat):
+                f.write(f"RAW_Data: ")
 
-                # get bit value, output on a single line.
-                if bit == 0:
-                    f.write(f"{2*te} -{te} ")
-                else:
-                    f.write(f"{te} -{2*te} ")
+                # header
+                for i in range(hc):
+                    f.write(f"{te} -{te} ")
+                f.write(f"{te} -{9*te} ")
 
-            # stop
-            f.write(f"{te} -{2*te} {te} -{end*te}\n")
+                # iterate over each bit
+                for i in range(64):
+                    # get bit value
+                    bit = (info >> (63 - i)) & 1
 
+                    # get bit value, output on a single line.
+                    if bit == 0:
+                        f.write(f"{2*te} -{te} ")
+                    else:
+                        f.write(f"{te} -{2*te} ")
+
+                # stop
+                f.write(f"{te} -{2*te} {te} -{end*te}\n")
+
+            # For signals with multiple numbers, it may be helpful to have some silence between them?
+            #f.write(f"RAW_Data: 100 -50000 100 -50000 100 -50000 100 -50000 100 -50000 100 -50000 100 -50000 100 -50000 100 -50000 100 -50000 100 -50000 100 -50000\n")
 main()
