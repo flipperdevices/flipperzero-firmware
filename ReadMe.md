@@ -51,8 +51,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Updated infrared assets #619 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/619)
 - Updated: [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite) [New auto flasher. Improve camera I/O, code, comments, and draw. Resolve bugs. #25 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pull/25)
 - OFW: [Enable PVS Studio license check #3122 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3122)
-- Updated: [XRemote v1.0 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated: [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
+- Updated: [XRemote v1.0 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 

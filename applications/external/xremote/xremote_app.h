@@ -59,7 +59,9 @@ typedef struct {
 
 XRemoteAppContext* xremote_app_context_alloc(void* arg);
 void xremote_app_context_free(XRemoteAppContext* ctx);
+
 const char* xremote_app_context_get_exit_str(XRemoteAppContext* ctx);
+void xremote_app_context_notify_led(XRemoteAppContext* app_ctx);
 
 typedef XRemoteView* (*XRemoteViewAllocator)(void* app_ctx);
 typedef void (*XRemoteAppClearCallback)(void* context);

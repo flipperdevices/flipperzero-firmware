@@ -16,13 +16,6 @@ struct XRemoteView {
     void* context;
 };
 
-const NotificationSequence g_sequence_blink_purple_50 = {
-    &message_red_255,
-    &message_blue_255,
-    &message_delay_50,
-    NULL,
-};
-
 XRemoteView*
     xremote_view_alloc(void* app_ctx, ViewInputCallback input_cb, ViewDrawCallback draw_cb) {
     XRemoteView* remote_view = malloc(sizeof(XRemoteView));
@@ -87,31 +80,22 @@ InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const 
     return infrared_remote_get_button_by_name(remote, name);
 }
 
-bool xremote_view_send_ir_by_name(XRemoteView* rview, const char* name) {
-    InfraredRemoteButton* button = xremote_view_get_button_by_name(rview, name);
+bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button) {
     xremote_app_assert(button, false);
+    XRemoteAppSettings* settings = rview->app_ctx->app_settings;
 
     InfraredSignal* signal = infrared_remote_button_get_signal(button);
     xremote_app_assert(signal, false);
 
-    infrared_signal_transmit(signal);
-    NotificationApp* notifications = rview->app_ctx->notifications;
-    notification_message(notifications, &g_sequence_blink_purple_50);
+    infrared_signal_transmit_times(signal, settings->repeat_count);
+    xremote_app_context_notify_led(rview->app_ctx);
 
     return true;
 }
 
-bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button) {
-    xremote_app_assert(button, false);
-
-    InfraredSignal* signal = infrared_remote_button_get_signal(button);
-    xremote_app_assert(signal, false);
-
-    infrared_signal_transmit(signal);
-    NotificationApp* notifications = rview->app_ctx->notifications;
-    notification_message(notifications, &g_sequence_blink_purple_50);
-
-    return true;
+bool xremote_view_send_ir_msg_by_name(XRemoteView* rview, const char* name) {
+    InfraredRemoteButton* button = xremote_view_get_button_by_name(rview, name);
+    return (button != NULL) ? xremote_view_press_button(rview, button) : false;
 }
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon) {
@@ -195,7 +179,8 @@ void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, con
         xremote_canvas_draw_icon(canvas, 6, 124, XRemoteIconBack);
         elements_multiline_text_aligned(canvas, 12, 128, AlignLeft, AlignBottom, text);
     } else {
-        xremote_canvas_draw_icon(canvas, 71, 60, XRemoteIconBack);
+        uint8_t x = strncmp(text, "Hold", 4) ? 71 : 76;
+        xremote_canvas_draw_icon(canvas, x, 60, XRemoteIconBack);
         elements_multiline_text_aligned(canvas, 128, 64, AlignRight, AlignBottom, text);
     }
 }
@@ -241,7 +226,6 @@ void xremote_canvas_draw_button_wide(
     uint8_t y,
     char* text,
     XRemoteIcon icon) {
-    (void)icon;
     elements_slightly_rounded_frame(canvas, x + 4, y, 56, 15);
 
     if(pressed) {
@@ -262,7 +246,6 @@ void xremote_canvas_draw_button_size(
     uint8_t xy,
     char* text,
     XRemoteIcon icon) {
-    (void)icon;
     elements_slightly_rounded_frame(canvas, x + 4, y, xy, 15);
 
     if(pressed) {

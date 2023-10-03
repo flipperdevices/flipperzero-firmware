@@ -9,7 +9,7 @@
 #include "xremote_learn.h"
 #include "views/xremote_learn_view.h"
 
-uint32_t xremote_learn_view_exit_callback(void* context) {
+static uint32_t xremote_learn_view_exit_callback(void* context) {
     UNUSED(context);
     return XRemoteViewSubmenu;
 }

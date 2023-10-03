@@ -144,13 +144,12 @@ XRemoteView*
     xremote_view_alloc(void* app_ctx, ViewInputCallback input_cb, ViewDrawCallback draw_cb);
 void xremote_view_free(XRemoteView* rview);
 
-View* xremote_view_get_view(XRemoteView* rview);
-bool xremote_view_send_ir_by_name(XRemoteView* rview, const char* name);
-
 InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const char* name);
 bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button);
+bool xremote_view_send_ir_msg_by_name(XRemoteView* rview, const char* name);
 
 void xremote_view_set_context(XRemoteView* rview, void* context, XRemoteViewClearCallback on_clear);
 void* xremote_view_get_context(XRemoteView* rview);
 void xremote_view_clear_context(XRemoteView* rview);
 void* xremote_view_get_app_context(XRemoteView* rview);
+View* xremote_view_get_view(XRemoteView* rview);
