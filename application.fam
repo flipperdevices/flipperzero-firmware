@@ -1,6 +1,6 @@
 App(
     appid="esp_flasher",
-    name="ESP Flasher",
+    name="[ESP] ESP Flasher",
     fap_version=(1,2),
     apptype=FlipperAppType.EXTERNAL,
     entry_point="esp_flasher_app",

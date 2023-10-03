@@ -272,6 +272,7 @@ static int32_t esp_flasher_flash_bin(void* context) {
 
     // done
     app->flash_worker_busy = false;
+    app->quickflash = false;
 
     // cleanup
     furi_stream_buffer_free(flash_rx_stream);
@@ -318,6 +319,10 @@ static int32_t esp_flasher_reset(void* context) {
     app->flash_worker_busy = false;
     app->reset = false;
     app->boot = false;
+
+    if(app->quickflash) {
+        esp_flasher_flash_bin(app);
+    }
 
     return 0;
 }

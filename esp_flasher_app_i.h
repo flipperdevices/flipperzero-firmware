@@ -65,6 +65,7 @@ struct EspFlasherApp {
 
     bool reset;
     bool boot;
+    bool quickflash;
 
     SwitchFirmware switch_fw;
 
