@@ -16,6 +16,7 @@ WARNING -- This could desync your remote from the receiver.
 WARNING -- Don't run this near your garage.  There is no reason to open the physical garage door & you will likely burn out the motor.
 
 ## Running
+- Step 0. Copy [these files](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder) into your firmware ``applications_user\genie-recorder`` folder. 
 - Step 1. Build your firmware.  You will get a build error.
 - Step 2. Edit your ``firmware\targets\f7\api_symbols.csv`` file so that storage_file_sync is public. 
   ``Function,+,storage_file_sync,_Bool,File*``
