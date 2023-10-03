@@ -223,7 +223,7 @@ GenieApp* genie_app_alloc() {
         0,
         128,
         64,
-        "Genie garage door recorder.\n---\n"
+        "Genie garage door recorder.\nVersion 1.2\n---\n"
         "This app clicks your remote\n"
         "and records the keys, so you\n"
         "can replay them later.\n"
