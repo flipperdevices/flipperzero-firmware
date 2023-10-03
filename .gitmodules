@@ -2,3 +2,7 @@
 	path = .modules/good-faps
 	url = ./
 	branch = good-faps
+[submodule ".modules/mayhem"]
+	path = .modules/mayhem
+	url = ./
+	branch = mayhem
