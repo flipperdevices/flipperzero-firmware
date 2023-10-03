@@ -10,3 +10,7 @@
 	path = multi_fuzzer
 	url = ./
 	branch = multi-fuzzer
+[submodule "subghz_bruteforcer"]
+	path = subghz_bruteforcer
+	url = ./
+	branch = subghz-bruteforcer
