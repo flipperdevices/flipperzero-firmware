@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0926-1820-0.92.3-55b093a.tgz&channel=RM0926-1820-0.92.3-55b093a&version=0.92.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0926-1820-0.92.3-55b093a-NoAnim.tgz&channel=RM0926-1820-0.92.3-55b093a-NoAnim&version=0.92.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1003-0047-0.92.3-0f6cbde.tgz&channel=RM1003-0047-0.92.3-0f6cbde&version=0.92.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1003-0047-0.92.3-0f6cbde-NoAnim.tgz&channel=RM1003-0047-0.92.3-0f6cbde-NoAnim&version=0.92.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -29,30 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1003-0020-0.92.3-e261c29](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-03 12:20 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-03 12:20 EST`
-- Custom Game Mode Menu will no longer be overwritten for every install. Update coming to have a correctly generated default when one does not exist.
-- Updated: [NFC Magic v2.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [Updated Gen4 Fast-Configuration command #55 (By jordam)](https://github.com/flipperdevices/flipperzero-good-faps/pull/55)
-- Updated: [NFC Magic Gen4 v1.2 #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack) [Updated Gen4 Fast-Configuration command #55 (By jordam)](https://github.com/flipperdevices/flipperzero-good-faps/pull/55)
-- [Picopass: Add haptics to loclass #53 (By bettse)](https://github.com/flipperdevices/flipperzero-good-faps/pull/53)
-- Updated: [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Updated: [Game Mode Menu Creation When Empty. Custom Game Mode Menu will no longer get reset on new install.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/de0d47367169a6c94d37ae5575a2170e4eac8a45)
-- Updated: [Tuning Fork v1.1 (By besya)](https://github.com/besya/flipperzero-tuning-fork) [Add Ukulele tuning #2 (By portalsoup)](https://github.com/besya/flipperzero-tuning-fork/pull/2)
-- Added: [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
-- Added: [XRemote (By kala13x)](https://github.com/kala13x/flipper-xremote)
-- Added: [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
-- New Bounty Intro: [ID Card v2.0 - Update v1.0 (By alanretgue) to set and retrieve values from apps_data .txt file and allow for an optional notes field. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/alanretgue/Flipper_Zero-id_card)
-- New Bounty Intro: [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
-- UL: [nice flor s add button code 0x3 (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/2f44fd6cac47d7a071e86311c4d2bd51f6a84b70)
-- [Rocateq Shopping Cart wav files #758 (By casimirextreme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/758)
-- Removed Shopping Cart WAV files from firmware to include in SD Card Assets.
-- Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
-- Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; TEMP REVERT: OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Now can crash iOS 17
-- UL: [Updated infrared assets #619 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/619)
-- Updated: [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite) [New auto flasher. Improve camera I/O, code, comments, and draw. Resolve bugs. #25 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/pull/25)
-- OFW: [Enable PVS Studio license check #3122 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/3122)
-- Updated: [Genie Door Recorder v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
-- Updated: [XRemote v1.0 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-03 12:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-03 12:45 EST`
 
 <a name="release">
 
@@ -490,4 +468,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0926-1820-0.92.3-55b093a.tgz&channel=RM0926-1820-0.92.3-55b093a&version=0.92.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0926-1820-0.92.3-55b093a-NoAnim.tgz&channel=RM0926-1820-0.92.3-55b093a-NoAnim&version=0.92.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1003-0047-0.92.3-0f6cbde.tgz&channel=RM1003-0047-0.92.3-0f6cbde&version=0.92.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1003-0047-0.92.3-0f6cbde-NoAnim.tgz&channel=RM1003-0047-0.92.3-0f6cbde-NoAnim&version=0.92.3)
