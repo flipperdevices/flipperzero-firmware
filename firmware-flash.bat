@@ -94,8 +94,8 @@ echo Your ESP32-CAM is ready to be flashed. Please follow the instructions below
 
 :uploadFirmware
 echo.
-echo 1. Ensure IO0 pin on ESP32-CAM is grounded to the proper GND pin.
-echo 2. Hold reset, and plug in your ESP32-CAM; hold for a few seconds and release.
+echo 1. Remove ESP32-CAM. Ensure IO0 pin on ESP32-CAM is grounded to the proper GND pin.
+echo 2. Hold reset, and insert your ESP32-CAM; hold for a few seconds and release.
 echo 3. Try to time your release simultaneously with continuing to the next step.
 echo 4. ESP32-CAM should now be in flash mode; allow some time for firmware upload.
 echo 5. Failure is common; verify all connections if errors persist and try again.
