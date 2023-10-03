@@ -14,3 +14,7 @@
 	path = subghz_bruteforcer
 	url = ./
 	branch = subghz-bruteforcer
+[submodule "sentry_safe"]
+	path = sentry_safe
+	url = ./
+	branch = sentry-safe
