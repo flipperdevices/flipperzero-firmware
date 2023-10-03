@@ -1,0 +1,5 @@
+# [remote "upstream"]
+#     url = https://github.com/username/repository
+#     fetch = +refs/heads/*:refs/remotes/repository/*
+# [alias]
+#     merge-upstream = pull --no-edit upstream branch
