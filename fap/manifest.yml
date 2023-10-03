@@ -16,5 +16,5 @@ sourcecode:
   location:
     commit_sha: ...
     origin: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite.git
-    subdir: src-fap
+    subdir: fap
   type: git

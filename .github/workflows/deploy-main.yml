@@ -27,7 +27,7 @@ jobs:
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
         id: build-app
         with:
-          app-dir: ./src-fap
+          app-dir: ./fap
           sdk-channel: ${{ matrix.sdk-channel }}
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3

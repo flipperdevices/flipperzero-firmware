@@ -33,6 +33,7 @@ typedef struct {
     uint32_t dither;
     uint32_t flash;
     uint32_t haptic;
+    uint32_t jpeg;
     uint32_t speaker;
     uint32_t led;
     ButtonMenu* button_menu;
@@ -63,6 +64,11 @@ typedef enum {
     CameraSuiteFlashOff,
     CameraSuiteFlashOn,
 } CameraSuiteFlashState;
+
+typedef enum {
+    CameraSuiteJpegOff,
+    CameraSuiteJpegOn,
+} CameraSuiteJpegState;
 
 typedef enum {
     CameraSuiteHapticOff,
