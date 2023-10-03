@@ -7,6 +7,8 @@
 #include <gui/icon_animation.h>
 #include <subghz_bruteforcer_icons.h>
 
+#include <assets_icons.h>
+
 #define TAG "SubBruteAttackView"
 
 struct SubBruteAttackView {

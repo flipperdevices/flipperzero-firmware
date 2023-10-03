@@ -19,6 +19,8 @@
 
 #include "subghz_bruteforcer_icons.h"
 
+#include <assets_icons.h>
+
 #include <dialogs/dialogs.h>
 
 #include <notification/notification.h>

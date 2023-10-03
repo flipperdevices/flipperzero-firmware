@@ -6,6 +6,8 @@
 #include <gui/icon.h>
 #include <gui/icon_animation.h>
 
+#include <assets_icons.h>
+
 /**
  * Thanks to the author of metronome
  * @param canvas
