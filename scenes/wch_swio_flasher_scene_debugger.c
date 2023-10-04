@@ -76,7 +76,7 @@ void wch_swio_flasher_scene_debugger_on_enter(void* context) {
         debugger_event_handler,
         context);
 
-    //WchSwioFlasher_NhcLink042Emu_attach(app->emulator);
+    WchSwioFlasher_NhcLink042Emu_attach(app->emulator);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, WchSwioFlasherViewDebuggerEmulator);
 }
@@ -110,6 +110,6 @@ void wch_swio_flasher_scene_debugger_on_exit(void* context) {
     WchSwioFlasher_MinichlinkDebugger_unregisterEvent(
         app->mini_debugger, WchSwioFlasher_MinichlinkDebugger_EndSessionEvent);
 
-    //WchSwioFlasher_NhcLink042Emu_detach(app->emulator);
+    WchSwioFlasher_NhcLink042Emu_detach(app->emulator);
     widget_reset(app->views.widget);
 }
