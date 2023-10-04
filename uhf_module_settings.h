@@ -18,7 +18,7 @@ static const uint8_t BAUD_RATES_COUNT = sizeof(BAUD_RATES) / sizeof(BAUD_RATES[0
 static const uint8_t POWER_DBM[] = {12, 14, 17, 20}; // To be determined ...
 static const uint8_t POWER_DBM_COUNT = sizeof(POWER_DBM) / sizeof(POWER_DBM[0]);
 // UHF WorkingArea
-static const char* WORKING_REGIONS_STR[] = {"China(900)MHz", "US", "EU", "China(800)MHz", "Korea"};
+static const char* WORKING_REGIONS_STR[] = {"CN1", "US", "EU", "CN2", "KR"};
 static const uint8_t __working_region_str = sizeof(WORKING_REGIONS_STR) / sizeof(WORKING_REGIONS_STR[0]);
 static const WorkingRegion WORKING_REGIONS[] = {WR_CHINA_900, WR_US, WR_EU, WR_CHINA_800, WR_KOREA};
 static const uint8_t WORKING_REGIONS_COUNT = sizeof(WORKING_REGIONS) / sizeof(WORKING_REGIONS[0]);

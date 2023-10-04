@@ -102,8 +102,8 @@ void uhf_scene_settings_on_enter(void* ctx) {
         WORKING_REGIONS_COUNT,
         uhf_settings_set_module_working_region,
         uhf_module);
-    
     variable_item_set_current_value_text(item, WORKING_REGIONS_STR[value_index]);
+    variable_item_set_current_value_index(item, value_index);
 
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewVariableItemList);
 }
