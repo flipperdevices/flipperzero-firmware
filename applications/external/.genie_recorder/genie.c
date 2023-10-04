@@ -223,7 +223,18 @@ GenieApp* genie_app_alloc() {
         0,
         128,
         64,
-        "Genie garage door recorder.\n---\nConnect door to pin A7!\n\nauthor: @codeallnight\nhttps://discord.com/invite/NsjCvqwPAd\nhttps://youtube.com/@MrDerekJamison");
+        "Genie garage door recorder.\nVersion 1.2\n---\n"
+        "This app clicks your remote\n"
+        "and records the keys, so you\n"
+        "can replay them later.\n"
+        "Connect your remote to pin\n"
+        "A7 and GND. Wiring diagram\n"
+        "at https://tinyurl.com/genierecorder or github.\n"
+        "Once connected run Start!\n---\n"
+        "author: @codeallnight\n"
+        "https://discord.com/invite/NsjCvqwPAd\n"
+        "https://youtube.com/@MrDerekJamison\n"
+        "https://github.com/jamisonderek/flipper-zero-tutorials");
     view_set_previous_callback(
         widget_get_view(app->widget_about), genie_navigation_submenu_callback);
     view_dispatcher_add_view(
