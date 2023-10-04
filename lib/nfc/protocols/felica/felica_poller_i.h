@@ -12,7 +12,8 @@ extern "C" {
 
 #define FELICA_POLLER_POLLING_FWT (200000U)
 
-#define FELICA_POLLER_CMD_POLLING_CODE (0x00U)
+#define FELICA_POLLER_CMD_POLLING_REQ_CODE (0x00U)
+#define FELICA_POLLER_CMD_POLLING_RESP_CODE (0x01U)
 
 typedef enum {
     FelicaPollerStateIdle,
