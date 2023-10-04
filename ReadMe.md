@@ -65,7 +65,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | IR Scope | ![IR Badge] | [by kallanreed](https://github.com/DarkFlippers/unleashed-firmware/pull/407) |  | [![UFW Badge]](https://lab.flipper.net/apps/ir_scope) |
 | MultiConverter plugin | ![Tools Badge] | [by theisolinearchip](https://github.com/theisolinearchip/flipperzero_stuff) |  | [![UFW Badge]](https://lab.flipper.net/apps/multi_converter) |
 | Barcode Generator | ![Tools Badge] | [by Kingal1337](https://github.com/Kingal1337/flipper-barcode-generator) |  | [![UFW Badge]](https://lab.flipper.net/apps/barcode_app) |
-| **TOTP (Authenticator)** | ![Tools Badge] | [by akopachov](https://github.com/akopachov/flipper-zero_authenticator) |  | [![Author Badge]](https://lab.flipper.net/apps/totp) |
+| **TOTP (Authenticator)** | ![Tools Badge] | [by akopachov](https://github.com/akopachov/flipper-zero_authenticator) |  | [![None Badge]](https://github.com/akopachov/flipper-zero_authenticator/wiki/Why-it-is-not-listed-in-official-Flipper-Application-Catalog%3F) |
 | HEX Viewer | ![Tools Badge] | [by QtRoS](https://github.com/QtRoS/flipper-zero-hex-viewer) |  | [![UFW Badge]](https://lab.flipper.net/apps/hex_viewer) |
 | Text Viewer | ![Tools Badge] | [by Willy-JL](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/text_viewer) | original by kowalski7cc & kyhwana | [![UFW Badge]](https://lab.flipper.net/apps/text_viewer) |
 | DTMF Dolphin | ![Tools Badge] | [by litui](https://github.com/litui/dtmf_dolphin) |  | [![UFW Badge]](https://lab.flipper.net/apps/dtmf_dolphin) |
