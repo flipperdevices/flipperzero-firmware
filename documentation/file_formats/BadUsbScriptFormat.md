@@ -72,10 +72,10 @@ Can be combined with a special key command or a single character.
 ## Key hold and release
 
 Up to 5 keys can be hold simultaneously.
-| Command | Parameters                      | Notes                                     |
-| ------- | ------------------------------- | ----------------------------------------- |
+| Command | Parameters                      | Notes                                    |
+| ------- | ------------------------------- | ---------------------------------------- |
 | HOLD    | Special key or single character | Press and hold key until RELEASE command |
-| RELEASE | Special key or single character | Release key                               |
+| RELEASE | Special key or single character | Release key                              |
 
 ## Wait for button press
 

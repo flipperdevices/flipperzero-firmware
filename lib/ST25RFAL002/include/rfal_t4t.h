@@ -84,7 +84,7 @@
 #define RFAL_T4T_ISO7816_P1_SELECT_BY_FILEID \
     0x00U /*!< P1 value for Select by file identifier                          */
 #define RFAL_T4T_ISO7816_P2_SELECT_FIRST_OR_ONLY_OCCURENCE \
-    0x00U /*!<      b2b1 P2 value for First or only occurrence                  */
+    0x00U /*!<      b2b1 P2 value for First or only occurrence                 */
 #define RFAL_T4T_ISO7816_P2_SELECT_RETURN_FCI_TEMPLATE \
     0x00U /*!< b4b3      P2 value for Return FCI template                      */
 #define RFAL_T4T_ISO7816_P2_SELECT_NO_RESPONSE_DATA \
