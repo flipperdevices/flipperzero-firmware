@@ -917,6 +917,9 @@ bool mf_classic_poller_detect(NfcGenericEvent event, void* context) {
         }
     }
 
+    bit_buffer_free(tx_buffer);
+    bit_buffer_free(rx_buffer);
+
     return detected;
 }
 

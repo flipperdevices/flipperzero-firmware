@@ -36,6 +36,7 @@ typedef enum {
     FuriHalNfcErrorIsrTimeout,
     FuriHalNfcErrorCommunicationTimeout,
     FuriHalNfcErrorBufferOverflow,
+    FuriHalNfcErrorIncompleteFrame,
     FuriHalNfcErrorDataFormat,
 } FuriHalNfcError;
 
