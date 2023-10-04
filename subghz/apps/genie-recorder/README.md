@@ -17,11 +17,11 @@ WARNING -- Don't run this near your garage.  There is no reason to open the phys
 
 ## Running
 - Step 0. Copy [these files](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder) into your firmware ``applications_user\genie-recorder`` folder. 
-- Step 1. Build your firmware.  You will get a build error.
+- Step 1. Build your firmware (``./fbt vscode_dist`` & ``./fbt`` -- "[Debug] Build Firmware").  You may get a build error.
 - Step 2. Edit your ``firmware\targets\f7\api_symbols.csv`` file so that storage_file_sync is public. 
   ``Function,+,storage_file_sync,_Bool,File*``
 - Step 3. Edit ``lib\subghz\protocols\keeloq.c`` so it have te_short=200, te_long=400, te_delta=70.  NOTE: This will no longer be able to receive signals from other KeeLoq devices.
-- Step 4. Build your firmware & deploy onto Flipper.
+- Step 4. Build your firmware & deploy onto Flipper  ``./fbt FORCE=1 flash_usb_full`` -- "[Debug]Flash (USB, with Resources)".
 - Step 5. On your Flipper Zero, load ``Sub-GHz`` app.
 - Step 6. Choose ``Read`` to start scanning.
 - Step 7. Press the LEFT button to edit the Config.
