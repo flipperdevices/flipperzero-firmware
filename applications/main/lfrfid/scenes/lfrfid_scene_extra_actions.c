@@ -37,12 +37,14 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
         SubmenuIndexPSK,
         lfrfid_scene_extra_actions_submenu_callback,
         app);
-    submenu_add_item(
+    submenu_add_lockable_item(
         submenu,
         "Clear T5577 Password",
         SubmenuIndexClearT5577,
         lfrfid_scene_extra_actions_submenu_callback,
-        app);
+        app,
+        !furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug),
+        "Enable\nDebug!");
     submenu_add_item(
         submenu,
         "Set/clear T5577 Cust.Pw",
