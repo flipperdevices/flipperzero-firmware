@@ -26,12 +26,10 @@ Adding options like settings the access password, baud rate, rf power, channel, 
 
 ## What's Changed
 
-- A complete refractor from the concept code to covert to a framework. So that it's easy to refractor for different possible module's. See [module.h](uhf_module.h) for more info.
-- Reading bank now can automatically detect bank size, for cases that PC(protocol control) bits aren't properly written to tag.
-- Can now view tag from saved.
-- Can now write tags from saved.
-- Icon added by [@xMasterX](https://github.com/xMasterX)
-- App is now named `[(Q)M100] UHF RFID`, meaning for M100 and QM100 modules
+- Added a settings page to allow for changing of the module's settings.
+- Added options like baud rate, rf power, region; more to come.
+- Tx communication is much more stable and faster now; more improvements to come.
+- Bug fixes and improvements.
 
 ## Features
 
@@ -39,11 +37,13 @@ Adding options like settings the access password, baud rate, rf power, channel, 
 - [x] View saved UHF RFID tag.
 - [x] Write Single UHF RFID tag.
 - [ ] Change Module setting parameters. **(In Progress)**
-  - [ ] Different Baudrates 
+  - [x] Set Baudrates 
   - [ ] Set/Reset Access Password
   - [ ] Set Kill Password
   - [ ] Kill Tag
-  - [ ] TBD
+  - [x] Set RF Power
+  - [x] Set Region
+
 - [ ] Edit/Create new data to write.
 - Extras
   - [ ] Read multiple tags at once
