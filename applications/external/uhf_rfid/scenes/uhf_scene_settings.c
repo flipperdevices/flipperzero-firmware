@@ -4,6 +4,9 @@
 void uhf_settings_set_module_baudrate(VariableItem* item) {
     M100Module* uhf_module = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
+    if(index >= BAUD_RATES_COUNT) {
+        return;
+    }
     uint32_t baudrate = BAUD_RATES[index];
     m100_set_baudrate(uhf_module, baudrate);
     char text_buf[10];
@@ -12,13 +15,32 @@ void uhf_settings_set_module_baudrate(VariableItem* item) {
 }
 
 void uhf_settings_set_module_powerdb(VariableItem* item) {
-    UNUSED(item);
+    M100Module* uhf_module = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    if(index >= POWER_DBM_COUNT) {
+        return;
+    }
+    uint16_t power = POWER_DBM[index];
+    m100_set_transmitting_power(uhf_module, power);
+    char text_buf[10];
+    snprintf(text_buf, sizeof(text_buf), "%ddBm", uhf_module->transmitting_power);
+    variable_item_set_current_value_text(item, text_buf);
+}
+
+void uhf_settings_set_module_working_region(VariableItem* item) {
+    M100Module* uhf_module = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    if(index >= WORKING_REGIONS_COUNT) {
+        return;
+    }
+    WorkingRegion region = WORKING_REGIONS[index];
+    m100_set_working_region(uhf_module, region);
+    variable_item_set_current_value_text(item, WORKING_REGIONS_STR[index]);
 }
 
 uint8_t uhf_settings_get_module_baudrate_index(M100Module* module) {
-    uint32_t baudrate = module->baudrate;
-    for(uint8_t i = 0; i < sizeof(BAUD_RATES); i++) {
-        if(BAUD_RATES[i] == baudrate) {
+    for(uint8_t i = 0; i < BAUD_RATES_COUNT; i++) {
+        if(BAUD_RATES[i] == module->baudrate) {
             return i;
         }
     }
@@ -26,9 +48,17 @@ uint8_t uhf_settings_get_module_baudrate_index(M100Module* module) {
 }
 
 uint8_t uhf_settings_get_module_power_index(M100Module* module) {
-    uint16_t power = module->transmitting_power;
-    for(uint8_t i = 0; i < sizeof(POWER_DBM); i++) {
-        if(POWER_DBM[i] == power) {
+    for(uint8_t i = 0; i < BAUD_RATES_COUNT; i++) {
+        if(POWER_DBM[i] == module->transmitting_power) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+uint8_t uhf_settings_get_module_working_region_index(M100Module* module) {
+    for(uint8_t i = 0; i < WORKING_REGIONS_COUNT; i++) {
+        if(WORKING_REGIONS[i] == module->region) {
             return i;
         }
     }
@@ -44,23 +74,36 @@ void uhf_scene_settings_on_enter(void* ctx) {
     uint8_t value_index = uhf_settings_get_module_baudrate_index(uhf_module);
     char text_buf[10];
     snprintf(text_buf, sizeof(text_buf), "%lu", uhf_module->baudrate);
-
     item = variable_item_list_add(
         variable_item_list,
         "Baudrate:",
-        sizeof(BAUD_RATES),
+        BAUD_RATES_COUNT,
         uhf_settings_set_module_baudrate,
         uhf_module);
 
     variable_item_set_current_value_text(item, text_buf);
     variable_item_set_current_value_index(item, value_index);
 
+    value_index = uhf_settings_get_module_power_index(uhf_module);
     item = variable_item_list_add(
         variable_item_list,
         "Power(DBM):",
-        sizeof(POWER_DBM),
+        POWER_DBM_COUNT,
         uhf_settings_set_module_powerdb,
         uhf_module);
+    snprintf(text_buf, sizeof(text_buf), "%ddBm", uhf_module->transmitting_power);
+    variable_item_set_current_value_text(item, text_buf);
+    variable_item_set_current_value_index(item, value_index);
+
+    value_index = uhf_settings_get_module_working_region_index(uhf_module);
+    item = variable_item_list_add(
+        variable_item_list,
+        "Region:",
+        WORKING_REGIONS_COUNT,
+        uhf_settings_set_module_working_region,
+        uhf_module);
+    variable_item_set_current_value_text(item, WORKING_REGIONS_STR[value_index]);
+    variable_item_set_current_value_index(item, value_index);
 
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewVariableItemList);
 }

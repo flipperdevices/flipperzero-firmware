@@ -15,16 +15,24 @@ void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
     tick = WAIT_TICK; // reset tick
 }
 
-static void setup_and_send_rx(M100Module* module, uint8_t* cmd, size_t cmd_length) {
+static M100ResponseType setup_and_send_rx(M100Module* module, uint8_t* cmd, size_t cmd_length) {
     buffer_reset(module->buf);
-    // furi_hal_uart_set_br(FuriHalUartIdUSART1, module->baudrate);
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
     tick = WAIT_TICK;
     furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, cmd_length);
     while(--tick) {
         furi_delay_us(5);
     }
     buffer_close(module->buf);
+    // Validation Checks
+    uint8_t* data = buffer_get_data(module->buf);
+    size_t length = buffer_get_size(module->buf);
+    // check if size > 0
+    if(!length) return M100EmptyResponse;
+    // check if data is valid
+    if(data[0] != FRAME_START || data[length - 1] != FRAME_END) return M100ValidationFail;
+    // check if checksum is correct
+    if(checksum(data + 1, length - 3) != data[length - 2]) return M100ChecksumFail;
+    return M100SuccessResponse;
 }
 
 M100ModuleInfo* m100_module_info_alloc() {
@@ -43,7 +51,8 @@ M100Module* m100_module_alloc() {
     module->info = m100_module_info_alloc();
     module->buf = buffer_alloc(MAX_BUFFER_SIZE);
     module->baudrate = DEFAULT_BAUDRATE;
-    // module->area = DEFAULT_AREA;
+    module->transmitting_power = DEFAULT_TRANSMITTING_POWER;
+    module->region = DEFAULT_WORKING_REGION;
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, module->buf);
     return module;
 }
@@ -120,9 +129,6 @@ M100ResponseType m100_single_poll(M100Module* module, UHFTag* uhf_tag) {
     setup_and_send_rx(module, (uint8_t*)&CMD_SINGLE_POLLING.cmd[0], CMD_SINGLE_POLLING.length);
     uint8_t* data = buffer_get_data(module->buf);
     size_t length = buffer_get_size(module->buf);
-    for(size_t i = 0; i < length; i++) {
-        FURI_LOG_E("TAG", "data[%d] = %02X", i, data[i]);
-    }
     if(length <= 8 && data[2] == 0xFF) return M100NoTagResponse;
     uint16_t pc = data[6];
     uint16_t crc = 0;
@@ -144,7 +150,7 @@ M100ResponseType m100_single_poll(M100Module* module, UHFTag* uhf_tag) {
     uhf_tag_set_epc_pc(uhf_tag, pc);
     uhf_tag_set_epc_crc(uhf_tag, crc);
     uhf_tag_set_epc(uhf_tag, data + 8, epc_len);
-    return M100Success;
+    return M100SuccessResponse;
 }
 
 M100ResponseType m100_set_select(M100Module* module, UHFTag* uhf_tag) {
@@ -183,7 +189,7 @@ M100ResponseType m100_set_select(M100Module* module, UHFTag* uhf_tag) {
     if(checksum(data + 1, 5) != data[6]) return M100ValidationFail; // error in rx
     if(data[5] != 0x00) return M100ValidationFail; // error if not 0
 
-    return M100Success;
+    return M100SuccessResponse;
 }
 
 UHFTag* m100_get_select_param(M100Module* module) {
@@ -208,9 +214,9 @@ M100ResponseType m100_read_label_data_storage(
     uint32_t access_pwd,
     uint16_t word_count) {
     /*
-    Will probably remove UHFTag as param and get it from get selected tag
-        */
-    if(bank == EPCBank) return M100Success;
+        Will probably remove UHFTag as param and get it from get selected tag
+    */
+    if(bank == EPCBank) return M100SuccessResponse;
     uint8_t cmd[MAX_BUFFER_SIZE];
     size_t cmd_length = CMD_READ_LABEL_DATA_STORAGE_AREA.length;
     memcpy(cmd, CMD_READ_LABEL_DATA_STORAGE_AREA.cmd, cmd_length);
@@ -227,30 +233,30 @@ M100ResponseType m100_read_label_data_storage(
     // calc checksum
     cmd[cmd_length - 2] = checksum(cmd + 1, cmd_length - 3);
 
-    setup_and_send_rx(module, cmd, cmd_length);
+    while(setup_and_send_rx(module, cmd, cmd_length) != M100SuccessResponse) {
+    }
 
     uint8_t* data = buffer_get_data(module->buf);
+
+    uint8_t rtn_command = data[2];
     uint16_t payload_len = data[3];
     payload_len = (payload_len << 8) + data[4];
-    size_t ptr_offset = 5 /*<-ptr offset*/ + uhf_tag->epc->size + 3 /*<-pc + ul*/;
-    size_t bank_data_length = payload_len - (ptr_offset - 5 /*dont include the offset*/);
-    // print paylod length ptr offset and bank data length
-    // FURI_LOG_E(
-    //     "TAG",
-    //     "payload_len: %d, ptr_offset: %d, bank_data_length: %d",
-    //     payload_len,
-    //     ptr_offset,
-    //     bank_data_length);
-    if(data[2] == 0xFF) {
-        if(payload_len == 0x0001) return M100NoTagResponse;
+
+    if(rtn_command == 0xFF) {
+        if(payload_len == 0x01) return M100NoTagResponse;
         return M100MemoryOverrun;
     }
+
+    size_t ptr_offset = 5 /*<-ptr offset*/ + uhf_tag_get_epc_size(uhf_tag) + 3 /*<-pc + ul*/;
+    size_t bank_data_length = payload_len - (ptr_offset - 5 /*dont include the offset*/);
+
     if(bank == TIDBank) {
         uhf_tag_set_tid(uhf_tag, data + ptr_offset, bank_data_length);
     } else if(bank == UserBank) {
         uhf_tag_set_user(uhf_tag, data + ptr_offset, bank_data_length);
     }
-    return M100Success;
+
+    return M100SuccessResponse;
 }
 
 M100ResponseType m100_write_label_data_storage(
@@ -325,7 +331,7 @@ M100ResponseType m100_write_label_data_storage(
         return M100NoTagResponse;
     else if(buff_data[2] == 0xFF)
         return M100ValidationFail;
-    return M100Success;
+    return M100SuccessResponse;
 }
 void m100_set_baudrate(M100Module* module, uint32_t baudrate) {
     size_t length = CMD_SET_COMMUNICATION_BAUD_RATE.length;
@@ -340,28 +346,26 @@ void m100_set_baudrate(M100Module* module, uint32_t baudrate) {
     module->baudrate = baudrate;
 }
 
-bool m100_set_working_area(M100Module* module, WorkingArea area) {
+bool m100_set_working_region(M100Module* module, WorkingRegion region) {
     size_t length = CMD_SET_WORK_AREA.length;
     uint8_t cmd[length];
     memcpy(cmd, CMD_SET_WORK_AREA.cmd, length);
-    cmd[5] = area;
-    Buffer* buf = buffer_alloc(12);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, buf);
-    furi_hal_uart_tx(FuriHalUartIdUSART1, cmd, length);
-    buffer_free(buf);
-    module->area = area;
-    return true;
-}
-
-bool m100_set_working_channel(M100Module* module, WorkingChannel channel) {
-    UNUSED(module);
-    UNUSED(channel);
+    cmd[5] = (uint8_t)region;
+    cmd[length - 2] = checksum(cmd + 1, length - 3);
+    setup_and_send_rx(module, cmd, length);
+    module->region = region;
     return true;
 }
 
 bool m100_set_transmitting_power(M100Module* module, uint16_t power) {
-    UNUSED(module);
-    UNUSED(power);
+    size_t length = CMD_SET_TRANSMITTING_POWER.length;
+    uint8_t cmd[length];
+    memcpy(cmd, CMD_SET_TRANSMITTING_POWER.cmd, length);
+    cmd[5] = (power >> 8) & 0xFF;
+    cmd[6] = power & 0xFF;
+    cmd[length - 2] = checksum(cmd + 1, length - 3);
+    setup_and_send_rx(module, cmd, length);
+    module->transmitting_power = power;
     return true;
 }
 
