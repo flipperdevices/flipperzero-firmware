@@ -101,8 +101,8 @@ bool furi_hal_nfc_event_wait_for_specific_irq(
     uint32_t mask,
     uint32_t timeout_ms) {
     furi_assert(furi_hal_nfc_event);
+    furi_assert(furi_hal_nfc_event->thread);
 
-    furi_hal_nfc_event->thread = furi_thread_get_current_id();
     bool irq_received = false;
     uint32_t event_flag =
         furi_thread_flags_wait(FuriHalNfcEventInternalTypeIrq, FuriFlagWaitAny, timeout_ms);
@@ -111,8 +111,6 @@ bool furi_hal_nfc_event_wait_for_specific_irq(
         irq_received = ((irq & mask) == mask);
         furi_thread_flags_clear(FuriHalNfcEventInternalTypeIrq);
     }
-
-    furi_hal_nfc_event->thread = NULL;
 
     return irq_received;
 }

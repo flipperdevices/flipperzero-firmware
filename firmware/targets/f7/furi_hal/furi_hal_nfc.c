@@ -18,6 +18,7 @@ FuriHalNfc furi_hal_nfc;
 
 static FuriHalNfcError furi_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
     FuriHalNfcError error = FuriHalNfcErrorNone;
+    furi_hal_nfc_event_start();
 
     if(!st25r3916_check_reg(
            handle,
