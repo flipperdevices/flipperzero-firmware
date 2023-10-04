@@ -21,8 +21,10 @@ NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context)
 
     NfcApp* instance = context;
     if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {
+        instance->nfc_dict_context.is_card_present = true;
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardDetected);
     } else if(mfc_event->type == MfClassicPollerEventTypeCardLost) {
+        instance->nfc_dict_context.is_card_present = false;
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventCardLost);
     } else if(mfc_event->type == MfClassicPollerEventTypeRequestMode) {
         const MfClassicData* mfc_data =
@@ -210,16 +212,22 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             const MfClassicData* mfc_data = nfc_poller_get_data(instance->poller);
             nfc_device_set_data(instance->nfc_device, NfcProtocolMfClassic, mfc_data);
             if(state == DictAttackStateUserDictInProgress) {
-                nfc_poller_stop(instance->poller);
-                nfc_poller_free(instance->poller);
-                nfc_dict_free(instance->nfc_dict_context.dict);
-                scene_manager_set_scene_state(
-                    instance->scene_manager,
-                    NfcSceneMfClassicDictAttack,
-                    DictAttackStateSystemDictInProgress);
-                nfc_scene_mf_classic_dict_attack_prepare_view(instance);
-                instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfClassic);
-                nfc_poller_start(instance->poller, nfc_dict_attack_worker_callback, instance);
+                if(instance->nfc_dict_context.is_card_present) {
+                    nfc_poller_stop(instance->poller);
+                    nfc_poller_free(instance->poller);
+                    nfc_dict_free(instance->nfc_dict_context.dict);
+                    scene_manager_set_scene_state(
+                        instance->scene_manager,
+                        NfcSceneMfClassicDictAttack,
+                        DictAttackStateSystemDictInProgress);
+                    nfc_scene_mf_classic_dict_attack_prepare_view(instance);
+                    instance->poller = nfc_poller_alloc(instance->nfc, NfcProtocolMfClassic);
+                    nfc_poller_start(instance->poller, nfc_dict_attack_worker_callback, instance);
+                } else {
+                    notification_message(instance->notifications, &sequence_success);
+                    scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
+                    dolphin_deed(DolphinDeedNfcReadSuccess);
+                }
                 consumed = true;
             } else if(state == DictAttackStateSystemDictInProgress) {
                 notification_message(instance->notifications, &sequence_success);
@@ -255,6 +263,7 @@ void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     instance->nfc_dict_context.dict_keys_current = 0;
     instance->nfc_dict_context.is_key_attack = false;
     instance->nfc_dict_context.key_attack_current_sector = 0;
+    instance->nfc_dict_context.is_card_present = false;
 
     nfc_blink_stop(instance);
     notification_message(instance->notifications, &sequence_display_backlight_enforce_auto);

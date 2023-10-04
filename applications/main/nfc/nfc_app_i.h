@@ -87,6 +87,7 @@ typedef struct {
     size_t dict_keys_current;
     bool is_key_attack;
     uint8_t key_attack_current_sector;
+    bool is_card_present;
 } NfcMfClassicDictAttackContext;
 
 struct NfcApp {
