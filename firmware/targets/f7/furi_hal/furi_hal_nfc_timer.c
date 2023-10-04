@@ -85,6 +85,7 @@ static void furi_hal_nfc_timer_init(FuriHalNfcTimer timer) {
     LL_TIM_SetClockSource(furi_hal_nfc_timers[timer].timer, LL_TIM_CLOCKSOURCE_INTERNAL);
 
     LL_TIM_GenerateEvent_UPDATE(furi_hal_nfc_timers[timer].timer);
+    LL_TIM_ClearFlag_UPDATE(furi_hal_nfc_timers[timer].timer);
 
     LL_TIM_EnableIT_UPDATE(furi_hal_nfc_timers[timer].timer);
     furi_hal_interrupt_set_isr(

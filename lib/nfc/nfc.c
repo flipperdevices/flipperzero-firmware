@@ -319,8 +319,8 @@ void nfc_start(Nfc* instance, NfcEventCallback callback, void* context) {
     } else {
         furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
     }
-    furi_thread_start(instance->worker_thread);
     instance->comm_state = NfcCommStateIdle;
+    furi_thread_start(instance->worker_thread);
 }
 
 void nfc_stop(Nfc* instance) {
