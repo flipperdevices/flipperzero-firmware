@@ -46,7 +46,7 @@ There will be many more features added in the future! If you have any ideas or s
 
 ## Hardware Requirements <a name="hardware-requirements"></a>
 
-Requires an ESP32-CAM module (I've personally used these: [Amazon Link 1][amazon-esp32-cam-link-1] | [Amazon Link 2][amazon-esp32-cam-link-2]).
+Requires an ESP32-CAM module. Below are two images of the ESP32-CAM module. You can find these all over Amazon, Ali Express, and other retailers.
 
 <img src=".github/images/esp32-cam-front.png" /><img src=".github/images/esp32-cam-back.png" />
 
@@ -225,15 +225,21 @@ Thank you!
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
+
 Fin. Thanks for looking and happy programming friend!
 
 Cody
+
+Donations are welcome and appreciated!
+
+btc: [bc1qfx3lvspkj0q077u3gnrnxqkqwyvcku2nml86wmudy7yf2u8edmqq0a5vnt][btc-address-link]
 
 <!-- LINKS -->
 
 [amazon-esp32-cam-link-1]: https://amzn.to/44rBFrb
 [amazon-esp32-cam-link-2]: https://amzn.to/45nDR45
 [arduino-ide]: https://www.arduino.cc/en/software
+[btc-address-link]: https://explorer.btc.com/btc/address/bc1qfx3lvspkj0q077u3gnrnxqkqwyvcku2nml86wmudy7yf2u8edmqq0a5vnt
 [flipper-zero-apps]: https://docs.flipper.net/apps
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
