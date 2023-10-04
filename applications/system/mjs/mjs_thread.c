@@ -20,7 +20,7 @@ struct MjsThread {
     FuriThread* thread;
     FuriString* path;
     CompositeApiResolver* resolver;
-    MjsThreadCallback end_callback;
+    MjsThreadCallback app_callback;
     void* context;
 };
 
@@ -86,6 +86,7 @@ int json_prettify_file(const char* file_name) {
 }
 
 static void mjs_print(struct mjs* mjs) {
+    FuriString* msg_str = furi_string_alloc();
     size_t i, num_args = mjs_nargs(mjs);
     for(i = 0; i < num_args; i++) {
         char* name = NULL;
@@ -94,17 +95,24 @@ static void mjs_print(struct mjs* mjs) {
         mjs_val_t arg = mjs_arg(mjs, i);
         mjs_err_t err = mjs_to_string(mjs, &arg, &name, &name_len, &need_free);
         if(err != MJS_OK) {
-            printf("err %s ", mjs_strerror(mjs, err));
+            furi_string_cat_printf(msg_str, "err %s ", mjs_strerror(mjs, err));
         } else {
-            printf("%s ", name);
+            furi_string_cat_printf(msg_str, "%s ", name);
         }
-
         if(need_free) {
             free(name);
             name = NULL;
         }
     }
-    printf("\r\n");
+    printf("%s\r\n", furi_string_get_cstr(msg_str));
+
+    MjsThread* worker = mjs->context;
+    furi_assert(worker);
+    if(worker->app_callback) {
+        worker->app_callback(MjsThreadEventPrint, furi_string_get_cstr(msg_str), worker->context);
+    }
+
+    // TODO: print callback
     mjs_return(mjs, MJS_UNDEFINED);
 }
 
@@ -177,6 +185,7 @@ static int32_t mjs_thread(void* arg) {
     composite_api_resolver_add(worker->resolver, application_api_interface);
 
     struct mjs* mjs = mjs_create(worker);
+    // js_modules_create(worker);
     mjs_val_t global = mjs_get_global(mjs);
     mjs_set(mjs, global, "print", ~0, MFS_MK_FN(mjs_print));
     mjs_set(mjs, global, "delay", ~0, MFS_MK_FN(mjs_delay));
@@ -192,18 +201,25 @@ static int32_t mjs_thread(void* arg) {
 
     if(err != MJS_OK) {
         FURI_LOG_E(TAG, "Exec error: %s", mjs_strerror(mjs, err));
+        if(worker->app_callback) {
+            worker->app_callback(MjsThreadEventError, mjs_strerror(mjs, err), worker->context);
+        }
         if(mjs->stack_trace != NULL) {
             FURI_LOG_E(TAG, "Stack trace:\n%s", mjs->stack_trace);
+            if(worker->app_callback) {
+                worker->app_callback(MjsThreadEventErrorTrace, mjs->stack_trace, worker->context);
+            }
+        }
+    } else {
+        if(worker->app_callback) {
+            worker->app_callback(MjsThreadEventDone, NULL, worker->context);
         }
     }
 
+    // js_modules_destroy(worker);
     mjs_destroy(mjs);
 
     composite_api_resolver_free(worker->resolver);
-
-    if(worker->end_callback) {
-        worker->end_callback(worker->context);
-    }
 
     return 0;
 }
@@ -212,7 +228,7 @@ MjsThread* mjs_thread_run(const char* script_path, MjsThreadCallback callback, v
     MjsThread* worker = malloc(sizeof(MjsThread));
     worker->path = furi_string_alloc_set(script_path);
     worker->thread = furi_thread_alloc_ex("MjsThread", 8 * 1024, mjs_thread, worker);
-    worker->end_callback = callback;
+    worker->app_callback = callback;
     worker->context = context;
     furi_thread_start(worker->thread);
     return worker;
