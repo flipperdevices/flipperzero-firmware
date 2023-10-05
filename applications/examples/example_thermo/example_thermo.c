@@ -221,8 +221,7 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 0, 16, 128, 16);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(
-        canvas, middle_x, 30, AlignCenter, AlignBottom, "Connect thermometer");
+    canvas_draw_str_aligned(canvas, middle_x, 30, AlignCenter, AlignBottom, "Connect thermometer");
 
     snprintf(
         text_store,
