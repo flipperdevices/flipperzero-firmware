@@ -1,0 +1,18 @@
+App(
+    appid="avr_isp",
+    name="[AVR] AVR Flasher",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="avr_isp_app",
+    requires=["gui"],
+    stack_size=4 * 1024,
+    fap_description="Application for flashing AVR microcontrollers",
+    fap_version="1.0",
+    fap_icon="avr_app_icon_10x10.png",
+    fap_category="GPIO",
+    fap_icon_assets="images",
+    fap_private_libs=[
+        Lib(
+            name="driver",
+        ),
+    ],
+)
