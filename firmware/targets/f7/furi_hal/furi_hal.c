@@ -50,6 +50,7 @@ void furi_hal_init() {
     furi_hal_light_init();
     furi_hal_bt_init();
     furi_hal_memory_init();
+    furi_hal_adc_init();
 
 #ifndef FURI_RAM_EXEC
     furi_hal_usb_init();
