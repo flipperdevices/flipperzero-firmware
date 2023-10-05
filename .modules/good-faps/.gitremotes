@@ -1,5 +1,0 @@
-[remote "upstream"]
-        url = https://github.com/flipperdevices/flipperzero-good-faps
-        fetch = +refs/heads/*:refs/remotes/flipperzero-good-faps/*
-[alias]
-    merge-upstream = pull --no-edit upstream dev

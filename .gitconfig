@@ -1,0 +1,2 @@
+[alias]
+    update-subtree = "!f() { git subtree pull -P $GIT_PREFIX $(<${GIT_PREFIX}.gitremote); }; f"

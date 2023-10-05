@@ -1,5 +1,0 @@
-[remote "upstream"]
-    url = https://github.com/DarkFlippers/Multi_Fuzzer
-    fetch = +refs/heads/*:refs/remotes/multi-fuzzer/*
-[alias]
-    merge-upstream = pull --no-edit upstream dev

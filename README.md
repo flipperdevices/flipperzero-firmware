@@ -13,11 +13,14 @@ Apps we use for Xtreme are all modified (some lots more than others). This inclu
 - **Updating and fixing apps** that were abandoned by the original developers
 
 ### How?
-**Apps made by the Xtreme team are just kept as code in the main branch. Others instead come from elsewhere and need tweaks applied.**
-Due to how Git works we can't just make edits in a submodule and publish it as a signle repo like that.
-Our changes need to be committed and tracked somewhere, but we didn't want to have a fork repo for each app.
-Instead we use **fork *branches*:tm:** where the **code for the apps is in branches** of this same repo and the **main branch has submodules to other branches** this same repo.
-As for pulling updates from the upstream repositories, remotes are not kept when pushing and cloning, so we use a modular system:
-- set it up by running `git config --local include.path ../.gitremotes` (this makes your git config import the file `.gitremotes`)
-- each app branch has a `.gitremotes` file which contains configuration for its `upstream` remote
-- this also has an alias for merging upstream updates with the correct ref by `git merge-upstream`
+**Apps made by the Xtreme team are kept as plain code here. For all others we use git subtrees to pull updates from elsewhere but also keep our own tweaks.**
+We didn't want to have fork repos for each single app since it would get out of hand very quick. Instead, we opted for subtrees.
+
+Subtrees work in a very peculiar way, where they pull and compare commit history from a remote repo and apply it to a subdirectory of this repo.
+That's why the commit history for our repo is so huge, it contains all the commits for all the apps, plus our edits.
+
+To make updating more manageable, we have added another layer on top of subtrees:
+- each remote app/repo has a `.gitremote` file that indicates the remote url and branch name
+- we have a git alias `update-subtree` for pulling updates based on the current directory (set it up by running `git config --local include.path ../.gitconfig`)
+- run `git update-subtree` in each subtree folder to update it
+- or run `find . -name .gitremote -execdir git update-subtree \;` to run it on all subtrees
