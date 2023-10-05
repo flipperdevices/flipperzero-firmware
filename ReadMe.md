@@ -35,6 +35,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Commented Out: [Genie Door Recorder v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials) - Will return once fixes are completed by developer.
 - Made Clear T5577 require debug to help avoid bricking tags (By SkeletonMan03)
 - Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
+- OFW PR: [Fix spelling across some project files #3128 (By h00die)](https://github.com/flipperdevices/flipperzero-firmware/pull/3128)
 
 <a name="release">
 
