@@ -2,7 +2,7 @@ App(
     appid="id_card",
     name="Id Card",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="id_card_app",
+    entry_point="id_card_main",
     cdefines=["APP_ID_CARD"],
     requires=["gui"],
     stack_size=1 * 1024,
