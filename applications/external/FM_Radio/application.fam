@@ -1,0 +1,14 @@
+App(
+    appid="radio",
+    name="FM Radio",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="my_app_name_app",
+    stack_size=1 * 1024,
+    fap_category="GPIO",
+    fap_icon="radio.png",
+    fap_icon_assets="images",
+    fap_author="coolshrimp",
+    fap_weburl="https://coolshrimp/flipperzero-firmware-wPlugins/",
+    fap_version="0.8",
+    fap_description="FM Radio App",
+)
