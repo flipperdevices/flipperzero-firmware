@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- exported from Silhouette Studio® Business Edition V4.5.180ssbe -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="304.8mm" height="304.8mm" viewBox="0 0 304.8 304.8">
+<defs>
+<path id="path_24cbc5068afcd4ea3cbe88f5e99eb8c0" d="M 38.751 24.99973 C 39.85371 24.99973 40.74944 24.09678 40.74944 22.98521 L 40.74944 7.014511 C 40.74944 5.902939 39.85371 5.000006 38.751 5.000006 L 6.998444 5.000006 C 5.895736 5.000006 5.000003 5.902939 5.000003 7.014511 L 5.000003 22.98521 C 5.000003 24.09678 5.895736 24.99973 6.998444 24.99973 L 38.751 24.99973 Z" fill-rule="evenodd" fill="none" fill-opacity="1" stroke="#FF0000" stroke-opacity="1" stroke-width="0.3527778" stroke-linecap="round" stroke-linejoin="round"/>
+</defs>
+<g>
+<use xlink:href="#path_24cbc5068afcd4ea3cbe88f5e99eb8c0"/>
+</g>
+</svg>

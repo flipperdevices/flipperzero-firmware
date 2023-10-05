@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<header>
+<title>Mayhem for Flipper Zero</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</header>
+<body style="margin:2%;padding:1%">
+    <h1>Mayhem for Flipper Zero -installer</h1>
+    <script type="module" src="https://unpkg.com/esp-web-tools@3.4.2/dist/web/install-button.js?module"></script>
+<style>
+  .container {
+    display: flex;
+    justify-content: space-between;
+  }
+  .left-div {
+    text-align: left;
+  }
+  .right-div {
+    width: 100%;
+    margin: 20px;
+    text-align: left;
+  }
+  .changelog-box {
+      width: 80%; /* Adjust the width as needed */
+      border: 1px solid #ccc; /* Border for the rectangle */
+      padding: 10px;
+      background-color: #f0f0f0;
+      font-family: monospace; /* Console-type font for the changelog content */
+      overflow: auto; /* Add scrollbars if content overflows */
+  }
+</style>
+
+<div class="container">
+  
+<div class="left-div">If you have <a href="https://flipper-xtre.me/update/" target="_blank">Xtreme firmware</a> on your Flipper Zero, then the apps are already on <i>Apps/GPIO</i>. You can also manually install them, one by one, using the links below:
+
+<ul>
+	<li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_marauder_companion&amp;firmware=unleashed" target="_blank">Marauder v0.6.2</a> (for <i>evil portal</i>, you need <i>ap.config.txt</i> and <i>index.html</i> on your ESP32CAM sd, check <a target="_blank" href=https://github.com/justcallmekoko/ESP32Marauder/wiki/evilportal>here</a>)</li>
+	<li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_camera&amp;firmware=unleashed" target="_blank">Camera v1.0.0</a></li>
+	<li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_morseflasher&amp;firmware=unleashed" target="_blank">MorseFlasher v0.1</a> (decoder app: <a target="_blank" href=https://m.apkpure.com/morse-code-agent-standard/com.erdatsai.morsecodeagent>apk</a>/<a target="_blank" href=https://play.google.com/store/apps/details?id=com.erdatsai.morsecodeagentpro>pro</a>)</li>
+	<li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_nannycam&amp;firmware=unleashed" target="_blank">NannyCam v0.1</a></li>
+	<li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_motion_detection&amp;firmware=unleashed" target="_blank">Motion v0.1</a></li>
+	<li><a href="https://flipc.org/eried/flipperzero-mayhem?root=flipper_companion_apps/applications/external/esp32cam_qrcode&amp;firmware=unleashed" target="_blank">QRcode v0.1</a></li>
+	<li>
+    <span style="color: gray;"><span style="text-decoration: line-through;">[MAYHEM] EvilPortal.fap</span> (now it is part of Marauder)</span>
+</li>
+</ul>
+
+Next, jumper pin <strong>IO0</strong> to <strong>GND</strong> and press and release reset on the ESP32CAM. Upload the firmware pressing Install button below. For more details on the apps check <a href="https://www.youtube.com/watch?v=F9Zp6oM2KYs">this</a> video, or take a look of the <a href="https://github.com/eried/flipperzero-mayhem/wiki">documentation</a>.<br><br><strong>Note 1:</strong> If you are using your Flipper to upload the firmware, remember to go to GPIO/USB-UART Bridge. After the upload, reset the ESP32 (or unplug/replug the module).<br><br><strong>Note 2:</strong> If you do not see the Install button below, your browser might not support this functionality.<br><br><strong>Note 3:</strong> <a href="https://github.com/eried/flipperzero-mayhem/wiki/Known-issues#mode-switch">Unplug</a> the USB-C cable to test the apps.<br><br>
+    <esp-web-install-button manifest="build/manifest.json"></esp-web-install-button>
+<p>Enjoy!</p></div>
+    
+      <div class="right-div"><!--<blockquote class="tiktok-embed" cite="https://www.tiktok.com/@erwinried/video/7194596683051764998" data-video-id="7194596683051764998" style="max-width: 605px;min-width: 325px;" > <section> <a target="_blank" title="@erwinried" href="https://www.tiktok.com/@erwinried?refer=embed">@erwinried</a> <a title="flipper" target="_blank" href="https://www.tiktok.com/tag/flipper?refer=embed">#flipper</a> <a title="flipperzero" target="_blank" href="https://www.tiktok.com/tag/flipperzero?refer=embed">#flipperzero</a> <a title="esp32" target="_blank" href="https://www.tiktok.com/tag/esp32?refer=embed">#esp32</a> <a target="_blank" title="? original sound - Erwin Ried" href="https://www.tiktok.com/music/original-sound-7194596679625001734?refer=embed">? original sound - Erwin Ried</a> </section> </blockquote> <script async src="https://www.tiktok.com/embed.js"></script>-->
+        <iframe width="400" height="230" src="https://www.youtube.com/embed/FATi5LiDsE0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          
+    <iframe width="400" height="230" src="https://www.youtube.com/embed/PVgeHghKsnQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>    
+        
+        </div>
+    
+</div>
+
+<div class="changelog-box">
+Changelog<br><br>
+v0.12.0 2023-09-14<br>
+* All the apps will have the version number now in the name<br>
+* Updated Marauder code to latest version<br>
+* Removed EvilPortal companion, since Marauder implements it now<br>
+</div>
+
+</body>
+</html>
