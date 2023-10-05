@@ -32,8 +32,12 @@ SOFTWARE.
 #include "../nhc_link042_emulator.h"
 #include "../minichlink_debugger.h"
 
-const NotificationSequence sequence_session_init = {
+const NotificationSequence sequence_backlight_on = {
     &message_display_backlight_on,
+    NULL,
+};
+
+const NotificationSequence sequence_session_init = {
     &message_blink_start_10,
     &message_blink_set_color_red,
     &message_do_not_reset,
@@ -41,7 +45,8 @@ const NotificationSequence sequence_session_init = {
 };
 
 const NotificationSequence sequence_session_end = {
-    &message_green_0,
+    &message_red_0,
+    &message_blink_stop,
     NULL,
 };
 
@@ -51,6 +56,7 @@ static void debugger_event_handler(void* context, WchSwioFlasher_MinichlinkDebug
     switch(ev) {
     case WchSwioFlasher_MinichlinkDebugger_InitSessionEvent:
         debugger_emulator_set_animation_status(app->views.debuger_emulator, 1);
+        notification_message(app->notification, &sequence_backlight_on);
         notification_message(app->notification, &sequence_session_init);
         break;
     case WchSwioFlasher_MinichlinkDebugger_EndSessionEvent:
