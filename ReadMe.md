@@ -237,7 +237,7 @@ $ ./fbt dolphin_ext
 - [Monty Hall v1.1 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
 - [NFC Crocodile (By Firemoon777)](https://github.com/Firemoon777/NfcCrocodile)
-- [Nu Pogodi! (Ну, погоди!) v1.1 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
+- [Nu Pogodi! (Ну, погоди!) v1.2 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
 - [Paint v1.1 (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Pong v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-pong) [(Patched By SimplyMinimal)](https://github.com/nmrr/flipperzero-pong/pull/2)
 - [Race v1.1 (By zyuhel)](https://github.com/zyuhel/flipperzero-racegame)
