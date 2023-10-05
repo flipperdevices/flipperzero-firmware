@@ -191,10 +191,15 @@ void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance) {
 
     furi_string_push_back(instance->mirror.ascii_mirror_data, 'x');
 
-    mf_ultraligt_format_mirror_data(
-        instance->mirror.ascii_mirror_data,
-        instance->data->counter[2].data,
-        sizeof(instance->data->counter[2].data));
+    mf_ultraligt_mirror_format_counter(instance);
+}
+
+void mf_ultraligt_mirror_format_counter(MfUltralightListener* instance) {
+    furi_string_left(
+        instance->mirror.ascii_mirror_data, instance->data->iso14443_3a_data->uid_len * 2 + 1);
+
+    uint8_t* c = instance->data->counter[2].data;
+    furi_string_cat_printf(instance->mirror.ascii_mirror_data, "%02X%02X%02X", c[2], c[1], c[0]);
 }
 
 bool mf_ultralight_composite_command_in_progress(MfUltralightListener* instance) {
@@ -222,8 +227,10 @@ void mf_ultralight_composite_command_set_next(
 void mf_ultralight_single_counter_try_increase(MfUltralightListener* instance) {
     if(mf_ultralight_support_feature(instance->features, MfUltralightFeatureSupportSingleCounter) &&
        instance->config->access.nfc_cnt_en && !instance->single_counter_increased) {
-        if(instance->data->counter[2].counter < MF_ULTRALIGHT_MAX_CNTR_VAL)
+        if(instance->data->counter[2].counter < MF_ULTRALIGHT_MAX_CNTR_VAL) {
             instance->data->counter[2].counter++;
+            mf_ultraligt_mirror_format_counter(instance);
+        }
         instance->single_counter_increased = true;
     }
 }
