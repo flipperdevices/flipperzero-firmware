@@ -11,6 +11,6 @@ App(
     fap_icon="wch_swio_flasher.png",  # 10x10 1-bit PNG
     fap_description="A WHC CH32V003 debugger/flasher tool",
     fap_author="Vojtech Suk",
-    fap_weburl="https://github.com/user/wch_swio_flasher",
+    fap_weburl="https://github.com/sukvojte/wch_swio_flasher",
     fap_icon_assets="images",  # Image assets to compile for this application
 )
