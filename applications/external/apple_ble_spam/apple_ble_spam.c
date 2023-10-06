@@ -3,7 +3,6 @@
 #include <furi_hal_bt.h>
 #include <stdint.h>
 #include <furi_hal_random.h>
-#include <assets_icons.h>
 #include "apple_ble_spam_icons.h"
 #include "lib/continuity/continuity.h"
 
@@ -50,9 +49,9 @@ struct hci_request {
     int rlen;
 };
 
-#define HCI_SEND_REQ_ADDR 0x08015eb4
-#define TARGET_SEQUENCE 0x48f2e800
-#define SEQUENCE_OFFSET 70
+#define HCI_SEND_REQ_ADDR 0x080161e8
+#define TARGET_SEQUENCE 0x33680446
+#define SEQUENCE_OFFSET 6
 #define START_ADDR 0x8000140
 #define END_ADDR 0x80800ec
 
