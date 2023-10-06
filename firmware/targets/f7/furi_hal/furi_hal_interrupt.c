@@ -7,8 +7,6 @@
 #include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_cortex.h>
-#include <stm32wbxx_ll_lpuart.h>
-#include <stm32wbxx_ll_usart.h>
 
 #define TAG "FuriHalInterrupt"
 
