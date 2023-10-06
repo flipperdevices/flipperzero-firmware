@@ -448,6 +448,12 @@ NfcError nfc_iso14443a_poller_trx_custom_parity(
             ret = nfc_process_hal_error(error);
             break;
         }
+        if(instance->rx_bits >= 9) {
+            if((instance->rx_bits % 9) != 0) {
+                ret = NfcErrorDataFormat;
+                break;
+            }
+        }
 
         bit_buffer_copy_bytes_with_parity(rx_buffer, instance->rx_buffer, instance->rx_bits);
     } while(false);
