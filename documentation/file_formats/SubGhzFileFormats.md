@@ -6,9 +6,9 @@ Flipper uses `.sub` files to store SubGhz transmissions. These are text files in
 
 A `.sub` files consist of 3 parts:
 
-- **header** contains file type, version, and frequency
-- **preset information** preset type and, in case of a custom preset, transceiver configuration data
-- **protocol and its data** contains protocol name and its specific data, such as key, bit length, etc., or RAW data
+- **header**, contains file type, version, and frequency
+- **preset information**, preset type and, in case of a custom preset, transceiver configuration data
+- **protocol and its data**, contains protocol name and its specific data, such as key, bit length, etc., or RAW data
 
 Flipper's SubGhz subsystem uses presets to configure the radio transceiver. Presets are used to configure modulation, bandwidth, filters, etc. There are several presets available in stock firmware, and there is a way to create custom presets. See [SubGhz Presets](#adding-a-custom-preset) for more details.
 
@@ -45,10 +45,10 @@ Built-in presets:
 
 Transceiver configuration data is a string of bytes, encoded in hex format, separated by spaces. For CC1101 data structure is: `XX YY XX YY .. 00 00 ZZ ZZ ZZ ZZ ZZ ZZ ZZ ZZ`, where:
 
-- **XX** holds register address,
-- **YY** contains register value,
-- **00 00**: marks register block end,
-- `ZZ ZZ ZZ ZZ ZZ ZZ ZZ ZZ`: 8 byte PA table (Power amplifier ramp table).
+- **XX**, holds register address,
+- **YY**, contains register value,
+- **00 00**, marks register block end,
+- **ZZ ZZ ZZ ZZ ZZ ZZ ZZ ZZ**, 8 byte PA table (Power amplifier ramp table).
 
 You can find more details in the [CC1101 datasheet](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and `furi_hal_subghz` code.
 
@@ -105,13 +105,13 @@ BinRAW `.sub` files and `RAW` files both contain data that has not been decoded 
 
 For `BinRAW` files, the following parameters are required and must be aligned to the left:
 
-- **Protocol** must be `RAW`.
-- **Bit** is the length of the payload of the entire file, in bits (max 4096).
-- **TE** is the quantization interval, in us.
-- **Bit_RAW** is the length of the payload in the next Data_RAW parameter, in bits.
-- **Data_RAW** is an encoded sequence of durations, where each bit in the sequence encodes one TE interval: 1 - high level (there is a carrier), 0 – low (no carrier).
+- **Protocol**, must be `BinRAW`.
+- **Bit**, is the length of the payload of the entire file, in bits (max 4096).
+- **TE**, is the quantization interval, in us.
+- **Bit_RAW**, is the length of the payload in the next Data_RAW parameter, in bits.
+- **Data_RAW**, is an encoded sequence of durations, where each bit in the sequence encodes one TE interval: 1 - high level (there is a carrier), 0 - low (no carrier).
     For example, TE=100, Bit_RAW=8, Data_RAW=0x37 => 0b00110111, that is, `-200 200 -100 300` will be transmitted.
-    When sending uploads, `Bit_RAW` and `Data_RAW` form a repeating block. Ûeveral such blocks are necessary if you want to send different sequences sequentially. However, usually, there will be only one block.
+    When sending uploads, `Bit_RAW` and `Data_RAW` form a repeating block. Several such blocks are necessary if you want to send different sequences sequentially. However, usually, there will be only one block.
 
 Example data from a `BinRAW` file:
 
