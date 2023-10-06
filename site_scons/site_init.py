@@ -2,7 +2,8 @@ import sys
 import os
 import atexit
 from ansi.color import fg, fx
-from SCons.Script import GetBuildFailures, Errors
+from SCons.Script import GetBuildFailures
+import SCons.Errors
 
 # necessary paths
 sys.path.insert(0, os.path.join(os.getcwd(), "scripts"))
