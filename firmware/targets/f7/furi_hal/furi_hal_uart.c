@@ -22,7 +22,7 @@ typedef struct {
     void* rx_callback_context;
 } FuriHalUart;
 
-static FuriHalUart* uart[FuriHalUartIdMAX] = {NULL, NULL};
+static FuriHalUart* uart[FuriHalUartIdMAX] = {0};
 
 inline void furi_hal_uart_wait_tx_complete(FuriHalUartId ch) {
     if(ch == FuriHalUartIdUSART1) {
@@ -46,7 +46,7 @@ static void furi_hal_usart_irq_callback() {
         LL_USART_ClearFlag_IDLE(USART1);
         if(uart[FuriHalUartIdUSART1]->rx_dma_callback) {
             uart[FuriHalUartIdUSART1]->rx_dma_callback(
-                FuriHalUartDmaEventRxEnd,
+                FuriHalUartDmaRxEventEnd,
                 FuriHalUartIdUSART1,
                 furi_hal_uart_dma_bytes_available(FuriHalUartIdUSART1),
                 uart[FuriHalUartIdUSART1]->rx_callback_context);
@@ -68,7 +68,7 @@ static void furi_hal_usart_dma_rx_isr() {
             FURI_HAL_UART_DMA_RX_BUFFER_SIZE / 4)) {
             if(uart[FuriHalUartIdUSART1]->rx_dma_callback) {
                 uart[FuriHalUartIdUSART1]->rx_dma_callback(
-                    FuriHalUartDmaEventRx,
+                    FuriHalUartDmaRxEventRx,
                     FuriHalUartIdUSART1,
                     furi_hal_uart_dma_bytes_available(FuriHalUartIdUSART1),
                     uart[FuriHalUartIdUSART1]->rx_callback_context);
@@ -82,7 +82,7 @@ static void furi_hal_usart_dma_rx_isr() {
            FURI_HAL_UART_DMA_RX_BUFFER_SIZE * 3 / 4) {
             if(uart[FuriHalUartIdUSART1]->rx_dma_callback) {
                 uart[FuriHalUartIdUSART1]->rx_dma_callback(
-                    FuriHalUartDmaEventRx,
+                    FuriHalUartDmaRxEventRx,
                     FuriHalUartIdUSART1,
                     furi_hal_uart_dma_bytes_available(FuriHalUartIdUSART1),
                     uart[FuriHalUartIdUSART1]->rx_callback_context);
@@ -201,7 +201,7 @@ static void furi_hal_lpuart_irq_callback() {
         LL_LPUART_ClearFlag_IDLE(LPUART1);
         if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
             uart[FuriHalUartIdLPUART1]->rx_dma_callback(
-                FuriHalUartDmaEventRxEnd,
+                FuriHalUartDmaRxEventEnd,
                 FuriHalUartIdLPUART1,
                 furi_hal_uart_dma_bytes_available(FuriHalUartIdLPUART1),
                 uart[FuriHalUartIdLPUART1]->rx_callback_context);
@@ -223,7 +223,7 @@ static void furi_hal_lpuart_dma_rx_isr() {
             FURI_HAL_UART_DMA_RX_BUFFER_SIZE / 4)) {
             if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
                 uart[FuriHalUartIdLPUART1]->rx_dma_callback(
-                    FuriHalUartDmaEventRx,
+                    FuriHalUartDmaRxEventRx,
                     FuriHalUartIdLPUART1,
                     furi_hal_uart_dma_bytes_available(FuriHalUartIdLPUART1),
                     uart[FuriHalUartIdLPUART1]->rx_callback_context);
@@ -237,7 +237,7 @@ static void furi_hal_lpuart_dma_rx_isr() {
            FURI_HAL_UART_DMA_RX_BUFFER_SIZE * 3 / 4) {
             if(uart[FuriHalUartIdLPUART1]->rx_dma_callback) {
                 uart[FuriHalUartIdLPUART1]->rx_dma_callback(
-                    FuriHalUartDmaEventRx,
+                    FuriHalUartDmaRxEventRx,
                     FuriHalUartIdLPUART1,
                     furi_hal_uart_dma_bytes_available(FuriHalUartIdLPUART1),
                     uart[FuriHalUartIdLPUART1]->rx_callback_context);
@@ -513,6 +513,7 @@ size_t furi_hal_uart_dma_rx(FuriHalUartId ch, uint8_t* data, size_t len) {
 
 void furi_hal_uart_set_irq_cb(FuriHalUartId ch, FuriHalUartRxByteCallback callback, void* context) {
     furi_assert(uart[ch] != NULL);
+
     if(ch == FuriHalUartIdUSART1) {
         if(callback == NULL) {
             furi_hal_interrupt_set_isr(FuriHalInterruptIdUart1, NULL, NULL);

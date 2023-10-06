@@ -77,7 +77,7 @@ static const CdcCallbacks cdc_cb = {
 static int32_t usb_uart_tx_thread(void* context);
 
 static void usb_uart_on_irq_rx_dma_cb(
-    FuriHalUartDmaEvent ev,
+    FuriHalUartDmaRxEvent ev,
     FuriHalUartId id_uart,
     size_t data_len,
     void* context) {

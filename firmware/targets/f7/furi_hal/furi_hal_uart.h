@@ -86,13 +86,13 @@ void furi_hal_uart_set_irq_cb(FuriHalUartId ch, FuriHalUartRxByteCallback callba
 
 /** UART DMA events */
 typedef enum {
-    FuriHalUartDmaEventRx,
-    FuriHalUartDmaEventRxEnd,
-} FuriHalUartDmaEvent;
+    FuriHalUartDmaRxEventRx,
+    FuriHalUartDmaRxEventEnd,
+} FuriHalUartDmaRxEvent;
 
 /** UART IRQ events */
 typedef void (*FuriHalUartDmaRxCallback)(
-    FuriHalUartDmaEvent ev,
+    FuriHalUartDmaRxEvent ev,
     FuriHalUartId id_uart,
     size_t data_len,
     void* context);
