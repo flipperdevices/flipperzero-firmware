@@ -10,6 +10,7 @@ from flipperzero_protobuf_py.flipperzero_protobuf.flipper_base import (
     FlipperProtoException,
 )
 from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import FlipperProto
+from flippigator.extensions.proxmark_wrapper import proxmark_wrapper
 from flippigator.flippigator import (
     FlippigatorException,
     Gator,
@@ -83,6 +84,13 @@ def pytest_addoption(parser):
         action="store_true",
         default=False,
         help="use this flag for skip setup cycle",
+    )
+    parser.addoption(
+        "--px3_path",
+        action="store",
+        default="C:\\Users\\User\\Desktop\\proxmark3\\client\\proxmark3.exe",
+        help="path to proxmark3 executable file",
+        type=str,
     )
 
 
@@ -338,6 +346,12 @@ def nav(flipper_serial, request):
             raise FlippigatorException("Can not enable debug")
 
     return nav
+
+
+@pytest.fixture(scope="session")
+def px(request):
+    px = proxmark_wrapper(request.config.getoption("--px3_path"))
+    return px
 
 
 @pytest.fixture(scope="session")

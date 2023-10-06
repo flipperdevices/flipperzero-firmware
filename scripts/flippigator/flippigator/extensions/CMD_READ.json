@@ -1,0 +1,29 @@
+{
+  "scenarios": [
+    {
+      "Name":"1",
+      "Card":"NTAG213.nfc",
+      "Description":"Describes what scenario does",
+      "Cmds": [
+        {
+          "cmd":"hf 14a raw -sck 1BDEADBEAF",
+          "result":"00 00 [ A0 1E ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 300A",
+          "result": "04 BA FF C9 CA 4D 5D 80 5A 48 00 00 E1 10 12 00 [ F5 67 ]"
+        }
+      ]
+    },
+    {
+      "Name":"2",
+      "Card":"NTAG213.nfc",
+      "Cmds": [
+        {
+          "cmd":"hf 14a raw -sck 1BDEADBEAF",
+          "result":"00 00 [ A0 1E ]"
+        }
+      ]
+    }
+  ]
+}
