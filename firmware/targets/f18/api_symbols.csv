@@ -1266,12 +1266,12 @@ Function,-,furi_hal_spi_dma_init,void,
 Function,+,furi_hal_spi_release,void,FuriHalSpiBusHandle*
 Function,+,furi_hal_switch,void,void*
 Function,+,furi_hal_uart_deinit,void,FuriHalUartId
-Function,+,furi_hal_uart_dma_available,size_t,FuriHalUartId
+Function,+,furi_hal_uart_dma_bytes_available,size_t,FuriHalUartId
 Function,+,furi_hal_uart_init,void,"FuriHalUartId, uint32_t"
 Function,+,furi_hal_uart_resume,void,FuriHalUartId
-Function,+,furi_hal_uart_rx_dma,size_t,"FuriHalUartId, uint8_t*, size_t"
+Function,+,furi_hal_uart_dma_rx,size_t,"FuriHalUartId, uint8_t*, size_t"
 Function,+,furi_hal_uart_set_br,void,"FuriHalUartId, uint32_t"
-Function,+,furi_hal_uart_set_dma_callback,void,"FuriHalUartId, FuriHalUartRxDMACallback, void*"
+Function,+,furi_hal_uart_dma_start,void,"FuriHalUartId, FuriHalUartDmaRxCallback, void*"
 Function,+,furi_hal_uart_set_irq_cb,void,"FuriHalUartId, FuriHalUartRxByteCallback, void*"
 Function,+,furi_hal_uart_suspend,void,FuriHalUartId
 Function,+,furi_hal_uart_tx,void,"FuriHalUartId, uint8_t*, size_t"

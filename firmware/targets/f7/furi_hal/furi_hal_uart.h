@@ -6,13 +6,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/**
- * UART events
- */
+
+/** UART IRQ events */
 typedef enum {
-    UartIrqEventRxByte,
-    UartIrqEventRxDMAEnd,
-    UartIrqEventRxDMA,
+    UartIrqEventRXNE,
 } UartIrqEvent;
 
 /**
@@ -26,11 +23,6 @@ typedef enum {
 } FuriHalUartId;
 
 typedef void (*FuriHalUartRxByteCallback)(UartIrqEvent ev, uint8_t data, void* context);
-typedef void (*FuriHalUartRxDMACallback)(
-    UartIrqEvent ev,
-    FuriHalUartId id_uart,
-    size_t data_len,
-    void* context);
 
 /**
  * Uart wait tx complete
@@ -90,32 +82,49 @@ void furi_hal_uart_tx(FuriHalUartId channel, uint8_t* buffer, size_t buffer_size
  */
 void furi_hal_uart_set_irq_cb(FuriHalUartId ch, FuriHalUartRxByteCallback callback, void* context);
 
+/* DMA based UART API */
+
+/** UART DMA events */
+typedef enum {
+    FuriHalUartDmaEventRx,
+    FuriHalUartDmaEventRxEnd,
+} FuriHalUartDmaEvent;
+
+/** UART IRQ events */
+typedef void (*FuriHalUartDmaRxCallback)(
+    FuriHalUartDmaEvent ev,
+    FuriHalUartId id_uart,
+    size_t data_len,
+    void* context);
+
 /**
  * Sets UART event callback receive DMA
  * @param channel UART channel
  * @param callback callback pointer
  * @param context callback context
  */
-void furi_hal_uart_set_dma_callback(
+void furi_hal_uart_dma_start(
     FuriHalUartId ch,
-    FuriHalUartRxDMACallback callback,
+    FuriHalUartDmaRxCallback callback,
     void* context);
 
-/**
- * Get data UART receive DMA
- * @param channel UART channel
- * @param data pointer data receive
- * @param len get data size (in bytes)
- * @return size actual data receive (in bytes)
+/** Get data UART receive DMA
+ *
+ * @param[in]  ch    UART instance
+ * @param[in]  data  pointer to data buffer
+ * @param      len   get data size (in bytes)
+ * @param      channel  UART channel
+ *
+ * @return     size actual data receive (in bytes)
  */
-size_t furi_hal_uart_rx_dma(FuriHalUartId ch, uint8_t* data, size_t len);
+size_t furi_hal_uart_dma_rx(FuriHalUartId ch, uint8_t* data, size_t len);
 
-/**
- * Get data UART receive DMA available
+/** Get received data size in DMA buffer
+ * 
  * @param channel UART channel
- * @return size actual data receive (in bytes)
+ * @return received data size (in bytes)
  */
-size_t furi_hal_uart_dma_available(FuriHalUartId ch);
+size_t furi_hal_uart_dma_bytes_available(FuriHalUartId ch);
 
 #ifdef __cplusplus
 }

@@ -85,7 +85,7 @@ static void usb_uart_on_irq_rx_dma_cb(
 
     UNUSED(ev);
     uint8_t data[data_len];
-    furi_hal_uart_rx_dma(id_uart, data, data_len);
+    furi_hal_uart_dma_rx(id_uart, data, data_len);
     furi_stream_buffer_send(usb_uart->rx_stream, data, data_len, 100);
     furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
 }
@@ -121,7 +121,7 @@ static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
         furi_hal_console_deinit();
     }
     furi_hal_uart_init(uart_ch, 115200);
-    furi_hal_uart_set_dma_callback(uart_ch, usb_uart_on_irq_rx_dma_cb, usb_uart);
+    furi_hal_uart_dma_start(uart_ch, usb_uart_on_irq_rx_dma_cb, usb_uart);
 }
 
 static void usb_uart_serial_deinit(UsbUartBridge* usb_uart, uint8_t uart_ch) {
