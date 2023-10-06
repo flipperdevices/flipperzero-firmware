@@ -483,9 +483,9 @@ static MfUltralightCommand
             break;
 
         uint8_t start_page = bit_buffer_get_byte(buffer, 1);
-        uint16_t pages_total = instance->data->pages_total;
+        uint16_t last_page = instance->data->pages_total - 1;
 
-        if(start_page < 2 || start_page > pages_total) {
+        if(start_page < 2 || start_page > last_page) {
             command = MfUltralightCommandNotProcessedNAK;
             break;
         }
