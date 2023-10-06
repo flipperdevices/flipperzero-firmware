@@ -24,3 +24,5 @@ To make updating more manageable, we have added another layer on top of subtrees
 - we have a git alias `update-subtree` for pulling updates based on the current directory (set it up by running `git config --local include.path ../.gitconfig`)
 - run `git update-subtree` in each subtree folder to update it
 - or run `find . -name .gitremote -execdir git update-subtree \;` to run it on all subtrees
+
+Also, some repos dont have the code in their top-level folders, so for those we have symlinks from our root folder to the approriate place in `.modules/`.
