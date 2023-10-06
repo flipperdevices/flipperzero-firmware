@@ -1,25 +1,25 @@
 #include <dialogs/dialogs.h>
-#include "mjs_thread.h"
+#include "js_thread.h"
 #include <storage/storage.h>
-#include "mjs_app_i.h"
+#include "js_app_i.h"
 #include <toolbox/path.h>
 
 #define TAG "MJS app"
 
 typedef struct {
-    MjsThread* mjs_thread;
+    JsThread* js_thread;
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     Loading* loading;
-    MjsConsoleView* console_view;
-} MjsApp;
+    JsConsoleView* console_view;
+} JsApp;
 
-static uint32_t mjs_view_exit(void* context) {
+static uint32_t js_view_exit(void* context) {
     UNUSED(context);
     return VIEW_NONE;
 }
 
-static void mjs_app_compact_trace(FuriString* trace_str) {
+static void js_app_compact_trace(FuriString* trace_str) {
     // Keep only first line
     size_t line_end = furi_string_search_char(trace_str, '\n');
     if(line_end > 0) {
@@ -39,29 +39,29 @@ static void mjs_app_compact_trace(FuriString* trace_str) {
     furi_string_free(file_name);
 }
 
-static void mjs_callback(MjsThreadEvent event, const char* msg, void* context) {
-    MjsApp* app = context;
+static void js_callback(JsThreadEvent event, const char* msg, void* context) {
+    JsApp* app = context;
     furi_assert(app);
 
-    if(event == MjsThreadEventDone) {
+    if(event == JsThreadEventDone) {
         FURI_LOG_I(TAG, "Script done");
         console_view_print(app->console_view, "--- DONE ---");
-    } else if(event == MjsThreadEventPrint) {
+    } else if(event == JsThreadEventPrint) {
         console_view_print(app->console_view, msg);
-    } else if(event == MjsThreadEventError) {
+    } else if(event == JsThreadEventError) {
         console_view_print(app->console_view, "--- ERROR ---");
         console_view_print(app->console_view, msg);
-    } else if(event == MjsThreadEventErrorTrace) {
+    } else if(event == JsThreadEventErrorTrace) {
         FuriString* compact_trace = furi_string_alloc_set_str(msg);
-        mjs_app_compact_trace(compact_trace);
+        js_app_compact_trace(compact_trace);
         console_view_print(app->console_view, furi_string_get_cstr(compact_trace));
         furi_string_free(compact_trace);
         console_view_print(app->console_view, "See logs for full trace");
     }
 }
 
-static MjsApp* mjs_app_alloc(void) {
-    MjsApp* app = malloc(sizeof(MjsApp));
+static JsApp* js_app_alloc(void) {
+    JsApp* app = malloc(sizeof(JsApp));
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->loading = loading_alloc();
@@ -70,22 +70,22 @@ static MjsApp* mjs_app_alloc(void) {
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_add_view(
-        app->view_dispatcher, MjsAppViewLoading, loading_get_view(app->loading));
+        app->view_dispatcher, JsAppViewLoading, loading_get_view(app->loading));
 
     app->console_view = console_view_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, MjsAppViewConsole, console_view_get_view(app->console_view));
-    view_set_previous_callback(console_view_get_view(app->console_view), mjs_view_exit);
-    view_dispatcher_switch_to_view(app->view_dispatcher, MjsAppViewConsole);
+        app->view_dispatcher, JsAppViewConsole, console_view_get_view(app->console_view));
+    view_set_previous_callback(console_view_get_view(app->console_view), js_view_exit);
+    view_dispatcher_switch_to_view(app->view_dispatcher, JsAppViewConsole);
 
     return app;
 }
 
-static void mjs_app_free(MjsApp* app) {
+static void js_app_free(JsApp* app) {
     console_view_free(app->console_view);
-    view_dispatcher_remove_view(app->view_dispatcher, MjsAppViewConsole);
+    view_dispatcher_remove_view(app->view_dispatcher, JsAppViewConsole);
     loading_free(app->loading);
-    view_dispatcher_remove_view(app->view_dispatcher, MjsAppViewLoading);
+    view_dispatcher_remove_view(app->view_dispatcher, JsAppViewLoading);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close("gui");
@@ -93,8 +93,8 @@ static void mjs_app_free(MjsApp* app) {
     free(app);
 }
 
-int32_t mjs_app(void* arg) {
-    MjsApp* app = mjs_app_alloc();
+int32_t js_app(void* arg) {
+    JsApp* app = js_app_alloc();
 
     FuriString* script_path = furi_string_alloc_set(APP_ASSETS_PATH());
     do {
@@ -117,15 +117,15 @@ int32_t mjs_app(void* arg) {
         furi_string_free(name);
         furi_string_free(start_text);
 
-        app->mjs_thread = mjs_thread_run(furi_string_get_cstr(script_path), mjs_callback, app);
+        app->js_thread = js_thread_run(furi_string_get_cstr(script_path), js_callback, app);
         view_dispatcher_run(app->view_dispatcher);
 
-        mjs_thread_stop(app->mjs_thread);
-        mjs_thread_free(app->mjs_thread);
+        js_thread_stop(app->js_thread);
+        js_thread_free(app->js_thread);
     } while(0);
 
     furi_string_free(script_path);
 
-    mjs_app_free(app);
+    js_app_free(app);
     return 0;
 }

@@ -5,6 +5,6 @@
 #include "views/console_view.h"
 
 typedef enum {
-    MjsAppViewConsole,
-    MjsAppViewLoading,
-} MjsAppView;
+    JsAppViewConsole,
+    JsAppViewLoading,
+} JsAppView;

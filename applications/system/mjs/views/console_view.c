@@ -1,4 +1,4 @@
-#include "../mjs_app_i.h"
+#include "../js_app_i.h"
 #include "console_font.h"
 
 #define CONSOLE_LINES 8
@@ -6,16 +6,16 @@
 #define LINE_BREAKS_MAX 3
 #define LINE_LEN_MAX (128 / CONSOLE_CHAR_W)
 
-struct MjsConsoleView {
+struct JsConsoleView {
     View* view;
 };
 
 typedef struct {
     FuriString* text[CONSOLE_LINES];
-} MjsConsoleViewModel;
+} JsConsoleViewModel;
 
 static void console_view_draw_callback(Canvas* canvas, void* _model) {
-    MjsConsoleViewModel* model = _model;
+    JsConsoleViewModel* model = _model;
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_custom_u8g2_font(canvas, u8g2_font_spleen5x8_mr);
@@ -38,10 +38,10 @@ static bool console_view_input_callback(InputEvent* event, void* context) {
     return false;
 }
 
-void console_view_push_line(MjsConsoleView* console_view, const char* text, bool line_trimmed) {
+void console_view_push_line(JsConsoleView* console_view, const char* text, bool line_trimmed) {
     with_view_model(
         console_view->view,
-        MjsConsoleViewModel * model,
+        JsConsoleViewModel * model,
         {
             FuriString* str_temp = model->text[0];
             for(size_t i = 0; i < CONSOLE_LINES - 1; i++) {
@@ -58,7 +58,7 @@ void console_view_push_line(MjsConsoleView* console_view, const char* text, bool
         true);
 }
 
-void console_view_print(MjsConsoleView* console_view, const char* text) {
+void console_view_print(JsConsoleView* console_view, const char* text) {
     char line_buf[LINE_LEN_MAX + 1];
     uint8_t line_buf_cnt = 0;
     uint8_t utf8_bytes_left = 0;
@@ -127,16 +127,16 @@ void console_view_print(MjsConsoleView* console_view, const char* text) {
     }
 }
 
-MjsConsoleView* console_view_alloc(void) {
-    MjsConsoleView* console_view = malloc(sizeof(MjsConsoleView));
+JsConsoleView* console_view_alloc(void) {
+    JsConsoleView* console_view = malloc(sizeof(JsConsoleView));
     console_view->view = view_alloc();
     view_set_draw_callback(console_view->view, console_view_draw_callback);
     view_set_input_callback(console_view->view, console_view_input_callback);
-    view_allocate_model(console_view->view, ViewModelTypeLocking, sizeof(MjsConsoleViewModel));
+    view_allocate_model(console_view->view, ViewModelTypeLocking, sizeof(JsConsoleViewModel));
 
     with_view_model(
         console_view->view,
-        MjsConsoleViewModel * model,
+        JsConsoleViewModel * model,
         {
             for(size_t i = 0; i < CONSOLE_LINES; i++) {
                 model->text[i] = furi_string_alloc();
@@ -146,10 +146,10 @@ MjsConsoleView* console_view_alloc(void) {
     return console_view;
 }
 
-void console_view_free(MjsConsoleView* console_view) {
+void console_view_free(JsConsoleView* console_view) {
     with_view_model(
         console_view->view,
-        MjsConsoleViewModel * model,
+        JsConsoleViewModel * model,
         {
             for(size_t i = 0; i < CONSOLE_LINES; i++) {
                 furi_string_free(model->text[i]);
@@ -160,6 +160,6 @@ void console_view_free(MjsConsoleView* console_view) {
     free(console_view);
 }
 
-View* console_view_get_view(MjsConsoleView* console_view) {
+View* console_view_get_view(JsConsoleView* console_view) {
     return console_view->view;
 }

@@ -1,9 +1,9 @@
 App(
-    appid="m_js",
+    appid="mjs",
     name="MJS",
     fap_category="Tools",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="mjs_app",
+    entry_point="js_app",
     stack_size=2 * 1024,
     cdefines=[
         ("CS_PLATFORM", "CS_P_STM32"),
