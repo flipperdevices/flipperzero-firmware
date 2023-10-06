@@ -2,8 +2,7 @@
 
 [![FAP Build](https://github.com/ezod/flipperzero-gps/actions/workflows/build.yml/badge.svg)](https://github.com/ezod/flipperzero-gps/actions/workflows/build.yml)
 
-A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the
-[Adafruit Ultimate GPS Breakout].
+A simple Flipper Zero application for NMEA 0183 serial GPS modules.
 
 ![ui](ui.png)
 
@@ -24,7 +23,7 @@ This is a single-screen app, and a few interactions are provided via the
 hardware buttons:
 
 - Long press the up button to change the **baud rate**. The default baud rate
-  is 9600, but 19200, 38400, 57600, and 115200 baud are also supported.
+  is 9600, but 4800, 19200, 38400, 57600, and 115200 baud are also supported.
 - Long press the right button to change **speed units** from knots to
   kilometers per hour.
 - Press the OK button to set the **backlight** to always on mode. Press it
@@ -45,9 +44,20 @@ the hardware setup.
 ### Confirmed Compatible Modules
 
 * [Adafruit Ultimate GPS Breakout]
+* ATGM336H
 * Beitian BN-180
+* Beitian BN-280
+* Beitian BN-880
+* Beitian BK-250
+* Beitian BK-357
+* Beitian BK-880Q
+* Beitian BE-280
+* Beitian BN-280ZF
+* Beitian BN-357ZF
 * Royaltek RBT-2100LP
 * [u-blox NEO-6M]
+* [u-blox NEO-7M]
+* [Uputronics u-blox MAX-M8C Pico]
 
 If you have verified this application working with a module not listed here,
 please submit a PR adding it to the list.
@@ -61,4 +71,6 @@ of the repository.
 [minmea]: https://github.com/kosma/minmea
 [qFlipper]: https://flipperzero.one/update
 [u-blox NEO-6M]: https://www.u-blox.com/en/product/neo-6-series
+[u-blox NEO-7M]: https://www.u-blox.com/en/product/neo-7-series
 [uFBT]: https://github.com/flipperdevices/flipperzero-ufbt
+[Uputronics u-blox MAX-M8C Pico]: https://store.uputronics.com/index.php?route=product/product&product_id=72
