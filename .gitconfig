@@ -1,2 +1,3 @@
 [alias]
     update-subtree = "!f() { git subtree pull -P $GIT_PREFIX $(<${GIT_PREFIX}.gitremote); }; f"
+    bulk-update-subtree = "!f() { find . -name .gitremote -execdir git update-subtree \\;; }; f"
