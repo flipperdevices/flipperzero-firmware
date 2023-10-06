@@ -11,9 +11,10 @@ class command_result:
         return self.__Result
 
     def __init__(self, input):
+        print("input: ", input)
         s = str(input).split("\n")
         self.__Command = s[0]
-        self.__Result = s[1].removeprefix("[+] ")
+        self.__Result = s[1].removeprefix("[+] ").removesuffix(" ")
 
 
 class proxmark_command:
@@ -24,7 +25,7 @@ class proxmark_command:
     @property
     def Result(self):
         return self.__Result
-    
+
     @property
     def Expected(self):
         return self.__Expected
@@ -37,11 +38,12 @@ class proxmark_command:
         self.__Command = cmd
         self.__Expected = expected
 
+
 class Scenario:
     def __init__(self, json):
-        self.Name = self.__decode(json,"Name")
-        self.Card = self.__decode(json,"Card")
-        self.Description = self.__decode(json,"Description")
+        self.Name = self.__decode(json, "Name")
+        self.Card = self.__decode(json, "Card")
+        self.Description = self.__decode(json, "Description")
         self.Cmds = []
         for jsc in json["Cmds"]:
             cmd = proxmark_command(jsc["cmd"], jsc["result"])
@@ -52,11 +54,9 @@ class Scenario:
             return json[name]
         except KeyError:
             return ""
-    
-    def get_commands(self)->List[str]:
+
+    def get_commands(self) -> List[str]:
         result = []
-        for cmd in self.Cmds:            
+        for cmd in self.Cmds:
             result.append(cmd.Command + "\n")
         return result
-
-        

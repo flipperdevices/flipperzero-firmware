@@ -1,4 +1,3 @@
-
 class nfc_scenario:
     @property
     def Name(self):

@@ -1,8 +1,10 @@
 import unittest
-from proxmark_wrapper import proxmark_wrapper
+
 from command_result import command_result
+from proxmark_wrapper import proxmark_wrapper
 
 PM3 = "C:\\Proxmark\\pm3.bat"
+
 
 class TestCmdRead(unittest.TestCase):
     def setUp(self) -> None:
@@ -19,5 +21,6 @@ class TestCmdRead(unittest.TestCase):
         self.assertEqual(result[0].Command, cmd.removesuffix("\n"))
         self.assertEqual(result[0].Result, expected)
 
+
 if __name__ == "__main__":
-  unittest.main()
+    unittest.main()
