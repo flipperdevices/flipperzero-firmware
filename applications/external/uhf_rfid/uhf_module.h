@@ -1,8 +1,10 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stddef.h>
+#include <furi_hal.h>
+#include "uhf_tag.h"
 #include "uhf_buffer.h"
 #include "uhf_tag.h"
 #include <furi_hal.h>
@@ -46,6 +48,7 @@ M100Module* m100_module_alloc();
 void m100_module_free(M100Module* module);
 uint16_t crc16_genibus(const uint8_t* data, size_t length);
 uint8_t checksum(const uint8_t* data, size_t length);
+uint8_t get_baudrate_count();
 
 // Function prototypes
 char* m100_get_hardware_version(M100Module* module);
