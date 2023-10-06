@@ -1,4 +1,4 @@
-# <img src="./xbox_controller.png" height="20px" /> Xbox Controller for Flipper Zero
+# <img src="./xbox_controller.png" height="20px" /> [Xbox Controller for Flipper Zero](https://github.com/gebeto/flipper-xbox-controller)
 
 <img src="https://i.imgur.com/kfxmusm.png" height="256px" />
 
