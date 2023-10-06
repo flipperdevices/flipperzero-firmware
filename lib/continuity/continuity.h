@@ -4,11 +4,12 @@
 #include <stdlib.h>
 
 // Hacked together by @Willy-JL
-// Custom adv logic by @Willy-JL and @xMasterX
+// Custom adv logic by @Willy-JL (idea by @xMasterX)
+// iOS 17 Crash by @ECTO-1A
 // Extensive testing and research on behavior and parameters by @Willy-JL and @ECTO-1A
 // Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
-// Airtag ID from https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
+// Controversy explained at https://willyjl.dev/blog/the-controversy-behind-apple-ble-spam
 
 typedef enum {
     ContinuityTypeAirDrop = 0x05,
@@ -17,6 +18,9 @@ typedef enum {
     ContinuityTypeHandoff = 0x0C,
     ContinuityTypeTetheringSource = 0x0E,
     ContinuityTypeNearbyAction = 0x0F,
+    ContinuityTypeNearbyInfo = 0x10,
+
+    ContinuityTypeCustomCrash,
     ContinuityTypeCount
 } ContinuityType;
 
@@ -37,6 +41,10 @@ typedef union {
         uint8_t flags;
         uint8_t type;
     } nearby_action;
+    struct {
+    } nearby_info;
+    struct {
+    } custom_crash;
 } ContinuityData;
 
 typedef struct {
