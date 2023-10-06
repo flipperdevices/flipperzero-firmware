@@ -225,14 +225,17 @@ Thank you!
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
+Donations are welcome and appreciated!
+
+| Type                                                           | Info                                                                               |
+| :------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| <img width="48" src=".github/ng-icons/email.svg" />            | webmaster@codytolene.com                                                           |
+| <img width="48" src=".github/simple-icons/buymeacoffee.svg" /> | https://www.buymeacoffee.com/codytolene                                            |
+| <img width="48" src=".github/images/bitcoin-btc-logo.svg" />   | [bc1qfx3lvspkj0q077u3gnrnxqkqwyvcku2nml86wmudy7yf2u8edmqq0a5vnt][btc-address-link] |
 
 Fin. Thanks for looking and happy programming friend!
 
 Cody
-
-Donations are welcome and appreciated!
-
-btc: [bc1qfx3lvspkj0q077u3gnrnxqkqwyvcku2nml86wmudy7yf2u8edmqq0a5vnt][btc-address-link]
 
 <!-- LINKS -->
 
