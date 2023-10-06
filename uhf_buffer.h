@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#define MAX_BUFFER_SIZE 100
+#define MAX_BUFFER_SIZE 200
 
 typedef struct Buffer {
     uint8_t* data;
