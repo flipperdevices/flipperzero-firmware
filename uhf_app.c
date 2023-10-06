@@ -122,9 +122,6 @@ void uhf_free(UHFApp* uhf_app) {
     view_dispatcher_remove_view(uhf_app->view_dispatcher, UHFViewLoading);
     loading_free(uhf_app->loading);
 
-    // Variable Item List
-    variable_item_list_free(uhf_app->variable_item_list);
-
     // TextInput
     view_dispatcher_remove_view(uhf_app->view_dispatcher, UHFViewTextInput);
     text_input_free(uhf_app->text_input);
