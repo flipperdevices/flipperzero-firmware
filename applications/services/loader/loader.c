@@ -3,12 +3,10 @@
 #include "loader_i.h"
 #include <applications.h>
 #include <storage/storage.h>
-//#include <storage/filesystem_api_defines.h>
 #include <furi_hal.h>
 #include <cfw.h>
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
-#include <toolbox/dir_walk.h>
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
 #include <toolbox/stream/file_stream.h>
@@ -222,40 +220,11 @@ static void loader_make_mainmenu_file(Storage* storage) {
 }
 
 static void loader_make_gamesmenu_file(Storage* storage) {
-    DirWalk* dir_walk = dir_walk_alloc(storage);
-    FuriString* name;
-    name = furi_string_alloc();
-
-    char* path = EXT_PATH("apps/Games");
-    size_t count = 0;
-
-    Stream* new = file_stream_alloc(storage);
-    if(!storage_file_exists(storage, CFW_MENU_GAMESMODE_PATH)) {
-        if(file_stream_open(new, CFW_MENU_GAMESMODE_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-            stream_write_format(new, "GamesMenuList Version %u\n", 0);
-
-            if(dir_walk_open(dir_walk, path)) {
-                FileInfo fileinfo;
-
-                while(dir_walk_read(dir_walk, name, &fileinfo) == DirWalkOK) {
-                    if(!file_info_is_dir(&fileinfo)) {
-                        char ext[5];
-                        path_extract_extension(name, ext, 5);
-
-                        if(strcmp(ext, ".fap") == 0) {
-                            if(count < 128) {
-                                stream_write_format(new, "%s\n", furi_string_get_cstr(name));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        furi_string_free(name);
-        dir_walk_free(dir_walk);
+    if(!storage_file_exists(storage, CFW_MENU_GAMESMODE_PATH) &&
+       storage_file_exists(storage, CFG_PATH("cfw_gamesmenu.default.txt"))) {
+        storage_common_copy(
+            storage, CFG_PATH("cfw_gamesmenu.default.txt"), CFW_MENU_GAMESMODE_PATH);
     }
-    file_stream_close(new);
-    stream_free(new);
 }
 
 static Loader* loader_alloc() {

@@ -11,7 +11,6 @@
 
 #define T5577_OPCODE_PAGE_0 0b10
 #define T5577_OPCODE_PAGE_1 0b11
-#define T5577_OPCODE_TESTMODE 0b01
 #define T5577_OPCODE_RESET 0b00
 
 static void t5577_start() {
@@ -111,7 +110,7 @@ void t5577_write_with_pass(LFRFIDT5577* data, uint32_t password) {
     t5577_start();
     FURI_CRITICAL_ENTER();
     for(size_t i = 0; i < data->blocks_to_write; i++) {
-        t5577_write_block_pass(0, false, data->block[i], true, password);
+        t5577_write_block_pass(i, false, data->block[i], true, password);
     }
     t5577_write_reset();
     FURI_CRITICAL_EXIT();

@@ -1,49 +1,91 @@
-# Flipper Zero Cross Remote
+# flipper-xremote
+Advanced IR Remote App for Flipper Device 
 
-## Current State
-- Infrared working
-- Pause working
-- SubGhz in Development
-- Edit/Rename/Delete features in development
+## Idea
+With the current infrared application, users must navigate through the menu to locate each button individually. This requires scrolling to the desired button and selecting it, which can be uncomfortable. The idea behind `XRemote` is that all physical buttons are pre-mapped to specific category buttons, and pressing a physical button directly sends an infrared signal. This allows the flipper device to be used as a remote rather than as a tool that has a remote.
 
-## What this is?
-This app combines commands used in IR and SubGhz into playlists that can be run with one click
-<br><br>
+`XRemote` also introduces a more user-friendly learning approach. Instead of having to manually name each button on the flipper when cloning a remote, the learning tool informs you upfront which buttons it will record. All you need to do is press the corresponding button on your existing remote, eliminating the need to name them individually.
 
-### What good is this?
-Imagine you want to sit down and watch a movie after a long days work. <br>
-Your probably do something like the following<br>
-- Turn on your TV with the IR TV remote<br>
-- Turn on your Bluray player with the Blueray IR remote<br>
-- Turn on your surround sound with the speaker IR remote<br>
-- Turn on your ceiling fan using a subGhz remote<br>
-- Turn on your AC using another remote<br>
-- etc<br>
-<br>
-Wouldn't it be nicer to simply click one button and let everything happen? This is what this app wants to do. <br>
+The application is compatible with standard `.ir` files. However, to ensure functionality, names within these files must align with the predefined naming scheme. If the button is not highlighted when pressed or the notification LED does not light up, the button with the appropriate name cannot be found in the file.
 
-### Features
-- Select commands from saved subGhz transmissions
-- Select commands registered with the IR App (choose from the created remote buttons)<br>
-- Chain these commands using an easy UI<br>
-- Save chained commands to a file<br>
-- Add pauses, becaue target systems are not always fast enough for multiple commands<br>
-- Run file containing chained IR & SubGhz commands<br>
+Button name | Description
+------------|-------------------
+`Power`     | Power
+`Setup`     | Setup/Settings
+`Input`     | Input/Source
+`Menu`      | Menu
+`List`      | List
+`Info`      | Info
+`Mode`      | Mode
+`Back`      | Back
+`Ok`        | Enter/Ok
+`Up`        | Up
+`Down`      | Down
+`Left`      | Left
+`Right`     | Right
+`Mute`      | Mute
+`Vol_up`    | Volume up
+`Vol_dn`    | Volume down
+`Ch_next`   | Next channel
+`Ch_prev`   | Previous channel
+`Next`      | Jump forward
+`Prev`      | Jump backward
+`Fast_fo`   | Fast forward
+`Fast_ba`   | Fast backward
+`Play_pa`   | Play/Pause
+`Pause`     | Pause
+`Play`      | Play
+`Stop`      | Stop
 
-## How to install on Flipper Zero
-- If you do not have one, download a firmware<br>
-- Plug your Flipper Zero in via USB. <br>
-- Copy the contents of this folder into the applications_user folder of your firmware. <br> 
+## Progress
 
-Then run the command: 
- ```
-.\fbt launch_app APPSRC=applications_user/xremote
- ```
-The application will be compiled and copied onto your device. 
+- [x] Application menu
+- [ ] Learn new remote
+- [ ] Signal analyzer
+- [x] Use saved remote
+    - [x] General button page
+    - [x] Control buttons page
+    - [x] Navigation buttons page
+    - [x] Player buttons page
+    - [ ] Custom buttons page
+    - [ ] Full button list
+    - [ ] Edit remote file
+    - [ ] Delete remote file
+- [x] Application settings
+    - [x] GUI to change settings
+    - [x] Load settings from the file
+    - [x] Store settings to the file
+    - [x] Vertical/horizontal views
+    - [x] IR command repeat count
+    - [x] Exit button behavior
 
-## Special Thanks
-- [Roguemaster](https://github.com/RogueMaster) from [Roguemaster Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins) for code contributions<br>
+## Screens
 
+<table align="center">
+    <tr>
+        <td align="center">Main menu</td>
+        <td align="center">Saved remote menu</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/app_menu.png" alt="XRemote main menu"></td>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_menu.png" alt="XRemote saved remote menu"></td>
+    </tr>
+</table>
 
-## Licensing
-This code is open-source and may be used for whatever you want to do with it. 
+<table align="center">
+    <tr>
+        <td align="center">Saved remote control apps</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_apps.png" alt="XRemote IR applicatoions"></td>
+    </tr>
+</table>
+
+<table align="center">
+    <tr>
+        <td align="center">Settings</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/settings_menu.png" alt="XRemote settings menu"></td>
+    </tr>
+</table>

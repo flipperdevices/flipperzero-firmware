@@ -37,6 +37,8 @@ static const uint8_t CMD_GET_QUERY_PARAMETERS_DATA[] = {0xBB, 0x00, 0x0D, 0x00, 
 static const uint8_t CMD_SET_QUERY_PARAMETER_DATA[] =
     {0xBB, 0x00, 0x0E, 0x00, 0x02, 0x10, 0x20, 0x40, 0x7E};
 static const uint8_t CMD_SET_WORK_AREA_DATA[] = {0xBB, 0x00, 0x07, 0x00, 0x01, 0x01, 0x09, 0x7E};
+static const uint8_t CMD_SET_TRANSMITTING_POWER_DATA[] =
+    {0xBB, 0x00, 0xB6, 0x00, 0x02, 0x07, 0xD0, 0x8F, 0x7E};
 
 // Define the Command structs
 static const Command CMD_HW_VERSION = {CMD_HW_VERSION_DATA, sizeof(CMD_HW_VERSION_DATA)};
@@ -82,3 +84,6 @@ static const Command CMD_SET_QUERY_PARAMETER = {
     CMD_SET_QUERY_PARAMETER_DATA,
     sizeof(CMD_SET_QUERY_PARAMETER_DATA)};
 static const Command CMD_SET_WORK_AREA = {CMD_SET_WORK_AREA_DATA, sizeof(CMD_SET_WORK_AREA_DATA)};
+static const Command CMD_SET_TRANSMITTING_POWER = {
+    CMD_SET_TRANSMITTING_POWER_DATA,
+    sizeof(CMD_SET_TRANSMITTING_POWER_DATA)};

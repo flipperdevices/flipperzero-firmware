@@ -128,7 +128,12 @@ const TUNING BassDropA5 = {
     5,
     {{"String 1", G2}, {"String 2", D2}, {"String 3", A1}, {"String 4", E1}, {"String 5", A0}}};
 
-#define TUNINGS_COUNT 14
+const TUNING UkuleleStandard4 = {
+    "Ukulele Standard 4",
+    4,
+    {{"String 1", A4}, {"String 2", E4}, {"String 3", C4}, {"String 4", G4}}};
+
+#define TUNINGS_COUNT 15
 
 TUNING TuningList[TUNINGS_COUNT] = {
     ScientificPitch,
@@ -146,6 +151,7 @@ TUNING TuningList[TUNINGS_COUNT] = {
     BassStandardTenor5,
     BassDropD4,
     BassD4,
-    BassDropA5};
+    BassDropA5,
+    UkuleleStandard4};
 
 #endif //TUNINGS

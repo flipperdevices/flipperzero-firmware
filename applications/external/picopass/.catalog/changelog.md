@@ -1,4 +1,8 @@
-## 1.5
+## 1.6
+ - Faster loclass response collection
+ - Save as LF for all bit lengths
+ - Removes unvalidated H10301 parsing
+ ## 1.5
  - New random filename API
 ## 1.4
  - Optimize crypto speed to fix compatibliity with Signo and OmniKey readers
