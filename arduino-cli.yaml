@@ -7,9 +7,9 @@ build_cache:
 daemon:
   port: "50051"
 directories:
-  data: C:\Users\NULL\AppData\Local\Temp\arduino-cli\data
-  downloads: C:\Users\NULL\AppData\Local\Temp\arduino-cli\downloads
-  user: C:\Users\NULL\AppData\Local\Temp\arduino-cli\user
+  data: C:\temp\arduino-cli\data
+  downloads: C:\temp\arduino-cli\downloads
+  user: C:\temp\arduino-cli\user
 library:
   enable_unsafe_install: false
 logging:
