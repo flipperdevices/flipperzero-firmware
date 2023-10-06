@@ -1,0 +1,4 @@
+[submodule ".modules/totp/totp/lib/wolfssl"]
+	path = .modules/totp/totp/lib/wolfssl
+	url = https://github.com/wolfSSL/wolfssl.git
+	branch = master
