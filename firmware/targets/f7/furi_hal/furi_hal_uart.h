@@ -103,10 +103,7 @@ typedef void (*FuriHalUartDmaRxCallback)(
  * @param callback callback pointer
  * @param context callback context
  */
-void furi_hal_uart_dma_start(
-    FuriHalUartId ch,
-    FuriHalUartDmaRxCallback callback,
-    void* context);
+void furi_hal_uart_dma_start(FuriHalUartId ch, FuriHalUartDmaRxCallback callback, void* context);
 
 /** Get data UART receive DMA
  *

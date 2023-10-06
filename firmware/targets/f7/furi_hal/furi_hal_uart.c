@@ -547,10 +547,7 @@ void furi_hal_uart_set_irq_cb(FuriHalUartId ch, FuriHalUartRxByteCallback callba
     uart[ch]->rx_callback_context = context;
 }
 
-void furi_hal_uart_dma_start(
-    FuriHalUartId ch,
-    FuriHalUartDmaRxCallback callback,
-    void* context) {
+void furi_hal_uart_dma_start(FuriHalUartId ch, FuriHalUartDmaRxCallback callback, void* context) {
     furi_assert(uart[ch] != NULL);
 
     if(ch == FuriHalUartIdUSART1) {
