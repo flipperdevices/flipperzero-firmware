@@ -1,4 +1,5 @@
 #include "gps_uart.h"
+#include "constants.h"
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -37,11 +38,20 @@ static void render_callback(Canvas* const canvas, void* context) {
         canvas_draw_str_aligned(canvas, 96, 18, AlignCenter, AlignBottom, buffer);
         snprintf(buffer, 64, "%.1f", (double)gps_uart->status.course);
         canvas_draw_str_aligned(canvas, 21, 40, AlignCenter, AlignBottom, buffer);
-        if(!gps_uart->speed_in_kms) {
+
+        switch(gps_uart->speed_units) {
+        case KPH:
+            snprintf(buffer, 64, "%.2f km", (double)(gps_uart->status.speed * KNOTS_TO_KPH));
+            break;
+        case MPH:
+            snprintf(buffer, 64, "%.2f mi", (double)(gps_uart->status.speed * KNOTS_TO_MPH));
+            break;
+        case KNOTS:
+        default:
             snprintf(buffer, 64, "%.2f kn", (double)gps_uart->status.speed);
-        } else {
-            snprintf(buffer, 64, "%.2f km", (double)(gps_uart->status.speed * 1.852));
+            break;
         }
+
         canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignBottom, buffer);
         snprintf(
             buffer,
@@ -153,10 +163,9 @@ int32_t gps_app(void* p) {
                         furi_mutex_release(gps_uart->mutex);
                         break;
                     case InputKeyRight:
-                        if(gps_uart->speed_in_kms) {
-                            gps_uart->speed_in_kms = false;
-                        } else {
-                            gps_uart->speed_in_kms = true;
+                        gps_uart->speed_units++;
+                        if(gps_uart->speed_units == INVALID) {
+                            gps_uart->speed_units = KNOTS;
                         }
                         break;
                     case InputKeyBack:
