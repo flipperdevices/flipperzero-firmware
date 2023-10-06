@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - OFW PR: [Fix spelling across some project files #3128 (By h00die)](https://github.com/flipperdevices/flipperzero-firmware/pull/3128)
 - Added: [FM Radio (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/FM_Radio) `Req: TEA5767 FM radio chip`
+- Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 
 <a name="release">
 
