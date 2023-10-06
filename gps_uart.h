@@ -23,6 +23,8 @@ typedef struct {
     int time_seconds;
 } GpsStatus;
 
+typedef enum SpeedUnit { KNOTS, KPH, MPH, INVALID } SpeedUnit;
+
 typedef struct {
     FuriMutex* mutex;
     FuriThread* thread;
@@ -33,7 +35,7 @@ typedef struct {
     uint32_t baudrate;
     bool changing_baudrate;
     bool backlight_on;
-    bool speed_in_kms;
+    SpeedUnit speed_units;
 
     GpsStatus status;
 } GpsUart;
