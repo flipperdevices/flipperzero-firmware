@@ -308,81 +308,40 @@ class TestEmulateNtag213:
     ]
 
     @pytest.mark.parametrize("command, expected_result", test_data_ascii_counter_0)
-    def test_ascii_counter_0(self, px, command, expected_result, error):
+    def test_ascii_counter_0(self, px, command, expected_result):
         px_result = px.execute(command)
 
         result = px_result[0]
 
-        assert expected_result == result, error
+        assert expected_result == result
 
         result = px_result[0]
 
         assert expected_result == result
 
     @pytest.mark.parametrize("command, expected_result", test_data_ascii_counter_1)
-    def test_ascii_counter_1(self, px, command, expected_result, error):
+    def test_ascii_counter_1(self, px, command, expected_result):
         px_result = px.execute(command)
 
         result = px_result[0]
 
-        assert expected_result == result, error
+        assert expected_result == result
 
     @pytest.mark.parametrize("command, expected_result", test_data_ascii_counter_2)
-    def test_ascii_counter_2(self, px, command, expected_result, error):
+    def test_ascii_counter_2(self, px, command, expected_result):
         px_result = px.execute(command)
 
         result = px_result[0]
 
-        assert expected_result == result, error
+        assert expected_result == result
 
     @pytest.mark.parametrize("command, expected_result", test_data_ascii_counter_3)
-    def test_ascii_counter_3(self, px, command, expected_result, error):
+    def test_ascii_counter_3(self, px, command, expected_result):
         px_result = px.execute(command)
 
         result = px_result[0]
 
-        assert expected_result == result, error
-
-    ASCII_COUNTER_0_PWD = {
-        "tag": "ASCII_COUNTER",
-        "Card": "NTAG213.nfc",
-        "Description": "Disable counter -> set ascii mirror page = 38, byte = 0, mode = COUNTER ->\nread data -> "
-        "CNT_ENABLE = 1 PSWD_CNT = 1 -> read data",
-        "Cmds": [
-            {"cmd": "hf 14a raw -sc A22A00050000", "result": "0A"},
-            {"cmd": "hf 14a raw -sc A229840026FF", "result": "0A"},
-            {
-                "cmd": "hf 14a raw -sc 3025",
-                "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 AA AA BD [ 7B 09 ]",
-            },
-            {
-                "cmd": "hf 14a raw -sc 3026",
-                "result": "00 00 00 00 00 00 00 00 00 AA AA BD 84 00 26 FF [ DB E9 ]",
-            },
-            {
-                "cmd": "hf 14a raw -sc 3027",
-                "result": "00 00 00 00 00 AA AA BD 84 00 26 FF 00 05 00 00 [ E3 5C ]",
-            },
-            {"cmd": "hf 14a raw -sc A22A18050000", "result": "0A"},
-            {
-                "cmd": "hf 14a raw -sck 1BFFFFFFFF",
-                "result": "00 00 00 00 30 30 30 30 35 39 00 00 00 AA AA BD [ 0C 3F ]",
-            },
-            {
-                "cmd": "hf 14a raw -ack 3025",
-                "result": "00 00 00 00 30 30 30 30 35 39 00 00 00 AA AA BD [ 0C 3F ]",
-            },
-            {
-                "cmd": "hf 14a raw -ack 3026",
-                "result": "30 30 30 30 35 41 00 00 00 AA AA BD 84 00 26 FF [ A8 56 ]",
-            },
-            {
-                "cmd": "hf 14a raw -ack 3027",
-                "result": "35 42 00 00 00 AA AA BD 84 00 26 FF 10 05 00 00 [ 5F D8 ]",
-            },
-            {"cmd": "hf 14a raw -ac A22A00050000", "result": "0A"},
-        ],
-    }
+        assert expected_result == result
 
     test_data_ascii_counter_0_pwd = [
         ("hf 14a raw -sc A22A00050000", "0A"),
@@ -420,9 +379,9 @@ class TestEmulateNtag213:
     ]
 
     @pytest.mark.parametrize("command, expected_result", test_data_ascii_counter_0_pwd)
-    def test_ascii_counter_0_pwd(self, px, command, expected_result, error):
+    def test_ascii_counter_0_pwd(self, px, command, expected_result):
         px_result = px.execute(command)
 
         result = px_result[0]
 
-        assert expected_result == result, error
+        assert expected_result == result
