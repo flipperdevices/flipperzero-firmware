@@ -126,10 +126,11 @@ char* m100_get_manufacturers(M100Module* module) {
 }
 
 M100ResponseType m100_single_poll(M100Module* module, UHFTag* uhf_tag) {
-    setup_and_send_rx(module, (uint8_t*)&CMD_SINGLE_POLLING.cmd[0], CMD_SINGLE_POLLING.length);
+    M100ResponseType rp_type =
+        setup_and_send_rx(module, (uint8_t*)&CMD_SINGLE_POLLING.cmd[0], CMD_SINGLE_POLLING.length);
+    if(rp_type != M100SuccessResponse) return rp_type;
     uint8_t* data = buffer_get_data(module->buf);
     size_t length = buffer_get_size(module->buf);
-    if(length <= 8 && data[2] == 0xFF) return M100NoTagResponse;
     uint16_t pc = data[6];
     uint16_t crc = 0;
     // mask out epc length from protocol control
@@ -233,8 +234,8 @@ M100ResponseType m100_read_label_data_storage(
     // calc checksum
     cmd[cmd_length - 2] = checksum(cmd + 1, cmd_length - 3);
 
-    while(setup_and_send_rx(module, cmd, cmd_length) != M100SuccessResponse) {
-    }
+    M100ResponseType rp_type = setup_and_send_rx(module, cmd, cmd_length);
+    if(rp_type != M100SuccessResponse) return rp_type;
 
     uint8_t* data = buffer_get_data(module->buf);
 
@@ -356,7 +357,6 @@ bool m100_set_working_region(M100Module* module, WorkingRegion region) {
     module->region = region;
     return true;
 }
-
 
 bool m100_set_transmitting_power(M100Module* module, uint16_t power) {
     size_t length = CMD_SET_TRANSMITTING_POWER.length;

@@ -26,7 +26,7 @@ UHFTag* send_polling_command(UHFWorker* uhf_worker) {
 }
 
 UHFWorkerEvent read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag, BankType bank) {
-    unsigned int retry = 3, word_low = 0, word_high = 64;
+    unsigned int word_low = 0, word_high = 64;
     unsigned int word_size;
     M100ResponseType status;
     do {
@@ -38,11 +38,8 @@ UHFWorkerEvent read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag,
             word_low = word_size + 1;
         } else if(status == M100MemoryOverrun) {
             word_high = word_size - 1;
-        } else if(status == M100NoTagResponse) {
-            retry--;
         }
-    } while(retry);
-    if(!retry) return UHFWorkerEventFail;
+    } while(true);
     return UHFWorkerEventSuccess;
 }
 
