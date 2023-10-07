@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1006-1521-0.92.3-2927efe](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-06 15:20 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-06 15:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-06 23:58 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-06 23:58 EST`
 - UL: [bugfix t5577_write_with_pass #612 (By baugp)](https://github.com/DarkFlippers/unleashed-firmware/pull/612)
 - Commented Out: [Genie Door Recorder v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials) - Will return once fixes are completed by developer.
 - Made Clear T5577 require debug to help avoid bricking tags (By SkeletonMan03)
@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [HEX input UI improvements #3112 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3112)
 - OFW: [fbt: glob improvements #3117 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3117)
 - OFW: [add documentation SubGhz Bin_RAW file format #3133 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3133)
+- Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 
 <a name="release">
 
