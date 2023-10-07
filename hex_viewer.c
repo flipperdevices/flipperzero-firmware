@@ -63,21 +63,22 @@ HexViewer* hex_viewer_app_alloc() {
 
     view_dispatcher_add_view(
         app->view_dispatcher, HexViewerViewIdMenu, submenu_get_view(app->submenu));
+
     app->hex_viewer_startscreen = hex_viewer_startscreen_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         HexViewerViewIdStartscreen,
         hex_viewer_startscreen_get_view(app->hex_viewer_startscreen));
-    app->hex_viewer_scene_1 = hex_viewer_scene_1_alloc();
+
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        HexViewerViewIdScene1,
-        hex_viewer_scene_1_get_view(app->hex_viewer_scene_1));
+        app->view_dispatcher, HexViewerViewIdScene1, text_input_get_view(app->text_input));
+
     app->hex_viewer_scene_2 = hex_viewer_scene_2_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         HexViewerViewIdScene2,
         hex_viewer_scene_2_get_view(app->hex_viewer_scene_2));
+
     app->button_menu = button_menu_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, HexViewerViewIdScene3, button_menu_get_view(app->button_menu));
