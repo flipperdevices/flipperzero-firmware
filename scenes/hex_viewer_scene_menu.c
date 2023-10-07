@@ -2,7 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexScene1 = 10,
-    // SubmenuIndexScene2,
+    SubmenuIndexScene2,
     // SubmenuIndexScene3,
     SubmenuIndexScene4,
     // SubmenuIndexScene5,
@@ -32,6 +32,12 @@ void hex_viewer_scene_menu_on_enter(void* context) {
         SubmenuIndexScene1,
         hex_viewer_scene_menu_submenu_callback,
         app);
+    submenu_add_item(
+        app->submenu,
+        "Show info ...",
+        SubmenuIndexScene2,
+        hex_viewer_scene_menu_submenu_callback,
+        app);
     // submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, hex_viewer_scene_menu_submenu_callback, app);
 
     submenu_set_selected_item(
@@ -55,11 +61,11 @@ bool hex_viewer_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene1);
             scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_1);
             return true;
-            // } else if (event.event == SubmenuIndexScene2) {
-            //     scene_manager_set_scene_state(
-            //         app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene2);
-            //     scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_2);
-            //     return true;
+        } else if(event.event == SubmenuIndexScene2) {
+            scene_manager_set_scene_state(
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene2);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_2);
+            return true;
             // } else if (event.event == SubmenuIndexScene3) {
             //     scene_manager_set_scene_state(
             //         app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene3);

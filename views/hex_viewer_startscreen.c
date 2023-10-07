@@ -44,7 +44,7 @@ void hex_viewer_startscreen_draw(Canvas* canvas, HexViewerStartscreenModel* mode
         canvas_set_color(canvas, ColorBlack);
 
         elements_button_left(canvas, model->mode ? "Addr" : "Text");
-        elements_button_right(canvas, "Info");
+        //elements_button_right(canvas, "Info");
         elements_button_center(canvas, "Menu");
 
         int ROW_HEIGHT = 12;
@@ -214,9 +214,7 @@ void hex_viewer_startscreen_enter(void* context) {
     with_view_model(
         instance->view,
         HexViewerStartscreenModel * model,
-        {
-            update_local_model_from_app(instance->context, model);
-        },
+        { update_local_model_from_app(instance->context, model); },
         true);
 }
 
