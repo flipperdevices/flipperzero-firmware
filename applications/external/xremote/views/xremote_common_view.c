@@ -9,8 +9,47 @@
 #include "xremote_common_view.h"
 #include "../xremote_app.h"
 
+typedef struct {
+    int index;
+    const char* name;
+} XRemoteButton;
+
+static const XRemoteButton g_buttons[XREMOTE_BUTTON_COUNT + 1] = {
+    {0, XREMOTE_COMMAND_POWER},
+    {1, XREMOTE_COMMAND_SETUP},
+    {2, XREMOTE_COMMAND_INPUT},
+    {3, XREMOTE_COMMAND_MENU},
+    {4, XREMOTE_COMMAND_LIST},
+    {5, XREMOTE_COMMAND_INFO},
+    {6, XREMOTE_COMMAND_BACK},
+    {7, XREMOTE_COMMAND_OK},
+    {8, XREMOTE_COMMAND_UP},
+    {9, XREMOTE_COMMAND_DOWN},
+    {10, XREMOTE_COMMAND_LEFT},
+    {11, XREMOTE_COMMAND_RIGHT},
+    {12, XREMOTE_COMMAND_JUMP_FORWARD},
+    {13, XREMOTE_COMMAND_JUMP_BACKWARD},
+    {14, XREMOTE_COMMAND_FAST_FORWARD},
+    {15, XREMOTE_COMMAND_FAST_BACKWARD},
+    {16, XREMOTE_COMMAND_PLAY_PAUSE},
+    {17, XREMOTE_COMMAND_PAUSE},
+    {18, XREMOTE_COMMAND_PLAY},
+    {19, XREMOTE_COMMAND_STOP},
+    {20, XREMOTE_COMMAND_MUTE},
+    {21, XREMOTE_COMMAND_MODE},
+    {22, XREMOTE_COMMAND_VOL_UP},
+    {23, XREMOTE_COMMAND_VOL_DOWN},
+    {24, XREMOTE_COMMAND_NEXT_CHAN},
+    {25, XREMOTE_COMMAND_PREV_CHAN},
+    {-1, NULL}};
+
+const char* xremote_button_get_name(int index) {
+    if(index > XREMOTE_BUTTON_COUNT) return NULL;
+    return g_buttons[index].name;
+}
+
 struct XRemoteView {
-    XRemoteViewClearCallback on_clear;
+    XRemoteClearCallback on_clear;
     XRemoteAppContext* app_ctx;
     View* view;
     void* context;
@@ -39,14 +78,12 @@ XRemoteView*
 void xremote_view_clear_context(XRemoteView* rview) {
     furi_assert(rview);
 
-    if(rview->context != NULL && rview->on_clear != NULL) {
-        rview->on_clear(rview->context);
-        rview->context = NULL;
-    }
+    if(rview->context && rview->on_clear) rview->on_clear(rview->context);
+
+    rview->context = NULL;
 }
 
-void xremote_view_set_context(XRemoteView* rview, void* context, XRemoteViewClearCallback on_clear) {
-    furi_assert(rview);
+void xremote_view_set_context(XRemoteView* rview, void* context, XRemoteClearCallback on_clear) {
     xremote_view_clear_context(rview);
     rview->context = context;
     rview->on_clear = on_clear;
@@ -167,9 +204,9 @@ void xremote_canvas_draw_header(Canvas* canvas, ViewOrientation orient, const ch
 
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, x, 0, align, AlignTop, "XRemote");
-
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(canvas, x, 12, align, AlignTop, section);
+
+    if(section != NULL) elements_multiline_text_aligned(canvas, x, 12, align, AlignTop, section);
 }
 
 void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, const char* text) {

@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [fbt: glob improvements #3117 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3117)
 - OFW: [add documentation SubGhz Bin_RAW file format #3133 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3133)
 - Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
+- Updated: [XRemote v1.0 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 
