@@ -10,7 +10,7 @@ More information: https://techryptic.github.io/2023/09/01/Annoying-Apple-Fans/
 
 ## Builds
 
-OFW: App Hub PR pending: https://github.com/flipperdevices/flipper-application-catalog/pull/149
+OFW: App Hub PR conditionally rejected: https://github.com/flipperdevices/flipper-application-catalog/pull/149
 
 Published (options):
 * [FlipC.org](https://flipc.org/noproto/apple_ble_spam_ofw?branch=master)
