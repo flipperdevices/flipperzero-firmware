@@ -35,7 +35,7 @@ endif()
 
 if(NOT STM32_TARGET_TRIPLET)
     if(DEFINED ENV{STM32_TARGET_TRIPLET})
-        message(STATUS "Detected toolchain path STM32_TARGET_TRIPLET in environmental variables: ")
+        message(STATUS "Detected target triplet STM32_TARGET_TRIPLET in environmental variables: ")
         message(STATUS "$ENV{STM32_TARGET_TRIPLET}")
         set(STM32_TARGET_TRIPLET $ENV{STM32_TARGET_TRIPLET})
     else()
