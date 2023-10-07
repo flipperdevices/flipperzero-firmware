@@ -19,60 +19,52 @@ struct XRemoteSignalAnalyzer {
     bool pause;
 };
 
-InfraredSignal* xremote_signal_analyzer_get_ir_signal(XRemoteSignalAnalyzer *analyzer)
-{
+InfraredSignal* xremote_signal_analyzer_get_ir_signal(XRemoteSignalAnalyzer* analyzer) {
     xremote_app_assert(analyzer, NULL);
     return analyzer->ir_signal;
 }
 
-XRemoteSignalReceiver* xremote_signal_analyzer_get_ir_receiver(XRemoteSignalAnalyzer *analyzer)
-{
+XRemoteSignalReceiver* xremote_signal_analyzer_get_ir_receiver(XRemoteSignalAnalyzer* analyzer) {
     xremote_app_assert(analyzer, NULL);
     return analyzer->ir_receiver;
 }
 
-XRemoteAppContext* xremote_signal_analyzer_get_app_context(XRemoteSignalAnalyzer *analyzer)
-{
+XRemoteAppContext* xremote_signal_analyzer_get_app_context(XRemoteSignalAnalyzer* analyzer) {
     xremote_app_assert(analyzer, NULL);
     return analyzer->app_ctx;
 }
 
-void xremote_signal_analyzer_send_event(XRemoteSignalAnalyzer* analyzer, XRemoteEvent event)
-{
+void xremote_signal_analyzer_send_event(XRemoteSignalAnalyzer* analyzer, XRemoteEvent event) {
     xremote_app_assert_void(analyzer);
     ViewDispatcher* view_disp = analyzer->app_ctx->view_dispatcher;
     view_dispatcher_send_custom_event(view_disp, event);
 }
 
-static void xremote_signal_analyzer_switch_to_view(XRemoteSignalAnalyzer* analyzer, XRemoteViewID view_id)
-{
+static void
+    xremote_signal_analyzer_switch_to_view(XRemoteSignalAnalyzer* analyzer, XRemoteViewID view_id) {
     xremote_app_assert_void(analyzer);
     ViewDispatcher* view_disp = analyzer->app_ctx->view_dispatcher;
     view_dispatcher_switch_to_view(view_disp, view_id);
 }
 
-static void xremote_signal_analyzer_rx_stop(XRemoteSignalAnalyzer *analyzer)
-{
+static void xremote_signal_analyzer_rx_stop(XRemoteSignalAnalyzer* analyzer) {
     xremote_app_assert_void(analyzer);
     analyzer->pause = true;
     xremote_signal_receiver_stop(analyzer->ir_receiver);
 }
 
-static void xremote_signal_analyzer_rx_start(XRemoteSignalAnalyzer *analyzer)
-{
+static void xremote_signal_analyzer_rx_start(XRemoteSignalAnalyzer* analyzer) {
     xremote_app_assert_void(analyzer);
     analyzer->pause = false;
     xremote_signal_receiver_start(analyzer->ir_receiver);
 }
 
-static uint32_t xremote_signal_analyzer_view_exit_callback(void* context)
-{
+static uint32_t xremote_signal_analyzer_view_exit_callback(void* context) {
     UNUSED(context);
     return XRemoteViewAnalyzer;
 }
 
-static void xremote_signal_analyzer_signal_callback(void *context, InfraredSignal* signal)
-{
+static void xremote_signal_analyzer_signal_callback(void* context, InfraredSignal* signal) {
     XRemoteSignalAnalyzer* analyzer = context;
     xremote_app_assert_void(!analyzer->pause);
     analyzer->pause = true;
@@ -81,28 +73,20 @@ static void xremote_signal_analyzer_signal_callback(void *context, InfraredSigna
     xremote_signal_analyzer_send_event(analyzer, XRemoteEventSignalReceived);
 }
 
-static bool xremote_signal_analyzer_custom_event_callback(void* context, uint32_t event)
-{
+static bool xremote_signal_analyzer_custom_event_callback(void* context, uint32_t event) {
     xremote_app_assert(context, false);
-    XRemoteSignalAnalyzer *analyzer = context;
+    XRemoteSignalAnalyzer* analyzer = context;
 
-    if (event == XRemoteEventSignalExit)
-    {
+    if(event == XRemoteEventSignalExit) {
         xremote_signal_analyzer_rx_stop(analyzer);
         xremote_signal_analyzer_switch_to_view(analyzer, XRemoteViewSubmenu);
-    }
-    else if (event == XRemoteEventSignalReceived)
-    {
+    } else if(event == XRemoteEventSignalReceived) {
         xremote_signal_analyzer_rx_stop(analyzer);
         xremote_signal_analyzer_switch_to_view(analyzer, XRemoteViewSignal);
-    }
-    else if (event == XRemoteEventSignalRetry)
-    {
+    } else if(event == XRemoteEventSignalRetry) {
         xremote_signal_analyzer_rx_start(analyzer);
         xremote_signal_analyzer_switch_to_view(analyzer, XRemoteViewAnalyzer);
-    }
-    else if (event == XRemoteEventSignalSend)
-    {
+    } else if(event == XRemoteEventSignalSend) {
         XRemoteAppContext* app_ctx = analyzer->app_ctx;
         xremote_app_send_signal(app_ctx, analyzer->ir_signal);
     }
@@ -110,9 +94,8 @@ static bool xremote_signal_analyzer_custom_event_callback(void* context, uint32_
     return true;
 }
 
-static XRemoteSignalAnalyzer* xremote_signal_analyzer_alloc(XRemoteAppContext* app_ctx)
-{
-    XRemoteSignalAnalyzer *analyzer = malloc(sizeof(XRemoteSignalAnalyzer));
+static XRemoteSignalAnalyzer* xremote_signal_analyzer_alloc(XRemoteAppContext* app_ctx) {
+    XRemoteSignalAnalyzer* analyzer = malloc(sizeof(XRemoteSignalAnalyzer));
     analyzer->ir_signal = infrared_signal_alloc();
     analyzer->app_ctx = app_ctx;
     analyzer->pause = false;
@@ -122,18 +105,19 @@ static XRemoteSignalAnalyzer* xremote_signal_analyzer_alloc(XRemoteAppContext* a
     view_set_previous_callback(view, xremote_signal_analyzer_view_exit_callback);
     view_dispatcher_add_view(app_ctx->view_dispatcher, XRemoteViewSignal, view);
 
-    view_dispatcher_set_custom_event_callback(app_ctx->view_dispatcher, xremote_signal_analyzer_custom_event_callback);
+    view_dispatcher_set_custom_event_callback(
+        app_ctx->view_dispatcher, xremote_signal_analyzer_custom_event_callback);
     view_dispatcher_set_event_callback_context(app_ctx->view_dispatcher, analyzer);
 
     analyzer->ir_receiver = xremote_signal_receiver_alloc(app_ctx);
     xremote_signal_receiver_set_context(analyzer->ir_receiver, analyzer, NULL);
-    xremote_signal_receiver_set_rx_callback(analyzer->ir_receiver, xremote_signal_analyzer_signal_callback);
+    xremote_signal_receiver_set_rx_callback(
+        analyzer->ir_receiver, xremote_signal_analyzer_signal_callback);
 
     return analyzer;
 }
 
-static void xremote_signal_analyzer_free(XRemoteSignalAnalyzer* analyzer)
-{
+static void xremote_signal_analyzer_free(XRemoteSignalAnalyzer* analyzer) {
     xremote_app_assert_void(analyzer);
     xremote_signal_receiver_stop(analyzer->ir_receiver);
 
@@ -149,14 +133,12 @@ static void xremote_signal_analyzer_free(XRemoteSignalAnalyzer* analyzer)
     free(analyzer);
 }
 
-static void xremote_signal_analyzer_clear_callback(void* context)
-{
-    XRemoteSignalAnalyzer *analyzer = context;
+static void xremote_signal_analyzer_clear_callback(void* context) {
+    XRemoteSignalAnalyzer* analyzer = context;
     xremote_signal_analyzer_free(analyzer);
 }
 
-XRemoteApp* xremote_analyzer_alloc(XRemoteAppContext* app_ctx)
-{
+XRemoteApp* xremote_analyzer_alloc(XRemoteAppContext* app_ctx) {
     XRemoteApp* app = xremote_app_alloc(app_ctx);
     app->view_id = XRemoteViewAnalyzer;
 

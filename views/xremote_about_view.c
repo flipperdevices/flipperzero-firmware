@@ -9,8 +9,7 @@
 #include "xremote_about_view.h"
 #include "../xremote.h"
 
-static void xremote_about_view_draw_vertical(Canvas* canvas, XRemoteViewModel* model)
-{
+static void xremote_about_view_draw_vertical(Canvas* canvas, XRemoteViewModel* model) {
     UNUSED(model);
     char version[32];
 
@@ -30,8 +29,7 @@ static void xremote_about_view_draw_vertical(Canvas* canvas, XRemoteViewModel* m
     canvas_draw_str_aligned(canvas, 11, 100, AlignLeft, AlignTop, "gmail.com");
 }
 
-static void xremote_about_view_draw_horizontal(Canvas* canvas, XRemoteViewModel* model)
-{
+static void xremote_about_view_draw_horizontal(Canvas* canvas, XRemoteViewModel* model) {
     UNUSED(model);
     char version[32];
 
@@ -51,33 +49,27 @@ static void xremote_about_view_draw_horizontal(Canvas* canvas, XRemoteViewModel*
     canvas_draw_str_aligned(canvas, 10, 52, AlignLeft, AlignTop, "gmail.com");
 }
 
-static void xremote_about_view_draw_callback(Canvas* canvas, void* context)
-{
+static void xremote_about_view_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     XRemoteViewModel* model = context;
-    XRemoteAppContext *app_ctx = model->context;
+    XRemoteAppContext* app_ctx = model->context;
     XRemoteViewDrawFunction xremote_about_view_draw_body;
 
     ViewOrientation orientation = app_ctx->app_settings->orientation;
     xremote_about_view_draw_body = orientation == ViewOrientationVertical ?
-        xremote_about_view_draw_vertical : xremote_about_view_draw_horizontal;
+                                       xremote_about_view_draw_vertical :
+                                       xremote_about_view_draw_horizontal;
 
     xremote_canvas_draw_header(canvas, orientation, "About");
     xremote_about_view_draw_body(canvas, model);
     xremote_canvas_draw_exit_footer(canvas, orientation, "Press to exit");
 }
 
-XRemoteView* xremote_about_view_alloc(void* app_ctx)
-{
-    XRemoteView *view = xremote_view_alloc(app_ctx,
-        NULL, xremote_about_view_draw_callback);
+XRemoteView* xremote_about_view_alloc(void* app_ctx) {
+    XRemoteView* view = xremote_view_alloc(app_ctx, NULL, xremote_about_view_draw_callback);
 
     with_view_model(
-        xremote_view_get_view(view),
-        XRemoteViewModel* model,
-        { model->context = app_ctx; },
-        true
-    );
+        xremote_view_get_view(view), XRemoteViewModel * model, { model->context = app_ctx; }, true);
 
     return view;
 }

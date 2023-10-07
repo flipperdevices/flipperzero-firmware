@@ -20,33 +20,33 @@
 
 #include "../infrared/infrared_remote.h"
 
-#define XREMOTE_BUTTON_COUNT            26
-#define XREMOTE_COMMAND_POWER           "Power"
-#define XREMOTE_COMMAND_SETUP           "Setup"
-#define XREMOTE_COMMAND_INPUT           "Input"
-#define XREMOTE_COMMAND_MENU            "Menu"
-#define XREMOTE_COMMAND_LIST            "List"
-#define XREMOTE_COMMAND_INFO            "Info"
-#define XREMOTE_COMMAND_BACK            "Back"
-#define XREMOTE_COMMAND_OK              "Ok"
-#define XREMOTE_COMMAND_UP              "Up"
-#define XREMOTE_COMMAND_DOWN            "Down"
-#define XREMOTE_COMMAND_LEFT            "Left"
-#define XREMOTE_COMMAND_RIGHT           "Right"
-#define XREMOTE_COMMAND_JUMP_FORWARD    "Next"
-#define XREMOTE_COMMAND_JUMP_BACKWARD   "Prev"
-#define XREMOTE_COMMAND_FAST_FORWARD    "Fast_fo"
-#define XREMOTE_COMMAND_FAST_BACKWARD   "Fast_ba"
-#define XREMOTE_COMMAND_PLAY_PAUSE      "Play_pa"
-#define XREMOTE_COMMAND_PAUSE           "Pause"
-#define XREMOTE_COMMAND_PLAY            "Play"
-#define XREMOTE_COMMAND_STOP            "Stop"
-#define XREMOTE_COMMAND_MUTE            "Mute"
-#define XREMOTE_COMMAND_MODE            "Mode"
-#define XREMOTE_COMMAND_VOL_UP          "Vol_up"
-#define XREMOTE_COMMAND_VOL_DOWN        "Vol_dn"
-#define XREMOTE_COMMAND_NEXT_CHAN       "Ch_next"
-#define XREMOTE_COMMAND_PREV_CHAN       "Ch_prev"
+#define XREMOTE_BUTTON_COUNT 26
+#define XREMOTE_COMMAND_POWER "Power"
+#define XREMOTE_COMMAND_SETUP "Setup"
+#define XREMOTE_COMMAND_INPUT "Input"
+#define XREMOTE_COMMAND_MENU "Menu"
+#define XREMOTE_COMMAND_LIST "List"
+#define XREMOTE_COMMAND_INFO "Info"
+#define XREMOTE_COMMAND_BACK "Back"
+#define XREMOTE_COMMAND_OK "Ok"
+#define XREMOTE_COMMAND_UP "Up"
+#define XREMOTE_COMMAND_DOWN "Down"
+#define XREMOTE_COMMAND_LEFT "Left"
+#define XREMOTE_COMMAND_RIGHT "Right"
+#define XREMOTE_COMMAND_JUMP_FORWARD "Next"
+#define XREMOTE_COMMAND_JUMP_BACKWARD "Prev"
+#define XREMOTE_COMMAND_FAST_FORWARD "Fast_fo"
+#define XREMOTE_COMMAND_FAST_BACKWARD "Fast_ba"
+#define XREMOTE_COMMAND_PLAY_PAUSE "Play_pa"
+#define XREMOTE_COMMAND_PAUSE "Pause"
+#define XREMOTE_COMMAND_PLAY "Play"
+#define XREMOTE_COMMAND_STOP "Stop"
+#define XREMOTE_COMMAND_MUTE "Mute"
+#define XREMOTE_COMMAND_MODE "Mode"
+#define XREMOTE_COMMAND_VOL_UP "Vol_up"
+#define XREMOTE_COMMAND_VOL_DOWN "Vol_dn"
+#define XREMOTE_COMMAND_NEXT_CHAN "Ch_next"
+#define XREMOTE_COMMAND_PREV_CHAN "Ch_prev"
 
 typedef enum {
     XRemoteEventReserved = 200,
@@ -115,30 +115,60 @@ typedef enum {
 } XRemoteViewID;
 
 typedef struct XRemoteView XRemoteView;
-typedef void (*XRemoteClearCallback)(void *context);
+typedef void (*XRemoteClearCallback)(void* context);
 typedef void (*XRemoteViewDrawFunction)(Canvas*, XRemoteViewModel*);
 typedef XRemoteView* (*XRemoteViewAllocator)(void* app_ctx);
 
 const char* xremote_button_get_name(int index);
 
 void xremote_canvas_draw_header(Canvas* canvas, ViewOrientation orient, const char* section);
-void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, const char *text);
+void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, const char* text);
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon);
-void xremote_canvas_draw_button(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, XRemoteIcon icon);
-void xremote_canvas_draw_button_png(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, const Icon* icon);
-void xremote_canvas_draw_button_wide(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, char* text, XRemoteIcon icon);
-void xremote_canvas_draw_button_size(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, uint8_t xy, char* text, XRemoteIcon icon);
-void xremote_canvas_draw_frame(Canvas* canvas, bool pressed, uint8_t x, uint8_t y, uint8_t xl, const char *text);
+void xremote_canvas_draw_button(
+    Canvas* canvas,
+    bool pressed,
+    uint8_t x,
+    uint8_t y,
+    XRemoteIcon icon);
+void xremote_canvas_draw_button_png(
+    Canvas* canvas,
+    bool pressed,
+    uint8_t x,
+    uint8_t y,
+    const Icon* icon);
+void xremote_canvas_draw_button_wide(
+    Canvas* canvas,
+    bool pressed,
+    uint8_t x,
+    uint8_t y,
+    char* text,
+    XRemoteIcon icon);
+void xremote_canvas_draw_button_size(
+    Canvas* canvas,
+    bool pressed,
+    uint8_t x,
+    uint8_t y,
+    uint8_t xy,
+    char* text,
+    XRemoteIcon icon);
+void xremote_canvas_draw_frame(
+    Canvas* canvas,
+    bool pressed,
+    uint8_t x,
+    uint8_t y,
+    uint8_t xl,
+    const char* text);
 
-XRemoteView* xremote_view_alloc(void *app_ctx, ViewInputCallback input_cb, ViewDrawCallback draw_cb);
+XRemoteView*
+    xremote_view_alloc(void* app_ctx, ViewInputCallback input_cb, ViewDrawCallback draw_cb);
 void xremote_view_free(XRemoteView* rview);
 
-InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView *rview, const char* name);
-bool xremote_view_press_button(XRemoteView *rview, InfraredRemoteButton* button);
-bool xremote_view_send_ir_msg_by_name(XRemoteView *rview, const char *name);
+InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const char* name);
+bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button);
+bool xremote_view_send_ir_msg_by_name(XRemoteView* rview, const char* name);
 
-void xremote_view_set_context(XRemoteView* rview, void *context, XRemoteClearCallback on_clear);
+void xremote_view_set_context(XRemoteView* rview, void* context, XRemoteClearCallback on_clear);
 void* xremote_view_get_context(XRemoteView* rview);
 void xremote_view_clear_context(XRemoteView* rview);
 void* xremote_view_get_app_context(XRemoteView* rview);

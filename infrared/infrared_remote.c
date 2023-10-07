@@ -97,7 +97,8 @@ bool infrared_remote_find_button_by_name(InfraredRemote* remote, const char* nam
     return false;
 }
 
-InfraredRemoteButton* infrared_remote_get_button_by_name(InfraredRemote* remote, const char* name) {
+InfraredRemoteButton*
+    infrared_remote_get_button_by_name(InfraredRemote* remote, const char* name) {
     for(size_t i = 0; i < InfraredButtonArray_size(remote->buttons); i++) {
         InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, i);
         if(!strcmp(infrared_remote_button_get_name(button), name)) {
@@ -139,7 +140,7 @@ bool infrared_remote_delete_button(InfraredRemote* remote, size_t index) {
 
 bool infrared_remote_delete_button_by_name(InfraredRemote* remote, const char* name) {
     size_t index = 0;
-    if (!infrared_remote_find_button_by_name(remote, name, &index)) return false;
+    if(!infrared_remote_find_button_by_name(remote, name, &index)) return false;
     return infrared_remote_delete_button(remote, index);
 }
 
