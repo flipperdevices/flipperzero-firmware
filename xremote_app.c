@@ -222,11 +222,17 @@ void xremote_app_submenu_alloc(XRemoteApp* app, uint32_t index, ViewNavigationCa
     app->submenu_id = index;
 
     XRemoteAppSettings* settings = app->app_ctx->app_settings;
+    View* view = submenu_get_view(app->submenu);
+    view_set_previous_callback(view, prev_cb);
+
+#ifdef FW_ORIGIN_Unleashed
     submenu_set_orientation(app->submenu, settings->orientation);
-    view_set_previous_callback(submenu_get_view(app->submenu), prev_cb);
+#else
+    view_set_orientation(view, settings->orientation);
+#endif
 
     ViewDispatcher* view_disp = app->app_ctx->view_dispatcher;
-    view_dispatcher_add_view(view_disp, app->submenu_id, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(view_disp, app->submenu_id, view);
 }
 
 void xremote_app_submenu_free(XRemoteApp* app) {
