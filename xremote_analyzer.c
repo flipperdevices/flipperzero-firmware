@@ -9,14 +9,12 @@
 #include "xremote_analyzer.h"
 #include "views/xremote_signal_view.h"
 
-#define XREMOTE_TEXT_MAX    128
-
 struct XRemoteSignalAnalyzer {
     XRemoteSignalReceiver* ir_receiver;
-    XRemoteAppContext* app_ctx;
-    XRemoteView* signal_view;
-    InfraredSignal* ir_signal;
     XRemoteClearCallback on_clear;
+    XRemoteAppContext* app_ctx;
+    InfraredSignal* ir_signal;
+    XRemoteView* signal_view;
     void* context;
     bool pause;
 };
