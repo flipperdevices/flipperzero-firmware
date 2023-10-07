@@ -41,13 +41,23 @@ WchSwioFlasher_SWIO* WchSwioFlasher_SWIO_create() {
     // TODO: check Flipper freq and MCU type
 
     furi_hal_gpio_init(&SWI_GPIO, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(&SWI_HW_RST_GPIO, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+
+    furi_hal_gpio_write(&SWI_HW_RST_GPIO, true);
     furi_hal_gpio_write(&SWI_GPIO, true);
-#ifdef SWIO_TRIGGER_OUT_ENABLE
-    furi_hal_gpio_init(&SWI_TRIG_GPIO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    furi_hal_gpio_write(&SWI_TRIG_GPIO, true);
-#endif
 
     return handle;
+}
+
+WchSwioFlasher_Error WchSwioFlasher_SWIO_hw_reset(WchSwioFlasher_SWIO* handle) {
+    UNUSED(handle);
+    furi_hal_gpio_write(&SWI_GPIO, true);
+
+    furi_hal_gpio_write(&SWI_HW_RST_GPIO, false);
+    furi_delay_ms(50);
+    furi_hal_gpio_write(&SWI_HW_RST_GPIO, true);
+
+    return WchSwioFlasher_Ok;
 }
 
 void WchSwioFlasher_SWIO_destroy(WchSwioFlasher_SWIO* handle) {

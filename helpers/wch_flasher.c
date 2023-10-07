@@ -119,6 +119,7 @@ static WchSwioFlasher_Error run_flash_command(
 
 WchSwioFlasher_Error
     WchSwioFlasher_WchFlasher_wipe_page(WchSwioFlasher_WchFlasher* handle, uint32_t dst_addr) {
+    CHECK_ERR(WchSwioFlasher_RiscVDebug_reset(handle->debug, WchSwioFlasher_RVD_ResetToHalt));
     CHECK_ERR(WchSwioFlasher_WchFlasher_unlock_flash(handle));
     dst_addr |= 0x08000000;
     run_flash_command(handle, dst_addr, BIT_CTLR_FTER, BIT_CTLR_FTER | BIT_CTLR_STRT);
@@ -127,6 +128,7 @@ WchSwioFlasher_Error
 
 WchSwioFlasher_Error
     WchSwioFlasher_WchFlasher_wipe_sector(WchSwioFlasher_WchFlasher* handle, uint32_t dst_addr) {
+    CHECK_ERR(WchSwioFlasher_RiscVDebug_reset(handle->debug, WchSwioFlasher_RVD_ResetToHalt));
     CHECK_ERR(WchSwioFlasher_WchFlasher_unlock_flash(handle));
     dst_addr |= 0x08000000;
     run_flash_command(handle, dst_addr, BIT_CTLR_PER, BIT_CTLR_PER | BIT_CTLR_STRT);
@@ -134,6 +136,8 @@ WchSwioFlasher_Error
 }
 
 WchSwioFlasher_Error WchSwioFlasher_WchFlasher_wipe_chip(WchSwioFlasher_WchFlasher* handle) {
+    CHECK_ERR(WchSwioFlasher_RiscVDebug_reset(handle->debug, WchSwioFlasher_RVD_ResetToHalt));
+
     CHECK_ERR(WchSwioFlasher_WchFlasher_unlock_flash(handle));
     uint32_t dst_addr = 0x08000000;
     run_flash_command(handle, dst_addr, BIT_CTLR_MER, BIT_CTLR_MER | BIT_CTLR_STRT);
@@ -145,8 +149,6 @@ WchSwioFlasher_Error WchSwioFlasher_WchFlasher_write_flash(
     uint32_t dst_addr,
     void* blob,
     int size) {
-    ERROR_HANDLER_INIT();
-
     FURI_LOG_D(TAG, "write_flash");
 
     CHECK_ERR(WchSwioFlasher_WchFlasher_unlock_flash(handle));

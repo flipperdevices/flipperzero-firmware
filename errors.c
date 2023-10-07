@@ -31,12 +31,18 @@ char* WchSwioFlasher_ErrorToString(WchSwioFlasher_Error error) {
         return "no-error";
     case WchSwioFlasher_Error_SwdResetDetected:
         return "swd-reset";
+    case WchSwioFlasher_Error_Timeout:
+        return "timeout";
     case WchSwioFlasher_Error_SwdParityCheckError:
         return "parity-error";
     case WchSwioFlasher_Error_ProgramRunError:
         return "program-run-error";
     case WchSwioFlasher_Error_TargetInInvalidState:
         return "target-in-invalid-state";
+    case WchSwioFlasher_Error_TargetNotKnown:
+        return "target-not-known";
+    case WchSwioFlasher_Error_ProgramNotFinishedYet:
+        return "program-not-finished-yet";
     default:
         break;
     }

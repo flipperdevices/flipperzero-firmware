@@ -32,6 +32,7 @@ This file is based on modified original from https://github.com/aappleby/PicoRVD
 #include "riscv_debug.h"
 #include "risc_debug_inner.h"
 #include "debug_defines.h"
+#include "wch_flasher_inner.h"
 #include "programs.h"
 #include "../config.h"
 
@@ -279,7 +280,8 @@ WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_set_gpr(
     return WchSwioFlasher_Ok;
 }
 
-static WchSwioFlasher_Error enable_breakpoints(WchSwioFlasher_RiscVDebug* handle) {
+static WchSwioFlasher_Error __attribute__((unused))
+enable_breakpoints(WchSwioFlasher_RiscVDebug* handle) {
     FURI_LOG_D(TAG, "enable_breakpoints");
 
     uint32_t dmstatus = 0;
@@ -311,7 +313,9 @@ WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_load_prog(
 WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_load_prog(
     WchSwioFlasher_RiscVDebug* handle,
     const WchSwioFlasher_RiscVProgram* program) {
+#ifdef RVD_TXRX_DEBUG_MSG_ENABLE
     FURI_LOG_D(TAG, "load_prog name=%s", program->name);
+#endif
 
     uint32_t* prog = (uint32_t*)program->data;
     // Upload any PROG{N} word that changed.
@@ -354,19 +358,120 @@ WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_load_prog(
 
     handle->prog_will_clobber = program->clobbers;
 
-    //LOG("RVDebug::load_prog() done\n");
+//LOG("RVDebug::load_prog() done\n");
+#ifdef RVD_TXRX_DEBUG_MSG_ENABLE
     FURI_LOG_D(TAG, "load_prog done");
+#endif
 
     return WchSwioFlasher_Ok;
 }
 
-WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_reset(WchSwioFlasher_RiscVDebug* handle) {
-    FURI_LOG_D(TAG, "reset_cpu");
+WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_get_chip_info(
+    WchSwioFlasher_RiscVDebug* handle,
+    WchSwioFlasher_RiscVDebug_ChipInfo* info) {
+    CHECK_ERR_M(
+        WchSwioFlasher_RiscVDebug_reset(handle, WchSwioFlasher_RVD_ResetToHalt),
+        "unable to halt target");
 
-    // Halt and leave halt request set
-    CHECK_ERR_M(set_dmcontrol(handle, 0x80000001), "unable to HALT ALL");
-    CHECK_ERR(wait_for_dmstatus(handle, DM_DMSTATUS_ALLHALTED, DM_DMSTATUS_ALLHALTED));
+    CHECK_ERR(WchSwioFlasher_RiscVDebug_get_mem_u32(handle, ADDR_ESIG_FLACAP, &info->flash_size));
+    info->flash_size &= 0xffff;
 
+    CHECK_ERR(
+        WchSwioFlasher_RiscVDebug_get_mem_u32(handle, ADDR_ESIG_UNIID1, &info->esig_uniid[0]));
+    CHECK_ERR(
+        WchSwioFlasher_RiscVDebug_get_mem_u32(handle, ADDR_ESIG_UNIID2, &info->esig_uniid[1]));
+    CHECK_ERR(
+        WchSwioFlasher_RiscVDebug_get_mem_u32(handle, ADDR_ESIG_UNIID3, &info->esig_uniid[2]));
+
+    FURI_LOG_D(
+        TAG,
+        "Detected chip flash: %lu kB, ESIG: " FMT_4HEX ", " FMT_4HEX ", " FMT_4HEX,
+        info->flash_size,
+        _UI(info->esig_uniid[0]),
+        _UI(info->esig_uniid[1]),
+        _UI(info->esig_uniid[2]));
+
+    CHECK_ERR_M(
+        WchSwioFlasher_RiscVDebug_reset(handle, WchSwioFlasher_RVD_ResetToRunNoCheck),
+        "unable to run target");
+
+    return WchSwioFlasher_Ok;
+}
+
+WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_reset(
+    WchSwioFlasher_RiscVDebug* handle,
+    WchSwioFlasher_RiscVDebug_ResetType type) {
+    FURI_LOG_D(TAG, "reset_cpu and %s", type != WchSwioFlasher_RVD_ResetToHalt ? "run" : "halt");
+
+    // -----
+    // see RISC-V QingKeyV2 Microprocessor Debug Manual for Reset/Halt/Resume Microprocessor usecases
+    // -----
+
+    // Do HW reset
+    CHECK_ERR_M(WchSwioFlasher_SWIO_hw_reset(handle->swio), "unable to toggle HW reset");
+    furi_delay_ms(50);
+
+    CHECK_ERR_M(WchSwioFlasher_SWIO_init(handle->swio), "unable to init SWIO");
+
+    // Make the debug module work properly.
+    CHECK_ERR_M(set_dmcontrol(handle, 0x80000001), "unable to init debug module");
+    furi_delay_ms(1);
+
+    // Initiate a halt request.
+    CHECK_ERR_M(set_dmcontrol(handle, 0x80000001), "unable to initiate halt");
+    furi_delay_ms(1);
+
+    if(type == WchSwioFlasher_RVD_ResetToRun || type == WchSwioFlasher_RVD_ResetToRunNoCheck) {
+        // Clear the halt request bit.
+        CHECK_ERR_M(set_dmcontrol(handle, 0x00000001), "unable to clear halt");
+        furi_delay_ms(1);
+
+        // Initiate a core reset request.
+        CHECK_ERR_M(set_dmcontrol(handle, 0x00000003), "unable to send reset core signal");
+        furi_delay_ms(1);
+    } else if(type == WchSwioFlasher_RVD_ResetToHalt) {
+        // Initiate a core reset request and hold the halt request.
+        CHECK_ERR_M(set_dmcontrol(handle, 0x80000003), "unable to send reset core and hold halt");
+        furi_delay_ms(1);
+    }
+
+    // Get the debug module status information, check rdata[19:18], if the value is 0b11, it means the processor has been reset, otherwise the reset failed.
+    CHECK_ERR(wait_for_dmstatus(
+        handle,
+        DM_DMSTATUS_ALLRESUMEACK | DM_DMSTATUS_ANYHAVERESET,
+        DM_DMSTATUS_ANYHAVERESET | DM_DMSTATUS_ANYHAVERESET));
+
+    if(type == WchSwioFlasher_RVD_ResetToRun || type == WchSwioFlasher_RVD_ResetToRunNoCheck) {
+        // Clear the reset signal
+        CHECK_ERR_M(set_dmcontrol(handle, 0x00000001), "unable to clear reset signal");
+        furi_delay_ms(1);
+
+        // Clear the reset status signal, this bit is valid for write 1 and read constant 0.
+        CHECK_ERR_M(set_dmcontrol(handle, 0x10000001), "unable to clear reset status signal");
+        furi_delay_ms(1);
+    } else if(type == WchSwioFlasher_RVD_ResetToHalt) {
+        // Clear the reset signal and hold the halt request.
+        CHECK_ERR_M(set_dmcontrol(handle, 0x80000001), "unable to clear reset signal");
+        furi_delay_ms(1);
+
+        // Clear the reset status signal and hold the halt request.
+        CHECK_ERR_M(set_dmcontrol(handle, 0x90000001), "unable to clear reset status signal");
+        furi_delay_ms(1);
+    }
+
+    if(type != WchSwioFlasher_RVD_ResetToRunNoCheck) {
+        // Get the debug module status information, check rdata[19:18], if the value is 0b00, it means the processor reset status has been cleared, otherwise the clearing fails.
+        CHECK_ERR(
+            wait_for_dmstatus(handle, DM_DMSTATUS_ALLRESUMEACK | DM_DMSTATUS_ANYHAVERESET, 0));
+    }
+
+    if(type == WchSwioFlasher_RVD_ResetToHalt) {
+        // Clear the halt request when the processor is reset and haltd again.
+        CHECK_ERR_M(set_dmcontrol(handle, 0x0000001), "unable to clear halt req");
+        furi_delay_ms(1);
+    }
+
+    /*
     // Set reset request
     CHECK_ERR_M(set_dmcontrol(handle, 0x80000003), "unable to HAVE RESET");
     CHECK_ERR(wait_for_dmstatus(handle, DM_DMSTATUS_ALLHAVERESET, DM_DMSTATUS_ALLHAVERESET));
@@ -392,7 +497,7 @@ WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_reset(WchSwioFlasher_RiscVDebug* 
 
     // Resetting the CPU also resets DCSR, redo it.
     CHECK_ERR(enable_breakpoints(handle));
-
+    */
     FURI_LOG_D(TAG, "reset_cpu done");
 
     return WchSwioFlasher_Ok;
@@ -451,7 +556,7 @@ static WchSwioFlasher_Error
         handle, &WchSwioFlasher_RiscVDebug_get_set_u32_program));
     CHECK_ERR(WchSwioFlasher_RiscVDebug_set_data1(handle, addr));
 
-    CHECK_ERR(WchSwioFlasher_RiscVDebug_run_prog(handle, WchSwioFlasher_RiscVDebug_NO_TIMEOUT));
+    CHECK_ERR(WchSwioFlasher_RiscVDebug_run_prog(handle, 10));
     CHECK_ERR(WchSwioFlasher_RiscVDebug_get_data0(handle, result));
 
     return WchSwioFlasher_Ok;
@@ -470,7 +575,7 @@ static WchSwioFlasher_Error
     CHECK_ERR(WchSwioFlasher_RiscVDebug_set_data0(handle, data));
     CHECK_ERR(WchSwioFlasher_RiscVDebug_set_data1(handle, addr | 1));
 
-    CHECK_ERR(WchSwioFlasher_RiscVDebug_run_prog(handle, WchSwioFlasher_RiscVDebug_NO_TIMEOUT));
+    CHECK_ERR(WchSwioFlasher_RiscVDebug_run_prog(handle, 10));
 
     return WchSwioFlasher_Ok;
 }

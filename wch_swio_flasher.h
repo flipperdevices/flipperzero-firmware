@@ -39,12 +39,14 @@ SOFTWARE.
 #include <notification/notification_messages.h>
 
 #include "views/debugger_emulator.h"
+#include "views/view_flasher.h"
 
 #include "minichlink_debugger.h"
 #include "nhc_link042_emulator.h"
 #include "helpers/riscv_debug.h"
 #include "helpers/swio.h"
 #include "helpers/wch_flasher.h"
+#include "ch32v_flipper_flasher.h"
 
 typedef struct App {
     Gui* gui;
@@ -57,17 +59,22 @@ typedef struct App {
 
     //
     //TextInput* text_input;
+    struct {
+        WchSwioFlasher_SWIO* swio;
+        WchSwioFlasher_RiscVDebug* riscv_debug;
+        WchSwioFlasher_WchFlasher* flasher;
+    } helpers;
 
-    WchSwioFlasher_SWIO* swio;
-    WchSwioFlasher_RiscVDebug* riscv_debug;
-    WchSwioFlasher_WchFlasher* flasher;
-
-    WchSwioFlasher_MinichlinkDebugger* mini_debugger;
-    WchSwioFlasher_NhcLink042Emu* emulator;
+    struct {
+        WchSwioFlasher_MinichlinkDebugger* mini_debugger;
+        WchSwioFlasher_NhcLink042Emu* emulator;
+        WchSwioFlasher_Ch32vFlipperFlasher* flasher;
+    } services;
 
     struct {
         Widget* widget;
         DebuggerEmulator* debuger_emulator;
+        ViewFlasher* flasher;
         Submenu* submenu;
         FuriString* file_path;
         FileBrowser* file_browser;
@@ -83,4 +90,9 @@ typedef enum {
     WchSwioFlasherViewSubmenu,
     WchSwioFlasherViewFileBrowser,
     WchSwioFlasherViewDebuggerEmulator,
+    WchSwioFlasherViewFlasher,
 } WchSwioFlasherView;
+
+void wch_swio_flasher_store_defaults();
+
+void wch_swio_flasher_load_defaults();

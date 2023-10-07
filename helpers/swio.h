@@ -45,3 +45,5 @@ WchSwioFlasher_Error
 
 WchSwioFlasher_Error
     WchSwioFlasher_SWIO_read(WchSwioFlasher_SWIO* handle, uint8_t address, uint32_t* data);
+
+WchSwioFlasher_Error WchSwioFlasher_SWIO_hw_reset(WchSwioFlasher_SWIO* handle);

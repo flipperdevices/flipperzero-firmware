@@ -27,7 +27,7 @@ SOFTWARE.
 
 #include "swio.h"
 
-#define SWI_TRIG_GPIO gpio_ext_pc1
+#define SWI_HW_RST_GPIO gpio_ext_pc1
 
 #define SWI_GPIO gpio_ext_pc0
 #define SWI_PORT_BASE GPIOC_BASE

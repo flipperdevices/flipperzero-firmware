@@ -25,21 +25,33 @@ SOFTWARE.
 
 #pragma once
 
-//#define SWIO_TXRX_DEBUG_MSG_ENABLE
-//#define SWIO_TRIGGER_OUT_ENABLE
+#include <gui/view.h>
 
-#define WCHF_VERIFY_MAX_BUFFER_SIZE 1024
-#define WCHF_WAIT_FOR_WRITE_FLASH_TIMEOUT 1000
+typedef struct ViewFlasher ViewFlasher;
 
-//#define NCHLNK_TXRX_DEBUG_MSG_ENABLE
-#define NCHLNK_TX_SEMAPHORE_TIMEOUT 5000
+typedef enum {
+    ViewFlasher_Action_ChipInfo = 0,
+    ViewFlasher_Action_OpenFile,
+    ViewFlasher_Action_EraseChip,
+    ViewFlasher_Action_WriteChip,
+    ViewFlasher_ActionCount,
+} ViewFlasher_View_Action;
 
-#define RVD_WAIT_FOR_DM_STATUS_TIMEOUT 500
-#define RVD_WAIT_FOR_CHIPINFO_TIMEOUT 500
+typedef void (*ViewFlasherDoActionCallback)(void* context, ViewFlasher_View_Action action);
 
-//#define RVD_TXRX_DEBUG_MSG_ENABLE
-#define RVD_CHECK_PROGRAM_UPLOAD_ENABLED
-#define RVD_CHECK_PROGRAM_EXECUTION_ENABLED
+void view_flasher_register_action_callback(
+    ViewFlasher* handle,
+    ViewFlasherDoActionCallback cb,
+    void* cb_context);
 
-#define RVD_NCHLINKEMU_TX_BUFF_SIZE 2048
-#define RVD_NCHLINKEMU_RX_BUFF_SIZE 2048
+ViewFlasher* view_flasher_alloc();
+
+void view_flasher_free(ViewFlasher* handle);
+
+View* view_flasher_get_view(ViewFlasher* flasher);
+
+void view_flasher_set_animation_status(ViewFlasher* handle, uint8_t enabled);
+
+void view_flasher_display_text(ViewFlasher* handle, const char* message);
+
+void view_flasher_display_clear_text(ViewFlasher* handle);

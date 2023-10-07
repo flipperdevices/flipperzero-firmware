@@ -45,13 +45,26 @@ typedef struct {
     uint32_t cached_regs; // bits are 1 if reg_cache[i] is valid
 } WchSwioFlasher_RiscVDebug;
 
+typedef struct {
+    uint32_t flash_size;
+    uint32_t esig_uniid[3];
+} WchSwioFlasher_RiscVDebug_ChipInfo;
+
 WchSwioFlasher_RiscVDebug* WchSwioFlasher_RiscVDebug_create(WchSwioFlasher_SWIO* swio);
 
 void WchSwioFlasher_RiscVDebug_destroy(WchSwioFlasher_RiscVDebug* handle);
 
 WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_init(WchSwioFlasher_RiscVDebug* handle);
 
-WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_reset(WchSwioFlasher_RiscVDebug* handle);
+typedef enum {
+    WchSwioFlasher_RVD_ResetToHalt = 0,
+    WchSwioFlasher_RVD_ResetToRun,
+    WchSwioFlasher_RVD_ResetToRunNoCheck,
+} WchSwioFlasher_RiscVDebug_ResetType;
+
+WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_reset(
+    WchSwioFlasher_RiscVDebug* handle,
+    WchSwioFlasher_RiscVDebug_ResetType type);
 
 WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_load_prog(
     WchSwioFlasher_RiscVDebug* handle,
@@ -120,3 +133,7 @@ WchSwioFlasher_Error
 
 WchSwioFlasher_Error
     WchSwioFlasher_RiscVDebug_machine_isa(WchSwioFlasher_RiscVDebug* handle, uint32_t* result);
+
+WchSwioFlasher_Error WchSwioFlasher_RiscVDebug_get_chip_info(
+    WchSwioFlasher_RiscVDebug* handle,
+    WchSwioFlasher_RiscVDebug_ChipInfo* info);

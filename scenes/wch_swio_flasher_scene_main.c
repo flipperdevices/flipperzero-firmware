@@ -40,6 +40,7 @@ void wch_swio_flasher_scene_main_submenu_callback(void* context, uint32_t index)
 void wch_swio_flasher_scene_main_on_enter(void* context) {
     WchSwioFlasherApp* app = context;
     Submenu* submenu = app->views.submenu;
+    submenu_set_header(submenu, "WCH SWIO Flasher");
     submenu_add_item(
         submenu,
         "Start debugger",
