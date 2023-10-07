@@ -84,9 +84,18 @@ static void usb_uart_on_irq_rx_dma_cb(
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
 
     UNUSED(ev);
-    uint8_t data[data_len];
-    furi_hal_uart_dma_rx(id_uart, data, data_len);
-    furi_stream_buffer_send(usb_uart->rx_stream, data, data_len, 100);
+    uint16_t max_len = 256;
+    uint8_t data[max_len];
+    do {
+        if(max_len >= data_len) {
+            max_len = data_len;
+        } else {
+            data_len -= max_len;
+        }
+        furi_hal_uart_dma_rx(id_uart, data, max_len);
+        furi_stream_buffer_send(usb_uart->rx_stream, data, max_len, 0);
+
+    } while(max_len != data_len);
     furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
 }
 

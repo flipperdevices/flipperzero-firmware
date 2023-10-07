@@ -105,7 +105,7 @@ typedef void (*FuriHalUartDmaRxCallback)(
  */
 void furi_hal_uart_dma_start(FuriHalUartId ch, FuriHalUartDmaRxCallback callback, void* context);
 
-/** Get data UART receive DMA
+/** Get data UART receive DMA, called only from the callback FuriHalUartDmaRxCallback
  *
  * @param[in]  ch    UART instance
  * @param[in]  data  pointer to data buffer
@@ -115,13 +115,6 @@ void furi_hal_uart_dma_start(FuriHalUartId ch, FuriHalUartDmaRxCallback callback
  * @return     size actual data receive (in bytes)
  */
 size_t furi_hal_uart_dma_rx(FuriHalUartId ch, uint8_t* data, size_t len);
-
-/** Get received data size in DMA buffer
- * 
- * @param channel UART channel
- * @return received data size (in bytes)
- */
-size_t furi_hal_uart_dma_bytes_available(FuriHalUartId ch);
 
 #ifdef __cplusplus
 }

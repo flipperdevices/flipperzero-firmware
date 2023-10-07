@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,40.0,,
+Version,+,41.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1096,11 +1096,11 @@ Function,+,furi_hal_clock_mco_disable,void,
 Function,+,furi_hal_clock_mco_enable,void,"FuriHalClockMcoSourceId, FuriHalClockMcoDivisorId"
 Function,-,furi_hal_clock_resume_tick,void,
 Function,-,furi_hal_clock_suspend_tick,void,
-Function,+,furi_hal_console_deinit,void,
 Function,-,furi_hal_clock_switch_hse2hsi,void,
 Function,-,furi_hal_clock_switch_hse2pll,_Bool,
 Function,-,furi_hal_clock_switch_hsi2hse,void,
 Function,-,furi_hal_clock_switch_pll2hse,_Bool,
+Function,+,furi_hal_console_deinit,void,
 Function,+,furi_hal_console_disable,void,
 Function,+,furi_hal_console_enable,void,
 Function,+,furi_hal_console_init,void,"FuriHalUartId, uint32_t"
@@ -1437,12 +1437,11 @@ Function,+,furi_hal_subghz_tx,_Bool,
 Function,+,furi_hal_subghz_write_packet,void,"const uint8_t*, uint8_t"
 Function,+,furi_hal_switch,void,void*
 Function,+,furi_hal_uart_deinit,void,FuriHalUartId
-Function,+,furi_hal_uart_dma_bytes_available,size_t,FuriHalUartId
+Function,+,furi_hal_uart_dma_rx,size_t,"FuriHalUartId, uint8_t*, size_t"
+Function,+,furi_hal_uart_dma_start,void,"FuriHalUartId, FuriHalUartDmaRxCallback, void*"
 Function,+,furi_hal_uart_init,void,"FuriHalUartId, uint32_t"
 Function,+,furi_hal_uart_resume,void,FuriHalUartId
-Function,+,furi_hal_uart_dma_rx,size_t,"FuriHalUartId, uint8_t*, size_t"
 Function,+,furi_hal_uart_set_br,void,"FuriHalUartId, uint32_t"
-Function,+,furi_hal_uart_dma_start,void,"FuriHalUartId, FuriHalUartDmaRxCallback, void*"
 Function,+,furi_hal_uart_set_irq_cb,void,"FuriHalUartId, FuriHalUartRxByteCallback, void*"
 Function,+,furi_hal_uart_suspend,void,FuriHalUartId
 Function,+,furi_hal_uart_tx,void,"FuriHalUartId, uint8_t*, size_t"

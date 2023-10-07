@@ -24,6 +24,8 @@ typedef struct {
 
 static FuriHalUart* uart[FuriHalUartIdMAX] = {0};
 
+static size_t furi_hal_uart_dma_bytes_available(FuriHalUartId ch);
+
 inline void furi_hal_uart_wait_tx_complete(FuriHalUartId ch) {
     if(ch == FuriHalUartIdUSART1) {
         while(!LL_USART_IsActiveFlag_TC(USART1))
@@ -468,7 +470,7 @@ void furi_hal_uart_tx(FuriHalUartId ch, uint8_t* buffer, size_t buffer_size) {
     }
 }
 
-size_t furi_hal_uart_dma_bytes_available(FuriHalUartId ch) {
+static size_t furi_hal_uart_dma_bytes_available(FuriHalUartId ch) {
     furi_assert(ch < FuriHalUartIdMAX);
     size_t index_dma = 0;
     if(ch == FuriHalUartIdUSART1) {
@@ -499,6 +501,7 @@ static uint8_t furi_hal_uart_dma_rx_read_byte(FuriHalUartId ch) {
 }
 
 size_t furi_hal_uart_dma_rx(FuriHalUartId ch, uint8_t* data, size_t len) {
+    furi_check(FURI_IS_IRQ_MODE());
     furi_assert(uart[ch] != NULL && uart[ch]->buffer_rx_ptr != NULL);
     size_t i = 0;
     size_t available = furi_hal_uart_dma_bytes_available(ch);
