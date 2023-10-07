@@ -6,6 +6,8 @@
 
    Modifications made:
    - Added function infrared_remote_get_button_by_name()
+   - Added function infrared_remote_delete_button_by_name()
+   - Added function infrared_remote_push_button()
 */
 
 #include "infrared_remote.h"
@@ -113,6 +115,13 @@ bool infrared_remote_add_button(InfraredRemote* remote, const char* name, Infrar
     return infrared_remote_store(remote);
 }
 
+void infrared_remote_push_button(InfraredRemote* remote, const char* name, InfraredSignal* signal) {
+    InfraredRemoteButton* button = infrared_remote_button_alloc();
+    infrared_remote_button_set_name(button, name);
+    infrared_remote_button_set_signal(button, signal);
+    InfraredButtonArray_push_back(remote->buttons, button);
+}
+
 bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name, size_t index) {
     furi_assert(index < InfraredButtonArray_size(remote->buttons));
     InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, index);
@@ -126,6 +135,12 @@ bool infrared_remote_delete_button(InfraredRemote* remote, size_t index) {
     InfraredButtonArray_pop_at(&button, remote->buttons, index);
     infrared_remote_button_free(button);
     return infrared_remote_store(remote);
+}
+
+bool infrared_remote_delete_button_by_name(InfraredRemote* remote, const char* name) {
+    size_t index = 0;
+    if (!infrared_remote_find_button_by_name(remote, name, &index)) return false;
+    return infrared_remote_delete_button(remote, index);
 }
 
 void infrared_remote_move_button(InfraredRemote* remote, size_t index_orig, size_t index_dest) {

@@ -10,9 +10,11 @@
 #include "xremote_learn.h"
 #include "xremote_control.h"
 #include "xremote_settings.h"
+#include "xremote_analyzer.h"
 
 #include "views/xremote_about_view.h"
 #include "views/xremote_learn_view.h"
+#include "views/xremote_signal_view.h"
 
 #define TAG "XRemote"
 
@@ -64,6 +66,8 @@ void xremote_submenu_callback(void* context, uint32_t index)
         child = xremote_learn_alloc(app->app_ctx);
     else if (index == XRemoteViewIRSubmenu)
         child = xremote_control_alloc(app->app_ctx);
+    else if (index == XRemoteViewAnalyzer)
+        child = xremote_analyzer_alloc(app->app_ctx);
     else if (index == XRemoteViewSettings)
         child = xremote_settings_alloc(app->app_ctx);
     else if (index == XRemoteViewAbout)
@@ -87,6 +91,7 @@ int32_t xremote_main(void* p)
     xremote_app_submenu_alloc(app, XRemoteViewSubmenu, xremote_exit_callback);
     xremote_app_submenu_add(app, "Learn", XRemoteViewLearn, xremote_submenu_callback);
     xremote_app_submenu_add(app, "Saved", XRemoteViewIRSubmenu, xremote_submenu_callback);
+    xremote_app_submenu_add(app, "Analyzer", XRemoteViewAnalyzer, xremote_submenu_callback);
     xremote_app_submenu_add(app, "Settings", XRemoteViewSettings, xremote_submenu_callback);
     xremote_app_submenu_add(app, "About", XRemoteViewAbout, xremote_submenu_callback);
 

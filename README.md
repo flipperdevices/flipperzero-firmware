@@ -40,8 +40,8 @@ Button name | Description
 ## Progress
 
 - [x] Application menu
-- [ ] Learn new remote
-- [ ] Signal analyzer
+- [x] Learn new remote
+- [x] Signal analyzer
 - [x] Use saved remote
     - [x] General button page
     - [x] Control buttons page
@@ -49,7 +49,7 @@ Button name | Description
     - [x] Player buttons page
     - [ ] Custom buttons page
     - [ ] Full button list
-    - [ ] Edit remote file
+    - [ ] Rename remote file
     - [ ] Delete remote file
 - [x] Application settings
     - [x] GUI to change settings
@@ -78,6 +78,17 @@ Button name | Description
     </tr>
     <tr>
         <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/saved_remote_apps.png" alt="XRemote IR applicatoions"></td>
+    </tr>
+</table>
+
+<table align="center">
+    <tr>
+        <td align="center">Learn mode</td>
+        <td align="center">Received signal</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/learn_mode.png" alt="XRemote learn mode"></td>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/signal_view.png" alt="XRemote received signal"></td>
     </tr>
 </table>
 

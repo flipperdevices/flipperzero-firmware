@@ -20,6 +20,7 @@
 
 #include "../infrared/infrared_remote.h"
 
+#define XREMOTE_BUTTON_COUNT            26
 #define XREMOTE_COMMAND_POWER           "Power"
 #define XREMOTE_COMMAND_SETUP           "Setup"
 #define XREMOTE_COMMAND_INPUT           "Input"
@@ -46,6 +47,18 @@
 #define XREMOTE_COMMAND_VOL_DOWN        "Vol_dn"
 #define XREMOTE_COMMAND_NEXT_CHAN       "Ch_next"
 #define XREMOTE_COMMAND_PREV_CHAN       "Ch_prev"
+
+typedef enum {
+    XRemoteEventReserved = 200,
+    XRemoteEventSignalReceived,
+    XRemoteEventSignalFinish,
+    XRemoteEventSignalSave,
+    XRemoteEventSignalRetry,
+    XRemoteEventSignalSend,
+    XRemoteEventSignalSkip,
+    XRemoteEventSignalAskExit,
+    XRemoteEventSignalExit
+} XRemoteEvent;
 
 typedef enum {
     /* Navigation */
@@ -80,11 +93,15 @@ typedef struct {
 
 typedef enum {
     XRemoteViewNone,
+    XRemoteViewSignal,
+    XRemoteViewTextInput,
+    XRemoteViewDialogExit,
 
     /* Main page */
     XRemoteViewSubmenu,
     XRemoteViewLearn,
     XRemoteViewSaved,
+    XRemoteViewAnalyzer,
     XRemoteViewSettings,
     XRemoteViewAbout,
 
@@ -98,8 +115,11 @@ typedef enum {
 } XRemoteViewID;
 
 typedef struct XRemoteView XRemoteView;
-typedef void (*XRemoteViewClearCallback)(void *context);
+typedef void (*XRemoteClearCallback)(void *context);
 typedef void (*XRemoteViewDrawFunction)(Canvas*, XRemoteViewModel*);
+typedef XRemoteView* (*XRemoteViewAllocator)(void* app_ctx);
+
+const char* xremote_button_get_name(int index);
 
 void xremote_canvas_draw_header(Canvas* canvas, ViewOrientation orient, const char* section);
 void xremote_canvas_draw_exit_footer(Canvas* canvas, ViewOrientation orient, const char *text);
@@ -118,7 +138,7 @@ InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView *rview, const 
 bool xremote_view_press_button(XRemoteView *rview, InfraredRemoteButton* button);
 bool xremote_view_send_ir_msg_by_name(XRemoteView *rview, const char *name);
 
-void xremote_view_set_context(XRemoteView* rview, void *context, XRemoteViewClearCallback on_clear);
+void xremote_view_set_context(XRemoteView* rview, void *context, XRemoteClearCallback on_clear);
 void* xremote_view_get_context(XRemoteView* rview);
 void xremote_view_clear_context(XRemoteView* rview);
 void* xremote_view_get_app_context(XRemoteView* rview);

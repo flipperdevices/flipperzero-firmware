@@ -14,6 +14,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
 #include <notification/notification.h>
@@ -22,6 +23,7 @@
 #include <flipper_format/flipper_format.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
+#include <infrared_worker.h>
 
 #include "views/xremote_common_view.h"
 #include "xc_icons.h"
@@ -63,12 +65,11 @@ void xremote_app_context_free(XRemoteAppContext* ctx);
 
 const char* xremote_app_context_get_exit_str(XRemoteAppContext* ctx);
 void xremote_app_context_notify_led(XRemoteAppContext* app_ctx);
-
-typedef XRemoteView* (*XRemoteViewAllocator)(void* app_ctx);
-typedef void (*XRemoteAppClearCallback)(void *context);
+void xremote_app_notification_blink(NotificationApp* notifications);
+bool xremote_app_send_signal(XRemoteAppContext* app_ctx, InfraredSignal* signal);
 
 typedef struct {
-    XRemoteAppClearCallback on_clear;
+    XRemoteClearCallback on_clear;
     XRemoteAppContext* app_ctx;
     XRemoteViewID submenu_id;
     XRemoteViewID view_id;
@@ -85,8 +86,8 @@ void xremote_app_view_alloc(XRemoteApp *app, uint32_t view_id, XRemoteViewAlloca
 void xremote_app_view_free(XRemoteApp* app);
 
 void xremote_app_view_set_previous_callback(XRemoteApp* app, ViewNavigationCallback callback);
-void xremote_app_set_view_context(XRemoteApp* app, void *context, XRemoteViewClearCallback on_clear);
-void xremote_app_set_user_context(XRemoteApp* app, void *context, XRemoteAppClearCallback on_clear);
+void xremote_app_set_view_context(XRemoteApp* app, void *context, XRemoteClearCallback on_clear);
+void xremote_app_set_user_context(XRemoteApp* app, void *context, XRemoteClearCallback on_clear);
 void xremote_app_user_context_free(XRemoteApp* app);
 
 bool xremote_app_has_view(XRemoteApp *app, uint32_t view_id);
