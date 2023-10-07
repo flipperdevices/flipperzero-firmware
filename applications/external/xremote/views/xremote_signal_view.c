@@ -17,7 +17,7 @@ static void xremote_signal_view_draw_callback(Canvas* canvas, void* context) {
     XRemoteAppContext* app_ctx = xremote_signal_analyzer_get_app_context(analyzer);
 
     ViewOrientation orientation = app_ctx->app_settings->orientation;
-    uint8_t y = orientation == ViewOrientationHorizontal ? 16 : 48;
+    uint8_t y = orientation == ViewOrientationHorizontal ? 17 : 49;
     const char* text = "Press any\nbutton on\nthe remote.";
 
     xremote_canvas_draw_header(canvas, orientation, "Analyzer");
@@ -67,11 +67,11 @@ static void xremote_signal_success_view_draw_callback(Canvas* canvas, void* cont
     if(app_ctx->app_settings->orientation == ViewOrientationHorizontal) {
         elements_multiline_text_aligned(canvas, 0, 17, AlignLeft, AlignTop, signal_info);
         xremote_canvas_draw_button_wide(
-            canvas, model->ok_pressed, 68, 25, "Send", XRemoteIconEnter);
+            canvas, model->ok_pressed, 68, 26, "Send", XRemoteIconEnter);
         xremote_canvas_draw_button_wide(
-            canvas, model->back_pressed, 68, 45, "Retry", XRemoteIconBack);
+            canvas, model->back_pressed, 68, 44, "Retry", XRemoteIconBack);
     } else {
-        elements_multiline_text_aligned(canvas, 0, 38, AlignLeft, AlignTop, signal_info);
+        elements_multiline_text_aligned(canvas, 0, 39, AlignLeft, AlignTop, signal_info);
         xremote_canvas_draw_button_wide(
             canvas, model->ok_pressed, 0, 88, "Send", XRemoteIconEnter);
         xremote_canvas_draw_button_wide(

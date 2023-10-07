@@ -30,6 +30,7 @@
 
 #define XREMOTE_APP_EXTENSION ".ir"
 #define XREMOTE_APP_FOLDER ANY_PATH("infrared")
+#define XREMOTE_APP_TEXT_MAX 128
 
 #define xremote_app_assert_void(cond) \
     if(!cond) return

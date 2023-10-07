@@ -9,8 +9,6 @@
 #include "xremote_learn.h"
 #include "views/xremote_learn_view.h"
 
-#define XREMOTE_TEXT_MAX 128
-
 struct XRemoteLearnContext {
     /* XRemote context */
     XRemoteSignalReceiver* ir_receiver;
@@ -32,7 +30,7 @@ struct XRemoteLearnContext {
     void* context;
 
     /* Private control flags */
-    char text_store[XREMOTE_TEXT_MAX + 1];
+    char text_store[XREMOTE_APP_TEXT_MAX + 1];
     uint8_t current_button;
     bool finish_learning;
     bool stop_receiver;
@@ -238,7 +236,7 @@ static void xremote_learn_finish(XRemoteLearnContext* learn_ctx) {
     xremote_app_assert_void(learn_ctx->text_input);
 
     if(infrared_remote_get_button_count(learn_ctx->ir_remote) || learn_ctx->is_dirty) {
-        snprintf(learn_ctx->text_store, XREMOTE_TEXT_MAX, "Remote_");
+        snprintf(learn_ctx->text_store, XREMOTE_APP_TEXT_MAX, "Remote_");
         text_input_set_header_text(learn_ctx->text_input, "Name new remote");
 
         text_input_set_result_callback(
@@ -246,7 +244,7 @@ static void xremote_learn_finish(XRemoteLearnContext* learn_ctx) {
             xremote_learn_text_input_callback,
             learn_ctx,
             learn_ctx->text_store,
-            XREMOTE_TEXT_MAX,
+            XREMOTE_APP_TEXT_MAX,
             true);
 
         xremote_learn_switch_to_view(learn_ctx, XRemoteViewTextInput);

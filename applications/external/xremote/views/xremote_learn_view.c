@@ -29,7 +29,7 @@ static void xremote_learn_view_draw_callback(Canvas* canvas, void* context) {
         button_name != NULL ? button_name : "");
 
     if(orientation == ViewOrientationHorizontal) {
-        elements_multiline_text_aligned(canvas, 0, 10, AlignLeft, AlignTop, info_text);
+        elements_multiline_text_aligned(canvas, 0, 12, AlignLeft, AlignTop, info_text);
         xremote_canvas_draw_button_wide(
             canvas, model->ok_pressed, 68, 22, "Finish", XRemoteIconEnter);
         xremote_canvas_draw_button_wide(
@@ -99,7 +99,7 @@ static void xremote_learn_success_view_draw_callback(Canvas* canvas, void* conte
             canvas, model->back_pressed, 68, 48, "Retry", XRemoteIconBack);
     } else {
         canvas_draw_str_aligned(canvas, 0, 12, AlignLeft, AlignTop, "Received signal");
-        elements_multiline_text_aligned(canvas, 0, 28, AlignLeft, AlignTop, signal_info);
+        elements_multiline_text_aligned(canvas, 0, 27, AlignLeft, AlignTop, signal_info);
         xremote_canvas_draw_button_wide(
             canvas, model->ok_pressed, 0, 76, "Finish", XRemoteIconEnter);
         xremote_canvas_draw_button_wide(
