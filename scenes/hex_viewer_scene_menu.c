@@ -19,11 +19,19 @@ void hex_viewer_scene_menu_on_enter(void* context) {
 
     submenu_set_header(app->submenu, "Select action");
     submenu_add_item(
-        app->submenu, "Open ...", SubmenuIndexScene4, hex_viewer_scene_menu_submenu_callback, app);
+        app->submenu,
+        "Open file ...",
+        SubmenuIndexScene4,
+        hex_viewer_scene_menu_submenu_callback,
+        app);
     // submenu_add_item(app->submenu, "Scene 2 (Inputs/Effects)", SubmenuIndexScene2, hex_viewer_scene_menu_submenu_callback, app);
     // submenu_add_item(app->submenu, "Scene 3 (Buttonmenu)", SubmenuIndexScene3, hex_viewer_scene_menu_submenu_callback, app);
     submenu_add_item(
-        app->submenu, "Go to ...", SubmenuIndexScene1, hex_viewer_scene_menu_submenu_callback, app);
+        app->submenu,
+        "Scroll to ...",
+        SubmenuIndexScene1,
+        hex_viewer_scene_menu_submenu_callback,
+        app);
     // submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, hex_viewer_scene_menu_submenu_callback, app);
 
     submenu_set_selected_item(

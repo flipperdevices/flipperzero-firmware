@@ -14,7 +14,7 @@ void hex_viewer_scene_scene_1_on_enter(void* context) {
 
     TextInput* text_input = app->text_input;
 
-    text_input_set_header_text(text_input, "Go to percent (0..100)");
+    text_input_set_header_text(text_input, "Scroll to percent (0..100)");
     text_input_set_result_callback(
         text_input,
         hex_viewer_scene_scene_1_callback,
