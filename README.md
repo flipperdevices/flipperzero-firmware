@@ -46,6 +46,7 @@ the hardware setup.
 * [Adafruit Ultimate GPS Breakout]
 * ATGM336H
 * Beitian BN-180
+* Beitian BN-220
 * Beitian BN-280
 * Beitian BN-880
 * Beitian BK-250
