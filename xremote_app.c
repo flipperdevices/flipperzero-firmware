@@ -111,6 +111,7 @@ XRemoteAppContext* xremote_app_context_alloc(void* arg) {
     ctx->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(ctx->view_dispatcher);
     view_dispatcher_attach_to_gui(ctx->view_dispatcher, ctx->gui, ViewDispatcherTypeFullscreen);
+
     return ctx;
 }
 
@@ -137,10 +138,22 @@ const char* xremote_app_context_get_exit_str(XRemoteAppContext* ctx) {
     return exit_behavior == XRemoteAppExitHold ? "Hold to exit" : "Press to exit";
 }
 
+void xremote_app_notification_blink(NotificationApp* notifications) {
+    xremote_app_assert_void(notifications);
+    notification_message(notifications, &g_sequence_blink_purple_50);
+}
+
 void xremote_app_context_notify_led(XRemoteAppContext* app_ctx) {
     xremote_app_assert_void(app_ctx);
-    NotificationApp* notifications = app_ctx->notifications;
-    notification_message(notifications, &g_sequence_blink_purple_50);
+    xremote_app_notification_blink(app_ctx->notifications);
+}
+
+bool xremote_app_send_signal(XRemoteAppContext* app_ctx, InfraredSignal* signal) {
+    xremote_app_assert(signal, false);
+    XRemoteAppSettings* settings = app_ctx->app_settings;
+    infrared_signal_transmit_times(signal, settings->repeat_count);
+    xremote_app_context_notify_led(app_ctx);
+    return true;
 }
 
 void xremote_app_view_alloc(XRemoteApp* app, uint32_t view_id, XRemoteViewAllocator allocator) {
@@ -209,11 +222,17 @@ void xremote_app_submenu_alloc(XRemoteApp* app, uint32_t index, ViewNavigationCa
     app->submenu_id = index;
 
     XRemoteAppSettings* settings = app->app_ctx->app_settings;
+    View* view = submenu_get_view(app->submenu);
+    view_set_previous_callback(view, prev_cb);
+
+#ifdef FW_ORIGIN_Unleashed
     submenu_set_orientation(app->submenu, settings->orientation);
-    view_set_previous_callback(submenu_get_view(app->submenu), prev_cb);
+#else
+    view_set_orientation(view, settings->orientation);
+#endif
 
     ViewDispatcher* view_disp = app->app_ctx->view_dispatcher;
-    view_dispatcher_add_view(view_disp, app->submenu_id, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(view_disp, app->submenu_id, view);
 }
 
 void xremote_app_submenu_free(XRemoteApp* app) {
@@ -240,16 +259,13 @@ void xremote_app_view_set_previous_callback(XRemoteApp* app, ViewNavigationCallb
     view_set_previous_callback(view, callback);
 }
 
-void xremote_app_set_view_context(
-    XRemoteApp* app,
-    void* context,
-    XRemoteViewClearCallback on_clear) {
+void xremote_app_set_view_context(XRemoteApp* app, void* context, XRemoteClearCallback on_clear) {
     furi_assert(app);
     xremote_app_assert_void(app->view_ctx);
     xremote_view_set_context(app->view_ctx, context, on_clear);
 }
 
-void xremote_app_set_user_context(XRemoteApp* app, void* context, XRemoteAppClearCallback on_clear) {
+void xremote_app_set_user_context(XRemoteApp* app, void* context, XRemoteClearCallback on_clear) {
     furi_assert(app);
     app->on_clear = on_clear;
     app->context = context;

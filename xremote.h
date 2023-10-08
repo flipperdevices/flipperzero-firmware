@@ -8,8 +8,8 @@
 
 #include "xremote_app.h"
 
-#define XREMOTE_VERSION_MAJOR  0
-#define XREMOTE_VERSION_MINOR  9
-#define XREMOTE_BUILD_NUMBER   26
+#define XREMOTE_VERSION_MAJOR 1
+#define XREMOTE_VERSION_MINOR 0
+#define XREMOTE_BUILD_NUMBER 2
 
-void xremote_get_version(char *version, size_t length);
+void xremote_get_version(char* version, size_t length);
