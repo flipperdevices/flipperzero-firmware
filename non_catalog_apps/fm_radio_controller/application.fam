@@ -1,23 +1,14 @@
 App(
     appid="fmradio_controller",
-    name="[TEA5767] Radio",
+    name="[TEA5767] FM Radio",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="radio_app",
-    requires=["gui"],
+    entry_point="fmradio_controller_app",
     stack_size=1 * 1024,
     fap_category="GPIO",
-    fap_private_libs=[
-        Lib(
-            name="TEA5767",
-            cincludes=["."],
-            sources=[
-                "TEA5767.c",
-            ],
-        ),
-    ],
     fap_icon="radio.png",
     fap_icon_assets="images",
-    fap_author="@victormico",
-    fap_version="0.1",
-    fap_description="Radio App",
+    fap_author="coolshrimp",
+    fap_weburl="https://coolshrimp/flipperzero-firmware-wPlugins/",
+    fap_version="0.8",
+    fap_description="FM Radio App",
 )

@@ -189,7 +189,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Atomic Dice Roller | ![GPIO Badge] | [by nmrr](https://github.com/nmrr/flipperzero-atomicdiceroller) |  | ![None Badge] |
 | NRF24 Channel Scanner | ![GPIO Badge] | [by htotoo](https://github.com/htotoo/NRF24ChannelScanner) |  | [![Author Badge]](https://lab.flipper.net/apps/nrf24channelscanner) |
 | Mx2125 - Step Counter | ![GPIO Badge] | [by grugnoymeme](https://github.com/grugnoymeme/flipperzero-stepcounter-fap) |  | ![None Badge] |
-| TEA5767 Radio control | ![GPIO Badge] | [by victormico](https://github.com/victormico/flipperzero-radio/tree/main) |  | ![None Badge] |
+| TEA5767 Radio control | ![GPIO Badge] | [original by victormico](https://github.com/victormico/flipperzero-radio/tree/main) | new version [by coolshrimp](https://coolshrimp/flipperzero-firmware-wPlugins/) | ![None Badge] |
 | IR Remote | ![IR Badge] | [by Hong5489](https://github.com/Hong5489/ir_remote) | improvements [by friebel](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [by d4ve10](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option) | ![None Badge] |
 | IR Intervalometer | ![IR Badge] | [by Nitepone](https://github.com/Nitepone/flipper-intervalometer) |  | [![UFW Badge]](https://lab.flipper.net/apps/sony_intervalometer) |
 | IR Xbox Controller | ![IR Badge] | [by gebeto](https://github.com/gebeto/flipper-xbox-controller) |  | [![Author Badge]](https://lab.flipper.net/apps/xbox_controller) |
