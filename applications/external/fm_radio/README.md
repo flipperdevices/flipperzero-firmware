@@ -25,11 +25,10 @@ TEA5767 Datasheet - (https://www.sparkfun.com/datasheets/Wireless/General/TEA576
 
 
 ## TO-DO
-Add User Settings Menu: 
--Standby/Mute On Exit: True/False
--RSSI Seek Strenght: 1-15
--Sound: Mono-L/Mono-R/Stereo
--User Editable Station List w/Names (Display on "Listen Now Page")
--Listen Now Page Causes Feedback (GetRadio Info call to update RSSI Stregth is the cause)
--Add the Preset Up/Down Icon.
+Add User Settings Menu: <br>
+-Standby/Mute On Exit: True/False<br>
+-RSSI Seek Strenght: 1-15<br>
+-Sound: Mono-L/Mono-R/Stereo<br>
+-User Editable Station List w/Names (Display on "Listen Now Page")<br>
+-Add the Preset Up/Down Icon.<br>
 -Redirect TEA5767 Audio To a GPIO and Playback on Flipper Internal Speaker
