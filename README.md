@@ -63,7 +63,7 @@ These configuration variables are optional:
 * `STM32_TOOLCHAIN_PATH` - where toolchain is located, **default**: `/usr`. Alternatively
   you can add the folder containing the toolchain binaries to the system path. If both are given,
   the `STM32_TOOLCHAIN_PATH` setting takes precedence
-* `TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
+* `STM32_TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
 * `FREERTOS_PATH` - Path to the FreeRTOS kernel when compiling with a RTOS. Does not need to be
    specified when using CMSIS
 
@@ -74,7 +74,7 @@ If you have access to a Unix shell, which is the default terminal on Linux, or t
 
 ```sh
 export STM32_TOOLCHAIN_PATH="<ToolchainPath>"
-export TARGET_TRIPLET=arm-none-eabi
+export STM32_TARGET_TRIPLET=arm-none-eabi
 export STM32_CUBE_<FAMILY>_PATH="<PathToCubeRoot>"
 ```
 
@@ -86,7 +86,7 @@ On Windows, you can use a Powershell script `path_helper.ps1`to set up the envir
 
 ```sh
 $env:STM32_TOOLCHAIN_PATH = "<ToolchainPath>"
-$env:TARGET_TRIPLET = arm-none-eabi
+$env:STM32_TARGET_TRIPLET = arm-none-eabi
 $env:STM32_CUBE_<FAMILY>_PATH="<PathToCubeRoot>"
 ```
 
