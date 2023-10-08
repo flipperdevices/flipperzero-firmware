@@ -147,6 +147,8 @@ void dev_info_svc_start() {
             dev_info_svc->service_handle,
             &dev_info_svc_chars[i],
             &dev_info_svc->characteristics[i]);
+    }
+    for(size_t i = 0; i < DevInfoSvcGattCharacteristicCount; i++) {
         flipper_gatt_characteristic_update(
             dev_info_svc->service_handle, &dev_info_svc->characteristics[i], NULL);
     }
