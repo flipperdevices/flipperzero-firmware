@@ -2,7 +2,7 @@ App(
     appid="id_card",
     name="Id Card",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="id_card_app",
+    entry_point="id_card_main",
     stack_size=1 * 1024,
     fap_icon_assets="images",
     fap_icon="images/icon_10x10.png",

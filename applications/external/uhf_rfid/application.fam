@@ -1,6 +1,6 @@
 App(
-    appid="qm100_uhf_rfid",
-    name="[(Q)M100] UHF RFID",
+    appid="uhf_rfid",
+    name="UHF RFID [(Q)M100]",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uhf_app_main",
     stack_size=12 * 1024,

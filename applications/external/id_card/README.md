@@ -11,6 +11,8 @@ If you have any problems with the connection between your computer and your devi
 
 # Introduction
 
+![](screenshoots/flipper_zero.jpeg)
+
 You heard about the [Flipper Zero](https://flipperzero.one/) and bought it for fun.
 You played with it and now you want to develop your first application to take the full advantage of the device.
 You are entering in a beautiful world with awesome capabilities.
@@ -140,7 +142,7 @@ App(
     appid="id_card",
     name="Id Card",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="id_card_app",
+    entry_point="id_card_main",
     cdefines=["APP_ID_CARD"],
     requires=["gui"],
     stack_size=1 * 1024,
@@ -166,6 +168,17 @@ The [Official documentation](https://github.com/flipperdevices/flipperzero-firmw
 ### Source code
 #### Include files
 ##### Regular headers
+
+In order to use the resources available on the Flipper Zero like the Screen or the SD card, you have include some headers.
+All the usefull headers are placed in the `application/sevices` directory.
+
+For this example, we will only use three headers specific for the Flipper Zero.
+```
+#include <furi.h>           # Used to have a message queue and log
+#include <gui/gui.h>        # Handle all the GUI utils
+#include <input/input.h>    # Handle the Inputs
+```
+
 ##### Image assets
 
 If you want to insert images in your application, you have to specify the directory of your image in the `fap_icon_assets` of your `application.fam`.
@@ -178,6 +191,139 @@ For example, if you want to include an image in your application `example`, you 
 This line will do some magic for you, generate all necessary variables and initialize it with image's values.
 All you have to do is accessing to your image's variable with this pattern: `I_{image_name}`.
 For istance, if your image is named `icon.png`, the generated variable is `I_icon`.
+
+##### Usefull structure
+
+It is a good practice to have a internal data structure where all the necessary assets are stored.
+In our case we will define an `Id_card` structure that store everything we need:
+- `FuriMessageQueue` pointer to store the user inputs.
+- `ViewPort` pointer to handle the display.
+- `GUI` pointer to the current GUI.
+
+```c
+typedef struct {
+    FuriMessageQueue* input_queue;
+    ViewPort* view_port;
+    Gui* gui;
+} Id_card;
+```
+
+#### Main function
+
+The entrypoint of the application needs to have the same name specified in the manifest file and has to match this signature:
+```c
+int32_t id_card_main(void* p) {
+    UNUSED(p);
+    return 0;
+}
+```
+
+In this main function, we have to do 3 things:
+- Allocation and initialization
+- Main loop and input handling
+- Free structures and exit the application
+
+##### Logging
+
+It can be very useful to log the execution of your application to trace it and know exactly what happened.
+To do that some macros are available easily.
+
+For example:
+```c
+FURI_LOG_I("Id_card", "Example");
+```
+
+To receive the logs, you have to launch the application in debug mode with the Serial console.
+Select the `[Debug] Launch App on Flipper with Serial Console` in VScode.
+
+If you are using CLI tools, you can also debug the `./fbt debug` command.
+
+##### Allocation and initialization
+
+This section depends on the assets you use, but this article will show you the minimum required for a simple application.
+
+To store all the data structures, we will use the previously defined structure.
+
+```c
+Id_card app;
+```
+
+Then, we have to allocate a `ViewPort` and a `FuriMessageQueue`.
+The `ViewPort` will handle your display in the GUI and the `FuriMessageQueue` will be used to handle user inputs.
+
+After that, we need to set callbacks functions to draw on the GUI and the inputs.
+```c
+view_port_draw_callback_set(app.view_port, draw_callback, &app);
+view_port_input_callback_set(app.view_port, input_callback, &app);
+```
+Those callbacks will be defined later in this tutorial.
+
+The next step is to add a GUI to the allocated `ViewPort`.
+```c
+app.gui = furi_record_open("gui");
+gui_add_view_port(app.gui, app.view_port, GuiLayerFullscreen);
+```
+
+##### Main loop and input handling
+
+In this part, we will look at the way to handle user inputs and its behaviour.
+
+The structure of this part is pretty simple.
+```c
+InputEvent input;
+uint8_t exit_loop = 0;
+
+while(1) {
+
+    // We will add the logic of the application in this scope.
+
+    if(exit_loop) {
+        break;
+    }
+
+    view_port_update(app.view_port);
+}
+```
+The `veiw_port_update` function call the callback function to draw the updated GUI.
+
+In this main loop, we have to get the last user input and check the error code.
+```c
+furi_check(
+    furi_message_queue_get(app.input_queue, &input, FuriWaitForever) == FuriStatusOk);
+```
+In this line we wait the next user input and store it in the input variable.
+Then, we check if there is an error with the `furi_check` function.
+
+The next step is to get the user entry type and do the application's logic.
+In our case, we want to exit the application whatever the key is entered by
+setting the `exit_loop` variable to 1.
+```c
+switch(input.key) {
+    case InputKeyLeft:
+    case InputKeyRight:
+    case InputKeyOk:
+    case InputKeyUp:
+    case InputKeyDown:
+    case InputKeyBack:
+        exit_loop = 1;
+        break;
+    default:
+        break;
+}
+```
+This is the minimal way to handle user inputs.
+
+##### Free structures and exit the application
+
+The final step of the main function is to free all the data structures to exit properly of the application.
+Firstly, you need to disable your `ViewPort`, remove the the GUI from the `ViewPort`and close the furi record.
+Then, you can free the `ViewPort`.
+```c
+view_port_enabled_set(app.view_port, false);
+gui_remove_view_port(app.gui, app.view_port);
+furi_record_close("gui");
+view_port_free(app.view_port);
+```
 
 #### Callbacks
 
@@ -220,36 +366,46 @@ canvas_set_font(canvas, FontSecondary);
 Then, to draw the text the function is:
 ```c
 canvas_draw_str_aligned(
-    canvas,     // Callback variable
-    1,          // x coordinate
-    1,          // y coordinate
-    AlignLeft,  // Horizontal alignement
-    AlignTop,   // Vertical alignement
-    "example"   // Text to display
-    );
+        canvas,     // Callback variable
+        1,          // x coordinate
+        1,          // y coordinate
+        AlignLeft,  // Horizontal alignement
+        AlignTop,   // Vertical alignement
+        "example"   // Text to display
+        );
 ```
 
 ###### Image
 
 Display images is very simplified by the build system.
-It generate and initialize the variables for you and you only have to give this
-variable to a function.
+It generate and initialize the variables for you and you only have to give this variable to a function.
 
 ```c
 canvas_draw_icon(
-    canvas,     // Callback variable
-    10,         // x coordinate
-    10,         // y coordinate
-    &I_icon     // Image to display
-    );
+        canvas,     // Callback variable
+        10,         // x coordinate
+        10,         // y coordinate
+        &I_icon     // Image to display
+        );
 ```
 
 ##### Inputs
 
-#### Main function
+The inputs callback is pretty simple because the only thing to do is to put the new `InputEvent` into the message queue. 
+This event will be handle by the main function written before.
+```c
+Id_card* app = context;
+furi_message_queue_put(app->input_queue, event, 0);
+```
 
-##### Allocations
-##### Input handling
-##### Free the memory
+# Conclusion
 
 # Going further
+## Use the Flipper Zero hardware
+
+A good way to start developping an application with hardware usage as NFC or infrared is to find [examples](https://github.com/djsime1/awesome-flipperzero) and understand how it work.
+Another way to learn how to develop an application like that is to explore the [firmware source code](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/services) and try to find interesting functions.
+
+## Use rust
+
+If you are a rust enjoyer and want to try it on Flipper Zero, you can try it with this [Github account](https://github.com/flipperzero-rs).

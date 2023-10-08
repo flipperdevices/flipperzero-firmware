@@ -1,13 +1,12 @@
-#include "gui/canvas.h"
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
+
 #include <stdint.h>
 #include <stdlib.h>
 
 #include "id_card_icons.h"
 
-// VALUES BELOW WOULD BE BETTER TAKEN FROM A TXT FILE WITH APP OPTIONS TO SET IT ON EDIT MODE
 #define NAME "John DOE"
 #define NUMBER "06 12 34 56 78"
 #define EMAIL "john.doe@example.com"
@@ -62,13 +61,14 @@ void input_callback(InputEvent* event, void* context) {
     furi_message_queue_put(app->input_queue, event, 0);
 }
 
-int32_t id_card_app(void* p) {
+int32_t id_card_main(void* p) {
     UNUSED(p);
 
     Id_card app;
 
     // Alloc
     app.view_port = view_port_alloc();
+    app.input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     // Callbacks
     view_port_draw_callback_set(app.view_port, draw_callback, &app);
@@ -80,12 +80,12 @@ int32_t id_card_app(void* p) {
 
     // Input handling
     InputEvent input;
-    app.input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     uint8_t exit_loop = 0;
+
+    FURI_LOG_I(TAG, "Start the main loop.");
     while(1) {
         furi_check(
             furi_message_queue_get(app.input_queue, &input, FuriWaitForever) == FuriStatusOk);
-        FURI_LOG_D(TAG, "In the while!!!");
 
         switch(input.key) {
         case InputKeyLeft:

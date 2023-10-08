@@ -1,15 +1,20 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stddef.h>
+#include <furi_hal.h>
+#include "uhf_tag.h"
 #include "uhf_buffer.h"
 #include "uhf_tag.h"
 #include <furi_hal.h>
 #include "uhf_module_settings.h"
 
+#define FRAME_START 0xBB
 #define FRAME_END 0x7E
-#define DEFAULT_BAUDRATE 115200
+#define DEFAULT_BAUDRATE BAUD_RATES[BAUD_RATES_COUNT - 1]
+#define DEFAULT_TRANSMITTING_POWER POWER_DBM[POWER_DBM_COUNT - 1]
+#define DEFAULT_WORKING_REGION WR_US
 
 typedef struct {
     char* hw_version;
@@ -18,17 +23,19 @@ typedef struct {
 } M100ModuleInfo;
 
 typedef enum {
-    M100Success,
+    M100SuccessResponse,
     M100ValidationFail,
     M100NoTagResponse,
-    M100MemoryOverrun
+    M100MemoryOverrun,
+    M100EmptyResponse,
+    M100ChecksumFail
 } M100ResponseType;
 
 typedef struct {
     M100ModuleInfo* info;
     uint32_t baudrate;
-    WorkingArea area;
-    WorkingChannel channel;
+    WorkingRegion region;
+    uint16_t region_frequency;
     uint16_t transmitting_power;
     bool freq_hopping;
     Buffer* buf;
@@ -41,6 +48,7 @@ M100Module* m100_module_alloc();
 void m100_module_free(M100Module* module);
 uint16_t crc16_genibus(const uint8_t* data, size_t length);
 uint8_t checksum(const uint8_t* data, size_t length);
+uint8_t get_baudrate_count();
 
 // Function prototypes
 char* m100_get_hardware_version(M100Module* module);
@@ -48,8 +56,7 @@ char* m100_get_software_version(M100Module* module);
 char* m100_get_manufacturers(M100Module* module);
 
 void m100_set_baudrate(M100Module* module, uint32_t baudrate);
-bool m100_set_working_area(M100Module* module, WorkingArea area);
-bool m100_set_working_channel(M100Module* module, WorkingChannel channel);
+bool m100_set_working_region(M100Module* module, WorkingRegion region);
 bool m100_set_transmitting_power(M100Module* module, uint16_t power);
 bool m100_set_freq_hopping(M100Module* module, bool hopping);
 bool m100_set_power(M100Module* module, uint8_t* power);

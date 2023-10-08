@@ -20,13 +20,13 @@ UHFTag* send_polling_command(UHFWorker* uhf_worker) {
             uhf_tag_free(uhf_tag);
             return NULL;
         }
-        if(status == M100Success) break;
+        if(status == M100SuccessResponse) break;
     }
     return uhf_tag;
 }
 
 UHFWorkerEvent read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag, BankType bank) {
-    unsigned int retry = 3, word_low = 0, word_high = 64;
+    unsigned int word_low = 0, word_high = 64;
     unsigned int word_size;
     M100ResponseType status;
     do {
@@ -34,17 +34,12 @@ UHFWorkerEvent read_bank_till_max_length(UHFWorker* uhf_worker, UHFTag* uhf_tag,
         if(word_low >= word_high) return UHFWorkerEventSuccess;
         word_size = (word_low + word_high) / 2;
         status = m100_read_label_data_storage(uhf_worker->module, uhf_tag, bank, 0, word_size);
-        if(status == M100Success) {
+        if(status == M100SuccessResponse) {
             word_low = word_size + 1;
         } else if(status == M100MemoryOverrun) {
             word_high = word_size - 1;
-        } else if(status == M100NoTagResponse) {
-            retry--;
         }
-        FURI_LOG_E("TAG", "read bank %d, word_low %d, word_high %d", bank, word_low, word_high);
-    } while(retry);
-    FURI_LOG_E("TAG", "read success; retry = %d", retry);
-    if(!retry) return UHFWorkerEventFail;
+    } while(true);
     return UHFWorkerEventSuccess;
 }
 
@@ -53,7 +48,8 @@ UHFWorkerEvent read_single_card(UHFWorker* uhf_worker) {
     if(uhf_tag == NULL) return UHFWorkerEventAborted;
     uhf_tag_wrapper_set_tag(uhf_worker->uhf_tag_wrapper, uhf_tag);
     // set select
-    if(m100_set_select(uhf_worker->module, uhf_tag) != M100Success) return UHFWorkerEventFail;
+    if(m100_set_select(uhf_worker->module, uhf_tag) != M100SuccessResponse)
+        return UHFWorkerEventFail;
     // read tid
     UHFWorkerEvent event;
     event = read_bank_till_max_length(uhf_worker, uhf_tag, TIDBank);
@@ -68,18 +64,19 @@ UHFWorkerEvent write_single_card(UHFWorker* uhf_worker) {
     UHFTag* uhf_tag_des = send_polling_command(uhf_worker);
     if(uhf_tag_des == NULL) return UHFWorkerEventAborted;
     UHFTag* uhf_tag_from = uhf_worker->uhf_tag_wrapper->uhf_tag;
-    if(m100_set_select(uhf_worker->module, uhf_tag_des) != M100Success) return UHFWorkerEventFail;
+    if(m100_set_select(uhf_worker->module, uhf_tag_des) != M100SuccessResponse)
+        return UHFWorkerEventFail;
     do {
         M100ResponseType rp_type = m100_write_label_data_storage(
             uhf_worker->module, uhf_tag_from, uhf_tag_des, UserBank, 0, 0);
         if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
-        if(rp_type == M100Success) break;
+        if(rp_type == M100SuccessResponse) break;
     } while(true);
     do {
         M100ResponseType rp_type = m100_write_label_data_storage(
             uhf_worker->module, uhf_tag_from, uhf_tag_des, EPCBank, 0, 0);
         if(uhf_worker->state == UHFWorkerStateStop) return UHFWorkerEventAborted;
-        if(rp_type == M100Success) break;
+        if(rp_type == M100SuccessResponse) break;
     } while(true);
     return UHFWorkerEventSuccess;
 }
@@ -91,9 +88,7 @@ int32_t uhf_worker_task(void* ctx) {
         uhf_worker->callback(event, uhf_worker->ctx);
     } else if(uhf_worker->state == UHFWorkerStateDetectSingle) {
         UHFWorkerEvent event = read_single_card(uhf_worker);
-        FURI_LOG_E("TAG", "read single card success");
         uhf_worker->callback(event, uhf_worker->ctx);
-        FURI_LOG_E("TAG", "read single card callback success %d", event);
     } else if(uhf_worker->state == UHFWorkerStateWriteSingle) {
         UHFWorkerEvent event = write_single_card(uhf_worker);
         uhf_worker->callback(event, uhf_worker->ctx);

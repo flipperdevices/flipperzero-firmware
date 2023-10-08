@@ -6,6 +6,8 @@
 
    Modifications made:
    - Added function infrared_remote_get_button_by_name()
+   - Added function infrared_remote_delete_button_by_name()
+   - Added function infrared_remote_push_button()
 */
 
 #pragma once
@@ -32,8 +34,10 @@ bool infrared_remote_find_button_by_name(InfraredRemote* remote, const char* nam
 InfraredRemoteButton* infrared_remote_get_button_by_name(InfraredRemote* remote, const char* name);
 
 bool infrared_remote_add_button(InfraredRemote* remote, const char* name, InfraredSignal* signal);
+void infrared_remote_push_button(InfraredRemote* remote, const char* name, InfraredSignal* signal);
 bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name, size_t index);
 bool infrared_remote_delete_button(InfraredRemote* remote, size_t index);
+bool infrared_remote_delete_button_by_name(InfraredRemote* remote, const char* name);
 void infrared_remote_move_button(InfraredRemote* remote, size_t index_orig, size_t index_dest);
 
 bool infrared_remote_store(InfraredRemote* remote);
