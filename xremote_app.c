@@ -8,7 +8,7 @@
 
 #include "xremote_app.h"
 
-#define XREMOTE_APP_SETTINGS ANY_PATH("infrared/assets/xremote.cfg")
+#define XREMOTE_APP_SETTINGS APP_DATA_PATH("xremote.cfg")
 #define TAG "XRemoteApp"
 
 const NotificationSequence g_sequence_blink_purple_50 = {
