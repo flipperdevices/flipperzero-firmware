@@ -11,10 +11,10 @@ Application for flipperzero device to control radio boards.
  - SDA = C1, Pin 15
 
 ## Controls
-Up = Preset Up
-Down = Preset Down
-Left = Seek Down
-Right = Seek Up
+Up = Preset Up<br>
+Down = Preset Down<br>
+Left = Seek Down<br>
+Right = Seek Up<br>
 OK = Toggle Mute
 
 ## References
