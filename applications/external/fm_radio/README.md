@@ -1,22 +1,32 @@
-[![FlipC.org](https://flipc.org/victormico/flipperzero-radio/badge?nowerr=1)](https://flipc.org/victormico/flipperzero-radio?nowerr=1)
-
-# flipperzero-radio
+# FM Radio - Flipper Zero
 Application for flipperzero device to control radio boards.
 
 ## Supported boards
 * [TEA5767](https://www.sparkfun.com/datasheets/Wireless/General/TEA5767.pdf)
 
 ## PIN
- - 3V3 (3V3, pin 9)  = VCC
- - GND (GND, pin 18) = GND
- - SCL (C0, pin 16)  = SCL
- - SDA (C1, pin 15)  = SDA
+ - VCC = 3V3, Pin 9
+ - GND = GND, Pin 18
+ - SCL = C0, Pin 16
+ - SDA = C1, Pin 15
 
+## Controls
+Up = Preset Up
+Down = Preset Down
+Left = Seek Down
+Right = Seek Up
+OK = Toggle Mute
 
 ## References
-App inspired by [Radio](https://github.com/mathertel/Radio) project for Arduino
+TEA5767 Datasheet - (https://www.sparkfun.com/datasheets/Wireless/General/TEA5767.pdf)
 
-## Aknowledgements
-Special thanks to [Derek Jamison](https://github.com/jamisonderek) for his amazing [Flipper Zero Tutorials](https://github.com/jamisonderek/flipper-zero-tutorials) that helped me to get started with Flipper Zero development.
 
-And to [Oleksii Kutuzov](https://github.com/oleksiikutuzov) for his [Lightmeter](https://github.com/oleksiikutuzov/flipperzero-lightmeter) app, which was used as a template for this app.
+## TO-DO
+Add User Settings Menu: 
+-Standby/Mute On Exit: True/False
+-RSSI Seek Strenght: 1-15
+-Sound: Mono-L/Mono-R/Stereo
+-User Editable Station List w/Names (Display on "Listen Now Page")
+-Listen Now Page Causes Feedback (GetRadio Info call to update RSSI Stregth is the cause)
+-Add the Preset Up/Down Icon.
+-Redirect TEA5767 Audio To a GPIO and Playback on Flipper Internal Speaker
