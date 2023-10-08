@@ -54,6 +54,9 @@ UHFApp* uhf_alloc() {
     view_dispatcher_attach_to_gui(
         uhf_app->view_dispatcher, uhf_app->gui, ViewDispatcherTypeFullscreen);
 
+    // Variable Item List
+    uhf_app->variable_item_list = variable_item_list_alloc();
+
     //worker
     uhf_app->worker = uhf_worker_alloc();
 
@@ -68,6 +71,13 @@ UHFApp* uhf_alloc() {
 
     // Open Notification record
     uhf_app->notifications = furi_record_open(RECORD_NOTIFICATION);
+
+    // Variable Item List
+    uhf_app->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        uhf_app->view_dispatcher,
+        UHFViewVariableItemList,
+        variable_item_list_get_view(uhf_app->variable_item_list));
 
     // Submenu
     uhf_app->submenu = submenu_alloc();
@@ -140,6 +150,9 @@ void uhf_free(UHFApp* uhf_app) {
     furi_record_close(RECORD_GUI);
     uhf_app->gui = NULL;
 
+    // Variable Item List
+    variable_item_list_free(uhf_app->variable_item_list);
+
     // Notifications
     furi_record_close(RECORD_NOTIFICATION);
     uhf_app->notifications = NULL;
@@ -189,7 +202,7 @@ int32_t uhf_app_main(void* ctx) {
     furi_hal_power_enable_otg();
     // init pin a2
     // furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
-
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, DEFAULT_BAUDRATE);
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneVerify);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
