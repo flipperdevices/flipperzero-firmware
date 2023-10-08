@@ -39,7 +39,7 @@ static bool dev_info_char_firmware_rev_callback(
     const uint8_t** data,
     uint16_t* data_len) {
     const DevInfoSvc* dev_info_svc = *(DevInfoSvc**)context;
-    *data_len = sizeof(dev_info_svc->hardware_revision);
+    *data_len = sizeof(dev_info_svc->hardware_revision) - 1;
     if(data) {
         *data = (const uint8_t*)&dev_info_svc->hardware_revision;
     }
