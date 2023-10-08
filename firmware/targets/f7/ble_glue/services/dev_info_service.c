@@ -16,7 +16,7 @@ typedef enum {
     DevInfoSvcGattCharacteristicSerial,
     // DevInfoSvcGattCharacteristicFirmwareRev,
     // DevInfoSvcGattCharacteristicSoftwareRev,
-    // DevInfoSvcGattCharacteristicRpcVersion,
+    DevInfoSvcGattCharacteristicRpcVersion,
     DevInfoSvcGattCharacteristicCount,
 } DevInfoSvcGattCharacteristicId;
 
@@ -63,64 +63,62 @@ static bool dev_info_char_software_rev_callback(
     return false;
 }
 
-static const FlipperGattCharacteristicParams
-    dev_info_svc_chars[DevInfoSvcGattCharacteristicCount] = {
-        [DevInfoSvcGattCharacteristicMfgName] =
-            {.name = "Manufacturer Name",
-             .data_prop_type = FlipperGattCharacteristicDataFixed,
-             .data.fixed.length = sizeof(dev_info_man_name) - 1,
-             .data.fixed.ptr = (const uint8_t*)&dev_info_man_name,
-             .uuid.Char_UUID_16 = MANUFACTURER_NAME_UUID,
-             .uuid_type = UUID_TYPE_16,
-             .char_properties = CHAR_PROP_READ,
-             .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
-             .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
-             .is_variable = CHAR_VALUE_LEN_CONSTANT},
-        [DevInfoSvcGattCharacteristicSerial] =
-            {.name = "Serial Number",
-             .data_prop_type = FlipperGattCharacteristicDataFixed,
-             .data.fixed.length = sizeof(dev_info_serial_num) - 1,
-             .data.fixed.ptr = (const uint8_t*)&dev_info_serial_num,
-             .uuid.Char_UUID_16 = SERIAL_NUMBER_UUID,
-             .uuid_type = UUID_TYPE_16,
-             .char_properties = CHAR_PROP_READ,
-             .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
-             .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
-             .is_variable = CHAR_VALUE_LEN_CONSTANT},
-        //  [DevInfoSvcGattCharacteristicFirmwareRev] =
-        //      {.name = "Firmware Revision",
-        //       .data_prop_type = FlipperGattCharacteristicDataCallback,
-        //       .data.callback.context = &dev_info_svc,
-        //       .data.callback.fn = dev_info_char_firmware_rev_callback,
-        //       .uuid.Char_UUID_16 = FIRMWARE_REVISION_UUID,
-        //       .uuid_type = UUID_TYPE_16,
-        //       .char_properties = CHAR_PROP_READ,
-        //       .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
-        //       .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
-        //       .is_variable = CHAR_VALUE_LEN_CONSTANT},
-        //  [DevInfoSvcGattCharacteristicSoftwareRev] =
-        //      {.name = "Software Revision",
-        //       .data_prop_type = FlipperGattCharacteristicDataCallback,
-        //       .data.callback.context = &dev_info_svc,
-        //       .data.callback.fn = dev_info_char_software_rev_callback,
-        //       .uuid.Char_UUID_16 = SOFTWARE_REVISION_UUID,
-        //       .uuid_type = UUID_TYPE_16,
-        //       .char_properties = CHAR_PROP_READ,
-        //       .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
-        //       .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
-        //       .is_variable = CHAR_VALUE_LEN_CONSTANT},
-        //  [DevInfoSvcGattCharacteristicRpcVersion] = {
-        //      .name = "RPC Version",
-        //      .data_prop_type = FlipperGattCharacteristicDataFixed,
-        //      .data.fixed.length = sizeof(dev_info_rpc_version) - 1,
-        //      .data.fixed.ptr = (const uint8_t*)&dev_info_rpc_version,
-        //      .uuid.Char_UUID_128 = DEV_INVO_RPC_VERSION_UID,
-        //      .uuid_type = UUID_TYPE_128,
-        //      .char_properties = CHAR_PROP_READ,
-        //      .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
-        //      .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
-        //      .is_variable = CHAR_VALUE_LEN_CONSTANT},
-};
+static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCharacteristicCount] =
+    {[DevInfoSvcGattCharacteristicMfgName] =
+         {.name = "Manufacturer Name",
+          .data_prop_type = FlipperGattCharacteristicDataFixed,
+          .data.fixed.length = sizeof(dev_info_man_name) - 1,
+          .data.fixed.ptr = (const uint8_t*)&dev_info_man_name,
+          .uuid.Char_UUID_16 = MANUFACTURER_NAME_UUID,
+          .uuid_type = UUID_TYPE_16,
+          .char_properties = CHAR_PROP_READ,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .is_variable = CHAR_VALUE_LEN_CONSTANT},
+     [DevInfoSvcGattCharacteristicSerial] =
+         {.name = "Serial Number",
+          .data_prop_type = FlipperGattCharacteristicDataFixed,
+          .data.fixed.length = sizeof(dev_info_serial_num) - 1,
+          .data.fixed.ptr = (const uint8_t*)&dev_info_serial_num,
+          .uuid.Char_UUID_16 = SERIAL_NUMBER_UUID,
+          .uuid_type = UUID_TYPE_16,
+          .char_properties = CHAR_PROP_READ,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .is_variable = CHAR_VALUE_LEN_CONSTANT},
+     //  [DevInfoSvcGattCharacteristicFirmwareRev] =
+     //      {.name = "Firmware Revision",
+     //       .data_prop_type = FlipperGattCharacteristicDataCallback,
+     //       .data.callback.context = &dev_info_svc,
+     //       .data.callback.fn = dev_info_char_firmware_rev_callback,
+     //       .uuid.Char_UUID_16 = FIRMWARE_REVISION_UUID,
+     //       .uuid_type = UUID_TYPE_16,
+     //       .char_properties = CHAR_PROP_READ,
+     //       .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+     //       .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+     //       .is_variable = CHAR_VALUE_LEN_CONSTANT},
+     //  [DevInfoSvcGattCharacteristicSoftwareRev] =
+     //      {.name = "Software Revision",
+     //       .data_prop_type = FlipperGattCharacteristicDataCallback,
+     //       .data.callback.context = &dev_info_svc,
+     //       .data.callback.fn = dev_info_char_software_rev_callback,
+     //       .uuid.Char_UUID_16 = SOFTWARE_REVISION_UUID,
+     //       .uuid_type = UUID_TYPE_16,
+     //       .char_properties = CHAR_PROP_READ,
+     //       .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+     //       .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+     //       .is_variable = CHAR_VALUE_LEN_CONSTANT},
+     [DevInfoSvcGattCharacteristicRpcVersion] = {
+         .name = "RPC Version",
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = sizeof(dev_info_rpc_version) - 1,
+         .data.fixed.ptr = (const uint8_t*)&dev_info_rpc_version,
+         .uuid.Char_UUID_128 = DEV_INVO_RPC_VERSION_UID,
+         .uuid_type = UUID_TYPE_128,
+         .char_properties = CHAR_PROP_READ,
+         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+         .is_variable = CHAR_VALUE_LEN_CONSTANT}};
 
 void dev_info_svc_start() {
     dev_info_svc = malloc(sizeof(DevInfoSvc));
@@ -190,21 +188,21 @@ void dev_info_svc_start() {
         FURI_LOG_E(TAG, "Failed to add software revision char: %d", status);
     }
 
-    static const uint8_t dev_info_rpc_version_uuid[] = DEV_INVO_RPC_VERSION_UID;
-    status = aci_gatt_add_char(
-        dev_info_svc->service_handle,
-        UUID_TYPE_128,
-        (const Char_UUID_t*)dev_info_rpc_version_uuid,
-        strlen(dev_info_rpc_version),
-        CHAR_PROP_READ,
-        ATTR_PERMISSION_AUTHEN_READ,
-        GATT_DONT_NOTIFY_EVENTS,
-        10,
-        CHAR_VALUE_LEN_CONSTANT,
-        &dev_info_svc->rpc_version_char_handle);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed to add rpc version characteristic: %d", status);
-    }
+    // static const uint8_t dev_info_rpc_version_uuid[] = DEV_INVO_RPC_VERSION_UID;
+    // status = aci_gatt_add_char(
+    //     dev_info_svc->service_handle,
+    //     UUID_TYPE_128,
+    //     (const Char_UUID_t*)dev_info_rpc_version_uuid,
+    //     strlen(dev_info_rpc_version),
+    //     CHAR_PROP_READ,
+    //     ATTR_PERMISSION_AUTHEN_READ,
+    //     GATT_DONT_NOTIFY_EVENTS,
+    //     10,
+    //     CHAR_VALUE_LEN_CONSTANT,
+    //     &dev_info_svc->rpc_version_char_handle);
+    // if(status) {
+    //     FURI_LOG_E(TAG, "Failed to add rpc version characteristic: %d", status);
+    // }
 
     for(size_t i = 0; i < DevInfoSvcGattCharacteristicCount; i++) {
         flipper_gatt_characteristic_update(
@@ -228,15 +226,15 @@ void dev_info_svc_start() {
     if(status) {
         FURI_LOG_E(TAG, "Failed to update software revision char: %d", status);
     }
-    status = aci_gatt_update_char_value(
-        dev_info_svc->service_handle,
-        dev_info_svc->rpc_version_char_handle,
-        0,
-        strlen(dev_info_rpc_version),
-        (uint8_t*)dev_info_rpc_version);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed to update rpc version char: %d", status);
-    }
+    // status = aci_gatt_update_char_value(
+    //     dev_info_svc->service_handle,
+    //     dev_info_svc->rpc_version_char_handle,
+    //     0,
+    //     strlen(dev_info_rpc_version),
+    //     (uint8_t*)dev_info_rpc_version);
+    // if(status) {
+    //     FURI_LOG_E(TAG, "Failed to update rpc version char: %d", status);
+    // }
 }
 
 void dev_info_svc_stop() {
@@ -259,11 +257,11 @@ void dev_info_svc_stop() {
         if(status) {
             FURI_LOG_E(TAG, "Failed to delete software revision char: %d", status);
         }
-        status =
-            aci_gatt_del_char(dev_info_svc->service_handle, dev_info_svc->rpc_version_char_handle);
-        if(status) {
-            FURI_LOG_E(TAG, "Failed to delete rpc version char: %d", status);
-        }
+        // status =
+        //     aci_gatt_del_char(dev_info_svc->service_handle, dev_info_svc->rpc_version_char_handle);
+        // if(status) {
+        //     FURI_LOG_E(TAG, "Failed to delete rpc version char: %d", status);
+        // }
         // Delete service
         status = aci_gatt_del_service(dev_info_svc->service_handle);
         if(status) {
