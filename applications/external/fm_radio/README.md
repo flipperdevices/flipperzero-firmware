@@ -1,6 +1,9 @@
 # FM Radio - Flipper Zero
 Application for flipperzero device to control radio boards.
 
+<img src="https://github.com/coolshrimp/flipperzero-firmware-wPlugins/blob/420/applications/external/fm_radio/images/Screenshot1.png">
+<img src="https://github.com/coolshrimp/flipperzero-firmware-wPlugins/blob/420/applications/external/fm_radio/images/Screenshot2.png">
+
 ## Supported boards
 * [TEA5767](https://www.sparkfun.com/datasheets/Wireless/General/TEA5767.pdf)
 
