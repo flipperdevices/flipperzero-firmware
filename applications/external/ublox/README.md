@@ -78,8 +78,9 @@ panel.
 
 ## Logging
 Press the right button on the data display to start logging. You'll be
-prompted to input a filename, and then logging will start. The app
-logs to KML format, and you can view them with a tool like [this
+prompted to input a filename, and then logging will start. Files are
+saved to `apps_data/ublox` on the SD card. The app logs to KML format,
+and you can view them with a tool like [this
 one](https://www.doogal.co.uk/KmlViewer). Press the right button to
 stop logging. Logging will also stop if you leave the data display.
 
@@ -90,3 +91,4 @@ This will synchronize the Flipper's time to the GPS's time. This
 doesn't touch the hour, so that your timezone is preserved, but syncs
 the minute and second. The Flipper's clock will be up to one second
 off, because there's no pulse-per-second signal.
+
