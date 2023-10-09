@@ -1,3 +1,4 @@
 [alias]
-    update-subtree = "!f() { git subtree pull -P $GIT_PREFIX $(<${GIT_PREFIX}.gitremote); }; f"
-    bulk-update-subtree = "!f() { find . -name .gitremote -execdir git update-subtree \\;; }; f"
+    add-app = "!f() { if [ \"$1\" = \"\" -o \"$2\" = \"\" -o \"$3\" = \"\" ]; then echo \"Usage: git add-app <path> <repo> <branch>\" && exit; fi; set -e; git subtree add -P \"$1\" \"$2\" \"$3\"; echo \"$2 $3\" > \"$1/.gitremote\"; git add \"$1/.gitremote\"; git commit -m \"Add upstream remote\"; }; f"
+    update-app = "!f() { git subtree pull -P $GIT_PREFIX $(<${GIT_PREFIX}.gitremote); }; f"
+    bulk-update-apps = "!f() { find . -name .gitremote -execdir git update-app \\;; }; f"

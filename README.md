@@ -20,9 +20,9 @@ Subtrees work in a very peculiar way, where they pull and compare commit history
 That's why the commit history for our repo is so huge, it contains all the commits for all the apps, plus our edits.
 
 To make updating more manageable, we have added another layer on top of subtrees:
-- each remote app/repo has a `.gitremote` file that indicates the remote url and branch name
-- we have a git alias `update-subtree` for pulling updates based on the current directory (set it up by running `git config --local include.path ../.gitconfig`)
-- run `git update-subtree` in each subtree folder to update it
-- or run `find . -name .gitremote -execdir git update-subtree \;` to run it on all subtrees
+- set it up by running `git config --local include.path ../.gitconfig`
+- add a new app with `git add-app <path> <repo> <branch>`, this will pull the commit history and create a `path/.gitremote` to remember the url and branch
+- run `git update-app` to pull updates based on the current subtree directory
+- or run `git bulk-update-apps` to do it for all subtrees
 
 Also, some repos dont have the code in their top-level folders, so for those we have symlinks from our root folder to the approriate place in `.modules/`.
