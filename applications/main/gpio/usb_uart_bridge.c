@@ -134,7 +134,7 @@ static void usb_uart_serial_deinit(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     UNUSED(usb_uart);
     furi_hal_uart_deinit(uart_ch);
     if(uart_ch == FuriHalUartIdUSART1)
-        furi_hal_console_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
+        furi_hal_console_init(FuriHalUartIdUSART1, FURI_HAL_CONSOLE_BAUDRATE);
 }
 
 static void usb_uart_set_baudrate(UsbUartBridge* usb_uart, uint32_t baudrate) {

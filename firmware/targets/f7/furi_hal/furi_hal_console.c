@@ -23,7 +23,7 @@ FuriHalConsole furi_hal_console = {
     .alive = false,
     .channel = FuriHalUartIdUSART1,
     .tx_callback = NULL,
-    .baudrate = CONSOLE_BAUDRATE,
+    .baudrate = FURI_HAL_CONSOLE_BAUDRATE,
     .tx_callback_context = NULL,
 };
 
@@ -41,7 +41,7 @@ void furi_hal_console_deinit() {
     furi_check(furi_hal_console.initialized);
     furi_hal_uart_deinit(furi_hal_console.channel);
     furi_hal_console.channel = FuriHalUartIdUSART1;
-    furi_hal_console.baudrate = CONSOLE_BAUDRATE;
+    furi_hal_console.baudrate = FURI_HAL_CONSOLE_BAUDRATE;
     furi_hal_console.alive = false;
     furi_hal_console.initialized = false;
 }

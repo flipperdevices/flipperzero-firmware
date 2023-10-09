@@ -7,9 +7,9 @@
 #include <furi_hal_uart.h>
 
 #ifdef HEAP_PRINT_DEBUG
-#define CONSOLE_BAUDRATE 1843200
+#define FURI_HAL_CONSOLE_BAUDRATE 1843200
 #else
-#define CONSOLE_BAUDRATE 230400
+#define FURI_HAL_CONSOLE_BAUDRATE 230400
 #endif
 
 #ifdef __cplusplus
