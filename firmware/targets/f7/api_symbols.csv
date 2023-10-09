@@ -154,6 +154,7 @@ Header,+,lib/music_worker/music_worker.h,,
 Header,+,lib/nanopb/pb.h,,
 Header,+,lib/nanopb/pb_decode.h,,
 Header,+,lib/nanopb/pb_encode.h,,
+Header,+,lib/nfc/helpers/iso13239_crc.h,,
 Header,+,lib/nfc/helpers/iso14443_crc.h,,
 Header,+,lib/nfc/helpers/nfc_data_generator.h,,
 Header,+,lib/nfc/helpers/nfc_dict.h,,
@@ -1842,6 +1843,9 @@ Function,-,islower,int,int
 Function,-,islower_l,int,"int, locale_t"
 Function,-,isnan,int,double
 Function,-,isnanf,int,float
+Function,+,iso13239_crc_append,void,"Iso13239CrcType, BitBuffer*"
+Function,+,iso13239_crc_check,_Bool,"Iso13239CrcType, const BitBuffer*"
+Function,+,iso13239_crc_trim,void,BitBuffer*
 Function,+,iso14443_3a_alloc,Iso14443_3aData*,
 Function,+,iso14443_3a_copy,void,"Iso14443_3aData*, const Iso14443_3aData*"
 Function,+,iso14443_3a_free,void,Iso14443_3aData*
