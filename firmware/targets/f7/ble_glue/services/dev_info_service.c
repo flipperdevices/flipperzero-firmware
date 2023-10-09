@@ -1,5 +1,6 @@
 #include "dev_info_service.h"
 #include "app_common.h"
+#include "core/log.h"
 #include "gatt_char.h"
 #include <ble/ble.h>
 
@@ -44,7 +45,8 @@ static bool dev_info_char_firmware_rev_callback(
     const uint8_t** data,
     uint16_t* data_len) {
     const DevInfoSvc* dev_info_svc = *(DevInfoSvc**)context;
-    *data_len = sizeof(dev_info_svc->hardware_revision) - 1;
+    // *data_len = sizeof(dev_info_svc->hardware_revision) - 1;
+    *data_len = strlen(dev_info_svc->hardware_revision);
     if(data) {
         *data = (const uint8_t*)&dev_info_svc->hardware_revision;
     }
@@ -167,21 +169,32 @@ void dev_info_svc_start() {
     UNUSED(dev_info_char_software_rev_callback);
     UNUSED(dev_info_char_firmware_rev_callback);
 
-    uuid = FIRMWARE_REVISION_UUID;
-    status = aci_gatt_add_char(
+    flipper_gatt_characteristic_init(
         dev_info_svc->service_handle,
-        UUID_TYPE_16,
-        (Char_UUID_t*)&uuid,
-        strlen(dev_info_svc->hardware_revision),
-        CHAR_PROP_READ,
-        ATTR_PERMISSION_AUTHEN_READ,
-        GATT_DONT_NOTIFY_EVENTS,
-        10,
-        CHAR_VALUE_LEN_CONSTANT,
-        &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev].handle);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed to add firmware revision char: %d", status);
-    }
+        &dev_info_svc_chars[DevInfoSvcGattCharacteristicFirmwareRev],
+        &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev]);
+
+    // uuid = FIRMWARE_REVISION_UUID;
+    // status = aci_gatt_add_char(
+    //     dev_info_svc->service_handle,
+    //     UUID_TYPE_16,
+    //     (Char_UUID_t*)&uuid,
+    //     strlen(dev_info_svc->hardware_revision),
+    //     CHAR_PROP_READ,
+    //     ATTR_PERMISSION_AUTHEN_READ,
+    //     GATT_DONT_NOTIFY_EVENTS,
+    //     10,
+    //     CHAR_VALUE_LEN_CONSTANT,
+    //     &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev].handle);
+    // if(status) {
+    //     FURI_LOG_E(TAG, "Failed to add firmware revision char: %d", status);
+    // }
+
+    // FURI_LOG_E(
+    //     TAG,
+    //     "Char fw len: %d/%d",
+    //     strlen(dev_info_svc->hardware_revision),
+    //     sizeof(dev_info_svc->hardware_revision) - 1);
 
     uuid = SOFTWARE_REVISION_UUID;
     status = aci_gatt_add_char(
@@ -198,6 +211,8 @@ void dev_info_svc_start() {
     if(status) {
         FURI_LOG_E(TAG, "Failed to add software revision char: %d", status);
     }
+
+    FURI_LOG_E(TAG, "Char sw len: %d", furi_string_size(dev_info_svc->version_string));
 
     flipper_gatt_characteristic_init(
         dev_info_svc->service_handle,
@@ -233,16 +248,20 @@ void dev_info_svc_start() {
         dev_info_svc->service_handle,
         &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicSerial],
         NULL);
-
-    status = aci_gatt_update_char_value(
+    flipper_gatt_characteristic_update(
         dev_info_svc->service_handle,
-        dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev].handle,
-        0,
-        strlen(dev_info_svc->hardware_revision),
-        (uint8_t*)dev_info_svc->hardware_revision);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed to update firmware revision char: %d", status);
-    }
+        &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev],
+        NULL);
+
+    // status = aci_gatt_update_char_value(
+    //     dev_info_svc->service_handle,
+    //     dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev].handle,
+    //     0,
+    //     strlen(dev_info_svc->hardware_revision),
+    //     (uint8_t*)dev_info_svc->hardware_revision);
+    // if(status) {
+    //     FURI_LOG_E(TAG, "Failed to update firmware revision char: %d", status);
+    // }
     status = aci_gatt_update_char_value(
         dev_info_svc->service_handle,
         dev_info_svc->characteristics[DevInfoSvcGattCharacteristicSoftwareRev].handle,
@@ -286,12 +305,16 @@ void dev_info_svc_stop() {
             dev_info_svc->service_handle,
             &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicSerial]);
 
-        status = aci_gatt_del_char(
+        flipper_gatt_characteristic_delete(
             dev_info_svc->service_handle,
-            dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev].handle);
-        if(status) {
-            FURI_LOG_E(TAG, "Failed to delete firmware revision char: %d", status);
-        }
+            &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev]);
+
+        // status = aci_gatt_del_char(
+        //     dev_info_svc->service_handle,
+        //     dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev].handle);
+        // if(status) {
+        //     FURI_LOG_E(TAG, "Failed to delete firmware revision char: %d", status);
+        // }
 
         status = aci_gatt_del_char(
             dev_info_svc->service_handle,
