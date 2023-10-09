@@ -20,9 +20,9 @@ static void cfw_app_scene_misc_screen_lcd_static_color_changed(VariableItem* ite
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, lcd_colors[index].name);
     notification_message(app->notification, &sequence_display_backlight_off);
-    rgb_backlight_set_color(0, lcd_colors[index].color);
-    rgb_backlight_set_color(1, lcd_colors[index].color);
-    rgb_backlight_set_color(2, lcd_colors[index].color);
+    rgb_backlight_set_color(0, &lcd_colors[index].color);
+    rgb_backlight_set_color(1, &lcd_colors[index].color);
+    rgb_backlight_set_color(2, &lcd_colors[index].color);
     notification_message(app->notification, &sequence_display_backlight_on);
     app->save_backlight = true;
 }
@@ -31,7 +31,7 @@ static void cfw_app_scene_misc_screen_lcd_color_changed(VariableItem* item, uint
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, lcd_colors[index].name);
     notification_message(app->notification, &sequence_display_backlight_off);
-    rgb_backlight_set_color(led, lcd_colors[index].color);
+    rgb_backlight_set_color(led, &lcd_colors[index].color);
     notification_message(app->notification, &sequence_display_backlight_on);
     app->save_backlight = true;
 }

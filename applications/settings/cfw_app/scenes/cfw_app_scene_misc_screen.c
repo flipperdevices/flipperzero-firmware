@@ -47,9 +47,9 @@ static void cfw_app_scene_misc_screen_lcd_style_changed(VariableItem* item) {
     case 1:
         notification_message(app->notification, &sequence_display_backlight_off);
         rgb_backlight_set_rainbow_mode(0);
-        rgb_backlight_set_color(0, lcd_colors[0].color);
-        rgb_backlight_set_color(1, lcd_colors[0].color);
-        rgb_backlight_set_color(2, lcd_colors[0].color);
+        rgb_backlight_set_color(0, &lcd_colors[0].color);
+        rgb_backlight_set_color(1, &lcd_colors[0].color);
+        rgb_backlight_set_color(2, &lcd_colors[0].color);
         notification_message(app->notification, &sequence_display_backlight_on);
         break;
     case 2:
