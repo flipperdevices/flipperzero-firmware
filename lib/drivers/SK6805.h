@@ -26,14 +26,14 @@
 /**
  * @brief Инициализация линии управления подсветкой
  */
-void SK6805_init(void);
+void SK6805_init();
 
 /**
  * @brief Получить количество светодиодов в подсветке
  *
  * @return Количество светодиодов
  */
-uint8_t SK6805_get_led_count(void);
+uint8_t SK6805_get_led_count();
 
 /**
  * @brief Установить цвет свечения светодиода
@@ -48,6 +48,6 @@ void SK6805_set_led_color(uint8_t led_index, uint8_t r, uint8_t g, uint8_t b);
 /**
  * @brief Обновление состояния подсветки дисплея
  */
-void SK6805_update(void);
+void SK6805_update();
 
 #endif /* SK6805_H_ */
