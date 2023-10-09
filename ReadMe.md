@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1008-1547-0.92.3-a105cdb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-09 16:26 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-09 16:26 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-09 16:55 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-09 16:55 EST`
 - UL: [bugfix t5577_write_with_pass #612 (By baugp)](https://github.com/DarkFlippers/unleashed-firmware/pull/612)
 - Commented Out: [Genie Door Recorder v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials) - Will return once fixes are completed by developer.
 - Made Clear T5577 require debug to help avoid bricking tags (By SkeletonMan03)
@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Firmware: bigger thread name storage. Notification app: better BacklightEnforce edge cases handling. #3137 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3137)
 - OFW: [CCID: Support PC To Reader Transfer Block data #3126 (By kidbomb)](https://github.com/flipperdevices/flipperzero-firmware/pull/3126)
 - OFW: [Fix spelling across some project files #3128 (By h00die)](https://github.com/flipperdevices/flipperzero-firmware/pull/3128)
+- [Speedup and consolidate color lib with pointers (By WillyJL, Ported/Modified By ESurge & RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/766)
 
 <a name="release">
 
