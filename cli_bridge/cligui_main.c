@@ -2,6 +2,8 @@
 #include "cli_control.h"
 #include "text_input.h"
 #include "console_output.h"
+#include <loader/loader_i.h>
+#include <gui/view_dispatcher_i.h>
 
 static bool cligui_custom_event_cb(void* context, uint32_t event) {
     UNUSED(event);
@@ -74,11 +76,9 @@ int32_t cligui_main(void* p) {
 
     cligui->gui = furi_record_open(RECORD_GUI);
     cligui->view_dispatcher = view_dispatcher_alloc();
-    cligui->view_dispatcher_i = (ViewDispatcher_internal*)(cligui->view_dispatcher);
-    prev_input_callback =
-        ((ViewPort_internal*)cligui->view_dispatcher_i->view_port)->input_callback;
+    prev_input_callback = cligui->view_dispatcher->view_port->input_callback;
     view_port_input_callback_set(
-        cligui->view_dispatcher_i->view_port, input_callback_wrapper, cligui);
+        cligui->view_dispatcher->view_port, input_callback_wrapper, cligui);
     view_dispatcher_enable_queue(cligui->view_dispatcher);
     view_dispatcher_set_event_callback_context(cligui->view_dispatcher, cligui);
     view_dispatcher_set_custom_event_callback(cligui->view_dispatcher, cligui_custom_event_cb);
