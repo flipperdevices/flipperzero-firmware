@@ -201,8 +201,8 @@ void dev_info_svc_start() {
 
     flipper_gatt_characteristic_init(
         dev_info_svc->service_handle,
-        &dev_info_svc_chars[DevInfoSvcGattCharacteristicMfgName],
-        &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicMfgName]);
+        &dev_info_svc_chars[DevInfoSvcGattCharacteristicRpcVersion],
+        &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicRpcVersion]);
 
     // static const uint8_t dev_info_rpc_version_uuid[] = DEV_INVO_RPC_VERSION_UID;
     // status = aci_gatt_add_char(
@@ -285,9 +285,6 @@ void dev_info_svc_stop() {
         flipper_gatt_characteristic_delete(
             dev_info_svc->service_handle,
             &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicSerial]);
-        flipper_gatt_characteristic_delete(
-            dev_info_svc->service_handle,
-            &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicRpcVersion]);
 
         status = aci_gatt_del_char(
             dev_info_svc->service_handle,
