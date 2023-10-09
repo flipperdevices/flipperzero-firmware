@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1008-1547-0.92.3-a105cdb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-08 15:47 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-08 15:47 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-09 15:21 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-09 15:21 EST`
 - UL: [bugfix t5577_write_with_pass #612 (By baugp)](https://github.com/DarkFlippers/unleashed-firmware/pull/612)
 - Commented Out: [Genie Door Recorder v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials) - Will return once fixes are completed by developer.
 - Made Clear T5577 require debug to help avoid bricking tags (By SkeletonMan03)
@@ -49,6 +49,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [XRemote v1.0.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated: [HEX Viewer v1.2 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` (Updates By ezod & Sil333033 (Using xMasterX code))
+- OFW: [hal: ble: length fix for fw version prop #3136 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3136)
+- OFW: [Lib: update stm32wb_copro to 1.17.3 release #3119 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3119)
+- OFW: [Firmware: bigger thread name storage. Notification app: better BacklightEnforce edge cases handling. #3137 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3137)
+- OFW: [CCID: Support PC To Reader Transfer Block data #3126 (By kidbomb)](https://github.com/flipperdevices/flipperzero-firmware/pull/3126)
+- OFW: [Fix spelling across some project files #3128 (By h00die)](https://github.com/flipperdevices/flipperzero-firmware/pull/3128)
 
 <a name="release">
 
