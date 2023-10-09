@@ -52,7 +52,7 @@ All fields that can be localized will be converted to imperial or
 metric units, depending on what you've set in Flipper's Settings.
 
 ## Car data display
-![u-blox app handheld data display](screenshots/data_display_handheld.png)
+![u-blox app car data display](screenshots/data_display_car.png)
 
 The car data display only displays 3 fields, in big numbers. You could
 in theory use it while you're driving (but place it on the dashboard
