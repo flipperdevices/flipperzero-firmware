@@ -15,6 +15,7 @@ void cfw_app_scene_misc_screen_rgb_settings_var_item_list_callback(void* context
     CfwApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
+
 static void cfw_app_scene_misc_screen_lcd_static_color_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -121,8 +122,6 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
-    size_t lcd_sz = COUNT_OF(lcd_colors);
-
     struct {
         uint8_t led;
         VariableItemChangeCallback cb;
@@ -132,6 +131,9 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
         {2, cfw_app_scene_misc_screen_lcd_color_2_changed},
     };
 
+    size_t lcd_sz = COUNT_OF(lcd_colors);
+
+    RgbColor color;
     switch(cfw_settings->lcd_style) {
     case 0:
         item = variable_item_list_add(
@@ -140,7 +142,6 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
             lcd_sz,
             cfw_app_scene_misc_screen_lcd_static_color_changed,
             app);
-        RgbColor color;
         rgb_backlight_get_color(0, &color);
         bool found = false;
         for(size_t i = 0; i < lcd_sz; i++) {
@@ -164,7 +165,6 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
             char name[12];
             snprintf(name, sizeof(name), "LCD LED %u", lcd_cols[i].led + 1);
             item = variable_item_list_add(var_item_list, name, lcd_sz, lcd_cols[i].cb, app);
-            RgbColor color;
             rgb_backlight_get_color(lcd_cols[i].led, &color);
             bool found = false;
             for(size_t i = 0; i < lcd_sz; i++) {
@@ -247,6 +247,7 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
 
 bool cfw_app_scene_misc_screen_rgb_settings_on_event(void* context, SceneManagerEvent event) {
     CfwApp* app = context;
+    CfwSettings* cfw_settings = CFW_SETTINGS();
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -256,11 +257,13 @@ bool cfw_app_scene_misc_screen_rgb_settings_on_event(void* context, SceneManager
         case VarItemListIndexLcdColor0:
         case VarItemListIndexLcdColor1:
         case VarItemListIndexLcdColor2:
-            scene_manager_set_scene_state(
-                app->scene_manager,
-                CfwAppSceneMiscScreenColor,
-                event.event - VarItemListIndexLcdStaticColor);
-            scene_manager_next_scene(app->scene_manager, CfwAppSceneMiscScreenColor);
+            if(cfw_settings->lcd_style == 0 || cfw_settings->lcd_style == 1) {
+                scene_manager_set_scene_state(
+                    app->scene_manager,
+                    CfwAppSceneMiscScreenColor,
+                    event.event - VarItemListIndexLcdStaticColor);
+                scene_manager_next_scene(app->scene_manager, CfwAppSceneMiscScreenColor);
+            }
             break;
         default:
             break;
