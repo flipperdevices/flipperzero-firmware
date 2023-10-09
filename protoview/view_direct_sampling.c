@@ -2,7 +2,7 @@
  * See the LICENSE file for information about the license. */
 
 #include "app.h"
-#include <cc1101.h>
+#include <cc1101_regs.h>
 
 static void direct_sampling_timer_start(ProtoViewApp *app);
 static void direct_sampling_timer_stop(ProtoViewApp *app);
@@ -93,15 +93,18 @@ void view_enter_direct_sampling(ProtoViewApp *app) {
     if (app->txrx->txrx_state == TxRxStateRx &&
         !app->txrx->debug_timer_sampling)
     {
-        furi_hal_subghz_stop_async_rx();
+        subghz_devices_stop_async_rx(app->radio_device);
 
         /* To read data asynchronously directly from the view, we need
          * to put the CC1101 back into reception mode (the previous call
          * to stop the async RX will put it into idle) and configure the
          * G0 pin for reading. */
-        furi_hal_subghz_rx();
-        furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo,
-                           GpioSpeedLow);
+        subghz_devices_set_rx(app->radio_device);
+        furi_hal_gpio_init(
+            subghz_devices_get_data_gpio(app->radio_device),
+            GpioModeInput,
+            GpioPullNo,
+            GpioSpeedLow);
     } else {
         raw_sampling_worker_stop(app);
     }
@@ -122,8 +125,13 @@ void view_exit_direct_sampling(ProtoViewApp *app) {
     if (app->txrx->txrx_state == TxRxStateRx &&
         !app->txrx->debug_timer_sampling)
     {
-        furi_hal_subghz_start_async_rx(protoview_rx_callback, NULL);
+        subghz_devices_start_async_rx(app->radio_device, protoview_rx_callback, NULL);
     } else {
+        furi_hal_gpio_init(
+            subghz_devices_get_data_gpio(app->radio_device),
+            GpioModeInput,
+            GpioPullNo,
+            GpioSpeedLow);
         raw_sampling_worker_start(app);
     }
 }
@@ -135,7 +143,7 @@ static void ds_timer_isr(void *ctx) {
     DirectSamplingViewPrivData *privdata = app->view_privdata;
 
     if (app->direct_sampling_enabled) {
-        bool level = furi_hal_gpio_read(&gpio_cc1101_g0);
+        bool level = furi_hal_gpio_read(subghz_devices_get_data_gpio(app->radio_device));
         bitmap_set(privdata->captured,CAPTURED_BITMAP_BYTES,
                    privdata->captured_idx,level);
         privdata->captured_idx = (privdata->captured_idx+1) %
@@ -146,6 +154,8 @@ static void ds_timer_isr(void *ctx) {
 
 static void direct_sampling_timer_start(ProtoViewApp *app) {
     DirectSamplingViewPrivData *privdata = app->view_privdata;
+
+    furi_hal_bus_enable(FuriHalBusTIM2);
 
     LL_TIM_InitTypeDef tim_init = {
         .Prescaler = 63,    /* CPU frequency is ~64Mhz. */
@@ -168,6 +178,6 @@ static void direct_sampling_timer_stop(ProtoViewApp *app) {
     LL_TIM_DisableCounter(TIM2);
     LL_TIM_DisableIT_UPDATE(TIM2);
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
-    LL_TIM_DeInit(TIM2);
+    furi_hal_bus_disable(FuriHalBusTIM2);
     FURI_CRITICAL_EXIT();
 }

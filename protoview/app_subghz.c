@@ -38,24 +38,23 @@ ProtoViewModulation ProtoViewModulations[] = {
  * subghz system and put it into idle state. */
 void radio_begin(ProtoViewApp* app) {
     furi_assert(app);
-    furi_hal_subghz_reset();
-    furi_hal_subghz_idle();
-
-    /* Power circuits are noisy. Suppressing the charge while we use
-     * ProtoView will improve the RF performances. */
-    furi_hal_power_suppress_charge_enter();
+    subghz_devices_reset(app->radio_device);
+    subghz_devices_idle(app->radio_device);
 
     /* The CC1101 preset can be either one of the standard presets, if
      * the modulation "custom" field is NULL, or a custom preset we
      * defined in custom_presets.h. */
     if (ProtoViewModulations[app->modulation].custom == NULL) {
-        furi_hal_subghz_load_preset(
-            ProtoViewModulations[app->modulation].preset);
+        subghz_devices_load_preset(
+            app->radio_device, ProtoViewModulations[app->modulation].preset, NULL);
     } else {
-        furi_hal_subghz_load_custom_preset(
+        subghz_devices_load_preset(
+            app->radio_device,
+            FuriHalSubGhzPresetCustom,
             ProtoViewModulations[app->modulation].custom);
     }
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(
+        subghz_devices_get_data_gpio(app->radio_device), GpioModeInput, GpioPullNo, GpioSpeedLow);
     app->txrx->txrx_state = TxRxStateIDLE;
 }
 
@@ -74,21 +73,26 @@ void protoview_rx_callback(bool level, uint32_t duration, void *context) {
 /* Setup the CC1101 to start receiving using a background worker. */
 uint32_t radio_rx(ProtoViewApp* app) {
     furi_assert(app);
-    if(!furi_hal_subghz_is_frequency_valid(app->frequency)) {
+    if(!subghz_devices_is_frequency_valid(app->radio_device, app->frequency)) {
         furi_crash(TAG" Incorrect RX frequency.");
     }
 
     if (app->txrx->txrx_state == TxRxStateRx) return app->frequency;
 
-    furi_hal_subghz_idle(); /* Put it into idle state in case it is sleeping. */
-    uint32_t value = furi_hal_subghz_set_frequency_and_path(app->frequency);
+    subghz_devices_idle(app->radio_device); /* Put it into idle state in case it is sleeping. */
+    uint32_t value = subghz_devices_set_frequency(app->radio_device, app->frequency);
     FURI_LOG_E(TAG, "Switched to frequency: %lu", value);
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
-    furi_hal_subghz_flush_rx();
-    furi_hal_subghz_rx();
+
+    subghz_devices_flush_rx(app->radio_device);
+    subghz_devices_set_rx(app->radio_device);
     if (!app->txrx->debug_timer_sampling) {
-        furi_hal_subghz_start_async_rx(protoview_rx_callback, NULL);
+        subghz_devices_start_async_rx(app->radio_device, protoview_rx_callback, NULL);
     } else {
+        furi_hal_gpio_init(
+            subghz_devices_get_data_gpio(app->radio_device),
+            GpioModeInput,
+            GpioPullNo,
+            GpioSpeedLow);
         raw_sampling_worker_start(app);
     }
     app->txrx->txrx_state = TxRxStateRx;
@@ -101,12 +105,12 @@ void radio_rx_end(ProtoViewApp* app) {
 
     if (app->txrx->txrx_state == TxRxStateRx) {
         if (!app->txrx->debug_timer_sampling) {
-            furi_hal_subghz_stop_async_rx();
+            subghz_devices_stop_async_rx(app->radio_device);
         } else {
             raw_sampling_worker_stop(app);
         }
     }
-    furi_hal_subghz_idle();
+    subghz_devices_idle(app->radio_device);
     app->txrx->txrx_state = TxRxStateIDLE;
 }
 
@@ -118,9 +122,8 @@ void radio_sleep(ProtoViewApp* app) {
          * chip into sleep. */
         radio_rx_end(app);
     }
-    furi_hal_subghz_sleep();
+    subghz_devices_sleep(app->radio_device);
     app->txrx->txrx_state = TxRxStateSleep;
-    furi_hal_power_suppress_charge_exit();
 }
 
 /* =============================== Transmission ============================= */
@@ -134,16 +137,14 @@ void radio_tx_signal(ProtoViewApp *app, FuriHalSubGhzAsyncTxCallback data_feeder
     if (oldstate == TxRxStateRx) radio_rx_end(app);
     radio_begin(app);
 
-    furi_hal_subghz_idle();
-    uint32_t value = furi_hal_subghz_set_frequency_and_path(app->frequency);
+    subghz_devices_idle(app->radio_device);
+    uint32_t value = subghz_devices_set_frequency(app->radio_device, app->frequency);
     FURI_LOG_E(TAG, "Switched to frequency: %lu", value);
-    furi_hal_gpio_write(&gpio_cc1101_g0, false);
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
-    furi_hal_subghz_start_async_tx(data_feeder, ctx);
-    while(!furi_hal_subghz_is_async_tx_complete()) furi_delay_ms(10);
-    furi_hal_subghz_stop_async_tx();
-    furi_hal_subghz_idle();
+    subghz_devices_start_async_tx(app->radio_device, data_feeder, ctx);
+    while(!subghz_devices_is_async_complete_tx(app->radio_device)) furi_delay_ms(10);
+    subghz_devices_stop_async_tx(app->radio_device);
+    subghz_devices_idle(app->radio_device);
 
     radio_begin(app);
     if (oldstate == TxRxStateRx) radio_rx(app);
@@ -159,7 +160,7 @@ void radio_tx_signal(ProtoViewApp *app, FuriHalSubGhzAsyncTxCallback data_feeder
 void protoview_timer_isr(void *ctx) {
     ProtoViewApp *app = ctx;
 
-    bool level = furi_hal_gpio_read(&gpio_cc1101_g0);
+    bool level = furi_hal_gpio_read(subghz_devices_get_data_gpio(app->radio_device));
     if (app->txrx->last_g0_value != level) {
         uint32_t now = DWT->CYCCNT;
         uint32_t dur = now - app->txrx->last_g0_change_time;
@@ -174,6 +175,8 @@ void protoview_timer_isr(void *ctx) {
 
 void raw_sampling_worker_start(ProtoViewApp *app) {
     UNUSED(app);
+
+    furi_hal_bus_enable(FuriHalBusTIM2);
 
     LL_TIM_InitTypeDef tim_init = {
         .Prescaler = 63,    /* CPU frequency is ~64Mhz. */
@@ -197,6 +200,6 @@ void raw_sampling_worker_stop(ProtoViewApp *app) {
     LL_TIM_DisableCounter(TIM2);
     LL_TIM_DisableIT_UPDATE(TIM2);
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
-    LL_TIM_DeInit(TIM2);
+    furi_hal_bus_disable(FuriHalBusTIM2);
     FURI_CRITICAL_EXIT();
 }
