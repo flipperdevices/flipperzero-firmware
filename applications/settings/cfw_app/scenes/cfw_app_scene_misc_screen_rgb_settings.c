@@ -140,7 +140,8 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
             lcd_sz,
             cfw_app_scene_misc_screen_lcd_static_color_changed,
             app);
-        RgbColor color = rgb_backlight_get_color(0);
+        RgbColor color;
+        rgb_backlight_get_color(0, &color);
         bool found = false;
         for(size_t i = 0; i < lcd_sz; i++) {
             if(rgbcmp(&color, &lcd_colors[i].color) != 0) continue;
@@ -163,7 +164,8 @@ void cfw_app_scene_misc_screen_rgb_settings_on_enter(void* context) {
             char name[12];
             snprintf(name, sizeof(name), "LCD LED %u", lcd_cols[i].led + 1);
             item = variable_item_list_add(var_item_list, name, lcd_sz, lcd_cols[i].cb, app);
-            RgbColor color = rgb_backlight_get_color(lcd_cols[i].led);
+            RgbColor color;
+            rgb_backlight_get_color(lcd_cols[i].led, &color);
             bool found = false;
             for(size_t i = 0; i < lcd_sz; i++) {
                 if(rgbcmp(&color, &lcd_colors[i].color) != 0) continue;

@@ -16,8 +16,9 @@ void cfw_app_scene_misc_screen_color_on_enter(void* context) {
 
     byte_input_set_header_text(byte_input, "Set LCD Color (#RRGGBB)");
 
-    app->lcd_color = rgb_backlight_get_color(
-        scene_manager_get_scene_state(app->scene_manager, CfwAppSceneMiscScreenColor));
+    rgb_backlight_get_color(
+        scene_manager_get_scene_state(app->scene_manager, CfwAppSceneMiscScreenColor),
+        &app->lcd_color);
 
     byte_input_set_result_callback(
         byte_input,
