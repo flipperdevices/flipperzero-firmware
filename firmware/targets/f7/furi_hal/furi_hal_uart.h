@@ -84,6 +84,8 @@ void furi_hal_uart_set_irq_cb(FuriHalUartId ch, FuriHalUartRxByteCallback callba
 
 /* DMA based UART API */
 
+#define FURI_HAL_UART_DMA_BUFFER_SIZE (256u)
+
 /** UART DMA events */
 typedef enum {
     FuriHalUartDmaRxEventRx,
