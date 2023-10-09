@@ -39,9 +39,14 @@ void icc_power_on_callback(uint8_t* atrBuffer, uint32_t* atrlen, void* context) 
     iso7816_answer_to_reset(atrBuffer, atrlen);
 }
 
-//dataBlock points to the buffer 
+//dataBlock points to the buffer
 //dataBlockLen tells reader how nany bytes should be read
-void xfr_datablock_callback(const uint8_t* dataBlock, uint32_t dataBlockLen, uint8_t* responseDataBlock, uint32_t* responseDataBlockLen, void* context) {
+void xfr_datablock_callback(
+    const uint8_t* dataBlock,
+    uint32_t dataBlockLen,
+    uint8_t* responseDataBlock,
+    uint32_t* responseDataBlockLen,
+    void* context) {
     UNUSED(context);
 
     struct ISO7816_Command_APDU commandAPDU;
