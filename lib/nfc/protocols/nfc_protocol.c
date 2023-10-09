@@ -44,7 +44,7 @@
 typedef struct {
     NfcProtocol parent_protocol; /**< Parent protocol identifier. */
     size_t children_num; /** < Number of the child protocols. */
-    const NfcProtocol* children_protocol; /**< Pointer to an array of child protocol nodes. */
+    const NfcProtocol* children_protocol; /**< Pointer to an array of child protocol identifiers. */
 } NfcProtocolTreeNode;
 
 /** List of ISO14443-3A child protocols. */
