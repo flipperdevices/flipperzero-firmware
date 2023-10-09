@@ -7,25 +7,23 @@
 extern "C" {
 #endif
 
-typedef struct RgbColor {
+typedef struct {
     uint8_t r;
     uint8_t g;
     uint8_t b;
 } RgbColor;
 
-typedef struct HsvColor {
+typedef struct {
     uint8_t h;
     uint8_t s;
     uint8_t v;
 } HsvColor;
 
 int rgbcmp(const RgbColor* a, const RgbColor* b);
-
 int hsvcmp(const HsvColor* a, const HsvColor* b);
 
-RgbColor hsv2rgb(HsvColor hsv);
-
-HsvColor rgb2hsv(RgbColor rgb);
+void hsv2rgb(const HsvColor* hsv, RgbColor* rgb);
+void rgb2hsv(const RgbColor* rgb, HsvColor* hsv);
 
 #ifdef __cplusplus
 }

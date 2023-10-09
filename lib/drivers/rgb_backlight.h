@@ -33,16 +33,11 @@ typedef enum {
 } RGBBacklightRainbowMode;
 
 /**
- * @brief Reconfigure rgb backlight with new settings
+ * @brief Load backlight settings from SD card. Needs to be run at boot
  *
  * @param enabled Whether the rgb backlight is enabled
  */
-void rgb_backlight_reconfigure(bool enabled);
-
-/**
- * @brief Load backlight settings from SD card
- */
-void rgb_backlight_load_settings();
+void rgb_backlight_load_settings(bool enabled);
 
 /**
  * @brief Save Current RGB Lighting Settings
@@ -55,9 +50,9 @@ void rgb_backlight_save_settings();
  * @param index What led to set the color to (0 - SK6805_LED_COUNT-1)
  * @param color RGB color to use
  */
-void rgb_backlight_set_color(uint8_t index, RgbColor color);
+void rgb_backlight_set_color(uint8_t index, const RgbColor* color);
 
-RgbColor rgb_backlight_get_color(uint8_t index);
+void rgb_backlight_get_color(uint8_t index, RgbColor* color);
 
 /**
  * @brief Change rainbow mode
@@ -94,6 +89,13 @@ uint32_t rgb_backlight_get_rainbow_interval();
 void rgb_backlight_set_rainbow_saturation(uint8_t rainbow_saturation);
 
 uint8_t rgb_backlight_get_rainbow_saturation();
+
+/**
+ * @brief Reconfigure rgb backlight with new settings
+ *
+ * @param enabled Whether the rgb backlight is enabled
+ */
+void rgb_backlight_reconfigure(bool enabled);
 
 /**
  * @brief Apply current RGB lighting settings
