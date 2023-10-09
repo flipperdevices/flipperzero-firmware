@@ -1,3 +1,6 @@
+[submodule ".modules/good-faps/dap_link/lib/free-dap"]
+	path = .modules/good-faps/dap_link/lib/free-dap
+	url = https://github.com/ataradov/free-dap.git
 [submodule ".modules/totp/totp/lib/wolfssl"]
 	path = .modules/totp/totp/lib/wolfssl
 	url = https://github.com/wolfSSL/wolfssl.git
