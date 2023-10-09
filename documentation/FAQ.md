@@ -4,43 +4,12 @@
 - Start with reading official main page: https://flipperzero.one/
 - Then check out official docs where you can find answers to most questions: https://docs.flipper.net/
 
-## How do I install Unleashed firmware?
-https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/HowToInstall.md
-### What version I should install? What do letters `e`, `r`, `c`... mean?
-Follow this link for details:<br>
-https://github.com/DarkFlippers/unleashed-firmware/blob/dev/CHANGELOG.md#recommended-update-option---web-updater
-
-
-**INSTALLED UNLEASHED AND NOW BACKLIGHT DOESNT WORK?**  <br>
-You’ve installed a version made for custom RGB modded flippers. The version ending in `“r”` is specifically for “RGB” modded flippers. <br>
-Please do not use that version if your flipper isn’t modded!
-  
-## What apps (plugins) are included with Unleashed FW?
-See default pack and extra pack (for `e` build) list here:<br>
-https://github.com/xMasterX/all-the-plugins/tree/dev
-
-## Where I can find differences between original (official) firmware and Unleashed firmware?
-Right here:<br>
-https://github.com/DarkFlippers/unleashed-firmware#whats-changed
-
 ## How to use SubGHz Remote app?
 1. Open app, press Back button, select New map file
 2. Configure signal files and their names for every button (you add only one signal and make other buttons empty - just don't select any files for them in config)
 3. Save new map file
 4. Open map file and select your previously created file
 5. Use buttons to send subghz signal files that you selected in map config at step 2
-
-
-## How to build (compile) firmware?
-Follow this link:<br>
-https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/HowToBuild.md#how-to-build-by-yourself
-
-## I installed Unleashed firmware and now my mobile app doesn't connect to flipper ( OR I changed flipper device name and my mobile app now doesn't connect to flipper )
-  1. Click Forget flipper in mobile app
-  2. Open your phone settings - bluetooth, find flipper - if it present here - open its options and click forget device
-  3. On flipper itself open Settings -> Bluetooth -> Forget all devices -> and confirm
-  4. Make sure your flipper has bluetooth ON and open Mobile app and pair it to flipper
-  5. Done
 
 ## My desktop (pin, favourites, etc..) (or other) settings was reset to default after update, what to do?
 Just configure that settings again, all is fine, and make sure you seen changelogs for the releases that came out after your previous version, when settings struct is changed, settings file are reset after update, this happens only when struct changes is required, so don't assume that settings will be reset in every release, this will happen only in specific ones
@@ -59,31 +28,6 @@ https://docs.flipper.net/basics/firmware-update/firmware-recovery
 ## Useful links and files
 Flipper Awesome - place where you can find almost all links that you might need:<br>
 https://github.com/djsime1/awesome-flipperzero
- 
-Dict files for iButton Fuzzer and RFID Fuzzer:<br>
-https://t.me/flipperzero_unofficial_ru/37058 <br>
-https://t.me/flipperzero_unofficial_ru/37072
-
-UL Releases in Telegram:<br>
-https://t.me/unleashed_fw <br>
-UL Dev Builds in Telegram:<br>
-https://t.me/kotnehleb <br>
-
-Our Discord: <br>
-https://discord.unleashedflip.com
-
-## How to change flipper name?
-All is simple:
-1. Open Settings -> Desktop -> Change Flipper Name
-2. Enter new name and click Save
-3. Exit from settings - Flipper will automatically reboot
-4. Done, you have custom name which will stay until you reset it to default or replace with new one
-
-How to reset name to default:
-1. Open Settings -> Desktop -> Change Flipper Name
-2. Do not enter anything, just click Save
-3. Exit from settings - Flipper will automatically reboot
-4. Done, name is reset to original one.  
 
 ## How do I copy files from Github to my Flipper Zero?
 Follow this detailed guide: <br>
@@ -96,27 +40,6 @@ These 2 repos will cover most(99.9%) of your needs:<br>
 https://github.com/UberGuidoZ/Flipper/tree/main
 <br>
 https://github.com/UberGuidoZ/Flipper-IRDB/tree/main
- 
-## How can I support Unleashed firmware project?
-https://github.com/DarkFlippers/unleashed-firmware#please-support-development-of-the-project
-
-## What are the dev builds? Where I can get latest build for dev branch?
-This is an automatic assembly of the latest commits from the repository that have not yet been released, the previous build is deleted when a new one is uploaded and old remains only as file in the telegram channel <br>
-Be aware that this is not release ready builds! They may have bugs and issues, if you are using dev build and found issue, report it! In github issues
-<br>
-
-Dev builds is available in Discord, ⁠in channel - `unleashed-development` <br>
-Builds also can be found here - https://t.me/kotnehleb <br>
-And here - https://dev.unleashedflip.com/ <br>
-
-## What is the update server?
-We have our own update server https://up.unleashedflip.com/directory.json  <br>
-It is identical to the official one, it is impossible to change it in applications without rebuilding the application, it is hardcoded there <br>
-If you want to use it, you need to patch or build your own build of the application you are interested in <br>
-
-Also you can use it with uFBT to build apps for UL SDK, uFBT will accept that link as one of args<br>
-
-The server will remain active and will be automatically updated
 
 ## External Radio: How to connect CC1101 module
 https://github.com/quen0n/flipperzero-ext-cc1101
@@ -127,14 +50,6 @@ https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/SubGHz
 ## How to use Flipper as new remote (Nice FlorS, BFT Mitto, Somfy Telis, Aprimatic, AN-Motors, etc..)
 https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/SubGHzRemoteProg.md
 
-## How Can I Unlock/Remove SubGHz restriction?
-If you are using Unleashed firmware - **all region locks are removed by default**!
-
-Also there is a way to go outside of frequencies stated in CC1101 datasheet, but transmission on those frequencies may cause chip damage, make sure you know what you are doing! Do not edit this settings to bypass region lock since there is no region locks in unleashed, all chip supported frequencies will work without any extra steps.<br>
-But, if you know that you need to bypass subghz chip safety restriction you can unlock the safety restriction which will allow you to go outside the chips supported frequency. <br>
-This covers how to do it and information regarding the risks of damage to the flipper by doing so <br>
-https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/DangerousSettings.md
-
 ## Can I clone a car key fob for my own car to use flipper as a key?
 No, and trying to do so with Read RAW will lead to key desync or unpair with blacklist which means re-pair is very hard and requires service tools
 
@@ -143,23 +58,6 @@ No, never
 
 ## Where can I find jamming files?
 Nowhere, this is illegal in almost every country in the world
-
-## I saw something on tiktok and want to ask how to do it, I just wanna be like real hacker
-And you might be banned for that in our communities, since 99% of that content is fake, or showing illegal actions, and we don't like tiktok related questions
-
-## I was banned in Unleashed Discord/Telegram/etc.. How to remove ban? I created github issue and it was removed too!
-Not possible, rules is rules, read them before sending messages in our communities
-
-## How to clean .DS_Store and other dot files left from macOS
-`sudo dot_clean -mn /Volumes/Flipper\ SD` -> `Flipper\ SD` may be named differently for you, replace with your microSD card name
-
-## How to sort files on flipper microSD on macOS/Linux
-`will make sorting faster, and will work for OFW` 
-1. `brew install fatsort` -> Install fatsort using brew.sh (only on macOS)
-2. `diskutil list` -> Find your disk name for flipper microSD
-3. `diskutil unmount /Volumes/Flipper\ SD`
-4. `sudo fatsort -n /dev/disk4s1` -> Replace `disk4s1` with your microSD id found on step 2
-
 
 ## Your Flipper feels slow and unresponsive?
 1. Make sure you using good microSD card from known brand, flipper works with microSD via SPI that means not any microSD will work good even if it works ok with other devices
@@ -184,12 +82,6 @@ Reboot it by holding Left + Back buttons
 2. Hold Up + Back for ~5 sec -> You will see reset screen -> Hold Right to reset (and down arrow to exit if you don't want to reset pin code)
 3. Done, internal memory (dolphin level, settings, pin code, is erased to default settings)
 
-## What are the differences between x, y and z firmware?
-If you just got your flipper and not sure what will work better for you, start with original official firmware, if you think you need more features or want to remove subghz region locks then<br>
-Try installing Unleashed firmware, which is fork of official firmware with many new features and preinstalled plugins (check out `e` build)<br>
-In other case If you want to experiment more with UI and other things look for existing forks of Unleashed firmware<br>
-Or create your own fork with your own customisations<br>
-Also before reporting any found issue make sure you are in correct repo, if you are using not Unleashed but different fork or original firmware, do not report issue in Unleashed firmware repo or UL communities (telegram, discord, etc..)
 
 
 ## Is there a correct way to capturing Infrared signals?
