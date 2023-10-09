@@ -1,6 +1,5 @@
 #include "dev_info_service.h"
 #include "app_common.h"
-#include "core/log.h"
 #include "gatt_char.h"
 #include <ble/ble.h>
 
