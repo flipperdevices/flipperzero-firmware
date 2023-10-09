@@ -14,8 +14,8 @@
 typedef enum {
     DevInfoSvcGattCharacteristicMfgName = 0,
     DevInfoSvcGattCharacteristicSerial,
-    // DevInfoSvcGattCharacteristicFirmwareRev,
-    // DevInfoSvcGattCharacteristicSoftwareRev,
+    DevInfoSvcGattCharacteristicFirmwareRev,
+    DevInfoSvcGattCharacteristicSoftwareRev,
     DevInfoSvcGattCharacteristicRpcVersion,
     DevInfoSvcGattCharacteristicCount,
 } DevInfoSvcGattCharacteristicId;
@@ -26,11 +26,11 @@ typedef struct {
     FlipperGattCharacteristicInstance characteristics[DevInfoSvcGattCharacteristicCount];
     FuriString* version_string;
     char hardware_revision[DEVICE_INFO_HARDWARE_REV_SIZE];
-    uint16_t man_name_char_handle;
-    uint16_t serial_num_char_handle;
-    uint16_t firmware_rev_char_handle;
-    uint16_t software_rev_char_handle;
-    uint16_t rpc_version_char_handle;
+    // uint16_t man_name_char_handle;
+    // uint16_t serial_num_char_handle;
+    // uint16_t firmware_rev_char_handle;
+    // uint16_t software_rev_char_handle;
+    // uint16_t rpc_version_char_handle;
 } DevInfoSvc;
 
 static DevInfoSvc* dev_info_svc = NULL;
@@ -86,28 +86,28 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
           .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
           .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
-     //  [DevInfoSvcGattCharacteristicFirmwareRev] =
-     //      {.name = "Firmware Revision",
-     //       .data_prop_type = FlipperGattCharacteristicDataCallback,
-     //       .data.callback.context = &dev_info_svc,
-     //       .data.callback.fn = dev_info_char_firmware_rev_callback,
-     //       .uuid.Char_UUID_16 = FIRMWARE_REVISION_UUID,
-     //       .uuid_type = UUID_TYPE_16,
-     //       .char_properties = CHAR_PROP_READ,
-     //       .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
-     //       .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
-     //       .is_variable = CHAR_VALUE_LEN_CONSTANT},
-     //  [DevInfoSvcGattCharacteristicSoftwareRev] =
-     //      {.name = "Software Revision",
-     //       .data_prop_type = FlipperGattCharacteristicDataCallback,
-     //       .data.callback.context = &dev_info_svc,
-     //       .data.callback.fn = dev_info_char_software_rev_callback,
-     //       .uuid.Char_UUID_16 = SOFTWARE_REVISION_UUID,
-     //       .uuid_type = UUID_TYPE_16,
-     //       .char_properties = CHAR_PROP_READ,
-     //       .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
-     //       .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
-     //       .is_variable = CHAR_VALUE_LEN_CONSTANT},
+     [DevInfoSvcGattCharacteristicFirmwareRev] =
+         {.name = "Firmware Revision",
+          .data_prop_type = FlipperGattCharacteristicDataCallback,
+          .data.callback.context = &dev_info_svc,
+          .data.callback.fn = dev_info_char_firmware_rev_callback,
+          .uuid.Char_UUID_16 = FIRMWARE_REVISION_UUID,
+          .uuid_type = UUID_TYPE_16,
+          .char_properties = CHAR_PROP_READ,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .is_variable = CHAR_VALUE_LEN_CONSTANT},
+     [DevInfoSvcGattCharacteristicSoftwareRev] =
+         {.name = "Software Revision",
+          .data_prop_type = FlipperGattCharacteristicDataCallback,
+          .data.callback.context = &dev_info_svc,
+          .data.callback.fn = dev_info_char_software_rev_callback,
+          .uuid.Char_UUID_16 = SOFTWARE_REVISION_UUID,
+          .uuid_type = UUID_TYPE_16,
+          .char_properties = CHAR_PROP_READ,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [DevInfoSvcGattCharacteristicRpcVersion] = {
          .name = "RPC Version",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
@@ -154,39 +154,39 @@ void dev_info_svc_start() {
             &dev_info_svc->characteristics[i]);
     }
 
-    UNUSED(dev_info_char_software_rev_callback);
-    UNUSED(dev_info_char_firmware_rev_callback);
+    // UNUSED(dev_info_char_software_rev_callback);
+    // UNUSED(dev_info_char_firmware_rev_callback);
 
-    uuid = FIRMWARE_REVISION_UUID;
-    status = aci_gatt_add_char(
-        dev_info_svc->service_handle,
-        UUID_TYPE_16,
-        (Char_UUID_t*)&uuid,
-        strlen(dev_info_svc->hardware_revision),
-        CHAR_PROP_READ,
-        ATTR_PERMISSION_AUTHEN_READ,
-        GATT_DONT_NOTIFY_EVENTS,
-        10,
-        CHAR_VALUE_LEN_CONSTANT,
-        &dev_info_svc->firmware_rev_char_handle);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed to add firmware revision char: %d", status);
-    }
-    uuid = SOFTWARE_REVISION_UUID;
-    status = aci_gatt_add_char(
-        dev_info_svc->service_handle,
-        UUID_TYPE_16,
-        (Char_UUID_t*)&uuid,
-        furi_string_size(dev_info_svc->version_string),
-        CHAR_PROP_READ,
-        ATTR_PERMISSION_AUTHEN_READ,
-        GATT_DONT_NOTIFY_EVENTS,
-        10,
-        CHAR_VALUE_LEN_CONSTANT,
-        &dev_info_svc->software_rev_char_handle);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed to add software revision char: %d", status);
-    }
+    // uuid = FIRMWARE_REVISION_UUID;
+    // status = aci_gatt_add_char(
+    //     dev_info_svc->service_handle,
+    //     UUID_TYPE_16,
+    //     (Char_UUID_t*)&uuid,
+    //     strlen(dev_info_svc->hardware_revision),
+    //     CHAR_PROP_READ,
+    //     ATTR_PERMISSION_AUTHEN_READ,
+    //     GATT_DONT_NOTIFY_EVENTS,
+    //     10,
+    //     CHAR_VALUE_LEN_CONSTANT,
+    //     &dev_info_svc->firmware_rev_char_handle);
+    // if(status) {
+    //     FURI_LOG_E(TAG, "Failed to add firmware revision char: %d", status);
+    // }
+    // uuid = SOFTWARE_REVISION_UUID;
+    // status = aci_gatt_add_char(
+    //     dev_info_svc->service_handle,
+    //     UUID_TYPE_16,
+    //     (Char_UUID_t*)&uuid,
+    //     furi_string_size(dev_info_svc->version_string),
+    //     CHAR_PROP_READ,
+    //     ATTR_PERMISSION_AUTHEN_READ,
+    //     GATT_DONT_NOTIFY_EVENTS,
+    //     10,
+    //     CHAR_VALUE_LEN_CONSTANT,
+    //     &dev_info_svc->software_rev_char_handle);
+    // if(status) {
+    //     FURI_LOG_E(TAG, "Failed to add software revision char: %d", status);
+    // }
 
     // static const uint8_t dev_info_rpc_version_uuid[] = DEV_INVO_RPC_VERSION_UID;
     // status = aci_gatt_add_char(
@@ -204,13 +204,23 @@ void dev_info_svc_start() {
     //     FURI_LOG_E(TAG, "Failed to add rpc version characteristic: %d", status);
     // }
 
-    for(size_t i = 0; i < DevInfoSvcGattCharacteristicCount; i++) {
-        flipper_gatt_characteristic_update(
-            dev_info_svc->service_handle, &dev_info_svc->characteristics[i], NULL);
-    }
+    // for(size_t i = 0; i < DevInfoSvcGattCharacteristicCount; i++) {
+    //     flipper_gatt_characteristic_update(
+    //         dev_info_svc->service_handle, &dev_info_svc->characteristics[i], NULL);
+    // }
+
+    flipper_gatt_characteristic_update(
+        dev_info_svc->service_handle,
+        &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicMfgName],
+        NULL);
+    flipper_gatt_characteristic_update(
+        dev_info_svc->service_handle,
+        &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicSerial],
+        NULL);
+
     status = aci_gatt_update_char_value(
         dev_info_svc->service_handle,
-        dev_info_svc->firmware_rev_char_handle,
+        dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev].handle,
         0,
         strlen(dev_info_svc->hardware_revision),
         (uint8_t*)dev_info_svc->hardware_revision);
@@ -219,13 +229,19 @@ void dev_info_svc_start() {
     }
     status = aci_gatt_update_char_value(
         dev_info_svc->service_handle,
-        dev_info_svc->software_rev_char_handle,
+        dev_info_svc->characteristics[DevInfoSvcGattCharacteristicSoftwareRev].handle,
         0,
         furi_string_size(dev_info_svc->version_string),
         (uint8_t*)furi_string_get_cstr(dev_info_svc->version_string));
     if(status) {
         FURI_LOG_E(TAG, "Failed to update software revision char: %d", status);
     }
+
+    flipper_gatt_characteristic_update(
+        dev_info_svc->service_handle,
+        &dev_info_svc->characteristics[DevInfoSvcGattCharacteristicRpcVersion],
+        NULL);
+
     // status = aci_gatt_update_char_value(
     //     dev_info_svc->service_handle,
     //     dev_info_svc->rpc_version_char_handle,
@@ -238,7 +254,7 @@ void dev_info_svc_start() {
 }
 
 void dev_info_svc_stop() {
-    tBleStatus status;
+    // tBleStatus status;
     if(dev_info_svc) {
         furi_string_free(dev_info_svc->version_string);
         // Delete service characteristics
@@ -247,26 +263,28 @@ void dev_info_svc_stop() {
                 dev_info_svc->service_handle, &dev_info_svc->characteristics[i]);
         }
 
-        status = aci_gatt_del_char(
-            dev_info_svc->service_handle, dev_info_svc->firmware_rev_char_handle);
-        if(status) {
-            FURI_LOG_E(TAG, "Failed to delete firmware revision char: %d", status);
-        }
-        status = aci_gatt_del_char(
-            dev_info_svc->service_handle, dev_info_svc->software_rev_char_handle);
-        if(status) {
-            FURI_LOG_E(TAG, "Failed to delete software revision char: %d", status);
-        }
+        // status = aci_gatt_del_char(
+        //     dev_info_svc->service_handle,
+        //     dev_info_svc->characteristics[DevInfoSvcGattCharacteristicFirmwareRev].handle);
+        // if(status) {
+        //     FURI_LOG_E(TAG, "Failed to delete firmware revision char: %d", status);
+        // }
+        // status = aci_gatt_del_char(
+        //     dev_info_svc->service_handle,
+        //     dev_info_svc->characteristics[DevInfoSvcGattCharacteristicSoftwareRev].handle);
+        // if(status) {
+        //     FURI_LOG_E(TAG, "Failed to delete software revision char: %d", status);
+        // }
         // status =
         //     aci_gatt_del_char(dev_info_svc->service_handle, dev_info_svc->rpc_version_char_handle);
         // if(status) {
         //     FURI_LOG_E(TAG, "Failed to delete rpc version char: %d", status);
         // }
         // Delete service
-        status = aci_gatt_del_service(dev_info_svc->service_handle);
-        if(status) {
-            FURI_LOG_E(TAG, "Failed to delete device info service: %d", status);
-        }
+        // status = aci_gatt_del_service(dev_info_svc->service_handle);
+        // if(status) {
+        //     FURI_LOG_E(TAG, "Failed to delete device info service: %d", status);
+        // }
         free(dev_info_svc);
         dev_info_svc = NULL;
     }
