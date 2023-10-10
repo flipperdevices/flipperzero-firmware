@@ -57,25 +57,38 @@ FelicaError felica_poller_async_polling(
     furi_assert(cmd);
     furi_assert(resp);
 
-    bit_buffer_set_size_bytes(instance->tx_buffer, 2);
-    // Set frame len
-    // TODO Set length in felica_poller_frame_exchange() ?
-    bit_buffer_set_byte(instance->tx_buffer, 0, sizeof(FelicaPollerPollingCommand) + 2);
-    // Set command code
-    bit_buffer_set_byte(instance->tx_buffer, 1, FELICA_POLLER_CMD_POLLING_CODE);
-    // Set other data
-    bit_buffer_append_bytes(
-        instance->tx_buffer, (uint8_t*)cmd, sizeof(FelicaPollerPollingCommand));
+    FelicaError error = FelicaErrorNone;
 
-    FelicaError error = felica_poller_frame_exchange(
-        instance, instance->tx_buffer, instance->rx_buffer, FELICA_POLLER_POLLING_FWT);
+    do {
+        bit_buffer_set_size_bytes(instance->tx_buffer, 2);
+        // Set frame len
+        bit_buffer_set_byte(
+            instance->tx_buffer, 0, sizeof(FelicaPollerPollingCommand) + FELICA_CRC_SIZE);
+        // Set command code
+        bit_buffer_set_byte(instance->tx_buffer, 1, FELICA_POLLER_CMD_POLLING_REQ_CODE);
+        // Set other data
+        bit_buffer_append_bytes(
+            instance->tx_buffer, (uint8_t*)cmd, sizeof(FelicaPollerPollingCommand));
 
-    if(error == FelicaErrorNone) {
-        // TODO extract length in felica_poller_frame_exchange() ?
+        error = felica_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, FELICA_POLLER_POLLING_FWT);
+
+        if(error != FelicaErrorNone) break;
+        if(bit_buffer_get_byte(instance->rx_buffer, 1) != FELICA_POLLER_CMD_POLLING_RESP_CODE) {
+            error = FelicaErrorProtocol;
+            break;
+        }
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) <
+           sizeof(FelicaIDm) + sizeof(FelicaPMm) + 1) {
+            error = FelicaErrorProtocol;
+            break;
+        }
+
         bit_buffer_write_bytes_mid(instance->rx_buffer, resp->idm.data, 2, sizeof(FelicaIDm));
         bit_buffer_write_bytes_mid(
             instance->rx_buffer, resp->pmm.data, sizeof(FelicaIDm) + 2, sizeof(FelicaPMm));
-    }
+
+    } while(false);
 
     return error;
 }

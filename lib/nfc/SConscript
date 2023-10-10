@@ -40,6 +40,7 @@ env.Append(
         # Misc
         File("helpers/nfc_util.h"),
         File("helpers/iso14443_crc.h"),
+        File("helpers/iso13239_crc.h"),
         File("helpers/nfc_data_generator.h"),
         File("helpers/nfc_dict.h"),
     ],

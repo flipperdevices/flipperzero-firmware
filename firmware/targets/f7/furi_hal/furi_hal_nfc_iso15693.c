@@ -19,6 +19,7 @@
 #define FURI_HAL_NFC_ISO15693_RESP_PATTERN_1 (0x02U)
 
 // Derived experimentally
+#define FURI_HAL_NFC_ISO15693_POLLER_FWT_COMP_FC (-1300)
 #define FURI_HAL_NFC_ISO15693_LISTENER_FDT_COMP_FC (2735)
 
 #define BITS_IN_BYTE (8U)
@@ -429,7 +430,7 @@ const FuriHalNfcTechBase furi_hal_nfc_iso15693 = {
             .compensation =
                 {
                     .fdt = FURI_HAL_NFC_POLLER_FDT_COMP_FC,
-                    .fwt = FURI_HAL_NFC_POLLER_FWT_COMP_FC,
+                    .fwt = FURI_HAL_NFC_ISO15693_POLLER_FWT_COMP_FC,
                 },
             .init = furi_hal_nfc_iso15693_poller_init,
             .deinit = furi_hal_nfc_iso15693_poller_deinit,

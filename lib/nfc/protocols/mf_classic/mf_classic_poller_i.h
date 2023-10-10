@@ -55,7 +55,7 @@ typedef enum {
 typedef struct {
     uint8_t current_sector;
     MfClassicSectorTrailer sec_tr;
-    uint8_t current_block;
+    uint16_t current_block;
     bool is_value_block;
     MfClassicKeyType key_type_read;
     MfClassicKeyType key_type_write;
@@ -68,7 +68,7 @@ typedef struct {
     MfClassicKey current_key;
     MfClassicKeyType current_key_type;
     bool auth_passed;
-    uint8_t current_block;
+    uint16_t current_block;
     uint8_t reuse_key_sector;
 } MfClassicPollerDictAttackContext;
 
