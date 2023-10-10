@@ -16,6 +16,8 @@ App(
         ),
     ],
     fap_icon_assets="icons",
+    fap_author="DrZlo13 & Skorpionm",
+    fap_weburl="https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/dap_link",
+    fap_version=(1, 1),
     fap_description="Enables use of Flipper as a debug probe for ARM devices, implements the CMSIS-DAP protocol",
-    fap_version="1.0",
 )

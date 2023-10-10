@@ -449,6 +449,7 @@ typedef struct {
     DapRxCallback rx_callback_v1;
     DapRxCallback rx_callback_v2;
     DapRxCallback rx_callback_cdc;
+    DapRxCallback tx_complete_cdc;
     DapCDCControlLineCallback control_line_callback_cdc;
     DapCDCConfigCallback config_callback_cdc;
     void* context;
@@ -522,15 +523,15 @@ int32_t dap_v2_usb_tx(uint8_t* buffer, uint8_t size) {
 int32_t dap_cdc_usb_tx(uint8_t* buffer, uint8_t size) {
     if((dap_state.semaphore_cdc == NULL) || (dap_state.connected == false)) return 0;
 
-    furi_check(furi_semaphore_acquire(dap_state.semaphore_cdc, FuriWaitForever) == FuriStatusOk);
-
-    if(dap_state.connected) {
-        int32_t len = usbd_ep_write(dap_state.usb_dev, HID_EP_IN | DAP_CDC_EP_SEND, buffer, size);
-        furi_console_log_printf("cdc tx %ld", len);
-        return len;
-    } else {
-        return 0;
+    if(furi_semaphore_acquire(dap_state.semaphore_cdc, 100) == FuriStatusOk) {
+        if(dap_state.connected) {
+            int32_t len =
+                usbd_ep_write(dap_state.usb_dev, HID_EP_IN | DAP_CDC_EP_SEND, buffer, size);
+            furi_console_log_printf("cdc tx %ld", len);
+            return len;
+        }
     }
+    return 0;
 }
 
 void dap_v1_usb_set_rx_callback(DapRxCallback callback) {
@@ -543,6 +544,10 @@ void dap_v2_usb_set_rx_callback(DapRxCallback callback) {
 
 void dap_cdc_usb_set_rx_callback(DapRxCallback callback) {
     dap_state.rx_callback_cdc = callback;
+}
+
+void dap_cdc_usb_set_tx_complete_callback(DapRxCallback callback) {
+    dap_state.tx_complete_cdc = callback;
 }
 
 void dap_cdc_usb_set_control_line_callback(DapCDCControlLineCallback callback) {
@@ -735,6 +740,9 @@ static void cdc_txrx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
     switch(event) {
     case usbd_evt_eptx:
         furi_semaphore_release(dap_state.semaphore_cdc);
+        if(dap_state.tx_complete_cdc != NULL) {
+            dap_state.tx_complete_cdc(dap_state.context_cdc);
+        }
         furi_console_log_printf("cdc tx complete");
         break;
     case usbd_evt_eprx:

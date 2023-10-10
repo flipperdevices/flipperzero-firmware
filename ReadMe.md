@@ -29,9 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1010-0113-0.93.1-49a03cb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-10 01:13 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-10 01:13 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-10 15:42 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-10 15:42 EST`
 - Updated: [ESP32-C6 Gravity v0.6 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
+- Updated: [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 
 <a name="release">
 
@@ -302,7 +303,7 @@ $ ./fbt dolphin_ext
 - [Counter v1.2 (By Krulknul)](https://github.com/Krulknul/dolphin-counter) [Improved (By plasticuproject)](https://github.com/plasticuproject/dolphin-better-counter)
 - [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - [Dab Timer v1.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
-- [DAP Link (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
+- [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - [DCF77 Transmitter v1.1 (By arha)](https://github.com/arha/flipper-dcf77)
 - [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
 - [Device Info (By hedger)](https://github.com/hedger/flipperdevinfo)
