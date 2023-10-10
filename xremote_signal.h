@@ -29,5 +29,5 @@ InfraredSignal* xremote_signal_receiver_get_signal(XRemoteSignalReceiver* rx_ctx
 void xremote_signal_receiver_start(XRemoteSignalReceiver* rx_ctx);
 void xremote_signal_receiver_stop(XRemoteSignalReceiver* rx_ctx);
 
-void xremote_signal_receiver_pause(XRemoteSignalReceiver* rx_ctx);
-void xremote_signal_receiver_resume(XRemoteSignalReceiver* rx_ctx);
+void xremote_signal_receiver_detach(XRemoteSignalReceiver* rx_ctx);
+void xremote_signal_receiver_attach(XRemoteSignalReceiver* rx_ctx);

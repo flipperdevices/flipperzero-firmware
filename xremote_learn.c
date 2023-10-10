@@ -255,6 +255,12 @@ static void xremote_learn_finish(XRemoteLearnContext* learn_ctx) {
     xremote_learn_switch_to_view(learn_ctx, XRemoteViewSubmenu);
 }
 
+static bool xremote_learn_custom_event_dummy_callback(void* context, uint32_t event) {
+    UNUSED(context);
+    UNUSED(event);
+    return true;
+}
+
 static bool xremote_learn_custom_event_callback(void* context, uint32_t event) {
     xremote_app_assert(context, false);
     XRemoteLearnContext* learn_ctx = context;
@@ -363,8 +369,8 @@ static void xremote_learn_context_free(XRemoteLearnContext* learn_ctx) {
     xremote_learn_exit_dialog_free(learn_ctx);
 
     ViewDispatcher* view_disp = learn_ctx->app_ctx->view_dispatcher;
-    view_dispatcher_set_custom_event_callback(view_disp, NULL);
-    view_dispatcher_set_event_callback_context(view_disp, NULL);
+    view_dispatcher_set_custom_event_callback(
+        view_disp, xremote_learn_custom_event_dummy_callback);
 
     view_dispatcher_remove_view(view_disp, XRemoteViewTextInput);
     text_input_free(learn_ctx->text_input);
