@@ -339,9 +339,9 @@ NfcError nfc_iso14443a_listener_tx_custom_parity(Nfc* instance, const BitBuffer*
  *
  * @param[in,out] instance pointer to the instance to be configured.
  * @param[in] uid pointer to a byte array containing the UID.
- * @param uid_len UID length in bytes (must be supported by the protocol).
- * @param atqa ATQA byte value.
- * @param sak SAK byte value.
+ * @param[in] uid_len UID length in bytes (must be supported by the protocol).
+ * @param[in] atqa ATQA byte value.
+ * @param[in] sak SAK byte value.
  * @returns NfcErrorNone on success, any other error code on failure.
  */
 NfcError nfc_iso14443a_listener_set_col_res_data(
