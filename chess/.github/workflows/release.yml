@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+env:
+  firmware_version: '0.86.1'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Flipper Zero Firmware
+        uses: actions/checkout@v3
+        with:
+          repository: 'flipperdevices/flipperzero-firmware'
+          ref: ${{ env.firmware_version }}
+          submodules: true
+      - name: Checkout flipper-chess
+        uses: actions/checkout@v3
+        with:
+          path: 'applications_user/flipper-chess'
+      - name: Build FAPs
+        run: ./fbt COMPACT=1 DEBUG=0 faps
+      - name: Check flipper-chess Built
+        run: test -f build/f7-firmware-C/.extapps/chess.fap
+      - name: Get Tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+        with:
+          strip_v: false
+      - name: Publish flipper-chess
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/f7-firmware-C/.extapps/chess.fap
+            applications_user/flipper-chess/README.md
+          name: ${{steps.tag.outputs.tag}}
+          body: Built against Flipper Zero firmware v${{ env.firmware_version }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
