@@ -292,6 +292,15 @@ FuriHalNfcError furi_hal_nfc_trx_reset();
 FuriHalNfcError furi_hal_nfc_event_start();
 
 /**
+ * @brief Disable generation of NFC HAL events.
+ *
+ * Unlike furi_hal_nfc_event_start(), this function may be called from any thread.
+ *
+ * @returns FuriHalNfcErrorNone on success, any other error code on failure.
+ */
+FuriHalNfcError furi_hal_nfc_event_stop();
+
+/**
  * @brief Manually emit the FuriHalNfcEventAbortRequest event.
  *
  * @returns FuriHalNfcErrorNone on success, any other error code on failure.

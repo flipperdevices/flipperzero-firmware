@@ -29,6 +29,7 @@ typedef enum {
     FelicaErrorCommunication,
     FelicaErrorFieldOff,
     FelicaErrorWrongCrc,
+    FelicaErrorProtocol,
     FelicaErrorTimeout,
 } FelicaError;
 

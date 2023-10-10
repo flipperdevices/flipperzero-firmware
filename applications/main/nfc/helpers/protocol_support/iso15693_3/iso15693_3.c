@@ -69,15 +69,17 @@ static NfcCommand
     Iso15693_3ListenerEvent* iso15693_3_event = event.event_data;
 
     if(iso15693_3_event->type == Iso15693_3ListenerEventTypeCustomCommand) {
-        furi_string_cat_printf(nfc->text_box_store, "R:");
-        for(size_t i = 0; i < bit_buffer_get_size_bytes(iso15693_3_event->data->buffer); i++) {
-            furi_string_cat_printf(
-                nfc->text_box_store,
-                " %02X",
-                bit_buffer_get_byte(iso15693_3_event->data->buffer, i));
+        if(furi_string_size(nfc->text_box_store) < NFC_LOG_SIZE_MAX) {
+            furi_string_cat_printf(nfc->text_box_store, "R:");
+            for(size_t i = 0; i < bit_buffer_get_size_bytes(iso15693_3_event->data->buffer); i++) {
+                furi_string_cat_printf(
+                    nfc->text_box_store,
+                    " %02X",
+                    bit_buffer_get_byte(iso15693_3_event->data->buffer, i));
+            }
+            furi_string_push_back(nfc->text_box_store, '\n');
+            view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventListenerUpdate);
         }
-        furi_string_push_back(nfc->text_box_store, '\n');
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventListenerUpdate);
     }
 
     return NfcCommandContinue;

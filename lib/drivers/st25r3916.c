@@ -54,25 +54,28 @@ bool st25r3916_read_fifo(
 
     bool read_success = false;
 
-    uint8_t fifo_status[2] = {};
-    st25r3916_read_burst_regs(handle, ST25R3916_REG_FIFO_STATUS1, fifo_status, 2);
-    size_t bytes = ((fifo_status[1] & ST25R3916_REG_FIFO_STATUS2_fifo_b_mask) >>
-                    ST25R3916_REG_FIFO_STATUS2_fifo_b_shift) |
-                   fifo_status[0];
-    uint8_t bits =
-        ((fifo_status[1] & ST25R3916_REG_FIFO_STATUS2_fifo_lb_mask) >>
-         ST25R3916_REG_FIFO_STATUS2_fifo_lb_shift);
+    do {
+        uint8_t fifo_status[2] = {};
+        st25r3916_read_burst_regs(handle, ST25R3916_REG_FIFO_STATUS1, fifo_status, 2);
+        size_t bytes = ((fifo_status[1] & ST25R3916_REG_FIFO_STATUS2_fifo_b_mask) >>
+                        ST25R3916_REG_FIFO_STATUS2_fifo_b_shift) |
+                       fifo_status[0];
+        uint8_t bits =
+            ((fifo_status[1] & ST25R3916_REG_FIFO_STATUS2_fifo_lb_mask) >>
+             ST25R3916_REG_FIFO_STATUS2_fifo_lb_shift);
 
-    if(bytes <= buff_size) {
+        if(bytes == 0) break;
+        if(bytes > buff_size) break;
+
         st25r3916_reg_read_fifo(handle, buff, bytes);
-        read_success = true;
-    }
 
-    if(bits) {
-        *buff_bits = (bytes - 1) * 8 + bits;
-    } else {
-        *buff_bits = bytes * 8;
-    }
+        if(bits) {
+            *buff_bits = (bytes - 1) * 8 + bits;
+        } else {
+            *buff_bits = bytes * 8;
+        }
+        read_success = true;
+    } while(false);
 
     return read_success;
 }

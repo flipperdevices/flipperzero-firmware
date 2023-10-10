@@ -61,6 +61,7 @@
 #define NFC_NAME_SIZE 22
 #define NFC_TEXT_STORE_SIZE 128
 #define NFC_BYTE_INPUT_STORE_SIZE 10
+#define NFC_LOG_SIZE_MAX (1024)
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
@@ -87,6 +88,7 @@ typedef struct {
     size_t dict_keys_current;
     bool is_key_attack;
     uint8_t key_attack_current_sector;
+    bool is_card_present;
 } NfcMfClassicDictAttackContext;
 
 struct NfcApp {

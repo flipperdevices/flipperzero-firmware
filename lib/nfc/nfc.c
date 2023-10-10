@@ -319,8 +319,8 @@ void nfc_start(Nfc* instance, NfcEventCallback callback, void* context) {
     } else {
         furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
     }
-    furi_thread_start(instance->worker_thread);
     instance->comm_state = NfcCommStateIdle;
+    furi_thread_start(instance->worker_thread);
 }
 
 void nfc_stop(Nfc* instance) {
@@ -447,6 +447,12 @@ NfcError nfc_iso14443a_poller_trx_custom_parity(
             FURI_LOG_D(TAG, "Failed in poller RX");
             ret = nfc_process_hal_error(error);
             break;
+        }
+        if(instance->rx_bits >= 9) {
+            if((instance->rx_bits % 9) != 0) {
+                ret = NfcErrorDataFormat;
+                break;
+            }
         }
 
         bit_buffer_copy_bytes_with_parity(rx_buffer, instance->rx_buffer, instance->rx_bits);
