@@ -1,4 +1,5 @@
 #include "furi_hal_nfc_i.h"
+#include "furi_hal_nfc_tech_i.h"
 
 static FuriHalNfcError furi_hal_nfc_felica_poller_init(FuriHalSpiBusHandle* handle) {
     // Enable Felica mode, AM modulation
