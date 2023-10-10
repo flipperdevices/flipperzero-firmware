@@ -10,10 +10,14 @@ static const uint32_t EVENT_PERIOD_MS = 10;
 static const float BEEP_FREQ = 1000.0f;
 static const float BEEP_VOL = 0.9f;
 static const GpioPin* const radarPin = &gpio_ext_pc3; // Pin 7
+static const GpioPin* const altRadarPin = &gpio_ext_pa7; // Pin 2
+static const GpioPin* const altGroundPin = &gpio_ext_pa6; // Pin 3
 
 bool presenceDetected = false;
 bool muted = false;
 bool active = false;
+bool continuous = false; // Start with no signal from OUT
+bool altPinout; // Sets which GPIO pinout config to use
 
 static void start_feedback(NotificationApp* notifications) {
     // Set LED to red for detection
@@ -50,7 +54,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 64, 2, AlignCenter, AlignTop, "Microwave Radar");
-
+    canvas_set_font(canvas, FontSecondary);
     if(active) {
         elements_multiline_text_aligned(canvas, 64, 12, AlignCenter, AlignTop, "Active");
     } else {
@@ -58,28 +62,50 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     }
 
     // Display presence status
+    canvas_set_font(canvas, FontPrimary);
     if(presenceDetected) {
         elements_multiline_text_aligned(
-            canvas, 64, 25, AlignCenter, AlignTop, "Presence Detected");
+            canvas, 64, 20, AlignCenter, AlignTop, "Presence Detected");
     } else {
-        elements_multiline_text_aligned(canvas, 64, 25, AlignCenter, AlignTop, "No Presence");
-    }
-
-    if(muted) {
-        elements_multiline_text_aligned(canvas, 64, 35, AlignCenter, AlignTop, "Muted");
+        elements_multiline_text_aligned(canvas, 64, 20, AlignCenter, AlignTop, "No Presence");
     }
 
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(
-        canvas, 64, 45, AlignCenter, AlignTop, "RCWL-0516 :: OUT -> Pin7");
-    elements_multiline_text_aligned(
-        canvas, 64, 55, AlignCenter, AlignTop, "VIN -> 5v :: GND -> GND");
+    if(muted) {
+        elements_multiline_text_aligned(canvas, 64, 32, AlignCenter, AlignTop, "Muted");
+    }
+
+    canvas_set_font(canvas, FontBatteryPercent);
+
+    if(altPinout) {
+        elements_multiline_text_aligned(
+            canvas, 64, 42, AlignCenter, AlignTop, "Alt-Pinout Enabled");
+        elements_multiline_text_aligned(
+            canvas, 64, 49, AlignCenter, AlignTop, "VIN -> 5v :: GND -> Pin 3");
+        elements_multiline_text_aligned(
+            canvas, 64, 56, AlignCenter, AlignTop, "OUT -> Pin 2 (A7)");
+    } else if(!altPinout) {
+        elements_multiline_text_aligned(
+            canvas, 64, 42, AlignCenter, AlignTop, "Alt-Pinout Disabled");
+        elements_multiline_text_aligned(
+            canvas, 64, 49, AlignCenter, AlignTop, "VIN -> 5v :: GND -> GND");
+        elements_multiline_text_aligned(
+            canvas, 64, 56, AlignCenter, AlignTop, "OUT -> Pin 7 (C3)");
+    }
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
+}
+
+static void get_reading() {
+    if(altPinout) {
+        continuous = furi_hal_gpio_read(altRadarPin);
+    } else {
+        continuous = furi_hal_gpio_read(radarPin);
+    }
 }
 
 int32_t app_radar_scanner(void* p) {
@@ -102,6 +128,17 @@ int32_t app_radar_scanner(void* p) {
 
     // set input to be low; RCWL-0516 outputs High (3v) on detection
     furi_hal_gpio_init(radarPin, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(altRadarPin, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(altGroundPin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_write(altGroundPin, false);
+
+    // Auto 5v- Thanks Willy!!
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
 
     bool alarming = false; // Sensor begins in-active until user starts
     bool running = true; // to prevent unwanted false positives
@@ -109,7 +146,7 @@ int32_t app_radar_scanner(void* p) {
     while(running) {
         if(active) {
             // start and stop feedback if sensor state is active
-            bool continuous = furi_hal_gpio_read(radarPin);
+            get_reading();
 
             if(continuous && !alarming) {
                 presenceDetected = true;
@@ -138,6 +175,9 @@ int32_t app_radar_scanner(void* p) {
                     muted = !muted; // Toggle the value of 'muted'
                     stop_feedback(notifications);
                 }
+                if(event.key == InputKeyRight) {
+                    altPinout = !altPinout; // Toggle alternate pinout
+                }
             }
         }
     }
@@ -145,6 +185,11 @@ int32_t app_radar_scanner(void* p) {
     // return control of the LED, beeper, backlight, and stop vibration
     stop_feedback(notifications);
     notification_message_block(notifications, &sequence_display_backlight_enforce_auto);
+
+    // Disable 5v power
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);

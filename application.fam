@@ -1,6 +1,6 @@
 App(
     appid="radar_scanner",
-    name="[GPIO] Radar Scanner",
+    name="[RCWL0516] Radar Scan",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="app_radar_scanner",
     requires=["gui"],
