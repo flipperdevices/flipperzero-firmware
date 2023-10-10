@@ -41,15 +41,18 @@ bool xremote_app_settings_store(XRemoteAppSettings* settings) {
     do {
         /* Write header in config file */
         if(!flipper_format_file_open_always(ff, XREMOTE_APP_SETTINGS)) break;
-        if(!flipper_format_write_header_cstr(ff, "XRemote settings file", 1)) break;
+        if(!flipper_format_write_header_cstr(ff, "XRemote", 1)) break;
         if(!flipper_format_write_comment_cstr(ff, "")) break;
 
         /* Write actual configuration to the settings file */
-        if(!flipper_format_write_uint32(ff, "orientation", (uint32_t*)&settings->orientation, 1))
-            break;
-        if(!flipper_format_write_uint32(ff, "repeat", (uint32_t*)&settings->repeat_count, 1))
-            break;
-        if(!flipper_format_write_uint32(ff, "exit", (uint32_t*)&settings->exit_behavior, 1)) break;
+        uint32_t value = settings->orientation == ViewOrientationHorizontal ? 0 : 1;
+        if(!flipper_format_write_uint32(ff, "orientation", &value, 1)) break;
+
+        value = settings->exit_behavior == XRemoteAppExitPress ? 0 : 1;
+        if(!flipper_format_write_uint32(ff, "appexit", &value, 1)) break;
+
+        value = settings->repeat_count;
+        if(!flipper_format_write_uint32(ff, "repeat", &value, 1)) break;
 
         success = true;
     } while(false);
@@ -74,15 +77,15 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
         /* Open file and read the header */
         if(!flipper_format_buffered_file_open_existing(ff, XREMOTE_APP_SETTINGS)) break;
         if(!flipper_format_read_header(ff, header, &version)) break;
-        if(!furi_string_equal(header, "XRemote settings file") || (version != 1)) break;
+        if(!furi_string_equal(header, "XRemote") || (version != 1)) break;
 
         /* Parse config data from the buffer */
         if(!flipper_format_read_uint32(ff, "orientation", &value, 1)) break;
-        settings->orientation = value;
+        settings->orientation = value == 0 ? ViewOrientationHorizontal : ViewOrientationVertical;
+        if(!flipper_format_read_uint32(ff, "appexit", &value, 1)) break;
+        settings->exit_behavior = value == 0 ? XRemoteAppExitPress : XRemoteAppExitHold;
         if(!flipper_format_read_uint32(ff, "repeat", &value, 1)) break;
         settings->repeat_count = value;
-        if(!flipper_format_read_uint32(ff, "exit", &value, 1)) break;
-        settings->exit_behavior = value;
 
         success = true;
     } while(false);
@@ -225,7 +228,7 @@ void xremote_app_submenu_alloc(XRemoteApp* app, uint32_t index, ViewNavigationCa
     View* view = submenu_get_view(app->submenu);
     view_set_previous_callback(view, prev_cb);
 
-#ifdef FW_ORIGIN_Unleashed
+#if defined(FW_ORIGIN_Unleashed) || defined(FW_ORIGIN_RM)
     submenu_set_orientation(app->submenu, settings->orientation);
 #else
     view_set_orientation(view, settings->orientation);
@@ -299,6 +302,7 @@ void xremote_app_free(XRemoteApp* app) {
     xremote_app_submenu_free(app);
     xremote_app_view_free(app);
 
+    /* Call clear callback if there is an user context attached  */
     if(app->on_clear != NULL) app->on_clear(app->context);
 
     free(app);
