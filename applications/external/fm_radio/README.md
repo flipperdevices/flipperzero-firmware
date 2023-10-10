@@ -32,3 +32,7 @@ Add User Settings Menu: <br>
 -User Editable Station List w/Names (Display on "Listen Now Page")<br>
 -Add the Preset Up/Down Icon.<br>
 -Redirect TEA5767 Audio To a GPIO and Playback on Flipper Internal Speaker
+
+
+Created By: Coolshrimp
+https://CoolshrimpModz.com
