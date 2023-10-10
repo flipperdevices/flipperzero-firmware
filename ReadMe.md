@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1009-1701-0.92.3-5d8224a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-09 17:01 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-09 17:01 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-10 01:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-10 01:00 EST`
 - UL: [bugfix t5577_write_with_pass #612 (By baugp)](https://github.com/DarkFlippers/unleashed-firmware/pull/612)
 - Commented Out: [Genie Door Recorder v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials) - Will return once fixes are completed by developer.
 - Made Clear T5577 require debug to help avoid bricking tags (By SkeletonMan03)
@@ -55,6 +55,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fix spelling across some project files #3128 (By h00die)](https://github.com/flipperdevices/flipperzero-firmware/pull/3128)
 - [Speedup and consolidate color lib with pointers (By WillyJL, Ported/Modified By ESurge & RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/766)
 - Updated: [XRemote v1.0.5 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- Updated: [Radar Scanner v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 
 <a name="release">
 
@@ -424,7 +425,7 @@ $ ./fbt dolphin_ext
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
 - [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
-- [Radar Scanner (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
+- [Radar Scanner v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 - [Radiation Sensor (By sionyx)](https://github.com/sionyx/flipper_radsens) `Req: RadSens`
 - [Radio WIP (By victormico)](https://github.com/victormico/flipperzero-radio) `Req: TEA5767`
 - [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
