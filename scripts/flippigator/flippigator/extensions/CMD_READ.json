@@ -1,0 +1,346 @@
+{
+  "ASCII_MIRROR_UID_0":
+    {
+      "tag":"ASCII_MIRROR_UID",
+      "Card":"NTAG213.nfc",
+      "Description":"Set ascii mirror page = 36, byte = 0, mode = UID. Then read data",
+      "Cmds": [
+        {
+          "cmd":"hf 14a raw -sc A229440024FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3024",
+          "result": "30 34 42 41 46 46 43 41 34 44 35 44 38 30 00 00 [ E9 19 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3023",
+          "result": "00 00 00 00 30 34 42 41 46 46 43 41 34 44 35 44 [ 1C AC ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "46 46 43 41 34 44 35 44 38 30 00 00 00 AA AA BD [ 32 A3 ]"
+        }
+      ]
+    },
+"ASCII_MIRROR_UID_1" :{
+      "tag":"ASCII_MIRROR_UID",
+      "Card":"NTAG213.nfc",
+      "Description":"Set ascii mirror page = 36, byte = 1, mode = UID. Then read data",
+      "Cmds": [
+        {
+          "cmd":"hf 14a raw -sc A229540024FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3024",
+          "result": "00 30 34 42 41 46 46 43 41 34 44 35 44 38 30 00 [ 45 02 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3023",
+          "result": "00 00 00 00 00 30 34 42 41 46 46 43 41 34 44 35 [ B1 7C ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "41 46 46 43 41 34 44 35 44 38 30 00 00 AA AA BD [ 36 2A ]"
+        }
+      ]
+    },
+  "ASCII_MIRROR_UID_2" :  {
+      "tag":"ASCII_MIRROR_UID",
+      "Card":"NTAG213.nfc",
+      "Description":"Set ascii mirror page = 36, byte = 2, mode = UID. Then read data",
+      "Cmds": [
+        {
+          "cmd":"hf 14a raw -sc A229640024FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3024",
+          "result": "00 00 30 34 42 41 46 46 43 41 34 44 35 44 38 30 [ EE 77 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3023",
+          "result": "00 00 00 00 00 00 30 34 42 41 46 46 43 41 34 44 [ 76 6C ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "42 41 46 46 43 41 34 44 35 44 38 30 00 AA AA BD [ 4A D4 ]"
+        }
+      ]
+    },
+  "ASCII_MIRROR_UID_3" :  {
+      "tag":"ASCII_MIRROR_UID",
+      "Card":"NTAG213.nfc",
+      "Description":"Set ascii mirror page = 36, byte = 3, mode = UID. Then read data",
+      "Cmds": [
+        {
+          "cmd":"hf 14a raw -sc A229740024FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3024",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 [ 37 49 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3023",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 [ 37 49 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 AA AA BD [ 7B 09 ]"
+        }
+      ]
+    },
+  "ASCII_COUNTER_0" :  {
+      "tag":"ASCII_COUNTER",
+      "Card":"NTAG213.nfc",
+      "Description":"Disable counter -> set ascii mirror page = 38, byte = 0, mode = COUNTER -> \nread data -> Enable counter -> read data",
+      "Cmds": [
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        },
+        {
+          "cmd":"hf 14a raw -sc A229840026FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 AA AA BD [ 7B 09 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "00 00 00 00 00 00 00 00 00 AA AA BD 84 00 26 FF [ DB E9 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "00 00 00 00 00 AA AA BD 84 00 26 FF 00 05 00 00 [ E3 5C ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A10050000",
+          "result": "0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 30 30 30 30 30 30 00 00 00 AA AA BD [ 54 E9 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 30 30 30 30 30 31 00 00 00 AA AA BD [ 81 76 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sck 3025",
+          "result": "00 00 00 00 30 30 30 30 30 32 00 00 00 AA AA BD [ EF DE ]"
+        },
+        {
+          "cmd": "hf 14a raw -ac 3025",
+          "result": "00 00 00 00 30 30 30 30 30 33 00 00 00 AA AA BD [ 3A 41 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "30 30 30 30 30 33 00 00 00 AA AA BD 84 00 26 FF [ 63 23 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "30 34 00 00 00 AA AA BD 84 00 26 FF 10 05 00 00 [ 4F B2 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        }
+      ]
+    },
+  "ASCII_COUNTER_1" :  {
+      "tag":"ASCII_COUNTER",
+      "Card":"NTAG213.nfc",
+      "Description":"Disable counter -> set ascii mirror page = 38, byte = 1, mode = COUNTER -> \nread data -> Enable counter -> read data",
+      "Cmds": [
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        },
+        {
+          "cmd":"hf 14a raw -sc A229940026FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 AA AA BD [ 7B 09 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "00 00 00 00 00 00 00 00 00 AA AA BD 84 00 26 FF [ DB E9 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "00 00 00 00 00 AA AA BD 84 00 26 FF 00 05 00 00 [ E3 5C ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A10050000",
+          "result": "0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 30 30 30 30 35 39 00 00 00 AA AA BD [ 0C 3F ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "30 30 30 30 35 41 00 00 00 AA AA BD 84 00 26 FF [ A8 56 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "35 42 00 00 00 AA AA BD 84 00 26 FF 10 05 00 00 [ 5F D8 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        }
+      ]
+    },
+  "ASCII_COUNTER_2" :  {
+      "tag":"ASCII_COUNTER",
+      "Card":"NTAG213.nfc",
+      "Description":"Disable counter -> set ascii mirror page = 38, byte = 2, mode = COUNTER -> \nread data -> Enable counter -> read data",
+      "Cmds": [
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        },
+        {
+          "cmd":"hf 14a raw -sc A229A40026FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 AA AA BD [ 7B 09 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "00 00 00 00 00 00 00 00 00 AA AA BD 84 00 26 FF [ DB E9 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "00 00 00 00 00 AA AA BD 84 00 26 FF 00 05 00 00 [ E3 5C ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A10050000",
+          "result": "0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 30 30 30 30 35 39 00 00 00 AA AA BD [ 0C 3F ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "30 30 30 30 35 41 00 00 00 AA AA BD 84 00 26 FF [ A8 56 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "35 42 00 00 00 AA AA BD 84 00 26 FF 10 05 00 00 [ 5F D8 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        }
+      ]
+    },
+ "ASCII_COUNTER_3" :   {
+      "tag":"ASCII_COUNTER",
+      "Card":"NTAG213.nfc",
+      "Description":"Disable counter -> set ascii mirror page = 38, byte = 3, mode = COUNTER -> \nread data -> Enable counter -> read data -> Result: ignore",
+      "Cmds": [
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        },
+        {
+          "cmd":"hf 14a raw -sc A229B40026FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 AA AA BD [ 7B 09 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "00 00 00 00 00 00 00 00 00 AA AA BD B4 00 26 FF [ 29 A5 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "00 00 00 00 00 AA AA BD B4 00 26 FF 00 05 00 00 [ 6B B1 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A10050000",
+          "result": "0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 AA AA BD [ 7B 09 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "00 00 00 00 00 00 00 00 00 AA AA BD B4 00 26 FF [ 29 A5 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "00 00 00 00 00 AA AA BD B4 00 26 FF 10 05 00 00 [ CA 72 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        }
+      ]
+    },
+  "ASCII_COUNTER_0_PWD" :  {
+      "tag":"ASCII_COUNTER",
+      "Card":"NTAG213.nfc",
+      "Description":"Disable counter -> set ascii mirror page = 38, byte = 0, mode = COUNTER ->\nread data -> CNT_ENABLE = 1 PSWD_CNT = 1 -> read data",
+      "Cmds": [
+        {
+          "cmd": "hf 14a raw -sc A22A00050000",
+          "result": "0A"
+        },
+        {
+          "cmd":"hf 14a raw -sc A229840026FF",
+          "result":"0A"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3025",
+          "result": "00 00 00 00 00 00 00 00 00 00 00 00 00 AA AA BD [ 7B 09 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3026",
+          "result": "00 00 00 00 00 00 00 00 00 AA AA BD 84 00 26 FF [ DB E9 ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc 3027",
+          "result": "00 00 00 00 00 AA AA BD 84 00 26 FF 00 05 00 00 [ E3 5C ]"
+        },
+        {
+          "cmd": "hf 14a raw -sc A22A18050000",
+          "result": "0A"
+        },
+        {
+          "cmd": "hf 14a raw -sck 1BFFFFFFFF",
+          "result": "00 00 00 00 30 30 30 30 35 39 00 00 00 AA AA BD [ 0C 3F ]"
+        },
+        {
+          "cmd": "hf 14a raw -ack 3025",
+          "result": "00 00 00 00 30 30 30 30 35 39 00 00 00 AA AA BD [ 0C 3F ]"
+        },
+        {
+          "cmd": "hf 14a raw -ack 3026",
+          "result": "30 30 30 30 35 41 00 00 00 AA AA BD 84 00 26 FF [ A8 56 ]"
+        },
+        {
+          "cmd": "hf 14a raw -ack 3027",
+          "result": "35 42 00 00 00 AA AA BD 84 00 26 FF 10 05 00 00 [ 5F D8 ]"
+        },
+        {
+          "cmd": "hf 14a raw -ac A22A00050000",
+          "result": "0A"
+        }
+      ]
+    }
+}
