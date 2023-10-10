@@ -12,7 +12,7 @@
 #include <gui/modules/variable_item_list.h>
 #include "uart_text_input.h"
 
-#define GRAVITY_VERSION "0.5.0"
+#define GRAVITY_VERSION "0.6.0"
 
 #define NUM_MENU_ITEMS (23)
 

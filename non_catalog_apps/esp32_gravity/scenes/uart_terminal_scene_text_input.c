@@ -28,6 +28,7 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
     // Setup view
     UART_TextInput* text_input = app->text_input;
     // Add help message to header
+
     char *helpStr = NULL;
     switch (app->gravityCommand) {
         case GRAVITY_BEACON:
@@ -92,6 +93,9 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
             break;
         case GRAVITY_INFO:
             helpStr = (char *)SHORT_INFO;
+            break;
+        case GRAVITY_PURGE:
+            helpStr = (char *)SHORT_PURGE;
             break;
         default:
             helpStr = "Send command to UART";
