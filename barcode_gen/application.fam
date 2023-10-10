@@ -1,0 +1,12 @@
+App(
+    appid="Barcode_App",
+    name="Barcode App",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="barcode_main",
+    requires=["gui", "storage"],
+    stack_size=2 * 1024,
+    fap_category="Misc",
+    fap_icon="images/barcode_10.png",
+    fap_icon_assets="images",
+    fap_icon_assets_symbol="barcode_app",
+)
