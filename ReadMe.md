@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1003-0047-0.92.3-0f6cbde.tgz&channel=RM1003-0047-0.92.3-0f6cbde&version=0.92.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1003-0047-0.92.3-0f6cbde-NoAnim.tgz&channel=RM1003-0047-0.92.3-0f6cbde-NoAnim&version=0.92.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1010-0133-0.93.1-ea673b9.tgz&channel=RM1010-0133-0.93.1-ea673b9&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1010-0133-0.93.1-ea673b9-NoAnim.tgz&channel=RM1010-0133-0.93.1-ea673b9-NoAnim&version=0.93.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,31 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-10-10 01:13 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-10 01:13 EST`
-- UL: [bugfix t5577_write_with_pass #612 (By baugp)](https://github.com/DarkFlippers/unleashed-firmware/pull/612)
-- Commented Out: [Genie Door Recorder v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials) - Will return once fixes are completed by developer.
-- Made Clear T5577 require debug to help avoid bricking tags (By SkeletonMan03)
-- Updated: [(Q)M100 UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
-- OFW PR: [Fix spelling across some project files #3128 (By h00die)](https://github.com/flipperdevices/flipperzero-firmware/pull/3128)
-- Added: [FM Radio (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/FM_Radio) `Req: TEA5767 FM radio chip`
-- Updated: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
-- Updated: [ID Card v1.0 (By alanretgue)](https://github.com/alanretgue/Flipper_Zero-id_card)
-- OFW: [HEX input UI improvements #3112 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3112)
-- OFW: [fbt: glob improvements #3117 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3117)
-- OFW: [add documentation SubGhz Bin_RAW file format #3133 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/3133)
-- UL: Temp fix for older iOS v9-14 HID support (By xMasterX)
-- UL: disable sorting if more than 300 files are in current folder (By xMasterX)
-- Updated: [FM Radio (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/FM_Radio) `Req: TEA5767 FM radio chip` - ReadMe updates only
-- Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
-- Updated: [HEX Viewer v1.2 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` (Updates By ezod & Sil333033 (Using xMasterX code))
-- OFW: [hal: ble: length fix for fw version prop #3136 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3136)
-- OFW: [Lib: update stm32wb_copro to 1.17.3 release #3119 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3119)
-- OFW: [Firmware: bigger thread name storage. Notification app: better BacklightEnforce edge cases handling. #3137 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3137)
-- OFW: [CCID: Support PC To Reader Transfer Block data #3126 (By kidbomb)](https://github.com/flipperdevices/flipperzero-firmware/pull/3126)
-- OFW: [Fix spelling across some project files #3128 (By h00die)](https://github.com/flipperdevices/flipperzero-firmware/pull/3128)
-- [Speedup and consolidate color lib with pointers (By WillyJL, Ported/Modified By ESurge & RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/766)
-- Updated: [XRemote v1.0.5 (By kala13x)](https://github.com/kala13x/flipper-xremote)
-- Updated: [Radar Scanner v2.0 (By MatthewKuKanich)](https://github.com/MatthewKuKanich/flipper-radar) `Req: RCWL-0516`
 
 <a name="release">
 
@@ -493,4 +468,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1003-0047-0.92.3-0f6cbde.tgz&channel=RM1003-0047-0.92.3-0f6cbde&version=0.92.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1003-0047-0.92.3-0f6cbde-NoAnim.tgz&channel=RM1003-0047-0.92.3-0f6cbde-NoAnim&version=0.92.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1010-0133-0.93.1-ea673b9.tgz&channel=RM1010-0133-0.93.1-ea673b9&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1010-0133-0.93.1-ea673b9-NoAnim.tgz&channel=RM1010-0133-0.93.1-ea673b9-NoAnim&version=0.93.1)
