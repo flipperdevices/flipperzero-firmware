@@ -108,13 +108,13 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * Probe: Any, target-ssids, APs
 * Sniff: On, Off
 * target-ssids: add, remove, list
-* scan: <ssid> WiFi BT BLE OFF
+* scan: <ssid> WiFi BT BLE *SERVICES* OFF
 * hop: on, off, sequential, random, default, set
-* view: sta, ap, bt, sta+ap+bt, sta+ap
+* view: sta, ap, bt, sta+ap+bt, sta+ap, *services*
 * select: sta, ap, bt
 * selected: sta, ap, bt, sta+ap+bt
-* clear: sta, ap, bt
-* purge: WiFi, BT, BLE
+* clear: sta, ap, bt, *services* *selected*
+* purge: WiFi, BT, BLE, *AP* *STA* *SERVICES*
 * get/set: <variables> BLE_PURGE_STRAT _MIN_AGE _MAX_RSSI
 * deauth: off, frame STA, device STA, spoof STA, frame APs, device APs, spoof APs, frame broadcast, device broadcast, spoof broadcast
 * mana: on, off, clear

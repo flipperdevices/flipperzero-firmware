@@ -64,9 +64,9 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Scan",
-    {"Status", "<SSID>", "WiFi", "BT", "BLE", "Off"},
-    6,
-    {"scan", "scan ", "scan wifi", "scan bt", "scan ble", "scan off"},
+    {"Status", "<SSID>", "WiFi", "BT", "BLE", "BT Svcs", "Off"},
+    7,
+    {"scan", "scan ", "scan wifi", "scan bt", "scan ble", "scan bt services", "scan off"},
     TOGGLE_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
@@ -78,18 +78,11 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"View",
-    {"STA", "AP", "BT", "BT+AP+STA", "STA+AP"},
-    5,
-    {"view sta", "view ap", "view bt", "view ap sta bt", "view sta ap"},
+    {"STA", "AP", "BT", "BT SVCS", "BT+AP+STA", "STA+AP"},
+    6,
+    {"view sta", "view ap", "view bt", "view bt services", "view ap sta bt", "view sta ap"},
     NO_ARGS,
     FOCUS_CONSOLE_START,
-    NO_TIP},
-    {"Select All",
-    {"STA", "AP", "BT"},
-    3,
-    {"select sta all", "select ap all", "select bt all"},
-    NO_ARGS,
-    FOCUS_CONSOLE_END,
     NO_TIP},
     {"Select",
     {"STA", "AP", "BT"},
@@ -106,16 +99,16 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     FOCUS_CONSOLE_START,
     NO_TIP},
     {"Clear",
-    {"STA", "AP", "BT", "ALL"},
-    4,
-    {"clear sta", "clear ap", "clear bt", "clear all"},
+    {"STA", "STA Sel.", "AP", "AP Sel.", "BT", "BT Sel.", "BT Svcs", "ALL"},
+    8,
+    {"clear sta", "clear sta selected", "clear ap", "clear ap selected", "clear bt", "clear bt selected", "clear bt services", "clear all"},
     NO_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Purge",
-    {"BLE"},
-    1,
-    {"purge ble"},
+    {"AP", "STA", "BT", "BLE"},
+    4,
+    {"purge ap", "purge sta", "purge bt", "purge ble"},
     NO_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
@@ -232,9 +225,9 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     furi_assert(index < NUM_MENU_ITEMS);
     const UART_TerminalItem* item = &items[index];
 
-    dolphin_deed(DolphinDeedGpioUartBridge);
 
     const int selected_option_index = app->selected_option_index[index];
+    dolphin_deed(DolphinDeedGpioUartBridge);
     furi_assert(selected_option_index < item->num_options_menu);
     app->selected_tx_string = item->actual_commands[selected_option_index];
     /* Don't clear screen if command is an empty string */
@@ -247,9 +240,10 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     app->show_stopscan_tip = item->show_stopscan_tip;
 
     /* GRAVITY: Set app->gravityMode based on first word in command */
-    
+
     //char *cmd = strsep(&origCmd, " ");
     /* GRAVITY: strsep is disabled by Flipper's SDK. RYO */
+
     char *cmd = strToken((char *)app->selected_tx_string, ' ', 1);
     if (!strcmp(cmd, "beacon")) {
         app->gravityCommand = GRAVITY_BEACON;

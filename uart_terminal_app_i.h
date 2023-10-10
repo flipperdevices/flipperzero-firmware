@@ -12,9 +12,9 @@
 #include <gui/modules/variable_item_list.h>
 #include "uart_text_input.h"
 
-#define GRAVITY_VERSION "0.5.1"
+#define GRAVITY_VERSION "0.6.0"
 
-#define NUM_MENU_ITEMS (24)
+#define NUM_MENU_ITEMS (23)
 
 #define UART_TERMINAL_TEXT_BOX_STORE_SIZE (1024)
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
