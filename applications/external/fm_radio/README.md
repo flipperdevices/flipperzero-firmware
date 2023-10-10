@@ -34,4 +34,5 @@ Add User Settings Menu: <br>
 -Redirect TEA5767 Audio To a GPIO and Playback on Flipper Internal Speaker
 
 
-Created By: Coolshrimp - https://CoolshrimpModz.com
+Created By: Coolshrimp
+https://CoolshrimpModz.com
