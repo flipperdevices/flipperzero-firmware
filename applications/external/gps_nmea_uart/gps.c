@@ -2,6 +2,7 @@
 #include "constants.h"
 
 #include <furi.h>
+#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <string.h>
 
@@ -94,6 +95,14 @@ int32_t gps_app(void* p) {
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
+
     GpsUart* gps_uart = gps_uart_enable();
 
     gps_uart->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -102,14 +111,6 @@ int32_t gps_app(void* p) {
         free(gps_uart);
         return 255;
     }
-
-    uint8_t attempts = 0;
-    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        furi_delay_ms(10);
-    }
-    furi_delay_ms(200);
 
     // set system callbacks
     ViewPort* view_port = view_port_alloc();
@@ -167,8 +168,8 @@ int32_t gps_app(void* p) {
 
                         gps_uart_init_thread(gps_uart);
                         gps_uart->changing_baudrate = true;
-                        view_port_update(view_port);
                         furi_mutex_release(gps_uart->mutex);
+                        view_port_update(view_port);
                         break;
                     case InputKeyRight:
                         gps_uart->speed_units++;
@@ -186,16 +187,12 @@ int32_t gps_app(void* p) {
             }
         }
         if(!gps_uart->changing_baudrate) {
-            view_port_update(view_port);
             furi_mutex_release(gps_uart->mutex);
+            view_port_update(view_port);
         } else {
             furi_delay_ms(1000);
             gps_uart->changing_baudrate = false;
         }
-    }
-
-    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
-        furi_hal_power_disable_otg();
     }
 
     notification_message_block(gps_uart->notifications, &sequence_display_backlight_enforce_auto);
@@ -206,6 +203,10 @@ int32_t gps_app(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(gps_uart->mutex);
     gps_uart_disable(gps_uart);
+
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }
