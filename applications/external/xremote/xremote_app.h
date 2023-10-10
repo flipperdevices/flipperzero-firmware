@@ -83,6 +83,7 @@ void xremote_app_submenu_add(
     const char* name,
     uint32_t index,
     SubmenuItemCallback callback);
+
 void xremote_app_submenu_alloc(XRemoteApp* app, uint32_t index, ViewNavigationCallback prev_cb);
 void xremote_app_submenu_free(XRemoteApp* app);
 

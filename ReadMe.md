@@ -46,7 +46,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: disable sorting if more than 300 files are in current folder (By xMasterX)
 - Updated: [FM Radio (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/FM_Radio) `Req: TEA5767 FM radio chip` - ReadMe updates only
 - Updated: [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: M100 or QM100`
-- Updated: [XRemote v1.0.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated: [HEX Viewer v1.2 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` (Updates By ezod & Sil333033 (Using xMasterX code))
 - OFW: [hal: ble: length fix for fw version prop #3136 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3136)
@@ -55,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [CCID: Support PC To Reader Transfer Block data #3126 (By kidbomb)](https://github.com/flipperdevices/flipperzero-firmware/pull/3126)
 - OFW: [Fix spelling across some project files #3128 (By h00die)](https://github.com/flipperdevices/flipperzero-firmware/pull/3128)
 - [Speedup and consolidate color lib with pointers (By WillyJL, Ported/Modified By ESurge & RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/766)
+- Updated: [XRemote v1.0.5 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 
@@ -474,7 +474,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- [XRemote v1.0.3 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- [XRemote v1.0.5 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
 

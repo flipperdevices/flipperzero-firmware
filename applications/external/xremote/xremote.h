@@ -10,6 +10,6 @@
 
 #define XREMOTE_VERSION_MAJOR 1
 #define XREMOTE_VERSION_MINOR 0
-#define XREMOTE_BUILD_NUMBER 3
+#define XREMOTE_BUILD_NUMBER 5
 
 void xremote_get_version(char* version, size_t length);
