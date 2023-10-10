@@ -2,6 +2,8 @@
 #include "js_modules.h"
 #include "modules/js_flipper.h"
 #include "modules/js_badusb.h"
+#include "modules/js_notification.h"
+#include "modules/js_dialog.h"
 
 typedef void* (*JsModeConstructor)(struct mjs* mjs, mjs_val_t* object);
 typedef void (*JsModeDestructor)(void* inst);
@@ -25,7 +27,10 @@ static const struct {
 } module_defs[] = {
     {"test", js_test_create, js_test_destroy},
     {"flipper", js_flipper_create, NULL},
-    {"badusb", js_badusb_create, js_badusb_destroy}};
+    {"badusb", js_badusb_create, js_badusb_destroy},
+    {"notification", js_notification_create, js_notification_destroy},
+    {"dialog", js_dialog_create, NULL},
+};
 
 struct JsModules {
     struct mjs* mjs;

@@ -19,6 +19,7 @@ if (badusb.isConnected()) {
     badusb.hold("SHIFT", "b");
     delay(2000);
     badusb.release();
+    badusb.press("ENTER");
     badusb.print("Hello")
     badusb.println("abcd")
     badusb.print("12345", 1000);
