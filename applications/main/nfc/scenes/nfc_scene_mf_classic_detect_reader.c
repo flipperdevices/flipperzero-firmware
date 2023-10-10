@@ -97,8 +97,11 @@ bool nfc_scene_mf_classic_detect_reader_on_event(void* context, SceneManagerEven
             detect_reader_set_state(instance->detect_reader, DetectReaderStateReaderDetected);
             detect_reader_set_nonces_collected(instance->detect_reader, nonces_pairs);
             if(nonces_pairs >= NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
-                nfc_listener_stop(instance->listener);
-                nfc_listener_free(instance->listener);
+                if(instance->listener) {
+                    nfc_listener_stop(instance->listener);
+                    nfc_listener_free(instance->listener);
+                    instance->listener = NULL;
+                }
                 detect_reader_set_state(instance->detect_reader, DetectReaderStateDone);
                 nfc_blink_stop(instance);
                 notification_message(instance->notifications, &sequence_single_vibro);
@@ -112,14 +115,19 @@ bool nfc_scene_mf_classic_detect_reader_on_event(void* context, SceneManagerEven
             nfc_blink_stop(instance);
             notification_message(instance->notifications, &sequence_detect_reader);
         } else if(event.event == NfcCustomEventViewExit) {
+            if(instance->listener) {
+                nfc_listener_stop(instance->listener);
+                nfc_listener_free(instance->listener);
+                instance->listener = NULL;
+            }
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicMfkeyNoncesInfo);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        size_t nonces_pairs = 2 * mfkey32_logger_get_params_num(instance->mfkey32_logger);
-        if(nonces_pairs < NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX) {
+        if(instance->listener) {
             nfc_listener_stop(instance->listener);
             nfc_listener_free(instance->listener);
+            instance->listener = NULL;
         }
         mfkey32_logger_free(instance->mfkey32_logger);
     }
