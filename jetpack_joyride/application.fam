@@ -12,5 +12,5 @@ App(
     fap_icon="icon.png",
     fap_category="Games",
     fap_icon_assets="assets",
-    fap_icon_assets_symbole="jetpack_game",
+    fap_icon_assets_symbol="jetpack_game",
 )
