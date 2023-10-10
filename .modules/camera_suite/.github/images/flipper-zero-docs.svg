@@ -1,0 +1,41 @@
+<svg 
+  aria-label="DOCS: FLIPPER ZERO"
+  height="28" 
+  role="img" 
+  width="178" 
+  xmlns:xlink="http://www.w3.org/1999/xlink" 
+  xmlns="http://www.w3.org/2000/svg" 
+>
+  <title>DOCS: FLIPPER ZERO</title>
+  <g shape-rendering="crispEdges">
+    <rect width="58" height="28" fill="#555"/>
+    <rect x="58" width="120" height="28" fill="#ee6e00"/>
+  </g>
+  <g 
+    fill="#fff" 
+    font-family="Verdana,Geneva,DejaVu Sans,sans-serif" 
+    font-size="100"
+    text-anchor="middle" 
+    text-rendering="geometricPrecision" 
+  >
+    <text 
+      fill="#fff"
+      textLength="340" 
+      transform="scale(.1)" 
+      x="290" 
+      y="175" 
+    >
+      DOCS
+    </text>
+    <text 
+      fill="#fff" 
+      font-weight="bold"
+      textLength="960" 
+      transform="scale(.1)" 
+      x="1180" 
+      y="175" 
+    >
+      FLIPPER ZERO
+    </text>
+  </g>
+</svg>

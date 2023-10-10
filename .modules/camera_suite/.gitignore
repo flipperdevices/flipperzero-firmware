@@ -1,0 +1,13 @@
+*.clang-format
+*.editorconfig
+*.exe
+*.flag
+*.vscode
+*.zip
+.DS_Store
+.idea
+.submodules/*
+/venv
+__pycache__
+dist/*
+fap/dist/*
