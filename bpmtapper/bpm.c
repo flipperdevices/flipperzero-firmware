@@ -3,9 +3,11 @@
 #include <dialogs/dialogs.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <m-string.h>
+
 #include <stdlib.h>
 #include "bpm_tapper_icons.h"
+
+#include <assets_icons.h>
 
 typedef enum {
     EventTypeTick,
@@ -92,6 +94,7 @@ static float queue_avg(queue *q) {
 //}
 //
 typedef struct {
+    FuriMutex* mutex;
     int taps;
     double bpm;
     uint32_t last_stamp;
@@ -129,42 +132,41 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    string_t tempStr;
+    FuriString* tempStr;
 
-    const BPMTapper* bpm_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if (bpm_state == NULL) {
-      return;
-    }
+    furi_assert(ctx);
+    const BPMTapper* bpm_state = ctx;
+    furi_mutex_acquire(bpm_state->mutex, FuriWaitForever);
     // border
     //canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
 
-    string_init(tempStr);
+    tempStr = furi_string_alloc();
 
-    string_printf(tempStr, "Taps: %d", bpm_state->taps);
-    canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignBottom, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "Taps: %d", bpm_state->taps);
+    canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignBottom, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_printf(tempStr, "Queue: %d", bpm_state->tap_queue->size);
-    canvas_draw_str_aligned(canvas, 70, 10, AlignLeft, AlignBottom, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "Queue: %d", bpm_state->tap_queue->size);
+    canvas_draw_str_aligned(canvas, 70, 10, AlignLeft, AlignBottom, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_printf(tempStr, "Interval: %dms", bpm_state->interval);
-    canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignBottom, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "Interval: %ldms", bpm_state->interval);
+    canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignBottom, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_printf(tempStr, "x2 %.2f /2 %.2f", bpm_state->bpm*2, bpm_state->bpm/2);
-    canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignCenter, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "x2 %.2f /2 %.2f", bpm_state->bpm * 2, bpm_state->bpm / 2);
+    canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_printf(tempStr, "%.2f", bpm_state->bpm);
+    furi_string_printf(tempStr, "%.2f", bpm_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_clear(tempStr);
+    furi_string_free(tempStr);
 
-    release_mutex((ValueMutex*)ctx, bpm_state);
+    furi_mutex_release(bpm_state->mutex);
 }
 
 
@@ -188,8 +190,8 @@ int32_t bpm_tapper_app(void* p) {
   // setup
   bpm_state_init(bpm_state);
   
-  ValueMutex state_mutex;
-  if (!init_mutex(&state_mutex, bpm_state, sizeof(bpm_state))) {
+  bpm_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+  if(!bpm_state->mutex) {
       FURI_LOG_E("BPM-Tapper", "cannot create mutex\r\n");
       free(bpm_state);
       return 255;
@@ -200,7 +202,7 @@ int32_t bpm_tapper_app(void* p) {
 
   // Set system callbacks
   ViewPort* view_port = view_port_alloc(); 
-  view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+  view_port_draw_callback_set(view_port, render_callback, bpm_state);
   view_port_input_callback_set(view_port, input_callback, event_queue);
   
   // Open GUI and register view_port
@@ -210,7 +212,7 @@ int32_t bpm_tapper_app(void* p) {
   PluginEvent event;
   for (bool processing = true; processing;) {
     FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-    BPMTapper* bpm_state = (BPMTapper*)acquire_mutex_block(&state_mutex);
+    furi_mutex_acquire(bpm_state->mutex, FuriWaitForever);
     if(event_status == FuriStatusOk) {
       // press events
       if(event.type == EventTypeKey) {
@@ -243,19 +245,19 @@ int32_t bpm_tapper_app(void* p) {
           }
         }
       } 
-    } else {
-      FURI_LOG_D("BPM-Tapper", "FuriMessageQueue: event timeout");
+    // } else {
+    //   FURI_LOG_D("BPM-Tapper", "FuriMessageQueue: event timeout");
     // event timeout
     }
     view_port_update(view_port);
-    release_mutex(&state_mutex, bpm_state);
+    furi_mutex_release(bpm_state->mutex);
   }
   view_port_enabled_set(view_port, false);
   gui_remove_view_port(gui, view_port);
   furi_record_close("gui");
   view_port_free(view_port);
   furi_message_queue_free(event_queue);
-  delete_mutex(&state_mutex);
+  furi_mutex_free(bpm_state->mutex);
   queue *q = bpm_state->tap_queue;
   free(q);
   free(bpm_state);
