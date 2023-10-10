@@ -39,6 +39,8 @@ typedef unsigned char byte;
 #include <notification/notification_messages.h>
 #include <notification/notification_app.h>
 
+#include <assets_icons.h>
+
 #define BF_INST_BUFFER_SIZE 2048
 #define BF_OUTPUT_SIZE 512
 #define BF_STACK_INITIAL_SIZE 128

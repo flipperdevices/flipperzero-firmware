@@ -1,5 +1,5 @@
 App(
-    appid="Brainfuck",
+    appid="brainfuck",
     name="Brainfuck",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="brainfuck_app",
