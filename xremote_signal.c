@@ -91,32 +91,30 @@ void xremote_signal_receiver_set_rx_callback(
     rx_ctx->rx_callback = rx_callback;
 }
 
-void xremote_signal_receiver_start(XRemoteSignalReceiver* rx_ctx) {
-    xremote_app_assert_void((rx_ctx && rx_ctx->worker && !rx_ctx->started));
+void xremote_signal_receiver_attach(XRemoteSignalReceiver* rx_ctx) {
+    xremote_app_assert_void((rx_ctx && rx_ctx->worker));
     infrared_worker_rx_set_received_signal_callback(
-        rx_ctx->worker, xremote_signal_receiver_rx_callback, (void*)rx_ctx);
+        rx_ctx->worker, xremote_signal_receiver_rx_callback, rx_ctx);
+}
 
+void xremote_signal_receiver_detach(XRemoteSignalReceiver* rx_ctx) {
+    xremote_app_assert_void((rx_ctx && rx_ctx->worker));
+    infrared_worker_rx_set_received_signal_callback(rx_ctx->worker, NULL, NULL);
+}
+
+void xremote_signal_receiver_start(XRemoteSignalReceiver* rx_ctx) {
+    xremote_app_assert_void((rx_ctx && !rx_ctx->started));
+    xremote_signal_receiver_attach(rx_ctx);
     infrared_worker_rx_start(rx_ctx->worker);
     xremote_app_notification_blink(rx_ctx->notifications);
     rx_ctx->started = true;
 }
 
 void xremote_signal_receiver_stop(XRemoteSignalReceiver* rx_ctx) {
-    xremote_app_assert_void((rx_ctx && rx_ctx->worker && rx_ctx->started));
-    infrared_worker_rx_set_received_signal_callback(rx_ctx->worker, NULL, NULL);
+    xremote_app_assert_void((rx_ctx && rx_ctx->started));
+    xremote_signal_receiver_detach(rx_ctx);
     infrared_worker_rx_stop(rx_ctx->worker);
     rx_ctx->started = false;
-}
-
-void xremote_signal_receiver_pause(XRemoteSignalReceiver* rx_ctx) {
-    xremote_app_assert_void((rx_ctx && rx_ctx->worker));
-    infrared_worker_rx_set_received_signal_callback(rx_ctx->worker, NULL, NULL);
-}
-
-void xremote_signal_receiver_resume(XRemoteSignalReceiver* rx_ctx) {
-    xremote_app_assert_void((rx_ctx && rx_ctx->worker));
-    infrared_worker_rx_set_received_signal_callback(
-        rx_ctx->worker, xremote_signal_receiver_rx_callback, (void*)rx_ctx);
 }
 
 InfraredSignal* xremote_signal_receiver_get_signal(XRemoteSignalReceiver* rx_ctx) {

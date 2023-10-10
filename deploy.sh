@@ -4,6 +4,7 @@
 
 # Change it according to the root path of the used firmware
 FLIPPER_FIRMWARE="/opt/flipper/firmwares/unleashed-firmware"
+#FLIPPER_FIRMWARE="/opt/flipper/firmwares/flipperzero-firmware"
 
 # Private variables
 XREMOTE_PROJ_PATH=$(dirname $(readlink -f "$0"))
