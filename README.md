@@ -322,9 +322,8 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - Game Boy Advance (GBA)
 
 ## Contributors
-<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/">EstebanFuentealba</a><br />
-<a href="https://github.com/R4g3D/Flipper-Zero-Game-Boy-Pokemon-Trading/">R4g3D</a><br />
-<a href="https://github.com/kbembedded/Flipper-Zero-Game-Boy-Pokemon-Trading/">kbembedded</a>
+[![Contributors](https://contrib.rocks/image?repo=EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/graphs/contributors)
+
 
 ## Links
 
