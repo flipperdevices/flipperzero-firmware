@@ -31,7 +31,7 @@ v1.0<br>
 <br>
 v0.8<br>
 -Created TEA5767 Library<br>
--Created FUntioning app<br>
+-Created Funtioning app<br>
 <br>
 Initial<br>
 -Created TEA5767 Library<br>
