@@ -3,7 +3,9 @@
  * @brief Main NFC device implementation definitions.
  *
  * All NFC device implementations must be registered here in order to be used
- * by the NfcDevice library (@see nfc_device.h).
+ * by the NfcDevice library.
+ *
+ * @see nfc_device.h
  *
  * This file is to be modified upon adding a new protocol (see below).
  */

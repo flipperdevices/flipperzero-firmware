@@ -4,12 +4,16 @@
  *
  * This library contains functions and definitions needed for NFC hardware low-level access.
  *
- * Application developers should first consider using the NFC protocol stack
- * (@see nfc_protocol.h) or the NFC transport layer (@see nfc.h) and see if
- * the APIs provided there are a good fit for the intended applicaton's purpose.
+ * Application developers should first consider using the NFC protocol stack or
+ * the NFC transport layer and see if the APIs provided there sufficient
+ * for the applicaton's intended purpose.
+ *
+ * @see nfc.h
+ * @see nfc_protocol.h
  *
  * If any of the above mentioned options is used, calling any of the functions provided by this
  * library is hardly necessary, as it will be taken care of under the hood.
+ *
  */
 #pragma once
 

@@ -9,21 +9,23 @@
  * All its child protocols are considered base protocols, which in turn serve
  * as parents to other, usually vendor-specific ones.
  *
- ****************************** Protocol tree structure ****************************
+ * ```
+ * **************************** Protocol tree structure ***************************
  *
- *                                                   (Start)
- *                                                      |
- *                             +------------------------+-----------+---------+
- *                             |                        |           |         |
- *                        ISO14443-3A              ISO14443-3B    Felica  ISO15693-3
- *                             |                        |                     |
- *             +---------------+-------------+     ISO14443-4B              SLIX
- *             |               |             |
- *        ISO14443-4A   Mf Ultralight   Mf Classic
- *             |
- *       +-----+-----+
- *       |           |
- *  Mf Desfire   Bank Card
+ *                                                  (Start)
+ *                                                     |
+ *                            +------------------------+-----------+---------+
+ *                            |                        |           |         |
+ *                       ISO14443-3A              ISO14443-3B    Felica  ISO15693-3
+ *                            |                        |                     |
+ *            +---------------+-------------+     ISO14443-4B              SLIX
+ *            |               |             |
+ *       ISO14443-4A   Mf Ultralight   Mf Classic
+ *            |
+ *      +-----+-----+
+ *      |           |
+ * Mf Desfire   Bank Card
+ * ```
  *
  * When implementing a new protocol, its place in the tree must be determined first.
  * If no appropriate base protocols exists, then it must be a base protocol itself.

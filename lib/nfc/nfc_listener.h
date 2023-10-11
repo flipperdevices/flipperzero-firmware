@@ -30,10 +30,12 @@ typedef struct NfcListener NfcListener;
 /**
  * @brief Allocate an NfcListener instance.
  *
- * @param[in] nfc pointer to an Nfc instance (@see nfc.h).
+ * @param[in] nfc pointer to an Nfc instance.
  * @param[in] protocol identifier of the protocol to be used.
  * @param[in] data pointer to the data to use during emulation.
  * @returns pointer to an allocated instance.
+ *
+ * @see nfc.h
  */
 NfcListener* nfc_listener_alloc(Nfc* nfc, NfcProtocol protocol, const NfcDeviceData* data);
 

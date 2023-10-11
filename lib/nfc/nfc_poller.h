@@ -1,10 +1,11 @@
 /**
  * @file nfc_poller.h
  * @brief The NfcPoller library provides NFC card reading(polling) facilities.
- * @see nfc_scanner.h
  *
  * Once started, it will try to activate and read a card using the designated protocol,
  * which is usually obtained by creating and starting an NfcScanner first.
+ *
+ * @see nfc_scanner.h
  *
  * When running, NfcPoller will generate events that the calling code must handle
  * by providing a callback function. The events passed to the callback are protocol-specific
@@ -28,9 +29,11 @@ typedef struct NfcPoller NfcPoller;
 /**
  * @brief Allocate an NfcPoller instance.
  *
- * @param[in] nfc pointer to an Nfc instance (@see nfc.h).
+ * @param[in] nfc pointer to an Nfc instance.
  * @param[in] protocol identifier of the protocol to be used.
  * @returns pointer to an allocated instance.
+ *
+ * @see nfc.h
  */
 NfcPoller* nfc_poller_alloc(Nfc* nfc, NfcProtocol protocol);
 
@@ -70,8 +73,10 @@ void nfc_poller_stop(NfcPoller* instance);
  * necessary to determine whether a card supporting the current protocol is in the vicinity
  * and whether it is functioning normally.
  *
- * It is used automatically inside NfcScanner (@see nfc_scanner.h), so there is usually no need
+ * It is used automatically inside NfcScanner, so there is usually no need
  * to call it explicitly.
+ *
+ * @see nfc_scanner.h
  *
  * @param[in,out] instance pointer to the instance to perform the detection with.
  * @returns true if a supported card was detected, false otherwise.

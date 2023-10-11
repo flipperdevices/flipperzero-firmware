@@ -28,8 +28,10 @@ struct NfcDevice {
 /**
  * @brief Get the mutable (non-const) data from an NfcDevice instance.
  *
- * The behaviour is the same as with nfc_device_get_data (@see nfc_device.h), but the
+ * The behaviour is the same as with nfc_device_get_data(), but the
  * return pointer is non-const, allowing for changing data it is pointing to.
+ *
+ * @see nfc_device.h
  *
  * Under the hood, nfc_device_get_data() calls this and then adds const-ness to the return value.
  *

@@ -62,8 +62,10 @@ typedef void (*NfcScannerCallback)(NfcScannerEvent event, void* context);
 /**
  * @brief Allocate an NfcScanner instance.
  *
- * @param[in] nfc pointer to an Nfc instance (@see nfc.h).
+ * @param[in] nfc pointer to an Nfc instance.
  * @returns pointer to the allocated NfcScanner instance.
+ *
+ * @see nfc.h
  */
 NfcScanner* nfc_scanner_alloc(Nfc* nfc);
 

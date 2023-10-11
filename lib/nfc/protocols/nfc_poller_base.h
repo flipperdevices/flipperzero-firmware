@@ -5,7 +5,7 @@
  * This file is an implementation detail. It must not be included in
  * any public API-related headers.
  *
- * @see nfc_poller.h for public API definitions.
+ * @see nfc_poller.h
  *
  */
 #pragma once
@@ -20,9 +20,11 @@ extern "C" {
 /**
  * @brief Allocate a protocol-specific poller instance.
  *
- * For base pollers (@see nfc_protocol.c) pass a pointer to an instance of type Nfc
+ * For base pollers pass a pointer to an instance of type Nfc
  * as the base_poller parameter, otherwise it must be a pointer to another poller instance
  * (compare iso14443_3a/iso14443_3a_poller.c and iso14443_4a/iso14443_4a_poller.c).
+ *
+ * @see nfc_protocol.c
  *
  * @param[in] base_poller pointer to the parent poller instance.
  * @returns pointer to the allocated poller instance.
@@ -39,7 +41,7 @@ typedef void (*NfcPollerFree)(NfcGenericInstance* instance);
 /**
  * @brief Set the callback function to handle events emitted by the poller instance.
  *
- * @see nfc_generic_event.h for the callback description.
+ * @see nfc_generic_event.h
  *
  * @param[in,out] poller pointer to the protocol-specific poller instance.
  * @param[in] callback pointer to the user-defined callback function which will receive events.
@@ -60,11 +62,13 @@ typedef void (
  *
  * Example for an application reading a card with a compound (non-base) protocol (simplified):
  *
- *   start()   < -     set_callback()    < -    set_callback()     < -  nfc_poller_start()
- *              |                         |                         |
- *     Nfc      |        Base Poller      |      Child Poller       |      Application
- *              |                         |                         |
- *   worker()  - >         run()         - >         run()         - >    handle_event()
+ * ```
+ * start()   <--     set_callback()    <--    set_callback()     <--  nfc_poller_start()
+ *            |                         |                         |
+ *   Nfc      |        Base Poller      |      Child Poller       |      Application
+ *            |                         |                         |
+ * worker()  -->         run()         -->         run()         --->    handle_event()
+ * ```
  *
  * The base poller receives events directly from an Nfc instance, from which they are
  * propagated as needed to however many other pollers there are in the current hierarchy.
@@ -73,7 +77,7 @@ typedef void (
  * on the particular poller implementation, it may perform actions such as reading
  * and writing to an NFC card, state changes and control of the parent poller.
  *
- * Additionally, @see nfc_generic_event.h for NfcGenericEvent description.
+ * @see nfc_generic_event.h
  *
  * @param[in] event protocol-specific event passed by the parent poller instance.
  * @param[in,out] context pointer to the protocol-specific poller instance.

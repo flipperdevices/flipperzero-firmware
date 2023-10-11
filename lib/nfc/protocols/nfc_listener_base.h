@@ -5,7 +5,7 @@
  * This file is an implementation detail. It must not be included in
  * any public API-related headers.
  *
- * @see nfc_listener.h for public API definitions.
+ * @see nfc_listener.h
  *
  */
 #pragma once
@@ -20,9 +20,11 @@ extern "C" {
 /**
  * @brief Allocate a protocol-specific listener instance.
  *
- * For base listeners (@see nfc_protocol.c) pass a pointer to an instance of type Nfc
+ * For base listeners pass a pointer to an instance of type Nfc
  * as the base_listener parameter, otherwise it must be a pointer to another listener instance
  * (compare iso14443_3a/iso14443_3a_listener.c and iso14443_4a/iso14443_4a_listener.c).
+ *
+ * @see nfc_protocol.c
  *
  * The NFC device data passed as the data parameter is copied to the instance and may
  * change during the emulation in response to reader commands.
@@ -47,7 +49,7 @@ typedef void (*NfcListenerFree)(NfcGenericInstance* instance);
 /**
  * @brief Set the callback function to handle events emitted by the listener instance.
  *
- * @see nfc_generic_event.h for the callback description.
+ * @see nfc_generic_event.h
  *
  * @param[in,out] listener
  * @param[in] callback pointer to the user-defined callback function which will receive events.

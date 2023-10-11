@@ -96,12 +96,14 @@ NfcProtocol nfc_device_get_protocol(const NfcDevice* instance);
  * Example: Call nfc_device_get_data() on an instance with Mf DESFire protocol.
  * The protocol hierarchy will look like the following:
  *
- *            Mf DESFire -> ISO14443-4A -> ISO14443-3A
+ * `Mf DESFire --> ISO14443-4A --> ISO14443-3A`
  *
  * Thus, the following values of the protocol parameter are valid:
- *  - NfcProtocolIso14443_3a
- *  - NfcProtocolIso14443_4a
- *  - NfcProtocolMfDesfire
+ *
+ *  * NfcProtocolIso14443_3a
+ *  * NfcProtocolIso14443_4a
+ *  * NfcProtocolMfDesfire
+ *
  * and passing them to the call would result in the respective data being returned.
  *
  * However, supplying a protocol identifier which is not in the hierarchy will
@@ -199,11 +201,16 @@ void nfc_device_copy_data(
  *
  * The following code snippets [1] and [2] are equivalent:
  *
- * [1] bool is_equal = nfc_device_is_equal(device1, device2);
- *
- * [2] NfcProtocol protocol = nfc_device_get_protocol(device2);
- *     const NfcDeviceData* data = nfc_device_get_data(device2, protocol);
- *     bool is_equal = nfc_device_is_equal_data(device1, protocol, data);
+ * [1]
+ * ```c
+ * bool is_equal = nfc_device_is_equal(device1, device2);
+ * ```
+ * [2]
+ * ```c
+ * NfcProtocol protocol = nfc_device_get_protocol(device2);
+ * const NfcDeviceData* data = nfc_device_get_data(device2, protocol);
+ * bool is_equal = nfc_device_is_equal_data(device1, protocol, data);
+ * ```
  *
  * @param[in] instance pointer to the instance to be compared.
  * @param[in] protocol protocol identifier of the data to be compared.
@@ -226,7 +233,6 @@ bool nfc_device_is_equal(const NfcDevice* instance, const NfcDevice* other);
 
 /**
  * @brief Set the loading callback function.
- * @see NfcLoadingCallback
  *
  * @param[in,out] instance pointer to the instance to be modified.
  * @param[in] callback pointer to a function to be called when the load operation completes.
