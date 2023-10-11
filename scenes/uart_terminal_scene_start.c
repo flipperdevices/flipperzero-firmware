@@ -496,6 +496,56 @@ uint8_t getCurrentMenu(UART_TerminalApp *app, UART_TerminalItem **theMenu) {
     return retVal;
 }
 
+static void displayMenu(UART_TerminalApp *app, UART_TerminalItem *selectedMenu) {
+    /* Clear current variable_item_list and build a new one using the menu
+       referenced by selectedMenu */
+    UART_TerminalItem *newMenu = NULL;
+    uint8_t newMenuCount = 0;
+    GravityMenu menuEnum = app->currentMenu;
+
+    if (!strcmp(selectedMenu->item_string, "Targets")) {
+        newMenu = targets;
+        newMenuCount = NUM_MAIN_ITEMS;
+        menuEnum = GRAVITY_MENU_TARGETS;
+    } else if (!strcmp(selectedMenu->item_string, "Packets")) {
+        newMenu = packets;
+        newMenuCount = NUM_PACKETS_ITEMS;
+        menuEnum = GRAVITY_MENU_PACKETS;
+    } else if (!strcmp(selectedMenu->item_string, "Attacks")) {
+        newMenu = attacks;
+        newMenuCount = NUM_ATTACK_ITEMS;
+        menuEnum = GRAVITY_MENU_ATTACKS;
+    } else if (!strcmp(selectedMenu->item_string, "Settings")) {
+        newMenu = settings;
+        newMenuCount = NUM_SETTINGS_ITEMS;
+        menuEnum = GRAVITY_MENU_SETTINGS;
+    } else if (!strcmp(selectedMenu->item_string, "Others")) {
+        newMenu = others;
+        newMenuCount = NUM_OTHER_ITEMS;
+        menuEnum = GRAVITY_MENU_OTHERS;
+    } else {
+        // TODO: Display error
+    }
+
+    /* Clear the current menu */
+    variable_item_list_reset();
+
+    /* Add the new list */
+    VariableItemList* var_item_list = app->var_item_list;
+    app->currentMenu = menuEnum;
+    for (uint8_t i = 0; i < newMenuCount; ++i) {
+        item = variable_item_list_add(
+            var_item_list,
+            newMenu[i].item_string,
+            newMenu[i].num_options_menu,
+            uart_terminal_scene_start_var_list_change_callback,
+            app);
+        variable_item_set_current_value_index(item, app->selected_option_index[i]);
+        variable_item_set_current_value_text(
+            item, newMenu[i].options_menu[app->selected_option_index[i]]);
+    }
+}
+
 /* Callback when an option is selected */
 static void uart_terminal_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -514,84 +564,89 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     furi_assert(index < menuCount);
     item = &theMenu[index];
 
-    dolphin_deed(DolphinDeedGpioUartBridge);
-    furi_assert(selected_option_index < item->num_options_menu);
-    app->selected_tx_string = item->actual_commands[selected_option_index];
-    /* Don't clear screen if command is an empty string */
-    app->is_command = (strlen(app->selected_tx_string) > 0);
-    app->is_custom_tx_string = false;
-    app->selected_menu_index = index;
-    app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
+    /* Are we displaying a submenu or executing something? */
+    if (item->isSubMenu) {
+        displayMenu(app, item);
+    } else {
+        dolphin_deed(DolphinDeedGpioUartBridge);
+        furi_assert(selected_option_index < item->num_options_menu);
+        app->selected_tx_string = item->actual_commands[selected_option_index];
+        /* Don't clear screen if command is an empty string */
+        app->is_command = (strlen(app->selected_tx_string) > 0);
+        app->is_custom_tx_string = false;
+        app->selected_menu_index = index;
+        app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
                                    (selected_option_index == 0) :
                                    item->focus_console;
-    app->show_stopscan_tip = item->show_stopscan_tip;
+        app->show_stopscan_tip = item->show_stopscan_tip;
 
-    /* GRAVITY: Set app->gravityMode based on first word in command */
+        /* GRAVITY: Set app->gravityMode based on first word in command */
 
-    //char *cmd = strsep(&origCmd, " ");
-    /* GRAVITY: strsep is disabled by Flipper's SDK. RYO */
+        //char *cmd = strsep(&origCmd, " ");
+        /* GRAVITY: strsep is disabled by Flipper's SDK. RYO */
 
-    char *cmd = strToken((char *)app->selected_tx_string, ' ', 1);
-    if (!strcmp(cmd, "beacon")) {
-        app->gravityCommand = GRAVITY_BEACON;
-    } else if (!strcmp(cmd, "target-ssids")) {
-        app->gravityCommand = GRAVITY_TARGET_SSIDS;
-    } else if (!strcmp(cmd, "probe")) {
-        app->gravityCommand = GRAVITY_PROBE;
-    } else if (!strcmp(cmd, "fuzz")) {
-        app->gravityCommand = GRAVITY_FUZZ;
-    } else if (!strcmp(cmd, "sniff")) {
-        app->gravityCommand = GRAVITY_SNIFF;
-    } else if (!strcmp(cmd, "deauth")) {
-        app->gravityCommand = GRAVITY_DEAUTH;
-    } else if (!strcmp(cmd, "mana")) {
-        app->gravityCommand = GRAVITY_MANA;
-    } else if (!strcmp(cmd, "stalk")) {
-        app->gravityCommand = GRAVITY_STALK;
-    } else if (!strcmp(cmd, "ap-dos")) {
-        app->gravityCommand = GRAVITY_AP_DOS;
-    } else if (!strcmp(cmd, "ap-clone")) {
-        app->gravityCommand = GRAVITY_AP_CLONE;
-    } else if (!strcmp(cmd, "scan")) {
-        app->gravityCommand = GRAVITY_SCAN;
-    } else if (!strcmp(cmd, "hop")) {
-        app->gravityCommand = GRAVITY_HOP;
-    } else if (!strcmp(cmd, "set")) {
-        app->gravityCommand = GRAVITY_SET;
-    } else if (!strcmp(cmd, "get")) {
-        app->gravityCommand = GRAVITY_GET;
-    } else if (!strcmp(cmd, "view")) {
-        app->gravityCommand = GRAVITY_VIEW;
-    } else if (!strcmp(cmd, "select")) {
-        app->gravityCommand = GRAVITY_SELECT;
-    } else if (!strcmp(cmd, "selected")) {
-        app->gravityCommand = GRAVITY_SELECTED;
-    } else if (!strcmp(cmd, "clear")) {
-        app->gravityCommand = GRAVITY_CLEAR;
-    } else if (!strcmp(cmd, "handshake")) {
-        app->gravityCommand = GRAVITY_HANDSHAKE;
-    } else if (!strcmp(cmd, "commands")) {
-        app->gravityCommand = GRAVITY_COMMANDS;
-    } else if (!strcmp(cmd, "info")) {
-        app->gravityCommand = GRAVITY_INFO;
-    } else {
-        app->gravityCommand = GRAVITY_NONE;
-    }
+        char *cmd = strToken((char *)app->selected_tx_string, ' ', 1);
+        if (!strcmp(cmd, "beacon")) {
+            app->gravityCommand = GRAVITY_BEACON;
+        } else if (!strcmp(cmd, "target-ssids")) {
+            app->gravityCommand = GRAVITY_TARGET_SSIDS;
+        } else if (!strcmp(cmd, "probe")) {
+            app->gravityCommand = GRAVITY_PROBE;
+        } else if (!strcmp(cmd, "fuzz")) {
+            app->gravityCommand = GRAVITY_FUZZ;
+        } else if (!strcmp(cmd, "sniff")) {
+            app->gravityCommand = GRAVITY_SNIFF;
+        } else if (!strcmp(cmd, "deauth")) {
+            app->gravityCommand = GRAVITY_DEAUTH;
+        } else if (!strcmp(cmd, "mana")) {
+            app->gravityCommand = GRAVITY_MANA;
+        } else if (!strcmp(cmd, "stalk")) {
+            app->gravityCommand = GRAVITY_STALK;
+        } else if (!strcmp(cmd, "ap-dos")) {
+            app->gravityCommand = GRAVITY_AP_DOS;
+        } else if (!strcmp(cmd, "ap-clone")) {
+            app->gravityCommand = GRAVITY_AP_CLONE;
+        } else if (!strcmp(cmd, "scan")) {
+            app->gravityCommand = GRAVITY_SCAN;
+        } else if (!strcmp(cmd, "hop")) {
+            app->gravityCommand = GRAVITY_HOP;
+        } else if (!strcmp(cmd, "set")) {
+            app->gravityCommand = GRAVITY_SET;
+        } else if (!strcmp(cmd, "get")) {
+            app->gravityCommand = GRAVITY_GET;
+        } else if (!strcmp(cmd, "view")) {
+            app->gravityCommand = GRAVITY_VIEW;
+        } else if (!strcmp(cmd, "select")) {
+            app->gravityCommand = GRAVITY_SELECT;
+        } else if (!strcmp(cmd, "selected")) {
+            app->gravityCommand = GRAVITY_SELECTED;
+        } else if (!strcmp(cmd, "clear")) {
+            app->gravityCommand = GRAVITY_CLEAR;
+        } else if (!strcmp(cmd, "handshake")) {
+            app->gravityCommand = GRAVITY_HANDSHAKE;
+        } else if (!strcmp(cmd, "commands")) {
+            app->gravityCommand = GRAVITY_COMMANDS;
+        } else if (!strcmp(cmd, "info")) {
+            app->gravityCommand = GRAVITY_INFO;
+        } else {
+            app->gravityCommand = GRAVITY_NONE;
+        }
 
-    free(cmd);
+        free(cmd);
 
-    /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
-    int cmdLen = strlen(app->selected_tx_string);
-    bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
-                            (item->needs_keyboard == TOGGLE_ARGS &&
+        /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
+        int cmdLen = strlen(app->selected_tx_string);
+        bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
+                                (item->needs_keyboard == TOGGLE_ARGS &&
                                 (app->selected_tx_string[cmdLen-1] == ' ')));
-    /* Initialise the serial console */
-    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+        /* Initialise the serial console */
+        uart_terminal_uart_tx((uint8_t*)("\n"), 1);
 
-    if(needs_keyboard) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
-    } else {
-        view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+        if(needs_keyboard) {
+            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
+        } else {
+            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+        }
     }
 }
 
