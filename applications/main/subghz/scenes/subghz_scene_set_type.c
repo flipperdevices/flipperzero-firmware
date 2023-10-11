@@ -198,14 +198,17 @@ bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
                 subghz_txrx_gen_secplus_v1_protocol(subghz->txrx, "AM650", 390000000);
             break;
         case SubmenuIndexSecPlus_v2_310_00:
+            key = (key & 0x7FFFF3FC); // 850LM pairing
             generated_protocol = subghz_txrx_gen_secplus_v2_protocol(
                 subghz->txrx, "AM650", 310000000, key, 0x68, 0xE500000);
             break;
         case SubmenuIndexSecPlus_v2_315_00:
+            key = (key & 0x7FFFF3FC); // 850LM pairing
             generated_protocol = subghz_txrx_gen_secplus_v2_protocol(
                 subghz->txrx, "AM650", 315000000, key, 0x68, 0xE500000);
             break;
         case SubmenuIndexSecPlus_v2_390_00:
+            key = (key & 0x7FFFF3FC); // 850LM pairing
             generated_protocol = subghz_txrx_gen_secplus_v2_protocol(
                 subghz->txrx, "AM650", 390000000, key, 0x68, 0xE500000);
             break;
