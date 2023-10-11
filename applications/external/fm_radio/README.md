@@ -25,17 +25,17 @@ TEA5767 Datasheet - (https://www.sparkfun.com/datasheets/Wireless/General/TEA576
 
 
 ## Changelog
-v1.0
--Reformated Code
--Added Station Names
-
-v0.8
--Created TEA5767 Library
--Created FUntioning app
-
-Initial
--Created TEA5767 Library
--Started Making APP
+v1.0<br>
+-Reformated Code<br>
+-Added Station Names<br>
+<br>
+v0.8<br>
+-Created TEA5767 Library<br>
+-Created FUntioning app<br>
+<br>
+Initial<br>
+-Created TEA5767 Library<br>
+-Started Making APP<br>
 
 ## TO-DO
 Add User Settings Menu: <br>

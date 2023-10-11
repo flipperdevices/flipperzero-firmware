@@ -289,10 +289,12 @@ void my_app_view_draw_callback(Canvas* canvas, void* model) {
     }   
 
     // Display the stored values on the 5th loop
-    canvas_draw_str(canvas, 10, 20, station_display);
-    canvas_draw_str(canvas, 10, 30, frequency_display);    
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 10, 23, station_display);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 10, 31, frequency_display);    
     canvas_draw_str(canvas, 10, 40, volume_display);
-    canvas_draw_str(canvas, 10, 50, signal_display);
+    canvas_draw_str(canvas, 10, 49, signal_display);
 }
 
 // Allocate memory for the application
