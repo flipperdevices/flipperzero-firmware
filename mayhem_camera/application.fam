@@ -1,6 +1,6 @@
 App(
     appid="mayhem_camera",
-    name="[MAYHEM] Camera v1.0.0",
+    name="[MAYHEM] Camera",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="camera_app",
     cdefines=["APP_CAMERA"],

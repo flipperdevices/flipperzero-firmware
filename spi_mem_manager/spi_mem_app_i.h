@@ -22,6 +22,8 @@
 #include "views/spi_mem_view_progress.h"
 #include "views/spi_mem_view_detect.h"
 
+#include <assets_icons.h>
+
 #define TAG "SPIMem"
 #define SPI_MEM_FILE_EXTENSION ".bin"
 #define SPI_MEM_FILE_PREFIX "SPIMem"

@@ -2,6 +2,8 @@
 #include <totp_icons.h>
 #include "constants.h"
 
+#include <assets_icons.h>
+
 #define TEXT_BOX_HEIGHT (13)
 #define TEXT_BOX_MARGIN (4)
 

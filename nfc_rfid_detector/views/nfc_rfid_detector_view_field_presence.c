@@ -2,6 +2,8 @@
 #include "../nfc_rfid_detector_app_i.h"
 #include <nfc_rfid_detector_icons.h>
 
+#include <assets_icons.h>
+
 #include <input/input.h>
 #include <gui/elements.h>
 

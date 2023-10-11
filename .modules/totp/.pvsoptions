@@ -1,1 +1,0 @@
---rules-config .pvsconfig -e totp/lib/wolfssl -e ~/.ufbt

@@ -8,6 +8,8 @@
 #include <lfrfid/protocols/lfrfid_protocols.h>
 #include <lfrfid/lfrfid_dict_file.h>
 
+#include <assets_icons.h>
+
 #define TAG "PicopassDevice"
 
 static const char* picopass_file_header = "Flipper Picopass device";

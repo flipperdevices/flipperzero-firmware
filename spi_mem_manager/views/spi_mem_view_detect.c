@@ -2,6 +2,8 @@
 #include "spi_mem_manager_icons.h"
 #include <gui/elements.h>
 
+#include <assets_icons.h>
+
 struct SPIMemDetectView {
     View* view;
     IconAnimation* icon;

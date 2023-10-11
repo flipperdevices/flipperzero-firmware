@@ -31,6 +31,8 @@
 #include <lib/nfc/nfc_device.h>
 #include "nfc_magic_icons.h"
 
+#include <assets_icons.h>
+
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 
 enum NfcMagicCustomEvent {

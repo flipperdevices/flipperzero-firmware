@@ -9,6 +9,8 @@
 #include "../../../services/crypto/crypto_facade.h"
 #include "../../../types/user_pin_codes.h"
 
+#include <assets_icons.h>
+
 #define MAX_CODE_LENGTH CRYPTO_IV_LENGTH
 static const uint8_t PIN_ASTERISK_RADIUS = 3;
 static const uint8_t PIN_ASTERISK_STEP = (PIN_ASTERISK_RADIUS << 1) + 2;

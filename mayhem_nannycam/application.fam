@@ -1,6 +1,6 @@
 App(
     appid="mayhem_nannycam",
-    name="[MAYHEM] Nanny Cam v0.1",
+    name="[MAYHEM] Nanny Cam",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",
     cdefines=["APP_QRCODE"],

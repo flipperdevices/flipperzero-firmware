@@ -44,7 +44,7 @@ void get_timefilename(FuriString* name) {
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
-        EXT_PATH("DCIM/%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
+        APP_DATA_PATH("%.4d%.2d%.2d-%.2d%.2d%.2d.bmp"),
         datetime.year,
         datetime.month,
         datetime.day,

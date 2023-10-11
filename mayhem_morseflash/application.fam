@@ -1,6 +1,6 @@
 App(
     appid="mayhem_morseflash",
-    name="[MAYHEM] Morse Flasher v0.1",
+    name="[MAYHEM] Morse Flash",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_terminal_app",
     cdefines=["APP_UART_TERMINAL"],

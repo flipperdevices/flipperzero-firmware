@@ -15,6 +15,8 @@
 #include "../../../workers/bt_type_code/bt_type_code.h"
 #endif
 
+#include <assets_icons.h>
+
 #ifdef TOTP_BADBT_AUTOMATION_ENABLED
 #define AUTOMATION_LIST_MAX_INDEX (3)
 #else

@@ -1,6 +1,6 @@
 App(
     appid="dap_link",
-    name="DAP Link",
+    name="[SWD-JTAG] DAP Link",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dap_link_app",
     requires=[
