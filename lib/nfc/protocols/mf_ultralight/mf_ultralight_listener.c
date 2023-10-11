@@ -85,12 +85,16 @@ static void mf_ultralight_listener_perform_read(
     mf_ultralight_single_counter_try_increase(instance);
 }
 
-static void mf_ultralight_listener_perform_write(
+static MfUltralightCommand mf_ultralight_listener_perform_write(
     MfUltralightListener* instance,
     const uint8_t* const rx_data,
     uint16_t start_page,
     bool do_i2c_check) {
-    if(start_page == 2 && instance->sector == 0)
+    MfUltralightCommand command = MfUltralightCommandProcessedACK;
+
+    if(start_page < 2 && instance->sector == 0)
+        command = MfUltralightCommandNotProcessedNAK;
+    else if(start_page == 2 && instance->sector == 0)
         mf_ultralight_static_lock_bytes_write(instance->static_lock, *((uint16_t*)&rx_data[2]));
     else if(start_page == 3 && instance->sector == 0)
         mf_ultralight_capability_container_write(&instance->data->page[start_page], rx_data);
@@ -102,6 +106,8 @@ static void mf_ultralight_listener_perform_write(
 
         memcpy(instance->data->page[page].data, rx_data, sizeof(MfUltralightPage));
     }
+
+    return command;
 }
 
 static MfUltralightCommand
@@ -212,9 +218,8 @@ static MfUltralightCommand
         if(mf_ultralight_dynamic_lock_check_page(instance, start_page)) break;
 
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
-        mf_ultralight_listener_perform_write(instance, &rx_data[2], start_page, do_i2c_check);
-
-        command = MfUltralightCommandProcessedACK;
+        command =
+            mf_ultralight_listener_perform_write(instance, &rx_data[2], start_page, do_i2c_check);
     } while(false);
 
     return command;
@@ -463,9 +468,7 @@ static MfUltralightCommand
         const uint8_t* rx_data = bit_buffer_get_data(buffer);
         uint8_t start_page = instance->composite_cmd.data;
 
-        mf_ultralight_listener_perform_write(instance, rx_data, start_page, false);
-
-        command = MfUltralightCommandProcessedACK;
+        command = mf_ultralight_listener_perform_write(instance, rx_data, start_page, false);
     } while(false);
 
     return command;
