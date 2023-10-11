@@ -39,8 +39,7 @@
 #define REG_3 0x02 // Register 3 address
 #define REG_3_SUD 0x80 // Search Up/Down: 1 to search up, 0 to search down
 #define REG_3_SSL 0x60 // Search Stop Level: Sets the level at which the search stops (2 bits)
-#define REG_3_HLSI \
-    0x10 // High/Low Side Injection: 1 for high side LO injection, 0 for low side LO injection
+#define REG_3_HLSI 0x10 // High/Low Side Injection: 1 for high side LO injection, 0 for low side LO injection
 #define REG_3_MS 0x08 // Mono to Stereo: 1 to force mono, 0 for stereo
 #define REG_3_MR 0x04 // Mute Right: 1 to mute the right audio channel and force mono, 0 to unmute
 #define REG_3_ML 0x02 // Mute Left: 1 to mute the left audio channel and force mono, 0 to unmute
@@ -53,18 +52,13 @@
 #define REG_4_XTAL 0x10 // Clock frequency: Sets the clock frequency (see Table 16)
 #define REG_4_SMUTE 0x08 // Soft Mute: 1 to activate soft mute, 0 to deactivate
 #define REG_4_HCC 0x04 // High Cut Control: 1 to activate high cut control, 0 to deactivate
-#define REG_4_SNC \
-    0x02 // Stereo Noise Cancelling: 1 to activate stereo noise cancelling, 0 to deactivate
-#define REG_4_SI \
-    0x01 // Search Indicator: 1 for ready flag output on pin SWPORT1, 0 for software programmable port 1
+#define REG_4_SNC  0x02 // Stereo Noise Cancelling: 1 to activate stereo noise cancelling, 0 to deactivate
+#define REG_4_SI 0x01 // Search Indicator: 1 for ready flag output on pin SWPORT1, 0 for software programmable port 1
 
 #define REG_5 0x04 // Register 5 address
-#define REG_5_PLLREF \
-    0x80 // PLL Ref: 1 to enable the 6.5 MHz reference frequency for the PLL, 0 to disable
+#define REG_5_PLLREF 0x80 // PLL Ref: 1 to enable the 6.5 MHz reference frequency for the PLL, 0 to disable
 #define REG_5_DTC 0x40 // De-emphasis Time Constant: 1 for 75 µs, 0 for 50 µs
 
-// ----- local variables
-/// Band datatype.
 /// The BANDs TEA5767 can tune to.
 typedef enum {
     RADIO_BAND_FM = 0x01, ///< FM band 87.5 - 108 MHz (USA, Europe) selected.

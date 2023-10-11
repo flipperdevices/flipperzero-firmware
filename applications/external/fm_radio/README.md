@@ -1,8 +1,8 @@
 # FM Radio - Flipper Zero
 Application for flipperzero device to control radio boards.
 
-<img src="https://github.com/coolshrimp/flipperzero-firmware-wPlugins/blob/420/applications/external/fm_radio/images/Screenshot1.png" width="250">
-<img src="https://github.com/coolshrimp/flipperzero-firmware-wPlugins/blob/420/applications/external/fm_radio/images/Screenshot2.png" width="250">
+<img src="https://github.com/coolshrimp/flipperzero-firmware-wPlugins/blob/420/applications/external/fm_radio/img/Screenshot1.png" width="250">
+<img src="https://github.com/coolshrimp/flipperzero-firmware-wPlugins/blob/420/applications/external/fm_radio/img/Screenshot2.png" width="250">
 
 ## Supported boards
 * [TEA5767](https://www.sparkfun.com/datasheets/Wireless/General/TEA5767.pdf)
@@ -24,15 +24,24 @@ OK = Toggle Mute
 TEA5767 Datasheet - (https://www.sparkfun.com/datasheets/Wireless/General/TEA5767.pdf)
 
 
+## Changelog
+v1.0
+-Reformated Code
+-Added Station Names
+
+v0.8
+-Created TEA5767 Library
+-Created FUntioning app
+
+Initial
+-Created TEA5767 Library
+-Started Making APP
+
 ## TO-DO
 Add User Settings Menu: <br>
 -Standby/Mute On Exit: True/False<br>
 -RSSI Seek Strenght: 1-15<br>
 -Sound: Mono-L/Mono-R/Stereo<br>
--User Editable Station List w/Names (Display on "Listen Now Page")<br>
+-User Editable Station List<br>
 -Add the Preset Up/Down Icon.<br>
 -Redirect TEA5767 Audio To a GPIO and Playback on Flipper Internal Speaker
-
-
-Created By: Coolshrimp
-https://CoolshrimpModz.com
