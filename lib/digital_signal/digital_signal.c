@@ -1,3 +1,4 @@
+#include "digital_signal.h"
 #include "digital_signal_i.h"
 
 #include <furi.h>
