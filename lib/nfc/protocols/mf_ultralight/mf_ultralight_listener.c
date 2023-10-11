@@ -490,6 +490,12 @@ static MfUltralightCommand
             break;
         }
 
+        if(!mf_ultralight_listener_check_access(
+               instance, start_page, MfUltralightListenerAccessTypeWrite)) {
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
+
         if(mf_ultralight_static_lock_check_page(instance->static_lock, start_page) ||
            mf_ultralight_dynamic_lock_check_page(instance, start_page)) {
             command = MfUltralightCommandNotProcessedNAK;
