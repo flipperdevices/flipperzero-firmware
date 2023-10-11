@@ -99,7 +99,7 @@ static void nfc_scene_read_on_enter_mf_ultralight(NfcApp* instance) {
     nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_mf_ultralight, instance);
 }
 
-static void nfc_scene_read_menu_on_enter_mf_ultralight(NfcApp* instance) {
+static void nfc_scene_read_and_saved_menu_on_enter_mf_ultralight(NfcApp* instance) {
     Submenu* submenu = instance->submenu;
 
     const MfUltralightData* data =
@@ -120,29 +120,24 @@ static void nfc_scene_read_success_on_enter_mf_ultralight(NfcApp* instance) {
     const MfUltralightData* data = nfc_device_get_data(device, NfcProtocolMfUltralight);
 
     FuriString* temp_str = furi_string_alloc();
-    furi_string_cat_printf(
-        temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
-    nfc_render_mf_ultralight_info(data, NfcProtocolFormatTypeShort, temp_str);
+
+    bool unlocked =
+        scene_manager_has_previous_scene(instance->scene_manager, NfcSceneMfUltralightUnlockWarn);
+    if(unlocked) {
+        nfc_render_mf_ultralight_pwd_pack(data, temp_str);
+    } else {
+        furi_string_cat_printf(
+            temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+
+        nfc_render_mf_ultralight_info(data, NfcProtocolFormatTypeShort, temp_str);
+    }
+
+    mf_ultralight_auth_reset(instance->mf_ul_auth);
 
     widget_add_text_scroll_element(
         instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
 
     furi_string_free(temp_str);
-}
-
-static void nfc_scene_saved_menu_on_enter_mf_ultralight(NfcApp* instance) {
-    Submenu* submenu = instance->submenu;
-    const MfUltralightData* data =
-        nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-
-    if(!mf_ultralight_is_all_data_read(data)) {
-        submenu_add_item(
-            submenu,
-            "Unlock",
-            SubmenuIndexUnlock,
-            nfc_protocol_support_common_submenu_callback,
-            instance);
-    }
 }
 
 static void nfc_scene_emulate_on_enter_mf_ultralight(NfcApp* instance) {
@@ -161,20 +156,13 @@ static bool nfc_scene_info_on_event_mf_ultralight(NfcApp* instance, uint32_t eve
     return false;
 }
 
-static bool nfc_unlock_item_pressed_process(NfcApp* instance, uint32_t event) {
+static bool
+    nfc_scene_read_and_saved_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexUnlock) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
         return true;
     }
     return false;
-}
-
-static bool nfc_scene_read_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
-    return nfc_unlock_item_pressed_process(instance, event);
-}
-
-static bool nfc_scene_saved_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
-    return nfc_unlock_item_pressed_process(instance, event);
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
@@ -197,8 +185,8 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
         },
     .scene_read_menu =
         {
-            .on_enter = nfc_scene_read_menu_on_enter_mf_ultralight,
-            .on_event = nfc_scene_read_menu_on_event_mf_ultralight,
+            .on_enter = nfc_scene_read_and_saved_menu_on_enter_mf_ultralight,
+            .on_event = nfc_scene_read_and_saved_menu_on_event_mf_ultralight,
         },
     .scene_read_success =
         {
@@ -207,8 +195,8 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
         },
     .scene_saved_menu =
         {
-            .on_enter = nfc_scene_saved_menu_on_enter_mf_ultralight,
-            .on_event = nfc_scene_saved_menu_on_event_mf_ultralight,
+            .on_enter = nfc_scene_read_and_saved_menu_on_enter_mf_ultralight,
+            .on_event = nfc_scene_read_and_saved_menu_on_event_mf_ultralight,
         },
     .scene_save_name =
         {

@@ -19,6 +19,7 @@
 #define FURI_HAL_NFC_ISO15693_RESP_PATTERN_1 (0x02U)
 
 // Derived experimentally
+#define FURI_HAL_NFC_ISO15693_POLLER_FWT_COMP_FC (-1300)
 #define FURI_HAL_NFC_ISO15693_LISTENER_FDT_COMP_FC (2735)
 
 #define BITS_IN_BYTE (8U)
@@ -174,13 +175,13 @@ static void iso15693_3_poller_encode_frame(
     *frame_buf_bits = byte_pos * BITS_IN_BYTE;
 }
 
-static bool iso15693_3_poller_decode_frame(
+static FuriHalNfcError iso15693_3_poller_decode_frame(
     const uint8_t* buf,
     size_t buf_bits,
     uint8_t* buf_decoded,
     size_t buf_decoded_size,
     size_t* buf_decoded_bits) {
-    bool decoded = false;
+    FuriHalNfcError ret = FuriHalNfcErrorDataFormat;
     size_t bit_pos = 0;
     memset(buf_decoded, 0, buf_decoded_size);
 
@@ -190,6 +191,11 @@ static bool iso15693_3_poller_decode_frame(
         if((buf[0] & FURI_HAL_NFC_ISO15693_RESP_SOF_MASK) !=
            FURI_HAL_NFC_ISO15693_RESP_SOF_PATTERN)
             break;
+
+        if(buf_bits == BITS_IN_BYTE) {
+            ret = FuriHalNfcErrorIncompleteFrame;
+            break;
+        }
 
         // 2 response bits = 1 data bit
         for(uint32_t i = FURI_HAL_NFC_ISO15693_RESP_SOF_SIZE;
@@ -202,7 +208,7 @@ static bool iso15693_3_poller_decode_frame(
 
             // Check EOF
             if(resp_byte == FURI_HAL_NFC_ISO15693_RESP_EOF_PATTERN) {
-                decoded = true;
+                ret = FuriHalNfcErrorNone;
                 break;
             }
 
@@ -223,11 +229,11 @@ static bool iso15693_3_poller_decode_frame(
 
     } while(false);
 
-    if(decoded) {
+    if(ret == FuriHalNfcErrorNone) {
         *buf_decoded_bits = bit_pos;
     }
 
-    return decoded;
+    return ret;
 }
 
 static FuriHalNfcError furi_hal_nfc_iso15693_poller_tx(
@@ -257,15 +263,14 @@ static FuriHalNfcError furi_hal_nfc_iso15693_poller_rx(
             handle, instance->fifo_buf, sizeof(instance->fifo_buf), &instance->fifo_buf_bits);
         if(error != FuriHalNfcErrorNone) break;
 
-        if(!iso15693_3_poller_decode_frame(
-               instance->fifo_buf,
-               instance->fifo_buf_bits,
-               instance->frame_buf,
-               sizeof(instance->frame_buf),
-               &instance->frame_buf_bits)) {
-            error = FuriHalNfcErrorDataFormat;
-            break;
-        }
+        error = iso15693_3_poller_decode_frame(
+            instance->fifo_buf,
+            instance->fifo_buf_bits,
+            instance->frame_buf,
+            sizeof(instance->frame_buf),
+            &instance->frame_buf_bits);
+        if(error != FuriHalNfcErrorNone) break;
+
         if(rx_data_size < instance->frame_buf_bits / BITS_IN_BYTE) {
             error = FuriHalNfcErrorBufferOverflow;
             break;
@@ -425,7 +430,7 @@ const FuriHalNfcTechBase furi_hal_nfc_iso15693 = {
             .compensation =
                 {
                     .fdt = FURI_HAL_NFC_POLLER_FDT_COMP_FC,
-                    .fwt = FURI_HAL_NFC_POLLER_FWT_COMP_FC,
+                    .fwt = FURI_HAL_NFC_ISO15693_POLLER_FWT_COMP_FC,
                 },
             .init = furi_hal_nfc_iso15693_poller_init,
             .deinit = furi_hal_nfc_iso15693_poller_deinit,

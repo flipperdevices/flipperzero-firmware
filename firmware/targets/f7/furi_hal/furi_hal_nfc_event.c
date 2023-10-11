@@ -15,6 +15,14 @@ FuriHalNfcError furi_hal_nfc_event_start() {
     return FuriHalNfcErrorNone;
 }
 
+FuriHalNfcError furi_hal_nfc_event_stop() {
+    furi_assert(furi_hal_nfc_event);
+
+    furi_hal_nfc_event->thread = NULL;
+
+    return FuriHalNfcErrorNone;
+}
+
 void furi_hal_nfc_event_set(FuriHalNfcEventInternalType event) {
     furi_assert(furi_hal_nfc_event);
     furi_assert(furi_hal_nfc_event->thread);

@@ -236,11 +236,25 @@ static NfcCommand mf_ultralight_poller_handler_read_version(MfUltralightPoller* 
         instance->data->type = mf_ultralight_get_type_by_version(&instance->data->version);
         instance->state = MfUltralightPollerStateGetFeatureSet;
     } else {
-        FURI_LOG_D(TAG, "Didn't response. Check NTAG 203");
+        FURI_LOG_D(TAG, "Didn't response. Check Ultralight C");
         iso14443_3a_poller_halt(instance->iso14443_3a_poller);
-        instance->state = MfUltralightPollerStateDetectNtag203;
+        instance->state = MfUltralightPollerStateDetectMfulC;
     }
 
+    return NfcCommandContinue;
+}
+
+static NfcCommand mf_ultralight_poller_handler_check_ultralight_c(MfUltralightPoller* instance) {
+    instance->error = mf_ultralight_poller_async_authenticate(instance);
+    if(instance->error == MfUltralightErrorNone) {
+        FURI_LOG_D(TAG, "Ultralight C detected");
+        instance->data->type = MfUltralightTypeMfulC;
+        instance->state = MfUltralightPollerStateGetFeatureSet;
+    } else {
+        FURI_LOG_D(TAG, "Didn't response. Check NTAG 203");
+        instance->state = MfUltralightPollerStateDetectNtag203;
+    }
+    iso14443_3a_poller_halt(instance->iso14443_3a_poller);
     return NfcCommandContinue;
 }
 
@@ -373,7 +387,7 @@ static NfcCommand mf_ultralight_poller_handler_read_tearing_flags(MfUltralightPo
 static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance) {
     NfcCommand command = NfcCommandContinue;
     if(mf_ultralight_support_feature(
-           instance->feature_set, MfUltralightFeatureSupportAuthentication)) {
+           instance->feature_set, MfUltralightFeatureSupportPasswordAuth)) {
         instance->mfu_event.type = MfUltralightPollerEventTypeAuthRequest;
 
         command = instance->callback(instance->general_event, instance->context);
@@ -382,7 +396,8 @@ static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance
             uint32_t pass = nfc_util_bytes2num(
                 instance->auth_context.password.data, sizeof(MfUltralightAuthPassword));
             FURI_LOG_D(TAG, "Trying to authenticate with password %08lX", pass);
-            instance->error = mf_ultralight_poller_async_auth(instance, &instance->auth_context);
+            instance->error =
+                mf_ultralight_poller_async_auth_pwd(instance, &instance->auth_context);
             if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Auth success");
                 instance->auth_context.auth_success = true;
@@ -449,7 +464,7 @@ static NfcCommand mf_ultralight_poller_handler_read_pages(MfUltralightPoller* in
 static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoller* instance) {
     do {
         if(!mf_ultralight_support_feature(
-               instance->feature_set, MfUltralightFeatureSupportAuthentication))
+               instance->feature_set, MfUltralightFeatureSupportPasswordAuth))
             break;
 
         MfUltralightConfigPages* config = NULL;
@@ -463,7 +478,8 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
                 MF_ULTRALIGHT_DEFAULT_PASSWORD,
                 sizeof(MfUltralightAuthPassword),
                 instance->auth_context.password.data);
-            instance->error = mf_ultralight_poller_async_auth(instance, &instance->auth_context);
+            instance->error =
+                mf_ultralight_poller_async_auth_pwd(instance, &instance->auth_context);
             if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Default password detected");
                 nfc_util_num2bytes(
@@ -508,6 +524,7 @@ static const MfUltralightPollerReadHandler
     mf_ultralight_poller_read_handler[MfUltralightPollerStateNum] = {
         [MfUltralightPollerStateIdle] = mf_ultralight_poller_handler_idle,
         [MfUltralightPollerStateReadVersion] = mf_ultralight_poller_handler_read_version,
+        [MfUltralightPollerStateDetectMfulC] = mf_ultralight_poller_handler_check_ultralight_c,
         [MfUltralightPollerStateDetectNtag203] = mf_ultralight_poller_handler_check_ntag_203,
         [MfUltralightPollerStateGetFeatureSet] = mf_ultralight_poller_handler_get_feature_set,
         [MfUltralightPollerStateReadSignature] = mf_ultralight_poller_handler_read_signature,

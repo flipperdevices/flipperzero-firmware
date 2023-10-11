@@ -36,6 +36,7 @@ typedef enum {
     FuriHalNfcErrorIsrTimeout,
     FuriHalNfcErrorCommunicationTimeout,
     FuriHalNfcErrorBufferOverflow,
+    FuriHalNfcErrorIncompleteFrame,
     FuriHalNfcErrorDataFormat,
 } FuriHalNfcError;
 
@@ -219,6 +220,12 @@ FuriHalNfcError furi_hal_nfc_trx_reset();
  * @return FuriHalNfcError
  */
 FuriHalNfcError furi_hal_nfc_event_start();
+
+/** Stop Nfc HAL events
+ *
+ * @return FuriHalNfcError
+ */
+FuriHalNfcError furi_hal_nfc_event_stop();
 
 /** Emit Abort event
  *
