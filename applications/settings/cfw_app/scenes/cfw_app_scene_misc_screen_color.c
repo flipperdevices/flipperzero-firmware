@@ -16,8 +16,9 @@ void cfw_app_scene_misc_screen_color_on_enter(void* context) {
 
     byte_input_set_header_text(byte_input, "Set LCD Color (#RRGGBB)");
 
-    app->lcd_color = rgb_backlight_get_color(
-        scene_manager_get_scene_state(app->scene_manager, CfwAppSceneMiscScreenColor));
+    rgb_backlight_get_color(
+        scene_manager_get_scene_state(app->scene_manager, CfwAppSceneMiscScreenColor),
+        &app->lcd_color);
 
     byte_input_set_result_callback(
         byte_input,
@@ -42,9 +43,9 @@ bool cfw_app_scene_misc_screen_color_on_event(void* context, SceneManagerEvent e
             switch(cfw_settings->lcd_style) {
             case 0:
                 notification_message(app->notification, &sequence_display_backlight_off);
-                rgb_backlight_set_color(0, app->lcd_color);
-                rgb_backlight_set_color(1, app->lcd_color);
-                rgb_backlight_set_color(2, app->lcd_color);
+                rgb_backlight_set_color(0, &app->lcd_color);
+                rgb_backlight_set_color(1, &app->lcd_color);
+                rgb_backlight_set_color(2, &app->lcd_color);
                 notification_message(app->notification, &sequence_display_backlight_on);
                 app->save_backlight = true;
                 break;
@@ -52,7 +53,7 @@ bool cfw_app_scene_misc_screen_color_on_event(void* context, SceneManagerEvent e
                 notification_message(app->notification, &sequence_display_backlight_off);
                 rgb_backlight_set_color(
                     scene_manager_get_scene_state(app->scene_manager, CfwAppSceneMiscScreenColor),
-                    app->lcd_color);
+                    &app->lcd_color);
                 notification_message(app->notification, &sequence_display_backlight_on);
                 app->save_backlight = true;
                 break;

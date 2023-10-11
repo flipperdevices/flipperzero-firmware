@@ -1,8 +1,8 @@
 #include "../dap_gui_i.h"
 
-#define DAP_VERSION_APP "0.1.0"
+#define DAP_VERSION_APP "1.1.0"
 #define DAP_DEVELOPED "Dr_Zlo"
-#define DAP_GITHUB "https://github.com/flipperdevices/flipperzero-firmware"
+#define DAP_GITHUB "https://github.com/flipperdevices/flipperzero-good-faps"
 
 void dap_scene_about_on_enter(void* context) {
     DapGuiApp* app = context;

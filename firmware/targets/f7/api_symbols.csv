@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,39.2,,
+Version,+,39.3,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1793,7 +1793,7 @@ Function,+,hex_char_to_hex_nibble,_Bool,"char, uint8_t*"
 Function,+,hex_char_to_uint8,_Bool,"char, char, uint8_t*"
 Function,+,hex_chars_to_uint64,_Bool,"const char*, uint64_t*"
 Function,+,hex_chars_to_uint8,_Bool,"const char*, uint8_t*"
-Function,+,hsv2rgb,RgbColor,HsvColor
+Function,+,hsv2rgb,void,"const HsvColor*, RgbColor*"
 Function,+,hsvcmp,int,"const HsvColor*, const HsvColor*"
 Function,-,hypot,double,"double, double"
 Function,-,hypotf,float,"float, float"
@@ -2653,16 +2653,16 @@ Function,-,rfal_platform_spi_acquire,void,
 Function,-,rfal_platform_spi_release,void,
 Function,-,rfal_set_callback_context,void,void*
 Function,-,rfal_set_state_changed_callback,void,RfalStateChangedCallback
-Function,+,rgb2hsv,HsvColor,RgbColor
-Function,+,rgb_backlight_get_color,RgbColor,uint8_t
+Function,+,rgb2hsv,void,"const RgbColor*, HsvColor*"
+Function,+,rgb_backlight_get_color,void,"uint8_t, RgbColor*"
 Function,+,rgb_backlight_get_rainbow_interval,uint32_t,
 Function,+,rgb_backlight_get_rainbow_mode,RGBBacklightRainbowMode,
 Function,+,rgb_backlight_get_rainbow_saturation,uint8_t,
 Function,+,rgb_backlight_get_rainbow_speed,uint8_t,
-Function,-,rgb_backlight_load_settings,void,
+Function,+,rgb_backlight_load_settings,void,_Bool
 Function,+,rgb_backlight_reconfigure,void,_Bool
 Function,+,rgb_backlight_save_settings,void,
-Function,+,rgb_backlight_set_color,void,"uint8_t, RgbColor"
+Function,+,rgb_backlight_set_color,void,"uint8_t, const RgbColor*"
 Function,+,rgb_backlight_set_rainbow_interval,void,uint32_t
 Function,+,rgb_backlight_set_rainbow_mode,void,RGBBacklightRainbowMode
 Function,+,rgb_backlight_set_rainbow_saturation,void,uint8_t

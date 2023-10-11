@@ -6,7 +6,7 @@
 #include <toolbox/path.h>
 
 #define TAG "TarArch"
-#define MAX_NAME_LEN 255
+#define MAX_NAME_LEN 254
 #define FILE_BLOCK_SIZE 512
 
 #define FILE_OPEN_NTRIES 10
