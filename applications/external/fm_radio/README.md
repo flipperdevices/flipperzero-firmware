@@ -44,4 +44,6 @@ Add User Settings Menu: <br>
 -Sound: Mono-L/Mono-R/Stereo<br>
 -User Editable Station List<br>
 -Add the Preset Up/Down Icon.<br>
--Redirect TEA5767 Audio To a GPIO and Playback on Flipper Internal Speaker
+-Redirect TEA5767 Audio To a GPIO and Playback on Flipper Internal Speaker<br>
+<br><br>
+## Created By: Coolshrimp - https://CoolshrimpModz.com
