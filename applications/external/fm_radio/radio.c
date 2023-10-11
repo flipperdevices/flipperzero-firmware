@@ -97,7 +97,7 @@ void elements_button_top_left(Canvas* canvas, const char* str);
 void elements_button_top_right(Canvas* canvas, const char* str);
 //lib can only do bottom left/right
 void elements_button_top_left(Canvas* canvas, const char* str) {
-    const uint8_t button_height = 12;
+    const uint8_t button_height = 10;
     const uint8_t vertical_offset = 3;
     const uint8_t horizontal_offset = 3;
     // You may need to declare or pass 'button_width' here.
@@ -115,7 +115,7 @@ void elements_button_top_left(Canvas* canvas, const char* str) {
     canvas_invert_color(canvas);
 }
 void elements_button_top_right(Canvas* canvas, const char* str) {
-    const uint8_t button_height = 12;
+    const uint8_t button_height = 10;
     const uint8_t vertical_offset = 3;
     const uint8_t horizontal_offset = 3;
     // You may need to declare or pass 'button_width' here.
@@ -330,10 +330,12 @@ void my_app_view_draw_callback(Canvas* canvas, void* model) {
     }
 
     // Display the stored values on the 5th loop
+    canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 10, 20, station_display);
+    canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 10, 30, frequency_display);
     canvas_draw_str(canvas, 10, 40, volume_display);
-    canvas_draw_str(canvas, 10, 50, signal_display);
+    canvas_draw_str(canvas, 10, 49, signal_display);
 }
 
 // Allocate memory for the application
