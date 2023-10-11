@@ -15,7 +15,7 @@ prev=$(git branch --show-current)
 temp=$(echo ${repo%/} | rev | cut -d/ -f1,2 | rev | tr / -)-${branch}
 fetch=_fetch-${temp}
 split=_split-${temp}-$(echo ${subdir} | tr / -)
-git fetch ${repo} ${branch}:${fetch}
+git fetch --no-tags ${repo} ${branch}:${fetch}
 git checkout ${fetch}
 git subtree split -P ${subdir} -b ${split}
 git checkout ${prev}
