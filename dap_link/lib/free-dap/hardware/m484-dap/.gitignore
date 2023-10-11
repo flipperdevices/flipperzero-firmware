@@ -1,0 +1,5 @@
+output/*
+!output/*.pdf
+!output/*.zip
+fp-info-cache
+
