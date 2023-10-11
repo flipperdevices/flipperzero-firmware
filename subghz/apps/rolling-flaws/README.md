@@ -106,6 +106,7 @@ void subghz_protocol_decoder_keeloq_get_string(void* context, FuriString* output
     // Continue with the original code.
 ```
 
+### HCS300
 Two common hardware implementations of KeeLoq are the HCS300, which uses 10 bits in discriminator & the HCS200, which uses 8 bits.  The Flipper Zero software implementation decodes using 8 bits.  If you make a custom change to the ``.\lib\subghz\protocols\keeloq.c`` file you can return the encoded data, which will be used by the Rolling Flaws application.  For "SN00/cfw*" set to "No" to work properly, you will need these changes.  For "SN bits/cfw*" set to "10 (dec)", you will also need this changes.  These changes allow the application to see the encrypted data, which is needed for the "SN00/cfw*" and "SN bits/cfw*" features to work properly.
 
 Step 1. Change the two occurances of ``decrypt & 0x0000FFFF`` to read ``decrypt``.
@@ -150,19 +151,45 @@ Method 2: (command-line + allows for "SN00/cfw*" and "SN bits/cfw*" features + a
 - Clone the firmware repository (make sure you use ``git clone --recursive``).
 - Copy the ``rolling_flaws`` folder into your firmware's ``applications_user`` folder.
 - Build the firmware using ``fbt updater_package``.
+- Do the steps in the previous [HCS300](#hcs300) section and then reflash the device.
+  - ``fbt update_package``
+- In qFlipper choose "Install from file" and choose the .tgz file from the ``dist\f7-C`` folder.
 
 Method 3: (VS Code + allows for "SN00/cfw*" and "SN bits/cfw*" features + allows for replay feature)
-- Install VS Code
-- Clone the firmware repository (make sure you use ``git clone --recursive``).
+- Install [VS Code](https://code.visualstudio.com/Download)
+- Clone the firmware repository (make sure you use **Git: Clone (Recursive)**).
+  - The URL for firmware is at https://github.com/flipperdevices/flipperzero-firmware
 - Make sure you have run ``fbt vscode_dist`` at least once, so VSCode works properly.
+  - You can right click on "FBT" and then choose `Open in Integrated Terminal`.
+  - Then type:  `./fbt vscode_dist`
+  - It should populate your `.vscode` folder.
 - Copy the ``rolling_flaws`` folder into your firmware's ``applications_user`` folder.
 - Ctrl+Shift+B
+- Select "[Debug] Flash (USB, with resources)"
+- Ctrl+Shift+B
 - Select "[Debug] Launch App on Flipper"
+- Do the steps in the previous [HCS300](#hcs300) section (so the "Enc:" data is present) and then reflash the device
+  - Select "[Debug] Flash (USB, with resources)"
+  - Select "[Debug] Launch App on Flipper"
 
-Method 4: (command-line)
-- Install [ufbt](https://github.com/flipperdevices/flipperzero-ufbt)
-- Switch into the ``rolling_flaws`` folder.
-- Install and launch the app using ``ufbt launch``.
+Here is a command-line method.  Before the last two commands, you should follow the steps in [HCS300](#hcs300) section (so the "Enc:" data is present).  Be sure your Flipper Zero is connected and that qFlipper is not running:
+```c
+mkdir \repos
+cd \repos
+git clone https://github.com/jamisonderek/flipper-zero-tutorials.git
+git clone --recursive https://github.com/flipperdevices/flipperzero-firmware
+cd flipperzero-firmware
+fbt vscode_dist
+cd applications_user
+md rolling-flaws
+cd rolling-flaws
+xcopy ..\..\..\flipper-zero-tutorials\subghz\apps\rolling-flaws\*.* . /e
+cd ..
+cd ..
+fbt FORCE=1 flash_usb_full 
+fbt launch APPSRC=applications_user\rolling-flaws 
+```
+
 
 ## Menu Options
 ### Config
