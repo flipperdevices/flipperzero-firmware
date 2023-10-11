@@ -1,0 +1,36 @@
+name: Create new release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 0 * * *
+
+jobs:
+  nightly-build:
+    runs-on: ubuntu-latest
+    env:
+      FBT_NO_SYNC: "true"
+      TARGETS: f7
+      DEFAULT_TARGET: f7
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install uFBT
+        run: python3 -m pip install --upgrade ufbt
+
+      - name: Build
+        run: ./build.ps1
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: |
+            build/*.zip
+            build/checksums.sha256
