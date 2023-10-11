@@ -26,6 +26,8 @@
 #include <stdio.h>    // for snprintf
 #include <math.h>     // for fabsf
 #include "TEA5767/TEA5767.h"
+#include <gui/icon_i.h>
+#include "fm_radio_icons.h"
 
 // Define macros for easier management
 #define BACKLIGHT_ALWAYS_ON
@@ -84,32 +86,40 @@ void elements_button_top_left(Canvas* canvas, const char* str);
 void elements_button_top_right(Canvas* canvas, const char* str);
 //lib can only do bottom left/right
 void elements_button_top_left(Canvas* canvas, const char* str) {
-    const uint8_t button_height = 10;
-    const uint8_t vertical_offset = 3;
-    const uint8_t horizontal_offset = 3;
-    // You may need to declare or pass 'button_width' here.
+    const uint8_t button_height = 10; // Define the height of the button
+    const uint8_t vertical_offset = 2; // Define the vertical offset of the text
+    const uint8_t horizontal_offset = 2; // Define the horizontal offset of the text
     const uint8_t string_width = canvas_string_width(canvas, str);
-    // 'button_width' should be declared or passed here.
-    const uint8_t button_width = string_width + horizontal_offset * 2 + 3;
+    const Icon* icon = &I_ButtonUp;
+    const uint8_t icon_h_offset = 2;
+    const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
+    const uint8_t icon_v_offset = icon->height + vertical_offset;
+    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
+
     const uint8_t x = 0;
     const uint8_t y = 0 + button_height;
-    canvas_draw_box(canvas, x, y - button_height, button_width, button_height);
-    canvas_draw_line(canvas, x + button_width + 0, y - button_height, x + button_width + 0, y - 1);
-    canvas_draw_line(canvas, x + button_width + 1, y - button_height, x + button_width + 1, y - 2);
-    canvas_draw_line(canvas, x + button_width + 2, y - button_height, x + button_width + 2, y - 3);
-    canvas_invert_color(canvas);
-    canvas_draw_str(canvas, x + horizontal_offset + 3, y - vertical_offset, str);
-    canvas_invert_color(canvas);
+
+    canvas_draw_box(canvas, x, y - button_height, button_width, button_height); // Draw the button
+    canvas_draw_line(canvas, x + button_width + 0, y - button_height, x + button_width + 0, y - 1); // Draw the button border
+    canvas_draw_line(canvas, x + button_width + 1, y - button_height, x + button_width + 1, y - 2); // Draw the button border
+    canvas_draw_line(canvas, x + button_width + 2, y - button_height, x + button_width + 2, y - 3); // Draw the button border
+
+    canvas_invert_color(canvas); // Invert the color of the text and icon
+    canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, &I_ButtonUp); // Draw the icon
+    canvas_draw_str(canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str); // Draw the text
+    canvas_invert_color(canvas); // Invert the color of the text and icon
 }
+
 void elements_button_top_right(Canvas* canvas, const char* str) {
     const uint8_t button_height = 10;
-    const uint8_t vertical_offset = 3;
-    const uint8_t horizontal_offset = 3;
-    // You may need to declare or pass 'button_width' here.
+    const uint8_t vertical_offset = 2;
+    const uint8_t horizontal_offset = 2;
     const uint8_t string_width = canvas_string_width(canvas, str);
-
-    // 'button_width' should be declared or passed here.
-    const uint8_t button_width = string_width + horizontal_offset * 2 + 3;
+    const Icon* icon = &I_ButtonDown;
+    const uint8_t icon_h_offset = 2;
+    const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
+    const uint8_t icon_v_offset = icon->height + vertical_offset;
+    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
     const uint8_t x = canvas_width(canvas);
     const uint8_t y = 0 + button_height;
@@ -121,6 +131,8 @@ void elements_button_top_right(Canvas* canvas, const char* str) {
 
     canvas_invert_color(canvas);
     canvas_draw_str(canvas, x - button_width + horizontal_offset, y - vertical_offset, str);
+    canvas_draw_icon(
+        canvas, x - horizontal_offset - icon->width, y - icon_v_offset, &I_ButtonDown);
     canvas_invert_color(canvas);
 }
 
@@ -263,10 +275,12 @@ void my_app_view_draw_callback(Canvas* canvas, void* model) {
     
     // Draw strings on the canvas
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 40, 10, "FM Radio");
+    canvas_draw_str(canvas, 33, 10, "FM Radio");
+    canvas_draw_icon(canvas,83, 0, &I_RadioSmall);
+
     // Draw button prompts
     canvas_set_font(canvas, FontSecondary);
-    elements_button_top_left(canvas, " Pre"); elements_button_top_right(canvas, "Pre ");
+    elements_button_top_left(canvas, "Pre"); elements_button_top_right(canvas, "Pre");
     elements_button_left(canvas, "Scan-"); elements_button_center(canvas, "Mute"); elements_button_right(canvas, "Scan+"); 
 
     struct RADIO_INFO info; // Create a struct to hold the radio info       
@@ -308,8 +322,7 @@ MyApp* my_app_alloc() {
 
     // Initialize the submenu
     app->submenu = submenu_alloc();
-    submenu_add_item(app->submenu, "Listen Now", MyAppSubmenuIndexFlipTheWorld, my_app_submenu_callback, app);
-    
+    submenu_add_item(app->submenu, "Listen Now", MyAppSubmenuIndexFlipTheWorld, my_app_submenu_callback, app);    
     //submenu_add_item(app->submenu, "Config", MyAppSubmenuIndexConfigure, my_app_submenu_callback, app);
     submenu_add_item(app->submenu, "About", MyAppSubmenuIndexAbout, my_app_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), my_app_navigation_exit_callback);
@@ -382,7 +395,7 @@ void my_app_free(MyApp* app) {
     free(app);
 }
 // Main function to start the application
-int32_t my_app_name_app(void* p) {
+int32_t my_fm_radio(void* p) {
     UNUSED(p);
     MyApp* app = my_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
