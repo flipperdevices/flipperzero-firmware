@@ -37,6 +37,8 @@ static bool select_ot_name_input_validator(const char* text, FuriString* error, 
             (uint8_t*)pokemon_fap->trade_block->ot_name, (char*)text, strlen(text));
     }
 
+    FURI_LOG_D(TAG, "[ot_name] Set OT name to %s", text);
+
     return rc;
 }
 

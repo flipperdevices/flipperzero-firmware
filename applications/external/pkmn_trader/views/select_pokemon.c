@@ -49,6 +49,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     /* Advance to next view with the selected pokemon */
     case InputKeyOk:
         pokemon_fap->curr_pokemon = selected_pokemon;
+        FURI_LOG_D(TAG, "[Select] Selected %s", pokemon_fap->pokemon_table[selected_pokemon].name);
         scene_manager_previous_scene(pokemon_fap->scene_manager);
         consumed = true;
         break;

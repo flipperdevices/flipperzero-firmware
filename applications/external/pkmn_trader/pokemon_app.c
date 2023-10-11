@@ -1920,6 +1920,7 @@ void pokemon_trade_block_set_default_name(char* dest, PokemonFap* pokemon_fap, s
             toupper(pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].name[i]));
         buf[i] = toupper(pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].name[i]);
     }
+    FURI_LOG_D(TAG, "[app] Set default nickname");
 
     if(dest != NULL) {
         strncpy(dest, buf, n);
@@ -1972,6 +1973,8 @@ void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
 
     pkmn->level_again = level;
     UINT32_TO_EXP(experience, pkmn->exp);
+    FURI_LOG_D(TAG, "[app] Set pkmn level %d", level);
+    FURI_LOG_D(TAG, "[app] Set pkmn exp %d", (int)experience);
 
     /* Generate STATEXP */
     switch(curr_stats) {
@@ -1988,6 +1991,7 @@ void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
         break;
     }
 
+    FURI_LOG_D(TAG, "[app] EVs set to %d", stat);
     stat = __builtin_bswap16(stat);
 
     pkmn->hp_ev = stat;
@@ -2006,33 +2010,50 @@ void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
                    ((special_iv & 0x0f));
         hp_iv = (pkmn->iv & 0xAA) >> 4;
     }
+    FURI_LOG_D(
+        TAG,
+        "[app] atk_iv %d, def_iv %d, spd_iv %d, spc_iv %d, hp_iv %d",
+        atk_iv,
+        def_iv,
+        spd_iv,
+        special_iv,
+        hp_iv);
 
     /* Calculate HP */
     // https://bulbapedia.bulbagarden.net/wiki/Stat#Generations_I_and_II
     stat = floor((((2 * (table->base_hp + hp_iv)) + floor(sqrt(pkmn->hp_ev) / 4)) * level) / 100) +
            (level + 10);
+    FURI_LOG_D(TAG, "[app] HP set to %d", stat);
     pkmn->hp = __builtin_bswap16(stat);
     pkmn->max_hp = pkmn->hp;
 
     /* Calculate ATK, DEF, SPD, SP */
+    /* TODO: these all use the same calculations, could put the stats in a sub-array and iterate
+     * through each element in order rather than having to repeat the code. IVs would also need
+     * to be in a similar array.
+     **/
     // https://bulbapedia.bulbagarden.net/wiki/Stat#Generations_I_and_II
     stat =
         floor((((2 * (table->base_atk + atk_iv)) + floor(sqrt(pkmn->atk_ev) / 4)) * level) / 100) +
         5;
+    FURI_LOG_D(TAG, "[app] ATK set to %d", stat);
     pkmn->atk = __builtin_bswap16(stat);
     stat =
         floor((((2 * (table->base_def + def_iv)) + floor(sqrt(pkmn->def_ev) / 4)) * level) / 100) +
         5;
+    FURI_LOG_D(TAG, "[app] DEF set to %d", stat);
     pkmn->def = __builtin_bswap16(stat);
     stat =
         floor((((2 * (table->base_spd + spd_iv)) + floor(sqrt(pkmn->spd_ev) / 4)) * level) / 100) +
         5;
+    FURI_LOG_D(TAG, "[app] SPD set to %d", stat);
     pkmn->spd = __builtin_bswap16(stat);
     stat = floor(
                (((2 * (table->base_special + special_iv)) + floor(sqrt(pkmn->special_ev) / 4)) *
                 level) /
                100) +
            5;
+    FURI_LOG_D(TAG, "[app] SPC set to %d", stat);
     pkmn->special = __builtin_bswap16(stat);
 }
 
@@ -2045,15 +2066,24 @@ void pokemon_trade_block_recalculate(PokemonFap* pokemon_fap) {
     /* Set current pokemon to the trade structure */
     pkmn->index = table->index;
     pokemon_fap->trade_block->party_members[0] = table->index;
+    FURI_LOG_D(TAG, "[app] Set %s in trade block", table->name);
 
     /* Set current pokemon's moves to the trade structure */
     for(i = 0; i < 4; i++) {
         pkmn->move[i] = table->move[i];
+        FURI_LOG_D(
+            TAG,
+            "[app] Set %s in trade block",
+            pokemon_named_list_get_name_from_index(pokemon_fap->move_list, pkmn->move[i]));
     }
 
     /* Set current pokemon's types to the trade structure */
     for(i = 0; i < 2; i++) {
         pkmn->type[i] = table->type[i];
+        FURI_LOG_D(
+            TAG,
+            "[app] Set %s in trade block",
+            pokemon_named_list_get_name_from_index(pokemon_fap->type_list, pkmn->type[i]));
     }
 
     pokemon_trade_block_recalculate_stats_from_level(pokemon_fap);

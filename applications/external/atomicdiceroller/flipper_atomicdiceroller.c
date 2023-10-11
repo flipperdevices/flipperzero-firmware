@@ -137,8 +137,12 @@ int32_t flipper_atomicdiceroller_app() {
     FuriTimer* timerPause = furi_timer_alloc(clock_tick_pause, FuriTimerTypePeriodic, event_queue);
 
     // ENABLE 5V pin
-    furi_hal_power_enable_otg();
-
+    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
     uint8_t diceBuffer[64];
     for(uint8_t i = 0; i < 64; i++) diceBuffer[i] = 0;
 
@@ -326,7 +330,10 @@ int32_t flipper_atomicdiceroller_app() {
 
     furi_record_close(RECORD_NOTIFICATION);
 
-    furi_hal_power_disable_otg();
+    // Disable 5v power
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     furi_hal_gpio_disable_int_callback(&gpio_ext_pa7);
     furi_hal_gpio_remove_int_callback(&gpio_ext_pa7);

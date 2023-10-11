@@ -15,6 +15,12 @@ static void select_move_selected_callback(void* context, uint32_t index) {
     } else {
         pokemon_fap->trade_block->party[0].move[move] = (uint8_t)index;
     }
+    FURI_LOG_D(
+        TAG,
+        "[move] Set move %s to %d",
+        pokemon_named_list_get_name_from_index(
+            pokemon_fap->move_list, pokemon_fap->trade_block->party[0].move[move]),
+        (int)move);
 
     /* Move back to move menu */
     scene_manager_search_and_switch_to_previous_scene(pokemon_fap->scene_manager, SelectMoveScene);
