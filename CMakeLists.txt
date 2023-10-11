@@ -117,3 +117,20 @@ else()
         )
     endif()
 endif()
+
+if (DEFINED CONFIG_SERIAL_FLASHER_WRITE_BLOCK_RETRIES)
+    target_compile_definitions(${target}
+    PUBLIC
+        SERIAL_FLASHER_WRITE_BLOCK_RETRIES=${CONFIG_SERIAL_FLASHER_WRITE_BLOCK_RETRIES}
+    )
+elseif (DEFINED SERIAL_FLASHER_WRITE_BLOCK_RETRIES)
+    target_compile_definitions(${target}
+    PUBLIC
+        SERIAL_FLASHER_WRITE_BLOCK_RETRIES=${SERIAL_FLASHER_WRITE_BLOCK_RETRIES}
+    )
+else()
+    target_compile_definitions(${target}
+    PUBLIC
+        SERIAL_FLASHER_WRITE_BLOCK_RETRIES=3
+    )
+endif()

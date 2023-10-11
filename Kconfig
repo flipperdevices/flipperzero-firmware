@@ -31,4 +31,8 @@ menu "ESP serial flasher"
         bool "Enable debug tracing output (only transfer data tracing is supported at the time)"
         default n
 
+    config SERIAL_FLASHER_WRITE_BLOCK_RETRIES
+        int "Number of retries when writing blocks either to target flash or RAM"
+        default 3
+
 endmenu
