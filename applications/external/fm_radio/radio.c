@@ -3,7 +3,7 @@
  * @author Coolshrimp - CoolshrimpModz.com
  *
  * @brief FM Radio using the TEA5767 FM radio chip.
- * @version 1.0
+ * @version 1.1
  * @date 2023-09-29
  * 
  * @copyright GPLv3
@@ -359,7 +359,7 @@ MyApp* my_app_alloc() {
     // Initialize the widget for displaying information about the app
     app->widget_about = widget_alloc();
     widget_add_text_scroll_element(app->widget_about, 0, 0, 128, 64,
-        "FM Radio (v1.0)\n"
+        "FM Radio (v1.1)\n"
         "---\n"
         "Created By Coolshrimp\n\n"
         "Up = Preset Up\n"
