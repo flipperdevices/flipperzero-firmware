@@ -5,7 +5,7 @@ App(
     entry_point="genie_record_app",
     requires=["gui", "subghz"],
     stack_size=2 * 1024,
-    fap_version=(1, 2),
+    fap_version=(1, 3),
     fap_icon="genie.png",
     fap_category="Sub-GHz",
     fap_icon_assets="assets",
