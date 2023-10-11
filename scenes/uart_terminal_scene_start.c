@@ -23,6 +23,8 @@ typedef struct {
     bool isSubMenu;
 } UART_TerminalItem;
 
+static void uart_terminal_scene_start_var_list_change_callback(VariableItem* item);
+
 // NUM_MENU_ITEMS defined in uart_terminal_app_i.h - if you add an entry here, increment it!
 /* CBC: Looking for a way to best use TOGGLE_ARGS, how's this:
         ** If actual_commands[i] ends with space, display a keyboard to fill in the blank ***
@@ -528,10 +530,11 @@ static void displayMenu(UART_TerminalApp *app, UART_TerminalItem *selectedMenu) 
     }
 
     /* Clear the current menu */
-    variable_item_list_reset();
+    VariableItemList* var_item_list = app->var_item_list;
+    variable_item_list_reset(var_item_list);
 
     /* Add the new list */
-    VariableItemList* var_item_list = app->var_item_list;
+    VariableItem *item = NULL;
     app->currentMenu = menuEnum;
     for (uint8_t i = 0; i < newMenuCount; ++i) {
         item = variable_item_list_add(
@@ -550,7 +553,7 @@ static void displayMenu(UART_TerminalApp *app, UART_TerminalItem *selectedMenu) 
 static void uart_terminal_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
-    const UART_TerminalItem *item = NULL;
+    UART_TerminalItem *item = NULL;
     UART_TerminalItem *theMenu = NULL;
     uint8_t menuCount = 0;
     const int selected_option_index = app->selected_option_index[index];
@@ -662,6 +665,7 @@ static void uart_terminal_scene_start_var_list_change_callback(VariableItem* ite
     //     // TODO: Display an error
     //     return;
     // }
+    printf("%u", menuCount);
 
     const UART_TerminalItem* menu_item = &theMenu[app->selected_menu_index];
     uint8_t item_index = variable_item_get_current_value_index(item);
