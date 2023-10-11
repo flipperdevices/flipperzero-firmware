@@ -525,6 +525,10 @@ static void displayMenu(UART_TerminalApp *app, UART_TerminalItem *selectedMenu) 
         newMenu = others;
         newMenuCount = NUM_OTHER_ITEMS;
         menuEnum = GRAVITY_MENU_OTHERS;
+    } else if (!strcmp(selectedMenu->item_string, "Main")) {
+        newMenu = mainmenu;
+        newMenuCount = NUM_MAIN_ITEMS;
+        menuEnum = GRAVITY_MENU_MAIN;
     } else {
         // TODO: Display error
     }
@@ -547,6 +551,8 @@ static void displayMenu(UART_TerminalApp *app, UART_TerminalItem *selectedMenu) 
         variable_item_set_current_value_text(
             item, newMenu[i].options_menu[app->selected_option_index[i]]);
     }
+    variable_item_list_set_selected_item(
+        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneStart));
 }
 
 /* Callback when an option is selected */
@@ -707,6 +713,8 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
     UNUSED(context);
     UART_TerminalApp* app = context;
     bool consumed = false;
+    GravityMenu newMenu = GRAVITY_MENU_MAIN;
+    char strNewMenu[MAX_MENU_STR_LEN] = "";
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UART_TerminalEventStartKeyboard) {
@@ -722,6 +730,34 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
     } else if(event.type == SceneManagerEventTypeTick) {
         app->selected_menu_index = variable_item_list_get_selected_item_index(app->var_item_list);
         consumed = true;
+    } else if (event.type == SceneManagerEventTypeBack) {
+        switch (app->currentMenu) {
+            case GRAVITY_MENU_MAIN:
+                consumed = false;
+                break;
+            case GRAVITY_MENU_FUZZ:
+            case GRAVITY_MENU_DEAUTH:
+                /* Parent of fuzz & deauth is Packets */
+                newMenu = GRAVITY_MENU_PACKETS;
+                strcpy(strNewMenu, "Packets");
+                consumed = true;
+                break;
+            case GRAVITY_MENU_TARGETS:
+            case GRAVITY_MENU_PACKETS:
+            case GRAVITY_MENU_ATTACKS:
+            case GRAVITY_MENU_SETTINGS:
+            case GRAVITY_MENU_OTHERS:
+                /* Parent of these is all Main */
+                newMenu = GRAVITY_MENU_MAIN;
+                strcpy(strNewMenu, "Main");
+                consumed = true;
+                break;
+        }
+        /* Create a stub UART_TerminalItem* to direct displayMenu */
+        UART_TerminalItem menuItem = { .item_string = strNewMenu };
+        app->currentMenu = newMenu;
+        displayMenu(app, &menuItem);
+        free(menuItem);
     }
     return consumed;
 }
