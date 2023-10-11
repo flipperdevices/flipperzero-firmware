@@ -1,4 +1,4 @@
-#include "nfc_protocol_support_defs.h"
+#include "nfc_protocol_support_base.h"
 
 #include <nfc/protocols/nfc_protocol.h>
 
