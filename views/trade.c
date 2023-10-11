@@ -361,6 +361,10 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
     struct trade_model* model = NULL;
     byte send = in;
 
+    /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
+     * and what response to expect.
+     */
+
     /* Since this is a fairly long function, it doesn't call any other functions,
      * the view model isn't locked, and we're in an interrupt context, lets just
      * mape the view model to a local var and commit it back when we're done.
@@ -368,11 +372,12 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
     model = view_get_model(trade->view);
 
     switch(trade->trade_centre_state) {
+    /* XXX: Wait for 5x 00 on the bus. This should be safe to just leave alone. 0x00 appears to be a sync byte */
     case INIT:
         // TODO: What does this value of in mean?
 	/* Currently, I believe this means OK/ACK */
 	/* It looks like GB sends a bunch of 0x00s once both sides agreed to the selected menu item */
-        if(in == 0x00) {
+        if(in == PKMN_BLANK) {
             // TODO: What does counter signify here?
 	    /* It looks like counter is just intended to wait for a sequence of 00s, but its not even really a sequence, just, 5 bytes in a row. */
             if(counter == 5) {
@@ -385,6 +390,13 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
         break;
 
     case READY_TO_GO:
+	/* While in this state we would mirror back whatever the GB sends us, which includes
+	 * the trade/battle menu selection and highlighted option. TODO: Only respond with
+	 * trade menu selection?
+	 */
+	/* XXX: Interestingly, the first byte we see seems to be 0xFE which is a no data byte byte */
+	/* This might have some issues with the FE byte? Since I think the next state is waiting for
+	 * not FD bytes */
 	/* I believe this is specifically 0xFD*/
 	/* Also specifically it is repeated 10 times to signify that the random block is about to start */
         if((in & 0xF0) == 0xF0) trade->trade_centre_state = SEEN_FIRST_WAIT;
@@ -428,25 +440,37 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
         break;
 
     /* This is where we get the data from gameboy that is their trade struct */
+    /* XXX: The current implementation ends up stopping short of sending data from flipper
+     * and instead mirrors back data from the gameboy before we have technically sent our
+     * whole struct */
     case SENDING_DATA:
         INPUT_BLOCK[counter] = in;
         send = trade_block_flat[counter];
         counter++;
-        if(counter == 405) //TODO: replace with sizeof struct rather than static number
+	/* This should be 418? */
+        if(counter == 418) //TODO: replace with sizeof struct rather than static number
             trade->trade_centre_state = SENDING_PATCH_DATA;
         break;
 
     /* XXX: I still have no idea what patch data is in context of the firmware */
+    /* XXX: This seems to end with the gameboy sending DF FE 15? */
+
+    /* A couple of FD bytes are sent, looks like 6, which means I don't think we can use count of FD bytes to see what mode we're in */
+    /* We need to send our own patch data as well as receiving and then applying */
     case SENDING_PATCH_DATA:
         if(in == 0xFD) {
             counter = 0;
             send = 0xFD;
         } else {
             counter++;
+	    /* This is actually 200 bytes */
+	    /* XXX: Interestingly, it does appear to actually be 197 bytes from the first 00 after trade block, minus FFs, to the last 00 sent before long delay */
             if(counter == 197) // TODO: What is this magic value?
                 trade->trade_centre_state = TRADE_PENDING;
         }
         break;
+
+    /* XXX: Patch incoming data here */
 
     case TRADE_PENDING:
         /* TODO: What are these states */
@@ -466,8 +490,10 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
             send = 0;
             trade->trade_centre_state = TRADE_CONFIRMATION;
         }
+	/* XXX: Test to make sure saying no at is this okay does the right thing */
         break;
 
+    /* XXX: The actual trade uses 0x62 a bunch? Is that the OKAY? Is 0x61 a NAK? Other docs show 0x6F? */
     case TRADE_CONFIRMATION:
         if(in == 0x61) {
             trade->trade_centre_state = TRADE_PENDING;
@@ -481,8 +507,8 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
     case DONE:
         if(in == 0x00) {
             send = 0;
-            trade->trade_centre_state = INIT;
-            model->gameboy_status = GAMEBOY_TRADING;
+            trade->trade_centre_state = SENDING_RANDOM_DATA;
+            model->gameboy_status = GAMEBOY_WAITING;
         }
         break;
 
