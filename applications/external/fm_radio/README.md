@@ -25,6 +25,8 @@ TEA5767 Datasheet - (https://www.sparkfun.com/datasheets/Wireless/General/TEA576
 
 
 ## Changelog
+v1.1<br>
+-Added Some Icons
 v1.0<br>
 -Reformated Code<br>
 -Added Station Names<br>
@@ -43,7 +45,6 @@ Add User Settings Menu: <br>
 -RSSI Seek Strenght: 1-15<br>
 -Sound: Mono-L/Mono-R/Stereo<br>
 -User Editable Station List<br>
--Add the Preset Up/Down Icon.<br>
 -Redirect TEA5767 Audio To a GPIO and Playback on Flipper Internal Speaker<br>
 <br><br>
 ## Created By: Coolshrimp - https://CoolshrimpModz.com
