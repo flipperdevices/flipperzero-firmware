@@ -46,7 +46,7 @@ UART_TerminalApp* uart_terminal_app_alloc() {
         UART_TerminalAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
-    for(int i = 0; i < NUM_MENU_ITEMS; ++i) {
+    for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
         app->selected_option_index[i] = 0;
     }
 
