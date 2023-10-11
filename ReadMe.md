@@ -34,6 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32-C6 Gravity v0.6 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - Updated: [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` (Changes By xMasterX)
+- Updated: [Dab Timer v1.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) Added Binary Clock Face (By RogueMaster)
 
 <a name="release">
 
@@ -303,7 +304,7 @@ $ ./fbt dolphin_ext
 - [Count Down Timer v1.2 (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [Counter v1.2 (By Krulknul)](https://github.com/Krulknul/dolphin-counter) [Improved (By plasticuproject)](https://github.com/plasticuproject/dolphin-better-counter)
 - [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
-- [Dab Timer v1.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
+- [Dab Timer v1.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer)
 - [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - [DCF77 Transmitter v1.1 (By arha)](https://github.com/arha/flipper-dcf77)
 - [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
