@@ -41,8 +41,10 @@ typedef enum {
     FuriHalNfcEventCollision = (1U << 8), /**< A collision has occurred. */
     FuriHalNfcEventTimerFwtExpired = (1U << 9), /**< Frame wait timer has expired. */
     FuriHalNfcEventTimerBlockTxExpired = (1U << 10), /**< Transmission block timer has expired. */
-    FuriHalNfcEventTimeout = (1U << 11), /**< No events have occurred in a specified time period. */
-    FuriHalNfcEventAbortRequest = (1U << 12), /**< User has requested to abort current operation. */
+    FuriHalNfcEventTimeout =
+        (1U << 11), /**< No events have occurred in a specified time period. */
+    FuriHalNfcEventAbortRequest =
+        (1U << 12), /**< User has requested to abort current operation. */
 } FuriHalNfcEvent;
 
 /**
