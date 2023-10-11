@@ -1,4 +1,0 @@
-[alias]
-    add-app = "!f() { if [ \"$1\" = \"\" -o \"$2\" = \"\" -o \"$3\" = \"\" ]; then echo \"Usage: git add-app <path> <repo> <branch> [link-subdir] [link-dest]\" && exit; fi; set -e; git subtree add -P \"$1\" \"$2\" \"$3\"; echo \"$2 $3\" > \"$1/.gitremote\" && git add \"$1/.gitremote\"; [ \"$4\" = \"\" -a \"$5\" = \"\" ] || (ln -s \"$1/$4\" \"$5\" && git add \"$5\"); git commit -m \"Add configs for ${5:-$1}\"; }; f"
-    update-app = "!f() { git subtree pull -P $GIT_PREFIX $(<${GIT_PREFIX}.gitremote); }; f"
-    bulk-update-apps = "!f() { find . -name .gitremote -execdir git update-app \\;; }; f"

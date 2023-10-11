@@ -1,0 +1,4 @@
+[alias]
+    add-app = "!bash .utils/add-app.sh"
+    update-app = "!bash .utils/update-app.sh"
+    bulk-update-apps = "!f() { find . -name .gitremote -execdir git update-app \\;; }; f"
