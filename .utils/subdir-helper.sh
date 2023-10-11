@@ -16,7 +16,7 @@ temp=$(echo ${repo%/} | rev | cut -d/ -f1,2 | rev | tr / -)-${branch}
 fetch=_fetch-${temp}
 split=_split-${temp}-$(echo ${subdir} | tr / -)
 git fetch --no-tags ${repo} ${branch}:${fetch}
-git checkout ${fetch}
+git checkout --recurse-submodules ${fetch}
 git subtree split -P ${subdir} -b ${split}
-git checkout ${prev}
+git checkout --recurse-submodules ${prev}
 git subtree ${action} -P ${path} ${split} -m "${action^} ${path} from ${repo}"
