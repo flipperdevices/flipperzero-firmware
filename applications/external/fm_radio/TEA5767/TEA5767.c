@@ -105,18 +105,25 @@ bool tea5767_seek(uint8_t* buffer, bool seek_up) {
     if(buffer == NULL) {
         return false;
     }
+
     buffer[REG_1] |= REG_1_SM; // Set the Search Mode (SM) bit to initiate seek
     if(seek_up) {
-        buffer[REG_3] |= REG_3_SUD; // Set Search Up (SUD) bit
-    } else {
-        buffer[REG_3] &= ~REG_3_SUD; // Set Search Down (SUD) bit
-    }
+        buffer[REG_3] |= REG_3_SUD;
+    } // Set Search Up (SUD) bit
+    else {
+        buffer[REG_3] &= ~REG_3_SUD;
+    } // Set Search Down (SUD) bit
     buffer[REG_3] |=
         (REG_3_SSL |
          0x60); // Set the Search Stop Level (SSL) to high for better tuning accuracy,  set bit 7 for RSSI 7
     buffer[REG_3] &= ~REG_3_MS; // Set stereo mode (clearing the Mono bit)
+    //buffer[REG_3] |= REG_4_SNC; // Set the Stereo Noise Cancelling (SNC) bit to 1 to reduce noise in stereo reception
+    buffer[REG_4] &= ~REG_4_STBY; // Clear the Standby bit in register 4 to exit standby mode
     buffer[REG_4] &= ~REG_4_BL; // Limit FM band 87.5 - 108 MHz.
-    buffer[REG_5] |= REG_5_PLLREF;
+    buffer[REG_5] |=
+        REG_5_PLLREF; // Set the PLLREF bit to 1 to enable the 6.5 MHz reference frequency for the PLL
+    buffer[REG_5] |= REG_5_DTC; // Set the De-emphasis Time Constant (DTC) bit to 1 for 75 µs
+
     // Write the updated register values to the TEA5767
     result = tea5767_write_registers(buffer);
     return result;
@@ -140,12 +147,20 @@ bool tea5767_set_frequency(uint8_t* buffer, int value) {
         return false;
     }
     uint16_t frequency = 4 * (value * 10000 + FILTER) / QUARTZ;
+
     buffer[REG_1] =
         ((buffer[0] & ~REG_1_PLL) |
          ((frequency >> 8) & REG_1_PLL)); // Set the upper 8 bits of the PLL word
     buffer[REG_2] = frequency & REG_2_PLL; // Set the lower 8 bits of the PLL word
+    buffer[REG_1] &= ~REG_1_MUTE; // Clear the Mute bit in register 1
     buffer[REG_3] &= ~REG_3_MS; // Set stereo mode (clearing the Mono bit)
-    buffer[REG_5] |= REG_5_PLLREF;
+    //buffer[REG_3] |= REG_4_SNC; // Set the Stereo Noise Cancelling (SNC) bit to 1 to reduce noise in stereo reception
+    buffer[REG_4] &= ~REG_4_STBY; // Clear the Standby bit in register 4 to exit standby mode
+    buffer[REG_4] &= ~REG_4_BL; // Limit FM band 87.5 - 108 MHz.
+    buffer[REG_5] |=
+        REG_5_PLLREF; // Set the PLLREF bit to 1 to enable the 6.5 MHz reference frequency for the PLL
+    buffer[REG_5] |= REG_5_DTC; // Set the De-emphasis Time Constant (DTC) bit to 1 for 75 µs
+
     result = tea5767_write_registers(buffer);
     return result;
 }

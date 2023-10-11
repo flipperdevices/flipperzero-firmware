@@ -63,8 +63,6 @@
     0x80 // PLL Ref: 1 to enable the 6.5 MHz reference frequency for the PLL, 0 to disable
 #define REG_5_DTC 0x40 // De-emphasis Time Constant: 1 for 75 µs, 0 for 50 µs
 
-// ----- local variables
-/// Band datatype.
 /// The BANDs TEA5767 can tune to.
 typedef enum {
     RADIO_BAND_FM = 0x01, ///< FM band 87.5 - 108 MHz (USA, Europe) selected.
