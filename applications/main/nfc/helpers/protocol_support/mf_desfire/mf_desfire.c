@@ -5,6 +5,7 @@
 
 #include "nfc/nfc_app_i.h"
 
+#include "../nfc_protocol_support_common.h"
 #include "../nfc_protocol_support_gui_common.h"
 #include "../iso14443_4a/iso14443_4a_i.h"
 

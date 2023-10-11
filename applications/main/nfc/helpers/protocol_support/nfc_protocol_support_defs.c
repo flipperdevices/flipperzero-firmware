@@ -1,5 +1,7 @@
 #include "nfc_protocol_support_defs.h"
 
+#include <nfc/protocols/nfc_protocol.h>
+
 #include "iso14443_3a/iso14443_3a.h"
 #include "iso14443_3b/iso14443_3b.h"
 #include "iso14443_4a/iso14443_4a.h"

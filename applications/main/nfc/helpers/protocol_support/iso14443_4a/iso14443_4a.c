@@ -6,6 +6,7 @@
 
 #include "nfc/nfc_app_i.h"
 
+#include "../nfc_protocol_support_common.h"
 #include "../nfc_protocol_support_gui_common.h"
 
 static void nfc_scene_info_on_enter_iso14443_4a(NfcApp* instance) {

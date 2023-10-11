@@ -2,7 +2,7 @@
 
 #include <core/string.h>
 
-#include "nfc_protocol_support_common.h"
+#include "../../nfc_app.h"
 
 typedef void (*NfcProtocolSupportOnEnter)(NfcApp* instance);
 

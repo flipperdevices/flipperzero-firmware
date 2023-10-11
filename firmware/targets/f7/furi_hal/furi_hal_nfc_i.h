@@ -29,9 +29,12 @@ extern "C" {
 typedef enum {
     FuriHalNfcEventInternalTypeAbort = (1U << 0), /**<  */
     FuriHalNfcEventInternalTypeIrq = (1U << 1), /**< NFC hardware interrupt has occurred. */
-    FuriHalNfcEventInternalTypeTimerFwtExpired = (1U << 2), /**< Frame wait time timeout has expired. */
-    FuriHalNfcEventInternalTypeTimerBlockTxExpired = (1U << 3), /**< Transmission block timeout has expired. */
-    FuriHalNfcEventInternalTypeTransparentDataReceived = (1U << 4), /**< Data was received in transparent mode. */
+    FuriHalNfcEventInternalTypeTimerFwtExpired =
+        (1U << 2), /**< Frame wait time timeout has expired. */
+    FuriHalNfcEventInternalTypeTimerBlockTxExpired =
+        (1U << 3), /**< Transmission block timeout has expired. */
+    FuriHalNfcEventInternalTypeTransparentDataReceived =
+        (1U << 4), /**< Data was received in transparent mode. */
 } FuriHalNfcEventInternalType;
 
 /** @brief Special bitmask value of all internal events. */
