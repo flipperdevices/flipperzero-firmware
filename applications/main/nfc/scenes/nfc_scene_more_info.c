@@ -1,6 +1,3 @@
-#include <furi.h>
-
-#include "../nfc_app_i.h"
 #include "../helpers/protocol_support/nfc_protocol_support.h"
 
 void nfc_scene_more_info_on_enter(void* context) {

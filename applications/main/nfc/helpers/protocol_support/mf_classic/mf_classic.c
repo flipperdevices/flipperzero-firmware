@@ -175,7 +175,7 @@ static void nfc_scene_emulate_on_enter_mf_classic(NfcApp* instance) {
 
 static bool nfc_scene_info_on_event_mf_classic(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneCardDump);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMoreInfo);
         return true;
     }
 
