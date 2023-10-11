@@ -14,9 +14,14 @@ $build_commands = @(
         ArtifactName = "totp_official-stable_fw{FEATURES_SUFFIX}.zip";
     }
     [PSCustomObject]@{
-        Name         = "Xtreme \ Unleashed";
-        FbtSwitch    = "x";
+        Name         = "Xtreme (stable) \ Unleashed";
+        FbtSwitch    = "xs";
         ArtifactName = "totp_xtreme_unleashed_fw{FEATURES_SUFFIX}.zip";
+    }
+    [PSCustomObject]@{
+        Name         = "Xtreme (dev)";
+        FbtSwitch    = "xd";
+        ArtifactName = "totp_xtreme_dev_fw{FEATURES_SUFFIX}.zip";
     }
 )
 

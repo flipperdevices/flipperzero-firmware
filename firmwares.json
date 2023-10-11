@@ -25,14 +25,27 @@
     },
     {
       "alias": [
-        "x",
-        "xtreme",
-        "xt"
+        "xs",
+        "xtreme-stable",
+        "xts"
       ],
-      "description": "Xtreme",
+      "description": "Xtreme stable",
       "type": "git-release",
       "git_repo": "Flipper-XFW/Xtreme-Firmware",
       "git_release": "latest"
+    },
+    {
+      "alias": [
+        "xd",
+        "xtreme-dev",
+        "xtd"
+      ],
+      "description": "Xtreme dev build",
+      "type": "git-action",
+      "git_repo": "Flipper-XFW/Xtreme-Firmware",
+      "git_action": "build.yml",
+      "git_artifact": "dist",
+      "git_branch": "dev"
     }
   ]
 }

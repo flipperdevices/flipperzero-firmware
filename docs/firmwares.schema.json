@@ -25,10 +25,12 @@
                 "type": "string"
               },
               "type": {
-                "description": "Type of firmware reference. `index` - firmware from index; `git-release` - firmware from gir releases",
+                "description": "Type of firmware reference. `index` - firmware from index; `git-release` - firmware from git releases; `direct-uri` - firmware from direct URI; `git-action` - firmware from github action artifacts",
                 "enum": [
                   "index",
-                  "git-release"
+                  "git-release",
+                  "direct-uri",
+                  "git-action"
                 ]
               }
             },
@@ -95,6 +97,72 @@
                   "required": [
                     "git_repo",
                     "git_release"
+                  ],
+                  "unevaluatedProperties ": false
+                },
+                "else": false
+              },
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "direct-uri"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "uri": {
+                      "description": "Firmware direct download uri",
+                      "type": "string",
+                      "pattern": "^(https?|ftp):\/\/.+"
+                    }
+                  },
+                  "required": [
+                    "uri"
+                  ],
+                  "unevaluatedProperties ": false
+                },
+                "else": false
+              },
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "git-action"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "git_repo": {
+                      "description": "Firmware Github repo in format `author/repo_name`",
+                      "type": "string"
+                    },
+                    "git_action": {
+                      "description": "Github action id or workflow action file name",
+                      "type": "string"
+                    },
+                    "git_artifact": {
+                      "description": "Github action artifact name (regex expression is acceptable)",
+                      "type": "string"
+                    },
+                    "git_branch": {
+                      "description": "Github branch name",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "git_repo",
+                    "git_action",
+                    "git_artifact",
+                    "git_branch"
                   ],
                   "unevaluatedProperties ": false
                 },
