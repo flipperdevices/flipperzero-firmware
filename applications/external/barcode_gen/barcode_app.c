@@ -1,6 +1,10 @@
 #include "barcode_app.h"
 
 #include "barcode_app_icons.h"
+#include <assets_icons.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
+#include <notification/notification_app.h>
 
 /**
  * Opens a file browser dialog and returns the filepath of the selected file
@@ -10,6 +14,9 @@
  *                  file_path will be the folder path is nothing is selected
  * @returns true if a file is selected
 */
+
+NotificationApp* notifications = 0;
+
 static bool select_file(const char* folder, FuriString* file_path) {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     DialogsFileBrowserOptions browser_options;
@@ -286,6 +293,12 @@ void free_app(BarcodeApp* app) {
     free(app);
 }
 
+void set_backlight_brightness(float brightness) {
+    NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
+    notifications->settings.display_brightness = brightness;
+    notification_message(notifications, &sequence_display_backlight_on);
+}
+
 int32_t barcode_main(void* p) {
     UNUSED(p);
     BarcodeApp* app = malloc(sizeof(BarcodeApp));
@@ -305,6 +318,13 @@ int32_t barcode_main(void* p) {
     view_dispatcher_add_view(app->view_dispatcher, MainMenuView, submenu_get_view(app->main_menu));
 
     submenu_add_item(app->main_menu, "Edit Barcode", EditBarcodeItem, submenu_callback, app);
+
+    NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
+    // Save original brightness
+    float originalBrightness = notifications->settings.display_brightness;
+    // force backlight and increase brightness
+    notification_message_block(notifications, &sequence_display_backlight_enforce_on);
+    set_backlight_brightness(10); // set to highest
 
     /*****************************
      * Creating Text Input View
@@ -343,6 +363,8 @@ int32_t barcode_main(void* p) {
     view_dispatcher_run(app->view_dispatcher);
 
     free_app(app);
+    notification_message_block(notifications, &sequence_display_backlight_enforce_auto);
+    set_backlight_brightness(originalBrightness);
 
     return 0;
 }
