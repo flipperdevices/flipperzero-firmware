@@ -91,7 +91,8 @@ struct Station stations[] = {
     {106.5, "106.5 Elmnt"},
     {106.7, "106.7 El Zol"},
     {107.1, "Q107"},
-    {107.5, "Amor 107.5"}};
+    {107.5, "Amor 107.5"},
+};
 
 // Function prototypes for forward declarations
 void elements_button_top_left(Canvas* canvas, const char* str);
@@ -132,13 +133,12 @@ void elements_button_top_left(Canvas* canvas, const char* str) {
         y - 3); // Draw the button border
 
     canvas_invert_color(canvas); // Invert the color of the text and icon
-    canvas_draw_icon(
-        canvas, x + horizontal_offset, y - icon_v_offset, &I_ButtonUp); // Draw the icon
     canvas_draw_str(
         canvas,
         x + horizontal_offset + icon_width_with_offset,
         y - vertical_offset,
         str); // Draw the text
+    canvas_draw_icon(canvas, x - horizontal_offset - icon->width, y - icon_v_offset, &I_ButtonUp);
     canvas_invert_color(canvas); // Invert the color of the text and icon
 }
 
@@ -147,7 +147,7 @@ void elements_button_top_right(Canvas* canvas, const char* str) {
     const uint8_t vertical_offset = 2;
     const uint8_t horizontal_offset = 2;
     const uint8_t string_width = canvas_string_width(canvas, str);
-    const Icon* icon = &I_ButtonDown;
+    const Icon* icon = &I_ButtonUp;
     const uint8_t icon_h_offset = 2;
     const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
     const uint8_t icon_v_offset = icon->height + vertical_offset;
@@ -163,8 +163,8 @@ void elements_button_top_right(Canvas* canvas, const char* str) {
 
     canvas_invert_color(canvas);
     canvas_draw_str(canvas, x - button_width + horizontal_offset, y - vertical_offset, str);
-    canvas_draw_icon(
-        canvas, x - horizontal_offset - icon->width, y - icon_v_offset, &I_ButtonDown);
+    canvas_draw_icon_ex(
+        canvas, x + horizontal_offset, y - icon_v_offset, &I_ButtonUp, IconRotation180);
     canvas_invert_color(canvas);
 }
 
