@@ -550,17 +550,17 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         if(state->faceType == 8) {
             canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
-                elements_button_left(canvas, "Reset");
+                // elements_button_left(canvas, "Reset");
             } else {
-                elements_button_left(canvas, "F9");
+                // elements_button_left(canvas, "F9");
             }
             canvas_set_color(canvas, ColorWhite);
         } else {
             canvas_set_color(canvas, ColorWhite);
             if(timer_start_timestamp != 0) {
-                elements_button_left(canvas, "Reset");
+                // elements_button_left(canvas, "Reset");
             } else {
-                elements_button_left(canvas, "F4");
+                // elements_button_left(canvas, "F4");
             }
             canvas_set_color(canvas, ColorBlack);
         }
@@ -647,7 +647,8 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     if(state->faceType < 5) {
         canvas_set_color(canvas, ColorWhite);
     }
-    if(state->faceType != 9 && state->faceType != 4) {
+    if(state->faceType != 3 && state->faceType != 4 && state->faceType != 8 &&
+       state->faceType != 9) {
         if(!state->desktop_settings->is_dumbmode && !state->w_test) {
             if(timer_running) {
                 elements_button_center(canvas, "Stop");
