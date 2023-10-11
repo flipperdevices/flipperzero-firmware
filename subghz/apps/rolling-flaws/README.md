@@ -157,16 +157,22 @@ Method 2: (command-line + allows for "SN00/cfw*" and "SN bits/cfw*" features + a
 
 Method 3: (VS Code + allows for "SN00/cfw*" and "SN bits/cfw*" features + allows for replay feature)
 - Install [VS Code](https://code.visualstudio.com/Download)
-- Clone the firmware repository (make sure you use ``git clone --recursive``).
+- Clone the firmware repository (make sure you use **Git: Clone (Recursive)**).
+  - The URL for firmware is at https://github.com/flipperdevices/flipperzero-firmware
 - Make sure you have run ``fbt vscode_dist`` at least once, so VSCode works properly.
+  - You can right click on "FBT" and then choose `Open in Integrated Terminal`.
+  - Then type:  `./fbt vscode_dist`
+  - It should populate your `.vscode` folder.
 - Copy the ``rolling_flaws`` folder into your firmware's ``applications_user`` folder.
 - Ctrl+Shift+B
 - Select "[Debug] Flash (USB, with resources)"
+- Ctrl+Shift+B
 - Select "[Debug] Launch App on Flipper"
-- Do the steps in the previous [HCS300](#hcs300) section and then reflash the device
+- Do the steps in the previous [HCS300](#hcs300) section (so the "Enc:" data is present) and then reflash the device
   - Select "[Debug] Flash (USB, with resources)"
   - Select "[Debug] Launch App on Flipper"
 
+Here is a command-line method.  Before the last two commands, you should follow the steps in [HCS300](#hcs300) section (so the "Enc:" data is present).  Be sure your Flipper Zero is connected and that qFlipper is not running:
 ```c
 mkdir \repos
 cd \repos
@@ -179,10 +185,10 @@ md rolling-flaws
 cd rolling-flaws
 xcopy ..\..\..\flipper-zero-tutorials\subghz\apps\rolling-flaws\*.* . /e
 cd ..
+cd ..
 fbt FORCE=1 flash_usb_full 
 fbt launch APPSRC=applications_user\rolling-flaws 
 ```
-
 
 
 ## Menu Options
