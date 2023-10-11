@@ -38,7 +38,7 @@ static void nfc_scene_info_on_enter_mf_classic(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static void nfc_scene_card_dump_on_enter_mf_classic(NfcApp* instance) {
+static void nfc_scene_more_info_on_enter_mf_classic(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
     const MfClassicData* mfc_data = nfc_device_get_data(device, NfcProtocolMfClassic);
 
@@ -230,9 +230,9 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
             .on_enter = nfc_scene_info_on_enter_mf_classic,
             .on_event = nfc_scene_info_on_event_mf_classic,
         },
-    .scene_card_dump =
+    .scene_more_info =
         {
-            .on_enter = nfc_scene_card_dump_on_enter_mf_classic,
+            .on_enter = nfc_scene_more_info_on_enter_mf_classic,
             .on_event = NULL,
         },
     .scene_read =

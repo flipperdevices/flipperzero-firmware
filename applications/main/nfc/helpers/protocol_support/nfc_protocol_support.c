@@ -83,20 +83,21 @@ static void nfc_protocol_support_scene_info_on_exit(NfcApp* instance) {
     widget_reset(instance->widget);
 }
 
-static void nfc_protocol_support_scene_card_dump_on_enter(NfcApp* instance) {
+// SceneMoreInfo
+static void nfc_protocol_support_scene_more_info_on_enter(NfcApp* instance) {
     const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
-    nfc_protocol_support[protocol]->scene_card_dump.on_enter(instance);
+    nfc_protocol_support[protocol]->scene_more_info.on_enter(instance);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewTextBox);
 }
 
 static bool
-    nfc_protocol_support_scene_card_dump_on_event(NfcApp* instance, SceneManagerEvent event) {
+    nfc_protocol_support_scene_more_info_on_event(NfcApp* instance, SceneManagerEvent event) {
     UNUSED(instance);
     UNUSED(event);
     return false;
 }
 
-static void nfc_protocol_support_scene_card_dump_on_exit(NfcApp* instance) {
+static void nfc_protocol_support_scene_more_info_on_exit(NfcApp* instance) {
     text_box_reset(instance->text_box);
     furi_string_reset(instance->text_box_store);
 }
@@ -689,11 +690,11 @@ static const NfcProtocolSupportCommonSceneBase
                 .on_event = nfc_protocol_support_scene_info_on_event,
                 .on_exit = nfc_protocol_support_scene_info_on_exit,
             },
-        [NfcProtocolSupportSceneCardDump] =
+        [NfcProtocolSupportSceneMoreInfo] =
             {
-                .on_enter = nfc_protocol_support_scene_card_dump_on_enter,
-                .on_event = nfc_protocol_support_scene_card_dump_on_event,
-                .on_exit = nfc_protocol_support_scene_card_dump_on_exit,
+                .on_enter = nfc_protocol_support_scene_more_info_on_enter,
+                .on_event = nfc_protocol_support_scene_more_info_on_event,
+                .on_exit = nfc_protocol_support_scene_more_info_on_exit,
             },
         [NfcProtocolSupportSceneRead] =
             {

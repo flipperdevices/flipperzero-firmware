@@ -36,7 +36,7 @@ static void nfc_scene_info_on_enter_mf_ultralight(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static void nfc_scene_card_dump_on_enter_mf_ultralight(NfcApp* instance) {
+static void nfc_scene_more_info_on_enter_mf_ultralight(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
     const MfUltralightData* mfu = nfc_device_get_data(device, NfcProtocolMfUltralight);
 
@@ -174,9 +174,9 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
             .on_enter = nfc_scene_info_on_enter_mf_ultralight,
             .on_event = nfc_scene_info_on_event_mf_ultralight,
         },
-    .scene_card_dump =
+    .scene_more_info =
         {
-            .on_enter = nfc_scene_card_dump_on_enter_mf_ultralight,
+            .on_enter = nfc_scene_more_info_on_enter_mf_ultralight,
             .on_event = NULL,
         },
     .scene_read =
