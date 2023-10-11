@@ -207,10 +207,11 @@ static MfUltralightCommand
 
         if(do_i2c_check) {
             if(!mf_ultralight_i2c_validate_pages(start_page, start_page, instance)) break;
+        } else if(pages_total < start_page) {
+            break;
         }
 
-        if(pages_total < start_page ||
-           !mf_ultralight_listener_check_access(
+        if(!mf_ultralight_listener_check_access(
                instance, start_page, MfUltralightListenerAccessTypeWrite))
             break;
 
