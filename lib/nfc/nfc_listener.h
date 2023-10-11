@@ -1,6 +1,6 @@
 /**
  * @file nfc_listener.h
- * @brief The NfcListener library provides NFC card emulation(listening) facilities.
+ * @brief NFC card emulation library.
  *
  * Once started, it will respond to supported commands from an NFC reader, thus imitating
  * (or emulating) an NFC card. The responses will depend on the data that was supplied to

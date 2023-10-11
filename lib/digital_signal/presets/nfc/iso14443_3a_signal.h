@@ -1,6 +1,6 @@
 /**
  * @file iso14443_3a_signal.h
- * @brief A DigitalSequence preset for generating ISO14443-3A compliant signals.
+ * @brief DigitalSequence preset for generating ISO14443-3A compliant signals.
  */
 #pragma once
 

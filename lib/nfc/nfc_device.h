@@ -1,6 +1,6 @@
 /**
  * @file nfc_device.h
- * @brief The NfcDevice library provides an abstract interface for managing NFC devices' data.
+ * @brief Abstract interface for managing NFC device data.
  *
  * Under the hood, it makes use of the protocol-specific functions that each one of them provides
  * and abstracts it with a protocol-independent API.

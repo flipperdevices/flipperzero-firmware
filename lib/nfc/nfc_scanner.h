@@ -1,9 +1,9 @@
 /**
  * @file nfc_scanner.h
- * @brief The NfcScanner library provides NFC card detection facilities.
+ * @brief NFC card detection library.
  *
- * Once started, it will iterate over all available protocols and return a list of
- * one or more detected protocol identifiers via a user-provided callback.
+ * Once started, a NfcScanner instance will iterate over all available protocols
+ * and return a list of one or more detected protocol identifiers via a user-provided callback.
  *
  * The NfcScanner behaviour is greedy, i.e. it will not stop scanning upon detection of
  * a just one protocol and will try others as well until all possibilities are exhausted.

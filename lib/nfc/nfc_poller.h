@@ -1,6 +1,6 @@
 /**
  * @file nfc_poller.h
- * @brief The NfcPoller library provides NFC card reading(polling) facilities.
+ * @brief NFC card reading library.
  *
  * Once started, it will try to activate and read a card using the designated protocol,
  * which is usually obtained by creating and starting an NfcScanner first.
