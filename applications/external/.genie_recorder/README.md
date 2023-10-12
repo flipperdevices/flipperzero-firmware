@@ -1,5 +1,10 @@
 # Genie garage door recorder
 
+Watch this [YouTube video](https://youtu.be/C-TnlVM4Ahs) for a demo of installing and running this application.
+
+* You MUST need to edit ``lib\subghz\protocols\keeloq.c`` to change the timing values; or else the application will not work!
+* NOTE: You no longer have to edit ``api_symbols.csv`` file.  
+
 ## Description
 This program was written to allow the Flipper Zero to press buttons on a Genie garage door opened and record the rolling code. The goal is to capture all 65,536 signals (which hopefully repeats when it gets to the end).  Our click speed is current 2000ms per click + however long it takes to get the signal.  So if we assume it's 1000-1500/hr = about 3 days?
 
@@ -16,12 +21,10 @@ WARNING -- This could desync your remote from the receiver.
 WARNING -- Don't run this near your garage.  There is no reason to open the physical garage door & you will likely burn out the motor.
 
 ## Running
-- Step 0. Copy [these files](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder) into your firmware ``applications_user\genie-recorder`` folder. 
-- Step 1. Build your firmware.  You will get a build error.
-- Step 2. Edit your ``firmware\targets\f7\api_symbols.csv`` file so that storage_file_sync is public. 
-  ``Function,+,storage_file_sync,_Bool,File*``
+- Step 1. Copy [these files](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder) into your firmware ``applications_user\genie-recorder`` folder. 
+- Step 2. Build your firmware (``./fbt vscode_dist`` & ``./fbt`` -- "[Debug] Build Firmware").  You may get a build error.
 - Step 3. Edit ``lib\subghz\protocols\keeloq.c`` so it have te_short=200, te_long=400, te_delta=70.  NOTE: This will no longer be able to receive signals from other KeeLoq devices.
-- Step 4. Build your firmware & deploy onto Flipper.
+- Step 4. Build your firmware & deploy onto Flipper  ``./fbt FORCE=1 flash_usb_full`` -- "[Debug]Flash (USB, with Resources)".
 - Step 5. On your Flipper Zero, load ``Sub-GHz`` app.
 - Step 6. Choose ``Read`` to start scanning.
 - Step 7. Press the LEFT button to edit the Config.
@@ -42,8 +45,7 @@ WARNING -- Don't run this near your garage.  There is no reason to open the phys
 - Step 18. Let it run for three days (the goal is to capture at least 65,536+ signals)
 - Step 19. Press the BACK button twice to exit the application.
 - Step 20. Copy the file "\apps_data\genie\keys.txt" from the SD card to your computer.
-
-- Step 21. Edit ``lib\subghz\protocols\keeloq.c`` so it have te_short=400, te_long=800, te_delta=140.
+- Step 21. Edit ``lib\subghz\protocols\keeloq.c`` so it has original values of te_short=400, te_long=800, te_delta=140.
 - Step 22. Build your firmware & deploy onto Flipper.
 
 Now that you have the keys.txt file, you can use the [Genie.py script](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/samples/genie-girud-1t/README.md) to generate a genie.sub file that will transmit the key.
