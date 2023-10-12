@@ -69,6 +69,12 @@ If enabled, `esp-serial-flasher` is capable of verifying flash integrity after w
 Default: Enabled
 > Warning: As ROM bootloader of the ESP8266 does not support MD5_CHECK, this option has to be disabled!
 
+* `SERIAL_FLASHER_WRITE_BLOCK_RETRIES`
+
+This configures the amount of retries for writing blocks either to target flash or RAM.
+
+Default: 3
+
 * `SERIAL_FLASHER_RESET_HOLD_TIME_MS`
 
 This is the time for which the reset pin is asserted when doing a hard reset in milliseconds.

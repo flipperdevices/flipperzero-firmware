@@ -292,9 +292,15 @@ esp_loader_error_t esp_loader_flash_write(void *payload, uint32_t size)
 
     md5_update(payload, (size + 3) & ~3);
 
-    loader_port_start_timer(DEFAULT_TIMEOUT);
+    unsigned int attempt = 0;
+    esp_loader_error_t result = ESP_LOADER_ERROR_FAIL;
+    do {
+        loader_port_start_timer(DEFAULT_TIMEOUT);
+        result = loader_flash_data_cmd(data, s_flash_write_size);
+        attempt++;
+    } while (result != ESP_LOADER_SUCCESS && attempt < SERIAL_FLASHER_WRITE_BLOCK_RETRIES);
 
-    return loader_flash_data_cmd(data, s_flash_write_size);
+    return result;
 }
 
 
@@ -317,8 +323,16 @@ esp_loader_error_t esp_loader_mem_start(uint32_t offset, uint32_t size, uint32_t
 esp_loader_error_t esp_loader_mem_write(const void *payload, uint32_t size)
 {
     const uint8_t *data = (const uint8_t *)payload;
-    loader_port_start_timer(timeout_per_mb(size, LOAD_RAM_TIMEOUT_PER_MB));
-    return loader_mem_data_cmd(data, size);
+    
+    unsigned int attempt = 0;
+    esp_loader_error_t result = ESP_LOADER_ERROR_FAIL;
+    do {
+        loader_port_start_timer(timeout_per_mb(size, LOAD_RAM_TIMEOUT_PER_MB));
+        result = loader_mem_data_cmd(data, size);
+        attempt++;
+    } while (result != ESP_LOADER_SUCCESS && attempt < SERIAL_FLASHER_WRITE_BLOCK_RETRIES);
+    
+    return result;
 }
 
 

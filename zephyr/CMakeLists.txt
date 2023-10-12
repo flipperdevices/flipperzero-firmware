@@ -27,4 +27,10 @@ if (CONFIG_ESP_SERIAL_FLASHER)
     if(DEFINED MD5_ENABLED OR CONFIG_SERIAL_FLASHER_MD5_ENABLED)
         target_compile_definitions(esp_flasher INTERFACE -DMD5_ENABLED=1)
     endif()
+
+    target_compile_definitions(esp_flasher
+    INTERFACE
+        SERIAL_FLASHER_WRITE_BLOCK_RETRIES=${CONFIG_SERIAL_FLASHER_WRITE_BLOCK_RETRIES}
+    )
+
 endif()
