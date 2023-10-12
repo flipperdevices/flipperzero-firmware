@@ -1,6 +1,6 @@
 /**
  * @file nfc_protocol_support_common.h
- * @brief Common NFC protocol support definitions.
+ * @brief Common application-level protocol support definitions.
  */
 #pragma once
 

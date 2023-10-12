@@ -1,3 +1,10 @@
+/**
+ * @file nfc_protocol_support_defs.c
+ * @brief Application-level protocol support definitions.
+ *
+ * This file is to be modified whenever support for
+ * a new protocol is to be added.
+ */
 #include "nfc_protocol_support_base.h"
 
 #include <nfc/protocols/nfc_protocol.h>
@@ -13,6 +20,14 @@
 #include "mf_desfire/mf_desfire.h"
 #include "slix/slix.h"
 
+/**
+ * @brief Array of pointers to concrete protocol support implementations.
+ *
+ * When adding support for a new protocol, add it to the end of this array
+ * under its respective index.
+ *
+ * @see nfc_protocol.h
+ */
 const NfcProtocolSupportBase* nfc_protocol_support[NfcProtocolNum] = {
     [NfcProtocolIso14443_3a] = &nfc_protocol_support_iso14443_3a,
     [NfcProtocolIso14443_3b] = &nfc_protocol_support_iso14443_3b,
@@ -24,5 +39,5 @@ const NfcProtocolSupportBase* nfc_protocol_support[NfcProtocolNum] = {
     [NfcProtocolMfClassic] = &nfc_protocol_support_mf_classic,
     [NfcProtocolMfDesfire] = &nfc_protocol_support_mf_desfire,
     [NfcProtocolSlix] = &nfc_protocol_support_slix,
-    /* Add new protocols here */
+    /* Add new protocol support implementations here */
 };

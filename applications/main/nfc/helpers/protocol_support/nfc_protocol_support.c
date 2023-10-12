@@ -1,3 +1,10 @@
+/**
+ * @file nfc_protocol_support.c
+ * @brief Common implementation of application-level protocol support.
+ *
+ * @see nfc_protocol_support_base.h
+ * @see nfc_protocol_support_common.h
+ */
 #include "nfc_protocol_support.h"
 
 #include "nfc/nfc_app_i.h"
@@ -6,14 +13,36 @@
 #include "nfc_protocol_support_defs.h"
 #include "nfc_protocol_support_gui_common.h"
 
+/**
+ * @brief Common scene entry handler.
+ *
+ * @param[in,out] instance pointer to the NFC application instance.
+ */
 typedef void (*NfcProtocolSupportCommonOnEnter)(NfcApp* instance);
+
+/**
+ * @brief Common scene custom event handler.
+ *
+ * @param[in,out] instance pointer to the NFC application instance.
+ * @param[in] event custom event to be handled.
+ * @returns true if the event was handled, false otherwise.
+ */
 typedef bool (*NfcProtocolSupportCommonOnEvent)(NfcApp* instance, SceneManagerEvent event);
+
+/**
+ * @brief Common scene exit handler.
+ *
+ * @param[in,out] instance pointer to the NFC application instance.
+ */
 typedef void (*NfcProtocolSupportCommonOnExit)(NfcApp* instance);
 
+/**
+ * @brief Structure containing common scene handler pointers.
+ */
 typedef struct {
-    NfcProtocolSupportCommonOnEnter on_enter;
-    NfcProtocolSupportCommonOnEvent on_event;
-    NfcProtocolSupportCommonOnExit on_exit;
+    NfcProtocolSupportCommonOnEnter on_enter; /**< Pointer to the on_enter() function. */
+    NfcProtocolSupportCommonOnEvent on_event; /**< Pointer to the on_event() function. */
+    NfcProtocolSupportCommonOnExit on_exit; /**< Pointer to the on_exit() function. */
 } NfcProtocolSupportCommonSceneBase;
 
 static const NfcProtocolSupportCommonSceneBase nfc_protocol_support_scenes[];
@@ -503,9 +532,18 @@ static void nfc_protocol_support_scene_save_name_on_exit(NfcApp* instance) {
 }
 
 // SceneEmulate
+/**
+ * @brief Current view displayed on the emulation scene.
+ *
+ * The emulation scehe has two states: the default one showing information about
+ * the card being emulated, and the logs which show the raw data received from the reader.
+ *
+ * The user has the ability to switch betweeen these two scenes, however the prompt to switch is
+ * only shown after some information had appered in the log view.
+ */
 enum {
-    NfcSceneEmulateStateWidget,
-    NfcSceneEmulateStateTextBox,
+    NfcSceneEmulateStateWidget, /**< Widget view is displayed. */
+    NfcSceneEmulateStateTextBox, /**< TextBox view is displayed. */
 };
 
 static void nfc_protocol_support_scene_emulate_on_enter(NfcApp* instance) {

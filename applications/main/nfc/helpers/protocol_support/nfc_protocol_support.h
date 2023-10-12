@@ -1,6 +1,6 @@
 /**
  * @file nfc_protocol_support.h
- * @brief Protocol support for NFC application.
+ * @brief Interface for application-level protocol support.
  *
  * NFC protocol support helper abstracts common scenes with a single interface
  * and lets each protocol decide on concrete implementation.
