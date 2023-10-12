@@ -255,6 +255,7 @@ typedef struct ccid_bulk_message_header {
     uint32_t dwLength;
     uint8_t bSlot;
     uint8_t bSeq;
+    uint8_t abRFU[3];
 } __attribute__((packed)) ccid_bulk_message_header_t;
 
 uint8_t SendBuffer[sizeof(ccid_bulk_message_header_t) + CCID_DATABLOCK_SIZE];
@@ -331,13 +332,13 @@ void CALLBACK_CCID_IccPowerOn(
             if(callbacks[CCID_SLOT_INDEX] != NULL) {
                 callbacks[CCID_SLOT_INDEX]->icc_power_on_callback(
                     responseDataBlock->abData, &responseDataBlock->dwLength, NULL);
+                    responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
+                                         CCID_ICCSTATUS_PRESENTANDACTIVE;
             } else {
                 responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
                                              CCID_ICCSTATUS_PRESENTANDINACTIVE;
             }
-
-            responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
-                                         CCID_ICCSTATUS_PRESENTANDACTIVE;
+            
         } else {
             responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
                                          CCID_ICCSTATUS_NOICCPRESENT;
@@ -366,13 +367,14 @@ void CALLBACK_CCID_XfrBlock(
                     responseDataBlock->abData,
                     &responseDataBlock->dwLength,
                     NULL);
+                    responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
+                                         CCID_ICCSTATUS_PRESENTANDACTIVE;
             } else {
                 responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
                                              CCID_ICCSTATUS_PRESENTANDINACTIVE;
             }
 
-            responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
-                                         CCID_ICCSTATUS_PRESENTANDACTIVE;
+            
         } else {
             responseDataBlock->bStatus = CCID_COMMANDSTATUS_PROCESSEDWITHOUTERROR |
                                          CCID_ICCSTATUS_NOICCPRESENT;
@@ -413,7 +415,7 @@ static void ccid_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
             usb_dev, ep, &ReceiveBuffer, sizeof(ccid_bulk_message_header_t) + CCID_DATABLOCK_SIZE);
         //minimum request size is header size
         furi_assert((uint16_t)bytes_read >= sizeof(ccid_bulk_message_header_t));
-        ccid_bulk_message_header_t* message = (ccid_bulk_message_header_t*)&ReceiveBuffer;
+        ccid_bulk_message_header_t* message = (ccid_bulk_message_header_t*)&ReceiveBuffer; //-V641
 
         if(message->bMessageType == PC_TO_RDR_ICCPOWERON) {
             struct pc_to_rdr_icc_power_on* requestDataBlock =
@@ -434,7 +436,7 @@ static void ccid_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
             struct pc_to_rdr_icc_power_off* requestIccPowerOff =
                 (struct pc_to_rdr_icc_power_off*)message;
             struct rdr_to_pc_slot_status* responseSlotStatus =
-                (struct rdr_to_pc_slot_status*)&SendBuffer;
+                (struct rdr_to_pc_slot_status*)&SendBuffer; //-V641
 
             CALLBACK_CCID_GetSlotStatus(
                 requestIccPowerOff->bSlot, requestIccPowerOff->bSeq, responseSlotStatus);
@@ -445,7 +447,7 @@ static void ccid_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
             struct pc_to_rdr_get_slot_status* requestSlotStatus =
                 (struct pc_to_rdr_get_slot_status*)message;
             struct rdr_to_pc_slot_status* responseSlotStatus =
-                (struct rdr_to_pc_slot_status*)&SendBuffer;
+                (struct rdr_to_pc_slot_status*)&SendBuffer; //-V641
 
             CALLBACK_CCID_GetSlotStatus(
                 requestSlotStatus->bSlot, requestSlotStatus->bSeq, responseSlotStatus);
@@ -474,9 +476,9 @@ static void ccid_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
                     (sizeof(uint8_t) * responseDataBlock->dwLength));
         } else if(message->bMessageType == PC_TO_RDR_SETPARAMETERS) {
             struct pc_to_rdr_set_parameters_t0* requestSetParametersT0 =
-                (struct pc_to_rdr_set_parameters_t0*)message;
+                (struct pc_to_rdr_set_parameters_t0*)message; //-V641
             struct rdr_to_pc_parameters_t0* responseSetParametersT0 =
-                (struct rdr_to_pc_parameters_t0*)&SendBuffer;
+                (struct rdr_to_pc_parameters_t0*)&SendBuffer; //-V641
 
             furi_assert(requestSetParametersT0->dwLength <= CCID_DATABLOCK_SIZE);
             furi_assert(
