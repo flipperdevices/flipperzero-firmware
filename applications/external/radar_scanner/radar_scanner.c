@@ -75,8 +75,21 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         elements_multiline_text_aligned(canvas, 64, 32, AlignCenter, AlignTop, "Muted");
     }
 
+#ifdef FW_ORIGIN_Official
+    canvas_set_font(canvas, FontKeyboard);
+    if(altPinout) {
+        elements_multiline_text_aligned(
+            canvas, 64, 42, AlignCenter, AlignTop, "Alt-PinoutEnabled");
+        elements_multiline_text_aligned(canvas, 64, 49, AlignCenter, AlignTop, "GND -> Pin 3");
+        elements_multiline_text_aligned(canvas, 64, 56, AlignCenter, AlignTop, "OUT -> Pin 2(A7)");
+    } else if(!altPinout) {
+        elements_multiline_text_aligned(
+            canvas, 64, 42, AlignCenter, AlignTop, "Alt-PinoutDisabled");
+        elements_multiline_text_aligned(canvas, 64, 49, AlignCenter, AlignTop, "GND -> GND");
+        elements_multiline_text_aligned(canvas, 64, 56, AlignCenter, AlignTop, "OUT -> Pin 7(C3)");
+    }
+#else
     canvas_set_font(canvas, FontBatteryPercent);
-
     if(altPinout) {
         elements_multiline_text_aligned(
             canvas, 64, 42, AlignCenter, AlignTop, "Alt-Pinout Enabled");
@@ -92,6 +105,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         elements_multiline_text_aligned(
             canvas, 64, 56, AlignCenter, AlignTop, "OUT -> Pin 7 (C3)");
     }
+#endif
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
@@ -132,7 +146,7 @@ int32_t app_radar_scanner(void* p) {
     furi_hal_gpio_init(altGroundPin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_write(altGroundPin, false);
 
-    // Auto 5v- Thanks xMasterX, since these next 6 lines of code came from you at first...
+    // Auto 5v power
     uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
