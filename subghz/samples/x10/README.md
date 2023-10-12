@@ -9,9 +9,12 @@ These Flipper Zero subghz captures are from the remote control for the X10.  Thi
 - Model CR12A   x10.com
 - FCC ID: [b4ssr12a](https://fccid.io/b4ssr12a)
 
+- Radio Shack  61-2663T   (Remote 2)
+- FCC ID: [b4s61-2663t](https://fccid.io/b4s61-2663t)
+
 
 ## Hardware
-NOTE: As an Amazon Associate I (CodeAllNight) earn from qualifying purchases from the amzn.to links below. 
+NOTE: As an Amazon Affiliate I (CodeAllNight) may earn from qualifying purchases from the amzn.to links below. 
 
 The signals were captured from the "X10 Camera Control System Remote Control Model CR12A" which you can purchase from https://amzn.to/3issZPs and should also be compatible with signals from https://amzn.to/3QEF7cM (but the timing may be slightly different).
 
