@@ -41,6 +41,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - OFW: [Fix various crashes if debug libraries used #3144 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3144)
 - CFW Settings Layout options for Terminal for Main Menu (By MatthewKuKanich)
+- OFW: [CAME/NICE 12-bit get assigned 16-bit key #3141 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/3141)
+- OFW: [Fix double arrows and add proper indication #3146 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3146)
 
 <a name="release">
 
