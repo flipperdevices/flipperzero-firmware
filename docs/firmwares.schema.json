@@ -156,13 +156,21 @@
                     "git_branch": {
                       "description": "Github branch name",
                       "type": "string"
+                    },
+                    "git_event": {
+                      "description": "Github event",
+                      "type": "string",
+                      "enum": [
+                        "push",
+                        "pull_request",
+                        "issue"
+                      ]
                     }
                   },
                   "required": [
                     "git_repo",
                     "git_action",
-                    "git_artifact",
-                    "git_branch"
+                    "git_artifact"
                   ],
                   "unevaluatedProperties ": false
                 },

@@ -25,7 +25,15 @@ if ($command -eq 'use') {
         $ufbt_command = "ufbt update --index-url=$($matching_firmware.index_url) --channel=$($matching_firmware.channel)"
     }
     elseif ($matching_firmware.type -eq 'git-action') {
-        $workflow_runs = Invoke-RestMethod -Uri "https://api.github.com/repos/$($matching_firmware.git_repo)/actions/workflows/$($matching_firmware.git_action)/runs?per_page=1&branch=$($matching_firmware.git_branch)&status=success"
+        $workflow_runs_uri = "https://api.github.com/repos/$($matching_firmware.git_repo)/actions/workflows/$($matching_firmware.git_action)/runs?per_page=1&status=success"
+        if ($matching_firmware.git_branch) {
+            $workflow_runs_uri += "&branch=$($matching_firmware.git_branch)"
+        }
+        if ($matching_firmware.git_event) {
+            $workflow_runs_uri += "&event=$($matching_firmware.git_event)"
+        }
+ 
+        $workflow_runs = Invoke-RestMethod -Uri $workflow_runs_uri
         $last_success_run = $workflow_runs.workflow_runs | Select-Object -Index 0
         $artifact_dir = Join-Path (Resolve-Path "~/") ".ufbt/.ufbt_fm/$($matching_firmware.git_repo)/$($matching_firmware.git_action)/$($matching_firmware.git_branch)"
         $sdk_zip_path = Join-Path $artifact_dir "sdk-$($last_success_run.id).zip"

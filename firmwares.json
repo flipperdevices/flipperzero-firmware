@@ -45,7 +45,8 @@
       "git_repo": "Flipper-XFW/Xtreme-Firmware",
       "git_action": "build.yml",
       "git_artifact": "dist",
-      "git_branch": "dev"
+      "git_branch": "dev",
+      "git_event": "push"
     }
   ]
 }
