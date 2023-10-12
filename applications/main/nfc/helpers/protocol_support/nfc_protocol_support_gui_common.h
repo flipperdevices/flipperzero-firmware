@@ -76,10 +76,10 @@ void nfc_protocol_support_common_on_enter_empty(NfcApp* instance);
 /**
  * @brief Empty on_event() handler.
  *
- * Does nothing and returns false.
+ * Does nothing and returns true.
  *
  * @param[in] instance pointer to the NFC application instance.
  * @param[in] event custom event type that has occurred.
- * @returns always false.
+ * @returns always true.
  */
 bool nfc_protocol_support_common_on_event_empty(NfcApp* instance, uint32_t event);

@@ -12,6 +12,7 @@ typedef enum {
     NfcProtocolFeatureEmulateUid = 1UL << 0, /**< Partial emulation is supported. */
     NfcProtocolFeatureEmulateFull = 1UL << 1, /**< Complete emulation is supported. */
     NfcProtocolFeatureEditUid = 1UL << 2, /**< UID editing is supported. */
+    NfcProtocolFeatureMoreInfo = 1UL << 3, /**< More information is provided. */
 } NfcProtocolFeature;
 
 /**

@@ -109,12 +109,12 @@ const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_iso15693_3,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read =
         {
             .on_enter = nfc_scene_read_on_enter_iso15693_3,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read_menu =
         {
@@ -124,7 +124,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
     .scene_read_success =
         {
             .on_enter = nfc_scene_read_success_on_enter_iso15693_3,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_saved_menu =
         {
@@ -133,12 +133,12 @@ const NfcProtocolSupportBase nfc_protocol_support_iso15693_3 = {
         },
     .scene_save_name =
         {
-            .on_enter = NULL,
-            .on_event = NULL,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_emulate =
         {
             .on_enter = nfc_scene_emulate_on_enter_iso15693_3,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
 };

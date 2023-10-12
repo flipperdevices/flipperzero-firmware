@@ -29,7 +29,7 @@ ADD_SCENE(nfc, mf_ultralight_unlock_warn, MfUltralightUnlockWarn)
 ADD_SCENE(nfc, mf_ultralight_key_input, MfUltralightKeyInput)
 ADD_SCENE(nfc, mf_ultralight_capture_pass, MfUltralightCapturePass)
 
-ADD_SCENE(nfc, mf_desfire_data, MfDesfireData)
+ADD_SCENE(nfc, mf_desfire_more_info, MfDesfireMoreInfo)
 ADD_SCENE(nfc, mf_desfire_app, MfDesfireApp)
 
 ADD_SCENE(nfc, mf_classic_dict_attack, MfClassicDictAttack)

@@ -19,7 +19,7 @@ typedef void (*NfcProtocolSupportOnEnter)(NfcApp* instance);
  * @brief Scene event handler.
  *
  * @param[in,out] instance pointer to the NFC application instance.
- * @param[in] custom event to be handled.
+ * @param[in] event custom event that has occurred.
  * @returns true if the event was handled, false otherwise.
  */
 typedef bool (*NfcProtocolSupportOnEvent)(NfcApp* instance, uint32_t event);
