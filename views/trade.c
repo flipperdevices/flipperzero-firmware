@@ -155,6 +155,9 @@ void screen_gameboy_connected(Canvas* const canvas) {
 
 int time_in_seconds = 0;
 
+uint8_t patch_list[205] = {0};
+uint8_t patch_cnt;
+
 static void trade_draw_callback(Canvas* canvas, void* model) {
     const char* gameboy_status_text = NULL;
     struct trade_model* view_model = model;
@@ -400,14 +403,27 @@ byte getTradeCentreResponse(byte in, void* context) {
             }
             counter++;
         }
+	/* XXX: HACK: prep patch list */
+	patch_list[0] = 0xFD;
+	patch_list[1] = 0xFD;
+	patch_list[2] = 0xFD;
+        /* Patchs actually start at 11th byte? */
+	patch_cnt = 10;
         break;
 
     /* This could fall in to the next case statement maybe? */
+    /* XXX: I think this should actually be checking for in to NOT == 0xFD */
     case WAITING_TO_SEND_DATA:
         if((in & 0xF0) != 0xF0) {
             counter = 0;
             INPUT_BLOCK[counter] = in;
-            send = trade_block_flat[counter];
+	    if (trade_block_flat[counter] == 0xFE) {
+                send = 0xFF;
+                patch_list[patch_cnt] = counter+1;
+                patch_cnt++;
+            } else {
+                send = trade_block_flat[counter];
+            }
             counter++;
             trade_centre_state = SENDING_DATA;
         }
@@ -417,14 +433,27 @@ byte getTradeCentreResponse(byte in, void* context) {
     /* XXX: The current implementation ends up stopping short of sending data from flipper
      * and instead mirrors back data from the gameboy before we have technically sent our
      * whole struct */
+    /* XXX: HACK: I think this will only work with the first patch list part */
     case SENDING_DATA:
         INPUT_BLOCK[counter] = in;
-        send = trade_block_flat[counter];
+        if (trade_block_flat[counter] == 0xFE) {
+            send = 0xFF;
+            patch_list[patch_cnt] = counter+1;
+            patch_cnt++;
+        } else {
+            send = trade_block_flat[counter];
+        }
         counter++;
+
+	if ((counter & 0xFF) == 0xFE) {
+            patch_list[patch_cnt] = 0xFF;
+	    patch_cnt++;
+	}
 	/* This should be 418? */
-        if(counter == 418) //TODO: replace with sizeof struct rather than static number
+	/* XXX: It breaks when this is set to 418. Need to fix this */
+        if(counter == 405) //TODO: replace with sizeof struct rather than static number
             trade_centre_state = SENDING_PATCH_DATA;
-        break;
+	break;
 
     /* XXX: I still have no idea what patch data is in context of the firmware */
     /* XXX: This seems to end with the gameboy sending DF FE 15? */
@@ -434,9 +463,13 @@ byte getTradeCentreResponse(byte in, void* context) {
     case SENDING_PATCH_DATA:
         if(in == 0xFD) {
             counter = 0;
+	    patch_cnt = 3;
             send = 0xFD;
         } else {
             counter++;
+            send = patch_list[patch_cnt];
+            patch_cnt++;
+
 	    /* This is actually 200 bytes */
 	    /* XXX: Interestingly, it does appear to actually be 197 bytes from the first 00 after trade block, minus FFs, to the last 00 sent before long delay */
             if(counter == 197) // TODO: What is this magic value?
@@ -483,6 +516,7 @@ byte getTradeCentreResponse(byte in, void* context) {
             send = 0;
             trade_centre_state = SENDING_RANDOM_DATA;
             gameboy_status = GAMEBOY_TRADING;
+	    counter = 0;
         }
         break;
 
