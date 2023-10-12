@@ -516,7 +516,7 @@ byte getTradeCentreResponse(byte in, void* context) {
     case DONE:
         if(in == 0x00) {
             send = 0;
-            trade_centre_state = SENDING_RANDOM_DATA;
+            trade_centre_state = READY_TO_GO;
             gameboy_status = GAMEBOY_TRADING;
 	    counter = 0;
         }
