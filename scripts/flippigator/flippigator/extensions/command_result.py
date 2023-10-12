@@ -13,8 +13,10 @@ class command_result:
     def __init__(self, input):
         print("input: ", input)
         s = str(input).split("\n")
+        # remove empty lines
+        s = list(filter(None, s))
         self.__Command = s[0]
-        self.__Result = s[1].removeprefix("[+] ").removesuffix(" ")
+        self.__Result = s[1:]
 
 
 class proxmark_command:

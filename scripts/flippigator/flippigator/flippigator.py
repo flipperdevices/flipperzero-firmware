@@ -298,12 +298,15 @@ class Navigator:
 
         return menus
 
-    def go_to(self, target, area=(0, 64, 0, 128)):
+    def go_to(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
         state = self.get_current_state(area=area)
         self.logger.info("Going to " + target)
 
         while not (target in state):
-            self.press_down()
+            if direction == "down":
+                self.press_down()
+            elif direction == "up":
+                self.press_up()
             state = self.get_current_state(area=area)
 
     def go_to_main_screen(self):

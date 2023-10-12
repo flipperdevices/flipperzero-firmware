@@ -44,7 +44,7 @@ class proxmark_wrapper:
 
         result = self.__get_result(data_out)
         print("result: ", result[0])
-        return result
+        return result[0]
 
     def shutdown(self):
         pass
@@ -57,8 +57,8 @@ class proxmark_wrapper:
         raw_result = str(output_data).split("[usb|script] pm3 --> ")
 
         print("raw_result: ", raw_result)
+        print("-------------------------------------")
         result = []
         for raw in raw_result[1:]:
-            print("raw: ", raw)
             result.append(command_result(raw).Result)
         return result

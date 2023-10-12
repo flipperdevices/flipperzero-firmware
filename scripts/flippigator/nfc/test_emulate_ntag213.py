@@ -13,18 +13,9 @@ class TestEmulateNtag213:
 
     @pytest.mark.skip(reason="not implemented")
     def test_ntag213_basic(self, px):
-        # nav.go_to_main_screen()
-        #
-        # if nav.open_file("NFC", "Ntag213") == -1:
-        #     assert 0, "File not found"
-        # nav.get_current_state()
-
-        # data = px.execute_single("hf 14a raw -sc 3000")
-        # repeat previous line with enter button in the end
-        # data = px.execute(["hf 14a raw -sc 3000\n"])
-        #
-        # print(data)
-        # result = px.execute_single("hf 14a raw -sc 3000")
+        """
+        Todo: Rewrite proper example (not up to date)
+        """
         pm = proxmark_wrapper("/home/vk/work/proxmark3/pm3")
         # pm.execute_single("hf 14a raw -sc 3000")
 
@@ -34,30 +25,9 @@ class TestEmulateNtag213:
         print(result)
         print("-------------------------------------")
 
-        # result = px.execute(["hf 14a raw -sc 3000\n","hf 14a raw -sc 3000\n","hf 14a raw -sc 3001\n"])
-        # print(result)
-
         assert (
             result == "04 63 5D B2 9A 5A 12 90 42 48 00 00 E1 10 6D 00 [ 65 9C ]"
         ), "Incorrect data on NFC card"
-        # reader_nfc.go_to_place()
-        # reader_nfc.clear()
-        #
-        # if nav.open_file("NFC", "BN2") == -1:
-        #     assert 0, "File not found"
-        # nav.get_current_state()
-        #
-        # start_time = time.time()
-        # while start_time + 5 > time.time():
-        #     if reader_nfc.update():
-        #         string = reader_nfc.get()
-        #         assert string == "W58W60950399D1334", "Emulated NFC card reading failed"
-        #         break
-        #
-        # if start_time + 5 < time.time():
-        #     assert 0, "Timeout of emulation"
-
-        # nav.go_to_main_screen()
 
     Test_Data = [
         ("hf 14a raw -sc A229440024FF", "0A", "Error: NFC card not found"),

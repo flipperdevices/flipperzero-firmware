@@ -3,11 +3,7 @@ name: 'Smoke tests'
 on:
   push:
     branches:
-      - dev
       - "release*"
-    tags:
-      - '*'
-  pull_request:
 
 env:
   TARGETS: f7
