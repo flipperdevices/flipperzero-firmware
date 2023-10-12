@@ -134,8 +134,7 @@ volatile connection_state_t connection_state =
     NOT_CONNECTED; // Should be made in to view model struct
 volatile trade_centre_state_t trade_centre_state =
     INIT; // Should be able to be made part of view model
-TradeBlock *input_block;
-//unsigned char INPUT_BLOCK[405]; // Put this in pokemon_fap? Not sure yet
+unsigned char INPUT_BLOCK[405]; // Put this in pokemon_fap? Not sure yet
 
 void screen_gameboy_connect(Canvas* const canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -156,13 +155,8 @@ void screen_gameboy_connected(Canvas* const canvas) {
 
 int time_in_seconds = 0;
 
-struct patch_list {
-    uint8_t index;
-    struct patch_list *next;
-};
-
-static struct patch_list *patch_list = NULL;
-uint8_t patch_cnt = 0;
+uint8_t patch_list[205] = {0};
+uint8_t patch_cnt;
 
 static void trade_draw_callback(Canvas* canvas, void* model) {
     const char* gameboy_status_text = NULL;
@@ -339,12 +333,8 @@ byte getTradeCentreResponse(byte in, void* context) {
     furi_assert(context);
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     uint8_t* trade_block_flat = (uint8_t*)pokemon_fap->trade_block;
-    uint8_t* input_block_flat = (uint8_t*)input_block;
     render_gameboy_state_t gameboy_status;
-    uint8_t in_pokemon_num = 0;
     byte send = in;
-    struct patch_list *patch_list_ptr = patch_list;
-    static struct patch_list *patch_list_hack;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
      * and what response to expect.
@@ -413,9 +403,12 @@ byte getTradeCentreResponse(byte in, void* context) {
             }
             counter++;
         }
-
-        /* Patches actually start at 11th byte? */
-	patch_cnt = 0;
+	/* XXX: HACK: prep patch list */
+	patch_list[0] = 0xFD;
+	patch_list[1] = 0xFD;
+	patch_list[2] = 0xFD;
+        /* Patchs actually start at 11th byte? */
+	patch_cnt = 10;
         break;
 
     /* This could fall in to the next case statement maybe? */
@@ -423,16 +416,11 @@ byte getTradeCentreResponse(byte in, void* context) {
     case WAITING_TO_SEND_DATA:
         if((in & 0xF0) != 0xF0) {
             counter = 0;
-            input_block_flat[counter] = in;
+            INPUT_BLOCK[counter] = in;
 	    if (trade_block_flat[counter] == 0xFE) {
-                while(patch_list_ptr->index != 0) {
-                    patch_list_ptr = patch_list_ptr->next;
-                }
-                patch_list_ptr->index = counter+1;
-                patch_list_ptr->next = malloc(sizeof(struct patch_list));
-                patch_list_ptr = patch_list_ptr->next;
-                patch_list_ptr->index = 0;
-                patch_list_ptr->next = NULL;
+                send = 0xFF;
+                patch_list[patch_cnt] = counter+1;
+                patch_cnt++;
             } else {
                 send = trade_block_flat[counter];
             }
@@ -446,19 +434,12 @@ byte getTradeCentreResponse(byte in, void* context) {
      * and instead mirrors back data from the gameboy before we have technically sent our
      * whole struct */
     /* XXX: HACK: I think this will only work with the first patch list part */
-    /* XXX: HACK: TODO: Set up functions to make it easier to add indicies to the patch list */
     case SENDING_DATA:
-        input_block_flat[counter] = in;
+        INPUT_BLOCK[counter] = in;
         if (trade_block_flat[counter] == 0xFE) {
             send = 0xFF;
-            while(patch_list_ptr->index != 0) {
-                patch_list_ptr = patch_list_ptr->next;
-            }
-            patch_list_ptr->index = counter+1;
-            patch_list_ptr->next = malloc(sizeof(struct patch_list));
-	    patch_list_ptr = patch_list_ptr->next;
-	    patch_list_ptr->index = 0;
-	    patch_list_ptr->next = NULL;
+            patch_list[patch_cnt] = counter+1;
+            patch_cnt++;
         } else {
             send = trade_block_flat[counter];
         }
@@ -466,19 +447,9 @@ byte getTradeCentreResponse(byte in, void* context) {
 
 	if (counter == 0xFE) {
             /* XXX: HACK: Just end the list instantly */
-            while(patch_list_ptr->index != 0) {
-                patch_list_ptr = patch_list_ptr->next;
-            }
-            patch_list_ptr->index = 0xFF;
-            patch_list_ptr->next = malloc(sizeof(struct patch_list));
-	    patch_list_ptr = patch_list_ptr->next;
-
-	    patch_list_ptr->index = 0xFF;
-            patch_list_ptr->next = malloc(sizeof(struct patch_list));
-
-	    patch_list_ptr = patch_list_ptr->next;
-	    patch_list_ptr->index = 0x0;
-	    patch_list_ptr->next = NULL;
+            patch_list[patch_cnt] = 0xFF;
+	    patch_cnt++;
+	    patch_list[patch_cnt] = 0xFF;
 	}
 	/* This should be 418? */
 	/* XXX: It breaks when this is set to 418. Need to fix this */
@@ -496,17 +467,9 @@ byte getTradeCentreResponse(byte in, void* context) {
             counter = 0;
 	    patch_cnt = 3;
             send = 0xFD;
-            patch_list_hack = patch_list;
         } else {
             counter++;
-            if (patch_cnt < 11) {
-                send = 0x00;
-            } else {
-                send = patch_list_hack->index;
-                if (patch_list_hack->next != NULL) {
-                    patch_list_hack = patch_list_hack->next;
-                }
-            }
+            send = patch_list[patch_cnt];
             patch_cnt++;
 
 	    /* This is actually 200 bytes */
@@ -527,7 +490,6 @@ byte getTradeCentreResponse(byte in, void* context) {
             gameboy_status = GAMEBOY_TRADE_READY;
 	    /* 0x6? says what pokemon the gameboy is sending us */
         } else if((in & 0x60) == 0x60) {
-            in_pokemon_num = in & 0x0F;
             send = 0x60; // first pokemon
             gameboy_status = GAMEBOY_SEND;
 	    /* I think this is a confirmation of what is being traded, likely from the dialog of:
@@ -557,13 +519,6 @@ byte getTradeCentreResponse(byte in, void* context) {
             trade_centre_state = READY_TO_GO;
             gameboy_status = GAMEBOY_TRADING;
 	    counter = 0;
-
-            /* Copy the traded-in pokemon's main data to our struct */
-	    pokemon_fap->trade_block->party_members[0] = input_block->party_members[in_pokemon_num];
-            memcpy(&(pokemon_fap->trade_block->party[0]), &(input_block->party[in_pokemon_num]), sizeof(struct pokemon_structure));
-            memcpy(&(pokemon_fap->trade_block->nickname[0]), &(input_block->nickname[in_pokemon_num]), sizeof(struct name));
-            memcpy(&(pokemon_fap->trade_block->ot_name[0]), &(input_block->ot_name[in_pokemon_num]), sizeof(struct name));
- 
         }
         break;
 
@@ -696,11 +651,6 @@ void trade_enter_callback(void* context) {
         },
         true);
 
-    /* XXX: HACK: Patch list setup */
-    patch_list = malloc(sizeof(struct patch_list));
-    patch_list->next = NULL;
-    patch_list->index = 0;
-
     // B3 (Pin6) / SO (2)
     furi_hal_gpio_write(&GAME_BOY_SO, false);
     furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
@@ -746,28 +696,17 @@ View* trade_alloc(PokemonFap* pokemon_fap) {
     view_set_enter_callback(view, trade_enter_callback);
     view_set_exit_callback(view, trade_exit_callback);
 
-    input_block = malloc(sizeof(TradeBlock));
-
     return view;
 }
 
 void trade_free(PokemonFap* pokemon_fap) {
     furi_assert(pokemon_fap);
-    struct patch_list *last_list = patch_list;
     // Free resources
     procesing = false;
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
 
     disconnect_pin(&GAME_BOY_CLK);
 
-    while (patch_list->next != NULL) {
-        patch_list = patch_list->next;
-        free(last_list);
-	last_list = patch_list;
-    }
-    free(last_list);
-
     view_free_model(pokemon_fap->trade_view);
     view_free(pokemon_fap->trade_view);
-    free(input_block);
 }
