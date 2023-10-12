@@ -392,6 +392,46 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
 
             break;
         }
+        case MenuStyleTerminal: {
+            // Draw a border around the screen
+            canvas_draw_frame(canvas, 0, 0, 128, 64);
+
+            // current dir on the title bar
+            canvas_set_font(canvas, FontSecondary);
+            char title[20];
+            snprintf(title, sizeof(title), "%s@fz: ~/Home", furi_hal_version_get_name_ptr());
+            canvas_draw_str(canvas, 20, 10, title);
+
+            canvas_draw_str(canvas, 118, 9, "x"); // "X" button on the top-right corner
+            canvas_draw_frame(canvas, 116, 2, 8, 9);
+            canvas_draw_frame(canvas, 0, 0, 128, 13);
+
+            // Display the user's name line at the bottom
+            canvas_set_font(canvas, FontBatteryPercent);
+            char prefix[15];
+            snprintf(prefix, sizeof(prefix), "%s@fz:~$", furi_hal_version_get_name_ptr());
+            canvas_draw_str(canvas, 2, 56, prefix);
+
+            size_t name_start_x = 2 + (strlen(prefix) - 1) * 6;
+
+            for(size_t i = 0; i < 4 && (position + i) < items_count; i++) {
+                item = MenuItemArray_get(model->items, position + i);
+                menu_short_name(item, name);
+
+                size_t scroll_counter = menu_scroll_counter(model, item);
+                if(i == 0) {
+                    // Display selected item to the right of the $ symbol
+                    // May want to reduce spacing
+                    elements_scrollable_text_line(
+                        canvas, name_start_x, 56, 60, name, scroll_counter, false, false);
+                } else {
+                    // Display the previous items above the user's name line
+                    canvas_draw_str(canvas, 2, 56 - i * 12, item->label);
+                }
+            }
+
+            break;
+        }
         default:
             break;
         }
@@ -640,6 +680,7 @@ static void menu_process_up(Menu* menu) {
             switch(my_menu_style) {
             case MenuStyleList:
             case MenuStyleEurocorp:
+            case MenuStyleTerminal:
                 if(position > 0) {
                     position--;
                     if(vertical_offset && vertical_offset == position) {
@@ -691,6 +732,7 @@ static void menu_process_down(Menu* menu) {
             switch(my_menu_style) {
             case MenuStyleList:
             case MenuStyleEurocorp:
+            case MenuStyleTerminal:
                 if(position < count - 1) {
                     position++;
                     if(vertical_offset < count - 8 && vertical_offset == position - 7) {

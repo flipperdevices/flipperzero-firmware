@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator) [added brightness increase #8 (By MatthewKuKanich)](https://github.com/Kingal1337/flipper-barcode-generator/pull/8)
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - OFW: [Fix various crashes if debug libraries used #3144 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3144)
+- CFW Settings Layout options for Terminal for Main Menu (By MatthewKuKanich)
 
 <a name="release">
 
@@ -179,7 +180,7 @@ $ ./fbt dolphin_ext
 - Settings: [CFW Settings for Desktop Settings & Passport Settings (By ESurge)]
 - Settings: [CFW Settings for Dark Mode (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/83e836fc797ce9ce8998a5d9b1fde6a172480bf2)
 - Settings: [CFW Settings Layout options for Commodore 64 for Main Menu (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a47e7a4a8459a32f493b2f2f4c20137e98da1a1)
-- Settings: [CFW Settings Layout options for Compact for Main Menu (By MatthewKuKanich & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a7208b228bd9eba465f162962b9385d02d28e68c)
+- Settings: [CFW Settings Layout options for Compact & Terminal for Main Menu (By MatthewKuKanich & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a7208b228bd9eba465f162962b9385d02d28e68c)
 - Settings: [CFW Settings Layout options for DSi, PS4, Vertical & Wii for Main Menu (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a47e7a4a8459a32f493b2f2f4c20137e98da1a1)
 - Settings: [CFW Settings Layout options for Eurocorp for Main Menu (By xtruan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/732)
 - Settings: [CFW Settings for Lock Menu Style (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fe3d1ccac0d2058769a0e8f1076b348ef59eaa29)
