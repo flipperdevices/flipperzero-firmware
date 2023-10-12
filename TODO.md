@@ -8,4 +8,4 @@
 
 - Add saving option
 
-- Emulate a full card and not only the UID
+- ~~Emulate a full card and not only the UID~~ 
