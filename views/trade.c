@@ -445,9 +445,11 @@ byte getTradeCentreResponse(byte in, void* context) {
         }
         counter++;
 
-	if ((counter & 0xFF) == 0xFE) {
+	if (counter == 0xFE) {
+            /* XXX: HACK: Just end the list instantly */
             patch_list[patch_cnt] = 0xFF;
 	    patch_cnt++;
+	    patch_list[patch_cnt] = 0xFF;
 	}
 	/* This should be 418? */
 	/* XXX: It breaks when this is set to 418. Need to fix this */
