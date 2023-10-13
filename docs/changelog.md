@@ -1,3 +1,12 @@
+## v0.6.3
+
+BT wardriving and Sour Apple! Requires a board with BT support. Thanks to @justcallmekoko for adding the new commands!
+
+Make sure you flash the latest release of Marauder FW to your wifi board: https://github.com/justcallmekoko/ESP32Marauder/releases/tag/v0.13.0
+
+Note: if you're flashing directly from your flipper using the ESP Flasher app, grab the bin that corresponds to your hardware and only reflash the Firmware partition. (If you have dual boot set up, then choose the slot where you want to install it. Otherwise, reflash FirmwareA only.)
+
+
 ## v0.6.2
 
 Happy wardriving! Thanks to @justcallmekoko for adding the gps and wardrive commands!
