@@ -119,7 +119,7 @@ int flip_rob_app(void* p) {
     /* Reset IR pin */
     furi_hal_gpio_init_simple(IR_PIN, GpioModeAnalog);
 
-    /* Clean up GUI and bail*/
+    /* Clean up GUI and bail */
     gui_remove_view_port(gui, view_port);
 
     return 0;
