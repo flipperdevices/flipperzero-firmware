@@ -1,0 +1,14 @@
+App(
+    appid="flip_rob",
+    name="R.O.B. Control",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flip_rob_app",
+    stack_size=2 * 1024,
+    fap_category="Infrared",
+    fap_icon="flip_rob.png",
+    fap_icon_assets="images",
+    fap_author="John Riney III",
+    fap_weburl="https://github.com/riney/flip_rob",
+    fap_version=(0, 1),
+    fap_description="Control Nintendo R.O.B.",
+)
