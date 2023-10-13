@@ -5,9 +5,8 @@ name: "FAP: Build for multiple SDK sources"
 
 on:
   push:
-    ## put your main branch name under "braches"
-    #branches: 
-    #  - master 
+    branches: 
+      - main
   pull_request:
   schedule: 
     # do a build every day
@@ -19,11 +18,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: dev channel
-            sdk-channel: dev
-          - name: release channel
+          - name: official firmware - release channel
             sdk-channel: release
-          # You can add unofficial channels here. See ufbt action docs for more info.
+          - name: official firmware - dev channel
+            sdk-channel: dev
+          - name: flipper unleashed - release channel
+            sdk-index-url: https://up.unleashedflip.com/directory.json
+            sdk-channel: release
     name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
       - name: Checkout
