@@ -18,11 +18,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: official firmware - release channel
+          - name: official
             sdk-channel: release
-          - name: official firmware - dev channel
+          - name: official
             sdk-channel: dev
-          - name: flipper unleashed - release channel
+          - name: unleashed
             sdk-index-url: https://up.unleashedflip.com/directory.json
             sdk-channel: release
     name: 'ufbt: Build for ${{ matrix.name }}'
@@ -38,5 +38,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           # See ufbt action docs for other output variables
-          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+          name: ${{ github.event.repository.name }}-${{matrix.name}}-${{matrix.sdk-channel}}-${{ steps.build-app.outputs.suffix }}
           path: ${{ steps.build-app.outputs.fap-artifacts }}
