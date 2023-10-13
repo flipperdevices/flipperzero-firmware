@@ -42,7 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [CFW Settings Layout options for Terminal for Main Menu (By MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/78555005bd9cd4f080d2cd67aba3f91afd1eff99)
 - OFW: [CAME/NICE 12-bit get assigned 16-bit key #3141 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/3141)
 - OFW: [Fix double arrows and add proper indication #3146 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3146)
-- Updated: [WiFi (Marauder) v6.2 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [Add commands for BT wardriving and Sour Apple #33 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/33) (NOW WITH MARAUDER SOUR APPLE)
+- Updated: [WiFi (Marauder) v6.3 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [Add commands for BT wardriving and Sour Apple #33 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/33) (NOW WITH MARAUDER SOUR APPLE)
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Crash message for malloc(0) (By Willy-JL)
 - Added: [R.O.B. Control (By riney)](https://github.com/riney/flip_rob)
@@ -461,7 +461,7 @@ $ ./fbt dolphin_ext
 - [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station)
 - [Wiegand Reader v1.2 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266`
-- [WiFi (Marauder) v6.2 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
+- [WiFi (Marauder) v6.3 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
