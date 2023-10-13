@@ -25,10 +25,6 @@
 * OFW: Add extended I2C HAL functions -> **Breaking API change 38.x -> 39.x**
 * OFW: New clock switch schema, **fixes random core2 crashes**
 
-[-> How to install firmware](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/HowToInstall.md)
-
-[-> Download qFlipper (official link)](https://flipperzero.one/update)
-
 ### Thanks to the UNLEASHED sponsors for our UNLEASHED changes:
 callmezimbra, Quen0n, MERRON, grvpvl (lvpvrg), art_col, ThurstonWaffles, Moneron, UterGrooll, LUCFER, Northpirate, zloepuzo, T.Rat, Alexey B., ionelife, ...
 and all other great people who supported our project and me (xMasterX), thanks to you all!
