@@ -33,6 +33,7 @@
  * ### 2.1 Recommended file structure
  *
  * The recommended file structure for a protocol is as follows:
+ *
  * ```text
  * protocols
  *     |
@@ -63,7 +64,7 @@
  *             +- protocol_name_sync_api.h       |
  *             |                                 |- add for synchronous API support
  *             +- protocol_name_sync_api.c       |
- *
+ *             |
  * ```
  *
  * Additionally, an arbitrary amount of private `protocol_name_*_i.h` header files may be created. Do not put implementation
@@ -86,6 +87,7 @@
  * | protocol_name_sync_api.c      | Synchronous API implementation. Optional. |
  *
  * ## 3 Implement the code
+ *
  * ### 3.1 Protocol data structure
  *
  * A protocol data structure is what holds all data that can be possibly read from a card of a certain type. It may include a unique identifier (UID),
@@ -149,10 +151,13 @@
  *
  * ## What's next?
  *
- * However not strictly necessary, it will be a good idea to integrate the newly implemented protocol to the main NFC application.
- * After having done that, a supported card plugin may be implemented to take further advantage of the new protocol.
+ * It's about time to integrate the newly implemented protocol into the main NFC application. Without that, reading a card
+ * of this type would crash it.
  *
  * @see nfc_protocol_support.h for more information on protocol integration.
+ *
+ * After having done that, a supported card plugin may be implemented to take further advantage of the new protocol.
+ *
  * @see nfc_supported_card_plugin.h for more information on supported card plugins.
  *
  */
