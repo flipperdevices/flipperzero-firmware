@@ -647,7 +647,7 @@ void trade_enter_callback(void* context) {
             model->draw_timer =
                 furi_timer_alloc(trade_draw_timer_callback, FuriTimerTypePeriodic, pokemon_fap);
             /* Every 100 ms, trigger a draw update */
-            furi_timer_start(model->draw_timer, 100);
+            furi_timer_start(model->draw_timer, pdMS_TO_TICKS(100));
         },
         true);
 
