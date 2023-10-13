@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1012-1745-0.93.1-ae9f9be](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-13 11:21 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-13 11:21 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-13 12:59 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-13 12:59 EST`
 - Updated: [ESP32-C6 Gravity v0.6 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - Updated: [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` (Changes By xMasterX)
@@ -39,7 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
 - Updated: [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator) [added brightness increase #8 (By MatthewKuKanich)](https://github.com/Kingal1337/flipper-barcode-generator/pull/8)
 - OFW: [Fix various crashes if debug libraries used #3144 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3144)
-- [CFW Settings Layout options for Terminal for Main Menu (By MatthewKuKanich)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/78555005bd9cd4f080d2cd67aba3f91afd1eff99)
+- [CFW Settings Layout options for Terminal for Main Menu (By MatthewKuKanich & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/78555005bd9cd4f080d2cd67aba3f91afd1eff99)
 - OFW: [CAME/NICE 12-bit get assigned 16-bit key #3141 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/3141)
 - OFW: [Fix double arrows and add proper indication #3146 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3146)
 - Updated: [WiFi (Marauder) v6.3 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [Add commands for BT wardriving and Sour Apple #33 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/33) (NOW WITH MARAUDER SOUR APPLE)
