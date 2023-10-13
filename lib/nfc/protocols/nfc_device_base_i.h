@@ -48,8 +48,8 @@ typedef void (*NfcDeviceReset)(NfcDeviceData* data);
 typedef void (*NfcDeviceCopy)(NfcDeviceData* data, const NfcDeviceData* other);
 
 /**
- * @deprecated
  * @brief Deprecated. Do not use in new protocols.
+ * @deprecated do not use in new protocols.
  *
  * @param[in,out] data pointer to the instance to be tested.
  * @param[in] device_type pointer to a FuriString containing a device type identifier.
@@ -138,7 +138,6 @@ typedef NfcDeviceData* (*NfcDeviceGetBaseData)(const NfcDeviceData* data);
  * @brief Generic NFC device interface.
  *
  * Each protocol must fill this structure with its own function implementations.
- * See above for the function signatures and descriptions.
  */
 typedef struct {
     const char*
