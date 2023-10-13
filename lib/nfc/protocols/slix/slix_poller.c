@@ -74,6 +74,7 @@ static NfcCommand slix_poller_handler_read_signature(SlixPoller* instance) {
 
 static NfcCommand slix_poller_handler_error(SlixPoller* instance) {
     instance->slix_event_data.error = instance->error;
+    instance->slix_event.type = SlixPollerEventTypeError;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
     instance->poller_state = SlixPollerStateIdle;
     return command;
@@ -127,7 +128,7 @@ static NfcCommand slix_poller_run(NfcGenericEvent event, void* context) {
 static bool slix_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolIso15693_3);
 
-    const SlixPoller* instance = context;
+    SlixPoller* instance = context;
     furi_assert(instance);
 
     const Iso15693_3PollerEvent* iso15693_3_event = event.event_data;
@@ -138,7 +139,11 @@ static bool slix_poller_detect(NfcGenericEvent event, void* context) {
     bool protocol_detected = false;
 
     if(iso15693_3_event->type == Iso15693_3PollerEventTypeReady) {
-        protocol_detected = slix_get_type(instance->data) < SlixTypeCount;
+        if(slix_get_type(instance->data) < SlixTypeCount) {
+            SlixSystemInfo system_info = {};
+            SlixError error = slix_poller_async_get_nxp_system_info(instance, &system_info);
+            protocol_detected = (error == SlixErrorNone);
+        }
     }
 
     return protocol_detected;

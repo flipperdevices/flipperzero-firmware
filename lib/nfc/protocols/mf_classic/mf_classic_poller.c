@@ -810,7 +810,7 @@ NfcCommand mf_classic_poller_handler_key_reuse_read_sector(MfClassicPoller* inst
         }
     } while(false);
 
-    uint8_t sec_tr_block_num =
+    uint16_t sec_tr_block_num =
         mf_classic_get_sector_trailer_num_by_sector(dict_attack_ctx->reuse_key_sector);
     dict_attack_ctx->current_block++;
     if(dict_attack_ctx->current_block > sec_tr_block_num) {
