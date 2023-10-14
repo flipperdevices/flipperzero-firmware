@@ -126,7 +126,7 @@ typedef enum {
 /* TODO: Convert all of these to be maintained in a struct in the Trade context */
 uint8_t out_data = 0; // Should be able to be made as part of view model or static in used function
 uint8_t in_data = 0; // Should be able to be made as part of view model or static in used function
-uint8_t shift = 0; //Should be able to be made as part of view model, is used in multiple funcs
+uint8_t shift = 0; // Should be able to be made as part of view model or static in used function
 uint32_t time = 0; //Should be able to be made static in used function
 volatile int counter = 0; // Should be able to be made static in used function
 volatile bool procesing = true; // Review this vars use, it could potentially be removed
@@ -157,8 +157,6 @@ int time_in_seconds = 0;
 
 uint8_t patch_list[205] = {0};
 uint8_t patch_cnt;
-
-FuriTimer* irq_bottom_half_timer;
 
 static void trade_draw_callback(Canvas* canvas, void* model) {
     const char* gameboy_status_text = NULL;
@@ -538,11 +536,12 @@ byte getTradeCentreResponse(byte in, void* context) {
     return send;
 }
 
-void response_byte_get(void* context) {
+void response_byte_get(void* context, uint32_t arg) {
     furi_assert(context);
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     bool connected;
     bool trading;
+    UNUSED(arg);
 
     with_view_model(
         pokemon_fap->trade_view,
@@ -588,7 +587,6 @@ void response_byte_get(void* context) {
 /* XXX: TODO: This needs to be responsible for reading the state of the clock pin to determine what edge we're on, read the state of the data in pin, shifting input data, shifting output data, and then calling the bottom half to set up new data where needed */
 void input_clk_gameboy(void* context) {
     furi_assert(context);
-    static int shift;
 
     /* Positive edge, data clocked in */
     if(furi_hal_gpio_read(&GAME_BOY_CLK)) {
@@ -606,10 +604,10 @@ void input_clk_gameboy(void* context) {
         in_data |= furi_hal_gpio_read(&GAME_BOY_SI);
         shift++;
 
-        if(shift == 8) {
+        if(shift > 7) {
+            shift = 0;
             /* Shedule bottom half */
-            /* XXX: TODO: Need to test if 0 works to make an immediate call */
-            furi_timer_start(irq_bottom_half_timer, 1);
+            furi_timer_pending_callback(response_byte_get, context, 0);
         }
 
         time = micros();
@@ -643,11 +641,10 @@ void trade_enter_callback(void* context) {
             model->draw_timer =
                 furi_timer_alloc(trade_draw_timer_callback, FuriTimerTypePeriodic, pokemon_fap);
             /* Every 100 ms, trigger a draw update */
-            furi_timer_start(model->draw_timer, pdMS_TO_TICKS(100));
+            //furi_ms_to_ticks
+            furi_timer_start(model->draw_timer, 100); //pdMS_TO_TICKS(100));
         },
         true);
-
-    irq_bottom_half_timer = furi_timer_alloc(response_byte_get, FuriTimerTypeOnce, pokemon_fap);
 
     // B3 (Pin6) / SO (2)
     furi_hal_gpio_write(&GAME_BOY_SO, false);
@@ -679,7 +676,6 @@ void trade_exit_callback(void* context) {
         struct trade_model * model,
         { furi_timer_free(model->draw_timer); },
         false);
-    furi_timer_free(irq_bottom_half_timer);
 }
 
 View* trade_alloc(PokemonFap* pokemon_fap) {

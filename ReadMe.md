@@ -43,9 +43,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [CAME/NICE 12-bit get assigned 16-bit key #3141 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/3141)
 - OFW: [Fix double arrows and add proper indication #3146 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3146)
 - Updated: [WiFi (Marauder) v6.3 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [Add commands for BT wardriving and Sour Apple #33 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/33) (NOW WITH MARAUDER SOUR APPLE)
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Crash message for malloc(0) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9d6a0ad2c9f295520bb015171f8b77bfcc8cd5e0)
 - Added: [R.O.B. Control (By riney)](https://github.com/riney/flip_rob)
+- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
