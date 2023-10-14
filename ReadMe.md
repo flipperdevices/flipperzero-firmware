@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1010-0133-0.93.1-ea673b9.tgz&channel=RM1010-0133-0.93.1-ea673b9&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1010-0133-0.93.1-ea673b9-NoAnim.tgz&channel=RM1010-0133-0.93.1-ea673b9-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1014-0047-0.93.1-8ca37f1.tgz&channel=RM1014-0047-0.93.1-8ca37f1&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1014-0047-0.93.1-8ca37f1-NoAnim.tgz&channel=RM1014-0047-0.93.1-8ca37f1-NoAnim&version=0.93.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -27,25 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1013-1543-0.93.1-b0f5603](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1014-0051-0.93.1-8ca37f1](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-13 15:43 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-13 15:43 EST`
-- Updated: [ESP32-C6 Gravity v0.6 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
-- Updated: [DAP Link v1.1 (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
-- Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` (Changes By xMasterX)
-- Updated: [Dab Timer v1.2 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dabtimer) Added Binary Clock Face (By RogueMaster)
-- Updated: [FM Radio v1.1 (By coolshrimp)](https://github.com/coolshrimp/flipperzero-firmware-wPlugins/tree/420/applications/external/FM_Radio)
-- Updated: [Atomic Dice Roller v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-atomicdiceroller)
-- Updated: [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator) [added brightness increase #8 (By MatthewKuKanich)](https://github.com/Kingal1337/flipper-barcode-generator/pull/8)
-- OFW: [Fix various crashes if debug libraries used #3144 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3144)
-- [CFW Settings Layout options for Terminal for Main Menu (By MatthewKuKanich & Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/78555005bd9cd4f080d2cd67aba3f91afd1eff99)
-- OFW: [CAME/NICE 12-bit get assigned 16-bit key #3141 (By jamisonderek)](https://github.com/flipperdevices/flipperzero-firmware/pull/3141)
-- OFW: [Fix double arrows and add proper indication #3146 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3146)
-- Updated: [WiFi (Marauder) v6.3 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [Add commands for BT wardriving and Sour Apple #33 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/33) (NOW WITH MARAUDER SOUR APPLE)
-- [Crash message for malloc(0) (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/9d6a0ad2c9f295520bb015171f8b77bfcc8cd5e0)
-- Added: [R.O.B. Control (By riney)](https://github.com/riney/flip_rob)
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-14 00:51 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-14 00:51 EST`
 
 <a name="release">
 
@@ -483,4 +468,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1010-0133-0.93.1-ea673b9.tgz&channel=RM1010-0133-0.93.1-ea673b9&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1010-0133-0.93.1-ea673b9-NoAnim.tgz&channel=RM1010-0133-0.93.1-ea673b9-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1014-0047-0.93.1-8ca37f1.tgz&channel=RM1014-0047-0.93.1-8ca37f1&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1014-0047-0.93.1-8ca37f1-NoAnim.tgz&channel=RM1014-0047-0.93.1-8ca37f1-NoAnim&version=0.93.1)
