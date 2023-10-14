@@ -15,13 +15,14 @@
 #define GRAVITY_VERSION "0.6.0"
 
 //#define NUM_MENU_ITEMS (23)
-#define MAX_MENU_ITEMS (9)
+#define MAX_MENU_ITEMS (21)
 #define NUM_MAIN_ITEMS (6)
 #define NUM_TARGET_ITEMS (9)
 #define NUM_PACKETS_ITEMS (4)
 #define NUM_HELP_ITEMS (5)
+#define NUM_HELP_INFO_ITEMS (21)
 #define NUM_ATTACK_ITEMS (6)
-#define NUM_SETTINGS_ITEMS (3)
+#define NUM_SETTINGS_ITEMS (15)
 #define NUM_DEAUTH_ITEMS (3)
 #define NUM_FUZZ_ITEMS (4)
 #define MAX_MENU_STR_LEN (12)
@@ -40,6 +41,7 @@ typedef enum {
   GRAVITY_MENU_ATTACKS,
   GRAVITY_MENU_SETTINGS,
   GRAVITY_MENU_HELP,
+  GRAVITY_MENU_HELP_INFO,
   GRAVITY_MENU_FUZZ,
   GRAVITY_MENU_DEAUTH
 } GravityMenu;
@@ -59,7 +61,7 @@ struct UART_TerminalApp {
 
     VariableItemList *main_menu_list, *targets_menu_list, *packets_menu_list;
     VariableItemList *attacks_menu_list, *settings_menu_list, *help_menu_list;
-    VariableItemList *deauth_menu_list, *fuzz_menu_list;
+    VariableItemList *deauth_menu_list, *fuzz_menu_list, *help_info_menu_list;
 
     UART_TerminalUart* uart;
     int selected_menu_index;
@@ -85,6 +87,7 @@ typedef enum {
     Gravity_AppViewAttacksMenu,
     Gravity_AppViewSettingsMenu,
     Gravity_AppViewHelpMenu,
+    Gravity_AppViewHelpInfoMenu,
     Gravity_AppViewDeauthMenu,
     Gravity_AppViewFuzzMenu,
 } UART_TerminalAppView;
@@ -99,7 +102,7 @@ typedef enum { FOCUS_CONSOLE_END = 0, FOCUS_CONSOLE_START, FOCUS_CONSOLE_TOGGLE 
 #define SHOW_STOPSCAN_TIP (true)
 #define NO_TIP (false)
 
-#define MAX_OPTIONS (12)
+#define MAX_OPTIONS (15)
 typedef struct {
     const char* item_string;
     const char* options_menu[MAX_OPTIONS];
