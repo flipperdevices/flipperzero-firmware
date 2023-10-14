@@ -15,11 +15,11 @@
 #define GRAVITY_VERSION "0.6.0"
 
 //#define NUM_MENU_ITEMS (23)
-#define MAX_MENU_ITEMS (8)
+#define MAX_MENU_ITEMS (9)
 #define NUM_MAIN_ITEMS (6)
-#define NUM_TARGET_ITEMS (8)
+#define NUM_TARGET_ITEMS (9)
 #define NUM_PACKETS_ITEMS (4)
-#define NUM_OTHER_ITEMS (2)
+#define NUM_HELP_ITEMS (5)
 #define NUM_ATTACK_ITEMS (6)
 #define NUM_SETTINGS_ITEMS (3)
 #define NUM_DEAUTH_ITEMS (3)
@@ -39,7 +39,7 @@ typedef enum {
   GRAVITY_MENU_PACKETS,
   GRAVITY_MENU_ATTACKS,
   GRAVITY_MENU_SETTINGS,
-  GRAVITY_MENU_OTHERS,
+  GRAVITY_MENU_HELP,
   GRAVITY_MENU_FUZZ,
   GRAVITY_MENU_DEAUTH
 } GravityMenu;
@@ -58,7 +58,7 @@ struct UART_TerminalApp {
     UART_TextInput* text_input;
 
     VariableItemList *main_menu_list, *targets_menu_list, *packets_menu_list;
-    VariableItemList *attacks_menu_list, *settings_menu_list, *others_menu_list;
+    VariableItemList *attacks_menu_list, *settings_menu_list, *help_menu_list;
     VariableItemList *deauth_menu_list, *fuzz_menu_list;
 
     UART_TerminalUart* uart;
@@ -84,7 +84,7 @@ typedef enum {
     Gravity_AppViewPacketsMenu,
     Gravity_AppViewAttacksMenu,
     Gravity_AppViewSettingsMenu,
-    Gravity_AppViewOthersMenu,
+    Gravity_AppViewHelpMenu,
     Gravity_AppViewDeauthMenu,
     Gravity_AppViewFuzzMenu,
 } UART_TerminalAppView;

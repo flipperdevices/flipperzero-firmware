@@ -34,7 +34,7 @@ UART_TerminalItem mainmenu[NUM_MAIN_ITEMS] = {
   FOCUS_CONSOLE_END,
   NO_TIP,
   true},
-  {"Others",
+  {"Help",
   {""},
   1,
   {""},
@@ -63,8 +63,8 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
         newScene = UART_TerminalSceneAttacks;
     } else if (!strcmp(item->item_string, "Settings")) {
         newScene = UART_TerminalSceneSettings;
-    } else if (!strcmp(item->item_string, "Others")) {
-        newScene = UART_TerminalSceneOthers;
+    } else if (!strcmp(item->item_string, "Help")) {
+        newScene = UART_TerminalSceneHelp;
     }
     if (newScene < 0) {
         return;

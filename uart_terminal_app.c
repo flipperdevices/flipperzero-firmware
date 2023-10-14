@@ -55,9 +55,9 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     app->settings_menu_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewSettingsMenu,
             variable_item_list_get_view(app->settings_menu_list));
-    app->others_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewOthersMenu,
-            variable_item_list_get_view(app->others_menu_list));
+    app->help_menu_list = variable_item_list_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewHelpMenu,
+            variable_item_list_get_view(app->help_menu_list));
     app->deauth_menu_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewDeauthMenu,
             variable_item_list_get_view(app->deauth_menu_list));
@@ -98,7 +98,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPacketsMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewAttacksMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewSettingsMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewOthersMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewHelpMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewDeauthMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewFuzzMenu);
     text_box_free(app->text_box);
