@@ -155,8 +155,54 @@ void screen_gameboy_connected(Canvas* const canvas) {
 
 int time_in_seconds = 0;
 
-uint8_t patch_list[205] = {0};
-uint8_t patch_cnt;
+struct patch_list {
+    uint8_t index;
+    struct patch_list *next;
+};
+
+static struct patch_list *patch_list = NULL;
+
+static struct patch_list* plist_alloc(void) {
+    static struct patch_list *plist = NULL;
+
+    plist = malloc(sizeof(struct patch_list));
+    plist->index = 0;
+    plist->next = NULL;
+    return plist;
+}
+
+static void plist_append(struct patch_list *plist, uint8_t index) {
+    furi_assert(plist);
+
+    plist->index = index;
+    plist->next = plist_alloc();
+}
+
+static void plist_free(struct patch_list *plist) {
+    furi_assert(plist);
+    struct patch_list *plist_next = plist->next;
+
+    while (plist != NULL) {
+        free(plist);
+	plist = plist_next;
+	plist_next = plist->next;
+    }
+}
+
+/* Returns the index value at offset member of the list. If offset is beyond
+ * the length of the allocated list, it will just return 0.
+ */
+static uint8_t plist_index_get(struct patch_list *plist, int offset) {
+    furi_assert(plist);
+    int i;
+
+    for (i = 0; i < offset; i++) {
+        if (plist->next == NULL) break;
+        plist = plist->next;
+    }
+
+    return plist->index;
+}
 
 static void trade_draw_callback(Canvas* canvas, void* model) {
     const char* gameboy_status_text = NULL;
@@ -405,12 +451,6 @@ byte getTradeCentreResponse(byte in, void* context) {
             }
             counter++;
         }
-	/* XXX: HACK: prep patch list */
-	patch_list[0] = 0xFD;
-	patch_list[1] = 0xFD;
-	patch_list[2] = 0xFD;
-        /* Patchs actually start at 11th byte? */
-	patch_cnt = 10;
         break;
 
     /* This could fall in to the next case statement maybe? */
@@ -419,14 +459,7 @@ byte getTradeCentreResponse(byte in, void* context) {
         if((in & 0xF0) != 0xF0) {
             counter = 0;
             input_block_flat[counter] = in;
-	    if (trade_block_flat[counter] == 0xFE) {
-                send = 0xFF;
-                patch_list[patch_cnt] = counter+1;
-                patch_cnt++;
-            } else {
-                send = trade_block_flat[counter];
-            }
-            counter++;
+            send = trade_block_flat[counter];
             trade_centre_state = SENDING_DATA;
         }
         break;
@@ -435,24 +468,11 @@ byte getTradeCentreResponse(byte in, void* context) {
     /* XXX: The current implementation ends up stopping short of sending data from flipper
      * and instead mirrors back data from the gameboy before we have technically sent our
      * whole struct */
-    /* XXX: HACK: I think this will only work with the first patch list part */
     case SENDING_DATA:
         input_block_flat[counter] = in;
-        if (trade_block_flat[counter] == 0xFE) {
-            send = 0xFF;
-            patch_list[patch_cnt] = counter+1;
-            patch_cnt++;
-        } else {
-            send = trade_block_flat[counter];
-        }
+        send = trade_block_flat[counter];
         counter++;
 
-	if (counter == 0xFE) {
-            /* XXX: HACK: Just end the list instantly */
-            patch_list[patch_cnt] = 0xFF;
-	    patch_cnt++;
-	    patch_list[patch_cnt] = 0xFF;
-	}
 	/* This should be 418? */
 	/* XXX: It breaks when this is set to 418. Need to fix this */
         if(counter == 405) //TODO: replace with sizeof struct rather than static number
@@ -467,13 +487,17 @@ byte getTradeCentreResponse(byte in, void* context) {
     case SENDING_PATCH_DATA:
         if(in == 0xFD) {
             counter = 0;
-	    patch_cnt = 3;
             send = 0xFD;
         } else {
-            counter++;
-            send = patch_list[patch_cnt];
-            patch_cnt++;
+            /* This magic number is basically the header length, 10, minus
+	     * the 3x 0xFD that we should be transmitting as part of the path
+	     * list header.
+	     */
+            if (counter > 6) {
+                send = plist_index_get(patch_list, (counter - 7));
+            }
 
+            counter++;
 	    /* This is actually 200 bytes */
 	    /* XXX: Interestingly, it does appear to actually be 197 bytes from the first 00 after trade block, minus FFs, to the last 00 sent before long delay */
             if(counter == 197) // TODO: What is this magic value?
@@ -641,8 +665,10 @@ void trade_draw_timer_callback(void* context) {
 }
 
 void trade_enter_callback(void* context) {
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
     furi_assert(context);
+    PokemonFap* pokemon_fap = (PokemonFap*)context;
+    uint8_t* trade_block_flat = (uint8_t*)(&(pokemon_fap->trade_block->party[0]));
+    int i = 0;
 
     with_view_model(
         pokemon_fap->trade_view,
@@ -670,6 +696,29 @@ void trade_enter_callback(void* context) {
     furi_hal_gpio_init(&GAME_BOY_CLK, GpioModeInterruptRise, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
     furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, pokemon_fap);
+
+    /* XXX: HACK: Set up our patch list now. Note that, this will cause weird
+     * problems if a pokemon with a patched index is traded to the flipper with
+     * a pokemon without a patched index, or the other way around. Need to implement
+     * a way to update the patch list after we get traded a pokemon.
+     */
+    patch_list = plist_alloc();
+    /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
+    /* The first half of the patch list covers offsets 0x00 - 0xfc, which
+     * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
+     * end of the first part. The second half of the patch list covers
+     * offsets 0xfd - 0x107. Which is expressed as 0x01 - 0xb. A 0xFF byte
+     * is added to signify the end of the second part/
+     */
+    for (i = 0; i < 264; i++) {
+        if (i == 0xFD)
+            plist_append(patch_list, 0xFF);
+
+        if (trade_block_flat[i] == 0xFE) {
+            plist_append(patch_list, (i % 0xfd) + 1);
+	    trade_block_flat[i] = 0xFF;
+	}
+    }
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -690,6 +739,8 @@ void trade_exit_callback(void* context) {
         struct trade_model * model,
         { furi_timer_free(model->draw_timer); },
         false);
+
+    plist_free(patch_list);
 }
 
 View* trade_alloc(PokemonFap* pokemon_fap) {
