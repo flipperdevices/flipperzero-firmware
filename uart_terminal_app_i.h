@@ -19,7 +19,7 @@
 #define NUM_MAIN_ITEMS (6)
 #define NUM_TARGET_ITEMS (8)
 #define NUM_PACKETS_ITEMS (4)
-#define NUM_OTHER_ITEMS (4)
+#define NUM_OTHER_ITEMS (2)
 #define NUM_ATTACK_ITEMS (6)
 #define NUM_SETTINGS_ITEMS (3)
 #define NUM_DEAUTH_ITEMS (3)

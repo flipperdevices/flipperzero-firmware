@@ -1,52 +1,28 @@
 #include "../uart_terminal_app_i.h"
 #include <dolphin/dolphin.h>
 
-UART_TerminalItem mainmenu[NUM_MAIN_ITEMS] = {
-  {"Targets",
-  {""},
-  1,
-  {""},
+UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
+  {"Hop",
+  {"Status", "On", "Off", "Sequential", "Random", "Default", "Set "},
+  7,
+  {"hop", "hop on", "hop off", "hop sequential", "hop random", "hop default", "hop "},
   TOGGLE_ARGS,
   FOCUS_CONSOLE_END,
   NO_TIP,
-  true},
-  {"Packets",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Attacks",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Settings",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Others",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Console",
-  {""},
-  1,
-  {""},
+  false},
+  {"Get",
+  {"pkt expiry", "SSID rnd chars", "Attack millis", "SSID min len", "SSID max len", "default SSID count", "Channel", "MAC", "MAC Randomisation", "Purge Strategy", "Purge Min Age", "Purge Max RSSI"},
+  12,
+  {"get expiry", "get scramble_words", "get attack_millis", "get ssid_len_min", "get ssid_len_max", "get default_ssid_count", "get channel", "get mac", "get mac_rand", "get ble_purge_strat", "get ble_purge_min_age", "get ble_purge_max_rssi"},
   NO_ARGS,
+  FOCUS_CONSOLE_END,
+  NO_TIP,
+  false},
+  {"Set",
+  {"pkt expiry", "SSID rnd chars", "Attack millis", "SSID min len", "SSID max len", "default SSID count", "Channel", "MAC", "MAC Randomisation", "Purge Strategy", "Purge Min Age", "Purge Max RSSI"},
+  12,
+  {"set expiry ", "set scramble_words ", "set attack_millis ", "set ssid_len_min ", "set ssid_len_max ", "set default_ssid_count ", "set channel ", "set mac ", "set mac_rand ", "set BLE_PURGE_STRAT ", "set BLE_PURGE_MIN_AGE ", "set BLE_PURGE_MAX_RSSI "},
+  INPUT_ARGS,
   FOCUS_CONSOLE_END,
   NO_TIP,
   false}
@@ -54,35 +30,29 @@ UART_TerminalItem mainmenu[NUM_MAIN_ITEMS] = {
 
 static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
     int newScene = -1;
-    if (!strcmp(item->item_string, "Targets")) {
-        // Targets menu
-        newScene = UART_TerminalSceneTargets;
-    } else if (!strcmp(item->item_string, "Packets")) {
-        newScene = UART_TerminalScenePackets;
-    } else if (!strcmp(item->item_string, "Attacks")) {
-        newScene = UART_TerminalSceneAttacks;
-    } else if (!strcmp(item->item_string, "Settings")) {
-        newScene = UART_TerminalSceneSettings;
-    } else if (!strcmp(item->item_string, "Others")) {
-        newScene = UART_TerminalSceneOthers;
+    if (!strcmp(item->item_string, "Get")) {
+        // Get Settings menu
+        //newScene = UART_TerminalSceneSettingsGet;
+    } else if (!strcmp(item->item_string, "Set")) {
+        //newScene = UART_TerminalSceneSettingsSet;
     }
     if (newScene < 0) {
         return;
     }
     scene_manager_set_scene_state(
-        app->scene_manager, UART_TerminalSceneMain, app->selected_menu_index);
+        app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_index);
     scene_manager_next_scene(app->scene_manager, newScene);
 }
 
 /* Callback when an option is selected */
-static void uart_terminal_scene_main_var_list_enter_callback(void* context, uint32_t index) {
+static void uart_terminal_scene_settings_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
     const int selected_option_index = app->selected_option_index[index];
 
-    furi_assert(index < NUM_MAIN_ITEMS);
-    item = &mainmenu[index];
+    furi_assert(index < NUM_SETTINGS_ITEMS);
+    item = &settings[index];
 
     /* Are we displaying a submenu or executing something? */
     if (item->isSubMenu) {
@@ -119,13 +89,13 @@ static void uart_terminal_scene_main_var_list_enter_callback(void* context, uint
 }
 
 /* Callback when a selected option is changed (I Think) */
-static void uart_terminal_scene_main_var_list_change_callback(VariableItem* item) {
+static void uart_terminal_scene_settings_var_list_change_callback(VariableItem* item) {
     furi_assert(item);
 
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    const UART_TerminalItem* menu_item = &mainmenu[app->selected_menu_index];
+    const UART_TerminalItem* menu_item = &settings[app->selected_menu_index];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
@@ -133,34 +103,34 @@ static void uart_terminal_scene_main_var_list_change_callback(VariableItem* item
 }
 
 /* Callback on entering the scene (initialisation) */
-void uart_terminal_scene_main_on_enter(void* context) {
+void uart_terminal_scene_settings_on_enter(void* context) {
     UART_TerminalApp* app = context;
-    VariableItemList* var_item_list = app->main_menu_list;
+    VariableItemList* var_item_list = app->settings_menu_list;
     VariableItem *item;
 
     variable_item_list_set_enter_callback(
-        var_item_list, uart_terminal_scene_main_var_list_enter_callback, app);
+        var_item_list, uart_terminal_scene_settings_var_list_enter_callback, app);
 
-    app->currentMenu = GRAVITY_MENU_MAIN;
-    for(int i = 0; i < NUM_MAIN_ITEMS; ++i) {
+    app->currentMenu = GRAVITY_MENU_SETTINGS;
+    for(int i = 0; i < NUM_SETTINGS_ITEMS; ++i) {
         item = variable_item_list_add(
             var_item_list,
-            mainmenu[i].item_string,
-            mainmenu[i].num_options_menu,
-            uart_terminal_scene_main_var_list_change_callback,
+            settings[i].item_string,
+            settings[i].num_options_menu,
+            uart_terminal_scene_settings_var_list_change_callback,
             app);
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
         variable_item_set_current_value_text(
-            item, mainmenu[i].options_menu[app->selected_option_index[i]]);
+            item, settings[i].options_menu[app->selected_option_index[i]]);
     }
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneMain));
+        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneSettings));
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewMainMenu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewSettingsMenu);
 }
 
 /* Event handler callback - Handle scene change and tick events */
-bool uart_terminal_scene_main_on_event(void* context, SceneManagerEvent event) {
+bool uart_terminal_scene_settings_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UART_TerminalApp* app = context;
     bool consumed = false;
@@ -168,23 +138,23 @@ bool uart_terminal_scene_main_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UART_TerminalEventStartKeyboard) {
             scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalSceneMain, app->selected_menu_index);
+                app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewTextInput);
         } else if(event.event == UART_TerminalEventStartConsole) {
             scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalSceneMain, app->selected_menu_index);
+                app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index = variable_item_list_get_selected_item_index(app->main_menu_list);
+        app->selected_menu_index = variable_item_list_get_selected_item_index(app->settings_menu_list);
         consumed = true;
     }
     return consumed;
 }
 
 /* Clean up on exit */
-void uart_terminal_scene_main_on_exit(void* context) {
+void uart_terminal_scene_settings_on_exit(void* context) {
     UART_TerminalApp* app = context;
-    variable_item_list_reset(app->main_menu_list);
+    variable_item_list_reset(app->settings_menu_list);
 }
