@@ -125,8 +125,8 @@ typedef enum {
 
 /* TODO: Convert all of these to be maintained in a struct in the Trade context */
 uint8_t out_data = 0; // Should be able to be made as part of view model or static in used function
-uint8_t in_data = 0; // Should be able to be made as part of view model or static in used function
-uint8_t shift = 0; // Should be able to be made as part of view model or static in used function
+uint8_t in_data = 0; //Should be able to be made as part of view model, is used in multiple funcs
+uint8_t shift = 0; //Should be able to be made as part of view model, is used in multiple funcs
 uint32_t time = 0; //Should be able to be made static in used function
 volatile int counter = 0; // Should be able to be made static in used function
 volatile bool procesing = true; // Review this vars use, it could potentially be removed
@@ -536,12 +536,11 @@ byte getTradeCentreResponse(byte in, void* context) {
     return send;
 }
 
-void response_byte_get(void* context, uint32_t arg) {
-    furi_assert(context);
+void transferBit(void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
+    furi_assert(context);
     bool connected;
     bool trading;
-    UNUSED(arg);
 
     with_view_model(
         pokemon_fap->trade_view,
@@ -552,26 +551,52 @@ void response_byte_get(void* context, uint32_t arg) {
         },
         false);
 
-    switch(connection_state) {
-    case NOT_CONNECTED:
-        connected = false;
-        out_data = getConnectResponse(in_data);
-        break;
-    case CONNECTED:
-        connected = true;
-        out_data = getMenuResponse(in_data);
-        break;
-    case TRADE_CENTRE:
-        out_data = getTradeCentreResponse(in_data, pokemon_fap);
-        break;
-    /* If we end up in the colosseum, then just repeat data back */
-    /* Do we need a way to close the connection? Would that be useful? */
-    default:
-        out_data = in_data;
-        break;
+    /* Shift data in every clock */
+    /* XXX: This logic can be made a little more clear I think.
+     * Its just shifting a bit in at a time, doesn't need the clever shifting maths */
+    byte raw_data = furi_hal_gpio_read(&GAME_BOY_SI);
+    in_data |= raw_data << (7 - shift);
+
+    /* Once a byte of data has been shifted in, process it */
+    if(++shift > 7) {
+        shift = 0;
+        switch(connection_state) {
+        case NOT_CONNECTED:
+            connected = false;
+            out_data = getConnectResponse(in_data);
+            break;
+        case CONNECTED:
+            connected = true;
+            out_data = getMenuResponse(in_data);
+            break;
+        case TRADE_CENTRE:
+            out_data = getTradeCentreResponse(in_data, pokemon_fap);
+            break;
+            /* If we end up in the colosseum, then just repeat data back */
+            /* Do we need a way to close the connection? Would that be useful? */
+        default:
+            out_data = in_data;
+            break;
+        }
+
+        in_data = 0; // TODO: I don't think this is necessary?
     }
 
+    /* Wait for the clock to go high again
+     * XXX: I think this is superfluous since we can IRQ on falling edge, read data, delay a moment, then set data and wait until next IRQ */
+    /* Basically, I don't want to stall in an interrupt context.
+     * Could also maybe IRQ on either edge? and set data out when appropriate? */
+    while(procesing && !furi_hal_gpio_read(&GAME_BOY_CLK))
+        ;
+
+    furi_hal_gpio_write(&GAME_BOY_SO, out_data & 0x80 ? true : false);
+    furi_delay_us(
+        DELAY_MICROSECONDS); // Wait 20-60us ... 120us max (in slave mode is not necessary)
+    // TODO: The above comment doesn't make sense as DELAY_MICROSECONDS is defined as 15
+
     if(trade_centre_state == READY_TO_GO) trading = true;
+
+    out_data = out_data << 1;
 
     with_view_model(
         pokemon_fap->trade_view,
@@ -583,39 +608,20 @@ void response_byte_get(void* context, uint32_t arg) {
         false);
 }
 
-/* This is called on both edges of the clock */
-/* XXX: TODO: This needs to be responsible for reading the state of the clock pin to determine what edge we're on, read the state of the data in pin, shifting input data, shifting output data, and then calling the bottom half to set up new data where needed */
 void input_clk_gameboy(void* context) {
     furi_assert(context);
 
-    /* Positive edge, data clocked in */
-    if(furi_hal_gpio_read(&GAME_BOY_CLK)) {
-        if(time > 0) {
-            //  if there is no response from the master in 120 microseconds, the counters are reset
-            if(micros() - time > 120) {
-                //  IDLE & Reset
-                in_data = 0;
-                shift = 0;
-            }
-        }
-
-        /* Shift data in every clock */
-        in_data <<= 1;
-        in_data |= furi_hal_gpio_read(&GAME_BOY_SI);
-        shift++;
-
-        if(shift > 7) {
+    if(time > 0) {
+        //  if there is no response from the master in 120 microseconds, the counters are reset
+        if(micros() - time > 120) {
+            //  IDLE & Reset
+            in_data = 0;
             shift = 0;
-            /* Shedule bottom half */
-            furi_timer_pending_callback(response_byte_get, context, 0);
         }
-
-        time = micros();
-    } else {
-        /* On the negative edge, set the next data */
-        furi_hal_gpio_write(&GAME_BOY_SO, out_data & 0x80 ? true : false);
-        out_data = out_data << 1;
     }
+
+    transferBit(context);
+    time = micros();
 }
 
 void trade_draw_timer_callback(void* context) {
@@ -641,8 +647,7 @@ void trade_enter_callback(void* context) {
             model->draw_timer =
                 furi_timer_alloc(trade_draw_timer_callback, FuriTimerTypePeriodic, pokemon_fap);
             /* Every 100 ms, trigger a draw update */
-            //furi_ms_to_ticks
-            furi_timer_start(model->draw_timer, 100); //pdMS_TO_TICKS(100));
+            furi_timer_start(model->draw_timer, furi_ms_to_ticks(100));
         },
         true);
 
@@ -653,7 +658,7 @@ void trade_enter_callback(void* context) {
     furi_hal_gpio_write(&GAME_BOY_SI, false);
     furi_hal_gpio_init(&GAME_BOY_SI, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
     // // C3 (Pin7) / CLK (5)
-    furi_hal_gpio_init(&GAME_BOY_CLK, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(&GAME_BOY_CLK, GpioModeInterruptRise, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
     furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, pokemon_fap);
 }
