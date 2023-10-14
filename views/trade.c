@@ -134,7 +134,7 @@ volatile connection_state_t connection_state =
     NOT_CONNECTED; // Should be made in to view model struct
 volatile trade_centre_state_t trade_centre_state =
     INIT; // Should be able to be made part of view model
-unsigned char INPUT_BLOCK[405]; // Put this in pokemon_fap? Not sure yet
+TradeBlock* input_block;
 
 void screen_gameboy_connect(Canvas* const canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -333,7 +333,9 @@ byte getTradeCentreResponse(byte in, void* context) {
     furi_assert(context);
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     uint8_t* trade_block_flat = (uint8_t*)pokemon_fap->trade_block;
+    uint8_t* input_block_flat = (uint8_t*)input_block;
     render_gameboy_state_t gameboy_status;
+    uint8_t in_pokemon_num = 0;
     byte send = in;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
@@ -416,7 +418,7 @@ byte getTradeCentreResponse(byte in, void* context) {
     case WAITING_TO_SEND_DATA:
         if((in & 0xF0) != 0xF0) {
             counter = 0;
-            INPUT_BLOCK[counter] = in;
+            input_block_flat[counter] = in;
 	    if (trade_block_flat[counter] == 0xFE) {
                 send = 0xFF;
                 patch_list[patch_cnt] = counter+1;
@@ -435,7 +437,7 @@ byte getTradeCentreResponse(byte in, void* context) {
      * whole struct */
     /* XXX: HACK: I think this will only work with the first patch list part */
     case SENDING_DATA:
-        INPUT_BLOCK[counter] = in;
+        input_block_flat[counter] = in;
         if (trade_block_flat[counter] == 0xFE) {
             send = 0xFF;
             patch_list[patch_cnt] = counter+1;
@@ -490,6 +492,7 @@ byte getTradeCentreResponse(byte in, void* context) {
             gameboy_status = GAMEBOY_TRADE_READY;
 	    /* 0x6? says what pokemon the gameboy is sending us */
         } else if((in & 0x60) == 0x60) {
+            in_pokemon_num = in & 0x0F;
             send = 0x60; // first pokemon
             gameboy_status = GAMEBOY_SEND;
 	    /* I think this is a confirmation of what is being traded, likely from the dialog of:
@@ -519,6 +522,12 @@ byte getTradeCentreResponse(byte in, void* context) {
             trade_centre_state = READY_TO_GO;
             gameboy_status = GAMEBOY_TRADING;
 	    counter = 0;
+
+            /* Copy the traded-in pokemon's main data to our struct */
+            pokemon_fap->trade_block->party_members[0] = input_block->party_members[in_pokemon_num];
+            memcpy(&(pokemon_fap->trade_block->party[0]), &(input_block->party[in_pokemon_num]), sizeof(struct pokemon_structure));
+            memcpy(&(pokemon_fap->trade_block->nickname[0]), &(input_block->nickname[in_pokemon_num]), sizeof(struct name));
+            memcpy(&(pokemon_fap->trade_block->ot_name[0]), &(input_block->ot_name[in_pokemon_num]), sizeof(struct name));
         }
         break;
 
@@ -696,6 +705,8 @@ View* trade_alloc(PokemonFap* pokemon_fap) {
     view_set_enter_callback(view, trade_enter_callback);
     view_set_exit_callback(view, trade_exit_callback);
 
+    input_block = malloc(sizeof(TradeBlock));
+
     return view;
 }
 
@@ -709,4 +720,5 @@ void trade_free(PokemonFap* pokemon_fap) {
 
     view_free_model(pokemon_fap->trade_view);
     view_free(pokemon_fap->trade_view);
+    free(input_block);
 }
