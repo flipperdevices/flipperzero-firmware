@@ -44,6 +44,8 @@ typedef enum {
   GRAVITY_MENU_DEAUTH
 } GravityMenu;
 
+char *strToken(char *cmdLine, char sep, int tokenNum);
+
 struct UART_TerminalApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
@@ -55,7 +57,9 @@ struct UART_TerminalApp {
     TextBox* text_box;
     UART_TextInput* text_input;
 
-    VariableItemList* var_item_list;
+    VariableItemList *main_menu_list, *targets_menu_list, *packets_menu_list;
+    VariableItemList *attacks_menu_list, *settings_menu_list, *others_menu_list;
+    VariableItemList *deauth_menu_list, *fuzz_menu_list;
 
     UART_TerminalUart* uart;
     int selected_menu_index;
@@ -73,7 +77,36 @@ struct UART_TerminalApp {
 };
 
 typedef enum {
-    UART_TerminalAppViewVarItemList,
     UART_TerminalAppViewConsoleOutput,
     UART_TerminalAppViewTextInput,
+    Gravity_AppViewMainMenu,
+    Gravity_AppViewTargetsMenu,
+    Gravity_AppViewPacketsMenu,
+    Gravity_AppViewAttacksMenu,
+    Gravity_AppViewSettingsMenu,
+    Gravity_AppViewOthersMenu,
+    Gravity_AppViewDeauthMenu,
+    Gravity_AppViewFuzzMenu,
 } UART_TerminalAppView;
+
+// For each command, define whether additional arguments are needed
+// (enabling text input to fill them out), and whether the console
+// text box should focus at the start of the output or the end
+typedef enum { NO_ARGS = 0, INPUT_ARGS, TOGGLE_ARGS } InputArgs;
+
+typedef enum { FOCUS_CONSOLE_END = 0, FOCUS_CONSOLE_START, FOCUS_CONSOLE_TOGGLE } FocusConsole;
+
+#define SHOW_STOPSCAN_TIP (true)
+#define NO_TIP (false)
+
+#define MAX_OPTIONS (12)
+typedef struct {
+    const char* item_string;
+    const char* options_menu[MAX_OPTIONS];
+    int num_options_menu;
+    const char* actual_commands[MAX_OPTIONS];
+    InputArgs needs_keyboard;
+    FocusConsole focus_console;
+    bool show_stopscan_tip;
+    bool isSubMenu;
+} UART_TerminalItem;

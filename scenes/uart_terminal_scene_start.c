@@ -1,27 +1,6 @@
 #include "../uart_terminal_app_i.h"
 #include <dolphin/dolphin.h>
 
-// For each command, define whether additional arguments are needed
-// (enabling text input to fill them out), and whether the console
-// text box should focus at the start of the output or the end
-typedef enum { NO_ARGS = 0, INPUT_ARGS, TOGGLE_ARGS } InputArgs;
-
-typedef enum { FOCUS_CONSOLE_END = 0, FOCUS_CONSOLE_START, FOCUS_CONSOLE_TOGGLE } FocusConsole;
-
-#define SHOW_STOPSCAN_TIP (true)
-#define NO_TIP (false)
-
-#define MAX_OPTIONS (12)
-typedef struct {
-    const char* item_string;
-    const char* options_menu[MAX_OPTIONS];
-    int num_options_menu;
-    const char* actual_commands[MAX_OPTIONS];
-    InputArgs needs_keyboard;
-    FocusConsole focus_console;
-    bool show_stopscan_tip;
-    bool isSubMenu;
-} UART_TerminalItem;
 
 static void uart_terminal_scene_start_var_list_change_callback(VariableItem* item);
 
@@ -29,122 +8,6 @@ static void uart_terminal_scene_start_var_list_change_callback(VariableItem* ite
 /* CBC: Looking for a way to best use TOGGLE_ARGS, how's this:
         ** If actual_commands[i] ends with space, display a keyboard to fill in the blank ***
 */
-UART_TerminalItem mainmenu[NUM_MAIN_ITEMS] = {
-  {"Targets",
-  {"target-SSIDs", "Scan", "View", "Select All", "Select", "Selected", "Clear", "Purge"},
-  8,
-  {"target-ssids", "scan", "view", "select all", "select", "selected", "clear", "purge"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Packets",
-  {"Beacon", "Probe", "Deauth", "Fuzz"},
-  4,
-  {"beacon", "probe", "deauth", "fuzz"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Attacks",
-  {"Mana", "Stalk", "SelectedAP DOS", "AP Clone"},
-  4,
-  {"mana", "stalk", "ap-dos", "ap-clone"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Settings",
-  {"Hop", "Get", "Set"},
-  3,
-  {"hop", "get", "set"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Others",
-  {"Sniff", "Help"},
-  2,
-  {"sniff", "help"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Console",
-  {"View", "Clear", "Send Cmd"},
-  3,
-  {"", "cls", " "},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false}
-};
-UART_TerminalItem targets[NUM_TARGET_ITEMS] = {
-  {"target-ssids",
-  {"Add", "Remove", "List"},
-  3,
-  {"target-ssids add ", "target-ssids remove ", "target-ssids"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Scan",
-  {"Status", "<SSID>", "WiFi", "BT", "BLE", "BT Svcs", "Off"},
-  7,
-  {"scan", "scan ", "scan wifi", "scan bt", "scan ble", "scan bt services", "scan off"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"View",
-  {"STA", "AP", "BT", "BT Svcs", "BT+AP+STA", "STA+AP"},
-  6,
-  {"view sta", "view ap", "view bt", "view bt services", "view ap sta bt", "view ap sta"},
-  NO_ARGS,
-  FOCUS_CONSOLE_START,
-  NO_TIP,
-  false},
-  {"Select All",
-  {"STA", "AP", "BT"},
-  3,
-  {"select sta all", "select ap all", "select bt all"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Select",
-  {"STA", "AP", "BT"},
-  3,
-  {"select sta ", "select ap ", "select bt "},
-  INPUT_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Selected",
-  {"AP", "STA", "BT", "AP+STA+BT"},
-  4,
-  {"selected ap", "selected sta", "selected bt", "selected"},
-  NO_ARGS,
-  FOCUS_CONSOLE_START,
-  NO_TIP,
-  false},
-  {"Clear",
-  {"STA", "STA Sel.", "AP", "AP Sel.", "BT", "BT Sel.", "BT Svcs", "ALL"},
-  8,
-  {"clear sta", "clear sta selected", "clear ap", "clear ap selected", "clear bt", "clear bt selected", "clear bt services", "clear all"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Purge",
-  {"AP", "STA", "BT", "BLE"},
-  4,
-  {"purge ap", "purge sta", "purge bt", "purge ble"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false}
-};
 UART_TerminalItem packets[NUM_PACKETS_ITEMS] = {
   {"Beacon",
   {"Status", "target-ssids", "APs", "RickRoll", "Random", "Infinite", "Off"},
@@ -431,128 +294,89 @@ UART_TerminalItem others[NUM_OTHER_ITEMS] = {
 //     NO_TIP},
 // };
 
+static UART_TerminalItem *currentMenu = others;
+static uint8_t currentMenuCount = NUM_TARGET_ITEMS;
 
-char *strToken(char *cmdLine, char sep, int tokenNum) {
-    int i;
-    int tokenCount = 0;
-    for (i = 0; i < (int)strlen(cmdLine) && tokenCount != tokenNum; ++i) {
-        if (cmdLine[i] == sep) {
-            ++tokenCount;
-        }
-    }
-    if (cmdLine[i - 1] == sep || cmdLine[i - 1] == '\0') {
-        /* Found the end of the token, now find the beginning */
-        int j;
-        for (j = (i - 2); j > 0 && cmdLine[j] != sep; --j) { }
-        /* Token runs from index j to (i - 2) */
-        char *retVal = malloc(sizeof(char) * (i - j));
-        if (retVal == NULL) {
-            printf("GRAVITY: Failed to malloc token\n");
-            return NULL;
-        }
-        strncpy(retVal, cmdLine, (i - j - 1));
-        retVal[i - j - 1] = '\0';
-        return retVal;
-    } else {
-        /* No token */
-        if (tokenNum == 1) {
-            return cmdLine;
-        } else {
-            return NULL;
-        }
-    }
-    return NULL;
-}
-
-uint8_t getCurrentMenu(UART_TerminalApp *app, UART_TerminalItem **theMenu) {
-    uint8_t retVal = 0;
-    *theMenu = NULL;
+void getCurrentMenu(UART_TerminalApp *app) {
     switch (app->currentMenu) {
         case GRAVITY_MENU_MAIN:
-            *theMenu = mainmenu;
-            retVal = NUM_MAIN_ITEMS;
+            //currentMenu = mainmenu;
+            currentMenuCount = NUM_MAIN_ITEMS;
             break;
         case GRAVITY_MENU_TARGETS:
-            *theMenu = targets;
-            retVal = NUM_TARGET_ITEMS;
+            currentMenu = others;
+            currentMenuCount = NUM_TARGET_ITEMS;
             break;
         case GRAVITY_MENU_PACKETS:
-            *theMenu = packets;
-            retVal = NUM_PACKETS_ITEMS;
+            currentMenu = packets;
+            currentMenuCount = NUM_PACKETS_ITEMS;
             break;
         case GRAVITY_MENU_ATTACKS:
-            *theMenu = attacks;
-            retVal = NUM_ATTACK_ITEMS;
+            currentMenu = attacks;
+            currentMenuCount = NUM_ATTACK_ITEMS;
             break;
         case GRAVITY_MENU_SETTINGS:
-            *theMenu = settings;
-            retVal = NUM_SETTINGS_ITEMS;
+            currentMenu = settings;
+            currentMenuCount = NUM_SETTINGS_ITEMS;
             break;
         case GRAVITY_MENU_FUZZ:
+            //currentMenu = mainmenu;
+            currentMenuCount = NUM_MAIN_ITEMS;
+            break;
         case GRAVITY_MENU_DEAUTH:
+            //currentMenu = mainmenu;
+            currentMenuCount = NUM_MAIN_ITEMS;
+            break;
         default:
-            *theMenu = NULL;
-            retVal = 0;
+            //currentMenu = mainmenu;
+            currentMenuCount = NUM_MAIN_ITEMS;
             break;
     }
-    return retVal;
 }
 
 static void displayMenu(UART_TerminalApp *app, UART_TerminalItem *selectedMenu) {
     /* Clear current variable_item_list and build a new one using the menu
        referenced by selectedMenu */
-    UART_TerminalItem *newMenu = NULL;
-    uint8_t newMenuCount = 0;
     GravityMenu menuEnum = app->currentMenu;
 
     if (!strcmp(selectedMenu->item_string, "Targets")) {
-        newMenu = targets;
-        newMenuCount = NUM_MAIN_ITEMS;
         menuEnum = GRAVITY_MENU_TARGETS;
     } else if (!strcmp(selectedMenu->item_string, "Packets")) {
-        newMenu = packets;
-        newMenuCount = NUM_PACKETS_ITEMS;
         menuEnum = GRAVITY_MENU_PACKETS;
     } else if (!strcmp(selectedMenu->item_string, "Attacks")) {
-        newMenu = attacks;
-        newMenuCount = NUM_ATTACK_ITEMS;
         menuEnum = GRAVITY_MENU_ATTACKS;
     } else if (!strcmp(selectedMenu->item_string, "Settings")) {
-        newMenu = settings;
-        newMenuCount = NUM_SETTINGS_ITEMS;
         menuEnum = GRAVITY_MENU_SETTINGS;
     } else if (!strcmp(selectedMenu->item_string, "Others")) {
-        newMenu = others;
-        newMenuCount = NUM_OTHER_ITEMS;
         menuEnum = GRAVITY_MENU_OTHERS;
     } else if (!strcmp(selectedMenu->item_string, "Main")) {
-        newMenu = mainmenu;
-        newMenuCount = NUM_MAIN_ITEMS;
         menuEnum = GRAVITY_MENU_MAIN;
     } else {
         // TODO: Display error
     }
+    /* With the enum getCurrentMenu will do the rest */
+    app->currentMenu = menuEnum;
+    getCurrentMenu(app);
 
     /* Clear the current menu */
-    VariableItemList* var_item_list = app->var_item_list;
+    VariableItemList* var_item_list = app->targets_menu_list;
     variable_item_list_reset(var_item_list);
 
     /* Add the new list */
     VariableItem *item = NULL;
-    app->currentMenu = menuEnum;
-    for (uint8_t i = 0; i < newMenuCount; ++i) {
+    for (uint8_t i = 0; i < currentMenuCount; ++i) {
         item = variable_item_list_add(
             var_item_list,
-            newMenu[i].item_string,
-            newMenu[i].num_options_menu,
+            currentMenu[i].item_string,
+            currentMenu[i].num_options_menu,
             uart_terminal_scene_start_var_list_change_callback,
             app);
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
         variable_item_set_current_value_text(
-            item, newMenu[i].options_menu[app->selected_option_index[i]]);
+            item, currentMenu[i].options_menu[app->selected_option_index[i]]);
     }
-    variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneStart));
+    // variable_item_list_set_selected_item(
+    //     var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneStart));
 }
 
 /* Callback when an option is selected */
@@ -560,18 +384,12 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
-    UART_TerminalItem *theMenu = NULL;
-    uint8_t menuCount = 0;
     const int selected_option_index = app->selected_option_index[index];
 
-    menuCount = getCurrentMenu(app, &theMenu);
-    // if (theMenu == NULL || menuCount == 0) {
-    //     // TODO: Display an error
-    //     return;
-    // }
+    getCurrentMenu(app);
 
-    furi_assert(index < menuCount);
-    item = &theMenu[index];
+    furi_assert(index < currentMenuCount);
+    item = &currentMenu[index];
 
     /* Are we displaying a submenu or executing something? */
     if (item->isSubMenu) {
@@ -665,15 +483,9 @@ static void uart_terminal_scene_start_var_list_change_callback(VariableItem* ite
 
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
-    UART_TerminalItem *theMenu = NULL;
-    uint8_t menuCount = getCurrentMenu(app, &theMenu);
-    // if (menuCount == 0 || theMenu == NULL) {
-    //     // TODO: Display an error
-    //     return;
-    // }
-    printf("%u", menuCount);
+    getCurrentMenu(app);
 
-    const UART_TerminalItem* menu_item = &theMenu[app->selected_menu_index];
+    const UART_TerminalItem* menu_item = &currentMenu[app->selected_menu_index];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
@@ -683,29 +495,30 @@ static void uart_terminal_scene_start_var_list_change_callback(VariableItem* ite
 /* Callback on entering the scene (initialisation) */
 void uart_terminal_scene_start_on_enter(void* context) {
     UART_TerminalApp* app = context;
-    VariableItemList* var_item_list = app->var_item_list;
-    VariableItem* item;
+    VariableItemList* var_item_list = app->targets_menu_list;
 
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_start_var_list_enter_callback, app);
 
-    app->currentMenu = GRAVITY_MENU_MAIN;
-    for(int i = 0; i < NUM_MAIN_ITEMS; ++i) {
-        item = variable_item_list_add(
-            var_item_list,
-            mainmenu[i].item_string,
-            mainmenu[i].num_options_menu,
-            uart_terminal_scene_start_var_list_change_callback,
-            app);
-        variable_item_set_current_value_index(item, app->selected_option_index[i]);
-        variable_item_set_current_value_text(
-            item, mainmenu[i].options_menu[app->selected_option_index[i]]);
-    }
+    app->currentMenu = GRAVITY_MENU_TARGETS;
+    // for(int i = 0; i < NUM_MAIN_ITEMS; ++i) {
+    //     item = variable_item_list_add(
+    //         var_item_list,
+    //         mainmenu[i].item_string,
+    //         mainmenu[i].num_options_menu,
+    //         uart_terminal_scene_start_var_list_change_callback,
+    //         app);
+    //     variable_item_set_current_value_index(item, app->selected_option_index[i]);
+    //     variable_item_set_current_value_text(
+    //         item, mainmenu[i].options_menu[app->selected_option_index[i]]);
+    // }
+    UART_TerminalItem itemMain = { .item_string = "Targets" };
+    displayMenu(app, &itemMain);
 
-    variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneStart));
+    // variable_item_list_set_selected_item(
+    //     var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneStart));
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewVarItemList);
+    // view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewVarItemList);
 }
 
 /* Event handler callback - Handle scene change and tick events */
@@ -714,21 +527,21 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
     UART_TerminalApp* app = context;
     bool consumed = false;
     GravityMenu newMenu = GRAVITY_MENU_MAIN;
-    char strNewMenu[MAX_MENU_STR_LEN] = "";
+    UART_TerminalItem menuItem = { .item_string = "Main" };
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UART_TerminalEventStartKeyboard) {
-            scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
+            // scene_manager_set_scene_state(
+                // app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewTextInput);
         } else if(event.event == UART_TerminalEventStartConsole) {
-            scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
+            // scene_manager_set_scene_state(
+                // app->scene_manager, UART_TerminalSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index = variable_item_list_get_selected_item_index(app->var_item_list);
+        app->selected_menu_index = variable_item_list_get_selected_item_index(app->targets_menu_list);
         consumed = true;
     } else if (event.type == SceneManagerEventTypeBack) {
         switch (app->currentMenu) {
@@ -739,7 +552,7 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
             case GRAVITY_MENU_DEAUTH:
                 /* Parent of fuzz & deauth is Packets */
                 newMenu = GRAVITY_MENU_PACKETS;
-                strcpy(strNewMenu, "Packets");
+                menuItem.item_string = "Packets";
                 consumed = true;
                 break;
             case GRAVITY_MENU_TARGETS:
@@ -748,16 +561,13 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
             case GRAVITY_MENU_SETTINGS:
             case GRAVITY_MENU_OTHERS:
                 /* Parent of these is all Main */
-                newMenu = GRAVITY_MENU_MAIN;
-                strcpy(strNewMenu, "Main");
+                /* They're already set as default */
                 consumed = true;
                 break;
         }
         /* Create a stub UART_TerminalItem* to direct displayMenu */
-        UART_TerminalItem menuItem = { .item_string = strNewMenu };
         app->currentMenu = newMenu;
         displayMenu(app, &menuItem);
-        free(menuItem);
     }
     return consumed;
 }
@@ -765,5 +575,5 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
 /* Clean up on exit */
 void uart_terminal_scene_start_on_exit(void* context) {
     UART_TerminalApp* app = context;
-    variable_item_list_reset(app->var_item_list);
+    variable_item_list_reset(app->targets_menu_list);
 }
