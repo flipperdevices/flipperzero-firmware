@@ -20,6 +20,8 @@
 
 #include "esubghz_chat_icons.h"
 
+#include <assets_icons.h>
+
 #define APPLICATION_NAME "ESubGhzChat"
 
 #define DEFAULT_FREQ 433920000
