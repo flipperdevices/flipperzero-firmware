@@ -3,29 +3,13 @@
 
 UART_TerminalItem attacks[NUM_ATTACK_ITEMS] = {
   {"Mana",
-  {"Status", "On", "Off", "Clear"},
-  4,
-  {"mana", "mana on", "mana off", "mana clear"},
+  {""},
+  1,
+  {""},
   NO_ARGS,
   FOCUS_CONSOLE_END,
   NO_TIP,
-  false},
-  {"Mana Verbose",
-  {"Status", "On", "Off"},
-  3,
-  {"mana verbose", "mana verbose on", "mana verbose off"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Mana Loud",
-  {"Status", "On", "Off"},
-  3,
-  {"mana loud", "mana loud on", "mana loud off"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
+  true},
   {"selectedAP DOS",
   {"Status", "On", "Off"},
   3,
@@ -56,7 +40,7 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
     int newScene = -1;
     if (!strcmp(item->item_string, "Mana")) {
         // Mana menu
-        //newScene = UART_TerminalSceneMana;
+        newScene = UART_TerminalSceneAttacksMana;
     }
     if (newScene < 0) {
         return;

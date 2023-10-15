@@ -1,10 +1,9 @@
 * Finish restructuring menus
-    * New menu for fuzz
-    * New menu for deauth
-    * New menu for scan
+    * Add purge strategy UI to scan
     * New menu for Mana
     * New menu for purge strategy
     * Maybe a UI for stalk
+    * Update set MAC to use hex UI module
     * BLE Purge strategy UI - Used in SCAN, GET, SET, & anywhere else relevant
 * Crashing
     * Scan - View - Select - Back
@@ -31,3 +30,13 @@ SCRAMBLE_WORDS |
 BLE_PURGE_STRAT |
 BLE_PURGE_MAX_RSSI |
 BLE_PURGE_MIN_AGE  
+
+mana:
+Auth: None, WEP, WPA
+Mana Mode: Normal, Loud, <todo>
+verbose
+Run: Status, Start, Stop
+Clear Mana Cache
+
+
+purge strategy:
