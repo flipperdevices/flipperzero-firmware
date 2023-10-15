@@ -1,0 +1,15 @@
+App(
+    appid="ble_spam",
+    name="BLE Spam",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ble_spam",
+    stack_size=4 * 1024,
+    fap_icon="ble_spam_10px.png",
+    fap_category="Bluetooth",
+    fap_author="@Willy-JL @ECTO-1A @Spooks4576",
+    fap_weburl="https://github.com/Flipper-XFW/Xtreme-Apps/tree/dev/ble_spam",
+    fap_version="2.0",
+    fap_description="Flood BLE advertisements to cause spammy and annoying popups/notifications",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="ble_spam",
+)
