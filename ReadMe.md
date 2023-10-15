@@ -194,6 +194,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | IR Intervalometer | ![IR Badge] | [by Nitepone](https://github.com/Nitepone/flipper-intervalometer) |  | [![UFW Badge]](https://lab.flipper.net/apps/sony_intervalometer) |
 | IR Xbox Controller | ![IR Badge] | [by gebeto](https://github.com/gebeto/flipper-xbox-controller) |  | [![Author Badge]](https://lab.flipper.net/apps/xbox_controller) |
 | XRemote | ![IR Badge] | [by kala13x](https://github.com/kala13x/flipper-xremote) | Check out original repo to find usage instructions! | ![None Badge] |
+| R.O.B. Control | ![IR Badge] | [by riney](https://github.com/riney/flip_rob) | Flipper app to control a Nintendo R.O.B./Family Computer Robot | ![None Badge] |
 | BPM Tapper | ![Media Badge] | [by panki27](https://github.com/panki27/bpm-tapper) |  | [![UFW Badge]](https://lab.flipper.net/apps/bpm_tapper) |
 | Flizzer Tracker | ![Media Badge] | [by LTVA1](https://github.com/LTVA1/flizzer_tracker) |  | [![Author Badge]](https://lab.flipper.net/apps/flizzer_tracker) |
 | Music Beeper | ![Media Badge] | [by qqMajiKpp / Haseo](https://github.com/qqmajikpp/) |  | ![None Badge] |
