@@ -9,8 +9,7 @@ App(
     order=90,
 	fap_author="bigbrodude6119",
 	fap_description="Create an evil captive portal Wi-Fi access point",
-    fap_libs=["assets"],
     fap_icon_assets="icons",
     fap_icon="icons/evil_portal_10px.png",
-    fap_category="GPIO",
+    fap_category="WiFi",
 )
