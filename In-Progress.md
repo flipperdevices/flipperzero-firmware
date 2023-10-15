@@ -12,3 +12,7 @@
 * Settings->BLE_PURGE_STRAT needs to become a submenu where each purge element can be enabled/disabled
 
 purge strategy:
+MIN_RSSI
+MAX_AGE
+Unselected
+Unnamed
