@@ -123,6 +123,10 @@ static void uart_terminal_scene_targets_var_list_change_callback(VariableItem* i
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
+    if (app->selected_menu_index >= NUM_TARGET_ITEMS) {
+        app->selected_menu_index = 0;
+    }
+
     const UART_TerminalItem* menu_item = &targets[app->selected_menu_index];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
