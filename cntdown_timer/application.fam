@@ -12,5 +12,5 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_icon="cntdown_timer.png",
-    fap_category="0w0mewo",
+    fap_category="Tools",
 )
