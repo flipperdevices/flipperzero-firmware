@@ -27,7 +27,7 @@
 #include <math.h>     // for fabsf
 #include "TEA5767/TEA5767.h"
 #include <gui/icon_i.h>
-#include "fm_radio_icons.h"
+#include "fmradio_controller_icons.h"
 
 // Define macros for easier management
 #define BACKLIGHT_ALWAYS_ON
