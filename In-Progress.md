@@ -1,12 +1,10 @@
 * Finish restructuring menus
-    * New HELP menu
-    * New menu for command help (info)
-    * New menu for get
-    * New menu for set
     * New menu for fuzz
     * New menu for deauth
+    * New menu for scan
     * New menu for Mana
     * Maybe a UI for stalk
+    * BLE Purge strategy UI - Used in SCAN, GET, SET, & anywhere else relevant
 * Crashing
     * Scan - View - Select - Back
 * Help
@@ -15,7 +13,7 @@
     * Get Started
     * Commands
     * Help
-* Re-implement command execution
+* Re-implement console/command execution
 * Re-implement cls/clear screen
 * Refactor console logic - to keep console recording during menu navigation
 

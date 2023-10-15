@@ -1,74 +1,46 @@
 #include "../uart_terminal_app_i.h"
 #include <dolphin/dolphin.h>
 
-UART_TerminalItem packets[NUM_PACKETS_ITEMS] = {
-  {"Beacon",
-  {"Status", "target-ssids", "APs", "RickRoll", "Random", "Infinite", "Off"},
-  7,
-  {"beacon", "beacon target-ssids", "beacon aps", "beacon rickroll", "beacon random ", "beacon infinite", "beacon off"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Probe",
-  {"Status", "Any", "target-ssids", "APs", "Off"},
-  5,
-  {"probe", "probe any", "probe target-ssids", "probe aps", "probe off"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Fuzz",
-  {""},
-  1,
-  {""},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Deauth",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Sniff",
-  {"Status", "On", "Off"},
+UART_TerminalItem packets_deauth[NUM_PACKETS_DEAUTH_ITEMS] = {
+  {"MAC Source",
+  {"Frame", "ESP32", "Spoof Frame"},
   3,
-  {"sniff", "sniff on", "sniff off"},
-  NO_ARGS,
+  {"frame", "device", "spoof"},
+  TOGGLE_ARGS,
   FOCUS_CONSOLE_END,
+  NO_TIP,
+  false},
+  {"Target",
+  {"Broadcast", "SelectedSTA", "SelectedAP"},
+  3,
+  {"broadcast", "selectedSTA", "selectedAP"},
+  TOGGLE_ARGS,
+  FOCUS_CONSOLE_END,
+  NO_TIP,
+  false},
+  {"Run",
+  {"Status", "Start", "Stop"},
+  3,
+  {"", "on", "off"},
+  TOGGLE_ARGS,
+  FOCUS_CONSOLE_START,
   NO_TIP,
   false}
 };
 
 static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
-    int newScene = -1;
-    if (!strcmp(item->item_string, "Deauth")) {
-        // Deauth menu
-        newScene = UART_TerminalScenePacketsFuzz;
-    } else if (!strcmp(item->item_string, "Fuzz")) {
-        newScene = UART_TerminalScenePacketsDeauth;
-    }
-    if (newScene < 0) {
-        return;
-    }
-    scene_manager_set_scene_state(
-        app->scene_manager, UART_TerminalScenePackets, app->selected_menu_index);
-    scene_manager_next_scene(app->scene_manager, newScene);
+    /* No Submenus */
 }
 
 /* Callback when an option is selected */
-static void uart_terminal_scene_packets_var_list_enter_callback(void* context, uint32_t index) {
+static void uart_terminal_scene_packets_deauth_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
     const int selected_option_index = app->selected_option_index[index];
 
-    furi_assert(index < NUM_PACKETS_ITEMS);
-    item = &packets[index];
+    furi_assert(index < NUM_PACKETS_DEAUTH_ITEMS);
+    item = &packets_deauth[index];
 
     /* Are we displaying a submenu or executing something? */
     if (item->isSubMenu) {
@@ -105,13 +77,13 @@ static void uart_terminal_scene_packets_var_list_enter_callback(void* context, u
 }
 
 /* Callback when a selected option is changed (I Think) */
-static void uart_terminal_scene_packets_var_list_change_callback(VariableItem* item) {
+static void uart_terminal_scene_packets_deauth_var_list_change_callback(VariableItem* item) {
     furi_assert(item);
 
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    const UART_TerminalItem* menu_item = &packets[app->selected_menu_index];
+    const UART_TerminalItem* menu_item = &packets_deauth[app->selected_menu_index];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
@@ -119,34 +91,34 @@ static void uart_terminal_scene_packets_var_list_change_callback(VariableItem* i
 }
 
 /* Callback on entering the scene (initialisation) */
-void uart_terminal_scene_packets_on_enter(void* context) {
+void uart_terminal_scene_packets_deauth_on_enter(void* context) {
     UART_TerminalApp* app = context;
-    VariableItemList* var_item_list = app->packets_menu_list;
+    VariableItemList* var_item_list = app->packets_deauth_menu_list;
     VariableItem *item;
 
     variable_item_list_set_enter_callback(
-        var_item_list, uart_terminal_scene_packets_var_list_enter_callback, app);
+        var_item_list, uart_terminal_scene_packets_deauth_var_list_enter_callback, app);
 
-    app->currentMenu = GRAVITY_MENU_PACKETS;
-    for(int i = 0; i < NUM_PACKETS_ITEMS; ++i) {
+    app->currentMenu = GRAVITY_MENU_PACKETS_DEAUTH;
+    for(int i = 0; i < NUM_PACKETS_DEAUTH_ITEMS; ++i) {
         item = variable_item_list_add(
             var_item_list,
-            packets[i].item_string,
-            packets[i].num_options_menu,
-            uart_terminal_scene_packets_var_list_change_callback,
+            packets_deauth[i].item_string,
+            packets_deauth[i].num_options_menu,
+            uart_terminal_scene_packets_deauth_var_list_change_callback,
             app);
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
         variable_item_set_current_value_text(
-            item, packets[i].options_menu[app->selected_option_index[i]]);
+            item, packets_deauth[i].options_menu[app->selected_option_index[i]]);
     }
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalScenePackets));
+        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalScenePacketsDeauth));
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewPacketsMenu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewPacketsDeauthMenu);
 }
 
 /* Event handler callback - Handle scene change and tick events */
-bool uart_terminal_scene_packets_on_event(void* context, SceneManagerEvent event) {
+bool uart_terminal_scene_packets_deauth_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UART_TerminalApp* app = context;
     bool consumed = false;
@@ -154,23 +126,23 @@ bool uart_terminal_scene_packets_on_event(void* context, SceneManagerEvent event
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == UART_TerminalEventStartKeyboard) {
             scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalScenePackets, app->selected_menu_index);
+                app->scene_manager, UART_TerminalScenePacketsDeauth, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewTextInput);
         } else if(event.event == UART_TerminalEventStartConsole) {
             scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalScenePackets, app->selected_menu_index);
+                app->scene_manager, UART_TerminalScenePacketsDeauth, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index = variable_item_list_get_selected_item_index(app->packets_menu_list);
+        app->selected_menu_index = variable_item_list_get_selected_item_index(app->packets_deauth_menu_list);
         consumed = true;
     }
     return consumed;
 }
 
 /* Clean up on exit */
-void uart_terminal_scene_packets_on_exit(void* context) {
+void uart_terminal_scene_packets_deauth_on_exit(void* context) {
     UART_TerminalApp* app = context;
-    variable_item_list_reset(app->packets_menu_list);
+    variable_item_list_reset(app->packets_deauth_menu_list);
 }

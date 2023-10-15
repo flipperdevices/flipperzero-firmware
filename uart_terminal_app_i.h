@@ -18,13 +18,15 @@
 #define MAX_MENU_ITEMS (21)
 #define NUM_MAIN_ITEMS (6)
 #define NUM_TARGET_ITEMS (8)
+#define NUM_TARGETS_SCAN_ITEMS (8)
 #define NUM_PACKETS_ITEMS (5)
+#define NUM_PACKETS_DEAUTH_ITEMS (3)
+#define NUM_PACKETS_FUZZ_ITEMS (4)
 #define NUM_HELP_ITEMS (5)
 #define NUM_HELP_INFO_ITEMS (21)
 #define NUM_ATTACK_ITEMS (6)
+#define NUM_ATTACK_MANA_ITEMS (8)
 #define NUM_SETTINGS_ITEMS (15)
-#define NUM_DEAUTH_ITEMS (3)
-#define NUM_FUZZ_ITEMS (4)
 #define MAX_MENU_STR_LEN (12)
 
 #define UART_TERMINAL_TEXT_BOX_STORE_SIZE (1024)
@@ -37,13 +39,15 @@
 typedef enum {
   GRAVITY_MENU_MAIN,
   GRAVITY_MENU_TARGETS,
+  GRAVITY_MENU_TARGETS_SCAN,
   GRAVITY_MENU_PACKETS,
+  GRAVITY_MENU_PACKETS_FUZZ,
+  GRAVITY_MENU_PACKETS_DEAUTH,
   GRAVITY_MENU_ATTACKS,
+  GRAVITY_MENU_ATTACKS_MANA,
   GRAVITY_MENU_SETTINGS,
   GRAVITY_MENU_HELP,
   GRAVITY_MENU_HELP_INFO,
-  GRAVITY_MENU_FUZZ,
-  GRAVITY_MENU_DEAUTH
 } GravityMenu;
 
 char *strToken(char *cmdLine, char sep, int tokenNum);
@@ -61,7 +65,8 @@ struct UART_TerminalApp {
 
     VariableItemList *main_menu_list, *targets_menu_list, *packets_menu_list;
     VariableItemList *attacks_menu_list, *settings_menu_list, *help_menu_list;
-    VariableItemList *deauth_menu_list, *fuzz_menu_list, *help_info_menu_list;
+    VariableItemList *packets_deauth_menu_list, *packets_fuzz_menu_list;
+    VariableItemList *help_info_menu_list, *targets_scan_menu_list, *attacks_mana_menu_list;
 
     UART_TerminalUart* uart;
     int selected_menu_index;
@@ -83,13 +88,15 @@ typedef enum {
     UART_TerminalAppViewTextInput,
     Gravity_AppViewMainMenu,
     Gravity_AppViewTargetsMenu,
+    Gravity_AppViewTargetsScanMenu,
     Gravity_AppViewPacketsMenu,
+    Gravity_AppViewPacketsDeauthMenu,
+    Gravity_AppViewPacketsFuzzMenu,
     Gravity_AppViewAttacksMenu,
+    Gravity_AppViewAttacksManaMenu,
     Gravity_AppViewSettingsMenu,
     Gravity_AppViewHelpMenu,
     Gravity_AppViewHelpInfoMenu,
-    Gravity_AppViewDeauthMenu,
-    Gravity_AppViewFuzzMenu,
 } UART_TerminalAppView;
 
 // For each command, define whether additional arguments are needed
