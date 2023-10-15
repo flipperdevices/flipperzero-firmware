@@ -33,6 +33,14 @@ UART_TerminalItem packets[NUM_PACKETS_ITEMS] = {
   TOGGLE_ARGS,
   FOCUS_CONSOLE_END,
   NO_TIP,
+  false},
+  {"Sniff",
+  {"Status", "On", "Off"},
+  3,
+  {"sniff", "sniff on", "sniff off"},
+  NO_ARGS,
+  FOCUS_CONSOLE_END,
+  NO_TIP,
   false}
 };
 

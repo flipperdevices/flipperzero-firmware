@@ -66,14 +66,6 @@ UART_TerminalItem targets[NUM_TARGET_ITEMS] = {
   FOCUS_CONSOLE_END,
   NO_TIP,
   false},
-  {"Sniff",
-  {"Status", "On", "Off"},
-  3,
-  {"sniff", "sniff on", "sniff off"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false}
 };
 
 static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
