@@ -1863,6 +1863,17 @@ const NamedList type_list[] = {
     {},
 };
 
+int pokemon_table_get_num_from_index(const PokemonTable* table, uint8_t index) {
+    int i;
+
+    for(i = 0;; i++) {
+        if(table[i].index == index) return i;
+        if(table[i].name == NULL) break;
+    }
+
+    return 0;
+}
+
 int pokemon_named_list_get_num_elements(const NamedList* list) {
     int i;
 
@@ -2133,6 +2144,7 @@ static void trade_block_free(TradeBlock* trade) {
 
 PokemonFap* pokemon_alloc() {
     PokemonFap* pokemon_fap = (PokemonFap*)malloc(sizeof(PokemonFap));
+    View* trade_view;
 
     // View dispatcher
     pokemon_fap->view_dispatcher = view_dispatcher_alloc();
@@ -2180,8 +2192,18 @@ PokemonFap* pokemon_alloc() {
         pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select_view);
 
     // Trade View
-    pokemon_fap->trade_view = trade_alloc(pokemon_fap);
-    view_dispatcher_add_view(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade_view);
+    /* Allocate a view and pass it to the trade routines. The trade API is
+     * responsible for freeing every resource, including the view itself. This
+     * is actually how it was already designed anyway, so we just create it first. The
+     * main FAP does not keep track of it. In theory, we could let the trade
+     * API handle all of it, however, it doesn't make sense to have the trade
+     * API add itself to the view dispatcher since that kind of management is
+     * outside the scope of the trade routines and is the responsibility of the
+     * main FAP.
+     */
+    trade_view = view_alloc();
+    pokemon_fap->trade = trade_alloc(pokemon_fap->trade_block, trade_view);
+    view_dispatcher_add_view(pokemon_fap->view_dispatcher, AppViewTrade, trade_view);
 
     return pokemon_fap;
 }

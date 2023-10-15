@@ -97,15 +97,6 @@
 
 #define TRADE_CENTRE_WAIT 0xFD
 
-struct trade_model {
-    bool trading;
-    bool connected;
-    render_gameboy_state_t gameboy_status;
-    uint8_t curr_pokemon;
-    const PokemonTable* pokemon_table;
-    FuriTimer* draw_timer;
-};
-
 typedef unsigned char byte;
 typedef enum { NOT_CONNECTED, CONNECTED, TRADE_CENTRE, COLOSSEUM } connection_state_t;
 typedef enum {
@@ -123,20 +114,51 @@ typedef enum {
     DONE
 } trade_centre_state_t;
 
-/* TODO: Convert all of these to be maintained in a struct in the Trade context */
-uint8_t out_data = 0; // Should be able to be made as part of view model or static in used function
-uint8_t in_data = 0; //Should be able to be made as part of view model, is used in multiple funcs
-uint8_t shift = 0; //Should be able to be made as part of view model, is used in multiple funcs
-uint32_t time = 0; //Should be able to be made static in used function
-volatile int counter = 0; // Should be able to be made static in used function
-volatile bool procesing = true; // Review this vars use, it could potentially be removed
-volatile connection_state_t connection_state =
-    NOT_CONNECTED; // Should be made in to view model struct
-volatile trade_centre_state_t trade_centre_state =
-    INIT; // Should be able to be made part of view model
-unsigned char INPUT_BLOCK[405]; // Put this in pokemon_fap? Not sure yet
+typedef enum {
+    GAMEBOY_INITIAL,
+    GAMEBOY_READY,
+    GAMEBOY_WAITING,
+    GAMEBOY_TRADE_READY,
+    GAMEBOY_SEND,
+    GAMEBOY_PENDING,
+    GAMEBOY_TRADING
+} render_gameboy_state_t;
+
+/* Anonymous struct */
+struct Trade {
+    trade_centre_state_t trade_centre_state;
+    connection_state_t connection_state; // Should be made in to view model struct
+    FuriTimer* draw_timer;
+    View* view;
+    uint8_t in_data; //Should be able to be made as part of view model, is used in multiple funcs
+    uint8_t shift; //Should be able to be made as part of view model, is used in multiple funcs
+    TradeBlock* trade_block;
+    TradeBlock* input_block;
+    const PokemonTable* pokemon_table;
+
+    uint32_t time; //Should be able to be made static in used function
+    uint8_t out_data; // Should be able to be made as part of view model or static in used function
+    int counter; // Should be able to be made static in used function
+};
+
+/* These are the needed variables for the draw callback */
+/* Technically, I think the "right" way to do this would be
+ * to keep these vars in the Trade struct and copy them in to
+ * the model when they may have changed. In the interest of
+ * saving space they are separated. Though it may make sense
+ * later down the line to keep this as a copy.
+ */
+struct trade_model {
+    render_gameboy_state_t gameboy_status;
+    bool trading;
+    bool connected;
+    uint8_t curr_pokemon;
+    const PokemonTable* pokemon_table;
+};
 
 void screen_gameboy_connect(Canvas* const canvas) {
+    furi_assert(canvas);
+
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_draw_icon(canvas, 1, 21, &I_Connect_me_62x31);
     canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
@@ -144,7 +166,10 @@ void screen_gameboy_connect(Canvas* const canvas) {
     canvas_draw_icon(canvas, 8, 2, &I_Space_65x18);
     canvas_draw_str(canvas, 18, 13, "Connect GB");
 }
+
 void screen_gameboy_connected(Canvas* const canvas) {
+    furi_assert(canvas);
+
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_draw_icon(canvas, 1, 21, &I_Connected_62x31);
     canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
@@ -153,19 +178,67 @@ void screen_gameboy_connected(Canvas* const canvas) {
     canvas_draw_str(canvas, 18, 13, "Connected!");
 }
 
-int time_in_seconds = 0;
+struct patch_list {
+    uint8_t index;
+    struct patch_list* next;
+};
 
-uint8_t patch_list[205] = {0};
-uint8_t patch_cnt;
+static struct patch_list* patch_list = NULL;
 
-static void trade_draw_callback(Canvas* canvas, void* model) {
+static struct patch_list* plist_alloc(void) {
+    static struct patch_list* plist = NULL;
+
+    plist = malloc(sizeof(struct patch_list));
+    plist->index = 0;
+    plist->next = NULL;
+    return plist;
+}
+
+static void plist_append(struct patch_list* plist, uint8_t index) {
+    furi_assert(plist);
+
+    plist->index = index;
+    plist->next = plist_alloc();
+}
+
+static void plist_free(struct patch_list* plist) {
+    furi_assert(plist);
+    struct patch_list* plist_next = plist->next;
+
+    while(plist != NULL) {
+        free(plist);
+        plist = plist_next;
+        plist_next = plist->next;
+    }
+}
+
+/* Returns the index value at offset member of the list. If offset is beyond
+ * the length of the allocated list, it will just return 0.
+ */
+static uint8_t plist_index_get(struct patch_list* plist, int offset) {
+    furi_assert(plist);
+    int i;
+
+    for(i = 0; i < offset; i++) {
+        if(plist->next == NULL) break;
+        plist = plist->next;
+    }
+
+    return plist->index;
+}
+
+static void trade_draw_callback(Canvas* canvas, void* view_model) {
+    furi_assert(view_model);
     const char* gameboy_status_text = NULL;
-    struct trade_model* view_model = model;
-    uint8_t curr_pokemon = view_model->curr_pokemon;
+    struct trade_model* model = view_model;
+    uint8_t curr_pokemon = model->curr_pokemon;
+    int time_in_seconds;
+
+    time_in_seconds = (int)DWT->CYCCNT / (72000000.0f / 4); //  250ms
 
     canvas_clear(canvas);
-    if(!view_model->trading) {
-        if(!view_model->connected) {
+    if(!model->trading) {
+        if(!model->connected) {
             furi_hal_light_set(LightGreen, 0x00);
             furi_hal_light_set(LightBlue, 0x00);
             furi_hal_light_set(LightRed, 0xff);
@@ -177,7 +250,7 @@ static void trade_draw_callback(Canvas* canvas, void* model) {
             screen_gameboy_connected(canvas);
         }
     } else {
-        switch(view_model->gameboy_status) {
+        switch(model->gameboy_status) {
         case GAMEBOY_TRADING:
             furi_hal_light_set(LightGreen, 0x00);
             furi_hal_light_set(LightRed, 0x00);
@@ -192,7 +265,7 @@ static void trade_draw_callback(Canvas* canvas, void* model) {
         case GAMEBOY_READY:
         case GAMEBOY_WAITING:
         case GAMEBOY_SEND:
-            canvas_draw_icon(canvas, 38, 11, view_model->pokemon_table[curr_pokemon].icon);
+            canvas_draw_icon(canvas, 38, 11, model->pokemon_table[curr_pokemon].icon);
             break;
         default:
             // Default state added to eliminated enum warning
@@ -203,7 +276,7 @@ static void trade_draw_callback(Canvas* canvas, void* model) {
         canvas_draw_frame(canvas, 0, 0, 128, 64);
         canvas_draw_icon(canvas, 24, 0, &I_Space_80x18);
 
-        switch(view_model->gameboy_status) {
+        switch(model->gameboy_status) {
         case GAMEBOY_READY:
             gameboy_status_text = "READY";
             break;
@@ -230,8 +303,6 @@ static void trade_draw_callback(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 48, 12, gameboy_status_text);
 
         canvas_draw_icon(canvas, 27, 1, &I_red_16x15);
-
-        time_in_seconds = (int)DWT->CYCCNT / (72000000.0f / 4); //  250ms
     }
 }
 
@@ -249,16 +320,17 @@ uint32_t micros() {
  * I think the documentation might be missing a detail as the code later does implement the saem
  * 0x60 value of "trade the first pokemon"
  */
-byte getConnectResponse(byte in) {
-    byte ret;
+static byte getConnectResponse(byte in, struct Trade* trade) {
+    furi_assert(trade);
 
     /* XXX: Can streamline this code a bit by setting ret to in
      * and then only setting ret where needed? Might be a useless
      * optimization though */
+    byte ret;
 
     switch(in) {
     case PKMN_CONNECTED:
-        connection_state = CONNECTED;
+        trade->connection_state = CONNECTED;
         ret = PKMN_CONNECTED;
         break;
     case PKMN_MASTER:
@@ -268,7 +340,7 @@ byte getConnectResponse(byte in) {
         ret = PKMN_BLANK;
         break;
     default:
-        connection_state = NOT_CONNECTED;
+        trade->connection_state = NOT_CONNECTED;
         ret = PKMN_BREAK_LINK;
         break;
     }
@@ -297,8 +369,9 @@ byte getConnectResponse(byte in) {
  *
  * This is where we loop if we end up in the colosseum
  */
-byte getMenuResponse(byte in) {
-    /* TODO: Find out what this byte means */
+static byte getMenuResponse(byte in, struct Trade* trade) {
+    furi_assert(trade);
+
     byte response = 0x00;
     /* XXX: Shouldn't this return a valid response for each option? 
      * e.g. if the gameboy selects trade center, should we also send trade center? 
@@ -311,14 +384,14 @@ byte getMenuResponse(byte in) {
         response = PKMN_CONNECTED;
         break;
     case PKMN_TRADE_CENTRE:
-        connection_state = TRADE_CENTRE;
+        trade->connection_state = TRADE_CENTRE;
         break;
     case PKMN_COLOSSEUM:
-        connection_state = COLOSSEUM;
+        trade->connection_state = COLOSSEUM;
         break;
     case PKMN_BREAK_LINK:
     case PKMN_MASTER:
-        connection_state = NOT_CONNECTED;
+        trade->connection_state = NOT_CONNECTED;
         response = PKMN_BREAK_LINK;
         break;
     default:
@@ -329,26 +402,28 @@ byte getMenuResponse(byte in) {
     return response;
 }
 
-byte getTradeCentreResponse(byte in, void* context) {
-    furi_assert(context);
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
-    uint8_t* trade_block_flat = (uint8_t*)pokemon_fap->trade_block;
-    render_gameboy_state_t gameboy_status;
+static byte getTradeCentreResponse(byte in, struct Trade* trade) {
+    furi_assert(trade);
+
+    uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
+    uint8_t* input_block_flat = (uint8_t*)trade->input_block;
+    static int counter; // Should be able to be made static in used function
+        // May need to make another state PRE-init or something to reset this on re-entry?
+    struct trade_model* model = NULL;
+    uint8_t in_pokemon_num = 0;
     byte send = in;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
      * and what response to expect.
      */
 
-    furi_assert(context);
+    /* Since this is a fairly long function, it doesn't call any other functions,
+     * the view model isn't locked, and we're in an interrupt context, lets just
+     * mape the view model to a local var and commit it back when we're done.
+     */
+    model = view_get_model(trade->view);
 
-    with_view_model(
-        pokemon_fap->trade_view,
-        struct trade_model * model,
-        { gameboy_status = model->gameboy_status; },
-        false);
-
-    switch(trade_centre_state) {
+    switch(trade->trade_centre_state) {
     /* XXX: Wait for 5x 00 on the bus. This should be safe to just leave alone. 0x00 appears to be a sync byte */
     case INIT:
         // TODO: What does this value of in mean?
@@ -358,9 +433,9 @@ byte getTradeCentreResponse(byte in, void* context) {
             // TODO: What does counter signify here?
             /* It looks like counter is just intended to wait for a sequence of 00s, but its not even really a sequence, just, 5 bytes in a row. */
             if(counter == 5) {
-                trade_centre_state = READY_TO_GO;
+                trade->trade_centre_state = READY_TO_GO;
                 //  CLICK EN LA MESA, when the gameboy clicks on the trade table
-                gameboy_status = GAMEBOY_READY;
+                model->gameboy_status = GAMEBOY_READY;
             }
             counter++;
         }
@@ -376,13 +451,13 @@ byte getTradeCentreResponse(byte in, void* context) {
 	 * not FD bytes */
         /* I believe this is specifically 0xFD*/
         /* Also specifically it is repeated 10 times to signify that the random block is about to start */
-        if((in & 0xF0) == 0xF0) trade_centre_state = SEEN_FIRST_WAIT;
+        if((in & 0xF0) == 0xF0) trade->trade_centre_state = SEEN_FIRST_WAIT;
         break;
 
     case SEEN_FIRST_WAIT:
         if((in & 0xF0) != 0xF0) {
             counter = 0;
-            trade_centre_state = SENDING_RANDOM_DATA;
+            trade->trade_centre_state = SENDING_RANDOM_DATA;
         }
         break;
 
@@ -398,17 +473,11 @@ byte getTradeCentreResponse(byte in, void* context) {
     case SENDING_RANDOM_DATA:
         if((in & 0xF0) == 0xF0) {
             if(counter == 5) {
-                trade_centre_state = WAITING_TO_SEND_DATA;
-                gameboy_status = GAMEBOY_WAITING;
+                trade->trade_centre_state = WAITING_TO_SEND_DATA;
+                model->gameboy_status = GAMEBOY_WAITING;
             }
             counter++;
         }
-        /* XXX: HACK: prep patch list */
-        patch_list[0] = 0xFD;
-        patch_list[1] = 0xFD;
-        patch_list[2] = 0xFD;
-        /* Patchs actually start at 11th byte? */
-        patch_cnt = 10;
         break;
 
     /* This could fall in to the next case statement maybe? */
@@ -416,16 +485,10 @@ byte getTradeCentreResponse(byte in, void* context) {
     case WAITING_TO_SEND_DATA:
         if((in & 0xF0) != 0xF0) {
             counter = 0;
-            INPUT_BLOCK[counter] = in;
-            if(trade_block_flat[counter] == 0xFE) {
-                send = 0xFF;
-                patch_list[patch_cnt] = counter + 1;
-                patch_cnt++;
-            } else {
-                send = trade_block_flat[counter];
-            }
+            input_block_flat[counter] = in;
+            send = trade_block_flat[counter];
             counter++;
-            trade_centre_state = SENDING_DATA;
+            trade->trade_centre_state = SENDING_DATA;
         }
         break;
 
@@ -433,28 +496,15 @@ byte getTradeCentreResponse(byte in, void* context) {
     /* XXX: The current implementation ends up stopping short of sending data from flipper
      * and instead mirrors back data from the gameboy before we have technically sent our
      * whole struct */
-    /* XXX: HACK: I think this will only work with the first patch list part */
     case SENDING_DATA:
-        INPUT_BLOCK[counter] = in;
-        if(trade_block_flat[counter] == 0xFE) {
-            send = 0xFF;
-            patch_list[patch_cnt] = counter + 1;
-            patch_cnt++;
-        } else {
-            send = trade_block_flat[counter];
-        }
+        input_block_flat[counter] = in;
+        send = trade_block_flat[counter];
         counter++;
 
-        if(counter == 0xFE) {
-            /* XXX: HACK: Just end the list instantly */
-            patch_list[patch_cnt] = 0xFF;
-            patch_cnt++;
-            patch_list[patch_cnt] = 0xFF;
-        }
         /* This should be 418? */
         /* XXX: It breaks when this is set to 418. Need to fix this */
         if(counter == 405) //TODO: replace with sizeof struct rather than static number
-            trade_centre_state = SENDING_PATCH_DATA;
+            trade->trade_centre_state = SENDING_PATCH_DATA;
         break;
 
     /* XXX: I still have no idea what patch data is in context of the firmware */
@@ -465,17 +515,21 @@ byte getTradeCentreResponse(byte in, void* context) {
     case SENDING_PATCH_DATA:
         if(in == 0xFD) {
             counter = 0;
-            patch_cnt = 3;
             send = 0xFD;
         } else {
-            counter++;
-            send = patch_list[patch_cnt];
-            patch_cnt++;
+            /* This magic number is basically the header length, 10, minus
+	     * the 3x 0xFD that we should be transmitting as part of the path
+	     * list header.
+	     */
+            if(counter > 6) {
+                send = plist_index_get(patch_list, (counter - 7));
+            }
 
+            counter++;
             /* This is actually 200 bytes */
             /* XXX: Interestingly, it does appear to actually be 197 bytes from the first 00 after trade block, minus FFs, to the last 00 sent before long delay */
             if(counter == 197) // TODO: What is this magic value?
-                trade_centre_state = TRADE_PENDING;
+                trade->trade_centre_state = TRADE_PENDING;
         }
         break;
 
@@ -485,19 +539,20 @@ byte getTradeCentreResponse(byte in, void* context) {
         /* TODO: What are these states */
         /* 0x6f is "close session?" */
         if(in == 0x6F) {
-            trade_centre_state = READY_TO_GO;
+            trade->trade_centre_state = READY_TO_GO;
             send = 0x6F;
-            gameboy_status = GAMEBOY_TRADE_READY;
+            model->gameboy_status = GAMEBOY_TRADE_READY;
             /* 0x6? says what pokemon the gameboy is sending us */
         } else if((in & 0x60) == 0x60) {
+            in_pokemon_num = in & 0x0F;
             send = 0x60; // first pokemon
-            gameboy_status = GAMEBOY_SEND;
+            model->gameboy_status = GAMEBOY_SEND;
             /* I think this is a confirmation of what is being traded, likely from the dialog of:
 	     * so and so will be traded for so and so, is that ok?
 	     */
         } else if(in == 0x00) {
             send = 0;
-            trade_centre_state = TRADE_CONFIRMATION;
+            trade->trade_centre_state = TRADE_CONFIRMATION;
         }
         /* XXX: Test to make sure saying no at is this okay does the right thing */
         break;
@@ -505,10 +560,10 @@ byte getTradeCentreResponse(byte in, void* context) {
     /* XXX: The actual trade uses 0x62 a bunch? Is that the OKAY? Is 0x61 a NAK? Other docs show 0x6F? */
     case TRADE_CONFIRMATION:
         if(in == 0x61) {
-            trade_centre_state = TRADE_PENDING;
-            gameboy_status = GAMEBOY_PENDING;
+            trade->trade_centre_state = TRADE_PENDING;
+            model->gameboy_status = GAMEBOY_PENDING;
         } else if((in & 0x60) == 0x60) {
-            trade_centre_state = DONE;
+            trade->trade_centre_state = DONE;
         }
         break;
 
@@ -516,9 +571,27 @@ byte getTradeCentreResponse(byte in, void* context) {
     case DONE:
         if(in == 0x00) {
             send = 0;
-            trade_centre_state = READY_TO_GO;
-            gameboy_status = GAMEBOY_TRADING;
+            trade->trade_centre_state = READY_TO_GO;
+            /* XXX: I think I want to change this? */
+            model->gameboy_status = GAMEBOY_TRADING;
+
             counter = 0;
+
+            /* Copy the traded-in pokemon's main data to our struct */
+            trade->trade_block->party_members[0] =
+                trade->input_block->party_members[in_pokemon_num];
+            memcpy(
+                &(trade->trade_block->party[0]),
+                &(trade->input_block->party[in_pokemon_num]),
+                sizeof(struct pokemon_structure));
+            memcpy(
+                &(trade->trade_block->nickname[0]),
+                &(trade->input_block->nickname[in_pokemon_num]),
+                sizeof(struct name));
+            memcpy(
+                &(trade->trade_block->ot_name[0]),
+                &(trade->input_block->ot_name[in_pokemon_num]),
+                sizeof(struct name));
         }
         break;
 
@@ -527,23 +600,22 @@ byte getTradeCentreResponse(byte in, void* context) {
         break;
     }
 
-    with_view_model(
-        pokemon_fap->trade_view,
-        struct trade_model * model,
-        { model->gameboy_status = gameboy_status; },
-        false);
+    view_commit_model(trade->view, false);
 
     return send;
 }
 
 void transferBit(void* context) {
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
     furi_assert(context);
+
+    struct Trade* trade = (struct Trade*)context;
+    static uint8_t
+        out_data; // XXX: If we need to clear this between runs of trade view, this needs to be moved to Trade
     bool connected;
     bool trading;
 
     with_view_model(
-        pokemon_fap->trade_view,
+        trade->view,
         struct trade_model * model,
         {
             connected = model->connected;
@@ -555,38 +627,38 @@ void transferBit(void* context) {
     /* XXX: This logic can be made a little more clear I think.
      * Its just shifting a bit in at a time, doesn't need the clever shifting maths */
     byte raw_data = furi_hal_gpio_read(&GAME_BOY_SI);
-    in_data |= raw_data << (7 - shift);
+    trade->in_data |= raw_data << (7 - trade->shift);
 
     /* Once a byte of data has been shifted in, process it */
-    if(++shift > 7) {
-        shift = 0;
-        switch(connection_state) {
+    if(++trade->shift > 7) {
+        trade->shift = 0;
+        switch(trade->connection_state) {
         case NOT_CONNECTED:
             connected = false;
-            out_data = getConnectResponse(in_data);
+            out_data = getConnectResponse(trade->in_data, trade);
             break;
         case CONNECTED:
             connected = true;
-            out_data = getMenuResponse(in_data);
+            out_data = getMenuResponse(trade->in_data, trade);
             break;
         case TRADE_CENTRE:
-            out_data = getTradeCentreResponse(in_data, pokemon_fap);
+            out_data = getTradeCentreResponse(trade->in_data, trade);
             break;
             /* If we end up in the colosseum, then just repeat data back */
             /* Do we need a way to close the connection? Would that be useful? */
         default:
-            out_data = in_data;
+            out_data = trade->in_data;
             break;
         }
 
-        in_data = 0; // TODO: I don't think this is necessary?
+        trade->in_data = 0; // TODO: I don't think this is necessary?
     }
 
     /* Wait for the clock to go high again
      * XXX: I think this is superfluous since we can IRQ on falling edge, read data, delay a moment, then set data and wait until next IRQ */
     /* Basically, I don't want to stall in an interrupt context.
      * Could also maybe IRQ on either edge? and set data out when appropriate? */
-    while(procesing && !furi_hal_gpio_read(&GAME_BOY_CLK))
+    while(!furi_hal_gpio_read(&GAME_BOY_CLK))
         ;
 
     furi_hal_gpio_write(&GAME_BOY_SO, out_data & 0x80 ? true : false);
@@ -594,16 +666,16 @@ void transferBit(void* context) {
         DELAY_MICROSECONDS); // Wait 20-60us ... 120us max (in slave mode is not necessary)
     // TODO: The above comment doesn't make sense as DELAY_MICROSECONDS is defined as 15
 
-    if(trade_centre_state == READY_TO_GO) trading = true;
+    if(trade->trade_centre_state == READY_TO_GO) trading = true;
 
     out_data = out_data << 1;
 
     with_view_model(
-        pokemon_fap->trade_view,
+        trade->view,
         struct trade_model * model,
         {
-            model->connected = connected;
             model->trading = trading;
+            model->connected = connected;
         },
         false);
 }
@@ -611,46 +683,63 @@ void transferBit(void* context) {
 void input_clk_gameboy(void* context) {
     furi_assert(context);
 
+    struct Trade* trade = (struct Trade*)context;
+    static uint32_t time; //This should be fine
+
     if(time > 0) {
         //  if there is no response from the master in 120 microseconds, the counters are reset
         if(micros() - time > 120) {
             //  IDLE & Reset
-            in_data = 0;
-            shift = 0;
+            trade->in_data = 0;
+            trade->shift = 0;
         }
     }
 
-    transferBit(context);
+    transferBit(trade);
     time = micros();
 }
 
 void trade_draw_timer_callback(void* context) {
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
+    furi_assert(context);
+
+    struct Trade* trade = (struct Trade*)context;
 
     with_view_model(
-        pokemon_fap->trade_view, struct trade_model * model, { UNUSED(model); }, true);
+        trade->view, struct trade_model * model, { UNUSED(model); }, true);
 }
 
 void trade_enter_callback(void* context) {
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
     furi_assert(context);
+    PokemonFap* pokemon_fap = (PokemonFap*)context;
+    uint8_t* trade_block_flat = (uint8_t*)(&(pokemon_fap->trade_block->party[0]));
+    int i = 0;
 
+    struct Trade* trade = (struct Trade*)context;
+
+    /* Re-init variables */
     with_view_model(
-        pokemon_fap->trade_view,
+        trade->view,
         struct trade_model * model,
         {
             model->trading = false;
             model->connected = false;
             model->gameboy_status = GAMEBOY_INITIAL;
-            model->pokemon_table = pokemon_fap->pokemon_table;
-            model->curr_pokemon = (uint8_t)pokemon_fap->curr_pokemon;
-            model->draw_timer =
-                furi_timer_alloc(trade_draw_timer_callback, FuriTimerTypePeriodic, pokemon_fap);
-            /* Every 100 ms, trigger a draw update */
-            furi_timer_start(model->draw_timer, furi_ms_to_ticks(100));
+            model->pokemon_table = trade->pokemon_table;
+            model->curr_pokemon = pokemon_table_get_num_from_index(
+                trade->pokemon_table, trade->trade_block->party_members[0]);
         },
         true);
+    trade->connection_state = NOT_CONNECTED;
+    trade->trade_centre_state = INIT;
 
+    trade->in_data = 0;
+    trade->shift = 0;
+
+    trade->draw_timer = furi_timer_alloc(trade_draw_timer_callback, FuriTimerTypePeriodic, trade);
+    /* Every 100 ms, trigger a draw update */
+    furi_timer_start(trade->draw_timer, furi_ms_to_ticks(100));
+
+    /* XXX: Figure out "proper" GPIO setup/use/teardown */
     // B3 (Pin6) / SO (2)
     furi_hal_gpio_write(&GAME_BOY_SO, false);
     furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
@@ -660,53 +749,88 @@ void trade_enter_callback(void* context) {
     // // C3 (Pin7) / CLK (5)
     furi_hal_gpio_init(&GAME_BOY_CLK, GpioModeInterruptRise, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
-    furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, pokemon_fap);
+
+    furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, trade);
+
+    /* XXX: HACK: Set up our patch list now. Note that, this will cause weird
+     * problems if a pokemon with a patched index is traded to the flipper with
+     * a pokemon without a patched index, or the other way around. Need to implement
+     * a way to update the patch list after we get traded a pokemon.
+     */
+    patch_list = plist_alloc();
+    /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
+    /* The first half of the patch list covers offsets 0x00 - 0xfc, which
+     * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
+     * end of the first part. The second half of the patch list covers
+     * offsets 0xfd - 0x107. Which is expressed as 0x01 - 0xb. A 0xFF byte
+     * is added to signify the end of the second part/
+     */
+    for(i = 0; i < 264; i++) {
+        if(i == 0xFD) plist_append(patch_list, 0xFF);
+
+        if(trade_block_flat[i] == 0xFE) {
+            plist_append(patch_list, (i % 0xfd) + 1);
+            trade_block_flat[i] = 0xFF;
+        }
+    }
 }
 
 void disconnect_pin(const GpioPin* pin) {
+    /* XXX: Why is this analog? Is that its default? */
+    /* XXX: May be able to use existing API functions for this as well */
     furi_hal_gpio_init(pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_write(pin, true);
 }
 
 void trade_exit_callback(void* context) {
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
     furi_assert(context);
-    procesing = false;
+
+    struct Trade* trade = (struct Trade*)context;
+
     furi_hal_light_set(LightGreen, 0x00);
     furi_hal_light_set(LightBlue, 0x00);
     furi_hal_light_set(LightRed, 0x00);
+
     /* Stop the timer, and deallocate it as the enter callback allocates it on entry */
-    with_view_model(
-        pokemon_fap->trade_view,
-        struct trade_model * model,
-        { furi_timer_free(model->draw_timer); },
-        false);
+    furi_timer_free(trade->draw_timer);
+
+    plist_free(patch_list);
 }
 
-View* trade_alloc(PokemonFap* pokemon_fap) {
-    View* view;
+void* trade_alloc(TradeBlock* trade_block, PokemonTable* table, View* view) {
+    furi_assert(trade_block);
+    furi_assert(view);
 
-    view = view_alloc();
-    procesing = true;
+    struct Trade* trade = malloc(sizeof(struct Trade));
 
-    view_set_context(view, pokemon_fap);
-    view_allocate_model(view, ViewModelTypeLockFree, sizeof(struct trade_model));
+    trade->view = view;
+    trade->trade_block = trade_block;
+    trade->input_block = malloc(sizeof(TradeBlock));
 
-    view_set_draw_callback(view, trade_draw_callback);
-    view_set_enter_callback(view, trade_enter_callback);
-    view_set_exit_callback(view, trade_exit_callback);
+    trade->pokemon_table = table;
 
-    return view;
+    view_set_context(trade->view, trade);
+    view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));
+
+    view_set_draw_callback(trade->view, trade_draw_callback);
+    view_set_enter_callback(trade->view, trade_enter_callback);
+    view_set_exit_callback(trade->view, trade_exit_callback);
+
+    return trade;
 }
 
-void trade_free(PokemonFap* pokemon_fap) {
-    furi_assert(pokemon_fap);
+void trade_free(void* context) {
+    furi_assert(context);
+
+    struct Trade* trade = (struct Trade*)context;
+
     // Free resources
-    procesing = false;
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
 
     disconnect_pin(&GAME_BOY_CLK);
 
-    view_free_model(pokemon_fap->trade_view);
-    view_free(pokemon_fap->trade_view);
+    view_free_model(trade->view);
+    view_free(trade->view);
+    free(trade->input_block);
+    free(trade);
 }
