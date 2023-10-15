@@ -420,3 +420,13 @@ ReturnCode picopass_device_parse_wiegand(uint8_t* credential, PicopassPacs* pacs
 
     return ERR_NONE;
 }
+
+bool picopass_device_hid_csn(PicopassDevice* dev) {
+    furi_assert(dev);
+    PicopassBlock* AA1 = dev->dev_data.AA1;
+    uint8_t* csn = AA1[PICOPASS_CSN_BLOCK_INDEX].data;
+    // From Proxmark3 RRG sourcecode
+    bool isHidRange = (memcmp(csn + 5, "\xFF\x12\xE0", 3) == 0) && ((csn[4] & 0xF0) == 0xF0);
+
+    return isHidRange;
+}
