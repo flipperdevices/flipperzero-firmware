@@ -48,9 +48,9 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
     int newScene = -1;
     if (!strcmp(item->item_string, "Deauth")) {
         // Deauth menu
-        newScene = UART_TerminalScenePacketsFuzz;
-    } else if (!strcmp(item->item_string, "Fuzz")) {
         newScene = UART_TerminalScenePacketsDeauth;
+    } else if (!strcmp(item->item_string, "Fuzz")) {
+        newScene = UART_TerminalScenePacketsFuzz;
     }
     if (newScene < 0) {
         return;

@@ -92,6 +92,7 @@ UART_TerminalApp* uart_terminal_app_alloc() {
         UART_TerminalAppViewTextInput,
         uart_text_input_get_view(app->text_input));
     app->currentMenu = GRAVITY_MENU_MAIN;
+    app->free_command = false;
 
     scene_manager_next_scene(app->scene_manager, UART_TerminalSceneMain);
 
@@ -127,6 +128,11 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
 
     // Close records
     furi_record_close(RECORD_GUI);
+
+    if (app->free_command) {
+        free(app->selected_tx_string);
+        app->free_command = false;
+    }
 
     free(app);
 }

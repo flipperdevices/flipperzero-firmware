@@ -94,6 +94,11 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             uart_terminal_uart_tx((uint8_t*)("\n"), 1);
         }
     }
+    if (app->free_command) {
+        free(app->selected_tx_string);
+        app->selected_tx_string = NULL;
+        app->free_command = false;
+    }
 }
 
 bool uart_terminal_scene_console_output_on_event(void* context, SceneManagerEvent event) {

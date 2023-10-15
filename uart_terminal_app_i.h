@@ -71,13 +71,14 @@ struct UART_TerminalApp {
     UART_TerminalUart* uart;
     int selected_menu_index;
     int selected_option_index[MAX_MENU_ITEMS];
-    const char* selected_tx_string;
+    char* selected_tx_string;
     bool is_command;
     bool is_custom_tx_string;
     bool focus_console_start;
     bool show_stopscan_tip;
     int BAUDRATE;
     int TERMINAL_MODE; //1=AT mode, 0=other mode
+    bool free_command;              /* Does selected_tx_string need to be free'd after send? */
 
     GravityCommand gravityCommand; /* Gravity command */
     GravityMenu currentMenu;

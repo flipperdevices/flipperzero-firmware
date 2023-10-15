@@ -36,9 +36,10 @@ UART_TerminalItem packets_fuzz[NUM_PACKETS_FUZZ_ITEMS] = {
   false},
 };
 
-static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
-    /* No submenus */
-}
+#define FUZZ_MENU_PACKET_TYPE 0
+#define FUZZ_MENU_FUZZ_TYPE 1
+#define FUZZ_MENU_TARGET 2
+#define FUZZ_MENU_RUN 3
 
 /* Callback when an option is selected */
 static void uart_terminal_scene_packets_fuzz_var_list_enter_callback(void* context, uint32_t index) {
@@ -47,48 +48,78 @@ static void uart_terminal_scene_packets_fuzz_var_list_enter_callback(void* conte
     UART_TerminalItem *item = NULL;
     const int selected_option_index = app->selected_option_index[index];
 
+    /* Don't do anything unless it's the Run menu item */
+    if (index != FUZZ_MENU_RUN) {
+        return;
+    }
+
     furi_assert(index < NUM_PACKETS_FUZZ_ITEMS);
     item = &packets_fuzz[index];
+    furi_assert(selected_option_index < item->num_options_menu);
+    dolphin_deed(DolphinDeedGpioUartBridge);
 
-    /* Are we displaying a submenu or executing something? */
-    if (item->isSubMenu) {
-        /* Display next scene */
-        displaySubmenu(app, item);
-    } else {
-        // TODO: Assemble command from components
-        /* Run a command */
-        dolphin_deed(DolphinDeedGpioUartBridge);
-        furi_assert(selected_option_index < item->num_options_menu);
-        app->selected_tx_string = item->actual_commands[selected_option_index];
-        /* Don't clear screen if command is an empty string */
-        app->is_command = (strlen(app->selected_tx_string) > 0);
-        app->is_custom_tx_string = false;
-        app->selected_menu_index = index;
-        app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
-                                   (selected_option_index == 0) :
-                                   item->focus_console;
-        app->show_stopscan_tip = item->show_stopscan_tip;
-
-        /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
-        int cmdLen = strlen(app->selected_tx_string);
-        bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
-                                (item->needs_keyboard == TOGGLE_ARGS &&
-                                (app->selected_tx_string[cmdLen-1] == ' ')));
-        /* Initialise the serial console */
-        uart_terminal_uart_tx((uint8_t*)("\n"), 1);
-
-        if(needs_keyboard) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
-        } else {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+    /* Are we getting status, starting or stopping? */
+    app->selected_tx_string = "";
+    if (!strcmp(item->actual_commands[selected_option_index], "")) {
+        app->selected_tx_string = "fuzz";
+    } else if (!strcmp(item->actual_commands[selected_option_index], "off")) {
+        app->selected_tx_string = "fuzz off";
+    } else if (!strcmp(item->actual_commands[selected_option_index], "on")) {
+        /* The command is FUZZ packetType fuzzType target on */
+        int cmdLength = 0;
+        UART_TerminalItem *thisItem;
+        for (int i = 0; i < FUZZ_MENU_RUN; ++i) {
+            thisItem = &packets_fuzz[i];
+            cmdLength += strlen(thisItem->actual_commands[app->selected_option_index[i]]);
         }
+        /* Add chars for FUZZ ON\0 & 4 spaces */
+        cmdLength += 11;
+
+        char *fuzz_command = malloc(sizeof(char) * cmdLength);
+        if (fuzz_command == NULL) {
+            /* Panic */
+            return;
+        }
+        /* sprintf doesn't work. Instead a loop of strcat's
+        sprintf(fuzz_command, "FUZZ %s %s %s ON",
+                packets_fuzz[0].actual_commands[app->selected_option_index[0]],
+                packets_fuzz[1].actual_commands[app->selected_option_index[1]],
+                packets_fuzz[2].actual_commands[app->selected_option_index[2]]);
+        */
+        strcpy(fuzz_command, "FUZZ ");
+        for (int i = 0; i < FUZZ_MENU_RUN; ++i) {
+            strcat(fuzz_command, packets_fuzz[i].actual_commands[app->selected_option_index[i]]);
+            strcat(fuzz_command, " ");
+        }
+        strcat(fuzz_command, "on");
+        app->selected_tx_string = fuzz_command;
+        app->free_command = true;
+    }
+    app->is_command = true;
+    app->is_custom_tx_string = false;
+    app->selected_menu_index = index;
+    app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
+                               (selected_option_index == 0) :
+                               item->focus_console;
+    app->show_stopscan_tip = item->show_stopscan_tip;
+    /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
+    int cmdLen = strlen(app->selected_tx_string);
+    bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
+                            (item->needs_keyboard == TOGGLE_ARGS &&
+                            (app->selected_tx_string[cmdLen-1] == ' ')));
+    /* Initialise the serial console */
+    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+
+    if(needs_keyboard) {
+        view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
+    } else {
+        view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
     }
 }
 
 /* Callback when a selected option is changed (I Think) */
 static void uart_terminal_scene_packets_fuzz_var_list_change_callback(VariableItem* item) {
     furi_assert(item);
-    // TODO: Set modified variable ready to run
 
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);

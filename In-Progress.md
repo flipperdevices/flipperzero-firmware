@@ -3,22 +3,18 @@
     * New menu for deauth
     * New menu for scan
     * New menu for Mana
+    * New menu for purge strategy
     * Maybe a UI for stalk
     * BLE Purge strategy UI - Used in SCAN, GET, SET, & anywhere else relevant
 * Crashing
     * Scan - View - Select - Back
-* Help
-    * Command info
-    * About
-    * Get Started
-    * Commands
-    * Help
+    * I think my scene exit functions need to include updating the selected menu item and suchforth to avoid crash
+
 * Re-implement console/command execution
 * Re-implement cls/clear screen
 * Refactor console logic - to keep console recording during menu navigation
 
 * Settings->BLE_PURGE_STRAT needs to become a submenu where each purge element can be enabled/disabled
-* I think my scene exit functions need to include updating the selected menu item and suchforth to avoid crash
 
 get/set:
 SSID_LEN_MIN |
