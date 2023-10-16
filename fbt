@@ -32,7 +32,7 @@ if [ -z "$FBT_NO_SYNC" ]; then
         exit 1;
     fi
     _FBT_CLONE_FLAGS="--jobs $N_GIT_THREADS";
-    if [ -z "$FBT_SHALLOW" ]; then
+    if [ ! -z "$FBT_SHALLOW" ]; then
         _FBT_CLONE_FLAGS="$_FBT_CLONE_FLAGS --depth 1";
     fi
 
