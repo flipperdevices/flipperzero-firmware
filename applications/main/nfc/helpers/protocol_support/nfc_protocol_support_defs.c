@@ -19,6 +19,7 @@
 #include "mf_classic/mf_classic.h"
 #include "mf_desfire/mf_desfire.h"
 #include "slix/slix.h"
+#include "st25tb/st25tb.h"
 
 /**
  * @brief Array of pointers to concrete protocol support implementations.
@@ -39,5 +40,6 @@ const NfcProtocolSupportBase* nfc_protocol_support[NfcProtocolNum] = {
     [NfcProtocolMfClassic] = &nfc_protocol_support_mf_classic,
     [NfcProtocolMfDesfire] = &nfc_protocol_support_mf_desfire,
     [NfcProtocolSlix] = &nfc_protocol_support_slix,
+    [NfcProtocolSt25tb] = &nfc_protocol_support_st25tb,
     /* Add new protocol support implementations here */
 };
