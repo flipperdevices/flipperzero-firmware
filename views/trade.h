@@ -8,6 +8,6 @@
 
 void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view);
 
-void trade_free(PokemonFap* pokemon_fap);
+void trade_free(void* trade_ctx);
 
 #endif /* TRADE_H */

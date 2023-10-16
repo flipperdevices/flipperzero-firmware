@@ -129,7 +129,7 @@ struct patch_list {
 };
 
 /* Anonymous struct */
-struct Trade {
+struct trade_ctx {
     trade_centre_state_t trade_centre_state;
     connection_state_t connection_state; // Should be made in to view model struct
     FuriTimer* draw_timer;
@@ -318,7 +318,7 @@ uint32_t micros() {
  * I think the documentation might be missing a detail as the code later does implement the saem
  * 0x60 value of "trade the first pokemon"
  */
-static uint8_t getConnectResponse(uint8_t in, struct Trade* trade) {
+static uint8_t getConnectResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
 
     /* XXX: Can streamline this code a bit by setting ret to in
@@ -367,7 +367,7 @@ static uint8_t getConnectResponse(uint8_t in, struct Trade* trade) {
  *
  * This is where we loop if we end up in the colosseum
  */
-static uint8_t getMenuResponse(uint8_t in, struct Trade* trade) {
+static uint8_t getMenuResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
 
     uint8_t response = 0x00;
@@ -400,7 +400,7 @@ static uint8_t getMenuResponse(uint8_t in, struct Trade* trade) {
     return response;
 }
 
-static uint8_t getTradeCentreResponse(uint8_t in, struct Trade* trade) {
+static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
 
     uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
@@ -595,7 +595,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct Trade* trade) {
 void transferBit(void* context) {
     furi_assert(context);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
     static uint8_t
         out_data; // XXX: If we need to clear this between runs of trade view, this needs to be moved to Trade
     bool connected;
@@ -675,7 +675,7 @@ void transferBit(void* context) {
 void input_clk_gameboy(void* context) {
     furi_assert(context);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
     static uint32_t time; //This should be fine
 
     if(time > 0) {
@@ -694,7 +694,7 @@ void input_clk_gameboy(void* context) {
 void trade_draw_timer_callback(void* context) {
     furi_assert(context);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
 
     with_view_model(
         trade->view, struct trade_model * model, { UNUSED(model); }, true);
@@ -702,7 +702,7 @@ void trade_draw_timer_callback(void* context) {
 
 void trade_enter_callback(void* context) {
     furi_assert(context);
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
     uint8_t* trade_block_flat = (uint8_t*)(&(trade->trade_block->party[0]));
     int i = 0;
 
@@ -778,7 +778,7 @@ void disconnect_pin(const GpioPin* pin) {
 void trade_exit_callback(void* context) {
     furi_assert(context);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
 
     furi_hal_light_set(LightGreen, 0x00);
     furi_hal_light_set(LightBlue, 0x00);
@@ -794,7 +794,7 @@ void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view
     furi_assert(trade_block);
     furi_assert(view);    
 
-    struct Trade* trade = malloc(sizeof(struct Trade));
+    struct trade_ctx* trade = malloc(sizeof(struct trade_ctx));
 
     trade->view = view;
     trade->trade_block = trade_block;
@@ -812,10 +812,10 @@ void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view
     return trade;
 }
 
-void trade_free(void* context) {
-    furi_assert(context);
+void trade_free(void* trade_ctx) {
+    furi_assert(trade_ctx);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)trade_ctx;
 
     // Free resources
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
