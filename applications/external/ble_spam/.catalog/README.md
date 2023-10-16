@@ -1,6 +1,6 @@
-# Apple BLE Spam
+# BLE Spam
 
-This application spams Bluetooth broadcast packets to Apple devices, which may be up to 5 meters away.
+This Flipper application ("FAP") spams broadcast packets to Apple, Android, and Windows devices, which may be up to 5 meters away.
 
 ## Usage
 
@@ -10,7 +10,7 @@ Select the desired attack using left and right, the interval using up and down, 
 
 Original app by @WillyJL
 
-Extensive testing and research on behavior and parameters by @WillyJL and @ECTO-1A
+Extensive testing and research on behavior and parameters by @WillyJL, @ECTO-1A, and @Spooks4576
 
 Structures docs and Nearby Action IDs from https://github.com/furiousMAC/continuity/
 

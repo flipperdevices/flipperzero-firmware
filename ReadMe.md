@@ -36,8 +36,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Fix: StatusBar drawn on menus (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/772)
 - [About on Power Off (By LeeroysHub)](https://github.com/LeeroysHub/)
-- Added: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
+- Added: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/ble_spam_ofw)
 - Keeping: [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) For its selection of spam types for Apple Devices.
+- Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/ble_spam_ofw) - Removed the popups from the list that had no class
 
 <a name="release">
 

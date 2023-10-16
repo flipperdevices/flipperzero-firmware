@@ -1,22 +1,8 @@
 #include <gui/gui.h>
+#include <gui/elements.h>
 #include <furi_hal_bt.h>
 #include <stdint.h>
-#include <gui/elements.h>
-
 #include "protocols/_registry.h"
-
-// Hacked together by @Willy-JL
-// Custom adv API by @Willy-JL (idea by @xMasterX)
-// iOS 17 Crash by @ECTO-1A
-// Android and Windows Pairs by @Spooks4576 and @ECTO-1A
-// Research on behaviors and parameters by @Willy-JL, @ECTO-1A and @Spooks4576
-// Controversy explained at https://willyjl.dev/blog/the-controversy-behind-apple-ble-spam
-
-typedef struct {
-    bool random_mac;
-    const BleSpamProtocol* protocol;
-    BleSpamMsg msg;
-} Payload;
 
 // NAPI
 // TODO: Use __attribute__((aligned(2))) instead?
@@ -195,6 +181,19 @@ bool napi_furi_hal_bt_custom_adv_stop() {
         return true;
     }
 }
+
+// Hacked together by @Willy-JL
+// Custom adv API by @Willy-JL (idea by @xMasterX)
+// iOS 17 Crash by @ECTO-1A
+// Android and Windows Pairs by @Spooks4576 and @ECTO-1A
+// Research on behaviors and parameters by @Willy-JL, @ECTO-1A and @Spooks4576
+// Controversy explained at https://willyjl.dev/blog/the-controversy-behind-apple-ble-spam
+
+typedef struct {
+    bool random_mac;
+    const BleSpamProtocol* protocol;
+    BleSpamMsg msg;
+} Payload;
 
 typedef struct {
     const char* title;
@@ -388,7 +387,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     switch(state->index) {
     case PageHelpApps:
-        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
         elements_text_box(
             canvas,
@@ -404,7 +403,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             false);
         break;
     case PageHelpDelay:
-        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
         elements_text_box(
             canvas,
@@ -420,7 +419,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             false);
         break;
     case PageHelpDistance:
-        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
         elements_text_box(
             canvas,
@@ -436,7 +435,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             false);
         break;
     case PageAboutCredits:
-        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Credits");
         elements_text_box(
             canvas,
@@ -446,7 +445,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             48,
             AlignLeft,
             AlignTop,
-            "App+Spam: \e#WillyJL\e#\n"
+            "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
             "                                   Version \e#2.0\e#",
@@ -456,13 +455,13 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         if(!attack) break;
         char str[32];
 
-        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_set_font(canvas, FontPrimary);
         snprintf(str, sizeof(str), "%ims", delays[state->delay]);
         canvas_draw_str_aligned(canvas, 116, 12, AlignRight, AlignBottom, str);
         canvas_draw_icon(canvas, 119, 6, &I_SmallArrowUp_3x5);
         canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
 
-        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_set_font(canvas, FontPrimary);
         snprintf(
             str,
             sizeof(str),
@@ -470,10 +469,10 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             state->index + 1,
             ATTACK_COUNT,
             protocol ? protocol->get_name(&payload->msg) : "Everything");
-        canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 21, str);
+        canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 24, str);
 
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 4, 32, attack->title);
+        canvas_draw_str(canvas, 4, 34, attack->title);
 
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 4, 46, attack->text);
