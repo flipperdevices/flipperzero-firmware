@@ -1,4 +1,5 @@
-#include <furi_hal_nfc_i.h>
+#include "furi_hal_nfc_i.h"
+#include "furi_hal_nfc_tech_i.h"
 
 #include <furi.h>
 #include <furi_hal_resources.h>

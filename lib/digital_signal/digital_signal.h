@@ -1,15 +1,17 @@
 /**
  * @file digital_signal.h
- * @brief DigitalSignal is a simple digital signal container for the DigitalSequence library.
+ * @brief Simple digital signal container for the DigitalSequence library.
  *
  * Each signal is represented by its start level (high or low) and one or more periods.
  * The output will transition to its inverse value on each period boundary.
  *
  * Example: A signal with n periods and HIGH start level.
  *
+ * ```
  * ----+        +------+    +- ... -+
  *  t0 |   t1   |  t2  | t3 |       | tn - 1
  *     +--------+      +----+       +--------
+ * ```
  *
  */
 #pragma once
@@ -21,10 +23,9 @@
 extern "C" {
 #endif
 
-/**
- * DigitalSignal uses 10 picosecond time units (1 tick = 10 ps).
- * The macros below is used to convert the time from other units.
- */
+// DigitalSignal uses 10 picosecond time units (1 tick = 10 ps).
+// Use the macros below to convert the time from other units.
+
 #define DIGITAL_SIGNAL_MS(x) ((x)*100000000UL)
 #define DIGITAL_SIGNAL_US(x) ((x)*100000UL)
 #define DIGITAL_SIGNAL_NS(x) ((x)*100UL)
@@ -62,26 +63,27 @@ void digital_signal_add_period(DigitalSignal* signal, uint32_t ticks);
  * by the given ticks value. Otherwise, the behaviour is identical to digital_signal_add_period().
  *
  * Example 1: add tc with HIGH level
- *
- *  before:
- *  ... ------+
- *        ta  |  tb
- *            +-------
- *  after:
- *  ... ------+      +-------
- *        ta  |  tb  |  tc
- *            +------+
- *
+ * ```
+ * before:
+ * ... ------+
+ *       ta  |  tb
+ *           +-------
+ * after:
+ * ... ------+      +-------
+ *       ta  |  tb  |  tc
+ *           +------+
+ * ```
  * Example 2: add tc with LOW level
- *
- *  before:
- *  ... ------+
- *        ta  |  tb
- *            +-------
- *  after:
- *  ... ------+
- *        ta  |   tb + tc
- *            +--------------
+ * ```
+ * before:
+ * ... ------+
+ *       ta  |  tb
+ *           +-------
+ * after:
+ * ... ------+
+ *       ta  |   tb + tc
+ *           +--------------
+ * ```
  *
  * @param[in,out] signal pointer to the instance to append to.
  * @param[in] ticks the period length, in 10 picosecond units.
