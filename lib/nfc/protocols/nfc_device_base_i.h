@@ -119,7 +119,7 @@ typedef const uint8_t* (*NfcDeviceGetUid)(const NfcDeviceData* data, size_t* uid
  *
  * @param[in,out] data pointer to the instance to be modified.
  * @param[in] uid pointer to the byte array containing the new UID.
- * @param[uid_len] length of the UID.
+ * @param[in] uid_len length of the UID.
  * @return true if the UID was valid and set, false otherwise.
  */
 typedef bool (*NfcDeviceSetUid)(NfcDeviceData* data, const uint8_t* uid, size_t uid_len);

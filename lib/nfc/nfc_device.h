@@ -30,7 +30,7 @@ typedef struct NfcDevice NfcDevice;
  * @brief Loading callback function signature.
  *
  * A function with such signature can be set as a callback to indicate
- * the completion (or a failure) of nfc_device_load() function.
+ * the completion (or a failure) of nfc_device_load() and nfc_device_save() functions.
  *
  * This facility is commonly used to control GUI elements, such as progress dialogs.
  *
@@ -67,7 +67,7 @@ void nfc_device_free(NfcDevice* instance);
 void nfc_device_clear(NfcDevice* instance);
 
 /**
- * @brief Reset and NfcDevice instance.
+ * @brief Reset an NfcDevice instance.
  *
  * The data contained in the instance will be reset according to the protocol-defined procedure.
  * Unlike the nfc_device_clear() function, the instance will remain valid.
@@ -156,7 +156,7 @@ const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len);
  *
  * @param[in,out] instance pointer to the instance to be modified.
  * @param[in] uid pointer to the byte array containing the new UID.
- * @param[uid_len] length of the UID.
+ * @param[in] uid_len length of the UID.
  * @return true if the UID was valid and set, false otherwise.
  */
 bool nfc_device_set_uid(NfcDevice* instance, const uint8_t* uid, size_t uid_len);

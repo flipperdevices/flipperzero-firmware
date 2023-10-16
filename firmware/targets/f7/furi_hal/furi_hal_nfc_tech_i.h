@@ -31,7 +31,7 @@ typedef FuriHalNfcError (*FuriHalNfcChipConfig)(FuriHalSpiBusHandle* handle);
  * @brief Transmit data using technology-specific framing and timings.
  *
  * @param[in,out] handle pointer to the NFC chip SPI handle.
- * @param[in] tx_data pointer to a byte array cntaining the data to be transmitted.
+ * @param[in] tx_data pointer to a byte array containing the data to be transmitted.
  * @param[in] tx_bits transmit data size, in bits.
  * @returns FuriHalNfcErrorNone on success, any other error code on failure.
  */

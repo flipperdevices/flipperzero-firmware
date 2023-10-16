@@ -27,7 +27,7 @@ extern "C" {
  * @brief Enumeration containing bitmask values for NFC HAL internal events.
  */
 typedef enum {
-    FuriHalNfcEventInternalTypeAbort = (1U << 0), /**<  */
+    FuriHalNfcEventInternalTypeAbort = (1U << 0), /**< Abort waiting for hardware events. */
     FuriHalNfcEventInternalTypeIrq = (1U << 1), /**< NFC hardware interrupt has occurred. */
     FuriHalNfcEventInternalTypeTimerFwtExpired =
         (1U << 2), /**< Frame wait time timeout has expired. */

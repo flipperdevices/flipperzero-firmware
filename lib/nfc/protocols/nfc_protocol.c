@@ -22,9 +22,7 @@
  *            |               |             |
  *       ISO14443-4A   Mf Ultralight   Mf Classic
  *            |
- *      +-----+-----+
- *      |           |
- * Mf Desfire   Bank Card
+ *       Mf Desfire
  * ```
  *
  * When implementing a new protocol, its place in the tree must be determined first.
