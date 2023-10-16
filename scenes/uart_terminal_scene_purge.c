@@ -42,30 +42,37 @@ UART_TerminalItem purgeMenu[NUM_PURGE_ITEMS] = {
 };
 
 enum PurgeMenuItems {
-    PURGE_MENU_AGE = 0,
-    PURGE_MENU_RSSI,
-    PURGE_MENU_AGE_ON,
+    PURGE_MENU_AGE_ON = 0,
+    PURGE_MENU_AGE,
     PURGE_MENU_RSSI_ON,
+    PURGE_MENU_RSSI,
     PURGE_MENU_UNSELECTED_ON,
     PURGE_MENU_UNNAMED_ON,
     PURGE_MENU_RUN,
 };
+
+VariableItem *menuItemViews[NUM_PURGE_ITEMS];
 
 /* Callback when an option is selected */
 static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
-    const int selected_option_index = app->selected_option_index[index];
-
-    /* Ignore enter on the boolean settings */
-    if (index < PURGE_MENU_RUN && index > PURGE_MENU_RSSI) {
-        return;
-    }
+    int selected_option_index = app->selected_option_index[index];
 
     furi_assert(index < NUM_PURGE_ITEMS);
     item = &purgeMenu[index];
     furi_assert(selected_option_index < item->num_options_menu);
+
+    /* Cycle through options when enter pressed */
+    if (index < PURGE_MENU_RUN) {
+        // increment selected_option_index % number of options
+        selected_option_index = (selected_option_index + 1) % item->num_options_menu;
+        app->selected_option_index[index] = selected_option_index;
+        variable_item_set_current_value_index(menuItemViews[index], selected_option_index);
+        return;
+    }
+
     dolphin_deed(DolphinDeedGpioUartBridge);
 
     /* TODO: Compile command string based on selection */
@@ -157,6 +164,7 @@ void uart_terminal_scene_purge_on_enter(void* context) {
             purgeMenu[i].num_options_menu,
             uart_terminal_scene_purge_var_list_change_callback,
             app);
+        menuItemViews[i] = item;
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
         variable_item_set_current_value_text(
             item, purgeMenu[i].options_menu[app->selected_option_index[i]]);
