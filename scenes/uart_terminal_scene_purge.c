@@ -51,7 +51,7 @@ enum PurgeMenuItems {
     PURGE_MENU_RUN,
 };
 
-VariableItem *menuItemViews[NUM_PURGE_ITEMS];
+VariableItem *purgeMenuItemViews[NUM_PURGE_ITEMS];
 
 /* Callback when an option is selected */
 static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uint32_t index) {
@@ -70,8 +70,8 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         selected_option_index = (selected_option_index + 1) % item->num_options_menu;
         app->selected_option_index[index] = selected_option_index;
         // YAGNI: Null check
-        variable_item_set_current_value_index(menuItemViews[index], selected_option_index);
-        variable_item_set_current_value_text(menuItemViews[index], item->options_menu[selected_option_index]);
+        variable_item_set_current_value_index(purgeMenuItemViews[index], selected_option_index);
+        variable_item_set_current_value_text(purgeMenuItemViews[index], item->options_menu[selected_option_index]);
         return;
     }
 
@@ -180,7 +180,7 @@ void uart_terminal_scene_purge_on_enter(void* context) {
             purgeMenu[i].num_options_menu,
             uart_terminal_scene_purge_var_list_change_callback,
             app);
-        menuItemViews[i] = item;
+        purgeMenuItemViews[i] = item;
         /* When transitioning between views app->selected_option_index[i] may
            be referencing a different view's options menu, and may be out of
            bounds of mainmenu[i].options_menu[].

@@ -51,15 +51,23 @@ enum ManaMenuItems {
     MANA_MENU_CLEAR,
 };
 
+VariableItem *manaMenuItemViews[NUM_ATTACK_MANA_ITEMS];
+
 /* Callback when an option is selected */
 static void uart_terminal_scene_attacks_mana_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
-    const int selected_option_index = app->selected_option_index[index];
+    int selected_option_index = app->selected_option_index[index];
 
-    /* Don't do anything unless it's the Run or Clear menu item */
+    /* Cycle through options when enter pressed */
     if (index < MANA_MENU_RUN) {
+        // increment selected_option_index % number of options
+        selected_option_index = (selected_option_index + 1) % item->num_options_menu;
+        app->selected_option_index[index] = selected_option_index;
+        // YAGNI: Null check
+        variable_item_set_current_value_index(manaMenuItemViews[index], selected_option_index);
+        variable_item_set_current_value_text(manaMenuItemViews[index], item->options_menu[selected_option_index]);
         return;
     }
 
@@ -159,6 +167,7 @@ void uart_terminal_scene_attacks_mana_on_enter(void* context) {
             attacks_mana[i].num_options_menu,
             uart_terminal_scene_attacks_mana_var_list_change_callback,
             app);
+        manaMenuItemViews[i] = item;
         /* When transitioning between views app->selected_option_index[i] may
            be referencing a different view's options menu, and may be out of
            bounds of mainmenu[i].options_menu[].
