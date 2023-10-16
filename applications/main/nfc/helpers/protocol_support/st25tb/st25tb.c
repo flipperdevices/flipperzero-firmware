@@ -1,9 +1,11 @@
-#include <nfc/protocols/nfc_protocol.h>
+#include "st25tb.h"
+#include "st25tb_render.h"
+
 #include <nfc/protocols/st25tb/st25tb_poller.h>
 
 #include "nfc/nfc_app_i.h"
-#include "st25tb_render.h"
-#include "../nfc_protocol_support_base.h"
+
+#include "../nfc_protocol_support_common.h"
 #include "../nfc_protocol_support_gui_common.h"
 
 static void nfc_scene_info_on_enter_st25tb(NfcApp* instance) {
@@ -85,7 +87,7 @@ const NfcProtocolSupportBase nfc_protocol_support_st25tb = {
     .scene_read =
         {
             .on_enter = nfc_scene_read_on_enter_st25tb,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read_menu =
         {
@@ -95,7 +97,7 @@ const NfcProtocolSupportBase nfc_protocol_support_st25tb = {
     .scene_read_success =
         {
             .on_enter = nfc_scene_read_success_on_enter_st25tb,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_saved_menu =
         {
@@ -104,7 +106,7 @@ const NfcProtocolSupportBase nfc_protocol_support_st25tb = {
         },
     .scene_emulate =
         {
-            .on_enter = NULL,
-            .on_event = NULL,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
 };
