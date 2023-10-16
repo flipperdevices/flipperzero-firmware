@@ -97,7 +97,6 @@
 
 #define TRADE_CENTRE_WAIT 0xFD
 
-typedef unsigned char byte;
 typedef enum { NOT_CONNECTED, CONNECTED, TRADE_CENTRE, COLOSSEUM } connection_state_t;
 typedef enum {
     INIT,
@@ -124,8 +123,13 @@ typedef enum {
     GAMEBOY_TRADING
 } render_gameboy_state_t;
 
+struct patch_list {
+    uint8_t index;
+    struct patch_list* next;
+};
+
 /* Anonymous struct */
-struct Trade {
+struct trade_ctx {
     trade_centre_state_t trade_centre_state;
     connection_state_t connection_state; // Should be made in to view model struct
     FuriTimer* draw_timer;
@@ -135,6 +139,7 @@ struct Trade {
     TradeBlock* trade_block;
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
+    struct patch_list* patch_list;
 };
 
 /* These are the needed variables for the draw callback */
@@ -174,15 +179,8 @@ void screen_gameboy_connected(Canvas* const canvas) {
     canvas_draw_str(canvas, 18, 13, "Connected!");
 }
 
-struct patch_list {
-    uint8_t index;
-    struct patch_list* next;
-};
-
-static struct patch_list* patch_list = NULL;
-
 static struct patch_list* plist_alloc(void) {
-    static struct patch_list* plist = NULL;
+    struct patch_list* plist = NULL;
 
     plist = malloc(sizeof(struct patch_list));
     plist->index = 0;
@@ -193,18 +191,22 @@ static struct patch_list* plist_alloc(void) {
 static void plist_append(struct patch_list* plist, uint8_t index) {
     furi_assert(plist);
 
+    for(;;) {
+        if(plist->next == NULL) break;
+        plist = plist->next;
+    }
     plist->index = index;
     plist->next = plist_alloc();
 }
 
 static void plist_free(struct patch_list* plist) {
     furi_assert(plist);
-    struct patch_list* plist_next = plist->next;
+    struct patch_list* plist_next = NULL;
 
     while(plist != NULL) {
+        plist_next = plist->next;
         free(plist);
         plist = plist_next;
-        plist_next = plist->next;
     }
 }
 
@@ -316,13 +318,13 @@ uint32_t micros() {
  * I think the documentation might be missing a detail as the code later does implement the saem
  * 0x60 value of "trade the first pokemon"
  */
-static byte getConnectResponse(byte in, struct Trade* trade) {
+static uint8_t getConnectResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
 
     /* XXX: Can streamline this code a bit by setting ret to in
      * and then only setting ret where needed? Might be a useless
      * optimization though */
-    byte ret;
+    uint8_t ret;
 
     switch(in) {
     case PKMN_CONNECTED:
@@ -365,10 +367,10 @@ static byte getConnectResponse(byte in, struct Trade* trade) {
  *
  * This is where we loop if we end up in the colosseum
  */
-static byte getMenuResponse(byte in, struct Trade* trade) {
+static uint8_t getMenuResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
 
-    byte response = 0x00;
+    uint8_t response = 0x00;
     /* XXX: Shouldn't this return a valid response for each option? 
      * e.g. if the gameboy selects trade center, should we also send trade center? 
      * or is the 0x00 an Agreement byte? I wonder if the leader/master is the
@@ -398,7 +400,7 @@ static byte getMenuResponse(byte in, struct Trade* trade) {
     return response;
 }
 
-static byte getTradeCentreResponse(byte in, struct Trade* trade) {
+static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
 
     uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
@@ -406,8 +408,8 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
     static int counter; // Should be able to be made static in used function
         // May need to make another state PRE-init or something to reset this on re-entry?
     struct trade_model* model = NULL;
-    uint8_t in_pokemon_num = 0;
-    byte send = in;
+    static uint8_t in_pokemon_num;
+    uint8_t send = in;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
      * and what response to expect.
@@ -489,21 +491,15 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
         break;
 
     /* This is where we get the data from gameboy that is their trade struct */
-    /* XXX: The current implementation ends up stopping short of sending data from flipper
-     * and instead mirrors back data from the gameboy before we have technically sent our
-     * whole struct */
     case SENDING_DATA:
         input_block_flat[counter] = in;
         send = trade_block_flat[counter];
         counter++;
 
-        /* This should be 418? */
-        /* XXX: It breaks when this is set to 418. Need to fix this */
-        if(counter == 405) //TODO: replace with sizeof struct rather than static number
+        if(counter == 415) //TODO: replace with sizeof struct rather than static number
             trade->trade_centre_state = SENDING_PATCH_DATA;
         break;
 
-    /* XXX: I still have no idea what patch data is in context of the firmware */
     /* XXX: This seems to end with the gameboy sending DF FE 15? */
 
     /* A couple of FD bytes are sent, looks like 6, which means I don't think we can use count of FD bytes to see what mode we're in */
@@ -518,14 +514,14 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
 	     * list header.
 	     */
             if(counter > 6) {
-                send = plist_index_get(patch_list, (counter - 7));
+                send = plist_index_get(trade->patch_list, (counter - 7));
             }
 
             counter++;
-            /* This is actually 200 bytes */
-            /* XXX: Interestingly, it does appear to actually be 197 bytes from the first 00 after trade block, minus FFs, to the last 00 sent before long delay */
-            if(counter == 197) // TODO: What is this magic value?
-                trade->trade_centre_state = TRADE_PENDING;
+            /* This is actually 200 bytes, but that includes the 3x 0xFD that we
+	     * sent without counting.
+	     */
+            if(counter == 197) trade->trade_centre_state = TRADE_PENDING;
         }
         break;
 
@@ -563,7 +559,6 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
         }
         break;
 
-    /* XXX: I think at this point, we're just mirroring data back out so that is why the flipper now reports the same data as the gameboy */
     case DONE:
         if(in == 0x00) {
             send = 0;
@@ -588,6 +583,8 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
                 &(trade->trade_block->ot_name[0]),
                 &(trade->input_block->ot_name[in_pokemon_num]),
                 sizeof(struct name));
+            model->curr_pokemon = pokemon_table_get_num_from_index(
+                trade->pokemon_table, trade->trade_block->party_members[0]);
         }
         break;
 
@@ -604,9 +601,8 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
 void transferBit(void* context) {
     furi_assert(context);
 
-    struct Trade* trade = (struct Trade*)context;
-    static uint8_t
-        out_data; // XXX: If we need to clear this between runs of trade view, this needs to be moved to Trade
+    struct trade_ctx* trade = (struct trade_ctx*)context;
+    static uint8_t out_data;
     bool connected;
     bool trading;
 
@@ -624,13 +620,12 @@ void transferBit(void* context) {
         false);
 
     /* Shift data in every clock */
-    /* XXX: This logic can be made a little more clear I think.
-     * Its just shifting a bit in at a time, doesn't need the clever shifting maths */
-    byte raw_data = furi_hal_gpio_read(&GAME_BOY_SI);
-    trade->in_data |= raw_data << (7 - trade->shift);
+    trade->in_data <<= 1;
+    trade->in_data |= !!furi_hal_gpio_read(&GAME_BOY_SI);
+    trade->shift++;
 
     /* Once a byte of data has been shifted in, process it */
-    if(++trade->shift > 7) {
+    if(trade->shift > 7) {
         trade->shift = 0;
         switch(trade->connection_state) {
         case NOT_CONNECTED:
@@ -684,7 +679,7 @@ void transferBit(void* context) {
 void input_clk_gameboy(void* context) {
     furi_assert(context);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
     static uint32_t time; //This should be fine
 
     if(time > 0) {
@@ -703,7 +698,7 @@ void input_clk_gameboy(void* context) {
 void trade_draw_timer_callback(void* context) {
     furi_assert(context);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
 
     with_view_model(
         trade->view, struct trade_model * model, { UNUSED(model); }, true);
@@ -711,7 +706,7 @@ void trade_draw_timer_callback(void* context) {
 
 void trade_enter_callback(void* context) {
     furi_assert(context);
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
     uint8_t* trade_block_flat = (uint8_t*)(&(trade->trade_block->party[0]));
     int i = 0;
 
@@ -758,7 +753,7 @@ void trade_enter_callback(void* context) {
      *
      * Can maybe use the furi timer queue callback thing
      */
-    patch_list = plist_alloc();
+    trade->patch_list = plist_alloc();
     /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
     /* The first half of the patch list covers offsets 0x00 - 0xfc, which
      * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
@@ -767,13 +762,14 @@ void trade_enter_callback(void* context) {
      * is added to signify the end of the second part/
      */
     for(i = 0; i < 264; i++) {
-        if(i == 0xFD) plist_append(patch_list, 0xFF);
+        if(i == 0xFD) plist_append(trade->patch_list, 0xFF);
 
         if(trade_block_flat[i] == 0xFE) {
-            plist_append(patch_list, (i % 0xfd) + 1);
+            plist_append(trade->patch_list, (i % 0xfd) + 1);
             trade_block_flat[i] = 0xFF;
         }
     }
+    plist_append(trade->patch_list, 0xFF);
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -786,7 +782,7 @@ void disconnect_pin(const GpioPin* pin) {
 void trade_exit_callback(void* context) {
     furi_assert(context);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)context;
 
     furi_hal_light_set(LightGreen, 0x00);
     furi_hal_light_set(LightBlue, 0x00);
@@ -795,14 +791,14 @@ void trade_exit_callback(void* context) {
     /* Stop the timer, and deallocate it as the enter callback allocates it on entry */
     furi_timer_free(trade->draw_timer);
 
-    plist_free(patch_list);
+    plist_free(trade->patch_list);
 }
 
-void* trade_alloc(TradeBlock* trade_block, PokemonTable* table, View* view) {
+void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view) {
     furi_assert(trade_block);
     furi_assert(view);
 
-    struct Trade* trade = malloc(sizeof(struct Trade));
+    struct trade_ctx* trade = malloc(sizeof(struct trade_ctx));
 
     trade->view = view;
     trade->trade_block = trade_block;
@@ -820,15 +816,17 @@ void* trade_alloc(TradeBlock* trade_block, PokemonTable* table, View* view) {
     return trade;
 }
 
-void trade_free(void* context) {
-    furi_assert(context);
+void trade_free(void* trade_ctx) {
+    furi_assert(trade_ctx);
 
-    struct Trade* trade = (struct Trade*)context;
+    struct trade_ctx* trade = (struct trade_ctx*)trade_ctx;
 
     // Free resources
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
 
     disconnect_pin(&GAME_BOY_CLK);
+
+    plist_free(trade->patch_list);
 
     view_free_model(trade->view);
     view_free(trade->view);

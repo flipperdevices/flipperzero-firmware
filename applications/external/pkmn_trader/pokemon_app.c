@@ -2202,7 +2202,8 @@ PokemonFap* pokemon_alloc() {
      * main FAP.
      */
     trade_view = view_alloc();
-    pokemon_fap->trade = trade_alloc(pokemon_fap->trade_block, trade_view);
+    pokemon_fap->trade =
+        trade_alloc(pokemon_fap->trade_block, pokemon_fap->pokemon_table, trade_view);
     view_dispatcher_add_view(pokemon_fap->view_dispatcher, AppViewTrade, trade_view);
 
     return pokemon_fap;
@@ -2216,7 +2217,7 @@ void free_app(PokemonFap* pokemon_fap) {
     select_pokemon_free(pokemon_fap);
 
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewTrade);
-    trade_free(pokemon_fap);
+    trade_free(pokemon_fap->trade);
 
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewMainMenu);
 
