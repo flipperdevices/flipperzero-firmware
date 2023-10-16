@@ -48,7 +48,7 @@ static void draw_ui_asset(uint8_t x, uint8_t y, uint8_t* const asset) {
     }
 }
 
-static void level_draw_bg(Canvas* const canvas, uint8_t index, bool isInverted) {
+static void draw_level_bg(Canvas* const canvas, uint8_t index, bool isInverted) {
     canvas_set_color(canvas, isInverted ? ColorWhite : ColorBlack);
     switch(index) {
     case 0:

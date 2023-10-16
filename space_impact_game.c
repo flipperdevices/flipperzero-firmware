@@ -16,7 +16,7 @@ static void game_update(GameState* game_state) {
     }
 
     // half enemy speed
-    if(game_state->level_time % 2 == 0) {
+    if(game_state->level_time % 3 == 0) {
         enemy_update(game_state);
     }
 
@@ -40,7 +40,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     if(game_state->level.isInvertedColor) canvas_draw_box(canvas, 0, 0, 128, 64);
 
-    level_draw_bg(canvas, game_state->level.index, game_state->level.isInvertedColor);
+    draw_level_bg(canvas, game_state->level.index, game_state->level.isInvertedColor);
 
     render_clear(game_state->level.isInvertedColor);
 
@@ -54,18 +54,23 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     // score
     //draw_number(90, 1, game_state->player.score, 5);
     draw_number(90, 1, game_state->level_time / FRAMES, 5);
+    draw_number(90, 10, game_state->enemies.spawn_order, 2);
     // player
     draw_ui_asset(game_state->player.position.x, game_state->player.position.y, ui_hero);
     // bullets
     for(int i = 0; i < BULLET_PULL; i++) {
-        if(game_state->player.bullets[i].x >= BULLET_X) draw_ui_asset(game_state->player.bullets[i].x, game_state->player.bullets[i].y, ui_bullet);
+        if(game_state->player.bullets[i].x >= BULLET_X) {
+            draw_ui_asset(game_state->player.bullets[i].x, game_state->player.bullets[i].y, ui_bullet);
+        }
     }
 
     // enemies
-    if(game_state->enemies.current_spawned >= 0) {
-        for(int i = 0; i <= game_state->enemies.current_spawned; i++) {
+    for(int i = 0; i < ENEMY_PULL; i++) {
+        if(game_state->enemies.spawned[i].life > 0 && game_state->enemies.spawned[i].position.x > 0) {
             draw_ui_asset(
-                game_state->enemies.spawned[i].position.x, game_state->enemies.spawned[i].position.y, enemies[game_state->level.enemySpawType[i]]);
+                game_state->enemies.spawned[i].position.x,
+                game_state->enemies.spawned[i].position.y,
+                enemy_frames[enemies[game_state->enemies.spawned[i].id].frames[game_state->enemies.spawned[i].frame]]);
         }
     }
 

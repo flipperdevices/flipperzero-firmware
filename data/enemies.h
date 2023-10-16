@@ -2,9 +2,9 @@
 #include <furi.h>
 #include "weapon.h"
 
-static uint8_t enemies[2][52] = {
+static uint8_t enemy_frames[2][ENEMY_UI_SIZE] = {
     {
-        // first ship
+        // id 0 frame 0
         10, 5, // size
         0,  1, 1, 1, 0, 1, 0, 1, 0, 0, //
         1,  1, 1, 0, 1, 0, 1, 0, 0, 1, //
@@ -13,40 +13,55 @@ static uint8_t enemies[2][52] = {
         0,  1, 1, 1, 0, 1, 0, 0, 1, 0, //
     },
     {
-        // second ship
+        // id 0 frame 1
         10, 5, // size
         0,  1, 1, 1, 0, 1, 0, 1, 0, 0, //
         1,  1, 1, 0, 1, 0, 1, 0, 0, 1, //
-        1,  1, 0, 1, 0, 0, 0, 1, 0, 0, //
+        1,  1, 0, 1, 0, 1, 0, 1, 0, 0, //
         1,  1, 1, 0, 1, 0, 1, 0, 0, 0, //
         0,  1, 1, 1, 0, 1, 0, 0, 1, 0, //
     }};
 
+EnemyTemplate enemies[2] = {
+    // id 0
+    {1, 10, {0, 1}},
+    // id 1
+    {2, 15, {0, 1}}
+    //
+};
+
 void enemy_try_spawn(GameState* const state) {
-    if(state->enemies.current_spawned < ENEMY_PULL) {
-        if(state->level.enemySpawDelay[state->enemies.current_spawned + 1] >= (state->level_time / FRAMES)) {
+    if(state->enemies.spawn_order < ENEMY_PULL) {
+        if(state->level.enemySpawDelay[state->enemies.spawn_order] <= (state->level_time / FRAMES)) {
             FURI_LOG_E(
                 TAG,
                 "spawned %d -- %d -- %d\r\n",
-                state->enemies.current_spawned + 1,
-                state->level.enemySpawDelay[state->enemies.current_spawned + 1],
+                state->enemies.spawn_order,
+                state->level.enemySpawDelay[state->enemies.spawn_order],
                 state->level_time);
 
-            state->enemies.spawned[state->enemies.current_spawned].points = 1;
-            state->enemies.spawned[state->enemies.current_spawned].life = 1;
-            state->enemies.spawned[state->enemies.current_spawned].id = levels->enemySpawType[state->enemies.current_spawned];
-            state->enemies.spawned[state->enemies.current_spawned].position.x = 40 + state->enemies.current_spawned * 5;
-            state->enemies.spawned[state->enemies.current_spawned].position.y = 35;
-            state->enemies.current_spawned++;
+            state->enemies.spawned[state->enemies.spawn_order].points = 1;
+            state->enemies.spawned[state->enemies.spawn_order].life = 1;
+            state->enemies.spawned[state->enemies.spawn_order].frame = 0;
+            state->enemies.spawned[state->enemies.spawn_order].id = levels->enemySpawType[state->enemies.spawn_order];
+            state->enemies.spawned[state->enemies.spawn_order].position.x = SCREEN_WIDTH;
+            state->enemies.spawned[state->enemies.spawn_order].position.y = 35;
+            state->enemies.spawn_order++;
         }
     }
 }
 
 void enemy_update(GameState* const state) {
     for(int i = 0; i < ENEMY_PULL; i++) {
+        if(state->enemies.spawned[i].position.x <= -10) {
+            state->enemies.spawned[i].life = 0;
+        }
         if(state->enemies.spawned[i].life > 0) {
             state->enemies.spawned[i].position.x--;
-            //state->enemies.spawned[i].position.y++;
+
+            if(state->level_time % 2 == 0) {
+                state->enemies.spawned[i].frame = (state->enemies.spawned[i].frame + 1) % 2;
+            }
         }
     }
 }
