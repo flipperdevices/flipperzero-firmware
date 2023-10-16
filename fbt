@@ -5,7 +5,8 @@
 set -eu;
 
 # private variables
-N_GIT_THREADS="$(getconf _NPROCESSORS_ONLN)";
+N_CORES="$(getconf _NPROCESSORS_ONLN)";
+N_GIT_THREADS="$(($N_CORES * 2))";
 SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd -P)";
 SCONS_DEFAULT_FLAGS="--warn=target-not-built";
 SCONS_EP="python3 -m SCons";
