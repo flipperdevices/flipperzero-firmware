@@ -87,7 +87,7 @@ static Attack attacks[] = {
     },
     {
         .title = "Android Device Pair",
-        .text = "~15min cooldown, long range",
+        .text = "Reboot cooldown, long range",
         .payload =
             {
                 .random_mac = true,
