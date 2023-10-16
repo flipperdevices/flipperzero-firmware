@@ -11,12 +11,46 @@
 #define XREMOTE_APP_SETTINGS APP_DATA_PATH("xremote.cfg")
 #define TAG "XRemoteApp"
 
+#define XREMOTE_ORIENTATION_TEXT_HORIZONTAL "Horizontal"
+#define XREMOTE_ORIENTATION_TEXT_VERTICAL "Vertical"
+#define XREMOTE_ORIENTATION_INDEX_HORIZONTAL 0
+#define XREMOTE_ORIENTATION_INDEX_VERTICAL 1
+
+#define XREMOTE_EXIT_BEHAVIOR_TEXT_PRESS "Press"
+#define XREMOTE_EXIT_BEHAVIOR_TEXT_HOLD "Hold"
+#define XREMOTE_EXIT_BEHAVIOR_INDEX_PRESS 0
+#define XREMOTE_EXIT_BEHAVIOR_INDEX_HOLD 1
+
 const NotificationSequence g_sequence_blink_purple_50 = {
     &message_red_255,
     &message_blue_255,
     &message_delay_50,
     NULL,
 };
+
+XRemoteAppExit xremote_app_get_exit_behavior(uint8_t exit_index) {
+    return exit_index ? XRemoteAppExitHold : XRemoteAppExitPress;
+}
+
+ViewOrientation xremote_app_get_orientation(uint8_t orientation_index) {
+    return orientation_index ? ViewOrientationVertical : ViewOrientationHorizontal;
+}
+
+const char* xremote_app_get_exit_str(XRemoteAppExit exit_behavior) {
+    return exit_behavior == XRemoteAppExitPress ? "Press" : "Hold";
+}
+
+const char* xremote_app_get_orientation_str(ViewOrientation view_orientation) {
+    return view_orientation == ViewOrientationHorizontal ? "Horizontal" : "Vertical";
+}
+
+uint32_t xremote_app_get_orientation_index(ViewOrientation view_orientation) {
+    return view_orientation == ViewOrientationHorizontal ? 0 : 1;
+}
+
+uint32_t xremote_app_get_exit_index(XRemoteAppExit exit_behavior) {
+    return exit_behavior == XRemoteAppExitPress ? 0 : 1;
+}
 
 XRemoteAppSettings* xremote_app_settings_alloc() {
     XRemoteAppSettings* settings = malloc(sizeof(XRemoteAppSettings));
@@ -45,10 +79,10 @@ bool xremote_app_settings_store(XRemoteAppSettings* settings) {
         if(!flipper_format_write_comment_cstr(ff, "")) break;
 
         /* Write actual configuration to the settings file */
-        uint32_t value = settings->orientation == ViewOrientationHorizontal ? 0 : 1;
+        uint32_t value = xremote_app_get_orientation_index(settings->orientation);
         if(!flipper_format_write_uint32(ff, "orientation", &value, 1)) break;
 
-        value = settings->exit_behavior == XRemoteAppExitPress ? 0 : 1;
+        value = xremote_app_get_exit_index(settings->exit_behavior);
         if(!flipper_format_write_uint32(ff, "appexit", &value, 1)) break;
 
         value = settings->repeat_count;
@@ -81,9 +115,11 @@ bool xremote_app_settings_load(XRemoteAppSettings* settings) {
 
         /* Parse config data from the buffer */
         if(!flipper_format_read_uint32(ff, "orientation", &value, 1)) break;
-        settings->orientation = value == 0 ? ViewOrientationHorizontal : ViewOrientationVertical;
+        settings->orientation = xremote_app_get_orientation(value);
+
         if(!flipper_format_read_uint32(ff, "appexit", &value, 1)) break;
-        settings->exit_behavior = value == 0 ? XRemoteAppExitPress : XRemoteAppExitHold;
+        settings->exit_behavior = xremote_app_get_exit_behavior(value);
+
         if(!flipper_format_read_uint32(ff, "repeat", &value, 1)) break;
         settings->repeat_count = value;
 
@@ -136,8 +172,34 @@ void xremote_app_context_free(XRemoteAppContext* ctx) {
     free(ctx);
 }
 
-const char* xremote_app_context_get_exit_str(XRemoteAppContext* ctx) {
-    XRemoteAppExit exit_behavior = ctx->app_settings->exit_behavior;
+bool xremote_app_browser_select_file(XRemoteAppContext* app_ctx, const char* extension) {
+    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_simply_mkdir(storage, XREMOTE_APP_FOLDER);
+
+    if(app_ctx->file_path == NULL) {
+        app_ctx->file_path = furi_string_alloc();
+        furi_string_set(app_ctx->file_path, XREMOTE_APP_FOLDER);
+    }
+
+    /* Open file browser (view and dialogs are managed by the browser itself) */
+    DialogsFileBrowserOptions browser;
+    dialog_file_browser_set_basic_options(&browser, extension, &I_IR_Icon_10x10);
+    browser.base_path = XREMOTE_APP_FOLDER;
+    FuriString* path = app_ctx->file_path;
+
+    /* Show file selection dialog (returns selected file path with file_path) */
+    bool status = dialog_file_browser_show(dialogs, path, path, &browser);
+
+    /* Cleanup file loading context */
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_DIALOGS);
+
+    return status;
+}
+
+const char* xremote_app_context_get_exit_str(XRemoteAppContext* app_ctx) {
+    XRemoteAppExit exit_behavior = app_ctx->app_settings->exit_behavior;
     return exit_behavior == XRemoteAppExitHold ? "Hold to exit" : "Press to exit";
 }
 
@@ -286,7 +348,10 @@ void xremote_app_user_context_free(XRemoteApp* app) {
 
 XRemoteApp* xremote_app_alloc(XRemoteAppContext* ctx) {
     furi_assert(ctx);
+
     XRemoteApp* app = malloc(sizeof(XRemoteApp));
+    xremote_app_assert(app, NULL);
+
     app->submenu_id = XRemoteViewNone;
     app->view_id = XRemoteViewNone;
     app->app_ctx = ctx;
@@ -294,6 +359,7 @@ XRemoteApp* xremote_app_alloc(XRemoteAppContext* ctx) {
     app->view_ctx = NULL;
     app->on_clear = NULL;
     app->context = NULL;
+
     return app;
 }
 

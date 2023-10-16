@@ -157,12 +157,13 @@ static void xremote_learn_dialog_exit_callback(DialogExResult result, void* cont
 static uint32_t xremote_learn_text_input_exit_callback(void* context) {
     TextInput* text_input = context;
     XRemoteLearnContext* learn_ctx;
+    XRemoteEvent event;
 
     learn_ctx = text_input_get_validator_callback_context(text_input);
     xremote_app_assert(learn_ctx, XRemoteViewSubmenu);
 
-    XRemoteEvent event = learn_ctx->prev_view == XRemoteViewSignal ? XRemoteEventSignalReceived :
-                                                                     XRemoteEventSignalRetry;
+    event = learn_ctx->prev_view == XRemoteViewSignal ? XRemoteEventSignalReceived :
+                                                        XRemoteEventSignalRetry;
 
     if(learn_ctx->current_button >= XREMOTE_BUTTON_COUNT)
         learn_ctx->current_button = XREMOTE_BUTTON_COUNT - 1;
@@ -193,9 +194,10 @@ static void xremote_learn_text_input_callback(void* context) {
         snprintf(
             output_file,
             sizeof(output_file),
-            "%s/%s.ir",
+            "%s/%s%s",
             XREMOTE_APP_FOLDER,
-            learn_ctx->text_store);
+            learn_ctx->text_store,
+            XREMOTE_APP_EXTENSION);
 
         infrared_remote_set_name(learn_ctx->ir_remote, learn_ctx->text_store);
         infrared_remote_set_path(learn_ctx->ir_remote, output_file);

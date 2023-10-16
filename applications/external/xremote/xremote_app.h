@@ -39,6 +39,14 @@
 
 typedef enum { XRemoteAppExitPress, XRemoteAppExitHold } XRemoteAppExit;
 
+XRemoteAppExit xremote_app_get_exit_behavior(uint8_t exit_index);
+const char* xremote_app_get_exit_str(XRemoteAppExit exit_behavior);
+uint32_t xremote_app_get_exit_index(XRemoteAppExit exit_behavior);
+
+ViewOrientation xremote_app_get_orientation(uint8_t orientation_index);
+const char* xremote_app_get_orientation_str(ViewOrientation view_orientation);
+uint32_t xremote_app_get_orientation_index(ViewOrientation view_orientation);
+
 typedef struct {
     ViewOrientation orientation;
     XRemoteAppExit exit_behavior;
@@ -63,10 +71,11 @@ typedef struct {
 XRemoteAppContext* xremote_app_context_alloc(void* arg);
 void xremote_app_context_free(XRemoteAppContext* ctx);
 
-const char* xremote_app_context_get_exit_str(XRemoteAppContext* ctx);
+const char* xremote_app_context_get_exit_str(XRemoteAppContext* app_ctx);
 void xremote_app_context_notify_led(XRemoteAppContext* app_ctx);
 void xremote_app_notification_blink(NotificationApp* notifications);
 bool xremote_app_send_signal(XRemoteAppContext* app_ctx, InfraredSignal* signal);
+bool xremote_app_browser_select_file(XRemoteAppContext* app_ctx, const char* extension);
 
 typedef struct {
     XRemoteClearCallback on_clear;

@@ -55,6 +55,8 @@ static void xremote_signal_receiver_clear_context(XRemoteSignalReceiver* rx_ctx)
 
 XRemoteSignalReceiver* xremote_signal_receiver_alloc(XRemoteAppContext* app_ctx) {
     XRemoteSignalReceiver* rx_ctx = malloc(sizeof(XRemoteSignalReceiver));
+    xremote_app_assert(rx_ctx, NULL);
+
     rx_ctx->signal = infrared_signal_alloc();
     rx_ctx->worker = infrared_worker_alloc();
 

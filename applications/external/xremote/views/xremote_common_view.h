@@ -109,9 +109,10 @@ typedef enum {
     XRemoteViewIRSubmenu,
     XRemoteViewIRGeneral,
     XRemoteViewIRControl,
+    XRemoteViewIRPlayback,
     XRemoteViewIRNavigation,
-    XRemoteViewIRPlayer,
-    XRemoteViewIRCustom
+    XRemoteViewIRCustomPage,
+    XRemoteViewIRAllButtons
 } XRemoteViewID;
 
 typedef struct XRemoteView XRemoteView;
