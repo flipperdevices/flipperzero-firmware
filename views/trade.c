@@ -410,7 +410,7 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
     static int counter; // Should be able to be made static in used function
 			// May need to make another state PRE-init or something to reset this on re-entry?
     struct trade_model* model = NULL;
-    uint8_t in_pokemon_num = 0;
+    static uint8_t in_pokemon_num;
     byte send = in;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
@@ -501,9 +501,7 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
         send = trade_block_flat[counter];
         counter++;
 
-	/* This should be 418? */
-	/* XXX: It breaks when this is set to 418. Need to fix this */
-        if(counter == 405) //TODO: replace with sizeof struct rather than static number
+        if(counter == 415) //TODO: replace with sizeof struct rather than static number
             trade->trade_centre_state = SENDING_PATCH_DATA;
 	break;
 
@@ -582,6 +580,7 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
             memcpy(&(trade->trade_block->party[0]), &(trade->input_block->party[in_pokemon_num]), sizeof(struct pokemon_structure));
             memcpy(&(trade->trade_block->nickname[0]), &(trade->input_block->nickname[in_pokemon_num]), sizeof(struct name));
             memcpy(&(trade->trade_block->ot_name[0]), &(trade->input_block->ot_name[in_pokemon_num]), sizeof(struct name));
+            model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
         }
         break;
 
