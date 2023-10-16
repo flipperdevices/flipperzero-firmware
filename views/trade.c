@@ -193,18 +193,22 @@ static struct patch_list* plist_alloc(void) {
 static void plist_append(struct patch_list *plist, uint8_t index) {
     furi_assert(plist);
 
+    for (;;) {
+        if (plist->next == NULL) break;
+        plist = plist->next;
+    }
     plist->index = index;
     plist->next = plist_alloc();
 }
 
 static void plist_free(struct patch_list *plist) {
     furi_assert(plist);
-    struct patch_list *plist_next = plist->next;
+    struct patch_list *plist_next = NULL;
 
     while (plist != NULL) {
+	plist_next = plist->next;
         free(plist);
 	plist = plist_next;
-	plist_next = plist->next;
     }
 }
 
@@ -764,6 +768,7 @@ void trade_enter_callback(void* context) {
 	    trade_block_flat[i] = 0xFF;
 	}
     }
+    plist_append(patch_list, 0xFF);
 }
 
 void disconnect_pin(const GpioPin* pin) {
