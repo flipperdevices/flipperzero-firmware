@@ -33,9 +33,11 @@ if [ -z "$FBT_NO_SYNC" ]; then
     fi
     _FBT_CLONE_FLAGS="--jobs $N_GIT_THREADS";
     if [ ! -z "$FBT_GIT_SUBMODULE_SHALLOW" ]; then
+        echo "Shallow cloning submodules";
         _FBT_CLONE_FLAGS="$_FBT_CLONE_FLAGS --depth 1";
     fi
 
+    echo git submodule update --init --recursive $_FBT_CLONE_FLAGS;
     git submodule update --init --recursive $_FBT_CLONE_FLAGS;
 fi
 
