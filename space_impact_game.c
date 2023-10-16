@@ -5,8 +5,6 @@
 #include "gui/assets.h"
 #include "data/enemies.h"
 
-#define FRAMES 25 //12
-
 static void game_update(GameState* game_state) {
     game_state->level_time++;
 

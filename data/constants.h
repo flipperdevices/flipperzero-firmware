@@ -3,6 +3,8 @@
 
 #define TAG "SpaceImpact"
 
+#define FRAMES 25 //12
+
 #define HERO_SIZE 8
 
 #define HERO_MIN_Y 7
