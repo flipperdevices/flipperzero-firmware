@@ -85,6 +85,9 @@ struct UART_TerminalApp {
 
     GravityCommand gravityCommand; /* Gravity command */
     GravityMenu currentMenu;
+    int purgeStrategy;
+    int purgeAge;
+    int purgeRSSI;
 };
 
 typedef enum {

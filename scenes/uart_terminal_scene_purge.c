@@ -11,7 +11,7 @@
 */
 
 UART_TerminalItem purgeMenu[NUM_PURGE_ITEMS] = {
-  {"Purge By Age?", {"On", "Off"}, 2, {"On", "Off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+  {"Purge By Age?", {"On", "Off"}, 2, {"on", "off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
   {"Purge Age",
   {"5 sec", "10 sec", "20 sec", "30 sec", "60 sec", "90 sec", "120 sec", "3 min", "5 min", "10 min", "30 min", "1 hour"},
   12,
@@ -20,7 +20,7 @@ UART_TerminalItem purgeMenu[NUM_PURGE_ITEMS] = {
   FOCUS_CONSOLE_END,
   NO_TIP,
   false},
-  {"Purge By RSSI?", {"On", "Off"}, 2, {"On", "Off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+  {"Purge By RSSI?", {"On", "Off"}, 2, {"on", "off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
   {"Purge RSSI",
   {"-125", "-115", "-105", "-95", "-85", "-75", "-65", "-55", "-45", "-35", "-25", "-15"},
   12,
@@ -29,8 +29,8 @@ UART_TerminalItem purgeMenu[NUM_PURGE_ITEMS] = {
   FOCUS_CONSOLE_END,
   NO_TIP,
   false},
-  {"Purge Unselecetd?", {"On", "Off"}, 2, {"On", "Off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
-  {"Purge Unnamed?", {"On", "Off"}, 2, {"On", "Off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+  {"Purge Unselecetd?", {"On", "Off"}, 2, {"on", "off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+  {"Purge Unnamed?", {"On", "Off"}, 2, {"on", "off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
   {"Done",
   {"Save Default", "Purge APs", "Purge STAs", "Purge BT", "Purge BLE"},
   5,
@@ -76,53 +76,108 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
     }
 
     dolphin_deed(DolphinDeedGpioUartBridge);
+    bool bAge = strcmp(purgeMenu[PURGE_MENU_AGE_ON].actual_commands[app->selected_option_index[PURGE_MENU_AGE_ON]], "off");
+    bool bRSSI = strcmp(purgeMenu[PURGE_MENU_RSSI_ON].actual_commands[app->selected_option_index[PURGE_MENU_RSSI_ON]], "off");
+    bool bUnselected = strcmp(purgeMenu[PURGE_MENU_UNSELECTED_ON].actual_commands[app->selected_option_index[PURGE_MENU_UNSELECTED_ON]], "off");
+    bool bUnnamed = strcmp(purgeMenu[PURGE_MENU_UNNAMED_ON].actual_commands[app->selected_option_index[PURGE_MENU_UNNAMED_ON]], "off");
+    const char *strAge = purgeMenu[PURGE_MENU_AGE].actual_commands[app->selected_option_index[PURGE_MENU_AGE]];
+    const char *strRSSI = purgeMenu[PURGE_MENU_RSSI].actual_commands[app->selected_option_index[PURGE_MENU_RSSI]];
     /* At this point we're ready to save or run the configured purge strategy */
     /* Expected command values: save, ap, sta, bt, ble */
-    if (!strcmp(item->actual_commands[selected_option_index], "save")) {
-        // Save
-        /* BLE_PURGE_MAX_RSSI, BLE_PURGE_MIN_AGE, BLE_PURGE_STRAT
-        RSSI = 1,
-            AGE = 2,
-            UNNAMED = 4,
-            UNSELECTED = 8,
-            NONE = 16
-            */
-    } else {
-        //purge [ AP | STA | BT | BLE ]+ [ RSSI [ <maxRSSI> ] | AGE [ <minAge> ] | UNNAMED | UNSELECTED | NONE ]+
+    /* Initialise the serial console */
+    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+    int strat = 0;
+    if (bAge) {
+        strat += GRAVITY_PURGE_AGE;
     }
-
-    /* TODO: Compile command string based on selection */
-    app->selected_tx_string = "";
-    if (!strcmp(item->actual_commands[selected_option_index], "")) {
-        app->selected_tx_string = "mana";
-    } else if (!strcmp(item->actual_commands[selected_option_index], "off")) {
-        app->selected_tx_string = "mana off";
-    } else if (!strcmp(item->actual_commands[selected_option_index], "on")) {
-        /* The command is mana [verbose] on auth none loud off */
-        /* ==> mana on auth loud\0 + up to 6 spaces */
-        int cmdLength = 0;
-        UART_TerminalItem *thisItem;
-        for (int i = 0; i < PURGE_MENU_RUN; ++i) {
-            thisItem = &purgeMenu[i];
-            cmdLength += strlen(thisItem->actual_commands[app->selected_option_index[i]]);
+    if (bRSSI) {
+        strat += GRAVITY_PURGE_RSSI;
+    }
+    if (bUnnamed) {
+        strat += GRAVITY_PURGE_UNNAMED;
+    }
+    if (bUnselected) {
+        strat += GRAVITY_PURGE_UNSELECTED;
+    }
+    if (strat == 0) {
+        strat = GRAVITY_PURGE_NONE;
+    }
+    if (!strcmp(item->actual_commands[selected_option_index], "save")) {
+        /* Compile selected strategies into their binary values */
+        /* Save age and RSSI directly, then launch console to save strategy
+           Probably something to refactor into a better UI in the near future */
+        //SET BLE_PURGE_MIN_AGE BLE_PURGE_MAX_RSSI 23 + strlen + \n\0
+        /* I agonised a bit over whether age and RSSI should be saved all the
+           time, or only when selected. These will only be saved where they
+           have been selected for use. */
+        char saveCmd[29] = "";
+        if (bAge) {
+            app->purgeAge = atoi(strAge);
+            strcpy(saveCmd, "SET BLE_PURGE_MIN_AGE ");
+            strcat(saveCmd, strAge);
+            strcat(saveCmd, "\n");
+            uart_terminal_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
+            // YAGNI: Delay
         }
-        /* Add chars for DEAUTH ON\0 & 3 spaces */
-        cmdLength += 21;
-
-        char *mana_command = malloc(sizeof(char) * cmdLength);
-        if (mana_command == NULL) {
-            /* Panic */
+        if (bRSSI) {
+            app->purgeRSSI = atoi(strRSSI);
+            strcpy(saveCmd, "SET BLE_PURGE_MAX_RSSI ");
+            strcat(saveCmd, strRSSI);
+            strcat(saveCmd, "\n");
+            uart_terminal_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
+            // YAGNI: Delay
+        }
+        char strStrat[2];
+        itoa(strat, strStrat, 10);
+        strcpy(saveCmd, "SET BLE_PURGE_STRAT ");
+        strcat(saveCmd, strStrat);
+        char *tx_command = malloc(sizeof(char) * (strlen(saveCmd) + 1));
+        if (tx_command == NULL) {
+            //TODO - Panic
             return;
         }
-        // strcpy(mana_command, "MANA ");
-        // strcat(mana_command, attacks_mana[MANA_MENU_VERBOSE].actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);
-        // strcat(mana_command, " ON AUTH ");
-        // strcat(mana_command, attacks_mana[MANA_MENU_AUTH].actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);
-        // strcat(mana_command, " LOUD ");
-        // strcat(mana_command, attacks_mana[MANA_MENU_MODE].actual_commands[app->selected_option_index[MANA_MENU_MODE]]);
-        app->selected_tx_string = mana_command;
+        strcpy(tx_command, saveCmd);
+        app->selected_tx_string = tx_command;
+        app->free_command = true;
+        /* Save defaults in Flipper app */
+        app->purgeStrategy = strat;
+    } else {
+        //purge [ AP | STA | BT | BLE ]+ [ RSSI [ <maxRSSI> ] | AGE [ <minAge> ] | UNNAMED | UNSELECTED | NONE ]+
+        // PURGE BLE RSSI -100 AGE 3600 UNNAMED UNSELECTED
+        char purgeCmd[39];
+        strcpy(purgeCmd, "purge ");
+        // ap/sta/bt/ble
+        strcat(purgeCmd, item->actual_commands[selected_option_index]);
+        strcat(purgeCmd, " ");
+        if (bRSSI) {
+            strcat(purgeCmd, "RSSI ");
+            strcat(purgeCmd, strRSSI);
+            strcat(purgeCmd, " ");
+        }
+        if (bAge) {
+            strcat(purgeCmd, "AGE ");
+            strcat(purgeCmd, strAge);
+            strcat(purgeCmd, " ");
+        }
+        if (bUnnamed) {
+            strcat(purgeCmd, "UNNAMED ");
+        }
+        if (bUnselected) {
+            strcat(purgeCmd, "UNSELECTED ");
+        }
+        if (!(bAge || bRSSI || bUnselected || bUnnamed)) {
+            strcat(purgeCmd, "NONE ");
+        }
+        char *tx_command = malloc(sizeof(char) * (strlen(purgeCmd) + 1));
+        if (tx_command == NULL) {
+            // TODO - Panic
+            return;
+        }
+        strcpy(tx_command, purgeCmd);
+        app->selected_tx_string = tx_command;
         app->free_command = true;
     }
+
     app->is_command = true;
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
@@ -135,8 +190,6 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
     bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
                             (item->needs_keyboard == TOGGLE_ARGS &&
                             (app->selected_tx_string[cmdLen-1] == ' ')));
-    /* Initialise the serial console */
-    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
 
     if(needs_keyboard) {
         view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
@@ -163,6 +216,15 @@ static void uart_terminal_scene_purge_var_list_change_callback(VariableItem* ite
     app->selected_option_index[app->selected_menu_index] = item_index;
 }
 
+int indexOf(char *val, const char **array, int arrayLen) {
+    int i;
+    for (i = 0; i < arrayLen && strcmp(val, array[i]); ++i) { }
+    if (i == arrayLen) {
+        i = -1;
+    }
+    return i;
+}
+
 /* Callback on entering the scene (initialisation) */
 void uart_terminal_scene_purge_on_enter(void* context) {
     UART_TerminalApp* app = context;
@@ -171,6 +233,52 @@ void uart_terminal_scene_purge_on_enter(void* context) {
 
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_purge_var_list_enter_callback, app);
+
+    if (app->purgeStrategy != 0) {
+        /* A purge strategy is in memory, use it for initial values */
+        // Figure out what index in purgeMenu[PURGE_MENU_AGE].options_menu[]
+        //      purgeAge is & set app->selected_option_index[PURGE_MENU_AGE]
+        char str[5];
+        itoa(app->purgeAge, str, 10);
+        int idx = indexOf(str, purgeMenu[PURGE_MENU_AGE].options_menu,
+                purgeMenu[PURGE_MENU_AGE].num_options_menu);
+        if (idx >= 0) {
+            app->selected_option_index[PURGE_MENU_AGE] = idx;
+        }
+        // Find index of purgeRSSI in purgeMenu[PURGE_MENU_RSSI].options_menu[]
+        // app->selected_option_index[PURGE_MENU_RSSI] = that
+        itoa(app->purgeRSSI, str, 10);
+        idx = indexOf(str, purgeMenu[PURGE_MENU_RSSI].options_menu,
+                purgeMenu[PURGE_MENU_RSSI].num_options_menu);
+        if (idx >= 0) {
+            app->selected_option_index[PURGE_MENU_RSSI] = idx;
+        }
+        /* Now set the boolean values */
+        int idxOn = indexOf("on", purgeMenu[PURGE_MENU_AGE_ON].options_menu,
+                purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
+        int idxOff = indexOf("off", purgeMenu[PURGE_MENU_AGE_ON].options_menu,
+                purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
+        if ((app->purgeStrategy & GRAVITY_PURGE_AGE) == GRAVITY_PURGE_AGE) {
+            app->selected_option_index[PURGE_MENU_AGE_ON] = idxOn;
+        } else {
+            app->selected_option_index[PURGE_MENU_AGE_ON] = idxOff;
+        }
+        if ((app->purgeStrategy & GRAVITY_PURGE_RSSI) == GRAVITY_PURGE_RSSI) {
+            app->selected_option_index[PURGE_MENU_RSSI_ON] = idxOn;
+        } else {
+            app->selected_option_index[PURGE_MENU_RSSI_ON] = idxOff;
+        }
+        if ((app->purgeStrategy & GRAVITY_PURGE_UNNAMED) == GRAVITY_PURGE_UNNAMED) {
+            app->selected_option_index[PURGE_MENU_UNNAMED_ON] = idxOn;
+        } else {
+            app->selected_option_index[PURGE_MENU_UNNAMED_ON] = idxOff;
+        }
+        if ((app->purgeStrategy & GRAVITY_PURGE_UNSELECTED) == GRAVITY_PURGE_UNSELECTED) {
+            app->selected_option_index[PURGE_MENU_UNSELECTED_ON] = idxOn;
+        } else {
+            app->selected_option_index[PURGE_MENU_UNSELECTED_ON] = idxOff;
+        }
+    }
 
     app->currentMenu = GRAVITY_MENU_PURGE;
     for(int i = 0; i < NUM_PURGE_ITEMS; ++i) {

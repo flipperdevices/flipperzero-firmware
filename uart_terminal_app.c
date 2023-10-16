@@ -96,6 +96,9 @@ UART_TerminalApp* uart_terminal_app_alloc() {
         uart_text_input_get_view(app->text_input));
     app->currentMenu = GRAVITY_MENU_MAIN;
     app->free_command = false;
+    app->purgeStrategy = 0;
+    app->purgeAge = 0;
+    app->purgeRSSI = 0;
 
     scene_manager_next_scene(app->scene_manager, UART_TerminalSceneMain);
 

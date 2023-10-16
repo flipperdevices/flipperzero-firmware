@@ -53,4 +53,13 @@ enum GravityCommand {
 };
 typedef enum GravityCommand GravityCommand;
 
+typedef enum {
+    GRAVITY_PURGE_IDLE = 0,
+    GRAVITY_PURGE_RSSI = 1,
+    GRAVITY_PURGE_AGE = 2,
+    GRAVITY_PURGE_UNNAMED = 4,
+    GRAVITY_PURGE_UNSELECTED = 8,
+    GRAVITY_PURGE_NONE = 16
+} gravity_bt_purge_strategy_t;
+
 #endif
