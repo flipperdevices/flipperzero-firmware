@@ -97,7 +97,6 @@
 
 #define TRADE_CENTRE_WAIT 0xFD
 
-typedef unsigned char byte;
 typedef enum { NOT_CONNECTED, CONNECTED, TRADE_CENTRE, COLOSSEUM } connection_state_t;
 typedef enum {
     INIT,
@@ -320,13 +319,13 @@ uint32_t micros() {
  * I think the documentation might be missing a detail as the code later does implement the saem
  * 0x60 value of "trade the first pokemon"
  */
-static byte getConnectResponse(byte in, struct Trade* trade) {
+static uint8_t getConnectResponse(uint8_t in, struct Trade* trade) {
     furi_assert(trade);
 
     /* XXX: Can streamline this code a bit by setting ret to in
      * and then only setting ret where needed? Might be a useless
      * optimization though */
-    byte ret;
+    uint8_t ret;
 
     switch(in) {
     case PKMN_CONNECTED:
@@ -369,10 +368,10 @@ static byte getConnectResponse(byte in, struct Trade* trade) {
  *
  * This is where we loop if we end up in the colosseum
  */
-static byte getMenuResponse(byte in, struct Trade* trade) {
+static uint8_t getMenuResponse(uint8_t in, struct Trade* trade) {
     furi_assert(trade);
 
-    byte response = 0x00;
+    uint8_t response = 0x00;
     /* XXX: Shouldn't this return a valid response for each option? 
      * e.g. if the gameboy selects trade center, should we also send trade center? 
      * or is the 0x00 an Agreement byte? I wonder if the leader/master is the
@@ -402,7 +401,7 @@ static byte getMenuResponse(byte in, struct Trade* trade) {
     return response;
 }
 
-static byte getTradeCentreResponse(byte in, struct Trade* trade) {
+static uint8_t getTradeCentreResponse(uint8_t in, struct Trade* trade) {
     furi_assert(trade);
 
     uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
@@ -411,7 +410,7 @@ static byte getTradeCentreResponse(byte in, struct Trade* trade) {
 			// May need to make another state PRE-init or something to reset this on re-entry?
     struct trade_model* model = NULL;
     static uint8_t in_pokemon_num;
-    byte send = in;
+    uint8_t send = in;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
      * and what response to expect.
@@ -619,7 +618,7 @@ void transferBit(void* context) {
     /* Shift data in every clock */
     /* XXX: This logic can be made a little more clear I think.
      * Its just shifting a bit in at a time, doesn't need the clever shifting maths */
-    byte raw_data = furi_hal_gpio_read(&GAME_BOY_SI);
+    uint8_t raw_data = furi_hal_gpio_read(&GAME_BOY_SI);
     trade->in_data |= raw_data << (7 - trade->shift);
 
     /* Once a byte of data has been shifted in, process it */
