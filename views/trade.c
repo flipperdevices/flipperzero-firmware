@@ -61,6 +61,7 @@
 #include <pokemon_icons.h>
 
 #include "../pokemon_app.h"
+#include "trade_patch_list.h"
 
 #define GAME_BOY_CLK gpio_ext_pb2
 #define GAME_BOY_SI gpio_ext_pc3
@@ -123,11 +124,6 @@ typedef enum {
     GAMEBOY_TRADING
 } render_gameboy_state_t;
 
-struct patch_list {
-    uint8_t index;
-    struct patch_list *next;
-};
-
 /* Anonymous struct */
 struct trade_ctx {
     trade_centre_state_t trade_centre_state;
@@ -177,94 +173,6 @@ void screen_gameboy_connected(Canvas* const canvas) {
     canvas_draw_icon(canvas, 80, 0, &I_game_boy);
     canvas_draw_icon(canvas, 8, 2, &I_Space_65x18);
     canvas_draw_str(canvas, 18, 13, "Connected!");
-}
-
-static struct patch_list* plist_alloc(void) {
-    struct patch_list *plist = NULL;
-
-    plist = malloc(sizeof(struct patch_list));
-    plist->index = 0;
-    plist->next = NULL;
-    return plist;
-}
-
-static void plist_append(struct patch_list *plist, uint8_t index) {
-    furi_assert(plist);
-
-    for (;;) {
-        if (plist->next == NULL) break;
-        plist = plist->next;
-    }
-    plist->index = index;
-    plist->next = plist_alloc();
-}
-
-static void plist_free(struct patch_list *plist) {
-    furi_assert(plist);
-    struct patch_list *plist_next = NULL;
-
-    while (plist != NULL) {
-	plist_next = plist->next;
-        free(plist);
-	plist = plist_next;
-    }
-}
-
-/* Returns the index value at offset member of the list. If offset is beyond
- * the length of the allocated list, it will just return 0.
- */
-static uint8_t plist_index_get(struct patch_list *plist, int offset) {
-    furi_assert(plist);
-    int i;
-
-    for (i = 0; i < offset; i++) {
-        if (plist->next == NULL) break;
-        plist = plist->next;
-    }
-
-    return plist->index;
-}
-
-static void plist_create(TradeBlock* trade_block, struct patch_list **pplist) {
-    furi_assert(trade_block);
-    furi_assert(pplist);
-    uint8_t* trade_block_flat = (uint8_t*)trade_block;
-    int i;
-    struct patch_list *plist = *pplist;
-    /* XXX: HACK: Set up our patch list now. Note that, this will cause weird
-     * problems if a pokemon with a patched index is traded to the flipper with
-     * a pokemon without a patched index, or the other way around. Need to implement
-     * a way to update the patch list after we get traded a pokemon.
-     *
-     * Can maybe use the furi timer queue callback thing
-     */
-
-    /* If plist is non-NULL that means its already been created. Tear it down
-     * first.
-     */
-    if (plist != NULL) {
-        plist_free(plist);
-        plist = NULL;
-    }
-
-    plist = plist_alloc();
-    /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
-    /* The first half of the patch list covers offsets 0x00 - 0xfc, which
-     * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
-     * end of the first part. The second half of the patch list covers
-     * offsets 0xfd - 0x107. Which is expressed as 0x01 - 0xb. A 0xFF byte
-     * is added to signify the end of the second part/
-     */
-    for (i = 0; i < 264; i++) {
-        if (i == 0xFD)
-            plist_append(plist, 0xFF);
-
-        if (trade_block_flat[i] == 0xFE) {
-            plist_append(plist, (i % 0xfd) + 1);
-	    trade_block_flat[i] = 0xFF;
-	}
-    }
-    plist_append(plist, 0xFF);
 }
 
 static void trade_draw_callback(Canvas* canvas, void* view_model) {
