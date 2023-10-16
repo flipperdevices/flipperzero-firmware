@@ -370,6 +370,11 @@ bool nfc_delete(NfcApp* instance) {
         nfc_delete_shadow_file(instance);
     }
 
+    if(furi_string_end_with_str(instance->file_path, NFC_APP_SHADOW_EXTENSION)) {
+        size_t path_len = furi_string_size(instance->file_path);
+        furi_string_replace_at(instance->file_path, path_len - 4, 4, NFC_APP_EXTENSION);
+    }
+
     return storage_simply_remove(instance->storage, furi_string_get_cstr(instance->file_path));
 }
 
