@@ -69,11 +69,27 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         // increment selected_option_index % number of options
         selected_option_index = (selected_option_index + 1) % item->num_options_menu;
         app->selected_option_index[index] = selected_option_index;
+        // YAGNI: Null check
         variable_item_set_current_value_index(menuItemViews[index], selected_option_index);
+        variable_item_set_current_value_text(menuItemViews[index], item->options_menu[selected_option_index]);
         return;
     }
 
     dolphin_deed(DolphinDeedGpioUartBridge);
+    /* At this point we're ready to save or run the configured purge strategy */
+    /* Expected command values: save, ap, sta, bt, ble */
+    if (!strcmp(item->actual_commands[selected_option_index], "save")) {
+        // Save
+        /* BLE_PURGE_MAX_RSSI, BLE_PURGE_MIN_AGE, BLE_PURGE_STRAT
+        RSSI = 1,
+            AGE = 2,
+            UNNAMED = 4,
+            UNSELECTED = 8,
+            NONE = 16
+            */
+    } else {
+        //purge [ AP | STA | BT | BLE ]+ [ RSSI [ <maxRSSI> ] | AGE [ <minAge> ] | UNNAMED | UNSELECTED | NONE ]+
+    }
 
     /* TODO: Compile command string based on selection */
     app->selected_tx_string = "";
@@ -165,6 +181,13 @@ void uart_terminal_scene_purge_on_enter(void* context) {
             uart_terminal_scene_purge_var_list_change_callback,
             app);
         menuItemViews[i] = item;
+        /* When transitioning between views app->selected_option_index[i] may
+           be referencing a different view's options menu, and may be out of
+           bounds of mainmenu[i].options_menu[].
+           If that is the case, use 0 instead */
+        if (app->selected_option_index[i] >= purgeMenu[i].num_options_menu) {
+            app->selected_option_index[i] = 0;
+        }
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
         variable_item_set_current_value_text(
             item, purgeMenu[i].options_menu[app->selected_option_index[i]]);

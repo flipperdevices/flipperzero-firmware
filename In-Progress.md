@@ -11,3 +11,4 @@
 * Flipper protocol for ESP32-Gravity to allow more sophisticated UIs
     * e.g. get all settings info, in bytes, from a single command
 * Just In Time view memory allocation (now that there are lots of them)
+* Cycle through menu item options in all UIs, not just Purge

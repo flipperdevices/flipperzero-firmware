@@ -226,6 +226,13 @@ void uart_terminal_scene_settings_on_enter(void* context) {
             settings[i].num_options_menu,
             uart_terminal_scene_settings_var_list_change_callback,
             app);
+        /* When transitioning between views app->selected_option_index[i] may
+           be referencing a different view's options menu, and may be out of
+           bounds of mainmenu[i].options_menu[].
+           If that is the case, use 0 instead */
+        if (app->selected_option_index[i] >= settings[i].num_options_menu) {
+            app->selected_option_index[i] = 0;
+        }
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
         variable_item_set_current_value_text(
             item, settings[i].options_menu[app->selected_option_index[i]]);
