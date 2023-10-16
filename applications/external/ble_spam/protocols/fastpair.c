@@ -26,11 +26,9 @@ void fastpair_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpam
             0x92BBBD, // Pixel Buds
 
             // Custom debug popups
-            0xAA1FE1, // ClownMaster
             0xAA187F, // VBucks
             0xF38C02, // Boykisser
             0x1448C9, // BLM
-            0xD5AB33, // Xtreme
             0x13B39D, // Talking Sasquach
         };
         model_id = models[rand() % COUNT_OF(models)];
