@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGHz: Add 4 more systems to Add Manually (untested!)
 - UL: SubGHz: Add Manually fixes
 - UL: Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Android Device is Reboot Cooldown vs ~15min
+- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 

@@ -135,10 +135,6 @@ struct Trade {
     TradeBlock* trade_block;
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
-
-    uint32_t time; //Should be able to be made static in used function
-    uint8_t out_data; // Should be able to be made as part of view model or static in used function
-    int counter; // Should be able to be made static in used function
 };
 
 /* These are the needed variables for the draw callback */
@@ -614,6 +610,10 @@ void transferBit(void* context) {
     bool connected;
     bool trading;
 
+    /* We use with_view_model since the functions called here could potentially
+     * also need to use the model resources. Right now this is not an issue, but
+     * if this were to ever end up having a lock, it could cause access issues.
+     */
     with_view_model(
         trade->view,
         struct trade_model * model,
@@ -654,10 +654,11 @@ void transferBit(void* context) {
         trade->in_data = 0; // TODO: I don't think this is necessary?
     }
 
-    /* Wait for the clock to go high again
-     * XXX: I think this is superfluous since we can IRQ on falling edge, read data, delay a moment, then set data and wait until next IRQ */
     /* Basically, I don't want to stall in an interrupt context.
      * Could also maybe IRQ on either edge? and set data out when appropriate? */
+    /* XXX: I'm not sure what this is accomplishing, as the data is valid on
+     * the rising edge of the clock. This can likely go away.
+     */
     while(!furi_hal_gpio_read(&GAME_BOY_CLK))
         ;
 
@@ -710,11 +711,9 @@ void trade_draw_timer_callback(void* context) {
 
 void trade_enter_callback(void* context) {
     furi_assert(context);
-    PokemonFap* pokemon_fap = (PokemonFap*)context;
-    uint8_t* trade_block_flat = (uint8_t*)(&(pokemon_fap->trade_block->party[0]));
-    int i = 0;
-
     struct Trade* trade = (struct Trade*)context;
+    uint8_t* trade_block_flat = (uint8_t*)(&(trade->trade_block->party[0]));
+    int i = 0;
 
     /* Re-init variables */
     with_view_model(
@@ -756,6 +755,8 @@ void trade_enter_callback(void* context) {
      * problems if a pokemon with a patched index is traded to the flipper with
      * a pokemon without a patched index, or the other way around. Need to implement
      * a way to update the patch list after we get traded a pokemon.
+     *
+     * Can maybe use the furi timer queue callback thing
      */
     patch_list = plist_alloc();
     /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
