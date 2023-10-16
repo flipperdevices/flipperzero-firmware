@@ -4,18 +4,18 @@
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://developers.google.com/nearby/fast-pair/specifications/introduction
 
-const char* fastpair_get_name(const BleSpamMsg* _msg) {
-    const FastpairMsg* msg = &_msg->fastpair;
-    UNUSED(msg);
+const char* fastpair_get_name(const BleSpamProtocolCfg* _cfg) {
+    const FastpairCfg* cfg = &_cfg->fastpair;
+    UNUSED(cfg);
     return "FastPair";
 }
 
-void fastpair_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpamMsg* _msg) {
-    const FastpairMsg* msg = _msg ? &_msg->fastpair : NULL;
+void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProtocolCfg* _cfg) {
+    const FastpairCfg* cfg = _cfg ? &_cfg->fastpair : NULL;
 
     uint32_t model_id;
-    if(msg && msg->model_id != 0x000000) {
-        model_id = msg->model_id;
+    if(cfg && cfg->model_id != 0x000000) {
+        model_id = cfg->model_id;
     } else {
         const uint32_t models[] = {
             // Genuine devices
@@ -57,8 +57,8 @@ void fastpair_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpam
     packet[i++] = 0x0A; // AD Type (Tx Power Level)
     packet[i++] = (rand() % 120) - 100; // -100 to +20 dBm
 
-    *out_size = size;
-    *out_packet = packet;
+    *_size = size;
+    *_packet = packet;
 }
 
 const BleSpamProtocol ble_spam_protocol_fastpair = {

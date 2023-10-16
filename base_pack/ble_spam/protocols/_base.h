@@ -7,10 +7,10 @@
 #include <furi_hal_random.h>
 #include <core/core_defines.h>
 
-typedef union BleSpamMsg BleSpamMsg;
+typedef union BleSpamProtocolCfg BleSpamProtocolCfg;
 
 typedef struct {
     const Icon* icon;
-    const char* (*get_name)(const BleSpamMsg* _msg);
-    void (*make_packet)(uint8_t* out_size, uint8_t** out_packet, const BleSpamMsg* _msg);
+    const char* (*get_name)(const BleSpamProtocolCfg* _cfg);
+    void (*make_packet)(uint8_t* _size, uint8_t** _packet, const BleSpamProtocolCfg* _cfg);
 } BleSpamProtocol;

