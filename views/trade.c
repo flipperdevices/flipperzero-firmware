@@ -225,6 +225,48 @@ static uint8_t plist_index_get(struct patch_list *plist, int offset) {
     return plist->index;
 }
 
+static void plist_create(TradeBlock* trade_block, struct patch_list **pplist) {
+    furi_assert(trade_block);
+    furi_assert(pplist);
+    uint8_t* trade_block_flat = (uint8_t*)trade_block;
+    int i;
+    struct patch_list *plist = *pplist;
+    /* XXX: HACK: Set up our patch list now. Note that, this will cause weird
+     * problems if a pokemon with a patched index is traded to the flipper with
+     * a pokemon without a patched index, or the other way around. Need to implement
+     * a way to update the patch list after we get traded a pokemon.
+     *
+     * Can maybe use the furi timer queue callback thing
+     */
+
+    /* If plist is non-NULL that means its already been created. Tear it down
+     * first.
+     */
+    if (plist != NULL) {
+        plist_free(plist);
+        plist = NULL;
+    }
+
+    plist = plist_alloc();
+    /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
+    /* The first half of the patch list covers offsets 0x00 - 0xfc, which
+     * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
+     * end of the first part. The second half of the patch list covers
+     * offsets 0xfd - 0x107. Which is expressed as 0x01 - 0xb. A 0xFF byte
+     * is added to signify the end of the second part/
+     */
+    for (i = 0; i < 264; i++) {
+        if (i == 0xFD)
+            plist_append(plist, 0xFF);
+
+        if (trade_block_flat[i] == 0xFE) {
+            plist_append(plist, (i % 0xfd) + 1);
+	    trade_block_flat[i] = 0xFF;
+	}
+    }
+    plist_append(plist, 0xFF);
+}
+
 static void trade_draw_callback(Canvas* canvas, void* view_model) {
     furi_assert(view_model);
     const char* gameboy_status_text = NULL;
@@ -697,8 +739,6 @@ void trade_draw_timer_callback(void* context) {
 void trade_enter_callback(void* context) {
     furi_assert(context);
     struct trade_ctx* trade = (struct trade_ctx*)context;
-    uint8_t* trade_block_flat = (uint8_t*)(&(trade->trade_block->party[0]));
-    int i = 0;
 
     /* Re-init variables */
     with_view_model(
@@ -735,38 +775,13 @@ void trade_enter_callback(void* context) {
 
     furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, trade);
 
-    /* XXX: HACK: Set up our patch list now. Note that, this will cause weird
-     * problems if a pokemon with a patched index is traded to the flipper with
-     * a pokemon without a patched index, or the other way around. Need to implement
-     * a way to update the patch list after we get traded a pokemon.
-     *
-     * Can maybe use the furi timer queue callback thing
-     */
-    trade->patch_list = plist_alloc();
-    /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
-    /* The first half of the patch list covers offsets 0x00 - 0xfc, which
-     * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
-     * end of the first part. The second half of the patch list covers
-     * offsets 0xfd - 0x107. Which is expressed as 0x01 - 0xb. A 0xFF byte
-     * is added to signify the end of the second part/
-     */
-    for (i = 0; i < 264; i++) {
-        if (i == 0xFD)
-            plist_append(trade->patch_list, 0xFF);
-
-        if (trade_block_flat[i] == 0xFE) {
-            plist_append(trade->patch_list, (i % 0xfd) + 1);
-	    trade_block_flat[i] = 0xFF;
-	}
-    }
-    plist_append(trade->patch_list, 0xFF);
+    /* Create a trade patch list from the current trade block */
+    plist_create(trade->trade_block, &(trade->patch_list));
 }
 
 void disconnect_pin(const GpioPin* pin) {
-    /* XXX: Why is this analog? Is that its default? */
-    /* XXX: May be able to use existing API functions for this as well */
-    furi_hal_gpio_init(pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    furi_hal_gpio_write(pin, true);
+    /* Existing projects seem to set the pin back to analog mode upon exit */
+    furi_hal_gpio_init_simple(pin, GpioModeAnalog);
 }
 
 void trade_exit_callback(void* context) {
@@ -793,8 +808,8 @@ void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view
     trade->view = view;
     trade->trade_block = trade_block;
     trade->input_block = malloc(sizeof(TradeBlock));
-
     trade->pokemon_table = table;
+    trade->patch_list = NULL;
 
     view_set_context(trade->view, trade);
     view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));
