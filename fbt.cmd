@@ -5,7 +5,7 @@ set SCONS_EP=python -m SCons
 
 if [%FBT_NO_SYNC%] == [] (
     set _FBT_CLONE_FLAGS=--jobs %NUMBER_OF_PROCESSORS%
-    if not [%FBT_SHALLOW%] == [] (
+    if not [%FBT_GIT_SUBMODULE_SHALLOW%] == [] (
         set _FBT_CLONE_FLAGS=%_FBT_CLONE_FLAGS% --depth 1
     )
     if exist ".git" (
