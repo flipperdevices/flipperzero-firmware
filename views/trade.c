@@ -123,6 +123,11 @@ typedef enum {
     GAMEBOY_TRADING
 } render_gameboy_state_t;
 
+struct patch_list {
+    uint8_t index;
+    struct patch_list *next;
+};
+
 /* Anonymous struct */
 struct Trade {
     trade_centre_state_t trade_centre_state;
@@ -134,6 +139,7 @@ struct Trade {
     TradeBlock* trade_block;
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
+    struct patch_list *patch_list;
 };
 
 /* These are the needed variables for the draw callback */
@@ -173,15 +179,8 @@ void screen_gameboy_connected(Canvas* const canvas) {
     canvas_draw_str(canvas, 18, 13, "Connected!");
 }
 
-struct patch_list {
-    uint8_t index;
-    struct patch_list *next;
-};
-
-static struct patch_list *patch_list = NULL;
-
 static struct patch_list* plist_alloc(void) {
-    static struct patch_list *plist = NULL;
+    struct patch_list *plist = NULL;
 
     plist = malloc(sizeof(struct patch_list));
     plist->index = 0;
@@ -519,7 +518,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct Trade* trade) {
 	     * list header.
 	     */
             if (counter > 6) {
-                send = plist_index_get(patch_list, (counter - 7));
+                send = plist_index_get(trade->patch_list, (counter - 7));
             }
 
             counter++;
@@ -749,7 +748,7 @@ void trade_enter_callback(void* context) {
      *
      * Can maybe use the furi timer queue callback thing
      */
-    patch_list = plist_alloc();
+    trade->patch_list = plist_alloc();
     /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
     /* The first half of the patch list covers offsets 0x00 - 0xfc, which
      * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
@@ -759,14 +758,14 @@ void trade_enter_callback(void* context) {
      */
     for (i = 0; i < 264; i++) {
         if (i == 0xFD)
-            plist_append(patch_list, 0xFF);
+            plist_append(trade->patch_list, 0xFF);
 
         if (trade_block_flat[i] == 0xFE) {
-            plist_append(patch_list, (i % 0xfd) + 1);
+            plist_append(trade->patch_list, (i % 0xfd) + 1);
 	    trade_block_flat[i] = 0xFF;
 	}
     }
-    plist_append(patch_list, 0xFF);
+    plist_append(trade->patch_list, 0xFF);
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -788,7 +787,7 @@ void trade_exit_callback(void* context) {
     /* Stop the timer, and deallocate it as the enter callback allocates it on entry */
     furi_timer_free(trade->draw_timer);
 
-    plist_free(patch_list);
+    plist_free(trade->patch_list);
 }
 
 void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view) {
@@ -822,6 +821,8 @@ void trade_free(void* context) {
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
 
     disconnect_pin(&GAME_BOY_CLK);
+
+    plist_free(trade->patch_list);
 
     view_free_model(trade->view);
     view_free(trade->view);
