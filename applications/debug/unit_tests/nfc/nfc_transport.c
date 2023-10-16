@@ -449,4 +449,10 @@ NfcError nfc_iso14443a_poller_trx_sdd_frame(
     return nfc_poller_trx(instance, tx_buffer, rx_buffer, fwt);
 }
 
+NfcError nfc_iso15693_listener_tx_sof(Nfc* instance) {
+    UNUSED(instance);
+
+    return NfcErrorNone;
+}
+
 #endif

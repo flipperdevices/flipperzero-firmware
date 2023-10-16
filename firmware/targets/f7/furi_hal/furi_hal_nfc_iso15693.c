@@ -400,6 +400,12 @@ static FuriHalNfcError furi_hal_nfc_iso15693_listener_tx(
     return error;
 }
 
+FuriHalNfcError furi_hal_nfc_iso15693_listener_tx_sof() {
+    iso15693_signal_tx_sof(furi_hal_nfc_iso15693_listener->signal, Iso15693SignalDataRateHi);
+
+    return FuriHalNfcErrorNone;
+}
+
 static FuriHalNfcError furi_hal_nfc_iso15693_listener_rx(
     FuriHalSpiBusHandle* handle,
     uint8_t* rx_data,
