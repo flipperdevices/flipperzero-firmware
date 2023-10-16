@@ -33,6 +33,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-15 21:13 EST`
 - Updated: [XRemote v1.0.6 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
+- UL: SubGHz: Add 4 more systems to Add Manually (untested!)
+- UL: SubGHz: Add Manually fixes
+- UL: Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Android Device is Reboot Cooldown vs ~15min
 
 <a name="release">
 
