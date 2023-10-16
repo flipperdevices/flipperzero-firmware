@@ -102,6 +102,7 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
   FOCUS_CONSOLE_START,
   NO_TIP,
   false},
+  {"Purge Strategy", {"Set"}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, true},
   {"BLE Purge Strategy",
   {"Get", "Set"},
   2,
@@ -135,6 +136,8 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
         //newScene = UART_TerminalSceneSettingsGet;
     } else if (!strcmp(item->item_string, "Set")) {
         //newScene = UART_TerminalSceneSettingsSet;
+    } else if (!strcmp(item->item_string, "Purge Strategy")) {
+        newScene = UART_TerminalScenePurge;
     }
     if (newScene < 0) {
         return;

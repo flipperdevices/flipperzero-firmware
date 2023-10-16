@@ -59,17 +59,27 @@ UART_TerminalItem targets[NUM_TARGET_ITEMS] = {
   NO_TIP,
   false},
   {"Purge",
-  {"AP", "STA", "BT", "BLE"},
-  4,
-  {"purge ap", "purge sta", "purge bt", "purge ble"},
+  {""},
+  1,
+  {""},
   NO_ARGS,
   FOCUS_CONSOLE_END,
   NO_TIP,
-  false},
+  true},
 };
 
 static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
     /* As of writing there are no submenus in Targets */
+    int newScene = -1;
+    if (!strcmp(item->item_string, "Purge")) {
+        newScene = UART_TerminalScenePurge;
+    }
+    if (newScene < 0) {
+        return;
+    }
+    scene_manager_set_scene_state(
+        app->scene_manager, UART_TerminalSceneTargets, app->selected_menu_index);
+    scene_manager_next_scene(app->scene_manager, newScene);
 }
 
 /* Callback when an option is selected */
