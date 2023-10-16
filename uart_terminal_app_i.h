@@ -27,6 +27,7 @@
 #define NUM_ATTACK_ITEMS (4)
 #define NUM_ATTACK_MANA_ITEMS (5)
 #define NUM_SETTINGS_ITEMS (15)
+#define NUM_PURGE_ITEMS (7)
 #define MAX_MENU_STR_LEN (12)
 
 #define UART_TERMINAL_TEXT_BOX_STORE_SIZE (1024)
@@ -48,6 +49,7 @@ typedef enum {
   GRAVITY_MENU_SETTINGS,
   GRAVITY_MENU_HELP,
   GRAVITY_MENU_HELP_INFO,
+  GRAVITY_MENU_PURGE,
 } GravityMenu;
 
 char *strToken(char *cmdLine, char sep, int tokenNum);
@@ -66,7 +68,8 @@ struct UART_TerminalApp {
     VariableItemList *main_menu_list, *targets_menu_list, *packets_menu_list;
     VariableItemList *attacks_menu_list, *settings_menu_list, *help_menu_list;
     VariableItemList *packets_deauth_menu_list, *packets_fuzz_menu_list;
-    VariableItemList *help_info_menu_list, *targets_scan_menu_list, *attacks_mana_menu_list;
+    VariableItemList *help_info_menu_list, *targets_scan_menu_list;
+    VariableItemList *attacks_mana_menu_list, *purge_menu_list;
 
     UART_TerminalUart* uart;
     int selected_menu_index;
@@ -98,6 +101,7 @@ typedef enum {
     Gravity_AppViewSettingsMenu,
     Gravity_AppViewHelpMenu,
     Gravity_AppViewHelpInfoMenu,
+    Gravity_AppViewPurgeMenu,
 } UART_TerminalAppView;
 
 // For each command, define whether additional arguments are needed
@@ -110,7 +114,7 @@ typedef enum { FOCUS_CONSOLE_END = 0, FOCUS_CONSOLE_START, FOCUS_CONSOLE_TOGGLE 
 #define SHOW_STOPSCAN_TIP (true)
 #define NO_TIP (false)
 
-#define MAX_OPTIONS (15)
+#define MAX_OPTIONS (24)
 typedef struct {
     const char* item_string;
     const char* options_menu[MAX_OPTIONS];

@@ -74,6 +74,9 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     app->help_info_menu_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewHelpInfoMenu,
             variable_item_list_get_view(app->help_info_menu_list));
+    app->purge_menu_list = variable_item_list_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewPurgeMenu,
+            variable_item_list_get_view(app->purge_menu_list));
 
 
     for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
@@ -116,6 +119,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewSettingsMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewHelpMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewHelpInfoMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPurgeMenu);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
     uart_text_input_free(app->text_input);
