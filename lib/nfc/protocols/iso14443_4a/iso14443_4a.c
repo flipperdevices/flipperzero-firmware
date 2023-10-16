@@ -239,7 +239,7 @@ uint32_t iso14443_4a_get_fwt_fc_max(const Iso14443_4aData* data) {
         if(!(data->ats_data.t0 & ISO14443_4A_ATS_T0_TB1)) break;
 
         const uint8_t fwi = data->ats_data.tb_1 >> 4;
-        if(fwi >= 15) break;
+        if(fwi == 0x0F) break;
 
         fwt_fc_max = 4096UL << fwi;
     } while(false);
