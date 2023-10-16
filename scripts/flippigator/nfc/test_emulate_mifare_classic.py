@@ -16,9 +16,9 @@ class TestEmulateClassic:
         nav.nfc.go_into()
         nav.go_to("Saved")
         nav.press_ok()
-        nav.go_to("T_mfc_4k7", direction="up")
         menu_items = nav.get_menu_list()
-        if "T_mfc_4k7" in menu_items:
+        if "browser_T_mfc_4k7" in menu_items:
+            nav.go_to("browser_T_mfc_4k7", direction="up")
             nav.press_ok()
             nav.go_to("Delete", direction="up")
             nav.press_ok()
@@ -47,9 +47,9 @@ class TestEmulateClassic:
         nav.nfc.go_into()
         nav.go_to("Saved")
         nav.press_ok()
-        nav.go_to("T_mfc_4k7", direction="up")
         menu_items = nav.get_menu_list()
-        if "T_mfc_4k7" in menu_items:
+        if "browser_T_mfc_4k7" in menu_items:
+            nav.go_to("browser_T_mfc_4k7", direction="up")
             nav.press_ok()
             nav.go_to("Delete", direction="up")
             nav.press_ok()
