@@ -42,19 +42,21 @@ bool tea5767_is_device_ready() {
 }
 
 bool tea5767_read_registers(uint8_t* buffer) {
-    if(buffer == NULL) return false;
+    if (buffer == NULL) return false;
     bool result = acquire_i2c();
-    if(result) {result =furi_hal_i2c_rx(&furi_hal_i2c_handle_external, TEA5767_ADR, buffer, 5, TIMEOUT_MS);}
+    if(result) {
+        result = furi_hal_i2c_rx(&furi_hal_i2c_handle_external, TEA5767_ADR, buffer, 5, TIMEOUT_MS);
+    }
     release_i2c();
     return result;
 }
 
 bool tea5767_write_registers(uint8_t* buffer) {
     bool result = false;
-    if(buffer == NULL) return false; // Added NULL check
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    result = furi_hal_i2c_tx(&furi_hal_i2c_handle_external, TEA5767_ADR, buffer, 5, TIMEOUT_MS);
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+    if (buffer == NULL) return false;  // Added NULL check
+        furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
+        result = furi_hal_i2c_tx(&furi_hal_i2c_handle_external, TEA5767_ADR, buffer, 5, TIMEOUT_MS);
+        furi_hal_i2c_release(&furi_hal_i2c_handle_external);
     return result;
 }
 
@@ -98,30 +100,28 @@ bool tea5767_set_stereo(uint8_t* buffer, bool stereo) {
 }
 
 bool tea5767_seek(uint8_t* buffer, bool seek_up) {
-    bool result = false;    
-    if(buffer == NULL) {return false;}
-    
-    buffer[REG_1] |= REG_1_SM; // Set the Search Mode (SM) bit to initiate seek    
-    if(seek_up) {buffer[REG_3] |= REG_3_SUD;} // Set Search Up (SUD) bit    
-    else {buffer[REG_3] &= ~REG_3_SUD; } // Set Search Down (SUD) bit       
+    bool result = false;
+    if (buffer == NULL) {return false;} 
+    buffer[REG_1] |= REG_1_SM;    // Set the Search Mode (SM) bit to initiate seek
+    if(seek_up) {    
+        buffer[REG_3] |= REG_3_SUD;  // Set Search Up (SUD) bit
+    } else {
+        buffer[REG_3] &= ~REG_3_SUD;  // Set Search Down (SUD) bit 
+    }
     buffer[REG_3] |= (REG_3_SSL | 0x60); // Set the Search Stop Level (SSL) to high for better tuning accuracy,  set bit 7 for RSSI 7
-    buffer[REG_3] &= ~REG_3_MS; // Set stereo mode (clearing the Mono bit)
-    //buffer[REG_3] |= REG_4_SNC; // Set the Stereo Noise Cancelling (SNC) bit to 1 to reduce noise in stereo reception
-    buffer[REG_4] &= ~REG_4_STBY; // Clear the Standby bit in register 4 to exit standby mode
-    buffer[REG_4] &= ~REG_4_BL; // Limit FM band 87.5 - 108 MHz.        
-    buffer[REG_5] |= REG_5_PLLREF;  // Set the PLLREF bit to 1 to enable the 6.5 MHz reference frequency for the PLL
-    buffer[REG_5] |= REG_5_DTC;     // Set the De-emphasis Time Constant (DTC) bit to 1 for 75 µs
-    
+    buffer[REG_3] &= ~REG_3_MS;  // Set stereo mode (clearing the Mono bit)   
+    buffer[REG_4] &= ~REG_4_BL;   // Limit FM band 87.5 - 108 MHz.        
+    buffer[REG_5] |= REG_5_PLLREF;
     // Write the updated register values to the TEA5767
     result = tea5767_write_registers(buffer);
-    return result;
+    return result;    
 }
 
 bool tea5767_get_frequency(uint8_t* buffer, int* value) {
     bool result = false;
     uint16_t frequency;
-    if(buffer == NULL || value == NULL) return false; //NULL check
-    if(tea5767_read_registers(buffer)) {
+    if (buffer == NULL || value == NULL) return false;  //NULL check
+    if (tea5767_read_registers(buffer)) {
         frequency = ((buffer[REG_1] & REG_1_PLL) << 8) | buffer[1];
         *value = (frequency * QUARTZ / 4 - FILTER) / 10000;
         result = true;
@@ -131,30 +131,24 @@ bool tea5767_get_frequency(uint8_t* buffer, int* value) {
 
 bool tea5767_set_frequency(uint8_t* buffer, int value) {
     bool result = false;
-    if(buffer == NULL) {return false;}
+    if (buffer == NULL) {return false;}
     uint16_t frequency = 4 * (value * 10000 + FILTER) / QUARTZ;
-
-    buffer[REG_1] = ((buffer[0] & ~REG_1_PLL) | ((frequency >> 8) & REG_1_PLL)); // Set the upper 8 bits of the PLL word
-    buffer[REG_2] = frequency & REG_2_PLL; // Set the lower 8 bits of the PLL word
-    buffer[REG_1] &= ~REG_1_MUTE; // Clear the Mute bit in register 1
-    buffer[REG_3] &= ~REG_3_MS;   // Set stereo mode (clearing the Mono bit)
-    //buffer[REG_3] |= REG_4_SNC; // Set the Stereo Noise Cancelling (SNC) bit to 1 to reduce noise in stereo reception
-    buffer[REG_4] &= ~REG_4_STBY; // Clear the Standby bit in register 4 to exit standby mode
-    buffer[REG_4] &= ~REG_4_BL;   // Limit FM band 87.5 - 108 MHz.
-    buffer[REG_5] |= REG_5_PLLREF;  // Set the PLLREF bit to 1 to enable the 6.5 MHz reference frequency for the PLL
-    buffer[REG_5] |= REG_5_DTC;     // Set the De-emphasis Time Constant (DTC) bit to 1 for 75 µs
-
+    buffer[REG_1] = ((buffer[0] & ~REG_1_PLL) | ((frequency >> 8) & REG_1_PLL));  // Set the upper 8 bits of the PLL word
+    buffer[REG_2] = frequency & REG_2_PLL;  // Set the lower 8 bits of the PLL word
+    buffer[REG_3] &= ~REG_3_MS;  // Set stereo mode (clearing the Mono bit)   
+    buffer[REG_5] |= REG_5_PLLREF;
     result = tea5767_write_registers(buffer);
     return result;
 }
 
 bool tea5767_get_radio_info(uint8_t* buffer, struct RADIO_INFO* info) {
     bool result = false;
-    int frequency_khz;
+    int frequency_khz; 
 
     // Error handling: Check if buffer and info are not NULL
-    if(buffer && info && tea5767_read_registers(buffer)) {
-        if(buffer[REG_3] & REG_3_MS) {
+    if (buffer && info && tea5767_read_registers(buffer)) {
+        
+        if (buffer[REG_3] & REG_3_MS) {
             info->stereo = true;
         } else {
             info->stereo = false;
@@ -163,41 +157,42 @@ bool tea5767_get_radio_info(uint8_t* buffer, struct RADIO_INFO* info) {
         info->signalLevel = buffer[REG_4] >> 4;
 
         // Determine signal quality based on signal level
-        if(info->signalLevel >= 0 && info->signalLevel <= 3) {
+        if (info->signalLevel >= 0 && info->signalLevel <= 3) {
             strncpy(info->signalQuality, "Poor", sizeof(info->signalQuality));
-        } else if(info->signalLevel >= 4 && info->signalLevel <= 7) {
+        } else if (info->signalLevel >= 4 && info->signalLevel <= 7) {
             strncpy(info->signalQuality, "Fair", sizeof(info->signalQuality));
-        } else if(info->signalLevel >= 8 && info->signalLevel <= 11) {
+        } else if (info->signalLevel >= 8 && info->signalLevel <= 11) {
             strncpy(info->signalQuality, "Good", sizeof(info->signalQuality));
-        } else if(info->signalLevel >= 12 && info->signalLevel <= 15) {
+        } else if (info->signalLevel >= 12 && info->signalLevel <= 15) {
             strncpy(info->signalQuality, "Excellent", sizeof(info->signalQuality));
         } else {
             strncpy(info->signalQuality, "Unknown", sizeof(info->signalQuality));
         }
 
         // Now get the frequency
-        if(tea5767_get_frequency(buffer, &frequency_khz)) {
-            info->frequency = frequency_khz / 100.0f; // Convert kHz to MHz
-            result = true; // Only return true if both read_registers and get_frequency succeeded
+        if (tea5767_get_frequency(buffer, &frequency_khz)) {
+            info->frequency = frequency_khz / 100.0f;  // Convert kHz to MHz
+            result = true;  // Only return true if both read_registers and get_frequency succeeded
         }
 
-        // Check if the radio is muted
-        if(buffer[REG_1] & REG_1_MUTE) {
+         // Check if the radio is muted
+        if (buffer[REG_1] & REG_1_MUTE) {
             info->muted = true;
         } else {
             info->muted = false;
         }
+
     }
     return result;
 }
 
-void tea5767_seekUp() {
+void tea5767_seekUp() {    
     //Get CUrrent Station
     double fm_frequency = tea5767_GetFreq();
     int targetFrequencyKHz = fm_frequency * 100;
-
+        
     uint8_t buffer[5];
-    if(tea5767_init(buffer)) {
+    if(tea5767_init(buffer)) { 
         tea5767_set_frequency(buffer, targetFrequencyKHz);
         // Start seeking upwards
         tea5767_seek(buffer, true);
@@ -205,12 +200,12 @@ void tea5767_seekUp() {
 }
 
 void tea5767_seekDown() {
-    //Get CUrrent Station
+        //Get CUrrent Station
     double fm_frequency = tea5767_GetFreq();
-    int targetFrequencyKHz = fm_frequency * 100;
-
+    int targetFrequencyKHz = fm_frequency * 100;     
+    
     uint8_t buffer[5];
-    if(tea5767_init(buffer)) {
+    if(tea5767_init(buffer)) {   
         tea5767_set_frequency(buffer, targetFrequencyKHz);
         // Start seeking upwards
         tea5767_seek(buffer, false);
@@ -230,34 +225,34 @@ void tea5767_ToggleMute() {
 
 void tea5767_MuteOn() {
     uint8_t buffer[5];
-    if(tea5767_read_registers(buffer)) { // Read the current state into the buffer
-        tea5767_set_mute(buffer, true); // Set the mute bit
+    if(tea5767_read_registers(buffer)) {  // Read the current state into the buffer
+        tea5767_set_mute(buffer, true);  // Set the mute bit
     }
 }
 
 void tea5767_MuteOff() {
     uint16_t frequency;
-    float value; // Changed to a float variable, not a pointer
+    float value;  // Changed to a float variable, not a pointer
     uint8_t buffer[5];
-    if(tea5767_read_registers(buffer)) { // Read the current state into the buffer
-        tea5767_set_mute(buffer, false); // Clear the mute bit
+    if (tea5767_read_registers(buffer)) {  // Read the current state into the buffer
+        tea5767_set_mute(buffer, false);  // Clear the mute bit
         frequency = ((buffer[0] & REG_1_PLL) << 8) | buffer[1];
-        value = (float)(frequency * QUARTZ / 4 - FILTER) / 10000; // Explicitly cast to float
-        tea5767_SetFreqMHz(value / 100.0); // Pass the float value, not the pointer
+        value = (float)(frequency * QUARTZ / 4 - FILTER) / 10000;  // Explicitly cast to float
+        tea5767_SetFreqMHz(value/ 100.0);  // Pass the float value, not the pointer
     }
 }
 
-void tea5767_SetFreqKHz(int freq_khz) {
+void tea5767_SetFreqKHz(int freq_khz) { 
     uint8_t buffer[5];
-    if(tea5767_init(buffer)) {
+    if (tea5767_init(buffer)) {
         tea5767_set_frequency(buffer, freq_khz);
     }
 }
 
-void tea5767_SetFreqMHz(float freq_mhz) {
+void tea5767_SetFreqMHz(float freq_mhz) { 
     uint8_t buffer[5];
-    if(tea5767_init(buffer)) {
-        int freq_khz = (int)(freq_mhz * 100.0); // Convert MHz to kHz
+    if (tea5767_init(buffer)) {
+        int freq_khz = (int)(freq_mhz * 100.0);  // Convert MHz to kHz
         tea5767_set_frequency(buffer, freq_khz);
     }
 }
@@ -266,13 +261,13 @@ float tea5767_GetFreq() {
     uint8_t buffer[5];
     int value;
     if(tea5767_get_frequency(buffer, &value)) {
-        return value / 100.0; // Convert to MHz
+        return value / 100.0;  // Convert to MHz
     }
-    return -1; // Error
+    return -1;  // Error
 }
 
-void tea5767_sleep(uint8_t* buffer) {
-    if(tea5767_read_registers(buffer)) {
+void tea5767_sleep(uint8_t *buffer) {
+    if(tea5767_read_registers(buffer)) {        
         buffer[REG_4] |= REG_4_STBY; // Set the Standby bit in register 4 to enter standby mode
         tea5767_write_registers(buffer);
     }
