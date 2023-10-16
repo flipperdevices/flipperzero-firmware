@@ -43,11 +43,13 @@ UART_TerminalItem attacks_mana[NUM_ATTACK_MANA_ITEMS] = {
   {"Clear Mana Cache", {""}, 1, {"clear"}, TOGGLE_ARGS, FOCUS_CONSOLE_START, NO_TIP, false}
 };
 
-#define MANA_MENU_AUTH 0
-#define MANA_MENU_MODE 1
-#define MANA_MENU_VERBOSE 2
-#define MANA_MENU_RUN 3
-#define MANA_MENU_CLEAR 4
+enum ManaMenuItems {
+    MANA_MENU_AUTH = 0,
+    MANA_MENU_MODE,
+    MANA_MENU_VERBOSE,
+    MANA_MENU_RUN,
+    MANA_MENU_CLEAR,
+};
 
 /* Callback when an option is selected */
 static void uart_terminal_scene_attacks_mana_var_list_enter_callback(void* context, uint32_t index) {

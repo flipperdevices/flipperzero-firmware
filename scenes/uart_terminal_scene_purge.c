@@ -41,13 +41,15 @@ UART_TerminalItem purgeMenu[NUM_PURGE_ITEMS] = {
   false}
 };
 
-#define PURGE_MENU_AGE 0
-#define PURGE_MENU_RSSI 1
-#define PURGE_MENU_AGE_ON 2
-#define PURGE_MENU_RSSI_ON 3
-#define PURGE_MENU_UNSELECTED_ON 4
-#define PURGE_MENU_UNNAMED_ON 5
-#define PURGE_MENU_RUN 6
+enum PurgeMenuItems {
+    PURGE_MENU_AGE = 0,
+    PURGE_MENU_RSSI,
+    PURGE_MENU_AGE_ON,
+    PURGE_MENU_RSSI_ON,
+    PURGE_MENU_UNSELECTED_ON,
+    PURGE_MENU_UNNAMED_ON,
+    PURGE_MENU_RUN,
+};
 
 /* Callback when an option is selected */
 static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uint32_t index) {

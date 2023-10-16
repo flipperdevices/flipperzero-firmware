@@ -28,9 +28,11 @@ UART_TerminalItem packets_deauth[NUM_PACKETS_DEAUTH_ITEMS] = {
   false}
 };
 
-#define DEAUTH_MENU_MAC 0
-#define DEAUTH_MENU_TARGET 1
-#define DEAUTH_MENU_RUN 2
+enum DeauthMenuItems {
+    DEAUTH_MENU_MAC = 0,
+    DEAUTH_MENU_TARGET,
+    DEAUTH_MENU_RUN,
+};
 
 /* Callback when an option is selected */
 static void uart_terminal_scene_packets_deauth_var_list_enter_callback(void* context, uint32_t index) {

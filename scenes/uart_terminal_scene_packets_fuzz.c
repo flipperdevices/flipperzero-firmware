@@ -36,10 +36,12 @@ UART_TerminalItem packets_fuzz[NUM_PACKETS_FUZZ_ITEMS] = {
   false},
 };
 
-#define FUZZ_MENU_PACKET_TYPE 0
-#define FUZZ_MENU_FUZZ_TYPE 1
-#define FUZZ_MENU_TARGET 2
-#define FUZZ_MENU_RUN 3
+enum FuzzMenuItems {
+    FUZZ_MENU_PACKET_TYPE = 0,
+    FUZZ_MENU_FUZZ_TYPE,
+    FUZZ_MENU_TARGET,
+    FUZZ_MENU_RUN,
+};
 
 /* Callback when an option is selected */
 static void uart_terminal_scene_packets_fuzz_var_list_enter_callback(void* context, uint32_t index) {

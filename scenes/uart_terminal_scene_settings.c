@@ -127,25 +127,7 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
   NO_TIP,
   false}
 };
-/*
-  {"Get",
-  {"pkt expiry", "SSID rnd chars", "Attack millis", "SSID min len", "SSID max len", "default SSID count", "Channel", "MAC", "MAC Randomisation", "Purge Strategy", "Purge Min Age", "Purge Max RSSI"},
-  12,
-  {"get expiry", "get scramble_words", "get attack_millis", "get ssid_len_min", "get ssid_len_max", "get default_ssid_count", "get channel", "get mac", "get mac_rand", "get ble_purge_strat", "get ble_purge_min_age", "get ble_purge_max_rssi"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Set",
-  {"pkt expiry", "SSID rnd chars", "Attack millis", "SSID min len", "SSID max len", "default SSID count", "Channel", "MAC", "MAC Randomisation", "Purge Strategy", "Purge Min Age", "Purge Max RSSI"},
-  12,
-  {"set expiry ", "set scramble_words ", "set attack_millis ", "set ssid_len_min ", "set ssid_len_max ", "set default_ssid_count ", "set channel ", "set mac ", "set mac_rand ", "set BLE_PURGE_STRAT ", "set BLE_PURGE_MIN_AGE ", "set BLE_PURGE_MAX_RSSI "},
-  INPUT_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false}
-};
-*/
+
 static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
     int newScene = -1;
     if (!strcmp(item->item_string, "Get")) {
