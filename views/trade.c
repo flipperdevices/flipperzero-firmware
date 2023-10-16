@@ -793,7 +793,7 @@ void trade_exit_callback(void* context) {
     plist_free(patch_list);
 }
 
-void* trade_alloc(TradeBlock* trade_block, PokemonTable* table, View* view) {
+void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view) {
     furi_assert(trade_block);
     furi_assert(view);    
 
