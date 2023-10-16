@@ -48,7 +48,7 @@ static St25tbError st25tb_poller_frame_exchange(
         NfcError error =
             nfc_poller_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
         if(error != NfcErrorNone) {
-            FURI_LOG_E(TAG, "error during trx: %d", error);
+            FURI_LOG_D(TAG, "error during trx: %d", error);
             ret = st25tb_poller_process_error(error);
             break;
         }
