@@ -491,9 +491,6 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         break;
 
     /* This is where we get the data from gameboy that is their trade struct */
-    /* XXX: The current implementation ends up stopping short of sending data from flipper
-     * and instead mirrors back data from the gameboy before we have technically sent our
-     * whole struct */
     case SENDING_DATA:
         input_block_flat[counter] = in;
         send = trade_block_flat[counter];
@@ -503,7 +500,6 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
             trade->trade_centre_state = SENDING_PATCH_DATA;
 	break;
 
-    /* XXX: I still have no idea what patch data is in context of the firmware */
     /* XXX: This seems to end with the gameboy sending DF FE 15? */
 
     /* A couple of FD bytes are sent, looks like 6, which means I don't think we can use count of FD bytes to see what mode we're in */
@@ -522,9 +518,10 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
             }
 
             counter++;
-	    /* This is actually 200 bytes */
-	    /* XXX: Interestingly, it does appear to actually be 197 bytes from the first 00 after trade block, minus FFs, to the last 00 sent before long delay */
-            if(counter == 197) // TODO: What is this magic value?
+	    /* This is actually 200 bytes, but that includes the 3x 0xFD that we
+	     * sent without counting.
+	     */
+            if(counter == 197)
                 trade->trade_centre_state = TRADE_PENDING;
         }
         break;
@@ -563,7 +560,6 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         }
         break;
 
-    /* XXX: I think at this point, we're just mirroring data back out so that is why the flipper now reports the same data as the gameboy */
     case DONE:
         if(in == 0x00) {
             send = 0;
@@ -596,8 +592,7 @@ void transferBit(void* context) {
     furi_assert(context);
 
     struct trade_ctx* trade = (struct trade_ctx*)context;
-    static uint8_t
-        out_data; // XXX: If we need to clear this between runs of trade view, this needs to be moved to Trade
+    static uint8_t out_data;
     bool connected;
     bool trading;
 
@@ -615,13 +610,12 @@ void transferBit(void* context) {
         false);
 
     /* Shift data in every clock */
-    /* XXX: This logic can be made a little more clear I think.
-     * Its just shifting a bit in at a time, doesn't need the clever shifting maths */
-    uint8_t raw_data = furi_hal_gpio_read(&GAME_BOY_SI);
-    trade->in_data |= raw_data << (7 - trade->shift);
+    trade->in_data <<= 1;
+    trade->in_data |= !!furi_hal_gpio_read(&GAME_BOY_SI);
+    trade->shift++;
 
     /* Once a byte of data has been shifted in, process it */
-    if(++trade->shift > 7) {
+    if(trade->shift > 7) {
         trade->shift = 0;
         switch(trade->connection_state) {
         case NOT_CONNECTED:
