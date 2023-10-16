@@ -77,7 +77,7 @@ static bool nfc_scene_saved_menu_on_event_st25tb(NfcApp* instance, uint32_t even
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_st25tb = {
-    .features = NfcProtocolFeatureNone, // TODO: Implement better UID editing,
+    .features = NfcProtocolFeatureNone,
 
     .scene_info =
         {
