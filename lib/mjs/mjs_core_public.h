@@ -55,6 +55,33 @@ extern "C" {
 
 typedef uint64_t mjs_val_t;
 
+/*
+ * A tag is made of the sign bit and the 4 lower order bits of byte 6.
+ * So in total we have 32 possible tags.
+ *
+ * Tag (1,0) however cannot hold a zero payload otherwise it's interpreted as an
+ * INFINITY; for simplicity we're just not going to use that combination.
+ */
+#define MAKE_TAG(s, t) ((uint64_t)(s) << 63 | (uint64_t)0x7ff0 << 48 | (uint64_t)(t) << 48)
+
+#define MJS_TAG_OBJECT MAKE_TAG(1, 1)
+#define MJS_TAG_FOREIGN MAKE_TAG(1, 2)
+#define MJS_TAG_UNDEFINED MAKE_TAG(1, 3)
+#define MJS_TAG_BOOLEAN MAKE_TAG(1, 4)
+#define MJS_TAG_NAN MAKE_TAG(1, 5)
+#define MJS_TAG_STRING_I MAKE_TAG(1, 6) /* Inlined string len < 5 */
+#define MJS_TAG_STRING_5 MAKE_TAG(1, 7) /* Inlined string len 5 */
+#define MJS_TAG_STRING_O MAKE_TAG(1, 8) /* Owned string */
+#define MJS_TAG_STRING_F MAKE_TAG(1, 9) /* Foreign string */
+#define MJS_TAG_STRING_C MAKE_TAG(1, 10) /* String chunk */
+#define MJS_TAG_STRING_D MAKE_TAG(1, 11) /* Dictionary string  */
+#define MJS_TAG_ARRAY MAKE_TAG(1, 12)
+#define MJS_TAG_FUNCTION MAKE_TAG(1, 13)
+#define MJS_TAG_FUNCTION_FFI MAKE_TAG(1, 14)
+#define MJS_TAG_NULL MAKE_TAG(1, 15)
+
+#define MJS_TAG_MASK MAKE_TAG(1, 15)
+
 /* This if-0 is a dirty workaround to force etags to pick `struct mjs` */
 #if 0
 /* Opaque structure. MJS engine context. */
@@ -64,6 +91,26 @@ struct mjs {
 #endif
 
 struct mjs;
+
+enum mjs_type {
+    /* Primitive types */
+    MJS_TYPE_UNDEFINED,
+    MJS_TYPE_NULL,
+    MJS_TYPE_BOOLEAN,
+    MJS_TYPE_NUMBER,
+    MJS_TYPE_STRING,
+    MJS_TYPE_FOREIGN,
+
+    /* Different classes of Object type */
+    MJS_TYPE_OBJECT_GENERIC,
+    MJS_TYPE_OBJECT_ARRAY,
+    MJS_TYPE_OBJECT_FUNCTION,
+    /*
+   * TODO(dfrank): if we support prototypes, need to add items for them here
+   */
+
+    MJS_TYPES_CNT
+};
 
 typedef enum mjs_err {
     MJS_OK,
@@ -87,17 +134,6 @@ struct mjs;
 
 /* Create MJS instance */
 struct mjs* mjs_create(void* context);
-
-struct mjs_create_opts {
-    /* use non-default bytecode definition file, testing-only */
-    const struct bf_code* code;
-};
-
-/*
- * Like `msj_create()`, but allows to customize initial MJS state, see `struct
- * mjs_create_opts`.
- */
-struct mjs* mjs_create_opt(struct mjs_create_opts opts);
 
 /* Destroy MJS instance */
 void mjs_destroy(struct mjs* mjs);
@@ -186,6 +222,8 @@ void mjs_exit(struct mjs* mjs);
 
 void mjs_set_flags_poller(struct mjs* mjs, mjs_flags_poller_t poller);
 
+void* mjs_get_context(struct mjs* mjs);
+
 /*
  * If there is no error message already set, then it's equal to
  * `mjs_set_errorf()`.
@@ -207,6 +245,8 @@ void mjs_print_error(struct mjs* mjs, FILE* fp, const char* msg, int print_stack
  * the error string might be overwritten by calls to `mjs_set_errorf`.
  */
 const char* mjs_strerror(struct mjs* mjs, enum mjs_err err);
+
+const char* mjs_get_stack_trace(struct mjs* mjs);
 
 /*
  * Sets whether *.jsc files are generated when *.js file is executed. By

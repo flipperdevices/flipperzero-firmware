@@ -43,6 +43,25 @@ int mjs_get_lineno_by_offset(struct mjs* mjs, int offset);
  */
 int mjs_get_offset_by_call_frame_num(struct mjs* mjs, int cf_num);
 
+/*
+ * Tries to convert `mjs_val_t` to a string, returns MJS_OK if successful.
+ * String is returned as a pair of pointers: `char **p, size_t *sizep`.
+ *
+ * Caller must also provide a non-null `need_free`, and if it is non-zero,
+ * then the string `*p` should be freed by the caller.
+ *
+ * MJS does not support `toString()` and `valueOf()`, so, passing an object
+ * always results in `MJS_TYPE_ERROR`.
+ */
+mjs_err_t mjs_to_string(struct mjs* mjs, mjs_val_t* v, char** p, size_t* sizep, int* need_free);
+
+/*
+ * Converts value to boolean as in the expression `if (v)`.
+ */
+mjs_val_t mjs_to_boolean_v(struct mjs* mjs, mjs_val_t v);
+
+int mjs_is_truthy(struct mjs* mjs, mjs_val_t v);
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

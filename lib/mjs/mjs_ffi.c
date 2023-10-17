@@ -44,6 +44,13 @@ void mjs_set_ffi_resolver(struct mjs* mjs, mjs_ffi_resolver_t* dlsym, void* hand
     mjs->dlsym_handle = handle;
 }
 
+void* mjs_ffi_resolve(struct mjs* mjs, const char* symbol) {
+    if(mjs->dlsym) {
+        return mjs->dlsym(mjs->dlsym_handle, symbol);
+    }
+    return NULL;
+}
+
 static mjs_ffi_ctype_t parse_cval_type(struct mjs* mjs, const char* s, const char* e) {
     struct mg_str ms = MG_NULL_STR;
     /* Trim leading and trailing whitespace */

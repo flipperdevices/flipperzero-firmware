@@ -26,6 +26,7 @@
         "assets",
         "one_wire",
         "music_worker",
+        "mjs",
         "misc",
         "flipper_application",
         "flipperformat",

@@ -129,6 +129,19 @@ void cs_log_set_file(FILE* file) {
 
 #else
 
+int cs_log_print_prefix(enum cs_log_level level, const char* file, int ln) WEAK;
+int cs_log_print_prefix(enum cs_log_level level, const char* file, int ln) {
+    (void)level;
+    (void)file;
+    (void)ln;
+    return 0;
+}
+
+void cs_log_printf(const char* fmt, ...) WEAK;
+void cs_log_printf(const char* fmt, ...) {
+    (void)fmt;
+}
+
 void cs_log_set_file_level(const char* file_level) {
     (void)file_level;
 }

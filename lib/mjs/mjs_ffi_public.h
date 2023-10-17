@@ -31,6 +31,8 @@ typedef void*(mjs_ffi_resolver_t)(void* handle, const char* symbol);
 
 void mjs_set_ffi_resolver(struct mjs* mjs, mjs_ffi_resolver_t* dlsym, void* handle);
 
+void* mjs_ffi_resolve(struct mjs* mjs, const char* symbol);
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

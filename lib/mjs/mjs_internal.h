@@ -25,6 +25,8 @@
 #define ENDL "\n"
 #endif
 
+#define MJS_EXPOSE_PRIVATE // TODO:
+
 #ifdef MJS_EXPOSE_PRIVATE
 #define MJS_PRIVATE
 #define MJS_EXTERN extern

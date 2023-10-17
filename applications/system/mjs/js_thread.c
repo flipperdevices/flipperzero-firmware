@@ -24,86 +24,6 @@ typedef enum {
     ThreadEventTest = (1 << 1),
 } WorkerEventFlags;
 
-// static void obj_type(mjs_val_t v) {
-//     if(mjs_is_number(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_number");
-//     } else if(mjs_is_boolean(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_boolean");
-//     } else if(mjs_is_string(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_string");
-//     } else if(mjs_is_array(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_array");
-//     } else if(mjs_is_object(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_object");
-//     } else if(mjs_is_foreign(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_foreign");
-//     } else if(mjs_is_function(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_function");
-//     } else if(mjs_is_null(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_null");
-//     } else if(mjs_is_undefined(v)) {
-//         FURI_LOG_I(TAG, "mjs_is_undefined");
-//     } else {
-//         FURI_LOG_I(TAG, "unknown");
-//     }
-// }
-
-// TODO: mjs fix
-void cs_log_printf(const char* fmt, ...) {
-    UNUSED(fmt);
-}
-
-// TODO: mjs fix
-int cs_log_print_prefix(enum cs_log_level level, const char* file, int ln) {
-    UNUSED(level);
-    UNUSED(file);
-    UNUSED(ln);
-    return 0;
-}
-
-char* cs_read_file(const char* path, size_t* size) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    Stream* stream = file_stream_alloc(storage);
-    char* data = NULL;
-    if(!file_stream_open(stream, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
-    } else {
-        *size = stream_size(stream);
-        data = (char*)malloc(*size + 1);
-        if(data != NULL) {
-            stream_rewind(stream);
-            if(stream_read(stream, (uint8_t*)data, *size) != *size) {
-                file_stream_close(stream);
-                furi_record_close(RECORD_STORAGE);
-                stream_free(stream);
-                free(data);
-                return NULL;
-            }
-            data[*size] = '\0';
-        }
-    }
-    file_stream_close(stream);
-    furi_record_close(RECORD_STORAGE);
-    stream_free(stream);
-    return data;
-}
-
-char* json_fread(const char* path) {
-    UNUSED(path);
-    return NULL;
-}
-
-int json_vfprintf(const char* file_name, const char* fmt, va_list ap) {
-    UNUSED(file_name);
-    UNUSED(fmt);
-    UNUSED(ap);
-    return 0;
-}
-
-int json_prettify_file(const char* file_name) {
-    UNUSED(file_name);
-    return 0;
-}
-
 static void mjs_str_print(FuriString* msg_str, struct mjs* mjs) {
     size_t num_args = mjs_nargs(mjs);
     for(size_t i = 0; i < num_args; i++) {
@@ -130,7 +50,7 @@ static void mjs_print(struct mjs* mjs) {
 
     printf("%s\r\n", furi_string_get_cstr(msg_str));
 
-    JsThread* worker = mjs->context;
+    JsThread* worker = mjs_get_context(mjs);
     furi_assert(worker);
     if(worker->app_callback) {
         worker->app_callback(JsThreadEventPrint, furi_string_get_cstr(msg_str), worker->context);
@@ -233,7 +153,7 @@ static void mjs_ffi_address(struct mjs* mjs) {
     mjs_val_t name_v = mjs_arg(mjs, 0);
     size_t len;
     const char* name = mjs_get_string(mjs, &name_v, &len);
-    void* addr = my_dlsym(mjs->dlsym_handle, name);
+    void* addr = mjs_ffi_resolve(mjs, name);
     mjs_return(mjs, mjs_mk_foreign(mjs, addr));
 }
 
@@ -245,7 +165,7 @@ static void mjs_require(struct mjs* mjs) {
     if((len == 0) || (name == NULL)) {
         mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "String argument is expected");
     } else {
-        JsThread* worker = mjs->context;
+        JsThread* worker = mjs_get_context(mjs);
         furi_assert(worker);
         req_object = js_module_require(worker->modules, name, len);
         if(req_object == MJS_UNDEFINED) {
@@ -278,7 +198,7 @@ static int32_t js_thread(void* arg) {
     composite_api_resolver_add(worker->resolver, application_api_interface);
 
     struct mjs* mjs = mjs_create(worker);
-    worker->modules = js_modules_create(mjs);
+    worker->modules = js_modules_create(mjs, worker->resolver);
     mjs_val_t global = mjs_get_global(mjs);
     mjs_set(mjs, global, "print", ~0, MFS_MK_FN(mjs_print));
     mjs_set(mjs, global, "delay", ~0, MFS_MK_FN(mjs_delay));
@@ -305,10 +225,11 @@ static int32_t js_thread(void* arg) {
         if(worker->app_callback) {
             worker->app_callback(JsThreadEventError, mjs_strerror(mjs, err), worker->context);
         }
-        if(mjs->stack_trace != NULL) {
-            FURI_LOG_E(TAG, "Stack trace:\n%s", mjs->stack_trace);
+        const char* stack_trace = mjs_get_stack_trace(mjs);
+        if(stack_trace != NULL) {
+            FURI_LOG_E(TAG, "Stack trace:\n%s", stack_trace);
             if(worker->app_callback) {
-                worker->app_callback(JsThreadEventErrorTrace, mjs->stack_trace, worker->context);
+                worker->app_callback(JsThreadEventErrorTrace, stack_trace, worker->context);
             }
         }
     } else {

@@ -39,6 +39,7 @@
         "one_wire",
         "ibutton",
         "music_worker",
+        "mjs",
         "misc",
         "mbedtls",
         "lfrfid",

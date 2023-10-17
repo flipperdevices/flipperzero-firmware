@@ -8,7 +8,6 @@
 
 #include "mjs_array.h"
 #include "mjs_bcode.h"
-#include "mjs_conversion.h"
 #include "mjs_core.h"
 #include "mjs_exec.h"
 #include "mjs_internal.h"

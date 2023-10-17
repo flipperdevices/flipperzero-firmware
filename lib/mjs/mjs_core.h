@@ -16,26 +16,6 @@ extern "C" {
 
 #define JUMP_INSTRUCTION_SIZE 2
 
-enum mjs_type {
-    /* Primitive types */
-    MJS_TYPE_UNDEFINED,
-    MJS_TYPE_NULL,
-    MJS_TYPE_BOOLEAN,
-    MJS_TYPE_NUMBER,
-    MJS_TYPE_STRING,
-    MJS_TYPE_FOREIGN,
-
-    /* Different classes of Object type */
-    MJS_TYPE_OBJECT_GENERIC,
-    MJS_TYPE_OBJECT_ARRAY,
-    MJS_TYPE_OBJECT_FUNCTION,
-    /*
-   * TODO(dfrank): if we support prototypes, need to add items for them here
-   */
-
-    MJS_TYPES_CNT
-};
-
 enum mjs_call_stack_frame_item {
     CALL_STACK_FRAME_ITEM_RETVAL_STACK_IDX, /* TOS */
     CALL_STACK_FRAME_ITEM_LOOP_ADDR_IDX,
@@ -45,33 +25,6 @@ enum mjs_call_stack_frame_item {
 
     CALL_STACK_FRAME_ITEMS_CNT
 };
-
-/*
- * A tag is made of the sign bit and the 4 lower order bits of byte 6.
- * So in total we have 32 possible tags.
- *
- * Tag (1,0) however cannot hold a zero payload otherwise it's interpreted as an
- * INFINITY; for simplicity we're just not going to use that combination.
- */
-#define MAKE_TAG(s, t) ((uint64_t)(s) << 63 | (uint64_t)0x7ff0 << 48 | (uint64_t)(t) << 48)
-
-#define MJS_TAG_OBJECT MAKE_TAG(1, 1)
-#define MJS_TAG_FOREIGN MAKE_TAG(1, 2)
-#define MJS_TAG_UNDEFINED MAKE_TAG(1, 3)
-#define MJS_TAG_BOOLEAN MAKE_TAG(1, 4)
-#define MJS_TAG_NAN MAKE_TAG(1, 5)
-#define MJS_TAG_STRING_I MAKE_TAG(1, 6) /* Inlined string len < 5 */
-#define MJS_TAG_STRING_5 MAKE_TAG(1, 7) /* Inlined string len 5 */
-#define MJS_TAG_STRING_O MAKE_TAG(1, 8) /* Owned string */
-#define MJS_TAG_STRING_F MAKE_TAG(1, 9) /* Foreign string */
-#define MJS_TAG_STRING_C MAKE_TAG(1, 10) /* String chunk */
-#define MJS_TAG_STRING_D MAKE_TAG(1, 11) /* Dictionary string  */
-#define MJS_TAG_ARRAY MAKE_TAG(1, 12)
-#define MJS_TAG_FUNCTION MAKE_TAG(1, 13)
-#define MJS_TAG_FUNCTION_FFI MAKE_TAG(1, 14)
-#define MJS_TAG_NULL MAKE_TAG(1, 15)
-
-#define MJS_TAG_MASK MAKE_TAG(1, 15)
 
 struct mjs_vals {
     /* Current `this` value  */

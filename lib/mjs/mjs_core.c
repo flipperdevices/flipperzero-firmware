@@ -146,6 +146,10 @@ void mjs_set_flags_poller(struct mjs* mjs, mjs_flags_poller_t poller) {
     mjs->flags_poller = poller;
 }
 
+void* mjs_get_context(struct mjs* mjs) {
+    return mjs->context;
+}
+
 mjs_err_t mjs_prepend_errorf(struct mjs* mjs, mjs_err_t err, const char* fmt, ...) {
     char* old_error_msg = mjs->error_msg;
     char* new_error_msg = NULL;
@@ -220,6 +224,10 @@ const char* mjs_strerror(struct mjs* mjs, enum mjs_err err) {
         "FILE_OPEN_ERROR",
         "BAD_ARGUMENTS"};
     return mjs->error_msg == NULL || mjs->error_msg[0] == '\0' ? err_names[err] : mjs->error_msg;
+}
+
+const char* mjs_get_stack_trace(struct mjs* mjs) {
+    return mjs->stack_trace;
 }
 
 MJS_PRIVATE size_t mjs_get_func_addr(mjs_val_t v) {

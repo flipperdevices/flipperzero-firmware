@@ -1,24 +1,19 @@
 App(
-    appid="mjs",
-    name="MJS",
+    appid="js_app",
+    name="JS",
     fap_category="Tools",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="js_app",
     stack_size=2 * 1024,
-    cdefines=[
-        ("CS_PLATFORM", "CS_P_STM32"),
-        "MJS_EXPOSE_PRIVATE",
-    ],
-    fap_private_libs=[
-        Lib(
-            name="mjs",
-            cflags=[
-                "-Wno-redundant-decls",
-                "-Wno-unused-function",
-            ],
-        ),
-    ],
     fap_libs=["gcc", "assets"],
     fap_file_assets="assets",
     order=0,
+)
+
+App(
+    appid="js_module_test",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_module_test_ep",
+    requires=["js_app"],
+    sources=["modules/module_test.c"],
 )

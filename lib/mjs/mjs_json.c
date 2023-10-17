@@ -7,11 +7,11 @@
 #include "common/frozen/frozen.h"
 #include "mjs_array.h"
 #include "mjs_internal.h"
-#include "mjs_conversion.h"
 #include "mjs_core.h"
 #include "mjs_object.h"
 #include "mjs_primitive.h"
 #include "mjs_string.h"
+#include "mjs_util_public.h"
 
 #define BUF_LEFT(size, used) (((size_t)(used) < (size)) ? ((size) - (used)) : 0)
 

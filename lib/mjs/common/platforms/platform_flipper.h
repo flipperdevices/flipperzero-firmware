@@ -15,9 +15,8 @@
  * limitations under the License.
  */
 
-#ifndef CS_COMMON_PLATFORMS_PLATFORM_STM32_H_
-#define CS_COMMON_PLATFORMS_PLATFORM_STM32_H_
-#if CS_PLATFORM == CS_P_STM32
+#pragma once
+#if CS_PLATFORM == CS_P_FLIPPER
 
 #include <ctype.h>
 #include <errno.h>
@@ -31,9 +30,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-// #include <dirent.h>
-
-// #include <stm32_sdk_hal.h>
 
 #define to64(x) strtoll(x, NULL, 10)
 #define INT64_FMT "lld"
@@ -49,5 +45,4 @@ typedef struct stat cs_stat_t;
 #define MG_ENABLE_FILESYSTEM 0
 #endif
 
-#endif /* CS_PLATFORM == CS_P_STM32 */
-#endif /* CS_COMMON_PLATFORMS_PLATFORM_STM32_H_ */
+#endif /* CS_PLATFORM == CS_P_FLIPPER */
