@@ -138,6 +138,7 @@ static void furi_hal_nfc_timer_start_core_ticks(FuriHalNfcTimer timer, uint64_t 
     const uint32_t arr_reg = core_ticks / (prescaler + 1);
     furi_check(arr_reg <= UINT16_MAX);
 
+    LL_TIM_DisableIT_UPDATE(furi_hal_nfc_timers[timer].timer);
     LL_TIM_SetPrescaler(furi_hal_nfc_timers[timer].timer, prescaler);
     LL_TIM_GenerateEvent_UPDATE(furi_hal_nfc_timers[timer].timer);
     LL_TIM_ClearFlag_UPDATE(furi_hal_nfc_timers[timer].timer);
