@@ -5,7 +5,6 @@ import time
 
 
 class TestEmulateClassic:
-
     @pytest.fixture(scope="class", autouse=True)
     def add_4k7_manually(self, nav):
         # Code below will run before each "function" (test)
@@ -14,22 +13,17 @@ class TestEmulateClassic:
         # nav.delete_file("NFC", "T_mfc_4k7")
         # Todo: return back to line above, after browser is fixed
         nav.nfc.go_into()
-        nav.go_to("Saved")
-        nav.press_ok()
+        nav.open("Saved")
         menu_items = nav.get_menu_list()
         if "browser_T_mfc_4k7" in menu_items:
-            nav.go_to("browser_T_mfc_4k7", direction="up")
-            nav.press_ok()
-            nav.go_to("Delete", direction="up")
-            nav.press_ok()
+            nav.open("browser_T_mfc_4k7", direction="up")
+            nav.open("Delete", direction="up")
             nav.press_right()
 
         nav.nfc.go_into()
-        nav.go_to("Add Manually")
-        nav.press_ok()
+        nav.open("Add Manually")
         # direction for faster testing, since its last element
-        nav.go_to("Mifare Classic 4k 7byte UID", direction="up")
-        nav.press_ok()
+        nav.open("Mifare Classic 4k 7byte UID", direction="up")
         nav.press_right()
         nav.press_ok()
         key = FlipperTextKeyboard(nav)
@@ -45,14 +39,11 @@ class TestEmulateClassic:
         # Todo: return back to line above, after browser is fixed
         # Todo2: move to function
         nav.nfc.go_into()
-        nav.go_to("Saved")
-        nav.press_ok()
+        nav.open("Saved")
         menu_items = nav.get_menu_list()
         if "browser_T_mfc_4k7" in menu_items:
-            nav.go_to("browser_T_mfc_4k7", direction="up")
-            nav.press_ok()
-            nav.go_to("Delete", direction="up")
-            nav.press_ok()
+            nav.open("browser_T_mfc_4k7", direction="up")
+            nav.open("Delete", direction="up")
             nav.press_right()
 
     @pytest.fixture(scope="function")
@@ -78,13 +69,15 @@ class TestEmulateClassic:
         assert expected in read1, "Incorrect block read"
 
         # write 1 block
-        write1 = px.execute("hf mf wrbl --blk 1 -k ffffffffffff -d 11223344556677889910111213141516")
+        write1 = px.execute(
+            "hf mf wrbl --blk 1 -k ffffffffffff -d 11223344556677889910111213141516"
+        )
         expected = "[+] Write ( ok )"
         assert expected in write1, "Incorrect block write"
 
         # read 1 block
         read1_wrong = px.execute("hf mf rdbl --blk 1 -k ffffffffffff")
-        expected = "[=]   1 | 11 22 33 44 55 66 77 88 99 10 11 12 13 14 15 16 | .\"3DUfw......... "
+        expected = '[=]   1 | 11 22 33 44 55 66 77 88 99 10 11 12 13 14 15 16 | ."3DUfw......... '
         assert expected in read1_wrong, "Incorrect block read"
 
         # set value block
@@ -110,7 +103,9 @@ class TestEmulateClassic:
         assert expected_status in dec_value, "Update failed"
 
         # change key A in 0 sector
-        change_key = px.execute("hf mf wrbl --blk 3 -k ffffffffffff -d a0a1a2a3a4a5ff078069ffffffffffff")
+        change_key = px.execute(
+            "hf mf wrbl --blk 3 -k ffffffffffff -d a0a1a2a3a4a5ff078069ffffffffffff"
+        )
         expected = "[=] data: A0 A1 A2 A3 A4 A5 FF 07 80 69 FF FF FF FF FF FF"
         expected_status = "[+] Write ( ok )"
         assert expected in change_key, "Incorrect change key"
@@ -150,34 +145,42 @@ class TestEmulateClassic:
         (
             "FF0F00",
             [
-                ("hf mf wrbl --blk 3 -k ffffffffffff -d ffffffffffffff0f0069ffffffffffff", "[+] Write ( ok )"),
-                ("hf mf rdbl --blk 3 -k ffffffffffff", "[=]   3 | 00 00 00 00 00 00 FF 0F 00 69 FF FF FF FF FF FF | .........i......"),
-                ("hf mf rdbl --blk 3 -b -k ffffffffffff", "[#] Read block error"), # [#] Read block error
-                ("hf mf wrbl --blk 3 -k ffffffffffff -d a0a1a2a3a4a5ff0f0069b0b1b2b3b4b5", "[+] Write ( ok )"),
-                ("hf mf wrbl --blk 3 -b -k b0b1b2b3b4b5 -d a1a2a3a4a5a6ff0f0069b1b2b3b4b5b6", "[-] ⛔ Write ( fail )"),
-                ("hf mf wrbl --blk 3 -k a0a1a2a3a4a5 -d a1a2a3a4a5a6ff078069b1b2b3b4b5b6", "[+] Write ( ok )"),
-                ("hf mf wrbl --blk 3 -b -k b1b2b3b4b5b6 -d a1a2a3a4a5a6ff078069b1b2b3b4b5b6", "[-] ⛔ Write ( fail )"),
-            ]
+                (
+                    "hf mf wrbl --blk 3 -k ffffffffffff -d ffffffffffffff0f0069ffffffffffff",
+                    "[+] Write ( ok )",
+                ),
+                (
+                    "hf mf rdbl --blk 3 -k ffffffffffff",
+                    "[=]   3 | 00 00 00 00 00 00 FF 0F 00 69 FF FF FF FF FF FF | .........i......",
+                ),
+                (
+                    "hf mf rdbl --blk 3 -b -k ffffffffffff",
+                    "[#] Read block error",
+                ),  # [#] Read block error
+                (
+                    "hf mf wrbl --blk 3 -k ffffffffffff -d a0a1a2a3a4a5ff0f0069b0b1b2b3b4b5",
+                    "[+] Write ( ok )",
+                ),
+                (
+                    "hf mf wrbl --blk 3 -b -k b0b1b2b3b4b5 -d a1a2a3a4a5a6ff0f0069b1b2b3b4b5b6",
+                    "[-] ⛔ Write ( fail )",
+                ),
+                (
+                    "hf mf wrbl --blk 3 -k a0a1a2a3a4a5 -d a1a2a3a4a5a6ff078069b1b2b3b4b5b6",
+                    "[+] Write ( ok )",
+                ),
+                (
+                    "hf mf wrbl --blk 3 -b -k b1b2b3b4b5b6 -d a1a2a3a4a5a6ff078069b1b2b3b4b5b6",
+                    "[-] ⛔ Write ( fail )",
+                ),
+            ],
         ),
     ]
 
     @pytest.mark.parametrize("condition, cmds", data)
     def test_trailer_access_condition(self, px, emulate_classic, condition, cmds):
-        result = px.execute(cmds[0][0])
-        assert result[0] == cmds[0][1], "1: Write failed"
-
-        result = px.execute(cmds[1][0])
-        assert result[0] == cmds[1][1], "2: No keyA, ACs, KeyB"
-
-        result = px.execute(cmds[2][0])
-        assert result[0] == cmds[2][1], "3: No KeyA, No ACs, No KeyB"
-        
-        result = px.execute(cmds[3][0])
-        assert result[0] == cmds[3][1], "4 Incorrect trailer read"
-        
-        result = px.execute(cmds[4][0])
-        assert result[0] == cmds[4][1], "5 Incorrect trailer read"
-        
-        result = px.execute(cmds[5][0])
-        assert result[0] == cmds[5][1], "Incorrect trailer read"
-
+        for i, cmd in enumerate(cmds):
+            command = cmd[0]
+            expected = cmd[1]
+            result = px.execute(command)
+            assert expected in result, f"{i}: {command} failed"
