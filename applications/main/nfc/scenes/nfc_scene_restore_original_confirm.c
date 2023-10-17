@@ -31,9 +31,8 @@ bool nfc_scene_restore_original_confirm_on_event(void* context, SceneManagerEven
             if(nfc_delete_shadow_file(nfc)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneRestoreOriginal);
             } else {
-                scene_manager_search_and_switch_to_previous_scene( //TODO: maybe some better handling, for example showing 'Error' scene
-                    nfc->scene_manager,
-                    NfcSceneStart);
+                scene_manager_search_and_switch_to_previous_scene(
+                    nfc->scene_manager, NfcSceneStart);
             }
             consumed = true;
         } else if(event.event == DialogExResultLeft) {

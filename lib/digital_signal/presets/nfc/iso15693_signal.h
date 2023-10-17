@@ -57,6 +57,17 @@ void iso15693_signal_tx(
     const uint8_t* tx_data,
     size_t tx_data_size);
 
+/**
+ * @brief Transmit Start of Frame using an Iso15693Signal instance.
+ * @see Iso15693SignalDataRate
+ *
+ * This function will block until the transmisson has been completed.
+ *
+ * @param[in] instance pointer to the instance used in transmission.
+ * @param[in] data_rate data rate to transmit at.
+ */
+void iso15693_signal_tx_sof(Iso15693Signal* instance, Iso15693SignalDataRate data_rate);
+
 #ifdef __cplusplus
 }
 #endif

@@ -242,7 +242,7 @@ static MfUltralightCommand
             break;
         }
 
-        // TODO: update when SRAM emulation implemented
+        // No SRAM emulation support
 
         command = MfUltralightCommandProcessedACK;
     } while(false);
@@ -442,9 +442,16 @@ static MfUltralightCommand
             instance->callback(instance->generic_event, instance->context);
         }
 
-        uint8_t* config_pass = instance->config->password.data;
-        uint8_t* auth_pass = password.data;
-        if(memcmp(config_pass, auth_pass, sizeof(MfUltralightAuthPassword)) != 0) break;
+        bool auth_success =
+            mf_ultralight_auth_check_password(&instance->config->password, &password);
+        bool card_locked = mf_ultralight_auth_limit_check_and_update(instance, auth_success);
+
+        if(card_locked) {
+            command = MfUltralightCommandNotProcessedAuthNAK;
+            break;
+        }
+
+        if(!auth_success) break;
 
         bit_buffer_copy_bytes(
             instance->tx_buffer, instance->config->pack.data, sizeof(MfUltralightAuthPack));
@@ -579,7 +586,7 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .callback = mf_ultralight_listener_read_version_handler,
     },
     {
-        .cmd = MF_ULTRALIGTH_CMD_READ_SIG,
+        .cmd = MF_ULTRALIGHT_CMD_READ_SIG,
         .cmd_len_bits = 2 * 8,
         .callback = mf_ultralight_listener_read_signature_handler,
     },
@@ -624,7 +631,7 @@ static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* insta
     MfUltralightData* data = instance->data;
     instance->features = mf_ultralight_get_feature_support_set(data->type);
     mf_ultralight_get_config_page(data, &instance->config);
-    mf_ultraligt_mirror_prepare_emulation(instance);
+    mf_ultralight_mirror_prepare_emulation(instance);
     mf_ultralight_static_lock_bytes_prepare(instance);
     mf_ultralight_dynamic_lock_bytes_prepare(instance);
 }
@@ -645,6 +652,8 @@ static NfcCommand mf_ultralight_command_postprocess(
 
         if(mfu_command == MfUltralightCommandNotProcessedNAK) {
             mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+        } else if(mfu_command == MfUltralightCommandNotProcessedAuthNAK) {
+            mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_AUTH_NAK);
         }
     }
 

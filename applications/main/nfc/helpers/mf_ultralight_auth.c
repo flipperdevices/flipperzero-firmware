@@ -29,9 +29,9 @@ bool mf_ultralight_generate_amiibo_pass(MfUltralightAuth* instance, uint8_t* uid
 
     bool generated = false;
     if(uid_len == 7) {
-        instance->password.data[0] = (uid[1] ^ uid[3] ^ 0xAA);
-        instance->password.data[1] = (uid[2] ^ uid[4] ^ 0x55);
-        instance->password.data[2] = (uid[3] ^ uid[5] ^ 0xAA);
+        instance->password.data[0] = uid[1] ^ uid[3] ^ 0xAA;
+        instance->password.data[1] = uid[2] ^ uid[4] ^ 0x55;
+        instance->password.data[2] = uid[3] ^ uid[5] ^ 0xAA;
         instance->password.data[3] = uid[4] ^ uid[6] ^ 0x55;
         generated = true;
     }

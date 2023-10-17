@@ -55,5 +55,3 @@ ADD_SCENE(nfc, set_atqa, SetAtqa)
 ADD_SCENE(nfc, set_uid, SetUid)
 
 ADD_SCENE(nfc, generate_info, GenerateInfo)
-
-ADD_SCENE(nfc, not_implemented, NotImplemented)

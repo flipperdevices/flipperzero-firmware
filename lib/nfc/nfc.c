@@ -359,7 +359,6 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
     NfcError error = NfcErrorNone;
 
     while(true) {
-        // TODO sanity timeout check
         event = furi_hal_nfc_poller_wait_event(FURI_HAL_NFC_EVENT_WAIT_FOREVER);
         if(event & FuriHalNfcEventTimerBlockTxExpired) {
             if(instance->comm_state == NfcCommStateWaitBlockTxTimer) {
@@ -631,6 +630,15 @@ NfcError nfc_iso14443a_listener_tx_custom_parity(Nfc* instance, const BitBuffer*
 
     error = furi_hal_nfc_iso14443a_listener_tx_custom_parity(tx_data, tx_parity, tx_bits);
     ret = nfc_process_hal_error(error);
+
+    return ret;
+}
+
+NfcError nfc_iso15693_listener_tx_sof(Nfc* instance) {
+    furi_assert(instance);
+
+    FuriHalNfcError error = furi_hal_nfc_iso15693_listener_tx_sof();
+    NfcError ret = nfc_process_hal_error(error);
 
     return ret;
 }

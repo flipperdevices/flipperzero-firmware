@@ -2,6 +2,8 @@
 
 #include <gui/elements.h>
 
+#define NFC_CLASSIC_KEYS_PER_SECTOR 2
+
 struct DictAttack {
     View* view;
     DictAttackCallback callback;
@@ -63,7 +65,11 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         elements_progress_bar_with_text(canvas, 0, 20, 128, dict_progress, draw_str);
         canvas_set_font(canvas, FontSecondary);
         snprintf(
-            draw_str, sizeof(draw_str), "Keys found: %d/%d", m->keys_found, m->sectors_total * 2);
+            draw_str,
+            sizeof(draw_str),
+            "Keys found: %d/%d",
+            m->keys_found,
+            m->sectors_total * NFC_CLASSIC_KEYS_PER_SECTOR);
         canvas_draw_str_aligned(canvas, 0, 33, AlignLeft, AlignTop, draw_str);
         snprintf(
             draw_str, sizeof(draw_str), "Sectors Read: %d/%d", m->sectors_read, m->sectors_total);

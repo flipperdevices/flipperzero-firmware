@@ -58,7 +58,7 @@ static NfcCommand
             instance->nfc_device, NfcProtocolMfUltralight, nfc_poller_get_data(instance->poller));
         const MfUltralightData* data =
             nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
-        if(instance->mf_ul_auth->type == MfUltralightAuthTypeXiaomii) {
+        if(instance->mf_ul_auth->type == MfUltralightAuthTypeXiaomi) {
             if(mf_ultralight_generate_xiaomi_pass(
                    instance->mf_ul_auth,
                    data->iso14443_3a_data->uid,

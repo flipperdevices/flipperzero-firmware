@@ -161,7 +161,7 @@ FuriHalNfcError furi_hal_nfc_iso14443a_poller_trx_short_frame(FuriHalNfcaShortFr
 
 FuriHalNfcError furi_hal_nfc_iso14443a_tx_sdd_frame(const uint8_t* tx_data, size_t tx_bits) {
     FuriHalNfcError error = FuriHalNfcErrorNone;
-    // TODO Set anticollision parameters
+    // No anticollision is supported in this version of library
     error = furi_hal_nfc_poller_tx(tx_data, tx_bits);
 
     return error;
@@ -175,7 +175,7 @@ FuriHalNfcError
     UNUSED(rx_data_size);
 
     error = furi_hal_nfc_poller_rx(rx_data, rx_data_size, rx_bits);
-    // TODO reset anticollision parameters here
+    // No anticollision is supported in this version of library
 
     return error;
 }
@@ -183,8 +183,6 @@ FuriHalNfcError
 FuriHalNfcError
     furi_hal_nfc_iso14443a_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
-
-    // TODO common code for furi_hal_nfc_poller_tx
 
     FuriHalNfcError err = FuriHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
@@ -303,7 +301,6 @@ FuriHalNfcError furi_hal_nfc_iso14443a_listener_tx_custom_parity(
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 
-    // TODO handle field off
     return FuriHalNfcErrorNone;
 }
 
