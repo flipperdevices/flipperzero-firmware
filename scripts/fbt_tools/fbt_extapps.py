@@ -187,7 +187,8 @@ class AppBuilder:
 
         app_artifacts.validator = self.app_env.ValidateAppImports(
             app_artifacts.compact,
-            STRICT_IMPORT_CHECK=self.app.do_strict_import_checks,
+            _CHECK_APP=self.app.do_strict_import_checks
+            and self.app_env.get("STRICT_FAP_IMPORT_CHECK"),
         )[0]
 
         if self.app.apptype == FlipperAppType.PLUGIN:
@@ -307,7 +308,7 @@ def validate_app_imports(target, source, env):
                 + fg.brightmagenta(f"{disabled_api_syms}")
                 + fg.brightyellow(")")
             )
-        if env.get("STRICT_IMPORT_CHECK"):
+        if env.get("_CHECK_APP"):
             raise UserError(warning_msg)
         else:
             SCons.Warnings.warn(SCons.Warnings.LinkWarning, warning_msg),
