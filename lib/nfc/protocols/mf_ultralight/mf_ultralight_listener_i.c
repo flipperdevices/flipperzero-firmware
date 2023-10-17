@@ -35,6 +35,9 @@
 #define MF_ULTRALIGHT_I2C_PAGE_ON_MIRRORED_SESSION_REG(page) \
     MF_ULTRALIGHT_PAGE_IN_BOUNDS(page, 0x00F8, 0x00F9)
 
+#define MF_ULTRALIGHT_AUTH_RESET_ATTEMPTS(instance) (instance->data->auth_attempts = 0)
+#define MF_ULTRALIGHT_AUTH_INCREASE_ATTEMPTS(instance) (instance->data->auth_attempts++)
+
 static MfUltralightMirrorConf mf_ultralight_mirror_check_mode(
     const MfUltralightConfigPages* const config,
     const MfUltralightListenerAuthState auth_state) {
@@ -536,4 +539,39 @@ bool mf_ultralight_dynamic_lock_check_page(const MfUltralightListener* instance,
         locked = MF_ULTRALIGHT_PAGE_LOCKED(current_locks, bit);
     }
     return locked;
+}
+
+static bool mf_ultralight_auth_check_attempts(const MfUltralightListener* instance) {
+    uint8_t authlim = ((instance->data->type == MfUltralightTypeNTAGI2CPlus1K) ||
+                       (instance->data->type == MfUltralightTypeNTAGI2CPlus2K)) ?
+                          (1U << instance->config->access.authlim) :
+                          instance->config->access.authlim;
+
+    return (instance->data->auth_attempts >= authlim);
+}
+
+bool mf_ultralight_auth_limit_check_and_update(MfUltralightListener* instance, bool auth_success) {
+    bool card_locked = false;
+
+    do {
+        if(instance->config->access.authlim == 0) break;
+        card_locked = mf_ultralight_auth_check_attempts(instance);
+        if(card_locked) break;
+
+        if(auth_success) {
+            MF_ULTRALIGHT_AUTH_RESET_ATTEMPTS(instance);
+        } else {
+            MF_ULTRALIGHT_AUTH_INCREASE_ATTEMPTS(instance);
+        }
+
+        card_locked = mf_ultralight_auth_check_attempts(instance);
+    } while(false);
+
+    return card_locked;
+}
+
+bool mf_ultralight_auth_check_password(
+    const MfUltralightAuthPassword* config_pass,
+    const MfUltralightAuthPassword* auth_pass) {
+    return memcmp(config_pass->data, auth_pass->data, sizeof(MfUltralightAuthPassword)) == 0;
 }
