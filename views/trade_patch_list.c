@@ -22,7 +22,6 @@ void plist_append(struct patch_list *plist, uint8_t index) {
 }
 
 void plist_free(struct patch_list *plist) {
-    furi_assert(plist);
     struct patch_list *plist_next = NULL;
 
     while (plist != NULL) {
@@ -47,12 +46,10 @@ uint8_t plist_index_get(struct patch_list *plist, int offset) {
     return plist->index;
 }
 
-void plist_create(TradeBlock* trade_block, struct patch_list **pplist) {
+void plist_create(struct patch_list **plist, TradeBlock* trade_block) {
     furi_assert(trade_block);
-    furi_assert(pplist);
     uint8_t* trade_block_flat = (uint8_t*)trade_block;
     int i;
-    struct patch_list *plist = *pplist;
     /* XXX: HACK: Set up our patch list now. Note that, this will cause weird
      * problems if a pokemon with a patched index is traded to the flipper with
      * a pokemon without a patched index, or the other way around. Need to implement
@@ -64,12 +61,12 @@ void plist_create(TradeBlock* trade_block, struct patch_list **pplist) {
     /* If plist is non-NULL that means its already been created. Tear it down
      * first.
      */
-    if (plist != NULL) {
-        plist_free(plist);
-        plist = NULL;
+    if (*plist != NULL) {
+        plist_free(*plist);
+        *plist = NULL;
     }
 
-    plist = plist_alloc();
+    *plist = plist_alloc();
     /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
     /* The first half of the patch list covers offsets 0x00 - 0xfc, which
      * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
@@ -79,12 +76,12 @@ void plist_create(TradeBlock* trade_block, struct patch_list **pplist) {
      */
     for (i = 0; i < 264; i++) {
         if (i == 0xFD)
-            plist_append(plist, 0xFF);
+            plist_append(*plist, 0xFF);
 
         if (trade_block_flat[i] == 0xFE) {
-            plist_append(plist, (i % 0xfd) + 1);
+            plist_append(*plist, (i % 0xfd) + 1);
 	    trade_block_flat[i] = 0xFF;
 	}
     }
-    plist_append(plist, 0xFF);
+    plist_append(*plist, 0xFF);
 }
