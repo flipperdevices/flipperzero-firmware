@@ -62,7 +62,7 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
             snprintf(
                 draw_str, sizeof(draw_str), "%zu/%zu", m->dict_keys_current, m->dict_keys_total);
         }
-        elements_progress_bar_with_text(canvas, 0, 0, 128, dict_progress, draw_str);
+        elements_progress_bar_with_text(canvas, 0, 20, 128, dict_progress, draw_str);
         canvas_set_font(canvas, FontSecondary);
         snprintf(
             draw_str,

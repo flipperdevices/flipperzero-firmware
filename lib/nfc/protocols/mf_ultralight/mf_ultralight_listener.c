@@ -242,7 +242,7 @@ static MfUltralightCommand
             break;
         }
 
-        // No SRAM emulation implementation support
+        // No SRAM emulation support
 
         command = MfUltralightCommandProcessedACK;
     } while(false);
