@@ -149,3 +149,4 @@ void picopass_device_set_loading_callback(
 
 ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs);
 ReturnCode picopass_device_parse_wiegand(uint8_t* credential, PicopassPacs* pacs);
+bool picopass_device_hid_csn(PicopassDevice* dev);
