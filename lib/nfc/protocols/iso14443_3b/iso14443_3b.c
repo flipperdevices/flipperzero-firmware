@@ -53,7 +53,7 @@ void iso14443_3b_copy(Iso14443_3bData* data, const Iso14443_3bData* other) {
 bool iso14443_3b_verify(Iso14443_3bData* data, const FuriString* device_type) {
     UNUSED(data);
     UNUSED(device_type);
-    // TODO: How to distinguish from old ISO14443-3/4a?
+    // No support for old ISO14443-3B
     return false;
 }
 

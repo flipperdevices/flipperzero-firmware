@@ -151,7 +151,7 @@ static uint8_t mf_ultralight_get_byte_offset(
     return (current_page > config->mirror_page) ? 0 : config->mirror.mirror_byte;
 }
 
-static void mf_ultraligt_format_mirror_data(
+static void mf_ultralight_format_mirror_data(
     FuriString* str,
     const uint8_t* const data,
     const uint8_t data_len) {
@@ -186,8 +186,8 @@ void mf_ultralight_mirror_read_handler(
     }
 }
 
-void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance) {
-    mf_ultraligt_format_mirror_data(
+void mf_ultralight_mirror_prepare_emulation(MfUltralightListener* instance) {
+    mf_ultralight_format_mirror_data(
         instance->mirror.ascii_mirror_data,
         instance->data->iso14443_3a_data->uid,
         instance->data->iso14443_3a_data->uid_len);

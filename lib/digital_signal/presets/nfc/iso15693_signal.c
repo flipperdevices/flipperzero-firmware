@@ -190,3 +190,16 @@ void iso15693_signal_tx(
 
     FURI_CRITICAL_EXIT();
 }
+
+void iso15693_signal_tx_sof(Iso15693Signal* instance, Iso15693SignalDataRate data_rate) {
+    furi_assert(instance);
+    furi_assert(data_rate < Iso15693SignalDataRateNum);
+
+    FURI_CRITICAL_ENTER();
+    digital_sequence_clear(instance->tx_sequence);
+    digital_sequence_add_signal(
+        instance->tx_sequence, iso15693_get_sequence_index(Iso15693SignalIndexSof, data_rate));
+    digital_sequence_transmit(instance->tx_sequence);
+
+    FURI_CRITICAL_EXIT();
+}

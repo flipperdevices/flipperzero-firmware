@@ -58,15 +58,6 @@ static void nfc_scene_read_success_on_enter_st25tb(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static bool nfc_scene_info_on_event_st25tb(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    }
-
-    return false;
-}
-
 static bool nfc_scene_saved_menu_on_event_st25tb(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEdit) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
@@ -82,7 +73,7 @@ const NfcProtocolSupportBase nfc_protocol_support_st25tb = {
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_st25tb,
-            .on_event = nfc_scene_info_on_event_st25tb,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read =
         {

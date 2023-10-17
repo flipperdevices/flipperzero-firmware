@@ -351,6 +351,14 @@ NfcError nfc_iso14443a_listener_set_col_res_data(
     uint8_t* atqa,
     uint8_t sak);
 
+/**
+ * @brief Send ISO15693 Start of Frame pattern in listener mode
+ *
+ * @param[in,out] instance pointer to the instance to be configured.
+ * @returns NfcErrorNone on success, any other error code on failure.
+ */
+NfcError nfc_iso15693_listener_tx_sof(Nfc* instance);
+
 #ifdef __cplusplus
 }
 #endif
