@@ -442,9 +442,19 @@ static MfUltralightCommand
             instance->callback(instance->generic_event, instance->context);
         }
 
-        uint8_t* config_pass = instance->config->password.data;
-        uint8_t* auth_pass = password.data;
-        if(memcmp(config_pass, auth_pass, sizeof(MfUltralightAuthPassword)) != 0) break;
+        bool auth_success =
+            mf_ultralight_auth_check_password(&instance->config->password, &password);
+        bool card_locked = mf_ultralight_auth_limit_check_and_update(instance, auth_success);
+
+        if(card_locked) {
+            command = MfUltralightCommandNotProcessedAuthNAK;
+            break;
+        }
+
+        if(!auth_success) {
+            command = MfUltralightCommandNotProcessedNAK;
+            break;
+        }
 
         bit_buffer_copy_bytes(
             instance->tx_buffer, instance->config->pack.data, sizeof(MfUltralightAuthPack));
@@ -645,6 +655,8 @@ static NfcCommand mf_ultralight_command_postprocess(
 
         if(mfu_command == MfUltralightCommandNotProcessedNAK) {
             mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+        } else if(mfu_command == MfUltralightCommandNotProcessedAuthNAK) {
+            mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_AUTH_NAK);
         }
     }
 

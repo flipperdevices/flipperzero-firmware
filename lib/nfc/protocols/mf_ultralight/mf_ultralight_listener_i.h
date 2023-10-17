@@ -20,6 +20,7 @@ typedef enum {
     MfUltralightCommandProcessedSilent,
     MfUltralightCommandNotProcessedNAK,
     MfUltralightCommandNotProcessedSilent,
+    MfUltralightCommandNotProcessedAuthNAK,
 } MfUltralightCommand;
 
 typedef MfUltralightCommand (
@@ -113,7 +114,10 @@ void mf_ultralight_dynamic_lock_bytes_write(
     MfUltralightDynamicLockData* const lock_bits,
     uint32_t new_bits);
 bool mf_ultralight_dynamic_lock_check_page(const MfUltralightListener* instance, uint16_t page);
-
+bool mf_ultralight_auth_limit_check_and_update(MfUltralightListener* instance, bool auth_success);
+bool mf_ultralight_auth_check_password(
+    const MfUltralightAuthPassword* config_pass,
+    const MfUltralightAuthPassword* auth_pass);
 #ifdef __cplusplus
 }
 #endif
