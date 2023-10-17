@@ -19,6 +19,6 @@ void plist_free(struct patch_list *plist);
 
 uint8_t plist_index_get(struct patch_list *plist, int offset);
 
-void plist_create(TradeBlock* trade_block, struct patch_list **pplist);
+void plist_create(struct patch_list **pplist, TradeBlock* trade_block);
 
 #endif /* TRADE_PATCH_LIST_H */
