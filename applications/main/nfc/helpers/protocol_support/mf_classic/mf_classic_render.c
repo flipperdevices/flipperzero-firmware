@@ -16,8 +16,6 @@ void nfc_render_mf_classic_info(
 
     furi_string_cat_printf(str, "\nKeys Found: %u/%u", keys_found, keys_total);
     furi_string_cat_printf(str, "\nSectors Read: %u/%u", sectors_read, sectors_total);
-
-    // TODO: Something else?
 }
 
 void nfc_render_mf_classic_dump(const MfClassicData* data, FuriString* str) {

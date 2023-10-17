@@ -68,7 +68,7 @@ static bool nfc_scene_saved_menu_on_event_felica(NfcApp* instance, uint32_t even
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_felica = {
-    .features = NfcProtocolFeatureNone, // TODO: Implement better UID editing
+    .features = NfcProtocolFeatureNone,
 
     .scene_info =
         {

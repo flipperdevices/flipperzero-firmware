@@ -171,7 +171,6 @@ Iso14443_3aError iso14443_3a_poller_async_activate(
                     ret = Iso14443_3aErrorColResFailed;
                     break;
                 }
-                // TODO BCC check here
                 bit_buffer_write_bytes(
                     instance->rx_buffer, &instance->col_res.sdd_resp, sizeof(Iso14443_3aSddResp));
                 instance->col_res.state = Iso14443_3aPollerColResStateStateSelectCascade;

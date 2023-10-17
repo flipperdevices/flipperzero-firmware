@@ -218,7 +218,6 @@ void nfc_render_mf_desfire_file_settings_data(
         return;
     }
 
-    // TODO: Replace with pretty_format
     for(uint32_t rec = 0; rec < record_count; rec++) {
         furi_string_cat_printf(str, "record %lu\n", rec);
         for(uint32_t ch = 0; ch < record_size; ch += 4) {
