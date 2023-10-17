@@ -1,29 +1,24 @@
 #include "../nfc_app_i.h"
 
+#include "../helpers/protocol_support/nfc_protocol_support_gui_common.h"
 #include "../helpers/protocol_support/mf_desfire/mf_desfire_render.h"
 
 enum {
-    MifareDesfireDataStateMenu,
-    MifareDesfireDataStateItem, // MUST be last, states >= this correspond with submenu index
+    MifareDesfireMoreInfoStateMenu,
+    MifareDesfireMoreInfoStateItem, // MUST be last, states >= this correspond with submenu index
 };
 
 enum SubmenuIndex {
     SubmenuIndexCardInfo,
-    SubmenuIndexDynamic, // dynamic indexes start here
+    SubmenuIndexDynamic, // dynamic indices start here
 };
 
-static void nfc_scene_mf_desfire_data_submenu_callback(void* context, uint32_t index) {
-    NfcApp* nfc = (NfcApp*)context;
-
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
-}
-
-void nfc_scene_mf_desfire_data_on_enter(void* context) {
+void nfc_scene_mf_desfire_more_info_on_enter(void* context) {
     NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
 
     const uint32_t state =
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireData);
+        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireMoreInfo);
     const MfDesfireData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolMfDesfire);
 
     text_box_set_font(nfc->text_box, TextBoxFontHex);
@@ -32,7 +27,7 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
         submenu,
         "Card info",
         SubmenuIndexCardInfo,
-        nfc_scene_mf_desfire_data_submenu_callback,
+        nfc_protocol_support_common_submenu_callback,
         nfc);
 
     FuriString* label = furi_string_alloc();
@@ -45,28 +40,28 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
             submenu,
             furi_string_get_cstr(label),
             i + SubmenuIndexDynamic,
-            nfc_scene_mf_desfire_data_submenu_callback,
+            nfc_protocol_support_common_submenu_callback,
             nfc);
     }
 
     furi_string_free(label);
 
-    if(state >= MifareDesfireDataStateItem) {
+    if(state >= MifareDesfireMoreInfoStateItem) {
         submenu_set_selected_item(
-            nfc->submenu, state - MifareDesfireDataStateItem + SubmenuIndexDynamic);
+            nfc->submenu, state - MifareDesfireMoreInfoStateItem + SubmenuIndexDynamic);
         scene_manager_set_scene_state(
-            nfc->scene_manager, NfcSceneMfDesfireData, MifareDesfireDataStateMenu);
+            nfc->scene_manager, NfcSceneMfDesfireMoreInfo, MifareDesfireMoreInfoStateMenu);
     }
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
-bool nfc_scene_mf_desfire_data_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_mf_desfire_more_info_on_event(void* context, SceneManagerEvent event) {
     NfcApp* nfc = context;
     bool consumed = false;
 
     const uint32_t state =
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireData);
+        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireMoreInfo);
     const MfDesfireData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolMfDesfire);
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -79,30 +74,35 @@ bool nfc_scene_mf_desfire_data_on_event(void* context, SceneManagerEvent event) 
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
             scene_manager_set_scene_state(
                 nfc->scene_manager,
-                NfcSceneMfDesfireData,
-                MifareDesfireDataStateItem + SubmenuIndexCardInfo);
+                NfcSceneMfDesfireMoreInfo,
+                MifareDesfireMoreInfoStateItem + SubmenuIndexCardInfo);
             consumed = true;
         } else {
             const uint32_t index = event.event - SubmenuIndexDynamic;
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneMfDesfireData, MifareDesfireDataStateItem + index);
+                nfc->scene_manager,
+                NfcSceneMfDesfireMoreInfo,
+                MifareDesfireMoreInfoStateItem + index);
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp, index << 1);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireApp);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        if(state >= MifareDesfireDataStateItem) {
+        if(state >= MifareDesfireMoreInfoStateItem) {
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneMfDesfireData, MifareDesfireDataStateMenu);
-            consumed = true;
+                nfc->scene_manager, NfcSceneMfDesfireMoreInfo, MifareDesfireMoreInfoStateMenu);
+        } else {
+            // Return directly to the Info scene
+            scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneInfo);
         }
+        consumed = true;
     }
 
     return consumed;
 }
 
-void nfc_scene_mf_desfire_data_on_exit(void* context) {
+void nfc_scene_mf_desfire_more_info_on_exit(void* context) {
     NfcApp* nfc = context;
 
     // Clear views

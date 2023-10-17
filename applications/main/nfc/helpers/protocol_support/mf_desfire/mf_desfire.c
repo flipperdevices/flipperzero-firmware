@@ -5,6 +5,7 @@
 
 #include "nfc/nfc_app_i.h"
 
+#include "../nfc_protocol_support_common.h"
 #include "../nfc_protocol_support_gui_common.h"
 #include "../iso14443_4a/iso14443_4a_i.h"
 
@@ -20,14 +21,12 @@ static void nfc_scene_info_on_enter_mf_desfire(NfcApp* instance) {
     widget_add_text_scroll_element(
         instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
 
-    widget_add_button_element(
-        instance->widget,
-        GuiButtonTypeRight,
-        "More",
-        nfc_protocol_support_common_widget_callback,
-        instance);
-
     furi_string_free(temp_str);
+}
+
+static void nfc_scene_more_info_on_enter_mf_desfire(NfcApp* instance) {
+    // Jump to advanced scene right away
+    scene_manager_next_scene(instance->scene_manager, NfcSceneMfDesfireMoreInfo);
 }
 
 static NfcCommand nfc_scene_read_poller_callback_mf_desfire(NfcGenericEvent event, void* context) {
@@ -75,27 +74,23 @@ static void nfc_scene_emulate_on_enter_mf_desfire(NfcApp* instance) {
         instance->listener, nfc_scene_emulate_listener_callback_iso14443_4a, instance);
 }
 
-static bool nfc_scene_info_on_event_mf_desfire(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfDesfireData);
-        return true;
-    }
-
-    return false;
-}
-
 const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
-    .features = NfcProtocolFeatureEmulateUid,
+    .features = NfcProtocolFeatureEmulateUid | NfcProtocolFeatureMoreInfo,
 
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_mf_desfire,
-            .on_event = nfc_scene_info_on_event_mf_desfire,
+            .on_event = nfc_protocol_support_common_on_event_empty,
+        },
+    .scene_more_info =
+        {
+            .on_enter = nfc_scene_more_info_on_enter_mf_desfire,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read =
         {
             .on_enter = nfc_scene_read_on_enter_mf_desfire,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read_menu =
         {
@@ -105,7 +100,7 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
     .scene_read_success =
         {
             .on_enter = nfc_scene_read_success_on_enter_mf_desfire,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_saved_menu =
         {
@@ -114,12 +109,12 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
         },
     .scene_save_name =
         {
-            .on_enter = NULL,
-            .on_event = NULL,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_emulate =
         {
             .on_enter = nfc_scene_emulate_on_enter_mf_desfire,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
 };

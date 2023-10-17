@@ -32,7 +32,7 @@ void nfc_render_mf_desfire_info(
 
     if(format_type != NfcProtocolFormatTypeFull) return;
 
-    furi_string_cat(str, "\n\e#ISO144443-4 data");
+    furi_string_cat(str, "\n\e#ISO14443-4 data");
     nfc_render_iso14443_4a_extra(mf_desfire_get_base_data(data), str);
 }
 

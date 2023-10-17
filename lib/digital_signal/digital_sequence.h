@@ -1,6 +1,6 @@
 /**
  * @file digital_sequence.h
- * @brief The DigitalSequence library is used to generate fast and precise digital signals.
+ * @brief Fast and precise digital signal generation library.
  *
  * Each sequence is represented by one or more (up to 32) registered signals, which are addressed
  * by their indices, and a list of signal indices to be transmitted.
@@ -9,15 +9,17 @@
  *
  * Example: A sequence containing 4 registered signals and n indices to transmit.
  *
- *  |Signal | Index |
- *  |:-----:|:-----:|
- *  |  SOF  |   0   |
- *  |  EOF  |   1   |
- *  | Zero  |   2   |
- *  |  One  |   3   |
+ * |Signal | Index |
+ * |:-----:|:-----:|
+ * |  SOF  |   0   |
+ * |  EOF  |   1   |
+ * | Zero  |   2   |
+ * |  One  |   3   |
  *
- *  Signal index | 0 | 3 | 2 | 2 | ... |   3   |   1   |
- *                 0   1   2   3   ...   n - 2   n - 1
+ * ```
+ * Signal index | 0 | 3 | 2 | 2 | ... |   3   |   1   |
+ *                0   1   2   3   ...   n - 2   n - 1
+ * ```
  *
  * The above sequence starts by transmitting the signal with index 0, which is SOF in this case,
  * then it proceeds with indices 3, 2, 2, which are One, Zero, Zero and after n - 2 signals,

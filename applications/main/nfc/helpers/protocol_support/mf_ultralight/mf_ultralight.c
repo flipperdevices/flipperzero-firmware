@@ -5,6 +5,7 @@
 
 #include "nfc/nfc_app_i.h"
 
+#include "../nfc_protocol_support_common.h"
 #include "../nfc_protocol_support_gui_common.h"
 
 enum {
@@ -25,17 +26,10 @@ static void nfc_scene_info_on_enter_mf_ultralight(NfcApp* instance) {
     widget_add_text_scroll_element(
         instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
 
-    widget_add_button_element(
-        instance->widget,
-        GuiButtonTypeRight,
-        "More",
-        nfc_protocol_support_common_widget_callback,
-        instance);
-
     furi_string_free(temp_str);
 }
 
-static void nfc_scene_card_dump_on_enter_mf_ultralight(NfcApp* instance) {
+static void nfc_scene_more_info_on_enter_mf_ultralight(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
     const MfUltralightData* mfu = nfc_device_get_data(device, NfcProtocolMfUltralight);
 
@@ -147,15 +141,6 @@ static void nfc_scene_emulate_on_enter_mf_ultralight(NfcApp* instance) {
     nfc_listener_start(instance->listener, NULL, NULL);
 }
 
-static bool nfc_scene_info_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneCardDump);
-        return true;
-    }
-
-    return false;
-}
-
 static bool
     nfc_scene_read_and_saved_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexUnlock) {
@@ -166,22 +151,22 @@ static bool
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
-    .features = NfcProtocolFeatureEmulateFull,
+    .features = NfcProtocolFeatureEmulateFull | NfcProtocolFeatureMoreInfo,
 
     .scene_info =
         {
             .on_enter = nfc_scene_info_on_enter_mf_ultralight,
-            .on_event = nfc_scene_info_on_event_mf_ultralight,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
-    .scene_card_dump =
+    .scene_more_info =
         {
-            .on_enter = nfc_scene_card_dump_on_enter_mf_ultralight,
-            .on_event = NULL,
+            .on_enter = nfc_scene_more_info_on_enter_mf_ultralight,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read =
         {
             .on_enter = nfc_scene_read_on_enter_mf_ultralight,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read_menu =
         {
@@ -191,7 +176,7 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
     .scene_read_success =
         {
             .on_enter = nfc_scene_read_success_on_enter_mf_ultralight,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_saved_menu =
         {
@@ -200,12 +185,12 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
         },
     .scene_save_name =
         {
-            .on_enter = NULL,
-            .on_event = NULL,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_emulate =
         {
             .on_enter = nfc_scene_emulate_on_enter_mf_ultralight,
-            .on_event = NULL,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
 };

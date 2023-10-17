@@ -1,4 +1,5 @@
 #include "furi_hal_nfc_i.h"
+#include "furi_hal_nfc_tech_i.h"
 
 #include <lib/drivers/st25r3916.h>
 
@@ -12,6 +13,7 @@ const FuriHalNfcTechBase* furi_hal_nfc_tech[FuriHalNfcTechNum] = {
     [FuriHalNfcTechIso14443b] = &furi_hal_nfc_iso14443b,
     [FuriHalNfcTechIso15693] = &furi_hal_nfc_iso15693,
     [FuriHalNfcTechFelica] = &furi_hal_nfc_felica,
+    // Add new technologies here
 };
 
 FuriHalNfc furi_hal_nfc;

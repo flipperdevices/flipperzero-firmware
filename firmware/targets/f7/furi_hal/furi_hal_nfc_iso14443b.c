@@ -1,4 +1,5 @@
 #include "furi_hal_nfc_i.h"
+#include "furi_hal_nfc_tech_i.h"
 
 static FuriHalNfcError furi_hal_nfc_iso14443b_common_init(FuriHalSpiBusHandle* handle) {
     // Common NFC-B settings, 106kbps

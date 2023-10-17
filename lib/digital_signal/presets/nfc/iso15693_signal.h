@@ -1,6 +1,6 @@
 /**
  * @file iso15693_signal.h
- * @brief A DigitalSequence preset for generating ISO15693-compliant signals.
+ * @brief DigitalSequence preset for generating ISO15693-compliant signals.
  *
  */
 #pragma once
@@ -16,10 +16,13 @@ extern "C" {
 
 typedef struct Iso15693Signal Iso15693Signal;
 
+/**
+ * @brief Supported data rates.
+ */
 typedef enum {
-    Iso15693SignalDataRateHi,
-    Iso15693SignalDataRateLo,
-    Iso15693SignalDataRateNum,
+    Iso15693SignalDataRateHi, /**< High data rate. */
+    Iso15693SignalDataRateLo, /**< Low data rate. */
+    Iso15693SignalDataRateNum, /**< Data rate mode count. Internal use. */
 } Iso15693SignalDataRate;
 
 /**

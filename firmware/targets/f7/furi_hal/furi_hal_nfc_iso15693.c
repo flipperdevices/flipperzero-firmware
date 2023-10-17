@@ -1,4 +1,5 @@
 #include "furi_hal_nfc_i.h"
+#include "furi_hal_nfc_tech_i.h"
 
 #include <digital_signal/presets/nfc/iso15693_signal.h>
 #include <signal_reader/parsers/iso15693/iso15693_parser.h>
