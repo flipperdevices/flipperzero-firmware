@@ -196,8 +196,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     const Attack* attack =
         (state->index >= 0 && state->index <= ATTACK_COUNT - 1) ? &attacks[state->index] : NULL;
-    const BleSpamPayload* payload = &attack->payload;
-    const BleSpamProtocol* protocol = attack->protocol;
+    const BleSpamPayload* payload = attack ? &attack->payload : NULL;
+    const BleSpamProtocol* protocol = attack ? attack->protocol : NULL;
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_icon(canvas, 4, 3, protocol ? protocol->icon : &I_ble);

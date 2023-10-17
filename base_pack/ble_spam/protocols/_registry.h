@@ -3,7 +3,6 @@
 #include "continuity.h"
 #include "fastpair.h"
 #include "swiftpair.h"
-#include <stdbool.h>
 
 union BleSpamProtocolCfg {
     ContinuityCfg continuity;
