@@ -70,7 +70,7 @@ void mf_ultralight_single_counter_try_to_unlock(
     MfUltralightListener* instance,
     Iso14443_3aListenerEventType type);
 
-void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance);
+void mf_ultralight_mirror_prepare_emulation(MfUltralightListener* instance);
 void mf_ultraligt_mirror_format_counter(MfUltralightListener* instance);
 void mf_ultralight_mirror_read_prepare(uint8_t start_page, MfUltralightListener* instance);
 void mf_ultralight_mirror_read_handler(

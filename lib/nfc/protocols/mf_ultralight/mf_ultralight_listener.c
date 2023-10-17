@@ -579,7 +579,7 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .callback = mf_ultralight_listener_read_version_handler,
     },
     {
-        .cmd = MF_ULTRALIGTH_CMD_READ_SIG,
+        .cmd = MF_ULTRALIGHT_CMD_READ_SIG,
         .cmd_len_bits = 2 * 8,
         .callback = mf_ultralight_listener_read_signature_handler,
     },
@@ -624,7 +624,7 @@ static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* insta
     MfUltralightData* data = instance->data;
     instance->features = mf_ultralight_get_feature_support_set(data->type);
     mf_ultralight_get_config_page(data, &instance->config);
-    mf_ultraligt_mirror_prepare_emulation(instance);
+    mf_ultralight_mirror_prepare_emulation(instance);
     mf_ultralight_static_lock_bytes_prepare(instance);
     mf_ultralight_dynamic_lock_bytes_prepare(instance);
 }

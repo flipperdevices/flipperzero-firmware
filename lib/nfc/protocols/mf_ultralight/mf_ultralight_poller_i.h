@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define MF_ULTRALIGHT_POLLER_STANDART_FWT_FC (60000)
+#define MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC (60000)
 #define MF_ULTRALIGHT_MAX_BUFF_SIZE (64)
 
 #define MF_ULTRALIGHT_DEFAULT_PASSWORD (0xffffffffUL)
@@ -115,7 +115,7 @@ MfUltralightError mf_ultralight_poller_async_read_page(
     MfUltralightPageReadCommandData* data);
 
 MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
-    MfUltralightPoller* instnace,
+    MfUltralightPoller* instance,
     uint8_t sector,
     uint8_t tag,
     MfUltralightPageReadCommandData* data);
