@@ -34,11 +34,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [XRemote v1.0.6 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - UL: SubGHz: Add 4 more systems to Add Manually (untested!)
 - UL: SubGHz: Add Manually fixes
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
-- UL: [Added NiceFloR-S to ignore options, removed colons. #620 (By G2Dolphin)](https://github.com/DarkFlippers/unleashed-firmware/pull/620)
 - Toxic groups (UL/XFW) are advertising a mis-spelling of my domain. Please be cautions to use the correct one. https://rogue-master.net/ NOT ROUGE MASTER
+- UL: [Added NiceFloR-S to ignore options, removed colons. #620 (By G2Dolphin)](https://github.com/DarkFlippers/unleashed-firmware/pull/620)
 - UL: Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Android Device is Reboot Cooldown vs ~15min (By xMasterX) + Refactor (By Willy-JL) + Bool Fix (By xMasterX)
+- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
