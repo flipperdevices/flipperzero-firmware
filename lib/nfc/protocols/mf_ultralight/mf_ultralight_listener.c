@@ -645,6 +645,8 @@ static NfcCommand mf_ultralight_command_postprocess(
 
         if(mfu_command == MfUltralightCommandNotProcessedNAK) {
             mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+        } else if(mfu_command == MfUltralightCommandNotProcessedAuthNAK) {
+            mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_AUTH_NAK);
         }
     }
 

@@ -20,6 +20,7 @@ typedef enum {
     MfUltralightCommandProcessedSilent,
     MfUltralightCommandNotProcessedNAK,
     MfUltralightCommandNotProcessedSilent,
+    MfUltralightCommandNotProcessedAuthNAK,
 } MfUltralightCommand;
 
 typedef MfUltralightCommand (
