@@ -558,10 +558,11 @@ bool mf_ultralight_auth_limit_check_and_update(MfUltralightListener* instance, b
         card_locked = mf_ultralight_auth_check_attempts(instance);
         if(card_locked) break;
 
-        if(auth_success)
+        if(auth_success) {
             MF_ULTRALIGHT_AUTH_RESET_ATTEMPTS(instance);
-        else
+        } else {
             MF_ULTRALIGHT_AUTH_INCREASE_ATTEMPTS(instance);
+        }
 
         card_locked = mf_ultralight_auth_check_attempts(instance);
     } while(false);
