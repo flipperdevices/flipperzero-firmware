@@ -53,6 +53,60 @@ enum PurgeMenuItems {
 
 VariableItem *purgeMenuItemViews[NUM_PURGE_ITEMS];
 
+int indexOf(char *val, const char **array, int arrayLen) {
+    int i;
+    for (i = 0; i < arrayLen && strcmp(val, array[i]); ++i) { }
+    if (i == arrayLen) {
+        i = -1;
+    }
+    return i;
+}
+
+static void purgeLoadFromMemory(UART_TerminalApp *app) {
+    /* A purge strategy is in memory, use it for initial values */
+    // Figure out what index in purgeMenu[PURGE_MENU_AGE].options_menu[]
+    //      purgeAge is & set app->selected_option_index[PURGE_MENU_AGE]
+    char str[5];
+    itoa(app->purgeAge, str, 10);
+    int idx = indexOf(str, purgeMenu[PURGE_MENU_AGE].options_menu,
+            purgeMenu[PURGE_MENU_AGE].num_options_menu);
+    if (idx >= 0) {
+        app->selected_option_index[PURGE_MENU_AGE] = idx;
+    }
+    // Find index of purgeRSSI in purgeMenu[PURGE_MENU_RSSI].options_menu[]
+    // app->selected_option_index[PURGE_MENU_RSSI] = that
+    itoa(app->purgeRSSI, str, 10);
+    idx = indexOf(str, purgeMenu[PURGE_MENU_RSSI].options_menu,
+            purgeMenu[PURGE_MENU_RSSI].num_options_menu);
+    if (idx >= 0) {
+        app->selected_option_index[PURGE_MENU_RSSI] = idx;
+    }
+    /* Now set the boolean values */
+    int idxOn = indexOf("on", purgeMenu[PURGE_MENU_AGE_ON].options_menu,
+            purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
+    int idxOff = indexOf("off", purgeMenu[PURGE_MENU_AGE_ON].options_menu,
+            purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
+    if ((app->purgeStrategy & GRAVITY_PURGE_AGE) == GRAVITY_PURGE_AGE) {
+        app->selected_option_index[PURGE_MENU_AGE_ON] = idxOn;
+    } else {
+        app->selected_option_index[PURGE_MENU_AGE_ON] = idxOff;
+    }
+    if ((app->purgeStrategy & GRAVITY_PURGE_RSSI) == GRAVITY_PURGE_RSSI) {
+        app->selected_option_index[PURGE_MENU_RSSI_ON] = idxOn;
+    } else {
+        app->selected_option_index[PURGE_MENU_RSSI_ON] = idxOff;
+    }
+    if ((app->purgeStrategy & GRAVITY_PURGE_UNNAMED) == GRAVITY_PURGE_UNNAMED) {
+        app->selected_option_index[PURGE_MENU_UNNAMED_ON] = idxOn;
+    } else {
+        app->selected_option_index[PURGE_MENU_UNNAMED_ON] = idxOff;
+    }
+    if ((app->purgeStrategy & GRAVITY_PURGE_UNSELECTED) == GRAVITY_PURGE_UNSELECTED) {
+        app->selected_option_index[PURGE_MENU_UNSELECTED_ON] = idxOn;
+    } else {
+        app->selected_option_index[PURGE_MENU_UNSELECTED_ON] = idxOff;
+    }
+}
 /* Callback when an option is selected */
 static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -216,15 +270,6 @@ static void uart_terminal_scene_purge_var_list_change_callback(VariableItem* ite
     app->selected_option_index[app->selected_menu_index] = item_index;
 }
 
-int indexOf(char *val, const char **array, int arrayLen) {
-    int i;
-    for (i = 0; i < arrayLen && strcmp(val, array[i]); ++i) { }
-    if (i == arrayLen) {
-        i = -1;
-    }
-    return i;
-}
-
 /* Callback on entering the scene (initialisation) */
 void uart_terminal_scene_purge_on_enter(void* context) {
     UART_TerminalApp* app = context;
@@ -235,49 +280,7 @@ void uart_terminal_scene_purge_on_enter(void* context) {
         var_item_list, uart_terminal_scene_purge_var_list_enter_callback, app);
 
     if (app->purgeStrategy != 0) {
-        /* A purge strategy is in memory, use it for initial values */
-        // Figure out what index in purgeMenu[PURGE_MENU_AGE].options_menu[]
-        //      purgeAge is & set app->selected_option_index[PURGE_MENU_AGE]
-        char str[5];
-        itoa(app->purgeAge, str, 10);
-        int idx = indexOf(str, purgeMenu[PURGE_MENU_AGE].options_menu,
-                purgeMenu[PURGE_MENU_AGE].num_options_menu);
-        if (idx >= 0) {
-            app->selected_option_index[PURGE_MENU_AGE] = idx;
-        }
-        // Find index of purgeRSSI in purgeMenu[PURGE_MENU_RSSI].options_menu[]
-        // app->selected_option_index[PURGE_MENU_RSSI] = that
-        itoa(app->purgeRSSI, str, 10);
-        idx = indexOf(str, purgeMenu[PURGE_MENU_RSSI].options_menu,
-                purgeMenu[PURGE_MENU_RSSI].num_options_menu);
-        if (idx >= 0) {
-            app->selected_option_index[PURGE_MENU_RSSI] = idx;
-        }
-        /* Now set the boolean values */
-        int idxOn = indexOf("on", purgeMenu[PURGE_MENU_AGE_ON].options_menu,
-                purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
-        int idxOff = indexOf("off", purgeMenu[PURGE_MENU_AGE_ON].options_menu,
-                purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
-        if ((app->purgeStrategy & GRAVITY_PURGE_AGE) == GRAVITY_PURGE_AGE) {
-            app->selected_option_index[PURGE_MENU_AGE_ON] = idxOn;
-        } else {
-            app->selected_option_index[PURGE_MENU_AGE_ON] = idxOff;
-        }
-        if ((app->purgeStrategy & GRAVITY_PURGE_RSSI) == GRAVITY_PURGE_RSSI) {
-            app->selected_option_index[PURGE_MENU_RSSI_ON] = idxOn;
-        } else {
-            app->selected_option_index[PURGE_MENU_RSSI_ON] = idxOff;
-        }
-        if ((app->purgeStrategy & GRAVITY_PURGE_UNNAMED) == GRAVITY_PURGE_UNNAMED) {
-            app->selected_option_index[PURGE_MENU_UNNAMED_ON] = idxOn;
-        } else {
-            app->selected_option_index[PURGE_MENU_UNNAMED_ON] = idxOff;
-        }
-        if ((app->purgeStrategy & GRAVITY_PURGE_UNSELECTED) == GRAVITY_PURGE_UNSELECTED) {
-            app->selected_option_index[PURGE_MENU_UNSELECTED_ON] = idxOn;
-        } else {
-            app->selected_option_index[PURGE_MENU_UNSELECTED_ON] = idxOff;
-        }
+        purgeLoadFromMemory(app);
     }
 
     app->currentMenu = GRAVITY_MENU_PURGE;
