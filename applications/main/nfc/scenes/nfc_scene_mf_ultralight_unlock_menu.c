@@ -63,7 +63,7 @@ bool nfc_scene_mf_ultralight_unlock_menu_on_event(void* context, SceneManagerEve
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockMenuXiaomi) {
-            nfc->mf_ul_auth->type = MfUltralightAuthTypeXiaomii;
+            nfc->mf_ul_auth->type = MfUltralightAuthTypeXiaomi;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockMenuReader) {

@@ -67,7 +67,7 @@ static void iso14443_3a_file_test(uint8_t uid_len) {
     Iso14443_3aData* data = iso14443_3a_alloc();
     data->uid_len = uid_len;
     furi_hal_random_fill_buf(data->uid, uid_len);
-    furi_hal_random_fill_buf(data->atqa, 2);
+    furi_hal_random_fill_buf(data->atqa, sizeof(data->atqa));
     furi_hal_random_fill_buf(&data->sak, 1);
 
     nfc_device_set_data(nfc_device, NfcProtocolIso14443_3a, data);
@@ -311,7 +311,7 @@ static void mf_ultralight_write() {
         furi_hal_random_fill_buf(page.data, sizeof(MfUltralightPage));
         mfu_data->page[i] = page;
         error = mf_ultralight_poller_write_page(poller, i, &page);
-        mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+        mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_write_page() failed");
     }
 
     // Verification read

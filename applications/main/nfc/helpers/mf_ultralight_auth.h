@@ -10,7 +10,7 @@ typedef enum {
     MfUltralightAuthTypeNone,
     MfUltralightAuthTypeReader,
     MfUltralightAuthTypeManual,
-    MfUltralightAuthTypeXiaomii,
+    MfUltralightAuthTypeXiaomi,
     MfUltralightAuthTypeAmiibo,
 } MfUltralightAuthType;
 
