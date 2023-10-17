@@ -451,10 +451,7 @@ static MfUltralightCommand
             break;
         }
 
-        if(!auth_success) {
-            command = MfUltralightCommandNotProcessedNAK;
-            break;
-        }
+        if(!auth_success) break;
 
         bit_buffer_copy_bytes(
             instance->tx_buffer, instance->config->pack.data, sizeof(MfUltralightAuthPack));
