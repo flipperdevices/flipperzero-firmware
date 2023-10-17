@@ -201,7 +201,6 @@ void furi_hal_nfc_timer_fwt_stop() {
 
 void furi_hal_nfc_timer_block_tx_start(uint32_t time_fc) {
     furi_check(furi_hal_nfc_timers[FuriHalNfcTimerBlockTx].is_configured);
-    furi_check(!furi_hal_nfc_timer_block_tx_is_running());
     furi_hal_nfc_timer_start_fc(FuriHalNfcTimerBlockTx, time_fc);
 }
 
