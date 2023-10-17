@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - UL: Fix Ignore Nice FloR-S option (By xMasterX)
 - Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Android Device is Reboot Cooldown vs ~15min + Bool Fix + Icon (By xMasterX) + Refactor+Bug Fixes+More Android pairs (By Willy-JL)
+- Updated: [WiFi (Marauder) v6.3 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add Swiftpair Spam, Evilportal sethtml, and LS command #36 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/36)
 
 <a name="release">
 
