@@ -125,7 +125,7 @@ static void nfc_dict_str_to_int(NfcDict* instance, FuriString* key_str, uint64_t
     for(uint8_t i = 0; i < instance->key_size * 2; i += 2) {
         args_char_to_hex(
             furi_string_get_char(key_str, i), furi_string_get_char(key_str, i + 1), &key_byte_tmp);
-        *key_int |= (uint64_t)key_byte_tmp << (8 * (5 - i / 2));
+        *key_int |= (uint64_t)key_byte_tmp << (8 * (instance->key_size - 1 - i / 2));
     }
 }
 

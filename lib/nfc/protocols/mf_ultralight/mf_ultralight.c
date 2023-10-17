@@ -465,7 +465,6 @@ bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData
     return is_equal;
 }
 
-// TODO: Improve this function
 const char*
     mf_ultralight_get_device_name(const MfUltralightData* data, NfcDeviceNameType name_type) {
     furi_assert(data);

@@ -2,6 +2,8 @@
 
 #include <nfc/protocols/mf_classic/mf_classic_listener.h>
 
+#define NXP_MANUFACTURER_ID (0x04)
+
 #define NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX (10U)
 #define NFC_SCENE_DETECT_READER_WAIT_NONCES_TIMEOUT_MS (1000)
 
@@ -45,12 +47,14 @@ void nfc_scene_mf_classic_detect_reader_on_enter(void* context) {
     NfcApp* instance = context;
 
     if(nfc_device_get_protocol(instance->nfc_device) == NfcProtocolInvalid) {
-        const Iso14443_3aData iso3_data = {
+        Iso14443_3aData iso3_data = {
             .uid_len = 7,
-            .uid = {0x04, 0x77, 0x70, 0x2A, 0x23, 0x4F, 0x80},
+            .uid = {0},
             .atqa = {0x44, 0x00},
             .sak = 0x08,
         };
+        iso3_data.uid[0] = NXP_MANUFACTURER_ID;
+        furi_hal_random_fill_buf(&iso3_data.uid[1], iso3_data.uid_len - 1);
         MfClassicData* mfc_data = mf_classic_alloc();
 
         mfc_data->type = MfClassicType4k;

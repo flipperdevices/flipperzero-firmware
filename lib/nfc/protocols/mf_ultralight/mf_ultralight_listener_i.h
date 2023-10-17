@@ -20,6 +20,7 @@ typedef enum {
     MfUltralightCommandProcessedSilent,
     MfUltralightCommandNotProcessedNAK,
     MfUltralightCommandNotProcessedSilent,
+    MfUltralightCommandNotProcessedAuthNAK,
 } MfUltralightCommand;
 
 typedef MfUltralightCommand (
@@ -70,7 +71,7 @@ void mf_ultralight_single_counter_try_to_unlock(
     MfUltralightListener* instance,
     Iso14443_3aListenerEventType type);
 
-void mf_ultraligt_mirror_prepare_emulation(MfUltralightListener* instance);
+void mf_ultralight_mirror_prepare_emulation(MfUltralightListener* instance);
 void mf_ultraligt_mirror_format_counter(MfUltralightListener* instance);
 void mf_ultralight_mirror_read_prepare(uint8_t start_page, MfUltralightListener* instance);
 void mf_ultralight_mirror_read_handler(
@@ -113,7 +114,10 @@ void mf_ultralight_dynamic_lock_bytes_write(
     MfUltralightDynamicLockData* const lock_bits,
     uint32_t new_bits);
 bool mf_ultralight_dynamic_lock_check_page(const MfUltralightListener* instance, uint16_t page);
-
+bool mf_ultralight_auth_limit_check_and_update(MfUltralightListener* instance, bool auth_success);
+bool mf_ultralight_auth_check_password(
+    const MfUltralightAuthPassword* config_pass,
+    const MfUltralightAuthPassword* auth_pass);
 #ifdef __cplusplus
 }
 #endif

@@ -70,7 +70,6 @@ void nfc_render_iso15693_3_extra(const Iso15693_3Data* data, FuriString* str) {
         const uint16_t display_block_count =
             MIN(NFC_RENDER_ISO15693_3_MAX_BYTES / block_size, block_count);
 
-        // TODO: Improve hex data display
         for(uint32_t i = 0; i < display_block_count; ++i) {
             furi_string_cat(str, "\e*");
 

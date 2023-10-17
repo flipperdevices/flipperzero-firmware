@@ -12,7 +12,6 @@ typedef enum {
     NfcScannerStateTryBasePollers,
     NfcScannerStateFindChildrenProtocols,
     NfcScannerStateDetectChildrenProtocols,
-    // TODO add state to retry base pollers after children pollers detection
     NfcScannerStateComplete,
 
     NfcScannerStateNum,

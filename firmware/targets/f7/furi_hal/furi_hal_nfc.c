@@ -333,7 +333,7 @@ static FuriHalNfcError furi_hal_nfc_poller_init_common(FuriHalSpiBusHandle* hand
 
 static FuriHalNfcError furi_hal_nfc_listener_init_common(FuriHalSpiBusHandle* handle) {
     UNUSED(handle);
-    // TODO: Common listener configuration
+    // No common listener configuration
     return FuriHalNfcErrorNone;
 }
 

@@ -44,7 +44,7 @@ MfUltralightError mf_ultralight_poller_async_auth_pwd(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
@@ -70,7 +70,7 @@ MfUltralightError mf_ultralight_poller_async_authenticate(MfUltralightPoller* in
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
@@ -101,7 +101,7 @@ MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorWrongCrc) {
             FURI_LOG_D(TAG, "Failed to issue sector select command");
             ret = mf_ultralight_process_error(error);
@@ -114,7 +114,7 @@ MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorTimeout) {
             // This is NOT a typo! The tag ACKs by not sending a response within 1ms.
             FURI_LOG_D(TAG, "Sector %u select NAK'd", sector);
@@ -142,7 +142,7 @@ MfUltralightError mf_ultralight_poller_async_read_page(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
@@ -173,7 +173,7 @@ MfUltralightError mf_ultralight_poller_async_write_page(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorWrongCrc) {
             ret = mf_ultralight_process_error(error);
             break;
@@ -204,7 +204,7 @@ MfUltralightError mf_ultralight_poller_async_read_version(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
@@ -228,13 +228,13 @@ MfUltralightError mf_ultralight_poller_async_read_signature(
     Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
-        const uint8_t read_signature_cmd[2] = {MF_ULTRALIGTH_CMD_READ_SIG, 0x00};
+        const uint8_t read_signature_cmd[2] = {MF_ULTRALIGHT_CMD_READ_SIG, 0x00};
         bit_buffer_copy_bytes(instance->tx_buffer, read_signature_cmd, sizeof(read_signature_cmd));
         error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
@@ -263,7 +263,7 @@ MfUltralightError mf_ultralight_poller_async_read_counter(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
@@ -292,7 +292,7 @@ MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+            MF_ULTRALIGHT_POLLER_STANDARD_FWT_FC);
         if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;

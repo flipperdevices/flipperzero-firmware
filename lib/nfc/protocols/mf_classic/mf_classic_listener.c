@@ -49,7 +49,7 @@ static MfClassicListenerCommand
     return command;
 }
 
-static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
+static MfClassicListenerCommand mf_classic_listener_auth_first_part_handler(
     MfClassicListener* instance,
     MfClassicKeyType key_type,
     uint8_t block_num) {
@@ -112,7 +112,7 @@ static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
 
 static MfClassicListenerCommand
     mf_classic_listener_auth_key_a_handler(MfClassicListener* instance, BitBuffer* buff) {
-    MfClassicListenerCommand command = mf_classic_listnener_auth_first_part_handler(
+    MfClassicListenerCommand command = mf_classic_listener_auth_first_part_handler(
         instance, MfClassicKeyTypeA, bit_buffer_get_byte(buff, 1));
 
     return command;
@@ -120,7 +120,7 @@ static MfClassicListenerCommand
 
 static MfClassicListenerCommand
     mf_classic_listener_auth_key_b_handler(MfClassicListener* instance, BitBuffer* buff) {
-    MfClassicListenerCommand command = mf_classic_listnener_auth_first_part_handler(
+    MfClassicListenerCommand command = mf_classic_listener_auth_first_part_handler(
         instance, MfClassicKeyTypeB, bit_buffer_get_byte(buff, 1));
 
     return command;

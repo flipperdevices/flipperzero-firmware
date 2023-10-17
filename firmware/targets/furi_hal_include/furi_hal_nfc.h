@@ -441,6 +441,12 @@ FuriHalNfcError furi_hal_nfc_iso14443a_listener_tx_custom_parity(
     const uint8_t* tx_parity,
     size_t tx_bits);
 
+/** Send ISO15693 SOF in listener mode
+ *
+ * @return FuriHalNfcError
+*/
+FuriHalNfcError furi_hal_nfc_iso15693_listener_tx_sof();
+
 #ifdef __cplusplus
 }
 #endif
