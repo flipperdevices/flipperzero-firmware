@@ -46,6 +46,8 @@ class Navigator:
         self.logger = logging.getLogger(window_name)
         if self._debugFlag:
             self.logger.setLevel(logging.DEBUG)
+        else:
+            self.logger.setLevel(logging.WARNING)
 
         self.nfc = AppNfc(self)
         self.rfid = AppRfid(self)
@@ -308,6 +310,10 @@ class Navigator:
             elif direction == "up":
                 self.press_up()
             state = self.get_current_state(area=area)
+
+    def open(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
+        self.go_to(target, area, direction)
+        self.press_ok()
 
     def go_to_main_screen(self):
         self.press_back()

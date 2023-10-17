@@ -6,7 +6,7 @@ import time
 
 class TestEmulateClassic:
 
-    @pytest.fixture(scope="function", autouse=True)
+    @pytest.fixture(scope="class", autouse=True)
     def add_4k7_manually(self, nav):
         # Code below will run before each "function" (test)
 
@@ -62,7 +62,7 @@ class TestEmulateClassic:
             assert 0, "File not found"
 
         # Need for emulation to start, otherwise error on proxmark side
-        time.sleep(2)
+        time.sleep(1)
 
     def test_mfc_4k7_basic(self, px, emulate_classic):
         """
@@ -138,3 +138,46 @@ class TestEmulateClassic:
         # read sector trailer with key B
         # trailer_b_key = px.execute("hf mf rdbl --blk 3 -b -k b0b1b2b3b4b5")
         # assert trailer_b_key[0] == "Key A not present, Access Bits not present, Key B not present in the output", "Incorrect trailer read"
+
+    # FF0F00	http://calc.gmss.ru/Mifare1k/	hf mf wrbl --blk 3 -k ffffffffffff -d ffffffffffffff0f0069ffffffffffff
+    # hf mf rdbl --blk 3 -k ffffffffffff	                                        No keyA, ACs, KeyB
+    # hf mf rdbl --blk 3 -b -k ffffffffffff	                                        No KeyA, No ACs, No KeyB
+    # hf mf wrbl --blk 3 -k ffffffffffff -d a0a1a2a3a4a5ff0f0069b0b1b2b3b4b5	    Keys changed
+    # hf mf wrbl --blk 3 -b -k ffffffffffff -d a1a2a3a4a5a6ff0f0069b1b2b3b4b5b6	    Keys not changed
+    # hf mf wrbl --blk 3 (-b) -k ffffffffffff -d a1a2a3a4a5a6ff078069b1b2b3b4b5b6	ACs not changed
+
+    data = [
+        (
+            "FF0F00",
+            [
+                ("hf mf wrbl --blk 3 -k ffffffffffff -d ffffffffffffff0f0069ffffffffffff", "[+] Write ( ok )"),
+                ("hf mf rdbl --blk 3 -k ffffffffffff", "[=]   3 | 00 00 00 00 00 00 FF 0F 00 69 FF FF FF FF FF FF | .........i......"),
+                ("hf mf rdbl --blk 3 -b -k ffffffffffff", "[#] Read block error"), # [#] Read block error
+                ("hf mf wrbl --blk 3 -k ffffffffffff -d a0a1a2a3a4a5ff0f0069b0b1b2b3b4b5", "[+] Write ( ok )"),
+                ("hf mf wrbl --blk 3 -b -k b0b1b2b3b4b5 -d a1a2a3a4a5a6ff0f0069b1b2b3b4b5b6", "[-] ⛔ Write ( fail )"),
+                ("hf mf wrbl --blk 3 -k a0a1a2a3a4a5 -d a1a2a3a4a5a6ff078069b1b2b3b4b5b6", "[+] Write ( ok )"),
+                ("hf mf wrbl --blk 3 -b -k b1b2b3b4b5b6 -d a1a2a3a4a5a6ff078069b1b2b3b4b5b6", "[-] ⛔ Write ( fail )"),
+            ]
+        ),
+    ]
+
+    @pytest.mark.parametrize("condition, cmds", data)
+    def test_trailer_access_condition(self, px, emulate_classic, condition, cmds):
+        result = px.execute(cmds[0][0])
+        assert result[0] == cmds[0][1], "1: Write failed"
+
+        result = px.execute(cmds[1][0])
+        assert result[0] == cmds[1][1], "2: No keyA, ACs, KeyB"
+
+        result = px.execute(cmds[2][0])
+        assert result[0] == cmds[2][1], "3: No KeyA, No ACs, No KeyB"
+        
+        result = px.execute(cmds[3][0])
+        assert result[0] == cmds[3][1], "4 Incorrect trailer read"
+        
+        result = px.execute(cmds[4][0])
+        assert result[0] == cmds[4][1], "5 Incorrect trailer read"
+        
+        result = px.execute(cmds[5][0])
+        assert result[0] == cmds[5][1], "Incorrect trailer read"
+
