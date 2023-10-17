@@ -1,4 +1,4 @@
-# WIP-flipperzero-StepCounter-fap
+# Flipperzero-StepCounter-fap
 This is a simple StepCounter/Pedometer for FlipperZero using a Memsic2125 module. 
 > Thanks to @jamisonderek for the tutorial on how to implement Memsic2125 module on Flipper Zero, and for the support.
 
@@ -19,3 +19,11 @@ This is a simple StepCounter/Pedometer for FlipperZero using a Memsic2125 module
 
 ![Main screen](https://raw.githubusercontent.com/grugnoymeme/flipperzero-StepCounter-fap/main/images/main_screen.png "main screen view")
 
+
+TODO List:
+- [ ] Add an INFO window with the link to the original Repo and the Pinout connection between the Flipper Zero and the Memsic Mx2125 module
+- [ ] Add a simple animation of a Dolphin Runner     
+- [ ] Add a management of the possible errors           
+- [ ] Add the possibility to restart the counting             
+- [ ] Add the possibility to set a daily/weekly GOAL to reach
+- [ ] Add the possibility to save dayly results in files at the path: apps_data/stepcounter, to comtìpare them and improve (interacting with calendar FAP? maybe...)

@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1016-1143-0.93.1-a804ac8](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-17 03:34 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-17 03:34 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-17 17:10 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-17 17:10 EST`
 - Updated: [XRemote v1.0.6 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - UL: SubGHz: Add 4 more systems to Add Manually (untested!)
 - UL: SubGHz: Add Manually fixes
@@ -38,7 +38,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Toxic groups (UL/XFW) are advertising a mis-spelling of my domain. Please be cautions to use the correct one. https://rogue-master.net/ NOT ROUGE MASTER
 - UL: [Added NiceFloR-S to ignore options, removed colons. #620 (By G2Dolphin)](https://github.com/DarkFlippers/unleashed-firmware/pull/620)
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- UL: Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Android Device is Reboot Cooldown vs ~15min + Bool Fix + Icon (By xMasterX) + Refactor+Bug Fixes (By Willy-JL)
+- UL: Fix Ignore Nice FloR-S option (By xMasterX)
+- Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Android Device is Reboot Cooldown vs ~15min + Bool Fix + Icon (By xMasterX) + Refactor+Bug Fixes+More Android pairs (By Willy-JL)
 
 <a name="release">
 
@@ -379,7 +380,7 @@ $ ./fbt dolphin_ext
 - [Music Player (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1189)
 - [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
-- [Mx2125 Step Counter (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
+- [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
 - [NFC Magic v2.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 - [NFC Magic Gen1 v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)

@@ -24,9 +24,15 @@ void fastpair_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProtoc
             0x718FA4, // JBL Live 300TWS
             0x821F66, // JBL Flip 6
             0x92BBBD, // Pixel Buds
+            0xD446A7, // Sony XM5
 
             // Custom debug popups
-            0xAA187F, // VBucks
+            0xD99CA1, // Flipper Zero
+            0x77FF67, // Free Robux
+            0xAA187F, // Free VBucks
+            0xDCE9EA, // Rickroll
+            0x87B25F, // Animated Rickroll
+            0x1448C9, // BLM
             0x13B39D, // Talking Sasquach
         };
         model_id = models[rand() % COUNT_OF(models)];
