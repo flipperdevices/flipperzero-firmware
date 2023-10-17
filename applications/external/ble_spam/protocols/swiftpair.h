@@ -6,6 +6,6 @@
 
 typedef struct {
     char display_name[25];
-} SwiftpairMsg;
+} SwiftpairCfg;
 
 extern const BleSpamProtocol ble_spam_protocol_swiftpair;

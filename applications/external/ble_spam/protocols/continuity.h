@@ -31,6 +31,6 @@ typedef struct {
             uint8_t type;
         } nearby_action;
     } data;
-} ContinuityMsg;
+} ContinuityCfg;
 
 extern const BleSpamProtocol ble_spam_protocol_continuity;

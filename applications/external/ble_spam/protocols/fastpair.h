@@ -6,6 +6,6 @@
 
 typedef struct {
     uint32_t model_id;
-} FastpairMsg;
+} FastpairCfg;
 
 extern const BleSpamProtocol ble_spam_protocol_fastpair;

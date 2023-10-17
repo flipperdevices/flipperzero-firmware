@@ -4,18 +4,18 @@
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/bluetooth-swift-pair
 
-const char* swiftpair_get_name(const BleSpamMsg* _msg) {
-    const SwiftpairMsg* msg = &_msg->swiftpair;
-    UNUSED(msg);
+const char* swiftpair_get_name(const BleSpamProtocolCfg* _cfg) {
+    const SwiftpairCfg* cfg = &_cfg->swiftpair;
+    UNUSED(cfg);
     return "SwiftPair";
 }
 
-void swiftpair_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpamMsg* _msg) {
-    const SwiftpairMsg* msg = _msg ? &_msg->swiftpair : NULL;
+void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProtocolCfg* _cfg) {
+    const SwiftpairCfg* cfg = _cfg ? &_cfg->swiftpair : NULL;
 
     const char* display_name;
-    if(msg && msg->display_name[0] != '\0') {
-        display_name = msg->display_name;
+    if(cfg && cfg->display_name[0] != '\0') {
+        display_name = cfg->display_name;
     } else {
         const char* names[] = {
             "Assquach💦",
@@ -43,8 +43,8 @@ void swiftpair_make_packet(uint8_t* out_size, uint8_t** out_packet, const BleSpa
     memcpy(&packet[i], display_name, display_name_len); // Display Name
     i += display_name_len;
 
-    *out_size = size;
-    *out_packet = packet;
+    *_size = size;
+    *_packet = packet;
 }
 
 const BleSpamProtocol ble_spam_protocol_swiftpair = {
