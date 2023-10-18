@@ -51,7 +51,7 @@ if ($command -eq 'use') {
             try {
                 $process = Start-Process -FilePath "curl" -ArgumentList $artifact_download_uri, "-L", "-o", $artifact_archive_path -Wait -NoNewWindow -PassThru
                 if ($process.ExitCode -ne 0) {
-                    throw "curl exited with non-zero code"
+                    throw "cURL exited with non-zero code"
                 }
             }
             catch {
