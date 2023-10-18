@@ -48,8 +48,9 @@ uint8_t plist_index_get(struct patch_list *plist, int offset) {
 
 void plist_create(struct patch_list **plist, TradeBlock* trade_block) {
     furi_assert(trade_block);
-    uint8_t* trade_block_flat = (uint8_t*)trade_block;
+    uint8_t* trade_party_flat = (uint8_t*)trade_block->party;
     int i;
+
     /* XXX: HACK: Set up our patch list now. Note that, this will cause weird
      * problems if a pokemon with a patched index is traded to the flipper with
      * a pokemon without a patched index, or the other way around. Need to implement
@@ -78,9 +79,9 @@ void plist_create(struct patch_list **plist, TradeBlock* trade_block) {
         if (i == 0xFD)
             plist_append(*plist, 0xFF);
 
-        if (trade_block_flat[i] == 0xFE) {
+        if (trade_party_flat[i] == 0xFE) {
             plist_append(*plist, (i % 0xfd) + 1);
-	    trade_block_flat[i] = 0xFF;
+	    trade_party_flat[i] = 0xFF;
 	}
     }
     plist_append(*plist, 0xFF);
