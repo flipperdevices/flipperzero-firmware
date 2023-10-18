@@ -47,12 +47,25 @@ if ($command -eq 'use') {
             }
             $artifact_archive_path = Join-Path $artifact_dir "artifact.zip"
             Write-Host "Downloading Github action artifacts"
-            $ProgressPreference = 'SilentlyContinue'
-            Invoke-WebRequest -Uri "https://nightly.link/$($matching_firmware.git_repo)/suites/$($last_success_run.check_suite_id)/artifacts/$($artifact.id)" -OutFile $artifact_archive_path -UseBasicParsing
+            $artifact_download_uri = "https://nightly.link/$($matching_firmware.git_repo)/suites/$($last_success_run.check_suite_id)/artifacts/$($artifact.id)"
+            try {
+                $process = Start-Process -FilePath "curl" -ArgumentList $artifact_download_uri, "-L", "-o", $artifact_archive_path -Wait -NoNewWindow -PassThru
+                if ($process.ExitCode -ne 0) {
+                    throw "curl exited with non-zero code"
+                }
+            }
+            catch {
+                $ProgressPreference = 'SilentlyContinue'
+                Invoke-WebRequest -Uri $artifact_download_uri -OutFile $artifact_archive_path -UseBasicParsing
+            }
             Write-Host "Extracting Github action artifacts"
+            $sdk_filename_pattern = $matching_firmware.sdk_filename_pattern
+            if (-not ($sdk_filename_pattern)) { 
+                $sdk_filename_pattern = "sdk.*\.zip$" 
+            }
             $zip_archive = [System.IO.Compression.ZipFile]::OpenRead($artifact_archive_path)
             try {
-                $sdk_zip_entry = $zip_archive.Entries | Where-Object { $_.Name.Contains("-sdk-") -and $_.Name.EndsWith(".zip") } | Select-Object -Index 0
+                $sdk_zip_entry = $zip_archive.Entries | Where-Object { $_.Name -match $sdk_filename_pattern } | Select-Object -Index 0
                 [System.IO.Compression.ZipFileExtensions]::ExtractToFile($sdk_zip_entry, $sdk_zip_path, $true)
             }
             finally {
@@ -69,8 +82,12 @@ if ($command -eq 'use') {
     else {
         $sdk_uri = ''
         if ($matching_firmware.type -eq 'git-release') {
+            $sdk_filename_pattern = $matching_firmware.sdk_filename_pattern
+            if (-not ($sdk_filename_pattern)) { 
+                $sdk_filename_pattern = "sdk.*\.zip$" 
+            }
             $release_info = Invoke-RestMethod -Uri "https://api.github.com/repos/$($matching_firmware.git_repo)/releases/$($matching_firmware.git_release)"
-            $sdk_uri = ($release_info.assets | Where-Object { $_.name.EndsWith("-sdk.zip") } | Select-Object -Index 0).browser_download_url
+            $sdk_uri = ($release_info.assets | Where-Object { $_.name -match $sdk_filename_pattern } | Select-Object -Index 0).browser_download_url
         }
         elseif ($matching_firmware.type -eq 'direct-uri') {
             $sdk_uri = $matching_firmware.uri

@@ -92,6 +92,10 @@
                     "git_release": {
                       "description": "Github release name to pull firmware from",
                       "type": "string"
+                    },
+                    "sdk_filename_pattern": {
+                      "description": "SDK filename regex pattern",
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -150,7 +154,11 @@
                       "type": "string"
                     },
                     "git_artifact": {
-                      "description": "Github action artifact name (regex expression is acceptable)",
+                      "description": "Github action artifact name regex pattern",
+                      "type": "string"
+                    },
+                    "sdk_filename_pattern": {
+                      "description": "SDK filename regex pattern",
                       "type": "string"
                     },
                     "git_branch": {

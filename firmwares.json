@@ -32,7 +32,8 @@
       "description": "Xtreme stable",
       "type": "git-release",
       "git_repo": "Flipper-XFW/Xtreme-Firmware",
-      "git_release": "latest"
+      "git_release": "latest",
+      "sdk_filename_pattern": "-sdk\\.zip$"
     },
     {
       "alias": [
@@ -46,7 +47,20 @@
       "git_action": "build.yml",
       "git_artifact": "dist",
       "git_branch": "dev",
-      "git_event": "push"
+      "git_event": "push",
+      "sdk_filename_pattern": "-sdk-.+\\.zip$"
+    },
+    {
+      "alias": [
+        "u",
+        "ul",
+        "unleashed"
+      ],
+      "description": "Unleashed",
+      "type": "git-release",
+      "git_repo": "DarkFlippers/unleashed-firmware",
+      "git_release": "latest",
+      "sdk_filename_pattern": "-sdk-.+\\.zip$"
     }
   ]
 }
