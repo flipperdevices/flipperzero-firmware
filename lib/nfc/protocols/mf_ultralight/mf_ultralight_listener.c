@@ -28,7 +28,8 @@ static bool mf_ultralight_listener_check_access(
     bool is_write_op = (access_type == MfUltralightListenerAccessTypeWrite);
 
     do {
-        if((instance->features & MfUltralightFeatureSupportPasswordAuth) == 0) {
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportPasswordAuth)) {
             access_success = true;
             break;
         }
