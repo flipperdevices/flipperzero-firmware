@@ -131,7 +131,6 @@ static void signal_reader_callback(SignalReaderEvent event, void* context) {
             instance->eof_received = true;
             instance->callback(Iso15693ParserEventDataReceived, instance->context);
         } else {
-            // TODO: Better garbage input handling
             instance->state = Iso15693ParserStateFail;
             instance->callback(Iso15693ParserEventDataReceived, instance->context);
         }
