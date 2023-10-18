@@ -1,0 +1,34 @@
+Import("env")
+
+env.Append(
+    # CPPPATH=[
+    #     "#/lib/subghz",
+    # ],
+    # SDK_HEADERS=[
+    #     File("environment.h"),
+    # ],
+)
+
+libenv = env.Clone(FW_LIB_NAME="uzlib")
+libenv.ApplyLibFlags()
+
+libenv.AppendUnique(
+    CCFLAGS=[
+        "-Wno-redundant-decls",
+        "-Wno-sign-compare",
+    ],
+)
+
+sources = [
+    "uzlib/src/adler32.c",
+    "uzlib/src/crc32.c",
+    "uzlib/src/defl_static.c",
+    "uzlib/src/genlz77.c",
+    "uzlib/src/tinfgzip.c",
+    "uzlib/src/tinflate.c",
+    "uzlib/src/tinfzlib.c",
+]
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

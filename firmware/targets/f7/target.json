@@ -29,6 +29,7 @@
         "toolbox",
         "nfc",
         "digital_signal",
+        "uzlib",
         "pulse_reader",
         "microtar",
         "usb_stm32",

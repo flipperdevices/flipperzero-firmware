@@ -445,6 +445,146 @@ static void storage_cli_remove(Cli* cli, FuriString* path) {
     furi_record_close(RECORD_STORAGE);
 }
 
+#include <lib/uzlib/src/uzlib.h>
+
+typedef struct {
+    File* file;
+    uint8_t* buffer;
+    size_t buffer_size;
+    uint8_t* dict;
+    size_t dict_size;
+    struct uzlib_uncomp uzlib;
+
+    bool eof;
+} UnZipData;
+
+typedef int (*UnizpDataReadCb)(struct uzlib_uncomp* uncomp);
+
+UnZipData* unzip_data_alloc(size_t dict_size, size_t buffer_size, UnizpDataReadCb cb, File* file) {
+    UnZipData* data = malloc(sizeof(UnZipData));
+    data->file = file;
+    data->buffer_size = buffer_size;
+    data->buffer = malloc(buffer_size);
+    data->dict_size = dict_size;
+    data->dict = malloc(dict_size);
+
+    uzlib_uncompress_init(&data->uzlib, data->dict, data->dict_size);
+
+    data->uzlib.source = 0;
+    data->uzlib.source_limit = 0;
+    data->uzlib.source_read_cb = cb;
+    data->eof = false;
+
+    return data;
+}
+
+void unzip_data_free(UnZipData* uzlib) {
+    free(uzlib->buffer);
+    free(uzlib->dict);
+    free(uzlib);
+}
+
+int unzip_read_cb(struct uzlib_uncomp* uncomp) {
+    void* data_p = uncomp;
+    data_p -= offsetof(UnZipData, uzlib);
+    UnZipData* data = data_p;
+
+    uint16_t read_size = storage_file_read(data->file, data->buffer, data->buffer_size);
+    data->uzlib.source = &data->buffer[1]; // we will return buffer[0] at exit
+    data->uzlib.source_limit = data->buffer + read_size;
+
+    if(read_size == 0) {
+        return -1;
+    }
+
+    return data->buffer[0];
+}
+
+int32_t unzip_get_data(UnZipData* data, void* out, size_t out_len) {
+    if(data->eof) {
+        return 0;
+    }
+
+    data->uzlib.dest = out;
+    data->uzlib.dest_limit = (uint8_t*)out + out_len;
+
+    int status = uzlib_uncompress_chksum(&data->uzlib);
+
+    if(status == TINF_DONE) {
+        data->eof = true;
+    }
+    if(status < 0) {
+        return status;
+    }
+    return data->uzlib.dest - (uint8_t*)out;
+}
+
+#include <lib/toolbox/profiler.h>
+
+static void storage_cli_unzip(Cli* cli, FuriString* path) {
+    UNUSED(cli);
+    UNUSED(path);
+    Storage* api = furi_record_open(RECORD_STORAGE);
+    File* in_file = storage_file_alloc(api);
+    File* out_file = storage_file_alloc(api);
+    UnZipData* data = unzip_data_alloc(32 * 1024, 10 * 1024, unzip_read_cb, in_file);
+    Profiler* profiler = profiler_alloc();
+
+    int res;
+
+    const size_t out_size = 10 * 1024;
+    uint8_t* out = malloc(out_size);
+
+    profiler_start(profiler, "unzip");
+
+    do {
+        if(!storage_file_open(in_file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+            storage_cli_print_error(storage_file_get_error(in_file));
+            break;
+        }
+
+        if(!storage_file_open(out_file, "/ext/out.txt", FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            storage_cli_print_error(storage_file_get_error(out_file));
+            break;
+        }
+
+        res = uzlib_gzip_parse_header(&data->uzlib);
+        if(res != TINF_OK) {
+            printf("Error parsing header: %d\n", res);
+            break;
+        }
+
+        while(true) {
+            res = unzip_get_data(data, out, out_size);
+            if(res < 0) {
+                printf("Error during decompression: %d\n", res);
+                break;
+            }
+            if(res == 0) {
+                printf("End\n");
+                break;
+            }
+
+            uint16_t written_size = storage_file_write(out_file, out, res);
+            if(written_size != res) {
+                storage_cli_print_error(storage_file_get_error(out_file));
+                break;
+            }
+        }
+    } while(false);
+
+    profiler_stop(profiler, "unzip");
+
+    profiler_dump(profiler);
+
+    profiler_free(profiler);
+    storage_file_free(in_file);
+    storage_file_free(out_file);
+    unzip_data_free(data);
+    free(out);
+    furi_record_close(RECORD_STORAGE);
+}
+
 static void storage_cli_rename(Cli* cli, FuriString* old_path, FuriString* args) {
     UNUSED(cli);
     Storage* api = furi_record_open(RECORD_STORAGE);
@@ -563,6 +703,11 @@ void storage_cli(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "remove") == 0) {
             storage_cli_remove(cli, path);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "unzip") == 0) {
+            storage_cli_unzip(cli, path);
             break;
         }
 
