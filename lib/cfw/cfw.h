@@ -31,6 +31,39 @@ typedef enum {
 } MenuStyle;
 
 typedef enum {
+    AnimStyleNone,
+    AnimStyleDefault,
+    AnimStyleMinimal,
+    AnimStyle420,
+    AnimStyle42018,
+    AnimStyleALL,
+    AnimStyleAnime,
+    AnimStyleAnime420,
+    AnimStyleAnime42018,
+    AnimStyleBMO,
+    AnimStyleCherry,
+    AnimStyleCorpLogos,
+    AnimStyleDBZ,
+    AnimStyleDigim0n,
+    AnimStyleDolphin,
+    AnimStyleHackz,
+    AnimStyleMario,
+    AnimStyleNYAN,
+    AnimStyleOnePiece,
+    AnimStyleP0kemon,
+    AnimStyleRM18,
+    AnimStyleRMSelect,
+    AnimStyleRMSelect18,
+    AnimStyleSAO,
+    AnimStyleScience,
+    AnimStyleSJUMP,
+    AnimStyleSquatch,
+    AnimStyleStock,
+    AnimStyleWatchDogs,
+    AnimStyleCount,
+} AnimStyle;
+
+typedef enum {
     SpiDefault, // cs on pa4
     SpiExtra, // cs on pc3
     SpiCount,
@@ -43,6 +76,7 @@ typedef enum {
 } UARTChannel;
 
 typedef struct {
+    AnimStyle anim_style;
     MenuStyle menu_style;
     MenuStyle game_menu_style;
     uint32_t start_point;

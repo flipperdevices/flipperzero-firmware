@@ -12,6 +12,14 @@
 #define CFW_DESKTOP_SELECT_STEALTH_ICON 9
 #define CFW_DESKTOP_SELECT_TOP_BAR 10
 
+const char* const anim_style_names[AnimStyleCount] = {
+    "None",      "Default",   "Minimal",      "420",       "420+18",        "ALL",
+    "Anime",     "Anime+420", "Anime+420+18", "BMO",       "Cherry",        "Corp Logos",
+    "DBZ",       "Digim0n",   "Dolphin",      "Hackz",     "Mario",         "NYAN",
+    "One Piece", "P0kemon",   "RM 18+",       "RM Select", "RM Select 18+", "SAO",
+    "Science",   "SJUMP",     "Squatch",      "Stock",     "WatchDogs",
+};
+
 #define BATTERY_VIEW_COUNT 7
 const char* const battery_view_count_text[BATTERY_VIEW_COUNT] =
     {"Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %", "None"};
@@ -60,6 +68,14 @@ const uint32_t dumbmode_icon_value[CFW_DESKTOP_ON_OFF_COUNT] = {false, true};
 static void cfw_app_scene_interface_desktop_var_item_list_callback(void* context, uint32_t index) {
     CfwApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
+static void cfw_app_scene_interface_desktop_anim_style_changed(VariableItem* item) {
+    CfwApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, anim_style_names[index]);
+    CFW_SETTINGS()->anim_style = index;
+    app->save_settings = true;
 }
 
 static void cfw_app_scene_interface_desktop_clock_enable_changed(VariableItem* item) {
@@ -144,7 +160,7 @@ static void cfw_app_scene_interface_desktop_dumbmode_icon_changed(VariableItem* 
 
 void cfw_app_scene_interface_desktop_on_enter(void* context) {
     CfwApp* app = context;
-    // CfwSettings* cfw_settings = CFW_SETTINGS();
+    CfwSettings* cfw_settings = CFW_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
 
     VariableItem* item;
@@ -152,6 +168,15 @@ void cfw_app_scene_interface_desktop_on_enter(void* context) {
 
     origIconStyle_value = app->desktop.icon_style;
     origBattDisp_value = app->desktop.displayBatteryPercentage;
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Animations",
+        AnimStyleCount,
+        cfw_app_scene_interface_desktop_anim_style_changed,
+        app);
+    variable_item_set_current_value_index(item, cfw_settings->anim_style);
+    variable_item_set_current_value_text(item, anim_style_names[cfw_settings->anim_style]);
 
     item = variable_item_list_add(
         var_item_list,

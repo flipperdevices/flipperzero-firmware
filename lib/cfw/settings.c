@@ -7,6 +7,7 @@
 #define TAG "CfwSettings"
 
 CfwSettings cfw_settings = {
+    .anim_style = AnimStyleDefault, // List
     .menu_style = MenuStyleList, // List
     .game_menu_style = MenuStyleWii, // List
     .start_point = 0, // First Item
@@ -31,6 +32,8 @@ void CFW_SETTINGS_LOAD() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     if(flipper_format_file_open_existing(file, CFW_SETTINGS_PATH)) {
+        flipper_format_rewind(file);
+        flipper_format_read_uint32(file, "anim_style", (uint32_t*)&x->anim_style, 1);
         flipper_format_rewind(file);
         flipper_format_read_uint32(file, "menu_style", (uint32_t*)&x->menu_style, 1);
         flipper_format_rewind(file);
@@ -81,6 +84,7 @@ void CFW_SETTINGS_SAVE() {
         // uint32_t e;
         // u = x->menu_style;
         // e = CLAMP(u, MenuStyleCount - 1U, 0U);
+        flipper_format_write_uint32(file, "anim_style", (uint32_t*)&x->anim_style, 1);
         flipper_format_write_uint32(file, "menu_style", (uint32_t*)&x->menu_style, 1);
         flipper_format_write_uint32(file, "game_menu_style", (uint32_t*)&x->game_menu_style, 1);
         flipper_format_write_uint32(file, "start_point", &x->start_point, 1);

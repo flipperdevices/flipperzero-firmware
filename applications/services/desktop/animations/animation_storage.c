@@ -5,6 +5,7 @@
 #include <core/dangerous_defines.h>
 #include <storage/storage.h>
 #include <gui/icon_i.h>
+#include <cfw.h>
 
 #include "animation_manager.h"
 #include "animation_storage.h"
@@ -14,7 +15,6 @@
 
 #define ANIMATION_META_FILE "meta.txt"
 #define ANIMATION_DIR EXT_PATH("dolphin")
-#define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 #define TAG "AnimationStorage"
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);
@@ -34,10 +34,106 @@ static bool animation_storage_load_single_manifest_info(
     FuriString* read_string;
     read_string = furi_string_alloc();
 
+    FuriString* anim_manifest;
+    anim_manifest = furi_string_alloc();
+    AnimStyle my_anim_style = CFW_SETTINGS()->anim_style;
+    switch(my_anim_style) {
+    case AnimStyleNone:
+        furi_string_printf(anim_manifest, "%s/manifest_None.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleDefault:
+        furi_string_printf(anim_manifest, "%s/manifest.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleMinimal:
+        furi_string_printf(anim_manifest, "%s/manifest_Minimal.txt", ANIMATION_DIR);
+        break;
+    case AnimStyle420:
+        furi_string_printf(anim_manifest, "%s/manifest_420.txt", ANIMATION_DIR);
+        break;
+    case AnimStyle42018:
+        furi_string_printf(anim_manifest, "%s/manifest_42018.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleALL:
+        furi_string_printf(anim_manifest, "%s/manifest_ALL.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleAnime:
+        furi_string_printf(anim_manifest, "%s/manifest_Anime.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleAnime420:
+        furi_string_printf(anim_manifest, "%s/manifest_Anime420.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleAnime42018:
+        furi_string_printf(anim_manifest, "%s/manifest_Anime42018.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleBMO:
+        furi_string_printf(anim_manifest, "%s/manifest_BMO.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleCherry:
+        furi_string_printf(anim_manifest, "%s/manifest_Cherry.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleCorpLogos:
+        furi_string_printf(anim_manifest, "%s/manifest_CorpLogos.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleDBZ:
+        furi_string_printf(anim_manifest, "%s/manifest_DBZ.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleDigim0n:
+        furi_string_printf(anim_manifest, "%s/manifest_Digim0n.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleDolphin:
+        furi_string_printf(anim_manifest, "%s/manifest_Dolphin.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleHackz:
+        furi_string_printf(anim_manifest, "%s/manifest_Hackz.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleMario:
+        furi_string_printf(anim_manifest, "%s/manifest_Mario.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleNYAN:
+        furi_string_printf(anim_manifest, "%s/manifest_NYAN.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleOnePiece:
+        furi_string_printf(anim_manifest, "%s/manifest_OnePiece.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleP0kemon:
+        furi_string_printf(anim_manifest, "%s/manifest_P0kemon.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleRM18:
+        furi_string_printf(anim_manifest, "%s/manifest_RM18.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleRMSelect:
+        furi_string_printf(anim_manifest, "%s/manifest_RMSelect.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleRMSelect18:
+        furi_string_printf(anim_manifest, "%s/manifest_RMSelect18.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleSAO:
+        furi_string_printf(anim_manifest, "%s/manifest_SAO.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleScience:
+        furi_string_printf(anim_manifest, "%s/manifest_Science.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleSJUMP:
+        furi_string_printf(anim_manifest, "%s/manifest_SJUMP.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleSquatch:
+        furi_string_printf(anim_manifest, "%s/manifest_Squatch.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleStock:
+        furi_string_printf(anim_manifest, "%s/manifest_Stock.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleWatchDogs:
+        furi_string_printf(anim_manifest, "%s/manifest_WatchDogs.txt", ANIMATION_DIR);
+        break;
+    default:
+        furi_string_printf(anim_manifest, "%s/manifest.txt", ANIMATION_DIR);
+        break;
+    }
+
     do {
         uint32_t u32value;
         if(FSE_OK != storage_sd_status(storage)) break;
-        if(!flipper_format_file_open_existing(file, ANIMATION_MANIFEST_FILE)) break;
+        if(!flipper_format_file_open_existing(file, furi_string_get_cstr(anim_manifest))) break;
 
         if(!flipper_format_read_header(file, read_string, &u32value)) break;
         if(furi_string_cmp_str(read_string, "Flipper Animation Manifest")) break;
@@ -71,6 +167,7 @@ static bool animation_storage_load_single_manifest_info(
     if(!result && manifest_info->name) {
         free((void*)manifest_info->name);
     }
+    furi_string_free(anim_manifest);
     furi_string_free(read_string);
     flipper_format_free(file);
 
@@ -90,12 +187,108 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
     FuriString* read_string;
     read_string = furi_string_alloc();
 
+    FuriString* anim_manifest;
+    anim_manifest = furi_string_alloc();
+    AnimStyle my_anim_style = CFW_SETTINGS()->anim_style;
+    switch(my_anim_style) {
+    case AnimStyleNone:
+        furi_string_printf(anim_manifest, "%s/manifest_None.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleDefault:
+        furi_string_printf(anim_manifest, "%s/manifest.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleMinimal:
+        furi_string_printf(anim_manifest, "%s/manifest_Minimal.txt", ANIMATION_DIR);
+        break;
+    case AnimStyle420:
+        furi_string_printf(anim_manifest, "%s/manifest_420.txt", ANIMATION_DIR);
+        break;
+    case AnimStyle42018:
+        furi_string_printf(anim_manifest, "%s/manifest_42018.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleALL:
+        furi_string_printf(anim_manifest, "%s/manifest_ALL.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleAnime:
+        furi_string_printf(anim_manifest, "%s/manifest_Anime.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleAnime420:
+        furi_string_printf(anim_manifest, "%s/manifest_Anime420.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleAnime42018:
+        furi_string_printf(anim_manifest, "%s/manifest_Anime42018.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleBMO:
+        furi_string_printf(anim_manifest, "%s/manifest_BMO.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleCherry:
+        furi_string_printf(anim_manifest, "%s/manifest_Cherry.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleCorpLogos:
+        furi_string_printf(anim_manifest, "%s/manifest_CorpLogos.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleDBZ:
+        furi_string_printf(anim_manifest, "%s/manifest_DBZ.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleDigim0n:
+        furi_string_printf(anim_manifest, "%s/manifest_Digim0n.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleDolphin:
+        furi_string_printf(anim_manifest, "%s/manifest_Dolphin.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleHackz:
+        furi_string_printf(anim_manifest, "%s/manifest_Hackz.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleMario:
+        furi_string_printf(anim_manifest, "%s/manifest_Mario.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleNYAN:
+        furi_string_printf(anim_manifest, "%s/manifest_NYAN.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleOnePiece:
+        furi_string_printf(anim_manifest, "%s/manifest_OnePiece.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleP0kemon:
+        furi_string_printf(anim_manifest, "%s/manifest_P0kemon.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleRM18:
+        furi_string_printf(anim_manifest, "%s/manifest_RM18.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleRMSelect:
+        furi_string_printf(anim_manifest, "%s/manifest_RMSelect.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleRMSelect18:
+        furi_string_printf(anim_manifest, "%s/manifest_RMSelect18.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleSAO:
+        furi_string_printf(anim_manifest, "%s/manifest_SAO.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleScience:
+        furi_string_printf(anim_manifest, "%s/manifest_Science.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleSJUMP:
+        furi_string_printf(anim_manifest, "%s/manifest_SJUMP.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleSquatch:
+        furi_string_printf(anim_manifest, "%s/manifest_Squatch.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleStock:
+        furi_string_printf(anim_manifest, "%s/manifest_Stock.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleWatchDogs:
+        furi_string_printf(anim_manifest, "%s/manifest_WatchDogs.txt", ANIMATION_DIR);
+        break;
+    default:
+        furi_string_printf(anim_manifest, "%s/manifest.txt", ANIMATION_DIR);
+        break;
+    }
+
     do {
         uint32_t u32value;
         StorageAnimation* storage_animation = NULL;
 
         if(FSE_OK != storage_sd_status(storage)) break;
-        if(!flipper_format_file_open_existing(file, ANIMATION_MANIFEST_FILE)) break;
+        if(!flipper_format_file_open_existing(file, furi_string_get_cstr(anim_manifest))) break;
         if(!flipper_format_read_header(file, read_string, &u32value)) break;
         if(furi_string_cmp_str(read_string, "Flipper Animation Manifest")) break;
         do {
@@ -126,6 +319,7 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
         animation_storage_free_storage_animation(&storage_animation);
     } while(0);
 
+    furi_string_free(anim_manifest);
     furi_string_free(read_string);
     flipper_format_free(file);
 
