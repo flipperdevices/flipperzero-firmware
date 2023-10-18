@@ -42,8 +42,7 @@ Iso14443_3bError iso14443_3b_poller_halt(Iso14443_3bPoller* instance);
 Iso14443_3bError iso14443_3b_poller_send_frame(
     Iso14443_3bPoller* instance,
     const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt);
+    BitBuffer* rx_buffer);
 
 #ifdef __cplusplus
 }

@@ -126,7 +126,7 @@ Iso14443_3bError
         bit_buffer_append_byte(instance->tx_buffer, 0x00);
 
         ret = iso14443_3b_poller_frame_exchange(
-            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_ATTRIB_FC);
+            instance, instance->tx_buffer, instance->rx_buffer, iso14443_3b_get_fwt_fc_max(data));
         if(ret != Iso14443_3bErrorNone) {
             instance->state = Iso14443_3bPollerStateActivationFailed;
             break;
@@ -179,15 +179,15 @@ Iso14443_3bError iso14443_3b_poller_halt(Iso14443_3bPoller* instance) {
 Iso14443_3bError iso14443_3b_poller_send_frame(
     Iso14443_3bPoller* instance,
     const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt) {
+    BitBuffer* rx_buffer) {
     Iso14443_3bError ret;
 
     do {
         ret = iso14443_3b_poller_prepare_trx(instance);
         if(ret != Iso14443_3bErrorNone) break;
 
-        ret = iso14443_3b_poller_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
+        ret = iso14443_3b_poller_frame_exchange(
+            instance, tx_buffer, rx_buffer, iso14443_3b_get_fwt_fc_max(instance->data));
     } while(false);
 
     return ret;

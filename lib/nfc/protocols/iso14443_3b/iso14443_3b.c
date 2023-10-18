@@ -12,6 +12,8 @@
 #define ISO14443_3B_APP_DATA_KEY "Application data"
 #define ISO14443_3B_PROTOCOL_INFO_KEY "Protocol info"
 
+#define ISO14443_3B_FDT_POLL_DEFAULT_FC (ISO14443_3B_FDT_POLL_FC)
+
 const NfcDeviceBase nfc_device_iso14443_3b = {
     .protocol_name = ISO14443_3B_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)iso14443_3b_alloc,
@@ -217,5 +219,5 @@ uint32_t iso14443_3b_get_fwt_fc_max(const Iso14443_3bData* data) {
     furi_assert(data);
 
     const uint8_t fwi = data->protocol_info.fwi;
-    return fwi < 15 ? 4096UL << fwi : 0;
+    return fwi < 0x0F ? 4096UL << fwi : ISO14443_3B_FDT_POLL_DEFAULT_FC;
 }
