@@ -656,7 +656,6 @@ static Iso15693_3Error iso15693_3_listener_handle_standard_request(
         // Several commands may not require an answer
         if(error == Iso15693_3ErrorFormat || error == Iso15693_3ErrorIgnore) break;
 
-        // TODO: Move it to a separate function
         if(error != Iso15693_3ErrorNone) {
             bit_buffer_reset(instance->tx_buffer);
             bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_RESP_FLAG_ERROR);
