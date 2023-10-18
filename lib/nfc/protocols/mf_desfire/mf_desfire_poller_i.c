@@ -19,6 +19,19 @@ MfDesfireError mf_desfire_process_error(Iso14443_4aError error) {
     }
 }
 
+static void mf_desfire_dump_buffer(const BitBuffer* buf) {
+    const size_t buf_size = bit_buffer_get_size_bytes(buf);
+    FuriString* tmp = furi_string_alloc_printf("Buffer dump (%zu byte(s)):\r\n", buf_size);
+
+    for(size_t i = 0; i < buf_size; ++i) {
+        furi_string_cat_printf(tmp, "%02X ", bit_buffer_get_byte(buf, i));
+    }
+
+    FURI_LOG_D(TAG, "%s", furi_string_get_cstr(tmp));
+
+    furi_string_free(tmp);
+}
+
 MfDesfireError mf_desfire_send_chunks(
     MfDesfirePoller* instance,
     const BitBuffer* tx_buffer,
@@ -88,18 +101,8 @@ MfDesfireError
         }
 
         if(!mf_desfire_version_parse(data, instance->result_buffer)) {
-            FuriString* tmp = furi_string_alloc();
-
-            const size_t response_size = bit_buffer_get_size_bytes(instance->result_buffer);
-            for(size_t i = 0; i < response_size; ++i) {
-                furi_string_cat_printf(
-                    tmp, "%02X ", bit_buffer_get_byte(instance->result_buffer, i));
-            }
-
-            FURI_LOG_D(TAG, "Wrong version response size: %zu bytes", response_size);
-            FURI_LOG_D(TAG, "Response dump: \r\n\t%s", furi_string_get_cstr(tmp));
-            furi_string_free(tmp);
-            error = MfDesfireErrorProtocol;
+            FURI_LOG_D(TAG, "Wrong version response size");
+            mf_desfire_dump_buffer(instance->result_buffer);
         }
     } while(false);
 
@@ -144,6 +147,8 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
         if(error != MfDesfireErrorNone) break;
 
         if(!mf_desfire_key_settings_parse(data, instance->result_buffer)) {
+            FURI_LOG_D(TAG, "Wrong key settings response");
+            mf_desfire_dump_buffer(instance->result_buffer);
             error = MfDesfireErrorProtocol;
         }
     } while(false);
@@ -173,6 +178,8 @@ MfDesfireError mf_desfire_poller_async_read_key_versions(
         if(error != MfDesfireErrorNone) break;
 
         if(!mf_desfire_key_version_parse(simple_array_get(data, i), instance->result_buffer)) {
+            FURI_LOG_D(TAG, "Wrong key version %lu response", i);
+            mf_desfire_dump_buffer(instance->result_buffer);
             error = MfDesfireErrorProtocol;
             break;
         }
@@ -251,6 +258,8 @@ MfDesfireError
 
         for(uint32_t i = 0; i < id_count; ++i) {
             if(!mf_desfire_file_id_parse(simple_array_get(data, i), i, instance->result_buffer)) {
+                FURI_LOG_D(TAG, "Wrong file id %lu response", i);
+                mf_desfire_dump_buffer(instance->result_buffer);
                 error = MfDesfireErrorProtocol;
                 break;
             }
@@ -278,6 +287,8 @@ MfDesfireError mf_desfire_poller_async_read_file_settings(
         if(error != MfDesfireErrorNone) break;
 
         if(!mf_desfire_file_settings_parse(data, instance->result_buffer)) {
+            FURI_LOG_D(TAG, "Wrong file settings response");
+            mf_desfire_dump_buffer(instance->result_buffer);
             error = MfDesfireErrorProtocol;
         }
     } while(false);
@@ -330,6 +341,8 @@ MfDesfireError mf_desfire_poller_async_read_file_data(
         if(error != MfDesfireErrorNone) break;
 
         if(!mf_desfire_file_data_parse(data, instance->result_buffer)) {
+            FURI_LOG_D(TAG, "Wrong file data response");
+            mf_desfire_dump_buffer(instance->result_buffer);
             error = MfDesfireErrorProtocol;
         }
     } while(false);
@@ -355,6 +368,8 @@ MfDesfireError mf_desfire_poller_async_read_file_value(
         if(error != MfDesfireErrorNone) break;
 
         if(!mf_desfire_file_data_parse(data, instance->result_buffer)) {
+            FURI_LOG_D(TAG, "Wrong file value response");
+            mf_desfire_dump_buffer(instance->result_buffer);
             error = MfDesfireErrorProtocol;
         }
     } while(false);
@@ -384,6 +399,8 @@ MfDesfireError mf_desfire_poller_async_read_file_records(
         if(error != MfDesfireErrorNone) break;
 
         if(!mf_desfire_file_data_parse(data, instance->result_buffer)) {
+            FURI_LOG_D(TAG, "Wrong file record response");
+            mf_desfire_dump_buffer(instance->result_buffer);
             error = MfDesfireErrorProtocol;
         }
     } while(false);
@@ -441,22 +458,37 @@ MfDesfireError mf_desfire_poller_async_read_application(
 
     do {
         error = mf_desfire_poller_async_read_key_settings(instance, &data->key_settings);
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_D(TAG, "Read key settings failure: Error %d", error);
+            break;
+        }
 
         error = mf_desfire_poller_async_read_key_versions(
             instance, data->key_versions, data->key_settings.max_keys);
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_D(TAG, "Read key versions failure: Error %d", error);
+            break;
+        }
 
         error = mf_desfire_poller_async_read_file_ids(instance, data->file_ids);
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_D(TAG, "Read file IDs failure: Error %d", error);
+            break;
+        }
 
         error = mf_desfire_poller_async_read_file_settings_multi(
             instance, data->file_ids, data->file_settings);
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_D(TAG, "Read file settings(multi) failure: Error %d", error);
+            break;
+        }
 
         error = mf_desfire_poller_async_read_file_data_multi(
             instance, data->file_ids, data->file_settings, data->file_data);
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_D(TAG, "Read file data(multi) failure: Error %d", error);
+            break;
+        }
 
     } while(false);
 
@@ -480,10 +512,16 @@ MfDesfireError mf_desfire_poller_async_read_applications(
         do {
             error = mf_desfire_poller_async_select_application(
                 instance, simple_array_cget(app_ids, i));
-            if(error != MfDesfireErrorNone) break;
+            if(error != MfDesfireErrorNone) {
+                FURI_LOG_D(TAG, "Select application %lu failure: Error %d", i, error);
+                break;
+            }
 
             MfDesfireApplication* current_app = simple_array_get(data, i);
             error = mf_desfire_poller_async_read_application(instance, current_app);
+            if(error != MfDesfireErrorNone) {
+                FURI_LOG_D(TAG, "Application %lu read failure: Error %d", i, error);
+            }
 
         } while(false);
     }
