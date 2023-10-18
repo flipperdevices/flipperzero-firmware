@@ -38,6 +38,7 @@ MfDesfireError mf_desfire_send_chunks(
 
         if(iso14443_4a_error != Iso14443_4aErrorNone) {
             error = mf_desfire_process_error(iso14443_4a_error);
+            FURI_LOG_D(TAG, "Send block failure (Initial): Error %d", error);
             break;
         }
 
@@ -56,6 +57,7 @@ MfDesfireError mf_desfire_send_chunks(
 
             if(iso14443_4a_error != Iso14443_4aErrorNone) {
                 error = mf_desfire_process_error(iso14443_4a_error);
+                FURI_LOG_D(TAG, "Send block failure (Follow-up): Error %d", error);
                 break;
             }
 
@@ -73,14 +75,30 @@ MfDesfireError
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_VERSION);
 
+    FURI_LOG_D(TAG, "Reading version");
+
     MfDesfireError error;
 
     do {
         error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
-        if(error != MfDesfireErrorNone) break;
+        if(error != MfDesfireErrorNone) {
+            FURI_LOG_D(TAG, "Read version failure: Error %d", error);
+            break;
+        }
 
         if(!mf_desfire_version_parse(data, instance->result_buffer)) {
+            FuriString* tmp = furi_string_alloc();
+
+            const size_t response_size = bit_buffer_get_size_bytes(instance->result_buffer);
+            for(size_t i = 0; i < response_size; ++i) {
+                furi_string_cat_printf(
+                    tmp, "%02X ", bit_buffer_get_byte(instance->result_buffer, i));
+            }
+
+            FURI_LOG_D(TAG, "Wrong version response size: %zu bytes", response_size);
+            FURI_LOG_D(TAG, "Response dump: \r\n\t%s", furi_string_get_cstr(tmp));
+            furi_string_free(tmp);
             error = MfDesfireErrorProtocol;
         }
     } while(false);

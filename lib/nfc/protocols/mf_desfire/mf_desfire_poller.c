@@ -225,9 +225,15 @@ static bool mf_desfire_poller_detect(NfcGenericEvent event, void* context) {
     bool protocol_detected = false;
 
     if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
+        FURI_LOG_D(TAG, "Detect started");
         MfDesfireVersion version = {};
         const MfDesfireError error = mf_desfire_poller_async_read_version(instance, &version);
         protocol_detected = (error == MfDesfireErrorNone);
+        if(protocol_detected) {
+            FURI_LOG_D(TAG, "Card was detected successfully");
+        } else {
+            FURI_LOG_D(TAG, "Card was NOT detected: Error %d", error);
+        }
     }
 
     return protocol_detected;
