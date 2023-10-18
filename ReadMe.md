@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Android Device is Reboot Cooldown vs ~15min + Bool Fix + Icon (By xMasterX) + Refactor+Bug Fixes+More Android pairs (By Willy-JL)
 - Updated: [WiFi (Marauder) v6.4 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add Swiftpair Spam, Evilportal sethtml, and LS command #36 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/36)
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware) Removed Unneded Import & Screens From xMasterX
+- Fix: [Debug: Launch app on Flipper broken in VSCode #982 (By jamisondeerek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/982)
 
 <a name="release">
 
