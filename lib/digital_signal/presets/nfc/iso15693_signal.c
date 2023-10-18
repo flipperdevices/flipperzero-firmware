@@ -116,7 +116,6 @@ static void iso15693_signal_bank_fill(Iso15693Signal* instance, Iso15693SignalDa
                                                                ISO15693_SIGNAL_COEFF_LO;
     DigitalSignal** bank = instance->banks[data_rate];
 
-    // FIXME: possibly a couple of wasted edges when k > 1
     bank[Iso15693SignalIndexSof] = digital_signal_alloc(ISO15693_SIGNAL_SOF_EDGES * k);
     bank[Iso15693SignalIndexEof] = digital_signal_alloc(ISO15693_SIGNAL_EOF_EDGES * k);
     bank[Iso15693SignalIndexOne] = digital_signal_alloc(ISO15693_SIGNAL_ONE_EDGES * k);
