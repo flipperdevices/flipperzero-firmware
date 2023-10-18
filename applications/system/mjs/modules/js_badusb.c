@@ -366,7 +366,7 @@ static void js_badusb_println(struct mjs* mjs) {
     badusb_print(mjs, true);
 }
 
-void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
     JsBadusbInst* badusb = malloc(sizeof(JsBadusbInst));
     mjs_val_t badusb_obj = mjs_mk_object(mjs);
     mjs_set(mjs, badusb_obj, INST_PROP_NAME, ~0, mjs_mk_foreign(mjs, badusb));
@@ -381,7 +381,7 @@ void* js_badusb_create(struct mjs* mjs, mjs_val_t* object) {
     return badusb;
 }
 
-void js_badusb_destroy(void* inst) {
+static void js_badusb_destroy(void* inst) {
     JsBadusbInst* badusb = inst;
     if(badusb->usb_if_prev) {
         furi_hal_hid_kb_release_all();
@@ -391,4 +391,20 @@ void js_badusb_destroy(void* inst) {
         free(badusb->hid_cfg);
     }
     free(badusb);
+}
+
+static const JsModuleDescriptor js_badusb_desc = {
+    "badusb",
+    js_badusb_create,
+    js_badusb_destroy,
+};
+
+static const FlipperAppPluginDescriptor plugin_descriptor = {
+    .appid = PLUGIN_APP_ID,
+    .ep_api_version = PLUGIN_API_VERSION,
+    .entry_point = &js_badusb_desc,
+};
+
+const FlipperAppPluginDescriptor* js_badusb_ep(void) {
+    return &plugin_descriptor;
 }

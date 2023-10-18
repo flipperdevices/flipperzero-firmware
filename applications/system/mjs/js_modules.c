@@ -2,12 +2,8 @@
 #include "js_modules.h"
 #include <m-dict.h>
 #include "modules/js_flipper.h"
-#include "modules/js_badusb.h"
-#include "modules/js_notification.h"
-#include "modules/js_dialog.h"
 
-typedef void* (*JsModeConstructor)(struct mjs* mjs, mjs_val_t* object);
-typedef void (*JsModeDestructor)(void* inst);
+#define TAG "JS modules"
 
 typedef struct {
     JsModeConstructor create;
@@ -17,15 +13,8 @@ typedef struct {
 
 DICT_DEF2(JsModuleDict, FuriString*, FURI_STRING_OPLIST, JsModuleData, M_POD_OPLIST);
 
-static const struct {
-    char* name;
-    JsModeConstructor create;
-    JsModeDestructor destroy;
-} modules_builtin[] = {
+static const JsModuleDescriptor modules_builtin[] = {
     {"flipper", js_flipper_create, NULL},
-    {"badusb", js_badusb_create, js_badusb_destroy},
-    {"notification", js_notification_create, js_notification_destroy},
-    {"dialog", js_dialog_create, NULL},
 };
 
 struct JsModules {
@@ -91,15 +80,26 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
     // External module load
     if(!module_found) {
         FuriString* module_path = furi_string_alloc();
-        furi_string_printf(module_path, "%s/%s.fal", APP_DATA_PATH("plugins"), name);
+        furi_string_printf(module_path, "%s/js_%s.fal", APP_DATA_PATH("plugins"), name);
         FURI_LOG_I(TAG, "Loading external module %s", furi_string_get_cstr(module_path));
         do {
+            uint32_t plugin_cnt_last = plugin_manager_get_count(modules->plugin_manager);
             PluginManagerError load_error = plugin_manager_load_single(
                 modules->plugin_manager, furi_string_get_cstr(module_path));
             if(load_error != PluginManagerErrorNone) {
                 break;
             }
-            // TODO: get ep struct, compare name, add to dict
+            const JsModuleDescriptor* plugin =
+                plugin_manager_get_ep(modules->plugin_manager, plugin_cnt_last);
+            furi_assert(plugin);
+
+            if(strncmp(name, plugin->name, name_len) != 0) {
+                FURI_LOG_E(TAG, "Module name missmatch %s", plugin->name);
+                break;
+            }
+            JsModuleData module = {.create = plugin->create, .destroy = plugin->destroy};
+            JsModuleDict_set_at(modules->module_dict, module_name, module);
+
             module_found = true;
         } while(0);
         furi_string_free(module_path);

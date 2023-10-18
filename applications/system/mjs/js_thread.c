@@ -3,7 +3,7 @@
 #include <loader/firmware_api/firmware_api.h>
 #include <flipper_application/api_hashtable/api_hashtable.h>
 #include <flipper_application/plugins/composite_resolver.h>
-#include "addon_api/app_api_interface.h"
+#include "plugin_api/app_api_interface.h"
 #include "js_thread.h"
 #include "js_thread_i.h"
 #include "js_modules.h"

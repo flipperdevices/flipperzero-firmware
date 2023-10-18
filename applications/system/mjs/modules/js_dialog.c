@@ -128,11 +128,27 @@ static void js_dialog_custom(struct mjs* mjs) {
     }
 }
 
-void* js_dialog_create(struct mjs* mjs, mjs_val_t* object) {
+static void* js_dialog_create(struct mjs* mjs, mjs_val_t* object) {
     mjs_val_t dialog_obj = mjs_mk_object(mjs);
     mjs_set(mjs, dialog_obj, "message", ~0, MFS_MK_FN(js_dialog_message));
     mjs_set(mjs, dialog_obj, "custom", ~0, MFS_MK_FN(js_dialog_custom));
     *object = dialog_obj;
 
     return (void*)1;
+}
+
+static const JsModuleDescriptor js_dialog_desc = {
+    "dialog",
+    js_dialog_create,
+    NULL,
+};
+
+static const FlipperAppPluginDescriptor plugin_descriptor = {
+    .appid = PLUGIN_APP_ID,
+    .ep_api_version = PLUGIN_API_VERSION,
+    .entry_point = &js_dialog_desc,
+};
+
+const FlipperAppPluginDescriptor* js_dialog_ep(void) {
+    return &plugin_descriptor;
 }

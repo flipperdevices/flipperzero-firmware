@@ -7,6 +7,15 @@
 #define PLUGIN_APP_ID "js"
 #define PLUGIN_API_VERSION 1
 
+typedef void* (*JsModeConstructor)(struct mjs* mjs, mjs_val_t* object);
+typedef void (*JsModeDestructor)(void* inst);
+
+typedef struct {
+    char* name;
+    JsModeConstructor create;
+    JsModeDestructor destroy;
+} JsModuleDescriptor;
+
 typedef struct JsModules JsModules;
 
 JsModules* js_modules_create(struct mjs* mjs, CompositeApiResolver* resolver);
