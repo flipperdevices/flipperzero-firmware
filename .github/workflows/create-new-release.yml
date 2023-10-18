@@ -11,6 +11,8 @@ on:
 jobs:
   set-new-version:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     outputs:
       commit_hash: ${{steps.commit_new_version.outputs.commit_hash}}
     steps:
@@ -39,9 +41,33 @@ jobs:
           commit_message: Updated version
           push_options: '--force'
 
-  build:
+  create-release:
     runs-on: ubuntu-latest
     needs: set-new-version
+    env:
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    outputs:
+      upload_url: ${{steps.create-release.outputs.upload_url}}
+    steps:
+      - id: create-release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          bodyFile: ".github/release-body.md"
+          artifactErrorsFailBuild: true
+          updateOnlyUnreleased: true
+          allowUpdates: true
+          removeArtifacts: true
+          draft: true
+          tag: "v${{ inputs.new_version }}"
+          commit: "${{needs.set-new-version.outputs.commit_hash}}"
+
+  build:
+    strategy:
+      matrix:
+        firmware: [od, os, xs, xd, ul]
+
+    runs-on: ubuntu-latest
+    needs: [set-new-version, create-release]
     env:
       FBT_NO_SYNC: "true"
       TARGETS: f7
@@ -63,17 +89,50 @@ jobs:
         run: python3 -m pip install --upgrade ufbt
 
       - name: Build
-        run: ./build.ps1
+        run: ./build.ps1 ${{ matrix.firmware }}
         shell: pwsh
 
-      - uses: ncipollo/release-action@v1.12.0
+      - uses: actions/upload-artifact@v3
         with:
-          artifacts: "build/*.zip,build/checksums.sha256"
-          bodyFile: ".github/release-body.md"
-          artifactErrorsFailBuild: true
-          updateOnlyUnreleased: true
-          allowUpdates: true
-          removeArtifacts: true
-          draft: true
-          tag: "v${{ inputs.new_version }}"
-          commit: "${{needs.set-new-version.outputs.commit_hash}}"
+          name: release
+          path: |
+            build/*.zip
+
+  checksum:
+    runs-on: ubuntu-latest
+    needs: ['create-release', 'build']
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: release
+          path: release
+      
+      - name: Generate checksum
+        run: |
+          cd release
+          find . -type f -maxdepth 1 -exec sha256sum {} \; > ../checksum.txt
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: |
+            checksum.txt
+
+  publish-artifacts:
+    runs-on: ubuntu-latest
+    needs: ['create-release', 'build', 'checksum']
+    env:
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: release
+          path: release
+
+      - name: Upload Release Assets
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: release/**
