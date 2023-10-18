@@ -70,6 +70,7 @@ Iso14443_4aError iso14443_4a_poller_send_block(
 
         if(iso14443_3a_error != Iso14443_3aErrorNone) {
             FURI_LOG_D(TAG, "ISO14443-3A frame failure: error %d", iso14443_3a_error);
+            FURI_LOG_D(TAG, "FWT was: %lu", iso14443_4a_get_fwt_fc_max(instance->data));
             error = iso14443_4a_process_error(iso14443_3a_error);
             break;
 
