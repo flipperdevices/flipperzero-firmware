@@ -26,6 +26,11 @@ extern "C" {
 #endif
 
 /**
+ * @brief NFC carrier frequency, in Hz.
+ */
+#define FURI_HAL_NFC_CARRIER_HZ (13560000UL)
+
+/**
  * @brief Special value indicating that waiting for an event shall never time out.
  */
 #define FURI_HAL_NFC_EVENT_WAIT_FOREVER (0xFFFFFFFFU)
