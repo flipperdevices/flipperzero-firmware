@@ -139,11 +139,13 @@ static void furi_hal_nfc_timer_start_core_ticks(FuriHalNfcTimer timer, uint64_t 
     furi_check(arr_reg <= UINT16_MAX);
 
     LL_TIM_DisableIT_UPDATE(furi_hal_nfc_timers[timer].timer);
-    LL_TIM_SetPrescaler(furi_hal_nfc_timers[timer].timer, prescaler);
-    LL_TIM_GenerateEvent_UPDATE(furi_hal_nfc_timers[timer].timer);
-    LL_TIM_ClearFlag_UPDATE(furi_hal_nfc_timers[timer].timer);
 
+    LL_TIM_SetPrescaler(furi_hal_nfc_timers[timer].timer, prescaler);
     LL_TIM_SetAutoReload(furi_hal_nfc_timers[timer].timer, arr_reg);
+
+    LL_TIM_GenerateEvent_UPDATE(furi_hal_nfc_timers[timer].timer);
+    while(!LL_TIM_IsActiveFlag_UPDATE(furi_hal_nfc_timers[timer].timer));
+    LL_TIM_ClearFlag_UPDATE(furi_hal_nfc_timers[timer].timer);
 
     LL_TIM_EnableIT_UPDATE(furi_hal_nfc_timers[timer].timer);
     LL_TIM_EnableCounter(furi_hal_nfc_timers[timer].timer);
