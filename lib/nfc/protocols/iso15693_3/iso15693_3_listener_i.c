@@ -76,7 +76,7 @@ static Iso15693_3Error iso15693_3_listener_inventory_handler(
         }
 
         if(mask_len != 0) {
-            // TODO: Take mask_len and mask_value into account (if present)
+            // TODO FL-3633: Take mask_len and mask_value into account (if present)
         }
 
         error = iso15693_3_listener_extension_handler(instance, ISO15693_3_CMD_INVENTORY);
