@@ -144,13 +144,14 @@ $ ./fbt dolphin_ext
 - Dolphin: Passport: Stored on SD with Multiple Pages, and Dynamic Icons/Images support [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
 - Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Random Deed Selection used for MAX +3 EXP daily gain.
 - Dolphin: Plugin Achivement +3 EXP for a total of up to 700 EXP daily. Plugin Achivements are:
+	- Any Application is Opened
 	- Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
 	- Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
 	- Games Only Mode from Lock Menu
 	- Getting 2048 in 2048
 	- Mouse Jacker Ducky Run
 	- NRFSniffer Found Address
-	- Stopwatch @ Alert
+	- Dab Timer @ Alert
 	- Tetris, Snake, or Flappy Bird Score For EXP
 	- Zombiez for every 20 Zombie kills
 - [GUI: Extended Keyboard (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/20bc89888ecaa47f3ee65c63416e609eeff70026)
