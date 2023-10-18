@@ -637,6 +637,9 @@ NfcError nfc_iso14443a_listener_tx_custom_parity(Nfc* instance, const BitBuffer*
 NfcError nfc_iso15693_listener_tx_sof(Nfc* instance) {
     furi_assert(instance);
 
+    while(furi_hal_nfc_timer_block_tx_is_running()) {
+    }
+
     FuriHalNfcError error = furi_hal_nfc_iso15693_listener_tx_sof();
     NfcError ret = nfc_process_hal_error(error);
 
