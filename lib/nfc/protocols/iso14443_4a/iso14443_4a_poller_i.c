@@ -69,11 +69,16 @@ Iso14443_4aError iso14443_4a_poller_send_block(
             iso14443_4a_get_fwt_fc_max(instance->data));
 
         if(iso14443_3a_error != Iso14443_3aErrorNone) {
+            FURI_LOG_D(TAG, "ISO14443-3A frame failure: error %d", iso14443_3a_error);
             error = iso14443_4a_process_error(iso14443_3a_error);
             break;
 
         } else if(!iso14443_4_layer_decode_block(
                       instance->iso14443_4_layer, rx_buffer, instance->rx_buffer)) {
+            FURI_LOG_D(TAG, "ISO14443-4 block decode failure\r\nRaw dump:");
+            for(size_t i = 0; i < bit_buffer_get_size_bytes(instance->rx_buffer); ++i) {
+                FURI_LOG_D(TAG, "%02X", bit_buffer_get_byte(instance->rx_buffer, i));
+            }
             error = Iso14443_4aErrorProtocol;
             break;
         }
