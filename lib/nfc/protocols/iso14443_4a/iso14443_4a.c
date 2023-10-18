@@ -11,6 +11,8 @@
 #define ISO14443_4A_TC1_KEY "TC(1)"
 #define ISO14443_4A_T1_TK_KEY "T1...Tk"
 
+#define ISO14443_4A_FDT_DEFAULT_FC ISO14443_3A_FDT_POLL_FC
+
 typedef enum {
     Iso14443_4aInterfaceByteTA1,
     Iso14443_4aInterfaceByteTB1,
@@ -230,10 +232,19 @@ uint16_t iso14443_4a_get_frame_size_max(const Iso14443_4aData* data) {
 uint32_t iso14443_4a_get_fwt_fc_max(const Iso14443_4aData* data) {
     furi_assert(data);
 
-    if(!(data->ats_data.t0 & ISO14443_4A_ATS_T0_TB1)) return 0;
+    uint32_t fwt_fc_max = ISO14443_4A_FDT_DEFAULT_FC;
 
-    const uint8_t fwi = data->ats_data.tb_1 >> 4;
-    return fwi < 15 ? 4096UL << fwi : 0;
+    do {
+        if(!(data->ats_data.tl > 1)) break;
+        if(!(data->ats_data.t0 & ISO14443_4A_ATS_T0_TB1)) break;
+
+        const uint8_t fwi = data->ats_data.tb_1 >> 4;
+        if(fwi == 0x0F) break;
+
+        fwt_fc_max = 4096UL << fwi;
+    } while(false);
+
+    return fwt_fc_max;
 }
 
 const uint8_t* iso14443_4a_get_historical_bytes(const Iso14443_4aData* data, uint32_t* count) {

@@ -88,7 +88,7 @@ static SlixError slix_listener_write_password(
         SlixListenerSessionState* session_state = &instance->session_state;
 
         if(session_state->password_match[password_type]) {
-            // TODO: check for password lock
+            // TODO FL-3634: check for password lock
             slix_set_password(slix_data, password_type, password);
             // Require another SET_PASSWORD command with the new password
             session_state->password_match[password_type] = false;

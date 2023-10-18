@@ -324,10 +324,6 @@ bool mf_desfire_key_settings_load(
         furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_MAX_KEYS_KEY);
         if(!flipper_format_read_hex(ff, furi_string_get_cstr(key), &data->max_keys, 1)) break;
 
-        // TODO: Whaaa
-        // ks->flags |= ks->max_keys >> 4;
-        // ks->max_keys &= 0xF;
-
         success = true;
     } while(false);
 

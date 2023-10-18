@@ -211,8 +211,16 @@ bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) 
     furi_assert(data);
     furi_assert(other);
 
-    // TODO: Complete equality method
-    return iso14443_4a_is_equal(data->iso14443_4a_data, other->iso14443_4a_data);
+    return iso14443_4a_is_equal(data->iso14443_4a_data, other->iso14443_4a_data) &&
+           memcmp(&data->version, &other->version, sizeof(MfDesfireVersion)) == 0 &&
+           memcmp(&data->free_memory, &other->free_memory, sizeof(MfDesfireFreeMemory)) == 0 &&
+           memcmp(
+               &data->master_key_settings,
+               &other->master_key_settings,
+               sizeof(MfDesfireKeySettings)) == 0 &&
+           simple_array_is_equal(data->master_key_versions, other->master_key_versions) &&
+           simple_array_is_equal(data->application_ids, other->application_ids) &&
+           simple_array_is_equal(data->applications, other->applications);
 }
 
 const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcDeviceNameType name_type) {

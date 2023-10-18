@@ -18,8 +18,7 @@ Iso14443_4bError iso14443_4b_poller_halt(Iso14443_4bPoller* instance) {
 Iso14443_4bError iso14443_4b_poller_send_block(
     Iso14443_4bPoller* instance,
     const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt) {
+    BitBuffer* rx_buffer) {
     furi_assert(instance);
 
     bit_buffer_reset(instance->tx_buffer);
@@ -29,7 +28,7 @@ Iso14443_4bError iso14443_4b_poller_send_block(
 
     do {
         Iso14443_3bError iso14443_3b_error = iso14443_3b_poller_send_frame(
-            instance->iso14443_3b_poller, instance->tx_buffer, instance->rx_buffer, fwt);
+            instance->iso14443_3b_poller, instance->tx_buffer, instance->rx_buffer);
 
         if(iso14443_3b_error != Iso14443_3bErrorNone) {
             error = iso14443_4b_process_error(iso14443_3b_error);

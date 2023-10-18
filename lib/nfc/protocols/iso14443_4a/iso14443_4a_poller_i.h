@@ -55,8 +55,7 @@ Iso14443_4aError
 Iso14443_4aError iso14443_4a_poller_send_block(
     Iso14443_4aPoller* instance,
     const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt);
+    BitBuffer* rx_buffer);
 
 #ifdef __cplusplus
 }
