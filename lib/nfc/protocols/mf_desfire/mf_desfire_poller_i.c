@@ -22,8 +22,7 @@ MfDesfireError mf_desfire_process_error(Iso14443_4aError error) {
 MfDesfireError mf_desfire_send_chunks(
     MfDesfirePoller* instance,
     const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt) {
+    BitBuffer* rx_buffer) {
     furi_assert(instance);
     furi_assert(instance->iso14443_4a_poller);
     furi_assert(instance->tx_buffer);
@@ -35,7 +34,7 @@ MfDesfireError mf_desfire_send_chunks(
 
     do {
         Iso14443_4aError iso14443_4a_error = iso14443_4a_poller_send_block(
-            instance->iso14443_4a_poller, tx_buffer, instance->rx_buffer, fwt);
+            instance->iso14443_4a_poller, tx_buffer, instance->rx_buffer);
 
         if(iso14443_4a_error != Iso14443_4aErrorNone) {
             error = mf_desfire_process_error(iso14443_4a_error);
@@ -53,7 +52,7 @@ MfDesfireError mf_desfire_send_chunks(
 
         while(bit_buffer_starts_with_byte(instance->rx_buffer, MF_DESFIRE_FLAG_HAS_NEXT)) {
             Iso14443_4aError iso14443_4a_error = iso14443_4a_poller_send_block(
-                instance->iso14443_4a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
+                instance->iso14443_4a_poller, instance->tx_buffer, instance->rx_buffer);
 
             if(iso14443_4a_error != Iso14443_4aErrorNone) {
                 error = mf_desfire_process_error(iso14443_4a_error);
@@ -77,11 +76,7 @@ MfDesfireError
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -103,11 +98,7 @@ MfDesfireError
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -130,11 +121,7 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -163,11 +150,7 @@ MfDesfireError mf_desfire_poller_async_read_key_versions(
     for(uint32_t i = 0; i < count; ++i) {
         bit_buffer_set_byte(instance->input_buffer, 1, i);
 
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -190,11 +173,7 @@ MfDesfireError
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -226,11 +205,8 @@ MfDesfireError mf_desfire_poller_async_select_application(
     bit_buffer_append_bytes(
         instance->input_buffer, (const uint8_t*)id, sizeof(MfDesfireApplicationId));
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error =
+        mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
     return error;
 }
@@ -245,11 +221,7 @@ MfDesfireError
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -283,11 +255,7 @@ MfDesfireError mf_desfire_poller_async_read_file_settings(
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -339,11 +307,7 @@ MfDesfireError mf_desfire_poller_async_read_file_data(
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -368,11 +332,7 @@ MfDesfireError mf_desfire_poller_async_read_file_value(
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 
@@ -401,11 +361,7 @@ MfDesfireError mf_desfire_poller_async_read_file_records(
     MfDesfireError error;
 
     do {
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+        error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
         if(error != MfDesfireErrorNone) break;
 

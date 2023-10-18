@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-#define MF_DESFIRE_POLLER_STANDARD_FWT_FC (200000)
-
 typedef enum {
     MfDesfirePollerStateIdle,
     MfDesfirePollerStateReadVersion,
@@ -54,8 +52,7 @@ const MfDesfireData* mf_desfire_poller_get_data(MfDesfirePoller* instance);
 MfDesfireError mf_desfire_send_chunks(
     MfDesfirePoller* instance,
     const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt);
+    BitBuffer* rx_buffer);
 
 MfDesfireError
     mf_desfire_poller_async_read_version(MfDesfirePoller* instance, MfDesfireVersion* data);

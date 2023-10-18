@@ -53,8 +53,7 @@ Iso14443_4aError
 Iso14443_4aError iso14443_4a_poller_send_block(
     Iso14443_4aPoller* instance,
     const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt) {
+    BitBuffer* rx_buffer) {
     furi_assert(instance);
 
     bit_buffer_reset(instance->tx_buffer);
@@ -64,7 +63,10 @@ Iso14443_4aError iso14443_4a_poller_send_block(
 
     do {
         Iso14443_3aError iso14443_3a_error = iso14443_3a_poller_send_standard_frame(
-            instance->iso14443_3a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
+            instance->iso14443_3a_poller,
+            instance->tx_buffer,
+            instance->rx_buffer,
+            iso14443_4a_get_fwt_fc_max(instance->data));
 
         if(iso14443_3a_error != Iso14443_3aErrorNone) {
             error = iso14443_4a_process_error(iso14443_3a_error);
