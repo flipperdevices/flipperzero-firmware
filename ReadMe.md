@@ -44,7 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fix: [Debug: Launch app on Flipper broken in VSCode #982 (By jamisondeerek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/982)
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Patreon Update: SD Card Assets now include the dolphin folder with Manifest Switcher files found here](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
-- [CFW Settings - Interface - Desktop - Animations Selector (By RogueMaster)]() [You must copy these files to your SD dolphin folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
+- Settings: [CFW Settings for Desktop Animations Selector (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d07f27fd259ce049ca7b928a9dd3e8242a769d01) [You must copy these files to your SD dolphin folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
 
 <a name="release">
 
@@ -181,6 +181,7 @@ $ ./fbt dolphin_ext
 - Settings: OFW PR [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
+- Settings: [CFW Settings for Desktop Animations Selector (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d07f27fd259ce049ca7b928a9dd3e8242a769d01)
 - Settings: [CFW Settings for Desktop Settings & Passport Settings (By ESurge)]
 - Settings: [CFW Settings for Dark Mode (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/83e836fc797ce9ce8998a5d9b1fde6a172480bf2)
 - Settings: [CFW Settings Layout options for Commodore 64 for Main Menu (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/5a47e7a4a8459a32f493b2f2f4c20137e98da1a1)
