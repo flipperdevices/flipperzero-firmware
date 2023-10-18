@@ -30,45 +30,42 @@ typedef struct {
     FuriHalNfcEventInternalType event;
     FuriHalInterruptId irq_id;
     IRQn_Type irq_type;
-    bool is_configured;
 #ifdef FURI_HAL_NFC_TIMER_DEBUG
     const GpioPin* pin;
 #endif
 } FuriHalNfcTimerConfig;
 
-static FuriHalNfcTimerConfig furi_hal_nfc_timers[FuriHalNfcTimerCount] = {
+static const FuriHalNfcTimerConfig furi_hal_nfc_timers[FuriHalNfcTimerCount] = {
     [FuriHalNfcTimerFwt] =
         {
-#ifdef FURI_HAL_NFC_TIMER_DEBUG
-            .pin = &gpio_ext_pa7,
-#endif
             .timer = TIM1,
             .bus = FuriHalBusTIM1,
             .event = FuriHalNfcEventInternalTypeTimerFwtExpired,
             .irq_id = FuriHalInterruptIdTim1UpTim16,
             .irq_type = TIM1_UP_TIM16_IRQn,
-            .is_configured = false,
+#ifdef FURI_HAL_NFC_TIMER_DEBUG
+            .pin = &gpio_ext_pa7,
+#endif
         },
     [FuriHalNfcTimerBlockTx] =
         {
-#ifdef FURI_HAL_NFC_TIMER_DEBUG
-            .pin = &gpio_ext_pa6,
-#endif
             .timer = TIM17,
             .bus = FuriHalBusTIM17,
             .event = FuriHalNfcEventInternalTypeTimerBlockTxExpired,
             .irq_id = FuriHalInterruptIdTim1TrgComTim17,
             .irq_type = TIM1_TRG_COM_TIM17_IRQn,
-            .is_configured = false,
+#ifdef FURI_HAL_NFC_TIMER_DEBUG
+            .pin = &gpio_ext_pa6,
+#endif
         },
 };
 
 static void furi_hal_nfc_timer_irq_callback(void* context) {
     // Returning removed const-ness
-    const FuriHalNfcTimerConfig* timer_config = context;
-    if(LL_TIM_IsActiveFlag_UPDATE(timer_config->timer)) {
-        LL_TIM_ClearFlag_UPDATE(timer_config->timer);
-        furi_hal_nfc_event_set(timer_config->event);
+    const FuriHalNfcTimerConfig* config = context;
+    if(LL_TIM_IsActiveFlag_UPDATE(config->timer)) {
+        LL_TIM_ClearFlag_UPDATE(config->timer);
+        furi_hal_nfc_event_set(config->event);
 #ifdef FURI_HAL_NFC_TIMER_DEBUG
         furi_hal_gpio_write(timer_config->pin, false);
 #endif
@@ -92,8 +89,6 @@ static void furi_hal_nfc_timer_init(FuriHalNfcTimer timer) {
         (FuriHalNfcTimerConfig*)config);
     NVIC_SetPriority(config->irq_type, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
     NVIC_EnableIRQ(config->irq_type);
-    //TODO: remove
-    furi_hal_nfc_timers[timer].is_configured = true;
 #ifdef FURI_HAL_NFC_TIMER_DEBUG
     furi_hal_gpio_init(config->pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_write(config->pin, false);
@@ -106,12 +101,14 @@ static void furi_hal_nfc_timer_deinit(FuriHalNfcTimer timer) {
     LL_TIM_ClearFlag_UPDATE(config->timer);
     furi_hal_interrupt_set_isr(config->irq_id, NULL, NULL);
     NVIC_DisableIRQ(config->irq_type);
-    //TODO: remove
-    furi_hal_nfc_timers[timer].is_configured = false;
 
     if(furi_hal_bus_is_enabled(config->bus)) {
         furi_hal_bus_disable(config->bus);
     }
+#ifdef FURI_HAL_NFC_TIMER_DEBUG
+    furi_hal_gpio_init_simple(config->pin, GpioModeAnalog);
+    furi_hal_gpio_write(config->pin, false);
+#endif
 }
 
 static int32_t furi_hal_nfc_timer_get_compensation(FuriHalNfcTimer timer) {
@@ -139,28 +136,28 @@ static inline bool furi_hal_nfc_timer_is_running(FuriHalNfcTimer timer) {
 static void furi_hal_nfc_timer_start_core_ticks(FuriHalNfcTimer timer, uint64_t core_ticks) {
     furi_check(!furi_hal_nfc_timer_is_running(timer));
 
+    const FuriHalNfcTimerConfig* config = &furi_hal_nfc_timers[timer];
+    furi_check(furi_hal_bus_is_enabled(config->bus));
+
     const uint32_t prescaler = (core_ticks - 1) / UINT16_MAX;
     furi_check(prescaler <= UINT16_MAX);
 
     const uint32_t arr_reg = core_ticks / (prescaler + 1);
     furi_check(arr_reg <= UINT16_MAX);
 
-    TIM_TypeDef* tim_x = furi_hal_nfc_timers[timer].timer;
+    LL_TIM_DisableIT_UPDATE(config->timer);
 
-    LL_TIM_DisableIT_UPDATE(tim_x);
+    LL_TIM_SetPrescaler(config->timer, prescaler);
+    LL_TIM_SetAutoReload(config->timer, arr_reg);
 
-    LL_TIM_SetPrescaler(tim_x, prescaler);
-    LL_TIM_SetAutoReload(tim_x, arr_reg);
-
-    LL_TIM_GenerateEvent_UPDATE(tim_x);
-    while(!LL_TIM_IsActiveFlag_UPDATE(tim_x))
+    LL_TIM_GenerateEvent_UPDATE(config->timer);
+    while(!LL_TIM_IsActiveFlag_UPDATE(config->timer))
         ;
-    LL_TIM_ClearFlag_UPDATE(tim_x);
+    LL_TIM_ClearFlag_UPDATE(config->timer);
 
-    LL_TIM_EnableIT_UPDATE(tim_x);
-    LL_TIM_EnableCounter(tim_x);
+    LL_TIM_EnableIT_UPDATE(config->timer);
+    LL_TIM_EnableCounter(config->timer);
 #ifdef FURI_HAL_NFC_TIMER_DEBUG
-    const FuriHalNfcTimerConfig* config = &furi_hal_nfc_timers[timer];
     furi_hal_gpio_write(config->pin, true);
 #endif
 }
@@ -180,18 +177,17 @@ static void furi_hal_nfc_timer_start_fc(FuriHalNfcTimer timer, uint32_t time_fc)
 }
 
 static void furi_hal_nfc_timer_stop(FuriHalNfcTimer timer) {
-    TIM_TypeDef* tim_x = furi_hal_nfc_timers[timer].timer;
+    const FuriHalNfcTimerConfig* config = &furi_hal_nfc_timers[timer];
 
-    LL_TIM_DisableIT_UPDATE(tim_x);
-    LL_TIM_DisableCounter(tim_x);
-    LL_TIM_SetCounter(tim_x, 0);
-    LL_TIM_SetAutoReload(tim_x, 0);
+    LL_TIM_DisableIT_UPDATE(config->timer);
+    LL_TIM_DisableCounter(config->timer);
+    LL_TIM_SetCounter(config->timer, 0);
+    LL_TIM_SetAutoReload(config->timer, 0);
 
-    if(LL_TIM_IsActiveFlag_UPDATE(tim_x)) {
-        LL_TIM_ClearFlag_UPDATE(tim_x);
+    if(LL_TIM_IsActiveFlag_UPDATE(config->timer)) {
+        LL_TIM_ClearFlag_UPDATE(config->timer);
     }
 #ifdef FURI_HAL_NFC_TIMER_DEBUG
-    const FuriHalNfcTimerConfig* config = &furi_hal_nfc_timers[timer];
     furi_hal_gpio_write(config->pin, false);
 #endif
 }
@@ -209,27 +205,22 @@ void furi_hal_nfc_timers_deinit() {
 }
 
 void furi_hal_nfc_timer_fwt_start(uint32_t time_fc) {
-    furi_check(furi_hal_nfc_timers[FuriHalNfcTimerFwt].is_configured);
     furi_hal_nfc_timer_start_fc(FuriHalNfcTimerFwt, time_fc);
 }
 
 void furi_hal_nfc_timer_fwt_stop() {
-    furi_check(furi_hal_nfc_timers[FuriHalNfcTimerFwt].is_configured);
     furi_hal_nfc_timer_stop(FuriHalNfcTimerFwt);
 }
 
 void furi_hal_nfc_timer_block_tx_start(uint32_t time_fc) {
-    furi_check(furi_hal_nfc_timers[FuriHalNfcTimerBlockTx].is_configured);
     furi_hal_nfc_timer_start_fc(FuriHalNfcTimerBlockTx, time_fc);
 }
 
 void furi_hal_nfc_timer_block_tx_start_us(uint32_t time_us) {
-    furi_check(furi_hal_nfc_timers[FuriHalNfcTimerBlockTx].is_configured);
     furi_hal_nfc_timer_start_us(FuriHalNfcTimerBlockTx, time_us);
 }
 
 void furi_hal_nfc_timer_block_tx_stop() {
-    furi_check(furi_hal_nfc_timers[FuriHalNfcTimerBlockTx].is_configured);
     furi_hal_nfc_timer_stop(FuriHalNfcTimerBlockTx);
 }
 
