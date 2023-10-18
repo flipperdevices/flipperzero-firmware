@@ -28,7 +28,8 @@ static bool mf_ultralight_listener_check_access(
     bool is_write_op = (access_type == MfUltralightListenerAccessTypeWrite);
 
     do {
-        if((instance->features & MfUltralightFeatureSupportPasswordAuth) == 0) {
+        if(!mf_ultralight_support_feature(
+               instance->features, MfUltralightFeatureSupportPasswordAuth)) {
             access_success = true;
             break;
         }
@@ -67,8 +68,11 @@ static void mf_ultralight_listener_perform_read(
     bool do_i2c_page_check) {
     uint16_t pages_total = instance->data->pages_total;
     mf_ultralight_mirror_read_prepare(start_page, instance);
-    for(uint8_t i = 0; i < page_cnt; i++) {
+    for(uint8_t i = 0, rollover = 0; i < page_cnt; i++) {
         uint16_t page = start_page + i;
+
+        bool page_restricted = !mf_ultralight_listener_check_access(
+            instance, page, MfUltralightListenerAccessTypeRead);
 
         if(do_i2c_page_check && !mf_ultralight_i2c_validate_pages(page, page, instance))
             memset(pages[i].data, 0, sizeof(MfUltralightPage));
@@ -78,7 +82,9 @@ static void mf_ultralight_listener_perform_read(
             if(do_i2c_page_check)
                 page = mf_ultralight_i2c_provide_page_by_requested(page, instance);
 
-            pages[i] = instance->data->page[page % pages_total];
+            page = page_restricted ? rollover++ : page % pages_total;
+            pages[i] = instance->data->page[page];
+
             mf_ultralight_mirror_read_handler(page, pages[i].data, instance);
         }
     }
