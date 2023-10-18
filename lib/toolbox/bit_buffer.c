@@ -313,10 +313,9 @@ void bit_buffer_append_bytes(BitBuffer* buf, const uint8_t* data, size_t size_by
     furi_assert(buf);
     furi_assert(data);
 
-    size_t buf_size_bytes = bit_buffer_get_size_bytes(buf);
+    const size_t buf_size_bytes = bit_buffer_get_size_bytes(buf);
     furi_assert(buf->capacity_bytes >= buf_size_bytes + size_bytes);
 
-    // TODO: Correct size
     memcpy(&buf->data[buf_size_bytes], data, size_bytes);
     buf->size_bits += size_bytes * BITS_IN_BYTE;
 }
