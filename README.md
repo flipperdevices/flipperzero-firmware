@@ -1,6 +1,7 @@
 # Flipperzero-StepCounter-fap
 This is a simple StepCounter/Pedometer for FlipperZero using a Memsic2125 module. 
-> Thanks to @jamisonderek for the tutorial on how to implement Memsic2125 module on Flipper Zero, and for the support.
+
+Thanks to @jamisonderek for the tutorial on how to implement Memsic2125 module on Flipper Zero, and for the support.
 
 # Links  
 <img src="https://raw.githubusercontent.com/grugnoymeme/flipperzero-StepCounter-fap/main/images/memsic_2125_chip.jpg" width="200" />
