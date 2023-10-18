@@ -14,7 +14,7 @@
 
 const char* const anim_style_names[AnimStyleCount] = {
     "None",      "Default",   "Minimal",      "420",       "420+18",        "ALL",
-    "Anime",     "Anime+420", "Anime+420+18", "BMO",       "Cherry",        "Corp Logos",
+    "Anime",     "Anime+420", "Anime+420+18", "BMO",       "Cherry 18+",    "Corp Logos",
     "DBZ",       "Digim0n",   "Dolphin",      "Hackz",     "Mario",         "NYAN",
     "One Piece", "P0kemon",   "RM 18+",       "RM Select", "RM Select 18+", "SAO",
     "Science",   "SJUMP",     "Squatch",      "Stock",     "WatchDogs",
