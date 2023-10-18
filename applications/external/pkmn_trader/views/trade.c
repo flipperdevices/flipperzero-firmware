@@ -695,7 +695,7 @@ void trade_enter_callback(void* context) {
     furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, trade);
 
     /* Create a trade patch list from the current trade block */
-    plist_create(trade->trade_block, &(trade->patch_list));
+    plist_create(trade->trade_block, trade->patch_list);
 }
 
 void disconnect_pin(const GpioPin* pin) {
@@ -749,8 +749,6 @@ void trade_free(void* trade_ctx) {
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
 
     disconnect_pin(&GAME_BOY_CLK);
-
-    plist_free(trade->patch_list);
 
     view_free_model(trade->view);
     view_free(trade->view);

@@ -29,20 +29,20 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1017-1744-0.93.1-2d1dc65](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-17 17:44 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-17 17:44 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-17 22:15 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-17 22:15 EST`
 - Updated: [XRemote v1.0.6 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - UL: SubGHz: Add 4 more systems to Add Manually (untested!)
 - UL: SubGHz: Add Manually fixes
 - Updated: [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
 - Toxic groups (UL/XFW) are advertising a mis-spelling of my domain. Please be cautions to use the correct one. https://rogue-master.net/ NOT ROUGE MASTER
 - UL: [Added NiceFloR-S to ignore options, removed colons. #620 (By G2Dolphin)](https://github.com/DarkFlippers/unleashed-firmware/pull/620)
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - UL: Fix Ignore Nice FloR-S option (By xMasterX)
 - Updated: [BLE Spam v2.0 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Android Device is Reboot Cooldown vs ~15min + Bool Fix + Icon (By xMasterX) + Refactor+Bug Fixes+More Android pairs (By Willy-JL)
 - Updated: [WiFi (Marauder) v6.4 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add Swiftpair Spam, Evilportal sethtml, and LS command #36 (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/36)
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware) Removed Unneded Import & Screens From xMasterX
 - Fix: [Debug: Launch app on Flipper broken in VSCode #982 (By jamisondeerek)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/982)
+- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
