@@ -153,6 +153,15 @@ struct trade_model {
     const PokemonTable* pokemon_table;
 };
 
+void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
+    furi_assert(context);
+    UNUSED(arg);
+
+    struct trade_ctx* trade = context;
+
+    plist_create(&(trade->patch_list), trade->trade_block);
+}
+
 void screen_gameboy_connect(Canvas* const canvas) {
     furi_assert(canvas);
 
@@ -381,6 +390,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
             // TODO: What does counter signify here?
             /* It looks like counter is just intended to wait for a sequence of 00s, but its not even really a sequence, just, 5 bytes in a row. */
             if(counter == 5) {
+                /* XXX: Set the ready to go state sooner in the link establishment. Maybe change the text a bit? */
                 trade->trade_centre_state = READY_TO_GO;
                 //  CLICK EN LA MESA, when the gameboy clicks on the trade table
                 model->gameboy_status = GAMEBOY_READY;
@@ -535,6 +545,9 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
                 sizeof(struct name));
             model->curr_pokemon = pokemon_table_get_num_from_index(
                 trade->pokemon_table, trade->trade_block->party_members[0]);
+
+            /* Schedule a callback outside of ISR context to rebuild the patch list */
+            furi_timer_pending_callback(pokemon_plist_recreate_callback, trade, 0);
         }
         break;
 
@@ -695,7 +708,7 @@ void trade_enter_callback(void* context) {
     furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, trade);
 
     /* Create a trade patch list from the current trade block */
-    plist_create(trade->trade_block, trade->patch_list);
+    plist_create(&(trade->patch_list), trade->trade_block);
 }
 
 void disconnect_pin(const GpioPin* pin) {
