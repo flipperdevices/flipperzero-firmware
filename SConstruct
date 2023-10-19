@@ -67,22 +67,22 @@ if GetOption("fullenv") or any(
     # Target for self-update package
     dist_basic_arguments = [
         "--bundlever",
-        '"${UPDATE_VERSION_STRING}"',
+        "${UPDATE_VERSION_STRING}",
     ]
     dist_radio_arguments = [
         "--radio",
-        '"${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}"',
+        "${ROOT_DIR.abspath}/${COPRO_STACK_BIN_DIR}/${COPRO_STACK_BIN}",
         "--radiotype",
         "${COPRO_STACK_TYPE}",
         "${COPRO_DISCLAIMER}",
         "--obdata",
-        '"${ROOT_DIR.abspath}/${COPRO_OB_DATA}"',
+        "${ROOT_DIR.abspath}/${COPRO_OB_DATA}",
         "--stackversion",
         "${COPRO_CUBE_VERSION}",
     ]
     dist_resource_arguments = [
         "-r",
-        '${RESOURCES_ROOT}"',
+        firmware_env.subst("${RESOURCES_ROOT}"),
     ]
     dist_splash_arguments = (
         [
