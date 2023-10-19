@@ -31,7 +31,7 @@ jobs:
         if: success()
         timeout-minutes: 10
         run: |
-          ./fbt firmware_latest flash SWD_TRANSPORT_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt resources firmware_latest flash SWD_TRANSPORT_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
 
       - name: 'Wait for flipper and format ext'
         id: format_ext
@@ -49,8 +49,7 @@ jobs:
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/resources /ext
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/unit_tests /ext/unit_tests
+          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send build/latest/resources /ext
           python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
