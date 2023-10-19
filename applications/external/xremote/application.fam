@@ -10,6 +10,6 @@ App(
     fap_icon="assets/App_Icon_10x10.png",
     fap_author="kala13x",
     fap_weburl="https://github.com/kala13x/flipper-xremote",
-    fap_version=(1, 0),
+    fap_version=(1, 1),
     fap_description="Advanced infrared remote control",
 )
