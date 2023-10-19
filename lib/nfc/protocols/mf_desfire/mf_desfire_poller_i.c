@@ -103,6 +103,7 @@ MfDesfireError
         if(!mf_desfire_version_parse(data, instance->result_buffer)) {
             FURI_LOG_D(TAG, "Wrong version response size");
             mf_desfire_dump_buffer(instance->result_buffer);
+            error = MfDesfireErrorProtocol;
         }
     } while(false);
 
