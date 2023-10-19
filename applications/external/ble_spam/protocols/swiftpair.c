@@ -1,16 +1,16 @@
 #include "swiftpair.h"
-#include "_registry.h"
+#include "_protocols.h"
 
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/bluetooth-swift-pair
 
-const char* swiftpair_get_name(const BleSpamProtocolCfg* _cfg) {
+const char* swiftpair_get_name(const ProtocolCfg* _cfg) {
     const SwiftpairCfg* cfg = &_cfg->swiftpair;
     UNUSED(cfg);
     return "SwiftPair";
 }
 
-void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProtocolCfg* _cfg) {
+void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const SwiftpairCfg* cfg = _cfg ? &_cfg->swiftpair : NULL;
 
     const char* display_name;
@@ -47,7 +47,7 @@ void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProto
     *_packet = packet;
 }
 
-const BleSpamProtocol ble_spam_protocol_swiftpair = {
+const Protocol protocol_swiftpair = {
     .icon = &I_windows,
     .get_name = swiftpair_get_name,
     .make_packet = swiftpair_make_packet,

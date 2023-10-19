@@ -8,4 +8,4 @@ typedef struct {
     char display_name[25];
 } SwiftpairCfg;
 
-extern const BleSpamProtocol ble_spam_protocol_swiftpair;
+extern const Protocol protocol_swiftpair;

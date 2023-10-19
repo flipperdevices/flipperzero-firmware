@@ -33,4 +33,4 @@ typedef struct {
     } data;
 } ContinuityCfg;
 
-extern const BleSpamProtocol ble_spam_protocol_continuity;
+extern const Protocol protocol_continuity;

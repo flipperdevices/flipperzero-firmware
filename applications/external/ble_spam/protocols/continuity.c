@@ -1,5 +1,5 @@
 #include "continuity.h"
-#include "_registry.h"
+#include "_protocols.h"
 
 // Hacked together by @Willy-JL
 // iOS 17 Crash by @ECTO-1A
@@ -16,7 +16,7 @@ static const char* type_names[ContinuityTypeCount] = {
     [ContinuityTypeNearbyInfo] = "Nearby Info",
     [ContinuityTypeCustomCrash] = "Custom Packet",
 };
-const char* continuity_get_name(const BleSpamProtocolCfg* _cfg) {
+const char* continuity_get_name(const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = &_cfg->continuity;
     return type_names[cfg->type];
 }
@@ -33,7 +33,7 @@ static uint8_t packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeCustomCrash] = HEADER_LEN + 11,
 };
 
-void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProtocolCfg* _cfg) {
+void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = _cfg ? &_cfg->continuity : NULL;
 
     ContinuityType type;
@@ -269,7 +269,7 @@ void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const BleSpamProt
     *_packet = packet;
 }
 
-const BleSpamProtocol ble_spam_protocol_continuity = {
+const Protocol protocol_continuity = {
     .icon = &I_apple,
     .get_name = continuity_get_name,
     .make_packet = continuity_make_packet,
