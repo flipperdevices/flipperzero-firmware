@@ -41,7 +41,6 @@ static void
     FuriString* buffer = furi_string_alloc();
     subghz_protocol_decoder_base_get_string(decoder_base, buffer);
     subghz_receiver_reset(receiver);
-    FURI_LOG_I(TAG, "PACKET:\r\n%s", furi_string_get_cstr(buffer));
     if(context->callback) {
         context->callback(buffer, context->callback_context);
     }
@@ -119,7 +118,9 @@ void start_listening(
 
     FURI_LOG_I(TAG, "Listening at frequency: %lu\r\n", frequency);
 
-    context->thread = furi_thread_alloc_ex("RX", 1024, listen_rx, context);
+    // This thread name is used by the genie protocol decoder to determine if it is running in the
+    // context of this application.  If it is, it will not attempt to find the next code.
+    context->thread = furi_thread_alloc_ex("genie-rx", 1024, listen_rx, context);
     furi_thread_start(context->thread);
 }
 
