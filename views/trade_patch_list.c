@@ -69,18 +69,18 @@ void plist_create(struct patch_list **plist, TradeBlock* trade_block) {
 
     *plist = plist_alloc();
     /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
-    /* The first half of the patch list covers offsets 0x00 - 0xfc, which
-     * is expressed as 0x01 - 0xfd. An 0xFF byte is added to signify the
+    /* The first half of the patch list covers offsets 0x00 - 0xfb, which
+     * is expressed as 0x01 - 0xfc. An 0xFF byte is added to signify the
      * end of the first part. The second half of the patch list covers
-     * offsets 0xfd - 0x107. Which is expressed as 0x01 - 0xb. A 0xFF byte
+     * offsets 0xfc - 0x107. Which is expressed as 0x01 - 0xc. A 0xFF byte
      * is added to signify the end of the second part/
      */
     for (i = 0; i < 264; i++) {
-        if (i == 0xFD)
+        if (i == 0xFC)
             plist_append(*plist, 0xFF);
 
         if (trade_party_flat[i] == 0xFE) {
-            plist_append(*plist, (i % 0xfd) + 1);
+            plist_append(*plist, (i % 0xfc) + 1);
 	    trade_party_flat[i] = 0xFF;
 	}
     }
