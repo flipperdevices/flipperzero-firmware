@@ -54,11 +54,6 @@ class Main(App):
             type=int,
             required=False,
         )
-        self.parser_manifest.add_argument(
-            "--static-dir",
-            help="Static files to add to resources",
-            required=True,
-        )
         self.parser_manifest.set_defaults(func=self.manifest)
 
         self.parser_copro = self.subparsers.add_parser(
@@ -227,11 +222,6 @@ class Main(App):
             self.logger.error(f'"{directory_path}" is not a directory')
             exit(255)
 
-        shutil.copytree(
-            self.args.static_dir,
-            directory_path,
-            dirs_exist_ok=True,
-        )
         manifest_file = os.path.join(directory_path, "Manifest")
         old_manifest = Manifest()
         if os.path.exists(manifest_file):

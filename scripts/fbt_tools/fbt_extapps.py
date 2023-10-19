@@ -344,6 +344,17 @@ def resources_fap_dist_emitter(target, source, env):
             source.append(app_artifacts.compact)
             target.append(resources_root.File(dist_path))
 
+    # Deploy apps' resources too
+    for app in env["APPBUILD"].apps:
+        if not app.resources:
+            continue
+        apps_resource_dir = app._appdir.Dir(app.resources)
+        for res_file in env.GlobRecursive("*", apps_resource_dir):
+            if not isinstance(res_file, File):
+                continue
+            source.append(res_file)
+            target.append(resources_root.File(res_file.get_path(apps_resource_dir)))
+
     assert len(target) == len(source)
     return (target, source)
 

@@ -6,7 +6,6 @@ assetsenv = env.Clone(
     tools=["fbt_assets"],
     FW_LIB_NAME="assets",
     GIT_UNIX_TIMESTAMP=get_git_commit_unix_timestamp(),
-    RESOURCES_STATIC_ROOT=env.Dir("#/assets/resources"),
 )
 assetsenv.ApplyLibFlags()
 
@@ -102,7 +101,6 @@ if assetsenv["IS_BASE_FIRMWARE"]:
                     "manifest",
                     "${TARGET.dir.posix}",
                     "--timestamp=${GIT_UNIX_TIMESTAMP}",
-                    "--static-dir=${RESOURCES_STATIC_ROOT}",
                 ]
             ],
             "${RESMANIFESTCOMSTR}",
