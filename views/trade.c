@@ -369,7 +369,6 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 
     uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
     uint8_t* input_block_flat = (uint8_t*)trade->input_block;
-    uint8_t* input_party_flat = (uint8_t*)trade->input_block->party;
     static int counter; // Should be able to be made static in used function
 			// May need to make another state PRE-init or something to reset this on re-entry?
     struct trade_model* model = NULL;
@@ -498,10 +497,10 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
                 default: // Any nonzero value will cause a patch
                     if (!patch_pt_2) {
                         /* Pt 1 is 0x00 - 0xFC */
-                        input_party_flat[in-1] = 0xFE;
+                        input_block_flat[in-1] = 0xFE;
                     } else {
                         /* Pt 2 is 0xFD - 0x107 */
-                        input_party_flat[0xFD + in-1] = 0xFE;
+                        input_block_flat[0xFD + in-1] = 0xFE;
                     }
                     break;
                 }
