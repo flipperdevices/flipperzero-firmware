@@ -1,7 +1,8 @@
+import time
+
 import pytest
 from flippigator.extensions.proxmark_wrapper import proxmark_wrapper
 from flippigator.flippigator import FlipperHEXKeyboard, FlipperTextKeyboard
-import time
 
 
 class TestEmulateClassic:
