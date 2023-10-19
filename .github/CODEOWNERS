@@ -45,7 +45,7 @@
 /targets/ @skotopes @DrZlo13 @hedger @nminaylov
 
 # Assets
-/assets/resources/infrared/ @skotopes @DrZlo13 @hedger @gsurkov
+/applications/main/infrared/resources/ @skotopes @DrZlo13 @hedger @gsurkov
 
 # Documentation
 /documentation/ @skotopes @DrZlo13 @hedger @drunkbatya

@@ -75,7 +75,7 @@ jobs:
           mkdir artifacts map_analyser_files
           cp dist/${TARGET}-*/* artifacts/ || true
           tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
-            -C assets resources
+            -C build/latest/resources .
           tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
             -C dist/${TARGET}-*/apps/Debug .
           tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \

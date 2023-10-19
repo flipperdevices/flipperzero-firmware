@@ -175,7 +175,7 @@ distenv.Depends(firmware_env["FW_RESOURCES"], external_apps_artifacts.resources_
 fap_deploy = distenv.PhonyTarget(
     "fap_deploy",
     "${PYTHON3} ${FBT_SCRIPT_DIR}/storage.py -p ${FLIP_PORT} send ${SOURCE} /ext/apps",
-    source=Dir("#/assets/resources/apps"),
+    source=firmware_env.Dir(("${RESOURCES_ROOT}/apps")),
 )
 
 
