@@ -33,6 +33,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-18 16:05 EST`
 - [SD Card Assets now include the dolphin folder with Manifest Switcher files, they can be found here.](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
 - [Improvement to code structure for animation loading (By LeeroysHub)](https://github.com/LeeroysHub/)
+- Updated: [XRemote v1.0.7 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- Updated commented: [Genie Recorder v2.4 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder)
 
 <a name="release">
 
@@ -455,7 +457,7 @@ $ ./fbt dolphin_ext
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
-- [XRemote v1.0.6 (By kala13x)](https://github.com/kala13x/flipper-xremote)
+- [XRemote v1.0.7 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
 

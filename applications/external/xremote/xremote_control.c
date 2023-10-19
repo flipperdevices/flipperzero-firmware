@@ -25,9 +25,9 @@ static uint32_t xremote_control_view_exit_callback(void* context) {
     return XRemoteViewIRSubmenu;
 }
 
-static void xremote_ir_clear_callback(void* context) {
+static void xremote_buttons_clear_callback(void* context) {
     xremote_app_assert_void(context);
-    infrared_remote_free((InfraredRemote*)context);
+    xremote_app_buttons_free((XRemoteAppButtons*)context);
 }
 
 static void xremote_control_submenu_callback(void* context, uint32_t index) {
@@ -53,28 +53,14 @@ static void xremote_control_submenu_callback(void* context, uint32_t index) {
     }
 }
 
-static InfraredRemote* xremote_load_ir_buttons(XRemoteAppContext* app_ctx) {
-    /* Show file selection dialog (returns selected file path with app_ctx->file_path) */
-    if(!xremote_app_browser_select_file(app_ctx, XREMOTE_APP_EXTENSION)) return NULL;
-    InfraredRemote* remote = infrared_remote_alloc();
-
-    /* Load buttons from the selected path */
-    if(!infrared_remote_load(remote, app_ctx->file_path)) {
-        infrared_remote_free(remote);
-        return NULL;
-    }
-
-    return remote;
-}
-
 XRemoteApp* xremote_control_alloc(XRemoteAppContext* app_ctx) {
     /* Open file browser and load buttons from selected file */
-    InfraredRemote* remote = xremote_load_ir_buttons(app_ctx);
-    xremote_app_assert(remote, NULL);
+    XRemoteAppButtons* buttons = xremote_app_buttons_load(app_ctx);
+    xremote_app_assert(buttons, NULL);
 
     /* Allocate remote controller app with submenu */
     XRemoteApp* app = xremote_app_alloc(app_ctx);
-    xremote_app_set_user_context(app, remote, xremote_ir_clear_callback);
+    xremote_app_set_user_context(app, buttons, xremote_buttons_clear_callback);
     xremote_app_submenu_alloc(app, XRemoteViewIRSubmenu, xremote_control_submenu_exit_callback);
 
     xremote_app_submenu_add(

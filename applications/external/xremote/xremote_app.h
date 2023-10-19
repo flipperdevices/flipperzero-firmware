@@ -28,6 +28,10 @@
 #include "views/xremote_common_view.h"
 #include "xc_icons.h"
 
+//////////////////////////////////////////////////////////////////////////////
+// XRemote generic functions and definitions
+//////////////////////////////////////////////////////////////////////////////
+
 #define XREMOTE_APP_EXTENSION ".ir"
 #define XREMOTE_APP_FOLDER ANY_PATH("infrared")
 #define XREMOTE_APP_TEXT_MAX 128
@@ -47,6 +51,10 @@ ViewOrientation xremote_app_get_orientation(uint8_t orientation_index);
 const char* xremote_app_get_orientation_str(ViewOrientation view_orientation);
 uint32_t xremote_app_get_orientation_index(ViewOrientation view_orientation);
 
+//////////////////////////////////////////////////////////////////////////////
+// XRemote application settings
+//////////////////////////////////////////////////////////////////////////////
+
 typedef struct {
     ViewOrientation orientation;
     XRemoteAppExit exit_behavior;
@@ -58,6 +66,10 @@ void xremote_app_settings_free(XRemoteAppSettings* settings);
 
 bool xremote_app_settings_store(XRemoteAppSettings* settings);
 bool xremote_app_settings_load(XRemoteAppSettings* settings);
+
+//////////////////////////////////////////////////////////////////////////////
+// XRemote gloal context shared between every child application
+//////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
     XRemoteAppSettings* app_settings;
@@ -76,6 +88,36 @@ void xremote_app_context_notify_led(XRemoteAppContext* app_ctx);
 void xremote_app_notification_blink(NotificationApp* notifications);
 bool xremote_app_send_signal(XRemoteAppContext* app_ctx, InfraredSignal* signal);
 bool xremote_app_browser_select_file(XRemoteAppContext* app_ctx, const char* extension);
+
+//////////////////////////////////////////////////////////////////////////////
+// XRemote buttons and custom button pairs
+//////////////////////////////////////////////////////////////////////////////
+
+typedef struct {
+    InfraredRemote* remote;
+    FuriString* custom_up;
+    FuriString* custom_down;
+    FuriString* custom_left;
+    FuriString* custom_right;
+    FuriString* custom_ok;
+    FuriString* custom_back;
+    FuriString* custom_up_hold;
+    FuriString* custom_down_hold;
+    FuriString* custom_left_hold;
+    FuriString* custom_right_hold;
+    FuriString* custom_ok_hold;
+} XRemoteAppButtons;
+
+void xremote_app_buttons_free(XRemoteAppButtons* buttons);
+XRemoteAppButtons* xremote_app_buttons_alloc();
+XRemoteAppButtons* xremote_app_buttons_load(XRemoteAppContext* app_ctx);
+
+bool xremote_app_extension_store(XRemoteAppButtons* buttons, FuriString* path);
+bool xremote_app_extension_load(XRemoteAppButtons* buttons, FuriString* path);
+
+//////////////////////////////////////////////////////////////////////////////
+// XRemote application factory
+//////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
     XRemoteClearCallback on_clear;

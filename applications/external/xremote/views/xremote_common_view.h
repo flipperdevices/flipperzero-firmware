@@ -21,6 +21,8 @@
 #include "../infrared/infrared_remote.h"
 
 #define XREMOTE_BUTTON_COUNT 26
+#define XREMOTE_NAME_MAX 16
+
 #define XREMOTE_COMMAND_POWER "Power"
 #define XREMOTE_COMMAND_SETUP "Setup"
 #define XREMOTE_COMMAND_INPUT "Input"
@@ -169,6 +171,7 @@ InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const 
 bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button);
 bool xremote_view_send_ir_msg_by_name(XRemoteView* rview, const char* name);
 
+void xremote_view_model_context_set(XRemoteView* rview, void* model_ctx);
 void xremote_view_set_context(XRemoteView* rview, void* context, XRemoteClearCallback on_clear);
 void* xremote_view_get_context(XRemoteView* rview);
 void xremote_view_clear_context(XRemoteView* rview);
