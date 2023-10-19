@@ -37,6 +37,8 @@ void beer_app_free(BeerApp** app) {
 
     furi_record_close(RECORD_GUI);
     furi_message_queue_free((*app)->event_queue);
+
+    free(*app);
 }
 
 int32_t beer_app(void* p) {
