@@ -1,0 +1,8 @@
+App(
+    appid="99",
+    name="99 bottles",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="beer_app",
+    fap_icon="99.png",
+    fap_category="Misc",
+)
