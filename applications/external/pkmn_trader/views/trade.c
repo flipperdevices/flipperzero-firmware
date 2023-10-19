@@ -483,28 +483,28 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 	     */
             if(counter > 6) {
                 send = plist_index_get(trade->patch_list, (counter - 7));
+            }
 
-                /* Patch received data */
-                /* This relies on the data sent only ever sending 0x00 after
-		 * part 2 of the patch list has been terminated. This is the
-		 * case in official Gen I code at this time.
-		 */
-                switch(in) {
-                case 0x00:
-                    break;
-                case 0xFF:
-                    patch_pt_2 = true;
-                    break;
-                default: // Any nonzero value will cause a patch
-                    if(!patch_pt_2) {
-                        /* Pt 1 is 0x00 - 0xFC */
-                        input_party_flat[in - 1] = 0xFE;
-                    } else {
-                        /* Pt 2 is 0xFD - 0x107 */
-                        input_party_flat[0xFD + in - 1] = 0xFE;
-                    }
-                    break;
+            /* Patch received data */
+            /* This relies on the data sent only ever sending 0x00 after
+             * part 2 of the patch list has been terminated. This is the
+             * case in official Gen I code at this time.
+             */
+            switch(in) {
+            case 0x00:
+                break;
+            case 0xFF:
+                patch_pt_2 = true;
+                break;
+            default: // Any nonzero value will cause a patch
+                if(!patch_pt_2) {
+                    /* Pt 1 is 0x00 - 0xFB */
+                    input_party_flat[in - 1] = 0xFE;
+                } else {
+                    /* Pt 2 is 0xFC - 0x107 */
+                    input_party_flat[0xFC + in - 1] = 0xFE;
                 }
+                break;
             }
 
             counter++;
