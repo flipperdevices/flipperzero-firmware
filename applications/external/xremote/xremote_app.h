@@ -94,13 +94,13 @@ bool xremote_app_browser_select_file(XRemoteAppContext* app_ctx, const char* ext
 //////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
+    XRemoteAppContext* app_ctx;
     InfraredRemote* remote;
     FuriString* custom_up;
     FuriString* custom_down;
     FuriString* custom_left;
     FuriString* custom_right;
     FuriString* custom_ok;
-    FuriString* custom_back;
     FuriString* custom_up_hold;
     FuriString* custom_down_hold;
     FuriString* custom_left_hold;
@@ -138,6 +138,11 @@ void xremote_app_submenu_add(
 void xremote_app_submenu_alloc(XRemoteApp* app, uint32_t index, ViewNavigationCallback prev_cb);
 void xremote_app_submenu_free(XRemoteApp* app);
 
+void xremote_app_view_alloc2(
+    XRemoteApp* app,
+    uint32_t view_id,
+    XRemoteViewAllocator2 allocator,
+    void* model_ctx);
 void xremote_app_view_alloc(XRemoteApp* app, uint32_t view_id, XRemoteViewAllocator allocator);
 void xremote_app_view_free(XRemoteApp* app);
 

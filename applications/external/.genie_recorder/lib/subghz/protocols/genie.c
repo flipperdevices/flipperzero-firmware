@@ -694,7 +694,7 @@ void subghz_protocol_decoder_genie_get_string(void* context, FuriString* output)
     // If we are in the genie thread (running the Genie Recorder app),
     // output the protocol & key, then exit without looking for the next code.
     const char* name = furi_thread_get_name(furi_thread_get_current_id());
-    if(strcmp(name, "genie-rx") == 0) {
+    if(name != NULL && strcmp(name, "genie-rx") == 0) {
         furi_string_cat_printf(
             output,
             "%s %dbit\r\n"

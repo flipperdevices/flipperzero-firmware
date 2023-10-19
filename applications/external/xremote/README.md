@@ -47,10 +47,10 @@ Button name | Description
     - [x] Control buttons page
     - [x] Navigation buttons page
     - [x] Player buttons page
-    - [ ] Custom buttons page
-    - [ ] Full button list
-    - [ ] Rename remote file
-    - [ ] Delete remote file
+    - [x] Custom buttons page
+    - [x] Edit custom layout
+    - [ ] Add or remove button
+    - [ ] All buttons page
 - [x] Application settings
     - [x] GUI to change settings
     - [x] Load settings from the file

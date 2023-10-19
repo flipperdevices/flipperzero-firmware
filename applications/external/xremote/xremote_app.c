@@ -90,8 +90,8 @@ bool xremote_app_extension_load(XRemoteAppButtons* buttons, FuriString* path) {
         if(!flipper_format_read_string(ff, "custom_right", tmp)) break;
         furi_string_set(buttons->custom_right, tmp);
 
-        if(!flipper_format_read_string(ff, "custom_back", tmp)) break;
-        furi_string_set(buttons->custom_back, tmp);
+        if(!flipper_format_read_string(ff, "custom_ok_hold", tmp)) break;
+        furi_string_set(buttons->custom_ok_hold, tmp);
 
         if(!flipper_format_read_string(ff, "custom_up_hold", tmp)) break;
         furi_string_set(buttons->custom_up_hold, tmp);
@@ -104,9 +104,6 @@ bool xremote_app_extension_load(XRemoteAppButtons* buttons, FuriString* path) {
 
         if(!flipper_format_read_string(ff, "custom_right_hold", tmp)) break;
         furi_string_set(buttons->custom_right_hold, tmp);
-
-        if(!flipper_format_read_string(ff, "custom_ok_hold", tmp)) break;
-        furi_string_set(buttons->custom_ok_hold, tmp);
 
         success = true;
     } while(false);
@@ -132,7 +129,6 @@ bool xremote_app_extension_store(XRemoteAppButtons* buttons, FuriString* path) {
         if(!flipper_format_write_string(ff, "custom_down", buttons->custom_down)) break;
         if(!flipper_format_write_string(ff, "custom_left", buttons->custom_left)) break;
         if(!flipper_format_write_string(ff, "custom_right", buttons->custom_right)) break;
-        if(!flipper_format_write_string(ff, "custom_back", buttons->custom_back)) break;
         if(!flipper_format_write_string(ff, "custom_ok_hold", buttons->custom_ok_hold)) break;
         if(!flipper_format_write_string(ff, "custom_up_hold", buttons->custom_up_hold)) break;
         if(!flipper_format_write_string(ff, "custom_down_hold", buttons->custom_down_hold)) break;
@@ -157,7 +153,6 @@ void xremote_app_buttons_free(XRemoteAppButtons* buttons) {
     furi_string_free(buttons->custom_left);
     furi_string_free(buttons->custom_right);
     furi_string_free(buttons->custom_ok);
-    furi_string_free(buttons->custom_back);
     furi_string_free(buttons->custom_up_hold);
     furi_string_free(buttons->custom_down_hold);
     furi_string_free(buttons->custom_left_hold);
@@ -167,29 +162,30 @@ void xremote_app_buttons_free(XRemoteAppButtons* buttons) {
 }
 
 XRemoteAppButtons* xremote_app_buttons_alloc() {
-    XRemoteAppButtons* btns = malloc(sizeof(XRemoteAppButtons));
-    btns->remote = infrared_remote_alloc();
+    XRemoteAppButtons* buttons = malloc(sizeof(XRemoteAppButtons));
+    buttons->remote = infrared_remote_alloc();
+    buttons->app_ctx = NULL;
 
     /* Setup default buttons for custom layout */
-    btns->custom_up = furi_string_alloc_set_str(XREMOTE_COMMAND_UP);
-    btns->custom_down = furi_string_alloc_set_str(XREMOTE_COMMAND_DOWN);
-    btns->custom_left = furi_string_alloc_set_str(XREMOTE_COMMAND_LEFT);
-    btns->custom_right = furi_string_alloc_set_str(XREMOTE_COMMAND_RIGHT);
-    btns->custom_ok = furi_string_alloc_set_str(XREMOTE_COMMAND_OK);
-    btns->custom_back = furi_string_alloc_set_str(XREMOTE_COMMAND_BACK);
-    btns->custom_up_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_POWER);
-    btns->custom_down_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_SETUP);
-    btns->custom_left_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_INPUT);
-    btns->custom_right_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_LIST);
-    btns->custom_ok_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_MENU);
+    buttons->custom_up = furi_string_alloc_set_str(XREMOTE_COMMAND_UP);
+    buttons->custom_down = furi_string_alloc_set_str(XREMOTE_COMMAND_DOWN);
+    buttons->custom_left = furi_string_alloc_set_str(XREMOTE_COMMAND_LEFT);
+    buttons->custom_right = furi_string_alloc_set_str(XREMOTE_COMMAND_RIGHT);
+    buttons->custom_ok = furi_string_alloc_set_str(XREMOTE_COMMAND_OK);
+    buttons->custom_up_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_INPUT);
+    buttons->custom_down_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_SETUP);
+    buttons->custom_left_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_MENU);
+    buttons->custom_right_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_LIST);
+    buttons->custom_ok_hold = furi_string_alloc_set_str(XREMOTE_COMMAND_POWER);
 
-    return btns;
+    return buttons;
 }
 
 XRemoteAppButtons* xremote_app_buttons_load(XRemoteAppContext* app_ctx) {
     /* Show file selection dialog (returns selected file path with app_ctx->file_path) */
     if(!xremote_app_browser_select_file(app_ctx, XREMOTE_APP_EXTENSION)) return NULL;
     XRemoteAppButtons* buttons = xremote_app_buttons_alloc();
+    buttons->app_ctx = app_ctx;
 
     /* Load buttons from the selected path */
     if(!infrared_remote_load(buttons->remote, app_ctx->file_path)) {
@@ -388,6 +384,26 @@ void xremote_app_view_alloc(XRemoteApp* app, uint32_t view_id, XRemoteViewAlloca
     app->view_id = view_id;
 
     app->view_ctx = allocator(app->app_ctx);
+    View* app_view = xremote_view_get_view(app->view_ctx);
+
+    ViewDispatcher* view_disp = app->app_ctx->view_dispatcher;
+    view_dispatcher_add_view(view_disp, app->view_id, app_view);
+}
+
+void xremote_app_view_alloc2(
+    XRemoteApp* app,
+    uint32_t view_id,
+    XRemoteViewAllocator2 allocator,
+    void* model_ctx) {
+    furi_assert(app);
+    xremote_app_assert_void(app->app_ctx);
+
+    if(app->view_id == view_id && app->view_ctx != NULL) return;
+
+    xremote_app_view_free(app);
+    app->view_id = view_id;
+
+    app->view_ctx = allocator(app->app_ctx, model_ctx);
     View* app_view = xremote_view_get_view(app->view_ctx);
 
     ViewDispatcher* view_disp = app->app_ctx->view_dispatcher;

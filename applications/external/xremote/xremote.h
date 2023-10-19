@@ -8,7 +8,7 @@
 
 #include "xremote_app.h"
 
-#define XREMOTE_BUILD_NUMBER 7
+#define XREMOTE_BUILD_NUMBER 10
 
 /* Returns FAP_VERSION + XREMOTE_BUILD_NUMBER */
 void xremote_get_version(char* version, size_t length);
