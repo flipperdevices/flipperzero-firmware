@@ -136,6 +136,11 @@ struct trade_ctx {
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
     struct patch_list* patch_list;
+
+    /* XXX: Lets add a variable back here to track trade state, to allow the main menu
+     * to show a second option of _continue_ trade, as well as modify the default trade
+     * option text to something like "restart trade/link/etc"
+     */
 };
 
 /* These are the needed variables for the draw callback */
@@ -364,11 +369,13 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 
     uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
     uint8_t* input_block_flat = (uint8_t*)trade->input_block;
+    uint8_t* input_party_flat = (uint8_t*)trade->input_block->party;
     static int counter; // Should be able to be made static in used function
         // May need to make another state PRE-init or something to reset this on re-entry?
     struct trade_model* model = NULL;
     static uint8_t in_pokemon_num;
     uint8_t send = in;
+    static bool patch_pt_2;
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
      * and what response to expect.
@@ -410,6 +417,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         /* I believe this is specifically 0xFD*/
         /* Also specifically it is repeated 10 times to signify that the random block is about to start */
         if((in & 0xF0) == 0xF0) trade->trade_centre_state = SEEN_FIRST_WAIT;
+        patch_pt_2 = false;
         break;
 
     case SEEN_FIRST_WAIT:
@@ -475,6 +483,28 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 	     */
             if(counter > 6) {
                 send = plist_index_get(trade->patch_list, (counter - 7));
+
+                /* Patch received data */
+                /* This relies on the data sent only ever sending 0x00 after
+		 * part 2 of the patch list has been terminated. This is the
+		 * case in official Gen I code at this time.
+		 */
+                switch(in) {
+                case 0x00:
+                    break;
+                case 0xFF:
+                    patch_pt_2 = true;
+                    break;
+                default: // Any nonzero value will cause a patch
+                    if(!patch_pt_2) {
+                        /* Pt 1 is 0x00 - 0xFC */
+                        input_party_flat[in - 1] = 0xFE;
+                    } else {
+                        /* Pt 2 is 0xFD - 0x107 */
+                        input_party_flat[0xFD + in - 1] = 0xFE;
+                    }
+                    break;
+                }
             }
 
             counter++;
@@ -484,8 +514,6 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
             if(counter == 197) trade->trade_centre_state = TRADE_PENDING;
         }
         break;
-
-        /* XXX: Patch incoming data here */
 
     case TRADE_PENDING:
         /* TODO: What are these states */
@@ -616,6 +644,7 @@ void transferBit(void* context) {
      * Could also maybe IRQ on either edge? and set data out when appropriate? */
     /* XXX: I'm not sure what this is accomplishing, as the data is valid on
      * the rising edge of the clock. This can likely go away.
+     * Need to set up IRQ as RiseFall and do the right thing here based on that.
      */
     while(!furi_hal_gpio_read(&GAME_BOY_CLK))
         ;
