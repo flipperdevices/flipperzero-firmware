@@ -5,13 +5,13 @@ from flippigator.extensions.proxmark_wrapper import proxmark_wrapper
 
 
 class TestEmulateNtag213:
-    @pytest.fixture(scope="class", autouse=True)
+    @pytest.fixture(scope="class", autouse=False)
     def emulate_ntag213(self, nav):
         nav.go_to_main_screen()
         if nav.open_file("NFC", "T_Ntag_213") == -1:
             assert 0, "File not found"
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture(scope="session", autouse=True)
     def reset_card_and_emulate(self, nav):
         nav.nfc.go_into()
         nav.open("Saved")
