@@ -1,10 +1,29 @@
 # flipper-xremote
-Advanced IR Remote App for Flipper Device 
 
-## About
+Advanced IR Remote App for Flipper Device
+
+## Idea
+
 Navigation to the menu to press each button individually can be often uncomfortable because it requires scrolling to the desired button and selecting it. The idea behind `XRemote` is that all physical buttons are pre-mapped to specific category buttons, and a physical button directly sends an infrared signal. This allows the flipper device to be used as a remote rather than as a tool that has a remote.
 
+## Learn new remote
+
 `XRemote` also introduces a more user-friendly learning approach. Instead of having to manually name each button on the flipper when cloning a remote, the learning tool informs you upfront which buttons it will record. All you need to do is press the corresponding button on your existing remote, eliminating the need to name them individually.
+
+## Custom Layout
+
+To customize your layout, open the saved remote file, select `Edit` in the menu, and configure which infrared commands should be transmitted when physical buttons are pressed or held. These changes will be stored in the existing remote file, which means that the configuration of custom buttons can be different for all remotes.
+
+<table align="center">
+    <tr>
+        <td align="center">Edit custom page buttons</td>
+    </tr>
+    <tr>
+        <td><img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/custom_layout.png" alt="XRemote edit layout"></td>
+    </tr>
+</table>
+
+## Standard file support
 
 The application is compatible with standard `.ir` files. However, to ensure functionality, names within these files must align with the predefined naming scheme. If the button is not highlighted when pressed or the notification LED does not light up, the button with the appropriate name cannot be found in the file.
 
@@ -43,21 +62,21 @@ Button name | Description
 - [x] Learn new remote
 - [x] Signal analyzer
 - [x] Use saved remote
-    - [x] General button page
-    - [x] Control buttons page
-    - [x] Navigation buttons page
-    - [x] Player buttons page
-    - [ ] Custom buttons page
-    - [ ] Full button list
-    - [ ] Rename remote file
-    - [ ] Delete remote file
+  - [x] General button page
+  - [x] Control buttons page
+  - [x] Navigation buttons page
+  - [x] Player buttons page
+  - [x] Custom buttons page
+  - [x] Edit custom layout
+  - [ ] Add or remove button
+  - [ ] All buttons page
 - [x] Application settings
-    - [x] GUI to change settings
-    - [x] Load settings from the file
-    - [x] Store settings to the file
-    - [x] Vertical/horizontal views
-    - [x] IR command repeat count
-    - [x] Exit button behavior
+  - [x] GUI to change settings
+  - [x] Load settings from the file
+  - [x] Store settings to the file
+  - [x] Vertical/horizontal views
+  - [x] IR command repeat count
+  - [x] Exit button behavior
 
 ## Screens
 
