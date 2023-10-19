@@ -54,7 +54,7 @@ struct __attribute__((__packed__)) name {
 };
 
 /* This is 415 bytes in memory/transmitted */
-/* But the gameboy seems to allocate 424 bytes? This includes 6 FD header, 3 00 tail, and trade block 415 bytes */
+/* But the gameboy seems to allocate 424 bytes? */
 struct __attribute__((__packed__)) trade_data_block {
     /* XXX: Change this to use struct name above */
     unsigned char trainer_name[11];
