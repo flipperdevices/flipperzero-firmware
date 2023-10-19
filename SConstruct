@@ -82,7 +82,7 @@ if GetOption("fullenv") or any(
     ]
     dist_resource_arguments = [
         "-r",
-        '"${ROOT_DIR.abspath}/assets/resources"',
+        '${RESOURCES_ROOT}"',
     ]
     dist_splash_arguments = (
         [

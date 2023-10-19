@@ -28,6 +28,8 @@ env = ENV.Clone(
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
     FW_FLAVOR=fw_build_meta["flavor"],
     LIB_DIST_DIR=fw_build_meta["build_dir"].Dir("lib"),
+    RESOURCES_ROOT=fw_build_meta["build_dir"].Dir("resources"),
+    TARGETS_ROOT=Dir("#/targets"),
     LINT_SOURCES=[
         Dir("applications"),
     ],
@@ -37,7 +39,7 @@ env = ENV.Clone(
     CPPPATH=[
         "#/furi",
         *(f"#/{app_dir[0]}" for app_dir in ENV["APPDIRS"] if app_dir[1]),
-        "#/firmware/targets/furi_hal_include",
+        "#/targets/furi_hal_include",
     ],
     # Specific flags for building libraries - always do optimized builds
     FW_LIB_OPTS={
@@ -104,7 +106,7 @@ lib_targets = env.BuildModules(
     [
         "lib",
         "assets",
-        "firmware",
+        "targets",
         "furi",
     ],
 )

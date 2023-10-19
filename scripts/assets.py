@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import shutil
 
 from flipper.app import App
 from flipper.assets.icon import file2image
@@ -52,6 +53,11 @@ class Main(App):
             default=0,
             type=int,
             required=False,
+        )
+        self.parser_manifest.add_argument(
+            "--static-dir",
+            help="Static files to add to resources",
+            required=True,
         )
         self.parser_manifest.set_defaults(func=self.manifest)
 
@@ -220,6 +226,12 @@ class Main(App):
         if not os.path.isdir(directory_path):
             self.logger.error(f'"{directory_path}" is not a directory')
             exit(255)
+
+        shutil.copytree(
+            self.args.static_dir,
+            directory_path,
+            dirs_exist_ok=True,
+        )
         manifest_file = os.path.join(directory_path, "Manifest")
         old_manifest = Manifest()
         if os.path.exists(manifest_file):

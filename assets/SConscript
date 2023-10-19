@@ -6,6 +6,7 @@ assetsenv = env.Clone(
     tools=["fbt_assets"],
     FW_LIB_NAME="assets",
     GIT_UNIX_TIMESTAMP=get_git_commit_unix_timestamp(),
+    RESOURCES_STATIC_ROOT=env.Dir("#/assets/resources"),
 )
 assetsenv.ApplyLibFlags()
 
@@ -65,34 +66,56 @@ env.SetDefault(FW_RESOURCES=None)
 if assetsenv["IS_BASE_FIRMWARE"]:
     # External dolphin animations
     dolphin_external = assetsenv.DolphinExtBuilder(
-        assetsenv.Dir("#/assets/resources/dolphin"),
+        assetsenv.Dir("${RESOURCES_ROOT}/dolphin"),
         assetsenv.Dir("#/assets/dolphin"),
         DOLPHIN_RES_TYPE="external",
     )
     if assetsenv["FORCE"]:
         assetsenv.AlwaysBuild(dolphin_external)
     assetsenv.Alias("dolphin_ext", dolphin_external)
-    assetsenv.Clean(dolphin_external, assetsenv.Dir("#/assets/resources/dolphin"))
+    assetsenv.Clean(dolphin_external, assetsenv.Dir("${RESOURCES_ROOT}/dolphin"))
+
+    # Copy src files to resources
+    # base_resources = assetsenv.Install(
+    #     "${RESOURCES_ROOT}", assetsenv.Dir("#/assets/resources")
+    # )
+    # base_resources = Command(
+    #     "${RESOURCES_ROOT}",
+    #     assetsenv.Dir("#/assets/resources"),
+    #     Copy("$TARGET", "$SOURCE"),
+    # )
+    # assetsenv.AlwaysBuild(base_resources)
 
     # Resources manifest
     resources = assetsenv.Command(
-        "#/assets/resources/Manifest",
+        "${RESOURCES_ROOT}/Manifest",
         assetsenv.GlobRecursive(
             "*",
-            assetsenv.Dir("resources").srcnode(),
+            "${RESOURCES_ROOT}",
             exclude=["Manifest"],
         ),
         action=Action(
-            '${PYTHON3} "${ASSETS_COMPILER}" manifest "${TARGET.dir.posix}" --timestamp=${GIT_UNIX_TIMESTAMP}',
+            [
+                [
+                    "${PYTHON3}",
+                    "${ASSETS_COMPILER}",
+                    "manifest",
+                    "${TARGET.dir.posix}",
+                    "--timestamp=${GIT_UNIX_TIMESTAMP}",
+                    "--static-dir=${RESOURCES_STATIC_ROOT}",
+                ]
+            ],
             "${RESMANIFESTCOMSTR}",
         ),
     )
-    assetsenv.Precious(resources)
+
+    # assetsenv.Depends(resources, base_resources)
+    # assetsenv.Precious(resources)
     assetsenv.AlwaysBuild(resources)
-    assetsenv.Clean(
-        resources,
-        assetsenv.Dir("#/assets/resources/apps"),
-    )
+    # assetsenv.Clean(
+    #     resources,
+    #     assetsenv.Dir("{$/apps"),
+    # )
 
     # Exporting resources node to external environment
     env.Replace(FW_RESOURCES=resources)

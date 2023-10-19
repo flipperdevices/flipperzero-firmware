@@ -14,7 +14,7 @@ appenv = ENV["APPENV"] = ENV.Clone(
         "fbt_assets",
         "fbt_sdk",
     ],
-    RESOURCES_ROOT=ENV.Dir("#/assets/resources"),
+    # RESOURCES_ROOT=ENV["BUILD_DIR"].Dir("resources"),
 )
 
 appenv.Replace(
