@@ -31,6 +31,8 @@ static MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_p
     instance->general_event.event_data = &instance->mf_desfire_event;
     instance->general_event.instance = instance;
 
+    nfc_set_fdt_poll_fc(iso14443_4a_poller->iso14443_3a_poller->nfc, 50000);
+
     return instance;
 }
 
