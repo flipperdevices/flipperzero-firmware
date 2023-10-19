@@ -74,17 +74,6 @@ if assetsenv["IS_BASE_FIRMWARE"]:
     assetsenv.Alias("dolphin_ext", dolphin_external)
     assetsenv.Clean(dolphin_external, assetsenv.Dir("${RESOURCES_ROOT}/dolphin"))
 
-    # Copy src files to resources
-    # base_resources = assetsenv.Install(
-    #     "${RESOURCES_ROOT}", assetsenv.Dir("#/assets/resources")
-    # )
-    # base_resources = Command(
-    #     "${RESOURCES_ROOT}",
-    #     assetsenv.Dir("#/assets/resources"),
-    #     Copy("$TARGET", "$SOURCE"),
-    # )
-    # assetsenv.AlwaysBuild(base_resources)
-
     # Resources manifest
     resources = assetsenv.Command(
         "${RESOURCES_ROOT}/Manifest",
@@ -107,7 +96,6 @@ if assetsenv["IS_BASE_FIRMWARE"]:
         ),
     )
 
-    # assetsenv.Depends(resources, base_resources)
     # assetsenv.Precious(resources)
     assetsenv.AlwaysBuild(resources)
     # assetsenv.Clean(

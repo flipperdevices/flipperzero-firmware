@@ -31,7 +31,7 @@ jobs:
         if: success()
         timeout-minutes: 10
         run: |
-          ./fbt flash SWD_TRANSPORT_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt firmware_latest flash SWD_TRANSPORT_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
 
       - name: 'Wait for flipper and format ext'
         id: format_ext
