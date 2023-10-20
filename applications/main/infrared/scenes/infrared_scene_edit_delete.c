@@ -51,7 +51,7 @@ void infrared_scene_edit_delete_on_enter(void* context) {
             0,
             "%s\n with %lu buttons",
             infrared_remote_get_name(remote),
-            infrared_remote_get_button_count(remote));
+            infrared_remote_get_signal_count(remote));
     } else {
         furi_assert(0);
     }
@@ -83,7 +83,7 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
 
             if(edit_target == InfraredEditTargetButton) {
                 furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
-                success = infrared_remote_delete_button(remote, app_state->current_button_index);
+                success = infrared_remote_delete_signal(remote, app_state->current_button_index);
                 app_state->current_button_index = InfraredButtonIndexNone;
             } else if(edit_target == InfraredEditTargetRemote) {
                 success = infrared_remote_remove(remote);

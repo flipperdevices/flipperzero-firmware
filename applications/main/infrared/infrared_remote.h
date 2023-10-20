@@ -12,23 +12,22 @@ void infrared_remote_reset(InfraredRemote* remote);
 const char* infrared_remote_get_name(const InfraredRemote* remote);
 const char* infrared_remote_get_path(const InfraredRemote* remote);
 
-size_t infrared_remote_get_button_count(const InfraredRemote* remote);
-const char* infrared_remote_get_button_name(const InfraredRemote* remote, size_t index);
-const InfraredSignal*
-    infrared_remote_get_button_signal(const InfraredRemote* remote, size_t index);
+size_t infrared_remote_get_signal_count(const InfraredRemote* remote);
+const char* infrared_remote_get_signal_name(const InfraredRemote* remote, size_t index);
+const InfraredSignal* infrared_remote_get_signal(const InfraredRemote* remote, size_t index);
 
-bool infrared_remote_find_button_by_name(
+bool infrared_remote_find_signal_by_name(
     const InfraredRemote* remote,
     const char* name,
     size_t* index);
 
-bool infrared_remote_add_button(
+bool infrared_remote_append_signal(
     InfraredRemote* remote,
     const InfraredSignal* signal,
     const char* name);
-bool infrared_remote_rename_button(InfraredRemote* remote, size_t index, const char* new_name);
-bool infrared_remote_delete_button(InfraredRemote* remote, size_t index);
-void infrared_remote_move_button(InfraredRemote* remote, size_t index, size_t new_index);
+bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const char* new_name);
+void infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index);
+bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index);
 
 bool infrared_remote_load(InfraredRemote* remote, const char* path);
 bool infrared_remote_rename(InfraredRemote* remote, const char* new_path);

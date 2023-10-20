@@ -274,7 +274,7 @@ bool infrared_add_remote_with_button(
     //
     // furi_string_free(new_name);
     // furi_string_free(new_path);
-    // return infrared_remote_add_button(remote, button_name, signal);
+    // return infrared_remote_append_signal(remote, button_name, signal);
 }
 
 bool infrared_rename_current_remote(Infrared* infrared, const char* new_name) {
@@ -336,9 +336,8 @@ void infrared_tx_start_signal(Infrared* infrared, const InfraredSignal* signal) 
 }
 
 void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
-    furi_assert(button_index < infrared_remote_get_button_count(infrared->remote));
-    const InfraredSignal* signal =
-        infrared_remote_get_button_signal(infrared->remote, button_index);
+    furi_assert(button_index < infrared_remote_get_signal_count(infrared->remote));
+    const InfraredSignal* signal = infrared_remote_get_signal(infrared->remote, button_index);
     infrared_tx_start_signal(infrared, signal);
 }
 
