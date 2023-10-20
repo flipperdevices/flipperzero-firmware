@@ -36,11 +36,11 @@ jobs:
 
       - name: Build
         shell: pwsh
-        run: ./ufbt.ps1 x --clean
+        run: ./ufbt.ps1 xs --clean
           
       - name: Analyze
         run: |
-          pvs-studio-analyzer analyze @.pvsoptions -f totp/.vscode/compile_commands.json -j -o PVS-Studio.log
+          pvs-studio-analyzer analyze @.pvsoptions -f totp/.vscode/compile_commands.json -j -o PVS-Studio.log --disableLicenseExpirationCheck
       - name: Convert report
         run: |
           plog-converter -t sarif -o pvs-report.sarif PVS-Studio.log
