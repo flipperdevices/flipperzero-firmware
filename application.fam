@@ -6,6 +6,7 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     fap_icon="matagotchi_10px.png",
+    fap_icon_assets="assets",
     fap_category="Games",
     fap_description="Tamagotchi like game",
     fap_author="MrModd",
