@@ -1,6 +1,6 @@
 #include "99.h"
 
-const int MAX_BEER = 99;
+const int BEER_MAX = 99;
 
 char* beer_plural(uint8_t cnt) {
     return cnt == 1 ? "bottle of beer" : "bottles of beer";
@@ -16,7 +16,7 @@ void beer_render_callback(Canvas* canvas, void* ctx) {
     uint8_t font_size = canvas_current_font_height(canvas) - 1;
     uint8_t pos = ((BeerApp*) ctx)->pos;
 
-    elements_scrollbar(canvas, MAX_BEER - pos, MAX_BEER + 1);
+    elements_scrollbar(canvas, BEER_MAX - pos, BEER_MAX + 1);
 
     if (pos == 0) {
         elements_multiline_text_aligned(
@@ -76,7 +76,7 @@ BeerApp* beer_app_alloc() {
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     view_port_input_callback_set(app->view_port, beer_input_callback, app->event_queue);
 
-    app->pos = MAX_BEER;
+    app->pos = BEER_MAX;
 
     return app;
 }
@@ -116,7 +116,7 @@ int32_t beer_main(void* p) {
                     break;
 
                 case InputKeyUp:
-                    if (app->pos < MAX_BEER) {
+                    if (app->pos < BEER_MAX) {
                         app->pos++;
                     }
 
