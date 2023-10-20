@@ -75,7 +75,7 @@ Button name | Description
     ```bash
     ./deploy.sh --fw=/path/to/the/firmware
     ```
-2. If you don't have the firmware please refer to the [official documentation](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md) for build instructions.
+2. If you don't have the firmware or the Linux please refer to the [official documentation](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md) for build instructions.
 
 ## Progress
 
