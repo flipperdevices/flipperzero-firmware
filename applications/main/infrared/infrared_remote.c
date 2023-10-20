@@ -7,6 +7,9 @@
 
 #define TAG "InfraredRemote"
 
+#define INFRARED_FILE_HEADER "IR signals file"
+#define INFRARED_FILE_VERSION (1)
+
 LIST_DEF(InfraredButtonNameList, FuriString*, FURI_STRING_OPLIST);
 
 struct InfraredRemote {
@@ -62,9 +65,7 @@ size_t infrared_remote_get_button_count(const InfraredRemote* remote) {
 InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index) {
     UNUSED(remote);
     UNUSED(index);
-    // furi_assert(index < InfraredButtonArray_size(remote->buttons));
-    // return *InfraredButtonArray_get(remote->buttons, index);
-    return NULL;
+    furi_crash("get_button() called");
 }
 
 const char* infrared_remote_get_button_name(const InfraredRemote* remote, size_t index) {
@@ -159,33 +160,8 @@ void infrared_remote_move_button(InfraredRemote* remote, size_t index_orig, size
 }
 
 bool infrared_remote_store(InfraredRemote* remote) {
-    furi_crash("No touchy");
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* ff = flipper_format_file_alloc(storage);
-    const char* path = furi_string_get_cstr(remote->path);
-
-    FURI_LOG_I(TAG, "store file: \'%s\'", path);
-
-    bool success = flipper_format_file_open_always(ff, path) &&
-                   flipper_format_write_header_cstr(ff, "IR signals file", 1);
-    if(success) {
-        // InfraredButtonArray_it_t it;
-        // for(InfraredButtonArray_it(it, remote->buttons); !InfraredButtonArray_end_p(it);
-        //     InfraredButtonArray_next(it)) {
-        //     InfraredRemoteButton* button = *InfraredButtonArray_cref(it);
-        //     success = infrared_signal_save(
-        //         infrared_remote_button_get_signal(button),
-        //         ff,
-        //         infrared_remote_button_get_name(button));
-        //     if(!success) {
-        //         break;
-        //     }
-        // }
-    }
-
-    flipper_format_free(ff);
-    furi_record_close(RECORD_STORAGE);
-    return success;
+    UNUSED(remote);
+    furi_crash("store() called");
 }
 
 bool infrared_remote_load(InfraredRemote* remote, FuriString* path) {
@@ -196,7 +172,7 @@ bool infrared_remote_load(InfraredRemote* remote, FuriString* path) {
     FuriString* buf;
     buf = furi_string_alloc();
 
-    FURI_LOG_I(TAG, "load file: \'%s\'", path_cstr);
+    FURI_LOG_I(TAG, "load file: '%s'", path_cstr);
     bool success = false;
 
     do {
@@ -205,7 +181,8 @@ bool infrared_remote_load(InfraredRemote* remote, FuriString* path) {
         uint32_t version;
         if(!flipper_format_read_header(ff, buf, &version)) break;
 
-        if(!furi_string_equal(buf, "IR signals file") || (version != 1)) break;
+        if(!furi_string_equal(buf, INFRARED_FILE_HEADER) || (version != INFRARED_FILE_VERSION))
+            break;
 
         path_extract_filename(path, buf, true);
 
@@ -224,6 +201,7 @@ bool infrared_remote_load(InfraredRemote* remote, FuriString* path) {
     furi_string_free(buf);
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
+
     return success;
 }
 

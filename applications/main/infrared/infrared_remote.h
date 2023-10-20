@@ -16,9 +16,6 @@ void infrared_remote_set_path(InfraredRemote* remote, const char* path);
 const char* infrared_remote_get_path(InfraredRemote* remote);
 
 size_t infrared_remote_get_button_count(const InfraredRemote* remote);
-
-InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index);
-
 const char* infrared_remote_get_button_name(const InfraredRemote* remote, size_t index);
 const InfraredSignal*
     infrared_remote_get_button_signal(const InfraredRemote* remote, size_t index);
@@ -30,6 +27,10 @@ bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name,
 bool infrared_remote_delete_button(InfraredRemote* remote, size_t index);
 void infrared_remote_move_button(InfraredRemote* remote, size_t index_orig, size_t index_dest);
 
-bool infrared_remote_store(InfraredRemote* remote);
 bool infrared_remote_load(InfraredRemote* remote, FuriString* path);
+bool infrared_remote_rename(InfraredRemote* remote, FuriString* new_path);
 bool infrared_remote_remove(InfraredRemote* remote);
+
+// DEPRECATED
+bool infrared_remote_store(InfraredRemote* remote);
+InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index);
