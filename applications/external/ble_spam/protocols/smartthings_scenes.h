@@ -1,0 +1,2 @@
+ADD_SCENE(smartthings_data, SmartthingsData)
+ADD_SCENE(smartthings_data_custom, SmartthingsDataCustom)

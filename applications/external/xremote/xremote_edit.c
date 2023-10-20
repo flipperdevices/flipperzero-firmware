@@ -13,15 +13,6 @@ typedef struct {
     XRemoteAppButtons* buttons;
 } XRemoteEditContext;
 
-#define XREMOTE_ORIENTATION_TEXT "Orientation"
-#define XREMOTE_ORIENTATION_MAX 2
-
-#define XREMOTE_EXIT_BEHAVIOR_TEXT "Exit Apps"
-#define XREMOTE_EXIT_BEHAVIOR_MAX 2
-
-#define XREMOTE_REPEAT_TEXT "IR Msg Repeat"
-#define XREMOTE_REPEAT_MAX 128
-
 static uint32_t xremote_edit_view_exit_callback(void* context) {
     UNUSED(context);
     return XRemoteViewIRSubmenu;

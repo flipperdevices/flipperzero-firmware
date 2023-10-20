@@ -23,12 +23,12 @@ typedef struct {
     ContinuityType type;
     union {
         struct {
+            uint16_t model_id;
             uint8_t prefix;
-            uint16_t model;
         } proximity_pair;
         struct {
-            uint8_t flags;
             uint8_t type;
+            uint8_t flags;
         } nearby_action;
     } data;
 } ContinuityCfg;

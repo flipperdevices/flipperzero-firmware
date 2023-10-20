@@ -1,0 +1,7 @@
+ADD_SCENE(continuity_pp_model_id, ContinuityPpModelId)
+ADD_SCENE(continuity_pp_model_id_custom, ContinuityPpModelIdCustom)
+ADD_SCENE(continuity_pp_prefix, ContinuityPpPrefix)
+ADD_SCENE(continuity_pp_prefix_custom, ContinuityPpPrefixCustom)
+ADD_SCENE(continuity_na_action_type, ContinuityNaActionType)
+ADD_SCENE(continuity_na_action_type_custom, ContinuityNaActionTypeCustom)
+ADD_SCENE(continuity_na_flags, ContinuityNaFlags)
