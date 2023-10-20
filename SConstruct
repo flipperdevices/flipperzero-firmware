@@ -95,7 +95,7 @@ if GetOption("fullenv") or any(
 
     selfupdate_dist = distenv.DistCommand(
         "updater_package",
-        (distenv["DIST_DEPENDS"], firmware_env["FW_RESOURCES"]),
+        (distenv["DIST_DEPENDS"], firmware_env["FW_RESOURCES_MANIFEST"]),
         DIST_EXTRA=[
             *dist_basic_arguments,
             *dist_radio_arguments,
@@ -128,7 +128,8 @@ if GetOption("fullenv") or any(
 
     # Installation over USB & CLI
     usb_update_package = distenv.AddUsbFlashTarget(
-        "#build/usbinstall.flag", (firmware_env["FW_RESOURCES"], selfupdate_dist)
+        "#build/usbinstall.flag",
+        (firmware_env["FW_RESOURCES_MANIFEST"], selfupdate_dist),
     )
     distenv.Alias("flash_usb_full", usb_update_package)
 
@@ -168,7 +169,9 @@ Depends(
 Alias("fap_dist", fap_dist)
 # distenv.Default(fap_dist)
 
-distenv.Depends(firmware_env["FW_RESOURCES"], external_apps_artifacts.resources_dist)
+distenv.Depends(
+    firmware_env["FW_RESOURCES_MANIFEST"], external_apps_artifacts.resources_dist
+)
 
 # Copy all faps to device
 

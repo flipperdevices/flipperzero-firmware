@@ -20,7 +20,7 @@ def main():
         logging.error("Flipper not found!")
         sys.exit(1)
 
-    with serial.Serial(flp_serial, timeout=150) as flipper:
+    with serial.Serial(flp_serial, timeout=300) as flipper:
         logging.info(f"Found Flipper at {flp_serial}")
         flipper.baudrate = 230400
         flipper.flushOutput()
