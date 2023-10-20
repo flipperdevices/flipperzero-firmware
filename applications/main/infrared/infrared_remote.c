@@ -1,12 +1,9 @@
 #include "infrared_remote.h"
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include <m-list.h>
+
 #include <toolbox/path.h>
 #include <storage/storage.h>
-#include <core/common_defines.h>
 
 #define TAG "InfraredRemote"
 

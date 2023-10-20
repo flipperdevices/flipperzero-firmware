@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdbool.h>
-
+#include "infrared_signal.h"
 #include "infrared_remote_button.h"
 
 typedef struct InfraredRemote InfraredRemote;
