@@ -43,7 +43,8 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             const char* arg = rpc_system_app_get_data(infrared->rpc_ctx);
             if(arg && (state == InfraredRpcStateIdle)) {
                 furi_string_set(infrared->file_path, arg);
-                result = infrared_remote_load(infrared->remote, infrared->file_path);
+                result = infrared_remote_load(
+                    infrared->remote, furi_string_get_cstr(infrared->file_path));
                 if(result) {
                     scene_manager_set_scene_state(
                         infrared->scene_manager, InfraredSceneRpc, InfraredRpcStateLoaded);

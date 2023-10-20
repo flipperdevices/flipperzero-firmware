@@ -38,7 +38,5 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
 }
 
 void infrared_scene_edit_move_on_exit(void* context) {
-    Infrared* infrared = context;
-    InfraredRemote* remote = infrared->remote;
-    infrared_remote_store(remote);
+    UNUSED(context);
 }
