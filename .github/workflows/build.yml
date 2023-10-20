@@ -1,0 +1,38 @@
+name: "FAP build"
+on:
+    push:
+        branches:
+            - main
+jobs:
+    fap-build:
+        runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            include:
+              - name: dev channel
+                sdk-channel: dev
+              - name: release channel
+                sdk-channel: release
+              - name: Unleashed dev
+                sdk-index-url: https://up.unleashedflip.com/directory.json
+                sdk-channel: dev
+              - name: Unleashed release
+                sdk-index-url: https://up.unleashedflip.com/directory.json
+                sdk-channel: release
+        name: 'Build for ${{ matrix.name }}'
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+            with:
+              submodules: recursive
+          - name: Build
+            uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+            id: build-app
+            with:
+              sdk-channel: ${{ matrix.sdk-channel }}
+              sdk-index-url: ${{ matrix.sdk-index-url }}
+          - name: Upload app artifacts
+            uses: actions/upload-artifact@v3
+            with:
+              name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+              path: ${{ steps.build-app.outputs.fap-artifacts }}
