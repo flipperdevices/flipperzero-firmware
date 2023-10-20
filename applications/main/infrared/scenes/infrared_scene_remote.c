@@ -31,12 +31,10 @@ void infrared_scene_remote_on_enter(void* context) {
     ButtonMenu* button_menu = infrared->button_menu;
     SceneManager* scene_manager = infrared->scene_manager;
 
-    size_t button_count = infrared_remote_get_button_count(remote);
-    for(size_t i = 0; i < button_count; ++i) {
-        InfraredRemoteButton* button = infrared_remote_get_button(remote, i);
+    for(size_t i = 0; i < infrared_remote_get_button_count(remote); ++i) {
         button_menu_add_item(
             button_menu,
-            infrared_remote_button_get_name(button),
+            infrared_remote_get_button_name(remote, i),
             i,
             infrared_scene_remote_button_menu_callback,
             ButtonMenuItemTypeCommon,

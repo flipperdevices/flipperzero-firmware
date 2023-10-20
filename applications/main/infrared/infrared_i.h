@@ -132,7 +132,7 @@ typedef enum {
 
 bool infrared_add_remote_with_button(Infrared* infrared, const char* name, InfraredSignal* signal);
 bool infrared_rename_current_remote(Infrared* infrared, const char* name);
-void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal);
+void infrared_tx_start_signal(Infrared* infrared, const InfraredSignal* signal);
 void infrared_tx_start_button_index(Infrared* infrared, size_t button_index);
 void infrared_tx_start_received(Infrared* infrared);
 void infrared_tx_stop(Infrared* infrared);

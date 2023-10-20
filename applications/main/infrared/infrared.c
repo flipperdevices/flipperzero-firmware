@@ -306,7 +306,7 @@ bool infrared_rename_current_remote(Infrared* infrared, const char* name) {
     return (status == FSE_OK || status == FSE_EXIST);
 }
 
-void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
+void infrared_tx_start_signal(Infrared* infrared, const InfraredSignal* signal) {
     if(infrared->app_state.is_transmitting) {
         return;
     }
@@ -318,11 +318,11 @@ void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
     }
 
     if(infrared_signal_is_raw(signal)) {
-        InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
+        const InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
         infrared_worker_set_raw_signal(
             infrared->worker, raw->timings, raw->timings_size, raw->frequency, raw->duty_cycle);
     } else {
-        InfraredMessage* message = infrared_signal_get_message(signal);
+        const InfraredMessage* message = infrared_signal_get_message(signal);
         infrared_worker_set_decoded_signal(infrared->worker, message);
     }
 
@@ -338,10 +338,8 @@ void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
 
 void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
     furi_assert(button_index < infrared_remote_get_button_count(infrared->remote));
-
-    InfraredRemoteButton* button = infrared_remote_get_button(infrared->remote, button_index);
-    InfraredSignal* signal = infrared_remote_button_get_signal(button);
-
+    const InfraredSignal* signal =
+        infrared_remote_get_button_signal(infrared->remote, button_index);
     infrared_tx_start_signal(infrared, signal);
 }
 

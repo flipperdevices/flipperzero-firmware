@@ -19,8 +19,8 @@ typedef struct {
 InfraredSignal* infrared_signal_alloc();
 void infrared_signal_free(InfraredSignal* signal);
 
-bool infrared_signal_is_raw(InfraredSignal* signal);
-bool infrared_signal_is_valid(InfraredSignal* signal);
+bool infrared_signal_is_raw(const InfraredSignal* signal);
+bool infrared_signal_is_valid(const InfraredSignal* signal);
 
 void infrared_signal_set_signal(InfraredSignal* signal, const InfraredSignal* other);
 
@@ -30,16 +30,14 @@ void infrared_signal_set_raw_signal(
     size_t timings_size,
     uint32_t frequency,
     float duty_cycle);
-InfraredRawSignal* infrared_signal_get_raw_signal(InfraredSignal* signal);
+
+const InfraredRawSignal* infrared_signal_get_raw_signal(const InfraredSignal* signal);
 
 void infrared_signal_set_message(InfraredSignal* signal, const InfraredMessage* message);
-InfraredMessage* infrared_signal_get_message(InfraredSignal* signal);
+const InfraredMessage* infrared_signal_get_message(const InfraredSignal* signal);
 
-bool infrared_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name);
+bool infrared_signal_save(const InfraredSignal* signal, FlipperFormat* ff, const char* name);
 bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name);
-bool infrared_signal_search_and_read(
-    InfraredSignal* signal,
-    FlipperFormat* ff,
-    const FuriString* name);
+bool infrared_signal_search_and_read(InfraredSignal* signal, FlipperFormat* ff, const char* name);
 
-void infrared_signal_transmit(InfraredSignal* signal);
+void infrared_signal_transmit(const InfraredSignal* signal);

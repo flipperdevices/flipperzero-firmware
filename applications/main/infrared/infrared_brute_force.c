@@ -129,7 +129,9 @@ void infrared_brute_force_stop(InfraredBruteForce* brute_force) {
 bool infrared_brute_force_send_next(InfraredBruteForce* brute_force) {
     furi_assert(brute_force->is_started);
     const bool success = infrared_signal_search_and_read(
-        brute_force->current_signal, brute_force->ff, brute_force->current_record_name);
+        brute_force->current_signal,
+        brute_force->ff,
+        furi_string_get_cstr(brute_force->current_record_name));
     if(success) {
         infrared_signal_transmit(brute_force->current_signal);
     }

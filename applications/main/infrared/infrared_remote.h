@@ -16,8 +16,14 @@ const char* infrared_remote_get_name(InfraredRemote* remote);
 void infrared_remote_set_path(InfraredRemote* remote, const char* path);
 const char* infrared_remote_get_path(InfraredRemote* remote);
 
-size_t infrared_remote_get_button_count(InfraredRemote* remote);
+size_t infrared_remote_get_button_count(const InfraredRemote* remote);
+
 InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index);
+
+const char* infrared_remote_get_button_name(const InfraredRemote* remote, size_t index);
+const InfraredSignal*
+    infrared_remote_get_button_signal(const InfraredRemote* remote, size_t index);
+
 bool infrared_remote_find_button_by_name(InfraredRemote* remote, const char* name, size_t* index);
 
 bool infrared_remote_add_button(InfraredRemote* remote, const char* name, InfraredSignal* signal);

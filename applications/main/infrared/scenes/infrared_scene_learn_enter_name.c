@@ -7,10 +7,10 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
     InfraredSignal* signal = infrared->received_signal;
 
     if(infrared_signal_is_raw(signal)) {
-        InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
+        const InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
         infrared_text_store_set(infrared, 0, "RAW_%d", raw->timings_size);
     } else {
-        InfraredMessage* message = infrared_signal_get_message(signal);
+        const InfraredMessage* message = infrared_signal_get_message(signal);
         infrared_text_store_set(
             infrared,
             0,
