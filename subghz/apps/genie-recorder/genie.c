@@ -42,7 +42,7 @@ typedef struct {
     bool pressed;
     uint32_t click_counter;
     uint32_t rx_counter;
-    uint16_t genie_save_counter;
+    uint32_t genie_save_counter;
     FuriString* key;
 } GenieApp;
 
@@ -116,8 +116,8 @@ static void genie_view_draw_callback(Canvas* canvas, void* model) {
         "Got %ld",
         app->genie_save_counter > 0 ? app->genie_save_counter : app->rx_counter);
     canvas_draw_str(canvas, 75, 45, buffer);
-    if(app->genie_save_counter != 0xFFFF) {
-        snprintf(buffer, COUNT_OF(buffer), "Remaining codes %d", 65536 - app->genie_save_counter);
+    if(app->genie_save_counter < 0x10000) {
+        snprintf(buffer, COUNT_OF(buffer), "Remaining codes %ld", 65536 - app->genie_save_counter);
         canvas_draw_str(canvas, 1, 32, buffer);
     } else {
         canvas_draw_str(canvas, 1, 30, "Found all codes!");
@@ -136,7 +136,7 @@ static uint32_t last_count() {
     return count;
 }
 
-static uint16_t save_count(uint32_t count, FuriString* key, bool is_genie) {
+static uint32_t save_count(uint32_t count, FuriString* key, bool is_genie) {
     FURI_LOG_D(TAG, "%ld,%s", count, furi_string_get_cstr(key));
     genie_save(count, key);
     if(is_genie) {
@@ -169,7 +169,7 @@ static void genie_packet(FuriString* buffer, void* context) {
     GenieApp* app = (GenieApp*)context;
     app->processing = true;
 
-/*
+    /*
     if(furi_string_search_str(buffer, "KeeLoq 64bit") < furi_string_size(buffer)) {
         release_button(app);
         FURI_LOG_D(TAG, "KeeLoq 64bit packet");
@@ -180,7 +180,7 @@ static void genie_packet(FuriString* buffer, void* context) {
             save_count(app->click_counter, app->key, false);
         }
     } else 
-*/    
+*/
     if(furi_string_search_str(buffer, "Genie 64bit") < furi_string_size(buffer)) {
         release_button(app);
         FURI_LOG_D(TAG, "Genie 64bit packet");
@@ -198,7 +198,9 @@ static void genie_packet(FuriString* buffer, void* context) {
 static void genie_tick(void* context) {
     GenieApp* app = (GenieApp*)context;
     if(!app->processing) {
-        if(app->pressed) {
+        if(app->genie_save_counter > 0xFFFF) {
+            release_button(app);
+        } else if(app->pressed) {
             release_button(app);
         } else {
             app->click_counter++;
