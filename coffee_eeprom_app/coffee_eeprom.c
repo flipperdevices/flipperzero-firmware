@@ -31,12 +31,17 @@ static void coffee_render_callback(Canvas* const canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    elements_button_left(canvas, "Load");
-    elements_button_right(canvas, "Save");
-    elements_button_center(canvas, "Edit (Hold)");
-    canvas_set_font(canvas, FontPrimary);
-    furi_string_printf(context->msg, "Credit: %.2f EUR", (double) context->credit);
-    canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, furi_string_get_cstr(context->msg));
+     if(context->credit >= 0.0){
+        furi_string_printf(context->msg, "Credit: %.2f EUR", (double) context->credit);
+        elements_button_left(canvas, "Load");
+        elements_button_right(canvas, "Save");
+        elements_button_center(canvas, "Edit (Hold)");
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, furi_string_get_cstr(context->msg));
+
+    }else{
+        furi_string_printf(context->status, "EEPROM not connected!");
+    }   
     canvas_set_font(canvas, FontKeyboard);
     canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, furi_string_get_cstr(context->status));
 }

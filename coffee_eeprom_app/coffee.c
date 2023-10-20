@@ -63,38 +63,36 @@ float read_credit(){
     memset(data_buffer, 0, sizeof(data_buffer)); //reset array
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
 	bool is_ready = false;
-	while(!is_ready){
-		is_ready = furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000);
-		if(is_ready){
-			furi_hal_i2c_read_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x44, data_buffer, sizeof(data_buffer), (uint32_t) 1000);
-			int credit = 0;
-			int exponent = 14;
-			int hi, lo = 0;
-			for (size_t i = 0; i < sizeof(data_buffer); i++)
-			{  //iterate 2 bit at times
-				hi = 0;
-				lo = 0;
-				for (int j = 3; j >= 0; j--) {
-					int k = (data_buffer[i] % 16) >> j; // right shift
-					if (k & 1){
-						if(j>=2)
-							hi += pow(2, j-2);
-						else
-							lo += pow(2, j);
-					}
+	is_ready = furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000);
+	if(is_ready){
+		furi_hal_i2c_read_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x44, data_buffer, sizeof(data_buffer), (uint32_t) 1000);
+		int credit = 0;
+		int exponent = 14;
+		int hi, lo = 0;
+		for (size_t i = 0; i < sizeof(data_buffer); i++)
+		{  //iterate 2 bit at times
+			hi = 0;
+			lo = 0;
+			for (int j = 3; j >= 0; j--) {
+				int k = (data_buffer[i] % 16) >> j; // right shift
+				if (k & 1){
+					if(j>=2)
+						hi += pow(2, j-2);
+					else
+						lo += pow(2, j);
 				}
-				credit += hi * pow(2, exponent) + lo * pow(2, exponent-8);
-				exponent -= 2;
 			}
-			furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-			return credit / 100.00;
+			credit += hi * pow(2, exponent) + lo * pow(2, exponent-8);
+			exponent -= 2;
 		}
-		else{
-			FURI_LOG_D("COFFEE", "READ CREDIT: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
-		}
+		furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+		return credit / 100.00;
 	}
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-	return 0.0;
+	else{
+		furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+		FURI_LOG_D("COFFEE", "READ CREDIT: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
+		return -1.0;
+	}
 }
 void calc_credit(float value, uint8_t* result){
 	//credit
