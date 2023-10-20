@@ -45,7 +45,7 @@ bool infrared_scene_learn_enter_name_on_event(void* context, SceneManagerEvent e
                     infrared_add_remote_with_button(infrared, infrared->text_store[0], signal);
             } else {
                 success =
-                    infrared_remote_add_button(infrared->remote, infrared->text_store[0], signal);
+                    infrared_remote_add_button(infrared->remote, signal, infrared->text_store[0]);
             }
 
             if(success) {

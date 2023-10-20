@@ -73,7 +73,7 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
                 const int32_t current_button_index = app_state->current_button_index;
                 furi_assert(current_button_index != InfraredButtonIndexNone);
                 success = infrared_remote_rename_button(
-                    remote, infrared->text_store[0], current_button_index);
+                    remote, current_button_index, infrared->text_store[0]);
                 app_state->current_button_index = InfraredButtonIndexNone;
             } else if(edit_target == InfraredEditTargetRemote) {
                 success = infrared_rename_current_remote(infrared, infrared->text_store[0]);

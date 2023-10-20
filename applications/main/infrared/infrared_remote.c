@@ -113,10 +113,13 @@ bool infrared_remote_find_button_by_name(
     return false;
 }
 
-bool infrared_remote_add_button(InfraredRemote* remote, const char* name, InfraredSignal* signal) {
+bool infrared_remote_add_button(
+    InfraredRemote* remote,
+    const InfraredSignal* signal,
+    const char* name) {
     UNUSED(remote);
-    UNUSED(name);
     UNUSED(signal);
+    UNUSED(name);
     furi_crash("infrared_remote_add_button() not implemented");
     // InfraredRemoteButton* button = infrared_remote_button_alloc();
     // infrared_remote_button_set_name(button, name);
@@ -125,10 +128,10 @@ bool infrared_remote_add_button(InfraredRemote* remote, const char* name, Infrar
     // return infrared_remote_store(remote);
 }
 
-bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name, size_t index) {
+bool infrared_remote_rename_button(InfraredRemote* remote, size_t index, const char* new_name) {
     UNUSED(remote);
-    UNUSED(new_name);
     UNUSED(index);
+    UNUSED(new_name);
     furi_crash("infrared_remote_rename_button() not implemented");
     // furi_assert(index < InfraredButtonArray_size(remote->buttons));
     // InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, index);
@@ -147,10 +150,10 @@ bool infrared_remote_delete_button(InfraredRemote* remote, size_t index) {
     // return infrared_remote_store(remote);
 }
 
-void infrared_remote_move_button(InfraredRemote* remote, size_t index_orig, size_t index_dest) {
+void infrared_remote_move_button(InfraredRemote* remote, size_t index, size_t new_index) {
     UNUSED(remote);
-    UNUSED(index_orig);
-    UNUSED(index_dest);
+    UNUSED(index);
+    UNUSED(new_index);
     furi_crash("infrared_remote_move_button() not implemented");
     // furi_assert(index_orig < InfraredButtonArray_size(remote->buttons));
     // furi_assert(index_dest < InfraredButtonArray_size(remote->buttons));

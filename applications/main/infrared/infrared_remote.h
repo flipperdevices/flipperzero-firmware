@@ -22,10 +22,13 @@ bool infrared_remote_find_button_by_name(
     const char* name,
     size_t* index);
 
-bool infrared_remote_add_button(InfraredRemote* remote, const char* name, InfraredSignal* signal);
-bool infrared_remote_rename_button(InfraredRemote* remote, const char* new_name, size_t index);
+bool infrared_remote_add_button(
+    InfraredRemote* remote,
+    const InfraredSignal* signal,
+    const char* name);
+bool infrared_remote_rename_button(InfraredRemote* remote, size_t index, const char* new_name);
 bool infrared_remote_delete_button(InfraredRemote* remote, size_t index);
-void infrared_remote_move_button(InfraredRemote* remote, size_t index_orig, size_t index_dest);
+void infrared_remote_move_button(InfraredRemote* remote, size_t index, size_t new_index);
 
 bool infrared_remote_load(InfraredRemote* remote, const char* path);
 bool infrared_remote_rename(InfraredRemote* remote, const char* new_path);
