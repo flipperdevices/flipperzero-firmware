@@ -19,6 +19,8 @@ void GameboyLiveCamera::start()
     this->exposure_time = 0x0500;
     this->unk2 = 0x24;
     this->unk3 = 0xBF;
+    this->dithering = true;
+    this->rotate90 = false;
 
     pinMode(GAMEBOY_RST, OUTPUT);
     pinMode(GAMEBOY_CLK, OUTPUT);
@@ -221,8 +223,8 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
     int y, x;
     for (uint8_t y = 0; y < GBCAM_H; y++)
     {
-        Serial.print("Y:");
-        Serial.print((char)y);
+        Serial1.print("Y:");
+        Serial1.print((char)y);
 
         for (uint8_t x = 0; x < GBCAM_W; x += 8)
         {
@@ -249,11 +251,11 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
                     c &= ~(1 << j); // Establece el bit j en 0
                 }
             }
-            Serial.print(c); // Imprimir el valor de c para colores 2 o 3
+            Serial1.print(c); // Imprimir el valor de c para colores 2 o 3
         }
 
         ++y;
-        Serial.flush();
+        Serial1.flush();
     }
     this->setWaitMode();
 }

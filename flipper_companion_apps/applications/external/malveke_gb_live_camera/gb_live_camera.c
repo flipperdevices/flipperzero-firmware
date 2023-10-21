@@ -23,14 +23,15 @@ static void gb_live_camera_view_draw_callback(Canvas* canvas, void* _model) {
 
     if (!model->initialized){
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 8, 31, "GAME BOY");
+        canvas_draw_str(canvas, 8, 28, "GAME BOY");
         canvas_draw_icon(canvas, 76, 8, &I_gbcam_48x49);
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 8, 21, "WAITING");
+        canvas_draw_str(canvas, 8, 18, "WAITING");
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 8, 41, "CAMERA...");
+        canvas_draw_str(canvas, 8, 38, "CAMERA...");
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 9, 50, "Insert Cartridge");
+        canvas_draw_str(canvas, 9, 47, "Insert Cartridge");
+        elements_button_center(canvas, "Ok"); 
     }
 }
 
@@ -97,6 +98,7 @@ static void save_image(void* context) {
 }
 
 static bool gb_live_camera_view_input_callback(InputEvent* event, void* context) {
+    UartEchoApp* instance = context;
     if (event->type == InputTypePress){
         if (event->key == InputKeyUp){
             const char gblivecamera_command_enable_dithering[] = "gblivecamera -D\n";
@@ -115,7 +117,20 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
             furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_decrease_exposure, strlen(gblivecamera_command_decrease_exposure));
         }
         else if (event->key == InputKeyOk){
-            save_image(context);
+            with_view_model(
+                    instance->view,
+                    UartDumpModel * model,
+                    {
+                        if (!model->initialized){
+                            const char gblivecamera_command[] = "gblivecamera\n\n";
+                            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command, strlen(gblivecamera_command));
+                        } else {
+                            save_image(context);
+                        }
+                    },
+                    true);
+            
+            
         }
     }
     return false;
@@ -123,6 +138,8 @@ static bool gb_live_camera_view_input_callback(InputEvent* event, void* context)
 
 static uint32_t gb_live_camera_exit(void* context) {
     UNUSED(context);
+    const char stop_command[] = "stopgblivecamera\n";
+    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)stop_command, strlen(stop_command));
     return VIEW_NONE;
 }
 
@@ -245,36 +262,25 @@ static UartEchoApp* gb_live_camera_app_alloc() {
     app->worker_thread = furi_thread_alloc_ex("UsbUartWorker", 2048, gb_live_camera_worker, app);
     furi_thread_start(app->worker_thread);
 
-    // Enable uart listener
-    furi_hal_console_disable();
+    // Enable uart listener (UART & UART1)
     furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, gb_live_camera_on_irq_cb, app);
-  
+    furi_hal_uart_init(FuriHalUartIdLPUART1, 115200);
+    furi_hal_uart_set_br(FuriHalUartIdLPUART1, 115200);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, gb_live_camera_on_irq_cb, app);
 
-    //  furi_hal_uart_init(FuriHalUartIdLPUART1, 115200);
-    // furi_hal_uart_set_br(FuriHalUartIdLPUART1, 115200);
-    // furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, gb_live_camera_on_irq_cb, app);
-
-    const char gblivecamera_command[] = "gblivecamera\n\n";
-    // furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)gblivecamera_command, strlen(gblivecamera_command));
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command, strlen(gblivecamera_command));
-
-    // }
-    // furi_delay_ms(1);
     return app;
 }
 
 static void gb_live_camera_app_free(UartEchoApp* app) {
     furi_assert(app);
-    const char stop_command[] = "stopgblivecamera\n";
-    // furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)stop_command, strlen(stop_command));
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)stop_command, strlen(stop_command));
-    furi_delay_ms(500); 
-    // furi_hal_console_enable(); // this will also clear IRQ callback so thread is no longer referenced
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
+
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
+    furi_hal_uart_deinit(FuriHalUartIdLPUART1);
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);

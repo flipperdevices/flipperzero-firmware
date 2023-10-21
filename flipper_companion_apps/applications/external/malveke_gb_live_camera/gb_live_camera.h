@@ -64,7 +64,6 @@ struct UartDumpModel {
     File* cameraSav;
     bool initialized;
     int page;
-    //bool marauderInitialized;
     uint8_t row_ringbuffer[RING_BUFFER_LENGTH];
     uint8_t ringbuffer_index;
 };
