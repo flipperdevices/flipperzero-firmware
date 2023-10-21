@@ -154,14 +154,58 @@ bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const c
 }
 
 bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index) {
-    UNUSED(remote);
-    UNUSED(index);
-    furi_crash("infrared_remote_delete_signal() not implemented");
-    // furi_assert(index < InfraredButtonArray_size(remote->buttons));
-    // InfraredRemoteButton* button;
-    // InfraredButtonArray_pop_at(&button, remote->buttons, index);
-    // infrared_remote_button_free(button);
-    // return infrared_remote_store(remote);
+    const size_t signal_count = infrared_remote_get_signal_count(remote);
+    furi_check(index < signal_count);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff_in = flipper_format_buffered_file_alloc(storage);
+    FlipperFormat* ff_out = flipper_format_buffered_file_alloc(storage);
+
+    const char* path_in = furi_string_get_cstr(remote->path);
+    // TODO: Generate a random file name
+    const char* path_out = "/any/infrared/test_remove.ir";
+
+    bool success = false;
+    InfraredSignal* signal = infrared_signal_alloc();
+    FuriString* signal_name = furi_string_alloc();
+
+    do {
+        if(!flipper_format_buffered_file_open_existing(ff_in, path_in)) break;
+        if(!flipper_format_buffered_file_open_always(ff_out, path_out)) break;
+        if(!flipper_format_write_header_cstr(ff_out, INFRARED_FILE_HEADER, INFRARED_FILE_VERSION))
+            break;
+
+        size_t i;
+        for(i = 0; i < signal_count; ++i) {
+            // Load signals one by one from the input file
+            if(!infrared_signal_read(signal, ff_in, signal_name)) break;
+            // Skip the signal that needs to be deleted ...
+            if(i == index) continue;
+            // ... But copy all others to the output file
+            if(!infrared_signal_save(signal, ff_out, furi_string_get_cstr(signal_name))) break;
+        }
+
+        if(i != signal_count) break;
+
+        if(!flipper_format_buffered_file_close(ff_out)) break;
+        if(!flipper_format_buffered_file_close(ff_in)) break;
+
+        // TODO Delete old file, rename the new file
+
+        // TODO Remove one entry from signal list
+
+        success = true;
+    } while(false);
+
+    furi_string_free(signal_name);
+    infrared_signal_free(signal);
+
+    flipper_format_free(ff_out);
+    flipper_format_free(ff_in);
+
+    furi_record_close(RECORD_STORAGE);
+
+    return success;
 }
 
 void infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index) {

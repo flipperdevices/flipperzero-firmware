@@ -14,14 +14,12 @@ void infrared_scene_edit_rename_on_enter(void* context) {
         text_input_set_header_text(text_input, "Name the button");
 
         const int32_t current_button_index = infrared->app_state.current_button_index;
-        furi_assert(current_button_index != InfraredButtonIndexNone);
+        furi_check(current_button_index != InfraredButtonIndexNone);
 
-        InfraredRemoteButton* current_button =
-            infrared_remote_get_button(remote, current_button_index);
         enter_name_length = INFRARED_MAX_BUTTON_NAME_LENGTH;
         strncpy(
             infrared->text_store[0],
-            infrared_remote_button_get_name(current_button),
+            infrared_remote_get_signal_name(remote, current_button_index),
             enter_name_length);
 
     } else if(edit_target == InfraredEditTargetRemote) {
@@ -44,7 +42,7 @@ void infrared_scene_edit_rename_on_enter(void* context) {
 
         furi_string_free(folder_path);
     } else {
-        furi_assert(0);
+        furi_crash(NULL);
     }
 
     text_input_set_result_callback(

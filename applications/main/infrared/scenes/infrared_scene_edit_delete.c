@@ -13,30 +13,30 @@ void infrared_scene_edit_delete_on_enter(void* context) {
 
     const InfraredEditTarget edit_target = infrared->app_state.edit_target;
     if(edit_target == InfraredEditTargetButton) {
-        int32_t current_button_index = infrared->app_state.current_button_index;
-        furi_assert(current_button_index != InfraredButtonIndexNone);
-
         dialog_ex_set_header(dialog_ex, "Delete Button?", 64, 0, AlignCenter, AlignTop);
-        InfraredRemoteButton* current_button =
-            infrared_remote_get_button(remote, current_button_index);
-        InfraredSignal* signal = infrared_remote_button_get_signal(current_button);
 
-        if(infrared_signal_is_raw(signal)) {
-            const InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
+        const int32_t current_button_index = infrared->app_state.current_button_index;
+        furi_check(current_button_index != InfraredButtonIndexNone);
+        // TODO: Handle situation if signal could not be loaded (load it beforehand?)
+        infrared_remote_load_signal(remote, infrared->current_signal, current_button_index);
+
+        if(infrared_signal_is_raw(infrared->current_signal)) {
+            const InfraredRawSignal* raw =
+                infrared_signal_get_raw_signal(infrared->current_signal);
             infrared_text_store_set(
                 infrared,
                 0,
                 "%s\nRAW\n%ld samples",
-                infrared_remote_button_get_name(current_button),
+                infrared_remote_get_signal_name(remote, current_button_index),
                 raw->timings_size);
 
         } else {
-            const InfraredMessage* message = infrared_signal_get_message(signal);
+            const InfraredMessage* message = infrared_signal_get_message(infrared->current_signal);
             infrared_text_store_set(
                 infrared,
                 0,
                 "%s\n%s\nA=0x%0*lX C=0x%0*lX",
-                infrared_remote_button_get_name(current_button),
+                infrared_remote_get_signal_name(remote, current_button_index),
                 infrared_get_protocol_name(message->protocol),
                 ROUND_UP_TO(infrared_get_protocol_address_length(message->protocol), 4),
                 message->address,

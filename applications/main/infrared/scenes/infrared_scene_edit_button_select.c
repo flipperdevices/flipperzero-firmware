@@ -18,14 +18,14 @@ void infrared_scene_edit_button_select_on_enter(void* context) {
 
     const size_t button_count = infrared_remote_get_signal_count(remote);
     for(size_t i = 0; i < button_count; ++i) {
-        InfraredRemoteButton* button = infrared_remote_get_button(remote, i);
         submenu_add_item(
             submenu,
-            infrared_remote_button_get_name(button),
+            infrared_remote_get_signal_name(remote, i),
             i,
             infrared_scene_edit_button_select_submenu_callback,
             context);
     }
+
     if(button_count && app_state->current_button_index != InfraredButtonIndexNone) {
         submenu_set_selected_item(submenu, app_state->current_button_index);
         app_state->current_button_index = InfraredButtonIndexNone;
