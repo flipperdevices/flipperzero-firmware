@@ -142,7 +142,7 @@ static Infrared* infrared_alloc() {
 
     infrared->worker = infrared_worker_alloc();
     infrared->remote = infrared_remote_alloc();
-    infrared->received_signal = infrared_signal_alloc();
+    infrared->current_signal = infrared_signal_alloc();
     infrared->brute_force = infrared_brute_force_alloc();
 
     infrared->submenu = submenu_alloc();
@@ -232,7 +232,7 @@ static void infrared_free(Infrared* infrared) {
     scene_manager_free(infrared->scene_manager);
 
     infrared_brute_force_free(infrared->brute_force);
-    infrared_signal_free(infrared->received_signal);
+    infrared_signal_free(infrared->current_signal);
     infrared_remote_free(infrared->remote);
     infrared_worker_free(infrared->worker);
 
@@ -337,12 +337,14 @@ void infrared_tx_start_signal(Infrared* infrared, const InfraredSignal* signal) 
 
 void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
     furi_assert(button_index < infrared_remote_get_signal_count(infrared->remote));
-    const InfraredSignal* signal = infrared_remote_get_signal(infrared->remote, button_index);
-    infrared_tx_start_signal(infrared, signal);
+
+    if(infrared_remote_load_signal(infrared->remote, infrared->current_signal, button_index)) {
+        infrared_tx_start_current(infrared);
+    }
 }
 
-void infrared_tx_start_received(Infrared* infrared) {
-    infrared_tx_start_signal(infrared, infrared->received_signal);
+void infrared_tx_start_current(Infrared* infrared) {
+    infrared_tx_start_signal(infrared, infrared->current_signal);
 }
 
 void infrared_tx_stop(Infrared* infrared) {
@@ -399,13 +401,13 @@ void infrared_signal_received_callback(void* context, InfraredWorkerSignal* rece
 
     if(infrared_worker_signal_is_decoded(received_signal)) {
         infrared_signal_set_message(
-            infrared->received_signal, infrared_worker_get_decoded_signal(received_signal));
+            infrared->current_signal, infrared_worker_get_decoded_signal(received_signal));
     } else {
         const uint32_t* timings;
         size_t timings_size;
         infrared_worker_get_raw_signal(received_signal, &timings, &timings_size);
         infrared_signal_set_raw_signal(
-            infrared->received_signal,
+            infrared->current_signal,
             timings,
             timings_size,
             INFRARED_COMMON_CARRIER_FREQUENCY,

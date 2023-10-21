@@ -20,7 +20,7 @@ bool infrared_scene_debug_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InfraredCustomEventTypeSignalReceived) {
             InfraredDebugView* debug_view = infrared->debug_view;
-            InfraredSignal* signal = infrared->received_signal;
+            InfraredSignal* signal = infrared->current_signal;
 
             if(infrared_signal_is_raw(signal)) {
                 const InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);

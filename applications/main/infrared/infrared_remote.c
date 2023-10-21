@@ -14,7 +14,6 @@ LIST_DEF(InfraredButtonNameList, FuriString*, FURI_STRING_OPLIST);
 
 struct InfraredRemote {
     InfraredButtonNameList_t button_names;
-    InfraredSignal* current_signal;
     FuriString* name;
     FuriString* path;
 };
@@ -22,7 +21,6 @@ struct InfraredRemote {
 InfraredRemote* infrared_remote_alloc() {
     InfraredRemote* remote = malloc(sizeof(InfraredRemote));
     InfraredButtonNameList_init(remote->button_names);
-    remote->current_signal = infrared_signal_alloc();
     remote->name = furi_string_alloc();
     remote->path = furi_string_alloc();
     return remote;
@@ -30,7 +28,6 @@ InfraredRemote* infrared_remote_alloc() {
 
 void infrared_remote_free(InfraredRemote* remote) {
     InfraredButtonNameList_clear(remote->button_names);
-    infrared_signal_free(remote->current_signal);
     furi_string_free(remote->path);
     furi_string_free(remote->name);
     free(remote);
@@ -70,28 +67,36 @@ const char* infrared_remote_get_signal_name(const InfraredRemote* remote, size_t
     return furi_string_get_cstr(*InfraredButtonNameList_cget(remote->button_names, index));
 }
 
-const InfraredSignal* infrared_remote_get_signal(const InfraredRemote* remote, size_t index) {
+bool infrared_remote_load_signal(
+    const InfraredRemote* remote,
+    InfraredSignal* signal,
+    size_t index) {
     furi_assert(index < infrared_remote_get_signal_count(remote));
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
+
+    bool success = false;
 
     do {
         const char* path = furi_string_get_cstr(remote->path);
         if(!flipper_format_buffered_file_open_existing(ff, path)) break;
 
         const char* name = infrared_remote_get_signal_name(remote, index);
-        if(!infrared_signal_search_and_read(remote->current_signal, ff, name)) {
+
+        if(!infrared_signal_search_and_read(signal, ff, name)) {
             FURI_LOG_E(TAG, "Failed to load signal '%s' from file '%s'", name, path);
         }
 
         if(!flipper_format_buffered_file_close(ff)) break;
+
+        success = true;
     } while(false);
 
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 
-    return remote->current_signal;
+    return success;
 }
 
 bool infrared_remote_find_signal_by_name(

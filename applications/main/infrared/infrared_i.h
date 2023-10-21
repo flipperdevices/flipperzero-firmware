@@ -84,7 +84,7 @@ struct Infrared {
     NotificationApp* notifications;
     InfraredWorker* worker;
     InfraredRemote* remote;
-    InfraredSignal* received_signal;
+    InfraredSignal* current_signal;
     InfraredBruteForce* brute_force;
 
     Submenu* submenu;
@@ -134,7 +134,7 @@ bool infrared_add_remote_with_button(Infrared* infrared, const char* name, Infra
 bool infrared_rename_current_remote(Infrared* infrared, const char* new_name);
 void infrared_tx_start_signal(Infrared* infrared, const InfraredSignal* signal);
 void infrared_tx_start_button_index(Infrared* infrared, size_t button_index);
-void infrared_tx_start_received(Infrared* infrared);
+void infrared_tx_start_current(Infrared* infrared);
 void infrared_tx_stop(Infrared* infrared);
 void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...);
 void infrared_text_store_clear(Infrared* infrared, uint32_t bank);

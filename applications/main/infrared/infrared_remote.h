@@ -14,17 +14,22 @@ const char* infrared_remote_get_path(const InfraredRemote* remote);
 
 size_t infrared_remote_get_signal_count(const InfraredRemote* remote);
 const char* infrared_remote_get_signal_name(const InfraredRemote* remote, size_t index);
-const InfraredSignal* infrared_remote_get_signal(const InfraredRemote* remote, size_t index);
 
 bool infrared_remote_find_signal_by_name(
     const InfraredRemote* remote,
     const char* name,
     size_t* index);
 
+bool infrared_remote_load_signal(
+    const InfraredRemote* remote,
+    InfraredSignal* signal,
+    size_t index);
+
 bool infrared_remote_append_signal(
     InfraredRemote* remote,
     const InfraredSignal* signal,
     const char* name);
+
 bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const char* new_name);
 void infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index);
 bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index);

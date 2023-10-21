@@ -4,7 +4,7 @@
 void infrared_scene_learn_enter_name_on_enter(void* context) {
     Infrared* infrared = context;
     TextInput* text_input = infrared->text_input;
-    InfraredSignal* signal = infrared->received_signal;
+    InfraredSignal* signal = infrared->current_signal;
 
     if(infrared_signal_is_raw(signal)) {
         const InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
@@ -33,7 +33,7 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
 
 bool infrared_scene_learn_enter_name_on_event(void* context, SceneManagerEvent event) {
     Infrared* infrared = context;
-    InfraredSignal* signal = infrared->received_signal;
+    InfraredSignal* signal = infrared->current_signal;
     SceneManager* scene_manager = infrared->scene_manager;
     bool consumed = false;
 

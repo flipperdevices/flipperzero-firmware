@@ -9,7 +9,7 @@ static void
 void infrared_scene_learn_success_on_enter(void* context) {
     Infrared* infrared = context;
     DialogEx* dialog_ex = infrared->dialog_ex;
-    InfraredSignal* signal = infrared->received_signal;
+    InfraredSignal* signal = infrared->current_signal;
 
     infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOn);
 
@@ -84,7 +84,7 @@ bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent even
             consumed = true;
         } else if(event.event == DialogExPressCenter) {
             infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOff);
-            infrared_tx_start_received(infrared);
+            infrared_tx_start_current(infrared);
             consumed = true;
         } else if(event.event == DialogExReleaseCenter) {
             infrared_tx_stop(infrared);
