@@ -5,7 +5,7 @@
 #include <gui/gui.h> // Canvas
 #include <input/input.h> // InputEvent
 
-#include "structs.h"
+#include "flipper_structs.h"
 
 /* Main thread used to receive user inputs and to request
  * the processing of background tasks */

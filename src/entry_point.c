@@ -5,7 +5,8 @@
 
 #include <dolphin/dolphin.h>
 
-#include "structs.h"
+#include "flipper_structs.h"
+#include "game_structs.h"
 #include "threads.h"
 
 /******************** Initialisation & startup *****************************/
@@ -33,11 +34,17 @@ static struct ApplicationContext * context_alloc() {
     furi_thread_set_context(context->secondary_thread, context);
     furi_thread_set_callback(context->secondary_thread, secondary_thread);
 
+    // Allocate memory for the game state
+    context->game_state = malloc(sizeof(struct GameState));
+
     return context;
 }
 
 /* Release the unused resources and deallocate memory */
 static void context_free(struct ApplicationContext *context) {
+    // Free the game state
+    free(context->game_state);
+
     // Free the secondary thread
     furi_thread_free(context->secondary_thread);
 
