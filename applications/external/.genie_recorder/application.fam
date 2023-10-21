@@ -1,14 +1,14 @@
 App(
     appid="genie_record_v2",
-    name="Genie Recorder v2",
+    name="Genie Door Recorder v2",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="genie_record_app",
-    stack_size=2 * 1024,
+    stack_size=4 * 1024,
     fap_icon="genie.png",
     fap_category="Sub-GHz",
     fap_icon_assets="assets",
     fap_author="jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials",
-    fap_version=(2, 4),
+    fap_version=(2, 5),
     fap_description="This application connects to a Genie garage door remote and capture all of the codes.  The Sub-GHz app can then be used to replay the codes to open the door.",
 )

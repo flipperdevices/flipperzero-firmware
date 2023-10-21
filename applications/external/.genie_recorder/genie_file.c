@@ -10,7 +10,7 @@
 
 // Should match application.fam, fap_version.
 #define GENIE_MAJOR_VERSION 2
-#define GENIE_MINOR_VERSION 4
+#define GENIE_MINOR_VERSION 5
 
 #define GENIE_MAGIC_CODE 0x472A
 
@@ -120,8 +120,8 @@ static uint32_t hex_to_i32(const char* data) {
     return value;
 }
 
-uint16_t genie_save_bin(const char* key) {
-    uint16_t result = 0;
+uint32_t genie_save_bin(const char* key) {
+    uint32_t result = 0;
     uint32_t key_high = 0;
     uint32_t key_low = 0;
     key_high = hex_to_i32(key);
@@ -189,9 +189,17 @@ uint16_t genie_save_bin(const char* key) {
 
             uint32_t existing = storage_file_read32(file);
             if(existing != 0 && existing != key_high) {
-                FURI_LOG_E(
-                    TAG, "Key mismatch at %04X. Old: %08lX, New: %08lX", count, existing, key_high);
-                result = count;
+                if(count != 0xFFFF) {
+                    FURI_LOG_E(
+                        TAG,
+                        "Key mismatch at %04X. Old: %08lX, New: %08lX",
+                        count,
+                        existing,
+                        key_high);
+                    result = count;
+                } else {
+                    result = 0x10000;
+                }
                 break;
             }
 
@@ -213,13 +221,16 @@ uint16_t genie_save_bin(const char* key) {
 
             if(count != 0xFFFF) {
                 count++;
+                result = count;
+
                 if(!storage_file_write16(file, count)) {
                     FURI_LOG_E(TAG, "Failed to write count to file: %04X", count);
                     break;
                 }
+            } else {
+                result = 0x10000;
             }
 
-            result = count;
         } else {
             FURI_LOG_E(TAG, "Failed to open file");
             break;

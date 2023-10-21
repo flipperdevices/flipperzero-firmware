@@ -2,7 +2,7 @@
 
 #define GENIE_ABOUT_TEXT                                     \
     "Genie garage door recorder.\n"                          \
-    "Version 2.4\n---\n"                                     \
+    "Version 2.5\n---\n"                                     \
     "Custom genie firmware is\n"                             \
     "required for this app.\n"                               \
     "---\n"                                                  \
