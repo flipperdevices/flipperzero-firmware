@@ -1,0 +1,4 @@
+ADD_SCENE(easysetup_buds_model, EasysetupBudsModel)
+ADD_SCENE(easysetup_buds_model_custom, EasysetupBudsModelCustom)
+ADD_SCENE(easysetup_watch_model, EasysetupWatchModel)
+ADD_SCENE(easysetup_watch_model_custom, EasysetupWatchModelCustom)

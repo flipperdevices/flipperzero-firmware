@@ -191,7 +191,7 @@ bool napi_furi_hal_bt_custom_adv_stop() {
 
 static Attack attacks[] = {
     {
-        .title = "+ Kitchen Sink",
+        .title = "The Kitchen Sink",
         .text = "Flood all attacks at once",
         .protocol = NULL,
         .payload =
@@ -252,7 +252,7 @@ static Attack attacks[] = {
             },
     },
     {
-        .title = "Android Device Pair",
+        .title = "Android Device Connect",
         .text = "Reboot cooldown, long range",
         .protocol = &protocol_fastpair,
         .payload =
@@ -265,21 +265,42 @@ static Attack attacks[] = {
             },
     },
     {
-        .title = "Samsung Earbuds Pair",
+        .title = "Samsung Buds Popup",
         .text = "No cooldown, long range",
-        .protocol = &protocol_smartthings,
+        .protocol = &protocol_easysetup,
         .payload =
             {
                 .random_mac = true,
                 .cfg =
                     {
-                        .smartthings = {},
+                        .easysetup =
+                            {
+                                .type = EasysetupTypeBuds,
+                                .data = {},
+                            },
+                    },
+            },
+    },
+    {
+        .title = "Samsung Watch Pair",
+        .text = "No cooldown, long range",
+        .protocol = &protocol_easysetup,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg =
+                    {
+                        .easysetup =
+                            {
+                                .type = EasysetupTypeWatch,
+                                .data = {},
+                            },
                     },
             },
     },
     {
         .title = "Windows Device Found",
-        .text = "Requires enabling SwiftPair",
+        .text = "No cooldown, short range",
         .protocol = &protocol_swiftpair,
         .payload =
             {
@@ -298,12 +319,38 @@ static uint16_t delays[] = {20, 50, 100, 200};
 
 typedef struct {
     Ctx ctx;
+    View* main_view;
+    bool lock_warning;
+    uint8_t lock_count;
+    FuriTimer* lock_timer;
+
     bool resume;
     bool advertising;
     uint8_t delay;
     FuriThread* thread;
     int8_t index;
 } State;
+
+NotificationMessage blink_message = {
+    .type = NotificationMessageTypeLedBlinkStart,
+    .data.led_blink.color = LightBlue | LightGreen,
+    .data.led_blink.on_time = 10,
+    .data.led_blink.period = 100,
+};
+const NotificationSequence blink_sequence = {
+    &blink_message,
+    &message_do_not_reset,
+    NULL,
+};
+static void start_blink(State* state) {
+    uint16_t period = delays[state->delay];
+    if(period <= 100) period += 30;
+    blink_message.data.led_blink.period = period;
+    notification_message_block(state->ctx.notification, &blink_sequence);
+}
+static void stop_blink(State* state) {
+    notification_message_block(state->ctx.notification, &sequence_blink_stop);
+}
 
 static int32_t adv_thread(void* _ctx) {
     State* state = _ctx;
@@ -314,6 +361,7 @@ static int32_t adv_thread(void* _ctx) {
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
     if(!payload->random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
+    if(state->ctx.led_indicator) start_blink(state);
 
     while(state->advertising) {
         if(protocol) {
@@ -331,6 +379,7 @@ static int32_t adv_thread(void* _ctx) {
         napi_furi_hal_bt_custom_adv_stop();
     }
 
+    if(state->ctx.led_indicator) stop_blink(state);
     return 0;
 }
 
@@ -341,19 +390,20 @@ static void toggle_adv(State* state) {
         furi_thread_join(state->thread);
         if(state->resume) furi_hal_bt_start_advertising();
     } else {
+        state->advertising = true;
         state->resume = furi_hal_bt_is_active();
         furi_hal_bt_stop_advertising();
-        state->advertising = true;
         furi_thread_start(state->thread);
     }
 }
 
-#define PAGE_MIN (-3)
+#define PAGE_MIN (-4)
 #define PAGE_MAX ATTACKS_COUNT
 enum {
     PageHelpApps = PAGE_MIN,
     PageHelpDelay,
     PageHelpDistance,
+    PageHelpInfoConfig,
     PageStart = 0,
     PageEnd = ATTACKS_COUNT - 1,
     PageAboutCredits = PAGE_MAX,
@@ -435,9 +485,25 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             48,
             AlignLeft,
             AlignTop,
-            "\e#Distance\e# is limited, attacks\n"
-            "work under 1 meter but a\n"
-            "few are marked 'long range'",
+            "\e#Distance\e# varies greatly:\n"
+            "some are long range (>30 m)\n"
+            "others are close range (<1 m)",
+            false);
+        break;
+    case PageHelpInfoConfig:
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "See \e#more info\e# and change\n"
+            "\e#attack options\e# by holding\n"
+            "Ok on each attack page",
             false);
         break;
     case PageAboutCredits:
@@ -454,11 +520,15 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e#\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#3.0\e#",
+            "                                   Version \e#3.3\e#",
             false);
         break;
     default: {
         if(!attack) break;
+        if(state->ctx.lock_keyboard && !state->advertising) {
+            // Forgive me Lord for I have sinned by handling state in draw
+            toggle_adv(state);
+        }
         char str[32];
 
         canvas_set_font(canvas, FontPrimary);
@@ -474,7 +544,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "%02i/%02i: %s",
             state->index + 1,
             ATTACKS_COUNT,
-            protocol ? protocol->get_name(&payload->cfg) : "Everything");
+            protocol ? protocol->get_name(&payload->cfg) : "Everything AND");
         canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 24, str);
 
         canvas_set_font(canvas, FontPrimary);
@@ -494,6 +564,17 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
     if(state->index < PAGE_MAX) {
         elements_button_right(canvas, next);
     }
+
+    if(state->ctx.lock_keyboard) {
+        canvas_set_font(canvas, FontSecondary);
+        elements_bold_rounded_frame(canvas, 14, 8, 99, 48);
+        elements_multiline_text(canvas, 65, 26, "To unlock\npress:");
+        canvas_draw_icon(canvas, 65, 42, &I_Pin_back_arrow_10x8);
+        canvas_draw_icon(canvas, 80, 42, &I_Pin_back_arrow_10x8);
+        canvas_draw_icon(canvas, 95, 42, &I_Pin_back_arrow_10x8);
+        canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42);
+        canvas_draw_dot(canvas, 17, 61);
+    }
 }
 
 static bool input_callback(InputEvent* input, void* _ctx) {
@@ -501,8 +582,22 @@ static bool input_callback(InputEvent* input, void* _ctx) {
     State* state = *(State**)view_get_model(view);
     bool consumed = false;
 
-    if(input->type == InputTypeShort || input->type == InputTypeLong ||
-       input->type == InputTypeRepeat) {
+    if(state->ctx.lock_keyboard) {
+        consumed = true;
+        with_view_model(
+            state->main_view, State * *model, { (*model)->lock_warning = true; }, true);
+        if(state->lock_count == 0) {
+            furi_timer_start(state->lock_timer, pdMS_TO_TICKS(1000));
+        }
+        if(input->type == InputTypeShort && input->key == InputKeyBack) {
+            state->lock_count++;
+        }
+        if(state->lock_count >= 3) {
+            furi_timer_start(state->lock_timer, 1);
+        }
+    } else if(
+        input->type == InputTypeShort || input->type == InputTypeLong ||
+        input->type == InputTypeRepeat) {
         consumed = true;
 
         bool is_attack = state->index >= 0 && state->index <= ATTACKS_COUNT - 1;
@@ -524,11 +619,13 @@ static bool input_callback(InputEvent* input, void* _ctx) {
         case InputKeyUp:
             if(is_attack && state->delay < COUNT_OF(delays) - 1) {
                 state->delay++;
+                if(advertising) start_blink(state);
             }
             break;
         case InputKeyDown:
             if(is_attack && state->delay > 0) {
                 state->delay--;
+                if(advertising) start_blink(state);
             }
             break;
         case InputKeyLeft:
@@ -556,6 +653,18 @@ static bool input_callback(InputEvent* input, void* _ctx) {
     return consumed;
 }
 
+static void lock_timer_callback(void* _ctx) {
+    State* state = _ctx;
+    if(state->lock_count < 3) {
+        notification_message_block(state->ctx.notification, &sequence_display_backlight_off);
+    } else {
+        state->ctx.lock_keyboard = false;
+    }
+    with_view_model(
+        state->main_view, State * *model, { (*model)->lock_warning = false; }, true);
+    state->lock_count = 0;
+}
+
 static bool back_event_callback(void* _ctx) {
     Ctx* ctx = _ctx;
     return scene_manager_handle_back_event(ctx->scene_manager);
@@ -570,7 +679,10 @@ int32_t ble_spam(void* p) {
     furi_thread_set_stack_size(state->thread, 4096);
     napi_hci_send_req = (int (*)(struct hci_request*, uint8_t))(
         (uintptr_t)(scan_memory_for_sequence(TARGET_SEQUENCE)) | 0x01);
+    state->ctx.led_indicator = true;
+    state->lock_timer = furi_timer_alloc(lock_timer_callback, FuriTimerTypeOnce, state);
 
+    state->ctx.notification = furi_record_open(RECORD_NOTIFICATION);
     Gui* gui = furi_record_open(RECORD_GUI);
     state->ctx.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(state->ctx.view_dispatcher);
@@ -578,14 +690,14 @@ int32_t ble_spam(void* p) {
     view_dispatcher_set_navigation_event_callback(state->ctx.view_dispatcher, back_event_callback);
     state->ctx.scene_manager = scene_manager_alloc(&scene_handlers, &state->ctx);
 
-    View* view_main = view_alloc();
-    view_allocate_model(view_main, ViewModelTypeLockFree, sizeof(State*));
+    state->main_view = view_alloc();
+    view_allocate_model(state->main_view, ViewModelTypeLocking, sizeof(State*));
     with_view_model(
-        view_main, State * *model, { *model = state; }, false);
-    view_set_context(view_main, view_main);
-    view_set_draw_callback(view_main, draw_callback);
-    view_set_input_callback(view_main, input_callback);
-    view_dispatcher_add_view(state->ctx.view_dispatcher, ViewMain, view_main);
+        state->main_view, State * *model, { *model = state; }, false);
+    view_set_context(state->main_view, state->main_view);
+    view_set_draw_callback(state->main_view, draw_callback);
+    view_set_input_callback(state->main_view, input_callback);
+    view_dispatcher_add_view(state->ctx.view_dispatcher, ViewMain, state->main_view);
 
     state->ctx.byte_input = byte_input_alloc();
     view_dispatcher_add_view(
@@ -622,12 +734,14 @@ int32_t ble_spam(void* p) {
     variable_item_list_free(state->ctx.variable_item_list);
 
     view_dispatcher_remove_view(state->ctx.view_dispatcher, ViewMain);
-    view_free(view_main);
+    view_free(state->main_view);
 
     scene_manager_free(state->ctx.scene_manager);
     view_dispatcher_free(state->ctx.view_dispatcher);
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
 
+    furi_timer_free(state->lock_timer);
     furi_thread_free(state->thread);
     free(state);
     return 0;

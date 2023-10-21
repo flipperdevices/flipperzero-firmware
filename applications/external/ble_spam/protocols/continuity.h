@@ -16,18 +16,18 @@ typedef enum {
     ContinuityTypeNearbyInfo = 0x10,
 
     ContinuityTypeCustomCrash,
-    ContinuityTypeCount
+    ContinuityTypeCOUNT
 } ContinuityType;
 
 typedef struct {
     ContinuityType type;
     union {
         struct {
-            uint16_t model_id;
+            uint16_t model;
             uint8_t prefix;
         } proximity_pair;
         struct {
-            uint8_t type;
+            uint8_t action;
             uint8_t flags;
         } nearby_action;
     } data;

@@ -1,2 +1,2 @@
-ADD_SCENE(fastpair_model_id, FastpairModelId)
-ADD_SCENE(fastpair_model_id_custom, FastpairModelIdCustom)
+ADD_SCENE(fastpair_model, FastpairModel)
+ADD_SCENE(fastpair_model_custom, FastpairModelCustom)

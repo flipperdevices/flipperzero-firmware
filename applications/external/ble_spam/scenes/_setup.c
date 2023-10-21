@@ -26,5 +26,5 @@ const SceneManagerHandlers scene_handlers = {
     .on_enter_handlers = scene_on_enter_handlers,
     .on_event_handlers = scene_on_event_handlers,
     .on_exit_handlers = scene_on_exit_handlers,
-    .scene_num = SceneCount,
+    .scene_num = SceneCOUNT,
 };

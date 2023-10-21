@@ -3,7 +3,7 @@
 const Protocol* protocols[] = {
     &protocol_continuity,
     &protocol_fastpair,
-    &protocol_smartthings,
+    &protocol_easysetup,
     &protocol_swiftpair,
 };
 

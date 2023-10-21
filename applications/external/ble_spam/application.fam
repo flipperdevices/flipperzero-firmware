@@ -10,6 +10,6 @@ App(
     fap_icon_assets_symbol="ble_spam",
     fap_author="Willy-JL & ECTO-1A & Spooks4576",  # Plus research from xMasterX; Working on OFW API thanks to noproto
     fap_weburl="https://github.com/noproto/apple_ble_spam_ofw",
-    fap_version=(3, 0),
+    fap_version=(3, 3),
     fap_description="Flood BLE advertisements to cause spammy and annoying popups/notifications",
 )

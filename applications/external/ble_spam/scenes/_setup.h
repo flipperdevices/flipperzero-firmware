@@ -6,7 +6,7 @@
 #define ADD_SCENE(name, id) Scene##id,
 typedef enum {
 #include "_scenes.h"
-    SceneCount,
+    SceneCOUNT,
 } Scene;
 #undef ADD_SCENE
 

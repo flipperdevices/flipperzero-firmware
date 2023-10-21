@@ -5,7 +5,7 @@
 // Documentation at https://developers.google.com/nearby/fast-pair/specifications/introduction
 
 typedef struct {
-    uint32_t model_id;
+    uint32_t model;
 } FastpairCfg;
 
 extern const Protocol protocol_fastpair;

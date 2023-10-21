@@ -2,13 +2,13 @@
 
 #include "continuity.h"
 #include "fastpair.h"
-#include "smartthings.h"
+#include "easysetup.h"
 #include "swiftpair.h"
 
 union ProtocolCfg {
     ContinuityCfg continuity;
     FastpairCfg fastpair;
-    SmartthingsCfg smartthings;
+    EasysetupCfg easysetup;
     SwiftpairCfg swiftpair;
 };
 
