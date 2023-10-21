@@ -1,0 +1,17 @@
+App(
+    appid="malveke_gb_live_camera",
+    name="[MALVEKE] GB Live Camera",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gb_live_camera_app",
+    cdefines=["APP_CAMERA"],
+    requires=["gui"],
+    stack_size=8*1024,
+    order=1,
+    fap_libs=["assets"],
+	fap_icon="icons/icon.png",
+    fap_icon_assets="icons",
+    fap_category="GPIO",
+	fap_description="ESP32 GAME BOY CAMERA live feed and photo capture, use left/right for exposition and center for saving a screenshot.",
+	fap_author="Esteban Fuentealba",
+	fap_weburl="https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/"
+)

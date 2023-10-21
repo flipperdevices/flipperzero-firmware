@@ -4,6 +4,8 @@ Flash Frequency: 80MHz
 Partition Scheme: Minimal SPIFFS
 https://www.online-utility.org/image/convert/to/XBM
 */
+#include "GameBoyCartridge.h"
+#include "GameboyLiveCamera.h"
 
 #include "configs.h"
 
@@ -133,6 +135,8 @@ const String PROGMEM version_number = MARAUDER_VERSION;
 
 uint32_t currentTime  = 0;
 
+GameBoyCartridge gameboy_cartridge;
+GameboyLiveCamera gameboy_live_camera;
 
 void backlightOn() {
   #ifdef HAS_SCREEN
@@ -163,31 +167,30 @@ void setup()
 {
   Serial.begin(115200);
   Serial1.begin(115200, SERIAL_8N1, 17, 18);
-  unsigned long waitForStreamMode = millis() + 3000;
-  
-  while (waitForStreamMode > millis()) {
-    if (Serial.available())  // if we receive anything, just switch to another mode
-    {
-      switch (Serial.read()) {
-        case 'c':
-          gb_camera_setup();
-          for (;;)
-            gb_camera_loop();
-        case 'g':
-          gameboy_setup();
-          for (;;)
-            gameboy_loop();
-        break;
-        case 's':
-          gb_live_camera_setup();
-          for (;;)
-            gb_live_camera_loop();
-        case 'w':  // Marauder
-          goto continue_to_marauder;
-      }
-    }
-  }
-  continue_to_marauder:;
+  // unsigned long waitForStreamMode = millis() + 3000;
+  // while (waitForStreamMode > millis()) {
+  //   if (Serial.available())  // if we receive anything, just switch to another mode
+  //   {
+  //     switch (Serial.read()) {
+  //       case 'c':
+  //         gb_camera_setup();
+  //         for (;;)
+  //           gb_camera_loop();
+  //       case 'g':
+  //         gameboy_setup();
+  //         for (;;)
+  //           gameboy_loop();
+  //       break;
+  //       case 's':
+  //         gb_live_camera_setup();
+  //         for (;;)
+  //           gb_live_camera_loop();
+  //       case 'w':  // Marauder
+  //         goto continue_to_marauder;
+  //     }
+  //   }
+  // }
+  // continue_to_marauder:;
   #ifdef MARAUDER_M5STICKC
     axp192_obj.begin();
   #endif
@@ -232,6 +235,9 @@ void setup()
     
   #endif
   settings_obj.begin(); 
+
+  gameboy_cartridge.begin();
+  gameboy_live_camera.begin();
   //Serial.println("\n\nHello, World!\n");
 
   Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
@@ -419,6 +425,9 @@ void loop()
   //if ((!do_draw) && (wifi_scan_obj.currentScanMode != ESP_UPDATE))
   //{
   cli_obj.main(currentTime);
+
+  gameboy_cartridge.main();
+  gameboy_live_camera.main();
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);
   #endif
@@ -462,7 +471,9 @@ void loop()
   #ifdef HAS_SCREEN
     delay(1);
   #else
-    delay(50);
+    if(!gameboy_live_camera.isRunning()) {
+      delay(50);
+    }
   #endif
   //}
   /*else if (wifi_scan_obj.currentScanMode == ESP_UPDATE) {

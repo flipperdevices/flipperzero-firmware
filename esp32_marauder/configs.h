@@ -795,7 +795,8 @@
       #define mac_history_len 512
     #elif defined(MARAUDER_FLIPPER)
       #ifdef WRITE_PACKETS_SERIAL
-        #define GPS_SOFTWARE_SERIAL
+        // #define GPS_SOFTWARE_SERIAL
+        #define GPS_SERIAL_INDEX 2
       #else
         #define GPS_SERIAL_INDEX 1
       #endif

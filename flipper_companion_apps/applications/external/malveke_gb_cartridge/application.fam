@@ -1,0 +1,17 @@
+App(
+    appid="malveke_gb_cartridge",
+    name="[MALVEKE] GAME BOY Cartridge (GB/GBC)",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gb_cartridge_app",
+    cdefines=["APP_BOILERPLATE"],
+    requires=[
+        "gui",
+        "storage",
+    ],
+    stack_size=2 * 1024,
+    order=10,
+    fap_libs=["assets"],
+    fap_icon="icons/icon.png",
+    fap_icon_assets="icons",
+    fap_category="GPIO",
+)

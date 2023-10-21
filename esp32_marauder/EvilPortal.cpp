@@ -65,7 +65,7 @@ void EvilPortal::setupServer() {
 bool EvilPortal::setHtml() {
   Serial.println("Setting HTML...");
   #ifndef WRITE_PACKETS_SERIAL
-    File html_file = sd_obj.getFile("/index.html");
+    File html_file = sd_obj.getFile("/" + this->target_html_name);
     if (!html_file) {
       #ifdef HAS_SCREEN
         this->sendToDisplay("Could not find /index.html.");

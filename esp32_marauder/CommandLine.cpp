@@ -33,8 +33,8 @@ void CommandLine::main(uint32_t currentTime) {
 
   this->runCommand(input);
 
-  if (input != "")
-    Serial.print("> ");
+  // if (input != "")
+  //   Serial.print("> ");
 }
 
 LinkedList<String> CommandLine::parseCommand(String input, char* delim) {
@@ -196,9 +196,7 @@ void CommandLine::filterAccessPoints(String filter) {
 }
 
 void CommandLine::runCommand(String input) {
-  if (input != "")
-    Serial.println("#" + input);
-  else
+  if (input == "")
     return;
 
   LinkedList<String> cmd_args = this->parseCommand(input, " ");
@@ -221,7 +219,6 @@ void CommandLine::runCommand(String input) {
     // WiFi sniff/scan
     Serial.println(HELP_EVIL_PORTAL_CMD);
     Serial.println(HELP_SIGSTREN_CMD);
-    Serial.println(HELP_SCANAPJSON_CMD);
     Serial.println(HELP_SCANAP_CMD);
     Serial.println(HELP_SCANSTA_CMD);
     Serial.println(HELP_SNIFF_RAW_CMD);
@@ -232,7 +229,9 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_SNIFF_DEAUTH_CMD);
     Serial.println(HELP_SNIFF_PMKID_CMD);
     Serial.println(HELP_STOPSCAN_CMD);
-    Serial.println(HELP_WARDRIVE_CMD);
+    #ifdef HAS_GPS
+      Serial.println(HELP_WARDRIVE_CMD);
+    #endif
     
     // WiFi attack
     Serial.println(HELP_ATTACK_CMD);
@@ -246,8 +245,18 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_SSID_CMD_B);
     
     // Bluetooth sniff/scan
-    Serial.println(HELP_BT_SNIFF_CMD);
-    Serial.println(HELP_BT_SKIM_CMD);
+    #ifdef HAS_BT
+      Serial.println(HELP_BT_SNIFF_CMD);
+      Serial.println(HELP_BT_SOUR_APPLE_CMD);
+      Serial.println(HELP_BT_SWIFTPAIR_SPAM_CMD);
+      #ifdef HAS_GPS
+        Serial.println(HELP_BT_WARDRIVE_CMD);
+      #endif
+      Serial.println(HELP_BT_SKIM_CMD);
+    #endif
+    Serial.println(HELP_GAMEBOY_CARTRIDGE_CMD);
+    Serial.println(HELP_GAMEBOY_LIVE_CAMERA_CMD);
+    Serial.println(HELP_GAMEBOY_STOP_LIVE_CAMERA_CMD);
     Serial.println(HELP_FOOT);
     return;
   }
@@ -267,32 +276,6 @@ void CommandLine::runCommand(String input) {
     wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
 
     Serial.println("Stopping WiFi tran/recv");
-
-    // If we don't do this, the text and button coordinates will be off
-    #ifdef HAS_SCREEN
-      display_obj.tft.init();
-      menu_function_obj.changeMenu(menu_function_obj.current_menu);
-    #endif
-  } else if (cmd_args.get(0) == STOPSCANJSON_CMD) {
-    
-    //if (wifi_scan_obj.currentScanMode == OTA_UPDATE) {
-    //  wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
-      //#ifdef HAS_SCREEN
-      //  menu_function_obj.changeMenu(menu_function_obj.updateMenu.parentMenu);
-      //#endif
-    //  WiFi.softAPdisconnect(true);
-    //  web_obj.shutdownServer();
-    //  return;
-    //}
-    
-    wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-    DynamicJsonDocument wifiJSON(1024);
-    wifiJSON["status"] = "stopping";
-    wifiJSON["message"] = "Stopping WiFi tran/recv";
-    Serial.print("JSON:");
-    serializeJson(wifiJSON, Serial);
-    Serial.println();
-    // Serial.println("Stopping WiFi tran/recv");
 
     // If we don't do this, the text and button coordinates will be off
     #ifdef HAS_SCREEN
@@ -474,18 +457,34 @@ void CommandLine::runCommand(String input) {
     else if (cmd_args.get(0) == WARDRIVE_CMD) {
       #ifdef HAS_GPS
         if (gps_obj.getGpsModuleStatus()) {
-          Serial.println("Starting Wardrive. Stop with " + (String)STOPSCAN_CMD);
-          #ifdef HAS_SCREEN
-            display_obj.clearScreen();
-            menu_function_obj.drawStatusBar();
-          #endif
-          wifi_scan_obj.StartScan(WIFI_SCAN_WAR_DRIVE, TFT_GREEN);
+          int sta_sw = this->argSearch(&cmd_args, "-s");
+
+          if (sta_sw == -1) {
+            Serial.println("Starting Wardrive. Stop with " + (String)STOPSCAN_CMD);
+            #ifdef HAS_SCREEN
+              display_obj.clearScreen();
+              menu_function_obj.drawStatusBar();
+            #endif
+            wifi_scan_obj.StartScan(WIFI_SCAN_WAR_DRIVE, TFT_GREEN);
+          }
+          else {Serial.println("Starting Station Wardrive. Stop with " + (String)STOPSCAN_CMD);
+            #ifdef HAS_SCREEN
+              display_obj.clearScreen();
+              menu_function_obj.drawStatusBar();
+            #endif
+            wifi_scan_obj.StartScan(WIFI_SCAN_STATION_WAR_DRIVE, TFT_GREEN);
+          }
         }
+        else
+          Serial.println("GPS Module not detected");
+      #else
+        Serial.println("GPS not supported");
       #endif
     }
     // AP Scan
     else if (cmd_args.get(0) == EVIL_PORTAL_CMD) {
       int cmd_sw = this->argSearch(&cmd_args, "-c");
+      int html_sw = this->argSearch(&cmd_args, "-w");
 
       if (cmd_sw != -1) {
         String et_command = cmd_args.get(cmd_sw + 1);
@@ -495,6 +494,14 @@ void CommandLine::runCommand(String input) {
             display_obj.clearScreen();
             menu_function_obj.drawStatusBar();
           #endif
+          if (html_sw != -1) {
+            String target_html_name = cmd_args.get(html_sw + 1);
+            evil_portal_obj.target_html_name = target_html_name;
+            Serial.println("Set html file as " + evil_portal_obj.target_html_name);
+          }
+          //else {
+          //  evil_portal_obj.target_html_name = "index.html";
+          //}
           wifi_scan_obj.StartScan(WIFI_SCAN_EVIL_PORTAL, TFT_MAGENTA);
         }
         else if (et_command == "reset") {
@@ -504,17 +511,14 @@ void CommandLine::runCommand(String input) {
           
         }
         else if (et_command == "sethtml") {
-
+          String target_html_name = cmd_args.get(cmd_sw + 2);
+          evil_portal_obj.target_html_name = target_html_name;
+          Serial.println("Set html file as " + evil_portal_obj.target_html_name);
         }
         else if (et_command == "setap") {
 
         }
       }
-    }
-    else if (cmd_args.get(0) == SCANAPJSON_CMD) {
-      int full_sw = -1;
-      // Serial.println("Starting AP scan. Stop with " + (String)STOPSCAN_CMD);
-      wifi_scan_obj.StartScan(WIFI_SCAN_TARGET_JSON_AP, TFT_MAGENTA);
     }
     else if (cmd_args.get(0) == SCANAP_CMD) {
       int full_sw = -1;
@@ -781,6 +785,63 @@ void CommandLine::runCommand(String input) {
         Serial.println("Bluetooth not supported");
       #endif
     }
+    else if (cmd_args.get(0) == BT_SOUR_APPLE_CMD) {
+      #ifdef HAS_BT
+        Serial.println("Starting Sour Apple attack. Stop with " + (String)STOPSCAN_CMD);
+        #ifdef HAS_SCREEN
+          display_obj.clearScreen();
+          menu_function_obj.drawStatusBar();
+        #endif
+        wifi_scan_obj.StartScan(BT_ATTACK_SOUR_APPLE, TFT_GREEN);
+      #else
+        Serial.println("Bluetooth not supported");
+      #endif
+    }
+    else if (cmd_args.get(0) == BT_SWIFTPAIR_SPAM_CMD) {
+      #ifdef HAS_BT
+        Serial.println("Starting Swiftpair Spam attack. Stop with " + (String)STOPSCAN_CMD);
+        #ifdef HAS_SCREEN
+          display_obj.clearScreen();
+          menu_function_obj.drawStatusBar();
+        #endif
+        wifi_scan_obj.StartScan(BT_ATTACK_SWIFTPAIR_SPAM, TFT_CYAN);
+      #else
+        Serial.println("Bluetooth not supported");
+      #endif
+    }
+    // Wardrive
+    else if (cmd_args.get(0) == BT_WARDRIVE_CMD) {
+      #ifdef HAS_BT
+        #ifdef HAS_GPS
+          if (gps_obj.getGpsModuleStatus()) {
+            int cont_sw = this->argSearch(&cmd_args, "-c");
+
+            if (cont_sw == -1) {
+              Serial.println("Starting BT Wardrive. Stop with " + (String)STOPSCAN_CMD);
+              #ifdef HAS_SCREEN
+                display_obj.clearScreen();
+                menu_function_obj.drawStatusBar();
+              #endif
+              wifi_scan_obj.StartScan(BT_SCAN_WAR_DRIVE, TFT_GREEN);
+            }
+            else {Serial.println("Starting Continuous BT Wardrive. Stop with " + (String)STOPSCAN_CMD);
+              #ifdef HAS_SCREEN
+                display_obj.clearScreen();
+                menu_function_obj.drawStatusBar();
+              #endif
+              wifi_scan_obj.StartScan(BT_SCAN_WAR_DRIVE_CONT, TFT_GREEN);
+            }
+          }
+          else
+            Serial.println("GPS Module not detected");
+        #else
+          Serial.println("GPS not supported");
+        #endif
+      #else
+        Serial.println("Bluetooth not supported");
+      #endif
+      
+    }
     // Bluetooth CC Skimmer scan
     else if (cmd_args.get(0) == BT_SKIM_CMD) {
       #ifdef HAS_BT
@@ -793,6 +854,86 @@ void CommandLine::runCommand(String input) {
       #else
         Serial.println("Bluetooth not supported");
       #endif
+    } else if(cmd_args.get(0) == GAMEBOY_CARTRIDGE_CMD) {
+      // Serial.println("GAME BOY Cartridge");
+      gameboy_cartridge.start();
+
+      int cont_sw = this->argSearch(&cmd_args, "-i");
+      if (cont_sw == -1) {
+        cont_sw = this->argSearch(&cmd_args, "-d");
+        if (cont_sw == -1) {
+          //  RESTORE
+          cont_sw = this->argSearch(&cmd_args, "-w");
+          if(cont_sw == -1) {
+            //  Info
+            gameboy_cartridge.headerROM_GB(true);
+          } else {
+            //  WRITE
+            cont_sw = this->argSearch(&cmd_args, "-o");
+            if (cont_sw == -1) {
+              cont_sw = this->argSearch(&cmd_args, "-a");
+              if (cont_sw == -1) {
+                gameboy_cartridge.headerROM_GB(true);
+              } else {
+                //  RAM
+                //  TODO:
+                Serial.println("RAM");
+              }
+            } else {
+              //  ROM
+              //  TODO:
+              Serial.println("ROM");
+            }
+          }
+        } else {
+          //  DUMP
+          cont_sw = this->argSearch(&cmd_args, "-o");
+          if (cont_sw == -1) {
+            cont_sw = this->argSearch(&cmd_args, "-a");
+            if (cont_sw == -1) {
+              // Serial.println("GAME BOY Info");
+              gameboy_cartridge.headerROM_GB(true);
+            } else {
+              gameboy_cartridge.readSRAM_GB();
+            }
+          } else {
+            gameboy_cartridge.readROM_GB();
+          }
+        }
+      } else {
+        // Serial.println("GAME BOY Info");
+        gameboy_cartridge.headerROM_GB(true);
+      }
+    } else if(cmd_args.get(0) == GAMEBOY_LIVE_CAMERA_CMD) {
+      int cont_sw = this->argSearch(&cmd_args, "-E");
+      if (cont_sw == -1) {
+        cont_sw = this->argSearch(&cmd_args, "-e");
+        if (cont_sw == -1) {
+          cont_sw = this->argSearch(&cmd_args, "-D");
+          if(cont_sw == -1) {
+            cont_sw = this->argSearch(&cmd_args, "-d");
+            if(cont_sw == -1) {
+              //  Start
+              
+              gameboy_live_camera.start();
+              delay(400);
+            } else {
+              gameboy_live_camera.disableDithering();
+            }
+          } else {
+            //  Dithering
+            gameboy_live_camera.enableDithering();
+          }
+        } else {
+          // Decrease Exposure
+          gameboy_live_camera.decreaseExposure();
+        }
+      } else {
+        // Increase Exposure
+        gameboy_live_camera.increaseExposure();
+      }
+    } else if(cmd_args.get(0) == GAMEBOY_STOP_LIVE_CAMERA_CMD) {
+      gameboy_live_camera.stop();
     }
 
     // Update command
