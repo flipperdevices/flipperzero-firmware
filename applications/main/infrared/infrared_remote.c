@@ -86,9 +86,8 @@ bool infrared_remote_load_signal(
 
         if(!infrared_signal_search_and_read(signal, ff, name)) {
             FURI_LOG_E(TAG, "Failed to load signal '%s' from file '%s'", name, path);
+            break;
         }
-
-        if(!flipper_format_buffered_file_close(ff)) break;
 
         success = true;
     } while(false);
@@ -121,15 +120,26 @@ bool infrared_remote_append_signal(
     InfraredRemote* remote,
     const InfraredSignal* signal,
     const char* name) {
-    UNUSED(remote);
-    UNUSED(signal);
-    UNUSED(name);
-    furi_crash("infrared_remote_append_signal() not implemented");
-    // InfraredRemoteButton* button = infrared_remote_button_alloc();
-    // infrared_remote_button_set_name(button, name);
-    // infrared_remote_button_set_signal(button, signal);
-    // InfraredButtonArray_push_back(remote->buttons, button);
-    // return infrared_remote_store(remote);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
+
+    bool success = false;
+    const char* path = furi_string_get_cstr(remote->path);
+
+    do {
+        if(!flipper_format_file_open_append(ff, path)) break;
+        if(!infrared_signal_save(signal, ff, name)) break;
+
+        FuriString* new_name = *InfraredButtonNameList_push_new(remote->button_names);
+        furi_string_set(new_name, name);
+
+        success = true;
+    } while(false);
+
+    flipper_format_free(ff);
+    furi_record_close(RECORD_STORAGE);
+
+    return success;
 }
 
 bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const char* new_name) {
