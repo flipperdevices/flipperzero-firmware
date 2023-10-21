@@ -36,6 +36,18 @@
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
 
+#if defined(HAVE_FIPS) && \
+        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+#define wc_Sha             Sha
+#define WC_SHA             SHA
+#define WC_SHA_BLOCK_SIZE  SHA_BLOCK_SIZE
+#define WC_SHA_DIGEST_SIZE SHA_DIGEST_SIZE
+#define WC_SHA_PAD_SIZE    SHA_PAD_SIZE
+
+/* for fips @wc_fips */
+#include <cyassl/ctaocrypt/sha.h>
+#endif
+
 #ifdef FREESCALE_LTC_SHA
     #include "fsl_ltc.h"
 #endif
@@ -66,7 +78,7 @@
 #ifdef WOLFSSL_ASYNC_CRYPT
     #include <wolfssl/wolfcrypt/async.h>
 #endif
-#ifdef WOLFSSL_ESP32_CRYPT
+#ifdef WOLFSSL_ESP32WROOM32_CRYPT
     #include <wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h>
 #endif
 #if defined(WOLFSSL_SILABS_SE_ACCEL)
@@ -98,8 +110,7 @@ enum {
 
 #elif defined(WOLFSSL_IMX6_CAAM) && !defined(WOLFSSL_QNX_CAAM)
     #include "wolfssl/wolfcrypt/port/caam/wolfcaam_sha.h"
-#elif (defined(WOLFSSL_RENESAS_TSIP_TLS) || \
-       defined(WOLFSSL_RENESAS_TSIP_CRYPTONLY)) && \
+#elif defined(WOLFSSL_RENESAS_TSIP_CRYPT) && \
    !defined(NO_WOLFSSL_RENESAS_TSIP_CRYPT_HASH)
     #include "wolfssl/wolfcrypt/port/Renesas/renesas_tsip_types.h"
 #elif defined(WOLFSSL_RENESAS_RX64_HASH)
@@ -162,8 +173,8 @@ struct wc_Sha {
         word32 len;
     #endif
 #endif
-#if defined(WOLFSSL_ESP32_CRYPT) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
     WC_ESP32SHA ctx;
 #endif
 #ifdef WOLFSSL_HASH_FLAGS

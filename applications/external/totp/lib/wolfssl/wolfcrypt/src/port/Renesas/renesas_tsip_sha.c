@@ -36,16 +36,18 @@
 
 #include <wolfssl/wolfcrypt/logging.h>
 
-#if (defined(WOLFSSL_RENESAS_TSIP_TLS) || \
-     defined(WOLFSSL_RENESAS_TSIP_CRYPTONLY))
+#if defined(WOLFSSL_RENESAS_TSIP_CRYPT)
 
 #include <wolfssl/wolfcrypt/memory.h>
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/port/Renesas/renesas-tsip-crypt.h>
 
+#if !defined(NO_SHA) && !defined(NO_WOLFSSL_RENESAS_TSIP_CRYPT_HASH)
+#include <wolfssl/wolfcrypt/sha.h>
+
 extern struct WOLFSSL_HEAP_HINT* tsip_heap_hint;
 
-#ifdef WOLFSSL_RENESAS_TSIP_TLS
+
 /*  get hmac from handshake messages exchanged with server.
  *
  */
@@ -276,7 +278,7 @@ WOLFSSL_LOCAL int tsip_GetMessageSha256(struct WOLFSSL* ssl, byte* hash,
     WOLFSSL_LEAVE("tsip_GetMessageSha256", ret);
     return ret;
 }
-#endif /* WOLFSSL_RENESAS_TSIP_TLS */
+
 
 
 
@@ -469,9 +471,7 @@ static int TSIPHashCopy(wolfssl_TSIP_Hash* src, wolfssl_TSIP_Hash* dst)
 
     return 0;
 }
-#if !defined(NO_SHA) && !defined(NO_WOLFSSL_RENESAS_TSIP_CRYPT_HASH)
-#include <wolfssl/wolfcrypt/sha.h>
-
+ /*  */
 int wc_InitSha_ex(wc_Sha* sha, void* heap, int devId)
 {
     return TSIPHashInit(sha, heap, devId, TSIP_SHA1);
@@ -496,7 +496,7 @@ int wc_ShaCopy(wc_Sha256* src, wc_Sha256* dst)
 {
     return TSIPHashCopy(src, dst);
 }
-#endif /* !NO_SHA && !NO_WOLFSSL_RENESAS_TSIP_CRYPT_HASH*/
+#endif /* !NO_SHA */
 
 #if !defined(NO_SHA256) && !defined(NO_WOLFSSL_RENESAS_TSIP_CRYPT_HASH)
 #include <wolfssl/wolfcrypt/sha256.h>
@@ -527,5 +527,5 @@ int wc_Sha256Copy(wc_Sha256* src, wc_Sha256* dst)
     return TSIPHashCopy(src, dst);
 }
 #endif /* !NO_SHA256 */
-#endif /* WOLFSSL_RENESAS_TSIP_TLS || WOLFSSL_RENESAS_TSIP_CRYPTONLY */
+#endif /* WOLFSSL_RENESAS_TSIP_CRYPT */
 #endif /* #if !defined(NO_SHA) || !defined(NO_SHA256) */

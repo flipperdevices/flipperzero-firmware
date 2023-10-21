@@ -58,7 +58,7 @@ static int psa_ecc_get_curve_info_from_curve_id(int ecc_curve,
  * psa_ecc_export_to_wc_key() - export psa @key_id into ecc_key @key
  * @key: already initialized ecc_key to export the key into [out]
  * @key_id: key to export [in]
- * @key_size: size of the key [in]
+ * @key_size: size fo the key [in]
  * @curve_id: wc id of the curve [in]
  *
  * returns 0 on success

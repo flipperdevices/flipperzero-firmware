@@ -681,7 +681,7 @@ static void scryptROMix(byte* x, byte* v, byte* y, int r, word32 n)
     word32 i;
     word32 j;
     word32 k;
-    word32 bSz = (word32)(128 * r);
+    word32 bSz = 128 * r;
 #ifdef WORD64_AVAILABLE
     word64* x64 = (word64*)x;
     word64* v64 = (word64*)v;
@@ -703,7 +703,7 @@ static void scryptROMix(byte* x, byte* v, byte* y, int r, word32 n)
     {
 #ifdef LITTLE_ENDIAN_ORDER
 #ifdef WORD64_AVAILABLE
-        j = (word32)(*(word64*)(x + (2*r - 1) * 64) & (n-1));
+        j = *(word64*)(x + (2*r - 1) * 64) & (n-1);
 #else
         j = *(word32*)(x + (2*r - 1) * 64) & (n-1);
 #endif
@@ -764,45 +764,43 @@ int wc_scrypt(byte* output, const byte* passwd, int passLen,
      * the comparison is greater than parallel's type. It wouldn't promote
      * both sides to word64. What follows is just arithmetic simplification.
      */
-    if (parallel > (int)((SCRYPT_WORD32_MAX / 4) / (word32)blockSize))
+    if ((word32)parallel > (SCRYPT_WORD32_MAX / (4 * blockSize)))
         return BAD_FUNC_ARG;
 
-    bSz = 128 * (word32)blockSize;
-    if (parallel > (int)(SCRYPT_WORD32_MAX / bSz))
+    bSz = 128 * blockSize;
+    if ((word32)parallel > (SCRYPT_WORD32_MAX / bSz))
         return BAD_FUNC_ARG;
-    blocksSz = bSz * (word32)parallel;
-    blocks = (byte*)XMALLOC((size_t)blocksSz, NULL, DYNAMIC_TYPE_TMP_BUFFER);
+    blocksSz = bSz * parallel;
+    blocks = (byte*)XMALLOC(blocksSz, NULL, DYNAMIC_TYPE_TMP_BUFFER);
     if (blocks == NULL) {
         ret = MEMORY_E;
         goto end;
     }
     /* Temporary for scryptROMix. */
-    v = (byte*)XMALLOC((size_t)((1 << cost) * bSz), NULL,
-                       DYNAMIC_TYPE_TMP_BUFFER);
+    v = (byte*)XMALLOC((1 << cost) * bSz, NULL, DYNAMIC_TYPE_TMP_BUFFER);
     if (v == NULL) {
         ret = MEMORY_E;
         goto end;
     }
     /* Temporary for scryptBlockMix. */
-    y = (byte*)XMALLOC((size_t)(blockSize * 128), NULL,
-                       DYNAMIC_TYPE_TMP_BUFFER);
+    y = (byte*)XMALLOC(blockSize * 128, NULL, DYNAMIC_TYPE_TMP_BUFFER);
     if (y == NULL) {
         ret = MEMORY_E;
         goto end;
     }
 
     /* Step 1. */
-    ret = wc_PBKDF2(blocks, passwd, passLen, salt, saltLen, 1, (int)blocksSz,
+    ret = wc_PBKDF2(blocks, passwd, passLen, salt, saltLen, 1, blocksSz,
                     WC_SHA256);
     if (ret != 0)
         goto end;
 
     /* Step 2. */
     for (i = 0; i < parallel; i++)
-        scryptROMix(blocks + i * (int)bSz, v, y, (int)blockSize, 1 << cost);
+        scryptROMix(blocks + i * bSz, v, y, blockSize, 1 << cost);
 
     /* Step 3. */
-    ret = wc_PBKDF2(output, passwd, passLen, blocks, (int)blocksSz, 1, dkLen,
+    ret = wc_PBKDF2(output, passwd, passLen, blocks, blocksSz, 1, dkLen,
                     WC_SHA256);
 end:
     if (blocks != NULL)

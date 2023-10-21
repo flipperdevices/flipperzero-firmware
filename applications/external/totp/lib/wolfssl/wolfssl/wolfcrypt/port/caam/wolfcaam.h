@@ -91,9 +91,8 @@ WOLFSSL_API int wc_caamCoverKey(byte* in, word32 inSz, byte* out, word32* outSz,
 #define WC_CAAM_MAC_SZ 16
 #define WC_CAAM_BLOB_RED   1
 #define WC_CAAM_BLOB_BLACK 2
-#define WC_CAAM_RED_KEYMOD_SZ 16
+#define WC_CAAM_RED_KEYMOD_SZ 8
 #define WC_CAAM_BLACK_KEYMOD_SZ 16
-#define WC_SM_BLOB_KEYMOD_SZ 8
 #define WC_CAAM_MAX_ENTROPY 44
 
 #if !defined(WOLFSSL_QNX_CAAM) && !defined(WOLFSSL_SECO_CAAM) && \

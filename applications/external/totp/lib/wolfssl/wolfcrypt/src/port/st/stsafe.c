@@ -19,12 +19,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
 
-#include <wolfssl/wolfcrypt/types.h>
 #include <wolfssl/wolfcrypt/port/st/stsafe.h>
 #include <wolfssl/wolfcrypt/logging.h>
 
 #ifndef STSAFE_INTERFACE_PRINTF
-#define STSAFE_INTERFACE_PRINTF(...) WC_DO_NOTHING
+#define STSAFE_INTERFACE_PRINTF(...)
 #endif
 
 #ifdef WOLFSSL_STSAFEA100

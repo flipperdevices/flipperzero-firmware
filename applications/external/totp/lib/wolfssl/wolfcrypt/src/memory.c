@@ -33,6 +33,15 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 
+/* check old macros @wc_fips */
+#if defined(USE_CYASSL_MEMORY) && !defined(USE_WOLFSSL_MEMORY)
+    #define USE_WOLFSSL_MEMORY
+#endif
+#if defined(CYASSL_MALLOC_CHECK) && !defined(WOLFSSL_MALLOC_CHECK)
+    #define WOLFSSL_MALLOC_CHECK
+#endif
+
+
 /*
 Possible memory options:
  * NO_WOLFSSL_MEMORY:               Disables wolf memory callback support. When not defined settings.h defines USE_WOLFSSL_MEMORY.
@@ -118,51 +127,6 @@ int wolfSSL_GetAllocators(wolfSSL_Malloc_cb*  mf,
     if (rf) *rf = realloc_function;
     return 0;
 }
-
-#ifdef WOLFSSL_MEM_FAIL_COUNT
-static wolfSSL_Mutex memFailMutex;
-int mem_fail_allocs = 0;
-int mem_fail_frees = 0;
-int mem_fail_cnt = 0;
-
-void wc_MemFailCount_Init()
-{
-    char* cnt;
-    wc_InitMutex(&memFailMutex);
-    cnt = getenv("MEM_FAIL_CNT");
-    if (cnt != NULL) {
-        fprintf(stderr, "MemFailCount At: %d\n", mem_fail_cnt);
-        mem_fail_cnt = atoi(cnt);
-    }
-}
-static int wc_MemFailCount_AllocMem(void)
-{
-    int ret = 1;
-
-    wc_LockMutex(&memFailMutex);
-    if ((mem_fail_cnt > 0) && (mem_fail_cnt <= mem_fail_allocs + 1)) {
-        ret = 0;
-    }
-    else {
-        mem_fail_allocs++;
-    }
-    wc_UnLockMutex(&memFailMutex);
-
-    return ret;
-}
-static void wc_MemFailCount_FreeMem(void)
-{
-    wc_LockMutex(&memFailMutex);
-    mem_fail_frees++;
-    wc_UnLockMutex(&memFailMutex);
-}
-void wc_MemFailCount_Free()
-{
-    wc_FreeMutex(&memFailMutex);
-    fprintf(stderr, "MemFailCount Total: %d\n", mem_fail_allocs);
-    fprintf(stderr, "MemFailCount Frees: %d\n", mem_fail_frees);
-}
-#endif
 
 #ifndef WOLFSSL_STATIC_MEMORY
 #ifdef WOLFSSL_CHECK_MEM_ZERO
@@ -304,6 +268,50 @@ void wc_MemZero_Check(void* addr, size_t len)
     wc_UnLockMutex(&zeroMutex);
 }
 #endif /* WOLFSSL_CHECK_MEM_ZERO */
+
+#ifdef WOLFSSL_MEM_FAIL_COUNT
+static wolfSSL_Mutex memFailMutex;
+int mem_fail_allocs = 0;
+int mem_fail_frees = 0;
+int mem_fail_cnt = 0;
+
+void wc_MemFailCount_Init()
+{
+    wc_InitMutex(&memFailMutex);
+    char* cnt = getenv("MEM_FAIL_CNT");
+    if (cnt != NULL) {
+        fprintf(stderr, "MemFailCount At: %d\n", mem_fail_cnt);
+        mem_fail_cnt = atoi(cnt);
+    }
+}
+static int wc_MemFailCount_AllocMem(void)
+{
+    int ret = 1;
+
+    wc_LockMutex(&memFailMutex);
+    if ((mem_fail_cnt > 0) && (mem_fail_cnt <= mem_fail_allocs + 1)) {
+        ret = 0;
+    }
+    else {
+        mem_fail_allocs++;
+    }
+    wc_UnLockMutex(&memFailMutex);
+
+    return ret;
+}
+static void wc_MemFailCount_FreeMem(void)
+{
+    wc_LockMutex(&memFailMutex);
+    mem_fail_frees++;
+    wc_UnLockMutex(&memFailMutex);
+}
+void wc_MemFailCount_Free()
+{
+    wc_FreeMutex(&memFailMutex);
+    fprintf(stderr, "MemFailCount Total: %d\n", mem_fail_allocs);
+    fprintf(stderr, "MemFailCount Frees: %d\n", mem_fail_frees);
+}
+#endif
 
 #ifdef WOLFSSL_DEBUG_MEMORY
 void* wolfSSL_Malloc(size_t size, const char* func, unsigned int line)
@@ -1316,13 +1324,8 @@ void *xmalloc(size_t n, void* heap, int type, const char* func,
     }
 #endif
 
-    if (malloc_function) {
-#ifndef WOLFSSL_STATIC_MEMORY
+    if (malloc_function)
         p32 = malloc_function(n + sizeof(word32) * 4);
-#else
-        p32 = malloc_function(n + sizeof(word32) * 4, heap, type);
-#endif
-    }
     else
         p32 = malloc(n + sizeof(word32) * 4);
 
@@ -1359,13 +1362,8 @@ void *xrealloc(void *p, size_t n, void* heap, int type, const char* func,
         oldLen = oldp32[0];
     }
 
-    if (realloc_function) {
-#ifndef WOLFSSL_STATIC_MEMORY
+    if (realloc_function)
         p32 = realloc_function(oldp32, n + sizeof(word32) * 4);
-#else
-        p32 = realloc_function(oldp32, n + sizeof(word32) * 4, heap, type);
-#endif
-    }
     else
         p32 = realloc(oldp32, n + sizeof(word32) * 4);
 
@@ -1405,13 +1403,8 @@ void xfree(void *p, void* heap, int type, const char* func, const char* file,
         fprintf(stderr, "Free: %p -> %u (%d) at %s:%s:%u\n", p, p32[0], type,
                                                               func, file, line);
 
-        if (free_function) {
-#ifndef WOLFSSL_STATIC_MEMORY
+        if (free_function)
             free_function(p32);
-#else
-            free_function(p32, heap, type);
-#endif
-        }
         else
             free(p32);
     }

@@ -548,9 +548,9 @@ typedef struct sp_ecc_ctx {
     /* No filesystem, no output
      * TODO: Use logging API?
      */
-    #define sp_print(a, s) WC_DO_NOTHING
-    #define sp_print_digit(a, s) WC_DO_NOTHING
-    #define sp_print_int(a, s) WC_DO_NOTHING
+    #define sp_print(a, s)
+    #define sp_print_digit(a, s)
+    #define sp_print_int(a, s)
 
 #endif /* !NO_FILESYSTEM */
 
@@ -656,7 +656,7 @@ typedef struct sp_ecc_ctx {
 /* Sets the multi-precision number negative.
  *
  * Negative support not compiled in, so does nothing. */
-#define sp_setneg(a) WC_DO_NOTHING
+#define sp_setneg(a) do{}while(0)
 #else
 /* Returns whether multi-precision number is negative.
  *
@@ -830,7 +830,7 @@ while (0)
 #define NEW_MP_INT_SIZE(name, bits, heap, type) \
     XMEMSET(name, 0, MP_INT_SIZEOF(MP_BITS_CNT(bits)))
 /* Dispose of static mp_int. */
-#define FREE_MP_INT_SIZE(name, heap, type) WC_DO_NOTHING
+#define FREE_MP_INT_SIZE(name, heap, type)
 /* Type to force compiler to not complain about size. */
 #define MP_INT_SIZE     sp_int_minimal
 #endif
@@ -924,8 +924,6 @@ MP_API int sp_init_copy (sp_int* r, const sp_int* a);
 MP_API int sp_copy(const sp_int* a, sp_int* r);
 MP_API int sp_exch(sp_int* a, sp_int* b);
 MP_API int sp_cond_swap_ct(sp_int* a, sp_int* b, int cnt, int swap);
-MP_API int sp_cond_swap_ct_ex(sp_int* a, sp_int* b, int cnt, int swap,
-    sp_int* t);
 
 #ifdef WOLFSSL_SP_INT_NEGATIVE
 MP_API int sp_abs(const sp_int* a, sp_int* r);
@@ -1102,7 +1100,6 @@ WOLFSSL_LOCAL void sp_memzero_check(sp_int* sp);
 #define mp_init_copy                        sp_init_copy
 #define mp_exch                             sp_exch
 #define mp_cond_swap_ct                     sp_cond_swap_ct
-#define mp_cond_swap_ct_ex                  sp_cond_swap_ct_ex
 #define mp_cmp_mag                          sp_cmp_mag
 #define mp_cmp                              sp_cmp
 #define mp_count_bits                       sp_count_bits

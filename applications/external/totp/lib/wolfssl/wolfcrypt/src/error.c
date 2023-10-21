@@ -589,12 +589,6 @@ const char* wc_GetErrorString(int error)
     case ASN_LEN_E:
         return "ASN.1 length invalid";
 
-    case SM4_GCM_AUTH_E:
-        return "SM4-GCM Authentication check fail";
-
-    case SM4_CCM_AUTH_E:
-        return "SM4-CCM Authentication check fail";
-
     default:
         return "unknown error number";
 

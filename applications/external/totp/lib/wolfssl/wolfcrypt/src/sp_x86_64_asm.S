@@ -55805,7 +55805,7 @@ _sp_256_cond_copy_4:
  * a   First number to multiply in Montgomery form.
  * b   Second number to multiply in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery multiplier.
+ * mp  Montgomery mulitplier.
  */
 #ifndef __APPLE__
 .text
@@ -56009,7 +56009,7 @@ _sp_256_mont_mul_4:
  * r   Result of squaring.
  * a   Number to square in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery multiplier.
+ * mp  Montgomery mulitplier.
  */
 #ifndef __APPLE__
 .text
@@ -57046,7 +57046,7 @@ _sp_256_mont_dbl_sub_4:
 /* Touch each possible point that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of point to retrieve.
  */
 #ifndef __APPLE__
@@ -57115,7 +57115,7 @@ L_256_get_point_33_4_start_1:
 /* Touch each possible point that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of point to retrieve.
  */
 #ifndef __APPLE__
@@ -57174,7 +57174,7 @@ L_256_get_point_33_avx2_4_start:
  * a   First number to multiply in Montgomery form.
  * b   Second number to multiply in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery multiplier.
+ * mp  Montgomery mulitplier.
  */
 #ifndef __APPLE__
 .text
@@ -57355,7 +57355,7 @@ _sp_256_mont_mul_avx2_4:
  * r   Result of squaring.
  * a   Number to square in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery multiplier.
+ * mp  Montgomery mulitplier.
  */
 #ifndef __APPLE__
 .text
@@ -57785,7 +57785,7 @@ _sp_256_div2_avx2_4:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -57845,7 +57845,7 @@ L_256_get_entry_64_4_start_0:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -57895,7 +57895,7 @@ L_256_get_entry_64_avx2_4_start:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -57955,7 +57955,7 @@ L_256_get_entry_65_4_start_0:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -61536,7 +61536,7 @@ _sp_384_mont_tpl_lower_6:
 /* Touch each possible point that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of point to retrieve.
  */
 #ifndef __APPLE__
@@ -61636,7 +61636,7 @@ L_384_get_point_33_6_start_2:
 /* Touch each possible point that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of point to retrieve.
  */
 #ifndef __APPLE__
@@ -62171,7 +62171,7 @@ _sp_384_div2_avx2_6:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -62241,7 +62241,7 @@ L_384_get_entry_64_6_start_0:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -62301,7 +62301,7 @@ L_384_get_entry_64_avx2_6_start:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -62371,7 +62371,7 @@ L_384_get_entry_65_6_start_0:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -65220,7 +65220,7 @@ _sp_521_cond_copy_9:
  * a   First number to multiply in Montgomery form.
  * b   Second number to multiply in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery multiplier.
+ * mp  Montgomery mulitplier.
  */
 #ifndef __APPLE__
 .text
@@ -65817,7 +65817,7 @@ _sp_521_mont_mul_9:
  * r   Result of squaring.
  * a   Number to square in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery multiplier.
+ * mp  Montgomery mulitplier.
  */
 #ifndef __APPLE__
 .text
@@ -67080,7 +67080,7 @@ _sp_521_div2_9:
 /* Touch each possible point that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of point to retrieve.
  */
 #ifndef __APPLE__
@@ -67225,7 +67225,7 @@ L_521_get_point_33_9_start_2:
 /* Touch each possible point that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of point to retrieve.
  */
 #ifndef __APPLE__
@@ -67326,7 +67326,7 @@ L_521_get_point_33_avx2_9_start:
  * a   First number to multiply in Montgomery form.
  * b   Second number to multiply in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery multiplier.
+ * mp  Montgomery mulitplier.
  */
 #ifndef __APPLE__
 .text
@@ -67941,7 +67941,7 @@ _sp_521_mont_mul_avx2_9:
  * r   Result of squaring.
  * a   Number to square in Montgomery form.
  * m   Modulus (prime).
- * mp  Montgomery multiplier.
+ * mp  Montgomery mulitplier.
  */
 #ifndef __APPLE__
 .text
@@ -68847,7 +68847,7 @@ _sp_521_div2_avx2_9:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -68966,7 +68966,7 @@ L_521_get_entry_64_9_start_1:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -69044,7 +69044,7 @@ L_521_get_entry_64_avx2_9_start:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__
@@ -69163,7 +69163,7 @@ L_521_get_entry_65_9_start_1:
 /* Touch each possible entry that could be being copied.
  *
  * r      Point to copy into.
- * table  Table - start of the entries to access
+ * table  Table - start of the entires to access
  * idx    Index of entry to retrieve.
  */
 #ifndef __APPLE__

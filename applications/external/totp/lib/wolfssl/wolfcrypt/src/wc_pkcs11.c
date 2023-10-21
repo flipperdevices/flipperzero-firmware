@@ -74,7 +74,7 @@
 #endif
 
 
-/* Maximum length of the EC parameter string. */
+/* Maximim length of the EC parameter string. */
 #define MAX_EC_PARAM_LEN   16
 
 
@@ -403,11 +403,11 @@ static void pkcs11_val(const char* op, CK_ULONG val)
 }
 #else
 /* Disable logging of PKCS#11 calls and return value. */
-#define PKCS11_RV(op, ev) WC_DO_NOTHING
+#define PKCS11_RV(op, ev)
 /* Disable logging of PKCS#11 calls and value. */
-#define PKCS11_VAL(op, val) WC_DO_NOTHING
+#define PKCS11_VAL(op, val)
 /* Disable logging of PKCS#11 template. */
-#define PKCS11_DUMP_TEMPLATE(name, templ, cnt) WC_DO_NOTHING
+#define PKCS11_DUMP_TEMPLATE(name, templ, cnt)
 #endif
 
 /**

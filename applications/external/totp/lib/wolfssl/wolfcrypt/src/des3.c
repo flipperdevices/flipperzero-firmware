@@ -49,6 +49,85 @@
     #include <wolfssl/wolfcrypt/cryptocb.h>
 #endif
 
+/* fips wrapper calls, user can call direct */
+#if defined(HAVE_FIPS) && \
+    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+
+    int wc_Des_SetKey(Des* des, const byte* key, const byte* iv, int dir)
+    {
+        return Des_SetKey(des, key, iv, dir);
+    }
+    int wc_Des3_SetKey(Des3* des, const byte* key, const byte* iv, int dir)
+    {
+        if (des == NULL || key == NULL || dir < 0) {
+            return BAD_FUNC_ARG;
+        }
+
+        return Des3_SetKey_fips(des, key, iv, dir);
+    }
+    int wc_Des_CbcEncrypt(Des* des, byte* out, const byte* in, word32 sz)
+    {
+        return Des_CbcEncrypt(des, out, in, sz);
+    }
+    int wc_Des_CbcDecrypt(Des* des, byte* out, const byte* in, word32 sz)
+    {
+        return Des_CbcDecrypt(des, out, in, sz);
+    }
+    int wc_Des3_CbcEncrypt(Des3* des, byte* out, const byte* in, word32 sz)
+    {
+        if (des == NULL || out == NULL || in == NULL) {
+            return BAD_FUNC_ARG;
+        }
+        return Des3_CbcEncrypt_fips(des, out, in, sz);
+    }
+    int wc_Des3_CbcDecrypt(Des3* des, byte* out, const byte* in, word32 sz)
+    {
+        if (des == NULL || out == NULL || in == NULL) {
+            return BAD_FUNC_ARG;
+        }
+        return Des3_CbcDecrypt_fips(des, out, in, sz);
+    }
+
+    #ifdef WOLFSSL_DES_ECB
+        /* One block, compatibility only */
+        int wc_Des_EcbEncrypt(Des* des, byte* out, const byte* in, word32 sz)
+        {
+            return Des_EcbEncrypt(des, out, in, sz);
+        }
+        int wc_Des3_EcbEncrypt(Des3* des, byte* out, const byte* in, word32 sz)
+        {
+            return Des3_EcbEncrypt(des, out, in, sz);
+        }
+    #endif /* WOLFSSL_DES_ECB */
+
+    void wc_Des_SetIV(Des* des, const byte* iv)
+    {
+        Des_SetIV(des, iv);
+    }
+    int wc_Des3_SetIV(Des3* des, const byte* iv)
+    {
+        return Des3_SetIV_fips(des, iv);
+    }
+
+    int wc_Des3Init(Des3* des3, void* heap, int devId)
+    {
+        (void)des3;
+        (void)heap;
+        (void)devId;
+        /* FIPS doesn't support:
+            return Des3Init(des3, heap, devId); */
+        return 0;
+    }
+    void wc_Des3Free(Des3* des3)
+    {
+        (void)des3;
+        /* FIPS doesn't support:
+            Des3Free(des3); */
+    }
+
+#else /* else build without fips, or for FIPS v2 */
+
+
 #if defined(WOLFSSL_TI_CRYPT)
     #include <wolfcrypt/src/port/ti/ti-des3.c>
 #else
@@ -438,7 +517,7 @@
 
 #elif defined(HAVE_COLDFIRE_SEC)
 
-    #include <wolfssl/wolfcrypt/types.h>
+    #include <wolfssl/ctaocrypt/types.h>
 
     #include "sec.h"
     #include "mcf5475_sec.h"
@@ -1810,4 +1889,5 @@ void wc_Des3Free(Des3* des3)
 }
 
 #endif /* WOLFSSL_TI_CRYPT */
+#endif /* HAVE_FIPS */
 #endif /* NO_DES3 */

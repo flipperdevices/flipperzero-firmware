@@ -356,7 +356,7 @@ while (0)
 #define NEW_MP_INT_SIZE(name, bits, heap, type) \
     XMEMSET(name, 0, sizeof(mp_int))
 /* Dispose of static mp_int. */
-#define FREE_MP_INT_SIZE(name, heap, type) WC_DO_NOTHING
+#define FREE_MP_INT_SIZE(name, heap, type)
 #endif
 
 /* Initialize an mp_int. */
@@ -861,7 +861,7 @@ MP_API int mp_radix_size (mp_int * a, int radix, int *size);
 #ifdef WOLFSSL_DEBUG_MATH
     MP_API void mp_dump(const char* desc, mp_int* a, byte verbose);
 #else
-    #define mp_dump(desc, a, verbose) WC_DO_NOTHING
+    #define mp_dump(desc, a, verbose)
 #endif
 
 #if defined(OPENSSL_EXTRA) || !defined(NO_DSA) || defined(HAVE_ECC)
@@ -899,8 +899,7 @@ MP_API int  mp_lcm(fp_int *a, fp_int *b, fp_int *c);
 MP_API int  mp_rand_prime(mp_int* a, int len, WC_RNG* rng, void* heap);
 MP_API int  mp_exch(mp_int *a, mp_int *b);
 #endif /* WOLFSSL_KEY_GEN */
-MP_API int  mp_cond_swap_ct_ex(mp_int* a, mp_int* b, int c, int m, mp_int* t);
-MP_API int  mp_cond_swap_ct(mp_int* a, mp_int* b, int c, int m);
+MP_API int  mp_cond_swap_ct (mp_int * a, mp_int * b, int c, int m);
 
 MP_API int  mp_cnt_lsb(fp_int *a);
 MP_API int  mp_div_2d(fp_int *a, int b, fp_int *c, fp_int *d);

@@ -24,7 +24,7 @@
 #ifndef WOLFCAAM_QNX_H
 #define WOLFCAAM_QNX_H
 
-#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/settings.h>
 
 #ifdef WOLFSSL_QNX_CAAM
 #include <sys/iofunc.h>
@@ -35,7 +35,7 @@
 #define Boolean int
 #define Success 1
 #define Failure 0
-#define INTERRUPT_Panic() WC_DO_NOTHING
+#define INTERRUPT_Panic()
 #define MemoryMapMayNotBeEmpty -1
 #define CAAM_WAITING -2
 #define NoActivityReady -1

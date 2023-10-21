@@ -59,8 +59,7 @@ enum Hash_Sum  {
     SHA3_384h = 422,
     SHA3_512h = 423,
     SHAKE128h = 424,
-    SHAKE256h = 425,
-    SM3h      = 640     /* 0x2A,0x81,0x1C,0xCF,0x55,0x01,0x83,0x11 */
+    SHAKE256h = 425
 };
 #endif /* !NO_ASN */
 
@@ -122,11 +121,6 @@ enum wc_HashType wc_HashTypeConvert(int hashType)
             eHashType = WC_HASH_TYPE_SHA3_512;
             break;
     #endif /* WOLFSSL_SHA3 */
-    #ifdef WOLFSSL_SM3
-        case WC_SM3:
-            eHashType = WC_HASH_TYPE_SM3;
-            break;
-    #endif
         default:
             eHashType = WC_HASH_TYPE_NONE;
             break;
@@ -228,11 +222,6 @@ int wc_HashGetOID(enum wc_HashType hash_type)
             oid = SHAKE256h;
             break;
     #endif
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            oid = SM3h;
-            break;
-    #endif
 
         /* Not Supported */
         case WC_HASH_TYPE_MD4:
@@ -300,11 +289,6 @@ enum wc_HashType wc_OidGetHash(int oid)
             hash_type = WC_HASH_TYPE_SHA3_512;
             break;
     #endif /* WOLFSSL_SHA3 */
-    #ifdef WOLFSSL_SM3
-        case SM3h:
-            hash_type = WC_HASH_TYPE_SM3;
-            break;
-    #endif
         default:
             break;
     }
@@ -410,12 +394,6 @@ int wc_HashGetDigestSize(enum wc_HashType hash_type)
             dig_size = BLAKE2S_OUTBYTES;
         #endif
             break;
-
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            dig_size = WC_SM3_DIGEST_SIZE;
-            break;
-    #endif
 
         /* Not Supported */
     #if defined(WOLFSSL_SHA3) && defined(WOLFSSL_SHAKE128)
@@ -529,12 +507,6 @@ int wc_HashGetBlockSize(enum wc_HashType hash_type)
             block_size = BLAKE2S_BLOCKBYTES;
         #endif
             break;
-
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            block_size = WC_SM3_BLOCK_SIZE;
-            break;
-    #endif
 
         /* Not Supported */
     #if defined(WOLFSSL_SHA3) && defined(WOLFSSL_SHAKE128)
@@ -654,12 +626,6 @@ int wc_Hash(enum wc_HashType hash_type, const byte* data,
 #endif
             break;
 
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            ret = wc_Sm3Hash(data, data_len, hash);
-            break;
-    #endif
-
         /* Not Supported */
         case WC_HASH_TYPE_MD2:
         case WC_HASH_TYPE_MD4:
@@ -756,12 +722,6 @@ int wc_HashInit_ex(wc_HashAlg* hash, enum wc_HashType type, void* heap,
             ret = wc_InitSha3_512(&hash->sha3, heap, devId);
 #endif
             break;
-
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            ret = wc_InitSm3(&hash->sm3, heap, devId);
-            break;
-    #endif
 
         /* not supported */
         case WC_HASH_TYPE_MD5_SHA:
@@ -869,12 +829,6 @@ int wc_HashUpdate(wc_HashAlg* hash, enum wc_HashType type, const byte* data,
 #endif
             break;
 
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            ret = wc_Sm3Update(&hash->sm3, data, dataSz);
-            break;
-    #endif
-
         /* not supported */
         case WC_HASH_TYPE_MD5_SHA:
         case WC_HASH_TYPE_MD2:
@@ -971,12 +925,6 @@ int wc_HashFinal(wc_HashAlg* hash, enum wc_HashType type, byte* out)
             ret = wc_Sha3_512_Final(&hash->sha3, out);
 #endif
             break;
-
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            ret = wc_Sm3Final(&hash->sm3, out);
-            break;
-    #endif
 
         /* not supported */
         case WC_HASH_TYPE_MD5_SHA:
@@ -1087,13 +1035,6 @@ int wc_HashFree(wc_HashAlg* hash, enum wc_HashType type)
 #endif
             break;
 
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            wc_Sm3Free(&hash->sm3);
-            ret = 0;
-            break;
-    #endif
-
         /* not supported */
         case WC_HASH_TYPE_MD5_SHA:
         case WC_HASH_TYPE_MD2:
@@ -1169,12 +1110,6 @@ int wc_HashSetFlags(wc_HashAlg* hash, enum wc_HashType type, word32 flags)
 #endif
             break;
 
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            ret = wc_Sm3SetFlags(&hash->sm3, flags);
-            break;
-    #endif
-
         /* not supported */
         case WC_HASH_TYPE_MD5_SHA:
         case WC_HASH_TYPE_MD2:
@@ -1247,12 +1182,6 @@ int wc_HashGetFlags(wc_HashAlg* hash, enum wc_HashType type, word32* flags)
             ret = wc_Sha3_GetFlags(&hash->sha3, flags);
 #endif
             break;
-
-    #ifdef WOLFSSL_SM3
-        case WC_HASH_TYPE_SM3:
-            ret = wc_Sm3GetFlags(&hash->sm3, flags);
-            break;
-    #endif
 
         /* not supported */
         case WC_HASH_TYPE_MD5_SHA:
@@ -1833,43 +1762,6 @@ int wc_HashGetFlags(wc_HashAlg* hash, enum wc_HashType type, word32* flags)
     }
 #endif /* WOLFSSL_SHAKE_256 */
 #endif /* WOLFSSL_SHA3 */
-
-#ifdef WOLFSSL_SM3
-    int wc_Sm3Hash(const byte* data, word32 len, byte* hash)
-    {
-        int ret = 0;
-    #ifdef WOLFSSL_SMALL_STACK
-        wc_Sm3* sm3;
-    #else
-        wc_Sm3 sm3[1];
-    #endif
-
-    #ifdef WOLFSSL_SMALL_STACK
-        sm3 = (wc_Sm3*)XMALLOC(sizeof(wc_Sm3), NULL, DYNAMIC_TYPE_TMP_BUFFER);
-        if (sm3 == NULL)
-            return MEMORY_E;
-    #endif
-
-        if ((ret = wc_InitSm3(sm3, NULL, INVALID_DEVID)) != 0) {
-            WOLFSSL_MSG("InitSm3 failed");
-        }
-        else {
-            if ((ret = wc_Sm3Update(sm3, data, len)) != 0) {
-                WOLFSSL_MSG("Sm3Update failed");
-            }
-            else if ((ret = wc_Sm3Final(sm3, hash)) != 0) {
-                WOLFSSL_MSG("Sm3Final failed");
-            }
-            wc_Sm3Free(sm3);
-        }
-
-    #ifdef WOLFSSL_SMALL_STACK
-        XFREE(sm3, NULL, DYNAMIC_TYPE_TMP_BUFFER);
-    #endif
-
-        return ret;
-    }
-#endif /* !WOLFSSL_NOSHA3_224 */
 
 #endif /* !NO_HASH_WRAPPER */
 

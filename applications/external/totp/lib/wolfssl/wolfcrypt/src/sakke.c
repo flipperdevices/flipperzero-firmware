@@ -293,7 +293,7 @@ static int sakke_load_base_point(SakkeKey* key)
             err = mp_read_radix(params->base->y, key->ecc.dp->Gy, MP_RADIX_HEX);
         }
         if (err == 0) {
-            /* Affine coordinates have a Z of 1 in Jacobian. */
+            /* Affine co-ordinates have a Z of 1 in Jacobian. */
             err = mp_set(params->base->z, 1);
         }
         if (err == 0) {
@@ -312,7 +312,7 @@ static int sakke_load_base_point(SakkeKey* key)
  * @param  [in]   key   SAKKE key.
  * @param  [in]   n     MP integer that is the scalar.
  * @param  [out]  res   ECC point to hold the result.
- * @param  [in]   map   Map the result to affine coordinates.
+ * @param  [in]   map   Map the result to affine co-ordinates.
  * @return  0 on success.
  * @return  MEMORY_E when dynamic memory allocation fails.
  */
@@ -338,7 +338,7 @@ static int sakke_mulmod_base(SakkeKey* key, const mp_int* n, ecc_point* res,
  * @param  [in]   n     MP integer that is the scalar.
  * @param  [in]   a     ECC point to add.
  * @param  [out]  res   ECC point to hold the result.
- * @param  [in]   map   Map the result to affine coordinates.
+ * @param  [in]   map   Map the result to affine co-ordinates.
  * @return  0 on success.
  * @return  MEMORY_E when dynamic memory allocation fails.
  */
@@ -363,7 +363,7 @@ static int sakke_mulmod_base_add(SakkeKey* key, const mp_int* n,
  * @param  [in]   key   SAKKE key.
  * @param  [in]   n     MP integer that is the scalar.
  * @param  [out]  res   ECC point to hold the result.
- * @param  [in]   map   Map the result to affine coordinates.
+ * @param  [in]   map   Map the result to affine co-ordinates.
  * @return  0 on success.
  * @return  MEMORY_E when dynamic memory allocation fails.
  */
@@ -386,7 +386,7 @@ static int sakke_mulmod_base(SakkeKey* key, const mp_int* n, ecc_point* res,
  * @param  [in]   a     ECC point to add. Point ordinates must be in Montgomery
  *                      form.
  * @param  [out]  res   ECC point to hold the result.
- * @param  [in]   map   Map the result to affine coordinates.
+ * @param  [in]   map   Map the result to affine co-ordinates.
  * @return  0 on success.
  * @return  MEMORY_E when dynamic memory allocation fails.
  */
@@ -408,7 +408,7 @@ static int sakke_mulmod_base_add(SakkeKey* key, const mp_int* n, ecc_point* a,
                 &params->prime, mp);
     }
     if ((err == 0) && map) {
-        /* Map result back to affine coordinates. */
+        /* Map result back to affine co-ordinates. */
         err = ecc_map(res, &params->prime, mp);
     }
 
@@ -425,7 +425,7 @@ static int sakke_mulmod_base_add(SakkeKey* key, const mp_int* n, ecc_point* a,
  * @param  [in]   p      ECC point to multiply.
  * @param  [in]   table  Precomputation table for p. May be NULL.
  * @param  [out]  res    ECC point to hold the result.
- * @param  [in]   map    Map the result to affine coordinates.
+ * @param  [in]   map    Map the result to affine co-ordinates.
  * @return  0 on success.
  * @return  MEMORY_E when dynamic memory allocation fails.
  */
@@ -457,7 +457,7 @@ static int sakke_mulmod_point(SakkeKey* key, const mp_int* n,
  * @param  [in]   p      ECC point to multiply.
  * @param  [in]   table  Precomputation table for p. May be NULL.
  * @param  [out]  res    ECC point to hold the result.
- * @param  [in]   map    Map the result to affine coordinates.
+ * @param  [in]   map    Map the result to affine co-ordinates.
  * @return  0 on success.
  * @return  MEMORY_E when dynamic memory allocation fails.
  */
@@ -1004,7 +1004,7 @@ int wc_MakeSakkeRsk(SakkeKey* key, const byte* id, word16 idSz, ecc_point* rsk)
 /**
  * Encode the SAKKE Receiver Secret Key (RSK) as DER encoded public ECC key.
  *
- * Encode the RSK to send to the receiving client.
+ * Encode the RSK to send to ther receiving client.
  *
  * X and y ordinate of RSK point concatenated. Each number is zero padded to
  * key size.
@@ -6794,7 +6794,7 @@ int wc_GenerateSakkeSSV(SakkeKey* key, WC_RNG* rng, byte* ssv, word16* ssvSz)
         }
     }
     if (err == 0) {
-        /* Return length only if an output buffer is NULL. */
+        /* Return length only if an ouput buffer is NULL. */
         if (ssv == NULL) {
             *ssvSz = (word16) (n / 8);
             err = LENGTH_ONLY_E;

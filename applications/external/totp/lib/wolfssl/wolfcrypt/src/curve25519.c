@@ -372,7 +372,7 @@ int wc_curve25519_export_public_ex(curve25519_key* key, byte* out,
                                      (int)sizeof(key->k), key->k);
         key->pubSet = (ret == 0);
     }
-    /* export public point with endianness */
+    /* export public point with endianess */
     curve25519_copy_point(out, key->p.point, endian);
     *outLen = CURVE25519_KEYSIZE;
 
@@ -410,7 +410,7 @@ int wc_curve25519_import_public_ex(const byte* in, word32 inLen,
        return ECC_BAD_ARG_E;
     }
 
-    /* import public point with endianness */
+    /* import public point with endianess */
     curve25519_copy_point(key->p.point, in, endian);
     key->pubSet = 1;
 
@@ -535,7 +535,7 @@ int wc_curve25519_export_private_raw_ex(curve25519_key* key, byte* out,
         return ECC_BAD_ARG_E;
     }
 
-    /* export private scalar with endianness */
+    /* export private scalar with endianess */
     curve25519_copy_point(out, key->k, endian);
     *outLen = CURVE25519_KEYSIZE;
 
@@ -632,7 +632,7 @@ int wc_curve25519_import_private_ex(const byte* priv, word32 privSz,
     se050_curve25519_free_key(key);
 #endif
 
-    /* import private scalar with endianness */
+    /* import private scalar with endianess */
     curve25519_copy_point(key->k, priv, endian);
     key->privSet = 1;
 

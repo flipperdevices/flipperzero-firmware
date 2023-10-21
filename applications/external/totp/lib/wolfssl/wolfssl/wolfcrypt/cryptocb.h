@@ -72,17 +72,6 @@
     #include <wolfssl/wolfcrypt/sha512.h>
 #endif
 
-#ifdef WOLF_CRYPTO_CB_CMD
-/* CryptoCb Commands */
-enum wc_CryptoCbCmdType {
-    WC_CRYPTOCB_CMD_TYPE_NONE = 0,
-    WC_CRYPTOCB_CMD_TYPE_REGISTER,
-    WC_CRYPTOCB_CMD_TYPE_UNREGISTER,
-
-    WC_CRYPTOCB_CMD_TYPE_MAX = WC_CRYPTOCB_CMD_TYPE_UNREGISTER
-};
-#endif
-
 /* Crypto Information Structure for callbacks */
 typedef struct wc_CryptoInfo {
     int algo_type; /* enum wc_AlgoType */
@@ -367,12 +356,6 @@ typedef struct wc_CryptoInfo {
         int type;
     } cmac;
 #endif
-#ifdef WOLF_CRYPTO_CB_CMD
-    struct {      /* uses wc_AlgoType=ALGO_NONE */
-        int type; /* enum wc_CryptoCbCmdType */
-        void *ctx;
-    } cmd;
-#endif
 #if HAVE_ANONYMOUS_INLINE_AGGREGATES
     };
 #endif
@@ -382,7 +365,6 @@ typedef struct wc_CryptoInfo {
 typedef int (*CryptoDevCallbackFunc)(int devId, wc_CryptoInfo* info, void* ctx);
 
 WOLFSSL_LOCAL void wc_CryptoCb_Init(void);
-WOLFSSL_LOCAL void wc_CryptoCb_Cleanup(void);
 WOLFSSL_LOCAL int wc_CryptoCb_GetDevIdAtIndex(int startIdx);
 WOLFSSL_API int  wc_CryptoCb_RegisterDevice(int devId, CryptoDevCallbackFunc cb, void* ctx);
 WOLFSSL_API void wc_CryptoCb_UnRegisterDevice(int devId);

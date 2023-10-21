@@ -31,12 +31,6 @@
 #include <wolfssl/wolfcrypt/error-crypt.h>
 #include <wolfssl/wolfcrypt/ecc.h>
 #include <wolfssl/wolfcrypt/port/silabs/silabs_ecc.h>
-#include "sl_se_manager_internal_keys.h"
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-static sl_se_key_descriptor_t private_device_key =
-    SL_SE_APPLICATION_ATTESTATION_KEY;
-#endif
 
 #ifndef WOLFSSL_HAVE_ECC_KEY_GET_PRIV
     /* FIPS build has replaced ecc.h. */
@@ -46,17 +40,11 @@ static sl_se_key_descriptor_t private_device_key =
 
 #define SILABS_UNSUPPORTED_KEY_TYPE 0xFFFFFFFF
 
-/* For older Gecko SDK's with spelling error */
-#ifndef SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY
-#define SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY \
-    SL_SE_KEY_FLAG_ASYMMMETRIC_SIGNING_ONLY
-#endif
-
-static sl_se_key_type_t silabs_map_key_type(ecc_curve_id curve_id)
+static sl_se_key_type_t silabs_map_key_type (ecc_curve_id curve_id)
 {
     sl_se_key_type_t res = SILABS_UNSUPPORTED_KEY_TYPE;
 
-    switch (curve_id) {
+    switch(curve_id) {
     case ECC_SECP192R1:
         res = SL_SE_KEY_TYPE_ECC_P192;
         break;
@@ -96,41 +84,28 @@ static sl_se_key_type_t silabs_map_key_type(ecc_curve_id curve_id)
     return res;
 }
 
-int silabs_ecc_sign_hash(const byte* in, word32 inlen, byte* out,
-    word32 *outlen, ecc_key* key)
+int silabs_ecc_sign_hash(const byte* in, word32 inlen, byte* out, word32 *outlen, ecc_key* key)
 {
-    sl_status_t sl_stat;
-    sl_se_key_descriptor_t* slkey = &key->key;
+    sl_status_t sl_stat = sl_se_init_command_context(&(key->cmd_ctx));
     word32 siglen = *outlen;
 
-    if ((int)siglen >= key->dp->size * 2) {
+    sl_stat = sl_se_validate_key(&(key->key));
+
+    if (key->dp->size * 2 <= (int)siglen) {
         siglen = key->dp->size * 2;
     }
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    /* if signing and not private key provided then use vault key */
-    if (key->type != ECC_PRIVATEKEY ||
-            mp_unsigned_bin_size(wc_ecc_key_get_priv(key)) == 0) {
-        slkey = &private_device_key;
-    }
-#endif
-
-    sl_stat = sl_se_init_command_context(&key->cmd_ctx);
-    if (sl_stat == SL_STATUS_OK) {
-        sl_stat = sl_se_validate_key(slkey);
-    }
-    if (sl_stat == SL_STATUS_OK) {
-        sl_stat = sl_se_ecc_sign(
-            &key->cmd_ctx,
-            slkey,
-            0,
-            1,
-            in,
-            inlen,
-            out,
-            siglen
+    sl_stat = sl_se_ecc_sign(
+        &(key->cmd_ctx),
+        &(key->key),
+        0,
+        1,
+        in,
+        inlen,
+        out,
+        siglen
         );
-    }
+
     return (sl_stat == SL_STATUS_OK) ? 0 : WC_HW_E;
 }
 
@@ -140,18 +115,18 @@ int silabs_ecc_verify_hash(const byte* sig, word32 siglen,
                            const byte* hash, word32 hashlen,
                            int* stat, ecc_key* key)
 {
-    sl_status_t sl_stat = sl_se_init_command_context(&key->cmd_ctx);
-    if (sl_stat == SL_STATUS_OK) {
-        sl_stat = sl_se_ecc_verify(
-            &key->cmd_ctx,
-            &key->key,
-            0,
-            1,
-            hash,
-            hashlen,
-            sig,
-            siglen);
-    }
+    sl_status_t sl_stat = sl_se_init_command_context(&(key->cmd_ctx));
+
+    sl_stat = sl_se_ecc_verify(
+        &(key->cmd_ctx),
+        &(key->key),
+        0,
+        1,
+        hash,
+        hashlen,
+        sig,
+        siglen);
+
     if (sl_stat == SL_STATUS_OK) {
         *stat = 1;
     } else if (sl_stat == SL_STATUS_INVALID_SIGNATURE) {
@@ -159,6 +134,7 @@ int silabs_ecc_verify_hash(const byte* sig, word32 siglen,
     } else {
         return WC_HW_E;
     }
+
     return 0;
 }
 #endif
@@ -168,86 +144,161 @@ int silabs_ecc_make_key(ecc_key* key, int keysize)
     sl_status_t sl_stat;
 
     key->key.type = silabs_map_key_type(key->dp->id);
-    if (key->key.type == SILABS_UNSUPPORTED_KEY_TYPE)
+    if (SILABS_UNSUPPORTED_KEY_TYPE == key->key.type)
         return WC_HW_E;
 
     key->key.size = keysize;
     key->key.storage.method = SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT;
-    key->key.flags = (SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY |
-                      SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY |
-                      SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY);
+    key->key.flags = SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY
+        | SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY
+        | SL_SE_KEY_FLAG_ASYMMMETRIC_SIGNING_ONLY;
 
-    sl_stat = sl_se_get_storage_size(&key->key,
-        &key->key.storage.location.buffer.size);
-    if (sl_stat == SL_STATUS_OK) {
-        key->key.storage.location.buffer.pointer = key->key_raw;
-        sl_stat = sl_se_generate_key(&key->cmd_ctx,
-                                    &key->key);
-    }
-    if (sl_stat == SL_STATUS_OK) {
-        key->type = ECC_PRIVATEKEY;
+    sl_stat = sl_se_get_storage_size(&key->key, &key->key.storage.location.buffer.size);
+    key->key.storage.location.buffer.pointer = key->key_raw;
 
-        /* copy key to mp components */
-        mp_read_unsigned_bin(key->pubkey.x,
-            key->key.storage.location.buffer.pointer, keysize);
-        mp_read_unsigned_bin(key->pubkey.y,
-            key->key.storage.location.buffer.pointer  + keysize, keysize);
-        mp_read_unsigned_bin(wc_ecc_key_get_priv(key),
-            key->key.storage.location.buffer.pointer + (2 * keysize), keysize);
-    }
+    sl_stat = sl_se_generate_key(&(key->cmd_ctx),
+                                 &(key->key));
+
+    key->type = ECC_PRIVATEKEY;
+
+    /* copy key to mp components */
+    mp_read_unsigned_bin (key->pubkey.x,
+                          key->key.storage.location.buffer.pointer,
+                          keysize);
+    mp_read_unsigned_bin (key->pubkey.y,
+                          key->key.storage.location.buffer.pointer  + keysize,
+                          keysize);
+    mp_read_unsigned_bin (wc_ecc_key_get_priv(key),
+                          key->key.storage.location.buffer.pointer + 2 * keysize,
+                          keysize);
 
     return (sl_stat == SL_STATUS_OK) ? 0 : WC_HW_E;
 }
 
-int silabs_ecc_import(ecc_key* key, word32 keysize, int pub, int priv)
+int silabs_ecc_import(ecc_key* key, word32 keysize)
 {
     sl_status_t sl_stat;
     int err = MP_OKAY;
-    word32 used;
+    word32 used = keysize;
 
     key->key.type = silabs_map_key_type(key->dp->id);
-    if (key->key.type == SILABS_UNSUPPORTED_KEY_TYPE || keysize == 0)
+    if (SILABS_UNSUPPORTED_KEY_TYPE == key->key.type)
         return WC_HW_E;
 
     key->key.size = keysize;
     key->key.storage.method = SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT;
-    key->key.flags = (
-        (pub ?  SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY : 0) |
-        (priv ? SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY : 0) |
-                SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY);
+    key->key.flags = SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY
+        | SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY
+        | SL_SE_KEY_FLAG_ASYMMMETRIC_SIGNING_ONLY;
 
-    sl_stat = sl_se_get_storage_size(&key->key,
-        &key->key.storage.location.buffer.size);
+    sl_stat = sl_se_get_storage_size(&key->key, &key->key.storage.location.buffer.size);
     key->key.storage.location.buffer.pointer = key->key_raw;
     if (sl_stat != SL_STATUS_OK)
       return WC_HW_E;
 
-    if (priv && pub)
-        key->type = ECC_PRIVATEKEY;
-    else if (priv)
-        key->type = ECC_PRIVATEKEY_ONLY;
-    else
-        key->type = ECC_PUBLICKEY;
+    key->type = ECC_PRIVATEKEY;
 
     /* copy key from mp components */
-    if (err == MP_OKAY && pub) {
-        used = keysize;
-        err = wc_export_int(key->pubkey.x,
-            key->key.storage.location.buffer.pointer,
-            &used, keysize, WC_TYPE_UNSIGNED_BIN);
-    }
-    if (err == MP_OKAY && pub) {
-        used = keysize;
-        err = wc_export_int(key->pubkey.y,
-            key->key.storage.location.buffer.pointer + keysize,
-            &used, keysize, WC_TYPE_UNSIGNED_BIN);
-    }
-    if (err == MP_OKAY && priv) {
-        used = keysize;
+    if (err == MP_OKAY)
+        err = wc_export_int(key->pubkey.x, key->key.storage.location.buffer.pointer,
+                            &used, keysize,
+                            WC_TYPE_UNSIGNED_BIN);
+    if (err == MP_OKAY)
+        err = wc_export_int(key->pubkey.y, key->key.storage.location.buffer.pointer + keysize,
+                            &used, keysize,
+                            WC_TYPE_UNSIGNED_BIN);
+    if (err == MP_OKAY)
         err = wc_export_int(wc_ecc_key_get_priv(key),
-            key->key.storage.location.buffer.pointer + (keysize * 2),
-            &used, keysize, WC_TYPE_UNSIGNED_BIN);
+            key->key.storage.location.buffer.pointer + 2 * keysize, &used,
+            keysize, WC_TYPE_UNSIGNED_BIN);
+
+    return err;
+}
+
+int silabs_ecc_import_private(ecc_key* key, word32 keysize)
+{
+    sl_status_t sl_stat;
+    int ret = 0;
+    word32 keySz = keysize;
+    key->key.type = silabs_map_key_type(key->dp->id);
+    if (SILABS_UNSUPPORTED_KEY_TYPE == key->key.type)
+        return WC_HW_E;
+
+    key->key.size = key->dp->size;
+    key->key.storage.method = SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT;
+    key->key.flags = SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY
+        | SL_SE_KEY_FLAG_ASYMMMETRIC_SIGNING_ONLY;
+
+    sl_stat = sl_se_get_storage_size(&key->key, &key->key.storage.location.buffer.size);
+    key->key.storage.location.buffer.pointer = key->key_raw;
+    if (sl_stat != SL_STATUS_OK)
+          return WC_HW_E;
+
+    ret = wc_export_int(wc_ecc_key_get_priv(key),
+        key->key.storage.location.buffer.pointer, &keySz, keySz,
+        WC_TYPE_UNSIGNED_BIN);
+
+    if (keySz != keysize)
+        ret = WC_HW_E;
+
+    return ret;
+}
+
+int silabs_ecc_sig_to_rs(ecc_key* key, word32 keySz)
+{
+    sl_status_t sl_stat;
+    int err = MP_OKAY;
+
+    key->key.type = silabs_map_key_type(key->dp->id);
+    if (SILABS_UNSUPPORTED_KEY_TYPE == key->key.type)
+        return WC_HW_E;
+
+    key->key.size = keySz;
+    key->key.storage.method = SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT;
+    key->key.flags = SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY
+        | SL_SE_KEY_FLAG_ASYMMMETRIC_SIGNING_ONLY;
+
+    sl_stat = sl_se_get_storage_size(&key->key, &key->key.storage.location.buffer.size);
+    key->key.storage.location.buffer.pointer = key->key_raw;
+    if (sl_stat != SL_STATUS_OK)
+          return WC_HW_E;
+
+    if (err == MP_OKAY) {
+        keySz = key->dp->size;
+        err = wc_export_int(key->pubkey.x,
+                            key->key.storage.location.buffer.pointer,
+                            &keySz, keySz, WC_TYPE_UNSIGNED_BIN);
+        if (err == MP_OKAY)
+            err = wc_export_int(key->pubkey.y,
+                                key->key.storage.location.buffer.pointer + keySz,
+                                &keySz, keySz, WC_TYPE_UNSIGNED_BIN);
     }
+
+    return err;
+}
+
+int silabs_ecc_import_private_raw(ecc_key* key, word32 keySz, const char* d, int encType)
+{
+    sl_status_t sl_stat;
+    int err = MP_OKAY;
+    key->type = ECC_PRIVATEKEY;
+    key->key.flags |= SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY;
+
+    sl_stat = sl_se_get_storage_size(&key->key, &key->key.storage.location.buffer.size);
+    if (sl_stat != SL_STATUS_OK)
+          return WC_HW_E;
+
+    if (encType == WC_TYPE_HEX_STR)
+        err = mp_read_radix(wc_ecc_key_get_priv(key), d, MP_RADIX_HEX);
+    else
+        err = mp_read_unsigned_bin(wc_ecc_key_get_priv(key), (const byte*)d,
+                                   key->dp->size);
+    if (err == MP_OKAY) {
+        err = wc_export_int(wc_ecc_key_get_priv(key),
+            key->key.storage.location.buffer.pointer + (2 * keySz), &keySz,
+            keySz, WC_TYPE_UNSIGNED_BIN);
+    }
+
     return err;
 }
 
@@ -286,7 +337,7 @@ int silabs_ecc_shared_secret(ecc_key* private_key, ecc_key* public_key,
 
     sl_stat = sl_se_ecdh_compute_shared_secret(
         &cmd,
-        &private_key->key,
+        &(private_key->key),
         &pub_key,
         &key_out);
 
@@ -297,69 +348,5 @@ int silabs_ecc_shared_secret(ecc_key* private_key, ecc_key* public_key,
 
     return (sl_stat == SL_STATUS_OK) ? 0 : WC_HW_E;
 }
-
-int silabs_ecc_export_public(ecc_key* key, sl_se_key_descriptor_t* seKey)
-{
-    int ret;
-    sl_status_t sl_stat;
-    sl_se_command_context_t cmd;
-
-    if (key == NULL || seKey == NULL)
-        return BAD_FUNC_ARG;
-
-    if (seKey->type == SL_SE_KEY_TYPE_ECC_P192)
-        ret = wc_ecc_set_curve(key, 24, ECC_SECP192R1);
-    else if (seKey->type == SL_SE_KEY_TYPE_ECC_P256)
-        ret = wc_ecc_set_curve(key, 32, ECC_SECP256R1);
-#ifdef SL_SE_KEY_TYPE_ECC_P384
-    else if (seKey->type == SL_SE_KEY_TYPE_ECC_P384)
-        ret = wc_ecc_set_curve(key, 48, ECC_SECP384R1);
-#endif
-#ifdef SL_SE_KEY_TYPE_ECC_P521
-    else if (seKey->type == SL_SE_KEY_TYPE_ECC_P521)
-        ret = wc_ecc_set_curve(key, 66, ECC_SECP521R1);
-#endif
-    else
-        ret = ECC_CURVE_OID_E;
-    if (ret != 0)
-        return ret;
-
-    key->type = ECC_PUBLICKEY;
-    key->key.type = seKey->type;
-    key->key.size = key->dp->size;
-    key->key.storage.method = SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT;
-    key->key.flags = (SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY |
-        SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY);
-
-    sl_stat = sl_se_get_storage_size(&key->key,
-        &key->key.storage.location.buffer.size);
-    key->key.storage.location.buffer.pointer = key->key_raw;
-    if (sl_stat == SL_STATUS_OK) {
-        sl_stat = sl_se_export_public_key(&cmd, seKey, &key->key);
-    }
-    if (sl_stat != SL_STATUS_OK) {
-        ret = WC_HW_E;
-    }
-    if (ret == 0) {
-        /* export public x and y */
-        ret = mp_read_unsigned_bin(key->pubkey.x,
-            key->key.storage.location.buffer.pointer,
-            key->key.size);
-    }
-    if (ret == 0) {
-        ret = mp_read_unsigned_bin(key->pubkey.y,
-            key->key.storage.location.buffer.pointer + key->key.size,
-            key->key.size);
-    }
-
-    return ret;
-}
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-int silabs_ecc_load_vault(ecc_key* key)
-{
-    return silabs_ecc_export_public(key, &private_device_key);
-}
-#endif
 
 #endif /* WOLFSSL_SILABS_SE_ACCEL */

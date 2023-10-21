@@ -37,8 +37,8 @@ extern "C" {
 #define XIL_CAST_U64(v) ((u64)(UINTPTR)(v))
 
 #ifdef XSECURE_CACHE_DISABLE
-#define WOLFSSL_XIL_DCACHE_INVALIDATE_RANGE(p, l) WC_DO_NOTHING
-#define WOLFSSL_XIL_DCACHE_FLUSH_RANGE(p, l)      WC_DO_NOTHING
+#define WOLFSSL_XIL_DCACHE_INVALIDATE_RANGE(p, l) do{}while(0)
+#define WOLFSSL_XIL_DCACHE_FLUSH_RANGE(p, l)      do{}while(0)
 #else
 #define WOLFSSL_XIL_DCACHE_INVALIDATE_RANGE(p, l) \
     do{ Xil_DCacheInvalidateRange((p), (l)); }while(0)
@@ -51,7 +51,7 @@ extern "C" {
 #include <unistd.h>
 #define WOLFSSL_XIL_SLEEP(n) do{ sleep(n); }while(0)
 #else
-#define WOLFSSL_XIL_SLEEP(n) WC_DO_NOTHING
+#define WOLFSSL_XIL_SLEEP(n) do{}while(0)
 #endif
 
 /* Provide our own message macro since the Versal PLM maybe

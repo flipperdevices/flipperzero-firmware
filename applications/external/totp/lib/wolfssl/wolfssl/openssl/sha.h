@@ -41,8 +41,8 @@
     #define CTX_SHA_HW_ADDER sizeof(STM32_HASH_Context)
 #elif defined(WOLFSSL_IMXRT1170_CAAM)
     #define CTX_SHA_HW_ADDER (sizeof(caam_hash_ctx_t) + sizeof(caam_handle_t))
-#elif defined(WOLFSSL_ESP32) && \
-     !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
+#elif defined(WOLFSSL_ESPWROOM32) && \
+     !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
     #define CTX_SHA_HW_ADDER sizeof(WC_ESP32SHA)
 #else
     #define CTX_SHA_HW_ADDER 0

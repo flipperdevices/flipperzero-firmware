@@ -47,6 +47,68 @@ void KcapiDh_Free(DhKey* key)
 
 static int KcapiDh_SetParams(DhKey* key)
 {
+#if defined(HAVE_FIPS) && \
+        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+    int ret = 0;
+    unsigned char* pkcs3 = NULL;
+    word32 len = 0, idx = 0, len2;
+
+    len  = MAX_SEQ_SZ;                  /* Sequence */
+    len += ASN_TAG_SZ + MAX_LENGTH_SZ;  /* Integer */
+    len += mp_leading_bit(&key->p) ? 1 : 0;
+    len += mp_unsigned_bin_size(&key->p);
+    len += ASN_TAG_SZ + MAX_LENGTH_SZ;  /* Integer */
+    len += mp_leading_bit(&key->g) ? 1 : 0;
+    len += mp_unsigned_bin_size(&key->g);
+
+    pkcs3 = (unsigned char*)XMALLOC(len, key->heap, DYNAMIC_TYPE_TMP_BUFFER);
+    if (pkcs3 == NULL) {
+        ret = MEMORY_E;
+    }
+
+    if (ret == 0) {
+        idx = len;
+        len2 = mp_unsigned_bin_size(&key->g);
+        idx -= len2;
+        ret = mp_to_unsigned_bin(&key->g, pkcs3 + idx);
+    }
+    if (ret >= 0) {
+        if (mp_leading_bit(&key->g)) {
+            pkcs3[--idx] = 0x00;
+            len2++;
+        }
+        idx -= SetLength(len2, NULL);
+        SetLength(len2, pkcs3 + idx);
+        pkcs3[--idx] = ASN_INTEGER;
+
+        len2 = mp_unsigned_bin_size(&key->p);
+        idx -= len2;
+        ret = mp_to_unsigned_bin(&key->p, pkcs3 + idx);
+    }
+    if (ret >= 0) {
+        if (mp_leading_bit(&key->p)) {
+            pkcs3[--idx] = 0x00;
+            len2++;
+        }
+        idx -= SetLength(len2, NULL);
+        SetLength(len2, pkcs3 + idx);
+        pkcs3[--idx] = ASN_INTEGER;
+
+        len2 = len - idx;
+        idx -= SetSequence(len2, NULL);
+        SetSequence(len2, pkcs3 + idx);
+
+        ret = kcapi_kpp_dh_setparam_pkcs3(key->handle, pkcs3 + idx, len - idx);
+        if (ret != 0) {
+            WOLFSSL_MSG("KcapiDh_SetParams: Failed to set");
+        }
+    }
+
+    if (pkcs3 != NULL) {
+        XFREE(pkcs3, key->heap, DYNAMIC_TYPE_TMP_BUFFER);
+    }
+    return ret;
+#else
     int ret;
     unsigned char* pkcs3 = NULL;
     word32 len;
@@ -74,6 +136,7 @@ static int KcapiDh_SetParams(DhKey* key)
         XFREE(pkcs3, key->heap, DYNAMIC_TYPE_TMP_BUFFER);
     }
     return ret;
+#endif
 }
 
 int KcapiDh_MakeKey(DhKey* key, byte* pub, word32* pubSz)

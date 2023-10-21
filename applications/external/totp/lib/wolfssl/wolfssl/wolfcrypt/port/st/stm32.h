@@ -168,11 +168,9 @@ int  wc_Stm32_Hash_Final(STM32_HASH_Context* stmCtx, word32 algo,
     struct Aes;
     #ifdef WOLFSSL_STM32_CUBEMX
         int wc_Stm32_Aes_Init(struct Aes* aes, CRYP_HandleTypeDef* hcryp);
-        void wc_Stm32_Aes_Cleanup(void);
     #else /* Standard Peripheral Library */
         int wc_Stm32_Aes_Init(struct Aes* aes, CRYP_InitTypeDef* cryptInit,
             CRYP_KeyInitTypeDef* keyInit);
-        void wc_Stm32_Aes_Cleanup(void);
     #endif /* WOLFSSL_STM32_CUBEMX */
 #endif /* !NO_AES */
 

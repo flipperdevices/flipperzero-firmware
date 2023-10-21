@@ -42,7 +42,7 @@
     #include <config.h>
 #endif
 
-#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/settings.h>
 
 /* PSA implementation takes over the Sha struct and Sha functions implementation
    completely. Devoiding the struct of the DevId field and hooks to make
@@ -78,8 +78,8 @@
 void PSA_LOCK(void);
 void PSA_UNLOCK(void);
 #else
-#define PSA_LOCK() WC_DO_NOTHING
-#define PSA_UNLOCK() WC_DO_NOTHING
+#define PSA_LOCK()
+#define PSA_UNLOCK()
 #endif
 
 int wc_psa_init(void);

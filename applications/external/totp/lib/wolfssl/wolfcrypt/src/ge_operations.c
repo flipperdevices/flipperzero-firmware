@@ -744,38 +744,38 @@ void sc_reduce(byte* s)
     carry = t[ 3] >> 42; t[ 4] += carry; t[ 3] &= MASK_42;
     carry = t[ 4] >> 42; t[ 5] += carry; t[ 4] &= MASK_42;
 
-    s[ 0] = (byte)(t[ 0] >>  0);
-    s[ 1] = (byte)(t[ 0] >>  8);
-    s[ 2] = (byte)(t[ 0] >> 16);
-    s[ 3] = (byte)(t[ 0] >> 24);
-    s[ 4] = (byte)(t[ 0] >> 32);
-    s[ 5] = (byte)(t[ 0] >> 40) | (byte)(t[ 1] <<  2);
-    s[ 6] = (byte)(t[ 1] >>  6);
-    s[ 7] = (byte)(t[ 1] >> 14);
-    s[ 8] = (byte)(t[ 1] >> 22);
-    s[ 9] = (byte)(t[ 1] >> 30);
-    s[10] = (byte)(t[ 1] >> 38) | (byte)(t[ 2] <<  4);
-    s[11] = (byte)(t[ 2] >>  4);
-    s[12] = (byte)(t[ 2] >> 12);
-    s[13] = (byte)(t[ 2] >> 20);
-    s[14] = (byte)(t[ 2] >> 28);
-    s[15] = (byte)(t[ 2] >> 36) | (byte)(t[ 3] <<  6);
-    s[16] = (byte)(t[ 3] >>  2);
-    s[17] = (byte)(t[ 3] >> 10);
-    s[18] = (byte)(t[ 3] >> 18);
-    s[19] = (byte)(t[ 3] >> 26);
-    s[20] = (byte)(t[ 3] >> 34);
-    s[21] = (byte)(t[ 4] >>  0);
-    s[22] = (byte)(t[ 4] >>  8);
-    s[23] = (byte)(t[ 4] >> 16);
-    s[24] = (byte)(t[ 4] >> 24);
-    s[25] = (byte)(t[ 4] >> 32);
-    s[26] = (byte)(t[ 4] >> 40) | (byte)(t[ 5] <<  2);
-    s[27] = (byte)(t[ 5] >>  6);
-    s[28] = (byte)(t[ 5] >> 14);
-    s[29] = (byte)(t[ 5] >> 22);
-    s[30] = (byte)(t[ 5] >> 30);
-    s[31] = (byte)(t[ 5] >> 38);
+    s[ 0] = (t[ 0] >>  0);
+    s[ 1] = (t[ 0] >>  8);
+    s[ 2] = (t[ 0] >> 16);
+    s[ 3] = (t[ 0] >> 24);
+    s[ 4] = (t[ 0] >> 32);
+    s[ 5] = (t[ 0] >> 40) | (t[ 1] <<  2);
+    s[ 6] = (t[ 1] >>  6);
+    s[ 7] = (t[ 1] >> 14);
+    s[ 8] = (t[ 1] >> 22);
+    s[ 9] = (t[ 1] >> 30);
+    s[10] = (t[ 1] >> 38) | (t[ 2] <<  4);
+    s[11] = (t[ 2] >>  4);
+    s[12] = (t[ 2] >> 12);
+    s[13] = (t[ 2] >> 20);
+    s[14] = (t[ 2] >> 28);
+    s[15] = (t[ 2] >> 36) | (t[ 3] <<  6);
+    s[16] = (t[ 3] >>  2);
+    s[17] = (t[ 3] >> 10);
+    s[18] = (t[ 3] >> 18);
+    s[19] = (t[ 3] >> 26);
+    s[20] = (t[ 3] >> 34);
+    s[21] = (t[ 4] >>  0);
+    s[22] = (t[ 4] >>  8);
+    s[23] = (t[ 4] >> 16);
+    s[24] = (t[ 4] >> 24);
+    s[25] = (t[ 4] >> 32);
+    s[26] = (t[ 4] >> 40) | (t[ 5] <<  2);
+    s[27] = (t[ 5] >>  6);
+    s[28] = (t[ 5] >> 14);
+    s[29] = (t[ 5] >> 22);
+    s[30] = (t[ 5] >> 30);
+    s[31] = (t[ 5] >> 38);
 }
 
 /*
@@ -896,38 +896,38 @@ void sc_muladd(byte* s, const byte* a, const byte* b, const byte* c)
     carry = t[ 3] >> 42; t[ 4] += carry; t[ 3] &= MASK_42;
     carry = t[ 4] >> 42; t[ 5] += carry; t[ 4] &= MASK_42;
 
-    s[ 0] = (byte)(t[ 0] >>  0);
-    s[ 1] = (byte)(t[ 0] >>  8);
-    s[ 2] = (byte)(t[ 0] >> 16);
-    s[ 3] = (byte)(t[ 0] >> 24);
-    s[ 4] = (byte)(t[ 0] >> 32);
-    s[ 5] = (byte)(t[ 0] >> 40) | (byte)(t[ 1] <<  2);
-    s[ 6] = (byte)(t[ 1] >>  6);
-    s[ 7] = (byte)(t[ 1] >> 14);
-    s[ 8] = (byte)(t[ 1] >> 22);
-    s[ 9] = (byte)(t[ 1] >> 30);
-    s[10] = (byte)(t[ 1] >> 38) | (byte)(t[ 2] <<  4);
-    s[11] = (byte)(t[ 2] >>  4);
-    s[12] = (byte)(t[ 2] >> 12);
-    s[13] = (byte)(t[ 2] >> 20);
-    s[14] = (byte)(t[ 2] >> 28);
-    s[15] = (byte)(t[ 2] >> 36) | (byte)(t[ 3] <<  6);
-    s[16] = (byte)(t[ 3] >>  2);
-    s[17] = (byte)(t[ 3] >> 10);
-    s[18] = (byte)(t[ 3] >> 18);
-    s[19] = (byte)(t[ 3] >> 26);
-    s[20] = (byte)(t[ 3] >> 34);
-    s[21] = (byte)(t[ 4] >>  0);
-    s[22] = (byte)(t[ 4] >>  8);
-    s[23] = (byte)(t[ 4] >> 16);
-    s[24] = (byte)(t[ 4] >> 24);
-    s[25] = (byte)(t[ 4] >> 32);
-    s[26] = (byte)(t[ 4] >> 40) | (byte)(t[ 5] <<  2);
-    s[27] = (byte)(t[ 5] >>  6);
-    s[28] = (byte)(t[ 5] >> 14);
-    s[29] = (byte)(t[ 5] >> 22);
-    s[30] = (byte)(t[ 5] >> 30);
-    s[31] = (byte)(t[ 5] >> 38);
+    s[ 0] = (t[ 0] >>  0);
+    s[ 1] = (t[ 0] >>  8);
+    s[ 2] = (t[ 0] >> 16);
+    s[ 3] = (t[ 0] >> 24);
+    s[ 4] = (t[ 0] >> 32);
+    s[ 5] = (t[ 0] >> 40) | (t[ 1] <<  2);
+    s[ 6] = (t[ 1] >>  6);
+    s[ 7] = (t[ 1] >> 14);
+    s[ 8] = (t[ 1] >> 22);
+    s[ 9] = (t[ 1] >> 30);
+    s[10] = (t[ 1] >> 38) | (t[ 2] <<  4);
+    s[11] = (t[ 2] >>  4);
+    s[12] = (t[ 2] >> 12);
+    s[13] = (t[ 2] >> 20);
+    s[14] = (t[ 2] >> 28);
+    s[15] = (t[ 2] >> 36) | (t[ 3] <<  6);
+    s[16] = (t[ 3] >>  2);
+    s[17] = (t[ 3] >> 10);
+    s[18] = (t[ 3] >> 18);
+    s[19] = (t[ 3] >> 26);
+    s[20] = (t[ 3] >> 34);
+    s[21] = (t[ 4] >>  0);
+    s[22] = (t[ 4] >>  8);
+    s[23] = (t[ 4] >> 16);
+    s[24] = (t[ 4] >> 24);
+    s[25] = (t[ 4] >> 32);
+    s[26] = (t[ 4] >> 40) | (t[ 5] <<  2);
+    s[27] = (t[ 5] >>  6);
+    s[28] = (t[ 5] >> 14);
+    s[29] = (t[ 5] >> 22);
+    s[30] = (t[ 5] >> 30);
+    s[31] = (t[ 5] >> 38);
 }
 #endif /* !HAVE___UINT128_T || NO_CURVED25519_128BIT */
 
@@ -985,9 +985,11 @@ static WC_INLINE void ge_add(ge_p1p1 *r,const ge_p3 *p,const ge_cached *q)
 
 #ifndef CURVED25519_ASM
 /* ge_scalar mult base */
-static unsigned char equal(unsigned char b,unsigned char c)
+static unsigned char equal(signed char b,signed char c)
 {
-  unsigned char x = b ^ c; /* 0: yes; 1..255: no */
+  unsigned char ub = b;
+  unsigned char uc = c;
+  unsigned char x = ub ^ uc; /* 0: yes; 1..255: no */
   word32 y = x; /* 0: yes; 1..255: no */
   y -= 1; /* 4294967295: yes; 0..254: no */
   y >>= 31; /* 1: yes; 0: no */
@@ -9096,7 +9098,7 @@ static void ge_select(ge_precomp *t,int pos,signed char b)
 #ifndef CURVED25519_ASM
   ge_precomp minust;
   unsigned char bnegative = negative(b);
-  unsigned char babs = (unsigned char)(b - (((-bnegative) & b) << 1));
+  unsigned char babs = b - (((-bnegative) & b) << 1);
 
   ge_precomp_0(t);
   cmov(t,&base[pos][0],babs,1);
@@ -9146,7 +9148,7 @@ void ge_scalarmult_base(ge_p3 *h,const unsigned char *a)
     e[i] += carry;
     carry = e[i] + 8;
     carry >>= 4;
-    e[i] -= (signed char)(carry << 4);
+    e[i] -= carry << 4;
   }
   e[63] += carry;
   /* each e[i] is between -8 and 8 */
@@ -9207,9 +9209,9 @@ static void slide(signed char *r,const unsigned char *a)
       for (b = 1;b <= 6 && i + b < SLIDE_SIZE;++b) {
         if (r[i + b]) {
           if (r[i] + (r[i + b] << b) <= 15) {
-            r[i] += (signed char)(r[i + b] << b); r[i + b] = 0;
+            r[i] += r[i + b] << b; r[i + b] = 0;
           } else if (r[i] - (r[i + b] << b) >= -15) {
-            r[i] -= (signed char)(r[i + b] << b);
+            r[i] -= r[i + b] << b;
             for (k = i + b;k < SLIDE_SIZE;++k) {
               if (!r[k]) {
                 r[k] = 1;
@@ -9795,7 +9797,7 @@ void ge_p3_tobytes(unsigned char *s,const ge_p3 *h)
   fe_mul(x,h->X,recip);
   fe_mul(y,h->Y,recip);
   fe_tobytes(s,y);
-  s[31] ^= (unsigned char)(fe_isnegative(x) << 7);
+  s[31] ^= fe_isnegative(x) << 7;
 }
 
 
@@ -9848,7 +9850,7 @@ void ge_tobytes(unsigned char *s,const ge_p2 *h)
   fe_mul(x,h->X,recip);
   fe_mul(y,h->Y,recip);
   fe_tobytes(s,y);
-  s[31] ^= (unsigned char)(fe_isnegative(x) << 7);
+  s[31] ^= fe_isnegative(x) << 7;
 }
 
 #endif /* !ED25519_SMALL */

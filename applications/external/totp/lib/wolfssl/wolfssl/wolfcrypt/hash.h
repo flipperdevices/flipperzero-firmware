@@ -55,9 +55,6 @@
 #if defined(HAVE_BLAKE2) || defined(HAVE_BLAKE2S)
     #include <wolfssl/wolfcrypt/blake2.h>
 #endif
-#ifdef WOLFSSL_SM3
-    #include <wolfssl/wolfcrypt/sm3.h>
-#endif
 
 
 #ifdef __cplusplus
@@ -79,8 +76,7 @@ enum wc_MACAlgorithm {
     sha384_mac,
     sha512_mac,
     rmd_mac,
-    blake2b_mac,
-    sm3_mac,
+    blake2b_mac
 };
 
 enum wc_HashFlags {
@@ -116,9 +112,6 @@ typedef union {
     #ifdef WOLFSSL_SHA3
         wc_Sha3 sha3;
     #endif
-    #ifdef WOLFSSL_SM3
-        wc_Sm3 sm3;
-    #endif
 } wc_HashAlg;
 #endif /* !NO_HASH_WRAPPER */
 
@@ -139,9 +132,6 @@ typedef union {
 #elif !defined(NO_SHA256)
     #define WC_MAX_DIGEST_SIZE WC_SHA256_DIGEST_SIZE
     #define WC_MAX_BLOCK_SIZE  WC_SHA256_BLOCK_SIZE
-#elif defined(WOLFSSL_SM3)
-    #define WC_MAX_DIGEST_SIZE WC_SM3_DIGEST_SIZE
-    #define WC_MAX_BLOCK_SIZE  WC_SM3_BLOCK_SIZE
 #elif defined(WOLFSSL_SHA224)
     #define WC_MAX_DIGEST_SIZE WC_SHA224_DIGEST_SIZE
     #define WC_MAX_BLOCK_SIZE  WC_SHA224_BLOCK_SIZE
@@ -235,10 +225,6 @@ WOLFSSL_API int wc_Shake256Hash(const byte* data, word32 len, byte* hash,
     word32 hashLen);
 #endif
 #endif /* WOLFSSL_SHA3 */
-
-#ifdef WOLFSSL_SM3
-WOLFSSL_API int wc_Sm3Hash(const byte* data, word32 len, byte* hash);
-#endif
 
 #endif /* !NO_HASH_WRAPPER */
 

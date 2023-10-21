@@ -1,0 +1,13 @@
+App(
+    appid="99",
+    name="99 Bottles",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="beer_main",
+    stack_size=1 * 1024,
+    fap_icon="99.png",
+    fap_category="Games",
+    fap_author="bolknote",
+    fap_weburl="https://github.com/bolknote/99-Flipper",
+    fap_version=(1, 0),
+    fap_description="99 bottles lyrics guide for Flipper Zero",
+)

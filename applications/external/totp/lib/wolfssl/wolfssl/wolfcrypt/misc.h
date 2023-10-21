@@ -102,13 +102,12 @@ void   ByteReverseWords64(word64* out, const word64* in, word32 byteCount);
 
 
 void c32to24(word32 in, word24 out);
-void c16toa(word16 wc_u16, byte* c);
-void c32toa(word32 wc_u32, byte* c);
-void c24to32(const word24 wc_u24, word32* wc_u32);
-void ato16(const byte* c, word16* wc_u16);
-void ato24(const byte* c, word32* wc_u24);
-void ato32(const byte* c, word32* wc_u32);
-void ato32le(const byte* c, word32* wc_u32);
+void c16toa(word16 u16, byte* c);
+void c32toa(word32 u32, byte* c);
+void c24to32(const word24 u24, word32* u32);
+void ato16(const byte* c, word16* u16);
+void ato24(const byte* c, word32* u24);
+void ato32(const byte* c, word32* u32);
 word32 btoi(byte b);
 
 WOLFSSL_LOCAL signed char HexCharToByte(char ch);

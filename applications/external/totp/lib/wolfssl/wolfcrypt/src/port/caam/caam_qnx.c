@@ -27,7 +27,7 @@
  * wolfssl/wolfcrypt/- path includes other than
  * wolfssl/wolfcrypt/port/caam/caam_* should be avoided!! */
 #undef WC_NO_HARDEN
-#define WC_NO_HARDEN /* silence warning, it is irrelevant here */
+#define WC_NO_HARDEN /* silence warning, it is irrelavent here */
 #include <wolfssl/wolfcrypt/settings.h>
 
 #if defined(__QNX__) || defined(__QNXNTO__)
@@ -55,7 +55,7 @@ static void* localMemory = NULL;
 static unsigned int localPhy = 0;
 sem_t localMemSem;
 
-/* Can be overridden, variable for how large of a local buffer to have.
+/* Can be overriden, variable for how large of a local buffer to have.
  * This allows for large performance gains when avoiding mapping new memory
  * for each operation. */
 #ifndef WOLFSSL_CAAM_QNX_MEMORY

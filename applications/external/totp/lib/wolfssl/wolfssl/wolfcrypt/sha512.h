@@ -37,6 +37,33 @@
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
 
+#if defined(HAVE_FIPS) && \
+        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+    #ifdef WOLFSSL_SHA512
+        #define wc_Sha512             Sha512
+        #define WC_SHA512             SHA512
+        #define WC_SHA512_BLOCK_SIZE  SHA512_BLOCK_SIZE
+        #define WC_SHA512_DIGEST_SIZE SHA512_DIGEST_SIZE
+        #define WC_SHA512_PAD_SIZE    SHA512_PAD_SIZE
+        #define wc_Sha512_224         Sha512_224
+        #define wc_Sha512_256         Sha512_256
+    #endif /* WOLFSSL_SHA512 */
+    #ifdef WOLFSSL_SHA384
+        #define wc_Sha384             Sha384
+        #define WC_SHA384             SHA384
+        #define WC_SHA384_BLOCK_SIZE  SHA384_BLOCK_SIZE
+        #define WC_SHA384_DIGEST_SIZE SHA384_DIGEST_SIZE
+        #define WC_SHA384_PAD_SIZE    SHA384_PAD_SIZE
+    #endif /* WOLFSSL_SHA384 */
+
+    #define CYASSL_SHA512
+    #if defined(WOLFSSL_SHA384)
+        #define CYASSL_SHA384
+    #endif
+    /* for fips @wc_fips */
+    #include <cyassl/ctaocrypt/sha512.h>
+#endif
+
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -48,7 +75,7 @@
 #ifdef WOLFSSL_ASYNC_CRYPT
     #include <wolfssl/wolfcrypt/async.h>
 #endif
-#ifdef WOLFSSL_ESP32_CRYPT
+#ifdef WOLFSSL_ESP32WROOM32_CRYPT
     #include <wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h>
 #endif
 #if defined(WOLFSSL_SILABS_SE_ACCEL)
@@ -123,10 +150,6 @@ enum {
 #if defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
     #include "wolfssl/wolfcrypt/port/nxp/se050_port.h"
 #endif
-#ifdef HAVE_ARIA
-    #include "mcapi.h"
-    #include "mcapi_error.h"
-#endif
 /* wc_Sha512 digest */
 struct wc_Sha512 {
 #ifdef WOLFSSL_PSOC6_CRYPTO
@@ -149,8 +172,8 @@ struct wc_Sha512 {
 #ifdef WOLFSSL_SMALL_STACK_CACHE
     word64* W;
 #endif
-#if defined(WOLFSSL_ESP32_CRYPT) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
     WC_ESP32SHA ctx;
 #endif
 #if defined(WOLFSSL_SILABS_SE_ACCEL)
@@ -177,9 +200,6 @@ struct wc_Sha512 {
 #ifdef WOLFSSL_IMXRT1170_CAAM
     caam_hash_ctx_t ctx;
     caam_handle_t hndl;
-#endif
-#ifdef HAVE_ARIA
-    MC_HSESSION hSession;
 #endif
 #endif /* WOLFSSL_PSOC6_CRYPTO */
 };
@@ -322,3 +342,4 @@ WOLFSSL_API int wc_Sha384Copy(wc_Sha384* src, wc_Sha384* dst);
 
 #endif /* WOLFSSL_SHA512 || WOLFSSL_SHA384 */
 #endif /* WOLF_CRYPT_SHA512_H */
+

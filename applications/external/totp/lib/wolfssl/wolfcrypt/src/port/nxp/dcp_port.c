@@ -47,9 +47,9 @@
 #define dcp_lock() wolfSSL_CryptHwMutexLock()
 #define dcp_unlock() wolfSSL_CryptHwMutexUnLock()
 #else
-#define dcp_lock_init() WC_DO_NOTHING
-#define dcp_lock()      WC_DO_NOTHING
-#define dcp_unlock()    WC_DO_NOTHING
+#define dcp_lock_init() do{}while(0)
+#define dcp_lock() do{}while(0)
+#define dcp_unlock() do{}while(0)
 #endif
 
 #if DCP_USE_OTP_KEY

@@ -52,9 +52,6 @@
 #define BIO_ctrl_pending                wolfSSL_BIO_ctrl_pending
 #define BIO_wpending                    wolfSSL_BIO_wpending
 #define BIO_get_mem_ptr                 wolfSSL_BIO_get_mem_ptr
-#ifdef OPENSSL_ALL
-#define BIO_set_mem_buf                 wolfSSL_BIO_set_mem_buf
-#endif
 #define BIO_int_ctrl                    wolfSSL_BIO_int_ctrl
 #define BIO_reset                       wolfSSL_BIO_reset
 #define BIO_s_file                      wolfSSL_BIO_s_file
@@ -82,8 +79,6 @@
 #define BIO_puts      wolfSSL_BIO_puts
 
 #define BIO_should_retry                wolfSSL_BIO_should_retry
-#define BIO_should_read                 wolfSSL_BIO_should_read
-#define BIO_should_write                wolfSSL_BIO_should_write
 
 #define BIO_TYPE_FILE WOLFSSL_BIO_FILE
 #define BIO_TYPE_BIO  WOLFSSL_BIO_BIO

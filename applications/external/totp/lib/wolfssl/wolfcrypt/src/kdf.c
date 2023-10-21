@@ -113,13 +113,6 @@ int wc_PRF(byte* result, word32 resLen, const byte* secret,
         break;
     #endif
 
-    #ifdef WOLFSSL_SM3
-        case sm3_mac:
-            hash = WC_SM3;
-            len  = WC_SM3_DIGEST_SIZE;
-        break;
-    #endif
-
     #ifndef NO_SHA
         case sha_mac:
             hash = WC_SHA;
@@ -136,7 +129,7 @@ int wc_PRF(byte* result, word32 resLen, const byte* secret,
     if (lastLen)
         times += 1;
 
-    /* times == 0 if resLen == 0, but times == 0 abides clang static analyzer
+    /* times == 0 iif resLen == 0, but times == 0 abides clang static analyzer
        while resLen == 0 doesn't */
     if (times == 0)
         return BAD_FUNC_ARG;
@@ -383,13 +376,6 @@ int wc_PRF_TLS(byte* digest, word32 digLen, const byte* secret, word32 secLen,
                 len = WC_SHA512_DIGEST_SIZE;
                 break;
             #endif
-
-            #ifdef WOLFSSL_SM3
-            case WC_SM3:
-                len = WC_SM3_DIGEST_SIZE;
-                break;
-            #endif
-
             default:
                 return BAD_FUNC_ARG;
         }

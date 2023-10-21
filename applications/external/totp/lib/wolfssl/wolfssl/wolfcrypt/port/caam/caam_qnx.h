@@ -47,7 +47,7 @@
 #define CAAM_ADDRESS uintptr_t
 #define Success 1
 #define Failure 0
-#define INTERRUPT_Panic() do {} while (0)
+#define INTERRUPT_Panic()
 #define MemoryMapMayNotBeEmpty -1
 #define CAAM_WAITING -2
 #define NoActivityReady -1

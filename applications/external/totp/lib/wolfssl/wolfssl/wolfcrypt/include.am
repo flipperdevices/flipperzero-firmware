@@ -75,17 +75,9 @@ nobase_include_HEADERS+= \
                          wolfssl/wolfcrypt/cryptocb.h \
                          wolfssl/wolfcrypt/kyber.h \
                          wolfssl/wolfcrypt/wc_kyber.h \
-                         wolfssl/wolfcrypt/ext_kyber.h \
-                         wolfssl/wolfcrypt/sm2.h \
-                         wolfssl/wolfcrypt/sm3.h \
-                         wolfssl/wolfcrypt/sm4.h \
-                         wolfssl/wolfcrypt/lms.h \
-                         wolfssl/wolfcrypt/wc_lms.h \
-                         wolfssl/wolfcrypt/ext_lms.h
+                         wolfssl/wolfcrypt/ext_kyber.h
 
 noinst_HEADERS+= \
-                         wolfssl/wolfcrypt/port/aria/aria-crypt.h \
-                         wolfssl/wolfcrypt/port/aria/aria-cryptocb.h \
                          wolfssl/wolfcrypt/port/pic32/pic32mz-crypt.h \
                          wolfssl/wolfcrypt/port/ti/ti-hash.h \
                          wolfssl/wolfcrypt/port/ti/ti-ccm.h \
@@ -133,11 +125,6 @@ endif
 
 if BUILD_DEVCRYPTO
 nobase_include_HEADERS+= wolfssl/wolfcrypt/port/devcrypto/wc_devcrypto.h
-endif
-
-if BUILD_ARIA
-nobase_include_HEADERS+= wolfssl/wolfcrypt/port/aria/aria-crypt.h
-nobase_include_HEADERS+= wolfssl/wolfcrypt/port/aria/aria-cryptocb.h
 endif
 
 if BUILD_ASYNCCRYPT

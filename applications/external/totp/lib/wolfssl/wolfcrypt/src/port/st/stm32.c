@@ -394,10 +394,6 @@ int wc_Stm32_Aes_Init(Aes* aes, CRYP_HandleTypeDef* hcryp)
 {
     int ret;
     word32 keySize;
-#ifdef STM32_HW_CLOCK_AUTO
-    /* enable the peripheral clock */
-    __HAL_RCC_CRYP_CLK_ENABLE();
-#endif
 
     ret = wc_AesGetKeySize(aes, &keySize);
     if (ret != 0)
@@ -432,13 +428,6 @@ int wc_Stm32_Aes_Init(Aes* aes, CRYP_HandleTypeDef* hcryp)
     return 0;
 }
 
-void wc_Stm32_Aes_Cleanup(void)
-{
-#ifdef STM32_HW_CLOCK_AUTO
-    /* disable the peripheral clock */
-    __HAL_RCC_CRYP_CLK_DISABLE();
-#endif
-}
 #else /* Standard Peripheral Library */
 
 int wc_Stm32_Aes_Init(Aes* aes, CRYP_InitTypeDef* cryptInit,
@@ -496,10 +485,6 @@ int wc_Stm32_Aes_Init(Aes* aes, CRYP_InitTypeDef* cryptInit,
     cryptInit->CRYP_DataType = CRYP_DataType_8b;
 
     return 0;
-}
-
-void wc_Stm32_Aes_Cleanup(void)
-{
 }
 #endif /* WOLFSSL_STM32_CUBEMX */
 #endif /* !NO_AES */

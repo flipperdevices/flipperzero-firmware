@@ -525,10 +525,15 @@ int wc_SignatureGenerate_ex(
         #endif
         }
         if (ret == 0) {
-            /* Generate signature using hash (also handles verify) */
-            ret = wc_SignatureGenerateHash_ex(hash_type, sig_type, hash_data,
-                hash_enc_len, sig, sig_len, key, key_len, rng, verify);
+            /* Generate signature using hash */
+            ret = wc_SignatureGenerateHash(hash_type, sig_type,
+                hash_data, hash_enc_len, sig, sig_len, key, key_len, rng);
         }
+    }
+
+    if (ret == 0 && verify) {
+        ret = wc_SignatureVerifyHash(hash_type, sig_type, hash_data,
+            hash_enc_len, sig, *sig_len, key, key_len);
     }
 
 #if defined(WOLFSSL_SMALL_STACK) || defined(NO_ASN)

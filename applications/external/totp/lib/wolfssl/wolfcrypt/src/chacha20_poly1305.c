@@ -355,9 +355,9 @@ static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
     int isEncrypt)
 {
     int ret;
-    long int dst_len = isEncrypt ?
-        (long int)src_len + POLY1305_DIGEST_SIZE :
-        (long int)src_len - POLY1305_DIGEST_SIZE;
+    ssize_t dst_len = isEncrypt ?
+        (ssize_t)src_len + POLY1305_DIGEST_SIZE :
+        (ssize_t)src_len - POLY1305_DIGEST_SIZE;
     const byte *src_i;
     byte *dst_i;
     size_t src_len_rem;
@@ -375,7 +375,7 @@ static WC_INLINE int wc_XChaCha20Poly1305_crypt_oneshot(
         goto out;
     }
 
-    if ((long int)dst_space < dst_len) {
+    if ((ssize_t)dst_space < dst_len) {
         ret = BUFFER_E;
         goto out;
     }

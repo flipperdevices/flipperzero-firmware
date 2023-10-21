@@ -113,7 +113,7 @@ static int KcapiHashUpdate(wolfssl_KCAPI_Hash* hash, const byte* in, word32 sz)
                                            hash->heap, DYNAMIC_TYPE_TMP_BUFFER);
                 if (pt == NULL) {
                     ret = MEMORY_E;
-                }
+	        }
                 else {
                     hash->msg = pt;
                 }
@@ -318,6 +318,36 @@ int wc_Sha224Copy(wc_Sha224* src, wc_Sha224* dst)
 static const char WC_NAME_SHA256[] = "sha256";
 
 
+/* create KCAPI handle for SHA256 operation */
+#if defined(HAVE_FIPS) && \
+                        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+int InitSha256(wc_Sha256* sha)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashInit(&sha->kcapi, NULL, INVALID_DEVID, WC_NAME_SHA256);
+}
+
+
+int Sha256Update(wc_Sha256* sha, const byte* in, word32 sz)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashUpdate(&sha->kcapi, in, sz);
+}
+
+
+int Sha256Final(wc_Sha256* sha, byte* hash)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashFinal(&sha->kcapi, hash, WC_SHA256_DIGEST_SIZE,
+                          WC_NAME_SHA256);
+}
+#else
 int wc_InitSha256_ex(wc_Sha256* sha, void* heap, int devid)
 {
     if (sha == NULL) {
@@ -344,6 +374,8 @@ int wc_Sha256Final(wc_Sha256* sha, byte* hash)
     return KcapiHashFinal(&sha->kcapi, hash, WC_SHA256_DIGEST_SIZE,
                           WC_NAME_SHA256);
 }
+#endif
+
 
 int wc_Sha256GetHash(wc_Sha256* sha, byte* hash)
 {
@@ -368,6 +400,37 @@ int wc_Sha256Copy(wc_Sha256* src, wc_Sha256* dst)
 
 static const char WC_NAME_SHA384[] = "sha384";
 
+
+#if defined(HAVE_FIPS) && \
+                        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+/* create KCAPI handle for SHA384 operation */
+int InitSha384(wc_Sha384* sha)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashInit(&sha->kcapi, NULL, INVALID_DEVID, WC_NAME_SHA384);
+}
+
+
+int Sha384Update(wc_Sha384* sha, const byte* in, word32 sz)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashUpdate(&sha->kcapi, in, sz);
+}
+
+
+int Sha384Final(wc_Sha384* sha, byte* hash)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashFinal(&sha->kcapi, hash, WC_SHA384_DIGEST_SIZE,
+                          WC_NAME_SHA384);
+}
+#else
 /* create KCAPI handle for SHA384 operation */
 int wc_InitSha384_ex(wc_Sha384* sha, void* heap, int devid)
 {
@@ -395,6 +458,7 @@ int wc_Sha384Final(wc_Sha384* sha, byte* hash)
     return KcapiHashFinal(&sha->kcapi, hash, WC_SHA384_DIGEST_SIZE,
                           WC_NAME_SHA384);
 }
+#endif
 
 int wc_Sha384GetHash(wc_Sha384* sha, byte* hash)
 {
@@ -419,6 +483,36 @@ int wc_Sha384Copy(wc_Sha384* src, wc_Sha384* dst)
 
 static const char WC_NAME_SHA512[] = "sha512";
 
+#if defined(HAVE_FIPS) && \
+                        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+/* create KCAPI handle for SHA512 operation */
+int InitSha512(wc_Sha512* sha)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashInit(&sha->kcapi, NULL, INVALID_DEVID, WC_NAME_SHA512);
+}
+
+
+int Sha512Update(wc_Sha512* sha, const byte* in, word32 sz)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashUpdate(&sha->kcapi, in, sz);
+}
+
+
+int Sha512Final(wc_Sha512* sha, byte* hash)
+{
+    if (sha == NULL) {
+        return BAD_FUNC_ARG;
+    }
+    return KcapiHashFinal(&sha->kcapi, hash, WC_SHA512_DIGEST_SIZE,
+                          WC_NAME_SHA512);
+}
+#else
 /* create KCAPI handle for SHA512 operation */
 int wc_InitSha512_ex(wc_Sha512* sha, void* heap, int devid)
 {
@@ -446,6 +540,7 @@ int wc_Sha512Final(wc_Sha512* sha, byte* hash)
     return KcapiHashFinal(&sha->kcapi, hash, WC_SHA512_DIGEST_SIZE,
                           WC_NAME_SHA512);
 }
+#endif
 
 int wc_Sha512GetHash(wc_Sha512* sha, byte* hash)
 {

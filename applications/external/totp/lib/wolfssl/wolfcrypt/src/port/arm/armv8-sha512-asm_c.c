@@ -1149,7 +1149,7 @@ void Transform_Sha512_Len_crypto(wc_Sha512* sha512, const byte* data, word32 len
         "adrp x4, %[L_SHA512_transform_crypto_len_k]@PAGE\n\t"
         "add  x4, x4, %[L_SHA512_transform_crypto_len_k]@PAGEOFF\n\t"
 #endif /* __APPLE__ */
-        /* Load first 16 64-bit words of K permanently */
+        /* Load first 16 64-bit words of K permantly */
         "ld1	{v8.2d, v9.2d, v10.2d, v11.2d}, [x4], #0x40\n\t"
         "ld1	{v12.2d, v13.2d, v14.2d, v15.2d}, [x4], #0x40\n\t"
         /* Load digest into working vars */

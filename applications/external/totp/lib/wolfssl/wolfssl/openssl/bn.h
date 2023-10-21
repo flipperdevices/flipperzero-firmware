@@ -30,7 +30,7 @@
 #ifndef WOLFSSL_BN_H_
 #define WOLFSSL_BN_H_
 
-#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/wolfmath.h>
 
 #ifdef __cplusplus
@@ -271,7 +271,7 @@ typedef WOLFSSL_BN_GENCB BN_GENCB;
 
 #define BN_mod_inverse wolfSSL_BN_mod_inverse
 
-#define BN_set_flags(x1, x2) WC_DO_NOTHING
+#define BN_set_flags(x1, x2)
 
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define BN_get_rfc2409_prime_768   wolfSSL_DH_768_prime

@@ -167,7 +167,7 @@ void fe448_sub(word8* r, const word8* a, const word8* b)
     }
 }
 
-/* Multiply a field element by 39081. r = (39081 * a) mod (2^448 - 2^224 - 1)
+/* Mulitply a field element by 39081. r = (39081 * a) mod (2^448 - 2^224 - 1)
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to multiply.
@@ -192,7 +192,7 @@ void fe448_mul39081(word8* r, const word8* a)
     }
 }
 
-/* Multiply two field elements. r = (a * b) mod (2^448 - 2^224 - 1)
+/* Mulitply two field elements. r = (a * b) mod (2^448 - 2^224 - 1)
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to multiply.
@@ -448,7 +448,7 @@ void fe448_neg(word8* r, const word8* a)
 }
 
 /* Raise field element to (p-3) / 4: 2^446 - 2^222 - 1
- * Used for calculating y-ordinate from x-ordinate for Ed448.
+ * Used for calcualting y-ordinate from x-ordinate for Ed448.
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to exponentiate.
@@ -609,62 +609,62 @@ void fe448_to_bytes(unsigned char* b, const sword64* a)
                       in4  += o; t = o << 56; in7  -= (sword64)t;
 
     /* Output as bytes */
-    b[ 0] = (byte)(in0  >>  0);
-    b[ 1] = (byte)(in0  >>  8);
-    b[ 2] = (byte)(in0  >> 16);
-    b[ 3] = (byte)(in0  >> 24);
-    b[ 4] = (byte)(in0  >> 32);
-    b[ 5] = (byte)(in0  >> 40);
-    b[ 6] = (byte)(in0  >> 48);
-    b[ 7] = (byte)(in1  >>  0);
-    b[ 8] = (byte)(in1  >>  8);
-    b[ 9] = (byte)(in1  >> 16);
-    b[10] = (byte)(in1  >> 24);
-    b[11] = (byte)(in1  >> 32);
-    b[12] = (byte)(in1  >> 40);
-    b[13] = (byte)(in1  >> 48);
-    b[14] = (byte)(in2  >>  0);
-    b[15] = (byte)(in2  >>  8);
-    b[16] = (byte)(in2  >> 16);
-    b[17] = (byte)(in2  >> 24);
-    b[18] = (byte)(in2  >> 32);
-    b[19] = (byte)(in2  >> 40);
-    b[20] = (byte)(in2  >> 48);
-    b[21] = (byte)(in3  >>  0);
-    b[22] = (byte)(in3  >>  8);
-    b[23] = (byte)(in3  >> 16);
-    b[24] = (byte)(in3  >> 24);
-    b[25] = (byte)(in3  >> 32);
-    b[26] = (byte)(in3  >> 40);
-    b[27] = (byte)(in3  >> 48);
-    b[28] = (byte)(in4  >>  0);
-    b[29] = (byte)(in4  >>  8);
-    b[30] = (byte)(in4  >> 16);
-    b[31] = (byte)(in4  >> 24);
-    b[32] = (byte)(in4  >> 32);
-    b[33] = (byte)(in4  >> 40);
-    b[34] = (byte)(in4  >> 48);
-    b[35] = (byte)(in5  >>  0);
-    b[36] = (byte)(in5  >>  8);
-    b[37] = (byte)(in5  >> 16);
-    b[38] = (byte)(in5  >> 24);
-    b[39] = (byte)(in5  >> 32);
-    b[40] = (byte)(in5  >> 40);
-    b[41] = (byte)(in5  >> 48);
-    b[42] = (byte)(in6  >>  0);
-    b[43] = (byte)(in6  >>  8);
-    b[44] = (byte)(in6  >> 16);
-    b[45] = (byte)(in6  >> 24);
-    b[46] = (byte)(in6  >> 32);
-    b[47] = (byte)(in6  >> 40);
-    b[48] = (byte)(in6  >> 48);
-    b[49] = (byte)(in7  >>  0);
-    b[50] = (byte)(in7  >>  8);
-    b[51] = (byte)(in7  >> 16);
-    b[52] = (byte)(in7  >> 24);
-    b[53] = (byte)(in7  >> 32);
-    b[54] = (byte)(in7  >> 40);
-    b[55] = (byte)(in7  >> 48);
+    b[ 0] = (in0  >>  0);
+    b[ 1] = (in0  >>  8);
+    b[ 2] = (in0  >> 16);
+    b[ 3] = (in0  >> 24);
+    b[ 4] = (in0  >> 32);
+    b[ 5] = (in0  >> 40);
+    b[ 6] = (in0  >> 48);
+    b[ 7] = (in1  >>  0);
+    b[ 8] = (in1  >>  8);
+    b[ 9] = (in1  >> 16);
+    b[10] = (in1  >> 24);
+    b[11] = (in1  >> 32);
+    b[12] = (in1  >> 40);
+    b[13] = (in1  >> 48);
+    b[14] = (in2  >>  0);
+    b[15] = (in2  >>  8);
+    b[16] = (in2  >> 16);
+    b[17] = (in2  >> 24);
+    b[18] = (in2  >> 32);
+    b[19] = (in2  >> 40);
+    b[20] = (in2  >> 48);
+    b[21] = (in3  >>  0);
+    b[22] = (in3  >>  8);
+    b[23] = (in3  >> 16);
+    b[24] = (in3  >> 24);
+    b[25] = (in3  >> 32);
+    b[26] = (in3  >> 40);
+    b[27] = (in3  >> 48);
+    b[28] = (in4  >>  0);
+    b[29] = (in4  >>  8);
+    b[30] = (in4  >> 16);
+    b[31] = (in4  >> 24);
+    b[32] = (in4  >> 32);
+    b[33] = (in4  >> 40);
+    b[34] = (in4  >> 48);
+    b[35] = (in5  >>  0);
+    b[36] = (in5  >>  8);
+    b[37] = (in5  >> 16);
+    b[38] = (in5  >> 24);
+    b[39] = (in5  >> 32);
+    b[40] = (in5  >> 40);
+    b[41] = (in5  >> 48);
+    b[42] = (in6  >>  0);
+    b[43] = (in6  >>  8);
+    b[44] = (in6  >> 16);
+    b[45] = (in6  >> 24);
+    b[46] = (in6  >> 32);
+    b[47] = (in6  >> 40);
+    b[48] = (in6  >> 48);
+    b[49] = (in7  >>  0);
+    b[50] = (in7  >>  8);
+    b[51] = (in7  >> 16);
+    b[52] = (in7  >> 24);
+    b[53] = (in7  >> 32);
+    b[54] = (in7  >> 40);
+    b[55] = (in7  >> 48);
 }
 
 /* Set the field element to 0.
@@ -788,7 +788,7 @@ void fe448_sub(sword64* r, const sword64* a, const sword64* b)
     r[7] = a[7] - b[7];
 }
 
-/* Multiply a field element by 39081. r = (39081 * a) mod (2^448 - 2^224 - 1)
+/* Mulitply a field element by 39081. r = (39081 * a) mod (2^448 - 2^224 - 1)
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to multiply.
@@ -826,7 +826,7 @@ void fe448_mul39081(sword64* r, const sword64* a)
     r[7] = (sword64)t7;
 }
 
-/* Multiply two field elements. r = (a * b) mod (2^448 - 2^224 - 1)
+/* Mulitply two field elements. r = (a * b) mod (2^448 - 2^224 - 1)
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to multiply.
@@ -1087,8 +1087,8 @@ int curve448(byte* r, const byte* n, const byte* a)
     for (i = 447; i >= 0; --i) {
         unsigned int b = (n[i >> 3] >> (i & 7)) & 1;
         swap ^= b;
-        fe448_cswap(x2, x3, (int)swap);
-        fe448_cswap(z2, z3, (int)swap);
+        fe448_cswap(x2, x3, swap);
+        fe448_cswap(z2, z3, swap);
         swap = b;
 
         /* Montgomery Ladder - double and add */
@@ -1172,7 +1172,7 @@ void fe448_neg(sword64* r, const sword64* a)
 }
 
 /* Raise field element to (p-3) / 4: 2^446 - 2^222 - 1
- * Used for calculating y-ordinate from x-ordinate for Ed448.
+ * Used for calcualting y-ordinate from x-ordinate for Ed448.
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to exponentiate.
@@ -1434,62 +1434,62 @@ void fe448_to_bytes(unsigned char* b, const sword32* a)
                       in8  += o; t = o << 28; in15 -= (sword32)t;
 
     /* Output as bytes */
-    b[ 0] = (byte)(in0  >>  0);
-    b[ 1] = (byte)(in0  >>  8);
-    b[ 2] = (byte)(in0  >> 16);
-    b[ 3] = (byte)(in0  >> 24) + ((in1  >>  0) <<  4);
-    b[ 4] = (byte)(in1  >>  4);
-    b[ 5] = (byte)(in1  >> 12);
-    b[ 6] = (byte)(in1  >> 20);
-    b[ 7] = (byte)(in2  >>  0);
-    b[ 8] = (byte)(in2  >>  8);
-    b[ 9] = (byte)(in2  >> 16);
-    b[10] = (byte)(in2  >> 24) + ((in3  >>  0) <<  4);
-    b[11] = (byte)(in3  >>  4);
-    b[12] = (byte)(in3  >> 12);
-    b[13] = (byte)(in3  >> 20);
-    b[14] = (byte)(in4  >>  0);
-    b[15] = (byte)(in4  >>  8);
-    b[16] = (byte)(in4  >> 16);
-    b[17] = (byte)(in4  >> 24) + ((in5  >>  0) <<  4);
-    b[18] = (byte)(in5  >>  4);
-    b[19] = (byte)(in5  >> 12);
-    b[20] = (byte)(in5  >> 20);
-    b[21] = (byte)(in6  >>  0);
-    b[22] = (byte)(in6  >>  8);
-    b[23] = (byte)(in6  >> 16);
-    b[24] = (byte)(in6  >> 24) + ((in7  >>  0) <<  4);
-    b[25] = (byte)(in7  >>  4);
-    b[26] = (byte)(in7  >> 12);
-    b[27] = (byte)(in7  >> 20);
-    b[28] = (byte)(in8  >>  0);
-    b[29] = (byte)(in8  >>  8);
-    b[30] = (byte)(in8  >> 16);
-    b[31] = (byte)(in8  >> 24) + ((in9  >>  0) <<  4);
-    b[32] = (byte)(in9  >>  4);
-    b[33] = (byte)(in9  >> 12);
-    b[34] = (byte)(in9  >> 20);
-    b[35] = (byte)(in10 >>  0);
-    b[36] = (byte)(in10 >>  8);
-    b[37] = (byte)(in10 >> 16);
-    b[38] = (byte)(in10 >> 24) + ((in11 >>  0) <<  4);
-    b[39] = (byte)(in11 >>  4);
-    b[40] = (byte)(in11 >> 12);
-    b[41] = (byte)(in11 >> 20);
-    b[42] = (byte)(in12 >>  0);
-    b[43] = (byte)(in12 >>  8);
-    b[44] = (byte)(in12 >> 16);
-    b[45] = (byte)(in12 >> 24) + ((in13 >>  0) <<  4);
-    b[46] = (byte)(in13 >>  4);
-    b[47] = (byte)(in13 >> 12);
-    b[48] = (byte)(in13 >> 20);
-    b[49] = (byte)(in14 >>  0);
-    b[50] = (byte)(in14 >>  8);
-    b[51] = (byte)(in14 >> 16);
-    b[52] = (byte)(in14 >> 24) + ((in15 >>  0) <<  4);
-    b[53] = (byte)(in15 >>  4);
-    b[54] = (byte)(in15 >> 12);
-    b[55] = (byte)(in15 >> 20);
+    b[ 0] = (in0  >>  0);
+    b[ 1] = (in0  >>  8);
+    b[ 2] = (in0  >> 16);
+    b[ 3] = (in0  >> 24) + ((in1  >>  0) <<  4);
+    b[ 4] = (in1  >>  4);
+    b[ 5] = (in1  >> 12);
+    b[ 6] = (in1  >> 20);
+    b[ 7] = (in2  >>  0);
+    b[ 8] = (in2  >>  8);
+    b[ 9] = (in2  >> 16);
+    b[10] = (in2  >> 24) + ((in3  >>  0) <<  4);
+    b[11] = (in3  >>  4);
+    b[12] = (in3  >> 12);
+    b[13] = (in3  >> 20);
+    b[14] = (in4  >>  0);
+    b[15] = (in4  >>  8);
+    b[16] = (in4  >> 16);
+    b[17] = (in4  >> 24) + ((in5  >>  0) <<  4);
+    b[18] = (in5  >>  4);
+    b[19] = (in5  >> 12);
+    b[20] = (in5  >> 20);
+    b[21] = (in6  >>  0);
+    b[22] = (in6  >>  8);
+    b[23] = (in6  >> 16);
+    b[24] = (in6  >> 24) + ((in7  >>  0) <<  4);
+    b[25] = (in7  >>  4);
+    b[26] = (in7  >> 12);
+    b[27] = (in7  >> 20);
+    b[28] = (in8  >>  0);
+    b[29] = (in8  >>  8);
+    b[30] = (in8  >> 16);
+    b[31] = (in8  >> 24) + ((in9  >>  0) <<  4);
+    b[32] = (in9  >>  4);
+    b[33] = (in9  >> 12);
+    b[34] = (in9  >> 20);
+    b[35] = (in10 >>  0);
+    b[36] = (in10 >>  8);
+    b[37] = (in10 >> 16);
+    b[38] = (in10 >> 24) + ((in11 >>  0) <<  4);
+    b[39] = (in11 >>  4);
+    b[40] = (in11 >> 12);
+    b[41] = (in11 >> 20);
+    b[42] = (in12 >>  0);
+    b[43] = (in12 >>  8);
+    b[44] = (in12 >> 16);
+    b[45] = (in12 >> 24) + ((in13 >>  0) <<  4);
+    b[46] = (in13 >>  4);
+    b[47] = (in13 >> 12);
+    b[48] = (in13 >> 20);
+    b[49] = (in14 >>  0);
+    b[50] = (in14 >>  8);
+    b[51] = (in14 >> 16);
+    b[52] = (in14 >> 24) + ((in15 >>  0) <<  4);
+    b[53] = (in15 >>  4);
+    b[54] = (in15 >> 12);
+    b[55] = (in15 >> 20);
 }
 
 /* Set the field element to 0.
@@ -1699,7 +1699,7 @@ void fe448_reduce(sword32* a)
     o = a[15] >> 28; a[0]  += (sword32)o;
                      a[8]  += (sword32)o; a[15] -= (sword32)(o << 28);
 }
-/* Multiply a field element by 39081. r = (39081 * a) mod (2^448 - 2^224 - 1)
+/* Mulitply a field element by 39081. r = (39081 * a) mod (2^448 - 2^224 - 1)
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to multiply.
@@ -1761,7 +1761,7 @@ void fe448_mul39081(sword32* r, const sword32* a)
     r[15] = (sword32)t15;
 }
 
-/* Multiply two field elements. r = a * b
+/* Mulitply two field elements. r = a * b
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to multiply.
@@ -1891,7 +1891,7 @@ static WC_INLINE void fe448_mul_8(sword32* r, const sword32* a, const sword32* b
     r[15] = (sword32)t15;
 }
 
-/* Multiply two field elements. r = (a * b) mod (2^448 - 2^224 - 1)
+/* Mulitply two field elements. r = (a * b) mod (2^448 - 2^224 - 1)
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to multiply.
@@ -2178,8 +2178,8 @@ int curve448(byte* r, const byte* n, const byte* a)
     for (i = 447; i >= 0; --i) {
         unsigned int b = (n[i >> 3] >> (i & 7)) & 1;
         swap ^= b;
-        fe448_cswap(x2, x3, (int)swap);
-        fe448_cswap(z2, z3, (int)swap);
+        fe448_cswap(x2, x3, swap);
+        fe448_cswap(z2, z3, swap);
         swap = b;
 
         /* Montgomery Ladder - double and add */
@@ -2271,7 +2271,7 @@ void fe448_neg(sword32* r, const sword32* a)
 }
 
 /* Raise field element to (p-3) / 4: 2^446 - 2^222 - 1
- * Used for calculating y-ordinate from x-ordinate for Ed448.
+ * Used for calcualting y-ordinate from x-ordinate for Ed448.
  *
  * r  [in]  Field element to hold result.
  * a  [in]  Field element to exponentiate.

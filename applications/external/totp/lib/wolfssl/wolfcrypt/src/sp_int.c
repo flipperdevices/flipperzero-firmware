@@ -197,7 +197,7 @@ This library provides single precision (SP) integer math functions.
     while (0)
 #else
     /* Nothing to do as declared on stack. */
-    #define FREE_SP_INT(n, h) WC_DO_NOTHING
+    #define FREE_SP_INT(n, h)
 #endif
 
 
@@ -318,7 +318,7 @@ while (0)
         FREE_DYN_SP_INT_ARRAY(n, h)
 #else
     /* Nothing to do as data declared on stack. */
-    #define FREE_SP_INT_ARRAY(n, h) WC_DO_NOTHING
+    #define FREE_SP_INT_ARRAY(n, h)
 #endif
 
 
@@ -4780,7 +4780,7 @@ static void _sp_mont_setup(const sp_int* m, sp_int_digit* rho);
 
 /* Determine when mp_add_d is required. */
 #if !defined(NO_PWDBASED) || defined(WOLFSSL_KEY_GEN) || !defined(NO_DH) || \
-    !defined(NO_DSA) || (defined(HAVE_ECC) && defined(HAVE_COMP_KEY)) || \
+    !defined(NO_DSA) || \
     (!defined(NO_RSA) && !defined(WOLFSSL_RSA_VERIFY_ONLY)) || \
     defined(OPENSSL_EXTRA)
 #define WOLFSSL_SP_ADD_D
@@ -5233,69 +5233,50 @@ int sp_exch(sp_int* a, sp_int* b)
  * @param [in]  b     Second SP int to conditionally swap.
  * @param [in]  cnt   Count of words to copy.
  * @param [in]  swap  When value is 1 then swap.
- * @param [in]  t     Temporary SP int to use in swap.
- * @return  MP_OKAY on success.
- * @return  MP_MEM when dynamic memory allocation fails.
- */
-int sp_cond_swap_ct_ex(sp_int* a, sp_int* b, int cnt, int swap, sp_int* t)
-{
-    unsigned int i;
-    sp_int_digit mask = (sp_int_digit)0 - (sp_int_digit)swap;
-
-    /* XOR other fields in sp_int into temp - mask set when swapping. */
-    t->used = (a->used ^ b->used) & (unsigned int)mask;
-#ifdef WOLFSSL_SP_INT_NEGATIVE
-    t->sign = (a->sign ^ b->sign) & (unsigned int)mask;
-#endif
-
-    /* XOR requested words into temp - mask set when swapping. */
-    for (i = 0; i < (unsigned int)cnt; i++) {
-        t->dp[i] = (a->dp[i] ^ b->dp[i]) & mask;
-    }
-
-    /* XOR temporary - when mask set then result will be b. */
-    a->used ^= t->used;
-#ifdef WOLFSSL_SP_INT_NEGATIVE
-    a->sign ^= t->sign;
-#endif
-    for (i = 0; i < (unsigned int)cnt; i++) {
-        a->dp[i] ^= t->dp[i];
-    }
-
-    /* XOR temporary - when mask set then result will be a. */
-    b->used ^= t->used;
-#ifdef WOLFSSL_SP_INT_NEGATIVE
-    b->sign ^= b->sign;
-#endif
-    for (i = 0; i < (unsigned int)cnt; i++) {
-        b->dp[i] ^= t->dp[i];
-    }
-
-    return MP_OKAY;
-}
-
-/* Conditional swap of SP int values in constant time.
- *
- * @param [in]  a     First SP int to conditionally swap.
- * @param [in]  b     Second SP int to conditionally swap.
- * @param [in]  cnt   Count of words to copy.
- * @param [in]  swap  When value is 1 then swap.
  * @return  MP_OKAY on success.
  * @return  MP_MEM when dynamic memory allocation fails.
  */
 int sp_cond_swap_ct(sp_int* a, sp_int* b, int cnt, int swap)
 {
+    unsigned int i;
     int err = MP_OKAY;
+    sp_int_digit mask = (sp_int_digit)0 - (sp_int_digit)swap;
     DECL_SP_INT(t, (size_t)cnt);
 
     /* Allocate temporary to hold masked xor of a and b. */
     ALLOC_SP_INT(t, cnt, err, NULL);
-
     if (err == MP_OKAY) {
-        err = sp_cond_swap_ct_ex(a, b, cnt, swap, t);
-        FREE_SP_INT(t, NULL);
+        /* XOR other fields in sp_int into temp - mask set when swapping. */
+        t->used = (a->used ^ b->used) & (unsigned int)mask;
+    #ifdef WOLFSSL_SP_INT_NEGATIVE
+        t->sign = (a->sign ^ b->sign) & (unsigned int)mask;
+    #endif
+
+        /* XOR requested words into temp - mask set when swapping. */
+        for (i = 0; i < (unsigned int)cnt; i++) {
+            t->dp[i] = (a->dp[i] ^ b->dp[i]) & mask;
+        }
+
+        /* XOR temporary - when mask set then result will be b. */
+        a->used ^= t->used;
+    #ifdef WOLFSSL_SP_INT_NEGATIVE
+        a->sign ^= t->sign;
+    #endif
+        for (i = 0; i < (unsigned int)cnt; i++) {
+            a->dp[i] ^= t->dp[i];
+        }
+
+        /* XOR temporary - when mask set then result will be a. */
+        b->used ^= t->used;
+    #ifdef WOLFSSL_SP_INT_NEGATIVE
+        b->sign ^= b->sign;
+    #endif
+        for (i = 0; i < (unsigned int)cnt; i++) {
+            b->dp[i] ^= t->dp[i];
+        }
     }
 
+    FREE_SP_INT(t, NULL);
     return err;
 }
 #endif /* HAVE_ECC && ECC_TIMING_RESISTANT && !WC_NO_CACHE_RESISTANT */
@@ -13796,7 +13777,7 @@ static int _sp_exptmod_nct(const sp_int* b, const sp_int* e, const sp_int* m,
     bits = sp_count_bits(e);
 
     /* Window bits based on number of pre-calculations versus number of loop
-     * calculations.
+     * calculcations.
      * Exponents for RSA and DH will result in 6-bit windows.
      * Note: for 4096-bit values, 7-bit window is slightly better.
      */
@@ -13833,7 +13814,7 @@ static int _sp_exptmod_nct(const sp_int* b, const sp_int* e, const sp_int* m,
         tr = t[preCnt + 0];
         bm = t[preCnt + 1];
 
-        /* Initialize all allocated  */
+        /* Iniitialize all allocated  */
         for (i = 0; i < preCnt; i++) {
             _sp_init_size(t[i], m->used * 2 + 1);
         }
@@ -13981,7 +13962,7 @@ static int _sp_exptmod_nct(const sp_int* b, const sp_int* e, const sp_int* m,
                     break;
                 }
 
-                /* 4.4. Get top window bits from exponent and drop. */
+                /* 4.4. Get top window bits from expononent and drop. */
                 if (err == MP_OKAY) {
                     if (c == 0) {
                         /* Bits from next digit. */

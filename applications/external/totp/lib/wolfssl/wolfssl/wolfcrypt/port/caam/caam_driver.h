@@ -54,8 +54,8 @@
     #define WOLFSSL_MSG(in) printf("%s\n", (in))
     void DEBUG_PRINT_ARRAY(void* a, int aSz, char* str);
 #else
-    #define WOLFSSL_MSG(in) do {} while (0)
-    #define DEBUG_PRINT_ARRAY(a,aSz,str) do {} while (0)
+    #define WOLFSSL_MSG(in)
+    #define DEBUG_PRINT_ARRAY(a,aSz,str)
 #endif
 
 #define CAAM_PAGE_MAX 6
@@ -455,6 +455,5 @@ struct DESCSTRUCT {
 #define MAX_ECDSA_SIGN_ADDR 8
 #define BLACK_KEY_MAC_SZ 16
 #define BLACK_BLOB_KEYMOD_SZ 16
-#define RED_BLOB_KEYMOD_SZ 16
-#define SM_BLOB_KEYMOD_SZ 8
+#define RED_BLOB_KEYMOD_SZ 8
 #endif /* CAAM_DRIVER_H */

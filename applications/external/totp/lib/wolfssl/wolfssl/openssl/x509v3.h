@@ -24,7 +24,6 @@
 #ifndef WOLFSSL_x509v3_H
 #define WOLFSSL_x509v3_H
 
-#include <wolfssl/wolfcrypt/types.h>
 #include <wolfssl/openssl/compat_types.h>
 #include <wolfssl/openssl/conf.h>
 #include <wolfssl/openssl/bio.h>
@@ -160,8 +159,8 @@ WOLFSSL_API WOLFSSL_ASN1_STRING* wolfSSL_a2i_IPADDRESS(const char* ipa);
 #define X509V3_EXT_conf_nid       wolfSSL_X509V3_EXT_conf_nid
 #define X509V3_set_ctx            wolfSSL_X509V3_set_ctx
 #ifndef NO_WOLFSSL_STUB
-#define X509V3_set_nconf(...)     WC_DO_NOTHING
-#define X509V3_EXT_cleanup(...)   WC_DO_NOTHING
+#define X509V3_set_nconf(...)
+#define X509V3_EXT_cleanup(...)
 #endif
 #define X509V3_set_ctx_test(ctx)  wolfSSL_X509V3_set_ctx(ctx, NULL, NULL, NULL, NULL, CTX_TEST)
 #define X509V3_set_ctx_nodb       wolfSSL_X509V3_set_ctx_nodb

@@ -54716,7 +54716,7 @@ _text ENDS
 ;  * a   First number to multiply in Montgomery form.
 ;  * b   Second number to multiply in Montgomery form.
 ;  * m   Modulus (prime).
-;  * mp  Montgomery multiplier.
+;  * mp  Montgomery mulitplier.
 ;  */
 _text SEGMENT READONLY PARA
 sp_256_mont_mul_4 PROC
@@ -54913,7 +54913,7 @@ _text ENDS
 ;  * r   Result of squaring.
 ;  * a   Number to square in Montgomery form.
 ;  * m   Modulus (prime).
-;  * mp  Montgomery multiplier.
+;  * mp  Montgomery mulitplier.
 ;  */
 _text SEGMENT READONLY PARA
 sp_256_mont_sqr_4 PROC
@@ -55852,7 +55852,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible point that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of point to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -55932,7 +55932,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible point that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of point to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -55990,7 +55990,7 @@ IFDEF HAVE_INTEL_AVX2
 ;  * a   First number to multiply in Montgomery form.
 ;  * b   Second number to multiply in Montgomery form.
 ;  * m   Modulus (prime).
-;  * mp  Montgomery multiplier.
+;  * mp  Montgomery mulitplier.
 ;  */
 _text SEGMENT READONLY PARA
 sp_256_mont_mul_avx2_4 PROC
@@ -56165,7 +56165,7 @@ IFDEF HAVE_INTEL_AVX2
 ;  * r   Result of squaring.
 ;  * a   Number to square in Montgomery form.
 ;  * m   Modulus (prime).
-;  * mp  Montgomery multiplier.
+;  * mp  Montgomery mulitplier.
 ;  */
 _text SEGMENT READONLY PARA
 sp_256_mont_sqr_avx2_4 PROC
@@ -56570,7 +56570,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -56633,7 +56633,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -56678,7 +56678,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -56741,7 +56741,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -60059,7 +60059,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible point that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of point to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -60170,7 +60170,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible point that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of point to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -60693,7 +60693,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -60774,7 +60774,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -60837,7 +60837,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -60918,7 +60918,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -63604,7 +63604,7 @@ _text ENDS
 ;  * a   First number to multiply in Montgomery form.
 ;  * b   Second number to multiply in Montgomery form.
 ;  * m   Modulus (prime).
-;  * mp  Montgomery multiplier.
+;  * mp  Montgomery mulitplier.
 ;  */
 _text SEGMENT READONLY PARA
 sp_521_mont_mul_9 PROC
@@ -64194,7 +64194,7 @@ _text ENDS
 ;  * r   Result of squaring.
 ;  * a   Number to square in Montgomery form.
 ;  * m   Modulus (prime).
-;  * mp  Montgomery multiplier.
+;  * mp  Montgomery mulitplier.
 ;  */
 _text SEGMENT READONLY PARA
 sp_521_mont_sqr_9 PROC
@@ -65376,7 +65376,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible point that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of point to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -65536,7 +65536,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible point that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of point to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -65652,7 +65652,7 @@ IFDEF HAVE_INTEL_AVX2
 ;  * a   First number to multiply in Montgomery form.
 ;  * b   Second number to multiply in Montgomery form.
 ;  * m   Modulus (prime).
-;  * mp  Montgomery multiplier.
+;  * mp  Montgomery mulitplier.
 ;  */
 _text SEGMENT READONLY PARA
 sp_521_mont_mul_avx2_9 PROC
@@ -66262,7 +66262,7 @@ IFDEF HAVE_INTEL_AVX2
 ;  * r   Result of squaring.
 ;  * a   Number to square in Montgomery form.
 ;  * m   Modulus (prime).
-;  * mp  Montgomery multiplier.
+;  * mp  Montgomery mulitplier.
 ;  */
 _text SEGMENT READONLY PARA
 sp_521_mont_sqr_avx2_9 PROC
@@ -67141,7 +67141,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -67273,7 +67273,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -67358,7 +67358,7 @@ IFNDEF WC_NO_CACHE_RESISTANT
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA
@@ -67490,7 +67490,7 @@ IFDEF HAVE_INTEL_AVX2
 ; /* Touch each possible entry that could be being copied.
 ;  *
 ;  * r      Point to copy into.
-;  * table  Table - start of the entries to access
+;  * table  Table - start of the entires to access
 ;  * idx    Index of entry to retrieve.
 ;  */
 _text SEGMENT READONLY PARA

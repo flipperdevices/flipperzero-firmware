@@ -97,7 +97,7 @@
             iov.iov_len = sz;
             ret = (int)kcapi_cipher_stream_update(aes->handle, &iov, 1);
             if (ret < 0) {
-                WOLFSSL_MSG("CbcEncrypt error updating through KCAPI");
+                WOLFSSL_MSG("CbcEncrypt error updateing through KCAPI");
             }
         }
         if (ret >= 0) {
@@ -155,7 +155,7 @@
             iov.iov_len = sz;
             ret = (int)kcapi_cipher_stream_update(aes->handle, &iov, 1);
             if (ret < 0) {
-                WOLFSSL_MSG("CbcDecrypt error updating through KCAPI");
+                WOLFSSL_MSG("CbcDecrypt error updateing through KCAPI");
             }
         }
         if (ret >= 0) {

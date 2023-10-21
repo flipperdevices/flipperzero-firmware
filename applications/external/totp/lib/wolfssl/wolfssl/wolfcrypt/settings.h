@@ -224,7 +224,7 @@
 /* #define WOLFSSL_ESPIDF */
 
 /* Uncomment next line if using Espressif ESP32-WROOM-32 */
-/* #define WOLFSSL_ESP32 */
+/* #define WOLFSSL_ESPWROOM32 */
 
 /* Uncomment next line if using Espressif ESP32-WROOM-32SE */
 /* #define WOLFSSL_ESPWROOM32SE */
@@ -350,29 +350,30 @@
     #define ECC_TIMING_RESISTANT
     #define WC_RSA_BLINDING
 
-#if defined(WOLFSSL_ESPWROOM32)
-    /* WOLFSSL_ESPWROOM32 is a legacy macro gate.
-    ** Not be be confused with WOLFSSL_ESPWROOM32SE, naming a specific board */
-    #undef WOLFSSL_ESP32
-    #define WOLFSSL_ESP32
-#endif
-
-#if defined(WOLFSSL_ESP32) || defined(WOLFSSL_ESPWROOM32SE)
-   #ifndef NO_ESP32_CRYPT
-        #define WOLFSSL_ESP32_CRYPT
+#if defined(WOLFSSL_ESPWROOM32) || defined(WOLFSSL_ESPWROOM32SE)
+   #ifndef NO_ESP32WROOM32_CRYPT
+        #define WOLFSSL_ESP32WROOM32_CRYPT
         #if defined(ESP32_USE_RSA_PRIMITIVE) && \
-            !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
-            #define WOLFSSL_ESP32_CRYPT_RSA_PRI
+            !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
+            #define WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI
             #define WOLFSSL_SMALL_STACK
         #endif
    #endif
 #endif
 #endif /* WOLFSSL_ESPIDF */
 
+#if defined(WOLFCRYPT_ONLY)
+    #undef WOLFSSL_RENESAS_TSIP
+#endif /* WOLFCRYPT_ONLY */
 #if defined(WOLFSSL_RENESAS_TSIP)
     #define TSIP_TLS_HMAC_KEY_INDEX_WORDSIZE 64
     #define TSIP_TLS_MASTERSECRET_SIZE       80   /* 20 words */
     #define TSIP_TLS_ENCPUBKEY_SZ_BY_CERTVRFY 560 /* in byte  */
+    #if !defined(NO_RENESAS_TSIP_CRYPT) && defined(WOLFSSL_RENESAS_RX65N)
+        #define WOLFSSL_RENESAS_TSIP_CRYPT
+        #define WOLFSSL_RENESAS_TSIP_TLS
+        #define WOLFSSL_RENESAS_TSIP_TLS_AES_CRYPT
+    #endif
 #endif /* WOLFSSL_RENESAS_TSIP */
 
 #if !defined(WOLFSSL_NO_HASH_RAW) && defined(WOLFSSL_RENESAS_RX64_HASH)
@@ -917,7 +918,7 @@ extern void uITRON4_free(void *p) ;
         #define SINGLE_THREADED
     #endif
 
-    #if (defined(RTPLATFORM) && (RTPLATFORM != 0))
+    #if (RTPLATFORM)
         #if (!RTP_LITTLE_ENDIAN)
             #define BIG_ENDIAN_ORDER
         #endif
@@ -936,13 +937,9 @@ extern void uITRON4_free(void *p) ;
         #endif
     #endif
 
-    #if (WINMSP3)
-        #define strtok_r strtok_s
-    #endif
-
     #define XMALLOC(s, h, type) ((void *)rtp_malloc((s), SSL_PRO_MALLOC))
     #define XFREE(p, h, type) (rtp_free(p))
-    #define XREALLOC(p, n, h, t) (rtp_realloc((p), (n), (t)))
+    #define XREALLOC(p, n, h, t) (rtp_realloc((p), (n)))
 
     #if (WINMSP3)
         #define XSTRNCASECMP(s1,s2,n)  _strnicmp((s1),(s2),(n))
@@ -1527,7 +1524,6 @@ extern void uITRON4_free(void *p) ;
 #ifdef MICRIUM
     #include <stdlib.h>
     #include <os.h>
-    #include <app_cfg.h>
     #if defined(RTOS_MODULE_NET_AVAIL) || (APP_CFG_TCPIP_EN == DEF_ENABLED)
         #include <net_cfg.h>
         #include <net_sock.h>
@@ -1880,13 +1876,11 @@ extern void uITRON4_free(void *p) ;
     #endif
 #endif
 
-#if defined(NO_WC_SSIZE_TYPE) || defined(ssize_t)
-    /* ssize_t comes from system headers or user_settings.h */
-#elif defined(WC_SSIZE_TYPE)
-    typedef WC_SSIZE_TYPE ssize_t;
-#elif defined(_MSC_VER)
-    #include <BaseTsd.h>
-    typedef SSIZE_T ssize_t;
+#ifdef _MSC_VER
+    #ifndef HAVE_SSIZE_T
+        #include <BaseTsd.h>
+        typedef SSIZE_T ssize_t;
+    #endif
 #endif
 
 /* If DCP is used without SINGLE_THREADED, enforce WOLFSSL_CRYPT_HW_MUTEX */
@@ -2033,22 +2027,17 @@ extern void uITRON4_free(void *p) ;
          *      Constant time: Always
          *      Enable:        WOLFSSL_SP_MATH_ALL
          */
-        #undef USE_FAST_MATH
-        #undef USE_INTEGER_HEAP_MATH
     #elif defined(WOLFSSL_SP_MATH)
         /*  2) SP Math with restricted key sizes: wolfSSL proprietary math
          *         implementation (sp_*.c).
          *      Constant time: Always
          *      Enable:        WOLFSSL_SP_MATH
          */
-        #undef USE_FAST_MATH
-        #undef USE_INTEGER_HEAP_MATH
     #elif defined(USE_FAST_MATH)
         /*  3) Tom's Fast Math: Stack based (tfm.c)
          *      Constant time: Only with TFM_TIMING_RESISTANT
          *      Enable:        USE_FAST_MATH
          */
-        #undef USE_INTEGER_HEAP_MATH
     #elif defined(USE_INTEGER_HEAP_MATH)
         /*  4) Integer Heap Math:  Heap based (integer.c)
          *      Constant time: Not supported
@@ -2613,11 +2602,6 @@ extern void uITRON4_free(void *p) ;
     #endif
 #endif
 
-/* Make sure setting OPENSSL_ALL also sets OPENSSL_EXTRA. */
-#if defined(OPENSSL_ALL) && !defined(OPENSSL_EXTRA)
-    #define OPENSSL_EXTRA
-#endif
-
 #ifdef HAVE_SNI
     #define SSL_CTRL_SET_TLSEXT_HOSTNAME 55
 #endif
@@ -2864,12 +2848,6 @@ extern void uITRON4_free(void *p) ;
     #error Small stack cannot be used with no malloc (WOLFSSL_NO_MALLOC)
 #endif
 
-/* If malloc is disabled make sure it is also disabled in SP math */
-#if defined(WOLFSSL_NO_MALLOC) && !defined(WOLFSSL_SP_NO_MALLOC) && \
-    (defined(WOLFSSL_SP_MATH) || defined(WOLFSSL_SP_MATH_ALL))
-    #define WOLFSSL_SP_NO_MALLOC
-#endif
-
 /* Enable DH Extra for QT, openssl all, openssh and static ephemeral */
 /* Allows export/import of DH key and params as DER */
 #if !defined(NO_DH) && !defined(WOLFSSL_DH_EXTRA) && \
@@ -3114,7 +3092,6 @@ extern void uITRON4_free(void *p) ;
     #endif
     /* Ciphersuite check done in internal.h */
 #endif
-
 
 #ifdef __cplusplus
     }   /* extern "C" */

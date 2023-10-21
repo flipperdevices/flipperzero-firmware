@@ -117,7 +117,7 @@ static int I2OSP(int n, int w, byte* out)
     }
 
     /* make sure the byte string is cleared */
-    XMEMSET(out, 0, (size_t)w);
+    XMEMSET( out, 0, w );
 
     for (i = 0; i < w && n > 0; i++) {
         out[w-(i + 1)] = (byte)n;
@@ -138,9 +138,9 @@ int wc_HpkeInit(Hpke* hpke, int kem, int kdf, int aead, void* heap)
     }
 
     XMEMSET(hpke, 0, sizeof(*hpke));
-    hpke->kem = (word32)kem;
-    hpke->kdf = (word32)kdf;
-    hpke->aead = (word32)aead;
+    hpke->kem = kem;
+    hpke->kdf = kdf;
+    hpke->aead = aead;
     hpke->heap = heap;
 
     /* set kem_suite_id */
@@ -177,7 +177,7 @@ int wc_HpkeInit(Hpke* hpke, int kem, int kdf, int aead, void* heap)
             hpke->curve_id = ECC_SECP256R1;
             hpke->Nsecret = WC_SHA256_DIGEST_SIZE;
             hpke->Nh = WC_SHA256_DIGEST_SIZE;
-            hpke->Ndh = (word32)wc_ecc_get_curve_size_from_id(hpke->curve_id);
+            hpke->Ndh = wc_ecc_get_curve_size_from_id(hpke->curve_id);
             hpke->Npk = 1 + hpke->Ndh * 2;
             break;
 #endif
@@ -187,7 +187,7 @@ int wc_HpkeInit(Hpke* hpke, int kem, int kdf, int aead, void* heap)
             hpke->curve_id = ECC_SECP384R1;
             hpke->Nsecret = WC_SHA384_DIGEST_SIZE;
             hpke->Nh = WC_SHA384_DIGEST_SIZE;
-            hpke->Ndh = (word32)wc_ecc_get_curve_size_from_id(hpke->curve_id);
+            hpke->Ndh = wc_ecc_get_curve_size_from_id(hpke->curve_id);
             hpke->Npk = 1 + hpke->Ndh * 2;
             break;
 #endif
@@ -197,7 +197,7 @@ int wc_HpkeInit(Hpke* hpke, int kem, int kdf, int aead, void* heap)
             hpke->curve_id = ECC_SECP521R1;
             hpke->Nsecret = WC_SHA512_DIGEST_SIZE;
             hpke->Nh = WC_SHA512_DIGEST_SIZE;
-            hpke->Ndh = (word32)wc_ecc_get_curve_size_from_id(hpke->curve_id);
+            hpke->Ndh = wc_ecc_get_curve_size_from_id(hpke->curve_id);
             hpke->Npk = 1 + hpke->Ndh * 2;
             break;
 #endif
@@ -272,7 +272,7 @@ int wc_HpkeInit(Hpke* hpke, int kem, int kdf, int aead, void* heap)
     }
 
     if ((int)hpke->Ndh < 0) {
-        return (int)hpke->Ndh;
+        return hpke->Ndh;
     }
 
     return ret;
@@ -332,7 +332,7 @@ int wc_HpkeGenerateKeyPair(Hpke* hpke, void** keypair, WC_RNG* rng)
         ret = MEMORY_E;
 
     if (ret != 0 && *keypair != NULL) {
-        wc_HpkeFreeKey(hpke, (word16)hpke->kem, *keypair, hpke->heap);
+        wc_HpkeFreeKey(hpke, hpke->kem, *keypair, hpke->heap);
         *keypair = NULL;
     }
 
@@ -373,7 +373,7 @@ int wc_HpkeSerializePublicKey(Hpke* hpke, void* key, byte* out, word16* outSz)
             break;
     }
 
-    *outSz = (word16)tmpOutSz;
+    *outSz = tmpOutSz;
 
     return ret;
 }
@@ -430,7 +430,7 @@ int wc_HpkeDeserializePublicKey(Hpke* hpke, void** key, const byte* in,
         ret = MEMORY_E;
 
     if (ret != 0 && *key != NULL) {
-        wc_HpkeFreeKey(hpke, (word16)hpke->kem, *key, hpke->heap);
+        wc_HpkeFreeKey(hpke, hpke->kem, *key, hpke->heap);
         *key = NULL;
     }
 
@@ -547,7 +547,7 @@ static int wc_HpkeLabeledExpand(Hpke* hpke, byte* suite_id, word32 suite_id_len,
 #endif
 
     /* copy length */
-    ret = I2OSP((int)L, 2, labeled_info);
+    ret = I2OSP(L, 2, labeled_info);
     labeled_info_p = labeled_info + 2;
 
     if (ret == 0) {
@@ -593,7 +593,7 @@ static int wc_HpkeContextComputeNonce(Hpke* hpke, HpkeBaseContext* context,
 
     /* convert the sequence into a byte string with the same length as the
      * nonce */
-    ret = I2OSP(context->seq, (int)hpke->Nn, seq_bytes);
+    ret = I2OSP(context->seq, hpke->Nn, seq_bytes);
     if (ret == 0) {
         xorbufout(out, context->base_nonce, seq_bytes, hpke->Nn);
     }
@@ -759,8 +759,8 @@ static int wc_HpkeEncap(Hpke* hpke, void* ephemeralKey, void* receiverKey,
         return BAD_FUNC_ARG;
     }
 
-    receiverPubKeySz = (word16)hpke->Npk;
-    ephemeralPubKeySz = (word16)hpke->Npk;
+    receiverPubKeySz = hpke->Npk;
+    ephemeralPubKeySz = hpke->Npk;
 
 #ifdef WOLFSSL_SMALL_STACK
     dh = (byte*)XMALLOC(hpke->Ndh, hpke->heap, DYNAMIC_TYPE_TMP_BUFFER);
@@ -990,7 +990,7 @@ static int wc_HpkeDecap(Hpke* hpke, void* receiverKey, const byte* pubKey,
         return BAD_FUNC_ARG;
     }
 
-    receiverPubKeySz = (word16)hpke->Npk;
+    receiverPubKeySz = hpke->Npk;
 
 #ifdef WOLFSSL_SMALL_STACK
     dh = (byte*)XMALLOC(hpke->Ndh, hpke->heap, DYNAMIC_TYPE_TMP_BUFFER);
@@ -1048,7 +1048,7 @@ static int wc_HpkeDecap(Hpke* hpke, void* receiverKey, const byte* pubKey,
         }
 
     if (ephemeralKey != NULL)
-        wc_HpkeFreeKey(hpke, (word16)hpke->kem, ephemeralKey, hpke->heap);
+        wc_HpkeFreeKey(hpke, hpke->kem, ephemeralKey, hpke->heap);
 
     if (ret == 0) {
         /* copy pubKey into kemContext */

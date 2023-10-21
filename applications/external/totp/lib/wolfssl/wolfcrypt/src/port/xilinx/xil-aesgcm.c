@@ -221,7 +221,7 @@ static WC_INLINE int handle_aad(       Aes* aes,
     byte initalCounter[AES_BLOCK_SIZE] = { 0 };
     XMEMCPY(initalCounter, iv, AEAD_NONCE_SZ);
     initalCounter[AES_BLOCK_SIZE - 1] = 1;
-    GHASH(&aes->gcm, authIn, authInSz, data, sz, authTag, AES_GCM_AUTH_SZ);
+    GHASH(aes, authIn, authInSz, data, sz, authTag, AES_GCM_AUTH_SZ);
     ret = wc_AesEncryptDirect(aes, scratch, initalCounter);
     if (ret == 0)
         xorbuf(authTag, scratch, AES_GCM_AUTH_SZ);
@@ -277,7 +277,7 @@ int wc_AesGcmEncrypt(       Aes* aes, byte* out,
 
     if (NEEDS_ALIGNMENT(out, XIL_AESGCM_ALIGN)) {
         if (in != in_aligned) {
-            /* In case `in` has been copied already, reuse that buffer
+            /* In case `in` has been copied already, re-use that buffer
              * and also write to it instead of allocating another one.
              */
             out_aligned = in_aligned;
@@ -392,7 +392,7 @@ int  wc_AesGcmDecrypt(       Aes* aes, byte* out,
 
     if (NEEDS_ALIGNMENT(out, XIL_AESGCM_ALIGN)) {
         if (in != in_aligned) {
-            /* In case `in` has been copied already, reuse that buffer
+            /* In case `in` has been copied already, re-use that buffer
              * and also write to it instead of allocating another one.
              */
             out_aligned = in_aligned;
@@ -558,7 +558,7 @@ int  wc_AesGcmEncrypt(Aes* aes, byte* out,
         XMEMSET(initalCounter, 0, AES_BLOCK_SIZE);
         XMEMCPY(initalCounter, iv, ivSz);
         initalCounter[AES_BLOCK_SIZE - 1] = 1;
-        GHASH(&aes->gcm, authIn, authInSz, out, sz, authTag, authTagSz);
+        GHASH(aes, authIn, authInSz, out, sz, authTag, authTagSz);
         ret = wc_AesEncryptDirect(aes, scratch, initalCounter);
         if (ret < 0)
             return ret;
@@ -597,7 +597,7 @@ int  wc_AesGcmDecrypt(Aes* aes, byte* out,
         XMEMCPY(initalCounter, iv, ivSz);
         initalCounter[AES_BLOCK_SIZE - 1] = 1;
         tag = buf;
-        GHASH(&aes->gcm, NULL, 0, in, sz, tag, AES_GCM_AUTH_SZ);
+        GHASH(aes, NULL, 0, in, sz, tag, AES_GCM_AUTH_SZ);
         ret = wc_AesEncryptDirect(aes, scratch, initalCounter);
         if (ret < 0)
             return ret;
@@ -614,7 +614,7 @@ int  wc_AesGcmDecrypt(Aes* aes, byte* out,
 
     /* account for additional data */
     if (authIn != NULL && authInSz > 0) {
-        GHASH(&aes->gcm, authIn, authInSz, in, sz, tag, AES_GCM_AUTH_SZ);
+        GHASH(aes, authIn, authInSz, in, sz, tag, AES_GCM_AUTH_SZ);
         ret = wc_AesEncryptDirect(aes, scratch, initalCounter);
         if (ret < 0)
             return ret;

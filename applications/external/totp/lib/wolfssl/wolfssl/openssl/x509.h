@@ -74,41 +74,47 @@
  * satisfy OpenSSL compatibility consumers to prevent compilation errors.
  * The list was taken from
  * https://github.com/openssl/openssl/blob/master/include/openssl/x509_vfy.h.in
- * One requirement for HAProxy is that the values should be literal constants.
  */
 
-#define X509_V_OK                                       0
+#define X509_V_OK                       WOLFSSL_X509_V_OK
 #define X509_V_ERR_UNSPECIFIED                          1
 #define X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT            2
 #define X509_V_ERR_UNABLE_TO_GET_CRL                    3
 #define X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE     4
 #define X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE      5
 #define X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY   6
-#define X509_V_ERR_CERT_SIGNATURE_FAILURE               7
+#define X509_V_ERR_CERT_SIGNATURE_FAILURE               \
+                            WOLFSSL_X509_V_ERR_CERT_SIGNATURE_FAILURE
 #define X509_V_ERR_CRL_SIGNATURE_FAILURE                8
-#define X509_V_ERR_CERT_NOT_YET_VALID                   9
-#define X509_V_ERR_CERT_HAS_EXPIRED                     10
+#define X509_V_ERR_CERT_NOT_YET_VALID   WOLFSSL_X509_V_ERR_CERT_NOT_YET_VALID
+#define X509_V_ERR_CERT_HAS_EXPIRED     WOLFSSL_X509_V_ERR_CERT_HAS_EXPIRED
 #define X509_V_ERR_CRL_NOT_YET_VALID                    11
 #define X509_V_ERR_CRL_HAS_EXPIRED                      12
-#define X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD       13
-#define X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD        14
+#define X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD       \
+                            WOLFSSL_X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD
+#define X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD        \
+                            WOLFSSL_X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD
 #define X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD       15
 #define X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD       16
 #define X509_V_ERR_OUT_OF_MEM                           17
-#define X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT          18
+#define X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT          \
+                            WOLFSSL_X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT
 #define X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN            19
-#define X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY    20
-#define X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE      21
-#define X509_V_ERR_CERT_CHAIN_TOO_LONG                  22
-#define X509_V_ERR_CERT_REVOKED                         23
-#define X509_V_ERR_NO_ISSUER_PUBLIC_KEY                 24
-#define X509_V_ERR_PATH_LENGTH_EXCEEDED                 25
+#define X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY    \
+                            WOLFSSL_X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY
+#define X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE      \
+                            WOLFSSL_X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE
+#define X509_V_ERR_CERT_CHAIN_TOO_LONG  WOLFSSL_X509_V_ERR_CERT_CHAIN_TOO_LONG
+#define X509_V_ERR_CERT_REVOKED         WOLFSSL_X509_V_ERR_CERT_REVOKED
+#define X509_V_ERR_NO_ISSUER_PUBLIC_KEY WOLFSSL_X509_V_ERR_INVALID_CA
+#define X509_V_ERR_PATH_LENGTH_EXCEEDED WOLFSSL_X509_V_ERR_PATH_LENGTH_EXCEEDED
 #define X509_V_ERR_INVALID_PURPOSE                      26
 #define X509_V_ERR_CERT_UNTRUSTED                       27
-#define X509_V_ERR_CERT_REJECTED                        28
+#define X509_V_ERR_CERT_REJECTED        WOLFSSL_X509_V_ERR_CERT_REJECTED
 
 /* These are 'informational' when looking for issuer cert */
-#define X509_V_ERR_SUBJECT_ISSUER_MISMATCH              29
+#define X509_V_ERR_SUBJECT_ISSUER_MISMATCH              \
+                             WOLFSSL_X509_V_ERR_SUBJECT_ISSUER_MISMATCH
 #define X509_V_ERR_AKID_SKID_MISMATCH                   30
 #define X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH          31
 #define X509_V_ERR_KEYUSAGE_NO_CERTSIGN                 32

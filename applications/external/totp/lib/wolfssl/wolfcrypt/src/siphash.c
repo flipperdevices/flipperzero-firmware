@@ -315,7 +315,7 @@ static WC_INLINE void SipHashOut(SipHash* sipHash, byte* out)
  *
  * @param [in, out] sipHash  SipHash object.
  * @param [out]     out      Buffer to place MAC into.
- * @param [in]      outSz    Size of output MAC. 8 or 16 only.
+ * @param [in]      outSz    Size of ouput MAC. 8 or 16 only.
  * @return  BAD_FUNC_ARG when sipHash or out is NULL.
  * @return  BAD_FUNC_ARG when outSz is not the same as initialized value.
  * @return  0 on success.
@@ -393,7 +393,7 @@ int wc_SipHashFinal(SipHash* sipHash, unsigned char* out, unsigned char outSz)
  * @param [in]      in       Input message.
  * @param [in]      inSz     Size of input message.
  * @param [out]     out      Buffer to place MAC into.
- * @param [in]      outSz    Size of output MAC. 8 or 16 only.
+ * @param [in]      outSz    Size of ouput MAC. 8 or 16 only.
  * @return  BAD_FUNC_ARG when key or out is NULL.
  * @return  BAD_FUNC_ARG when in is NULL and inSz is not zero.
  * @return  BAD_FUNC_ARG when outSz is neither 8 nor 16.
@@ -622,7 +622,7 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
  * @param [in]      in       Input message.
  * @param [in]      inSz     Size of input message.
  * @param [out]     out      Buffer to place MAC into.
- * @param [in]      outSz    Size of output MAC. 8 or 16 only.
+ * @param [in]      outSz    Size of ouput MAC. 8 or 16 only.
  * @return  BAD_FUNC_ARG when key or out is NULL.
  * @return  BAD_FUNC_ARG when in is NULL and inSz is not zero.
  * @return  BAD_FUNC_ARG when outSz is not 8 nor 16.
@@ -851,7 +851,7 @@ int wc_SipHash(const unsigned char* key, const unsigned char* in, word32 inSz,
  * @param [in]      in       Input message.
  * @param [in]      inSz     Size of input message.
  * @param [out]     out      Buffer to place MAC into.
- * @param [in]      outSz    Size of output MAC. 8 or 16 only.
+ * @param [in]      outSz    Size of ouput MAC. 8 or 16 only.
  * @return  BAD_FUNC_ARG when key or out is NULL.
  * @return  BAD_FUNC_ARG when in is NULL and inSz is not zero.
  * @return  BAD_FUNC_ARG when outSz is not 8 nor 16.

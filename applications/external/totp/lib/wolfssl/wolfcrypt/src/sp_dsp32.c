@@ -4464,10 +4464,10 @@ int wolfSSL_DSP_ECC_Verify_256(remote_handle64 h, int32 *u1, int hashLen, int32*
         u2 = u2d;
         tmp = tmpd;
 
-        XMEMCPY(u2, r, 40);
-        XMEMCPY(p2->x, x, 40);
-        XMEMCPY(p2->y, y, 40);
-        XMEMCPY(p2->z, z, 40);
+	XMEMCPY(u2, r, 40);
+	XMEMCPY(p2->x, x, 40);
+	XMEMCPY(p2->y, y, 40);
+	XMEMCPY(p2->z, z, 40);
 
             sp_256_mul_10(s, s, p256_norm_order);
         err = sp_256_mod_10(s, s, p256_order);
@@ -4492,7 +4492,7 @@ int wolfSSL_DSP_ECC_Verify_256(remote_handle64 h, int32 *u1, int hashLen, int32*
 
         /* (r + n*order).z'.z' mod prime == (u1.G + u2.Q)->x' */
         /* Reload r and convert to Montgomery form. */
-        XMEMCPY(u2, r, 40);
+	XMEMCPY(u2, r, 40);
         err = sp_256_mod_mul_norm_10(u2, u2, p256_mod);
     }
 
@@ -4503,7 +4503,7 @@ int wolfSSL_DSP_ECC_Verify_256(remote_handle64 h, int32 *u1, int hashLen, int32*
         *res = (int)(sp_256_cmp_10(p1->x, u1) == 0);
         if (*res == 0) {
             /* Reload r and add order. */
-            XMEMCPY(u2, r, 40);
+	    XMEMCPY(u2, r, 40);
             carry = sp_256_add_10(u2, u2, p256_order);
             /* Carry means result is greater than mod and is not valid. */
             if (carry == 0) {

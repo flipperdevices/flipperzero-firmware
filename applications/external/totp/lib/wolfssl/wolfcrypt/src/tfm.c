@@ -232,8 +232,8 @@ int fp_mul(fp_int *A, fp_int *B, fp_int *C)
     int   ret = 0;
     int   y, yy, oldused;
 
-#if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
   ret = esp_mp_mul(A, B, C);
   if(ret != -2) return ret;
 #endif
@@ -2997,8 +2997,8 @@ static int _fp_exptmod_base_2(fp_int * X, int digits, fp_int * P,
 int fp_exptmod(fp_int * G, fp_int * X, fp_int * P, fp_int * Y)
 {
 
-#if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
    int x = fp_count_bits (X);
 #endif
 
@@ -3019,8 +3019,8 @@ int fp_exptmod(fp_int * G, fp_int * X, fp_int * P, fp_int * Y)
       return FP_OKAY;
    }
 
-#if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
    if(x > EPS_RSA_EXPT_XBTIS) {
       return esp_mp_exptmod(G, X, x, P, Y);
    }
@@ -3082,8 +3082,8 @@ int fp_exptmod(fp_int * G, fp_int * X, fp_int * P, fp_int * Y)
 int fp_exptmod_ex(fp_int * G, fp_int * X, int digits, fp_int * P, fp_int * Y)
 {
 
-#if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
    int x = fp_count_bits (X);
 #endif
 
@@ -3104,8 +3104,8 @@ int fp_exptmod_ex(fp_int * G, fp_int * X, int digits, fp_int * P, fp_int * Y)
       return FP_OKAY;
    }
 
-#if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
    if(x > EPS_RSA_EXPT_XBTIS) {
       return esp_mp_exptmod(G, X, x, P, Y);
    }
@@ -3166,30 +3166,23 @@ int fp_exptmod_ex(fp_int * G, fp_int * X, int digits, fp_int * P, fp_int * Y)
 
 int fp_exptmod_nct(fp_int * G, fp_int * X, fp_int * P, fp_int * Y)
 {
-#if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
    int x = fp_count_bits (X);
 #endif
 
-   /* handle modulus of zero and prevent overflows */
-   if (fp_iszero(P) || (P->used > (FP_SIZE/2))) {
-      return FP_VAL;
-   }
-   if (fp_isone(P)) {
-      fp_set(Y, 0);
-      return FP_OKAY;
-   }
-   if (fp_iszero(X)) {
-      fp_set(Y, 1);
-      return FP_OKAY;
-   }
    if (fp_iszero(G)) {
-      fp_set(Y, 0);
+      fp_set(G, 0);
       return FP_OKAY;
    }
 
-#if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && \
-   !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
+   /* prevent overflows */
+   if (P->used > (FP_SIZE/2)) {
+      return FP_VAL;
+   }
+
+#if defined(WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI) && \
+   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
    if(x > EPS_RSA_EXPT_XBTIS) {
       return esp_mp_exptmod(G, X, x, P, Y);
    }
@@ -3871,10 +3864,6 @@ int fp_read_unsigned_bin(fp_int *a, const unsigned char *b, int c)
   /* zero the int */
   fp_zero (a);
 
-  if (c == 0) {
-      return FP_OKAY;
-  }
-
   /* if input b excess max, then truncate */
   if (c > 0 && (word32)c > maxC) {
      int excess = (c - maxC);
@@ -4405,9 +4394,6 @@ void fp_clear(fp_int *a)
 
 void fp_forcezero (mp_int * a)
 {
-    if (a == NULL)
-      return;
-
     int size;
     a->used = 0;
     a->sign = FP_ZPOS;
@@ -4505,8 +4491,8 @@ int wolfcrypt_mp_mulmod (mp_int * a, mp_int * b, mp_int * c, mp_int * d)
 int mp_mulmod (mp_int * a, mp_int * b, mp_int * c, mp_int * d)
 #endif
 {
- #if defined(WOLFSSL_ESP32_CRYPT_RSA_PRI) && \
-    !defined(NO_WOLFSSL_ESP32_CRYPT_RSA_PRI)
+ #if defined(WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI) && \
+    !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_RSA_PRI)
     int A = fp_count_bits (a);
     int B = fp_count_bits (b);
 
@@ -4817,10 +4803,21 @@ int mp_montgomery_calc_normalization(mp_int *a, mp_int *b)
 
 #endif /* WOLFSSL_KEY_GEN || HAVE_ECC */
 
-static int fp_cond_swap_ct_ex(mp_int* a, mp_int* b, int c, int m, mp_int* t)
+static int fp_cond_swap_ct (mp_int * a, mp_int * b, int c, int m)
 {
     int i;
     mp_digit mask = (mp_digit)0 - m;
+#ifndef WOLFSSL_SMALL_STACK
+    fp_int  t[1];
+#else
+    fp_int* t;
+#endif
+
+#ifdef WOLFSSL_SMALL_STACK
+   t = (fp_int*)XMALLOC(sizeof(fp_int), NULL, DYNAMIC_TYPE_BIGINT);
+   if (t == NULL)
+       return FP_MEM;
+#endif
 
     t->used = (a->used ^ b->used) & mask;
     for (i = 0; i < c; i++) {
@@ -4834,26 +4831,6 @@ static int fp_cond_swap_ct_ex(mp_int* a, mp_int* b, int c, int m, mp_int* t)
     for (i = 0; i < c; i++) {
         b->dp[i] ^= t->dp[i];
     }
-
-    return FP_OKAY;
-}
-
-
-static int fp_cond_swap_ct(mp_int* a, mp_int* b, int c, int m)
-{
-#ifndef WOLFSSL_SMALL_STACK
-    fp_int  t[1];
-#else
-    fp_int* t;
-#endif
-
-#ifdef WOLFSSL_SMALL_STACK
-   t = (fp_int*)XMALLOC(sizeof(fp_int), NULL, DYNAMIC_TYPE_BIGINT);
-   if (t == NULL)
-       return FP_MEM;
-#endif
-
-   fp_cond_swap_ct_ex(a, b, c, m, t);
 
 #ifdef WOLFSSL_SMALL_STACK
     XFREE(t, NULL, DYNAMIC_TYPE_BIGINT);
@@ -5445,12 +5422,7 @@ int mp_prime_is_prime_ex(mp_int* a, int t, int* result, WC_RNG* rng)
 #endif /* !NO_RSA || !NO_DSA || !NO_DH || WOLFSSL_KEY_GEN */
 
 
-int mp_cond_swap_ct_ex(mp_int* a, mp_int* b, int c, int m, mp_int* t)
-{
-    return fp_cond_swap_ct_ex(a, b, c, m, t);
-}
-
-int mp_cond_swap_ct(mp_int* a, mp_int* b, int c, int m)
+int mp_cond_swap_ct(mp_int * a, mp_int * b, int c, int m)
 {
     return fp_cond_swap_ct(a, b, c, m);
 }

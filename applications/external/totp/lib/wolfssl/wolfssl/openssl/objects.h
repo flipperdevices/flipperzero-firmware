@@ -23,7 +23,7 @@
 #ifndef WOLFSSL_OBJECTS_H_
 #define WOLFSSL_OBJECTS_H_
 
-#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/settings.h>
 #ifndef OPENSSL_EXTRA_SSL_GUARD
 #define OPENSSL_EXTRA_SSL_GUARD
 #include <wolfssl/ssl.h>
@@ -62,7 +62,7 @@
 #define i2t_ASN1_OBJECT  wolfSSL_i2t_ASN1_OBJECT
 
 /* not required for wolfSSL */
-#define OPENSSL_load_builtin_modules() WC_DO_NOTHING
+#define OPENSSL_load_builtin_modules()
 
 
 #define NID_ad_OCSP                     178

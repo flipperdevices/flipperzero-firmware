@@ -1323,7 +1323,7 @@ int wc_TranslateHSMError(int current, hsm_err_t err)
             break;
 
         default:
-            WOLFSSL_MSG("SECO HSM: unknown error value found");
+            WOLFSSL_MSG("SECO HSM: unkown error value found");
     }
 
     if (current != 0) {

@@ -118,7 +118,7 @@ WC_INLINE static int set_cpuid_flags(void) {
    if(IS_INTEL_BMI2 && IS_INTEL_ADX){  func;  ret ;  }
 
 #else
-    #define IF_HAVE_INTEL_MULX(func, ret) WC_DO_NOTHING
+    #define IF_HAVE_INTEL_MULX(func, ret)
 #endif
 
 #if defined(TFM_X86) && !defined(TFM_SSE2)

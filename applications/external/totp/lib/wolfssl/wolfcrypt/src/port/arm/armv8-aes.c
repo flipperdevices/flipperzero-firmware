@@ -1462,7 +1462,7 @@ int wc_AesCtrEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
 
 /* PMULL and RBIT only with AArch64 */
 /* Use ARM hardware for polynomial multiply */
-void GMULT(byte* X, byte* Y)
+static void GMULT(byte* X, byte* Y)
 {
     __asm__ volatile (
         "LD1 {v0.16b}, [%[inX]] \n"
@@ -1511,19 +1511,14 @@ void GMULT(byte* X, byte* Y)
 }
 
 
-void GHASH(Gcm* gcm, const byte* a, word32 aSz, const byte* c,
-    word32 cSz, byte* s, word32 sSz)
+void GHASH(Aes* aes, const byte* a, word32 aSz,
+                                const byte* c, word32 cSz, byte* s, word32 sSz)
 {
     byte x[AES_BLOCK_SIZE];
     byte scratch[AES_BLOCK_SIZE];
     word32 blocks, partial;
-    byte* h;
+    byte* h = aes->H;
 
-    if (gcm == NULL) {
-        return;
-    }
-
-    h = gcm->H;
     XMEMSET(x, 0, AES_BLOCK_SIZE);
 
     /* Hash in A, the Additional Authentication Data */
@@ -1602,8 +1597,8 @@ static int Aes128GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         initialCounter[AES_BLOCK_SIZE - 1] = 1;
     }
     else {
-        GHASH(&aes->gcm, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
-        GMULT(initialCounter, aes->gcm.H);
+        GHASH(aes, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
+        GMULT(initialCounter, aes->H);
     }
     XMEMCPY(counter, initialCounter, AES_BLOCK_SIZE);
 
@@ -1616,14 +1611,14 @@ static int Aes128GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         /* do as many blocks as possible */
         while (blocks--) {
             xorbuf(x, authIn, AES_BLOCK_SIZE);
-            GMULT(x, aes->gcm.H);
+            GMULT(x, aes->H);
             authIn += AES_BLOCK_SIZE;
         }
         if (partial != 0) {
             XMEMSET(scratch, 0, AES_BLOCK_SIZE);
             XMEMCPY(scratch, authIn, partial);
             xorbuf(x, scratch, AES_BLOCK_SIZE);
-            GMULT(x, aes->gcm.H);
+            GMULT(x, aes->H);
         }
     }
 
@@ -1782,10 +1777,10 @@ static int Aes128GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
             "STR q17, [%[xOut]] \n" /* GHASH x value for partial blocks */
 
             :[out] "=r" (out), "=r" (keyPt), [ctrOut] "=r" (ctr), "=r" (in)
-            ,[xOut] "=r" (xPt),"=m" (aes->gcm.H)
+            ,[xOut] "=r" (xPt),"=m" (aes->H)
             :"0" (out), [Key] "1" (keyPt), [ctr] "2" (ctr), [blocks] "r" (blocks),
              [input] "3" (in)
-            ,[inX] "4" (xPt), [inY] "m" (aes->gcm.H)
+            ,[inX] "4" (xPt), [inY] "m" (aes->H)
             : "cc", "w11", "v0", "v1", "v2", "v3", "v4", "v5",
             "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14"
             ,"v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24"
@@ -1802,7 +1797,7 @@ static int Aes128GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         XMEMSET(scratch, 0, AES_BLOCK_SIZE);
         XMEMCPY(scratch, out, partial);
         xorbuf(x, scratch, AES_BLOCK_SIZE);
-        GMULT(x, aes->gcm.H);
+        GMULT(x, aes->H);
     }
 
     /* Hash in the lengths of A and C in bits */
@@ -1871,7 +1866,7 @@ static int Aes128GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
         :[out] "=r" (sPt), "=r" (keyPt), "=r" (iCtr)
         :[tag] "0" (sPt), [Key] "1" (keyPt),
-        [ctr] "2" (iCtr) , [h] "m" (aes->gcm.H)
+        [ctr] "2" (iCtr) , [h] "m" (aes->H)
         : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5",
         "v6", "v7", "v8", "v9", "v10","v11","v12","v13","v14",
         "v15", "v16", "v17","v18", "v19", "v20","v21","v22","v23","v24"
@@ -1920,8 +1915,8 @@ static int Aes192GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         initialCounter[AES_BLOCK_SIZE - 1] = 1;
     }
     else {
-        GHASH(&aes->gcm, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
-        GMULT(initialCounter, aes->gcm.H);
+        GHASH(aes, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
+        GMULT(initialCounter, aes->H);
     }
     XMEMCPY(counter, initialCounter, AES_BLOCK_SIZE);
 
@@ -1934,14 +1929,14 @@ static int Aes192GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         /* do as many blocks as possible */
         while (blocks--) {
             xorbuf(x, authIn, AES_BLOCK_SIZE);
-            GMULT(x, aes->gcm.H);
+            GMULT(x, aes->H);
             authIn += AES_BLOCK_SIZE;
         }
         if (partial != 0) {
             XMEMSET(scratch, 0, AES_BLOCK_SIZE);
             XMEMCPY(scratch, authIn, partial);
             xorbuf(x, scratch, AES_BLOCK_SIZE);
-            GMULT(x, aes->gcm.H);
+            GMULT(x, aes->H);
         }
     }
 
@@ -2108,10 +2103,10 @@ static int Aes192GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
             "STR q17, [%[xOut]] \n" /* GHASH x value for partial blocks */
 
             :[out] "=r" (out), "=r" (keyPt), [ctrOut] "=r" (ctr), "=r" (in)
-            ,[xOut] "=r" (xPt),"=m" (aes->gcm.H)
+            ,[xOut] "=r" (xPt),"=m" (aes->H)
             :"0" (out), [Key] "1" (keyPt), [ctr] "2" (ctr), [blocks] "r" (blocks),
              [input] "3" (in)
-            ,[inX] "4" (xPt), [inY] "m" (aes->gcm.H)
+            ,[inX] "4" (xPt), [inY] "m" (aes->H)
             : "cc", "w11", "v0", "v1", "v2", "v3", "v4", "v5",
             "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14"
             ,"v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",
@@ -2129,7 +2124,7 @@ static int Aes192GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         XMEMSET(scratch, 0, AES_BLOCK_SIZE);
         XMEMCPY(scratch, out, partial);
         xorbuf(x, scratch, AES_BLOCK_SIZE);
-        GMULT(x, aes->gcm.H);
+        GMULT(x, aes->H);
     }
 
     /* Hash in the lengths of A and C in bits */
@@ -2203,7 +2198,7 @@ static int Aes192GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
         :[out] "=r" (sPt), "=r" (keyPt), "=r" (iCtr)
         :[tag] "0" (sPt), [Key] "1" (keyPt),
-        [ctr] "2" (iCtr) , [h] "m" (aes->gcm.H)
+        [ctr] "2" (iCtr) , [h] "m" (aes->H)
         : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5",
         "v6", "v7", "v8", "v9", "v10","v11","v12","v13","v14",
         "v15", "v16", "v17","v18", "v19", "v20","v21","v22","v23","v24"
@@ -2253,8 +2248,8 @@ static int Aes256GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         initialCounter[AES_BLOCK_SIZE - 1] = 1;
     }
     else {
-        GHASH(&aes->gcm, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
-        GMULT(initialCounter, aes->gcm.H);
+        GHASH(aes, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
+        GMULT(initialCounter, aes->H);
     }
     XMEMCPY(counter, initialCounter, AES_BLOCK_SIZE);
 
@@ -2267,14 +2262,14 @@ static int Aes256GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         /* do as many blocks as possible */
         while (blocks--) {
             xorbuf(x, authIn, AES_BLOCK_SIZE);
-            GMULT(x, aes->gcm.H);
+            GMULT(x, aes->H);
             authIn += AES_BLOCK_SIZE;
         }
         if (partial != 0) {
             XMEMSET(scratch, 0, AES_BLOCK_SIZE);
             XMEMCPY(scratch, authIn, partial);
             xorbuf(x, scratch, AES_BLOCK_SIZE);
-            GMULT(x, aes->gcm.H);
+            GMULT(x, aes->H);
         }
     }
 
@@ -2449,10 +2444,10 @@ static int Aes256GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
             "STR q17, [%[xOut]] \n" /* GHASH x value for partial blocks */
 
             :[out] "=r" (out), "=r" (keyPt), [ctrOut] "=r" (ctr), "=r" (in)
-            ,[xOut] "=r" (xPt),"=m" (aes->gcm.H)
+            ,[xOut] "=r" (xPt),"=m" (aes->H)
             :"0" (out), [Key] "1" (keyPt), [ctr] "2" (ctr), [blocks] "r" (blocks),
              [input] "3" (in)
-            ,[inX] "4" (xPt), [inY] "m" (aes->gcm.H)
+            ,[inX] "4" (xPt), [inY] "m" (aes->H)
             : "cc", "w11", "v0", "v1", "v2", "v3", "v4", "v5",
             "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14"
             ,"v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24"
@@ -2469,7 +2464,7 @@ static int Aes256GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         XMEMSET(scratch, 0, AES_BLOCK_SIZE);
         XMEMCPY(scratch, out, partial);
         xorbuf(x, scratch, AES_BLOCK_SIZE);
-        GMULT(x, aes->gcm.H);
+        GMULT(x, aes->H);
     }
 
     /* Hash in the lengths of A and C in bits */
@@ -2547,7 +2542,7 @@ static int Aes256GcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
         :[out] "=r" (sPt), "=r" (keyPt), "=r" (iCtr)
         :[tag] "0" (sPt), [Key] "1" (keyPt),
-        [ctr] "2" (iCtr) , [h] "m" (aes->gcm.H)
+        [ctr] "2" (iCtr) , [h] "m" (aes->H)
         : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5",
         "v6", "v7", "v8", "v9", "v10","v11","v12","v13","v14",
         "v15", "v16", "v17","v18", "v19", "v20","v21","v22","v23",
@@ -2675,8 +2670,8 @@ int  wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         initialCounter[AES_BLOCK_SIZE - 1] = 1;
     }
     else {
-        GHASH(&aes->gcm, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
-        GMULT(initialCounter, aes->gcm.H);
+        GHASH(aes, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
+        GMULT(initialCounter, aes->H);
     }
     XMEMCPY(ctr, initialCounter, AES_BLOCK_SIZE);
 
@@ -2686,8 +2681,8 @@ int  wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         byte Tprime[AES_BLOCK_SIZE];
         byte EKY0[AES_BLOCK_SIZE];
 
-        GHASH(&aes->gcm, authIn, authInSz, in, sz, Tprime, sizeof(Tprime));
-        GMULT(Tprime, aes->gcm.H);
+        GHASH(aes, authIn, authInSz, in, sz, Tprime, sizeof(Tprime));
+        GMULT(Tprime, aes->H);
         wc_AesEncrypt(aes, ctr, EKY0);
         xorbuf(Tprime, EKY0, sizeof(Tprime));
 
@@ -4220,7 +4215,7 @@ int wc_AesCtrEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
  * on ARMv8". Shifting left to account for bit reflection is based on
  * "Carry-Less Multiplication and Its Usage for Computing the GCM mode"
  */
-void GMULT(byte* X, byte* Y)
+static void GMULT(byte* X, byte* Y)
 {
     __asm__ __volatile__ (
         "VLD1.32 {q0}, [%[x]] \n"
@@ -4279,13 +4274,13 @@ void GMULT(byte* X, byte* Y)
 }
 
 
-void GHASH(Gcm* gcm, const byte* a, word32 aSz, const byte* c, word32 cSz,
-    byte* s, word32 sSz)
+void GHASH(Aes* aes, const byte* a, word32 aSz,
+                                const byte* c, word32 cSz, byte* s, word32 sSz)
 {
     byte x[AES_BLOCK_SIZE];
     byte scratch[AES_BLOCK_SIZE];
     word32 blocks, partial;
-    byte* h = gcm->H;
+    byte* h = aes->H;
 
     XMEMSET(x, 0, AES_BLOCK_SIZE);
 
@@ -4382,7 +4377,7 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         initialCounter[AES_BLOCK_SIZE - 1] = 1;
     }
     else {
-        GHASH(&aes->gcm, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
+        GHASH(aes, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
     }
     XMEMCPY(ctr, initialCounter, AES_BLOCK_SIZE);
 
@@ -4403,7 +4398,7 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
     }
 
-    GHASH(&aes->gcm, authIn, authInSz, out, sz, authTag, authTagSz);
+    GHASH(aes, authIn, authInSz, out, sz, authTag, authTagSz);
     wc_AesEncrypt(aes, initialCounter, scratch);
     if (authTagSz > AES_BLOCK_SIZE) {
         xorbuf(authTag, scratch, AES_BLOCK_SIZE);
@@ -4459,7 +4454,7 @@ int  wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         initialCounter[AES_BLOCK_SIZE - 1] = 1;
     }
     else {
-        GHASH(&aes->gcm, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
+        GHASH(aes, NULL, 0, iv, ivSz, initialCounter, AES_BLOCK_SIZE);
     }
     XMEMCPY(ctr, initialCounter, AES_BLOCK_SIZE);
 
@@ -4469,7 +4464,7 @@ int  wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         byte Tprime[AES_BLOCK_SIZE];
         byte EKY0[AES_BLOCK_SIZE];
 
-        GHASH(&aes->gcm, authIn, authInSz, in, sz, Tprime, sizeof(Tprime));
+        GHASH(aes, authIn, authInSz, in, sz, Tprime, sizeof(Tprime));
         wc_AesEncrypt(aes, ctr, EKY0);
         xorbuf(Tprime, EKY0, sizeof(Tprime));
 
@@ -4528,7 +4523,7 @@ int  wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 #define GHASH_ONE_BLOCK(aes, block)                     \
     do {                                                \
         xorbuf(AES_TAG(aes), block, AES_BLOCK_SIZE);    \
-        GMULT(AES_TAG(aes), aes->gcm.H);                \
+        GMULT(AES_TAG(aes), aes->H);                    \
     }                                                   \
     while (0)
 
@@ -4643,7 +4638,7 @@ static void GHASH_UPDATE(Aes* aes, const byte* a, word32 aSz, const byte* c,
                 sz = cSz;
             }
             XMEMCPY(AES_LASTGBLOCK(aes) + aes->cOver, c, sz);
-            /* Update count of unused encrypted counter. */
+            /* Update count of unsed encrypted counter. */
             aes->cOver += sz;
             if (aes->cOver == AES_BLOCK_SIZE) {
                 /* We have filled up the block and can process. */
@@ -4721,13 +4716,13 @@ static void AesGcmInit_C(Aes* aes, const byte* iv, word32 ivSz)
     else {
         /* Counter is GHASH of IV. */
     #ifdef OPENSSL_EXTRA
-        word32 aadTemp = aes->gcm.aadLen;
-        aes->gcm.aadLen = 0;
+        word32 aadTemp = aes->aadLen;
+        aes->aadLen = 0;
     #endif
-        GHASH(&aes->gcm, NULL, 0, iv, ivSz, counter, AES_BLOCK_SIZE);
-        GMULT(counter, aes->gcm.H);
+        GHASH(aes, NULL, 0, iv, ivSz, counter, AES_BLOCK_SIZE);
+        GMULT(counter, aes->H);
     #ifdef OPENSSL_EXTRA
-        aes->gcm.aadLen = aadTemp;
+        aes->aadLen = aadTemp;
     #endif
     }
 
@@ -4816,7 +4811,7 @@ static void AesGcmFinal_C(Aes* aes, byte* authTag, word32 authTagSz)
     xorbuf(authTag, AES_INITCTR(aes), authTagSz);
 #ifdef OPENSSL_EXTRA
     /* store AAD size for next call */
-    aes->gcm.aadLen = aes->aSz;
+    aes->aadLen = aes->aSz;
 #endif
     /* Zeroize last block to protect sensitive data. */
     ForceZero(AES_LASTBLOCK(aes), AES_BLOCK_SIZE);
@@ -4977,7 +4972,7 @@ int wc_AesGcmEncryptUpdate(Aes* aes, byte* out, const byte* in, word32 sz,
     if (ret == 0) {
         /* Encrypt the plaintext. */
         AesGcmCryptUpdate_C(aes, out, in, sz);
-        /* Update the authentication tag with any authentication data and the
+        /* Update the authenication tag with any authentication data and the
          * new cipher text. */
         GHASH_UPDATE(aes, authIn, authInSz, out, sz);
     }
@@ -5086,7 +5081,7 @@ int wc_AesGcmDecryptUpdate(Aes* aes, byte* out, const byte* in, word32 sz,
 
     if (ret == 0) {
         /* Decrypt with AAD and/or cipher text. */
-        /* Update the authentication tag with any authentication data and
+        /* Update the authenication tag with any authentication data and
          * cipher text. */
         GHASH_UPDATE(aes, authIn, authInSz, in, sz);
         /* Decrypt the cipher text. */
@@ -5406,10 +5401,10 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
         aes->gcmKeySet = 1;
 #endif
 
-        wc_AesEncrypt(aes, iv, aes->gcm.H);
+        wc_AesEncrypt(aes, iv, aes->H);
     #if defined(__aarch64__)
         {
-            word32* pt = (word32*)aes->gcm.H;
+            word32* pt = (word32*)aes->H;
             __asm__ volatile (
                 "LD1 {v0.16b}, [%[h]] \n"
                 "RBIT v0.16b, v0.16b \n"
@@ -5421,7 +5416,7 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
         }
     #else
         {
-            word32* pt = (word32*)aes->gcm.H;
+            word32* pt = (word32*)aes->H;
             __asm__ volatile (
                 "VLD1.32 {q0}, [%[h]] \n"
                 "VREV64.8 q0, q0 \n"
@@ -5967,15 +5962,15 @@ static WC_INLINE void RIGHTSHIFTX(byte* x)
     x[0] ^= borrow;
 }
 
-void GenerateM0(Gcm* gcm)
+static void GenerateM0(Aes* aes)
 {
     int i;
-    byte (*m)[AES_BLOCK_SIZE] = gcm->M0;
+    byte (*m)[AES_BLOCK_SIZE] = aes->M0;
 
     /* 0 times -> 0x0 */
     XMEMSET(m[0x0], 0, AES_BLOCK_SIZE);
     /* 1 times -> 0x8 */
-    XMEMCPY(m[0x8], gcm->H, AES_BLOCK_SIZE);
+    XMEMCPY(m[0x8], aes->H, AES_BLOCK_SIZE);
     /* 2 times -> 0x4 */
     XMEMCPY(m[0x4], m[0x8], AES_BLOCK_SIZE);
     RIGHTSHIFTX(m[0x4]);
@@ -6015,7 +6010,7 @@ void GenerateM0(Gcm* gcm)
     xorbuf (m[0xf], m[0x7], AES_BLOCK_SIZE);
 
     for (i = 0; i < 16; i++) {
-        word32* m32 = (word32*)gcm->M0[i];
+        word32* m32 = (word32*)aes->M0[i];
         m32[0] = ByteReverseWord32(m32[0]);
         m32[1] = ByteReverseWord32(m32[1]);
         m32[2] = ByteReverseWord32(m32[2]);
@@ -6040,9 +6035,9 @@ int wc_AesGcmSetKey(Aes* aes, const byte* key, word32 len)
     ret = wc_AesSetKey(aes, key, len, iv, AES_ENCRYPTION);
     
     if (ret == 0) {
-        AES_ECB_encrypt(iv, aes->gcm.H, AES_BLOCK_SIZE,
+        AES_ECB_encrypt(iv, aes->H, AES_BLOCK_SIZE,
             (const unsigned char*)aes->key, aes->rounds);
-        GenerateM0(&aes->gcm);
+        GenerateM0(aes);
     }
 
     return ret;
@@ -6094,13 +6089,13 @@ static void gcm_ghash_arm32(Aes* aes, const byte* a, word32 aSz, const byte* c,
         blocks = aSz / AES_BLOCK_SIZE;
         partial = aSz % AES_BLOCK_SIZE;
         if (blocks > 0) {
-            GCM_gmult_len(x, aes->gcm.M0, a, blocks * AES_BLOCK_SIZE);
+            GCM_gmult_len(x, aes->M0, a, blocks * AES_BLOCK_SIZE);
             a += blocks * AES_BLOCK_SIZE;
         }
         if (partial != 0) {
             XMEMSET(scratch, 0, AES_BLOCK_SIZE);
             XMEMCPY(scratch, a, partial);
-            GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+            GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
         }
     }
 
@@ -6109,20 +6104,20 @@ static void gcm_ghash_arm32(Aes* aes, const byte* a, word32 aSz, const byte* c,
         blocks = cSz / AES_BLOCK_SIZE;
         partial = cSz % AES_BLOCK_SIZE;
         if (blocks > 0) {
-            GCM_gmult_len(x, aes->gcm.M0, c, blocks * AES_BLOCK_SIZE);
+            GCM_gmult_len(x, aes->M0, c, blocks * AES_BLOCK_SIZE);
             c += blocks * AES_BLOCK_SIZE;
         }
         if (partial != 0) {
             XMEMSET(scratch, 0, AES_BLOCK_SIZE);
             XMEMCPY(scratch, c, partial);
-            GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+            GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
         }
     }
 
     /* Hash in the lengths of A and C in bits */
     FlattenSzInBits(&scratch[0], aSz);
     FlattenSzInBits(&scratch[8], cSz);
-    GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+    GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
 
     /* Copy the result into s. */
     XMEMCPY(s, x, sSz);
@@ -6173,13 +6168,13 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         blocks = authInSz / AES_BLOCK_SIZE;
         partial = authInSz % AES_BLOCK_SIZE;
         if (blocks > 0) {
-            GCM_gmult_len(x, aes->gcm.M0, authIn, blocks * AES_BLOCK_SIZE);
+            GCM_gmult_len(x, aes->M0, authIn, blocks * AES_BLOCK_SIZE);
             authIn += blocks * AES_BLOCK_SIZE;
         }
         if (partial != 0) {
             XMEMSET(scratch, 0, AES_BLOCK_SIZE);
             XMEMCPY(scratch, authIn, partial);
-            GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+            GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
         }
     }
 
@@ -6189,7 +6184,7 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     if (blocks > 0) {
         AES_GCM_encrypt(in, out, blocks * AES_BLOCK_SIZE,
             (const unsigned char*)aes->key, aes->rounds, counter);
-        GCM_gmult_len(x, aes->gcm.M0, out, blocks * AES_BLOCK_SIZE);
+        GCM_gmult_len(x, aes->M0, out, blocks * AES_BLOCK_SIZE);
         in += blocks * AES_BLOCK_SIZE;
         out += blocks * AES_BLOCK_SIZE;
     }
@@ -6202,14 +6197,14 @@ int wc_AesGcmEncrypt(Aes* aes, byte* out, const byte* in, word32 sz,
 
         XMEMSET(scratch, 0, AES_BLOCK_SIZE);
         XMEMCPY(scratch, out, partial);
-        GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+        GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
     }
 
     /* Hash in the lengths of A and C in bits */
     XMEMSET(scratch, 0, AES_BLOCK_SIZE);
     FlattenSzInBits(&scratch[0], authInSz);
     FlattenSzInBits(&scratch[8], sz);
-    GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+    GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
     if (authTagSz > AES_BLOCK_SIZE) {
         XMEMCPY(authTag, x, AES_BLOCK_SIZE);
     }
@@ -6261,13 +6256,13 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
         blocks = authInSz / AES_BLOCK_SIZE;
         partial = authInSz % AES_BLOCK_SIZE;
         if (blocks > 0) {
-            GCM_gmult_len(x, aes->gcm.M0, authIn, blocks * AES_BLOCK_SIZE);
+            GCM_gmult_len(x, aes->M0, authIn, blocks * AES_BLOCK_SIZE);
             authIn += blocks * AES_BLOCK_SIZE;
         }
         if (partial != 0) {
             XMEMSET(scratch, 0, AES_BLOCK_SIZE);
             XMEMCPY(scratch, authIn, partial);
-            GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+            GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
         }
     }
 
@@ -6275,7 +6270,7 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     partial = sz % AES_BLOCK_SIZE;
     /* do as many blocks as possible */
     if (blocks > 0) {
-        GCM_gmult_len(x, aes->gcm.M0, in, blocks * AES_BLOCK_SIZE);
+        GCM_gmult_len(x, aes->M0, in, blocks * AES_BLOCK_SIZE);
 
         AES_GCM_encrypt(in, out, blocks * AES_BLOCK_SIZE,
             (const unsigned char*)aes->key, aes->rounds, counter);
@@ -6285,7 +6280,7 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     if (partial != 0) {
         XMEMSET(scratch, 0, AES_BLOCK_SIZE);
         XMEMCPY(scratch, in, partial);
-        GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+        GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
 
         AES_GCM_encrypt(in, scratch, AES_BLOCK_SIZE,
             (const unsigned char*)aes->key, aes->rounds, counter);
@@ -6295,7 +6290,7 @@ int wc_AesGcmDecrypt(Aes* aes, byte* out, const byte* in, word32 sz,
     XMEMSET(scratch, 0, AES_BLOCK_SIZE);
     FlattenSzInBits(&scratch[0], authInSz);
     FlattenSzInBits(&scratch[8], sz);
-    GCM_gmult_len(x, aes->gcm.M0, scratch, AES_BLOCK_SIZE);
+    GCM_gmult_len(x, aes->M0, scratch, AES_BLOCK_SIZE);
     AES_ECB_encrypt(initialCounter, scratch, AES_BLOCK_SIZE,
         (const unsigned char*)aes->key, aes->rounds);
     xorbuf(x, scratch, authTagSz);

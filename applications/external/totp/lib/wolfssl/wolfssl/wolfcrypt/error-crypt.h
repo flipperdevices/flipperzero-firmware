@@ -33,6 +33,11 @@ the error status.
 
 #include <wolfssl/wolfcrypt/types.h>
 
+#if defined(HAVE_FIPS) && \
+    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+    #include <cyassl/ctaocrypt/error-crypt.h>
+#endif /* HAVE_FIPS V1 */
+
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -255,10 +260,7 @@ enum {
     ASN_DEPTH_E         = -296,  /* Invalid ASN.1 - depth check */
     ASN_LEN_E           = -297,  /* ASN.1 length invalid */
 
-    SM4_GCM_AUTH_E      = -298,  /* SM4-GCM Authentication check failure */
-    SM4_CCM_AUTH_E      = -299,  /* SM4-CCM Authentication check failure */
-
-    WC_LAST_E           = -299,  /* Update this to indicate last error */
+    WC_LAST_E           = -297,  /* Update this to indicate last error */
     MIN_CODE_E          = -300   /* errors -101 - -299 */
 
     /* add new companion error id strings for any new error codes

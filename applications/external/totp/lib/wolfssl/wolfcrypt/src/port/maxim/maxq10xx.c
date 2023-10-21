@@ -23,7 +23,7 @@
     #include <config.h>
 #endif
 
-#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/settings.h>
 
 #if defined(WOLFSSL_MAXQ1065) ||  defined(WOLFSSL_MAXQ108X)
 
@@ -52,7 +52,7 @@
 #ifdef MAXQ_DEBUG
 void dbg_dumphex(const char *identifier, const uint8_t* pdata, uint32_t plen);
 #else
-#define dbg_dumphex(identifier, pdata, plen) WC_DO_NOTHING
+#define dbg_dumphex(identifier, pdata, plen)
 #endif /* MAXQ_DEBUG */
 
 #if defined(USE_WINDOWS_API)

@@ -44,18 +44,19 @@ int silabs_ecc_verify_hash (const byte* sig, word32 siglen,
                             int* stat, ecc_key* key);
 
 
+
 int silabs_ecc_make_key(ecc_key* key, int keysize);
 
-int silabs_ecc_import(ecc_key* key, word32 keysize, int pub, int priv);
-int silabs_ecc_export_public(ecc_key* key, sl_se_key_descriptor_t* seKey);
+int silabs_ecc_import(ecc_key* key, word32 keysize);
+
+int silabs_ecc_import_private(ecc_key* key, word32 keysize);
+
+int silabs_ecc_sig_to_rs(ecc_key* key, word32 keySz);
+
+int silabs_ecc_import_private_raw(ecc_key* key, word32 keySz, const char* d, int encType);
 
 int silabs_ecc_shared_secret(ecc_key* private_key, ecc_key* public_key,
                              byte* out, word32* outlen);
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-int silabs_ecc_load_vault(ecc_key* key);
-#endif
-
 
 #endif /* WOLFSSL_SILABS_SE_ACCEL */
 

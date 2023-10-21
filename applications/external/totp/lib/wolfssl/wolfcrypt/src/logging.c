@@ -127,7 +127,6 @@ THREAD_LS_T void *StackSizeCheck_stackOffsetPointer = 0;
 /* Set these to default values initially. */
 static wolfSSL_Logging_cb log_function = NULL;
 static int loggingEnabled = 0;
-THREAD_LS_T const char* log_prefix = NULL;
 
 #if defined(WOLFSSL_APACHE_MYNEWT)
 #include "log/log.h"
@@ -184,15 +183,6 @@ void wolfSSL_Debugging_OFF(void)
 {
 #ifdef DEBUG_WOLFSSL
     loggingEnabled = 0;
-#endif
-}
-
-WOLFSSL_API void wolfSSL_SetLoggingPrefix(const char* prefix)
-{
-#ifdef DEBUG_WOLFSSL
-    log_prefix = prefix;
-#else
-    (void)prefix;
 #endif
 }
 
@@ -326,17 +316,14 @@ static void wolfssl_log(const int logLevel, const char *const logMessage)
       defined(HAVE_STACK_SIZE_VERBOSE) && defined(HAVE_STACK_SIZE_VERBOSE_LOG)
         STACK_SIZE_CHECKPOINT_MSG(logMessage);
 #else
-        if (log_prefix != NULL)
-            fprintf(stderr, "[%s]: %s\n", log_prefix, logMessage);
-        else
-            fprintf(stderr, "%s\n", logMessage);
+        fprintf(stderr, "%s\n", logMessage);
 #endif
     }
 }
 
 #ifndef WOLFSSL_DEBUG_ERRORS_ONLY
 
-#if defined(XVSNPRINTF) && !defined(NO_WOLFSSL_MSG_EX)
+#if !defined(_WIN32) && defined(XVSNPRINTF) && !defined(NO_WOLFSSL_MSG_EX)
 #include <stdarg.h> /* for var args */
 #ifndef WOLFSSL_MSG_EX_BUF_SZ
 #define WOLFSSL_MSG_EX_BUF_SZ 100
@@ -490,7 +477,7 @@ static int get_abs_idx(int relative_idx)
         return (int)((wc_errors.head_idx + wc_errors.count - 1)
                       % ERROR_QUEUE_MAX);
     }
-    return (int)((wc_errors.head_idx + (size_t)relative_idx) % ERROR_QUEUE_MAX);
+    return (int)((wc_errors.head_idx + relative_idx) % ERROR_QUEUE_MAX);
 }
 
 /**
@@ -539,13 +526,13 @@ static int pass_entry(struct wc_error_entry *entry,
 static void set_entry(struct wc_error_entry *entry, int error,
                       const char *file, const char *reason, int line)
 {
-    size_t sz;
+    int sz;
 
     XMEMSET(entry, 0, sizeof(struct wc_error_entry));
     entry->err = error;
 
     entry->line  = line;
-    sz = XSTRLEN(reason);
+    sz = (int)XSTRLEN(reason);
     if (sz > WOLFSSL_MAX_ERROR_SZ - 1) {
         sz = WOLFSSL_MAX_ERROR_SZ - 1;
     }
@@ -554,7 +541,7 @@ static void set_entry(struct wc_error_entry *entry, int error,
         entry->reason[WOLFSSL_MAX_ERROR_SZ - 1] = '\0';
     }
 
-    sz = XSTRLEN(file);
+    sz = (int)XSTRLEN(file);
     if (sz > WOLFSSL_MAX_ERROR_SZ - 1) {
         sz = WOLFSSL_MAX_ERROR_SZ - 1;
     }
@@ -641,7 +628,7 @@ void wc_RemoveErrorNode(int relative_idx)
         if (abs_idx >= (int)wc_errors.head_idx) {
             /* removed entry sits "above" head (or is head),
              * move entries below it "up" */
-            move_count = (size_t)abs_idx - wc_errors.head_idx;
+            move_count = (abs_idx - (int)wc_errors.head_idx);
             if (move_count > 0) {
                 XMEMMOVE(&wc_errors.entries[wc_errors.head_idx + 1],
                          &wc_errors.entries[wc_errors.head_idx],
@@ -655,7 +642,7 @@ void wc_RemoveErrorNode(int relative_idx)
              * move entries above it "down" */
             int last_idx = get_abs_idx(-1);
             if (last_idx >= abs_idx) {  /* this SHOULD always be true */
-                move_count = (size_t)(last_idx - abs_idx);
+                move_count = (last_idx - abs_idx);
                 if (move_count > 0) {
                     XMEMMOVE(&wc_errors.entries[abs_idx],
                              &wc_errors.entries[abs_idx + 1],
@@ -738,7 +725,7 @@ unsigned long wc_PeekErrorNodeLineData(const char **file, int *line,
 
 /**
  * Get the error value at the HEAD of the ERR queue or 0 if the queue
- * is empty. The HEAD entry is removed by this call.
+ * is emtpy. The HEAD entry is removed by this call.
  */
 unsigned long wc_GetErrorNodeErr(void)
 {
@@ -759,7 +746,7 @@ unsigned long wc_GetErrorNodeErr(void)
             wc_ClearErrorNodes();
         }
     }
-    return (unsigned long)ret;
+    return ret;
 }
 
 #if !defined(NO_FILESYSTEM) && !defined(NO_STDIO_FILESYSTEM)
@@ -1508,7 +1495,7 @@ void WOLFSSL_ERROR(int error)
                     "wolfSSL error occurred, error = %d line:%u file:%s",
                     error, line, file);
 
-            if (wc_AddErrorNode(error, (int)line, buffer, (char*)file) != 0) {
+            if (wc_AddErrorNode(error, line, buffer, (char*)file) != 0) {
                 WOLFSSL_MSG("Error creating logging node");
                 /* with void function there is no return here, continue on
                  * to unlock mutex and log what buffer was created. */

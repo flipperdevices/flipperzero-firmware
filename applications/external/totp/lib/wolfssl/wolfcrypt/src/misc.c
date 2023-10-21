@@ -104,13 +104,13 @@ masking and clearing memory logic.
 
     WC_MISC_STATIC WC_INLINE word32 rotlFixed(word32 x, word32 y)
     {
-        return (x << y) | (x >> (sizeof(x) * 8 - y));
+        return (x << y) | (x >> (sizeof(y) * 8 - y));
     }
 
 /* This routine performs a right circular arithmetic shift of <x> by <y> value. */
     WC_MISC_STATIC WC_INLINE word32 rotrFixed(word32 x, word32 y)
     {
-        return (x >> y) | (x << (sizeof(x) * 8 - y));
+        return (x >> y) | (x << (sizeof(y) * 8 - y));
     }
 
 #endif
@@ -120,14 +120,14 @@ masking and clearing memory logic.
 /* This routine performs a left circular arithmetic shift of <x> by <y> value */
 WC_MISC_STATIC WC_INLINE word16 rotlFixed16(word16 x, word16 y)
 {
-    return (x << y) | (x >> (sizeof(x) * 8 - y));
+    return (x << y) | (x >> (sizeof(y) * 8 - y));
 }
 
 
 /* This routine performs a right circular arithmetic shift of <x> by <y> value */
 WC_MISC_STATIC WC_INLINE word16 rotrFixed16(word16 x, word16 y)
 {
-    return (x >> y) | (x << (sizeof(x) * 8 - y));
+    return (x >> y) | (x << (sizeof(y) * 8 - y));
 }
 
 #endif /* WC_RC2 */
@@ -470,15 +470,6 @@ WC_MISC_STATIC WC_INLINE void ato32(const byte* c, word32* wc_u32)
               ((word32)c[1] << 16) |
               ((word32)c[2] << 8) |
                (word32)c[3];
-}
-
-/* convert opaque to 32 bit integer. Interpret as little endian. */
-WC_MISC_STATIC WC_INLINE void ato32le(const byte* c, word32* wc_u32)
-{
-    *wc_u32 =  (word32)c[0] |
-              ((word32)c[1] << 8) |
-              ((word32)c[2] << 16) |
-              ((word32)c[3] << 24);
 }
 
 

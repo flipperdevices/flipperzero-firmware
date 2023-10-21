@@ -27,7 +27,7 @@
     #include <config.h>
 #endif
 
-#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/settings.h>
 
 #if defined(WOLFSSL_TI_CRYPT) ||  defined(WOLFSSL_TI_HASH)
 
@@ -37,8 +37,8 @@ int wolfSSL_TI_CCMInit(void) ;
 void wolfSSL_TI_lockCCM(void) ;
 void wolfSSL_TI_unlockCCM(void) ;
 #else
-#define wolfSSL_TI_lockCCM() WC_DO_NOTHING
-#define wolfSSL_TI_unlockCCM() WC_DO_NOTHING
+#define wolfSSL_TI_lockCCM()
+#define wolfSSL_TI_unlockCCM()
 #endif
 
 #endif

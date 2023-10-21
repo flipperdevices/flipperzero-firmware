@@ -1,6 +1,7 @@
-# flipper-xremote
-
-Advanced IR Remote App for Flipper Device
+<p align="center">Advanced IR Remote App for Flipper Device</p>
+<p align="center">
+    <img src="https://github.com/kala13x/flipper-xremote/blob/main/screens/flipperzero.png" alt="XRemote">
+</p>
 
 ## Idea
 
@@ -55,6 +56,26 @@ Button name | Description
 `Pause`     | Pause
 `Play`      | Play
 `Stop`      | Stop
+
+
+## Installation options
+
+1. Install the latest stable version directly from the [application catalog](https://lab.flipper.net/apps/flipper_xremote).
+
+2. Manually install using `.fap` file:  
+   - Download the `.fap` file from the [Releases](https://github.com/kala13x/flipper-xremote/releases) section of this repository.
+   - Write the `.fap` file to an SD card using [qFlipper](https://docs.flipper.net/qflipper) or any your preferred SD card writer.
+
+## Build options
+
+1. If you already have the flipper zero firmware cloned on the Linux:
+   - Connect your Flipper device to your computer using a USB cable.
+   - Use deploy script from this repository to build and run the application on the device:
+
+    ```bash
+    ./deploy.sh --fw=/path/to/the/firmware
+    ```
+2. If you don't have the firmware or the Linux please refer to the [official documentation](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md) for build instructions.
 
 ## Progress
 

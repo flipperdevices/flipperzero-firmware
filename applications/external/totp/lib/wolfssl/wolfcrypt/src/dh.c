@@ -1021,7 +1021,7 @@ static int _ffc_pairwise_consistency_test(DhKey* key,
 /* if not using fixed points use DiscreteLogWorkFactor function for unusual size
    otherwise round up on size needed */
 #ifndef WOLFSSL_DH_CONST
-    #define WOLFSSL_DH_ROUND(x) WC_DO_NOTHING
+    #define WOLFSSL_DH_ROUND(x)
 #else
     #define WOLFSSL_DH_ROUND(x) \
         do {                    \
@@ -2886,11 +2886,6 @@ int wc_DhGenerateParams(WC_RNG *rng, int modSz, DhKey *dh)
             ret = 0;
     unsigned char *buf = NULL;
 
-#if !defined(WOLFSSL_SMALL_STACK) || defined(WOLFSSL_NO_MALLOC)
-    XMEMSET(tmp, 0, sizeof(tmp));
-    XMEMSET(tmp2, 0, sizeof(tmp2));
-#endif
-
     if (rng == NULL || dh == NULL)
         ret = BAD_FUNC_ARG;
 
@@ -2939,22 +2934,9 @@ int wc_DhGenerateParams(WC_RNG *rng, int modSz, DhKey *dh)
 
 #if defined(WOLFSSL_SMALL_STACK) && !defined(WOLFSSL_NO_MALLOC)
     if (ret == 0) {
-        if ((tmp = (mp_int *)XMALLOC(sizeof(*tmp), NULL,
-                DYNAMIC_TYPE_WOLF_BIGINT)) == NULL) {
+        if (((tmp = (mp_int *)XMALLOC(sizeof(*tmp), NULL, DYNAMIC_TYPE_WOLF_BIGINT)) == NULL) ||
+            ((tmp2 = (mp_int *)XMALLOC(sizeof(*tmp2), NULL, DYNAMIC_TYPE_WOLF_BIGINT)) == NULL))
             ret = MEMORY_E;
-        }
-        else {
-            XMEMSET(tmp, 0, sizeof(*tmp));
-        }
-    }
-    if (ret == 0) {
-        if ((tmp2 = (mp_int *)XMALLOC(sizeof(*tmp2), NULL,
-                DYNAMIC_TYPE_WOLF_BIGINT)) == NULL) {
-            ret = MEMORY_E;
-        }
-        else {
-            XMEMSET(tmp2, 0, sizeof(*tmp2));
-        }
     }
 #endif
 

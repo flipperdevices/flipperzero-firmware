@@ -205,7 +205,7 @@ int wolfEventQueue_Poll(WOLF_EVENT_QUEUE* queue, void* context_filter,
     }
 #endif
 
-    /* iterate event queue */
+    /* iterrate event queue */
     for (event = queue->head; event != NULL; event = event->next)
     {
         /* optional filter based on context */

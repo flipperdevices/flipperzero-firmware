@@ -27,5 +27,11 @@
 #include <wolfssl/wolfcrypt/port/kcapi/wc_kcapi.h>
 #include <wolfssl/wolfcrypt/hmac.h>
 
+#if defined(HAVE_FIPS) && \
+                        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+int HmacInit(Hmac* hmac, void* heap, int devId);
+void HmacFree(Hmac* hmac);
+#endif
+
 #endif /* WOLF_CRYPT_KCAPI_HMAC_H  */
 

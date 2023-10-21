@@ -23,7 +23,7 @@
     #include <config.h>
 #endif
 
-#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/settings.h>
 
 #ifdef HAVE_INTEL_QA_SYNC
 
@@ -227,7 +227,7 @@ static int IntelQaGetCyInstanceCount(void);
 #ifdef QAT_DEBUG
     #define QLOG(...) do { printf(__VA_ARGS__); } while (0)
 #else
-    #define QLOG(...) WC_DO_NOTHING
+    #define QLOG(...)
 #endif
 
 

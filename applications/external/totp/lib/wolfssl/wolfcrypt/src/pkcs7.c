@@ -2374,7 +2374,6 @@ static int PKCS7_EncodeSigned(PKCS7* pkcs7, ESD* esd,
     word32 totalSz, total2Sz;
     int idx = 0, ret = 0;
     int digEncAlgoId, digEncAlgoType;
-    int keyIdSize;
     byte* flatSignedAttribs = NULL;
     word32 flatSignedAttribsSz = 0;
 
@@ -2392,13 +2391,6 @@ static int PKCS7_EncodeSigned(PKCS7* pkcs7, ESD* esd,
         hashBuf == NULL) {
         return BAD_FUNC_ARG;
     }
-
-#if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
-    keyIdSize = wc_HashGetDigestSize(wc_HashTypeConvert(HashIdAlg(
-           pkcs7->publicKeyOID)));
-#else
-    keyIdSize = KEYID_SIZE;
-#endif
 
 #ifdef WOLFSSL_SMALL_STACK
     signedDataOid = (byte *)XMALLOC(MAX_OID_SZ, pkcs7->heap, DYNAMIC_TYPE_TMP_BUFFER);
@@ -2493,10 +2485,11 @@ static int PKCS7_EncodeSigned(PKCS7* pkcs7, ESD* esd,
 
     } else if (pkcs7->sidType == CMS_SKID) {
         /* SubjectKeyIdentifier */
-        esd->issuerSKIDSz = SetOctetString(keyIdSize, esd->issuerSKID);
-        esd->issuerSKIDSeqSz = SetExplicit(0, esd->issuerSKIDSz + keyIdSize,
+        esd->issuerSKIDSz = SetOctetString(KEYID_SIZE, esd->issuerSKID);
+        esd->issuerSKIDSeqSz = SetExplicit(0, esd->issuerSKIDSz + KEYID_SIZE,
                                            esd->issuerSKIDSeq);
-        signerInfoSz += (esd->issuerSKIDSz + esd->issuerSKIDSeqSz + keyIdSize);
+        signerInfoSz += (esd->issuerSKIDSz + esd->issuerSKIDSeqSz +
+                         KEYID_SIZE);
 
         /* version MUST be 3 */
         esd->signerVersionSz = SetMyVersion(3, esd->signerVersion, 0);
@@ -2730,8 +2723,8 @@ static int PKCS7_EncodeSigned(PKCS7* pkcs7, ESD* esd,
         idx += esd->issuerSKIDSeqSz;
         XMEMCPY(output2 + idx, esd->issuerSKID, esd->issuerSKIDSz);
         idx += esd->issuerSKIDSz;
-        XMEMCPY(output2 + idx, pkcs7->issuerSubjKeyId, keyIdSize);
-        idx += keyIdSize;
+        XMEMCPY(output2 + idx, pkcs7->issuerSubjKeyId, KEYID_SIZE);
+        idx += KEYID_SIZE;
     } else if (pkcs7->sidType == DEGENERATE_SID) {
         /* no signer infos in degenerate case */
     } else {
@@ -5771,30 +5764,29 @@ static int wc_PKCS7_KariParseRecipCert(WC_PKCS7_KARI* kari, const byte* cert,
     int ret;
     word32 idx;
 
-    if (kari == NULL || kari->decoded == NULL) {
+    if (kari == NULL || kari->decoded == NULL ||
+        cert == NULL || certSz == 0)
+        return BAD_FUNC_ARG;
+
+    /* decode certificate */
+    InitDecodedCert(kari->decoded, (byte*)cert, certSz, kari->heap);
+    kari->decodedInit = 1;
+    ret = ParseCert(kari->decoded, CA_TYPE, NO_VERIFY, 0);
+    if (ret < 0)
+        return ret;
+
+    /* only supports ECDSA for now */
+    if (kari->decoded->keyOID != ECDSAk) {
+        WOLFSSL_MSG("CMS KARI only supports ECDSA key types");
         return BAD_FUNC_ARG;
     }
 
-    /* decode certificate */
-    if (cert != NULL) {
-        InitDecodedCert(kari->decoded, (byte*)cert, certSz, kari->heap);
-        kari->decodedInit = 1;
-        ret = ParseCert(kari->decoded, CA_TYPE, NO_VERIFY, 0);
-        if (ret < 0)
-            return ret;
-
-        /* only supports ECDSA for now */
-        if (kari->decoded->keyOID != ECDSAk) {
-            WOLFSSL_MSG("CMS KARI only supports ECDSA key types");
-            return BAD_FUNC_ARG;
-        }
-
-        /* make sure subject key id was read from cert */
-        if (kari->decoded->extSubjKeyIdSet == 0) {
-            WOLFSSL_MSG("Failed to read subject key ID from recipient cert");
-            return BAD_FUNC_ARG;
-        }
+    /* make sure subject key id was read from cert */
+    if (kari->decoded->extSubjKeyIdSet == 0) {
+        WOLFSSL_MSG("Failed to read subject key ID from recipient cert");
+        return BAD_FUNC_ARG;
     }
+
     ret = wc_ecc_init_ex(kari->recipKey, kari->heap, kari->devId);
     if (ret != 0)
         return ret;
@@ -5803,10 +5795,6 @@ static int wc_PKCS7_KariParseRecipCert(WC_PKCS7_KARI* kari, const byte* cert,
 
     /* get recip public key */
     if (kari->direction == WC_PKCS7_ENCODE) {
-        if (cert == NULL) {
-            WOLFSSL_MSG("Error recipient cert can not be null with encode");
-            return BAD_FUNC_ARG;
-        }
 
         idx = 0;
         ret = wc_EccPublicKeyDecode(kari->decoded->publicKey, &idx,
@@ -6130,7 +6118,6 @@ int wc_PKCS7_AddRecipient_KARI(PKCS7* pkcs7, const byte* cert, word32 certSz,
     int ret = 0;
     int keySz, direction = 0;
     int blockKeySz = 0;
-    int keyIdSize;
 
     /* ASN.1 layout */
     int totalSz = 0;
@@ -6180,13 +6167,6 @@ int wc_PKCS7_AddRecipient_KARI(PKCS7* pkcs7, const byte* cert, word32 certSz,
     }
 #else
     byte encryptedKey[MAX_ENCRYPTED_KEY_SZ];
-#endif
-
-#if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
-    keyIdSize = wc_HashGetDigestSize(wc_HashTypeConvert(HashIdAlg(
-           pkcs7->publicKeyOID)));
-#else
-    keyIdSize = KEYID_SIZE;
 #endif
 
     /* allocate and init memory for recipient */
@@ -6314,12 +6294,12 @@ int wc_PKCS7_AddRecipient_KARI(PKCS7* pkcs7, const byte* cert, word32 certSz,
     totalSz += (encryptedKeyOctetSz + encryptedKeySz);
 
     /* SubjectKeyIdentifier */
-    subjKeyIdOctetSz = SetOctetString(keyIdSize, subjKeyIdOctet);
-    totalSz += (subjKeyIdOctetSz + keyIdSize);
+    subjKeyIdOctetSz = SetOctetString(KEYID_SIZE, subjKeyIdOctet);
+    totalSz += (subjKeyIdOctetSz + KEYID_SIZE);
 
     /* RecipientKeyIdentifier IMPLICIT [0] */
     recipKeyIdSeqSz = SetImplicit(ASN_SEQUENCE, 0, subjKeyIdOctetSz +
-                                  keyIdSize, recipKeyIdSeq);
+                                  KEYID_SIZE, recipKeyIdSeq);
     totalSz += recipKeyIdSeqSz;
 
     /* RecipientEncryptedKey */
@@ -6443,8 +6423,8 @@ int wc_PKCS7_AddRecipient_KARI(PKCS7* pkcs7, const byte* cert, word32 certSz,
     XMEMCPY(recip->recip + idx, subjKeyIdOctet, subjKeyIdOctetSz);
     idx += subjKeyIdOctetSz;
     /* subject key id */
-    XMEMCPY(recip->recip + idx, kari->decoded->extSubjKeyId, keyIdSize);
-    idx += keyIdSize;
+    XMEMCPY(recip->recip + idx, kari->decoded->extSubjKeyId, KEYID_SIZE);
+    idx += KEYID_SIZE;
     XMEMCPY(recip->recip + idx, encryptedKeyOctet, encryptedKeyOctetSz);
     idx += encryptedKeyOctetSz;
     /* encrypted CEK */
@@ -6493,7 +6473,6 @@ int wc_PKCS7_AddRecipient_KTRI(PKCS7* pkcs7, const byte* cert, word32 certSz,
     WC_RNG rng;
     word32 idx = 0;
     word32 encryptedKeySz = 0;
-    int keyIdSize;
 
     int ret = 0, blockKeySz;
     int verSz = 0, issuerSz = 0, snSz = 0, keyEncAlgSz = 0;
@@ -6620,13 +6599,6 @@ int wc_PKCS7_AddRecipient_KTRI(PKCS7* pkcs7, const byte* cert, word32 certSz,
         return ret;
     }
 
-#if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
-    keyIdSize = wc_HashGetDigestSize(wc_HashTypeConvert(HashIdAlg(
-           decoded->signatureOID)));
-#else
-    keyIdSize = KEYID_SIZE;
-#endif
-
     if (sidType == CMS_ISSUER_AND_SERIAL_NUMBER) {
 
         /* version, must be 0 for IssuerAndSerialNumber */
@@ -6683,7 +6655,7 @@ int wc_PKCS7_AddRecipient_KTRI(PKCS7* pkcs7, const byte* cert, word32 certSz,
         verSz = SetMyVersion(2, ver, 0);
         recip->recipVersion = 2;
 
-        issuerSKIDSz = SetLength(keyIdSize, issuerSKID);
+        issuerSKIDSz = SetLength(KEYID_SIZE, issuerSKID);
     } else {
         FreeDecodedCert(decoded);
 #ifdef WOLFSSL_SMALL_STACK
@@ -6843,10 +6815,10 @@ int wc_PKCS7_AddRecipient_KTRI(PKCS7* pkcs7, const byte* cert, word32 certSz,
 
     } else {
         recipSeqSz = SetSequence(verSz + ASN_TAG_SZ + issuerSKIDSz +
-                                 keyIdSize + keyEncAlgSz + encKeyOctetStrSz +
+                                 KEYID_SIZE + keyEncAlgSz + encKeyOctetStrSz +
                                  encryptedKeySz, recipSeq);
 
-        if (recipSeqSz + verSz + ASN_TAG_SZ + issuerSKIDSz + keyIdSize +
+        if (recipSeqSz + verSz + ASN_TAG_SZ + issuerSKIDSz + KEYID_SIZE +
             keyEncAlgSz + encKeyOctetStrSz + encryptedKeySz > MAX_RECIP_SZ) {
             WOLFSSL_MSG("RecipientInfo output buffer too small");
             FreeDecodedCert(decoded);
@@ -6880,8 +6852,8 @@ int wc_PKCS7_AddRecipient_KTRI(PKCS7* pkcs7, const byte* cert, word32 certSz,
         idx += ASN_TAG_SZ;
         XMEMCPY(recip->recip + idx, issuerSKID, issuerSKIDSz);
         idx += issuerSKIDSz;
-        XMEMCPY(recip->recip + idx, pkcs7->issuerSubjKeyId, keyIdSize);
-        idx += keyIdSize;
+        XMEMCPY(recip->recip + idx, pkcs7->issuerSubjKeyId, KEYID_SIZE);
+        idx += KEYID_SIZE;
     }
     XMEMCPY(recip->recip + idx, keyAlgArray, keyEncAlgSz);
     idx += keyEncAlgSz;
@@ -8595,7 +8567,6 @@ static int wc_PKCS7_DecryptKtri(PKCS7* pkcs7, byte* in, word32 inSz,
 {
     int length, encryptedKeySz = 0, ret = 0;
     int keySz, version, sidType = 0;
-    int keyIdSize;
     word32 encOID = 0;
     word32 keyIdx;
     byte   issuerHash[KEYID_SIZE];
@@ -8620,13 +8591,6 @@ static int wc_PKCS7_DecryptKtri(PKCS7* pkcs7, byte* in, word32 inSz,
 #else
     mp_int serialNum[1];
     RsaKey privKey[1];
-#endif
-
-#if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
-    keyIdSize = wc_HashGetDigestSize(wc_HashTypeConvert(HashIdAlg(
-           pkcs7->publicKeyOID)));
-#else
-    keyIdSize = KEYID_SIZE;
 #endif
 
     switch (pkcs7->state) {
@@ -8716,12 +8680,11 @@ static int wc_PKCS7_DecryptKtri(PKCS7* pkcs7, byte* in, word32 inSz,
                 if (GetSequence(pkiMsg, idx, &length, pkiMsgSz) < 0)
                     return ASN_PARSE_E;
 
-                if (GetNameHash_ex(pkiMsg, idx, issuerHash, pkiMsgSz,
-                                   pkcs7->publicKeyOID) < 0)
+                if (GetNameHash(pkiMsg, idx, issuerHash, pkiMsgSz) < 0)
                     return ASN_PARSE_E;
 
                 /* if we found correct recipient, issuer hashes will match */
-                if (XMEMCMP(issuerHash, pkcs7->issuerHash, keyIdSize) == 0) {
+                if (XMEMCMP(issuerHash, pkcs7->issuerHash, KEYID_SIZE) == 0) {
                     *recipFound = 1;
                 }
 
@@ -8769,15 +8732,15 @@ static int wc_PKCS7_DecryptKtri(PKCS7* pkcs7, byte* in, word32 inSz,
                 if (GetLength(pkiMsg, idx, &length, pkiMsgSz) < 0)
                     return ASN_PARSE_E;
 
-                if ((word32)keyIdSize > pkiMsgSz - (*idx))
+                if (KEYID_SIZE > pkiMsgSz - (*idx))
                     return BUFFER_E;
 
                 /* if we found correct recipient, SKID will match */
                 if (XMEMCMP(pkiMsg + (*idx), pkcs7->issuerSubjKeyId,
-                            keyIdSize) == 0) {
+                            KEYID_SIZE) == 0) {
                     *recipFound = 1;
                 }
-                (*idx) += keyIdSize;
+                (*idx) += KEYID_SIZE;
             }
 
             if (GetAlgoId(pkiMsg, idx, &encOID, oidKeyType, pkiMsgSz) < 0)
@@ -9186,18 +9149,10 @@ static int wc_PKCS7_KariGetSubjectKeyIdentifier(WC_PKCS7_KARI* kari,
 {
     int length;
     byte tag;
-    int keyIdSize;
 
     if (kari == NULL || pkiMsg == NULL || idx == NULL || recipFound == NULL ||
             rid == NULL)
         return BAD_FUNC_ARG;
-
-#if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
-    keyIdSize = wc_HashGetDigestSize(wc_HashTypeConvert(HashIdAlg(
-           kari->decoded->signatureOID)));
-#else
-    keyIdSize = KEYID_SIZE;
-#endif
 
     /* remove RecipientKeyIdentifier IMPLICIT [0] */
     if (GetASNTag(pkiMsg, idx, &tag, pkiMsgSz) < 0) {
@@ -9223,14 +9178,14 @@ static int wc_PKCS7_KariGetSubjectKeyIdentifier(WC_PKCS7_KARI* kari,
     if (GetLength(pkiMsg, idx, &length, pkiMsgSz) < 0)
         return ASN_PARSE_E;
 
-    if (length != keyIdSize)
+    if (length != KEYID_SIZE)
         return ASN_PARSE_E;
 
-    XMEMCPY(rid, pkiMsg + (*idx), keyIdSize);
+    XMEMCPY(rid, pkiMsg + (*idx), KEYID_SIZE);
     (*idx) += length;
 
     /* subject key id should match if recipient found */
-    if (XMEMCMP(rid, kari->decoded->extSubjKeyId, keyIdSize) == 0) {
+    if (XMEMCMP(rid, kari->decoded->extSubjKeyId, KEYID_SIZE) == 0) {
         *recipFound = 1;
     }
 
@@ -9245,7 +9200,6 @@ static int wc_PKCS7_KariGetIssuerAndSerialNumber(WC_PKCS7_KARI* kari,
                         int* recipFound, byte* rid)
 {
     int length, ret;
-    int keyIdSize;
 #ifdef WOLFSSL_SMALL_STACK
     mp_int* serial;
     mp_int* recipSerial;
@@ -9258,31 +9212,15 @@ static int wc_PKCS7_KariGetIssuerAndSerialNumber(WC_PKCS7_KARI* kari,
         return BAD_FUNC_ARG;
     }
 
-#if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
-    keyIdSize = wc_HashGetDigestSize(wc_HashTypeConvert(HashIdAlg(
-           kari->decoded->signatureOID)));
-#else
-    keyIdSize = KEYID_SIZE;
-#endif
-
     /* remove IssuerAndSerialNumber */
     if (GetSequence(pkiMsg, idx, &length, pkiMsgSz) < 0)
         return ASN_PARSE_E;
 
-    if (GetNameHash_ex(pkiMsg, idx, rid, pkiMsgSz,
-                       kari->decoded->signatureOID) < 0) {
+    if (GetNameHash(pkiMsg, idx, rid, pkiMsgSz) < 0)
         return ASN_PARSE_E;
-    }
 
     /* if we found correct recipient, issuer hashes will match */
-    if (kari->decodedInit == 1) {
-        if (XMEMCMP(rid, kari->decoded->issuerHash, keyIdSize) == 0) {
-            *recipFound = 1;
-        }
-    }
-    else {
-        /* can not confirm recipient serial number with no cert provided */
-        WOLFSSL_MSG("No recipient cert loaded to match with CMS serial number");
+    if (XMEMCMP(rid, kari->decoded->issuerHash, KEYID_SIZE) == 0) {
         *recipFound = 1;
     }
 
@@ -9320,8 +9258,7 @@ static int wc_PKCS7_KariGetIssuerAndSerialNumber(WC_PKCS7_KARI* kari,
         return ret;
     }
 
-    if (kari->decodedInit == 1 &&
-            mp_cmp(recipSerial, serial) != MP_EQ) {
+    if (mp_cmp(recipSerial, serial) != MP_EQ) {
         mp_clear(serial);
         mp_clear(recipSerial);
         WOLFSSL_MSG("CMS serial number does not match recipient");
@@ -9939,7 +9876,6 @@ static int wc_PKCS7_DecryptKari(PKCS7* pkcs7, byte* in, word32 inSz,
     int ret, keySz;
     int encryptedKeySz;
     int direction = 0;
-    int keyIdSize;
     word32 keyAgreeOID, keyWrapOID;
     byte rid[KEYID_SIZE];
 
@@ -9957,16 +9893,11 @@ static int wc_PKCS7_DecryptKari(PKCS7* pkcs7, byte* in, word32 inSz,
 
     WOLFSSL_ENTER("wc_PKCS7_DecryptKari");
     if (pkcs7 == NULL || pkiMsg == NULL ||
+            ((pkcs7->singleCert == NULL || pkcs7->singleCertSz == 0) &&
+              pkcs7->wrapCEKCb == NULL) ||
         idx == NULL || decryptedKey == NULL || decryptedKeySz == NULL) {
         return BAD_FUNC_ARG;
     }
-
-#if defined(WOLFSSL_SM2) && defined(WOLFSSL_SM3)
-    keyIdSize = wc_HashGetDigestSize(wc_HashTypeConvert(HashIdAlg(
-           pkcs7->publicKeyOID)));
-#else
-    keyIdSize = KEYID_SIZE;
-#endif
 
     switch (pkcs7->state) {
         case WC_PKCS7_DECRYPT_KARI: {
@@ -9997,15 +9928,17 @@ static int wc_PKCS7_DecryptKari(PKCS7* pkcs7, byte* in, word32 inSz,
             encryptedKeySz = MAX_ENCRYPTED_KEY_SZ;
 
             /* parse cert and key */
-            ret = wc_PKCS7_KariParseRecipCert(kari, (byte*)pkcs7->singleCert,
-                                          pkcs7->singleCertSz, pkcs7->privateKey,
-                                          pkcs7->privateKeySz);
-            if (ret != 0) {
-                wc_PKCS7_KariFree(kari);
-            #ifdef WOLFSSL_SMALL_STACK
-                XFREE(encryptedKey, pkcs7->heap, DYNAMIC_TYPE_PKCS7);
-            #endif
-                return ret;
+            if (pkcs7->singleCert != NULL) {
+                ret = wc_PKCS7_KariParseRecipCert(kari, (byte*)pkcs7->singleCert,
+                                              pkcs7->singleCertSz, pkcs7->privateKey,
+                                              pkcs7->privateKeySz);
+                if (ret != 0) {
+                    wc_PKCS7_KariFree(kari);
+                #ifdef WOLFSSL_SMALL_STACK
+                    XFREE(encryptedKey, pkcs7->heap, DYNAMIC_TYPE_PKCS7);
+                #endif
+                    return ret;
+                }
             }
 
             /* remove OriginatorIdentifierOrKey */
@@ -10121,7 +10054,7 @@ static int wc_PKCS7_DecryptKari(PKCS7* pkcs7, byte* in, word32 inSz,
                 tmpKeySz = (word32)ret;
 
                 keySz = pkcs7->wrapCEKCb(pkcs7, encryptedKey, encryptedKeySz,
-                        rid, keyIdSize, tmpKeyDer, tmpKeySz,
+                        rid, KEYID_SIZE, tmpKeyDer, tmpKeySz,
                         decryptedKey, *decryptedKeySz,
                         keyWrapOID, (int)PKCS7_KARI, direction);
                 XFREE(tmpKeyDer, pkcs7->heap, DYNAMIC_TYPE_TMP_BUFFER);

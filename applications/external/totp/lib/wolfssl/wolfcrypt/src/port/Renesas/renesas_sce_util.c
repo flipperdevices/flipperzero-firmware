@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1335, USA
  */
-#include <wolfssl/wolfcrypt/types.h>
+#include <wolfssl/wolfcrypt/settings.h>
 
 #if defined(WOLFSSL_RENESAS_SCEPROTECT) || \
     defined(WOLFSSL_RENESAS_SCEPROTECT_CRYPTONLY)
@@ -39,7 +39,7 @@
 #if defined(DEBUG_PK_CB)
     #define WOLFSSL_PKMSG(_f_, ...) printf(_f_, ##__VA_ARGS__)
 #else
-    #define WOLFSSL_PKMSG(_f_, ...) WC_DO_NOTHING
+    #define WOLFSSL_PKMSG(_f_, ...)
 #endif
 
 #if defined(WOLFSSL_RENESAS_SCEPROTECT_ECC)
@@ -372,7 +372,7 @@ WOLFSSL_LOCAL int SCE_EccSharedSecret(WOLFSSL* ssl, ecc_key* otherKey,
                 return ret;
             }
 
-            /* copy generated ecdh public key into buffer */
+            /* copy generated ecdh public key inot buffer */
             pubKeyDer[0] = ECC_POINT_UNCOMP;
             *pubKeySz = 1 + sizeof(cbInfo->ecc_ecdh_public_key);
             XMEMCPY(&pubKeyDer[1], &cbInfo->ecc_ecdh_public_key,

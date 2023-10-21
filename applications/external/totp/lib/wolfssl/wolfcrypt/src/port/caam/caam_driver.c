@@ -1840,7 +1840,7 @@ void caamDescInit(DESCSTRUCT* desc, int type, unsigned int args[4],
 
 static int SetupJobRing(struct JobRing* r)
 {
-    /* get environment specific addresses to use for job rings */
+    /* get enviornment specific addresses to use for job rings */
     CAAM_SET_JOBRING_ADDR(&r->BaseAddr, &r->JobIn, &r->VirtualIn);
 
     /* register the in/out and sizes of job ring */

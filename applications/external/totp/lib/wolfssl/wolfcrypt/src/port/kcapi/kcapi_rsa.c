@@ -45,6 +45,164 @@ void KcapiRsa_Free(RsaKey* key)
     }
 }
 
+#if defined(HAVE_FIPS) && \
+        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+/* Set the DER/BER encoding of the ASN.1 INTEGER header.
+ *
+ * len        Length of data to encode.
+ * firstByte  First byte of data, most significant byte of integer, to encode.
+ * output     Buffer to write into.
+ * returns the number of bytes added to the buffer.
+ */
+static int SetASNInt(int len, byte firstByte, byte* output)
+{
+    word32 idx = 0;
+
+    if (output)
+        output[idx] = ASN_INTEGER;
+    idx++;
+    if (firstByte & 0x80)
+        len++;
+    idx += SetLength(len, output ? output + idx : NULL);
+    if (firstByte & 0x80) {
+        if (output)
+            output[idx] = 0x00;
+        idx++;
+    }
+
+    return idx;
+}
+
+static int SetASNIntMP(mp_int* n, int maxSz, byte* output)
+{
+    int idx = 0;
+    int leadingBit;
+    int length;
+    int err;
+
+    leadingBit = mp_leading_bit(n);
+    length = mp_unsigned_bin_size(n);
+    idx = SetASNInt(length, leadingBit ? 0x80 : 0x00, output);
+    if (maxSz >= 0 && (idx + length) > maxSz)
+        return BUFFER_E;
+
+    if (output) {
+        err = mp_to_unsigned_bin(n, output + idx);
+        if (err != MP_OKAY)
+            return MP_TO_E;
+    }
+    idx += length;
+
+    return idx;
+}
+
+static mp_int* GetRsaInt(RsaKey* key, int idx)
+{
+    if (idx == 0)
+        return &key->n;
+    if (idx == 1)
+        return &key->e;
+    if (idx == 2)
+        return &key->d;
+    if (idx == 3)
+        return &key->p;
+    if (idx == 4)
+        return &key->q;
+    if (idx == 5)
+        return &key->dP;
+    if (idx == 6)
+        return &key->dQ;
+    if (idx == 7)
+        return &key->u;
+
+    return NULL;
+}
+
+/* Release Tmp RSA resources */
+static WC_INLINE void FreeTmpRsas(byte** tmps, void* heap)
+{
+    int i;
+
+    (void)heap;
+
+    for (i = 0; i < RSA_INTS; i++)
+        XFREE(tmps[i], heap, DYNAMIC_TYPE_RSA);
+}
+
+
+/* Convert RsaKey key to DER format, write to output (inLen), return bytes
+   written */
+static int wc_RsaKeyToDer(RsaKey* key, byte* output, word32 inLen)
+{
+    word32 seqSz, verSz, rawLen, intTotalLen = 0;
+    word32 sizes[RSA_INTS];
+    int    i, j, outLen, ret = 0;
+
+    byte  seq[MAX_SEQ_SZ];
+    byte  ver[MAX_VERSION_SZ];
+    byte* tmps[RSA_INTS];
+
+    if (!key || !output)
+        return BAD_FUNC_ARG;
+
+    if (key->type != RSA_PRIVATE)
+        return BAD_FUNC_ARG;
+
+    for (i = 0; i < RSA_INTS; i++)
+        tmps[i] = NULL;
+
+    /* write all big ints from key to DER tmps */
+    for (i = 0; i < RSA_INTS; i++) {
+        int mpSz;
+        mp_int* keyInt = GetRsaInt(key, i);
+
+        rawLen = mp_unsigned_bin_size(keyInt) + 1;
+        tmps[i] = (byte*)XMALLOC(rawLen + MAX_SEQ_SZ, key->heap,
+                                 DYNAMIC_TYPE_RSA);
+        if (tmps[i] == NULL) {
+            ret = MEMORY_E;
+            break;
+        }
+
+        mpSz = SetASNIntMP(keyInt, MAX_RSA_INT_SZ, tmps[i]);
+        if (mpSz < 0) {
+            ret = mpSz;
+            break;
+        }
+        intTotalLen += (sizes[i] = mpSz);
+    }
+
+    if (ret != 0) {
+        FreeTmpRsas(tmps, key->heap);
+        return ret;
+    }
+
+    /* make headers */
+    verSz = SetMyVersion(0, ver, FALSE);
+    seqSz = SetSequence(verSz + intTotalLen, seq);
+
+    outLen = seqSz + verSz + intTotalLen;
+    if (outLen > (int)inLen) {
+        FreeTmpRsas(tmps, key->heap);
+        return BAD_FUNC_ARG;
+    }
+
+    /* write to output */
+    XMEMCPY(output, seq, seqSz);
+    j = seqSz;
+    XMEMCPY(output + j, ver, verSz);
+    j += verSz;
+
+    for (i = 0; i < RSA_INTS; i++) {
+        XMEMCPY(output + j, tmps[i], sizes[i]);
+        j += sizes[i];
+    }
+    FreeTmpRsas(tmps, key->heap);
+
+    return outLen;
+}
+#endif
+
 #if !defined(WOLFSSL_RSA_PUBLIC_ONLY) && !defined(WOLFSSL_RSA_VERIFY_ONLY)
 static int KcapiRsa_SetPrivKey(RsaKey* key)
 {

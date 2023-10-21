@@ -163,7 +163,7 @@ To enable SCP03 authentication, wolfSSL was using the following defines:
 ```
 
 Default ENC, MAC, and DEK keys for SCP03 should be set by defining the
-following values. These are the default keys wolfSSL used for the SE50C2
+following values. Thes are the default keys wolfSSL used for the SE50C2
 variant (OEF OID: A201). The variant can be seen by running the
 `se05x_GetInfo` sample application.
 
@@ -382,7 +382,7 @@ set to the number of bytes written into “out”.
 wolfSSL will not auto-delete generated keys associated with wolfCrypt
 structures (ex: `RsaKey`, `ecc_key`, etc) when the respective key free function
 is called (ex: `wc_ecc_free()`, `wc_FreeRsaKey()`). This is done by design in
-case the application wants to reuse that key that has been generated and
+case the application wants to re-use that key that has been generated and
 stored in the SE050.
 
 Credentials can be deleted from the SE050 storage by calling the wolfSSL helper

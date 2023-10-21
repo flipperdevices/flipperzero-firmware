@@ -838,7 +838,7 @@ int SynchronousSendRequest(int type, unsigned int args[4], CAAM_BUFFER *buf,
                 buf[1].Length, (byte*)buf[2].TheAddress,
                 buf[2].Length, (byte*)buf[0].TheAddress,
                 buf[0].Length, CAAM_ENCAP_BLOB,
-                (args[0] == 0)? CAAM_RED_BLOB : CAAM_BLACK_BLOB)
+                (args[0] = 0)? CAAM_RED_BLOB : CAAM_BLACK_BLOB)
                 != kStatus_Success) {
             ret = WC_HW_E;
         }
@@ -849,7 +849,7 @@ int SynchronousSendRequest(int type, unsigned int args[4], CAAM_BUFFER *buf,
                 (byte*)buf[2].TheAddress, buf[2].Length,
                 (byte*)buf[0].TheAddress, buf[0].Length,
                 CAAM_DECAP_BLOB,
-                (args[0] == 0)? CAAM_RED_BLOB : CAAM_BLACK_BLOB)
+                (args[0] = 0)? CAAM_RED_BLOB : CAAM_BLACK_BLOB)
                 != kStatus_Success) {
             ret = WC_HW_E;
         }

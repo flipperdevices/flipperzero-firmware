@@ -243,9 +243,6 @@ typedef enum ecc_curve_id {
     ECC_BRAINPOOLP384R1,
     ECC_BRAINPOOLP512R1,
 
-    /* SM2 */
-    ECC_SM2P256V1,
-
     /* Twisted Edwards Curves */
 #ifdef HAVE_CURVE25519
     ECC_X25519,

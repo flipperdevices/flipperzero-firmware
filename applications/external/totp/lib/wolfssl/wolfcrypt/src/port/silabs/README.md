@@ -15,15 +15,11 @@ To enable support define the following:
 #define WOLFSSL_SILABS_SE_ACCEL
 ```
 
-## Simplicity Studio Example
-
-For the Silicon Labs Simplicity Studio example see [/IDE/SimplicityStudio/README.md](/IDE/SimplicityStudio/README.md).
-
 ## Caveats
 
 :warning: **Be sure to update the SE firmware** Testing and results were done using SE firmware `1.2.6`
 
-Update was performed under Simplicity Studio directory:
+Update was preformed under Simplicity Studio directory:
     `./developer/adapter_packs/commander/commander  flash ./offline/efr32/firmware/series2config1/se_firmware_package/s2c1_se_fw_upgrade_app_1v2p6.hex`
 
  * AES GCM tags length >= 16 bytes
@@ -37,7 +33,8 @@ Update was performed under Simplicity Studio directory:
 
 The SE manager supports multi-threading for FreeRTOS and Micrium
 ([ref](https://docs.silabs.com/gecko-platform/latest/service/api/group-sl-se-manager#autotoc-md152)).
-If a different OS is used with multi-threading, additional mutex protection may be necessary.
+If a different OS is used with multi-threading, additional mutex
+protection may be necessary.
 
 ## Benchmarks
 
