@@ -31,8 +31,9 @@ const char* const passport_on_off_text[PASSPORT_ON_OFF_COUNT] = {
 
 const char* const background_text[PASSPORT_BG_COUNT] = {
     "None",
-    "DB",
+    "AD Police",
     "Circuit",
+    "DB",
     "Flipper",
     "Furipass",
     "Mario",
@@ -43,8 +44,9 @@ const char* const background_text[PASSPORT_BG_COUNT] = {
 
 const uint32_t background_value[PASSPORT_BG_COUNT] = {
     BG_NONE,
-    BG_DB,
+    BG_ADPOLICE,
     BG_CIRCUIT,
+    BG_DB,
     BG_STOCK,
     BG_FURI,
     BG_MARIO,
@@ -55,6 +57,7 @@ const uint32_t background_value[PASSPORT_BG_COUNT] = {
 
 const char* const image_text[PROFILE_IMG_COUNT] = {
     "None",
+    "AD Police",
     "Briareos",
     "Cobra",
     "Dali Mask",
@@ -78,6 +81,7 @@ const char* const image_text[PROFILE_IMG_COUNT] = {
     "Pikachu (Sleepy)",
     "Rabbit",
     "Shinkai",
+    "Skull",
     "Slime",
     "Sonic",
     "Spider Jerusalem",
@@ -88,13 +92,13 @@ const char* const image_text[PROFILE_IMG_COUNT] = {
     "Waifu 3"};
 
 const uint32_t image_value[PROFILE_IMG_COUNT] = {
-    PIMG_NONE,        PIMG_BRIAREOS,     PIMG_COBRA,     PIMG_DALI,     PIMG_DEER,
-    PIMG_DOLPHIN,     PIMG_DOLPHINMOODY, PIMG_ED209,     PIMG_FSOCIETY, PIMG_FSOCIETY2,
-    PIMG_GOKUSET,     PIMG_GOKUKID,      PIMG_GOKUADULT, PIMG_GOKUSSJ,  PIMG_GOKUSSJ3,
-    PIMG_GUYFAWKES,   PIMG_LAIN,         PIMG_MARIO,     PIMG_MARVIN,   PIMG_MORELEELLOO,
-    PIMG_NEUROMANCER, PIMG_PIKASLEEPY,   PIMG_RABBIT,    PIMG_SHINKAI,  PIMG_SLIME,
-    PIMG_SONIC,       PIMG_SPIDER,       PIMG_TANKGIRL,  PIMG_TOTORO,   PIMG_WAIFU1,
-    PIMG_WAIFU2,      PIMG_WAIFU3};
+    PIMG_NONE,        PIMG_ADPOLICE,    PIMG_BRIAREOS,     PIMG_COBRA,     PIMG_DALI,
+    PIMG_DEER,        PIMG_DOLPHIN,     PIMG_DOLPHINMOODY, PIMG_ED209,     PIMG_FSOCIETY,
+    PIMG_FSOCIETY2,   PIMG_GOKUSET,     PIMG_GOKUKID,      PIMG_GOKUADULT, PIMG_GOKUSSJ,
+    PIMG_GOKUSSJ3,    PIMG_GUYFAWKES,   PIMG_LAIN,         PIMG_MARIO,     PIMG_MARVIN,
+    PIMG_MORELEELLOO, PIMG_NEUROMANCER, PIMG_PIKASLEEPY,   PIMG_RABBIT,    PIMG_SHINKAI,
+    PIMG_SKULL,       PIMG_SLIME,       PIMG_SONIC,        PIMG_SPIDER,    PIMG_TANKGIRL,
+    PIMG_TOTORO,      PIMG_WAIFU1,      PIMG_WAIFU2,       PIMG_WAIFU3};
 
 const uint32_t name_value[PASSPORT_ON_OFF_COUNT] = {false, true};
 

@@ -198,6 +198,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case BG_SLUT:
             canvas_draw_icon(canvas, 0, 0, &I_passport_SlutPass);
             break;
+        case BG_ADPOLICE:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_ADPolice);
+            break;
         }
 
         // draw portrait
@@ -296,6 +299,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             break;
         case PIMG_WAIFU3:
             canvas_draw_icon(canvas, 11, 2, &I_Waifu3);
+            break;
+        case PIMG_ADPOLICE:
+            canvas_draw_icon(canvas, 11, 2, &I_AD_Police);
+            break;
+        case PIMG_SKULL:
+            canvas_draw_icon(canvas, 11, 2, &I_Skull);
             break;
         }
 
