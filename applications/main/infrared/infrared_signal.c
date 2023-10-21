@@ -8,6 +8,8 @@
 
 #define TAG "InfraredSignal"
 
+#define INFRARED_SIGNAL_NAME_KEY "name"
+
 struct InfraredSignal {
     bool is_raw;
     union {
@@ -238,7 +240,7 @@ const InfraredMessage* infrared_signal_get_message(const InfraredSignal* signal)
 
 bool infrared_signal_save(const InfraredSignal* signal, FlipperFormat* ff, const char* name) {
     if(!flipper_format_write_comment_cstr(ff, "") ||
-       !flipper_format_write_string_cstr(ff, "name", name)) {
+       !flipper_format_write_string_cstr(ff, INFRARED_SIGNAL_NAME_KEY, name)) {
         return false;
     } else if(signal->is_raw) {
         return infrared_signal_save_raw(&signal->payload.raw, ff);
@@ -248,19 +250,20 @@ bool infrared_signal_save(const InfraredSignal* signal, FlipperFormat* ff, const
 }
 
 bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name) {
-    FuriString* tmp = furi_string_alloc();
-
     bool success = false;
 
     do {
-        if(!flipper_format_read_string(ff, "name", tmp)) break;
-        furi_string_set(name, tmp);
+        if(!infrared_signal_read_name(ff, name)) break;
         if(!infrared_signal_read_body(signal, ff)) break;
-        success = true;
-    } while(0);
 
-    furi_string_free(tmp);
+        success = true;
+    } while(false);
+
     return success;
+}
+
+bool infrared_signal_read_name(FlipperFormat* ff, FuriString* name) {
+    return flipper_format_read_string(ff, INFRARED_SIGNAL_NAME_KEY, name);
 }
 
 bool infrared_signal_search_and_read(InfraredSignal* signal, FlipperFormat* ff, const char* name) {
@@ -269,9 +272,8 @@ bool infrared_signal_search_and_read(InfraredSignal* signal, FlipperFormat* ff, 
 
     do {
         bool is_name_found = false;
-        while(flipper_format_read_string(ff, "name", tmp)) {
+        while(!is_name_found && infrared_signal_read_name(ff, tmp)) {
             is_name_found = furi_string_equal(tmp, name);
-            if(is_name_found) break;
         }
         if(!is_name_found) break; //-V547
         if(!infrared_signal_read_body(signal, ff)) break; //-V779

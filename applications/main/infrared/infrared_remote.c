@@ -198,7 +198,7 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
         infrared_remote_set_path(remote, path);
         InfraredButtonNameList_reset(remote->button_names);
 
-        while(flipper_format_read_string(ff, "name", tmp)) {
+        while(infrared_signal_read_name(ff, tmp)) {
             InfraredButtonNameList_push_back(remote->button_names, tmp);
         }
 
