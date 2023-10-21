@@ -13,17 +13,24 @@ struct GameEvent {
     enum GameEventType type;
 };
 
-/* Which animation to display in the main screen */
-enum Animation {
-    INVALID, // Used to distinguish an uninitialized value
-    EGG
+enum LifeStage {
+    EGG,
+    BABY,
+    CHILD,
+    TEEN,
+    ADULT
+};
+
+struct PersistentGameState {
+    uint32_t last_recorded_event; // Timestamp converted from FuriHalRtcDateTime
+    enum LifeStage stage;
 };
 
 /* Internal state of the game. Some of the info are persisted on
  * the storage */
 struct GameState {
+    struct PersistentGameState persistent;
     // Transient information
-    enum Animation animation;
     uint32_t next_animation_index;
 };
 

@@ -6,9 +6,7 @@
 #include "flipper_structs.h"
 #include "game_structs.h"
 
-/* Init the temporary structures used for the GUI and
- * draw a first UI */
-void init_gui(ViewPort *, struct GameState *);
+void refresh_gui(ViewPort *);
 
 /* Understand which image to display and draw it */
 void decode_and_draw_image(Canvas *, struct GameState *);

@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "game_structs.h"
 #include "gui.h"
+#include "state_management.h"
 
 void main_thread(struct ApplicationContext *context) {
     furi_thread_start(context->secondary_thread);
@@ -60,7 +61,8 @@ int32_t secondary_thread(void *ctx)
     struct ApplicationContext *context = (struct ApplicationContext *)ctx;
 
     // Start by initializing everything
-    init_gui(context->view_port, context->game_state);
+    init_state(context->game_state);
+    refresh_gui(context->view_port);
 
     // Process actions the main thread requests to perform
     struct GameEvent event;
@@ -72,11 +74,10 @@ int32_t secondary_thread(void *ctx)
             switch(event.type) {
                 case IDLE_TIMEOUT:
                     context->game_state->next_animation_index++;
-                    // This call will asynchronously (and in a separated thread)
-                    // call main_draw_callback()
-                    view_port_update(context->view_port);
+                    refresh_gui(context->view_port);
                     break;
                 case SAVE_AND_EXIT:
+                    persist_state(context->game_state);
                     return 0;
                 default:
                     furi_crash("Unexpected game event type");
