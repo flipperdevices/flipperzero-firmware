@@ -79,7 +79,9 @@ FuriHalNfcError furi_hal_nfc_init() {
 
     do {
         error = furi_hal_nfc_acquire();
-        if(error != FuriHalNfcErrorNone) break;
+        if(error != FuriHalNfcErrorNone) {
+            furi_hal_nfc_low_power_mode_start();
+        }
 
         FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
         // Set default state
@@ -93,6 +95,8 @@ FuriHalNfcError furi_hal_nfc_init() {
            ST25R3916_REG_IC_IDENTITY_ic_type_st25r3916) {
             FURI_LOG_E(TAG, "Wrong chip id");
             error = FuriHalNfcErrorCommunication;
+            furi_hal_nfc_low_power_mode_start();
+            furi_hal_nfc_release();
             break;
         }
         // Clear interrupts
@@ -105,7 +109,11 @@ FuriHalNfcError furi_hal_nfc_init() {
         st25r3916_change_test_reg_bits(handle, 0x04, 0x10, 0x10);
 
         error = furi_hal_nfc_turn_on_osc(handle);
-        if(error != FuriHalNfcErrorNone) break;
+        if(error != FuriHalNfcErrorNone) {
+            furi_hal_nfc_low_power_mode_start();
+            furi_hal_nfc_release();
+            break;
+        }
 
         // Measure voltage
         // Set measure power supply voltage source
