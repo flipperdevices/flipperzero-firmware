@@ -157,12 +157,13 @@ bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index) {
     furi_check(index < signal_count);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    // Create input and output files
     FlipperFormat* ff_in = flipper_format_buffered_file_alloc(storage);
     FlipperFormat* ff_out = flipper_format_buffered_file_alloc(storage);
 
     const char* path_in = furi_string_get_cstr(remote->path);
     // TODO: Generate a random file name
-    const char* path_out = "/any/infrared/test_remove.ir";
+    const char* path_out = "/any/infrared/temp.ir.swp";
 
     bool success = false;
     InfraredSignal* signal = infrared_signal_alloc();
@@ -189,10 +190,10 @@ bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index) {
         if(!flipper_format_buffered_file_close(ff_out)) break;
         if(!flipper_format_buffered_file_close(ff_in)) break;
 
-        // TODO Delete old file, rename the new file
+        const FS_Error status = storage_common_rename(storage, path_out, path_in);
+        if(status != FSE_OK && status != FSE_EXIST) break;
 
-        // TODO Remove one entry from signal list
-
+        InfraredSignalNameArray_remove_v(remote->signal_names, index, index + 1);
         success = true;
     } while(false);
 
