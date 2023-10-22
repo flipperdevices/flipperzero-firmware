@@ -26,7 +26,7 @@ static struct ApplicationContext * context_alloc() {
 
     // Allocate memory for queues
     context->user_input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
-    context->game_event_queue = furi_message_queue_alloc(8, sizeof(struct GameEvent));
+    context->threads_message_queue = furi_message_queue_alloc(8, sizeof(struct ThreadsMessage));
 
     // Create a secondary thread
     context->secondary_thread = furi_thread_alloc();
@@ -49,7 +49,7 @@ static void context_free(struct ApplicationContext *context) {
     furi_thread_free(context->secondary_thread);
 
     // Free the queues
-    furi_message_queue_free(context->game_event_queue);
+    furi_message_queue_free(context->threads_message_queue);
     furi_message_queue_free(context->user_input_queue);
 
     // Unregister and free view_port

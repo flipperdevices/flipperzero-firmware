@@ -41,16 +41,16 @@ void main_thread(struct ApplicationContext *context) {
             }
         } else if(status == FuriStatusErrorTimeout) {
             // No user input, perform background operations
-            struct GameEvent game_event = {.type = IDLE_TIMEOUT};
-            furi_message_queue_put(context->game_event_queue, &game_event, FuriWaitForever);
+            struct ThreadsMessage threads_message = {.type = IDLE_TIMEOUT};
+            furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
         } else {
             furi_crash("Unexpected status in message queue");
         }
     }
 
     /* Signal the secondary thread to cease operation and exit */
-    struct GameEvent game_event = {.type = SAVE_AND_EXIT};
-    furi_message_queue_put(context->game_event_queue, &game_event, FuriWaitForever);
+    struct ThreadsMessage threads_message = {.type = SAVE_AND_EXIT};
+    furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
 
     /* Wait for the secondary thread to finish */
     furi_thread_join(context->secondary_thread);
@@ -65,13 +65,13 @@ int32_t secondary_thread(void *ctx)
     refresh_gui(context->view_port);
 
     // Process actions the main thread requests to perform
-    struct GameEvent event;
+    struct ThreadsMessage message;
     while(true) {
         // Block until a message is received
-        FuriStatus status = furi_message_queue_get(context->game_event_queue, &event, FuriWaitForever);
+        FuriStatus status = furi_message_queue_get(context->threads_message_queue, &message, FuriWaitForever);
         if(status == FuriStatusOk) {
             // Received something
-            switch(event.type) {
+            switch(message.type) {
                 case IDLE_TIMEOUT:
                     context->game_state->next_animation_index++;
                     refresh_gui(context->view_port);
