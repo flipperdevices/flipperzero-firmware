@@ -49,6 +49,8 @@ static void draw_ui_asset(uint8_t x, uint8_t y, uint8_t* const asset) {
 }
 
 static void draw_level_bg(Canvas* const canvas, uint8_t index, bool isInverted) {
+    if(isInverted) canvas_draw_box(canvas, 0, 0, 128, 64);
+
     canvas_set_color(canvas, isInverted ? ColorWhite : ColorBlack);
     switch(index) {
     case 0:
@@ -65,6 +67,8 @@ static void draw_level_bg(Canvas* const canvas, uint8_t index, bool isInverted) 
 }
 
 static void draw_destroy(Canvas* const canvas, uint8_t frame, uint8_t x, uint8_t y) {
+    canvas_set_color(canvas, isInverted ? ColorWhite : ColorBlack);
+
     if(frame == 1) {
         canvas_draw_icon(canvas, x, y, &I_destroy1);
     } else if(frame == 2) {

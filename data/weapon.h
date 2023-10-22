@@ -54,11 +54,8 @@ void weapon_check_colisions(GameState* const state) {
                 state->player.bullets[i].y = 0;
                 state->enemies.spawned[e].life--;
 
+                // destroy enemy
                 if(state->enemies.spawned[e].life <= 0) {
-                    state->enemies.spawned[e].position.x = 0;
-                    state->enemies.spawned[e].position.y = 0;
-                    state->player.score += 10;
-
                     // add destroy animation
                     for(int d = 0; d < ENEMY_PULL; d++) {
                         if(state->destroy[d].frame == 0) {
@@ -68,6 +65,10 @@ void weapon_check_colisions(GameState* const state) {
                             break;
                         }
                     }
+
+                    state->enemies.spawned[e].position.x = 0;
+                    state->enemies.spawned[e].position.y = 0;
+                    state->player.score += 10;
                 }
             }
         }

@@ -97,4 +97,8 @@ void game_init(GameState* const state) {
 
     state->level_index = 0;
     set_level(state);
+
+    for(int d = 0; d < ENEMY_PULL; d++) {
+        state->destroy[d].frame = 0;
+    }
 }

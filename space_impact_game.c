@@ -9,15 +9,13 @@ static void game_update(GameState* game_state) {
     game_state->level_time++;
 
     // destroy anims
-    for(int i = 0; i < ENEMY_PULL; i++) {
-        if(game_state->destroy[i].frame > 0) {
-            game_state->destroy[i].frame++;
-        }
-
-        if(game_state->destroy[i].frame > DESTROY_FRAMES) {
-            game_state->destroy[i].frame = 0;
-            game_state->destroy[i].pos.x = 0;
-            game_state->destroy[i].pos.y = 0;
+    if(game_state->level_time % 2 == 0) {
+        for(int i = 0; i < ENEMY_PULL; i++) {
+            if(game_state->destroy[i].frame > DESTROY_FRAMES) {
+                game_state->destroy[i].frame = 0;
+            } else if(game_state->destroy[i].frame > 0) {
+                game_state->destroy[i].frame++;
+            }
         }
     }
 
@@ -51,8 +49,6 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     if(game_state == NULL) {
         return;
     }
-
-    if(game_state->level.isInvertedColor) canvas_draw_box(canvas, 0, 0, 128, 64);
 
     draw_level_bg(canvas, game_state->level.index, game_state->level.isInvertedColor);
 
