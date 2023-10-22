@@ -8,6 +8,19 @@
 static void game_update(GameState* game_state) {
     game_state->level_time++;
 
+    // destroy anims
+    for(int i = 0; i < ENEMY_PULL; i++) {
+        if(game_state->destroy[i].frame > 0) {
+            game_state->destroy[i].frame++;
+        }
+
+        if(game_state->destroy[i].frame > DESTROY_FRAMES) {
+            game_state->destroy[i].frame = 0;
+            game_state->destroy[i].pos.x = 0;
+            game_state->destroy[i].pos.y = 0;
+        }
+    }
+
     // update position
     if(game_state->up && game_state->player.position.y > HERO_MIN_Y) {
         game_state->player.position.y--;
@@ -21,6 +34,7 @@ static void game_update(GameState* game_state) {
     }
 
     weapon_update(game_state);
+    weapon_check_colisions(game_state);
     enemy_try_spawn(game_state);
 
     if(game_state->fire) {
@@ -71,6 +85,13 @@ static void draw_callback(Canvas* canvas, void* ctx) {
                 game_state->enemies.spawned[i].position.x,
                 game_state->enemies.spawned[i].position.y,
                 enemy_frames[enemies[game_state->enemies.spawned[i].id].frames[game_state->enemies.spawned[i].frame]]);
+        }
+    }
+
+    // destroy anims
+    for(int i = 0; i < ENEMY_PULL; i++) {
+        if(game_state->destroy[i].frame > 0) {
+            draw_destroy(canvas, game_state->destroy[i].frame, game_state->destroy[i].pos.x, game_state->destroy[i].pos.y);
         }
     }
 

@@ -63,3 +63,11 @@ static void draw_level_bg(Canvas* const canvas, uint8_t index, bool isInverted) 
         break;
     }
 }
+
+static void draw_destroy(Canvas* const canvas, uint8_t frame, uint8_t x, uint8_t y) {
+    if(frame == 1) {
+        canvas_draw_icon(canvas, x, y, &I_destroy1);
+    } else if(frame == 2) {
+        canvas_draw_icon(canvas, x, y, &I_destroy2);
+    }
+}

@@ -4,6 +4,7 @@
 #define TAG "SpaceImpact"
 
 #define FRAMES 25 //12
+#define DESTROY_FRAMES 2
 
 #define HERO_SIZE 8
 
@@ -53,6 +54,11 @@ typedef struct {
 } EnemyState;
 
 typedef struct {
+    int8_t frame;
+    Vector2 pos;
+} AnimState;
+
+typedef struct {
     int score;
     uint8_t life;
     uint8_t rockets;
@@ -64,6 +70,7 @@ typedef struct {
     FuriMutex* mutex;
     PlayerState player;
     EnemyState enemies;
+    AnimState destroy[ENEMY_PULL];
     uint8_t level_index;
     uint16_t level_time;
     Level level;
