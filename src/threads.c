@@ -11,6 +11,7 @@ void main_thread(struct ApplicationContext *context) {
 
     bool running = true;
     InputEvent input_event;
+    struct ThreadsMessage threads_message;
 
     while(running) {
         FuriStatus status = furi_message_queue_get(context->user_input_queue, &input_event, USER_INPUT_IDLE_TICKS);
@@ -24,7 +25,9 @@ void main_thread(struct ApplicationContext *context) {
                     case InputKeyDown:
                     case InputKeyOk:
                     case InputKeyBack:
-                        // Nothing yet
+                        threads_message.type = BUTTON_PRESSED;
+                        threads_message.key = input_event.key;
+                        furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
                         break;
                     default:
                         furi_crash("Unexpected input value");
@@ -41,7 +44,7 @@ void main_thread(struct ApplicationContext *context) {
             }
         } else if(status == FuriStatusErrorTimeout) {
             // No user input, perform background operations
-            struct ThreadsMessage threads_message = {.type = IDLE_TIMEOUT};
+            threads_message.type = IDLE_TIMEOUT;
             furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
         } else {
             furi_crash("Unexpected status in message queue");
@@ -49,7 +52,7 @@ void main_thread(struct ApplicationContext *context) {
     }
 
     /* Signal the secondary thread to cease operation and exit */
-    struct ThreadsMessage threads_message = {.type = SAVE_AND_EXIT};
+    threads_message.type = SAVE_AND_EXIT;
     furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
 
     /* Wait for the secondary thread to finish */
@@ -79,6 +82,9 @@ int32_t secondary_thread(void *ctx)
                 case SAVE_AND_EXIT:
                     persist_state(context->game_state);
                     return 0;
+                case BUTTON_PRESSED:
+                    // Nothing yet
+                    break;
                 default:
                     furi_crash("Unexpected game event type");
             }
