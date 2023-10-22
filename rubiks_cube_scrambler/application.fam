@@ -15,6 +15,6 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rubiks_cube_scrambler_main",
     stack_size=1 * 1024,
-    fap_category="Misc",
+    fap_category="Games",
     fap_icon="cube.png",
 )
