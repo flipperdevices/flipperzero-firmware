@@ -13,4 +13,13 @@
 #define GAME_STATE_HEADER_MAGIC 0xFE
 #define GAME_STATE_HEADER_VERSION 0x01
 
+/* Game parameters */
+static const uint32_t MAX_XP_PER_STAGE[] = {1,    // EGG
+                                            10,   // BABY
+                                            30,   //CHILD
+                                            40,   //TEEN
+                                            100}; //ADULT
+#define NEW_XP_FREQUENCY 120 // One new XP every 120 seconds
+#define NEW_XP_PROBABILITY 70 // 70% of probability of getting a new XP
+
 #endif

@@ -1,7 +1,7 @@
 #include <furi_hal.h> // For RTC handling
 
-#include "constants.h"
 #include "state_management.h"
+#include "feature_management.h"
 #include "save_restore.h"
 
 static uint32_t get_current_timestamp() {
@@ -13,9 +13,13 @@ static uint32_t get_current_timestamp() {
 void init_state(struct GameState *game_state) {
     // Try to load the state from the storage
     if(!load_from_file(&game_state->persistent)) {
+        uint32_t current_timestamp = get_current_timestamp();
+
         // Failed, init the struct with default values
-        game_state->persistent.last_recorded_event = get_current_timestamp();
         game_state->persistent.stage = EGG;
+
+        // Init every individual feature
+        init_xp(game_state, current_timestamp);
     }
     game_state->next_animation_index = 0;
 }
@@ -28,10 +32,12 @@ void persist_state(struct GameState *game_state) {
 }
 
 static void _generate_new_random_event(uint32_t timestamp, struct GameState *game_state, struct GameEvents *game_events) {
-    UNUSED(timestamp);
-    UNUSED(game_state);
-    UNUSED(game_events);
-    return;
+    if (game_state->persistent.stage == DEAD) {
+        // Can't do much
+        return;
+    }
+    // Check every individual feature
+    check_xp(game_state, timestamp, game_events);
 }
 
 void generate_new_random_events(struct GameState *game_state, struct GameEvents *game_events) {
@@ -41,7 +47,10 @@ void generate_new_random_events(struct GameState *game_state, struct GameEvents 
 }
 
 bool process_events(struct GameState *game_state, struct GameEvents game_events) {
-    UNUSED(game_state);
-    UNUSED(game_events);
-    return false;
+    bool new_events = false;
+
+    // Process every individual feature
+    new_events |= apply_xp(game_state, game_events);
+
+    return new_events;
 }

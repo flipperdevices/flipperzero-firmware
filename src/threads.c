@@ -76,7 +76,7 @@ int32_t secondary_thread(void *ctx)
           // Received something
             switch(message.type) {
                 case IDLE_TIMEOUT: ;
-                    struct GameEvents events;
+                    struct GameEvents events = { 0 };
                     generate_new_random_events(context->game_state, &events);
                     if (process_events(context->game_state, events)) {
                         // There was an update in the game state,

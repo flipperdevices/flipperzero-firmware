@@ -17,16 +17,19 @@ struct ThreadsMessage {
 };
 
 enum LifeStage {
-    EGG,
-    BABY,
-    CHILD,
-    TEEN,
-    ADULT
+    EGG = 0,
+    BABY = 1,
+    CHILD = 2,
+    TEEN = 3,
+    ADULT = 4,
+    DEAD = 5
 };
 
 struct PersistentGameState {
-    uint32_t last_recorded_event; // Timestamp converted from FuriHalRtcDateTime
     enum LifeStage stage;
+    // Feature XP
+    uint32_t xp;
+    uint32_t last_recorded_xp_update; // Timestamp converted from FuriHalRtcDateTime
 };
 
 /* Internal state of the game. Some of the info are persisted on
@@ -38,6 +41,7 @@ struct GameState {
 };
 
 struct GameEvents {
-    uint32_t unused;
+    uint32_t xp; // How many new XP to assign
+    uint32_t xp_timestamp; // New timestamp to use in the GameState
 };
 #endif
