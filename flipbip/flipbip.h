@@ -9,12 +9,13 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/dialog_ex.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include "scenes/flipbip_scene.h"
 #include "views/flipbip_scene_1.h"
 
-#define FLIPBIP_VERSION "v1.13"
+#define FLIPBIP_VERSION "v1.14"
 
 #define COIN_BTC 0
 #define COIN_DOGE 3
@@ -22,6 +23,8 @@
 #define COIN_ZEC 133
 
 #define TEXT_BUFFER_SIZE 256
+
+
 
 typedef struct {
     Gui* gui;
@@ -31,6 +34,7 @@ typedef struct {
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     TextInput* text_input;
+    DialogEx* renew_dialog;
     FlipBipScene1* flipbip_scene_1;
     char* mnemonic_menu_text;
     // Settings options
@@ -45,6 +49,8 @@ typedef struct {
     char passphrase_text[TEXT_BUFFER_SIZE];
     char import_mnemonic_text[TEXT_BUFFER_SIZE];
     char input_text[TEXT_BUFFER_SIZE];
+
+    void (* wallet_create)(void* context);
 } FlipBip;
 
 typedef enum {
@@ -53,6 +59,7 @@ typedef enum {
     FlipBipViewIdScene1,
     FlipBipViewIdSettings,
     FlipBipViewIdTextInput,
+    FlipBipViewRenewConfirm,
 } FlipBipViewId;
 
 typedef enum {
@@ -86,3 +93,15 @@ typedef enum {
     FlipBipStatusSaveError = 12,
     FlipBipStatusMnemonicCheckError = 13,
 } FlipBipStatus;
+
+typedef enum {
+    SubmenuIndexScene1BTC = 10,
+    SubmenuIndexScene1ETH,
+    SubmenuIndexScene1DOGE,
+    SubmenuIndexScene1ZEC,
+    SubmenuIndexScene1New,
+    SubmenuIndexScene1Renew,
+    SubmenuIndexScene1Import,
+    SubmenuIndexSettings,
+    SubmenuIndexNOP,
+} SubmenuIndex;
