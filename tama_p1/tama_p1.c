@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <furi_hal_bus.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <storage/storage.h>
@@ -719,6 +720,7 @@ static void tama_p1_init(TamaApp* const ctx) {
 
     // Load ROM
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("tama_p1"), STORAGE_APP_DATA_PATH_PREFIX);
     FileInfo fi;
     if(storage_common_stat(storage, TAMA_ROM_PATH, &fi) == FSE_OK) {
         File* rom_file = storage_file_alloc(storage);
@@ -750,6 +752,9 @@ static void tama_p1_init(TamaApp* const ctx) {
     if(ctx->rom != NULL) {
         // Init TIM2
         // 64KHz
+
+        furi_hal_bus_enable(FuriHalBusTIM2);
+
         LL_TIM_InitTypeDef tim_init = {
             .Prescaler = 999,
             .CounterMode = LL_TIM_COUNTERMODE_UP,
@@ -782,6 +787,7 @@ static void tama_p1_deinit(TamaApp* const ctx) {
     if(ctx->rom != NULL) {
         tamalib_release();
         furi_thread_free(ctx->thread);
+        furi_hal_bus_disable(FuriHalBusTIM2);
         free(ctx->rom);
     }
 }
