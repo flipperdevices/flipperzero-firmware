@@ -143,7 +143,7 @@ static void fastpair_extra_config(Ctx* ctx) {
 
 static uint8_t fastpair_config_count(const ProtocolCfg* _cfg) {
     UNUSED(_cfg);
-    return ConfigCOUNT;
+    return ConfigCOUNT - ConfigExtraStart - 1;
 }
 
 const Protocol protocol_fastpair = {

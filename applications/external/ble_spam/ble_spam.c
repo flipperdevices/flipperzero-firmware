@@ -565,7 +565,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
         elements_button_right(canvas, next);
     }
 
-    if(state->ctx.lock_keyboard) {
+    if(state->lock_warning) {
         canvas_set_font(canvas, FontSecondary);
         elements_bold_rounded_frame(canvas, 14, 8, 99, 48);
         elements_multiline_text(canvas, 65, 26, "To unlock\npress:");

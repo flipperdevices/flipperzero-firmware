@@ -81,7 +81,7 @@ static void swiftpair_extra_config(Ctx* ctx) {
 
 static uint8_t swiftpair_config_count(const ProtocolCfg* _cfg) {
     UNUSED(_cfg);
-    return ConfigCOUNT;
+    return ConfigCOUNT - ConfigExtraStart - 1;
 }
 
 const Protocol protocol_swiftpair = {

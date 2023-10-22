@@ -42,13 +42,13 @@ void scene_config_on_enter(void* _ctx) {
     VariableItemList* list = ctx->variable_item_list;
     variable_item_list_reset(list);
 
-    variable_item_list_add(list, ctx->attack->title, 0, NULL, ctx);
+    variable_item_list_set_header(list, ctx->attack->title);
 
     config_bool(list, "Random MAC", &ctx->attack->payload.random_mac);
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
     if(!ctx->attack->protocol) {
-        variable_item_list_add(list, "None shall escape the S I N K", 0, NULL, NULL);
+        variable_item_list_add(list, "None shall escape the SINK", 0, NULL, NULL);
     } else if(ctx->attack->protocol->extra_config) {
         ctx->fallback_config_enter = config_callback;
         ctx->attack->protocol->extra_config(ctx);
