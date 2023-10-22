@@ -19,6 +19,35 @@ struct InfraredRemote {
     FuriString* path;
 };
 
+typedef struct {
+    InfraredRemote* remote;
+    FlipperFormat* ff_in;
+    FlipperFormat* ff_out;
+    FuriString* signal_name;
+    InfraredSignal* signal;
+    size_t signal_index;
+} InfraredRemoteBatchContext;
+
+typedef union {
+    struct {
+        size_t index;
+    } delete;
+
+    struct {
+        size_t index;
+        const char* new_name;
+    } rename;
+
+    struct {
+        size_t old_index;
+        size_t new_index;
+    } move;
+} InfraredRemoteUserContext;
+
+typedef bool (*InfraredRemoteBatchCallback)(
+    const InfraredRemoteBatchContext* context,
+    const InfraredRemoteUserContext* user_context);
+
 InfraredRemote* infrared_remote_alloc() {
     InfraredRemote* remote = malloc(sizeof(InfraredRemote));
     InfraredSignalNameArray_init(remote->signal_names);
@@ -141,6 +170,62 @@ bool infrared_remote_append_signal(
     return success;
 }
 
+static bool infrared_remote_batch_start(
+    InfraredRemote* remote,
+    InfraredRemoteBatchCallback user_callback,
+    const InfraredRemoteUserContext* user_context) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    InfraredRemoteBatchContext context = {
+        .remote = remote,
+        .ff_in = flipper_format_buffered_file_alloc(storage),
+        .ff_out = flipper_format_buffered_file_alloc(storage),
+        .signal_name = furi_string_alloc(),
+        .signal = infrared_signal_alloc(),
+        .signal_index = 0,
+    };
+
+    const char* path_in = furi_string_get_cstr(remote->path);
+    // TODO: Generate a random file name
+    const char* path_out = ANY_PATH("infrared/temp.ir.swp");
+
+    bool success = false;
+
+    do {
+        if(!flipper_format_buffered_file_open_existing(context.ff_in, path_in)) break;
+        if(!flipper_format_buffered_file_open_always(context.ff_out, path_out)) break;
+        if(!flipper_format_write_header_cstr(
+               context.ff_out, INFRARED_FILE_HEADER, INFRARED_FILE_VERSION))
+            break;
+
+        const size_t signal_count = infrared_remote_get_signal_count(remote);
+
+        for(; context.signal_index < signal_count; ++context.signal_index) {
+            if(!infrared_signal_read(context.signal, context.ff_in, context.signal_name)) break;
+            if(!user_callback(&context, user_context)) break;
+        }
+
+        if(context.signal_index != signal_count) break;
+
+        if(!flipper_format_buffered_file_close(context.ff_out)) break;
+        if(!flipper_format_buffered_file_close(context.ff_in)) break;
+
+        const FS_Error status = storage_common_rename(storage, path_out, path_in);
+        if(status != FSE_OK && status != FSE_EXIST) break;
+
+        success = true;
+    } while(false);
+
+    infrared_signal_free(context.signal);
+    furi_string_free(context.signal_name);
+    flipper_format_free(context.ff_out);
+    flipper_format_free(context.ff_in);
+
+    furi_record_close(RECORD_STORAGE);
+
+    return success;
+}
+
 bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const char* new_name) {
     UNUSED(remote);
     UNUSED(index);
@@ -152,60 +237,34 @@ bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const c
     // return infrared_remote_store(remote);
 }
 
+static bool infrared_remote_delete_signal_callback(
+    const InfraredRemoteBatchContext* context,
+    const InfraredRemoteUserContext* user_context) {
+    if(context->signal_index == user_context->delete.index) {
+        // Do not save the signal to be deleted, remove it from the signal name list instead
+        InfraredSignalNameArray_remove_v(
+            context->remote->signal_names, context->signal_index, context->signal_index + 1);
+    } else {
+        // Pass other signals through
+        return infrared_signal_save(
+            context->signal, context->ff_out, furi_string_get_cstr(context->signal_name));
+    }
+
+    return true;
+}
+
 bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index) {
-    const size_t signal_count = infrared_remote_get_signal_count(remote);
-    furi_check(index < signal_count);
+    furi_check(index < infrared_remote_get_signal_count(remote));
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    // Create input and output files
-    FlipperFormat* ff_in = flipper_format_buffered_file_alloc(storage);
-    FlipperFormat* ff_out = flipper_format_buffered_file_alloc(storage);
+    const InfraredRemoteUserContext user_context = {
+        .delete =
+            {
+                .index = index,
+            },
+    };
 
-    const char* path_in = furi_string_get_cstr(remote->path);
-    // TODO: Generate a random file name
-    const char* path_out = "/any/infrared/temp.ir.swp";
-
-    bool success = false;
-    InfraredSignal* signal = infrared_signal_alloc();
-    FuriString* signal_name = furi_string_alloc();
-
-    do {
-        if(!flipper_format_buffered_file_open_existing(ff_in, path_in)) break;
-        if(!flipper_format_buffered_file_open_always(ff_out, path_out)) break;
-        if(!flipper_format_write_header_cstr(ff_out, INFRARED_FILE_HEADER, INFRARED_FILE_VERSION))
-            break;
-
-        size_t i;
-        for(i = 0; i < signal_count; ++i) {
-            // Load signals one by one from the input file
-            if(!infrared_signal_read(signal, ff_in, signal_name)) break;
-            // Skip the signal that needs to be deleted ...
-            if(i == index) continue;
-            // ... But copy all others to the output file
-            if(!infrared_signal_save(signal, ff_out, furi_string_get_cstr(signal_name))) break;
-        }
-
-        if(i != signal_count) break;
-
-        if(!flipper_format_buffered_file_close(ff_out)) break;
-        if(!flipper_format_buffered_file_close(ff_in)) break;
-
-        const FS_Error status = storage_common_rename(storage, path_out, path_in);
-        if(status != FSE_OK && status != FSE_EXIST) break;
-
-        InfraredSignalNameArray_remove_v(remote->signal_names, index, index + 1);
-        success = true;
-    } while(false);
-
-    furi_string_free(signal_name);
-    infrared_signal_free(signal);
-
-    flipper_format_free(ff_out);
-    flipper_format_free(ff_in);
-
-    furi_record_close(RECORD_STORAGE);
-
-    return success;
+    return infrared_remote_batch_start(
+        remote, infrared_remote_delete_signal_callback, &user_context);
 }
 
 void infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index) {
