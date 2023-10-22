@@ -173,6 +173,27 @@ For example, if my ssid was "wifiball" and not broadcast, and the password was
 Message: WIFI:S:wifiball;P:pa$$\:word;T:WPA;H:true;
 ```
 
+## Example: vCard
+Phones can scan [vCard] qrcodes to automatically add a contact to their address
+book. Starting with qrcode v2, multi-line qrcodes can be created, allowing you
+to create vCards!
+
+```
+Filetype: QRCode
+Version: 1
+Message: BEGIN:VCARD
+Message: VERSION:3.0
+Message: N:Smith;John
+Message: FN:John Smith
+Message: ADR;TYPE=dom,home,postal,parcel:;;123 Example St;Exampleton;CA;90210;
+Message: BDAY:1970-01-01
+Message: TEL;TYPE=pref,voice,msg,cell:+18005551212
+Message: END:VCARD
+```
+
+Check the [vCard] specification to learn about all of the fields and their
+values.
+
 ## Building
 First, clone the [flipperzero-firmware] repo and then clone this repo in the
 `applications_user` directory:
@@ -206,3 +227,4 @@ compiler errors and allow the explicit selection of the qrcode mode.
 [QRCode]: https://github.com/ricmoo/QRCode
 [qFlipper]: https://docs.flipperzero.one/qflipper
 [Releases]: https://github.com/bmatcuk/flipperzero-qrcode/releases/latest
+[vCard]: https://www.evenx.com/vcard-3-0-format-specification
