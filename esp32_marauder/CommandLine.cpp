@@ -6,14 +6,16 @@ CommandLine::CommandLine() {
 void CommandLine::RunSetup() {
   Serial.println(this->ascii_art);
 
-  Serial.println(F("\n\n--------------------------------\n"));
-  Serial.println(F("         ESP32 Marauder      \n"));
-  Serial.println("            " + version_number + "\n");
+  Serial.println(F("--------------------------------------------\n"));
+  Serial.println(F(" [MALVEKE] GAME BOY Tools for Flipper Zero \n"));
+  Serial.println(F("             ESP32 Marauder       \n"));
+  Serial.println("                " + version_number + "\n");
   #ifdef WRITE_PACKETS_SERIAL
-    Serial.println(F("           >> Serial      \n"));
+    Serial.println(F("              >> Serial      \n"));
   #endif
-  Serial.println(F("       By: justcallmekoko\n"));
-  Serial.println(F("--------------------------------\n\n"));
+  Serial.println(F("           By: justcallmekoko\n"));
+  Serial.println(F("--------------------------------------------\n\n"));
+  
   
   Serial.print("> ");
 }

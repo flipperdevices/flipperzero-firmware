@@ -1,11 +1,12 @@
 import { Transport, ESPLoader } from "esptool-js";
 import {
   FlashError,
-  FlashState,
-  Manifest,
   FlashStateType,
 } from "./const";
-import { sleep } from "./util/sleep";
+import { sleep } from "./sleep";
+import { Terminal } from "xterm";
+import { FitAddon } from 'xterm-addon-fit';
+
 
 const resetTransport = async (transport) => {
   await transport.device.setSignals({
@@ -37,10 +38,24 @@ export const flash = async (
     });
 
   const transport = new Transport(port);
+  const terminal = document.getElementById("terminal");
+  const term = new Terminal({ rows: 8 });
+  const fitAddon = new FitAddon();
+  term.loadAddon(fitAddon);
+  //  Fix methods
+  term.clean = function() {
+    this.clear();
+  }
+  term.writeLine = function (value)  {
+    this.writeln(value);
+  }
+  term.open(terminal);
+  fitAddon.fit();
   const esploader = new ESPLoader({
     transport,
     baudrate: 115200,
     romBaudrate: 115200,
+    terminal: term
   });
 
   // For debugging
@@ -56,7 +71,6 @@ export const flash = async (
     await esploader.main_fn();
     await esploader.flash_id();
   } catch (err) {
-    console.error(err);
     fireStateEvent({
       state: FlashStateType.ERROR,
       message:
@@ -109,10 +123,13 @@ export const flash = async (
     details: { done: false },
   });
 
-  const manifestURL = new URL(manifestPath, location.toString()).toString();
+  // const manifestURL = new URL(manifestPath, location.toString()).toString();
   const filePromises = build.parts.map(async (part) => {
-    const url = new URL(part.path, manifestURL).toString();
-    const resp = await fetch(url);
+    
+    // const url = new URL(`/firmware/${part.path}`).toString();
+    console.log('firmware:',`/firmware/${part.path}`)
+
+    const resp = await fetch(`/firmware/${part.path}`);
     if (!resp.ok) {
       throw new Error(
         `Downlading firmware ${part.path} failed: ${resp.status}`,
@@ -122,7 +139,7 @@ export const flash = async (
     const reader = new FileReader();
     const blob = await resp.blob();
 
-    return new Promise<string>((resolve) => {
+    return new Promise((resolve) => {
       reader.addEventListener("load", () => resolve(reader.result));
       reader.readAsBinaryString(blob);
     });
