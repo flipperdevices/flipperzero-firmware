@@ -71,6 +71,11 @@ static bool gui_redraw_fs(Gui* gui) {
 }
 
 static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
+    //We dont want to draw the status bar if its hidden.
+    if(gui->hide_statusbar_count > 0) {
+        return;
+    }
+
     ViewPortArray_it_t it;
     uint8_t left_used = 0;
     uint8_t right_used = 0;
@@ -78,11 +83,6 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
     uint8_t right_slim_used = 0;
     uint8_t top_used = 0;
     uint8_t width;
-
-    //We dont want to draw the status bar if its hidden.
-    if(gui->hide_statusbar_count > 0) {
-        return;
-    }
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
         canvas_set_orientation(gui->canvas, CanvasOrientationHorizontalFlip);
