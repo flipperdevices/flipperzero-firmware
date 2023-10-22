@@ -14,7 +14,7 @@
 #include "stm32_sam.h"
 
 #define TAG "SAM"
-#define SAM_SAVE_PATH EXT_PATH("sam.txt")
+#define SAM_SAVE_PATH APP_DATA_PATH("message.txt")
 #define TEXT_BUFFER_SIZE 256
 STM32SAM voice;
 
@@ -89,6 +89,7 @@ static void save_message(FuriString* save_string) {
 
 static bool load_messages() {
     Storage* storage = (Storage*)furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("sam.txt"), SAM_SAVE_PATH);
     File* file = storage_file_alloc(storage);
     uint16_t bytes_read = 0;
     if(storage_file_open(file, SAM_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
