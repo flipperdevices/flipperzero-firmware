@@ -66,7 +66,7 @@ uint8_t send_status = sst_none; // sst_*
 bool cmd_array = false;
 uint8_t cmd_array_idx;
 uint8_t cmd_array_cnt = 0;
-bool cmd_array_hex;
+uint8_t cmd_array_type; //  0 - auto, 1 - hex, 2 - decimal
 uint8_t save_settings = 0;
 uint16_t view_cmd[rwt_max - 1] = {0}; // SetBatch, ReadBatch, Read, WriteBatch
 uint8_t view_x = 0;
@@ -522,10 +522,10 @@ bool nrf24_read_newpacket() {
                 char hex[9];
                 hex[0] = '\0';
                 add_to_str_hex_variable(hex, (uint8_t*)&var, size);
-                if((cmd_array && cmd_array_hex) || furi_string_end_with_str(str, "0x"))
+                if((cmd_array && cmd_array_type == 1) || furi_string_end_with_str(str, "0x"))
                     furi_string_cat_str(str, hex);
                 else {
-                    if(var >= 0 && var <= 9)
+                    if((var >= 0 && var <= 9) || cmd_array_type == 2)
                         furi_string_cat_printf(str, "%ld", var);
                     else
                         furi_string_cat_printf(str, "%ld (%s)", var, hex);
@@ -534,7 +534,7 @@ bool nrf24_read_newpacket() {
             if(cmd_array) {
                 if(--cmd_array_cnt) {
                     furi_string_cat_str(str, ",");
-                    if(cmd_array_hex) furi_string_cat_str(str, "0x");
+                    if(cmd_array_type == 1) furi_string_cat_str(str, "0x");
                     payload[cmd_array_idx] += size; // next array element
                     NRF_repeat = -1;
                     send_status = sst_sending; // Will be send after delay_between_pkt
@@ -599,7 +599,7 @@ bool fill_payload(char* p, uint8_t* idx_i, int32_t var_n) {
                 len = end - p;
             else {
                 len = strlen(p);
-                if(*(p + len - 1) == '#') len--;
+                if(*(p + len - 1) == '#' || *(p + len - 1) == '$') len--;
             }
             b = subs_constant(p, len);
             if(b == VAR_EMPTY) {
@@ -612,7 +612,7 @@ bool fill_payload(char* p, uint8_t* idx_i, int32_t var_n) {
             }
         } else if(end == p) {
             idx += payload_struct[fld];
-        } else if(*p == '#') { // value in Hexadecimal, end string
+        } else if(*p == '#' || *p == '$') { // value forced in Hex/Dec, end string
             break;
         } else {
             ERR = 2;
@@ -654,9 +654,10 @@ bool Run_Read_cmd(FuriString* cmd) {
     furi_string_set_strn(
         fs, (char*)furi_string_get_cstr(cmd), p - (char*)furi_string_get_cstr(cmd));
     furi_string_cat_str(fs, ": ");
-    bool hexval;
-    if((hexval = *(p + strlen(p) - 1) == '#'))
-        furi_string_cat_str(fs, "0x"); // value in Hex format
+    uint8_t valtype;
+    char c = *(p + strlen(p) - 1);
+    valtype = c == '#' ? 1 : c == '$' ? 2 : 0;
+    if(valtype == 1) furi_string_cat_str(fs, "0x"); // value in Hex format
     Log[Log_Total++] = fs;
     p++;
     memset(payload, 0, sizeof(payload));
@@ -670,7 +671,7 @@ bool Run_Read_cmd(FuriString* cmd) {
         if(p) {
             cmd_array_cnt = str_to_int(p + 1);
             if(cmd_array_cnt > 1) {
-                cmd_array_hex = hexval;
+                cmd_array_type = valtype;
                 cmd_array = true; // array
             }
         }
@@ -1290,23 +1291,22 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str(canvas, 0, 10, screen_buf);
             if(ListenFields) {
                 char *p2, *p = ListenFields;
-                uint8_t hex, len, *pld = payload_receive;
+                uint8_t valtype, len, *pld = payload_receive;
                 for(uint8_t i = 0; i < 5 && *p; i++) {
-                    hex = false;
                     p2 = strchr(p, ',');
                     if(p2 == NULL) p2 = p + strlen(p);
-                    if(*(p2 - 1) == '#') hex = true;
+                    valtype = *(p2 - 1) == '#' ? 1 : *(p2 - 1) == '$' ? 2 : 0;
                     memcpy(screen_buf, p, len = p2 - p);
                     strcpy(screen_buf + len, ": ");
                     if(ListenNew) {
                         len = payload_struct[i];
                         int32_t n = get_payload_receive_field(pld, len);
-                        if(hex) {
+                        if(valtype == 1) {
                             strcat(screen_buf, "0x");
                             add_to_str_hex_variable(screen_buf, pld, len);
                         } else {
                             snprintf(screen_buf + strlen(screen_buf), 20, "%ld", n);
-                            if(n > 9) {
+                            if(n > 9 && valtype == 0) {
                                 strcat(screen_buf, " (");
                                 add_to_str_hex_variable(screen_buf, pld, len);
                                 strcat(screen_buf, ")");

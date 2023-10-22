@@ -99,29 +99,31 @@ W: _PORTA=,0x3B,,WRAM
 R: _PORTB=0x36,,RAM
 W: _PORTB=,0x38,WRAM
 
-R: _LED_Warning=0x71,,RAM
-W: _LED_Warning=,0x71,WRAM
-R: _IRHashLast*2=0x89,,RAM2#
-R: _IRCntLast=0x87,,RAM
-R: _IRHash*2=0x8B,,RAM2#
-R: _SleepTimer=0x8E,,RAM
-R: _FanOn=0x7F,,RAM
-R: _FanOnNext=0x7D,,RAM
-R: _FanOnNextCnt=0x7B,,RAM
-R: _FanOnLast=0x7C,,RAM
+R: _LED_Warning=0x72,,RAM
+W: _LED_Warning=,0x72,WRAM
+R: _IRHashLast*2=0x8A,,RAM2#
+R: _IRCntLast=0x88,,RAM
+R: _IRLastDuration=0x9A,,RAM
+R: _IRLastDurArr[50]=i:0xA6,,RAM$
+R: _IRHash*2=0x8C,,RAM2#
+R: _SleepTimer=0x8F,,RAM
+R: _FanOn=0x80,,RAM
+R: _FanOnNext=0x7E,,RAM
+R: _FanOnNextCnt=0x7C,,RAM
+R: _FanOnLast=0x7D,,RAM
 
-R: _OutSpeedMax=0x90,,RAM
-W: _OutSpeedMax=,0x90,WRAM
+R: _OutSpeedMax=0x91,,RAM
+W: _OutSpeedMax=,0x91,WRAM
 
-R: _Fanspeed=0x7E,,RAM
+R: _Fanspeed=0x7F,,RAM
 R: _SSR_full_period*2=0x64,,RAM2
 
-R: _PulseDelayAfterZero*2=0x9F,,RAM2
-W: _PulseDelayAfterZero*2=,0x9F,WRAM2
-R: _PulseWidth*2=0x92,,RAM2
-W: _PulseWidth*2=,0x92,WRAM2
-R: _PulseWidth2=0xA3,,RAM
-W: _PulseWidth2=,0xA3,WRAM
+R: _PulseDelayAfterZero*2=0xA0,,RAM2
+W: _PulseDelayAfterZero*2=,0xA0,WRAM2
+R: _PulseWidth*2=0x93,,RAM2
+W: _PulseWidth*2=,0x93,WRAM2
+R: _PulseWidth2=0xA4,,RAM
+W: _PulseWidth2=,0xA4,WRAM
 
 W: Reset=0xEEEE,14,SET
 
@@ -159,6 +161,6 @@ WBatch: FanCooker Down/Up key idx: FanCookSpIdxDnKey=5;FanCookSpIdxUpKey=6
 WBatch: LED Warning: _LED Warning=0x10
 WBatch: OSCCAL: _OSCCAL=146
 WBatch: CO2 Level: CO2 level={820,910,1000};PauseSetByCO2,min=10
-WBatch: Zero cross EEPROM: SSR_PulseWidth,us=9990;SSR2_PulseWidth,us=0;SSR_PulseSafeTime,us=100;Reset
+WBatch: Zero cross EEPROM: SSR_PulseWidth,us=9990;SSR2_PulseWidth,us=0;SSR_PulseSafeTime,us=120;Reset
 WBatch: Zero cross RAM: _PulseDelayAfterZero=0001;_PulseWidth=200;_PulseWidth2=200
 WBatch: Reset: Reset

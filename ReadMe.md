@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [BLE Spam v3.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - RemovedL [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) since config view makes old app obsolete.
 - New Passport Assets: [An AD Police Backgroud and profile picture & a Skull profile picture (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main)
+- Updated: [NRF24 Batch v2.0 (By vad7)](https://github.com/vad7/nRF24-Batch)
 
 <a name="release">
 
