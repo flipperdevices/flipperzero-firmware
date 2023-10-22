@@ -45,11 +45,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NRF24 Batch v2.0 (By vad7)](https://github.com/vad7/nRF24-Batch)
 - [Added SubGHz Frequency 434040000 (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/990)
 - Updated: [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP) (No Real Changes)
-- Updated: [BLE Spam v3.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 - Updated: [Rubiks Cube Scrambler v1.3 (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [SubGHZ Remote Exit on Back, and Stop Transmit (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/b1b727cff884871356e8a69038cfea523d118701)
 - Updated: [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - Added: [Space Impact WIP v0.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-space-impact)
+- Updated: [BLE Spam v3.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
 
 <a name="release">
 
