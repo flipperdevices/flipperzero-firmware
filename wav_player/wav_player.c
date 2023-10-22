@@ -14,6 +14,8 @@
 
 #include <wav_player_icons.h>
 
+#include <assets_icons.h>
+
 #define TAG "WavPlayer"
 
 #define WAVPLAYER_FOLDER "/ext/wav_player"
