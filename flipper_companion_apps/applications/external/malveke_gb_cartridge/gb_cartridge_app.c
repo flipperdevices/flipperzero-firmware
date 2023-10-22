@@ -37,9 +37,11 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     view_dispatcher_set_navigation_event_callback(app->view_dispatcher, gb_cartridge_app_navigation_event_callback);
     view_dispatcher_set_tick_event_callback(app->view_dispatcher, gb_cartridge_app_tick_event_callback, 100);
     view_dispatcher_set_custom_event_callback(app->view_dispatcher, gb_cartridge_app_custom_event_callback);
-    app->submenu = submenu_alloc();
+    app->submenu = variable_item_list_alloc();
 
     // Set defaults, in case no config loaded
+    app->gameboy_rom_option_selected_index = 0;
+    app->gameboy_rom_option_selected_text = "gb";
     app->haptic = 1;
     app->speaker = 1;
     app->led = 1;
@@ -55,7 +57,7 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->uart = usart_init(app);
     app->lp_uart = lp_uart_init(app);
     
-    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdMenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdMenu, variable_item_list_get_view(app->submenu));
     app->gb_cartridge_startscreen = gb_cartridge_startscreen_alloc();
     view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdStartscreen, gb_cartridge_startscreen_get_view(app->gb_cartridge_startscreen));
     app->gb_cartridge_scene_1 = gb_cartridge_scene_1_alloc();
@@ -87,7 +89,7 @@ void gb_cartridge_app_app_free(GBCartridge* app) {
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdScene1);
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, GBCartridgeViewIdSettings);
-    submenu_free(app->submenu);
+    variable_item_list_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);

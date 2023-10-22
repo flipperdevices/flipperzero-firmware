@@ -33,6 +33,8 @@ typedef struct {
     
     char* cart_dump_rom_filename_sequential;
     bool rx_active;
+
+    char* gameboy_rom_option_selected_text;
 } GameBoyCartridgeROMWriteModel;
 
 // void dump_rom_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
@@ -144,7 +146,7 @@ void gb_cartridge_scene_4_draw(Canvas* canvas, GameBoyCartridgeROMWriteModel* mo
     if(model->total_rom > 0 && model->transfered > 0) {
         progress = model->transfered * 100 / model->total_rom;
     }
-    snprintf(progressText, sizeof(progressText), "%d%% Write ROM...", progress);
+    snprintf(progressText, sizeof(progressText), "%d%% Write ROM... GB: %s", progress, model->gameboy_rom_option_selected_text);
     canvas_draw_str_aligned(canvas, 128 / 2, 0, AlignCenter, AlignTop, progressText);
     canvas_set_font(canvas, FontSecondary);
 
@@ -238,7 +240,7 @@ bool gb_cartridge_scene_4_input(InputEvent* event, void* context) {
                         furi_string_set(path, MALVEKE_APP_FOLDER);
                         DialogsFileBrowserOptions browser_options;
                         dialog_file_browser_set_basic_options(
-                            &browser_options, ".sav", NULL);
+                            &browser_options, app->gameboy_rom_option_selected_text, NULL);
                         browser_options.base_path = MALVEKE_APP_FOLDER;
                         browser_options.skip_assets = true;
 
@@ -287,6 +289,8 @@ void gb_cartridge_scene_4_enter(void* context) {
         {
             
             UNUSED(model);
+            gb_cartridge_scene_4_model_init(model);
+            model->gameboy_rom_option_selected_text = app->gameboy_rom_option_selected_text;
 
             
             

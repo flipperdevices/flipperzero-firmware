@@ -45,7 +45,7 @@ typedef struct {
     Storage* storage;
     NotificationApp* notification;
     ViewDispatcher* view_dispatcher;
-    Submenu* submenu;
+    VariableItemList* submenu;
     bool need_to_prompt_settings_init;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
@@ -74,6 +74,9 @@ typedef struct {
 
     File* cart_rom;
     File* cart_ram;
+
+    uint32_t gameboy_rom_option_selected_index;
+    char* gameboy_rom_option_selected_text;
 } GBCartridge;
 
 
@@ -107,4 +110,10 @@ typedef enum {
     GBCartridgeSettingsOff,
     GBCartridgeSettingsOn,
 } GBCartridgeSettingsStoreState;
+
+typedef enum {
+    GBCartridgeRomOptionGB,
+    GBCartridgeRomOptionGBC,
+} GBCartridgeRomOptionState;
+
 

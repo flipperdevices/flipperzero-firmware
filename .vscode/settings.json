@@ -52,6 +52,7 @@
         "malveke_notifications.h": "c",
         "gb_cartridge_scene_4.h": "c",
         "gb_cartridge_speaker.h": "c",
-        "sequential_file.h": "c"
+        "sequential_file.h": "c",
+        "ctype.h": "c"
     }
 }
