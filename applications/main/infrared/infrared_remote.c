@@ -75,12 +75,6 @@ size_t infrared_remote_get_signal_count(const InfraredRemote* remote) {
     return StringArray_size(remote->signal_names);
 }
 
-InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index) {
-    UNUSED(remote);
-    UNUSED(index);
-    furi_crash("infrared_remote_get_button() not implemented");
-}
-
 const char* infrared_remote_get_signal_name(const InfraredRemote* remote, size_t index) {
     furi_assert(index < infrared_remote_get_signal_count(remote));
     return *StringArray_cget(remote->signal_names, index);

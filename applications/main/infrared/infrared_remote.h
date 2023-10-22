@@ -1,7 +1,6 @@
 #pragma once
 
 #include "infrared_signal.h"
-#include "infrared_remote_button.h"
 
 typedef struct InfraredRemote InfraredRemote;
 
@@ -34,8 +33,6 @@ bool infrared_remote_rename(InfraredRemote* remote, const char* new_path);
 bool infrared_remote_remove(InfraredRemote* remote);
 
 // DEPRECATED
-InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index);
-
 bool infrared_remote_find_signal_by_name(
     const InfraredRemote* remote,
     const char* name,
