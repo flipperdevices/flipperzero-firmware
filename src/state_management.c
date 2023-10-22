@@ -1,5 +1,6 @@
 #include <furi_hal.h> // For RTC handling
 
+#include "constants.h"
 #include "state_management.h"
 #include "save_restore.h"
 
@@ -24,4 +25,23 @@ void persist_state(struct GameState *game_state) {
     if (!result) {
         furi_crash("Unable to save to storage");
     }
+}
+
+static void _generate_new_random_event(uint32_t timestamp, struct GameState *game_state, struct GameEvents *game_events) {
+    UNUSED(timestamp);
+    UNUSED(game_state);
+    UNUSED(game_events);
+    return;
+}
+
+void generate_new_random_events(struct GameState *game_state, struct GameEvents *game_events) {
+    uint32_t current_timestamp = get_current_timestamp();
+    _generate_new_random_event(current_timestamp, game_state, game_events);
+    return;
+}
+
+bool process_events(struct GameState *game_state, struct GameEvents game_events) {
+    UNUSED(game_state);
+    UNUSED(game_events);
+    return false;
 }

@@ -68,6 +68,9 @@ int32_t matagotchi_app(void* p) {
     /* Allocate all of the necessary structures */
     struct ApplicationContext *context = context_alloc();
 
+    /* Perform required RTOS init sequences */
+    furi_hal_random_init();
+
     dolphin_deed(DolphinDeedPluginStart);
 
     /* Start the applicaton's main loop. It won't return until the application was requested to exit. */

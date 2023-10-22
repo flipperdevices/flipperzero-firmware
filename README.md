@@ -5,7 +5,6 @@ Tamagotchi like game for Flipper Zero
 
 # TODO
 
-* Create the event struct and a `process_event` function that updates the state
 * Create a fast forward API for state restoration
 * Create timer for random events
 * Create user input events

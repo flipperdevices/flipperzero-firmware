@@ -73,10 +73,19 @@ int32_t secondary_thread(void *ctx)
         // Block until a message is received
         FuriStatus status = furi_message_queue_get(context->threads_message_queue, &message, FuriWaitForever);
         if(status == FuriStatusOk) {
-            // Received something
+          // Received something
             switch(message.type) {
-                case IDLE_TIMEOUT:
-                    context->game_state->next_animation_index++;
+                case IDLE_TIMEOUT: ;
+                    struct GameEvents events;
+                    generate_new_random_events(context->game_state, &events);
+                    if (process_events(context->game_state, events)) {
+                        // There was an update in the game state,
+                        // reset the animation
+                        context->game_state->next_animation_index = 0;
+                    } else {
+                        // Continue with the background animation
+                        context->game_state->next_animation_index++;
+                    }
                     refresh_gui(context->view_port);
                     break;
                 case SAVE_AND_EXIT:

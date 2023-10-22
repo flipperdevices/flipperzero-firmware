@@ -37,4 +37,7 @@ struct GameState {
     uint32_t next_animation_index;
 };
 
+struct GameEvents {
+    uint32_t unused;
+};
 #endif
