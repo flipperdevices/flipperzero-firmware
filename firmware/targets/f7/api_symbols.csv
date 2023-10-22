@@ -257,7 +257,7 @@ Function,+,LL_I2C_Init,ErrorStatus,"I2C_TypeDef*, const LL_I2C_InitTypeDef*"
 Function,-,LL_I2C_StructInit,void,LL_I2C_InitTypeDef*
 Function,-,LL_Init1msTick,void,uint32_t
 Function,+,LL_LPTIM_DeInit,ErrorStatus,LPTIM_TypeDef*
-Function,-,LL_LPTIM_Disable,void,LPTIM_TypeDef*
+Function,+,LL_LPTIM_Disable,void,LPTIM_TypeDef*
 Function,+,LL_LPTIM_Init,ErrorStatus,"LPTIM_TypeDef*, const LL_LPTIM_InitTypeDef*"
 Function,-,LL_LPTIM_StructInit,void,LL_LPTIM_InitTypeDef*
 Function,-,LL_LPUART_DeInit,ErrorStatus,const USART_TypeDef*
