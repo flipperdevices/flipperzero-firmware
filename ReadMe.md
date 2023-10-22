@@ -34,7 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [SD Card Assets now include the dolphin folder with Manifest Switcher files, they can be found here.](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
 - [Improvement to code structure for animation loading (By LeeroysHub)](https://github.com/LeeroysHub/)
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Reverted: [Improvement to code structure for animation loading (By LeeroysHub)] <https://github.com/LeeroysHub/>
+- Reverted: [Improvement to code structure for animation loading (By LeeroysHub)](https://github.com/LeeroysHub/)
 - Updated: [XRemote v1.1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 - Updated commented: [Genie Recorder v2.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder)
 - Added: [99 Bottles (By bolknote)](https://github.com/bolknote/99-Flipper)
@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - RemovedL [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) since config view makes old app obsolete.
 - New Passport Assets: [An AD Police Backgroud and profile picture & a Skull profile picture (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main)
 - Updated: [NRF24 Batch v2.0 (By vad7)](https://github.com/vad7/nRF24-Batch)
+- [Added SubGHz Frequency 434040000, improved No SD images & gui code move (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/990)
 
 <a name="release">
 
