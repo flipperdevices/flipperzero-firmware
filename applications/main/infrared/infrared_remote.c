@@ -2,6 +2,7 @@
 
 #include <m-array.h>
 
+#include <toolbox/m_cstr_dup.h>
 #include <toolbox/path.h>
 #include <storage/storage.h>
 
@@ -10,7 +11,7 @@
 #define INFRARED_FILE_HEADER "IR signals file"
 #define INFRARED_FILE_VERSION (1)
 
-ARRAY_DEF(InfraredSignalNameArray, FuriString*, FURI_STRING_OPLIST);
+ARRAY_DEF(InfraredSignalNameArray, const char*, M_CSTR_DUP_OPLIST);
 
 struct InfraredRemote {
     InfraredSignalNameArray_t signal_names;
@@ -64,7 +65,7 @@ InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t 
 
 const char* infrared_remote_get_signal_name(const InfraredRemote* remote, size_t index) {
     furi_assert(index < infrared_remote_get_signal_count(remote));
-    return furi_string_get_cstr(*InfraredSignalNameArray_cget(remote->signal_names, index));
+    return *InfraredSignalNameArray_cget(remote->signal_names, index);
 }
 
 bool infrared_remote_load_signal(
@@ -107,7 +108,7 @@ bool infrared_remote_find_signal_by_name(
 
     for(InfraredSignalNameArray_it(it, remote->signal_names); !InfraredSignalNameArray_end_p(it);
         InfraredSignalNameArray_next(it), ++i) {
-        if(furi_string_equal(*InfraredSignalNameArray_cref(it), name)) {
+        if(strcmp(*InfraredSignalNameArray_cref(it), name) == 0) {
             *index = i;
             return true;
         }
@@ -130,9 +131,7 @@ bool infrared_remote_append_signal(
         if(!flipper_format_file_open_append(ff, path)) break;
         if(!infrared_signal_save(signal, ff, name)) break;
 
-        FuriString* new_name = *InfraredSignalNameArray_push_new(remote->signal_names);
-        furi_string_set(new_name, name);
-
+        InfraredSignalNameArray_push_back(remote->signal_names, name);
         success = true;
     } while(false);
 
@@ -243,7 +242,7 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
         InfraredSignalNameArray_reset(remote->signal_names);
 
         while(infrared_signal_read_name(ff, tmp)) {
-            InfraredSignalNameArray_push_back(remote->signal_names, tmp);
+            InfraredSignalNameArray_push_back(remote->signal_names, furi_string_get_cstr(tmp));
         }
 
         success = true;
