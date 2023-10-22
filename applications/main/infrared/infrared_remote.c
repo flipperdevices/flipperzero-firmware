@@ -1,6 +1,6 @@
 #include "infrared_remote.h"
 
-#include <m-list.h>
+#include <m-array.h>
 
 #include <toolbox/path.h>
 #include <storage/storage.h>
@@ -10,31 +10,31 @@
 #define INFRARED_FILE_HEADER "IR signals file"
 #define INFRARED_FILE_VERSION (1)
 
-LIST_DEF(InfraredButtonNameList, FuriString*, FURI_STRING_OPLIST);
+ARRAY_DEF(InfraredSignalNameArray, FuriString*, FURI_STRING_OPLIST);
 
 struct InfraredRemote {
-    InfraredButtonNameList_t button_names;
+    InfraredSignalNameArray_t signal_names;
     FuriString* name;
     FuriString* path;
 };
 
 InfraredRemote* infrared_remote_alloc() {
     InfraredRemote* remote = malloc(sizeof(InfraredRemote));
-    InfraredButtonNameList_init(remote->button_names);
+    InfraredSignalNameArray_init(remote->signal_names);
     remote->name = furi_string_alloc();
     remote->path = furi_string_alloc();
     return remote;
 }
 
 void infrared_remote_free(InfraredRemote* remote) {
-    InfraredButtonNameList_clear(remote->button_names);
+    InfraredSignalNameArray_clear(remote->signal_names);
     furi_string_free(remote->path);
     furi_string_free(remote->name);
     free(remote);
 }
 
 void infrared_remote_reset(InfraredRemote* remote) {
-    InfraredButtonNameList_reset(remote->button_names);
+    InfraredSignalNameArray_reset(remote->signal_names);
     furi_string_reset(remote->name);
     furi_string_reset(remote->path);
 }
@@ -53,7 +53,7 @@ const char* infrared_remote_get_path(const InfraredRemote* remote) {
 }
 
 size_t infrared_remote_get_signal_count(const InfraredRemote* remote) {
-    return InfraredButtonNameList_size(remote->button_names);
+    return InfraredSignalNameArray_size(remote->signal_names);
 }
 
 InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index) {
@@ -64,7 +64,7 @@ InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t 
 
 const char* infrared_remote_get_signal_name(const InfraredRemote* remote, size_t index) {
     furi_assert(index < infrared_remote_get_signal_count(remote));
-    return furi_string_get_cstr(*InfraredButtonNameList_cget(remote->button_names, index));
+    return furi_string_get_cstr(*InfraredSignalNameArray_cget(remote->signal_names, index));
 }
 
 bool infrared_remote_load_signal(
@@ -103,11 +103,11 @@ bool infrared_remote_find_signal_by_name(
     const char* name,
     size_t* index) {
     uint32_t i = 0;
-    InfraredButtonNameList_it_t it;
+    InfraredSignalNameArray_it_t it;
 
-    for(InfraredButtonNameList_it(it, remote->button_names); !InfraredButtonNameList_end_p(it);
-        InfraredButtonNameList_next(it), ++i) {
-        if(furi_string_equal(*InfraredButtonNameList_cref(it), name)) {
+    for(InfraredSignalNameArray_it(it, remote->signal_names); !InfraredSignalNameArray_end_p(it);
+        InfraredSignalNameArray_next(it), ++i) {
+        if(furi_string_equal(*InfraredSignalNameArray_cref(it), name)) {
             *index = i;
             return true;
         }
@@ -130,7 +130,7 @@ bool infrared_remote_append_signal(
         if(!flipper_format_file_open_append(ff, path)) break;
         if(!infrared_signal_save(signal, ff, name)) break;
 
-        FuriString* new_name = *InfraredButtonNameList_push_new(remote->button_names);
+        FuriString* new_name = *InfraredSignalNameArray_push_new(remote->signal_names);
         furi_string_set(new_name, name);
 
         success = true;
@@ -240,10 +240,10 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
             break;
 
         infrared_remote_set_path(remote, path);
-        InfraredButtonNameList_reset(remote->button_names);
+        InfraredSignalNameArray_reset(remote->signal_names);
 
         while(infrared_signal_read_name(ff, tmp)) {
-            InfraredButtonNameList_push_back(remote->button_names, tmp);
+            InfraredSignalNameArray_push_back(remote->signal_names, tmp);
         }
 
         success = true;
