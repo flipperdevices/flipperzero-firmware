@@ -11,10 +11,10 @@
 #define INFRARED_FILE_HEADER "IR signals file"
 #define INFRARED_FILE_VERSION (1)
 
-ARRAY_DEF(InfraredSignalNameArray, const char*, M_CSTR_DUP_OPLIST);
+ARRAY_DEF(StringArray, const char*, M_CSTR_DUP_OPLIST);
 
 struct InfraredRemote {
-    InfraredSignalNameArray_t signal_names;
+    StringArray_t signal_names;
     FuriString* name;
     FuriString* path;
 };
@@ -26,45 +26,35 @@ typedef struct {
     FuriString* signal_name;
     InfraredSignal* signal;
     size_t signal_index;
-} InfraredRemoteBatchContext;
+} InfraredBatchContext;
 
-typedef union {
-    struct {
-        size_t index;
-    } delete;
+typedef struct {
+    size_t index;
+    const char* name;
+    const InfraredSignal* signal;
+} InfraredBatchUserContext;
 
-    struct {
-        size_t index;
-        const char* new_name;
-    } rename;
-
-    struct {
-        size_t old_index;
-        size_t new_index;
-    } move;
-} InfraredRemoteUserContext;
-
-typedef bool (*InfraredRemoteBatchCallback)(
-    const InfraredRemoteBatchContext* context,
-    const InfraredRemoteUserContext* user_context);
+typedef bool (*InfraredBatchCallback)(
+    const InfraredBatchContext* context,
+    const InfraredBatchUserContext* user_context);
 
 InfraredRemote* infrared_remote_alloc() {
     InfraredRemote* remote = malloc(sizeof(InfraredRemote));
-    InfraredSignalNameArray_init(remote->signal_names);
+    StringArray_init(remote->signal_names);
     remote->name = furi_string_alloc();
     remote->path = furi_string_alloc();
     return remote;
 }
 
 void infrared_remote_free(InfraredRemote* remote) {
-    InfraredSignalNameArray_clear(remote->signal_names);
+    StringArray_clear(remote->signal_names);
     furi_string_free(remote->path);
     furi_string_free(remote->name);
     free(remote);
 }
 
 void infrared_remote_reset(InfraredRemote* remote) {
-    InfraredSignalNameArray_reset(remote->signal_names);
+    StringArray_reset(remote->signal_names);
     furi_string_reset(remote->name);
     furi_string_reset(remote->path);
 }
@@ -83,7 +73,7 @@ const char* infrared_remote_get_path(const InfraredRemote* remote) {
 }
 
 size_t infrared_remote_get_signal_count(const InfraredRemote* remote) {
-    return InfraredSignalNameArray_size(remote->signal_names);
+    return StringArray_size(remote->signal_names);
 }
 
 InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t index) {
@@ -94,7 +84,7 @@ InfraredRemoteButton* infrared_remote_get_button(InfraredRemote* remote, size_t 
 
 const char* infrared_remote_get_signal_name(const InfraredRemote* remote, size_t index) {
     furi_assert(index < infrared_remote_get_signal_count(remote));
-    return *InfraredSignalNameArray_cget(remote->signal_names, index);
+    return *StringArray_cget(remote->signal_names, index);
 }
 
 bool infrared_remote_load_signal(
@@ -133,11 +123,11 @@ bool infrared_remote_find_signal_by_name(
     const char* name,
     size_t* index) {
     uint32_t i = 0;
-    InfraredSignalNameArray_it_t it;
+    StringArray_it_t it;
 
-    for(InfraredSignalNameArray_it(it, remote->signal_names); !InfraredSignalNameArray_end_p(it);
-        InfraredSignalNameArray_next(it), ++i) {
-        if(strcmp(*InfraredSignalNameArray_cref(it), name) == 0) {
+    for(StringArray_it(it, remote->signal_names); !StringArray_end_p(it);
+        StringArray_next(it), ++i) {
+        if(strcmp(*StringArray_cref(it), name) == 0) {
             *index = i;
             return true;
         }
@@ -160,7 +150,7 @@ bool infrared_remote_append_signal(
         if(!flipper_format_file_open_append(ff, path)) break;
         if(!infrared_signal_save(signal, ff, name)) break;
 
-        InfraredSignalNameArray_push_back(remote->signal_names, name);
+        StringArray_push_back(remote->signal_names, name);
         success = true;
     } while(false);
 
@@ -172,11 +162,11 @@ bool infrared_remote_append_signal(
 
 static bool infrared_remote_batch_start(
     InfraredRemote* remote,
-    InfraredRemoteBatchCallback user_callback,
-    const InfraredRemoteUserContext* user_context) {
+    InfraredBatchCallback user_callback,
+    const InfraredBatchUserContext* user_context) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    InfraredRemoteBatchContext context = {
+    InfraredBatchContext context = {
         .remote = remote,
         .ff_in = flipper_format_buffered_file_alloc(storage),
         .ff_out = flipper_format_buffered_file_alloc(storage),
@@ -211,9 +201,7 @@ static bool infrared_remote_batch_start(
         if(!flipper_format_buffered_file_close(context.ff_in)) break;
 
         const FS_Error status = storage_common_rename(storage, path_out, path_in);
-        if(status != FSE_OK && status != FSE_EXIST) break;
-
-        success = true;
+        success = (status == FSE_OK || status == FSE_EXIST);
     } while(false);
 
     infrared_signal_free(context.signal);
@@ -227,15 +215,14 @@ static bool infrared_remote_batch_start(
 }
 
 static bool infrared_remote_rename_signal_callback(
-    const InfraredRemoteBatchContext* context,
-    const InfraredRemoteUserContext* user_context) {
+    const InfraredBatchContext* context,
+    const InfraredBatchUserContext* user_context) {
     const char* signal_name;
 
-    if(context->signal_index == user_context->rename.index) {
+    if(context->signal_index == user_context->index) {
         // Rename the signal at requested index
-        signal_name = user_context->rename.new_name;
-        InfraredSignalNameArray_set_at(
-            context->remote->signal_names, context->signal_index, signal_name);
+        signal_name = user_context->name;
+        StringArray_set_at(context->remote->signal_names, context->signal_index, signal_name);
     } else {
         // Use the original name otherwise
         signal_name = furi_string_get_cstr(context->signal_name);
@@ -247,24 +234,22 @@ static bool infrared_remote_rename_signal_callback(
 bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const char* new_name) {
     furi_check(index < infrared_remote_get_signal_count(remote));
 
-    const InfraredRemoteUserContext user_context = {
-        .rename =
-            {
-                .index = index,
-                .new_name = new_name,
-            },
+    const InfraredBatchUserContext rename_context = {
+        .index = index,
+        .name = new_name,
+        .signal = NULL,
     };
 
     return infrared_remote_batch_start(
-        remote, infrared_remote_rename_signal_callback, &user_context);
+        remote, infrared_remote_rename_signal_callback, &rename_context);
 }
 
 static bool infrared_remote_delete_signal_callback(
-    const InfraredRemoteBatchContext* context,
-    const InfraredRemoteUserContext* user_context) {
-    if(context->signal_index == user_context->delete.index) {
+    const InfraredBatchContext* context,
+    const InfraredBatchUserContext* user_context) {
+    if(context->signal_index == user_context->index) {
         // Do not save the signal to be deleted, remove it from the signal name list instead
-        InfraredSignalNameArray_remove_v(
+        StringArray_remove_v(
             context->remote->signal_names, context->signal_index, context->signal_index + 1);
     } else {
         // Pass other signals through
@@ -278,15 +263,14 @@ static bool infrared_remote_delete_signal_callback(
 bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index) {
     furi_check(index < infrared_remote_get_signal_count(remote));
 
-    const InfraredRemoteUserContext user_context = {
-        .delete =
-            {
-                .index = index,
-            },
+    const InfraredBatchUserContext delete_context = {
+        .index = index,
+        .name = NULL,
+        .signal = NULL,
     };
 
     return infrared_remote_batch_start(
-        remote, infrared_remote_delete_signal_callback, &user_context);
+        remote, infrared_remote_delete_signal_callback, &delete_context);
 }
 
 void infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index) {
@@ -321,10 +305,10 @@ bool infrared_remote_load(InfraredRemote* remote, const char* path) {
             break;
 
         infrared_remote_set_path(remote, path);
-        InfraredSignalNameArray_reset(remote->signal_names);
+        StringArray_reset(remote->signal_names);
 
         while(infrared_signal_read_name(ff, tmp)) {
-            InfraredSignalNameArray_push_back(remote->signal_names, furi_string_get_cstr(tmp));
+            StringArray_push_back(remote->signal_names, furi_string_get_cstr(tmp));
         }
 
         success = true;
