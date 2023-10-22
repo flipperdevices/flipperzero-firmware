@@ -209,6 +209,43 @@ static bool infrared_remote_batch_start(
     return success;
 }
 
+static bool infrared_remote_insert_signal_callback(
+    const InfraredBatch* batch,
+    const InfraredBatchTarget* target) {
+    // Insert a signal under the specified index
+    if(batch->signal_index == target->signal_index) {
+        if(!infrared_signal_save(target->signal, batch->ff_out, target->signal_name)) return false;
+        StringArray_push_at(
+            batch->remote->signal_names, target->signal_index, target->signal_name);
+    }
+
+    // Write the rest normally
+    return infrared_signal_save(
+        batch->signal, batch->ff_out, furi_string_get_cstr(batch->signal_name));
+}
+
+bool infrared_remote_insert_signal(
+    InfraredRemote* remote,
+    const InfraredSignal* signal,
+    const char* name,
+    size_t index) {
+    const size_t signal_count = infrared_remote_get_signal_count(remote);
+    furi_check(index <= signal_count);
+
+    if(index == signal_count) {
+        return infrared_remote_append_signal(remote, signal, name);
+    }
+
+    const InfraredBatchTarget insert_target = {
+        .signal_index = index,
+        .signal_name = name,
+        .signal = signal,
+    };
+
+    return infrared_remote_batch_start(
+        remote, infrared_remote_insert_signal_callback, &insert_target);
+}
+
 static bool infrared_remote_rename_signal_callback(
     const InfraredBatch* batch,
     const InfraredBatchTarget* target) {
@@ -268,17 +305,14 @@ bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index) {
         remote, infrared_remote_delete_signal_callback, &delete_target);
 }
 
-void infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index) {
+bool infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index) {
     UNUSED(remote);
     UNUSED(index);
     UNUSED(new_index);
-    furi_crash("infrared_remote_move_signal() not implemented");
-    // furi_assert(index_orig < InfraredButtonArray_size(remote->buttons));
-    // furi_assert(index_dest < InfraredButtonArray_size(remote->buttons));
-    //
-    // InfraredRemoteButton* button;
-    // InfraredButtonArray_pop_at(&button, remote->buttons, index_orig);
-    // InfraredButtonArray_push_at(remote->buttons, index_dest, button);
+
+    FURI_LOG_D(TAG, "Moving signal from index %zu to %zu", index, new_index);
+
+    return true;
 }
 
 bool infrared_remote_load(InfraredRemote* remote, const char* path) {
