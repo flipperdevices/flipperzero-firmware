@@ -226,15 +226,37 @@ static bool infrared_remote_batch_start(
     return success;
 }
 
+static bool infrared_remote_rename_signal_callback(
+    const InfraredRemoteBatchContext* context,
+    const InfraredRemoteUserContext* user_context) {
+    const char* signal_name;
+
+    if(context->signal_index == user_context->rename.index) {
+        // Rename the signal at requested index
+        signal_name = user_context->rename.new_name;
+        InfraredSignalNameArray_set_at(
+            context->remote->signal_names, context->signal_index, signal_name);
+    } else {
+        // Use the original name otherwise
+        signal_name = furi_string_get_cstr(context->signal_name);
+    }
+
+    return infrared_signal_save(context->signal, context->ff_out, signal_name);
+}
+
 bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const char* new_name) {
-    UNUSED(remote);
-    UNUSED(index);
-    UNUSED(new_name);
-    furi_crash("infrared_remote_rename_signal() not implemented");
-    // furi_assert(index < InfraredButtonArray_size(remote->buttons));
-    // InfraredRemoteButton* button = *InfraredButtonArray_get(remote->buttons, index);
-    // infrared_remote_button_set_name(button, new_name);
-    // return infrared_remote_store(remote);
+    furi_check(index < infrared_remote_get_signal_count(remote));
+
+    const InfraredRemoteUserContext user_context = {
+        .rename =
+            {
+                .index = index,
+                .new_name = new_name,
+            },
+    };
+
+    return infrared_remote_batch_start(
+        remote, infrared_remote_rename_signal_callback, &user_context);
 }
 
 static bool infrared_remote_delete_signal_callback(
