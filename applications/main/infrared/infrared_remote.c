@@ -229,10 +229,7 @@ bool infrared_remote_insert_signal(
     const InfraredSignal* signal,
     const char* name,
     size_t index) {
-    const size_t signal_count = infrared_remote_get_signal_count(remote);
-    furi_assert(index <= signal_count);
-
-    if(index == signal_count) {
+    if(index >= infrared_remote_get_signal_count(remote)) {
         return infrared_remote_append_signal(remote, signal, name);
     }
 
