@@ -50,6 +50,19 @@ Iso14443_4aError
     return error;
 }
 
+static void iso14443_4a_dump_buffer(const BitBuffer* buf) {
+    const size_t buf_size = bit_buffer_get_size_bytes(buf);
+    FuriString* tmp = furi_string_alloc_printf("ISO14443-3A frame (%zu bytes):", buf_size);
+
+    for(size_t i = 0; i < buf_size; ++i) {
+        furi_string_cat_printf(tmp, " %02X", bit_buffer_get_byte(buf, i));
+    }
+
+    FURI_LOG_D(TAG, "%s", furi_string_get_cstr(tmp));
+
+    furi_string_free(tmp);
+}
+
 Iso14443_4aError iso14443_4a_poller_send_block(
     Iso14443_4aPoller* instance,
     const BitBuffer* tx_buffer,
@@ -68,6 +81,8 @@ Iso14443_4aError iso14443_4a_poller_send_block(
             instance->rx_buffer,
             iso14443_4a_get_fwt_fc_max(instance->data));
 
+        iso14443_4a_dump_buffer(instance->rx_buffer);
+
         if(iso14443_3a_error != Iso14443_3aErrorNone) {
             FURI_LOG_D(TAG, "ISO14443-3A frame failure: error %d", iso14443_3a_error);
             FURI_LOG_D(TAG, "FWT was: %lu", iso14443_4a_get_fwt_fc_max(instance->data));
@@ -76,10 +91,8 @@ Iso14443_4aError iso14443_4a_poller_send_block(
 
         } else if(!iso14443_4_layer_decode_block(
                       instance->iso14443_4_layer, rx_buffer, instance->rx_buffer)) {
-            FURI_LOG_D(TAG, "ISO14443-4 block decode failure\r\nRaw dump:");
-            for(size_t i = 0; i < bit_buffer_get_size_bytes(instance->rx_buffer); ++i) {
-                FURI_LOG_D(TAG, "%02X", bit_buffer_get_byte(instance->rx_buffer, i));
-            }
+            FURI_LOG_D(TAG, "ISO14443-4 block decode failure");
+            iso14443_4a_dump_buffer(instance->rx_buffer);
             error = Iso14443_4aErrorProtocol;
             break;
         }

@@ -21,10 +21,10 @@ MfDesfireError mf_desfire_process_error(Iso14443_4aError error) {
 
 static void mf_desfire_dump_buffer(const BitBuffer* buf) {
     const size_t buf_size = bit_buffer_get_size_bytes(buf);
-    FuriString* tmp = furi_string_alloc_printf("Buffer dump (%zu byte(s)):\r\n", buf_size);
+    FuriString* tmp = furi_string_alloc_printf("Mf Desfire frame (%zu bytes):", buf_size);
 
     for(size_t i = 0; i < buf_size; ++i) {
-        furi_string_cat_printf(tmp, "%02X ", bit_buffer_get_byte(buf, i));
+        furi_string_cat_printf(tmp, " %02X", bit_buffer_get_byte(buf, i));
     }
 
     FURI_LOG_D(TAG, "%s", furi_string_get_cstr(tmp));
@@ -88,7 +88,7 @@ MfDesfireError
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_VERSION);
 
-    FURI_LOG_D(TAG, "Reading version");
+    FURI_LOG_D(TAG, "Read Version");
 
     MfDesfireError error;
 
@@ -117,6 +117,8 @@ MfDesfireError
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_FREE_MEMORY);
 
+    FURI_LOG_D(TAG, "Read Free Memory");
+
     MfDesfireError error;
 
     do {
@@ -139,6 +141,8 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
 
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_KEY_SETTINGS);
+
+    FURI_LOG_D(TAG, "Read Key Settings");
 
     MfDesfireError error;
 
@@ -172,6 +176,8 @@ MfDesfireError mf_desfire_poller_async_read_key_versions(
     MfDesfireError error = MfDesfireErrorNone;
 
     for(uint32_t i = 0; i < count; ++i) {
+        FURI_LOG_D(TAG, "Read Key Version %lu", i);
+
         bit_buffer_set_byte(instance->input_buffer, 1, i);
 
         error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
@@ -195,6 +201,8 @@ MfDesfireError
 
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_APPLICATION_IDS);
+
+    FURI_LOG_D(TAG, "Read Application IDs");
 
     MfDesfireError error;
 
@@ -231,6 +239,8 @@ MfDesfireError mf_desfire_poller_async_select_application(
     bit_buffer_append_bytes(
         instance->input_buffer, (const uint8_t*)id, sizeof(MfDesfireApplicationId));
 
+    FURI_LOG_D(TAG, "Select Application ID %02X%02X%02X", id->data[0], id->data[1], id->data[2]);
+
     MfDesfireError error =
         mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
 
@@ -243,6 +253,8 @@ MfDesfireError
 
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_FILE_IDS);
+
+    FURI_LOG_D(TAG, "Read File IDs");
 
     MfDesfireError error;
 
@@ -279,6 +291,8 @@ MfDesfireError mf_desfire_poller_async_read_file_settings(
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_FILE_SETTINGS);
     bit_buffer_append_byte(instance->input_buffer, id);
+
+    FURI_LOG_D(TAG, "Reading file settings for %X", id);
 
     MfDesfireError error;
 
@@ -335,6 +349,8 @@ MfDesfireError mf_desfire_poller_async_read_file_data(
     bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&size, 3);
 
     MfDesfireError error;
+
+    FURI_LOG_D(TAG, "Reading file data (id = %X)", id);
 
     do {
         error = mf_desfire_send_chunks(instance, instance->input_buffer, instance->result_buffer);
