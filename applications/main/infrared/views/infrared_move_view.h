@@ -6,8 +6,6 @@ typedef struct InfraredMoveView InfraredMoveView;
 
 typedef void (*InfraredMoveCallback)(uint32_t index_old, uint32_t index_new, void* context);
 
-typedef const char* (*InfraredMoveGetItemCallback)(uint32_t index, void* context);
-
 InfraredMoveView* infrared_move_view_alloc(void);
 
 void infrared_move_view_free(InfraredMoveView* debug_view);
