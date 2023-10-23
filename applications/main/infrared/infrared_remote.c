@@ -230,7 +230,7 @@ bool infrared_remote_insert_signal(
     const char* name,
     size_t index) {
     const size_t signal_count = infrared_remote_get_signal_count(remote);
-    furi_check(index <= signal_count);
+    furi_assert(index <= signal_count);
 
     if(index == signal_count) {
         return infrared_remote_append_signal(remote, signal, name);
@@ -264,7 +264,7 @@ static bool infrared_remote_rename_signal_callback(
 }
 
 bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const char* new_name) {
-    furi_check(index < infrared_remote_get_signal_count(remote));
+    furi_assert(index < infrared_remote_get_signal_count(remote));
 
     const InfraredBatchTarget rename_target = {
         .signal_index = index,
@@ -293,7 +293,7 @@ static bool infrared_remote_delete_signal_callback(
 }
 
 bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index) {
-    furi_check(index < infrared_remote_get_signal_count(remote));
+    furi_assert(index < infrared_remote_get_signal_count(remote));
 
     const InfraredBatchTarget delete_target = {
         .signal_index = index,
@@ -306,13 +306,29 @@ bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index) {
 }
 
 bool infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index) {
-    UNUSED(remote);
-    UNUSED(index);
-    UNUSED(new_index);
+    const size_t signal_count = infrared_remote_get_signal_count(remote);
+    furi_assert(index < signal_count);
+    furi_assert(new_index < signal_count);
 
-    FURI_LOG_D(TAG, "Moving signal from index %zu to %zu", index, new_index);
+    if(index == new_index) return true;
 
-    return true;
+    InfraredSignal* signal = infrared_signal_alloc();
+    char* signal_name = strdup(infrared_remote_get_signal_name(remote, index));
+
+    bool success = false;
+
+    do {
+        if(!infrared_remote_load_signal(remote, signal, index)) break;
+        if(!infrared_remote_delete_signal(remote, index)) break;
+        if(!infrared_remote_insert_signal(remote, signal, signal_name, new_index)) break;
+
+        success = true;
+    } while(false);
+
+    free(signal_name);
+    infrared_signal_free(signal);
+
+    return success;
 }
 
 bool infrared_remote_load(InfraredRemote* remote, const char* path) {
