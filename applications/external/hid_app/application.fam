@@ -8,7 +8,7 @@ App(
     fap_icon="hid_usb_10px.png",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="hid",
-    fap_author="Cutch", # If anyone is missing here, please let me know with commit and I will add you, many commits have been made for this app in the past and none of which I remember. Likely has been revised by xMasterX and also has had features added by others. Accelerated Mouse Pointer by LeeroysHub https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643
+    fap_author="Cutch",  # If anyone is missing here, please let me know with commit and I will add you, many commits have been made for this app in the past and none of which I remember. Likely has been revised by xMasterX and also has had features added by others. Accelerated Mouse Pointer by LeeroysHub https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643
     # fap_weburl="https://github.com/flipperdevices/flipperzero-firmware/pull/1330",
     fap_weburl="https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/system/hid_app",
     fap_version=(1, 5),
@@ -25,7 +25,7 @@ App(
     fap_icon="hid_ble_10px.png",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="hid",
-    fap_author="Cutch", # If anyone is missing here, please let me know with commit and I will add you, many commits have been made for this app in the past and none of which I remember. Likely has been revised by xMasterX and also has had features added by others. Accelerated Mouse Pointer by LeeroysHub https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643
+    fap_author="Cutch",  # If anyone is missing here, please let me know with commit and I will add you, many commits have been made for this app in the past and none of which I remember. Likely has been revised by xMasterX and also has had features added by others. Accelerated Mouse Pointer by LeeroysHub https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643
     # fap_weburl="https://github.com/flipperdevices/flipperzero-firmware/pull/1330",
     fap_weburl="https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/system/hid_app",
     fap_version=(1, 5),

@@ -1,5 +1,5 @@
 App(
-    appid="space_impact", 
+    appid="space_impact",
     name="Space Impact",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="impact_game_main",
