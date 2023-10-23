@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - Added: [Space Impact WIP v0.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-space-impact)
 - Updated: [BLE Spam v3.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
+- Updated: [Bluetooth/USB Remote v1.5 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer. Screen Nav is easy now! (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
 
 <a name="release">
 
@@ -305,7 +306,7 @@ $ ./fbt dolphin_ext
 - [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
 - [BG Loader (By twisted-pear)](https://github.com/twisted-pear/bgloader)
 - [BLE Spam v3.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
-- [Bluetooth Remote (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
+- [Bluetooth/USB Remote v1.5 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
 - [BPM Tapper v1.1 (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Brainfuck v1.1 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
