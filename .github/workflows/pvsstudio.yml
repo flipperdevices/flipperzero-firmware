@@ -40,7 +40,7 @@ jobs:
           
       - name: Analyze
         run: |
-          pvs-studio-analyzer analyze @.pvsoptions -f totp/.vscode/compile_commands.json -j -o PVS-Studio.log --disableLicenseExpirationCheck
+          pvs-studio-analyzer analyze @.pvsoptions -f totp/.vscode/compile_commands.json -j -o PVS-Studio.log
       - name: Convert report
         run: |
           plog-converter -t sarif -o pvs-report.sarif PVS-Studio.log
