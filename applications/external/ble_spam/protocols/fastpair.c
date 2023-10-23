@@ -21,17 +21,18 @@ const struct {
     {0x72FB00, "Soundcore Spirit Pro GVA"},
 
     // Custom debug popups
+    {0x87B25F, "Animated Rickroll"},
+    {0x1448C9, "BLM"},
+    {0xE2106F, "FBI"},
     {0xD99CA1, "Flipper Zero"},
     {0x77FF67, "Free Robux"},
     {0xAA187F, "Free VBucks"},
-    {0xDCE9EA, "Rickroll"},
-    {0x87B25F, "Animated Rickroll"},
-    {0x1448C9, "BLM"},
-    {0x13B39D, "Talking Sasquach"},
     {0x7C6CDB, "Obama"},
+    {0xDCE9EA, "Rickroll"},
     {0x005EF9, "Ryanair"},
-    {0xE2106F, "FBI"},
+    {0x13B39D, "Talking Sasquach"},
     {0xB37A62, "Tesla"},
+    {0x92ADC9, "Ton Upgrade Netflix"},
 };
 const uint8_t models_count = COUNT_OF(models);
 
