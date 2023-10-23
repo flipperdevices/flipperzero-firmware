@@ -6,25 +6,21 @@ static void infrared_scene_edit_move_button_callback(
     void* context) {
     InfraredRemote* remote = context;
     furi_assert(remote);
+    // TODO: Emit an event instead
     infrared_remote_move_signal(remote, index_old, index_new);
-}
-
-static const char* infrared_scene_edit_move_get_name_callback(uint32_t index, void* context) {
-    InfraredRemote* remote = context;
-    furi_assert(remote);
-    return infrared_remote_get_signal_name(remote, index);
 }
 
 void infrared_scene_edit_move_on_enter(void* context) {
     Infrared* infrared = context;
     InfraredRemote* remote = infrared->remote;
 
-    infrared_move_view_set_callback(infrared->move_view, infrared_scene_edit_move_button_callback);
+    for(size_t i = 0; i < infrared_remote_get_signal_count(remote); ++i) {
+        infrared_move_view_add_item(
+            infrared->move_view, infrared_remote_get_signal_name(remote, i));
+    }
 
-    uint32_t btn_count = infrared_remote_get_signal_count(remote);
-    infrared_move_view_list_init(
-        infrared->move_view, btn_count, infrared_scene_edit_move_get_name_callback, remote);
-    infrared_move_view_list_update(infrared->move_view);
+    infrared_move_view_set_callback(
+        infrared->move_view, infrared_scene_edit_move_button_callback, remote);
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewMove);
 }
@@ -40,5 +36,6 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
 }
 
 void infrared_scene_edit_move_on_exit(void* context) {
-    UNUSED(context);
+    Infrared* infrared = context;
+    infrared_move_view_reset(infrared->move_view);
 }
