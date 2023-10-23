@@ -62,7 +62,7 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             const char* arg = rpc_system_app_get_data(infrared->rpc_ctx);
             if(arg && (state == InfraredRpcStateLoaded)) {
                 size_t button_index = 0;
-                if(infrared_remote_find_signal_by_name(infrared->remote, arg, &button_index)) {
+                if(infrared_remote_get_signal_index(infrared->remote, arg, &button_index)) {
                     infrared_tx_start_button_index(infrared, button_index);
                     result = true;
                     scene_manager_set_scene_state(

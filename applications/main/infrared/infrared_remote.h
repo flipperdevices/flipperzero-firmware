@@ -13,6 +13,10 @@ const char* infrared_remote_get_path(const InfraredRemote* remote);
 
 size_t infrared_remote_get_signal_count(const InfraredRemote* remote);
 const char* infrared_remote_get_signal_name(const InfraredRemote* remote, size_t index);
+bool infrared_remote_get_signal_index(
+    const InfraredRemote* remote,
+    const char* name,
+    size_t* index);
 
 bool infrared_remote_load_signal(
     const InfraredRemote* remote,
@@ -38,9 +42,3 @@ bool infrared_remote_create(InfraredRemote* remote, const char* path);
 bool infrared_remote_load(InfraredRemote* remote, const char* path);
 bool infrared_remote_rename(InfraredRemote* remote, const char* new_path);
 bool infrared_remote_remove(InfraredRemote* remote);
-
-// DEPRECATED
-bool infrared_remote_find_signal_by_name(
-    const InfraredRemote* remote,
-    const char* name,
-    size_t* index);

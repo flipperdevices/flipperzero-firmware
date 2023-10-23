@@ -111,7 +111,7 @@ bool infrared_remote_load_signal(
     return success;
 }
 
-bool infrared_remote_find_signal_by_name(
+bool infrared_remote_get_signal_index(
     const InfraredRemote* remote,
     const char* name,
     size_t* index) {
