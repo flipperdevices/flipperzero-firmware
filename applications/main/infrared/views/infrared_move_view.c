@@ -128,9 +128,8 @@ static bool infrared_move_view_input_callback(InputEvent* event, void* context) 
             true);
 
         consumed = true;
-    }
 
-    if((event->key == InputKeyOk) && (event->type == InputTypeShort)) {
+    } else if((event->key == InputKeyOk) && (event->type == InputTypeShort)) {
         with_view_model(
             move_view->view,
             InfraredMoveViewModel * model,
@@ -144,26 +143,26 @@ static bool infrared_move_view_input_callback(InputEvent* event, void* context) 
                 model->is_moving = !(model->is_moving);
             },
             true);
+
         consumed = true;
+
+    } else if(event->key == InputKeyBack) {
+        with_view_model(
+            move_view->view,
+            InfraredMoveViewModel * model,
+            {
+                if(model->is_moving && move_view->callback) {
+                    move_view->callback(
+                        model->start_idx, model->current_idx, move_view->callback_context);
+                }
+                model->is_moving = false;
+            },
+            false);
+
+        // Not consuming, Back event is passed thru
     }
 
     return consumed;
-}
-
-static void infrared_move_view_on_exit(void* context) {
-    furi_assert(context);
-    InfraredMoveView* move_view = context;
-
-    with_view_model(
-        move_view->view,
-        InfraredMoveViewModel * model,
-        {
-            if(model->is_moving && move_view->callback) {
-                move_view->callback(
-                    model->start_idx, model->current_idx, move_view->callback_context);
-            }
-        },
-        false);
 }
 
 void infrared_move_view_set_callback(
@@ -205,7 +204,6 @@ InfraredMoveView* infrared_move_view_alloc(void) {
     view_allocate_model(move_view->view, ViewModelTypeLocking, sizeof(InfraredMoveViewModel));
     view_set_draw_callback(move_view->view, infrared_move_view_draw_callback);
     view_set_input_callback(move_view->view, infrared_move_view_input_callback);
-    view_set_exit_callback(move_view->view, infrared_move_view_on_exit);
     view_set_context(move_view->view, move_view);
 
     with_view_model(

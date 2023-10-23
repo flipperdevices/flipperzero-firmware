@@ -4,10 +4,14 @@ static void infrared_scene_edit_move_button_callback(
     uint32_t index_old,
     uint32_t index_new,
     void* context) {
-    InfraredRemote* remote = context;
-    furi_assert(remote);
-    // TODO: Emit an event instead
-    infrared_remote_move_signal(remote, index_old, index_new);
+    Infrared* infrared = context;
+    furi_assert(infrared);
+
+    infrared->app_state.prev_button_index = index_old;
+    infrared->app_state.current_button_index = index_new;
+
+    view_dispatcher_send_custom_event(
+        infrared->view_dispatcher, InfraredCustomEventTypeButtonSelected);
 }
 
 void infrared_scene_edit_move_on_enter(void* context) {
@@ -20,7 +24,7 @@ void infrared_scene_edit_move_on_enter(void* context) {
     }
 
     infrared_move_view_set_callback(
-        infrared->move_view, infrared_scene_edit_move_button_callback, remote);
+        infrared->move_view, infrared_scene_edit_move_button_callback, infrared);
 
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewMove);
 }
@@ -29,8 +33,17 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
     Infrared* infrared = context;
     bool consumed = false;
 
-    UNUSED(event);
-    UNUSED(infrared);
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == InfraredCustomEventTypeButtonSelected) {
+            if(!infrared_remote_move_signal(
+                   infrared->remote,
+                   infrared->app_state.prev_button_index,
+                   infrared->app_state.current_button_index)) {
+                // TODO: Handle error
+            }
+            consumed = true;
+        }
+    }
 
     return consumed;
 }
