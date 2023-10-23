@@ -331,6 +331,31 @@ bool infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t ne
     return success;
 }
 
+bool infrared_remote_create(InfraredRemote* remote, const char* path) {
+    FURI_LOG_I(TAG, "Creating new file: '%s'", path);
+
+    infrared_remote_reset(remote);
+    infrared_remote_set_path(remote, path);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
+
+    bool success = false;
+
+    do {
+        if(!flipper_format_file_open_always(ff, path)) break;
+        if(!flipper_format_write_header_cstr(ff, INFRARED_FILE_HEADER, INFRARED_FILE_VERSION))
+            break;
+
+        success = true;
+    } while(false);
+
+    flipper_format_free(ff);
+    furi_record_close(RECORD_STORAGE);
+
+    return success;
+}
+
 bool infrared_remote_load(InfraredRemote* remote, const char* path) {
     FURI_LOG_I(TAG, "Loading file: '%s'", path);
 

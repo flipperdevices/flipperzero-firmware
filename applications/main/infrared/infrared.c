@@ -254,27 +254,27 @@ bool infrared_add_remote_with_button(
     Infrared* infrared,
     const char* button_name,
     InfraredSignal* signal) {
-    UNUSED(infrared);
-    UNUSED(button_name);
-    UNUSED(signal);
-    furi_crash("infrared_add_remote_with_button() not implemented");
-    // InfraredRemote* remote = infrared->remote;
-    //
-    // FuriString *new_name, *new_path;
-    // new_name = furi_string_alloc_set(INFRARED_DEFAULT_REMOTE_NAME);
-    // new_path = furi_string_alloc_set(INFRARED_APP_FOLDER);
-    //
-    // infrared_find_vacant_remote_name(new_name, furi_string_get_cstr(new_path));
-    // furi_string_cat_printf(
-    //     new_path, "/%s%s", furi_string_get_cstr(new_name), INFRARED_APP_EXTENSION);
-    //
-    // infrared_remote_reset(remote);
-    // infrared_remote_set_name(remote, furi_string_get_cstr(new_name));
-    // infrared_remote_set_path(remote, furi_string_get_cstr(new_path));
-    //
-    // furi_string_free(new_name);
-    // furi_string_free(new_path);
-    // return infrared_remote_append_signal(remote, button_name, signal);
+    InfraredRemote* remote = infrared->remote;
+
+    FuriString* new_name = furi_string_alloc_set(INFRARED_DEFAULT_REMOTE_NAME);
+    FuriString* new_path = furi_string_alloc_set(INFRARED_APP_FOLDER);
+
+    infrared_find_vacant_remote_name(new_name, furi_string_get_cstr(new_path));
+    furi_string_cat_printf(
+        new_path, "/%s%s", furi_string_get_cstr(new_name), INFRARED_APP_EXTENSION);
+
+    bool success = false;
+
+    do {
+        if(!infrared_remote_create(remote, furi_string_get_cstr(new_path))) break;
+        if(!infrared_remote_append_signal(remote, signal, button_name)) break;
+        success = true;
+    } while(false);
+
+    furi_string_free(new_name);
+    furi_string_free(new_path);
+
+    return success;
 }
 
 bool infrared_rename_current_remote(Infrared* infrared, const char* new_name) {

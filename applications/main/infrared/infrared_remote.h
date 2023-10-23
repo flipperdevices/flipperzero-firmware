@@ -34,6 +34,7 @@ bool infrared_remote_rename_signal(InfraredRemote* remote, size_t index, const c
 bool infrared_remote_move_signal(InfraredRemote* remote, size_t index, size_t new_index);
 bool infrared_remote_delete_signal(InfraredRemote* remote, size_t index);
 
+bool infrared_remote_create(InfraredRemote* remote, const char* path);
 bool infrared_remote_load(InfraredRemote* remote, const char* path);
 bool infrared_remote_rename(InfraredRemote* remote, const char* new_path);
 bool infrared_remote_remove(InfraredRemote* remote);
