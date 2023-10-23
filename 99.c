@@ -14,36 +14,34 @@ void beer_render_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
 
     uint8_t font_size = canvas_current_font_height(canvas) - 1;
-    uint8_t pos = ((BeerApp*) ctx)->pos;
+    uint8_t pos = ((BeerApp*)ctx)->pos;
 
     elements_scrollbar(canvas, BEER_MAX - pos, BEER_MAX + 1);
 
-    if (pos == 0) {
+    if(pos == 0) {
         elements_multiline_text_aligned(
-            canvas, 0, 0, AlignLeft, AlignTop,
+            canvas,
+            0,
+            0,
+            AlignLeft,
+            AlignTop,
             "No more bottles of beer on\n"
             "the wall, no more bottles of\n"
             "beer.\n"
             "Go to the store and buy some\n"
             "more, 99 bottles of beer on\n"
-            "the wall."
-        );
+            "the wall.");
     } else {
         FuriString* str = furi_string_alloc();
         furi_string_printf(
-            str,
-            "%d %s on the wall,\n%d %s of beer.",
-            pos, beer_plural(pos), pos, beer_plural(pos)
-        );
+            str, "%d %s on the wall,\n%d %s.", pos, beer_plural(pos), pos, beer_plural(pos));
 
         elements_multiline_text_aligned(
-            canvas, 0, 0, AlignLeft, AlignTop,
-            furi_string_get_cstr(str)
-        );
+            canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(str));
 
         furi_string_printf(str, "Take one down and pass it\naround, ");
 
-        if (--pos > 0) {
+        if(--pos > 0) {
             furi_string_cat_printf(str, "%d", pos);
         } else {
             furi_string_cat_printf(str, "no");
@@ -52,9 +50,7 @@ void beer_render_callback(Canvas* canvas, void* ctx) {
         furi_string_cat_printf(str, " %s\non the wall.", beer_plural(pos));
 
         elements_multiline_text_aligned(
-            canvas, 0, font_size * 3, AlignLeft, AlignTop,
-            furi_string_get_cstr(str)
-        );
+            canvas, 0, font_size * 3, AlignLeft, AlignTop, furi_string_get_cstr(str));
 
         furi_string_free(str);
     }
@@ -104,26 +100,26 @@ int32_t beer_main(void* p) {
             furi_message_queue_get(app->event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
         if(event.type == InputTypeShort) {
-            switch (event.key) {
-                case InputKeyBack:
-                    return 0;
+            switch(event.key) {
+            case InputKeyBack:
+                return 0;
 
-                case InputKeyDown:
-                    if (app->pos > 0) {
-                        app->pos--;
-                    }
+            case InputKeyDown:
+                if(app->pos > 0) {
+                    app->pos--;
+                }
 
-                    break;
+                break;
 
-                case InputKeyUp:
-                    if (app->pos < BEER_MAX) {
-                        app->pos++;
-                    }
+            case InputKeyUp:
+                if(app->pos < BEER_MAX) {
+                    app->pos++;
+                }
 
-                    break;
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
 
             view_port_update(app->view_port);
