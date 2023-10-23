@@ -145,7 +145,7 @@ uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* data) {
 
     uint32_t cuid = 0;
     const uint8_t* cuid_start = data->uid;
-    if(data->uid_len == 7) {
+    if(data->uid_len == ISO14443_3A_UID_7_BYTES) {
         cuid_start = &data->uid[3];
     }
     cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) | (cuid_start[3]);

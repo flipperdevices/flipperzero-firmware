@@ -1861,6 +1861,8 @@ Function,+,iso14443_3a_get_uid,const uint8_t*,"const Iso14443_3aData*, size_t*"
 Function,+,iso14443_3a_is_equal,_Bool,"const Iso14443_3aData*, const Iso14443_3aData*"
 Function,+,iso14443_3a_load,_Bool,"Iso14443_3aData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_3a_poller_read,Iso14443_3aError,"Nfc*, Iso14443_3aData*"
+Function,+,iso14443_3a_poller_send_standard_frame,Iso14443_3aError,"Iso14443_3aPoller*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,iso14443_3a_poller_txrx,Iso14443_3aError,"Iso14443_3aPoller*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,iso14443_3a_reset,void,Iso14443_3aData*
 Function,+,iso14443_3a_save,_Bool,"const Iso14443_3aData*, FlipperFormat*"
 Function,+,iso14443_3a_set_atqa,void,"Iso14443_3aData*, const uint8_t[2]"
