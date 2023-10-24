@@ -175,24 +175,20 @@ static int8_t getAlphanumeric(char c) {
     return -1;
 }
 
-static bool isAlphanumeric(const char* text, uint16_t length) {
-    while(length != 0) {
-        if(getAlphanumeric(text[--length]) == -1) {
-            return false;
-        }
-    }
-    return true;
-}
+/* static bool isAlphanumeric(const char *text, uint16_t length) { */
+/*     while (length != 0) { */
+/*         if (getAlphanumeric(text[--length]) == -1) { return false; } */
+/*     } */
+/*     return true; */
+/* } */
 
-static bool isNumeric(const char* text, uint16_t length) {
-    while(length != 0) {
-        char c = text[--length];
-        if(c < '0' || c > '9') {
-            return false;
-        }
-    }
-    return true;
-}
+/* static bool isNumeric(const char *text, uint16_t length) { */
+/*     while (length != 0) { */
+/*         char c = text[--length]; */
+/*         if (c < '0' || c > '9') { return false; } */
+/*     } */
+/*     return true; */
+/* } */
 
 // We store the following tightly packed (less 8) in modeInfo
 //               <=9  <=26  <= 40
@@ -703,11 +699,9 @@ static int8_t encodeDataCodewords(
     BitBucket* dataCodewords,
     const uint8_t* text,
     uint16_t length,
+    int8_t mode,
     uint8_t version) {
-    int8_t mode = MODE_BYTE;
-
-    if(isNumeric((char*)text, length)) {
-        mode = MODE_NUMERIC;
+    if(mode == MODE_NUMERIC) {
         bb_appendBits(dataCodewords, 1 << MODE_NUMERIC, 4);
         bb_appendBits(dataCodewords, length, getModeBits(version, MODE_NUMERIC));
 
@@ -728,8 +722,7 @@ static int8_t encodeDataCodewords(
             bb_appendBits(dataCodewords, accumData, accumCount * 3 + 1);
         }
 
-    } else if(isAlphanumeric((char*)text, length)) {
-        mode = MODE_ALPHANUMERIC;
+    } else if(mode == MODE_ALPHANUMERIC) {
         bb_appendBits(dataCodewords, 1 << MODE_ALPHANUMERIC, 4);
         bb_appendBits(dataCodewords, length, getModeBits(version, MODE_ALPHANUMERIC));
 
@@ -853,6 +846,7 @@ uint16_t qrcode_getBufferSize(uint8_t version) {
 int8_t qrcode_initBytes(
     QRCode* qrcode,
     uint8_t* modules,
+    int8_t mode,
     uint8_t version,
     uint8_t ecc,
     uint8_t* data,
@@ -880,7 +874,7 @@ int8_t qrcode_initBytes(
     bb_initBuffer(&codewords, codewordBytes, (int32_t)sizeof(codewordBytes));
 
     // Place the data code words into the buffer
-    int8_t mode = encodeDataCodewords(&codewords, data, length, version);
+    mode = encodeDataCodewords(&codewords, data, length, mode, version);
 
     if(mode < 0) {
         return -1;
@@ -938,14 +932,9 @@ int8_t qrcode_initBytes(
     return 0;
 }
 
-int8_t qrcode_initText(
-    QRCode* qrcode,
-    uint8_t* modules,
-    uint8_t version,
-    uint8_t ecc,
-    const char* data) {
-    return qrcode_initBytes(qrcode, modules, version, ecc, (uint8_t*)data, strlen(data));
-}
+/* int8_t qrcode_initText(QRCode *qrcode, uint8_t *modules, uint8_t version, uint8_t ecc, const char *data) { */
+/*     return qrcode_initBytes(qrcode, modules, version, ecc, (uint8_t*)data, strlen(data)); */
+/* } */
 
 bool qrcode_getModule(QRCode* qrcode, uint8_t x, uint8_t y) {
     if(x >= qrcode->size || y >= qrcode->size) {
