@@ -1,6 +1,3 @@
-[submodule "base_pack/dap_link/lib/free-dap"]
-	path = base_pack/dap_link/lib/free-dap
-	url = https://github.com/ataradov/free-dap.git
 [submodule "base_pack/subbrute"]
 	path = base_pack/subbrute
 	url = https://github.com/DarkFlippers/flipperzero-subbrute.git
