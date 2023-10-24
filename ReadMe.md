@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1018-1512-0.93.1-caf606c.tgz&channel=RM1018-1512-0.93.1-caf606c&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1018-1512-0.93.1-caf606c-NoAnim.tgz&channel=RM1018-1512-0.93.1-caf606c-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1024-0025-0.93.1-dfdda47.tgz&channel=RM1024-0025-0.93.1-dfdda47&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1024-0025-0.93.1-dfdda47-NoAnim.tgz&channel=RM1024-0025-0.93.1-dfdda47-NoAnim&version=0.93.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,31 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-23 23:00 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-23 23:00 EST`
-- [SD Card Assets now include the dolphin folder with Manifest Switcher files, they can be found here.](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
-- [Improvement to code structure for animation loading (By LeeroysHub)](https://github.com/LeeroysHub/)
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Reverted: [Improvement to code structure for animation loading (By LeeroysHub)](https://github.com/LeeroysHub/)
-- Updated: [XRemote v1.1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
-- Updated commented: [Genie Recorder v2.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder)
-- Added: [99 Bottles (By bolknote)](https://github.com/bolknote/99-Flipper)
-- Added: [Coffee-EEPROM (By wh00hw)](https://github.com/wh00hw/Coffee-EEPROM-FAP) For ethical pentest only.
-- Updated: [Authenticator/TOTP v5.5.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator) WOLFSSL UPDATE
-- RemovedL [Apple BLE Spam v1.2 (By Willy-JL & ECTO-1A with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) since config view makes old app obsolete.
-- New Passport Assets: [An AD Police Backgroud and profile picture & a Skull profile picture (By Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main)
-- Updated: [NRF24 Batch v2.0 (By vad7)](https://github.com/vad7/nRF24-Batch)
-- [Added SubGHz Frequency 434040000 (By LeeroysHub)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/990)
-- Updated: [FlipBIP Crypto Wallet v1.14 (By xtruan)](https://github.com/xtruan/FlipBIP) (No Real Changes)
-- Updated: [Rubiks Cube Scrambler v1.3 (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
-- Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [SubGHZ Remote Exit on Back, and Stop Transmit (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/b1b727cff884871356e8a69038cfea523d118701)
-- Updated: [QR Code v2.0 (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
-- Added: [Space Impact WIP v0.2 (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-space-impact)
-- Updated: [Bluetooth/USB Remote v1.5 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer. Screen Nav is easy now! (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
-- OFW: [FastFAP: human readable error log #3156 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3156)
-- OFW: [fbt: glob & git improvements #3151 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3151)
-- Patreon Build Update: The ALL build is being replaced by ANIMSWITCHER. Too many people installing the ALL build and expecting their Flipper to work well without reading warnings on the ReadMe. If you have too many animations, Flipper runs slower.
-- Updated: Accelerated Mouse Pointer Code Improvements (By LeeroysHub / Idea From Willy-JL)
-- Updated: [BLE Spam v3.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [New Android Spam (By John4E656F)](https://github.com/John4E656F/fl-BLE_SPAM/blob/main/protocols/fastpair.c)
-- Updated: [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 
 <a name="release">
 
@@ -499,4 +474,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1018-1512-0.93.1-caf606c.tgz&channel=RM1018-1512-0.93.1-caf606c&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1018-1512-0.93.1-caf606c-NoAnim.tgz&channel=RM1018-1512-0.93.1-caf606c-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1024-0025-0.93.1-dfdda47.tgz&channel=RM1024-0025-0.93.1-dfdda47&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1024-0025-0.93.1-dfdda47-NoAnim.tgz&channel=RM1024-0025-0.93.1-dfdda47-NoAnim&version=0.93.1)
