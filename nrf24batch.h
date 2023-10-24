@@ -11,22 +11,23 @@
 #include <power/power_service/power_i.h>
 
 typedef enum {
-    EventTypeTick,
-    EventTypeKey,
+	EventTypeTick,
+	EventTypeKey,
 } EventType;
 
 typedef struct {
-    EventType type;
-    InputEvent input;
+	EventType type;
+	InputEvent input;
 } PluginEvent;
 
 typedef struct {
-    FuriMutex* mutex;
+	FuriMutex* mutex;
 } PluginState;
 
 typedef struct {
     Gui* gui;
-    Storage* storage;
-    NotificationApp* notification;
-    PluginState* plugin_state;
+	Storage* storage;
+	NotificationApp* notification;
+	PluginState* plugin_state;
 } nRF24Batch;
+
