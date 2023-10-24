@@ -57,7 +57,7 @@ struct Picopass {
 
     char text_store[PICOPASS_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
-    uint8_t byte_input_store[RFAL_PICOPASS_BLOCK_LEN];
+    uint8_t byte_input_store[PICOPASS_BLOCK_LEN];
 
     // Common Views
     Submenu* submenu;
