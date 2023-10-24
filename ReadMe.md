@@ -103,7 +103,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Game15 | ![Games Badge] | [by x27](https://github.com/x27/flipperzerogame15) |  | [![UFW Badge]](https://lab.flipper.net/apps/game15) |
 | Solitaire | ![Games Badge] | [by teeebor](https://github.com/teeebor/flipper_games) |  | ![None Badge] |
 | BlackJack | ![Games Badge] | [by teeebor](https://github.com/teeebor/flipper_games) |  | ![None Badge] |
-| 2048 game | ![Games Badge] | [by eugenekirzhanov](https://github.com/eugenekirzhanov/flipperzero2048game) |  | [![UFW Badge]](https://lab.flipper.net/apps/game_2048) |
+| 2048 game | ![Games Badge] | [by eugenekirzhanov](https://github.com/eugene-kirzhanov/flipper-zero-2048-game) |  | [![UFW Badge]](https://lab.flipper.net/apps/game_2048) |
 | Bomberduck | ![Games Badge] | [by leoneedmorecoffee](https://github.com/leoneedmorecoffee/flipperzerobomberduck) |  | ![None Badge] |
 | JetPack Joyride | ![Games Badge] | [by timstrasser](https://github.com/timstrasser) |  | [![Author Badge]](https://lab.flipper.net/apps/jetpack_game) |
 
