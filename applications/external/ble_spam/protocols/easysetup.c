@@ -81,7 +81,7 @@ void easysetup_make_packet(uint8_t* out_size, uint8_t** out_packet, const Protoc
     const EasysetupCfg* cfg = _cfg ? &_cfg->easysetup : NULL;
 
     EasysetupType type;
-    if(cfg) {
+    if(cfg && cfg->type != 0x00) {
         type = cfg->type;
     } else {
         type = rand() % EasysetupTypeCOUNT;

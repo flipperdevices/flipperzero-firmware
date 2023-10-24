@@ -194,7 +194,7 @@ FuriHalNfcReturn rfalPicoPassPollerWriteBlock(uint8_t blockNum, uint8_t data[8],
     FuriHalNfcReturn ret;
 
     uint8_t txBuf[14] = {RFAL_PICOPASS_CMD_UPDATE, blockNum, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    memcpy(txBuf + 2, data, RFAL_PICOPASS_BLOCK_LEN);
+    memcpy(txBuf + 2, data, PICOPASS_BLOCK_LEN);
     memcpy(txBuf + 10, mac, 4);
 
     uint16_t recvLen = 0;

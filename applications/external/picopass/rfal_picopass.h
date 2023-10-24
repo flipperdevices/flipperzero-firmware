@@ -3,7 +3,7 @@
 #include <furi_hal_nfc.h>
 
 #define RFAL_PICOPASS_UID_LEN 8
-#define RFAL_PICOPASS_BLOCK_LEN 8
+#define PICOPASS_BLOCK_LEN 8
 
 enum {
     // PicoPass command bytes:
@@ -59,7 +59,7 @@ typedef struct {
 } rfalPicoPassCheckRes;
 
 typedef struct {
-    uint8_t data[RFAL_PICOPASS_BLOCK_LEN];
+    uint8_t data[PICOPASS_BLOCK_LEN];
     uint8_t crc[2];
 } rfalPicoPassReadBlockRes;
 

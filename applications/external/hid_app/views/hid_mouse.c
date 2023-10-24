@@ -118,10 +118,11 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
         hid_mouse->view,
         HidMouseModel * model,
         {
-            model->button_press_repeat_count = (event->type == InputTypePress)   ? 1 :
-                                  (event->type == InputTypeRelease) ? 0 :
-                                  (model->button_press_repeat_count >= 10)       ? 10 :
-                                                                      model->button_press_repeat_count + 1;
+            model->button_press_repeat_count =
+                (event->type == InputTypePress)          ? 1 :
+                (event->type == InputTypeRelease)        ? 0 :
+                (model->button_press_repeat_count >= 10) ? 10 :
+                                                           model->button_press_repeat_count + 1;
 
             if(event->key == InputKeyBack) {
                 if(event->type == InputTypeShort) {

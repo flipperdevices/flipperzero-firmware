@@ -52,9 +52,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Bluetooth/USB Remote v1.5 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer. Screen Nav is easy now! (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
 - OFW: [FastFAP: human readable error log #3156 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/3156)
 - OFW: [fbt: glob & git improvements #3151 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3151)
-- Updated: [BLE Spam v3.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [New Android Spam (By John4E656F)](https://github.com/John4E656F/fl-BLE_SPAM/blob/main/protocols/fastpair.c)
 - Patreon Build Update: The ALL build is being replaced by ANIMSWITCHER. Too many people installing the ALL build and expecting their Flipper to work well without reading warnings on the ReadMe. If you have too many animations, Flipper runs slower.
 - Updated: Accelerated Mouse Pointer Code Improvements (By LeeroysHub / Idea From Willy-JL)
+- Updated: [BLE Spam v3.3 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [New Android Spam (By John4E656F)](https://github.com/John4E656F/fl-BLE_SPAM/blob/main/protocols/fastpair.c)
+- Updated: [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass)
 
 <a name="release">
 

@@ -91,7 +91,7 @@ static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const Prot
     const ContinuityCfg* cfg = _cfg ? &_cfg->continuity : NULL;
 
     ContinuityType type;
-    if(cfg) {
+    if(cfg && cfg->type != 0x00) {
         type = cfg->type;
     } else {
         const ContinuityType types[] = {
