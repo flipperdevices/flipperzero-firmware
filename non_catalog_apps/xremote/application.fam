@@ -6,7 +6,7 @@ App(
     requires=["gui", "dialogs", "infrared"],
     stack_size=3 * 1024,
     order=1,
-    fap_version="1.0",
+    fap_version="1.1",
     fap_category="Infrared",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="xc",

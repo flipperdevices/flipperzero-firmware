@@ -48,6 +48,14 @@ const char* xremote_button_get_name(int index) {
     return g_buttons[index].name;
 }
 
+int xremote_button_get_index(const char* name) {
+    size_t i;
+    for(i = 0; i < XREMOTE_BUTTON_COUNT; i++) {
+        if(!strcmp(name, g_buttons[i].name)) return g_buttons[i].index;
+    }
+    return -1;
+}
+
 struct XRemoteView {
     XRemoteClearCallback on_clear;
     XRemoteAppContext* app_ctx;
@@ -55,9 +63,14 @@ struct XRemoteView {
     void* context;
 };
 
+XRemoteView* xremote_view_alloc_empty() {
+    XRemoteView* remote_view = malloc(sizeof(XRemoteView));
+    return remote_view;
+}
+
 XRemoteView*
     xremote_view_alloc(void* app_ctx, ViewInputCallback input_cb, ViewDrawCallback draw_cb) {
-    XRemoteView* remote_view = malloc(sizeof(XRemoteView));
+    XRemoteView* remote_view = xremote_view_alloc_empty();
     remote_view->app_ctx = app_ctx;
     remote_view->view = view_alloc();
 
@@ -89,9 +102,19 @@ void xremote_view_set_context(XRemoteView* rview, void* context, XRemoteClearCal
     rview->on_clear = on_clear;
 }
 
+void xremote_view_set_view(XRemoteView* rview, View* view) {
+    xremote_view_clear_context(rview);
+    rview->view = view;
+}
+
 void* xremote_view_get_context(XRemoteView* rview) {
     furi_assert(rview);
     return rview->context;
+}
+
+void xremote_view_set_app_context(XRemoteView* rview, void* app_ctx) {
+    furi_assert(rview);
+    rview->app_ctx = app_ctx;
 }
 
 void* xremote_view_get_app_context(XRemoteView* rview) {
@@ -113,8 +136,8 @@ View* xremote_view_get_view(XRemoteView* rview) {
 
 InfraredRemoteButton* xremote_view_get_button_by_name(XRemoteView* rview, const char* name) {
     xremote_app_assert(rview->context, NULL);
-    InfraredRemote* remote = (InfraredRemote*)rview->context;
-    return infrared_remote_get_button_by_name(remote, name);
+    XRemoteAppButtons* buttons = (XRemoteAppButtons*)rview->context;
+    return infrared_remote_get_button_by_name(buttons->remote, name);
 }
 
 bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button) {
@@ -133,6 +156,23 @@ bool xremote_view_press_button(XRemoteView* rview, InfraredRemoteButton* button)
 bool xremote_view_send_ir_msg_by_name(XRemoteView* rview, const char* name) {
     InfraredRemoteButton* button = xremote_view_get_button_by_name(rview, name);
     return (button != NULL) ? xremote_view_press_button(rview, button) : false;
+}
+
+void xremote_view_model_context_set(XRemoteView* rview, void* model_ctx) {
+    with_view_model(
+        xremote_view_get_view(rview),
+        XRemoteViewModel * model,
+        {
+            model->context = model_ctx;
+            model->up_pressed = false;
+            model->down_pressed = false;
+            model->left_pressed = false;
+            model->right_pressed = false;
+            model->back_pressed = false;
+            model->ok_pressed = false;
+            model->hold = false;
+        },
+        true);
 }
 
 void xremote_canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, XRemoteIcon icon) {
@@ -261,7 +301,7 @@ void xremote_canvas_draw_button_wide(
     bool pressed,
     uint8_t x,
     uint8_t y,
-    char* text,
+    const char* text,
     XRemoteIcon icon) {
     elements_slightly_rounded_frame(canvas, x + 4, y, 56, 15);
 

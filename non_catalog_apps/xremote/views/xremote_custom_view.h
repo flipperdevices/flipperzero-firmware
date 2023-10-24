@@ -10,4 +10,4 @@
 
 #include "xremote_common_view.h"
 
-XRemoteView* xremote_custom_view_alloc(void* app_ctx);
+XRemoteView* xremote_custom_view_alloc(void* app_ctx, void* model_ctx);

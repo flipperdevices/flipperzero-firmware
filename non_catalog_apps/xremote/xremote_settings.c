@@ -13,18 +13,10 @@ typedef struct {
     XRemoteAppContext* app_ctx;
 } XRemoteSettingsContext;
 
-#define XREMOTE_ORIENTATION_TEXT_HORIZONTAL "Horizontal"
-#define XREMOTE_ORIENTATION_TEXT_VERTICAL "Vertical"
 #define XREMOTE_ORIENTATION_TEXT "Orientation"
-#define XREMOTE_ORIENTATION_INDEX_HORIZONTAL 0
-#define XREMOTE_ORIENTATION_INDEX_VERTICAL 1
 #define XREMOTE_ORIENTATION_MAX 2
 
-#define XREMOTE_EXIT_BEHAVIOR_TEXT_PRESS "Press"
-#define XREMOTE_EXIT_BEHAVIOR_TEXT_HOLD "Hold"
 #define XREMOTE_EXIT_BEHAVIOR_TEXT "Exit Apps"
-#define XREMOTE_EXIT_BEHAVIOR_INDEX_PRESS 0
-#define XREMOTE_EXIT_BEHAVIOR_INDEX_HOLD 1
 #define XREMOTE_EXIT_BEHAVIOR_MAX 2
 
 #define XREMOTE_REPEAT_TEXT "IR Msg Repeat"
@@ -35,45 +27,13 @@ static uint32_t xremote_settings_view_exit_callback(void* context) {
     return XRemoteViewSubmenu;
 }
 
-static uint32_t xremote_settings_get_exit_index(XRemoteAppSettings* settings) {
-    return settings->exit_behavior == XRemoteAppExitPress ? XREMOTE_EXIT_BEHAVIOR_INDEX_PRESS :
-                                                            XREMOTE_EXIT_BEHAVIOR_INDEX_HOLD;
-}
-
-static const char* xremote_settings_get_exit_str(XRemoteAppSettings* settings) {
-    return settings->exit_behavior == XRemoteAppExitPress ? XREMOTE_EXIT_BEHAVIOR_TEXT_PRESS :
-                                                            XREMOTE_EXIT_BEHAVIOR_TEXT_HOLD;
-}
-
-static XRemoteAppExit xremote_settings_get_exit_behavior(uint8_t exit_behavior) {
-    return exit_behavior == XREMOTE_EXIT_BEHAVIOR_INDEX_PRESS ? XRemoteAppExitPress :
-                                                                XRemoteAppExitHold;
-}
-
-static uint32_t xremote_settings_get_orientation_index(XRemoteAppSettings* settings) {
-    return settings->orientation == ViewOrientationHorizontal ?
-               XREMOTE_ORIENTATION_INDEX_HORIZONTAL :
-               XREMOTE_ORIENTATION_INDEX_VERTICAL;
-}
-
-static const char* xremote_settings_get_orientation_str(XRemoteAppSettings* settings) {
-    return settings->orientation == ViewOrientationHorizontal ?
-               XREMOTE_ORIENTATION_TEXT_HORIZONTAL :
-               XREMOTE_ORIENTATION_TEXT_VERTICAL;
-}
-
-static ViewOrientation xremote_settings_get_orientation(uint8_t orientation) {
-    return orientation == XREMOTE_ORIENTATION_INDEX_HORIZONTAL ? ViewOrientationHorizontal :
-                                                                 ViewOrientationVertical;
-}
-
 static void infrared_settings_orientation_changed(VariableItem* item) {
     XRemoteSettingsContext* ctx = variable_item_get_context(item);
     XRemoteAppSettings* settings = ctx->app_ctx->app_settings;
 
-    uint8_t orientation = variable_item_get_current_value_index(item);
-    settings->orientation = xremote_settings_get_orientation(orientation);
-    const char* orientation_str = xremote_settings_get_orientation_str(settings);
+    uint8_t orientation_index = variable_item_get_current_value_index(item);
+    settings->orientation = xremote_app_get_orientation(orientation_index);
+    const char* orientation_str = xremote_app_get_orientation_str(settings->orientation);
 
     variable_item_set_current_value_text(item, orientation_str);
     xremote_app_settings_store(settings);
@@ -95,9 +55,9 @@ static void infrared_settings_exit_changed(VariableItem* item) {
     XRemoteSettingsContext* ctx = variable_item_get_context(item);
     XRemoteAppSettings* settings = ctx->app_ctx->app_settings;
 
-    uint8_t exit = variable_item_get_current_value_index(item);
-    settings->exit_behavior = xremote_settings_get_exit_behavior(exit);
-    const char* exit_str = xremote_settings_get_exit_str(settings);
+    uint8_t exit_index = variable_item_get_current_value_index(item);
+    settings->exit_behavior = xremote_app_get_exit_behavior(exit_index);
+    const char* exit_str = xremote_app_get_exit_str(settings->exit_behavior);
 
     variable_item_set_current_value_text(item, exit_str);
     xremote_app_settings_store(settings);
@@ -125,8 +85,8 @@ static XRemoteSettingsContext* xremote_settings_context_alloc(XRemoteAppContext*
         context);
 
     /* Get application orientation settings */
-    const char* orient_str = xremote_settings_get_orientation_str(settings);
-    uint32_t orient_index = xremote_settings_get_orientation_index(settings);
+    const char* orient_str = xremote_app_get_orientation_str(settings->orientation);
+    uint32_t orient_index = xremote_app_get_orientation_index(settings->orientation);
 
     /* Set current orientation item index and string */
     variable_item_set_current_value_index(item, orient_index);
@@ -154,8 +114,8 @@ static XRemoteSettingsContext* xremote_settings_context_alloc(XRemoteAppContext*
         context);
 
     /* Get exit behavior settings */
-    const char* exit_str = xremote_settings_get_exit_str(settings);
-    uint32_t exit_index = xremote_settings_get_exit_index(settings);
+    const char* exit_str = xremote_app_get_exit_str(settings->exit_behavior);
+    uint32_t exit_index = xremote_app_get_exit_index(settings->exit_behavior);
 
     /* Set exit behavior item index and string */
     variable_item_set_current_value_index(item, exit_index);
