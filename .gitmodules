@@ -7,6 +7,3 @@
 [submodule "base_pack/multi_fuzzer"]
 	path = base_pack/multi_fuzzer
 	url = https://github.com/DarkFlippers/Multi_Fuzzer.git
-[submodule "base_pack/totp/lib/wolfssl"]
-	path = base_pack/totp/lib/wolfssl
-	url = https://github.com/wolfSSL/wolfssl.git
