@@ -3,7 +3,7 @@
 App(
 	# --- App Info
 	appid="wii_ec_anal",
-	name="Wii EC Analyser",
+	name="[WII] EC Analyser",
 
 	# --- Entry point
 	apptype=FlipperAppType.EXTERNAL,
@@ -32,5 +32,5 @@ App(
 #	fap_version=(1,0),
 
 	fap_icon="WiiEC.png",
-	fap_category="Cyborg Systems",
+	fap_category="GPIO",
 )

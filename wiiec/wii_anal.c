@@ -399,7 +399,7 @@ int32_t  wii_ec_anal (void)
 	// ==================== Main event loop ====================
 
 	if (state->run)  do {
-		bool        redraw = false;
+		// bool        redraw = false;
 		FuriStatus  status = FuriStatusErrorTimeout;
 
 		// Wait for a message
@@ -451,13 +451,13 @@ int32_t  wii_ec_anal (void)
 
 			//---------------------------------------------
 			case EVID_WIIEC:  // WiiMote Perhipheral
-				if (evWiiEC(&msg, state))  redraw = true ;
+				evWiiEC(&msg, state);
 				break;
 
 			//---------------------------------------------
 			case EVID_KEY:  // Key events
 				patBacklight(state);
-				if (evKey(&msg, state))  redraw = true;
+				evKey(&msg, state);
 				break;
 
 			//---------------------------------------------
@@ -471,7 +471,7 @@ int32_t  wii_ec_anal (void)
 		}
 
 		// *** Update the GUI screen via the viewport ***
-		if (redraw)  view_port_update(vpp) ;
+		view_port_update(vpp) ;
 
 		// *** Try to release the plugin state variables ***
 		if (furi_mutex_release(state->mutex) != FuriStatusOk) {
@@ -485,13 +485,13 @@ int32_t  wii_ec_anal (void)
 
 bail:
 	// 10. Release system notification queue
-	if (state->notify) {
+	if (state && state->notify) {
 		furi_record_close(RECORD_NOTIFICATION);
 		state->notify = NULL;
 	}
 
 	// 9. Stop the timer
-	if (state->timer) {
+	if (state && state->timer) {
 		(void)furi_timer_stop(state->timer);
 		furi_timer_free(state->timer);
 		state->timer = NULL;
@@ -512,7 +512,7 @@ bail:
 	}
 
 	// 5. Free the mutex
-	if (state->mutex) {
+	if (state && state->mutex) {
 		furi_mutex_free(state->mutex);
 		state->mutex = NULL;
 	}
