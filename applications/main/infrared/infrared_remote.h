@@ -14,7 +14,7 @@
 #include "infrared_signal.h"
 
 /**
- * @brief InfraredRemote opaque type definition.
+ * @brief InfraredRemote opaque type declaration.
  */
 typedef struct InfraredRemote InfraredRemote;
 
