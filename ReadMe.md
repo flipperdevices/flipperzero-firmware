@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `18 Oct 01:12 GMT +3`
+### Apps checked & updated at `25 Oct 00:13 GMT +3`
 
 
 # Default pack
@@ -190,10 +190,11 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | NRF24 Channel Scanner | ![GPIO Badge] | [by htotoo](https://github.com/htotoo/NRF24ChannelScanner) |  | [![Author Badge]](https://lab.flipper.net/apps/nrf24channelscanner) |
 | Mx2125 - Step Counter | ![GPIO Badge] | [by grugnoymeme](https://github.com/grugnoymeme/flipperzero-stepcounter-fap) |  | ![None Badge] |
 | TEA5767 Radio control | ![GPIO Badge] | [original by victormico](https://github.com/victormico/flipperzero-radio/tree/main) | new version [by coolshrimp](https://coolshrimp/flipperzero-firmware-wPlugins/) | ![None Badge] |
+| Coffee EEPROM | ![GPIO Badge] | [by wh00hw](https://github.com/wh00hw/Coffee-EEPROM-FAP) | read more details in original repo | ![None Badge] |
 | IR Remote | ![IR Badge] | [by Hong5489](https://github.com/Hong5489/ir_remote) | improvements [by friebel](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [by d4ve10](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option) | ![None Badge] |
 | IR Intervalometer | ![IR Badge] | [by Nitepone](https://github.com/Nitepone/flipper-intervalometer) |  | [![UFW Badge]](https://lab.flipper.net/apps/sony_intervalometer) |
 | IR Xbox Controller | ![IR Badge] | [by gebeto](https://github.com/gebeto/flipper-xbox-controller) |  | [![Author Badge]](https://lab.flipper.net/apps/xbox_controller) |
-| XRemote | ![IR Badge] | [by kala13x](https://github.com/kala13x/flipper-xremote) | Check out original repo to find usage instructions! | ![Author Badge](https://lab.flipper.net/apps/flipper_xremote) |
+| XRemote | ![IR Badge] | [by kala13x](https://github.com/kala13x/flipper-xremote) | Check out original repo to find usage instructions! | [![Author Badge]](https://lab.flipper.net/apps/flipper_xremote) |
 | R.O.B. Control | ![IR Badge] | [by riney](https://github.com/riney/flip_rob) | Flipper app to control a Nintendo R.O.B./Family Computer Robot | ![None Badge] |
 | BPM Tapper | ![Media Badge] | [by panki27](https://github.com/panki27/bpm-tapper) |  | [![UFW Badge]](https://lab.flipper.net/apps/bpm_tapper) |
 | Flizzer Tracker | ![Media Badge] | [by LTVA1](https://github.com/LTVA1/flizzer_tracker) |  | [![Author Badge]](https://lab.flipper.net/apps/flizzer_tracker) |
