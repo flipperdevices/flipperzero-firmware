@@ -20,10 +20,9 @@ typedef struct {
     bool left_mouse_held;
     bool right_mouse_pressed;
     bool connected;
+    uint8_t button_press_repeat_count;
     HidTransport transport;
 } HidMouseModel;
-
-static uint32_t button_press_repeat_count;
 
 static void hid_mouse_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -119,17 +118,11 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
         hid_mouse->view,
         HidMouseModel * model,
         {
-            //Save a repeat counter for the acceleration of the mouse pointer...
-            if(event->type == InputTypeRelease) {
-                button_press_repeat_count = 0;
-            } else if(event->type == InputTypePress) {
-                button_press_repeat_count = 2;
-            } else if(event->type == InputTypeRepeat) {
-                button_press_repeat_count =
-                    (button_press_repeat_count > 10) ? 10 : button_press_repeat_count + 1;
-            }
+            model->button_press_repeat_count = (event->type == InputTypePress)   ? 1 :
+                                  (event->type == InputTypeRelease) ? 0 :
+                                  (model->button_press_repeat_count >= 10)       ? 10 :
+                                                                      model->button_press_repeat_count + 1;
 
-            //Process the button presses.
             if(event->key == InputKeyBack) {
                 if(event->type == InputTypeShort) {
                     hid_hal_mouse_press(hid_mouse->hid, HID_MOUSE_BTN_RIGHT);
@@ -161,8 +154,7 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->right_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, MOUSE_MOVE_SHORT, 0);
                 } else if(event->type == InputTypeRepeat) {
-                    //Accelerated
-                    for(int32_t i = button_press_repeat_count; i > 1; i = i - 2)
+                    for(uint8_t i = model->button_press_repeat_count; i > 1; i -= 2)
                         hid_hal_mouse_move(hid_mouse->hid, MOUSE_MOVE_LONG, 0);
                 } else if(event->type == InputTypeRelease) {
                     model->right_pressed = false;
@@ -172,8 +164,7 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->left_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, -MOUSE_MOVE_SHORT, 0);
                 } else if(event->type == InputTypeRepeat) {
-                    //Accelerated
-                    for(int32_t i = button_press_repeat_count; i > 1; i = i - 2)
+                    for(uint8_t i = model->button_press_repeat_count; i > 1; i -= 2)
                         hid_hal_mouse_move(hid_mouse->hid, -MOUSE_MOVE_LONG, 0);
                 } else if(event->type == InputTypeRelease) {
                     model->left_pressed = false;
@@ -183,9 +174,9 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->down_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, 0, MOUSE_MOVE_SHORT);
                 } else if(event->type == InputTypeRepeat) {
-                    //Accelerated
-                    for(int32_t i = button_press_repeat_count; i > 1; i = i - 2)
+                    for(uint8_t i = model->button_press_repeat_count; i > 1; i -= 2)
                         hid_hal_mouse_move(hid_mouse->hid, 0, MOUSE_MOVE_LONG);
+
                 } else if(event->type == InputTypeRelease) {
                     model->down_pressed = false;
                 }
@@ -194,8 +185,7 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->up_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, 0, -MOUSE_MOVE_SHORT);
                 } else if(event->type == InputTypeRepeat) {
-                    //Accelerated
-                    for(int32_t i = button_press_repeat_count; i > 1; i = i - 2)
+                    for(uint8_t i = model->button_press_repeat_count; i > 1; i -= 2)
                         hid_hal_mouse_move(hid_mouse->hid, 0, -MOUSE_MOVE_LONG);
                 } else if(event->type == InputTypeRelease) {
                     model->up_pressed = false;
