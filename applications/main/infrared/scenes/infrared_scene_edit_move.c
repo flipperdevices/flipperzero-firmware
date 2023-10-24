@@ -26,7 +26,10 @@ void infrared_scene_edit_move_on_enter(void* context) {
     infrared_move_view_set_callback(
         infrared->move_view, infrared_scene_edit_move_button_callback, infrared);
 
-    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewMove);
+    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationHorizontal);
+    view_stack_add_view(infrared->view_stack, infrared_move_view_get_view(infrared->move_view));
+
+    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 }
 
 bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
@@ -35,10 +38,14 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InfraredCustomEventTypeButtonSelected) {
-            if(!infrared_remote_move_signal(
-                   infrared->remote,
-                   infrared->app_state.prev_button_index,
-                   infrared->app_state.current_button_index)) {
+            infrared_show_loading_popup(infrared, true);
+            const bool button_moved = infrared_remote_move_signal(
+                infrared->remote,
+                infrared->app_state.prev_button_index,
+                infrared->app_state.current_button_index);
+            infrared_show_loading_popup(infrared, false);
+
+            if(!button_moved) {
                 infrared_show_error_message(
                     infrared,
                     "Failed to move\n\"%s\"",
@@ -47,6 +54,7 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_search_and_switch_to_previous_scene(
                     infrared->scene_manager, InfraredSceneRemoteList);
             }
+
             consumed = true;
         }
     }
@@ -56,5 +64,6 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
 
 void infrared_scene_edit_move_on_exit(void* context) {
     Infrared* infrared = context;
+    view_stack_remove_view(infrared->view_stack, infrared_move_view_get_view(infrared->move_view));
     infrared_move_view_reset(infrared->move_view);
 }
