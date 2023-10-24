@@ -12,7 +12,7 @@
 #include <toolbox/stream/file_stream.h>
 
 #include <hex_editor_icons.h>
-// #include <assets_icons.h>
+#include <assets_icons.h>
 
 #define TAG "HexEditor"
 
@@ -159,7 +159,7 @@ int32_t hex_editor_app(void* p) {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            furi_string_set(file_path, "/any");
+            furi_string_set(file_path, STORAGE_EXT_PATH_PREFIX);
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(&browser_options, "*", &I_edit_10px);
