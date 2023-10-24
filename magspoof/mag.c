@@ -92,11 +92,6 @@ static Mag* mag_alloc() {
     view_dispatcher_add_view(
         mag->view_dispatcher, MagViewTextInput, text_input_get_view(mag->text_input));
 
-    // Custom Mag Text Input
-    mag->mag_text_input = mag_text_input_alloc();
-    view_dispatcher_add_view(
-        mag->view_dispatcher, MagViewMagTextInput, mag_text_input_get_view(mag->mag_text_input));
-
     return mag;
 }
 
@@ -148,10 +143,6 @@ static void mag_free(Mag* mag) {
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewTextInput);
     text_input_free(mag->text_input);
 
-    // Custom Mag TextInput
-    view_dispatcher_remove_view(mag->view_dispatcher, MagViewMagTextInput);
-    mag_text_input_free(mag->mag_text_input);
-
     // View Dispatcher
     view_dispatcher_free(mag->view_dispatcher);
 
@@ -179,10 +170,23 @@ int32_t mag_app(void* p) {
 
     mag_make_app_folder(mag);
 
+    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(mag->scene_manager, MagSceneStart);
 
     view_dispatcher_run(mag->view_dispatcher);
+
+    // Disable 5v power
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     mag_free(mag);
 

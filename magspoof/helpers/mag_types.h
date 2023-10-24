@@ -12,7 +12,6 @@ typedef enum {
     MagViewWidget,
     MagViewVariableItemList,
     MagViewTextInput,
-    MagViewMagTextInput,
 } MagView;
 
 typedef enum {

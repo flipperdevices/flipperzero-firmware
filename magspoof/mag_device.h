@@ -7,10 +7,12 @@
 
 #include "mag_icons.h"
 
+#include <assets_icons.h>
+
 #define MAG_DEV_NAME_MAX_LEN 22
 #define MAG_DEV_TRACKS 3
 
-#define MAG_APP_FOLDER ANY_PATH("mag")
+#define MAG_APP_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define MAG_APP_EXTENSION ".mag"
 
 typedef void (*MagLoadingCallback)(void* context, bool state);
