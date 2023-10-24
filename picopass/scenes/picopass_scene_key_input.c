@@ -7,7 +7,7 @@ void picopass_scene_key_input_text_input_callback(void* context) {
     Picopass* picopass = context;
 
     picopass->dev->dev_data.pacs.elite_kdf = true;
-    memcpy(picopass->dev->dev_data.pacs.key, picopass->byte_input_store, RFAL_PICOPASS_BLOCK_LEN);
+    memcpy(picopass->dev->dev_data.pacs.key, picopass->byte_input_store, PICOPASS_BLOCK_LEN);
     view_dispatcher_send_custom_event(picopass->view_dispatcher, PicopassCustomEventByteInputDone);
 }
 
@@ -22,7 +22,7 @@ void picopass_scene_key_input_on_enter(void* context) {
         NULL,
         picopass,
         picopass->byte_input_store,
-        RFAL_PICOPASS_BLOCK_LEN);
+        PICOPASS_BLOCK_LEN);
     view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewByteInput);
 }
 
