@@ -16,21 +16,21 @@ typedef enum {
     ContinuityTypeNearbyInfo = 0x10,
 
     ContinuityTypeCustomCrash,
-    ContinuityTypeCount
+    ContinuityTypeCOUNT
 } ContinuityType;
 
 typedef struct {
     ContinuityType type;
     union {
         struct {
-            uint8_t prefix;
             uint16_t model;
+            uint8_t prefix;
         } proximity_pair;
         struct {
+            uint8_t action;
             uint8_t flags;
-            uint8_t type;
         } nearby_action;
     } data;
 } ContinuityCfg;
 
-extern const BleSpamProtocol ble_spam_protocol_continuity;
+extern const Protocol protocol_continuity;
