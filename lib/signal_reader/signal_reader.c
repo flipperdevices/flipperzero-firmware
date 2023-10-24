@@ -74,7 +74,7 @@ SignalReader* signal_reader_alloc(const GpioPin* gpio_pin, uint32_t size) {
     SignalReader* instance = malloc(sizeof(SignalReader));
 
     instance->pin = gpio_pin;
-    instance->pull = GpioPullNo;
+    instance->pull = GpioPullDown;
 
     instance->buffer_size = size;
     instance->gpio_buffer = malloc(sizeof(uint16_t) * size * 8);
