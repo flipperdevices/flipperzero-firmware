@@ -23,7 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Set up ufbt
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
@@ -31,18 +31,56 @@ jobs:
           sdk-channel: ${{ github.event.inputs.sdk-channel || 'rc'}}
           task: setup
 
-      - name: Build & lint all apps
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+        with:
+          dir_names: true
+          dir_names_max_depth: 1
+          dir_names_exclude_current_dir: true
+          files: |
+            !.*/**
+
+      - name: Build & lint updated apps
+        if: steps.changed-files.outputs.all_changed_and_modified_files != ''
         run: |
+          BUILD_FAILED=0
+          for appdir in ${{ steps.changed-files.outputs.all_changed_and_modified_files }} ; do
+            echo "Building in $appdir"
+            pushd $appdir
+            if ! ufbt build faps ; then
+              echo "::error::Failed to build $appdir"
+              BUILD_FAILED=1
+            fi
+            popd
+          done
+          if [ $BUILD_FAILED -ne 0 ] ; then
+            echo One or more apps failed to build
+            exit 1
+          fi
+
+      - name: Build & lint all apps
+        if: steps.changed-files.outputs.all_changed_and_modified_files == ''
+        run: |
+          BUILD_FAILED=0
           for appdir in $( dirname $( find . -name application.fam ) ) ; do
             echo "Building in $appdir"
             pushd $appdir
-            ufbt lint faps
+            if ! ufbt build faps ; then
+              BUILD_FAILED=1
+              echo "::error::Failed to build $appdir"
+            fi
             popd
           done
-          rm -rf dist || true && mkdir dist
-          for fapfile in $( find . -name "*.fap" ) ; do
-            cp $fapfile dist/
-          done
+          if [ $BUILD_FAILED -ne 0 ] ; then
+            echo One or more apps failed to build
+            exit 1
+          fi
+      
+      - name: Gather build artifacts
+        run: |
+          mkdir -p dist
+          cp -v $( find . -name '*.fap' ) dist/
 
       - name: Upload all .fap files
         uses: actions/upload-artifact@v3
