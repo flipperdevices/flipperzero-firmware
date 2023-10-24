@@ -28,6 +28,7 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
         infrared->text_store[0],
         INFRARED_MAX_BUTTON_NAME_LENGTH,
         true);
+
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewTextInput);
 }
 
@@ -39,14 +40,11 @@ bool infrared_scene_learn_enter_name_on_event(void* context, SceneManagerEvent e
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == InfraredCustomEventTypeTextEditDone) {
-            bool success = false;
-            if(infrared->app_state.is_learning_new_remote) {
-                success =
-                    infrared_add_remote_with_button(infrared, infrared->text_store[0], signal);
-            } else {
-                success = infrared_remote_append_signal(
-                    infrared->remote, signal, infrared->text_store[0]);
-            }
+            const char* signal_name = infrared->text_store[0];
+            const bool success =
+                infrared->app_state.is_learning_new_remote ?
+                    infrared_add_remote_with_button(infrared, signal_name, signal) :
+                    infrared_remote_append_signal(infrared->remote, signal, signal_name);
 
             if(success) {
                 scene_manager_next_scene(scene_manager, InfraredSceneLearnDone);
