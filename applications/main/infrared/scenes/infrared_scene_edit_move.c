@@ -39,7 +39,13 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
                    infrared->remote,
                    infrared->app_state.prev_button_index,
                    infrared->app_state.current_button_index)) {
-                // TODO: Handle error
+                infrared_show_error_message(
+                    infrared,
+                    "Failed to move\n\"%s\"",
+                    infrared_remote_get_signal_name(
+                        infrared->remote, infrared->app_state.current_button_index));
+                scene_manager_search_and_switch_to_previous_scene(
+                    infrared->scene_manager, InfraredSceneRemoteList);
             }
             consumed = true;
         }

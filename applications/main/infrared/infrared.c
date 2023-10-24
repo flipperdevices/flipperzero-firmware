@@ -21,7 +21,7 @@ static const NotificationSequence* infrared_notification_sequences[] = {
 
 static void infrared_make_app_folder(Infrared* infrared) {
     if(!storage_simply_mkdir(infrared->storage, INFRARED_APP_FOLDER)) {
-        dialog_message_show_storage_error(infrared->dialogs, "Cannot create\napp folder");
+        infrared_show_error_message(infrared, "Cannot create\napp folder");
     }
 }
 
@@ -340,6 +340,11 @@ void infrared_tx_start_button_index(Infrared* infrared, size_t button_index) {
 
     if(infrared_remote_load_signal(infrared->remote, infrared->current_signal, button_index)) {
         infrared_tx_start_current(infrared);
+    } else {
+        infrared_show_error_message(
+            infrared,
+            "Failed to load\n\"%s\"",
+            infrared_remote_get_signal_name(infrared->remote, button_index));
     }
 }
 
@@ -393,6 +398,17 @@ void infrared_show_loading_popup(Infrared* infrared, bool show) {
         // Restore default timer priority
         vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
     }
+}
+
+void infrared_show_error_message(Infrared* infrared, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    FuriString* message = furi_string_alloc_vprintf(fmt, args);
+    dialog_message_show_storage_error(infrared->dialogs, furi_string_get_cstr(message));
+
+    furi_string_free(message);
+    va_end(args);
 }
 
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
@@ -449,14 +465,15 @@ int32_t infrared_app(void* p) {
             rpc_system_app_send_started(infrared->rpc_ctx);
             is_rpc_mode = true;
         } else {
-            furi_string_set(infrared->file_path, (const char*)p);
-            is_remote_loaded =
-                infrared_remote_load(infrared->remote, furi_string_get_cstr(infrared->file_path));
+            const char* file_path = (const char*)p;
+            is_remote_loaded = infrared_remote_load(infrared->remote, file_path);
+
             if(!is_remote_loaded) {
-                dialog_message_show_storage_error(
-                    infrared->dialogs, "Failed to load\nselected remote");
+                infrared_show_error_message(infrared, "Failed to load\n\"%s\"", file_path);
                 return -1;
             }
+
+            furi_string_set(infrared->file_path, file_path);
         }
     }
 

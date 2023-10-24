@@ -17,8 +17,15 @@ void infrared_scene_edit_delete_on_enter(void* context) {
 
         const int32_t current_button_index = infrared->app_state.current_button_index;
         furi_check(current_button_index != InfraredButtonIndexNone);
-        // TODO: Handle situation if signal could not be loaded (load it beforehand?)
-        infrared_remote_load_signal(remote, infrared->current_signal, current_button_index);
+
+        if(!infrared_remote_load_signal(remote, infrared->current_signal, current_button_index)) {
+            infrared_show_error_message(
+                infrared,
+                "Failed to load\n\"%s\"",
+                infrared_remote_get_signal_name(remote, current_button_index));
+            scene_manager_previous_scene(infrared->scene_manager);
+            return;
+        }
 
         if(infrared_signal_is_raw(infrared->current_signal)) {
             const InfraredRawSignal* raw =
@@ -89,12 +96,16 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
                 success = infrared_remote_remove(remote);
                 app_state->current_button_index = InfraredButtonIndexNone;
             } else {
-                furi_assert(0);
+                furi_crash(NULL);
             }
 
             if(success) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditDeleteDone);
             } else {
+                infrared_show_error_message(
+                    infrared,
+                    "Failed to\ndelete %s",
+                    edit_target == InfraredEditTargetButton ? "button" : "file");
                 const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneStart};
                 scene_manager_search_and_switch_to_previous_scene_one_of(
                     scene_manager, possible_scenes, COUNT_OF(possible_scenes));

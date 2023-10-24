@@ -76,12 +76,16 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
             } else if(edit_target == InfraredEditTargetRemote) {
                 success = infrared_rename_current_remote(infrared, infrared->text_store[0]);
             } else {
-                furi_assert(0);
+                furi_crash(NULL);
             }
 
             if(success) {
                 scene_manager_next_scene(scene_manager, InfraredSceneEditRenameDone);
             } else {
+                infrared_show_error_message(
+                    infrared,
+                    "Failed to\nrename %s",
+                    edit_target == InfraredEditTargetButton ? "button" : "file");
                 scene_manager_search_and_switch_to_previous_scene(
                     scene_manager, InfraredSceneRemoteList);
             }

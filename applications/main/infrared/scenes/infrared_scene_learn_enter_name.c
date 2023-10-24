@@ -52,7 +52,10 @@ bool infrared_scene_learn_enter_name_on_event(void* context, SceneManagerEvent e
                 scene_manager_next_scene(scene_manager, InfraredSceneLearnDone);
                 dolphin_deed(DolphinDeedIrSave);
             } else {
-                dialog_message_show_storage_error(infrared->dialogs, "Failed to save file");
+                infrared_show_error_message(
+                    infrared,
+                    "Failed to\n%s",
+                    infrared->app_state.is_learning_new_remote ? "create file" : "add signal");
                 const uint32_t possible_scenes[] = {InfraredSceneRemoteList, InfraredSceneStart};
                 scene_manager_search_and_switch_to_previous_scene_one_of(
                     scene_manager, possible_scenes, COUNT_OF(possible_scenes));
