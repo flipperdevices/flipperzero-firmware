@@ -8,12 +8,19 @@ const struct {
     uint32_t value;
     const char* name;
 } models[] = {
+    // Genuine actions
+    {0x00000C, "Set Up Device"},
+
     // Genuine devices
+    {0x00000a, "Anti-Spoofing Test (lmao)"},
+    {0x0001F0, "Bisto CSR8670 Dev Board"},
+    {0x000047, "Arduino 101"},
     {0xCD8256, "Bose NC 700"},
     {0xF52494, "JBL Buds Pro"},
     {0x718FA4, "JBL Live 300TWS"},
     {0x821F66, "JBL Flip 6"},
     {0x92BBBD, "Pixel Buds"},
+    {0x000006, "Google Pixel buds"},
     {0xD446A7, "Sony XM5"},
     {0x2D7A23, "Sony WF-1000XM4"},
     {0x0E30C3, "Razer Hammerhead TWS"},
