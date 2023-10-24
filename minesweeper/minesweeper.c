@@ -48,9 +48,11 @@ typedef enum {
 } Field;
 
 typedef struct {
+  FuriMutex* mutex;
+  DialogsApp* dialogs;
+  NotificationApp* notifications;
   Field minefield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
   TileType playfield[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
-  FuriTimer* timer;
   int cursor_x;
   int cursor_y;
   int mines_left;
@@ -60,13 +62,6 @@ typedef struct {
   uint32_t game_started_tick;
 } Minesweeper;
 
-static void timer_callback(void* ctx) {
-  UNUSED(ctx);
-  NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-  notification_message(notification, &sequence_reset_vibro);
-  furi_record_close(RECORD_NOTIFICATION);
-}
-
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
@@ -75,10 +70,9 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    const Minesweeper* minesweeper_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if (minesweeper_state == NULL) {
-      return;
-    }
+    furi_assert(ctx);
+    const Minesweeper* minesweeper_state = ctx;
+    furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
     FuriString* mineStr;
     FuriString* timeStr;
     mineStr = furi_string_alloc();
@@ -163,7 +157,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     furi_string_free(mineStr);
     furi_string_free(timeStr);
-    release_mutex((ValueMutex*)ctx, minesweeper_state);
+    furi_mutex_release(minesweeper_state->mutex);
 }
 
 static void setup_playfield(Minesweeper* minesweeper_state) {
@@ -179,7 +173,7 @@ static void setup_playfield(Minesweeper* minesweeper_state) {
     int rand_y = rand() % PLAYFIELD_HEIGHT;
     // make sure first guess isn't a mine
     if (minesweeper_state->minefield[rand_x][rand_y] == FieldEmpty &&
-       (minesweeper_state->cursor_x != rand_x && minesweeper_state->cursor_y != rand_y )) {
+      (minesweeper_state->cursor_x != rand_x || minesweeper_state->cursor_y != rand_y)) {
        minesweeper_state->minefield[rand_x][rand_y] = FieldMine;
        mines_left--;
     }
@@ -203,32 +197,26 @@ static void place_flag(Minesweeper* minesweeper_state) {
 
 static bool game_lost(Minesweeper* minesweeper_state) {
   // returns true if the player wants to restart, otherwise false
-  DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
 
   DialogMessage* message = dialog_message_alloc();
-  const char* header_text = "Game Over";
-  const char* message_text = "You hit a mine!";
 
-  dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
-  dialog_message_set_text(message, message_text, 64, 32, AlignCenter, AlignCenter);
+  dialog_message_set_header(message, "Game Over", 64, 3, AlignCenter, AlignTop);
+  dialog_message_set_text(message, "You hit a mine!", 64, 32, AlignCenter, AlignCenter);
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
 
-  dialog_message_set_icon(message, NULL, 0, 10);
+  // Set cursor to initial position
+  minesweeper_state->cursor_x = 0;
+  minesweeper_state->cursor_y = 0;
 
-  NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
-  notification_message(notifications, &sequence_set_vibro_on);
-  furi_record_close(RECORD_NOTIFICATION);
-  furi_timer_start(minesweeper_state->timer, (uint32_t) furi_kernel_get_tick_frequency() * 0.2);
+  notification_message(minesweeper_state->notifications, &sequence_single_vibro);
 
-  DialogMessageButton choice = dialog_message_show(dialogs, message);
+  DialogMessageButton choice = dialog_message_show(minesweeper_state->dialogs, message);
   dialog_message_free(message);
-  furi_record_close(RECORD_DIALOGS);
 
   return choice == DialogMessageButtonCenter;
 }
 
 static bool game_won(Minesweeper* minesweeper_state) {
-  DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
 
   FuriString* tempStr;
   tempStr = furi_string_alloc();
@@ -246,12 +234,10 @@ static bool game_won(Minesweeper* minesweeper_state) {
   dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
   dialog_message_set_text(message, furi_string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
   dialog_message_set_buttons(message, NULL, "Play again", NULL);
-  dialog_message_set_icon(message, NULL, 72, 17);
 
-  DialogMessageButton choice = dialog_message_show(dialogs, message);
+  DialogMessageButton choice = dialog_message_show(minesweeper_state->dialogs, message);
   dialog_message_free(message);
   furi_string_free(tempStr);
-  furi_record_close(RECORD_DIALOGS);
   return choice == DialogMessageButtonCenter;
 }
 
@@ -359,21 +345,6 @@ static void minesweeper_state_init(Minesweeper* const minesweeper_state) {
 
 int32_t minesweeper_app(void* p) {
   UNUSED(p);
-  DialogsApp *dialogs = furi_record_open(RECORD_DIALOGS);
-
-  DialogMessage* message = dialog_message_alloc();
-  const char* header_text = "Minesweeper";
-  const char* message_text = "Hold OK pressed to toggle flags.\ngithub.com/panki27";
-
-  dialog_message_set_header(message, header_text, 64, 3, AlignCenter, AlignTop);
-  dialog_message_set_text(message, message_text, 64, 32, AlignCenter, AlignCenter);
-  dialog_message_set_buttons(message, NULL, "Play", NULL);
-
-  dialog_message_set_icon(message, NULL, 0, 10);
-
-  dialog_message_show(dialogs, message);
-  dialog_message_free(message);
-  furi_record_close(RECORD_DIALOGS);
 
   FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
@@ -381,56 +352,80 @@ int32_t minesweeper_app(void* p) {
   // setup
   minesweeper_state_init(minesweeper_state);
 
-  ValueMutex state_mutex;
-  if (!init_mutex(&state_mutex, minesweeper_state, sizeof(minesweeper_state))) {
+  minesweeper_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+  if(!minesweeper_state->mutex) {
       FURI_LOG_E("Minesweeper", "cannot create mutex\r\n");
       free(minesweeper_state);
       return 255;
   }
   // BEGIN IMPLEMENTATION
 
+  minesweeper_state->dialogs = furi_record_open(RECORD_DIALOGS);
+  minesweeper_state->notifications = furi_record_open(RECORD_NOTIFICATION);
+
+  DialogMessage* message = dialog_message_alloc();
+
+  dialog_message_set_header(message, "Minesweeper", 64, 3, AlignCenter, AlignTop);
+  dialog_message_set_text(
+      message,
+      "Hold OK pressed to toggle flags.\ngithub.com/panki27",
+      64,
+      32,
+      AlignCenter,
+      AlignCenter);
+  dialog_message_set_buttons(message, NULL, "Play", NULL);
+
+  dialog_message_show(minesweeper_state->dialogs, message);
+  dialog_message_free(message);
+
   // Set system callbacks
   ViewPort* view_port = view_port_alloc();
-  view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+  view_port_draw_callback_set(view_port, render_callback, minesweeper_state);
   view_port_input_callback_set(view_port, input_callback, event_queue);
-  minesweeper_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypeOnce, &state_mutex);
 
   // Open GUI and register view_port
-  Gui* gui = furi_record_open("gui");
+  Gui* gui = furi_record_open(RECORD_GUI);
   gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
   PluginEvent event;
   for (bool processing = true; processing;) {
     FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-    Minesweeper* minesweeper_state = (Minesweeper*)acquire_mutex_block(&state_mutex);
     if(event_status == FuriStatusOk) {
       // press events
       if(event.type == EventTypeKey) {
         if(event.input.type == InputTypeShort) {
           switch(event.input.key) {
             case InputKeyUp:
+              furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
               minesweeper_state->cursor_y--;
               if(minesweeper_state->cursor_y < 0) {
                  minesweeper_state->cursor_y = PLAYFIELD_HEIGHT - 1;
               }
+              furi_mutex_release(minesweeper_state->mutex);
               break;
             case InputKeyDown:
+              furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
               minesweeper_state->cursor_y++;
               if(minesweeper_state->cursor_y >= PLAYFIELD_HEIGHT) {
                  minesweeper_state->cursor_y = 0;
               }
+              furi_mutex_release(minesweeper_state->mutex);
               break;
             case InputKeyRight:
+              furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
               minesweeper_state->cursor_x++;
               if(minesweeper_state->cursor_x >= PLAYFIELD_WIDTH) {
                  minesweeper_state->cursor_x = 0;
               }
+              furi_mutex_release(minesweeper_state->mutex);
               break;
             case InputKeyLeft:
+              furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
               minesweeper_state->cursor_x--;
               if(minesweeper_state->cursor_x < 0) {
                  minesweeper_state->cursor_x = PLAYFIELD_WIDTH-1;
               }
+              furi_mutex_release(minesweeper_state->mutex);
               break;
             case InputKeyOk:
               if (!minesweeper_state->game_started) {
@@ -462,7 +457,7 @@ int32_t minesweeper_app(void* p) {
               // Exit the plugin
               processing = false;
               break;
-            case InputKeyMAX:
+            default:
               break;
           }
         } else if (event.input.type == InputTypeLong) {
@@ -476,30 +471,29 @@ int32_t minesweeper_app(void* p) {
               break;
             case InputKeyOk:
               FURI_LOG_D("Minesweeper", "Toggling flag");
+              furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
               place_flag(minesweeper_state);
+              furi_mutex_release(minesweeper_state->mutex);
               break;
             case InputKeyBack:
               processing = false;
               break;
-            case InputKeyMAX:
+            default:
               break;
           }
         }
       }
-    } else {
-      // event timeout
-      ;
     }
     view_port_update(view_port);
-    release_mutex(&state_mutex, minesweeper_state);
   }
   view_port_enabled_set(view_port, false);
   gui_remove_view_port(gui, view_port);
-  furi_record_close("gui");
+  furi_record_close(RECORD_GUI);
+  furi_record_close(RECORD_DIALOGS);
+  furi_record_close(RECORD_NOTIFICATION);
   view_port_free(view_port);
   furi_message_queue_free(event_queue);
-  delete_mutex(&state_mutex);
-  furi_timer_free(minesweeper_state->timer);
+  furi_mutex_free(minesweeper_state->mutex);
   free(minesweeper_state);
 
   return 0;
