@@ -1,4 +1,4 @@
-#include <lib/toolbox/random_name.h>
+#include <toolbox/name_generator.h>
 #include "../mag_i.h"
 
 void mag_scene_input_name_on_enter(void* context) {
@@ -13,7 +13,7 @@ void mag_scene_input_name_on_enter(void* context) {
 
     if(name_is_empty) {
         furi_string_set(mag->file_path, MAG_APP_FOLDER);
-        set_random_name(mag->text_store, MAG_TEXT_STORE_SIZE);
+        name_generator_make_auto(mag->text_store, MAG_TEXT_STORE_SIZE, "Mag");
         furi_string_set(folder_path, MAG_APP_FOLDER);
     } else {
         // TODO: compatible types etc
