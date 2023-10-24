@@ -42,7 +42,9 @@ void scene_config_on_enter(void* _ctx) {
     VariableItemList* list = ctx->variable_item_list;
     variable_item_list_reset(list);
 
-    variable_item_list_set_header(list, ctx->attack->title);
+    // Add item to be used as attack name header
+    variable_item_list_add(list, ctx->attack->title, 0, NULL, NULL);
+    //variable_item_list_set_header(list, ctx->attack->title);
 
     config_bool(list, "Random MAC", &ctx->attack->payload.random_mac);
 
