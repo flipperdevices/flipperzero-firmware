@@ -70,7 +70,10 @@ void infrared_scene_edit_delete_on_enter(void* context) {
     dialog_ex_set_result_callback(dialog_ex, infrared_scene_edit_delete_dialog_result_callback);
     dialog_ex_set_context(dialog_ex, context);
 
-    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewDialogEx);
+    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationHorizontal);
+    view_stack_add_view(infrared->view_stack, dialog_ex_get_view(infrared->dialog_ex));
+
+    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 }
 
 bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event) {
@@ -90,7 +93,9 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
 
             if(edit_target == InfraredEditTargetButton) {
                 furi_assert(app_state->current_button_index != InfraredButtonIndexNone);
+                infrared_show_loading_popup(infrared, true);
                 success = infrared_remote_delete_signal(remote, app_state->current_button_index);
+                infrared_show_loading_popup(infrared, false);
                 app_state->current_button_index = InfraredButtonIndexNone;
             } else if(edit_target == InfraredEditTargetRemote) {
                 success = infrared_remote_remove(remote);
@@ -119,5 +124,5 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
 
 void infrared_scene_edit_delete_on_exit(void* context) {
     Infrared* infrared = context;
-    UNUSED(infrared);
+    view_stack_remove_view(infrared->view_stack, dialog_ex_get_view(infrared->dialog_ex));
 }
