@@ -53,7 +53,10 @@ void infrared_scene_edit_rename_on_enter(void* context) {
         enter_name_length,
         false);
 
-    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewTextInput);
+    view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationHorizontal);
+    view_stack_add_view(infrared->view_stack, text_input_get_view(infrared->text_input));
+
+    view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
 }
 
 bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event) {
@@ -70,8 +73,10 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
             if(edit_target == InfraredEditTargetButton) {
                 const int32_t current_button_index = app_state->current_button_index;
                 furi_assert(current_button_index != InfraredButtonIndexNone);
+                infrared_show_loading_popup(infrared, true);
                 success = infrared_remote_rename_signal(
                     remote, current_button_index, infrared->text_store[0]);
+                infrared_show_loading_popup(infrared, false);
                 app_state->current_button_index = InfraredButtonIndexNone;
             } else if(edit_target == InfraredEditTargetRemote) {
                 success = infrared_rename_current_remote(infrared, infrared->text_store[0]);
@@ -99,6 +104,8 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
 void infrared_scene_edit_rename_on_exit(void* context) {
     Infrared* infrared = context;
     TextInput* text_input = infrared->text_input;
+
+    view_stack_remove_view(infrared->view_stack, text_input_get_view(text_input));
 
     void* validator_context = text_input_get_validator_callback_context(text_input);
     text_input_set_validator(text_input, NULL, NULL);
