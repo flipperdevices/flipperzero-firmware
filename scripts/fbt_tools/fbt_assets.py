@@ -135,14 +135,33 @@ def generate(env):
         BUILDERS={
             "IconBuilder": Builder(
                 action=Action(
-                    '${PYTHON3} ${ASSETS_COMPILER} icons ${ICON_SRC_DIR} ${TARGET.dir} --filename "${ICON_FILE_NAME}"',
+                    [
+                        [
+                            "${PYTHON3}",
+                            "${ASSETS_COMPILER}",
+                            "icons",
+                            "${ICON_SRC_DIR}",
+                            "${TARGET.dir}",
+                            "--filename",
+                            "${ICON_FILE_NAME}",
+                        ],
+                    ],
                     "${ICONSCOMSTR}",
                 ),
                 emitter=icons_emitter,
             ),
             "ProtoBuilder": Builder(
                 action=Action(
-                    "${PYTHON3} ${NANOPB_COMPILER} -q -I${SOURCE.dir.posix} -D${TARGET.dir.posix} ${SOURCES.posix}",
+                    [
+                        [
+                            "${PYTHON3}",
+                            "${NANOPB_COMPILER}",
+                            "-q",
+                            "-I${SOURCE.dir.posix}",
+                            "-D${TARGET.dir.posix}",
+                            "${SOURCES.posix}",
+                        ],
+                    ],
                     "${PROTOCOMSTR}",
                 ),
                 emitter=proto_emitter,
@@ -151,14 +170,32 @@ def generate(env):
             ),
             "DolphinSymBuilder": Builder(
                 action=Action(
-                    "${PYTHON3} ${ASSETS_COMPILER} dolphin -s dolphin_${DOLPHIN_RES_TYPE} ${SOURCE} ${_DOLPHIN_OUT_DIR}",
+                    [
+                        [
+                            "${PYTHON3}",
+                            "${ASSETS_COMPILER}",
+                            "dolphin",
+                            "-s",
+                            "dolphin_${DOLPHIN_RES_TYPE}",
+                            "${SOURCE}",
+                            "${_DOLPHIN_OUT_DIR}",
+                        ],
+                    ],
                     "${DOLPHINCOMSTR}",
                 ),
                 emitter=dolphin_emitter,
             ),
             "DolphinExtBuilder": Builder(
                 action=Action(
-                    "${PYTHON3} ${ASSETS_COMPILER} dolphin ${SOURCE} ${_DOLPHIN_OUT_DIR}",
+                    [
+                        [
+                            "${PYTHON3}",
+                            "${ASSETS_COMPILER}",
+                            "dolphin",
+                            "${SOURCE}",
+                            "${_DOLPHIN_OUT_DIR}",
+                        ],
+                    ],
                     "${DOLPHINCOMSTR}",
                 ),
                 emitter=dolphin_emitter,
@@ -168,6 +205,20 @@ def generate(env):
                     proto_ver_generator,
                     "${PBVERCOMSTR}",
                 ),
+            ),
+            "ManifestBuilder": Builder(
+                action=Action(
+                    [
+                        [
+                            "${PYTHON3}",
+                            "${ASSETS_COMPILER}",
+                            "manifest",
+                            "${TARGET.dir.posix}",
+                            "--timestamp=${GIT_UNIX_TIMESTAMP}",
+                        ]
+                    ],
+                    "${RESMANIFESTCOMSTR}",
+                )
             ),
         }
     )

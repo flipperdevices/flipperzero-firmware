@@ -6,11 +6,14 @@ assetsenv = env.Clone(
     tools=["fbt_assets"],
     FW_LIB_NAME="assets",
     GIT_UNIX_TIMESTAMP=get_git_commit_unix_timestamp(),
+    ASSETS_OUTPUT_DIR=env.Dir("compiled"),
+    ASSETS_SRC_DIR=env.Dir("#/assets"),
 )
 assetsenv.ApplyLibFlags()
 
 icons = assetsenv.CompileIcons(
-    assetsenv.Dir("compiled"), assetsenv.Dir("#/assets/icons")
+    assetsenv["ASSETS_OUTPUT_DIR"],
+    assetsenv["ASSETS_SRC_DIR"].Dir("icons"),
 )
 assetsenv.Alias("icons", icons)
 
@@ -18,7 +21,7 @@ assetsenv.Alias("icons", icons)
 # Protobuf .proto -> .c + .h
 proto_src = assetsenv.Glob("protobuf/*.proto", source=True)
 proto_options = assetsenv.Glob("protobuf/*.options", source=True)
-proto = assetsenv.ProtoBuilder(assetsenv.Dir("compiled"), proto_src)
+proto = assetsenv.ProtoBuilder(assetsenv["ASSETS_OUTPUT_DIR"], proto_src)
 assetsenv.Depends(proto, proto_options)
 # Precious(proto)
 assetsenv.Alias("proto", proto)
@@ -27,8 +30,8 @@ assetsenv.Alias("proto", proto)
 # Internal animations
 
 dolphin_internal = assetsenv.DolphinSymBuilder(
-    assetsenv.Dir("compiled"),
-    assetsenv.Dir("#/assets/dolphin"),
+    assetsenv["ASSETS_OUTPUT_DIR"],
+    assetsenv["ASSETS_SRC_DIR"].Dir("dolphin"),
     DOLPHIN_RES_TYPE="internal",
 )
 assetsenv.Alias("dolphin_internal", dolphin_internal)
@@ -37,8 +40,8 @@ assetsenv.Alias("dolphin_internal", dolphin_internal)
 # Blocking animations
 
 dolphin_blocking = assetsenv.DolphinSymBuilder(
-    assetsenv.Dir("compiled"),
-    assetsenv.Dir("#/assets/dolphin"),
+    assetsenv["ASSETS_OUTPUT_DIR"],
+    assetsenv["ASSETS_SRC_DIR"].Dir("dolphin"),
     DOLPHIN_RES_TYPE="blocking",
 )
 assetsenv.Alias("dolphin_blocking", dolphin_blocking)
@@ -46,8 +49,8 @@ assetsenv.Alias("dolphin_blocking", dolphin_blocking)
 
 # Protobuf version meta
 proto_ver = assetsenv.ProtoVerBuilder(
-    "compiled/protobuf_version.h",
-    "#/assets/protobuf/Changelog",
+    "${ASSETS_OUTPUT_DIR}/protobuf_version.h",
+    assetsenv["ASSETS_SRC_DIR"].File("protobuf/Changelog"),
 )
 assetsenv.Depends(proto_ver, proto)
 assetsenv.Alias("proto_ver", proto_ver)
@@ -65,34 +68,22 @@ env.SetDefault(FW_RESOURCES_MANIFEST=None)
 if assetsenv["IS_BASE_FIRMWARE"]:
     # External dolphin animations
     dolphin_external = assetsenv.DolphinExtBuilder(
-        assetsenv.Dir("${RESOURCES_ROOT}/dolphin"),
-        assetsenv.Dir("#/assets/dolphin"),
+        Dir("${RESOURCES_ROOT}/dolphin"),
+        assetsenv["ASSETS_SRC_DIR"].Dir("dolphin"),
         DOLPHIN_RES_TYPE="external",
     )
     if assetsenv["FORCE"]:
         assetsenv.AlwaysBuild(dolphin_external)
     assetsenv.Alias("dolphin_ext", dolphin_external)
-    assetsenv.Clean(dolphin_external, assetsenv.Dir("${RESOURCES_ROOT}/dolphin"))
+    assetsenv.Clean(dolphin_external, Dir("${RESOURCES_ROOT}/dolphin"))
 
     # Resources manifest
-    resources = assetsenv.Command(
+    resources = assetsenv.ManifestBuilder(
         "${RESOURCES_ROOT}/Manifest",
         assetsenv.GlobRecursive(
             "*",
             "${RESOURCES_ROOT}",
             exclude=["Manifest"],
-        ),
-        action=Action(
-            [
-                [
-                    "${PYTHON3}",
-                    "${ASSETS_COMPILER}",
-                    "manifest",
-                    "${TARGET.dir.posix}",
-                    "--timestamp=${GIT_UNIX_TIMESTAMP}",
-                ]
-            ],
-            "${RESMANIFESTCOMSTR}",
         ),
     )
 
@@ -100,7 +91,7 @@ if assetsenv["IS_BASE_FIRMWARE"]:
     assetsenv.AlwaysBuild(resources)
     # assetsenv.Clean(
     #     resources,
-    #     assetsenv.Dir("{$/apps"),
+    #     Dir("{$/apps"),
     # )
 
     # Exporting resources node to external environment
