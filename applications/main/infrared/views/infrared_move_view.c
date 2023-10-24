@@ -18,7 +18,7 @@ struct InfraredMoveView {
     void* callback_context;
 };
 
-ARRAY_DEF(InfraredMoveViewItemArray, const char*, M_CSTR_DUP_OPLIST);
+ARRAY_DEF(InfraredMoveViewItemArray, const char*, M_CSTR_DUP_OPLIST); //-V575
 
 typedef struct {
     InfraredMoveViewItemArray_t labels;
