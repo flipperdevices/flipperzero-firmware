@@ -256,7 +256,7 @@ bool infrared_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString*
         if(!infrared_signal_read_name(ff, name)) break;
         if(!infrared_signal_read_body(signal, ff)) break;
 
-        success = true;
+        success = true; //-V779
     } while(false);
 
     return success;
@@ -272,7 +272,7 @@ bool infrared_signal_search_and_read(InfraredSignal* signal, FlipperFormat* ff, 
 
     do {
         bool is_name_found = false;
-        while(!is_name_found && infrared_signal_read_name(ff, tmp)) {
+        while(!is_name_found && infrared_signal_read_name(ff, tmp)) { //-V560
             is_name_found = furi_string_equal(tmp, name);
         }
         if(!is_name_found) break; //-V547

@@ -11,7 +11,7 @@
 #define INFRARED_FILE_HEADER "IR signals file"
 #define INFRARED_FILE_VERSION (1)
 
-ARRAY_DEF(StringArray, const char*, M_CSTR_DUP_OPLIST);
+ARRAY_DEF(StringArray, const char*, M_CSTR_DUP_OPLIST); //-V575
 
 struct InfraredRemote {
     StringArray_t signal_names;
