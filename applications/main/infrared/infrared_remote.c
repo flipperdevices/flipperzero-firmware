@@ -157,6 +157,7 @@ static bool infrared_remote_batch_start(
     InfraredRemote* remote,
     InfraredBatchCallback batch_callback,
     const InfraredBatchTarget* target) {
+    FuriString* tmp = furi_string_alloc();
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     InfraredBatch batch_context = {
@@ -169,8 +170,15 @@ static bool infrared_remote_batch_start(
     };
 
     const char* path_in = furi_string_get_cstr(remote->path);
-    // TODO: Generate a random file name
-    const char* path_out = ANY_PATH("infrared/temp.ir.swp");
+    const char* path_out;
+
+    FS_Error status;
+
+    do {
+        furi_string_printf(tmp, "%s.temp%08x.swp", path_in, rand());
+        path_out = furi_string_get_cstr(tmp);
+        status = storage_common_stat(storage, path_out, NULL);
+    } while(status == FSE_OK || status == FSE_EXIST);
 
     bool success = false;
 
@@ -203,6 +211,7 @@ static bool infrared_remote_batch_start(
     furi_string_free(batch_context.signal_name);
     flipper_format_free(batch_context.ff_out);
     flipper_format_free(batch_context.ff_in);
+    furi_string_free(tmp);
 
     furi_record_close(RECORD_STORAGE);
 
