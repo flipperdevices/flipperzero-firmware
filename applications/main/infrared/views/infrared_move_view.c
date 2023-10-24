@@ -5,6 +5,8 @@
 #include <gui/canvas.h>
 #include <gui/elements.h>
 
+#include <toolbox/m_cstr_dup.h>
+
 #define LIST_ITEMS 4U
 #define LIST_LINE_H 13U
 #define HEADER_H 12U
@@ -16,7 +18,7 @@ struct InfraredMoveView {
     void* callback_context;
 };
 
-ARRAY_DEF(InfraredMoveViewItemArray, const char*, M_CSTR_OPLIST);
+ARRAY_DEF(InfraredMoveViewItemArray, const char*, M_CSTR_DUP_OPLIST);
 
 typedef struct {
     InfraredMoveViewItemArray_t labels;
