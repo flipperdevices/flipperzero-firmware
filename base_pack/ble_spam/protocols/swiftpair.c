@@ -4,27 +4,33 @@
 // Hacked together by @Willy-JL and @Spooks4576
 // Documentation at https://learn.microsoft.com/en-us/windows-hardware/design/component-guidelines/bluetooth-swift-pair
 
-static const char* swiftpair_get_name(const ProtocolCfg* _cfg) {
+const char* names[] = {
+    "Assquach💦",
+    "Flipper 🐬",
+    "iOS 17 🍎",
+    "Kink💦",
+    "👉👌",
+    "🔵🦷",
+};
+const uint8_t names_count = COUNT_OF(names);
+
+static const char* get_name(const ProtocolCfg* _cfg) {
     UNUSED(_cfg);
     return "SwiftPair";
 }
 
-static void swiftpair_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
-    const SwiftpairCfg* cfg = _cfg ? &_cfg->swiftpair : NULL;
+static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
+    SwiftpairCfg* cfg = _cfg ? &_cfg->specific.swiftpair : NULL;
 
     const char* name;
-    if(cfg && cfg->name[0] != '\0') {
+    switch(cfg ? _cfg->mode : ProtocolModeRandom) {
+    case ProtocolModeRandom:
+    default:
+        name = names[rand() % names_count];
+        break;
+    case ProtocolModeValue:
         name = cfg->name;
-    } else {
-        const char* names[] = {
-            "Assquach💦",
-            "Flipper 🐬",
-            "iOS 17 🍎",
-            "Kink💦",
-            "👉👌",
-            "🔵🦷",
-        };
-        name = names[rand() % COUNT_OF(names)];
+        break;
     }
     uint8_t name_len = strlen(name);
 
@@ -66,43 +72,48 @@ static void config_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-static void swiftpair_extra_config(Ctx* ctx) {
-    SwiftpairCfg* cfg = &ctx->attack->payload.cfg.swiftpair;
+static void extra_config(Ctx* ctx) {
+    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
+    SwiftpairCfg* cfg = &_cfg->specific.swiftpair;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
 
     item = variable_item_list_add(list, "Display Name", 0, NULL, NULL);
-    variable_item_set_current_value_text(item, cfg->name[0] != '\0' ? cfg->name : "Random");
+    variable_item_set_current_value_text(
+        item, _cfg->mode == ProtocolModeRandom ? "Random" : cfg->name);
 
     variable_item_list_add(list, "Requires enabling SwiftPair", 0, NULL, NULL);
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
-static uint8_t swiftpair_config_count(const ProtocolCfg* _cfg) {
+static uint8_t config_count(const ProtocolCfg* _cfg) {
     UNUSED(_cfg);
     return ConfigCOUNT - ConfigExtraStart - 1;
 }
 
 const Protocol protocol_swiftpair = {
     .icon = &I_windows,
-    .get_name = swiftpair_get_name,
-    .make_packet = swiftpair_make_packet,
-    .extra_config = swiftpair_extra_config,
-    .config_count = swiftpair_config_count,
+    .get_name = get_name,
+    .make_packet = make_packet,
+    .extra_config = extra_config,
+    .config_count = config_count,
 };
 
 static void name_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
+    _cfg->mode = ProtocolModeValue;
     scene_manager_previous_scene(ctx->scene_manager);
 }
 void scene_swiftpair_name_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    SwiftpairCfg* cfg = &ctx->attack->payload.cfg.swiftpair;
+    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
+    SwiftpairCfg* cfg = &_cfg->specific.swiftpair;
     TextInput* text_input = ctx->text_input;
     text_input_reset(text_input);
 
-    text_input_set_header_text(text_input, "Leave empty for random");
+    text_input_set_header_text(text_input, "Press back for random");
 
     text_input_set_result_callback(
         text_input, name_callback, ctx, cfg->name, sizeof(cfg->name), true);
@@ -112,8 +123,11 @@ void scene_swiftpair_name_on_enter(void* _ctx) {
     view_dispatcher_switch_to_view(ctx->view_dispatcher, ViewTextInput);
 }
 bool scene_swiftpair_name_on_event(void* _ctx, SceneManagerEvent event) {
-    UNUSED(_ctx);
-    UNUSED(event);
+    Ctx* ctx = _ctx;
+    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
+    if(event.type == SceneManagerEventTypeBack) {
+        _cfg->mode = ProtocolModeRandom;
+    }
     return false;
 }
 void scene_swiftpair_name_on_exit(void* _ctx) {
