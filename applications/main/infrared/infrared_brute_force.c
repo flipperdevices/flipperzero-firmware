@@ -111,7 +111,7 @@ bool infrared_brute_force_start(
     return success;
 }
 
-bool infrared_brute_force_is_started(InfraredBruteForce* brute_force) {
+bool infrared_brute_force_is_started(const InfraredBruteForce* brute_force) {
     return brute_force->is_started;
 }
 
