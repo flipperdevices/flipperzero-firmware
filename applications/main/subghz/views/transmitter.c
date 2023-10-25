@@ -21,6 +21,7 @@ typedef struct {
     SubGhzRadioDeviceType device_type;
     FuriString* temp_button_id;
     bool draw_temp_button;
+    bool is_legal;
 } SubGhzViewTransmitterModel;
 
 void subghz_view_transmitter_set_callback(
@@ -48,6 +49,7 @@ void subghz_view_transmitter_add_data_to_show(
             furi_string_set(model->frequency_str, frequency_str);
             furi_string_set(model->preset_str, preset_str);
             model->show_button = show_button;
+            model->is_legal = subghz_is_legal(model->frequency_str);
         },
         true);
 }
@@ -110,6 +112,12 @@ void subghz_view_transmitter_draw(Canvas* canvas, SubGhzViewTransmitterModel* mo
         canvas_set_font(canvas, FontBatteryPercent);
         canvas_draw_str(canvas, 117, 40, furi_string_get_cstr(model->temp_button_id));
         canvas_set_font(canvas, FontSecondary);
+    }
+
+    if(model->is_legal) {
+        canvas_draw_icon(canvas, 117, 9, &I_AngSmile1_10x12);
+    } else {
+        canvas_draw_icon(canvas, 117, 9, &I_EviSmile1_10x12);
     }
 
     if(model->show_button) {
@@ -250,6 +258,7 @@ SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
             model->preset_str = furi_string_alloc();
             model->key_str = furi_string_alloc();
             model->temp_button_id = furi_string_alloc();
+            model->is_legal = false;
         },
         true);
     return subghz_transmitter;

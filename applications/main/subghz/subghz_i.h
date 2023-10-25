@@ -123,6 +123,7 @@ SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz);
 void subghz_lock(SubGhz* subghz);
 void subghz_unlock(SubGhz* subghz);
 bool subghz_is_locked(SubGhz* subghz);
+bool subghz_is_legal(FuriString* val_str);
 
 void subghz_rx_key_state_set(SubGhz* subghz, SubGhzRxKeyState state);
 SubGhzRxKeyState subghz_rx_key_state_get(SubGhz* subghz);

@@ -418,6 +418,37 @@ bool subghz_is_locked(SubGhz* subghz) {
     return (subghz->lock == SubGhzLockOn);
 }
 
+bool subghz_is_legal(FuriString* val_str) {
+    bool is_allowed = false;
+    char* end_char;
+    uint32_t value = (uint32_t)(strtof(furi_string_get_cstr(val_str), &end_char) * 1000000.0);
+    switch(furi_hal_version_get_hw_region()) {
+    case FuriHalVersionRegionEuRu:
+        if((value >= 433050000 && value <= 434790000) ||
+           (value >= 868150000 && value <= 868550000)) {
+            is_allowed = true;
+        }
+        break;
+    case FuriHalVersionRegionUsCaAu:
+        if((value >= 304100000 && value <= 321950000) ||
+           (value >= 433050000 && value <= 434790000) ||
+           (value >= 915000000 && value <= 928000000)) {
+            is_allowed = true;
+        }
+        break;
+    case FuriHalVersionRegionJp:
+        if((value >= 312000000 && value <= 315250000) ||
+           (value >= 920500000 && value <= 923500000)) {
+            is_allowed = true;
+        }
+        break;
+    default:
+        is_allowed = true;
+        break;
+    }
+    return is_allowed;
+}
+
 void subghz_rx_key_state_set(SubGhz* subghz, SubGhzRxKeyState state) {
     furi_assert(subghz);
     subghz->rx_key_state = state;

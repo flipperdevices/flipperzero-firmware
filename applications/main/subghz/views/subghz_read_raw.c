@@ -32,6 +32,7 @@ typedef struct {
     float raw_threshold_rssi;
     bool not_showing_samples;
     SubGhzRadioDeviceType device_type;
+    bool is_legal;
 } SubGhzReadRAWModel;
 
 void subghz_read_raw_set_callback(
@@ -55,6 +56,7 @@ void subghz_read_raw_add_data_statusbar(
         {
             furi_string_set(model->frequency_str, frequency_str);
             furi_string_set(model->preset_str, preset_str);
+            model->is_legal = subghz_is_legal(model->frequency_str);
         },
         true);
 }
@@ -360,6 +362,11 @@ void subghz_read_raw_draw(Canvas* canvas, SubGhzReadRAWModel* model) {
     if(graphics_mode == 0) {
         subghz_read_raw_draw_sin(canvas, model);
     } else {
+        if(model->is_legal) {
+            canvas_draw_icon(canvas, 117, 9, &I_AngSmile1_10x12);
+        } else {
+            canvas_draw_icon(canvas, 117, 9, &I_EviSmile1_10x12);
+        }
         subghz_read_raw_draw_rssi(canvas, model);
         subghz_read_raw_draw_scale(canvas, model);
         subghz_read_raw_draw_threshold_rssi(canvas, model);
@@ -540,6 +547,7 @@ void subghz_read_raw_set_status(
                 furi_string_reset(model->file_name);
                 furi_string_set(model->sample_write, "0 spl.");
                 model->raw_threshold_rssi = raw_threshold_rssi;
+                model->is_legal = false;
             },
             true);
         break;
@@ -633,6 +641,7 @@ SubGhzReadRAW* subghz_read_raw_alloc(bool raw_send_only) {
             model->raw_send_only = raw_send_only;
             model->rssi_history = malloc(SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE * sizeof(uint8_t));
             model->raw_threshold_rssi = -127.0f;
+            model->is_legal = false;
         },
         true);
 
