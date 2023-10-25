@@ -1,6 +1,5 @@
 * Finish restructuring menus
     * Maybe a UI for stalk
-    * Update set MAC to use hex UI module
 * Console strings full review and refactor
 * Add selected_options_index[NUM_PURGE_ITEMS] to UART_TerminalItem
     * Change UART_TerminalApp.selected_option_index[MAX_MENU_ITEMS] to int**
