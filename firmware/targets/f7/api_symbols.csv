@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,39.1,,
+Version,+,40.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -1331,6 +1331,12 @@ Function,-,furi_hal_rfid_init,void,
 Function,+,furi_hal_rfid_pin_pull_pulldown,void,
 Function,+,furi_hal_rfid_pin_pull_release,void,
 Function,+,furi_hal_rfid_pins_reset,void,
+Function,+,furi_hal_rfid_rtf_carrier_in_ETR_mode,void,uint8_t
+Function,+,furi_hal_rfid_rtf_carrier_in_start,void,"void*, uint8_t, uint32_t*, uint32_t*, size_t, FuriHalRfidReadCaptureCallback"
+Function,+,furi_hal_rfid_rtf_carrier_in_stop,void,
+Function,+,furi_hal_rfid_rtf_carrier_out_start,void,
+Function,+,furi_hal_rfid_rtf_carrier_out_stop,void,
+Function,+,furi_hal_rfid_rtf_pull_out_dma_start,void,size_t
 Function,+,furi_hal_rfid_set_read_period,void,uint32_t
 Function,+,furi_hal_rfid_set_read_pulse,void,uint32_t
 Function,+,furi_hal_rfid_tim_emulate_dma_start,void,"uint32_t*, uint32_t*, size_t, FuriHalRfidDMACallback, void*"

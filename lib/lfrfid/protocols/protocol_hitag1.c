@@ -3,7 +3,7 @@
 #include "lfrfid_protocols.h"
 
 #define HITAG1_PAGES 64
-#define HITAG1_DATA_SIZE HITAG1_PAGES * 4 + HITAG1_PAGES
+#define HITAG1_DATA_SIZE (HITAG1_PAGES * 4 + HITAG1_PAGES)
 
 typedef struct {
     uint8_t tagData[HITAG1_DATA_SIZE];

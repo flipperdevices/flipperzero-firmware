@@ -54,32 +54,6 @@
 
 #define TAG "LFRFIDHitagWorker"
 
-// TIMER definitions
-#define CARRIER_OUT_TIMER TIM1
-#define CARRIER_OUT_TIMER_BUS FuriHalBusTIM1
-//#define CARRIER_OUT_TIMER_IRQ FuriHalInterruptIdTIM1 //TODO am i using this?
-#define CARRIER_OUT_TIMER_CHANNEL LL_TIM_CHANNEL_CH1 // or LL_TIM_CHANNEL_CH1N
-
-#define CARRIER_IN_TIMER TIM2
-#define CARRIER_IN_TIMER_BUS FuriHalBusTIM2
-#define CARRIER_IN_TIMER_IND_CH LL_TIM_CHANNEL_CH2 //no longer used via ETR setup
-#define CARRIER_IN_TIMER_DIR_CH LL_TIM_CHANNEL_CH1 //no longer used via ETR setup
-
-#define CARRIER_IN_REFERENCE_TIMER TIM1
-#define CARRIER_IN_REFERENCE_TIMER_BUS FuriHalBusTIM1
-
-#define PULL_OUT_TIMER TIM2
-#define PULL_OUT_TIMER_BUS FuriHalBusTIM2
-#define PULL_OUT_TIMER_CHANNEL LL_TIM_CHANNEL_CH3
-
-// DMA Channels definition
-#define PULL_OUT_DMA DMA2
-#define PULL_OUT_DMA_CH1 LL_DMA_CHANNEL_1
-#define PULL_OUT_DMA_CH2 LL_DMA_CHANNEL_2
-#define PULL_OUT_DMA_CH1_IRQ FuriHalInterruptIdDma2Ch1
-#define PULL_OUT_DMA_CH1_DEF PULL_OUT_DMA, PULL_OUT_DMA_CH1
-#define PULL_OUT_DMA_CH2_DEF PULL_OUT_DMA, PULL_OUT_DMA_CH2
-
 typedef enum {
     HitagProtocolAntiCollision,
     HitagProtocolManchesterCoding,
@@ -128,7 +102,6 @@ typedef struct {
     BufferStream* stream;
     VarintPair* pair;
     uint32_t capCounter;
-    uint32_t prevTIMval;
 } LfRfidHitagCaptureData;
 
 typedef struct {
@@ -158,8 +131,6 @@ struct LFRFIDHitagWorker {
 
 static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context);
 static int32_t lfrfid_hitag_worker_read_thread(void* thread_context);
-
-static void lfrfid_hitag_worker_carrier_in_IC_mode(void* capture_context);
 
 //------------------------------------------------------------------ shared functions ------------------------------------------------------------------
 
@@ -215,9 +186,8 @@ void lfrfid_hitag_worker_stop(LFRFIDHitagWorker* worker) {
     furi_thread_join(worker->thread);
 }
 
-//------------------------------------------------------------------ READ TAG: capture input interrupt functions ------------------------------------------------------------------
-
-static void lfrfid_hitag_worker_capture_in_cc_isr(bool level, uint32_t duration, void* context) {
+//------------------------------------------------------------------ READ TAG: TIMER & DMA callback functions ------------------------------------------------------------------
+static void lfrfid_hitag_worker_capture_in_cc_callback(bool level, uint32_t duration, void* context) {
     LfRfidHitagCaptureData* capData = context;
 
     //check if there is a new pair available: pulse + period
@@ -233,481 +203,34 @@ static void lfrfid_hitag_worker_capture_in_cc_isr(bool level, uint32_t duration,
     }
 }
 
-//------------------------------------------------------------------ READ TAG: carrier out TIMER, DMA & interrupts functions ------------------------------------------------------------------
-
-static void lfrfid_hitag_worker_carrier_out_dma_isr(void* dma_context) {
+//leave this in hitag_worker
+static void lfrfid_hitag_worker_carrier_out_dma_callback(bool half, void* dma_context) {
     LFRFIDHitagWorker* worker = (LFRFIDHitagWorker*)dma_context;
     worker->DMAeventCount++;
-
-    if(LL_DMA_IsActiveFlag_HT1(DMA1)) {
-        LL_DMA_ClearFlag_HT1(DMA1);
-        //halfway through DMA buffer --> first half can be repopulated
-        //just signal that it can be repopulated, not execute the repopulating itself, since this is an interrupt, holding up all other stuff
+	
+    if (half){
         furi_event_flag_set(worker->events, 1 << LFRFIDHitagWorkerSignalHalfTransfer);
-    }
-
-    if(LL_DMA_IsActiveFlag_TC1(DMA1)) {
-        LL_DMA_ClearFlag_TC1(DMA1);
-        //fully through DMA buffer --> second half can be repopulated
-        //just signal that it can be repopulated, not execute the repopulating itself, since this is an interrupt, holding up all other stuff
+    } else {
         furi_event_flag_set(worker->events, 1 << LFRFIDHitagWorkerSignalTransferComplete);
     }
 }
 
-void lfrfid_hitag_worker_carrier_out_start(
-    uint32_t* duration,
-    uint32_t* pulse,
-    size_t length,
-    void* context) {
-    // configure timer
-    furi_hal_bus_enable(CARRIER_OUT_TIMER_BUS);
 
-    LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler = SystemCoreClock / (125000 * HITAG_BASEPERIOD) -
-                               1; // sets the basis TIMER frequency to 8*freq (1MHz) for the timer
-    TIM_InitStruct.Autoreload =
-        HITAG_BASEPERIOD -
-        1; //initial PWM period =125kHz  (ARR will be handled via DMA further on)
-    LL_TIM_Init(CARRIER_OUT_TIMER, &TIM_InitStruct);
-    LL_TIM_DisableARRPreload(CARRIER_OUT_TIMER);
+//------------------------------------------------------------------ EMULATE TAG: TIMER callback functions)------------------------------------------------------------------
+static void lfrfid_hitag_worker_carrier_in_callback(bool level, uint32_t duration, void* capture_context){
+    UNUSED(level);
 
-    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
-    TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
-    TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_ENABLE;
-    TIM_OC_InitStruct.CompareValue =
-        HITAG_BASEPERIOD /
-        2; //initial pulse duration of half period ((CCR will be handled via DMA further on)
-    LL_TIM_OC_Init(CARRIER_OUT_TIMER, CARRIER_OUT_TIMER_CHANNEL, &TIM_OC_InitStruct);
-
-    LL_TIM_OC_SetPolarity(CARRIER_OUT_TIMER, CARRIER_OUT_TIMER_CHANNEL, LL_TIM_OCPOLARITY_HIGH);
-    LL_TIM_EnableDMAReq_UPDATE(CARRIER_OUT_TIMER);
-
-    // configure DMA "mem -> ARR" channel
-    LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (CARRIER_OUT_TIMER->ARR);
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)duration;
-    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = length;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM1_UP;
-    dma_config.Priority = LL_DMA_MODE_NORMAL;
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-
-    // configure DMA "mem -> CCR1" channel
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (CARRIER_OUT_TIMER->CCR1);
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)pulse;
-    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = length;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM1_UP;
-    dma_config.Priority = LL_DMA_MODE_NORMAL;
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &dma_config);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-
-    // attach interrupt to one of DMA channels
-    furi_hal_interrupt_set_isr(
-        FuriHalInterruptIdDma1Ch1, lfrfid_hitag_worker_carrier_out_dma_isr, context);
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_1);
-
-    // start
-    LL_TIM_EnableAllOutputs(CARRIER_OUT_TIMER);
-
-    LL_TIM_SetCounter(CARRIER_OUT_TIMER, 0);
-    LL_TIM_EnableCounter(CARRIER_OUT_TIMER);
-}
-
-void lfrfid_hitag_worker_carrier_out_stop() {
-    LL_TIM_DisableCounter(CARRIER_OUT_TIMER);
-    LL_TIM_DisableAllOutputs(CARRIER_OUT_TIMER);
-
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
-    LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_1);
-
-    FURI_CRITICAL_ENTER();
-
-    LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_2);
-
-    furi_hal_bus_disable(CARRIER_OUT_TIMER_BUS);
-
-    FURI_CRITICAL_EXIT();
-}
-
-//------------------------------------------------------------------ EMULATE TAG: pull out TIMER, DMA & interrupts functions ------------------------------------------------------------------
-
-static void lfrfid_hitag_worker_pull_out_dma_stop(void* capture_context) {
-    //reconfigure pull_out pin to fixed low state
-    //via forced OC INACTIVE MODE
-    LL_TIM_OC_SetMode(PULL_OUT_TIMER, PULL_OUT_TIMER_CHANNEL, LL_TIM_OCMODE_FORCED_INACTIVE);
-
-    //disable DMA channels & requests
-    LL_TIM_DisableDMAReq_UPDATE(PULL_OUT_TIMER);
-    LL_DMA_DisableChannel(PULL_OUT_DMA_CH1_DEF); //need to disable when using normal mode?
-    LL_DMA_DisableChannel(PULL_OUT_DMA_CH2_DEF); //need to disable when using normal mode?
-    //LL_TIM_DisableAllOutputs(PULL_OUT_TIMER); 		//no need to disable when reconfiguring pin?
-
-    //for logging both ccr & arr times during emulate (iso only arr)
-    LL_TIM_DisableIT_CC3(PULL_OUT_TIMER);
-
-    //switch carrier detection back to input capture for stable readings (required for command detection)
-    lfrfid_hitag_worker_carrier_in_IC_mode(capture_context);
-}
-
-static void lfrfid_hitag_worker_pull_out_dma_isr(void* capture_context) {
-    /* currently no HT interrupt enabled, only TC
-	if(LL_DMA_IsActiveFlag_HT1(PULL_OUT_DMA)) {
-        LL_DMA_ClearFlag_HT1(PULL_OUT_DMA);
-		//lfrfid_hitag_worker_pull_out_dma_stop();
-    }
-	*/
-
-    if(LL_DMA_IsActiveFlag_TC1(PULL_OUT_DMA)) {
-        LL_DMA_ClearFlag_TC1(PULL_OUT_DMA);
-        lfrfid_hitag_worker_pull_out_dma_stop(capture_context);
-    }
-}
-
-static void lfrfid_hitag_worker_pull_out_dma_start(size_t length) {
-    //array pointers remain the same, but length changes so
-    //reset DMA length (only possible when DMA channel is disabled
-    //this also resets the DMA counter (the DMA length is the 'remaining counter'
-    LL_DMA_SetDataLength(PULL_OUT_DMA_CH1_DEF, length);
-    LL_DMA_SetDataLength(PULL_OUT_DMA_CH2_DEF, length);
-
-    //enable DMA
-    LL_DMA_EnableChannel(PULL_OUT_DMA_CH1_DEF);
-    LL_DMA_EnableChannel(PULL_OUT_DMA_CH2_DEF);
-
-    //set OC to PWM1 mode
-    LL_TIM_OC_SetMode(
-        PULL_OUT_TIMER,
-        PULL_OUT_TIMER_CHANNEL,
-        LL_TIM_OCMODE_PWM1); //during emulate (dma controlled) mode
-
-    //only enable DMA requests on timer update after enabling both channels (otherwise you risk that first DMA request only triggers one of the channels)
-    LL_TIM_EnableDMAReq_UPDATE(PULL_OUT_TIMER);
-
-    //for logging both ccr & arr times during emulate (iso only arr)
-    LL_TIM_EnableIT_CC3(PULL_OUT_TIMER);
-}
-
-static void lfrfid_hitag_worker_pull_out_dma_setup(
-    uint32_t* duration,
-    uint32_t* pulse,
-    size_t length,
-    void* capture_context) {
-    //DMA setup
-    LL_TIM_DisableDMAReq_UPDATE(PULL_OUT_TIMER); //start with DMA requests disabled
-
-    // configure DMA "mem -> ARR" channel
-    LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (PULL_OUT_TIMER->ARR);
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)duration;
-    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    //dma_config.Mode = LL_DMA_MODE_CIRCULAR;	//keep cycling through memory array
-    dma_config.Mode = LL_DMA_MODE_NORMAL; //cycle only once through memory array
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = length;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-    dma_config.Priority = LL_DMA_MODE_NORMAL;
-    LL_DMA_Init(PULL_OUT_DMA_CH1_DEF, &dma_config);
-
-    // configure DMA "mem -> CCR3" channel
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (PULL_OUT_TIMER->CCR3);
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)pulse;
-    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    //dma_config.Mode = LL_DMA_MODE_CIRCULAR;	//keep cycling through memory array
-    dma_config.Mode = LL_DMA_MODE_NORMAL; //cycle only once through memory array
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = length;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-    dma_config.Priority = LL_DMA_MODE_NORMAL;
-    LL_DMA_Init(PULL_OUT_DMA_CH2_DEF, &dma_config);
-
-    // enable DMA interrupts
-    furi_hal_interrupt_set_isr(
-        PULL_OUT_DMA_CH1_IRQ, lfrfid_hitag_worker_pull_out_dma_isr, capture_context);
-
-    //LL_DMA_EnableIT_HT(PULL_OUT_DMA_CH1_DEF);	//let's try normal DMA mode and only transfer complete interrupt
-    LL_DMA_EnableIT_TC(PULL_OUT_DMA_CH1_DEF);
-}
-
-//------------------------------------------------------------------ EMULATE TAG: carrier input TIMER & interrupt functions (switching input capture & ETR)------------------------------------------------------------------
-
-static void lfrfid_hitag_worker_carrier_in_isr(void* capture_context) {
-    if(LL_TIM_IsActiveFlag_CC1(CARRIER_IN_TIMER)) {
-        uint32_t newTIMval = LL_TIM_IC_GetCaptureCH1(CARRIER_IN_TIMER);
-        LL_TIM_ClearFlag_CC1(CARRIER_IN_TIMER);
-
-        //ARR for TIM2 in input capture mode is UINT32_MAX so at freq of 1MHz this is 70+ minutes, instead of resetting counter, just store prev value and take difference of both
-        //this will increase measurement accuracy, since both values are then purely hardware controlled, no dependency of interrupt timing to (re)set any timer values
-        //LL_TIM_SetCounter(CARRIER_IN_TIMER, 0);
-
-        LfRfidHitagCaptureData* capData = capture_context;
-        capData->capCounter++;
-        //pack varint (as part of a pair)
-        //cleaner would be to pack as a varint iso varint_pair, though i'm not sure if I can get the data & size of a packed varint
-        varint_pair_pack(capData->pair, true, newTIMval - capData->prevTIMval);
-        //but send anyhow, doesn't matter that it's not a pair
-        buffer_stream_send_from_isr(
-            capData->stream,
-            varint_pair_get_data(capData->pair),
-            varint_pair_get_size(capData->pair));
-        varint_pair_reset(capData->pair);
-
-        capData->prevTIMval = newTIMval;
-    } else if(LL_TIM_IsActiveFlag_UPDATE(CARRIER_IN_TIMER)) {
-        uint32_t newTIMval = LL_TIM_GetCounter(CARRIER_IN_REFERENCE_TIMER);
-        LL_TIM_ClearFlag_UPDATE(CARRIER_IN_TIMER);
-
-        //ARR for ref timer in ETR mode is UINT32_MAX so at freq of 1MHz this is 70+ minutes, instead of resetting counter, just store prev value and take difference of both
-        //this will increase measurement accuracy, since both values are then purely hardware controlled, no dependency of interrupt timing to (re)set any timer values
-        LL_TIM_SetCounter(CARRIER_IN_REFERENCE_TIMER, 0);
-
-        LfRfidHitagCaptureData* capData = capture_context;
-        capData->capCounter++;
-        //pack varint (as part of a pair)
-        //cleaner would be to pack as a varint iso varint_pair, though i'm not sure if I can get the data & size of a packed varint
-        varint_pair_pack(capData->pair, true, newTIMval); // - capData->prevTIMval);
-        //but send anyhow, doesn't matter that it's not a pair
-        buffer_stream_send_from_isr(
-            capData->stream,
-            varint_pair_get_data(capData->pair),
-            varint_pair_get_size(capData->pair));
-        varint_pair_reset(capData->pair);
-
-        //capData->prevTIMval = newTIMval;
-    } else if(LL_TIM_IsActiveFlag_CC3(CARRIER_IN_TIMER)) {
-        uint32_t newTIMval = LL_TIM_GetCounter(CARRIER_IN_REFERENCE_TIMER);
-        LL_TIM_ClearFlag_CC3(CARRIER_IN_TIMER);
-
-        //don't reset timer for the ccr (HIGH) timing, this way the arr (duration) timing is still full duraton timing (iso only LOW timing)
-        //LL_TIM_SetCounter(CARRIER_IN_REFERENCE_TIMER, 0);
-
-        LfRfidHitagCaptureData* capData = capture_context;
-        capData->capCounter++;
-        //pack varint (as part of a pair)
-        //cleaner would be to pack as a varint iso varint_pair, though i'm not sure if I can get the data & size of a packed varint
-        varint_pair_pack(capData->pair, true, newTIMval); // - capData->prevTIMval);
-        //but send anyhow, doesn't matter that it's not a pair
-        buffer_stream_send_from_isr(
-            capData->stream,
-            varint_pair_get_data(capData->pair),
-            varint_pair_get_size(capData->pair));
-        varint_pair_reset(capData->pair);
-
-        //capData->prevTIMval = newTIMval;
-    }
-}
-
-static void lfrfid_hitag_worker_carrier_in_ETR_mode(void* capture_context, uint8_t ext_prescaler) {
-    //disable counters temporarily
-    LL_TIM_DisableCounter(CARRIER_IN_TIMER);
-    LL_TIM_DisableCounter(CARRIER_IN_REFERENCE_TIMER);
-
-    //disable Input capture & related interrupt
-    LL_TIM_DisableIT_CC1(CARRIER_IN_TIMER);
-    LL_TIM_CC_DisableChannel(CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH);
-
-    //reset capdata prev value
     LfRfidHitagCaptureData* capData = capture_context;
-    capData->prevTIMval = 0;
-
-    //switch clocksource to ETR with external prescaling via ARR
-    LL_TIM_SetPrescaler(CARRIER_IN_TIMER, 1 - 1); //prescaler is only applied at next update event
-    LL_TIM_GenerateEvent_UPDATE(
-        CARRIER_IN_TIMER); //prescaler is only applied at next update event //TODO: how to prevent this from creating a capdata entry
-    LL_TIM_SetAutoReload(CARRIER_IN_TIMER, ext_prescaler - 1);
-    LL_TIM_SetClockSource(CARRIER_IN_TIMER, LL_TIM_CLOCKSOURCE_EXT_MODE2);
-
-    //reconfigure carrier_in pin to TIM2 ETR
-    furi_hal_gpio_init_ex(
-        &gpio_rfid_carrier, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn2TIM2);
-
-    //reset timer counter & capture context for period calculation
-    LL_TIM_SetCounter(CARRIER_IN_TIMER, 0);
-    LL_TIM_SetCounter(CARRIER_IN_REFERENCE_TIMER, 0);
-
-    //enable interrupt via update
-    LL_TIM_EnableIT_UPDATE(CARRIER_IN_TIMER);
-
-    //re-enable counters
-    LL_TIM_EnableCounter(CARRIER_IN_TIMER);
-    LL_TIM_EnableCounter(CARRIER_IN_REFERENCE_TIMER);
-}
-
-static void lfrfid_hitag_worker_carrier_in_IC_mode(void* capture_context) {
-    //disable counters temporarily
-    LL_TIM_DisableCounter(CARRIER_IN_TIMER);
-    LL_TIM_DisableCounter(CARRIER_IN_REFERENCE_TIMER);
-
-    //disable interrupt via update
-    LL_TIM_DisableIT_UPDATE(CARRIER_IN_TIMER);
-
-    //reset capdata prev value
-    LfRfidHitagCaptureData* capData = capture_context;
-    capData->prevTIMval = 0;
-
-    //switch clocksource to system/64, external prescaling is handled in IC prescaler
-    LL_TIM_SetClockSource(CARRIER_IN_TIMER, LL_TIM_CLOCKSOURCE_INTERNAL);
-    LL_TIM_SetPrescaler(CARRIER_IN_TIMER, 64 - 1); //prescaler is only applied at next update event
-    LL_TIM_GenerateEvent_UPDATE(
-        CARRIER_IN_TIMER); //prescaler is only applied at next update event	//TODO: how to prevent this from creating a capdata entry
-    LL_TIM_SetAutoReload(CARRIER_IN_TIMER, UINT32_MAX);
-
-    //reconfigure carrier_in pin to TIM2 CH1 for input capture
-    furi_hal_gpio_init_ex(
-        &gpio_rfid_carrier, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
-
-    //reset timer counter & capture context for period calculation
-    LL_TIM_SetCounter(CARRIER_IN_TIMER, 0);
-    LL_TIM_SetCounter(CARRIER_IN_REFERENCE_TIMER, 0);
-
-    //enable Input capture & related interrupt
-    LL_TIM_EnableIT_CC1(CARRIER_IN_TIMER);
-    LL_TIM_CC_EnableChannel(CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH);
-
-    //re-enable counters
-    LL_TIM_EnableCounter(CARRIER_IN_TIMER);
-    LL_TIM_EnableCounter(CARRIER_IN_REFERENCE_TIMER);
-}
-
-static void lfrfid_hitag_worker_carrier_in_start(
-    void* capture_context,
-    uint8_t ext_prescaler,
-    uint32_t* duration,
-    uint32_t* pulse,
-    size_t length) {
-    FURI_CRITICAL_ENTER();
-    LL_DMA_DeInit(PULL_OUT_DMA_CH1_DEF); //required?
-    LL_DMA_DeInit(PULL_OUT_DMA_CH2_DEF); //required?
-    FURI_CRITICAL_EXIT();
-
-    furi_hal_bus_enable(CARRIER_IN_TIMER_BUS);
-    furi_hal_bus_enable(CARRIER_IN_REFERENCE_TIMER_BUS);
-
-    //setup reference timer: simple setup with base freq of 1MHz and max autoreload
-    LL_TIM_InitTypeDef TIM_InitStruct_Ref = {0};
-    TIM_InitStruct_Ref.Prescaler =
-        64 -
-        1; //system base freq is 64MHz, so this sets base freq for TIM to 1MHz (aka 1us period)
-    TIM_InitStruct_Ref.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct_Ref.Autoreload = UINT32_MAX;
-    TIM_InitStruct_Ref.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-    LL_TIM_Init(CARRIER_IN_REFERENCE_TIMER, &TIM_InitStruct_Ref);
-
-    //setup carrier in timer for input capture
-    LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler =
-        64 -
-        1; //system base freq is 64MHz, so this sets base freq for TIM to 1MHz (aka 1us period)
-    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = UINT32_MAX;
-    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-    LL_TIM_Init(CARRIER_IN_TIMER, &TIM_InitStruct);
-
-    LL_TIM_DisableARRPreload(CARRIER_IN_TIMER);
-    LL_TIM_SetClockSource(
-        CARRIER_IN_TIMER,
-        LL_TIM_CLOCKSOURCE_INTERNAL); //default is internal, so likely not required
-    LL_TIM_DisableDMAReq_TRIG(CARRIER_IN_TIMER);
-    LL_TIM_DisableIT_TRIG(CARRIER_IN_TIMER);
-
-    //meanwhile already prepre the ETR
-    LL_TIM_ConfigETR(
-        CARRIER_IN_TIMER,
-        LL_TIM_ETR_POLARITY_INVERTED,
-        LL_TIM_ETR_PRESCALER_DIV1,
-        LL_TIM_ETR_FILTER_FDIV1);
-
-    //INPUT CAPTURE SETUP
-    // Timer: channel 1 direct (from GPIO)
-    LL_TIM_IC_SetActiveInput(
-        CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH, LL_TIM_ACTIVEINPUT_DIRECTTI);
-    //prescaling direct channel seems to be working fine (and is necessary since otherwise sd write cannot keep up)
-    if(ext_prescaler == 4) {
-        LL_TIM_IC_SetPrescaler(CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH, LL_TIM_ICPSC_DIV4);
-    } else if(ext_prescaler == 2) {
-        LL_TIM_IC_SetPrescaler(CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH, LL_TIM_ICPSC_DIV2);
-    } else {
-        LL_TIM_IC_SetPrescaler(CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH, LL_TIM_ICPSC_DIV1);
-    }
-    LL_TIM_IC_SetPolarity(CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH, LL_TIM_IC_POLARITY_RISING);
-    LL_TIM_IC_SetFilter(CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH, LL_TIM_IC_FILTER_FDIV1);
-    /* Timer: channel 2 indirect (from channel 1)
-	// only measure & write to file the period (not the on & off cycle), this reduced CPU load on SD write to (hopefully) keep up with period measurements without prescaler
-    LL_TIM_IC_SetActiveInput(CARRIER_IN_TIMER, CARRIER_IN_TIMER_IND_CH, LL_TIM_ACTIVEINPUT_INDIRECTTI);
-    //presaling indirect channel doesn't really work well yet :/
-	LL_TIM_IC_SetPrescaler(CARRIER_IN_TIMER, CARRIER_IN_TIMER_IND_CH, LL_TIM_ICPSC_DIV2);	
-    LL_TIM_IC_SetPolarity(CARRIER_IN_TIMER, CARRIER_IN_TIMER_IND_CH, LL_TIM_IC_POLARITY_FALLING);
-    LL_TIM_IC_SetFilter(CARRIER_IN_TIMER, CARRIER_IN_TIMER_IND_CH, LL_TIM_IC_FILTER_FDIV1);
-	*/
-
-    //set interrupt callback for capturing period
-    LL_TIM_EnableIT_CC1(CARRIER_IN_TIMER);
-    //LL_TIM_EnableIT_CC2(CARRIER_IN_TIMER);
-    furi_hal_interrupt_set_isr(
-        FuriHalInterruptIdTIM2, lfrfid_hitag_worker_carrier_in_isr, capture_context);
-
-    //OUTPUT COMPARE SETUP
-    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
-    //TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;			//during emulate (dma controlled) mode
-    TIM_OC_InitStruct.OCMode =
-        LL_TIM_OCMODE_FORCED_INACTIVE; //during carrier in put output to forced low state
-    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
-    TIM_OC_InitStruct.CompareValue =
-        0; //0% this should have almost similar effect as keeping output forced inactive (there's still some micropulse emited, going high at ARR and immediately down again at CCR value)
-    LL_TIM_OC_Init(PULL_OUT_TIMER, PULL_OUT_TIMER_CHANNEL, &TIM_OC_InitStruct);
-    LL_TIM_OC_SetPolarity(
-        PULL_OUT_TIMER,
-        PULL_OUT_TIMER_CHANNEL,
-        LL_TIM_OCPOLARITY_HIGH); //active high (gpio goes high when pulse is high)
-
-    //INIT DMA (do not start it yet)
-    lfrfid_hitag_worker_pull_out_dma_setup(duration, pulse, length, capture_context);
-
-    LL_TIM_CC_EnableChannel(CARRIER_IN_TIMER, CARRIER_IN_TIMER_DIR_CH);
-    //LL_TIM_CC_EnableChannel(CARRIER_IN_TIMER, CARRIER_IN_TIMER_IND_CH);
-    LL_TIM_CC_EnableChannel(PULL_OUT_TIMER, PULL_OUT_TIMER_CHANNEL);
-    LL_TIM_SetCounter(CARRIER_IN_TIMER, 0);
-    LL_TIM_SetCounter(CARRIER_IN_REFERENCE_TIMER, 0);
-    LL_TIM_EnableCounter(CARRIER_IN_TIMER);
-    LL_TIM_EnableCounter(CARRIER_IN_REFERENCE_TIMER);
-}
-
-void lfrfid_hitag_worker_carrier_in_stop() {
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
-    furi_hal_interrupt_set_isr(PULL_OUT_DMA_CH1_IRQ, NULL, NULL);
-
-    LL_TIM_DisableCounter(CARRIER_IN_TIMER);
-    LL_TIM_DisableCounter(CARRIER_IN_REFERENCE_TIMER);
-    LL_TIM_DisableAllOutputs(CARRIER_IN_TIMER); //used for pull pin OC
-
-    FURI_CRITICAL_ENTER();
-    LL_DMA_DeInit(PULL_OUT_DMA_CH1_DEF);
-    LL_DMA_DeInit(PULL_OUT_DMA_CH2_DEF);
-
-    furi_hal_bus_disable(CARRIER_IN_TIMER_BUS);
-    furi_hal_bus_disable(CARRIER_IN_REFERENCE_TIMER_BUS);
-
-    FURI_CRITICAL_EXIT();
+    capData->capCounter++;
+    //pack varint (as part of a pair)
+    //cleaner would be to pack as a varint iso varint_pair, though i'm not sure if I can get the data & size of a packed varint
+    varint_pair_pack(capData->pair, true, duration);
+    //but send anyhow, doesn't matter that it's not a pair
+    buffer_stream_send_from_isr(
+        capData->stream,
+        varint_pair_get_data(capData->pair),
+        varint_pair_get_size(capData->pair));
+    varint_pair_reset(capData->pair);
 }
 
 //------------------------------------------------------------------ hitag data parsing functions ------------------------------------------------------------------
@@ -848,27 +371,8 @@ static void lfrfid_hitag_worker_yield_dma_buffer_BPLM(
         data->CMDposition++;
     }
 
-    /*if buffer is not full, but command is fully processed: fill remainder of buffer with normal on cycles
-	if (s<len+start){
-		for (;s<len+start;s++){
-			if (s%50<1){	//to put some OOK all the time (to prime the capture in comparator)
-				dataDMA->timer_buffer_ccr[s]=HITAG_BASEPERIOD/4;	//25%duty cycle
-				dataDMA->timer_buffer_arr[s]=1*HITAG_BASEPERIOD-1;
-			} else {
-				dataDMA->timer_buffer_ccr[s]=HITAG_BASEPERIOD/2;
-				dataDMA->timer_buffer_arr[s]=HITAG_BASEPERIOD-1;
-			}
-		}
-		//other stuff to do?
-	}
-	*/
-
-    //if buffer was full, but command not yet fully processed: set starting position for next time:
-    if(!itemProcessed) {
-        data->CMDsubposition += (len + start) - lastarrposition;
-    } else {
-        data->CMDsubposition = 0;
-    }
+    //set starting position for next time:
+    data->CMDsubposition += (len + start) - lastarrposition;
 }
 
 static uint16_t lfrfid_hitag_worker_yield_dma_buffer_MC(
@@ -978,14 +482,14 @@ static void lfrfid_hitag_worker_decoder_feed(
                 (*bits)++;
             } else if(*bits == startBits) {
                 //same as previous bit (last startbit it 1, so add 1 to the memBlock)
-                memBlock[(*bits - startBits) / 32] |= (bit >> (*bits - startBits) % 32); //add 1
+                memBlock[(*bits - startBits) / 32] |= (bit >> ((*bits - startBits) % 32)); //add 1
                 (*bits)++;
             } else {
                 //add same as previous bit
                 if(memBlock[(*bits - startBits - 1) / 32] &
-                   (bit >> (*bits - startBits - 1) % 32)) {
+                   (bit >> ((*bits - startBits - 1) % 32))) {
                     memBlock[(*bits - startBits) / 32] |=
-                        (bit >> (*bits - startBits) % 32); //add 1
+                        (bit >> ((*bits - startBits) % 32)); //add 1
                     (*bits)++;
                 } else {
                     (*bits)++; //no mem action for 0, just increase bitcounter
@@ -1003,7 +507,7 @@ static void lfrfid_hitag_worker_decoder_feed(
                 *half = true;
             } else if(*bits == startBits) {
                 //assuming all startbits were 1's, this is a data 10 detection
-                memBlock[(*bits - startBits) / 32] |= (bit >> (*bits - startBits) % 32); //add 1
+                memBlock[(*bits - startBits) / 32] |= (bit >> ((*bits - startBits) % 32)); //add 1
                 (*bits)++;
                 (*bits)++; //no mem action for 0, just increase bitcounter
                 *half = true;
@@ -1011,12 +515,12 @@ static void lfrfid_hitag_worker_decoder_feed(
                 //if we're in half of a bit, add 1, else add 10 and set half flag
                 if(*half) {
                     memBlock[(*bits - startBits) / 32] |=
-                        (bit >> (*bits - startBits) % 32); //add 1
+                        (bit >> ((*bits - startBits) % 32)); //add 1
                     (*bits)++;
                     *half = false;
                 } else {
                     memBlock[(*bits - startBits) / 32] |=
-                        (bit >> (*bits - startBits) % 32); //add 1
+                        (bit >> ((*bits - startBits) % 32)); //add 1
                     (*bits)++;
                     (*bits)++; //no mem action for 0, just increase bitcounter
                     *half = true;
@@ -1031,7 +535,7 @@ static void lfrfid_hitag_worker_decoder_feed(
             } else {
                 //TODO check that prev bit is indeed 0
                 //add 10 to the memBlock
-                memBlock[(*bits - startBits) / 32] |= (bit >> (*bits - startBits) % 32); //add 1
+                memBlock[(*bits - startBits) / 32] |= (bit >> ((*bits - startBits) % 32)); //add 1
                 (*bits)++;
                 (*bits)++; //no mem action for 0, just increase bitcounter
             }
@@ -1043,12 +547,12 @@ static void lfrfid_hitag_worker_decoder_feed(
                 } else if(*half && pulse < HITAG_DURATION_M) {
                     //second half or 0 bit + another 1 bit
                     memBlock[(*bits - startBits) / 32] |=
-                        (bit >> (*bits - startBits) % 32); //add 1
+                        (bit >> ((*bits - startBits) % 32)); //add 1
                     (*bits)++;
                 } else if(!(*half) && pulse < HITAG_DURATION_S) {
                     //another 1 bit
                     memBlock[(*bits - startBits) / 32] |=
-                        (bit >> (*bits - startBits) % 32); //add 1
+                        (bit >> ((*bits - startBits) % 32)); //add 1
                     (*bits)++;
                 } else {
                     //invalid pulse duration --> reset?
@@ -1070,7 +574,7 @@ static void lfrfid_hitag_worker_decoder_feed(
             //if first short: add 1 to memBlock and increase half counter
             if(*half == false) {
                 if(*bits >= startBits) {
-                    memBlock[(*bits - startBits) / 32] |= (bit >> (*bits - startBits) % 32);
+                    memBlock[(*bits - startBits) / 32] |= ((bit >> (*bits - startBits) % 32));
                 }
                 (*bits)++;
                 *half = true;
@@ -1323,8 +827,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
     capData->stream = buffer_stream_alloc(EMULATE_BUFFER_SIZE, EMULATE_BUFFER_COUNT);
     capData->pair = varint_pair_alloc();
     capData->capCounter = 0;
-    capData->prevTIMval = 0;
-
+    
     //init dmaData for emulate mode:
     uint16_t dmaLen = 0;
     TimerDMAData* dataDMA = malloc(sizeof(TimerDMAData));
@@ -1343,7 +846,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
     // PA15 carrier_in to alt ftn 1 (TIM2 CH1) to use it for input capture
     furi_hal_gpio_init_ex(
         &gpio_rfid_carrier, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
-    // pull to alternate function 1 (TIM2 CH3) to drive low (for read carrier) or pull antenna via DMA (for emulation)
+    // pull to alternate function 1 (TIM2 CH3) to drive low (for command detection) or pull antenna via DMA (for command replies)
     furi_hal_gpio_init_ex(
         &gpio_nfc_irq_rfid_pull,
         GpioModeAltFunctionPushPull,
@@ -1352,12 +855,13 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
         GpioAltFn1TIM2);
 
     //start capture via carrier in instead of rfid in
-    lfrfid_hitag_worker_carrier_in_start(
+    furi_hal_rfid_rtf_carrier_in_start(
         capData,
         worker->carrierPrescaler,
         dataDMA->timer_buffer_arr,
         dataDMA->timer_buffer_ccr,
-        dmaLen);
+        dmaLen,
+        lfrfid_hitag_worker_carrier_in_callback);
 
     uint8_t prescaler = worker->carrierPrescaler;
     uint8_t period = 8 * prescaler - 1;
@@ -1493,7 +997,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
                                         //update the previous (last) bit from 0 to 1 if a command was ongoing
                                         if(maxBitCounter > 0) {
                                             maxBits[(maxBitCounter - 1) / 32] |=
-                                                (one >> (maxBitCounter - 1) % 32);
+                                                (one >> ((maxBitCounter - 1) % 32));
                                         }
                                         maxDelta -= miniMaxDelta;
                                         lastMaxIndex = miniMaxIndex;
@@ -1503,11 +1007,11 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 
                                 //now process the (possibly updated) delta
                                 if(maxDelta >= 18) {
-                                    if(18 <= maxDelta && maxDelta <= 22) {
+                                    if(maxDelta <= 22) {
                                         maxBitCounter++;
                                     } else if(26 <= maxDelta && maxDelta <= 32) {
                                         maxBits[(maxBitCounter) / 32] |=
-                                            (one >> (maxBitCounter) % 32);
+                                            (one >> ((maxBitCounter) % 32));
                                         maxBitCounter++;
                                     } else if(maxBitCounter > 0) {
                                         //end of bitstring caused by invalid delta
@@ -1582,7 +1086,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
                                         //update the previous (last) bit from 0 to 1 if a command was ongoing
                                         if(minBitCounter > 0) {
                                             minBits[(minBitCounter - 1) / 32] |=
-                                                (one >> (minBitCounter - 1) % 32);
+                                                (one >> ((minBitCounter - 1) % 32));
                                         }
                                         minDelta -= miniMinDelta;
                                         lastMinIndex = miniMinIndex;
@@ -1592,11 +1096,11 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 
                                 //now process the (possibly updated) delta
                                 if(minDelta >= 18) {
-                                    if(18 <= minDelta && minDelta <= 22) {
+                                    if(minDelta <= 22) {
                                         minBitCounter++;
                                     } else if(26 <= minDelta && minDelta <= 32) {
                                         minBits[(minBitCounter) / 32] |=
-                                            (one >> (minBitCounter) % 32);
+                                            (one >> ((minBitCounter) % 32));
                                         minBitCounter++;
                                     } else if(minBitCounter > 0) {
                                         //end of bitstring caused by invalid delta
@@ -1892,8 +1396,8 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
                                 }
 
                                 if(dmaLen > 0) { //switch to reply mode
-                                    //switch carrier mode to ETR required for emulation
-                                    lfrfid_hitag_worker_carrier_in_ETR_mode(capData, prescaler);
+                                    //switch carrier mode to ETR required for replying
+                                    furi_hal_rfid_rtf_carrier_in_ETR_mode(prescaler);
 
                                     //respect hitag WAIT1 time
                                     uint32_t wait1_periods = 180 / prescaler;
@@ -1902,7 +1406,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
                                     }
 
                                     //just start the DMA, stopping is handled in DMA transfer complete interrupt
-                                    lfrfid_hitag_worker_pull_out_dma_start((size_t)dmaLen);
+                                    furi_hal_rfid_rtf_pull_out_dma_start((size_t)dmaLen);
                                 }
                             }
                         }
@@ -1926,7 +1430,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
     }
 
     //stop carrier capture in
-    lfrfid_hitag_worker_carrier_in_stop();
+    furi_hal_rfid_rtf_carrier_in_stop();
 
     free(worker->tag);
     free(dataDMA);
@@ -2014,14 +1518,14 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
         dataCMD, backupCMD, dataDMA, DMA_BUFFER_SIZE / 2, DMA_BUFFER_SIZE / 2);
 
     //start TIM1 with DMA function
-    lfrfid_hitag_worker_carrier_out_start(
-        dataDMA->timer_buffer_arr, dataDMA->timer_buffer_ccr, DMA_BUFFER_SIZE, worker);
+    furi_hal_rfid_rtf_carrier_out_start(
+        dataDMA->timer_buffer_arr, dataDMA->timer_buffer_ccr, DMA_BUFFER_SIZE, lfrfid_hitag_worker_carrier_out_dma_callback, worker);
 
     // start capture
     LfRfidHitagCaptureData* capData = malloc(sizeof(LfRfidHitagCaptureData));
     capData->stream = buffer_stream_alloc(READ_BUFFER_SIZE, READ_BUFFER_COUNT);
     capData->pair = varint_pair_alloc();
-    furi_hal_rfid_tim_read_capture_start(lfrfid_hitag_worker_capture_in_cc_isr, capData);
+    furi_hal_rfid_tim_read_capture_start(lfrfid_hitag_worker_capture_in_cc_callback, capData);
 
     while(1) {
         Buffer* buffer = buffer_stream_receive(capData->stream, 1);
@@ -2359,7 +1863,7 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 
     //stop timers
     furi_hal_rfid_tim_read_capture_stop();
-    lfrfid_hitag_worker_carrier_out_stop();
+    furi_hal_rfid_rtf_carrier_out_stop();
 
     //free memory
     free(dataCMD);

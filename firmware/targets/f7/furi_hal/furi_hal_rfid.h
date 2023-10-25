@@ -76,6 +76,37 @@ void furi_hal_rfid_set_read_period(uint32_t period);
  */
 void furi_hal_rfid_set_read_pulse(uint32_t pulse);
 
+void furi_hal_rfid_rtf_carrier_out_stop();
+
+void furi_hal_rfid_rtf_carrier_out_start();
+
+/** start pull out dma timer for RTF rfid emulation mode
+ *
+ * @param      length  length of dma buffer
+ */
+void furi_hal_rfid_rtf_pull_out_dma_start(size_t length);
+
+/** switch timer settings to ETR during RTF rfid emulation mode
+ *
+ * @param      prevTIMval  pointer for storing previous timer duration value
+ * @param      ext_prescaler  prescaler to use for timer settings
+ */
+void furi_hal_rfid_rtf_carrier_in_ETR_mode(uint8_t ext_prescaler);
+
+/** start carrier in timers in RTF rfid emulation mode
+ */
+void furi_hal_rfid_rtf_carrier_in_start(
+    void* capture_context,
+    uint8_t ext_prescaler,
+    uint32_t* duration,
+    uint32_t* pulse,
+    size_t length,
+    FuriHalRfidReadCaptureCallback callback);
+
+/** stop carrier in timers in RTF rfid emulation mode
+ */
+void furi_hal_rfid_rtf_carrier_in_stop();
+
 /** Start/Enable comparator */
 void furi_hal_rfid_comp_start();
 

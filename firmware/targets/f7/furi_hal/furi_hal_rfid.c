@@ -9,6 +9,7 @@
 #include <stm32wbxx_ll_comp.h>
 #include <stm32wbxx_ll_dma.h>
 
+// TIMER definitions
 #define FURI_HAL_RFID_READ_TIMER TIM1
 #define FURI_HAL_RFID_READ_TIMER_BUS FuriHalBusTIM1
 #define FURI_HAL_RFID_READ_TIMER_CHANNEL LL_TIM_CHANNEL_CH1N
@@ -20,10 +21,25 @@
 #define FURI_HAL_RFID_EMULATE_TIMER_IRQ FuriHalInterruptIdTIM2
 #define FURI_HAL_RFID_EMULATE_TIMER_CHANNEL LL_TIM_CHANNEL_CH3
 
+#define FURI_HAL_RFID_RTF_PULL_OUT_TIMER TIM2
+//#define FURI_HAL_RFID_RTF_PULL_OUT_TIMER_BUS FuriHalBusTIM2
+#define FURI_HAL_RFID_RTF_PULL_OUT_TIMER_CHANNEL LL_TIM_CHANNEL_CH3
+
+#define FURI_HAL_RFID_RTF_CARRIER_IN_TIMER TIM2
+#define FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_BUS FuriHalBusTIM2
+#define FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH LL_TIM_CHANNEL_CH1
+
+#define FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER TIM1
+#define FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER_BUS FuriHalBusTIM1
+
 #define RFID_CAPTURE_TIM TIM2
 #define RFID_CAPTURE_TIM_BUS FuriHalBusTIM2
 #define RFID_CAPTURE_IND_CH LL_TIM_CHANNEL_CH3
 #define RFID_CAPTURE_DIR_CH LL_TIM_CHANNEL_CH4
+
+#define CARRIER_OUT_TIMER TIM1
+#define CARRIER_OUT_TIMER_BUS FuriHalBusTIM1
+#define CARRIER_OUT_TIMER_CHANNEL LL_TIM_CHANNEL_CH1 // or LL_TIM_CHANNEL_CH1N
 
 // Field presence detection
 #define FURI_HAL_RFID_FIELD_FREQUENCY_MIN 80000
@@ -46,6 +62,15 @@
 #define RFID_DMA_CH1_DEF RFID_DMA, RFID_DMA_CH1_CHANNEL
 #define RFID_DMA_CH2_DEF RFID_DMA, RFID_DMA_CH2_CHANNEL
 
+// DMA Channels definition for RTF mode
+#define FURI_HAL_RFID_RTF_PULL_OUT_DMA DMA2
+#define FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1 LL_DMA_CHANNEL_1
+#define FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2 LL_DMA_CHANNEL_2
+#define FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_IRQ FuriHalInterruptIdDma2Ch1
+#define FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF FURI_HAL_RFID_RTF_PULL_OUT_DMA, FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1
+#define FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2_DEF FURI_HAL_RFID_RTF_PULL_OUT_DMA, FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2
+
+
 typedef struct {
     uint32_t counter;
     uint32_t set_tim_counter_cnt;
@@ -56,6 +81,7 @@ typedef struct {
     FuriHalRfidReadCaptureCallback read_capture_callback;
     void* context;
     FuriHalRfidField field;
+	uint32_t prevTIMval;
 } FuriHalRfid;
 
 FuriHalRfid* furi_hal_rfid = NULL;
@@ -72,6 +98,7 @@ void furi_hal_rfid_init() {
     furi_hal_rfid = malloc(sizeof(FuriHalRfid));
     furi_hal_rfid->field.counter = 0;
     furi_hal_rfid->field.set_tim_counter_cnt = 0;
+	furi_hal_rfid->prevTIMval = 0;
 
     furi_hal_rfid_pins_reset();
 
@@ -429,6 +456,436 @@ void furi_hal_rfid_set_read_pulse(uint32_t pulse) {
 #error Update this code. Would you kindly?
 #endif
 }
+
+
+
+
+static void furi_hal_rfid_rtf_carrier_out_dma_isr(void* dma_context) {
+    if(LL_DMA_IsActiveFlag_HT1(DMA1)) {
+        LL_DMA_ClearFlag_HT1(DMA1);
+        furi_hal_rfid->dma_callback(true, dma_context);
+    }
+
+    if(LL_DMA_IsActiveFlag_TC1(DMA1)) {
+        LL_DMA_ClearFlag_TC1(DMA1);
+        furi_hal_rfid->dma_callback(false, dma_context);
+    }
+}
+
+void furi_hal_rfid_rtf_carrier_out_start(
+    uint32_t* duration,
+    uint32_t* pulse,
+    size_t length,
+    FuriHalRfidDMACallback callback,
+    void* context) {
+    furi_assert(furi_hal_rfid);
+
+    // setup interrupts
+    furi_hal_rfid->dma_callback = callback;
+	
+    // configure timer
+    furi_hal_bus_enable(CARRIER_OUT_TIMER_BUS);
+
+    LL_TIM_InitTypeDef TIM_InitStruct = {0};
+    TIM_InitStruct.Prescaler = SystemCoreClock / (125000 * 8) -
+                               1; // sets the basis TIMER frequency to 8*freq (1MHz) for the timer
+    TIM_InitStruct.Autoreload = 8 - 1; //initial PWM period =125kHz
+    LL_TIM_Init(CARRIER_OUT_TIMER, &TIM_InitStruct);
+    LL_TIM_DisableARRPreload(CARRIER_OUT_TIMER);
+
+    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+    TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
+    TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_ENABLE;
+    TIM_OC_InitStruct.CompareValue = 8 / 2; //initial pulse duration of half period
+    LL_TIM_OC_Init(CARRIER_OUT_TIMER, CARRIER_OUT_TIMER_CHANNEL, &TIM_OC_InitStruct);
+
+    LL_TIM_OC_SetPolarity(CARRIER_OUT_TIMER, CARRIER_OUT_TIMER_CHANNEL, LL_TIM_OCPOLARITY_HIGH);
+    LL_TIM_EnableDMAReq_UPDATE(CARRIER_OUT_TIMER);
+
+    // configure DMA "mem -> ARR" channel
+    LL_DMA_InitTypeDef dma_config = {0};
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (CARRIER_OUT_TIMER->ARR);
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)duration;
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = length;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM1_UP;
+    dma_config.Priority = LL_DMA_MODE_NORMAL;
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+
+    // configure DMA "mem -> CCR1" channel
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (CARRIER_OUT_TIMER->CCR1);
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)pulse;
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = length;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM1_UP;
+    dma_config.Priority = LL_DMA_MODE_NORMAL;
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &dma_config);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
+
+    // attach interrupt to one of DMA channels
+    furi_hal_interrupt_set_isr(
+        FuriHalInterruptIdDma1Ch1, furi_hal_rfid_rtf_carrier_out_dma_isr, context);
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_1);
+
+    // start
+    LL_TIM_EnableAllOutputs(CARRIER_OUT_TIMER);
+
+    LL_TIM_SetCounter(CARRIER_OUT_TIMER, 0);
+    LL_TIM_EnableCounter(CARRIER_OUT_TIMER);
+}
+
+void furi_hal_rfid_rtf_carrier_out_stop() {
+    LL_TIM_DisableCounter(CARRIER_OUT_TIMER);
+    LL_TIM_DisableAllOutputs(CARRIER_OUT_TIMER);
+
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
+    LL_DMA_DisableIT_TC(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_1);
+
+    FURI_CRITICAL_ENTER();
+
+    LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_2);
+
+    furi_hal_bus_disable(CARRIER_OUT_TIMER_BUS);
+
+    FURI_CRITICAL_EXIT();
+}
+
+static void furi_hal_rfid_rtf_carrier_in_IC_mode();
+
+static void furi_hal_rfid_rtf_carrier_in_isr(void* capture_context) {
+    uint32_t TIMval = 0;
+	//note that I'm doing 2 captures during ETR mode (pulse & duration) and sending both towards hitagworker as a duration, though this is only used for logging, no processing is done
+	//while in IC mode I'm only doing 1 capture (duration only) and sending this towards hitagworker as a duration used for command detection
+	if(LL_TIM_IsActiveFlag_CC1(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER)) {
+        //INPUT CAPTURE trigger on channel 1 for CARRIER_IN_TIMER (TIM2) is used in command detection mode to capture duration
+        uint32_t newTIMval = LL_TIM_IC_GetCaptureCH1(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+        LL_TIM_ClearFlag_CC1(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+
+        //ARR for TIM2 in input capture mode is UINT32_MAX so at freq of 1MHz this is 70+ minutes, instead of resetting counter, just store prev value and take difference of both
+        //this increases measurement accuracy, since value is then purely hardware controlled, no dependency of interrupt timing to (re)set any timer values
+        TIMval = newTIMval - furi_hal_rfid->prevTIMval;
+        furi_hal_rfid->prevTIMval = newTIMval;
+    } else if(LL_TIM_IsActiveFlag_UPDATE(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER)) {
+        //UPDATE is used in reply mode (ETR +DMA setup) to capture duration (for logging/debugging only)
+        TIMval = LL_TIM_GetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER);
+        LL_TIM_ClearFlag_UPDATE(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+
+        LL_TIM_SetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER, 0);
+    } else if(LL_TIM_IsActiveFlag_CC3(FURI_HAL_RFID_RTF_PULL_OUT_TIMER)) {
+        //OUTPUT COMPARE trigger on channel 3 for PULL_OUT_TIMER (TIM2) is used in reply mode (ETR + DMA setup) to also capture pulse (for logging/debugging only)
+        TIMval = LL_TIM_GetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER);
+        LL_TIM_ClearFlag_CC3(FURI_HAL_RFID_RTF_PULL_OUT_TIMER);
+    }
+	
+	if (TIMval != 0){
+        furi_hal_rfid->read_capture_callback(true, TIMval, capture_context);
+    }
+}
+
+static void furi_hal_rfid_rtf_pull_out_dma_stop() {
+    //reconfigure pull_out pin to fixed low state
+    //via forced OC INACTIVE MODE
+    LL_TIM_OC_SetMode(FURI_HAL_RFID_RTF_PULL_OUT_TIMER, FURI_HAL_RFID_RTF_PULL_OUT_TIMER_CHANNEL, LL_TIM_OCMODE_FORCED_INACTIVE);
+
+    //disable DMA channels & requests
+    LL_TIM_DisableDMAReq_UPDATE(FURI_HAL_RFID_RTF_PULL_OUT_TIMER);
+    LL_DMA_DisableChannel(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF); //need to disable when using normal mode?
+    LL_DMA_DisableChannel(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2_DEF); //need to disable when using normal mode?
+    //LL_TIM_DisableAllOutputs(FURI_HAL_RFID_RTF_PULL_OUT_TIMER); 		//no need to disable when reconfiguring pin?
+
+    //for logging both ccr & arr times during emulate (iso only arr)
+    LL_TIM_DisableIT_CC3(FURI_HAL_RFID_RTF_PULL_OUT_TIMER);
+
+    //switch carrier detection back to input capture for stable readings (required for command detection)
+    furi_hal_rfid_rtf_carrier_in_IC_mode();
+}
+
+static void furi_hal_rfid_rtf_pull_out_dma_isr() {
+    // currently no HT interrupt enabled, only TC
+	if(LL_DMA_IsActiveFlag_TC1(FURI_HAL_RFID_RTF_PULL_OUT_DMA)) {
+        LL_DMA_ClearFlag_TC1(FURI_HAL_RFID_RTF_PULL_OUT_DMA);
+        furi_hal_rfid_rtf_pull_out_dma_stop();
+    }
+}
+
+void furi_hal_rfid_rtf_pull_out_dma_start(size_t length) {
+    //array pointers remain the same, but length changes so
+    //reset DMA length (only possible when DMA channel is disabled
+    //this also resets the DMA counter (the DMA length is the 'remaining counter'
+    LL_DMA_SetDataLength(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF, length);
+    LL_DMA_SetDataLength(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2_DEF, length);
+
+    //enable DMA
+    LL_DMA_EnableChannel(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF);
+    LL_DMA_EnableChannel(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2_DEF);
+
+    //set OC to PWM1 mode
+    LL_TIM_OC_SetMode(
+        FURI_HAL_RFID_RTF_PULL_OUT_TIMER,
+        FURI_HAL_RFID_RTF_PULL_OUT_TIMER_CHANNEL,
+        LL_TIM_OCMODE_PWM1); //during reply (dma controlled) mode
+
+    //only enable DMA requests on timer update after enabling both channels (otherwise you risk that first DMA request only triggers one of the channels)
+    LL_TIM_EnableDMAReq_UPDATE(FURI_HAL_RFID_RTF_PULL_OUT_TIMER);
+
+    //for logging both ccr & arr times during emulate (iso only arr)
+    LL_TIM_EnableIT_CC3(FURI_HAL_RFID_RTF_PULL_OUT_TIMER);
+}
+
+static void furi_hal_rfid_rtf_pull_out_dma_setup(
+    uint32_t* duration,
+    uint32_t* pulse,
+    size_t length) {
+    //DMA setup
+    LL_TIM_DisableDMAReq_UPDATE(FURI_HAL_RFID_RTF_PULL_OUT_TIMER); //start with DMA requests disabled
+
+    // configure DMA "mem -> ARR" channel
+    LL_DMA_InitTypeDef dma_config = {0};
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (FURI_HAL_RFID_RTF_PULL_OUT_TIMER->ARR);
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)duration;
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    //dma_config.Mode = LL_DMA_MODE_CIRCULAR;	//keep cycling through memory array
+    dma_config.Mode = LL_DMA_MODE_NORMAL; //cycle only once through memory array
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = length;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
+    dma_config.Priority = LL_DMA_MODE_NORMAL;
+    LL_DMA_Init(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF, &dma_config);
+
+    // configure DMA "mem -> CCR3" channel
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (FURI_HAL_RFID_RTF_PULL_OUT_TIMER->CCR3);
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)pulse;
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    //dma_config.Mode = LL_DMA_MODE_CIRCULAR;	//keep cycling through memory array
+    dma_config.Mode = LL_DMA_MODE_NORMAL; //cycle only once through memory array
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = length;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
+    dma_config.Priority = LL_DMA_MODE_NORMAL;
+    LL_DMA_Init(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2_DEF, &dma_config);
+
+    // enable DMA interrupts
+    furi_hal_interrupt_set_isr(
+        FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_IRQ, furi_hal_rfid_rtf_pull_out_dma_isr, NULL);
+
+    //LL_DMA_EnableIT_HT(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF);	//let's try normal DMA mode and only transfer complete interrupt
+    LL_DMA_EnableIT_TC(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF);
+}
+
+void furi_hal_rfid_rtf_carrier_in_ETR_mode(uint8_t ext_prescaler) {
+    //ETR mode used during emulation while replying to commands from reader
+    //it has less accuracy than IC mode, but microcontroller cannot run DMA for pull out and input capture for carrier in at the same time
+	
+    //disable counters temporarily
+    LL_TIM_DisableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_DisableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER);
+
+    //disable Input capture & related interrupt
+    LL_TIM_DisableIT_CC1(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_CC_DisableChannel(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH);
+
+    //reset previous TIMER value
+    furi_hal_rfid->prevTIMval = 0;
+
+    //switch clocksource to ETR with external prescaling via ARR
+    LL_TIM_SetPrescaler(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, 1 - 1); //prescaler is only applied at next update event
+    LL_TIM_GenerateEvent_UPDATE(
+        FURI_HAL_RFID_RTF_CARRIER_IN_TIMER); //prescaler is only applied at next update event //TODO: how to prevent this from creating a capture data entry
+    LL_TIM_SetAutoReload(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, ext_prescaler - 1);
+    LL_TIM_SetClockSource(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, LL_TIM_CLOCKSOURCE_EXT_MODE2);
+
+    //reconfigure carrier_in pin to TIM2 ETR
+    furi_hal_gpio_init_ex(
+        &gpio_rfid_carrier, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn2TIM2);
+
+    //reset timer counter & capture context for period calculation
+    LL_TIM_SetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, 0);
+    LL_TIM_SetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER, 0);
+
+    //enable interrupt via update
+    LL_TIM_EnableIT_UPDATE(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+
+    //re-enable counters
+    LL_TIM_EnableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_EnableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER);
+}
+
+static void furi_hal_rfid_rtf_carrier_in_IC_mode() {
+    //input caputre mode used during emulation while scanning for commands from reader. Input capture yields more accurate results compared to ETR.
+    
+    //disable counters temporarily
+    LL_TIM_DisableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_DisableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER);
+
+    //disable interrupt via update
+    LL_TIM_DisableIT_UPDATE(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+
+    //reset previous TIMER value
+    furi_hal_rfid->prevTIMval = 0;
+
+    //switch clocksource to system/64, external prescaling is handled in IC prescaler
+    LL_TIM_SetClockSource(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, LL_TIM_CLOCKSOURCE_INTERNAL);
+    LL_TIM_SetPrescaler(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, 64 - 1); //prescaler is only applied at next update event
+    LL_TIM_GenerateEvent_UPDATE(
+        FURI_HAL_RFID_RTF_CARRIER_IN_TIMER); //prescaler is only applied at next update event	//TODO: how to prevent this from creating a capture data entry
+    LL_TIM_SetAutoReload(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, UINT32_MAX);
+
+    //reconfigure carrier_in pin to TIM2 CH1 for input capture
+    furi_hal_gpio_init_ex(
+        &gpio_rfid_carrier, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+
+    //reset timer counter & capture context for period calculation
+    LL_TIM_SetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, 0);
+    LL_TIM_SetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER, 0);
+
+    //enable Input capture & related interrupt
+    LL_TIM_EnableIT_CC1(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_CC_EnableChannel(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH);
+
+    //re-enable counters
+    LL_TIM_EnableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_EnableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER);
+}
+
+void furi_hal_rfid_rtf_carrier_in_start(
+    void* capture_context,
+    uint8_t ext_prescaler,
+    uint32_t* duration,
+    uint32_t* pulse,
+    size_t length,
+    FuriHalRfidReadCaptureCallback callback) {
+    furi_assert(furi_hal_rfid);
+    furi_hal_rfid->read_capture_callback = callback;
+
+    FURI_CRITICAL_ENTER();
+    LL_DMA_DeInit(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF); //required?
+    LL_DMA_DeInit(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2_DEF); //required?
+    FURI_CRITICAL_EXIT();
+
+    furi_hal_bus_enable(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_BUS);
+    furi_hal_bus_enable(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER_BUS);
+
+    //setup reference timer: simple setup with base freq of 1MHz and max autoreload
+    LL_TIM_InitTypeDef TIM_InitStruct_Ref = {0};
+    TIM_InitStruct_Ref.Prescaler =
+        64 -
+        1; //system base freq is 64MHz, so this sets base freq for TIM to 1MHz (aka 1us period)
+    TIM_InitStruct_Ref.CounterMode = LL_TIM_COUNTERMODE_UP;
+    TIM_InitStruct_Ref.Autoreload = UINT32_MAX;
+    TIM_InitStruct_Ref.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+    LL_TIM_Init(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER, &TIM_InitStruct_Ref);
+
+    //setup carrier in timer for input capture
+    LL_TIM_InitTypeDef TIM_InitStruct = {0};
+    TIM_InitStruct.Prescaler =
+        64 -
+        1; //system base freq is 64MHz, so this sets base freq for TIM to 1MHz (aka 1us period)
+    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+    TIM_InitStruct.Autoreload = UINT32_MAX;
+    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+    LL_TIM_Init(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, &TIM_InitStruct);
+
+    LL_TIM_DisableARRPreload(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_SetClockSource(
+        FURI_HAL_RFID_RTF_CARRIER_IN_TIMER,
+        LL_TIM_CLOCKSOURCE_INTERNAL); //default is internal, so likely not required
+    LL_TIM_DisableDMAReq_TRIG(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_DisableIT_TRIG(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+
+    //meanwhile already prepare the ETR
+    LL_TIM_ConfigETR(
+        FURI_HAL_RFID_RTF_CARRIER_IN_TIMER,
+        LL_TIM_ETR_POLARITY_INVERTED,
+        LL_TIM_ETR_PRESCALER_DIV1,
+        LL_TIM_ETR_FILTER_FDIV1);
+
+    //INPUT CAPTURE SETUP
+    // Timer: channel 1 direct (from GPIO)
+    LL_TIM_IC_SetActiveInput(
+        FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH, LL_TIM_ACTIVEINPUT_DIRECTTI);
+    //prescaling direct channel seems to be working fine (and is necessary since otherwise sd write cannot keep up)
+    if(ext_prescaler == 4) {
+        LL_TIM_IC_SetPrescaler(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH, LL_TIM_ICPSC_DIV4);
+    } else if(ext_prescaler == 2) {
+        LL_TIM_IC_SetPrescaler(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH, LL_TIM_ICPSC_DIV2);
+    } else {
+        LL_TIM_IC_SetPrescaler(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH, LL_TIM_ICPSC_DIV1);
+    }
+    LL_TIM_IC_SetPolarity(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH, LL_TIM_IC_POLARITY_RISING);
+    LL_TIM_IC_SetFilter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH, LL_TIM_IC_FILTER_FDIV1);
+    
+    //set interrupt callback for capturing period
+    LL_TIM_EnableIT_CC1(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    //LL_TIM_EnableIT_CC2(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    furi_hal_interrupt_set_isr(
+        FuriHalInterruptIdTIM2, furi_hal_rfid_rtf_carrier_in_isr, capture_context);
+
+    //OUTPUT COMPARE SETUP
+    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+    //TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;			//during emulate (dma controlled) mode
+    TIM_OC_InitStruct.OCMode =
+        LL_TIM_OCMODE_FORCED_INACTIVE; //during carrier in, put output to forced low state
+    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
+    TIM_OC_InitStruct.CompareValue =
+        0; //0% this should have almost similar effect as keeping output forced inactive (there's still some micropulse emited, going high at ARR and immediately down again at CCR value)
+    LL_TIM_OC_Init(FURI_HAL_RFID_RTF_PULL_OUT_TIMER, FURI_HAL_RFID_RTF_PULL_OUT_TIMER_CHANNEL, &TIM_OC_InitStruct);
+    LL_TIM_OC_SetPolarity(
+        FURI_HAL_RFID_RTF_PULL_OUT_TIMER,
+        FURI_HAL_RFID_RTF_PULL_OUT_TIMER_CHANNEL,
+        LL_TIM_OCPOLARITY_HIGH); //active high (gpio goes high when pulse is high)
+
+    //INIT DMA (do not start it yet)
+    furi_hal_rfid_rtf_pull_out_dma_setup(duration, pulse, length);
+
+    LL_TIM_CC_EnableChannel(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_DIR_CH);
+    LL_TIM_CC_EnableChannel(FURI_HAL_RFID_RTF_PULL_OUT_TIMER, FURI_HAL_RFID_RTF_PULL_OUT_TIMER_CHANNEL);
+    LL_TIM_SetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER, 0);
+    LL_TIM_SetCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER, 0);
+    LL_TIM_EnableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_EnableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER);
+}
+
+void furi_hal_rfid_rtf_carrier_in_stop() {
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
+    furi_hal_interrupt_set_isr(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_IRQ, NULL, NULL);
+
+    LL_TIM_DisableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER);
+    LL_TIM_DisableCounter(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER);
+    LL_TIM_DisableAllOutputs(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER); //used for pull pin OC
+
+    FURI_CRITICAL_ENTER();
+    LL_DMA_DeInit(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH1_DEF);
+    LL_DMA_DeInit(FURI_HAL_RFID_RTF_PULL_OUT_DMA_CH2_DEF);
+
+    furi_hal_bus_disable(FURI_HAL_RFID_RTF_CARRIER_IN_TIMER_BUS);
+    furi_hal_bus_disable(FURI_HAL_RFID_RTF_CARRIER_IN_REFERENCE_TIMER_BUS);
+
+    FURI_CRITICAL_EXIT();
+}
+
+
+
+
 
 void furi_hal_rfid_comp_start() {
     LL_COMP_Enable(COMP1);

@@ -375,7 +375,6 @@ static LFRFIDWorkerReadState lfrfid_worker_read_rtf( //reader talks first
                 LFRFIDProtocolHitag1; //TODO get protocol ID from hitag_worker when expanding the worker to include other hitag protocols
             break;
         } else if(++delays >= timeout / delay_ms) {
-            state = LFRFIDWorkerReadTimeout;
             break;
         }
     }
