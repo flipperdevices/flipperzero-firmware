@@ -183,7 +183,6 @@ fap_deploy = distenv.PhonyTarget(
             "/ext/apps",
         ]
     ],
-    # FIXME
     source=firmware_env.Dir(("${RESOURCES_ROOT}/apps")),
 )
 
