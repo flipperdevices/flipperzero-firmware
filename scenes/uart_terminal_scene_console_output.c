@@ -84,31 +84,27 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     /* GRAVITY: Ignore the "cls" command */
     if(app->is_command && app->selected_tx_string && strcmp(app->selected_tx_string, "cls")) {
         if(app->TERMINAL_MODE == 1) {
-            furi_string_cat_str(app->text_box_store, app->selected_tx_string);
-            app->text_box_store_strlen += strlen(app->selected_tx_string);
-            char foo[3];
-            itoa(strlen(app->selected_tx_string), foo, 10);
-            furi_string_cat_str(app->text_box_store, foo);
-            app->text_box_store_strlen += strlen(foo);
+            // furi_string_cat_str(app->text_box_store, app->selected_tx_string);
+            // app->text_box_store_strlen += strlen(app->selected_tx_string);
+            // char foo[3];
+            // itoa(strlen(app->selected_tx_string), foo, 10);
+            // furi_string_cat_str(app->text_box_store, foo);
+            // app->text_box_store_strlen += strlen(foo);
             uart_terminal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
             uart_terminal_uart_tx((uint8_t*)("\r\n"), 2);
         } else {
-            furi_string_cat_str(app->text_box_store, app->selected_tx_string);
-            app->text_box_store_strlen += strlen(app->selected_tx_string);
-            char foo[3];
-            itoa(strlen(app->selected_tx_string), foo, 10);
-            furi_string_cat_str(app->text_box_store, foo);
-            app->text_box_store_strlen += strlen(foo);
-
-            //platformDelay(5);
-            //return;
+            // furi_string_cat_str(app->text_box_store, app->selected_tx_string);
+            // app->text_box_store_strlen += strlen(app->selected_tx_string);
+            // char foo[3];
+            // itoa(strlen(app->selected_tx_string), foo, 10);
+            // furi_string_cat_str(app->text_box_store, foo);
+            // app->text_box_store_strlen += strlen(foo);
             uart_terminal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
             uart_terminal_uart_tx((uint8_t*)("\n"), 1);
         }
     }
-    //return;
     if (app->free_command) {
         free(app->selected_tx_string);
         app->selected_tx_string = NULL;

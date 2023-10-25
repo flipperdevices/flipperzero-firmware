@@ -2,27 +2,27 @@
 #include <dolphin/dolphin.h>
 
 UART_TerminalItem help_info[NUM_HELP_INFO_ITEMS] = {
-  {"Beacon", {""}, 1, {"INFO beacon"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Target-SSIDs", {""}, 1, {"INFO Target-SSIDs"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Probe", {""}, 1, {"INFO probe"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Fuzz", {""}, 1, {"INFO fuzz"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Sniff", {""}, 1, {"INFO sniff"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Deauth", {""}, 1, {"INFO deauth"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Mana", {""}, 1, {"INFO mana"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Stalk", {""}, 1, {"INFO stalk"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"AP-DOS", {""}, 1, {"INFO AP-DOS"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"AP-Clone", {""}, 1, {"INFO AP-Clone"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Scan", {""}, 1, {"INFO scan"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Hop", {""}, 1, {"INFO hop"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Get", {""}, 1, {"INFO get"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Set", {""}, 1, {"INFO set"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"View", {""}, 1, {"INFO view"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Select", {""}, 1, {"INFO select"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Selected", {""}, 1, {"INFO selected"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Clear", {""}, 1, {"INFO clear"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Info", {""}, 1, {"INFO info"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Version", {""}, 1, {"INFO gravity-version"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Purge", {""}, 1, {"INFO Purge"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false}
+  {"Beacon", {""}, 1, {"info beacon"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Target-SSIDs", {""}, 1, {"info Target-SSIDs"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Probe", {""}, 1, {"info probe"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Fuzz", {""}, 1, {"info fuzz"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Sniff", {""}, 1, {"info sniff"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Deauth", {""}, 1, {"info deauth"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Mana", {""}, 1, {"info mana"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Stalk", {""}, 1, {"info stalk"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"AP-DOS", {""}, 1, {"info AP-DOS"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"AP-Clone", {""}, 1, {"info AP-Clone"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Scan", {""}, 1, {"info scan"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Hop", {""}, 1, {"info hop"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Get", {""}, 1, {"info get"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Set", {""}, 1, {"info set"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"View", {""}, 1, {"info view"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Select", {""}, 1, {"info select"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Selected", {""}, 1, {"info selected"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Clear", {""}, 1, {"info clear"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Info", {""}, 1, {"info info"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Version", {""}, 1, {"info gravity-version"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+  {"Purge", {""}, 1, {"info Purge"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false}
 };
 
 static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {

@@ -101,7 +101,8 @@ static void uart_terminal_scene_attacks_mana_var_list_enter_callback(void* conte
             /* Panic */
             return;
         }
-        strcpy(mana_command, "MANA ");
+        memset(mana_command, '\0', cmdLength);
+        strcpy(mana_command, "mana ");
         strcat(mana_command, attacks_mana[MANA_MENU_VERBOSE].actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);
         strcat(mana_command, " ON AUTH ");
         strcat(mana_command, attacks_mana[MANA_MENU_AUTH].actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);

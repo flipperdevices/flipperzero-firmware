@@ -90,13 +90,8 @@ static void uart_terminal_scene_packets_fuzz_var_list_enter_callback(void* conte
             /* Panic */
             return;
         }
-        /* sprintf doesn't work. Instead a loop of strcat's
-        sprintf(fuzz_command, "FUZZ %s %s %s ON",
-                packets_fuzz[0].actual_commands[app->selected_option_index[0]],
-                packets_fuzz[1].actual_commands[app->selected_option_index[1]],
-                packets_fuzz[2].actual_commands[app->selected_option_index[2]]);
-        */
-        strcpy(fuzz_command, "FUZZ ");
+        memset(fuzz_command, '\0', cmdLength);
+        strcpy(fuzz_command, "fuzz ");
         for (int i = 0; i < FUZZ_MENU_RUN; ++i) {
             strcat(fuzz_command, packets_fuzz[i].actual_commands[app->selected_option_index[i]]);
             strcat(fuzz_command, " ");

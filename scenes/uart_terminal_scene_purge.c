@@ -175,7 +175,7 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         char saveCmd[29] = "";
         if (bAge) {
             app->purgeAge = atoi(strAge);
-            strcpy(saveCmd, "SET BLE_PURGE_MIN_AGE ");
+            strcpy(saveCmd, "set BLE_PURGE_MIN_AGE ");
             strcat(saveCmd, strAge);
             strcat(saveCmd, "\n");
             uart_terminal_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
@@ -183,7 +183,7 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         }
         if (bRSSI) {
             app->purgeRSSI = atoi(strRSSI);
-            strcpy(saveCmd, "SET BLE_PURGE_MAX_RSSI ");
+            strcpy(saveCmd, "set BLE_PURGE_MAX_RSSI ");
             strcat(saveCmd, strRSSI);
             strcat(saveCmd, "\n");
             uart_terminal_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
@@ -191,7 +191,7 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         }
         char strStrat[3];
         itoa(strat, strStrat, 10);
-        strcpy(saveCmd, "SET BLE_PURGE_STRAT ");
+        strcpy(saveCmd, "set BLE_PURGE_STRAT ");
         strcat(saveCmd, strStrat);
         if (saveCmd[strlen(saveCmd) - 1] == ' ') {
             saveCmd[strlen(saveCmd) - 1] = '\0';
@@ -243,7 +243,8 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
             // TODO - Panic
             return;
         }
-        strcpy(tx_command, purgeCmd);
+        memset(tx_command, '\0', strlen(purgeCmd) + 1);
+        strncpy(tx_command, purgeCmd, strlen(purgeCmd));
         app->selected_tx_string = tx_command;
         app->free_command = true;
     }
