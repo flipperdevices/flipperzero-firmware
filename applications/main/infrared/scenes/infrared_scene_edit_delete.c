@@ -1,13 +1,13 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 
 static void
     infrared_scene_edit_delete_dialog_result_callback(DialogExResult result, void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(infrared->view_dispatcher, result);
 }
 
 void infrared_scene_edit_delete_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     DialogEx* dialog_ex = infrared->dialog_ex;
     InfraredRemote* remote = infrared->remote;
 
@@ -77,7 +77,7 @@ void infrared_scene_edit_delete_on_enter(void* context) {
 }
 
 bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     SceneManager* scene_manager = infrared->scene_manager;
     bool consumed = false;
 
@@ -123,6 +123,6 @@ bool infrared_scene_edit_delete_on_event(void* context, SceneManagerEvent event)
 }
 
 void infrared_scene_edit_delete_on_exit(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     view_stack_remove_view(infrared->view_stack, dialog_ex_get_view(infrared->dialog_ex));
 }

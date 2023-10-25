@@ -1,13 +1,13 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 
 static void
     infrared_scene_learn_success_dialog_result_callback(DialogExResult result, void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     view_dispatcher_send_custom_event(infrared->view_dispatcher, result);
 }
 
 void infrared_scene_learn_success_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     DialogEx* dialog_ex = infrared->dialog_ex;
     InfraredSignal* signal = infrared->current_signal;
 
@@ -56,7 +56,7 @@ void infrared_scene_learn_success_on_enter(void* context) {
 }
 
 bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent event) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     SceneManager* scene_manager = infrared->scene_manager;
     const bool is_transmitter_idle = !infrared->app_state.is_transmitting;
     bool consumed = false;
@@ -96,7 +96,7 @@ bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent even
 }
 
 void infrared_scene_learn_success_on_exit(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     dialog_ex_reset(infrared->dialog_ex);
     infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOff);
 }

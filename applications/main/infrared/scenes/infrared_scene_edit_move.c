@@ -1,10 +1,10 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 
 static void infrared_scene_edit_move_button_callback(
     uint32_t index_old,
     uint32_t index_new,
     void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     furi_assert(infrared);
 
     infrared->app_state.prev_button_index = index_old;
@@ -15,7 +15,7 @@ static void infrared_scene_edit_move_button_callback(
 }
 
 void infrared_scene_edit_move_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     InfraredRemote* remote = infrared->remote;
 
     for(size_t i = 0; i < infrared_remote_get_signal_count(remote); ++i) {
@@ -33,7 +33,7 @@ void infrared_scene_edit_move_on_enter(void* context) {
 }
 
 bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -63,7 +63,7 @@ bool infrared_scene_edit_move_on_event(void* context, SceneManagerEvent event) {
 }
 
 void infrared_scene_edit_move_on_exit(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     view_stack_remove_view(infrared->view_stack, infrared_move_view_get_view(infrared->move_view));
     infrared_move_view_reset(infrared->move_view);
 }

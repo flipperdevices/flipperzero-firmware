@@ -1,10 +1,10 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 
 #include <string.h>
 #include <toolbox/path.h>
 
 void infrared_scene_edit_rename_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     InfraredRemote* remote = infrared->remote;
     TextInput* text_input = infrared->text_input;
     size_t enter_name_length = 0;
@@ -60,7 +60,7 @@ void infrared_scene_edit_rename_on_enter(void* context) {
 }
 
 bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     InfraredRemote* remote = infrared->remote;
     SceneManager* scene_manager = infrared->scene_manager;
     InfraredAppState* app_state = &infrared->app_state;
@@ -102,7 +102,7 @@ bool infrared_scene_edit_rename_on_event(void* context, SceneManagerEvent event)
 }
 
 void infrared_scene_edit_rename_on_exit(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     TextInput* text_input = infrared->text_input;
 
     view_stack_remove_view(infrared->view_stack, text_input_get_view(text_input));

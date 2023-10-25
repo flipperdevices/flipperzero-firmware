@@ -1,8 +1,8 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 #include <dolphin/dolphin.h>
 
 void infrared_scene_learn_enter_name_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     TextInput* text_input = infrared->text_input;
     InfraredSignal* signal = infrared->current_signal;
 
@@ -33,7 +33,7 @@ void infrared_scene_learn_enter_name_on_enter(void* context) {
 }
 
 bool infrared_scene_learn_enter_name_on_event(void* context, SceneManagerEvent event) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     InfraredSignal* signal = infrared->current_signal;
     SceneManager* scene_manager = infrared->scene_manager;
     bool consumed = false;
@@ -66,6 +66,6 @@ bool infrared_scene_learn_enter_name_on_event(void* context, SceneManagerEvent e
 }
 
 void infrared_scene_learn_enter_name_on_exit(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     UNUSED(infrared);
 }

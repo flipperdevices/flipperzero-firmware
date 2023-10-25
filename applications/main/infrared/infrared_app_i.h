@@ -22,7 +22,7 @@
 
 #include <infrared_worker.h>
 
-#include "infrared.h"
+#include "infrared_app.h"
 #include "infrared_remote.h"
 #include "infrared_brute_force.h"
 #include "infrared_custom_event.h"
@@ -74,7 +74,9 @@ typedef struct {
     uint32_t last_transmit_time;
 } InfraredAppState;
 
-struct Infrared {
+typedef struct InfraredApp InfraredApp;
+
+struct InfraredApp {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
 
@@ -130,17 +132,17 @@ typedef enum {
     InfraredNotificationMessageBlinkStop,
 } InfraredNotificationMessage;
 
-bool infrared_add_remote_with_button(Infrared* infrared, const char* name, InfraredSignal* signal);
-bool infrared_rename_current_remote(Infrared* infrared, const char* new_name);
-void infrared_tx_start_signal(Infrared* infrared, const InfraredSignal* signal);
-void infrared_tx_start_button_index(Infrared* infrared, size_t button_index);
-void infrared_tx_start_current(Infrared* infrared);
-void infrared_tx_stop(Infrared* infrared);
-void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text, ...);
-void infrared_text_store_clear(Infrared* infrared, uint32_t bank);
-void infrared_play_notification_message(Infrared* infrared, uint32_t message);
-void infrared_show_loading_popup(Infrared* infrared, bool show);
-void infrared_show_error_message(Infrared* infrared, const char* fmt, ...)
+bool infrared_add_remote_with_button(InfraredApp* infrared, const char* name, InfraredSignal* signal);
+bool infrared_rename_current_remote(InfraredApp* infrared, const char* new_name);
+void infrared_tx_start_signal(InfraredApp* infrared, const InfraredSignal* signal);
+void infrared_tx_start_button_index(InfraredApp* infrared, size_t button_index);
+void infrared_tx_start_current(InfraredApp* infrared);
+void infrared_tx_stop(InfraredApp* infrared);
+void infrared_text_store_set(InfraredApp* infrared, uint32_t bank, const char* text, ...);
+void infrared_text_store_clear(InfraredApp* infrared, uint32_t bank);
+void infrared_play_notification_message(InfraredApp* infrared, uint32_t message);
+void infrared_show_loading_popup(InfraredApp* infrared, bool show);
+void infrared_show_error_message(InfraredApp* infrared, const char* fmt, ...)
     _ATTRIBUTE((__format__(__printf__, 2, 3)));
 
 void infrared_signal_received_callback(void* context, InfraredWorkerSignal* received_signal);

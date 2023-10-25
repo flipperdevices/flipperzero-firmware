@@ -1,7 +1,7 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 
 void infrared_scene_remote_list_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     SceneManager* scene_manager = infrared->scene_manager;
     ViewDispatcher* view_dispatcher = infrared->view_dispatcher;
 

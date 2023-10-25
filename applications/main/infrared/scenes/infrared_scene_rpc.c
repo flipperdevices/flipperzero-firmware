@@ -1,4 +1,4 @@
-#include "../infrared_i.h"
+#include "../infrared_app_i.h"
 #include <gui/canvas.h>
 
 typedef enum {
@@ -8,7 +8,7 @@ typedef enum {
 } InfraredRpcState;
 
 void infrared_scene_rpc_on_enter(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     Popup* popup = infrared->popup;
 
     popup_set_header(popup, "Infrared", 89, 42, AlignCenter, AlignBottom);
@@ -27,7 +27,7 @@ void infrared_scene_rpc_on_enter(void* context) {
 }
 
 bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -92,7 +92,7 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
 }
 
 void infrared_scene_rpc_on_exit(void* context) {
-    Infrared* infrared = context;
+    InfraredApp* infrared = context;
     if(scene_manager_get_scene_state(infrared->scene_manager, InfraredSceneRpc) ==
        InfraredRpcStateSending) {
         infrared_tx_stop(infrared);
