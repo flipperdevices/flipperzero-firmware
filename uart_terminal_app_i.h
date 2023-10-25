@@ -10,6 +10,7 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/byte_input.h>
 #include "uart_text_input.h"
 
 #define GRAVITY_VERSION "0.6.0"
@@ -29,6 +30,7 @@
 #define NUM_SETTINGS_ITEMS (16)
 #define NUM_PURGE_ITEMS (7)
 #define MAX_MENU_STR_LEN (12)
+#define NUM_MAC_BYTES (6)
 
 #define UART_TERMINAL_TEXT_BOX_STORE_SIZE (1024)
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
@@ -47,6 +49,7 @@ typedef enum {
   GRAVITY_MENU_ATTACKS,
   GRAVITY_MENU_ATTACKS_MANA,
   GRAVITY_MENU_SETTINGS,
+  GRAVITY_MENU_SETTINGS_MAC,
   GRAVITY_MENU_HELP,
   GRAVITY_MENU_HELP_INFO,
   GRAVITY_MENU_PURGE,
@@ -70,6 +73,9 @@ struct UART_TerminalApp {
     VariableItemList *packets_deauth_menu_list, *packets_fuzz_menu_list;
     VariableItemList *help_info_menu_list, *targets_scan_menu_list;
     VariableItemList *attacks_mana_menu_list, *purge_menu_list;
+    ByteInput *settings_mac_bytes;
+
+    uint8_t mac_bytes[NUM_MAC_BYTES];
 
     UART_TerminalUart* uart;
     int selected_menu_index;
@@ -102,6 +108,7 @@ typedef enum {
     Gravity_AppViewAttacksMenu,
     Gravity_AppViewAttacksManaMenu,
     Gravity_AppViewSettingsMenu,
+    Gravity_AppViewSettingsMac,
     Gravity_AppViewHelpMenu,
     Gravity_AppViewHelpInfoMenu,
     Gravity_AppViewPurgeMenu,

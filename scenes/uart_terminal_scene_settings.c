@@ -49,7 +49,7 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
   {"MAC",
   {"Get", "Set"},
   2,
-  {"get MAC", "set MAC "},
+  {"get MAC", "set"},
   TOGGLE_ARGS,
   FOCUS_CONSOLE_START,
   NO_TIP,
@@ -138,6 +138,8 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
         //newScene = UART_TerminalSceneSettingsSet;
     } else if (!strcmp(item->item_string, "Purge Strategy")) {
         newScene = UART_TerminalScenePurge;
+    } else if (!strcmp(item->item_string, "MAC")) {
+        newScene = UART_TerminalSceneSettingsMac;
     }
     if (newScene < 0) {
         return;
@@ -158,7 +160,8 @@ static void uart_terminal_scene_settings_var_list_enter_callback(void* context, 
     item = &settings[index];
 
     /* Are we displaying a submenu or executing something? */
-    if (item->isSubMenu) {
+    /* The MAC menu item only uses a submenu for setting */
+    if (item->isSubMenu || (!strcmp(item->item_string, "MAC") && !strcmp(item->actual_commands[selected_option_index], "set"))) {
         /* Display next scene */
         displaySubmenu(app, item);
     } else {

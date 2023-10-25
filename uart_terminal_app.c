@@ -77,10 +77,18 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     app->purge_menu_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewPurgeMenu,
             variable_item_list_get_view(app->purge_menu_list));
-
+    /* Initialise the byte input view to set MAC */
+    app->settings_mac_bytes = byte_input_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewSettingsMac,
+            byte_input_get_view(app->settings_mac_bytes));
 
     for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
         app->selected_option_index[i] = 0;
+    }
+    /* Initialise MAC bytes to 00:00:00:00:00:00 */
+    // TODO : Get and use the device's real MAC
+    for (int i=0; i < NUM_MAC_BYTES; ++i) {
+        app->mac_bytes[i] = 0;
     }
 
     app->text_box = text_box_alloc();
@@ -123,6 +131,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewHelpMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewHelpInfoMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPurgeMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewSettingsMac);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
     uart_text_input_free(app->text_input);

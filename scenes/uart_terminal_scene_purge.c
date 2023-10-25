@@ -170,8 +170,6 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         /* I agonised a bit over whether age and RSSI should be saved all the
            time, or only when selected. These will only be saved where they
            have been selected for use. */
-
-           // TODO : Malloc saveCmd and free later - another race condition??
         char saveCmd[29] = "";
         if (bAge) {
             app->purgeAge = atoi(strAge);
