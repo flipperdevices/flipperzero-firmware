@@ -14,7 +14,8 @@ static void infrared_scene_universal_common_progress_back_callback(void* context
     view_dispatcher_send_custom_event(infrared->view_dispatcher, event);
 }
 
-static void infrared_scene_universal_common_show_popup(InfraredApp* infrared, uint32_t record_count) {
+static void
+    infrared_scene_universal_common_show_popup(InfraredApp* infrared, uint32_t record_count) {
     ViewStack* view_stack = infrared->view_stack;
     InfraredProgressView* progress = infrared->progress;
     infrared_progress_view_set_progress_total(progress, record_count);

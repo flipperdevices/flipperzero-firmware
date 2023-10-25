@@ -132,7 +132,10 @@ typedef enum {
     InfraredNotificationMessageBlinkStop,
 } InfraredNotificationMessage;
 
-bool infrared_add_remote_with_button(InfraredApp* infrared, const char* name, InfraredSignal* signal);
+bool infrared_add_remote_with_button(
+    InfraredApp* infrared,
+    const char* name,
+    InfraredSignal* signal);
 bool infrared_rename_current_remote(InfraredApp* infrared, const char* new_name);
 void infrared_tx_start_signal(InfraredApp* infrared, const InfraredSignal* signal);
 void infrared_tx_start_button_index(InfraredApp* infrared, size_t button_index);
