@@ -92,7 +92,7 @@ See [Universal Remotes](/documentation/UniversalRemotes.md) for more information
 
 ### Examples
 
-See [Infrared Unit Tests](/assets/unit_tests/infrared/) for various examples.
+See [Infrared Unit Tests](/applications/debug/unit_tests/resources/unit_tests/infrared/) for various examples.
 
 ### Description
 
