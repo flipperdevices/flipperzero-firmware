@@ -5,11 +5,25 @@
 #include "easysetup.h"
 #include "swiftpair.h"
 
-union ProtocolCfg {
-    ContinuityCfg continuity;
-    FastpairCfg fastpair;
-    EasysetupCfg easysetup;
-    SwiftpairCfg swiftpair;
+typedef enum {
+    ProtocolModeRandom,
+    ProtocolModeValue,
+    ProtocolModeBruteforce,
+} ProtocolMode;
+
+struct ProtocolCfg {
+    ProtocolMode mode;
+    struct {
+        uint8_t counter;
+        uint32_t value;
+        uint8_t size;
+    } bruteforce;
+    union {
+        ContinuityCfg continuity;
+        FastpairCfg fastpair;
+        EasysetupCfg easysetup;
+        SwiftpairCfg swiftpair;
+    } specific;
 };
 
 extern const Protocol* protocols[];
