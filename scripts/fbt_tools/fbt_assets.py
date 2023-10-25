@@ -8,7 +8,7 @@ from SCons.Errors import StopError
 from SCons.Node.FS import File
 
 
-def icons_emitter(target, source, env):
+def _icons_emitter(target, source, env):
     icons_src = env.GlobRecursive("*.png", env["ICON_SRC_DIR"])
     icons_src += env.GlobRecursive("**/frame_rate", env["ICON_SRC_DIR"])
 
@@ -19,7 +19,7 @@ def icons_emitter(target, source, env):
     return target, icons_src
 
 
-def proto_emitter(target, source, env):
+def _proto_emitter(target, source, env):
     target = []
     for src in source:
         basename = os.path.splitext(src.name)[0]
@@ -28,7 +28,7 @@ def proto_emitter(target, source, env):
     return target, source
 
 
-def dolphin_emitter(target, source, env):
+def _dolphin_emitter(target, source, env):
     res_root_dir = source[0].Dir(env["DOLPHIN_RES_TYPE"])
     source = [res_root_dir]
     source.extend(env.GlobRecursive("*.*", res_root_dir.srcnode()))
@@ -65,7 +65,7 @@ def dolphin_emitter(target, source, env):
     return target, source
 
 
-def _invoke_git(args, source_dir):
+def __invoke_git(args, source_dir):
     cmd = ["git"]
     cmd.extend(args)
     return (
@@ -75,11 +75,11 @@ def _invoke_git(args, source_dir):
     )
 
 
-def proto_ver_generator(target, source, env):
+def _proto_ver_generator(target, source, env):
     target_file = target[0]
     src_dir = source[0].dir.abspath
     try:
-        _invoke_git(
+        __invoke_git(
             ["fetch", "--tags"],
             source_dir=src_dir,
         )
@@ -88,7 +88,7 @@ def proto_ver_generator(target, source, env):
         print(fg.boldred("Git: fetch failed"))
 
     try:
-        git_describe = _invoke_git(
+        git_describe = __invoke_git(
             ["describe", "--tags", "--abbrev=0"],
             source_dir=src_dir,
         )
@@ -147,7 +147,7 @@ def generate(env):
                     ],
                     "${ICONSCOMSTR}",
                 ),
-                emitter=icons_emitter,
+                emitter=_icons_emitter,
             ),
             "ProtoBuilder": Builder(
                 action=Action(
@@ -163,7 +163,7 @@ def generate(env):
                     ],
                     "${PROTOCOMSTR}",
                 ),
-                emitter=proto_emitter,
+                emitter=_proto_emitter,
                 suffix=".pb.c",
                 src_suffix=".proto",
             ),
@@ -182,7 +182,7 @@ def generate(env):
                     ],
                     "${DOLPHINCOMSTR}",
                 ),
-                emitter=dolphin_emitter,
+                emitter=_dolphin_emitter,
             ),
             "DolphinExtBuilder": Builder(
                 action=Action(
@@ -197,11 +197,11 @@ def generate(env):
                     ],
                     "${DOLPHINCOMSTR}",
                 ),
-                emitter=dolphin_emitter,
+                emitter=_dolphin_emitter,
             ),
             "ProtoVerBuilder": Builder(
                 action=Action(
-                    proto_ver_generator,
+                    _proto_ver_generator,
                     "${PBVERCOMSTR}",
                 ),
             ),

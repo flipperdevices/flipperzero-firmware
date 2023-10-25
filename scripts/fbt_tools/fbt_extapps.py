@@ -288,7 +288,7 @@ def prepare_app_metadata(target, source, env):
         )
 
 
-def validate_app_imports(target, source, env):
+def _validate_app_imports(target, source, env):
     sdk_cache = SdkCache(env["SDK_DEFINITION"].path, load_version_only=False)
     app_syms = set()
     with open(target[0].path, "rt") as f:
@@ -340,7 +340,7 @@ def GetExtAppByIdOrPath(env, app_dir):
     return app_artifacts
 
 
-def embed_app_metadata_emitter(target, source, env):
+def _embed_app_metadata_emitter(target, source, env):
     app = env["APP"]
 
     # Hack: change extension for fap libs
@@ -526,7 +526,7 @@ def generate(env, **kw):
                 generator=generate_embed_app_metadata_actions,
                 suffix=".fap",
                 src_suffix=".elf",
-                emitter=embed_app_metadata_emitter,
+                emitter=_embed_app_metadata_emitter,
             ),
             "ValidateAppImports": Builder(
                 action=[
@@ -535,7 +535,7 @@ def generate(env, **kw):
                         None,  # "$APPDUMP_COMSTR",
                     ),
                     Action(
-                        validate_app_imports,
+                        _validate_app_imports,
                         "$APPCHECK_COMSTR",
                     ),
                 ],

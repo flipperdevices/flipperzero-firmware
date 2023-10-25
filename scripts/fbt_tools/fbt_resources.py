@@ -1,7 +1,6 @@
 import os
 import shutil
 
-from ansi.color import fg
 from SCons.Action import Action
 from SCons.Builder import Builder
 from SCons.Errors import StopError
