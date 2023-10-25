@@ -11,31 +11,31 @@
 */
 
 UART_TerminalItem purgeMenu[NUM_PURGE_ITEMS] = {
-  {"Purge By Age?", {"On", "Off"}, 2, {"on", "off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+  {"Purge By Age?", {"On", "Off"}, 2, {"on", "off"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
   {"Purge Age",
   {"5 sec", "10 sec", "20 sec", "30 sec", "60 sec", "90 sec", "120 sec", "3 min", "5 min", "10 min", "30 min", "1 hour"},
   12,
   {"5", "10", "20", "30", "60", "90", "120", "180", "300", "600", "1800", "3600"},
-  TOGGLE_ARGS,
+  NO_ARGS,
   FOCUS_CONSOLE_END,
   NO_TIP,
   false},
-  {"Purge By RSSI?", {"On", "Off"}, 2, {"on", "off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+  {"Purge By RSSI?", {"On", "Off"}, 2, {"on", "off"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
   {"Purge RSSI",
   {"-125", "-115", "-105", "-95", "-85", "-75", "-65", "-55", "-45", "-35", "-25", "-15"},
   12,
   {"-125", "-115", "-105", "-95", "-85", "-75", "-65", "-55", "-45", "-35", "-25", "-15"},
-  TOGGLE_ARGS,
+  NO_ARGS,
   FOCUS_CONSOLE_END,
   NO_TIP,
   false},
-  {"Purge Unselecetd?", {"On", "Off"}, 2, {"on", "off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
-  {"Purge Unnamed?", {"On", "Off"}, 2, {"on", "off"}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+  {"Purge Unselected?", {"On", "Off"}, 2, {"on", "off"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+  {"Purge Unnamed?", {"On", "Off"}, 2, {"on", "off"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
   {"Done",
   {"Save Default", "Purge APs", "Purge STAs", "Purge BT", "Purge BLE"},
   5,
   {"save", "ap", "sta", "bt", "ble"},
-  TOGGLE_ARGS,
+  NO_ARGS,
   FOCUS_CONSOLE_START,
   NO_TIP,
   false}
@@ -66,9 +66,13 @@ static void purgeLoadFromMemory(UART_TerminalApp *app) {
     /* A purge strategy is in memory, use it for initial values */
     // Figure out what index in purgeMenu[PURGE_MENU_AGE].options_menu[]
     //      purgeAge is & set app->selected_option_index[PURGE_MENU_AGE]
+    if (app->purgeStrategy == 0) {
+        // TODO: Report missing value
+        return;
+    }
     char str[5];
     itoa(app->purgeAge, str, 10);
-    int idx = indexOf(str, purgeMenu[PURGE_MENU_AGE].options_menu,
+    int idx = indexOf(str, purgeMenu[PURGE_MENU_AGE].actual_commands,
             purgeMenu[PURGE_MENU_AGE].num_options_menu);
     if (idx >= 0) {
         app->selected_option_index[PURGE_MENU_AGE] = idx;
@@ -76,15 +80,15 @@ static void purgeLoadFromMemory(UART_TerminalApp *app) {
     // Find index of purgeRSSI in purgeMenu[PURGE_MENU_RSSI].options_menu[]
     // app->selected_option_index[PURGE_MENU_RSSI] = that
     itoa(app->purgeRSSI, str, 10);
-    idx = indexOf(str, purgeMenu[PURGE_MENU_RSSI].options_menu,
+    idx = indexOf(str, purgeMenu[PURGE_MENU_RSSI].actual_commands,
             purgeMenu[PURGE_MENU_RSSI].num_options_menu);
     if (idx >= 0) {
         app->selected_option_index[PURGE_MENU_RSSI] = idx;
     }
     /* Now set the boolean values */
-    int idxOn = indexOf("on", purgeMenu[PURGE_MENU_AGE_ON].options_menu,
+    int idxOn = indexOf("on", purgeMenu[PURGE_MENU_AGE_ON].actual_commands,
             purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
-    int idxOff = indexOf("off", purgeMenu[PURGE_MENU_AGE_ON].options_menu,
+    int idxOff = indexOf("off", purgeMenu[PURGE_MENU_AGE_ON].actual_commands,
             purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
     if ((app->purgeStrategy & GRAVITY_PURGE_AGE) == GRAVITY_PURGE_AGE) {
         app->selected_option_index[PURGE_MENU_AGE_ON] = idxOn;
@@ -129,6 +133,8 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         return;
     }
 
+    app->free_command = false;
+
     dolphin_deed(DolphinDeedGpioUartBridge);
     bool bAge = strcmp(purgeMenu[PURGE_MENU_AGE_ON].actual_commands[app->selected_option_index[PURGE_MENU_AGE_ON]], "off");
     bool bRSSI = strcmp(purgeMenu[PURGE_MENU_RSSI_ON].actual_commands[app->selected_option_index[PURGE_MENU_RSSI_ON]], "off");
@@ -164,6 +170,8 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         /* I agonised a bit over whether age and RSSI should be saved all the
            time, or only when selected. These will only be saved where they
            have been selected for use. */
+
+           // TODO : Malloc saveCmd and free later - another race condition??
         char saveCmd[29] = "";
         if (bAge) {
             app->purgeAge = atoi(strAge);
@@ -181,16 +189,20 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
             uart_terminal_uart_tx((uint8_t *)saveCmd, strlen(saveCmd));
             // YAGNI: Delay
         }
-        char strStrat[2];
+        char strStrat[3];
         itoa(strat, strStrat, 10);
         strcpy(saveCmd, "SET BLE_PURGE_STRAT ");
         strcat(saveCmd, strStrat);
+        if (saveCmd[strlen(saveCmd) - 1] == ' ') {
+            saveCmd[strlen(saveCmd) - 1] = '\0';
+        }
         char *tx_command = malloc(sizeof(char) * (strlen(saveCmd) + 1));
         if (tx_command == NULL) {
             //TODO - Panic
             return;
         }
-        strcpy(tx_command, saveCmd);
+        memset(tx_command, '\0', strlen(saveCmd) + 1);
+        strncpy(tx_command, saveCmd, strlen(saveCmd));
         app->selected_tx_string = tx_command;
         app->free_command = true;
         /* Save defaults in Flipper app */
@@ -198,7 +210,7 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
     } else {
         //purge [ AP | STA | BT | BLE ]+ [ RSSI [ <maxRSSI> ] | AGE [ <minAge> ] | UNNAMED | UNSELECTED | NONE ]+
         // PURGE BLE RSSI -100 AGE 3600 UNNAMED UNSELECTED
-        char purgeCmd[39];
+        char purgeCmd[49];
         strcpy(purgeCmd, "purge ");
         // ap/sta/bt/ble
         strcat(purgeCmd, item->actual_commands[selected_option_index]);
@@ -221,6 +233,10 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         }
         if (!(bAge || bRSSI || bUnselected || bUnnamed)) {
             strcat(purgeCmd, "NONE ");
+        }
+        /* Remove a trailing space to avoid displaying keyboard */
+        if (purgeCmd[strlen(purgeCmd) - 1] == ' ') {
+            purgeCmd[strlen(purgeCmd) - 1] = '\0';
         }
         char *tx_command = malloc(sizeof(char) * (strlen(purgeCmd) + 1));
         if (tx_command == NULL) {
@@ -276,13 +292,17 @@ void uart_terminal_scene_purge_on_enter(void* context) {
     VariableItemList* var_item_list = app->purge_menu_list;
     VariableItem *item;
 
+    /* Initialise app->free_command */
+    app->free_command = false;
+
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_purge_var_list_enter_callback, app);
 
+    /* Load purge config from Flipper memory if we've been here before */
     if (app->purgeStrategy != 0) {
         purgeLoadFromMemory(app);
     }
-
+    /* Need to create the menu before we can set values for selected_options_index[] */
     app->currentMenu = GRAVITY_MENU_PURGE;
     for(int i = 0; i < NUM_PURGE_ITEMS; ++i) {
         item = variable_item_list_add(
@@ -303,8 +323,12 @@ void uart_terminal_scene_purge_on_enter(void* context) {
         variable_item_set_current_value_text(
             item, purgeMenu[i].options_menu[app->selected_option_index[i]]);
     }
-    variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalScenePurge));
+    /* Set selected menu item when returning back to the scene */
+    app->selected_menu_index = scene_manager_get_scene_state(app->scene_manager, UART_TerminalScenePurge);
+    if (app->selected_menu_index >= NUM_PURGE_ITEMS) {
+        app->selected_menu_index = 0;
+    }
+    variable_item_list_set_selected_item(var_item_list, app->selected_menu_index);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewPurgeMenu);
 }
