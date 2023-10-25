@@ -5,6 +5,7 @@ from ansi.color import fg
 from SCons.Action import Action
 from SCons.Builder import Builder
 from SCons.Errors import StopError
+from SCons.Node.FS import File
 
 
 def icons_emitter(target, source, env):
@@ -38,16 +39,14 @@ def dolphin_emitter(target, source, env):
     if env["DOLPHIN_RES_TYPE"] == "external":
         target = [target_base_dir.File("manifest.txt")]
         ## A detailed list of files to be generated
-        ## works better if we just leave target the folder
-        # target = []
-        # target.extend(
-        #     map(
-        #         lambda node: target_base_dir.File(
-        #             res_root_dir.rel_path(node).replace(".png", ".bm")
-        #         ),
-        #         filter(lambda node: isinstance(node, SCons.Node.FS.File), source),
-        #     )
-        # )
+        target.extend(
+            map(
+                lambda node: target_base_dir.File(
+                    res_root_dir.rel_path(node).replace(".png", ".bm")
+                ),
+                filter(lambda node: isinstance(node, File), source),
+            )
+        )
     else:
         asset_basename = f"assets_dolphin_{env['DOLPHIN_RES_TYPE']}"
         target = [
@@ -127,7 +126,6 @@ def generate(env):
             ICONSCOMSTR="\tICONS\t${TARGET}",
             PROTOCOMSTR="\tPROTO\t${SOURCE}",
             DOLPHINCOMSTR="\tDOLPHIN\t${DOLPHIN_RES_TYPE}",
-            RESMANIFESTCOMSTR="\tMANIFEST\t${TARGET}",
             PBVERCOMSTR="\tPBVER\t${TARGET}",
         )
 
@@ -205,20 +203,6 @@ def generate(env):
                     proto_ver_generator,
                     "${PBVERCOMSTR}",
                 ),
-            ),
-            "ManifestBuilder": Builder(
-                action=Action(
-                    [
-                        [
-                            "${PYTHON3}",
-                            "${ASSETS_COMPILER}",
-                            "manifest",
-                            "${TARGET.dir.posix}",
-                            "--timestamp=${GIT_UNIX_TIMESTAMP}",
-                        ]
-                    ],
-                    "${RESMANIFESTCOMSTR}",
-                )
             ),
         }
     )

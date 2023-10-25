@@ -167,17 +167,23 @@ Depends(
     list(app_artifact.validator for app_artifact in external_app_list),
 )
 Alias("fap_dist", fap_dist)
-# distenv.Default(fap_dist)
-
-distenv.Depends(
-    firmware_env["FW_RESOURCES_MANIFEST"], external_apps_artifacts.resources_dist
-)
 
 # Copy all faps to device
 
 fap_deploy = distenv.PhonyTarget(
     "fap_deploy",
-    "${PYTHON3} ${FBT_SCRIPT_DIR}/storage.py -p ${FLIP_PORT} send ${SOURCE} /ext/apps",
+    [
+        [
+            "${PYTHON3}",
+            "${FBT_SCRIPT_DIR}/storage.py",
+            "-p",
+            "${FLIP_PORT}",
+            "send",
+            "${SOURCE}",
+            "/ext/apps",
+        ]
+    ],
+    # FIXME
     source=firmware_env.Dir(("${RESOURCES_ROOT}/apps")),
 )
 
@@ -317,9 +323,7 @@ distenv.PhonyTarget(
 )
 
 # Start Flipper CLI via PySerial's miniterm
-distenv.PhonyTarget(
-    "cli", "${PYTHON3} ${FBT_SCRIPT_DIR}/serial_cli.py  -p ${FLIP_PORT}"
-)
+distenv.PhonyTarget("cli", "${PYTHON3} ${FBT_SCRIPT_DIR}/serial_cli.py -p ${FLIP_PORT}")
 
 # Update WiFi devboard firmware
 distenv.PhonyTarget("devboard_flash", "${PYTHON3} ${FBT_SCRIPT_DIR}/wifi_board.py")

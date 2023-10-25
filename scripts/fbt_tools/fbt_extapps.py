@@ -331,45 +331,6 @@ def GetExtAppByIdOrPath(env, app_dir):
     return app_artifacts
 
 
-def resources_fap_dist_emitter(target, source, env):
-    # Initially we have a single target - target dir
-    # Here we inject pairs of (target, source) for each file
-    resources_root = target[0]
-
-    target = []
-    for app_artifacts in env["EXT_APPS"].values():
-        for _, dist_path in filter(
-            lambda dist_entry: dist_entry[0], app_artifacts.dist_entries
-        ):
-            source.append(app_artifacts.compact)
-            target.append(resources_root.File(dist_path))
-
-    # Deploy apps' resources too
-    for app in env["APPBUILD"].apps:
-        if not app.resources:
-            continue
-        apps_resource_dir = app._appdir.Dir(app.resources)
-        for res_file in env.GlobRecursive("*", apps_resource_dir):
-            if not isinstance(res_file, File):
-                continue
-            source.append(res_file)
-            target.append(resources_root.File(res_file.get_path(apps_resource_dir)))
-
-    assert len(target) == len(source)
-    return (target, source)
-
-
-def resources_fap_dist_action(target, source, env):
-    # FIXME: find a proper way to remove stale files
-    target_dir = env.Dir("${RESOURCES_ROOT}/apps")
-    shutil.rmtree(target_dir.path, ignore_errors=True)
-
-    # Iterate over pairs generated in emitter
-    for src, target in zip(source, target):
-        os.makedirs(os.path.dirname(target.path), exist_ok=True)
-        shutil.copy(src.path, target.path)
-
-
 def embed_app_metadata_emitter(target, source, env):
     app = env["APP"]
 
@@ -407,33 +368,52 @@ def generate_embed_app_metadata_actions(source, target, env, for_signature):
         Action(prepare_app_metadata, "$APPMETA_COMSTR"),
     ]
 
-    objcopy_str = (
-        "${OBJCOPY} "
-        "--remove-section .ARM.attributes "
-        "--add-section ${_FAP_META_SECTION}=${APP._section_fapmeta} "
-    )
+    objcopy_args = [
+        "${OBJCOPY}",
+        "--remove-section",
+        ".ARM.attributes",
+        "--add-section",
+        "${_FAP_META_SECTION}=${APP._section_fapmeta}",
+        "--set-section-flags",
+        "${_FAP_META_SECTION}=contents,noload,readonly,data",
+    ]
 
     if app._section_fapfileassets:
         actions.append(Action(prepare_app_file_assets, "$APPFILE_COMSTR"))
-        objcopy_str += (
-            "--add-section ${_FAP_FILEASSETS_SECTION}=${APP._section_fapfileassets} "
+        objcopy_args.extend(
+            (
+                "--add-section",
+                "${_FAP_FILEASSETS_SECTION}=${APP._section_fapfileassets}",
+                "--set-section-flags",
+                "${_FAP_FILEASSETS_SECTION}=contents,noload,readonly,data",
+            )
         )
 
-    objcopy_str += (
-        "--set-section-flags ${_FAP_META_SECTION}=contents,noload,readonly,data "
-        "--strip-debug --strip-unneeded "
-        "--add-gnu-debuglink=${SOURCE} "
-        "${SOURCES} ${TARGET}"
+    objcopy_args.extend(
+        (
+            "--strip-debug",
+            "--strip-unneeded",
+            "--add-gnu-debuglink=${SOURCE}",
+            "${SOURCES}",
+            "${TARGET}",
+        )
     )
 
     actions.extend(
         (
             Action(
-                objcopy_str,
+                [objcopy_args],
                 "$APPMETAEMBED_COMSTR",
             ),
             Action(
-                "${PYTHON3} ${FBT_SCRIPT_DIR}/fastfap.py ${TARGET} ${OBJCOPY}",
+                [
+                    [
+                        "${PYTHON3}",
+                        "${FBT_SCRIPT_DIR}/fastfap.py",
+                        "${TARGET}",
+                        "${OBJCOPY}",
+                    ]
+                ],
                 "$FASTFAP_COMSTR",
             ),
         )
@@ -511,7 +491,6 @@ def generate(env, **kw):
     )
     if not env["VERBOSE"]:
         env.SetDefault(
-            FAPDISTCOMSTR="\tFAPDIST\t${TARGET}",
             APPMETA_COMSTR="\tAPPMETA\t${TARGET}",
             APPFILE_COMSTR="\tAPPFILE\t${TARGET}",
             APPMETAEMBED_COMSTR="\tFAP\t${TARGET}",
@@ -534,13 +513,6 @@ def generate(env, **kw):
 
     env.Append(
         BUILDERS={
-            "FapDist": Builder(
-                action=Action(
-                    resources_fap_dist_action,
-                    "$FAPDISTCOMSTR",
-                ),
-                emitter=resources_fap_dist_emitter,
-            ),
             "EmbedAppMetadata": Builder(
                 generator=generate_embed_app_metadata_actions,
                 suffix=".fap",
