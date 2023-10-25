@@ -135,6 +135,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
     uart_text_input_free(app->text_input);
+    byte_input_free(app->settings_mac_bytes);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
