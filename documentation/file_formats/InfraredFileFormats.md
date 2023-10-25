@@ -72,9 +72,9 @@ Known protocols are represented in the `parsed` form, whereas non-recognized sig
 
 ### Examples
 
-- [TV Universal Library](/assets/resources/infrared/assets/tv.ir)
-- [A/C Universal Library](/assets/resources/infrared/assets/ac.ir)
-- [Audio Universal Library](/assets/resources/infrared/assets/audio.ir)
+- [TV Universal Library](/applications/main/infrared/resources/infrared/assets/tv.ir)
+- [A/C Universal Library](/applications/main/infrared/resources/infrared/assets/ac.ir)
+- [Audio Universal Library](/applications/main/infrared/resources/infrared/assets/audio.ir)
 
 ### Description
 
