@@ -84,7 +84,7 @@ bool infrared_scene_learn_success_on_event(void* context, SceneManagerEvent even
             consumed = true;
         } else if(event.event == DialogExPressCenter) {
             infrared_play_notification_message(infrared, InfraredNotificationMessageGreenOff);
-            infrared_tx_start_current(infrared);
+            infrared_tx_start(infrared);
             consumed = true;
         } else if(event.event == DialogExReleaseCenter) {
             infrared_tx_stop(infrared);

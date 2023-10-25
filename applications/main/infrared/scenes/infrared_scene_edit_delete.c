@@ -33,7 +33,7 @@ void infrared_scene_edit_delete_on_enter(void* context) {
             infrared_text_store_set(
                 infrared,
                 0,
-                "%s\nRAW\n%ld samples",
+                "%s\nRAW\n%zu samples",
                 infrared_remote_get_signal_name(remote, current_button_index),
                 raw->timings_size);
 
@@ -56,7 +56,7 @@ void infrared_scene_edit_delete_on_enter(void* context) {
         infrared_text_store_set(
             infrared,
             0,
-            "%s\n with %lu buttons",
+            "%s\n with %zu buttons",
             infrared_remote_get_name(remote),
             infrared_remote_get_signal_count(remote));
     } else {
