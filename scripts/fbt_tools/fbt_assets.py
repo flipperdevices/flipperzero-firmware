@@ -39,6 +39,7 @@ def dolphin_emitter(target, source, env):
     if env["DOLPHIN_RES_TYPE"] == "external":
         target = [target_base_dir.File("manifest.txt")]
         ## A detailed list of files to be generated
+        # Preserve original paths, do .png -> .bm conversion
         target.extend(
             map(
                 lambda node: target_base_dir.File(

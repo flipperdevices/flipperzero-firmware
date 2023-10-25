@@ -1,6 +1,3 @@
-# import os
-# import subprocess
-
 import os
 import shutil
 
@@ -11,7 +8,7 @@ from SCons.Errors import StopError
 from SCons.Node.FS import Dir, File
 
 
-def resources_dist_emitter(target, source, env):
+def _resources_dist_emitter(target, source, env):
     resources_root = env.Dir(env["RESOURCES_ROOT"])
 
     target = []
@@ -53,7 +50,7 @@ def resources_dist_emitter(target, source, env):
     return (target, source)
 
 
-def resources_dist_action(target, source, env):
+def _resources_dist_action(target, source, env):
     shutil.rmtree(env.Dir(env["RESOURCES_ROOT"]).abspath, ignore_errors=True)
     for src, target in zip(source, target):
         os.makedirs(os.path.dirname(target.path), exist_ok=True)
@@ -75,10 +72,10 @@ def generate(env, **kw):
         BUILDERS={
             "ResourcesDist": Builder(
                 action=Action(
-                    resources_dist_action,
+                    _resources_dist_action,
                     "${RESOURCEDISTCOMSTR}",
                 ),
-                emitter=resources_dist_emitter,
+                emitter=_resources_dist_emitter,
             ),
             "ManifestBuilder": Builder(
                 action=Action(
