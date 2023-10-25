@@ -242,8 +242,8 @@ class Main(App):
         for record in only_in_new:
             self.logger.debug(f"Only in new: {record}")
         if any((only_in_old, changed, only_in_new)):
-            self.logger.warning(
-                f"Manifest is updated ({len(only_in_new)} new, {len(only_in_old)} removed, {len(changed)} changed). Updating"
+            self.logger.info(
+                f"Manifest updated ({len(only_in_new)} new, {len(only_in_old)} removed, {len(changed)} changed)"
             )
             new_manifest.save(manifest_file)
         else:
