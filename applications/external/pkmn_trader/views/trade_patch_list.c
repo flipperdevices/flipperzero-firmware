@@ -76,12 +76,19 @@ void plist_create(struct patch_list** plist, TradeBlock* trade_block) {
      * is added to signify the end of the second part/
      */
     for(i = 0; i < 264; i++) {
-        if(i == 0xFC) plist_append(*plist, 0xFF);
+        FURI_LOG_D(TAG, "%02X", trade_party_flat[i]);
+        if(i == 0xFC) {
+            FURI_LOG_D(TAG, "[plist] part 1 end");
+            plist_append(*plist, 0xFF);
+        }
 
         if(trade_party_flat[i] == 0xFE) {
+            FURI_LOG_D(
+                TAG, "[plist] patching byte 0x%02X, adding 0x%02X to plist", i, (i % 0xfc) + 1);
             plist_append(*plist, (i % 0xfc) + 1);
             trade_party_flat[i] = 0xFF;
         }
     }
+    FURI_LOG_D(TAG, "[plist] part 2 end");
     plist_append(*plist, 0xFF);
 }

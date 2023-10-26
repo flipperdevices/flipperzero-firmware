@@ -161,7 +161,6 @@ struct trade_model {
 void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     furi_assert(context);
     UNUSED(arg);
-
     struct trade_ctx* trade = context;
 
     plist_create(&(trade->patch_list), trade->trade_block);
@@ -284,10 +283,6 @@ uint32_t micros() {
  */
 static uint8_t getConnectResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
-
-    /* XXX: Can streamline this code a bit by setting ret to in
-     * and then only setting ret where needed? Might be a useless
-     * optimization though */
     uint8_t ret;
 
     switch(in) {
@@ -418,6 +413,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         /* Also specifically it is repeated 10 times to signify that the random block is about to start */
         if((in & 0xF0) == 0xF0) trade->trade_centre_state = SEEN_FIRST_WAIT;
         patch_pt_2 = false;
+        in_pokemon_num = 0;
         break;
 
     case SEEN_FIRST_WAIT:
@@ -464,14 +460,16 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         send = trade_block_flat[counter];
         counter++;
 
-        if(counter == 415) //TODO: replace with sizeof struct rather than static number
+        if(counter == 418) //TODO: replace with sizeof struct rather than static number
             trade->trade_centre_state = SENDING_PATCH_DATA;
         break;
 
     /* XXX: This seems to end with the gameboy sending DF FE 15? */
 
     /* A couple of FD bytes are sent, looks like 6, which means I don't think we can use count of FD bytes to see what mode we're in */
-    /* We need to send our own patch data as well as receiving and then applying */
+    /* XXX: THIS IS TESTED AND WORKING AS OF 20231025!
+     * That means we for sure start this state and leave ths state at the right
+     * parts of communication */
     case SENDING_PATCH_DATA:
         if(in == 0xFD) {
             counter = 0;
@@ -511,7 +509,9 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
             /* This is actually 200 bytes, but that includes the 3x 0xFD that we
 	     * sent without counting.
 	     */
-            if(counter == 197) trade->trade_centre_state = TRADE_PENDING;
+            if(counter == 196) {
+                trade->trade_centre_state = TRADE_PENDING;
+            }
         }
         break;
 
@@ -524,15 +524,18 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
             model->gameboy_status = GAMEBOY_TRADE_READY;
             /* 0x6? says what pokemon the gameboy is sending us */
         } else if((in & 0x60) == 0x60) {
-            in_pokemon_num = in & 0x0F;
+            in_pokemon_num = in;
             send = 0x60; // first pokemon
             model->gameboy_status = GAMEBOY_SEND;
             /* I think this is a confirmation of what is being traded, likely from the dialog of:
 	     * so and so will be traded for so and so, is that ok?
 	     */
         } else if(in == 0x00) {
-            send = 0;
-            trade->trade_centre_state = TRADE_CONFIRMATION;
+            if(in_pokemon_num != 0) {
+                send = 0;
+                trade->trade_centre_state = TRADE_CONFIRMATION;
+                in_pokemon_num &= 0x0F;
+            }
         }
         /* XXX: Test to make sure saying no at is this okay does the right thing */
         break;
