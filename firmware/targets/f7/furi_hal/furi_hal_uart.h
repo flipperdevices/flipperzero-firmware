@@ -71,7 +71,7 @@ void furi_hal_uart_set_br(FuriHalUartId channel, uint32_t baud);
  * @param buffer data
  * @param buffer_size data size (in bytes)
  */
-void furi_hal_uart_tx(FuriHalUartId channel, uint8_t* buffer, size_t buffer_size);
+void furi_hal_uart_tx(FuriHalUartId channel, uint8_t const* buffer, size_t buffer_size);
 
 /**
  * Sets UART event callback

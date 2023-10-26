@@ -170,7 +170,7 @@ void furi_hal_uart_resume(FuriHalUartId channel) {
     furi_hal_usart_prev_enabled[channel] = false;
 }
 
-void furi_hal_uart_tx(FuriHalUartId ch, uint8_t* buffer, size_t buffer_size) {
+void furi_hal_uart_tx(FuriHalUartId ch, uint8_t const* buffer, size_t buffer_size) {
     if(ch == FuriHalUartIdUSART1) {
         if(LL_USART_IsEnabled(USART1) == 0) return;
 
