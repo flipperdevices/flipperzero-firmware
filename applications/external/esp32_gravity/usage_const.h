@@ -14,7 +14,7 @@ const char SHORT_SNIFF[] = "Display interesting packets. Usage: sniff [ ON | OFF
 const char SHORT_DEAUTH[] =
     "Deauth attack. Usage: deauth [ <millis> ] [ FRAME | DEVICE | SPOOF ]\n\t\t[ STA | AP | BROADCAST | OFF ]";
 const char SHORT_MANA[] =
-    "Mana attack. Usage: mana ( CLEAR | ( [ VERBOSE ] [ ON | OFF ] ) |\n\t\t( AUTH [ NONE | WEP | WPA ] ) | ( LOUD [ ON | OFF ] ) )";
+    "Mana attack. Usage: mana [ CLEAR ] [ VERBOSE ] [ LOUD ] [ AUTH [ NONE | WEP | WPA ] ] [ ON | OFF ]";
 const char SHORT_STALK[] = "Toggle target tracking/homing. Usage: stalk [ ON | OFF ]";
 const char SHORT_AP_DOS[] = "Denial-of-service attack on selectedAPs. Usage: ap-dos [ ON | OFF ]";
 const char SHORT_AP_CLONE[] =
@@ -54,7 +54,7 @@ const char USAGE_FUZZ[] =
 const char USAGE_SNIFF[] = "sniff [ ON | OFF ]";
 const char USAGE_DEAUTH[] = "deauth <millis>";
 const char USAGE_MANA[] =
-    "mana ( CLEAR | ( [ VERBOSE ] [ ON | OFF ] ) | ( AUTH [ NONE | WEP | WPA ] ) | ( LOUD [ ON | OFF ] ) )";
+    "mana [ CLEAR ] [ VERBOSE ] [ LOUD ] [ AUTH [ NONE | WEP | WPA ] ] [ ON | OFF ]";
 const char USAGE_STALK[] = "stalk [ ON | OFF ]";
 const char USAGE_AP_DOS[] = "ap-dos [ ON | OFF ]";
 const char USAGE_AP_CLONE[] = "ap-clone [ ( ON | OFF ) ( OPEN | WEP | WPA )+ ]";

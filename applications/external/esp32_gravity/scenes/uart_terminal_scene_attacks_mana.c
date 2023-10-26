@@ -11,7 +11,7 @@ UART_TerminalItem attacks_mana[NUM_ATTACK_MANA_ITEMS] = {
     {"Authentication",
      {"None", "WEP", "WPA"},
      3,
-     {"none", "wep", "wpa"},
+     {"auth none ", "auth wep ", "auth wpa "},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP,
@@ -19,12 +19,12 @@ UART_TerminalItem attacks_mana[NUM_ATTACK_MANA_ITEMS] = {
     {"Mana Mode",
      {"Normal", "Loud"},
      2,
-     {"", "LOUD on"},
+     {"", "LOUD "},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP,
      false},
-    {"Verbose", {"On", "Off"}, 2, {"VERBOSE", ""}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+    {"Verbose", {"On", "Off"}, 2, {"VERBOSE ", ""}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
     {"Run",
      {"Status", "Start", "Stop"},
      3,
@@ -79,16 +79,16 @@ static void
     } else if(!strcmp(item->actual_commands[selected_option_index], "clear")) {
         app->selected_tx_string = "mana clear";
     } else if(!strcmp(item->actual_commands[selected_option_index], "on")) {
-        /* The command is mana [verbose] on auth none loud off */
-        /* ==> mana on auth loud\0 + up to 6 spaces */
+        /* The command is mana [verbose] [loud] [auth [none | wep | wpa]] [clear] [on | off] */
+        /* ==> mana clear verbose loud auth none off\0 ==  38, or strlen + "mana" + 5 spaces + \0 */
         int cmdLength = 0;
         UART_TerminalItem* thisItem;
-        for(int i = 0; i < MANA_MENU_RUN; ++i) {
+        for(int i = 0; i <= MANA_MENU_RUN; ++i) {
             thisItem = &attacks_mana[i];
             cmdLength += strlen(thisItem->actual_commands[app->selected_option_index[i]]);
         }
-        /* Add chars for DEAUTH ON\0 & 3 spaces */
-        cmdLength += 21;
+        /* Add chars for MANA \0 */
+        cmdLength += 6;
 
         char* mana_command = malloc(sizeof(char) * cmdLength);
         if(mana_command == NULL) {
@@ -101,15 +101,17 @@ static void
             mana_command,
             attacks_mana[MANA_MENU_VERBOSE]
                 .actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);
-        strcat(mana_command, " ON AUTH ");
-        strcat(
-            mana_command,
-            attacks_mana[MANA_MENU_AUTH]
-                .actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);
         strcat(
             mana_command,
             attacks_mana[MANA_MENU_MODE]
                 .actual_commands[app->selected_option_index[MANA_MENU_MODE]]);
+        strcat(
+            mana_command,
+            attacks_mana[MANA_MENU_AUTH]
+                .actual_commands[app->selected_option_index[MANA_MENU_AUTH]]);
+        strcat(
+            mana_command,
+            attacks_mana[MANA_MENU_RUN].actual_commands[app->selected_option_index[MANA_MENU_RUN]]);
         app->selected_tx_string = mana_command;
         app->free_command = true;
     }
