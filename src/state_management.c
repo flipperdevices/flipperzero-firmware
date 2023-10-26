@@ -12,6 +12,12 @@ static uint32_t get_current_timestamp() {
     return furi_hal_rtc_datetime_to_timestamp(&current_time);
 }
 
+static void fast_forward_state(struct GameState *game_state) {
+    struct GameEvents events = { 0 };
+    generate_new_random_events(game_state, &events);
+    process_events(game_state, events);
+}
+
 void init_state(struct GameState *game_state) {
     // Try to load the state from the storage
     if(!load_from_file(&game_state->persistent)) {
@@ -22,6 +28,11 @@ void init_state(struct GameState *game_state) {
 
         // Init every individual feature
         init_xp(game_state, current_timestamp);
+    } else {
+        // State loaded from file. Actualize it up to
+        // the current timestamp.
+        FURI_LOG_D(LOG_TAG, "Fast forwarding persisted state to current time");
+        fast_forward_state(game_state);
     }
     game_state->next_animation_index = 0;
 }

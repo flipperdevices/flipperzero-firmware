@@ -5,6 +5,6 @@ Tamagotchi like game for Flipper Zero
 
 # TODO
 
-* Create a fast forward API for state restoration
-* Create timer for random events
+* Create images for all stages
+* Add hp feature
 * Create user input events
