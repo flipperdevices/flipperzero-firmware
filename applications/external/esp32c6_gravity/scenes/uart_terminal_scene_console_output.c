@@ -1,5 +1,4 @@
 #include "../uart_terminal_app_i.h"
-
 #define MIN_VERSION_STRLEN 43
 
 void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
@@ -87,14 +86,31 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     /* GRAVITY: Ignore the "cls" command */
     if(app->is_command && app->selected_tx_string && strcmp(app->selected_tx_string, "cls")) {
         if(app->TERMINAL_MODE == 1) {
+            // furi_string_cat_str(app->text_box_store, app->selected_tx_string);
+            // app->text_box_store_strlen += strlen(app->selected_tx_string);
+            // char foo[3];
+            // itoa(strlen(app->selected_tx_string), foo, 10);
+            // furi_string_cat_str(app->text_box_store, foo);
+            // app->text_box_store_strlen += strlen(foo);
             uart_terminal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
             uart_terminal_uart_tx((uint8_t*)("\r\n"), 2);
         } else {
+            // furi_string_cat_str(app->text_box_store, app->selected_tx_string);
+            // app->text_box_store_strlen += strlen(app->selected_tx_string);
+            // char foo[3];
+            // itoa(strlen(app->selected_tx_string), foo, 10);
+            // furi_string_cat_str(app->text_box_store, foo);
+            // app->text_box_store_strlen += strlen(foo);
             uart_terminal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
             uart_terminal_uart_tx((uint8_t*)("\n"), 1);
         }
+    }
+    if(app->free_command) {
+        free(app->selected_tx_string);
+        app->selected_tx_string = NULL;
+        app->free_command = false;
     }
 }
 
@@ -120,7 +136,7 @@ void uart_terminal_scene_console_output_on_exit(void* context) {
     uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
 
     /* Instruct ESP32 to halt any UIs that may be drawing */
-    if(!strcmp(app->selected_tx_string, "stalk on")) {
+    if(app->selected_tx_string != NULL && !strcmp(app->selected_tx_string, "stalk on")) {
         uart_terminal_uart_tx((uint8_t*)"stalk off\n", strlen("stalk off\n"));
     }
 }
