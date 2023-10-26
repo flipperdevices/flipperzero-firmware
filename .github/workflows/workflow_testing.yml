@@ -1,0 +1,93 @@
+name: 'Testing workflows'
+
+on:
+  pull_request:
+
+env:
+  TARGETS: f7
+  DEFAULT_TARGET: f7
+  FBT_TOOLCHAIN_PATH: /opt
+  ACTIONS_RUNNER_DEBUG: true
+
+jobs:
+  unit_tests_dockerized:
+    runs-on: [self-hosted, FlipperZeroIntegrationTest]
+    steps:
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Flash unit tests firmware'
+        id: flashing
+        if: success()
+        timeout-minutes: 10
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          ./fbt flash FIRMWARE_APP_SET=unit_tests FORCE=1
+          python3 scripts/testops.py await_flipper
+
+      - name: 'Copy assets and unit data, reboot and wait for flipper'
+        id: copy
+        timeout-minutes: 7
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/storage.py -f send assets/resources /ext
+          python3 scripts/storage.py -f send assets/unit_tests /ext/unit_tests
+
+      - name: 'Run units and validate results'
+        id: run_units
+        timeout-minutes: 7
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testops.py run_units
+
+      - name: 'Check GDB output'
+        if: failure()
+        run: |
+          ./fbt gdb_trace_all FIRMWARE_APP_SET=unit_tests FORCE=1
+
+      - name: 'Create notification'
+        if: failure()
+        run: |
+          echo "::error ::Unit tests failed, check that step for details"
+
+
+  updater_tests_dockerized:
+    runs-on: [self-hosted, FlipperZeroIntegrationTest]
+    steps:
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          submodules: false
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Flashing target firmware'
+        id: first_full_flash
+        timeout-minutes: 10
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          ./fbt flash_usb_full FORCE=1
+          python3 scripts/testops.py await_flipper
+
+      - name: 'Validating updater'
+        id: second_full_flash
+        timeout-minutes: 5
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          ./fbt flash_usb_full FORCE=1
+          python3 scripts/testops.py await_flipper
+
+      - name: 'Create notification'
+        if: failure()
+        run: |
+          echo "::error ::Flipper updater failure"
+
