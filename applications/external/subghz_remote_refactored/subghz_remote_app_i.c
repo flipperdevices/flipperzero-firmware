@@ -3,9 +3,8 @@
 #include <flipper_format/flipper_format_i.h>
 
 #include "helpers/txrx/subghz_txrx.h"
-#ifndef FW_ORIGIN_Official
+#include <lib/subghz/protocols/protocol_items.h>
 #include <lib/subghz/blocks/custom_btn.h>
-#endif
 
 #define TAG "SubGhzRemote"
 
@@ -222,9 +221,9 @@ bool subrem_tx_start_sub(SubGhzRemoteApp* app, SubRemSubFilePreset* sub_preset) 
             sub_preset->freq_preset.frequency,
             NULL,
             0);
-#ifndef FW_ORIGIN_Official
+
         subghz_custom_btns_reset();
-#endif
+
         if(subghz_txrx_tx_start(app->txrx, sub_preset->fff_data) == SubGhzTxRxStartTxStateOk) {
             ret = true;
         }
@@ -239,12 +238,12 @@ bool subrem_tx_stop_sub(SubGhzRemoteApp* app, bool forced) {
 
     if(forced || (sub_preset->type != SubGhzProtocolTypeRAW)) {
         subghz_txrx_stop(app->txrx);
-#ifndef FW_ORIGIN_Official
+
         if(sub_preset->type == SubGhzProtocolTypeDynamic) {
             subghz_txrx_reset_dynamic_and_custom_btns(app->txrx);
         }
         subghz_custom_btns_reset();
-#endif
+
         return true;
     }
 
