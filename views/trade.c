@@ -223,13 +223,9 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
                 canvas_draw_icon(canvas, 0, 0, &I_gb_step_2);
             }
             break;
-        case GAMEBOY_READY:
-        case GAMEBOY_WAITING:
-        case GAMEBOY_SEND:
-            canvas_draw_icon(canvas, 38, 11, model->pokemon_table[curr_pokemon].icon);
-            break;
         default:
-            // Default state added to eliminated enum warning
+	    /* Every other state, draw the pokemon we're planning to trade */
+            canvas_draw_icon(canvas, 38, 11, model->pokemon_table[curr_pokemon].icon);
             break;
         }
         canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
@@ -248,7 +244,7 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
             gameboy_status_text = "READY";
             break;
         case GAMEBOY_SEND:
-            gameboy_status_text = "DEAL...";
+            gameboy_status_text = "DEAL!";
             break;
         case GAMEBOY_PENDING:
             gameboy_status_text = "PENDING...";
@@ -342,9 +338,25 @@ static uint8_t getMenuResponse(uint8_t in, struct trade_ctx* trade) {
         break;
     case PKMN_TRADE_CENTRE:
         trade->connection_state = TRADE_CENTRE;
+        with_view_model(
+            trade->view,
+            struct trade_model * model,
+            {
+                model->gameboy_status = GAMEBOY_READY;
+                model->trading = true;
+            },
+            false);
         break;
     case PKMN_COLOSSEUM:
         trade->connection_state = COLOSSEUM;
+        with_view_model(
+            trade->view,
+            struct trade_model * model,
+            {
+                model->gameboy_status = GAMEBOY_READY;
+                model->trading = true;
+            },
+            false);
         break;
     case PKMN_BREAK_LINK:
     case PKMN_MASTER:
@@ -395,7 +407,6 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
                 /* XXX: Set the ready to go state sooner in the link establishment. Maybe change the text a bit? */
                 trade->trade_centre_state = READY_TO_GO;
                 //  CLICK EN LA MESA, when the gameboy clicks on the trade table
-                model->gameboy_status = GAMEBOY_READY;
             }
             counter++;
         }
@@ -460,8 +471,9 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         send = trade_block_flat[counter];
         counter++;
 
-        if(counter == 418) //TODO: replace with sizeof struct rather than static number
+        if(counter == sizeof(TradeBlock))
             trade->trade_centre_state = SENDING_PATCH_DATA;
+
 	break;
 
     /* XXX: This seems to end with the gameboy sending DF FE 15? */
@@ -538,9 +550,13 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 	    }
         }
 	/* XXX: Test to make sure saying no at is this okay does the right thing */
+	/* XXX: It does not */
         break;
 
     /* XXX: The actual trade uses 0x62 a bunch? Is that the OKAY? Is 0x61 a NAK? Other docs show 0x6F? */
+    /* XXX: The pending text never really shows up. Maybe have a "DEAL?" and "DEAL!" state instead?
+     * Actually, I think that goes by too quick, I think once you accept it goes straight in to trade.
+     * So maybe the PENNDING state is actually useless? */
     case TRADE_CONFIRMATION:
         if(in == 0x61) {
             trade->trade_centre_state = TRADE_PENDING;
@@ -587,7 +603,6 @@ void transferBit(void* context) {
     struct trade_ctx* trade = (struct trade_ctx*)context;
     static uint8_t out_data;
     bool connected;
-    bool trading;
 
     /* We use with_view_model since the functions called here could potentially
      * also need to use the model resources. Right now this is not an issue, but
@@ -598,7 +613,6 @@ void transferBit(void* context) {
         struct trade_model * model,
         {
             connected = model->connected;
-            trading = model->trading;
         },
         false);
 
@@ -646,15 +660,12 @@ void transferBit(void* context) {
         DELAY_MICROSECONDS); // Wait 20-60us ... 120us max (in slave mode is not necessary)
     // TODO: The above comment doesn't make sense as DELAY_MICROSECONDS is defined as 15
 
-    if(trade->trade_centre_state == READY_TO_GO) trading = true;
-
     out_data = out_data << 1;
 
     with_view_model(
         trade->view,
         struct trade_model * model,
         {
-            model->trading = trading;
             model->connected = connected;
         },
         false);
