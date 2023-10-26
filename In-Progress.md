@@ -1,17 +1,11 @@
 * Finish restructuring menus
     * Maybe a UI for stalk
-* Console strings full review and refactor
-    * Check fuzz after flash
-        * fuzzType may be broken (in esp32-Gravity)
-    * Check deauth after flash
-    * Check mana after flash
 * Add selected_options_index[NUM_PURGE_ITEMS] to UART_TerminalItem
     * Change UART_TerminalApp.selected_option_index[MAX_MENU_ITEMS] to int**
     - Will no longer need purgeLoadFromMemory()
     - Enter callbacks set app->selected_option_index to scene->selected_option_index
     - Perhaps store a ref to selected_tx_string in UART_TerminalItem or a global, and only free selected_tx_string in the exit function of relevant scenes
 
-* Further testing of ALL menu items, and particularly purge, fuzz, deauth and mana
 * Re-implement console/command execution
 * Re-implement cls/clear screen
 * Refactor console logic - to keep console recording during menu navigation
