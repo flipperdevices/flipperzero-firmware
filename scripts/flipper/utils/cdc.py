@@ -6,20 +6,7 @@ def resolve_port(logger, portname: str = "auto"):
     if portname != "auto":
         return portname
     # Try guessing
-    flippers = list(list_ports.grep("flip_", include_links=True))
-    logger.info(
-        f"Found following ports symlink=0 {list(list_ports.grep('flip_', include_links=False))}"
-    )
-    logger.info(
-        f"Found following ports symlink=1 {list(list_ports.grep('flip_', include_links=True))}"
-    )
-    for port in list_ports.comports():
-        if port.vid is not None and port.pid is not None:
-            logger.info(
-                "Port={},VID={:#06x},PID={:#06x}".format(
-                    port.device, port.vid, port.pid
-                )
-            )
+    flippers = list(list_ports.grep("flip_"))
     if len(flippers) == 1:
         flipper = flippers[0]
         logger.info(f"Using {flipper.serial_number} on {flipper.device}")
