@@ -4,9 +4,6 @@ Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
-Header,+,applications/services/desktop/desktop_settings.h,,
-Header,+,applications/services/desktop/helpers/pin.h,,
-Header,+,applications/services/desktop/views/desktop_view_pin_input.h,,
 Header,+,applications/services/dialogs/dialogs.h,,
 Header,+,applications/services/dolphin/dolphin.h,,
 Header,+,applications/services/dolphin/helpers/dolphin_state.h,,
@@ -758,28 +755,6 @@ Function,-,ctermid,char*,char*
 Function,-,ctime,char*,const time_t*
 Function,-,ctime_r,char*,"const time_t*, char*"
 Function,-,cuserid,char*,char*
-Function,-,desktop_api_get_status_pubsub,FuriPubSub*,Desktop*
-Function,-,desktop_api_is_locked,_Bool,Desktop*
-Function,-,desktop_api_unlock,void,Desktop*
-Function,+,desktop_pin_compare,_Bool,"const PinCode*, const PinCode*"
-Function,+,desktop_pin_lock_error_notify,void,
-Function,-,desktop_pin_lock_get_fail_timeout,uint32_t,
-Function,+,desktop_view_pin_input_alloc,DesktopViewPinInput*,
-Function,+,desktop_view_pin_input_free,void,DesktopViewPinInput*
-Function,+,desktop_view_pin_input_get_view,View*,DesktopViewPinInput*
-Function,-,desktop_view_pin_input_hide_pin,void,"DesktopViewPinInput*, _Bool"
-Function,+,desktop_view_pin_input_lock_input,void,DesktopViewPinInput*
-Function,+,desktop_view_pin_input_reset_pin,void,DesktopViewPinInput*
-Function,+,desktop_view_pin_input_set_back_callback,void,"DesktopViewPinInput*, DesktopViewPinInputCallback"
-Function,+,desktop_view_pin_input_set_context,void,"DesktopViewPinInput*, void*"
-Function,+,desktop_view_pin_input_set_done_callback,void,"DesktopViewPinInput*, DesktopViewPinInputDoneCallback"
-Function,+,desktop_view_pin_input_set_label_button,void,"DesktopViewPinInput*, const char*"
-Function,+,desktop_view_pin_input_set_label_primary,void,"DesktopViewPinInput*, uint8_t, uint8_t, const char*"
-Function,+,desktop_view_pin_input_set_label_secondary,void,"DesktopViewPinInput*, uint8_t, uint8_t, const char*"
-Function,+,desktop_view_pin_input_set_pin,void,"DesktopViewPinInput*, const PinCode*"
-Function,+,desktop_view_pin_input_set_pin_position,void,"DesktopViewPinInput*, uint8_t, uint8_t"
-Function,-,desktop_view_pin_input_set_timeout_callback,void,"DesktopViewPinInput*, DesktopViewPinInputCallback"
-Function,+,desktop_view_pin_input_unlock_input,void,DesktopViewPinInput*
 Function,+,dialog_ex_alloc,DialogEx*,
 Function,+,dialog_ex_disable_extended_events,void,DialogEx*
 Function,+,dialog_ex_enable_extended_events,void,DialogEx*
@@ -1589,7 +1564,7 @@ Function,+,furi_hal_version_get_model_name,const char*,
 Function,+,furi_hal_version_get_name_ptr,const char*,
 Function,+,furi_hal_version_get_otp_version,FuriHalVersionOtpVersion,
 Function,-,furi_hal_version_init,void,
-Function,+,furi_hal_version_set_name,void,const char*
+Function,-,furi_hal_version_set_name,void,const char*
 Function,+,furi_hal_version_uid,const uint8_t*,
 Function,+,furi_hal_version_uid_default,const uint8_t*,
 Function,+,furi_hal_version_uid_size,size_t,
@@ -2659,7 +2634,7 @@ Function,+,rgb_backlight_get_rainbow_interval,uint32_t,
 Function,+,rgb_backlight_get_rainbow_mode,RGBBacklightRainbowMode,
 Function,+,rgb_backlight_get_rainbow_saturation,uint8_t,
 Function,+,rgb_backlight_get_rainbow_speed,uint8_t,
-Function,+,rgb_backlight_load_settings,void,_Bool
+Function,-,rgb_backlight_load_settings,void,_Bool
 Function,+,rgb_backlight_reconfigure,void,_Bool
 Function,+,rgb_backlight_save_settings,void,
 Function,+,rgb_backlight_set_color,void,"uint8_t, const RgbColor*"
