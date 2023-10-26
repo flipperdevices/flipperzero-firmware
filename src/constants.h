@@ -7,6 +7,9 @@
  * passing to some background activity */
 #define USER_INPUT_IDLE_TICKS 1000U
 
+/* Log strings */
+#define LOG_TAG "Matagotchi"
+
 /* Game state file info */
 #define GAME_STATE_STORAGE_FILENAME "matagotchi.save"
 #define GAME_STATE_STORAGE_PATH APP_DATA_PATH(GAME_STATE_STORAGE_FILENAME)

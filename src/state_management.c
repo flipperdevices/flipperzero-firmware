@@ -1,6 +1,8 @@
+#include <furi.h> // For FURI_LOG_D
 #include <furi_hal.h> // For RTC handling
 
 #include "state_management.h"
+#include "constants.h"
 #include "feature_management.h"
 #include "save_restore.h"
 
@@ -33,6 +35,7 @@ void persist_state(struct GameState *game_state) {
 
 static void _generate_new_random_event(uint32_t timestamp, struct GameState *game_state, struct GameEvents *game_events) {
     if (game_state->persistent.stage == DEAD) {
+        FURI_LOG_D(LOG_TAG, "Received generate request, but stage is DEAD");
         // Can't do much
         return;
     }

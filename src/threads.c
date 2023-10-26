@@ -13,6 +13,8 @@ void main_thread(struct ApplicationContext *context) {
     InputEvent input_event;
     struct ThreadsMessage threads_message;
 
+    FURI_LOG_D(LOG_TAG, "Main thread started");
+
     while(running) {
         FuriStatus status = furi_message_queue_get(context->user_input_queue, &input_event, USER_INPUT_IDLE_TICKS);
         if(status == FuriStatusOk) {
@@ -27,6 +29,7 @@ void main_thread(struct ApplicationContext *context) {
                     case InputKeyBack:
                         threads_message.type = BUTTON_PRESSED;
                         threads_message.key = input_event.key;
+                        FURI_LOG_T(LOG_TAG, "User input received: %u", input_event.key);
                         furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
                         break;
                     default:
@@ -45,6 +48,7 @@ void main_thread(struct ApplicationContext *context) {
         } else if(status == FuriStatusErrorTimeout) {
             // No user input, perform background operations
             threads_message.type = IDLE_TIMEOUT;
+            FURI_LOG_T(LOG_TAG, "Timeout waiting for user input");
             furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
         } else {
             furi_crash("Unexpected status in message queue");
@@ -52,16 +56,20 @@ void main_thread(struct ApplicationContext *context) {
     }
 
     /* Signal the secondary thread to cease operation and exit */
+    FURI_LOG_D(LOG_TAG, "Time to stop");
     threads_message.type = SAVE_AND_EXIT;
     furi_message_queue_put(context->threads_message_queue, &threads_message, FuriWaitForever);
 
     /* Wait for the secondary thread to finish */
     furi_thread_join(context->secondary_thread);
+    FURI_LOG_D(LOG_TAG, "Ciao!");
 }
 
 int32_t secondary_thread(void *ctx)
 {
     struct ApplicationContext *context = (struct ApplicationContext *)ctx;
+
+    FURI_LOG_D(LOG_TAG, "Secondary thread started");
 
     // Start by initializing everything
     init_state(context->game_state);
@@ -75,7 +83,8 @@ int32_t secondary_thread(void *ctx)
         if(status == FuriStatusOk) {
           // Received something
             switch(message.type) {
-                case IDLE_TIMEOUT: ;
+                case IDLE_TIMEOUT:
+                    FURI_LOG_T(LOG_TAG, "Received timeout message");
                     struct GameEvents events = { 0 };
                     generate_new_random_events(context->game_state, &events);
                     if (process_events(context->game_state, events)) {
@@ -89,9 +98,11 @@ int32_t secondary_thread(void *ctx)
                     refresh_gui(context->view_port);
                     break;
                 case SAVE_AND_EXIT:
+                    FURI_LOG_T(LOG_TAG, "Received termination message");
                     persist_state(context->game_state);
                     return 0;
                 case BUTTON_PRESSED:
+                    FURI_LOG_T(LOG_TAG, "Received input message");
                     // Nothing yet
                     break;
                 default:
