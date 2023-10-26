@@ -57,7 +57,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             app->text_box_store_strlen += strlen(about1);
             furi_string_cat_str(app->text_box_store, GRAVITY_VERSION);
             app->text_box_store_strlen += strlen(GRAVITY_VERSION);
-            furi_string_cat_str(app->text_box_store, "");
+            furi_string_cat_str(app->text_box_store, "\n");
             app->text_box_store_strlen += strlen("\n");
             //furi_string_cat_printf(app->text_box_store, %s\n", GRAVITY_VERSION);
             //app->text_box_store_strlen += 5 + strlen("              Flipper Gravity\nBy Chris BC\n\nBe The Unseen Force.\n\nhttps://github.com/chris-bc/esp32-gravity\nhttps://github.com/chris-bc/Flipper-Gravity\n\nFlipper-Gravity : v\n");
