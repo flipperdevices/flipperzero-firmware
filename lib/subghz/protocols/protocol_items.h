@@ -45,5 +45,6 @@
 #include "kinggates_stylo_4k.h"
 #include "bin_raw.h"
 #include "x10.h"
+#include "genie.h"
 
 extern const SubGhzProtocolRegistry subghz_protocol_registry;
