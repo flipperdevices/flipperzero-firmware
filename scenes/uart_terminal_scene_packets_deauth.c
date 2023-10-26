@@ -87,7 +87,9 @@ static void uart_terminal_scene_packets_deauth_var_list_enter_callback(void* con
             strcat(deauth_command, packets_deauth[i].actual_commands[app->selected_option_index[i]]);
             strcat(deauth_command, " ");
         }
-        strcat(deauth_command, "on");
+        if (strlen(deauth_command) == strlen("deauth ")) {
+            strcat(deauth_command, "on");
+        }
         app->selected_tx_string = deauth_command;
         app->free_command = true;
     }

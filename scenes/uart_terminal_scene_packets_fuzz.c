@@ -96,7 +96,9 @@ static void uart_terminal_scene_packets_fuzz_var_list_enter_callback(void* conte
             strcat(fuzz_command, packets_fuzz[i].actual_commands[app->selected_option_index[i]]);
             strcat(fuzz_command, " ");
         }
-        strcat(fuzz_command, "on");
+        if (strlen(fuzz_command) == strlen("fuzz ")) {
+            strcat(fuzz_command, "on");
+        }
         app->selected_tx_string = fuzz_command;
         app->free_command = true;
     }
