@@ -1,6 +1,10 @@
 * Finish restructuring menus
     * Maybe a UI for stalk
 * Console strings full review and refactor
+    * Check fuzz after flash
+        * fuzzType may be broken (in esp32-Gravity)
+    * Check deauth after flash
+    * Check mana after flash
 * Add selected_options_index[NUM_PURGE_ITEMS] to UART_TerminalItem
     * Change UART_TerminalApp.selected_option_index[MAX_MENU_ITEMS] to int**
     - Will no longer need purgeLoadFromMemory()

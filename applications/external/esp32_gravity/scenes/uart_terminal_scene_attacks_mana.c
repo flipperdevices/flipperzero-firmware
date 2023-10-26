@@ -19,7 +19,7 @@ UART_TerminalItem attacks_mana[NUM_ATTACK_MANA_ITEMS] = {
     {"Mana Mode",
      {"Normal", "Loud"},
      2,
-     {"LOUD off", "LOUD on"},
+     {"", "LOUD on"},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP,
@@ -106,7 +106,6 @@ static void
             mana_command,
             attacks_mana[MANA_MENU_AUTH]
                 .actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);
-        strcat(mana_command, " LOUD ");
         strcat(
             mana_command,
             attacks_mana[MANA_MENU_MODE]
