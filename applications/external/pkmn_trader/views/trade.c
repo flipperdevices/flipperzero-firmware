@@ -54,8 +54,8 @@
  *
  *   I think I need to hook this up to a logic analyzer to see more.
  */
-#include <furi_hal_light.h>
 #include <furi.h>
+#include <furi_hal.h>
 
 #include <gui/view.h>
 #include <pokemon_icons.h>
@@ -127,11 +127,12 @@ typedef enum {
 /* Anonymous struct */
 struct trade_ctx {
     trade_centre_state_t trade_centre_state;
-    connection_state_t connection_state; // Should be made in to view model struct
+    connection_state_t connection_state;
     FuriTimer* draw_timer;
     View* view;
-    uint8_t in_data; //Should be able to be made as part of view model, is used in multiple funcs
-    uint8_t shift; //Should be able to be made as part of view model, is used in multiple funcs
+    uint8_t in_data;
+    uint8_t out_data;
+    uint8_t shift;
     TradeBlock* trade_block;
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
@@ -261,10 +262,6 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
 
         canvas_draw_icon(canvas, 27, 1, &I_red_16x15);
     }
-}
-
-uint32_t micros() {
-    return DWT->CYCCNT / 64;
 }
 
 /* Get the response byte from the link partner, updating the connection
@@ -471,6 +468,11 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         send = trade_block_flat[counter];
         counter++;
 
+        /* XXX: TODO: right now, tradeblock is padded with 3 extra 0x00s.
+	 * These are normally transmitted but we can do away with the padding
+	 * by adding another state between this and the next state to wait for
+	 * the padding to finish.
+	 */
         if(counter == sizeof(TradeBlock)) trade->trade_centre_state = SENDING_PATCH_DATA;
 
         break;
@@ -611,7 +613,6 @@ void transferBit(void* context) {
     furi_assert(context);
 
     struct trade_ctx* trade = (struct trade_ctx*)context;
-    static uint8_t out_data;
     bool connected;
 
     /* We use with_view_model since the functions called here could potentially
@@ -632,40 +633,24 @@ void transferBit(void* context) {
         switch(trade->connection_state) {
         case NOT_CONNECTED:
             connected = false;
-            out_data = getConnectResponse(trade->in_data, trade);
+            trade->out_data = getConnectResponse(trade->in_data, trade);
             break;
         case CONNECTED:
             connected = true;
-            out_data = getMenuResponse(trade->in_data, trade);
+            trade->out_data = getMenuResponse(trade->in_data, trade);
             break;
         case TRADE_CENTRE:
-            out_data = getTradeCentreResponse(trade->in_data, trade);
+            trade->out_data = getTradeCentreResponse(trade->in_data, trade);
             break;
             /* If we end up in the colosseum, then just repeat data back */
             /* Do we need a way to close the connection? Would that be useful? */
         default:
-            out_data = trade->in_data;
+            trade->out_data = trade->in_data;
             break;
         }
 
         trade->in_data = 0; // TODO: I don't think this is necessary?
     }
-
-    /* Basically, I don't want to stall in an interrupt context.
-     * Could also maybe IRQ on either edge? and set data out when appropriate? */
-    /* XXX: I'm not sure what this is accomplishing, as the data is valid on
-     * the rising edge of the clock. This can likely go away.
-     * Need to set up IRQ as RiseFall and do the right thing here based on that.
-     */
-    while(!furi_hal_gpio_read(&GAME_BOY_CLK))
-        ;
-
-    furi_hal_gpio_write(&GAME_BOY_SO, out_data & 0x80 ? true : false);
-    furi_delay_us(
-        DELAY_MICROSECONDS); // Wait 20-60us ... 120us max (in slave mode is not necessary)
-    // TODO: The above comment doesn't make sense as DELAY_MICROSECONDS is defined as 15
-
-    out_data = out_data << 1;
 
     with_view_model(
         trade->view, struct trade_model * model, { model->connected = connected; }, false);
@@ -675,19 +660,33 @@ void input_clk_gameboy(void* context) {
     furi_assert(context);
 
     struct trade_ctx* trade = (struct trade_ctx*)context;
-    static uint32_t time; //This should be fine
+    static uint32_t time;
+    /* Clocks idle between bytes is nominally 430 us long for burst data,
+     * 15 ms for idle polling (e.g. waiting for menu selection), some oddball
+     * 2 ms gaps that appears between one 0xFE byte from the gameboy every trade;
+     * clock period is nominally 122 us.
+     * Therefore, if we havn't seen a clock in 500 us, reset our bit counter.
+     * Note that, this should never actually be a concern, but it is an additional
+     * safeguard against desyncing.
+     */
+    const uint32_t time_ticks = furi_hal_cortex_instructions_per_microsecond() * 500;
 
-    if(time > 0) {
-        //  if there is no response from the master in 120 microseconds, the counters are reset
-        if(micros() - time > 120) {
-            //  IDLE & Reset
-            trade->in_data = 0;
-            trade->shift = 0;
+    if(furi_hal_gpio_read(&GAME_BOY_CLK)) {
+        /* XXX: I think we can remove the check of time > 0? */
+        if(time > 0) {
+            if((DWT->CYCCNT - time) > time_ticks) {
+                //  IDLE & Reset
+                trade->in_data = 0;
+                trade->shift = 0;
+            }
         }
+        transferBit(trade);
+        time = DWT->CYCCNT;
+    } else {
+        /* On the falling edge of each clock, set up the next bit */
+        furi_hal_gpio_write(&GAME_BOY_SO, trade->out_data & 0x80 ? true : false);
+        trade->out_data <<= 1;
     }
-
-    transferBit(trade);
-    time = micros();
 }
 
 void trade_draw_timer_callback(void* context) {
@@ -720,6 +719,7 @@ void trade_enter_callback(void* context) {
     trade->trade_centre_state = INIT;
 
     trade->in_data = 0;
+    trade->out_data = 0;
     trade->shift = 0;
 
     trade->draw_timer = furi_timer_alloc(trade_draw_timer_callback, FuriTimerTypePeriodic, trade);
@@ -732,9 +732,9 @@ void trade_enter_callback(void* context) {
     furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     // B2 (Pin5) / SI (3)
     furi_hal_gpio_write(&GAME_BOY_SI, false);
-    furi_hal_gpio_init(&GAME_BOY_SI, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(&GAME_BOY_SI, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
     // // C3 (Pin7) / CLK (5)
-    furi_hal_gpio_init(&GAME_BOY_CLK, GpioModeInterruptRise, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(&GAME_BOY_CLK, GpioModeInterruptRiseFall, GpioPullUp, GpioSpeedVeryHigh);
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
 
     furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, trade);
