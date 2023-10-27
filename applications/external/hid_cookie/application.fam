@@ -1,0 +1,15 @@
+App(
+    appid="cookie_clicker",
+    name="Cookie Clicker",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hid_cookie_ble_app",
+    stack_size=1 * 1024,
+    fap_category="Bluetooth",
+    fap_icon="hid_cookie_ble_10px.png",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="hid",
+    fap_author="jamisonderek",
+    fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie",
+    fap_version=(1, 0),
+    fap_description="The goal of this application is use the Flipper Zero's bluetooth connectivity to send mouse clicks to your phone at a given frequency. If you are playing a game, such as Cookie Clicker 2, this will result in a 'screen tap' being simulated. Only connect to phones you own (unless your friends ask you to connect your Flipper Zero to their phone, so they can unlock more achievements in their games!)",
+)
