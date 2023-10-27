@@ -13,7 +13,8 @@ static bool lfrfid_debug_back_event_callback(void* context) {
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static void rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
+static void
+    rpc_command_callback(RpcAppSystemEvent rpc_event, const RpcAppSystemData* data, void* context) {
     furi_assert(context);
     LfRfid* app = (LfRfid*)context;
 
@@ -25,6 +26,9 @@ static void rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
     } else if(rpc_event == RpcAppEventAppExit) {
         view_dispatcher_send_custom_event(app->view_dispatcher, LfRfidEventExit);
     } else if(rpc_event == RpcAppEventLoadFile) {
+        furi_assert(data);
+        furi_assert(data->type == RpcAppSystemDataTypeCStr);
+        furi_string_set(app->file_path, data->cstr);
         view_dispatcher_send_custom_event(app->view_dispatcher, LfRfidEventRpcLoadFile);
     } else {
         rpc_system_app_confirm(app->rpc_ctx, rpc_event, false);

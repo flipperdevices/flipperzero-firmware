@@ -20,7 +20,10 @@ void subghz_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(subghz->scene_manager);
 }
 
-static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) {
+static void subghz_rpc_command_callback(
+    RpcAppSystemEvent event,
+    const RpcAppSystemData* data,
+    void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
 
@@ -34,6 +37,9 @@ static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) 
     } else if(event == RpcAppEventAppExit) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
     } else if(event == RpcAppEventLoadFile) {
+        furi_assert(data);
+        furi_assert(data->type == RpcAppSystemDataTypeCStr);
+        furi_string_set(subghz->file_path, data->cstr);
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneRpcLoad);
     } else if(event == RpcAppEventButtonPress) {
         view_dispatcher_send_custom_event(

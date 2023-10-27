@@ -13,19 +13,34 @@ typedef enum {
     RpcAppEventButtonRelease,
 } RpcAppSystemEvent;
 
-typedef void (*RpcAppSystemCallback)(RpcAppSystemEvent event, void* context);
+typedef enum {
+    RpcAppSystemDataTypeCStr,
+    RpcAppSystemDataTypeInt32,
+} RpcAppSystemDataType;
+
+typedef struct {
+    RpcAppSystemDataType type;
+    union {
+        const char* cstr;
+        int32_t i32;
+    };
+} RpcAppSystemData;
+
+typedef void (
+    *RpcAppSystemCallback)(RpcAppSystemEvent event, const RpcAppSystemData* data, void* context);
 typedef void (
     *RpcAppSystemDataExchangeCallback)(const uint8_t* data, size_t data_size, void* context);
 
 typedef struct RpcAppSystem RpcAppSystem;
 
-void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback callback, void* ctx);
+void rpc_system_app_set_callback(
+    RpcAppSystem* rpc_app,
+    RpcAppSystemCallback callback,
+    void* context);
 
 void rpc_system_app_send_started(RpcAppSystem* rpc_app);
 
 void rpc_system_app_send_exited(RpcAppSystem* rpc_app);
-
-const char* rpc_system_app_get_data(RpcAppSystem* rpc_app);
 
 void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEvent event, bool result);
 

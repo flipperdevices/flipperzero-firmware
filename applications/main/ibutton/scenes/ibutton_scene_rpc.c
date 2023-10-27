@@ -23,22 +23,17 @@ bool ibutton_scene_rpc_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
 
-        if(event.event == iButtonCustomEventRpcLoad) {
+        if(event.event == iButtonCustomEventRpcLoadFile) {
             bool result = false;
-            const char* file_path = rpc_system_app_get_data(ibutton->rpc);
 
-            if(file_path && (furi_string_empty(ibutton->file_path))) {
-                furi_string_set(ibutton->file_path, file_path);
+            if(ibutton_load_key(ibutton)) {
+                popup_set_text(popup, ibutton->key_name, 82, 32, AlignCenter, AlignTop);
+                view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewPopup);
 
-                if(ibutton_load_key(ibutton)) {
-                    popup_set_text(popup, ibutton->key_name, 82, 32, AlignCenter, AlignTop);
-                    view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewPopup);
+                ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateStart);
+                ibutton_worker_emulate_start(ibutton->worker, ibutton->key);
 
-                    ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateStart);
-                    ibutton_worker_emulate_start(ibutton->worker, ibutton->key);
-
-                    result = true;
-                }
+                result = true;
             }
 
             rpc_system_app_confirm(ibutton->rpc, RpcAppEventLoadFile, result);

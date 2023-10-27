@@ -44,7 +44,10 @@ static void infrared_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(infrared->scene_manager);
 }
 
-static void infrared_rpc_command_callback(RpcAppSystemEvent event, void* context) {
+static void infrared_rpc_command_callback(
+    RpcAppSystemEvent event,
+    const RpcAppSystemData* data,
+    void* context) {
     furi_assert(context);
     InfraredApp* infrared = context;
     furi_assert(infrared->rpc_ctx);
@@ -58,11 +61,22 @@ static void infrared_rpc_command_callback(RpcAppSystemEvent event, void* context
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcExit);
     } else if(event == RpcAppEventLoadFile) {
+        furi_assert(data->type == RpcAppSystemDataTypeCStr);
+        furi_string_set(infrared->file_path, data->cstr);
         view_dispatcher_send_custom_event(
-            infrared->view_dispatcher, InfraredCustomEventTypeRpcLoad);
+            infrared->view_dispatcher, InfraredCustomEventTypeRpcLoadFile);
     } else if(event == RpcAppEventButtonPress) {
-        view_dispatcher_send_custom_event(
-            infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPress);
+        furi_assert(
+            data->type == RpcAppSystemDataTypeCStr || data->type == RpcAppSystemDataTypeInt32);
+        if(data->type == RpcAppSystemDataTypeCStr) {
+            furi_string_set(infrared->button_name, data->cstr);
+            view_dispatcher_send_custom_event(
+                infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressName);
+        } else if(data->type == RpcAppSystemDataTypeInt32) {
+            infrared->app_state.current_button_index = data->i32;
+            view_dispatcher_send_custom_event(
+                infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressIndex);
+        }
     } else if(event == RpcAppEventButtonRelease) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonRelease);
@@ -117,6 +131,7 @@ static InfraredApp* infrared_alloc() {
     InfraredApp* infrared = malloc(sizeof(InfraredApp));
 
     infrared->file_path = furi_string_alloc();
+    infrared->button_name = furi_string_alloc();
 
     InfraredAppState* app_state = &infrared->app_state;
     app_state->is_learning_new_remote = false;
@@ -247,6 +262,7 @@ static void infrared_free(InfraredApp* infrared) {
     infrared->gui = NULL;
 
     furi_string_free(infrared->file_path);
+    furi_string_free(infrared->button_name);
 
     free(infrared);
 }

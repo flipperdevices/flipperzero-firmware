@@ -694,13 +694,15 @@ static bool nfc_protocol_support_scene_rpc_on_event(NfcApp* instance, SceneManag
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventRpcLoad && instance->rpc_state == NfcRpcStateIdle) {
-            furi_string_set(instance->file_path, rpc_system_app_get_data(instance->rpc_ctx));
-            const bool load_success = nfc_load_file(instance, instance->file_path, false);
-            if(load_success) {
-                nfc_protocol_support_scene_rpc_setup_ui_and_emulate(instance);
+        if(event.event == NfcCustomEventRpcLoadFile) {
+            bool success = false;
+            if(instance->rpc_state == NfcRpcStateIdle) {
+                if(nfc_load_file(instance, instance->file_path, false)) {
+                    nfc_protocol_support_scene_rpc_setup_ui_and_emulate(instance);
+                    success = true;
+                }
             }
-            rpc_system_app_confirm(instance->rpc_ctx, RpcAppEventLoadFile, load_success);
+            rpc_system_app_confirm(instance->rpc_ctx, RpcAppEventLoadFile, success);
         } else if(event.event == NfcCustomEventRpcExit) {
             rpc_system_app_confirm(instance->rpc_ctx, RpcAppEventAppExit, true);
             scene_manager_stop(instance->scene_manager);

@@ -38,11 +38,9 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             view_dispatcher_stop(infrared->view_dispatcher);
         } else if(event.event == InfraredCustomEventTypePopupClosed) {
             view_dispatcher_stop(infrared->view_dispatcher);
-        } else if(event.event == InfraredCustomEventTypeRpcLoad) {
+        } else if(event.event == InfraredCustomEventTypeRpcLoadFile) {
             bool result = false;
-            const char* arg = rpc_system_app_get_data(infrared->rpc_ctx);
-            if(arg && (state == InfraredRpcStateIdle)) {
-                furi_string_set(infrared->file_path, arg);
+            if(state == InfraredRpcStateIdle) {
                 result = infrared_remote_load(
                     infrared->remote, furi_string_get_cstr(infrared->file_path));
                 if(result) {
@@ -57,16 +55,28 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 infrared->popup, infrared->text_store[0], 89, 44, AlignCenter, AlignTop);
 
             rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventLoadFile, result);
-        } else if(event.event == InfraredCustomEventTypeRpcButtonPress) {
+        } else if(
+            event.event == InfraredCustomEventTypeRpcButtonPressName ||
+            event.event == InfraredCustomEventTypeRpcButtonPressIndex) {
             bool result = false;
-            const char* arg = rpc_system_app_get_data(infrared->rpc_ctx);
-            if(arg && (state == InfraredRpcStateLoaded)) {
-                size_t button_index = 0;
-                if(infrared_remote_get_signal_index(infrared->remote, arg, &button_index)) {
-                    infrared_tx_start_button_index(infrared, button_index);
-                    result = true;
+            if(state == InfraredRpcStateLoaded) {
+                if(event.event == InfraredCustomEventTypeRpcButtonPressName) {
+                    // TODO: Simplify infrared_remote_get_signal_index()
+                    size_t index;
+                    infrared->app_state.current_button_index =
+                        infrared_remote_get_signal_index(
+                            infrared->remote,
+                            furi_string_get_cstr(infrared->button_name),
+                            &index) ?
+                            (signed)index :
+                            InfraredButtonIndexNone;
+                }
+                if(infrared->app_state.current_button_index != InfraredButtonIndexNone) {
+                    infrared_tx_start_button_index(
+                        infrared, infrared->app_state.current_button_index);
                     scene_manager_set_scene_state(
                         infrared->scene_manager, InfraredSceneRpc, InfraredRpcStateSending);
+                    result = true;
                 }
             }
             rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventButtonRelease, result);

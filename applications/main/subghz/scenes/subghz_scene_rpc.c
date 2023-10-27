@@ -39,7 +39,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             view_dispatcher_stop(subghz->view_dispatcher);
         } else if(event.event == SubGhzCustomEventSceneRpcButtonPress) {
             bool result = false;
-            if((state == SubGhzRpcStateLoaded)) {
+            if(state == SubGhzRpcStateLoaded) {
                 switch(
                     subghz_txrx_tx_start(subghz->txrx, subghz_txrx_get_fff_data(subghz->txrx))) {
                 case SubGhzTxRxStartTxStateErrorOnlyRx:
@@ -73,12 +73,10 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             rpc_system_app_confirm(subghz->rpc_ctx, RpcAppEventButtonRelease, result);
         } else if(event.event == SubGhzCustomEventSceneRpcLoad) {
             bool result = false;
-            const char* arg = rpc_system_app_get_data(subghz->rpc_ctx);
-            if(arg && (state == SubGhzRpcStateIdle)) {
-                if(subghz_key_load(subghz, arg, false)) {
+            if(state == SubGhzRpcStateIdle) {
+                if(subghz_key_load(subghz, furi_string_get_cstr(subghz->file_path), false)) {
                     scene_manager_set_scene_state(
                         subghz->scene_manager, SubGhzSceneRpc, SubGhzRpcStateLoaded);
-                    furi_string_set(subghz->file_path, arg);
                     result = true;
                     FuriString* file_name;
                     file_name = furi_string_alloc();
