@@ -85,7 +85,8 @@ NfcCommand mf_classic_poller_handler_detect_type(MfClassicPoller* instance) {
         iso14443_3a_copy(
             instance->data->iso14443_3a_data,
             iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
-        MfClassicError error = mf_classic_async_get_nt(instance, 254, MfClassicKeyTypeA, NULL);
+        MfClassicError error =
+            mf_classic_async_get_nt(instance, 254, MfClassicKeyTypeA, NULL, false);
         if(error == MfClassicErrorNone) {
             instance->data->type = MfClassicType4k;
             instance->state = MfClassicPollerStateStart;
@@ -95,7 +96,8 @@ NfcCommand mf_classic_poller_handler_detect_type(MfClassicPoller* instance) {
             instance->current_type_check = MfClassicType1k;
         }
     } else if(instance->current_type_check == MfClassicType1k) {
-        MfClassicError error = mf_classic_async_get_nt(instance, 62, MfClassicKeyTypeA, NULL);
+        MfClassicError error =
+            mf_classic_async_get_nt(instance, 62, MfClassicKeyTypeA, NULL, false);
         if(error == MfClassicErrorNone) {
             instance->data->type = MfClassicType1k;
             FURI_LOG_D(TAG, "1K detected");
@@ -235,7 +237,7 @@ NfcCommand mf_classic_poller_handler_read_block(MfClassicPoller* instance) {
     do {
         // Authenticate to sector
         error = mf_classic_async_auth(
-            instance, write_ctx->current_block, auth_key, write_ctx->key_type_read, NULL);
+            instance, write_ctx->current_block, auth_key, write_ctx->key_type_read, NULL, false);
         if(error != MfClassicErrorNone) {
             FURI_LOG_D(TAG, "Failed to auth to block %d", write_ctx->current_block);
             instance->state = MfClassicPollerStateFail;
@@ -293,7 +295,12 @@ NfcCommand mf_classic_poller_handler_write_block(MfClassicPoller* instance) {
         // Reauth if necessary
         if(write_ctx->need_halt_before_write) {
             error = mf_classic_async_auth(
-                instance, write_ctx->current_block, auth_key, write_ctx->key_type_write, NULL);
+                instance,
+                write_ctx->current_block,
+                auth_key,
+                write_ctx->key_type_write,
+                NULL,
+                false);
             if(error != MfClassicErrorNone) {
                 FURI_LOG_D(
                     TAG, "Failed to auth to block %d for writing", write_ctx->current_block);
@@ -402,8 +409,8 @@ NfcCommand mf_classic_poller_handler_write_value_block(MfClassicPoller* instance
         MfClassicKey* key = (auth_key_type == MfClassicKeyTypeA) ? &write_ctx->sec_tr.key_a :
                                                                    &write_ctx->sec_tr.key_b;
 
-        MfClassicError error =
-            mf_classic_async_auth(instance, write_ctx->current_block, key, auth_key_type, NULL);
+        MfClassicError error = mf_classic_async_auth(
+            instance, write_ctx->current_block, key, auth_key_type, NULL, false);
         if(error != MfClassicErrorNone) break;
 
         error = mf_classic_async_value_cmd(instance, write_ctx->current_block, value_cmd, diff);
@@ -467,7 +474,8 @@ NfcCommand mf_classic_poller_handler_request_read_sector_blocks(MfClassicPoller*
                 sec_read_ctx->current_block,
                 &sec_read_ctx->key,
                 sec_read_ctx->key_type,
-                NULL);
+                NULL,
+                false);
             if(error != MfClassicErrorNone) break;
 
             sec_read_ctx->auth_passed = true;
@@ -533,7 +541,7 @@ NfcCommand mf_classic_poller_handler_auth_a(MfClassicPoller* instance) {
         FURI_LOG_D(TAG, "Auth to block %d with key A: %06llx", block, key);
 
         MfClassicError error = mf_classic_async_auth(
-            instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeA, NULL);
+            instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeA, NULL, false);
         if(error == MfClassicErrorNone) {
             FURI_LOG_I(TAG, "Key A found");
             mf_classic_set_key_found(
@@ -571,7 +579,7 @@ NfcCommand mf_classic_poller_handler_auth_b(MfClassicPoller* instance) {
         FURI_LOG_D(TAG, "Auth to block %d with key B: %06llx", block, key);
 
         MfClassicError error = mf_classic_async_auth(
-            instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeB, NULL);
+            instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeB, NULL, false);
         if(error == MfClassicErrorNone) {
             FURI_LOG_I(TAG, "Key B found");
             mf_classic_set_key_found(
@@ -626,7 +634,8 @@ NfcCommand mf_classic_poller_handler_read_sector(MfClassicPoller* instance) {
                 block_num,
                 &dict_attack_ctx->current_key,
                 dict_attack_ctx->current_key_type,
-                NULL);
+                NULL,
+                false);
             if(error != MfClassicErrorNone) {
                 instance->state = MfClassicPollerStateNextSector;
                 FURI_LOG_W(TAG, "Failed to re-auth. Go to next sector");
@@ -714,7 +723,7 @@ NfcCommand mf_classic_poller_handler_key_reuse_auth_key_a(MfClassicPoller* insta
         FURI_LOG_D(TAG, "Key attack auth to block %d with key A: %06llx", block, key);
 
         MfClassicError error = mf_classic_async_auth(
-            instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeA, NULL);
+            instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeA, NULL, false);
         if(error == MfClassicErrorNone) {
             FURI_LOG_I(TAG, "Key A found");
             mf_classic_set_key_found(
@@ -749,7 +758,7 @@ NfcCommand mf_classic_poller_handler_key_reuse_auth_key_b(MfClassicPoller* insta
         FURI_LOG_D(TAG, "Key attack auth to block %d with key B: %06llx", block, key);
 
         MfClassicError error = mf_classic_async_auth(
-            instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeB, NULL);
+            instance, block, &dict_attack_ctx->current_key, MfClassicKeyTypeB, NULL, false);
         if(error == MfClassicErrorNone) {
             FURI_LOG_I(TAG, "Key B found");
             mf_classic_set_key_found(
@@ -788,7 +797,8 @@ NfcCommand mf_classic_poller_handler_key_reuse_read_sector(MfClassicPoller* inst
                 block_num,
                 &dict_attack_ctx->current_key,
                 dict_attack_ctx->current_key_type,
-                NULL);
+                NULL,
+                false);
             if(error != MfClassicErrorNone) {
                 instance->state = MfClassicPollerStateKeyReuseStart;
                 break;

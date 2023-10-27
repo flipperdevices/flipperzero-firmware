@@ -173,14 +173,16 @@ MfClassicError mf_classic_async_get_nt(
     MfClassicPoller* instance,
     uint8_t block_num,
     MfClassicKeyType key_type,
-    MfClassicNt* nt);
+    MfClassicNt* nt,
+    bool is_nested);
 
 MfClassicError mf_classic_async_auth(
     MfClassicPoller* instance,
     uint8_t block_num,
     MfClassicKey* key,
     MfClassicKeyType key_type,
-    MfClassicAuthContext* data);
+    MfClassicAuthContext* data,
+    bool is_nested);
 
 MfClassicError mf_classic_async_halt(MfClassicPoller* instance);
 

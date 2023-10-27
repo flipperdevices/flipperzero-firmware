@@ -111,6 +111,7 @@ typedef struct {
     MfClassicNr nr;
     MfClassicAr ar;
     MfClassicAt at;
+    bool is_nested;
 } MfClassicAuthContext;
 
 typedef union {
