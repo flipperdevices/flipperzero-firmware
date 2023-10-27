@@ -1,0 +1,13 @@
+App(
+    appid="gpio_badge",
+    name="GPIO Badge",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_diag_lights_app",
+    stack_size=2 * 1024,
+    fap_icon="gpio_badge.png",
+    fap_category="GPIO",
+    fap_author="jamisonderek",
+    fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio/gpio_badge",
+    fap_version=(1, 0),
+    fap_description="This is an app for the GPIO DIAGNOSTICS BOARD FOR FLIPPER ZERO by MakeItHackin.",
+)
