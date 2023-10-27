@@ -15,5 +15,3 @@ typedef void (*JsThreadCallback)(JsThreadEvent event, const char* msg, void* con
 JsThread* js_thread_run(const char* script_path, JsThreadCallback callback, void* context);
 
 void js_thread_stop(JsThread* worker);
-
-void js_thread_free(JsThread* worker);

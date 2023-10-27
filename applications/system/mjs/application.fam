@@ -33,3 +33,11 @@ App(
     requires=["js_app"],
     sources=["modules/js_badusb.c"],
 )
+
+App(
+    appid="js_uart",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="js_uart_ep",
+    requires=["js_app"],
+    sources=["modules/js_uart.c"],
+)

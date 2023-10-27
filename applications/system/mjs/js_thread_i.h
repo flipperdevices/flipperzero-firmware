@@ -14,4 +14,13 @@
 
 #define MFS_MK_FN(fn) mjs_mk_foreign_func(mjs, (mjs_func_ptr_t)fn)
 
+typedef enum {
+    ThreadEventStop = (1 << 0),
+    ThreadEventCustomDataRx = (1 << 1),
+} WorkerEventFlags;
+
 bool js_delay_with_flags(struct mjs* mjs, uint32_t time);
+
+void js_flags_set(struct mjs* mjs, uint32_t flags);
+
+uint32_t js_flags_wait(struct mjs* mjs, uint32_t flags, uint32_t timeout);

@@ -121,7 +121,6 @@ int32_t js_app(void* arg) {
         view_dispatcher_run(app->view_dispatcher);
 
         js_thread_stop(app->js_thread);
-        js_thread_free(app->js_thread);
     } while(0);
 
     furi_string_free(script_path);

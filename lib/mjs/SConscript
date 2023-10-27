@@ -9,6 +9,7 @@ env.Append(
         File("mjs_exec_public.h"),
         File("mjs_object_public.h"),
         File("mjs_string_public.h"),
+        File("mjs_array_public.h"),
         File("mjs_primitive_public.h"),
         File("mjs_util_public.h"),
     ],

@@ -19,11 +19,6 @@ struct JsThread {
     JsModules* modules;
 };
 
-typedef enum {
-    ThreadEventStop = (1 << 0),
-    ThreadEventTest = (1 << 1),
-} WorkerEventFlags;
-
 static void mjs_str_print(FuriString* msg_str, struct mjs* mjs) {
     size_t num_args = mjs_nargs(mjs);
     for(size_t i = 0; i < num_args; i++) {
@@ -113,6 +108,32 @@ bool js_delay_with_flags(struct mjs* mjs, uint32_t time) {
         return true;
     }
     return false;
+}
+
+void js_flags_set(struct mjs* mjs, uint32_t flags) {
+    JsThread* worker = mjs_get_context(mjs);
+    furi_assert(worker);
+    furi_thread_flags_set(furi_thread_get_id(worker->thread), flags);
+}
+
+uint32_t js_flags_wait(struct mjs* mjs, uint32_t flags_mask, uint32_t timeout) {
+    flags_mask |= ThreadEventStop;
+    uint32_t flags = furi_thread_flags_get();
+    furi_check((flags & FuriFlagError) == 0);
+    if(flags == 0) {
+        flags = furi_thread_flags_wait(flags_mask, FuriFlagWaitAny, timeout);
+    } else {
+        uint32_t state = furi_thread_flags_clear(flags & flags_mask);
+        furi_check((state & FuriFlagError) == 0);
+    }
+
+    if(flags & FuriFlagError) {
+        return 0;
+    }
+    if(flags & ThreadEventStop) {
+        mjs_exit(mjs);
+    }
+    return flags;
 }
 
 static void mjs_delay(struct mjs* mjs) {
@@ -238,8 +259,8 @@ static int32_t js_thread(void* arg) {
         }
     }
 
-    mjs_destroy(mjs);
     js_modules_destroy(worker->modules);
+    mjs_destroy(mjs);
 
     composite_api_resolver_free(worker->resolver);
 
@@ -258,9 +279,6 @@ JsThread* js_thread_run(const char* script_path, JsThreadCallback callback, void
 
 void js_thread_stop(JsThread* worker) {
     furi_thread_flags_set(furi_thread_get_id(worker->thread), ThreadEventStop);
-}
-
-void js_thread_free(JsThread* worker) {
     furi_thread_join(worker->thread);
     furi_thread_free(worker->thread);
     furi_string_free(worker->path);
