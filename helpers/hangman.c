@@ -35,7 +35,7 @@ char* hangman_get_random_word() {
         word[i] = 0xD0; // Russian letter prefix code
         word[i + 1] = word_bin[i / 2];
     }
-    
+
     word[word_len - 1] = 0;
 
     furi_string_free(line);
@@ -68,18 +68,27 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
+void hangman_generate_word(HangmanApp* app) {
+    app->word = hangman_get_random_word();
+    app->word_guessed = malloc(strlen(app->word) + 1);
+    // div by 2 because of UTF-8
+    size_t len = strlen(app->word) / 2;
+    memset(app->word_guessed, '_', len);
+    app->word_guessed[len] = 0;
+}
+
 HangmanApp* hangman_app_alloc() {
     HangmanApp* app = malloc(sizeof(HangmanApp));
 
     furi_hal_random_init();
-    app->word = hangman_get_random_word();
+    hangman_generate_word(app);
 
     app->view_port = view_port_alloc();
     view_port_draw_callback_set(app->view_port, hangman_render_callback, app);
     app->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
-    app->event_queue = furi_message_queue_alloc(1, sizeof(InputEvent));
+    app->event_queue = furi_message_queue_alloc(10, sizeof(InputEvent));
     view_port_input_callback_set(app->view_port, hangman_input_callback, app->event_queue);
 
     return app;
@@ -96,12 +105,13 @@ void hangman_app_free(HangmanApp** app) {
     furi_message_queue_free((*app)->event_queue);
 
     free((*app)->word);
+    free((*app)->word_guessed);
     free(*app);
 }
 
 void hangman_wait_a_key(HangmanApp* app) {
     for(InputEvent event;;) {
-        if(furi_message_queue_get(app->event_queue, &event, 0) == FuriStatusOk) {
+        if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
             if(event.type == InputTypePress) break;
         }
     }

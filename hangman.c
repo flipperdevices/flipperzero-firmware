@@ -6,10 +6,11 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    canvas_set_custom_u8g2_font(canvas, u8g2_font_haxrcorp4089_t_cyrillic);
+    canvas_set_custom_u8g2_font(canvas, u8g2_font_8x13_t_cyrillic);
 
     uint8_t h = canvas_current_font_height(canvas);
     hangman_draw_utf8_str(canvas, 0, h, context->word);
+//    hangman_draw_utf8_str(canvas, 0, h * 1.3, context->word_guessed);
 }
 
 int32_t hangman_main(void* p) {

@@ -16,6 +16,7 @@ typedef struct {
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
     char* word;
+    char* word_guessed;
 } HangmanApp;
 
 int8_t hangman_GetGlyphWidth(u8g2_t* u8g2, uint16_t requested_encoding);
