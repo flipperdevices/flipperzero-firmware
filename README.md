@@ -1,6 +1,8 @@
 # flipperzero-qrcode
 Display qrcodes on the [Flipper Zero]
 
+![qrcode screenshot](https://github.com/bmatcuk/flipperzero-qrcode/blob/main/ss2.png?raw=true)
+
 ## Download
 Grab the latest `qrcode.fap` from [Releases].
 
