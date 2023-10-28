@@ -10,6 +10,7 @@
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/file_stream.h>
 #include <furi_hal_random.h>
+#include "hangman_icons.h"
 
 typedef struct {
     Gui* gui;
@@ -26,3 +27,4 @@ HangmanApp* hangman_app_alloc();
 void hangman_wait_a_key(HangmanApp* app);
 char* hangman_get_random_word();
 void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str);
+void hangman_draw_keyboard(Canvas *canvas);

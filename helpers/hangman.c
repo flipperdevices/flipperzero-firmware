@@ -46,6 +46,21 @@ char* hangman_get_random_word() {
     return word;
 }
 
+void hangman_draw_keyboard(Canvas *canvas) {
+    canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
+    uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, 0x20);
+    uint8_t glyph_h =  canvas_current_font_height(canvas);
+
+    for (uint8_t j = 0; j < 4; j++) {
+        uint8_t y = 27 + j * glyph_h;
+
+        for (uint8_t i = 0; i < 8; i++) {
+            uint8_t x = 38 + i * glyph_w * 1.6;
+            canvas_draw_glyph(canvas, x, y, 0x0410 + j * 8 + i);
+        }
+    }
+}
+
 void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str) {
     FuriStringUTF8State state = FuriStringUTF8StateStarting;
     FuriStringUnicodeValue value = 0;
