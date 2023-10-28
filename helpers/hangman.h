@@ -4,6 +4,10 @@
 #define HANGMAN_GALLOWS_MAX_STATE 7
 #define HANGMAN_GALLOWS_INIT_STATE 0
 
+#define HANGMAN_LETTERS_CNT 32
+
+#define HANGMAN_KEYBOARD_ROW 8
+
 #include "hangman_icons.h"
 #include <gui/gui.h>
 #include <gui/canvas_i.h>
@@ -19,9 +23,10 @@ typedef struct {
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
     char* word;
-    char* word_guessed;
+    char* word_under;
     uint8_t pos;
     uint8_t gallows_state;
+    bool opened[HANGMAN_LETTERS_CNT];
 } HangmanApp;
 
 int8_t hangman_GetGlyphWidth(u8g2_t* u8g2, uint16_t requested_encoding);
@@ -34,3 +39,5 @@ void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, uint8_t space, 
 void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context);
 void hangman_draw_word(Canvas *canvas, HangmanApp* context);
 void hangman_draw_gallows(Canvas *canvas, HangmanApp* context);
+void hangman_choice_letter(HangmanApp* app);
+
