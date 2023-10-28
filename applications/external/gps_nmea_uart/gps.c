@@ -1,8 +1,6 @@
 #include "gps_uart.h"
 #include "constants.h"
-
 #include <furi.h>
-#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <string.h>
 
@@ -52,7 +50,6 @@ static void render_callback(Canvas* const canvas, void* context) {
             snprintf(buffer, 64, "%.2f kn", (double)gps_uart->status.speed);
             break;
         }
-
         canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignBottom, buffer);
         snprintf(
             buffer,
@@ -95,14 +92,6 @@ int32_t gps_app(void* p) {
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
-    uint8_t attempts = 0;
-    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        furi_delay_ms(10);
-    }
-    furi_delay_ms(200);
-
     GpsUart* gps_uart = gps_uart_enable();
 
     gps_uart->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -111,6 +100,14 @@ int32_t gps_app(void* p) {
         free(gps_uart);
         return 255;
     }
+
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
 
     // set system callbacks
     ViewPort* view_port = view_port_alloc();
@@ -132,11 +129,8 @@ int32_t gps_app(void* p) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypeShort) {
                     switch(event.input.key) {
-                    case InputKeyUp:
-                    case InputKeyDown:
-                    case InputKeyRight:
-                    case InputKeyLeft:
                     case InputKeyBack:
+                        processing = false;
                         break;
                     case InputKeyOk:
                         if(!gps_uart->backlight_on) {
@@ -168,6 +162,8 @@ int32_t gps_app(void* p) {
 
                         gps_uart_init_thread(gps_uart);
                         gps_uart->changing_baudrate = true;
+                        furi_mutex_release(gps_uart->mutex);
+                        view_port_update(view_port);
                         break;
                     case InputKeyRight:
                         gps_uart->speed_units++;
@@ -184,11 +180,10 @@ int32_t gps_app(void* p) {
                 }
             }
         }
-
-        furi_mutex_release(gps_uart->mutex);
-        view_port_update(view_port);
-
-        if(gps_uart->changing_baudrate) {
+        if(!gps_uart->changing_baudrate) {
+            furi_mutex_release(gps_uart->mutex);
+            view_port_update(view_port);
+        } else {
             furi_delay_ms(1000);
             gps_uart->changing_baudrate = false;
         }

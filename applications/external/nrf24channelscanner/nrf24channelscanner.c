@@ -194,7 +194,8 @@ int32_t nrf24channelscanner_main(void* p) {
 
         if(event.type == EventTypeKey) {
             szuz = false; //hit any button, so hide welcome screen
-            if(event.input.type == InputTypeLong && event.input.key == InputKeyBack) {
+            if((event.input.type == InputTypeShort || event.input.type == InputTypeLong) &&
+               event.input.key == InputKeyBack) {
                 if(isScanning) {
                     stopNrfScan = true; //if running, stop it.
                     notification_message(notification, &sequence_blink_yellow_100);

@@ -239,7 +239,8 @@ int32_t flipper_geiger_app() {
 
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeInput) {
-                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
+                if(event.input.key == InputKeyBack &&
+                   (event.input.type == InputTypeShort || event.input.type == InputTypeLong)) {
                     break;
                 } else if(event.input.key == InputKeyOk && event.input.type == InputTypeLong) {
                     counter = 0;
