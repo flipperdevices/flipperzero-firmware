@@ -26,5 +26,6 @@ void hangman_render_callback(Canvas* canvas, void* ctx);
 HangmanApp* hangman_app_alloc();
 void hangman_wait_a_key(HangmanApp* app);
 char* hangman_get_random_word();
-void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str);
+void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, uint8_t space, const char* str);
 void hangman_draw_keyboard(Canvas *canvas);
+void hangman_draw_word(Canvas *canvas, HangmanApp* context);
