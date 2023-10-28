@@ -40,7 +40,7 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
     canvas_set_color(canvas, ColorBlack);
 
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
-    uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, 0x20);
+    uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, ' ');
     uint8_t glyph_h = canvas_current_font_height(canvas);
 
     for(uint8_t j = 0; j < HANGMAN_LETTERS_CNT / HANGMAN_KEYBOARD_ROW; j++) {
@@ -73,8 +73,9 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
 void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x13B_t_cyrillic);
 
-    uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, 0x20);
-    uint8_t center_x = (canvas_width(canvas) - (glyph_w + 3) * strlen(app->word)) / 2;
+    uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, ' ');
+    uint8_t center_x =
+        (canvas_width(canvas) - (glyph_w + HANGMAN_KEYBOARD_GAP) * strlen(app->word)) / 2;
 
     uint8_t h = canvas_current_font_height(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -88,7 +89,7 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
         canvas_set_color(canvas, ColorXOR);
         canvas_draw_glyph(canvas, x, h + 1, '_');
 
-        x += glyph_w + 3;
+        x += glyph_w + HANGMAN_KEYBOARD_GAP;
     }
 }
 

@@ -3,10 +3,9 @@
 #define HANGMAN_DICT_FILE APP_ASSETS_PATH("dict.bin")
 #define HANGMAN_GALLOWS_MAX_STATE 7
 #define HANGMAN_GALLOWS_INIT_STATE 0
-
 #define HANGMAN_LETTERS_CNT 32
-
 #define HANGMAN_KEYBOARD_ROW 8
+#define HANGMAN_KEYBOARD_GAP 3
 
 #include "hangman_icons.h"
 #include <gui/gui.h>
