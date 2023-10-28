@@ -1,0 +1,8 @@
+App(
+    appid="hangman",
+    name="Hangman",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hangman_main",
+    fap_category="Misc",
+    fap_file_assets="files",
+)
