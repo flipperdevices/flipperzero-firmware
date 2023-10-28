@@ -50,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - NFC: [Extra NFC Mifare Keys (By Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
 - SubGHz: [Added custom radio presets for AM_Q (By Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
 - SubGHz: [Oregon2 (thanks to haisenteck) (From Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
+- Updated: [NRF24 Batch v2.0 (By vad7)](https://github.com/vad7/nRF24-Batch) Minor asset update.
 
 <a name="release">
 
