@@ -672,13 +672,10 @@ void input_clk_gameboy(void* context) {
     const uint32_t time_ticks = furi_hal_cortex_instructions_per_microsecond() * 500;
 
     if (furi_hal_gpio_read(&GAME_BOY_CLK)) {
-        /* XXX: I think we can remove the check of time > 0? */
-        if(time > 0) {
-            if((DWT->CYCCNT - time) > time_ticks) {
-                //  IDLE & Reset
-                trade->in_data = 0;
-                trade->shift = 0;
-            }
+        if((DWT->CYCCNT - time) > time_ticks) {
+            //  IDLE & Reset
+            trade->in_data = 0;
+            trade->shift = 0;
         }
         transferBit(trade);
 	time = DWT->CYCCNT;
