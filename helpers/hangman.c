@@ -36,7 +36,7 @@ char* hangman_get_random_word() {
     return word;
 }
 
-void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context) {
+void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
     canvas_set_color(canvas, ColorBlack);
 
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
@@ -52,37 +52,37 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context) {
 
             uint16_t ch = 0x0410 + n;
 
-            if(context->opened[n] != HangmanOpenedInit) {
+            if(app->opened[n] != HangmanOpenedInit) {
                 canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_m_symbols);
-                ch = context->opened[n] == HangmanOpenedNotFound ? 0x2717 : 0x2713; // ✕ : ✓
+                ch = app->opened[n] == HangmanOpenedNotFound ? 0x2717 : 0x2713; // ✕ : ✓
             }
 
-            if(n == context->pos) {
+            if(n == app->pos) {
                 canvas_draw_glyph(canvas, x - 1, y, ch); // Made bold
             }
 
             canvas_draw_glyph(canvas, x, y, ch);
 
-            if(context->opened[n]) {
+            if(app->opened[n]) {
                 canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
             }
         }
     }
 }
 
-void hangman_draw_word(Canvas* canvas, HangmanApp* context) {
+void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x13B_t_cyrillic);
 
     uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, 0x20);
-    uint8_t center_x = (canvas_width(canvas) - (glyph_w + 3) * strlen(context->word)) / 2;
+    uint8_t center_x = (canvas_width(canvas) - (glyph_w + 3) * strlen(app->word)) / 2;
 
     uint8_t h = canvas_current_font_height(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    for(uint8_t i = 0, x = center_x; i < strlen(context->word); i++) {
-        if(context->opened[context->word[i] - 0x10]) {
+    for(uint8_t i = 0, x = center_x; i < strlen(app->word); i++) {
+        if(app->opened[app->word[i] - 0x10]) {
             canvas_set_color(canvas, ColorBlack);
-            canvas_draw_glyph(canvas, x, h, context->word[i] + 0x0400); // convert to UCS-2
+            canvas_draw_glyph(canvas, x, h, app->word[i] + 0x0400); // convert to UCS-2
         }
 
         canvas_set_color(canvas, ColorXOR);
@@ -114,9 +114,9 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-void hangman_draw_gallows(Canvas* canvas, HangmanApp* context) {
+void hangman_draw_gallows(Canvas* canvas, HangmanApp* app) {
     const Icon* gallows[HANGMAN_GALLOWS_MAX_STATE] = {&I_1, &I_2, &I_3, &I_4, &I_5, &I_6, &I_7};
-    canvas_draw_icon(canvas, 0, 30, gallows[context->gallows_state]);
+    canvas_draw_icon(canvas, 0, 30, gallows[app->gallows_state]);
 }
 
 void hangman_choice_letter(HangmanApp* app) {
