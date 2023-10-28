@@ -281,6 +281,57 @@ static Vector2 angle_to_vector2(float angle_in_degrees, uint8_t distance, Vector
     return vec;
 }
 
+void clock_render_binary(
+    Canvas* const canvas,
+    int32_t value,
+    int32_t height,
+    uint32_t timer_start_timestamp) {
+    if(timer_start_timestamp != 0) {
+        // FuriString* str = furi_string_alloc();
+        // furi_string_printf(str, "%li", value);
+        // canvas_draw_str_aligned(
+        // canvas, 10, height+4, AlignCenter, AlignCenter, furi_string_get_cstr(str)); // DRAW TIME
+        // furi_string_free(str);
+    }
+    int32_t h_loc_start = 24;
+    if(value >= 32) {
+        canvas_draw_icon(canvas, h_loc_start, height, &I_GameMode_11x8);
+        value = value - 32;
+    } else {
+        canvas_draw_icon(canvas, h_loc_start, height, &I_InvertGameMode_11x8);
+    }
+    if(value >= 16) {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 1), height, &I_GameMode_11x8);
+        value = value - 16;
+    } else {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 1), height, &I_InvertGameMode_11x8);
+    }
+    if(value >= 8) {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 2), height, &I_GameMode_11x8);
+        value = value - 8;
+    } else {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 2), height, &I_InvertGameMode_11x8);
+    }
+    if(value >= 4) {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 3), height, &I_GameMode_11x8);
+        value = value - 4;
+    } else {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 3), height, &I_InvertGameMode_11x8);
+    }
+    if(value >= 2) {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 4), height, &I_GameMode_11x8);
+        value = value - 2;
+    } else {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 4), height, &I_InvertGameMode_11x8);
+    }
+    if(value >= 1) {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 5), height, &I_GameMode_11x8);
+        value = value - 1;
+    } else {
+        canvas_draw_icon(canvas, h_loc_start + (14 * 5), height, &I_InvertGameMode_11x8);
+    }
+}
+
 static void clock_render_callback(Canvas* const canvas, void* ctx) {
     ClockState* state = ctx;
     if(furi_mutex_acquire(state->mutex, 200) != FuriStatusOk) {
@@ -334,13 +385,13 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     char alertTime[4];
     snprintf(alertTime, sizeof(alertTime), "%d", alert_time);
     furi_mutex_release(state->mutex);
-    if(state->faceType == 0 || state->faceType == 4) {
-        if(state->faceType == 4) {
+    if(state->faceType == 0 || state->faceType == 5) {
+        if(state->faceType == 5) {
             canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
-                elements_button_left(canvas, "F5");
+                elements_button_left(canvas, "F6");
             }
             canvas_set_color(canvas, ColorWhite);
         } else {
@@ -392,14 +443,14 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         if(state->time_format == LocaleTimeFormat12h)
             canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
         canvas_draw_str_aligned(canvas, 96, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
-    } else if(state->faceType == 1 || state->faceType == 5) {
+    } else if(state->faceType == 1 || state->faceType == 6) {
         canvas_set_font(canvas, FontSecondary);
-        if(state->faceType == 5) {
+        if(state->faceType == 6) {
             canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
-                elements_button_left(canvas, "F6");
+                elements_button_left(canvas, "F7");
             }
             canvas_set_color(canvas, ColorWhite);
         } else {
@@ -460,13 +511,13 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
                     canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
             canvas_set_font(canvas, FontSecondary);
         }
-    } else if(state->faceType == 2 || state->faceType == 6) {
-        if(state->faceType == 6) {
+    } else if(state->faceType == 2 || state->faceType == 7) {
+        if(state->faceType == 7) {
             canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
                 elements_button_left(canvas, "Reset");
             } else {
-                elements_button_left(canvas, "F7");
+                elements_button_left(canvas, "F8");
             }
             canvas_set_color(canvas, ColorWhite);
         } else {
@@ -495,21 +546,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(
                 canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
-    } else {
-        if(state->faceType == 7) {
+    } else if(state->faceType == 3 || state->faceType == 8) {
+        if(state->faceType == 8) {
             canvas_draw_icon(canvas, 0, 0, &I_black);
             if(timer_start_timestamp != 0) {
-                elements_button_left(canvas, "Reset");
+                // elements_button_left(canvas, "Reset");
             } else {
-                elements_button_left(canvas, "F8");
+                // elements_button_left(canvas, "F9");
             }
             canvas_set_color(canvas, ColorWhite);
         } else {
             canvas_set_color(canvas, ColorWhite);
             if(timer_start_timestamp != 0) {
-                elements_button_left(canvas, "Reset");
+                // elements_button_left(canvas, "Reset");
             } else {
-                elements_button_left(canvas, "F4");
+                // elements_button_left(canvas, "F4");
             }
             canvas_set_color(canvas, ColorBlack);
         }
@@ -552,35 +603,75 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
                 canvas, 15, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         }
         furi_string_free(str);
+    } else {
+        if(state->faceType == 9) {
+            canvas_draw_icon(canvas, 0, 0, &I_black);
+            if(timer_start_timestamp != 0) {
+                // elements_button_left(canvas, "Reset");
+            } else {
+                // elements_button_left(canvas, "F10");
+            }
+            canvas_set_color(canvas, ColorWhite);
+        } else {
+            canvas_set_color(canvas, ColorWhite);
+            if(timer_start_timestamp != 0) {
+                // elements_button_left(canvas, "Reset");
+            } else {
+                // elements_button_left(canvas, "F5");
+            }
+            canvas_set_color(canvas, ColorBlack);
+        }
+        canvas_set_font(canvas, FontBatteryPercent);
+        if(timer_start_timestamp != 0) {
+            int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                   timer_stopped_seconds;
+            clock_render_binary(canvas, elapsed_secs / 60, 5, timer_start_timestamp);
+            clock_render_binary(canvas, elapsed_secs % 60, 5 + (9 * 1), timer_start_timestamp);
+            // snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
+            // canvas_draw_str_aligned(
+            // canvas, 12, 1, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+            // canvas_draw_str_aligned(
+            // canvas, 102, 1, AlignCenter, AlignTop, date_string); // DRAW DATE
+            clock_render_binary(canvas, curr_dt.hour, 5 + (9 * 3), timer_start_timestamp);
+            clock_render_binary(canvas, curr_dt.minute, 5 + (9 * 4), timer_start_timestamp);
+            clock_render_binary(canvas, curr_dt.second, 5 + (9 * 5), timer_start_timestamp);
+        } else {
+            clock_render_binary(canvas, curr_dt.hour, 18, timer_start_timestamp);
+            clock_render_binary(canvas, curr_dt.minute, 28, timer_start_timestamp);
+            clock_render_binary(canvas, curr_dt.second, 38, timer_start_timestamp);
+        }
     }
-    if(state->faceType >= 4) {
+    if(state->faceType >= 5) {
         canvas_set_color(canvas, ColorBlack);
     }
-    if(state->faceType < 4) {
+    if(state->faceType < 5) {
         canvas_set_color(canvas, ColorWhite);
     }
-    if(!state->desktop_settings->is_dumbmode && !state->w_test) {
-        if(timer_running) {
-            elements_button_center(canvas, "Stop");
-        } else {
-            elements_button_center(canvas, "Start");
+    if(state->faceType != 3 && state->faceType != 4 && state->faceType != 8 &&
+       state->faceType != 9) {
+        if(!state->desktop_settings->is_dumbmode && !state->w_test) {
+            if(timer_running) {
+                elements_button_center(canvas, "Stop");
+            } else {
+                elements_button_center(canvas, "Start");
+            }
         }
-    }
-    if(timer_running && !state->w_test) {
-        if(songSelect == 0) {
-            elements_button_right(canvas, "S:OFF");
-        } else if(songSelect == 1) {
-            elements_button_right(canvas, "S:PoRa");
-        } else if(songSelect == 2) {
-            elements_button_right(canvas, "S:Mario");
-        } else if(songSelect == 3) {
-            elements_button_right(canvas, "S:ByMin");
+        if(timer_running && !state->w_test) {
+            if(songSelect == 0) {
+                elements_button_right(canvas, "S:OFF");
+            } else if(songSelect == 1) {
+                elements_button_right(canvas, "S:PoRa");
+            } else if(songSelect == 2) {
+                elements_button_right(canvas, "S:Mario");
+            } else if(songSelect == 3) {
+                elements_button_right(canvas, "S:ByMin");
+            }
         }
-    }
-    // if(state->faceType >= 4) canvas_set_color(canvas, ColorBlack);
-    // if(state->faceType < 4) canvas_set_color(canvas, ColorWhite);
-    if(state->w_test && state->desktop_settings->is_dumbmode) {
-        canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
+        // if(state->faceType >= 5) canvas_set_color(canvas, ColorBlack);
+        // if(state->faceType < 5) canvas_set_color(canvas, ColorWhite);
+        if(state->w_test && state->desktop_settings->is_dumbmode) {
+            canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
+        }
     }
 }
 
@@ -707,7 +798,7 @@ int32_t clock_app(void* p) {
                                 plugin_state->timer_stopped_seconds = 0;
                                 plugin_state->timerSecs = 0;
                             } else {
-                                if(plugin_state->faceType <= 6) {
+                                if(plugin_state->faceType <= 8) {
                                     plugin_state->faceType = plugin_state->faceType + 1;
                                 } else {
                                     plugin_state->faceType = 0;
