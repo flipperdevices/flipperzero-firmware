@@ -6,7 +6,7 @@ char* hangman_get_random_word() {
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
 
-    if(file_stream_open(stream, DICT_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(file_stream_open(stream, HANGMAN_DICT_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
         int32_t offset = furi_hal_random_get() % stream_size(stream);
 
         if(offset > 0) {
@@ -115,6 +115,11 @@ void hangman_generate_word(HangmanApp* app) {
     app->word_guessed[len] = 0;
 }
 
+void hangman_draw_gallows(Canvas *canvas, HangmanApp* context) {
+    const Icon* gallows[HANGMAN_GALLOWS_MAX_STATE] = {&I_1, &I_2, &I_3, &I_4, &I_5, &I_6, &I_7};
+    canvas_draw_icon(canvas, 0, 30, gallows[context->gallows_state]);
+}
+
 HangmanApp* hangman_app_alloc() {
     HangmanApp* app = malloc(sizeof(HangmanApp));
 
@@ -130,6 +135,7 @@ HangmanApp* hangman_app_alloc() {
     view_port_input_callback_set(app->view_port, hangman_input_callback, app->event_queue);
 
     app->pos = 0;
+    app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
     return app;
 }
 
@@ -174,6 +180,10 @@ void hangman_wait_a_key(HangmanApp* app) {
 
                 default:
                     break;
+                }
+
+                if (++app->gallows_state >= HANGMAN_GALLOWS_MAX_STATE) {
+                    app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
                 }
 
                 view_port_update(app->view_port);

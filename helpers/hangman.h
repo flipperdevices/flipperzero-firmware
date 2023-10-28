@@ -1,7 +1,10 @@
 #pragma once
 
-#define DICT_FILE APP_ASSETS_PATH("dict.bin")
+#define HANGMAN_DICT_FILE APP_ASSETS_PATH("dict.bin")
+#define HANGMAN_GALLOWS_MAX_STATE 7
+#define HANGMAN_GALLOWS_INIT_STATE 0
 
+#include "hangman_icons.h"
 #include <gui/gui.h>
 #include <gui/canvas_i.h>
 #include <u8g2/u8g2.h>
@@ -10,7 +13,6 @@
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/file_stream.h>
 #include <furi_hal_random.h>
-#include "hangman_icons.h"
 
 typedef struct {
     Gui* gui;
@@ -18,7 +20,8 @@ typedef struct {
     FuriMessageQueue* event_queue;
     char* word;
     char* word_guessed;
-    int8_t pos;
+    uint8_t pos;
+    uint8_t gallows_state;
 } HangmanApp;
 
 int8_t hangman_GetGlyphWidth(u8g2_t* u8g2, uint16_t requested_encoding);
@@ -30,3 +33,4 @@ char* hangman_get_random_word();
 void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, uint8_t space, const char* str);
 void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context);
 void hangman_draw_word(Canvas *canvas, HangmanApp* context);
+void hangman_draw_gallows(Canvas *canvas, HangmanApp* context);
