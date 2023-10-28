@@ -17,7 +17,7 @@ Write start: 0,0,0x2F
 
 R: ID*=,0,0x65
 
-R: CO2 level*2[3]=i:4,,ROM2
+R: CO2 level*2[3]=i:4,,ROM2$
 W: CO2 level*2=,i:4,WROM2
 
 R: Fan speeds=25
