@@ -344,8 +344,7 @@ MfDesfireError mf_desfire_poller_async_read_file_value(
     return error;
 }
 
-// TODO FL-3639: this function is equal to mf_desfire_poller_async_read_file_data()
-MfDesfireError mf_desfire_poller_async_read_file_records( //-V524
+MfDesfireError mf_desfire_poller_async_read_file_records(
     MfDesfirePoller* instance,
     MfDesfireFileId id,
     uint32_t offset,
