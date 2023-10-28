@@ -14,7 +14,9 @@ int32_t hangman_main(void* p) {
     UNUSED(p);
     __attribute__((__cleanup__(hangman_app_free))) HangmanApp* app = hangman_app_alloc();
 
-    hangman_wait_a_key(app);
+    while (hangman_wait_a_key(app)) {
+        hangman_clear_state(app);
+    }
 
     return 0;
 }

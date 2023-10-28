@@ -58,7 +58,7 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context) {
             }
 
             if(n == context->pos) {
-                canvas_draw_glyph(canvas, x - 1, y, ch);
+                canvas_draw_glyph(canvas, x - 1, y, ch); // Made bold
             }
 
             canvas_draw_glyph(canvas, x, y, ch);
@@ -71,7 +71,6 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context) {
 }
 
 void hangman_draw_word(Canvas* canvas, HangmanApp* context) {
-    canvas_set_color(canvas, ColorBlack);
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x13B_t_cyrillic);
 
     uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, 0x20);
@@ -82,14 +81,15 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* context) {
 
     for(uint8_t i = 0, x = center_x; i < strlen(context->word); i++) {
         if(context->opened[context->word[i] - 0x10]) {
+            canvas_set_color(canvas, ColorBlack);
             canvas_draw_glyph(canvas, x, h, context->word[i] + 0x0400); // convert to UCS-2
         }
 
+        canvas_set_color(canvas, ColorXOR);
+        canvas_draw_glyph(canvas, x, h + 1, '_');
+
         x += glyph_w + 3;
     }
-
-    canvas_set_color(canvas, ColorXOR);
-    hangman_draw_utf8_str(canvas, center_x, h + 1, 3, context->word_under);
 }
 
 void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, uint8_t space, const char* str) {
@@ -114,34 +114,39 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-void hangman_generate_word(HangmanApp* app) {
-    app->word = hangman_get_random_word();
-    app->word_under = strdup(app->word);
-    memset(app->word_under, '_', strlen(app->word));
-}
-
 void hangman_draw_gallows(Canvas* canvas, HangmanApp* context) {
     const Icon* gallows[HANGMAN_GALLOWS_MAX_STATE] = {&I_1, &I_2, &I_3, &I_4, &I_5, &I_6, &I_7};
     canvas_draw_icon(canvas, 0, 30, gallows[context->gallows_state]);
 }
 
 void hangman_choice_letter(HangmanApp* app) {
-    if (strchr(app->word, app->pos + 0x10) == NULL) {
+    if(strchr(app->word, app->pos + 0x10) == NULL) {
         app->opened[app->pos] = HangmanOpenedNotFound;
 
         if(app->gallows_state < HANGMAN_GALLOWS_MAX_STATE - 1) {
             app->gallows_state++;
+        } else {
+            app->need_generate = true;
         }
     } else {
         app->opened[app->pos] = HangmanOpenedFound;
     }
 }
 
+void hangman_clear_state(HangmanApp* app) {
+    app->pos = 0;
+    app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
+    memset(app->opened, HangmanOpenedInit, HANGMAN_LETTERS_CNT);
+    app->need_generate = false;
+
+    app->word = hangman_get_random_word();
+}
+
 HangmanApp* hangman_app_alloc() {
     HangmanApp* app = malloc(sizeof(HangmanApp));
 
     furi_hal_random_init();
-    hangman_generate_word(app);
+    hangman_clear_state(app);
 
     app->view_port = view_port_alloc();
     view_port_draw_callback_set(app->view_port, hangman_render_callback, app);
@@ -150,10 +155,6 @@ HangmanApp* hangman_app_alloc() {
 
     app->event_queue = furi_message_queue_alloc(10, sizeof(InputEvent));
     view_port_input_callback_set(app->view_port, hangman_input_callback, app->event_queue);
-
-    app->pos = 0;
-    app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
-    memset(app->opened, HangmanOpenedInit, HANGMAN_LETTERS_CNT);
 
     return app;
 }
@@ -169,12 +170,11 @@ void hangman_app_free(HangmanApp** app) {
     furi_message_queue_free((*app)->event_queue);
 
     free((*app)->word);
-    free((*app)->word_under);
     free(*app);
 }
 
-void hangman_wait_a_key(HangmanApp* app) {
-    for(InputEvent event;;) {
+bool hangman_wait_a_key(HangmanApp* app) {
+    for(InputEvent event; !app->need_generate;) {
         if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
             if(event.type == InputTypeShort) {
                 switch(event.key) {
@@ -183,7 +183,7 @@ void hangman_wait_a_key(HangmanApp* app) {
                     break;
 
                 case InputKeyBack:
-                    return;
+                    return false;
 
                 case InputKeyDown:
                     if(app->pos < HANGMAN_LETTERS_CNT - HANGMAN_KEYBOARD_ROW)
@@ -191,8 +191,7 @@ void hangman_wait_a_key(HangmanApp* app) {
                     break;
 
                 case InputKeyUp:
-                    if(app->pos > HANGMAN_KEYBOARD_ROW)
-                        app->pos -= HANGMAN_KEYBOARD_ROW;
+                    if(app->pos > HANGMAN_KEYBOARD_ROW) app->pos -= HANGMAN_KEYBOARD_ROW;
                     break;
 
                 case InputKeyLeft:
@@ -219,4 +218,6 @@ void hangman_wait_a_key(HangmanApp* app) {
             }
         }
     }
+
+    return true;
 }

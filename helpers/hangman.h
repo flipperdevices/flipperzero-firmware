@@ -29,21 +29,22 @@ typedef struct {
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
     char* word;
-    char* word_under;
     uint8_t pos;
     uint8_t gallows_state;
     HangmanOpened opened[HANGMAN_LETTERS_CNT];
+    bool need_generate;
 } HangmanApp;
 
 int8_t hangman_GetGlyphWidth(u8g2_t* u8g2, uint16_t requested_encoding);
 void hangman_app_free(HangmanApp** app);
 void hangman_render_callback(Canvas* canvas, void* ctx);
 HangmanApp* hangman_app_alloc();
-void hangman_wait_a_key(HangmanApp* context);
+bool hangman_wait_a_key(HangmanApp* context);
 char* hangman_get_random_word();
 void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, uint8_t space, const char* str);
 void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context);
 void hangman_draw_word(Canvas *canvas, HangmanApp* context);
 void hangman_draw_gallows(Canvas *canvas, HangmanApp* context);
 void hangman_choice_letter(HangmanApp* app);
+void hangman_clear_state(HangmanApp* app);
 
