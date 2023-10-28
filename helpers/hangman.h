@@ -18,6 +18,12 @@
 #include <toolbox/stream/file_stream.h>
 #include <furi_hal_random.h>
 
+typedef enum {
+    HangmanOpenedInit,
+    HangmanOpenedFound,
+    HangmanOpenedNotFound,
+} HangmanOpened;
+
 typedef struct {
     Gui* gui;
     ViewPort* view_port;
@@ -26,7 +32,7 @@ typedef struct {
     char* word_under;
     uint8_t pos;
     uint8_t gallows_state;
-    bool opened[HANGMAN_LETTERS_CNT];
+    HangmanOpened opened[HANGMAN_LETTERS_CNT];
 } HangmanApp;
 
 int8_t hangman_GetGlyphWidth(u8g2_t* u8g2, uint16_t requested_encoding);

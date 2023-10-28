@@ -52,9 +52,9 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context) {
 
             uint16_t ch = 0x0410 + n;
 
-            if(context->opened[n]) {
+            if(context->opened[n] != HangmanOpenedInit) {
                 canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_m_symbols);
-                ch = strchr(context->word, n + 0x10) == NULL ? 0x2717 : 0x2713; // ✕ : ✓
+                ch = context->opened[n] == HangmanOpenedNotFound ? 0x2717 : 0x2713; // ✕ : ✓
             }
 
             if(n == context->pos) {
@@ -126,12 +126,14 @@ void hangman_draw_gallows(Canvas* canvas, HangmanApp* context) {
 }
 
 void hangman_choice_letter(HangmanApp* app) {
-    app->opened[app->pos] = true;
-
     if (strchr(app->word, app->pos + 0x10) == NULL) {
+        app->opened[app->pos] = HangmanOpenedNotFound;
+
         if(app->gallows_state < HANGMAN_GALLOWS_MAX_STATE - 1) {
             app->gallows_state++;
         }
+    } else {
+        app->opened[app->pos] = HangmanOpenedFound;
     }
 }
 
@@ -151,7 +153,7 @@ HangmanApp* hangman_app_alloc() {
 
     app->pos = 0;
     app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
-    memset(app->opened, false, HANGMAN_LETTERS_CNT);
+    memset(app->opened, HangmanOpenedInit, HANGMAN_LETTERS_CNT);
 
     return app;
 }
