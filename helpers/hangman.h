@@ -18,14 +18,15 @@ typedef struct {
     FuriMessageQueue* event_queue;
     char* word;
     char* word_guessed;
+    int8_t pos;
 } HangmanApp;
 
 int8_t hangman_GetGlyphWidth(u8g2_t* u8g2, uint16_t requested_encoding);
 void hangman_app_free(HangmanApp** app);
 void hangman_render_callback(Canvas* canvas, void* ctx);
 HangmanApp* hangman_app_alloc();
-void hangman_wait_a_key(HangmanApp* app);
+void hangman_wait_a_key(HangmanApp* context);
 char* hangman_get_random_word();
 void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, uint8_t space, const char* str);
-void hangman_draw_keyboard(Canvas *canvas);
+void hangman_draw_keyboard(Canvas* canvas, HangmanApp* context);
 void hangman_draw_word(Canvas *canvas, HangmanApp* context);

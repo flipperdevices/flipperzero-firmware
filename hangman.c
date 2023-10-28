@@ -8,7 +8,7 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
     hangman_draw_word(canvas, context);
     canvas_draw_icon(canvas, 0, 30, &I_hangman);
 
-    hangman_draw_keyboard(canvas);
+    hangman_draw_keyboard(canvas, context);
 }
 
 int32_t hangman_main(void* p) {
