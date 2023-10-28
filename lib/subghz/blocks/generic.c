@@ -8,6 +8,8 @@ void subghz_block_generic_get_preset_name(const char* preset_name, FuriString* p
     const char* preset_name_temp;
     if(!strcmp(preset_name, "AM270")) {
         preset_name_temp = "FuriHalSubGhzPresetOok270Async";
+    } else if(!strcmp(preset_name, "AM_Q")) {
+        preset_name_temp = "FuriHalSubGhzPresetOok650Async_q";
     } else if(!strcmp(preset_name, "AM650")) {
         preset_name_temp = "FuriHalSubGhzPresetOok650Async";
     } else if(!strcmp(preset_name, "FM238")) {

@@ -44,6 +44,7 @@ const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_kinggates_stylo_4k,
     &subghz_protocol_bin_raw,
     &subghz_protocol_x10,
+    &subghz_protocol_oregon2,
     &subghz_protocol_genie,
 };
 

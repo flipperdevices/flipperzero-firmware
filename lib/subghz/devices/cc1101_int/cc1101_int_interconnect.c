@@ -32,6 +32,10 @@ static void subghz_device_cc1101_int_interconnect_load_preset(
     case FuriHalSubGhzPresetOok650Async:
         furi_hal_subghz_load_custom_preset(subghz_device_cc1101_preset_ook_650khz_async_regs);
         break;
+    case FuriHalSubGhzPresetOok650Async_q:
+        furi_hal_subghz_load_custom_preset(
+            subghz_device_cc1101_preset_ook_650khz_async_regs_better_q);
+        break;
     case FuriHalSubGhzPresetOok270Async:
         furi_hal_subghz_load_custom_preset(subghz_device_cc1101_preset_ook_270khz_async_regs);
         break;
