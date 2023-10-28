@@ -134,6 +134,59 @@ void hangman_choice_letter(HangmanApp* app) {
     }
 }
 
+void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
+    const Icon I_ButtonCenter_7x7 = {
+        .width = 7,
+        .height = 7,
+        .frame_count = 1,
+        .frame_rate = 0,
+        .frames = (const uint8_t* const[]){
+            (const uint8_t[]){0x00, 0x1c, 0x22, 0x5d, 0x5d, 0x5d, 0x22, 0x1c}}};
+
+    const uint8_t button_height = 12;
+    const uint8_t vertical_offset = 3;
+    const uint8_t horizontal_offset = 1;
+    const uint8_t string_width = hangman_GetGlyphWidth(&canvas->fb, ' ') * strlen(str) / 2;
+    const Icon* icon = &I_ButtonCenter_7x7;
+    const uint8_t icon_h_offset = 3;
+    const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
+    const uint8_t icon_v_offset = icon->height + vertical_offset;
+    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
+
+    const uint8_t x = (canvas_width(canvas) - button_width) / 2;
+
+    canvas_draw_box(canvas, x, y - button_height, button_width, button_height);
+
+    canvas_draw_line(canvas, x - 1, y, x - 1, y - button_height + 0);
+    canvas_draw_line(canvas, x - 2, y, x - 2, y - button_height + 1);
+    canvas_draw_line(canvas, x - 3, y, x - 3, y - button_height + 2);
+
+    canvas_draw_line(canvas, x + button_width + 0, y, x + button_width + 0, y - button_height + 0);
+    canvas_draw_line(canvas, x + button_width + 1, y, x + button_width + 1, y - button_height + 1);
+    canvas_draw_line(canvas, x + button_width + 2, y, x + button_width + 2, y - button_height + 2);
+
+    canvas_invert_color(canvas);
+    canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, &I_ButtonCenter_7x7);
+    hangman_draw_utf8_str(
+        canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, 0, str);
+    canvas_invert_color(canvas);
+}
+
+void hangman_text_window(Canvas* canvas, char* txt) {
+    canvas_clear(canvas);
+    elements_frame(canvas, 20, 13, 88, 37);
+
+    hangman_ok_button(canvas, 50, "Окей");
+
+    uint8_t txt_w = hangman_GetGlyphWidth(&canvas->fb, ' ') * strlen(txt) / 2;
+    hangman_draw_utf8_str(
+        canvas,
+        (canvas_width(canvas) - txt_w) / 2,
+        17 + canvas_current_font_height(canvas),
+        0,
+        txt);
+}
+
 void hangman_clear_state(HangmanApp* app) {
     app->pos = 0;
     app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;

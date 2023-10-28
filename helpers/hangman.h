@@ -10,6 +10,8 @@
 #include "hangman_icons.h"
 #include <gui/gui.h>
 #include <gui/canvas_i.h>
+#include <gui/elements.h>
+#include <gui/icon_i.h>
 #include <u8g2/u8g2.h>
 #include <furi.h>
 #include <storage/storage.h>
@@ -46,4 +48,6 @@ void hangman_draw_word(Canvas *canvas, HangmanApp* app);
 void hangman_draw_gallows(Canvas *canvas, HangmanApp* app);
 void hangman_choice_letter(HangmanApp* app);
 void hangman_clear_state(HangmanApp* app);
+void hangman_text_window(Canvas* canvas, char* txt);
+
 

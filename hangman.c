@@ -8,6 +8,8 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
     hangman_draw_word(canvas, context);
     hangman_draw_gallows(canvas, context);
     hangman_draw_keyboard(canvas, context);
+
+//    hangman_text_window(canvas, "Вы победили!");
 }
 
 int32_t hangman_main(void* p) {
