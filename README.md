@@ -7,7 +7,9 @@
 
 # Dab Timer / Clock (By RogueMaster)
 - We were the first clock created for Flipper Zero
-- Has 6 different clock faces
+- Has 10 different clock faces
+- - Includes a circular clock face
+- - Includes a BINARY clock & timer
 - - Faces can be changed using the left button
 - Start/Stop timer using center button
 - Built in timer chime after 80 seconds (1 minute and 20 seconds)
