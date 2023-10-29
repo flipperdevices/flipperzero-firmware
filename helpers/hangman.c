@@ -93,6 +93,25 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     }
 }
 
+void hangman_render_callback(Canvas* canvas, void* ctx) {
+    HangmanApp* app = (HangmanApp*) ctx;
+
+    canvas_clear(canvas);
+
+    hangman_draw_word(canvas, app);
+    hangman_draw_gallows(canvas, app);
+    hangman_draw_keyboard(canvas, app);
+
+    if (app->eog != HangmanGameOn) {
+        if(app->eog == HangmanGameLoose) {
+            hangman_text_window(canvas, "Вы проиграли!");
+        } else {
+            hangman_text_window(canvas, "Вы выиграли!");
+        }
+        app->need_generate = true;
+    }
+}
+
 void hangman_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
 
@@ -102,10 +121,9 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
 
 void hangman_choice_letter(HangmanApp* app) {
     if(strchr(app->word, app->pos + 0x10) == NULL) {
-        app->opened[app->pos] = HangmanOpenedNotFound;
-
         if(app->gallows_state < HANGMAN_GALLOWS_MAX_STATE - 1) {
             app->gallows_state++;
+            app->opened[app->pos] = HangmanOpenedNotFound;
         } else {
             app->eog = HangmanGameLoose;
 
