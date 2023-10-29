@@ -50,6 +50,7 @@ jobs:
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          rm -rf build/latest/resources/dolphin
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send build/latest/resources /ext
           python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
