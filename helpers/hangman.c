@@ -121,10 +121,10 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
 
 void hangman_choice_letter(HangmanApp* app) {
     if(strchr(app->word, app->pos + 0x10) == NULL) {
-        if(app->gallows_state < HANGMAN_GALLOWS_MAX_STATE - 1) {
-            app->gallows_state++;
-            app->opened[app->pos] = HangmanOpenedNotFound;
-        } else {
+        app->gallows_state++;
+        app->opened[app->pos] = HangmanOpenedNotFound;
+
+        if (app->gallows_state >= HANGMAN_GALLOWS_MAX_STATE - 1) {
             app->eog = HangmanGameLoose;
 
             // Open the non-guessed letters
@@ -192,7 +192,9 @@ void hangman_app_free(HangmanApp** app) {
 }
 
 bool hangman_wait_close_window(HangmanApp* app) {
-    for (InputEvent event;;) {
+    InputEvent event;
+
+    for (;;) {
         if (furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
             if (event.type == InputTypeShort) {
                 switch (event.key) {
@@ -212,7 +214,9 @@ bool hangman_wait_close_window(HangmanApp* app) {
 }
 
 bool hangman_main_loop(HangmanApp* app) {
-    for(InputEvent event; !app->need_generate;) {
+    InputEvent event;
+
+    while (app->eog == HangmanGameOn && !app->need_generate) {
         if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
             if(event.type == InputTypeShort) {
                 switch(event.key) {
