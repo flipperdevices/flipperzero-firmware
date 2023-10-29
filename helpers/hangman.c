@@ -140,7 +140,7 @@ void hangman_choice_letter(HangmanApp* app) {
         app->eog = HangmanGameWin;
         app->opened[app->pos] = HangmanOpenedFound;
 
-        // Checking if all letters are open
+        // Checking if all letters were opened
         for(uint8_t i = 0; i < strlen(app->word); i++) {
             if(app->opened[app->word[i] - 0x10] != HangmanOpenedFound) {
                 app->eog = HangmanGameOn;
