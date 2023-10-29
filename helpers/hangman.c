@@ -173,17 +173,19 @@ void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
 }
 
 void hangman_text_window(Canvas* canvas, char* txt) {
-    canvas_clear(canvas);
-    elements_frame(canvas, 20, 13, 88, 37);
+    uint8_t x = 23, y = 18, w = 84, h = 34;
 
-    hangman_ok_button(canvas, 50, "Окей");
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x - 2, y - 2, w + 4, h + 4);
+    canvas_set_color(canvas, ColorBlack);
+
+    elements_frame(canvas, x, y, w, h);
+    hangman_ok_button(canvas, y + h, "Окей");
 
     uint8_t txt_w = hangman_GetGlyphWidth(&canvas->fb, ' ') * strlen(txt) / 2;
     hangman_draw_utf8_str(
-        canvas,
-        (canvas_width(canvas) - txt_w) / 2,
-        17 + canvas_current_font_height(canvas),
-        txt);
+        canvas, (canvas_width(canvas) - txt_w) / 2, x + canvas_current_font_height(canvas), txt);
 }
 
 void hangman_clear_state(HangmanApp* app) {
