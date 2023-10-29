@@ -9,16 +9,13 @@
 #include <furi_hal.h>
 
 #include <stdlib.h>
-#include <rfal_rf.h>
 
-#include <platform.h>
 #include <PAC.h>
 #include <SamVersion.h>
 
 struct SeaderWorker {
     FuriThread* thread;
     Storage* storage;
-    Stream* dict_stream;
     uint8_t sam_version[2];
 
     SeaderUartBridge* uart;

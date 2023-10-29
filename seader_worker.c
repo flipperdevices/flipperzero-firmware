@@ -1,7 +1,6 @@
 #include "seader_worker_i.h"
 
 #include <flipper_format/flipper_format.h>
-#include <lib/nfc/protocols/nfc_util.h>
 #include <lib/lfrfid/tools/bit_lib.h>
 
 #define TAG "SeaderWorker"
@@ -24,45 +23,6 @@ bool requestPacs = true;
 
 // Forward declaration
 void seader_send_card_detected(SeaderUartBridge* seader_uart, CardDetails_t* cardDetails);
-
-static void seader_worker_enable_field() {
-    furi_hal_nfc_ll_txrx_on();
-    furi_hal_nfc_acquire();
-    furi_hal_nfc_ll_poll();
-}
-
-static ReturnCode seader_worker_disable_field(ReturnCode rc) {
-    furi_hal_nfc_ll_txrx_off();
-    furi_hal_nfc_field_detect_stop();
-    furi_hal_nfc_release();
-    return rc;
-}
-
-static uint16_t seader_worker_picopass_update_ccitt(uint16_t crcSeed, uint8_t dataByte) {
-    uint16_t crc = crcSeed;
-    uint8_t dat = dataByte;
-
-    dat ^= (uint8_t)(crc & 0xFFU);
-    dat ^= (dat << 4);
-
-    crc = (crc >> 8) ^ (((uint16_t)dat) << 8) ^ (((uint16_t)dat) << 3) ^ (((uint16_t)dat) >> 4);
-
-    return crc;
-}
-
-static uint16_t seader_worker_picopass_calculate_ccitt(
-    uint16_t preloadValue,
-    const uint8_t* buf,
-    uint16_t length) {
-    uint16_t crc = preloadValue;
-    uint16_t index;
-
-    for(index = 0; index < length; index++) {
-        crc = seader_worker_picopass_update_ccitt(crc, buf[index]);
-    }
-
-    return crc;
-}
 
 /***************************** Seader Worker API *******************************/
 
@@ -122,7 +82,7 @@ void seader_worker_stop(SeaderWorker* seader_worker) {
        seader_worker->state == SeaderWorkerStateReady) {
         return;
     }
-    seader_worker_disable_field(ERR_NONE);
+    // seader_worker_disable_field();
 
     seader_worker_change_state(seader_worker, SeaderWorkerStateStop);
     furi_thread_join(seader_worker->thread);
@@ -138,15 +98,7 @@ void* calloc(size_t count, size_t size) {
     return malloc(count * size);
 }
 
-void seader_nfc_scene_field_on_enter() {
-    furi_hal_nfc_field_on();
-    furi_hal_nfc_acquire();
-}
 
-void seader_nfc_scene_field_on_exit() {
-    furi_hal_nfc_sleep();
-    furi_hal_nfc_field_off();
-}
 
 bool seader_send_apdu(
     SeaderUartBridge* seader_uart,
@@ -186,66 +138,9 @@ static int seader_asn_to_string(const void* buffer, size_t size, void* app_key) 
     return 0;
 }
 
-bool seader_mf_df_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
-    return ATQA0 == 0x44 && ATQA1 == 0x03 && SAK == 0x20;
-}
-
-bool seader_mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
-    if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
-        return true;
-    } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
-        //skylanders support
-        return true;
-    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 bool seader_read_nfc(SeaderUartBridge* seader_uart) {
-    FuriHalNfcDevData nfc_data = {};
-    bool rtn = false;
-    if(furi_hal_nfc_detect(&nfc_data, 300)) {
-        // Process first found device
-        if(nfc_data.type == FuriHalNfcTypeA) {
-            FURI_LOG_D(TAG, "NFC-A detected");
-            CardDetails_t* cardDetails = 0;
-            cardDetails = calloc(1, sizeof *cardDetails);
-            assert(cardDetails);
-
-            OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)nfc_data.uid, nfc_data.uid_len);
-            uint8_t protocolBytes[] = {0x00, FrameProtocol_nfc};
-            OCTET_STRING_fromBuf(
-                &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
-
-            OCTET_STRING_t sak = {.buf = &(nfc_data.sak), .size = 1};
-            cardDetails->sak = &sak;
-
-            uint8_t fake_seos_ats[] = {0x78, 0x77, 0x80, 0x02};
-            uint8_t fake_desfire_ats[] = {0x75, 0x77, 0x81, 0x02, 0x80};
-            if(seader_mf_df_check_card_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak)) {
-                FURI_LOG_D(TAG, "Desfire");
-                OCTET_STRING_t atqa = {.buf = fake_desfire_ats, .size = sizeof(fake_desfire_ats)};
-                cardDetails->atqa = &atqa;
-                seader_send_card_detected(seader_uart, cardDetails);
-                rtn = true;
-            } else if(seader_mf_classic_check_card_type(
-                          nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak)) {
-                FURI_LOG_D(TAG, "MFC");
-                seader_send_card_detected(seader_uart, cardDetails);
-                rtn = true;
-            } else if(nfc_data.interface == FuriHalNfcInterfaceIsoDep) {
-                FURI_LOG_D(TAG, "ISO-DEP");
-                OCTET_STRING_t atqa = {.buf = fake_seos_ats, .size = sizeof(fake_seos_ats)};
-                cardDetails->atqa = &atqa;
-                seader_send_card_detected(seader_uart, cardDetails);
-                rtn = true;
-            }
-            ASN_STRUCT_FREE(asn_DEF_CardDetails, cardDetails);
-        }
-    }
-    return rtn;
+  UNUSED(seader_uart);
+    return false;
 }
 
 bool seader_detect_nfc(SeaderWorker* seader_worker) {
@@ -551,203 +446,8 @@ void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t l
     ASN_STRUCT_FREE(asn_DEF_Response, response);
 }
 
-bool seader_iso14443a_transmit(
-    SeaderWorker* seader_worker,
-    uint8_t* buffer,
-    size_t len,
-    uint16_t timeout,
-    uint8_t format[3]) {
-    SeaderUartBridge* seader_uart = seader_worker->uart;
-    FuriHalNfcTxRxContext tx_rx = {.tx_rx_type = FuriHalNfcTxRxTypeDefault};
-
-    memcpy(&tx_rx.tx_data, buffer, len);
-    tx_rx.tx_bits = len * 8;
-
-    if(format[0] == 0x00 && format[1] == 0xC0 && format[2] == 0x00) {
-        tx_rx.tx_rx_type = FuriHalNfcTxRxTypeRxNoCrc;
-        tx_rx.tx_bits -= 16;
-    } else if(
-        (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x40) ||
-        (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x24) ||
-        (format[0] == 0x00 && format[1] == 0x00 && format[2] == 0x44)) {
-        tx_rx.tx_rx_type = FuriHalNfcTxRxTypeRaw;
-        tx_rx.tx_bits -= 8;
-        tx_rx.tx_parity[0] = 0;
-
-        // Don't forget to swap the bits of buffer[8]
-        for(size_t i = 0; i < 8 + 1; i++) {
-            bit_lib_reverse_bits(buffer + i, 0, 8);
-        }
-
-        // Pull out parity bits
-        for(size_t i = 0; i < 8; i++) {
-            bool val = bit_lib_get_bit(buffer + i + 1, i);
-            bit_lib_set_bit(tx_rx.tx_parity, i, val);
-        }
-
-        for(size_t i = 0; i < 8; i++) {
-            buffer[i] = (buffer[i] << i) | (buffer[i + 1] >> (8 - i));
-        }
-
-        for(size_t i = 0; i < 8; i++) {
-            bit_lib_reverse_bits(buffer + i, 0, 8);
-            tx_rx.tx_data[i] = buffer[i];
-        }
-    }
-
-    if(furi_hal_nfc_tx_rx(&tx_rx, timeout)) {
-        furi_delay_ms(1);
-        size_t length = tx_rx.rx_bits / 8;
-        memset(display, 0, sizeof(display));
-        for(uint8_t i = 0; i < length; i++) {
-            snprintf(display + (i * 2), sizeof(display), "%02x", tx_rx.rx_data[i]);
-        }
-        FURI_LOG_D(TAG, "NFC Response %d: %s [%02x]", length, display, tx_rx.rx_parity[0]);
-
-        if(tx_rx.tx_rx_type == FuriHalNfcTxRxTypeRaw) {
-            for(size_t i = 0; i < length; i++) {
-                bit_lib_reverse_bits(tx_rx.rx_data + i, 0, 8);
-            }
-
-            uint8_t with_parity[FURI_HAL_NFC_DATA_BUFF_SIZE];
-            memset(with_parity, 0, sizeof(with_parity));
-            length = length + (length / 8) + 1;
-
-            uint8_t parts = 1 + length / 9;
-            for(size_t p = 0; p < parts; p++) {
-                uint8_t doffset = p * 9;
-                uint8_t soffset = p * 8;
-
-                for(size_t i = 0; i < 9; i++) {
-                    with_parity[i + doffset] = tx_rx.rx_data[i + soffset] >> i;
-                    if(i > 0) {
-                        with_parity[i + doffset] |= tx_rx.rx_data[i + soffset - 1] << (9 - i);
-                    }
-
-                    if(i > 0) {
-                        bool val = bit_lib_get_bit(tx_rx.rx_parity, i - 1);
-                        bit_lib_set_bit(with_parity + i, i - 1, val);
-                    }
-                }
-            }
-
-            memcpy(tx_rx.rx_data, with_parity, length);
-
-            for(size_t i = 0; i < length; i++) {
-                bit_lib_reverse_bits(tx_rx.rx_data + i, 0, 8);
-            }
-
-            memset(display, 0, sizeof(display));
-
-            for(uint8_t i = 0; i < length; i++) {
-                snprintf(display + (i * 2), sizeof(display), "%02x", tx_rx.rx_data[i]);
-            }
-            FURI_LOG_D(
-                TAG, "Mutated NFC Response %d: %s [%02x]", length, display, tx_rx.rx_parity[0]);
-        }
-
-        seader_send_nfc_rx(seader_uart, tx_rx.rx_data, length);
-    } else {
-        FURI_LOG_W(TAG, "Bad exchange");
-        if(seader_worker->callback) {
-            seader_worker->callback(SeaderWorkerEventFail, seader_worker->context);
-        }
-    }
-
-    return false;
-}
-
-uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
-uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
-uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
-uint8_t read4Block13[] = {0x06, 0x0D, 0x96, 0xE8};
-uint8_t updateBlock2[] = {0x87, 0x02};
-
-void seader_capture_sio(
-    uint8_t* buffer,
-    size_t len,
-    uint8_t* rxBuffer,
-    SeaderCredential* credential) {
-    if(memcmp(buffer, read4Block6, len) == 0 && rxBuffer[0] == 0x30) {
-        memcpy(credential->sio, rxBuffer, 32);
-    } else if(memcmp(buffer, read4Block10, len) == 0 && rxBuffer[0] == 0x30) {
-        memcpy(credential->sio, rxBuffer, 32);
-    } else if(memcmp(buffer, read4Block9, len) == 0) {
-        memcpy(credential->sio + 32, rxBuffer + 8, 24);
-    } else if(memcmp(buffer, read4Block13, len) == 0) {
-        memcpy(credential->sio + 32, rxBuffer + 8, 24);
-    }
-}
-
-FuriHalNfcReturn
-    seader_worker_fake_epurse_update(uint8_t* buffer, uint8_t* rxBuffer, uint16_t* recvLen) {
-    uint8_t fake_response[10];
-    memset(fake_response, 0, sizeof(fake_response));
-    memcpy(fake_response + 0, buffer + 6, 4);
-    memcpy(fake_response + 4, buffer + 2, 4);
-
-    uint16_t crc = seader_worker_picopass_calculate_ccitt(0xE012, fake_response, 8);
-    memcpy(fake_response + 8, &crc, sizeof(uint16_t));
-
-    memcpy(rxBuffer, fake_response, sizeof(fake_response));
-    *recvLen = sizeof(fake_response);
-
-    memset(display, 0, sizeof(display));
-    for(uint8_t i = 0; i < sizeof(fake_response); i++) {
-        snprintf(display + (i * 2), sizeof(display), "%02x", fake_response[i]);
-    }
-    FURI_LOG_I(TAG, "Fake update E-Purse response: %s", display);
-    return FuriHalNfcReturnOk;
-}
-
-bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) {
-    SeaderUartBridge* seader_uart = seader_worker->uart;
-    SeaderCredential* credential = seader_worker->credential;
-    char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
-    FuriHalNfcReturn ret;
-    uint16_t recvLen = 0;
-    uint32_t flags = RFAL_PICOPASS_TXRX_FLAGS;
-    uint32_t fwt = furi_hal_nfc_ll_ms2fc(20);
-
-    uint8_t rxBuffer[64] = {0};
-
-    if(memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
-        ret = seader_worker_fake_epurse_update(buffer, rxBuffer, &recvLen);
-    } else {
-        ret = furi_hal_nfc_ll_txrx(buffer, len, rxBuffer, sizeof(rxBuffer), &recvLen, flags, fwt);
-    }
-
-    if(ret == FuriHalNfcReturnOk) {
-        memset(display, 0, sizeof(display));
-        for(uint8_t i = 0; i < recvLen; i++) {
-            snprintf(display + (i * 2), sizeof(display), "%02x", rxBuffer[i]);
-        }
-        // FURI_LOG_D(TAG, "Result %d %s", recvLen, display);
-        seader_capture_sio(buffer, len, rxBuffer, credential);
-        seader_send_nfc_rx(seader_uart, rxBuffer, recvLen);
-    } else if(ret == FuriHalNfcReturnCrc) {
-        memset(display, 0, sizeof(display));
-        for(uint8_t i = 0; i < recvLen; i++) {
-            snprintf(display + (i * 2), sizeof(display), "%02x", rxBuffer[i]);
-        }
-        // FURI_LOG_D(TAG, "[CRC error] Result %d %s", recvLen, display);
-        seader_capture_sio(buffer, len, rxBuffer, credential);
-        seader_send_nfc_rx(seader_uart, rxBuffer, recvLen);
-
-        // Act as if it was OK
-        return true;
-    } else {
-        FURI_LOG_E(TAG, "furi_hal_nfc_ll_txrx Error %d", ret);
-
-        if(seader_worker->callback) {
-            seader_worker->callback(SeaderWorkerEventFail, seader_worker->context);
-        }
-    }
-
-    return ret == FuriHalNfcReturnOk;
-}
-
 bool seader_parse_nfc_command_transmit(SeaderWorker* seader_worker, NFCSend_t* nfcSend) {
+  UNUSED(seader_worker);
     long timeOut = nfcSend->timeOut;
     Protocol_t protocol = nfcSend->protocol;
     FrameProtocol_t frameProtocol = protocol.buf[1];
@@ -774,22 +474,17 @@ bool seader_parse_nfc_command_transmit(SeaderWorker* seader_worker, NFCSend_t* n
 #endif
 
     if(frameProtocol == FrameProtocol_iclass) {
-        return seader_iso15693_transmit(seader_worker, nfcSend->data.buf, nfcSend->data.size);
+      // TODO
     } else if(frameProtocol == FrameProtocol_nfc) {
-        return seader_iso14443a_transmit(
-            seader_worker,
-            nfcSend->data.buf,
-            nfcSend->data.size,
-            (uint16_t)timeOut,
-            nfcSend->format->buf);
+      // TODO
     }
     return false;
 }
 
 bool seader_parse_nfc_off(SeaderUartBridge* seader_uart) {
     FURI_LOG_D(TAG, "Set Field Off");
-    seader_worker_disable_field(ERR_NONE);
-    seader_nfc_scene_field_on_exit();
+    // seader_worker_disable_field();
+    // seader_nfc_scene_field_on_exit();
 
     NFCResponse_t* nfcResponse = 0;
     nfcResponse = calloc(1, sizeof *nfcResponse);
@@ -910,95 +605,6 @@ bool seader_process_apdu(SeaderWorker* seader_worker, uint8_t* apdu, size_t len)
     return false;
 }
 
-ReturnCode seader_picopass_card_init(SeaderWorker* seader_worker) {
-    SeaderUartBridge* seader_uart = seader_worker->uart;
-    SeaderCredential* credential = seader_worker->credential;
-    rfalPicoPassIdentifyRes idRes;
-    rfalPicoPassSelectRes selRes;
-
-    ReturnCode err;
-
-    err = rfalPicoPassPollerIdentify(&idRes);
-    if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerIdentify error %d", err);
-        return err;
-    }
-
-    err = rfalPicoPassPollerSelect(idRes.CSN, &selRes);
-    if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerSelect error %d", err);
-        return err;
-    }
-
-    memset(display, 0, sizeof(display));
-    for(uint8_t i = 0; i < RFAL_PICOPASS_MAX_BLOCK_LEN; i++) {
-        snprintf(display + (i * 2), sizeof(display), "%02x", selRes.CSN[i]);
-    }
-
-    FURI_LOG_D(TAG, "Sending card detected info: %s", display);
-
-    CardDetails_t* cardDetails = 0;
-    cardDetails = calloc(1, sizeof *cardDetails);
-    assert(cardDetails);
-
-    uint8_t protocolBytes[] = {0x00, FrameProtocol_iclass};
-    OCTET_STRING_fromBuf(
-        &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
-    OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)selRes.CSN, RFAL_PICOPASS_MAX_BLOCK_LEN);
-
-    memcpy(credential->diversifier, selRes.CSN, RFAL_PICOPASS_MAX_BLOCK_LEN);
-
-    seader_send_card_detected(seader_uart, cardDetails);
-
-    ASN_STRUCT_FREE(asn_DEF_CardDetails, cardDetails);
-    return ERR_NONE;
-}
-
-ReturnCode seader_picopass_card_detect() {
-    ReturnCode err;
-
-    err = rfalPicoPassPollerInitialize();
-    if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerInitialize error %d", err);
-        return err;
-    }
-
-    err = rfalFieldOnAndStartGT();
-    if(err != ERR_NONE) {
-        FURI_LOG_E(TAG, "rfalFieldOnAndStartGT error %d", err);
-        return err;
-    }
-
-    err = rfalPicoPassPollerCheckPresence();
-    if(err != ERR_RF_COLLISION) {
-        if(err != ERR_TIMEOUT) {
-            FURI_LOG_E(TAG, "rfalPicoPassPollerCheckPresence error %d", err);
-        }
-        return err;
-    }
-
-    return ERR_NONE;
-}
-
-ReturnCode seader_picopass_card_read(SeaderWorker* seader_worker) {
-    ReturnCode err = ERR_TIMEOUT;
-
-    while(seader_worker->state == SeaderWorkerStateReadPicopass) {
-        // Card found
-        if(seader_picopass_card_detect() == ERR_NONE) {
-            err = seader_picopass_card_init(seader_worker);
-            if(err != ERR_NONE) {
-                FURI_LOG_E(TAG, "picopass_card_init error %d", err);
-            }
-            break;
-        }
-
-        furi_delay_ms(100);
-    }
-
-    return err;
-}
-
 void seader_worker_process_sam_message(SeaderWorker* seader_worker, CCID_Message* message) {
     if(seader_process_apdu(seader_worker, message->payload, message->dwLength)) {
         // no-op
@@ -1026,20 +632,16 @@ int32_t seader_worker_task(void* context) {
         requestPacs = true;
         seader_credential_clear(seader_worker->credential);
         seader_worker->credential->type = SeaderCredentialTypePicopass;
-        seader_worker_enable_field();
-        if(seader_picopass_card_read(seader_worker) != ERR_NONE) {
-            // Turn off if cancelled / no card found
-            seader_worker_disable_field(ERR_NONE);
-        }
+        // TODO
     } else if(seader_worker->state == SeaderWorkerStateRead14a) {
         FURI_LOG_D(TAG, "Read 14a");
         requestPacs = true;
         seader_credential_clear(seader_worker->credential);
         seader_worker->credential->type = SeaderCredentialType14A;
-        seader_nfc_scene_field_on_enter();
+        // seader_nfc_scene_field_on_enter();
         if(!seader_detect_nfc(seader_worker)) {
             // Turn off if cancelled / no card found
-            seader_nfc_scene_field_on_exit();
+            // seader_nfc_scene_field_on_exit();
         }
     }
     FURI_LOG_D(TAG, "Worker Task Complete");
