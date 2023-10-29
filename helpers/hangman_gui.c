@@ -20,6 +20,7 @@ void hangman_draw_gallows(Canvas* canvas, HangmanApp* app) {
     canvas_draw_icon(canvas, 0, 30, gallows[app->gallows_state]);
 }
 
+// This function was copied from Flipper Zero firmware
 void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
     const Icon I_ButtonCenter_7x7 = {
         .width = 7,
