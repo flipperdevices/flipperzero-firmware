@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Re-uploading AD Police background with XP bar (By Kuronons)](https://github.com/Kuronons/FZ_graphics/commit/fe782c6f91c8c6ae935546ee7b35f6bcaeeb1036)
 - [Update tv.ir #639 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/639)
 - Added: [Hangman (In Russian) v1.0 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 

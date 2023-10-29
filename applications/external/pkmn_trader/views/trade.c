@@ -81,6 +81,7 @@
 
 #define SERIAL_PREAMBLE_LENGTH 6
 #define SERIAL_RN_PREAMBLE_LENGTH 7
+#define SERIAL_TRADE_PREAMBLE_LENGTH 9
 #define SERIAL_RNS_LENGTH 10
 #define SERIAL_PATCH_LIST_PART_TERMINATOR 0xFF
 #define SERIAL_NO_DATA_BYTE 0xFE
@@ -100,14 +101,10 @@
 
 typedef enum { NOT_CONNECTED, CONNECTED, TRADE_CENTRE, COLOSSEUM } connection_state_t;
 typedef enum {
+    TRADE_RESET,
     INIT,
-    READY_TO_GO,
-    SEEN_FIRST_WAIT,
-    SENDING_RANDOM_DATA,
-    WAITING_TO_SEND_DATA,
-    START_SENDING_DATA,
+    TRADE_RANDOM,
     SENDING_DATA,
-    DATA_SENT,
     SENDING_PATCH_DATA,
     TRADE_PENDING,
     TRADE_CONFIRMATION,
@@ -269,10 +266,6 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
  *
  * PKMN_BLANK is an agreement between the two devices that they have
  * determined their roles
- *
- * XXX: I'm not sure if PKMN_CONNECTED is correct or if the documentation is missing a detail
- * I think the documentation might be missing a detail as the code later does implement the saem
- * 0x60 value of "trade the first pokemon"
  */
 static uint8_t getConnectResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
@@ -322,7 +315,7 @@ static uint8_t getConnectResponse(uint8_t in, struct trade_ctx* trade) {
 static uint8_t getMenuResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
 
-    uint8_t response = 0x00;
+    uint8_t response = PKMN_BLANK;
     /* XXX: Shouldn't this return a valid response for each option? 
      * e.g. if the gameboy selects trade center, should we also send trade center? 
      * or is the 0x00 an Agreement byte? I wonder if the leader/master is the
@@ -345,6 +338,7 @@ static uint8_t getMenuResponse(uint8_t in, struct trade_ctx* trade) {
             false);
         break;
     case PKMN_COLOSSEUM:
+        /* XXX: Ignore this */
         trade->connection_state = COLOSSEUM;
         with_view_model(
             trade->view,
@@ -391,74 +385,50 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
      */
     model = view_get_model(trade->view);
 
+    /* There is a handful of commucations that happen once the gameboy
+     * clicks on the table. For all of them, the Flipper can just mirror back
+     * the byte the gameboy sends. We can spin in this forever until we see 10x
+     * SERIAL_PREAMBLE_BYTEs. Once we receive those, the counters are synched,
+     * and every byte after that can be easily counted for the actual transferr
+     * of Pokemon data.
+     */
     switch(trade->trade_centre_state) {
-    /* XXX: Wait for 5x 00 on the bus. This should be safe to just leave alone. 0x00 appears to be a sync byte */
+    case TRADE_RESET:
+        /* Reset counters and other static variables */
+        counter = 0;
+        patch_pt_2 = false;
+        trade->trade_centre_state = INIT;
+        break;
+
+    /* This state runs through the end of the random preamble */
     case INIT:
-        // TODO: What does this value of in mean?
-        /* Currently, I believe this means OK/ACK */
-        /* It looks like GB sends a bunch of 0x00s once both sides agreed to the selected menu item */
-        if(in == PKMN_BLANK) {
-            // TODO: What does counter signify here?
-            /* It looks like counter is just intended to wait for a sequence of 00s, but its not even really a sequence, just, 5 bytes in a row. */
-            if(counter == 5) {
-                /* XXX: Set the ready to go state sooner in the link establishment. Maybe change the text a bit? */
-                trade->trade_centre_state = READY_TO_GO;
-                //  CLICK EN LA MESA, when the gameboy clicks on the trade table
-            }
+        if(in == SERIAL_PREAMBLE_BYTE) {
             counter++;
         }
-        break;
-
-    case READY_TO_GO:
-        /* While in this state we would mirror back whatever the GB sends us, which includes
-	 * the trade/battle menu selection and highlighted option. TODO: Only respond with
-	 * trade menu selection?
-	 */
-        /* XXX: Interestingly, the first byte we see seems to be 0xFE which is a no data byte byte */
-        /* This might have some issues with the FE byte? Since I think the next state is waiting for
-	 * not FD bytes */
-        /* I believe this is specifically 0xFD*/
-        /* Also specifically it is repeated 10 times to signify that the random block is about to start */
-        if((in & 0xF0) == 0xF0) trade->trade_centre_state = SEEN_FIRST_WAIT;
-        patch_pt_2 = false;
-        in_pokemon_num = 0;
-        break;
-
-    case SEEN_FIRST_WAIT:
-        if((in & 0xF0) != 0xF0) {
+        if(counter == SERIAL_RNS_LENGTH) {
+            trade->trade_centre_state = TRADE_RANDOM;
             counter = 0;
-            trade->trade_centre_state = SENDING_RANDOM_DATA;
         }
         break;
 
+    /* Once we start getting PKMN_BLANKs, we get them until we get 10x
+     * SERIAL_PREAMBLE_BYTE, and then 10 random numbers. The 10 random
+     * numbers are for synchrinizing the PRNG between the two systems,
+     * we do not use these numbers at this time.
+     */
     /* The leader/master sends 10 random bytes. This is to synchronize the RNG
      * between the connected systems. I don't think this is really needed for
      * trade, only for battles so that both sides resolve chance events exactly
      * the same way.
      *
      * Note that every random number returned is forced to be less than FD
-     *
-     * Once random is doing being send, 9? more FD bytes are sent
      */
-    case SENDING_RANDOM_DATA:
-        if((in & 0xF0) == 0xF0) {
-            if(counter == 5) {
-                trade->trade_centre_state = WAITING_TO_SEND_DATA;
-                model->gameboy_status = GAMEBOY_WAITING;
-            }
-            counter++;
-        }
-        break;
-
-    /* This could fall in to the next case statement maybe? */
-    /* XXX: I think this should actually be checking for in to NOT == 0xFD */
-    case WAITING_TO_SEND_DATA:
-        if((in & 0xF0) != 0xF0) {
-            counter = 0;
-            input_block_flat[counter] = in;
-            send = trade_block_flat[counter];
-            counter++;
+    /* This also waits through the end of the trade block preamble */
+    case TRADE_RANDOM:
+        counter++;
+        if(counter == (SERIAL_RNS_LENGTH + SERIAL_TRADE_PREAMBLE_LENGTH)) {
             trade->trade_centre_state = SENDING_DATA;
+            counter = 0;
         }
         break;
 
@@ -484,9 +454,9 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
      * That means we for sure start this state and leave ths state at the right
      * parts of communication */
     case SENDING_PATCH_DATA:
-        if(in == 0xFD) {
+        if(in == SERIAL_PREAMBLE_BYTE) {
             counter = 0;
-            send = 0xFD;
+            send = SERIAL_PREAMBLE_BYTE;
         } else {
             /* This magic number is basically the header length, 10, minus
 	     * the 3x 0xFD that we should be transmitting as part of the path
@@ -502,18 +472,18 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
              * case in official Gen I code at this time.
              */
             switch(in) {
-            case 0x00:
+            case PKMN_BLANK:
                 break;
-            case 0xFF:
+            case SERIAL_PATCH_LIST_PART_TERMINATOR:
                 patch_pt_2 = true;
                 break;
             default: // Any nonzero value will cause a patch
                 if(!patch_pt_2) {
                     /* Pt 1 is 0x00 - 0xFB */
-                    input_party_flat[in - 1] = 0xFE;
+                    input_party_flat[in - 1] = SERIAL_NO_DATA_BYTE;
                 } else {
                     /* Pt 2 is 0xFC - 0x107 */
-                    input_party_flat[0xFC + in - 1] = 0xFE;
+                    input_party_flat[0xFC + in - 1] = SERIAL_NO_DATA_BYTE;
                 }
                 break;
             }
@@ -532,7 +502,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         /* TODO: What are these states */
         /* 0x6f is "close session?" */
         if(in == 0x6F) {
-            trade->trade_centre_state = READY_TO_GO;
+            trade->trade_centre_state = INIT;
             send = 0x6F;
             model->gameboy_status = GAMEBOY_TRADE_READY;
             /* 0x6? says what pokemon the gameboy is sending us */
@@ -568,9 +538,9 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
         break;
 
     case DONE:
-        if(in == 0x00) {
+        if(in == PKMN_BLANK) {
             send = 0;
-            trade->trade_centre_state = READY_TO_GO;
+            trade->trade_centre_state = TRADE_RESET;
             /* XXX: I think I want to change this? */
             model->gameboy_status = GAMEBOY_TRADING;
 
@@ -672,13 +642,10 @@ void input_clk_gameboy(void* context) {
     const uint32_t time_ticks = furi_hal_cortex_instructions_per_microsecond() * 500;
 
     if(furi_hal_gpio_read(&GAME_BOY_CLK)) {
-        /* XXX: I think we can remove the check of time > 0? */
-        if(time > 0) {
-            if((DWT->CYCCNT - time) > time_ticks) {
-                //  IDLE & Reset
-                trade->in_data = 0;
-                trade->shift = 0;
-            }
+        if((DWT->CYCCNT - time) > time_ticks) {
+            //  IDLE & Reset
+            trade->in_data = 0;
+            trade->shift = 0;
         }
         transferBit(trade);
         time = DWT->CYCCNT;
