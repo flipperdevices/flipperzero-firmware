@@ -93,7 +93,7 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     }
 }
 
-void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, uint8_t space, const char* str) {
+void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str) {
     FuriStringUTF8State state = FuriStringUTF8StateStarting;
     FuriStringUnicodeValue value = 0;
 
@@ -103,7 +103,7 @@ void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, uint8_t space, 
 
         if(state == FuriStringUTF8StateStarting) {
             canvas_draw_glyph(canvas, x, y, value);
-            x += hangman_GetGlyphWidth(&canvas->fb, value) + space;
+            x += hangman_GetGlyphWidth(&canvas->fb, value);
         }
     }
 }
@@ -168,7 +168,7 @@ void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
     canvas_invert_color(canvas);
     canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, &I_ButtonCenter_7x7);
     hangman_draw_utf8_str(
-        canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, 0, str);
+        canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str);
     canvas_invert_color(canvas);
 }
 
@@ -183,7 +183,6 @@ void hangman_text_window(Canvas* canvas, char* txt) {
         canvas,
         (canvas_width(canvas) - txt_w) / 2,
         17 + canvas_current_font_height(canvas),
-        0,
         txt);
 }
 
