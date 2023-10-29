@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - SubGHz: [Oregon2 (thanks to haisenteck) (From Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
 - Updated: [NRF24 Batch v2.0 (By vad7)](https://github.com/vad7/nRF24-Batch) Minor asset update.
 - Updated: [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) [Add Support Multi-fucc and Xeon bootmode (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e6677c8aa0e299f7d057d6493f0a2c67cc8c7877) + Fix bootloader mode issue (By Sil333033)
+- [Re-uploading AD Police background with XP bar (By Kuronons)](https://github.com/Kuronons/FZ_graphics/commit/fe782c6f91c8c6ae935546ee7b35f6bcaeeb1036)
 
 <a name="release">
 
