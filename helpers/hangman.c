@@ -43,12 +43,12 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
     uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, ' ');
     uint8_t glyph_h = canvas_current_font_height(canvas);
 
-    for(uint8_t j = 0; j < HANGMAN_LETTERS_CNT / HANGMAN_KEYBOARD_ROW; j++) {
+    for(uint8_t j = 0; j < HANGMAN_LETTERS_CNT / HANGMAN_KEYBOARD_COLS; j++) {
         uint8_t y = 29 + j * glyph_h * .94;
 
-        for(uint8_t i = 0; i < HANGMAN_KEYBOARD_ROW; i++) {
+        for(uint8_t i = 0; i < HANGMAN_KEYBOARD_COLS; i++) {
             uint8_t x = 42 + i * glyph_w * 1.85;
-            uint8_t n = j * HANGMAN_KEYBOARD_ROW + i;
+            uint8_t n = j * HANGMAN_KEYBOARD_COLS + i;
 
             uint16_t ch = 0x0410 + n;
 
@@ -224,12 +224,21 @@ bool hangman_main_loop(HangmanApp* app) {
                     return false;
 
                 case InputKeyDown:
-                    if(app->pos < HANGMAN_LETTERS_CNT - HANGMAN_KEYBOARD_ROW)
-                        app->pos += HANGMAN_KEYBOARD_ROW;
+                    if(app->pos < HANGMAN_LETTERS_CNT - HANGMAN_KEYBOARD_COLS) {
+                        app->pos += HANGMAN_KEYBOARD_COLS;
+                    } else {
+                        app->pos -= HANGMAN_KEYBOARD_COLS *
+                              (HANGMAN_KEYBOARD_ROWS - 1);
+                    }
                     break;
 
                 case InputKeyUp:
-                    if(app->pos > HANGMAN_KEYBOARD_ROW) app->pos -= HANGMAN_KEYBOARD_ROW;
+                    if(app->pos >= HANGMAN_KEYBOARD_COLS) {
+                        app->pos -= HANGMAN_KEYBOARD_COLS;
+                    } else {
+                        app->pos += HANGMAN_KEYBOARD_COLS *
+                            (HANGMAN_KEYBOARD_ROWS - 1);
+                    }
                     break;
 
                 case InputKeyLeft:
