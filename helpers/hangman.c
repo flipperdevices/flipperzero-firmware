@@ -127,10 +127,28 @@ void hangman_choice_letter(HangmanApp* app) {
         if(app->gallows_state < HANGMAN_GALLOWS_MAX_STATE - 1) {
             app->gallows_state++;
         } else {
-            app->need_generate = true;
+            app->eog = HangmanGameLoose;
+
+            // Open the non-guessed letters
+            for(uint8_t i = 0; i < strlen(app->word); i++) {
+                int letter = app->word[i] - 0x10;
+
+                if(app->opened[letter] != HangmanOpenedFound) {
+                    app->opened[letter] = HangmanOpenedNotFound;
+                }
+            }
         }
     } else {
+        app->eog = HangmanGameWin;
         app->opened[app->pos] = HangmanOpenedFound;
+
+        // Checking if all letters are open
+        for(uint8_t i = 0; i < strlen(app->word); i++) {
+            if(app->opened[app->word[i] - 0x10] != HangmanOpenedFound) {
+                app->eog = HangmanGameOn;
+                break;
+            }
+        }
     }
 }
 
@@ -175,7 +193,6 @@ void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
 void hangman_text_window(Canvas* canvas, char* txt) {
     uint8_t x = 23, y = 18, w = 84, h = 34;
 
-
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, x - 2, y - 2, w + 4, h + 4);
     canvas_set_color(canvas, ColorBlack);
@@ -193,6 +210,7 @@ void hangman_clear_state(HangmanApp* app) {
     app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
     memset(app->opened, HangmanOpenedInit, HANGMAN_LETTERS_CNT);
     app->need_generate = false;
+    app->eog = HangmanGameOn;
 
     app->word = hangman_get_random_word();
 }
@@ -228,7 +246,27 @@ void hangman_app_free(HangmanApp** app) {
     free(*app);
 }
 
-bool hangman_wait_a_key(HangmanApp* app) {
+bool hangman_wait_close_window(HangmanApp* app) {
+    for (InputEvent event;;) {
+        if (furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
+            if (event.type == InputTypeShort) {
+                switch (event.key) {
+                case InputKeyOk:
+                    hangman_clear_state(app);
+                    view_port_update(app->view_port);
+                    return true;
+
+                case InputKeyBack:
+                    return false;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+}
+
+bool hangman_main_loop(HangmanApp* app) {
     for(InputEvent event; !app->need_generate;) {
         if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
             if(event.type == InputTypeShort) {

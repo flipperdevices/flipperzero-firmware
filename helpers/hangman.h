@@ -25,6 +25,12 @@ typedef enum {
     HangmanOpenedNotFound,
 } HangmanOpened;
 
+typedef enum {
+    HangmanGameOn,
+    HangmanGameWin,
+    HangmanGameLoose,
+} HangmanGameResult;
+
 typedef struct {
     Gui* gui;
     ViewPort* view_port;
@@ -34,13 +40,15 @@ typedef struct {
     uint8_t gallows_state;
     HangmanOpened opened[HANGMAN_LETTERS_CNT];
     bool need_generate;
+    HangmanGameResult eog;
 } HangmanApp;
 
 int8_t hangman_GetGlyphWidth(u8g2_t* u8g2, uint16_t requested_encoding);
 void hangman_app_free(HangmanApp** app);
 void hangman_render_callback(Canvas* canvas, void* ctx);
 HangmanApp* hangman_app_alloc();
-bool hangman_wait_a_key(HangmanApp* app);
+bool hangman_main_loop(HangmanApp* app);
+bool hangman_wait_close_window(HangmanApp* app);
 char* hangman_get_random_word();
 void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app);
 void hangman_draw_word(Canvas *canvas, HangmanApp* app);
