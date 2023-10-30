@@ -3,6 +3,9 @@
 unsigned char raw_buffer[FRAME_SIZE]; // max( 16*8*14*8, 16*14*16 ) sensor pixels , tile bytes
 static uint8_t GBCAM_BUFFER[GBCAM_W * GBCAM_H];
 
+HardwareSerial Serial3(3);
+
+
 GameboyLiveCamera::GameboyLiveCamera()
 {
     this->runGameboyLiveCamera = false;
@@ -346,6 +349,7 @@ void GameboyLiveCamera::setup()
     this->exposure_time = 0x0500;
     this->unk2 = 0x24;
     this->unk3 = 0xBF;
+    delay(400);
 }
 void GameboyLiveCamera::enableDithering() {
     this->dithering = true;

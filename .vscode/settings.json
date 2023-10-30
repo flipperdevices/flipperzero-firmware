@@ -53,6 +53,8 @@
         "gb_cartridge_scene_4.h": "c",
         "gb_cartridge_speaker.h": "c",
         "sequential_file.h": "c",
-        "ctype.h": "c"
+        "ctype.h": "c",
+        "gb_cartridge_app.h": "c",
+        "string.h": "c"
     }
 }

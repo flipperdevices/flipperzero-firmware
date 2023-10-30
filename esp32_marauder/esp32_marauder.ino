@@ -428,6 +428,7 @@ void loop()
 
   gameboy_cartridge.main();
   gameboy_live_camera.main();
+  if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM()) {
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);
   #endif
@@ -471,9 +472,7 @@ void loop()
   #ifdef HAS_SCREEN
     delay(1);
   #else
-    if(!gameboy_live_camera.isRunning()) {
-      delay(50);
-    }
+    delay(50);
   #endif
   //}
   /*else if (wifi_scan_obj.currentScanMode == ESP_UPDATE) {
@@ -493,4 +492,5 @@ void loop()
     //cli_obj.main(currentTime);
     delay(1);
   }*/
+  }
 }

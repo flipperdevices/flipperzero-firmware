@@ -263,11 +263,14 @@ static UartEchoApp* gb_live_camera_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener (UART & UART1)
+    // furi_hal_console_disable();
     furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
     furi_hal_uart_init(FuriHalUartIdLPUART1, 115200);
     furi_hal_uart_set_br(FuriHalUartIdLPUART1, 115200);
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, gb_live_camera_on_irq_cb, app);
-
+    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, gb_live_camera_on_irq_cb, app);
+    furi_hal_power_enable_otg();
+    furi_delay_ms(1); 
     return app;
 }
 
@@ -278,7 +281,7 @@ static void gb_live_camera_app_free(UartEchoApp* app) {
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
 
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
+    // furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
     furi_hal_uart_set_irq_cb(FuriHalUartIdLPUART1, NULL, NULL);
     furi_hal_uart_deinit(FuriHalUartIdLPUART1);
 

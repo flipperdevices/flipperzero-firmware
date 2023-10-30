@@ -879,12 +879,27 @@ void CommandLine::runCommand(String input) {
               } else {
                 //  RAM
                 //  TODO:
-                Serial.println("RAM");
+                // Serial.println("RAM");
               }
             } else {
               //  ROM
               //  TODO:
-              Serial.println("ROM");
+              cont_sw = this->argSearch(&cmd_args, "-s");
+              if (cont_sw == -1) {
+                cont_sw = this->argSearch(&cmd_args, "-e");
+                if (cont_sw == -1) {
+                  // Serial.println("Error");
+                } else {
+                  //  END WRITE
+                  gameboy_cartridge.endWriteRAM_GB();
+                }
+              } else {
+                //  START WRITE
+                Serial.println("START ROM 1");
+                gameboy_cartridge.startWriteRAM_GB();
+                Serial.println("START ROM 2");
+              }
+              // Serial.println("ROM");
             }
           }
         } else {
@@ -916,7 +931,6 @@ void CommandLine::runCommand(String input) {
             cont_sw = this->argSearch(&cmd_args, "-d");
             if(cont_sw == -1) {
               //  Start
-              
               gameboy_live_camera.start();
               delay(400);
             } else {
