@@ -7,6 +7,9 @@ Flipboard* flipboard_alloc(
     KeySettingModelFields fields,
     bool single_mode_button,
     bool attach_keyboard,
+    KeyboardInputKey* keyboard_keys,
+    KeyboardInputKey* keyboard_shift_keys,
+    uint8_t keyboard_rows,
     GetPrimaryView get_primary_view) {
     Flipboard* app = (Flipboard*)malloc(sizeof(Flipboard));
     app->model = flipboard_model_alloc(app_name, single_mode_button, fields);
@@ -21,7 +24,8 @@ Flipboard* flipboard_alloc(
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
-    app->key_config = key_config_alloc(app->model, FlipboardViewConfigureId);
+    app->key_config = key_config_alloc(
+        app->model, FlipboardViewConfigureId, keyboard_keys, keyboard_shift_keys, keyboard_rows);
 
     key_config_register_dispatcher(app->key_config, app->view_dispatcher);
     key_config_register_variable_item_list(app->key_config, FlipboardViewConfigureSubviewId);

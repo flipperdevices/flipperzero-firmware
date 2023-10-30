@@ -1,5 +1,6 @@
 #include "app.h"
 #include "app_config.h"
+#include "app_keyboard_layout.h"
 
 /*
 This method handles Flipper D-Pad input when in the FlipboardKeyboard mode.
@@ -109,6 +110,9 @@ int32_t flipboard_keyboard_app(void* p) {
         fields,
         single_mode_button,
         attach_keyboard,
+        keys,
+        shift_keys,
+        COUNT_OF(keys) / 12,
         get_primary_view);
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
     flipboard_free(app);

@@ -6,6 +6,7 @@
 #define KEYBOARD_INPUT_DISPLAYED_HEIGHT 13
 #define KEYBOARD_INPUT_GLYPH_HEIGHT_OFFSET 10
 #define KEYBOARD_INPUT_IMAGE_HEIGHT_OFFSET 1
+#define KEYBOARD_INPUT_COLS 12
 
 static bool keyboard_input_model_shifted(KeyboardInputModel* model) {
     return (model->modifiers & KEY_MOD_LEFT_SHIFT) != 0 ||
@@ -264,7 +265,10 @@ static bool keyboard_input_input_callback(InputEvent* event, void* context) {
     return was_handled;
 }
 
-KeyboardInput* keyboard_input_alloc() {
+KeyboardInput* keyboard_input_alloc(
+    KeyboardInputKey* keyboard_keys,
+    KeyboardInputKey* keyboard_shift_keys,
+    uint8_t keyboard_rows) {
     KeyboardInput* keyboard_input = (KeyboardInput*)malloc(sizeof(KeyboardInput));
 
     keyboard_input->view_keyboard_input = view_alloc();
@@ -277,11 +281,11 @@ KeyboardInput* keyboard_input_alloc() {
     view_allocate_model(
         keyboard_input->view_keyboard_input, ViewModelTypeLocking, sizeof(KeyboardInputModel));
 
-    for(size_t i = 0; i < COUNT_OF(keys); i++) {
-        if(shift_keys[i].code != 0) {
-            keys[i].shift = &shift_keys[i];
+    for(size_t i = 0; i < keyboard_rows * KEYBOARD_INPUT_COLS; i++) {
+        if(keyboard_shift_keys[i].code != 0) {
+            keyboard_keys[i].shift = &keyboard_shift_keys[i];
         } else {
-            keys[i].shift = NULL;
+            keyboard_keys[i].shift = NULL;
         }
     }
 
@@ -290,12 +294,12 @@ KeyboardInput* keyboard_input_alloc() {
         KeyboardInputModel * model,
         {
             model->cols = KEYBOARD_INPUT_COLS;
-            model->rows = KEYBOARD_INPUT_ROWS;
+            model->rows = keyboard_rows;
             model->top_row = 0;
             model->current_col = 0;
             model->current_row = 0;
             model->modifiers = 0;
-            model->keys = keys;
+            model->keys = keyboard_keys;
         },
         true);
 
@@ -303,13 +307,19 @@ KeyboardInput* keyboard_input_alloc() {
 }
 
 void keyboard_input_free(KeyboardInput* keyboard_input) {
+    with_view_model(
+        keyboard_input->view_keyboard_input,
+        KeyboardInputModel * model,
+        {
+            for(size_t i = 0; i < model->rows * KEYBOARD_INPUT_COLS; i++) {
+                if(model->keys[i].shift) {
+                    free(model->keys[i].shift);
+                    model->keys[i].shift = NULL;
+                }
+            }
+        },
+        false);
     view_free(keyboard_input->view_keyboard_input);
-    for(size_t i = 0; i < COUNT_OF(keys); i++) {
-        if(keys[i].shift) {
-            free(keys[i].shift);
-            keys[i].shift = NULL;
-        }
-    }
     free(keyboard_input);
 }
 

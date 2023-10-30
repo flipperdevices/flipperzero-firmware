@@ -2,7 +2,8 @@
 
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
-#include "../common/key_setting_model.h"
+#include "key_setting_model.h"
+#include "keyboard_input.h"
 
 typedef struct Flipboard Flipboard;
 typedef struct FlipboardModel FlipboardModel;
@@ -16,6 +17,9 @@ Flipboard* flipboard_alloc(
     KeySettingModelFields fields,
     bool single_mode_button,
     bool attach_keyboard,
+    KeyboardInputKey* keyboard_keys,
+    KeyboardInputKey* keyboard_shift_keys,
+    uint8_t keyboard_rows,
     GetPrimaryView get_primary_view);
 
 FlipboardModel* flipboard_get_model(Flipboard* app);

@@ -4,11 +4,11 @@
 
 #include <gui/view_dispatcher.h>
 #include <gui/modules/widget.h>
-#include "../common/app_menu.h"
-#include "../common/flipboard_model.h"
-#include "../common/key_config.h"
-#include "../common/leds.h"
-#include "../common/keyboard.h"
+#include "app_menu.h"
+#include "flipboard_model.h"
+#include "key_config.h"
+#include "leds.h"
+#include "keyboard.h"
 
 struct Flipboard {
     ViewDispatcher* view_dispatcher;

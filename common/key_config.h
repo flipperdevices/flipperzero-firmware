@@ -2,11 +2,17 @@
 
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
+#include "keyboard_input.h"
 
 typedef struct FlipboardModel FlipboardModel;
 typedef struct KeyConfig KeyConfig;
 
-KeyConfig* key_config_alloc(FlipboardModel* model, uint32_t config_view_id);
+KeyConfig* key_config_alloc(
+    FlipboardModel* model,
+    uint32_t config_view_id,
+    KeyboardInputKey* keyboard_keys,
+    KeyboardInputKey* keyboard_shift_keys,
+    uint8_t keyboard_rows);
 View* key_config_get_view(KeyConfig* key_config);
 uint32_t key_config_get_view_id(KeyConfig* key_config);
 void key_config_register_dispatcher(KeyConfig* key_config, ViewDispatcher* view_dispatcher);

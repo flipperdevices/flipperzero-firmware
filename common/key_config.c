@@ -167,52 +167,51 @@ static void message_updated(void* context) {
     view_dispatcher_switch_to_view(key_config->view_dispatcher, key_config->view_item_list_id);
 }
 
-uint32_t menu_0(void* context) {
+static uint32_t menu_0(void* context) {
     UNUSED(context);
     return (uint32_t)0;
 }
-uint32_t menu_1(void* context) {
+static uint32_t menu_1(void* context) {
     UNUSED(context);
     return (uint32_t)1;
 }
-uint32_t menu_2(void* context) {
+static uint32_t menu_2(void* context) {
     UNUSED(context);
     return (uint32_t)2;
 }
-uint32_t menu_3(void* context) {
+static uint32_t menu_3(void* context) {
     UNUSED(context);
     return (uint32_t)3;
 }
-uint32_t menu_4(void* context) {
+static uint32_t menu_4(void* context) {
     UNUSED(context);
     return (uint32_t)4;
 }
-uint32_t menu_5(void* context) {
+static uint32_t menu_5(void* context) {
     UNUSED(context);
     return (uint32_t)5;
 }
-uint32_t menu_6(void* context) {
+static uint32_t menu_6(void* context) {
     UNUSED(context);
     return (uint32_t)6;
 }
-uint32_t menu_7(void* context) {
+static uint32_t menu_7(void* context) {
     UNUSED(context);
     return (uint32_t)7;
 }
-uint32_t menu_8(void* context) {
+static uint32_t menu_8(void* context) {
     UNUSED(context);
     return (uint32_t)8;
 }
-uint32_t menu_9(void* context) {
+static uint32_t menu_9(void* context) {
     UNUSED(context);
     return (uint32_t)9;
 }
-uint32_t menu_10(void* context) {
+static uint32_t menu_10(void* context) {
     UNUSED(context);
     return (uint32_t)10;
 }
-
-ViewNavigationCallback get_menu(uint32_t i) {
+static ViewNavigationCallback get_menu(uint32_t i) {
     switch(i) {
     case 1:
         return menu_1;
@@ -394,13 +393,19 @@ static void item_callback(void* context, uint32_t index) {
     }
 }
 
-KeyConfig* key_config_alloc(FlipboardModel* model, uint32_t config_view_id) {
+KeyConfig* key_config_alloc(
+    FlipboardModel* model,
+    uint32_t config_view_id,
+    KeyboardInputKey* keyboard_keys,
+    KeyboardInputKey* keyboard_shift_keys,
+    uint8_t keyboard_rows) {
     KeyConfig* key_config = (KeyConfig*)malloc(sizeof(KeyConfig));
     key_config->view_dispatcher = NULL;
     key_config->model = model;
     key_config->text_input = text_input_alloc();
     key_config->view_text_input_id = 0;
-    key_config->keyboard_input = keyboard_input_alloc();
+    key_config->keyboard_input =
+        keyboard_input_alloc(keyboard_keys, keyboard_shift_keys, keyboard_rows);
     key_config->view_keyboard_input_id = 0;
     key_config->menu_keys = submenu_alloc();
     key_config->view_menu_keys_id = config_view_id;
