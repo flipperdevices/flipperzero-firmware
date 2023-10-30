@@ -20,7 +20,9 @@ void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str
 
 void hangman_draw_gallows(Canvas* canvas, HangmanApp* app) {
     const Icon* gallows[HANGMAN_GALLOWS_MAX_STATE] = {&I_1, &I_2, &I_3, &I_4, &I_5, &I_6, &I_7};
+    canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon(canvas, 0, 30, gallows[app->gallows_state]);
+    canvas_set_color(canvas, ColorWhite);
 }
 
 // This function was copied from Flipper Zero firmware
