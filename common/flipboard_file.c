@@ -4,6 +4,7 @@
 
 #include "key_setting_model.h"
 
+#define BUY_MSG "Buy your Flipboard at"
 #define FLIPBOARD_URL "https://tindie.com/stores/MakeItHackin"
 
 #define FLIPBOARD_KEY_NAME_SIZE 25
@@ -22,8 +23,6 @@ static void ensure_dir_exists(Storage* storage, char* dir) {
     if(!storage_dir_exists(storage, dir)) {
         FURI_LOG_I(TAG, "Creating directory: %s", dir);
         storage_simply_mkdir(storage, dir);
-    } else {
-        FURI_LOG_I(TAG, "Directory exists: %s", dir);
     }
 }
 
@@ -32,7 +31,7 @@ static void ensure_save_folder_exists(Storage* storage) {
     ensure_dir_exists(storage, FLIPBOARD_SAVE_FOLDER);
 }
 
-bool flipboard_save(FlipboardModel* model, KeySettingModelFields fields) {
+bool flipboard_model_save(FlipboardModel* model, KeySettingModelFields fields) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* file_path = furi_string_alloc();
@@ -49,22 +48,25 @@ bool flipboard_save(FlipboardModel* model, KeySettingModelFields fields) {
 
     do {
         if(!storage) {
-            printf("Failed to open storage\r\n");
+            FURI_LOG_E(TAG, "Failed to open storage");
             break;
         }
 
         ensure_save_folder_exists(storage);
 
         if(!flipper_format_file_open_always(format, furi_string_get_cstr(file_path))) {
-            printf("Failed to open file for writing: \"%s\"\r\n", furi_string_get_cstr(file_path));
+            FURI_LOG_E(
+                TAG, "Failed to open file for writing: \"%s\"", furi_string_get_cstr(file_path));
             break;
         }
 
         if(!flipper_format_write_header_cstr(format, FLIPBOARD_HEADER, FLIPBOARD_VERSION)) {
+            FURI_LOG_E(TAG, "Failed to write header");
             break;
         }
 
-        if(!flipper_format_write_comment_cstr(format, "Buy your flipboard at " FLIPBOARD_URL)) {
+        if(!flipper_format_write_comment_cstr(format, BUY_MSG " " FLIPBOARD_URL)) {
+            FURI_LOG_E(TAG, "Failed to write comment");
             break;
         }
 
@@ -78,8 +80,6 @@ bool flipboard_save(FlipboardModel* model, KeySettingModelFields fields) {
         success = true;
     } while(false);
 
-    FURI_LOG_D(TAG, "Save %s.", success ? "successful" : "failed");
-
     flipper_format_free(format);
     furi_string_free(file_path);
     furi_string_free(buffer);
@@ -87,7 +87,7 @@ bool flipboard_save(FlipboardModel* model, KeySettingModelFields fields) {
     return success;
 }
 
-bool flipboard_load(FlipboardModel* model) {
+bool flipboard_model_load(FlipboardModel* model) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* file_path = furi_string_alloc();
@@ -108,12 +108,13 @@ bool flipboard_load(FlipboardModel* model) {
         uint32_t version = 0;
 
         if(!storage) {
-            printf("Failed to open storage\r\n");
+            FURI_LOG_E(TAG, "Failed to open storage");
             break;
         }
 
         if(!flipper_format_file_open_existing(format, furi_string_get_cstr(file_path))) {
-            printf("Failed to open file for reading: \"%s\"\r\n", furi_string_get_cstr(file_path));
+            FURI_LOG_E(
+                TAG, "Failed to open file for reading: \"%s\"", furi_string_get_cstr(file_path));
             break;
         }
         if(!flipper_format_read_header(format, buffer, &version)) {
@@ -130,22 +131,20 @@ bool flipboard_load(FlipboardModel* model) {
                 model, i, key_setting_model_alloc_from_ff(i, format));
         }
 
+        for(size_t i = 1; i < 16;) {
+            if(flipboard_model_get_key_setting_model(model, i) == NULL) {
+                flipboard_model_set_key_setting_model(model, i, key_setting_model_alloc(i));
+            }
+
+            if(flipboard_model_get_single_button_mode(model)) {
+                i = i << 1;
+            } else {
+                i++;
+            }
+        }
+
         success = true;
     } while(false);
-
-    FURI_LOG_D(TAG, "Load %s.", success ? "successful" : "failed");
-
-    for(size_t i = 1; i < 16;) {
-        if(flipboard_model_get_key_setting_model(model, i) == NULL) {
-            flipboard_model_set_key_setting_model(model, i, key_setting_model_alloc(i));
-        }
-
-        if(flipboard_model_get_single_button_mode(model)) {
-            i = i << 1;
-        } else {
-            i++;
-        }
-    }
 
     flipper_format_free(format);
     furi_string_free(file_path);

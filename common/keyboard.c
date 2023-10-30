@@ -54,6 +54,14 @@ void flipboard_keyboard_send_keycode(FlipboardKeyboard* keyboard, uint16_t code)
     }
 }
 
+void flipboard_keyboard_release_keycode(FlipboardKeyboard* keyboard, uint16_t code) {
+    FURI_LOG_D("Keyboard", "Release keycode: %d", code);
+    if(keyboard->attached) {
+        furi_delay_ms(PRESS_DELAY_MS);
+        furi_hal_hid_kb_release(code);
+    }
+}
+
 void flipboard_keyboard_release_all(FlipboardKeyboard* keyboard) {
     FURI_LOG_D("Keyboard", "Release all keys");
     if(keyboard->attached) {

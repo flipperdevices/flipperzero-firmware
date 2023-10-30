@@ -31,12 +31,18 @@ Flipboard* flipboard_alloc(
     app->view_primary = get_primary_view(app);
 
     app->app_menu = app_menu_alloc(app->view_dispatcher);
-    app_menu_add_config(
+    app_menu_add_item(
         app->app_menu,
+        "Config",
         key_config_get_view(app->key_config),
         key_config_get_view_id(app->key_config));
+
     app_menu_add_item(app->app_menu, primary_item_name, app->view_primary, FlipboardViewPrimaryId);
-    app_menu_add_about(app->app_menu, about_text, FlipboardViewAboutId);
+
+    app->widget_about = widget_alloc();
+    widget_add_text_scroll_element(app->widget_about, 0, 0, 128, 64, about_text);
+    app_menu_add_item(
+        app->app_menu, "About", widget_get_view(app->widget_about), FlipboardViewAboutId);
 
     app_menu_show(app->app_menu);
     flipboard_leds_update(flipboard_model_get_leds(app->model));
@@ -66,6 +72,7 @@ void flipboard_free(Flipboard* app) {
 
     view_free(app->view_primary);
     key_config_free(app->key_config);
+    widget_free(app->widget_about);
     app_menu_free(app->app_menu);
 
     view_dispatcher_free(app->view_dispatcher);

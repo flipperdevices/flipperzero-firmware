@@ -9,7 +9,6 @@
 struct AppMenu {
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
-    Widget* widget_about;
     uint8_t view_id_count;
     uint32_t view_ids[MAX_MENU_ITEMS];
 };

@@ -17,7 +17,7 @@ FlipboardModel*
     }
     flipboard_leds_reset(model->leds);
 
-    flipboard_load(model);
+    flipboard_model_load(model);
 
     return model;
 }
@@ -103,7 +103,7 @@ void flipboard_model_set_key_monitor(
 }
 
 void flipboard_model_free(FlipboardModel* model) {
-    flipboard_save(model, model->key_setting_model_fields);
+    flipboard_model_save(model, model->key_setting_model_fields);
 
     if(model->speaker) {
         speaker_free(model->speaker);
@@ -201,8 +201,10 @@ void flipboard_model_send_keystrokes(FlipboardModel* model, KeySettingModel* ksm
         for(uint8_t count = keystroke.count; count != 0; count--) {
             flipboard_keyboard_send_keycode(
                 flipboard_model_get_keyboard(model), keystroke.key_code | modifiers);
-            flipboard_keyboard_release_all(flipboard_model_get_keyboard(model));
+            flipboard_keyboard_release_keycode(
+                flipboard_model_get_keyboard(model), keystroke.key_code);
         }
+        flipboard_keyboard_release_all(flipboard_model_get_keyboard(model));
 
         if(!send_modifiers) {
             modifiers = 0;

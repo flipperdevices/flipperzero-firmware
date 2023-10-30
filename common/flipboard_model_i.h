@@ -11,8 +11,6 @@
 
 #include <gui/gui.h>
 
-typedef struct KeyMonitor KeyMonitor;
-
 struct FlipboardModel {
     KeySettingModel* key_setting_model[16];
     KeySettingModelFields key_setting_model_fields;

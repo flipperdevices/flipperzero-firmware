@@ -11,6 +11,7 @@ void flipboard_keyboard_detatch(FlipboardKeyboard* keyboard);
 void flipboard_keyboard_send_char(FlipboardKeyboard* keyboard, char ch);
 void flipboard_keyboard_send_text(FlipboardKeyboard* keyboard, const char* message);
 void flipboard_keyboard_send_keycode(FlipboardKeyboard* keyboard, uint16_t code);
+void flipboard_keyboard_release_keycode(FlipboardKeyboard* keyboard, uint16_t code);
 void flipboard_keyboard_release_all(FlipboardKeyboard* keyboard);
 void flipboard_keyboard_send_keycodes(
     FlipboardKeyboard* keyboard,
