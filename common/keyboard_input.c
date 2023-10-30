@@ -7,8 +7,21 @@
 #define KEYBOARD_INPUT_GLYPH_HEIGHT_OFFSET 10
 #define KEYBOARD_INPUT_IMAGE_HEIGHT_OFFSET 1
 
-static KeyboardInputKeyResult
-    keyboard_input_model_get_key(KeyboardInputModel* model, uint8_t col, uint8_t row) {
+static bool keyboard_input_model_shifted(KeyboardInputModel* model) {
+    return (model->modifiers & KEY_MOD_LEFT_SHIFT) != 0 ||
+           (model->modifiers & KEY_MOD_RIGHT_SHIFT) != 0;
+}
+
+static bool keyboard_input_model_enabled_modifier(KeyboardInputModel* model, uint16_t code) {
+    return (code == HID_KEYBOARD_L_SHIFT && (model->modifiers & KEY_MOD_LEFT_SHIFT)) ||
+           (code == HID_KEYBOARD_R_SHIFT && (model->modifiers & KEY_MOD_RIGHT_SHIFT));
+}
+
+static KeyboardInputKeyResult keyboard_input_model_get_key(
+    KeyboardInputModel* model,
+    uint8_t col,
+    uint8_t row,
+    bool shifted) {
     if(row > model->rows || col > model->cols) {
         KeyboardInputKeyResult result = {
             .code = 0, .ch = 0, .icon = NULL, .col = 0, .row = 0, .width = 0};
@@ -19,17 +32,33 @@ static KeyboardInputKeyResult
     uint16_t index = row * model->cols + col;
     uint16_t idx = index - 1;
 
+    KeyboardInputKey* key = !shifted ? &model->keys[index] :
+                            ((model->keys[index].shift != NULL) &&
+                             (model->keys[index].code != model->keys[index].shift->code)) ?
+                                       model->keys[index].shift :
+                                       &model->keys[index];
+
+    if((model->keys[index].shift != NULL) &&
+       keyboard_input_model_enabled_modifier(model, key->code)) {
+        key = model->keys[index].shift;
+    }
+
     KeyboardInputKeyResult result = {
-        .code = model->keys[index].code,
-        .ch = model->keys[index].ch,
-        .icon = model->keys[index].icon,
-        .col = col,
-        .row = row,
-        .width = 1};
+        .code = key->code, .ch = key->ch, .icon = key->icon, .col = col, .row = row, .width = 1};
 
     while(idx != 0 && index != 0) {
-        if(model->keys[idx].code != model->keys[index].code) {
-            break;
+        if(!shifted) {
+            if(model->keys[idx].code != model->keys[index].code) {
+                break;
+            }
+        } else {
+            uint16_t c1 = model->keys[idx].shift != NULL ? model->keys[idx].shift->code :
+                                                           model->keys[idx].code;
+            uint16_t c2 = model->keys[index].shift != NULL ? model->keys[index].shift->code :
+                                                             model->keys[index].code;
+            if(c1 != c2) {
+                break;
+            }
         }
 
         result.col--;
@@ -50,7 +79,19 @@ static KeyboardInputKeyResult
         for(int col = 0; col < model->cols; col++) {
             uint16_t index = row * model->cols + col;
             if(model->keys[index].code == key_code) {
-                KeyboardInputKeyResult result = keyboard_input_model_get_key(model, col, row);
+                KeyboardInputKeyResult result =
+                    keyboard_input_model_get_key(model, col, row, false);
+                return result;
+            }
+        }
+    }
+
+    for(int row = 0; row < model->rows; row++) {
+        for(int col = 0; col < model->cols; col++) {
+            uint16_t index = row * model->cols + col;
+            if(model->keys[index].code == key_code) {
+                KeyboardInputKeyResult result =
+                    keyboard_input_model_get_key(model, col, row, true);
                 return result;
             }
         }
@@ -61,7 +102,8 @@ static KeyboardInputKeyResult
         for(int col = 0; col < model->cols; col++) {
             uint16_t index = row * model->cols + col;
             if(model->keys[index].code == search_key_code) {
-                KeyboardInputKeyResult result = keyboard_input_model_get_key(model, col, row);
+                KeyboardInputKeyResult result =
+                    keyboard_input_model_get_key(model, col, row, false);
                 return result;
             }
         }
@@ -79,10 +121,12 @@ static void keyboard_input_draw_callback(Canvas* canvas, void* context) {
     KeyboardInputModel* model = (KeyboardInputModel*)context;
     canvas_set_font(canvas, FontKeyboard);
 
+    bool shifted = keyboard_input_model_shifted(model);
     for(int y = 0; y < KEYBOARD_INPUT_DISPLAYED_ROWS; y++) {
         for(int x = 0; x < model->cols;) {
             KeyboardInputKeyResult result =
-                keyboard_input_model_get_key(model, x, y + model->top_row);
+                keyboard_input_model_get_key(model, x, y + model->top_row, shifted);
+
             if(result.code == 0 || result.width == 0) {
                 x++;
                 continue;
@@ -137,8 +181,9 @@ static bool keyboard_input_input_callback(InputEvent* event, void* context) {
                 keyboard_input->view_keyboard_input,
                 KeyboardInputModel * model,
                 {
+                    bool shifted = keyboard_input_model_shifted(model);
                     KeyboardInputKeyResult kikr = keyboard_input_model_get_key(
-                        model, model->current_col, model->current_row);
+                        model, model->current_col, model->current_row, shifted);
                     model->current_col = kikr.col;
                     if(model->current_col > 0) {
                         model->current_col--;
@@ -153,8 +198,9 @@ static bool keyboard_input_input_callback(InputEvent* event, void* context) {
                 keyboard_input->view_keyboard_input,
                 KeyboardInputModel * model,
                 {
+                    bool shifted = keyboard_input_model_shifted(model);
                     KeyboardInputKeyResult kikr = keyboard_input_model_get_key(
-                        model, model->current_col, model->current_row);
+                        model, model->current_col, model->current_row, shifted);
                     model->current_col = kikr.col + kikr.width - 1;
                     if(model->current_col < model->cols - 1) {
                         model->current_col++;
@@ -197,10 +243,15 @@ static bool keyboard_input_input_callback(InputEvent* event, void* context) {
                 keyboard_input->view_keyboard_input,
                 KeyboardInputModel * model,
                 {
+                    bool shifted = keyboard_input_model_shifted(model);
                     if(model->callback != NULL) {
                         KeyboardInputKeyResult kikr = keyboard_input_model_get_key(
-                            model, model->current_col, model->current_row);
-                        model->callback(kikr.code, model->callback_context);
+                            model, model->current_col, model->current_row, shifted);
+                        if(kikr.code == HID_KEYBOARD_L_SHIFT) {
+                            model->modifiers ^= KEY_MOD_LEFT_SHIFT;
+                        } else {
+                            model->callback(kikr.code, model->callback_context);
+                        }
                         was_handled = true;
                     } else {
                         furi_assert(model->callback != NULL);
@@ -225,6 +276,15 @@ KeyboardInput* keyboard_input_alloc() {
         NULL); // This will be set later by key_config's item_clicked.
     view_allocate_model(
         keyboard_input->view_keyboard_input, ViewModelTypeLocking, sizeof(KeyboardInputModel));
+
+    for(size_t i = 0; i < COUNT_OF(keys); i++) {
+        if(shift_keys[i].code != 0) {
+            keys[i].shift = &shift_keys[i];
+        } else {
+            keys[i].shift = NULL;
+        }
+    }
+
     with_view_model(
         keyboard_input->view_keyboard_input,
         KeyboardInputModel * model,
@@ -244,6 +304,12 @@ KeyboardInput* keyboard_input_alloc() {
 
 void keyboard_input_free(KeyboardInput* keyboard_input) {
     view_free(keyboard_input->view_keyboard_input);
+    for(size_t i = 0; i < COUNT_OF(keys); i++) {
+        if(keys[i].shift) {
+            free(keys[i].shift);
+            keys[i].shift = NULL;
+        }
+    }
     free(keyboard_input);
 }
 
@@ -261,7 +327,7 @@ void keyboard_input_set_key(KeyboardInput* keyboard_input, uint16_t key_code) {
                 model->top_row = model->current_row;
             }
             model->current_col = kikr.col;
-            model->modifiers = 0;
+            model->modifiers = key_code & 0xFF00;
         },
         true);
 }
