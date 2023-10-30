@@ -45,6 +45,9 @@ typedef struct KeyboardInputKeyResult {
     uint8_t width;
 } KeyboardInputKeyResult;
 
+#define KEYBOARD_INPUT_COLS 12
+#define KEYBOARD_INPUT_ROWS 7
+
 KeyboardInputKey keys[] = {
     {.code = HID_KEYBOARD_F1, .ch = '1', .icon = NULL},
     {.code = HID_KEYBOARD_F1, .ch = '1', .icon = NULL},
