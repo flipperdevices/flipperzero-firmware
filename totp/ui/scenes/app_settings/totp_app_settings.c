@@ -15,12 +15,6 @@
 #include "../../../workers/bt_type_code/bt_type_code.h"
 #endif
 
-#ifdef TOTP_BADBT_AUTOMATION_ENABLED
-#define AUTOMATION_LIST_MAX_INDEX (3)
-#else
-#define AUTOMATION_LIST_MAX_INDEX (1)
-#endif
-#define BAD_KB_LAYOUT_LIST_MAX_INDEX (2)
 #define FONT_TEST_STR_LENGTH (7)
 
 static const char* YES_NO_LIST[] = {"NO", "YES"};
@@ -73,9 +67,9 @@ void totp_scene_app_settings_activate(PluginState* plugin_state) {
     scene_state->notification_sound = plugin_state->notification_method & NotificationMethodSound;
     scene_state->notification_vibro = plugin_state->notification_method & NotificationMethodVibro;
     scene_state->automation_method =
-        MIN(plugin_state->automation_method, AUTOMATION_LIST_MAX_INDEX);
+        MIN(plugin_state->automation_method, COUNT_OF(AUTOMATION_LIST) - 1);
     scene_state->automation_kb_layout =
-        MIN(plugin_state->automation_kb_layout, BAD_KB_LAYOUT_LIST_MAX_INDEX);
+        MIN(plugin_state->automation_kb_layout, COUNT_OF(BAD_KB_LAYOUT_LIST) - 1);
 
     scene_state->total_fonts_count = totp_font_provider_get_fonts_count();
     scene_state->active_font_index = plugin_state->active_font_index;
@@ -288,14 +282,14 @@ bool totp_scene_app_settings_handle_event(
                     &scene_state->automation_method,
                     1,
                     0,
-                    AUTOMATION_LIST_MAX_INDEX,
+                    COUNT_OF(AUTOMATION_LIST) - 1,
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == BadKeyboardLayoutSelect) {
                 totp_roll_value_uint8_t(
                     &scene_state->automation_kb_layout,
                     1,
                     0,
-                    BAD_KB_LAYOUT_LIST_MAX_INDEX,
+                    COUNT_OF(BAD_KB_LAYOUT_LIST) - 1,
                     RollOverflowBehaviorRoll);
             }
             break;
@@ -324,14 +318,14 @@ bool totp_scene_app_settings_handle_event(
                     &scene_state->automation_method,
                     -1,
                     0,
-                    AUTOMATION_LIST_MAX_INDEX,
+                    COUNT_OF(AUTOMATION_LIST) - 1,
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == BadKeyboardLayoutSelect) {
                 totp_roll_value_uint8_t(
                     &scene_state->automation_kb_layout,
                     -1,
                     0,
-                    BAD_KB_LAYOUT_LIST_MAX_INDEX,
+                    COUNT_OF(BAD_KB_LAYOUT_LIST) - 1,
                     RollOverflowBehaviorRoll);
             }
             break;
