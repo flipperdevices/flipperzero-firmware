@@ -47,5 +47,6 @@
 #include "x10.h"
 #include "oregon2.h"
 #include "genie.h"
+#include "honeywell.h"
 
 extern const SubGhzProtocolRegistry subghz_protocol_registry;
