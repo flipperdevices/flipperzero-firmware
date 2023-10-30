@@ -367,10 +367,11 @@ static FuriHalInfraredTxGetDataState
         *duration = timing.duration;
         state = timing.state;
     } else {
-        furi_crash();
+        // Why bother if we crash anyway?..
         *level = 0;
         *duration = 100;
         state = FuriHalInfraredTxGetDataStateDone;
+        furi_crash();
     }
 
     uint32_t flags_set = furi_thread_flags_set(
@@ -443,9 +444,8 @@ static bool infrared_worker_tx_fill_buffer(InfraredWorker* instance) {
         }
 
         if(status == InfraredStatusError) {
-            furi_crash();
             new_data_available = false;
-            break;
+            furi_crash();
         } else if(status == InfraredStatusOk) {
             timing.state = FuriHalInfraredTxGetDataStateOk;
         } else if(status == InfraredStatusDone) {
