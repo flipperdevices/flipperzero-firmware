@@ -7,50 +7,11 @@
 #include "config_keystroke.h"
 #include "config_tones.h"
 
-/*
-    uint8_t keystrokes_count;
-    Keystroke* keystrokes;
-*/
-
 typedef struct {
     void* app;
     uint8_t key;
     uint8_t index;
 } VariableItemContext;
-
-/*
-static void flipboard_setting_keystroke_key_code_changed(VariableItem* item, int i) {
-    UNUSED(i);
-    uint8_t selection_index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, setting_switch_key_names[selection_index]);
-    uint16_t key_code = setting_switch_key_values[selection_index];
-
-    VariableItemContext* vic = variable_item_get_context(item);
-    FlipboardModel* model = vic->app->model;
-
-    uint8_t count = key_setting_model_get_keystroke(
-                        flipboard_model_get_key_setting_model(model, vic->key), vic->index)
-                        .count;
-    key_setting_model_set_keystroke(
-        flipboard_model_get_key_setting_model(model, vic->key), vic->index, key_code, count);
-}
-
-static void flipboard_setting_keystroke_count_changed(VariableItem* item, int i) {
-    UNUSED(i);
-    uint8_t selection_index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, setting_switch_key_names[selection_index]);
-    uint16_t count = selection_index;
-
-    VariableItemContext* vic = variable_item_get_context(item);
-    FlipboardModel* model = vic->app->model;
-
-    uint16_t key_code = key_setting_model_get_keystroke(
-                            flipboard_model_get_key_setting_model(model, vic->key), vic->index)
-                            .key_code;
-    key_setting_model_set_keystroke(
-        flipboard_model_get_key_setting_model(model, vic->key), vic->index, key_code, count);
-}
-*/
 
 static void populate_variable_item_list(KeyConfig* key_config, KeySettingModel* ksm);
 
@@ -279,6 +240,18 @@ ViewNavigationCallback get_menu(uint32_t i) {
     }
 }
 
+static void keyboard_input_callback(uint16_t key_code, void* context) {
+    KeySettingModel* ksm = (KeySettingModel*)context;
+    KeyConfig* key_config = (KeyConfig*)key_setting_model_get_key_config(ksm);
+    uint8_t item = key_setting_model_get_temp_index(ksm);
+    Keystroke ks = key_setting_model_get_keystroke(ksm, item);
+    if(ks.key_code != key_code) {
+        key_setting_model_set_keystroke(ksm, (uint8_t)item, key_code, ks.count);
+        populate_variable_item_list(key_config, ksm);
+    }
+    view_dispatcher_switch_to_view(key_config->view_dispatcher, key_config->view_item_list_id);
+}
+
 static void item_clicked(void* context, uint32_t index) {
     KeySettingModel* ksm = (KeySettingModel*)context;
     uint8_t message_index = key_setting_model_get_message_index(ksm);
@@ -323,6 +296,30 @@ static void item_clicked(void* context, uint32_t index) {
         key_setting_model_append_keystroke(ksm, keycode, 1);
 
         populate_variable_item_list(key_config, ksm);
+        return;
+    }
+
+    if(index > message_index && index < keystroke_index) {
+        uint32_t item = (index - message_index);
+        if(item % 2 == 0) {
+            FURI_LOG_D("Flipboard", "Count clicked.  Ignorning");
+            return;
+        }
+
+        item = item / 2;
+        KeyConfig* key_config = (KeyConfig*)key_setting_model_get_key_config(ksm);
+        view_set_previous_callback(
+            keyboard_input_get_view(key_config->keyboard_input),
+            get_menu(key_config->view_item_list_id));
+
+        Keystroke keystroke = key_setting_model_get_keystroke(ksm, (uint8_t)item);
+        keyboard_input_set_key(key_config->keyboard_input, keystroke.key_code);
+        key_setting_model_set_temp_index(ksm, (uint8_t)item);
+        keyboard_input_set_callback(key_config->keyboard_input, keyboard_input_callback, ksm);
+
+        view_dispatcher_switch_to_view(
+            key_config->view_dispatcher, key_config->view_keyboard_input_id);
+
         return;
     }
 
@@ -403,6 +400,8 @@ KeyConfig* key_config_alloc(FlipboardModel* model, uint32_t config_view_id) {
     key_config->model = model;
     key_config->text_input = text_input_alloc();
     key_config->view_text_input_id = 0;
+    key_config->keyboard_input = keyboard_input_alloc();
+    key_config->view_keyboard_input_id = 0;
     key_config->menu_keys = submenu_alloc();
     key_config->view_menu_keys_id = config_view_id;
     key_config->item_list = variable_item_list_alloc();
@@ -463,6 +462,15 @@ void key_config_register_text_input(KeyConfig* key_config, uint32_t text_input_i
         text_input_get_view(key_config->text_input));
 }
 
+void key_config_register_keyboard_input(KeyConfig* key_config, uint32_t keyboard_input_id) {
+    furi_assert(key_config->view_dispatcher != NULL);
+    key_config->view_keyboard_input_id = keyboard_input_id;
+    view_dispatcher_add_view(
+        key_config->view_dispatcher,
+        key_config->view_keyboard_input_id,
+        keyboard_input_get_view(key_config->keyboard_input));
+}
+
 void key_config_free(KeyConfig* key_config) {
     if(key_config->view_dispatcher != NULL) {
         if(key_config->view_item_list_id) {
@@ -474,9 +482,15 @@ void key_config_free(KeyConfig* key_config) {
             view_dispatcher_remove_view(
                 key_config->view_dispatcher, key_config->view_text_input_id);
         }
+
+        if(key_config->view_keyboard_input_id) {
+            view_dispatcher_remove_view(
+                key_config->view_dispatcher, key_config->view_keyboard_input_id);
+        }
     }
     variable_item_list_free(key_config->item_list);
     submenu_free(key_config->menu_keys);
     text_input_free(key_config->text_input);
+    keyboard_input_free(key_config->keyboard_input);
     free(key_config);
 }

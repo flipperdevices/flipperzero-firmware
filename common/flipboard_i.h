@@ -24,6 +24,7 @@ typedef enum {
     FlipboardViewConfigureId,
     FlipboardViewConfigureSubviewId,
     FlipboardViewConfigureTextInputId,
+    FlipboardViewConfigureKeyboardInputId,
 
     FlipboardViewAboutId,
     FlipboardViewPrimaryId,

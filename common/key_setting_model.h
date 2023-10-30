@@ -47,6 +47,8 @@ void key_setting_model_set_message_index(KeySettingModel* model, uint8_t index);
 uint8_t key_setting_model_get_message_index(KeySettingModel* model);
 char* key_setting_model_get_temp_buffer(KeySettingModel* model);
 size_t key_setting_model_get_temp_buffer_size(KeySettingModel* model);
+void key_setting_model_set_temp_index(KeySettingModel* model, uint8_t index);
+uint8_t key_setting_model_get_temp_index(KeySettingModel* model);
 
 void key_setting_model_set_key_config(KeySettingModel* model, void* key_config);
 void* key_setting_model_get_key_config(KeySettingModel* model);

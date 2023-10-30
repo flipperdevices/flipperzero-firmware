@@ -3,8 +3,7 @@
 #include <furi.h>
 #include "key_setting_model.h"
 
-struct KeySettingModel
-{
+struct KeySettingModel {
     // The key this setting is for (0-15)
     uint8_t key_id;
 
@@ -21,21 +20,24 @@ struct KeySettingModel
     uint8_t keystrokes_count;
 
     // Key codes to send when this key is pressed
-    Keystroke *keystrokes;
+    Keystroke* keystrokes;
 
     // Index of the menu item for adding another keystroke
     uint8_t keystroke_index;
 
     // Message to send when this key is pressed
-    FuriString *message;
+    FuriString* message;
 
     // Temp buffer for editing message
-    char *temp_buffer;
+    char* temp_buffer;
     size_t temp_buffer_size;
 
     // Index of the menu item for editing message
     uint8_t message_index;
 
     // KeyConfig associated with this key
-    void *key_config;
+    void* key_config;
+
+    // Temp index. Used for storing the index of the key being edited
+    uint8_t temp_index;
 };

@@ -26,6 +26,7 @@ Flipboard* flipboard_alloc(
     key_config_register_dispatcher(app->key_config, app->view_dispatcher);
     key_config_register_variable_item_list(app->key_config, FlipboardViewConfigureSubviewId);
     key_config_register_text_input(app->key_config, FlipboardViewConfigureTextInputId);
+    key_config_register_keyboard_input(app->key_config, FlipboardViewConfigureKeyboardInputId);
 
     app->view_primary = get_primary_view(app);
 

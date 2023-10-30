@@ -15,6 +15,6 @@ App(
     order=10,
     fap_icon="flipkeyboard/flipkeyboard.png",
     fap_category="GPIO",
-    fap_icon_assets="flipkeyboard/assets",
+    fap_icon_assets="common/assets",
     fap_description="FlipBoard Keyboard turns your FlipBoard into a keyboard.",
 )

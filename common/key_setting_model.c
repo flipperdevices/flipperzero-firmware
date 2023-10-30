@@ -59,6 +59,14 @@ size_t key_setting_model_get_temp_buffer_size(KeySettingModel* model) {
     return model->temp_buffer_size;
 }
 
+void key_setting_model_set_temp_index(KeySettingModel* model, uint8_t index) {
+    model->temp_index = index;
+}
+
+uint8_t key_setting_model_get_temp_index(KeySettingModel* model) {
+    return model->temp_index;
+}
+
 void key_setting_model_set_key_config(KeySettingModel* model, void* key_config) {
     model->key_config = key_config;
 }

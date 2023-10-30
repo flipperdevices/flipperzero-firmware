@@ -47,6 +47,7 @@ void flipboard_keyboard_send_text(FlipboardKeyboard* keyboard, const char* messa
 }
 
 void flipboard_keyboard_send_keycode(FlipboardKeyboard* keyboard, uint16_t code) {
+    FURI_LOG_D("Keyboard", "Sending keycode: %d", code);
     if(keyboard->attached) {
         furi_delay_ms(PRESS_DELAY_MS);
         furi_hal_hid_kb_press(code);
@@ -54,6 +55,7 @@ void flipboard_keyboard_send_keycode(FlipboardKeyboard* keyboard, uint16_t code)
 }
 
 void flipboard_keyboard_release_all(FlipboardKeyboard* keyboard) {
+    FURI_LOG_D("Keyboard", "Release all keys");
     if(keyboard->attached) {
         furi_delay_ms(RELEASE_DELAY_MS);
         furi_hal_hid_kb_release_all();
