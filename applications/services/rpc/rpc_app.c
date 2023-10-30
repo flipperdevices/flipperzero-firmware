@@ -330,6 +330,7 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEventType event_t
     case RpcAppEventTypeLoadFile:
     case RpcAppEventTypeButtonPress:
     case RpcAppEventTypeButtonRelease:
+    case RpcAppEventTypeDataExchange:
         last_id = rpc_app->last_id;
         rpc_app->last_id = 0;
         FURI_LOG_D(TAG, "AppConfirm: event %d last_id %lu status %d", event_type, last_id, status);
