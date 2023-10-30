@@ -1,5 +1,4 @@
 #include "helpers/hangman.h"
-#include <u8g2/u8g2_fonts.c>
 
 int32_t hangman_main(void* p) {
     UNUSED(p);

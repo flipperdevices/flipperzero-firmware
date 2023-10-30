@@ -1,4 +1,5 @@
 #include "hangman.h"
+#include "hangman_fonts.h"
 
 char* hangman_get_random_word() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -40,7 +41,7 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
     canvas_set_color(canvas, ColorBlack);
 
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
-    uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, ' ');
+    uint8_t glyph_w = canvas_glyph_width(canvas, ' ');
     uint8_t glyph_h = canvas_current_font_height(canvas);
 
     for(uint8_t j = 0; j < HANGMAN_LETTERS_CNT / HANGMAN_KEYBOARD_COLS; j++) {
@@ -73,7 +74,7 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
 void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x13B_t_cyrillic);
 
-    uint8_t glyph_w = hangman_GetGlyphWidth(&canvas->fb, ' ');
+    uint8_t glyph_w = canvas_glyph_width(canvas, ' ');
     uint8_t center_x =
         (canvas_width(canvas) - (glyph_w + HANGMAN_KEYBOARD_GAP) * strlen(app->word)) / 2;
 
@@ -104,9 +105,9 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
 
     if(app->eog != HangmanGameOn) {
         if(app->eog == HangmanGameLoose) {
-            hangman_text_window(canvas, "You Lose");
+            hangman_text_window(canvas, "You Lose!");
         } else {
-            hangman_text_window(canvas, "You Win");
+            hangman_text_window(canvas, "You Win!");
         }
         app->need_generate = true;
     }

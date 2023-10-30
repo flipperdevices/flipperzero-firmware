@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Bluetooth/USB Remote v1.5 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
 - OFW: [Storage: speedup write_chunk cli command #3173 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3173)
 - OFW: [Allow for larger Infrared remotes #3164 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3173)
+- Updated: [Hangman (In Russian) v1.0 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Temp Deferred (more testing needed): OFW: [fbt: reworked assets & resources handling #3160 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3160)
 
 <a name="release">

@@ -9,11 +9,9 @@
 #define HANGMAN_KEYBOARD_GAP 3
 
 #include "hangman_icons.h"
+
 #include <gui/gui.h>
-#include <gui/canvas_i.h>
 #include <gui/elements.h>
-#include <gui/icon_i.h>
-#include <u8g2/u8g2.h>
 #include <furi.h>
 #include <storage/storage.h>
 #include <toolbox/stream/stream.h>
@@ -44,7 +42,6 @@ typedef struct {
     HangmanGameResult eog;
 } HangmanApp;
 
-int8_t hangman_GetGlyphWidth(u8g2_t* u8g2, uint16_t requested_encoding);
 void hangman_app_free(HangmanApp** app);
 void hangman_render_callback(Canvas* canvas, void* ctx);
 HangmanApp* hangman_app_alloc();
