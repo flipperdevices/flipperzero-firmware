@@ -6,7 +6,7 @@
 
 #include <gui/gui.h>
 #include <gui/view.h>
-#include <assets_icons.h>
+#include <infrared_icons.h>
 #include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
@@ -18,6 +18,7 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/button_menu.h>
 #include <gui/modules/button_panel.h>
+#include <gui/modules/variable_item_list.h>
 
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
@@ -108,6 +109,7 @@ struct InfraredApp {
 
     Submenu* submenu; /**< Standard view for displaying application menus. */
     TextInput* text_input; /**< Standard view for receiving user text input. */
+    VariableItemList* variable_item_list;
     DialogEx* dialog_ex; /**< Standard view for displaying dialogs. */
     ButtonMenu* button_menu; /**< Custom view for interacting with IR remotes. */
     Popup* popup; /**< Standard view for displaying messages. */
@@ -134,6 +136,7 @@ struct InfraredApp {
 typedef enum {
     InfraredViewSubmenu,
     InfraredViewTextInput,
+    InfraredViewVariableItemList,
     InfraredViewDialogEx,
     InfraredViewButtonMenu,
     InfraredViewPopup,

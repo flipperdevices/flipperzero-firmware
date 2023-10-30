@@ -29,8 +29,9 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1029-2313-0.93.1-ae9f3a7](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-23 23:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-29 23:13 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-10-30 14:14 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-10-30 14:14 EST`
+- Deferred: OFWx5: [NFC refactoring #3050](https://github.com/flipperdevices/flipperzero-firmware/pull/3050) [MF DESFire Fixes #3167](https://github.com/flipperdevices/flipperzero-firmware/pull/3167) [NFC RC fixes #3165](https://github.com/flipperdevices/flipperzero-firmware/pull/3165) [Fix crash on files > 64B #3166](https://github.com/flipperdevices/flipperzero-firmware/pull/3166) [fix crash after st25tb save #3170](https://github.com/flipperdevices/flipperzero-firmware/pull/3170) Waiting on bug removal and app refactors to not hinder NFC functionality.
 - [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) ADDED: `sas_lounge.html` by [PontusMadsen](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/79)
 - SubGHz: [Transmit Indicator before Out of Region Frequency Use (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e24d4a0689db555ae083fec23a471e878adb6cd4)
 - Added: [Genie Recorder v2.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/apps/genie-recorder)
@@ -57,6 +58,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [Authenticator/TOTP v5.6.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Bluetooth/USB Remote v1.5 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
+- OFW: [Storage: speedup write_chunk cli command #3173 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3173)
+- OFW: [Allow for larger Infrared remotes #3164 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3173)
+- Temp Deferred (more testing needed): OFW: [fbt: reworked assets & resources handling #3160 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3160)
 
 <a name="release">
 
