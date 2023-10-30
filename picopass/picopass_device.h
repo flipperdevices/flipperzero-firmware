@@ -96,7 +96,7 @@ typedef struct {
 } PicopassPacs;
 
 typedef struct {
-    uint8_t data[RFAL_PICOPASS_BLOCK_LEN];
+    uint8_t data[PICOPASS_BLOCK_LEN];
 } PicopassBlock;
 
 typedef struct {
