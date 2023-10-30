@@ -76,7 +76,7 @@ static const FuriHalNfcTech nfc_tech_table[NfcModeNum][NfcTechNum] = {
             [NfcTechIso14443a] = FuriHalNfcTechIso14443a,
             [NfcTechIso14443b] = FuriHalNfcTechInvalid,
             [NfcTechIso15693] = FuriHalNfcTechIso15693,
-            [NfcTechFelica] = FuriHalNfcTechInvalid,
+            [NfcTechFelica] = FuriHalNfcTechFelica,
         },
 };
 

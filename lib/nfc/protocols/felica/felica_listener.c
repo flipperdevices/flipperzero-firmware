@@ -14,6 +14,13 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
     instance->data = data;
     instance->tx_buffer = bit_buffer_alloc(FELICA_LISTENER_MAX_BUFFER_SIZE);
 
+    //nfc_set_guard_time_us(instance->nfc, FELICA_GUARD_TIME_US);
+    nfc_set_fdt_listen_fc(
+        instance->nfc, FELICA_FDT_LISTEN_FC); //TODO verify FELICA_FDT_LISTEN_FC value
+
+    nfc_config(instance->nfc, NfcModeListener, NfcTechFelica);
+    //nfc_set_fdt_poll_poll_us(instance->nfc, FELICA_POLL_POLL_MIN_US);
+
     return instance;
 }
 
