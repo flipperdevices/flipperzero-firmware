@@ -149,6 +149,10 @@ typedef struct {
 } MfClassicChangeValueContext;
 
 typedef struct {
+    uint8_t block_num;
+} MfClassicTransferValueContext;
+
+typedef struct {
     MfClassicDeviceKeys keys;
     uint8_t current_sector;
 } MfClassicReadContext;
@@ -160,6 +164,7 @@ typedef union {
     MfClassicWriteBlockContext write_block_context;
     MfClassicReadValueContext read_value_context;
     MfClassicChangeValueContext change_value_context;
+    MfClassicTransferValueContext transfer_value_context;
     MfClassicReadContext read_context;
 } MfClassicPollerContextData;
 
