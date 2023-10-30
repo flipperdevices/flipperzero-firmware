@@ -6,7 +6,8 @@
 
 #define TAG "MfDesfirePoller"
 
-#define MF_DESFIRE_BUF_SIZE_MAX (64U)
+#define MF_DESFIRE_BUF_SIZE (64U)
+#define MF_DESFIRE_RESULT_BUF_SIZE (512U)
 
 typedef NfcCommand (*MfDesfirePollerReadHandler)(MfDesfirePoller* instance);
 
@@ -20,18 +21,16 @@ static MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_p
     MfDesfirePoller* instance = malloc(sizeof(MfDesfirePoller));
     instance->iso14443_4a_poller = iso14443_4a_poller;
     instance->data = mf_desfire_alloc();
-    instance->tx_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
-    instance->rx_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
-    instance->input_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
-    instance->result_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
+    instance->tx_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE);
+    instance->rx_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE);
+    instance->input_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE);
+    instance->result_buffer = bit_buffer_alloc(MF_DESFIRE_RESULT_BUF_SIZE);
 
     instance->mf_desfire_event.data = &instance->mf_desfire_event_data;
 
     instance->general_event.protocol = NfcProtocolMfDesfire;
     instance->general_event.event_data = &instance->mf_desfire_event;
     instance->general_event.instance = instance;
-
-    nfc_set_fdt_poll_fc(iso14443_4a_poller->iso14443_3a_poller->nfc, 50000);
 
     return instance;
 }
