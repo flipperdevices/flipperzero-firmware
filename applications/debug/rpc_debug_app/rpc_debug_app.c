@@ -59,10 +59,6 @@ static void rpc_debug_app_rpc_command_callback(const RpcAppSystemEvent* event, v
     } else if(event->type == RpcAppEventTypeDataExchange) {
         furi_assert(event->data.type == RpcAppSystemEventDataTypeBytes);
 
-        for(uint32_t i = 0; i < event->data.bytes.size; ++i) {
-            FURI_LOG_D("Hello", "%02X", event->data.bytes.ptr[i]);
-        }
-
         rpc_debug_app_format_hex(
             event->data.bytes.ptr, event->data.bytes.size, app->text_store, TEXT_STORE_SIZE);
 
