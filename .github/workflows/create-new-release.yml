@@ -131,7 +131,7 @@ jobs:
           path: release
 
       - name: Upload Release Assets
-        uses: shogo82148/actions-upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@v1.7.2
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: release/**
+          asset_path: release/*.*
