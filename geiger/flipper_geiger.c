@@ -217,7 +217,7 @@ int32_t flipper_geiger_app()
         {   
             if(event.type == EventTypeInput) 
             {
-                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) 
+                if(event.input.key == InputKeyBack && (event.input.type == InputTypeShort || event.input.type == InputTypeLong)) 
                 {
                     break;
                 }
