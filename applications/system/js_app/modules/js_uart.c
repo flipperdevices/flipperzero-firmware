@@ -14,10 +14,10 @@ typedef struct {
 
 typedef struct {
     size_t len;
-    char* text;
-} PatternListItem;
+    char* data;
+} PatternArrayItem;
 
-ARRAY_DEF(PatternList, PatternListItem, M_POD_OPLIST);
+ARRAY_DEF(PatternArray, PatternArrayItem, M_POD_OPLIST);
 
 static void js_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     JsUartInst* uart = context;
@@ -86,8 +86,25 @@ static void js_uart_write(struct mjs* mjs) {
                 break;
             }
             furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)&byte_val, 1);
+        } else if(mjs_is_array(arg)) {
+            size_t array_len = mjs_array_length(mjs, arg);
+            for(size_t i = 0; i < array_len; i++) {
+                mjs_val_t array_arg = mjs_array_get(mjs, arg, i);
+                if(!mjs_is_number(array_arg)) {
+                    args_correct = false;
+                    break;
+                }
+                uint32_t byte_val = mjs_get_int32(mjs, array_arg);
+                if(byte_val > 0xFF) {
+                    args_correct = false;
+                    break;
+                }
+                furi_hal_uart_tx(FuriHalUartIdLPUART1, (uint8_t*)&byte_val, 1);
+            }
+            if(!args_correct) {
+                break;
+            }
         } else {
-            // TODO: mjs_is_array(v)
             args_correct = false;
             break;
         }
@@ -229,7 +246,49 @@ static void js_uart_readln(struct mjs* mjs) {
     furi_string_free(rx_buf);
 }
 
-static bool js_uart_expect_parse_args(struct mjs* mjs, PatternList_t patterns, uint32_t* timeout) {
+static bool js_uart_expect_parse_string(struct mjs* mjs, mjs_val_t arg, PatternArray_t patterns) {
+    size_t str_len = 0;
+    const char* arg_str = mjs_get_string(mjs, &arg, &str_len);
+    if((str_len == 0) || (arg_str == NULL)) {
+        return false;
+    }
+    PatternArrayItem* item = PatternArray_push_new(patterns);
+    item->data = malloc(str_len + 1);
+    memcpy(item->data, arg_str, str_len);
+    item->len = str_len;
+    return true;
+}
+
+static bool js_uart_expect_parse_array(struct mjs* mjs, mjs_val_t arg, PatternArray_t patterns) {
+    size_t array_len = mjs_array_length(mjs, arg);
+    if(array_len == 0) {
+        return false;
+    }
+    char* array_data = malloc(array_len + 1);
+
+    for(size_t i = 0; i < array_len; i++) {
+        mjs_val_t array_arg = mjs_array_get(mjs, arg, i);
+        if(!mjs_is_number(array_arg)) {
+            free(array_data);
+            return false;
+        }
+
+        uint32_t byte_val = mjs_get_int32(mjs, array_arg);
+        if(byte_val > 0xFF) {
+            free(array_data);
+            return false;
+        }
+        array_data[i] = byte_val;
+    }
+
+    PatternArrayItem* item = PatternArray_push_new(patterns);
+    item->data = array_data;
+    item->len = array_len;
+    return true;
+}
+
+static bool
+    js_uart_expect_parse_args(struct mjs* mjs, PatternArray_t patterns, uint32_t* timeout) {
     size_t num_args = mjs_nargs(mjs);
     if(num_args == 2) {
         mjs_val_t timeout_arg = mjs_arg(mjs, 1);
@@ -241,45 +300,52 @@ static bool js_uart_expect_parse_args(struct mjs* mjs, PatternList_t patterns, u
         return false;
     }
     mjs_val_t patterns_arg = mjs_arg(mjs, 0);
-    if(mjs_is_string(patterns_arg)) { // Single string argument
-        size_t str_len = 0;
-        const char* arg_str = mjs_get_string(mjs, &patterns_arg, &str_len);
-        if((str_len == 0) || (arg_str == NULL)) {
+    if(mjs_is_string(patterns_arg)) { // Single string pattern
+        if(!js_uart_expect_parse_string(mjs, patterns_arg, patterns)) {
             return false;
         }
-        PatternListItem* item = PatternList_push_new(patterns);
-        item->text = malloc(str_len + 1);
-        memcpy(item->text, arg_str, str_len);
-        item->len = str_len;
-    } else if(mjs_is_array(patterns_arg)) { // Array of strings
-        size_t patterns_cnt = mjs_array_length(mjs, patterns_arg);
-        for(size_t i = 0; i < patterns_cnt; i++) {
-            mjs_val_t arg = mjs_array_get(mjs, patterns_arg, i);
-            if(!mjs_is_string(arg)) {
-                return false;
-            }
-            size_t str_len = 0;
-            const char* arg_str = mjs_get_string(mjs, &arg, &str_len);
-            if((str_len == 0) || (arg_str == NULL)) {
-                return false;
-            }
-            PatternListItem* item = PatternList_push_new(patterns);
-            item->text = malloc(str_len + 1);
-            memcpy(item->text, arg_str, str_len);
-            item->len = str_len;
+    } else if(mjs_is_array(patterns_arg)) {
+        size_t array_len = mjs_array_length(mjs, patterns_arg);
+        if(array_len == 0) {
+            return false;
         }
-        // TODO: support for binary patterns
+        mjs_val_t array_arg = mjs_array_get(mjs, patterns_arg, 0);
+
+        if(mjs_is_number(array_arg)) { // Binary array pattern
+            if(!js_uart_expect_parse_array(mjs, patterns_arg, patterns)) {
+                return false;
+            }
+        } else if((mjs_is_string(array_arg)) || (mjs_is_array(array_arg))) { // Multiple patterns
+            for(size_t i = 0; i < array_len; i++) {
+                mjs_val_t arg = mjs_array_get(mjs, patterns_arg, i);
+
+                if(mjs_is_string(arg)) {
+                    if(!js_uart_expect_parse_string(mjs, arg, patterns)) {
+                        return false;
+                    }
+                } else if(mjs_is_array(arg)) {
+                    if(!js_uart_expect_parse_array(mjs, arg, patterns)) {
+                        return false;
+                    }
+                }
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
     }
     return true;
 }
 
-static int32_t check_pattern_start(PatternList_t patterns, char value, int32_t pattern_last) {
-    size_t list_len = PatternList_size(patterns);
-    if((pattern_last + 1) >= (int32_t)list_len) {
+static int32_t
+    js_uart_expect_check_pattern_start(PatternArray_t patterns, char value, int32_t pattern_last) {
+    size_t array_len = PatternArray_size(patterns);
+    if((pattern_last + 1) >= (int32_t)array_len) {
         return (-1);
     }
-    for(size_t i = pattern_last + 1; i < list_len; i++) {
-        if(PatternList_get(patterns, i)->text[0] == value) {
+    for(size_t i = pattern_last + 1; i < array_len; i++) {
+        if(PatternArray_get(patterns, i)->data[0] == value) {
             return i;
         }
     }
@@ -297,20 +363,24 @@ static void js_uart_expect(struct mjs* mjs) {
     }
 
     uint32_t timeout = FuriWaitForever;
-    PatternList_t patterns;
-    PatternList_init(patterns);
+    PatternArray_t patterns;
+    PatternArray_it_t it;
+    PatternArray_init(patterns);
 
     if(!js_uart_expect_parse_args(mjs, patterns, &timeout)) {
         mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "");
         mjs_return(mjs, MJS_UNDEFINED);
-        PatternList_clear(patterns);
+        for(PatternArray_it(it, patterns); !PatternArray_end_p(it); PatternArray_next(it)) {
+            const PatternArrayItem* item = PatternArray_cref(it);
+            free(item->data);
+        }
+        PatternArray_clear(patterns);
         return;
     }
 
     size_t pattern_len_max = 0;
-    PatternList_it_t it;
-    for(PatternList_it(it, patterns); !PatternList_end_p(it); PatternList_next(it)) {
-        const PatternListItem* item = PatternList_cref(it);
+    for(PatternArray_it(it, patterns); !PatternArray_end_p(it); PatternArray_next(it)) {
+        const PatternArrayItem* item = PatternArray_cref(it);
         if(item->len > pattern_len_max) {
             pattern_len_max = item->len;
         }
@@ -330,7 +400,7 @@ static void js_uart_expect(struct mjs* mjs) {
                 is_timeout = true;
                 break;
             }
-            pattern_candidate = check_pattern_start(patterns, compare_buf[0], -1);
+            pattern_candidate = js_uart_expect_check_pattern_start(patterns, compare_buf[0], -1);
             if(pattern_candidate == -1) {
                 continue;
             }
@@ -339,7 +409,7 @@ static void js_uart_expect(struct mjs* mjs) {
         assert(pattern_candidate >= 0);
 
         // Read next and try to find pattern match
-        PatternListItem* pattern_cur = PatternList_get(patterns, pattern_candidate);
+        PatternArrayItem* pattern_cur = PatternArray_get(patterns, pattern_candidate);
         pattern_found = pattern_candidate;
         for(size_t i = 0; i < pattern_cur->len; i++) {
             if(i >= buf_len) {
@@ -350,7 +420,7 @@ static void js_uart_expect(struct mjs* mjs) {
                 }
                 buf_len++;
             }
-            if(compare_buf[i] != pattern_cur->text[i]) {
+            if(compare_buf[i] != pattern_cur->data[i]) {
                 pattern_found = -1;
                 break;
             }
@@ -360,14 +430,15 @@ static void js_uart_expect(struct mjs* mjs) {
         }
 
         // Search other patterns with the same start char
-        pattern_candidate = check_pattern_start(patterns, compare_buf[0], pattern_candidate);
+        pattern_candidate =
+            js_uart_expect_check_pattern_start(patterns, compare_buf[0], pattern_candidate);
         if(pattern_candidate >= 0) {
             continue;
         }
 
         // Look for another pattern start
         for(size_t i = 1; i < buf_len; i++) {
-            pattern_candidate = check_pattern_start(patterns, compare_buf[i], -1);
+            pattern_candidate = js_uart_expect_check_pattern_start(patterns, compare_buf[i], -1);
             if(pattern_candidate >= 0) {
                 memmove(&compare_buf[0], &compare_buf[i], buf_len - i);
                 buf_len -= i;
@@ -385,11 +456,11 @@ static void js_uart_expect(struct mjs* mjs) {
         FURI_LOG_W(TAG, "Expect: timeout");
     }
 
-    for(PatternList_it(it, patterns); !PatternList_end_p(it); PatternList_next(it)) {
-        const PatternListItem* item = PatternList_cref(it);
-        free(item->text);
+    for(PatternArray_it(it, patterns); !PatternArray_end_p(it); PatternArray_next(it)) {
+        const PatternArrayItem* item = PatternArray_cref(it);
+        free(item->data);
     }
-    PatternList_clear(patterns);
+    PatternArray_clear(patterns);
     free(compare_buf);
 
     if(pattern_found >= 0) {

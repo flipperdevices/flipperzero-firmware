@@ -1,8 +1,10 @@
 let uart = require("uart");
 uart.setup(115200);
 
-uart.write("\n");
-let console_resp = uart.expect("# ", 1000);
+// uart.write("\n");
+uart.write([0x0a]);
+// let console_resp = uart.expect("# ", 1000);
+let console_resp = uart.expect([0x23, 0x20], 1000);
 if (console_resp === undefined) {
     print("No CLI response");
 } else {
@@ -17,5 +19,3 @@ if (console_resp === undefined) {
         print("uci cmd not found");
     }
 }
-
-
