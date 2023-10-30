@@ -54,7 +54,7 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             popup_set_text(
                 infrared->popup, infrared->text_store[0], 89, 44, AlignCenter, AlignTop);
 
-            rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventLoadFile, result);
+            rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventTypeLoadFile, result);
         } else if(
             event.event == InfraredCustomEventTypeRpcButtonPressName ||
             event.event == InfraredCustomEventTypeRpcButtonPressIndex) {
@@ -79,7 +79,7 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                     result = true;
                 }
             }
-            rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventButtonRelease, result);
+            rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventTypeButtonRelease, result);
         } else if(event.event == InfraredCustomEventTypeRpcButtonRelease) {
             bool result = false;
             if(state == InfraredRpcStateSending) {
@@ -88,11 +88,11 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_set_scene_state(
                     infrared->scene_manager, InfraredSceneRpc, InfraredRpcStateLoaded);
             }
-            rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventButtonRelease, result);
+            rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventTypeButtonRelease, result);
         } else if(event.event == InfraredCustomEventTypeRpcExit) {
             scene_manager_stop(infrared->scene_manager);
             view_dispatcher_stop(infrared->view_dispatcher);
-            rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventAppExit, true);
+            rpc_system_app_confirm(infrared->rpc_ctx, RpcAppEventTypeAppExit, true);
         } else if(event.event == InfraredCustomEventTypeRpcSessionClose) {
             scene_manager_stop(infrared->scene_manager);
             view_dispatcher_stop(infrared->view_dispatcher);

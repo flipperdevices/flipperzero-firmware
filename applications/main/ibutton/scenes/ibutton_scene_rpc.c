@@ -36,10 +36,10 @@ bool ibutton_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 result = true;
             }
 
-            rpc_system_app_confirm(ibutton->rpc, RpcAppEventLoadFile, result);
+            rpc_system_app_confirm(ibutton->rpc, RpcAppEventTypeLoadFile, result);
 
         } else if(event.event == iButtonCustomEventRpcExit) {
-            rpc_system_app_confirm(ibutton->rpc, RpcAppEventAppExit, true);
+            rpc_system_app_confirm(ibutton->rpc, RpcAppEventTypeAppExit, true);
             scene_manager_stop(ibutton->scene_manager);
             view_dispatcher_stop(ibutton->view_dispatcher);
 

@@ -6,28 +6,33 @@ extern "C" {
 #endif
 
 typedef enum {
-    RpcAppEventSessionClose,
-    RpcAppEventAppExit,
-    RpcAppEventLoadFile,
-    RpcAppEventButtonPress,
-    RpcAppEventButtonRelease,
-} RpcAppSystemEvent;
-
-typedef enum {
-    RpcAppSystemDataTypeCStr,
-    RpcAppSystemDataTypeInt32,
-} RpcAppSystemDataType;
+    RpcAppSystemEventDataTypeNone,
+    RpcAppSystemEventDataTypeCStr,
+    RpcAppSystemEventDataTypeInt32,
+} RpcAppSystemEventDataType;
 
 typedef struct {
-    RpcAppSystemDataType type;
+    RpcAppSystemEventDataType type;
     union {
         const char* cstr;
         int32_t i32;
     };
-} RpcAppSystemData;
+} RpcAppSystemEventData;
 
-typedef void (
-    *RpcAppSystemCallback)(RpcAppSystemEvent event, const RpcAppSystemData* data, void* context);
+typedef enum {
+    RpcAppEventTypeSessionClose,
+    RpcAppEventTypeAppExit,
+    RpcAppEventTypeLoadFile,
+    RpcAppEventTypeButtonPress,
+    RpcAppEventTypeButtonRelease,
+} RpcAppSystemEventType;
+
+typedef struct {
+    RpcAppSystemEventType type;
+    RpcAppSystemEventData data;
+} RpcAppSystemEvent;
+
+typedef void (*RpcAppSystemCallback)(const RpcAppSystemEvent* event, void* context);
 typedef void (
     *RpcAppSystemDataExchangeCallback)(const uint8_t* data, size_t data_size, void* context);
 
@@ -42,7 +47,7 @@ void rpc_system_app_send_started(RpcAppSystem* rpc_app);
 
 void rpc_system_app_send_exited(RpcAppSystem* rpc_app);
 
-void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEvent event, bool result);
+void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEventType event_type, bool result);
 
 void rpc_system_app_set_error_code(RpcAppSystem* rpc_app, uint32_t error_code);
 

@@ -44,44 +44,42 @@ static void infrared_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(infrared->scene_manager);
 }
 
-static void infrared_rpc_command_callback(
-    RpcAppSystemEvent event,
-    const RpcAppSystemData* data,
-    void* context) {
+static void infrared_rpc_command_callback(const RpcAppSystemEvent* event, void* context) {
     furi_assert(context);
     InfraredApp* infrared = context;
     furi_assert(infrared->rpc_ctx);
 
-    if(event == RpcAppEventSessionClose) {
+    if(event->type == RpcAppEventTypeSessionClose) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcSessionClose);
         rpc_system_app_set_callback(infrared->rpc_ctx, NULL, NULL);
         infrared->rpc_ctx = NULL;
-    } else if(event == RpcAppEventAppExit) {
+    } else if(event->type == RpcAppEventTypeAppExit) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcExit);
-    } else if(event == RpcAppEventLoadFile) {
-        furi_assert(data->type == RpcAppSystemDataTypeCStr);
-        furi_string_set(infrared->file_path, data->cstr);
+    } else if(event->type == RpcAppEventTypeLoadFile) {
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeCStr);
+        furi_string_set(infrared->file_path, event->data.cstr);
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcLoadFile);
-    } else if(event == RpcAppEventButtonPress) {
+    } else if(event->type == RpcAppEventTypeButtonPress) {
         furi_assert(
-            data->type == RpcAppSystemDataTypeCStr || data->type == RpcAppSystemDataTypeInt32);
-        if(data->type == RpcAppSystemDataTypeCStr) {
-            furi_string_set(infrared->button_name, data->cstr);
+            event->data.type == RpcAppSystemEventDataTypeCStr ||
+            event->data.type == RpcAppSystemEventDataTypeInt32);
+        if(event->data.type == RpcAppSystemEventDataTypeCStr) {
+            furi_string_set(infrared->button_name, event->data.cstr);
             view_dispatcher_send_custom_event(
                 infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressName);
-        } else if(data->type == RpcAppSystemDataTypeInt32) {
-            infrared->app_state.current_button_index = data->i32;
+        } else if(event->data.type == RpcAppSystemEventDataTypeInt32) {
+            infrared->app_state.current_button_index = event->data.i32;
             view_dispatcher_send_custom_event(
                 infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressIndex);
         }
-    } else if(event == RpcAppEventButtonRelease) {
+    } else if(event->type == RpcAppEventTypeButtonRelease) {
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonRelease);
     } else {
-        rpc_system_app_confirm(infrared->rpc_ctx, event, false);
+        rpc_system_app_confirm(infrared->rpc_ctx, event->type, false);
     }
 }
 

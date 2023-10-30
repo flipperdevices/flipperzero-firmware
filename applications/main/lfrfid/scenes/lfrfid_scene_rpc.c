@@ -24,7 +24,7 @@ bool lfrfid_scene_rpc_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == LfRfidEventExit) {
-            rpc_system_app_confirm(app->rpc_ctx, RpcAppEventAppExit, true);
+            rpc_system_app_confirm(app->rpc_ctx, RpcAppEventTypeAppExit, true);
             scene_manager_stop(app->scene_manager);
             view_dispatcher_stop(app->view_dispatcher);
         } else if(event.event == LfRfidEventRpcSessionClose) {
@@ -46,7 +46,7 @@ bool lfrfid_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                     result = true;
                 }
             }
-            rpc_system_app_confirm(app->rpc_ctx, RpcAppEventLoadFile, result);
+            rpc_system_app_confirm(app->rpc_ctx, RpcAppEventTypeLoadFile, result);
         }
     }
     return consumed;
