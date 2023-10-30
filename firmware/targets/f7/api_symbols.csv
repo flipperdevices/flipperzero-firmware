@@ -2506,7 +2506,6 @@ Function,+,rpc_system_app_exchange_data,void,"RpcAppSystem*, const uint8_t*, siz
 Function,+,rpc_system_app_send_exited,void,RpcAppSystem*
 Function,+,rpc_system_app_send_started,void,RpcAppSystem*
 Function,+,rpc_system_app_set_callback,void,"RpcAppSystem*, RpcAppSystemCallback, void*"
-Function,+,rpc_system_app_set_data_exchange_callback,void,"RpcAppSystem*, RpcAppSystemDataExchangeCallback, void*"
 Function,+,rpc_system_app_set_error_code,void,"RpcAppSystem*, uint32_t"
 Function,+,rpc_system_app_set_error_text,void,"RpcAppSystem*, const char*"
 Function,-,rpmatch,int,const char*

@@ -58,16 +58,16 @@ static void infrared_rpc_command_callback(const RpcAppSystemEvent* event, void* 
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcExit);
     } else if(event->type == RpcAppEventTypeLoadFile) {
-        furi_assert(event->data.type == RpcAppSystemEventDataTypeCStr);
-        furi_string_set(infrared->file_path, event->data.cstr);
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeString);
+        furi_string_set(infrared->file_path, event->data.string);
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcLoadFile);
     } else if(event->type == RpcAppEventTypeButtonPress) {
         furi_assert(
-            event->data.type == RpcAppSystemEventDataTypeCStr ||
+            event->data.type == RpcAppSystemEventDataTypeString ||
             event->data.type == RpcAppSystemEventDataTypeInt32);
-        if(event->data.type == RpcAppSystemEventDataTypeCStr) {
-            furi_string_set(infrared->button_name, event->data.cstr);
+        if(event->data.type == RpcAppSystemEventDataTypeString) {
+            furi_string_set(infrared->button_name, event->data.string);
             view_dispatcher_send_custom_event(
                 infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressName);
         } else if(event->data.type == RpcAppSystemEventDataTypeInt32) {

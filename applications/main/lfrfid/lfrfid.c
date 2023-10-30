@@ -25,8 +25,8 @@ static void rpc_command_callback(const RpcAppSystemEvent* event, void* context) 
     } else if(event->type == RpcAppEventTypeAppExit) {
         view_dispatcher_send_custom_event(app->view_dispatcher, LfRfidEventExit);
     } else if(event->type == RpcAppEventTypeLoadFile) {
-        furi_assert(event->data.type == RpcAppSystemEventDataTypeCStr);
-        furi_string_set(app->file_path, event->data.cstr);
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeString);
+        furi_string_set(app->file_path, event->data.string);
         view_dispatcher_send_custom_event(app->view_dispatcher, LfRfidEventRpcLoadFile);
     } else {
         rpc_system_app_confirm(app->rpc_ctx, event->type, false);

@@ -10,11 +10,8 @@
 struct RpcAppSystem {
     RpcSession* session;
 
-    RpcAppSystemCallback app_callback;
-    void* app_context;
-
-    RpcAppSystemDataExchangeCallback data_exchange_callback;
-    void* data_exchange_context;
+    RpcAppSystemCallback callback;
+    void* callback_context;
 
     PB_Main* state_msg;
     PB_Main* error_msg;
@@ -114,18 +111,20 @@ static void rpc_system_app_exit_request(const PB_Main* request, void* context) {
 
     PB_CommandStatus status;
 
-    if(rpc_app->app_callback) {
+    if(rpc_app->callback) {
         FURI_LOG_D(TAG, "ExitRequest: id %lu", request->command_id);
         furi_assert(!rpc_app->last_id);
         rpc_app->last_id = request->command_id;
 
         const RpcAppSystemEvent event = {
             .type = RpcAppEventTypeAppExit,
-            .data = {
-                .type = RpcAppSystemEventDataTypeNone,
-            }};
+            .data =
+                {
+                    .type = RpcAppSystemEventDataTypeNone,
+                },
+        };
 
-        rpc_app->app_callback(&event, rpc_app->app_context);
+        rpc_app->callback(&event, rpc_app->callback_context);
 
     } else {
         status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
@@ -146,19 +145,21 @@ static void rpc_system_app_load_file(const PB_Main* request, void* context) {
     furi_assert(session);
 
     PB_CommandStatus status;
-    if(rpc_app->app_callback) {
+    if(rpc_app->callback) {
         FURI_LOG_D(TAG, "LoadFile: id %lu", request->command_id);
         furi_assert(!rpc_app->last_id);
         rpc_app->last_id = request->command_id;
 
         const RpcAppSystemEvent event = {
             .type = RpcAppEventTypeLoadFile,
-            .data = {
-                .type = RpcAppSystemEventDataTypeCStr,
-                .cstr = request->content.app_load_file_request.path,
-            }};
+            .data =
+                {
+                    .type = RpcAppSystemEventDataTypeString,
+                    .string = request->content.app_load_file_request.path,
+                },
+        };
 
-        rpc_app->app_callback(&event, rpc_app->app_context);
+        rpc_app->callback(&event, rpc_app->callback_context);
 
     } else {
         status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
@@ -179,19 +180,21 @@ static void rpc_system_app_button_press(const PB_Main* request, void* context) {
     furi_assert(session);
 
     PB_CommandStatus status;
-    if(rpc_app->app_callback) {
+    if(rpc_app->callback) {
         FURI_LOG_D(TAG, "ButtonPress");
         furi_assert(!rpc_app->last_id);
         rpc_app->last_id = request->command_id;
 
         const RpcAppSystemEvent event = {
             .type = RpcAppEventTypeButtonPress,
-            .data = {
-                .type = RpcAppSystemEventDataTypeCStr,
-                .cstr = request->content.app_button_press_request.args,
-            }};
+            .data =
+                {
+                    .type = RpcAppSystemEventDataTypeString,
+                    .string = request->content.app_button_press_request.args,
+                },
+        };
 
-        rpc_app->app_callback(&event, rpc_app->app_context);
+        rpc_app->callback(&event, rpc_app->callback_context);
 
     } else {
         status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
@@ -212,18 +215,20 @@ static void rpc_system_app_button_release(const PB_Main* request, void* context)
     furi_assert(session);
 
     PB_CommandStatus status;
-    if(rpc_app->app_callback) {
+    if(rpc_app->callback) {
         FURI_LOG_D(TAG, "ButtonRelease");
         furi_assert(!rpc_app->last_id);
         rpc_app->last_id = request->command_id;
 
         const RpcAppSystemEvent event = {
             .type = RpcAppEventTypeButtonRelease,
-            .data = {
-                .type = RpcAppSystemEventDataTypeNone,
-            }};
+            .data =
+                {
+                    .type = RpcAppSystemEventDataTypeNone,
+                },
+        };
 
-        rpc_app->app_callback(&event, rpc_app->app_context);
+        rpc_app->callback(&event, rpc_app->callback_context);
 
     } else {
         status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
@@ -258,24 +263,35 @@ static void rpc_system_app_data_exchange_process(const PB_Main* request, void* c
     RpcSession* session = rpc_app->session;
     furi_assert(session);
 
-    PB_CommandStatus command_status;
-    pb_bytes_array_t* data = request->content.app_data_exchange_request.data;
+    PB_CommandStatus status;
 
-    if(rpc_app->data_exchange_callback) {
-        uint8_t* data_bytes = NULL;
-        size_t data_size = 0;
-        if(data) {
-            data_bytes = data->bytes;
-            data_size = data->size;
-        }
-        rpc_app->data_exchange_callback(data_bytes, data_size, rpc_app->data_exchange_context);
-        command_status = PB_CommandStatus_OK;
+    if(rpc_app->callback) {
+        FURI_LOG_D(TAG, "DataExchange");
+        furi_assert(!rpc_app->last_id);
+        rpc_app->last_id = request->command_id;
+
+        const pb_bytes_array_t* data = request->content.app_data_exchange_request.data;
+
+        const RpcAppSystemEvent event = {
+            .type = RpcAppEventTypeDataExchange,
+            .data =
+                {
+                    .type = RpcAppSystemEventDataTypeBytes,
+                    .bytes =
+                        {
+                            .ptr = data ? data->bytes : NULL,
+                            .size = data ? data->size : 0,
+                        },
+                },
+        };
+
+        rpc_app->callback(&event, rpc_app->callback_context);
     } else {
-        command_status = PB_CommandStatus_ERROR_APP_CMD_ERROR;
+        status = PB_CommandStatus_ERROR_APP_NOT_RUNNING;
+        FURI_LOG_E(
+            TAG, "DataExchange: APP_NOT_RUNNING, id %lu, status: %d", request->command_id, status);
+        rpc_send_and_release_empty(session, request->command_id, status);
     }
-
-    FURI_LOG_D(TAG, "DataExchange");
-    rpc_send_and_release_empty(session, request->command_id, command_status);
 }
 
 void rpc_system_app_send_started(RpcAppSystem* rpc_app) {
@@ -328,8 +344,8 @@ void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEventType event_t
 void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback callback, void* ctx) {
     furi_assert(rpc_app);
 
-    rpc_app->app_callback = callback;
-    rpc_app->app_context = ctx;
+    rpc_app->callback = callback;
+    rpc_app->callback_context = ctx;
 }
 
 void rpc_system_app_set_error_code(RpcAppSystem* rpc_app, uint32_t error_code) {
@@ -354,16 +370,6 @@ void rpc_system_app_error_reset(RpcAppSystem* rpc_app) {
 
     rpc_system_app_set_error_code(rpc_app, 0);
     rpc_system_app_set_error_text(rpc_app, NULL);
-}
-
-void rpc_system_app_set_data_exchange_callback(
-    RpcAppSystem* rpc_app,
-    RpcAppSystemDataExchangeCallback callback,
-    void* ctx) {
-    furi_assert(rpc_app);
-
-    rpc_app->data_exchange_callback = callback;
-    rpc_app->data_exchange_context = ctx;
 }
 
 void rpc_system_app_exchange_data(RpcAppSystem* rpc_app, const uint8_t* data, size_t data_size) {
@@ -448,21 +454,21 @@ void rpc_system_app_free(void* context) {
     RpcSession* session = rpc_app->session;
     furi_assert(session);
 
-    if(rpc_app->app_callback) {
+    if(rpc_app->callback) {
         const RpcAppSystemEvent event = {
             .type = RpcAppEventTypeSessionClose,
-            .data = {
-                .type = RpcAppSystemEventDataTypeNone,
-            }};
+            .data =
+                {
+                    .type = RpcAppSystemEventDataTypeNone,
+                },
+        };
 
-        rpc_app->app_callback(&event, rpc_app->app_context);
+        rpc_app->callback(&event, rpc_app->callback_context);
     }
 
-    while(rpc_app->app_callback) {
+    while(rpc_app->callback) {
         furi_delay_tick(1);
     }
-
-    furi_assert(!rpc_app->data_exchange_callback);
 
     pb_release(&PB_Main_msg, rpc_app->error_msg);
 

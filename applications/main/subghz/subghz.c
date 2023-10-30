@@ -34,8 +34,8 @@ static void subghz_rpc_command_callback(const RpcAppSystemEvent* event, void* co
     } else if(event->type == RpcAppEventTypeAppExit) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
     } else if(event->type == RpcAppEventTypeLoadFile) {
-        furi_assert(event->data.type == RpcAppSystemEventDataTypeCStr);
-        furi_string_set(subghz->file_path, event->data.cstr);
+        furi_assert(event->data.type == RpcAppSystemEventDataTypeString);
+        furi_string_set(subghz->file_path, event->data.string);
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneRpcLoad);
     } else if(event->type == RpcAppEventTypeButtonPress) {
         view_dispatcher_send_custom_event(
