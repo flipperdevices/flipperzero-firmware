@@ -21,9 +21,9 @@
 #define NUM_MENU_ITEMS (6)
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
-#define UART_CH                                                                 \
-    (XTREME_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
-                                                          FuriHalUartIdLPUART1)
+#define UART_CH                                                              \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : \
+                                                       FuriHalUartIdLPUART1)
 
 #define SET_HTML_CMD "sethtml"
 #define SET_AP_CMD "setap"
