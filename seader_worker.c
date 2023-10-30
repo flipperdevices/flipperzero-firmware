@@ -649,3 +649,46 @@ int32_t seader_worker_task(void* context) {
 
     return 0;
 }
+
+NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void* context) {
+    furi_assert(event.protocol == NfcProtocolIso14443_4a);
+
+    Seader* seader = context;
+    SeaderUartBridge* seader_uart = seader->uart;
+    const Iso14443_4aPollerEvent* iso14443_4a_event = event.event_data;
+
+    if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
+        nfc_device_set_data(seader->nfc_device, NfcProtocolIso14443_4a, nfc_poller_get_data(seader->poller));
+        FURI_LOG_D(TAG, "poller 14a ready");
+
+        size_t uid_len;
+        const uint8_t* uid = nfc_device_get_uid(seader->nfc_device, &uid_len);
+
+        // const Iso14443_4aData* iso14443_4a_data = nfc_device_get_data(seader->nfc_device, NfcProtocolIso14443_4a);
+        //const Iso14443_3aData* iso14443_3a_data = iso14443_4a_data->iso14443_3a_data;
+        const Iso14443_3aData* iso14443_3a_data = nfc_device_get_data(seader->nfc_device, NfcProtocolIso14443_3a);
+        uint8_t sak_val = iso14443_3a_get_sak(iso14443_3a_data);
+
+        CardDetails_t* cardDetails = 0;
+        cardDetails = calloc(1, sizeof *cardDetails);
+        assert(cardDetails);
+
+        OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)uid, uid_len);
+        uint8_t protocolBytes[] = {0x00, FrameProtocol_nfc};
+        OCTET_STRING_fromBuf(&cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
+
+        OCTET_STRING_t sak = {.buf = &sak_val, .size = 1};
+        cardDetails->sak = &sak;
+
+        OCTET_STRING_t atqa = {.buf = (uint8_t*)iso14443_3a_data->atqa, .size = 2};
+        cardDetails->atqa = &atqa;
+
+        seader_send_card_detected(seader_uart, cardDetails);
+
+        ASN_STRUCT_FREE(asn_DEF_CardDetails, cardDetails);
+
+        return NfcCommandStop;
+    }
+
+    return NfcCommandContinue;
+}
