@@ -14,6 +14,7 @@ typedef struct St25tbPoller St25tbPoller;
 typedef enum {
     St25tbPollerEventTypeError,
     St25tbPollerEventTypeReady,
+    St25tbPollerEventTypeReadSuccessful,
 } St25tbPollerEventType;
 
 typedef struct {

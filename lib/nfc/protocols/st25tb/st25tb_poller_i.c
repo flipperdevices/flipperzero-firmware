@@ -1,9 +1,7 @@
 #include "st25tb_poller_i.h"
 
-#include "bit_buffer.h"
-#include "core/core_defines.h"
-#include "protocols/st25tb/st25tb.h"
-#include <nfc/helpers/iso14443_crc.h>
+#include <furi.h>
+#include "nfc/helpers/iso14443_crc.h"
 
 #define TAG "ST25TBPoller"
 
@@ -22,7 +20,7 @@ static St25tbError st25tb_poller_prepare_trx(St25tbPoller* instance) {
     furi_assert(instance);
 
     if(instance->state == St25tbPollerStateIdle) {
-        return st25tb_poller_async_activate(instance, NULL);
+        return st25tb_poller_async_select(instance, NULL);
     }
 
     return St25tbErrorNone;
@@ -85,12 +83,11 @@ St25tbType st25tb_get_type_from_uid(const uint8_t uid[ST25TB_UID_SIZE]) {
     }
 }
 
-St25tbError st25tb_poller_async_initiate(St25tbPoller* instance, uint8_t* chip_id) {
+St25tbError st25tb_poller_async_detect(St25tbPoller* instance, uint8_t* chip_id_ptr) {
     // Send Initiate()
     furi_assert(instance);
     furi_assert(instance->nfc);
 
-    instance->state = St25tbPollerStateInitiateInProgress;
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
     bit_buffer_append_byte(instance->tx_buffer, 0x06);
@@ -109,66 +106,79 @@ St25tbError st25tb_poller_async_initiate(St25tbPoller* instance, uint8_t* chip_i
             ret = St25tbErrorCommunication;
             break;
         }
-        if(chip_id) {
-            *chip_id = bit_buffer_get_byte(instance->rx_buffer, 0);
+        uint8_t chip_id = bit_buffer_get_byte(instance->rx_buffer, 0);
+        FURI_LOG_D(TAG, "Got chip_id=0x%02X", chip_id);
+        if(chip_id_ptr) {
+            *chip_id_ptr = chip_id;
         }
     } while(false);
 
     return ret;
 }
 
-St25tbError st25tb_poller_async_activate(St25tbPoller* instance, St25tbData* data) {
+St25tbError st25tb_poller_async_select(St25tbPoller* instance, uint8_t* chip_id_ptr) {
     furi_assert(instance);
     furi_assert(instance->nfc);
-
-    st25tb_reset(data);
 
     St25tbError ret;
 
     do {
-        ret = st25tb_poller_async_initiate(instance, &data->chip_id);
-        if(ret != St25tbErrorNone) {
-            break;
+        uint8_t chip_id;
+        if(chip_id_ptr != NULL) {
+            chip_id = *chip_id_ptr;
+        } else {
+            ret = st25tb_poller_async_detect(instance, &chip_id);
+            if(ret != St25tbErrorNone) {
+                break;
+            }
         }
-
-        instance->state = St25tbPollerStateActivationInProgress;
 
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_reset(instance->rx_buffer);
 
         // Send Select(Chip_ID), let's just assume that collisions won't ever happen :D
         bit_buffer_append_byte(instance->tx_buffer, 0x0E);
-        bit_buffer_append_byte(instance->tx_buffer, data->chip_id);
+        bit_buffer_append_byte(instance->tx_buffer, chip_id);
 
         ret = st25tb_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, ST25TB_FDT_FC);
         if(ret != St25tbErrorNone) {
-            instance->state = St25tbPollerStateActivationFailed;
             break;
         }
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != 1) {
             FURI_LOG_D(TAG, "Unexpected Select response size");
-            instance->state = St25tbPollerStateActivationFailed;
             ret = St25tbErrorCommunication;
             break;
         }
 
-        if(bit_buffer_get_byte(instance->rx_buffer, 0) != data->chip_id) {
+        if(bit_buffer_get_byte(instance->rx_buffer, 0) != chip_id) {
             FURI_LOG_D(TAG, "ChipID mismatch");
-            instance->state = St25tbPollerStateActivationFailed;
             ret = St25tbErrorColResFailed;
             break;
         }
-        instance->state = St25tbPollerStateActivated;
+        FURI_LOG_D(TAG, "Selected chip_id=0x%02X", chip_id);
 
-        ret = st25tb_poller_async_get_uid(instance, data->uid);
+        ret = st25tb_poller_async_get_uid(instance, instance->data->uid);
         if(ret != St25tbErrorNone) {
-            instance->state = St25tbPollerStateActivationFailed;
             break;
         }
-        data->type = st25tb_get_type_from_uid(data->uid);
+        instance->data->type = st25tb_get_type_from_uid(instance->data->uid);
+        instance->state = St25tbPollerStateSelected;
+    } while(false);
 
+    return ret;
+}
+
+St25tbError st25tb_poller_async_read(St25tbPoller* instance, St25tbData* data) {
+    furi_assert(instance);
+    furi_assert(instance->nfc);
+
+    St25tbError ret;
+    
+    memcpy(data, instance->data, sizeof(St25tbData));
+
+    do {
         bool read_blocks = true;
         for(uint8_t i = 0; i < st25tb_get_block_count(data->type); i++) {
             ret = st25tb_poller_async_read_block(instance, &data->blocks[i], i);
@@ -182,6 +192,10 @@ St25tbError st25tb_poller_async_activate(St25tbPoller* instance, St25tbData* dat
         }
         ret = st25tb_poller_async_read_block(
             instance, &data->system_otp_block, ST25TB_SYSTEM_OTP_BLOCK);
+        if(ret != St25tbErrorNone) {
+            break;
+        }
+        instance->state = St25tbPollerStateRead;
     } while(false);
 
     return ret;
@@ -207,7 +221,6 @@ St25tbError st25tb_poller_async_get_uid(St25tbPoller* instance, uint8_t uid[ST25
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != ST25TB_UID_SIZE) {
             FURI_LOG_D(TAG, "Unexpected Get_UID() response size");
-            instance->state = St25tbPollerStateActivationFailed;
             ret = St25tbErrorCommunication;
             break;
         }
@@ -216,6 +229,17 @@ St25tbError st25tb_poller_async_get_uid(St25tbPoller* instance, uint8_t uid[ST25
         FURI_SWAP(uid[1], uid[6]);
         FURI_SWAP(uid[2], uid[5]);
         FURI_SWAP(uid[3], uid[4]);
+        FURI_LOG_D(
+            TAG,
+            "Got tag with uid: %02X %02X %02X %02X %02X %02X %02X %02X",
+            uid[0],
+            uid[1],
+            uid[2],
+            uid[3],
+            uid[4],
+            uid[5],
+            uid[6],
+            uid[7]);
     } while(false);
     return ret;
 }
@@ -237,7 +261,7 @@ St25tbError
     bit_buffer_append_byte(instance->tx_buffer, block_number);
     St25tbError ret;
     do {
-        ret = st25tb_poller_frame_exchange(
+        ret = st25tb_poller_send_frame(
             instance, instance->tx_buffer, instance->rx_buffer, ST25TB_FDT_FC);
         if(ret != St25tbErrorNone) {
             break;

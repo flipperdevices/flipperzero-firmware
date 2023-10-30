@@ -1,5 +1,3 @@
-#include "protocols/nfc_protocol.h"
-#include "protocols/st25tb/st25tb.h"
 #include "st25tb_poller_i.h"
 
 #include <nfc/protocols/nfc_poller_base.h>
@@ -19,6 +17,7 @@ static St25tbPoller* st25tb_poller_alloc(Nfc* nfc) {
     furi_assert(nfc);
 
     St25tbPoller* instance = malloc(sizeof(St25tbPoller));
+    instance->state = St25tbPollerStateIdle;
     instance->nfc = nfc;
     instance->tx_buffer = bit_buffer_alloc(ST25TB_POLLER_MAX_BUFFER_SIZE);
     instance->rx_buffer = bit_buffer_alloc(ST25TB_POLLER_MAX_BUFFER_SIZE);
@@ -70,24 +69,28 @@ static NfcCommand st25tb_poller_run(NfcGenericEvent event, void* context) {
     NfcCommand command = NfcCommandContinue;
 
     if(nfc_event->type == NfcEventTypePollerReady) {
-        if(instance->state != St25tbPollerStateActivated) {
-            St25tbError error = st25tb_poller_async_activate(instance, instance->data);
-
-            if(error == St25tbErrorNone) {
-                instance->st25tb_event.type = St25tbPollerEventTypeReady;
-                instance->st25tb_event_data.error = error;
-                command = instance->callback(instance->general_event, instance->context);
-            } else {
-                instance->st25tb_event.type = St25tbPollerEventTypeError;
-                instance->st25tb_event_data.error = error;
-                command = instance->callback(instance->general_event, instance->context);
-                // Add delay to switch context
-                furi_delay_ms(100);
-            }
-        } else {
-            instance->st25tb_event.type = St25tbPollerEventTypeReady;
-            instance->st25tb_event_data.error = St25tbErrorNone;
+        St25tbError error = St25tbErrorNone;
+        instance->st25tb_event.type = St25tbPollerEventTypeReady;
+        switch(instance->state) {
+        case St25tbPollerStateIdle:
+            error = st25tb_poller_async_select(instance, NULL);
+            break;
+        case St25tbPollerStateSelected:
+            error = st25tb_poller_async_read(instance, instance->data);
+            break;
+        case St25tbPollerStateRead:
+            instance->st25tb_event.type = St25tbPollerEventTypeReadSuccessful;
+            break;
+        }
+        if(error == St25tbErrorNone) {
+            instance->st25tb_event_data.error = error;
             command = instance->callback(instance->general_event, instance->context);
+        } else {
+            instance->st25tb_event.type = St25tbPollerEventTypeError;
+            instance->st25tb_event_data.error = error;
+            command = instance->callback(instance->general_event, instance->context);
+            // Add delay to switch context
+            furi_delay_ms(100);
         }
     }
 
@@ -106,7 +109,7 @@ static bool st25tb_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(instance->state == St25tbPollerStateIdle);
 
     if(nfc_event->type == NfcEventTypePollerReady) {
-        St25tbError error = st25tb_poller_async_initiate(instance, NULL);
+        St25tbError error = st25tb_poller_async_detect(instance, NULL);
         protocol_detected = (error == St25tbErrorNone);
     }
 

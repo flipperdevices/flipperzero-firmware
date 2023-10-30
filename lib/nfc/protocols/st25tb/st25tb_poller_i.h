@@ -11,11 +11,8 @@ extern "C" {
 
 typedef enum {
     St25tbPollerStateIdle,
-    St25tbPollerStateInitiateInProgress,
-    St25tbPollerStateInitiateFailed,
-    St25tbPollerStateActivationInProgress,
-    St25tbPollerStateActivationFailed,
-    St25tbPollerStateActivated,
+    St25tbPollerStateSelected,
+    St25tbPollerStateRead,
 } St25tbPollerState;
 
 struct St25tbPoller {
@@ -34,9 +31,13 @@ struct St25tbPoller {
 
 const St25tbData* st25tb_poller_get_data(St25tbPoller* instance);
 
-St25tbError st25tb_poller_async_initiate(St25tbPoller* instance, uint8_t* chip_id);
+St25tbType st25tb_get_type_from_uid(const uint8_t uid[ST25TB_UID_SIZE]);
 
-St25tbError st25tb_poller_async_activate(St25tbPoller* instance, St25tbData* data);
+St25tbError st25tb_poller_async_detect(St25tbPoller* instance, uint8_t* chip_id);
+
+St25tbError st25tb_poller_async_select(St25tbPoller* instance, uint8_t* chip_id);
+
+St25tbError st25tb_poller_async_read(St25tbPoller* instance, St25tbData* data);
 
 St25tbError st25tb_poller_async_get_uid(St25tbPoller* instance, uint8_t uid[ST25TB_UID_SIZE]);
 
