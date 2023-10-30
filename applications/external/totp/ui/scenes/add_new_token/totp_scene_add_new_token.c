@@ -62,7 +62,8 @@ static void update_duration_text(SceneState* scene_state) {
 
 static TotpIteratorUpdateTokenResult add_token_handler(TokenInfo* tokenInfo, const void* context) {
     const struct TotpAddContext* context_t = context;
-    if(sscanf(context_t->scene_state->initial_counter, "%" PRIu64, &tokenInfo->counter) != 1) {
+    if(context_t->scene_state->type == TokenTypeHOTP &&
+       sscanf(context_t->scene_state->initial_counter, "%" PRIu64, &tokenInfo->counter) != 1) {
         return TotpIteratorUpdateTokenResultInvalidCounter;
     }
 
@@ -264,15 +265,24 @@ bool totp_scene_add_new_token_handle_event(
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == TokenLengthSelect) {
                 totp_roll_value_uint8_t(
-                    &scene_state->digits_count_index, 1, 0, 2, RollOverflowBehaviorRoll);
+                    &scene_state->digits_count_index,
+                    1,
+                    0,
+                    COUNT_OF(TOKEN_DIGITS_TEXT_LIST) - 1,
+                    RollOverflowBehaviorRoll);
             } else if(
                 scene_state->selected_control == TokenDurationOrCounterSelect &&
                 scene_state->type == TokenTypeTOTP) {
                 totp_roll_value_uint8_t(
-                    &scene_state->duration, 15, 15, 255, RollOverflowBehaviorStop);
+                    &scene_state->duration, 15, 15, UINT8_MAX, RollOverflowBehaviorStop);
                 update_duration_text(scene_state);
             } else if(scene_state->selected_control == TokenTypeSelect) {
-                totp_roll_value_uint8_t(&scene_state->type, 1, 0, 1, RollOverflowBehaviorRoll);
+                totp_roll_value_uint8_t(
+                    &scene_state->type,
+                    1,
+                    0,
+                    COUNT_OF(TOKEN_TYPE_LIST) - 1,
+                    RollOverflowBehaviorRoll);
             }
             break;
         case InputKeyLeft:
@@ -285,15 +295,24 @@ bool totp_scene_add_new_token_handle_event(
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == TokenLengthSelect) {
                 totp_roll_value_uint8_t(
-                    &scene_state->digits_count_index, -1, 0, 2, RollOverflowBehaviorRoll);
+                    &scene_state->digits_count_index,
+                    -1,
+                    0,
+                    COUNT_OF(TOKEN_DIGITS_TEXT_LIST) - 1,
+                    RollOverflowBehaviorRoll);
             } else if(
                 scene_state->selected_control == TokenDurationOrCounterSelect &&
                 scene_state->type == TokenTypeTOTP) {
                 totp_roll_value_uint8_t(
-                    &scene_state->duration, -15, 15, 255, RollOverflowBehaviorStop);
+                    &scene_state->duration, -15, 15, UINT8_MAX, RollOverflowBehaviorStop);
                 update_duration_text(scene_state);
             } else if(scene_state->selected_control == TokenTypeSelect) {
-                totp_roll_value_uint8_t(&scene_state->type, -1, 0, 1, RollOverflowBehaviorRoll);
+                totp_roll_value_uint8_t(
+                    &scene_state->type,
+                    -1,
+                    0,
+                    COUNT_OF(TOKEN_TYPE_LIST) - 1,
+                    RollOverflowBehaviorRoll);
             }
             break;
         case InputKeyOk:

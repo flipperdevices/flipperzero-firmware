@@ -119,7 +119,7 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
         HidMouseModel * model,
         {
             model->button_press_repeat_count =
-                (event->type == InputTypePress)          ? 1 :
+                (event->type == InputTypePress)          ? 3 :
                 (event->type == InputTypeRelease)        ? 0 :
                 (model->button_press_repeat_count >= 10) ? 10 :
                                                            model->button_press_repeat_count + 1;
