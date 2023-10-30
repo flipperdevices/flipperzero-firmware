@@ -24,36 +24,49 @@ extern "C" {
 #endif
 
 // Flags instead of pointers will save ~4 bytes on furi_assert and furi_check calls.
+#define __FURI_MESSAGE_NULL (NULL)
 #define __FURI_ASSERT_MESSAGE_FLAG (0x01)
 #define __FURI_CHECK_MESSAGE_FLAG (0x02)
 
 /** Crash system */
-FURI_NORETURN void __furi_crash();
+FURI_NORETURN void __furi_crash_implementation();
 
 /** Halt system */
-FURI_NORETURN void __furi_halt();
+FURI_NORETURN void __furi_halt_implementation();
 
 /** Crash system with message. Show message after reboot. */
-#define furi_crash(message)                                   \
+#define __furi_crash(message)                                 \
     do {                                                      \
         register const void* r12 asm("r12") = (void*)message; \
         asm volatile("sukima%=:" : : "r"(r12));               \
-        __furi_crash();                                       \
+        __furi_crash_implementation();                        \
     } while(0)
 
+/** Crash system
+ *
+ * @param      optional  message
+ */
+#define furi_crash(...) M_APPLY(__furi_crash, M_DEFAULT_ARGS(1, (__FURI_MESSAGE_NULL), __VA_ARGS__))
+
 /** Halt system with message. */
-#define furi_halt(message)                                    \
+#define __furi_halt(message)                                  \
     do {                                                      \
         register const void* r12 asm("r12") = (void*)message; \
         asm volatile("sukima%=:" : : "r"(r12));               \
-        __furi_halt();                                        \
+        __furi_halt_implementation();                         \
     } while(0)
+
+/** Halt system
+ *
+ * @param      optional  message
+ */
+#define furi_halt(...) M_APPLY(__furi_halt, M_DEFAULT_ARGS(1, (__FURI_MESSAGE_NULL), __VA_ARGS__))
 
 /** Check condition and crash if check failed */
 #define __furi_check(__e, __m) \
     do {                       \
         if(!(__e)) {           \
-            furi_crash(__m);   \
+            __furi_crash(__m); \
         }                      \
     } while(0)
 
@@ -70,7 +83,7 @@ FURI_NORETURN void __furi_halt();
 #define __furi_assert(__e, __m) \
     do {                        \
         if(!(__e)) {            \
-            furi_crash(__m);    \
+            __furi_crash(__m);  \
         }                       \
     } while(0)
 #else
