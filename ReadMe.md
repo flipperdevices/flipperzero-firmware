@@ -60,10 +60,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Storage: speedup write_chunk cli command #3173 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3173)
 - OFW: [Allow for larger Infrared remotes #3164 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3173)
 - [Honeywell Security protocol added (By htotoo)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/785861b397668e70395f0104031d148ced3a9224)
-- Deferred: OFWx5: [NFC refactoring #3050](https://github.com/flipperdevices/flipperzero-firmware/pull/3050) [MF DESFire Fixes #3167](https://github.com/flipperdevices/flipperzero-firmware/pull/3167) [NFC RC fixes #3165](https://github.com/flipperdevices/flipperzero-firmware/pull/3165) [Fix crash on files > 64B #3166](https://github.com/flipperdevices/flipperzero-firmware/pull/3166) [fix crash after st25tb save #3170](https://github.com/flipperdevices/flipperzero-firmware/pull/3170) Waiting on bug removal and app refactors to not hinder NFC functionality.
-- Temp Deferred (more testing needed): OFW: [fbt: reworked assets & resources handling #3160 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3160)
 - [Update mf_classic_dict Added FitIn Vienna (By fastbone)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/991)
 - Updated: [Hangman (In Russian) v1.0 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- OFW: [Furi: cleanup crash use #3175 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3175)
+- OFW: [Rename menu items related to dummy mode and sound #3177 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/3177)
+- Deferred: OFWx5: [NFC refactoring #3050](https://github.com/flipperdevices/flipperzero-firmware/pull/3050) [MF DESFire Fixes #3167](https://github.com/flipperdevices/flipperzero-firmware/pull/3167) [NFC RC fixes #3165](https://github.com/flipperdevices/flipperzero-firmware/pull/3165) [Fix crash on files > 64B #3166](https://github.com/flipperdevices/flipperzero-firmware/pull/3166) [fix crash after st25tb save #3170](https://github.com/flipperdevices/flipperzero-firmware/pull/3170) Waiting on bug removal and app refactors to not hinder NFC functionality.
+- Temp Deferred (more testing needed): OFW: [fbt: reworked assets & resources handling #3160 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3160) [fbt: SD card resource handling speedup #3178 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3178)
 
 <a name="release">
 
