@@ -26,5 +26,5 @@ FlipboardModel* flipboard_get_model(Flipboard* app);
 ViewDispatcher* flipboard_get_view_dispatcher(Flipboard* app);
 uint32_t flipboard_navigation_show_app_menu(void* context);
 View* flipboard_get_primary_view(Flipboard* app);
-
+void flipboard_override_config_view(Flipboard* app, View* view);
 void flipboard_free(Flipboard* app);

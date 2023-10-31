@@ -66,6 +66,16 @@ View* flipboard_get_primary_view(Flipboard* app) {
     return app->view_primary;
 }
 
+void flipboard_override_config_view(Flipboard* app, View* view) {
+    if(app->key_config) {
+        key_config_free(app->key_config);
+        app->key_config = NULL;
+    }
+    view_dispatcher_remove_view(app->view_dispatcher, FlipboardViewConfigureId);
+    view_dispatcher_add_view(app->view_dispatcher, FlipboardViewConfigureId, view);
+    
+}
+
 uint32_t flipboard_navigation_show_app_menu(void* context) {
     UNUSED(context);
     return FLIPBOARD_APP_MENU_VIEW_ID;
@@ -75,7 +85,9 @@ void flipboard_free(Flipboard* app) {
     flipboard_model_free(app->model);
 
     view_free(app->view_primary);
-    key_config_free(app->key_config);
+    if(app->key_config) {
+        key_config_free(app->key_config);
+    }
     widget_free(app->widget_about);
     app_menu_free(app->app_menu);
 

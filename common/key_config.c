@@ -307,6 +307,10 @@ static void item_clicked(void* context, uint32_t index) {
 
         item = item / 2;
         KeyConfig* key_config = (KeyConfig*)key_setting_model_get_key_config(ksm);
+        if(key_config->keyboard_input == NULL) {
+            return;
+        }
+
         view_set_previous_callback(
             keyboard_input_get_view(key_config->keyboard_input),
             get_menu(key_config->view_item_list_id));
@@ -405,7 +409,9 @@ KeyConfig* key_config_alloc(
     key_config->text_input = text_input_alloc();
     key_config->view_text_input_id = 0;
     key_config->keyboard_input =
-        keyboard_input_alloc(keyboard_keys, keyboard_shift_keys, keyboard_rows);
+        (keyboard_keys == NULL) ?
+            NULL :
+            keyboard_input_alloc(keyboard_keys, keyboard_shift_keys, keyboard_rows);
     key_config->view_keyboard_input_id = 0;
     key_config->menu_keys = submenu_alloc();
     key_config->view_menu_keys_id = config_view_id;
@@ -469,6 +475,9 @@ void key_config_register_text_input(KeyConfig* key_config, uint32_t text_input_i
 
 void key_config_register_keyboard_input(KeyConfig* key_config, uint32_t keyboard_input_id) {
     furi_assert(key_config->view_dispatcher != NULL);
+    if(key_config->keyboard_input == NULL) {
+        return;
+    }
     key_config->view_keyboard_input_id = keyboard_input_id;
     view_dispatcher_add_view(
         key_config->view_dispatcher,
@@ -496,6 +505,8 @@ void key_config_free(KeyConfig* key_config) {
     variable_item_list_free(key_config->item_list);
     submenu_free(key_config->menu_keys);
     text_input_free(key_config->text_input);
-    keyboard_input_free(key_config->keyboard_input);
+    if(key_config->keyboard_input) {
+        keyboard_input_free(key_config->keyboard_input);
+    }
     free(key_config);
 }

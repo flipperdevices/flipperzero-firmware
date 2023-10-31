@@ -18,3 +18,24 @@ App(
     fap_icon_assets="flipkeyboard/assets",
     fap_description="FlipBoard Keyboard turns your FlipBoard into a keyboard.",
 )
+
+App(
+    appid="flipboard_blinky",
+    name="FlipBoard Blinky",
+    apptype=FlipperAppType.EXTERNAL,
+    sources=[
+        "flipblinky/*.c",
+        "common/*.c",
+        "common/model/*.c",
+        "common/view/*.c",
+        "flipboard_blinky_*.c*",
+    ],
+    entry_point="flipboard_blinky_app",
+    stack_size=4 * 1024,
+    requires=["gui"],
+    order=10,
+    fap_icon="flipblinky/flipblinky.png",
+    fap_category="GPIO",
+    fap_icon_assets="flipblinky/assets",
+    fap_description="FlipBoard Blinky turns your FlipBoard into a blinky badge.",
+)
