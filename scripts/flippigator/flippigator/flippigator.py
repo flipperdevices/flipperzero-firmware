@@ -60,6 +60,19 @@ class Navigator:
         self.applications = AppApplications(self)
         self.settings = AppSettings(self)
 
+        self.font_helvB08 = list()
+        for i in range(256):
+            self.font_helvB08.append(cv.imread("./font_helvB08/helvB08_" + str(i) + ".png"))
+        self.font_HaxrCorp_4089 = list()
+        for i in range(256):
+            self.font_HaxrCorp_4089.append(cv.imread("./font_HaxrCorp_4089/HaxrCorp_4089_" + str(i) + ".png"))
+        self.font_profont11 = list()
+        for i in range(256):
+            self.font_profont11.append(cv.imread("./font_profont11/profont11_" + str(i) + ".png"))
+        self.font_profont22 = list()
+        for i in range(256):
+            self.font_profont22.append(cv.imread("./font_profont22/profont22_" + str(i) + ".png"))
+
         for filename in os.listdir(path):
             f = cv.imread(path + str(filename), 0)
             self.imRef.update({filename[:-4]: f})
@@ -132,6 +145,12 @@ class Navigator:
 
         cv.imshow(self._window_name, display_image)
         key = cv.waitKey(1)
+
+    def get_ref_from_string(phrase, font):
+        result = font[ord(phrase[0])]
+        for i in phrase[1:]:
+            result = numpy.concatenate((result, font[ord(i)]), axis=1)
+        return result
 
     def recog_ref(self, ref=None, area=(0, 64, 0, 128)):
         if ref is None:
