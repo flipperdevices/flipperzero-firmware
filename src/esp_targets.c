@@ -39,6 +39,7 @@ typedef struct {
 
 static esp_loader_error_t spi_config_esp32(uint32_t efuse_base, uint32_t *spi_config);
 static esp_loader_error_t spi_config_esp32xx(uint32_t efuse_base, uint32_t *spi_config);
+static esp_loader_error_t spi_config_unsupported(uint32_t efuse_base, uint32_t *spi_config);
 
 static const esp_target_t esp_target[ESP_MAX_CHIP] = {
 
@@ -188,7 +189,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         },
         .efuse_base = 0x600B0800,
         .chip_magic_value = { 0x2CE0806F, 0 },
-        .read_spi_config = spi_config_esp32xx,
+        .read_spi_config = spi_config_unsupported,
         .encryption_in_begin_flash_cmd = true,
     },
 };
@@ -279,6 +280,13 @@ static esp_loader_error_t spi_config_esp32xx(uint32_t efuse_base, uint32_t *spi_
     }
 
     *spi_config = pins;
+    return ESP_LOADER_SUCCESS;
+}
+
+// Some newer chips like the esp32c6 do not support configurable SPI
+static esp_loader_error_t spi_config_unsupported(uint32_t efuse_base, uint32_t *spi_config)
+{
+    *spi_config = 0;
     return ESP_LOADER_SUCCESS;
 }
 
