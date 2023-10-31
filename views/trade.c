@@ -644,22 +644,27 @@ void trade_draw_timer_callback(void* context) {
 void trade_enter_callback(void* context) {
     furi_assert(context);
     struct trade_ctx* trade = (struct trade_ctx*)context;
+    struct trade_model* model;
 
-    /* Re-init variables */
-    with_view_model(
-        trade->view,
-        struct trade_model * model,
-        {
-            model->trading = false;
-            model->connected = false;
-            model->gameboy_status = GAMEBOY_INITIAL;
-            model->pokemon_table = trade->pokemon_table;
-            model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
-	    model->ledon = false;
-        },
-        true);
-    trade->connection_state = NOT_CONNECTED;
-    trade->trade_centre_state = INIT;
+    /* Reinit variables.
+     * Note that, the connected and trading variables are left untouched as
+     * once the gameboy is connected, the Flipper, in a Ready state, can go
+     * back a menu and change/update the pokemon and re-enter the same trade
+     * session.
+     */
+    model = view_get_model(trade->view);
+
+    if (!model->trading || !model->connected) {
+        trade->connection_state = NOT_CONNECTED;
+        model->gameboy_status = GAMEBOY_INITIAL;
+    }
+    model->pokemon_table = trade->pokemon_table;
+    model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
+    model->ledon = false;
+
+    view_commit_model(trade->view, true);
+
+    trade->trade_centre_state = TRADE_RESET;
 
     trade->in_data = 0;
     trade->out_data = 0;
@@ -723,6 +728,17 @@ void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view
 
     view_set_context(trade->view, trade);
     view_allocate_model(trade->view, ViewModelTypeLockFree, sizeof(struct trade_model));
+    /* Only initialize these at pokemon start. This allows us to remain
+     * connected and in the trade center.
+     */
+    with_view_model(
+        trade->view,
+        struct trade_model * model,
+        {
+            model->trading = false;
+            model->connected = false;
+	},
+	false);
 
     view_set_draw_callback(trade->view, trade_draw_callback);
     view_set_enter_callback(trade->view, trade_enter_callback);

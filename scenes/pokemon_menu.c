@@ -38,6 +38,13 @@ void main_menu_scene_on_enter(void* context) {
      */
     scene_manager_set_scene_state(pokemon_fap->scene_manager, SelectMoveScene, 0);
 
+    /* HACK: Since we may have come from trade view, we cannot assume that
+     * pokemon_fap->curr_pokemon is correct.
+     * The proper way to do this would be to instead of tracking curr_pokemon
+     * separately, have it always be derived fro the current trade_block.
+     */
+    pokemon_fap->curr_pokemon = pokemon_table_get_num_from_index(pokemon_fap->pokemon_table, pokemon_fap->trade_block->party_members[0]);
+
     submenu_reset(pokemon_fap->submenu);
 
     snprintf(
