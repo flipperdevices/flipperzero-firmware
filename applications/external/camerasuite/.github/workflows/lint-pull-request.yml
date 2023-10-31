@@ -1,0 +1,22 @@
+name: "Build test + lint."
+on: pull_request
+jobs:
+  ufbt-build-action:
+    runs-on: ubuntu-latest
+    name: "ufbt: Build for Dev branch"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build with ufbt
+        # Flipper Zero ufbt action
+        # https://github.com/flipperdevices/flipperzero-ufbt-action
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        id: build-app
+        with:
+          app-dir: ./fap
+          sdk-channel: dev
+      - name: Lint sources
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        with:
+          skip-setup: true
+          task: lint
