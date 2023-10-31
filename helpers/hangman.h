@@ -16,7 +16,6 @@
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/file_stream.h>
 #include <furi_hal_random.h>
-#include <string.h>
 
 typedef enum {
     HangmanOpenedInit,
