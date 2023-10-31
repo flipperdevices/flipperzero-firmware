@@ -97,18 +97,17 @@ FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks) {
     return (stat);
 }
 
-FuriStatus furi_timer_reset(FuriTimer* instance) {
+FuriStatus furi_timer_restart(FuriTimer* instance) {
     furi_assert(!furi_kernel_is_irq_or_masked());
     furi_assert(instance);
 
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     FuriStatus stat;
 
-    if(xTimerIsTimerActive(hTimer) == pdFALSE) {
-        stat = FuriStatusErrorResource;
-    } else {
-        furi_check(xTimerReset(hTimer, portMAX_DELAY) == pdPASS);
+    if(xTimerReset(hTimer, portMAX_DELAY) == pdPASS) {
         stat = FuriStatusOk;
+    } else {
+        stat = FuriStatusErrorResource;
     }
 
     /* Return execution status */

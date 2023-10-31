@@ -40,13 +40,13 @@ void furi_timer_free(FuriTimer* instance);
  */
 FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks);
 
-/** Reset timer - restart with previous timeout value
+/** Restart timer with previous timeout value
  *
  * @param      instance  The pointer to FuriTimer instance
  *
  * @return     The furi status.
  */
-FuriStatus furi_timer_reset(FuriTimer* instance);
+FuriStatus furi_timer_restart(FuriTimer* instance);
 
 /** Stop timer
  *
