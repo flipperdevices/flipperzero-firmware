@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-for file in */.gitsubtree; do
+for file in **/.gitsubtree; do
     subtree="$(dirname "${file}")"
     echo -e "\n\nUpdating ${subtree}..."
     pushd "${subtree}" > /dev/null
