@@ -39,29 +39,29 @@ typedef struct {
 const GpioPin* const gpio_accelerometer = &gpio_ext_pc0;
 
 void step_callback(void* ctx) {
-	StepCounterContext* context = (StepCounterContext*)ctx;
+    StepCounterContext* context = (StepCounterContext*)ctx;
     StepCounterData* stepData = context->data;
-    
+
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(0);
-	uint32_t now = timer.start;
+    uint32_t now = timer.start;
 
-	if (furi_hal_gpio_read(stepData->pin)) { 
-	  if (stepData->time_of_last_high_pulse != 0) {
-		 stepData->time_of_high_to_high = now - stepData->time_of_last_high_pulse;
-	  }
-	  stepData->time_of_last_high_pulse = now;
-	} else {
-	  uint32_t high_duration = now - stepData->time_of_last_high_pulse;
-	  bool current_state = high_duration < (stepData->time_of_high_to_high >> 1);
+    if(furi_hal_gpio_read(stepData->pin)) {
+        if(stepData->time_of_last_high_pulse != 0) {
+            stepData->time_of_high_to_high = now - stepData->time_of_last_high_pulse;
+        }
+        stepData->time_of_last_high_pulse = now;
+    } else {
+        uint32_t high_duration = now - stepData->time_of_last_high_pulse;
+        bool current_state = high_duration < (stepData->time_of_high_to_high >> 1);
 
-	  if(current_state != stepData->prevState) {
-		  stepData->prevState = current_state;
-		  stepData->stepCount++;
+        if(current_state != stepData->prevState) {
+            stepData->prevState = current_state;
+            stepData->stepCount++;
 
-		 StepCounterEvent event = {.type = StepCounterEventTypeStep};
-		 furi_message_queue_put(context->queue, &event, 0);
-	  }
-   }
+            StepCounterEvent event = {.type = StepCounterEventTypeStep};
+            furi_message_queue_put(context->queue, &event, 0);
+        }
+    }
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* queue) {
