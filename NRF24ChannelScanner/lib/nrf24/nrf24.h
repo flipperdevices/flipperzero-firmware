@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi_hal_spi.h>
-#if __has_include("myinclude.h") 
+#if __has_include("xtreme.h") 
 #include <xtreme.h>
 #endif
 
