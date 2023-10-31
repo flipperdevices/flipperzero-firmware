@@ -1,17 +1,13 @@
 App(
-    appid="nrf24channelscanner",
-    name="[NRF24] Channel Scan",
+    appid="channel_scan",
+    name="Channel Scan",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="nrf24channelscanner_main",
-    fap_author="HTotoo",
-    fap_weburl="https://github.com/htotoo/NRF24ChannelScanner",
     stack_size=2 * 1024,
-    requires=["gui"],
-    fap_category="GPIO",
-    fap_version=(1, 3),
+    fap_category="GPIO/NRF24",
+    fap_icon_assets_symbol="nrf24channelscanner",
     fap_icon_assets="images",
     fap_icon="fapicon.png",
-    fap_description="Scans 2.4Ghz frequency for usage data.",
     fap_private_libs=[
         Lib(
             name="nrf24",
@@ -20,4 +16,8 @@ App(
             ],
         ),
     ],
+    fap_author="HTotoo",
+    fap_weburl="https://github.com/htotoo/NRF24ChannelScanner",
+    fap_version=(1, 3),
+    fap_description="Scans 2.4Ghz frequency for usage data.",
 )
