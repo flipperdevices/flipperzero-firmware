@@ -12,7 +12,7 @@
 #define FRAME_TOP 3
 #define FRAME_CELL_SIZE 7
 
-#define SAVING_DIRECTORY "/ext/apps/Games"
+#define SAVING_DIRECTORY STORAGE_APP_DATA_PATH_PREFIX
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_reversi.save"
 
 typedef enum {
@@ -166,6 +166,7 @@ static void gray_canvas(Canvas* const canvas) {
 
 bool load_game(GameState* game_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("apps/Games/game_reversi.save"), SAVING_FILENAME);
 
     File* file = storage_file_alloc(storage);
     uint16_t bytes_readed = 0;
@@ -182,12 +183,6 @@ bool load_game(GameState* game_state) {
 
 void save_game(const GameState* game_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-
-    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
-        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
-            return;
-        }
-    }
 
     File* file = storage_file_alloc(storage);
     if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
@@ -315,7 +310,7 @@ int32_t game_reversi_app() {
     if (!app_state.game.is_game_over && (app_state.game.current_player != app_state.game.human_color)) {
       computer_move(&app_state.game);
     }
-    FuriStatus event_status = furi_message_queue_get(event_queue, &input, FuriWaitForever);
+    FuriStatus event_status = furi_message_queue_get(event_queue, &input, 100);
     if(event_status == FuriStatusOk) {
       // handle only press event, ignore repeat/release events
 
@@ -334,6 +329,7 @@ int32_t game_reversi_app() {
       view_port_update(view_port);
       furi_mutex_release(app_state.mutex);
     }
+    view_port_update(view_port);
   }
 
   gui_remove_view_port(gui, view_port);
