@@ -126,7 +126,6 @@ bool uart_terminal_scene_text_input_on_event(void* context, SceneManagerEvent ev
             consumed = true;
         }
     }
-
     return consumed;
 }
 

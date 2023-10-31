@@ -1,6 +1,6 @@
 * Finish restructuring menus
     * Maybe a UI for stalk
-* Perhaps store a ref to selected_tx_string in UART_TerminalItem or a global, and only free selected_tx_string in the exit function of relevant scenes
+* header text in text input box is full of overlapping text, even after slimming help text right down. Why???
 
 * Re-implement console/command execution
 * Re-implement cls/clear screen
