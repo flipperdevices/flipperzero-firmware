@@ -51,6 +51,12 @@ typedef struct {
  */
 typedef enum {
     /**
+     * @brief Denotes an invalid state.
+     *
+     * An event of this type shall never be passed into the callback.
+     */
+    RpcAppEventTypeInvalid,
+    /**
      * @brief The client side has closed the session.
      *
      * After receiving this event, the RPC context is no more valid.
@@ -59,34 +65,34 @@ typedef enum {
     /**
      * @brief The client has requested the application to exit.
      *
-     * To acknowledge the command, call rpc_system_app_send_exited().
+     * The application must exit after receiving this command.
      */
     RpcAppEventTypeAppExit,
     /**
      * @brief The client has requested the application to load a file.
      *
-     * This command is optional. Its meaning is application-specific, i.e.
-     * the application might or might not require additional commands after
-     * loading a file to do anything useful.
+     * This command's meaning is application-specific, i.e. the application might or
+     * might not require additional commands after loading a file to do anything useful.
      */
     RpcAppEventTypeLoadFile,
     /**
      * @brief The client has informed the application that a button has been pressed.
      *
-     * This command is optional. Its meaning is application-specific, e.g.
-     * to select a part of the previously loaded file or to invoke
-     * a particular function within the application.
+     * This command's meaning is application-specific, e.g. to select a part of the
+     * previously loaded file or to invoke a particular function within the application.
      */
     RpcAppEventTypeButtonPress,
     /**
      * @brief The client has informed the application that a button has been released.
      *
-     * This command is optional. Its meaning is application-specific, e.g.
-     * to cease all activities to be conducted while a button is being pressed.
+     * This command's meaning is application-specific, e.g. to cease
+     * all activities to be conducted while a button is being pressed.
      */
     RpcAppEventTypeButtonRelease,
     /**
-     * This command is optional. It is used to bi-directionally exchange arbitrary raw data.
+     * @brief The client has sent a byte array of arbitrary size.
+     *
+     * This command's purpose is bi-directional exchange of arbitrary raw data.
      * Useful for implementing higher-level protocols while using the RPC as a transport layer.
      */
     RpcAppEventTypeDataExchange,
@@ -130,7 +136,7 @@ void rpc_system_app_set_callback(
     void* context);
 
 /**
- * @brief Send a confirmation that an RpcAppSystem instance has been started and is ready.
+ * @brief Send a notification that an RpcAppSystem instance has been started and is ready.
  *
  * Call this function once right after acquiring an RPC context and setting the callback.
  *
@@ -139,7 +145,9 @@ void rpc_system_app_set_callback(
 void rpc_system_app_send_started(RpcAppSystem* rpc_app);
 
 /**
- * @brief Send a confirmation that the application using an RpcAppSystem instance is about to exit.
+ * @brief Send a notification that the application using an RpcAppSystem instance is about to exit.
+ *
+ * Call this function when the application is about to exit (usually in the *_free() function).
  *
  * @param[in,out] rpc_app pointer to the instance to be used.
  */
@@ -148,7 +156,8 @@ void rpc_system_app_send_exited(RpcAppSystem* rpc_app);
 /**
  * @brief Send a confirmation that the application using an RpcAppSystem instance has handled the event.
  *
- * An explicit confirmation is required for all optional event types:
+ * An explicit confirmation is required for the following event types:
+ * - RpcAppEventTypeAppExit
  * - RpcAppEventTypeLoadFile
  * - RpcAppEventTypeButtonPress
  * - RpcAppEventTypeButtonRelease
