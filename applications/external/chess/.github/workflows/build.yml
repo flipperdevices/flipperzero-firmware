@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+env:
+  firmware_version: '0.86.1'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Flipper Zero Firmware
+        uses: actions/checkout@v3
+        with:
+          repository: 'flipperdevices/flipperzero-firmware'
+          ref: ${{ env.firmware_version }}
+          submodules: true
+      - name: Checkout flipper-chess
+        uses: actions/checkout@v3
+        with:
+          path: 'applications_user/flipper-chess'
+      - name: Build FAPs
+        run: ./fbt COMPACT=1 DEBUG=0 faps
+      - name: Check flipper-chess Built
+        run: test -f build/f7-firmware-C/.extapps/chess.fap
+      - name: Check flipper-chess Size
+        run: ls -l --block-size=K build/f7-firmware-C/.extapps/chess.fap
