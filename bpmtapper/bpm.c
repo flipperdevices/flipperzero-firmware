@@ -245,9 +245,9 @@ int32_t bpm_tapper_app(void* p) {
                     }
                 }
             }
-        // } else {
-        //     FURI_LOG_D("BPM-Tapper", "FuriMessageQueue: event timeout");
-        // event timeout
+            // } else {
+            //     FURI_LOG_D("BPM-Tapper", "FuriMessageQueue: event timeout");
+            // event timeout
         }
         view_port_update(view_port);
         furi_mutex_release(bpm_state->mutex);
