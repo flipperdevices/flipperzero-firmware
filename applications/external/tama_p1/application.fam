@@ -1,9 +1,0 @@
-App(
-    appid="tama_p1",
-    name="TAMA P1",
-    apptype=FlipperAppType.EXTERNAL,
-    entry_point="tama_p1_app",
-    stack_size=2 * 1024,
-    fap_icon="tamaIcon.png",
-    fap_category="Games",
-)
