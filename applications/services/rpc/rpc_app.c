@@ -206,7 +206,7 @@ static void rpc_system_app_button_press(const PB_Main* request, void* context) {
         RpcAppSystemEvent event;
         event.type = RpcAppEventTypeButtonPress;
 
-        if(strlen(request->content.app_button_press_request.args) == 0) {
+        if(strlen(request->content.app_button_press_request.args) != 0) {
             event.data.type = RpcAppSystemEventDataTypeString;
             event.data.string = request->content.app_button_press_request.args;
         } else {

@@ -1,6 +1,8 @@
 #include "../infrared_app_i.h"
 #include <gui/canvas.h>
 
+#define TAG "InfraredApp"
+
 typedef enum {
     InfraredRpcStateIdle,
     InfraredRpcStateLoaded,
@@ -62,14 +64,18 @@ bool infrared_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             if(state == InfraredRpcStateLoaded) {
                 if(event.event == InfraredCustomEventTypeRpcButtonPressName) {
                     // TODO: Simplify infrared_remote_get_signal_index()
+                    const char* button_name = furi_string_get_cstr(infrared->button_name);
                     size_t index;
                     infrared->app_state.current_button_index =
                         infrared_remote_get_signal_index(
                             infrared->remote,
-                            furi_string_get_cstr(infrared->button_name),
+                            button_name,
                             &index) ?
                             (signed)index :
                             InfraredButtonIndexNone;
+                    FURI_LOG_D(TAG, "Sending signal with name \"%s\"", button_name);
+                } else {
+                    FURI_LOG_D(TAG, "Sending signal with index \"%ld\"", infrared->app_state.current_button_index);
                 }
                 if(infrared->app_state.current_button_index != InfraredButtonIndexNone) {
                     infrared_tx_start_button_index(
