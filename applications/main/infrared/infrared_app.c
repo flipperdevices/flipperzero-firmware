@@ -79,7 +79,7 @@ static void infrared_rpc_command_callback(const RpcAppSystemEvent* event, void* 
         view_dispatcher_send_custom_event(
             infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonRelease);
     } else {
-        rpc_system_app_confirm(infrared->rpc_ctx, event->type, false);
+        rpc_system_app_confirm(infrared->rpc_ctx, false);
     }
 }
 

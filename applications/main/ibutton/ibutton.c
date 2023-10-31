@@ -55,7 +55,7 @@ static void ibutton_rpc_command_callback(const RpcAppSystemEvent* event, void* c
         furi_string_set(ibutton->file_path, event->data.string);
         view_dispatcher_send_custom_event(ibutton->view_dispatcher, iButtonCustomEventRpcLoadFile);
     } else {
-        rpc_system_app_confirm(ibutton->rpc, event->type, false);
+        rpc_system_app_confirm(ibutton->rpc, false);
     }
 }
 

@@ -702,9 +702,9 @@ static bool nfc_protocol_support_scene_rpc_on_event(NfcApp* instance, SceneManag
                     success = true;
                 }
             }
-            rpc_system_app_confirm(instance->rpc_ctx, RpcAppEventTypeLoadFile, success);
+            rpc_system_app_confirm(instance->rpc_ctx, success);
         } else if(event.event == NfcCustomEventRpcExit) {
-            rpc_system_app_confirm(instance->rpc_ctx, RpcAppEventTypeAppExit, true);
+            rpc_system_app_confirm(instance->rpc_ctx, true);
             scene_manager_stop(instance->scene_manager);
             view_dispatcher_stop(instance->view_dispatcher);
         } else if(event.event == NfcCustomEventRpcSessionClose) {

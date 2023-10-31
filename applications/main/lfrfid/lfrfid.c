@@ -29,7 +29,7 @@ static void rpc_command_callback(const RpcAppSystemEvent* event, void* context) 
         furi_string_set(app->file_path, event->data.string);
         view_dispatcher_send_custom_event(app->view_dispatcher, LfRfidEventRpcLoadFile);
     } else {
-        rpc_system_app_confirm(app->rpc_ctx, event->type, false);
+        rpc_system_app_confirm(app->rpc_ctx, false);
     }
 }
 

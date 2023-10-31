@@ -31,7 +31,7 @@ static void nfc_app_rpc_command_callback(const RpcAppSystemEvent* event, void* c
         furi_string_set(nfc->file_path, event->data.string);
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoadFile);
     } else {
-        rpc_system_app_confirm(nfc->rpc_ctx, event->type, false);
+        rpc_system_app_confirm(nfc->rpc_ctx, false);
     }
 }
 

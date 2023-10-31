@@ -33,7 +33,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubGhzCustomEventSceneExit) {
             scene_manager_stop(subghz->scene_manager);
             view_dispatcher_stop(subghz->view_dispatcher);
-            rpc_system_app_confirm(subghz->rpc_ctx, RpcAppEventTypeAppExit, true);
+            rpc_system_app_confirm(subghz->rpc_ctx, true);
         } else if(event.event == SubGhzCustomEventSceneRpcSessionClose) {
             scene_manager_stop(subghz->scene_manager);
             view_dispatcher_stop(subghz->view_dispatcher);
@@ -61,7 +61,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                     break;
                 }
             }
-            rpc_system_app_confirm(subghz->rpc_ctx, RpcAppEventTypeButtonPress, result);
+            rpc_system_app_confirm(subghz->rpc_ctx, result);
         } else if(event.event == SubGhzCustomEventSceneRpcButtonRelease) {
             bool result = false;
             if(state == SubGhzRpcStateTx) {
@@ -70,7 +70,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 result = true;
             }
             state = SubGhzRpcStateIdle;
-            rpc_system_app_confirm(subghz->rpc_ctx, RpcAppEventTypeButtonRelease, result);
+            rpc_system_app_confirm(subghz->rpc_ctx, result);
         } else if(event.event == SubGhzCustomEventSceneRpcLoad) {
             bool result = false;
             if(state == SubGhzRpcStateIdle) {
@@ -95,7 +95,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                     rpc_system_app_set_error_text(subghz->rpc_ctx, "Cannot parse file");
                 }
             }
-            rpc_system_app_confirm(subghz->rpc_ctx, RpcAppEventTypeLoadFile, result);
+            rpc_system_app_confirm(subghz->rpc_ctx, result);
         }
     }
     return consumed;

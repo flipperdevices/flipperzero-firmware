@@ -302,10 +302,10 @@ void rpc_system_app_send_exited(RpcAppSystem* rpc_app) {
     rpc_send(rpc_app->session, rpc_app->state_msg);
 }
 
-void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEventType event_type, bool result) {
-    UNUSED(event_type);
+void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result) {
     furi_assert(rpc_app);
     furi_assert(rpc_app->last_command_id != 0);
+    /* Ensure that only commands of these types can be confirmed */
     furi_assert(
         rpc_app->last_event_type == RpcAppEventTypeAppExit ||
         rpc_app->last_event_type == RpcAppEventTypeLoadFile ||

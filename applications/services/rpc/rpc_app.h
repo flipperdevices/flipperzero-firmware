@@ -166,10 +166,9 @@ void rpc_system_app_send_exited(RpcAppSystem* rpc_app);
  * Not confirming these events will result in a client-side timeout.
  *
  * @param[in,out] rpc_app pointer to the instance to be used.
- * @param[in] event_type type of event to confirm. // TODO this parameter is useless, remove it.
  * @param[in] result whether the command was successfully handled or not (true for success).
  */
-void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEventType event_type, bool result);
+void rpc_system_app_confirm(RpcAppSystem* rpc_app, bool result);
 
 /**
  * @brief Set the error code stored in an RpcAppSystem instance.

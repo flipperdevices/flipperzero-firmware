@@ -44,7 +44,7 @@ static void subghz_rpc_command_callback(const RpcAppSystemEvent* event, void* co
         view_dispatcher_send_custom_event(
             subghz->view_dispatcher, SubGhzCustomEventSceneRpcButtonRelease);
     } else {
-        rpc_system_app_confirm(subghz->rpc_ctx, event->type, false);
+        rpc_system_app_confirm(subghz->rpc_ctx, false);
     }
 }
 

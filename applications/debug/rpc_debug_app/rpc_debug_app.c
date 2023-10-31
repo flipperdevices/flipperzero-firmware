@@ -55,7 +55,7 @@ static void rpc_debug_app_rpc_command_callback(const RpcAppSystemEvent* event, v
     } else if(event->type == RpcAppEventTypeAppExit) {
         scene_manager_stop(app->scene_manager);
         view_dispatcher_stop(app->view_dispatcher);
-        rpc_system_app_confirm(app->rpc, RpcAppEventTypeAppExit, true);
+        rpc_system_app_confirm(app->rpc, true);
     } else if(event->type == RpcAppEventTypeDataExchange) {
         furi_assert(event->data.type == RpcAppSystemEventDataTypeBytes);
 
@@ -65,7 +65,7 @@ static void rpc_debug_app_rpc_command_callback(const RpcAppSystemEvent* event, v
         view_dispatcher_send_custom_event(
             app->view_dispatcher, RpcDebugAppCustomEventRpcDataExchange);
     } else {
-        rpc_system_app_confirm(app->rpc, event->type, false);
+        rpc_system_app_confirm(app->rpc, false);
     }
 }
 
