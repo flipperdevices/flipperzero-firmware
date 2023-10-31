@@ -1,12 +1,12 @@
 # Run time checks and forced system crash
 
-The best way to protect system integrity is to reduce amount cases that we must handle and crash system as early as possible.
+The best way to protect system integrity is to reduce amount cases that we must handle and crash the system as early as possible.
 For that purpose we have bunch of helpers located in Furi Core check.h.
 
 ## Couple notes before start
 
-- Definition of Crash - log event, save crash information in RTC and reboot system.
-- Definition of Halt - log event, stall system.
+- Definition of Crash - log event, save crash information in RTC and reboot the system.
+- Definition of Halt - log event, stall the system.
 - Debug and production builds behaves differently: debug build will never reset system in order to preserve state for debugging.
 - If you have debugger connected we will stop before reboot automatically.
 - All helpers accept optional MESSAGE_CSTR: it can be in RAM or Flash memory, but only messages from Flash will be shown after system reboot.
@@ -31,7 +31,7 @@ Always assert condition and crash the system if CONDITION is false.
 
 Crash the system.
 
-- Use it to crash system. For example: if abnormal condition detected.
+- Use it to crash the system. For example: if abnormal condition detected.
 
 ## `furi_halt()` or `furi_halt(MESSAGE_CSTR)`
 
