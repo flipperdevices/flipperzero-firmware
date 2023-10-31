@@ -16,18 +16,14 @@ char dir[4] = {'\'', '2'};
 const int32_t SLEN = 20;
 #define RESULT_SIZE 100
 
-struct GetScramble
-{
-	char mainScramble[25][3];
+struct GetScramble {
+    char mainScramble[25][3];
 };
 struct GetScramble a;
 
-
-void scrambleReplace()
-{
+void scrambleReplace() {
     // Initialize the mainScramble array with all the possible moves
-    for (int32_t i = 0; i < SLEN; i++)
-    {
+    for(int32_t i = 0; i < SLEN; i++) {
         a.mainScramble[i][0] = moves[furi_hal_random_get() % 6];
         a.mainScramble[i][1] = dir[furi_hal_random_get() % 3];
     }
@@ -43,23 +39,21 @@ void scrambleReplace()
     } */
 
     // Select the first 10 elements as the scramble, using only the first two elements of the dir array
-    for (int32_t i = 0; i < SLEN; i++)
-    {
+    for(int32_t i = 0; i < SLEN; i++) {
         a.mainScramble[i][1] = dir[furi_hal_random_get() % 3];
     }
-     for (int32_t i = 1; i < SLEN; i++) {
-        while ( a.mainScramble[i][0] == a.mainScramble[i - 2][0] || a.mainScramble[i][0] == a.mainScramble[i - 1][0]) {
-            a.mainScramble[i][0] = moves[furi_hal_random_get()%5];
+    for(int32_t i = 1; i < SLEN; i++) {
+        while(a.mainScramble[i][0] == a.mainScramble[i - 2][0] ||
+              a.mainScramble[i][0] == a.mainScramble[i - 1][0]) {
+            a.mainScramble[i][0] = moves[furi_hal_random_get() % 5];
         }
     }
 }
 
-char *printData()
-{
+char* printData() {
     static char result[RESULT_SIZE];
     int32_t offset = 0;
-    for (int32_t loop = 0; loop < SLEN; loop++)
-    {
+    for(int32_t loop = 0; loop < SLEN; loop++) {
         offset += snprintf(result + offset, RESULT_SIZE - offset, "%s ", a.mainScramble[loop]);
     }
     return result;

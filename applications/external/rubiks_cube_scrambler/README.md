@@ -1,4 +1,4 @@
-# Rubik's Cube Scrambler FAP [![FlipC.org](https://flipc.org/RaZeSloth/flipperzero-rubiks-cube-scrambler/badge?root=%2Fsrc%2Frubiks_cube_scrambler%2F)](https://flipc.org/RaZeSloth/flipperzero-rubiks-cube-scrambler?root=/src/rubiks_cube_scrambler/)
+# Rubik's Cube Scrambler FAP
 
 ## Where to start?
 Install the .fap file and put it in your apps folder
