@@ -38,13 +38,6 @@ void main_menu_scene_on_enter(void* context) {
      */
     scene_manager_set_scene_state(pokemon_fap->scene_manager, SelectMoveScene, 0);
 
-    /* HACK: Since we may have come from trade view, we cannot assume that
-     * pokemon_fap->curr_pokemon is correct.
-     * The proper way to do this would be to instead of tracking curr_pokemon
-     * separately, have it always be derived fro the current trade_block.
-     */
-    pokemon_fap->curr_pokemon = pokemon_table_get_num_from_index(pokemon_fap->pokemon_table, pokemon_fap->trade_block->party_members[0]);
-
     submenu_reset(pokemon_fap->submenu);
 
     snprintf(
@@ -61,11 +54,7 @@ void main_menu_scene_on_enter(void* context) {
         pokemon_fap->submenu, buf, SelectNicknameScene, scene_change_from_main_cb, pokemon_fap);
     snprintf(buf, sizeof(buf), "Level:           %d", pokemon_fap->trade_block->party[0].level);
     submenu_add_item(
-        pokemon_fap->submenu,
-        buf,
-        SelectLevelScene,
-        scene_change_from_main_cb,
-        pokemon_fap);
+        pokemon_fap->submenu, buf, SelectLevelScene, scene_change_from_main_cb, pokemon_fap);
     submenu_add_item(
         pokemon_fap->submenu,
         "Select Moves",

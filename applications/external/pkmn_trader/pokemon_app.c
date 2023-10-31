@@ -1866,9 +1866,9 @@ const NamedList type_list[] = {
 int pokemon_table_get_num_from_index(const PokemonTable* table, uint8_t index) {
     int i;
 
-    for (i = 0;; i++) {
-        if (table[i].index == index) return i;
-        if (table[i].name == NULL) break;
+    for(i = 0;; i++) {
+        if(table[i].index == index) return i;
+        if(table[i].name == NULL) break;
     }
 
     return 0;
@@ -2205,7 +2205,8 @@ PokemonFap* pokemon_alloc() {
      * main FAP.
      */
     trade_view = view_alloc();
-    pokemon_fap->trade = trade_alloc(pokemon_fap->trade_block, pokemon_fap->pokemon_table, trade_view);
+    pokemon_fap->trade =
+        trade_alloc(pokemon_fap->trade_block, pokemon_fap->pokemon_table, trade_view);
     view_dispatcher_add_view(pokemon_fap->view_dispatcher, AppViewTrade, trade_view);
 
     return pokemon_fap;
