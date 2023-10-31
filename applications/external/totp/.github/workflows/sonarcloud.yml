@@ -1,0 +1,39 @@
+name: SonarCloud
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ['master']
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: ubuntu-latest
+    env:
+      BUILD_WRAPPER_OUT_DIR: "$HOME/build_wrapper_output" # Directory where build-wrapper output will be placed
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          submodules: 'recursive'
+
+      - name: Install sonar-scanner and build-wrapper
+        uses: SonarSource/sonarcloud-github-c-cpp@v2.0.1
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install uFBT
+        run: python3 -m pip install --upgrade ufbt
+
+      - name: Build
+        shell: pwsh
+        run: ./ufbt.ps1 xs --clean
+
+      - name: Run sonar-scanner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          sonar-scanner --define sonar.cfamily.compile-commands="totp/.vscode/compile_commands.json"

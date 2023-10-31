@@ -1,0 +1,53 @@
+name: PVS-Studio build analysis
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ['master']
+jobs:
+  build-analyze:
+    runs-on: ubuntu-latest
+    env:
+      FBT_NO_SYNC: "true"
+      TARGETS: f7
+      DEFAULT_TARGET: f7
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          submodules: 'recursive'
+      - name: Install tools
+        run: |
+          wget -q -O - https://files.pvs-studio.com/etc/pubkey.txt \
+            | sudo apt-key add -
+          sudo wget -O /etc/apt/sources.list.d/viva64.list \
+            https://files.pvs-studio.com/etc/viva64.list
+          sudo apt update
+          sudo apt install pvs-studio
+          pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install uFBT
+        run: python3 -m pip install --upgrade ufbt
+
+      - name: Build
+        shell: pwsh
+        run: ./ufbt.ps1 xs --clean
+          
+      - name: Analyze
+        run: |
+          pvs-studio-analyzer analyze @.pvsoptions -f totp/.vscode/compile_commands.json -j -o PVS-Studio.log
+      - name: Convert report
+        run: |
+          plog-converter -t sarif -o pvs-report.sarif PVS-Studio.log
+          sed -i 's/"results": null/"results": []/g' pvs-report.sarif
+          sed -i 's/"rules": null/"rules": []/g' pvs-report.sarif
+      - name: Publish report
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: pvs-report.sarif
+          category: PVS-Studio

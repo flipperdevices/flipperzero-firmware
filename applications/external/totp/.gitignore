@@ -1,0 +1,61 @@
+*.swp
+*.gdb_history
+
+
+# LSP
+.cache
+compile_commands.json
+
+# JetBrains IDEs
+.idea/
+
+# Python VirtEnvironments
+.env
+.venv
+env/
+venv/
+
+# Python Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pickle
+
+.obj/
+bindings/
+.DS_Store
+.mxproject
+Brewfile.lock.json
+
+# Visual Studio Code
+.vscode/
+
+# legendary cmake's
+build
+CMakeLists.txt
+
+# bundle output
+dist
+
+# kde
+.directory
+null.d
+
+# SCons
+.sconsign.dblite
+# SCons build dir
+build/
+
+# Toolchain
+/toolchain
+
+# openocd output file
+openocd.log
+
+# PVS Studio temporary files
+.PVS-Studio/
+PVS-Studio.log
+
+totp/dist/*
+totp/config/app/ufbt_def.h
+.vscode

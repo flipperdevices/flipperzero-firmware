@@ -1,0 +1,197 @@
+{
+  "description": "Schema file for uFBT-FirmwareManager firmwares.json file",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "firmwares": {
+      "description": "Available firmwares",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "alias": {
+                "description": "Firmware alias(-es)",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "uniqueItems": true
+              },
+              "description": {
+                "description": "User-friendly description explaining firmware details",
+                "type": "string"
+              },
+              "type": {
+                "description": "Type of firmware reference. `index` - firmware from index; `git-release` - firmware from git releases; `direct-uri` - firmware from direct URI; `git-action` - firmware from github action artifacts",
+                "enum": [
+                  "index",
+                  "git-release",
+                  "direct-uri",
+                  "git-action"
+                ]
+              }
+            },
+            "required": [
+              "alias",
+              "description"
+            ],
+            "unevaluatedProperties ": false
+          },
+          {
+            "oneOf": [
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "index"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "index_url": {
+                      "description": "Index URL to look for firmware",
+                      "type": "string"
+                    },
+                    "channel": {
+                      "description": "Index channel to pull firmware from",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "index_url",
+                    "channel"
+                  ],
+                  "unevaluatedProperties ": false
+                },
+                "else": false
+              },
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "git-release"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "git_repo": {
+                      "description": "Firmware Github repo in format `author/repo_name`",
+                      "type": "string"
+                    },
+                    "git_release": {
+                      "description": "Github release name to pull firmware from",
+                      "type": "string"
+                    },
+                    "sdk_filename_pattern": {
+                      "description": "SDK filename regex pattern",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "git_repo",
+                    "git_release"
+                  ],
+                  "unevaluatedProperties ": false
+                },
+                "else": false
+              },
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "direct-uri"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "uri": {
+                      "description": "Firmware direct download uri",
+                      "type": "string",
+                      "pattern": "^(https?|ftp):\/\/.+"
+                    }
+                  },
+                  "required": [
+                    "uri"
+                  ],
+                  "unevaluatedProperties ": false
+                },
+                "else": false
+              },
+              {
+                "if": {
+                  "properties": {
+                    "type": {
+                      "const": "git-action"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "git_repo": {
+                      "description": "Firmware Github repo in format `author/repo_name`",
+                      "type": "string"
+                    },
+                    "git_action": {
+                      "description": "Github action id or workflow action file name",
+                      "type": "string"
+                    },
+                    "git_artifact": {
+                      "description": "Github action artifact name regex pattern",
+                      "type": "string"
+                    },
+                    "sdk_filename_pattern": {
+                      "description": "SDK filename regex pattern",
+                      "type": "string"
+                    },
+                    "git_branch": {
+                      "description": "Github branch name",
+                      "type": "string"
+                    },
+                    "git_event": {
+                      "description": "Github event",
+                      "type": "string",
+                      "enum": [
+                        "push",
+                        "pull_request",
+                        "issue"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "git_repo",
+                    "git_action",
+                    "git_artifact"
+                  ],
+                  "unevaluatedProperties ": false
+                },
+                "else": false
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "firmwares"
+  ],
+  "unevaluatedProperties ": false
+}

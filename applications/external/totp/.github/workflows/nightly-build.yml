@@ -1,0 +1,62 @@
+name: Nightly build
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 0 * * *
+
+jobs:
+  nightly-build:
+    strategy:
+      matrix:
+        firmware: [od, os, xs, xd, ul]
+
+    runs-on: ubuntu-latest
+    env:
+      FBT_NO_SYNC: "true"
+      TARGETS: f7
+      DEFAULT_TARGET: f7
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:  
+          ref: master
+          submodules: 'recursive'
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install uFBT
+        run: python3 -m pip install --upgrade ufbt
+
+      - name: Build
+        run: ./build.ps1 ${{ matrix.firmware }}
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: |
+            build/*.zip
+  checksum:
+    runs-on: ubuntu-latest
+    needs: ['nightly-build']
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: dist
+          path: dist
+      
+      - name: Generate checksum
+        run: |
+          cd dist
+          find . -type f -maxdepth 1 -exec sha256sum {} \; > ../checksum.txt
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: |
+            checksum.txt

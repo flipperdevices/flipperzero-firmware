@@ -1,0 +1,137 @@
+name: Create new release
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_version:
+        description: 'New version'
+        required: true
+        type: string
+
+jobs:
+  set-new-version:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    outputs:
+      commit_hash: ${{steps.commit_new_version.outputs.commit_hash}}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set new version format
+        run: |
+          if [[ "${{ inputs.new_version }}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; 
+          then 
+            echo "New version looks okay";
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            sed -r -i "s/TOTP_APP_VERSION_MAJOR\\s+\\([0-9]+\\)/TOTP_APP_VERSION_MAJOR ($MAJOR)/g" totp/version.h
+            sed -r -i "s/TOTP_APP_VERSION_MINOR\\s+\\([0-9]+\\)/TOTP_APP_VERSION_MINOR ($MINOR)/g" totp/version.h
+            sed -r -i "s/TOTP_APP_VERSION_PATCH\\s+\\([0-9]+\\)/TOTP_APP_VERSION_PATCH ($PATCH)/g" totp/version.h
+            sed -r -i "s/fap_version=\"[0-9]+\\.[0-9]+\"/fap_version=\"$MAJOR.$MINOR$PATCH\"/g" totp/application.fam
+          else 
+            echo "Invalid version format";
+            exit 1
+          fi
+
+      - id: commit_new_version
+        uses: stefanzweifel/git-auto-commit-action@v4.16.0
+        with:
+          commit_message: Updated version
+          push_options: '--force'
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: set-new-version
+    env:
+      GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    outputs:
+      upload_url: ${{steps.create-release.outputs.upload_url}}
+    steps:
+      - uses: actions/checkout@v3
+      - id: create-release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          bodyFile: ".github/release-body.md"
+          artifactErrorsFailBuild: true
+          updateOnlyUnreleased: true
+          allowUpdates: true
+          removeArtifacts: true
+          draft: true
+          tag: "v${{ inputs.new_version }}"
+          commit: "${{needs.set-new-version.outputs.commit_hash}}"
+
+  build:
+    strategy:
+      matrix:
+        firmware: [od, os, xs, xd, ul]
+
+    runs-on: ubuntu-latest
+    needs: [set-new-version, create-release]
+    env:
+      FBT_NO_SYNC: "true"
+      TARGETS: f7
+      DEFAULT_TARGET: f7
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: "${{needs.set-new-version.outputs.commit_hash}}"
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install uFBT
+        run: python3 -m pip install --upgrade ufbt
+
+      - name: Build
+        run: ./build.ps1 ${{ matrix.firmware }}
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: |
+            build/*.zip
+
+  checksum:
+    runs-on: ubuntu-latest
+    needs: ['create-release', 'build']
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: release
+          path: release
+      
+      - name: Generate checksum
+        run: |
+          cd release
+          find . -type f -maxdepth 1 -exec sha256sum {} \; > ../checksum.txt
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: release
+          path: |
+            checksum.txt
+
+  publish-artifacts:
+    runs-on: ubuntu-latest
+    needs: ['create-release', 'build', 'checksum']
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: release
+          path: release
+
+      - name: Upload Release Assets
+        uses: shogo82148/actions-upload-release-asset@v1.7.2
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: release/*.*
