@@ -262,6 +262,7 @@ static void rpc_system_app_get_error_process(const PB_Main* request, void* conte
 
     PB_Main* response = malloc(sizeof(PB_Main));
 
+    response->command_id = request->command_id;
     response->which_content = PB_Main_app_get_error_response_tag;
     response->content.app_get_error_response.code = rpc_app->error_code;
     response->content.app_get_error_response.text = rpc_app->error_text;
