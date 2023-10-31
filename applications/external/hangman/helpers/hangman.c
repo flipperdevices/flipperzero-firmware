@@ -50,7 +50,7 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
             uint8_t x = 42 + i * glyph_w * 1.85;
             uint8_t n = j * app->lang->keyboard_cols + i;
 
-            if (n > app->lang->letters_cnt - 1) {
+            if(n > app->lang->letters_cnt - 1) {
                 break;
             }
 
@@ -80,8 +80,7 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     uint8_t glyph_w = canvas_glyph_width(canvas, ' ');
     uint8_t gap = app->lang->keyboard_gap;
 
-    uint8_t center_x =
-        (canvas_width(canvas) - (glyph_w + gap) * strlen(app->word)) / 2;
+    uint8_t center_x = (canvas_width(canvas) - (glyph_w + gap) * strlen(app->word)) / 2;
 
     uint8_t h = canvas_current_font_height(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -171,10 +170,10 @@ void hangman_clear_state(HangmanApp* app) {
     app->word = hangman_get_random_word(app->lang->dict_file);
 }
 
-int hangman_read_int(Stream *stream) {
-    FuriString *line = furi_string_alloc();
+int hangman_read_int(Stream* stream) {
+    FuriString* line = furi_string_alloc();
 
-    if (!stream_read_line(stream, line)) {
+    if(!stream_read_line(stream, line)) {
         furi_crash(NULL);
     }
 
@@ -184,18 +183,18 @@ int hangman_read_int(Stream *stream) {
     return result;
 }
 
-HangmanLangConfig *hangman_load_config() {
-    Storage *storage = furi_record_open(RECORD_STORAGE);
-    Stream *stream = file_stream_alloc(storage);
-    FuriString *line = furi_string_alloc();
-    HangmanLangConfig *config = malloc(sizeof(HangmanLangConfig));
+HangmanLangConfig* hangman_load_config() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* stream = file_stream_alloc(storage);
+    FuriString* line = furi_string_alloc();
+    HangmanLangConfig* config = malloc(sizeof(HangmanLangConfig));
 
-    if (!file_stream_open(stream, HANGMAN_META_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(!file_stream_open(stream, HANGMAN_META_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
         furi_crash(NULL);
     }
 
     FuriString* dict_path = furi_string_alloc_set_str(APP_ASSETS_PATH(""));
-    if (!stream_read_line(stream, line)) {
+    if(!stream_read_line(stream, line)) {
         furi_crash(NULL);
     }
     furi_string_cat(dict_path, line);
@@ -204,12 +203,12 @@ HangmanLangConfig *hangman_load_config() {
     furi_string_free(line);
     furi_string_free(dict_path);
 
-    config->unicode_base  = hangman_read_int(stream);
+    config->unicode_base = hangman_read_int(stream);
     config->first_letter_offset = hangman_read_int(stream);
-    config->letters_cnt   = hangman_read_int(stream);
+    config->letters_cnt = hangman_read_int(stream);
     config->keyboard_cols = hangman_read_int(stream);
-    config->keyboard_gap  = hangman_read_int(stream);
-    config->keyboard_rows = ceil((float) config->letters_cnt / config->keyboard_cols);
+    config->keyboard_gap = hangman_read_int(stream);
+    config->keyboard_rows = ceil((float)config->letters_cnt / config->keyboard_cols);
 
     file_stream_close(stream);
     stream_free(stream);
@@ -292,19 +291,18 @@ bool hangman_main_loop(HangmanApp* app) {
                 case InputKeyDown:
                     app->pos += app->lang->keyboard_cols;
 
-                    if (app->pos >= app->lang->letters_cnt) {
+                    if(app->pos >= app->lang->letters_cnt) {
                         app->pos %= app->lang->keyboard_cols;
                     }
 
                     break;
 
                 case InputKeyUp:
-                    if (app->pos >= app->lang->keyboard_cols) {
+                    if(app->pos >= app->lang->keyboard_cols) {
                         app->pos -= app->lang->keyboard_cols;
                     } else {
-                        app->pos += app->lang->keyboard_cols *
-                                    (app->lang->keyboard_rows - 1);
-                        if (app->pos >= app->lang->letters_cnt) {
+                        app->pos += app->lang->keyboard_cols * (app->lang->keyboard_rows - 1);
+                        if(app->pos >= app->lang->letters_cnt) {
                             app->pos -= app->lang->keyboard_cols;
                         }
                     }
