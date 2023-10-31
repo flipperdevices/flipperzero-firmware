@@ -7,6 +7,7 @@
 #include <notification/notification_messages.h>
 #include <nrf24.h>
 #include "nrf24channelscanner_icons.h"
+#include <assets_icons.h>
 
 const uint8_t num_channels = 128;
 static uint8_t nrf24values[128] = {0}; //to store channel data
@@ -193,7 +194,8 @@ int32_t nrf24channelscanner_main(void* p) {
 
         if(event.type == EventTypeKey) {
             szuz = false; //hit any button, so hide welcome screen
-            if(event.input.type == InputTypeLong && event.input.key == InputKeyBack) {
+            if((event.input.type == InputTypeShort || event.input.type == InputTypeLong) &&
+               event.input.key == InputKeyBack) {
                 if(isScanning) {
                     stopNrfScan = true; //if running, stop it.
                     notification_message(notification, &sequence_blink_yellow_100);
