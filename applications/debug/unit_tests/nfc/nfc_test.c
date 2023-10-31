@@ -53,7 +53,7 @@ static void nfc_test_alloc() {
 }
 
 static void nfc_test_free() {
-    furi_assert(nfc_test);
+    furi_check(nfc_test);
 
     furi_record_close(RECORD_STORAGE);
     nfca_signal_free(nfc_test->signal);

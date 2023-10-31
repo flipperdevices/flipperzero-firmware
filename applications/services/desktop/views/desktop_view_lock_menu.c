@@ -222,14 +222,14 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
                 break;
             case DesktopLockMenuIndexBasicStealth:
                 if(m->stealth_mode) {
-                    str = "Sound Mode";
+                    str = "Unmute";
                 } else {
-                    str = "Stealth Mode";
+                    str = "Mute";
                 }
                 break;
             case DesktopLockMenuIndexBasicDummy:
                 if(m->dummy_mode) {
-                    str = "Brainiac Mode";
+                    str = "Default Mode";
                 } else {
                     str = "Dummy Mode";
                 }
