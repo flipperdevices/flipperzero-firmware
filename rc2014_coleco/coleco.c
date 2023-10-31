@@ -400,10 +400,10 @@ int32_t coleco_app(void* p)
         view_port_update(view_port);
       }
     }
-    else
-    {
-      FURI_LOG_D("Coleco", "FuriMessageQueue: event timeout");
-    }
+    // else
+    // {
+    //   FURI_LOG_D("Coleco", "FuriMessageQueue: event timeout");
+    // }
 
     furi_mutex_release(coleco->mutex);
   }
