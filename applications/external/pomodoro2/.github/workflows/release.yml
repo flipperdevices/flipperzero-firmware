@@ -1,0 +1,52 @@
+name: Release
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Bump and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.0
+        with:
+          access_token: ${{ github.token }}
+
+      - uses: actions/checkout@v4
+
+      - name: Build Application
+        run: |
+          bash tools/build.sh -f unleashed
+          bash tools/build.sh
+
+      - name: Bump Version and Push Tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          release_branches: master
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Create a GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }}
+          body: |
+            # Installation
+
+            * Download application file for your firmware. In the release you can find 
+            `flipp_pomodoro_{firmware}_{api_version}.fap` where:
+            * * `{firmware}` - is type of firmware you use `standard` stands for official one.
+            * * `{api_version}` - is the version of API that was used for build. There is no easy way to map api version and firmware version. But this app is made the way the latest release is compatable with latest api/firmware.
+            * Copy `flipp_pomodoro_{firmware}_{api_version}.fap` to SD-card of your flipper `/apps/Misc`. 
+            * Run from `Applications` menu of your flipper.
+            * Hint: add app to favorites and stay always productive
+
+            So Long, and Thanks for All the Fish! 🐬 
+
+            # Change Detail
+            ${{ steps.tag_version.outputs.changelog }}
+          artifacts: "dist/**"

@@ -1,0 +1,6 @@
+[submodule ".standard-firmware"]
+	path = .standard-firmware
+	url = https://github.com/flipperdevices/flipperzero-firmware.git
+[submodule ".unleashed-firmware"]
+	path = .unleashed-firmware
+	url = https://github.com/DarkFlippers/unleashed-firmware.git
