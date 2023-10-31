@@ -1,7 +1,7 @@
 #include "scientist.h"
 #include "game_sprites.h"
 
-#include <jetpack_game_icons.h>
+#include <jetpack_icons.h>
 #include <gui/gui.h>
 
 void scientist_tick(SCIENTIST* const scientists) {

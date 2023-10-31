@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include <jetpack_game_icons.h>
+#include "jetpack_icons.h"
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/icon_animation.h>
@@ -354,8 +354,8 @@ int32_t jetpack_game_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);

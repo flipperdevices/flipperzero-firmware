@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <jetpack_game_icons.h>
+#include <jetpack_icons.h>
 #include <gui/gui.h>
 
 #include "coin.h"
