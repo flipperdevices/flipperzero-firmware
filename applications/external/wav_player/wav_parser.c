@@ -11,7 +11,7 @@ const char* format_text(FormatTag tag) {
     default:
         return "Unknown";
     }
-};
+}
 
 struct WavParser {
     WavHeaderChunk header;

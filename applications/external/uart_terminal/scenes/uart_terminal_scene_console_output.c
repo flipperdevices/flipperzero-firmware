@@ -123,7 +123,8 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         app->BAUDRATE = 115200;
         app->uart = uart_terminal_uart_init(app);
     }
-    if(0 == strncmp("128000", app->selected_tx_string, strlen("128000")) && app->BAUDRATE != 128000) {
+    if(0 == strncmp("128000", app->selected_tx_string, strlen("128000")) &&
+       app->BAUDRATE != 128000) {
         uart_terminal_uart_free(app->uart);
         app->BAUDRATE = 128000;
         app->uart = uart_terminal_uart_init(app);
@@ -134,12 +135,14 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         app->BAUDRATE = 230400;
         app->uart = uart_terminal_uart_init(app);
     }
-    if(0 == strncmp("250000", app->selected_tx_string, strlen("250000")) && app->BAUDRATE != 250000) {
+    if(0 == strncmp("250000", app->selected_tx_string, strlen("250000")) &&
+       app->BAUDRATE != 250000) {
         uart_terminal_uart_free(app->uart);
         app->BAUDRATE = 250000;
         app->uart = uart_terminal_uart_init(app);
     }
-    if(0 == strncmp("256000", app->selected_tx_string, strlen("256000")) && app->BAUDRATE != 256000) {
+    if(0 == strncmp("256000", app->selected_tx_string, strlen("256000")) &&
+       app->BAUDRATE != 256000) {
         uart_terminal_uart_free(app->uart);
         app->BAUDRATE = 256000;
         app->uart = uart_terminal_uart_init(app);
@@ -188,7 +191,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
 
     // Send command with CR+LF or newline '\n'
     if(app->is_command && app->selected_tx_string) {
-        if(app->TERMINAL_MODE == 1){
+        if(app->TERMINAL_MODE == 1) {
             uart_terminal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
             uart_terminal_uart_tx((uint8_t*)("\r\n"), 2);

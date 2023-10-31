@@ -27,7 +27,7 @@
 
 #define TAG "MifareFuzzerApp"
 
-#define MIFARE_FUZZER_APP_FOLDER EXT_PATH("mifare_fuzzer")
+#define MIFARE_FUZZER_APP_FOLDER EXT_PATH("apps_data/mifare_fuzzer")
 #define MIFARE_FUZZER_FILE_EXT ".txt"
 
 #define MIFARE_FUZZER_TICK_PERIOD 200
@@ -48,7 +48,6 @@ typedef enum {
 } MifareFuzzerView;
 
 struct MifareFuzzerApp {
-
     Gui* gui;
 
     ViewDispatcher* view_dispatcher;
@@ -74,5 +73,4 @@ struct MifareFuzzerApp {
     FuriString* file_path;
     FuriString* uid_str;
     Stream* uids_stream;
-
 };
