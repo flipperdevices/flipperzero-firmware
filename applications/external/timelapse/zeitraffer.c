@@ -7,8 +7,8 @@
 #include "gpio_item.h"
 #include "zeitraffer_icons.h"
 
-#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/zeitraffer"
-#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/zeitraffer.conf"
+#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/intravelometer"
+#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/intravelometer.conf"
 
 // Часть кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 
@@ -325,6 +325,7 @@ int32_t zeitraffer_app(void* p) {
                     }
                 }
             }
+            view_port_update(view_port);
         }
 
         // Наше событие — это сработавший таймер
@@ -378,6 +379,8 @@ int32_t zeitraffer_app(void* p) {
             default:
                 notification_message(notifications, &sequence_display_backlight_enforce_auto);
             }
+
+            view_port_update(view_port);
         }
         if(Time < 1) Time = 1; // Не даём открутить таймер меньше единицы
         if(Count < -1)
@@ -398,7 +401,7 @@ int32_t zeitraffer_app(void* p) {
         }
         if(!flipper_format_write_comment_cstr(
                save,
-               "Zeitraffer app settings: № of frames, interval time, backlight type, Delay")) {
+               "Zeitraffer app settings: n of frames, interval time, backlight type, Delay")) {
             notification_message(notifications, &sequence_error);
             break;
         }
@@ -422,6 +425,7 @@ int32_t zeitraffer_app(void* p) {
     } while(0);
 
     flipper_format_free(save);
+
     furi_record_close(RECORD_STORAGE);
 
     // Очищаем таймер

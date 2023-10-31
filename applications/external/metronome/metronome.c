@@ -1,7 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
-#include <core/string.h>
 #include <stdlib.h>
 
 #include <gui/gui.h>
@@ -54,7 +53,8 @@ typedef struct {
 } MetronomeState;
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    const MetronomeState* metronome_state = (MetronomeState*)ctx;
+    furi_assert(ctx);
+    const MetronomeState* metronome_state = ctx;
     furi_mutex_acquire(metronome_state->mutex, FuriWaitForever);
 
     FuriString* tempStr = furi_string_alloc();
@@ -140,8 +140,10 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 
 static void timer_callback(void* ctx) {
     // this is where we go BEEP!
-    MetronomeState* metronome_state = (MetronomeState*)ctx;
+    furi_assert(ctx);
+    MetronomeState* metronome_state = ctx;
     furi_mutex_acquire(metronome_state->mutex, FuriWaitForever);
+
     metronome_state->current_beat++;
     if(metronome_state->current_beat > metronome_state->beats_per_bar) {
         metronome_state->current_beat = 1;
@@ -176,7 +178,7 @@ static void timer_callback(void* ctx) {
         case Silent:
             break;
         }
-    };
+    }
 
     // this is a bit of a kludge... if we are on vibro and unpronounced, stop vibro after half the usual duration
     switch(metronome_state->output_mode) {
@@ -267,7 +269,6 @@ static void metronome_state_init(MetronomeState* const metronome_state) {
     metronome_state->current_beat = 0;
     metronome_state->output_mode = Loud;
     metronome_state->notifications = furi_record_open(RECORD_NOTIFICATION);
-    metronome_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
 int32_t metronome_app() {
@@ -276,6 +277,7 @@ int32_t metronome_app() {
     MetronomeState* metronome_state = malloc(sizeof(MetronomeState));
     metronome_state_init(metronome_state);
 
+    metronome_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!metronome_state->mutex) {
         FURI_LOG_E("Metronome", "cannot create mutex\r\n");
         free(metronome_state);
@@ -290,8 +292,7 @@ int32_t metronome_app() {
         furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, metronome_state);
 
     // Open GUI and register view_port
-    //
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     PluginEvent event;
@@ -377,23 +378,20 @@ int32_t metronome_app() {
                     }
                 }
             }
-        } else {
-            FURI_LOG_D("Metronome", "FuriMessageQueue: event timeout");
-            // event timeout
         }
 
-        view_port_update(view_port);
         furi_mutex_release(metronome_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
-    furi_record_close("gui");
+    furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
+    furi_mutex_free(metronome_state->mutex);
     furi_timer_free(metronome_state->timer);
     furi_record_close(RECORD_NOTIFICATION);
-    furi_mutex_free(metronome_state->mutex);
     free(metronome_state);
 
     return 0;
