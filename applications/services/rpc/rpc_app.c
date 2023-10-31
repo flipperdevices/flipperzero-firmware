@@ -203,14 +203,16 @@ static void rpc_system_app_button_press(const PB_Main* request, void* context) {
     if(rpc_app->callback) {
         FURI_LOG_D(TAG, "ButtonPress");
 
-        const RpcAppSystemEvent event = {
-            .type = RpcAppEventTypeButtonPress,
-            .data =
-                {
-                    .type = RpcAppSystemEventDataTypeString,
-                    .string = request->content.app_button_press_request.args,
-                },
-        };
+        RpcAppSystemEvent event;
+        event.type = RpcAppEventTypeButtonPress;
+
+        if(strlen(request->content.app_button_press_request.args) == 0) {
+            event.data.type = RpcAppSystemEventDataTypeString;
+            event.data.string = request->content.app_button_press_request.args;
+        } else {
+            event.data.type = RpcAppSystemEventDataTypeInt32;
+            event.data.i32 = request->content.app_button_press_request.index;
+        }
 
         rpc_system_app_error_reset(rpc_app);
         rpc_system_app_set_last_command(rpc_app, request->command_id, &event);
