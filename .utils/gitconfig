@@ -1,4 +1,4 @@
 [alias]
     add-app = "!bash .utils/add-app.sh"
     update-app = "!bash .utils/update-app.sh"
-    bulk-update-apps = "!f() { set -e; find . -depth -maxdepth 2 -name .gitsubtree \\( -execdir git update-app \\; -o -quit \\); }; f"
+    bulk-update-apps = "!bash .utils/bulk-update-apps.sh"
