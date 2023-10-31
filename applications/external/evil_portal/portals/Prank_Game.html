@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guess the number to use WiFi</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            background: #cfcfcf;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+        }
+        #user-input {
+            margin: 1em;
+            font-size: 1em;
+            padding: 0.25em;
+            width: 40%;
+            max-width: 150px;
+        }
+        #submit-btn, #reset-btn {
+            font-size: 2em;
+            margin: 1em;
+            cursor: pointer;
+        }
+        #message {
+            font-size: 1.5em;
+        }
+        #instruction {
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <h1>Guess the number to use WiFi</h1>
+    <p id="instruction">Enter a number between 0-10</p>
+    <input id="user-input" type="number" min="0" max="10"/>
+    <button id="submit-btn">Guess</button>
+    <p id="message"></p>
+    <button id="reset-btn" style="display: none;">Reset Game</button>
+    <script>
+        var randomNumber = Math.floor(Math.random() * 11);
+        var submitBtn = document.getElementById("submit-btn");
+        var userInput = document.getElementById("user-input");
+        var message = document.getElementById("message");
+        var resetBtn = document.getElementById("reset-btn");
+
+        submitBtn.addEventListener("click", function(){
+            var userGuess = userInput.value;
+            if(userGuess == randomNumber) {
+                message.textContent = "Congratulations! You've guessed the number.";
+                endGame();
+            } else {
+                message.textContent = "Try again!";
+            }
+        });
+
+        resetBtn.addEventListener("click", function(){
+            randomNumber = Math.floor(Math.random() * 11);
+            message.textContent = "";
+            userInput.value = "";
+            resetBtn.style.display = "none";
+            submitBtn.style.display = "block";
+            userInput.disabled = false;
+        });
+
+        function endGame() {
+            submitBtn.style.display = "none";
+            resetBtn.style.display = "block";
+            userInput.disabled = true;
+        }
+    </script>
+</body>
+</html>

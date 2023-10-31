@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #000;
+            color: #0F0;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #terminal {
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+            padding: 20px;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            animation: type 20s steps(80, end);
+        }
+        @keyframes type {
+            from {width: 0;}
+        }
+    </style>
+    <title>Hacking Simulation</title>
+</head>
+<body>
+    <div id="terminal"></div>
+    <script>
+        const lines = [
+            'Initiating connection...',
+            'Bypassing security protocols...',
+            'Accessing system...',
+            'Disabling antivirus...',
+            'Initiating data transfer...',
+            'Deleting files...',
+            'Formatting drive...',
+            'Hacking successful.'
+        ];
+        let i = 0;
+        let txt = '';
+        let speed = 100;
+
+        function typeWriter() {
+            if (i < lines.length) {
+                txt += lines[i] + "\n";
+                document.getElementById("terminal").innerHTML = txt;
+                i++;
+                setTimeout(typeWriter, speed);
+            }
+        }
+        typeWriter();
+    </script>
+</body>
+</html>

