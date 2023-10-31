@@ -1,4 +1,3 @@
-#include <assets_icons.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
@@ -10,6 +9,7 @@
 #include <stdbool.h> // Header-file for boolean data-type.
 #include <stdio.h>
 #include <string.h>
+#include "etch_icons.h"
 
 #define WIDTH 64
 #define HEIGHT 32
@@ -22,6 +22,7 @@ typedef struct selected_position {
 } selected_position;
 
 typedef struct {
+    FuriMutex* mutex;
     selected_position selected;
     bool board[64][32];
     bool isDrawing;
@@ -83,8 +84,9 @@ const NotificationSequence sequence_cleanup = {
 };
 
 void etch_draw_callback(Canvas* canvas, void* ctx) {
-    const EtchData* etch_state = acquire_mutex((ValueMutex*)ctx, 25);
-    UNUSED(ctx);
+    furi_assert(ctx);
+    const EtchData* etch_state = ctx;
+    furi_mutex_acquire(etch_state->mutex, FuriWaitForever);
 
     canvas_clear(canvas);
 
@@ -134,7 +136,7 @@ void etch_draw_callback(Canvas* canvas, void* ctx) {
         brush_size);
 
     //release the mutex
-    release_mutex((ValueMutex*)ctx, etch_state);
+    furi_mutex_release(etch_state->mutex);
 }
 
 void etch_input_callback(InputEvent* input_event, void* ctx) {
@@ -148,8 +150,8 @@ int32_t etch_a_sketch_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     EtchData* etch_state = malloc(sizeof(EtchData));
-    ValueMutex etch_state_mutex;
-    if(!init_mutex(&etch_state_mutex, etch_state, sizeof(EtchData))) {
+    etch_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!etch_state->mutex) {
         FURI_LOG_E("etch", "cannot create mutex\r\n");
         free(etch_state);
         return -1;
@@ -157,7 +159,7 @@ int32_t etch_a_sketch_app(void* p) {
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, etch_draw_callback, &etch_state_mutex);
+    view_port_draw_callback_set(view_port, etch_draw_callback, etch_state);
     view_port_input_callback_set(view_port, etch_input_callback, event_queue);
 
     // Register view port in GUI
@@ -262,10 +264,11 @@ int32_t etch_a_sketch_app(void* p) {
     notification_message(notification, &sequence_cleanup);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
+    furi_mutex_free(etch_state->mutex);
     furi_message_queue_free(event_queue);
-    free(etch_state);
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
+    free(etch_state);
 
     return 0;
 }
