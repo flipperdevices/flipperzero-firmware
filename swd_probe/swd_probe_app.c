@@ -5,6 +5,12 @@
 #include "jep106.h"
 #include "adi.h"
 
+#include <toolbox/path.h>
+
+#include <assets_icons.h>
+
+#define SWD_PATH EXT_PATH("apps_data/swd")
+
 static void render_callback(Canvas* const canvas, void* cb_ctx);
 static bool swd_message_process(AppFSM* ctx);
 static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23, uint32_t* data);
@@ -679,7 +685,7 @@ static bool swd_apscan_test(AppFSM* const ctx, uint32_t ap) {
 static void swd_script_log(ScriptContext* ctx, FuriLogLevel level, const char* format, ...) {
     bool commandline = false;
     ScriptContext* cur = ctx;
-    char buffer[256];
+    FuriString* buffer = furi_string_alloc();
     va_list argp;
     va_start(argp, format);
 
@@ -704,17 +710,19 @@ static void swd_script_log(ScriptContext* ctx, FuriLogLevel level, const char* f
             break;
         }
 
-        strcpy(buffer, prefix);
-        size_t pos = strlen(buffer);
-        vsnprintf(&buffer[pos], sizeof(buffer) - pos - 2, format, argp);
-        strcat(buffer, "\n");
-        if(!usb_uart_tx_data(ctx->app->uart, (uint8_t*)buffer, strlen(buffer))) {
+        furi_string_cat_str(buffer, prefix);
+        furi_string_cat_printf(buffer, format, argp);
+        furi_string_cat_str(buffer, "\n");
+
+        if(!usb_uart_tx_data(
+               ctx->app->uart, (uint8_t*)furi_string_get_cstr(buffer), furi_string_size(buffer))) {
             DBGS("Sending via USB failed");
         }
     } else {
-        LOG(buffer);
+        LOG(furi_string_get_cstr(buffer));
     }
     va_end(argp);
+    furi_string_free(buffer);
 }
 
 /* read characters until newline was read */
@@ -946,34 +954,36 @@ static bool swd_scriptfunc_call(ScriptContext* ctx) {
 
     /* fetch previous file directory */
     char filename[MAX_FILE_LENGTH];
-    strncpy(filename, ctx->filename, sizeof(filename));
-    char* path = strrchr(filename, '/');
-    path[1] = '\000';
+    FuriString* filepath = furi_string_alloc();
+    path_extract_dirname(ctx->filename, filepath);
 
-    /* append filename */
-    if(!swd_script_get_string(ctx, &path[1], sizeof(filename) - strlen(path))) {
-        swd_script_log(ctx, FuriLogLevelError, "failed to parse filename");
-        return false;
-    }
+    bool success = false;
+    do {
+        /* append filename */
+        if(!swd_script_get_string(ctx, filename, sizeof(filename))) {
+            swd_script_log(ctx, FuriLogLevelError, "failed to parse filename");
+            break;
+        }
+        furi_string_cat_printf(filepath, "/%s", filename);
 
-    swd_script_seek_newline(ctx);
+        swd_script_seek_newline(ctx);
 
-    /* append extension */
-    if(strlen(filename) + 5 >= sizeof(filename)) {
-        swd_script_log(ctx, FuriLogLevelError, "name too long");
-        return false;
-    }
+        /* append extension */
+        furi_string_cat_str(filepath, ".swd");
 
-    strcat(filename, ".swd");
+        bool ret = swd_execute_script(ctx->app, furi_string_get_cstr(filepath));
 
-    bool ret = swd_execute_script(ctx->app, filename);
+        if(!ret) {
+            swd_script_log(
+                ctx, FuriLogLevelError, "failed to exec '%s'", furi_string_get_cstr(filepath));
+            break;
+        }
 
-    if(!ret) {
-        swd_script_log(ctx, FuriLogLevelError, "failed to exec '%s'", filename);
-        return false;
-    }
+        success = true;
+    } while(false);
+    furi_string_free(filepath);
 
-    return true;
+    return success;
 }
 
 static bool swd_scriptfunc_status(ScriptContext* ctx) {
@@ -2926,10 +2936,9 @@ static bool swd_message_process(AppFSM* ctx) {
                     break;
 
                 case ModePageScan: {
-                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                    FuriString* result_path = furi_string_alloc_printf(SWD_PATH);
                     FuriString* preselected = furi_string_alloc_printf(
-                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                             ANY_PATH("swd"));
+                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected : SWD_PATH);
                     DialogsFileBrowserOptions options;
 
                     dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
@@ -2999,10 +3008,9 @@ static bool swd_message_process(AppFSM* ctx) {
                     }
                 } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
                     uint32_t mode_page = ctx->mode_page;
-                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                    FuriString* result_path = furi_string_alloc_printf(SWD_PATH);
                     FuriString* preselected = furi_string_alloc_printf(
-                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                             ANY_PATH("swd"));
+                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected : SWD_PATH);
                     DialogsFileBrowserOptions options;
 
                     dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
@@ -3101,6 +3109,7 @@ int32_t swd_probe_app_main(void* p) {
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(app->storage, EXT_PATH("swd_scripts"), SWD_PATH);
 
     DBGS("furi_mutex_alloc");
     app->swd_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -3128,7 +3137,7 @@ int32_t swd_probe_app_main(void* p) {
     notification_message(app->notification, &sequence_display_backlight_enforce_on);
 
     DBGS("swd_execute_script");
-    swd_execute_script(app, ANY_PATH("swd/startup.swd"));
+    swd_execute_script(app, SWD_PATH "/startup.swd");
 
     DBGS("processing");
     for(bool processing = true; processing;) {
@@ -3164,6 +3173,11 @@ int32_t swd_probe_app_main(void* p) {
     furi_message_queue_free(app->event_queue);
     furi_mutex_free(app->gui_mutex);
     furi_mutex_free(app->swd_mutex);
+
+    // Reset GPIO pins to default state
+    for(int io = 0; io < 8; io++) {
+        furi_hal_gpio_init(gpios[io], GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    }
     free(app);
 
     furi_record_close(RECORD_GUI);

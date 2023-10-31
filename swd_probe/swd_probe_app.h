@@ -18,10 +18,6 @@
 #include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <lib/subghz/receiver.h>
-#include <lib/subghz/transmitter.h>
-#include <lib/subghz/subghz_file_encoder_worker.h>
-#include <notification/notification.h>
 
 #include "usb_uart.h"
 
