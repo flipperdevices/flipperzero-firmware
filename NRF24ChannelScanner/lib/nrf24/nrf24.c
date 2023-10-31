@@ -7,9 +7,19 @@
 
 void nrf24_init() {
     // this is needed if multiple SPI devices are connected to the same bus but with different CS pins
-    furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
-    furi_hal_gpio_write(&gpio_ext_pc3, true);
-
+	#ifdef XTREME_SETTINGS_PATH
+	
+    if(xtreme_settings.spi_nrf24_handle == SpiDefault) {
+        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pc3, true);
+    } else if(xtreme_settings.spi_nrf24_handle == SpiExtra) {
+        furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pa4, true);
+    }
+	#else
+		furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
+		furi_hal_gpio_write(&gpio_ext_pc3, true);
+	#endif
     furi_hal_spi_bus_handle_init(nrf24_HANDLE);
     furi_hal_spi_acquire(nrf24_HANDLE);
     furi_hal_gpio_init(nrf24_CE_PIN, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
@@ -22,8 +32,16 @@ void nrf24_deinit() {
     furi_hal_gpio_write(nrf24_CE_PIN, false);
     furi_hal_gpio_init(nrf24_CE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
-    // resetting the CS pins to floating
-    furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
+	#ifdef XTREME_SETTINGS_PATH
+		// resetting the CS pins to floating
+		if(xtreme_settings.spi_nrf24_handle == SpiDefault) {
+			furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
+		} else if(xtreme_settings.spi_nrf24_handle == SpiExtra) {
+			furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeAnalog);
+		}
+	#else
+		furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
+	#endif
 }
 
 void nrf24_spi_trx(
