@@ -7,7 +7,11 @@ App(
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,
     order=10,
-    sources=["*.c", "!subghz_cli.c"],
+    sources=[
+        "*.c",
+        "!subghz_cli.c",
+        "!helpers/subghz_chat.c",
+    ],
     resources="resources",
     fap_libs=["assets", "hwdrivers"],
     fap_icon="icon.png",
