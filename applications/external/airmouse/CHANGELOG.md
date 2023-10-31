@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.0.6 (2023-08-09)
+## v0.0.5 (2023-08-09)
 
 **Fix firmware 0.88 issues**
 
