@@ -9,23 +9,20 @@
 
 #include "wire_tester_icons.h"
 
-
 //#define TAG "wire_tester"
-
 
 static const uint32_t EVENT_PERIOD_MS = 10; // check for input changes often
 static const float BEEP_FREQ = 2400.0f; // louder than other frequencies
 static const float BEEP_VOL = 0.8f;
 static const GpioPin* const INPUT_PIN = &gpio_ext_pb2; // pin 6
 
-
 static void start_feedback(NotificationApp* notifications) {
     // set LED to green
     notification_message_block(notifications, &sequence_set_only_green_255);
 
     // start beep
-    if (furi_hal_speaker_acquire(1000)) {
-         furi_hal_speaker_start(BEEP_FREQ, BEEP_VOL);
+    if(furi_hal_speaker_acquire(1000)) {
+        furi_hal_speaker_start(BEEP_FREQ, BEEP_VOL);
     }
 }
 
@@ -34,7 +31,7 @@ static void stop_feedback(NotificationApp* notifications) {
     notification_message_block(notifications, &sequence_reset_rgb);
 
     // stop beep
-    if (furi_hal_speaker_is_mine()) {
+    if(furi_hal_speaker_is_mine()) {
         furi_hal_speaker_stop();
         furi_hal_speaker_release();
     }
@@ -75,24 +72,25 @@ int32_t app_main(void* p) {
 
     bool alarming = false;
     bool running = true;
-    while (running) {
+    while(running) {
         // start and stop feedback on the transition
         bool continuous = !furi_hal_gpio_read(INPUT_PIN);
-        if (continuous && !alarming) {
+        if(continuous && !alarming) {
             start_feedback(notifications);
-        } else if (!continuous && alarming) {
+        } else if(!continuous && alarming) {
             stop_feedback(notifications);
         }
         alarming = continuous;
 
         // exit on back key
         InputEvent event;
-        if (furi_message_queue_get(event_queue, &event, EVENT_PERIOD_MS) == FuriStatusOk) {
-            if ((event.type == InputTypePress || event.type == InputTypeRepeat)
-                    && event.key == InputKeyBack) {
+        if(furi_message_queue_get(event_queue, &event, EVENT_PERIOD_MS) == FuriStatusOk) {
+            if((event.type == InputTypePress || event.type == InputTypeRepeat) &&
+               event.key == InputKeyBack) {
                 running = false;
             }
         }
+        view_port_update(view_port);
     }
 
     // return control of the LED, beeper, and backlight
