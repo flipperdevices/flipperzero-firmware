@@ -41,13 +41,13 @@ static void uart_terminal_scene_packets_deauth_var_list_enter_callback(void* con
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
-    int selected_option_index = app->selected_option_index[index];
+    int selected_option_index = app->selected_menu_options[GRAVITY_MENU_PACKETS_DEAUTH][index];
 
     /* Cycle through options when enter pressed */
     if (index < DEAUTH_MENU_RUN) {
         // increment selected_option_index % number of options
         selected_option_index = (selected_option_index + 1) % item->num_options_menu;
-        app->selected_option_index[index] = selected_option_index;
+        app->selected_menu_options[GRAVITY_MENU_PACKETS_DEAUTH][index] = selected_option_index;
         // YAGNI: Null check
         variable_item_set_current_value_index(deauthMenuItemViews[index], selected_option_index);
         variable_item_set_current_value_text(deauthMenuItemViews[index], item->options_menu[selected_option_index]);
@@ -71,7 +71,7 @@ static void uart_terminal_scene_packets_deauth_var_list_enter_callback(void* con
         UART_TerminalItem *thisItem;
         for (int i = 0; i < DEAUTH_MENU_RUN; ++i) {
             thisItem = &packets_deauth[i];
-            cmdLength += strlen(thisItem->actual_commands[app->selected_option_index[i]]);
+            cmdLength += strlen(thisItem->actual_commands[app->selected_menu_options[GRAVITY_MENU_PACKETS_DEAUTH][i]]);
         }
         /* Add chars for DEAUTH ON\0 & 3 spaces */
         cmdLength += 12;
@@ -85,7 +85,7 @@ static void uart_terminal_scene_packets_deauth_var_list_enter_callback(void* con
         strcpy(deauth_command, "deauth");
         for (int i = 0; i < DEAUTH_MENU_RUN; ++i) {
             strcat(deauth_command, " ");
-            strcat(deauth_command, packets_deauth[i].actual_commands[app->selected_option_index[i]]);
+            strcat(deauth_command, packets_deauth[i].actual_commands[app->selected_menu_options[GRAVITY_MENU_PACKETS_DEAUTH][i]]);
         }
         if (strlen(deauth_command) == strlen("deauth")) {
             strcat(deauth_command, " on");
@@ -95,7 +95,7 @@ static void uart_terminal_scene_packets_deauth_var_list_enter_callback(void* con
     }
     app->is_command = true;
     app->is_custom_tx_string = false;
-    app->selected_menu_index = index;
+    app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH] = index;
     app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
                                (selected_option_index == 0) :
                                item->focus_console;
@@ -122,15 +122,15 @@ static void uart_terminal_scene_packets_deauth_var_list_change_callback(Variable
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    if (app->selected_menu_index > NUM_PACKETS_DEAUTH_ITEMS) {
-        app->selected_menu_index = 0;
+    if (app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH] > NUM_PACKETS_DEAUTH_ITEMS) {
+        app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH] = 0;
     }
 
-    const UART_TerminalItem* menu_item = &packets_deauth[app->selected_menu_index];
+    const UART_TerminalItem* menu_item = &packets_deauth[app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH]];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
-    app->selected_option_index[app->selected_menu_index] = item_index;
+    app->selected_menu_options[GRAVITY_MENU_PACKETS_DEAUTH][app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH]] = item_index;
 }
 
 /* Callback on entering the scene (initialisation) */
@@ -151,16 +151,9 @@ void uart_terminal_scene_packets_deauth_on_enter(void* context) {
             uart_terminal_scene_packets_deauth_var_list_change_callback,
             app);
         deauthMenuItemViews[i] = item;
-        /* When transitioning between views app->selected_option_index[i] may
-           be referencing a different view's options menu, and may be out of
-           bounds of mainmenu[i].options_menu[].
-           If that is the case, use 0 instead */
-        if (app->selected_option_index[i] >= packets_deauth[i].num_options_menu) {
-            app->selected_option_index[i] = 0;
-        }
-        variable_item_set_current_value_index(item, app->selected_option_index[i]);
+        variable_item_set_current_value_index(item, app->selected_menu_options[GRAVITY_MENU_PACKETS_DEAUTH][i]);
         variable_item_set_current_value_text(
-            item, packets_deauth[i].options_menu[app->selected_option_index[i]]);
+            item, packets_deauth[i].options_menu[app->selected_menu_options[GRAVITY_MENU_PACKETS_DEAUTH][i]]);
     }
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalScenePacketsDeauth));
@@ -175,18 +168,17 @@ bool uart_terminal_scene_packets_deauth_on_event(void* context, SceneManagerEven
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == UART_TerminalEventStartKeyboard) {
-            scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalScenePacketsDeauth, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewTextInput);
-        } else if(event.event == UART_TerminalEventStartConsole) {
-            scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalScenePacketsDeauth, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
+        int nextScene = 0;
+        if (event.event == UART_TerminalEventStartKeyboard) {
+            nextScene = UART_TerminalAppViewTextInput;
+        } else if (event.event == UART_TerminalEventStartConsole) {
+            nextScene = UART_TerminalAppViewConsoleOutput;
         }
+        scene_manager_set_scene_state(app->scene_manager, UART_TerminalScenePacketsDeauth, app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH]);
+        scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index = variable_item_list_get_selected_item_index(app->packets_deauth_menu_list);
+        app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH] = variable_item_list_get_selected_item_index(app->packets_deauth_menu_list);
         consumed = true;
     }
     return consumed;
@@ -196,4 +188,5 @@ bool uart_terminal_scene_packets_deauth_on_event(void* context, SceneManagerEven
 void uart_terminal_scene_packets_deauth_on_exit(void* context) {
     UART_TerminalApp* app = context;
     variable_item_list_reset(app->packets_deauth_menu_list);
+    scene_manager_set_scene_state(app->scene_manager, UART_TerminalScenePacketsDeauth, app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH]);
 }

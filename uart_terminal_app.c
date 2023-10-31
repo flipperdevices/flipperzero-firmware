@@ -82,8 +82,11 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewSettingsMac,
             byte_input_get_view(app->settings_mac_bytes));
 
-    for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
-        app->selected_option_index[i] = 0;
+    for (int j = 0; j < GRAVITY_MENU_COUNT; ++j) {
+        for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
+            app->selected_menu_options[j][i] = 0;
+        }
+        app->selected_menu_items[j] = 0;
     }
     /* Initialise MAC bytes to 00:00:00:00:00:00 */
     // TODO : Get and use the device's real MAC

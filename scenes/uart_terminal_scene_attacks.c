@@ -46,7 +46,7 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
         return;
     }
     scene_manager_set_scene_state(
-        app->scene_manager, UART_TerminalScenePackets, app->selected_menu_index);
+        app->scene_manager, UART_TerminalScenePackets, app->selected_menu_items[GRAVITY_MENU_ATTACKS]);
     scene_manager_next_scene(app->scene_manager, newScene);
 }
 
@@ -55,7 +55,7 @@ static void uart_terminal_scene_attacks_var_list_enter_callback(void* context, u
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
-    const int selected_option_index = app->selected_option_index[index];
+    const int selected_option_index = app->selected_menu_options[GRAVITY_MENU_ATTACKS][index];
 
     furi_assert(index < NUM_ATTACK_ITEMS);
     item = &attacks[index];
@@ -72,7 +72,7 @@ static void uart_terminal_scene_attacks_var_list_enter_callback(void* context, u
         /* Don't clear screen if command is an empty string */
         app->is_command = (strlen(app->selected_tx_string) > 0);
         app->is_custom_tx_string = false;
-        app->selected_menu_index = index;
+        app->selected_menu_items[GRAVITY_MENU_ATTACKS] = index;
         app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
                                    (selected_option_index == 0) :
                                    item->focus_console;
@@ -101,15 +101,15 @@ static void uart_terminal_scene_attacks_var_list_change_callback(VariableItem* i
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    if (app->selected_menu_index >= NUM_ATTACK_ITEMS) {
-        app->selected_menu_index = 0;
+    if (app->selected_menu_items[GRAVITY_MENU_ATTACKS] >= NUM_ATTACK_ITEMS) {
+        app->selected_menu_items[GRAVITY_MENU_ATTACKS] = 0;
     }
 
-    const UART_TerminalItem* menu_item = &attacks[app->selected_menu_index];
+    const UART_TerminalItem* menu_item = &attacks[app->selected_menu_items[GRAVITY_MENU_ATTACKS]];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
-    app->selected_option_index[app->selected_menu_index] = item_index;
+    app->selected_menu_options[GRAVITY_MENU_ATTACKS][app->selected_menu_items[GRAVITY_MENU_ATTACKS]] = item_index;
 }
 
 /* Callback on entering the scene (initialisation) */
@@ -129,16 +129,9 @@ void uart_terminal_scene_attacks_on_enter(void* context) {
             attacks[i].num_options_menu,
             uart_terminal_scene_attacks_var_list_change_callback,
             app);
-        /* When transitioning between views app->selected_option_index[i] may
-           be referencing a different view's options menu, and may be out of
-           bounds of mainmenu[i].options_menu[].
-           If that is the case, use 0 instead */
-        if (app->selected_option_index[i] >= attacks[i].num_options_menu) {
-            app->selected_option_index[i] = 0;
-        }
-        variable_item_set_current_value_index(item, app->selected_option_index[i]);
+        variable_item_set_current_value_index(item, app->selected_menu_options[GRAVITY_MENU_ATTACKS][i]);
         variable_item_set_current_value_text(
-            item, attacks[i].options_menu[app->selected_option_index[i]]);
+            item, attacks[i].options_menu[app->selected_menu_options[GRAVITY_MENU_ATTACKS][i]]);
     }
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneAttacks));
@@ -153,18 +146,17 @@ bool uart_terminal_scene_attacks_on_event(void* context, SceneManagerEvent event
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == UART_TerminalEventStartKeyboard) {
-            scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalSceneAttacks, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewTextInput);
-        } else if(event.event == UART_TerminalEventStartConsole) {
-            scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalSceneAttacks, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
+        int nextScene = 0;
+        if (event.event == UART_TerminalEventStartKeyboard) {
+            nextScene = UART_TerminalAppViewTextInput;
+        } else if (event.event == UART_TerminalEventStartConsole) {
+            nextScene = UART_TerminalAppViewConsoleOutput;
         }
+        scene_manager_set_scene_state(app->scene_manager, UART_TerminalSceneAttacks, app->selected_menu_items[GRAVITY_MENU_ATTACKS]);
+        scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index = variable_item_list_get_selected_item_index(app->attacks_menu_list);
+        app->selected_menu_items[GRAVITY_MENU_ATTACKS] = variable_item_list_get_selected_item_index(app->attacks_menu_list);
         consumed = true;
     }
     return consumed;
@@ -174,4 +166,5 @@ bool uart_terminal_scene_attacks_on_event(void* context, SceneManagerEvent event
 void uart_terminal_scene_attacks_on_exit(void* context) {
     UART_TerminalApp* app = context;
     variable_item_list_reset(app->attacks_menu_list);
+    scene_manager_set_scene_state(app->scene_manager, UART_TerminalSceneAttacks, app->selected_menu_items[GRAVITY_MENU_ATTACKS]);
 }

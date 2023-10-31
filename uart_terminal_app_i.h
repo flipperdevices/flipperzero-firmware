@@ -40,9 +40,8 @@
 #include "esp_flip_struct.h"
 
 typedef enum {
-  GRAVITY_MENU_MAIN,
+  GRAVITY_MENU_MAIN = 0,
   GRAVITY_MENU_TARGETS,
-  GRAVITY_MENU_TARGETS_SCAN,
   GRAVITY_MENU_PACKETS,
   GRAVITY_MENU_PACKETS_FUZZ,
   GRAVITY_MENU_PACKETS_DEAUTH,
@@ -53,6 +52,7 @@ typedef enum {
   GRAVITY_MENU_HELP,
   GRAVITY_MENU_HELP_INFO,
   GRAVITY_MENU_PURGE,
+  GRAVITY_MENU_COUNT
 } GravityMenu;
 
 char *strToken(char *cmdLine, char sep, int tokenNum);
@@ -78,8 +78,10 @@ struct UART_TerminalApp {
     uint8_t mac_bytes[NUM_MAC_BYTES];
 
     UART_TerminalUart* uart;
-    int selected_menu_index;
-    int selected_option_index[MAX_MENU_ITEMS];
+    //int selected_menu_index; in progress refactoring to selected_menu_items[]
+    //int selected_option_index[MAX_MENU_ITEMS];
+    int selected_menu_items[GRAVITY_MENU_COUNT];
+    int selected_menu_options[GRAVITY_MENU_COUNT][MAX_MENU_ITEMS];
     char* selected_tx_string;
     bool is_command;
     bool is_custom_tx_string;
