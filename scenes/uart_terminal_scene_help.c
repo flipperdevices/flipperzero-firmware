@@ -64,8 +64,9 @@ static void uart_terminal_scene_help_var_list_enter_callback(void* context, uint
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
     const int selected_option_index = app->selected_menu_options[GRAVITY_MENU_HELP][index];
-
     furi_assert(index < NUM_HELP_ITEMS);
+    app->selected_menu_items[GRAVITY_MENU_HELP] = index;
+
     item = &help[index];
 
     /* Are we displaying a submenu or executing something? */
@@ -80,7 +81,6 @@ static void uart_terminal_scene_help_var_list_enter_callback(void* context, uint
         /* Don't clear screen if command is an empty string */
         app->is_command = (strlen(app->selected_tx_string) > 0);
         app->is_custom_tx_string = false;
-        app->selected_menu_items[GRAVITY_MENU_HELP] = index;
         app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
                                    (selected_option_index == 0) :
                                    item->focus_console;

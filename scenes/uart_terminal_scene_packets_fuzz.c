@@ -51,6 +51,8 @@ static void uart_terminal_scene_packets_fuzz_var_list_enter_callback(void* conte
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
     int selected_option_index = app->selected_menu_options[GRAVITY_MENU_PACKETS_FUZZ][index];
+    furi_assert(index < NUM_PACKETS_FUZZ_ITEMS);
+    app->selected_menu_items[GRAVITY_MENU_PACKETS_FUZZ] = index;
 
     /* Cycle through options when enter pressed */
     if (index < FUZZ_MENU_RUN) {
@@ -63,7 +65,6 @@ static void uart_terminal_scene_packets_fuzz_var_list_enter_callback(void* conte
         return;
     }
 
-    furi_assert(index < NUM_PACKETS_FUZZ_ITEMS);
     item = &packets_fuzz[index];
     furi_assert(selected_option_index < item->num_options_menu);
     dolphin_deed(DolphinDeedGpioUartBridge);
@@ -104,7 +105,6 @@ static void uart_terminal_scene_packets_fuzz_var_list_enter_callback(void* conte
     }
     app->is_command = true;
     app->is_custom_tx_string = false;
-    app->selected_menu_items[GRAVITY_MENU_PACKETS_FUZZ] = index;
     app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
                                (selected_option_index == 0) :
                                item->focus_console;
