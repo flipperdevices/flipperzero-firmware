@@ -81,7 +81,7 @@ WeatherStationApp* weather_station_app_alloc() {
     app->setting = subghz_setting_alloc();
 
     //ToDo FIX  file name setting
-    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user"));
+    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user.txt"));
 
     //init Worker & Protocol & History
     app->lock = WSLockOff;
@@ -97,6 +97,14 @@ WeatherStationApp* weather_station_app_alloc() {
     subghz_environment_set_protocol_registry(
         app->txrx->environment, (void*)&weather_station_protocol_registry);
     app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
+
+    subghz_devices_init();
+
+    app->txrx->radio_device =
+        radio_device_loader_set(app->txrx->radio_device, SubGhzRadioDeviceTypeExternalCC1101);
+
+    subghz_devices_reset(app->txrx->radio_device);
+    subghz_devices_idle(app->txrx->radio_device);
 
     subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
     subghz_worker_set_overrun_callback(
@@ -115,8 +123,10 @@ WeatherStationApp* weather_station_app_alloc() {
 void weather_station_app_free(WeatherStationApp* app) {
     furi_assert(app);
 
-    //CC1101 off
-    ws_sleep(app);
+    subghz_devices_sleep(app->txrx->radio_device);
+    radio_device_loader_end(app->txrx->radio_device);
+
+    subghz_devices_deinit();
 
     // Submenu
     view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewSubmenu);

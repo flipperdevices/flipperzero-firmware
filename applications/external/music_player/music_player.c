@@ -3,15 +3,15 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <music_player_icons.h>
+#include "music_player_icons.h"
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 
 #define TAG "MusicPlayer"
 
+#define MUSIC_PLAYER_APP_PATH_FOLDER EXT_PATH("apps_data/music_player")
 #define MUSIC_PLAYER_APP_EXTENSION "*"
-#define MUSIC_PLAYER_EXAMPLE_FILE "Marble_Machine.fmf"
 
 #define MUSIC_PLAYER_SEMITONE_HISTORY_SIZE 4
 
@@ -258,7 +258,7 @@ MusicPlayer* music_player_alloc() {
     MusicPlayer* instance = malloc(sizeof(MusicPlayer));
 
     instance->model = malloc(sizeof(MusicPlayerModel));
-    instance->model->volume = 3;
+    instance->model->volume = 4;
 
     instance->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
@@ -306,31 +306,18 @@ int32_t music_player_app(void* p) {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            Storage* storage = furi_record_open(RECORD_STORAGE);
-            storage_common_migrate(
-                storage, EXT_PATH("music_player"), STORAGE_APP_DATA_PATH_PREFIX);
-
-            if(!storage_common_exists(storage, APP_DATA_PATH(MUSIC_PLAYER_EXAMPLE_FILE))) {
-                storage_common_copy(
-                    storage,
-                    APP_ASSETS_PATH(MUSIC_PLAYER_EXAMPLE_FILE),
-                    APP_DATA_PATH(MUSIC_PLAYER_EXAMPLE_FILE));
-            }
-            furi_record_close(RECORD_STORAGE);
-
-            furi_string_set(file_path, STORAGE_APP_DATA_PATH_PREFIX);
+            furi_string_set(file_path, MUSIC_PLAYER_APP_PATH_FOLDER);
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(
                 &browser_options, MUSIC_PLAYER_APP_EXTENSION, &I_music_10px);
             browser_options.hide_ext = false;
-            browser_options.base_path = STORAGE_APP_DATA_PATH_PREFIX;
+            browser_options.base_path = MUSIC_PLAYER_APP_PATH_FOLDER;
 
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
             bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);
 
             furi_record_close(RECORD_DIALOGS);
-
             if(!res) {
                 FURI_LOG_E(TAG, "No file selected");
                 break;

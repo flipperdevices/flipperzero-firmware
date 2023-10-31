@@ -1,6 +1,10 @@
 
 ## From https://github.com/RfidResearchGroup/proxmark3/blob/master/client/dictionaries/iclass_default_keys.dic
 
+#FORMAT GUIDE: Never add # after a key.
+#Always put the key on a new line and the comments on a separate line.
+#Failure to do so will result in the key being skipped.
+
 # key1/Kc from PicoPass 2k documentation
 7665544332211000
 # SAGEM

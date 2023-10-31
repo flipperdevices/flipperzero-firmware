@@ -19,9 +19,9 @@ static void append_suffixed_byte_count(FuriString* string, uint32_t count) {
     } else if(count < 1024 * 1024) {
         furi_string_cat_printf(string, "%luK", count / 1024);
     } else if(count < 1024 * 1024 * 1024) {
-        furi_string_cat_printf(string, "%.3fM", (double)count / (1024 * 1024));
+        furi_string_cat_printf(string, "%.1fM", (double)count / (1024 * 1024));
     } else {
-        furi_string_cat_printf(string, "%.3fG", (double)count / (1024 * 1024 * 1024));
+        furi_string_cat_printf(string, "%.1fG", (double)count / (1024 * 1024 * 1024));
     }
 }
 
@@ -34,28 +34,28 @@ static void mass_storage_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str_aligned(
         canvas, canvas_width(canvas) / 2, 0, AlignCenter, AlignTop, "USB Mass Storage");
 
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, FontBatteryPercent);
     elements_string_fit_width(canvas, model->file_name, 89 - 2);
     canvas_draw_str_aligned(
-        canvas, 50, 23, AlignCenter, AlignBottom, furi_string_get_cstr(model->file_name));
+        canvas, 92, 24, AlignRight, AlignBottom, furi_string_get_cstr(model->file_name));
 
     furi_string_set_str(model->status_string, "R:");
     append_suffixed_byte_count(model->status_string, model->bytes_read);
     if(model->read_speed) {
-        furi_string_cat_str(model->status_string, "; ");
+        furi_string_cat_str(model->status_string, "/");
         append_suffixed_byte_count(model->status_string, model->read_speed);
-        furi_string_cat_str(model->status_string, "ps");
+        furi_string_cat_str(model->status_string, "s");
     }
-    canvas_draw_str(canvas, 12, 34, furi_string_get_cstr(model->status_string));
+    canvas_draw_str(canvas, 14, 34, furi_string_get_cstr(model->status_string));
 
     furi_string_set_str(model->status_string, "W:");
     append_suffixed_byte_count(model->status_string, model->bytes_written);
     if(model->write_speed) {
-        furi_string_cat_str(model->status_string, "; ");
+        furi_string_cat_str(model->status_string, "/");
         append_suffixed_byte_count(model->status_string, model->write_speed);
-        furi_string_cat_str(model->status_string, "ps");
+        furi_string_cat_str(model->status_string, "s");
     }
-    canvas_draw_str(canvas, 12, 44, furi_string_get_cstr(model->status_string));
+    canvas_draw_str(canvas, 14, 43, furi_string_get_cstr(model->status_string));
 }
 
 MassStorage* mass_storage_alloc() {

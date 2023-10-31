@@ -16,7 +16,7 @@
 #include <gui/modules/widget.h>
 #include <storage/storage.h>
 #include "views/mass_storage_view.h"
-#include <mass_storage_icons.h>
+#include "mass_storage_icons.h"
 
 #define MASS_STORAGE_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define MASS_STORAGE_APP_EXTENSION ".img"

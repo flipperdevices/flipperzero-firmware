@@ -48,13 +48,18 @@ static void weather_station_scene_receiver_update_statusbar(void* context) {
             app->ws_receiver,
             furi_string_get_cstr(frequency_str),
             furi_string_get_cstr(modulation_str),
-            furi_string_get_cstr(history_stat_str));
+            furi_string_get_cstr(history_stat_str),
+            radio_device_loader_is_external(app->txrx->radio_device));
 
         furi_string_free(frequency_str);
         furi_string_free(modulation_str);
     } else {
         ws_view_receiver_add_data_statusbar(
-            app->ws_receiver, furi_string_get_cstr(history_stat_str), "", "");
+            app->ws_receiver,
+            furi_string_get_cstr(history_stat_str),
+            "",
+            "",
+            radio_device_loader_is_external(app->txrx->radio_device));
     }
     furi_string_free(history_stat_str);
 }
@@ -133,7 +138,7 @@ void weather_station_scene_receiver_on_enter(void* context) {
 
     if(app->txrx->txrx_state == WSTxRxStateRx) {
         ws_rx_end(app);
-    };
+    }
     if((app->txrx->txrx_state == WSTxRxStateIDLE) || (app->txrx->txrx_state == WSTxRxStateSleep)) {
         ws_begin(
             app,
@@ -157,7 +162,7 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
             if(app->txrx->txrx_state == WSTxRxStateRx) {
                 ws_rx_end(app);
                 ws_sleep(app);
-            };
+            }
             app->txrx->hopper_state = WSHopperStateOFF;
             app->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(app->txrx->receiver, NULL, app);
@@ -196,7 +201,7 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
             weather_station_scene_receiver_update_statusbar(app);
         }
         // Get current RSSI
-        float rssi = furi_hal_subghz_get_rssi();
+        float rssi = subghz_devices_get_rssi(app->txrx->radio_device);
         ws_view_receiver_set_rssi(app->ws_receiver, rssi);
 
         if(app->txrx->txrx_state == WSTxRxStateRx) {

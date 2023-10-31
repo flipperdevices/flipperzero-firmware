@@ -111,7 +111,7 @@ static uint8_t avr_isp_prog_getch(AvrIspProg* instance) {
     uint8_t data[1] = {0};
     while(furi_stream_buffer_receive(instance->stream_rx, &data, sizeof(int8_t), 30) == 0) {
         if(instance->exit) break;
-    };
+    }
     return data[0];
 }
 
@@ -348,7 +348,7 @@ static void avr_isp_prog_commit(AvrIspProg* instance, uint16_t addr, uint8_t dat
         while((furi_get_tick() - starttime) < 30) {
             if(avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_FLASH_HI(addr)) != 0xFF) {
                 break;
-            };
+            }
         }
     }
 }
