@@ -178,9 +178,8 @@ int32_t wifi_marauder_app(void* p) {
     furi_delay_ms(200);
     furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    for(int i=0;i<2;i++)
-    {
-        furi_delay_ms(500); 
+    for(int i = 0; i < 2; i++) {
+        furi_delay_ms(500);
         furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'w'}, 1);
     }
     furi_delay_ms(1);
