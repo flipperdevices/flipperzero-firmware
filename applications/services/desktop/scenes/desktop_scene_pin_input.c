@@ -20,7 +20,7 @@
 #define INPUT_PIN_VIEW_TIMEOUT 15000
 
 typedef struct {
-    TimerHandle_t timer;
+    FuriTimer* timer;
 } DesktopScenePinInputState;
 
 static void desktop_scene_locked_light_red(bool value) {
@@ -34,16 +34,16 @@ static void desktop_scene_locked_light_red(bool value) {
 }
 
 static void
-    desktop_scene_pin_input_set_timer(Desktop* desktop, bool enable, TickType_t new_period) {
+    desktop_scene_pin_input_set_timer(Desktop* desktop, bool enable, uint32_t new_period) {
     furi_assert(desktop);
 
     DesktopScenePinInputState* state = (DesktopScenePinInputState*)scene_manager_get_scene_state(
         desktop->scene_manager, DesktopScenePinInput);
     furi_assert(state);
     if(enable) {
-        xTimerChangePeriod(state->timer, new_period, portMAX_DELAY);
+        furi_timer_start(state->timer, new_period);
     } else {
-        xTimerStop(state->timer, portMAX_DELAY);
+        furi_timer_stop(state->timer);
     }
 }
 
@@ -64,8 +64,8 @@ static void desktop_scene_pin_input_done_callback(const PinCode* pin_code, void*
     }
 }
 
-static void desktop_scene_pin_input_timer_callback(TimerHandle_t timer) {
-    Desktop* desktop = pvTimerGetTimerID(timer);
+static void desktop_scene_pin_input_timer_callback(void* context) {
+    Desktop* desktop = context;
 
     view_dispatcher_send_custom_event(
         desktop->view_dispatcher, DesktopPinInputEventResetWrongPinLabel);
@@ -84,7 +84,7 @@ void desktop_scene_pin_input_on_enter(void* context) {
 
     DesktopScenePinInputState* state = malloc(sizeof(DesktopScenePinInputState));
     state->timer =
-        xTimerCreate(NULL, 10000, pdFALSE, desktop, desktop_scene_pin_input_timer_callback);
+        furi_timer_alloc(desktop_scene_pin_input_timer_callback, FuriTimerTypeOnce, desktop);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopScenePinInput, (uint32_t)state);
 
     desktop_view_pin_input_hide_pin(desktop->pin_input_view, true);
@@ -149,10 +149,7 @@ void desktop_scene_pin_input_on_exit(void* context) {
 
     DesktopScenePinInputState* state = (DesktopScenePinInputState*)scene_manager_get_scene_state(
         desktop->scene_manager, DesktopScenePinInput);
-    xTimerStop(state->timer, portMAX_DELAY);
-    while(xTimerIsTimerActive(state->timer)) {
-        furi_delay_tick(1);
-    }
-    xTimerDelete(state->timer, portMAX_DELAY);
+
+    furi_timer_free(state->timer);
     free(state);
 }

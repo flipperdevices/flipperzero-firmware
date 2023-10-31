@@ -125,6 +125,15 @@ uint32_t furi_timer_is_running(FuriTimer* instance) {
     return (uint32_t)xTimerIsTimerActive(hTimer);
 }
 
+uint32_t furi_timer_get_expire_time(FuriTimer* instance) {
+    furi_assert(!furi_kernel_is_irq_or_masked());
+    furi_assert(instance);
+
+    TimerHandle_t hTimer = (TimerHandle_t)instance;
+
+    return (uint32_t)xTimerGetExpiryTime(hTimer);
+}
+
 void furi_timer_pending_callback(FuriTimerPendigCallback callback, void* context, uint32_t arg) {
     BaseType_t ret = pdFAIL;
     if(furi_kernel_is_irq_or_masked()) {

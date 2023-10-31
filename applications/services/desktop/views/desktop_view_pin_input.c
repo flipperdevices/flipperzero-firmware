@@ -21,7 +21,7 @@ struct DesktopViewPinInput {
     DesktopViewPinInputCallback timeout_callback;
     DesktopViewPinInputDoneCallback done_callback;
     void* context;
-    TimerHandle_t timer;
+    FuriTimer* timer;
 };
 
 typedef struct {
@@ -90,7 +90,7 @@ static bool desktop_view_pin_input_input(InputEvent* event, void* context) {
         pin_input->back_callback(pin_input->context);
     }
 
-    xTimerStart(pin_input->timer, 0);
+    furi_timer_start(pin_input->timer, NO_ACTIVITY_TIMEOUT);
 
     return true;
 }
@@ -170,8 +170,8 @@ static void desktop_view_pin_input_draw(Canvas* canvas, void* context) {
     }
 }
 
-void desktop_view_pin_input_timer_callback(TimerHandle_t timer) {
-    DesktopViewPinInput* pin_input = pvTimerGetTimerID(timer);
+void desktop_view_pin_input_timer_callback(void* context) {
+    DesktopViewPinInput* pin_input = context;
 
     if(pin_input->timeout_callback) {
         pin_input->timeout_callback(pin_input->context);
@@ -180,12 +180,12 @@ void desktop_view_pin_input_timer_callback(TimerHandle_t timer) {
 
 static void desktop_view_pin_input_enter(void* context) {
     DesktopViewPinInput* pin_input = context;
-    xTimerStart(pin_input->timer, portMAX_DELAY);
+    furi_timer_start(pin_input->timer, NO_ACTIVITY_TIMEOUT);
 }
 
 static void desktop_view_pin_input_exit(void* context) {
     DesktopViewPinInput* pin_input = context;
-    xTimerStop(pin_input->timer, portMAX_DELAY);
+    furi_timer_stop(pin_input->timer);
 }
 
 DesktopViewPinInput* desktop_view_pin_input_alloc(void) {
@@ -195,12 +195,8 @@ DesktopViewPinInput* desktop_view_pin_input_alloc(void) {
     view_set_context(pin_input->view, pin_input);
     view_set_draw_callback(pin_input->view, desktop_view_pin_input_draw);
     view_set_input_callback(pin_input->view, desktop_view_pin_input_input);
-    pin_input->timer = xTimerCreate(
-        NULL,
-        pdMS_TO_TICKS(NO_ACTIVITY_TIMEOUT),
-        pdFALSE,
-        pin_input,
-        desktop_view_pin_input_timer_callback);
+    pin_input->timer =
+        furi_timer_alloc(desktop_view_pin_input_timer_callback, FuriTimerTypeOnce, pin_input);
     view_set_enter_callback(pin_input->view, desktop_view_pin_input_enter);
     view_set_exit_callback(pin_input->view, desktop_view_pin_input_exit);
 
@@ -216,11 +212,7 @@ DesktopViewPinInput* desktop_view_pin_input_alloc(void) {
 void desktop_view_pin_input_free(DesktopViewPinInput* pin_input) {
     furi_assert(pin_input);
 
-    xTimerStop(pin_input->timer, portMAX_DELAY);
-    while(xTimerIsTimerActive(pin_input->timer)) {
-        furi_delay_tick(1);
-    }
-    xTimerDelete(pin_input->timer, portMAX_DELAY);
+    furi_timer_free(pin_input->timer);
 
     view_free(pin_input->view);
     free(pin_input);

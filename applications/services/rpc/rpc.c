@@ -162,7 +162,7 @@ void rpc_session_set_terminated_callback(
  * odd: client sends close request and sends command after.
  */
 size_t
-    rpc_session_feed(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
+    rpc_session_feed(RpcSession* session, uint8_t* encoded_bytes, size_t size, uint32_t timeout) {
     furi_assert(session);
     furi_assert(encoded_bytes);
 
