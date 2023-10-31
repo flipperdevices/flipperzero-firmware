@@ -145,8 +145,9 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     // Close records
     furi_record_close(RECORD_GUI);
 
-    if (app->free_command) {
+    if (app->free_command && app->selected_tx_string != NULL) {
         free(app->selected_tx_string);
+        app->selected_tx_string = NULL;
         app->free_command = false;
     }
 

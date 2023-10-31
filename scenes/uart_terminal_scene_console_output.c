@@ -117,7 +117,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             uart_terminal_uart_tx((uint8_t*)("\n"), 1);
         }
     }
-    if (app->free_command) {
+    if (app->free_command && app->selected_tx_string != NULL) {
         free(app->selected_tx_string);
         app->selected_tx_string = NULL;
         app->free_command = false;

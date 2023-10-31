@@ -155,7 +155,7 @@ static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uin
         strncpy(tx_command, saveCmd, strlen(saveCmd));
         app->selected_tx_string = tx_command;
         app->free_command = true;
-        /* Save defaults in Flipper app */
+        /* Save strategy in Flipper app to use later */
         app->purgeStrategy = strat;
     } else {
         //purge [ AP | STA | BT | BLE ]+ [ RSSI [ <maxRSSI> ] | AGE [ <minAge> ] | UNNAMED | UNSELECTED | NONE ]+
