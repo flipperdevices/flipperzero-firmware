@@ -5,14 +5,11 @@
 #include <dialogs/dialogs.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-
 #include <storage/storage.h>
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
 #include <toolbox/stream/file_stream.h>
-
-#include <hex_editor_icons.h>
-// #include <assets_icons.h>
+#include "hex_editor_icons.h"
 
 #define TAG "HexEditor"
 
@@ -29,26 +26,19 @@ typedef struct {
 typedef struct {
     HexEditorModel* model;
     FuriMutex** mutex;
-
     FuriMessageQueue* input_queue;
-
     ViewPort* view_port;
     Gui* gui;
     Storage* storage;
-
     FuriString* buffer;
 } HexEditor;
 
 static void draw_callback(Canvas* canvas, void* ctx) {
     HexEditor* hex_editor = ctx;
-
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 0, 10, "Line and mode:");
-
-
     canvas_set_font(canvas, FontSecondary);
-
     canvas_draw_str_aligned(
         canvas,
         0,
@@ -56,10 +46,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         AlignLeft,
         AlignBottom,
         furi_string_get_cstr(hex_editor->buffer) + hex_editor->model->string_offset);
-
-
     canvas_draw_icon(canvas, 0, 20, &I_Pin_arrow_up_7x9);
-
     if(hex_editor->model->mode) {
         elements_button_left(canvas, "ASCII -");
         elements_button_right(canvas, "ASCII +");
@@ -67,17 +54,14 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         elements_button_left(canvas, "");
         elements_button_right(canvas, "");
     }
-
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_glyph(canvas, 0, 45, '0' + hex_editor->model->mode);
     canvas_draw_glyph(canvas, 30, 45, hex_editor->model->editable_char);
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
-    // Проверяем, что контекст не нулевой
     furi_assert(ctx);
     HexEditor* hex_editor = ctx;
-
     furi_message_queue_put(hex_editor->input_queue, input_event, 100);
 }
 
@@ -99,9 +83,7 @@ static HexEditor* hex_editor_alloc() {
 
     instance->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(instance->gui, instance->view_port, GuiLayerFullscreen);
-
     instance->storage = furi_record_open(RECORD_STORAGE);
-
     instance->buffer = furi_string_alloc();
 
     return instance;
@@ -109,19 +91,13 @@ static HexEditor* hex_editor_alloc() {
 
 static void hex_editor_free(HexEditor* instance) {
     furi_record_close(RECORD_STORAGE);
-
     gui_remove_view_port(instance->gui, instance->view_port);
     furi_record_close(RECORD_GUI);
-    view_port_free(instance->view_port);
-
     furi_message_queue_free(instance->input_queue);
-
     furi_mutex_free(instance->mutex);
-
+    view_port_free(instance->view_port);
     if(instance->model->stream) buffered_file_stream_close(instance->model->stream);
-
     furi_string_free(instance->buffer);
-
     free(instance->model);
     free(instance);
 }
@@ -129,10 +105,8 @@ static void hex_editor_free(HexEditor* instance) {
 static bool hex_editor_open_file(HexEditor* hex_editor, const char* file_path) {
     furi_assert(hex_editor);
     furi_assert(file_path);
-
     hex_editor->model->stream = buffered_file_stream_alloc(hex_editor->storage);
     bool isOk = true;
-
     do {
         if(!buffered_file_stream_open(
                hex_editor->model->stream, file_path, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
@@ -143,7 +117,6 @@ static bool hex_editor_open_file(HexEditor* hex_editor, const char* file_path) {
 
         hex_editor->model->file_size = stream_size(hex_editor->model->stream);
     } while(false);
-
     return isOk;
 }
 
@@ -151,15 +124,13 @@ int32_t hex_editor_app(void* p) {
     UNUSED(p);
 
     HexEditor* hex_editor = hex_editor_alloc();
-
     FuriString* file_path;
     file_path = furi_string_alloc();
-
     do {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            furi_string_set(file_path, "/any");
+            furi_string_set(file_path, "/ext");
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(&browser_options, "*", &I_edit_10px);
@@ -176,9 +147,7 @@ int32_t hex_editor_app(void* p) {
         }
 
         FURI_LOG_I(TAG, "File selected: %s", furi_string_get_cstr(file_path));
-
         if(!hex_editor_open_file(hex_editor, furi_string_get_cstr(file_path))) break;
-
         if(!stream_read_line(hex_editor->model->stream, hex_editor->buffer)) {
             FURI_LOG_T(TAG, "No keys left in dict");
             break;
@@ -233,7 +202,6 @@ int32_t hex_editor_app(void* p) {
                         // NOT work on first line
                         stream_seek_to_char(
                             hex_editor->model->stream, '\n', StreamDirectionBackward);
-
 
                         if(!stream_seek_to_char(
                                hex_editor->model->stream, '\n', StreamDirectionBackward)) {
@@ -307,13 +275,10 @@ int32_t hex_editor_app(void* p) {
             if(event.key == InputKeyBack) {
                 break;
             }
-            // ?
             view_port_update(hex_editor->view_port);
         }
     } while(false);
-
     furi_string_free(file_path);
     hex_editor_free(hex_editor);
-
     return 0;
 }

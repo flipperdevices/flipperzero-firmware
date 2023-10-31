@@ -40,62 +40,70 @@ void  furi_hal_i2c_release (FuriHalI2cBusHandle* handle)
 
 */
 
-#ifndef  I2C_WORKAROUND_H_
-#define  I2C_WORKAROUND_H_
+#ifndef I2C_WORKAROUND_H_
+#define I2C_WORKAROUND_H_
 
-#include  <furi_hal.h>
+#include <furi_hal.h>
 
 #define ENABLE_WORKAROUND 1
 
 #if ENABLE_WORKAROUND == 1
-	//+============================================================================ ========================================
-	static inline
-	bool furi_hal_Wi2c_is_device_ready (FuriHalI2cBusHandle* const bus,  const uint8_t addr,  const uint32_t tmo)
-	{
-		furi_hal_i2c_acquire(bus);
-		bool rv = furi_hal_i2c_is_device_ready(bus, addr, tmo);
-		furi_hal_i2c_release(bus);
-		return rv;
-	}
+//+============================================================================ ========================================
+static inline bool furi_hal_Wi2c_is_device_ready(
+    FuriHalI2cBusHandle* const bus,
+    const uint8_t addr,
+    const uint32_t tmo) {
+    furi_hal_i2c_acquire(bus);
+    bool rv = furi_hal_i2c_is_device_ready(bus, addr, tmo);
+    furi_hal_i2c_release(bus);
+    return rv;
+}
 
-	//+============================================================================
-	static inline
-	bool furi_hal_Wi2c_tx ( FuriHalI2cBusHandle* const bus,  const uint8_t addr,
-	                        const void* buf,  const size_t len,  const uint32_t tmo )
-	{
-		furi_hal_i2c_acquire(bus);
-		bool rv = furi_hal_i2c_tx(bus, addr, buf, len, tmo);
-		furi_hal_i2c_release(bus);
-		return rv;
-	}
+//+============================================================================
+static inline bool furi_hal_Wi2c_tx(
+    FuriHalI2cBusHandle* const bus,
+    const uint8_t addr,
+    const void* buf,
+    const size_t len,
+    const uint32_t tmo) {
+    furi_hal_i2c_acquire(bus);
+    bool rv = furi_hal_i2c_tx(bus, addr, buf, len, tmo);
+    furi_hal_i2c_release(bus);
+    return rv;
+}
 
-	//+============================================================================
-	static inline
-	bool furi_hal_Wi2c_rx ( FuriHalI2cBusHandle* const bus,  const uint8_t addr,
-	                        void* buf,  const size_t len,  const uint32_t tmo )
-	{
-		furi_hal_i2c_acquire(bus);
-		bool rv = furi_hal_i2c_rx(bus, addr, buf, len, tmo);
-		furi_hal_i2c_release(bus);
-		return rv;
-	}
+//+============================================================================
+static inline bool furi_hal_Wi2c_rx(
+    FuriHalI2cBusHandle* const bus,
+    const uint8_t addr,
+    void* buf,
+    const size_t len,
+    const uint32_t tmo) {
+    furi_hal_i2c_acquire(bus);
+    bool rv = furi_hal_i2c_rx(bus, addr, buf, len, tmo);
+    furi_hal_i2c_release(bus);
+    return rv;
+}
 
-	//+============================================================================
-	static inline
-	bool furi_hal_Wi2c_trx ( FuriHalI2cBusHandle* const bus,  const uint8_t addr,
-	                         const void* tx,  const size_t txlen,
-	                               void* rx,  const size_t rxlen,  const uint32_t tmo )
-	{
-		bool    rv = furi_hal_Wi2c_tx(bus, addr, tx, txlen, tmo);
-		if (rv) rv = furi_hal_Wi2c_rx(bus, addr, rx, rxlen, tmo);
-		return rv;
-	}
+//+============================================================================
+static inline bool furi_hal_Wi2c_trx(
+    FuriHalI2cBusHandle* const bus,
+    const uint8_t addr,
+    const void* tx,
+    const size_t txlen,
+    void* rx,
+    const size_t rxlen,
+    const uint32_t tmo) {
+    bool rv = furi_hal_Wi2c_tx(bus, addr, tx, txlen, tmo);
+    if(rv) rv = furi_hal_Wi2c_rx(bus, addr, rx, rxlen, tmo);
+    return rv;
+}
 
-	//----------------------------------------------------------------------------- ----------------------------------------
-#	define  furi_hal_i2c_is_device_ready(...)  furi_hal_Wi2c_is_device_ready(__VA_ARGS__)
-#	define  furi_hal_i2c_tx(...)               furi_hal_Wi2c_tx(__VA_ARGS__)
-#	define  furi_hal_i2c_rx(...)               furi_hal_Wi2c_rx(__VA_ARGS__)
-#	define  furi_hal_i2c_trx(...)              furi_hal_Wi2c_trx(__VA_ARGS__)
+//----------------------------------------------------------------------------- ----------------------------------------
+#define furi_hal_i2c_is_device_ready(...) furi_hal_Wi2c_is_device_ready(__VA_ARGS__)
+#define furi_hal_i2c_tx(...) furi_hal_Wi2c_tx(__VA_ARGS__)
+#define furi_hal_i2c_rx(...) furi_hal_Wi2c_rx(__VA_ARGS__)
+#define furi_hal_i2c_trx(...) furi_hal_Wi2c_trx(__VA_ARGS__)
 
 #endif //ENABLE_WORKAROUND
 
@@ -103,17 +111,21 @@ void  furi_hal_i2c_release (FuriHalI2cBusHandle* handle)
 // Some devices take a moment to respond to read requests
 // The puts a delay between the address being set and the data being read
 //
-static inline
-bool furi_hal_i2c_trxd ( FuriHalI2cBusHandle* const bus,  const uint8_t addr,
-                          const void* tx,  const size_t txlen,
-                                void* rx,  const size_t rxlen,  const uint32_t tmo,  const uint32_t us )
-{
-	bool  rv = furi_hal_i2c_tx(bus, addr, tx, txlen, tmo);
-	if (rv) {
-		furi_delay_us(us);
-		rv = furi_hal_i2c_rx(bus, addr, rx, rxlen, tmo);
-	}
-	return rv;
+static inline bool furi_hal_i2c_trxd(
+    FuriHalI2cBusHandle* const bus,
+    const uint8_t addr,
+    const void* tx,
+    const size_t txlen,
+    void* rx,
+    const size_t rxlen,
+    const uint32_t tmo,
+    const uint32_t us) {
+    bool rv = furi_hal_i2c_tx(bus, addr, tx, txlen, tmo);
+    if(rv) {
+        furi_delay_us(us);
+        rv = furi_hal_i2c_rx(bus, addr, rx, rxlen, tmo);
+    }
+    return rv;
 }
 
 #endif //I2C_WORKAROUND_H_

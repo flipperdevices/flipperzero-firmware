@@ -8,6 +8,4 @@
 
 #include "images.h"
 
-const image_t  img_5x7_F = { 5, 7, false, 5, 0, {
-	0xFC, 0x21, 0xC8, 0x42, 0x00
-}};
+const image_t img_5x7_F = {5, 7, false, 5, 0, {0xFC, 0x21, 0xC8, 0x42, 0x00}};

@@ -51,7 +51,6 @@ typedef struct {
     uint32_t us_interpacket;
 } MagSetting;
 
-
 typedef struct {
     ViewDispatcher* view_dispatcher;
     Gui* gui;
@@ -84,7 +83,7 @@ typedef struct {
     FuriStreamBuffer* uart_rx_stream;
     uint8_t uart_rx_buf[UART_RX_BUF_SIZE + 1];
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
-    
+
     char uart_text_input_store[UART_TERMINAL_TEXT_INPUT_STORE_SIZE + 1];
     FuriString* uart_text_box_store;
     size_t uart_text_box_store_strlen;
