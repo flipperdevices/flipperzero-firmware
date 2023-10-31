@@ -90,6 +90,11 @@
 #define PKMN_SLAVE 0x02
 #define PKMN_CONNECTED 0x60
 #define PKMN_WAIT 0x7F
+#define PKMN_TRADE_ACCEPT 0x62
+#define PKMN_TRADE_REJECT 0x61
+#define PKMN_TABLE_LEAVE 0x6f
+#define PKMN_SEL_NUM_MASK 0x60
+#define PKMN_SEL_NUM_ONE 0x60
 
 #define PKMN_ACTION 0x60
 
@@ -106,6 +111,7 @@ typedef enum {
     TRADE_RANDOM,
     SENDING_DATA,
     SENDING_PATCH_DATA,
+    TRADE_SELECT,
     TRADE_PENDING,
     TRADE_CONFIRMATION,
     DONE
@@ -115,9 +121,7 @@ typedef enum {
     GAMEBOY_INITIAL,
     GAMEBOY_READY,
     GAMEBOY_WAITING,
-    GAMEBOY_TRADE_READY,
-    GAMEBOY_SEND,
-    GAMEBOY_PENDING,
+    GAMEBOY_TRADE_PENDING,
     GAMEBOY_TRADING
 } render_gameboy_state_t;
 
@@ -152,6 +156,7 @@ struct trade_model {
     render_gameboy_state_t gameboy_status;
     bool trading;
     bool connected;
+    bool ledon; // Controlls the blue LED during trade
     uint8_t curr_pokemon;
     const PokemonTable* pokemon_table;
 };
@@ -191,9 +196,6 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
     const char* gameboy_status_text = NULL;
     struct trade_model* model = view_model;
     uint8_t curr_pokemon = model->curr_pokemon;
-    int time_in_seconds;
-
-    time_in_seconds = (int)DWT->CYCCNT / (72000000.0f / 4); //  250ms
 
     canvas_clear(canvas);
     if(!model->trading) {
@@ -212,8 +214,8 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         switch(model->gameboy_status) {
         case GAMEBOY_TRADING:
             furi_hal_light_set(LightGreen, 0x00);
-            furi_hal_light_set(LightRed, 0x00);
-            if(time_in_seconds % 2 == 1) {
+	    furi_hal_light_set(LightRed, 0x00);
+            if(model->ledon) {
                 furi_hal_light_set(LightBlue, 0xff);
                 canvas_draw_icon(canvas, 0, 0, &I_gb_step_1);
             } else {
@@ -224,6 +226,7 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         default:
 	    /* Every other state, draw the pokemon we're planning to trade */
             canvas_draw_icon(canvas, 38, 11, model->pokemon_table[curr_pokemon].icon);
+            furi_hal_light_set(LightBlue, 0x00);
             break;
         }
         canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
@@ -238,17 +241,11 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         case GAMEBOY_WAITING:
             gameboy_status_text = "WAITING";
             break;
-        case GAMEBOY_TRADE_READY:
-            gameboy_status_text = "READY";
-            break;
-        case GAMEBOY_SEND:
-            gameboy_status_text = "DEAL!";
-            break;
-        case GAMEBOY_PENDING:
-            gameboy_status_text = "PENDING...";
+        case GAMEBOY_TRADE_PENDING:
+            gameboy_status_text = "DEAL?";
             break;
         case GAMEBOY_TRADING:
-            gameboy_status_text = "TRADING...";
+            gameboy_status_text = "TRADING!";
             break;
         default:
             gameboy_status_text = "INITIAL";
@@ -316,11 +313,6 @@ static uint8_t getMenuResponse(uint8_t in, struct trade_ctx* trade) {
     furi_assert(trade);
 
     uint8_t response = PKMN_BLANK;
-    /* XXX: Shouldn't this return a valid response for each option? 
-     * e.g. if the gameboy selects trade center, should we also send trade center? 
-     * or is the 0x00 an Agreement byte? I wonder if the leader/master is the
-     * only one allowed to make the selection, and if the follower/slave selects a different
-     * option it just instead returns BREAK_LINK? */
 
     switch(in) {
     case PKMN_CONNECTED:
@@ -338,24 +330,13 @@ static uint8_t getMenuResponse(uint8_t in, struct trade_ctx* trade) {
             false);
         break;
     case PKMN_COLOSSEUM:
-	/* XXX: Ignore this */
-        trade->connection_state = COLOSSEUM;
-        with_view_model(
-            trade->view,
-            struct trade_model * model,
-            {
-                model->gameboy_status = GAMEBOY_READY;
-                model->trading = true;
-            },
-            false);
-        break;
     case PKMN_BREAK_LINK:
     case PKMN_MASTER:
         trade->connection_state = NOT_CONNECTED;
         response = PKMN_BREAK_LINK;
         break;
     default:
-        response = in;
+	response = in;
         break;
     }
 
@@ -404,6 +385,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
     case INIT:
 	if (in == SERIAL_PREAMBLE_BYTE) {
 	    counter++;
+            model->gameboy_status = GAMEBOY_WAITING;
         }
         if (counter == SERIAL_RNS_LENGTH) {
 	    trade->trade_centre_state = TRADE_RANDOM;
@@ -494,58 +476,51 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 	     * sent without counting.
 	     */
             if(counter == 196) {
-                trade->trade_centre_state = TRADE_PENDING;
+                trade->trade_centre_state = TRADE_SELECT;
 	    }
         }
         break;
 
+    case TRADE_SELECT:
+	    in_pokemon_num = 0;
+	    if (in == PKMN_BLANK) {
+	        trade->trade_centre_state = TRADE_PENDING;
+	    } else {
+	        break;
+	    }
+	    [[fallthrough]];
     case TRADE_PENDING:
-        /* TODO: What are these states */
-	/* 0x6f is "close session?" */
-        if(in == 0x6F) {
-            trade->trade_centre_state = INIT;
-            send = 0x6F;
-            model->gameboy_status = GAMEBOY_TRADE_READY;
-	    /* 0x6? says what pokemon the gameboy is sending us */
-        } else if((in & 0x60) == 0x60) {
+	/* If the player leaves the trade menu and returns to the room */
+        if(in == PKMN_TABLE_LEAVE) {
+            trade->trade_centre_state = TRADE_RESET;
+            send = PKMN_TABLE_LEAVE;
+            model->gameboy_status = GAMEBOY_READY;
+        } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
             in_pokemon_num = in;
-            send = 0x60; // first pokemon
-            model->gameboy_status = GAMEBOY_SEND;
-	    /* I think this is a confirmation of what is being traded, likely from the dialog of:
-	     * so and so will be traded for so and so, is that ok?
-	     */
-        } else if(in == 0x00) {
+            send = PKMN_SEL_NUM_ONE; // We're sending the first pokemon
+            model->gameboy_status = GAMEBOY_TRADE_PENDING;
+        } else if(in == PKMN_BLANK) {
             if (in_pokemon_num != 0) {
                 send = 0;
                 trade->trade_centre_state = TRADE_CONFIRMATION;
 		in_pokemon_num &= 0x0F;
 	    }
         }
-	/* XXX: Test to make sure saying no at is this okay does the right thing */
-	/* XXX: It does not */
         break;
 
-    /* XXX: The actual trade uses 0x62 a bunch? Is that the OKAY? Is 0x61 a NAK? Other docs show 0x6F? */
-    /* XXX: The pending text never really shows up. Maybe have a "DEAL?" and "DEAL!" state instead?
-     * Actually, I think that goes by too quick, I think once you accept it goes straight in to trade.
-     * So maybe the PENNDING state is actually useless? */
     case TRADE_CONFIRMATION:
-        if(in == 0x61) {
-            trade->trade_centre_state = TRADE_PENDING;
-            model->gameboy_status = GAMEBOY_PENDING;
-        } else if((in & 0x60) == 0x60) {
+        if(in == PKMN_TRADE_REJECT) {
+            trade->trade_centre_state = TRADE_SELECT;
+            model->gameboy_status = GAMEBOY_WAITING;
+        } else if(in == PKMN_TRADE_ACCEPT) {
             trade->trade_centre_state = DONE;
         }
         break;
 
     case DONE:
         if(in == PKMN_BLANK) {
-            send = 0;
             trade->trade_centre_state = TRADE_RESET;
-	    /* XXX: I think I want to change this? */
             model->gameboy_status = GAMEBOY_TRADING;
-
-	    counter = 0;
 
             /* Copy the traded-in pokemon's main data to our struct */
             trade->trade_block->party_members[0] = trade->input_block->party_members[in_pokemon_num];
@@ -663,7 +638,7 @@ void trade_draw_timer_callback(void* context) {
     struct trade_ctx* trade = (struct trade_ctx*)context;
 
     with_view_model(
-        trade->view, struct trade_model * model, { UNUSED(model); }, true);
+        trade->view, struct trade_model * model, { model->ledon ^= 1; }, true);
 }
 
 void trade_enter_callback(void* context) {
@@ -680,6 +655,7 @@ void trade_enter_callback(void* context) {
             model->gameboy_status = GAMEBOY_INITIAL;
             model->pokemon_table = trade->pokemon_table;
             model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
+	    model->ledon = false;
         },
         true);
     trade->connection_state = NOT_CONNECTED;
@@ -689,11 +665,13 @@ void trade_enter_callback(void* context) {
     trade->out_data = 0;
     trade->shift = 0;
 
+    /* Every 250 ms, trigger a draw update. 250 ms was chosen so that during
+     * the trade process, each update can flip the LED and screen to make the
+     * trade animation.
+     */
     trade->draw_timer = furi_timer_alloc(trade_draw_timer_callback, FuriTimerTypePeriodic, trade);
-    /* Every 100 ms, trigger a draw update */
-    furi_timer_start(trade->draw_timer, furi_ms_to_ticks(100));
+    furi_timer_start(trade->draw_timer, furi_ms_to_ticks(250));
 
-    /* XXX: Figure out "proper" GPIO setup/use/teardown */
     // B3 (Pin6) / SO (2)
     furi_hal_gpio_write(&GAME_BOY_SO, false);
     furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
@@ -727,6 +705,7 @@ void trade_exit_callback(void* context) {
     /* Stop the timer, and deallocate it as the enter callback allocates it on entry */
     furi_timer_free(trade->draw_timer);
 
+    /* Destroy the patch list, it is allocated on the enter callback */
     plist_free(trade->patch_list);
 }
 
