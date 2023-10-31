@@ -5400,15 +5400,14 @@ void STM32SAM::sam(
         }
     }
 
+    if(i < 256) {
+        input[i] = phonetic ? '\x9b' : '[';
+    }
+
     if(!phonetic) {
-        strncat(input, "[", 256);
         if(!TextToPhonemes((unsigned char*)input)) {
-            // PrintUsage();
             return;
         }
-
-    } else {
-        strncat(input, "\x9b", 256);
     }
 
     SetInput(input);

@@ -2,7 +2,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
@@ -40,12 +39,13 @@ typedef enum {
     DirectionLeft,
 } Direction;
 
-#define MAX_SNAKE_LEN 15 * 31 //128 * 64 / 4 
+#define MAX_SNAKE_LEN 15 * 31 //128 * 64 / 4
 
 #define x_back_symbol 50
 #define y_back_symbol 9
 
 typedef struct {
+    FuriMutex* mutex;
     Point points[MAX_SNAKE_LEN];
     uint16_t len;
     Direction currentMovement;
@@ -97,10 +97,9 @@ const NotificationSequence sequence_eat = {
 };
 
 static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
-    const SnakeState* snake_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(snake_state == NULL) {
-        return;
-    }
+    furi_assert(ctx);
+    const SnakeState* snake_state = ctx;
+    furi_mutex_acquire(snake_state->mutex, FuriWaitForever);
 
     // Before the function is called, the state is set with the canvas_reset(canvas)
 
@@ -112,8 +111,8 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
     f.x = f.x * 4 + 1;
     f.y = f.y * 4 + 1;
     canvas_draw_rframe(canvas, f.x, f.y, 6, 6, 2);
-    canvas_draw_dot(canvas,f.x+3,f.y-1);
-    canvas_draw_dot(canvas,f.x+4,f.y-2);
+    canvas_draw_dot(canvas, f.x + 3, f.y - 1);
+    canvas_draw_dot(canvas, f.x + 4, f.y - 2);
     //canvas_draw_dot(canvas,f.x+4,f.y-3);
 
     // Snake
@@ -122,9 +121,9 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         p.x = p.x * 4 + 2;
         p.y = p.y * 4 + 2;
         canvas_draw_box(canvas, p.x, p.y, 4, 4);
-        if(i==0){
+        if(i == 0) {
             canvas_set_color(canvas, ColorWhite);
-            canvas_draw_box(canvas,p.x+1,p.y+1,2,2);
+            canvas_draw_box(canvas, p.x + 1, p.y + 1, 2, 2);
             canvas_set_color(canvas, ColorBlack);
         }
     }
@@ -139,10 +138,10 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_frame(canvas, 34, 20, 62, 24);
 
         canvas_set_font(canvas, FontPrimary);
-        if(snake_state->state == GameStateGameOver){
+        if(snake_state->state == GameStateGameOver) {
             canvas_draw_str_aligned(canvas, 65, 31, AlignCenter, AlignBottom, "Game Over");
         }
-        if(snake_state->state == GameStatePause){
+        if(snake_state->state == GameStatePause) {
             canvas_draw_str_aligned(canvas, 65, 31, AlignCenter, AlignBottom, "Pause");
         }
 
@@ -156,38 +155,39 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_box(canvas, 25, 2, 81, 11);
         canvas_draw_box(canvas, 28, 54, 73, 9);
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_str_aligned(canvas, 65, 10, AlignCenter, AlignBottom, "Hold        to Exit App");
-        snprintf(buffer, sizeof(buffer), "Complete: %-5.1f%%", (double)((snake_state->len - 7U)/4.58));
+        canvas_draw_str_aligned(
+            canvas, 65, 10, AlignCenter, AlignBottom, "Hold        to Exit App");
+        snprintf(
+            buffer, sizeof(buffer), "Complete: %-5.1f%%", (double)((snake_state->len - 7U) / 4.58));
         canvas_draw_str_aligned(canvas, 65, 62, AlignCenter, AlignBottom, buffer);
         {
-        canvas_draw_dot(canvas,x_back_symbol+0,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+1,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+2,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+3,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+4,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+5,y_back_symbol-1);
-        canvas_draw_dot(canvas,x_back_symbol+6,y_back_symbol-2);
-        canvas_draw_dot(canvas,x_back_symbol+6,y_back_symbol-3);
-        canvas_draw_dot(canvas,x_back_symbol+5,y_back_symbol-4);
-        canvas_draw_dot(canvas,x_back_symbol+4,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol+3,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol+2,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol+1,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol+0,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol-2,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol-3,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol-2,y_back_symbol-6);
-        canvas_draw_dot(canvas,x_back_symbol-2,y_back_symbol-4);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-6);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-4);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-7);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-3);
+            canvas_draw_dot(canvas, x_back_symbol + 0, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 1, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 2, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 3, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 4, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 5, y_back_symbol - 1);
+            canvas_draw_dot(canvas, x_back_symbol + 6, y_back_symbol - 2);
+            canvas_draw_dot(canvas, x_back_symbol + 6, y_back_symbol - 3);
+            canvas_draw_dot(canvas, x_back_symbol + 5, y_back_symbol - 4);
+            canvas_draw_dot(canvas, x_back_symbol + 4, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol + 3, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol + 2, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol + 1, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol + 0, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol - 2, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol - 3, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol - 2, y_back_symbol - 6);
+            canvas_draw_dot(canvas, x_back_symbol - 2, y_back_symbol - 4);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 6);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 4);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 7);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 3);
         }
-
     }
 
-    release_mutex((ValueMutex*)ctx, snake_state);
+    furi_mutex_release(snake_state->mutex);
 }
 
 static void snake_game_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -376,8 +376,8 @@ int32_t snake_20_app(void* p) {
     SnakeState* snake_state = malloc(sizeof(SnakeState));
     snake_game_init_game(snake_state);
 
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, snake_state, sizeof(SnakeState))) {
+    snake_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!snake_state->mutex) {
         FURI_LOG_E("SnakeGame", "cannot create mutex\r\n");
         furi_message_queue_free(event_queue);
         free(snake_state);
@@ -385,7 +385,7 @@ int32_t snake_20_app(void* p) {
     }
 
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, snake_game_render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, snake_game_render_callback, snake_state);
     view_port_input_callback_set(view_port, snake_game_input_callback, event_queue);
 
     FuriTimer* timer =
@@ -399,13 +399,11 @@ int32_t snake_20_app(void* p) {
 
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
 
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
-
     SnakeEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-        SnakeState* snake_state = (SnakeState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(snake_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeKey) {
@@ -460,30 +458,30 @@ int32_t snake_20_app(void* p) {
                     }
                 }
                 //LongPress Events
-                if(event.input.type == InputTypeLong){
+                if(event.input.type == InputTypeLong) {
                     switch(event.input.key) {
                     case InputKeyUp:
                         if(snake_state->state != GameStatePause) {
-                        snake_state->nextMovement = DirectionUp;
-                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
+                            snake_state->nextMovement = DirectionUp;
+                            furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
                         }
                         break;
                     case InputKeyDown:
                         if(snake_state->state != GameStatePause) {
-                        snake_state->nextMovement = DirectionDown;
-                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
+                            snake_state->nextMovement = DirectionDown;
+                            furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
                         }
                         break;
                     case InputKeyRight:
                         if(snake_state->state != GameStatePause) {
-                        snake_state->nextMovement = DirectionRight;
-                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
+                            snake_state->nextMovement = DirectionRight;
+                            furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
                         }
                         break;
                     case InputKeyLeft:
                         if(snake_state->state != GameStatePause) {
-                        snake_state->nextMovement = DirectionLeft;
-                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
+                            snake_state->nextMovement = DirectionLeft;
+                            furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
                         }
                         break;
                     case InputKeyBack:
@@ -491,15 +489,14 @@ int32_t snake_20_app(void* p) {
                         break;
                     default:
                         break;
+                    }
                 }
-                
-            }
-            //ReleaseKey Event
-            if(event.input.type ==  InputTypeRelease){
-                if(snake_state->state != GameStatePause) {
-                    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
+                //ReleaseKey Event
+                if(event.input.type == InputTypeRelease) {
+                    if(snake_state->state != GameStatePause) {
+                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
+                    }
                 }
-            }
             } else if(event.type == EventTypeTick) {
                 snake_game_process_game_step(snake_state, notification);
             }
@@ -507,8 +504,8 @@ int32_t snake_20_app(void* p) {
             // event timeout
         }
 
+        furi_mutex_release(snake_state->mutex);
         view_port_update(view_port);
-        release_mutex(&state_mutex, snake_state);
     }
 
     // Wait for all notifications to be played and return backlight to normal state
@@ -521,7 +518,7 @@ int32_t snake_20_app(void* p) {
     furi_record_close(RECORD_NOTIFICATION);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(snake_state->mutex);
     free(snake_state);
 
     return 0;
