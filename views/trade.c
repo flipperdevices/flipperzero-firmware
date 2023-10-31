@@ -349,8 +349,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
     uint8_t* trade_block_flat = (uint8_t*)trade->trade_block;
     uint8_t* input_block_flat = (uint8_t*)trade->input_block;
     uint8_t* input_party_flat = (uint8_t*)trade->input_block->party;
-    static int counter; // Should be able to be made static in used function
-			// May need to make another state PRE-init or something to reset this on re-entry?
+    static int counter;
     struct trade_model* model = NULL;
     static uint8_t in_pokemon_num;
     uint8_t send = in;
@@ -386,7 +385,17 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 	if (in == SERIAL_PREAMBLE_BYTE) {
 	    counter++;
             model->gameboy_status = GAMEBOY_WAITING;
-        }
+        /* If the GB is in the trade menu and the Flipper went back to the main
+	 * menu and then back in to the trade screen, the Gameboy is "waiting"
+	 * and the flipper is "ready". In the waiting state, the Gameboy would
+	 * send a trade request value, responding to that with a request to
+	 * leave the table, the Gameboy just pops back to the trade screen and
+	 * does nothing. If the Gameboy cancels and then re-selects the table,
+	 * everything correctly re-syncs.
+	 */
+        } else if ((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
+            send = PKMN_TABLE_LEAVE;
+	}
         if (counter == SERIAL_RNS_LENGTH) {
 	    trade->trade_centre_state = TRADE_RANDOM;
 	    counter = 0;
@@ -657,6 +666,8 @@ void trade_enter_callback(void* context) {
     if (!model->trading || !model->connected) {
         trade->connection_state = NOT_CONNECTED;
         model->gameboy_status = GAMEBOY_INITIAL;
+    } else if (model->trading && model->connected) {
+        model->gameboy_status = GAMEBOY_READY;
     }
     model->pokemon_table = trade->pokemon_table;
     model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
