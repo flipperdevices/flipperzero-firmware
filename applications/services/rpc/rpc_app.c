@@ -97,7 +97,7 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
         } else if(status == LoaderStatusOk) {
             result = PB_CommandStatus_OK;
         } else {
-            furi_crash(NULL);
+            furi_crash();
         }
     }
 
