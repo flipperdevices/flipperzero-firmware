@@ -18,6 +18,8 @@
 #include <cli/cli.h>
 #include <loader/loader.h>
 #include <protobuf_version.h>
+
+#include <FreeRTOS.h>
 #include <semphr.h>
 
 LIST_DEF(MsgList, PB_Main, M_POD_OPLIST)

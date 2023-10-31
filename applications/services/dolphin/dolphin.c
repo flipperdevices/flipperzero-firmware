@@ -167,8 +167,8 @@ int32_t dolphin_srv(void* p) {
                 dolphin_state_on_deed(dolphin->state, event.deed);
                 DolphinPubsubEvent event = DolphinPubsubEventUpdate;
                 furi_pubsub_publish(dolphin->pubsub, &event);
-                furi_timer_stop(dolphin->butthurt_timer);
-                furi_timer_stop(dolphin->flush_timer);
+                furi_timer_reset(dolphin->butthurt_timer);
+                furi_timer_reset(dolphin->flush_timer);
             } else if(event.type == DolphinEventTypeStats) {
                 event.stats->icounter = dolphin->state->data.icounter;
                 event.stats->butthurt = dolphin->state->data.butthurt;
