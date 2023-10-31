@@ -238,9 +238,6 @@ int32_t totp_app() {
 
     TotpCliContext* cli_context = totp_cli_register_command_handler(plugin_state);
 
-    // Affecting dolphin level
-    dolphin_deed(DolphinDeedPluginStart);
-
     FuriMutex* main_loop_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     struct TotpRenderCallbackContext render_context = {
         .plugin_state = plugin_state, .mutex = main_loop_mutex};
