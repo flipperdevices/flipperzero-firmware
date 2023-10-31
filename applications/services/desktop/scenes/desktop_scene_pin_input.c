@@ -32,8 +32,7 @@ static void desktop_scene_locked_light_red(bool value) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-static void
-    desktop_scene_pin_input_set_timer(Desktop* desktop, bool enable, uint32_t new_period) {
+static void desktop_scene_pin_input_set_timer(Desktop* desktop, bool enable, uint32_t new_period) {
     furi_assert(desktop);
 
     DesktopScenePinInputState* state = (DesktopScenePinInputState*)scene_manager_get_scene_state(

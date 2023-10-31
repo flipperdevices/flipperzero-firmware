@@ -3,7 +3,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-
 typedef enum {
     LFRFIDEventStopThread = (1 << 0),
     LFRFIDEventStopMode = (1 << 1),

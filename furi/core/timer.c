@@ -148,9 +148,9 @@ void furi_timer_set_thread_priority(FuriTimerThreadPriority priority) {
     furi_assert(!furi_kernel_is_irq_or_masked());
     TaskHandle_t task_handle = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
 
-    if (priority == FuriTimerThreadPriorityNormal) {
+    if(priority == FuriTimerThreadPriorityNormal) {
         vTaskPrioritySet(task_handle, configTIMER_TASK_PRIORITY);
-    } else if (priority == FuriTimerThreadPriorityElevated) {
+    } else if(priority == FuriTimerThreadPriorityElevated) {
         vTaskPrioritySet(task_handle, configMAX_PRIORITIES - 1);
     } else {
         furi_crash();

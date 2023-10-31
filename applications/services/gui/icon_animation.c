@@ -76,7 +76,7 @@ void icon_animation_stop(IconAnimation* instance) {
     furi_assert(instance);
     if(instance->animating) {
         instance->animating = false;
-        furi_check(furi_timer_stop(instance->timer) == FuriStatusOk);
+        furi_timer_stop(instance->timer);
         instance->frame = 0;
     }
 }

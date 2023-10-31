@@ -113,7 +113,8 @@ int32_t input_srv(void* p) {
                 } else {
                     event.sequence_counter = input->pin_states[i].counter;
                     furi_timer_stop(input->pin_states[i].press_timer);
-                    while(furi_timer_is_running(input->pin_states[i].press_timer)) furi_delay_tick(1);
+                    while(furi_timer_is_running(input->pin_states[i].press_timer))
+                        furi_delay_tick(1);
                     if(input->pin_states[i].press_counter < INPUT_LONG_PRESS_COUNTS) {
                         event.type = InputTypeShort;
                         furi_pubsub_publish(input->event_pubsub, &event);
