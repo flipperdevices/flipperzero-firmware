@@ -19,7 +19,6 @@
 #define MAX_MENU_ITEMS (21)
 #define NUM_MAIN_ITEMS (6)
 #define NUM_TARGET_ITEMS (8)
-#define NUM_TARGETS_SCAN_ITEMS (8)
 #define NUM_PACKETS_ITEMS (5)
 #define NUM_PACKETS_DEAUTH_ITEMS (3)
 #define NUM_PACKETS_FUZZ_ITEMS (4)
@@ -71,8 +70,7 @@ struct UART_TerminalApp {
     VariableItemList *main_menu_list, *targets_menu_list, *packets_menu_list;
     VariableItemList *attacks_menu_list, *settings_menu_list, *help_menu_list;
     VariableItemList *packets_deauth_menu_list, *packets_fuzz_menu_list;
-    VariableItemList *help_info_menu_list, *targets_scan_menu_list;
-    VariableItemList *attacks_mana_menu_list, *purge_menu_list;
+    VariableItemList *help_info_menu_list, *attacks_mana_menu_list, *purge_menu_list;
     ByteInput *settings_mac_bytes;
 
     uint8_t mac_bytes[NUM_MAC_BYTES];
@@ -103,7 +101,6 @@ typedef enum {
     UART_TerminalAppViewTextInput,
     Gravity_AppViewMainMenu,
     Gravity_AppViewTargetsMenu,
-    Gravity_AppViewTargetsScanMenu,
     Gravity_AppViewPacketsMenu,
     Gravity_AppViewPacketsDeauthMenu,
     Gravity_AppViewPacketsFuzzMenu,

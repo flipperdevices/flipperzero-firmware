@@ -1,10 +1,6 @@
 * Finish restructuring menus
     * Maybe a UI for stalk
-* Add selected_options_index[NUM_PURGE_ITEMS] to UART_TerminalItem
-    * Change UART_TerminalApp.selected_option_index[MAX_MENU_ITEMS] to int**
-    - Will no longer need purgeLoadFromMemory()
-    - Enter callbacks set app->selected_option_index to scene->selected_option_index
-    - Perhaps store a ref to selected_tx_string in UART_TerminalItem or a global, and only free selected_tx_string in the exit function of relevant scenes
+* Perhaps store a ref to selected_tx_string in UART_TerminalItem or a global, and only free selected_tx_string in the exit function of relevant scenes
 
 * Re-implement console/command execution
 * Re-implement cls/clear screen

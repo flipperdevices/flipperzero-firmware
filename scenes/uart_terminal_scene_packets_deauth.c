@@ -155,8 +155,7 @@ void uart_terminal_scene_packets_deauth_on_enter(void* context) {
         variable_item_set_current_value_text(
             item, packets_deauth[i].options_menu[app->selected_menu_options[GRAVITY_MENU_PACKETS_DEAUTH][i]]);
     }
-    variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalScenePacketsDeauth));
+    variable_item_list_set_selected_item(var_item_list, app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH]);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewPacketsDeauthMenu);
 }
@@ -174,7 +173,6 @@ bool uart_terminal_scene_packets_deauth_on_event(void* context, SceneManagerEven
         } else if (event.event == UART_TerminalEventStartConsole) {
             nextScene = UART_TerminalAppViewConsoleOutput;
         }
-        scene_manager_set_scene_state(app->scene_manager, UART_TerminalScenePacketsDeauth, app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH]);
         scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
@@ -188,5 +186,4 @@ bool uart_terminal_scene_packets_deauth_on_event(void* context, SceneManagerEven
 void uart_terminal_scene_packets_deauth_on_exit(void* context) {
     UART_TerminalApp* app = context;
     variable_item_list_reset(app->packets_deauth_menu_list);
-    scene_manager_set_scene_state(app->scene_manager, UART_TerminalScenePacketsDeauth, app->selected_menu_items[GRAVITY_MENU_PACKETS_DEAUTH]);
 }

@@ -45,8 +45,6 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
     if (newScene < 0) {
         return;
     }
-    scene_manager_set_scene_state(
-        app->scene_manager, UART_TerminalScenePackets, app->selected_menu_items[GRAVITY_MENU_ATTACKS]);
     scene_manager_next_scene(app->scene_manager, newScene);
 }
 
@@ -133,8 +131,7 @@ void uart_terminal_scene_attacks_on_enter(void* context) {
         variable_item_set_current_value_text(
             item, attacks[i].options_menu[app->selected_menu_options[GRAVITY_MENU_ATTACKS][i]]);
     }
-    variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneAttacks));
+    variable_item_list_set_selected_item(var_item_list, app->selected_menu_items[GRAVITY_MENU_ATTACKS]);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewAttacksMenu);
 }
@@ -152,7 +149,6 @@ bool uart_terminal_scene_attacks_on_event(void* context, SceneManagerEvent event
         } else if (event.event == UART_TerminalEventStartConsole) {
             nextScene = UART_TerminalAppViewConsoleOutput;
         }
-        scene_manager_set_scene_state(app->scene_manager, UART_TerminalSceneAttacks, app->selected_menu_items[GRAVITY_MENU_ATTACKS]);
         scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
@@ -166,5 +162,4 @@ bool uart_terminal_scene_attacks_on_event(void* context, SceneManagerEvent event
 void uart_terminal_scene_attacks_on_exit(void* context) {
     UART_TerminalApp* app = context;
     variable_item_list_reset(app->attacks_menu_list);
-    scene_manager_set_scene_state(app->scene_manager, UART_TerminalSceneAttacks, app->selected_menu_items[GRAVITY_MENU_ATTACKS]);
 }

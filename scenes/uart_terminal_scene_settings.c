@@ -104,25 +104,25 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
   false},
   {"Purge Strategy", {"Set"}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, true},
   {"BLE Purge Strategy",
-  {"Get", "Set"},
-  2,
-  {"get BLE_PURGE_STRAT", "set BLE_PURGE_STRAT "},
+  {"Get"},
+  1,
+  {"get BLE_PURGE_STRAT"},
   TOGGLE_ARGS,
   FOCUS_CONSOLE_START,
   NO_TIP,
   false},
   {"BLE Purge Max RSSI",
-  {"Get", "Set"},
-  2,
-  {"get BLE_PURGE_MAX_RSSI", "set BLE_PURGE_MAX_RSSI "},
+  {"Get"},
+  1,
+  {"get BLE_PURGE_MAX_RSSI"},
   TOGGLE_ARGS,
   FOCUS_CONSOLE_START,
   NO_TIP,
   false},
   {"BLE Purge Min Age",
-  {"Get", "Set"},
-  2,
-  {"get BLE_PURGE_MIN_AGE", "set BLE_PURGE_MIN_AGE "},
+  {"Get"},
+  1,
+  {"get BLE_PURGE_MIN_AGE"},
   TOGGLE_ARGS,
   FOCUS_CONSOLE_START,
   NO_TIP,
@@ -131,12 +131,7 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
 
 static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
     int newScene = -1;
-    if (!strcmp(item->item_string, "Get")) {
-        // Get Settings menu
-        //newScene = UART_TerminalSceneSettingsGet;
-    } else if (!strcmp(item->item_string, "Set")) {
-        //newScene = UART_TerminalSceneSettingsSet;
-    } else if (!strcmp(item->item_string, "Purge Strategy")) {
+    if (!strcmp(item->item_string, "Purge Strategy")) {
         newScene = UART_TerminalScenePurge;
     } else if (!strcmp(item->item_string, "MAC")) {
         newScene = UART_TerminalSceneSettingsMac;
@@ -144,8 +139,6 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
     if (newScene < 0) {
         return;
     }
-    scene_manager_set_scene_state(
-        app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_items[GRAVITY_MENU_SETTINGS]);
     scene_manager_next_scene(app->scene_manager, newScene);
 }
 
@@ -154,7 +147,7 @@ static void uart_terminal_scene_settings_var_list_enter_callback(void* context, 
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem *item = NULL;
-    const int selected_option_index = app->selected_menu_options[GRAVITY_MENU_PURGE][index];
+    const int selected_option_index = app->selected_menu_options[GRAVITY_MENU_SETTINGS][index];
     furi_assert(index < NUM_SETTINGS_ITEMS);
     app->selected_menu_items[GRAVITY_MENU_SETTINGS] = index;
 
@@ -209,7 +202,7 @@ static void uart_terminal_scene_settings_var_list_change_callback(VariableItem* 
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
-    app->selected_menu_options[GRAVITY_MENU_PURGE][app->selected_menu_items[GRAVITY_MENU_SETTINGS]] = item_index;
+    app->selected_menu_options[GRAVITY_MENU_SETTINGS][app->selected_menu_items[GRAVITY_MENU_SETTINGS]] = item_index;
 }
 
 /* Callback on entering the scene (initialisation) */
@@ -229,12 +222,11 @@ void uart_terminal_scene_settings_on_enter(void* context) {
             settings[i].num_options_menu,
             uart_terminal_scene_settings_var_list_change_callback,
             app);
-        variable_item_set_current_value_index(item, app->selected_menu_options[GRAVITY_MENU_PURGE][i]);
+        variable_item_set_current_value_index(item, app->selected_menu_options[GRAVITY_MENU_SETTINGS][i]);
         variable_item_set_current_value_text(
-            item, settings[i].options_menu[app->selected_menu_options[GRAVITY_MENU_PURGE][i]]);
+            item, settings[i].options_menu[app->selected_menu_options[GRAVITY_MENU_SETTINGS][i]]);
     }
-    variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneSettings));
+    variable_item_list_set_selected_item(var_item_list, app->selected_menu_items[GRAVITY_MENU_SETTINGS]);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewSettingsMenu);
 }
@@ -252,7 +244,6 @@ bool uart_terminal_scene_settings_on_event(void* context, SceneManagerEvent even
         } else if (event.event == UART_TerminalEventStartConsole) {
             nextScene = UART_TerminalAppViewConsoleOutput;
         }
-        scene_manager_set_scene_state(app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_items[GRAVITY_MENU_SETTINGS]);
         scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
@@ -266,5 +257,4 @@ bool uart_terminal_scene_settings_on_event(void* context, SceneManagerEvent even
 void uart_terminal_scene_settings_on_exit(void* context) {
     UART_TerminalApp* app = context;
     variable_item_list_reset(app->settings_menu_list);
-    scene_manager_set_scene_state(app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_items[GRAVITY_MENU_SETTINGS]);
 }

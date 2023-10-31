@@ -47,9 +47,6 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     app->targets_menu_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewTargetsMenu,
             variable_item_list_get_view(app->targets_menu_list));
-    app->targets_scan_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewTargetsScanMenu,
-            variable_item_list_get_view(app->targets_scan_menu_list));
     app->packets_menu_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewPacketsMenu,
             variable_item_list_get_view(app->packets_menu_list));
@@ -124,7 +121,6 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewMainMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewTargetsMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewTargetsScanMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPacketsMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPacketsDeauthMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPacketsFuzzMenu);

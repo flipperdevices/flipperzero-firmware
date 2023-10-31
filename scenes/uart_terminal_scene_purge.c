@@ -62,55 +62,6 @@ int indexOf(char *val, const char **array, int arrayLen) {
     return i;
 }
 
-static void purgeLoadFromMemory(UART_TerminalApp *app) {
-    /* A purge strategy is in memory, use it for initial values */
-    // Figure out what index in purgeMenu[PURGE_MENU_AGE].options_menu[]
-    //      purgeAge is & set app->selected_option_index[PURGE_MENU_AGE]
-    if (app->purgeStrategy == 0) {
-        // TODO: Report missing value
-        return;
-    }
-    char str[5];
-    itoa(app->purgeAge, str, 10);
-    int idx = indexOf(str, purgeMenu[PURGE_MENU_AGE].actual_commands,
-            purgeMenu[PURGE_MENU_AGE].num_options_menu);
-    if (idx >= 0) {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_AGE] = idx;
-    }
-    // Find index of purgeRSSI in purgeMenu[PURGE_MENU_RSSI].options_menu[]
-    // app->selected_option_index[PURGE_MENU_RSSI] = that
-    itoa(app->purgeRSSI, str, 10);
-    idx = indexOf(str, purgeMenu[PURGE_MENU_RSSI].actual_commands,
-            purgeMenu[PURGE_MENU_RSSI].num_options_menu);
-    if (idx >= 0) {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_RSSI] = idx;
-    }
-    /* Now set the boolean values */
-    int idxOn = indexOf("on", purgeMenu[PURGE_MENU_AGE_ON].actual_commands,
-            purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
-    int idxOff = indexOf("off", purgeMenu[PURGE_MENU_AGE_ON].actual_commands,
-            purgeMenu[PURGE_MENU_AGE_ON].num_options_menu);
-    if ((app->purgeStrategy & GRAVITY_PURGE_AGE) == GRAVITY_PURGE_AGE) {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_AGE_ON] = idxOn;
-    } else {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_AGE_ON] = idxOff;
-    }
-    if ((app->purgeStrategy & GRAVITY_PURGE_RSSI) == GRAVITY_PURGE_RSSI) {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_RSSI_ON] = idxOn;
-    } else {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_RSSI_ON] = idxOff;
-    }
-    if ((app->purgeStrategy & GRAVITY_PURGE_UNNAMED) == GRAVITY_PURGE_UNNAMED) {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_UNNAMED_ON] = idxOn;
-    } else {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_UNNAMED_ON] = idxOff;
-    }
-    if ((app->purgeStrategy & GRAVITY_PURGE_UNSELECTED) == GRAVITY_PURGE_UNSELECTED) {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_UNSELECTED_ON] = idxOn;
-    } else {
-        app->selected_menu_options[GRAVITY_MENU_PURGE][PURGE_MENU_UNSELECTED_ON] = idxOff;
-    }
-}
 /* Callback when an option is selected */
 static void uart_terminal_scene_purge_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -297,10 +248,6 @@ void uart_terminal_scene_purge_on_enter(void* context) {
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_purge_var_list_enter_callback, app);
 
-    /* Load purge config from Flipper memory if we've been here before */
-    if (app->purgeStrategy != 0) {
-        purgeLoadFromMemory(app);
-    }
     /* Need to create the menu before we can set values for selected_options_index[] */
     app->currentMenu = GRAVITY_MENU_PURGE;
     for(int i = 0; i < NUM_PURGE_ITEMS; ++i) {
@@ -314,11 +261,6 @@ void uart_terminal_scene_purge_on_enter(void* context) {
         variable_item_set_current_value_index(item, app->selected_menu_options[GRAVITY_MENU_PURGE][i]);
         variable_item_set_current_value_text(
             item, purgeMenu[i].options_menu[app->selected_menu_options[GRAVITY_MENU_PURGE][i]]);
-    }
-    /* Set selected menu item when returning back to the scene */
-    app->selected_menu_items[GRAVITY_MENU_PURGE] = scene_manager_get_scene_state(app->scene_manager, UART_TerminalScenePurge);
-    if (app->selected_menu_items[GRAVITY_MENU_PURGE] >= NUM_PURGE_ITEMS) {
-        app->selected_menu_items[GRAVITY_MENU_PURGE] = 0;
     }
     variable_item_list_set_selected_item(var_item_list, app->selected_menu_items[GRAVITY_MENU_PURGE]);
 
@@ -338,7 +280,6 @@ bool uart_terminal_scene_purge_on_event(void* context, SceneManagerEvent event) 
         } else if (event.event == UART_TerminalEventStartConsole) {
             nextScene = UART_TerminalAppViewConsoleOutput;
         }
-        scene_manager_set_scene_state(app->scene_manager, UART_TerminalScenePurge, app->selected_menu_items[GRAVITY_MENU_PURGE]);
         scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
@@ -352,5 +293,4 @@ bool uart_terminal_scene_purge_on_event(void* context, SceneManagerEvent event) 
 void uart_terminal_scene_purge_on_exit(void* context) {
     UART_TerminalApp* app = context;
     variable_item_list_reset(app->purge_menu_list);
-    scene_manager_set_scene_state(app->scene_manager, UART_TerminalScenePurge, app->selected_menu_items[GRAVITY_MENU_PURGE]);
 }
