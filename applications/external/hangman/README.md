@@ -1,11 +1,11 @@
-# Игра «Виселица» («Балда»)
-Первая русскоязычная программа для Flipper Zero.
+# The game "Gallows" ("Balda")
+The first Russian-language program for Flipper Zero.
 
-Правила очень просты — «Флиппер» загадывает слово, вам надо его отгадать, выбирая буквы. Если буква встречается, она будет нарисована на той позиции или позициях,
-где она встречается в слове, если нет, то будет нарисована часть «виселицы». Если «виселица» нарисуется полностью, вы проиграете, если угадаете слово раньше, выиграете.
-
+The rules are very simple – "Flipper" guesses a word, you have to guess it by choosing letters. If a letter occurs, it will be drawn at that position or positions, where it occurs in the word, if not, then part of the "gallows" will be drawn. If the "gallows" is drawn in full, you lose, if you guess the word earlier, you win.
 
 ![photo_2023-10-29 14 07 24](https://github.com/bolknote/Flipper-Zero-Hangman-Game/assets/392509/09bbfb68-8d3e-48a7-85b8-0eec082c67ea)
 
-* Программист: Евгений Степанищев (@bolknote)
-* Иллюстратор: Ева Степанищева
+* Programmer: Evgeny Stepanischev (@bolknote) 
+* Illustrator: Eva Stepanischeva
+* README, DIALOG and BUTTONS UPDATED TO ENGLISH (By RogueMaster)
+* HANGMAN IMAGE FIXED (By RogueMaster)

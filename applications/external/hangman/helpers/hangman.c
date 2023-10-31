@@ -95,7 +95,7 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
 }
 
 void hangman_render_callback(Canvas* canvas, void* ctx) {
-    HangmanApp* app = (HangmanApp*) ctx;
+    HangmanApp* app = (HangmanApp*)ctx;
 
     canvas_clear(canvas);
 
@@ -103,11 +103,11 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
     hangman_draw_gallows(canvas, app);
     hangman_draw_keyboard(canvas, app);
 
-    if (app->eog != HangmanGameOn) {
+    if(app->eog != HangmanGameOn) {
         if(app->eog == HangmanGameLoose) {
-            hangman_text_window(canvas, "Вы проиграли!");
+            hangman_text_window(canvas, "You Lose!");
         } else {
-            hangman_text_window(canvas, "Вы выиграли!");
+            hangman_text_window(canvas, "You Win!");
         }
         app->need_generate = true;
     }
@@ -125,7 +125,7 @@ void hangman_choice_letter(HangmanApp* app) {
         app->gallows_state++;
         app->opened[app->pos] = HangmanOpenedNotFound;
 
-        if (app->gallows_state >= HANGMAN_GALLOWS_MAX_STATE - 1) {
+        if(app->gallows_state >= HANGMAN_GALLOWS_MAX_STATE - 1) {
             app->eog = HangmanGameLoose;
 
             // Open the non-guessed letters
@@ -195,10 +195,10 @@ void hangman_app_free(HangmanApp** app) {
 bool hangman_wait_close_window(HangmanApp* app) {
     InputEvent event;
 
-    for (;;) {
-        if (furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
-            if (event.type == InputTypeShort) {
-                switch (event.key) {
+    for(;;) {
+        if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
+            if(event.type == InputTypeShort) {
+                switch(event.key) {
                 case InputKeyOk:
                     hangman_clear_state(app);
                     view_port_update(app->view_port);
@@ -217,7 +217,7 @@ bool hangman_wait_close_window(HangmanApp* app) {
 bool hangman_main_loop(HangmanApp* app) {
     InputEvent event;
 
-    while (app->eog == HangmanGameOn && !app->need_generate) {
+    while(app->eog == HangmanGameOn && !app->need_generate) {
         if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
             if(event.type == InputTypeShort) {
                 switch(event.key) {
@@ -232,8 +232,7 @@ bool hangman_main_loop(HangmanApp* app) {
                     if(app->pos < HANGMAN_LETTERS_CNT - HANGMAN_KEYBOARD_COLS) {
                         app->pos += HANGMAN_KEYBOARD_COLS;
                     } else {
-                        app->pos -= HANGMAN_KEYBOARD_COLS *
-                              (HANGMAN_KEYBOARD_ROWS - 1);
+                        app->pos -= HANGMAN_KEYBOARD_COLS * (HANGMAN_KEYBOARD_ROWS - 1);
                     }
                     break;
 
@@ -241,8 +240,7 @@ bool hangman_main_loop(HangmanApp* app) {
                     if(app->pos >= HANGMAN_KEYBOARD_COLS) {
                         app->pos -= HANGMAN_KEYBOARD_COLS;
                     } else {
-                        app->pos += HANGMAN_KEYBOARD_COLS *
-                            (HANGMAN_KEYBOARD_ROWS - 1);
+                        app->pos += HANGMAN_KEYBOARD_COLS * (HANGMAN_KEYBOARD_ROWS - 1);
                     }
                     break;
 

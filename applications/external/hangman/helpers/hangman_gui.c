@@ -64,7 +64,7 @@ void hangman_text_window(Canvas* canvas, char* txt) {
     canvas_set_color(canvas, ColorBlack);
 
     elements_frame(canvas, x, y, w, h);
-    hangman_ok_button(canvas, y + h, "Окей");
+    hangman_ok_button(canvas, y + h, "Ok");
 
     uint8_t txt_w = canvas_glyph_width(canvas, ' ') * strlen(txt) / 2;
     hangman_draw_utf8_str(

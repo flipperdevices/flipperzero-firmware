@@ -47,8 +47,6 @@ void hangman_render_callback(Canvas* canvas, void* ctx);
 HangmanApp* hangman_app_alloc();
 bool hangman_main_loop(HangmanApp* app);
 bool hangman_wait_close_window(HangmanApp* app);
-void hangman_draw_gallows(Canvas *canvas, HangmanApp* app);
+void hangman_draw_gallows(Canvas* canvas, HangmanApp* app);
 void hangman_clear_state(HangmanApp* app);
 void hangman_text_window(Canvas* canvas, char* txt);
-
-
