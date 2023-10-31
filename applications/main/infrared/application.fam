@@ -18,5 +18,10 @@ App(
     apptype=FlipperAppType.STARTUP,
     targets=["f7"],
     entry_point="infrared_on_system_start",
+    sources=[
+        "infrared_cli.c",
+        "infrared_brute_force.c",
+        "infrared_signal.c",
+    ],
     order=20,
 )
