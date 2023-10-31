@@ -1,10 +1,32 @@
 #include "../picopass_i.h"
 #include <dolphin/dolphin.h>
 
-void picopass_write_key_worker_callback(PicopassWorkerEvent event, void* context) {
-    UNUSED(event);
+NfcCommand picopass_scene_write_key_poller_callback(PicopassPollerEvent event, void* context) {
+    NfcCommand command = NfcCommandContinue;
     Picopass* picopass = context;
-    view_dispatcher_send_custom_event(picopass->view_dispatcher, PicopassCustomEventWorkerExit);
+
+    if(event.type == PicopassPollerEventTypeRequestMode) {
+        event.data->req_mode.mode = PicopassPollerModeWriteKey;
+    } else if(event.type == PicopassPollerEventTypeRequestKey) {
+        event.data->req_key.is_key_provided = true;
+        memcpy(event.data->req_key.key, picopass->dev->dev_data.pacs.key, PICOPASS_KEY_LEN);
+        event.data->req_key.is_elite_key = picopass->dev->dev_data.pacs.elite_kdf;
+    } else if(event.type == PicopassPollerEventTypeRequestWriteKey) {
+        event.data->req_write_key.data = &picopass->dev->dev_data;
+        memcpy(
+            event.data->req_write_key.key,
+            picopass->write_key_context.key_to_write,
+            PICOPASS_KEY_LEN);
+        event.data->req_write_key.is_elite_key = picopass->write_key_context.is_elite;
+    } else if(event.type == PicopassPollerEventTypeSuccess) {
+        view_dispatcher_send_custom_event(
+            picopass->view_dispatcher, PicopassCustomEventPollerSuccess);
+    } else if(event.type == PicopassPollerEventTypeFail) {
+        view_dispatcher_send_custom_event(
+            picopass->view_dispatcher, PicopassCustomEventPollerFail);
+    }
+
+    return command;
 }
 
 void picopass_scene_write_key_on_enter(void* context) {
@@ -18,14 +40,10 @@ void picopass_scene_write_key_on_enter(void* context) {
 
     // Start worker
     view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewPopup);
-    picopass_worker_start(
-        picopass->worker,
-        PicopassWorkerStateWriteKey,
-        &picopass->dev->dev_data,
-        picopass_write_key_worker_callback,
-        picopass);
-
     picopass_blink_start(picopass);
+
+    picopass->poller = picopass_poller_alloc(picopass->nfc);
+    picopass_poller_start(picopass->poller, picopass_scene_write_key_poller_callback, picopass);
 }
 
 bool picopass_scene_write_key_on_event(void* context, SceneManagerEvent event) {
@@ -33,8 +51,11 @@ bool picopass_scene_write_key_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == PicopassCustomEventWorkerExit) {
+        if(event.event == PicopassCustomEventPollerSuccess) {
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteCardSuccess);
+            consumed = true;
+        } else if(event.event == PicopassCustomEventPollerFail) {
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteCardFailure);
             consumed = true;
         }
     }
@@ -45,7 +66,9 @@ void picopass_scene_write_key_on_exit(void* context) {
     Picopass* picopass = context;
 
     // Stop worker
-    picopass_worker_stop(picopass->worker);
+    picopass_poller_stop(picopass->poller);
+    picopass_poller_free(picopass->poller);
+
     // Clear view
     popup_reset(picopass->popup);
 

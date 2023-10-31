@@ -1,3 +1,5 @@
+## 1.7
+ - Rework application with new NFC API
 ## 1.6
  - Faster loclass response collection
  - Save as LF for all bit lengths

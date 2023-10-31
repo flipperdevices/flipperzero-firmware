@@ -23,7 +23,6 @@ void picopass_tick_event_callback(void* context) {
 Picopass* picopass_alloc() {
     Picopass* picopass = malloc(sizeof(Picopass));
 
-    picopass->worker = picopass_worker_alloc();
     picopass->view_dispatcher = view_dispatcher_alloc();
     picopass->scene_manager = scene_manager_alloc(&picopass_scene_handlers, picopass);
     view_dispatcher_enable_queue(picopass->view_dispatcher);
@@ -34,6 +33,8 @@ Picopass* picopass_alloc() {
         picopass->view_dispatcher, picopass_back_event_callback);
     view_dispatcher_set_tick_event_callback(
         picopass->view_dispatcher, picopass_tick_event_callback, 100);
+
+    picopass->nfc = nfc_alloc();
 
     // Picopass device
     picopass->dev = picopass_device_alloc();
@@ -100,6 +101,8 @@ void picopass_free(Picopass* picopass) {
     picopass_device_free(picopass->dev);
     picopass->dev = NULL;
 
+    nfc_free(picopass->nfc);
+
     // Submenu
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewMenu);
     submenu_free(picopass->submenu);
@@ -129,10 +132,6 @@ void picopass_free(Picopass* picopass) {
 
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewLoclass);
     loclass_free(picopass->loclass);
-
-    // Worker
-    picopass_worker_stop(picopass->worker);
-    picopass_worker_free(picopass->worker);
 
     // View Dispatcher
     view_dispatcher_free(picopass->view_dispatcher);
