@@ -1,0 +1,22 @@
+App(
+    appid="flipbip",
+    name="FlipBIP Crypto Wallet",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipbip_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=3 * 1024,
+    order=10,
+    fap_icon="flipbip_10px.png",
+    fap_private_libs=[
+        Lib(
+            name="crypto",
+        ),
+    ],
+    fap_category="Tools",
+    fap_author="Struan Clark (xtruan)",
+    fap_weburl="https://github.com/xtruan/FlipBIP",
+    fap_version=(1, 14),
+    fap_description="Crypto wallet for Flipper",
+)
