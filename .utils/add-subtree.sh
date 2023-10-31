@@ -2,7 +2,7 @@
 set -e
 
 if [ "$1" = "" ] || [ "$2" = "" ] || [ "$3" = "" ]; then
-    echo "Usage: git add-app <path> <repo> <branch> [subdir]"
+    echo "Usage: git add-subtree <path> <repo> <branch> [subdir]"
     exit
 fi
 path=${1%/}
@@ -13,7 +13,7 @@ subdir=${4%/}
 if [ "${subdir}" = "" ]; then
     git subtree add -P ${path} ${repo} ${branch} -m "Add ${path} from ${repo}"
 else
-    bash .utils/subdir-helper.sh ${path} ${repo} ${branch} ${subdir} add
+    bash .utils/subtree-subdir-helper.sh ${path} ${repo} ${branch} ${subdir} add
 fi
 
 gitsubtree=${path}/.gitsubtree

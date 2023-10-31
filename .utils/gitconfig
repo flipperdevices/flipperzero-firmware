@@ -1,4 +1,4 @@
 [alias]
-    add-app = "!bash .utils/add-app.sh"
-    update-app = "!bash .utils/update-app.sh"
-    bulk-update-apps = "!bash .utils/bulk-update-apps.sh"
+    add-subtree = "!bash .utils/add-subtree.sh"
+    update-subtree = "!bash .utils/update-subtree.sh"
+    bulk-update-subtrees = "!bash .utils/bulk-update-subtrees.sh"
