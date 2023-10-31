@@ -3,7 +3,6 @@
 #include <gui/scene_manager.h>
 #include <gui/view_stack.h>
 #include <stdint.h>
-#include <portmacro.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 

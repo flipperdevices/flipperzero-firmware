@@ -1,7 +1,6 @@
 
 #include "one_shot_animation_view.h"
 #include <furi.h>
-#include <portmacro.h>
 #include <gui/canvas.h>
 #include <gui/view.h>
 #include <gui/icon_i.h>

@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <FreeRTOS.h>
-#include <portmacro.h>
 #include <projdefs.h>
 #include <input/input.h>
 #include <gui/canvas.h>

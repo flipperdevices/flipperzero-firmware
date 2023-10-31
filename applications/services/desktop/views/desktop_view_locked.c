@@ -5,7 +5,6 @@
 #include <gui/icon.h>
 #include <gui/view.h>
 #include <assets_icons.h>
-#include <portmacro.h>
 
 #include <desktop/desktop_settings.h>
 #include "../desktop_i.h"

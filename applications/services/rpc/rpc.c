@@ -6,7 +6,6 @@
 
 #include <storage.pb.h>
 #include <flipper.pb.h>
-#include <portmacro.h>
 
 #include <furi.h>
 

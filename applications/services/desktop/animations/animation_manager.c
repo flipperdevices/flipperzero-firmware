@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <furi.h>
 #include <furi_hal.h>
-#include <portmacro.h>
 #include <dolphin/dolphin.h>
 #include <power/power_service/power.h>
 #include <storage/storage.h>

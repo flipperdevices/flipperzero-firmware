@@ -4,7 +4,6 @@
 #include <gui/elements.h>
 #include <assets_icons.h>
 #include <stdint.h>
-#include <portmacro.h>
 
 #include "desktop_view_pin_input.h"
 #include <desktop/desktop_settings.h>

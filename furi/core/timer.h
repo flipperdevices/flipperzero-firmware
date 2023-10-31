@@ -68,6 +68,17 @@ typedef void (*FuriTimerPendigCallback)(void* context, uint32_t arg);
 
 void furi_timer_pending_callback(FuriTimerPendigCallback callback, void* context, uint32_t arg);
 
+typedef enum {
+    FuriTimerThreadPriorityNormal, /**< Lower then other threads */
+    FuriTimerThreadPriorityElevated, /**< Same as other threads */
+} FuriTimerThreadPriority;
+
+/** Set Timer thread priority
+ *
+ * @param[in]  priority  The priority
+ */
+void furi_timer_set_thread_priority(FuriTimerThreadPriority priority);
+
 #ifdef __cplusplus
 }
 #endif
