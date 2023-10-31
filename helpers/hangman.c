@@ -27,6 +27,8 @@ char* hangman_get_random_word(const char* dict_file) {
         furi_crash(NULL);
     }
 
+    furi_string_trim(line);
+
     char* word = strdup(furi_string_get_cstr(line));
     furi_string_free(line);
     file_stream_close(stream);
@@ -178,7 +180,7 @@ int hangman_read_int(Stream *stream) {
         furi_crash(NULL);
     }
 
-    int result = atoi(furi_string_get_cstr(line));
+    int result = strtol(furi_string_get_cstr(line), NULL, 10);
     furi_string_free(line);
 
     return result;
@@ -200,16 +202,40 @@ HangmanLangConfig *hangman_load_config() {
     }
     furi_string_cat(dict_path, line);
     config->dict_file = strdup(furi_string_get_cstr(dict_path));
-
-    furi_string_free(line);
     furi_string_free(dict_path);
 
-    config->unicode_base  = hangman_read_int(stream);
-    config->first_letter_offset = hangman_read_int(stream);
-    config->letters_cnt   = hangman_read_int(stream);
     config->keyboard_cols = hangman_read_int(stream);
     config->keyboard_gap  = hangman_read_int(stream);
+    config->first_letter_offset = hangman_read_int(stream);
+
+    // letters
+    if (!stream_read_line(stream, line)) {
+        furi_crash(NULL);
+    }
+
+    uint16_t abc[HANGMAN_MAX_ALP_SIZE];
+    uint16_t min = 0xFFFF;
+    uint16_t cnt = 0;
+
+    const char* token = furi_string_get_cstr(line);
+    while (*token && cnt < HANGMAN_MAX_ALP_SIZE) {
+        char *end;
+        int num = strtol(token, &end, 16);
+        if (num == 0) break;
+
+        abc[cnt++] = num;
+        if (min > num) min = num;
+        token = end + 1;
+    }
+
+    furi_string_free(line);
+
+    config->letters_cnt = cnt;
+    config->unicode_base = min;
     config->keyboard_rows = ceil((float) config->letters_cnt / config->keyboard_cols);
+
+    for (int i = 0; i < cnt; i++ )
+        abc[i] -= config->unicode_base;
 
     file_stream_close(stream);
     stream_free(stream);

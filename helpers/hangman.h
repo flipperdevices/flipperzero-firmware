@@ -2,6 +2,8 @@
 
 #define HANGMAN_GALLOWS_MAX_STATE 7
 #define HANGMAN_GALLOWS_INIT_STATE 0
+#define HANGMAN_MAX_ALP_SIZE 0xFF
+
 #define HANGMAN_META_FILE APP_ASSETS_PATH("russian.meta")
 
 #include "hangman_icons.h"
@@ -14,6 +16,7 @@
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/file_stream.h>
 #include <furi_hal_random.h>
+#include <string.h>
 
 typedef enum {
     HangmanOpenedInit,
@@ -44,7 +47,7 @@ typedef struct {
     char* word;
     uint8_t pos;
     uint8_t gallows_state;
-    HangmanOpened opened[0xFF];
+    HangmanOpened opened[HANGMAN_MAX_ALP_SIZE];
     bool need_generate;
     HangmanGameResult eog;
     HangmanLangConfig* lang;
