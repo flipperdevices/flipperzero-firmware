@@ -2,17 +2,11 @@
 
 #define HANGMAN_GALLOWS_MAX_STATE 7
 #define HANGMAN_GALLOWS_INIT_STATE 0
-
-#define HANGMAN_DICT_FILE APP_ASSETS_PATH("russian.dict")
-#define HANGMAN_UNICODE_BASE 0x0410
-#define HANGMAN_FIRST_LETTER_OFFSET 0x10
-#define HANGMAN_LETTERS_CNT 32
-#define HANGMAN_KEYBOARD_COLS 8
-#define HANGMAN_KEYBOARD_ROWS HANGMAN_LETTERS_CNT / HANGMAN_KEYBOARD_COLS
-#define HANGMAN_KEYBOARD_GAP 3
+#define HANGMAN_META_FILE APP_ASSETS_PATH("russian.meta")
 
 #include "hangman_icons.h"
 
+#include <math.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <furi.h>
@@ -34,15 +28,26 @@ typedef enum {
 } HangmanGameResult;
 
 typedef struct {
+    char* dict_file;
+    uint16_t unicode_base;
+    uint8_t first_letter_offset;
+    uint8_t letters_cnt;
+    uint8_t keyboard_cols;
+    uint8_t keyboard_rows;
+    uint8_t keyboard_gap;
+} HangmanLangConfig;
+
+typedef struct {
     Gui* gui;
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
     char* word;
     uint8_t pos;
     uint8_t gallows_state;
-    HangmanOpened opened[HANGMAN_LETTERS_CNT];
+    HangmanOpened opened[0xFF];
     bool need_generate;
     HangmanGameResult eog;
+    HangmanLangConfig* lang;
 } HangmanApp;
 
 void hangman_app_free(HangmanApp** app);
