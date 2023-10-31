@@ -21,7 +21,6 @@ App(
     entry_point="all_in_one_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
-    sources=["plugins/supported_cards/all_in_one.c"],
 )
 
 App(
@@ -30,7 +29,6 @@ App(
     entry_point="opal_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
-    sources=["plugins/supported_cards/opal.c"],
 )
 
 App(
@@ -39,7 +37,6 @@ App(
     entry_point="myki_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
-    sources=["plugins/supported_cards/myki.c"],
 )
 
 App(
@@ -48,7 +45,6 @@ App(
     entry_point="troika_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
-    sources=["plugins/supported_cards/troika.c"],
 )
 
 App(
@@ -57,7 +53,6 @@ App(
     entry_point="plantain_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
-    sources=["plugins/supported_cards/plantain.c"],
 )
 
 App(
@@ -66,7 +61,6 @@ App(
     entry_point="two_cities_plugin_ep",
     targets=["f7"],
     requires=["nfc"],
-    sources=["plugins/supported_cards/two_cities.c"],
 )
 
 App(
@@ -74,6 +68,5 @@ App(
     targets=["f7"],
     apptype=FlipperAppType.STARTUP,
     entry_point="nfc_on_system_start",
-    sources=["nfc_cli.c"],
     order=30,
 )
