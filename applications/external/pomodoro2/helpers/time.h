@@ -7,8 +7,7 @@ extern const int TIME_SECONDS_IN_MINUTE;
 extern const int TIME_MINUTES_IN_HOUR;
 
 /// @brief Container for a time period
-typedef struct
-{
+typedef struct {
     uint8_t seconds;
     uint8_t minutes;
     uint32_t total_seconds;
