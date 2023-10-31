@@ -43,9 +43,8 @@ FURI_NORETURN void __furi_halt_implementation();
 
 /** Crash system
  *
- * @param      optional  message
+ * @param      optional  message (const char*)
  */
-
 #define furi_crash(...) M_APPLY(__furi_crash, M_IF_EMPTY(__VA_ARGS__)((NULL), (__VA_ARGS__)))
 
 /** Halt system with message. */
@@ -58,7 +57,7 @@ FURI_NORETURN void __furi_halt_implementation();
 
 /** Halt system
  *
- * @param      optional  message
+ * @param      optional  message (const char*)
  */
 #define furi_halt(...) M_APPLY(__furi_halt, M_IF_EMPTY(__VA_ARGS__)((NULL), (__VA_ARGS__)))
 
@@ -73,7 +72,7 @@ FURI_NORETURN void __furi_halt_implementation();
 /** Check condition and crash if failed
  *
  * @param      condition to check
- * @param      optional  message
+ * @param      optional  message (const char*)
  */
 #define furi_check(...) \
     M_APPLY(__furi_check, M_DEFAULT_ARGS(2, (__FURI_CHECK_MESSAGE_FLAG), __VA_ARGS__))
@@ -99,7 +98,7 @@ FURI_NORETURN void __furi_halt_implementation();
  * @warning    only will do check if firmware compiled in debug mode
  *
  * @param      condition to check
- * @param      optional  message
+ * @param      optional  message (const char*)
  */
 #define furi_assert(...) \
     M_APPLY(__furi_assert, M_DEFAULT_ARGS(2, (__FURI_ASSERT_MESSAGE_FLAG), __VA_ARGS__))
