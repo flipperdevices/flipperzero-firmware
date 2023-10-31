@@ -51,7 +51,7 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
             uint8_t x = 42 + i * glyph_w * 1.85;
             uint8_t n = j * HANGMAN_KEYBOARD_COLS + i;
 
-            uint16_t ch = 0x0410 + n;
+            uint16_t ch = HANGMAN_UNICODE_BASE + n;
 
             if(app->opened[n] != HangmanOpenedInit) {
                 canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_m_symbols);
@@ -82,9 +82,14 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     canvas_set_color(canvas, ColorBlack);
 
     for(uint8_t i = 0, x = center_x; i < strlen(app->word); i++) {
-        if(app->opened[app->word[i] - 0x10]) {
+        if(app->opened[app->word[i] - HANGMAN_FIRST_LETTER_OFFSET]) {
             canvas_set_color(canvas, ColorBlack);
-            canvas_draw_glyph(canvas, x, h, app->word[i] + 0x0400); // convert to UCS-2
+            canvas_draw_glyph(
+                canvas,
+                x,
+                h,
+                app->word[i] + HANGMAN_UNICODE_BASE -
+                    HANGMAN_FIRST_LETTER_OFFSET); // convert to UCS-2
         }
 
         canvas_set_color(canvas, ColorXOR);
@@ -121,7 +126,7 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
 }
 
 void hangman_choice_letter(HangmanApp* app) {
-    if(strchr(app->word, app->pos + 0x10) == NULL) {
+    if(strchr(app->word, app->pos + HANGMAN_FIRST_LETTER_OFFSET) == NULL) {
         app->gallows_state++;
         app->opened[app->pos] = HangmanOpenedNotFound;
 
@@ -130,7 +135,7 @@ void hangman_choice_letter(HangmanApp* app) {
 
             // Open the non-guessed letters
             for(uint8_t i = 0; i < strlen(app->word); i++) {
-                int letter = app->word[i] - 0x10;
+                int letter = app->word[i] - HANGMAN_FIRST_LETTER_OFFSET;
 
                 if(app->opened[letter] != HangmanOpenedFound) {
                     app->opened[letter] = HangmanOpenedNotFound;
@@ -143,7 +148,7 @@ void hangman_choice_letter(HangmanApp* app) {
 
         // Checking if all letters were opened
         for(uint8_t i = 0; i < strlen(app->word); i++) {
-            if(app->opened[app->word[i] - 0x10] != HangmanOpenedFound) {
+            if(app->opened[app->word[i] - HANGMAN_FIRST_LETTER_OFFSET] != HangmanOpenedFound) {
                 app->eog = HangmanGameOn;
                 break;
             }
