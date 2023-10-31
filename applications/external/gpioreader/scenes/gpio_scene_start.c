@@ -1,7 +1,6 @@
 #include "../gpio_app_i.h"
 #include "furi_hal_power.h"
 #include "furi_hal_usb.h"
-#include <dolphin/dolphin.h>
 
 enum GpioItem {
     GpioItemUsbUart,
@@ -56,7 +55,7 @@ void gpio_scene_start_on_enter(void* context) {
     variable_item_list_add(var_item_list, "USB-UART Bridge", 0, NULL, NULL);
 
     variable_item_list_add(var_item_list, "GPIO Manual Control", 0, NULL, NULL);
-    
+
     variable_item_list_add(var_item_list, "GPIO Manual Read", 0, NULL, NULL);
 
     item = variable_item_list_add(
@@ -97,7 +96,6 @@ bool gpio_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == GpioStartEventUsbUart) {
             scene_manager_set_scene_state(app->scene_manager, GpioSceneStart, GpioItemUsbUart);
             if(!furi_hal_usb_is_locked()) {
-                DOLPHIN_DEED(DolphinDeedGpioUartBridge);
                 scene_manager_next_scene(app->scene_manager, GpioSceneUsbUart);
             } else {
                 scene_manager_next_scene(app->scene_manager, GpioSceneUsbUartCloseRpc);

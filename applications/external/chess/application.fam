@@ -3,11 +3,7 @@ App(
     name="Chess",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipchess_app",
-    requires=[
-        "gui",
-    ],
     stack_size=4 * 1024,
-    order=10,
     fap_icon="flipchess_10px.png",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="flipchess",

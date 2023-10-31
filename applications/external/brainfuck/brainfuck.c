@@ -27,36 +27,46 @@ BFApp* brainfuck_alloc() {
     brainfuck->scene_manager = scene_manager_alloc(&brainfuck_scene_handlers, brainfuck);
     view_dispatcher_enable_queue(brainfuck->view_dispatcher);
     view_dispatcher_set_event_callback_context(brainfuck->view_dispatcher, brainfuck);
-    view_dispatcher_set_custom_event_callback(brainfuck->view_dispatcher, brainfuck_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(brainfuck->view_dispatcher, brainfuck_back_event_callback);
+    view_dispatcher_set_custom_event_callback(
+        brainfuck->view_dispatcher, brainfuck_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        brainfuck->view_dispatcher, brainfuck_back_event_callback);
 
     // Open GUI record
     brainfuck->gui = furi_record_open(RECORD_GUI);
-    view_dispatcher_attach_to_gui(brainfuck->view_dispatcher, brainfuck->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_attach_to_gui(
+        brainfuck->view_dispatcher, brainfuck->gui, ViewDispatcherTypeFullscreen);
 
     // Open Notification record
     brainfuck->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // Submenu
     brainfuck->submenu = submenu_alloc();
-    view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewMenu, submenu_get_view(brainfuck->submenu));
+    view_dispatcher_add_view(
+        brainfuck->view_dispatcher, brainfuckViewMenu, submenu_get_view(brainfuck->submenu));
 
     // Popup
     brainfuck->popup = popup_alloc();
-    view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewPopup, popup_get_view(brainfuck->popup));
+    view_dispatcher_add_view(
+        brainfuck->view_dispatcher, brainfuckViewPopup, popup_get_view(brainfuck->popup));
 
     // Text Input
     brainfuck->text_input = text_input_alloc();
-    view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewTextInput, text_input_get_view(brainfuck->text_input));
+    view_dispatcher_add_view(
+        brainfuck->view_dispatcher,
+        brainfuckViewTextInput,
+        text_input_get_view(brainfuck->text_input));
 
     // Textbox
     brainfuck->text_box = text_box_alloc();
-    view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewTextBox, text_box_get_view(brainfuck->text_box)); 
+    view_dispatcher_add_view(
+        brainfuck->view_dispatcher, brainfuckViewTextBox, text_box_get_view(brainfuck->text_box));
     brainfuck->text_box_store = furi_string_alloc();
 
     // Dev environment
     brainfuck->BF_dev_env = bf_dev_env_alloc(brainfuck);
-    view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewDev, bf_dev_env_get_view(brainfuck->BF_dev_env));
+    view_dispatcher_add_view(
+        brainfuck->view_dispatcher, brainfuckViewDev, bf_dev_env_get_view(brainfuck->BF_dev_env));
 
     // File path
     brainfuck->BF_file_path = furi_string_alloc();
@@ -122,10 +132,14 @@ void brainfuck_show_loading_popup(void* context, bool show) {
 int32_t brainfuck_app(void* p) {
     UNUSED(p);
     BFApp* brainfuck = brainfuck_alloc();
-    if(!brainfuck){ return 0; }
+    if(!brainfuck) {
+        return 0;
+    }
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_simply_mkdir(storage, "/ext/brainfuck");
+    storage_simply_mkdir(storage, EXT_PATH("apps_data/brainfuck"));
+    storage_common_copy(storage, EXT_PATH("brainfuck"), EXT_PATH("apps_data/brainfuck"));
+    storage_common_remove(storage, EXT_PATH("brainfuck"));
 
     scene_manager_next_scene(brainfuck->scene_manager, brainfuckSceneStart);
 

@@ -11,4 +11,7 @@ void gpio_reader_free(GpioReader* gpio_reader);
 
 View* gpio_reader_get_view(GpioReader* gpio_reader);
 
-void gpio_reader_set_ok_callback(GpioReader* gpio_reader, GpioReaderOkCallback callback, void* context);
+void gpio_reader_set_ok_callback(
+    GpioReader* gpio_reader,
+    GpioReaderOkCallback callback,
+    void* context);
