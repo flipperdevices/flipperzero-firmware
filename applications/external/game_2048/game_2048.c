@@ -13,7 +13,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <storage/storage.h>
-#include <dolphin/dolphin.h>
 
 #include "digits.h"
 #include "array_utils.h"
@@ -24,7 +23,7 @@
 #define FRAME_TOP 1
 #define FRAME_SIZE 61
 
-#define SAVING_DIRECTORY "/ext/apps/Games"
+#define SAVING_DIRECTORY EXT_PATH("apps_data/game_2048")
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_2048.save"
 
 typedef enum {
@@ -301,6 +300,8 @@ void init_game(GameState* const game_state, bool clear_top_score) {
 
 bool load_game(GameState* game_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_copy(storage, EXT_PATH("apps/Games/game_2048.save"), SAVING_FILENAME);
+    storage_common_remove(storage, EXT_PATH("apps/Games/game_2048.save"));
 
     File* file = storage_file_alloc(storage);
     uint16_t bytes_readed = 0;
@@ -400,9 +401,6 @@ int32_t game_2048_app() {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    // Call dolphin deed on game start
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
-
     bool is_finished = false;
     while(!is_finished) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &input, FuriWaitForever);
@@ -494,8 +492,8 @@ int32_t game_2048_app() {
                 }
             }
 
-            view_port_update(view_port);
             furi_mutex_release(game_state->mutex);
+            view_port_update(view_port);
         }
     }
 
