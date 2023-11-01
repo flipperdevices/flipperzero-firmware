@@ -218,8 +218,6 @@ Header,+,lib/toolbox/stream/string_stream.h,,
 Header,+,lib/toolbox/tar/tar_archive.h,,
 Header,+,lib/toolbox/value_index.h,,
 Header,+,lib/toolbox/version.h,,
-Function,+,CFW_SETTINGS,CfwSettings*,
-Function,+,CFW_SETTINGS_SAVE,void,
 Header,+,targets/f7/furi_hal/furi_hal_bus.h,,
 Header,+,targets/f7/furi_hal/furi_hal_clock.h,,
 Header,+,targets/f7/furi_hal/furi_hal_console.h,,
@@ -238,6 +236,7 @@ Header,+,targets/f7/furi_hal/furi_hal_rfid.h,,
 Header,+,targets/f7/furi_hal/furi_hal_spi_config.h,,
 Header,+,targets/f7/furi_hal/furi_hal_spi_types.h,,
 Header,+,targets/f7/furi_hal/furi_hal_subghz.h,,
+Header,+,targets/f7/furi_hal/furi_hal_subghz_configs.h,,
 Header,+,targets/f7/furi_hal/furi_hal_target_hw.h,,
 Header,+,targets/f7/furi_hal/furi_hal_uart.h,,
 Header,+,targets/f7/furi_hal/furi_hal_usb_cdc.h,,
@@ -270,6 +269,8 @@ Header,+,targets/furi_hal_include/furi_hal_usb_hid.h,,
 Header,+,targets/furi_hal_include/furi_hal_usb_hid_u2f.h,,
 Header,+,targets/furi_hal_include/furi_hal_version.h,,
 Header,+,targets/furi_hal_include/furi_hal_vibro.h,,
+Function,+,CFW_SETTINGS,CfwSettings*,
+Function,+,CFW_SETTINGS_SAVE,void,
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, const LL_ADC_CommonInitTypeDef*"
 Function,-,LL_ADC_CommonStructInit,void,LL_ADC_CommonInitTypeDef*
@@ -935,23 +936,6 @@ Function,-,fdim,double,"double, double"
 Function,-,fdimf,float,"float, float"
 Function,-,fdiml,long double,"long double, long double"
 Function,-,fdopen,FILE*,"int, const char*"
-Function,-,felica_check_ic_type,_Bool,uint8_t*
-Function,-,felica_clear,void,FelicaData*
-Function,-,felica_define_normal_block,void,"FelicaService*, uint16_t, uint8_t*"
-Function,+,felica_estimate_timing_us,uint_least32_t,"uint_least8_t, uint_least8_t"
-Function,-,felica_get_ic_type,FelicaICType,uint8_t*
-Function,-,felica_get_service_name,FuriString*,FelicaService*
-Function,+,felica_get_system_name,FuriString*,FelicaSystem*
-Function,-,felica_lite_dump_data,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaData*, FelicaSystem*"
-Function,-,felica_lite_is_issued,_Bool,FelicaLiteInfo*
-Function,-,felica_lite_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, _Bool, const uint8_t*, uint8_t"
-Function,-,felica_lite_prepare_unencrypted_write,uint8_t,"uint8_t*, const FelicaReader*, const uint8_t*, uint8_t, const uint8_t*"
-Function,-,felica_parse_unencrypted_read,uint16_t,"uint8_t*, uint8_t, FelicaReader*, uint8_t*, uint16_t"
-Function,-,felica_parse_unencrypted_write,_Bool,"uint8_t*, uint8_t, FelicaReader*"
-Function,-,felica_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, const uint16_t*, uint8_t, const uint32_t*, uint8_t"
-Function,-,felica_prepare_unencrypted_write,uint8_t,"uint8_t*, FelicaReader*, const uint16_t*, uint8_t, const uint32_t*, uint8_t, const uint8_t*"
-Function,-,felica_push_normal_block,void,"FelicaService*, uint8_t*"
-Function,-,felica_read_card,_Bool,"FuriHalNfcTxRxContext*, FelicaData*, uint8_t*, uint8_t*"
 Function,-,feof,int,FILE*
 Function,-,feof_unlocked,int,FILE*
 Function,-,ferror,int,FILE*
@@ -2309,33 +2293,6 @@ Function,-,modf,double,"double, double*"
 Function,-,modff,float,"float, float*"
 Function,-,modfl,long double,"long double, long double*"
 Function,-,mrand48,long,
-Function,-,mrtd_alloc_init,MrtdApplication*,"FuriHalNfcTxRxContext*, MrtdData*"
-Function,-,mrtd_auth_method_parse_string,_Bool,"MrtdAuthMethod*, const char*"
-Function,+,mrtd_auth_method_string,const char*,MrtdAuthMethod
-Function,+,mrtd_auth_params_load,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*, _Bool"
-Function,+,mrtd_auth_params_save,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*"
-Function,-,mrtd_auth_params_save_file,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*, const char*, const char*"
-Function,-,mrtd_authenticate,_Bool,MrtdApplication*
-Function,-,mrtd_bac_check_digit,uint8_t,"const char*, const uint8_t"
-Function,-,mrtd_bac_decrypt,_Bool,"const uint8_t*, size_t, uint8_t*, uint8_t*"
-Function,-,mrtd_bac_decrypt_verify,_Bool,"const uint8_t*, size_t, uint8_t*, uint8_t*, uint8_t*"
-Function,-,mrtd_bac_decrypt_verify_sm,uint16_t,"const uint8_t*, size_t, uint8_t*, uint8_t*, uint64_t, uint8_t*, size_t*"
-Function,-,mrtd_bac_encrypt,_Bool,"const uint8_t*, size_t, const uint8_t*, uint8_t*"
-Function,-,mrtd_bac_get_kmrz,_Bool,"MrtdAuthData*, char*, uint8_t"
-Function,-,mrtd_bac_keys,_Bool,"MrtdAuthData*, uint8_t[16], uint8_t[16]"
-Function,-,mrtd_bac_keys_from_seed,_Bool,"const uint8_t*, uint8_t*, uint8_t*"
-Function,-,mrtd_bac_mac,_Bool,"const uint8_t*, size_t, const uint8_t*, uint8_t*"
-Function,-,mrtd_bac_mac_finalize,_Bool,"mrtd_bac_mac_ctx*, uint8_t[8]"
-Function,-,mrtd_bac_mac_init,_Bool,"mrtd_bac_mac_ctx*, const uint8_t[16]"
-Function,-,mrtd_bac_mac_pad,_Bool,mrtd_bac_mac_ctx*
-Function,-,mrtd_bac_mac_update,_Bool,"mrtd_bac_mac_ctx*, const uint8_t*, size_t"
-Function,-,mrtd_bac_padded_mac,_Bool,"const uint8_t*, size_t, uint8_t*, uint8_t*"
-Function,-,mrtd_parse_date,void,"MrtdDate*, const unsigned char*"
-Function,-,mrtd_print_date,void,"char*, MrtdDate*"
-Function,-,mrtd_protect_apdu,size_t,"uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, const void*, int16_t, const uint8_t*, const uint8_t*, uint64_t, uint8_t*"
-Function,-,mrtd_read_parse_file,_Bool,"MrtdApplication*, EFFile"
-Function,-,mrtd_select_app,_Bool,"MrtdApplication*, AIDValue"
-Function,+,mrtd_tag_to_file,const EFFile*,uint8_t
 Function,-,music_worker_alloc,MusicWorker*,
 Function,-,music_worker_clear,void,MusicWorker*
 Function,-,music_worker_free,void,MusicWorker*
@@ -3145,7 +3102,6 @@ Function,-,tgammal,long double,long double
 Function,-,time,time_t,time_t*
 Function,-,timingsafe_bcmp,int,"const void*, const void*, size_t"
 Function,-,timingsafe_memcmp,int,"const void*, const void*, size_t"
-Function,-,tlv_number,int,TlvInfo
 Function,-,tmpfile,FILE*,
 Function,-,tmpnam,char*,char*
 Function,-,toascii,int,int
@@ -3306,9 +3262,7 @@ Function,-,y1f,float,float
 Function,-,yn,double,"int, double"
 Function,-,ynf,float,"int, float"
 Variable,-,AHBPrescTable,const uint32_t[16],
-Variable,-,AID,AIDSet,
 Variable,-,APBPrescTable,const uint32_t[8],
-Variable,-,EF,const EFFormat,
 Variable,+,FLIPPER_APPS,const FlipperInternalApplication[],
 Variable,+,FLIPPER_APPS_COUNT,const size_t,
 Variable,+,FLIPPER_ARCHIVE,const FlipperInternalApplication,

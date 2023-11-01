@@ -33,6 +33,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-01 02:15 EST`
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [Hangman (In Russian) v1.0 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- More apps added as subtrees... more to come... (By RogueMaster)
 - OFW: [NFC refactoring #3050 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3050)
 - OFW: [MF DESFire Fixes #3167 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3167)
 - OFW: [NFC RC fixes #3165 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3165)
@@ -41,12 +42,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [fbt: reworked assets & resources handling #3160 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3160)
 - OFW: [fbt: SD card resource handling speedup #3178 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3178)
 - OFW: [fbt: source collection improvements #3181 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3181)
-- OFW: [Dolphin: Extreme butthurt loop fix #3184 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3184)
 - OFW: [Furi, FuriHal: remove FreeRTOS headers leaks #3179 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3179)
+- OFW: [Dolphin: Extreme butthurt loop fix #3184 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3184)
 - Updated: [Mfkey32 v1.2 (By noproto)](https://github.com/noproto/FlipperMfkey) [Update Mfkey32 app with new NFC API #69 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/69)
 - Updated: [NFC Magic v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67)
 - Updated: [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - Updated: [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
+- Updated a few internal apps to have their CLI with the app again (By RogueMaster)
 
 <a name="release">
 
