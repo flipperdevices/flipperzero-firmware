@@ -4,18 +4,19 @@
 #include <gui/gui.h>
 
 typedef struct {
-    const char *name;               //Name of the menu
-    bool enabled;                   //Is the menu item enabled (it will not render, you cannot select it)
+    const char* name; //Name of the menu
+    bool enabled; //Is the menu item enabled (it will not render, you cannot select it)
 
-    void (*callback)(void *state);  //Callback for when the activate_menu is called while this menu is selected
+    void (*callback)(
+        void* state); //Callback for when the activate_menu is called while this menu is selected
 } MenuItem;
 
 typedef struct {
-    MenuItem *items;                //list of menu items
-    uint8_t menu_count;             //count of menu items (do not change)
-    uint8_t current_menu;           //currently selected menu item
-    uint8_t menu_width;             //width of the menu
-    bool enabled;                   //is the menu enabled (it will not render and accept events when disabled)
+    MenuItem* items; //list of menu items
+    uint8_t menu_count; //count of menu items (do not change)
+    uint8_t current_menu; //currently selected menu item
+    uint8_t menu_width; //width of the menu
+    bool enabled; //is the menu enabled (it will not render and accept events when disabled)
 } Menu;
 
 /**
@@ -23,7 +24,7 @@ typedef struct {
  *
  * @param menu Pointer of the menu to clean up
  */
-void free_menu(Menu *menu);
+void free_menu(Menu* menu);
 
 /**
  * Add a new menu item
@@ -32,7 +33,7 @@ void free_menu(Menu *menu);
  * @param name      Name of the menu item
  * @param callback  Callback called on activation
  */
-void add_menu(Menu *menu, const char *name, void (*callback)(void *));
+void add_menu(Menu* menu, const char* name, void (*callback)(void*));
 
 /**
  * Setting menu item to be enabled/disabled
@@ -41,7 +42,7 @@ void add_menu(Menu *menu, const char *name, void (*callback)(void *));
  * @param index Menu index to set
  * @param state Enabled (true), Disabled(false)
  */
-void set_menu_state(Menu *menu, uint8_t index, bool state);
+void set_menu_state(Menu* menu, uint8_t index, bool state);
 
 /**
  * Moves selection up or down
@@ -49,7 +50,7 @@ void set_menu_state(Menu *menu, uint8_t index, bool state);
  * @param menu      Pointer of the menu
  * @param direction Direction to move -1 down, 1 up
  */
-void move_menu(Menu *menu, int8_t direction);
+void move_menu(Menu* menu, int8_t direction);
 
 /**
  * Triggers the current menu callback
@@ -57,7 +58,7 @@ void move_menu(Menu *menu, int8_t direction);
  * @param menu  Pointer of the menu
  * @param state Usually your application state
  */
-void activate_menu(Menu *menu, void *state);
+void activate_menu(Menu* menu, void* state);
 
 /**
  * Renders the menu at a coordinate (call it in your render function).
@@ -73,4 +74,4 @@ void activate_menu(Menu *menu, void *state);
  * @param pos_x     X position to draw
  * @param pos_y     Y position to draw
  */
-void render_menu(Menu *menu, Canvas *canvas, uint8_t pos_x, uint8_t pos_y);
+void render_menu(Menu* menu, Canvas* canvas, uint8_t pos_x, uint8_t pos_y);
