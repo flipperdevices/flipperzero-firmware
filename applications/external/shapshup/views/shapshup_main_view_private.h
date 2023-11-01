@@ -4,7 +4,7 @@
 #include "../shapshup_i.h"
 #include <input/input.h>
 #include <gui/elements.h>
-#include "assets_icons.h"
+#include "shapshup_icons.h"
 #include <gui/icon.h>
 #include <m-array.h>
 

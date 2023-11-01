@@ -3,7 +3,7 @@
 #include "../helpers/shapshup_files.h"
 #include "../shapshup_custom_event.h"
 #include <gui/view.h>
-#include "assets_icons.h"
+#include "shapshup_icons.h"
 #include <input/input.h>
 #include <gui/elements.h>
 #include <gui/icon.h>
