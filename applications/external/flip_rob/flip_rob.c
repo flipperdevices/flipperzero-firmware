@@ -53,8 +53,7 @@ static void my_draw_callback(Canvas* canvas, void* context) {
 void send_bit(int8_t b) {
     if(b == 0) {
         furi_hal_gpio_write(IR_PIN, false);
-    }
-    else {
+    } else {
         furi_hal_gpio_write(IR_PIN, true);
     }
 
@@ -90,31 +89,25 @@ int flip_rob_app(void* p) {
         if(!furi_hal_gpio_read(LEFT_PIN)) {
             /* L/R mirrored for ease of use */
             send_command(RIGHT_COMMAND);
-        }
-        else if(!furi_hal_gpio_read(RIGHT_PIN)) {
+        } else if(!furi_hal_gpio_read(RIGHT_PIN)) {
             send_command(LEFT_COMMAND);
-        }
-        else if(!furi_hal_gpio_read(UP_PIN)) {
+        } else if(!furi_hal_gpio_read(UP_PIN)) {
             send_command(UP_COMMAND);
-        }
-        else if(!furi_hal_gpio_read(DOWN_PIN)) {
+        } else if(!furi_hal_gpio_read(DOWN_PIN)) {
             send_command(DOWN_COMMAND);
-        }
-        else if(furi_hal_gpio_read(OK_PIN)) {
+        } else if(furi_hal_gpio_read(OK_PIN)) {
             /* OK isn't inverted for some reason? */
             if(hands_closed == 1) {
                 hands_closed = 0;
                 send_command(OPEN_COMMAND);
-            }
-            else {
+            } else {
                 hands_closed = 1;
                 send_command(CLOSE_COMMAND);
             }
         }
 
         furi_delay_ms(250);
-    }
-    while(furi_hal_gpio_read(BACK_PIN));
+    } while(furi_hal_gpio_read(BACK_PIN));
 
     /* Reset IR pin */
     furi_hal_gpio_init_simple(IR_PIN, GpioModeAnalog);
