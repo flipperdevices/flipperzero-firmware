@@ -87,10 +87,7 @@ def _proto_ver_generator(target, source, env):
             git_args.append("--unshallow")
 
         try:
-            __invoke_git(
-                git_args,
-                source_dir=src_dir
-        )
+            __invoke_git(git_args, source_dir=src_dir)
         except (subprocess.CalledProcessError, EnvironmentError):
             # Not great, not terrible
             print(fg.boldred("Git: fetch failed"))
@@ -103,7 +100,7 @@ def _proto_ver_generator(target, source, env):
             )
         except (subprocess.CalledProcessError, EnvironmentError):
             return None
-        
+
     fetch()
     git_describe = describe()
     if not git_describe:
