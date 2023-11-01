@@ -70,24 +70,31 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     // bullets
     for(int i = 0; i < BULLET_PULL; i++) {
         if(game_state->player.bullets[i].x >= BULLET_X) {
-            draw_ui_asset(game_state->player.bullets[i].x, game_state->player.bullets[i].y, ui_bullet);
+            draw_ui_asset(
+                game_state->player.bullets[i].x, game_state->player.bullets[i].y, ui_bullet);
         }
     }
 
     // enemies
     for(int i = 0; i < ENEMY_PULL; i++) {
-        if(game_state->enemies.spawned[i].life > 0 && game_state->enemies.spawned[i].position.x > 0) {
+        if(game_state->enemies.spawned[i].life > 0 &&
+           game_state->enemies.spawned[i].position.x > 0) {
             draw_ui_asset(
                 game_state->enemies.spawned[i].position.x,
                 game_state->enemies.spawned[i].position.y,
-                enemy_frames[enemies[game_state->enemies.spawned[i].id].frames[game_state->enemies.spawned[i].frame]]);
+                enemy_frames[enemies[game_state->enemies.spawned[i].id]
+                                 .frames[game_state->enemies.spawned[i].frame]]);
         }
     }
 
     // destroy anims
     for(int i = 0; i < ENEMY_PULL; i++) {
         if(game_state->destroy[i].frame > 0) {
-            draw_destroy(canvas, game_state->destroy[i].frame, game_state->destroy[i].pos.x, game_state->destroy[i].pos.y);
+            draw_destroy(
+                canvas,
+                game_state->destroy[i].frame,
+                game_state->destroy[i].pos.x,
+                game_state->destroy[i].pos.y);
         }
     }
 

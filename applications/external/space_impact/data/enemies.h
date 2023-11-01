@@ -32,7 +32,8 @@ EnemyTemplate enemies[2] = {
 
 void enemy_try_spawn(GameState* const state) {
     if(state->enemies.spawn_order < ENEMY_PULL) {
-        if(state->level.enemySpawDelay[state->enemies.spawn_order] <= (state->level_time / FRAMES)) {
+        if(state->level.enemySpawDelay[state->enemies.spawn_order] <=
+           (state->level_time / FRAMES)) {
             FURI_LOG_E(
                 TAG,
                 "spawned %d -- %d -- %d\r\n",
@@ -43,7 +44,8 @@ void enemy_try_spawn(GameState* const state) {
             state->enemies.spawned[state->enemies.spawn_order].points = 1;
             state->enemies.spawned[state->enemies.spawn_order].life = 1;
             state->enemies.spawned[state->enemies.spawn_order].frame = 0;
-            state->enemies.spawned[state->enemies.spawn_order].id = levels->enemySpawType[state->enemies.spawn_order];
+            state->enemies.spawned[state->enemies.spawn_order].id =
+                levels->enemySpawType[state->enemies.spawn_order];
             state->enemies.spawned[state->enemies.spawn_order].position.x = SCREEN_WIDTH;
             state->enemies.spawned[state->enemies.spawn_order].position.y = 35;
             state->enemies.spawn_order++;

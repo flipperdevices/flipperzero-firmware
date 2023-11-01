@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <gui/canvas.h>
-#include "space_impact_app_icons.h"
+#include <space_impact_icons.h>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
