@@ -1,0 +1,17 @@
+App(
+    appid="nupogodi",
+    name="Nu pogodi",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nupogodi_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+	fap_icon="nupogodi.png",
+    fap_category="Games",
+    fap_icon_assets="icons",
+    fap_description="Elektronika IM-02 - Nu, Pogodi!",
+    fap_version="1.2",
+    fap_author="sionyx",
+)
