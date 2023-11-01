@@ -62,4 +62,16 @@ typedef enum {
     GRAVITY_PURGE_NONE = 16
 } gravity_bt_purge_strategy_t;
 
+typedef enum HopStatus {
+    HOP_STATUS_OFF,
+    HOP_STATUS_ON,
+    HOP_STATUS_DEFAULT
+} HopStatus;
+
+typedef enum HopMode {
+    HOP_MODE_SEQUENTIAL = 0,
+    HOP_MODE_RANDOM,
+    HOP_MODE_COUNT
+} HopMode;
+
 #endif
