@@ -34,7 +34,12 @@ void beer_render_callback(Canvas* canvas, void* ctx) {
     } else {
         FuriString* str = furi_string_alloc();
         furi_string_printf(
-            str, "%d %s on the wall,\n%d %s.", pos, beer_plural(pos), pos, beer_plural(pos));
+            str,
+            "%d %s on the wall,\n%d %s of beer.",
+            pos,
+            beer_plural(pos),
+            pos,
+            beer_plural(pos));
 
         elements_multiline_text_aligned(
             canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(str));
