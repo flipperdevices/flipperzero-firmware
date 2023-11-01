@@ -49,7 +49,7 @@ jobs:
       - name: 'Check GDB output'
         if: failure()
         run: |
-          ./fbt gdb_trace_all FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt gdb_trace_all FIRMWARE_APP_SET=unit_tests LIB_DEBUG=1 FORCE=1
 
       - name: 'Create notification'
         if: failure()
