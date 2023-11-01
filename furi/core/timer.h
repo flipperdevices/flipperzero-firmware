@@ -46,7 +46,7 @@ FuriStatus furi_timer_start(FuriTimer* instance, uint32_t ticks);
  *
  * @return     The furi status.
  */
-FuriStatus furi_timer_restart(FuriTimer* instance);
+FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks);
 
 /** Stop timer
  *
