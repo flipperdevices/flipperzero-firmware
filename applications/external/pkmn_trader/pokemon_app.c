@@ -2135,9 +2135,6 @@ static TradeBlock* trade_block_alloc(void) {
     /* Set up initial level */
     trade->party[0].level = 2;
 
-    /* Clear pad bytes at the end */
-    memset(trade->pad, 0x00, sizeof(trade->pad));
-
     return trade;
 }
 

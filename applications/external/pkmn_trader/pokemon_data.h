@@ -69,7 +69,6 @@ struct __attribute__((__packed__)) trade_data_block {
     /* OT name should not exceed 7 chars! */
     struct name ot_name[6];
     struct name nickname[6];
-    uint8_t pad[3]; // 3 bytes of 0x00 padding
 };
 
 typedef struct trade_data_block TradeBlock;
