@@ -106,8 +106,8 @@ FuriStatus furi_timer_restart(FuriTimer* instance, uint32_t ticks) {
     TimerHandle_t hTimer = (TimerHandle_t)instance;
     FuriStatus stat;
 
-    if(xTimerChangePeriod(hTimer, ticks, portMAX_DELAY) == pdPASS
-        && xTimerReset(hTimer, portMAX_DELAY) == pdPASS) {
+    if(xTimerChangePeriod(hTimer, ticks, portMAX_DELAY) == pdPASS &&
+       xTimerReset(hTimer, portMAX_DELAY) == pdPASS) {
         stat = FuriStatusOk;
     } else {
         stat = FuriStatusErrorResource;
