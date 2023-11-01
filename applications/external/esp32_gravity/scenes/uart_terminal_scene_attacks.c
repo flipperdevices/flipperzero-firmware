@@ -2,47 +2,47 @@
 #include <dolphin/dolphin.h>
 
 UART_TerminalItem attacks[NUM_ATTACK_ITEMS] = {
-  {"Mana",
-  {""},
-  1,
-  {""},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"selectedAP DOS",
-  {"Status", "On", "Off"},
-  3,
-  {"ap-dos", "ap-dos on", "ap-dos off"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"AP Clone Attack",
-  {"Status", "Off", "OPN", "WEP", "WPA", "OPN+WEP", "OPN+WPA", "WEP+WPA", "OPN+WEP+WPA"},
-  9,
-  {"ap-clone", "ap-clone off", "ap-clone on open", "ap-clone on wep", "ap-clone on wpa", "ap-clone on open wep", "ap-clone on open wpa", "ap-clone on wep wpa", "ap-clone on open wep wpa"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Homing",
-  {"On", "Off"},
-  2,
-  {"stalk on", "stalk off"},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false}
-};
+    {"Mana", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP, true},
+    {"selectedAP DOS",
+     {"Status", "On", "Off"},
+     3,
+     {"ap-dos", "ap-dos on", "ap-dos off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP,
+     false},
+    {"AP Clone Attack",
+     {"Status", "Off", "OPN", "WEP", "WPA", "OPN+WEP", "OPN+WPA", "WEP+WPA", "OPN+WEP+WPA"},
+     9,
+     {"ap-clone",
+      "ap-clone off",
+      "ap-clone on open",
+      "ap-clone on wep",
+      "ap-clone on wpa",
+      "ap-clone on open wep",
+      "ap-clone on open wpa",
+      "ap-clone on wep wpa",
+      "ap-clone on open wep wpa"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP,
+     false},
+    {"Homing",
+     {"On", "Off"},
+     2,
+     {"stalk on", "stalk off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP,
+     false}};
 
-static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
+static void displaySubmenu(UART_TerminalApp* app, UART_TerminalItem* item) {
     int newScene = -1;
-    if (!strcmp(item->item_string, "Mana")) {
+    if(!strcmp(item->item_string, "Mana")) {
         // Mana menu
         newScene = UART_TerminalSceneAttacksMana;
     }
-    if (newScene < 0) {
+    if(newScene < 0) {
         return;
     }
     scene_manager_set_scene_state(
@@ -54,14 +54,14 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
 static void uart_terminal_scene_attacks_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
-    UART_TerminalItem *item = NULL;
+    UART_TerminalItem* item = NULL;
     const int selected_option_index = app->selected_option_index[index];
 
     furi_assert(index < NUM_ATTACK_ITEMS);
     item = &attacks[index];
 
     /* Are we displaying a submenu or executing something? */
-    if (item->isSubMenu) {
+    if(item->isSubMenu) {
         /* Display next scene */
         displaySubmenu(app, item);
     } else {
@@ -74,22 +74,25 @@ static void uart_terminal_scene_attacks_var_list_enter_callback(void* context, u
         app->is_custom_tx_string = false;
         app->selected_menu_index = index;
         app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
-                                   (selected_option_index == 0) :
-                                   item->focus_console;
+                                       (selected_option_index == 0) :
+                                       item->focus_console;
         app->show_stopscan_tip = item->show_stopscan_tip;
 
         /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
         int cmdLen = strlen(app->selected_tx_string);
-        bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
-                                (item->needs_keyboard == TOGGLE_ARGS &&
-                                (app->selected_tx_string[cmdLen-1] == ' ')));
+        bool needs_keyboard =
+            ((item->needs_keyboard == INPUT_ARGS) ||
+             (item->needs_keyboard == TOGGLE_ARGS &&
+              (app->selected_tx_string[cmdLen - 1] == ' ')));
         /* Initialise the serial console */
         uart_terminal_uart_tx((uint8_t*)("\n"), 1);
 
         if(needs_keyboard) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartKeyboard);
         } else {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartConsole);
         }
     }
 }
@@ -101,7 +104,7 @@ static void uart_terminal_scene_attacks_var_list_change_callback(VariableItem* i
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    if (app->selected_menu_index >= NUM_ATTACK_ITEMS) {
+    if(app->selected_menu_index >= NUM_ATTACK_ITEMS) {
         app->selected_menu_index = 0;
     }
 
@@ -116,7 +119,7 @@ static void uart_terminal_scene_attacks_var_list_change_callback(VariableItem* i
 void uart_terminal_scene_attacks_on_enter(void* context) {
     UART_TerminalApp* app = context;
     VariableItemList* var_item_list = app->attacks_menu_list;
-    VariableItem *item;
+    VariableItem* item;
 
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_attacks_var_list_enter_callback, app);
@@ -133,7 +136,7 @@ void uart_terminal_scene_attacks_on_enter(void* context) {
            be referencing a different view's options menu, and may be out of
            bounds of mainmenu[i].options_menu[].
            If that is the case, use 0 instead */
-        if (app->selected_option_index[i] >= attacks[i].num_options_menu) {
+        if(app->selected_option_index[i] >= attacks[i].num_options_menu) {
             app->selected_option_index[i] = 0;
         }
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
@@ -141,7 +144,8 @@ void uart_terminal_scene_attacks_on_enter(void* context) {
             item, attacks[i].options_menu[app->selected_option_index[i]]);
     }
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneAttacks));
+        var_item_list,
+        scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneAttacks));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewAttacksMenu);
 }
@@ -164,7 +168,8 @@ bool uart_terminal_scene_attacks_on_event(void* context, SceneManagerEvent event
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index = variable_item_list_get_selected_item_index(app->attacks_menu_list);
+        app->selected_menu_index =
+            variable_item_list_get_selected_item_index(app->attacks_menu_list);
         consumed = true;
     }
     return consumed;

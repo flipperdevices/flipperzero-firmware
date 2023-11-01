@@ -2,38 +2,37 @@
 #include <dolphin/dolphin.h>
 
 UART_TerminalItem help_info[NUM_HELP_INFO_ITEMS] = {
-  {"Beacon", {""}, 1, {"info beacon"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Target-SSIDs", {""}, 1, {"info Target-SSIDs"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Probe", {""}, 1, {"info probe"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Fuzz", {""}, 1, {"info fuzz"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Sniff", {""}, 1, {"info sniff"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Deauth", {""}, 1, {"info deauth"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Mana", {""}, 1, {"info mana"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Stalk", {""}, 1, {"info stalk"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"AP-DOS", {""}, 1, {"info AP-DOS"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"AP-Clone", {""}, 1, {"info AP-Clone"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Scan", {""}, 1, {"info scan"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Hop", {""}, 1, {"info hop"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Get", {""}, 1, {"info get"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Set", {""}, 1, {"info set"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"View", {""}, 1, {"info view"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Select", {""}, 1, {"info select"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Selected", {""}, 1, {"info selected"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Clear", {""}, 1, {"info clear"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Info", {""}, 1, {"info info"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Version", {""}, 1, {"info gravity-version"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-  {"Purge", {""}, 1, {"info Purge"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false}
-};
+    {"Beacon", {""}, 1, {"info beacon"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Target-SSIDs", {""}, 1, {"info Target-SSIDs"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Probe", {""}, 1, {"info probe"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Fuzz", {""}, 1, {"info fuzz"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Sniff", {""}, 1, {"info sniff"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Deauth", {""}, 1, {"info deauth"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Mana", {""}, 1, {"info mana"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Stalk", {""}, 1, {"info stalk"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"AP-DOS", {""}, 1, {"info AP-DOS"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"AP-Clone", {""}, 1, {"info AP-Clone"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Scan", {""}, 1, {"info scan"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Hop", {""}, 1, {"info hop"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Get", {""}, 1, {"info get"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Set", {""}, 1, {"info set"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"View", {""}, 1, {"info view"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Select", {""}, 1, {"info select"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Selected", {""}, 1, {"info selected"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Clear", {""}, 1, {"info clear"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Info", {""}, 1, {"info info"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Version", {""}, 1, {"info gravity-version"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Purge", {""}, 1, {"info Purge"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false}};
 
-static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
+static void displaySubmenu(UART_TerminalApp* app, UART_TerminalItem* item) {
     int newScene = -1;
-    if (!strcmp(item->item_string, "Deauth")) {
+    if(!strcmp(item->item_string, "Deauth")) {
         // Targets menu
         //newScene = UART_TerminalSceneTargets;
-    } else if (!strcmp(item->item_string, "Fuzz")) {
+    } else if(!strcmp(item->item_string, "Fuzz")) {
         //newScene = UART_TerminalScenePackets;
     }
-    if (newScene < 0) {
+    if(newScene < 0) {
         return;
     }
     scene_manager_set_scene_state(
@@ -45,14 +44,14 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
 static void uart_terminal_scene_help_info_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
-    UART_TerminalItem *item = NULL;
+    UART_TerminalItem* item = NULL;
     const int selected_option_index = app->selected_option_index[index];
 
     furi_assert(index < NUM_HELP_INFO_ITEMS);
     item = &help_info[index];
 
     /* Are we displaying a submenu or executing something? */
-    if (item->isSubMenu) {
+    if(item->isSubMenu) {
         /* Display next scene */
         displaySubmenu(app, item);
     } else {
@@ -65,22 +64,25 @@ static void uart_terminal_scene_help_info_var_list_enter_callback(void* context,
         app->is_custom_tx_string = false;
         app->selected_menu_index = index;
         app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
-                                   (selected_option_index == 0) :
-                                   item->focus_console;
+                                       (selected_option_index == 0) :
+                                       item->focus_console;
         app->show_stopscan_tip = item->show_stopscan_tip;
 
         /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
         int cmdLen = strlen(app->selected_tx_string);
-        bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
-                                (item->needs_keyboard == TOGGLE_ARGS &&
-                                (app->selected_tx_string[cmdLen-1] == ' ')));
+        bool needs_keyboard =
+            ((item->needs_keyboard == INPUT_ARGS) ||
+             (item->needs_keyboard == TOGGLE_ARGS &&
+              (app->selected_tx_string[cmdLen - 1] == ' ')));
         /* Initialise the serial console */
         uart_terminal_uart_tx((uint8_t*)("\n"), 1);
 
         if(needs_keyboard) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartKeyboard);
         } else {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartConsole);
         }
     }
 }
@@ -92,7 +94,7 @@ static void uart_terminal_scene_help_info_var_list_change_callback(VariableItem*
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    if (app->selected_menu_index >= NUM_HELP_INFO_ITEMS) {
+    if(app->selected_menu_index >= NUM_HELP_INFO_ITEMS) {
         app->selected_menu_index = 0;
     }
 
@@ -107,7 +109,7 @@ static void uart_terminal_scene_help_info_var_list_change_callback(VariableItem*
 void uart_terminal_scene_help_info_on_enter(void* context) {
     UART_TerminalApp* app = context;
     VariableItemList* var_item_list = app->help_info_menu_list;
-    VariableItem *item;
+    VariableItem* item;
 
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_help_info_var_list_enter_callback, app);
@@ -124,7 +126,7 @@ void uart_terminal_scene_help_info_on_enter(void* context) {
            be referencing a different view's options menu, and may be out of
            bounds of mainmenu[i].options_menu[].
            If that is the case, use 0 instead */
-        if (app->selected_option_index[i] >= help_info[i].num_options_menu) {
+        if(app->selected_option_index[i] >= help_info[i].num_options_menu) {
             app->selected_option_index[i] = 0;
         }
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
@@ -132,7 +134,8 @@ void uart_terminal_scene_help_info_on_enter(void* context) {
             item, help_info[i].options_menu[app->selected_option_index[i]]);
     }
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneHelpInfo));
+        var_item_list,
+        scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneHelpInfo));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewHelpInfoMenu);
 }
@@ -155,7 +158,8 @@ bool uart_terminal_scene_help_info_on_event(void* context, SceneManagerEvent eve
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index = variable_item_list_get_selected_item_index(app->help_info_menu_list);
+        app->selected_menu_index =
+            variable_item_list_get_selected_item_index(app->help_info_menu_list);
         consumed = true;
     }
     return consumed;

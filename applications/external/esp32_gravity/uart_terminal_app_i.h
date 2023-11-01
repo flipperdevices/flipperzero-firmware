@@ -40,22 +40,22 @@
 #include "esp_flip_struct.h"
 
 typedef enum {
-  GRAVITY_MENU_MAIN,
-  GRAVITY_MENU_TARGETS,
-  GRAVITY_MENU_TARGETS_SCAN,
-  GRAVITY_MENU_PACKETS,
-  GRAVITY_MENU_PACKETS_FUZZ,
-  GRAVITY_MENU_PACKETS_DEAUTH,
-  GRAVITY_MENU_ATTACKS,
-  GRAVITY_MENU_ATTACKS_MANA,
-  GRAVITY_MENU_SETTINGS,
-  GRAVITY_MENU_SETTINGS_MAC,
-  GRAVITY_MENU_HELP,
-  GRAVITY_MENU_HELP_INFO,
-  GRAVITY_MENU_PURGE,
+    GRAVITY_MENU_MAIN,
+    GRAVITY_MENU_TARGETS,
+    GRAVITY_MENU_TARGETS_SCAN,
+    GRAVITY_MENU_PACKETS,
+    GRAVITY_MENU_PACKETS_FUZZ,
+    GRAVITY_MENU_PACKETS_DEAUTH,
+    GRAVITY_MENU_ATTACKS,
+    GRAVITY_MENU_ATTACKS_MANA,
+    GRAVITY_MENU_SETTINGS,
+    GRAVITY_MENU_SETTINGS_MAC,
+    GRAVITY_MENU_HELP,
+    GRAVITY_MENU_HELP_INFO,
+    GRAVITY_MENU_PURGE,
 } GravityMenu;
 
-char *strToken(char *cmdLine, char sep, int tokenNum);
+char* strToken(char* cmdLine, char sep, int tokenNum);
 
 struct UART_TerminalApp {
     Gui* gui;
@@ -73,7 +73,7 @@ struct UART_TerminalApp {
     VariableItemList *packets_deauth_menu_list, *packets_fuzz_menu_list;
     VariableItemList *help_info_menu_list, *targets_scan_menu_list;
     VariableItemList *attacks_mana_menu_list, *purge_menu_list;
-    ByteInput *settings_mac_bytes;
+    ByteInput* settings_mac_bytes;
 
     uint8_t mac_bytes[NUM_MAC_BYTES];
 
@@ -87,7 +87,7 @@ struct UART_TerminalApp {
     bool show_stopscan_tip;
     int BAUDRATE;
     int TERMINAL_MODE; //1=AT mode, 0=other mode
-    bool free_command;              /* Does selected_tx_string need to be free'd after send? */
+    bool free_command; /* Does selected_tx_string need to be free'd after send? */
 
     GravityCommand gravityCommand; /* Gravity command */
     GravityMenu currentMenu;

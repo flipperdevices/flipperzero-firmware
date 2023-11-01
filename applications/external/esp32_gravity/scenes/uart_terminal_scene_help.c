@@ -2,55 +2,19 @@
 #include <dolphin/dolphin.h>
 
 UART_TerminalItem help[NUM_HELP_ITEMS] = {
-    {"Command Help",
-    {""},
-    1,
-    {""},
-    NO_ARGS,
-    FOCUS_CONSOLE_START,
-    NO_TIP,
-    true},
-    {"About",
-    {""},
-    1,
-    {"gravity-version"},
-    NO_ARGS,
-    FOCUS_CONSOLE_START,
-    NO_TIP,
-    false},
-    {"Get Started",
-    {""},
-    1,
-    {"GET_STARTED"},
-    NO_ARGS,
-    FOCUS_CONSOLE_START,
-    NO_TIP,
-    false},
-    {"Commands",
-    {""},
-    1,
-    {"commands"},
-    NO_ARGS,
-    FOCUS_CONSOLE_START,
-    NO_TIP,
-    false},
-    {"Help",
-    {""},
-    1,
-    {"help"},
-    NO_ARGS,
-    FOCUS_CONSOLE_START,
-    NO_TIP,
-    false}
-};
+    {"Command Help", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, true},
+    {"About", {""}, 1, {"gravity-version"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Get Started", {""}, 1, {"GET_STARTED"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Commands", {""}, 1, {"commands"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
+    {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, false}};
 
-static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
+static void displaySubmenu(UART_TerminalApp* app, UART_TerminalItem* item) {
     int newScene = -1;
-    if (!strcmp(item->item_string, "Command Help")) {
+    if(!strcmp(item->item_string, "Command Help")) {
         // Help Info menu
         newScene = UART_TerminalSceneHelpInfo;
     }
-    if (newScene < 0) {
+    if(newScene < 0) {
         return;
     }
     scene_manager_set_scene_state(
@@ -62,14 +26,14 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
 static void uart_terminal_scene_help_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
-    UART_TerminalItem *item = NULL;
+    UART_TerminalItem* item = NULL;
     const int selected_option_index = app->selected_option_index[index];
 
     furi_assert(index < NUM_HELP_ITEMS);
     item = &help[index];
 
     /* Are we displaying a submenu or executing something? */
-    if (item->isSubMenu) {
+    if(item->isSubMenu) {
         /* Display next scene */
         displaySubmenu(app, item);
     } else {
@@ -82,22 +46,25 @@ static void uart_terminal_scene_help_var_list_enter_callback(void* context, uint
         app->is_custom_tx_string = false;
         app->selected_menu_index = index;
         app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
-                                   (selected_option_index == 0) :
-                                   item->focus_console;
+                                       (selected_option_index == 0) :
+                                       item->focus_console;
         app->show_stopscan_tip = item->show_stopscan_tip;
 
         /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
         int cmdLen = strlen(app->selected_tx_string);
-        bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
-                                (item->needs_keyboard == TOGGLE_ARGS &&
-                                (app->selected_tx_string[cmdLen-1] == ' ')));
+        bool needs_keyboard =
+            ((item->needs_keyboard == INPUT_ARGS) ||
+             (item->needs_keyboard == TOGGLE_ARGS &&
+              (app->selected_tx_string[cmdLen - 1] == ' ')));
         /* Initialise the serial console */
         uart_terminal_uart_tx((uint8_t*)("\n"), 1);
 
         if(needs_keyboard) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartKeyboard);
         } else {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartConsole);
         }
     }
 }
@@ -109,7 +76,7 @@ static void uart_terminal_scene_help_var_list_change_callback(VariableItem* item
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    if (app->selected_menu_index >= NUM_HELP_ITEMS) {
+    if(app->selected_menu_index >= NUM_HELP_ITEMS) {
         app->selected_menu_index = 0;
     }
 
@@ -124,7 +91,7 @@ static void uart_terminal_scene_help_var_list_change_callback(VariableItem* item
 void uart_terminal_scene_help_on_enter(void* context) {
     UART_TerminalApp* app = context;
     VariableItemList* var_item_list = app->help_menu_list;
-    VariableItem *item;
+    VariableItem* item;
 
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_help_var_list_enter_callback, app);
@@ -141,7 +108,7 @@ void uart_terminal_scene_help_on_enter(void* context) {
            be referencing a different view's options menu, and may be out of
            bounds of mainmenu[i].options_menu[].
            If that is the case, use 0 instead */
-        if (app->selected_option_index[i] >= help[i].num_options_menu) {
+        if(app->selected_option_index[i] >= help[i].num_options_menu) {
             app->selected_option_index[i] = 0;
         }
         variable_item_set_current_value_index(item, app->selected_option_index[i]);

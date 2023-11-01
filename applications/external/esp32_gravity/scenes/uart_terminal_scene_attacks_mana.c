@@ -8,40 +8,32 @@
 // Clear Mana Cache
 
 UART_TerminalItem attacks_mana[NUM_ATTACK_MANA_ITEMS] = {
-  {"Authentication",
-  {"None", "WEP", "WPA"},
-  3,
-  {"auth none ", "auth wep ", "auth wpa "},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Mana Mode",
-  {"Normal", "Loud"},
-  2,
-  {"", "LOUD "},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Verbose",
-  {"On", "Off"},
-  2,
-  {"VERBOSE ", ""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false},
-  {"Run",
-  {"Status", "Start", "Stop"},
-  3,
-  {"", "on", "off"},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_START,
-  NO_TIP,
-  false},
-  {"Clear Mana Cache", {""}, 1, {"clear"}, TOGGLE_ARGS, FOCUS_CONSOLE_START, NO_TIP, false}
-};
+    {"Authentication",
+     {"None", "WEP", "WPA"},
+     3,
+     {"auth none ", "auth wep ", "auth wpa "},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP,
+     false},
+    {"Mana Mode",
+     {"Normal", "Loud"},
+     2,
+     {"", "LOUD "},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP,
+     false},
+    {"Verbose", {"On", "Off"}, 2, {"VERBOSE ", ""}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, false},
+    {"Run",
+     {"Status", "Start", "Stop"},
+     3,
+     {"", "on", "off"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP,
+     false},
+    {"Clear Mana Cache", {""}, 1, {"clear"}, TOGGLE_ARGS, FOCUS_CONSOLE_START, NO_TIP, false}};
 
 enum ManaMenuItems {
     MANA_MENU_AUTH = 0,
@@ -51,23 +43,25 @@ enum ManaMenuItems {
     MANA_MENU_CLEAR,
 };
 
-VariableItem *manaMenuItemViews[NUM_ATTACK_MANA_ITEMS];
+VariableItem* manaMenuItemViews[NUM_ATTACK_MANA_ITEMS];
 
 /* Callback when an option is selected */
-static void uart_terminal_scene_attacks_mana_var_list_enter_callback(void* context, uint32_t index) {
+static void
+    uart_terminal_scene_attacks_mana_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
-    UART_TerminalItem *item = NULL;
+    UART_TerminalItem* item = NULL;
     int selected_option_index = app->selected_option_index[index];
 
     /* Cycle through options when enter pressed */
-    if (index < MANA_MENU_RUN) {
+    if(index < MANA_MENU_RUN) {
         // increment selected_option_index % number of options
         selected_option_index = (selected_option_index + 1) % item->num_options_menu;
         app->selected_option_index[index] = selected_option_index;
         // YAGNI: Null check
         variable_item_set_current_value_index(manaMenuItemViews[index], selected_option_index);
-        variable_item_set_current_value_text(manaMenuItemViews[index], item->options_menu[selected_option_index]);
+        variable_item_set_current_value_text(
+            manaMenuItemViews[index], item->options_menu[selected_option_index]);
         return;
     }
 
@@ -78,35 +72,46 @@ static void uart_terminal_scene_attacks_mana_var_list_enter_callback(void* conte
 
     /* Are we getting status, starting or stopping? */
     app->selected_tx_string = "";
-    if (!strcmp(item->actual_commands[selected_option_index], "")) {
+    if(!strcmp(item->actual_commands[selected_option_index], "")) {
         app->selected_tx_string = "mana";
-    } else if (!strcmp(item->actual_commands[selected_option_index], "off")) {
+    } else if(!strcmp(item->actual_commands[selected_option_index], "off")) {
         app->selected_tx_string = "mana off";
-    } else if (!strcmp(item->actual_commands[selected_option_index], "clear")) {
+    } else if(!strcmp(item->actual_commands[selected_option_index], "clear")) {
         app->selected_tx_string = "mana clear";
-    } else if (!strcmp(item->actual_commands[selected_option_index], "on")) {
+    } else if(!strcmp(item->actual_commands[selected_option_index], "on")) {
         /* The command is mana [verbose] [loud] [auth [none | wep | wpa]] [clear] [on | off] */
         /* ==> mana clear verbose loud auth none off\0 ==  38, or strlen + "mana" + 5 spaces + \0 */
         int cmdLength = 0;
-        UART_TerminalItem *thisItem;
-        for (int i = 0; i <= MANA_MENU_RUN; ++i) {
+        UART_TerminalItem* thisItem;
+        for(int i = 0; i <= MANA_MENU_RUN; ++i) {
             thisItem = &attacks_mana[i];
             cmdLength += strlen(thisItem->actual_commands[app->selected_option_index[i]]);
         }
         /* Add chars for MANA \0 */
         cmdLength += 6;
 
-        char *mana_command = malloc(sizeof(char) * cmdLength);
-        if (mana_command == NULL) {
+        char* mana_command = malloc(sizeof(char) * cmdLength);
+        if(mana_command == NULL) {
             /* Panic */
             return;
         }
         memset(mana_command, '\0', cmdLength);
         strcpy(mana_command, "mana ");
-        strcat(mana_command, attacks_mana[MANA_MENU_VERBOSE].actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);
-        strcat(mana_command, attacks_mana[MANA_MENU_MODE].actual_commands[app->selected_option_index[MANA_MENU_MODE]]);
-        strcat(mana_command, attacks_mana[MANA_MENU_AUTH].actual_commands[app->selected_option_index[MANA_MENU_AUTH]]);
-        strcat(mana_command, attacks_mana[MANA_MENU_RUN].actual_commands[app->selected_option_index[MANA_MENU_RUN]]);
+        strcat(
+            mana_command,
+            attacks_mana[MANA_MENU_VERBOSE]
+                .actual_commands[app->selected_option_index[MANA_MENU_VERBOSE]]);
+        strcat(
+            mana_command,
+            attacks_mana[MANA_MENU_MODE]
+                .actual_commands[app->selected_option_index[MANA_MENU_MODE]]);
+        strcat(
+            mana_command,
+            attacks_mana[MANA_MENU_AUTH]
+                .actual_commands[app->selected_option_index[MANA_MENU_AUTH]]);
+        strcat(
+            mana_command,
+            attacks_mana[MANA_MENU_RUN].actual_commands[app->selected_option_index[MANA_MENU_RUN]]);
         app->selected_tx_string = mana_command;
         app->free_command = true;
     }
@@ -114,14 +119,14 @@ static void uart_terminal_scene_attacks_mana_var_list_enter_callback(void* conte
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
     app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
-                               (selected_option_index == 0) :
-                               item->focus_console;
+                                   (selected_option_index == 0) :
+                                   item->focus_console;
     app->show_stopscan_tip = item->show_stopscan_tip;
     /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
     int cmdLen = strlen(app->selected_tx_string);
-    bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
-                            (item->needs_keyboard == TOGGLE_ARGS &&
-                            (app->selected_tx_string[cmdLen-1] == ' ')));
+    bool needs_keyboard =
+        ((item->needs_keyboard == INPUT_ARGS) ||
+         (item->needs_keyboard == TOGGLE_ARGS && (app->selected_tx_string[cmdLen - 1] == ' ')));
     /* Initialise the serial console */
     uart_terminal_uart_tx((uint8_t*)("\n"), 1);
 
@@ -139,7 +144,7 @@ static void uart_terminal_scene_attacks_mana_var_list_change_callback(VariableIt
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    if (app->selected_menu_index >= NUM_ATTACK_MANA_ITEMS) {
+    if(app->selected_menu_index >= NUM_ATTACK_MANA_ITEMS) {
         app->selected_menu_index = 0;
     }
 
@@ -154,7 +159,7 @@ static void uart_terminal_scene_attacks_mana_var_list_change_callback(VariableIt
 void uart_terminal_scene_attacks_mana_on_enter(void* context) {
     UART_TerminalApp* app = context;
     VariableItemList* var_item_list = app->attacks_mana_menu_list;
-    VariableItem *item;
+    VariableItem* item;
 
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_attacks_mana_var_list_enter_callback, app);
@@ -172,7 +177,7 @@ void uart_terminal_scene_attacks_mana_on_enter(void* context) {
            be referencing a different view's options menu, and may be out of
            bounds of mainmenu[i].options_menu[].
            If that is the case, use 0 instead */
-        if (app->selected_option_index[i] >= attacks_mana[i].num_options_menu) {
+        if(app->selected_option_index[i] >= attacks_mana[i].num_options_menu) {
             app->selected_option_index[i] = 0;
         }
         variable_item_set_current_value_index(item, app->selected_option_index[i]);
@@ -180,7 +185,8 @@ void uart_terminal_scene_attacks_mana_on_enter(void* context) {
             item, attacks_mana[i].options_menu[app->selected_option_index[i]]);
     }
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneAttacksMana));
+        var_item_list,
+        scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneAttacksMana));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewAttacksManaMenu);
 }
@@ -203,7 +209,8 @@ bool uart_terminal_scene_attacks_mana_on_event(void* context, SceneManagerEvent 
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index = variable_item_list_get_selected_item_index(app->attacks_mana_menu_list);
+        app->selected_menu_index =
+            variable_item_list_get_selected_item_index(app->attacks_mana_menu_list);
         consumed = true;
     }
     return consumed;

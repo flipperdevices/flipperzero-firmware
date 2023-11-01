@@ -2,71 +2,28 @@
 #include <dolphin/dolphin.h>
 
 UART_TerminalItem mainmenu[NUM_MAIN_ITEMS] = {
-  {"Targets",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Packets",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Attacks",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Settings",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Help",
-  {""},
-  1,
-  {""},
-  TOGGLE_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  true},
-  {"Console",
-  {""},
-  1,
-  {""},
-  NO_ARGS,
-  FOCUS_CONSOLE_END,
-  NO_TIP,
-  false}
-};
+    {"Targets", {""}, 1, {""}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, true},
+    {"Packets", {""}, 1, {""}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, true},
+    {"Attacks", {""}, 1, {""}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, true},
+    {"Settings", {""}, 1, {""}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, true},
+    {"Help", {""}, 1, {""}, TOGGLE_ARGS, FOCUS_CONSOLE_END, NO_TIP, true},
+    {"Console", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP, false}};
 
-static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
+static void displaySubmenu(UART_TerminalApp* app, UART_TerminalItem* item) {
     int newScene = -1;
-    if (!strcmp(item->item_string, "Targets")) {
+    if(!strcmp(item->item_string, "Targets")) {
         // Targets menu
         newScene = UART_TerminalSceneTargets;
-    } else if (!strcmp(item->item_string, "Packets")) {
+    } else if(!strcmp(item->item_string, "Packets")) {
         newScene = UART_TerminalScenePackets;
-    } else if (!strcmp(item->item_string, "Attacks")) {
+    } else if(!strcmp(item->item_string, "Attacks")) {
         newScene = UART_TerminalSceneAttacks;
-    } else if (!strcmp(item->item_string, "Settings")) {
+    } else if(!strcmp(item->item_string, "Settings")) {
         newScene = UART_TerminalSceneSettings;
-    } else if (!strcmp(item->item_string, "Help")) {
+    } else if(!strcmp(item->item_string, "Help")) {
         newScene = UART_TerminalSceneHelp;
     }
-    if (newScene < 0) {
+    if(newScene < 0) {
         return;
     }
     scene_manager_set_scene_state(
@@ -78,14 +35,14 @@ static void displaySubmenu(UART_TerminalApp *app, UART_TerminalItem *item) {
 static void uart_terminal_scene_main_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
-    UART_TerminalItem *item = NULL;
+    UART_TerminalItem* item = NULL;
     const int selected_option_index = app->selected_option_index[index];
 
     furi_assert(index < NUM_MAIN_ITEMS);
     item = &mainmenu[index];
 
     /* Are we displaying a submenu or executing something? */
-    if (item->isSubMenu) {
+    if(item->isSubMenu) {
         /* Display next scene */
         displaySubmenu(app, item);
     } else {
@@ -98,22 +55,25 @@ static void uart_terminal_scene_main_var_list_enter_callback(void* context, uint
         app->is_custom_tx_string = false;
         app->selected_menu_index = index;
         app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
-                                   (selected_option_index == 0) :
-                                   item->focus_console;
+                                       (selected_option_index == 0) :
+                                       item->focus_console;
         app->show_stopscan_tip = item->show_stopscan_tip;
 
         /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
         int cmdLen = strlen(app->selected_tx_string);
-        bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
-                                (item->needs_keyboard == TOGGLE_ARGS &&
-                                (app->selected_tx_string[cmdLen-1] == ' ')));
+        bool needs_keyboard =
+            ((item->needs_keyboard == INPUT_ARGS) ||
+             (item->needs_keyboard == TOGGLE_ARGS &&
+              (app->selected_tx_string[cmdLen - 1] == ' ')));
         /* Initialise the serial console */
         uart_terminal_uart_tx((uint8_t*)("\n"), 1);
 
         if(needs_keyboard) {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartKeyboard);
         } else {
-            view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartConsole);
+            view_dispatcher_send_custom_event(
+                app->view_dispatcher, UART_TerminalEventStartConsole);
         }
     }
 }
@@ -125,7 +85,7 @@ static void uart_terminal_scene_main_var_list_change_callback(VariableItem* item
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    if (app->selected_menu_index >= NUM_MAIN_ITEMS) {
+    if(app->selected_menu_index >= NUM_MAIN_ITEMS) {
         app->selected_menu_index = 0;
     }
 
@@ -140,7 +100,7 @@ static void uart_terminal_scene_main_var_list_change_callback(VariableItem* item
 void uart_terminal_scene_main_on_enter(void* context) {
     UART_TerminalApp* app = context;
     VariableItemList* var_item_list = app->main_menu_list;
-    VariableItem *item;
+    VariableItem* item;
 
     variable_item_list_set_enter_callback(
         var_item_list, uart_terminal_scene_main_var_list_enter_callback, app);
@@ -157,7 +117,7 @@ void uart_terminal_scene_main_on_enter(void* context) {
            be referencing a different view's options menu, and may be out of
            bounds of mainmenu[i].options_menu[].
            If that is the case, use 0 instead */
-        if (app->selected_option_index[i] >= mainmenu[i].num_options_menu) {
+        if(app->selected_option_index[i] >= mainmenu[i].num_options_menu) {
             app->selected_option_index[i] = 0;
         }
         variable_item_set_current_value_index(item, app->selected_option_index[i]);

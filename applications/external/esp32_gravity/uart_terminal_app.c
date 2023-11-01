@@ -42,52 +42,78 @@ UART_TerminalApp* uart_terminal_app_alloc() {
 
     /* Initialise variable item lists and attach them to their view */
     app->main_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewMainMenu,
-            variable_item_list_get_view(app->main_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewMainMenu,
+        variable_item_list_get_view(app->main_menu_list));
     app->targets_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewTargetsMenu,
-            variable_item_list_get_view(app->targets_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewTargetsMenu,
+        variable_item_list_get_view(app->targets_menu_list));
     app->targets_scan_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewTargetsScanMenu,
-            variable_item_list_get_view(app->targets_scan_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewTargetsScanMenu,
+        variable_item_list_get_view(app->targets_scan_menu_list));
     app->packets_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewPacketsMenu,
-            variable_item_list_get_view(app->packets_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewPacketsMenu,
+        variable_item_list_get_view(app->packets_menu_list));
     app->packets_deauth_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewPacketsDeauthMenu,
-            variable_item_list_get_view(app->packets_deauth_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewPacketsDeauthMenu,
+        variable_item_list_get_view(app->packets_deauth_menu_list));
     app->packets_fuzz_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewPacketsFuzzMenu,
-            variable_item_list_get_view(app->packets_fuzz_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewPacketsFuzzMenu,
+        variable_item_list_get_view(app->packets_fuzz_menu_list));
     app->attacks_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewAttacksMenu,
-            variable_item_list_get_view(app->attacks_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewAttacksMenu,
+        variable_item_list_get_view(app->attacks_menu_list));
     app->attacks_mana_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewAttacksManaMenu,
-            variable_item_list_get_view(app->attacks_mana_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewAttacksManaMenu,
+        variable_item_list_get_view(app->attacks_mana_menu_list));
     app->settings_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewSettingsMenu,
-            variable_item_list_get_view(app->settings_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewSettingsMenu,
+        variable_item_list_get_view(app->settings_menu_list));
     app->help_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewHelpMenu,
-            variable_item_list_get_view(app->help_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewHelpMenu,
+        variable_item_list_get_view(app->help_menu_list));
     app->help_info_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewHelpInfoMenu,
-            variable_item_list_get_view(app->help_info_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewHelpInfoMenu,
+        variable_item_list_get_view(app->help_info_menu_list));
     app->purge_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewPurgeMenu,
-            variable_item_list_get_view(app->purge_menu_list));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewPurgeMenu,
+        variable_item_list_get_view(app->purge_menu_list));
     /* Initialise the byte input view to set MAC */
     app->settings_mac_bytes = byte_input_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, Gravity_AppViewSettingsMac,
-            byte_input_get_view(app->settings_mac_bytes));
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        Gravity_AppViewSettingsMac,
+        byte_input_get_view(app->settings_mac_bytes));
 
     for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
         app->selected_option_index[i] = 0;
     }
     /* Initialise MAC bytes to 00:00:00:00:00:00 */
     // TODO : Get and use the device's real MAC
-    for (int i=0; i < NUM_MAC_BYTES; ++i) {
+    for(int i = 0; i < NUM_MAC_BYTES; ++i) {
         app->mac_bytes[i] = 0;
     }
 
@@ -146,7 +172,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     // Close records
     furi_record_close(RECORD_GUI);
 
-    if (app->free_command) {
+    if(app->free_command) {
         free(app->selected_tx_string);
         app->free_command = false;
     }
@@ -167,21 +193,22 @@ int32_t uart_terminal_app(void* p) {
     return 0;
 }
 
-char *strToken(char *cmdLine, char sep, int tokenNum) {
+char* strToken(char* cmdLine, char sep, int tokenNum) {
     int i;
     int tokenCount = 0;
-    for (i = 0; i < (int)strlen(cmdLine) && tokenCount != tokenNum; ++i) {
-        if (cmdLine[i] == sep) {
+    for(i = 0; i < (int)strlen(cmdLine) && tokenCount != tokenNum; ++i) {
+        if(cmdLine[i] == sep) {
             ++tokenCount;
         }
     }
-    if (cmdLine[i - 1] == sep || cmdLine[i - 1] == '\0') {
+    if(cmdLine[i - 1] == sep || cmdLine[i - 1] == '\0') {
         /* Found the end of the token, now find the beginning */
         int j;
-        for (j = (i - 2); j > 0 && cmdLine[j] != sep; --j) { }
+        for(j = (i - 2); j > 0 && cmdLine[j] != sep; --j) {
+        }
         /* Token runs from index j to (i - 2) */
-        char *retVal = malloc(sizeof(char) * (i - j));
-        if (retVal == NULL) {
+        char* retVal = malloc(sizeof(char) * (i - j));
+        if(retVal == NULL) {
             printf("GRAVITY: Failed to malloc token\n");
             return NULL;
         }
@@ -190,7 +217,7 @@ char *strToken(char *cmdLine, char sep, int tokenNum) {
         return retVal;
     } else {
         /* No token */
-        if (tokenNum == 1) {
+        if(tokenNum == 1) {
             return cmdLine;
         } else {
             return NULL;

@@ -22,7 +22,7 @@ void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
     /* Appending to the text box resets the view to its default. If it's been
        more than 10 seconds since running the command, focus the text box at end */
     TickType_t delay = pdMS_TO_TICKS(10000);
-    if (xTaskGetTickCount() - launchTime >= delay) {
+    if(xTaskGetTickCount() - launchTime >= delay) {
         text_box_set_focus(app->text_box, TextBoxFocusEnd);
     }
 
@@ -44,27 +44,29 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         text_box_set_focus(text_box, TextBoxFocusEnd);
     }
 
-    if(app->is_command) {                       /* View console ensures this is false */
+    if(app->is_command) { /* View console ensures this is false */
         furi_string_reset(app->text_box_store);
         app->text_box_store_strlen = 0;
 
         /* Handle Flipper commands here - set ap->is_command = false for commands that are consumed */
-        if (!strcmp(app->selected_tx_string, "GET_STARTED")) {
+        if(!strcmp(app->selected_tx_string, "GET_STARTED")) {
             app->is_command = false;
             /* Display detailed instructions on getting started */
             uart_text_input_set_header_text(app->text_input, "Getting Started");
             // TODO: See if the header works
-            const char string[] = "             Flipper Gravity\nGETTING STARTED\nUnless you're doing a basic beacon spam or probe flood attack, or a Mana attack, the first thing to do is turn scanning on and let it run while you explore the menu. View found APs (you can leave scanning on or turn it off), select a few APs or STAs and run a DEAUTH attack against the selected APs or STAs. When an AP is specified for a DEAUTH attack Gravity will use all STAs it identifies as clients of the specified APs. Turn off scanning and deauth, and turn on MANA or LOUD MANA. This is still under development, but you can watch Wireshark to see if any devices send you an association request.\n";
+            const char string[] =
+                "             Flipper Gravity\nGETTING STARTED\nUnless you're doing a basic beacon spam or probe flood attack, or a Mana attack, the first thing to do is turn scanning on and let it run while you explore the menu. View found APs (you can leave scanning on or turn it off), select a few APs or STAs and run a DEAUTH attack against the selected APs or STAs. When an AP is specified for a DEAUTH attack Gravity will use all STAs it identifies as clients of the specified APs. Turn off scanning and deauth, and turn on MANA or LOUD MANA. This is still under development, but you can watch Wireshark to see if any devices send you an association request.\n";
             furi_string_cat_str(app->text_box_store, string);
             app->text_box_store_strlen += strlen(string);
-        } else if (!strcmp(app->selected_tx_string, "gravity-version")) {
+        } else if(!strcmp(app->selected_tx_string, "gravity-version")) {
             /* Display Flipper-Gravity components of the About screen */
             /* Not setting app->is_command = false;
                We want this command to be passed through to esp32-Gravity, so we can also
                display its version */
             /* Display a basic about screen */
             // TODO: See if the following works:
-            const char about1[] = "              Flipper Gravity\nBy Chris BC\n\nBe The Unseen Force.\n\nhttps://github.com/chris-bc/esp32-gravity\nhttps://github.com/chris-bc/Flipper-Gravity\n\nFlipper-Gravity : v";
+            const char about1[] =
+                "              Flipper Gravity\nBy Chris BC\n\nBe The Unseen Force.\n\nhttps://github.com/chris-bc/esp32-gravity\nhttps://github.com/chris-bc/Flipper-Gravity\n\nFlipper-Gravity : v";
             furi_string_cat_str(app->text_box_store, about1);
             app->text_box_store_strlen += strlen(about1);
             furi_string_cat_str(app->text_box_store, GRAVITY_VERSION);
@@ -117,7 +119,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             uart_terminal_uart_tx((uint8_t*)("\n"), 1);
         }
     }
-    if (app->free_command) {
+    if(app->free_command) {
         free(app->selected_tx_string);
         app->selected_tx_string = NULL;
         app->free_command = false;
@@ -146,8 +148,7 @@ void uart_terminal_scene_console_output_on_exit(void* context) {
     uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
 
     /* Instruct ESP32 to halt any UIs that may be drawing */
-    if (app->selected_tx_string != NULL && !strcmp(app->selected_tx_string, "stalk on")) {
-        uart_terminal_uart_tx(
-                (uint8_t*)"stalk off\n", strlen("stalk off\n"));
+    if(app->selected_tx_string != NULL && !strcmp(app->selected_tx_string, "stalk on")) {
+        uart_terminal_uart_tx((uint8_t*)"stalk off\n", strlen("stalk off\n"));
     }
 }
