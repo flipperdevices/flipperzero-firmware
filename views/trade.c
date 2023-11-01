@@ -109,8 +109,9 @@ typedef enum {
     TRADE_RESET,
     INIT,
     TRADE_RANDOM,
-    SENDING_DATA,
-    SENDING_PATCH_DATA,
+    TRADE_DATA,
+    TRADE_PATCH_HEADER,
+    TRADE_PATCH_DATA,
     TRADE_SELECT,
     TRADE_PENDING,
     TRADE_CONFIRMATION,
@@ -357,6 +358,10 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 
     /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
      * and what response to expect.
+     *
+     * NOTE: There is at least one NO_DATA_BYTE/0xFE, maybe two I think, transmitted
+     * during a normal session. Need to be careful when handling this not to
+     * mess up any counts anywhere.
      */
 
     /* Since this is a fairly long function, it doesn't call any other functions,
@@ -418,76 +423,83 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
     case TRADE_RANDOM:
 	counter++;
 	if (counter == (SERIAL_RNS_LENGTH + SERIAL_TRADE_PREAMBLE_LENGTH)) {
-		trade->trade_centre_state = SENDING_DATA;
+		trade->trade_centre_state = TRADE_DATA;
 		counter = 0;
 	}
 	break;
 
     /* This is where we get the data from gameboy that is their trade struct */
-    case SENDING_DATA:
+    case TRADE_DATA:
         input_block_flat[counter] = in;
         send = trade_block_flat[counter];
         counter++;
 
-	/* XXX: TODO: right now, tradeblock is padded with 3 extra 0x00s.
-	 * These are normally transmitted but we can do away with the padding
-	 * by adding another state between this and the next state to wait for
-	 * the padding to finish.
-	 */
-        if(counter == sizeof(TradeBlock))
-            trade->trade_centre_state = SENDING_PATCH_DATA;
+        if(counter == sizeof(TradeBlock)) {
+            trade->trade_centre_state = TRADE_PATCH_HEADER;
+	    counter = 0;
+	}
 
 	break;
 
-    /* XXX: This seems to end with the gameboy sending DF FE 15? */
+    /* This absorbs the 3 byte ending sequence (DF FE 15) after the trade data is
+     * swapped, then the 3x SERIAL_PREAMBLE_BYTEs that end the trade data, and
+     * another 3x of them that start the patch data. By the time we're done with
+     * this state, the patch list blank bytes are ready to be transmitted.
+     * We only care about the 6x total preamble bytes.
+     */ 
+    case TRADE_PATCH_HEADER:
+	if (in == SERIAL_PREAMBLE_BYTE) {
+		counter++;
+	}
 
-    /* A couple of FD bytes are sent, looks like 6, which means I don't think we can use count of FD bytes to see what mode we're in */
-    /* XXX: THIS IS TESTED AND WORKING AS OF 20231025!
-     * That means we for sure start this state and leave ths state at the right
-     * parts of communication */
-    case SENDING_PATCH_DATA:
-        if(in == SERIAL_PREAMBLE_BYTE) {
-            counter = 0;
-            send = SERIAL_PREAMBLE_BYTE;
-        } else {
-            /* This magic number is basically the header length, 10, minus
-	     * the 3x 0xFD that we should be transmitting as part of the path
-	     * list header.
-	     */
-            if (counter > 6) {
-                send = plist_index_get(trade->patch_list, (counter - 7));
-            }
-
-            /* Patch received data */
-            /* This relies on the data sent only ever sending 0x00 after
-             * part 2 of the patch list has been terminated. This is the
-             * case in official Gen I code at this time.
-             */
-            switch (in) {
-            case PKMN_BLANK:
-                break;
-            case SERIAL_PATCH_LIST_PART_TERMINATOR:
-                patch_pt_2 = true;
-                break;
-            default: // Any nonzero value will cause a patch
-                if (!patch_pt_2) {
-                    /* Pt 1 is 0x00 - 0xFB */
-                    input_party_flat[in-1] = SERIAL_NO_DATA_BYTE;
-                } else {
-                    /* Pt 2 is 0xFC - 0x107 */
-                    input_party_flat[0xFC + in-1] = SERIAL_NO_DATA_BYTE;
-                }
-                break;
-            }
-
-            counter++;
-	    /* This is actually 200 bytes, but that includes the 3x 0xFD that we
-	     * sent without counting.
-	     */
-            if(counter == 196) {
-                trade->trade_centre_state = TRADE_SELECT;
-	    }
+	if (counter == 6) {
+		counter = 0;
+		trade->trade_centre_state = TRADE_PATCH_DATA;
+	} else {
+		break;
+	}
+	[[fallthrough]];
+    case TRADE_PATCH_DATA:
+	counter++;
+        /* This magic number is basically the header length, 10, minus
+	 * the 3x 0xFD that we should be transmitting as part of the patch
+	 * list header.
+	 */
+        if (counter > 7) {
+            send = plist_index_get(trade->patch_list, (counter - 8));
         }
+
+        /* Patch received data */
+        /* This relies on the data sent only ever sending 0x00 after
+         * part 2 of the patch list has been terminated. This is the
+         * case in official Gen I code at this time.
+         */
+        switch (in) {
+        case PKMN_BLANK:
+            break;
+        case SERIAL_PATCH_LIST_PART_TERMINATOR:
+            patch_pt_2 = true;
+            break;
+        default: // Any nonzero value will cause a patch
+            if (!patch_pt_2) {
+                /* Pt 1 is 0x00 - 0xFB */
+                input_party_flat[in-1] = SERIAL_NO_DATA_BYTE;
+            } else {
+                /* Pt 2 is 0xFC - 0x107 */
+                input_party_flat[0xFC + in-1] = SERIAL_NO_DATA_BYTE;
+            }
+            break;
+        }
+
+	/* What is interesting about the following check, is the Pokemon code
+	 * seems to allocate 203 bytes, 3x for the preamble, and then 200 bytes
+	 * of patch list. But in practice, the Gameboy seems to transmit 3x
+	 * preamble bytes, 7x 0x00, then 189 bytes for the patch list. A
+	 * total of 199 bytes transmitted.
+	 */
+        if(counter == 196) {
+            trade->trade_centre_state = TRADE_SELECT;
+	}
         break;
 
     case TRADE_SELECT:
