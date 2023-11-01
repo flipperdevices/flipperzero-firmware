@@ -1,0 +1,170 @@
+name: 'Build'
+
+on:
+  push:
+    branches:
+      - dev
+    tags:
+      - '*'
+  pull_request:
+
+env:
+  DEFAULT_TARGET: f7
+  FBT_TOOLCHAIN_PATH: /runner/_work
+  FBT_GIT_SUBMODULE_SHALLOW: 1
+
+jobs:
+  main:
+    runs-on: [self-hosted, FlipperZeroShell]
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [f7, f18]    
+    steps:
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
+
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Get commit details'
+        id: names
+        run: |
+          BUILD_TYPE='DEBUG=1 COMPACT=0'
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            TYPE="pull"
+          elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            TYPE="tag"
+            BUILD_TYPE='DEBUG=0 COMPACT=1'
+          else
+            TYPE="other"
+          fi
+          python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE" || cat "${{ github.event_path }}"
+          echo "event_type=$TYPE" >> $GITHUB_OUTPUT
+          echo "FBT_BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
+          echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
+          echo "TARGET_HW=$(echo "${{ matrix.target }}" | sed 's/f//')" >> $GITHUB_ENV
+
+      - name: 'Check API versions for consistency between targets'
+        run: |
+          set -e
+          N_API_HEADER_SIGNATURES=`ls -1 targets/f*/api_symbols.csv | xargs -I {} sh -c "head -n2 {} | md5sum" | sort -u | wc -l`
+          if [ $N_API_HEADER_SIGNATURES != 1 ] ; then
+            echo API versions aren\'t matching for available targets. Please update!
+            echo API versions are:
+            head -n2 targets/f*/api_symbols.csv
+            exit 1
+          fi
+
+      - name: 'Build the firmware and apps'
+        id: build-fw
+        run: |
+          ./fbt TARGET_HW=$TARGET_HW $FBT_BUILD_TYPE copro_dist updater_package fap_dist
+          echo "firmware_api=$(./fbt TARGET_HW=$TARGET_HW get_apiversion)" >> $GITHUB_OUTPUT
+
+      - name: 'Check for uncommitted changes'
+        run: |
+          git diff --exit-code
+
+      - name: 'Copy build output'
+        run: |
+          set -e
+          rm -rf artifacts map_analyser_files || true
+          mkdir artifacts map_analyser_files
+          cp dist/${TARGET}-*/* artifacts/ || true
+          tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
+            -C build/latest resources
+          tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
+            -C dist/${TARGET}-*/apps/Debug .
+          tar czpf "artifacts/flipper-z-${TARGET}-appsymbols-${SUFFIX}.tgz" \
+            -C dist/${TARGET}-*/debug_elf .
+
+      - name: 'Copy universal artifacts'
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
+        run: |
+          tar czpf "artifacts/flipper-z-any-scripts-${SUFFIX}.tgz" scripts
+          cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
+
+      - name: 'Upload artifacts to update server'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          FILES=$(for ARTIFACT in $(find artifacts -maxdepth 1 -not -type d); do echo "-F files=@${ARTIFACT}"; done)
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              -F "branch=${BRANCH_NAME}" \
+              -F "version_token=${COMMIT_SHA}" \
+              ${FILES[@]} \
+              "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
+
+      - name: 'Copy & analyse map analyser files'
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET }}
+        run: |
+          cp build/${DEFAULT_TARGET}-firmware-*/firmware.elf.map map_analyser_files/firmware.elf.map
+          cp build/${DEFAULT_TARGET}-firmware-*/firmware.elf map_analyser_files/firmware.elf
+          cp ${{ github.event_path }} map_analyser_files/event.json
+          source scripts/toolchain/fbtenv.sh
+          get_size()
+          {
+            SECTION="$1";
+            arm-none-eabi-size \
+              -A map_analyser_files/firmware.elf \
+              | grep "^$SECTION" | awk '{print $2}'
+          }
+          export BSS_SIZE="$(get_size ".bss")"
+          export TEXT_SIZE="$(get_size ".text")"
+          export RODATA_SIZE="$(get_size ".rodata")"
+          export DATA_SIZE="$(get_size ".data")"
+          export FREE_FLASH_SIZE="$(get_size ".free_flash")"
+          python3 -m pip install mariadb==1.1.6 cxxfilt==0.3.0
+          python3 scripts/map_parser.py map_analyser_files/firmware.elf.map map_analyser_files/firmware.elf.map.all
+          python3 scripts/map_mariadb_insert.py \
+              ${{ secrets.AMAP_MARIADB_USER }} \
+              ${{ secrets.AMAP_MARIADB_PASSWORD }} \
+              ${{ secrets.AMAP_MARIADB_HOST }} \
+              ${{ secrets.AMAP_MARIADB_PORT }} \
+              ${{ secrets.AMAP_MARIADB_DATABASE }} \
+              map_analyser_files/firmware.elf.map.all
+
+      - name: 'Find previous comment'
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
+        uses: peter-evans/find-comment@v2
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Compiled ${{ matrix.target }} firmware for commit'
+
+      - name: 'Create or update comment'
+        if: ${{ !github.event.pull_request.head.repo.fork && matrix.target == env.DEFAULT_TARGET && github.event.pull_request }}
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **Compiled ${{ matrix.target }} firmware for commit `${{steps.names.outputs.commit_sha}}`:**
+            - [📦 Update package](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
+            - [📥 DFU file](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-full-${{steps.names.outputs.suffix}}.dfu)
+            - [☁️ Web/App updater](https://lab.flipper.net/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
+          edit-mode: replace
+
+      - name: 'SDK submission to staging catalog'
+        if: ${{ steps.names.outputs.event_type == 'tag' && matrix.target == env.DEFAULT_TARGET }}
+        uses: ./.github/actions/submit_sdk
+        with:
+          catalog-url: ${{ secrets.CATALOG_STAGING_URL }}
+          catalog-api-token: ${{ secrets.CATALOG_STAGING_API_TOKEN }}
+          firmware-api: ${{ steps.build-fw.outputs.firmware_api }}
+          firmware-target: ${{ matrix.target }}
+          firmware-version: ${{ steps.names.outputs.suffix }}
+
+      - name: 'SDK submission to prod catalog'
+        if: ${{ steps.names.outputs.event_type == 'tag' && matrix.target == env.DEFAULT_TARGET }}
+        uses: ./.github/actions/submit_sdk
+        with:
+          catalog-url: ${{ secrets.CATALOG_URL }}
+          catalog-api-token: ${{ secrets.CATALOG_API_TOKEN }}
+          firmware-api: ${{ steps.build-fw.outputs.firmware_api }}
+          firmware-target: ${{ matrix.target }}
+          firmware-version: ${{ steps.names.outputs.suffix }}

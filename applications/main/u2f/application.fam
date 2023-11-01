@@ -6,7 +6,9 @@ App(
     stack_size=2 * 1024,
     icon="A_U2F_14",
     order=80,
+    resources="resources",
+    fap_libs=["assets"],
     fap_icon="icon.png",
-    fap_category="Main",
+    fap_category="USB",
     fap_icon_assets="images",
 )

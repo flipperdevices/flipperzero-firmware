@@ -6,6 +6,8 @@ App(
     stack_size=2 * 1024,
     icon="A_BadUsb_14",
     order=70,
+    resources="resources",
+    fap_libs=["assets"],
     fap_category="USB",
     fap_icon="icon.png",
     fap_icon_assets="images",
