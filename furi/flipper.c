@@ -8,6 +8,8 @@
 #include <cfw/private.h>
 #include <cfw/namespoof.h>
 
+#include <FreeRTOS.h>
+
 #define TAG "Flipper"
 
 static void flipper_print_version(const char* target, const Version* version) {
