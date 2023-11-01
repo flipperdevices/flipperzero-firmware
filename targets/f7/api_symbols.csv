@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,44.1,,
+Version,+,44.2,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -2623,6 +2623,7 @@ Function,+,st25tb_load,_Bool,"St25tbData*, FlipperFormat*, uint32_t"
 Function,+,st25tb_poller_detect_type,St25tbError,"Nfc*, St25tbType*"
 Function,+,st25tb_poller_read,St25tbError,"Nfc*, St25tbData*"
 Function,+,st25tb_poller_read_block,St25tbError,"Nfc*, uint8_t, uint32_t*"
+Function,+,st25tb_poller_write_block,St25tbError,"Nfc*, uint8_t, uint32_t"
 Function,+,st25tb_reset,void,St25tbData*
 Function,+,st25tb_save,_Bool,"const St25tbData*, FlipperFormat*"
 Function,+,st25tb_set_uid,_Bool,"St25tbData*, const uint8_t*, size_t"

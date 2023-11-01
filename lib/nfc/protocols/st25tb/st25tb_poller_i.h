@@ -44,6 +44,9 @@ St25tbError st25tb_poller_async_get_uid(St25tbPoller* instance, uint8_t uid[ST25
 St25tbError
     st25tb_poller_async_read_block(St25tbPoller* instance, uint32_t* block, uint8_t block_number);
 
+St25tbError
+    st25tb_poller_async_write_block(St25tbPoller* instance, uint32_t block, uint8_t block_number);
+
 St25tbError st25tb_poller_halt(St25tbPoller* instance);
 
 St25tbError st25tb_poller_send_frame(

@@ -4,6 +4,7 @@
 #include <nfc/nfc_poller.h>
 
 #include <furi.h>
+#include <stdint.h>
 
 #define ST25TB_POLLER_FLAG_COMMAND_COMPLETE (1UL << 0)
 
@@ -11,6 +12,7 @@ typedef enum {
     St25tbPollerCmdTypeDetectType,
     St25tbPollerCmdTypeRead,
     St25tbPollerCmdTypeReadBlock,
+    St25tbPollerCmdTypeWriteBlock,
 
     St25tbPollerCmdTypeNum,
 } St25tbPollerCmdType;
@@ -26,6 +28,10 @@ typedef union {
         uint8_t block_num;
         uint32_t* block;
     } read_block;
+    struct {
+        uint8_t block_num;
+        uint32_t block;
+    } write_block;
 } St25tbPollerCmdData;
 
 typedef struct {
@@ -56,10 +62,17 @@ static St25tbError
         poller, data->read_block.block, data->read_block.block_num);
 }
 
+static St25tbError
+    st25tb_poller_write_block_handler(St25tbPoller* poller, St25tbPollerCmdData* data) {
+    return st25tb_poller_async_write_block(
+        poller, data->write_block.block, data->write_block.block_num);
+}
+
 static St25tbPollerCmdHandler st25tb_poller_cmd_handlers[St25tbPollerCmdTypeNum] = {
     [St25tbPollerCmdTypeDetectType] = st25tb_poller_detect_handler,
     [St25tbPollerCmdTypeRead] = st25tb_poller_read_handler,
     [St25tbPollerCmdTypeReadBlock] = st25tb_poller_read_block_handler,
+    [St25tbPollerCmdTypeWriteBlock] = st25tb_poller_write_block_handler,
 };
 
 static NfcCommand st25tb_poller_cmd_callback(NfcGenericEvent event, void* context) {
@@ -104,6 +117,17 @@ St25tbError st25tb_poller_read_block(Nfc* nfc, uint8_t block_num, uint32_t* bloc
         .cmd_type = St25tbPollerCmdTypeReadBlock,
         .cmd_data = {
             .read_block = {
+                .block = block,
+                .block_num = block_num,
+            }}};
+    return st25tb_poller_cmd_execute(nfc, &poller_context);
+}
+
+St25tbError st25tb_poller_write_block(Nfc* nfc, uint8_t block_num, uint32_t block) {
+    St25tbPollerContext poller_context = {
+        .cmd_type = St25tbPollerCmdTypeWriteBlock,
+        .cmd_data = {
+            .write_block = {
                 .block = block,
                 .block_num = block_num,
             }}};

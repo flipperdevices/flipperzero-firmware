@@ -175,7 +175,7 @@ St25tbError st25tb_poller_async_read(St25tbPoller* instance, St25tbData* data) {
     furi_assert(instance->nfc);
 
     St25tbError ret;
-    
+
     memcpy(data, instance->data, sizeof(St25tbData));
 
     do {
@@ -274,6 +274,50 @@ St25tbError
         }
         bit_buffer_write_bytes(instance->rx_buffer, block, ST25TB_BLOCK_SIZE);
         FURI_LOG_D(TAG, "read result: %08lX", *block);
+    } while(false);
+
+    return ret;
+}
+
+St25tbError
+    st25tb_poller_async_write_block(St25tbPoller* instance, uint32_t block, uint8_t block_number) {
+    furi_assert(instance);
+    furi_assert(instance->nfc);
+    furi_assert(
+        (block_number <= st25tb_get_block_count(instance->data->type)) ||
+        block_number == ST25TB_SYSTEM_OTP_BLOCK);
+    FURI_LOG_D(TAG, "writing block %d", block_number);
+    bit_buffer_reset(instance->tx_buffer);
+
+    // Send Write_block(Addr, Data)
+    bit_buffer_append_byte(instance->tx_buffer, 0x09);
+    bit_buffer_append_byte(instance->tx_buffer, block_number);
+    bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&block, ST25TB_BLOCK_SIZE);
+    St25tbError ret;
+    do {
+        ret = st25tb_poller_send_frame(
+            instance, instance->tx_buffer, instance->rx_buffer, ST25TB_FDT_FC);
+        if(ret != St25tbErrorTimeout) { // tag doesn't ack writes so timeout are expected.
+            break;
+        }
+
+        furi_delay_ms(7); // 7ms is the max programming time as per datasheet
+
+        uint32_t block_check;
+        ret = st25tb_poller_async_read_block(instance, &block_check, block_number);
+        if(ret != St25tbErrorNone) {
+            FURI_LOG_E(TAG, "write verification failed: read error");
+            break;
+        }
+        if(block_check != block) {
+            FURI_LOG_E(
+                TAG,
+                "write verification failed: wrote %08lX but read back %08lX",
+                block,
+                block_check);
+            ret = St25tbErrorWriteFailed;
+            break;
+        }
     } while(false);
 
     return ret;

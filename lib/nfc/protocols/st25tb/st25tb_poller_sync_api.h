@@ -9,6 +9,8 @@ extern "C" {
 
 St25tbError st25tb_poller_read_block(Nfc* nfc, uint8_t block_num, uint32_t* block);
 
+St25tbError st25tb_poller_write_block(Nfc* nfc, uint8_t block_num, uint32_t block);
+
 St25tbError st25tb_poller_detect_type(Nfc* nfc, St25tbType* type);
 
 St25tbError st25tb_poller_read(Nfc* nfc, St25tbData* data);

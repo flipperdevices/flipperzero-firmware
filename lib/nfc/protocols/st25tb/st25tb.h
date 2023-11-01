@@ -27,6 +27,7 @@ typedef enum {
     St25tbErrorFieldOff,
     St25tbErrorWrongCrc,
     St25tbErrorTimeout,
+    St25tbErrorWriteFailed,
 } St25tbError;
 
 typedef enum {
