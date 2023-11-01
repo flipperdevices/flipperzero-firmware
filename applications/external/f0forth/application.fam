@@ -1,0 +1,15 @@
+App(
+    appid="f0forth",
+    name="F0 Forth",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="f0forth",
+    stack_size=16 * 1024,
+    requires=["gui"],
+    fap_private_libs=[
+        Lib(
+            name="pforth",
+            cflags=["-DPF_USER_CUSTOM", "-DPF_NO_INIT", "-DPF_USER_FILEIO=\\\"../../pf_fileio_f0.h\\\"", "-DPF_USER_INC1=\\\"../../pf_malloc_f0.h\\\"", "-DPF_NO_CLIB", "-DPF_STATIC_DIC", "-Wno-redundant-decls", "-Wno-cast-function-type", "-Wno-unused-parameter", "-Wno-sign-compare", "-Wno-incompatible-pointer-types", "-Wno-shift-count-overflow"],
+        ),
+    ],
+    fap_icon="forth10px.png",
+)
