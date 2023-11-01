@@ -61,8 +61,10 @@ class GameBoyCartridge {
     void readSRAM_GB();
     void writeROM_GB();
     void writeRAM_GB();
-    void startWriteRAM_GB();
-    void endWriteRAM_GB();
+    // void startWriteRAM_GB();
+    // void endWriteRAM_GB();
+    void startReadRAM_GB();
+    void endReadRAM_GB();
 
     bool isWrittingRAM();
     bool isWrittingROM();

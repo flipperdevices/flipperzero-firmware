@@ -883,115 +883,69 @@ void GameBoyCartridge::readSRAM_GB()
         // this->write_byte_GB(0x4000, 0);
         this->writtingRAM = true;
     }
-    /*
-    // if cartridge have RAM test
-    if (this->ramEndAddress > 0)
-    {
-        if (this->cartridgeType <= 4)
-        {                                   // MBC1
-            this->write_byte_GB(0x6000, 1); // Set RAM Mode
-        }
-
-        this->dataBusAsOutput();
-        // Initialise MBC
-        this->write_byte_GB(0x0000, 0x0A);
-        delayMicroseconds(50);
-        this->dataBusAsInput();
-
-        // Switch RAM banks
-        for (uint8_t bank = 0; bank < this->sramBanks; bank++)
-        {
-            this->write_byte_GB(0x4000, bank);
-
-            // Read RAM
-            for (word ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress += 64)
-            {
-                uint8_t readData[64];
-                for (uint8_t i = 0; i < 64; i++)
-                {
-                    readData[i] = this->read_byte_GB(ramAddress + i);
-                    
-                }
-                buffer_obj.addPacket(readData, 64);
-                // Serial1.write(readData, 64); // Send the 64 byte chunk
-                processedProgressBar += 64;
-            }
-        }
-
-        // Disable RAM
-        this->write_byte_GB(0x0000, 0x00);
-        delay(50);
-
-        transferJSON["type"] = "success";
-        transferJSON["total"] = totalProgressBar;
-        transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
-        transferJSON["ramBanks"] = this->sramBanks;
-
-        delay(200);
-        Serial.print("JSON:");
-        serializeJson(transferJSON, Serial);
-        Serial.println();
-    }
-
-    this->rd_wr_mreq_off();
-    */
 }
-void GameBoyCartridge::startWriteRAM_GB()
-{
-    //  Load ROM header
-    this->headerROM_GB(false);
-    this->writtingRAM = true;
+void GameBoyCartridge::startReadRAM_GB() {
 
-    this->rd_wr_mreq_reset();
-
-    // MBC2 Fix (unknown why this fixes it, maybe has to read ROM before RAM?)
-    this->read_byte_GB(0x0134);
-
-    // Does cartridge have RAM
-    if (this->ramEndAddress > 0)
-    {
-        if (this->cartridgeType <= 4)
-        {                                   // MBC1
-            this->write_byte_GB(0x6000, 1); // Set RAM Mode
-        }
-
-        // Initialise MBC
-        this->write_byte_GB(0x0000, 0x0A);
-
-        // Switch RAM banks
-        for (uint8_t bank = 0; bank < ramBanks; bank++)
-        {
-            this->write_byte_GB(0x4000, bank);
-
-            // Write RAM
-            for (uint16_t ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress++)
-            {
-                // Wait for serial input
-                while (Serial.available()){
-                }
-
-                // Read input
-                uint8_t readValue = (uint8_t)Serial.read();
-
-                // Write to RAM
-                cs_mreqPin_low;
-                this->write_byte_GB(ramAddress, readValue);
-                asm volatile("nop");
-                asm volatile("nop");
-                asm volatile("nop");
-                cs_mreqPin_high;
-            }
-        }
-
-        // Disable RAM
-        this->write_byte_GB(0x0000, 0x00);
-        Serial.flush(); // Flush any serial data that wasn't processed
-    }
 }
-void GameBoyCartridge::endWriteRAM_GB()
-{
-    this->writtingRAM = false;
+void GameBoyCartridge::endReadRAM_GB() {
+
 }
+// void GameBoyCartridge::startWriteRAM_GB()
+// {
+//     //  Load ROM header
+//     this->headerROM_GB(false);
+//     this->writtingRAM = true;
+
+//     this->rd_wr_mreq_reset();
+
+//     // MBC2 Fix (unknown why this fixes it, maybe has to read ROM before RAM?)
+//     this->read_byte_GB(0x0134);
+
+//     // Does cartridge have RAM
+//     if (this->ramEndAddress > 0)
+//     {
+//         if (this->cartridgeType <= 4)
+//         {                                   // MBC1
+//             this->write_byte_GB(0x6000, 1); // Set RAM Mode
+//         }
+
+//         // Initialise MBC
+//         this->write_byte_GB(0x0000, 0x0A);
+
+//         // Switch RAM banks
+//         for (uint8_t bank = 0; bank < ramBanks; bank++)
+//         {
+//             this->write_byte_GB(0x4000, bank);
+
+//             // Write RAM
+//             for (uint16_t ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress++)
+//             {
+//                 // Wait for serial input
+//                 while (Serial.available()){
+//                 }
+
+//                 // Read input
+//                 uint8_t readValue = (uint8_t)Serial.read();
+
+//                 // Write to RAM
+//                 cs_mreqPin_low;
+//                 this->write_byte_GB(ramAddress, readValue);
+//                 asm volatile("nop");
+//                 asm volatile("nop");
+//                 asm volatile("nop");
+//                 cs_mreqPin_high;
+//             }
+//         }
+
+//         // Disable RAM
+//         this->write_byte_GB(0x0000, 0x00);
+//         Serial.flush(); // Flush any serial data that wasn't processed
+//     }
+// }
+// void GameBoyCartridge::endWriteRAM_GB()
+// {
+//     this->writtingRAM = false;
+// }
 bool GameBoyCartridge::isWrittingROM()
 {
     return this->writtingROM;
