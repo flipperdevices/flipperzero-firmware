@@ -407,7 +407,7 @@ class AppBuildset:
         return sdk_headers
 
     def get_apps_of_type(self, apptype: FlipperAppType, all_known: bool = False):
-        """ Looks up apps of given type in current app set. If all_known is true, 
+        """Looks up apps of given type in current app set. If all_known is true,
         ignores app set and checks all loaded apps' manifests."""
         return sorted(
             filter(
