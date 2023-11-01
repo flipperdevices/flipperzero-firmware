@@ -82,7 +82,7 @@ def _proto_ver_generator(target, source, env):
     src_dir = source[0].dir.abspath
     try:
         __invoke_git(
-            ["fetch", "--tags"],
+            ["fetch", "--tags", "--unshallow"],
             source_dir=src_dir,
         )
     except (subprocess.CalledProcessError, EnvironmentError):
