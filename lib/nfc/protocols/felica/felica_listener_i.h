@@ -13,10 +13,9 @@ struct FelicaListener {
     FelicaListenerState state;
 
     BitBuffer* tx_buffer;
+    BitBuffer* rx_buffer;
 
     NfcGenericEvent generic_event;
-    //Iso14443_3aListenerEvent iso14443_3a_event;
-    //Iso14443_3aListenerEventData iso14443_3a_event_data;
     NfcGenericCallback callback;
     void* context;
 };

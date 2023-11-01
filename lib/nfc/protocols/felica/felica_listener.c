@@ -13,13 +13,14 @@ FelicaListener* felica_listener_alloc(Nfc* nfc, FelicaData* data) {
     instance->nfc = nfc;
     instance->data = data;
     instance->tx_buffer = bit_buffer_alloc(FELICA_LISTENER_MAX_BUFFER_SIZE);
+    instance->rx_buffer = bit_buffer_alloc(FELICA_LISTENER_MAX_BUFFER_SIZE);
 
-    //nfc_set_guard_time_us(instance->nfc, FELICA_GUARD_TIME_US);
     nfc_set_fdt_listen_fc(
         instance->nfc, FELICA_FDT_LISTEN_FC); //TODO verify FELICA_FDT_LISTEN_FC value
 
     nfc_config(instance->nfc, NfcModeListener, NfcTechFelica);
-    //nfc_set_fdt_poll_poll_us(instance->nfc, FELICA_POLL_POLL_MIN_US);
+    nfc_felica_listener_set_sensf_res_data(
+        nfc, data->idm.data, sizeof(data->idm), data->pmm.data, sizeof(data->pmm));
 
     return instance;
 }
@@ -29,6 +30,7 @@ void felica_listener_free(FelicaListener* instance) {
     furi_assert(instance->tx_buffer);
 
     bit_buffer_free(instance->tx_buffer);
+    bit_buffer_free(instance->rx_buffer);
     free(instance);
 }
 
@@ -62,15 +64,12 @@ NfcCommand felica_listener_run(NfcGenericEvent event, void* context) {
 
     if(nfc_event->type == NfcEventTypeListenerActivated) {
         instance->state = Felica_ListenerStateActivated;
+        FURI_LOG_D(TAG, "Activated");
     } else if(nfc_event->type == NfcEventTypeFieldOff) {
         instance->state = Felica_ListenerStateIdle;
-        /* if(instance->callback) {
-            instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeFieldOff;
-            instance->callback(instance->generic_event, instance->context);
-        }*/
-        command = NfcCommandSleep;
+        FURI_LOG_D(TAG, "Field Off");
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
-        FURI_LOG_D(TAG, "Test");
+        FURI_LOG_D(TAG, "Rx Done");
     }
     return command;
 }
