@@ -11,3 +11,12 @@ App(
     fap_icon="icon.png",
     fap_icon_assets="images",
 )
+
+App(
+    appid="lfrfid_start",
+    targets=["f7"],
+    apptype=FlipperAppType.STARTUP,
+    entry_point="lfrfid_on_system_start",
+    sources=["lfrfid_cli.c"],
+    order=50,
+)
