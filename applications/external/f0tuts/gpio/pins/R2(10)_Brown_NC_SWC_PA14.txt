@@ -1,6 +1,0 @@
-This pin is used for general IO, timer & SWD only.
-
-CHECK: "LPTIM1.OUT/SWCLK"
-
-Devices:
-- None

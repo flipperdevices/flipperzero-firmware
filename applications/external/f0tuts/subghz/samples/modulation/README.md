@@ -1,2 +1,0 @@
-# Modulation
-The following .SUB files have the same data encoded with various modulations.  I found it helpful to load the various .SUB files and play them with a Flipper Zero to an SDR to visually understand how the data looks when viewed with an SDR application.

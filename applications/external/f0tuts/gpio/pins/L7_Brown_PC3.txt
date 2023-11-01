@@ -1,8 +1,0 @@
-This is just a general purpose GPIO pin.
-
-Generic GPIO uses PC3.
-
-CHECK: "LPTIM1.ETR LPTIM2.ETR/ADC1.4"
-
-Devices:
-- None
