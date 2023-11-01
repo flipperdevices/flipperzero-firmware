@@ -70,7 +70,7 @@ static void infrared_rpc_command_callback(const RpcAppSystemEvent* event, void* 
             furi_string_set(infrared->button_name, event->data.string);
             view_dispatcher_send_custom_event(
                 infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressName);
-        } else if(event->data.type == RpcAppSystemEventDataTypeInt32) {
+        } else {
             infrared->app_state.current_button_index = event->data.i32;
             view_dispatcher_send_custom_event(
                 infrared->view_dispatcher, InfraredCustomEventTypeRpcButtonPressIndex);

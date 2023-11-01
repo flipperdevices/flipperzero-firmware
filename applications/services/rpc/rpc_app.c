@@ -69,22 +69,23 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
     furi_assert(rpc_app->last_command_id == 0);
     furi_assert(rpc_app->last_event_type == RpcAppEventTypeInvalid);
 
+    FURI_LOG_D(TAG, "StartProcess: id %lu", request->command_id);
+
     Loader* loader = furi_record_open(RECORD_LOADER);
     const char* app_name = request->content.app_start_request.name;
 
-    PB_CommandStatus result = PB_CommandStatus_ERROR_INVALID_PARAMETERS;
-
-    FURI_LOG_D(TAG, "StartProcess: id %lu", request->command_id);
+    PB_CommandStatus result;
 
     if(app_name) {
         rpc_system_app_error_reset(rpc_app);
 
+        char app_args_temp[RPC_SYSTEM_APP_TEMP_ARGS_SIZE];
         const char* app_args = request->content.app_start_request.args;
+
         if(app_args && strcmp(app_args, "RPC") == 0) {
             // If app is being started in RPC mode - pass RPC context via args string
-            char args_temp[RPC_SYSTEM_APP_TEMP_ARGS_SIZE];
-            snprintf(args_temp, RPC_SYSTEM_APP_TEMP_ARGS_SIZE, "RPC %08lX", (uint32_t)rpc_app);
-            app_args = args_temp;
+            snprintf(app_args_temp, RPC_SYSTEM_APP_TEMP_ARGS_SIZE, "RPC %08lX", (uint32_t)rpc_app);
+            app_args = app_args_temp;
         }
 
         const LoaderStatus status = loader_start(loader, app_name, app_args, NULL);
@@ -99,6 +100,8 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
         } else {
             furi_crash();
         }
+    } else {
+        result = PB_CommandStatus_ERROR_INVALID_PARAMETERS;
     }
 
     furi_record_close(RECORD_LOADER);
