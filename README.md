@@ -3,8 +3,13 @@
 # Matagotchi
 Tamagotchi like game for Flipper Zero
 
+# Disclamer
+This application is still under initial development
+
 # TODO
 
-* Create images for all stages
+* Rework the GUI code to use the Flipper scene manager
+* Add ability to delete the state in settings
+* Add about page in settings
 * Add hp feature
-* Create user input events
+* Add animations for stage up
