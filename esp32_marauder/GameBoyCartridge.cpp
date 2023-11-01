@@ -1,9 +1,27 @@
 #include "GameBoyCartridge.h"
 
+
+bool transferSRAMInProgress = false;
+uint8_t currentBank = 0;
+word currentRamAddress = 0xA000;
+uint8_t currentByte = 0;
+uint32_t processedProgressBar = 0;
+
 GameBoyCartridge::GameBoyCartridge()
 {
     this->runGameBoyCartridge = false;
+    this->writtingRAM = false;
+    this->writtingROM = false;
     this->lastByte = 0;
+    this->cartridgeType = 0;
+    this->romSize = 0;
+    this->romBanks = 0;
+    this->ramSize = 0;
+    this->ramBanks = 0;
+    this->sramSize = 0;
+    this->romEndAddress = 0x7FFF;
+    this->sramBanks = 0;
+    this->romType = 0;
 }
 void GameBoyCartridge::begin()
 {
@@ -48,9 +66,12 @@ void GameBoyCartridge::start()
 
     // RST to H
     digitalWrite(GAMEBOY_RST, HIGH);
-    
+
     transferJSON.clear();
     this->lastByte = 0;
+    // #ifdef WRITE_PACKETS_SERIAL
+    // buffer_obj.open();
+    // #endif
     this->runGameBoyCartridge = true;
 }
 void GameBoyCartridge::stop()
@@ -248,98 +269,98 @@ void GameBoyCartridge::headerROM_GB(bool printInfo = true)
         transferJSON["message"] = "HEADER CHECKSUM ERROR";
     }
 
-    cartridgeType = this->startRomBuffer[0x0147];
-    romType = cartridgeType;
-    romSize = this->startRomBuffer[0x0148];
-    ramSize = this->startRomBuffer[0x0149];
-    sramSize = this->startRomBuffer[0x149];
+    this->cartridgeType = this->startRomBuffer[0x0147];
+    this->romType = this->cartridgeType;
+    this->romSize = this->startRomBuffer[0x0148];
+    this->ramSize = this->startRomBuffer[0x0149];
+    this->sramSize = this->startRomBuffer[0x149];
 
     // Get Checksum as string
     sprintf(checksumStr, "%02X%02X", this->startRomBuffer[0x14E], this->startRomBuffer[0x14F]);
 
     // ROM banks
-    switch (romSize)
+    switch (this->romSize)
     {
     case 0x00:
-        romBanks = 2;
+        this->romBanks = 2;
         break;
     case 0x01:
-        romBanks = 4;
+        this->romBanks = 4;
         break;
     case 0x02:
-        romBanks = 8;
+        this->romBanks = 8;
         break;
     case 0x03:
-        romBanks = 16;
+        this->romBanks = 16;
         break;
     case 0x04:
-        romBanks = 32;
+        this->romBanks = 32;
         break;
     case 0x05:
-        romBanks = 64;
+        this->romBanks = 64;
         break;
     case 0x06:
-        romBanks = 128;
+        this->romBanks = 128;
         break;
     case 0x07:
-        romBanks = 256;
+        this->romBanks = 256;
         break;
     case 0x08:
-        romBanks = 512;
+        this->romBanks = 512;
         break;
     default:
-        romBanks = 2;
+        this->romBanks = 2;
     }
 
     // SRAM banks
-    sramBanks = 0;
-    if (romType == 6)
+    this->sramBanks = 0;
+    if (this->romType == 6)
     {
-        sramBanks = 1;
+        this->sramBanks = 1;
     }
 
     // SRAM size
-    switch (sramSize)
+    switch (this->sramSize)
     {
     case 2:
-        sramBanks = 1;
+        this->sramBanks = 1;
         break;
     case 3:
-        sramBanks = 4;
+        this->sramBanks = 4;
         break;
     case 4:
-        sramBanks = 16;
+        this->sramBanks = 16;
         break;
     case 5:
-        sramBanks = 8;
+        this->sramBanks = 8;
         break;
     }
 
     // RAM end address
-    if (cartridgeType == 6)
+    if (this->cartridgeType == 6)
     {
-        ramEndAddress = 0xA1FF;
+        this->ramEndAddress = 0xA1FF;
     } // MBC2 512 bytes (nibbles)
-    if (ramSize == 1)
+    if (this->ramSize == 1)
     {
-        ramEndAddress = 0xA7FF;
+        this->ramEndAddress = 0xA7FF;
     } // 2K RAM
-    if (ramSize > 1)
+    if (this->ramSize > 1)
     {
-        ramEndAddress = 0xBFFF;
+        this->ramEndAddress = 0xBFFF;
     } // 8K RAM
 
     // M161 banks are double size and start with 0
-    if (romType == 0x104)
+    if (this->romType == 0x104)
     {
         romStartBank = 0;
-        romBanks >>= 1;
+        this->romBanks >>= 1;
         romEndAddress = 0x7FFF;
     }
     // MBC6 banks are half size
-    else if (romType == 32)
+    else if (this->romType == 32)
     {
-        romBanks <<= 1;
+        this->romBanks <<= 1;
         romEndAddress = 0x3FFF;
     }
     if (strcmp(checksumStr, "00") != 0)
@@ -348,76 +369,76 @@ void GameBoyCartridge::headerROM_GB(bool printInfo = true)
         transferJSON["message"] = "";
         transferJSON["checksum"] = checksumStr;
         transferJSON["title"] = this->gameTitle;
-        transferJSON["ramBanks"] = sramBanks;
-        transferJSON["ramEndAddress"] = ramEndAddress;
-        transferJSON["romBanks"] = romBanks;
+        transferJSON["ramBanks"] = this->sramBanks;
+        transferJSON["ramEndAddress"] = this->ramEndAddress;
+        transferJSON["romBanks"] = this->romBanks;
         transferJSON["romEndAddress"] = romEndAddress;
         if (cartID[0] != 0)
         {
             transferJSON["serial"] = cartID;
         }
         transferJSON["rev"] = romVersion;
-        if ((romType == 0) || (romType == 8) || (romType == 9))
+        if ((this->romType == 0) || (this->romType == 8) || (this->romType == 9))
         {
             transferJSON["mapper"] = "None";
         }
-        else if ((romType == 1) || (romType == 2) || (romType == 3))
+        else if ((this->romType == 1) || (this->romType == 2) || (this->romType == 3))
         {
             transferJSON["mapper"] = "MBC1";
         }
-        else if ((romType == 5) || (romType == 6))
+        else if ((this->romType == 5) || (this->romType == 6))
         {
             transferJSON["mapper"] = "MBC2";
         }
-        else if ((romType == 11) || (romType == 12) || (romType == 13))
+        else if ((this->romType == 11) || (this->romType == 12) || (this->romType == 13))
         {
             transferJSON["mapper"] = "MMM01";
         }
-        else if ((romType == 15) || (romType == 16) || (romType == 17) || (romType == 18) || (romType == 19))
+        else if ((this->romType == 15) || (this->romType == 16) || (this->romType == 17) || (this->romType == 18) || (this->romType == 19))
         {
             transferJSON["mapper"] = "MBC3";
         }
-        else if ((romType == 21) || (romType == 22) || (romType == 23))
+        else if ((this->romType == 21) || (this->romType == 22) || (this->romType == 23))
         {
             transferJSON["mapper"] = "MBC4";
         }
-        else if ((romType == 25) || (romType == 26) || (romType == 27) || (romType == 28) || (romType == 29) || (romType == 309))
+        else if ((this->romType == 25) || (this->romType == 26) || (this->romType == 27) || (this->romType == 28) || (this->romType == 29) || (this->romType == 309))
         {
             transferJSON["mapper"] = "MBC5";
         }
-        else if (romType == 32)
+        else if (this->romType == 32)
         {
             transferJSON["mapper"] = "MBC6";
         }
-        else if (romType == 34)
+        else if (this->romType == 34)
         {
             transferJSON["mapper"] = "MBC7";
         }
-        else if (romType == 252)
+        else if (this->romType == 252)
         {
             transferJSON["mapper"] = "Camera";
         }
-        else if (romType == 253)
+        else if (this->romType == 253)
         {
             transferJSON["mapper"] = "TAMA5";
         }
-        else if (romType == 254)
+        else if (this->romType == 254)
         {
             transferJSON["mapper"] = "HuC-3";
         }
-        else if (romType == 255)
+        else if (this->romType == 255)
         {
             transferJSON["mapper"] = "HuC-1";
         }
-        else if ((romType == 0x101) || (romType == 0x103))
+        else if ((this->romType == 0x101) || (this->romType == 0x103))
         {
             transferJSON["mapper"] = "MBC1M";
         }
-        else if (romType == 0x104)
+        else if (this->romType == 0x104)
         {
             transferJSON["mapper"] = "M161";
         }
-        switch (romSize)
+        switch (this->romSize)
         {
         case 0:
             transferJSON["ROMSize"] = "32 KB";
@@ -456,18 +477,18 @@ void GameBoyCartridge::headerROM_GB(bool printInfo = true)
             break;
         }
 
-        switch (sramSize)
+        switch (this->sramSize)
         {
         case 0:
-            if (romType == 6)
+            if (this->romType == 6)
             {
                 transferJSON["RAMSize"] = "512 Byte";
             }
-            else if (romType == 0x22)
+            else if (this->romType == 0x22)
             {
                 transferJSON["RAMSize"] = String(this->lastByte) + " Byte";
             }
-            else if (romType == 0xFD)
+            else if (this->romType == 0xFD)
             {
                 transferJSON["RAMSize"] = "32 Byte";
             }
@@ -485,7 +506,7 @@ void GameBoyCartridge::headerROM_GB(bool printInfo = true)
             break;
 
         case 3:
-            if (romType == 0x20)
+            if (this->romType == 0x20)
             {
                 transferJSON["RAMSize"] = "1.03 MB";
             }
@@ -631,32 +652,32 @@ void GameBoyCartridge::readROM_GB()
     transferJSON.clear();
     word romAddress = 0;
     uint32_t processedProgressBar = 0;
-    uint32_t totalProgressBar = (uint32_t)(romBanks) * 16384;
+    uint32_t totalProgressBar = (uint32_t)(this->romBanks) * 16384;
 
     transferJSON["type"] = "rom";
     transferJSON["total"] = totalProgressBar;
     transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
-    transferJSON["romBanks"] = romBanks;
+    transferJSON["romBanks"] = this->romBanks;
     delay(200);
     Serial.print("JSON:");
     serializeJson(transferJSON, Serial);
     Serial.println();
 
-    for (word currBank = romStartBank; currBank < romBanks; currBank++)
+    for (word currBank = romStartBank; currBank < this->romBanks; currBank++)
     {
         // Second bank starts at 0x4000
         if (currBank > 1)
         {
             romAddress = 0x4000;
             // MBC6 banks are half size
-            if (romType == 32)
+            if (this->romType == 32)
             {
                 romEndAddress = 0x5FFF;
             }
         }
 
         // Set ROM bank for M161
-        if (romType == 0x104)
+        if (this->romType == 0x104)
         {
             romAddress = 0;
             // Set CS2 to LOW
@@ -668,7 +689,7 @@ void GameBoyCartridge::readROM_GB()
         }
 
         // Set ROM bank for MBC1M
-        else if (romType == 0x101 || romType == 0x103)
+        else if (this->romType == 0x101 || this->romType == 0x103)
         {
             if (currBank < 10)
             {
@@ -683,7 +704,7 @@ void GameBoyCartridge::readROM_GB()
         }
 
         // Set ROM bank for MBC6
-        else if (romType == 32)
+        else if (this->romType == 32)
         {
             this->write_byte_GB(0x2800, 0);
             this->write_byte_GB(0x3800, 0);
@@ -692,7 +713,7 @@ void GameBoyCartridge::readROM_GB()
         }
 
         // Set ROM bank for TAMA5
-        else if (romType == 0xFD)
+        else if (this->romType == 0xFD)
         {
             // writeByteSRAM_GB(0xA001, 0);
             // writeByteSRAM_GB(0xA000, currBank & 0x0f);
@@ -701,9 +722,9 @@ void GameBoyCartridge::readROM_GB()
         }
 
         // Set ROM bank for MBC2/3/4/5
-        else if (romType >= 5)
+        else if (this->romType >= 5)
         {
-            if (romType >= 11 && romType <= 13)
+            if (this->romType >= 11 && this->romType <= 13)
             {
                 if ((currBank & 0x1f) == 0)
                 {
@@ -731,7 +752,7 @@ void GameBoyCartridge::readROM_GB()
             }
             else
             {
-                if ((romType >= 0x19 && romType <= 0x1E) && (currBank == 0 || currBank == 256))
+                if ((this->romType >= 0x19 && this->romType <= 0x1E) && (currBank == 0 || currBank == 256))
                 {
                     this->write_byte_GB(0x3000, (currBank >> 8) & 0xFF);
                 }
@@ -749,11 +770,15 @@ void GameBoyCartridge::readROM_GB()
         // Read banks and save to SD
         while (romAddress <= romEndAddress)
         {
+            uint8_t* logBuffer = nullptr;
             for (int i = 0; i < 512; i++)
             {
                 sdBuffer[i] = this->read_byte_GB(romAddress + i);
+                logBuffer[0] = this->read_byte_GB(romAddress + i);
+                // buffer_obj.addPacket(logBuffer, 1);
             }
-            Serial1.write(sdBuffer, 512);
+            // Serial1.write(sdBuffer, 512);
+            
             romAddress += 512;
             processedProgressBar += 512;
         }
@@ -761,7 +786,7 @@ void GameBoyCartridge::readROM_GB()
     transferJSON["type"] = "success";
     transferJSON["total"] = totalProgressBar;
     transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
-    transferJSON["romBanks"] = romBanks;
+    transferJSON["romBanks"] = this->romBanks;
     delay(200);
     Serial.print("JSON:");
     serializeJson(transferJSON, Serial);
@@ -804,7 +829,7 @@ byte GameBoyCartridge::readByteSRAM_GB(uint16_t myAddress)
     //    1   1   1
     // Pull RD HIGH
     rdPin_high;
-    if (romType == 252)
+    if (this->romType == 252)
     {
         // Pull CS HIGH
         cs_mreqPin_high;
@@ -827,29 +852,43 @@ void GameBoyCartridge::readSRAM_GB()
     transferJSON.clear();
     // Initialize progress bar
     uint32_t processedProgressBar = 0;
-    uint32_t totalProgressBar = (uint32_t)(sramBanks) * 8192;
+    uint32_t totalProgressBar = (uint32_t)(this->sramBanks) * 8192;
 
     transferJSON["type"] = "ram";
     transferJSON["total"] = totalProgressBar;
     transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
-    transferJSON["ramBanks"] = sramBanks;
-    transferJSON["lastByte"] = ramEndAddress;
-
+    transferJSON["ramBanks"] = this->sramBanks;
+    transferJSON["lastByte"] = this->ramEndAddress;
+    
     delay(200);
     Serial.print("JSON:");
     serializeJson(transferJSON, Serial);
     Serial.println();
-
+    
     this->rd_wr_mreq_reset();
 
     // MBC2 Fix (unknown why this fixes reading the ram, maybe has to read ROM before RAM?)
     this->read_byte_GB(0x0134);
+    if(this->ramEndAddress > 0) {
+        if (this->cartridgeType <= 4)
+        {                                   // MBC1
+            this->write_byte_GB(0x6000, 1); // Set RAM Mode
+        }
+        this->dataBusAsOutput();
+        // Initialise MBC
+        this->write_byte_GB(0x0000, 0x0A);
+        delayMicroseconds(50);
+        this->dataBusAsInput();
 
+        // this->write_byte_GB(0x4000, 0);
+        this->writtingRAM = true;
+    }
+    /*
     // if cartridge have RAM test
-    if (ramEndAddress > 0)
+    if (this->ramEndAddress > 0)
     {
-        if (cartridgeType <= 4)
-        {                                  // MBC1
+        if (this->cartridgeType <= 4)
+        {                                   // MBC1
             this->write_byte_GB(0x6000, 1); // Set RAM Mode
         }
 
@@ -860,19 +899,21 @@ void GameBoyCartridge::readSRAM_GB()
         this->dataBusAsInput();
 
         // Switch RAM banks
-        for (uint8_t bank = 0; bank < sramBanks; bank++)
+        for (uint8_t bank = 0; bank < this->sramBanks; bank++)
         {
             this->write_byte_GB(0x4000, bank);
 
             // Read RAM
-            for (word ramAddress = 0xA000; ramAddress <= ramEndAddress; ramAddress += 64)
+            for (word ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress += 64)
             {
                 uint8_t readData[64];
                 for (uint8_t i = 0; i < 64; i++)
                 {
                     readData[i] = this->read_byte_GB(ramAddress + i);
+                    
                 }
-                Serial1.write(readData, 64); // Send the 64 byte chunk
+                buffer_obj.addPacket(readData, 64);
+                // Serial1.write(readData, 64); // Send the 64 byte chunk
                 processedProgressBar += 64;
             }
         }
@@ -884,7 +925,7 @@ void GameBoyCartridge::readSRAM_GB()
         transferJSON["type"] = "success";
         transferJSON["total"] = totalProgressBar;
         transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
-        transferJSON["ramBanks"] = sramBanks;
+        transferJSON["ramBanks"] = this->sramBanks;
 
         delay(200);
         Serial.print("JSON:");
@@ -893,12 +934,141 @@ void GameBoyCartridge::readSRAM_GB()
     }
 
     this->rd_wr_mreq_off();
+    */
 }
+void GameBoyCartridge::startWriteRAM_GB()
+{
+    //  Load ROM header
+    this->headerROM_GB(false);
+    this->writtingRAM = true;
 
+    this->rd_wr_mreq_reset();
+
+    // MBC2 Fix (unknown why this fixes it, maybe has to read ROM before RAM?)
+    this->read_byte_GB(0x0134);
+
+    // Does cartridge have RAM
+    if (this->ramEndAddress > 0)
+    {
+        if (this->cartridgeType <= 4)
+        {                                   // MBC1
+            this->write_byte_GB(0x6000, 1); // Set RAM Mode
+        }
+
+        // Initialise MBC
+        this->write_byte_GB(0x0000, 0x0A);
+
+        // Switch RAM banks
+        for (uint8_t bank = 0; bank < ramBanks; bank++)
+        {
+            this->write_byte_GB(0x4000, bank);
+
+            // Write RAM
+            for (uint16_t ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress++)
+            {
+                // Wait for serial input
+                while (Serial.available()){
+                }
+
+                // Read input
+                uint8_t readValue = (uint8_t)Serial.read();
+
+                // Write to RAM
+                cs_mreqPin_low;
+                this->write_byte_GB(ramAddress, readValue);
+                asm volatile("nop");
+                asm volatile("nop");
+                asm volatile("nop");
+                cs_mreqPin_high;
+            }
+        }
+
+        // Disable RAM
+        this->write_byte_GB(0x0000, 0x00);
+        Serial.flush(); // Flush any serial data that wasn't processed
+    }
+}
+void GameBoyCartridge::endWriteRAM_GB()
+{
+    this->writtingRAM = false;
+}
+bool GameBoyCartridge::isWrittingROM()
+{
+    return this->writtingROM;
+}
+bool GameBoyCartridge::isWrittingRAM()
+{
+    return this->writtingRAM;
+}
 void GameBoyCartridge::setup()
 {
-    
+    buffer_obj = Buffer();
+    this->writtingRAM = false;
+    this->writtingROM = false;
+    this->lastByte = 0;
+    this->cartridgeType = 0;
+    this->romSize = 0;
+    this->romBanks = 0;
+    this->ramSize = 0;
+    this->ramBanks = 0;
+    this->sramSize = 0;
+    this->romEndAddress = 0x7FFF;
+    this->sramBanks = 0;
+    this->romType = 0;
+
+
+    currentBank = 0;
+    currentRamAddress = 0xA000;
+    currentByte = 0;
 }
 void GameBoyCartridge::main()
 {
+    if (this->isWrittingRAM())
+    {
+        // if (!transferSRAMInProgress) {
+            if (currentBank < this->sramBanks) {
+                this->write_byte_GB(0x4000, currentBank);
+                // Read RAM
+                for (word ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress += 64)
+                {
+                    uint8_t readData[64];
+                    for (uint8_t i = 0; i < 64; i++)
+                    {
+                        readData[i] = this->readByteSRAM_GB(ramAddress + i);
+                        
+                    }
+                    // buffer_obj.addPacket(readData, 64);
+                    // buffer_obj.forceSaveSerial();
+                    Serial1.write(readData, 64); // Send the 64 byte chunk
+                    Serial1.flush();
+                    processedProgressBar += 64;
+                }
+                currentBank++;
+            } else {
+                 // Disable RAM
+                this->write_byte_GB(0x0000, 0x00);
+                delay(50);
+                uint32_t totalProgressBar = (uint32_t)(this->sramBanks) * 8192;
+                transferJSON["type"] = "success";
+                transferJSON["total"] = totalProgressBar;
+                transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
+                transferJSON["ramBanks"] = this->sramBanks;
+
+                delay(200);
+                Serial.print("JSON:");
+                serializeJson(transferJSON, Serial);
+                Serial.println();
+                // La transferencia de SRAM está completa
+                // Resto del código del bucle principal
+                // ...
+                transferSRAMInProgress = false;
+                this->writtingRAM = false;
+
+                this->rd_wr_mreq_off();
+            }
+        // }
+    }
+    else if (this->isWrittingROM())
+    {
+    }
 }

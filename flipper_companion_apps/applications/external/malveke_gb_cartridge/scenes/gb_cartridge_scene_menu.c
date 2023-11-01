@@ -73,6 +73,7 @@ void gb_cartridge_scene_menu_on_enter(void* context) {
     
 
     variable_item_list_add(app->submenu, "Write RAM", 1, NULL, NULL);
+    variable_item_list_add(app->submenu, "Settings", 1, NULL, NULL);
 
     variable_item_list_set_enter_callback(app->submenu, gb_cartridge_scene_menu_submenu_callback, app);
 
@@ -106,6 +107,10 @@ bool gb_cartridge_scene_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene4);
             scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_4);
+        } else if (event.event == SubmenuIndexScene5) {
+            scene_manager_set_scene_state(
+                app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexScene5);
+            scene_manager_next_scene(app->scene_manager, GBCartridgeSceneScene_5);
         } else if (event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
                 app->scene_manager, GBCartridgeSceneMenu, SubmenuIndexSettings);

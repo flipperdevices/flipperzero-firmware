@@ -68,6 +68,9 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene3, gb_cartridge_scene_3_get_view(app->gb_cartridge_scene_3));
     app->gb_cartridge_scene_4 = gb_cartridge_scene_4_alloc();
     view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene4, gb_cartridge_scene_4_get_view(app->gb_cartridge_scene_4));
+    app->gb_cartridge_scene_5 = gb_cartridge_scene_5_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene5, gb_cartridge_scene_5_get_view(app->gb_cartridge_scene_5));
+    
     // app->button_menu = button_menu_alloc();
     // view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdScene3, button_menu_get_view(app->button_menu));
     

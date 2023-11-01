@@ -13,6 +13,7 @@
 #include "../helpers/sequential_file.h"
 #include <stdio.h>   // Para sprintf
 #include <string.h>  // Para strlen
+#include <lib/toolbox/stream/file_stream.h>
 
 struct GBCartridgeScene4 {
     View* view;
@@ -20,7 +21,6 @@ struct GBCartridgeScene4 {
     void* context;
     GBCartridge* app;
 };
-// static uint64_t last_toggle_time = 0;
 
 typedef struct {
     char* event_type;
@@ -37,26 +37,6 @@ typedef struct {
     char* gameboy_rom_option_selected_text;
 } GameBoyCartridgeROMWriteModel;
 
-// void dump_rom_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
-//     UNUSED(len);
-//     UNUSED(buf);
-//     GBCartridge* instance = context;
-//     storage_file_write(instance->cart_rom, buf, len);
-//     with_view_model(
-//         instance->gb_cartridge_scene_4->view,
-//         GameBoyCartridgeROMWriteModel * model,
-//         { 
-//             model->transfered += len;
-//             uint64_t current_time = furi_hal_rtc_get_timestamp();
-//             model->elapsed_time = current_time - model->start_time;
-//             if (current_time - last_toggle_time >= 0.2) {
-//                 model->rx_active = !model->rx_active;
-//                 last_toggle_time = current_time;
-//             }
-//         },
-//         true);
-// }
-
 void gb_cartridge_scene_4_set_callback(
     GBCartridgeScene4* instance,
     GBCartridgeScene4Callback callback,
@@ -66,57 +46,7 @@ void gb_cartridge_scene_4_set_callback(
     instance->callback = callback;
     instance->context = context;
 }
-// void gameboy_rom_write_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
-//     furi_assert(context);
-//     UNUSED(len);
-//     UNUSED(buf);
-//     GBCartridge* instance = context;
-//     with_view_model(
-//         instance->gb_cartridge_scene_4->view,
-//         GameBoyCartridgeROMWriteModel * model,
-//         {
-//             UNUSED(model);
-//             cJSON* json = cJSON_Parse((char*)buf);
-//             if(json == NULL) {
-//             } else {
-//                 cJSON* type = cJSON_GetObjectItemCaseSensitive(json, "type");
-//                 if(cJSON_IsString(type) && (type->valuestring != NULL)) {
-//                     model->event_type = strdup(type->valuestring);
-//                 } else {
-//                     model->event_type = "None";
-//                 }
-//                 //  Total
-//                 cJSON* total = cJSON_GetObjectItemCaseSensitive(json, "total");
-//                 if(cJSON_IsNumber(total)) {
-//                     model->total_rom = total->valueint;
-//                 } else {
-//                     model->total_rom = 0;
-//                 }
-//                 //  Progress
-//                 cJSON* progress = cJSON_GetObjectItemCaseSensitive(json, "progress");
-//                 if(cJSON_IsNumber(progress)) {
-//                     model->progress = progress->valueint;
-//                 } else {
-//                     model->progress = 0;
-//                 }
-//                 //  RomBanks
-//                 cJSON* romBanks = cJSON_GetObjectItemCaseSensitive(json, "romBanks");
-//                 if(cJSON_IsNumber(romBanks)) {
-//                     model->romBanks = romBanks->valueint;
-//                 } else {
-//                     model->romBanks = 0;
-//                 }
-//             }
-//             if (strcmp(model->event_type, "success") == 0) {
-//                 model->progress = 100;
-//                 if(instance->cart_rom && storage_file_is_open(instance->cart_rom)) {
-//                     storage_file_close(instance->cart_rom);
-//                 }
-//                 notification_success(instance->notification);
-//             }
-//         },
-//         true);
-// }
+
 static void drawProgressBar(Canvas* canvas, int progress) {
     for(int x = 0; x < 64 - 14 - UI_PADDING - UI_PADDING -UI_PADDING - UI_PADDING; x += 5) {
         for(int row = 0; row < 20; row += 5) {
@@ -199,7 +129,32 @@ static void gb_cartridge_scene_4_model_init(GameBoyCartridgeROMWriteModel* const
     model->elapsed_time = 0;
     model->start_time = 0;
 }
+// static bool select_rom_file(GBCartridge *app, Stream* stream) {
+//     bool result = false;
+//     FuriString* file_path = furi_string_alloc();
+//     furi_string_set(file_path, MALVEKE_APP_FOLDER);
+//     DialogsFileBrowserOptions browser_options;
+//     dialog_file_browser_set_basic_options(
+//         &browser_options, app->gameboy_rom_option_selected_text, NULL);
+//     browser_options.base_path = MALVEKE_APP_FOLDER;
+//     browser_options.skip_assets = true;
 
+//     // Input events and views are managed by file_browser
+//     bool res = dialog_file_browser_show( app->dialogs, file_path, file_path, &browser_options);
+//     UNUSED(res);
+//     FURI_LOG_I(TAG, "File selected: %s", furi_string_get_cstr(file_path));
+//     if(res) {
+//         if(!file_stream_open(stream, furi_string_get_cstr(file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+//             FURI_LOG_D(TAG, "Cannot open file \"%s\"", furi_string_get_cstr(file_path));
+//             file_stream_close(stream);
+//         } else {
+//             FURI_LOG_D(TAG, "Open file \"%s\"", furi_string_get_cstr(file_path));
+//             result = true;
+//         }
+//     }
+//     furi_string_free(file_path);
+//     return result;
+// }
 bool gb_cartridge_scene_4_input(InputEvent* event, void* context) {
     furi_assert(context);
     GBCartridgeScene4* instance = context;
@@ -234,32 +189,27 @@ bool gb_cartridge_scene_4_input(InputEvent* event, void* context) {
                         GBCartridge* app = ((GBCartridge*)instance->context);
                         UNUSED(model);
                         UNUSED(app);
+                        // uint8_t buffer[BUFFER_SIZE];
+                        // size_t bytesRead;
+                        // Stream* file_stream = file_stream_alloc(app->storage);
+                       
+                        // if(select_rom_file(app, file_stream)) {
+                        //     const char gbcartridge_start_command[] = "gbcartridge -w -o -s\n";
+                        //     uart_tx((uint8_t*)gbcartridge_start_command, strlen(gbcartridge_start_command));
+                        //     furi_delay_ms(500);
+                            
+                        //     while (file_stream_read(file_stream, buffer, sizeof(buffer), &bytesRead) && bytesRead > 0) {
+                        //         // Send 64 bytes at a time
+                        //         lp_uart_tx((uint8_t*)buffer, bytesRead);
+                        //     }
 
+                        //     const char gbcartridge_end_command[] = "gbcartridge -w -o -e\n";
+                        //     uart_tx((uint8_t*)gbcartridge_end_command, strlen(gbcartridge_end_command));
 
-                        FuriString* path = furi_string_alloc();
-                        furi_string_set(path, MALVEKE_APP_FOLDER);
-                        DialogsFileBrowserOptions browser_options;
-                        dialog_file_browser_set_basic_options(
-                            &browser_options, app->gameboy_rom_option_selected_text, NULL);
-                        browser_options.base_path = MALVEKE_APP_FOLDER;
-                        browser_options.skip_assets = true;
-
-                        // Input events and views are managed by file_browser
-                        bool res = dialog_file_browser_show( app->dialogs, path, path, &browser_options);
-
-                        UNUSED(res);
-
-                        
-                        // model->start_time = furi_hal_rtc_get_timestamp(); // Registra el tiempo de inicio
-                        // app->cart_rom = storage_file_alloc(app->storage);
-
-                        
-                        // if(storage_file_open(app->cart_rom, model->cart_dump_rom_filename_sequential, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-                        //     const char gbcartridge_command[] = "gbcartridge -w -o\n";
-                        //     uart_tx((uint8_t*)gbcartridge_command, strlen(gbcartridge_command));
-                        // } else {
-                        //     dialog_message_show_storage_error(app->dialogs, "Cannot open dump file");
+                            
+                        //     file_stream_close(file_stream);
                         // }
+                        // stream_free(file_stream);
                     },
                     true);
             break;
@@ -291,33 +241,6 @@ void gb_cartridge_scene_4_enter(void* context) {
             UNUSED(model);
             gb_cartridge_scene_4_model_init(model);
             model->gameboy_rom_option_selected_text = app->gameboy_rom_option_selected_text;
-
-            
-            
-            // furi_record_close("dialogs");
-
-
-            // Stream* file_stream = file_stream_alloc(app->storage);
-            // FuriString* path = furi_string_alloc();
-            // furi_string_set(path, MALVEKE_APP_FOLDER);
-            // if(file_stream_open(file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-
-            // }
-
-
-
-            // gb_cartridge_scene_4_model_init(model);
-            // model->cart_dump_rom_filename  = app->cart_dump_rom_filename;
-            // model->cart_dump_rom_extension = app->cart_dump_rom_extension;
-            // char *filename = strrchr(sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, app->cart_dump_rom_filename, app->cart_dump_rom_extension), '/');
-            // filename++;
-            // char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, app->cart_dump_rom_filename, app->cart_dump_rom_extension);
-            // model->cart_dump_rom_filename_sequential =  filename;
-
-             // Register callbacks to receive data
-            // uart_set_handle_rx_data_cb(app->uart, gameboy_rom_write_handle_rx_data_cb); // setup callback for general log rx thread
-            // uart_set_handle_rx_data_cb(app->lp_uart, dump_rom_handle_rx_data_cb); // setup callback for general log rx thread
-
 
         },
         false);

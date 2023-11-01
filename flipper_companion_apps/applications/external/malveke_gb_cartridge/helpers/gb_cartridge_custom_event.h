@@ -34,6 +34,13 @@ typedef enum {
     GBCartridgeCustomEventScene4Right,
     GBCartridgeCustomEventScene4Ok,
     GBCartridgeCustomEventScene4Back,
+
+    GBCartridgeCustomEventScene5Up,
+    GBCartridgeCustomEventScene5Down,
+    GBCartridgeCustomEventScene5Left,
+    GBCartridgeCustomEventScene5Right,
+    GBCartridgeCustomEventScene5Ok,
+    GBCartridgeCustomEventScene5Back,
 } GBCartridgeCustomEvent;
 
 enum GBCartridgeCustomEventType {

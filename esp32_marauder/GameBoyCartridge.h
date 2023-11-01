@@ -10,7 +10,7 @@
 
 #include "Buffer.h"
 
-extern Buffer buffer_obj; 
+extern Buffer buffer_obj;
 
 DynamicJsonDocument transferJSON(2048);
 
@@ -20,8 +20,22 @@ class GameBoyCartridge {
     uint8_t startRomBuffer[385];
     char gameTitle[17];
     
+    uint16_t cartridgeType;
+    uint16_t romSize;
+    uint16_t romBanks;
+    uint16_t ramSize;
+    uint16_t ramBanks;
+    uint16_t ramEndAddress;
+    unsigned long sramSize = 0;
+    word romEndAddress;
+    word sramBanks;
+    int romType;
+
+
     word lastByte;
     bool runGameBoyCartridge;
+    bool writtingRAM;
+    bool writtingROM;
     void setup();
     
     byte read_byte_GB(uint16_t address);
@@ -45,7 +59,13 @@ class GameBoyCartridge {
     void headerROM_GB(bool printInfo);
     void readROM_GB();
     void readSRAM_GB();
+    void writeROM_GB();
+    void writeRAM_GB();
+    void startWriteRAM_GB();
+    void endWriteRAM_GB();
 
+    bool isWrittingRAM();
+    bool isWrittingROM();
 };
 
 #endif

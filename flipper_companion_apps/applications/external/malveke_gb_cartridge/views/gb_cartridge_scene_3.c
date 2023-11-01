@@ -53,7 +53,9 @@ void dump_ram_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     UNUSED(len);
     UNUSED(buf);
     GBCartridge* instance = context;
-    storage_file_write(instance->cart_ram, buf, len);
+    if(instance->is_writing_ram) {
+        storage_file_write(instance->cart_ram, buf, len);
+    }
     with_view_model(
         instance->gb_cartridge_scene_3->view,
         GameBoyCartridgeRAMBackupModel * model,
@@ -121,9 +123,9 @@ void gameboy_ram_backup_handle_rx_data_cb(uint8_t* buf, size_t len, void* contex
             }
             if (strcmp(model->event_type, "success") == 0) {
                 model->progress = 100;
-                if(instance->cart_ram && storage_file_is_open(instance->cart_ram)) {
-                    storage_file_close(instance->cart_ram);
-                }
+                // if(instance->cart_ram && storage_file_is_open(instance->cart_ram)) {
+                //     storage_file_close(instance->cart_ram);
+                // }
                 notification_success(instance->notification);
             }
         },
@@ -226,9 +228,15 @@ bool gb_cartridge_scene_3_input(InputEvent* event, void* context) {
                     {
                         UNUSED(model);
                         GBCartridge* app = (GBCartridge*)instance->context;
+                        UNUSED(app);
                         // Unregister rx callback
                         uart_set_handle_rx_data_cb(app->uart, NULL);
                         uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+
+                        app->is_writing_ram = false;
+                        if(app->cart_ram && storage_file_is_open(app->cart_ram)) {
+                            storage_file_close(app->cart_ram);
+                        }
                         instance->callback(GBCartridgeCustomEventScene3Back, instance->context);
                     },
                     true);
@@ -269,6 +277,11 @@ bool gb_cartridge_scene_3_input(InputEvent* event, void* context) {
 void gb_cartridge_scene_3_exit(void* context) {
     furi_assert(context);
     GBCartridge* app = context;
+    // Automatically stop the scan when exiting view
+    // uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+    // furi_delay_ms(50);
+
+    
     gb_cartridge_stop_all_sound(app);
 }
 
@@ -291,7 +304,7 @@ void gb_cartridge_scene_3_enter(void* context) {
             // filename++;
             char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, app->cart_dump_ram_filename, app->cart_dump_ram_extension);
             model->cart_dump_ram_filename_sequential =  filename;
-
+            app->is_writing_ram = true;
              // Register callbacks to receive data
             uart_set_handle_rx_data_cb(app->uart, gameboy_ram_backup_handle_rx_data_cb); // setup callback for general log rx thread
             uart_set_handle_rx_data_cb(app->lp_uart, dump_ram_handle_rx_data_cb); // setup callback for general log rx thread

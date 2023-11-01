@@ -19,6 +19,7 @@
 #include "views/gb_cartridge_scene_2.h"
 #include "views/gb_cartridge_scene_3.h"
 #include "views/gb_cartridge_scene_4.h"
+#include "views/gb_cartridge_scene_5.h"
 #include "helpers/gb_cartridge_storage.h"
 #include "uart.h"
 #include "helpers/cJSON.h"
@@ -40,6 +41,8 @@
 #define UI_PROGRESS_COLS 8
 #define UI_PROGRESS_ROWS 4
 
+#define BUFFER_SIZE 64
+
 typedef struct {
     Gui* gui;
     Storage* storage;
@@ -54,6 +57,8 @@ typedef struct {
     GBCartridgeScene2* gb_cartridge_scene_2;
     GBCartridgeScene3* gb_cartridge_scene_3;
     GBCartridgeScene4* gb_cartridge_scene_4;
+    GBCartridgeScene5* gb_cartridge_scene_5;
+    
     DialogsApp* dialogs; // File Browser
     FuriString* file_path; // File Browser
     uint32_t haptic; 
@@ -77,6 +82,10 @@ typedef struct {
 
     uint32_t gameboy_rom_option_selected_index;
     char* gameboy_rom_option_selected_text;
+
+    FuriThread* thread;
+    bool is_writing_rom;
+    bool is_writing_ram;
 } GBCartridge;
 
 

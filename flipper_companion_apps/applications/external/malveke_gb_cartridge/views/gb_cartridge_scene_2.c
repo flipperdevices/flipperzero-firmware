@@ -37,7 +37,9 @@ void dump_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     UNUSED(len);
     UNUSED(buf);
     GBCartridge* instance = context;
-    storage_file_write(instance->cart_rom, buf, len);
+    if(instance->is_writing_rom) {
+        storage_file_write(instance->cart_rom, buf, len);
+    }
     with_view_model(
         instance->gb_cartridge_scene_2->view,
         GameBoyCartridgeROMBackupModel * model,
@@ -213,9 +215,10 @@ bool gb_cartridge_scene_2_input(InputEvent* event, void* context) {
                     {
                         UNUSED(model);
                         GBCartridge* app = (GBCartridge*)instance->context;
-                        // Unregister rx callback
-                        uart_set_handle_rx_data_cb(app->uart, NULL);
-                        uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+                        UNUSED(app);
+                        // // Unregister rx callback
+                        // uart_set_handle_rx_data_cb(app->uart, NULL);
+                        // uart_set_handle_rx_data_cb(app->lp_uart, NULL);
                         instance->callback(GBCartridgeCustomEventScene2Back, instance->context);
                     },
                     true);
@@ -257,6 +260,18 @@ bool gb_cartridge_scene_2_input(InputEvent* event, void* context) {
 void gb_cartridge_scene_2_exit(void* context) {
     furi_assert(context);
     GBCartridge* app = context;
+
+    // Automatically stop the scan when exiting view
+    // uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+    // furi_delay_ms(50);
+
+    uart_set_handle_rx_data_cb(app->uart, NULL);
+    uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+
+    app->is_writing_rom = false;
+    if(app->cart_rom && storage_file_is_open(app->cart_rom)) {
+        storage_file_close(app->cart_rom);
+    }
     gb_cartridge_stop_all_sound(app);
 }
 
@@ -276,7 +291,7 @@ void gb_cartridge_scene_2_enter(void* context) {
             // filename++;
             char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, app->cart_dump_rom_filename, model->cart_dump_rom_extension);
             model->cart_dump_rom_filename_sequential =  filename;
-
+            app->is_writing_rom = true;
              // Register callbacks to receive data
             uart_set_handle_rx_data_cb(app->uart, gameboy_rom_backup_handle_rx_data_cb); // setup callback for general log rx thread
             uart_set_handle_rx_data_cb(app->lp_uart, dump_handle_rx_data_cb); // setup callback for general log rx thread
