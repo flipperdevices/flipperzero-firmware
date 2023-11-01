@@ -8,7 +8,7 @@ App(
     stack_size=2 * 1024,
     order=60,
     fap_icon_assets="images",
-    fap_icon="iBIcon.png",
+    fap_icon="icon.png",
     fap_category="iButton",
 )
 

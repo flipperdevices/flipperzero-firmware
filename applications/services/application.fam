@@ -9,7 +9,6 @@ App(
         "desktop",
         "loader",
         "power",
-        "ibutton_srv",
         "infrared_srv",
         "lfrfid_srv",
         "onewire_srv",
