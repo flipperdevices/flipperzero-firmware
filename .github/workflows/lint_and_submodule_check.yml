@@ -28,6 +28,7 @@ jobs:
           SUB_BRANCH="dev";
           SUB_COMMITS_MIN=40;
           cd "$SUB_PATH";
+          git fetch --tags --unshallow;
           SUBMODULE_HASH="$(git rev-parse HEAD)";
           BRANCHES=$(git branch -r --contains "$SUBMODULE_HASH");
           COMMITS_IN_BRANCH="$(git rev-list --count dev)";
