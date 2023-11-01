@@ -56,7 +56,7 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
                 break;
             }
 
-            uint16_t ch = app->lang->unicode_base + n;
+            uint16_t ch = app->lang->unicode_base + app->lang->letters[n];
 
             if(app->opened[n] != HangmanOpenedInit) {
                 canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_m_symbols);
@@ -117,9 +117,9 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
 
     if(app->eog != HangmanGameOn) {
         if(app->eog == HangmanGameLoose) {
-            hangman_text_window(canvas, "Вы проиграли!");
+            hangman_text_window(canvas, app->lang->message_ok, app->lang->message_loose);
         } else {
-            hangman_text_window(canvas, "Вы выиграли!");
+            hangman_text_window(canvas, app->lang->message_ok, app->lang->message_won);
         }
         app->need_generate = true;
     }
@@ -182,7 +182,18 @@ int hangman_read_int(Stream *stream) {
 
     int result = strtol(furi_string_get_cstr(line), NULL, 10);
     furi_string_free(line);
+    return result;
+}
 
+char* hangman_read_str(Stream *stream) {
+    FuriString *line = furi_string_alloc();
+
+    if (!stream_read_line(stream, line)) {
+        furi_crash(NULL);
+    }
+
+    char *result = strdup(furi_string_get_cstr(line));
+    furi_string_free(line);
     return result;
 }
 
@@ -209,34 +220,30 @@ HangmanLangConfig *hangman_load_config() {
     config->first_letter_offset = hangman_read_int(stream);
 
     // letters
-    if (!stream_read_line(stream, line)) {
-        furi_crash(NULL);
-    }
+    config->unicode_base = 0xFFFF;
+    config->letters_cnt = 0;
 
-    uint16_t abc[HANGMAN_MAX_ALP_SIZE];
-    uint16_t min = 0xFFFF;
-    uint16_t cnt = 0;
-
-    const char* token = furi_string_get_cstr(line);
-    while (*token && cnt < HANGMAN_MAX_ALP_SIZE) {
+    const char* token = hangman_read_str(stream);
+    while (*token && config->letters_cnt < HANGMAN_MAX_ALP_SIZE) {
         char *end;
         int num = strtol(token, &end, 16);
         if (num == 0) break;
 
-        abc[cnt++] = num;
-        if (min > num) min = num;
-        token = end + 1;
+        config->letters[config->letters_cnt++] = num;
+        if (config->unicode_base > num) config->unicode_base = num;
+        token = end + 1; // +1 because of space
     }
 
-    furi_string_free(line);
-
-    config->letters_cnt = cnt;
-    config->unicode_base = min;
     config->keyboard_rows = ceil((float) config->letters_cnt / config->keyboard_cols);
 
-    for (int i = 0; i < cnt; i++ )
-        abc[i] -= config->unicode_base;
+    for (int i = 0; i < config->letters_cnt; i++ )
+        config->letters[i] -= config->unicode_base;
 
+    config->message_ok    = hangman_read_str(stream);
+    config->message_won   = hangman_read_str(stream);
+    config->message_loose = hangman_read_str(stream);
+
+    furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
     furi_record_close(RECORD_STORAGE);
@@ -275,6 +282,9 @@ void hangman_app_free(HangmanApp** app) {
 
     free((*app)->word);
     free((*app)->lang->dict_file);
+    free((*app)->lang->message_ok);
+    free((*app)->lang->message_loose);
+    free((*app)->lang->message_won);
     free((*app)->lang);
     free(*app);
 }
