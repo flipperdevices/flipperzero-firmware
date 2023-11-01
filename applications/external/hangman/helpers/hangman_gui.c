@@ -1,5 +1,13 @@
 #include "hangman.h"
 
+size_t hangman_string_length(const char* str) {
+    FuriString* furi_str = furi_string_alloc_set_str(str);
+    size_t len = furi_string_utf8_length(furi_str);
+    furi_string_free(furi_str);
+
+    return len;
+}
+
 void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str) {
     FuriStringUTF8State state = FuriStringUTF8StateStarting;
     FuriStringUnicodeValue value = 0;
@@ -30,7 +38,7 @@ void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
     const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;
     const uint8_t horizontal_offset = 1;
-    const uint8_t string_width = canvas_glyph_width(canvas, ' ') * strlen(str) / 2;
+    const uint8_t string_width = canvas_glyph_width(canvas, ' ') * hangman_string_length(str);
     const Icon* icon = &I_button_ok_7x7;
     const uint8_t icon_h_offset = 3;
     const uint8_t icon_width_with_offset = 7 + icon_h_offset;
@@ -56,7 +64,7 @@ void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
     canvas_invert_color(canvas);
 }
 
-void hangman_text_window(Canvas* canvas, char* txt) {
+void hangman_text_window(Canvas* canvas, char* ok, char* txt) {
     uint8_t x = 23, y = 18, w = 84, h = 34;
 
     canvas_set_color(canvas, ColorWhite);
@@ -64,9 +72,9 @@ void hangman_text_window(Canvas* canvas, char* txt) {
     canvas_set_color(canvas, ColorBlack);
 
     elements_frame(canvas, x, y, w, h);
-    hangman_ok_button(canvas, y + h, "Ok");
+    hangman_ok_button(canvas, y + h, ok);
 
-    uint8_t txt_w = canvas_glyph_width(canvas, ' ') * strlen(txt) / 2;
+    uint8_t txt_w = canvas_glyph_width(canvas, ' ') * hangman_string_length(txt);
     hangman_draw_utf8_str(
         canvas, (canvas_width(canvas) - txt_w) / 2, x + canvas_current_font_height(canvas), txt);
 }
