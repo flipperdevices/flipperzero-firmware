@@ -12,7 +12,6 @@ App(
         "ibutton_srv",
         "infrared_srv",
         "lfrfid_srv",
-        "nfc_srv",
         "onewire_srv",
         "subghz_srv",
     ],

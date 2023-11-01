@@ -14,6 +14,7 @@ App(
         "!nfc_cli.c",
     ],
     fap_libs=["assets"],
+    fap_icon="icon.png",
     fap_category="NFC",
     fap_icon_assets="images",
 )
