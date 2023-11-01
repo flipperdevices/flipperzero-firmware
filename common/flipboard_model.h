@@ -36,3 +36,6 @@ void flipboard_model_set_colors(FlipboardModel* model, KeySettingModel* ksm, uin
 void flipboard_model_send_keystrokes(FlipboardModel* model, KeySettingModel* ksm);
 void flipboard_model_send_text(FlipboardModel* model, KeySettingModel* ksm);
 uint8_t flipboard_model_reduce(FlipboardModel* model, uint8_t new_key, bool left_wins);
+
+void* flipboard_model_get_custom_data(FlipboardModel* model);
+void flipboard_model_set_custom_data(FlipboardModel* model, void* custom_data);

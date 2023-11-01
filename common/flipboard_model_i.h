@@ -25,4 +25,6 @@ struct FlipboardModel {
     bool single_button_mode;
     bool has_speaker;
     bool backlight_always_on;
+
+    void* custom_data;
 };

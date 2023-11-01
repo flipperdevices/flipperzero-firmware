@@ -1,5 +1,6 @@
 #include "app.h"
 #include "app_config.h"
+#include "flipboard_blinky_icons.h"
 
 #include <gui/modules/widget.h>
 #include <furi.h>
@@ -17,24 +18,23 @@ bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
 This method handles drawing when in the FlipboardKeyboard mode.
 */
 void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
-    static uint8_t counter = 0;
-
     FlipboardModelRef* my_model = (FlipboardModelRef*)model;
-    canvas_draw_str(canvas, 2, 15, "PRESS FLIPBOARD");
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_icon(canvas, 1, 1, &I_nametag);
 
-    if(flipboard_model_get_single_button_mode(my_model->model)) {
-        canvas_draw_str(canvas, 22, 30, "BUTTON");
-    } else {
-        canvas_draw_str(canvas, 22, 30, "BUTTONS");
-    }
-
-    KeyMonitor* km = flipboard_model_get_key_monitor(my_model->model);
-    if(km != NULL) {
-        uint8_t last = key_monitor_get_last_status(km);
+    FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(my_model->model);
+    if(fbm->detail_counter > 0) {
         FuriString* str = furi_string_alloc();
-        furi_string_printf(str, "%02X   %02x", last, counter++);
-        canvas_draw_str(canvas, 55, 50, furi_string_get_cstr(str));
+        furi_string_printf(
+            str,
+            "Speed:%lu    Effect:%d of %d",
+            fbm->period_ms,
+            fbm->effect_id,
+            fbm->max_effect_id);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 1, 61, furi_string_get_cstr(str));
         furi_string_free(str);
+        fbm->detail_counter--;
     }
 }
 
@@ -45,32 +45,64 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
     Flipboard* app = (Flipboard*)context;
     FlipboardModel* model = flipboard_get_model(app);
     uint8_t reduced_new_key = flipboard_model_reduce(model, new_key, false);
+    uint32_t detail_counter_ticks = 20;
 
     FURI_LOG_D(TAG, "SW EVENT: old=%d new=%d reduced=%d", old_key, new_key, reduced_new_key);
 
-    KeySettingModel* ksm = flipboard_model_get_key_setting_model(model, reduced_new_key);
-    flipboard_model_send_keystrokes(model, ksm);
-    flipboard_model_send_text(model, ksm);
-    flipboard_model_play_tone(model, ksm);
-    flipboard_model_set_colors(model, ksm, new_key);
+    FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
+    if((new_key == 1) || (new_key == 3)) {
+        // Faster by 5ms
+        uint32_t delay = (new_key == 1) ? 5 : 20;
+        if(fbm->period_ms > delay) {
+            fbm->period_ms -= delay;
+            if(fbm->period_ms < 20) {
+                fbm->period_ms = 20;
+            }
+            furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
+            fbm->detail_counter = detail_counter_ticks;
+        }
+    } else if(new_key == 2) {
+        // Slower by 20ms
+        uint32_t delay = 20;
+        fbm->period_ms += delay;
+        furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
+        fbm->detail_counter = detail_counter_ticks;
+    } else if(new_key == 4) {
+        // Previous effect
+        fbm->effect_id--;
+        if(fbm->effect_id < 1) {
+            fbm->effect_id = fbm->max_effect_id;
+        }
+        fbm->detail_counter = detail_counter_ticks;
+    } else if(new_key == 8) {
+        // Next effect
+        fbm->effect_id++;
+        if(fbm->effect_id > fbm->max_effect_id) {
+            fbm->effect_id = 1;
+        }
+        fbm->detail_counter = detail_counter_ticks;
+    } else if(new_key == 12) {
+        // Max effect
+        fbm->effect_id = fbm->max_effect_id;
+        fbm->detail_counter = detail_counter_ticks;
+    }
 
     return true;
 }
 
-static FuriTimer* timer;
-uint32_t colors[4] = {0xFF0000, 0xFFFFFF, 0xFF0000, 0x0000FF};
 void flipboard_tick_callback(void* context) {
     FlipboardModel* model = (FlipboardModel*)context;
+    FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
     FlipboardLeds* leds = flipboard_model_get_leds(model);
-    uint32_t tmp = colors[0];
+    uint32_t tmp = fbm->colors[0];
     for(int i = 0; i < 3; i++) {
-        colors[i] = colors[i + 1];
+        fbm->colors[i] = fbm->colors[i + 1];
     }
-    colors[3] = tmp;
-    flipboard_leds_set(leds, LedId1, colors[0]);
-    flipboard_leds_set(leds, LedId2, colors[1]);
-    flipboard_leds_set(leds, LedId3, colors[2]);
-    flipboard_leds_set(leds, LedId4, colors[3]);
+    fbm->colors[3] = tmp;
+    flipboard_leds_set(leds, LedId1, fbm->colors[0]);
+    flipboard_leds_set(leds, LedId2, fbm->colors[1]);
+    flipboard_leds_set(leds, LedId3, fbm->colors[2]);
+    flipboard_leds_set(leds, LedId4, fbm->colors[3]);
     flipboard_leds_update(leds);
 }
 
@@ -79,9 +111,9 @@ This method is invoked when entering the FlipboardKeyboard mode.
 */
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
+    FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
     flipboard_model_set_key_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
-    timer = furi_timer_alloc(flipboard_tick_callback, FuriTimerTypePeriodic, fm);
-    furi_timer_start(timer, furi_ms_to_ticks(80));
+    furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
     flipboard_model_set_gui_refresh_speed_ms(fm, 1000);
 }
 
@@ -90,12 +122,11 @@ This method is invoked when exiting the FlipboardKeyboard mode.
 */
 void flipboard_exit_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
-    flipboard_model_set_colors(fm, NULL, 0x0);
+    FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
+    furi_timer_stop(fbm->timer);
     flipboard_model_set_key_monitor(fm, NULL, NULL);
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
-    furi_timer_stop(timer);
-    furi_timer_free(timer);
-    timer = NULL;
+    flipboard_model_set_colors(fm, NULL, 0x0);
 }
 
 /*
@@ -114,6 +145,27 @@ View* get_primary_view(void* context) {
     FlipboardModelRef* ref = (FlipboardModelRef*)view_get_model(view_primary);
     ref->model = model;
     return view_primary;
+}
+
+FlipboardBlinkyModel* flipboard_blinky_model_alloc(FlipboardModel* context) {
+    FlipboardBlinkyModel* fbm = malloc(sizeof(FlipboardBlinkyModel));
+    fbm->timer = furi_timer_alloc(flipboard_tick_callback, FuriTimerTypePeriodic, context);
+    fbm->period_ms = 200;
+    fbm->colors[0] = 0xFF0000;
+    fbm->colors[1] = 0xFFFFFF;
+    fbm->colors[2] = 0xFF0000;
+    fbm->colors[3] = 0x0000FF;
+    fbm->effect_id = 1;
+    fbm->max_effect_id = 3;
+    fbm->detail_counter = 0;
+    return fbm;
+}
+
+void flipboard_blinky_model_free(FlipboardBlinkyModel* fbm) {
+    if(fbm->timer) {
+        furi_timer_free(fbm->timer);
+    }
+    free(fbm);
 }
 
 int32_t flipboard_blinky_app(void* p) {
@@ -140,8 +192,13 @@ int32_t flipboard_blinky_app(void* p) {
         widget, 0, 0, 128, 64, "TODO: Add config screen!\n\nPress BACK for now.");
     view_set_previous_callback(widget_get_view(widget), flipboard_navigation_show_app_menu);
     flipboard_override_config_view(app, widget_get_view(widget));
+    FlipboardModel* model = flipboard_get_model(app);
+    FlipboardBlinkyModel* fbm = flipboard_blinky_model_alloc(model);
+    flipboard_model_set_custom_data(model, fbm);
 
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
+
+    flipboard_blinky_model_free(fbm);
     flipboard_free(app);
 
     return 0;

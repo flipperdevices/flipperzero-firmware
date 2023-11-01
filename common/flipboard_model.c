@@ -12,6 +12,7 @@ FlipboardModel*
     model->gui_refresh_timer = NULL;
     model->leds = flipboard_leds_alloc();
     model->backlight_always_on = true;
+    model->custom_data = NULL;
     if(model->backlight_always_on) {
         backlight_on();
     }
@@ -52,6 +53,15 @@ Speaker* flipboard_model_get_speaker(FlipboardModel* model) {
 
 FlipboardLeds* flipboard_model_get_leds(FlipboardModel* model) {
     return model->leds;
+}
+
+void* flipboard_model_get_custom_data(FlipboardModel* model) {
+    return model->custom_data;
+}
+
+void flipboard_model_set_custom_data(FlipboardModel* model, void* custom_data) {
+    // NOTE: The caller is responsible for freeing the previous and new custom_data.
+    model->custom_data = custom_data;
 }
 
 static void __gui_redraw() {
