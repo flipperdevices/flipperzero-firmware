@@ -11,6 +11,7 @@
 #include "notifications.h"
 #include <dolphin/dolphin.h>
 
+#define TAG "NuPogodi"
 #define WIN_SCORES 100
 #define EGGS_2_SCORES 10
 #define EGGS_3_SCORES 20
@@ -326,7 +327,6 @@ static int32_t nupogodi_worker(void* context) {
                             model->tick--;
                         } else {
                             model->mode = Play;
-                            dolphin_deed(DolphinDeedPluginGameStart);
                         }
                         break;
                     case Ready:
@@ -337,7 +337,6 @@ static int32_t nupogodi_worker(void* context) {
                         model->scores = 0;
                         model->missed = 0;
                         model->mode = Play;
-                        dolphin_deed(DolphinDeedPluginGameStart);
                         break;
                     case Play:
                         // Прокатываем все яйца на одно деление вперед
