@@ -11,4 +11,3 @@ On your Flipper Zero, press the OK button twice and then press one of three butt
 Rock beats scissors, scissors beat paper, and paper beats rock.
 
 Wins and losses stats are available in the app, as well as the ability to change your name for games.
-

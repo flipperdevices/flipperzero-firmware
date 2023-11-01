@@ -15,7 +15,7 @@ This project is intended to be overlayed on top of an existing firmware repo.
 These directions assume you are starting at the flipper desktop.  If not, please press the back button until you are at the desktop.
 
 - Press the OK button on the flipper to pull up the main menu.
-- Choose "Applications" from the menu.
+- Choose "Apps" from the menu.
 - Choose "Gpio" from the sub-menu.
 - Choose "GPIO 7-Segment Output"
 

@@ -36,7 +36,7 @@ The pins should be connected to the Flipper Zero as follows:
 These directions assume you are starting at the flipper desktop. If not, please press the back button until you are at the desktop.
 
 - Press the OK button on the flipper to pull up the main menu.
-- Choose "Applications" from the menu.
+- Choose "Apps" from the menu.
 - Choose "Misc" from the sub-menu.
 - Choose "Memsic 2125"
 

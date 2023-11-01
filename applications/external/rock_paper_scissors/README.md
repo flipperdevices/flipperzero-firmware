@@ -34,7 +34,7 @@ These directions assume you are starting at the flipper desktop. If not, please 
 
 - On both Flippers, launch the "Rock Paper Scissors" application.
   - Press the OK button on the flipper to pull up the main menu.
-  - Choose "Applications" from the menu.
+  - Choose "Apps" from the menu.
   - Choose "Games" from the sub-menu.
   - Choose "Rock Paper Scissors"
 
