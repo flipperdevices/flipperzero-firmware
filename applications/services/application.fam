@@ -9,9 +9,6 @@ App(
         "desktop",
         "loader",
         "power",
-        "infrared_srv",
-        "lfrfid_srv",
         "onewire_srv",
-        "subghz_srv",
     ],
 )
