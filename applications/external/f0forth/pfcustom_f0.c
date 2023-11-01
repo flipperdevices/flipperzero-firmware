@@ -41,109 +41,98 @@
 #define DEFAULT_USER_DEPTH (512)
 
 struct thread_callback_ctx {
-	ExecToken XT;
-	void *actual_ctx;
+    ExecToken XT;
+    void* actual_ctx;
 };
 
-static void *ThreadContextAlloc(ExecToken XT, void *actual_ctx)
-{
-	struct thread_callback_ctx *cb_ctx = malloc(sizeof(struct
-				thread_callback_ctx));
+static void* ThreadContextAlloc(ExecToken XT, void* actual_ctx) {
+    struct thread_callback_ctx* cb_ctx = malloc(sizeof(struct thread_callback_ctx));
 
-	cb_ctx->XT = XT;
-	cb_ctx->actual_ctx = actual_ctx;
+    cb_ctx->XT = XT;
+    cb_ctx->actual_ctx = actual_ctx;
 
-	return cb_ctx;
+    return cb_ctx;
 }
 
-static int32_t ThreadCallbackDispatcher(void* context)
-{
-	struct thread_callback_ctx *cb_ctx = context;
+static int32_t ThreadCallbackDispatcher(void* context) {
+    struct thread_callback_ctx* cb_ctx = context;
 
-	pfTaskData_t *gCurrentTask = pfCreateTask(DEFAULT_USER_DEPTH,
-			DEFAULT_RETURN_DEPTH);
+    pfTaskData_t* gCurrentTask = pfCreateTask(DEFAULT_USER_DEPTH, DEFAULT_RETURN_DEPTH);
 
-	PUSH_DATA_STACK(cb_ctx->actual_ctx);
-	pfCatch(cb_ctx->XT, gCurrentTask);
-	cell_t ret = POP_DATA_STACK;
+    PUSH_DATA_STACK(cb_ctx->actual_ctx);
+    pfCatch(cb_ctx->XT, gCurrentTask);
+    cell_t ret = POP_DATA_STACK;
 
-	pfDeleteTask(gCurrentTask);
+    pfDeleteTask(gCurrentTask);
 
-	free(cb_ctx);
-	return ret;
+    free(cb_ctx);
+    return ret;
 }
 
-static void HaveReadCallbackDispatcher(void* context)
-{
-	struct thread_callback_ctx *cb_ctx = context;
+static void HaveReadCallbackDispatcher(void* context) {
+    struct thread_callback_ctx* cb_ctx = context;
 
-	pfTaskData_t *gCurrentTask = pfCreateTask(DEFAULT_USER_DEPTH,
-			DEFAULT_RETURN_DEPTH);
+    pfTaskData_t* gCurrentTask = pfCreateTask(DEFAULT_USER_DEPTH, DEFAULT_RETURN_DEPTH);
 
-	PUSH_DATA_STACK(cb_ctx->actual_ctx);
-	pfCatch(cb_ctx->XT, gCurrentTask);
+    PUSH_DATA_STACK(cb_ctx->actual_ctx);
+    pfCatch(cb_ctx->XT, gCurrentTask);
 
-	pfDeleteTask(gCurrentTask);
+    pfDeleteTask(gCurrentTask);
 
-	free(cb_ctx);
+    free(cb_ctx);
 }
 
 /****************************************************************
 ** Step 1: Put your own special glue routines here
 **     or link them in from another file or library.
 ****************************************************************/
-static char *RecordNotificationWrapper(void)
-{
-	return RECORD_NOTIFICATION;
+static char* RecordNotificationWrapper(void) {
+    return RECORD_NOTIFICATION;
 }
 
-static void *SequenceSingleVibroWrapper(void)
-{
-	return (void*) &sequence_single_vibro;
+static void* SequenceSingleVibroWrapper(void) {
+    return (void*)&sequence_single_vibro;
 }
 
-static void *SequenceDoubleVibroWrapper(void)
-{
-	return (void*) &sequence_double_vibro;
+static void* SequenceDoubleVibroWrapper(void) {
+    return (void*)&sequence_double_vibro;
 }
 
-static void *SequenceSuccessWrapper(void)
-{
-	return (void*) &sequence_success;
+static void* SequenceSuccessWrapper(void) {
+    return (void*)&sequence_success;
 }
 
-static void *SequenceErrorWrapper(void)
-{
-	return (void*) &sequence_error;
+static void* SequenceErrorWrapper(void) {
+    return (void*)&sequence_error;
 }
 
-static void *SequenceAudiovisualAlertWrapper(void)
-{
-	return (void*) &sequence_audiovisual_alert;
+static void* SequenceAudiovisualAlertWrapper(void) {
+    return (void*)&sequence_audiovisual_alert;
 }
 
-static FuriThread *FuriThreadAllocExWrapper(const char *name, uint32_t
-		stack_size, FuriThreadCallback callback, void *context)
-{
-	void *ctx = ThreadContextAlloc((ExecToken) callback, context);
-	FuriThreadCallback cb = ThreadCallbackDispatcher;
+static FuriThread* FuriThreadAllocExWrapper(
+    const char* name,
+    uint32_t stack_size,
+    FuriThreadCallback callback,
+    void* context) {
+    void* ctx = ThreadContextAlloc((ExecToken)callback, context);
+    FuriThreadCallback cb = ThreadCallbackDispatcher;
 
-	return furi_thread_alloc_ex(name, stack_size, cb, ctx);
+    return furi_thread_alloc_ex(name, stack_size, cb, ctx);
 }
 
-static void SubghzTxRxWorkerSetCallbackHaveReadWrapper(SubGhzTxRxWorker*
-		instance, SubGhzTxRxWorkerCallbackHaveRead callback, void*
-		context)
-{
-	void *ctx = ThreadContextAlloc((ExecToken) callback, context);
-	SubGhzTxRxWorkerCallbackHaveRead cb = HaveReadCallbackDispatcher;
+static void SubghzTxRxWorkerSetCallbackHaveReadWrapper(
+    SubGhzTxRxWorker* instance,
+    SubGhzTxRxWorkerCallbackHaveRead callback,
+    void* context) {
+    void* ctx = ThreadContextAlloc((ExecToken)callback, context);
+    SubGhzTxRxWorkerCallbackHaveRead cb = HaveReadCallbackDispatcher;
 
-	subghz_tx_rx_worker_set_callback_have_read(instance, cb, ctx);
+    subghz_tx_rx_worker_set_callback_have_read(instance, cb, ctx);
 }
 
-static const char *SubghzDeviceCC1101IntNameWrapper(void)
-{
-	return SUBGHZ_DEVICE_CC1101_INT_NAME;
+static const char* SubghzDeviceCC1101IntNameWrapper(void) {
+    return SUBGHZ_DEVICE_CC1101_INT_NAME;
 }
 
 /****************************************************************
@@ -154,37 +143,36 @@ static const char *SubghzDeviceCC1101IntNameWrapper(void)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wcast-function-type"
-CFunc0 CustomFunctionTable[] =
-{
-	(CFunc0) furi_delay_ms,
-	(CFunc0) furi_get_tick,
-	(CFunc0) furi_hal_version_get_name_ptr,
-	(CFunc0) furi_record_open,
-	(CFunc0) furi_record_close,
-	(CFunc0) RecordNotificationWrapper,
-	(CFunc0) notification_message,
-	(CFunc0) SequenceSingleVibroWrapper,
-	(CFunc0) SequenceDoubleVibroWrapper,
-	(CFunc0) SequenceSuccessWrapper,
-	(CFunc0) SequenceErrorWrapper,
-	(CFunc0) SequenceAudiovisualAlertWrapper,
-	(CFunc0) FuriThreadAllocExWrapper,
-	(CFunc0) furi_thread_free,
-	(CFunc0) furi_thread_start,
-	(CFunc0) furi_thread_join,
-	(CFunc0) subghz_tx_rx_worker_available,
-	(CFunc0) subghz_tx_rx_worker_read,
-	(CFunc0) subghz_tx_rx_worker_write,
-	(CFunc0) subghz_tx_rx_worker_alloc,
-	(CFunc0) subghz_tx_rx_worker_free,
-	(CFunc0) subghz_tx_rx_worker_start,
-	(CFunc0) subghz_tx_rx_worker_stop,
-	(CFunc0) subghz_tx_rx_worker_is_running,
-	(CFunc0) SubghzTxRxWorkerSetCallbackHaveReadWrapper,
-	(CFunc0) subghz_devices_init,
-	(CFunc0) subghz_devices_deinit,
-	(CFunc0) subghz_devices_get_by_name,
-	(CFunc0) SubghzDeviceCC1101IntNameWrapper,
+CFunc0 CustomFunctionTable[] = {
+    (CFunc0)furi_delay_ms,
+    (CFunc0)furi_get_tick,
+    (CFunc0)furi_hal_version_get_name_ptr,
+    (CFunc0)furi_record_open,
+    (CFunc0)furi_record_close,
+    (CFunc0)RecordNotificationWrapper,
+    (CFunc0)notification_message,
+    (CFunc0)SequenceSingleVibroWrapper,
+    (CFunc0)SequenceDoubleVibroWrapper,
+    (CFunc0)SequenceSuccessWrapper,
+    (CFunc0)SequenceErrorWrapper,
+    (CFunc0)SequenceAudiovisualAlertWrapper,
+    (CFunc0)FuriThreadAllocExWrapper,
+    (CFunc0)furi_thread_free,
+    (CFunc0)furi_thread_start,
+    (CFunc0)furi_thread_join,
+    (CFunc0)subghz_tx_rx_worker_available,
+    (CFunc0)subghz_tx_rx_worker_read,
+    (CFunc0)subghz_tx_rx_worker_write,
+    (CFunc0)subghz_tx_rx_worker_alloc,
+    (CFunc0)subghz_tx_rx_worker_free,
+    (CFunc0)subghz_tx_rx_worker_start,
+    (CFunc0)subghz_tx_rx_worker_stop,
+    (CFunc0)subghz_tx_rx_worker_is_running,
+    (CFunc0)SubghzTxRxWorkerSetCallbackHaveReadWrapper,
+    (CFunc0)subghz_devices_init,
+    (CFunc0)subghz_devices_deinit,
+    (CFunc0)subghz_devices_get_by_name,
+    (CFunc0)SubghzDeviceCC1101IntNameWrapper,
 };
 #pragma GCC diagnostic pop
 
@@ -194,74 +182,73 @@ CFunc0 CustomFunctionTable[] =
 **     It is called by the pForth kernel.
 ****************************************************************/
 
-Err CompileCustomFunctions(void)
-{
-	Err err;
-	int i = 0;
-/* Compile Forth words that call your custom functions.
+Err CompileCustomFunctions(void) {
+    Err err;
+    int i = 0;
+    /* Compile Forth words that call your custom functions.
 ** Make sure order of functions matches that in LoadCustomFunctionTable().
 ** Parameters are: Name in UPPER CASE, Function, Index, Mode, NumParams
 */
-	err = CreateGlueToC( "FURI_DELAY_MS", i++, C_RETURNS_VOID, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "FURI_GET_TICK", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "FURI_HAL_VERSION_GET_NAME_PTR", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "FURI_RECORD_OPEN", i++, C_RETURNS_VALUE, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "FURI_RECORD_CLOSE", i++, C_RETURNS_VOID, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "RECORD_NOTIFICATION", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "NOTIFICATION_MESSAGE", i++, C_RETURNS_VOID, 2 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SEQUENCE_SINGLE_VIBRO", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SEQUENCE_DOUBLE_VIBRO", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SEQUENCE_SUCCESS", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SEQUENCE_ERROR", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SEQUENCE_AUDIOVISUAL_ALERT", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "FURI_THREAD_ALLOC_EX", i++, C_RETURNS_VALUE, 4 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "FURI_THREAD_FREE", i++, C_RETURNS_VOID, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "FURI_THREAD_START", i++, C_RETURNS_VOID, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "FURI_THREAD_JOIN", i++, C_RETURNS_VALUE, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_AVAILABLE", i++, C_RETURNS_VALUE, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_READ", i++, C_RETURNS_VALUE, 3 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_WRITE", i++, C_RETURNS_VALUE, 3 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_ALLOC", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_FREE", i++, C_RETURNS_VOID, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_START", i++, C_RETURNS_VALUE, 3 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_STOP", i++, C_RETURNS_VOID, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_IS_RUNNING", i++, C_RETURNS_VALUE, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_TX_RX_WORKER_SET_CALLBACK", i++, C_RETURNS_VOID, 3 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_DEVICES_INIT", i++, C_RETURNS_VOID, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_DEVICES_DEINIT", i++, C_RETURNS_VOID, 0 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_DEVICES_GET_BY_NAME", i++, C_RETURNS_VALUE, 1 );
-	if( err < 0 ) return err;
-	err = CreateGlueToC( "SUBGHZ_DEVICE_CC1101_INT_NAME", i++, C_RETURNS_VALUE, 0 );
-	if( err < 0 ) return err;
+    err = CreateGlueToC("FURI_DELAY_MS", i++, C_RETURNS_VOID, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("FURI_GET_TICK", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("FURI_HAL_VERSION_GET_NAME_PTR", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("FURI_RECORD_OPEN", i++, C_RETURNS_VALUE, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("FURI_RECORD_CLOSE", i++, C_RETURNS_VOID, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("RECORD_NOTIFICATION", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("NOTIFICATION_MESSAGE", i++, C_RETURNS_VOID, 2);
+    if(err < 0) return err;
+    err = CreateGlueToC("SEQUENCE_SINGLE_VIBRO", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("SEQUENCE_DOUBLE_VIBRO", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("SEQUENCE_SUCCESS", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("SEQUENCE_ERROR", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("SEQUENCE_AUDIOVISUAL_ALERT", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("FURI_THREAD_ALLOC_EX", i++, C_RETURNS_VALUE, 4);
+    if(err < 0) return err;
+    err = CreateGlueToC("FURI_THREAD_FREE", i++, C_RETURNS_VOID, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("FURI_THREAD_START", i++, C_RETURNS_VOID, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("FURI_THREAD_JOIN", i++, C_RETURNS_VALUE, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_AVAILABLE", i++, C_RETURNS_VALUE, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_READ", i++, C_RETURNS_VALUE, 3);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_WRITE", i++, C_RETURNS_VALUE, 3);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_ALLOC", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_FREE", i++, C_RETURNS_VOID, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_START", i++, C_RETURNS_VALUE, 3);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_STOP", i++, C_RETURNS_VOID, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_IS_RUNNING", i++, C_RETURNS_VALUE, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_TX_RX_WORKER_SET_CALLBACK", i++, C_RETURNS_VOID, 3);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_DEVICES_INIT", i++, C_RETURNS_VOID, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_DEVICES_DEINIT", i++, C_RETURNS_VOID, 0);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_DEVICES_GET_BY_NAME", i++, C_RETURNS_VALUE, 1);
+    if(err < 0) return err;
+    err = CreateGlueToC("SUBGHZ_DEVICE_CC1101_INT_NAME", i++, C_RETURNS_VALUE, 0);
+    if(err < 0) return err;
 
-	return 0;
+    return 0;
 }
 
 /****************************************************************
