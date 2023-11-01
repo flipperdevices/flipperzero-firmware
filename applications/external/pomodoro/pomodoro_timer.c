@@ -3,7 +3,7 @@
 #include <furi_hal.h>
 #include <gui/elements.h>
 #include <notification/notification_messages.h>
-#include "pomodoro_icons.h"
+#include "pomodoro_timer_icons.h"
 
 const NotificationSequence sequence_finish = {
     &message_display_backlight_on,
@@ -239,4 +239,9 @@ void pomodoro_draw_callback(Canvas* canvas, void* context, int max_seconds, int 
     for(int i = 0; i < model->counter; ++i) {
         canvas_draw_disc(canvas, 122 - i * 10, 15, 4);
     }
+}
+
+void pomodoro_timer_update(PomodoroTimer* pomodoro_timer) {
+    with_view_model(
+        pomodoro_timer->view, PomodoroTimerModel * model, { UNUSED(model); }, true);
 }
