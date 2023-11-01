@@ -1,0 +1,227 @@
+name: "Build for Firmware"
+run-name: "Build ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Enter version to build or left empty for current version"
+        required: false
+        type: string
+  release:
+    types: [created, prereleased]
+  push:
+    paths:
+      - .github/workflows/build-with-firmware.yml
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: firmware-build-${{ vars.FIRMWARE_VERSION }}-${{ vars.RELEASE_VERSION }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    env:
+      FAP_INCLUDED_IN_FW: 0
+      REPO_SELF: ${{ vars.REPO_SELF }}
+      OFW_PATH: "applications_user/${{ vars.FAP_NAME }}"
+      RELATIVE_PATH: "applications/external/${{ vars.FAP_NAME }}"
+      CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
+      ZIP_NAME: ""
+      ZIP_TAG: ""
+      TGZ_NAME: ""
+      TGZ_TAG: ""
+    strategy:
+      fail-fast: false
+      matrix:
+        firmware: [unlshd, official]
+        include:
+          - firmware: unlshd
+            url: ${{ vars.REPO_UNLEASHED }}
+            version: ${{ vars.FIRMWARE_VERSION }}
+            src-included: 0
+          - firmware: official
+            url: ${{ vars.REPO_OFFICIAL }}
+            version: "official"
+            src-included: 0
+    steps:
+      - name: Set version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          CURRENT_VERSION: ${{ env.CURRENT_VERSION }}
+        shell: pwsh
+        run: |
+          $ReleaseVersion = ([string]::IsNullOrWhitespace($env:INPUT_VERSION) ? $env:CURRENT_VERSION : $env:INPUT_VERSION)
+          Write-Output ('RELEASE_VERSION={0}' -f $ReleaseVersion) >> $env:GITHUB_ENV
+
+      - name: Copy Firmware Files
+        uses: actions/checkout@v3
+        with:
+          repository: "${{ matrix.url }}"
+          clean: "true"
+          submodules: "true"
+          ref: "dev"
+
+      - name: Copy Repo Files
+        if: ${{ matrix.src-included == 0 }}
+        uses: actions/checkout@v3
+        with:
+          repository: "${{ vars.REPO_SELF }}"
+          clean: "true"
+          submodules: "true"
+          path: "${{ env.OFW_PATH }}"
+
+      - name: Print vars about state or repo if Unleashed
+        if: ${{ matrix.src-included == 1 }}
+        shell: pwsh
+        run: |
+          git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1
+          if( ${{ env.FAP_INCLUDED_IN_FW }} -eq 1 ) {
+            git submodule set-branch --branch master '${{ env.RELATIVE_PATH }}'
+            git submodule sync '${{ env.RELATIVE_PATH }}'
+          }
+          cd '${{ env.OFW_PATH }}'
+          if ( '${{ env.CURRENT_VERSION }}' -ne '${{ env.RELEASE_VERSION }}' ) {
+            Write-Output '::warning title=Different version::Current version is ${{ env.CURRENT_VERSION }} but we trying to build ${{ env.RELEASE_VERSION }}'
+            git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
+
+            if ( $LASTEXITCODE -ne 0 ) {
+              Write-Error '::error title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
+              exit 1
+            }
+          }
+
+          $Output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
+
+          if ( $LASTEXITCODE -ne 0 ) {
+            Write-Error '::error title=Invalid checkout::Invalid checkout'
+            exit 1
+          }
+          Write-Output ('::notice title=Git output::{0}' -f $Output)
+
+      - name: Print vars about state or repo if Official
+        if: ${{ matrix.src-included == 0 }}
+        shell: pwsh
+        run: |
+          git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1
+          cd '${{ env.OFW_PATH }}'
+
+          if ( '${{ env.CURRENT_VERSION }}' -ne '${{ env.RELEASE_VERSION }}' ) {
+            Write-Output '::warning title=Different version::Current version is ${{ env.CURRENT_VERSION }} but we trying to build ${{ env.RELEASE_VERSION }}'
+            git checkout tags/v${{ env.RELEASE_VERSION }} -b tmp-build
+
+            if ( $LASTEXITCODE -ne 0 ) {
+              Write-Error '::error title=Cannot checkout to this version::Error during execution checkout to this tag ${{ env.RELEASE_VERSION }}'
+              exit 1
+            }
+          } else {
+            $Output = (git log --pretty=format:'%s by %C(yellow)%an%Creset (%ad)%n %n%b' --date=local --abbrev-commit --max-count=1)
+
+            if ( $LASTEXITCODE -ne 0 ) {
+              Write-Error '::error title=Invalid checkout::Invalid checkout'
+              exit 1
+            }
+            Write-Output ('::notice title=Git output::{0}' -f $Output)
+          }
+
+      - name: Remove other apps
+        shell: pwsh
+        if: ${{ success() }}
+        # rm to remove problem FAP which includes non-existent files
+        run: |
+          Remove-Item -Force -Recurse ./applications/debug -ErrorAction SilentlyContinue
+          Remove-Item -Force -Recurse ./applications/examples -ErrorAction SilentlyContinue
+
+      - name: Build Firmware
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: ${{ matrix.version }}
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
+
+      - name: Build FAPs
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: ${{ matrix.version }}
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+          # rm to remove problem FAP which includes non-existent files
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
+
+      - name: Create assets
+        if: ${{ success() }}
+        shell: pwsh
+        env:
+          ZIP_NAME: "${{ vars.FAP_NAME }}_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.zip"
+          TGZ_NAME: "${{ vars.FAP_NAME }}_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.tgz"
+        run: |
+          function Format-Bytes {
+            param(
+                  [int]$number
+              )
+              $sizes = 'KB', 'MB', 'GB', 'TB', 'PB'
+              for ($x = 0; $x -lt $sizes.count; $x++) {
+                  if ($number -lt [int64]"1$($sizes[$x])") {
+                      if ($x -eq 0) {
+                          return "$number B"
+                      }
+                      else {
+                          $num = $number / [int64]"1$($sizes[$x-1])"
+                          $num = "{0:N2}" -f $num
+                          return "$num $($sizes[$x-1])"
+                      }
+                  }
+              }
+          }
+          $ZipName = $env:ZIP_NAME
+          $TgzName = $env:TGZ_NAME
+          $FapNamme = '${{ vars.FAP_NAME }}.fap'
+          $DstFap = "./$FapNamme"
+          $AppDir = "dist/f7-C/apps/Sub-GHz"
+
+          if (!(Test-Path -Path "$AppDir/$FapNamme" -PathType Leaf)) {
+              Write-Error '::error title=Files not found::Cannot find files in location'
+              exit 1
+          }
+
+          $Size = (Get-Item -Path "$AppDir/$FapNamme" | Get-ItemPropertyValue -Name Length)
+          Write-Output ('Filesize: {0}' -f (Format-Bytes $Size))
+          Copy-Item -Force -Verbose -Path "$AppDir/$FapNamme" -Destination $DstFap
+
+          zip -r -qq $ZipName $DstFap
+          tar zcf $TgzName $DstFap
+
+          if ( !(Test-Path -Path $ZipName -PathType Leaf) -or !(Test-Path -Path $TgzName -PathType Leaf) ) {
+              Write-Error '::error title=Files not found::Cannot find files in location'
+              exit 1
+          }
+
+          $ZipSize = Format-Bytes (Get-Item -Path $ZipName).Length
+          $TgzSize = Format-Bytes (Get-Item -Path $TgzName ).Length
+
+          Write-Output ('ZIP_NAME={0}' -f $ZipName) >> $env:GITHUB_ENV
+          Write-Output ('TGZ_NAME={0}' -f $TgzName ) >> $env:GITHUB_ENV
+          Write-Output ('ZIP_TAG={0} ({1})' -f $ZipName, $ZipSize) >> $env:GITHUB_ENV
+          Write-Output ('TGZ_TAG={0} ({1})' -f $TgzName , $TgzSize) >> $env:GITHUB_ENV
+
+      - name: Upload assets
+        if: ${{ success() && env.ZIP_NAME != '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
+        run: |
+          gh release create v${{ env.RELEASE_VERSION }} --generate-notes --draft -R ${{ env.REPO_SELF }}
+          gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' \
+            '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
+          gh release edit 'v${{ env.RELEASE_VERSION }}' --draft=false -R ${{ env.REPO_SELF }}
+
+#EOF
