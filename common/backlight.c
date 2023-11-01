@@ -14,3 +14,9 @@ void backlight_off() {
         furi_record_open(RECORD_NOTIFICATION), &sequence_display_backlight_enforce_auto);
     furi_record_close(RECORD_NOTIFICATION);
 }
+
+void backlight_force_off() {
+    notification_message(
+        furi_record_open(RECORD_NOTIFICATION), &sequence_display_backlight_off_delay_1000);
+    furi_record_close(RECORD_NOTIFICATION);
+}

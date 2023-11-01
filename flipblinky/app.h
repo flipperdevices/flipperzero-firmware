@@ -24,8 +24,9 @@
 typedef struct FlipboardBlinkyModel {
     FuriTimer* timer;
     uint32_t period_ms;
-    uint32_t colors[4];
+    uint32_t colors[6];
+    uint8_t effect_counter;
     uint8_t effect_id;
     uint8_t max_effect_id;
-    uint32_t detail_counter;
+    uint32_t show_details_counter;
 } FlipboardBlinkyModel;

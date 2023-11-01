@@ -23,7 +23,7 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     canvas_draw_icon(canvas, 1, 1, &I_nametag);
 
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(my_model->model);
-    if(fbm->detail_counter > 0) {
+    if(fbm->show_details_counter > 0) {
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_box(canvas, 0, 48, 128, 64 - 48);
         canvas_set_color(canvas, ColorBlack);
@@ -37,27 +37,99 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 1, 61, furi_string_get_cstr(str));
         furi_string_free(str);
-        fbm->detail_counter--;
+        fbm->show_details_counter--;
     }
 }
 
+enum LedColors {
+    LedColorBlack = 0x000000,
+    LedColorRed = 0xFF0000,
+    LedColorOrange = 0xFF1F00,
+    LedColorYellow = 0xFF7F00,
+    LedColorGreen = 0x00FF00,
+    LedColorCyan = 0x00FFFF,
+    LedColorBlue = 0x0000FF,
+    LedColorViolet = 0x1F00FF,
+    LedColorMagenta = 0x7F00FF,
+    LedColorWhite = 0xFFFFFF,
+};
+
 void flipboard_reset_effect(FlipboardModel* model) {
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
-    fbm->colors[0] = 0xFF0000;
-    fbm->colors[1] = 0xFFFFFF;
-    fbm->colors[2] = 0xFF0000;
-    fbm->colors[3] = 0x0000FF;
+    fbm->effect_counter = 0;
+
+    if(fbm->effect_id == 1) {
+        fbm->colors[0] = LedColorRed;
+        fbm->colors[1] = LedColorWhite;
+        fbm->colors[2] = LedColorRed;
+        fbm->colors[3] = LedColorBlue;
+    } else if(fbm->effect_id == 2) {
+        fbm->colors[0] = LedColorYellow;
+        fbm->colors[1] = LedColorOrange;
+        fbm->colors[2] = LedColorYellow;
+        fbm->colors[3] = LedColorOrange;
+    } else if(fbm->effect_id == 3) {
+        fbm->colors[0] = LedColorGreen;
+        fbm->colors[1] = LedColorBlue;
+        fbm->colors[2] = LedColorMagenta;
+        fbm->colors[3] = LedColorBlack;
+    } else if(fbm->effect_id == 4) {
+        fbm->colors[4] = LedColorViolet;
+        fbm->colors[5] = LedColorRed;
+    } else if(fbm->effect_id == 5) {
+        // Random colors
+    } else {
+        for(int i = 0; i < 5; i++) {
+            fbm->colors[i] = LedColorBlack;
+        }
+        FlipboardLeds* leds = flipboard_model_get_leds(model);
+        flipboard_leds_set(leds, LedId1, fbm->colors[0]);
+        flipboard_leds_set(leds, LedId2, fbm->colors[1]);
+        flipboard_leds_set(leds, LedId3, fbm->colors[2]);
+        flipboard_leds_set(leds, LedId4, fbm->colors[3]);
+        flipboard_leds_update(leds);
+    }
+
+    if(fbm->effect_id == fbm->max_effect_id) {
+        backlight_force_off();
+    } else {
+        backlight_on();
+    }
 }
 
 void flipboard_do_effect(FlipboardModel* model) {
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
     FlipboardLeds* leds = flipboard_model_get_leds(model);
 
-    uint32_t tmp = fbm->colors[0];
-    for(int i = 0; i < 3; i++) {
-        fbm->colors[i] = fbm->colors[i + 1];
+    if(fbm->effect_id == fbm->max_effect_id) {
+        return;
+    } else if(fbm->effect_id == fbm->max_effect_id - 1) {
+        // Random color
+        for(int i = 0; i < 4; i++) {
+            fbm->colors[i] = rand() % 0xFFFFFF;
+        }
+    } else if(fbm->effect_id == fbm->max_effect_id - 2) {
+        for(int i = 0; i < 4; i++) {
+            fbm->colors[i] = fbm->colors[4];
+        }
+        if(fbm->effect_counter < 4) {
+            fbm->colors[fbm->effect_counter] = fbm->colors[5];
+        } else {
+            fbm->colors[6 - fbm->effect_counter] = fbm->colors[5];
+        }
+        fbm->effect_counter++;
+        if(fbm->effect_counter >= 6) {
+            fbm->effect_counter = 0;
+        }
+    } else {
+        // Scroll colors
+        uint32_t tmp = fbm->colors[0];
+        for(int i = 0; i < 3; i++) {
+            fbm->colors[i] = fbm->colors[i + 1];
+        }
+        fbm->colors[3] = tmp;
     }
-    fbm->colors[3] = tmp;
+
     flipboard_leds_set(leds, LedId1, fbm->colors[0]);
     flipboard_leds_set(leds, LedId2, fbm->colors[1]);
     flipboard_leds_set(leds, LedId3, fbm->colors[2]);
@@ -82,37 +154,37 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
         uint32_t delay = (new_key == 1) ? 5 : 20;
         if(fbm->period_ms > delay) {
             fbm->period_ms -= delay;
-            if(fbm->period_ms < 20) {
-                fbm->period_ms = 20;
+            if(fbm->period_ms < 50) {
+                fbm->period_ms = 50;
             }
             furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
-            fbm->detail_counter = detail_counter_ticks;
+            fbm->show_details_counter = detail_counter_ticks;
         }
     } else if(new_key == 2) {
         // Slower by 20ms
         uint32_t delay = 20;
         fbm->period_ms += delay;
         furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
-        fbm->detail_counter = detail_counter_ticks;
+        fbm->show_details_counter = detail_counter_ticks;
     } else if(new_key == 4) {
         // Previous effect
         fbm->effect_id--;
         if(fbm->effect_id < 1) {
             fbm->effect_id = fbm->max_effect_id;
         }
-        fbm->detail_counter = detail_counter_ticks;
+        fbm->show_details_counter = detail_counter_ticks;
     } else if(new_key == 8) {
         // Next effect
         fbm->effect_id++;
         if(fbm->effect_id > fbm->max_effect_id) {
             fbm->effect_id = 1;
         }
-        fbm->detail_counter = detail_counter_ticks;
+        fbm->show_details_counter = detail_counter_ticks;
         flipboard_reset_effect(model);
     } else if(new_key == 12) {
         // Max effect
         fbm->effect_id = fbm->max_effect_id;
-        fbm->detail_counter = detail_counter_ticks;
+        fbm->show_details_counter = detail_counter_ticks;
         flipboard_reset_effect(model);
     }
 
@@ -132,7 +204,7 @@ void flipboard_enter_callback(void* context) {
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
     flipboard_model_set_key_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
-    flipboard_model_set_gui_refresh_speed_ms(fm, 1000);
+    flipboard_model_set_gui_refresh_speed_ms(fm, 0);
 }
 
 /*
@@ -170,8 +242,8 @@ FlipboardBlinkyModel* flipboard_blinky_model_alloc(FlipboardModel* context) {
     fbm->timer = furi_timer_alloc(flipboard_tick_callback, FuriTimerTypePeriodic, context);
     fbm->period_ms = 200;
     fbm->effect_id = 1;
-    fbm->max_effect_id = 3;
-    fbm->detail_counter = 0;
+    fbm->max_effect_id = 6;
+    fbm->show_details_counter = 0;
     return fbm;
 }
 
