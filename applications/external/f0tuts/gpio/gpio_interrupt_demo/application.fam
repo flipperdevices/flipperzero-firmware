@@ -1,0 +1,10 @@
+App(
+    appid="gpio_interrupt_demo",
+    name="GPIO Interrupt Demo",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_interrupt_demo_app",
+    requires=["gui", "gpio"],
+    stack_size=2 * 1024,
+    fap_icon="gpio_interrupt_demo.png",
+    fap_category="Gpio",
+)

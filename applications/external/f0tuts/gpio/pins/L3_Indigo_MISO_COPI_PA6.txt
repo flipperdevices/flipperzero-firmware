@@ -1,0 +1,10 @@
+For SPI, the naming convetion is changing.  You may see "MISO", "MI", "SO", "CIPO", "CI", "PO". This pin is Flipper data out "SDI" (which should connect to the device data in "SDO") pin. "I" refers to "Input" and "O" refers to "Output". "M/C" refers to "Main", "Master" (not used anymore), "Controller". "S/P" refers to "Subnode", "Slave" (not used anymore), "Perpherial". "SD" refers to "Serial Data".
+
+Generic GPIO uses PA6.
+
+Devices:
+- BME280[SPI] (SDO)
+- BMP280[SPI] (SDO)
+- NRF24L01[SPI] (MI)
+- NRF24L01[SPI] (MISO)
+- CC1101[SPI] (SO)

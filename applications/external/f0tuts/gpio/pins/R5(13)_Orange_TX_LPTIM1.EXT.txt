@@ -1,0 +1,11 @@
+This pin is Flipper TX on USART (so connect to RX on device).
+
+The Signal Generator/Clock Generator app uses LPTIM1.EXT (pin 13) for the clock signal.
+
+Generic GPIO uses PB6.
+
+CHECK: "COMP2 IN+/MCO"
+
+Devices:
+- NMEA GPS[USART] (RX)
+- HC-SR04[GPIO] (Trig)

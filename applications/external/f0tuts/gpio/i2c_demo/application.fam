@@ -1,0 +1,10 @@
+App(
+    appid="i2c_demo",
+    name="I2C Demo",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="i2c_demo_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="i2c_demo.png",
+    fap_category="GPIO",
+)

@@ -1,0 +1,10 @@
+App(
+    appid="gpio_polling_demo",
+    name="Gpio Polling Demo",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_polling_demo_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="gpio_polling_demo.png",
+    fap_category="Misc",
+)

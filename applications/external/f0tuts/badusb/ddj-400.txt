@@ -1,0 +1,10 @@
+ID 0x2b73:0x0026 ddj-400:ddj-400
+REM #
+REM # Triggers DDJ-400 Rekordbox firmware update application on Windows.
+REM # (because of USB ID and NAME of device.)
+REM #
+GUI r
+DELAY 1000
+ESCAPE
+DELAY 60000
+DELAY 60000

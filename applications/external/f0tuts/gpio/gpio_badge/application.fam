@@ -1,0 +1,10 @@
+App(
+    appid="gpio_badge",
+    name="GPIO Badge",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_diag_lights_app",
+    requires=["gui", "subghz"],
+    stack_size=2 * 1024,
+    fap_icon="gpio_badge.png",
+    fap_category="Misc",
+)

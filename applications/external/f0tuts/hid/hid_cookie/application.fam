@@ -1,0 +1,11 @@
+App(
+    appid="cookie_bt",
+    name="Cookie Clicker",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hid_cookie_ble_app",
+    stack_size=1 * 1024,
+    fap_category="Bluetooth",
+    fap_icon="hid_cookie_ble_10px.png",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="hid",
+)

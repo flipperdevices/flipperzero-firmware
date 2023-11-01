@@ -1,0 +1,9 @@
+For 1-Wire (iButton) devices this is the wire.  It has built-in 1K pull-up resistor to 5 volts.
+
+Generic GPIO uses PC0.
+
+CHECK: "PB14/TIM1.2N/I2C3.SDA-Pullup"
+
+Devices:
+- iButton[1Wire] (center of button)
+- DS18B20[1Wire] (yellow wire)

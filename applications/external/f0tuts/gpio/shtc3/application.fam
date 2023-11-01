@@ -1,0 +1,10 @@
+App(
+    appid="i2c_read_shtc3",
+    name="I2C SHTC3 Demo",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="i2c_read_shtc3_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="i2c_read_shtc3.png",
+    fap_category="GPIO",
+)

@@ -1,0 +1,15 @@
+App(
+    appid="skeleton_app",
+    name="[WIP] Skeleton Sample App",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="main_skeleton_app",
+    stack_size=4 * 1024,
+    requires=[
+        "gui",
+    ],
+    order=10,
+    fap_icon="app.png",
+    fap_category="GPIO",
+    fap_icon_assets="assets",
+    fap_description="Skeleton Sample App.  This is intended to be used as a starting point for new applications with one primary screen.",
+)

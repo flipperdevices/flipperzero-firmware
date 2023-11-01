@@ -1,0 +1,11 @@
+This pin is Flipper TX on LPUART [Low Power UART] (so connect to RX on device).
+
+For I2C devices this is SDA (Serial Data) pin.
+
+Generic GPIO uses PC1.
+
+CHECK: "LPTIM1.OUT/ADC1.2"
+
+Devices:
+- BME280[I2C] (SDA)
+- BH1750[I2C] (SDA)

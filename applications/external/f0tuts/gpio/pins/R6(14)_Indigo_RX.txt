@@ -1,0 +1,9 @@
+This pin is Flipper RX on USART (so connect to TX on device).
+
+Generic GPIO uses PB7.
+
+CHECK: "LPTIM1.IN2/COMP2 IN-"
+
+Devices:
+- NMEA GPS[USART] (TX)
+- HC-SR04[GPIO] (Echo)

@@ -1,0 +1,10 @@
+App(
+    appid="knob_demo",
+    name="Knob Demo",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="knob_demo_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="knob_demo.png",
+    fap_category="Misc",
+)
