@@ -2,6 +2,7 @@ App(
     appid="picopass",
     name="PicoPass [iClass]",
     apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
     entry_point="picopass_app",
     stack_size=4 * 1024,
     fap_icon="125_10px.png",
@@ -15,9 +16,8 @@ App(
     ],
     fap_icon_assets="icons",
     fap_file_assets="files",
-    fap_icon_assets_symbol="picopass",
     fap_author="bettse",
     fap_weburl="https://github.com/bettse/flipperzero-good-faps/tree/dev/picopass",
-    fap_version=(1, 6),
+    fap_version="1.7",
     fap_description="App to communicate with NFC tags using the PicoPass(iClass) format",
 )

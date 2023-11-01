@@ -31,14 +31,22 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-01 02:15 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-01 02:15 EST`
-- OFW: [NFC refactoring #3050](https://github.com/flipperdevices/flipperzero-firmware/pull/3050)
-- OFW: [MF DESFire Fixes #3167](https://github.com/flipperdevices/flipperzero-firmware/pull/3167)
-- OFW: [NFC RC fixes #3165](https://github.com/flipperdevices/flipperzero-firmware/pull/3165)
-- OFW: [Fix crash on files > 64B #3166](https://github.com/flipperdevices/flipperzero-firmware/pull/3166)
-- OFW: [fix crash after st25tb save #3170](https://github.com/flipperdevices/flipperzero-firmware/pull/3170)
-- Temp Deferred (more testing needed): OFW: [fbt: reworked assets & resources handling #3160 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3160) [fbt: SD card resource handling speedup #3178 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3178) [fbt: source collection improvements #3181 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3181)
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [Hangman (In Russian) v1.0 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- OFW: [NFC refactoring #3050 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3050)
+- OFW: [MF DESFire Fixes #3167 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3167)
+- OFW: [NFC RC fixes #3165 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3165)
+- OFW: [Fix crash on files > 64B #3166 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3166)
+- OFW: [fix crash after st25tb save #3170 (By augustozanellato)](https://github.com/flipperdevices/flipperzero-firmware/pull/3170)
+- OFW: [fbt: reworked assets & resources handling #3160 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3160)
+- OFW: [fbt: SD card resource handling speedup #3178 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3178)
+- OFW: [fbt: source collection improvements #3181 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/3181)
+- OFW: [Dolphin: Extreme butthurt loop fix #3184 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3184)
+- OFW: [Furi, FuriHal: remove FreeRTOS headers leaks #3179 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3179)
+- Updated: [Mfkey32 v1.2 (By noproto)](https://github.com/noproto/FlipperMfkey) [Update Mfkey32 app with new NFC API #69 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/69)
+- Updated: [NFC Magic v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67)
+- Updated: [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
+- Updated: [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 
 <a name="release">
 
@@ -375,7 +383,7 @@ $ ./fbt dolphin_ext
 - [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
 - [MAX31855 (By skotopes)](https://github.com/skotopes/flipperzero_max31855)
 - [Metronome v1.1 (By panki27)](https://github.com/panki27/Metronome)
-- [Mfkey32 v1.1 (By noproto)](https://github.com/noproto/FlipperMfkey)
+- [Mfkey32 v1.2 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
@@ -391,7 +399,7 @@ $ ./fbt dolphin_ext
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
-- [NFC Magic v1.0 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+- [NFC Magic v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
@@ -404,7 +412,7 @@ $ ./fbt dolphin_ext
 - [PC Monitor v1.0 (By TheSainEyereg)](https://github.com/TheSainEyereg/flipper-pc-monitor) _Req: [Backend](https://github.com/TheSainEyereg/flipper-pc-monitor-backend)_
 - [Pet a Dolphin (By ugeneSmile)](https://github.com/EugeneSmile/PetADolphin)
 - [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth)
-- [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
+- [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
@@ -420,7 +428,7 @@ $ ./fbt dolphin_ext
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator v1.2 (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
-- [RFID Detector v1.1 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
+- [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
 - [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [R.O.B. Control (By riney)](https://github.com/riney/flip_rob)
