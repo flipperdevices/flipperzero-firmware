@@ -11,7 +11,7 @@ char** hangman_menu_read(size_t* menu_size) {
     size_t cnt = 0;
 
     if(file_stream_open(stream, HANGMAN_MENU_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        while (stream_read_line(stream, line)) {
+        while(stream_read_line(stream, line)) {
             furi_string_trim(line);
 
             if(cnt == capacity) {
