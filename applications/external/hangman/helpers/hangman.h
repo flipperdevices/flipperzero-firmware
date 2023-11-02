@@ -39,7 +39,7 @@ typedef struct {
     uint8_t keyboard_rows;
     uint8_t keyboard_gap;
     uint16_t letters[HANGMAN_MAX_ALP_SIZE];
-    char * message_ok, * message_won, * message_loose;
+    char *message_ok, *message_won, *message_loose;
 } HangmanLangConfig;
 
 typedef struct {
@@ -63,12 +63,9 @@ void hangman_render_callback(Canvas* canvas, void* ctx);
 HangmanApp* hangman_app_alloc();
 bool hangman_main_loop(HangmanApp* app);
 bool hangman_wait_close_window(HangmanApp* app);
-void hangman_draw_gallows(Canvas *canvas, HangmanApp* app);
+void hangman_draw_gallows(Canvas* canvas, HangmanApp* app);
 void hangman_clear_state(HangmanApp* app);
 void hangman_text_window(Canvas* canvas, char* ok, char* txt);
 
 char** hangman_menu_read(size_t* menu_size);
 void free_hangman_menu_data(char** lines, size_t menu_size);
-
-
-
