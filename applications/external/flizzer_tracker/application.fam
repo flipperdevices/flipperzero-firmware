@@ -4,6 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flizzer_tracker_app",
     stack_size=2 * 1024,
+    resources="resources",
     fap_version=(0, 3),
     fap_description="An advanced Flipper Zero chiptune tracker with 4 channels",
     fap_author="LTVA",
