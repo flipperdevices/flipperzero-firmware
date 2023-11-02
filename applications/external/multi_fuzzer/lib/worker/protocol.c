@@ -75,6 +75,7 @@ const uint8_t uid_list_cyfral[][Cyfral_DATA_SIZE] = {
 #define HIDProx_DATA_SIZE (6)
 #define PAC_DATA_SIZE (4)
 #define H10301_DATA_SIZE (3)
+#define IOPROXXSF_DATA_SIZE (4)
 
 const uint8_t uid_list_em4100[][EM4100_DATA_SIZE] = {
     {0x00, 0x00, 0x00, 0x00, 0x00}, // Null bytes
@@ -150,6 +151,26 @@ const uint8_t uid_list_h10301[][H10301_DATA_SIZE] = {
     {0xCA, 0xCA, 0xCA}, // From arha
 };
 
+const uint8_t uid_list_ioproxxsf[][IOPROXXSF_DATA_SIZE] = {
+    {0x00, 0x00, 0x00, 0x00}, // Null bytes
+    {0xFF, 0xFF, 0xFF, 0xFF}, // Only FF
+    {0x11, 0x11, 0x11, 0x11}, // Only 11
+    {0x22, 0x22, 0x22, 0x22}, // Only 22
+    {0x33, 0x33, 0x33, 0x33}, // Only 33
+    {0x44, 0x44, 0x44, 0x44}, // Only 44
+    {0x55, 0x55, 0x55, 0x55}, // Only 55
+    {0x66, 0x66, 0x66, 0x66}, // Only 66
+    {0x77, 0x77, 0x77, 0x77}, // Only 77
+    {0x88, 0x88, 0x88, 0x88}, // Only 88
+    {0x99, 0x99, 0x99, 0x99}, // Only 99
+    {0x12, 0x34, 0x56, 0x78}, // Incremental UID
+    {0x9A, 0x78, 0x56, 0x34}, // Decremental UID
+    {0x04, 0xd0, 0x9b, 0x0d}, // From arha
+    {0x34, 0x00, 0x29, 0x3d}, // From arha
+    {0x04, 0xdf, 0x00, 0x00}, // From arha
+    {0xCA, 0xCA, 0xCA, 0xCA}, // From arha
+};
+
 #if defined(RFID_125_PROTOCOL)
 const FuzzerProtocol fuzzer_proto_items[] = {
     // EM4100
@@ -190,6 +211,16 @@ const FuzzerProtocol fuzzer_proto_items[] = {
             {
                 .val = (const uint8_t*)&uid_list_h10301,
                 .len = COUNT_OF(uid_list_h10301),
+            },
+    },
+    // IoProxXSF
+    {
+        .name = "IoProxXSF",
+        .data_size = IOPROXXSF_DATA_SIZE,
+        .dict =
+            {
+                .val = (const uint8_t*)&uid_list_ioproxxsf,
+                .len = COUNT_OF(uid_list_ioproxxsf),
             },
     },
 };
