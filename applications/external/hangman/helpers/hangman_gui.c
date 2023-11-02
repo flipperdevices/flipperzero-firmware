@@ -78,5 +78,6 @@ void hangman_text_window(Canvas* canvas, char* ok, char* txt) {
     elements_frame(canvas, x, y, w, h);
     hangman_ok_button(canvas, y + h, ok);
 
-    hangman_draw_utf8_str(canvas, (cw - txt_w) / 2, x + canvas_current_font_height(canvas), txt);
+    hangman_draw_utf8_str(
+        canvas, (cw - txt_w) / 2, y + canvas_current_font_height(canvas) + 4, txt);
 }

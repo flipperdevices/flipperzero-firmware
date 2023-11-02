@@ -197,24 +197,30 @@ char* hangman_read_str(Stream* stream) {
     return result;
 }
 
-HangmanLangConfig* hangman_load_config() {
+char* hangman_add_asset_path(const char* filename) {
+    FuriString* full_path = furi_string_alloc_set_str(APP_ASSETS_PATH(""));
+    furi_string_cat_str(full_path, filename);
+
+    const char* file_full_path = furi_string_get_cstr(full_path);
+    char* result = strdup(file_full_path);
+    furi_string_free(full_path);
+    return result;
+}
+
+HangmanLangConfig* hangman_load_config(char* meta_file) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
     HangmanLangConfig* config = malloc(sizeof(HangmanLangConfig));
 
-    if(!file_stream_open(stream, HANGMAN_META_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(!file_stream_open(stream, meta_file, FSAM_READ, FSOM_OPEN_EXISTING)) {
         furi_crash(NULL);
     }
 
-    FuriString* dict_path = furi_string_alloc_set_str(APP_ASSETS_PATH(""));
     if(!stream_read_line(stream, line)) {
         furi_crash(NULL);
     }
-    furi_string_cat(dict_path, line);
-    config->dict_file = strdup(furi_string_get_cstr(dict_path));
-    furi_string_free(dict_path);
-
+    config->dict_file = hangman_add_asset_path(furi_string_get_cstr(line));
     config->keyboard_cols = hangman_read_int(stream);
     config->keyboard_gap = hangman_read_int(stream);
     config->first_letter_offset = hangman_read_int(stream);
@@ -253,7 +259,16 @@ HangmanLangConfig* hangman_load_config() {
 HangmanApp* hangman_app_alloc() {
     HangmanApp* app = malloc(sizeof(HangmanApp));
 
-    app->lang = hangman_load_config();
+    app->show_menu = true;
+
+    app->menu = hangman_menu_read(&app->menu_cnt);
+    if(app->menu_cnt & 1 || app->menu_cnt < 2) {
+        furi_crash(NULL);
+    }
+
+    char* meta_file = hangman_add_asset_path(app->menu[1]);
+    app->lang = hangman_load_config(meta_file);
+    free(meta_file);
 
     furi_hal_random_init();
     hangman_clear_state(app);
@@ -278,6 +293,8 @@ void hangman_app_free(HangmanApp** app) {
 
     furi_record_close(RECORD_GUI);
     furi_message_queue_free((*app)->event_queue);
+
+    hangman_free_menu_data((*app)->menu, (*app)->menu_cnt);
 
     free((*app)->word);
     free((*app)->lang->dict_file);
