@@ -138,7 +138,7 @@ struct trade_ctx {
     TradeBlock* trade_block;
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
-    struct patch_list *patch_list;
+    struct patch_list* patch_list;
 };
 
 /* These are the needed variables for the draw callback */
@@ -492,8 +492,7 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 	 * preamble bytes, 7x 0x00, then 189 bytes for the patch list. A
 	 * total of 199 bytes transmitted.
 	 */
-        if(counter == 196)
-            trade->trade_centre_state = TRADE_SELECT;
+        if(counter == 196) trade->trade_centre_state = TRADE_SELECT;
 
         break;
 

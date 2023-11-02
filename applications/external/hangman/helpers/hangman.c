@@ -192,7 +192,7 @@ char* hangman_read_str(Stream* stream) {
     }
 
     furi_string_trim(line);
-    char *result = strdup(furi_string_get_cstr(line));
+    char* result = strdup(furi_string_get_cstr(line));
     furi_string_free(line);
     return result;
 }
