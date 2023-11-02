@@ -96,7 +96,7 @@ void loader_port_esp32_deinit(void)
 esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
     uart_write_bytes(s_uart_port, (const char *)data, size);
-    esp_err_t err = uart_wait_tx_done(s_uart_port, pdMS_TO_TICKS(timeout));
+    esp_err_t err = uart_wait_tx_done(s_uart_port, timeout);
 
     if (err == ESP_OK) {
 #ifdef SERIAL_FLASHER_DEBUG_TRACE
@@ -113,7 +113,7 @@ esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_
 
 esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
-    int read = uart_read_bytes(s_uart_port, data, size, pdMS_TO_TICKS(timeout));
+    int read = uart_read_bytes(s_uart_port, data, size, timeout);
 
     if (read < 0) {
         return ESP_LOADER_ERROR_FAIL;
