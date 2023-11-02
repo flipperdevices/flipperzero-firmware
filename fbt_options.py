@@ -38,7 +38,7 @@ COPRO_STACK_ADDR = "0x0"
 COPRO_STACK_BIN_DIR = posixpath.join(COPRO_CUBE_DIR, "firmware")
 
 # Supported toolchain versions
-FBT_TOOLCHAIN_VERSIONS = (" 10.3.", " 12.3.")
+FBT_TOOLCHAIN_VERSIONS = (" 10.3.", " 12.3.", " 13.2.")
 
 OPENOCD_OPTS = [
     "-f",
