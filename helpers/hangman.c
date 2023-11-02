@@ -1,5 +1,5 @@
 #include "hangman.h"
-#include "hangman_fonts.h"
+#include "helpers/hangman_fonts.h"
 
 char* hangman_get_random_word(const char* dict_file) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -106,22 +106,63 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     }
 }
 
+void hangman_draw_menu(Canvas* canvas, HangmanApp* app) {
+    canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
+
+    uint8_t max_txt_w = 0;
+    for (uint8_t i = 0; i < app->menu_cnt; i += 2) {
+        uint8_t txt_w = hangman_string_length(app->menu[i]);
+        if (txt_w > max_txt_w) {
+            max_txt_w = txt_w;
+        }
+    }
+
+    max_txt_w *= canvas_glyph_width(canvas, ' ');
+    uint8_t txt_h = canvas_current_font_height(canvas);
+
+    uint8_t w = max_txt_w + 30;
+    uint8_t h = txt_h * app->menu_cnt / 2 + 6;
+    uint8_t x = (canvas_width(canvas) - w) / 2;
+    uint8_t y = (canvas_height(canvas) - h) / 2;
+
+    hangman_window(canvas, x, y, w, h);
+
+    uint8_t txt_x = (canvas_width(canvas) - max_txt_w) / 2;
+
+    for (uint8_t i = 0, menu_item = 0; i < app->menu_cnt; i += 2, menu_item++) {
+        uint8_t txt_y = y + (menu_item + 1) * txt_h;
+
+        canvas_set_color(canvas, ColorBlack);
+
+        if (menu_item == app->menu_item) {
+            canvas_draw_box(canvas, x, txt_y - txt_h + 3, w, txt_h);
+            canvas_invert_color(canvas);
+        }
+
+        hangman_draw_utf8_str(canvas, txt_x, txt_y, app->menu[i]);
+    }
+}
+
 void hangman_render_callback(Canvas* canvas, void* ctx) {
     HangmanApp* app = (HangmanApp*)ctx;
 
     canvas_clear(canvas);
 
-    hangman_draw_word(canvas, app);
-    hangman_draw_gallows(canvas, app);
-    hangman_draw_keyboard(canvas, app);
+    if (app->menu_show) {
+        hangman_draw_menu(canvas, app);
+    } else {
+        hangman_draw_word(canvas, app);
+        hangman_draw_gallows(canvas, app);
+        hangman_draw_keyboard(canvas, app);
 
-    if(app->eog != HangmanGameOn) {
-        if(app->eog == HangmanGameLoose) {
-            hangman_text_window(canvas, app->lang->message_ok, app->lang->message_loose);
-        } else {
-            hangman_text_window(canvas, app->lang->message_ok, app->lang->message_won);
+        if(app->eog != HangmanGameOn) {
+            if(app->eog == HangmanGameLoose) {
+                hangman_text_window(canvas, app->lang->message_ok, app->lang->message_loose);
+            } else {
+                hangman_text_window(canvas, app->lang->message_ok, app->lang->message_won);
+            }
+            app->need_generate = true;
         }
-        app->need_generate = true;
     }
 }
 
@@ -261,14 +302,16 @@ HangmanLangConfig *hangman_load_config(char* meta_file) {
 HangmanApp* hangman_app_alloc() {
     HangmanApp* app = malloc(sizeof(HangmanApp));
 
-    app->show_menu = true;
+    app->menu_item = 0;
 
     app->menu = hangman_menu_read(&app->menu_cnt);
     if (app->menu_cnt & 1 || app->menu_cnt < 2) {
         furi_crash(NULL);
     }
 
-    char* meta_file = hangman_add_asset_path(app->menu[1]);
+    app->menu_show = app->menu_cnt > 2;
+
+    char* meta_file = hangman_add_asset_path(app->menu[app->menu_item * 2 + 1]);
     app->lang = hangman_load_config(meta_file);
     free(meta_file);
 
@@ -324,6 +367,42 @@ bool hangman_wait_close_window(HangmanApp* app) {
                 default:
                     break;
                 }
+            }
+        }
+    }
+}
+
+bool hangman_menu_selection(HangmanApp* app) {
+    InputEvent event;
+    int8_t menu_cnt = app->menu_cnt / 2;
+
+    for(;;) {
+        if(furi_message_queue_get(app->event_queue, &event, 100) == FuriStatusOk) {
+            if(event.type == InputTypeShort) {
+                switch(event.key) {
+                case InputKeyOk:
+                    app->menu_show = false;
+                    view_port_update(app->view_port);
+                    return true;
+
+                case InputKeyBack:
+                    return false;
+
+                case InputKeyUp:
+                    if(--app->menu_item < 0) {
+                        app->menu_item = menu_cnt - 1;
+                    }
+                    break;
+                case InputKeyDown:
+                    if(++app->menu_item > menu_cnt - 1) {
+                        app->menu_item = 0;
+                    }
+                    break;
+                default:
+                    break;
+                }
+
+                view_port_update(app->view_port);
             }
         }
     }

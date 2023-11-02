@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Fontname: -Misc-Fixed-Medium-R-SemiCondensed--12-110-75-75-C-60-ISO10646-1
 Copyright: Public domain terminal emulator font.  Share and enjoy.
