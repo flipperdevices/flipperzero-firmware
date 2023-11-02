@@ -64,6 +64,14 @@ void hangman_ok_button(Canvas* canvas, uint8_t y, const char* str) {
     canvas_invert_color(canvas);
 }
 
+void hangman_window(Canvas* canvas, uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x - 2, y - 2, w + 4, h + 4);
+    canvas_set_color(canvas, ColorBlack);
+
+    elements_frame(canvas, x, y, w, h);
+}
+
 void hangman_text_window(Canvas* canvas, char* ok, char* txt) {
     uint8_t txt_w = canvas_glyph_width(canvas, ' ') * hangman_string_length(txt);
 
@@ -71,11 +79,7 @@ void hangman_text_window(Canvas* canvas, char* ok, char* txt) {
     uint8_t w = txt_w + 10, h = 34, y = 18;
     uint8_t x = (cw - w) / 2;
 
-    canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, x - 2, y - 2, w + 4, h + 4);
-    canvas_set_color(canvas, ColorBlack);
-
-    elements_frame(canvas, x, y, w, h);
+    hangman_window(canvas, x, y, w, h);
     hangman_ok_button(canvas, y + h, ok);
 
     hangman_draw_utf8_str(
