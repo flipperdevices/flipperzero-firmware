@@ -3,8 +3,9 @@
 #define HANGMAN_GALLOWS_MAX_STATE 7
 #define HANGMAN_GALLOWS_INIT_STATE 0
 #define HANGMAN_MAX_ALP_SIZE 0xFF
+#define HANGMAN_MAX_MENU_SIZE 5
 
-#define HANGMAN_META_FILE APP_ASSETS_PATH("russian.bolk")
+#define HANGMAN_MENU_FILE APP_ASSETS_PATH("menu.txt")
 
 #include "hangman_icons.h"
 
@@ -52,6 +53,8 @@ typedef struct {
     bool need_generate;
     HangmanGameResult eog;
     HangmanLangConfig* lang;
+    char** menu;
+    size_t menu_cnt;
 } HangmanApp;
 
 void hangman_app_free(HangmanApp** app);
@@ -62,5 +65,9 @@ bool hangman_wait_close_window(HangmanApp* app);
 void hangman_draw_gallows(Canvas *canvas, HangmanApp* app);
 void hangman_clear_state(HangmanApp* app);
 void hangman_text_window(Canvas* canvas, char* ok, char* txt);
+
+char** hangman_menu_read(size_t* menu_size);
+void free_hangman_menu_data(char** lines, size_t menu_size);
+
 
 
