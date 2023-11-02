@@ -261,6 +261,8 @@ HangmanLangConfig *hangman_load_config(char* meta_file) {
 HangmanApp* hangman_app_alloc() {
     HangmanApp* app = malloc(sizeof(HangmanApp));
 
+    app->show_menu = true;
+
     app->menu = hangman_menu_read(&app->menu_cnt);
     if (app->menu_cnt & 1 || app->menu_cnt < 2) {
         furi_crash(NULL);
@@ -294,7 +296,7 @@ void hangman_app_free(HangmanApp** app) {
     furi_record_close(RECORD_GUI);
     furi_message_queue_free((*app)->event_queue);
 
-    free_hangman_menu_data((*app)->menu, (*app)->menu_cnt);
+    hangman_free_menu_data((*app)->menu, (*app)->menu_cnt);
 
     free((*app)->word);
     free((*app)->lang->dict_file);

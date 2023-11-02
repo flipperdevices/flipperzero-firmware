@@ -35,7 +35,7 @@ char** hangman_menu_read(size_t* menu_size) {
     return lines;
 }
 
-void free_hangman_menu_data(char** lines, size_t menu_size) {
+void hangman_free_menu_data(char** lines, size_t menu_size) {
     for(size_t i = 0; i < menu_size; i++) {
         free(lines[i]);
     }

@@ -53,6 +53,7 @@ typedef struct {
     bool need_generate;
     HangmanGameResult eog;
     HangmanLangConfig* lang;
+    bool show_menu;
     char** menu;
     size_t menu_cnt;
 } HangmanApp;
