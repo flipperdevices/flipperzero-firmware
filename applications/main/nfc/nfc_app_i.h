@@ -7,7 +7,7 @@
 
 #include <gui/gui.h>
 #include <gui/view.h>
-#include <assets_icons.h>
+#include <nfc_icons.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <cli/cli.h>
@@ -57,7 +57,6 @@
 #include <toolbox/path.h>
 #include <toolbox/name_generator.h>
 #include <dolphin/dolphin.h>
-#include <nfc_icons.h>
 
 #define NFC_NAME_SIZE 22
 #define NFC_TEXT_STORE_SIZE 128
