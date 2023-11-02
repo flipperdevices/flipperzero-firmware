@@ -139,11 +139,6 @@ struct trade_ctx {
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
     struct patch_list* patch_list;
-
-    /* XXX: Lets add a variable back here to track trade state, to allow the main menu
-     * to show a second option of _continue_ trade, as well as modify the default trade
-     * option text to something like "restart trade/link/etc"
-     */
 };
 
 /* These are the needed variables for the draw callback */
@@ -497,9 +492,8 @@ static uint8_t getTradeCentreResponse(uint8_t in, struct trade_ctx* trade) {
 	 * preamble bytes, 7x 0x00, then 189 bytes for the patch list. A
 	 * total of 199 bytes transmitted.
 	 */
-        if(counter == 196) {
-            trade->trade_centre_state = TRADE_SELECT;
-        }
+        if(counter == 196) trade->trade_centre_state = TRADE_SELECT;
+
         break;
 
     case TRADE_SELECT:
@@ -733,9 +727,11 @@ void trade_exit_callback(void* context) {
 
     /* Stop the timer, and deallocate it as the enter callback allocates it on entry */
     furi_timer_free(trade->draw_timer);
+    trade->draw_timer = NULL;
 
     /* Destroy the patch list, it is allocated on the enter callback */
     plist_free(trade->patch_list);
+    trade->patch_list = NULL;
 }
 
 void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view) {
@@ -744,6 +740,7 @@ void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view
 
     struct trade_ctx* trade = malloc(sizeof(struct trade_ctx));
 
+    memset(trade, '\0', sizeof(struct trade_ctx));
     trade->view = view;
     trade->trade_block = trade_block;
     trade->input_block = malloc(sizeof(TradeBlock));
