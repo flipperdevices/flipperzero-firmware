@@ -395,8 +395,11 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
 
                 response->has_next = fs_operation_success && (size_left > 0);
             } else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
                 response->content.storage_read_response.file.data =
-                    malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(0));
+                    malloc(PB_BYTES_ARRAY_T_ALLOCSIZE(3));
+#pragma GCC diagnostic pop
                 response->content.storage_read_response.file.data->size = 0;
                 response->content.storage_read_response.has_file = true;
                 response->has_next = false;

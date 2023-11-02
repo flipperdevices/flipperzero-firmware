@@ -11,6 +11,7 @@ enum SubmenuIndex {
 static void nfc_scene_set_type_init_edit_data(Iso14443_3aData* data, size_t uid_len) {
     // Easiest way to create a zero'd buffer of given length
     uint8_t* uid = malloc(uid_len);
+    memset(uid, 0, uid_len);
     iso14443_3a_set_uid(data, uid, uid_len);
     free(uid);
 }
