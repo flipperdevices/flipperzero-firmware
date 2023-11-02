@@ -27,15 +27,17 @@ class TestMain(BaseCase):
         """
         nav.go_to_main_screen()
         nav.press_ok()
-        assert nav.get_menu_list() == [
+        ref_list = [
             "Sub-GHz",
-            "RFID",
+            "125 kHz RFID",
             "NFC",
             "Infrared",
             "GPIO",
             "iButton",
-            "BadUSB",
+            "Bad USB",
             "U2F",
             "Settings",
             "Apps",
         ]
+
+        assert nav.get_menu_list(ref = nav.get_ref_from_list(ref_list, nav.font_helvB08, invert = 0)) == ref_list

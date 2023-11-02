@@ -9,23 +9,23 @@ def get_ref_from_string(phrase, font):
 
 font_helvB08 = list()
 for i in range(256):
-	font_helvB08.append(cv.imread("./font_helvB08/helvB08_" + str(i) + ".png"))
+	font_helvB08.append(cv.imread("./flippigator/fonts/font_helvB08/helvB08_" + str(i) + ".png"))
 
 font_HaxrCorp_4089 = list()
 for i in range(256):
-	font_HaxrCorp_4089.append(cv.imread("./font_HaxrCorp_4089/HaxrCorp_4089_" + str(i) + ".png"))
+	font_HaxrCorp_4089.append(cv.imread("./flippigator/fonts/font_HaxrCorp_4089/HaxrCorp_4089_" + str(i) + ".png"))
 
 font_profont11 = list()
 for i in range(256):
-	font_profont11.append(cv.imread("./font_profont11/profont11_" + str(i) + ".png"))
+	font_profont11.append(cv.imread("./flippigator/fonts/font_profont11/profont11_" + str(i) + ".png"))
 
 font_profont22 = list()
 for i in range(256):
-	font_profont22.append(cv.imread("./font_profont22/profont22_" + str(i) + ".png"))
+	font_profont22.append(cv.imread("./flippigator/fonts/font_profont22/profont22_" + str(i) + ".png"))
 
-phrase1 = "Hello, world! This phrase is typed by font 'helvB08', like flipper's menu"
+phrase1 = "iButton"
 phrase2 = "And this phrase is typed by font 'HaxrCorp_4089', like flipper's file browser"
-phrase3 = "Finaly, this is font 'profont11', just for example"
+phrase3 = "iButton"
 phrase4 = "And if you think that whole that fonts are too smal, we also have 'profont22'!"
 
 cv.imshow('out1', get_ref_from_string(phrase1, font_helvB08))

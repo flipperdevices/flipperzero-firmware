@@ -16,6 +16,7 @@ from flippigator.modules.rfid import AppRfid
 from flippigator.modules.settings import AppSettings
 from flippigator.modules.subghz import AppSubGhz
 from flippigator.modules.u2f import AppU2f
+from PIL import Image, ImageFont, ImageDraw
 
 # APPLY_TEMPLATE_THRESHOLD = 0.99
 SCREEN_H = 128
@@ -60,18 +61,10 @@ class Navigator:
         self.applications = AppApplications(self)
         self.settings = AppSettings(self)
 
-        self.font_helvB08 = list()
-        for i in range(256):
-            self.font_helvB08.append(cv.imread("./font_helvB08/helvB08_" + str(i) + ".png"))
-        self.font_HaxrCorp_4089 = list()
-        for i in range(256):
-            self.font_HaxrCorp_4089.append(cv.imread("./font_HaxrCorp_4089/HaxrCorp_4089_" + str(i) + ".png"))
-        self.font_profont11 = list()
-        for i in range(256):
-            self.font_profont11.append(cv.imread("./font_profont11/profont11_" + str(i) + ".png"))
-        self.font_profont22 = list()
-        for i in range(256):
-            self.font_profont22.append(cv.imread("./font_profont22/profont22_" + str(i) + ".png"))
+        self.font_helvB08 = ImageFont.load("./flippigator/fonts/helvB08.pil")
+        self.font_haxrcorp_4089 = ImageFont.truetype("./flippigator/fonts/haxrcorp_4089.ttf", 15)
+        self.font_profont11 = ImageFont.load("./flippigator/fonts/profont11.pil")
+        self.font_profont22 = ImageFont.load("./flippigator/fonts/profont22.pil")
 
         for filename in os.listdir(path):
             f = cv.imread(path + str(filename), 0)
@@ -146,21 +139,93 @@ class Navigator:
         cv.imshow(self._window_name, display_image)
         key = cv.waitKey(1)
 
-    def get_ref_from_string(phrase, font):
-        result = font[ord(phrase[0])]
-        for i in phrase[1:]:
-            result = numpy.concatenate((result, font[ord(i)]), axis=1)
+    def get_ref_from_string(self, phrase, font, invert = 0):
+        result = Image.new("L", font.getsize(phrase), 255)
+        dctx = ImageDraw.Draw(result)
+        dctx.text((0, 0), phrase, font=font)
+        del dctx
+        result = numpy.array(result)
+        if invert:
+            result = cv.bitwise_not(result)
+        cv.imshow(phrase, result)
         return result
 
+    def get_ref_from_list(self, ref_list, font, invert = 0):
+        ref_dict = dict()
+        for i in ref_list:
+            ref_dict.update({i: self.get_ref_from_string(i, font, invert)})
+        return ref_dict
+
+
     def recog_ref(self, ref=None, area=(0, 64, 0, 128)):
-        if ref is None:
-            ref = []
+        if ref == None:
+            ref = self.imRef
         # self.updateScreen()
         temp_pic_list = list()
         screen_image = self.get_raw_screen()[area[0] : area[1], area[2] : area[3]]
-        if len(ref) == 0:
-            ref = list(self.imRef.keys())
-        for im in ref:
+        for im in ref.keys():
+            template = cv.cvtColor(ref.get(im), 0)
+            if (template.shape[0] <= screen_image.shape[0]) and (
+                (template.shape[1] <= screen_image.shape[1])
+            ):
+                res = cv.matchTemplate(screen_image, template, cv.TM_CCOEFF_NORMED)
+                min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
+                if max_val > self._threshold:
+                    h, w, ch = template.shape
+                    temp_pic_list.append(
+                        (
+                            str(im),
+                            (max_loc[0] + area[2], max_loc[1] + area[0]),
+                            (max_loc[0] + w + area[2], max_loc[1] + h + area[0]),
+                        )
+                    )
+
+        found_ic = list()
+
+        # display_image = None
+        # TODO: add blank image initialization
+
+        display_image = self.get_screen()
+
+        for i in temp_pic_list:
+            if self._guiFlag == 1:
+                display_image = cv.rectangle(
+                    display_image,
+                    (i[1][0] * self._scale, i[1][1] * self._scale),
+                    (i[2][0] * self._scale, i[2][1] * self._scale),
+                    (255, 255, 0, 0),
+                    2,
+                )
+                display_image = cv.putText(
+                    display_image,
+                    i[0],
+                    (i[1][0] * self._scale, (i[2][1] + 2) * self._scale),
+                    cv.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (255, 255, 0, 0),
+                    1,
+                )
+            found_ic.append(i[0])
+
+        # todo: add reference display_image
+        # initialize display_image
+        # display_image = self.screen_image
+
+        if self._guiFlag == 1:
+            cv.imshow(self._window_name, display_image)
+            key = cv.waitKey(1)
+
+        if self._debugFlag == 1:
+            self.logger.debug("Found: " + str(found_ic))
+
+        return found_ic
+
+    def recog_from_list(self, ref_list, font, area=(0, 64, 0, 128)):
+        ref_dict = []
+        for i in ref_list:
+            ref_dict.update({i: self.get_ref_from_string(i, font)})
+        screen_image = self.get_raw_screen()[area[0] : area[1], area[2] : area[3]]
+        for im in ref_list:
             template = cv.cvtColor(self.imRef.get(im), 0)
             if (template.shape[0] <= screen_image.shape[0]) and (
                 (template.shape[1] <= screen_image.shape[1])
@@ -219,7 +284,7 @@ class Navigator:
 
     def get_current_state(self, timeout: float = 5, ref=None, area=(0, 64, 0, 128)):
         if ref is None:
-            ref = []
+            ref = self.imRef
         self.update_screen()
         state = self.recog_ref(ref, area)
         start_time = time.time()
@@ -281,14 +346,16 @@ class Navigator:
         self.proto.rpc_gui_send_input(f"{duration} {button}")
         self.logger.debug("Press " + button)
 
-    def get_menu_list(self):
+    def get_menu_list(self, ref = None):
+        if ref == None:
+            ref = self.imRef
         time.sleep(0.2)
         self.logger.info("Scanning menu list")
         menus = list()
-        self.get_current_state(timeout=1)
+        self.get_current_state(timeout=1, ref=ref)
 
         while True:
-            cur = self.get_current_state(timeout=1)
+            cur = self.get_current_state(timeout=1, ref=ref)
             if not (cur == []):
                 if cur[0] in menus:
                     break
@@ -347,7 +414,7 @@ class Navigator:
             else:
                 self.press_back()
 
-        time.sleep(1)  # wait for some time, because of missing key pressing
+        time.sleep(1.5)  # wait for some time, because of missing key pressing
 
     def open_file(self, module, filename):
         self.logger.info("Opening file '" + filename + "' in module '" + module + "'")
