@@ -53,9 +53,10 @@ typedef struct {
     bool need_generate;
     HangmanGameResult eog;
     HangmanLangConfig* lang;
-    bool show_menu;
-    char** menu;
+    bool menu_show;
+    int8_t menu_item;
     size_t menu_cnt;
+    char** menu;
 } HangmanApp;
 
 void hangman_app_free(HangmanApp** app);
@@ -63,9 +64,22 @@ void hangman_render_callback(Canvas* canvas, void* ctx);
 HangmanApp* hangman_app_alloc();
 bool hangman_main_loop(HangmanApp* app);
 bool hangman_wait_close_window(HangmanApp* app);
+bool hangman_menu_selection(HangmanApp* app);
 void hangman_draw_gallows(Canvas* canvas, HangmanApp* app);
 void hangman_clear_state(HangmanApp* app);
 void hangman_text_window(Canvas* canvas, char* ok, char* txt);
+void hangman_window(Canvas* canvas, uint8_t x, uint8_t y, uint8_t w, uint8_t h);
+void hangman_draw_utf8_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str);
+
+size_t hangman_string_length(const char* str);
 
 char** hangman_menu_read(size_t* menu_size);
-void free_hangman_menu_data(char** lines, size_t menu_size);
+void hangman_free_menu_data(char** lines, size_t menu_size);
+void hangman_draw_menu(Canvas* canvas, HangmanApp* app);
+
+void hangman_load_lang(HangmanApp* app);
+void hangman_choice_letter(HangmanApp* app);
+
+bool hangman_wait_close_window(HangmanApp* app);
+bool hangman_menu_selection(HangmanApp* app);
+bool hangman_main_loop(HangmanApp* app);

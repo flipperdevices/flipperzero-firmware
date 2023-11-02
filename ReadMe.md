@@ -62,8 +62,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - Updated: [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - Updated a few internal apps to have their CLI with the app again (By RogueMaster)
-- Many merge and app fixes to have resources in the app folders like OFW and timer fixes due to refactoring (By RogueMaster)
+- Many merge and app fixes to have resources in the app folders like OFW and timer fixes due to refactoring (By RogueMaster)(https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a46259ce444f296f2747b46540a5564f66e45a5d)
+- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [Add IoProxXSF to RFID Fuzzer (By SkeletonMan03)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a46259ce444f296f2747b46540a5564f66e45a5d)
+- Updated: [Hangman (In Russian) v1.0 (By Evgeny Stepanischev & Eva Stepanischeva)]
 
 <a name="release">
 
