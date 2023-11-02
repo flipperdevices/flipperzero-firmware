@@ -4,7 +4,7 @@
 #define HANGMAN_GALLOWS_INIT_STATE 0
 #define HANGMAN_MAX_ALP_SIZE 0xFF
 
-#define HANGMAN_META_FILE APP_ASSETS_PATH("russian.meta")
+#define HANGMAN_META_FILE APP_ASSETS_PATH("russian.bolk")
 
 #include "hangman_icons.h"
 

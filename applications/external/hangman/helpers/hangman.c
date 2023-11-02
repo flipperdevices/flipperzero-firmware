@@ -132,7 +132,7 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
 }
 
 void hangman_choice_letter(HangmanApp* app) {
-    if(strchr(app->word, app->pos + app->lang->first_letter_offset) == NULL) {
+    if(strchr(app->word, app->lang->letters[app->pos] + app->lang->first_letter_offset) == NULL) {
         app->gallows_state++;
         app->opened[app->pos] = HangmanOpenedNotFound;
 
@@ -191,7 +191,8 @@ char* hangman_read_str(Stream* stream) {
         furi_crash(NULL);
     }
 
-    char* result = strdup(furi_string_get_cstr(line));
+    furi_string_trim(line);
+    char *result = strdup(furi_string_get_cstr(line));
     furi_string_free(line);
     return result;
 }
