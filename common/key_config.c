@@ -427,7 +427,38 @@ KeyConfig* key_config_alloc(
     int display_count = 0;
     for(int i = 1; i < 16;) {
         display_count++;
-        furi_string_printf(key_name, "Key %d", display_count);
+        furi_string_printf(key_name, "Key %d (", display_count);
+        if(i == 15) {
+            furi_string_cat_printf(key_name, "all buttons");
+        } else {
+            int btn = 0;
+            if(i & 1) {
+                furi_string_cat_printf(key_name, "btn1");
+                btn |= 1;
+                if(btn != i) {
+                    furi_string_cat_printf(key_name, ", ");
+                }
+            }
+            if(i & 2) {
+                furi_string_cat_printf(key_name, "btn2");
+                btn |= 2;
+                if(btn != i) {
+                    furi_string_cat_printf(key_name, ", ");
+                }
+            }
+            if(i & 4) {
+                furi_string_cat_printf(key_name, "btn3");
+                btn |= 4;
+                if(btn != i) {
+                    furi_string_cat_printf(key_name, ", ");
+                }
+            }
+            if(i & 8) {
+                furi_string_cat_printf(key_name, "btn4");
+                btn |= 8;
+            }
+        }
+        furi_string_cat_printf(key_name, ")");
         submenu_add_item(
             key_config->menu_keys, furi_string_get_cstr(key_name), i, item_callback, key_config);
         if(single) {

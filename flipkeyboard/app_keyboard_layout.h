@@ -94,6 +94,19 @@ KeyboardInputKey shift_keys[] = {
     {},
     {},
     //
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    //
 };
 
 KeyboardInputKey keys[] = {
@@ -136,8 +149,8 @@ KeyboardInputKey keys[] = {
     {.code = HID_KEYBOARD_DELETE, .ch = 0, .icon = &I_backspace_15x10},
     {.code = HID_KEYBOARD_DELETE, .ch = 0, .icon = &I_backspace_15x10},
 
-    {.code = HID_KEYBOARD_TAB, .ch = 'T', .icon = NULL},
-    {.code = HID_KEYBOARD_TAB, .ch = 'T', .icon = NULL},
+    {.code = HID_KEYBOARD_TAB, .ch = 0, .icon = &I_tab_15x10},
+    {.code = HID_KEYBOARD_TAB, .ch = 0, .icon = &I_tab_15x10},
     {.code = HID_KEYBOARD_Q, .ch = 'q', .icon = NULL},
     {.code = HID_KEYBOARD_W, .ch = 'w', .icon = NULL},
     {.code = HID_KEYBOARD_E, .ch = 'e', .icon = NULL},
@@ -175,9 +188,11 @@ KeyboardInputKey keys[] = {
     {.code = HID_KEYBOARD_DOT, .ch = '.', .icon = NULL},
     {.code = HID_KEYBOARD_SLASH, .ch = '/', .icon = NULL},
 
-    {.code = HID_KEYBOARD_L_CTRL, .ch = 'C', .icon = NULL},
+    {.code = HID_KEYBOARD_L_CTRL, .ch = 0, .icon = &I_control_15x10},
+    {.code = HID_KEYBOARD_L_CTRL, .ch = 0, .icon = &I_control_15x10},
     {.code = HID_KEYBOARD_L_GUI, .ch = 0, .icon = &I_gui_5x10},
-    {.code = HID_KEYBOARD_L_ALT, .ch = 'A', .icon = NULL},
+    {.code = HID_KEYBOARD_L_ALT, .ch = 0, .icon = &I_alt_15x10},
+    {.code = HID_KEYBOARD_L_ALT, .ch = 0, .icon = &I_alt_15x10},
     {.code = HID_KEYBOARD_SPACEBAR, .ch = ' ', .icon = NULL},
     {.code = HID_KEYBOARD_SPACEBAR, .ch = ' ', .icon = NULL},
     {.code = HID_KEYBOARD_SPACEBAR, .ch = ' ', .icon = NULL},
@@ -185,6 +200,17 @@ KeyboardInputKey keys[] = {
     {.code = HID_KEYBOARD_BACKSLASH, .ch = '\\', .icon = NULL},
     {.code = HID_KEYBOARD_SEMICOLON, .ch = ';', .icon = NULL},
     {.code = HID_KEYBOARD_GRAVE_ACCENT, .ch = '`', .icon = NULL},
+
+    {.code = HID_KEYBOARD_LEFT_ARROW, .ch = 0, .icon = &I_left_5x10},
+    {.code = HID_KEYBOARD_RIGHT_ARROW, .ch = 0, .icon = &I_right_5x10},
+    {.code = HID_KEYBOARD_UP_ARROW, .ch = 0, .icon = &I_up_5x10},
+    {.code = HID_KEYBOARD_DOWN_ARROW, .ch = 0, .icon = &I_down_5x10},
     {.code = HID_KEYBOARD_MINUS, .ch = '-', .icon = NULL},
     {.code = HID_KEYBOARD_EQUAL_SIGN, .ch = '=', .icon = NULL},
+    {.code = HID_KEYBOARD_SYSREQ, .ch = 0, .icon = &I_sysreq_25x10},
+    {.code = HID_KEYBOARD_SYSREQ, .ch = 0, .icon = &I_sysreq_25x10},
+    {.code = HID_KEYBOARD_SYSREQ, .ch = 0, .icon = &I_sysreq_25x10},
+    {.code = HID_KEYBOARD_POWER, .ch = 0, .icon = &I_power_25x10},
+    {.code = HID_KEYBOARD_POWER, .ch = 0, .icon = &I_power_25x10},
+    {.code = HID_KEYBOARD_POWER, .ch = 0, .icon = &I_power_25x10},
 };
