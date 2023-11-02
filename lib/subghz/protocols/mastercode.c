@@ -232,8 +232,6 @@ void subghz_protocol_decoder_mastercode_feed(void* context, bool level, uint32_t
 
     switch(instance->decoder.parser_step) {
     case MastercodeDecoderStepReset:
-        //if((!level) && (DURATION_DIFF(duration, subghz_protocol_mastercode_const.te_short * 51) <
-        //                subghz_protocol_mastercode_const.te_delta * 25)) {
         if((!level) && (DURATION_DIFF(duration, subghz_protocol_mastercode_const.te_short * 16) <
                         subghz_protocol_mastercode_const.te_delta * 8)) {
             instance->decoder.parser_step = MastercodeDecoderStepSaveDuration;
@@ -286,7 +284,7 @@ void subghz_protocol_decoder_mastercode_feed(void* context, bool level, uint32_t
                     instance->decoder.parser_step = MastercodeDecoderStepReset;
                 }
 
-                             if(instance->decoder.decode_count_bit ==
+                if(instance->decoder.decode_count_bit ==
                    subghz_protocol_mastercode_const.min_count_bit_for_found) {
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
@@ -347,17 +345,16 @@ void subghz_protocol_decoder_mastercode_get_string(void* context, FuriString* ou
     furi_assert(context);
     SubGhzProtocolDecoderMastercode* instance = context;
     subghz_protocol_mastercode_check_remote_controller(&instance->generic);
-    //uint32_t data = (uint32_t)(instance->generic.data & 0xFFFFFF);
     furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
-        "Key:%04lX   Btn %X\r\n"
+        "Key:%09lX   Btn %X\r\n"
         "  +:   " DIP_PATTERN "\r\n"
         "  o:   " DIP_PATTERN "\r\n"
         "  -:   " DIP_PATTERN "\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
-        (uint32_t)(instance->generic.data >> 20 & 0x0FFFF),
+        (uint32_t)(instance->generic.data & 0x0FFFFFFFFF),
         instance->generic.btn,
         SHOW_DIP_P(instance->generic.serial, DIP_P),
         SHOW_DIP_P(instance->generic.serial, DIP_O),
