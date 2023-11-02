@@ -207,14 +207,17 @@ void hangman_choice_letter(HangmanApp* app) {
 void hangman_clear_state(HangmanApp* app) {
     app->pos = 0;
     app->gallows_state = HANGMAN_GALLOWS_INIT_STATE;
-    memset(app->opened, HangmanOpenedInit, app->lang->letters_cnt);
     app->need_generate = false;
     app->eog = HangmanGameOn;
 
     if (app->word != NULL) {
         free(app->word);
     }
-    app->word = hangman_get_random_word(app->lang->dict_file);
+
+    if (app->lang != NULL) {
+        memset(app->opened, HangmanOpenedInit, app->lang->letters_cnt);
+        app->word = hangman_get_random_word(app->lang->dict_file);
+    }
 }
 
 int hangman_read_int(Stream *stream) {
@@ -302,9 +305,15 @@ HangmanLangConfig *hangman_load_config(char* meta_file) {
     return config;
 }
 
+void hangman_load_lang(HangmanApp* app) {
+    char* meta_file = hangman_add_asset_path(app->menu[app->menu_item * 2 + 1]);
+    app->lang = hangman_load_config(meta_file);
+    free(meta_file);
+}
+
 HangmanApp* hangman_app_alloc() {
     HangmanApp* app = malloc(sizeof(HangmanApp));
-
+    furi_hal_random_init();
     app->menu_item = 0;
 
     app->menu = hangman_menu_read(&app->menu_cnt);
@@ -313,12 +322,10 @@ HangmanApp* hangman_app_alloc() {
     }
 
     app->menu_show = app->menu_cnt > 2;
+    if (!app->menu_show) {
+        hangman_load_lang(app);
+    }
 
-    char* meta_file = hangman_add_asset_path(app->menu[app->menu_item * 2 + 1]);
-    app->lang = hangman_load_config(meta_file);
-    free(meta_file);
-
-    furi_hal_random_init();
     hangman_clear_state(app);
 
     app->view_port = view_port_alloc();
@@ -385,6 +392,8 @@ bool hangman_menu_selection(HangmanApp* app) {
                 switch(event.key) {
                 case InputKeyOk:
                     app->menu_show = false;
+                    hangman_load_lang(app);
+                    hangman_clear_state(app);
                     view_port_update(app->view_port);
                     return true;
 
