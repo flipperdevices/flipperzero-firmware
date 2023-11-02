@@ -77,19 +77,18 @@ bool hangman_main_loop(HangmanApp* app) {
                 case InputKeyDown:
                     app->pos += app->lang->keyboard_cols;
 
-                    if (app->pos >= app->lang->letters_cnt) {
+                    if(app->pos >= app->lang->letters_cnt) {
                         app->pos %= app->lang->keyboard_cols;
                     }
 
                     break;
 
                 case InputKeyUp:
-                    if (app->pos >= app->lang->keyboard_cols) {
+                    if(app->pos >= app->lang->keyboard_cols) {
                         app->pos -= app->lang->keyboard_cols;
                     } else {
-                        app->pos += app->lang->keyboard_cols *
-                                    (app->lang->keyboard_rows - 1);
-                        if (app->pos >= app->lang->letters_cnt) {
+                        app->pos += app->lang->keyboard_cols * (app->lang->keyboard_rows - 1);
+                        if(app->pos >= app->lang->letters_cnt) {
                             app->pos -= app->lang->keyboard_cols;
                         }
                     }
