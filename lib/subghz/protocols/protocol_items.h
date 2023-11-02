@@ -49,4 +49,4 @@
 #include "genie.h"
 #include "honeywell.h"
 
-extern const SubGhzProtocolRegistry subghz_protocol_registry;
+// extern const SubGhzProtocolRegistry subghz_protocol_registry;
