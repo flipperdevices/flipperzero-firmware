@@ -89,7 +89,7 @@ void pcsg_view_receiver_set_lock(PCSGReceiver* pcsg_receiver, PCSGLock lock) {
             PCSGReceiverModel * model,
             { model->bar_show = PCSGReceiverBarShowLock; },
             true);
-        furi_timer_start(pcsg_receiver->timer, pdMS_TO_TICKS(1000));
+        furi_timer_start(pcsg_receiver->timer, 1000);
     } else {
         with_view_model(
             pcsg_receiver->view,

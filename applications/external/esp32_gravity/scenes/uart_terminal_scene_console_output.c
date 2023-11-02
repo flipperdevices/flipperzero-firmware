@@ -2,7 +2,7 @@
 
 #define MIN_VERSION_STRLEN 43
 
-TickType_t launchTime;
+uint32_t launchTime;
 
 void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
@@ -21,8 +21,8 @@ void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
 
     /* Appending to the text box resets the view to its default. If it's been
        more than 10 seconds since running the command, focus the text box at end */
-    TickType_t delay = pdMS_TO_TICKS(10000);
-    if(xTaskGetTickCount() - launchTime >= delay) {
+    uint32_t delay = 10000;
+    if(furi_get_tick() - launchTime >= delay) {
         text_box_set_focus(app->text_box, TextBoxFocusEnd);
     }
 
@@ -33,7 +33,7 @@ void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
 void uart_terminal_scene_console_output_on_enter(void* context) {
     UART_TerminalApp* app = context;
 
-    launchTime = xTaskGetTickCount();
+    launchTime = furi_get_tick();
 
     TextBox* text_box = app->text_box;
     text_box_reset(app->text_box);

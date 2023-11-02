@@ -35,6 +35,19 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Hangman (In Russian) v1.0 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - More apps added as subtrees... more to come... (By RogueMaster)
 - OFW: [NFC refactoring #3050 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3050)
+- Removed due to refactor needed: [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- Removed due to refactor needed: [Mifare Fuzzer v1.1 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
+- Removed due to refactor needed: [Mifare Nested v1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
+- Removed due to refactor needed: [NFC Crocodile (By Firemoon777)](https://github.com/Firemoon777/NfcCrocodile)
+- Removed due to refactor needed: [NFC Magic Gen1 v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- Removed due to refactor needed: [NFC Magic Gen4 v1.2 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/all-the-plugins)
+- Removed due to refactor needed: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
+- Removed due to refactor needed: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
+- Removed due to refactor needed: [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
+- Removed due to refactor needed: [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
+- Removed due to refactor needed: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
+- Removed due to refactor needed: [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
+- Removed due to refactor needed: [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - OFW: [MF DESFire Fixes #3167 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3167)
 - OFW: [NFC RC fixes #3165 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3165)
 - OFW: [Fix crash on files > 64B #3166 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3166)
@@ -49,6 +62,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - Updated: [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - Updated a few internal apps to have their CLI with the app again (By RogueMaster)
+- Many merge and app fixes to have resources in the app folders like OFW and timer fixes due to refactoring (By RogueMaster)
 
 <a name="release">
 
@@ -254,7 +268,6 @@ $ ./fbt dolphin_ext
 - [Minesweeper v1.1 (By panki27)](https://github.com/panki27/minesweeper) [Fix minesweeper freeze bug, do some refactoring (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/56c11c70b3617764b6d2ea7b008c67dce517fa25)
 - [Monty Hall v1.1 (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
-- [NFC Crocodile (By Firemoon777)](https://github.com/Firemoon777/NfcCrocodile)
 - [Nu Pogodi! (Ну, погоди!) v1.2 (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
 - [Paint v1.1 (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Pong v1.2 (By nmrr)](https://github.com/nmrr/flipperzero-pong) [(Patched By SimplyMinimal)](https://github.com/nmrr/flipperzero-pong/pull/2)
@@ -338,7 +351,6 @@ $ ./fbt dolphin_ext
 - [DSTIKE Deauther v1.1 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `Req: ESP8266`
 - [DTMF Dolphin v1.2 (By litui)](https://github.com/litui/dtmf_dolphin)
 - [EM4100 Key Generator v1.1 (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
-- [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
 - [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
@@ -389,8 +401,6 @@ $ ./fbt dolphin_ext
 - [Mfkey32 With Nested v1.0 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [MH-Z19 UART (By skotopes)](https://github.com/skotopes/flipperzero_mhz19_uart)
-- [Mifare Fuzzer v1.1 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
-- [Mifare Nested v1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - [Morse Code v1.1 (By wh00hw)](https://github.com/DarkFlippers/unleashed-firmware/pull/144)
 - [Mouse Jacker v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Mouse Jiggler v1.1 (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
@@ -440,7 +450,6 @@ $ ./fbt dolphin_ext
 - [Sentry Safe v1.1 (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Servotester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)
 - [ServoTester (2) (By mhasbini)](https://github.com/mhasbini/ServoTesterApp/tree/master)
-- [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Skeleton App v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Spectrum Analyzer v1.2 (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
@@ -450,7 +459,6 @@ $ ./fbt dolphin_ext
 - [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [Sub-GHz Rolling Flaws v1.5 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials)
 - [SWD Probe v1.1 (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
-- [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
 - [Text To SAM v1.2 (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Text Viewer v1.5 (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ae4fc4a54febccb44b010c4025a99c2edef9a7f0)
@@ -462,7 +470,6 @@ $ ./fbt dolphin_ext
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Mass Storage v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
-- [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
 - [WAV Player v1.1 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)
 - [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
@@ -479,13 +486,20 @@ $ ./fbt dolphin_ext
 
 - If you can fix any of these, DM me on Discord for a surprise reward.
 - [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
-- Needs NFC Refactor:
+- Needs Refactor:
+- [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- [Mifare Fuzzer v1.1 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
+- [Mifare Nested v1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
+- [NFC Crocodile (By Firemoon777)](https://github.com/Firemoon777/NfcCrocodile)
 - [NFC Magic Gen1 v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Magic Gen4 v1.2 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/all-the-plugins)
 - [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
+- [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
+- [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
+- [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)

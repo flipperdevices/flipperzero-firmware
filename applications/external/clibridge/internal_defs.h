@@ -27,10 +27,8 @@ typedef struct {
     void* state_context;
 
     char* name;
-    configSTACK_DEPTH_TYPE stack_size;
     FuriThreadPriority priority;
 
-    TaskHandle_t task_handle;
     bool heap_trace_enabled;
     size_t heap_size;
 

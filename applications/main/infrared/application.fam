@@ -11,6 +11,7 @@ App(
     resources="resources",
     fap_icon="icon.png",
     fap_category="Infrared",
+    fap_icon_assets="images",
 )
 
 App(

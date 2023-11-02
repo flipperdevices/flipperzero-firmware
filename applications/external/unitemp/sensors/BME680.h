@@ -74,17 +74,16 @@ typedef struct {
     int32_t t_fine;
 } BME680_instance;
 
-extern const SensorType BMP280;
 extern const SensorType BME680;
 /**
- * @brief Выделение памяти и установка начальных значений датчика BMP280
+ * @brief Выделение памяти и установка начальных значений датчика BME680
  * @param sensor Указатель на создаваемый датчик
  * @return Истина при успехе
  */
 bool unitemp_BME680_alloc(Sensor* sensor, char* args);
 
 /**
- * @brief Инициализации датчика BMP280
+ * @brief Инициализации датчика BME680
  * @param sensor Указатель на датчик
  * @return Истина если инициализация упспешная
  */

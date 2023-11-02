@@ -89,7 +89,7 @@ void ws_view_receiver_set_lock(WSReceiver* ws_receiver, WSLock lock) {
             WSReceiverModel * model,
             { model->bar_show = WSReceiverBarShowLock; },
             true);
-        furi_timer_start(ws_receiver->timer, pdMS_TO_TICKS(1000));
+        furi_timer_start(ws_receiver->timer, 1000);
     } else {
         with_view_model(
             ws_receiver->view,
