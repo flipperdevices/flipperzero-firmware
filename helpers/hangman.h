@@ -77,4 +77,9 @@ char** hangman_menu_read(size_t* menu_size);
 void hangman_free_menu_data(char** lines, size_t menu_size);
 void hangman_draw_menu(Canvas* canvas, HangmanApp* app);
 
+void hangman_load_lang(HangmanApp* app);
+void hangman_choice_letter(HangmanApp* app);
 
+bool hangman_wait_close_window(HangmanApp* app);
+bool hangman_menu_selection(HangmanApp* app);
+bool hangman_main_loop(HangmanApp* app);
