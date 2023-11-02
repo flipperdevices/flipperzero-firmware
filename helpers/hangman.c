@@ -211,6 +211,9 @@ void hangman_clear_state(HangmanApp* app) {
     app->need_generate = false;
     app->eog = HangmanGameOn;
 
+    if (app->word != NULL) {
+        free(app->word);
+    }
     app->word = hangman_get_random_word(app->lang->dict_file);
 }
 
