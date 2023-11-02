@@ -1360,7 +1360,6 @@ typedef struct w64wrapper {
         #define WAIT_OBJECT_0 0L
     #elif defined(FREERTOS)
         typedef unsigned int   THREAD_RETURN;
-        typedef TaskHandle_t   THREAD_TYPE;
         #define WOLFSSL_THREAD
     #else
         typedef unsigned int  THREAD_RETURN;

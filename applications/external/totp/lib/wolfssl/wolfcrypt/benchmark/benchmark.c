@@ -10005,7 +10005,7 @@ void bench_sphincsKeySign(byte level, byte optim)
         (void) reset;
 
         /* tick count == ms, if configTICK_RATE_HZ is set to 1000 */
-        tickCount = xTaskGetTickCount();
+        tickCount = furi_get_tick();
         return (double)tickCount / 1000;
     }
 
