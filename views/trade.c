@@ -139,11 +139,6 @@ struct trade_ctx {
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
     struct patch_list *patch_list;
-
-    /* XXX: Lets add a variable back here to track trade state, to allow the main menu
-     * to show a second option of _continue_ trade, as well as modify the default trade
-     * option text to something like "restart trade/link/etc"
-     */
 };
 
 /* These are the needed variables for the draw callback */
