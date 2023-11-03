@@ -25,7 +25,7 @@
 #define DEFAULT_BAUDRATE 115200
 
 /* Get UART DTS entry used as flash interface */
-static const struct device *esp_uart_dev = DEVICE_DT_GET(DT_ALIAS(uart1));
+static const struct device *esp_uart_dev = DEVICE_DT_GET(DT_ALIAS(uart));
 /* Get GPIO pin connected to the ESP's enable pin. */
 static const struct gpio_dt_spec esp_enable_spec = GPIO_DT_SPEC_GET(DT_ALIAS(en), gpios);
 /* Get GPIO pin  connected to the ESP's boot pin. */
