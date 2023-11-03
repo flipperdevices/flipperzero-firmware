@@ -143,11 +143,9 @@ class Navigator:
         result = Image.new("L", font.getsize(phrase), 255)
         dctx = ImageDraw.Draw(result)
         dctx.text((0, 0), phrase, font=font)
-        del dctx
         result = numpy.array(result)
         if invert:
             result = cv.bitwise_not(result)
-        cv.imshow(phrase, result)
         return result
 
     def get_ref_from_list(self, ref_list, font, invert = 0):
@@ -156,6 +154,17 @@ class Navigator:
             ref_dict.update({i: self.get_ref_from_string(i, font, invert)})
         return ref_dict
 
+    def get_ref_all_fonts(self, phrase):
+        ref_dict = dict()
+        ref_dict.update({"gen0": self.get_ref_from_string(phrase, self.font_helvB08, 0)})
+        #ref_dict.update({1: self.get_ref_from_string(phrase, self.font_helvB08, 1)})
+        #ref_dict.update({2: self.get_ref_from_string(phrase, self.font_haxrcorp_4089, 0)})
+        ref_dict.update({"gen1": self.get_ref_from_string(phrase, self.font_haxrcorp_4089, 1)})
+        #ref_dict.update({4: self.get_ref_from_string(phrase, self.font_profont22, 0)})
+        ref_dict.update({"gen2": self.get_ref_from_string(phrase, self.font_profont22, 1)})
+        #ref_dict.update({6: self.get_ref_from_string(phrase, self.font_profont11, 0)})
+        ref_dict.update({"gen3": self.get_ref_from_string(phrase, self.font_profont11, 1)})
+        return ref_dict
 
     def recog_ref(self, ref=None, area=(0, 64, 0, 128)):
         if ref == None:
@@ -165,68 +174,6 @@ class Navigator:
         screen_image = self.get_raw_screen()[area[0] : area[1], area[2] : area[3]]
         for im in ref.keys():
             template = cv.cvtColor(ref.get(im), 0)
-            if (template.shape[0] <= screen_image.shape[0]) and (
-                (template.shape[1] <= screen_image.shape[1])
-            ):
-                res = cv.matchTemplate(screen_image, template, cv.TM_CCOEFF_NORMED)
-                min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
-                if max_val > self._threshold:
-                    h, w, ch = template.shape
-                    temp_pic_list.append(
-                        (
-                            str(im),
-                            (max_loc[0] + area[2], max_loc[1] + area[0]),
-                            (max_loc[0] + w + area[2], max_loc[1] + h + area[0]),
-                        )
-                    )
-
-        found_ic = list()
-
-        # display_image = None
-        # TODO: add blank image initialization
-
-        display_image = self.get_screen()
-
-        for i in temp_pic_list:
-            if self._guiFlag == 1:
-                display_image = cv.rectangle(
-                    display_image,
-                    (i[1][0] * self._scale, i[1][1] * self._scale),
-                    (i[2][0] * self._scale, i[2][1] * self._scale),
-                    (255, 255, 0, 0),
-                    2,
-                )
-                display_image = cv.putText(
-                    display_image,
-                    i[0],
-                    (i[1][0] * self._scale, (i[2][1] + 2) * self._scale),
-                    cv.FONT_HERSHEY_SIMPLEX,
-                    0.5,
-                    (255, 255, 0, 0),
-                    1,
-                )
-            found_ic.append(i[0])
-
-        # todo: add reference display_image
-        # initialize display_image
-        # display_image = self.screen_image
-
-        if self._guiFlag == 1:
-            cv.imshow(self._window_name, display_image)
-            key = cv.waitKey(1)
-
-        if self._debugFlag == 1:
-            self.logger.debug("Found: " + str(found_ic))
-
-        return found_ic
-
-    def recog_from_list(self, ref_list, font, area=(0, 64, 0, 128)):
-        ref_dict = []
-        for i in ref_list:
-            ref_dict.update({i: self.get_ref_from_string(i, font)})
-        screen_image = self.get_raw_screen()[area[0] : area[1], area[2] : area[3]]
-        for im in ref_list:
-            template = cv.cvtColor(self.imRef.get(im), 0)
             if (template.shape[0] <= screen_image.shape[0]) and (
                 (template.shape[1] <= screen_image.shape[1])
             ):
@@ -387,15 +334,27 @@ class Navigator:
         return menus
 
     def go_to(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
-        state = self.get_current_state(area=area)
-        self.logger.info("Going to " + target)
+        if target not in self.imRef.keys():
+            ref = self.get_ref_all_fonts(target)
+            state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
+            self.logger.info("Going to " + target)
 
-        while not (target in state):
-            if direction == "down":
-                self.press_down()
-            elif direction == "up":
-                self.press_up()
-            state = self.get_current_state(area=area)
+            while (len(state) == 0):
+                if direction == "down":
+                    self.press_down()
+                elif direction == "up":
+                    self.press_up()
+                state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
+        else:
+            state = self.get_current_state(area=area, timeout = 0.5)
+            self.logger.info("Going to " + target)
+
+            while (not (target in state)):
+                if direction == "down":
+                    self.press_down()
+                elif direction == "up":
+                    self.press_up()
+                state = self.get_current_state(area=area, timeout = 0.5)
 
     def open(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
         self.go_to(target, area, direction)
