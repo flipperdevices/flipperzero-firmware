@@ -74,9 +74,80 @@ const uint8_t subghz_device_cc1101_preset_ook_270khz_async_regs[] = {
 };
 
 const uint8_t subghz_device_cc1101_preset_ook_650khz_async_regs_better_q[] = {
-    0x02, 0x0D, 0x03, 0x07, 0x08, 0x32, 0x0B, 0x06, 0x14, 0x00, 0x13, 0x00, 0x12, 0x30, 0x11,
-    0x22, 0x10, 0x1C, 0x18, 0x18, 0x19, 0x18, 0x1D, 0x91, 0x1C, 0x00, 0x1B, 0x07, 0x20, 0xFB,
-    0x22, 0x11, 0x21, 0xB6, 0x00, 0x00, 0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    // https://www.youtube.com/watch?v=VxMDdYuRITE
+
+    /* GPIO GD0 */
+    CC1101_IOCFG0,
+    0x0D, // GD0 as async serial data output/input
+
+    /* FIFO and internals */
+    CC1101_FIFOTHR,
+    0x07, // The only important bit is ADC_RETENTION
+
+    /* Packet engine */
+    CC1101_PKTCTRL0,
+    0x32, // Async, continious, no whitening
+
+    /* Frequency Synthesizer Control */
+    CC1101_FSCTRL1,
+    0x06, // IF = (26*10^6) / (2^10) * 0x06 = 152343.75Hz
+
+    // Modem Configuration
+    CC1101_MDMCFG0,
+    0x00, // Channel spacing is 25kHz
+    CC1101_MDMCFG1,
+    0x00, // Channel spacing is 25kHz
+    CC1101_MDMCFG2,
+    0x30, // Format ASK/OOK, No preamble/sync
+    CC1101_MDMCFG3,
+    0x22, // Data rate is 115.051 kBaud
+    CC1101_MDMCFG4,
+    0x1C, // Rx BW filter is 650.000kHz
+
+    /* Main Radio Control State Machine */
+    CC1101_MCSM0,
+    0x18, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
+
+    /* Frequency Offset Compensation Configuration */
+    CC1101_FOCCFG,
+    0x18, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
+
+    /* Automatic Gain Control */
+    // CC1101_AGCTRL0,0x40, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
+    // CC1101_AGCTRL1,0x00, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
+    // CC1101_AGCCTRL2, 0x03, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
+    //MAGN_TARGET for RX filter BW =< 100 kHz is 0x3. For higher RX filter BW's MAGN_TARGET is 0x7.
+    CC1101_AGCCTRL0,
+    0x91, // 10 - Medium hysteresis, medium asymmetric dead zone, medium gain ; 01 - 16 samples agc; 00 - Normal AGC, 01 - 8dB boundary
+    CC1101_AGCCTRL1,
+    0x0, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
+    CC1101_AGCCTRL2,
+    0x07, // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 42 dB
+
+    /* Wake on radio and timeouts control */
+    CC1101_WORCTRL,
+    0xFB, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
+
+    /* Frontend configuration */
+    CC1101_FREND0,
+    0x11, // Adjusts current TX LO buffer + high is PATABLE[1]
+    CC1101_FREND1,
+    0xB6, //
+
+    /* End load reg */
+    0,
+    0,
+
+    //ook_async_patable[8]
+    0x00,
+    0xC0, // 12dBm 0xC0, 10dBm 0xC5, 7dBm 0xCD, 5dBm 0x86, 0dBm 0x50, -6dBm 0x37, -10dBm 0x26, -15dBm 0x1D, -20dBm 0x17, -30dBm 0x03
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+};
 
 const uint8_t subghz_device_cc1101_preset_ook_650khz_async_regs[] = {
     // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
