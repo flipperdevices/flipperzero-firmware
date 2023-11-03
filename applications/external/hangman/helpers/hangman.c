@@ -284,7 +284,12 @@ HangmanLangConfig* hangman_load_config(char* meta_file) {
 
         config->letters[config->letters_cnt++] = num;
         if(config->unicode_base > num) config->unicode_base = num;
-        token = end + 1; // +1 because of space
+
+        if(*end == ' ') {
+            token = end + 1; // +1 because of space
+        } else {
+            break;
+        }
     }
 
     config->keyboard_rows = ceil((float)config->letters_cnt / config->keyboard_cols);
