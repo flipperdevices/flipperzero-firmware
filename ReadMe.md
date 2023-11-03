@@ -150,6 +150,7 @@ $ ./fbt dolphin_ext
 - Assets: Includes a NFC Rick Roll link
 - Assets: Includes New Dolphin Animations: [Listed Here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/assets/resources/dolphin)
 - Assets: Includes NFC Assets: 86 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) [It is recommended you randomize UID with this script.](https://github.com/Lanjelin/AmiiboConverter/tree/main)[Patreon Build Only](https://www.patreon.com/RogueMaster/membership)
+- Assets: Includes NFC Assets: RogueMaster GitHub and RogueMaster Patreon
 - Assets: Includes sample Music Player tunes
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
 - Assets: Includes SubGHz assets for Crosswalk, CVS/Walgreens CS Buttons [Thanks jimilinuxguy](https://github.com/jimilinuxguy/customer-assistance-buttons-sdr/tree/main/cvs/English), Handicap Doors, Honda Lock/Unlock, Lowes, Sextoys, Tesla Charge Port & Unitree Go1 Robot Dog.
@@ -160,6 +161,7 @@ $ ./fbt dolphin_ext
 - Assets: Includes SubGHz SexToy files [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - Assets: Includes Tama P1 Rom Game file. [this rom](https://tinyurl.com/tamap1)
 - Assets: Includes WAV files for Unlock/Lock Gatekeeper Systems wheels found on some Shopping Carts/Trolleys (Thanks to lukejtaylor) (May not work off lipper)
+- Assets: Includes Wifi scripts for: [Create EAPOLpacketsSniffer.json #714 (By grugnoymeme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/714) & Wifi Scripts for Beacon Spam themed for Aperature Science, Funny and RM.
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - BadUSB: Assets for Kiosk Evasion (By nocomp) and Wifi Stealer (By 7h30th3r0n3)
 - BadUSB: Assets for RickRoll, RogueMaster GitHub and RogueMaster Patreon
