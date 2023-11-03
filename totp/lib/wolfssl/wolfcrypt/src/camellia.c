@@ -1464,7 +1464,7 @@ static void camellia_decrypt256(const u32 *subkey, u32 *io)
  * API for compatibility
  */
 
-static void Camellia_EncryptBlock(const int keyBitLength,
+static void Camellia_EncryptBlock(const word32 keyBitLength,
                            const unsigned char *plaintext,
                            const KEY_TABLE_TYPE keyTable,
                            unsigned char *ciphertext)
@@ -1495,7 +1495,7 @@ static void Camellia_EncryptBlock(const int keyBitLength,
     PUTU32(ciphertext + 12, tmp[3]);
 }
 
-static void Camellia_DecryptBlock(const int keyBitLength,
+static void Camellia_DecryptBlock(const word32 keyBitLength,
                            const unsigned char *ciphertext,
                            const KEY_TABLE_TYPE keyTable,
                            unsigned char *plaintext)

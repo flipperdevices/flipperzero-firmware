@@ -548,7 +548,7 @@ int wc_KyberKey_Decapsulate(KyberKey* key, unsigned char* ss,
  * @param  [in]       in   Buffer holding encoded key.
  * @param  [in]       len  Length of data in buffer.
  * @return  0 on success.
- * @return  BAD_FUNC_ARG when key ot in is NULL.
+ * @return  BAD_FUNC_ARG when key or in is NULL.
  * @return  NOT_COMPILED_IN when key type is not supported.
  * @return  BUFFER_E when len is not the correct size.
  */

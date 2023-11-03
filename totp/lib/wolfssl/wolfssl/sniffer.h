@@ -313,6 +313,35 @@ SSL_SNIFFER_API int ssl_PollSniffer(WOLF_EVENT** events, int maxEvents,
 
 #endif /* WOLFSSL_ASYNC_CRYPT */
 
+#ifdef WOLFSSL_SNIFFER_KEYLOGFILE
+
+typedef enum {
+    SNIFFER_SECRET_TLS12_MASTER_SECRET,
+#if defined(WOLFSSL_TLS13)
+    SNIFFER_SECRET_CLIENT_EARLY_TRAFFIC_SECRET,
+    SNIFFER_SECRET_CLIENT_HANDSHAKE_TRAFFIC_SECRET,
+    SNIFFER_SECRET_SERVER_HANDSHAKE_TRAFFIC_SECRET,
+    SNIFFER_SECRET_CLIENT_TRAFFIC_SECRET,
+    SNIFFER_SECRET_SERVER_TRAFFIC_SECRET,
+#endif /* WOLFSSL_TLS13 */
+    SNIFFER_SECRET_NUM_SECRET_TYPES
+} SnifferSecretType;
+
+
+WOLFSSL_API
+SSL_SNIFFER_API int ssl_CreateKeyLogSnifferServer(const char* address,
+                                                  int port,
+                                                  char* error);
+
+WOLFSSL_API
+SSL_SNIFFER_API int ssl_LoadSecretsFromKeyLogFile(const char* keylogfile,
+                                                  char* error);
+
+typedef int (*SSLSnifferSecretCb)(unsigned char* client_random,
+                                  int type,
+                                  unsigned char* output_secret);
+
+#endif /* WOLFSSL_SNIFFER_KEYLOGFILE */
 
 
 #ifdef __cplusplus

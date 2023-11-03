@@ -63,6 +63,8 @@ EXTRA_DIST += wolfcrypt/src/port/ti/ti-aes.c \
               wolfcrypt/src/port/arm/armv8-aes.c \
               wolfcrypt/src/port/arm/armv8-sha256.c \
               wolfcrypt/src/port/arm/armv8-chacha.c \
+              wolfcrypt/src/port/aria/aria-crypt.c \
+              wolfcrypt/src/port/aria/aria-cryptocb.c \
               wolfcrypt/src/port/nxp/ksdk_port.c \
               wolfcrypt/src/port/nxp/dcp_port.c \
               wolfcrypt/src/port/nxp/se050_port.c \
@@ -120,11 +122,12 @@ EXTRA_DIST += wolfcrypt/src/port/ti/ti-aes.c \
               wolfcrypt/src/port/arm/cryptoCellHash.c \
               wolfcrypt/src/port/Renesas/renesas_tsip_aes.c \
               wolfcrypt/src/port/Renesas/renesas_tsip_sha.c \
+              wolfcrypt/src/port/Renesas/renesas_tsip_rsa.c \
               wolfcrypt/src/port/Renesas/renesas_tsip_util.c \
-              wolfcrypt/src/port/Renesas/renesas_sce_util.c \
-              wolfcrypt/src/port/Renesas/renesas_sce_aes.c \
-              wolfcrypt/src/port/Renesas/renesas_sce_sha.c \
-              wolfcrypt/src/port/Renesas/renesas_sce_rsa.c \
+              wolfcrypt/src/port/Renesas/renesas_fspsm_util.c \
+              wolfcrypt/src/port/Renesas/renesas_fspsm_aes.c \
+              wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c \
+              wolfcrypt/src/port/Renesas/renesas_fspsm_rsa.c \
               wolfcrypt/src/port/Renesas/renesas_common.c \
               wolfcrypt/src/port/Renesas/renesas_rx64_hw_sha.c \
               wolfcrypt/src/port/Renesas/renesas_rx64_hw_util.c \

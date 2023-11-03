@@ -36,24 +36,39 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
 
 #include <wolfssl/wolfcrypt/types.h>
 
+#if !defined(NO_AES) || defined(WOLFSSL_SM4)
+typedef struct Gcm {
+    ALIGN16 byte H[16];
+#ifdef OPENSSL_EXTRA
+    word32 aadH[4]; /* additional authenticated data GHASH */
+    word32 aadLen;  /* additional authenticated data len */
+#endif
+#ifdef GCM_TABLE
+    /* key-based fast multiplication table. */
+    ALIGN16 byte M0[256][16];
+#elif defined(GCM_TABLE_4BIT)
+    #if defined(BIG_ENDIAN_ORDER) || defined(WC_16BIT_CPU)
+        ALIGN16 byte M0[16][16];
+    #else
+        ALIGN16 byte M0[32][16];
+    #endif
+#endif /* GCM_TABLE */
+} Gcm;
+
+WOLFSSL_LOCAL void GenerateM0(Gcm* gcm);
+#ifdef WOLFSSL_ARMASM
+WOLFSSL_LOCAL void GMULT(byte* X, byte* Y);
+#endif
+WOLFSSL_LOCAL void GHASH(Gcm* gcm, const byte* a, word32 aSz, const byte* c,
+                         word32 cSz, byte* s, word32 sSz);
+#endif
+
 #ifndef NO_AES
 
 #if defined(HAVE_FIPS) && \
     defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2)
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
-
-/* included for fips @wc_fips */
-#if defined(HAVE_FIPS) && \
-    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-#include <cyassl/ctaocrypt/aes.h>
-#if defined(CYASSL_AES_COUNTER) && !defined(WOLFSSL_AES_COUNTER)
-    #define WOLFSSL_AES_COUNTER
-#endif
-#if !defined(WOLFSSL_AES_DIRECT) && defined(CYASSL_AES_DIRECT)
-    #define WOLFSSL_AES_DIRECT
-#endif
-#endif
 
 #ifndef WC_NO_RNG
     #include <wolfssl/wolfcrypt/random.h>
@@ -117,14 +132,20 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
     #include <wolfssl/wolfcrypt/port/arm/cryptoCell.h>
 #endif
 
-#if defined(WOLFSSL_RENESAS_TSIP_TLS) && \
-    defined(WOLFSSL_RENESAS_TSIP_TLS_AES_CRYPT)
+#if (defined(WOLFSSL_RENESAS_TSIP_TLS) && \
+    defined(WOLFSSL_RENESAS_TSIP_TLS_AES_CRYPT)) ||\
+    defined(WOLFSSL_RENESAS_TSIP_CRYPTONLY)
     #include <wolfssl/wolfcrypt/port/Renesas/renesas_tsip_types.h>
+#endif
+
+#if defined(WOLFSSL_RENESAS_FSPSM)
+    #include <wolfssl/wolfcrypt/port/Renesas/renesas-fspsm-crypt.h>
 #endif
 
 #ifdef WOLFSSL_MAXQ10XX_CRYPTO
     #include <wolfssl/wolfcrypt/port/maxim/maxq10xx.h>
 #endif
+
 
 #ifdef __cplusplus
     extern "C" {
@@ -184,7 +205,6 @@ enum {
     WOLF_ENUM_DUMMY_LAST_ELEMENT(AES)
 };
 
-
 struct Aes {
     /* AESNI needs key first, rounds 2nd, not sure why yet */
     ALIGN16 word32 key[60];
@@ -199,11 +219,7 @@ struct Aes {
     word32 nonceSz;
 #endif
 #ifdef HAVE_AESGCM
-    ALIGN16 byte H[AES_BLOCK_SIZE];
-#ifdef OPENSSL_EXTRA
-    word32 aadH[4]; /* additional authenticated data GHASH */
-    word32 aadLen;  /* additional authenticated data len */
-#endif
+    Gcm gcm;
 
 #ifdef WOLFSSL_SE050
     sss_symmetric_t aes_ctx; /* used as the function context */
@@ -212,16 +228,6 @@ struct Aes {
     byte   keyIdSet;
     byte   useSWCrypt; /* Use SW crypt instead of SE050, before SCP03 auth */
 #endif
-#ifdef GCM_TABLE
-    /* key-based fast multiplication table. */
-    ALIGN16 byte M0[256][AES_BLOCK_SIZE];
-#elif defined(GCM_TABLE_4BIT)
-    #if defined(BIG_ENDIAN_ORDER) || defined(WC_16BIT_CPU)
-        ALIGN16 byte M0[16][AES_BLOCK_SIZE];
-    #else
-        ALIGN16 byte M0[32][AES_BLOCK_SIZE];
-    #endif
-#endif /* GCM_TABLE */
 #ifdef HAVE_CAVIUM_OCTEON_SYNC
     word32 y0;
 #endif
@@ -292,13 +298,13 @@ struct Aes {
 #if defined(WOLFSSL_CRYPTOCELL)
     aes_context_t ctx;
 #endif
-#if defined(WOLFSSL_RENESAS_TSIP_TLS) && \
-    defined(WOLFSSL_RENESAS_TSIP_TLS_AES_CRYPT)
+#if (defined(WOLFSSL_RENESAS_TSIP_TLS) && \
+    defined(WOLFSSL_RENESAS_TSIP_TLS_AES_CRYPT)) ||\
+    defined(WOLFSSL_RENESAS_TSIP_CRYPTONLY)
     TSIP_AES_CTX ctx;
 #endif
-#if defined(WOLFSSL_RENESAS_SCEPROTECT) ||\
-    defined(WOLFSSL_RENESAS_SCEPROTECT_CRYPTONLY)
-    SCE_AES_CTX ctx;
+#if defined(WOLFSSL_RENESAS_FSPSM)
+    FSPSM_AES_CTX ctx;
 #endif
 #if defined(WOLFSSL_IMXRT_DCP)
     dcp_handle_t handle;
@@ -414,16 +420,13 @@ WOLFSSL_API int wc_AesEcbDecrypt(Aes* aes, byte* out,
 #ifdef WOLFSSL_AES_COUNTER
  WOLFSSL_API int wc_AesCtrEncrypt(Aes* aes, byte* out,
                                    const byte* in, word32 sz);
+ WOLFSSL_API int wc_AesCtrSetKey(Aes* aes, const byte* key, word32 len,
+                                        const byte* iv, int dir);
+
 #endif
 /* AES-DIRECT */
 #if defined(WOLFSSL_AES_DIRECT)
-#if defined(HAVE_FIPS) && \
-    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
- WOLFSSL_API void wc_AesEncryptDirect(Aes* aes, byte* out, const byte* in);
- WOLFSSL_API void wc_AesDecryptDirect(Aes* aes, byte* out, const byte* in);
- WOLFSSL_API int wc_AesSetKeyDirect(Aes* aes, const byte* key, word32 len,
-                                const byte* iv, int dir);
-#elif defined(BUILDING_WOLFSSL)
+#if defined(BUILDING_WOLFSSL)
  WOLFSSL_API WARN_UNUSED_RESULT int wc_AesEncryptDirect(Aes* aes, byte* out,
                                                         const byte* in);
  WOLFSSL_API WARN_UNUSED_RESULT int wc_AesDecryptDirect(Aes* aes, byte* out,
@@ -505,8 +508,6 @@ WOLFSSL_API int wc_AesGcmDecryptFinal(Aes* aes, const byte* authTag,
                                const byte* authIn, word32 authInSz,
                                const byte* authTag, word32 authTagSz);
 #endif /* WC_NO_RNG */
- WOLFSSL_LOCAL void GHASH(Aes* aes, const byte* a, word32 aSz, const byte* c,
-                               word32 cSz, byte* s, word32 sSz);
 #endif /* HAVE_AESGCM */
 #ifdef HAVE_AESCCM
  WOLFSSL_LOCAL int wc_AesCcmCheckTagSize(int sz);
@@ -529,6 +530,7 @@ WOLFSSL_API int wc_AesGcmDecryptFinal(Aes* aes, const byte* authTag,
                                    byte* authTag, word32 authTagSz,
                                    const byte* authIn, word32 authInSz);
 #endif /* HAVE_AESCCM */
+
 #ifdef HAVE_AES_KEYWRAP
  WOLFSSL_API int  wc_AesKeyWrap(const byte* key, word32 keySz,
                                 const byte* in, word32 inSz,
@@ -565,6 +567,14 @@ WOLFSSL_API int wc_AesXtsEncrypt(XtsAes* aes, byte* out,
 WOLFSSL_API int wc_AesXtsDecrypt(XtsAes* aes, byte* out,
         const byte* in, word32 sz, const byte* i, word32 iSz);
 
+WOLFSSL_API int wc_AesXtsEncryptConsecutiveSectors(XtsAes* aes,
+        byte* out, const byte* in, word32 sz, word64 sector,
+        word32 sectorSz);
+
+WOLFSSL_API int wc_AesXtsDecryptConsecutiveSectors(XtsAes* aes,
+        byte* out, const byte* in, word32 sz, word64 sector,
+        word32 sectorSz);
+
 WOLFSSL_API int wc_AesXtsFree(XtsAes* aes);
 #endif
 
@@ -589,6 +599,71 @@ int wc_AesSivDecrypt(const byte* key, word32 keySz, const byte* assoc,
                      word32 assocSz, const byte* nonce, word32 nonceSz,
                      const byte* in, word32 inSz, byte* siv, byte* out);
 #endif
+
+#ifdef WOLFSSL_AES_EAX
+
+/* Because of the circular dependency between AES and CMAC, we need to prevent
+ * inclusion of AES EAX from CMAC to avoid a recursive inclusion */
+#ifndef WOLF_CRYPT_CMAC_H
+#include <wolfssl/wolfcrypt/cmac.h>
+struct AesEax {
+    Aes  aes;
+    Cmac nonceCmac;
+    Cmac aadCmac;
+    Cmac ciphertextCmac;
+    byte nonceCmacFinal[AES_BLOCK_SIZE];
+    byte aadCmacFinal[AES_BLOCK_SIZE];
+    byte ciphertextCmacFinal[AES_BLOCK_SIZE];
+    byte prefixBuf[AES_BLOCK_SIZE];
+};
+#endif /* !defined(WOLF_CRYPT_CMAC_H) */
+
+typedef struct AesEax AesEax;
+
+/* One-shot API */
+WOLFSSL_API int  wc_AesEaxEncryptAuth(const byte* key, word32 keySz, byte* out,
+                                      const byte* in, word32 inSz,
+                                      const byte* nonce, word32 nonceSz,
+                                      /* output computed auth tag */
+                                      byte* authTag, word32 authTagSz,
+                                      /* input data to authenticate (header) */
+                                      const byte* authIn, word32 authInSz);
+
+WOLFSSL_API int  wc_AesEaxDecryptAuth(const byte* key, word32 keySz, byte* out,
+                                      const byte* in, word32 inSz,
+                                      const byte* nonce, word32 nonceSz,
+                                      /* auth tag to verify against */
+                                      const byte* authTag, word32 authTagSz,
+                                      /* input data to authenticate (header) */
+                                      const byte* authIn, word32 authInSz);
+
+/* Incremental API */
+WOLFSSL_API int  wc_AesEaxInit(AesEax* eax,
+                               const byte* key, word32 keySz,
+                               const byte* nonce, word32 nonceSz,
+                               const byte* authIn, word32 authInSz);
+
+WOLFSSL_API int  wc_AesEaxEncryptUpdate(AesEax* eax, byte* out,
+                                        const byte* in, word32 inSz,
+                                        const byte* authIn, word32 authInSz);
+
+WOLFSSL_API int  wc_AesEaxDecryptUpdate(AesEax* eax, byte* out,
+                                        const byte* in, word32 inSz,
+                                        const byte* authIn, word32 authInSz);
+
+WOLFSSL_API int  wc_AesEaxAuthDataUpdate(AesEax* eax,
+                                       const byte* authIn, word32 authInSz);
+
+WOLFSSL_API int wc_AesEaxEncryptFinal(AesEax* eax,
+                                      byte* authTag, word32 authTagSz);
+
+WOLFSSL_API int wc_AesEaxDecryptFinal(AesEax* eax,
+                                      const byte* authIn, word32 authInSz);
+
+WOLFSSL_API int wc_AesEaxFree(AesEax* eax);
+
+#endif /* WOLFSSL_AES_EAX */
+
 
 #ifdef __cplusplus
     } /* extern "C" */

@@ -33,8 +33,10 @@ try {
 
     Write-Host "Extracting WolfSSL $tag"
     $zip_archive = [System.IO.Compression.ZipFile]::OpenRead($archive_path)
+    $wolfssl_include_paths = "^wolfSSL-wolfssl-\w+\/(wolfssl\/|wolfcrypt\/|README$|LICENSING$|COPYING$|\.gitignore$)"
+    $wolfssl_exclude_paths = "^wolfSSL-wolfssl-\w+\/(wolfcrypt\/(test\/|benchmark\/|src\/port\/|src\/.+\.i$|src\/.+\.S$|user-crypto\/)|(wolfssl\/(openssl\/|wolfcrypt\/port\/)))"
     try {
-        $zip_archive.Entries | Where-Object { $_.FullName -match "^wolfSSL-wolfssl-\w+\/(wolfssl\/|wolfcrypt\/|README$|LICENSING$|COPYING$|\.gitignore$)" } | ForEach-Object {
+        $zip_archive.Entries | Where-Object { $_.FullName -match $wolfssl_include_paths -and $_.FullName -notmatch $wolfssl_exclude_paths } | ForEach-Object {
             if (-not($_.FullName.EndsWith('/') -or $_.FullName.EndsWith('\'))) {
                 $file = Join-Path $output_dir ($_.FullName -replace '^wolfSSL-wolfssl-\w+\/', '')
                 $parent = Split-Path -Parent $file
@@ -44,9 +46,6 @@ try {
                 [System.IO.Compression.ZipFileExtensions]::ExtractToFile($_, $file, $true)
             }
         }
-
-        Remove-Item (Join-Path $output_dir 'wolfcrypt/test') -Force -Recurse
-        Remove-Item (Join-Path $output_dir 'wolfcrypt/benchmark') -Force -Recurse
     }
     finally {
         $zip_archive.Dispose()

@@ -26,6 +26,8 @@
 #ifndef WOLFSSL_IO_H
 #define WOLFSSL_IO_H
 
+#include <wolfssl/ssl.h>
+
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -169,7 +171,8 @@
     #endif
 
     #if defined(WOLFSSL_RENESAS_RA6M3G) || defined(WOLFSSL_RENESAS_RA6M3) ||\
-                    defined(WOLFSSL_RENESAS_RA6M4)
+                    defined(WOLFSSL_RENESAS_RA6M4) || \
+                    defined(WOLFSSL_RENESAS_RZN2L)
       /* Uses FREERTOS_TCP */
         #include <errno.h>
     #endif
@@ -381,6 +384,13 @@
             #define XSOCKLENT socklen_t
         #endif
     #endif
+    #ifndef XSOCKOPT_TYPE_OPTVAL_TYPE
+        #ifdef USE_WINDOWS_API
+            #define XSOCKOPT_TYPE_OPTVAL_TYPE void*
+        #else
+            #define XSOCKOPT_TYPE_OPTVAL_TYPE char*
+        #endif
+    #endif
 
     /* Socket Addr Support */
     #ifdef HAVE_SOCKADDR
@@ -429,7 +439,7 @@ WOLFSSL_API  int wolfIO_Recv(SOCKET_T sd, char *buf, int sz, int rdFlags);
         extern int closesocket(int);
         #define CloseSocket(s) closesocket(s)
     #endif
-    #define StartTCP()
+    #define StartTCP() WC_DO_NOTHING
 #elif defined(FUSION_RTOS)
     #ifndef CloseSocket
         #define CloseSocket(s) do {                     \
@@ -441,7 +451,7 @@ WOLFSSL_API  int wolfIO_Recv(SOCKET_T sd, char *buf, int sz, int rdFlags);
     #ifndef CloseSocket
         #define CloseSocket(s) close(s)
     #endif
-    #define StartTCP()
+    #define StartTCP() WC_DO_NOTHING
     #ifdef FREERTOS_TCP_WINSIM
         extern int close(int);
     #endif

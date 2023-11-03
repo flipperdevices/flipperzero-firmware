@@ -63,6 +63,7 @@ if ($command -eq 'use') {
             if (-not ($sdk_filename_pattern)) { 
                 $sdk_filename_pattern = "sdk.*\.zip$" 
             }
+            Add-Type -Assembly System.IO.Compression.FileSystem
             $zip_archive = [System.IO.Compression.ZipFile]::OpenRead($artifact_archive_path)
             try {
                 $sdk_zip_entry = $zip_archive.Entries | Where-Object { $_.Name -match $sdk_filename_pattern } | Select-Object -Index 0
@@ -70,8 +71,8 @@ if ($command -eq 'use') {
             }
             finally {
                 $zip_archive.Dispose()
+                Remove-Item $artifact_archive_path -Force
             }
-            Remove-Item $artifact_archive_path -Force
         }
 
         $ufbt_state = Get-UfbtState
