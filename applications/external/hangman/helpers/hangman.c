@@ -349,11 +349,16 @@ void hangman_app_free(HangmanApp** app) {
 
     hangman_free_menu_data((*app)->menu, (*app)->menu_cnt);
 
-    free((*app)->word);
-    free((*app)->lang->dict_file);
-    free((*app)->lang->message_ok);
-    free((*app)->lang->message_loose);
-    free((*app)->lang->message_won);
-    free((*app)->lang);
+    if((*app)->word != NULL) {
+        free((*app)->word);
+    }
+    if((*app)->lang != NULL) {
+        free((*app)->lang->dict_file);
+        free((*app)->lang->message_ok);
+        free((*app)->lang->message_loose);
+        free((*app)->lang->message_won);
+        free((*app)->lang);
+    }
+
     free(*app);
 }
