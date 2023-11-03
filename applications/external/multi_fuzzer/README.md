@@ -21,6 +21,10 @@ This is a completely remade app, visual style inspired by [iButton fuzzer](https
 - HIDProx
 - PAC/Stanley
 - H10301
+- IoProxXSF
+- Paradox
+- Indala26
+- Viking
 
 ## Application Features
 ### Main screen
