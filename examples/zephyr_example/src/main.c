@@ -31,7 +31,7 @@ static const struct gpio_dt_spec esp_enable_spec = GPIO_DT_SPEC_GET(DT_ALIAS(en)
 /* Get GPIO pin  connected to the ESP's boot pin. */
 static const struct gpio_dt_spec esp_boot_spec = GPIO_DT_SPEC_GET(DT_ALIAS(boot), gpios);
 
-void main(void)
+int main(void)
 {
 	example_binaries_t bin;
 
@@ -78,4 +78,6 @@ void main(void)
 	loader_port_change_transmission_rate(DEFAULT_BAUDRATE);
 
 	loader_port_reset_target();
+
+	return 0;
 }
