@@ -17,21 +17,29 @@ typedef enum {
     St25tbPollerCmdTypeNum,
 } St25tbPollerCmdType;
 
+typedef struct {
+    St25tbType* type;
+} St25tbPollerCmdDetectTypeData;
+
+typedef struct {
+    St25tbData* data;
+} St25tbPollerCmdReadData;
+
+typedef struct {
+    uint8_t block_num;
+    uint32_t* block;
+} St25tbPollerCmdReadBlockData;
+
+typedef struct {
+    uint8_t block_num;
+    uint32_t block;
+} St25tbPollerCmdWriteBlockData;
+
 typedef union {
-    struct {
-        St25tbType* type;
-    } detect_type;
-    struct {
-        St25tbData* data;
-    } read;
-    struct {
-        uint8_t block_num;
-        uint32_t* block;
-    } read_block;
-    struct {
-        uint8_t block_num;
-        uint32_t block;
-    } write_block;
+    St25tbPollerCmdDetectTypeData detect_type;
+    St25tbPollerCmdReadData read;
+    St25tbPollerCmdReadBlockData read_block;
+    St25tbPollerCmdWriteBlockData write_block;
 } St25tbPollerCmdData;
 
 typedef struct {
@@ -115,33 +123,57 @@ static St25tbError st25tb_poller_cmd_execute(Nfc* nfc, St25tbPollerContext* poll
 St25tbError st25tb_poller_read_block(Nfc* nfc, uint8_t block_num, uint32_t* block) {
     St25tbPollerContext poller_context = {
         .cmd_type = St25tbPollerCmdTypeReadBlock,
-        .cmd_data = {
-            .read_block = {
-                .block = block,
-                .block_num = block_num,
-            }}};
+        .cmd_data =
+            {
+                .read_block =
+                    {
+                        .block = block,
+                        .block_num = block_num,
+                    },
+            },
+    };
     return st25tb_poller_cmd_execute(nfc, &poller_context);
 }
 
 St25tbError st25tb_poller_write_block(Nfc* nfc, uint8_t block_num, uint32_t block) {
     St25tbPollerContext poller_context = {
         .cmd_type = St25tbPollerCmdTypeWriteBlock,
-        .cmd_data = {
-            .write_block = {
-                .block = block,
-                .block_num = block_num,
-            }}};
+        .cmd_data =
+            {
+                .write_block =
+                    {
+                        .block = block,
+                        .block_num = block_num,
+                    },
+            },
+    };
     return st25tb_poller_cmd_execute(nfc, &poller_context);
 }
 
 St25tbError st25tb_poller_detect_type(Nfc* nfc, St25tbType* type) {
     St25tbPollerContext poller_context = {
-        .cmd_type = St25tbPollerCmdTypeDetectType, .cmd_data = {.detect_type = {.type = type}}};
+        .cmd_type = St25tbPollerCmdTypeDetectType,
+        .cmd_data =
+            {
+                .detect_type =
+                    {
+                        .type = type,
+                    },
+            },
+    };
     return st25tb_poller_cmd_execute(nfc, &poller_context);
 }
 
 St25tbError st25tb_poller_read(Nfc* nfc, St25tbData* data) {
     St25tbPollerContext poller_context = {
-        .cmd_type = St25tbPollerCmdTypeRead, .cmd_data = {.read = {.data = data}}};
+        .cmd_type = St25tbPollerCmdTypeRead,
+        .cmd_data =
+            {
+                .read =
+                    {
+                        .data = data,
+                    },
+            },
+    };
     return st25tb_poller_cmd_execute(nfc, &poller_context);
 }
