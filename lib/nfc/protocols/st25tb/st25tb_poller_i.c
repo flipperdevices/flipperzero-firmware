@@ -16,16 +16,6 @@ static St25tbError st25tb_poller_process_error(NfcError error) {
     }
 }
 
-static St25tbError st25tb_poller_prepare_trx(St25tbPoller* instance) {
-    furi_assert(instance);
-
-    if(instance->state == St25tbPollerStateIdle) {
-        return st25tb_poller_async_select(instance, NULL);
-    }
-
-    return St25tbErrorNone;
-}
-
 static St25tbError st25tb_poller_frame_exchange(
     St25tbPoller* instance,
     const BitBuffer* tx_buffer,
@@ -261,7 +251,7 @@ St25tbError
     bit_buffer_append_byte(instance->tx_buffer, block_number);
     St25tbError ret;
     do {
-        ret = st25tb_poller_send_frame(
+        ret = st25tb_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, ST25TB_FDT_FC);
         if(ret != St25tbErrorNone) {
             break;
@@ -295,7 +285,7 @@ St25tbError
     bit_buffer_append_bytes(instance->tx_buffer, (uint8_t*)&block, ST25TB_BLOCK_SIZE);
     St25tbError ret;
     do {
-        ret = st25tb_poller_send_frame(
+        ret = st25tb_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, ST25TB_FDT_FC);
         if(ret != St25tbErrorTimeout) { // tag doesn't ack writes so timeout are expected.
             break;
@@ -342,23 +332,6 @@ St25tbError st25tb_poller_halt(St25tbPoller* instance) {
         }
 
         instance->state = St25tbPollerStateIdle;
-    } while(false);
-
-    return ret;
-}
-
-St25tbError st25tb_poller_send_frame(
-    St25tbPoller* instance,
-    const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt) {
-    St25tbError ret;
-
-    do {
-        ret = st25tb_poller_prepare_trx(instance);
-        if(ret != St25tbErrorNone) break;
-
-        ret = st25tb_poller_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
     } while(false);
 
     return ret;

@@ -49,12 +49,6 @@ St25tbError
 
 St25tbError st25tb_poller_halt(St25tbPoller* instance);
 
-St25tbError st25tb_poller_send_frame(
-    St25tbPoller* instance,
-    const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt);
-
 #ifdef __cplusplus
 }
 #endif
