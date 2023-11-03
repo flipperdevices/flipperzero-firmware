@@ -42,6 +42,9 @@ WOLFSSL_LOCAL int  LoadCRL(WOLFSSL_CRL* crl, const char* path, int type,
 WOLFSSL_LOCAL int  BufferLoadCRL(WOLFSSL_CRL* crl, const byte* buff, long sz,
                                  int type, int verify);
 WOLFSSL_LOCAL int  CheckCertCRL(WOLFSSL_CRL* crl, DecodedCert* cert);
+WOLFSSL_LOCAL int  CheckCertCRL_ex(WOLFSSL_CRL* crl, byte* issuerHash,
+        byte* serial, int serialSz, byte* serialHash, const byte* extCrlInfo,
+        int extCrlInfoSz, void* issuerName);
 
 
 #ifdef __cplusplus

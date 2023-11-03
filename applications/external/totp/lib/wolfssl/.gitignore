@@ -64,6 +64,8 @@ ctaocrypt/benchmark/benchmark
 ctaocrypt/test/testctaocrypt
 wolfcrypt/benchmark/benchmark
 wolfcrypt/test/testwolfcrypt
+examples/async/async_client
+examples/async/async_server
 examples/benchmark/tls_bench
 examples/client/client
 examples/echoclient/echoclient
@@ -74,6 +76,7 @@ examples/sctp/sctp-server-dtls
 examples/sctp/sctp-client
 examples/sctp/sctp-client-dtls
 examples/asn1/asn1
+examples/pem/pem
 server_ready
 snifftest
 output
@@ -84,6 +87,7 @@ testsuite/testsuite.test
 tests/unit.test
 tests/bio_write_test.txt
 tests/test-log-dump-to-file.txt
+tests/cert_cache.tmp
 test-write-dhparams.pem
 testsuite/*.der
 testsuite/*.pem
@@ -343,6 +347,8 @@ doc/pdf
 
 # XCODE Index
 IDE/XCODE/Index
+IDE/**/xcshareddata
+IDE/**/DerivedData
 
 # ARM DS-5 && Eclipse
 \.settings/
@@ -403,7 +409,8 @@ libFuzzer
 XXX-fips-test
 
 # ASYNC
-async
+/wolfAsyncCrypt
+/async
 
 # Generated user_settings_asm.h.
 user_settings_asm.h
@@ -417,3 +424,15 @@ user_settings_asm.h
 
 # auto-created CMake backups
 **/CMakeLists.txt.old
+
+# MagicCrypto (ARIA Cipher)
+MagicCrypto
+
+# CMake  build directory
+/out
+/out_temp
+
+# debian packaging
+debian/changelog
+debian/control
+*.deb

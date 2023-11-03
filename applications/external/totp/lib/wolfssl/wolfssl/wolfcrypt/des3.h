@@ -35,12 +35,6 @@
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
 
-#if defined(HAVE_FIPS) && \
-        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-    /* included for fips @wc_fips */
-    #include <cyassl/ctaocrypt/des3.h>
-#endif
-
 #ifdef __cplusplus
     extern "C" {
 #endif

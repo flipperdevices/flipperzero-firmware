@@ -63,58 +63,6 @@ This library contains implementation for the random number generator.
 #endif
 
 
-/* If building for old FIPS. */
-#if defined(HAVE_FIPS) && \
-    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-
-int wc_GenerateSeed(OS_Seed* os, byte* seed, word32 sz)
-{
-    return GenerateSeed(os, seed, sz);
-}
-
-int wc_InitRng_ex(WC_RNG* rng, void* heap, int devId)
-{
-    (void)heap;
-    (void)devId;
-    return InitRng_fips(rng);
-}
-
-WOLFSSL_ABI
-int wc_InitRng(WC_RNG* rng)
-{
-    return InitRng_fips(rng);
-}
-
-
-int wc_RNG_GenerateBlock(WC_RNG* rng, byte* b, word32 sz)
-{
-    return RNG_GenerateBlock_fips(rng, b, sz);
-}
-
-
-int wc_RNG_GenerateByte(WC_RNG* rng, byte* b)
-{
-    return RNG_GenerateByte(rng, b);
-}
-
-#ifdef HAVE_HASHDRBG
-
-    int wc_FreeRng(WC_RNG* rng)
-    {
-        return FreeRng_fips(rng);
-    }
-
-    int wc_RNG_HealthTest(int reseed, const byte* seedA, word32 seedASz,
-                                      const byte* seedB, word32 seedBSz,
-                                      byte* output, word32 outputSz)
-    {
-        return RNG_HealthTest_fips(reseed, seedA, seedASz,
-                              seedB, seedBSz, output, outputSz);
-   }
-#endif /* HAVE_HASHDRBG */
-
-#else /* else build without fips, or for new fips */
-
 #ifndef WC_NO_RNG /* if not FIPS and RNG is disabled then do not compile */
 
 #include <wolfssl/wolfcrypt/sha256.h>
@@ -874,8 +822,18 @@ static WC_INLINE word64 Entropy_TimeHiRes(void)
 
     return now.tv_nsec;
 }
-#elif !defined(SINGLE_THREADED) && defined(_POSIX_THREADS) && \
-      !defined(__MINGW32__)
+#elif defined(_WIN32) /* USE_WINDOWS_API */
+/* Get the high resolution time counter.
+ *
+ * @return  64-bit timer
+ */
+static WC_INLINE word64 Entropy_TimeHiRes(void)
+{
+    LARGE_INTEGER count;
+    QueryPerformanceCounter(&count);
+    return (word64)(count.QuadPart);
+}
+#elif defined(WOLFSSL_THREAD_NO_JOIN)
 
 /* Start and stop thread that counts as a proxy for time counter. */
 #define ENTROPY_MEMUSE_THREADED
@@ -890,8 +848,6 @@ typedef struct ENTROPY_THREAD_DATA {
 
 /* Track whether entropy thread has been started already. */
 static int entropy_thread_started = 0;
-/* Cache thread id for joining on exit. */
-static THREAD_TYPE entropy_thread_id = 0;
 /* Data for thread to update/observer. */
 static volatile ENTROPY_THREAD_DATA entropy_thread_data = { 0, 0 };
 
@@ -910,12 +866,9 @@ static WC_INLINE word64 Entropy_TimeHiRes(void)
  * @param [in,out] args  Entropy data including: counter and stop flag.
  * @return  NULL always.
  */
-static THREAD_RETURN WOLFSSL_THREAD Entropy_IncCounter(void* args)
+static THREAD_RETURN WOLFSSL_THREAD_NO_JOIN Entropy_IncCounter(void* args)
 {
     (void)args;
-
-    /* Thread resources to be disposed of. */
-    pthread_detach(pthread_self());
 
     /* Keep going until caller tells us to stop and exit. */
     while (!entropy_thread_data.stop) {
@@ -927,7 +880,7 @@ static THREAD_RETURN WOLFSSL_THREAD Entropy_IncCounter(void* args)
     fprintf(stderr, "EXITING ENTROPY COUNTER THREAD\n");
 #endif
     /* Exit from thread. */
-    pthread_exit(NULL);
+    WOLFSSL_RETURN_FROM_THREAD(0);
 }
 
 /* Start a thread that increments counter if not one already.
@@ -954,8 +907,8 @@ static int Entropy_StartThread(void)
         fprintf(stderr, "STARTING ENTROPY COUNTER THREAD\n");
     #endif
         /* Create a thread that increments the counter in the data. */
-        ret = pthread_create(&entropy_thread_id, NULL, Entropy_IncCounter,
-            NULL);
+        /* Thread resources to be disposed of. */
+        ret = wolfSSL_NewThreadNoJoin(Entropy_IncCounter, NULL);
         if (ret == 0) {
             /* Wait for the counter to increase indicating thread started. */
             while (entropy_thread_data.counter == start_counter) {
@@ -983,6 +936,7 @@ static void Entropy_StopThread(void)
         entropy_thread_started = 0;
     }
 }
+    /* end if defined(HAVE_PTHREAD) */
 
 #else
 
@@ -1284,7 +1238,7 @@ static int Entropy_HealthTest_Proportion(byte noise)
     }
     else {
         /* Get first value in queue - value to test. */
-        byte val = prop_samples[prop_first];
+        byte val = (byte)prop_samples[prop_first];
         /* Store new sample in queue. */
         prop_samples[prop_last] = noise;
         /* Update first index now that we have removed in from the queue. */
@@ -1912,9 +1866,13 @@ int wc_RNG_GenerateBlock(WC_RNG* rng, byte* output, word32 sz)
             if (ret == DRBG_SUCCESS)
                 ret = Hash_DRBG_Generate((DRBG_internal *)rng->drbg, output, sz);
 
-            ForceZero(newSeed, sizeof(newSeed));
         #ifdef WOLFSSL_SMALL_STACK
+            if (newSeed != NULL) {
+                ForceZero(newSeed, SEED_SZ + SEED_BLOCK_SZ);
+            }
             XFREE(newSeed, rng->heap, DYNAMIC_TYPE_SEED);
+        #else
+            ForceZero(newSeed, sizeof(newSeed));
         #endif
         }
         else {
@@ -2627,6 +2585,8 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
 #elif defined(HAVE_RTP_SYS) || defined(EBSNET)
 
 #include "rtprand.h"   /* rtp_rand () */
+
+#if (defined(HAVE_RTP_SYS) || (defined(RTPLATFORM) && (RTPLATFORM != 0)))
 #include "rtptime.h"   /* rtp_get_system_msec() */
 
 int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
@@ -2640,6 +2600,19 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
 
     return 0;
 }
+#else
+int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
+{
+    word32 i;
+    KS_SEED(ks_get_ticks());
+
+    for (i = 0; i < sz; i++ ) {
+        output[i] = KS_RANDOM() % 256;
+    }
+
+    return 0;
+}
+#endif /* defined(HAVE_RTP_SYS) || (defined(RTPLATFORM) && (RTPLATFORM != 0)) */
 
 #elif (defined(WOLFSSL_ATMEL) || defined(WOLFSSL_ATECC_RNG)) && \
       !defined(WOLFSSL_PIC32MZ_RNG)
@@ -2935,7 +2908,22 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
 
         return 0;
     }
-    #elif defined(WOLFSSL_STM32F427_RNG) || defined(WOLFSSL_STM32_RNG_NOLIB)
+    #elif defined(WOLFSSL_STM32F427_RNG) || defined(WOLFSSL_STM32_RNG_NOLIB) \
+        || defined(STM32_NUTTX_RNG)
+
+    #ifdef STM32_NUTTX_RNG
+        #include "hardware/stm32_rng.h"
+        /* Set CONFIG_STM32U5_RNG in NuttX to enable the RCC */
+        #define WC_RNG_CR *((volatile uint32_t*)(STM32_RNG_CR))
+        #define WC_RNG_SR *((volatile uint32_t*)(STM32_RNG_SR))
+        #define WC_RNG_DR *((volatile uint32_t*)(STM32_RNG_DR))
+    #else
+        /* Comes from "stm32xxxx_hal.h" */
+        #define WC_RNG_CR RNG->CR
+        #define WC_RNG_SR RNG->SR
+        #define WC_RNG_DR RNG->DR
+    #endif
+
 
     /* Generate a RNG seed using the hardware RNG on the STM32F427
      * directly, following steps outlined in STM32F4 Reference
@@ -2951,29 +2939,31 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
             return ret;
         }
 
+    #ifndef STM32_NUTTX_RNG
         /* enable RNG peripheral clock */
         RCC->AHB2ENR |= RCC_AHB2ENR_RNGEN;
+    #endif
 
         /* enable RNG interrupt, set IE bit in RNG->CR register */
-        RNG->CR |= RNG_CR_IE;
+        WC_RNG_CR |= RNG_CR_IE;
 
         /* enable RNG, set RNGEN bit in RNG->CR. Activates RNG,
          * RNG_LFSR, and error detector */
-        RNG->CR |= RNG_CR_RNGEN;
+        WC_RNG_CR |= RNG_CR_RNGEN;
 
         /* verify no errors, make sure SEIS and CEIS bits are 0
          * in RNG->SR register */
-        if (RNG->SR & (RNG_SR_SECS | RNG_SR_CECS)) {
+        if (WC_RNG_SR & (RNG_SR_SECS | RNG_SR_CECS)) {
             wolfSSL_CryptHwMutexUnLock();
             return RNG_FAILURE_E;
         }
 
         for (i = 0; i < sz; i++) {
             /* wait until RNG number is ready */
-            while ((RNG->SR & RNG_SR_DRDY) == 0) { }
+            while ((WC_RNG_SR & RNG_SR_DRDY) == 0) { }
 
             /* get value */
-            output[i] = RNG->DR;
+            output[i] = WC_RNG_DR;
         }
 
         wolfSSL_CryptHwMutexUnLock();
@@ -3400,7 +3390,7 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
 #elif defined(WOLFSSL_ESPIDF)
 
     /* Espressif */
-    #if defined(WOLFSSL_ESPWROOM32) || defined(WOLFSSL_ESPWROOM32SE)
+    #if defined(WOLFSSL_ESP32) || defined(WOLFSSL_ESPWROOM32SE)
 
         /* Espressif ESP32 */
         #include <esp_system.h>
@@ -3446,7 +3436,7 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
 
             return 0;
         }
-    #endif /* end WOLFSSL_ESPWROOM32 */
+    #endif /* end WOLFSSL_ESP32 */
 
 #elif defined(WOLFSSL_LINUXKM)
     #include <linux/random.h>
@@ -3459,61 +3449,6 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
         return 0;
     }
 
-#elif defined(WOLFSSL_RENESAS_TSIP)
-#if defined(WOLFSSL_RENESA_TSIP_IAREWRX)
-   #include "r_bsp/mcu/all/r_rx_compiler.h"
-#endif
-   #include "r_bsp/platform.h"
-    #include "r_tsip_rx_if.h"
-
-    int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
-    {
-        int ret = 0;
-        word32 buffer[4];
-
-        while (sz > 0) {
-            word32 len = sizeof(buffer);
-
-            if (sz < len) {
-                len = sz;
-            }
-            /* return 4 words random number*/
-            ret = R_TSIP_GenerateRandomNumber((uint32_t*)buffer);
-            if(ret == TSIP_SUCCESS) {
-                XMEMCPY(output, &buffer, len);
-                output += len;
-                sz -= len;
-            } else
-                return ret;
-        }
-        return ret;
-    }
-#elif defined(WOLFSSL_RENESAS_SCEPROTECT) || \
-          defined(WOLFSSL_RENESAS_SCEPROTECT_CRYPTONLY)
-    #include "r_sce.h"
-
-    int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
-    {
-        int ret = 0;
-        word32 buffer[4];
-
-        while (sz > 0) {
-            word32 len = sizeof(buffer);
-
-            if (sz < len) {
-                len = sz;
-            }
-            /* return 4 words random number*/
-            ret = R_SCE_RandomNumberGenerate(buffer);
-            if(ret == FSP_SUCCESS) {
-                XMEMCPY(output, &buffer, len);
-                output += len;
-                sz -= len;
-            } else
-                return ret;
-        }
-        return ret;
-    }
 
 #elif defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_TRNG)
     #include "hal_data.h"
@@ -3833,4 +3768,3 @@ int wc_hwrng_generate_block(byte *output, word32 sz)
 #endif
 
 #endif /* WC_NO_RNG */
-#endif /* HAVE_FIPS */

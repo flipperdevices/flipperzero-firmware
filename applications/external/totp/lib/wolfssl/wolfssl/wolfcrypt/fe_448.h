@@ -66,7 +66,7 @@ WOLFSSL_LOCAL int  curve448(byte* r, const byte* n, const byte* a);
 #if !defined(CURVED448_128BIT)
 WOLFSSL_LOCAL void fe448_reduce(fe448*);
 #else
-#define fe448_reduce(a)
+#define fe448_reduce(a) WC_DO_NOTHING
 #endif
 WOLFSSL_LOCAL void fe448_neg(fe448* r, const fe448* a);
 WOLFSSL_LOCAL void fe448_add(fe448* r, const fe448* a, const fe448* b);
@@ -93,7 +93,7 @@ WOLFSSL_LOCAL void fe448_pow_2_446_222_1(fe448* r, const fe448* a);
 WOLFSSL_LOCAL void fe448_init(void);
 WOLFSSL_LOCAL int  curve448(byte* r, const byte* n, const byte* a);
 
-#define fe448_reduce(a)
+#define fe448_reduce(a) WC_DO_NOTHING
 
 WOLFSSL_LOCAL void fe448_neg(word8* r, const word8* a);
 WOLFSSL_LOCAL void fe448_add(word8* r, const word8* a, const word8* b);

@@ -52,7 +52,7 @@ typedef struct wolfssl_quic_method_t WOLFSSL_QUIC_METHOD;
 
 struct wolfssl_quic_method_t {
     /**
-     * Provide secrets to the QUIC stack when they becaome available in the SSL
+     * Provide secrets to the QUIC stack when they become available in the SSL
      * instance during handshake processing. read/write secrets have the same
      * length. A call may only provide one, passing NULL as the other.
      */
