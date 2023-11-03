@@ -436,9 +436,8 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
                 break;
             }
 
-            const uint32_t old_path_len = strlen(old_path);
-            const uint32_t old_path_len_adj =
-                old_path_len - old_path[old_path_len - 1] == '/' ? 1 : 0;
+            const uint32_t adj = old_path[strlen(old_path) - 1] == '/' ? 1 : 0;
+            const uint32_t old_path_len_adj = strlen(old_path) - adj;
 
             if(strncasecmp(new_path, old_path, old_path_len_adj) == 0) {
                 error = FSE_INVALID_NAME;
