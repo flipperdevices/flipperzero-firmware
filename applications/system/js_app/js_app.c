@@ -3,6 +3,7 @@
 #include <storage/storage.h>
 #include "js_app_i.h"
 #include <toolbox/path.h>
+#include <assets_icons.h>
 
 #define TAG "MJS app"
 
@@ -102,7 +103,7 @@ int32_t js_app(void* arg) {
             furi_string_set(script_path, (const char*)arg);
         } else {
             DialogsFileBrowserOptions browser_options;
-            dialog_file_browser_set_basic_options(&browser_options, ".js", NULL);
+            dialog_file_browser_set_basic_options(&browser_options, ".js", &I_js_script_10px);
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
             if(!dialog_file_browser_show(dialogs, script_path, script_path, &browser_options))
                 break;

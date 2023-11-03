@@ -1,6 +1,6 @@
 App(
     appid="js_app",
-    name="JS",
+    name="JS Runner",
     fap_category="Tools",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="js_app",
@@ -8,6 +8,7 @@ App(
     fap_libs=["gcc", "assets"],
     fap_file_assets="assets",
     order=0,
+    fap_icon="icon.png",
 )
 
 App(

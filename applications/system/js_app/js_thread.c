@@ -189,9 +189,6 @@ static void mjs_require(struct mjs* mjs) {
         JsThread* worker = mjs_get_context(mjs);
         furi_assert(worker);
         req_object = js_module_require(worker->modules, name, len);
-        if(req_object == MJS_UNDEFINED) {
-            mjs_prepend_errorf(mjs, MJS_BAD_ARGS_ERROR, "\"%s\" module not found", name);
-        }
     }
     mjs_return(mjs, req_object);
 }

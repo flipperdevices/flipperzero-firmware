@@ -54,7 +54,8 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
     JsModuleData* module_inst = JsModuleDict_get(modules->module_dict, module_name);
     if(module_inst) {
         furi_string_free(module_name);
-        // TODO: "already exists" error
+        mjs_prepend_errorf(
+            modules->mjs, MJS_BAD_ARGS_ERROR, "\"%s\" module is already installed", name);
         return MJS_UNDEFINED;
     }
 
@@ -113,6 +114,10 @@ mjs_val_t js_module_require(JsModules* modules, const char* name, size_t name_le
         if(module_inst->create) {
             module_inst->context = module_inst->create(modules->mjs, &module_object);
         }
+    }
+
+    if(module_object == MJS_UNDEFINED) {
+        mjs_prepend_errorf(modules->mjs, MJS_BAD_ARGS_ERROR, "\"%s\" module load fail", name);
     }
 
     furi_string_free(module_name);

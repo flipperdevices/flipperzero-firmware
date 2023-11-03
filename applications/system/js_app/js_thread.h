@@ -7,7 +7,6 @@ typedef enum {
     JsThreadEventError,
     JsThreadEventPrint,
     JsThreadEventErrorTrace,
-    // TODO: input wait, ....
 } JsThreadEvent;
 
 typedef void (*JsThreadCallback)(JsThreadEvent event, const char* msg, void* context);
