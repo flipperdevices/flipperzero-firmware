@@ -11,7 +11,7 @@ Following steps are performed in order to re-program target's memory:
 
 1. Peripherals are initialized (GPIO for BOOT and EN pins and UART).
 2. UART1 (can be changed) through which new binary will be transfered is initialized.
-3. Host puts slave device into boot mode tries to connect by calling `esp_loader_connect()`.
+3. Host puts target device into boot mode tries to connect by calling `esp_loader_connect()`.
 4. Binary file is opened and its size is acquired, as it has to be known before flashing.
 5. Then `esp_loader_flash_start()` is called to enter flashing mode and erase amount of memory to be flashed.
 6. `esp_loader_flash_write()` function is called repeatedly until the whole binary image is transfered.
@@ -40,9 +40,11 @@ Table below shows connection between the two devices:
 
 ## Build and flash
 
-To run the example, type the following command:
+To run the example, type the following commands:
 
 ```c
+west init
+west update
 west build -p -b <supported board>
 west flash
 west espressif monitor
