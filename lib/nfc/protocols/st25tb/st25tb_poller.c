@@ -62,17 +62,30 @@ static void
 }
 
 static St25tbPollerState
+    st25tb_poller_return_to_idle_on_error(St25tbError* error, St25tbPollerState next_state) {
+    if(*error == St25tbErrorNone) {
+        return next_state;
+    } else {
+        return St25tbPollerStateIdle;
+    }
+}
+
+static St25tbPollerState
     st25tb_poller_state_idle_handler(St25tbError* error, St25tbPoller* instance) {
     instance->st25tb_event.type = St25tbPollerEventTypeReady;
+
     *error = st25tb_poller_async_select(instance, NULL);
-    return St25tbPollerStateSelected;
+
+    return st25tb_poller_return_to_idle_on_error(error, St25tbPollerStateSelected);
 }
 
 static St25tbPollerState
     st25tb_poller_state_selected_handler(St25tbError* error, St25tbPoller* instance) {
     instance->st25tb_event.type = St25tbPollerEventTypeReadSuccessful;
+
     *error = st25tb_poller_async_read(instance, instance->data);
-    return St25tbPollerStateRead;
+
+    return st25tb_poller_return_to_idle_on_error(error, St25tbPollerStateRead);
 }
 
 static St25tbPollerState
