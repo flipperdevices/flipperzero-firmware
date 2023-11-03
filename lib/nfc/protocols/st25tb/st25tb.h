@@ -45,7 +45,6 @@ typedef struct {
     St25tbType type;
     uint32_t blocks[ST25TB_MAX_BLOCKS];
     uint32_t system_otp_block;
-    uint8_t chip_id;
 } St25tbData;
 
 extern const NfcDeviceBase nfc_device_st25tb;
