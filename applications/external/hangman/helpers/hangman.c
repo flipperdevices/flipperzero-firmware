@@ -284,7 +284,12 @@ HangmanLangConfig* hangman_load_config(char* meta_file) {
 
         config->letters[config->letters_cnt++] = num;
         if(config->unicode_base > num) config->unicode_base = num;
-        token = end + 1; // +1 because of space
+
+        if(*end == ' ') {
+            token = end + 1; // +1 because of space
+        } else {
+            break;
+        }
     }
 
     config->keyboard_rows = ceil((float)config->letters_cnt / config->keyboard_cols);
@@ -349,11 +354,16 @@ void hangman_app_free(HangmanApp** app) {
 
     hangman_free_menu_data((*app)->menu, (*app)->menu_cnt);
 
-    free((*app)->word);
-    free((*app)->lang->dict_file);
-    free((*app)->lang->message_ok);
-    free((*app)->lang->message_loose);
-    free((*app)->lang->message_won);
-    free((*app)->lang);
+    if((*app)->word != NULL) {
+        free((*app)->word);
+    }
+    if((*app)->lang != NULL) {
+        free((*app)->lang->dict_file);
+        free((*app)->lang->message_ok);
+        free((*app)->lang->message_loose);
+        free((*app)->lang->message_won);
+        free((*app)->lang);
+    }
+
     free(*app);
 }

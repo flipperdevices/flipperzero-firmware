@@ -1,3 +1,5 @@
+Anime
+anime.bolk
 English
 english.bolk
 Русский

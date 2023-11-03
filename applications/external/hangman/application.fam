@@ -9,6 +9,6 @@ App(
     fap_icon="hangman.png",
     fap_author="Evgeny Stepanischev, Eva Stepanischeva",
     fap_weburl="https://github.com/bolknote/Flipper-Zero-Hangman-Game",
-    fap_version=(1, 0),
     fap_description="Hangman for Flipper",
+    fap_version=(1, 1),
 )
