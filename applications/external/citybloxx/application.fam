@@ -8,6 +8,6 @@ App(
     fap_icon="icon.png",
     fap_author="Milk-Cool",
     fap_weburl="https://github.com/Milk-Cool/fz-citybloxx",
-    fap_version="1.0"
+    fap_version="1.0",
     fap_description="City Bloxx for the Flipper Zero!",
 )
