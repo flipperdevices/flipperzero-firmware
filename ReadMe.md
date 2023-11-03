@@ -36,7 +36,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [Add IoProxXSF, Paradox, Indala26, and Viking to RFID Fuzzer #4 (By SkeletonMan03)](https://github.com/DarkFlippers/Multi_Fuzzer/pull/4)
 - Updated: [Hangman v1.1 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Hangman Anime Dictionary (By RogueMaster)
+- Expanded Hangman Anime Dictionary (By RogueMaster)
 - [Add documentation and source URL about the AM_Q CC1101 preset #995 (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
+- Added: [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
 
 <a name="release">
 
