@@ -34,7 +34,7 @@ try {
     Write-Host "Extracting WolfSSL $tag"
     $zip_archive = [System.IO.Compression.ZipFile]::OpenRead($archive_path)
     $wolfssl_include_paths = "^wolfSSL-wolfssl-\w+\/(wolfssl\/|wolfcrypt\/|README$|LICENSING$|COPYING$|\.gitignore$)"
-    $wolfssl_exclude_paths = "^wolfSSL-wolfssl-\w+\/(wolfcrypt\/(test\/|benchmark\/|src\/port\/|src\/.+\.i$|src\/.+\.S$|user-crypto\/)|(wolfssl\/(openssl\/|wolfcrypt\/port\/)))"
+    $wolfssl_exclude_paths = "^wolfSSL-wolfssl-\w+\/(wolfcrypt\/(test\/|benchmark\/|src\/port\/|src\/.+\.i$|src\/.+\.S$|src\/.+\.asm$|src\/.+\.am$|user-crypto\/)|(wolfssl\/(openssl\/|wolfcrypt\/port\/|.+\.am$|.+\.rc$)))"
     try {
         $zip_archive.Entries | Where-Object { $_.FullName -match $wolfssl_include_paths -and $_.FullName -notmatch $wolfssl_exclude_paths } | ForEach-Object {
             if (-not($_.FullName.EndsWith('/') -or $_.FullName.EndsWith('\'))) {
