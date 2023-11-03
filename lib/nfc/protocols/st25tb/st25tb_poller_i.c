@@ -154,7 +154,6 @@ St25tbError st25tb_poller_async_select(St25tbPoller* instance, uint8_t* chip_id_
             break;
         }
         instance->data->type = st25tb_get_type_from_uid(instance->data->uid);
-        instance->state = St25tbPollerStateSelected;
     } while(false);
 
     return ret;
@@ -185,7 +184,6 @@ St25tbError st25tb_poller_async_read(St25tbPoller* instance, St25tbData* data) {
         if(ret != St25tbErrorNone) {
             break;
         }
-        instance->state = St25tbPollerStateRead;
     } while(false);
 
     return ret;

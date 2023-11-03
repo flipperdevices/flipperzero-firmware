@@ -6,6 +6,8 @@
 
 #define TAG "ST25TBPoller"
 
+typedef St25tbPollerState (*St25tbPollerStateHandler)(St25tbError* error, St25tbPoller* instance);
+
 const St25tbData* st25tb_poller_get_data(St25tbPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
@@ -59,6 +61,33 @@ static void
     instance->context = context;
 }
 
+static St25tbPollerState
+    st25tb_poller_state_idle_handler(St25tbError* error, St25tbPoller* instance) {
+    instance->st25tb_event.type = St25tbPollerEventTypeReady;
+    *error = st25tb_poller_async_select(instance, NULL);
+    return St25tbPollerStateSelected;
+}
+
+static St25tbPollerState
+    st25tb_poller_state_selected_handler(St25tbError* error, St25tbPoller* instance) {
+    instance->st25tb_event.type = St25tbPollerEventTypeReadSuccessful;
+    *error = st25tb_poller_async_read(instance, instance->data);
+    return St25tbPollerStateRead;
+}
+
+static St25tbPollerState
+    st25tb_poller_state_read_handler(St25tbError* error, St25tbPoller* instance) {
+    instance->st25tb_event.type = St25tbPollerEventTypeReadSuccessful;
+    *error = St25tbErrorNone;
+    return St25tbPollerStateRead;
+}
+
+static St25tbPollerStateHandler st25tb_poller_state_handlers[St25tbPollerStateNum] = {
+    [St25tbPollerStateIdle] = st25tb_poller_state_idle_handler,
+    [St25tbPollerStateSelected] = st25tb_poller_state_selected_handler,
+    [St25tbPollerStateRead] = st25tb_poller_state_read_handler,
+};
+
 static NfcCommand st25tb_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolInvalid);
@@ -68,20 +97,13 @@ static NfcCommand st25tb_poller_run(NfcGenericEvent event, void* context) {
     NfcEvent* nfc_event = event.event_data;
     NfcCommand command = NfcCommandContinue;
 
+    furi_assert(instance->state < St25tbPollerStateNum);
+
     if(nfc_event->type == NfcEventTypePollerReady) {
-        St25tbError error = St25tbErrorNone;
-        instance->st25tb_event.type = St25tbPollerEventTypeReady;
-        switch(instance->state) {
-        case St25tbPollerStateIdle:
-            error = st25tb_poller_async_select(instance, NULL);
-            break;
-        case St25tbPollerStateSelected:
-            error = st25tb_poller_async_read(instance, instance->data);
-            break;
-        case St25tbPollerStateRead:
-            instance->st25tb_event.type = St25tbPollerEventTypeReadSuccessful;
-            break;
-        }
+        St25tbError error;
+
+        instance->state = st25tb_poller_state_handlers[instance->state](&error, instance);
+
         if(error == St25tbErrorNone) {
             instance->st25tb_event_data.error = error;
             command = instance->callback(instance->general_event, instance->context);

@@ -13,6 +13,8 @@ typedef enum {
     St25tbPollerStateIdle,
     St25tbPollerStateSelected,
     St25tbPollerStateRead,
+
+    St25tbPollerStateNum,
 } St25tbPollerState;
 
 struct St25tbPoller {
