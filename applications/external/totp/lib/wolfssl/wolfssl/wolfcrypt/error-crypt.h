@@ -33,11 +33,6 @@ the error status.
 
 #include <wolfssl/wolfcrypt/types.h>
 
-#if defined(HAVE_FIPS) && \
-    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-    #include <cyassl/ctaocrypt/error-crypt.h>
-#endif /* HAVE_FIPS V1 */
-
 #ifdef __cplusplus
     extern "C" {
 #endif
@@ -54,7 +49,7 @@ enum {
     BAD_MUTEX_E        = -106,  /* Bad mutex operation */
     WC_TIMEOUT_E       = -107,  /* timeout error */
     WC_PENDING_E       = -108,  /* wolfCrypt operation pending (would block) */
-    WC_NOT_PENDING_E   = -109,  /* wolfCrypt operation not pending */
+    WC_NO_PENDING_E    = -109,  /* no asynchronous operation pending */
 
     MP_INIT_E          = -110,  /* mp_init error state */
     MP_READ_E          = -111,  /* mp_read error state */
@@ -69,8 +64,11 @@ enum {
     MP_CMP_E           = -120,  /* mp_cmp error state */
     MP_ZERO_E          = -121,  /* got a mp zero result, not expected */
 
+    AES_EAX_AUTH_E     = -122, /* AES-EAX Authentication check failure */
+
     MEMORY_E           = -125,  /* out of memory error */
     VAR_STATE_CHANGE_E = -126,  /* var state modified by different thread */
+    FIPS_DEGRADED_E    = -127,  /* FIPS Module in degraded mode */
 
     RSA_WRONG_TYPE_E   = -130,  /* RSA wrong block type for RSA function */
     RSA_BUFFER_E       = -131,  /* RSA buffer error, output too small or
@@ -260,7 +258,10 @@ enum {
     ASN_DEPTH_E         = -296,  /* Invalid ASN.1 - depth check */
     ASN_LEN_E           = -297,  /* ASN.1 length invalid */
 
-    WC_LAST_E           = -297,  /* Update this to indicate last error */
+    SM4_GCM_AUTH_E      = -298,  /* SM4-GCM Authentication check failure */
+    SM4_CCM_AUTH_E      = -299,  /* SM4-CCM Authentication check failure */
+
+    WC_LAST_E           = -299,  /* Update this to indicate last error */
     MIN_CODE_E          = -300   /* errors -101 - -299 */
 
     /* add new companion error id strings for any new error codes

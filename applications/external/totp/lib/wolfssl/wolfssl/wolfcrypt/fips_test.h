@@ -77,10 +77,10 @@ enum FipsCastStateId {
 };
 
 enum FipsModeId {
-    FIPS_MODE_INIT,
-    FIPS_MODE_NORMAL,
-    FIPS_MODE_DEGRADED,
-    FIPS_MODE_FAILED
+    FIPS_MODE_INIT = 0,
+    FIPS_MODE_NORMAL = 1,
+    FIPS_MODE_DEGRADED = 2,
+    FIPS_MODE_FAILED = 3
 };
 
 
@@ -92,6 +92,7 @@ WOLFSSL_API int wolfCrypt_SetCb_fips(wolfCrypt_fips_cb cbf);
 
 /* Public get status functions */
 WOLFSSL_API int wolfCrypt_GetStatus_fips(void);
+WOLFSSL_API int wolfCrypt_GetMode_fips(void);
 WOLFSSL_API const char* wolfCrypt_GetCoreHash_fips(void);
 
 #ifdef HAVE_FORCE_FIPS_FAILURE
@@ -105,6 +106,7 @@ WOLFSSL_LOCAL int DoKnownAnswerTests(char* base16_hash, int base16_hashSz); /* F
 
 WOLFSSL_API int wc_RunCast_fips(int type);
 WOLFSSL_API int wc_GetCastStatus_fips(int type);
+WOLFSSL_API int wc_RunAllCast_fips(void);
 
 #ifdef __cplusplus
     } /* extern "C" */

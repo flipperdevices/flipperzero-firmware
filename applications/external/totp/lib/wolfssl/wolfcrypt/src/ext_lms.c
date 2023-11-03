@@ -37,6 +37,7 @@
     #include <wolfcrypt/src/misc.c>
 #endif
 
+#ifndef WOLFSSL_LMS_VERIFY_ONLY
 /* If built against hss_lib_thread.a, the hash-sigs lib will spawn
  * worker threads to parallelize cpu intensive tasks. This will mainly
  * speedup key generation and signing, and to a lesser extent
@@ -101,7 +102,8 @@ static bool LmsWritePrivKey(unsigned char *private_key,
     }
 
     /* Use write callback that saves private key to non-volatile storage. */
-    ret = key->write_private_key(private_key, len_private_key, key->context);
+    ret = key->write_private_key(private_key, (word32)len_private_key,
+                                 key->context);
 
     if (ret != WC_LMS_RC_SAVED_TO_NV_MEMORY) {
         WOLFSSL_MSG("error: LmsKey write_private_key failed");
@@ -140,7 +142,8 @@ static bool LmsReadPrivKey(unsigned char *private_key,
     }
 
     /* Use read callback that reads private key from non-volatile storage. */
-    ret = key->read_private_key(private_key, len_private_key, key->context);
+    ret = key->read_private_key(private_key, (word32)len_private_key,
+                                key->context);
 
     if (ret != WC_LMS_RC_READ_TO_MEMORY) {
         WOLFSSL_MSG("error: LmsKey read_private_key failed");
@@ -151,6 +154,7 @@ static bool LmsReadPrivKey(unsigned char *private_key,
 
     return true;
 }
+#endif /* ifndef WOLFSSL_LMS_VERIFY_ONLY */
 
 const char * wc_LmsKey_ParmToStr(enum wc_LmsParm lmsParm)
 {
@@ -242,14 +246,16 @@ int wc_LmsKey_Init(LmsKey * key, void * heap, int devId)
 
     ForceZero(key, sizeof(LmsKey));
 
-    /* Set the max number of worker threads that hash-sigs can spawn. */
+#ifndef WOLFSSL_LMS_VERIFY_ONLY
     hss_init_extra_info(&key->info);
+    /* Set the max number of worker threads that hash-sigs can spawn. */
     hss_extra_info_set_threads(&key->info, EXT_LMS_MAX_THREADS);
 
     key->working_key = NULL;
     key->write_private_key = NULL;
     key->read_private_key = NULL;
     key->context = NULL;
+#endif /* ifndef WOLFSSL_LMS_VERIFY_ONLY */
     key->state = WC_LMS_STATE_INITED;
 
     return 0;
@@ -405,6 +411,70 @@ int wc_LmsKey_SetParameters(LmsKey * key, int levels, int height,
     return 0;
 }
 
+/* Get the parameters of an LMS key.
+ *
+ * Key must be inited and parameters set before calling this.
+ *
+ * Returns 0 on success.
+ * */
+int wc_LmsKey_GetParameters(const LmsKey * key, int * levels, int * height,
+    int * winternitz)
+{
+    if (key == NULL || levels == NULL || height == NULL || winternitz == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+    /* This shouldn't happen, but check the LmsKey parameters aren't invalid. */
+
+    if (key->levels < MIN_HSS_LEVELS || key->levels > MAX_HSS_LEVELS) {
+        WOLFSSL_MSG("error: LmsKey invalid level parameter");
+        return -1;
+    }
+
+    *levels = key->levels;
+
+    switch (key->lm_type[0]) {
+    case LMS_SHA256_N32_H5:
+        *height = 5;
+        break;
+    case LMS_SHA256_N32_H10:
+        *height = 10;
+        break;
+    case LMS_SHA256_N32_H15:
+        *height = 15;
+        break;
+    case LMS_SHA256_N32_H20:
+        *height = 20;
+        break;
+    case LMS_SHA256_N32_H25:
+        *height = 25;
+        break;
+    default:
+        WOLFSSL_MSG("error: LmsKey invalid height parameter");
+        return -1;
+    }
+
+    switch (key->lm_ots_type[0]) {
+    case LMOTS_SHA256_N32_W1:
+        *winternitz = 1;
+        break;
+    case LMOTS_SHA256_N32_W2:
+        *winternitz = 2;
+        break;
+    case LMOTS_SHA256_N32_W4:
+        *winternitz = 4;
+        break;
+    case LMOTS_SHA256_N32_W8:
+        *winternitz = 8;
+        break;
+    default:
+        WOLFSSL_MSG("error: LmsKey invalid winternitz parameter");
+        return -1;
+    }
+
+    return 0;
+}
+
 /* Frees the LMS key from memory.
  *
  * This does not affect the private key saved to non-volatile storage.
@@ -415,10 +485,12 @@ void wc_LmsKey_Free(LmsKey* key)
         return;
     }
 
+#ifndef WOLFSSL_LMS_VERIFY_ONLY
     if (key->working_key != NULL) {
         hss_free_working_key(key->working_key);
         key->working_key = NULL;
     }
+#endif /* ifndef WOLFSSL_LMS_VERIFY_ONLY */
 
     ForceZero(key, sizeof(LmsKey));
 
@@ -427,6 +499,7 @@ void wc_LmsKey_Free(LmsKey* key)
     return;
 }
 
+#ifndef WOLFSSL_LMS_VERIFY_ONLY
 /* Set the write private key callback to the LMS key structure.
  *
  * The callback must be able to write/update the private key to
@@ -647,7 +720,7 @@ int wc_LmsKey_Reload(LmsKey * key)
 
 /* Given a levels, height, winternitz parameter set, determine
  * the private key length */
-int wc_LmsKey_GetPrivLen(LmsKey * key, word32 * len)
+int wc_LmsKey_GetPrivLen(const LmsKey * key, word32 * len)
 {
     if (key == NULL || len == NULL) {
         return BAD_FUNC_ARG;
@@ -655,65 +728,6 @@ int wc_LmsKey_GetPrivLen(LmsKey * key, word32 * len)
 
     *len = (word32) hss_get_private_key_len(key->levels, key->lm_type,
                                             key->lm_ots_type);
-
-    return 0;
-}
-
-/* Given a levels, height, winternitz parameter set, determine
- * the public key length */
-int wc_LmsKey_GetPubLen(LmsKey * key, word32 * len)
-{
-    if (key == NULL || len == NULL) {
-        return BAD_FUNC_ARG;
-    }
-
-    *len = (word32) hss_get_public_key_len(key->levels, key->lm_type,
-                                           key->lm_ots_type);
-
-    return 0;
-}
-
-/* Export a generated public key and parameter set from one LmsKey
- * to another. Use this to prepare a signature verification LmsKey
- * that is pub only.
- *
- * Though the public key is all that is used to verify signatures,
- * the parameter set is needed to calculate the signature length
- * before hand. */
-int wc_LmsKey_ExportPub(LmsKey * keyDst, const LmsKey * keySrc)
-{
-    if (keyDst == NULL || keySrc == NULL) {
-        return BAD_FUNC_ARG;
-    }
-
-    ForceZero(keyDst, sizeof(LmsKey));
-
-    XMEMCPY(keyDst->pub, keySrc->pub, sizeof(keySrc->pub));
-    XMEMCPY(keyDst->lm_type, keySrc->lm_type, sizeof(keySrc->lm_type));
-    XMEMCPY(keyDst->lm_ots_type, keySrc->lm_ots_type,
-            sizeof(keySrc->lm_ots_type));
-
-    keyDst->levels = keySrc->levels;
-
-    /* Mark this key as verify only, to prevent misuse. */
-    keyDst->state = WC_LMS_STATE_VERIFYONLY;
-
-    return 0;
-}
-
-/* Given a levels, height, winternitz parameter set, determine
- * the signature length.
- *
- * Call this before wc_LmsKey_Sign so you know the length of
- * the required signature buffer. */
-int wc_LmsKey_GetSigLen(LmsKey * key, word32 * len)
-{
-    if (key == NULL || len == NULL) {
-        return BAD_FUNC_ARG;
-    }
-
-    *len = (word32) hss_get_signature_len(key->levels, key->lm_type,
-                                          key->lm_ots_type);
 
     return 0;
 }
@@ -773,27 +787,6 @@ int wc_LmsKey_Sign(LmsKey* key, byte * sig, word32 * sigSz, const byte * msg,
     return 0;
 }
 
-int wc_LmsKey_Verify(LmsKey * key, const byte * sig, word32 sigSz,
-    const byte * msg, int msgSz)
-{
-    bool result = true;
-
-    if (key == NULL || sig == NULL || msg == NULL) {
-        return BAD_FUNC_ARG;
-    }
-
-    result = hss_validate_signature(key->pub, (const void *) msg, msgSz, sig,
-                                    sigSz, &key->info);
-
-    if (!result) {
-        WOLFSSL_MSG("error: hss_validate_signature failed");
-        return -1;
-    }
-
-    return 0;
-}
-
-
 /* Returns 1 if there are signatures remaining.
  * Returns 0 if available signatures are exhausted.
  *
@@ -815,4 +808,165 @@ int wc_LmsKey_SigsLeft(LmsKey * key)
 
     return 1;
 }
+
+#endif /* ifndef WOLFSSL_LMS_VERIFY_ONLY*/
+
+/* Given a levels, height, winternitz parameter set, determine
+ * the public key length */
+int wc_LmsKey_GetPubLen(const LmsKey * key, word32 * len)
+{
+    if (key == NULL || len == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+    *len = (word32) hss_get_public_key_len(key->levels, key->lm_type,
+                                           key->lm_ots_type);
+
+    return 0;
+}
+
+/* Export a generated public key and parameter set from one LmsKey
+ * to another. Use this to prepare a signature verification LmsKey
+ * that is pub only.
+ *
+ * Though the public key is all that is used to verify signatures,
+ * the parameter set is needed to calculate the signature length
+ * before hand. */
+int wc_LmsKey_ExportPub(LmsKey * keyDst, const LmsKey * keySrc)
+{
+    if (keyDst == NULL || keySrc == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+    ForceZero(keyDst, sizeof(LmsKey));
+
+    XMEMCPY(keyDst->pub, keySrc->pub, sizeof(keySrc->pub));
+    XMEMCPY(keyDst->lm_type, keySrc->lm_type, sizeof(keySrc->lm_type));
+    XMEMCPY(keyDst->lm_ots_type, keySrc->lm_ots_type,
+            sizeof(keySrc->lm_ots_type));
+
+    keyDst->levels = keySrc->levels;
+
+    /* Mark this key as verify only, to prevent misuse. */
+    keyDst->state = WC_LMS_STATE_VERIFYONLY;
+
+    return 0;
+}
+
+/* Exports the raw LMS public key buffer from key to out buffer.
+ * The out buffer should be large enough to hold the public key, and
+ * outLen should indicate the size of the buffer.
+ *
+ * - Returns 0 on success, and sets outLen to LMS pubLen.
+ * - Returns BUFFER_E if outLen < LMS pubLen.
+ *
+ * Call wc_LmsKey_GetPubLen beforehand to determine pubLen.
+ * */
+int wc_LmsKey_ExportPubRaw(const LmsKey * key, byte * out, word32 * outLen)
+{
+    int    ret = 0;
+    word32 pubLen = 0;
+
+    if (key == NULL || out == NULL || outLen == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+    ret = wc_LmsKey_GetPubLen(key, &pubLen);
+
+    if (ret != 0) {
+        WOLFSSL_MSG("error: wc_LmsKey_GetPubLen failed");
+        return -1;
+    }
+
+    if (*outLen < pubLen) {
+        return BUFFER_E;
+    }
+
+    XMEMCPY(out, key->pub, pubLen);
+    *outLen = pubLen;
+
+    return 0;
+}
+
+/* Imports a raw public key buffer from in array to LmsKey key.
+ *
+ * The LMS parameters must be set first with wc_LmsKey_SetLmsParm or
+ * wc_LmsKey_SetParameters, and inLen must match the length returned
+ * by wc_LmsKey_GetPubLen.
+ *
+ * - Returns 0 on success.
+ * - Returns BUFFER_E if inlen != LMS pubLen.
+ *
+ * Call wc_LmsKey_GetPubLen beforehand to determine pubLen.
+ * */
+int wc_LmsKey_ImportPubRaw(LmsKey * key, const byte * in, word32 inLen)
+{
+    int    ret = 0;
+    word32 pubLen = 0;
+
+    if (key == NULL || in == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+    ret = wc_LmsKey_GetPubLen(key, &pubLen);
+
+    if (ret != 0) {
+        WOLFSSL_MSG("error: wc_LmsKey_GetPubLen failed");
+        return -1;
+    }
+
+    if (inLen != pubLen) {
+        /* Something inconsistent. Parameters weren't set, or input
+         * pub key is wrong.*/
+        return BUFFER_E;
+    }
+
+    XMEMCPY(key->pub, in, pubLen);
+
+    return 0;
+}
+
+/* Given a levels, height, winternitz parameter set, determine
+ * the signature length.
+ *
+ * Call this before wc_LmsKey_Sign so you know the length of
+ * the required signature buffer. */
+int wc_LmsKey_GetSigLen(const LmsKey * key, word32 * len)
+{
+    if (key == NULL || len == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+    *len = (word32) hss_get_signature_len(key->levels, key->lm_type,
+                                          key->lm_ots_type);
+
+    return 0;
+}
+
+int wc_LmsKey_Verify(LmsKey * key, const byte * sig, word32 sigSz,
+    const byte * msg, int msgSz)
+{
+    bool result = true;
+
+    if (key == NULL || sig == NULL || msg == NULL) {
+        return BAD_FUNC_ARG;
+    }
+
+#ifdef WOLFSSL_LMS_VERIFY_ONLY
+    result = hss_validate_signature(key->pub, (const void *) msg, msgSz, sig,
+                                    sigSz, NULL);
+#else
+    result = hss_validate_signature(key->pub, (const void *) msg, msgSz, sig,
+                                    sigSz, &key->info);
+#endif
+
+
+    if (!result) {
+        WOLFSSL_MSG("error: hss_validate_signature failed");
+        return -1;
+    }
+
+    return 0;
+}
+
 #endif /* WOLFSSL_HAVE_LMS */

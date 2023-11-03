@@ -37,26 +37,6 @@
     #include <wolfssl/wolfcrypt/fips.h>
 #endif /* HAVE_FIPS_VERSION >= 2 */
 
-#if defined(HAVE_FIPS) && \
-        (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-    #define wc_Sha256             Sha256
-    #define WC_SHA256             SHA256
-    #define WC_SHA256_BLOCK_SIZE  SHA256_BLOCK_SIZE
-    #define WC_SHA256_DIGEST_SIZE SHA256_DIGEST_SIZE
-    #define WC_SHA256_PAD_SIZE    SHA256_PAD_SIZE
-
-    #ifdef WOLFSSL_SHA224
-        #define wc_Sha224             Sha224
-        #define WC_SHA224             SHA224
-        #define WC_SHA224_BLOCK_SIZE  SHA224_BLOCK_SIZE
-        #define WC_SHA224_DIGEST_SIZE SHA224_DIGEST_SIZE
-        #define WC_SHA224_PAD_SIZE    SHA224_PAD_SIZE
-    #endif
-
-    /* for fips @wc_fips */
-    #include <cyassl/ctaocrypt/sha256.h>
-#endif
-
 #ifdef FREESCALE_LTC_SHA
     #include "fsl_ltc.h"
 #endif
@@ -97,7 +77,7 @@
 #if defined(WOLFSSL_DEVCRYPTO) && defined(WOLFSSL_DEVCRYPTO_HASH)
     #include <wolfssl/wolfcrypt/port/devcrypto/wc_devcrypto.h>
 #endif
-#if defined(WOLFSSL_ESP32WROOM32_CRYPT)
+#if defined(WOLFSSL_ESP32_CRYPT)
     #include "wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h"
 #endif
 #if defined(WOLFSSL_CRYPTOCELL)
@@ -150,13 +130,14 @@ enum {
     #include "wolfssl/wolfcrypt/port/caam/wolfcaam_sha.h"
 #elif defined(WOLFSSL_AFALG_HASH)
     #include "wolfssl/wolfcrypt/port/af_alg/afalg_hash.h"
-#elif defined(WOLFSSL_RENESAS_TSIP_CRYPT) && \
+#elif (defined(WOLFSSL_RENESAS_TSIP_TLS) || \
+       defined(WOLFSSL_RENESAS_TSIP_CRYPTONLY)) && \
    !defined(NO_WOLFSSL_RENESAS_TSIP_CRYPT_HASH)
     #include "wolfssl/wolfcrypt/port/Renesas/renesas_tsip_types.h"
 #elif (defined(WOLFSSL_RENESAS_SCEPROTECT) || \
-        defined(WOLFSSL_RENESAS_SCEPROTECT_CRYPTONLY)) && \
-   !defined(NO_WOLFSSL_RENESAS_SCEPROTECT_HASH)
-    #include "wolfssl/wolfcrypt/port/Renesas/renesas-sce-crypt.h"
+       defined(WOLFSSL_RENESAS_RSIP))    && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    #include "wolfssl/wolfcrypt/port/Renesas/renesas-fspsm-crypt.h"
 #elif defined(WOLFSSL_RENESAS_RX64_HASH)
     #include "wolfssl/wolfcrypt/port/Renesas/renesas-rx64-hw-crypt.h"
 #else
@@ -167,6 +148,11 @@ enum {
 
 #ifdef WOLFSSL_MAXQ10XX_CRYPTO
     #include <wolfssl/wolfcrypt/port/maxim/maxq10xx.h>
+#endif
+
+#ifdef HAVE_ARIA
+    #include "mcapi.h"
+    #include "mcapi_error.h"
 #endif
 
 /* wc_Sha256 digest */
@@ -214,8 +200,8 @@ struct wc_Sha256 {
     word32 used;
     word32 len;
 #endif
-#if defined(WOLFSSL_ESP32WROOM32_CRYPT) && \
-   !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+#if defined(WOLFSSL_ESP32_CRYPT) && \
+   !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
     WC_ESP32SHA ctx;
 #endif
 #ifdef WOLFSSL_MAXQ10XX_CRYPTO
@@ -234,6 +220,9 @@ struct wc_Sha256 {
 #ifdef WOLFSSL_IMXRT1170_CAAM
     caam_hash_ctx_t ctx;
     caam_handle_t hndl;
+#endif
+#ifdef HAVE_ARIA
+    MC_HSESSION hSession;
 #endif
 #ifdef WOLFSSL_HASH_FLAGS
     word32 flags; /* enum wc_HashFlags in hash.h */
@@ -329,4 +318,3 @@ WOLFSSL_API int wc_Sha224Copy(wc_Sha224* src, wc_Sha224* dst);
 
 #endif /* NO_SHA256 */
 #endif /* WOLF_CRYPT_SHA256_H */
-

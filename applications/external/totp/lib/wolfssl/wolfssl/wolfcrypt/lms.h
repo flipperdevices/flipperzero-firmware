@@ -109,23 +109,31 @@ WOLFSSL_API int  wc_LmsKey_Init(LmsKey * key, void * heap, int devId);
 WOLFSSL_API int  wc_LmsKey_SetLmsParm(LmsKey * key, enum wc_LmsParm lmsParm);
 WOLFSSL_API int  wc_LmsKey_SetParameters(LmsKey * key, int levels,
     int height, int winternitz);
+WOLFSSL_API int  wc_LmsKey_GetParameters(const LmsKey * key, int * levels,
+    int * height, int * winternitz);
+#ifndef WOLFSSL_LMS_VERIFY_ONLY
 WOLFSSL_API int  wc_LmsKey_SetWriteCb(LmsKey * key,
     write_private_key_cb write_cb);
 WOLFSSL_API int  wc_LmsKey_SetReadCb(LmsKey * key,
     read_private_key_cb read_cb);
 WOLFSSL_API int  wc_LmsKey_SetContext(LmsKey * key, void * context);
-WOLFSSL_API void wc_LmsKey_Free(LmsKey * key);
 WOLFSSL_API int  wc_LmsKey_MakeKey(LmsKey * key, WC_RNG * rng);
 WOLFSSL_API int  wc_LmsKey_Reload(LmsKey * key);
-WOLFSSL_API int  wc_LmsKey_GetSigLen(LmsKey * key, word32 * len);
-WOLFSSL_API int  wc_LmsKey_GetPrivLen(LmsKey * key, word32 * len);
-WOLFSSL_API int  wc_LmsKey_GetPubLen(LmsKey * key, word32 * len);
-WOLFSSL_API int  wc_LmsKey_ExportPub(LmsKey * keyDst, const LmsKey * keySrc);
+WOLFSSL_API int  wc_LmsKey_GetPrivLen(const LmsKey * key, word32 * len);
 WOLFSSL_API int  wc_LmsKey_Sign(LmsKey * key, byte * sig, word32 * sigSz,
     const byte * msg, int msgSz);
+WOLFSSL_API int  wc_LmsKey_SigsLeft(LmsKey * key);
+#endif /* ifndef WOLFSSL_LMS_VERIFY_ONLY */
+WOLFSSL_API void wc_LmsKey_Free(LmsKey * key);
+WOLFSSL_API int  wc_LmsKey_GetSigLen(const LmsKey * key, word32 * len);
+WOLFSSL_API int  wc_LmsKey_GetPubLen(const LmsKey * key, word32 * len);
+WOLFSSL_API int  wc_LmsKey_ExportPub(LmsKey * keyDst, const LmsKey * keySrc);
+WOLFSSL_API int  wc_LmsKey_ExportPubRaw(const LmsKey * key, byte * out,
+    word32 * outLen);
+WOLFSSL_API int  wc_LmsKey_ImportPubRaw(LmsKey * key, const byte * in,
+    word32 inLen);
 WOLFSSL_API int  wc_LmsKey_Verify(LmsKey * key, const byte * sig, word32 sigSz,
     const byte * msg, int msgSz);
-WOLFSSL_API int  wc_LmsKey_SigsLeft(LmsKey * key);
 WOLFSSL_API const char * wc_LmsKey_ParmToStr(enum wc_LmsParm lmsParm);
 WOLFSSL_API const char * wc_LmsKey_RcToStr(enum wc_LmsRc lmsRc);
 #ifdef __cplusplus
