@@ -553,6 +553,15 @@ int mp_exch (mp_int * a, mp_int * b)
   return MP_OKAY;
 }
 
+int mp_cond_swap_ct_ex (mp_int * a, mp_int * b, int c, int m, mp_int * t)
+{
+    (void)c;
+    (void)t;
+    if (m == 1)
+        mp_exch(a, b);
+    return MP_OKAY;
+}
+
 int mp_cond_swap_ct (mp_int * a, mp_int * b, int c, int m)
 {
     (void)c;
@@ -946,7 +955,7 @@ int wolfcrypt_mp_exptmod (mp_int * G, mp_int * X, mp_int * P, mp_int * Y)
   }
 
 #ifdef BN_MP_EXPTMOD_BASE_2
-  if (G->used == 1 && G->dp[0] == 2) {
+  if (G->used == 1 && G->dp[0] == 2 && mp_isodd(P) == MP_YES) {
     return mp_exptmod_base_2(X, P, Y);
   }
 #endif
@@ -976,7 +985,7 @@ int wolfcrypt_mp_exptmod (mp_int * G, mp_int * X, mp_int * P, mp_int * Y)
   }
 #endif
 
-  /* if the modulus is odd or dr != 0 use the montgomery method */
+  /* if the modulus is odd use the montgomery method, or use other known */
 #ifdef BN_MP_EXPTMOD_FAST_C
   if (mp_isodd (P) == MP_YES || dr !=  0) {
     return mp_exptmod_fast (G, X, P, Y, dr);
@@ -1976,7 +1985,6 @@ int mp_dr_is_modulus(mp_int *a)
    return 1;
 }
 
-
 /* computes Y == G**X mod P, HAC pp.616, Algorithm 14.85
  *
  * Uses a left-to-right k-ary sliding window to compute the modular
@@ -2104,7 +2112,10 @@ int mp_exptmod_fast (mp_int * G, mp_int * X, mp_int * P, mp_int * Y,
      if ((err = mp_reduce_2k_setup(P, &mp)) != MP_OKAY) {
         goto LBL_M;
      }
-     redux = mp_reduce_2k;
+     /* mp of zero is not usable */
+     if (mp != 0) {
+         redux = mp_reduce_2k;
+     }
 #endif
   }
 
@@ -3314,7 +3325,7 @@ int mp_init_size (mp_int * a, int size)
 }
 
 
-/* the jist of squaring...
+/* the list of squaring...
  * you do like mult except the offset of the tmpx [one that
  * starts closer to zero] can't equal the offset of tmpy.
  * So basically you set up iy like before then you min it with

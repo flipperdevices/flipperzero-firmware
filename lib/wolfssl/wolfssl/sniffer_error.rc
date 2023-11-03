@@ -1,5 +1,5 @@
 
-STRINGTABLE 
+STRINGTABLE
 {
     1, "Out of Memory"
     2, "New SSL Sniffer Server Registered"
@@ -60,7 +60,7 @@ STRINGTABLE
     48, "Wrong Protocol type"
     49, "Packet Short for header processing"
     50, "Got Unknown Record Type"
-    
+
     51, "Can't Open Trace File"
     52, "Session in Fatal Error State"
     53, "Partial SSL record received"
@@ -72,7 +72,7 @@ STRINGTABLE
     58, "Received an Overlap Duplicate Packet"
     59, "Received an Overlap Reassembly Begin Duplicate Packet"
     60, "Received an Overlap Reassembly End Duplicate Packet"
-    
+
     61, "Missed the Client Hello Entirely"
     62, "Got Hello Request msg"
     63, "Got Session Ticket msg"
@@ -118,4 +118,6 @@ STRINGTABLE
     96, "Setting up keys"
     97, "Unsupported TLS Version"
     98, "Server Client Key Mismatch"
+
+    99, "Invalid or missing keylog file"
 }

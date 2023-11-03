@@ -197,7 +197,7 @@ This library provides single precision (SP) integer math functions.
     while (0)
 #else
     /* Nothing to do as declared on stack. */
-    #define FREE_SP_INT(n, h)
+    #define FREE_SP_INT(n, h) WC_DO_NOTHING
 #endif
 
 
@@ -318,7 +318,7 @@ while (0)
         FREE_DYN_SP_INT_ARRAY(n, h)
 #else
     /* Nothing to do as data declared on stack. */
-    #define FREE_SP_INT_ARRAY(n, h)
+    #define FREE_SP_INT_ARRAY(n, h) WC_DO_NOTHING
 #endif
 
 
@@ -1245,7 +1245,7 @@ static WC_INLINE sp_int_digit sp_div_word(sp_int_digit hi, sp_int_digit lo,
         : [a] "r" (va), [b] "r" (vb), [c] "r" (vc)       \
         : "cc"                                           \
     )
-#if defined(WOLFSSL_SP_ARM_ARCH) && (WOLFSSL_SP_ARM_ARCH >= 7)
+#if defined(WOLFSSL_ARM_ARCH) && (WOLFSSL_ARM_ARCH >= 7)
 /* Count leading zeros - instruction only available on ARMv7 and newer. */
 #define SP_ASM_LZCNT(va, vn)                             \
     __asm__ __volatile__ (                               \
@@ -1272,7 +1272,7 @@ static WC_INLINE sp_int_digit sp_div_word(sp_int_digit hi, sp_int_digit lo,
                                           sp_int_digit d)
 {
     sp_int_digit r = 0;
-#if defined(WOLFSSL_SP_ARM_ARCH) && (WOLFSSL_SP_ARM_ARCH < 7)
+#if defined(WOLFSSL_ARM_ARCH) && (WOLFSSL_ARM_ARCH < 7)
     static const char debruijn32[32] = {
         0, 31, 9, 30, 3, 8, 13, 29, 2, 5, 7, 21, 12, 24, 28, 19,
         1, 10, 4, 14, 6, 22, 25, 20, 11, 15, 23, 26, 16, 27, 17, 18
@@ -1282,7 +1282,7 @@ static WC_INLINE sp_int_digit sp_div_word(sp_int_digit hi, sp_int_digit lo,
 
     __asm__ __volatile__ (
         /* Shift d so that top bit is set. */
-#if defined(WOLFSSL_SP_ARM_ARCH) && (WOLFSSL_SP_ARM_ARCH < 7)
+#if defined(WOLFSSL_ARM_ARCH) && (WOLFSSL_ARM_ARCH < 7)
         "ldr	r4, %[m]\n\t"
         "mov	r5, %[d]\n\t"
         "orr	r5, r5, r5, lsr #1\n\t"
@@ -1291,8 +1291,8 @@ static WC_INLINE sp_int_digit sp_div_word(sp_int_digit hi, sp_int_digit lo,
         "orr	r5, r5, r5, lsr #8\n\t"
         "orr	r5, r5, r5, lsr #16\n\t"
         "add	r5, r5, #1\n\t"
-        "mul	r5, r5, r4\n\t"
-        "lsr	r5, r5, #27\n\t"
+        "mul	r6, r5, r4\n\t"
+        "lsr	r5, r6, #27\n\t"
         "ldrb	r5, [%[t], r5]\n\t"
 #else
         "clz	r5, %[d]\n\t"
@@ -1352,7 +1352,7 @@ static WC_INLINE sp_int_digit sp_div_word(sp_int_digit hi, sp_int_digit lo,
         "sbc	r8, r8, r8\n\t"
         "sub	%[r], %[r], r8\n\t"
         : [r] "+r" (r), [hi] "+r" (hi), [lo] "+r" (lo), [d] "+r" (d)
-#if defined(WOLFSSL_SP_ARM_ARCH) && (WOLFSSL_SP_ARM_ARCH < 7)
+#if defined(WOLFSSL_ARM_ARCH) && (WOLFSSL_ARM_ARCH < 7)
         : [t] "r" (debruijn32), [m] "m" (debruijn32_mul)
 #else
         :
@@ -4780,7 +4780,7 @@ static void _sp_mont_setup(const sp_int* m, sp_int_digit* rho);
 
 /* Determine when mp_add_d is required. */
 #if !defined(NO_PWDBASED) || defined(WOLFSSL_KEY_GEN) || !defined(NO_DH) || \
-    !defined(NO_DSA) || \
+    !defined(NO_DSA) || (defined(HAVE_ECC) && defined(HAVE_COMP_KEY)) || \
     (!defined(NO_RSA) && !defined(WOLFSSL_RSA_VERIFY_ONLY)) || \
     defined(OPENSSL_EXTRA)
 #define WOLFSSL_SP_ADD_D
@@ -5233,50 +5233,69 @@ int sp_exch(sp_int* a, sp_int* b)
  * @param [in]  b     Second SP int to conditionally swap.
  * @param [in]  cnt   Count of words to copy.
  * @param [in]  swap  When value is 1 then swap.
+ * @param [in]  t     Temporary SP int to use in swap.
+ * @return  MP_OKAY on success.
+ * @return  MP_MEM when dynamic memory allocation fails.
+ */
+int sp_cond_swap_ct_ex(sp_int* a, sp_int* b, int cnt, int swap, sp_int* t)
+{
+    unsigned int i;
+    sp_int_digit mask = (sp_int_digit)0 - (sp_int_digit)swap;
+
+    /* XOR other fields in sp_int into temp - mask set when swapping. */
+    t->used = (a->used ^ b->used) & (unsigned int)mask;
+#ifdef WOLFSSL_SP_INT_NEGATIVE
+    t->sign = (a->sign ^ b->sign) & (unsigned int)mask;
+#endif
+
+    /* XOR requested words into temp - mask set when swapping. */
+    for (i = 0; i < (unsigned int)cnt; i++) {
+        t->dp[i] = (a->dp[i] ^ b->dp[i]) & mask;
+    }
+
+    /* XOR temporary - when mask set then result will be b. */
+    a->used ^= t->used;
+#ifdef WOLFSSL_SP_INT_NEGATIVE
+    a->sign ^= t->sign;
+#endif
+    for (i = 0; i < (unsigned int)cnt; i++) {
+        a->dp[i] ^= t->dp[i];
+    }
+
+    /* XOR temporary - when mask set then result will be a. */
+    b->used ^= t->used;
+#ifdef WOLFSSL_SP_INT_NEGATIVE
+    b->sign ^= b->sign;
+#endif
+    for (i = 0; i < (unsigned int)cnt; i++) {
+        b->dp[i] ^= t->dp[i];
+    }
+
+    return MP_OKAY;
+}
+
+/* Conditional swap of SP int values in constant time.
+ *
+ * @param [in]  a     First SP int to conditionally swap.
+ * @param [in]  b     Second SP int to conditionally swap.
+ * @param [in]  cnt   Count of words to copy.
+ * @param [in]  swap  When value is 1 then swap.
  * @return  MP_OKAY on success.
  * @return  MP_MEM when dynamic memory allocation fails.
  */
 int sp_cond_swap_ct(sp_int* a, sp_int* b, int cnt, int swap)
 {
-    unsigned int i;
     int err = MP_OKAY;
-    sp_int_digit mask = (sp_int_digit)0 - (sp_int_digit)swap;
     DECL_SP_INT(t, (size_t)cnt);
 
     /* Allocate temporary to hold masked xor of a and b. */
     ALLOC_SP_INT(t, cnt, err, NULL);
+
     if (err == MP_OKAY) {
-        /* XOR other fields in sp_int into temp - mask set when swapping. */
-        t->used = (a->used ^ b->used) & (unsigned int)mask;
-    #ifdef WOLFSSL_SP_INT_NEGATIVE
-        t->sign = (a->sign ^ b->sign) & (unsigned int)mask;
-    #endif
-
-        /* XOR requested words into temp - mask set when swapping. */
-        for (i = 0; i < (unsigned int)cnt; i++) {
-            t->dp[i] = (a->dp[i] ^ b->dp[i]) & mask;
-        }
-
-        /* XOR temporary - when mask set then result will be b. */
-        a->used ^= t->used;
-    #ifdef WOLFSSL_SP_INT_NEGATIVE
-        a->sign ^= t->sign;
-    #endif
-        for (i = 0; i < (unsigned int)cnt; i++) {
-            a->dp[i] ^= t->dp[i];
-        }
-
-        /* XOR temporary - when mask set then result will be a. */
-        b->used ^= t->used;
-    #ifdef WOLFSSL_SP_INT_NEGATIVE
-        b->sign ^= b->sign;
-    #endif
-        for (i = 0; i < (unsigned int)cnt; i++) {
-            b->dp[i] ^= t->dp[i];
-        }
+        err = sp_cond_swap_ct_ex(a, b, cnt, swap, t);
+        FREE_SP_INT(t, NULL);
     }
 
-    FREE_SP_INT(t, NULL);
     return err;
 }
 #endif /* HAVE_ECC && ECC_TIMING_RESISTANT && !WC_NO_CACHE_RESISTANT */
@@ -5476,8 +5495,8 @@ int sp_cmp(const sp_int* a, const sp_int* b)
  *************************/
 
 #if (!defined(NO_RSA) && !defined(WOLFSSL_RSA_VERIFY_ONLY)) || \
-    (defined(WOLFSSL_SP_MATH_ALL) && defined(HAVE_ECC)) || \
-    defined(OPENSSL_EXTRA)
+    ((defined(WOLFSSL_SP_MATH_ALL) || defined(WOLFSSL_SP_SM2)) && \
+     defined(HAVE_ECC)) || defined(OPENSSL_EXTRA)
 /* Check if a bit is set
  *
  * When a is NULL, result is 0.
@@ -6447,7 +6466,7 @@ static void _sp_div_3(const sp_int* a, sp_int* r, sp_int_digit* rem)
         }
         /* Sum digits of sum. */
         t = (t >> SP_WORD_SIZE) + (t & SP_MASK);
-        /* Get top digit after multipling by (2^SP_WORD_SIZE) / 3. */
+        /* Get top digit after multiplying by (2^SP_WORD_SIZE) / 3. */
         tt = (sp_int_digit)((t * SP_DIV_3_CONST) >> SP_WORD_SIZE);
         /* Subtract trial division. */
         tr = (sp_int_digit)(t - (sp_int_word)tt * 3);
@@ -6479,7 +6498,7 @@ static void _sp_div_3(const sp_int* a, sp_int* r, sp_int_digit* rem)
     #ifndef SQR_MUL_ASM
             /* Combine remainder from last operation with this word. */
             t = ((sp_int_word)tr << SP_WORD_SIZE) | a->dp[i];
-            /* Get top digit after multipling by (2^SP_WORD_SIZE) / 3. */
+            /* Get top digit after multiplying by (2^SP_WORD_SIZE) / 3. */
             tt = (sp_int_digit)((t * SP_DIV_3_CONST) >> SP_WORD_SIZE);
             /* Subtract trial division. */
             tr = (sp_int_digit)(t - (sp_int_word)tt * 3);
@@ -6540,7 +6559,7 @@ static void _sp_div_10(const sp_int* a, sp_int* r, sp_int_digit* rem)
     #ifndef SQR_MUL_ASM
             /* Combine remainder from last operation with this word. */
             t = ((sp_int_word)tr << SP_WORD_SIZE) | a->dp[i];
-            /* Get top digit after multipling by (2^SP_WORD_SIZE) / 10. */
+            /* Get top digit after multiplying by (2^SP_WORD_SIZE) / 10. */
             tt = (sp_int_digit)((t * SP_DIV_10_CONST) >> SP_WORD_SIZE);
             /* Subtract trial division. */
             tr = (sp_int_digit)(t - (sp_int_word)tt * 10);
@@ -6566,7 +6585,7 @@ static void _sp_div_10(const sp_int* a, sp_int* r, sp_int_digit* rem)
     #ifndef SQR_MUL_ASM
             /* Combine remainder from last operation with this word. */
             t = ((sp_int_word)tr << SP_WORD_SIZE) | a->dp[i];
-            /* Get top digit after multipling by (2^SP_WORD_SIZE) / 10. */
+            /* Get top digit after multiplying by (2^SP_WORD_SIZE) / 10. */
             tt = (sp_int_digit)((t * SP_DIV_10_CONST) >> SP_WORD_SIZE);
             /* Subtract trial division. */
             tr = (sp_int_digit)(t - (sp_int_word)tt * 10);
@@ -6630,7 +6649,7 @@ static void _sp_div_small(const sp_int* a, sp_int_digit d, sp_int* r,
         #ifndef SQR_MUL_ASM
             /* Combine remainder from last operation with this word. */
             t = ((sp_int_word)tr << SP_WORD_SIZE) | a->dp[i];
-            /* Get top digit after multipling. */
+            /* Get top digit after multiplying. */
             tt = (sp_int_digit)((t * m) >> SP_WORD_SIZE);
             /* Subtract trial division. */
             tr = (sp_int_digit)t - (sp_int_digit)(tt * d);
@@ -6657,7 +6676,7 @@ static void _sp_div_small(const sp_int* a, sp_int_digit d, sp_int* r,
         #ifndef SQR_MUL_ASM
             /* Combine remainder from last operation with this word. */
             t = ((sp_int_word)tr << SP_WORD_SIZE) | a->dp[i];
-            /* Get top digit after multipling. */
+            /* Get top digit after multiplying. */
             tt = (sp_int_digit)((t * m) >> SP_WORD_SIZE);
             /* Subtract trial division. */
             tr = (sp_int_digit)t - (sp_int_digit)(tt * d);
@@ -8725,9 +8744,9 @@ int sp_mod(const sp_int* a, const sp_int* m, sp_int* r)
  *
  * Optimised code for when number of digits in a and b are the same.
  *
- * @param  [in]   a    SP integer to mulitply.
- * @param  [in]   b    SP integer to mulitply by.
- * @param  [out]  r    SP integer to hod reult.
+ * @param  [in]   a    SP integer to multiply.
+ * @param  [in]   b    SP integer to multiply by.
+ * @param  [out]  r    SP integer to hold result.
  *
  * @return  MP_OKAY otherwise.
  * @return  MP_MEM when dynamic memory allocation fails.
@@ -8804,9 +8823,9 @@ static int _sp_mul_nxn(const sp_int* a, const sp_int* b, sp_int* r)
 
 /* Multiply a by b into r. r = a * b
  *
- * @param  [in]   a    SP integer to mulitply.
- * @param  [in]   b    SP integer to mulitply by.
- * @param  [out]  r    SP integer to hod reult.
+ * @param  [in]   a    SP integer to multiply.
+ * @param  [in]   b    SP integer to multiply by.
+ * @param  [out]  r    SP integer to hold result.
  *
  * @return  MP_OKAY otherwise.
  * @return  MP_MEM when dynamic memory allocation fails.
@@ -8882,9 +8901,9 @@ static int _sp_mul(const sp_int* a, const sp_int* b, sp_int* r)
 #else
 /* Multiply a by b into r. r = a * b
  *
- * @param  [in]   a    SP integer to mulitply.
- * @param  [in]   b    SP integer to mulitply by.
- * @param  [out]  r    SP integer to hod reult.
+ * @param  [in]   a    SP integer to multiply.
+ * @param  [in]   b    SP integer to multiply by.
+ * @param  [out]  r    SP integer to hold result.
  *
  * @return  MP_OKAY otherwise.
  * @return  MP_MEM when dynamic memory allocation fails.
@@ -13777,7 +13796,7 @@ static int _sp_exptmod_nct(const sp_int* b, const sp_int* e, const sp_int* m,
     bits = sp_count_bits(e);
 
     /* Window bits based on number of pre-calculations versus number of loop
-     * calculcations.
+     * calculations.
      * Exponents for RSA and DH will result in 6-bit windows.
      * Note: for 4096-bit values, 7-bit window is slightly better.
      */
@@ -13814,7 +13833,7 @@ static int _sp_exptmod_nct(const sp_int* b, const sp_int* e, const sp_int* m,
         tr = t[preCnt + 0];
         bm = t[preCnt + 1];
 
-        /* Iniitialize all allocated  */
+        /* Initialize all allocated  */
         for (i = 0; i < preCnt; i++) {
             _sp_init_size(t[i], m->used * 2 + 1);
         }
@@ -13962,7 +13981,7 @@ static int _sp_exptmod_nct(const sp_int* b, const sp_int* e, const sp_int* m,
                     break;
                 }
 
-                /* 4.4. Get top window bits from expononent and drop. */
+                /* 4.4. Get top window bits from exponent and drop. */
                 if (err == MP_OKAY) {
                     if (c == 0) {
                         /* Bits from next digit. */
@@ -17598,7 +17617,7 @@ int sp_read_unsigned_bin(sp_int* a, const byte* in, word32 inSz)
         a->used = (inSz + SP_WORD_SIZEOF - 1) / SP_WORD_SIZEOF;
 
     #if defined(BIG_ENDIAN_ORDER) && !defined(WOLFSSL_SP_INT_DIGIT_ALIGN)
-        /* Data endian matches respresentation of number.
+        /* Data endian matches representation of number.
          * Directly copy if we don't have alignment issues.
          */
         for (i = (int)(inSz-1); i > SP_WORD_SIZEOF-1; i -= SP_WORD_SIZEOF) {
@@ -17755,6 +17774,73 @@ int sp_to_unsigned_bin_len(const sp_int* a, byte* out, int outSz)
     return err;
 }
 
+/* Convert the multi-precision number to an array of bytes in big-endian format.
+ *
+ * Constant-time implementation.
+ *
+ * The array must be large enough for encoded number - use mp_unsigned_bin_size
+ * to calculate the number of bytes required.
+ * Front-pads the output array with zeros to make number the size of the array.
+ *
+ * @param  [in]   a      SP integer.
+ * @param  [out]  out    Array to put encoding into.
+ * @param  [in]   outSz  Size of the array in bytes.
+ *
+ * @return  MP_OKAY on success.
+ * @return  MP_VAL when a or out is NULL.
+ */
+int sp_to_unsigned_bin_len_ct(const sp_int* a, byte* out, int outSz)
+{
+    int err = MP_OKAY;
+
+    /* Validate parameters. */
+    if ((a == NULL) || (out == NULL) || (outSz < 0)) {
+        err = MP_VAL;
+    }
+
+#if SP_WORD_SIZE > 8
+    if (err == MP_OKAY) {
+        /* Start at the end of the buffer - least significant byte. */
+        int j;
+        unsigned int i;
+        sp_digit mask = (sp_digit)-1;
+        sp_int_digit d;
+
+        /* Put each digit in. */
+        i = 0;
+        for (j = outSz - 1; j >= 0; ) {
+            int b;
+            d = a->dp[i];
+            /* Place each byte of a digit into the buffer. */
+            for (b = 0; (j >= 0) && (b < SP_WORD_SIZEOF); b++) {
+                out[j--] = (byte)((sp_digit)d & mask);
+                d >>= 8;
+            }
+            mask &= (sp_digit)0 - (i < a->used - 1);
+            i += (unsigned int)(1 & mask);
+        }
+    }
+#else
+    if ((err == MP_OKAY) && ((unsigned int)outSz < a->used)) {
+        err = MP_VAL;
+    }
+    if (err == MP_OKAY) {
+        unsigned int i;
+        int j;
+        sp_digit mask = (sp_digit)-1;
+
+        i = 0;
+        for (j = outSz - 1; j >= 0; j--) {
+            out[j] = a->dp[i] & mask;
+            mask &= (sp_digit)0 - (i < a->used - 1);
+            i += (unsigned int)(1 & mask);
+        }
+    }
+#endif
+
+    return err;
+}
+
 #if defined(WOLFSSL_SP_MATH_ALL) && !defined(NO_RSA) && \
     !defined(WOLFSSL_RSA_VERIFY_ONLY)
 /* Store the number in big-endian format in array at an offset.
@@ -17882,7 +17968,7 @@ static int _sp_read_radix_10(sp_int* a, const char* in)
         ch = in[i];
         /* Check character is valid. */
         if ((ch >= '0') && (ch <= '9')) {
-            /* Assume '0'..'9' are continuous valus as characters. */
+            /* Assume '0'..'9' are continuous values as characters. */
             ch -= '0';
         }
         else {
@@ -18476,7 +18562,7 @@ int sp_rand_prime(sp_int* r, int len, WC_RNG* rng, void* heap)
  *
  * @param  [in]   a       SP integer to check.
  * @param  [in]   b       SP integer that is a small prime.
- * @param  [out]  result  MP_YES when number is likey prime.
+ * @param  [out]  result  MP_YES when number is likely prime.
  *                        MP_NO otherwise.
  * @param  [in]   n1      SP integer temporary.
  * @param  [in]   r       SP integer temporary.

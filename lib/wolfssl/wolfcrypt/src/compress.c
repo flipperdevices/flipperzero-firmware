@@ -245,6 +245,7 @@ int wc_DeCompressDynamic(byte** out, int maxSz, int memoryType,
     stream.opaque = (voidpf)0;
 
     if (inflateInit2(&stream, DEFLATE_DEFAULT_WINDOWBITS | windowBits) != Z_OK) {
+        XFREE(tmp, heap, memoryType);
         return DECOMPRESS_INIT_E;
     }
 
