@@ -267,8 +267,6 @@ void subghz_protocol_decoder_mastercode_feed(void* context, bool level, uint32_t
                 subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 instance->decoder.parser_step = MastercodeDecoderStepSaveDuration;
             } else if(
-                //DURATION_DIFF(duration, subghz_protocol_mastercode_const.te_short * 51) <
-                //subghz_protocol_mastercode_const.te_delta * 25) {
                 DURATION_DIFF(duration, subghz_protocol_mastercode_const.te_short * 16) <
                 subghz_protocol_mastercode_const.te_delta * 8) {
                 if((DURATION_DIFF(
