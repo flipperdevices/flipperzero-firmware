@@ -22,6 +22,8 @@ typedef struct  {
     char* cart_RAMSize;
     char* cart_gb_type;
     bool cart_gb_sgb;
+    int ramBanks;
+    int romBanks;
     uint8_t cart_logo[48*8];
 
 } GameBoyCartridgeModel;
@@ -101,6 +103,25 @@ void gameboy_information_handle_rx_data_cb(uint8_t* buf, size_t len, void* conte
                 } else {
                     model->cart_gb_sgb = false;
                 }
+
+                //  Rom Banks
+                cJSON* romBanks = cJSON_GetObjectItemCaseSensitive(json, "romBanks");
+                if(cJSON_IsNumber(romBanks)) {
+                    model->romBanks = romBanks->valueint;
+                } else {
+                    model->romBanks = 0;
+                }
+
+                //  Ram Banks
+                cJSON* ramBanks = cJSON_GetObjectItemCaseSensitive(json, "ramBanks");
+                if(cJSON_IsNumber(ramBanks)) {
+                    model->ramBanks = ramBanks->valueint;
+                } else {
+                    model->ramBanks = 0;
+                }
+
+
+
                 cJSON* gb_logo =  cJSON_GetObjectItemCaseSensitive(json, "logo");
                 if (cJSON_IsArray(gb_logo)) {
                     // Leer los elementos del arreglo "logo"
@@ -126,6 +147,9 @@ void gameboy_information_handle_rx_data_cb(uint8_t* buf, size_t len, void* conte
 
                 instance->cart_dump_ram_filename = (char*)furi_string_get_cstr(path);
                 instance->cart_dump_ram_extension = "sav";
+
+                instance->rom_banks = model->romBanks;
+                instance->ram_banks = model->ramBanks;
                 
             }
         },true);
@@ -311,7 +335,7 @@ bool gb_cartridge_scene_1_input(InputEvent* event, void* context) {
                         }
                         // Register callbacks to receive data
                         uart_set_handle_rx_data_cb(((GBCartridge*)instance->app)->uart, gameboy_information_handle_rx_data_cb); // setup callback for general log rx thread
-                        const char gbcartridge_command[] = "gbcartridge\n";
+                        const char gbcartridge_command[] = "gbcartridge -i\n";
                         uart_tx((uint8_t*)gbcartridge_command, strlen(gbcartridge_command));
                     },
                     true);
@@ -356,7 +380,7 @@ void gb_cartridge_scene_1_enter(void* context) {
     
     // Register callbacks to receive data
     uart_set_handle_rx_data_cb(((GBCartridge*)instance->app)->uart, gameboy_information_handle_rx_data_cb); // setup callback for general log rx thread
-    const char gbcartridge_command[] = "gbcartridge\n";
+    const char gbcartridge_command[] = "gbcartridge -i\n";
     uart_tx((uint8_t*)gbcartridge_command, strlen(gbcartridge_command));
 }
 

@@ -30,6 +30,11 @@ class GameBoyCartridge {
     word romEndAddress;
     word sramBanks;
     int romType;
+    word romAddress = 0;
+    uint8_t currentBank = 0;
+    uint32_t processedProgressBar = 0;
+    uint32_t totalProgressBar = 0;
+    word romStartBank = 1;
 
 
     word lastByte;

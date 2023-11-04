@@ -171,7 +171,7 @@ bool gb_cartridge_scene_4_input(InputEvent* event, void* context) {
                         GBCartridge* app = (GBCartridge*)instance->context;
                         // Unregister rx callback
                         uart_set_handle_rx_data_cb(app->uart, NULL);
-                        uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+                        // uart_set_handle_rx_data_cb(app->lp_uart, NULL);
                         instance->callback(GBCartridgeCustomEventScene4Back, instance->context);
                     },
                     true);

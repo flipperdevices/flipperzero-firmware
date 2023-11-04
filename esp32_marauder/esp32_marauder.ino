@@ -428,7 +428,7 @@ void loop()
 
   gameboy_cartridge.main();
   gameboy_live_camera.main();
-  if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM()) {
+  if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM()) {
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);
   #endif

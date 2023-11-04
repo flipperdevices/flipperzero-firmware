@@ -79,6 +79,9 @@ GBCartridge* gb_cartridge_app_app_alloc() {
 
     //End Scene Additions
 
+    //  Enable 5v
+    furi_hal_power_enable_otg();
+    furi_delay_ms(1); 
     return app;
 }
 

@@ -66,9 +66,9 @@ void gb_cartridge_scene_2_set_callback(
 }
 
 void gameboy_rom_backup_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
-    furi_assert(context);
+    // furi_assert(context);
     UNUSED(len);
-    UNUSED(buf);
+    // UNUSED(buf);
     GBCartridge* instance = context;
 
     with_view_model(
@@ -111,9 +111,13 @@ void gameboy_rom_backup_handle_rx_data_cb(uint8_t* buf, size_t len, void* contex
             }
             if (strcmp(model->event_type, "success") == 0) {
                 model->progress = 100;
-                if(instance->cart_rom && storage_file_is_open(instance->cart_rom)) {
-                    storage_file_close(instance->cart_rom);
-                }
+                // cJSON* total = cJSON_GetObjectItemCaseSensitive(json, "total");
+                // if(cJSON_IsNumber(total)) {
+                //     model->transfered = total->valueint;
+                // }
+                // if(instance->cart_rom && storage_file_is_open(instance->cart_rom)) {
+                //     storage_file_close(instance->cart_rom);
+                // }
                 notification_success(instance->notification);
             }
         },
@@ -217,8 +221,14 @@ bool gb_cartridge_scene_2_input(InputEvent* event, void* context) {
                         GBCartridge* app = (GBCartridge*)instance->context;
                         UNUSED(app);
                         // // Unregister rx callback
-                        // uart_set_handle_rx_data_cb(app->uart, NULL);
-                        // uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+                        uart_set_handle_rx_data_cb(app->uart, NULL);
+                        uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+                        //  Close file
+                        app->is_writing_rom = false;
+                        if(app->cart_rom && storage_file_is_open(app->cart_rom)) {
+                            storage_file_close(app->cart_rom);
+                        }
+                        notification_message(app->notification, &sequence_display_backlight_enforce_auto);
                         instance->callback(GBCartridgeCustomEventScene2Back, instance->context);
                     },
                     true);
@@ -264,14 +274,6 @@ void gb_cartridge_scene_2_exit(void* context) {
     // Automatically stop the scan when exiting view
     // uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
     // furi_delay_ms(50);
-
-    uart_set_handle_rx_data_cb(app->uart, NULL);
-    uart_set_handle_rx_data_cb(app->lp_uart, NULL);
-
-    app->is_writing_rom = false;
-    if(app->cart_rom && storage_file_is_open(app->cart_rom)) {
-        storage_file_close(app->cart_rom);
-    }
     gb_cartridge_stop_all_sound(app);
 }
 
@@ -279,6 +281,9 @@ void gb_cartridge_scene_2_enter(void* context) {
     furi_assert(context);
     GBCartridgeScene2* instance = context;
     GBCartridge* app = (GBCartridge*)instance->context;
+    //  backlight on
+    notification_message(app->notification, &sequence_display_backlight_enforce_on);
+
     UNUSED(app);
     // dolphin_deed(DolphinDeedPluginStart);
     with_view_model(
@@ -287,14 +292,15 @@ void gb_cartridge_scene_2_enter(void* context) {
         {
             model->cart_dump_rom_filename  = app->cart_dump_rom_filename;
             model->cart_dump_rom_extension = app->cart_dump_rom_extension;
+            model->total_rom =  app->rom_banks * 16 * 1024;
             // char *filename = strrchr(model->cart_dump_rom_filename_sequential, '/');
             // filename++;
             char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, app->cart_dump_rom_filename, model->cart_dump_rom_extension);
             model->cart_dump_rom_filename_sequential =  filename;
-            app->is_writing_rom = true;
              // Register callbacks to receive data
             uart_set_handle_rx_data_cb(app->uart, gameboy_rom_backup_handle_rx_data_cb); // setup callback for general log rx thread
             uart_set_handle_rx_data_cb(app->lp_uart, dump_handle_rx_data_cb); // setup callback for general log rx thread
+            app->is_writing_rom = true;
         },
         false);
    

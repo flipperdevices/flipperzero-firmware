@@ -78,14 +78,14 @@ static int32_t cartridge_writting_worker_thread(void* thread_context) {
 
     if (select_ram_file(app, file))
     {
-        const char gbcartridge_start_command[] = "gbcartridge -w -o -s\n";
+        const char gbcartridge_start_command[] = "gbcartridge -w -a -s\n";
         uart_tx((uint8_t *)gbcartridge_start_command, strlen(gbcartridge_start_command));
         furi_delay_ms(100);
         
         uint16_t ret = 0;
         do {
             ret = storage_file_read(file, buffer, sizeof(buffer) - 1);
-            lp_uart_tx((uint8_t *)buffer, sizeof(buffer));
+            // lp_uart_tx((uint8_t *)buffer, sizeof(buffer));
             // uart_tx((uint8_t *)buffer, sizeof(buffer))
 
             with_view_model(
@@ -99,7 +99,7 @@ static int32_t cartridge_writting_worker_thread(void* thread_context) {
             
         } while(ret > 0);
 
-        const char gbcartridge_end_command[] = "gbcartridge -w -o -e\n";
+        const char gbcartridge_end_command[] = "gbcartridge -w -a -e\n";
         uart_tx((uint8_t *)gbcartridge_end_command, strlen(gbcartridge_end_command));
         storage_file_free(file);
     }
@@ -228,7 +228,7 @@ bool gb_cartridge_scene_5_input(InputEvent *event, void *context)
                     GBCartridge *app = (GBCartridge *)instance->context;
                     // Unregister rx callback
                     uart_set_handle_rx_data_cb(app->uart, NULL);
-                    uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+                    // uart_set_handle_rx_data_cb(app->lp_uart, NULL);
                     instance->callback(GBCartridgeCustomEventScene5Back, instance->context);
                 },
                 true);

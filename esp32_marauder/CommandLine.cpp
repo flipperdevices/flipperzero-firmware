@@ -877,9 +877,23 @@ void CommandLine::runCommand(String input) {
               if (cont_sw == -1) {
                 gameboy_cartridge.headerROM_GB(true);
               } else {
-                //  RAM
-                //  TODO:
-                // Serial.println("RAM");
+                cont_sw = this->argSearch(&cmd_args, "-s");
+                if (cont_sw == -1) {
+                  cont_sw = this->argSearch(&cmd_args, "-e");
+                  if (cont_sw == -1) {
+                    // Serial.println("Error");
+                  } else {
+                    //  END WRITE
+                    gameboy_cartridge.endReadRAM_GB();
+                  }
+                } else {
+                  //  START WRITE
+                  //  https://github.com/sanni/cartreader/blob/6b0ded69c7f160e7171cfa40ed6c0b23606a4434/Cart_Reader/GB.ino#L88
+                  //  https://www.insidegadgets.com/2011/04/07/gbcartread-arduino-based-gameboy-cart-reader-%e2%80%93-part-3-write-to-ram/
+                  Serial.println("START RAM 1");
+                  gameboy_cartridge.startReadRAM_GB();
+                  Serial.println("START RAM 2");
+                }
               }
             } else {
               //  ROM
@@ -891,13 +905,15 @@ void CommandLine::runCommand(String input) {
                   // Serial.println("Error");
                 } else {
                   //  END WRITE
-                  gameboy_cartridge.endWriteRAM_GB();
+                  // gameboy_cartridge.endWriteRAM_GB();
                 }
               } else {
                 //  START WRITE
                 Serial.println("START ROM 1");
-                gameboy_cartridge.startWriteRAM_GB();
-                Serial.println("START ROM 2");
+                //  https://github.com/lesserkuma/FlashGBX/blob/c12b1de4dd66a8ec85bab1e0e70bf8661b4255fd/FlashGBX/hw_GBxCartRW.py#L1367
+                //  https://arduino.stackexchange.com/questions/63078/cannot-write-pin-low
+                //  https://www.insidegadgets.com/2017/01/22/gbxcartread-part-3-gba-eeprom-readwrite-flash-write-and-determining-sizes/
+                // gameboy_cartridge.startWriteRAM_GB();
               }
               // Serial.println("ROM");
             }

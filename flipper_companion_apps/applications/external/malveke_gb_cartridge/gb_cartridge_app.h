@@ -86,6 +86,10 @@ typedef struct {
     FuriThread* thread;
     bool is_writing_rom;
     bool is_writing_ram;
+
+    int rom_banks;
+    int ram_banks;
+
 } GBCartridge;
 
 

@@ -1,11 +1,6 @@
 #include "GameBoyCartridge.h"
 
 
-bool transferSRAMInProgress = false;
-uint8_t currentBank = 0;
-word currentRamAddress = 0xA000;
-uint8_t currentByte = 0;
-uint32_t processedProgressBar = 0;
 
 GameBoyCartridge::GameBoyCartridge()
 {
@@ -22,6 +17,7 @@ GameBoyCartridge::GameBoyCartridge()
     this->romEndAddress = 0x7FFF;
     this->sramBanks = 0;
     this->romType = 0;
+    this->currentBank = 0;
 }
 void GameBoyCartridge::begin()
 {
@@ -58,10 +54,10 @@ void GameBoyCartridge::start()
     {
         pinMode(DATA_GB_GBC_PINS[i], INPUT);
     }
-    for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS) / sizeof(DATA_GB_GBC_PINS[0]); i++)
-    {
-        pinMode(DATA_GB_GBC_PINS[i], HIGH);
-    }
+    // for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS) / sizeof(DATA_GB_GBC_PINS[0]); i++)
+    // {
+    //     pinMode(DATA_GB_GBC_PINS[i], HIGH);
+    // }
     delay(400);
 
     // RST to H
@@ -109,7 +105,8 @@ void GameBoyCartridge::gb_mode(void)
 }
 // Set the 16 bit address
 void GameBoyCartridge::set_address_GB(uint16_t address)
-{
+{   
+    // this->dataBusAsOutput();
     // Write each of the bits into the address pins
     for (uint32_t i = 0; i < sizeof(ADDRESS_GB_GBC_PINS) / sizeof(ADDRESS_GB_GBC_PINS[0]); i++)
     {
@@ -125,19 +122,26 @@ byte GameBoyCartridge::read_byte_GB(uint16_t address)
 
     asm volatile("nop"); // Delay a little (minimum is 2 nops, using 3 to be sure)
     asm volatile("nop");
-    asm volatile("nop");
-    asm volatile("nop");
+    // asm volatile("nop");
+    // asm volatile("nop");
 
     byte data = 0; // Read data
     for (int i = 0; i < 8; i++)
     {
         int raw_data = digitalRead(DATA_GB_GBC_PINS[i]);
         data |= raw_data << i;
+        // asm volatile("nop"); // Delay a little (minimum is 2 nops, using 3 to be sure)
+        // asm volatile("nop");
+        // asm volatile("nop");
+        // asm volatile("nop");
     }
     // Switch and RD to HIGH
     rdPin_high;
     cs_mreqPin_high;
-
+    // asm volatile("nop"); // Delay a little (minimum is 2 nops, using 3 to be sure)
+    // asm volatile("nop");
+    // asm volatile("nop");
+    // asm volatile("nop");
     return data;
 }
 void GameBoyCartridge::headerROM_GB(bool printInfo = true)
@@ -353,15 +357,15 @@ void GameBoyCartridge::headerROM_GB(bool printInfo = true)
     // M161 banks are double size and start with 0
     if (this->romType == 0x104)
     {
-        romStartBank = 0;
+        this->romStartBank = 0;
         this->romBanks >>= 1;
-        romEndAddress = 0x7FFF;
+        this->romEndAddress = 0x7FFF;
     }
     // MBC6 banks are half size
     else if (this->romType == 32)
     {
         this->romBanks <<= 1;
-        romEndAddress = 0x3FFF;
+        this->romEndAddress = 0x3FFF;
     }
     if (strcmp(checksumStr, "00") != 0)
     {
@@ -372,7 +376,7 @@ void GameBoyCartridge::headerROM_GB(bool printInfo = true)
         transferJSON["ramBanks"] = this->sramBanks;
         transferJSON["ramEndAddress"] = this->ramEndAddress;
         transferJSON["romBanks"] = this->romBanks;
-        transferJSON["romEndAddress"] = romEndAddress;
+        transferJSON["romEndAddress"] = this->romEndAddress;
         if (cartID[0] != 0)
         {
             transferJSON["serial"] = cartID;
@@ -618,10 +622,10 @@ void GameBoyCartridge::write_byte_GB(int address, byte data)
         pinMode(DATA_GB_GBC_PINS[i], INPUT);
     }
     // Enable pullups
-    for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS) / sizeof(DATA_GB_GBC_PINS[0]); i++)
-    {
-        pinMode(DATA_GB_GBC_PINS[i], HIGH);
-    }
+    // for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS) / sizeof(DATA_GB_GBC_PINS[0]); i++)
+    // {
+    //     pinMode(DATA_GB_GBC_PINS[i], HIGH);
+    // }
 }
 
 // Turn RD, WR, CS/MREQ and CS2 to high so they are deselected (reset state)
@@ -650,147 +654,198 @@ void GameBoyCartridge::rd_wr_mreq_off(void)
 void GameBoyCartridge::readROM_GB()
 {
     transferJSON.clear();
-    word romAddress = 0;
-    uint32_t processedProgressBar = 0;
-    uint32_t totalProgressBar = (uint32_t)(this->romBanks) * 16384;
+    this->romEndAddress = 0x7FFF;
+    this->romAddress = 0;
+    this->romStartBank = 0;
+    this->processedProgressBar = 0;
+    
+    // M161 banks are double size and start with 0
+    // if (this->romType == 0x104) {
+    //     this->romStartBank = 0;
+    //     this->romBanks >>= 1;
+    //     this->romEndAddress = 0x7FFF;
+    // }
+    // // MBC6 banks are half size
+    // else if (this->romType == 32) {
+    //     this->romBanks <<= 1;
+    //     this->romEndAddress = 0x3FFF;
+    // }
 
-    transferJSON["type"] = "rom";
-    transferJSON["total"] = totalProgressBar;
-    transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
-    transferJSON["romBanks"] = this->romBanks;
-    delay(200);
-    Serial.print("JSON:");
-    serializeJson(transferJSON, Serial);
-    Serial.println();
 
-    for (word currBank = romStartBank; currBank < this->romBanks; currBank++)
+    this->totalProgressBar = (uint32_t)(this->romBanks) * 16384;
+
+    // transferJSON["type"] = "rom";
+    // transferJSON["total"] = this->totalProgressBar ;
+    // transferJSON["progress"] = this->processedProgressBar * 100 / this->totalProgressBar ;
+    // transferJSON["romBanks"] = this->romBanks;
+    // delay(200);
+    // Serial.print("JSON:");
+    // serializeJson(transferJSON, Serial);
+    // Serial.println();
+
+
+    this->currentBank = this->romStartBank;
+
+    // this->writtingROM = true;
+    delay(400);
+    /*
+    for (byte bank = 0; bank < romBanks; bank++)
     {
-        // Second bank starts at 0x4000
-        if (currBank > 1)
+        // DumpROMBank(i);
+        word offset = 0;
+  
+        if (bank > 0)
         {
-            romAddress = 0x4000;
-            // MBC6 banks are half size
-            if (this->romType == 32)
+            offset = 0x4000;  
+            // SwitchROMBank(bank);
+            this->dataBusAsOutput();
+  
+            switch (this->romType)
             {
-                romEndAddress = 0x5FFF;
-            }
-        }
-
-        // Set ROM bank for M161
-        if (this->romType == 0x104)
-        {
-            romAddress = 0;
-            // Set CS2 to LOW
-            cs2Pin_low;
-            delay(50);
-            // Set CS2 to HIGH
-            cs2Pin_high;
-            this->write_byte_GB(0x4000, currBank & 0x7);
-        }
-
-        // Set ROM bank for MBC1M
-        else if (this->romType == 0x101 || this->romType == 0x103)
-        {
-            if (currBank < 10)
-            {
-                this->write_byte_GB(0x4000, currBank >> 4);
-                this->write_byte_GB(0x2000, (currBank & 0x1f));
-            }
-            else
-            {
-                this->write_byte_GB(0x4000, currBank >> 4);
-                this->write_byte_GB(0x2000, 0x10 | (currBank & 0x1f));
-            }
-        }
-
-        // Set ROM bank for MBC6
-        else if (this->romType == 32)
-        {
-            this->write_byte_GB(0x2800, 0);
-            this->write_byte_GB(0x3800, 0);
-            this->write_byte_GB(0x2000, currBank);
-            this->write_byte_GB(0x3000, currBank);
-        }
-
-        // Set ROM bank for TAMA5
-        else if (this->romType == 0xFD)
-        {
-            // writeByteSRAM_GB(0xA001, 0);
-            // writeByteSRAM_GB(0xA000, currBank & 0x0f);
-            // writeByteSRAM_GB(0xA001, 1);
-            // writeByteSRAM_GB(0xA000, (currBank >> 4) & 0x0f);
-        }
-
-        // Set ROM bank for MBC2/3/4/5
-        else if (this->romType >= 5)
-        {
-            if (this->romType >= 11 && this->romType <= 13)
-            {
-                if ((currBank & 0x1f) == 0)
+                case 0xFF:
                 {
-                    // reset MMM01
-                    cs2Pin_low;
-                    delay(50);
-                    cs2Pin_high;
-
-                    // remap to higher 4Mbits ROM
-                    this->write_byte_GB(0x3fff, 0x20);
-                    this->write_byte_GB(0x5fff, 0x40);
-                    this->write_byte_GB(0x7fff, 0x01);
-                    this->write_byte_GB(0x1fff, 0x3a);
-                    this->write_byte_GB(0x1fff, 0x7a);
-
-                    // for every 4Mbits ROM, restart from 0x0000
-                    romAddress = 0x0000;
-                    currBank++;
+                    this->write_byte_GB(0x2100, bank);
+                    break;
                 }
-                else
+                case 0x06:
+                case 0xFC:
                 {
-                    this->write_byte_GB(0x6000, 0);
-                    this->write_byte_GB(0x2000, (currBank & 0x1f));
+                    this->write_byte_GB(0x2100, bank);
+                    break;
+                }
+                case 0x1E:
+                {
+                    this->write_byte_GB(0x2100, bank);
+                    break;
                 }
             }
-            else
-            {
-                if ((this->romType >= 0x19 && this->romType <= 0x1E) && (currBank == 0 || currBank == 256))
-                {
-                    this->write_byte_GB(0x3000, (currBank >> 8) & 0xFF);
-                }
-                this->write_byte_GB(0x2100, currBank & 0xFF);
-            }
+            this->dataBusAsInput();
         }
-        // Set ROM bank for MBC1
-        else
+        
+        for (word address = 0; address < 0x4000; address++)
         {
-            this->write_byte_GB(0x6000, 0);
-            this->write_byte_GB(0x4000, currBank >> 5);
-            this->write_byte_GB(0x2000, currBank & 0x1F);
+            byte data = this->read_byte_GB(address + offset);
+            Serial.write(data);
         }
-
-        // Read banks and save to SD
-        while (romAddress <= romEndAddress)
-        {
-            uint8_t* logBuffer = nullptr;
-            for (int i = 0; i < 512; i++)
-            {
-                sdBuffer[i] = this->read_byte_GB(romAddress + i);
-                logBuffer[0] = this->read_byte_GB(romAddress + i);
-                // buffer_obj.addPacket(logBuffer, 1);
-            }
-            // Serial1.write(sdBuffer, 512);
-            
-            romAddress += 512;
-            processedProgressBar += 512;
-        }
+        
     }
-    transferJSON["type"] = "success";
-    transferJSON["total"] = totalProgressBar;
-    transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
-    transferJSON["romBanks"] = this->romBanks;
-    delay(200);
-    Serial.print("JSON:");
-    serializeJson(transferJSON, Serial);
-    Serial.println();
+    */
+    
+   
+    word romAddress = 0;
+    word romEndAddress;
+    uint32_t processedProgressBar = 0;
+  uint32_t totalProgressBar = (uint32_t)(this->romBanks)*16384;
+    for (word currBank = romStartBank; currBank < romBanks; currBank++) {
+    // Second bank starts at 0x4000
+    if (currBank > 1) {
+      romAddress = 0x4000;
+
+      // MBC6 banks are half size
+      if (this->romType == 32) {
+        romEndAddress = 0x5FFF;
+      }
+    }
+
+    // Set ROM bank for M161
+    if (this->romType == 0x104) {
+      romAddress = 0;
+      // Set CS2(PH0) to LOW
+      // PORTH &= ~(1 << 0);
+      cs2Pin_low;
+      delay(50);
+      // Set CS2(PH0) to HIGH
+      // PORTH |= (1 << 0);
+      cs2Pin_high;
+      this->write_byte_GB(0x4000, currBank & 0x7);
+    }
+
+    // Set ROM bank for MBC1M
+    else if (this->romType == 0x101 || this->romType == 0x103) {
+      if (currBank < 10) {
+        this->write_byte_GB(0x4000, currBank >> 4);
+        this->write_byte_GB(0x2000, (currBank & 0x1f));
+      } else {
+        this->write_byte_GB(0x4000, currBank >> 4);
+        this->write_byte_GB(0x2000, 0x10 | (currBank & 0x1f));
+      }
+    }
+
+    // Set ROM bank for MBC6
+    else if (this->romType == 32) {
+      this->write_byte_GB(0x2800, 0);
+      this->write_byte_GB(0x3800, 0);
+      this->write_byte_GB(0x2000, currBank);
+      this->write_byte_GB(0x3000, currBank);
+    }
+
+    // Set ROM bank for TAMA5
+    else if (this->romType == 0xFD) {
+      // writeByteSRAM_GB(0xA001, 0);
+      // writeByteSRAM_GB(0xA000, currBank & 0x0f);
+      // writeByteSRAM_GB(0xA001, 1);
+      // writeByteSRAM_GB(0xA000, (currBank >> 4) & 0x0f);
+    }
+
+    // Set ROM bank for MBC2/3/4/5
+    else if (this->romType >= 5) {
+      if (this->romType >= 11 && this->romType <= 13) {
+        if ((currBank & 0x1f) == 0) {
+          // reset MMM01
+          // PORTH &= ~(1 << 0);
+          cs2Pin_low;
+          delay(50);
+          // PORTH |= (1 << 0);
+          cs2Pin_high;
+
+          // remap to higher 4Mbits ROM
+          this->write_byte_GB(0x3fff, 0x20);
+          this->write_byte_GB(0x5fff, 0x40);
+          this->write_byte_GB(0x7fff, 0x01);
+          this->write_byte_GB(0x1fff, 0x3a);
+          this->write_byte_GB(0x1fff, 0x7a);
+
+          // for every 4Mbits ROM, restart from 0x0000
+          romAddress = 0x0000;
+          currBank++;
+        } else {
+          this->write_byte_GB(0x6000, 0);
+          this->write_byte_GB(0x2000, (currBank & 0x1f));
+        }
+      } else {
+        if ((this->romType >= 0x19 && this->romType <= 0x1E) && (currBank == 0 || currBank == 256)) {
+          this->write_byte_GB(0x3000, (currBank >> 8) & 0xFF);
+        }
+        this->write_byte_GB(0x2100, currBank & 0xFF);
+      }
+    }
+    // Set ROM bank for MBC1
+    else {
+      this->write_byte_GB(0x6000, 0);
+      this->write_byte_GB(0x4000, currBank >> 5);
+      this->write_byte_GB(0x2000, currBank & 0x1F);
+    }
+    
+    // Read banks and save to SD
+    while (romAddress <= romEndAddress) {
+      for (int i = 0; i < 512; i++) {
+        char hexbuffer[3]; // Se reserva espacio para almacenar el valor hexadecimal y el carácter nulo
+        sdBuffer[i] = this->read_byte_GB(romAddress + i);
+        
+      }
+      Serial.write(sdBuffer, 512);
+      romAddress += 512;
+      processedProgressBar += 512;
+      //transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
+
+      //Serial.print("JSON:");
+      //serializeJson(transferJSON, Serial);
+      //Serial.println();
+      // Serial.print(processedProgressBar * 100 / totalProgressBar );
+      // Serial.println("%");
+    }
+    
+  }
 }
 
 byte GameBoyCartridge::readByteSRAM_GB(uint16_t myAddress)
@@ -851,12 +906,12 @@ void GameBoyCartridge::readSRAM_GB()
 {
     transferJSON.clear();
     // Initialize progress bar
-    uint32_t processedProgressBar = 0;
-    uint32_t totalProgressBar = (uint32_t)(this->sramBanks) * 8192;
+    this->processedProgressBar = 0;
+    this->totalProgressBar  = (uint32_t)(this->sramBanks) * 8192;
 
     transferJSON["type"] = "ram";
-    transferJSON["total"] = totalProgressBar;
-    transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
+    transferJSON["total"] = this->totalProgressBar;
+    transferJSON["progress"] = this->processedProgressBar * 100 / this->totalProgressBar;
     transferJSON["ramBanks"] = this->sramBanks;
     transferJSON["lastByte"] = this->ramEndAddress;
     
@@ -956,7 +1011,7 @@ bool GameBoyCartridge::isWrittingRAM()
 }
 void GameBoyCartridge::setup()
 {
-    buffer_obj = Buffer();
+    // buffer_obj = Buffer();
     this->writtingRAM = false;
     this->writtingROM = false;
     this->lastByte = 0;
@@ -969,60 +1024,354 @@ void GameBoyCartridge::setup()
     this->romEndAddress = 0x7FFF;
     this->sramBanks = 0;
     this->romType = 0;
-
-
-    currentBank = 0;
-    currentRamAddress = 0xA000;
-    currentByte = 0;
+    this->currentBank = 0;
 }
 void GameBoyCartridge::main()
 {
     if (this->isWrittingRAM())
     {
-        // if (!transferSRAMInProgress) {
-            if (currentBank < this->sramBanks) {
-                this->write_byte_GB(0x4000, currentBank);
-                // Read RAM
-                for (word ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress += 64)
+        if (this->currentBank < this->sramBanks) {
+            this->write_byte_GB(0x4000, this->currentBank);
+            // Read RAM
+            for (word ramAddress = 0xA000; ramAddress <= this->ramEndAddress; ramAddress += 64)
+            {
+                uint8_t readData[64];
+                for (uint8_t i = 0; i < 64; i++)
                 {
-                    uint8_t readData[64];
-                    for (uint8_t i = 0; i < 64; i++)
-                    {
-                        readData[i] = this->readByteSRAM_GB(ramAddress + i);
-                        
-                    }
-                    // buffer_obj.addPacket(readData, 64);
-                    // buffer_obj.forceSaveSerial();
-                    Serial1.write(readData, 64); // Send the 64 byte chunk
-                    Serial1.flush();
-                    processedProgressBar += 64;
+                    readData[i] = this->readByteSRAM_GB(ramAddress + i);
+                    
                 }
-                currentBank++;
-            } else {
-                 // Disable RAM
-                this->write_byte_GB(0x0000, 0x00);
-                delay(50);
-                uint32_t totalProgressBar = (uint32_t)(this->sramBanks) * 8192;
-                transferJSON["type"] = "success";
-                transferJSON["total"] = totalProgressBar;
-                transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
-                transferJSON["ramBanks"] = this->sramBanks;
-
-                delay(200);
-                Serial.print("JSON:");
-                serializeJson(transferJSON, Serial);
-                Serial.println();
-                // La transferencia de SRAM está completa
-                // Resto del código del bucle principal
-                // ...
-                transferSRAMInProgress = false;
-                this->writtingRAM = false;
-
-                this->rd_wr_mreq_off();
+                Serial1.write(readData, 64); // Send the 64 byte chunk
+                Serial1.flush();
+                this->processedProgressBar += 64;
             }
-        // }
-    }
+            this->currentBank++;
+        } else {
+                // Disable RAM
+            this->write_byte_GB(0x0000, 0x00);
+            delay(50);
+            this->totalProgressBar = (uint32_t)(this->sramBanks) * 8192;
+            transferJSON["type"] = "success";
+            transferJSON["total"] = this->totalProgressBar;
+            transferJSON["progress"] = this->processedProgressBar * 100 / this->totalProgressBar;
+            transferJSON["ramBanks"] = this->sramBanks;
+
+            delay(200);
+            Serial.print("JSON:");
+            serializeJson(transferJSON, Serial);
+            Serial.println();
+            this->writtingRAM = false;
+
+            this->rd_wr_mreq_off();
+        }
+    } 
     else if (this->isWrittingROM())
     {
+        if (this->currentBank < this->romBanks) {
+            /*
+            // Second bank starts at 0x4000
+            if (this->currentBank > 0)
+            {
+                this->romAddress = 0x4000;
+                this->dataBusAsOutput();
+                if ((this->romType == 1) || (this->romType == 2) || (this->romType == 3)) {
+                    //  MBC_1
+                    this->write_byte_GB(0x2100, this->currentBank);
+                } else if (((this->romType == 5) || (this->romType == 6)) || ((this->romType == 15) || (this->romType == 16) || (this->romType == 17) || (this->romType == 18) || (this->romType == 19))) {
+                    //  MBC_2 MBC_3
+                    this->write_byte_GB(0x2100, this->currentBank);
+                } else if ((this->romType == 25) || (this->romType == 26) || (this->romType == 27) || (this->romType == 28) || (this->romType == 29) || (this->romType == 309)) {
+                    //  MBC_5
+                    this->write_byte_GB(0x2100, this->currentBank);
+                }
+                this->dataBusAsInput();
+                // // MBC6 banks are half size
+                // if (this->romType == 32)
+                // {
+                //     this->romEndAddress = 0x5FFF;
+                // }
+            }
+            transferJSON.clear();
+            transferJSON["type"] = "transfer";
+            transferJSON["offset"] =this->romAddress;
+            JsonArray chunkArray = transferJSON.createNestedArray("chunk");
+            for (word address = 0; address < 0x4000; address++) {
+                byte data = this->read_byte_GB(address + this->romAddress);
+                chunkArray.add(data);
+                this->processedProgressBar++;
+                // Serial1.write(data);
+            }
+            transferJSON["transfered"] = this->processedProgressBar;
+            Serial.print("JSON:");
+            serializeJson(transferJSON, Serial);
+            Serial.println();
+            // Serial1.flush();
+
+            // // Set ROM bank for M161
+            // if (this->romType == 0x104)
+            // {
+            //     this->romAddress = 0;
+            //     // Set CS2 to LOW
+            //     cs2Pin_low;
+            //     delay(50);
+            //     // Set CS2 to HIGH
+            //     cs2Pin_high;
+            //     this->write_byte_GB(0x4000, this->currentBank & 0x7);
+            // }
+
+            // // Set ROM bank for MBC1M
+            // else if (this->romType == 0x101 || this->romType == 0x103)
+            // {
+            //     if (this->currentBank < 10)
+            //     {
+            //         this->write_byte_GB(0x4000, this->currentBank >> 4);
+            //         this->write_byte_GB(0x2000, (this->currentBank & 0x1f));
+            //     }
+            //     else
+            //     {
+            //         this->write_byte_GB(0x4000, this->currentBank >> 4);
+            //         this->write_byte_GB(0x2000, 0x10 | (this->currentBank & 0x1f));
+            //     }
+            // }
+
+            // // Set ROM bank for MBC6
+            // else if (this->romType == 32)
+            // {
+            //     this->write_byte_GB(0x2800, 0);
+            //     this->write_byte_GB(0x3800, 0);
+            //     this->write_byte_GB(0x2000, this->currentBank);
+            //     this->write_byte_GB(0x3000, this->currentBank);
+            // }
+
+            // // Set ROM bank for TAMA5
+            // else if (this->romType == 0xFD)
+            // {
+            //     //  TODO:
+            //     // this->write_byte_SRAM_GB(0xA001, 0);
+            //     // this->write_byte_SRAM_GB(0xA000, this->currentBank & 0x0f);
+            //     // this->write_byte_SRAM_GB(0xA001, 1);
+            //     // this->write_byte_SRAM_GB(0xA000, (this->currentBank >> 4) & 0x0f);
+            // }
+
+            // // Set ROM bank for MBC2/3/4/5
+            // else if (this->romType >= 5)
+            // {
+            //     if (this->romType >= 11 && this->romType <= 13)
+            //     {
+            //         if ((this->currentBank & 0x1f) == 0)
+            //         {
+            //             // reset MMM01
+            //             cs2Pin_low;
+            //             delay(50);
+            //             cs2Pin_high;
+
+            //             // remap to higher 4Mbits ROM
+            //             this->write_byte_GB(0x3fff, 0x20);
+            //             this->write_byte_GB(0x5fff, 0x40);
+            //             this->write_byte_GB(0x7fff, 0x01);
+            //             this->write_byte_GB(0x1fff, 0x3a);
+            //             this->write_byte_GB(0x1fff, 0x7a);
+
+            //             // for every 4Mbits ROM, restart from 0x0000
+            //             this->romAddress = 0x0000;
+            //             this->currentBank++;
+            //         }
+            //         else
+            //         {
+            //             this->write_byte_GB(0x6000, 0);
+            //             this->write_byte_GB(0x2000, (this->currentBank & 0x1f));
+            //         }
+            //     }
+            //     else
+            //     {
+            //         if ((this->romType >= 0x19 && this->romType <= 0x1E) && (this->currentBank == 0 || this->currentBank == 256))
+            //         {
+            //             this->write_byte_GB(0x3000, (this->currentBank >> 8) & 0xFF);
+            //         }
+            //         this->write_byte_GB(0x2100, this->currentBank & 0xFF);
+            //     }
+            // }
+            // // Set ROM bank for MBC1
+            // else
+            // {
+            //     this->write_byte_GB(0x6000, 0);
+            //     this->write_byte_GB(0x4000, this->currentBank >> 5);
+            //     this->write_byte_GB(0x2000, this->currentBank & 0x1F);
+            // }
+            
+            // Read banks and save to SD
+            // while (this->romAddress <= this->romEndAddress) {
+            //     for (int i = 0; i < 512; i++)
+            //     {
+            //         sdBuffer[i] = this->read_byte_GB(this->romAddress + i);
+            //     }
+            //     Serial1.write(sdBuffer, 512);
+            //     Serial1.flush();
+            //     this->romAddress += 512;
+            //     this->processedProgressBar += 512;
+            // }
+
+            // transferJSON["type"] = "progress";
+            // transferJSON["total"] = this->totalProgressBar;
+            // transferJSON["transfered"] = this->processedProgressBar;
+            
+            // transferJSON["progress"] = this->processedProgressBar * 100 / this->totalProgressBar;
+            // transferJSON["romBanks"] = this->romBanks;
+            // Serial.print("JSON:");
+            // serializeJson(transferJSON, Serial);
+            // Serial.println();
+            // transferJSON.clear();
+            
+            // delay(1000);
+            // __asm__("nop\n\t"
+            //         "nop\n\t"
+            //         "nop\n\t"
+            //         "nop\n\t");
+            */
+           // Second bank starts at 0x4000
+            if (this->currentBank > 1)
+            {
+                this->romAddress = 0x4000;
+                // MBC6 banks are half size
+                if (this->romType == 32)
+                {
+                    this->romEndAddress = 0x5FFF;
+                }
+            }
+
+            // Set ROM bank for M161
+            if (this->romType == 0x104)
+            {
+                this->romAddress = 0;
+                // Set CS2 to LOW
+                cs2Pin_low;
+                delay(50);
+                // Set CS2 to HIGH
+                cs2Pin_high;
+                this->write_byte_GB(0x4000, this->currentBank & 0x7);
+            }
+
+            // Set ROM bank for MBC1M
+            else if (this->romType == 0x101 || this->romType == 0x103)
+            {
+                if (this->currentBank < 10)
+                {
+                    this->write_byte_GB(0x4000, this->currentBank >> 4);
+                    this->write_byte_GB(0x2000, (this->currentBank & 0x1f));
+                }
+                else
+                {
+                    this->write_byte_GB(0x4000, this->currentBank >> 4);
+                    this->write_byte_GB(0x2000, 0x10 | (this->currentBank & 0x1f));
+                }
+            }
+
+            // Set ROM bank for MBC6
+            else if (this->romType == 32)
+            {
+                this->write_byte_GB(0x2800, 0);
+                this->write_byte_GB(0x3800, 0);
+                this->write_byte_GB(0x2000, this->currentBank);
+                this->write_byte_GB(0x3000, this->currentBank);
+            }
+
+            // Set ROM bank for TAMA5
+            else if (this->romType == 0xFD)
+            {
+                //  TODO:
+                // this->write_byte_SRAM_GB(0xA001, 0);
+                // this->write_byte_SRAM_GB(0xA000, this->currentBank & 0x0f);
+                // this->write_byte_SRAM_GB(0xA001, 1);
+                // this->write_byte_SRAM_GB(0xA000, (this->currentBank >> 4) & 0x0f);
+            }
+
+            // Set ROM bank for MBC2/3/4/5
+            else if (this->romType >= 5)
+            {
+                if (this->romType >= 11 && this->romType <= 13)
+                {
+                    if ((this->currentBank & 0x1f) == 0)
+                    {
+                        // reset MMM01
+                        cs2Pin_low;
+                        delay(50);
+                        cs2Pin_high;
+
+                        // remap to higher 4Mbits ROM
+                        this->write_byte_GB(0x3fff, 0x20);
+                        this->write_byte_GB(0x5fff, 0x40);
+                        this->write_byte_GB(0x7fff, 0x01);
+                        this->write_byte_GB(0x1fff, 0x3a);
+                        this->write_byte_GB(0x1fff, 0x7a);
+
+                        // for every 4Mbits ROM, restart from 0x0000
+                        this->romAddress = 0x0000;
+                        this->currentBank++;
+                    }
+                    else
+                    {
+                        this->write_byte_GB(0x6000, 0);
+                        this->write_byte_GB(0x2000, (this->currentBank & 0x1f));
+                    }
+                }
+                else
+                {
+                    if ((this->romType >= 0x19 && this->romType <= 0x1E) && (this->currentBank == 0 || this->currentBank == 256))
+                    {
+                        this->write_byte_GB(0x3000, (this->currentBank >> 8) & 0xFF);
+                    }
+                    this->write_byte_GB(0x2100, this->currentBank & 0xFF);
+                }
+            }
+            // Set ROM bank for MBC1
+            else
+            {
+                this->write_byte_GB(0x6000, 0);
+                this->write_byte_GB(0x4000, this->currentBank >> 5);
+                this->write_byte_GB(0x2000, this->currentBank & 0x1F);
+            }
+            
+            // Read banks and save to SD
+            while (this->romAddress <= this->romEndAddress) {
+                // transferJSON.clear();
+                // transferJSON["type"] = "transfer";
+                // transferJSON["offset"] = this->romAddress;
+                // JsonArray chunkArray = transferJSON.createNestedArray("chunk");
+                for (int i = 0; i < 512; i++)
+                {
+                    sdBuffer[i] = this->read_byte_GB(this->romAddress + i);
+                    // chunkArray.add(this->read_byte_GB(this->romAddress + i));
+                }
+                // uint8_t read_byte = this->read_byte_GB(this->romAddress);
+                // Serial1.write(sdBuffer, 512);
+                Serial.write(sdBuffer, 512);
+                Serial.flush();
+                this->romAddress += 1;
+                this->processedProgressBar += 1;
+
+                
+                // transferJSON["transfered"] = this->processedProgressBar;
+                // Serial.print("JSON:");
+                // serializeJson(transferJSON, Serial);
+                // Serial.println();
+                
+                
+                    
+               
+            }
+            this->currentBank++;
+        } else {
+            transferJSON.clear();
+            transferJSON["type"] = "success";
+            transferJSON["total"] = this->totalProgressBar;
+            transferJSON["transfered"] = this->processedProgressBar;
+            transferJSON["progress"] = this->processedProgressBar * 100 / this->totalProgressBar;
+            transferJSON["romBanks"] = this->romBanks;
+            delay(200);
+            Serial.print("JSON:");
+            serializeJson(transferJSON, Serial);
+            Serial.println();
+            this->writtingROM = false;
+        }
     }
 }
