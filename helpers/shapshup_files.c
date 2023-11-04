@@ -1,19 +1,4 @@
-#include <stdio.h>
-#include <stddef.h>
-#include <stdbool.h>
 #include <inttypes.h>
-//#include "../../../lib/toolbox/path.h"
-//#include "../../../lib/toolbox/stream/stream.h"
-//#include "../../../furi/core/string.h"
-//#include "../../../furi/furi.h"
-//#include "../../../lib/flipper_format/flipper_format_stream_i.h"
-//#include "../../../applications/services/storage/storage.h"
-//#include "../../../furi/core/check.h"
-//#include "../../../furi/core/record.h"
-//#include "../../../lib/flipper_format/flipper_format.h"
-//#include "../../../furi/core/log.h"
-//#include "../../../lib/flipper_format/flipper_format_i.h"
-//#include "../../../lib/subghz/types.h"
 #include "shapshup_files.h"
 
 #define TAG "ShapShupFiles"

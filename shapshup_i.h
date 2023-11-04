@@ -9,9 +9,6 @@
 #include <notification/notification_messages.h>
 #include <string.h>
 
-#include <lib/toolbox/stream/stream.h>
-#include <stream_buffer.h>
-
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/view_stack.h>
@@ -29,6 +26,8 @@
 #include <lib/subghz/environment.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+
+#include <lib/toolbox/stream/stream.h>
 
 #include "shapshup.h"
 #include "scenes/shapshup_scene.h"
@@ -49,6 +48,7 @@ typedef enum {
     ShapShupViewTextInput,
     ShapShupViewDialogEx,
     ShapShupViewPopup,
+    ShapShupViewLoading,
     ShapShupViewWidget,
     ShapShupViewStack,
 } ShapShupView;

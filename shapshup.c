@@ -76,6 +76,11 @@ ShapShupState* shapshup_alloc() {
     view_dispatcher_add_view(
         instance->view_dispatcher, ShapShupViewPopup, popup_get_view(instance->popup));
 
+    // Loading
+    instance->loading = loading_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher, ShapShupViewLoading, loading_get_view(instance->loading));
+
     // ViewStack
     instance->view_stack = view_stack_alloc();
     view_dispatcher_add_view(
@@ -121,6 +126,10 @@ void shapshup_free(ShapShupState* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, ShapShupViewPopup);
     popup_free(instance->popup);
 
+    // Loading
+    view_dispatcher_remove_view(instance->view_dispatcher, ShapShupViewLoading);
+    loading_free(instance->loading);
+
     // ViewStack
     view_dispatcher_remove_view(instance->view_dispatcher, ShapShupViewStack);
     view_stack_free(instance->view_stack);
@@ -150,19 +159,16 @@ void shapshup_free(ShapShupState* instance) {
 }
 
 void shapshup_show_loading_popup(void* context, bool show) {
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+    furi_assert(context);
     ShapShupState* instance = context;
-    ViewStack* view_stack = instance->view_stack;
-    Loading* loading = instance->loading;
 
     if(show) {
         // Raise timer priority so that animations can play
-        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
-        view_stack_add_view(view_stack, loading_get_view(loading));
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
+        view_dispatcher_switch_to_view(instance->view_dispatcher, ShapShupViewPopup);
     } else {
-        view_stack_remove_view(view_stack, loading_get_view(loading));
         // Restore default timer priority
-        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
 }
 
@@ -181,7 +187,7 @@ void shapshup_popup_closed_callback(void* context) {
 }
 
 // ENTRYPOINT
-__attribute__((unused)) int32_t shapshup_app(void* p) {
+int32_t shapshup_app(void* p) {
     UNUSED(p);
 
     ShapShupState* instance = shapshup_alloc();
