@@ -34,7 +34,7 @@ void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart, uint8_t slot) {
     }
     powered[slot] = true;
 
-    FURI_LOG_D(TAG, "Sending Power On (%d)", slot);
+    //FURI_LOG_D(TAG, "Sending Power On (%d)", slot);
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -56,7 +56,7 @@ void seader_ccid_check_for_sam(SeaderUartBridge* seader_uart) {
 }
 
 void seader_ccid_GetSlotStatus(SeaderUartBridge* seader_uart, uint8_t slot) {
-    FURI_LOG_D(TAG, "seader_ccid_GetSlotStatus(%d)", slot);
+    //FURI_LOG_D(TAG, "seader_ccid_GetSlotStatus(%d)", slot);
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -150,7 +150,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 // No change, no-op
                 break;
             case CARD_IN_1:
-                FURI_LOG_D(TAG, "Card Inserted (0)");
+                //FURI_LOG_D(TAG, "Card Inserted (0)");
                 if(hasSAM && sam_slot == 0) {
                     break;
                 }
@@ -159,15 +159,13 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 seader_ccid_IccPowerOn(seader_uart, 0);
                 break;
             case CARD_OUT_1:
-                FURI_LOG_D(TAG, "Card Removed (0)");
+                // FURI_LOG_D(TAG, "Card Removed (0)");
                 if(hasSAM && sam_slot == 0) {
                     powered[0] = false;
                     hasSAM = false;
                     retries = 3;
                 }
                 break;
-            default:
-                FURI_LOG_D(TAG, "Unknown slot 0 card event");
             };
 
             switch(cmd[1] & SLOT_1_MASK) {
@@ -176,7 +174,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 // No change, no-op
                 break;
             case CARD_IN_2:
-                FURI_LOG_D(TAG, "Card Inserted (1)");
+                // FURI_LOG_D(TAG, "Card Inserted (1)");
                 if(hasSAM && sam_slot == 1) {
                     break;
                 }
@@ -185,15 +183,13 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 seader_ccid_IccPowerOn(seader_uart, 1);
                 break;
             case CARD_OUT_2:
-                FURI_LOG_D(TAG, "Card Removed (1)");
+                // FURI_LOG_D(TAG, "Card Removed (1)");
                 if(hasSAM && sam_slot == 1) {
                     powered[1] = false;
                     hasSAM = false;
                     retries = 3;
                 }
                 break;
-            default:
-                FURI_LOG_D(TAG, "Unknown slot 1 card event");
             };
 
             return 2;
@@ -236,6 +232,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
         message.consumed += 2 + 10 + message.dwLength + 1;
 
         if(message.dwLength == 0) {
+          /*
             FURI_LOG_D(
                 TAG,
                 "CCID [%d|%d] type: %02x, status: %02x, error: %02x",
@@ -244,7 +241,9 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 message.bMessageType,
                 message.bStatus,
                 message.bError);
+                */
         } else {
+          /*
             FURI_LOG_D(
                 TAG,
                 "CCID [%d|%d] %ld: %s",
@@ -252,6 +251,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 message.bSeq,
                 message.dwLength,
                 display);
+                */
         }
 
         //0306 81 00000000 0000 0200 01 87
