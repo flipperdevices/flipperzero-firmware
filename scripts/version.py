@@ -45,7 +45,8 @@ class GitVersion:
                 int(os.environ["SOURCE_DATE_EPOCH"])
             )
         else:
-            if os.name == 'nt':
+            dateSettings = self._exec_git("config --get log.date").strip()
+            if dateSettings == "local":
                 commit_date = datetime.strptime(
                     self._exec_git("log -1 --format=%cd").strip(),
                     "%a %b %d %H:%M:%S %Y",
@@ -55,7 +56,6 @@ class GitVersion:
                     self._exec_git("log -1 --format=%cd").strip(),
                     "%a %b %d %H:%M:%S %Y %z",
                 )
-
         return {
             "GIT_COMMIT": commit,
             "GIT_BRANCH": branch,
