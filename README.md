@@ -1,7 +1,6 @@
 <p>
   <h1 align="center"><b><a href='https://rogue-master.net'><img src="https://rogue-master.net/img/rmlogo.png" width="40%"></a></b></h1>
 </p>
-
 <h1 align="center"><a href='https://discord.gg/gF2bBUzAFe' target='_blank'><img src='https://rogue-master.net/img/Discord.png' alt='Discord' title='Discord'></a>
 &nbsp;<a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases/latest' target='_blank'><img src='https://rogue-master.net/img/Github.png' alt='Firmware GitHub' title='Firmware GitHub'></a>
 &nbsp;<a href='https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release' target='_blank'><img src='https://rogue-master.net/img/Patreon.png' alt='Latest PATREON Release' title='Latest PATREON Release'></a>
@@ -9,11 +8,10 @@
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
 # [Support Me On Patreon to get the best assets updated frequently!](https://www.patreon.com/RogueMaster)
-
 ## [This repo is an improved fork of the OG Evil Portal app by bigbrodude6119!](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
-
 - I have made some changes to file names and accepted some PRs that were open.
 - Also gave it a more descriptive application.fam file.
+- [Fixed to compile on 0.94.1 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-evil-portal/commit/85df877fc6841db1d67adf3d0d4e822412da468f)
 
 # Flipper Zero Evil Portal
 
