@@ -15,13 +15,13 @@
 
 #define SEADER_POLLER_MAX_FWT (200000U)
 #define SEADER_POLLER_MAX_BUFFER_SIZE (64U)
-#define SEADER_MQ_TIMEOUT FuriWaitForever
 
 struct SeaderWorker {
     FuriThread* thread;
     Storage* storage;
     uint8_t sam_version[2];
     FuriMessageQueue* messages;
+    FuriMutex* mq_mutex;
 
     SeaderUartBridge* uart;
     SeaderCredential* credential;
