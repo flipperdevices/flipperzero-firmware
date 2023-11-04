@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "xremote_control.h": "c",
+        "xremote_learn.h": "c",
+        "xremote_settings.h": "c",
+        "xremote_common_view.h": "c",
+        "xremote_app.h": "c",
+        "xremote_saved_view.h": "c",
+        "infrared_remote.h": "c",
+        "xremote_navigation_view.h": "c",
+        "xremote_settings_view.h": "c",
+        "xremote_learn_view.h": "c",
+        "system_error": "c",
+        "typeinfo": "c",
+        "xremote_analyzer.h": "c"
+    }
+}
