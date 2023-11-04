@@ -45,10 +45,16 @@ class GitVersion:
                 int(os.environ["SOURCE_DATE_EPOCH"])
             )
         else:
-            commit_date = datetime.strptime(
-                self._exec_git("log -1 --format=%cd").strip(),
-                "%a %b %d %H:%M:%S %Y %z",
-            )
+            if os.name == 'nt':
+                commit_date = datetime.strptime(
+                    self._exec_git("log -1 --format=%cd").strip(),
+                    "%a %b %d %H:%M:%S %Y",
+                )
+            else:
+                commit_date = datetime.strptime(
+                    self._exec_git("log -1 --format=%cd").strip(),
+                    "%a %b %d %H:%M:%S %Y %z",
+                )
 
         return {
             "GIT_COMMIT": commit,
