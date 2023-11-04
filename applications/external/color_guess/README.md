@@ -1,36 +1,32 @@
-# Leed's Flipper Zero Applications
+# Flipper Zero Color Guessing Game
+ <div style="text-align:center">
+ <img src="assets/flipper_logo_orange.png"/>
+ <img src="assets/preview.jpg" />
+ </div>
 
- <div style="text-align:center"><img src="Misc/ledpulser/assets/flipper_logo_orange.png"/></div>
+## What this is?
+As a web developer I enjoy guessing colours by HEX Code. This game is targeted at other Devs and graphic designers<br>
+that also enjoy this. 
+<br><br>
 
-## What Apps do I have here 
+### Mode 1
+The LED will display a color and you must try and guess it by adjusting the HEX values on the screen. A timer will show<br>
+how fast you were. Three levels of difficulty are available. Vibro hints given to help you find the solution. 
 
-## Tools
-- Cross Remote: An app to chain Infrared and SubGhz commands and run them with on click<br>
-(in Development)
+### Mode 2
+You can define a color using the HEX code on-screen and the LED will display this color
 
-## Games
-- Color Guess: For designers/webworkers. Guess the HEX value of the color shown on the LED light<br>
-
-## Misc (Stuff I did to learn from)
-- Orgamotron: Added new vibro modes to the app orginally developed by qqmajikpp<br>
-- Ledpulser: Runs pulse animations on the LED light<br>
 
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware<br>
 - Plug your Flipper Zero in via USB. <br>
-- Copy the contents of the application folder into the applications_user folder of your firmware. <br> 
+- Copy the contents of this folder into the applications_user folder of your firmware. <br> 
 
 Then run the command: 
  ```
-.\fbt launch_app APPSRC=applications_user/<application name>
+.\fbt launch_app APPSRC=applications_user/color_guess
  ```
 The application will be compiled and copied onto your device. 
 
-## Documentation / Tutorials
-<a href="Tutorials">Documentation</a>
-
 ## Licensing
 This code is open-source and may be used for whatever you want to do with it. 
-
-## Source
-[https://github.com/leedave/Leeds-Flipper-Zero-Applications]
