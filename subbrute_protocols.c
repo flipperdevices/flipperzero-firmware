@@ -1,6 +1,5 @@
 #include "subbrute_protocols.h"
 #include "math.h"
-#include <string.h>
 
 #define TAG "SubBruteProtocols"
 
@@ -573,7 +572,7 @@ SubBruteFileProtocol subbrute_protocol_file_protocol_name(FuriString* name) {
 void subbrute_protocol_create_candidate_for_existing_file(
     FuriString* candidate,
     uint64_t step,
-    uint8_t bit_index,
+    size_t bit_index,
     uint64_t file_key,
     bool two_bytes) {
     uint8_t p[8];
@@ -584,7 +583,7 @@ void subbrute_protocol_create_candidate_for_existing_file(
     uint8_t high_byte = (step >> 8) & 0xff;
 
     size_t size = sizeof(uint64_t);
-    for(uint8_t i = 0; i < size; i++) {
+    for(size_t i = 0; i < size; i++) {
         if(i == bit_index - 1 && two_bytes) {
             furi_string_cat_printf(candidate, "%02X %02X", high_byte, low_byte);
             i++;
@@ -619,7 +618,7 @@ void subbrute_protocol_create_candidate_for_default(
         uint64_t total = 0;
         for(size_t j = 0; j < 8; j++) {
             total |= lut[step % 3] << (2 * j);
-            double sub_step = step / 3;
+            double sub_step = (double)step / 3;
             step = (uint64_t)floor(sub_step);
         }
         total <<= 9;
@@ -636,7 +635,7 @@ void subbrute_protocol_create_candidate_for_default(
         uint64_t total = 0;
         for(size_t j = 0; j < 8; j++) {
             total |= lut[step % 3] << (2 * j);
-            double sub_step = step / 3;
+            double sub_step = (double)step / 3;
             step = (uint64_t)floor(sub_step);
         }
         total <<= 9;
@@ -655,7 +654,7 @@ void subbrute_protocol_create_candidate_for_default(
         uint64_t total = 0;
         for(size_t j = 0; j < 8; j++) {
             total |= lut[step % 3] << (2 * j);
-            double sub_step = step / 3;
+            double sub_step = (double)step / 3;
             step = (uint64_t)floor(sub_step);
         }
         total <<= 8;
@@ -671,7 +670,7 @@ void subbrute_protocol_create_candidate_for_default(
     }
 
     size_t size = sizeof(uint64_t);
-    for(uint8_t i = 0; i < size; i++) {
+    for(size_t i = 0; i < size; i++) {
         if(p[i] != 0) {
             furi_string_cat_printf(candidate, "%02X", p[i]);
         } else {
