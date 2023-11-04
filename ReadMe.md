@@ -32,13 +32,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-03 15:17 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-03 15:17 EST`
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [Add IoProxXSF, Paradox, Indala26, and Viking to RFID Fuzzer #4 (By SkeletonMan03)](https://github.com/DarkFlippers/Multi_Fuzzer/pull/4)
 - Updated: [Hangman v1.1 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Hangman Anime Dictionary (By RogueMaster)
 - Expanded Hangman Anime Dictionary (By RogueMaster)
 - [Add documentation and source URL about the AM_Q CC1101 preset #995 (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
 - Added: [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
 - Updated: [Authenticator/TOTP v5.7.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [Added IoProxXSF, Paradox, Indala26, Viking, Pyramid, Keri, and Jablotron to RFID Fuzzer #4 (By SkeletonMan03)](https://github.com/DarkFlippers/Multi_Fuzzer/pull/4)
 
 ## IN THIS BRANCH:
 
