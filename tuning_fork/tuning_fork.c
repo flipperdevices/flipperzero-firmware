@@ -1,7 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
-#include <m-string.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -31,6 +30,7 @@ enum Page {
 };
 
 typedef struct {
+  FuriMutex* mutex;
   bool playing;
   enum Page page;
   int current_tuning_note_index;
@@ -115,11 +115,17 @@ static void decrease_volume(TuningForkState* tuning_fork_state) {
 }
 
 static void play(TuningForkState* tuning_fork_state) {
-  furi_hal_speaker_start(current_tuning_note_freq(tuning_fork_state), tuning_fork_state->volume);
+  if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
+    furi_hal_speaker_start(
+      current_tuning_note_freq(tuning_fork_state), tuning_fork_state->volume);
+  }
 }
 
 static void stop() {
-  furi_hal_speaker_stop();
+  if(furi_hal_speaker_is_mine()) {
+    furi_hal_speaker_stop();
+    furi_hal_speaker_release();
+  }
 }
 
 static void replay(TuningForkState* tuning_fork_state) {
@@ -128,13 +134,10 @@ static void replay(TuningForkState* tuning_fork_state) {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-  TuningForkState* tuning_fork_state = acquire_mutex((ValueMutex*)ctx, 25);
-  if(tuning_fork_state == NULL) {
-    return;
-  }
+  TuningForkState* tuning_fork_state = ctx;
+  furi_mutex_acquire(tuning_fork_state->mutex, FuriWaitForever);
 
-  string_t tempStr;
-  string_init(tempStr);
+  FuriString* tempStr = furi_string_alloc();
 
   canvas_draw_frame(canvas, 0, 0, 128, 64);
 
@@ -143,21 +146,24 @@ static void render_callback(Canvas* const canvas, void* ctx) {
   if (tuning_fork_state->page == Tunings) {
     char tuningLabel[20];
     current_tuning_label(tuning_fork_state, tuningLabel);
-    string_printf(tempStr, "< %s >", tuningLabel);
-    canvas_draw_str_aligned(canvas, 64, 28, AlignCenter, AlignCenter, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "< %s >", tuningLabel);
+    canvas_draw_str_aligned(
+      canvas, 64, 28, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
   } else {
     char tuningLabel[20];
     current_tuning_label(tuning_fork_state, tuningLabel);
-    string_printf(tempStr, "%s", tuningLabel);
-    canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "%s", tuningLabel);
+    canvas_draw_str_aligned(
+      canvas, 64, 8, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
     char tuningNoteLabel[20];
     current_tuning_note_label(tuning_fork_state, tuningNoteLabel);
-    string_printf(tempStr, "< %s >", tuningNoteLabel);
-    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "< %s >", tuningNoteLabel);
+    canvas_draw_str_aligned(
+      canvas, 64, 24, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
   }
 
   canvas_set_font(canvas, FontSecondary);
@@ -177,8 +183,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     elements_progress_bar(canvas, 8, 36, 112, tuning_fork_state->volume);
   }
 
-  string_clear(tempStr);
-  release_mutex((ValueMutex*)ctx, tuning_fork_state);
+  furi_string_free(tempStr);
+  furi_mutex_release(tuning_fork_state->mutex);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -203,8 +209,8 @@ int32_t tuning_fork_app() {
   TuningForkState* tuning_fork_state = malloc(sizeof(TuningForkState));
   tuning_fork_state_init(tuning_fork_state);
 
-  ValueMutex state_mutex;
-  if(!init_mutex(&state_mutex, tuning_fork_state, sizeof(TuningForkState))) {
+  tuning_fork_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+  if(!tuning_fork_state->mutex) {
     FURI_LOG_E("TuningFork", "cannot create mutex\r\n");
     free(tuning_fork_state);
     return 255;
@@ -212,7 +218,7 @@ int32_t tuning_fork_app() {
 
   // Set system callbacks
   ViewPort* view_port = view_port_alloc();
-  view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+  view_port_draw_callback_set(view_port, render_callback, tuning_fork_state);
   view_port_input_callback_set(view_port, input_callback, event_queue);
 
   Gui* gui = furi_record_open("gui");
@@ -222,7 +228,7 @@ int32_t tuning_fork_app() {
   for(bool processing = true; processing;) {
     FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-    TuningForkState* tuning_fork_state = (TuningForkState*)acquire_mutex_block(&state_mutex);
+    furi_mutex_acquire(tuning_fork_state->mutex, FuriWaitForever);
 
     if(event_status == FuriStatusOk) {
       if(event.type == EventTypeKey) {
@@ -287,6 +293,8 @@ int32_t tuning_fork_app() {
                 tuning_fork_state->page = Tunings;
               }
               break;
+            default:
+              break;
           }
         } else if (event.input.type == InputTypeLong) {
           // hold events
@@ -328,6 +336,8 @@ int32_t tuning_fork_app() {
                 tuning_fork_state->page = Tunings;
                 tuning_fork_state->current_tuning_note_index = 0;
               }
+              break;
+            default:
               break;
           }
         } else if (event.input.type == InputTypeRepeat) {
@@ -371,15 +381,17 @@ int32_t tuning_fork_app() {
                 tuning_fork_state->current_tuning_note_index = 0;
               }
               break;
+            default:
+              break;
           }
         }
       }
-    } else {
-      FURI_LOG_D("TuningFork", "FuriMessageQueue: event timeout");
+      // } else {
+      //   FURI_LOG_D("TuningFork", "FuriMessageQueue: event timeout");
     }
 
     view_port_update(view_port);
-    release_mutex(&state_mutex, tuning_fork_state);
+    furi_mutex_release(tuning_fork_state->mutex);
   }
 
   view_port_enabled_set(view_port, false);
@@ -387,7 +399,7 @@ int32_t tuning_fork_app() {
   furi_record_close("gui");
   view_port_free(view_port);
   furi_message_queue_free(event_queue);
-  delete_mutex(&state_mutex);
+  furi_mutex_free(tuning_fork_state->mutex);
   furi_record_close(RECORD_NOTIFICATION);
   free(tuning_fork_state);
 
