@@ -1,0 +1,17 @@
+App(
+    appid="dice_app",
+    name="Dice D&D",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="dice_dnd_app",
+    cdefines=["APP_DICE_DND"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=90,
+	fap_icon="icon.png",
+    fap_category="Games",
+    fap_icon_assets="assets",
+    fap_author="@Ka3u6y6a",
+    fap_weburl="https://github.com/Ka3u6y6a/flipper-zero-dice",
+    fap_version="1.2",
+    fap_description="Dice rolling, types: Coin, d4, d6, d8, d10, d12, d20, d100",
+)
