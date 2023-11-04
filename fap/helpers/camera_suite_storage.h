@@ -2,7 +2,11 @@
 #include <string.h>
 #include <storage/storage.h>
 #include <flipper_format/flipper_format_i.h>
+
 #include "../camera_suite.h"
+
+#ifndef CAMERA_SUITE_STORAGE_H
+#define CAMERA_SUITE_STORAGE_H
 
 #define BOILERPLATE_SETTINGS_FILE_VERSION 1
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/camera_suite")
@@ -21,3 +25,5 @@
 void camera_suite_save_settings(void* context);
 
 void camera_suite_read_settings(void* context);
+
+#endif
