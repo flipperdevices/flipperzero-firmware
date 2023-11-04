@@ -731,15 +731,13 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
 
     if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
         if(stage == SeaderPollerEventTypeCardDetect) {
-            // FURI_LOG_D(TAG, "Card Detect");
+            FURI_LOG_D(TAG, "Card Detect");
             nfc_device_set_data(
                 seader->nfc_device, NfcProtocolIso14443_4a, nfc_poller_get_data(seader->poller));
 
             size_t uid_len;
             const uint8_t* uid = nfc_device_get_uid(seader->nfc_device, &uid_len);
 
-            // const Iso14443_4aData* iso14443_4a_data = nfc_device_get_data(seader->nfc_device, NfcProtocolIso14443_4a);
-            //const Iso14443_3aData* iso14443_3a_data = iso14443_4a_data->iso14443_3a_data;
             const Iso14443_3aData* iso14443_3a_data =
                 nfc_device_get_data(seader->nfc_device, NfcProtocolIso14443_3a);
             uint8_t sak_val = iso14443_3a_get_sak(iso14443_3a_data);
@@ -763,6 +761,8 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
 
             ASN_STRUCT_FREE(asn_DEF_CardDetails, cardDetails);
 
+            nfc_set_fdt_poll_fc(event.instance, SEADER_POLLER_MAX_FWT);
+            furi_thread_set_current_priority(FuriThreadPriorityLowest);
             stage = SeaderPollerEventTypeConversation;
         } else if(stage == SeaderPollerEventTypeConversation) {
 
@@ -792,9 +792,9 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
             // TESTING
             //return NfcCommandStop;
 
-            //stage = SeaderPollerEventTypeComplete;
+            // stage = SeaderPollerEventTypeComplete;
         } else if(stage == SeaderPollerEventTypeComplete) {
-            // FURI_LOG_D(TAG, "Complete");
+            FURI_LOG_D(TAG, "Complete");
             return NfcCommandStop;
         }
     }
