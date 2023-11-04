@@ -38,6 +38,7 @@ typedef struct {
 /** The camera model. */
 extern CameraModel camera_model;
 
-void initialize_camera_model();
+/** Reset camera model defaults. */
+void reset_camera_model();
 
 #endif

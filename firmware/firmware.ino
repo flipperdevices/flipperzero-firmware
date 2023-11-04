@@ -5,7 +5,7 @@ void setup() {
     Serial.begin(230400); // 115200
 
     // Initialize the camera model.
-    initialize_camera_model();
+    reset_camera_model();
 
     // Initialize the camera configuration.
     initialize_camera_config();

@@ -8,7 +8,7 @@ daemon:
   port: "50051"
 directories:
   data: C:\temp\arduino-cli\data
-  downloads: C:\temp\arduino-cli\downloads
+  downloads: C:\temp\arduino-cli\staging
   user: C:\temp\arduino-cli\user
 library:
   enable_unsafe_install: false

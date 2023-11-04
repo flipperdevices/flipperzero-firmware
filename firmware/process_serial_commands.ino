@@ -6,44 +6,52 @@ void process_serial_commands() {
         sensor_t* cam = esp_camera_sensor_get();
 
         switch (input) {
-        case '>': // Toggle dithering.
+        case '>': // Backward supports `[ESP32] Camera`.
             camera_model.isDitheringEnabled = !camera_model.isDitheringEnabled;
             break;
-        case 'i': // Turn invert off.
+        case '<': // _Only_ for backwards support on `[ESP32] Camera`.
+            camera_model.isInvertEnabled = !camera_model.isInvertEnabled;
+            break;
+        case 'i':
             camera_model.isInvertEnabled = false;
             break;
-        case 'I': // Turn invert on.
+        case 'I':
             camera_model.isInvertEnabled = true;
             break;
-        case 'b': // Remove brightness.
-            cam->set_contrast(cam, cam->status.brightness - 1);
+        case 'b': // Backward supports `[ESP32] Camera`.
+            lower_brightness();
             break;
-        case 'B': // Add brightness.
-            cam->set_contrast(cam, cam->status.brightness + 1);
+        case 'B': // Backward supports `[ESP32] Camera`.
+            add_brightness();
             break;
-        case 'c': // Remove contrast.
-            cam->set_contrast(cam, cam->status.contrast - 1);
+        case 'c': // Backward supports `[ESP32] Camera`.
+            lower_contrast();
             break;
-        case 'C': // Add contrast.
-            cam->set_contrast(cam, cam->status.contrast + 1);
+        case 'C': // Backward supports `[ESP32] Camera`.
+            add_contrast();
             break;
-        case 'f': // Turn the flash off.
-            toggle_flash_off();
+        case 'f':
+            turn_flash_off();
             break;
-        case 'F': // Turn the flash on.
-            toggle_flash_on();
+        case 'F':
+            turn_flash_on();
             break;
-        case 'P': // Save image to the onboard SD card.
-            // @todo - Future feature.
-            // save_picture_to_sd_card();
+        case 'P':
+            // save_picture_to_sd_card(); // Staged future feature.
             break;
-        case 'M': // Toggle Mirror.
-            cam->set_hmirror(cam, !cam->status.hmirror);
+        case 'M': // _Only_ for backwards support on `[ESP32] Camera`.
+            set_hmirror(!cam->status.hmirror);
             break;
         case 's': // Stop stream.
+            // Reset the camera and model just in case `[ESP32] Camera` is
+            // subsequently used.
+            reset_camera();
+            reset_camera_model();
             camera_model.isStreamEnabled = false;
             break;
         case 'S': // Start stream.
+            reset_camera();
+            reset_camera_model();
             camera_model.isStreamEnabled = true;
             break;
         case '0': // Use Floyd Steinberg dithering.
