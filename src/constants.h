@@ -3,9 +3,9 @@
 
 #include <storage/storage.h> // For APP_DATA_PATH
 
-/* How many ticks to wait for user input before
- * passing to some background activity */
-#define USER_INPUT_IDLE_TICKS 1000U
+/* Delay between two background activities performed
+ * by secondary_thread */
+#define BACKGROUND_ACTIVITY_TICKS 1000U
 
 /* Log strings */
 #define LOG_TAG "Matagotchi"

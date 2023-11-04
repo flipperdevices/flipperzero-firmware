@@ -5,9 +5,7 @@
 #include <furi_hal.h>
 
 enum ThreadsMessageType {
-    IDLE_TIMEOUT, // No user input received, perform background work
-    SAVE_AND_EXIT, // Request to exit the program, save the state and quit the thread
-    BUTTON_PRESSED
+    SAVE_AND_EXIT // Request to exit the program, save the state and quit the thread
 };
 
 /* Request from main thread to be processed by secondary thread */
