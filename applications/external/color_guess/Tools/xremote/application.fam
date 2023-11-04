@@ -1,0 +1,22 @@
+App(
+    appid="xremote",
+    name="Cross Remote",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="xremote_app",
+    cdefines=["APP_XREMOTE"],
+    requires=[
+        "gui",
+        "storage",
+        "dialogs",
+    ],
+    stack_size=3 * 1024,
+    order=10,
+    fap_libs=["assets"],
+    fap_icon="icons/xremote_10px.png",
+    fap_icon_assets="icons",
+    fap_version="0.8",
+    fap_category="Infrared",
+    fap_author="Leedave",
+    fap_description="One-Click, sends multiple commands",
+    fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications"
+)
