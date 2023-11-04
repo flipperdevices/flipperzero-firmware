@@ -46,7 +46,7 @@ uint8_t plist_index_get(struct patch_list *plist, int offset) {
     return plist->index;
 }
 
-void plist_create(struct patch_list **plist, TradeBlock* trade_block) {
+void plist_create(struct patch_list **pplist, TradeBlock* trade_block) {
     furi_assert(trade_block);
     uint8_t* trade_party_flat = (uint8_t*)trade_block->party;
     int i;
@@ -62,12 +62,12 @@ void plist_create(struct patch_list **plist, TradeBlock* trade_block) {
     /* If plist is non-NULL that means its already been created. Tear it down
      * first.
      */
-    if (*plist != NULL) {
-        plist_free(*plist);
-        *plist = NULL;
+    if (*pplist != NULL) {
+        plist_free(*pplist);
+        *pplist = NULL;
     }
 
-    *plist = plist_alloc();
+    *pplist = plist_alloc();
     /* NOTE: 264 magic number is the length of the party block, 44 * 6 */
     /* The first half of the patch list covers offsets 0x00 - 0xfb, which
      * is expressed as 0x01 - 0xfc. An 0xFF byte is added to signify the
@@ -79,15 +79,15 @@ void plist_create(struct patch_list **plist, TradeBlock* trade_block) {
         FURI_LOG_D(TAG, "%02X", trade_party_flat[i]);
         if (i == 0xFC) {
             FURI_LOG_D(TAG, "[plist] part 1 end");
-            plist_append(*plist, 0xFF);
+            plist_append(*pplist, 0xFF);
         }
 
         if (trade_party_flat[i] == 0xFE) {
             FURI_LOG_D(TAG, "[plist] patching byte 0x%02X, adding 0x%02X to plist", i, (i % 0xfc) + 1);
-            plist_append(*plist, (i % 0xfc) + 1);
+            plist_append(*pplist, (i % 0xfc) + 1);
 	    trade_party_flat[i] = 0xFF;
 	}
     }
     FURI_LOG_D(TAG, "[plist] part 2 end");
-    plist_append(*plist, 0xFF);
+    plist_append(*pplist, 0xFF);
 }
