@@ -189,6 +189,17 @@ static void game_state_init(GameState *const game_state) {
     game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
+static void game_state_reinit(GameState* const game_state) {
+    game_state->last_tick = furi_get_tick();
+    game_state->y_acceleration = game_state->y_speed = 0;
+    game_state->y_position = DINO_START_Y;
+    game_state->has_cactus = 0;
+    game_state->background_position = 0;
+    game_state->lost = 0;
+    game_state->x_speed = START_x_speed;
+    game_state->score = 0;
+}
+
 int32_t trexrunner_app() {
 
     FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
@@ -216,7 +227,7 @@ int32_t trexrunner_app() {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     PluginEvent event;
-    for (bool processing = true; processing && !game_state->lost;) {
+    for (bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         if (event_status == FuriStatusOk) {
             // press events
@@ -232,7 +243,11 @@ int32_t trexrunner_app() {
                         case InputKeyRight:
                             break;
                         case InputKeyOk:
-                            if (game_state->y_position == DINO_START_Y)
+                            if(game_state->lost) {
+                                game_state_reinit(game_state);
+                                break;
+                            }
+                            if(game_state->y_position == DINO_START_Y)
                                 game_state->y_speed = JUMP_SPEED;       
                             break;
                         case InputKeyMAX:
@@ -244,12 +259,9 @@ int32_t trexrunner_app() {
                     }
                 }
             }
-        } else {
-            // event timeout
-            ;
-        }
-        if (game_state->lost){
-            furi_message_queue_get(event_queue, &event, 1500); //Sleep to show  the "you lost" message
+            // } else {
+            //     // event timeout
+            //     ;
         }
         view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
