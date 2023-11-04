@@ -1,0 +1,50 @@
+name: Changelog
+run-name: "Changelog for ${{ github.ref }} by @${{ github.ACTOR }}"
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+#    tags:
+#      - "v*.*.*"
+#   release:
+#     types:
+#       - created
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: "✏️ Generate release changelog"
+        uses: heinrichreimer/github-changelog-generator-action@v2.3
+        with:
+          token: ${{ secrets.FLIPPER_TOKEN }}
+          user: ${{ github.repository_owner }}
+          repo: ${{ github.repository }}
+          output: CHANGELOG.md
+          unreleased: false
+          stripGeneratorNotice: true
+
+      - name: "Show CHANGELOG.md"
+        run: cat CHANGELOG.md
+
+      - name: "Commit changes"
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "docs: update `CHANGELOG.md`"
+          file_pattern: "*.md"
+          branch: ${{ github.ref_name }}
+          commit_options: '--no-verify --signoff'
+          # skip_dirty_check: true
+          # skip_checkout: true
+          # skip_fetch: true
