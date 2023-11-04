@@ -10,12 +10,12 @@
 #include <core/core_defines.h>
 #include "../ble_spam.h"
 
-typedef union ProtocolCfg ProtocolCfg;
+typedef struct Payload Payload;
 
 typedef struct {
     const Icon* icon;
-    const char* (*get_name)(const ProtocolCfg* _cfg);
-    void (*make_packet)(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg);
+    const char* (*get_name)(const Payload* payload);
+    void (*make_packet)(uint8_t* _size, uint8_t** _packet, Payload* payload);
     void (*extra_config)(Ctx* ctx);
-    uint8_t (*config_count)(const ProtocolCfg* _cfg);
+    uint8_t (*config_count)(const Payload* payload);
 } Protocol;

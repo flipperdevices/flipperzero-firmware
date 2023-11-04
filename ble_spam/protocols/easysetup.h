@@ -5,7 +5,7 @@
 // Research by @Spooks4576
 
 typedef enum {
-    EasysetupTypeBuds,
+    EasysetupTypeBuds = 0x01, // Skip 0 as it means unset
     EasysetupTypeWatch,
     EasysetupTypeCOUNT,
 } EasysetupType;

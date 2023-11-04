@@ -36,9 +36,9 @@ const struct {
     const char* name;
 } watch_models[] = {
     {0x1A, "Fallback Watch"},
-    {0x01, "White Watch4 Classic 44"},
-    {0x02, "Black Watch4 Classic 40"},
-    {0x03, "White Watch4 Classic 40"},
+    {0x01, "White Watch4 Classic 44m"},
+    {0x02, "Black Watch4 Classic 40m"},
+    {0x03, "White Watch4 Classic 40m"},
     {0x04, "Black Watch4 44mm"},
     {0x05, "Silver Watch4 44mm"},
     {0x06, "Green Watch4 44mm"},
@@ -59,8 +59,8 @@ const struct {
     {0x1B, "Black Watch6 Pink 40mm"},
     {0x1C, "Gold Watch6 Gold 40mm"},
     {0x1D, "Silver Watch6 Cyan 44mm"},
-    {0x1E, "Black Watch6 Classic 43mm"},
-    {0x20, "Green Watch6 Classic 43mm"},
+    {0x1E, "Black Watch6 Classic 43m"},
+    {0x20, "Green Watch6 Classic 43m"},
 };
 const uint8_t watch_models_count = COUNT_OF(watch_models);
 
@@ -68,8 +68,8 @@ static const char* type_names[EasysetupTypeCOUNT] = {
     [EasysetupTypeBuds] = "EasySetup Buds",
     [EasysetupTypeWatch] = "EasySetup Watch",
 };
-static const char* easysetup_get_name(const ProtocolCfg* _cfg) {
-    const EasysetupCfg* cfg = &_cfg->easysetup;
+static const char* get_name(const Payload* payload) {
+    const EasysetupCfg* cfg = &payload->cfg.easysetup;
     return type_names[cfg->type];
 }
 
@@ -77,14 +77,18 @@ static uint8_t packet_sizes[EasysetupTypeCOUNT] = {
     [EasysetupTypeBuds] = 31,
     [EasysetupTypeWatch] = 15,
 };
-void easysetup_make_packet(uint8_t* out_size, uint8_t** out_packet, const ProtocolCfg* _cfg) {
-    const EasysetupCfg* cfg = _cfg ? &_cfg->easysetup : NULL;
+void make_packet(uint8_t* out_size, uint8_t** out_packet, Payload* payload) {
+    EasysetupCfg* cfg = payload ? &payload->cfg.easysetup : NULL;
 
     EasysetupType type;
-    if(cfg) {
+    if(cfg && cfg->type != 0x00) {
         type = cfg->type;
     } else {
-        type = rand() % EasysetupTypeCOUNT;
+        const EasysetupType types[] = {
+            EasysetupTypeBuds,
+            EasysetupTypeWatch,
+        };
+        type = types[rand() % COUNT_OF(types)];
     }
 
     uint8_t size = packet_sizes[type];
@@ -94,10 +98,17 @@ void easysetup_make_packet(uint8_t* out_size, uint8_t** out_packet, const Protoc
     switch(type) {
     case EasysetupTypeBuds: {
         uint32_t model;
-        if(cfg && cfg->data.buds.model != 0x000000) {
-            model = cfg->data.buds.model;
-        } else {
+        switch(cfg ? payload->mode : PayloadModeRandom) {
+        case PayloadModeRandom:
+        default:
             model = buds_models[rand() % buds_models_count].value;
+            break;
+        case PayloadModeValue:
+            model = cfg->data.buds.model;
+            break;
+        case PayloadModeBruteforce:
+            model = cfg->data.buds.model = payload->bruteforce.value;
+            break;
         }
 
         packet[i++] = 27; // Size
@@ -137,10 +148,17 @@ void easysetup_make_packet(uint8_t* out_size, uint8_t** out_packet, const Protoc
     }
     case EasysetupTypeWatch: {
         uint8_t model;
-        if(cfg && cfg->data.watch.model != 0x00) {
-            model = cfg->data.watch.model;
-        } else {
+        switch(cfg ? payload->mode : PayloadModeRandom) {
+        case PayloadModeRandom:
+        default:
             model = watch_models[rand() % watch_models_count].value;
+            break;
+        case PayloadModeValue:
+            model = cfg->data.watch.model;
+            break;
+        case PayloadModeBruteforce:
+            model = cfg->data.watch.model = payload->bruteforce.value;
+            break;
         }
 
         packet[i++] = 14; // Size
@@ -181,7 +199,8 @@ enum {
 };
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
     switch(cfg->type) {
     case EasysetupTypeBuds: {
@@ -214,31 +233,36 @@ static void config_callback(void* _ctx, uint32_t index) {
     }
 }
 static void buds_model_changed(VariableItem* item) {
-    EasysetupCfg* cfg = variable_item_get_context(item);
+    Payload* payload = variable_item_get_context(item);
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
+        payload->mode = PayloadModeValue;
         cfg->data.buds.model = buds_models[index].value;
         variable_item_set_current_value_text(item, buds_models[index].name);
     } else {
-        cfg->data.buds.model = 0x000000;
+        payload->mode = PayloadModeRandom;
         variable_item_set_current_value_text(item, "Random");
     }
 }
 static void watch_model_changed(VariableItem* item) {
-    EasysetupCfg* cfg = variable_item_get_context(item);
+    Payload* payload = variable_item_get_context(item);
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
+        payload->mode = PayloadModeValue;
         cfg->data.watch.model = watch_models[index].value;
         variable_item_set_current_value_text(item, watch_models[index].name);
     } else {
-        cfg->data.watch.model = 0x00;
+        payload->mode = PayloadModeRandom;
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static void easysetup_extra_config(Ctx* ctx) {
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+static void extra_config(Ctx* ctx) {
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
     size_t value_index;
@@ -246,13 +270,16 @@ static void easysetup_extra_config(Ctx* ctx) {
     switch(cfg->type) {
     case EasysetupTypeBuds: {
         item = variable_item_list_add(
-            list, "Model Code", buds_models_count + 1, buds_model_changed, cfg);
+            list, "Model Code", buds_models_count + 1, buds_model_changed, payload);
         const char* model_name = NULL;
         char model_name_buf[9];
-        if(cfg->data.buds.model == 0x000000) {
+        switch(payload->mode) {
+        case PayloadModeRandom:
+        default:
             model_name = "Random";
             value_index = 0;
-        } else {
+            break;
+        case PayloadModeValue:
             for(uint8_t i = 0; i < buds_models_count; i++) {
                 if(cfg->data.buds.model == buds_models[i].value) {
                     model_name = buds_models[i].name;
@@ -265,6 +292,11 @@ static void easysetup_extra_config(Ctx* ctx) {
                 model_name = model_name_buf;
                 value_index = buds_models_count + 1;
             }
+            break;
+        case PayloadModeBruteforce:
+            model_name = "Bruteforce";
+            value_index = buds_models_count + 1;
+            break;
         }
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
@@ -274,13 +306,16 @@ static void easysetup_extra_config(Ctx* ctx) {
     }
     case EasysetupTypeWatch: {
         item = variable_item_list_add(
-            list, "Model Code", watch_models_count + 1, watch_model_changed, cfg);
+            list, "Model Code", watch_models_count + 1, watch_model_changed, payload);
         const char* model_name = NULL;
         char model_name_buf[3];
-        if(cfg->data.watch.model == 0x00) {
+        switch(payload->mode) {
+        case PayloadModeRandom:
+        default:
             model_name = "Random";
             value_index = 0;
-        } else {
+            break;
+        case PayloadModeValue:
             for(uint8_t i = 0; i < watch_models_count; i++) {
                 if(cfg->data.watch.model == watch_models[i].value) {
                     model_name = watch_models[i].name;
@@ -293,6 +328,11 @@ static void easysetup_extra_config(Ctx* ctx) {
                 model_name = model_name_buf;
                 value_index = watch_models_count + 1;
             }
+            break;
+        case PayloadModeBruteforce:
+            model_name = "Bruteforce";
+            value_index = watch_models_count + 1;
+            break;
         }
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
@@ -309,31 +349,40 @@ static uint8_t config_counts[EasysetupTypeCOUNT] = {
     [EasysetupTypeBuds] = ConfigBudsCOUNT - ConfigExtraStart - 1,
     [EasysetupTypeWatch] = ConfigWatchCOUNT - ConfigExtraStart - 1,
 };
-static uint8_t easysetup_config_count(const ProtocolCfg* _cfg) {
-    const EasysetupCfg* cfg = &_cfg->easysetup;
+static uint8_t config_count(const Payload* payload) {
+    const EasysetupCfg* cfg = &payload->cfg.easysetup;
     return config_counts[cfg->type];
 }
 
 const Protocol protocol_easysetup = {
     .icon = &I_android,
-    .get_name = easysetup_get_name,
-    .make_packet = easysetup_make_packet,
-    .extra_config = easysetup_extra_config,
-    .config_count = easysetup_config_count,
+    .get_name = get_name,
+    .make_packet = make_packet,
+    .extra_config = extra_config,
+    .config_count = config_count,
 };
 
 static void buds_model_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     switch(index) {
     case 0:
-        cfg->data.buds.model = 0x000000;
+        payload->mode = PayloadModeRandom;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     case buds_models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneEasysetupBudsModelCustom);
         break;
+    case buds_models_count + 2:
+        payload->mode = PayloadModeBruteforce;
+        payload->bruteforce.counter = 0;
+        payload->bruteforce.value = cfg->data.buds.model;
+        payload->bruteforce.size = 3;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
+        payload->mode = PayloadModeValue;
         cfg->data.buds.model = buds_models[index - 1].value;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
@@ -341,28 +390,34 @@ static void buds_model_callback(void* _ctx, uint32_t index) {
 }
 void scene_easysetup_buds_model_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    bool found = false;
     submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, buds_model_callback, ctx);
-    if(cfg->data.buds.model == 0x000000) {
-        found = true;
+    if(payload->mode == PayloadModeRandom) {
         selected = 0;
     }
+
+    bool found = false;
     for(uint8_t i = 0; i < buds_models_count; i++) {
         submenu_add_item(submenu, buds_models[i].name, i + 1, buds_model_callback, ctx);
-        if(!found && cfg->data.buds.model == buds_models[i].value) {
+        if(!found && payload->mode == PayloadModeValue &&
+           cfg->data.buds.model == buds_models[i].value) {
             found = true;
             selected = i + 1;
         }
     }
     submenu_add_item(submenu, "Custom", buds_models_count + 1, buds_model_callback, ctx);
-    if(!found) {
-        found = true;
+    if(!found && payload->mode == PayloadModeValue) {
         selected = buds_models_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", buds_models_count + 2, buds_model_callback, ctx);
+    if(payload->mode == PayloadModeBruteforce) {
+        selected = buds_models_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);
@@ -380,12 +435,18 @@ void scene_easysetup_buds_model_on_exit(void* _ctx) {
 
 static void buds_model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
+    payload->mode = PayloadModeValue;
+    cfg->data.buds.model =
+        (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
 void scene_easysetup_buds_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Enter custom Model Code");
@@ -405,24 +466,30 @@ bool scene_easysetup_buds_model_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_easysetup_buds_model_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
-    cfg->data.buds.model =
-        (ctx->byte_store[0] << 0x10) + (ctx->byte_store[1] << 0x08) + (ctx->byte_store[2] << 0x00);
+    UNUSED(_ctx);
 }
 
 static void watch_model_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     switch(index) {
     case 0:
-        cfg->data.watch.model = 0x00;
+        payload->mode = PayloadModeRandom;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     case watch_models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneEasysetupWatchModelCustom);
         break;
+    case watch_models_count + 2:
+        payload->mode = PayloadModeBruteforce;
+        payload->bruteforce.counter = 0;
+        payload->bruteforce.value = cfg->data.watch.model;
+        payload->bruteforce.size = 1;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
+        payload->mode = PayloadModeValue;
         cfg->data.watch.model = watch_models[index - 1].value;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
@@ -430,28 +497,34 @@ static void watch_model_callback(void* _ctx, uint32_t index) {
 }
 void scene_easysetup_watch_model_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    bool found = false;
     submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, watch_model_callback, ctx);
-    if(cfg->data.watch.model == 0x00) {
-        found = true;
+    if(payload->mode == PayloadModeRandom) {
         selected = 0;
     }
+
+    bool found = false;
     for(uint8_t i = 0; i < watch_models_count; i++) {
         submenu_add_item(submenu, watch_models[i].name, i + 1, watch_model_callback, ctx);
-        if(!found && cfg->data.watch.model == watch_models[i].value) {
+        if(!found && payload->mode == PayloadModeValue &&
+           cfg->data.watch.model == watch_models[i].value) {
             found = true;
             selected = i + 1;
         }
     }
     submenu_add_item(submenu, "Custom", watch_models_count + 1, watch_model_callback, ctx);
-    if(!found) {
-        found = true;
+    if(!found && payload->mode == PayloadModeValue) {
         selected = watch_models_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", watch_models_count + 2, watch_model_callback, ctx);
+    if(payload->mode == PayloadModeBruteforce) {
+        selected = watch_models_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);
@@ -469,12 +542,17 @@ void scene_easysetup_watch_model_on_exit(void* _ctx) {
 
 static void watch_model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
+    payload->mode = PayloadModeValue;
+    cfg->data.watch.model = (ctx->byte_store[0] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
 void scene_easysetup_watch_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
+    Payload* payload = &ctx->attack->payload;
+    EasysetupCfg* cfg = &payload->cfg.easysetup;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Enter custom Model Code");
@@ -492,7 +570,5 @@ bool scene_easysetup_watch_model_custom_on_event(void* _ctx, SceneManagerEvent e
     return false;
 }
 void scene_easysetup_watch_model_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    EasysetupCfg* cfg = &ctx->attack->payload.cfg.easysetup;
-    cfg->data.watch.model = (ctx->byte_store[0] << 0x00);
+    UNUSED(_ctx);
 }

@@ -71,8 +71,8 @@ static const char* type_names[ContinuityTypeCOUNT] = {
     [ContinuityTypeNearbyInfo] = "Nearby Info",
     [ContinuityTypeCustomCrash] = "Continuity Custom",
 };
-static const char* continuity_get_name(const ProtocolCfg* _cfg) {
-    const ContinuityCfg* cfg = &_cfg->continuity;
+static const char* get_name(const Payload* payload) {
+    const ContinuityCfg* cfg = &payload->cfg.continuity;
     return type_names[cfg->type];
 }
 
@@ -87,11 +87,11 @@ static uint8_t packet_sizes[ContinuityTypeCOUNT] = {
     [ContinuityTypeNearbyInfo] = HEADER_LEN + 5,
     [ContinuityTypeCustomCrash] = HEADER_LEN + 11,
 };
-static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const ProtocolCfg* _cfg) {
-    const ContinuityCfg* cfg = _cfg ? &_cfg->continuity : NULL;
+static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
+    ContinuityCfg* cfg = payload ? &payload->cfg.continuity : NULL;
 
     ContinuityType type;
-    if(cfg) {
+    if(cfg && cfg->type != 0x00) {
         type = cfg->type;
     } else {
         const ContinuityType types[] = {
@@ -139,14 +139,21 @@ static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const Prot
 
     case ContinuityTypeProximityPair: {
         uint16_t model;
-        if(cfg && cfg->data.proximity_pair.model != 0x0000) {
-            model = cfg->data.proximity_pair.model;
-        } else {
+        switch(payload ? payload->mode : PayloadModeRandom) {
+        case PayloadModeRandom:
+        default:
             model = pp_models[rand() % pp_models_count].value;
+            break;
+        case PayloadModeValue:
+            model = cfg->data.proximity_pair.model;
+            break;
+        case PayloadModeBruteforce:
+            model = cfg->data.proximity_pair.model = payload->bruteforce.value;
+            break;
         }
 
         uint8_t prefix;
-        if(cfg && cfg->data.proximity_pair.prefix == 0x00) {
+        if(cfg && cfg->data.proximity_pair.prefix != 0x00) {
             prefix = cfg->data.proximity_pair.prefix;
         } else {
             if(model == 0x0055 || model == 0x0030)
@@ -209,10 +216,17 @@ static void continuity_make_packet(uint8_t* _size, uint8_t** _packet, const Prot
 
     case ContinuityTypeNearbyAction: {
         uint8_t action;
-        if(cfg && cfg->data.nearby_action.action != 0x00) {
-            action = cfg->data.nearby_action.action;
-        } else {
+        switch(payload ? payload->mode : PayloadModeRandom) {
+        case PayloadModeRandom:
+        default:
             action = na_actions[rand() % na_actions_count].value;
+            break;
+        case PayloadModeValue:
+            action = cfg->data.nearby_action.action;
+            break;
+        case PayloadModeBruteforce:
+            action = cfg->data.nearby_action.action = payload->bruteforce.value;
+            break;
         }
 
         uint8_t flags;
@@ -293,7 +307,8 @@ enum {
 };
 static void config_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     scene_manager_set_scene_state(ctx->scene_manager, SceneConfig, index);
     switch(cfg->type) {
     case ContinuityTypeProximityPair: {
@@ -341,19 +356,22 @@ static void config_callback(void* _ctx, uint32_t index) {
     }
 }
 static void pp_model_changed(VariableItem* item) {
-    ContinuityCfg* cfg = variable_item_get_context(item);
+    Payload* payload = variable_item_get_context(item);
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
+        payload->mode = PayloadModeValue;
         cfg->data.proximity_pair.model = pp_models[index].value;
         variable_item_set_current_value_text(item, pp_models[index].name);
     } else {
-        cfg->data.proximity_pair.model = 0x0000;
+        payload->mode = PayloadModeRandom;
         variable_item_set_current_value_text(item, "Random");
     }
 }
 static void pp_prefix_changed(VariableItem* item) {
-    ContinuityCfg* cfg = variable_item_get_context(item);
+    Payload* payload = variable_item_get_context(item);
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
@@ -365,33 +383,39 @@ static void pp_prefix_changed(VariableItem* item) {
     }
 }
 static void na_action_changed(VariableItem* item) {
-    ContinuityCfg* cfg = variable_item_get_context(item);
+    Payload* payload = variable_item_get_context(item);
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     uint8_t index = variable_item_get_current_value_index(item);
     if(index) {
         index--;
+        payload->mode = PayloadModeValue;
         cfg->data.nearby_action.action = na_actions[index].value;
         variable_item_set_current_value_text(item, na_actions[index].name);
     } else {
-        cfg->data.nearby_action.action = 0x00;
+        payload->mode = PayloadModeRandom;
         variable_item_set_current_value_text(item, "Random");
     }
 }
-static void continuity_extra_config(Ctx* ctx) {
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+static void extra_config(Ctx* ctx) {
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
     size_t value_index;
 
     switch(cfg->type) {
     case ContinuityTypeProximityPair: {
-        item =
-            variable_item_list_add(list, "Model Code", pp_models_count + 1, pp_model_changed, cfg);
+        item = variable_item_list_add(
+            list, "Model Code", pp_models_count + 1, pp_model_changed, payload);
         const char* model_name = NULL;
         char model_name_buf[5];
-        if(cfg->data.proximity_pair.model == 0x0000) {
+        switch(payload->mode) {
+        case PayloadModeRandom:
+        default:
             model_name = "Random";
             value_index = 0;
-        } else {
+            break;
+        case PayloadModeValue:
             for(uint8_t i = 0; i < pp_models_count; i++) {
                 if(cfg->data.proximity_pair.model == pp_models[i].value) {
                     model_name = pp_models[i].name;
@@ -405,12 +429,17 @@ static void continuity_extra_config(Ctx* ctx) {
                 model_name = model_name_buf;
                 value_index = pp_models_count + 1;
             }
+            break;
+        case PayloadModeBruteforce:
+            model_name = "Bruteforce";
+            value_index = pp_models_count + 1;
+            break;
         }
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, model_name);
 
-        item =
-            variable_item_list_add(list, "Prefix", pp_prefixes_count + 1, pp_prefix_changed, cfg);
+        item = variable_item_list_add(
+            list, "Prefix", pp_prefixes_count + 1, pp_prefix_changed, payload);
         const char* prefix_name = NULL;
         char prefix_name_buf[3];
         if(cfg->data.proximity_pair.prefix == 0x00) {
@@ -440,13 +469,16 @@ static void continuity_extra_config(Ctx* ctx) {
     }
     case ContinuityTypeNearbyAction: {
         item = variable_item_list_add(
-            list, "Action Type", na_actions_count + 1, na_action_changed, cfg);
+            list, "Action Type", na_actions_count + 1, na_action_changed, payload);
         const char* action_name = NULL;
         char action_name_buf[3];
-        if(cfg->data.nearby_action.action == 0x00) {
+        switch(payload->mode) {
+        case PayloadModeRandom:
+        default:
             action_name = "Random";
             value_index = 0;
-        } else {
+            break;
+        case PayloadModeValue:
             for(uint8_t i = 0; i < na_actions_count; i++) {
                 if(cfg->data.nearby_action.action == na_actions[i].value) {
                     action_name = na_actions[i].name;
@@ -463,6 +495,11 @@ static void continuity_extra_config(Ctx* ctx) {
                 action_name = action_name_buf;
                 value_index = na_actions_count + 1;
             }
+            break;
+        case PayloadModeBruteforce:
+            action_name = "Bruteforce";
+            value_index = na_actions_count + 1;
+            break;
         }
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, action_name);
@@ -502,31 +539,40 @@ static uint8_t config_counts[ContinuityTypeCOUNT] = {
     [ContinuityTypeNearbyInfo] = 0,
     [ContinuityTypeCustomCrash] = ConfigCcCOUNT - ConfigExtraStart - 1,
 };
-static uint8_t continuity_config_count(const ProtocolCfg* _cfg) {
-    const ContinuityCfg* cfg = &_cfg->continuity;
+static uint8_t config_count(const Payload* payload) {
+    const ContinuityCfg* cfg = &payload->cfg.continuity;
     return config_counts[cfg->type];
 }
 
 const Protocol protocol_continuity = {
     .icon = &I_apple,
-    .get_name = continuity_get_name,
-    .make_packet = continuity_make_packet,
-    .extra_config = continuity_extra_config,
-    .config_count = continuity_config_count,
+    .get_name = get_name,
+    .make_packet = make_packet,
+    .extra_config = extra_config,
+    .config_count = config_count,
 };
 
 static void pp_model_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     switch(index) {
     case 0:
-        cfg->data.proximity_pair.model = 0x0000;
+        payload->mode = PayloadModeRandom;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     case pp_models_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneContinuityPpModelCustom);
         break;
+    case pp_models_count + 2:
+        payload->mode = PayloadModeBruteforce;
+        payload->bruteforce.counter = 0;
+        payload->bruteforce.value = cfg->data.proximity_pair.model;
+        payload->bruteforce.size = 2;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
+        payload->mode = PayloadModeValue;
         cfg->data.proximity_pair.model = pp_models[index - 1].value;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
@@ -534,28 +580,34 @@ static void pp_model_callback(void* _ctx, uint32_t index) {
 }
 void scene_continuity_pp_model_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    bool found = false;
     submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, pp_model_callback, ctx);
-    if(cfg->data.proximity_pair.model == 0x0000) {
-        found = true;
+    if(payload->mode == PayloadModeRandom) {
         selected = 0;
     }
+
+    bool found = false;
     for(uint8_t i = 0; i < pp_models_count; i++) {
         submenu_add_item(submenu, pp_models[i].name, i + 1, pp_model_callback, ctx);
-        if(!found && cfg->data.proximity_pair.model == pp_models[i].value) {
+        if(!found && payload->mode == PayloadModeValue &&
+           cfg->data.proximity_pair.model == pp_models[i].value) {
             found = true;
             selected = i + 1;
         }
     }
     submenu_add_item(submenu, "Custom", pp_models_count + 1, pp_model_callback, ctx);
-    if(!found) {
-        found = true;
+    if(!found && payload->mode == PayloadModeValue) {
         selected = pp_models_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", pp_models_count + 2, pp_model_callback, ctx);
+    if(payload->mode == PayloadModeBruteforce) {
+        selected = pp_models_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);
@@ -573,12 +625,17 @@ void scene_continuity_pp_model_on_exit(void* _ctx) {
 
 static void pp_model_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
+    payload->mode = PayloadModeValue;
+    cfg->data.proximity_pair.model = (ctx->byte_store[0] << 0x08) + (ctx->byte_store[1] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
 void scene_continuity_pp_model_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Enter custom Model Code");
@@ -597,14 +654,13 @@ bool scene_continuity_pp_model_custom_on_event(void* _ctx, SceneManagerEvent eve
     return false;
 }
 void scene_continuity_pp_model_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
-    cfg->data.proximity_pair.model = (ctx->byte_store[0] << 0x08) + (ctx->byte_store[1] << 0x00);
+    UNUSED(_ctx);
 }
 
 static void pp_prefix_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     switch(index) {
     case 0:
         cfg->data.proximity_pair.prefix = 0x00;
@@ -621,7 +677,8 @@ static void pp_prefix_callback(void* _ctx, uint32_t index) {
 }
 void scene_continuity_pp_prefix_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
     bool found = false;
@@ -632,6 +689,7 @@ void scene_continuity_pp_prefix_on_enter(void* _ctx) {
         found = true;
         selected = 0;
     }
+
     for(uint8_t i = 0; i < pp_prefixes_count; i++) {
         submenu_add_item(submenu, pp_prefixes[i].name, i + 1, pp_prefix_callback, ctx);
         if(!found && cfg->data.proximity_pair.prefix == pp_prefixes[i].value) {
@@ -641,7 +699,6 @@ void scene_continuity_pp_prefix_on_enter(void* _ctx) {
     }
     submenu_add_item(submenu, "Custom", pp_prefixes_count + 1, pp_prefix_callback, ctx);
     if(!found) {
-        found = true;
         selected = pp_prefixes_count + 1;
     }
 
@@ -660,12 +717,16 @@ void scene_continuity_pp_prefix_on_exit(void* _ctx) {
 
 static void pp_prefix_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
+    cfg->data.proximity_pair.prefix = (ctx->byte_store[0] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
 void scene_continuity_pp_prefix_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Enter custom Prefix");
@@ -683,23 +744,30 @@ bool scene_continuity_pp_prefix_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_pp_prefix_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
-    cfg->data.proximity_pair.prefix = (ctx->byte_store[0] << 0x00);
+    UNUSED(_ctx);
 }
 
 static void na_action_callback(void* _ctx, uint32_t index) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     switch(index) {
     case 0:
-        cfg->data.nearby_action.action = 0x00;
+        payload->mode = PayloadModeRandom;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
     case na_actions_count + 1:
         scene_manager_next_scene(ctx->scene_manager, SceneContinuityNaActionCustom);
         break;
+    case na_actions_count + 2:
+        payload->mode = PayloadModeBruteforce;
+        payload->bruteforce.counter = 0;
+        payload->bruteforce.value = cfg->data.nearby_action.action;
+        payload->bruteforce.size = 1;
+        scene_manager_previous_scene(ctx->scene_manager);
+        break;
     default:
+        payload->mode = PayloadModeValue;
         cfg->data.nearby_action.action = na_actions[index - 1].value;
         scene_manager_previous_scene(ctx->scene_manager);
         break;
@@ -707,28 +775,34 @@ static void na_action_callback(void* _ctx, uint32_t index) {
 }
 void scene_continuity_na_action_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     Submenu* submenu = ctx->submenu;
     uint32_t selected = 0;
-    bool found = false;
     submenu_reset(submenu);
 
     submenu_add_item(submenu, "Random", 0, na_action_callback, ctx);
-    if(cfg->data.nearby_action.action == 0x00) {
-        found = true;
+    if(payload->mode == PayloadModeRandom) {
         selected = 0;
     }
+
+    bool found = false;
     for(uint8_t i = 0; i < na_actions_count; i++) {
         submenu_add_item(submenu, na_actions[i].name, i + 1, na_action_callback, ctx);
-        if(!found && cfg->data.nearby_action.action == na_actions[i].value) {
+        if(!found && payload->mode == PayloadModeValue &&
+           cfg->data.nearby_action.action == na_actions[i].value) {
             found = true;
             selected = i + 1;
         }
     }
     submenu_add_item(submenu, "Custom", na_actions_count + 1, na_action_callback, ctx);
-    if(!found) {
-        found = true;
+    if(!found && payload->mode == PayloadModeValue) {
         selected = na_actions_count + 1;
+    }
+
+    submenu_add_item(submenu, "Bruteforce", na_actions_count + 2, na_action_callback, ctx);
+    if(payload->mode == PayloadModeBruteforce) {
+        selected = na_actions_count + 2;
     }
 
     submenu_set_selected_item(submenu, selected);
@@ -746,12 +820,17 @@ void scene_continuity_na_action_on_exit(void* _ctx) {
 
 static void na_action_custom_callback(void* _ctx) {
     Ctx* ctx = _ctx;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
+    payload->mode = PayloadModeValue;
+    cfg->data.nearby_action.action = (ctx->byte_store[0] << 0x00);
     scene_manager_previous_scene(ctx->scene_manager);
     scene_manager_previous_scene(ctx->scene_manager);
 }
 void scene_continuity_na_action_custom_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Enter custom Action Type");
@@ -769,9 +848,7 @@ bool scene_continuity_na_action_custom_on_event(void* _ctx, SceneManagerEvent ev
     return false;
 }
 void scene_continuity_na_action_custom_on_exit(void* _ctx) {
-    Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
-    cfg->data.nearby_action.action = (ctx->byte_store[0] << 0x00);
+    UNUSED(_ctx);
 }
 
 static void na_flags_callback(void* _ctx) {
@@ -780,7 +857,8 @@ static void na_flags_callback(void* _ctx) {
 }
 void scene_continuity_na_flags_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     ByteInput* byte_input = ctx->byte_input;
 
     byte_input_set_header_text(byte_input, "Press back for automatic");
@@ -801,6 +879,7 @@ bool scene_continuity_na_flags_on_event(void* _ctx, SceneManagerEvent event) {
 }
 void scene_continuity_na_flags_on_exit(void* _ctx) {
     Ctx* ctx = _ctx;
-    ContinuityCfg* cfg = &ctx->attack->payload.cfg.continuity;
+    Payload* payload = &ctx->attack->payload;
+    ContinuityCfg* cfg = &payload->cfg.continuity;
     cfg->data.nearby_action.flags = (ctx->byte_store[0] << 0x00);
 }
