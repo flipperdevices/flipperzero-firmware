@@ -8,17 +8,19 @@
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <notification/notification_messages.h>
 #include <nrf24.h>
 #include "mousejacker_ducky.h"
-#include "NRF24_Mouse_Jacker_icons.h"
+#include <dolphin/dolphin.h>
+#include "nrf24_mouse_jacker_ms_icons.h"
 
 #define TAG "mousejacker"
 #define MICROSOFT_MIN_CHANNEL 49
 #define LOGITECH_MAX_CHANNEL 85
-#define NRFSNIFF_APP_PATH_FOLDER "/ext/nrfsniff"
+#define NRFSNIFF_APP_PATH_FOLDER "/ext/apps_data/nrfsniff"
 #define NRFSNIFF_APP_PATH_EXTENSION ".txt"
 #define NRFSNIFF_APP_FILENAME "addresses.txt"
-#define MOUSEJACKER_APP_PATH_FOLDER "/ext/mousejacker"
+#define LOCAL_BADUSB_FOLDER "/ext/badusb"
 #define MOUSEJACKER_APP_PATH_EXTENSION ".txt"
 #define MAX_ADDRS 100
 
@@ -108,7 +110,7 @@ static bool open_ducky_script(Stream* stream, PluginState* plugin_state) {
     bool result = false;
     FuriString* path;
     path = furi_string_alloc();
-    furi_string_set(path, MOUSEJACKER_APP_PATH_FOLDER);
+    furi_string_set(path, LOCAL_BADUSB_FOLDER);
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
@@ -184,6 +186,7 @@ static bool process_ducky_file(
             mj_process_ducky_script(
                 nrf24_HANDLE, addr, addr_size, rate, (char*)file_buf, plugin_state);
             FURI_LOG_D(TAG, "finished execution");
+            dolphin_deed(getRandomDeed());
             loaded = true;
         } else {
             FURI_LOG_D(TAG, "load failed. file size: %d", file_size);
@@ -259,7 +262,7 @@ static int32_t mj_worker_thread(void* ctx) {
             5,
             loaded_addrs[addr_idx][0],
             2,
-	    //MICROSOFT_MIN_CHANNEL,
+            //MICROSOFT_MIN_CHANNEL,
             LOGITECH_MAX_CHANNEL,
             true);
         ducky_ok = process_ducky_file(
@@ -299,6 +302,8 @@ int32_t mousejacker_app(void* p) {
         return 255;
     }
 
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, plugin_state);
@@ -309,7 +314,7 @@ int32_t mousejacker_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     plugin_state->storage = furi_record_open(RECORD_STORAGE);
-    storage_common_mkdir(plugin_state->storage, MOUSEJACKER_APP_PATH_FOLDER);
+    storage_common_mkdir(plugin_state->storage, LOCAL_BADUSB_FOLDER);
     plugin_state->file_stream = file_stream_alloc(plugin_state->storage);
 
     plugin_state->mjthread = furi_thread_alloc();
@@ -327,6 +332,14 @@ int32_t mousejacker_app(void* p) {
         plugin_state->addr_err = true;
     }
     stream_free(plugin_state->file_stream);
+
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+
     nrf24_init();
 
     PluginEvent event;
@@ -362,6 +375,7 @@ int32_t mousejacker_app(void* p) {
                             if(!plugin_state->is_thread_running) {
                                 start_mjthread(plugin_state);
                                 view_port_update(view_port);
+                                notification_message(notification, &sequence_error);
                             }
                         }
                         break;
@@ -381,20 +395,25 @@ int32_t mousejacker_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_thread_free(plugin_state->mjthread);
     nrf24_deinit();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
+    furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_STORAGE);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
+
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }

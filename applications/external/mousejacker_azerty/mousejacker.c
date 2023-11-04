@@ -18,7 +18,7 @@
 #define NRFSNIFF_APP_PATH_FOLDER "/ext/apps_data/nrfsniff"
 #define NRFSNIFF_APP_PATH_EXTENSION ".txt"
 #define NRFSNIFF_APP_FILENAME "addresses.txt"
-#define MOUSEJACKER_APP_PATH_FOLDER "/ext/apps_data/mousejacker"
+#define LOCAL_BADUSB_FOLDER "/ext/bad_usb"
 #define MOUSEJACKER_APP_PATH_EXTENSION ".txt"
 #define MAX_ADDRS 100
 
@@ -108,7 +108,7 @@ static bool open_ducky_script(Stream* stream, PluginState* plugin_state) {
     bool result = false;
     FuriString* path;
     path = furi_string_alloc();
-    furi_string_set(path, MOUSEJACKER_APP_PATH_FOLDER);
+    furi_string_set(path, LOCAL_BADUSB_FOLDER);
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(
@@ -299,12 +299,6 @@ int32_t mousejacker_app_azerty(void* p) {
         return 255;
     }
 
-    uint8_t attempts = 0;
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        furi_delay_ms(10);
-    }
-
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, plugin_state);
@@ -315,7 +309,7 @@ int32_t mousejacker_app_azerty(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     plugin_state->storage = furi_record_open(RECORD_STORAGE);
-    storage_common_mkdir(plugin_state->storage, MOUSEJACKER_APP_PATH_FOLDER);
+    storage_common_mkdir(plugin_state->storage, LOCAL_BADUSB_FOLDER);
     plugin_state->file_stream = file_stream_alloc(plugin_state->storage);
 
     plugin_state->mjthread = furi_thread_alloc();
@@ -333,6 +327,14 @@ int32_t mousejacker_app_azerty(void* p) {
         plugin_state->addr_err = true;
     }
     stream_free(plugin_state->file_stream);
+
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+
     nrf24_init();
 
     PluginEvent event;
@@ -402,7 +404,7 @@ int32_t mousejacker_app_azerty(void* p) {
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
 
-    if(furi_hal_power_is_otg_enabled()) {
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
 

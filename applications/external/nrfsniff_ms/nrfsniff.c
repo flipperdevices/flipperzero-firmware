@@ -4,6 +4,8 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
+#include <storage/storage.h>
 
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
@@ -15,7 +17,7 @@
 #define MAX_ADDRS 100
 #define MAX_CONFIRMED 32
 
-#define NRFSNIFF_APP_PATH_FOLDER "/ext/nrfsniff"
+#define NRFSNIFF_APP_PATH_FOLDER EXT_PATH("apps_data/nrfsniff")
 #define NRFSNIFF_APP_FILENAME "addresses.txt"
 #define TAG "nrfsniff"
 
@@ -276,7 +278,8 @@ static void wrap_up(Storage* storage, NotificationApp* notification) {
         hexlify(addr, 5, trying);
         FURI_LOG_I(TAG, "trying address %s", trying);
         //ch = nrf24_find_channel(nrf24_HANDLE, addr, addr, 5, rate, 2, LOGITECH_MAX_CHANNEL, false);
-        ch = nrf24_find_channel(nrf24_HANDLE, addr, addr, 5, rate, MICROSOFT_MIN_CHANNEL, LOGITECH_MAX_CHANNEL, false);
+        ch = nrf24_find_channel(
+            nrf24_HANDLE, addr, addr, 5, rate, MICROSOFT_MIN_CHANNEL, LOGITECH_MAX_CHANNEL, false);
         FURI_LOG_I(TAG, "find_channel returned %d", (int)ch);
         if(ch > LOGITECH_MAX_CHANNEL) {
             alt_address(addr, altaddr);
@@ -284,7 +287,14 @@ static void wrap_up(Storage* storage, NotificationApp* notification) {
             FURI_LOG_I(TAG, "trying alternate address %s", trying);
             ch = nrf24_find_channel(
                 //nrf24_HANDLE, altaddr, altaddr, 5, rate, 2, LOGITECH_MAX_CHANNEL, false);
-                nrf24_HANDLE, altaddr, altaddr, 5, rate, MICROSOFT_MIN_CHANNEL, LOGITECH_MAX_CHANNEL, false);
+                nrf24_HANDLE,
+                altaddr,
+                altaddr,
+                5,
+                rate,
+                MICROSOFT_MIN_CHANNEL,
+                LOGITECH_MAX_CHANNEL,
+                false);
             FURI_LOG_I(TAG, "find_channel returned %d", (int)ch);
             memcpy(addr, altaddr, 5);
         }
@@ -293,6 +303,7 @@ static void wrap_up(Storage* storage, NotificationApp* notification) {
             hexlify(addr, 5, top_address);
             found_count++;
             save_addr_to_file(storage, addr, 5, notification);
+            dolphin_deed(getRandomDeed());
             if(confirmed_idx < MAX_CONFIRMED) memcpy(confirmed[confirmed_idx++], addr, 5);
             break;
         }
@@ -329,6 +340,13 @@ int32_t nrfsniff_app(void* p) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(plugin_state);
         return 255;
+    }
+
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
     }
 
     nrf24_init();
@@ -438,8 +456,8 @@ int32_t nrfsniff_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     clear_cache();
@@ -456,6 +474,10 @@ int32_t nrfsniff_app(void* p) {
     furi_message_queue_free(event_queue);
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
+
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }

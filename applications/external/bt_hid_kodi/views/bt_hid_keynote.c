@@ -3,8 +3,7 @@
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
-
-#include "assets_icons.h"
+#include <bt_hid_kodi_icons.h>
 
 const char* bt_hid_hold_exit = "Hold      : exit";
 const char* bt_hid_hold_space = "Hold      : space";
@@ -178,13 +177,13 @@ static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* eve
                 }
                 if(event->key == InputKeyOk) {
                     if(!model->switch_space_return) {
-	                furi_hal_bt_hid_kb_press(HID_KEYBOARD_SPACEBAR);
-	                furi_hal_bt_hid_kb_release(HID_KEYBOARD_SPACEBAR);
-		    } else {
-		        furi_hal_bt_hid_kb_press(HID_KEYBOARD_RETURN);
-			furi_hal_bt_hid_kb_release(HID_KEYBOARD_RETURN);
-         	    }
-               }
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_SPACEBAR);
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_SPACEBAR);
+                    } else {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_RETURN);
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_RETURN);
+                    }
+                }
             }
         },
         true);
@@ -198,14 +197,14 @@ static bool bt_hid_keynote_input_callback(InputEvent* event, void* context) {
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
         furi_hal_bt_hid_kb_release_all();
     } else if(event->type == InputTypeLong && event->key == InputKeyOk) {
-    with_view_model(
-        bt_hid_keynote->view,
-        BtHidKeynoteModel * model,
-        {
-	    model->switch_space_return = !model->switch_space_return;
-            consumed = true;
-        },
-        true);
+        with_view_model(
+            bt_hid_keynote->view,
+            BtHidKeynoteModel * model,
+            {
+                model->switch_space_return = !model->switch_space_return;
+                consumed = true;
+            },
+            true);
     } else {
         bt_hid_keynote_process(bt_hid_keynote, event);
         consumed = true;

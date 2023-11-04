@@ -6,8 +6,26 @@ static const char ducky_cmd_string[] = {"STRING "};
 static const char ducky_cmd_repeat[] = {"REPEAT "};
 
 // Bytes 0 to 3 are hardcoded for my specific mouse (they should be known after the sniffing but addresses.txt doesn't save them)
-static uint8_t MICROSOFT_HID_TEMPLATE[] =
-    {0x08, 0x90, 0x19, 0x01, 0x00, 0x00, 67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static uint8_t MICROSOFT_HID_TEMPLATE[] = {
+    0x08,
+    0x90,
+    0x19,
+    0x01,
+    0x00,
+    0x00,
+    67,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00,
+    0x00};
 
 uint8_t prev_hid = 0;
 uint8_t sequence_num = 0;

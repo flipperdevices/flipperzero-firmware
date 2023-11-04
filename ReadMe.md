@@ -40,6 +40,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
 - Updated: [Authenticator/TOTP v5.7.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [Added IoProxXSF, Paradox, Indala26, Viking, Pyramid, Keri, and Jablotron to RFID Fuzzer #4 (By SkeletonMan03)](https://github.com/DarkFlippers/Multi_Fuzzer/pull/4)
+- Added: [BT Remote for Kodi (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi)
+- Added: [Mouse Jacker for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms) `Req: NRF24`
+- Added: [NRF Sniffer for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/nrfsniff_ms) `Req: NRF24`
 
 <a name="release">
 
@@ -306,6 +309,7 @@ $ ./fbt dolphin_ext
 - [Bluetooth/USB Remote v1.5 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Accelerated Mouse Pointer (By LeeroysHub)](https://github.com/LeeroysHub/flipperzero-firmware-wPlugins/commit/f67680d5b004a72419550a8268802030a8421643)
 - [BPM Tapper v1.1 (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Brainfuck v1.1 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
+- [BT Remote for Kodi (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi)
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [BT Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
@@ -390,6 +394,7 @@ $ ./fbt dolphin_ext
 - [Mifare Nested v1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - [Morse Code v1.1 (By wh00hw)](https://github.com/DarkFlippers/unleashed-firmware/pull/144)
 - [Mouse Jacker v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
+- [Mouse Jacker for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms) `Req: NRF24`
 - [Mouse Jiggler v1.1 (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
 - [Multi Converter v1.1 (By theisolinearchip)](https://github.com/theisolinearchip)
 - [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) [With Changes By qqMajiKpp/Haseo](https://github.com/qqmajikpp/)
@@ -408,6 +413,7 @@ $ ./fbt dolphin_ext
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
+- [NRF Sniffer for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/nrfsniff_ms) `Req: NRF24`
 - [NRF24 Batch v2.0 (By vad7)](https://github.com/vad7/nRF24-Batch)
 - [NRF24 Channel Scanner v1.3 (by htotoo)](https://github.com/htotoo/NRF24ChannelScanner)
 - [NRF24 Scanner v2.3 (By vad7)](https://github.com/vad7/nrf24scan)
