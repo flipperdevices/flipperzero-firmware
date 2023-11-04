@@ -103,4 +103,4 @@ void seader_ccid_XfrBlockToSlot(
     uint8_t slot,
     uint8_t* data,
     size_t len);
-size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len);
+size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len);

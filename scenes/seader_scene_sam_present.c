@@ -21,12 +21,14 @@ void seader_scene_sam_present_on_update(void* context) {
     Submenu* submenu = seader->submenu;
     submenu_reset(submenu);
 
+    /*
     submenu_add_item(
         submenu,
         "Read Picopass",
         SubmenuIndexReadPicopass,
         seader_scene_sam_present_submenu_callback,
         seader);
+        */
     submenu_add_item(
         submenu,
         "Read 14443A",
@@ -66,14 +68,14 @@ bool seader_scene_sam_present_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexReadPicopass) {
-                scene_manager_set_scene_state(
-                    seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexReadPicopass);
-                scene_manager_next_scene(seader->scene_manager, SeaderSceneReadPicopass);
+            scene_manager_set_scene_state(
+                seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexReadPicopass);
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneReadPicopass);
             consumed = true;
         } else if(event.event == SubmenuIndexRead14a) {
-                scene_manager_set_scene_state(
-                    seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexRead14a);
-                scene_manager_next_scene(seader->scene_manager, SeaderSceneRead14a);
+            scene_manager_set_scene_state(
+                seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexRead14a);
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneRead14a);
             consumed = true;
         } else if(event.event == SubmenuIndexSamInfo) {
             scene_manager_set_scene_state(

@@ -39,7 +39,6 @@ void seader_uart_set_baudrate(SeaderUartBridge* seader_uart, uint32_t baudrate) 
 }
 
 size_t seader_uart_process_buffer(Seader* seader, uint8_t* cmd, size_t cmd_len) {
-    SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader->uart;
     if(cmd_len < 2) {
         return cmd_len;
@@ -47,7 +46,7 @@ size_t seader_uart_process_buffer(Seader* seader, uint8_t* cmd, size_t cmd_len) 
 
     size_t consumed = 0;
     do {
-        consumed = seader_ccid_process(seader_worker, cmd, cmd_len);
+        consumed = seader_ccid_process(seader, cmd, cmd_len);
 
         if(consumed > 0) {
             memset(cmd, 0, consumed);

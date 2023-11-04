@@ -20,6 +20,8 @@ void seader_scene_read_14a_on_enter(void* context) {
     view_dispatcher_switch_to_view(seader->view_dispatcher, SeaderViewPopup);
 
     seader->poller = nfc_poller_alloc(seader->nfc, NfcProtocolIso14443_4a);
+
+    //nfc_config(seader->nfc, NfcModePoller, NfcTechIso14443a);
     nfc_poller_start(seader->poller, seader_worker_poller_callback_iso14443_4a, seader);
 
     seader_blink_start(seader);
@@ -46,9 +48,9 @@ bool seader_scene_read_14a_on_event(void* context, SceneManagerEvent event) {
 void seader_scene_read_14a_on_exit(void* context) {
     Seader* seader = context;
 
-    if (seader->poller) {
-      nfc_poller_stop(seader->poller);
-      nfc_poller_free(seader->poller);
+    if(seader->poller) {
+        nfc_poller_stop(seader->poller);
+        nfc_poller_free(seader->poller);
     }
 
     // Clear view

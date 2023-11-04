@@ -26,7 +26,6 @@
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
 
 #include <nfc/nfc_poller.h>
-#include <nfc/nfc_scanner.h>
 
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_data_generator.h>
@@ -106,7 +105,6 @@ struct Seader {
 
     Nfc* nfc;
     NfcPoller* poller;
-    NfcScanner* scanner;
 
     NfcDevice* nfc_device;
 };

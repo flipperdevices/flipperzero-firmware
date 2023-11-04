@@ -130,7 +130,8 @@ void seader_ccid_XfrBlockToSlot(
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
 
-size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
+size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
+    SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
     CCID_Message message;
     message.consumed = 0;
@@ -302,7 +303,7 @@ size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd
         if(message.bMessageType == CCID_MESSAGE_TYPE_RDR_to_PC_DataBlock) {
             if(hasSAM) {
                 if(message.bSlot == sam_slot) {
-                    seader_worker_process_sam_message(seader_worker, &message);
+                    seader_worker_process_sam_message(seader, &message);
                 } else {
                     FURI_LOG_D(TAG, "Discarding message on non-sam slot");
                 }

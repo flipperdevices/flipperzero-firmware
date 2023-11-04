@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
+
 #include "seader_credential.h"
 #include "seader_bridge.h"
 
@@ -51,8 +52,7 @@ void seader_worker_start(
     void* context);
 
 void seader_worker_stop(SeaderWorker* seader_worker);
-void seader_worker_process_sam_message(SeaderWorker* seader_worker, CCID_Message* message);
+void seader_worker_process_sam_message(Seader* seader, CCID_Message* message);
 void seader_worker_send_version(SeaderWorker* seader_worker);
-
 
 NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void* context);
