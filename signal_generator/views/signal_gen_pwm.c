@@ -3,6 +3,8 @@
 #include <gui/elements.h>
 #include <signal_generator_icons.h>
 
+#include <assets_icons.h>
+
 typedef enum {
     LineIndexChannel,
     LineIndexFrequency,
