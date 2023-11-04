@@ -532,8 +532,8 @@ int32_t solitaire_app(void *p) {
                 processing = game_state->processing;
                 game_state->input = InputKeyMAX;
             }
-        } else {
-            FURI_LOG_W(APP_NAME, "osMessageQueue: event timeout");
+            // } else {
+            //     FURI_LOG_W(APP_NAME, "osMessageQueue: event timeout");
             // event timeout
         }
 
