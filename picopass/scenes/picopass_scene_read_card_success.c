@@ -1,5 +1,6 @@
 #include "../picopass_i.h"
 #include <dolphin/dolphin.h>
+#include <picopass_keys.h>
 
 void picopass_scene_read_card_success_widget_callback(
     GuiButtonType result,

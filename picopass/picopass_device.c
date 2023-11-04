@@ -227,8 +227,8 @@ static bool picopass_device_load_data(PicopassDevice* dev, FuriString* path, boo
         }
         if(!block_read) break;
 
-        if(picopass_device_parse_credential(AA1, pacs) != ERR_NONE) break;
-        if(picopass_device_parse_wiegand(pacs->credential, pacs) != ERR_NONE) break;
+        picopass_device_parse_credential(AA1, pacs);
+        picopass_device_parse_wiegand(pacs->credential, pacs);
 
         parsed = true;
     } while(false);
@@ -345,7 +345,7 @@ void picopass_device_set_loading_callback(
     dev->loading_cb_ctx = context;
 }
 
-ReturnCode picopass_device_decrypt(uint8_t* enc_data, uint8_t* dec_data) {
+void picopass_device_decrypt(uint8_t* enc_data, uint8_t* dec_data) {
     uint8_t key[32] = {0};
     memcpy(key, picopass_iclass_decryptionkey, sizeof(picopass_iclass_decryptionkey));
     mbedtls_des3_context ctx;
@@ -353,35 +353,20 @@ ReturnCode picopass_device_decrypt(uint8_t* enc_data, uint8_t* dec_data) {
     mbedtls_des3_set2key_dec(&ctx, key);
     mbedtls_des3_crypt_ecb(&ctx, enc_data, dec_data);
     mbedtls_des3_free(&ctx);
-    return ERR_NONE;
 }
 
-ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs) {
-    ReturnCode err;
-
+void picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs) {
     pacs->biometrics = AA1[6].data[4];
     pacs->pin_length = AA1[6].data[6] & 0x0F;
     pacs->encryption = AA1[6].data[7];
 
     if(pacs->encryption == PicopassDeviceEncryption3DES) {
         FURI_LOG_D(TAG, "3DES Encrypted");
-        err = picopass_device_decrypt(AA1[7].data, pacs->credential);
-        if(err != ERR_NONE) {
-            FURI_LOG_E(TAG, "decrypt error %d", err);
-            return err;
-        }
+        picopass_device_decrypt(AA1[7].data, pacs->credential);
 
-        err = picopass_device_decrypt(AA1[8].data, pacs->pin0);
-        if(err != ERR_NONE) {
-            FURI_LOG_E(TAG, "decrypt error %d", err);
-            return err;
-        }
+        picopass_device_decrypt(AA1[8].data, pacs->pin0);
 
-        err = picopass_device_decrypt(AA1[9].data, pacs->pin1);
-        if(err != ERR_NONE) {
-            FURI_LOG_E(TAG, "decrypt error %d", err);
-            return err;
-        }
+        picopass_device_decrypt(AA1[9].data, pacs->pin1);
     } else if(pacs->encryption == PicopassDeviceEncryptionNone) {
         FURI_LOG_D(TAG, "No Encryption");
         memcpy(pacs->credential, AA1[7].data, PICOPASS_BLOCK_LEN);
@@ -394,11 +379,9 @@ ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pa
     }
 
     pacs->sio = (AA1[10].data[0] == 0x30); // rough check
-
-    return ERR_NONE;
 }
 
-ReturnCode picopass_device_parse_wiegand(uint8_t* credential, PicopassPacs* pacs) {
+void picopass_device_parse_wiegand(uint8_t* credential, PicopassPacs* pacs) {
     uint32_t* halves = (uint32_t*)credential;
     if(halves[0] == 0) {
         uint8_t leading0s = __builtin_clz(REVERSE_BYTES_U32(halves[1]));
@@ -415,8 +398,6 @@ ReturnCode picopass_device_parse_wiegand(uint8_t* credential, PicopassPacs* pacs
     swapped = swapped ^ sentinel;
     memcpy(credential, &swapped, sizeof(uint64_t));
     FURI_LOG_D(TAG, "PACS: (%d) %016llx", pacs->bitLength, swapped);
-
-    return ERR_NONE;
 }
 
 bool picopass_device_hid_csn(PicopassDevice* dev) {

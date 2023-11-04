@@ -102,7 +102,6 @@ typedef struct {
 typedef struct {
     PicopassBlock AA1[PICOPASS_MAX_APP_LIMIT];
     PicopassPacs pacs;
-    IclassEliteDictAttackData iclass_elite_dict_attack_data;
 } PicopassDeviceData;
 
 typedef struct {
@@ -147,6 +146,6 @@ void picopass_device_set_loading_callback(
     PicopassLoadingCallback callback,
     void* context);
 
-ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs);
-ReturnCode picopass_device_parse_wiegand(uint8_t* credential, PicopassPacs* pacs);
+void picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pacs);
+void picopass_device_parse_wiegand(uint8_t* credential, PicopassPacs* pacs);
 bool picopass_device_hid_csn(PicopassDevice* dev);
