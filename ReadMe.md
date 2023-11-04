@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [BT Remote for Kodi (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi)
 - Added: [Mouse Jacker for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms) `Req: NRF24`
 - Added: [NRF Sniffer for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/nrfsniff_ms) `Req: NRF24`
+- Updated: [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 
 <a name="release">
 
