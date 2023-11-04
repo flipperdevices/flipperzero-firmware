@@ -7,15 +7,19 @@
 #include <assets_icons.h>
 
 /**
- * Thanks to the author of metronome
+ * @brief draw button in top left corner of screen
+ *
+ * @author panki27 (https://github.com/panki27/Metronome)
  * @param canvas Canvas* 
- * @param str const char*
+ * @param str caption of button
  */
 void elements_button_top_left(Canvas* canvas, const char* str);
 
 /**
- * Thanks to the author of metronome
+ * @brief draw button in top right corner of screen
+ * 
+ * @author panki27 (https://github.com/panki27/Metronome)
  * @param canvas Canvas*
- * @param str const char*
+ * @param str caption of button
  */
 void elements_button_top_right(Canvas* canvas, const char* str);

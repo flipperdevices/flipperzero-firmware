@@ -34,17 +34,40 @@
 #include "views/shapshup_main_view.h"
 #include "helpers/shapshup_files.h"
 
-#define SHAPSHUP_TEXT_STORE_SIZE 256
-
+/**
+ * @brief max size of text field
+ * 
+ */
+#define SHAPSHUP_TEXT_STORE_SIZE 255
+/**
+ * @brief max size of filename
+ * 
+ */
 #define SHAPSHUP_MAX_LEN_NAME 64
+/**
+ * @brief default directory to show
+ * 
+ */
 #define SHAPSHUP_PATH EXT_PATH("subghz")
+/**
+ * @brief filename extension to show
+ * 
+ */
 #define SHAPSHUP_FILE_EXT ".sub"
+
+/**
+ * @brief used for DEBUG purpose
+ * 
+ */
 //#define SHAPSHUP_FAST_TRACK false
 
+/**
+ * @brief view mode
+ * 
+ */
 typedef enum {
     ShapShupViewNone,
     ShapShupViewMain,
-    ShapShupViewAttack,
     ShapShupViewTextInput,
     ShapShupViewDialogEx,
     ShapShupViewPopup,
@@ -53,6 +76,10 @@ typedef enum {
     ShapShupViewStack,
 } ShapShupView;
 
+/**
+ * @brief main state of app
+ * 
+ */
 struct ShapShupState {
     // GUI elements
     NotificationApp* notifications;
@@ -65,19 +92,13 @@ struct ShapShupState {
     DialogsApp* dialogs;
     Loading* loading;
 
-    // Other
     char text_store[SHAPSHUP_MAX_LEN_NAME];
     FuriString* file_path;
 
-    // Views
-    ShapShupMainView* view_main;
-    ShapShupView current_view;
-
-    // Scene
-    SceneManager* scene_manager;
-
-    // Storage
-    Storage* storage;
+    ShapShupMainView* view_main; /** View main, default view*/
+    ShapShupView current_view; /** @enum ShapShupView for track enums */
+    SceneManager* scene_manager; /** Scene manager*/
+    Storage* storage; /** Storage pointer */
 };
 
 /**

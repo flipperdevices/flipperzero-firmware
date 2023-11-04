@@ -14,7 +14,7 @@
 #include "shapshup_custom_event.h"
 
 #define TAG "ShapShupApp"
-#define DELAY_MS 100
+#define TICK_PERIOD 500
 
 static bool shapshup_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -51,7 +51,7 @@ ShapShupState* shapshup_alloc() {
     view_dispatcher_set_navigation_event_callback(
         instance->view_dispatcher, shapshup_back_event_callback);
     view_dispatcher_set_tick_event_callback(
-        instance->view_dispatcher, shapshup_tick_event_callback, 500);
+        instance->view_dispatcher, shapshup_tick_event_callback, TICK_PERIOD);
 
     //Dialog
     instance->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -165,7 +165,7 @@ void shapshup_show_loading_popup(void* context, bool show) {
     if(show) {
         // Raise timer priority so that animations can play
         furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
-        view_dispatcher_switch_to_view(instance->view_dispatcher, ShapShupViewPopup);
+        view_dispatcher_switch_to_view(instance->view_dispatcher, ShapShupViewLoading);
     } else {
         // Restore default timer priority
         furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
@@ -186,7 +186,12 @@ void shapshup_popup_closed_callback(void* context) {
         instance->view_dispatcher, ShapShupCustomEventTypePopupClosed);
 }
 
-// ENTRYPOINT
+/**
+ * @brief Entrypoint
+ * 
+ * @param p 
+ * @return int32_t 
+ */
 int32_t shapshup_app(void* p) {
     UNUSED(p);
 
