@@ -1,0 +1,15 @@
+App(
+    appid="remote_kodi",
+    name="Remote for Kodi",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bt_hid_kodi",
+    stack_size=1 * 1024,
+    fap_icon_assets_symbol="bt_hid_kodi",
+    fap_icon="bt_remote_10px.png",
+    fap_icon_assets="assets",
+    fap_category="Bluetooth",
+    fap_author="coded-with-claws",
+    fap_weburl="https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi",
+    fap_version=(1, 0),
+    fap_description="Application Bluetooth remote Keynote for Kodi (original app + feature: long press on OK to switch between Space and Return (useful for Kodi to navigate the menus))",
+)

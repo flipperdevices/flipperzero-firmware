@@ -1,0 +1,23 @@
+App(
+    appid="mouse_jacker_ms",
+    name="Mouse Jacker MS",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="mousejacker_app",
+    stack_size=2 * 1024,
+    fap_icon_assets_symbol="nrf24_mouse_jacker_ms",
+    fap_icon="mouse_10px.png",
+    fap_category="GPIO/NRF24",
+    fap_icon_assets="images",
+    fap_private_libs=[
+        Lib(
+            name="nrf24",
+            sources=[
+                "nrf24.c",
+            ],
+        ),
+    ],
+    fap_author="coded-with-claws",
+    fap_weburl="https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms",
+    fap_version=(1, 0),
+    fap_description="Applications Mousejacker for Microsoft mouse (hardcoded)",
+)

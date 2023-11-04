@@ -1,0 +1,22 @@
+App(
+    appid="sniffer_ms",
+    name="Sniffer MS",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nrfsniff_app",
+    stack_size=2 * 1024,
+    fap_icon_assets_symbol="nrf24_sniffer_ms",
+    fap_icon="nrfsniff_10px.png",
+    fap_category="GPIO/NRF24",
+    fap_private_libs=[
+        Lib(
+            name="nrf24",
+            sources=[
+                "nrf24.c",
+            ],
+        ),
+    ],
+    fap_author="coded-with-claws",
+    fap_weburl="https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/nrfsniff_ms",
+    fap_version=(1, 0),
+    fap_description="Applications NRF Sniff & Mousejacker for Microsoft mouse (hardcoded)",
+)
