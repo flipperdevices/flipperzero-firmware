@@ -124,11 +124,23 @@ int32_t evil_portal_app(void* p) {
     UNUSED(p);
     Evil_PortalApp* evil_portal_app = evil_portal_app_alloc();
 
+    uint8_t attempts = 0;
+    bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
+
     evil_portal_app->uart = evil_portal_uart_init(evil_portal_app);
 
     view_dispatcher_run(evil_portal_app->view_dispatcher);
 
     evil_portal_app_free(evil_portal_app);
+
+    if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }
