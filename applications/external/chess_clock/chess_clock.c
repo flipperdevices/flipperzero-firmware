@@ -129,7 +129,8 @@ int32_t chess_clock_app() {
                 plugin_state->last_tick = now;
             } else {
                 plugin_state->time_left_p1 -= now - plugin_state->last_tick;
-                if(plugin_state->time_left_p1 <= 0 || plugin_state->time_left_p1 >= UINT32_MAX - 1000) {
+                if(plugin_state->time_left_p1 <= 0 ||
+                   plugin_state->time_left_p1 >= UINT32_MAX - 1000) {
                     plugin_state->time_left_p1 = 0;
                     plugin_state->state = ChessClockStateGameOver;
                     notification_message(notification, &sequence_set_only_blue_255);
@@ -146,7 +147,8 @@ int32_t chess_clock_app() {
                 plugin_state->last_tick = now;
             } else {
                 plugin_state->time_left_p2 -= now - plugin_state->last_tick;
-                if(plugin_state->time_left_p2 <= 0 || plugin_state->time_left_p2 >= UINT32_MAX - 1000) {
+                if(plugin_state->time_left_p2 <= 0 ||
+                   plugin_state->time_left_p2 >= UINT32_MAX - 1000) {
                     plugin_state->time_left_p2 = 0;
                     plugin_state->state = ChessClockStateGameOver;
                     notification_message(notification, &sequence_set_only_green_255);
