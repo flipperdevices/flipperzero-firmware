@@ -290,22 +290,12 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
 
                     // Save picture directly to ESP32-CAM.
-                    // @todo - Add this functionality.
+                    // @todo - Future functionality.
                     // data[0] = 'P';
                     // furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
 
-                    // if(model->flash) {
-                    //     data[0] = 'F';
-                    //     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
-                    //     furi_delay_ms(50);
-                    // }
-
                     // Take a picture.
                     save_image(model);
-
-                    // if(model->flash) {
-                    //     data[0] = 'f';
-                    // }
                     instance->callback(CameraSuiteCustomEventSceneCameraOk, instance->context);
                 },
                 true);
@@ -328,11 +318,6 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
 
 static void camera_suite_view_camera_exit(void* context) {
     UNUSED(context);
-
-    // Set the camera flash to off.
-    uint8_t flash_off = 'f';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_off, 1);
-    furi_delay_ms(50);
 
     // Stop camera stream.
     uint8_t stop_camera = 's';
@@ -357,23 +342,16 @@ static void camera_suite_view_camera_enter(void* context) {
     // Get/set dither type.
     uint8_t dither_type = instance_context->dither;
     furi_hal_uart_tx(FuriHalUartIdUSART1, &dither_type, 1);
-    furi_delay_ms(75);
+    furi_delay_ms(50);
 
-    // Make sure the camera is not inverted.
-    uint8_t invert_camera = 'i';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &invert_camera, 1);
-    furi_delay_ms(75);
-
-    // Toggle flash on or off based on the current state. This will keep the
-    // flash on initially. However we're toggling it for now on input.
-    uint8_t flash_state = instance_context->flash ? 'F' : 'f';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_state, 1);
-    furi_delay_ms(75);
-
-    // Make sure we start with the flash off.
-    // uint8_t flash_state = 'f';
-    // furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_state, 1);
-    // furi_delay_ms(75);
+    // The camera always starts `S` with the flash off. Check to see if the
+    // flash is enabled and send the appropriate command to the ESP32-CAM.
+    // The flash will stay on the entire time the user is in the camera view.
+    if(instance_context->flash) {
+        uint8_t flash_on = 'F';
+        furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_on, 1);
+        furi_delay_ms(50);
+    }
 
     with_view_model(
         instance->view,
