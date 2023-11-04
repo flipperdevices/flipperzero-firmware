@@ -544,8 +544,8 @@ int32_t blackjack_app(void *p) {
                 tick(game_state);
                 processing = game_state->processing;
             }
-        } else {
-            FURI_LOG_D(APP_NAME, "osMessageQueue: event timeout");
+            // } else {
+            //     FURI_LOG_D(APP_NAME, "osMessageQueue: event timeout");
             // event timeout
         }
         view_port_update(view_port);
