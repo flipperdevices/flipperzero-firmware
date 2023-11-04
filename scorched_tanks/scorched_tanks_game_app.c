@@ -12,7 +12,7 @@
 #define PLAYER_INIT_AIM 45
 #define PLAYER_INIT_POWER 50
 #define ENEMY_INIT_LOCATION_X 108
-#define TANK_BARREL_LENGTH 7
+#define TANK_BARREL_LENGTH 8
 #define GRAVITY_FORCE (double)0.5
 #define MIN_GROUND_HEIGHT 35
 #define MAX_GROUND_HEIGHT 55
@@ -51,7 +51,7 @@ double scorched_tanks_tan[91] = {
     -2.246, -2.356, -2.475, -2.605, -2.747, -2.904, -3.078, -3.271, -3.487, -3.732, -4.011,
     -4.331, -4.704, -5.144, -5.671, -6.313, -7.115, -8.144, -9.513, -11.429, -14.298, -19.077,
     -28.627, -57.254, -90747.269};
-unsigned char scorched_tanks_ground_modifiers[SCREEN_WIDTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t scorched_tanks_ground_modifiers[SCREEN_WIDTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 typedef struct
 {
@@ -75,10 +75,10 @@ typedef struct
 
 typedef struct
 {
-    unsigned char locationX;
-    unsigned char hp;
+    uint8_t locationX;
+    uint8_t hp;
     int aimAngle;
-    unsigned char firePower;
+    uint8_t firePower;
 } Tank;
 
 typedef struct
@@ -90,9 +90,10 @@ typedef struct
     bool isShooting;
     int windSpeed;
     Point trajectory[SCREEN_WIDTH];
-    unsigned char trajectoryAnimationStep;
+    uint8_t trajectoryAnimationStep;
     PointDetailed bulletPosition;
     PointDetailed bulletVector;
+    FuriMutex* mutex;
 } Game;
 
 typedef enum
@@ -116,7 +117,7 @@ void scorched_tanks_generate_ground(Game *game_state)
 {
     int lastHeight = 45;
 
-    for (unsigned char a = 0; a < SCREEN_WIDTH; a++)
+    for (uint8_t a = 0; a < SCREEN_WIDTH; a++)
     {
         int diffHeight = scorched_tanks_random(-2, 3);
         int changeLength = scorched_tanks_random(1, 6);
@@ -223,9 +224,9 @@ void scorched_tanks_calculate_trajectory(Game *game_state)
     }
 }
 
-static void scorched_tanks_draw_tank(Canvas *const canvas, unsigned char x, unsigned char y, bool isPlayer)
+static void scorched_tanks_draw_tank(Canvas *const canvas, uint8_t x, uint8_t y, bool isPlayer)
 {
-    int lineIndex = -2;
+    uint8_t lineIndex = 0;
 
     if (isPlayer)
     {
@@ -263,12 +264,8 @@ static void scorched_tanks_draw_tank(Canvas *const canvas, unsigned char x, unsi
 
 static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
 {
-    const Game *game_state = acquire_mutex((ValueMutex *)ctx, 25);
-
-    if (game_state == NULL)
-    {
-        return;
-    }
+    const Game* game_state = ctx;
+    furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
     canvas_draw_frame(canvas, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -313,13 +310,13 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
         aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
         aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
 
-        aimX1 += 2;
-        aimX2 += 2;
+        aimX1 += 1;
+        aimX2 += 1;
     }
     else
     {
         aimX1 = game_state->enemy.locationX;
-        aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE + 2;
+        aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
 
         double sinFromAngle = scorched_tanks_sin[game_state->enemy.aimAngle];
         double cosFromAngle = scorched_tanks_cos[game_state->enemy.aimAngle];
@@ -328,11 +325,11 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
 
         aimX2 = aimX1 - (aimX2 - aimX1);
 
-        aimX1 -= 2;
-        aimX2 -= 2;
+        aimX1 -= 1;
+        aimX2 -= 1;
     }
 
-    canvas_draw_line(canvas, aimX1, aimY1 - 2, aimX2, aimY2 - 2);
+    canvas_draw_line(canvas, aimX1, aimY1 - 3, aimX2, aimY2 - 3);
 
     canvas_set_font(canvas, FontSecondary);
 
@@ -363,7 +360,7 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
         canvas_draw_str(canvas, 27, 10, buffer);
     }
 
-    release_mutex((ValueMutex *)ctx, game_state);
+    furi_mutex_release(game_state->mutex);
 }
 
 static void scorched_tanks_input_callback(InputEvent *input_event, FuriMessageQueue *event_queue)
@@ -432,14 +429,13 @@ static void scorched_tanks_aim_up(Game *game_state)
 
 static void scorched_tanks_aim_down(Game *game_state)
 {
-    if (!game_state->isShooting)
+    if (game_state->player.aimAngle > 0 && !game_state->isShooting)
     {
-        if (game_state->isPlayerTurn && game_state->player.aimAngle > 0)
+        if (game_state->isPlayerTurn)
         {
             game_state->player.aimAngle--;
         }
-
-        if (!game_state->isPlayerTurn && game_state->enemy.aimAngle > 0)
+        else
         {
             game_state->enemy.aimAngle--;
         }
@@ -461,8 +457,8 @@ static void scorched_tanks_fire(Game *game_state)
         {
             double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
             double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
-            unsigned char aimX1 = game_state->player.locationX;
-            unsigned char aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
+            uint8_t aimX1 = game_state->player.locationX;
+            uint8_t aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
             int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
             int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
             game_state->bulletPosition.x = aimX2;
@@ -474,8 +470,8 @@ static void scorched_tanks_fire(Game *game_state)
         {
             double sinFromAngle = scorched_tanks_sin[game_state->enemy.aimAngle];
             double cosFromAngle = scorched_tanks_cos[game_state->enemy.aimAngle];
-            unsigned char aimX1 = game_state->enemy.locationX;
-            unsigned char aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
+            uint8_t aimX1 = game_state->enemy.locationX;
+            uint8_t aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
             int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
             int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
             aimX2 = aimX1 - (aimX2 - aimX1);
@@ -513,16 +509,17 @@ int32_t scorched_tanks_game_app(void *p)
     Game *game_state = malloc(sizeof(Game));
     scorched_tanks_init_game(game_state);
 
-    ValueMutex state_mutex;
-    if (!init_mutex(&state_mutex, game_state, sizeof(ScorchedTanksEvent)))
+    game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!game_state->mutex)
     {
         FURI_LOG_E("ScorchedTanks", "cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(game_state);
         return 255;
     }
 
     ViewPort *view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, scorched_tanks_render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, scorched_tanks_render_callback, game_state);
     view_port_input_callback_set(view_port, scorched_tanks_input_callback, event_queue);
 
     FuriTimer *timer =
@@ -536,7 +533,8 @@ int32_t scorched_tanks_game_app(void *p)
     ScorchedTanksEvent event;
     for (bool processing = true; processing;)
     {
-        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 50);
+        furi_message_queue_get(event_queue, &event, 50);
+        furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
         if (event.type == EventTypeKey)
         { // && game->isPlayerTurn
@@ -562,6 +560,8 @@ int32_t scorched_tanks_game_app(void *p)
                 case InputKeyBack:
                     processing = false;
                     break;
+                default:
+                    break;
                 }
             }
         }
@@ -571,7 +571,7 @@ int32_t scorched_tanks_game_app(void *p)
         }
 
         view_port_update(view_port);
-        release_mutex(&state_mutex, game_state);
+        furi_mutex_release(game_state->mutex);
     }
 
     furi_timer_free(timer);
@@ -580,7 +580,7 @@ int32_t scorched_tanks_game_app(void *p)
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(game_state->mutex);
     free(game_state);
 
     return 0;
