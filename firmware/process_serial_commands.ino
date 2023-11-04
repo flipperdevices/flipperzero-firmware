@@ -43,15 +43,13 @@ void process_serial_commands() {
             set_hmirror(!cam->status.hmirror);
             break;
         case 's': // Stop stream.
-            // Reset the camera and model just in case `[ESP32] Camera` is
-            // subsequently used.
-            reset_camera();
-            reset_camera_model();
+            set_camera_model_defaults();
+            set_camera_defaults();
             camera_model.isStreamEnabled = false;
             break;
         case 'S': // Start stream.
-            reset_camera();
-            reset_camera_model();
+            set_camera_model_defaults();
+            set_camera_defaults();
             camera_model.isStreamEnabled = true;
             break;
         case '0': // Use Floyd Steinberg dithering.

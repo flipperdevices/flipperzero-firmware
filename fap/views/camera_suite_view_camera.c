@@ -191,10 +191,6 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
         switch(event->key) {
         // Camera: Stop stream.
         case InputKeyBack: {
-            // Set the camera flash to off.
-            uint8_t flash_off = 'f';
-            furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_off, 1);
-            furi_delay_ms(50);
             // Stop camera stream.
             uint8_t stop_camera = 's';
             furi_hal_uart_tx(FuriHalUartIdUSART1, &stop_camera, 1);
@@ -322,7 +318,6 @@ static void camera_suite_view_camera_exit(void* context) {
     // Stop camera stream.
     uint8_t stop_camera = 's';
     furi_hal_uart_tx(FuriHalUartIdUSART1, &stop_camera, 1);
-    furi_delay_ms(50);
 }
 
 static void camera_suite_view_camera_enter(void* context) {
@@ -337,21 +332,22 @@ static void camera_suite_view_camera_enter(void* context) {
     // Start camera stream.
     uint8_t start_camera = 'S';
     furi_hal_uart_tx(FuriHalUartIdUSART1, &start_camera, 1);
-    furi_delay_ms(75);
+    furi_delay_ms(50);
 
     // Get/set dither type.
     uint8_t dither_type = instance_context->dither;
     furi_hal_uart_tx(FuriHalUartIdUSART1, &dither_type, 1);
     furi_delay_ms(50);
 
-    // The camera always starts `S` with the flash off. Check to see if the
-    // flash is enabled and send the appropriate command to the ESP32-CAM.
-    // The flash will stay on the entire time the user is in the camera view.
-    if(instance_context->flash) {
-        uint8_t flash_on = 'F';
-        furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_on, 1);
-        furi_delay_ms(50);
-    }
+    // Make sure the camera is not inverted.
+    uint8_t invert_camera = 'i';
+    furi_hal_uart_tx(FuriHalUartIdUSART1, &invert_camera, 1);
+    furi_delay_ms(50);
+
+    // Toggle flash on or off based on the current state. If the user has this
+    // on the flash will stay on the entire time the user is in the camera view.
+    uint8_t flash_state = instance_context->flash ? 'F' : 'f';
+    furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_state, 1);
 
     with_view_model(
         instance->view,

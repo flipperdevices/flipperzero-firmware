@@ -22,7 +22,12 @@ echo https://github.com/CodyTolene/Flipper-Zero-Camera-Suite
 echo.
 echo ------------------------------------------------------------------------------
 echo Before you begin please make sure your Flipper Zero is plugged into your PC.
-echo Then on your Flipper Zero, open the GPIO menu and select USB-UART Bridge.
+echo Then on your Flipper Zero, open the GPIO menu and select USB-UART Bridge. In
+echo the USB-UART Bridge config menu, make sure the following configuration is set:
+echo - USB Channel = 1 (on newer firmware)
+echo - Baudrate = Host
+echo - UART Pins = 13,14
+echo - RTS/DTR Pins = None
 echo ------------------------------------------------------------------------------
 echo.
 pause

@@ -11,16 +11,13 @@
 void initialize_camera();
 
 /** Reset the camera to the default settings. */
-void reset_camera();
+void set_camera_defaults();
 
 /** Turn the flash off. */
 void turn_flash_off();
 
 /** Turn the flash on. */
 void turn_flash_on();
-
-/** If the flash state ever gets out of sync with the camera model, fix it. */
-void handle_flash_state();
 
 /** Add contrast to the camera. */
 void add_contrast();

@@ -5,6 +5,9 @@
 
 #include "../camera_suite.h"
 
+#ifndef CAMERA_SUITE_STORAGE_H
+#define CAMERA_SUITE_STORAGE_H
+
 #define BOILERPLATE_SETTINGS_FILE_VERSION 1
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/camera_suite")
 #define BOILERPLATE_SETTINGS_SAVE_PATH CONFIG_FILE_DIRECTORY_PATH "/camera_suite.conf"
@@ -22,3 +25,5 @@
 void camera_suite_save_settings(void* context);
 
 void camera_suite_read_settings(void* context);
+
+#endif
