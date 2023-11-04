@@ -60,7 +60,7 @@ static void camera_suite_view_camera_draw(Canvas* canvas, void* model) {
     }
 
     // Draw the guide if the camera is not initialized.
-    if(!uartDumpModel->initialized) {
+    if(!uartDumpModel->is_initialized) {
         canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 8, 12, "Connect the ESP32-CAM");
@@ -116,7 +116,7 @@ static void save_image(void* model) {
     // Free the file name after use.
     furi_string_free(file_name);
 
-    if(!uartDumpModel->inverted) {
+    if(!uartDumpModel->is_inverted) {
         for(size_t i = 0; i < FRAME_BUFFER_LENGTH; ++i) {
             uartDumpModel->pixels[i] = ~uartDumpModel->pixels[i];
         }
@@ -155,14 +155,14 @@ static void
     furi_assert(model);
     furi_assert(instance_context);
 
+    model->is_dithering_enabled = true;
+    model->is_inverted = false;
+    uint32_t orientation = instance_context->orientation;
+    model->orientation = orientation;
+
     for(size_t i = 0; i < FRAME_BUFFER_LENGTH; i++) {
         model->pixels[i] = 0;
     }
-
-    uint32_t orientation = instance_context->orientation;
-    model->flash = instance_context->flash;
-    model->inverted = false;
-    model->orientation = orientation;
 }
 
 static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
@@ -192,8 +192,8 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
         // Camera: Stop stream.
         case InputKeyBack: {
             // Stop camera stream.
-            uint8_t stop_camera = 's';
-            furi_hal_uart_tx(FuriHalUartIdUSART1, &stop_camera, 1);
+            data[0] = 's';
+            furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
             // Go back to the main menu.
             with_view_model(
                 instance->view,
@@ -203,7 +203,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                     instance->callback(CameraSuiteCustomEventSceneCameraBack, instance->context);
                 },
                 true);
-            break;
+            return true;
         }
         // Camera: Toggle invert on the ESP32-CAM.
         case InputKeyLeft: {
@@ -211,16 +211,15 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                 instance->view,
                 UartDumpModel * model,
                 {
-                    UNUSED(model);
                     camera_suite_play_happy_bump(instance->context);
                     camera_suite_play_input_sound(instance->context);
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
-                    if(model->inverted) {
+                    if(model->is_inverted) {
                         data[0] = 'i';
-                        model->inverted = false;
+                        model->is_inverted = false;
                     } else {
                         data[0] = 'I';
-                        model->inverted = true;
+                        model->is_inverted = true;
                     }
                     instance->callback(CameraSuiteCustomEventSceneCameraLeft, instance->context);
                 },
@@ -229,15 +228,20 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
         }
         // Camera: Enable/disable dithering.
         case InputKeyRight: {
-            data[0] = '>';
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
-                    UNUSED(model);
                     camera_suite_play_happy_bump(instance->context);
                     camera_suite_play_input_sound(instance->context);
                     camera_suite_led_set_rgb(instance->context, 0, 0, 255);
+                    if(model->is_dithering_enabled) {
+                        data[0] = 'd';
+                        model->is_dithering_enabled = false;
+                    } else {
+                        data[0] = 'D';
+                        model->is_dithering_enabled = true;
+                    }
                     instance->callback(CameraSuiteCustomEventSceneCameraRight, instance->context);
                 },
                 true);
@@ -304,20 +308,16 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
         }
         }
 
-        if(data[0] != 'X') {
+        if(data[0] != 'X') { // 'X' is the default/null value.
             // Send `data` to the ESP32-CAM.
             furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
         }
     }
-    return true;
+    return false;
 }
 
 static void camera_suite_view_camera_exit(void* context) {
-    UNUSED(context);
-
-    // Stop camera stream.
-    uint8_t stop_camera = 's';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &stop_camera, 1);
+    furi_assert(context);
 }
 
 static void camera_suite_view_camera_enter(void* context) {
@@ -332,22 +332,23 @@ static void camera_suite_view_camera_enter(void* context) {
     // Start camera stream.
     uint8_t start_camera = 'S';
     furi_hal_uart_tx(FuriHalUartIdUSART1, &start_camera, 1);
-    furi_delay_ms(50);
+    furi_delay_ms(10);
 
     // Get/set dither type.
     uint8_t dither_type = instance_context->dither;
     furi_hal_uart_tx(FuriHalUartIdUSART1, &dither_type, 1);
-    furi_delay_ms(50);
+    furi_delay_ms(10);
 
     // Make sure the camera is not inverted.
     uint8_t invert_camera = 'i';
     furi_hal_uart_tx(FuriHalUartIdUSART1, &invert_camera, 1);
-    furi_delay_ms(50);
+    furi_delay_ms(10);
 
     // Toggle flash on or off based on the current state. If the user has this
     // on the flash will stay on the entire time the user is in the camera view.
     uint8_t flash_state = instance_context->flash ? 'F' : 'f';
     furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_state, 1);
+    furi_delay_ms(10);
 
     with_view_model(
         instance->view,
@@ -403,7 +404,7 @@ static void process_ringbuffer(UartDumpModel* model, uint8_t const byte) {
     // Check whether the ring buffer is filled.
     if(model->ringbuffer_index >= RING_BUFFER_LENGTH) {
         model->ringbuffer_index = 0; // Reset the ring buffer index.
-        model->initialized = true; // Set the connection as successfully established.
+        model->is_initialized = true; // Set the connection as successfully established.
 
         // Compute the starting index for the row in the pixel buffer.
         size_t row_start_index = model->row_identifier * ROW_BUFFER_LENGTH;

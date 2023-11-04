@@ -10,8 +10,6 @@ void initialize_camera() {
 }
 
 void set_camera_defaults() {
-    turn_flash_off();
-
     // Get the camera sensor reference.
     sensor_t* cam = esp_camera_sensor_get();
 
@@ -24,14 +22,20 @@ void set_camera_defaults() {
 }
 
 void turn_flash_off() {
-    pinMode(FLASH_GPIO_NUM, OUTPUT);
-    digitalWrite(FLASH_GPIO_NUM, LOW);
+    int flashState = digitalRead(FLASH_GPIO_NUM);
+    if (flashState == HIGH) {
+        pinMode(FLASH_GPIO_NUM, OUTPUT);
+        digitalWrite(FLASH_GPIO_NUM, LOW);
+    }
     camera_model.isFlashEnabled = false;
 }
 
 void turn_flash_on() {
-    pinMode(FLASH_GPIO_NUM, OUTPUT);
-    digitalWrite(FLASH_GPIO_NUM, HIGH);
+    int flashState = digitalRead(FLASH_GPIO_NUM);
+    if (flashState == LOW) {
+        pinMode(FLASH_GPIO_NUM, OUTPUT);
+        digitalWrite(FLASH_GPIO_NUM, HIGH);
+    }
     camera_model.isFlashEnabled = true;
 }
 

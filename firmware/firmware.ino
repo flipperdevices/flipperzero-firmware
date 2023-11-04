@@ -26,7 +26,7 @@ void loop() {
             // Return the frame buffer back to the camera driver.
             esp_camera_fb_return(frame_buffer);
         }
-        delay(25);
+        delay(10);
     }
 
     process_serial_commands();

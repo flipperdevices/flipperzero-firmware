@@ -117,7 +117,7 @@ arduino-cli %CONFIG_FILE% upload -p %PORT_NUMBER% --fqbn !SELECTED_BOARD! %FIRMW
 if !ERRORLEVEL! EQU 0 (
     goto :uploadSuccess
 ) else (
-    if !RETRY_COUNT! lss 5 (
+    if !RETRY_COUNT! lss 3 (
         set /a RETRY_COUNT+=1
         goto :uploadLoop
     ) else (
