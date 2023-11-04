@@ -481,7 +481,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     char buffer[64];
 
     canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontBatteryPercent);
+    canvas_set_font(canvas, FontSecondary);
     uint8_t width = canvas_width(canvas);
 
     // First and last scale pin
