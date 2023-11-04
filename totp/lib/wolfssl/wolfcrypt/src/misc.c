@@ -104,13 +104,13 @@ masking and clearing memory logic.
 
     WC_MISC_STATIC WC_INLINE word32 rotlFixed(word32 x, word32 y)
     {
-        return (x << y) | (x >> (sizeof(y) * 8 - y));
+        return (x << y) | (x >> (sizeof(x) * 8 - y));
     }
 
 /* This routine performs a right circular arithmetic shift of <x> by <y> value. */
     WC_MISC_STATIC WC_INLINE word32 rotrFixed(word32 x, word32 y)
     {
-        return (x >> y) | (x << (sizeof(y) * 8 - y));
+        return (x >> y) | (x << (sizeof(x) * 8 - y));
     }
 
 #endif
@@ -120,14 +120,14 @@ masking and clearing memory logic.
 /* This routine performs a left circular arithmetic shift of <x> by <y> value */
 WC_MISC_STATIC WC_INLINE word16 rotlFixed16(word16 x, word16 y)
 {
-    return (x << y) | (x >> (sizeof(y) * 8 - y));
+    return (x << y) | (x >> (sizeof(x) * 8 - y));
 }
 
 
 /* This routine performs a right circular arithmetic shift of <x> by <y> value */
 WC_MISC_STATIC WC_INLINE word16 rotrFixed16(word16 x, word16 y)
 {
-    return (x >> y) | (x << (sizeof(y) * 8 - y));
+    return (x >> y) | (x << (sizeof(x) * 8 - y));
 }
 
 #endif /* WC_RC2 */
@@ -273,11 +273,11 @@ WC_MISC_STATIC WC_INLINE void xorbufout(void* out, const void* buf,
 {
     word32      i;
     byte*       o;
-    byte*       b;
+    const byte* b;
     const byte* m;
 
     o = (byte*)out;
-    b = (byte*)buf;
+    b = (const byte*)buf;
     m = (const byte*)mask;
 
 
@@ -285,6 +285,15 @@ WC_MISC_STATIC WC_INLINE void xorbufout(void* out, const void* buf,
             ((wc_ptr_t)b) % WOLFSSL_WORD_SIZE &&
             ((wc_ptr_t)b) % WOLFSSL_WORD_SIZE ==
                         ((wc_ptr_t)m) % WOLFSSL_WORD_SIZE) {
+        /* type-punning helpers */
+        union {
+            byte* bp;
+            wolfssl_word* wp;
+        } tpo;
+        union {
+            const byte* bp;
+            const wolfssl_word* wp;
+        } tpb, tpm;
         /* Alignment checks out. Possible to XOR words. */
         /* Move alignment so that it lines up with a
          * WOLFSSL_WORD_SIZE boundary */
@@ -292,8 +301,13 @@ WC_MISC_STATIC WC_INLINE void xorbufout(void* out, const void* buf,
             *(o++) = (byte)(*(b++) ^ *(m++));
             count--;
         }
-        XorWordsOut( (wolfssl_word**)&o, (const wolfssl_word**)&b,
-                     (const wolfssl_word**)&m, count / WOLFSSL_WORD_SIZE);
+        tpo.bp = o;
+        tpb.bp = b;
+        tpm.bp = m;
+        XorWordsOut( &tpo.wp, &tpb.wp, &tpm.wp, count / WOLFSSL_WORD_SIZE);
+        o = tpo.bp;
+        b = tpb.bp;
+        m = tpm.bp;
         count %= WOLFSSL_WORD_SIZE;
     }
 
@@ -326,6 +340,15 @@ WC_MISC_STATIC WC_INLINE void xorbuf(void* buf, const void* mask, word32 count)
 
     if (((wc_ptr_t)b) % WOLFSSL_WORD_SIZE ==
             ((wc_ptr_t)m) % WOLFSSL_WORD_SIZE) {
+        /* type-punning helpers */
+        union {
+            byte* bp;
+            wolfssl_word* wp;
+        } tpb;
+        union {
+            const byte* bp;
+            const wolfssl_word* wp;
+        } tpm;
         /* Alignment checks out. Possible to XOR words. */
         /* Move alignment so that it lines up with a
          * WOLFSSL_WORD_SIZE boundary */
@@ -333,8 +356,11 @@ WC_MISC_STATIC WC_INLINE void xorbuf(void* buf, const void* mask, word32 count)
             *(b++) ^= *(m++);
             count--;
         }
-        XorWords( (wolfssl_word**)&b,
-                  (const wolfssl_word**)&m, count / WOLFSSL_WORD_SIZE);
+        tpb.bp = b;
+        tpm.bp = m;
+        XorWords( &tpb.wp, &tpm.wp, count / WOLFSSL_WORD_SIZE);
+        b = tpb.bp;
+        m = tpm.bp;
         count %= WOLFSSL_WORD_SIZE;
     }
 
@@ -470,6 +496,15 @@ WC_MISC_STATIC WC_INLINE void ato32(const byte* c, word32* wc_u32)
               ((word32)c[1] << 16) |
               ((word32)c[2] << 8) |
                (word32)c[3];
+}
+
+/* convert opaque to 32 bit integer. Interpret as little endian. */
+WC_MISC_STATIC WC_INLINE void ato32le(const byte* c, word32* wc_u32)
+{
+    *wc_u32 =  (word32)c[0] |
+              ((word32)c[1] << 8) |
+              ((word32)c[2] << 16) |
+              ((word32)c[3] << 24);
 }
 
 

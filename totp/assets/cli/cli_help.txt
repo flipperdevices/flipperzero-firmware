@@ -40,9 +40,9 @@ Options:
   -t <type>      Token type. Must be one of: totp, hotp [default: totp]
   -i <counter>   Token initial counter. Applicable for HOTP tokens only. Must be positive integer number [default: 0]
   -a <algo>      Token hashing algorithm. Must be one of: sha1, sha256, sha512, steam [default: sha1]
-  -d <digits>    Number of digits to generate, one of: 5, 6, 8 [default: 6]
+  -d <digits>    Token digits count. Must be one of: 5, 6, 8 [default: 6]
   -e <encoding>  Token secret encoding, one of base32, base64 [default: base32]
-  -l <duration>  Token lifetime duration in seconds. Applicable for TOTP tokens only.Must be between: 15 and 255 [default: 30]
+  -l <duration>  Token lifetime duration in seconds. Applicable for TOTP tokens only. Must be between: 15 and 255 [default: 30]
   -u             Show console user input as-is without masking
   -b <feature>   Token automation features to be enabled. Must be one of: none, enter, tab [default: none]
                  # none - No features
