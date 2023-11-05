@@ -60,7 +60,7 @@ SubGhzRemote* xremote_sg_remote_alloc() {
 
     // SubGhz Settings
     remote->setting = subghz_setting_alloc();
-    subghz_setting_load(remote->setting, EXT_PATH("subghz/assets/setting_user.txt"));
+    subghz_setting_load(remote->setting, EXT_PATH("subghz/assets/setting_user"));
 
     remote->txrx = malloc(sizeof(SubGhzTxRx));
     remote->txrx->preset = malloc(sizeof(SubGhzRadioPreset));

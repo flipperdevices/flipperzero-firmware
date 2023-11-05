@@ -163,7 +163,7 @@ void add_to_hand(Hand* hand_ptr, Card card);
 void draw_card_space(int16_t pos_x, int16_t pos_y, bool highlighted, Canvas* const canvas);
 
 /**
- * Draws a column of card, displaying the last [max_cards] cards on the list
+ * Draws a column of card, displaying the last 4 cards on the list
  * @param hand              Hand object
  * @param pos_x             X coordinate to draw
  * @param pos_y             Y coordinate to draw

@@ -1,5 +1,7 @@
 # Flipper Zero LED Pulse Animations
 
+ <div style="text-align:center"><img src="assets/flipper_logo_orange.png"/></div>
+
 ## What this is?
 This app is a proof-of-concept to show abilities of the LED light integrated in the Flipper Zero device. 
 <br><br>
@@ -26,6 +28,9 @@ Then run the command:
 .\fbt launch_app APPSRC=applications_user/ledpulser
  ```
 The application will be compiled and copied onto your device. 
+
+## Credits
+- Updates for FW 0.79 by Roguemaster
 
 ## Licensing
 This code is open-source and may be used for whatever you want to do with it. 
