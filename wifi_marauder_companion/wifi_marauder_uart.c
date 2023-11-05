@@ -1,6 +1,11 @@
 #include "wifi_marauder_app_i.h"
 #include "wifi_marauder_uart.h"
 
+#include <xtreme.h>
+#define XTREME_UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+bool xtreme_uart = false;
+
 #define UART_CH (FuriHalUartIdUSART1)
 #define LP_UART_CH (FuriHalUartIdLPUART1)
 #define BAUDRATE (115200)
@@ -58,8 +63,13 @@ static int32_t uart_worker(void* context) {
     return 0;
 }
 
+// Will switch appropriately based on whether usart_init or xtreme_uart_init was called
 void wifi_marauder_uart_tx(uint8_t* data, size_t len) {
-    furi_hal_uart_tx(UART_CH, data, len);
+    if(xtreme_uart) {
+        furi_hal_uart_tx(XTREME_UART_CH, data, len);
+    } else {
+        furi_hal_uart_tx(UART_CH, data, len);
+    }
 }
 
 void wifi_marauder_lp_uart_tx(uint8_t* data, size_t len) {
@@ -90,7 +100,13 @@ WifiMarauderUart*
     return uart;
 }
 
+WifiMarauderUart* wifi_marauder_xtreme_uart_init(WifiMarauderApp* app) {
+    xtreme_uart = true;
+    return wifi_marauder_uart_init(app, XTREME_UART_CH, "WifiMarauderUartRxThread");
+}
+
 WifiMarauderUart* wifi_marauder_usart_init(WifiMarauderApp* app) {
+    xtreme_uart = false;
     return wifi_marauder_uart_init(app, UART_CH, "WifiMarauderUartRxThread");
 }
 
@@ -108,8 +124,9 @@ void wifi_marauder_uart_free(WifiMarauderUart* uart) {
     furi_hal_uart_set_irq_cb(uart->channel, NULL, NULL);
     if(uart->channel == FuriHalUartIdLPUART1) {
         furi_hal_uart_deinit(uart->channel);
+    } else {
+        furi_hal_console_enable();
     }
-    furi_hal_console_enable();
 
     free(uart);
 }
