@@ -28,11 +28,11 @@ typedef struct {
     uint8_t y;
 } TttMultiGameMove;
 
-TttMultiGameMove *ttt_multi_game_move_alloc();
+TttMultiGameMove* ttt_multi_game_move_alloc();
 
-void ttt_multi_game_move_free(TttMultiGameMove *move);
+void ttt_multi_game_move_free(TttMultiGameMove* move);
 
-void ttt_multi_game_move_copy(TttMultiGameMove *dst, const TttMultiGameMove *src);
+void ttt_multi_game_move_copy(TttMultiGameMove* dst, const TttMultiGameMove* src);
 
 TttMultiGame* ttt_multi_game_alloc();
 

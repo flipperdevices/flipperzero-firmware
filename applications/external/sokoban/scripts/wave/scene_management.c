@@ -10,8 +10,7 @@ typedef void (*InputCallback)(InputKey, InputType, void*);
 typedef void (*TickCallback)(void*);
 typedef void (*TransitionCallback)(int from, int to, void*);
 
-struct Scene
-{
+struct Scene {
     RenderCallback renderCallback;
     TickCallback tickCallback;
     InputCallback inputCallback;
@@ -19,15 +18,13 @@ struct Scene
     void* context;
 };
 
-typedef struct ScenesListNode
-{
+typedef struct ScenesListNode {
     int id;
     Scene* scene;
     struct ScenesListNode* next;
 } ScenesListNode;
 
-struct SceneManager
-{
+struct SceneManager {
     ScenesListNode* scenesListHead;
     ScenesListNode* currentScene;
     ViewPort* viewPort;
@@ -36,8 +33,12 @@ struct SceneManager
     bool isAutoManaged;
 };
 
-Scene* scene_alloc(RenderCallback renderCallback, TickCallback tickCallback, InputCallback inputCallback, TransitionCallback transitionCallback, void* context)
-{
+Scene* scene_alloc(
+    RenderCallback renderCallback,
+    TickCallback tickCallback,
+    InputCallback inputCallback,
+    TransitionCallback transitionCallback,
+    void* context) {
     Scene* scene = (Scene*)malloc(sizeof(Scene));
     scene->renderCallback = renderCallback;
     scene->tickCallback = tickCallback;
@@ -47,55 +48,47 @@ Scene* scene_alloc(RenderCallback renderCallback, TickCallback tickCallback, Inp
     return scene;
 }
 
-void scene_destroy(Scene* s)
-{
+void scene_destroy(Scene* s) {
     free(s);
 }
 
-Scene* scene_manager_get_current_scene(SceneManager* sceneManager)
-{
-    if (sceneManager == NULL || sceneManager->currentScene == NULL)
-        return NULL;
+Scene* scene_manager_get_current_scene(SceneManager* sceneManager) {
+    if(sceneManager == NULL || sceneManager->currentScene == NULL) return NULL;
 
     return sceneManager->currentScene->scene;
 }
 
-void scene_manager_tick(SceneManager* sceneManager)
-{
-    while (furi_message_queue_get_count(sceneManager->eventQueue) > 0)
-    {
+void scene_manager_tick(SceneManager* sceneManager) {
+    while(furi_message_queue_get_count(sceneManager->eventQueue) > 0) {
         InputEvent input;
         furi_message_queue_get(sceneManager->eventQueue, &input, 0);
         Scene* currentScene = scene_manager_get_current_scene(sceneManager);
-        if (currentScene && currentScene->inputCallback)
+        if(currentScene && currentScene->inputCallback)
             currentScene->inputCallback(input.key, input.type, currentScene->context);
     }
 
     Scene* currentScene = scene_manager_get_current_scene(sceneManager);
-    if (currentScene && currentScene->tickCallback)
+    if(currentScene && currentScene->tickCallback)
         currentScene->tickCallback(currentScene->context);
 
     view_port_update(sceneManager->viewPort);
 }
 
-void scene_manager_draw_callback(Canvas* canvas, void* context)
-{
+void scene_manager_draw_callback(Canvas* canvas, void* context) {
     SceneManager* sceneManager = (SceneManager*)context;
     Scene* currentScene = scene_manager_get_current_scene(sceneManager);
-    if (currentScene && currentScene->renderCallback)
+    if(currentScene && currentScene->renderCallback)
         currentScene->renderCallback(canvas, currentScene->context);
 }
 
-void scene_manager_input_callback(InputEvent* input_event, void* context)
-{
+void scene_manager_input_callback(InputEvent* input_event, void* context) {
     SceneManager* sceneManager = (SceneManager*)context;
     Scene* currentScene = scene_manager_get_current_scene(sceneManager);
-    if (currentScene)
+    if(currentScene)
         furi_message_queue_put(sceneManager->eventQueue, input_event, FuriWaitForever);
 }
 
-void scene_manager_register_scene(SceneManager* sceneManager, int id, Scene* scene)
-{
+void scene_manager_register_scene(SceneManager* sceneManager, int id, Scene* scene) {
     ScenesListNode* node = (ScenesListNode*)malloc(sizeof(ScenesListNode));
     node->id = id;
     node->scene = scene;
@@ -103,57 +96,59 @@ void scene_manager_register_scene(SceneManager* sceneManager, int id, Scene* sce
     sceneManager->scenesListHead = node;
 }
 
-void scene_manager_set_scene(SceneManager* sceneManager, int to)
-{
+void scene_manager_set_scene(SceneManager* sceneManager, int to) {
     ScenesListNode* nextNode = NULL;
-    for (nextNode = sceneManager->scenesListHead; nextNode; nextNode = nextNode->next)
-    {
-        if (nextNode->id == to)
-            break;
+    for(nextNode = sceneManager->scenesListHead; nextNode; nextNode = nextNode->next) {
+        if(nextNode->id == to) break;
     }
 
-    int from = sceneManager->currentScene ? sceneManager->currentScene->id : SCENE_MANAGER_NO_SCENE;
+    int from = sceneManager->currentScene ? sceneManager->currentScene->id :
+                                            SCENE_MANAGER_NO_SCENE;
     Scene* currentScene = scene_manager_get_current_scene(sceneManager);
 
-    FURI_LOG_D("SCENE_MANAGER", "Transitioning from %d to %d. Current free memory: %d", from, to, memmgr_get_free_heap());
+    FURI_LOG_D(
+        "SCENE_MANAGER",
+        "Transitioning from %d to %d. Current free memory: %d",
+        from,
+        to,
+        memmgr_get_free_heap());
 
-    if (currentScene && currentScene->transitionCallback)
-    {
+    if(currentScene && currentScene->transitionCallback) {
         currentScene->transitionCallback(from, to, currentScene->context);
-        FURI_LOG_D("SCENE_MANAGER", "Finished OUT call in %d. Current free memory: %d", from, memmgr_get_free_heap());
+        FURI_LOG_D(
+            "SCENE_MANAGER",
+            "Finished OUT call in %d. Current free memory: %d",
+            from,
+            memmgr_get_free_heap());
     }
 
-    if (from != to)
-    {
-        if (nextNode && nextNode->scene && nextNode->scene->transitionCallback)
-        {
+    if(from != to) {
+        if(nextNode && nextNode->scene && nextNode->scene->transitionCallback) {
             nextNode->scene->transitionCallback(from, to, nextNode->scene->context);
-            FURI_LOG_D("SCENE_MANAGER", "Finished IN call in %d. Current free memory: %d", to, memmgr_get_free_heap());
+            FURI_LOG_D(
+                "SCENE_MANAGER",
+                "Finished IN call in %d. Current free memory: %d",
+                to,
+                memmgr_get_free_heap());
         }
-    }
-    else
-    {
+    } else {
         FURI_LOG_D("SCENE_MANAGER", "Transitioned to the same scene. Skipping redundant IN call.");
     }
 
     sceneManager->currentScene = nextNode;
 }
 
-int scene_manager_get_current_scene_id(SceneManager* sceneManager)
-{
-    if (sceneManager->currentScene == NULL)
-        return SCENE_MANAGER_NO_SCENE;
+int scene_manager_get_current_scene_id(SceneManager* sceneManager) {
+    if(sceneManager->currentScene == NULL) return SCENE_MANAGER_NO_SCENE;
 
     return sceneManager->currentScene->id;
 }
 
-bool scene_manager_has_scene(SceneManager* sceneManager)
-{
+bool scene_manager_has_scene(SceneManager* sceneManager) {
     return sceneManager->currentScene != NULL;
 }
 
-SceneManager* scene_manager_alloc(ViewPort* viewPort, Gui* gui, FuriMessageQueue* eventQueue)
-{
+SceneManager* scene_manager_alloc(ViewPort* viewPort, Gui* gui, FuriMessageQueue* eventQueue) {
     SceneManager* sceneManager = (SceneManager*)malloc(sizeof(SceneManager));
     sceneManager->viewPort = viewPort;
     sceneManager->eventQueue = eventQueue;
@@ -166,8 +161,7 @@ SceneManager* scene_manager_alloc(ViewPort* viewPort, Gui* gui, FuriMessageQueue
     return sceneManager;
 }
 
-SceneManager* scene_manager_alloc_auto()
-{
+SceneManager* scene_manager_alloc_auto() {
     ViewPort* viewPort = view_port_alloc();
     Gui* gui = furi_record_open(RECORD_GUI);
     FuriMessageQueue* eventQueue = furi_message_queue_alloc(8, sizeof(InputEvent)); //LEAK
@@ -177,11 +171,9 @@ SceneManager* scene_manager_alloc_auto()
     return sceneManager;
 }
 
-void scene_manager_free(SceneManager* sceneManager)
-{
+void scene_manager_free(SceneManager* sceneManager) {
     ScenesListNode* node = sceneManager->scenesListHead;
-    while (node)
-    {
+    while(node) {
         ScenesListNode* nextNode = node->next;
         scene_destroy(node->scene);
         free(node);
@@ -190,8 +182,7 @@ void scene_manager_free(SceneManager* sceneManager)
 
     gui_remove_view_port(sceneManager->gui, sceneManager->viewPort);
 
-    if (sceneManager->isAutoManaged)
-    {
+    if(sceneManager->isAutoManaged) {
         furi_message_queue_free(sceneManager->eventQueue);
         view_port_free(sceneManager->viewPort);
         furi_record_close(RECORD_GUI);

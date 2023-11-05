@@ -26,7 +26,7 @@ void ttt_multi_game_move_copy(TttMultiGameMove* dst, const TttMultiGameMove* src
 }
 
 TttMultiGameMove* ttt_multi_game_move_alloc() {
-    TttMultiGameMove *move = malloc(sizeof(TttMultiGameMove));
+    TttMultiGameMove* move = malloc(sizeof(TttMultiGameMove));
 
     ttt_multi_game_move_reset(move);
 

@@ -9,8 +9,7 @@
 Card AllCardsData[NUMBER_OF_CARDS];
 const int CARD_NONE = -1;
 
-struct LevelState
-{
+struct LevelState {
     int cardLocation[NUMBER_OF_CARDS]; // 0 = deck, -1 = discard, 1+ = player index
     int playerTurn;
     int direction;

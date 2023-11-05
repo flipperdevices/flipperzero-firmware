@@ -7,17 +7,11 @@
 #include "wave/graphics/icon_drawing.h"
 #include "gui/canvas.h"
 
-typedef enum Screen
-{
-    Screen_ControlsGuide,
-    Screen_Credits,
-    Screen_COUNT
-} Screen;
+typedef enum Screen { Screen_ControlsGuide, Screen_Credits, Screen_COUNT } Screen;
 
 static Screen currentScreen;
 
-void credits_transition_callback(int from, int to, void* context)
-{
+void credits_transition_callback(int from, int to, void* context) {
     UNUSED(from);
     UNUSED(to);
     UNUSED(context);
@@ -25,8 +19,7 @@ void credits_transition_callback(int from, int to, void* context)
     currentScreen = 0;
 }
 
-void render_boxed_text(Canvas* canvas, char* text, int x, int y)
-{
+void render_boxed_text(Canvas* canvas, char* text, int x, int y) {
     int fontHeight = canvas_current_font_height(canvas);
     int textWidth = strlen(text) * fontHeight * 2 / 3;
 
@@ -39,8 +32,7 @@ void render_boxed_text(Canvas* canvas, char* text, int x, int y)
     canvas_draw_str_aligned(canvas, x + textWidth / 2, y, AlignCenter, AlignCenter, text);
 }
 
-void render_controls_guide(Canvas* canvas)
-{
+void render_controls_guide(Canvas* canvas) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
@@ -63,8 +55,7 @@ void render_controls_guide(Canvas* canvas)
     render_boxed_text(canvas, "Exit", 90, 54);
 }
 
-void render_credits(Canvas* canvas)
-{
+void render_credits(Canvas* canvas) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
@@ -87,25 +78,21 @@ void render_credits(Canvas* canvas)
     canvas_draw_str_aligned(canvas, 64, 62, AlignCenter, AlignBottom, "https://rac.so");
 }
 
-void credits_render_callback(Canvas* const canvas, void* context)
-{
+void credits_render_callback(Canvas* const canvas, void* context) {
     UNUSED(context);
 
-    if (currentScreen == Screen_ControlsGuide)
+    if(currentScreen == Screen_ControlsGuide)
         render_controls_guide(canvas);
-    else if (currentScreen == Screen_Credits)
+    else if(currentScreen == Screen_Credits)
         render_credits(canvas);
 }
 
-void credits_input_callback(InputKey key, InputType type, void* context)
-{
+void credits_input_callback(InputKey key, InputType type, void* context) {
     UNUSED(key);
     AppContext* app = (AppContext*)context;
 
-    if (type != InputTypePress)
-        return;
+    if(type != InputTypePress) return;
 
     currentScreen += 1;
-    if (currentScreen >= Screen_COUNT)
-        scene_manager_set_scene(app->sceneManager, SceneType_Menu);
+    if(currentScreen >= Screen_COUNT) scene_manager_set_scene(app->sceneManager, SceneType_Menu);
 }

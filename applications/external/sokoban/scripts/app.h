@@ -20,43 +20,37 @@ typedef struct SceneManager SceneManager;
 typedef struct AppGameplayState AppGameplayState;
 typedef struct LevelsDatabase LevelsDatabase;
 
-typedef struct AppContext
-{
+typedef struct AppContext {
     Gui* gui;
     SceneManager* sceneManager;
     AppGameplayState* gameplay;
     LevelsDatabase* database;
 } AppContext;
 
-typedef enum SceneType
-{
+typedef enum SceneType {
     SceneType_None,
     SceneType_Menu,
     SceneType_Game,
     SceneType_Credits,
 } SceneType;
 
-typedef struct AppGameplayState
-{
+typedef struct AppGameplayState {
     int selectedCollection;
     int selectedLevel;
 } AppGameplayState;
 
-typedef struct LevelItem
-{
+typedef struct LevelItem {
     unsigned short worldBest;
     unsigned short playerBest;
 } LevelItem;
 
-typedef struct LevelsCollection
-{
+typedef struct LevelsCollection {
     char name[32];
     int levelsCount;
     LevelItem* levels;
 } LevelsCollection;
 
-typedef struct LevelsDatabase
-{
+typedef struct LevelsDatabase {
     int collectionsCount;
     LevelsCollection* collections;
 } LevelsDatabase;

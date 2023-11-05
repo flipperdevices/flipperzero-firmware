@@ -10,8 +10,7 @@
 
 typedef struct List List;
 
-typedef enum ActionType
-{
+typedef enum ActionType {
     ActionType_None,
     ActionType_Skip,
     ActionType_Invert,
@@ -20,8 +19,7 @@ typedef enum ActionType
     ActionType_ChangeSuitPlus4,
 } ActionType;
 
-typedef enum CardSuit
-{
+typedef enum CardSuit {
     CardSuit_None,
     CardSuit_Spades,
     CardSuit_Hearts,
@@ -29,8 +27,7 @@ typedef enum CardSuit
     CardSuit_Clubs,
 } CardSuit;
 
-typedef struct Card
-{
+typedef struct Card {
     CardSuit suit;
     int number;
     ActionType action;

@@ -27,15 +27,34 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 #include <notification/notification_messages.h>
 #include <storage/storage.h>
 
-AppContext* app_alloc()
-{
+AppContext* app_alloc() {
     AppContext* app = malloc(sizeof(AppContext));
     app->gameplay = malloc(sizeof(AppGameplayState));
 
     app->sceneManager = scene_manager_alloc_auto();
-    scene_manager_register_scene(app->sceneManager, SceneType_Menu, scene_alloc(menu_render_callback, NULL, menu_input_callback, menu_transition_callback, app));
-    scene_manager_register_scene(app->sceneManager, SceneType_Credits, scene_alloc(credits_render_callback, NULL, credits_input_callback, credits_transition_callback, app));
-    scene_manager_register_scene(app->sceneManager, SceneType_Game, scene_alloc(game_render_callback, game_tick_callback, game_handle_input, game_transition_callback, app));
+    scene_manager_register_scene(
+        app->sceneManager,
+        SceneType_Menu,
+        scene_alloc(
+            menu_render_callback, NULL, menu_input_callback, menu_transition_callback, app));
+    scene_manager_register_scene(
+        app->sceneManager,
+        SceneType_Credits,
+        scene_alloc(
+            credits_render_callback,
+            NULL,
+            credits_input_callback,
+            credits_transition_callback,
+            app));
+    scene_manager_register_scene(
+        app->sceneManager,
+        SceneType_Game,
+        scene_alloc(
+            game_render_callback,
+            game_tick_callback,
+            game_handle_input,
+            game_transition_callback,
+            app));
 
     app->database = levels_database_load();
     levels_database_load_player_progress(app->database);
@@ -43,8 +62,7 @@ AppContext* app_alloc()
     return app;
 }
 
-void app_free(AppContext* app)
-{
+void app_free(AppContext* app) {
     levels_database_free(app->database);
 
     scene_manager_free(app->sceneManager);
@@ -53,8 +71,7 @@ void app_free(AppContext* app)
     free(app);
 }
 
-int32_t app_main(void* p)
-{
+int32_t app_main(void* p) {
     UNUSED(p);
 
     FURI_LOG_D("SOKOBAN", "App started.");
@@ -70,8 +87,7 @@ int32_t app_main(void* p)
 
     scene_manager_set_scene(app->sceneManager, SceneType_Menu);
 
-    while (scene_manager_has_scene(app->sceneManager))
-    {
+    while(scene_manager_has_scene(app->sceneManager)) {
         exception_manager_handle_exceptions(app->sceneManager);
         scene_manager_tick(app->sceneManager);
         furi_delay_ms(100);
