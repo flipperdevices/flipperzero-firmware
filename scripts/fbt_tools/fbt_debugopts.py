@@ -40,7 +40,7 @@ def generate(env, **kw):
         ],
         GDBOPTS_BASE=[
             "-ex",
-            "source '${FBT_DEBUG_DIR}/gdbinit'",
+            "source ${FBT_DEBUG_DIR}/gdbinit",
             "-ex",
             "target extended-remote ${GDBREMOTE}",
         ],
