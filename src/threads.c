@@ -1,23 +1,17 @@
 #include <furi.h>
-#include <gui/scene_manager.h>
 
 #include "threads.h"
 #include "constants.h"
 #include "game_structs.h"
-#include "gui/scenes.h"
 #include "state_management.h"
+#include "gui/utils.h"
 
 void main_thread(struct ApplicationContext *context) {
     furi_thread_start(context->secondary_thread);
 
     FURI_LOG_D(LOG_TAG, "Main thread started");
 
-    // Select the first scene to launch
-    scene_manager_next_scene(context->scene_manager, scene_loading);
-    FURI_LOG_D(LOG_TAG, "Starting dispatcher...");
-
-    /* Blocking call until the back button is pressed from the main view */
-    view_dispatcher_run(context->view_dispatcher);
+    start_gui_and_block(context); // Blocking call until the GUI is terminated
 
     /* At this point the GUI is stopped */
 
@@ -41,7 +35,7 @@ int32_t secondary_thread(void *ctx)
     init_state(context->game_state);
 
     // Now we are ready to open the main scene
-    scene_manager_next_scene(context->scene_manager, scene_main);
+    switch_to_main_scene(context);
 
     // Process actions the main thread requests to perform
     struct ThreadsMessage message;
@@ -70,7 +64,7 @@ int32_t secondary_thread(void *ctx)
                 // Continue with the background animation
                 context->game_state->next_animation_index++;
             }
-            scene_manager_handle_tick_event(context->scene_manager);
+            send_tick_to_scene(context);
         } else {
             furi_crash("Unexpected status in game event queue");
         }
