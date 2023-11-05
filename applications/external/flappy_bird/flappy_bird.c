@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <dolphin/dolphin.h>
 
-#include <FlappyBird_icons.h>
+#include "flappy_bird_icons.h"
 #include <furi.h>
 #include <gui/gui.h>
-#include <gui/icon_animation_i.h>
 #include <input/input.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "Flappy"
 #define DEBUG false
@@ -30,6 +30,14 @@ typedef enum {
     EventTypeKey,
 } EventType;
 
+typedef enum { BirdState0 = 0, BirdState1, BirdState2, BirdStateMAX } BirdState;
+
+const Icon* bird_states[BirdStateMAX] = {
+    &I_bird_01,
+    &I_bird_02,
+    &I_bird_03,
+};
+
 typedef struct {
     int x;
     int y;
@@ -38,7 +46,6 @@ typedef struct {
 typedef struct {
     float gravity;
     POINT point;
-    IconAnimation* sprite;
 } BIRD;
 
 typedef struct {
@@ -60,6 +67,7 @@ typedef struct {
     PILAR pilars[FLAPPY_PILAR_MAX];
     bool debug;
     State state;
+    FuriMutex* mutex;
 } GameState;
 
 typedef struct {
@@ -92,7 +100,6 @@ static void flappy_game_state_init(GameState* const game_state) {
     bird.gravity = 0.0f;
     bird.point.x = 15;
     bird.point.y = 32;
-    bird.sprite = icon_animation_alloc(&A_bird);
 
     game_state->debug = DEBUG;
     game_state->bird = bird;
@@ -105,7 +112,6 @@ static void flappy_game_state_init(GameState* const game_state) {
 }
 
 static void flappy_game_state_free(GameState* const game_state) {
-    icon_animation_free(game_state->bird.sprite);
     free(game_state);
 }
 
@@ -175,10 +181,9 @@ static void flappy_game_flap(GameState* const game_state) {
 }
 
 static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
-    const GameState* game_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(game_state == NULL) {
-        return;
-    }
+    furi_assert(ctx);
+    const GameState* game_state = ctx;
+    furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 
@@ -224,14 +229,14 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
         }
 
         // Switch animation
-        game_state->bird.sprite->frame = 1;
+        BirdState bird_state = BirdState1;
         if(game_state->bird.gravity < -0.5)
-            game_state->bird.sprite->frame = 0;
+            bird_state = BirdState0;
         else if(game_state->bird.gravity > 0.5)
-            game_state->bird.sprite->frame = 2;
+            bird_state = BirdState2;
 
-        canvas_draw_icon_animation(
-            canvas, game_state->bird.point.x, game_state->bird.point.y, game_state->bird.sprite);
+        canvas_draw_icon(
+            canvas, game_state->bird.point.x, game_state->bird.point.y, bird_states[bird_state]);
 
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
@@ -257,7 +262,7 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
         if(game_state->points != 0 && game_state->points % 5 == 0) {
-            DOLPHIN_DEED(getRandomDeed());
+            dolphin_deed(getRandomDeed());
         }
 
         canvas_set_font(canvas, FontSecondary);
@@ -266,7 +271,7 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignBottom, buffer);
     }
 
-    release_mutex((ValueMutex*)ctx, game_state);
+    furi_mutex_release(game_state->mutex);
 }
 
 static void flappy_game_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -292,8 +297,8 @@ int32_t flappy_game_app(void* p) {
     GameState* game_state = malloc(sizeof(GameState));
     flappy_game_state_init(game_state);
 
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, game_state, sizeof(GameState))) {
+    game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!game_state->mutex) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         return_code = 255;
         goto free_and_exit;
@@ -301,7 +306,7 @@ int32_t flappy_game_app(void* p) {
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, flappy_game_render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, flappy_game_render_callback, game_state);
     view_port_input_callback_set(view_port, flappy_game_input_callback, event_queue);
 
     FuriTimer* timer =
@@ -315,7 +320,7 @@ int32_t flappy_game_app(void* p) {
     GameEvent event;
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-        GameState* game_state = (GameState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             // press events
@@ -356,8 +361,8 @@ int32_t flappy_game_app(void* p) {
             }
         }
 
+        furi_mutex_release(game_state->mutex);
         view_port_update(view_port);
-        release_mutex(&state_mutex, game_state);
     }
 
     furi_timer_free(timer);
@@ -365,7 +370,7 @@ int32_t flappy_game_app(void* p) {
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(view_port);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(game_state->mutex);
 
 free_and_exit:
     flappy_game_state_free(game_state);
