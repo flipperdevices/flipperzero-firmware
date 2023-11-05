@@ -8,6 +8,6 @@ App(
     stack_size=4 * 1024,
     order=90,
     fap_icon="wifi_10px.png",
-    fap_category="GPIO",
+    fap_category="WiFi",
     fap_icon_assets="assets",
 )
