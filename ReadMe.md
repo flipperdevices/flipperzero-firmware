@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1103-1517-0.93.1-5b5f666](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-04 17:50 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-04 17:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-05 01:30 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-05 01:30 EST`
 - These PRs are in our refactor branch for testing: [NFC refactoring #3050](https://github.com/flipperdevices/flipperzero-firmware/pull/3050) [MF DESFire Fixes #3167](https://github.com/flipperdevices/flipperzero-firmware/pull/3167) [NFC RC fixes #3165](https://github.com/flipperdevices/flipperzero-firmware/pull/3165) [Fix crash on files > 64B #3166](https://github.com/flipperdevices/flipperzero-firmware/pull/3166) [fix crash after st25tb save #3170](https://github.com/flipperdevices/flipperzero-firmware/pull/3170) [fbt: reworked assets & resources handling #3160](https://github.com/flipperdevices/flipperzero-firmware/pull/3160) [fbt: SD card resource handling speedup #3178](https://github.com/flipperdevices/flipperzero-firmware/pull/3178) [fbt: source collection improvements #3181](https://github.com/flipperdevices/flipperzero-firmware/pull/3181) [Furi, FuriHal: remove FreeRTOS headers leaks #3179](https://github.com/flipperdevices/flipperzero-firmware/pull/3179) [Dolphin: Extreme butthurt loop fix #3184](https://github.com/flipperdevices/flipperzero-firmware/pull/3184) [Fix crash when exiting write mode #3191](https://github.com/flipperdevices/flipperzero-firmware/pull/3191) [fbt: dist improvements #3186](https://github.com/flipperdevices/flipperzero-firmware/pull/3186)
 - Updated: [Hangman v1.1 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Hangman Anime Dictionary (By RogueMaster)
@@ -46,7 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Passport settings now includes options for DEDSEC passport background style, DEDSEC passport image and Wrench set passport image (mood dependant) (By Kuronons)](https://github.com/Kuronons/FZ_graphics/commit/a2e5a1e1c9eaf99e063bd72df6d435fd40e7096c)
 - Updated: [Tetris v1.2 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game) [Improved tetris app (By noiob)](https://github.com/xMasterX/all-the-plugins/pull/25)
-- Updated: [BLE Spam v4.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Added Additional 200 devices (By Mr-Proxy-source) & Fix for Too huge for VarItemList (By Willy-JL)
+- Updated: [BLE Spam v4.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Additional 200 devices (By Mr-Proxy-source) & Fix: Too huge VarItemList (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fd04e572c6634c558c80b121a920abeb3dab4f16)
 
 <a name="release">
 
