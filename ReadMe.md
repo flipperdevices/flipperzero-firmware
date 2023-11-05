@@ -27,10 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1103-1517-0.93.1-5b5f666](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1105-0148-0.93.1-3abf580](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-05 01:30 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-05 01:30 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-05 01:48 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-05 01:48 EST`
 - These PRs are in our refactor branch for testing: [NFC refactoring #3050](https://github.com/flipperdevices/flipperzero-firmware/pull/3050) [MF DESFire Fixes #3167](https://github.com/flipperdevices/flipperzero-firmware/pull/3167) [NFC RC fixes #3165](https://github.com/flipperdevices/flipperzero-firmware/pull/3165) [Fix crash on files > 64B #3166](https://github.com/flipperdevices/flipperzero-firmware/pull/3166) [fix crash after st25tb save #3170](https://github.com/flipperdevices/flipperzero-firmware/pull/3170) [fbt: reworked assets & resources handling #3160](https://github.com/flipperdevices/flipperzero-firmware/pull/3160) [fbt: SD card resource handling speedup #3178](https://github.com/flipperdevices/flipperzero-firmware/pull/3178) [fbt: source collection improvements #3181](https://github.com/flipperdevices/flipperzero-firmware/pull/3181) [Furi, FuriHal: remove FreeRTOS headers leaks #3179](https://github.com/flipperdevices/flipperzero-firmware/pull/3179) [Dolphin: Extreme butthurt loop fix #3184](https://github.com/flipperdevices/flipperzero-firmware/pull/3184) [Fix crash when exiting write mode #3191](https://github.com/flipperdevices/flipperzero-firmware/pull/3191) [fbt: dist improvements #3186](https://github.com/flipperdevices/flipperzero-firmware/pull/3186)
 - Updated: [Hangman v1.1 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Hangman Anime Dictionary (By RogueMaster)
