@@ -27,7 +27,7 @@
 #define NUM_HELP_INFO_ITEMS (21)
 #define NUM_ATTACK_ITEMS (4)
 #define NUM_ATTACK_MANA_ITEMS (5)
-#define NUM_SETTINGS_ITEMS (15)
+#define NUM_SETTINGS_ITEMS (16)
 #define NUM_PURGE_ITEMS (7)
 #define MAX_MENU_STR_LEN (12)
 #define NUM_MAC_BYTES (6)
@@ -59,7 +59,8 @@ typedef enum {
 
 /* Menu items and options for Settings menu */
 enum SettingsMenuItems {
-    SETTINGS_MENU_HOP_MODE = 0,
+    SETTINGS_MENU_SYNC = 0,
+    SETTINGS_MENU_HOP_MODE,
     SETTINGS_MENU_HOP_STATUS,
     SETTINGS_MENU_SSID_MIN,
     SETTINGS_MENU_SSID_MAX,

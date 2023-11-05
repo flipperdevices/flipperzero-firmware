@@ -2,6 +2,14 @@
 #include <dolphin/dolphin.h>
 
 UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
+  {"Synchronise",
+  {"Load From ESP32", "Save To Flipper", "Load From Flipper"},
+  3,
+  {"sync", "save", "load"},
+  NO_ARGS,
+  FOCUS_CONSOLE_END,
+  NO_TIP,
+  false},
   {"Hop Mode",
   {"Get", "Sequential", "Random"},
   3,

@@ -2,11 +2,9 @@
     * Maybe a UI for stalk
 * header text in text input box is full of overlapping text, even after slimming help text right down. Why???
 * Settings menu items to Load from ESP32, Save to Flipper, Load from Flipper
-
+* Ability to save and load settings to/from Flipper
 * Options that display their value instead of 'get' don't need multiple options - just select it to set
 * Refactor console logic - to keep console recording during menu navigation
-* Flipper protocol for ESP32-Gravity to allow more sophisticated UIs
-    * e.g. get all settings info, in bytes, from a single command
 * Just In Time view memory allocation (now that there are lots of them)
 
 esp32 command: sync

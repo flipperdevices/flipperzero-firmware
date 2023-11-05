@@ -115,9 +115,6 @@ bool syncProcessResponse(UART_TerminalApp *app) {
                 // set MAC
                 mac_string_to_bytes(tokenValue, app->mac_bytes);
                 break;
-            case GRAVITY_SYNC_ATTACK_PKTS:
-                // Do nothing
-                break;
             case GRAVITY_SYNC_ATTACK_MILLIS:
                 /* If 'get' label has already been replaced by sync, free that memory */
                 if (strcmp(settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET], STRINGS_GET)) {
