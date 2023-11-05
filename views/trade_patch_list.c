@@ -51,14 +51,6 @@ void plist_create(struct patch_list **pplist, TradeBlock* trade_block) {
     uint8_t* trade_party_flat = (uint8_t*)trade_block->party;
     int i;
 
-    /* XXX: HACK: Set up our patch list now. Note that, this will cause weird
-     * problems if a pokemon with a patched index is traded to the flipper with
-     * a pokemon without a patched index, or the other way around. Need to implement
-     * a way to update the patch list after we get traded a pokemon.
-     *
-     * Can maybe use the furi timer queue callback thing
-     */
-
     /* If plist is non-NULL that means its already been created. Tear it down
      * first.
      */
