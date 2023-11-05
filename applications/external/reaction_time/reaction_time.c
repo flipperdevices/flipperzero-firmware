@@ -37,29 +37,25 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     canvas_set_font(canvas, FontPrimary);
     switch(plugin_state->state) {
-        case GameStateStart:
-            elements_multiline_text_aligned(
-                canvas, 64, 28, AlignCenter, AlignTop, "Press to start");
-            break;
-        case GameStateReady:
-        case GameStateWait:
-            elements_multiline_text_aligned(
-                canvas, 64, 28, AlignCenter, AlignTop, "Get ready...");
-            break;
-        case GameStatePress:
-            elements_multiline_text_aligned(
-                canvas, 64, 28, AlignCenter, AlignTop, "PRESS");
-            break;
-        case GameStateShowTime: {
-            char text[50];
-            snprintf(text, sizeof(text), "Reaction time: %lu ms", plugin_state->reaction_time);
-            elements_multiline_text_aligned(canvas, 64, 28, AlignCenter, AlignTop, text);
-            break;
-        }
-        case GameStateLoss:
-            elements_multiline_text_aligned(
-                canvas, 64, 28, AlignCenter, AlignTop, "Too soon!");
-            break;
+    case GameStateStart:
+        elements_multiline_text_aligned(canvas, 64, 28, AlignCenter, AlignTop, "Press to start");
+        break;
+    case GameStateReady:
+    case GameStateWait:
+        elements_multiline_text_aligned(canvas, 64, 28, AlignCenter, AlignTop, "Get ready...");
+        break;
+    case GameStatePress:
+        elements_multiline_text_aligned(canvas, 64, 28, AlignCenter, AlignTop, "PRESS");
+        break;
+    case GameStateShowTime: {
+        char text[50];
+        snprintf(text, sizeof(text), "Reaction time: %lu ms", plugin_state->reaction_time);
+        elements_multiline_text_aligned(canvas, 64, 28, AlignCenter, AlignTop, text);
+        break;
+    }
+    case GameStateLoss:
+        elements_multiline_text_aligned(canvas, 64, 28, AlignCenter, AlignTop, "Too soon!");
+        break;
     }
 }
 
@@ -90,49 +86,55 @@ int32_t reaction_time_app() {
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 10);
 
-        if(event_status == FuriStatusOk && event.type == EventTypeKey && event.input.key == InputKeyBack) {
+        if(event_status == FuriStatusOk && event.type == EventTypeKey &&
+           event.input.key == InputKeyBack) {
             break;
         }
 
         switch(plugin_state->state) {
-           case GameStateStart:
-                if(event_status == FuriStatusOk && event.type == EventTypeKey && event.input.type == InputTypePress) {
-                    plugin_state->start_tick = furi_get_tick();
-                    plugin_state->state = GameStateReady;
-                }
-                break;
-            case GameStateReady:
-                plugin_state->state = GameStateWait;
-                notification_message(notification, &sequence_set_only_red_255);
-                break;
-            case GameStateWait:
-                if(event_status == FuriStatusOk && event.type == EventTypeKey && event.input.type == InputTypePress) {
-                    plugin_state->state = GameStateLoss;
-                    notification_message(notification, &sequence_single_vibro);
-                } else if((furi_get_tick() - plugin_state->start_tick) > wait_time) {
-                    plugin_state->start_tick = furi_get_tick();
-                    plugin_state->state = GameStatePress;
-                    notification_message(notification, &sequence_set_only_blue_255);
-                    notification_message(notification, &sequence_single_vibro);
-                }
-                break;
-            case GameStatePress:
-                if(event_status == FuriStatusOk && event.type == EventTypeKey && event.input.type == InputTypePress) {
-                    plugin_state->reaction_time = (furi_get_tick() - plugin_state->start_tick);
-                    plugin_state->state = GameStateShowTime;
-                }
-                break;
-            case GameStateShowTime:
-                if(event_status == FuriStatusOk && event.type == EventTypeKey && event.input.type == InputTypePress) {
-                    plugin_state->state = GameStateStart;
-                    notification_message(notification, &sequence_reset_rgb);
-                }
-                break;
-            case GameStateLoss:
-                if(event_status == FuriStatusOk && event.type == EventTypeKey && event.input.type == InputTypePress) {
-                    plugin_state->state = GameStateStart;
-                    notification_message(notification, &sequence_reset_rgb);
-                }
+        case GameStateStart:
+            if(event_status == FuriStatusOk && event.type == EventTypeKey &&
+               event.input.type == InputTypePress) {
+                plugin_state->start_tick = furi_get_tick();
+                plugin_state->state = GameStateReady;
+            }
+            break;
+        case GameStateReady:
+            plugin_state->state = GameStateWait;
+            notification_message(notification, &sequence_set_only_red_255);
+            break;
+        case GameStateWait:
+            if(event_status == FuriStatusOk && event.type == EventTypeKey &&
+               event.input.type == InputTypePress) {
+                plugin_state->state = GameStateLoss;
+                notification_message(notification, &sequence_single_vibro);
+            } else if((furi_get_tick() - plugin_state->start_tick) > wait_time) {
+                plugin_state->start_tick = furi_get_tick();
+                plugin_state->state = GameStatePress;
+                notification_message(notification, &sequence_set_only_blue_255);
+                notification_message(notification, &sequence_single_vibro);
+            }
+            break;
+        case GameStatePress:
+            if(event_status == FuriStatusOk && event.type == EventTypeKey &&
+               event.input.type == InputTypePress) {
+                plugin_state->reaction_time = (furi_get_tick() - plugin_state->start_tick);
+                plugin_state->state = GameStateShowTime;
+            }
+            break;
+        case GameStateShowTime:
+            if(event_status == FuriStatusOk && event.type == EventTypeKey &&
+               event.input.type == InputTypePress) {
+                plugin_state->state = GameStateStart;
+                notification_message(notification, &sequence_reset_rgb);
+            }
+            break;
+        case GameStateLoss:
+            if(event_status == FuriStatusOk && event.type == EventTypeKey &&
+               event.input.type == InputTypePress) {
+                plugin_state->state = GameStateStart;
+                notification_message(notification, &sequence_reset_rgb);
+            }
             break;
         }
 
