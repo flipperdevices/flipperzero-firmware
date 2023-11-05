@@ -285,6 +285,8 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
          }
          memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
          app->syncBufLen = 0;
+         /* De-register the sync callback */
+         uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
      }
 }
 
