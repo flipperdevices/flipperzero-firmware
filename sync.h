@@ -11,5 +11,6 @@ bool syncNextToken(uint8_t **syncString, GravitySyncItem *tokenItem, char *token
 bool syncProcessResponse(UART_TerminalApp *app);
 void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context);
 void syncCleanup();
+void do_sync(UART_TerminalApp *app);
 
 #endif

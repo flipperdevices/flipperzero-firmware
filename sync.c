@@ -248,21 +248,25 @@ bool syncProcessResponse(UART_TerminalApp *app) {
 
 /* Handle synchronisation response from Flipper */
 void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
-    furi_assert(context);
-    UART_TerminalApp* app = context;
+     furi_assert(context);
+     UART_TerminalApp* app = context;
+
+     if (len == 0 || buf == NULL) {
+         return;
+     }
 
     /* Ensure syncBuffer has enough space for buf */
-    int copyLen = app->syncBufLen + len;
-    if (copyLen >= SYNC_BUFFER_SIZE) {
-        /* Buffer too small, copy as much as we can
-           YAGNI: Process buffer contents then clear all bar the last sync element
-           if it is incomplete. Then add the remainder of buf (buffer is plenty
-           large enough)
-        */
-        copyLen = SYNC_BUFFER_SIZE - app->syncBufLen - 1;
-    } else {
-        copyLen = len;
-    }
+     int copyLen = app->syncBufLen + len;
+     if (copyLen >= SYNC_BUFFER_SIZE) {
+    //     /* Buffer too small, copy as much as we can
+    //        YAGNI: Process buffer contents then clear all bar the last sync element
+    //        if it is incomplete. Then add the remainder of buf (buffer is plenty
+    //        large enough)
+    //     */
+         copyLen = SYNC_BUFFER_SIZE - app->syncBufLen - 1;
+     } else {
+         copyLen = len;
+     }
     /* Append buf to syncBuffer */
     memcpy(app->syncBuffer + sizeof(char) * app->syncBufLen, buf, copyLen);
     app->syncBufLen += copyLen;
@@ -273,15 +277,15 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     */
 
     /* Sync is complete when a newline is encountered */
-    if (buf[len - 1] == '\n') {
-        app->syncComplete = true;
-        /* Process sync elements */
-        if (!syncProcessResponse(app)) {
-            // TODO: Display modal dialogue reporting failure
-        }
-        memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
-        app->syncBufLen = 0;
-    }
+     if (buf[len - 1] == '\n') {
+         app->syncComplete = true;
+         /* Process sync elements */
+         if (!syncProcessResponse(app)) {
+             // TODO: Display modal dialogue reporting failure
+         }
+         memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+         app->syncBufLen = 0;
+     }
 }
 
 /* Free options labels that have been modified by Sync to replace the "Get" option label */
@@ -300,5 +304,17 @@ void syncCleanup() {
     }
     if (strcmp(settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET], STRINGS_GET)) {
         free(settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET]);
+    }
+}
+
+void do_sync(UART_TerminalApp *app) {
+    if (!app->syncComplete) {
+        /* Initialise sync buffer */
+        memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+        app->syncBufLen = 0;
+        /* Register callback to receive data */
+        uart_terminal_uart_set_handle_rx_data_cb(app->uart, uart_terminal_sync_rx_data_cb);
+        /* Execute Sync */
+        uart_terminal_uart_tx((uint8_t *)"sync\n", 5);
     }
 }

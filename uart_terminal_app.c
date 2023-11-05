@@ -179,6 +179,8 @@ int32_t uart_terminal_app(void* p) {
 
     uart_terminal_app->uart = uart_terminal_uart_init(uart_terminal_app);
 
+    do_sync(uart_terminal_app);
+
     view_dispatcher_run(uart_terminal_app->view_dispatcher);
 
     uart_terminal_app_free(uart_terminal_app);
