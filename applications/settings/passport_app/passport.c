@@ -75,6 +75,10 @@ void passport_alloc(Passport* passport) {
         passport->tmpLvl = 0;
         if(stats->level > 10) passport->tmpLvl = 1;
         if(stats->level > 20) passport->tmpLvl = 2;
+    } else if(passport->settings.image == PIMG_WRENCH) {
+        passport->tmpMood = 2;
+        if(stats->butthurt <= 9) passport->tmpMood = 1;
+        if(stats->butthurt <= 4) passport->tmpMood = 0;
     } else if(passport->settings.image == PIMG_DOLPHINMOODY) {
         passport->tmpLvl = 0;
         if(stats->level > 10) passport->tmpLvl = 1;
@@ -201,6 +205,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case BG_ADPOLICE:
             canvas_draw_icon(canvas, 0, 0, &I_passport_ADPolice);
             break;
+        case BG_DEDSEC:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_dedsec);
+            break;
         }
 
         // draw portrait
@@ -220,7 +227,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_icon(canvas, 11, 2, &I_Deer);
             break;
         case PIMG_DOLPHIN:
-            canvas_draw_icon(canvas, 11, 2, portrait[passport->tmpLvl]);
+            canvas_draw_icon(canvas, 11, 2, portrait_happy[passport->tmpLvl]);
             break;
         case PIMG_DOLPHINMOODY:
             canvas_draw_icon(canvas, 11, 2, portraitsMoody[passport->tmpMood][passport->tmpLvl]);
@@ -305,6 +312,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             break;
         case PIMG_SKULL:
             canvas_draw_icon(canvas, 11, 2, &I_Skull);
+            break;
+        case PIMG_DEDSEC:
+            canvas_draw_icon(canvas, 11, 2, &I_Dedsec_Mask);
+            break;
+        case PIMG_WRENCH:
+            canvas_draw_icon(canvas, 11, 2, portrait_wrench[passport->tmpMood]);
             break;
         }
 
