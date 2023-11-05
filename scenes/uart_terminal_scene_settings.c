@@ -157,6 +157,8 @@ static void uart_terminal_scene_settings_var_list_enter_callback(void* context, 
     if (item->isSubMenu) {
         /* Display next scene */
         displaySubmenu(app, item);
+    } else if (!strcmp(item->actual_commands[selected_option_index], "sync")) {
+        do_sync(app);
     } else {
         /* Run a command */
         dolphin_deed(DolphinDeedGpioUartBridge);
