@@ -1,0 +1,42 @@
+name: "FAP Build"
+on:
+  push:
+    branches:
+      - feature_wifi_marauder_app
+  pull_request:
+  schedule:
+    # do a build every day
+    - cron: "1 1 * * *"
+jobs:
+  ufbt-build-action:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: dev channel
+            sdk-channel: dev
+          - name: release channel
+            sdk-channel: release
+          - name: Unleashed dev
+            sdk-index-url: https://up.unleashedflip.com/directory.json
+            sdk-channel: dev
+          - name: Unleashed release
+            sdk-index-url: https://up.unleashedflip.com/directory.json
+            sdk-channel: release
+    name: 'ufbt: Build for ${{ matrix.name }}'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Build with ufbt
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        id: build-app
+        with:
+          sdk-channel: ${{ matrix.sdk-channel }}
+          sdk-index-url: ${{ matrix.sdk-index-url }}
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
