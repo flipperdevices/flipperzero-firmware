@@ -1,5 +1,6 @@
-#include <inttypes.h>
 #include "shapshup_files.h"
+#include <inttypes.h>
+#include <lib/subghz/types.h>
 
 #define TAG "ShapShupFiles"
 #define RAW_KEY_NAME "RAW_Data"

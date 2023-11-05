@@ -1,11 +1,9 @@
 #pragma once
 #include <furi.h>
+#include "m-array.h"
+#include <toolbox/path.h>
 #include <flipper_format_i.h>
 #include <flipper_format_stream_i.h>
-#include <subghz/types.h>
-#include <toolbox/path.h>
-#include <subghz/types.h>
-#include "m-array.h"
 
 /**
  * @brief file operation result response
