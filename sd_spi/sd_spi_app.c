@@ -17,6 +17,8 @@
 #include <gui/modules/widget.h>
 
 
+
+
 #include "sd_spi.h"
 
 #define TAG "sd-spi-app"
@@ -235,6 +237,7 @@ void text_input_done_callback(void* context){
   storage_file_close(file);
   storage_file_free(file);
   furi_record_close(RECORD_STORAGE);
+
   scene_manager_previous_scene(app->scene_manager);
 }
 
@@ -242,6 +245,7 @@ void text_input_done_callback(void* context){
 void app_scene_on_enter_password(void* context) {
     FURI_LOG_T(TAG, "app_scene_on_enter_password");
     SDSPIApp* app = context;
+    // TextInput* text_input = app->text_input;
     text_input_set_header_text(app->text_input,"Enter password");
     text_input_set_validator(app->text_input, text_input_validator, context);
     text_input_set_result_callback(
@@ -262,7 +266,9 @@ bool app_scene_on_event_password(void* context, SceneManagerEvent event) {
 void app_scene_on_exit_password(void* context) {
     FURI_LOG_T(TAG, "app_scene_on_exit_password");
     SDSPIApp* app = context;
-    text_input_reset(app->text_input);
+    UNUSED(app);
+    // text_input_reset(app->text_input);
+    // text_input_set_validator(app->text_input, NULL, NULL);
 }
 
 /* App Scene Confirm SD Force Erase */
@@ -485,6 +491,7 @@ void app_view_dispatcher_init(SDSPIApp* app) {
       else{
         FURI_LOG_E(TAG, "File pwd not found");
       }
+      FURI_LOG_E(TAG, "storage_file_free");
       storage_file_free(file);
     }
     furi_string_free(path);

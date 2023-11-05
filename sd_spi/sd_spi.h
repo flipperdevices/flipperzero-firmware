@@ -7,7 +7,7 @@
 #define SD_TIMEOUT_MS 500//(1000)
 #define SD_BLOCK_SIZE 512
 
-#define VERSION_APP "0.1"
+#define VERSION_APP "0.2"
 #define DEVELOPED " "
 #define GITHUB "github.com/Gl1tchub/Flipperzero-SD-SPI"
 
