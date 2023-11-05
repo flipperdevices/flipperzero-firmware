@@ -1,0 +1,31 @@
+name: "FAP: Build and lint"
+on: [push, pull_request]
+jobs:
+  ufbt-build-action:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: release channel
+            sdk-channel: release
+          - name: dev channel
+            sdk-channel: dev
+          - name: xtreme firmware
+            sdk-hw-target: f7
+            sdk-url: https://github.com/Flipper-XFW/Xtreme-Firmware/releases/download/XFW-0050_27072023/XFW-0050_27072023-sdk.zip
+    name: 'ufbt: Build for ${{ matrix.name }}'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build with ufbt
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        id: build-app
+        with:
+          sdk-channel: ${{ matrix.sdk-channel }}
+          sdk-url: ${{ matrix.sdk-url }}
+          sdk-hw-target: ${{ matrix.sdk-hw-target }}
+      - name: Upload app artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.event.repository.name }}-${{ steps.build-app.outputs.suffix }}
+          path: ${{ steps.build-app.outputs.fap-artifacts }}
