@@ -46,6 +46,7 @@ bool syncProcessResponse(UART_TerminalApp *app) {
     int tokenInt;
     GravitySyncItem tokenItem = 0;
     char tokenValue[18] = "";
+    char *newGet = NULL;
 
     /* syncNextToken will set nextIndex to -1 after last token returned */
     while (syncNextToken(&nextToken, &tokenItem, tokenValue)) {
@@ -67,13 +68,44 @@ bool syncProcessResponse(UART_TerminalApp *app) {
                 app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_HOP_STATUS] = newStatus;
                 break;
             case GRAVITY_SYNC_SSID_MIN:
-                // set ssid min
+                /* If the "Get" label has already been replaced free the existing string */
+                if (strcmp(settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET], STRINGS_GET)) {
+                    free(settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET]);
+                }
+                /* Allocate non-transient memory to store the new label */
+                newGet = malloc(sizeof(char) * (strlen(tokenValue) + 1));
+                if (newGet == NULL) {
+                    // TODO: Panic!
+                    break;
+                }
+                strcpy(newGet, tokenValue);
+                settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET] = newGet;
                 break;
             case GRAVITY_SYNC_SSID_MAX:
-                // set max
+                /* If label has already been replaced then free the contents */
+                if (strcmp(settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET], STRINGS_GET)) {
+                    free(settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET]);
+                }
+                newGet = malloc(sizeof(char) * (strlen(tokenValue) + 1));
+                if (newGet == NULL) {
+                    // TODO: error
+                    break;
+                }
+                strcpy(newGet, tokenValue);
+                settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET] = newGet;
                 break;
             case GRAVITY_SYNC_SSID_COUNT:
-                // set count
+                /* If label has already been replaced then free it */
+                if (strcmp(settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET], STRINGS_GET)) {
+                    free(settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET]);
+                }
+                newGet = malloc(sizeof(char) * (strlen(tokenValue) + 1));
+                if (newGet == NULL) {
+                    // TODO: Panic
+                    break;
+                }
+                strcpy(newGet, tokenValue);
+                settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET] = newGet;
                 break;
             case GRAVITY_SYNC_CHANNEL:
                 // set channel
@@ -87,7 +119,17 @@ bool syncProcessResponse(UART_TerminalApp *app) {
                 // Do nothing
                 break;
             case GRAVITY_SYNC_ATTACK_MILLIS:
-                // set value
+                /* If 'get' label has already been replaced by sync, free that memory */
+                if (strcmp(settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET], STRINGS_GET)) {
+                    free(settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET]);
+                }
+                newGet = malloc(sizeof(char) * (strlen(tokenValue) + 1));
+                if (newGet == NULL) {
+                    // TODO: Panic
+                    break;
+                }
+                strcpy(newGet, tokenValue);
+                settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET] = newGet;
                 break;
             case GRAVITY_SYNC_MAC_RAND:
                 // set value
@@ -95,10 +137,34 @@ bool syncProcessResponse(UART_TerminalApp *app) {
                 app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_MAC_RAND] = tokenInt;
                 break;
             case GRAVITY_SYNC_PKT_EXPIRY:
-                // set
+                /* Free the label if it's already been changed by sync */
+                if (strcmp(settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET], STRINGS_GET)) {
+                    free(settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET]);
+                }
+                newGet = malloc(sizeof(char) * (strlen(tokenValue) + 1));
+                if (newGet == NULL) {
+                    // TODO: Panic
+                    break;
+                }
+                strcpy(newGet, tokenValue);
+                settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET] = newGet;
                 break;
             case GRAVITY_SYNC_HOP_MODE:
-                // set
+                // set 
+                tokenInt = strtol(tokenValue, NULL, 10);
+                int currentHopMode = 0;
+                switch (tokenInt) {
+                    case HOP_MODE_SEQUENTIAL:
+                        currentHopMode = OPTIONS_HOP_MODE_SEQUENTIAL;
+                        break;
+                    case HOP_MODE_RANDOM:
+                        currentHopMode = OPTIONS_HOP_MODE_RANDOM;
+                        break;
+                    default:
+                        // TODO: Error
+                        break;
+                }
+                app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_HOP_MODE] = currentHopMode;
                 break;
             case GRAVITY_SYNC_DICT_DISABLED:
                 // set
@@ -215,5 +281,24 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
         }
         memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
         app->syncBufLen = 0;
+    }
+}
+
+/* Free options labels that have been modified by Sync to replace the "Get" option label */
+void syncCleanup() {
+    if (strcmp(settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET], STRINGS_GET)) {
+        free(settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET]);
+    }
+    if (strcmp(settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET], STRINGS_GET)) {
+        free(settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET]);
+    }
+    if (strcmp(settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET], STRINGS_GET)) {
+        free(settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET]);
+    }
+    if (strcmp(settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET], STRINGS_GET)) {
+        free(settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET]);
+    }
+    if (strcmp(settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET], STRINGS_GET)) {
+        free(settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET]);
     }
 }

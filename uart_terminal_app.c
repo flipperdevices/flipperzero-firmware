@@ -169,6 +169,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
         app->free_command = false;
     }
 
+    syncCleanup();
     free(app);
 }
 

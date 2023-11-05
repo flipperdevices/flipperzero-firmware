@@ -36,6 +36,8 @@
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
 #define UART_CH (FuriHalUartIdUSART1)
 
+#define STRINGS_GET "Get"
+
 /* GRAVITY: Import GravityMode etc. */
 #include "esp_flip_struct.h"
 
@@ -77,12 +79,18 @@ enum SettingsMenuItems {
 #define OPTIONS_HOP_ON 1
 #define OPTIONS_HOP_OFF 2
 #define OPTIONS_HOP_DEFAULT 3
-#define OPTIONS_HOPMODE_SEQUENTIAL 1
-#define OPTIONS_HOPMODE_RANDOM 2
+#define OPTIONS_HOP_MODE_SEQUENTIAL 1
+#define OPTIONS_HOP_MODE_RANDOM 2
 #define OPTIONS_DICT_WORDS 1
 #define OPTIONS_DICT_CHARS 2
 #define OPTIONS_MAC_RAND_ON 1
 #define OPTIONS_MAC_RAND_OFF 2
+#define OPTIONS_SSID_MIN_GET 0
+#define OPTIONS_SSID_MAX_GET 0
+#define OPTIONS_SSID_DEFAULT_GET 0
+#define OPTIONS_ATTACK_MILLIS_GET 0
+#define OPTIONS_PKT_EXPIRY_GET 0
+
 
 /* Menu items and options for Purge menu */
 enum PurgeMenuItems {
@@ -175,9 +183,9 @@ typedef enum { FOCUS_CONSOLE_END = 0, FOCUS_CONSOLE_START, FOCUS_CONSOLE_TOGGLE 
 #define MAX_OPTIONS (24)
 typedef struct {
     const char* item_string;
-    const char* options_menu[MAX_OPTIONS];
+    char* options_menu[MAX_OPTIONS];
     int num_options_menu;
-    const char* actual_commands[MAX_OPTIONS];
+    char* actual_commands[MAX_OPTIONS];
     InputArgs needs_keyboard;
     FocusConsole focus_console;
     bool show_stopscan_tip;
@@ -185,3 +193,4 @@ typedef struct {
 } UART_TerminalItem;
 
 extern UART_TerminalItem purgeMenu[]; /* Provided by uart_terminal_scene_purge.c */
+extern UART_TerminalItem settings[];  /* Used by sync.c */
