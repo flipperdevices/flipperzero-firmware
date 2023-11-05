@@ -28,7 +28,3 @@ Build application
 
 Now it will be available in *build/f7-firmware-D/.extapps* folder in file racegame.fap. Copy it to flipper and enjoy.
 
-
-
-https://user-images.githubusercontent.com/4603624/228524577-7a6acbd4-f5fb-4dbd-8ad4-ac42f4106d7e.mp4
-
