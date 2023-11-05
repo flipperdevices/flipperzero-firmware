@@ -13,7 +13,7 @@
 #include <gui/modules/byte_input.h>
 #include "uart_text_input.h"
 #include "sync.h"
-#include "settings.h"
+#include "storage.h"
 
 #define GRAVITY_VERSION "1.0.0"
 #define SYNC_BUFFER_SIZE 256
