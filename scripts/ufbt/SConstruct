@@ -127,7 +127,6 @@ dist_env = env.Clone(
     tools=[
         "fbt_dist",
         "fbt_debug",
-        "openocd",
         "blackmagic",
         "jflash",
         "textfile",
