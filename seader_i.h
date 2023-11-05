@@ -40,6 +40,7 @@
 #include <Payload.h>
 #include <FrameProtocol.h>
 
+#include "protocol/picopass_poller.h"
 #include "scenes/seader_scene.h"
 
 #include "seader_bridge.h"
@@ -105,6 +106,7 @@ struct Seader {
 
     Nfc* nfc;
     NfcPoller* poller;
+    PicopassPoller* picopass_poller;
 
     NfcDevice* nfc_device;
 };

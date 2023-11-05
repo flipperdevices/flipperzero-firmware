@@ -21,14 +21,12 @@ void seader_scene_sam_present_on_update(void* context) {
     Submenu* submenu = seader->submenu;
     submenu_reset(submenu);
 
-    /*
     submenu_add_item(
         submenu,
         "Read Picopass",
         SubmenuIndexReadPicopass,
         seader_scene_sam_present_submenu_callback,
         seader);
-        */
     submenu_add_item(
         submenu,
         "Read 14443A",

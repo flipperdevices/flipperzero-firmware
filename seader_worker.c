@@ -452,6 +452,30 @@ void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t l
     ASN_STRUCT_FREE(asn_DEF_Response, response);
 }
 
+NfcCommand seader_iso15693_transmit(
+    Seader* seader,
+    uint8_t* buffer,
+    size_t len,
+    uint16_t timeout,
+    uint8_t format[3]) {
+    UNUSED(timeout);
+    UNUSED(format);
+    UNUSED(seader);
+    UNUSED(buffer);
+    UNUSED(len);
+
+    /*
+    BitBuffer* tx_buffer = bit_buffer_alloc(len);
+    BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
+    */
+    NfcCommand ret = NfcCommandContinue;
+
+
+
+    return ret;
+}
+
+
 /* Assumes this is called in the context of the NFC API callback */
 NfcCommand seader_iso14443a_transmit(
     Seader* seader,
@@ -514,7 +538,8 @@ NfcCommand seader_parse_nfc_command_transmit(Seader* seader, NFCSend_t* nfcSend)
 #endif
 
     if(frameProtocol == FrameProtocol_iclass) {
-        // TODO
+        return seader_iso15693_transmit(
+            seader, nfcSend->data.buf, nfcSend->data.size, (uint16_t)timeOut, nfcSend->format->buf);
     } else if(frameProtocol == FrameProtocol_nfc) {
         return seader_iso14443a_transmit(
             seader, nfcSend->data.buf, nfcSend->data.size, (uint16_t)timeOut, nfcSend->format->buf);
@@ -814,3 +839,18 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
 
     return NfcCommandContinue;
 }
+
+NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, void* context) {
+    furi_assert(context);
+    NfcCommand command = NfcCommandContinue;
+
+    Seader* seader = context;
+    UNUSED(seader);
+
+    if(event.type == PicopassPollerEventTypeSuccess) {
+      FURI_LOG_D(TAG, "PicopassPollerEventTypeSuccess");
+    }
+
+    return command;
+}
+

@@ -56,3 +56,5 @@ void seader_worker_process_sam_message(Seader* seader, CCID_Message* message);
 void seader_worker_send_version(SeaderWorker* seader_worker);
 
 NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void* context);
+
+NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, void* context);

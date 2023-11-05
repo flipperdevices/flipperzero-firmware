@@ -1,12 +1,6 @@
 #include "../seader_i.h"
 #include <dolphin/dolphin.h>
 
-void seader_read_14a_worker_callback(SeaderWorkerEvent event, void* context) {
-    UNUSED(event);
-    Seader* seader = context;
-    view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
-}
-
 void seader_scene_read_14a_on_enter(void* context) {
     Seader* seader = context;
     dolphin_deed(DolphinDeedNfcRead);
