@@ -157,6 +157,19 @@ void uart_terminal_scene_main_on_enter(void* context) {
     }
     variable_item_list_set_selected_item(var_item_list, app->selected_menu_items[GRAVITY_MENU_MAIN]);
 
+    /* Automatically retrieve setting and state information from Flipper if this has
+       not already occurred
+    */
+    if (!app->syncComplete) {
+        /* Initialise sync buffer */
+        memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+        app->syncBufLen = 0;
+        /* Register callback to receive data */
+        uart_terminal_uart_set_handle_rx_data_cb(app->uart, uart_terminal_sync_rx_data_cb);
+        /* Execute Sync */
+        uart_terminal_uart_tx((uint8_t *)"sync\n", 5);
+    }
+
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewMainMenu);
 }
 

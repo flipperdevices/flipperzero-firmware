@@ -41,16 +41,6 @@ UART_TerminalItem purgeMenu[NUM_PURGE_ITEMS] = {
   false}
 };
 
-enum PurgeMenuItems {
-    PURGE_MENU_AGE_ON = 0,
-    PURGE_MENU_AGE,
-    PURGE_MENU_RSSI_ON,
-    PURGE_MENU_RSSI,
-    PURGE_MENU_UNSELECTED_ON,
-    PURGE_MENU_UNNAMED_ON,
-    PURGE_MENU_RUN,
-};
-
 VariableItem *purgeMenuItemViews[NUM_PURGE_ITEMS];
 
 int indexOf(char *val, const char **array, int arrayLen) {

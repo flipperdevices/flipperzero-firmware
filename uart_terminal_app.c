@@ -3,6 +3,23 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+/* Convert the specified string to a byte array
+   bMac must be a pointer to 6 bytes of allocated memory */
+bool mac_string_to_bytes(char *strMac, uint8_t *bMac) {
+    int values[6];
+
+    if (6 == sscanf(strMac, "%x:%x:%x:%x:%x:%x%*c", &values[0],
+        &values[1], &values[2], &values[3], &values[4], &values[5])) {
+        // Now convert to uint8_t
+        for (int i = 0; i < 6; ++i) {
+            bMac[i] = (uint8_t)values[i];
+        }
+    } else {
+        return false;
+    }
+    return true;
+}
+
 static bool uart_terminal_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     UART_TerminalApp* app = context;
@@ -107,6 +124,7 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     app->purgeStrategy = 0;
     app->purgeAge = 0;
     app->purgeRSSI = 0;
+    app->syncBufLen = 0;
 
     scene_manager_next_scene(app->scene_manager, UART_TerminalSceneMain);
 

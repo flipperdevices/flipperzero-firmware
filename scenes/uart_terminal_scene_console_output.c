@@ -16,6 +16,7 @@ void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
     }
 
     // Null-terminate buf and append to text box store
+    // TODO: stack overflow!!
     buf[len] = '\0';
     furi_string_cat_printf(app->text_box_store, "%s", buf);
 

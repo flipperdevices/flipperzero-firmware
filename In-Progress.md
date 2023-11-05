@@ -9,6 +9,9 @@
     * e.g. get all settings info, in bytes, from a single command
 * Just In Time view memory allocation (now that there are lots of them)
 
+esp32 command: sync
+Return all settings in a fixed, parseable format. (<syncItem>:<value>)+
+
 ST25RFAL002/timer.h timerDelay(uint16_t millis)
 ST25RFAL002/platform.h platformDelay(millis)
     #define platformDelay(t) furi_delay_ms(t) /*!< Performs a delay for the given time (ms)    */

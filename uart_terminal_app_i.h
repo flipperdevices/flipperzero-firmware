@@ -12,10 +12,11 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/byte_input.h>
 #include "uart_text_input.h"
+#include "sync.h"
 
-#define GRAVITY_VERSION "0.6.0"
+#define GRAVITY_VERSION "1.0.0"
+#define SYNC_BUFFER_SIZE 256
 
-//#define NUM_MENU_ITEMS (23)
 #define MAX_MENU_ITEMS (21)
 #define NUM_MAIN_ITEMS (6)
 #define NUM_TARGET_ITEMS (8)
@@ -54,7 +55,53 @@ typedef enum {
   GRAVITY_MENU_COUNT
 } GravityMenu;
 
+/* Menu items and options for Settings menu */
+enum SettingsMenuItems {
+    SETTINGS_MENU_HOP_MODE = 0,
+    SETTINGS_MENU_HOP_STATUS,
+    SETTINGS_MENU_SSID_MIN,
+    SETTINGS_MENU_SSID_MAX,
+    SETTINGS_MENU_SSID_DEFAULT,
+    SETTINGS_MENU_CHANNEL,
+    SETTINGS_MENU_MAC,
+    SETTINGS_MENU_ATTACK_PKTS,
+    SETTINGS_MENU_ATTACK_MILLIS,
+    SETTINGS_MENU_MAC_RAND,
+    SETTINGS_MENU_PKT_EXPIRY,
+    SETTINGS_MENU_DICT_DISABLE,
+    SETTINGS_MENU_PURGE_STRAT,
+    SETTINGS_MENU_PURGE_RSSI_MAX,
+    SETTINGS_MENU_PURGE_AGE_MIN
+};
+
+#define OPTIONS_HOP_ON 1
+#define OPTIONS_HOP_OFF 2
+#define OPTIONS_HOP_DEFAULT 3
+#define OPTIONS_HOPMODE_SEQUENTIAL 1
+#define OPTIONS_HOPMODE_RANDOM 2
+#define OPTIONS_DICT_WORDS 1
+#define OPTIONS_DICT_CHARS 2
+#define OPTIONS_MAC_RAND_ON 1
+#define OPTIONS_MAC_RAND_OFF 2
+
+/* Menu items and options for Purge menu */
+enum PurgeMenuItems {
+    PURGE_MENU_AGE_ON = 0,
+    PURGE_MENU_AGE,
+    PURGE_MENU_RSSI_ON,
+    PURGE_MENU_RSSI,
+    PURGE_MENU_UNSELECTED_ON,
+    PURGE_MENU_UNNAMED_ON,
+    PURGE_MENU_RUN,
+};
+
+#define OPTIONS_PURGE_ON 0
+#define OPTIONS_PURGE_OFF 1
+
+
 char *strToken(char *cmdLine, char sep, int tokenNum);
+bool mac_string_to_bytes(char *strMac, uint8_t *bMac);
+bool syncProcessResponse(UART_TerminalApp *app);
 
 struct UART_TerminalApp {
     Gui* gui;
@@ -76,8 +123,6 @@ struct UART_TerminalApp {
     uint8_t mac_bytes[NUM_MAC_BYTES];
 
     UART_TerminalUart* uart;
-    //int selected_menu_index; in progress refactoring to selected_menu_items[]
-    //int selected_option_index[MAX_MENU_ITEMS];
     int selected_menu_items[GRAVITY_MENU_COUNT];
     int selected_menu_options[GRAVITY_MENU_COUNT][MAX_MENU_ITEMS];
     char* selected_tx_string;
@@ -94,6 +139,10 @@ struct UART_TerminalApp {
     int purgeStrategy;
     int purgeAge;
     int purgeRSSI;
+
+    uint8_t syncBuffer[SYNC_BUFFER_SIZE];
+    int syncBufLen;
+    bool syncComplete;
 };
 
 typedef enum {
@@ -134,3 +183,5 @@ typedef struct {
     bool show_stopscan_tip;
     bool isSubMenu;
 } UART_TerminalItem;
+
+extern UART_TerminalItem purgeMenu[]; /* Provided by uart_terminal_scene_purge.c */
