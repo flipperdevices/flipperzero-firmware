@@ -7,7 +7,7 @@ Assuming the toolchain is already installed, copy **flipper_pong** directory to 
 
 Plug your **Flipper Zero** and build the Pong :
 ```
-./fbt launch_app APPSRC=applications_user/flipper_pong
+./fbt DEBUG=no LIB_DEBUG=no COMPACT=yes launch_app APPSRC=applications_user/flipper_pong
 ```
 
 The game will automatically be launched after compilation
@@ -21,11 +21,3 @@ If you don't want to build the game, just simply copy **flipper_pong.fap** on yo
 ## Gallery ##
 
 <img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper1.png" width=20% height=20%> <img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper2.png" width=10% height=10%> <img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper3.png" width=10% height=10%>
-
-## Changelog
-
-* 2023-04-11
-  * Code refactoring by replacing old mutex call by new method
-
-* 2022-12-30
-  * Initial release
