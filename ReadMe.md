@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Passport settings now includes options for DEDSEC passport background style, DEDSEC passport image and Wrench set passport image (mood dependant) (By Kuronons)](https://github.com/Kuronons/FZ_graphics/commit/a2e5a1e1c9eaf99e063bd72df6d435fd40e7096c)
 - Updated: [Tetris v1.2 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game) [Improved tetris app (By noiob)](https://github.com/xMasterX/all-the-plugins/pull/25)
+- Updated: [BLE Spam v4.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) Added Additional 200 devices (By Mr-Proxy-source) & Fix for Too huge for VarItemList (By Willy-JL)
 
 <a name="release">
 
