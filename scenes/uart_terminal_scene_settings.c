@@ -55,13 +55,13 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
   NO_TIP,
   false},
   {"MAC",
-  {"Get", "Set"},
-  2,
-  {"get MAC", "set"},
+  {""},
+  1,
+  {"mac"},
   TOGGLE_ARGS,
   FOCUS_CONSOLE_START,
   NO_TIP,
-  false},
+  true},
   {"Attack Pkts",
   {"Get", "Set"},
   2,
@@ -154,8 +154,7 @@ static void uart_terminal_scene_settings_var_list_enter_callback(void* context, 
     item = &settings[index];
 
     /* Are we displaying a submenu or executing something? */
-    /* The MAC menu item only uses a submenu for setting */
-    if (item->isSubMenu || (!strcmp(item->item_string, "MAC") && !strcmp(item->actual_commands[selected_option_index], "set"))) {
+    if (item->isSubMenu) {
         /* Display next scene */
         displaySubmenu(app, item);
     } else {

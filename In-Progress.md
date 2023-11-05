@@ -2,7 +2,6 @@
     * Maybe a UI for stalk
 * header text in text input box is full of overlapping text, even after slimming help text right down. Why???
 
-* Settings->MAC doesn't need a get option, just launch the view to get or set
 * Options that display their value instead of 'get' don't need multiple options - just select it to set
 * Re-implement console/command execution
 * Re-implement cls/clear screen
