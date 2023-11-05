@@ -1,7 +1,7 @@
 #include "scene_credits.h"
 #include "app.h"
 #include "scene_management.h"
-#include "racso_ultimate_tic_tac_toe_icons.h"
+#include "ultimate_tic_tac_toe_icons.h"
 
 void credits_render_callback(Canvas* const canvas, void* context) {
     UNUSED(context);

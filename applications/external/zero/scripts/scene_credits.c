@@ -1,7 +1,7 @@
 #include "scene_credits.h"
 #include "app.h"
 #include "wave/scene_management.h"
-#include "racso_zero_icons.h"
+#include "zero_icons.h"
 
 void credits_render_callback(Canvas* const canvas, void* context) {
     UNUSED(context);

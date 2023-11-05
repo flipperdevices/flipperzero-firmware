@@ -59,7 +59,7 @@ void app_free(AppContext* app) {
     free(app);
 }
 
-int32_t app_main(void* p) {
+int32_t racso_zero_app_main(void* p) {
     UNUSED(p);
 
     dolphin_deed(DolphinDeedPluginGameStart);

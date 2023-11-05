@@ -1,7 +1,7 @@
 #include "app.h"
 #include "game.h"
 #include "app_gameplay.h"
-#include "racso_ultimate_tic_tac_toe_icons.h"
+#include "ultimate_tic_tac_toe_icons.h"
 #include "scene_management.h"
 #include <furi.h>
 #include <gui/gui.h>

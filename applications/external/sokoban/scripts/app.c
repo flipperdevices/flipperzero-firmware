@@ -71,7 +71,7 @@ void app_free(AppContext* app) {
     free(app);
 }
 
-int32_t app_main(void* p) {
+int32_t sokoban_app_main(void* p) {
     UNUSED(p);
 
     FURI_LOG_D("SOKOBAN", "App started.");

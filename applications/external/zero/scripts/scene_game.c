@@ -6,7 +6,7 @@
 #include "wave/calc.h"
 #include "wave/data_structures/list.h"
 #include "wave/exception_manager.h"
-#include "racso_zero_icons.h"
+#include "zero_icons.h"
 #include <gui/gui.h>
 #include <furi.h>
 #include <string.h>

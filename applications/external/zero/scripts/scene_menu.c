@@ -1,7 +1,7 @@
 #include "app.h"
 #include "game.h"
 #include "app_gameplay.h"
-#include "racso_zero_icons.h"
+#include "zero_icons.h"
 #include "wave/scene_management.h"
 #include <furi.h>
 #include <gui/gui.h>
