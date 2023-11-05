@@ -3,14 +3,11 @@ App(
     name="Multi Counter",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="counterapp",
-    requires=[
-        "gui",
-    ],
-    fap_category="Tools",
+    fap_category="Games",
     fap_icon="icons/counter_icon.png",
     fap_icon_assets="icons",
+    fap_author="JadePossible & Roro",
+    fap_weburl="https://github.com/JadePossible/Flipper-Multi-Counter",
+    fap_version=(1, 0),
     fap_description="Counter App with 4 counter for tabletop games",
-    fap_author="@JadePossible & Roro",
-    fap_version="1.0",
-    fap_weburl="https://github.com/JadePossible/Flipper-Multi-Counter"
 )
