@@ -40,17 +40,6 @@ COPRO_STACK_BIN_DIR = posixpath.join(COPRO_CUBE_DIR, "firmware")
 # Supported toolchain versions
 FBT_TOOLCHAIN_VERSIONS = (" 10.3.",)
 
-OPENOCD_OPTS = [
-    "-f",
-    "interface/stlink.cfg",
-    "-c",
-    "transport select hla_swd",
-    "-f",
-    "${FBT_DEBUG_DIR}/stm32wbx.cfg",
-    "-c",
-    "stm32wbx.cpu configure -rtos auto",
-]
-
 SVD_FILE = "${FBT_DEBUG_DIR}/STM32WB55_CM4.svd"
 
 # Look for blackmagic probe on serial ports and local network

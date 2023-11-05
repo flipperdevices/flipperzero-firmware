@@ -46,11 +46,6 @@ vars.AddVariables(
         default="",
     ),
     (
-        "OPENOCD_OPTS",
-        "Options to pass to OpenOCD",
-        "",
-    ),
-    (
         "BLACKMAGIC",
         "Blackmagic probe location",
         "auto",

@@ -166,11 +166,6 @@ vars.AddVariables(
         tuple(),
     ),
     (
-        "OPENOCD_OPTS",
-        "Options to pass to OpenOCD",
-        "",
-    ),
-    (
         "BLACKMAGIC",
         "Blackmagic probe location",
         "auto",

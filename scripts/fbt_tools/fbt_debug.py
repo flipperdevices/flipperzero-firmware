@@ -19,6 +19,16 @@ def generate(env, **kw):
     env.AddMethod(GetDevices)
     env.SetDefault(
         FBT_DEBUG_DIR="${FBT_SCRIPT_DIR}/debug",
+        OPENOCD_OPTS=[
+            "-f",
+            "interface/stlink.cfg",
+            "-c",
+            "transport select hla_swd",
+            "-f",
+            "${FBT_DEBUG_DIR}/stm32wbx.cfg",
+            "-c",
+            "stm32wbx.cpu configure -rtos auto",
+        ],
     )
 
     if (adapter_serial := env.subst("$SWD_TRANSPORT_SERIAL")) != "auto":

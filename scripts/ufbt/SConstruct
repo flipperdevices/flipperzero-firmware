@@ -126,23 +126,13 @@ env.PreConfigureUfbtEnvionment()
 dist_env = env.Clone(
     tools=[
         "fbt_dist",
-        "fbt_debugopts",
+        "fbt_debug",
         "openocd",
         "blackmagic",
         "jflash",
         "textfile",
     ],
     ENV=os.environ,
-    OPENOCD_OPTS=[
-        "-f",
-        "interface/stlink.cfg",
-        "-c",
-        "transport select hla_swd",
-        "-f",
-        "${FBT_DEBUG_DIR}/stm32wbx.cfg",
-        "-c",
-        "stm32wbx.cpu configure -rtos auto",
-    ],
 )
 
 flash_target = dist_env.FwFlash(

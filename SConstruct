@@ -38,8 +38,7 @@ SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 distenv = coreenv.Clone(
     tools=[
         "fbt_dist",
-        "fbt_debugopts",
-        "openocd",
+        "fbt_debug",
         "blackmagic",
         "jflash",
     ],
@@ -266,13 +265,6 @@ distenv.PhonyTarget(
     GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     GDBPYOPTS=debug_other_opts,
-)
-
-
-# Just start OpenOCD
-distenv.PhonyTarget(
-    "openocd",
-    "${OPENOCDCOM}",
 )
 
 # Linter
