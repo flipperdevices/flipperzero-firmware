@@ -115,7 +115,7 @@ extapps.sdk_tree = sdk_header_tree
 api_check = appenv.ApiTableValidator(appenv["SDK_DEFINITION"], amalgamated_api)
 Precious(api_check)
 NoClean(api_check)
-AlwaysBuild(api_check)
+# AlwaysBuild(api_check)
 Alias("api_check", api_check)
 
 firmware_apitable = appenv.ApiSymbolTable(
