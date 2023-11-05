@@ -14,7 +14,7 @@
 #include "shapshup_custom_event.h"
 
 #define TAG "ShapShupApp"
-#define DELAY_MS 100
+#define TICK_PERIOD 500
 
 static bool shapshup_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -51,7 +51,7 @@ ShapShupState* shapshup_alloc() {
     view_dispatcher_set_navigation_event_callback(
         instance->view_dispatcher, shapshup_back_event_callback);
     view_dispatcher_set_tick_event_callback(
-        instance->view_dispatcher, shapshup_tick_event_callback, 500);
+        instance->view_dispatcher, shapshup_tick_event_callback, TICK_PERIOD);
 
     //Dialog
     instance->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -75,6 +75,11 @@ ShapShupState* shapshup_alloc() {
     instance->popup = popup_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, ShapShupViewPopup, popup_get_view(instance->popup));
+
+    // Loading
+    instance->loading = loading_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher, ShapShupViewLoading, loading_get_view(instance->loading));
 
     // ViewStack
     instance->view_stack = view_stack_alloc();
@@ -121,6 +126,10 @@ void shapshup_free(ShapShupState* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, ShapShupViewPopup);
     popup_free(instance->popup);
 
+    // Loading
+    view_dispatcher_remove_view(instance->view_dispatcher, ShapShupViewLoading);
+    loading_free(instance->loading);
+
     // ViewStack
     view_dispatcher_remove_view(instance->view_dispatcher, ShapShupViewStack);
     view_stack_free(instance->view_stack);
@@ -150,16 +159,14 @@ void shapshup_free(ShapShupState* instance) {
 }
 
 void shapshup_show_loading_popup(void* context, bool show) {
+    furi_assert(context);
     ShapShupState* instance = context;
-    ViewStack* view_stack = instance->view_stack;
-    Loading* loading = instance->loading;
 
     if(show) {
         // Raise timer priority so that animations can play
         furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
-        view_stack_add_view(view_stack, loading_get_view(loading));
+        view_dispatcher_switch_to_view(instance->view_dispatcher, ShapShupViewLoading);
     } else {
-        view_stack_remove_view(view_stack, loading_get_view(loading));
         // Restore default timer priority
         furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
@@ -179,8 +186,13 @@ void shapshup_popup_closed_callback(void* context) {
         instance->view_dispatcher, ShapShupCustomEventTypePopupClosed);
 }
 
-// ENTRYPOINT
-__attribute__((unused)) int32_t shapshup_app(void* p) {
+/**
+ * @brief Entrypoint
+ * 
+ * @param p 
+ * @return int32_t 
+ */
+int32_t shapshup_app(void* p) {
     UNUSED(p);
 
     ShapShupState* instance = shapshup_alloc();
