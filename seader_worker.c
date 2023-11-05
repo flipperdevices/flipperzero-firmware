@@ -469,7 +469,8 @@ NfcCommand seader_iso14443a_transmit(
     do {
         // bit_buffer_reset(tx_buffer);
         bit_buffer_append_bytes(tx_buffer, buffer, len);
-        NfcError error = iso14443_4a_poller_send_block(seader->poller, tx_buffer, rx_buffer);
+        //NfcError error = iso14443_4a_poller_send_block(seader->poller, tx_buffer, rx_buffer);
+        NfcError error = nfc_poller_trx(seader->nfc, tx_buffer, rx_buffer, SEADER_POLLER_MAX_FWT);
         if(error != NfcErrorNone) {
             FURI_LOG_W(TAG, "nfc_poller_trx error %d", error);
             ret = NfcCommandStop;
