@@ -97,7 +97,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Flappy Bird | ![Games Badge] | [by DroomOne](https://github.com/DroomOne/flipperzerofirmware/tree/dev/applications/flappy_bird) |  | [![UFW Badge]](https://lab.flipper.net/apps/flappy_bird) |
 | Arkanoid | ![Games Badge] | by xMasterX | refactored by xMasterX, [original by gotnull](https://github.com/gotnull/flipperzerofirmwarewPlugins) | [![UFW Badge]](https://lab.flipper.net/apps/arkanoid) |
 | Tic Tac Toe | ![Games Badge] | by xMasterX | refactored by xMasterX, [original by gotnull](https://github.com/gotnull/flipperzerofirmwarewPlugins) | [![UFW Badge]](https://lab.flipper.net/apps/tictactoe) |
-| Tetris (with fixes) | ![Games Badge] | [by jeffplang](https://github.com/jeffplang/flipperzerofirmware/tree/tetris_game/applications/tetris) |  | [![UFW Badge]](https://lab.flipper.net/apps/tetris_game) |
+| Tetris (with fixes) | ![Games Badge] | [by jeffplang](https://github.com/jeffplang/flipperzerofirmware/tree/tetris_game/applications/tetris) & [noiob](https://github.com/noiob) |  | [![UFW Badge]](https://lab.flipper.net/apps/tetris_game) |
 | Minesweeper | ![Games Badge] | [by panki27](https://github.com/panki27/minesweeper) |  | [![UFW Badge]](https://lab.flipper.net/apps/minesweeper) |
 | Heap Defence (aka Stack Attack) | ![Games Badge] | by xMasterX | ported to latest firmware by xMasterX, [original by wquinoa & Vedmein](https://github.com/Vedmein/flipperzerofirmware/tree/hd/svistoperdelki) | [![UFW Badge]](https://lab.flipper.net/apps/heap_defence) |
 | Game15 | ![Games Badge] | [by x27](https://github.com/x27/flipperzerogame15) |  | [![UFW Badge]](https://lab.flipper.net/apps/game15) |
