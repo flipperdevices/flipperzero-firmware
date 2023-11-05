@@ -85,6 +85,7 @@ int32_t reaction_main(void* p) {
             if(state == 0 && event.type == InputTypePress && event.key == InputKeyOk) {
                 state = 1;
                 time = 0;
+                view_port_update(view_port);
                 int t = rand() % 6000 + 1000;
                 furi_delay_ms(t);
                 furi_timer_start(timer_stop, t);
