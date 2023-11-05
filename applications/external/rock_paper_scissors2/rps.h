@@ -1,5 +1,5 @@
-#ifndef  RPS_H_
-#define  RPS_H_
+#ifndef RPS_H_
+#define RPS_H_
 
 typedef enum HandType {
     HandTypeRock,
@@ -29,24 +29,24 @@ typedef enum GameResult {
 } GameResult_t;
 
 typedef struct RPSApp {
-    // Flipper Firmware Variables 
-    FuriMessageQueue*   event_queue;
-    ViewPort*           view_port;
-    Gui*                gui;
-    FuriMutex**         mutex;
-    FuriTimer*          roll_timer;
-    FuriTimer*          roll_complete_timer;
-    
+    // Flipper Firmware Variables
+    FuriMessageQueue* event_queue;
+    ViewPort* view_port;
+    Gui* gui;
+    FuriMutex** mutex;
+    FuriTimer* roll_timer;
+    FuriTimer* roll_complete_timer;
+
     // App Variables
-    HandType_t          user_hand;
-    HandType_t          system_hand;
-    GameState_t         game_state;
-    HandBoxType_t       system_hand_box;
-    HandBoxType_t       user_hand_box;
-    char*               click_message;
-    char*               middle_message;
-    uint16_t            system_score;
-    uint16_t            user_score;
+    HandType_t user_hand;
+    HandType_t system_hand;
+    GameState_t game_state;
+    HandBoxType_t system_hand_box;
+    HandBoxType_t user_hand_box;
+    char* click_message;
+    char* middle_message;
+    uint16_t system_score;
+    uint16_t user_score;
 } RPSApp_t;
 
 #endif // RPS_H_
