@@ -23,6 +23,6 @@ git checkout "${prev}"
 exec 69>&1
 result="$(git subtree "${action}" -P "${path}" "${split}" -m "${action^} ${path} from ${repo}" 2>&1 | tee /proc/self/fd/69)"
 if grep "refusing to merge unrelated histories" <<< "$result" > /dev/null; then
-    echo "History at ${repo} is unrelated, using quash..."
+    echo "History at ${repo} is unrelated, using squash..."
     git subtree "${action}" -P "${path}" "${split}" -m "${action^} ${path} from ${repo}" --squash
 fi
