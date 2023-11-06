@@ -859,24 +859,38 @@ void CommandLine::runCommand(String input) {
     } else if(cmd_args.get(0) == GAMEBOY_CARTRIDGE_CMD) {
       // Serial.println("GAME BOY Cartridge");
       gameboy_cartridge.start();
-
-      int cont_sw = this->argSearch(&cmd_args, "-i");
-      if (cont_sw == -1) {
-        cont_sw = this->argSearch(&cmd_args, "-d");
+      int cont_sw = this->argSearch(&cmd_args, "-t");
+      if(cont_sw == -1) {
+        int cont_sw = this->argSearch(&cmd_args, "-i");
         if (cont_sw == -1) {
-          //  RESTORE
-          cont_sw = this->argSearch(&cmd_args, "-w");
-          if(cont_sw == -1) {
-            //  Info
-            gameboy_cartridge.headerROM_GB(true);
-          } else {
-            //  WRITE
-            cont_sw = this->argSearch(&cmd_args, "-o");
-            if (cont_sw == -1) {
-              cont_sw = this->argSearch(&cmd_args, "-a");
+          cont_sw = this->argSearch(&cmd_args, "-d");
+          if (cont_sw == -1) {
+            //  RESTORE
+            cont_sw = this->argSearch(&cmd_args, "-w");
+            if(cont_sw == -1) {
+              //  Info
+              gameboy_cartridge.headerROM_GB(true);
+            } else {
+              //  WRITE
+              cont_sw = this->argSearch(&cmd_args, "-o");
               if (cont_sw == -1) {
-                gameboy_cartridge.headerROM_GB(true);
+                cont_sw = this->argSearch(&cmd_args, "-a");
+                if (cont_sw == -1) {
+                  gameboy_cartridge.headerROM_GB(true);
+                } else {
+
+                  int fileSize = cmd_args.get(cont_sw + 1).toInt();
+                  
+
+
+                  //  START WRITE
+                  //  https://github.com/sanni/cartreader/blob/6b0ded69c7f160e7171cfa40ed6c0b23606a4434/Cart_Reader/GB.ino#L88
+                  //  https://www.insidegadgets.com/2011/04/07/gbcartread-arduino-based-gameboy-cart-reader-%e2%80%93-part-3-write-to-ram/
+                  gameboy_cartridge.restoreRAM(fileSize);
+                }
               } else {
+                //  ROM
+                //  TODO:
                 cont_sw = this->argSearch(&cmd_args, "-s");
                 if (cont_sw == -1) {
                   cont_sw = this->argSearch(&cmd_args, "-e");
@@ -884,59 +898,44 @@ void CommandLine::runCommand(String input) {
                     // Serial.println("Error");
                   } else {
                     //  END WRITE
-                    gameboy_cartridge.endReadRAM_GB();
+                    // gameboy_cartridge.endWriteRAM_GB();
                   }
                 } else {
                   //  START WRITE
-                  //  https://github.com/sanni/cartreader/blob/6b0ded69c7f160e7171cfa40ed6c0b23606a4434/Cart_Reader/GB.ino#L88
-                  //  https://www.insidegadgets.com/2011/04/07/gbcartread-arduino-based-gameboy-cart-reader-%e2%80%93-part-3-write-to-ram/
-                  Serial.println("START RAM 1");
-                  gameboy_cartridge.startReadRAM_GB();
-                  Serial.println("START RAM 2");
+                  Serial.println("START ROM 1");
+                  //  https://github.com/lesserkuma/FlashGBX/blob/c12b1de4dd66a8ec85bab1e0e70bf8661b4255fd/FlashGBX/hw_GBxCartRW.py#L1367
+                  //  https://arduino.stackexchange.com/questions/63078/cannot-write-pin-low
+                  //  https://www.insidegadgets.com/2017/01/22/gbxcartread-part-3-gba-eeprom-readwrite-flash-write-and-determining-sizes/
+                  // gameboy_cartridge.startWriteRAM_GB();
                 }
+                // Serial.println("ROM");
+              }
+            }
+          } else {
+            //  DUMP
+            cont_sw = this->argSearch(&cmd_args, "-o");
+            if (cont_sw == -1) {
+              cont_sw = this->argSearch(&cmd_args, "-a");
+              if (cont_sw == -1) {
+                // Serial.println("GAME BOY Info");
+                gameboy_cartridge.headerROM_GB(true);
+              } else {
+                gameboy_cartridge.readSRAM_GB();
               }
             } else {
-              //  ROM
-              //  TODO:
-              cont_sw = this->argSearch(&cmd_args, "-s");
-              if (cont_sw == -1) {
-                cont_sw = this->argSearch(&cmd_args, "-e");
-                if (cont_sw == -1) {
-                  // Serial.println("Error");
-                } else {
-                  //  END WRITE
-                  // gameboy_cartridge.endWriteRAM_GB();
-                }
-              } else {
-                //  START WRITE
-                Serial.println("START ROM 1");
-                //  https://github.com/lesserkuma/FlashGBX/blob/c12b1de4dd66a8ec85bab1e0e70bf8661b4255fd/FlashGBX/hw_GBxCartRW.py#L1367
-                //  https://arduino.stackexchange.com/questions/63078/cannot-write-pin-low
-                //  https://www.insidegadgets.com/2017/01/22/gbxcartread-part-3-gba-eeprom-readwrite-flash-write-and-determining-sizes/
-                // gameboy_cartridge.startWriteRAM_GB();
-              }
-              // Serial.println("ROM");
+              gameboy_cartridge.readROM_GB();
             }
           }
         } else {
-          //  DUMP
-          cont_sw = this->argSearch(&cmd_args, "-o");
-          if (cont_sw == -1) {
-            cont_sw = this->argSearch(&cmd_args, "-a");
-            if (cont_sw == -1) {
-              // Serial.println("GAME BOY Info");
-              gameboy_cartridge.headerROM_GB(true);
-            } else {
-              gameboy_cartridge.readSRAM_GB();
-            }
-          } else {
-            gameboy_cartridge.readROM_GB();
-          }
+          // Serial.println("GAME BOY Info");
+          gameboy_cartridge.headerROM_GB(true);
         }
       } else {
-        // Serial.println("GAME BOY Info");
-        gameboy_cartridge.headerROM_GB(true);
+        int fileSize = cmd_args.get(cont_sw + 1).toInt();
+        gameboy_cartridge.test(fileSize);
       }
+
+      
     } else if(cmd_args.get(0) == GAMEBOY_LIVE_CAMERA_CMD) {
       int cont_sw = this->argSearch(&cmd_args, "-E");
       if (cont_sw == -1) {

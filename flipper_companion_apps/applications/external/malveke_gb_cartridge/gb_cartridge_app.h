@@ -79,6 +79,7 @@ typedef struct {
 
     File* cart_rom;
     File* cart_ram;
+    File* cart_log;
 
     uint32_t gameboy_rom_option_selected_index;
     char* gameboy_rom_option_selected_text;

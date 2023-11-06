@@ -1,6 +1,9 @@
 #include "../gb_cartridge_app.h"
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_uart.h>
+// #include <stm32wbxx_ll_lpuart.h>
+#include <stm32wbxx_ll_usart.h>
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
@@ -14,6 +17,8 @@
 #include <stdio.h>  // Para sprintf
 #include <string.h> // Para strlen
 
+
+// static bool waiting_acknowledgement = true;
 struct GBCartridgeScene5
 {
     View *view;
@@ -35,9 +40,36 @@ typedef struct
     char *cart_dump_ram_filename_sequential;
     bool rx_active;
 
+    bool ack;
+
+
+    char* event_title;
+
 } GameBoyCartridgeRAMWriteModel;
+/*
+void gameboy_log_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
+    furi_assert(context);
+    GBCartridge* instance = context;
+    UNUSED(len);
+    UNUSED(buf);
+    UNUSED(instance);
+    storage_file_write(instance->cart_log, buf, len);
+    // with_view_model(
+    //     instance->gb_cartridge_scene_5->view,
+    //     GameBoyCartridgeRAMWriteModel * model,
+    //     { 
+    //         model->transfered -= len;
+    //         // uint64_t current_time = furi_hal_rtc_get_timestamp();
+    //         // model->elapsed_time = current_time - model->start_time;
+    //         // if (current_time - last_toggle_time >= 0.2) {
+    //         //     model->rx_active = !model->rx_active;
+    //         //     // last_toggle_time = current_time;
+    //         // }
+    //     },
+    //     true);
 
-
+}
+*/
 static bool select_ram_file(GBCartridge *app, File *file)
 {
     bool result = false;
@@ -70,39 +102,151 @@ static bool select_ram_file(GBCartridge *app, File *file)
     return result;
 }
 
+// static void wait_for_ack (void* context) {
+//     GBCartridge* instance = context;
+//     bool waiting_acknowledgement = true;
+//     while(waiting_acknowledgement) {
+//         with_view_model(
+//                 instance->gb_cartridge_scene_5->view,
+//                 GameBoyCartridgeRAMWriteModel * model,
+//                 {
+//                     waiting_acknowledgement = model->ack;
+//                     if(model->ack) {
+//                         model->ack = false;
+//                     }
+//                 },
+//                 true);
+//         furi_delay_ms(2);
+//     }
+// }
+
 static int32_t cartridge_writting_worker_thread(void* thread_context) {
     GBCartridge* app = thread_context;
     UNUSED(app);
-    uint8_t buffer[BUFFER_SIZE];
+    /*
+    uint8_t buffer[8];
+    buffer[0] = 'A';
+    buffer[1] = 'B';
+    buffer[2] = 'C';
+    buffer[3] = 'D';
+
+    buffer[4] = 'E';
+    buffer[5] = 'F';
+    buffer[6] = 'G';
+    buffer[7] = 'H';
+
+    char gbcartridge_start_command[80]; // A reasonably sized buffer.
+    snprintf(gbcartridge_start_command, sizeof(gbcartridge_start_command), "gbcartridge -w -a %d\n", 8);
+    uart_tx((uint8_t *)gbcartridge_start_command, strlen(gbcartridge_start_command));
+    furi_delay_ms(20);
+
+    uint8_t buffer2[4];
+    int x = 0;
+    for(int i = 0; i < 4; i++) {
+        buffer2[x] = buffer[i];
+        x++;
+    }
+    uart_tx(buffer2, sizeof(buffer2));
+    x = 0;
+    for(int i = 4; i < 8; i++) {
+        buffer2[x] = buffer[i];
+        x++;
+    }
+    uart_tx(buffer2, sizeof(buffer2));
+    */
+    
+    // uint8_t data_buffer[BUFFER_SIZE];
     File* file = storage_file_alloc(app->storage);
 
     if (select_ram_file(app, file))
     {
-        const char gbcartridge_start_command[] = "gbcartridge -w -a -s\n";
-        uart_tx((uint8_t *)gbcartridge_start_command, strlen(gbcartridge_start_command));
-        furi_delay_ms(100);
+
+        uint64_t fileSize = storage_file_size(file);
+
+
+        uint8_t buffer[BUFFER_SIZE];
         
-        uint16_t ret = 0;
-        do {
-            ret = storage_file_read(file, buffer, sizeof(buffer) - 1);
-            // lp_uart_tx((uint8_t *)buffer, sizeof(buffer));
-            // uart_tx((uint8_t *)buffer, sizeof(buffer))
+        char gbcartridge_start_command[80]; // A reasonably sized buffer.
+        snprintf(gbcartridge_start_command, sizeof(gbcartridge_start_command), "gbcartridge -w -a %lld\n", fileSize);
+        // snprintf(gbcartridge_start_command, sizeof(gbcartridge_start_command), "gbcartridge -t %d\n", 128);
+   
+        uart_tx((uint8_t *)gbcartridge_start_command, strlen(gbcartridge_start_command));
+        furi_delay_ms(500);
+    
+        
+        with_view_model(
+            app->gb_cartridge_scene_5->view,
+            GameBoyCartridgeRAMWriteModel * model,
+            {
+                model->total_ram = fileSize;
 
-            with_view_model(
-                app->gb_cartridge_scene_5->view,
-                GameBoyCartridgeRAMWriteModel * model,
-                {
-                    model->total_ram = storage_file_size(file);
-                    model->transfered += ret;
-                },
-                true);
+                // char title[42];
+                // snprintf(title, sizeof(title), "%lld", fileSize);
+                // // Asignar memoria para event_title y copiar el contenido de title
+                // model->event_title = (char*)malloc(strlen(title) + 1);
+                
+                // strcpy(model->event_title, title);
+            },
+            true);
+        
+        // uint8_t data[1];
+        int counter = 0;
+        while (fileSize > 0) {
+            uint16_t bytes_read = storage_file_read(file, buffer, BUFFER_SIZE);
             
-        } while(ret > 0);
+            if (bytes_read > 0) {
+                // buffer[BUFFER_SIZE-1] = '\0';
+                // uart_tx((uint8_t *)buffer, bytes_read+1);
 
-        const char gbcartridge_end_command[] = "gbcartridge -w -a -e\n";
-        uart_tx((uint8_t *)gbcartridge_end_command, strlen(gbcartridge_end_command));
+                // uint8_t string_buffer[BUFFER_SIZE + 1]; // +1 para el carácter nulo
+                // memcpy(string_buffer, buffer, bytes_read); // Copia los datos del búfer al búfer de cadena
+                // string_buffer[bytes_read] = '\0'; // Agrega el carácter nulo al final
+
+
+
+                uart_tx((uint8_t *)buffer, bytes_read);
+                // furi_delay_ms(500);
+                // while(!LL_USART_IsActiveFlag_TC(USART1));
+                
+                // if(counter == 1) {
+                //     break;
+                // }
+                fileSize -= bytes_read;
+                    with_view_model(
+                        app->gb_cartridge_scene_5->view,
+                        GameBoyCartridgeRAMWriteModel * model,
+                        {
+                            model->transfered += bytes_read;
+                        },
+                        true);
+                // bool waiting_acknowledgement = true;
+                // while(waiting_acknowledgement){
+                //             with_view_model(
+                //                     app->gb_cartridge_scene_5->view,
+                //                     GameBoyCartridgeRAMWriteModel * model,
+                //                     {
+                //                         waiting_acknowledgement = model->ack;
+                //                         if(model->ack) {
+                //                             model->ack = false;
+                //                         }
+                //                     },
+                //                     false);
+                //     furi_delay_ms(50);
+                // }
+
+                counter++;
+            } else {
+                break;
+            }
+        }
+
+        storage_file_close(file);
+
+        // const char gbcartridge_end_command[] = "gbcartridge -w -a\n";
+        // uart_tx((uint8_t *)gbcartridge_end_command, strlen(gbcartridge_end_command));
         storage_file_free(file);
     }
+    
     return 0;
 }
 void gb_cartridge_scene_5_set_callback(
@@ -158,7 +302,7 @@ void gb_cartridge_scene_5_draw(Canvas *canvas, GameBoyCartridgeRAMWriteModel *mo
 
     // char *filename = strrchr(model->cart_dump_ram_filename_sequential, '/');
     // filename++;
-    // canvas_draw_str_aligned(canvas, 128/2, 12, AlignCenter, AlignTop, filename);
+    canvas_draw_str_aligned(canvas, 128/2, 12, AlignCenter, AlignTop, model->event_title);
 
     char total_ram_str[20];
     snprintf(total_ram_str, sizeof(total_ram_str), "of %.2lf MiB", (double)(model->total_ram / 1024.0 / 1024.0));
@@ -209,6 +353,46 @@ static void gb_cartridge_scene_5_model_init(GameBoyCartridgeRAMWriteModel *const
     model->ramBanks = 0;
     model->elapsed_time = 0;
     model->start_time = 0;
+    model->event_title = "...";
+    model->ack = false;
+}
+void gameboy_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
+    furi_assert(context);
+    UNUSED(len);
+    UNUSED(buf);
+    GBCartridge* instance = context;
+    with_view_model(
+        instance->gb_cartridge_scene_5->view,
+        GameBoyCartridgeRAMWriteModel * model,
+        {
+            UNUSED(model);
+            cJSON* json = cJSON_Parse((char*)buf);
+            if(json == NULL) {
+            } else {
+                cJSON* type = cJSON_GetObjectItemCaseSensitive(json, "type");
+                if(cJSON_IsString(type) && (type->valuestring != NULL)) {
+                    model->event_type = strdup(type->valuestring);
+                } else {
+                    model->event_type = "None";
+                }
+                cJSON* str = cJSON_GetObjectItemCaseSensitive(json, "str");
+                if(cJSON_IsString(str) && (str->valuestring != NULL)) {
+                    model->event_title = strdup(str->valuestring);
+                } else {
+                    model->event_title = "None";
+                }
+                
+            }
+            if (strcmp(model->event_type, "ack") == 0) {
+                model->ack = true;
+                // model->transfered += 1;
+                // waiting_acknowledgement = false;
+            }
+            if (strcmp(model->event_type, "success") == 0) {
+                notification_success(instance->notification);
+            }
+        },
+        true);
 }
 bool gb_cartridge_scene_5_input(InputEvent *event, void *context)
 {
@@ -227,8 +411,13 @@ bool gb_cartridge_scene_5_input(InputEvent *event, void *context)
                     UNUSED(model);
                     GBCartridge *app = (GBCartridge *)instance->context;
                     // Unregister rx callback
+                    uart_set_handle_rx_data_cb(app->lp_uart, NULL);
                     uart_set_handle_rx_data_cb(app->uart, NULL);
-                    // uart_set_handle_rx_data_cb(app->lp_uart, NULL);
+
+                    // if(app->cart_log && storage_file_is_open(app->cart_log)) {
+                    //     storage_file_close(app->cart_log);
+                    // }
+                    
                     instance->callback(GBCartridgeCustomEventScene5Back, instance->context);
                 },
                 true);
@@ -244,8 +433,18 @@ bool gb_cartridge_scene_5_input(InputEvent *event, void *context)
                 GameBoyCartridgeRAMWriteModel * model,
                 {
                     GBCartridge *app = ((GBCartridge *)instance->context);
-                    app->thread = furi_thread_alloc_ex("CartridgeWriterWorker", 2048, cartridge_writting_worker_thread, app);
-                    furi_thread_start(app->thread);
+                    // app->cart_log = storage_file_alloc(app->storage);
+                    // char *filename = sequential_file_resolve_path(app->storage, MALVEKE_APP_FOLDER, "logs", "txt");
+                    // if(storage_file_open(app->cart_log, filename, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                        uart_set_handle_rx_data_cb(app->uart, gameboy_handle_rx_data_cb);
+                        // uart_set_handle_rx_data_cb(app->lp_uart, gameboy_log_handle_rx_data_cb);
+                        
+                        app->thread = furi_thread_alloc_ex("CartridgeWriterWorker", 2048, cartridge_writting_worker_thread, app);
+                        furi_thread_start(app->thread);
+                       
+
+                    // }
+                    
 
                     UNUSED(model);
                     

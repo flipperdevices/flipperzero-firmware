@@ -1,5 +1,6 @@
 #include "GameBoyCartridge.h"
-
+#include "save.h"
+#include "soc/rtc_wdt.h"
 
 
 GameBoyCartridge::GameBoyCartridge()
@@ -7,6 +8,7 @@ GameBoyCartridge::GameBoyCartridge()
     this->runGameBoyCartridge = false;
     this->writtingRAM = false;
     this->writtingROM = false;
+    this->restoringRAM = false;
     this->lastByte = 0;
     this->cartridgeType = 0;
     this->romSize = 0;
@@ -117,11 +119,18 @@ byte GameBoyCartridge::read_byte_GB(uint16_t address)
 {
     this->set_address_GB(address);
 
-    cs_mreqPin_low;
+    __asm__("nop\n\t"
+          "nop\n\t"
+          "nop\n\t"
+          "nop\n\t");
+          
+    // cs_mreqPin_low;
     rdPin_low;
 
-    asm volatile("nop"); // Delay a little (minimum is 2 nops, using 3 to be sure)
-    asm volatile("nop");
+    __asm__("nop\n\t"
+          "nop\n\t"
+          "nop\n\t"
+          "nop\n\t");
     // asm volatile("nop");
     // asm volatile("nop");
 
@@ -137,7 +146,11 @@ byte GameBoyCartridge::read_byte_GB(uint16_t address)
     }
     // Switch and RD to HIGH
     rdPin_high;
-    cs_mreqPin_high;
+    // cs_mreqPin_high;
+    __asm__("nop\n\t"
+          "nop\n\t"
+          "nop\n\t"
+          "nop\n\t");
     // asm volatile("nop"); // Delay a little (minimum is 2 nops, using 3 to be sure)
     // asm volatile("nop");
     // asm volatile("nop");
@@ -595,26 +608,29 @@ void GameBoyCartridge::write_byte_GB(int address, byte data)
     }
 
     // Wait till output is stable
-    __asm__("nop\n\t"
-            "nop\n\t"
-            "nop\n\t"
-            "nop\n\t");
+    wait(120);
+    // __asm__("nop\n\t"
+    //         "nop\n\t"
+    //         "nop\n\t"
+    //         "nop\n\t");
     // Pull WR low
     wrPin_low;
     // Leave WR low for at least 60ns
-    __asm__("nop\n\t"
-            "nop\n\t"
-            "nop\n\t"
-            "nop\n\t");
+    wait(120);
+    // __asm__("nop\n\t"
+    //         "nop\n\t"
+    //         "nop\n\t"
+    //         "nop\n\t");
 
     // Pull WR HIGH
     wrPin_high;
 
     // Leave WR high for at least 50ns
-    __asm__("nop\n\t"
-            "nop\n\t"
-            "nop\n\t"
-            "nop\n\t");
+    wait(120);
+    // __asm__("nop\n\t"
+    //         "nop\n\t"
+    //         "nop\n\t"
+    //         "nop\n\t");
 
     // Switch data pins to input
     for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS) / sizeof(DATA_GB_GBC_PINS[0]); i++)
@@ -939,12 +955,424 @@ void GameBoyCartridge::readSRAM_GB()
         this->writtingRAM = true;
     }
 }
-void GameBoyCartridge::startReadRAM_GB() {
-
+void GameBoyCartridge::ramEnable() {
+    this->dataBusAsOutput();
+    this->write_byte_GB(0x0000, 0x0A);
+    delayMicroseconds(10);
+    this->dataBusAsInput();
 }
-void GameBoyCartridge::endReadRAM_GB() {
-
+void GameBoyCartridge::ramDisable() {
+    this->dataBusAsOutput();
+    // Disable SRAM
+    this->write_byte_GB(0x0000, 0x00);
+    delay(50);
+    this->dataBusAsInput();
 }
+// Receive Serial data
+uint8_t GameBoyCartridge::serial_receive() {
+    while (Serial.available() <= 0);
+	return Serial.read(); // Get and return received data from buffer
+}
+// Transmit Serial data
+void GameBoyCartridge::serial_transmit(uint8_t data) {
+  while (!(Serial.availableForWrite() > 0)); // Wait for the serial buffer to have space
+  Serial.write(data);
+}
+// Read 1-128 bytes from the Serial 
+void GameBoyCartridge::serial_read_bytes(uint8_t count) {
+	for (uint8_t x = 0; x < count; x++) {
+		this->receivedBuffer[x] = this->serial_receive();
+	}
+}
+// Read from Serial until a 0 (string terminator byte) is received
+void GameBoyCartridge::serial_read_chars() {
+  uint8_t x = 0;
+  while (1) {
+    char receivedChar = Serial1.read();
+    if (receivedChar == 0 || x >= sizeof(receivedBuffer) - 1) {
+      break;
+    }
+    this->receivedBuffer[x] = receivedChar;
+    x++;
+  }
+  this->receivedBuffer[x] = 0; // Null-terminate the string
+}
+
+// Triggers CS and CLK pin
+void GameBoyCartridge::writeByteSRAM_GB(uint16_t address, uint8_t data) {
+  // Set address
+
+    this->set_address_GB(address);
+                
+    for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS) / sizeof(DATA_GB_GBC_PINS[0]); i++)
+    {
+        digitalWrite(DATA_GB_GBC_PINS[i], data & (1 << i) ? HIGH : LOW);
+    }
+
+    //  CS RD WR (010)
+
+    delayMicroseconds(10);
+    wrPin_low;
+    rdPin_high;
+    cs_mreqPin_low;
+
+    delayMicroseconds(10);
+
+    //  CS RD WR (111)
+    wrPin_high;
+    rdPin_high;
+    cs_mreqPin_high;
+    delayMicroseconds(10);
+}
+
+void GameBoyCartridge::test(uint16_t maxBufferSize) {
+
+    uint8_t sav_file[maxBufferSize];
+    memset(sav_file, 0, maxBufferSize);  // Inicializar el arreglo con ceros
+    size_t currentIndex = 0;
+    uint16_t counter = 0;
+    int bytesRead = 0;
+
+    // while(Serial.available() <= 0);
+    Serial.flush();
+    String input = "";
+    while(true) {
+        if (Serial.available() > 0) {
+            sav_file[bytesRead] = Serial.read();
+            bytesRead++;
+
+            // Si has leído la cantidad de datos esperada
+            if (bytesRead == maxBufferSize) {
+                // Has guardado todos los datos en sav_file
+                break;
+            }
+        }
+            
+        // if(Serial.available() > 0) {
+            // for (uint8_t x = 0; x < 64; x++) {
+                // this->receivedBuffer[counter + x] = Serial.read();
+                // sav_file[counter] = this->serial_receive();
+                // sav_file[counter] = (uint8_t)Serial.read();
+                // currentIndex++; 
+            // }
+
+            
+            counter++;
+
+        if (counter >= maxBufferSize-1) {
+            break;
+        }
+    }
+    transferJSON.clear();
+    transferJSON["type"] = "success";
+    Serial.print("JSON:");
+    serializeJson(transferJSON, Serial);
+    Serial.println();
+
+    WiFi.mode(WIFI_AP);
+    gbStartAP("Tester", "12345678");
+    _server.on("/image", HTTP_GET,  [maxBufferSize, &sav_file](AsyncWebServerRequest *request){
+        AsyncResponseStream *response = request->beginResponseStream("text/html");
+        for (size_t i = 0; i < maxBufferSize; i++) {
+            if (i % 16 == 0) {
+                response->print("\n"); // Add a vertical bar to separate each line
+            }
+            response->print(" ");
+            response->printf("%02X", sav_file[i]);
+        }
+        request->send(response);
+    });
+    _server.begin();
+}
+void GameBoyCartridge::restoreRAM(size_t maxBufferSize) {
+    
+    pinMode(GAMEBOY_RST, OUTPUT);
+    pinMode(GAMEBOY_CLK, OUTPUT);
+    pinMode(GAMEBOY_WR, OUTPUT);
+    pinMode(GAMEBOY_RD, OUTPUT);
+    pinMode(GAMEBOY_CS, OUTPUT);
+
+    // Set Control Pins to Output RST(PH0) CLK(PH1) CS(PH3) WR(PH5) RD(PH6)
+    for (uint32_t i = 0; i < sizeof(ADDRESS_GB_GBC_PINS)/sizeof(ADDRESS_GB_GBC_PINS[0]); i++)
+    {
+        pinMode(ADDRESS_GB_GBC_PINS[i], OUTPUT);
+    }
+    // Set Data Pins (D0-D7) to Input
+    for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS)/sizeof(DATA_GB_GBC_PINS[0]); i++)
+    {
+        pinMode(DATA_GB_GBC_PINS[i], INPUT);
+    }
+
+    digitalWrite(GAMEBOY_CLK, LOW);
+    digitalWrite(GAMEBOY_RST, LOW);
+    digitalWrite(GAMEBOY_WR, HIGH);
+    digitalWrite(GAMEBOY_RD, HIGH);
+    digitalWrite(GAMEBOY_CS, HIGH);
+
+    delay(400);
+    digitalWrite(GAMEBOY_RST, HIGH);
+
+    if(this->ramEndAddress > 0) {
+
+        // this->gb_mode();
+        // this->rd_wr_mreq_reset();
+        this->totalRamBytes = (this->sramBanks) * 8192;
+        this->currentAddress = 0xA000;
+
+        // MBC2 Fix
+        this->read_byte_GB(0x0134);
+        
+        // Enable SRAM for MBC1
+        if (this->romType <= 4 || (this->romType >= 11 && this->romType <= 13)) {
+            this->write_byte_GB(0x6000, 1); // Set RAM Mode
+        }
+        // Initialise MBC
+        //  EnableRAM
+        this->ramEnable();
+        this->currentBank = 0;
+
+
+        // Switch RAM banks
+        int x = 0;
+        for (uint8_t currBank = 0; currBank < this->sramBanks; currBank++) {
+            this->dataBusAsOutput();
+            this->write_byte_GB(0x4000, currBank);
+            this->dataBusAsInput();
+            // Write RAM
+            this->dataBusAsOutput();
+            
+            for (word sramAddress = 0xA000; sramAddress <= this->ramEndAddress; sramAddress++)
+            {   
+                /*
+                while(Serial.available() <= 0);
+                // if (Serial.available() > 0) {
+                for (uint8_t x = 0; x < 64; x++) {
+                    // this->receivedBuffer[x] = Serial.read();
+                    this->writeByteSRAM_GB(sramAddress + x,  this->receivedBuffer[x]);
+                    // sav_file[counter + x] = Serial.read();
+                    // currentIndex++; 
+                }
+                // }
+                */
+               this->writeByteSRAM_GB(sramAddress,  save_gb[x]);
+               x++;
+            }
+
+            this->dataBusAsInput();
+        }
+
+        this->ramDisable();
+        // free(sav_file);
+        transferJSON.clear();
+        transferJSON["type"] = "success";
+        Serial.print("JSON:");
+        serializeJson(transferJSON, Serial);
+        Serial.println();
+
+    }
+    /*
+    uint8_t sav_file[maxBufferSize];
+    // memset(sav_file, 0, maxBufferSize);  // Inicializar el arreglo con ceros
+    size_t currentIndex = 0;
+    uint16_t counter = 0;
+    // transferJSON.clear();
+    // transferJSON["type"] = "ack";
+
+    // transferJSON["str"] = String(maxBufferSize);
+
+    // Serial.print("JSON:");
+    // serializeJson(transferJSON, Serial);
+    // Serial.println();
+    while (1) {
+        if (Serial.available()) {
+            for (uint8_t x = 0; x < 64; x++) {
+                // this->receivedBuffer[counter + x] = Serial.read();
+                sav_file[counter + x] = Serial.read();
+                currentIndex++; 
+            }
+            counter += 64;
+            
+            // transferJSON.clear();
+            // transferJSON["type"] = "ack";
+            // String hexString = "";
+            // char hexCar[3];
+            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[0]); // 00
+            // hexString += hexCar;
+            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[1]); // 00
+            // hexString += hexCar;    
+            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[58]); // E1
+            // hexString += hexCar;
+            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[59]); // 00
+            // hexString += hexCar;
+            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[60]); // 38
+            // hexString += hexCar;
+            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[61]); // 05
+            // hexString += hexCar;
+            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[62]); // 08
+            // hexString += hexCar;
+            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[63]); // 00
+            // hexString += hexCar;
+
+            // transferJSON["str"] = hexString;
+
+            // Serial.print("JSON:");
+            // serializeJson(transferJSON, Serial);
+            // Serial.println();
+            
+            delayMicroseconds(10);
+            transferJSON.clear();
+            transferJSON["type"] = "ack";
+            String hexString = "";
+            char hexCar[3];
+            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[0]); // 00
+            hexString += hexCar;
+            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[1]); // 00
+            hexString += hexCar;    
+            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[58]); // E1
+            hexString += hexCar;
+            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[59]); // 00
+            hexString += hexCar;
+            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[60]); // 38
+            hexString += hexCar;
+            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[61]); // 05
+            hexString += hexCar;
+            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[62]); // 08
+            hexString += hexCar;
+            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[63]); // 00
+            hexString += hexCar;
+            transferJSON["str"] = hexString;
+
+            Serial.print("JSON:");
+            serializeJson(transferJSON, Serial);
+            Serial.println();
+        }
+        if (counter >= maxBufferSize-1) {
+            break;
+        }
+    }
+
+    transferJSON.clear();
+    transferJSON["type"] = "success";
+    
+    // String hexString = "";
+    // char hexCar[3];
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[58]); // E1
+    // hexString += hexCar;
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[59]); // 00
+    // hexString += hexCar;
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[60]); // 38
+    // hexString += hexCar;
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[61]); // 05
+    // hexString += hexCar;
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[62]); // 08
+    // hexString += hexCar;
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[63]); // 00
+    // hexString += hexCar;
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[64]); // 00
+    // hexString += hexCar;
+
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[17257]); // 83
+    // hexString += hexCar;
+
+
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[26048]); // C8
+    // hexString += hexCar;
+
+
+    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[30670]); // FF
+    // hexString += hexCar;
+
+    // transferJSON["str"] = hexString;
+   transferJSON["str"] = "end";
+    Serial.print("JSON:");
+    serializeJson(transferJSON, Serial);
+    Serial.println();
+    /*
+    // Serial1.flush();
+    pinMode(GAMEBOY_RST, OUTPUT);
+    pinMode(GAMEBOY_CLK, OUTPUT);
+    pinMode(GAMEBOY_WR, OUTPUT);
+    pinMode(GAMEBOY_RD, OUTPUT);
+    pinMode(GAMEBOY_CS, OUTPUT);
+
+    // Set Control Pins to Output RST(PH0) CLK(PH1) CS(PH3) WR(PH5) RD(PH6)
+    for (uint32_t i = 0; i < sizeof(ADDRESS_GB_GBC_PINS)/sizeof(ADDRESS_GB_GBC_PINS[0]); i++)
+    {
+        pinMode(ADDRESS_GB_GBC_PINS[i], OUTPUT);
+    }
+    // Set Data Pins (D0-D7) to Input
+    for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS)/sizeof(DATA_GB_GBC_PINS[0]); i++)
+    {
+        pinMode(DATA_GB_GBC_PINS[i], INPUT);
+    }
+
+    digitalWrite(GAMEBOY_CLK, LOW);
+    digitalWrite(GAMEBOY_RST, LOW);
+    digitalWrite(GAMEBOY_WR, HIGH);
+    digitalWrite(GAMEBOY_RD, HIGH);
+    digitalWrite(GAMEBOY_CS, HIGH);
+
+    delay(100);
+    digitalWrite(GAMEBOY_RST, HIGH);
+
+
+    // this->ramEndAddress = 0xC000;
+    if(this->ramEndAddress > 0) {
+
+        // this->gb_mode();
+        // this->rd_wr_mreq_reset();
+        this->totalRamBytes = (this->sramBanks) * 8192;
+        this->currentAddress = 0xA000;
+
+        // MBC2 Fix
+        this->read_byte_GB(0x0134);
+        
+        // Enable SRAM for MBC1
+        if (this->romType <= 4 || (this->romType >= 11 && this->romType <= 13)) {
+            this->write_byte_GB(0x6000, 1); // Set RAM Mode
+        }
+        // Initialise MBC
+        //  EnableRAM
+        this->ramEnable();
+        this->currentBank = 0;
+
+
+        // Switch RAM banks
+        uint8_t x = 0;
+        for (uint8_t currBank = 0; currBank < this->sramBanks; currBank++) {
+            this->dataBusAsOutput();
+            this->write_byte_GB(0x4000, currBank);
+            this->dataBusAsInput();
+            // Write RAM
+            this->dataBusAsOutput();
+            
+            for (word sramAddress = 0xA000; sramAddress <= this->ramEndAddress; sramAddress++)
+            {
+                this->writeByteSRAM_GB(sramAddress,  this->receivedBuffer[x]);
+                x++;
+            }
+
+            this->dataBusAsInput();
+        }
+
+        this->ramDisable();
+        free(sav_file);
+        transferJSON.clear();
+        transferJSON["type"] = "success";
+        Serial.print("JSON:");
+        serializeJson(transferJSON, Serial);
+        Serial.println();
+
+    }
+    */
+    
+}
+// void GameBoyCartridge::startReadRAM_GB() {
+
+// }
+// void GameBoyCartridge::endReadRAM_GB() {
+
+// }
 // void GameBoyCartridge::startWriteRAM_GB()
 // {
 //     //  Load ROM header
@@ -1009,8 +1437,13 @@ bool GameBoyCartridge::isWrittingRAM()
 {
     return this->writtingRAM;
 }
+bool GameBoyCartridge::isRestoringRAM()
+{
+    return this->restoringRAM;
+}
 void GameBoyCartridge::setup()
 {
+    disableCore0WDT();  
     // buffer_obj = Buffer();
     this->writtingRAM = false;
     this->writtingROM = false;
@@ -1039,7 +1472,6 @@ void GameBoyCartridge::main()
                 for (uint8_t i = 0; i < 64; i++)
                 {
                     readData[i] = this->readByteSRAM_GB(ramAddress + i);
-                    
                 }
                 Serial1.write(readData, 64); // Send the 64 byte chunk
                 Serial1.flush();
@@ -1065,7 +1497,66 @@ void GameBoyCartridge::main()
             this->rd_wr_mreq_off();
         }
     } 
-    else if (this->isWrittingROM())
+    else if(this->isRestoringRAM()) 
+    {   
+        // if (Serial1.available() > 0) {
+            if (this->ramEndAddress > 0) {
+                // this->serial_read_bytes(64);
+                // for (uint8_t i = 0; i < 64; i++) {
+                //     this->receivedBuffer[i] = (uint8_t)Serial1.read();
+                // }
+
+                // if (this->currentBank < this->sramBanks) {
+                    
+                //     this->write_byte_GB(0x4000, this->currentBank);
+                    
+                //     // Write RAM
+                //     for (uint8_t x = 0; x < 64; x++) {
+                //         this->write_byte_GB(this->currentAddress, this->receivedBuffer[x], MEMORY_WRITE );
+                //         this->currentAddress++;
+                //     }
+                //     // this->serial_transmit('1');
+
+                //     this->currentBank++;
+
+                //     transferJSON.clear();
+                //     transferJSON["type"] = "ack";
+                //     Serial.print("JSON:");
+                //     serializeJson(transferJSON, Serial);
+                //     Serial.println();
+
+                //     this->serial_read_bytes(64);
+                // } else {
+                //     // Disable SRAM
+                //     this->write_byte_GB(0x0000, 0x00);
+
+                //     transferJSON.clear();
+                //     transferJSON["type"] = "success";
+                //     Serial.print("JSON:");
+                //     serializeJson(transferJSON, Serial);
+                //     Serial.println();
+                
+                //     this->restoringRAM = false;
+                // }
+            
+            }
+        // } else {
+        //     if (this->currentBank == this->sramBanks) {
+        //         // Disable SRAM
+        //         this->write_byte_GB(0x0000, 0x00);
+
+        //         transferJSON.clear();
+        //         transferJSON["type"] = "success";
+        //         Serial.print("JSON:");
+        //         serializeJson(transferJSON, Serial);
+        //         Serial.println();
+            
+        //         this->restoringRAM = false;
+        //     }
+        // }
+        
+        
+    } else if (this->isWrittingROM())
     {
         if (this->currentBank < this->romBanks) {
             /*

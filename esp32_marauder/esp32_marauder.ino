@@ -424,11 +424,13 @@ void loop()
   
   //if ((!do_draw) && (wifi_scan_obj.currentScanMode != ESP_UPDATE))
   //{
+  if(!gameboy_cartridge.isRestoringRAM()){
   cli_obj.main(currentTime);
+  }
 
   gameboy_cartridge.main();
   gameboy_live_camera.main();
-  if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM()) {
+  if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM() && !gameboy_cartridge.isRestoringRAM()) {
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);
   #endif
