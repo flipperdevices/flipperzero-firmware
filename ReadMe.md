@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Tetris v1.2 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game) [Improved tetris app (By noiob)](https://github.com/xMasterX/all-the-plugins/pull/25)
 - Updated: [BLE Spam v4.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Additional 200 devices (By Mr-Proxy-source) & Fix: Too huge VarItemList (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fd04e572c6634c558c80b121a920abeb3dab4f16)
 - Added: [SD SPI v0.2 (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
+- Patreon DBZ Build Update: [Added stopoxy_goku_128x64 (By stopoxy)](https://github.com/stopoxy/FZAnimations/tree/main/stopoxy_goku_128x64)
 
 <a name="release">
 
