@@ -525,10 +525,6 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
          * part 2 of the patch list has been terminated. This is the
          * case in official Gen I code at this time.
          */
-	/* XXX: Test to see if the number 8 in any names cause issues.
-	 * The flipper trainer name, and pokemon names I think are outside
-	 * of this calculation so I have no idea how this is supposed to work.
-	 */
         switch (in) {
         case PKMN_BLANK:
             break;
@@ -713,10 +709,10 @@ void trade_enter_callback(void* context) {
 
     model = view_get_model(trade->view);
 
-    if (model->gameboy_status > GAMEBOY_READY) {
-        model->gameboy_status = GAMEBOY_READY;
-    } else if (model->gameboy_status == GAMEBOY_COLOSSEUM) {
+    if (model->gameboy_status == GAMEBOY_COLOSSEUM) {
         model->gameboy_status = GAMEBOY_CONN_FALSE;
+    } else if (model->gameboy_status > GAMEBOY_READY) {
+        model->gameboy_status = GAMEBOY_READY;
     }
     trade->trade_centre_state = TRADE_RESET;
     model->pokemon_table = trade->pokemon_table;
