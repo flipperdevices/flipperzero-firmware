@@ -20,9 +20,9 @@ static bool select_ot_name_input_validator(const char* text, FuriString* error, 
     // OT name is 7 chars max on gen 1, so only take that and then fill the rest of the 11 bytes with term
 
     for(i = 0; i < sizeof(ot_name_buf); i++) {
-        if (isdigit((unsigned int)text[i])) {
+        if(isdigit((unsigned int)text[i])) {
             furi_string_printf(error, "Name cannot\ncontain\nnumbers!");
-	    rc = false;
+            rc = false;
         }
     }
 
@@ -35,7 +35,6 @@ static bool select_ot_name_input_validator(const char* text, FuriString* error, 
             (uint8_t*)pokemon_fap->trade_block->ot_name, (char*)text, strlen(text));
         FURI_LOG_D(TAG, "[ot_name] Set OT name to %s", text);
     }
-
 
     return rc;
 }
