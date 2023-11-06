@@ -401,7 +401,7 @@ int32_t game_2048_app() {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     // Call dolphin deed on game start
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     bool is_finished = false;
     while(!is_finished) {
@@ -494,8 +494,8 @@ int32_t game_2048_app() {
                 }
             }
 
-            view_port_update(view_port);
             furi_mutex_release(game_state->mutex);
+            view_port_update(view_port);
         }
     }
 
