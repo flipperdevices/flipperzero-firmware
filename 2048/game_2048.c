@@ -489,8 +489,8 @@ int32_t game_2048_app() {
                 }
             }
 
-            view_port_update(view_port);
             furi_mutex_release(game_state->mutex);
+            view_port_update(view_port);
         }
     }
 
