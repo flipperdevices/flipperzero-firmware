@@ -43,7 +43,7 @@ class GitVersion:
             )
         else:
             commit_date = datetime.strptime(
-                self._exec_git("log -1 --format=%cd").strip(),
+                self._exec_git("log -1 --format=%cd --date=default").strip(),
                 "%a %b %d %H:%M:%S %Y %z",
             )
 
