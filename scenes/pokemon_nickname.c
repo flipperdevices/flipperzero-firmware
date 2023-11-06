@@ -22,6 +22,7 @@ static char name_buf[11];
 static bool select_nickname_input_validator(const char* text, FuriString* error, void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     bool rc = true;
+    unsigned int i;
 
     if(text[0] == '\0') {
         /* Get the pokemon's name and populate our buffer with it */
@@ -30,18 +31,22 @@ static bool select_nickname_input_validator(const char* text, FuriString* error,
         return true;
     }
 
-    if(rc == false) {
-        furi_string_printf(error, "Some error?");
-    } else {
+    for(i = 0; i < strlen(text); i++) {
+        if(isdigit((unsigned int)text[i])) {
+            furi_string_printf(error, "Name cannot\ncontain\nnumbers!");
+            rc = false;
+        }
+    }
+
+    if(rc == true) {
         /* Clear existing nickname in trade block*/
         memset(pokemon_fap->trade_block->nickname, TERM_, sizeof(struct name));
 
         /* Encode string to nickname */
         pokemon_str_to_encoded_array(
             (uint8_t*)pokemon_fap->trade_block->nickname, (char*)text, strlen(text));
+        FURI_LOG_D(TAG, "[nickname] Set nickname to %s", text);
     }
-
-    FURI_LOG_D(TAG, "[nickname] Set nickname to %s", text);
 
     return rc;
 }
