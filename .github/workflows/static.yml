@@ -39,13 +39,11 @@ jobs:
           node-version: 18
           cache: 'npm'
       - name: Install dependencies
-        run: |
-          cd webinstaller
-          npm install
+        run: npm install
+        working-directory: ./webinstaller
       - name: Build
-        run: |
-          cd webinstaller
-          npm run build
+        run: npm run build
+        working-directory: ./webinstaller
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
