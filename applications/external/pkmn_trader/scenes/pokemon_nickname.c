@@ -33,14 +33,14 @@ static bool select_nickname_input_validator(const char* text, FuriString* error,
         return true;
     }
 
-    for(i = 0; i < strlen(text); i++) {
-        if(isdigit((unsigned int)text[i])) {
+    for (i = 0; i < strlen(text); i++) {
+        if (isdigit((unsigned int)text[i])) {
             furi_string_printf(error, "Name cannot\ncontain\nnumbers!");
-            rc = false;
-        }
+	    rc = false;
+	 }
     }
 
-    if(rc == true) {
+    if (rc == true) {
         /* Clear existing nickname in trade block*/
         memset(pokemon_fap->trade_block->nickname, TERM_, sizeof(struct name));
 
