@@ -125,7 +125,7 @@
 #define PKMN_COLOSSEUM ITEM_2_SELECTED
 #define PKMN_BREAK_LINK ITEM_3_SELECTED
 
-/* States specific to the trade process. */
+ /* States specific to the trade process. */
 typedef enum {
     TRADE_RESET,
     TRADE_INIT,
@@ -166,7 +166,7 @@ struct trade_ctx {
     TradeBlock* trade_block;
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
-    struct patch_list* patch_list;
+    struct patch_list *patch_list;
 };
 
 /* These are the needed variables for the draw callback */
@@ -185,7 +185,7 @@ struct trade_model {
 static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     furi_assert(context);
     UNUSED(arg);
-    struct trade_ctx* trade = context;
+    struct trade_ctx *trade = context;
 
     plist_create(&(trade->patch_list), trade->trade_block);
 }
@@ -217,7 +217,8 @@ static void trade_draw_connected(Canvas* const canvas) {
 /* Draws a frame around the screen, with a box at the top for a text string,
  * and an icon of the player.
  */
-static void trade_draw_frame(Canvas* canvas, const char* str) {
+static void trade_draw_frame(Canvas* canvas, const char *str)
+{
     furi_assert(canvas);
 
     canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
@@ -228,7 +229,8 @@ static void trade_draw_frame(Canvas* canvas, const char* str) {
 }
 
 /* Draws the pokemon's image in the middle of the screen */
-static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon* icon) {
+static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon *icon)
+{
     furi_assert(canvas);
     furi_assert(icon);
 
@@ -258,28 +260,28 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
     const Icon* icon = model->pokemon_table[model->curr_pokemon].icon;
 
     canvas_clear(canvas);
-    switch(model->gameboy_status) {
+    switch (model->gameboy_status) {
     case GAMEBOY_CONN_FALSE:
         furi_hal_light_set(LightGreen, 0x00);
         furi_hal_light_set(LightRed, 0xff);
         trade_draw_connect(canvas);
         break;
-    case GAMEBOY_CONN_TRUE:
+    case GAMEBOY_CONN_TRUE: 
         furi_hal_light_set(LightGreen, 0xff);
         furi_hal_light_set(LightRed, 0x00);
         trade_draw_connected(canvas);
         break;
     case GAMEBOY_READY:
-        trade_draw_pkmn_avatar(canvas, icon);
-        trade_draw_frame(canvas, "READY");
+	trade_draw_pkmn_avatar(canvas, icon);
+	trade_draw_frame(canvas, "READY");
         break;
     case GAMEBOY_WAITING:
-        trade_draw_pkmn_avatar(canvas, icon);
-        trade_draw_frame(canvas, "WAITING");
+	trade_draw_pkmn_avatar(canvas, icon);
+	trade_draw_frame(canvas, "WAITING");
         break;
     case GAMEBOY_TRADE_PENDING:
-        trade_draw_pkmn_avatar(canvas, icon);
-        trade_draw_frame(canvas, "DEAL?");
+	trade_draw_pkmn_avatar(canvas, icon);
+	trade_draw_frame(canvas, "DEAL?");
         break;
     case GAMEBOY_TRADING:
         furi_hal_light_set(LightGreen, 0x00);
@@ -296,9 +298,9 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         trade_draw_frame(canvas, "FIGHT!");
         break;
     default:
-        trade_draw_frame(canvas, "INITIAL");
-        break;
-    }
+	    trade_draw_frame(canvas, "INITIAL");
+            break;
+     }
 }
 
 /* Get the response byte from the link partner, updating the connection
@@ -313,7 +315,9 @@ static uint8_t getConnectResponse(struct trade_ctx* trade) {
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_CONN_TRUE; },
+            {
+                model->gameboy_status = GAMEBOY_CONN_TRUE;
+            },
             false);
         ret = PKMN_CONNECTED;
         break;
@@ -327,7 +331,9 @@ static uint8_t getConnectResponse(struct trade_ctx* trade) {
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_CONN_FALSE; },
+            {
+                model->gameboy_status = GAMEBOY_CONN_FALSE;
+            },
             false);
         ret = PKMN_BREAK_LINK;
         break;
@@ -368,14 +374,18 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_READY; },
+            {
+                model->gameboy_status = GAMEBOY_READY;
+            },
             false);
         break;
     case PKMN_COLOSSEUM:
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_COLOSSEUM; },
+            {
+                model->gameboy_status = GAMEBOY_COLOSSEUM;
+            },
             false);
         break;
     case PKMN_BREAK_LINK:
@@ -383,12 +393,14 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_CONN_FALSE; },
+            {
+                model->gameboy_status = GAMEBOY_CONN_FALSE;
+            },
             false);
         response = PKMN_BREAK_LINK;
         break;
     default:
-        response = trade->in_data;
+	response = trade->in_data;
         break;
     }
 
@@ -431,26 +443,26 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
      */
     switch(trade->trade_centre_state) {
     case TRADE_RESET:
-        /* Reset counters and other static variables */
-        counter = 0;
-        patch_pt_2 = false;
-        trade->trade_centre_state = TRADE_INIT;
-        break;
+	    /* Reset counters and other static variables */
+	    counter = 0;
+	    patch_pt_2 = false;
+	    trade->trade_centre_state = TRADE_INIT;
+	    break;
 
     /* This state runs through the end of the random preamble */
     case TRADE_INIT:
-        if(in == SERIAL_PREAMBLE_BYTE) {
-            counter++;
+	if (in == SERIAL_PREAMBLE_BYTE) {
+	    counter++;
             model->gameboy_status = GAMEBOY_WAITING;
-        } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
+        } else if ((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
             send = PKMN_TABLE_LEAVE;
-        }
-        if(counter == SERIAL_RNS_LENGTH) {
-            trade->trade_centre_state = TRADE_RANDOM;
-            counter = 0;
-        }
-        break;
-
+	}
+        if (counter == SERIAL_RNS_LENGTH) {
+	    trade->trade_centre_state = TRADE_RANDOM;
+	    counter = 0;
+	}
+	break;
+	    	
     /* Once we start getting PKMN_BLANKs, we mirror them until we get 10x
      * SERIAL_PREAMBLE_BYTE, and then 10 random numbers. The 10 random
      * numbers are for synchrinizing the PRNG between the two systems,
@@ -460,12 +472,12 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
      * bytes.
      */
     case TRADE_RANDOM:
-        counter++;
-        if(counter == (SERIAL_RNS_LENGTH + SERIAL_TRADE_PREAMBLE_LENGTH)) {
-            trade->trade_centre_state = TRADE_DATA;
-            counter = 0;
-        }
-        break;
+	counter++;
+	if (counter == (SERIAL_RNS_LENGTH + SERIAL_TRADE_PREAMBLE_LENGTH)) {
+		trade->trade_centre_state = TRADE_DATA;
+		counter = 0;
+	}
+	break;
 
     /* This is where we exchange trade_block data with the Gameboy */
     case TRADE_DATA:
@@ -475,36 +487,36 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 
         if(counter == sizeof(TradeBlock)) {
             trade->trade_centre_state = TRADE_PATCH_HEADER;
-            counter = 0;
-        }
+	    counter = 0;
+	}
 
-        break;
+	break;
 
     /* This absorbs the 3 byte ending sequence (DF FE 15) after the trade data is
      * swapped, then the 3x SERIAL_PREAMBLE_BYTEs that end the trade data, and
      * another 3x of them that start the patch data. By the time we're done with
      * this state, the patch list BLANK bytes are ready to be transmitted.
      * We only care about the 6x total preamble bytes.
-     */
+     */ 
     case TRADE_PATCH_HEADER:
-        if(in == SERIAL_PREAMBLE_BYTE) {
-            counter++;
-        }
+	if (in == SERIAL_PREAMBLE_BYTE) {
+		counter++;
+	}
 
-        if(counter == 6) {
-            counter = 0;
-            trade->trade_centre_state = TRADE_PATCH_DATA;
-        } else {
-            break;
-        }
-        [[fallthrough]];
+	if (counter == 6) {
+		counter = 0;
+		trade->trade_centre_state = TRADE_PATCH_DATA;
+	} else {
+		break;
+	}
+	[[fallthrough]];
     case TRADE_PATCH_DATA:
-        counter++;
+	counter++;
         /* This magic number is basically the header length, 10, minus
 	 * the 3x 0xFD that we should be transmitting as part of the patch
 	 * list header.
 	 */
-        if(counter > 7) {
+        if (counter > 7) {
             send = plist_index_get(trade->patch_list, (counter - 8));
         }
 
@@ -513,32 +525,33 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
          * part 2 of the patch list has been terminated. This is the
          * case in official Gen I code at this time.
          */
-        switch(in) {
+        switch (in) {
         case PKMN_BLANK:
             break;
         case SERIAL_PATCH_LIST_PART_TERMINATOR:
             patch_pt_2 = true;
             break;
         default: // Any nonzero value will cause a patch
-            if(!patch_pt_2) {
+            if (!patch_pt_2) {
                 /* Pt 1 is 0x00 - 0xFB */
-                input_party_flat[in - 1] = SERIAL_NO_DATA_BYTE;
+                input_party_flat[in-1] = SERIAL_NO_DATA_BYTE;
             } else {
                 /* Pt 2 is 0xFC - 0x107
 		 * 0xFC + in - 1
 		 */
-                input_party_flat[0xFB + in] = SERIAL_NO_DATA_BYTE;
+                input_party_flat[0xFB+in] = SERIAL_NO_DATA_BYTE;
             }
             break;
         }
 
-        /* What is interesting about the following check, is the Pokemon code
+	/* What is interesting about the following check, is the Pokemon code
 	 * seems to allocate 203 bytes, 3x for the preamble, and then 200 bytes
 	 * of patch list. But in practice, the Gameboy seems to transmit 3x
 	 * preamble bytes, 7x 0x00, then 189 bytes for the patch list. A
 	 * total of 199 bytes transmitted.
 	 */
-        if(counter == 196) trade->trade_centre_state = TRADE_SELECT;
+        if(counter == 196)
+            trade->trade_centre_state = TRADE_SELECT;
 
         break;
 
@@ -546,34 +559,34 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
      * moves to the pending state.
      */
     case TRADE_SELECT:
-        in_pkmn_idx = 0;
-        if(in == PKMN_BLANK) {
-            trade->trade_centre_state = TRADE_PENDING;
-        } else {
-            break;
-        }
-        [[fallthrough]];
+	    in_pkmn_idx = 0;
+	    if (in == PKMN_BLANK) {
+	        trade->trade_centre_state = TRADE_PENDING;
+	    } else {
+	        break;
+	    }
+	    [[fallthrough]];
     /* Handle the Gameboy selecting a pokemon to trade, or leaving the table */
     case TRADE_PENDING:
-        /* If the player leaves the trade menu and returns to the room */
+	/* If the player leaves the trade menu and returns to the room */
         if(in == PKMN_TABLE_LEAVE) {
             trade->trade_centre_state = TRADE_RESET;
             send = PKMN_TABLE_LEAVE;
             model->gameboy_status = GAMEBOY_READY;
-            /* If the player selected a pokemon to send from the Gameboy */
+        /* If the player selected a pokemon to send from the Gameboy */
         } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
             in_pkmn_idx = in;
             send = PKMN_SEL_NUM_ONE; // We always send the first pokemon
             model->gameboy_status = GAMEBOY_TRADE_PENDING;
-            /* BLANKs are sent in a few places, we want to do nothing about them
+        /* BLANKs are sent in a few places, we want to do nothing about them
 	 * unless the Gameboy already sent us an index they want to trade.
 	 */
         } else if(in == PKMN_BLANK) {
-            if(in_pkmn_idx != 0) {
+            if (in_pkmn_idx != 0) {
                 send = 0;
                 trade->trade_centre_state = TRADE_CONFIRMATION;
-                in_pkmn_idx &= 0x0F;
-            }
+		in_pkmn_idx &= 0x0F;
+	    }
         }
         break;
 
@@ -597,20 +610,10 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 
             /* Copy the traded-in pokemon's main data to our struct */
             trade->trade_block->party_members[0] = trade->input_block->party_members[in_pkmn_idx];
-            memcpy(
-                &(trade->trade_block->party[0]),
-                &(trade->input_block->party[in_pkmn_idx]),
-                sizeof(struct pokemon_structure));
-            memcpy(
-                &(trade->trade_block->nickname[0]),
-                &(trade->input_block->nickname[in_pkmn_idx]),
-                sizeof(struct name));
-            memcpy(
-                &(trade->trade_block->ot_name[0]),
-                &(trade->input_block->ot_name[in_pkmn_idx]),
-                sizeof(struct name));
-            model->curr_pokemon = pokemon_table_get_num_from_index(
-                trade->pokemon_table, trade->trade_block->party_members[0]);
+            memcpy(&(trade->trade_block->party[0]), &(trade->input_block->party[in_pkmn_idx]), sizeof(struct pokemon_structure));
+            memcpy(&(trade->trade_block->nickname[0]), &(trade->input_block->nickname[in_pkmn_idx]), sizeof(struct name));
+            memcpy(&(trade->trade_block->ot_name[0]), &(trade->input_block->ot_name[in_pkmn_idx]), sizeof(struct name));
+            model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
 
             /* Schedule a callback outside of ISR context to rebuild the patch
 	     * list with the new pokemon that we just accepted.
@@ -636,7 +639,12 @@ void transferBit(void* context) {
     render_gameboy_state_t status;
 
     with_view_model(
-        trade->view, struct trade_model * model, { status = model->gameboy_status; }, false);
+        trade->view,
+        struct trade_model * model,
+        {
+	    status = model->gameboy_status;
+        },
+        false);
 
     /* Shift data in every clock */
     trade->in_data <<= 1;
@@ -647,20 +655,20 @@ void transferBit(void* context) {
     if(trade->shift == 8) {
         trade->shift = 0;
         switch(status) {
-        case GAMEBOY_CONN_FALSE:
+	case GAMEBOY_CONN_FALSE:
             trade->out_data = getConnectResponse(trade);
             break;
-        case GAMEBOY_CONN_TRUE:
+	case GAMEBOY_CONN_TRUE:
             trade->out_data = getMenuResponse(trade);
             break;
-        case GAMEBOY_COLOSSEUM:
-            trade->out_data = trade->in_data;
-            break;
+	case GAMEBOY_COLOSSEUM:
+	    trade->out_data = trade->in_data;
+	    break;
         /* Every other state is trade related */
         default:
             trade->out_data = getTradeCentreResponse(trade);
             break;
-        }
+	}
     }
 }
 
@@ -679,18 +687,19 @@ void input_clk_gameboy(void* context) {
      */
     const uint32_t time_ticks = furi_hal_cortex_instructions_per_microsecond() * 500;
 
-    if(furi_hal_gpio_read(&GAME_BOY_CLK)) {
+    if (furi_hal_gpio_read(&GAME_BOY_CLK)) {
         if((DWT->CYCCNT - time) > time_ticks) {
             trade->in_data = 0;
             trade->shift = 0;
         }
         transferBit(trade);
-        time = DWT->CYCCNT;
+	time = DWT->CYCCNT;
     } else {
         /* On the falling edge of each clock, set up the next bit */
         furi_hal_gpio_write(&GAME_BOY_SO, !!(trade->out_data & 0x80));
         trade->out_data <<= 1;
     }
+
 }
 
 void trade_enter_callback(void* context) {
@@ -700,15 +709,14 @@ void trade_enter_callback(void* context) {
 
     model = view_get_model(trade->view);
 
-    if(model->gameboy_status == GAMEBOY_COLOSSEUM) {
+    if (model->gameboy_status == GAMEBOY_COLOSSEUM) {
         model->gameboy_status = GAMEBOY_CONN_FALSE;
-    } else if(model->gameboy_status > GAMEBOY_READY) {
+    } else if (model->gameboy_status > GAMEBOY_READY) {
         model->gameboy_status = GAMEBOY_READY;
     }
     trade->trade_centre_state = TRADE_RESET;
     model->pokemon_table = trade->pokemon_table;
-    model->curr_pokemon = pokemon_table_get_num_from_index(
-        trade->pokemon_table, trade->trade_block->party_members[0]);
+    model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
     model->ledon = false;
 
     view_commit_model(trade->view, true);
@@ -765,7 +773,7 @@ void trade_exit_callback(void* context) {
 
 void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view) {
     furi_assert(trade_block);
-    furi_assert(view);
+    furi_assert(view);    
 
     struct trade_ctx* trade = malloc(sizeof(struct trade_ctx));
 

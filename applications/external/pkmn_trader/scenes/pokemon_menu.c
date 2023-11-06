@@ -43,8 +43,7 @@ void main_menu_scene_on_enter(void* context) {
      * The proper way to do this would be to instead of tracking curr_pokemon
      * separately, have it always be derived fro the current trade_block.
      */
-    pokemon_fap->curr_pokemon = pokemon_table_get_num_from_index(
-        pokemon_fap->pokemon_table, pokemon_fap->trade_block->party_members[0]);
+    pokemon_fap->curr_pokemon = pokemon_table_get_num_from_index(pokemon_fap->pokemon_table, pokemon_fap->trade_block->party_members[0]);
 
     submenu_reset(pokemon_fap->submenu);
 
