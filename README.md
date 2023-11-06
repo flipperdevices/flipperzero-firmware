@@ -5,6 +5,8 @@
 
 # How to use:
 
+[New python script by JacobTDC (produces better-looking videos because of dithering filter)](https://gist.github.com/JacobTDC/524322a78bb0ba5008604d905ccd4270) 
+
 [Experimental makefile-compiled crossplatform project](https://github.com/LTVA1/flipper-zero-video-player/tree/main/makefile_project_converter)
 
 First, place your video (`source.mp4`) in some empty folder, create "frames" folder there and run this (install ffmpeg if you don't have it) (change the 1280x720 resolution to match your source video resolution if necessary, change 96x64 resolution according to your video aspect ratio if necessary):
