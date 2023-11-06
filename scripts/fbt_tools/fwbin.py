@@ -2,16 +2,13 @@ import SCons
 from SCons.Action import Action
 from SCons.Builder import Builder
 
-__OBJCOPY_ARM_BIN = "arm-none-eabi-objcopy"
-__NM_ARM_BIN = "arm-none-eabi-nm"
-
 
 def generate(env):
     env.SetDefault(
         BIN2DFU="${FBT_SCRIPT_DIR}/bin2dfu.py",
         BIN_SIZE_SCRIPT="${FBT_SCRIPT_DIR}/fwsize.py",
-        OBJCOPY=__OBJCOPY_ARM_BIN,  # FIXME
-        NM=__NM_ARM_BIN,  # FIXME
+        OBJCOPY="objcopy",
+        NM="nm",
     )
 
     if not env["VERBOSE"]:
@@ -65,12 +62,4 @@ def generate(env):
 
 
 def exists(env):
-    try:
-        return env["OBJCOPY"]
-    except KeyError:
-        pass
-
-    if objcopy := env.WhereIs(__OBJCOPY_ARM_BIN):
-        return objcopy
-
-    raise SCons.Errors.StopError("Could not detect objcopy for arm")
+    return True

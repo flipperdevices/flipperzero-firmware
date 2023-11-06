@@ -1,5 +1,6 @@
 import subprocess
 
+import fwbin
 import gdb
 import objdump
 import strip
@@ -53,7 +54,7 @@ def generate(env, **kw):
             OBJDUMPCOMSTR="\tOBJDUMP\t${TARGET}",
         )
 
-    for orig_tool in (asm, gcc, gxx, ar, gnulink, strip, gdb, objdump):
+    for orig_tool in (asm, gcc, gxx, ar, gnulink, strip, gdb, objdump, fwbin):
         orig_tool.generate(env)
     env.SetDefault(
         TOOLCHAIN_PREFIX=kw.get("toolchain_prefix"),
@@ -72,6 +73,7 @@ def generate(env, **kw):
             "GDB",
             "GDBPY",
             "OBJDUMP",
+            "NM",
         ],
     )
     # Call CC to check version
