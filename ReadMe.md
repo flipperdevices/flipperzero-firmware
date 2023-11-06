@@ -50,6 +50,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## IN THIS BRANCH:
 
+- Removed: NFC: [NFC - Machine Readable Travel Documents & ISO7816 #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
+- Removed: NFC: Some [NFC FeliCa support (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2093) (Felica support readded by NFC refactoring)
 - OFW: [NFC refactoring #3050 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3050)
 - Removed due to refactor needed: [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Removed due to refactor needed: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
@@ -77,8 +79,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Magic v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67)
 - Updated: [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - Updated: [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
-- Updated a few internal apps to have their CLI with the app again (By RogueMaster)
-- Many merge and app fixes to have resources in the app folders like OFW and timer fixes due to refactoring (By RogueMaster)
+- App fixes to have resources in the app folders like OFW (By RogueMaster)
+- Updated a iButton, Infrared, RFID & SubGHz apps to have their CLI with the app folder again (By RogueMaster)
+- Temp Fixes for SubGHz Registry files (By RogueMaster)
+- Fixes due to refactoring/OFW updates (By RogueMaster) for [Brainfuck v1.1 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck), [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge), [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote), [ESP32 Gravity v0.6 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity), [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher), [Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal), [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth), [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker), [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper), [USB Mass Storage v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage)... more changes to cite...
 - Updated: [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 
 <a name="release">
@@ -374,7 +378,6 @@ $ ./fbt dolphin_ext
 - [DTMF Dolphin v1.2 (By litui)](https://github.com/litui/dtmf_dolphin)
 - [EM4100 Key Generator v1.1 (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
 - [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - [ESP WiFi Scanner v1.1 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
 - [ESP32 Gravity v0.6 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
@@ -385,6 +388,7 @@ $ ./fbt dolphin_ext
 - [ESP32CAM Motion Detection v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Nanny Cam v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM QR Code v0.1 (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave](https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
