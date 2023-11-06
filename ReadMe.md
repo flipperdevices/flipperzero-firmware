@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Passport settings now includes options for DEDSEC passport background style, DEDSEC passport image and Wrench set passport image (mood dependant) (By Kuronons)](https://github.com/Kuronons/FZ_graphics/commit/a2e5a1e1c9eaf99e063bd72df6d435fd40e7096c)
 - Updated: [Tetris v1.2 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game) [Improved tetris app (By noiob)](https://github.com/xMasterX/all-the-plugins/pull/25)
 - Updated: [BLE Spam v4.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Additional 200 devices (By Mr-Proxy-source) & Fix: Too huge VarItemList (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fd04e572c6634c558c80b121a920abeb3dab4f16)
+- Added: [SD SPI v0.2 (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
 
 <a name="release">
 
@@ -450,6 +451,7 @@ $ ./fbt dolphin_ext
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
 - [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- [SD SPI v0.2 (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
 - [Sentry Safe v1.1 (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Servotester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)
 - [ServoTester (2) (By mhasbini)](https://github.com/mhasbini/ServoTesterApp/tree/master)
@@ -487,12 +489,6 @@ $ ./fbt dolphin_ext
 - [Wii EC Analyzer v1.1 (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Wire Tester v1.1 (By unixispower)](https://gitlab.com/unixispower/flipper-wire-tester)
 - [XRemote v1.1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
-
-## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
-
-- If you can fix any of these, DM me on Discord for a surprise reward.
-- [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
-- Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
 
