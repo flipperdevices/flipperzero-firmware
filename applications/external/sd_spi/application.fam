@@ -1,0 +1,13 @@
+App(
+    appid="sd_spi_app",
+    name="SD SPI",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="sd_spi_app",
+    stack_size=2 * 1024,
+    fap_category="GPIO",
+    fap_icon="sd_spi_app_10px.png",
+    fap_author="Gl1tchub",
+    fap_weburl="https://github.com/Gl1tchub/Flipperzero-SD-SPI",
+    fap_version=(0, 2),
+    fap_description="SD SPI Lock Management",
+)

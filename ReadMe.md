@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Passport settings now includes options for DEDSEC passport background style, DEDSEC passport image and Wrench set passport image (mood dependant) (By Kuronons)](https://github.com/Kuronons/FZ_graphics/commit/a2e5a1e1c9eaf99e063bd72df6d435fd40e7096c)
 - Updated: [Tetris v1.2 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game) [Improved tetris app (By noiob)](https://github.com/xMasterX/all-the-plugins/pull/25)
 - Updated: [BLE Spam v4.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Additional 200 devices (By Mr-Proxy-source) & Fix: Too huge VarItemList (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fd04e572c6634c558c80b121a920abeb3dab4f16)
+- Added: [SD SPI v0.2 (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
 
 ## IN THIS BRANCH:
 
@@ -78,7 +79,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - Updated a few internal apps to have their CLI with the app again (By RogueMaster)
 - Many merge and app fixes to have resources in the app folders like OFW and timer fixes due to refactoring (By RogueMaster)
-- Updated: [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
+- Updated: [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 
 <a name="release">
 
@@ -469,9 +470,11 @@ $ ./fbt dolphin_ext
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
 - [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- [SD SPI v0.2 (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
 - [Sentry Safe v1.1 (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Servotester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)
 - [ServoTester (2) (By mhasbini)](https://github.com/mhasbini/ServoTesterApp/tree/master)
+- [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Skeleton App v1.1 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/ui/skeleton_app)
 - [Spectrum Analyzer v1.2 (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
@@ -507,8 +510,6 @@ $ ./fbt dolphin_ext
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
 
 - If you can fix any of these, DM me on Discord for a surprise reward.
-- [SD SPI (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
-- Needs Refactor:
 - [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
 - [Mifare Fuzzer v1.1 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
@@ -520,7 +521,6 @@ $ ./fbt dolphin_ext
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
-- [ShapShup v1.1 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
