@@ -87,7 +87,6 @@ typedef enum {
     SD_TOKEN_STOP_DATA_MULTIPLE_BLOCK_WRITE = 0xFD,
 } SdSpiToken;
 
-
 static inline void sd_spi_select_card() {
     furi_hal_gpio_write(furi_hal_sd_spi_handle->cs, false);
     furi_delay_us(10); // Entry guard time for some SD cards
@@ -184,7 +183,6 @@ static inline void sd_spi_read_bytes(uint8_t* data, uint32_t size) {
 }
 
 static inline void sd_spi_write_bytes_dma(uint8_t* data, uint32_t size) {
-
     uint32_t timeout_mul = (size / 512) + 1;
     furi_check(furi_hal_spi_bus_trx_dma(
         furi_hal_sd_spi_handle, data, NULL, size, SD_TIMEOUT_MS * timeout_mul));
@@ -694,12 +692,11 @@ uint8_t sd_max_mount_retry_count() {
 }
 
 SdSpiStatus sd_init(bool power_reset) {
-
     sd_spi_debug("sd_init");
 
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
     furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_external;
-    furi_hal_gpio_init(&gpio_ext_pa4,GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(&gpio_ext_pa4, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
 
     if(power_reset) {
         sd_spi_debug("Power reset");
@@ -731,7 +728,7 @@ SdSpiStatus sd_init(bool power_reset) {
     }
 
     for(uint8_t i = 0; i < 128; i++) {
-    // for(uint8_t i = 0; i < 4; i++) {
+        // for(uint8_t i = 0; i < 4; i++) {
         status = sd_spi_init_spi_mode();
         if(status == SdSpiStatusOK) {
             // SD initialized and init to SPI mode properly
@@ -742,11 +739,9 @@ SdSpiStatus sd_init(bool power_reset) {
 
     status = sd_get_card_state();
 
-
     furi_hal_sd_spi_handle = NULL;
     furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
     // furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_slow);
-
 
     // Init sector cache
     // sector_cache_init();
@@ -762,7 +757,8 @@ SdSpiStatus sd_get_card_state(void) {
     sd_spi_deselect_card_and_purge();
 
     // Return status OK if response is valid
-    if((response.r1 == SdSpi_R1_NO_ERROR) && (response.r2 == SdSpi_R2_NO_ERROR || response.r2 == SdSpi_R2_CARD_LOCKED)) {
+    if((response.r1 == SdSpi_R1_NO_ERROR) &&
+       (response.r2 == SdSpi_R2_NO_ERROR || response.r2 == SdSpi_R2_CARD_LOCKED)) {
         return SdSpiStatusOK;
     }
 
@@ -803,143 +799,150 @@ SdSpiStatus sd_get_card_info(SD_CardInfo* card_info) {
 }
 
 SdSpiStatus sd_set_pwd(char* pwd) {
+    sd_spi_debug("sd_set_pwd");
+    sd_spi_debug(pwd);
 
-  sd_spi_debug("sd_set_pwd");
-  sd_spi_debug(pwd);
+    SdSpiStatus status = SdSpiStatusError;
+    SdSpiCmdAnswer response;
 
-  SdSpiStatus status = SdSpiStatusError;
-  SdSpiCmdAnswer response;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_external;
 
-  furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
-  furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_external;
+    for(uint8_t i = 0; i < LOCK_UNLOCK_ATTEMPS; i++) {
+        response = sd_spi_send_cmd(SD_CMD42_LOCK_UNLOCK, 0, 0xFF, SdSpiCmdAnswerTypeR1);
+        if(response.r1 == SdSpi_R1_NO_ERROR) {
+            sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_NO_ERROR");
+            uint8_t data[512] = {0xFF};
+            data[0] = 0x05;
+            data[1] = strlen(pwd);
+            for(int i = 0; i < (int)strlen(pwd); i++) {
+                data[i + 2] = pwd[i];
+            }
 
-  for(uint8_t i = 0; i < LOCK_UNLOCK_ATTEMPS; i++) {
+            sd_spi_write_byte(SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE);
+            sd_spi_write_bytes_dma(data, SD_BLOCK_SIZE);
+            sd_spi_purge_crc();
 
-    response = sd_spi_send_cmd(SD_CMD42_LOCK_UNLOCK, 0, 0xFF, SdSpiCmdAnswerTypeR1);
-    if(response.r1 == SdSpi_R1_NO_ERROR) {
-      sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_NO_ERROR");
-      uint8_t data[512] = {0xFF};
-      data[0] = 0x05;
-      data[1] = strlen(pwd);
-      for(int i = 0; i < (int)strlen(pwd); i++){
-        data[i+2] = pwd[i];
-      }
+            SdSpiDataResponce data_responce = sd_spi_get_data_response(SD_TIMEOUT_MS);
+            sd_spi_deselect_card_and_purge();
 
-      sd_spi_write_byte(SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE);
-      sd_spi_write_bytes_dma(data, SD_BLOCK_SIZE);
-      sd_spi_purge_crc();
+            if(data_responce == SdSpiDataResponceOK) {
+                sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceOK");
 
-      SdSpiDataResponce data_responce = sd_spi_get_data_response(SD_TIMEOUT_MS);
-      sd_spi_deselect_card_and_purge();
-
-      if(data_responce == SdSpiDataResponceOK) {
-        sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceOK");
-
-        if(sd_get_card_state()==SdSpiStatusOK) {
-          if(cmd_answer.r2==SdSpi_R2_CARD_LOCKED) { status = SdSpiStatusOK; break; }
-          else { sd_spi_debug("SD_CMD42_LOCK_UNLOCK CARD UNLOCKED"); }
+                if(sd_get_card_state() == SdSpiStatusOK) {
+                    if(cmd_answer.r2 == SdSpi_R2_CARD_LOCKED) {
+                        status = SdSpiStatusOK;
+                        break;
+                    } else {
+                        sd_spi_debug("SD_CMD42_LOCK_UNLOCK CARD UNLOCKED");
+                    }
+                }
+            } else {
+                sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceError");
+            }
+        } else {
+            sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_ERROR");
         }
-      }
-      else { sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceError"); }
     }
-    else { sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_ERROR"); }
 
-  }
+    furi_hal_sd_spi_handle = NULL;
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
 
-
-  furi_hal_sd_spi_handle = NULL;
-  furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
-
-  return status;
+    return status;
 }
 SdSpiStatus sd_clr_pwd(char* pwd) {
-  sd_spi_debug("sd_clr_pwd");
-  sd_spi_debug(pwd);
+    sd_spi_debug("sd_clr_pwd");
+    sd_spi_debug(pwd);
 
-  SdSpiStatus status = SdSpiStatusError;
-  SdSpiCmdAnswer response;
+    SdSpiStatus status = SdSpiStatusError;
+    SdSpiCmdAnswer response;
 
-  furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
-  furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_external;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_external;
 
-  for(uint8_t i = 0; i < LOCK_UNLOCK_ATTEMPS; i++) {
+    for(uint8_t i = 0; i < LOCK_UNLOCK_ATTEMPS; i++) {
+        response = sd_spi_send_cmd(SD_CMD42_LOCK_UNLOCK, 0, 0xFF, SdSpiCmdAnswerTypeR1);
+        if(response.r1 == SdSpi_R1_NO_ERROR) {
+            sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_NO_ERROR");
+            uint8_t data[512] = {0xFF};
+            data[0] = 0x02;
+            data[1] = strlen(pwd);
+            for(int i = 0; i < (int)strlen(pwd); i++) {
+                data[i + 2] = pwd[i];
+            }
 
-    response = sd_spi_send_cmd(SD_CMD42_LOCK_UNLOCK, 0, 0xFF, SdSpiCmdAnswerTypeR1);
-    if(response.r1 == SdSpi_R1_NO_ERROR) {
-      sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_NO_ERROR");
-      uint8_t data[512] = {0xFF};
-      data[0] = 0x02;
-      data[1] = strlen(pwd);
-      for(int i = 0; i < (int)strlen(pwd); i++){
-        data[i+2] = pwd[i];
-      }
+            sd_spi_write_byte(SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE);
+            sd_spi_write_bytes_dma(data, SD_BLOCK_SIZE);
+            sd_spi_purge_crc();
 
-      sd_spi_write_byte(SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE);
-      sd_spi_write_bytes_dma(data, SD_BLOCK_SIZE);
-      sd_spi_purge_crc();
+            SdSpiDataResponce data_responce = sd_spi_get_data_response(SD_TIMEOUT_MS);
+            sd_spi_deselect_card_and_purge();
 
-      SdSpiDataResponce data_responce = sd_spi_get_data_response(SD_TIMEOUT_MS);
-      sd_spi_deselect_card_and_purge();
+            if(data_responce == SdSpiDataResponceOK) {
+                sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceOK");
 
-      if(data_responce == SdSpiDataResponceOK) {
-        sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceOK");
-
-        if(sd_get_card_state()==SdSpiStatusOK) {
-          if(cmd_answer.r2==SdSpi_R2_NO_ERROR) { status = SdSpiStatusOK; break; }
+                if(sd_get_card_state() == SdSpiStatusOK) {
+                    if(cmd_answer.r2 == SdSpi_R2_NO_ERROR) {
+                        status = SdSpiStatusOK;
+                        break;
+                    }
+                }
+            } else {
+                sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceError");
+            }
+        } else {
+            sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_ERROR");
         }
-      }
-      else { sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceError"); }
     }
-    else { sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_ERROR"); }
 
-  }
+    furi_hal_sd_spi_handle = NULL;
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
 
-  furi_hal_sd_spi_handle = NULL;
-  furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
-
-  return status;
+    return status;
 }
 SdSpiStatus sd_force_erase(void) {
-  SdSpiStatus status = SdSpiStatusError;
-  SdSpiCmdAnswer response;
+    SdSpiStatus status = SdSpiStatusError;
+    SdSpiCmdAnswer response;
 
-  furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
-  furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_external;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_external;
 
-
-  sd_spi_debug("SD_CMD16_SET_BLOCKLEN 1");
-  sd_spi_send_cmd(SD_CMD16_SET_BLOCKLEN, 1, 0xFF, SdSpiCmdAnswerTypeR1);
-  sd_spi_deselect_card_and_purge();
-
-  sd_spi_debug("SD_CMD42_LOCK_UNLOCK");
-  response = sd_spi_send_cmd(SD_CMD42_LOCK_UNLOCK, 0, 0xFF, SdSpiCmdAnswerTypeR1);
-
-  if(response.r1 == SdSpi_R1_NO_ERROR) {
-
-    sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_NO_ERROR");
-    uint8_t data[2] = {0xfe,0x08};
-    sd_spi_write_bytes_dma(data, sizeof(data));
-    sd_spi_purge_crc();
-
-    SdSpiDataResponce data_responce = sd_spi_get_data_response(SD_TIMEOUT_MS);
+    sd_spi_debug("SD_CMD16_SET_BLOCKLEN 1");
+    sd_spi_send_cmd(SD_CMD16_SET_BLOCKLEN, 1, 0xFF, SdSpiCmdAnswerTypeR1);
     sd_spi_deselect_card_and_purge();
 
-    status = SdSpiStatusOK;
+    sd_spi_debug("SD_CMD42_LOCK_UNLOCK");
+    response = sd_spi_send_cmd(SD_CMD42_LOCK_UNLOCK, 0, 0xFF, SdSpiCmdAnswerTypeR1);
 
-    if(data_responce == SdSpiDataResponceOK) {
-      sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceOK");
-      if(sd_get_card_state()==SdSpiStatusOK) {
-        if(cmd_answer.r2==SdSpi_R2_NO_ERROR) { status = SdSpiStatusOK; }
-      }
+    if(response.r1 == SdSpi_R1_NO_ERROR) {
+        sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_NO_ERROR");
+        uint8_t data[2] = {0xfe, 0x08};
+        sd_spi_write_bytes_dma(data, sizeof(data));
+        sd_spi_purge_crc();
+
+        SdSpiDataResponce data_responce = sd_spi_get_data_response(SD_TIMEOUT_MS);
+        sd_spi_deselect_card_and_purge();
+
+        status = SdSpiStatusOK;
+
+        if(data_responce == SdSpiDataResponceOK) {
+            sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceOK");
+            if(sd_get_card_state() == SdSpiStatusOK) {
+                if(cmd_answer.r2 == SdSpi_R2_NO_ERROR) {
+                    status = SdSpiStatusOK;
+                }
+            }
+        } else {
+            sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceError");
+        }
+    } else {
+        sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_ERROR");
     }
-    else { sd_spi_debug("SD_CMD42_LOCK_UNLOCK SdSpiDataResponceError"); }
-  }
-  else { sd_spi_debug("SD_CMD42_LOCK_UNLOCK R1_ERROR"); }
 
-  furi_hal_sd_spi_handle = NULL;
-  furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
+    furi_hal_sd_spi_handle = NULL;
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
 
-  return status;
+    return status;
 }
 
 SdSpiStatus

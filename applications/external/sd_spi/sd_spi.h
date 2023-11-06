@@ -4,13 +4,12 @@
 
 #define __IO volatile
 
-#define SD_TIMEOUT_MS 500//(1000)
+#define SD_TIMEOUT_MS 500 //(1000)
 #define SD_BLOCK_SIZE 512
 
 #define VERSION_APP "0.2"
 #define DEVELOPED " "
 #define GITHUB "github.com/Gl1tchub/Flipperzero-SD-SPI"
-
 
 typedef enum {
     SdSpiStatusOK,
@@ -118,25 +117,24 @@ typedef struct {
 /**
  * @brief SD Card information structure
  */
- typedef struct {
-     SD_CSD Csd;
-     SD_CID Cid;
-     uint64_t CardCapacity; /*!< Card Capacity */
-     uint32_t CardBlockSize; /*!< Card Block Size */
-     uint32_t LogBlockNbr; /*!< Specifies the Card logical Capacity in blocks   */
-     uint32_t LogBlockSize; /*!< Specifies logical block size in bytes           */
- } SD_CardInfo;
+typedef struct {
+    SD_CSD Csd;
+    SD_CID Cid;
+    uint64_t CardCapacity; /*!< Card Capacity */
+    uint32_t CardBlockSize; /*!< Card Block Size */
+    uint32_t LogBlockNbr; /*!< Specifies the Card logical Capacity in blocks   */
+    uint32_t LogBlockSize; /*!< Specifies logical block size in bytes           */
+} SD_CardInfo;
 
- typedef struct {
-     uint8_t r1;
-     uint8_t r2;
-     uint8_t r3;
-     uint8_t r4;
-     uint8_t r5;
- } SdSpiCmdAnswer;
+typedef struct {
+    uint8_t r1;
+    uint8_t r2;
+    uint8_t r3;
+    uint8_t r4;
+    uint8_t r5;
+} SdSpiCmdAnswer;
 
- extern SdSpiCmdAnswer cmd_answer;
-
+extern SdSpiCmdAnswer cmd_answer;
 
 /**
  * @brief SD card max mount retry count
