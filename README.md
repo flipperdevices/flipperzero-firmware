@@ -59,7 +59,6 @@ The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi and Bl
 - [MALVEKE] GAME BOY Printer Link Cable Transfer
 - [MALVEKE] GAME BOY Logo Generator
 - [MALVEKE] Pokemon Trading
-- [[MALVEKE] Telegram BOT](./flipper_companion_apps/applications/external/malveke_telegrambot/README.md)
 
 ## TODO
 - [ ] Refactor Code
