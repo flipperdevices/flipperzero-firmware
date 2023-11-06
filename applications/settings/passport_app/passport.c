@@ -206,7 +206,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_icon(canvas, 0, 0, &I_passport_ADPolice);
             break;
         case BG_DEDSEC:
-            canvas_draw_icon(canvas, 0, 0, &I_passport_DedSec);
+            canvas_draw_icon(canvas, 0, 0, &I_passport_dedsec);
             break;
         case BG_MEDIEVAL:
             canvas_draw_icon(canvas, 0, 0, &I_passport_Medieval);

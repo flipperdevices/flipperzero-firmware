@@ -27,7 +27,6 @@ bool hex_viewer_scene_startscreen_on_event(void* context, SceneManagerEvent even
             consumed = true;
             break;
         case HexViewerCustomEventStartscreenRight:
-            // TODO Dialog
             consumed = true;
             break;
         case HexViewerCustomEventStartscreenUp:
@@ -38,7 +37,7 @@ bool hex_viewer_scene_startscreen_on_event(void* context, SceneManagerEvent even
             break;
         case HexViewerCustomEventStartscreenOk:
             if(!app->model->file_size)
-                scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_4);
+                scene_manager_next_scene(app->scene_manager, HexViewerSceneOpen);
             else
                 scene_manager_next_scene(app->scene_manager, HexViewerSceneMenu);
             consumed = true;
