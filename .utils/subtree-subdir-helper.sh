@@ -19,4 +19,10 @@ git fetch --no-tags "${repo}" "${branch}:${fetch}"
 git checkout "${fetch}"
 git subtree split -P "${subdir}" -b "${split}"
 git checkout "${prev}"
-git subtree "${action}" -P "${path}" "${split}" -m "${action^} ${path} from ${repo}"
+
+exec 69>&1
+result="$(git subtree "${action}" -P "${path}" "${split}" -m "${action^} ${path} from ${repo}" 2>&1 | tee >(cat - >&69))"
+if echo "$result" | grep "refusing to merge unrelated histories" > /dev/null; then
+    echo "History at ${repo} is unrelated, using quash..."
+    git subtree "${action}" -P "${path}" "${split}" -m "${action^} ${path} from ${repo}" --squash
+fi
