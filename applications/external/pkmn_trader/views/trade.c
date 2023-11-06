@@ -1,59 +1,83 @@
 /*
  * This setup always forces the flipper to the follower/slave role in the link.
- * As far as I can tell, there is no specific reason for this other than it may
- * be a bit easier to handle an incoming clock rather than generating a clock.
+ * This just makes our logic consistent and since we're going to be gobs faster
+ * than a real Gameboy, we can be guaranteed to always be ready to respond.
  *
  * As documented here: http://www.adanscotney.com/2014/01/spoofing-pokemon-trades-with-stellaris.html
  * The general gist of the communication is as follows:
- * - Each gameboy tries to listen for an external clock coming in on the link cable.
- *   After some unknown timeout, this gameboy decides its going to take the leader/master role.
- *   In this state, it generates a clock and repeatedly sends out PKMN_MASTER(0x01)
- *   TODO: I'm not sure what kind of timeouts exist. Nor exactly how the GBs know they are connected.
- * - The other side, sensing a clock from the leader/master, then responds with PKMN_SLAVE(0x02)
+ * 1) Each gameboy tries to listen for an external clock coming in on the link cable.
+ *     After some unknown timeout, this gameboy decides its going to take the leader/master role.
+ *     In this state, it generates a clock and repeatedly sends out PKMN_MASTER(0x01)
+ * 2) The other side, sensing a clock from the leader/master, then responds with PKMN_SLAVE(0x02)
+ * 3) Once both sides understand their roles, they both respond with PKMN_BLANK(0x00) for a bit.
+ * 4) Next, the leader/master sends CONNECTED(0x60) bytes that the follower/slave repeats
+ *     back. Then a bunch of BLANK bytes.
+ * 5) At this point, each gameboy repeatedly sends the menu item it has highlighted,
+ *     prepended by a BLANK, in groups of 3 bytes. These are ITEM_*_HIGHLIGHTED.
+ * 6) Then, once both sides send ITEM_*_SELECTED, the next step occurs.
+ *     This application, from steps 3 through 6, just repeats bytes back and lets the Gameboy
+ *     dictate the steps. We stay here until we start seeing PREAMBLE(0xFD) bytes,
+ *     as those dictate the start of the next sections.
  *
- *   In this application, we more or less force the flipper in to the follower/slave role. I'm
- *   not really sure why, but I assume it goes back to the original reference implementation.
- *   In the Flipper, it might also just be easier with the asynchronous context to be in the
- *   follower/slave role and just respond to clocks on an interrupt.
+ * The Flipper is now in the "READY" state.
  *
- * - Once both sides understand their roles, they both respond with PKMN_BLANK(0x00)
- * - At this point, each gameboy repeatedly sends the menu item it has highlighted.
- *   These are ITEM_*_HIGHLIGHTED.
- * - Then, once both sides send ITEM_*_SELECTED, the next step occurs.
+ * 7) Once the player on the gameboy side uses the trade table, a block of data is
+ *     transmitted. This starts with 10x PREAMBLE(0xFD) bytes, 10x random bytes (to
+ *     sync the RNG between two devices, unused at this time), and then the 415 trade_block,
+ *     struct gets transferred. At the end of this is 3 ending bytes, DF FE 15. And, wierdly,
+ *     3 PREAMBLE(0xFD) bytes.
+ * 8) The patch list starts with 3x more PREAMBLE(0xFD) bytes for a total of 6x PREABMLE,
+ *     followed by 7x BLANK bytes. Then remaining 189 bytes of patch list data. The patch
+ *     list is used to compensate for byte values of NO_DATA_BYE(0xFE) being transmitted.
+ *     The patch list is specifically for the party data of the trade_block. To patch
+ *     outgoing data, if a byte is 0xFE, it is changed to 0xFF, and the index+1 is
+ *     added to the patch list. There are two parts to the patch list as the data it
+ *     covers is longer than 0xFC. After each part is complete, 0xFF is added to the
+ *     patch list. The first part of the patch list can patch 0x00:0xFB of the party,
+ *     the second part can patch 0xFC:0x107 of the party. If there are no bytes to
+ *     patch in a part, 0xFF is just appended. After both terminators, it is expected
+ *     all remaining bytes are 0x00.
  *
- *   In this application, we simply repeat the same value back to the gameboy. That is,
- *   if the connected gameboy selected trade, we respond with trade as well.
+ * The Flipper is now in the "WAITING" state.
  *
- * - Once the player on the gameboy side uses the trade table, a block of data is
- *   transmitted. This includes random bytes (presumably to set up the RNG seeds
- *   between two devices), and all trainer/pokemon data up from (this is the trade_block).
- * - At this point, both sides have full copies of each other's currenty party. The sides
- *   simply indicate which pokemon they are sending.
+ * 9) At this point, both sides have full copies of each other's currenty party. The sides
+ *     simply indicate which pokemon they are sending. This is done with a BLANK byte to
+ *     start, and then each side indicates which pokemon it wants to trade with SEL_NUM_MASK(0x60)
+ *     + party index. We always transmit the first pokemon. Once in a agreement, both
+ *     sides transmit a handful of BLANK bytes.
  *
- *   Interestingly, there is a close session byte (0x7f) that we don't seem to use at this time.
- *   Could be useful for, e.g. indicating to the flipper that we're done trading for a more
- *   clean exit.
+ * The Flipper is now in the "DEAL?" state.
  *
- *   Also, the above website mentions the data struct being 415 bytes, but we only receive
- *   405. The original Flipper implementation also used 405 bytes for the output. Finally,
- *   some other implementations of this that have surfaced use 418 bytes (with this original
- *   implementation having 3 bytes at the end of the struct commented out).
+ * A) Starting with another BLANK byte, both sides need to agree to the trade by
+ *     sending TRADE_ACCEPT(0x62) repeatedly, and then a handful of BLANK bytes.
+ *     To disagree with a trade, either side would send TRADE_REJECT(0x61), the
+ *     Flipper will never send this on its own. If the Gameboy does, both it and
+ *     the flipper got back to step 9 again.
  *
- *   Doing the calculations myself, 415 should be the expected side of the trade block sent
- *   including the player name, appended with the 6-pokemon party structure:
- *   https://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9mon_data_structure_(Generation_I)#6-Pok.C3.A9mon_Party_Structure
- *   (note that all of the OT names and pokemon nicknames in the table actually are 11 bytes
- *   in memory)
+ * The Flipper is now in the "TRADING" state.
  *
- *   Digging through some disassembled and commented pokemon code, it does appear that there are
- *   3 extra bytes sent. So the 418 number may be more correct. 
+ * B) The Flipper actually goes back to step 7, but keeps the drawing mode as
+ *     TRADING. After the trade is complete on the Gameboy, it re-sends the
+ *     trade_block data. This re-syncs the states between the Flipper and
+ *     Gameboy and another trade can occur.
  *
- *   Seems like there are 9 random numbers according to comments in disassembled pokemon code? But it could also be 17 based on RN+RNS lengths?
+ * *) A point of note is that the Flipper can go back to the main menu from
+ *     any state. Though, doing so in the TRADING state might actually cause
+ *     the Gameboy to have issues. When in READY or WAITING state, the Flipper
+ *     can go back and modify the pokemon that the Gameboy sent to it. If the
+ *     Flipper then goes back to Trade from the main menu, it will be in the
+ *     READY state. If the Gameboy is still on the trade menu, and it tries
+ *     to trade, the trade will be rejected. The Gameboy needs to exit the
+ *     trade menu, and then re-enter it by selecting the table in the trade
+ *     center. This will then push the Flipper to the WAITING state, and the
+ *     trade_blocks will re-sync between them with the new data. If the Gameboy
+ *     leave the trade menu while the Flipper is in the WAITING state, the
+ *     Flipper will go back to the READY state.
  *
- *   Once that is sent, serial preamble length is sent
- *
- *   I think I need to hook this up to a logic analyzer to see more.
+ *    TODO: Set up requiring a long back press to go back to the main menu
+ *     from the TRADING state or from the main menu to exit the application.
  */
+
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -101,6 +125,7 @@
 #define PKMN_COLOSSEUM ITEM_2_SELECTED
 #define PKMN_BREAK_LINK ITEM_3_SELECTED
 
+ /* States specific to the trade process. */
 typedef enum {
     TRADE_RESET,
     TRADE_INIT,
@@ -114,13 +139,20 @@ typedef enum {
     TRADE_DONE
 } trade_centre_state_t;
 
+/* Global states for the trade logic. These are used to dictate what gets drawn
+ * to the screen but also handle a few sync states. The CONN states are to denote
+ * if a link has been established or note. READY through TRADING are all specific
+ * screens to draw in the trade center. COLOSSEUM causes a data loopback so the
+ * player can fight themselves.
+ */
 typedef enum {
     GAMEBOY_CONN_FALSE,
     GAMEBOY_CONN_TRUE,
     GAMEBOY_READY,
     GAMEBOY_WAITING,
     GAMEBOY_TRADE_PENDING,
-    GAMEBOY_TRADING
+    GAMEBOY_TRADING,
+    GAMEBOY_COLOSSEUM
 } render_gameboy_state_t;
 
 /* Anonymous struct */
@@ -134,16 +166,10 @@ struct trade_ctx {
     TradeBlock* trade_block;
     TradeBlock* input_block;
     const PokemonTable* pokemon_table;
-    struct patch_list* patch_list;
+    struct patch_list *patch_list;
 };
 
 /* These are the needed variables for the draw callback */
-/* Technically, I think the "right" way to do this would be
- * to keep these vars in the Trade struct and copy them in to
- * the model when they may have changed. In the interest of
- * saving space they are separated. Though it may make sense
- * later down the line to keep this as a copy.
- */
 struct trade_model {
     render_gameboy_state_t gameboy_status;
     bool ledon; // Controlls the blue LED during trade
@@ -151,15 +177,21 @@ struct trade_model {
     const PokemonTable* pokemon_table;
 };
 
-void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
+/* A callback function that must be called outside of an interrupt context,
+ * This will completely destroy the current patch list, and then rebuild it from
+ * the current trade_block state. This is used mostly after a trade to rebuild
+ * the list with the new data we just copied in.
+ */
+static void pokemon_plist_recreate_callback(void* context, uint32_t arg) {
     furi_assert(context);
     UNUSED(arg);
-    struct trade_ctx* trade = context;
+    struct trade_ctx *trade = context;
 
     plist_create(&(trade->patch_list), trade->trade_block);
 }
 
-void screen_gameboy_connect(Canvas* const canvas) {
+/* Draws a whole screen image with Flipper mascot, Gameboy, etc. */
+static void trade_draw_connect(Canvas* const canvas) {
     furi_assert(canvas);
 
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -170,7 +202,8 @@ void screen_gameboy_connect(Canvas* const canvas) {
     canvas_draw_str(canvas, 18, 13, "Connect GB");
 }
 
-void screen_gameboy_connected(Canvas* const canvas) {
+/* Draws a whole screen image with Flipper mascot, Gameboy, etc. */
+static void trade_draw_connected(Canvas* const canvas) {
     furi_assert(canvas);
 
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -181,7 +214,13 @@ void screen_gameboy_connected(Canvas* const canvas) {
     canvas_draw_str(canvas, 18, 13, "Connected!");
 }
 
-static void trade_draw_frame(Canvas* canvas, const char* str) {
+/* Draws a frame around the screen, with a box at the top for a text string,
+ * and an icon of the player.
+ */
+static void trade_draw_frame(Canvas* canvas, const char *str)
+{
+    furi_assert(canvas);
+
     canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_draw_icon(canvas, 24, 0, &I_Space_80x18);
@@ -189,40 +228,60 @@ static void trade_draw_frame(Canvas* canvas, const char* str) {
     canvas_draw_icon(canvas, 27, 1, &I_red_16x15);
 }
 
-static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon* icon) {
+/* Draws the pokemon's image in the middle of the screen */
+static void trade_draw_pkmn_avatar(Canvas* canvas, const Icon *icon)
+{
+    furi_assert(canvas);
+    furi_assert(icon);
+
     canvas_draw_icon(canvas, 38, 11, icon);
     furi_hal_light_set(LightBlue, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
 }
 
+/* Called every 250 ms on a timer. This controls the blue LED when in TRADING
+ * state. This is necessary as Flipper OS does not make any guarantees on when
+ * draw updates may or may not be called. There are situations where a draw
+ * update is called much faster. Therefore, we need to control the update rate
+ * via the ledon view_model variable.
+ */
+static void trade_draw_timer_callback(void* context) {
+    furi_assert(context);
+
+    struct trade_ctx* trade = (struct trade_ctx*)context;
+
+    with_view_model(
+        trade->view, struct trade_model * model, { model->ledon ^= 1; }, true);
+}
+
 static void trade_draw_callback(Canvas* canvas, void* view_model) {
     furi_assert(view_model);
     struct trade_model* model = view_model;
-    uint8_t curr_pokemon = model->curr_pokemon;
+    const Icon* icon = model->pokemon_table[model->curr_pokemon].icon;
 
     canvas_clear(canvas);
-    switch(model->gameboy_status) {
+    switch (model->gameboy_status) {
     case GAMEBOY_CONN_FALSE:
         furi_hal_light_set(LightGreen, 0x00);
         furi_hal_light_set(LightRed, 0xff);
-        screen_gameboy_connect(canvas);
+        trade_draw_connect(canvas);
         break;
-    case GAMEBOY_CONN_TRUE:
+    case GAMEBOY_CONN_TRUE: 
         furi_hal_light_set(LightGreen, 0xff);
         furi_hal_light_set(LightRed, 0x00);
-        screen_gameboy_connected(canvas);
+        trade_draw_connected(canvas);
         break;
     case GAMEBOY_READY:
-        trade_draw_pkmn_avatar(canvas, model->pokemon_table[curr_pokemon].icon);
-        trade_draw_frame(canvas, "READY");
+	trade_draw_pkmn_avatar(canvas, icon);
+	trade_draw_frame(canvas, "READY");
         break;
     case GAMEBOY_WAITING:
-        trade_draw_pkmn_avatar(canvas, model->pokemon_table[curr_pokemon].icon);
-        trade_draw_frame(canvas, "WAITING");
+	trade_draw_pkmn_avatar(canvas, icon);
+	trade_draw_frame(canvas, "WAITING");
         break;
     case GAMEBOY_TRADE_PENDING:
-        trade_draw_pkmn_avatar(canvas, model->pokemon_table[curr_pokemon].icon);
-        trade_draw_frame(canvas, "DEAL?");
+	trade_draw_pkmn_avatar(canvas, icon);
+	trade_draw_frame(canvas, "DEAL?");
         break;
     case GAMEBOY_TRADING:
         furi_hal_light_set(LightGreen, 0x00);
@@ -235,17 +294,17 @@ static void trade_draw_callback(Canvas* canvas, void* view_model) {
         }
         trade_draw_frame(canvas, "TRADING");
         break;
-    default:
-        trade_draw_frame(canvas, "INITIAL");
+    case GAMEBOY_COLOSSEUM:
+        trade_draw_frame(canvas, "FIGHT!");
         break;
-    }
+    default:
+	    trade_draw_frame(canvas, "INITIAL");
+            break;
+     }
 }
 
 /* Get the response byte from the link partner, updating the connection
  * state if needed.
- *
- * PKMN_BLANK is an agreement between the two devices that they have
- * determined their roles
  */
 static uint8_t getConnectResponse(struct trade_ctx* trade) {
     furi_assert(trade);
@@ -256,7 +315,9 @@ static uint8_t getConnectResponse(struct trade_ctx* trade) {
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_CONN_TRUE; },
+            {
+                model->gameboy_status = GAMEBOY_CONN_TRUE;
+            },
             false);
         ret = PKMN_CONNECTED;
         break;
@@ -270,7 +331,9 @@ static uint8_t getConnectResponse(struct trade_ctx* trade) {
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_CONN_FALSE; },
+            {
+                model->gameboy_status = GAMEBOY_CONN_FALSE;
+            },
             false);
         ret = PKMN_BREAK_LINK;
         break;
@@ -297,8 +360,6 @@ static uint8_t getConnectResponse(struct trade_ctx* trade) {
  * http://www.adanscotney.com/2014/01/spoofing-pokemon-trades-with-stellaris.html
  * it is presumed these bytes are to sync the RNG seed between the units to
  * not need arbitration on various die rolls.
- *
- * This is where we loop if we end up in the colosseum
  */
 static uint8_t getMenuResponse(struct trade_ctx* trade) {
     furi_assert(trade);
@@ -313,22 +374,33 @@ static uint8_t getMenuResponse(struct trade_ctx* trade) {
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_READY; },
+            {
+                model->gameboy_status = GAMEBOY_READY;
+            },
             false);
         break;
-    /* XXX: Fix the case of gameboy selection colosseum */
     case PKMN_COLOSSEUM:
+        with_view_model(
+            trade->view,
+            struct trade_model * model,
+            {
+                model->gameboy_status = GAMEBOY_COLOSSEUM;
+            },
+            false);
+        break;
     case PKMN_BREAK_LINK:
     case PKMN_MASTER:
         with_view_model(
             trade->view,
             struct trade_model * model,
-            { model->gameboy_status = GAMEBOY_CONN_FALSE; },
+            {
+                model->gameboy_status = GAMEBOY_CONN_FALSE;
+            },
             false);
         response = PKMN_BREAK_LINK;
         break;
     default:
-        response = trade->in_data;
+	response = trade->in_data;
         break;
     }
 
@@ -344,23 +416,21 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     struct trade_model* model = NULL;
     uint8_t in = trade->in_data;
     uint8_t send = in;
-
-    /* XXX: move to trade ctx ? */
     static bool patch_pt_2;
     static int counter;
-    static uint8_t in_pokemon_num;
+    static uint8_t in_pkmn_idx;
 
-    /* TODO: Figure out how we should respond to a no_data_byte and/or how to send one
-     * and what response to expect.
+    /* TODO: Figure out how we should respond to a no_data_byte and/or how to
+     * send one and what response to expect.
      *
-     * NOTE: There is at least one NO_DATA_BYTE/0xFE, maybe two I think, transmitted
-     * during a normal session. Need to be careful when handling this not to
-     * mess up any counts anywhere.
+     * This isn't a high priority since it should be unlikely that we would
+     * actually ever receive a NO_DATA_BYE as the Gameboy is the leader/master
+     * and therefore would only transmit when it has data ready.
      */
 
     /* Since this is a fairly long function, it doesn't call any other functions,
      * the view model isn't locked, and we're in an interrupt context, lets just
-     * mape the view model to a local var and commit it back when we're done.
+     * map the view model to a local var and commit it back when we're done.
      */
     model = view_get_model(trade->view);
 
@@ -373,56 +443,43 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
      */
     switch(trade->trade_centre_state) {
     case TRADE_RESET:
-        /* Reset counters and other static variables */
-        counter = 0;
-        patch_pt_2 = false;
-        trade->trade_centre_state = TRADE_INIT;
-        break;
+	    /* Reset counters and other static variables */
+	    counter = 0;
+	    patch_pt_2 = false;
+	    trade->trade_centre_state = TRADE_INIT;
+	    break;
 
     /* This state runs through the end of the random preamble */
     case TRADE_INIT:
-        if(in == SERIAL_PREAMBLE_BYTE) {
-            counter++;
+	if (in == SERIAL_PREAMBLE_BYTE) {
+	    counter++;
             model->gameboy_status = GAMEBOY_WAITING;
-            /* If the GB is in the trade menu and the Flipper went back to the main
-	 * menu and then back in to the trade screen, the Gameboy is "waiting"
-	 * and the flipper is "ready". In the waiting state, the Gameboy would
-	 * send a trade request value, responding to that with a request to
-	 * leave the table, the Gameboy just pops back to the trade screen and
-	 * does nothing. If the Gameboy cancels and then re-selects the table,
-	 * everything correctly re-syncs.
-	 */
-        } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
+        } else if ((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
             send = PKMN_TABLE_LEAVE;
-        }
-        if(counter == SERIAL_RNS_LENGTH) {
-            trade->trade_centre_state = TRADE_RANDOM;
-            counter = 0;
-        }
-        break;
-
-    /* Once we start getting PKMN_BLANKs, we get them until we get 10x
+	}
+        if (counter == SERIAL_RNS_LENGTH) {
+	    trade->trade_centre_state = TRADE_RANDOM;
+	    counter = 0;
+	}
+	break;
+	    	
+    /* Once we start getting PKMN_BLANKs, we mirror them until we get 10x
      * SERIAL_PREAMBLE_BYTE, and then 10 random numbers. The 10 random
      * numbers are for synchrinizing the PRNG between the two systems,
      * we do not use these numbers at this time.
-     */
-    /* The leader/master sends 10 random bytes. This is to synchronize the RNG
-     * between the connected systems. I don't think this is really needed for
-     * trade, only for battles so that both sides resolve chance events exactly
-     * the same way.
      *
-     * Note that every random number returned is forced to be less than FD
+     * This waits through the end of the trade block preamble, a total of 20
+     * bytes.
      */
-    /* This also waits through the end of the trade block preamble */
     case TRADE_RANDOM:
-        counter++;
-        if(counter == (SERIAL_RNS_LENGTH + SERIAL_TRADE_PREAMBLE_LENGTH)) {
-            trade->trade_centre_state = TRADE_DATA;
-            counter = 0;
-        }
-        break;
+	counter++;
+	if (counter == (SERIAL_RNS_LENGTH + SERIAL_TRADE_PREAMBLE_LENGTH)) {
+		trade->trade_centre_state = TRADE_DATA;
+		counter = 0;
+	}
+	break;
 
-    /* This is where we get the data from gameboy that is their trade struct */
+    /* This is where we exchange trade_block data with the Gameboy */
     case TRADE_DATA:
         input_block_flat[counter] = in;
         send = trade_block_flat[counter];
@@ -430,36 +487,36 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
 
         if(counter == sizeof(TradeBlock)) {
             trade->trade_centre_state = TRADE_PATCH_HEADER;
-            counter = 0;
-        }
+	    counter = 0;
+	}
 
-        break;
+	break;
 
     /* This absorbs the 3 byte ending sequence (DF FE 15) after the trade data is
      * swapped, then the 3x SERIAL_PREAMBLE_BYTEs that end the trade data, and
      * another 3x of them that start the patch data. By the time we're done with
-     * this state, the patch list blank bytes are ready to be transmitted.
+     * this state, the patch list BLANK bytes are ready to be transmitted.
      * We only care about the 6x total preamble bytes.
-     */
+     */ 
     case TRADE_PATCH_HEADER:
-        if(in == SERIAL_PREAMBLE_BYTE) {
-            counter++;
-        }
+	if (in == SERIAL_PREAMBLE_BYTE) {
+		counter++;
+	}
 
-        if(counter == 6) {
-            counter = 0;
-            trade->trade_centre_state = TRADE_PATCH_DATA;
-        } else {
-            break;
-        }
-        [[fallthrough]];
+	if (counter == 6) {
+		counter = 0;
+		trade->trade_centre_state = TRADE_PATCH_DATA;
+	} else {
+		break;
+	}
+	[[fallthrough]];
     case TRADE_PATCH_DATA:
-        counter++;
+	counter++;
         /* This magic number is basically the header length, 10, minus
 	 * the 3x 0xFD that we should be transmitting as part of the patch
 	 * list header.
 	 */
-        if(counter > 7) {
+        if (counter > 7) {
             send = plist_index_get(trade->patch_list, (counter - 8));
         }
 
@@ -468,62 +525,72 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
          * part 2 of the patch list has been terminated. This is the
          * case in official Gen I code at this time.
          */
-        switch(in) {
+        switch (in) {
         case PKMN_BLANK:
             break;
         case SERIAL_PATCH_LIST_PART_TERMINATOR:
             patch_pt_2 = true;
             break;
         default: // Any nonzero value will cause a patch
-            if(!patch_pt_2) {
+            if (!patch_pt_2) {
                 /* Pt 1 is 0x00 - 0xFB */
-                input_party_flat[in - 1] = SERIAL_NO_DATA_BYTE;
+                input_party_flat[in-1] = SERIAL_NO_DATA_BYTE;
             } else {
                 /* Pt 2 is 0xFC - 0x107
 		 * 0xFC + in - 1
 		 */
-                input_party_flat[0xFB + in] = SERIAL_NO_DATA_BYTE;
+                input_party_flat[0xFB+in] = SERIAL_NO_DATA_BYTE;
             }
             break;
         }
 
-        /* What is interesting about the following check, is the Pokemon code
+	/* What is interesting about the following check, is the Pokemon code
 	 * seems to allocate 203 bytes, 3x for the preamble, and then 200 bytes
 	 * of patch list. But in practice, the Gameboy seems to transmit 3x
 	 * preamble bytes, 7x 0x00, then 189 bytes for the patch list. A
 	 * total of 199 bytes transmitted.
 	 */
-        if(counter == 196) trade->trade_centre_state = TRADE_SELECT;
+        if(counter == 196)
+            trade->trade_centre_state = TRADE_SELECT;
 
         break;
 
+    /* Resets the incoming pokemon index, and once a BLANK byte is received,
+     * moves to the pending state.
+     */
     case TRADE_SELECT:
-        in_pokemon_num = 0;
-        if(in == PKMN_BLANK) {
-            trade->trade_centre_state = TRADE_PENDING;
-        } else {
-            break;
-        }
-        [[fallthrough]];
+	    in_pkmn_idx = 0;
+	    if (in == PKMN_BLANK) {
+	        trade->trade_centre_state = TRADE_PENDING;
+	    } else {
+	        break;
+	    }
+	    [[fallthrough]];
+    /* Handle the Gameboy selecting a pokemon to trade, or leaving the table */
     case TRADE_PENDING:
-        /* If the player leaves the trade menu and returns to the room */
+	/* If the player leaves the trade menu and returns to the room */
         if(in == PKMN_TABLE_LEAVE) {
             trade->trade_centre_state = TRADE_RESET;
             send = PKMN_TABLE_LEAVE;
             model->gameboy_status = GAMEBOY_READY;
+        /* If the player selected a pokemon to send from the Gameboy */
         } else if((in & PKMN_SEL_NUM_MASK) == PKMN_SEL_NUM_MASK) {
-            in_pokemon_num = in;
-            send = PKMN_SEL_NUM_ONE; // We're sending the first pokemon
+            in_pkmn_idx = in;
+            send = PKMN_SEL_NUM_ONE; // We always send the first pokemon
             model->gameboy_status = GAMEBOY_TRADE_PENDING;
+        /* BLANKs are sent in a few places, we want to do nothing about them
+	 * unless the Gameboy already sent us an index they want to trade.
+	 */
         } else if(in == PKMN_BLANK) {
-            if(in_pokemon_num != 0) {
+            if (in_pkmn_idx != 0) {
                 send = 0;
                 trade->trade_centre_state = TRADE_CONFIRMATION;
-                in_pokemon_num &= 0x0F;
-            }
+		in_pkmn_idx &= 0x0F;
+	    }
         }
         break;
 
+    /* Handle the Gameboy accepting or rejecting a trade deal */
     case TRADE_CONFIRMATION:
         if(in == PKMN_TRADE_REJECT) {
             trade->trade_centre_state = TRADE_SELECT;
@@ -533,30 +600,24 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
         }
         break;
 
+    /* Start the actual trade. Waits in reset until the Gameboy is done with
+     * its animation and re-exchanges updated party data.
+     */
     case TRADE_DONE:
         if(in == PKMN_BLANK) {
             trade->trade_centre_state = TRADE_RESET;
             model->gameboy_status = GAMEBOY_TRADING;
 
             /* Copy the traded-in pokemon's main data to our struct */
-            trade->trade_block->party_members[0] =
-                trade->input_block->party_members[in_pokemon_num];
-            memcpy(
-                &(trade->trade_block->party[0]),
-                &(trade->input_block->party[in_pokemon_num]),
-                sizeof(struct pokemon_structure));
-            memcpy(
-                &(trade->trade_block->nickname[0]),
-                &(trade->input_block->nickname[in_pokemon_num]),
-                sizeof(struct name));
-            memcpy(
-                &(trade->trade_block->ot_name[0]),
-                &(trade->input_block->ot_name[in_pokemon_num]),
-                sizeof(struct name));
-            model->curr_pokemon = pokemon_table_get_num_from_index(
-                trade->pokemon_table, trade->trade_block->party_members[0]);
+            trade->trade_block->party_members[0] = trade->input_block->party_members[in_pkmn_idx];
+            memcpy(&(trade->trade_block->party[0]), &(trade->input_block->party[in_pkmn_idx]), sizeof(struct pokemon_structure));
+            memcpy(&(trade->trade_block->nickname[0]), &(trade->input_block->nickname[in_pkmn_idx]), sizeof(struct name));
+            memcpy(&(trade->trade_block->ot_name[0]), &(trade->input_block->ot_name[in_pkmn_idx]), sizeof(struct name));
+            model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
 
-            /* Schedule a callback outside of ISR context to rebuild the patch list */
+            /* Schedule a callback outside of ISR context to rebuild the patch
+	     * list with the new pokemon that we just accepted.
+	     */
             furi_timer_pending_callback(pokemon_plist_recreate_callback, trade, 0);
         }
         break;
@@ -571,49 +632,43 @@ static uint8_t getTradeCentreResponse(struct trade_ctx* trade) {
     return send;
 }
 
-/* XXX: Need to grab model here but carefully */
 void transferBit(void* context) {
     furi_assert(context);
 
     struct trade_ctx* trade = (struct trade_ctx*)context;
     render_gameboy_state_t status;
 
-    /* We use with_view_model since the functions called here could potentially
-     * also need to use the model resources. Right now this is not an issue, but
-     * if this were to ever end up having a lock, it could cause access issues.
-     */
     with_view_model(
-        trade->view, struct trade_model * model, { status = model->gameboy_status; }, false);
+        trade->view,
+        struct trade_model * model,
+        {
+	    status = model->gameboy_status;
+        },
+        false);
 
     /* Shift data in every clock */
     trade->in_data <<= 1;
-    trade->in_data |= !!furi_hal_gpio_read(&GAME_BOY_SI);
+    trade->in_data |= furi_hal_gpio_read(&GAME_BOY_SI);
     trade->shift++;
 
     /* Once a byte of data has been shifted in, process it */
-    if(trade->shift > 7) {
+    if(trade->shift == 8) {
         trade->shift = 0;
         switch(status) {
-        case GAMEBOY_CONN_FALSE:
+	case GAMEBOY_CONN_FALSE:
             trade->out_data = getConnectResponse(trade);
             break;
-        case GAMEBOY_CONN_TRUE:
+	case GAMEBOY_CONN_TRUE:
             trade->out_data = getMenuResponse(trade);
             break;
+	case GAMEBOY_COLOSSEUM:
+	    trade->out_data = trade->in_data;
+	    break;
+        /* Every other state is trade related */
         default:
             trade->out_data = getTradeCentreResponse(trade);
             break;
-        }
-#if 0
-	XXX: 
-	/* If we end up in the colosseum, then just repeat data back */
-	/* Do we need a way to close the connection? Would that be useful? */
-            trade->out_data = trade->in_data;
-            break;
-        }
-#endif
-
-        trade->in_data = 0; // TODO: I don't think this is necessary?
+	}
     }
 }
 
@@ -632,28 +687,19 @@ void input_clk_gameboy(void* context) {
      */
     const uint32_t time_ticks = furi_hal_cortex_instructions_per_microsecond() * 500;
 
-    if(furi_hal_gpio_read(&GAME_BOY_CLK)) {
+    if (furi_hal_gpio_read(&GAME_BOY_CLK)) {
         if((DWT->CYCCNT - time) > time_ticks) {
-            //  IDLE & Reset
             trade->in_data = 0;
             trade->shift = 0;
         }
         transferBit(trade);
-        time = DWT->CYCCNT;
+	time = DWT->CYCCNT;
     } else {
         /* On the falling edge of each clock, set up the next bit */
-        furi_hal_gpio_write(&GAME_BOY_SO, trade->out_data & 0x80 ? true : false);
+        furi_hal_gpio_write(&GAME_BOY_SO, !!(trade->out_data & 0x80));
         trade->out_data <<= 1;
     }
-}
 
-void trade_draw_timer_callback(void* context) {
-    furi_assert(context);
-
-    struct trade_ctx* trade = (struct trade_ctx*)context;
-
-    with_view_model(
-        trade->view, struct trade_model * model, { model->ledon ^= 1; }, true);
 }
 
 void trade_enter_callback(void* context) {
@@ -661,21 +707,16 @@ void trade_enter_callback(void* context) {
     struct trade_ctx* trade = (struct trade_ctx*)context;
     struct trade_model* model;
 
-    /* Reinit variables.
-     * Note that, the connected and trading variables are left untouched as
-     * once the gameboy is connected, the Flipper, in a Ready state, can go
-     * back a menu and change/update the pokemon and re-enter the same trade
-     * session.
-     */
     model = view_get_model(trade->view);
 
-    if(model->gameboy_status > GAMEBOY_READY) {
+    if (model->gameboy_status == GAMEBOY_COLOSSEUM) {
+        model->gameboy_status = GAMEBOY_CONN_FALSE;
+    } else if (model->gameboy_status > GAMEBOY_READY) {
         model->gameboy_status = GAMEBOY_READY;
     }
     trade->trade_centre_state = TRADE_RESET;
     model->pokemon_table = trade->pokemon_table;
-    model->curr_pokemon = pokemon_table_get_num_from_index(
-        trade->pokemon_table, trade->trade_block->party_members[0]);
+    model->curr_pokemon = pokemon_table_get_num_from_index(trade->pokemon_table, trade->trade_block->party_members[0]);
     model->ledon = false;
 
     view_commit_model(trade->view, true);
@@ -732,7 +773,7 @@ void trade_exit_callback(void* context) {
 
 void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view) {
     furi_assert(trade_block);
-    furi_assert(view);
+    furi_assert(view);    
 
     struct trade_ctx* trade = malloc(sizeof(struct trade_ctx));
 
