@@ -1,6 +1,6 @@
 #include "../hex_viewer.h"
 
-void hex_viewer_scene_scene_4_on_enter(void* context) {
+void hex_viewer_scene_open_on_enter(void* context) {
     furi_assert(context);
     HexViewer* app = context;
 
@@ -29,7 +29,7 @@ void hex_viewer_scene_scene_4_on_enter(void* context) {
     }
 }
 
-bool hex_viewer_scene_scene_4_on_event(void* context, SceneManagerEvent event) {
+bool hex_viewer_scene_open_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
     bool consumed = true;
@@ -37,6 +37,6 @@ bool hex_viewer_scene_scene_4_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void hex_viewer_scene_scene_4_on_exit(void* context) {
+void hex_viewer_scene_open_on_exit(void* context) {
     UNUSED(context);
 }

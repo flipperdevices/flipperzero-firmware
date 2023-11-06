@@ -1,10 +1,6 @@
 #include "../hex_viewer.h"
-#include "../helpers/hex_viewer_custom_event.h"
-#include "../helpers/hex_viewer_haptic.h"
-#include "../helpers/hex_viewer_led.h"
-#include "../views/hex_viewer_scene_2.h"
 
-void hex_viewer_scene_scene_2_on_enter(void* context) {
+void hex_viewer_scene_info_on_enter(void* context) {
     furi_assert(context);
     HexViewer* app = context;
 
@@ -31,7 +27,7 @@ void hex_viewer_scene_scene_2_on_enter(void* context) {
         app->scene_manager, HexViewerViewIdStartscreen);
 }
 
-bool hex_viewer_scene_scene_2_on_event(void* context, SceneManagerEvent event) {
+bool hex_viewer_scene_info_on_event(void* context, SceneManagerEvent event) {
     HexViewer* app = context;
     UNUSED(app);
     UNUSED(event);
@@ -40,7 +36,7 @@ bool hex_viewer_scene_scene_2_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void hex_viewer_scene_scene_2_on_exit(void* context) {
+void hex_viewer_scene_info_on_exit(void* context) {
     HexViewer* app = context;
     UNUSED(app);
 }

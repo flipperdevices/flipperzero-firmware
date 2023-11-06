@@ -1,14 +1,13 @@
 #include "../hex_viewer.h"
 #include "../helpers/hex_viewer_custom_event.h"
-#include "../views/hex_viewer_scene_1.h"
 
-void hex_viewer_scene_scene_1_callback(void* context) {
+void hex_viewer_scene_scroll_callback(void* context) {
     HexViewer* app = (HexViewer*)context;
     view_dispatcher_send_custom_event(
         app->view_dispatcher, HexViewerCustomEventMenuPercentEntered);
 }
 
-void hex_viewer_scene_scene_1_on_enter(void* context) {
+void hex_viewer_scene_scroll_on_enter(void* context) {
     furi_assert(context);
     HexViewer* app = context;
 
@@ -17,16 +16,16 @@ void hex_viewer_scene_scene_1_on_enter(void* context) {
     text_input_set_header_text(text_input, "Scroll to percent (0..100)");
     text_input_set_result_callback(
         text_input,
-        hex_viewer_scene_scene_1_callback,
+        hex_viewer_scene_scroll_callback,
         app,
         app->percent_buf,
         HEX_VIEWER_PERCENT_INPUT,
         false);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, HexViewerSceneScene_1);
+    view_dispatcher_switch_to_view(app->view_dispatcher, HexViewerSceneScroll);
 }
 
-bool hex_viewer_scene_scene_1_on_event(void* context, SceneManagerEvent event) {
+bool hex_viewer_scene_scroll_on_event(void* context, SceneManagerEvent event) {
     HexViewer* app = (HexViewer*)context;
     bool consumed = false;
 
@@ -57,6 +56,6 @@ bool hex_viewer_scene_scene_1_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void hex_viewer_scene_scene_1_on_exit(void* context) {
+void hex_viewer_scene_scroll_on_exit(void* context) {
     UNUSED(context);
 }

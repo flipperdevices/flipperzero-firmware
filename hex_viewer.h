@@ -18,8 +18,6 @@
 #include <gui/modules/dialog_ex.h>
 #include "scenes/hex_viewer_scene.h"
 #include "views/hex_viewer_startscreen.h"
-#include "views/hex_viewer_scene_1.h"
-#include "views/hex_viewer_scene_2.h"
 #include "helpers/hex_viewer_storage.h"
 
 #include <storage/storage.h>
@@ -29,9 +27,6 @@
 
 #define TAG "HexViewer"
 
-// #define SUBGHZ_APP_EXTENSION ".sub"
-// #define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
-
 #define HEX_VIEWER_APP_PATH_FOLDER "/any" // TODO ANY_PATH
 #define HEX_VIEWER_APP_EXTENSION "*"
 #define HEX_VIEWER_PERCENT_INPUT 16
@@ -40,37 +35,30 @@
 #define HEX_VIEWER_LINES_ON_SCREEN 4u
 #define HEX_VIEWER_BUF_SIZE (HEX_VIEWER_LINES_ON_SCREEN * HEX_VIEWER_BYTES_PER_LINE)
 
-// typedef struct HexViewerModel HexViewerModel;
-// typedef struct HexViewer HexViewer;
-
-typedef struct
-{
+typedef struct {
     uint8_t file_bytes[HEX_VIEWER_LINES_ON_SCREEN][HEX_VIEWER_BYTES_PER_LINE];
     uint32_t file_offset;
     uint32_t file_read_bytes;
     uint32_t file_size;
 
-    Stream *stream;
+    Stream* stream;
 } HexViewerModel;
 
 // TODO Clean
-typedef struct
-{
-    HexViewerModel *model;
+typedef struct {
+    HexViewerModel* model;
 
-    Gui *gui;
-    Storage *storage;
-    NotificationApp *notification;
-    ViewDispatcher *view_dispatcher;
-    Submenu *submenu;
-    TextInput *text_input;
-    SceneManager *scene_manager;
-    VariableItemList *variable_item_list;
-    HexViewerStartscreen *hex_viewer_startscreen;
-    HexViewerScene1 *hex_viewer_scene_1;
-    HexViewerScene2 *hex_viewer_scene_2;
-    DialogsApp *dialogs;   // File Browser
-    FuriString *file_path; // File Browser
+    Gui* gui;
+    Storage* storage;
+    NotificationApp* notification;
+    ViewDispatcher* view_dispatcher;
+    Submenu* submenu;
+    TextInput* text_input;
+    SceneManager* scene_manager;
+    VariableItemList* variable_item_list;
+    HexViewerStartscreen* hex_viewer_startscreen;
+    DialogsApp* dialogs; // File Browser
+    FuriString* file_path; // File Browser
     uint32_t haptic;
     uint32_t speaker;
     uint32_t led;
@@ -78,38 +66,29 @@ typedef struct
     char percent_buf[HEX_VIEWER_PERCENT_INPUT];
 } HexViewer;
 
-typedef enum
-{
+typedef enum {
     HexViewerViewIdStartscreen,
     HexViewerViewIdMenu,
-    HexViewerViewIdScene1,
-    HexViewerViewIdScene2,
-    HexViewerViewIdScene3,
-    HexViewerViewIdScene4,
-    HexViewerViewIdScene5,
+    HexViewerViewIdScroll,
     HexViewerViewIdSettings,
 } HexViewerViewId;
 
-typedef enum
-{
+typedef enum {
     HexViewerHapticOff,
     HexViewerHapticOn,
 } HexViewerHapticState;
 
-typedef enum
-{
+typedef enum {
     HexViewerSpeakerOff,
     HexViewerSpeakerOn,
 } HexViewerSpeakerState;
 
-typedef enum
-{
+typedef enum {
     HexViewerLedOff,
     HexViewerLedOn,
 } HexViewerLedState;
 
-typedef enum
-{
+typedef enum {
     HexViewerSettingsOff,
     HexViewerSettingsOn,
 } HexViewerSettingsStoreState;

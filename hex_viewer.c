@@ -71,13 +71,7 @@ HexViewer* hex_viewer_app_alloc() {
         hex_viewer_startscreen_get_view(app->hex_viewer_startscreen));
 
     view_dispatcher_add_view(
-        app->view_dispatcher, HexViewerViewIdScene1, text_input_get_view(app->text_input));
-
-    app->hex_viewer_scene_2 = hex_viewer_scene_2_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        HexViewerViewIdScene2,
-        hex_viewer_scene_2_get_view(app->hex_viewer_scene_2));
+        app->view_dispatcher, HexViewerViewIdScroll, text_input_get_view(app->text_input));
 
     app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
@@ -100,8 +94,7 @@ void hex_viewer_app_free(HexViewer* app) {
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdScene1);
-    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdScene2);
+    view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdScroll);
     view_dispatcher_remove_view(app->view_dispatcher, HexViewerViewIdSettings);
 
     submenu_free(app->submenu);
