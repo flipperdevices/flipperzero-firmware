@@ -22,13 +22,9 @@ void hex_viewer_scene_scene_4_on_enter(void* context) {
     }
 
     if(success) {
-        // Load page to do something with result
-        //scene_manager_next_scene(app->scene_manager, HexViewerViewIdMenu);
-        //scene_manager_previous_scene(app->scene_manager); // temp for showcase
         scene_manager_search_and_switch_to_previous_scene(
             app->scene_manager, HexViewerViewIdStartscreen);
     } else {
-        // This is basically if someone quites the browser
         scene_manager_previous_scene(app->scene_manager);
     }
 }

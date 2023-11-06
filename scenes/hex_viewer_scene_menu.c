@@ -66,10 +66,6 @@ bool hex_viewer_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene2);
             scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_2);
             return true;
-            // } else if (event.event == SubmenuIndexScene3) {
-            //     scene_manager_set_scene_state(
-            //         app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene3);
-            //     scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_3);
         } else if(event.event == SubmenuIndexScene4) {
             scene_manager_set_scene_state(
                 app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene4);
