@@ -256,65 +256,69 @@ int32_t four_in_row_app(void* p) {
     while(1) {
         // Выбираем событие из очереди в переменную event (ждем бесконечно долго, если очередь пуста)
         // и проверяем, что у нас получилось это сделать
-        furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
-        furi_mutex_acquire(fourinrow_state->mutex, FuriWaitForever);
-        // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
-        if(wincheck() != -1) {
-            notification_message(notification, &end);
-            furi_delay_ms(1000);
-            if(wincheck() == 1) {
-                scoreX++;
-            }
-            if(wincheck() == 2) {
-                scoreO++;
-            }
-            init();
-        }
-
-        if(event.type == InputTypePress) {
-            if(event.key == InputKeyOk) {
-                int nh = next_height(cursorx);
-                if(nh != -1) {
-                    matrix[nh][cursorx] = player;
-                    player = 3 - player;
-                }
-            }
-            if(event.key == InputKeyUp) {
-                //cursory--;
-            }
-            if(event.key == InputKeyDown) {
-                //cursory++;
-            }
-            if(event.key == InputKeyLeft) {
-                if(cursorx > 0) {
-                    cursorx--;
-                }
-            }
-            if(event.key == InputKeyRight) {
-                if(cursorx < 6) {
-                    cursorx++;
-                }
-            }
-            if(event.key == InputKeyBack) {
+        if(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
+            if((event.type == InputTypePress) && (event.key == InputKeyBack)) {
                 break;
             }
+
+            furi_mutex_acquire(fourinrow_state->mutex, FuriWaitForever);
+            if(wincheck() != -1) {
+                notification_message(notification, &end);
+                furi_delay_ms(1000);
+                if(wincheck() == 1) {
+                    scoreX++;
+                }
+                if(wincheck() == 2) {
+                    scoreO++;
+                }
+                init();
+                furi_mutex_release(fourinrow_state->mutex);
+                continue;
+            }
+
+            if(event.type == InputTypePress) {
+                if(event.key == InputKeyOk) {
+                    int nh = next_height(cursorx);
+                    if(nh != -1) {
+                        matrix[nh][cursorx] = player;
+                        player = 3 - player;
+                    }
+                }
+                if(event.key == InputKeyUp) {
+                    //cursory--;
+                }
+                if(event.key == InputKeyDown) {
+                    //cursory++;
+                }
+                if(event.key == InputKeyLeft) {
+                    if(cursorx > 0) {
+                        cursorx--;
+                    }
+                }
+                if(event.key == InputKeyRight) {
+                    if(cursorx < 6) {
+                        cursorx++;
+                    }
+                }
+            }
+
+            furi_mutex_release(fourinrow_state->mutex);
         }
         view_port_update(view_port);
-        furi_mutex_release(fourinrow_state->mutex);
     }
 
+    // Чистим созданные объекты, связанные с интерфейсом
+    view_port_enabled_set(view_port, false);
+    gui_remove_view_port(gui, view_port);
+    view_port_free(view_port);
+    furi_message_queue_free(event_queue);
+    furi_record_close(RECORD_GUI);
     // Clear notification
     notification_message_block(notification, &sequence_display_backlight_enforce_auto);
     furi_record_close(RECORD_NOTIFICATION);
 
-    // Специальная очистка памяти, занимаемой очередью
-    furi_message_queue_free(event_queue);
-
-    // Чистим созданные объекты, связанные с интерфейсом
-    gui_remove_view_port(gui, view_port);
-    view_port_free(view_port);
     furi_mutex_free(fourinrow_state->mutex);
-    furi_record_close(RECORD_GUI);
+
     free(fourinrow_state);
 
     return 0;
