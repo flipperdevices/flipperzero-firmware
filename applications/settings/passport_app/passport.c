@@ -206,7 +206,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_icon(canvas, 0, 0, &I_passport_ADPolice);
             break;
         case BG_DEDSEC:
-            canvas_draw_icon(canvas, 0, 0, &I_passport_dedsec);
+            canvas_draw_icon(canvas, 0, 0, &I_passport_DedSec);
+            break;
+        case BG_MEDIEVAL:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_Medieval);
             break;
         }
 
@@ -318,6 +321,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             break;
         case PIMG_WRENCH:
             canvas_draw_icon(canvas, 11, 2, portrait_wrench[passport->tmpMood]);
+            break;
+        case PIMG_LEEROY:
+            canvas_draw_icon(canvas, 11, 2, &I_Leeroy_Jenkins);
             break;
         }
 
