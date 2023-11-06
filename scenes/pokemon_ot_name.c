@@ -10,34 +10,32 @@
 
 static char ot_name_buf[8];
 
+/* XXX: Pokemon names cannot include numbers! */
+
 static bool select_ot_name_input_validator(const char* text, FuriString* error, void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
     bool rc = true;
     unsigned int i;
 
-    // XXX If no pokemon name, use default. How TF to have text input handle that?
     // OT name is 7 chars max on gen 1, so only take that and then fill the rest of the 11 bytes with term
 
     for(i = 0; i < sizeof(ot_name_buf); i++) {
-        if(!isalnum((unsigned int)text[i])) {
-            if(text[i] == '\0') break;
-            rc = false;
-            break;
+        if (isdigit((unsigned int)text[i])) {
+            furi_string_printf(error, "Name cannot\ncontain\nnumbers!");
+	    rc = false;
         }
     }
 
-    if(rc == false) {
-        furi_string_printf(error, "Some error?");
-    } else {
+    if(rc == true) {
         /* Clear existing OT Name in trade block*/
         memset(pokemon_fap->trade_block->ot_name, TERM_, sizeof(struct name));
 
         /* Encode string to OT Name */
         pokemon_str_to_encoded_array(
             (uint8_t*)pokemon_fap->trade_block->ot_name, (char*)text, strlen(text));
+        FURI_LOG_D(TAG, "[ot_name] Set OT name to %s", text);
     }
 
-    FURI_LOG_D(TAG, "[ot_name] Set OT name to %s", text);
 
     return rc;
 }
