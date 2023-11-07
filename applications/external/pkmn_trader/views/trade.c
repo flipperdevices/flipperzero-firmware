@@ -763,14 +763,17 @@ void trade_exit_callback(void* context) {
     trade->patch_list = NULL;
 }
 
-void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view) {
+void* trade_alloc(
+    TradeBlock* trade_block,
+    const PokemonTable* table,
+    ViewDispatcher* view_dispatcher,
+    uint32_t view_id) {
     furi_assert(trade_block);
-    furi_assert(view);
 
     struct trade_ctx* trade = malloc(sizeof(struct trade_ctx));
 
     memset(trade, '\0', sizeof(struct trade_ctx));
-    trade->view = view;
+    trade->view = view_alloc();
     trade->trade_block = trade_block;
     trade->input_block = malloc(sizeof(TradeBlock));
     trade->pokemon_table = table;
@@ -783,18 +786,21 @@ void* trade_alloc(TradeBlock* trade_block, const PokemonTable* table, View* view
     view_set_enter_callback(trade->view, trade_enter_callback);
     view_set_exit_callback(trade->view, trade_exit_callback);
 
+    view_dispatcher_add_view(view_dispatcher, view_id, trade->view);
+
     return trade;
 }
 
-void trade_free(void* trade_ctx) {
+void trade_free(ViewDispatcher* view_dispatcher, uint32_t view_id, void* trade_ctx) {
     furi_assert(trade_ctx);
 
     struct trade_ctx* trade = (struct trade_ctx*)trade_ctx;
 
     // Free resources
     furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
-
     disconnect_pin(&GAME_BOY_CLK);
+
+    view_dispatcher_remove_view(view_dispatcher, view_id);
 
     view_free_model(trade->view);
     view_free(trade->view);

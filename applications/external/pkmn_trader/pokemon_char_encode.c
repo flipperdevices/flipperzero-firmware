@@ -3,7 +3,6 @@
 
 #include "pokemon_char_encode.h"
 
-/* XXX Current text_input module only offers alnum and space input */
 char pokemon_char_to_encoded(int byte) {
     switch(byte) {
     case 'A':

@@ -1880,11 +1880,6 @@ int pokemon_named_list_get_num_elements(const NamedList* list) {
     for(i = 0;; i++) {
         if(list[i].name == NULL) return i;
     }
-
-    /* XXX: Would be faster to do something like this, but, can't easily do
-     * that using the current pointers. Might be able to clean this up later?
-     */
-    //return sizeof(type_list)/sizeof(type_list[0]);
 }
 
 int pokemon_named_list_get_list_pos_from_index(const NamedList* list, uint8_t index) {
@@ -1895,7 +1890,7 @@ int pokemon_named_list_get_list_pos_from_index(const NamedList* list, uint8_t in
         if(index == list[i].index) return i;
     }
 
-    /* XXX: This will return the first entry in case index is not matched.
+    /* This will return the first entry in case index is not matched.
      * Could be surprising at runtime.
      */
     return 0;
@@ -1909,7 +1904,7 @@ const char* pokemon_named_list_get_name_from_index(const NamedList* list, uint8_
         if(index == list[i].index) return list[i].name;
     }
 
-    /* XXX: This will return the first entry in the case index is not matched,
+    /* This will return the first entry in the case index is not matched,
      * this could be confusing/problematic at runtime.
      */
     return list[0].name;
@@ -1922,9 +1917,6 @@ void pokemon_trade_block_set_default_name(char* dest, PokemonFap* pokemon_fap, s
 
     /* Walk through the default name, toupper() each character, encode it, and
      * then write that to the same position in the trade_block.
-     */
-    /* XXX: The limit of this is hard-coded to a length of 11 at most. This may
-     * be a problem down the road!
      */
     for(i = 0; i < 11; i++) {
         pokemon_fap->trade_block->nickname[0].str[i] = pokemon_char_to_encoded(
@@ -2128,9 +2120,11 @@ static TradeBlock* trade_block_alloc(void) {
     /* OT trainer ID# */
     trade->party[0].ot_id = __builtin_bswap16(42069);
 
-    /* XXX: move pp isn't explicitly set up, should be fine */
-    /* XXX: catch/held isn't explicitly set up, should be okay for only Gen I support now */
-    /* XXX: Status condition isn't explicity let up, would you ever want to? */
+    /* Notes:
+     * Move pp isn't explicitly set up, should be fine
+     * Catch/held isn't explicitly set up, should be okay for only Gen I support now
+     * Status condition isn't explicity let up, would you ever want to?
+     */
 
     /* Set up initial level */
     trade->party[0].level = 2;
@@ -2144,7 +2138,6 @@ static void trade_block_free(TradeBlock* trade) {
 
 PokemonFap* pokemon_alloc() {
     PokemonFap* pokemon_fap = (PokemonFap*)malloc(sizeof(PokemonFap));
-    View* trade_view;
 
     // View dispatcher
     pokemon_fap->view_dispatcher = view_dispatcher_alloc();
@@ -2192,19 +2185,12 @@ PokemonFap* pokemon_alloc() {
         pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select_view);
 
     // Trade View
-    /* Allocate a view and pass it to the trade routines. The trade API is
-     * responsible for freeing every resource, including the view itself. This
-     * is actually how it was already designed anyway, so we just create it first. The
-     * main FAP does not keep track of it. In theory, we could let the trade
-     * API handle all of it, however, it doesn't make sense to have the trade
-     * API add itself to the view dispatcher since that kind of management is
-     * outside the scope of the trade routines and is the responsibility of the
-     * main FAP.
-     */
-    trade_view = view_alloc();
-    pokemon_fap->trade =
-        trade_alloc(pokemon_fap->trade_block, pokemon_fap->pokemon_table, trade_view);
-    view_dispatcher_add_view(pokemon_fap->view_dispatcher, AppViewTrade, trade_view);
+    /* Allocates its own view and adds it to the main view_dispatcher */
+    pokemon_fap->trade = trade_alloc(
+        pokemon_fap->trade_block,
+        pokemon_fap->pokemon_table,
+        pokemon_fap->view_dispatcher,
+        AppViewTrade);
 
     return pokemon_fap;
 }
@@ -2216,8 +2202,8 @@ void free_app(PokemonFap* pokemon_fap) {
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewSelectPokemon);
     select_pokemon_free(pokemon_fap);
 
-    view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewTrade);
-    trade_free(pokemon_fap->trade);
+    /* Also removes itself from the view_dispatcher */
+    trade_free(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade);
 
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewMainMenu);
 
