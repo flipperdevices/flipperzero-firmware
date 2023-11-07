@@ -43,6 +43,8 @@ typedef enum {
     AnimStyleBMO,
     AnimStyleCherry,
     AnimStyleCorpLogos,
+    AnimStyleCustom1,
+    AnimStyleCustom2,
     AnimStyleDBZ,
     AnimStyleDigim0n,
     AnimStyleDolphin,

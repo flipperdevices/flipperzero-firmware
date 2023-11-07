@@ -1,6 +1,6 @@
 #pragma once
 
-#include "polyfills.h"
+#include <furi_hal_crypto.h>
 
 #define CRYPTO_IV_LENGTH (16)
 #define CRYPTO_SALT_LENGTH (16)

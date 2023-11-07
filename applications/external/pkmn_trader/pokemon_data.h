@@ -43,8 +43,6 @@ struct __attribute__((__packed__)) pokemon_structure {
     uint16_t special; // Calculated from level
 };
 
-/* XXX: Stock gameboy seems to use one TERM_ byte and then 0x00 for remaining bytes */
-/* but only OT Name? nickname is TERM_ all the way */
 struct __attribute__((__packed__)) name {
     /* Reused a few times, but in Gen I, all name strings are 11 bytes in memory.
      * At most, 10 symbols and a TERM_ byte.
@@ -55,7 +53,7 @@ struct __attribute__((__packed__)) name {
 
 /* This is 418 bytes in memory/transmitted */
 struct __attribute__((__packed__)) trade_data_block {
-    /* XXX: Change this to use struct name above */
+    /* TODO: Change this to use struct name above */
     unsigned char trainer_name[11];
     uint8_t party_cnt;
     /* Only the first pokemon is ever used even though there are 7 bytes here.

@@ -29,14 +29,13 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1106-1300-0.93.1-aa231de](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-06 13:00 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-06 13:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-07 12:02 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-07 12:02 EST`
 - Updated: [Hangman v1.1 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Hangman Anime Dictionary (By RogueMaster)
 - Expanded Hangman Anime Dictionary (By RogueMaster)
 - [Add documentation and source URL about the AM_Q CC1101 preset #995 (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
 - Added: [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
-- Updated: [Authenticator/TOTP v5.7.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [Added IoProxXSF, Paradox, Indala26, Viking, Pyramid, Keri, and Jablotron to RFID Fuzzer #4 (By SkeletonMan03)](https://github.com/DarkFlippers/Multi_Fuzzer/pull/4)
 - Added: [BT Remote for Kodi (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi)
 - Added: [Mouse Jacker for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms) `Req: NRF24`
@@ -50,7 +49,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Patreon DBZ + ANIMSWITCHER Build Update: [Added stopoxy_goku_128x64 (By stopoxy)](https://github.com/stopoxy/FZAnimations/tree/main/stopoxy_goku_128x64)
 - [CFW Settings: Passport settings now includes options for Medeival passport background style and a Leeroy Jenkins profile image (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- [CFW Settings: Passport settings: Updated AD Police passport background (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
+- Updated: [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- Updated: [Authenticator/TOTP v5.7.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [ESP32CAM Marauder v0.6.4 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- Added Custom 1 and Custom 2 options to CFW Settings-Interface-Desktop-Animations to allow for two custom user defined background sets. Edit dolphin/manifest_Custom1.txt and dolphin/manifest_Custom2.txt on your SD Card in order to change these custom sets. (By RogueMaster)
 
 ## IN THIS BRANCH:
 
@@ -153,7 +156,7 @@ $ ./fbt dolphin_ext
 
 ## All Changes and Features
 
-- Animations: [CFW Settings for Desktop Animations Set Selector (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d07f27fd259ce049ca7b928a9dd3e8242a769d01) [Copy this to SD dolphin folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher) [Improvement to code structure for animation loading (By LeeroysHub)](https://github.com/LeeroysHub/)
+- Animations: [CFW Settings for Desktop Animations Set Selector (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d07f27fd259ce049ca7b928a9dd3e8242a769d01) [Copy this to SD dolphin folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
 - Animations: Hold Center to change Flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Animations: iButton and RFID P0kem0n images [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/)
 - Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to qqMajiKpp](https://github.com/qqmajikpp/)
@@ -459,7 +462,7 @@ $ ./fbt dolphin_ext
 - [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
-- [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
