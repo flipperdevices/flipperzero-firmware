@@ -74,6 +74,12 @@ static bool animation_storage_load_single_manifest_info(
     case AnimStyleCorpLogos:
         furi_string_printf(anim_manifest, "%s/manifest_CorpLogos.txt", ANIMATION_DIR);
         break;
+    case AnimStyleCustom1:
+        furi_string_printf(anim_manifest, "%s/manifest_Custom1.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleCustom2:
+        furi_string_printf(anim_manifest, "%s/manifest_Custom2.txt", ANIMATION_DIR);
+        break;
     case AnimStyleDBZ:
         furi_string_printf(anim_manifest, "%s/manifest_DBZ.txt", ANIMATION_DIR);
         break;
@@ -226,6 +232,12 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
         break;
     case AnimStyleCorpLogos:
         furi_string_printf(anim_manifest, "%s/manifest_CorpLogos.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleCustom1:
+        furi_string_printf(anim_manifest, "%s/manifest_Custom1.txt", ANIMATION_DIR);
+        break;
+    case AnimStyleCustom2:
+        furi_string_printf(anim_manifest, "%s/manifest_Custom2.txt", ANIMATION_DIR);
         break;
     case AnimStyleDBZ:
         furi_string_printf(anim_manifest, "%s/manifest_DBZ.txt", ANIMATION_DIR);
