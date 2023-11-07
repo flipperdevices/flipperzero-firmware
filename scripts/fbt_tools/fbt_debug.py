@@ -1,4 +1,9 @@
+import os
+import tempfile
+
 from SCons.Errors import UserError
+from SCons.Script import Builder
+from SCons.Script import Flatten
 
 
 def _get_device_serials(search_str="STLink"):
@@ -13,6 +18,60 @@ def GetDevices(env):
         raise UserError("No devices found")
 
     print("\n".join(serials))
+
+
+class _GdbCommandlineWrapper:
+    def __init__(self, binary_name, command_list_var_name):
+        print("new _GdbCommandlineWrapper")
+        self.command_list_var_name = command_list_var_name
+        self.gdb_binary = binary_name
+        self.fd = self.tmpfile = None
+
+    def create_args_action(self, target, source, env):
+        assert self.fd is None
+        fd, self.tmpfile = tempfile.mkstemp(text=True)
+        print("tmpfile", self.tmpfile)
+
+        self._gdb_args = Flatten(env[self.command_list_var_name])
+        print("gdb args", self._gdb_args)
+
+        filedata = bytearray("\n".join(self._gdb_args), "utf-8")
+        env.Replace(_GDB_CMD_FILE=self.tmpfile)
+        os.write(fd, filedata)
+        os.close(fd)
+
+    def get_gdb_commandline(self):
+        # print("get_gdb_commandline", self, self.tmpfile)
+        return [self.gdb_binary, "-ex", "source ${_GDB_CMD_FILE}", "${SOURCES}"]
+
+    def cleanup_tmpfile(self, target, source, env):
+        # print("cleanup_tmpfile", self)
+        assert self.tmpfile is not None
+        env.Replace(_GDB_CMD_FILE=None)
+        os.unlink(self.tmpfile)
+        self.tmpfile = None
+
+
+def _gdb_generator(source, target, env, for_signature):
+    if for_signature:
+        return [
+            "${GDB}",
+            "${GDBOPTS}",
+            "${SOURCES}",
+        ]
+
+    wrapper = _GdbCommandlineWrapper("${GDBPY}", "GDBOPTS")
+    return [
+        env.Action(wrapper.create_args_action, None),
+        wrapper.get_gdb_commandline(),
+        env.Action(wrapper.cleanup_tmpfile, None),
+    ]
+
+
+def _gdb_emitter(target, source, env):
+    # print("_gdb_emitter", target, source, env)
+    # return [], source
+    return target, source
 
 
 def generate(env, **kw):
@@ -84,6 +143,26 @@ def generate(env, **kw):
             "fw-version",
         ],
         JFLASHPROJECT="${FBT_DEBUG_DIR}/fw.jflash",
+    )
+
+    env.Append(
+        BUILDERS={
+            "GDB": Builder(
+                generator=_gdb_generator,
+                emitter=_gdb_emitter,
+                src_suffix=".elf",
+                # action=[
+                #     [
+                #         "${GDB}",
+                #         "${GDBOPTS}",
+                #         "${GDBPYOPTS}",
+                #         "${SOURCES}",
+                #         "${GDBFLASH}",
+                #     ]
+                # ],
+                # suffix=".elf",
+            ),
+        }
     )
 
 

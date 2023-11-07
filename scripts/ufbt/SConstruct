@@ -90,8 +90,8 @@ env = core_env.Clone(
         ),
         "fwbin",
         "python3",
-        "sconsrecursiveglob",
-        "sconsmodular",
+        "recursiveglob",
+        "fbt_modular",
         "ccache",
         "fbt_apps",
         "fbt_extapps",
@@ -194,7 +194,7 @@ dist_env.PhonyTarget(
 dist_env.PhonyTarget(
     "debug_other_blackmagic",
     "${GDBPYCOM}",
-    GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
+    GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     GDBPYOPTS=debug_other_opts,
 )

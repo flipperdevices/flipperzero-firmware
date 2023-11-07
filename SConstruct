@@ -219,6 +219,18 @@ distenv.PhonyTarget(
     ],
 )
 
+debug2 = distenv.GDB(
+    source=firmware_env["FW_ELF"],
+    GDBOPTS=[
+        "source scripts/debug/gdbinit",
+        "source /Users/hedger/tmp/ufbt_test/fw with spaces/scripts/debug/FreeRTOS/FreeRTOS.py",
+        "source /Users/hedger/tmp/ufbt_test/fw with spaces/scripts/debug/flipperapps.py",
+        "source /Users/hedger/tmp/ufbt_test/fw with spaces/scripts/debug/flipperversion.py",
+    ],
+)
+distenv.Pseudo(debug2)
+distenv.Alias("debug2", debug2)
+
 # Debugging firmware
 firmware_debug = distenv.PhonyTarget(
     "debug",
