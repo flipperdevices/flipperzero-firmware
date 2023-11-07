@@ -65,6 +65,9 @@
 - [MALVEKE] GAME BOY Logo Generator
 - [MALVEKE] Pokemon Trading
 
+## Contributors
+[![Contributors](https://contrib.rocks/image?repo=EstebanFuentealba/MALVEKE-Flipper-Zero)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/graphs/contributors)
+
 ## TODO
 - [ ] Refactor Code
 - [ ] Documentation
