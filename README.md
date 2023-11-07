@@ -38,7 +38,7 @@ There is a companion app for desktop allowing you to interract with Flipper Auth
 
 ## Have questions?
 
-Checkout [FAQ](https://github.com/akopachov/flipper-zero_authenticator/wiki/FAQ) or ask in [Discord server](https://discord.gg/flipper-xtreme)
+Checkout [FAQ](https://github.com/akopachov/flipper-zero_authenticator/wiki/FAQ) or ask on this [Discord server](https://discord.gg/flipper-xtreme)
 
 ## Looking for better Flipper Zero Firmware?
 
