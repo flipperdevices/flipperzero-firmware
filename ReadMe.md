@@ -53,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [CFW Settings: Passport settings: Updated AD Police passport background (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
 - Updated: [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [Authenticator/TOTP v5.7.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [ESP32CAM Marauder v0.6.4 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 
 <a name="release">
 
