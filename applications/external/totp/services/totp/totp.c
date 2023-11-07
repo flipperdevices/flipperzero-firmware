@@ -7,10 +7,10 @@
 #include "../../config/wolfssl/config.h"
 #include <wolfssl/wolfcrypt/hmac.h>
 #ifdef NO_INLINE
-    #include <wolfssl/wolfcrypt/misc.h>
+#include <wolfssl/wolfcrypt/misc.h>
 #else
-    #define WOLFSSL_MISC_INCLUDED
-    #include <wolfcrypt/src/misc.c>
+#define WOLFSSL_MISC_INCLUDED
+#include <wolfcrypt/src/misc.c>
 #endif
 
 #define HMAC_MAX_RESULT_SIZE WC_SHA512_DIGEST_SIZE

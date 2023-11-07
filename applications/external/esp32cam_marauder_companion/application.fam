@@ -1,6 +1,6 @@
 App(
     appid="cam_marauder",
-    name="[CAM] Marauder v0.6.4",7b18e4007769da87ff858a77940e912ca98ab673:applications/external/esp32cam_marauder_companion/flipper_companion_apps/applications/external/esp32cam_marauder_companion/application.fam
+    name="[CAM] Marauder v0.6.4",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_marauder_app",
     stack_size=4 * 1024,
