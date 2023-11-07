@@ -52,7 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [CFW Settings: Passport settings now includes options for Medeival passport background style and a Leeroy Jenkins profile image (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - [CFW Settings: Passport settings: Updated AD Police passport background (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
-- Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- Updated: [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 
 <a name="release">
 
@@ -436,7 +436,7 @@ $ ./fbt dolphin_ext
 - [PicoPass (iClass) v1.6 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
-- [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Pomodoro 2 v1.3 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [Protocol Visualizer v1.1 (By antirez)](https://github.com/antirez/protoview)
