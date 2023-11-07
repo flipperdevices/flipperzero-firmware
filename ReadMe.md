@@ -52,6 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [CFW Settings: Passport settings now includes options for Medeival passport background style and a Leeroy Jenkins profile image (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [Pokemon Trading v1.3 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
+- [CFW Settings: Passport settings: Updated AD Police passport background (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
 
 <a name="release">
 
