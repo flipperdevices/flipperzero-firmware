@@ -116,6 +116,7 @@ class MenuFunctions
     String u_result = "";
 
     uint32_t initTime = 0;
+    uint8_t menu_start_index = 0;
 
 
     // Main menu stuff
@@ -144,6 +145,7 @@ class MenuFunctions
 
     // Bluetooth menu stuff
     Menu bluetoothSnifferMenu;
+    Menu bluetoothAttackMenu;
 
     // Settings things menus
     Menu generateSSIDsMenu;
@@ -162,8 +164,10 @@ class MenuFunctions
     String callSetting(String key);
     void runBoolSetting(String ley);
     void displaySetting(String key, Menu* menu, int index);
-    void buttonSelected(uint8_t b);
-    void buttonNotSelected(uint8_t b);
+    void buttonSelected(uint8_t b, int8_t x = -1);
+    void buttonNotSelected(uint8_t b, int8_t x = -1);
+
+    uint8_t updateTouch(uint16_t *x, uint16_t *y, uint16_t threshold = 600);
 
   public:
     MenuFunctions();
@@ -192,7 +196,7 @@ class MenuFunctions
     void buildButtons(Menu* menu, int starting_index = 0);
     void changeMenu(Menu* menu);
     void drawStatusBar();
-    void displayCurrentMenu();
+    void displayCurrentMenu(uint8_t start_index = 0);
     void main(uint32_t currentTime);
     void RunSetup();
     void orientDisplay();

@@ -2,6 +2,7 @@
 #define GpsInterface_h
 
 #include <MicroNMEA.h>
+#include <SoftwareSerial.h>
 
 #include "configs.h"
 
