@@ -13,9 +13,6 @@ App(
             name="base32",
         ),
         Lib(
-            name="base64",
-        ),
-        Lib(
             name="timezone_utils",
         ),
         Lib(
@@ -33,6 +30,7 @@ App(
                 "wolfcrypt/src/sha.c",
                 "wolfcrypt/src/sha256.c",
                 "wolfcrypt/src/sha512.c",
+                "wolfcrypt/src/coding.c",
             ],
             cflags=["-Wno-error"],
             cdefines=["HAVE_CONFIG_H"],
