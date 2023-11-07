@@ -15,7 +15,12 @@
     <figcaption>MALVEKE Prototype V2.3</figcaption>
 </figure>
 
-The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi and Bluetooth/Bluetooth Low Energy (BT/BLE), it allows you to connect all Game Boy peripherals and additional accessories such as NRF24, CC1101, and GPS.
+<p align='center'>
+<a href="https://www.tindie.com/products/efuentealba/malveke-game-boy-tools-for-flipper-zero/"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
+</p>
+
+
+**GAME BOY** Tools for Flipper Zero. The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi, it allows you to connect all GAME BOY peripherals and additional accessories such as NRF24, CC1101, and GPS..
 
 <table>
   <tbody>
