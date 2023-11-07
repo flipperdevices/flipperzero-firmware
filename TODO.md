@@ -11,8 +11,8 @@
     - [x] Add view to allow the traded Pokemon's level to be chosen between 2 and 100  
     - [x] Add view to allow the traded Pokemon's hidden stats to be chosen (IV and EV) from some options  
       - [ ] Are there any better ways to present these options?  
-    - [ ] Debug traded Pokemon level issue where after a battle the Pokemon's level drops (doesn't affect all traded Pokemon)  
-    - [ ] Optimise the level selection screen to be a number slider input instead of the current slideshow style selector (Implemented as text input that only accepts numbers)  
+    - [x] Debug traded Pokemon level issue where after a battle the Pokemon's level drops (doesn't affect all traded Pokemon)  
+    - [x] Optimise the level selection screen to be a number slider input instead of the current slideshow style selector (Implemented as text input that only accepts numbers)  
   - Moves  
     - [x] Add view to allow the traded Pokemon's moveset to be chosen (all 4 moves) allowing no move as an option  
     - [ ] Find a way to get faster scrolling through the move select submenu  
@@ -24,7 +24,7 @@
     - [x] Support setting pokemon type(s)  
     - [ ] Implement a save/revert to default workflow on the select types scene  
   - Trade  
-    - [ ] Investigate Trade screens not always blinking  
+    - [x] Investigate Trade screens not always blinking  
   - UI  
     - [ ] Find a way to line up submenu items so the main menu looks cleaner  
       - They currently _mostly_ line up thanks to some manual spacing, but tabs don't appear to be supported to force that alignment  
@@ -32,15 +32,16 @@
 - Documentation  
   - [x] Add images for the level selection screen, stats selection screen, and move selection screens as per the original README  
 - Codebase  
-  - [ ] Reimplement Logging calls  
+  - [x] Reimplement Logging calls  
   - [ ] Clean up the codebase as it is now, there are a lot of optimizations in speed and code complexity that can be made, especially in added code in pokemon_app and maybe some code reduction/reuse in scenes  
   - [ ] Consider using a single View in main app struct and only allocate a view as needed to reduce memory footprint  
 
 - Future Wants  
-  - [ ] Trading to Gen II games with both Gen I and Gen II pokemon  
+  - [ ] Trading to Gen II games with both Gen I and Gen II Pokemon  
   - [ ] Enable IR mystery gift usage in Gen II using Flipper  
-  - [ ] Be able to set up mutiple pokemon to be able to trade more than one per trip to trade center  
-  - [ ] Be able to trade back and forth for e.g. trading a pokemon that evolves only when traded  
-  - [ ] Would Separateing out link cable states result in a cleaner API?  
+  - [ ] Be able to set up multiple Pokemon to be able to trade more than one per trip to trade center  
+  - [x] Be able to trade back and forth for e.g. trading a Pokemon that evolves only when traded  
+  - [x] Would Separating out link cable states result in a cleaner API?  
   - [ ] Implement some simple logic to be able to "battle" the Flipper?  
-  - [ ] There was a suggestion to be able to trade in a pokemon to harvest OT name and ID on the flipper and set it to that.  
+  - [ ] There was a suggestion to be able to trade in a Pokemon to harvest OT name and ID on the flipper and set it to that.  
+  - [ ] Ability to save Pokemon to SD card. Either created on, or traded to, the Flipper app.  
