@@ -1863,17 +1863,23 @@ const NamedList type_list[] = {
     {},
 };
 
+int pokemon_table_get_num_from_index(const PokemonTable* table, uint8_t index) {
+    int i;
+
+    for(i = 0;; i++) {
+        if(table[i].index == index) return i;
+        if(table[i].name == NULL) break;
+    }
+
+    return 0;
+}
+
 int pokemon_named_list_get_num_elements(const NamedList* list) {
     int i;
 
     for(i = 0;; i++) {
         if(list[i].name == NULL) return i;
     }
-
-    /* XXX: Would be faster to do something like this, but, can't easily do
-     * that using the current pointers. Might be able to clean this up later?
-     */
-    //return sizeof(type_list)/sizeof(type_list[0]);
 }
 
 int pokemon_named_list_get_list_pos_from_index(const NamedList* list, uint8_t index) {
@@ -1884,7 +1890,7 @@ int pokemon_named_list_get_list_pos_from_index(const NamedList* list, uint8_t in
         if(index == list[i].index) return i;
     }
 
-    /* XXX: This will return the first entry in case index is not matched.
+    /* This will return the first entry in case index is not matched.
      * Could be surprising at runtime.
      */
     return 0;
@@ -1898,7 +1904,7 @@ const char* pokemon_named_list_get_name_from_index(const NamedList* list, uint8_
         if(index == list[i].index) return list[i].name;
     }
 
-    /* XXX: This will return the first entry in the case index is not matched,
+    /* This will return the first entry in the case index is not matched,
      * this could be confusing/problematic at runtime.
      */
     return list[0].name;
@@ -1912,14 +1918,12 @@ void pokemon_trade_block_set_default_name(char* dest, PokemonFap* pokemon_fap, s
     /* Walk through the default name, toupper() each character, encode it, and
      * then write that to the same position in the trade_block.
      */
-    /* XXX: The limit of this is hard-coded to a length of 11 at most. This may
-     * be a problem down the road!
-     */
     for(i = 0; i < 11; i++) {
         pokemon_fap->trade_block->nickname[0].str[i] = pokemon_char_to_encoded(
             toupper(pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].name[i]));
         buf[i] = toupper(pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].name[i]);
     }
+    FURI_LOG_D(TAG, "[app] Set default nickname");
 
     if(dest != NULL) {
         strncpy(dest, buf, n);
@@ -1972,6 +1976,8 @@ void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
 
     pkmn->level_again = level;
     UINT32_TO_EXP(experience, pkmn->exp);
+    FURI_LOG_D(TAG, "[app] Set pkmn level %d", level);
+    FURI_LOG_D(TAG, "[app] Set pkmn exp %d", (int)experience);
 
     /* Generate STATEXP */
     switch(curr_stats) {
@@ -1988,6 +1994,7 @@ void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
         break;
     }
 
+    FURI_LOG_D(TAG, "[app] EVs set to %d", stat);
     stat = __builtin_bswap16(stat);
 
     pkmn->hp_ev = stat;
@@ -2006,33 +2013,50 @@ void pokemon_trade_block_recalculate_stats_from_level(PokemonFap* pokemon_fap) {
                    ((special_iv & 0x0f));
         hp_iv = (pkmn->iv & 0xAA) >> 4;
     }
+    FURI_LOG_D(
+        TAG,
+        "[app] atk_iv %d, def_iv %d, spd_iv %d, spc_iv %d, hp_iv %d",
+        atk_iv,
+        def_iv,
+        spd_iv,
+        special_iv,
+        hp_iv);
 
     /* Calculate HP */
     // https://bulbapedia.bulbagarden.net/wiki/Stat#Generations_I_and_II
     stat = floor((((2 * (table->base_hp + hp_iv)) + floor(sqrt(pkmn->hp_ev) / 4)) * level) / 100) +
            (level + 10);
+    FURI_LOG_D(TAG, "[app] HP set to %d", stat);
     pkmn->hp = __builtin_bswap16(stat);
     pkmn->max_hp = pkmn->hp;
 
     /* Calculate ATK, DEF, SPD, SP */
+    /* TODO: these all use the same calculations, could put the stats in a sub-array and iterate
+     * through each element in order rather than having to repeat the code. IVs would also need
+     * to be in a similar array.
+     **/
     // https://bulbapedia.bulbagarden.net/wiki/Stat#Generations_I_and_II
     stat =
         floor((((2 * (table->base_atk + atk_iv)) + floor(sqrt(pkmn->atk_ev) / 4)) * level) / 100) +
         5;
+    FURI_LOG_D(TAG, "[app] ATK set to %d", stat);
     pkmn->atk = __builtin_bswap16(stat);
     stat =
         floor((((2 * (table->base_def + def_iv)) + floor(sqrt(pkmn->def_ev) / 4)) * level) / 100) +
         5;
+    FURI_LOG_D(TAG, "[app] DEF set to %d", stat);
     pkmn->def = __builtin_bswap16(stat);
     stat =
         floor((((2 * (table->base_spd + spd_iv)) + floor(sqrt(pkmn->spd_ev) / 4)) * level) / 100) +
         5;
+    FURI_LOG_D(TAG, "[app] SPD set to %d", stat);
     pkmn->spd = __builtin_bswap16(stat);
     stat = floor(
                (((2 * (table->base_special + special_iv)) + floor(sqrt(pkmn->special_ev) / 4)) *
                 level) /
                100) +
            5;
+    FURI_LOG_D(TAG, "[app] SPC set to %d", stat);
     pkmn->special = __builtin_bswap16(stat);
 }
 
@@ -2045,15 +2069,24 @@ void pokemon_trade_block_recalculate(PokemonFap* pokemon_fap) {
     /* Set current pokemon to the trade structure */
     pkmn->index = table->index;
     pokemon_fap->trade_block->party_members[0] = table->index;
+    FURI_LOG_D(TAG, "[app] Set %s in trade block", table->name);
 
     /* Set current pokemon's moves to the trade structure */
     for(i = 0; i < 4; i++) {
         pkmn->move[i] = table->move[i];
+        FURI_LOG_D(
+            TAG,
+            "[app] Set %s in trade block",
+            pokemon_named_list_get_name_from_index(pokemon_fap->move_list, pkmn->move[i]));
     }
 
     /* Set current pokemon's types to the trade structure */
     for(i = 0; i < 2; i++) {
         pkmn->type[i] = table->type[i];
+        FURI_LOG_D(
+            TAG,
+            "[app] Set %s in trade block",
+            pokemon_named_list_get_name_from_index(pokemon_fap->type_list, pkmn->type[i]));
     }
 
     pokemon_trade_block_recalculate_stats_from_level(pokemon_fap);
@@ -2087,9 +2120,11 @@ static TradeBlock* trade_block_alloc(void) {
     /* OT trainer ID# */
     trade->party[0].ot_id = __builtin_bswap16(42069);
 
-    /* XXX: move pp isn't explicitly set up, should be fine */
-    /* XXX: catch/held isn't explicitly set up, should be okay for only Gen I support now */
-    /* XXX: Status condition isn't explicity let up, would you ever want to? */
+    /* Notes:
+     * Move pp isn't explicitly set up, should be fine
+     * Catch/held isn't explicitly set up, should be okay for only Gen I support now
+     * Status condition isn't explicity let up, would you ever want to?
+     */
 
     /* Set up initial level */
     trade->party[0].level = 2;
@@ -2150,8 +2185,12 @@ PokemonFap* pokemon_alloc() {
         pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select_view);
 
     // Trade View
-    pokemon_fap->trade_view = trade_alloc(pokemon_fap);
-    view_dispatcher_add_view(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade_view);
+    /* Allocates its own view and adds it to the main view_dispatcher */
+    pokemon_fap->trade = trade_alloc(
+        pokemon_fap->trade_block,
+        pokemon_fap->pokemon_table,
+        pokemon_fap->view_dispatcher,
+        AppViewTrade);
 
     return pokemon_fap;
 }
@@ -2163,8 +2202,8 @@ void free_app(PokemonFap* pokemon_fap) {
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewSelectPokemon);
     select_pokemon_free(pokemon_fap);
 
-    view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewTrade);
-    trade_free(pokemon_fap);
+    /* Also removes itself from the view_dispatcher */
+    trade_free(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade);
 
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewMainMenu);
 
