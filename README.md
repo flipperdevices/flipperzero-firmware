@@ -15,7 +15,12 @@
     <figcaption>MALVEKE Prototype V2.3</figcaption>
 </figure>
 
-The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi and Bluetooth/Bluetooth Low Energy (BT/BLE), it allows you to connect all Game Boy peripherals and additional accessories such as NRF24, CC1101, and GPS.
+<p align='center'>
+<a href="https://www.tindie.com/stores/efuentealba/?ref=offsite_badges&utm_source=sellers_efuentealba&utm_medium=badges&utm_campaign=badge_large"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
+</p>
+
+
+**GAME BOY** Tools for Flipper Zero. The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi, it allows you to connect all GAME BOY peripherals and additional accessories such as NRF24, CC1101, and GPS..
 
 <table>
   <tbody>
@@ -52,7 +57,7 @@ The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi and Bl
 
 ## Flipper faps
 - [[MALVEKE] GAME BOY Cartridge  (GB/GBC)](./flipper_companion_apps/applications/external/malveke_gb_cartridge/README.md)
-- [MALVEKE] GAME BOY Cartridge  (GBA)
+- [[MALVEKE] GAME BOY ADVANCE Cartridge](./flipper_companion_apps/applications/external/malveke_gba_cartridge/README.md)
 - [MALVEKE] GAME BOY Camera Viewer 
 - [[MALVEKE] GAME BOY Live Camera](./flipper_companion_apps/applications/external/malveke_gb_live_camera/README.md)
 - [[MALVEKE] GAME BOY Camera Link Cable Transfer](./flipper_companion_apps/applications/external/malveke_gb_link_camera/README.md)
@@ -60,12 +65,29 @@ The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi and Bl
 - [MALVEKE] GAME BOY Logo Generator
 - [MALVEKE] Pokemon Trading
 
+## Contributors
+[![Contributors](https://contrib.rocks/image?repo=EstebanFuentealba/MALVEKE-Flipper-Zero)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/graphs/contributors)
+
+## More functionality
+Join in on the fun and contribute to the development. You could add new functionality, such as:
+
+- GAME BOY Camera Nany Cam
+- GAME BOY Camera Motion detection
+- Hack GAME BOY Specifics Cartridges/Games
+- GAME BOY Camera Record videos
+- GAME BOY Wifi/SugGhz Multiplayer
+- Print photos from Flipper Zero to the GAME BOY Printer
+- GAME BOY Emulator that runs on Flipper Zero.
+- [Send your suggestion](/MALVEKE-Flipper-Zero/issues/new) (or just hack the code yourself)
+
 ## TODO
 - [ ] Refactor Code
 - [ ] Documentation
 - [ ] Application GAME BOY Printer
 - [ ] Play a GAME BOY ROM in Flipper Zero
 
+## Acknowledgements
+This project builds upon the excellent work of [Just Call Me Koko](https://github.com/justcallmekoko/), the [ESP32Marauder](https://github.com/justcallmekoko/ESP32Marauder)
 
 <p align='center'>
 <br />
