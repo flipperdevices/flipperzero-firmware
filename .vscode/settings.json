@@ -55,6 +55,7 @@
         "sequential_file.h": "c",
         "ctype.h": "c",
         "gb_cartridge_app.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "gba_cartridge_scene.h": "c"
     }
 }

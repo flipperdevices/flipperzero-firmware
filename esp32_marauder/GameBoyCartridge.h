@@ -14,7 +14,6 @@
 
 extern Buffer buffer_obj;
 
-DynamicJsonDocument transferJSON(2048);
 
 class GameBoyCartridge {
 

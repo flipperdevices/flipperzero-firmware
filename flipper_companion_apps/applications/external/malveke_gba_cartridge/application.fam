@@ -1,0 +1,17 @@
+App(
+    appid="malveke_gba_cartridge",
+    name="[MALVEKE] GAME BOY ADVANCE Cartridge",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gba_cartridge_app",
+    cdefines=["APP_BOILERPLATE"],
+    requires=[
+        "gui",
+        "storage",
+    ],
+    stack_size=2 * 1024,
+    order=10,
+    fap_libs=["assets"],
+    fap_icon="icons/icon.png",
+    fap_icon_assets="icons",
+    fap_category="GPIO",
+)

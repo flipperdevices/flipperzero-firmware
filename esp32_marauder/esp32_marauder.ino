@@ -5,6 +5,7 @@ Partition Scheme: Minimal SPIFFS
 https://www.online-utility.org/image/convert/to/XBM
 */
 #include "GameBoyCartridge.h"
+#include "GameBoyAdvanceCartridge.h"
 #include "GameboyLiveCamera.h"
 
 #include "configs.h"
@@ -136,6 +137,7 @@ const String PROGMEM version_number = MARAUDER_VERSION;
 uint32_t currentTime  = 0;
 
 GameBoyCartridge gameboy_cartridge;
+GameBoyAdvanceCartridge gameboy_advance_cartridge;
 GameboyLiveCamera gameboy_live_camera;
 
 void backlightOn() {
@@ -236,7 +238,9 @@ void setup()
   #endif
   settings_obj.begin(); 
 
+  //  MALVEKE
   gameboy_cartridge.begin();
+  gameboy_advance_cartridge.begin();
   gameboy_live_camera.begin();
   //Serial.println("\n\nHello, World!\n");
 
@@ -429,6 +433,7 @@ void loop()
   }
 
   gameboy_cartridge.main();
+  gameboy_advance_cartridge.main();
   gameboy_live_camera.main();
   if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM() && !gameboy_cartridge.isRestoringRAM()) {
   #ifdef HAS_SCREEN

@@ -2,6 +2,7 @@
 #define gameboy_h
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 // #include "SerialTransfer.h"
 // #include "MemoryFile.h"
 // #include <iostream>
@@ -40,6 +41,21 @@ SDA  V_SPI_HD   9
 #endif
 
 
+const char* AGB_Header_ROM_Sizes[] = {
+    "64 KiB",
+    "128 KiB",
+    "256 KiB",
+    "512 KiB",
+    "1 MiB",
+    "2 MiB",
+    "4 MiB",
+    "8 MiB",
+    "16 MiB",
+    "32 MiB",
+    "64 MiB",
+    "128 MiB",
+    "256 MiB"
+};
 uint8_t nintendoLogo[] = {0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
                           0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
                           0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E};
@@ -152,6 +168,58 @@ const static uint32_t DATA_GB_GBC_PINS[8] =
     GAMEBOY_D07
 };
 
+// Address pins
+const static uint32_t ADDRESS_GBA_PINS[24] =
+    {
+        GAMEBOY_A00,
+        GAMEBOY_A01,
+        GAMEBOY_A02,
+        GAMEBOY_A03,
+        GAMEBOY_A04,
+        GAMEBOY_A05,
+        GAMEBOY_A06,
+        GAMEBOY_A07,
+
+        GAMEBOY_A08,
+        GAMEBOY_A09,
+        GAMEBOY_A10,
+        GAMEBOY_A11,
+        GAMEBOY_A12,
+        GAMEBOY_A13,
+        GAMEBOY_A14,
+        GAMEBOY_A15,
+
+        GAMEBOY_D00,
+        GAMEBOY_D01,
+        GAMEBOY_D02,
+        GAMEBOY_D03,
+        GAMEBOY_D04,
+        GAMEBOY_D05,
+        GAMEBOY_D06,
+        GAMEBOY_D07,
+};
+// Data pins
+const static uint32_t DATA_GBA_PINS[16] =
+    {
+        GAMEBOY_A00,
+        GAMEBOY_A01,
+        GAMEBOY_A02,
+        GAMEBOY_A03,
+        GAMEBOY_A04,
+        GAMEBOY_A05,
+        GAMEBOY_A06,
+        GAMEBOY_A07,
+
+        GAMEBOY_A08,
+        GAMEBOY_A09,
+        GAMEBOY_A10,
+        GAMEBOY_A11,
+        GAMEBOY_A12,
+        GAMEBOY_A13,
+        GAMEBOY_A14,
+        GAMEBOY_A15,
+};
+
 #define WR_PIN GAMEBOY_WR
 #define RD_PIN GAMEBOY_RD
 #define CS_MREQ_PIN GAMEBOY_CS
@@ -185,5 +253,7 @@ void wait(int i)
     __asm__("nop\n"); 
   }
 }
+
+DynamicJsonDocument transferJSON(2048);
 
 #endif
