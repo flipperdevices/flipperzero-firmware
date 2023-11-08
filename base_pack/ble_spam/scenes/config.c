@@ -19,7 +19,7 @@ static void config_callback(void* _ctx, uint32_t index) {
     if(!ctx->attack->protocol) {
         index--;
     } else if(ctx->attack->protocol->config_count) {
-        uint8_t extra = ctx->attack->protocol->config_count(&ctx->attack->payload.cfg);
+        uint8_t extra = ctx->attack->protocol->config_count(&ctx->attack->payload);
         if(index > extra) index -= extra;
     }
 

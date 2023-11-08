@@ -14,21 +14,21 @@ const char* names[] = {
 };
 const uint8_t names_count = COUNT_OF(names);
 
-static const char* get_name(const ProtocolCfg* _cfg) {
-    UNUSED(_cfg);
+static const char* get_name(const Payload* payload) {
+    UNUSED(payload);
     return "SwiftPair";
 }
 
-static void make_packet(uint8_t* _size, uint8_t** _packet, ProtocolCfg* _cfg) {
-    SwiftpairCfg* cfg = _cfg ? &_cfg->specific.swiftpair : NULL;
+static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
+    SwiftpairCfg* cfg = payload ? &payload->cfg.swiftpair : NULL;
 
     const char* name;
-    switch(cfg ? _cfg->mode : ProtocolModeRandom) {
-    case ProtocolModeRandom:
+    switch(cfg ? payload->mode : PayloadModeRandom) {
+    case PayloadModeRandom:
     default:
         name = names[rand() % names_count];
         break;
-    case ProtocolModeValue:
+    case PayloadModeValue:
         name = cfg->name;
         break;
     }
@@ -73,22 +73,22 @@ static void config_callback(void* _ctx, uint32_t index) {
     }
 }
 static void extra_config(Ctx* ctx) {
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
-    SwiftpairCfg* cfg = &_cfg->specific.swiftpair;
+    Payload* payload = &ctx->attack->payload;
+    SwiftpairCfg* cfg = &payload->cfg.swiftpair;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
 
     item = variable_item_list_add(list, "Display Name", 0, NULL, NULL);
     variable_item_set_current_value_text(
-        item, _cfg->mode == ProtocolModeRandom ? "Random" : cfg->name);
+        item, payload->mode == PayloadModeRandom ? "Random" : cfg->name);
 
     variable_item_list_add(list, "Requires enabling SwiftPair", 0, NULL, NULL);
 
     variable_item_list_set_enter_callback(list, config_callback, ctx);
 }
 
-static uint8_t config_count(const ProtocolCfg* _cfg) {
-    UNUSED(_cfg);
+static uint8_t config_count(const Payload* payload) {
+    UNUSED(payload);
     return ConfigCOUNT - ConfigExtraStart - 1;
 }
 
@@ -102,14 +102,14 @@ const Protocol protocol_swiftpair = {
 
 static void name_callback(void* _ctx) {
     Ctx* ctx = _ctx;
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
-    _cfg->mode = ProtocolModeValue;
+    Payload* payload = &ctx->attack->payload;
+    payload->mode = PayloadModeValue;
     scene_manager_previous_scene(ctx->scene_manager);
 }
 void scene_swiftpair_name_on_enter(void* _ctx) {
     Ctx* ctx = _ctx;
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
-    SwiftpairCfg* cfg = &_cfg->specific.swiftpair;
+    Payload* payload = &ctx->attack->payload;
+    SwiftpairCfg* cfg = &payload->cfg.swiftpair;
     TextInput* text_input = ctx->text_input;
     text_input_reset(text_input);
 
@@ -124,9 +124,9 @@ void scene_swiftpair_name_on_enter(void* _ctx) {
 }
 bool scene_swiftpair_name_on_event(void* _ctx, SceneManagerEvent event) {
     Ctx* ctx = _ctx;
-    ProtocolCfg* _cfg = &ctx->attack->payload.cfg;
+    Payload* payload = &ctx->attack->payload;
     if(event.type == SceneManagerEventTypeBack) {
-        _cfg->mode = ProtocolModeRandom;
+        payload->mode = PayloadModeRandom;
     }
     return false;
 }
