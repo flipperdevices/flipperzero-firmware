@@ -1,5 +1,16 @@
 # [MALVEKE] ***GAME BOY*** Live Camera 
 
+<figure>
+    <img src="./docs/images/proto.png" />
+    <figcaption>MALVEKE Prototype V2.3</figcaption>
+</figure>
+
+<div align="center">
+
+https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/assets/442927/8c11cb8a-2a05-47e2-a0e0-1d3a1fe386ea
+
+</div>
+
 ## Introduction
 
 <div align="center">

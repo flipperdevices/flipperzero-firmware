@@ -1,5 +1,10 @@
 # [MALVEKE] ***GAME BOY*** Cartridge (GB/GBC)
 
+<figure>
+    <img src="./docs/images/proto.jpg" />
+    <figcaption>MALVEKE Prototype V2.3</figcaption>
+</figure>
+
 ## Introduction
 
 <div align="center">
@@ -8,13 +13,18 @@
 :- | :- | :- | :- 
 [![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_gb_cartridge&branch=main)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_gb_cartridge&branch=main)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_gb_cartridge&branch=main&firmware=unleashed)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_gb_cartridge&branch=main&firmware=unleashed)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_gb_cartridge&branch=main&firmware=roguemaster)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_gb_cartridge&branch=main&firmware=roguemaster)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_gb_cartridge&branch=main&firmware=xtreme)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_gb_cartridge&branch=main&firmware=xtreme)
 </div>
-Use this code as a foundation for developing Flipper Zero Applications, change the contents of this file when developing a new project
 <br>
+
+<div align="center">
+
+https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/assets/442927/a1d06e1f-5626-4a67-b058-24ff8f24eaf6
+
+</div>
 
 ### Features
 - Read info from GAME BOY/GAME BOY Color Cartridges
 - Backing up and restoring your saves (RAM)
-- Backing up and restoring your games (ROM)
+- Backing up and restoring your games (ROM) (WIP)
 
 
 

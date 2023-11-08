@@ -12,7 +12,7 @@
 
 <figure>
     <img src="./assets/proto.jpg" />
-    <figcaption>Prototipe v1</figcaption>
+    <figcaption>MALVEKE Prototype V2.3</figcaption>
 </figure>
 
 The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi and Bluetooth/Bluetooth Low Energy (BT/BLE), it allows you to connect all Game Boy peripherals and additional accessories such as NRF24, CC1101, and GPS.
@@ -51,10 +51,11 @@ The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi and Bl
 
 
 ## Flipper faps
-- [MALVEKE] GAME BOY Cartridge  (GB/GBC)
+- [[MALVEKE] GAME BOY Cartridge  (GB/GBC)](./flipper_companion_apps/applications/external/malveke_gb_cartridge/README.md)
 - [MALVEKE] GAME BOY Cartridge  (GBA)
-- [MALVEKE] GAME BOY Live Camera
-- [MALVEKE] GAME BOY Camera Link Cable Transfer
+- [MALVEKE] GAME BOY Camera Viewer 
+- [[MALVEKE] GAME BOY Live Camera](./flipper_companion_apps/applications/external/malveke_gb_live_camera/README.md)
+- [[MALVEKE] GAME BOY Camera Link Cable Transfer](./flipper_companion_apps/applications/external/malveke_gb_link_camera/README.md)
 - [MALVEKE] GAME BOY Printer Link Cable Transfer
 - [MALVEKE] GAME BOY Logo Generator
 - [MALVEKE] Pokemon Trading
