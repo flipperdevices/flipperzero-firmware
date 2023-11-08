@@ -88,6 +88,8 @@ void totp_type_code_worker_execute_automation(
         return;
     }
 
+    uint32_t keystroke_delay = get_keystroke_delay(features);
+
     while(i < code_buffer_size && (cb_char = code_buffer[i]) != 0) {
         uint8_t char_index = CONVERT_CHAR_TO_DIGIT(cb_char);
         if(char_index > 9) {
@@ -105,18 +107,18 @@ void totp_type_code_worker_execute_automation(
         }
 
         totp_type_code_worker_press_key(hid_kb_key, key_press_fn, key_release_fn, features);
-        furi_delay_ms(get_keystroke_delay(features));
+        furi_delay_ms(keystroke_delay);
         i++;
     }
 
     if(features & TokenAutomationFeatureEnterAtTheEnd) {
-        furi_delay_ms(get_keystroke_delay(features));
+        furi_delay_ms(keystroke_delay);
         totp_type_code_worker_press_key(
             HID_KEYBOARD_RETURN, key_press_fn, key_release_fn, features);
     }
 
     if(features & TokenAutomationFeatureTabAtTheEnd) {
-        furi_delay_ms(get_keystroke_delay(features));
+        furi_delay_ms(keystroke_delay);
         totp_type_code_worker_press_key(HID_KEYBOARD_TAB, key_press_fn, key_release_fn, features);
     }
 }
