@@ -7,7 +7,7 @@ App(
     requires=["gui", "cli", "dialogs", "storage", "input", "notification", "bt"],
     stack_size=2 * 1024,
     order=20,
-    fap_version="5.50",
+    fap_version="5.70",
     fap_author="Alexander Kopachov (@akopachov)",
     fap_description="Software-based TOTP/HOTP authenticator for Flipper Zero device",
     fap_weburl="https://github.com/akopachov/flipper-zero_authenticator",
@@ -18,9 +18,6 @@ App(
     fap_private_libs=[
         Lib(
             name="base32",
-        ),
-        Lib(
-            name="base64",
         ),
         Lib(
             name="timezone_utils",
@@ -40,6 +37,7 @@ App(
                 "wolfcrypt/src/sha.c",
                 "wolfcrypt/src/sha256.c",
                 "wolfcrypt/src/sha512.c",
+                "wolfcrypt/src/coding.c",
             ],
             cflags=["-Wno-error"],
             cdefines=["HAVE_CONFIG_H"],

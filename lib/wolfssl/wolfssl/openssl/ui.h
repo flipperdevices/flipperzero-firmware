@@ -1,2 +1,0 @@
-/* ui.h for openssl */
-

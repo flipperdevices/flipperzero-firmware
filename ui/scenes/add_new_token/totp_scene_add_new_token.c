@@ -62,7 +62,8 @@ static void update_duration_text(SceneState* scene_state) {
 
 static TotpIteratorUpdateTokenResult add_token_handler(TokenInfo* tokenInfo, const void* context) {
     const struct TotpAddContext* context_t = context;
-    if(sscanf(context_t->scene_state->initial_counter, "%" PRIu64, &tokenInfo->counter) != 1) {
+    if(context_t->scene_state->type == TokenTypeHOTP &&
+       sscanf(context_t->scene_state->initial_counter, "%" PRIu64, &tokenInfo->counter) != 1) {
         return TotpIteratorUpdateTokenResultInvalidCounter;
     }
 
@@ -264,15 +265,24 @@ bool totp_scene_add_new_token_handle_event(
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == TokenLengthSelect) {
                 totp_roll_value_uint8_t(
-                    &scene_state->digits_count_index, 1, 0, 2, RollOverflowBehaviorRoll);
+                    &scene_state->digits_count_index,
+                    1,
+                    0,
+                    COUNT_OF(TOKEN_DIGITS_TEXT_LIST) - 1,
+                    RollOverflowBehaviorRoll);
             } else if(
                 scene_state->selected_control == TokenDurationOrCounterSelect &&
                 scene_state->type == TokenTypeTOTP) {
                 totp_roll_value_uint8_t(
-                    &scene_state->duration, 15, 15, 255, RollOverflowBehaviorStop);
+                    &scene_state->duration, 15, 15, UINT8_MAX, RollOverflowBehaviorStop);
                 update_duration_text(scene_state);
             } else if(scene_state->selected_control == TokenTypeSelect) {
-                totp_roll_value_uint8_t(&scene_state->type, 1, 0, 1, RollOverflowBehaviorRoll);
+                totp_roll_value_uint8_t(
+                    &scene_state->type,
+                    1,
+                    0,
+                    COUNT_OF(TOKEN_TYPE_LIST) - 1,
+                    RollOverflowBehaviorRoll);
             }
             break;
         case InputKeyLeft:
@@ -285,76 +295,85 @@ bool totp_scene_add_new_token_handle_event(
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == TokenLengthSelect) {
                 totp_roll_value_uint8_t(
-                    &scene_state->digits_count_index, -1, 0, 2, RollOverflowBehaviorRoll);
+                    &scene_state->digits_count_index,
+                    -1,
+                    0,
+                    COUNT_OF(TOKEN_DIGITS_TEXT_LIST) - 1,
+                    RollOverflowBehaviorRoll);
             } else if(
                 scene_state->selected_control == TokenDurationOrCounterSelect &&
                 scene_state->type == TokenTypeTOTP) {
                 totp_roll_value_uint8_t(
-                    &scene_state->duration, -15, 15, 255, RollOverflowBehaviorStop);
+                    &scene_state->duration, -15, 15, UINT8_MAX, RollOverflowBehaviorStop);
                 update_duration_text(scene_state);
             } else if(scene_state->selected_control == TokenTypeSelect) {
-                totp_roll_value_uint8_t(&scene_state->type, -1, 0, 1, RollOverflowBehaviorRoll);
+                totp_roll_value_uint8_t(
+                    &scene_state->type,
+                    -1,
+                    0,
+                    COUNT_OF(TOKEN_TYPE_LIST) - 1,
+                    RollOverflowBehaviorRoll);
             }
             break;
-        case InputKeyOk:
+        case InputKeyOk: {
+            switch(scene_state->selected_control) {
+            case TokenNameTextBox:
+                ask_user_input(
+                    plugin_state,
+                    "Token name",
+                    &scene_state->token_name,
+                    &scene_state->token_name_length);
+                break;
+            case TokenSecretTextBox:
+                ask_user_input(
+                    plugin_state,
+                    "Token secret",
+                    &scene_state->token_secret,
+                    &scene_state->token_secret_length);
+                break;
+            case TokenAlgoSelect:
+                break;
+            case TokenLengthSelect:
+                break;
+            case TokenDurationOrCounterSelect:
+                if(scene_state->type == TokenTypeHOTP) {
+                    ask_user_input(
+                        plugin_state,
+                        "Initial counter",
+                        &scene_state->initial_counter,
+                        &scene_state->initial_counter_length);
+                }
+                break;
+            case ConfirmButton: {
+                struct TotpAddContext add_context = {
+                    .scene_state = scene_state, .crypto_settings = &plugin_state->crypto_settings};
+                TokenInfoIteratorContext* iterator_context =
+                    totp_config_get_token_iterator_context(plugin_state);
+                TotpIteratorUpdateTokenResult add_result = totp_token_info_iterator_add_new_token(
+                    iterator_context, &add_token_handler, &add_context);
+
+                if(add_result == TotpIteratorUpdateTokenResultSuccess) {
+                    totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
+                } else if(add_result == TotpIteratorUpdateTokenResultInvalidSecret) {
+                    show_invalid_field_message(
+                        plugin_state, TokenSecretTextBox, "Token secret is invalid");
+                } else if(add_result == TotpIteratorUpdateTokenResultInvalidCounter) {
+                    show_invalid_field_message(
+                        plugin_state, TokenDurationOrCounterSelect, "Initial counter is invalid");
+                } else if(add_result == TotpIteratorUpdateTokenResultFileUpdateFailed) {
+                    totp_dialogs_config_updating_error(plugin_state);
+                }
+
+                break;
+            }
+            default:
+                break;
+            }
             break;
+        }
         case InputKeyBack:
             totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
             break;
-        default:
-            break;
-        }
-    } else if(event->input.type == InputTypeShort && event->input.key == InputKeyOk) {
-        switch(scene_state->selected_control) {
-        case TokenNameTextBox:
-            ask_user_input(
-                plugin_state,
-                "Token name",
-                &scene_state->token_name,
-                &scene_state->token_name_length);
-            break;
-        case TokenSecretTextBox:
-            ask_user_input(
-                plugin_state,
-                "Token secret",
-                &scene_state->token_secret,
-                &scene_state->token_secret_length);
-            break;
-        case TokenAlgoSelect:
-            break;
-        case TokenLengthSelect:
-            break;
-        case TokenDurationOrCounterSelect:
-            if(scene_state->type == TokenTypeHOTP) {
-                ask_user_input(
-                    plugin_state,
-                    "Initial counter",
-                    &scene_state->initial_counter,
-                    &scene_state->initial_counter_length);
-            }
-            break;
-        case ConfirmButton: {
-            struct TotpAddContext add_context = {
-                .scene_state = scene_state, .crypto_settings = &plugin_state->crypto_settings};
-            TokenInfoIteratorContext* iterator_context =
-                totp_config_get_token_iterator_context(plugin_state);
-            TotpIteratorUpdateTokenResult add_result = totp_token_info_iterator_add_new_token(
-                iterator_context, &add_token_handler, &add_context);
-
-            if(add_result == TotpIteratorUpdateTokenResultSuccess) {
-                totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
-            } else if(add_result == TotpIteratorUpdateTokenResultInvalidSecret) {
-                show_invalid_field_message(
-                    plugin_state, TokenSecretTextBox, "Token secret is invalid");
-            } else if(add_result == TotpIteratorUpdateTokenResultInvalidCounter) {
-                show_invalid_field_message(
-                    plugin_state, TokenDurationOrCounterSelect, "Initial counter is invalid");
-            } else if(add_result == TotpIteratorUpdateTokenResultFileUpdateFailed) {
-                totp_dialogs_config_updating_error(plugin_state);
-            }
-
-            break;
-        }
         default:
             break;
         }

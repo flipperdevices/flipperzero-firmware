@@ -28,17 +28,18 @@ D. J. Bernstein
 Public domain.
 
 */
-#ifdef WOLFSSL_ARMASM
-    /* implementation is located in wolfcrypt/src/port/arm/armv8-chacha.c */
 
-#else
 #ifdef HAVE_CONFIG_H
     #include <config.h>
 #endif
 
 #include <wolfssl/wolfcrypt/settings.h>
 
-#if defined(HAVE_CHACHA) && !defined(WOLFSSL_ARMASM)
+#if defined(WOLFSSL_ARMASM) && !defined(WOLFSSL_ARMASM_NO_NEON)
+    /* implementation is located in wolfcrypt/src/port/arm/armv8-chacha.c */
+
+#else
+#if defined(HAVE_CHACHA)
 
 #include <wolfssl/wolfcrypt/chacha.h>
 #include <wolfssl/wolfcrypt/error-crypt.h>
@@ -436,6 +437,6 @@ void wc_Chacha_purge_current_block(ChaCha* ctx) {
     }
 }
 
-#endif /* HAVE_CHACHA*/
+#endif /* HAVE_CHACHA */
 
-#endif /* WOLFSSL_ARMASM */
+#endif /* WOLFSSL_ARMASM && !WOLFSSL_ARMASM_NO_NEON */

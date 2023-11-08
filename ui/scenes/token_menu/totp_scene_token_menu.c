@@ -116,65 +116,65 @@ bool totp_scene_token_menu_handle_event(const PluginEvent* const event, PluginSt
             break;
         case InputKeyLeft:
             break;
-        case InputKeyOk:
-            break;
-        case InputKeyBack: {
-            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
-            break;
-        }
-        default:
-            break;
-        }
-    } else if(event->input.type == InputTypeShort && event->input.key == InputKeyOk) {
-        switch(scene_state->selected_control) {
-        case AddNewToken: {
+        case InputKeyOk: {
+            switch(scene_state->selected_control) {
+            case AddNewToken: {
 #ifdef TOTP_UI_ADD_NEW_TOKEN_ENABLED
-            totp_scene_director_activate_scene(plugin_state, TotpSceneAddNewToken);
+                totp_scene_director_activate_scene(plugin_state, TotpSceneAddNewToken);
 #else
-            DialogMessage* message = dialog_message_alloc();
-            dialog_message_set_buttons(message, "Back", NULL, NULL);
-            dialog_message_set_header(message, "Information", 0, 0, AlignLeft, AlignTop);
-            dialog_message_set_text(
-                message,
-                "Read here\nhttps://t.ly/8ZOtj\n how to add new token",
-                SCREEN_WIDTH_CENTER,
-                SCREEN_HEIGHT_CENTER,
-                AlignCenter,
-                AlignCenter);
-            dialog_message_show(plugin_state->dialogs_app, message);
-            dialog_message_free(message);
-#endif
-            break;
-        }
-        case DeleteToken: {
-            DialogMessage* message = dialog_message_alloc();
-            dialog_message_set_buttons(message, "No", NULL, "Yes");
-            dialog_message_set_header(message, "Confirmation", 0, 0, AlignLeft, AlignTop);
-            dialog_message_set_text(
-                message,
-                "Are you sure want to delete?",
-                SCREEN_WIDTH_CENTER,
-                SCREEN_HEIGHT_CENTER,
-                AlignCenter,
-                AlignCenter);
-            DialogMessageButton dialog_result =
+                DialogMessage* message = dialog_message_alloc();
+                dialog_message_set_buttons(message, "Back", NULL, NULL);
+                dialog_message_set_header(message, "Information", 0, 0, AlignLeft, AlignTop);
+                dialog_message_set_text(
+                    message,
+                    "Read here\nhttps://t.ly/8ZOtj\nhow to add new token",
+                    SCREEN_WIDTH_CENTER,
+                    SCREEN_HEIGHT_CENTER,
+                    AlignCenter,
+                    AlignCenter);
                 dialog_message_show(plugin_state->dialogs_app, message);
-            dialog_message_free(message);
-            TokenInfoIteratorContext* iterator_context =
-                totp_config_get_token_iterator_context(plugin_state);
-            if(dialog_result == DialogMessageButtonRight &&
-               totp_token_info_iterator_get_total_count(iterator_context) > 0) {
-                if(!totp_token_info_iterator_remove_current_token_info(iterator_context)) {
-                    totp_dialogs_config_updating_error(plugin_state);
-                    return false;
-                }
+                dialog_message_free(message);
+#endif
+                break;
+            }
+            case DeleteToken: {
+                DialogMessage* message = dialog_message_alloc();
+                dialog_message_set_buttons(message, "No", NULL, "Yes");
+                dialog_message_set_header(message, "Confirmation", 0, 0, AlignLeft, AlignTop);
+                dialog_message_set_text(
+                    message,
+                    "Are you sure want to delete?",
+                    SCREEN_WIDTH_CENTER,
+                    SCREEN_HEIGHT_CENTER,
+                    AlignCenter,
+                    AlignCenter);
+                DialogMessageButton dialog_result =
+                    dialog_message_show(plugin_state->dialogs_app, message);
+                dialog_message_free(message);
+                TokenInfoIteratorContext* iterator_context =
+                    totp_config_get_token_iterator_context(plugin_state);
+                if(dialog_result == DialogMessageButtonRight &&
+                   totp_token_info_iterator_get_total_count(iterator_context) > 0) {
+                    if(!totp_token_info_iterator_remove_current_token_info(iterator_context)) {
+                        totp_dialogs_config_updating_error(plugin_state);
+                        return false;
+                    }
 
-                totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
+                    totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
+                }
+                break;
+            }
+            case AppSettings: {
+                totp_scene_director_activate_scene(plugin_state, TotpSceneAppSettings);
+                break;
+            }
+            default:
+                break;
             }
             break;
         }
-        case AppSettings: {
-            totp_scene_director_activate_scene(plugin_state, TotpSceneAppSettings);
+        case InputKeyBack: {
+            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
             break;
         }
         default:

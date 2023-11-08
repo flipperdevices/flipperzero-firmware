@@ -28,7 +28,8 @@
 #include <wolfssl/wolfcrypt/settings.h>
 
 #if defined(HAVE_PKCS12) && \
-    !defined(NO_ASN) && !defined(NO_PWDBASED) && !defined(NO_HMAC)
+    !defined(NO_ASN) && !defined(NO_PWDBASED) && !defined(NO_HMAC) && \
+    !defined(NO_CERTS)
 
 #include <wolfssl/wolfcrypt/asn.h>
 #include <wolfssl/wolfcrypt/asn_public.h>
@@ -1229,7 +1230,7 @@ static int PKCS12_CheckConstructedZero(byte* data, word32 dataSz, word32* idx)
 static int PKCS12_CoalesceOctetStrings(WC_PKCS12* pkcs12, byte* data,
         word32 dataSz, word32* idx, int* curIdx)
 {
-    byte*  mergedData = NULL; /* buffer for concatonated strings */
+    byte*  mergedData = NULL; /* buffer for concatenated strings */
     word32 mergedSz = 0;      /* total size of merged strings */
     int    encryptedContentSz = 0;
     int    originalEncSz = 0;
@@ -1243,7 +1244,7 @@ static int PKCS12_CoalesceOctetStrings(WC_PKCS12* pkcs12, byte* data,
         ret = ASN_PARSE_E;
     }
 
-    /* Loop through octet strings and concatonate them without
+    /* Loop through octet strings and concatenate them without
      * the tags and length */
     while ((int)*idx < originalEncSz + *curIdx) {
         if (GetASNTag(data, idx, &tag, dataSz) < 0) {
@@ -1281,7 +1282,7 @@ static int PKCS12_CoalesceOctetStrings(WC_PKCS12* pkcs12, byte* data,
     *idx += SetLength(mergedSz, &data[*idx]);
 
     if (mergedSz > 0) {
-        /* Copy over concatonated octet strings into data buffer */
+        /* Copy over concatenated octet strings into data buffer */
         XMEMCPY(&data[*idx], mergedData, mergedSz);
 
         XFREE(mergedData, pkcs12->heap, DYNAMIC_TYPE_PKCS);

@@ -442,28 +442,6 @@ void ge_scalarmult_base(ge_p3 *R,const unsigned char *nonce)
 
 
 /* pack the point h into array s */
-void ge_p3_tobytes(unsigned char *s,const ge_p3 *h)
-{
-    byte x[F25519_SIZE];
-    byte y[F25519_SIZE];
-    byte z1[F25519_SIZE];
-    byte parity;
-
-    fe_inv__distinct(z1, h->Z);
-    fe_mul__distinct(x, h->X, z1);
-    fe_mul__distinct(y, h->Y, z1);
-
-    fe_normalize(x);
-    fe_normalize(y);
-
-    parity = (x[0] & 1) << 7;
-    lm_copy(s, y);
-    fe_normalize(s);
-    s[31] |= parity;
-}
-
-
-/* pack the point h into array s */
 void ge_tobytes(unsigned char *s,const ge_p2 *h)
 {
     byte x[F25519_SIZE];

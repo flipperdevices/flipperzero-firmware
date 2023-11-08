@@ -92,6 +92,7 @@ struct ed448_key {
     WC_ASYNC_DEV asyncDev;
 #endif
 #if defined(WOLF_CRYPTO_CB)
+    void* devCtx;
     int devId;
 #endif
     void *heap;
