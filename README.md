@@ -86,6 +86,8 @@ Join in on the fun and contribute to the development. You could add new function
 - [ ] Application GAME BOY Printer
 - [ ] Play a GAME BOY ROM in Flipper Zero
 
+## Acknowledgements
+This project builds upon the excellent work of [Just Call Me Koko](https://github.com/justcallmekoko/), the [ESP32Marauder](https://github.com/justcallmekoko/ESP32Marauder)
 
 <p align='center'>
 <br />
