@@ -57,7 +57,7 @@
 
 ## Flipper faps
 - [[MALVEKE] GAME BOY Cartridge  (GB/GBC)](./flipper_companion_apps/applications/external/malveke_gb_cartridge/README.md)
-- [MALVEKE] GAME BOY Cartridge  (GBA)
+- [[MALVEKE] GAME BOY ADVANCE Cartridge](./flipper_companion_apps/applications/external/malveke_gba_cartridge/README.md)
 - [MALVEKE] GAME BOY Camera Viewer 
 - [[MALVEKE] GAME BOY Live Camera](./flipper_companion_apps/applications/external/malveke_gb_live_camera/README.md)
 - [[MALVEKE] GAME BOY Camera Link Cable Transfer](./flipper_companion_apps/applications/external/malveke_gb_link_camera/README.md)
