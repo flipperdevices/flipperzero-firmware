@@ -62,7 +62,7 @@ class Navigator:
         self.settings = AppSettings(self)
 
         self.font_helvB08 = ImageFont.load("./flippigator/fonts/helvB08.pil")
-        self.font_haxrcorp_4089 = ImageFont.truetype("./flippigator/fonts/haxrcorp_4089.ttf", 15)
+        self.font_haxrcorp_4089 = ImageFont.truetype("./flippigator/fonts/haxrcorp_4089.ttf", 16)
         self.font_profont11 = ImageFont.load("./flippigator/fonts/profont11.pil")
         self.font_profont22 = ImageFont.load("./flippigator/fonts/profont22.pil")
 
@@ -140,12 +140,22 @@ class Navigator:
         key = cv.waitKey(1)
 
     def get_ref_from_string(self, phrase, font, invert = 0):
-        result = Image.new("L", font.getsize(phrase), 255)
+        self.logger.debug("Generated template for '" + phrase + "'")
+        result = Image.new("L", font.getsize(phrase+"  "), 255)
         dctx = ImageDraw.Draw(result)
-        dctx.text((0, 0), phrase, font=font)
+        dctx.text((0, 0), phrase+"  ", font=font)
         result = numpy.array(result)
+        result = result[1:, :]
         if invert:
             result = cv.bitwise_not(result)
+        display_image = cv.resize(
+            result,
+            (0, 0), 
+            fx=self._scale, 
+            fy=self._scale,
+            interpolation=cv.INTER_NEAREST,
+        ) 
+        cv.imshow(phrase, display_image)
         return result
 
     def get_ref_from_list(self, ref_list, font, invert = 0):
@@ -299,10 +309,10 @@ class Navigator:
         time.sleep(0.2)
         self.logger.info("Scanning menu list")
         menus = list()
-        self.get_current_state(timeout=1, ref=ref)
+        self.get_current_state(timeout=0.2, ref=ref)
 
         while True:
-            cur = self.get_current_state(timeout=1, ref=ref)
+            cur = self.get_current_state(timeout=0.2, ref=ref)
             if not (cur == []):
                 if cur[0] in menus:
                     break
@@ -334,10 +344,11 @@ class Navigator:
         return menus
 
     def go_to(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
-        if target not in self.imRef.keys():
+        if not (target in self.imRef.keys()):
+            self.logger.info("Going to " + target)
+            self.logger.info("No ref for target, generating from text" + target)
             ref = self.get_ref_all_fonts(target)
             state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
-            self.logger.info("Going to " + target)
 
             while (len(state) == 0):
                 if direction == "down":
@@ -346,7 +357,7 @@ class Navigator:
                     self.press_up()
                 state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
         else:
-            state = self.get_current_state(area=area, timeout = 0.5)
+            state = self.get_current_state(area=area, timeout = 0.3)
             self.logger.info("Going to " + target)
 
             while (not (target in state)):

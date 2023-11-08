@@ -14,29 +14,31 @@ class TestApplications(BaseCase):
         Verifying applications folder list
         """
         nav.applications.go_into()
-        menu = nav.get_menu_list()
         menu_ref = [
-            "FileBrowserLevelUp",
-            "folder_Bluetooth",
-            "folder_GPIO",
-            "folder_Games",
-            "folder_Infrared",
-            "folder_Debug",
-            "folder_Media",
-            "folder_NFC",
-            "folder_RFID",
-            "folder_Sub-GHz",
-            "folder_Tools",
-            "folder_USB",
-            "folder_iButton",
+            "Bluetooth",
+            "GPIO",
+            "Games",
+            "Infrared",
+            "Debug",
+            "NFC",
+            "RFID",
+            "Sub-GHz",
+            "Tools",
+            "USB",
+            "iButton",
         ]
+        ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)
+        ref["FileBrowserLevelUp"] = nav.imRef["FileBrowserLevelUp"]
+        menu = nav.get_menu_list(ref = ref)
         for i in menu:
             if i in menu_ref:
                 menu_ref.remove(i)
-        if len(menu_ref):
-            if "folder_Debug" in menu_ref:
-                menu_ref.remove("folder_Debug")
 
+        print(menu_ref)
+        if "Debug" in menu_ref:
+            menu_ref.remove("Debug")
+
+        print(menu_ref)
         assert len(menu_ref) == 0, "Applications menu list is wrong"
         nav.go_to_main_screen()
 
@@ -48,7 +50,7 @@ class TestApplications(BaseCase):
         nav.applications.go_into()
 
         with allure.step("Bluetooth apps"):
-            nav.go_to("folder_Bluetooth")
+            nav.go_to("Bluetooth")
             nav.press_ok()
             menu = nav.get_menu_list()
             menu_ref = [
