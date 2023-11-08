@@ -68,6 +68,18 @@
 ## Contributors
 [![Contributors](https://contrib.rocks/image?repo=EstebanFuentealba/MALVEKE-Flipper-Zero)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/graphs/contributors)
 
+## More functionality
+Join in on the fun and contribute to the development. You could add new functionality, such as:
+
+- GAME BOY Camera Nany Cam
+- GAME BOY Camera Motion detection
+- Hack GAME BOY Specifics Cartridges/Games
+- GAME BOY Camera Record videos
+- GAME BOY Wifi/SugGhz Multiplayer
+- Print photos from Flipper Zero to the GAME BOY Printer
+- GAME BOY Emulator that runs on Flipper Zero.
+- [Send your suggestion](/MALVEKE-Flipper-Zero/issues/new) (or just hack the code yourself)
+
 ## TODO
 - [ ] Refactor Code
 - [ ] Documentation
