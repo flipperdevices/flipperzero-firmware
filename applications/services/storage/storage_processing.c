@@ -363,6 +363,8 @@ static FS_Error storage_process_common_remove(Storage* app, FuriString* path) {
     FS_Error ret = storage_get_data(app, path, &storage);
 
     do {
+        if(ret != FSE_OK) break;
+
         if(storage_path_already_open(path, storage)) {
             ret = FSE_ALREADY_OPEN;
             break;
