@@ -37,11 +37,11 @@
   - [ ] Consider using a single View in main app struct and only allocate a view as needed to reduce memory footprint  
 
 - Future Wants  
-  - [ ] Trading to Gen II games with both Gen I and Gen II pokemon  
+  - [ ] Trading to Gen II games with both Gen I and Gen II Pokemon  
   - [ ] Enable IR mystery gift usage in Gen II using Flipper  
-  - [ ] Be able to set up mutiple pokemon to be able to trade more than one per trip to trade center  
-  - [x] Be able to trade back and forth for e.g. trading a pokemon that evolves only when traded  
-  - [x] Would Separateing out link cable states result in a cleaner API?  
+  - [ ] Be able to set up multiple Pokemon to be able to trade more than one per trip to trade center  
+  - [x] Be able to trade back and forth for e.g. trading a Pokemon that evolves only when traded  
+  - [x] Would Separating out link cable states result in a cleaner API?  
   - [ ] Implement some simple logic to be able to "battle" the Flipper?  
-  - [ ] There was a suggestion to be able to trade in a pokemon to harvest OT name and ID on the flipper and set it to that.  
-  - [ ] Ability to save pokemon to SD card. Either created on, or traded to, the Flipper app.  
+  - [ ] There was a suggestion to be able to trade in a Pokemon to harvest OT name and ID on the flipper and set it to that.  
+  - [ ] Ability to save Pokemon to SD card. Either created on, or traded to, the Flipper app.  

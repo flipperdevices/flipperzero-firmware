@@ -51,7 +51,7 @@ struct __attribute__((__packed__)) name {
     unsigned char str[11];
 };
 
-/* This is 418 bytes in memory/transmitted */
+/* This is 415 bytes in memory/transmitted */
 struct __attribute__((__packed__)) trade_data_block {
     /* TODO: Change this to use struct name above */
     unsigned char trainer_name[11];
