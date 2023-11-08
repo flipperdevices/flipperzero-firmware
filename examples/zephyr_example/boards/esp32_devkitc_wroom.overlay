@@ -12,7 +12,7 @@
 	aliases {
 		en = &en_button;
 		boot = &boot_button;
-		uart1 = &uart1;
+		uart = &uart1;
 	};
 
 	gpio_keys {
