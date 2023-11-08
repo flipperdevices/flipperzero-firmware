@@ -111,7 +111,7 @@ bool syncProcessResponse(UART_TerminalApp *app) {
                 // set channel
                 app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_CHANNEL] = strtol(tokenValue, NULL, 10);
                 break;
-            case GRAVITY_SYNC_MAC:
+            case GRAVITY_SYNC_MAC: ;
                 // set MAC
                 mac_string_to_bytes(tokenValue, app->mac_bytes);
                 break;
@@ -315,5 +315,9 @@ void do_sync(UART_TerminalApp *app) {
         uart_terminal_uart_set_handle_rx_data_cb(app->uart, uart_terminal_sync_rx_data_cb);
         /* Execute Sync */
         uart_terminal_uart_tx((uint8_t *)"sync\n", 5);
+        //char purgeString[] = "(0:2)(1:8)(2:32)(3:20)(4:1)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:11)(12:-95)(13:90)\n";
+        //char purgeString[] = "(5:40:91:51:BB:AC:7D)\n";
+        //uint8_t *purgeBytes = (uint8_t *)purgeString;
+        //uart_terminal_sync_rx_data_cb(purgeBytes, strlen(purgeString), app);
     }
 }
