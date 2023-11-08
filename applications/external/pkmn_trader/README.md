@@ -22,7 +22,7 @@ It currently trades a Pokemon based on your choice of Pokemon, Level, Stats and 
 
 ## Installation Directions
 
-This project is intended to be overlayed on top of an existing firmware repo,  in my case the **Release 0.79.1** version.
+This project is intended to be overlaid on top of an existing firmware repo,  in my case the **Release 0.79.1** version.
 
 - Clone the [Flipper Zero firmware repository](https://github.com/flipperdevices/flipperzero-firmware). Refer to [this tutorial](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/firmware/updating/README.md) for updating the firmware.
 - Copy the "pokemon" folder into the `/applications_user/pokemon` folder in your firmware.
@@ -87,7 +87,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <br />
     </p>
 
-- The `Select Moves` menu is used to pick the set the traded Pokemon's moves. They are pre-populated with the moveset that the Pokemon would know at level 1. Selecting a move slot will bring up an alphabetical index of moves. Additionally, `No Move` and `Default` can be quickliy selected. Note that any move after the first `No Move` is ignored. 
+- The `Select Moves` menu is used to pick the set the traded Pokemon's moves. They are pre-populated with the moveset that the Pokemon would know at level 1. Selecting a move slot will bring up an alphabetical index of moves. Additionally, `No Move` and `Default` can be quickly selected. Note that any move after the first `No Move` is ignored. 
 
     <p align='center'>
         <br />
@@ -115,7 +115,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
 - The Pokemon's stats can also be influenced. The current settings are:
   - `Random IV, Zero EV` Mimics stats of a caught wild Pokemon.
   - `Random IV, Max EV / Level` IV is randomized, but EV is set to the maximum a trained Pokemon could be for its current level.
-  - `Randon IV, Max EV` IV is randomized, EV is set to the abosolute max for a perfectly trained Pokemon.
+  - `Randon IV, Max EV` IV is randomized, EV is set to the absolute max for a perfectly trained Pokemon.
   - `Max IV, Zero EV` Mimics stats of a caught wild Pokemon, but with the maximum IV possible.
   - `Max IV, Max EV / Level` IV is max, EV is set to the maximum a trained Pokemon could be for its current level.
   - `Max IV, Max EV` Absolutely perfect and overly powerful Pokemon.
@@ -126,7 +126,7 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <br />
     </p>
 
-- The `OT ID#` and `OT Name` of the Pokemon can also be set. The `OT ID#` must be between `0` and `65535`. Setting the `OT ID#` and `OT Name` to the same as your current trainer's causes the game to believe it was a wild caught Pokemon and not one that was traded. This means high level Pokmon will still obey you without badges, but, will not get the experience boost of a traded Pokemon.
+- The `OT ID#` and `OT Name` of the Pokemon can also be set. The `OT ID#` must be between `0` and `65535`. Setting the `OT ID#` and `OT Name` to the same as your current trainer's causes the game to believe it was a wild caught Pokemon and not one that was traded. This means high level Pokemon will still obey you without badges, but, will not get the experience boost of a traded Pokemon.
 
     <p align='center'>
         <br />
@@ -219,6 +219,8 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <br />
         <img src="./docs/images/flipper-zero-flat-12.png" width="400" /><br />
     </p>
+
+- Once the trade is complete, both the **Game Boy** and the **Flipper Zero** will return to the `WAITING` state. If the **Game Boy** selects `CANCEL`, the **Flipper Zero** will return to the `READY` state. The <img src="./docs/images/back.png" /> BACK button can be pressed to return to the main menu. The traded Pokemon can be modified, or completely changed, if desired. Once the **Flipper Zero** Re-enters the Trade screen, and the **Game Boy** re-selects the trade table in-game, another trade can be completed. This allows for trading multiple Pokemon without having to reset the **Game Boy** each time.
 
     If the Flipper Zero gets stuck at the end of the exchange, you must reboot it by pressing the <img src="./docs/images/left.png" /> LEFT + <img src="./docs/images/back.png" /> BACK key combination.
 
@@ -328,7 +330,7 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 ## Links
 
 - [Flipper Zero firmware source code](https://github.com/flipperdevices/flipperzero-firmware)
-- Adan Scotney's pokemon [trade protocol specification](http://www.adanscotney.com/2014/01/spoofing-pokemon-trades-with-stellaris.html) and implementation
+- Adan Scotney's Pokemon [trade protocol specification](http://www.adanscotney.com/2014/01/spoofing-pokemon-trades-with-stellaris.html) and implementation
 - Derek Jamison - [Youtube Channel](https://www.youtube.com/@MrDerekJamison)
 - Matt Penny - [GBPlay Blog](https://blog.gbplay.io/)
 - [Pokémon data structure (Generation I)](<https://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9mon_data_structure_(Generation_I)>)
