@@ -4,18 +4,19 @@
 #include <furi_hal.h>
 
 /* Convert the specified string to a byte array
-   bMac must be a pointer to 6 bytes of allocated memory */
+   bMac must be a pointer to initialised memory of the required size.
+   For a MAC this is 6 bytes, although the function supports string
+   arrays of arbitrary length.
+*/
 bool mac_string_to_bytes(char *strMac, uint8_t *bMac) {
-    int values[6];
-
-    if (6 == sscanf(strMac, "%x:%x:%x:%x:%x:%x%*c", &values[0],
-        &values[1], &values[2], &values[3], &values[4], &values[5])) {
-        // Now convert to uint8_t
-        for (int i = 0; i < 6; ++i) {
-            bMac[i] = (uint8_t)values[i];
-        }
-    } else {
+    uint8_t nBytes = (strlen(strMac) + 1) / 3;
+    if (nBytes == 0) {
         return false;
+    }
+    char *pStrMac = strMac;
+    /* Use strtol to get the next number in the string and append to bMac */
+    for (int i = 0; i < nBytes; ++i, ++pStrMac) {   /* ++pStrMac will skip the bounding ':' and */
+        bMac[i] = strtol(pStrMac, &pStrMac, 10);    /*  move to the first digit of the next byte */
     }
     return true;
 }
@@ -104,9 +105,9 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     }
     /* Initialise MAC bytes to 00:00:00:00:00:00 */
     // TODO : Get and use the device's real MAC
-    for (int i=0; i < NUM_MAC_BYTES; ++i) {
-        app->mac_bytes[i] = 0;
-    }
+    // for (int i=0; i < NUM_MAC_BYTES; ++i) {
+    //     app->mac_bytes[i] = 20;
+    // }
 
     app->text_box = text_box_alloc();
     view_dispatcher_add_view(
