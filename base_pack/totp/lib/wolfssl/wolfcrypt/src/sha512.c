@@ -26,21 +26,23 @@
 
 #include <wolfssl/wolfcrypt/settings.h>
 
-#if (defined(WOLFSSL_SHA512) || defined(WOLFSSL_SHA384)) && !defined(WOLFSSL_ARMASM) && !defined(WOLFSSL_PSOC6_CRYPTO)
+#if (defined(WOLFSSL_SHA512) || defined(WOLFSSL_SHA384)) && \
+    (!defined(WOLFSSL_ARMASM) && !defined(WOLFSSL_ARMASM_NO_NEON)) && \
+    !defined(WOLFSSL_PSOC6_CRYPTO)
 
 /* determine if we are using Espressif SHA hardware acceleration */
-#undef WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW
-#if defined(WOLFSSL_ESP32WROOM32_CRYPT) && \
-    !defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+#undef WOLFSSL_USE_ESP32_CRYPT_HASH_HW
+#if defined(WOLFSSL_ESP32_CRYPT) && \
+    !defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
     /* define a single keyword for simplicity & readability
      *
      * by default the HW acceleration is on for ESP32-WROOM32
      * but individual components can be turned off.
      */
-    #define WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW
+    #define WOLFSSL_USE_ESP32_CRYPT_HASH_HW
     static const char* TAG = "wc_sha_512";
 #else
-    #undef WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW
+    #undef WOLFSSL_USE_ESP32_CRYPT_HASH_HW
 #endif
 
 #if defined(HAVE_FIPS) && defined(HAVE_FIPS_VERSION) && (HAVE_FIPS_VERSION >= 2)
@@ -70,92 +72,6 @@
 #if defined(USE_SLOW_SHA2) && !defined(USE_SLOW_SHA512)
     #define USE_SLOW_SHA512
 #endif
-
-/* fips wrapper calls, user can call direct */
-#if defined(HAVE_FIPS) && \
-    (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
-
-    #ifdef WOLFSSL_SHA512
-
-        int wc_InitSha512(wc_Sha512* sha)
-        {
-            if (sha == NULL) {
-                return BAD_FUNC_ARG;
-            }
-
-            return InitSha512_fips(sha);
-        }
-        int wc_InitSha512_ex(wc_Sha512* sha, void* heap, int devId)
-        {
-            (void)heap;
-            (void)devId;
-            if (sha == NULL) {
-                return BAD_FUNC_ARG;
-            }
-            return InitSha512_fips(sha);
-        }
-        int wc_Sha512Update(wc_Sha512* sha, const byte* data, word32 len)
-        {
-            if (sha == NULL || (data == NULL && len > 0)) {
-                return BAD_FUNC_ARG;
-            }
-
-            return Sha512Update_fips(sha, data, len);
-        }
-        int wc_Sha512Final(wc_Sha512* sha, byte* out)
-        {
-            if (sha == NULL || out == NULL) {
-                return BAD_FUNC_ARG;
-            }
-
-            return Sha512Final_fips(sha, out);
-        }
-        void wc_Sha512Free(wc_Sha512* sha)
-        {
-            (void)sha;
-            /* Not supported in FIPS */
-        }
-    #endif
-
-    #if defined(WOLFSSL_SHA384) || defined(HAVE_AESGCM)
-        int wc_InitSha384(wc_Sha384* sha)
-        {
-            if (sha == NULL) {
-                return BAD_FUNC_ARG;
-            }
-            return InitSha384_fips(sha);
-        }
-        int wc_InitSha384_ex(wc_Sha384* sha, void* heap, int devId)
-        {
-            (void)heap;
-            (void)devId;
-            if (sha == NULL) {
-                return BAD_FUNC_ARG;
-            }
-            return InitSha384_fips(sha);
-        }
-        int wc_Sha384Update(wc_Sha384* sha, const byte* data, word32 len)
-        {
-            if (sha == NULL || (data == NULL && len > 0)) {
-                return BAD_FUNC_ARG;
-            }
-            return Sha384Update_fips(sha, data, len);
-        }
-        int wc_Sha384Final(wc_Sha384* sha, byte* out)
-        {
-            if (sha == NULL || out == NULL) {
-                return BAD_FUNC_ARG;
-            }
-            return Sha384Final_fips(sha, out);
-        }
-        void wc_Sha384Free(wc_Sha384* sha)
-        {
-            (void)sha;
-            /* Not supported in FIPS */
-        }
-    #endif /* WOLFSSL_SHA384 || HAVE_AESGCM */
-
-#else /* else build without fips, or for FIPS v2 */
 
 #include <wolfssl/wolfcrypt/logging.h>
 
@@ -219,6 +135,10 @@
 
 #elif defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
+
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c */
 
 #elif defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
     int wc_InitSha512(wc_Sha512* sha512)
@@ -294,7 +214,7 @@ static int InitSha512(wc_Sha512* sha512)
     sha512->loLen   = 0;
     sha512->hiLen   = 0;
 
-#if defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+#if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
 
     /* HW needs to be carefully initialized, taking into account soft copy.
     ** If already in use; copy may revert to SW as needed. */
@@ -334,7 +254,7 @@ static int InitSha512_224(wc_Sha512* sha512)
     sha512->loLen   = 0;
     sha512->hiLen   = 0;
 
-#if defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+#if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
     /* HW needs to be carefully initialized, taking into account soft copy.
     ** If already in use; copy may revert to SW as needed.
     **
@@ -376,7 +296,7 @@ static int InitSha512_256(wc_Sha512* sha512)
     sha512->loLen   = 0;
     sha512->hiLen   = 0;
 
-#if defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+#if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
     /* HW needs to be carefully initialized, taking into account soft copy.
     ** If already in use; copy may revert to SW as needed.
     **
@@ -616,7 +536,7 @@ static int InitSha512_Family(wc_Sha512* sha512, void* heap, int devId,
 
 int wc_InitSha512_ex(wc_Sha512* sha512, void* heap, int devId)
 {
-#if defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+#if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
     if (sha512->ctx.mode != ESP32_SHA_INIT) {
         ESP_LOGV(TAG, "Set ctx mode from prior value: "
                       "%d", sha512->ctx.mode);
@@ -632,7 +552,7 @@ int wc_InitSha512_ex(wc_Sha512* sha512, void* heap, int devId)
    (!defined(HAVE_FIPS) || FIPS_VERSION_GE(5, 3)) && !defined(HAVE_SELFTEST)
 int wc_InitSha512_224_ex(wc_Sha512* sha512, void* heap, int devId)
 {
-#ifdef WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW
+#ifdef WOLFSSL_USE_ESP32_CRYPT_HASH_HW
     /* No SHA512/224 HW support is available, set to SW. */
     sha512->ctx.mode = ESP32_SHA_SW; /* no SHA224 HW, so always SW */
 #endif
@@ -644,7 +564,7 @@ int wc_InitSha512_224_ex(wc_Sha512* sha512, void* heap, int devId)
    (!defined(HAVE_FIPS) || FIPS_VERSION_GE(5, 3)) && !defined(HAVE_SELFTEST)
 int wc_InitSha512_256_ex(wc_Sha512* sha512, void* heap, int devId)
 {
-#ifdef WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW
+#ifdef WOLFSSL_USE_ESP32_CRYPT_HASH_HW
     /* No SHA512/256 HW support is available on ESP32, set to SW. */
     sha512->ctx.mode = ESP32_SHA_SW;
 #endif
@@ -835,15 +755,15 @@ static WC_INLINE int Sha512Update(wc_Sha512* sha512, const byte* data, word32 le
             if (!IS_INTEL_AVX1(intel_flags) && !IS_INTEL_AVX2(intel_flags))
         #endif
             {
-        #if !defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
-             defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+        #if !defined(WOLFSSL_ESP32_CRYPT) || \
+             defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
                 ByteReverseWords64(sha512->buffer, sha512->buffer,
                                                          WC_SHA512_BLOCK_SIZE);
         #endif
             }
     #endif
-    #if !defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
-         defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+    #if !defined(WOLFSSL_ESP32_CRYPT) || \
+         defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
             ret = Transform_Sha512(sha512);
     #else
             if(sha512->ctx.mode == ESP32_SHA_INIT) {
@@ -908,13 +828,13 @@ static WC_INLINE int Sha512Update(wc_Sha512* sha512, const byte* data, word32 le
 
             data += WC_SHA512_BLOCK_SIZE;
             len  -= WC_SHA512_BLOCK_SIZE;
-    #if !defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
-         defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+    #if !defined(WOLFSSL_ESP32_CRYPT) || \
+         defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
             ByteReverseWords64(sha512->buffer, sha512->buffer,
                                                        WC_SHA512_BLOCK_SIZE);
     #endif
-    #if !defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
-         defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+    #if !defined(WOLFSSL_ESP32_CRYPT) || \
+         defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
             ret = Transform_Sha512(sha512);
     #else
             if(sha512->ctx.mode == ESP32_SHA_INIT) {
@@ -980,6 +900,9 @@ int wc_Sha512Update(wc_Sha512* sha512, const byte* data, word32 len)
 
 #if defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+   !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/renesas/renesas_fspsm_sha.c */
 #elif defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
 
 #else
@@ -1014,15 +937,15 @@ static WC_INLINE int Sha512Final(wc_Sha512* sha512)
     #endif
         {
 
-       #if !defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
-            defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+       #if !defined(WOLFSSL_ESP32_CRYPT) || \
+            defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
             ByteReverseWords64(sha512->buffer,sha512->buffer,
                                                          WC_SHA512_BLOCK_SIZE);
        #endif
         }
 
 #endif /* LITTLE_ENDIAN_ORDER */
-    #if defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+    #if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
         if (sha512->ctx.mode == ESP32_SHA_INIT) {
             esp_sha_try_hw_lock(&sha512->ctx);
         }
@@ -1056,15 +979,15 @@ static WC_INLINE int Sha512Final(wc_Sha512* sha512)
         (defined(HAVE_INTEL_AVX1) || defined(HAVE_INTEL_AVX2))
         if (!IS_INTEL_AVX1(intel_flags) && !IS_INTEL_AVX2(intel_flags))
     #endif
-    #if !defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
-         defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+    #if !defined(WOLFSSL_ESP32_CRYPT) || \
+         defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
             ByteReverseWords64(sha512->buffer, sha512->buffer, WC_SHA512_PAD_SIZE);
     #endif
 #endif
     /* ! length ordering dependent on digest endian type ! */
 
-#if !defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
-     defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+#if !defined(WOLFSSL_ESP32_CRYPT) || \
+     defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
     sha512->buffer[WC_SHA512_BLOCK_SIZE / sizeof(word64) - 2] = sha512->hiLen;
     sha512->buffer[WC_SHA512_BLOCK_SIZE / sizeof(word64) - 1] = sha512->loLen;
 #endif
@@ -1077,8 +1000,8 @@ static WC_INLINE int Sha512Final(wc_Sha512* sha512)
                            WC_SHA512_BLOCK_SIZE - WC_SHA512_PAD_SIZE);
 #endif
 
-#if !defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
-    defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_HASH)
+#if !defined(WOLFSSL_ESP32_CRYPT) || \
+    defined(NO_WOLFSSL_ESP32_CRYPT_HASH)
     ret = Transform_Sha512(sha512);
 #else
     if(sha512->ctx.mode == ESP32_SHA_INIT) {
@@ -1105,6 +1028,7 @@ static WC_INLINE int Sha512Final(wc_Sha512* sha512)
         ByteReverseWords64(sha512->digest, sha512->digest, WC_SHA512_DIGEST_SIZE);
     #endif
 
+
     return 0;
 }
 
@@ -1115,6 +1039,10 @@ static WC_INLINE int Sha512Final(wc_Sha512* sha512)
 #if defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
 #elif defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
+
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c */
 
 #else
 
@@ -1210,6 +1138,7 @@ void wc_Sha512Free(wc_Sha512* sha512)
 
 #ifdef WOLFSSL_SMALL_STACK_CACHE
     if (sha512->W != NULL) {
+        ForceZero(sha512->W, sizeof(word64) * 16);
         XFREE(sha512->W, sha512->heap, DYNAMIC_TYPE_TMP_BUFFER);
         sha512->W = NULL;
     }
@@ -1221,6 +1150,7 @@ void wc_Sha512Free(wc_Sha512* sha512)
 
 #if defined(WOLFSSL_HASH_KEEP)
     if (sha512->msg != NULL) {
+        ForceZero(sha512->msg, sha512->len);
         XFREE(sha512->msg, sha512->heap, DYNAMIC_TYPE_TMP_BUFFER);
         sha512->msg = NULL;
     }
@@ -1229,6 +1159,8 @@ void wc_Sha512Free(wc_Sha512* sha512)
 #if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_SHA512)
     wolfAsync_DevCtxFree(&sha512->asyncDev, WOLFSSL_ASYNC_MARKER_SHA512);
 #endif /* WOLFSSL_ASYNC_CRYPT */
+
+    ForceZero(sha512, sizeof(*sha512));
 }
 #if (defined(OPENSSL_EXTRA) || defined(HAVE_CURL)) \
     && !defined(WOLFSSL_KCAPI_HASH)
@@ -1281,6 +1213,7 @@ int wc_Sha512Transform(wc_Sha512* sha, const unsigned char* data)
 
     XMEMCPY(sha->buffer, buffer, WC_SHA512_BLOCK_SIZE);
 #ifdef WOLFSSL_SMALL_STACK
+    ForceZero(buffer, WC_SHA512_BLOCK_SIZE);
     XFREE(buffer, sha->heap, DYNAMIC_TYPE_TMP_BUFFER);
 #endif
     return ret;
@@ -1333,6 +1266,10 @@ int wc_Sha512Transform(wc_Sha512* sha, const unsigned char* data)
 #elif defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
 
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c */
+
 #else
 
 static int InitSha384(wc_Sha384* sha384)
@@ -1354,7 +1291,7 @@ static int InitSha384(wc_Sha384* sha384)
     sha384->loLen   = 0;
     sha384->hiLen   = 0;
 
-#if  defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+#if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
     /* HW needs to be carefully initialized, taking into account soft copy.
     ** If already in use; copy may revert to SW as needed. */
     esp_sha_init(&(sha384->ctx), WC_HASH_TYPE_SHA384);
@@ -1362,6 +1299,10 @@ static int InitSha384(wc_Sha384* sha384)
 
 #ifdef WOLFSSL_HASH_FLAGS
     sha384->flags = 0;
+#endif
+
+#ifdef HAVE_ARIA
+    sha384->hSession = NULL;
 #endif
 
 #ifdef WOLFSSL_HASH_KEEP
@@ -1476,7 +1417,7 @@ int wc_InitSha384_ex(wc_Sha384* sha384, void* heap, int devId)
     sha384->devId = devId;
     sha384->devCtx = NULL;
 #endif
-#if defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+#if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
     if (sha384->ctx.mode != ESP32_SHA_INIT) {
         ESP_LOGV(TAG, "Set ctx mode from prior value: "
                            "%d", sha384->ctx.mode);
@@ -1526,6 +1467,7 @@ void wc_Sha384Free(wc_Sha384* sha384)
 
 #ifdef WOLFSSL_SMALL_STACK_CACHE
     if (sha384->W != NULL) {
+        ForceZero(sha384->W, sizeof(word64) * 16);
         XFREE(sha384->W, sha384->heap, DYNAMIC_TYPE_TMP_BUFFER);
         sha384->W = NULL;
     }
@@ -1537,6 +1479,7 @@ void wc_Sha384Free(wc_Sha384* sha384)
 
 #if defined(WOLFSSL_HASH_KEEP)
     if (sha384->msg != NULL) {
+        ForceZero(sha384->msg, sha384->len);
         XFREE(sha384->msg, sha384->heap, DYNAMIC_TYPE_TMP_BUFFER);
         sha384->msg = NULL;
     }
@@ -1549,16 +1492,27 @@ void wc_Sha384Free(wc_Sha384* sha384)
 #if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_SHA384)
     wolfAsync_DevCtxFree(&sha384->asyncDev, WOLFSSL_ASYNC_MARKER_SHA384);
 #endif /* WOLFSSL_ASYNC_CRYPT */
+
+#ifdef HAVE_ARIA
+    if (sha384->hSession != NULL) {
+        MC_CloseSession(sha384->hSession);
+        sha384->hSession = NULL;
+    }
+#endif
+
+    ForceZero(sha384, sizeof(*sha384));
 }
 
 #endif /* WOLFSSL_SHA384 */
-
-#endif /* HAVE_FIPS */
 
 #ifdef WOLFSSL_SHA512
 
 #if defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
+
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c */
 
 #else
 
@@ -1616,16 +1570,17 @@ int wc_Sha512Copy(wc_Sha512* src, wc_Sha512* dst)
     dst->W = NULL;
 #endif
 
-#ifdef WOLFSSL_SILABS_SHA512
-    dst->silabsCtx.hash_ctx.cmd_ctx = &(dst->silabsCtx.cmd_ctx);
-    dst->silabsCtx.hash_ctx.hash_type_ctx = &(dst->silabsCtx.hash_type_ctx);
+#if defined(WOLFSSL_SILABS_SE_ACCEL) && defined(WOLFSSL_SILABS_SE_ACCEL_3) && \
+    defined(WOLFSSL_SILABS_SHA512)
+    dst->silabsCtx.hash_ctx.cmd_ctx = &dst->silabsCtx.cmd_ctx;
+    dst->silabsCtx.hash_ctx.hash_type_ctx = &dst->silabsCtx.hash_type_ctx;
 #endif
 
 #if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_SHA512)
     ret = wolfAsync_DevCopy(&src->asyncDev, &dst->asyncDev);
 #endif
 
-#if defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+#if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
     if (ret == 0) {
         ret = esp_sha512_ctx_copy(src, dst);
     }
@@ -1682,6 +1637,10 @@ int wc_Sha512_224Update(wc_Sha512* sha, const byte* data, word32 len)
 
 #if defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c */
+
 #elif defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
 
 #else
@@ -1706,6 +1665,9 @@ void wc_Sha512_224Free(wc_Sha512* sha)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
 #elif defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
 
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c */
 
 #else
 int wc_Sha512_224GetHash(wc_Sha512* sha512, byte* hash)
@@ -1754,6 +1716,10 @@ int wc_Sha512_256Update(wc_Sha512* sha, const byte* data, word32 len)
 }
 #if defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c */
+
 #elif defined(WOLFSSL_SE050) && defined(WOLFSSL_SE050_HASH)
 
 #else
@@ -1776,6 +1742,9 @@ void wc_Sha512_256Free(wc_Sha512* sha)
 
 #if defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/Renesas/renesas_fspsm_sha.c */
 
 #else
 int wc_Sha512_256GetHash(wc_Sha512* sha512, byte* hash)
@@ -1815,7 +1784,9 @@ int wc_Sha512_256Transform(wc_Sha512* sha, const unsigned char* data)
 
 #if defined(WOLFSSL_KCAPI_HASH)
     /* functions defined in wolfcrypt/src/port/kcapi/kcapi_hash.c */
-
+#elif defined(WOLFSSL_RENESAS_RSIP) && \
+     !defined(NO_WOLFSSL_RENESAS_FSPSM_HASH)
+    /* functions defined in wolfcrypt/src/port/renesas/renesas_fspsm_sha.c */
 #else
 
 int wc_Sha384GetHash(wc_Sha384* sha384, byte* hash)
@@ -1867,17 +1838,25 @@ int wc_Sha384Copy(wc_Sha384* src, wc_Sha384* dst)
     dst->W = NULL;
 #endif
 
-#ifdef WOLFSSL_SILABS_SHA384
-    dst->silabsCtx.hash_ctx.cmd_ctx = &(dst->silabsCtx.cmd_ctx);
-    dst->silabsCtx.hash_ctx.hash_type_ctx = &(dst->silabsCtx.hash_type_ctx);
+#if defined(WOLFSSL_SILABS_SE_ACCEL) && defined(WOLFSSL_SILABS_SE_ACCEL_3) && \
+    defined(WOLFSSL_SILABS_SHA384)
+    dst->silabsCtx.hash_ctx.cmd_ctx = &dst->silabsCtx.cmd_ctx;
+    dst->silabsCtx.hash_ctx.hash_type_ctx = &dst->silabsCtx.hash_type_ctx;
 #endif
 
 #if defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_SHA384)
     ret = wolfAsync_DevCopy(&src->asyncDev, &dst->asyncDev);
 #endif
 
-#if defined(WOLFSSL_USE_ESP32WROOM32_CRYPT_HASH_HW)
+#if defined(WOLFSSL_USE_ESP32_CRYPT_HASH_HW)
     esp_sha384_ctx_copy(src, dst);
+#endif
+
+#ifdef HAVE_ARIA
+    dst->hSession = NULL;
+    if((src->hSession != NULL) && (MC_CopySession(src->hSession, &(dst->hSession)) != MC_OK)) {
+        return MEMORY_E;
+    }
 #endif
 
 #ifdef WOLFSSL_HASH_FLAGS

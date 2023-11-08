@@ -1399,6 +1399,7 @@ int wc_Shake256_Update(wc_Shake* shake, const byte* data, word32 len)
  *
  * shake  wc_Shake object holding state.
  * hash  Buffer to hold the hash result. Must be at least 64 bytes.
+ * hashLen Size of hash in bytes.
  * returns 0 on success.
  */
 int wc_Shake256_Final(wc_Shake* shake, byte* hash, word32 hashLen)

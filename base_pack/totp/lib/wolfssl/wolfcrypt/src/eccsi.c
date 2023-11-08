@@ -1350,14 +1350,12 @@ static int eccsi_mulmod_base_add(EccsiKey* key, const mp_int* n,
 {
     int err = 0;
 
-#ifdef WOLFSSL_HAVE_SP_ECC
-#ifndef WOLFSSL_SP_NO_256
+#if defined(WOLFSSL_HAVE_SP_ECC) && !defined(WOLFSSL_SP_NO_256)
     if ((key->ecc.idx != ECC_CUSTOM_IDX) &&
             (ecc_sets[key->ecc.idx].id == ECC_SECP256R1)) {
         err = sp_ecc_mulmod_base_add_256(n, a, 1, res, map, key->heap);
     }
     else
-#endif
 #endif
 #ifndef WOLFSSL_SP_MATH
     {
@@ -1377,7 +1375,12 @@ static int eccsi_mulmod_base_add(EccsiKey* key, const mp_int* n,
     {
         err = NOT_COMPILED_IN;
     }
+    (void)key;
+    (void)n;
+    (void)a;
+    (void)res;
     (void)mp;
+    (void)map;
 #endif
 
     return err;
@@ -1401,14 +1404,12 @@ static int eccsi_mulmod_point(EccsiKey* key, const mp_int* n, ecc_point* point,
 {
     int err;
 
-#ifdef WOLFSSL_HAVE_SP_ECC
-#ifndef WOLFSSL_SP_NO_256
+#if defined(WOLFSSL_HAVE_SP_ECC) && !defined(WOLFSSL_SP_NO_256)
     if ((key->ecc.idx != ECC_CUSTOM_IDX) &&
             (ecc_sets[key->ecc.idx].id == ECC_SECP256R1)) {
         err = sp_ecc_mulmod_256(n, point, res, map, key->heap);
     }
     else
-#endif
 #endif
     {
         EccsiKeyParams* params = &key->params;
@@ -1437,8 +1438,7 @@ static int eccsi_mulmod_point(EccsiKey* key, const mp_int* n, ecc_point* point,
 static int eccsi_mulmod_point_add(EccsiKey* key, const mp_int* n,
         ecc_point* point, ecc_point* a, ecc_point* res, mp_digit mp, int map)
 {
-#ifdef WOLFSSL_HAVE_SP_ECC
-#ifndef WOLFSSL_SP_NO_256
+#if defined(WOLFSSL_HAVE_SP_ECC) && !defined(WOLFSSL_SP_NO_256)
     int err = NOT_COMPILED_IN;
 
     if ((key->ecc.idx != ECC_CUSTOM_IDX) &&
@@ -1449,7 +1449,6 @@ static int eccsi_mulmod_point_add(EccsiKey* key, const mp_int* n,
     (void)mp;
 
     return err;
-#endif
 #else
     int err;
     EccsiKeyParams* params = &key->params;

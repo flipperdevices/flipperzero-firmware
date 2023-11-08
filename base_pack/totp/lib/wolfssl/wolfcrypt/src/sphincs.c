@@ -76,22 +76,22 @@ int wc_sphincs_sign_msg(const byte* in, word32 inLen, byte* out, word32 *outLen,
 
     if (ret == 0) {
         if ((key->optim == FAST_VARIANT) && (key->level == 1)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_128f_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_128f_simple);
         }
         else if ((key->optim == FAST_VARIANT) && (key->level == 3)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_192f_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_192f_simple);
         }
         else if ((key->optim == FAST_VARIANT) && (key->level == 5)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_256f_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_256f_simple);
         }
         else if ((key->optim == SMALL_VARIANT) && (key->level == 1)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_128s_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_128s_simple);
         }
         else if ((key->optim == SMALL_VARIANT) && (key->level == 3)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_192s_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_192s_simple);
         }
         else if ((key->optim == SMALL_VARIANT) && (key->level == 5)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_256s_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_256s_simple);
         }
 
         if (oqssig == NULL) {
@@ -183,22 +183,22 @@ int wc_sphincs_verify_msg(const byte* sig, word32 sigLen, const byte* msg,
 
     if (ret == 0) {
         if ((key->optim == FAST_VARIANT) && (key->level == 1)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_128f_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_128f_simple);
         }
         else if ((key->optim == FAST_VARIANT) && (key->level == 3)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_192f_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_192f_simple);
         }
         else if ((key->optim == FAST_VARIANT) && (key->level == 5)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_256f_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_256f_simple);
         }
         else if ((key->optim == SMALL_VARIANT) && (key->level == 1)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_128s_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_128s_simple);
         }
         else if ((key->optim == SMALL_VARIANT) && (key->level == 3)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_192s_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_192s_simple);
         }
         else if ((key->optim == SMALL_VARIANT) && (key->level == 5)) {
-            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake256_256s_simple);
+            oqssig = OQS_SIG_new(OQS_SIG_alg_sphincs_shake_256s_simple);
         }
 
         if (oqssig == NULL) {
@@ -244,7 +244,7 @@ int wc_sphincs_init(sphincs_key* key)
 /* Set the level of the sphincs private/public key.
  *
  * key   [out]  Sphincs key.
- * level [in]   Either 2,3 or 5.
+ * level [in]   Either 1, 3 or 5.
  * optim [in]   Either FAST_VARIANT or SMALL_VARIANT.
  * returns BAD_FUNC_ARG when key is NULL or level or optim are bad values.
  */

@@ -15,12 +15,6 @@
 #include "../../../workers/bt_type_code/bt_type_code.h"
 #endif
 
-#ifdef TOTP_BADBT_AUTOMATION_ENABLED
-#define AUTOMATION_LIST_MAX_INDEX (3)
-#else
-#define AUTOMATION_LIST_MAX_INDEX (1)
-#endif
-#define BAD_KB_LAYOUT_LIST_MAX_INDEX (2)
 #define FONT_TEST_STR_LENGTH (7)
 
 static const char* YES_NO_LIST[] = {"NO", "YES"};
@@ -73,9 +67,9 @@ void totp_scene_app_settings_activate(PluginState* plugin_state) {
     scene_state->notification_sound = plugin_state->notification_method & NotificationMethodSound;
     scene_state->notification_vibro = plugin_state->notification_method & NotificationMethodVibro;
     scene_state->automation_method =
-        MIN(plugin_state->automation_method, AUTOMATION_LIST_MAX_INDEX);
+        MIN(plugin_state->automation_method, COUNT_OF(AUTOMATION_LIST) - 1);
     scene_state->automation_kb_layout =
-        MIN(plugin_state->automation_kb_layout, BAD_KB_LAYOUT_LIST_MAX_INDEX);
+        MIN(plugin_state->automation_kb_layout, COUNT_OF(BAD_KB_LAYOUT_LIST) - 1);
 
     scene_state->total_fonts_count = totp_font_provider_get_fonts_count();
     scene_state->active_font_index = plugin_state->active_font_index;
@@ -288,14 +282,14 @@ bool totp_scene_app_settings_handle_event(
                     &scene_state->automation_method,
                     1,
                     0,
-                    AUTOMATION_LIST_MAX_INDEX,
+                    COUNT_OF(AUTOMATION_LIST) - 1,
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == BadKeyboardLayoutSelect) {
                 totp_roll_value_uint8_t(
                     &scene_state->automation_kb_layout,
                     1,
                     0,
-                    BAD_KB_LAYOUT_LIST_MAX_INDEX,
+                    COUNT_OF(BAD_KB_LAYOUT_LIST) - 1,
                     RollOverflowBehaviorRoll);
             }
             break;
@@ -324,18 +318,47 @@ bool totp_scene_app_settings_handle_event(
                     &scene_state->automation_method,
                     -1,
                     0,
-                    AUTOMATION_LIST_MAX_INDEX,
+                    COUNT_OF(AUTOMATION_LIST) - 1,
                     RollOverflowBehaviorRoll);
             } else if(scene_state->selected_control == BadKeyboardLayoutSelect) {
                 totp_roll_value_uint8_t(
                     &scene_state->automation_kb_layout,
                     -1,
                     0,
-                    BAD_KB_LAYOUT_LIST_MAX_INDEX,
+                    COUNT_OF(BAD_KB_LAYOUT_LIST) - 1,
                     RollOverflowBehaviorRoll);
             }
             break;
         case InputKeyOk:
+            if(scene_state->selected_control == ConfirmButton) {
+                plugin_state->timezone_offset = (float)scene_state->tz_offset_hours +
+                                                (float)scene_state->tz_offset_minutes / 60.0f;
+
+                plugin_state->notification_method =
+                    (scene_state->notification_sound ? NotificationMethodSound :
+                                                       NotificationMethodNone) |
+                    (scene_state->notification_vibro ? NotificationMethodVibro :
+                                                       NotificationMethodNone);
+
+                plugin_state->automation_method = scene_state->automation_method;
+                plugin_state->active_font_index = scene_state->active_font_index;
+                plugin_state->automation_kb_layout = scene_state->automation_kb_layout;
+
+                if(!totp_config_file_update_user_settings(plugin_state)) {
+                    totp_dialogs_config_updating_error(plugin_state);
+                    return false;
+                }
+
+#ifdef TOTP_BADBT_AUTOMATION_ENABLED
+                if((scene_state->automation_method & AutomationMethodBadBt) == 0 &&
+                   plugin_state->bt_type_code_worker_context != NULL) {
+                    totp_bt_type_code_worker_free(plugin_state->bt_type_code_worker_context);
+                    plugin_state->bt_type_code_worker_context = NULL;
+                }
+#endif
+
+                totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu);
+            }
             break;
         case InputKeyBack: {
             totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu);
@@ -344,34 +367,6 @@ bool totp_scene_app_settings_handle_event(
         default:
             break;
         }
-    } else if(
-        event->input.type == InputTypeShort && event->input.key == InputKeyOk &&
-        scene_state->selected_control == ConfirmButton) {
-        plugin_state->timezone_offset =
-            (float)scene_state->tz_offset_hours + (float)scene_state->tz_offset_minutes / 60.0f;
-
-        plugin_state->notification_method =
-            (scene_state->notification_sound ? NotificationMethodSound : NotificationMethodNone) |
-            (scene_state->notification_vibro ? NotificationMethodVibro : NotificationMethodNone);
-
-        plugin_state->automation_method = scene_state->automation_method;
-        plugin_state->active_font_index = scene_state->active_font_index;
-        plugin_state->automation_kb_layout = scene_state->automation_kb_layout;
-
-        if(!totp_config_file_update_user_settings(plugin_state)) {
-            totp_dialogs_config_updating_error(plugin_state);
-            return false;
-        }
-
-#ifdef TOTP_BADBT_AUTOMATION_ENABLED
-        if((scene_state->automation_method & AutomationMethodBadBt) == 0 &&
-           plugin_state->bt_type_code_worker_context != NULL) {
-            totp_bt_type_code_worker_free(plugin_state->bt_type_code_worker_context);
-            plugin_state->bt_type_code_worker_context = NULL;
-        }
-#endif
-
-        totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu);
     }
 
     return true;

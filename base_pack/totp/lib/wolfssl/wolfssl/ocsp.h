@@ -53,15 +53,19 @@ typedef struct OcspRequest WOLFSSL_OCSP_REQUEST;
 WOLFSSL_LOCAL int  InitOCSP(WOLFSSL_OCSP* ocsp, WOLFSSL_CERT_MANAGER* cm);
 WOLFSSL_LOCAL void FreeOCSP(WOLFSSL_OCSP* ocsp, int dynamic);
 
-WOLFSSL_LOCAL int  CheckCertOCSP(WOLFSSL_OCSP* ocsp, DecodedCert* cert,
-                                 WOLFSSL_BUFFER_INFO* responseBuffer);
+WOLFSSL_LOCAL int  CheckCertOCSP(WOLFSSL_OCSP* ocsp, DecodedCert* cert);
 WOLFSSL_LOCAL int  CheckCertOCSP_ex(WOLFSSL_OCSP* ocsp, DecodedCert* cert,
-                                    WOLFSSL_BUFFER_INFO* responseBuffer, WOLFSSL* ssl);
+                                    WOLFSSL* ssl);
 WOLFSSL_LOCAL int  CheckOcspRequest(WOLFSSL_OCSP* ocsp,
-                 OcspRequest* ocspRequest, WOLFSSL_BUFFER_INFO* responseBuffer);
+                 OcspRequest* ocspRequest, WOLFSSL_BUFFER_INFO* responseBuffer,
+                 void* heap);
 WOLFSSL_LOCAL int CheckOcspResponse(WOLFSSL_OCSP *ocsp, byte *response, int responseSz,
                                     WOLFSSL_BUFFER_INFO *responseBuffer, CertStatus *status,
-                                    OcspEntry *entry, OcspRequest *ocspRequest);
+                                    OcspEntry *entry, OcspRequest *ocspRequest,
+                                    void* heap);
+
+WOLFSSL_LOCAL int CheckOcspResponder(OcspResponse *bs, DecodedCert *cert,
+                                     void* vp);
 
 #if defined(OPENSSL_ALL) || defined(WOLFSSL_NGINX) || defined(WOLFSSL_HAPROXY) || \
     defined(WOLFSSL_APACHE_HTTPD) || defined(HAVE_LIGHTY)

@@ -168,7 +168,7 @@ static int ed448_hash(ed448_key* key, const byte* in, word32 inLen,
 /* Derive the public key for the private key.
  *
  * key       [in]  Ed448 key object.
- * pubKey    [in]  Byte array to hold te public key.
+ * pubKey    [in]  Byte array to hold the public key.
  * pubKeySz  [in]  Size of the array in bytes.
  * returns BAD_FUNC_ARG when key is NULL or pubKeySz is not equal to
  *         ED448_PUB_KEY_SIZE,

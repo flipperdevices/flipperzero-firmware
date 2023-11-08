@@ -85,12 +85,12 @@ enum {
 
 /* An ED25519 Key */
 struct ed25519_key {
-    byte    p[ED25519_PUB_KEY_SIZE]; /* compressed public key */
-    byte    k[ED25519_PRV_KEY_SIZE]; /* private key : 32 secret -- 32 public */
+    ALIGN16 byte p[ED25519_PUB_KEY_SIZE]; /* compressed public key */
+    ALIGN16 byte k[ED25519_PRV_KEY_SIZE]; /* private key: 32 secret, 32 pub */
 #ifdef FREESCALE_LTC_ECC
     /* uncompressed point coordinates */
-    byte pointX[ED25519_KEY_SIZE]; /* recovered X coordinate */
-    byte pointY[ED25519_KEY_SIZE]; /* Y coordinate is the public key with The most significant bit of the final octet always zero. */
+    ALIGN16 byte pointX[ED25519_KEY_SIZE]; /* recovered X coordinate */
+    ALIGN16 byte pointY[ED25519_KEY_SIZE]; /* Y coordinate is the public key with The most significant bit of the final octet always zero. */
 #endif
 #ifdef WOLFSSL_SE050
     word32 keyId;
@@ -103,6 +103,7 @@ struct ed25519_key {
     WC_ASYNC_DEV asyncDev;
 #endif
 #if defined(WOLF_CRYPTO_CB)
+    void* devCtx;
     int devId;
 #endif
     void *heap;

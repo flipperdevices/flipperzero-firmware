@@ -104,6 +104,7 @@ enum Ecc_Sum {
     ECC_SECP256R1_OID = 526,
     ECC_SECP256K1_OID = 186,
     ECC_BRAINPOOLP256R1_OID = 104,
+    ECC_SM2P256V1_OID = 667,
     ECC_X25519_OID = 365,
     ECC_ED25519_OID = 256,
     ECC_BRAINPOOLP320R1_OID = 106,
@@ -115,6 +116,26 @@ enum Ecc_Sum {
     ECC_SECP521R1_OID = 211
 };
 
+
+enum EncPkcs8Types {
+    ENC_PKCS8_VER_PKCS12 = 1,
+    ENC_PKCS8_VER_PKCS5 =  5,
+
+    ENC_PKCS8_PBES2 =  13,
+
+    ENC_PKCS8_PBE_SHA1_RC4_128   = 1,
+    ENC_PKCS8_PBE_SHA1_DES       = 2,
+    ENC_PKCS8_PBE_SHA1_DES3      = 3,
+    ENC_PKCS8_PBE_SHA1_40RC2_CBC = 6,
+
+    ENC_PKCS8_PBES1_MD5_DES      = 3,
+    ENC_PKCS8_PBES1_SHA1_DES     = 10,
+
+    ENC_PKCS8_ALG_AES128CBC = 414,
+    ENC_PKCS8_ALG_AES256CBC = 454,
+    ENC_PKCS8_ALG_DES       = 69,
+    ENC_PKCS8_ALG_DES3      = 652
+};
 
 /* Certificate file Type */
 enum CertType {
@@ -154,7 +175,8 @@ enum CertType {
     SPHINCS_SMALL_LEVEL1_TYPE,
     SPHINCS_SMALL_LEVEL3_TYPE,
     SPHINCS_SMALL_LEVEL5_TYPE,
-    ECC_PARAM_TYPE
+    ECC_PARAM_TYPE,
+    CHAIN_CERT_TYPE
 };
 
 
@@ -186,6 +208,8 @@ enum Ctc_SigType {
     CTC_SHA3_512wRSA = 430,
 
     CTC_RSASSAPSS    = 654,
+
+    CTC_SM3wSM2      = 740, /* 1.2.156.10197.1.501 */
 
     CTC_ED25519      = 256,
     CTC_ED448        = 257,
@@ -368,7 +392,9 @@ typedef struct CertExtension {
 } CertExtension;
 #endif
 
-#if defined(WOLFSSL_CERT_GEN) || defined(OPENSSL_EXTRA) || defined(OPENSSL_EXTRA_X509_SMALL)
+#if defined(WOLFSSL_CERT_GEN) || defined(OPENSSL_EXTRA) || \
+    defined(OPENSSL_EXTRA_X509_SMALL) || defined(WOLFSSL_CERT_EXT) || \
+    defined(WOLFSSL_CERT_REQ)
 typedef struct CertName {
     char country[CTC_NAME_SIZE];
     char countryEnc;
@@ -422,6 +448,7 @@ typedef struct CertName {
 
 #ifndef NUM_CUSTOM_EXT
 #define NUM_CUSTOM_EXT 16
+#endif /* NUM_CUSTOM_EXT */
 
 /* for user to fill for certificate generation */
 typedef struct Cert {
@@ -618,7 +645,6 @@ WOLFSSL_API int wc_SetCustomExtension(Cert *cert, int critical, const char *oid,
 #endif
 
 #endif /* WOLFSSL_CERT_EXT */
-#endif /* WOLFSSL_CERT_GEN */
 
 WOLFSSL_API int wc_GetDateInfo(const byte* certDate, int certDateSz,
     const byte** date, byte* format, int* length);
@@ -723,6 +749,8 @@ WOLFSSL_API int wc_DhPrivKeyToDer(DhKey* key, byte* out, word32* outSz);
     WOLFSSL_ABI
     WOLFSSL_API int wc_EccPrivateKeyDecode(const byte* input, word32* inOutIdx,
                                            ecc_key* key, word32 inSz);
+    WOLFSSL_LOCAL int wc_BuildEccKeyDer(ecc_key* key, byte* output, word32 *inLen,
+                                        int pubIn, int curveIn);
     WOLFSSL_ABI
     WOLFSSL_API int wc_EccKeyToDer(ecc_key* key, byte* output, word32 inLen);
     WOLFSSL_API int wc_EccPrivateKeyToDer(ecc_key* key, byte* output,
@@ -911,9 +939,6 @@ WOLFSSL_API int wc_GetUUIDFromCert(struct DecodedCert* cert,
 WOLFSSL_API int wc_GetFASCNFromCert(struct DecodedCert* cert,
                                     byte* fascn, word32* fascnSz);
 #endif /* WOLFSSL_FPKI */
-#ifdef __cplusplus
-    } /* extern "C" */
-#endif
 
 #if !defined(XFPRINTF) || defined(NO_FILESYSTEM) || \
     defined(NO_STDIO_FILESYSTEM) && defined(WOLFSSL_ASN_PRINT)
@@ -1014,5 +1039,9 @@ WOLFSSL_API int wc_Asn1_PrintAll(Asn1* asn1, Asn1PrintOptions* opts,
     unsigned char* data, word32 len);
 
 #endif /* WOLFSSL_ASN_PRINT */
+
+#ifdef __cplusplus
+    } /* extern "C" */
+#endif
 
 #endif /* WOLF_CRYPT_ASN_PUBLIC_H */

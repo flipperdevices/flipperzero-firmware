@@ -107,7 +107,7 @@
     #define MAX_ECC_BITS_NEEDED    384
 #elif defined(HAVE_ECC320)
     #define MAX_ECC_BITS_NEEDED    320
-#elif !defined(NO_ECC256)
+#elif !defined(NO_ECC256) || defined(WOLFSSL_SM2)
     #define MAX_ECC_BITS_NEEDED    256
 #elif defined(HAVE_ECC239)
     #define MAX_ECC_BITS_NEEDED    239
@@ -242,6 +242,9 @@ typedef enum ecc_curve_id {
     ECC_BRAINPOOLP320R1,
     ECC_BRAINPOOLP384R1,
     ECC_BRAINPOOLP512R1,
+
+    /* SM2 */
+    ECC_SM2P256V1,
 
     /* Twisted Edwards Curves */
 #ifdef HAVE_CURVE25519
@@ -502,6 +505,7 @@ struct ecc_key {
     byte pubkey_raw[ECC_MAX_CRYPTO_HW_PUBKEY_SIZE];
 #endif
 #if defined(PLUTON_CRYPTO_ECC) || defined(WOLF_CRYPTO_CB)
+    void* devCtx;
     int devId;
 #endif
 #if defined(HAVE_PKCS11)
@@ -892,8 +896,12 @@ enum ecEncAlgo {
 };
 
 enum ecKdfAlgo {
-    ecHKDF_SHA256 = 1,  /* default */
-    ecHKDF_SHA1   = 2
+    ecHKDF_SHA256      = 1,  /* default */
+    ecHKDF_SHA1        = 2,
+    ecKDF_X963_SHA1    = 3,
+    ecKDF_X963_SHA256  = 4,
+    ecKDF_SHA1         = 5,
+    ecKDF_SHA256       = 6
 };
 
 enum ecMacAlgo {

@@ -60,6 +60,10 @@
 
 /* THREADING/MUTEX SECTION */
 #ifdef USE_WINDOWS_API
+    #if defined(__MINGW32__) && !defined(SINGLE_THREADED)
+        #define WOLFSSL_PTHREADS
+        #include <pthread.h>
+    #endif
     #ifdef WOLFSSL_GAME_BUILD
         #include "system/xtl.h"
     #else
@@ -76,6 +80,9 @@
                 #include <ws2tcpip.h> /* required for InetPton */
             #endif
         #endif /* WOLFSSL_SGX */
+    #endif
+    #ifndef SINGLE_THREADED
+        #include <process.h>
     #endif
 #elif defined(THREADX)
     #ifndef SINGLE_THREADED
@@ -244,7 +251,11 @@
     #elif defined(MICRIUM)
         typedef OS_MUTEX wolfSSL_Mutex;
     #elif defined(EBSNET)
-        typedef RTP_MUTEX wolfSSL_Mutex;
+        #if (defined(RTPLATFORM) && (RTPLATFORM != 0))
+            typedef RTP_MUTEX wolfSSL_Mutex;
+        #else
+            typedef KS_RTIPSEM wolfSSL_Mutex;
+        #endif
     #elif defined(FREESCALE_MQX) || defined(FREESCALE_KSDK_MQX)
         typedef MUTEX_STRUCT wolfSSL_Mutex;
     #elif defined(FREESCALE_FREE_RTOS)
@@ -349,7 +360,7 @@ typedef struct wolfSSL_Ref {
         (ref)->count = 1;                    \
         *(err) = 0;                          \
     } while(0)
-#define wolfSSL_RefFree(ref)
+#define wolfSSL_RefFree(ref) WC_DO_NOTHING
     #define wolfSSL_RefInc(ref, err)         \
     do {                                     \
         (ref)->count++;                      \
@@ -369,7 +380,7 @@ typedef struct wolfSSL_Ref {
         wolfSSL_Atomic_Int_Init(&(ref)->count, 1); \
         *(err) = 0;                          \
     } while(0)
-#define wolfSSL_RefFree(ref)
+#define wolfSSL_RefFree(ref) WC_DO_NOTHING
 #define wolfSSL_RefInc(ref, err)             \
     do {                                     \
         (void)wolfSSL_Atomic_Int_FetchAdd(&(ref)->count, 1); \
@@ -440,6 +451,7 @@ typedef void (mutex_cb)(int flag, int type, const char* file, int line);
 
 WOLFSSL_API int wc_LockMutex_ex(int flag, int type, const char* file, int line);
 WOLFSSL_API int wc_SetMutexCb(mutex_cb* cb);
+WOLFSSL_API mutex_cb* wc_GetMutexCb(void);
 #endif
 
 /* main crypto initialization function */
@@ -474,6 +486,8 @@ WOLFSSL_ABI WOLFSSL_API int wolfCrypt_Cleanup(void);
     #define XSEEK_END                VSEEK_END
     #define XBADFILE                 -1
     #define XFGETS(b,s,f)            -2 /* Not ported yet */
+    #define XSNPRINTF rtp_snprintf
+    #define XFPRINTF fprintf
 
 #elif defined(LSR_FS)
     #include <fs.h>
@@ -615,7 +629,7 @@ WOLFSSL_ABI WOLFSSL_API int wolfCrypt_Cleanup(void);
     #define XFREAD     fread
     #define XFWRITE    fwrite
     #define XFCLOSE    fclose
-    #define XSEEK_END  SEEK_SET
+    #define XSEEK_SET  SEEK_SET
     #define XSEEK_END  SEEK_END
     #define XBADFILE   NULL
     #define XFGETS     fgets
@@ -729,10 +743,10 @@ WOLFSSL_ABI WOLFSSL_API int wolfCrypt_Cleanup(void);
 #endif
 
     #ifndef MAX_FILENAME_SZ
-        #define MAX_FILENAME_SZ  256 /* max file name length */
+        #define MAX_FILENAME_SZ (260 + 1) /* max file name length */
     #endif
     #ifndef MAX_PATH
-        #define MAX_PATH 256
+        #define MAX_PATH (260 + 1)
     #endif
 
     WOLFSSL_LOCAL int wc_FileLoad(const char* fname, unsigned char** buf,
@@ -856,7 +870,7 @@ WOLFSSL_ABI WOLFSSL_API int wolfCrypt_Cleanup(void);
     #include "os.h"           /* dc_rtc_api needs    */
     #include "dc_rtc_api.h"   /* to get current time */
 
-    /* uses parital <time.h> structures */
+    /* uses partial <time.h> structures */
     #define XTIME(tl)       (0)
     #define XGMTIME(c, t)   rtpsys_gmtime((c))
 
@@ -1150,6 +1164,23 @@ WOLFSSL_ABI WOLFSSL_API int wolfCrypt_Cleanup(void);
         #define WOLFSSL_SCE_GSCE_HANDLE g_sce
     #endif
 #endif
+
+
+    /* AFTER user_settings.h is loaded,
+    ** determine if POSIX multi-threaded: HAVE_PTHREAD  */
+    #if defined(SINGLE_THREADED) || defined(__MINGW32__)
+        /* Never HAVE_PTHREAD in single thread, or non-POSIX mode.
+        ** Reminder: MING32 is win32 threads, not POSIX threads */
+        #undef HAVE_PTHREAD
+    #else
+        /* _POSIX_THREADS is defined by unistd.h so this check needs to happen
+         * after we include all the platform relevant libs. */
+        #ifdef _POSIX_THREADS
+            /* HAVE_PTHREAD == POSIX threads capable and enabled. */
+            #undef HAVE_PTHREAD
+            #define HAVE_PTHREAD 1
+        #endif
+    #endif
 
 #ifdef __cplusplus
     }  /* extern "C" */

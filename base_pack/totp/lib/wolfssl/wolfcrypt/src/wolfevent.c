@@ -180,8 +180,12 @@ int wolfEventQueue_Remove(WOLF_EVENT_QUEUE* queue, WOLF_EVENT* event)
     else {
         WOLF_EVENT* next = event->next;
         WOLF_EVENT* prev = event->prev;
-        next->prev = prev;
-        prev->next = next;
+        if ((next == NULL) || (prev == NULL)) {
+            ret = BAD_STATE_E;
+        } else {
+            next->prev = prev;
+            prev->next = next;
+        }
     }
     queue->count--;
 
@@ -205,7 +209,7 @@ int wolfEventQueue_Poll(WOLF_EVENT_QUEUE* queue, void* context_filter,
     }
 #endif
 
-    /* iterrate event queue */
+    /* iterate event queue */
     for (event = queue->head; event != NULL; event = event->next)
     {
         /* optional filter based on context */
