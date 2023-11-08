@@ -266,7 +266,10 @@ bool infrared_signal_read_name(FlipperFormat* ff, FuriString* name) {
     return flipper_format_read_string(ff, INFRARED_SIGNAL_NAME_KEY, name);
 }
 
-bool infrared_signal_search_by_name_and_read(InfraredSignal* signal, FlipperFormat* ff, const char* name) {
+bool infrared_signal_search_by_name_and_read(
+    InfraredSignal* signal,
+    FlipperFormat* ff,
+    const char* name) {
     bool success = false;
     FuriString* tmp = furi_string_alloc();
 
@@ -284,7 +287,10 @@ bool infrared_signal_search_by_name_and_read(InfraredSignal* signal, FlipperForm
     return success;
 }
 
-bool infrared_signal_search_by_index_and_read(InfraredSignal* signal, FlipperFormat* ff, size_t index) {
+bool infrared_signal_search_by_index_and_read(
+    InfraredSignal* signal,
+    FlipperFormat* ff,
+    size_t index) {
     bool success = false;
     FuriString* tmp = furi_string_alloc();
 
