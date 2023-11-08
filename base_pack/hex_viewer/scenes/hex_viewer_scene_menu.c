@@ -1,11 +1,9 @@
 #include "../hex_viewer.h"
 
 enum SubmenuIndex {
-    SubmenuIndexScene1 = 10,
-    SubmenuIndexScene2,
-    // SubmenuIndexScene3,
-    SubmenuIndexScene4,
-    // SubmenuIndexScene5,
+    SubmenuIndexScroll = 10,
+    SubmenuIndexInfo,
+    SubmenuIndexOpen,
     // SubmenuIndexSettings,
 };
 
@@ -21,21 +19,19 @@ void hex_viewer_scene_menu_on_enter(void* context) {
     submenu_add_item(
         app->submenu,
         "Open file ...",
-        SubmenuIndexScene4,
+        SubmenuIndexOpen,
         hex_viewer_scene_menu_submenu_callback,
         app);
-    // submenu_add_item(app->submenu, "Scene 2 (Inputs/Effects)", SubmenuIndexScene2, hex_viewer_scene_menu_submenu_callback, app);
-    // submenu_add_item(app->submenu, "Scene 3 (Buttonmenu)", SubmenuIndexScene3, hex_viewer_scene_menu_submenu_callback, app);
     submenu_add_item(
         app->submenu,
         "Scroll to ...",
-        SubmenuIndexScene1,
+        SubmenuIndexScroll,
         hex_viewer_scene_menu_submenu_callback,
         app);
     submenu_add_item(
         app->submenu,
         "Show info ...",
-        SubmenuIndexScene2,
+        SubmenuIndexInfo,
         hex_viewer_scene_menu_submenu_callback,
         app);
     // submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, hex_viewer_scene_menu_submenu_callback, app);
@@ -56,24 +52,20 @@ bool hex_viewer_scene_menu_on_event(void* context, SceneManagerEvent event) {
         scene_manager_previous_scene(app->scene_manager);
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexScene1) {
+        if(event.event == SubmenuIndexScroll) {
             scene_manager_set_scene_state(
-                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene1);
-            scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_1);
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScroll);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneScroll);
             return true;
-        } else if(event.event == SubmenuIndexScene2) {
+        } else if(event.event == SubmenuIndexInfo) {
             scene_manager_set_scene_state(
-                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene2);
-            scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_2);
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexInfo);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneInfo);
             return true;
-            // } else if (event.event == SubmenuIndexScene3) {
-            //     scene_manager_set_scene_state(
-            //         app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene3);
-            //     scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_3);
-        } else if(event.event == SubmenuIndexScene4) {
+        } else if(event.event == SubmenuIndexOpen) {
             scene_manager_set_scene_state(
-                app->scene_manager, HexViewerSceneMenu, SubmenuIndexScene4);
-            scene_manager_next_scene(app->scene_manager, HexViewerSceneScene_4);
+                app->scene_manager, HexViewerSceneMenu, SubmenuIndexOpen);
+            scene_manager_next_scene(app->scene_manager, HexViewerSceneOpen);
             // } else if (event.event == SubmenuIndexSettings) {
             //     scene_manager_set_scene_state(
             //         app->scene_manager, HexViewerSceneMenu, SubmenuIndexSettings);

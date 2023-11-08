@@ -1,6 +1,6 @@
 #include "../hex_viewer.h"
 
-void hex_viewer_scene_scene_4_on_enter(void* context) {
+void hex_viewer_scene_open_on_enter(void* context) {
     furi_assert(context);
     HexViewer* app = context;
 
@@ -22,18 +22,14 @@ void hex_viewer_scene_scene_4_on_enter(void* context) {
     }
 
     if(success) {
-        // Load page to do something with result
-        //scene_manager_next_scene(app->scene_manager, HexViewerViewIdMenu);
-        //scene_manager_previous_scene(app->scene_manager); // temp for showcase
         scene_manager_search_and_switch_to_previous_scene(
             app->scene_manager, HexViewerViewIdStartscreen);
     } else {
-        // This is basically if someone quites the browser
         scene_manager_previous_scene(app->scene_manager);
     }
 }
 
-bool hex_viewer_scene_scene_4_on_event(void* context, SceneManagerEvent event) {
+bool hex_viewer_scene_open_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
     bool consumed = true;
@@ -41,6 +37,6 @@ bool hex_viewer_scene_scene_4_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void hex_viewer_scene_scene_4_on_exit(void* context) {
+void hex_viewer_scene_open_on_exit(void* context) {
     UNUSED(context);
 }
