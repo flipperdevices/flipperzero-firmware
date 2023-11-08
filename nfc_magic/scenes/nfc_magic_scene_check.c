@@ -24,6 +24,7 @@ void nfc_magic_scene_check_on_enter(void* context) {
     nfc_magic_app_blink_start(instance);
 
     nfc_magic_scanner_start(instance->scanner, nfc_magic_check_worker_callback, instance);
+    nfc_magic_scanner_set_gen4_password(instance->scanner, instance->gen4_password);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewPopup);
 }
