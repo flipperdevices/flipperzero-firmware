@@ -3,7 +3,7 @@
 #include <furi_hal_nfc.h>
 
 #define RFAL_PICOPASS_UID_LEN 8
-#define RFAL_PICOPASS_BLOCK_LEN 8
+#define PICOPASS_BLOCK_LEN 8
 
 enum {
     // PicoPass command bytes:
@@ -59,17 +59,6 @@ typedef struct {
 } rfalPicoPassCheckRes;
 
 typedef struct {
-    uint8_t data[RFAL_PICOPASS_BLOCK_LEN];
+    uint8_t data[PICOPASS_BLOCK_LEN];
     uint8_t crc[2];
 } rfalPicoPassReadBlockRes;
-
-uint16_t rfalPicoPassCalculateCcitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length);
-
-FuriHalNfcReturn rfalPicoPassPollerInitialize(void);
-FuriHalNfcReturn rfalPicoPassPollerCheckPresence(void);
-FuriHalNfcReturn rfalPicoPassPollerIdentify(rfalPicoPassIdentifyRes* idRes);
-FuriHalNfcReturn rfalPicoPassPollerSelect(uint8_t* csn, rfalPicoPassSelectRes* selRes);
-FuriHalNfcReturn rfalPicoPassPollerReadCheck(rfalPicoPassReadCheckRes* rcRes);
-FuriHalNfcReturn rfalPicoPassPollerCheck(uint8_t* mac, rfalPicoPassCheckRes* chkRes);
-FuriHalNfcReturn rfalPicoPassPollerReadBlock(uint8_t blockNum, rfalPicoPassReadBlockRes* readRes);
-FuriHalNfcReturn rfalPicoPassPollerWriteBlock(uint8_t blockNum, uint8_t data[8], uint8_t mac[4]);
