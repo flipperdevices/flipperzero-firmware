@@ -8,8 +8,8 @@
 #include "common.h"
 #include "../services/crypto/crypto_facade.h"
 
-#define ESTIMATE_BASE32_PLAIN_LENGTH(base32_length) ((base32_length) * 0.625f)
-#define ESTIMATE_BASE64_PLAIN_LENGTH(base64_length) ((base64_length) * 0.75f)
+#define ESTIMATE_BASE32_PLAIN_LENGTH(base32_length) ((base32_length)*0.625f)
+#define ESTIMATE_BASE64_PLAIN_LENGTH(base64_length) ((base64_length)*0.75f)
 
 TokenInfo* token_info_alloc() {
     TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
@@ -47,7 +47,11 @@ bool token_info_set_secret(
         plain_secret_length = plain_secret_size;
         plain_secret = malloc(plain_secret_size);
         furi_check(plain_secret != NULL);
-        if (Base64_Decode((const uint8_t*)plain_token_secret, token_secret_length, plain_secret, &plain_secret_length) != 0) {
+        if(Base64_Decode(
+               (const uint8_t*)plain_token_secret,
+               token_secret_length,
+               plain_secret,
+               &plain_secret_length) != 0) {
             plain_secret_length = 0;
         }
     } else {
