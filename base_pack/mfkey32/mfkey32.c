@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <storage/storage.h>
-#include <lib/nfc/helpers/mf_classic_dict.h>
+#include <toolbox/stream/buffered_file_stream.h>
 #include <lib/toolbox/args.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <dolphin/dolphin.h>
@@ -123,10 +123,15 @@ typedef struct {
     size_t remaining_nonces;
 } MfClassicNonceArray;
 
-struct MfClassicDict {
+typedef enum {
+    MfClassicDictTypeSystem,
+    MfClassicDictTypeUser,
+} MfClassicDictType;
+
+typedef struct {
     Stream* stream;
     uint32_t total_keys;
-};
+} MfClassicDict;
 
 static const uint8_t table[256] = {
     0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3,
