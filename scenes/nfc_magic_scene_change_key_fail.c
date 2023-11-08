@@ -1,6 +1,6 @@
 #include "../nfc_magic_app_i.h"
 
-void nfc_magic_scene_write_fail_widget_callback(
+void nfc_magic_scene_change_key_fail_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
@@ -10,7 +10,7 @@ void nfc_magic_scene_write_fail_widget_callback(
     }
 }
 
-void nfc_magic_scene_write_fail_on_enter(void* context) {
+void nfc_magic_scene_change_key_fail_on_enter(void* context) {
     NfcMagicApp* instance = context;
     Widget* widget = instance->widget;
 
@@ -18,24 +18,20 @@ void nfc_magic_scene_write_fail_on_enter(void* context) {
 
     widget_add_icon_element(widget, 72, 17, &I_DolphinCommon_56x48);
     widget_add_string_element(
-        widget, 7, 4, AlignLeft, AlignTop, FontPrimary, "Writing gone wrong!");
-    widget_add_string_multiline_element(
-        widget,
-        7,
-        17,
-        AlignLeft,
-        AlignTop,
-        FontSecondary,
-        "Not all sectors\nwere written\ncorrectly.");
+        widget, 7, 4, AlignLeft, AlignTop, FontPrimary, "Can't change password!");
 
     widget_add_button_element(
-        widget, GuiButtonTypeLeft, "Finish", nfc_magic_scene_write_fail_widget_callback, instance);
+        widget,
+        GuiButtonTypeLeft,
+        "Finish",
+        nfc_magic_scene_change_key_fail_widget_callback,
+        instance);
 
     // Setup and start worker
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewWidget);
 }
 
-bool nfc_magic_scene_write_fail_on_event(void* context, SceneManagerEvent event) {
+bool nfc_magic_scene_change_key_fail_on_event(void* context, SceneManagerEvent event) {
     NfcMagicApp* instance = context;
     bool consumed = false;
 
@@ -51,7 +47,7 @@ bool nfc_magic_scene_write_fail_on_event(void* context, SceneManagerEvent event)
     return consumed;
 }
 
-void nfc_magic_scene_write_fail_on_exit(void* context) {
+void nfc_magic_scene_change_key_fail_on_exit(void* context) {
     NfcMagicApp* instance = context;
 
     widget_reset(instance->widget);

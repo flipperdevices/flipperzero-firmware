@@ -1,97 +1,136 @@
-#include "../nfc_magic_i.h"
+#include "../nfc_magic_app_i.h"
 
 enum {
     NfcMagicSceneWipeStateCardSearch,
     NfcMagicSceneWipeStateCardFound,
 };
 
-bool nfc_magic_wipe_worker_callback(NfcMagicWorkerEvent event, void* context) {
-    furi_assert(context);
+NfcCommand nfc_mafic_scene_wipe_gen1_poller_callback(Gen1aPollerEvent event, void* context) {
+    NfcMagicApp* instance = context;
+    furi_assert(event.data);
 
-    NfcMagic* nfc_magic = context;
-    view_dispatcher_send_custom_event(nfc_magic->view_dispatcher, event);
+    NfcCommand command = NfcCommandContinue;
 
-    return true;
+    if(event.type == Gen1aPollerEventTypeDetected) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventCardDetected);
+    } else if(event.type == Gen1aPollerEventTypeRequestMode) {
+        event.data->request_mode.mode = Gen1aPollerModeWipe;
+    } else if(event.type == Gen1aPollerEventTypeSuccess) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventWorkerSuccess);
+        command = NfcCommandStop;
+    } else if(event.type == Gen1aPollerEventTypeFail) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventWorkerFail);
+        command = NfcCommandStop;
+    }
+
+    return command;
 }
 
-static void nfc_magic_scene_wipe_setup_view(NfcMagic* nfc_magic) {
-    Popup* popup = nfc_magic->popup;
+NfcCommand nfc_mafic_scene_wipe_gen4_poller_callback(Gen4PollerEvent event, void* context) {
+    NfcMagicApp* instance = context;
+
+    NfcCommand command = NfcCommandContinue;
+
+    if(event.type == Gen4PollerEventTypeCardDetected) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventCardDetected);
+    } else if(event.type == Gen4PollerEventTypeRequestMode) {
+        event.data->request_mode.mode = Gen4PollerModeWipe;
+    } else if(event.type == Gen4PollerEventTypeSuccess) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventWorkerSuccess);
+        command = NfcCommandStop;
+    } else if(event.type == Gen4PollerEventTypeFail) {
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcMagicCustomEventWorkerFail);
+        command = NfcCommandStop;
+    }
+
+    return command;
+}
+
+static void nfc_magic_scene_wipe_setup_view(NfcMagicApp* instance) {
+    Popup* popup = instance->popup;
     popup_reset(popup);
-    uint32_t state = scene_manager_get_scene_state(nfc_magic->scene_manager, NfcMagicSceneWipe);
+    uint32_t state = scene_manager_get_scene_state(instance->scene_manager, NfcMagicSceneWipe);
 
     if(state == NfcMagicSceneWipeStateCardSearch) {
-        popup_set_icon(nfc_magic->popup, 0, 8, &I_NFC_manual_60x50);
+        popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
         popup_set_text(
-            nfc_magic->popup,
-            "Apply the\nsame card\nto the back",
-            128,
-            32,
-            AlignRight,
-            AlignCenter);
+            instance->popup, "Apply the\nsame card\nto the back", 128, 32, AlignRight, AlignCenter);
     } else {
         popup_set_icon(popup, 12, 23, &I_Loading_24);
         popup_set_header(popup, "Wiping\nDon't move...", 52, 32, AlignLeft, AlignCenter);
     }
 
-    view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewPopup);
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcMagicAppViewPopup);
 }
 
 void nfc_magic_scene_wipe_on_enter(void* context) {
-    NfcMagic* nfc_magic = context;
+    NfcMagicApp* instance = context;
 
     scene_manager_set_scene_state(
-        nfc_magic->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
-    nfc_magic_scene_wipe_setup_view(nfc_magic);
+        instance->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
+    nfc_magic_scene_wipe_setup_view(instance);
 
-    // Setup and start worker
-    nfc_magic_worker_start(
-        nfc_magic->worker,
-        NfcMagicWorkerStateWipe,
-        nfc_magic->dev,
-        &nfc_magic->source_dev->dev_data,
-        nfc_magic->new_password,
-        nfc_magic_wipe_worker_callback,
-        nfc_magic);
-    nfc_magic_blink_start(nfc_magic);
+    nfc_magic_app_blink_start(instance);
+
+    if(instance->protocol == NfcMagicProtocolGen1) {
+        instance->gen1a_poller = gen1a_poller_alloc(instance->nfc);
+        gen1a_poller_start(
+            instance->gen1a_poller, nfc_mafic_scene_wipe_gen1_poller_callback, instance);
+    } else {
+        instance->gen4_poller = gen4_poller_alloc(instance->nfc);
+        gen4_poller_set_password(instance->gen4_poller, instance->gen4_password);
+        gen4_poller_start(
+            instance->gen4_poller, nfc_mafic_scene_wipe_gen4_poller_callback, instance);
+    }
 }
 
 bool nfc_magic_scene_wipe_on_event(void* context, SceneManagerEvent event) {
-    NfcMagic* nfc_magic = context;
+    NfcMagicApp* instance = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcMagicWorkerEventSuccess) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneSuccess);
-            consumed = true;
-        } else if(event.event == NfcMagicWorkerEventFail) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWipeFail);
-            consumed = true;
-        } else if(event.event == NfcMagicWorkerEventWrongCard) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneNotMagic);
-            consumed = true;
-        } else if(event.event == NfcMagicWorkerEventCardDetected) {
+        if(event.event == NfcMagicCustomEventCardDetected) {
             scene_manager_set_scene_state(
-                nfc_magic->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardFound);
-            nfc_magic_scene_wipe_setup_view(nfc_magic);
+                instance->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardFound);
+            nfc_magic_scene_wipe_setup_view(instance);
             consumed = true;
-        } else if(event.event == NfcMagicWorkerEventNoCardDetected) {
+        } else if(event.event == NfcMagicCustomEventCardLost) {
             scene_manager_set_scene_state(
-                nfc_magic->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
-            nfc_magic_scene_wipe_setup_view(nfc_magic);
+                instance->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
+            nfc_magic_scene_wipe_setup_view(instance);
+            consumed = true;
+        } else if(event.event == NfcMagicCustomEventWorkerSuccess) {
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneSuccess);
+            consumed = true;
+        } else if(event.event == NfcMagicCustomEventWorkerFail) {
+            scene_manager_next_scene(instance->scene_manager, NfcMagicSceneWipeFail);
             consumed = true;
         }
     }
+
     return consumed;
 }
 
 void nfc_magic_scene_wipe_on_exit(void* context) {
-    NfcMagic* nfc_magic = context;
+    NfcMagicApp* instance = context;
 
-    nfc_magic_worker_stop(nfc_magic->worker);
+    if(instance->protocol == NfcMagicProtocolGen1) {
+        gen1a_poller_stop(instance->gen1a_poller);
+        gen1a_poller_free(instance->gen1a_poller);
+    } else {
+        gen4_poller_stop(instance->gen4_poller);
+        gen4_poller_free(instance->gen4_poller);
+    }
     scene_manager_set_scene_state(
-        nfc_magic->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
+        instance->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
     // Clear view
-    popup_reset(nfc_magic->popup);
+    popup_reset(instance->popup);
 
-    nfc_magic_blink_stop(nfc_magic);
+    nfc_magic_app_blink_stop(instance);
 }
