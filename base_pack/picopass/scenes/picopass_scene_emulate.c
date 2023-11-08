@@ -1,10 +1,11 @@
 #include "../picopass_i.h"
 #include <dolphin/dolphin.h>
 
-void picopass_emulate_worker_callback(PicopassWorkerEvent event, void* context) {
-    furi_assert(context);
-    Picopass* picopass = context;
-    view_dispatcher_send_custom_event(picopass->view_dispatcher, event);
+NfcCommand picopass_scene_listener_callback(PicopassListenerEvent event, void* context) {
+    UNUSED(event);
+    UNUSED(context);
+
+    return NfcCommandContinue;
 }
 
 void picopass_scene_emulate_on_enter(void* context) {
@@ -17,18 +18,11 @@ void picopass_scene_emulate_on_enter(void* context) {
     widget_add_string_element(widget, 89, 32, AlignCenter, AlignTop, FontPrimary, "Emulating");
     widget_add_string_element(widget, 89, 42, AlignCenter, AlignTop, FontPrimary, "PicoPass");
 
-    // Setup view
     view_dispatcher_switch_to_view(picopass->view_dispatcher, PicopassViewWidget);
-
-    // Start worker
-    picopass_worker_start(
-        picopass->worker,
-        PicopassWorkerStateEmulate,
-        &picopass->dev->dev_data,
-        picopass_emulate_worker_callback,
-        picopass);
-
     picopass_blink_emulate_start(picopass);
+
+    picopass->listener = picopass_listener_alloc(picopass->nfc, &picopass->dev->dev_data);
+    picopass_listener_start(picopass->listener, picopass_scene_listener_callback, picopass);
 }
 
 bool picopass_scene_emulate_on_event(void* context, SceneManagerEvent event) {
@@ -49,9 +43,8 @@ void picopass_scene_emulate_on_exit(void* context) {
     Picopass* picopass = context;
 
     picopass_blink_stop(picopass);
-
-    // Stop worker
-    picopass_worker_stop(picopass->worker);
+    picopass_listener_stop(picopass->listener);
+    picopass_listener_free(picopass->listener);
 
     // Clear view
     widget_reset(picopass->widget);
