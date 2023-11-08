@@ -57,6 +57,8 @@ void nfc_poller_free(NfcPoller* instance);
  */
 void nfc_poller_start(NfcPoller* instance, NfcGenericCallback callback, void* context);
 
+void nfc_poller_start_custom(NfcPoller* instance, NfcGenericCallback callback, void* context);
+
 /**
  * @brief Stop an NfcPoller instance.
  *
