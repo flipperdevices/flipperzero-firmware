@@ -84,7 +84,7 @@ bool totp_scene_authenticate_handle_event(
     }
 
     SceneState* scene_state = plugin_state->current_scene_state;
-    if(event->input.type == InputTypeShort) {
+    if(event->input.type == InputTypePress) {
         switch(event->input.key) {
         case InputKeyUp:
             if(scene_state->code_length < MAX_CODE_LENGTH) {
@@ -110,8 +110,41 @@ bool totp_scene_authenticate_handle_event(
                 scene_state->code_length++;
             }
             break;
-        case InputKeyOk:
+        case InputKeyOk: {
+            CryptoSeedIVResult seed_result = totp_crypto_seed_iv(
+                &plugin_state->crypto_settings,
+                &scene_state->code_input[0],
+                scene_state->code_length);
+
+            if(seed_result & CryptoSeedIVResultFlagSuccess &&
+               seed_result & CryptoSeedIVResultFlagNewCryptoVerifyData) {
+                totp_config_file_update_crypto_signatures(plugin_state);
+            }
+
+            if(totp_crypto_verify_key(&plugin_state->crypto_settings)) {
+                totp_config_file_ensure_latest_encryption(
+                    plugin_state, &scene_state->code_input[0], scene_state->code_length);
+                totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
+            } else {
+                memset(&scene_state->code_input[0], 0, MAX_CODE_LENGTH);
+                memset(&plugin_state->crypto_settings.iv[0], 0, CRYPTO_IV_LENGTH);
+                scene_state->code_length = 0;
+
+                DialogMessage* message = dialog_message_alloc();
+                dialog_message_set_buttons(message, "Try again", NULL, NULL);
+                dialog_message_set_header(
+                    message,
+                    "You entered\ninvalid PIN",
+                    SCREEN_WIDTH_CENTER - 25,
+                    SCREEN_HEIGHT_CENTER - 5,
+                    AlignCenter,
+                    AlignCenter);
+                dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
+                dialog_message_show(plugin_state->dialogs_app, message);
+                dialog_message_free(message);
+            }
             break;
+        }
         case InputKeyBack:
             if(scene_state->code_length > 0) {
                 scene_state->code_input[scene_state->code_length - 1] = 0;
@@ -120,39 +153,6 @@ bool totp_scene_authenticate_handle_event(
             break;
         default:
             break;
-        }
-    } else if(event->input.type == InputTypeRelease && event->input.key == InputKeyOk) {
-        CryptoSeedIVResult seed_result = totp_crypto_seed_iv(
-            &plugin_state->crypto_settings, &scene_state->code_input[0], scene_state->code_length);
-
-        if(seed_result & CryptoSeedIVResultFlagSuccess &&
-           seed_result & CryptoSeedIVResultFlagNewCryptoVerifyData) {
-            totp_config_file_update_crypto_signatures(plugin_state);
-        }
-
-        if(totp_crypto_verify_key(&plugin_state->crypto_settings)) {
-            FURI_LOG_D(LOGGING_TAG, "PIN is valid");
-            totp_config_file_ensure_latest_encryption(
-                plugin_state, &scene_state->code_input[0], scene_state->code_length);
-            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
-        } else {
-            FURI_LOG_D(LOGGING_TAG, "PIN is NOT valid");
-            memset(&scene_state->code_input[0], 0, MAX_CODE_LENGTH);
-            memset(&plugin_state->crypto_settings.iv[0], 0, CRYPTO_IV_LENGTH);
-            scene_state->code_length = 0;
-
-            DialogMessage* message = dialog_message_alloc();
-            dialog_message_set_buttons(message, "Try again", NULL, NULL);
-            dialog_message_set_header(
-                message,
-                "You entered\ninvalid PIN",
-                SCREEN_WIDTH_CENTER - 25,
-                SCREEN_HEIGHT_CENTER - 5,
-                AlignCenter,
-                AlignCenter);
-            dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
-            dialog_message_show(plugin_state->dialogs_app, message);
-            dialog_message_free(message);
         }
     }
 
