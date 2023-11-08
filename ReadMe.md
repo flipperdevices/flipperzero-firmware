@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1031-1757-0.93.1-ef656e6.tgz&channel=RM1031-1757-0.93.1-ef656e6&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1031-1757-0.93.1-ef656e6-NoAnim.tgz&channel=RM1031-1757-0.93.1-ef656e6-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1107-1320-0.93.1-1120ee6.tgz&channel=RM1107-1320-0.93.1-1120ee6&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1107-1320-0.93.1-1120ee6-NoAnim.tgz&channel=RM1107-1320-0.93.1-1120ee6-NoAnim&version=0.93.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -27,33 +27,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1106-1300-0.93.1-aa231de](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM1107-1301-0.93.1-1109702](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-07 12:02 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-07 12:02 EST`
-- Updated: [Hangman v1.1 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
-- Hangman Anime Dictionary (By RogueMaster)
-- Expanded Hangman Anime Dictionary (By RogueMaster)
-- [Add documentation and source URL about the AM_Q CC1101 preset #995 (By user890104)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/995)
-- Added: [City Bloxx (By Milk-Cool)](https://github.com/Milk-Cool/fz-citybloxx)
-- Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [Added IoProxXSF, Paradox, Indala26, Viking, Pyramid, Keri, and Jablotron to RFID Fuzzer #4 (By SkeletonMan03)](https://github.com/DarkFlippers/Multi_Fuzzer/pull/4)
-- Added: [BT Remote for Kodi (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/bt_hid_kodi)
-- Added: [Mouse Jacker for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/mousejacker_ms) `Req: NRF24`
-- Added: [NRF Sniffer for MS Mouse (Remixed By coded-with-claws)](https://github.com/coded-with-claws/flipperzero-tools/tree/main/applications_user/nrfsniff_ms) `Req: NRF24`
-- Updated: [ESP32 Camera Suite v1.3 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- [Passport settings now includes options for DEDSEC passport background style, DEDSEC passport image and Wrench set passport image (mood dependant) (By Kuronons)](https://github.com/Kuronons/FZ_graphics/commit/a2e5a1e1c9eaf99e063bd72df6d435fd40e7096c)
-- Updated: [Tetris v1.2 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game) [Improved tetris app (By noiob)](https://github.com/xMasterX/all-the-plugins/pull/25)
-- Updated: [BLE Spam v4.1 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) [Additional 200 devices (By Mr-Proxy-source) & Fix: Too huge VarItemList (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fd04e572c6634c558c80b121a920abeb3dab4f16)
-- Added: [SD SPI v0.2 (By Gl1tchub)](https://github.com/Gl1tchub/Flipperzero-SD-SPI) `Req: External SD Board`
-- U2F Moved in Apps from Main to USB
-- Patreon DBZ + ANIMSWITCHER Build Update: [Added stopoxy_goku_128x64 (By stopoxy)](https://github.com/stopoxy/FZAnimations/tree/main/stopoxy_goku_128x64)
-- [CFW Settings: Passport settings now includes options for Medeival passport background style and a Leeroy Jenkins profile image (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
-- Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- [CFW Settings: Passport settings: Updated AD Police passport background (By Kuronons)](https://github.com/Kuronons/FZ_graphics)
-- Updated: [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [Authenticator/TOTP v5.7.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [ESP32CAM Marauder v0.6.4 (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- Added Custom 1 and Custom 2 options to CFW Settings-Interface-Desktop-Animations to allow for two custom user defined background sets. Edit dolphin/manifest_Custom1.txt and dolphin/manifest_Custom2.txt on your SD Card in order to change these custom sets. (By RogueMaster)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-07 16:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-07 16:20 EST`
 
 ## IN THIS BRANCH:
 
@@ -87,7 +64,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - Updated: [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - App fixes to have resources in the app folders like OFW (By RogueMaster)
-- Updated a iButton, Infrared, RFID & SubGHz apps to have their CLI with the app folder again (By RogueMaster)
+- Updated iButton, Infrared, RFID & SubGHz apps to have their CLI with the app folder again (By RogueMaster)
 - Temp Fixes for SubGHz Registry files (By RogueMaster)
 - Fixes due to refactoring/OFW updates (By RogueMaster) for [Archive App (Internal) (By OFW with CFW Changes)], [Brainfuck v1.1 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck), [BLE Spam v4.1 (By Willy-JL et all)](https://github.com/noproto/apple_ble_spam_ofw), [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge), [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote), [ESP32 Gravity v0.6 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity), [ESP Flasher v1.2 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher), [Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal), [pForth (By twisted-pear)](https://github.com/twisted-pear/f0forth), [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker), [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507), [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker), [NFC Magic v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966), [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass), [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager), [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507), [Tetris v1.2 (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game), [UHF RFID WIP v1.1 (By frux-c)](https://github.com/frux-c/uhf_rfid), [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin), [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms), [USB Mass Storage v1.2 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage), [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) & [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
 - Updated: [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
@@ -156,6 +133,7 @@ $ ./fbt dolphin_ext
 
 ## All Changes and Features
 
+- Animations: [Added Custom 1 and Custom 2 options to CFW Settings-Interface-Desktop-Animations to allow for two custom user defined background sets. Edit dolphin/manifest_Custom1.txt and dolphin/manifest_Custom2.txt on your SD Card in order to change these custom sets. (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3e52a6f26d8fc9e25149dd7cb4622f0eaaa339db)
 - Animations: [CFW Settings for Desktop Animations Set Selector (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d07f27fd259ce049ca7b928a9dd3e8242a769d01) [Copy this to SD dolphin folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
 - Animations: Hold Center to change Flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Animations: iButton and RFID P0kem0n images [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/)
@@ -547,4 +525,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1031-1757-0.93.1-ef656e6.tgz&channel=RM1031-1757-0.93.1-ef656e6&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1031-1757-0.93.1-ef656e6-NoAnim.tgz&channel=RM1031-1757-0.93.1-ef656e6-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1107-1320-0.93.1-1120ee6.tgz&channel=RM1107-1320-0.93.1-1120ee6&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1107-1320-0.93.1-1120ee6-NoAnim.tgz&channel=RM1107-1320-0.93.1-1120ee6-NoAnim&version=0.93.1)
