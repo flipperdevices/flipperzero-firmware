@@ -68,6 +68,7 @@ class Display
     bool tteBar = false;
     bool draw_tft = false;
     bool exit_draw = false;
+    bool headless_mode = false;
 
     uint8_t TOP_FIXED_AREA_2 = 48;
     uint8_t print_delay_1, print_delay_2 = 10;

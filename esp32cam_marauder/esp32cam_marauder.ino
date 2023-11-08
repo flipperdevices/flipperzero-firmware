@@ -323,6 +323,17 @@ void setup()
   #ifdef HAS_SCREEN
     delay(2000);
 
+    // Do some stealth mode stuff
+    #ifdef HAS_BUTTONS
+      if (c_btn.justPressed()) {
+        display_obj.headless_mode = true;
+
+        backlightOff();
+
+        Serial.println("Headless Mode enabled");
+      }
+    #endif
+
     display_obj.clearScreen();
   
     display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);

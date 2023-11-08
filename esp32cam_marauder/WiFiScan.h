@@ -78,6 +78,11 @@
 #define WIFI_SCAN_EVIL_PORTAL 30
 #define WIFI_SCAN_GPS_DATA 31
 #define WIFI_SCAN_WAR_DRIVE 32
+#define WIFI_SCAN_STATION_WAR_DRIVE 33
+#define BT_SCAN_WAR_DRIVE 34
+#define BT_SCAN_WAR_DRIVE_CONT 35
+#define BT_ATTACK_SOUR_APPLE 36
+#define BT_ATTACK_SWIFTPAIR_SPAM 37
 
 #define GRAPH_REFRESH 100
 
@@ -246,7 +251,10 @@ class WiFiScan
     void save_mac(unsigned char* mac);
     void clearMacHistory();
     void executeWarDrive();
+    void executeSourApple();
+    void executeSwiftpairSpam();
     void startWardriverWiFi();
+    void generateRandomMac(uint8_t* mac);
 
     void startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_string);
 
@@ -278,6 +286,8 @@ class WiFiScan
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
     void RunPacketMonitor(uint8_t scan_mode, uint16_t color);
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
+    void RunSourApple(uint8_t scan_mode, uint16_t color);
+    void RunSwiftpairSpam(uint8_t scan_mode, uint16_t color);
     void RunLvJoinWiFi(uint8_t scan_mode, uint16_t color);
     void RunEvilPortal(uint8_t scan_mode, uint16_t color);
     bool checkMem();
@@ -340,6 +350,7 @@ class WiFiScan
     void main(uint32_t currentTime);
     void StartScan(uint8_t scan_mode, uint16_t color = 0);
     void StopScan(uint8_t scan_mode);
+    const char* generateRandomName();
     //void addLog(String log, int len);
     
     static void getMAC(char *addr, uint8_t* data, uint16_t offset);

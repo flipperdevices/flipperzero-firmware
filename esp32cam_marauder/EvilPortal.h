@@ -99,6 +99,8 @@ class EvilPortal {
   public:
     EvilPortal();
 
+    String target_html_name = "index.html";
+
     String get_user_name();
     String get_password();
     void addLog(String log, int len);

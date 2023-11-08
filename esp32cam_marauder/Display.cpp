@@ -25,7 +25,7 @@ void Display::RunSetup()
   #endif
 
   #ifdef MARAUDER_M5STICKC
-    tft.setRotation(3);
+    tft.setRotation(1);
   #endif
 
   tft.setCursor(0, 0);
