@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,44.0,,
+Version,v,44.1,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2048,6 +2048,7 @@ Function,-,srand48,void,long
 Function,-,srandom,void,unsigned
 Function,+,sscanf,int,"const char*, const char*, ..."
 Function,+,storage_common_copy,FS_Error,"Storage*, const char*, const char*"
+Function,+,storage_common_equivalent_path,_Bool,"Storage*, const char*, const char*, _Bool"
 Function,+,storage_common_exists,_Bool,"Storage*, const char*"
 Function,+,storage_common_fs_info,FS_Error,"Storage*, const char*, uint64_t*, uint64_t*"
 Function,+,storage_common_merge,FS_Error,"Storage*, const char*, const char*"

@@ -300,6 +300,33 @@ FS_Error storage_common_migrate(Storage* storage, const char* source, const char
  */
 bool storage_common_exists(Storage* storage, const char* path);
 
+/**
+ * @brief Test whether two paths are equivalent.
+ *
+ * This function will resolve aliases and apply filesystem-specific
+ * rules to determine whether the two given paths are equivalent.
+ *
+ * Examples:
+ * - /int/text and /ext/test -> false (Different storages),
+ * - /int/Test and /int/test -> false (Case-sensitive storage),
+ * - /ext/Test and /ext/test -> true (Case-insensitive storage).
+ *
+ * If the truncate parameter is set to true, the second path will be
+ * truncated to be no longer than the first one. It is useful to determine
+ * whether path2 is a subdirectory of path1.
+ *
+ * @param storage pointer to the storage API instance.
+ * @param path1 pointer to a zero-terminated string containing the first path.
+ * @param path2 pointer to a zero-terminated string containing the second path.
+ * @param truncate whether to truncate path2 to be no longer than path1.
+ * @return true if paths are equivalent, false otherwise.
+ */
+bool storage_common_equivalent_path(
+    Storage* storage,
+    const char* path1,
+    const char* path2,
+    bool truncate);
+
 /******************* Error Functions *******************/
 
 /** Retrieves the error text from the error id
