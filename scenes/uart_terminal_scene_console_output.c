@@ -16,9 +16,18 @@ void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
     }
 
     // Null-terminate buf and append to text box store
-    // TODO: stack overflow!!
-    buf[len] = '\0';
-    furi_string_cat_printf(app->text_box_store, "%s", buf);
+    uint8_t *buf2 = malloc(sizeof(uint8_t) * (len + 1));
+    /* If it fails leave in the stack overflow that was previously there (lazy) */
+    if (buf2 == NULL) {
+        buf2 = buf;
+    }
+    memcpy(buf2, buf, len);
+    buf2[len] = '\0';
+    furi_string_cat_printf(app->text_box_store, "%s", buf2);
+    /* Free buf2 if we malloc'd it */
+    if (buf != buf2) {
+        free(buf2);
+    }
 
     /* Appending to the text box resets the view to its default. If it's been
        more than 10 seconds since running the command, focus the text box at end */
