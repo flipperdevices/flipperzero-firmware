@@ -129,8 +129,6 @@ struct UART_TerminalApp {
     VariableItemList *help_info_menu_list, *attacks_mana_menu_list, *purge_menu_list;
     ByteInput *settings_mac_bytes;
 
-    uint8_t mac_bytes[NUM_MAC_BYTES];
-
     UART_TerminalUart* uart;
     int selected_menu_items[GRAVITY_MENU_COUNT];
     int selected_menu_options[GRAVITY_MENU_COUNT][MAX_MENU_ITEMS];
@@ -141,13 +139,14 @@ struct UART_TerminalApp {
     bool show_stopscan_tip;
     int BAUDRATE;
     int TERMINAL_MODE; //1=AT mode, 0=other mode
-    bool free_command;              /* Does selected_tx_string need to be free'd after send? */
+    bool free_command;             /* Does selected_tx_string need to be free'd after send? */
 
     GravityCommand gravityCommand; /* Gravity command */
     GravityMenu currentMenu;
     int purgeStrategy;
     int purgeAge;
     int purgeRSSI;
+    uint8_t mac_bytes[NUM_MAC_BYTES];
 
     uint8_t syncBuffer[SYNC_BUFFER_SIZE];
     int syncBufLen;
