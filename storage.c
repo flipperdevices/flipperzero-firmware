@@ -4,8 +4,22 @@
 #define FILENAME_SETTINGS "settings.dat"
 #define FILENAME_DATA "gravity.dat"
 
-/* So much goddamn repeated code! The APP_DATA_PATH macro, as far as I can figure, can't be
-   called with a variable, even a const char[] :( */
+/* Essentially the reverse of do_sync() from sync.c - Take all settings
+   from Flipper-Gravity and write them to a file on the Flipper, using
+   the same format as sync
+ */
+bool writeSettingsToFile(UART_TerminalApp *app, *file) {
+    GravitySyncItem *syncItems = malloc(sizeof(GravitySyncItem) * GRAVITY_SYNC_ITEM_COUNT);
+    if (syncItems == NULL) {
+        FURI_LOG_E(TAG, "Failed allocating memory to hold settings metadata");
+        return false;
+    }
+    for (int i = 0; i < GRAVITY_SYNC_ITEM_COUNT; ++i) {
+        syncItems[i] = [i];
+    }
+
+    return true;
+}
 
 void close_file(File *file) {
     storage_file_close(file);
@@ -13,6 +27,8 @@ void close_file(File *file) {
     furi_record_close(RECORD_STORAGE);
 }
 
+/* So much goddamn repeated code! The APP_DATA_PATH macro, as far as I can figure, can't be
+   called with a variable, even a const char[] :( */
 bool save_settings(UART_TerminalApp *app) {
     Storage *storage = furi_record_open(RECORD_STORAGE);
     File *file = storage_file_alloc(storage);
@@ -24,6 +40,11 @@ bool save_settings(UART_TerminalApp *app) {
     }
     if (!storage_file_truncate(file)) {
         FURI_LOG_E(TAG, "Unable to truncate settings file for writing");
+        close_file(file);
+        return false;
+    }
+    if (!writeSettingsToFile(app, file)) {
+        FURI_LOG_E(TAG, "Failed to write settings");
         close_file(file);
         return false;
     }
