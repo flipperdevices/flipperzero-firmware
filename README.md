@@ -28,7 +28,7 @@ Questions are stored as plain text files in `question_lists`. Feel free to corre
 
 Questions then trasformed into C file with
 ```
-python3 applications_user/flipper_questions/generate_questions.py
+python3 <path_to_fam>/generate_questions.py <path_to_fam>
 ```
 or
 ```

@@ -1,13 +1,15 @@
 import os
+import sys
 
 char_type = "char"
-app_name = "flipper_questions"
-app_path = f"./applications_user/{app_name}"
-qustions_path = f"{app_path}/question_lists/"
-lists = {}
-questions_output = f"{app_path}/qdb.h"
 
-prefix = "#ifndef QDB\n#define QDB\n#include <furi.h>\n"
+app_path = "." if len(sys.argv) < 2 else sys.argv[1]
+qustions_path = os.path.join(app_path, "question_lists")
+questions_output = os.path.join(app_path, "qdb.h")
+
+lists = {}
+
+prefix = "// This file was generated with generate_questions.py\n#ifndef QDB\n#define QDB\n#include <furi.h>\n"
 struct = f"typedef {char_type} q_char;\n" + "typedef struct QuestionList {const char * name; uint16_t size; q_char** questions;} QuestionList;"
 
 for file in [os.path.join(qustions_path, entry) for entry in os.listdir(qustions_path)]:
