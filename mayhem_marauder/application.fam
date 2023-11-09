@@ -1,7 +1,7 @@
 App(
     appid="mayhem_marauder",
     name="[MAYHEM] Marauder",
-    fap_version=(6,0),
+    fap_version=(6,4),
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_marauder_app",
     requires=["gui"],
