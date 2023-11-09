@@ -568,7 +568,7 @@ int32_t blackjack_app(void* p) {
     FuriTimer* timer = furi_timer_alloc(update_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 25);
 
-    Gui* gui = furi_record_open("gui");
+    Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     AppEvent event;
@@ -610,12 +610,10 @@ int32_t blackjack_app(void* p) {
                 tick(game_state);
                 processing = game_state->processing;
             }
-            // } else {
-            //     FURI_LOG_D(APP_NAME, "osMessageQueue: event timeout");
-            // event timeout
         }
-        view_port_update(view_port);
+
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);
