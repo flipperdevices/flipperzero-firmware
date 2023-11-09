@@ -29,47 +29,47 @@
 #define HTML_FOLDER ANY_PATH("apps_data/evil_portal/html")
 
 struct Evil_PortalApp {
-  Gui *gui;
-  ViewDispatcher *view_dispatcher;
-  SceneManager *scene_manager;
+    Gui* gui;
+    ViewDispatcher* view_dispatcher;
+    SceneManager* scene_manager;
 
-  FuriString* portal_logs;
-  const char *command_queue[1];
-  int command_index;
-  bool has_command_queue;
+    FuriString* portal_logs;
+    const char* command_queue[1];
+    int command_index;
+    bool has_command_queue;
 
-  FuriString *text_box_store;
-  size_t text_box_store_strlen;
-  TextBox *text_box;
+    FuriString* text_box_store;
+    size_t text_box_store_strlen;
+    TextBox* text_box;
 
-  VariableItemList *var_item_list;
-  Evil_PortalUart *uart;
-  TextInput* text_input;
-  DialogsApp* dialogs;
-  FuriString* file_path;
-  Loading* loading;
-  ViewStack* view_stack;
+    VariableItemList* var_item_list;
+    Evil_PortalUart* uart;
+    TextInput* text_input;
+    DialogsApp* dialogs;
+    FuriString* file_path;
+    Loading* loading;
+    ViewStack* view_stack;
 
-  int selected_menu_index;
-  int selected_option_index[NUM_MENU_ITEMS];
-  const char *selected_tx_string;
-  bool is_command;
-  bool is_custom_tx_string;
-  bool focus_console_start;
-  bool show_stopscan_tip;
-  bool sent_ap;
-  bool sent_html;
-  bool sent_reset;
-  int BAUDRATE;
-  char text_store[2][128 + 1];
+    int selected_menu_index;
+    int selected_option_index[NUM_MENU_ITEMS];
+    const char* selected_tx_string;
+    bool is_command;
+    bool is_custom_tx_string;
+    bool focus_console_start;
+    bool show_stopscan_tip;
+    bool sent_ap;
+    bool sent_html;
+    bool sent_reset;
+    int BAUDRATE;
+    char text_store[2][128 + 1];
 
-  uint8_t *index_html;
-  uint8_t *ap_name;
+    uint8_t* index_html;
+    uint8_t* ap_name;
 };
 
 typedef enum {
-  Evil_PortalAppViewVarItemList,
-  Evil_PortalAppViewConsoleOutput,
-  Evil_PortalAppViewStartPortal,
-  Evil_PortalAppViewTextInput,
+    Evil_PortalAppViewVarItemList,
+    Evil_PortalAppViewConsoleOutput,
+    Evil_PortalAppViewStartPortal,
+    Evil_PortalAppViewTextInput,
 } Evil_PortalAppView;
