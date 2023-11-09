@@ -355,7 +355,7 @@ void code_128_loader(BarcodeData* barcode_data) {
 void code_128c_loader(BarcodeData* barcode_data) {
     int barcode_length = furi_string_size(barcode_data->raw_data);
 
-    //the start code for character set C 
+    //the start code for character set C
     int start_code_value = 105;
 
     //The bits for the start code
@@ -396,14 +396,14 @@ void code_128c_loader(BarcodeData* barcode_data) {
     } else {
         FuriString* value = furi_string_alloc();
         FuriString* char_bits = furi_string_alloc();
-        for(int i = 0; i < barcode_length; i+=2) {
+        for(int i = 0; i < barcode_length; i += 2) {
             char barcode_char1 = furi_string_get_char(barcode_data->raw_data, i);
-            char barcode_char2 = furi_string_get_char(barcode_data->raw_data, i+1);
+            char barcode_char2 = furi_string_get_char(barcode_data->raw_data, i + 1);
             FURI_LOG_I(TAG, "c128c bc1='%c' bc2='%c'", barcode_char1, barcode_char2);
 
             char current_chars[4];
             snprintf(current_chars, 3, "%c%c", barcode_char1, barcode_char2);
-	    FURI_LOG_I(TAG, "c128c current_chars='%s'", current_chars);
+            FURI_LOG_I(TAG, "c128c current_chars='%s'", current_chars);
 
             //using the value of the characters, get the characters bits
             if(!flipper_format_read_string(ff, current_chars, char_bits)) {
@@ -434,13 +434,12 @@ void code_128c_loader(BarcodeData* barcode_data) {
         }
         //calculate the check digit and convert it into a c string for lookup in the encoding table
         final_check_digit = checksum_adder % 103;
-	FURI_LOG_I(TAG, "c128c finale_check_digit=%d", final_check_digit);
+        FURI_LOG_I(TAG, "c128c finale_check_digit=%d", final_check_digit);
 
-	int length = snprintf(NULL, 0, "%d", final_check_digit);
-	if (final_check_digit < 100)
-            length=2;
-        char* final_check_digit_string = malloc(length+1);
-	snprintf(final_check_digit_string, length + 1, "%02d", final_check_digit);
+        int length = snprintf(NULL, 0, "%d", final_check_digit);
+        if(final_check_digit < 100) length = 2;
+        char* final_check_digit_string = malloc(length + 1);
+        snprintf(final_check_digit_string, length + 1, "%02d", final_check_digit);
 
         //after the checksum has been calculated, add the bits to the full barcode
         if(!flipper_format_read_string(ff, final_check_digit_string, char_bits)) {
@@ -475,7 +474,7 @@ void code_128c_loader(BarcodeData* barcode_data) {
     furi_string_free(barcode_bits);
 }
 
-void codabar_loader(BarcodeData* barcode_data){
+void codabar_loader(BarcodeData* barcode_data) {
     int barcode_length = furi_string_size(barcode_data->raw_data);
 
     int min_digits = barcode_data->type_obj->min_digits;
