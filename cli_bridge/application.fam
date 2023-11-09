@@ -3,7 +3,7 @@ App(
     name="CLI-GUI Bridge",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="cligui_main",
-    requires=["gui","cli"],
+    requires=["gui", "cli"],
     stack_size=8 * 1024,
     fap_icon="cligui.png",
     fap_category="Tools",
