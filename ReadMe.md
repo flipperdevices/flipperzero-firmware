@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP v5.7.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Lowered less common AM_Q preset option so it does not interfere with normal SubGHz Read RAW config (By RogueMaster)
 - Updated: [Hangman v1.2 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
+- [Smooth Mouse Acceleration in BT and USB Mouse (By Leeroy)](https://github.com/LeeroysHub/RM-Flipper/commit/b86b359f1dd96aae6322d8091924202ae7ac8208)
 
 <a name="release">
 
