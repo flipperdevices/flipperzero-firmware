@@ -12,7 +12,4 @@ void bf_dev_env_free(BFDevEnv* devEnv);
 
 View* bf_dev_env_get_view(BFDevEnv* devEnv);
 
-void bf_dev_env_set_ok(
-    BFDevEnv* devEnv,
-    DevEnvOkCallback callback,
-    void* context);
+void bf_dev_env_set_ok(BFDevEnv* devEnv, DevEnvOkCallback callback, void* context);
