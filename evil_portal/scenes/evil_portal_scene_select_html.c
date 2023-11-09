@@ -39,12 +39,7 @@ void evil_portal_scene_select_html_on_enter(void* context) {
         evil_portal_show_loading_popup(app, false);
     }
 
-    if(success) {
-        scene_manager_search_and_switch_to_previous_scene(
-            app->scene_manager, Evil_PortalSceneStart);
-    } else {
-        scene_manager_previous_scene(app->scene_manager);
-    }
+    scene_manager_search_and_switch_to_previous_scene(app->scene_manager, Evil_PortalSceneStart);
 }
 
 bool evil_portal_scene_select_html_on_event(void* context, SceneManagerEvent event) {
