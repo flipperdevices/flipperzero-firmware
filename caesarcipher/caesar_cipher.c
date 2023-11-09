@@ -62,6 +62,7 @@ static void text_input_callback(void* ctx) {
     furi_assert(ctx);
     CaesarState* caesar_state = ctx;
     furi_mutex_acquire(caesar_state->mutex, FuriWaitForever);
+
     FURI_LOG_D("caesar_cipher", "Input text: %s", caesar_state->input);
     // this is where we build the output.
     string_to_uppercase(caesar_state->input);
@@ -139,7 +140,7 @@ int32_t caesar_cipher_app() {
     FURI_LOG_D("ceasar_cipher", "starting view dispatcher");
     view_dispatcher_set_navigation_event_callback(
         caesar_state->view_dispatcher, back_event_callback);
-    view_dispatcher_set_event_callback_context(caesar_state->view_dispatcher, &state_mutex);
+    view_dispatcher_set_event_callback_context(caesar_state->view_dispatcher, caesar_state);
     view_dispatcher_switch_to_view(caesar_state->view_dispatcher, 0);
     view_dispatcher_run(caesar_state->view_dispatcher);
 
