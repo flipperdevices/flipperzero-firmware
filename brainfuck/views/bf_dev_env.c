@@ -20,6 +20,12 @@ typedef struct {
     int right;
 } bMapping;
 
+#ifdef FW_ORIGIN_Official
+#define FONT_NAME FontSecondary
+#else
+#define FONT_NAME FontBatteryPercent
+#endif
+
 static bool bf_dev_process_up(BFDevEnv* devEnv);
 static bool bf_dev_process_down(BFDevEnv* devEnv);
 static bool bf_dev_process_left(BFDevEnv* devEnv);
@@ -63,7 +69,7 @@ static void bf_dev_draw_button(Canvas* canvas, int x, int y, bool selected, cons
     if(selected) {
         canvas_draw_rbox(canvas, x, y, BT_X, BT_Y, 3);
         canvas_invert_color(canvas);
-        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_set_font(canvas, FONT_NAME);
         canvas_draw_str_aligned(
             canvas, x + (BT_X / 2), y + (BT_Y / 2) - 1, AlignCenter, AlignCenter, lbl);
         canvas_invert_color(canvas);
@@ -73,7 +79,7 @@ static void bf_dev_draw_button(Canvas* canvas, int x, int y, bool selected, cons
         canvas_draw_rbox(canvas, x + 2, y - 1, BT_X - 2, BT_Y - 1, 3);
         canvas_invert_color(canvas);
         canvas_draw_rframe(canvas, x, y, BT_X, BT_Y, 3);
-        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_set_font(canvas, FONT_NAME);
         canvas_draw_str_aligned(
             canvas, x + (BT_X / 2), y + (BT_Y / 2) - 1, AlignCenter, AlignCenter, lbl);
     }
@@ -131,7 +137,7 @@ static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
     //textbox
     //grossly overcomplicated. not fixing it.
     canvas_draw_rframe(canvas, 1, 1, 126, 33, 2);
-    canvas_set_font(canvas, FontBatteryPercent);
+    canvas_set_font(canvas, FONT_NAME);
 
     int dbOffset = 0;
     if(appDev->dataSize > 72) {

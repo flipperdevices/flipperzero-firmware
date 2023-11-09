@@ -37,7 +37,6 @@ typedef unsigned char byte;
 #include <toolbox/stream/file_stream.h>
 
 #include <notification/notification_messages.h>
-#include <notification/notification_app.h>
 
 #include <assets_icons.h>
 
