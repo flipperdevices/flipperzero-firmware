@@ -22,8 +22,6 @@
 #include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
 
-#include <assets_icons.h>
-
 #define ESP_FLASHER_TEXT_BOX_STORE_SIZE (4096)
 
 #define ESP_APP_FOLDER_USER "apps_data/esp_flasher"
@@ -67,7 +65,6 @@ struct EspFlasherApp {
 
     bool reset;
     bool boot;
-    bool quickflash;
 
     SwitchFirmware switch_fw;
 

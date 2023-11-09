@@ -68,7 +68,6 @@ EspFlasherApp* esp_flasher_app_alloc() {
 
     app->reset = false;
     app->boot = false;
-    app->quickflash = false;
 
     scene_manager_next_scene(app->scene_manager, EspFlasherSceneStart);
 
