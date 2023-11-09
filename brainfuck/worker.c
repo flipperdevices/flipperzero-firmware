@@ -24,50 +24,54 @@ int stackSizeReal = 0;
 
 BFApp* wrkrApp = 0;
 
-void killThread(){
+void killThread() {
     killswitch = true;
 }
 
-bool validateInstPtr(){
-    if(instPtr > instCount || instPtr < 0){
+bool validateInstPtr() {
+    if(instPtr > instCount || instPtr < 0) {
         return false;
     }
     return true;
 }
 
-bool validateStackPtr(){
-    if(stackPtr > stackSize || stackPtr < 0){
+bool validateStackPtr() {
+    if(stackPtr > stackSize || stackPtr < 0) {
         return false;
     }
     return true;
 }
 
-char* workerGetOutput(){
+char* workerGetOutput() {
     return wOutput;
 }
 
-int getStackSize(){
+int getStackSize() {
     return stackSizeReal;
 }
 
-int getOpCount(){
+int getOpCount() {
     return runOpCount;
 }
 
-int getStatus(){
+int getStatus() {
     return status;
 }
 
-void initWorker(BFApp* app){
+void initWorker(BFApp* app) {
     wrkrApp = app;
 
     //rebuild output
-    if(wOutput){ free(wOutput); }
+    if(wOutput) {
+        free(wOutput);
+    }
     wOutput = (char*)malloc(BF_OUTPUT_SIZE);
     wOutputPtr = 0;
 
     //rebuild stack
-    if(bfStack){ free(bfStack); }
+    if(bfStack) {
+        free(bfStack);
+    }
     bfStack = (uint8_t*)malloc(BF_STACK_INITIAL_SIZE);
     memset(bfStack, 0x00, BF_STACK_INITIAL_SIZE);
     stackSize = BF_STACK_INITIAL_SIZE;
@@ -88,16 +92,19 @@ void initWorker(BFApp* app){
     status = 0;
 }
 
-void rShift(){
+void rShift() {
     runOpCount++;
     stackPtr++;
-    if(!validateStackPtr()){ status = 2; return; }
+    if(!validateStackPtr()) {
+        status = 2;
+        return;
+    }
 
-    while(stackPtr > stackSize){
+    while(stackPtr > stackSize) {
         stackSize += BF_STACK_STEP_SIZE;
         void* tmp = realloc(bfStack, stackSize);
 
-        if(!tmp){ 
+        if(!tmp) {
             status = 2;
             return;
         }
@@ -105,72 +112,94 @@ void rShift(){
         memset((tmp + stackSize) - BF_STACK_STEP_SIZE, 0x00, BF_STACK_STEP_SIZE);
         bfStack = (uint8_t*)tmp;
     };
-    if(stackPtr > stackSizeReal){ 
-        stackSizeReal = stackPtr; 
+    if(stackPtr > stackSizeReal) {
+        stackSizeReal = stackPtr;
     }
 }
 
-void lShift(){
+void lShift() {
     runOpCount++;
     stackPtr--;
-    if(!validateStackPtr()){ status = 2; return; }
+    if(!validateStackPtr()) {
+        status = 2;
+        return;
+    }
 }
 
-void inc(){
+void inc() {
     runOpCount++;
-    if(!validateStackPtr()){ status = 2; return; }
+    if(!validateStackPtr()) {
+        status = 2;
+        return;
+    }
     bfStack[stackPtr]++;
 }
 
-void dec(){
+void dec() {
     runOpCount++;
-    if(!validateStackPtr()){ status = 2; return; }
+    if(!validateStackPtr()) {
+        status = 2;
+        return;
+    }
     bfStack[stackPtr]--;
 }
 
-void print(){
+void print() {
     runOpCount++;
     wOutput[wOutputPtr] = bfStack[stackPtr];
     wOutputPtr++;
-    if(wOutputPtr > (BF_OUTPUT_SIZE - 1)){ wOutputPtr = 0;}
+    if(wOutputPtr > (BF_OUTPUT_SIZE - 1)) {
+        wOutputPtr = 0;
+    }
 }
 
-void input(){
+void input() {
     runOpCount++;
-    
+
     bfStack[stackPtr] = (uint8_t)wInput[wInputPtr];
-    if(wInput[wInputPtr] == 0x00 || wInputPtr >= 64){
+    if(wInput[wInputPtr] == 0x00 || wInputPtr >= 64) {
         wInputPtr = 0;
-    }
-    else{
+    } else {
         wInputPtr++;
     }
 }
 
 void loop() {
     runOpCount++;
-	if (bfStack[stackPtr] == 0) {
-		int loopCount = 1;
-		while (loopCount > 0) {
-			instPtr++;
-            if(!validateInstPtr()){ status = 2; return; }
-			if (inst[instPtr] == '[') { loopCount++; }
-			else if (inst[instPtr] == ']') { loopCount--; }
-		}
-	}
+    if(bfStack[stackPtr] == 0) {
+        int loopCount = 1;
+        while(loopCount > 0) {
+            instPtr++;
+            if(!validateInstPtr()) {
+                status = 2;
+                return;
+            }
+            if(inst[instPtr] == '[') {
+                loopCount++;
+            } else if(inst[instPtr] == ']') {
+                loopCount--;
+            }
+        }
+    }
 }
 
 void endLoop() {
     runOpCount++;
-	if (bfStack[stackPtr] != 0) {
-		int loopCount = 1;
-		while (loopCount > 0) {
-			instPtr--;
-            if(!validateInstPtr()){ status = 2; return; }
-			if (inst[instPtr] == ']') { loopCount++; }
-			else if (inst[instPtr] == '[') { loopCount--; }
-		}
-	}
+    if(bfStack[stackPtr] != 0) {
+        int loopCount = 1;
+        while(loopCount > 0) {
+            instPtr--;
+            if(!validateInstPtr()) {
+                status = 2;
+                return;
+            }
+            if(inst[instPtr] == ']') {
+                loopCount++;
+            } else if(inst[instPtr] == '[') {
+                loopCount--;
+            }
+        }
+    }
 }
 
 static const NotificationSequence led_on = {
@@ -189,66 +218,71 @@ void input_kill(void* _ctx) {
     killswitch = true;
 }
 
-void beginWorker(){
+void beginWorker() {
     status = 1;
 
     //redefined from furi_hal_resources.c
     const GpioPin gpio_button_back = {.port = GPIOC, .pin = LL_GPIO_PIN_13};
 
-    while (inst[instPtr] != 0x00) {
-
-        if(runOpCount % 500 == 0){ 
-            text_box_set_text(wrkrApp->text_box, workerGetOutput()); 
+    while(inst[instPtr] != 0x00) {
+        if(runOpCount % 500 == 0) {
+            text_box_set_text(wrkrApp->text_box, workerGetOutput());
             notification_message(wrkrApp->notifications, &led_on);
         }
 
         //status 2 indicates failure
-        if(status == 2){ status = 0; break; }
+        if(status == 2) {
+            status = 0;
+            break;
+        }
 
         //read back button directly to avoid weirdness in furi
         if(killswitch || !furi_hal_gpio_read(&gpio_button_back)) {
-            status = 0; 
-            killswitch = false; 
-            break; 
+            status = 0;
+            killswitch = false;
+            break;
         }
 
-        switch (inst[instPtr]) {
-            case '>':
-                rShift();
-                break;
-            case '<':
-                lShift();
-                break;
+        switch(inst[instPtr]) {
+        case '>':
+            rShift();
+            break;
+        case '<':
+            lShift();
+            break;
 
-            case '+':
-                inc();
-                break;
-                
-            case '-':
-                dec();
-                break;
-                
-            case '.':
-                print();
-                break;
-            
-            case ',':
-                input();
-                break;
-                
-            case '[':
-                loop();
-                break;
-                
-            case ']':
-                endLoop();
-                break;
-                
-            default:
-                break;
+        case '+':
+            inc();
+            break;
+
+        case '-':
+            dec();
+            break;
+
+        case '.':
+            print();
+            break;
+
+        case ',':
+            input();
+            break;
+
+        case '[':
+            loop();
+            break;
+
+        case ']':
+            endLoop();
+            break;
+
+        default:
+            break;
         }
         instPtr++;
-        if(!validateInstPtr()){ status = 0; break; }
+        if(!validateInstPtr()) {
+            status = 0;
+            break;
+        }
     }
 
     notification_message(wrkrApp->notifications, &led_off);

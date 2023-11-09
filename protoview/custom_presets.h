@@ -75,7 +75,8 @@ static uint8_t protoview_subghz_tpms1_fsk_async_regs[][2] = {
     // // Modem Configuration
     {CC1101_MDMCFG0, 0x00},
     {CC1101_MDMCFG1, 0x02},
-    {CC1101_MDMCFG2, 0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized). Other code reading TPMS uses GFSK, but should be the same when in RX mode.
+    {CC1101_MDMCFG2,
+     0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized). Other code reading TPMS uses GFSK, but should be the same when in RX mode.
     {CC1101_MDMCFG3, 0x93}, // Data rate is 20kBaud
     {CC1101_MDMCFG4, 0x59}, // Rx bandwidth filter is 325 kHz
     {CC1101_DEVIATN, 0x41}, // Deviation 28.56 kHz
@@ -105,8 +106,10 @@ static uint8_t protoview_subghz_tpms1_fsk_async_regs[][2] = {
     {0, 0},
 
     /* CC1101 2FSK PATABLE. */
-    {0xC0, 0}, {0,0}, {0,0}, {0,0}
-};
+    {0xC0, 0},
+    {0, 0},
+    {0, 0},
+    {0, 0}};
 
 /* This is like the default Flipper OOK 640Khz bandwidth preset, but
  * the bandwidth is changed to 10kBaud to accomodate TPMS frequency. */
@@ -155,8 +158,10 @@ static const uint8_t protoview_subghz_tpms2_ook_async_regs[][2] = {
     {0, 0},
 
     /* CC1101 OOK PATABLE. */
-    {0, 0xC0}, {0,0}, {0,0}, {0,0}
-};
+    {0, 0xC0},
+    {0, 0},
+    {0, 0},
+    {0, 0}};
 
 /* GFSK 19k dev, 325 Khz filter, 20kBaud. Different AGI settings.
  * Works well with Toyota. */
@@ -202,8 +207,10 @@ static uint8_t protoview_subghz_tpms3_gfsk_async_regs[][2] = {
     {0, 0},
 
     /* CC1101 2FSK PATABLE. */
-    {0xC0, 0}, {0,0}, {0,0}, {0,0}
-};
+    {0xC0, 0},
+    {0, 0},
+    {0, 0},
+    {0, 0}};
 
 /* 40 KBaud, 2FSK, 28 kHz deviation, 270 Khz bandwidth filter. */
 static uint8_t protoview_subghz_40k_fsk_async_regs[][2] = {
@@ -220,7 +227,8 @@ static uint8_t protoview_subghz_40k_fsk_async_regs[][2] = {
     // // Modem Configuration
     {CC1101_MDMCFG0, 0x00},
     {CC1101_MDMCFG1, 0x02},
-    {CC1101_MDMCFG2, 0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized). Other code reading TPMS uses GFSK, but should be the same when in RX mode.
+    {CC1101_MDMCFG2,
+     0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized). Other code reading TPMS uses GFSK, but should be the same when in RX mode.
     {CC1101_MDMCFG3, 0x93}, // Data rate is 40kBaud
     {CC1101_MDMCFG4, 0x6A}, // 6 = BW filter 270kHz, A = Data rate exp
     {CC1101_DEVIATN, 0x41}, // Deviation 28kHz
@@ -250,8 +258,10 @@ static uint8_t protoview_subghz_40k_fsk_async_regs[][2] = {
     {0, 0},
 
     /* CC1101 2FSK PATABLE. */
-    {0xC0, 0}, {0,0}, {0,0}, {0,0}
-};
+    {0xC0, 0},
+    {0, 0},
+    {0, 0},
+    {0, 0}};
 
 /* This is like the default Flipper OOK 640Khz bandwidth preset, but
  * the bandwidth is changed to 40kBaud, in order to receive signals
@@ -301,6 +311,7 @@ static const uint8_t protoview_subghz_40k_ook_async_regs[][2] = {
     {0, 0},
 
     /* CC1101 OOK PATABLE. */
-    {0, 0xC0}, {0,0}, {0,0}, {0,0}
-};
-
+    {0, 0xC0},
+    {0, 0},
+    {0, 0},
+    {0, 0}};

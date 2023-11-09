@@ -46,7 +46,6 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 0, 10, "Line and mode:");
 
-
     canvas_set_font(canvas, FontSecondary);
 
     canvas_draw_str_aligned(
@@ -56,7 +55,6 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         AlignLeft,
         AlignBottom,
         furi_string_get_cstr(hex_editor->buffer) + hex_editor->model->string_offset);
-
 
     canvas_draw_icon(canvas, 0, 20, &I_Pin_arrow_up_7x9);
 
@@ -233,7 +231,6 @@ int32_t hex_editor_app(void* p) {
                         // NOT work on first line
                         stream_seek_to_char(
                             hex_editor->model->stream, '\n', StreamDirectionBackward);
-
 
                         if(!stream_seek_to_char(
                                hex_editor->model->stream, '\n', StreamDirectionBackward)) {

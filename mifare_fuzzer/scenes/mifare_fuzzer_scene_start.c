@@ -8,13 +8,13 @@ enum SubmenuIndex {
 };
 
 /// @brief mifare_fuzzer_scene_start_submenu_callback()
-/// @param context 
-/// @param index 
+/// @param context
+/// @param index
 void mifare_fuzzer_scene_start_submenu_callback(void* context, uint32_t index) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_start_submenu_callback() :: index = %ld", index);
     MifareFuzzerApp* app = context;
     uint8_t custom_event = 255;
-    switch(index){
+    switch(index) {
     case SubmenuIndexClassic1k:
         custom_event = MifareFuzzerEventClassic1k;
         break;
@@ -32,7 +32,7 @@ void mifare_fuzzer_scene_start_submenu_callback(void* context, uint32_t index) {
 }
 
 /// @brief mifare_fuzzer_scene_start_on_enter()
-/// @param context 
+/// @param context
 void mifare_fuzzer_scene_start_on_enter(void* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_start_on_enter()");
     MifareFuzzerApp* app = context;
@@ -44,41 +44,31 @@ void mifare_fuzzer_scene_start_on_enter(void* context) {
         "Classic 1k",
         SubmenuIndexClassic1k,
         mifare_fuzzer_scene_start_submenu_callback,
-        app
-    );
+        app);
     submenu_add_item(
         submenu_card,
         "Classic 4k",
         SubmenuIndexClassic4k,
         mifare_fuzzer_scene_start_submenu_callback,
-        app
-    );
+        app);
     submenu_add_item(
         submenu_card,
         "Ultralight",
         SubmenuIndexUltralight,
         mifare_fuzzer_scene_start_submenu_callback,
-        app
-    );
+        app);
 
     // set selected menu
-    submenu_set_selected_item(submenu_card,
-        scene_manager_get_scene_state(
-            app->scene_manager,
-            MifareFuzzerSceneStart
-        )
-    );
+    submenu_set_selected_item(
+        submenu_card, scene_manager_get_scene_state(app->scene_manager, MifareFuzzerSceneStart));
 
-    view_dispatcher_switch_to_view(
-        app->view_dispatcher,
-        MifareFuzzerViewSelectCard
-    );
+    view_dispatcher_switch_to_view(app->view_dispatcher, MifareFuzzerViewSelectCard);
 }
 
 /// @brief mifare_fuzzer_scene_start_on_event()
-/// @param context 
-/// @param event 
-/// @return 
+/// @param context
+/// @param event
+/// @return
 bool mifare_fuzzer_scene_start_on_event(void* context, SceneManagerEvent event) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_start_on_event()");
     MifareFuzzerApp* app = context;
@@ -88,7 +78,8 @@ bool mifare_fuzzer_scene_start_on_event(void* context, SceneManagerEvent event) 
         //FURI_LOG_D(TAG, "mifare_fuzzer_scene_start_on_event() :: event.event = %ld", event.event);
         if(event.event == MifareFuzzerEventClassic1k) {
             // save selected item
-            scene_manager_set_scene_state(app->scene_manager, MifareFuzzerSceneStart, SubmenuIndexClassic1k);
+            scene_manager_set_scene_state(
+                app->scene_manager, MifareFuzzerSceneStart, SubmenuIndexClassic1k);
             // set emulator card
             app->card = MifareCardClassic1k;
             mifare_fuzzer_emulator_set_card(app->emulator_view, app->card);
@@ -97,7 +88,8 @@ bool mifare_fuzzer_scene_start_on_event(void* context, SceneManagerEvent event) 
             consumed = true;
         } else if(event.event == MifareFuzzerEventClassic4k) {
             // save selected item
-            scene_manager_set_scene_state(app->scene_manager, MifareFuzzerSceneStart, SubmenuIndexClassic4k);
+            scene_manager_set_scene_state(
+                app->scene_manager, MifareFuzzerSceneStart, SubmenuIndexClassic4k);
             // set emulator card
             app->card = MifareCardClassic4k;
             mifare_fuzzer_emulator_set_card(app->emulator_view, app->card);
@@ -106,7 +98,8 @@ bool mifare_fuzzer_scene_start_on_event(void* context, SceneManagerEvent event) 
             consumed = true;
         } else if(event.event == MifareFuzzerEventUltralight) {
             // save selected item
-            scene_manager_set_scene_state(app->scene_manager, MifareFuzzerSceneStart, SubmenuIndexUltralight);
+            scene_manager_set_scene_state(
+                app->scene_manager, MifareFuzzerSceneStart, SubmenuIndexUltralight);
             // set emulator card
             app->card = MifareCardUltralight;
             mifare_fuzzer_emulator_set_card(app->emulator_view, app->card);
@@ -114,7 +107,7 @@ bool mifare_fuzzer_scene_start_on_event(void* context, SceneManagerEvent event) 
             scene_manager_next_scene(app->scene_manager, MifareFuzzerSceneAttack);
             consumed = true;
         }
-    } else if (event.type == SceneManagerEventTypeTick) {
+    } else if(event.type == SceneManagerEventTypeTick) {
         //FURI_LOG_D(TAG, "mifare_fuzzer_scene_start_on_event() :: SceneManagerEventTypeTick");
         //consumed = true;
     }
@@ -123,7 +116,7 @@ bool mifare_fuzzer_scene_start_on_event(void* context, SceneManagerEvent event) 
 }
 
 /// @brief mifare_fuzzer_scene_start_on_exit()
-/// @param context 
+/// @param context
 void mifare_fuzzer_scene_start_on_exit(void* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_start_on_exit()");
     MifareFuzzerApp* app = context;

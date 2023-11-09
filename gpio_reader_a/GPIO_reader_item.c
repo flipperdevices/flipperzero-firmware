@@ -13,14 +13,15 @@ const char* gpio_item_get_pull_mode(uint8_t pull_mode) {
 const char* gpio_item_get_pin_level(uint8_t index) {
     furi_assert(index < GPIO_ITEM_COUNT);
     //furi_hal_gpio_write(gpio_item[index].pin, level);
-    if (furi_hal_gpio_read(gpio_item[index].pin)){
+    if(furi_hal_gpio_read(gpio_item[index].pin)) {
         return "High";
-    }else{
+    } else {
         return "Low";
     }
 }
 
 void gpio_item_configure_pin(uint8_t index, uint8_t pull_mode) {
     furi_assert(index < GPIO_ITEM_COUNT);
-    furi_hal_gpio_init(gpio_item[index].pin, GpioModeInput, gpio_pull_mode[pull_mode].pull, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(
+        gpio_item[index].pin, GpioModeInput, gpio_pull_mode[pull_mode].pull, GpioSpeedVeryHigh);
 }

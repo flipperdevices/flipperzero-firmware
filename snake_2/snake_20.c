@@ -40,7 +40,7 @@ typedef enum {
     DirectionLeft,
 } Direction;
 
-#define MAX_SNAKE_LEN 15 * 31 //128 * 64 / 4 
+#define MAX_SNAKE_LEN 15 * 31 //128 * 64 / 4
 
 #define x_back_symbol 50
 #define y_back_symbol 9
@@ -112,8 +112,8 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
     f.x = f.x * 4 + 1;
     f.y = f.y * 4 + 1;
     canvas_draw_rframe(canvas, f.x, f.y, 6, 6, 2);
-    canvas_draw_dot(canvas,f.x+3,f.y-1);
-    canvas_draw_dot(canvas,f.x+4,f.y-2);
+    canvas_draw_dot(canvas, f.x + 3, f.y - 1);
+    canvas_draw_dot(canvas, f.x + 4, f.y - 2);
     //canvas_draw_dot(canvas,f.x+4,f.y-3);
 
     // Snake
@@ -122,9 +122,9 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         p.x = p.x * 4 + 2;
         p.y = p.y * 4 + 2;
         canvas_draw_box(canvas, p.x, p.y, 4, 4);
-        if(i==0){
+        if(i == 0) {
             canvas_set_color(canvas, ColorWhite);
-            canvas_draw_box(canvas,p.x+1,p.y+1,2,2);
+            canvas_draw_box(canvas, p.x + 1, p.y + 1, 2, 2);
             canvas_set_color(canvas, ColorBlack);
         }
     }
@@ -139,10 +139,10 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_frame(canvas, 34, 20, 62, 24);
 
         canvas_set_font(canvas, FontPrimary);
-        if(snake_state->state == GameStateGameOver){
+        if(snake_state->state == GameStateGameOver) {
             canvas_draw_str_aligned(canvas, 65, 31, AlignCenter, AlignBottom, "Game Over");
         }
-        if(snake_state->state == GameStatePause){
+        if(snake_state->state == GameStatePause) {
             canvas_draw_str_aligned(canvas, 65, 31, AlignCenter, AlignBottom, "Pause");
         }
 
@@ -156,35 +156,36 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_box(canvas, 25, 2, 81, 11);
         canvas_draw_box(canvas, 28, 54, 73, 9);
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_str_aligned(canvas, 65, 10, AlignCenter, AlignBottom, "Hold        to Exit App");
-        snprintf(buffer, sizeof(buffer), "Complete: %-5.1f%%", (double)((snake_state->len - 7U)/4.58));
+        canvas_draw_str_aligned(
+            canvas, 65, 10, AlignCenter, AlignBottom, "Hold        to Exit App");
+        snprintf(
+            buffer, sizeof(buffer), "Complete: %-5.1f%%", (double)((snake_state->len - 7U) / 4.58));
         canvas_draw_str_aligned(canvas, 65, 62, AlignCenter, AlignBottom, buffer);
         {
-        canvas_draw_dot(canvas,x_back_symbol+0,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+1,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+2,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+3,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+4,y_back_symbol);
-        canvas_draw_dot(canvas,x_back_symbol+5,y_back_symbol-1);
-        canvas_draw_dot(canvas,x_back_symbol+6,y_back_symbol-2);
-        canvas_draw_dot(canvas,x_back_symbol+6,y_back_symbol-3);
-        canvas_draw_dot(canvas,x_back_symbol+5,y_back_symbol-4);
-        canvas_draw_dot(canvas,x_back_symbol+4,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol+3,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol+2,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol+1,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol+0,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol-2,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol-3,y_back_symbol-5);
-        canvas_draw_dot(canvas,x_back_symbol-2,y_back_symbol-6);
-        canvas_draw_dot(canvas,x_back_symbol-2,y_back_symbol-4);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-6);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-4);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-7);
-        canvas_draw_dot(canvas,x_back_symbol-1,y_back_symbol-3);
+            canvas_draw_dot(canvas, x_back_symbol + 0, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 1, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 2, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 3, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 4, y_back_symbol);
+            canvas_draw_dot(canvas, x_back_symbol + 5, y_back_symbol - 1);
+            canvas_draw_dot(canvas, x_back_symbol + 6, y_back_symbol - 2);
+            canvas_draw_dot(canvas, x_back_symbol + 6, y_back_symbol - 3);
+            canvas_draw_dot(canvas, x_back_symbol + 5, y_back_symbol - 4);
+            canvas_draw_dot(canvas, x_back_symbol + 4, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol + 3, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol + 2, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol + 1, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol + 0, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol - 2, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol - 3, y_back_symbol - 5);
+            canvas_draw_dot(canvas, x_back_symbol - 2, y_back_symbol - 6);
+            canvas_draw_dot(canvas, x_back_symbol - 2, y_back_symbol - 4);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 6);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 4);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 7);
+            canvas_draw_dot(canvas, x_back_symbol - 1, y_back_symbol - 3);
         }
-
     }
 
     furi_mutex_release(snake_state->mutex);
@@ -460,30 +461,30 @@ int32_t snake_20_app(void* p) {
                     }
                 }
                 //LongPress Events
-                if(event.input.type == InputTypeLong){
+                if(event.input.type == InputTypeLong) {
                     switch(event.input.key) {
                     case InputKeyUp:
                         if(snake_state->state != GameStatePause) {
-                        snake_state->nextMovement = DirectionUp;
-                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
+                            snake_state->nextMovement = DirectionUp;
+                            furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
                         }
                         break;
                     case InputKeyDown:
                         if(snake_state->state != GameStatePause) {
-                        snake_state->nextMovement = DirectionDown;
-                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
+                            snake_state->nextMovement = DirectionDown;
+                            furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
                         }
                         break;
                     case InputKeyRight:
                         if(snake_state->state != GameStatePause) {
-                        snake_state->nextMovement = DirectionRight;
-                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
+                            snake_state->nextMovement = DirectionRight;
+                            furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
                         }
                         break;
                     case InputKeyLeft:
                         if(snake_state->state != GameStatePause) {
-                        snake_state->nextMovement = DirectionLeft;
-                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
+                            snake_state->nextMovement = DirectionLeft;
+                            furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
                         }
                         break;
                     case InputKeyBack:
@@ -491,15 +492,14 @@ int32_t snake_20_app(void* p) {
                         break;
                     default:
                         break;
+                    }
                 }
-                
-            }
-            //ReleaseKey Event
-            if(event.input.type ==  InputTypeRelease){
-                if(snake_state->state != GameStatePause) {
-                    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
+                //ReleaseKey Event
+                if(event.input.type == InputTypeRelease) {
+                    if(snake_state->state != GameStatePause) {
+                        furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
+                    }
                 }
-            }
             } else if(event.type == EventTypeTick) {
                 snake_game_process_game_step(snake_state, notification);
             }

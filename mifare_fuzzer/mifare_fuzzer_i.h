@@ -48,7 +48,6 @@ typedef enum {
 } MifareFuzzerView;
 
 struct MifareFuzzerApp {
-
     Gui* gui;
 
     ViewDispatcher* view_dispatcher;
@@ -74,5 +73,4 @@ struct MifareFuzzerApp {
     FuriString* file_path;
     FuriString* uid_str;
     Stream* uids_stream;
-
 };

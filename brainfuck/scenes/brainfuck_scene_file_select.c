@@ -15,11 +15,10 @@ void brainfuck_scene_file_select_on_enter(void* context) {
 
     bool selected = dialog_file_browser_show(dialogs, path, path, &browser_options);
 
-    if(selected){
+    if(selected) {
         furi_string_set(app->BF_file_path, path);
         scene_manager_next_scene(app->scene_manager, brainfuckSceneDevEnv);
-    }
-    else{
+    } else {
         scene_manager_search_and_switch_to_previous_scene(app->scene_manager, brainfuckSceneStart);
     }
 }

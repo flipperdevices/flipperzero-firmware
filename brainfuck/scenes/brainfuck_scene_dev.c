@@ -14,4 +14,3 @@ bool brainfuck_scene_dev_env_on_event(void* context, SceneManagerEvent event) {
 void brainfuck_scene_dev_env_on_exit(void* context) {
     UNUSED(context);
 }
-

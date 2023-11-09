@@ -25,7 +25,8 @@ void mass_storage_scene_start_on_enter(void* context) {
     variable_item_list_set_header(variable_item_list, "USB Mass Storage");
 
     variable_item_list_set_selected_item(
-        variable_item_list, scene_manager_get_scene_state(app->scene_manager, MassStorageSceneStart));
+        variable_item_list,
+        scene_manager_get_scene_state(app->scene_manager, MassStorageSceneStart));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewStart);
 }
@@ -38,8 +39,7 @@ bool mass_storage_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        scene_manager_set_scene_state(
-            app->scene_manager, MassStorageSceneStart, event.event);
+        scene_manager_set_scene_state(app->scene_manager, MassStorageSceneStart, event.event);
         consumed = true;
         switch(event.event) {
         case VarItemListIndexSelectDiskImage:

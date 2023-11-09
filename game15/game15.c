@@ -46,10 +46,7 @@ static moving_cell_t moving_cell;
 static uint8_t loaded_saving_ticks;
 static uint8_t popup_menu_selected_item;
 
-static const char* popup_menu_strings[] = {
-    "Continue",
-    "Reset"
-};
+static const char* popup_menu_strings[] = {"Continue", "Reset"};
 
 static uint8_t keys[KEY_STACK_SIZE];
 static uint8_t key_stack_head = 0;
@@ -222,10 +219,8 @@ static bool is_board_solved() {
 static void game_tick() {
     switch(game_state.scene) {
     case ScenePlay:
-        if (game_state.move_count >= 1)
-            game_state.tick_count++;
-        if (loaded_saving_ticks)
-            loaded_saving_ticks--;
+        if(game_state.move_count >= 1) game_state.tick_count++;
+        if(loaded_saving_ticks) loaded_saving_ticks--;
         if(moving_cell.move_direction == DirectionNone && !key_stack_is_empty()) {
             set_moving_cell_by_direction(key_stack_pop());
             if(moving_cell.move_direction == DirectionNone) {
@@ -259,27 +254,25 @@ static void game_tick() {
         break;
 
     case ScenePopup:
-        if (!key_stack_is_empty()) {
-            switch(key_stack_pop())
-            {
-                case DirectionDown:
-                    popup_menu_selected_item++;
-                    popup_menu_selected_item = popup_menu_selected_item % POPUP_MENU_ITEMS;
-                    break;
-                case DirectionUp:
-                    popup_menu_selected_item--;
-                    popup_menu_selected_item = popup_menu_selected_item % POPUP_MENU_ITEMS;
-                    break;
-                case DirectionNone:
-                    if (popup_menu_selected_item == 0) {
-                        game_state.scene = ScenePlay;
-                        notification_message(notification, &sequence_single_vibro);
-                    }
-                    else if (popup_menu_selected_item == 1) {
-                        notification_message(notification, &sequence_single_vibro);
-                        game_init();
-                    }
-                    break;
+        if(!key_stack_is_empty()) {
+            switch(key_stack_pop()) {
+            case DirectionDown:
+                popup_menu_selected_item++;
+                popup_menu_selected_item = popup_menu_selected_item % POPUP_MENU_ITEMS;
+                break;
+            case DirectionUp:
+                popup_menu_selected_item--;
+                popup_menu_selected_item = popup_menu_selected_item % POPUP_MENU_ITEMS;
+                break;
+            case DirectionNone:
+                if(popup_menu_selected_item == 0) {
+                    game_state.scene = ScenePlay;
+                    notification_message(notification, &sequence_single_vibro);
+                } else if(popup_menu_selected_item == 1) {
+                    notification_message(notification, &sequence_single_vibro);
+                    game_init();
+                }
+                break;
             }
         }
         break;
@@ -354,17 +347,19 @@ static void render_callback(Canvas* const canvas) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 128, 64);
 
-    if(game_state.scene == ScenePlay || game_state.scene == SceneWin || game_state.scene == ScenePopup) {
+    if(game_state.scene == ScenePlay || game_state.scene == SceneWin ||
+       game_state.scene == ScenePopup) {
         canvas_set_color(canvas, ColorBlack);
         board_draw(canvas);
         info_draw(canvas);
 
-        if (loaded_saving_ticks && game_state.scene != ScenePopup) {
+        if(loaded_saving_ticks && game_state.scene != ScenePopup) {
             canvas_set_color(canvas, ColorWhite);
             canvas_draw_rbox(canvas, 20, 24, 88, 16, 4);
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_rframe(canvas, 20, 24, 88, 16, 4);
-            canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "Restoring game ...");
+            canvas_draw_str_aligned(
+                canvas, 64, 32, AlignCenter, AlignCenter, "Restoring game ...");
         }
     }
 
@@ -377,23 +372,23 @@ static void render_callback(Canvas* const canvas) {
         canvas_draw_box(canvas, 10, 23, 108, 18);
         canvas_set_color(canvas, ColorBlack);
         canvas_draw_xbm(canvas, 14, 27, 100, 10, pic_puzzled);
-    }
-    else if (game_state.scene == ScenePopup) {
-            gray_screen(canvas);
-            canvas_set_color(canvas, ColorWhite);
-            canvas_draw_rbox(canvas, 28, 16, 72, 32, 4);
-            canvas_set_color(canvas, ColorBlack);
-            canvas_draw_rframe(canvas, 28, 16, 72, 32, 4);
+    } else if(game_state.scene == ScenePopup) {
+        gray_screen(canvas);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_rbox(canvas, 28, 16, 72, 32, 4);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_rframe(canvas, 28, 16, 72, 32, 4);
 
-            for(int i=0; i < POPUP_MENU_ITEMS; i++) {
-                if ( i ==  popup_menu_selected_item) {
-                    canvas_set_color(canvas, ColorBlack);
-                    canvas_draw_box(canvas, 34, 20 + 12 * i, 60, 12);
-                }
-                
-                canvas_set_color(canvas, i == popup_menu_selected_item ? ColorWhite : ColorBlack);
-                canvas_draw_str_aligned(canvas, 64, 26 + 12 * i, AlignCenter, AlignCenter, popup_menu_strings[i]);
+        for(int i = 0; i < POPUP_MENU_ITEMS; i++) {
+            if(i == popup_menu_selected_item) {
+                canvas_set_color(canvas, ColorBlack);
+                canvas_draw_box(canvas, 34, 20 + 12 * i, 60, 12);
             }
+
+            canvas_set_color(canvas, i == popup_menu_selected_item ? ColorWhite : ColorBlack);
+            canvas_draw_str_aligned(
+                canvas, 64, 26 + 12 * i, AlignCenter, AlignCenter, popup_menu_strings[i]);
+        }
     }
 }
 
@@ -414,18 +409,16 @@ static void game_event_handler(GameEvent const event) {
                 key_stack_push(DirectionLeft);
                 break;
             case InputKeyOk:
-                if (game_state.scene == ScenePlay) {
+                if(game_state.scene == ScenePlay) {
                     game_state.scene = ScenePopup;
                     key_stack_init();
-                } 
-                else
+                } else
                     key_stack_push(DirectionNone);
                 break;
             case InputKeyBack:
-                if (game_state.scene == ScenePopup) {
+                if(game_state.scene == ScenePopup) {
                     game_state.scene = ScenePlay;
-                }
-                else {
+                } else {
                     storage_game_state_save();
                     sandbox_loop_exit();
                 }
@@ -455,12 +448,11 @@ int32_t game15_app() {
 
     loaded_saving_ticks = 0;
     if(storage_game_state_load()) {
-        if (game_state.scene != ScenePlay) 
+        if(game_state.scene != ScenePlay)
             game_init();
         else
             loaded_saving_ticks = FPS;
-    }
-    else 
+    } else
         game_init();
 
     sandbox_init(

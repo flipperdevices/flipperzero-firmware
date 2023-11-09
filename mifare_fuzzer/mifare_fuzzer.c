@@ -1,9 +1,9 @@
 #include "mifare_fuzzer_i.h"
 
 /// @brief mifare_fuzzer_custom_event_callback()
-/// @param context 
-/// @param event 
-/// @return 
+/// @param context
+/// @param event
+/// @return
 static bool mifare_fuzzer_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     MifareFuzzerApp* app = context;
@@ -11,8 +11,8 @@ static bool mifare_fuzzer_custom_event_callback(void* context, uint32_t event) {
 }
 
 /// @brief mifare_fuzzer_back_event_callback()
-/// @param context 
-/// @return 
+/// @param context
+/// @return
 static bool mifare_fuzzer_back_event_callback(void* context) {
     furi_assert(context);
     MifareFuzzerApp* app = context;
@@ -20,15 +20,15 @@ static bool mifare_fuzzer_back_event_callback(void* context) {
 }
 
 /// @brief mifare_fuzzer_tick_event_callback()
-/// @param context 
-static void mifare_fuzzer_tick_event_callback(void* context){
+/// @param context
+static void mifare_fuzzer_tick_event_callback(void* context) {
     furi_assert(context);
     MifareFuzzerApp* app = context;
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
 /// @brief mifare_fuzzer_alloc()
-/// @return 
+/// @return
 MifareFuzzerApp* mifare_fuzzer_alloc() {
     MifareFuzzerApp* app = malloc(sizeof(MifareFuzzerApp));
 
@@ -36,43 +36,35 @@ MifareFuzzerApp* mifare_fuzzer_alloc() {
     app->scene_manager = scene_manager_alloc(&mifare_fuzzer_scene_handlers, app);
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-    view_dispatcher_set_custom_event_callback(app->view_dispatcher, mifare_fuzzer_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, mifare_fuzzer_back_event_callback);
+    view_dispatcher_set_custom_event_callback(
+        app->view_dispatcher, mifare_fuzzer_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        app->view_dispatcher, mifare_fuzzer_back_event_callback);
 
     // 1000 ticks are about 1 sec
-    view_dispatcher_set_tick_event_callback(app->view_dispatcher, mifare_fuzzer_tick_event_callback, MIFARE_FUZZER_TICK_PERIOD);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, mifare_fuzzer_tick_event_callback, MIFARE_FUZZER_TICK_PERIOD);
 
     // Open GUI record
     app->gui = furi_record_open(RECORD_GUI);
-    view_dispatcher_attach_to_gui(
-        app->view_dispatcher,
-        app->gui,
-        ViewDispatcherTypeFullscreen
-    );
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // view: select card type
     app->submenu_card = submenu_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        MifareFuzzerViewSelectCard,
-        submenu_get_view(app->submenu_card)
-    );
+        app->view_dispatcher, MifareFuzzerViewSelectCard, submenu_get_view(app->submenu_card));
 
     // view: select attack type
     app->submenu_attack = submenu_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        MifareFuzzerViewSelectAttack,
-        submenu_get_view(app->submenu_attack)
-    );
+        app->view_dispatcher, MifareFuzzerViewSelectAttack, submenu_get_view(app->submenu_attack));
 
     // view: emulator
     app->emulator_view = mifare_fuzzer_emulator_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         MifareFuzzerViewEmulator,
-        mifare_fuzzer_emulator_get_view(app->emulator_view)
-    );
+        mifare_fuzzer_emulator_get_view(app->emulator_view));
 
     // worker
     app->worker = mifare_fuzzer_worker_alloc();
@@ -95,7 +87,7 @@ MifareFuzzerApp* mifare_fuzzer_alloc() {
 }
 
 /// @brief mifare_fuzzer_free()
-/// @param app 
+/// @param app
 void mifare_fuzzer_free(MifareFuzzerApp* app) {
     furi_assert(app);
 
@@ -146,8 +138,8 @@ void mifare_fuzzer_free(MifareFuzzerApp* app) {
 }
 
 /// @brief mifare_fuzzer_app (ENTRYPOINT)
-/// @param p 
-/// @return 
+/// @param p
+/// @return
 int32_t mifare_fuzzer_app(void* p) {
     UNUSED(p);
     //FURI_LOG_D(TAG, "mifare_fuzzer_app()");
