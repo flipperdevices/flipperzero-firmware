@@ -10,7 +10,6 @@
 #include <wolfssl/wolfcrypt/hmac.h>
 #include "memset_s.h"
 #include "constants.h"
-#include "polyfills.h"
 
 #define CRYPTO_ALIGNMENT_FACTOR (16)
 

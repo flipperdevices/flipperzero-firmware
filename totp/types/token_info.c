@@ -1,11 +1,15 @@
 #include "token_info.h"
 #include <furi/core/check.h>
 #include <base32.h>
-#include <base64.h>
+#include "../../config/wolfssl/config.h"
+#include <wolfssl/wolfcrypt/coding.h>
 #include <memset_s.h>
 #include <inttypes.h>
 #include "common.h"
 #include "../services/crypto/crypto_facade.h"
+
+#define ESTIMATE_BASE32_PLAIN_LENGTH(base32_length) ((base32_length)*0.625f)
+#define ESTIMATE_BASE64_PLAIN_LENGTH(base64_length) ((base64_length)*0.75f)
 
 TokenInfo* token_info_alloc() {
     TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
@@ -33,19 +37,23 @@ bool token_info_set_secret(
     size_t plain_secret_length;
     size_t plain_secret_size;
     if(plain_token_secret_encoding == PlainTokenSecretEncodingBase32) {
-        plain_secret_size = token_secret_length;
+        plain_secret_size = ESTIMATE_BASE32_PLAIN_LENGTH(token_secret_length);
         plain_secret = malloc(plain_secret_size);
         furi_check(plain_secret != NULL);
         plain_secret_length =
             base32_decode((const uint8_t*)plain_token_secret, plain_secret, plain_secret_size);
     } else if(plain_token_secret_encoding == PlainTokenSecretEncodingBase64) {
-        plain_secret_length = 0;
-        plain_secret = base64_decode(
-            (const uint8_t*)plain_token_secret,
-            token_secret_length,
-            &plain_secret_length,
-            &plain_secret_size);
+        plain_secret_size = ESTIMATE_BASE64_PLAIN_LENGTH(token_secret_length);
+        plain_secret_length = plain_secret_size;
+        plain_secret = malloc(plain_secret_size);
         furi_check(plain_secret != NULL);
+        if(Base64_Decode(
+               (const uint8_t*)plain_token_secret,
+               token_secret_length,
+               plain_secret,
+               &plain_secret_length) != 0) {
+            plain_secret_length = 0;
+        }
     } else {
         return false;
     }

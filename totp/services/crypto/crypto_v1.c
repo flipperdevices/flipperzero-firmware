@@ -7,7 +7,6 @@
 #include <furi_hal_version.h>
 #include "../../types/common.h"
 #include "memset_s.h"
-#include "polyfills.h"
 
 #define CRYPTO_KEY_SLOT (2)
 #define CRYPTO_VERIFY_KEY_LENGTH (16)
