@@ -5,6 +5,10 @@
 #include <m-bptree.h>
 #include <m-array.h>
 #include <cli/cli.h>
+#include <gui/gui.h>
+#include <gui/view_dispatcher.h>
+#include <gui/modules/menu.h>
+#include <gui/modules/submenu.h>
 
 typedef struct {
     FuriThreadStdoutWriteCallback write_callback;
@@ -54,6 +58,7 @@ typedef struct {
 
 typedef struct {
     Gui* gui;
+    FuriMutex* mutex;
     bool is_enabled;
     ViewPortOrientation orientation;
 
@@ -66,22 +71,6 @@ typedef struct {
     ViewPortInputCallback input_callback;
     void* input_callback_context;
 } ViewPort_internal;
-
-typedef struct {
-    char* args;
-    FuriThread* thread;
-    bool insomniac;
-    void* fap;
-} LoaderAppData_internal;
-
-typedef struct {
-    void* pubsub;
-    void* queue;
-    void* loader_menu;
-    void* loader_applications;
-    LoaderAppData_internal app;
-} Loader_internal;
-
 
 typedef struct {
     CliCallback callback;
