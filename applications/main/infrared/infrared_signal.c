@@ -273,15 +273,12 @@ bool infrared_signal_search_by_name_and_read(
     bool success = false;
     FuriString* tmp = furi_string_alloc();
 
-    do {
-        bool is_name_found = false;
-        while(!is_name_found && infrared_signal_read_name(ff, tmp)) { //-V560
-            is_name_found = furi_string_equal(tmp, name);
+    while(infrared_signal_read_name(ff, tmp)) {
+        if(furi_string_equal(tmp, name)) {
+            success = infrared_signal_read_body(signal, ff);
+            break;
         }
-        if(!is_name_found) break; //-V547
-        if(!infrared_signal_read_body(signal, ff)) break; //-V779
-        success = true;
-    } while(false);
+    }
 
     furi_string_free(tmp);
     return success;
