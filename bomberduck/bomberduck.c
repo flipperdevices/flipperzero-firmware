@@ -5,7 +5,6 @@
 #include <input/input.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <gui/canvas_i.h>
 #include "bomberduck_icons.h"
 #include <dolphin/dolphin.h>
 
@@ -626,8 +625,8 @@ int32_t bomberduck_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(bomber_state->mutex);
+        view_port_update(view_port);
     }
 
     // Return to normal backlight settings
