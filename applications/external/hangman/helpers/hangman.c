@@ -149,7 +149,7 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
 
     if(app->menu_show) {
         hangman_draw_menu(canvas, app);
-    } else {
+    } else if(app->lang != NULL) {
         hangman_draw_word(canvas, app);
         hangman_draw_gallows(canvas, app);
         hangman_draw_keyboard(canvas, app);
