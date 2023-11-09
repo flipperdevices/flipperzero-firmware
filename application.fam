@@ -9,5 +9,5 @@ App(
     ],
     stack_size=2 * 1024,
     fap_icon="atomicdiceroller.png",
-    fap_category="Tools",
+    fap_category="GPIO",
 )
