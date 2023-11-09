@@ -1,12 +1,16 @@
 App(
     appid="counter",
     name="Counter",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="counterapp",
     requires=[
         "gui",
     ],
-    fap_category="Misc",
+    fap_category="Tools",
     fap_icon="icons/counter_icon.png",
     fap_icon_assets="icons",
+    fap_author="@Krulknul",
+    fap_weburl="https://github.com/Krulknul/dolphin-counter",
+    fap_version="1.2",
+    fap_description="Simple counter",
 )
