@@ -1,0 +1,12 @@
+REMOTE: /ext/infrared/Vizio.ir
+UP: Up
+DOWN: Down
+LEFT: Left
+RIGHT: Right
+OK: Ok
+BACK: Back
+UPHOLD: Vol_up
+DOWNHOLD: Vol_dn
+LEFTHOLD: Mute
+RIGHTHOLD: Input
+OKHOLD: Power
