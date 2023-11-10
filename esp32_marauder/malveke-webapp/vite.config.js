@@ -29,7 +29,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'gameboy-camera/index.html'),
-        // printer: resolve(__dirname, 'gameboy-printer/index.html'),
+        printer: resolve(__dirname, 'gameboy-printer/index.html'),
         logo: resolve(__dirname, 'gameboy-logo/index.html'),
         telegram: resolve(__dirname, 'telegram/index.html'),
       },

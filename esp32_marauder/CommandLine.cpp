@@ -258,6 +258,7 @@ void CommandLine::runCommand(String input) {
     #endif
     Serial.println(HELP_GAMEBOY_CARTRIDGE_CMD);
     Serial.println(HELP_GAMEBOY_ADVANCE_CARTRIDGE_CMD);
+    Serial.println(HELP_GAMEBOY_CAMERA_SERVER_CMD);
     Serial.println(HELP_GAMEBOY_LIVE_CAMERA_CMD);
     Serial.println(HELP_GAMEBOY_STOP_LIVE_CAMERA_CMD);
     Serial.println(HELP_FOOT);
@@ -945,6 +946,15 @@ void CommandLine::runCommand(String input) {
 
       } else {
         gameboy_advance_cartridge.headerROM_GBA(true);
+      }
+    } else if(cmd_args.get(0) == GAMEBOY_CAMERA_SERVER_CMD) {
+      
+      int cont_sw = this->argSearch(&cmd_args, "-i"); // init
+      if (cont_sw == -1) {
+        cont_sw = this->argSearch(&cmd_args, "-s"); // stop
+        gameboy_camera_server.stop();
+      } else {
+        gameboy_camera_server.start();
       }
     } else if(cmd_args.get(0) == GAMEBOY_LIVE_CAMERA_CMD) {
       int cont_sw = this->argSearch(&cmd_args, "-E");

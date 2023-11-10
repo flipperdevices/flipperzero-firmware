@@ -24,14 +24,14 @@ void gbStartAP(char* ssid, char* password) {
       request->send(response);
   });
   
-//   _server.on("/assets/_plugin-vue_export-helper.js", HTTP_GET, [](AsyncWebServerRequest *request){
-//       AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", assets__plugin_vue_export_helper_js_gz, assets__plugin_vue_export_helper_js_gz_len);
-//       response->addHeader("Content-Encoding", "gzip");
-//       request->send(response);
-//   });
-//   _server.on("/assets/_plugin-vue_export-helper.css", HTTP_GET, [](AsyncWebServerRequest *request){
-//       AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", assets__plugin_vue_export_helper_css_gz, assets__plugin_vue_export_helper_css_gz_len);
-//       response->addHeader("Content-Encoding", "gzip");
-//       request->send(response);
-//   });
+  // _server.on("/assets/_plugin-vue_export-helper.js", HTTP_GET, [](AsyncWebServerRequest *request){
+  //     AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", assets__plugin_vue_export_helper_js_gz, assets__plugin_vue_export_helper_js_gz_len);
+  //     response->addHeader("Content-Encoding", "gzip");
+  //     request->send(response);
+  // });
+  // _server.on("/assets/_plugin-vue_export-helper.css", HTTP_GET, [](AsyncWebServerRequest *request){
+  //     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", assets__plugin_vue_export_helper_css_gz, assets__plugin_vue_export_helper_css_gz_len);
+  //     response->addHeader("Content-Encoding", "gzip");
+  //     request->send(response);
+  // });
 }

@@ -9,7 +9,7 @@
   #define WRITE_PACKETS_SERIAL
   
   //// BOARD TARGETS
-  //#define MARAUDER_M5STICKC
+  // #define MARAUDER_M5STICKC
   //#define MARAUDER_MINI
   //#define MARAUDER_V4
   //#define MARAUDER_V6
@@ -22,20 +22,21 @@
   //#define XIAO_ESP32_S3
   //// END BOARD TARGETS
 
-  #define MARAUDER_VERSION "v0.13.2"
+  #define MARAUDER_VERSION "v0.13.4"
 
  //// BOARD FEATURES
   #ifdef MARAUDER_M5STICKC
     //#define FLIPPER_ZERO_HAT
     #define HAS_BATTERY
+    #define HAS_BT
     #define HAS_BUTTONS
-    #define HAS_NEOPIXEL_LED
+    //#define HAS_NEOPIXEL_LED
     #define HAS_PWR_MGMT
     #define HAS_SCREEN
     #define HAS_SD
     #define USE_SD
     #define HAS_TEMP_SENSOR
-    //#define HAS_GPS
+    #define HAS_GPS
   #endif
 
   #ifdef MARAUDER_MINI
@@ -70,7 +71,8 @@
     //#define FLIPPER_ZERO_HAT
     #define HAS_BATTERY
     #define HAS_BT
-    //#define HAS_BUTTONS
+    #define HAS_BT_REMOTE
+    #define HAS_BUTTONS
     #define HAS_NEOPIXEL_LED
     //#define HAS_PWR_MGMT
     #define HAS_SCREEN
@@ -126,7 +128,7 @@
   #ifdef ESP32_LDDB
     //#define FLIPPER_ZERO_HAT
     //#define HAS_BATTERY
-    //#define HAS_BT
+    #define HAS_BT
     //#define HAS_BUTTONS
     #define HAS_NEOPIXEL_LED
     //#define HAS_PWR_MGMT
@@ -204,6 +206,22 @@
       #define U_BTN -1
       #define R_BTN -1
       #define D_BTN 39
+    #endif
+
+    #ifdef MARAUDER_V6
+      #define L_BTN -1
+      #define C_BTN 0
+      #define U_BTN -1
+      #define R_BTN -1
+      #define D_BTN -1
+    #endif
+
+    #ifdef MARAUDER_V6_1
+      #define L_BTN -1
+      #define C_BTN 0
+      #define U_BTN -1
+      #define R_BTN -1
+      #define D_BTN -1
     #endif  
 
   #endif
@@ -220,8 +238,8 @@
       #define TFT_CS 5
       #define TFT_DC 23
       #define TFT_RST 18
-      #define TFT_BL 10
-      #define TOUCH_CS 10
+      #define TFT_BL -1
+      #define TOUCH_CS -1
       //#define SD_CS 1
 
       #define SCREEN_BUFFER
@@ -254,7 +272,8 @@
       //#define MENU_FONT &FreeMonoBold9pt7b
       //#define MENU_FONT &FreeSans9pt7b
       //#define MENU_FONT &FreeSansBold9pt7b
-      #define BUTTON_ARRAY_LEN 12
+      #define BUTTON_SCREEN_LIMIT 6
+      #define BUTTON_ARRAY_LEN 13
       #define STATUS_BAR_WIDTH (TFT_HEIGHT/16)
       #define LVGL_TICK_PERIOD 6
     
@@ -309,6 +328,7 @@
       //#define MENU_FONT &FreeMonoBold9pt7b
       //#define MENU_FONT &FreeSans9pt7b
       //#define MENU_FONT &FreeSansBold9pt7b
+      #define BUTTON_SCREEN_LIMIT 12
       #define BUTTON_ARRAY_LEN 12
       #define STATUS_BAR_WIDTH 16
       #define LVGL_TICK_PERIOD 6
@@ -366,6 +386,7 @@
       //#define MENU_FONT &FreeMonoBold9pt7b
       //#define MENU_FONT &FreeSans9pt7b
       //#define MENU_FONT &FreeSansBold9pt7b
+      #define BUTTON_SCREEN_LIMIT 12
       #define BUTTON_ARRAY_LEN 12
       #define STATUS_BAR_WIDTH 16
       #define LVGL_TICK_PERIOD 6
@@ -424,6 +445,7 @@
       //#define MENU_FONT &FreeMonoBold9pt7b
       //#define MENU_FONT &FreeSans9pt7b
       //#define MENU_FONT &FreeSansBold9pt7b
+      #define BUTTON_SCREEN_LIMIT 12
       #define BUTTON_ARRAY_LEN 12
       #define STATUS_BAR_WIDTH 16
       #define LVGL_TICK_PERIOD 6
@@ -492,7 +514,8 @@
       //#define MENU_FONT &FreeMonoBold9pt7b
       //#define MENU_FONT &FreeSans9pt7b
       //#define MENU_FONT &FreeSansBold9pt7b
-      #define BUTTON_ARRAY_LEN 12
+      #define BUTTON_SCREEN_LIMIT 10
+      #define BUTTON_ARRAY_LEN 13
       #define STATUS_BAR_WIDTH (TFT_HEIGHT/16)
       #define LVGL_TICK_PERIOD 6
 
@@ -610,7 +633,7 @@
     #define KEY_TEXTSIZE 1   // Font size multiplier
     #define ICON_W 22
     #define ICON_H 22
-    #define BUTTON_PADDING 10
+    #define BUTTON_PADDING 60
   #endif
   //// END MENU DEFINITIONS
 
@@ -795,13 +818,17 @@
       #define mac_history_len 512
     #elif defined(MARAUDER_FLIPPER)
       #ifdef WRITE_PACKETS_SERIAL
-        // #define GPS_SOFTWARE_SERIAL
-        #define GPS_SERIAL_INDEX 2
+        #define GPS_SOFTWARE_SERIAL
       #else
         #define GPS_SERIAL_INDEX 1
       #endif
       #define GPS_TX 9
       #define GPS_RX 21
+      #define mac_history_len 512
+    #elif defined(MARAUDER_M5STICKC)
+      #define GPS_SERIAL_INDEX 1
+      #define GPS_TX 33
+      #define GPS_RX 32
       #define mac_history_len 512
     #endif
   #else

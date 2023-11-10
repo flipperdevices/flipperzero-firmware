@@ -6,6 +6,7 @@ https://www.online-utility.org/image/convert/to/XBM
 */
 #include "GameBoyCartridge.h"
 #include "GameBoyAdvanceCartridge.h"
+#include "GameBoyCameraServer.h"
 #include "GameboyLiveCamera.h"
 
 #include "configs.h"
@@ -138,6 +139,7 @@ uint32_t currentTime  = 0;
 
 GameBoyCartridge gameboy_cartridge;
 GameBoyAdvanceCartridge gameboy_advance_cartridge;
+GameBoyCameraServer gameboy_camera_server;
 GameboyLiveCamera gameboy_live_camera;
 
 void backlightOn() {
@@ -241,6 +243,7 @@ void setup()
   //  MALVEKE
   gameboy_cartridge.begin();
   gameboy_advance_cartridge.begin();
+  gameboy_camera_server.begin();
   gameboy_live_camera.begin();
   //Serial.println("\n\nHello, World!\n");
 
@@ -428,14 +431,15 @@ void loop()
   
   //if ((!do_draw) && (wifi_scan_obj.currentScanMode != ESP_UPDATE))
   //{
-  if(!gameboy_cartridge.isRestoringRAM()){
+  if(!gameboy_cartridge.isRestoringRAM() && !gameboy_camera_server.isRunning()){
   cli_obj.main(currentTime);
   }
 
   gameboy_cartridge.main();
   gameboy_advance_cartridge.main();
+  gameboy_camera_server.main();
   gameboy_live_camera.main();
-  if(!gameboy_live_camera.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM() && !gameboy_cartridge.isRestoringRAM()) {
+  if(!gameboy_live_camera.isRunning() && !gameboy_camera_server.isRunning() && !gameboy_cartridge.isWrittingRAM() && !gameboy_cartridge.isWrittingROM() && !gameboy_cartridge.isRestoringRAM()) {
   #ifdef HAS_SCREEN
     display_obj.main(wifi_scan_obj.currentScanMode);
   #endif

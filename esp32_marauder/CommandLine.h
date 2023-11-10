@@ -22,6 +22,7 @@
 #endif
 #include "GameBoyCartridge.h"
 #include "GameBoyAdvanceCartridge.h"
+#include "GameboyCameraServer.h"
 #include "GameboyLiveCamera.h"
 extern WiFiScan wifi_scan_obj;
 //extern Web web_obj;
@@ -39,6 +40,7 @@ extern const String PROGMEM board_target;
 //  MALVEKE
 extern GameBoyCartridge gameboy_cartridge;
 extern GameBoyAdvanceCartridge gameboy_advance_cartridge;
+extern GameBoyCameraServer gameboy_camera_server;
 extern GameboyLiveCamera gameboy_live_camera;
 //// Commands
 
@@ -90,6 +92,7 @@ const char PROGMEM BT_SKIM_CMD[] = "sniffskim";
 //  MALVEKE
 const char PROGMEM GAMEBOY_CARTRIDGE_CMD[] = "gbcartridge";
 const char PROGMEM GAMEBOY_ADVANCE_CARTRIDGE_CMD[] = "gbacartridge";
+const char PROGMEM GAMEBOY_CAMERA_SERVER_CMD[] = "gbcameraserver";
 const char PROGMEM GAMEBOY_LIVE_CAMERA_CMD[] = "gblivecamera";
 const char PROGMEM GAMEBOY_STOP_LIVE_CAMERA_CMD[] = "stopgblivecamera";
 
@@ -141,6 +144,7 @@ const char PROGMEM HELP_BT_SKIM_CMD[] = "sniffskim";
 
 const char PROGMEM HELP_GAMEBOY_CARTRIDGE_CMD[] = "gbcartridge";
 const char PROGMEM HELP_GAMEBOY_ADVANCE_CARTRIDGE_CMD[] = "gbacartridge";
+const char PROGMEM HELP_GAMEBOY_CAMERA_SERVER_CMD[] = "gbcameraserver";
 const char PROGMEM HELP_GAMEBOY_LIVE_CAMERA_CMD[] = "gblivecamera";
 const char PROGMEM HELP_GAMEBOY_STOP_LIVE_CAMERA_CMD[] = "stopgblivecamera";
 
