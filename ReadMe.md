@@ -62,7 +62,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Furi, FuriHal: remove FreeRTOS headers leaks #3179 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3179)
 - OFW: [Dolphin: Extreme butthurt loop fix #3184 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/3184)
 - Updated: [Mfkey32 v1.2 (By noproto)](https://github.com/noproto/FlipperMfkey) [Update Mfkey32 app with new NFC API #69 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/69)
-- Updated: [NFC Magic v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67)
 - Updated: [RFID Detector v1.2 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - Updated: [PicoPass (iClass) v1.7 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - App fixes to have resources in the app folders like OFW (By RogueMaster)
@@ -73,6 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [NFC: Felica UID emulation #3190 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3190)
 - OFW: [Fix NFC unit tests #3192 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3192)
 - OFW: [Infrared remote button index support #3180 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3180)
+- Updated: [NFC Magic v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71)
 
 <a name="release">
 
