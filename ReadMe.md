@@ -31,6 +31,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-09 23:20 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-09 23:20 EST`
+- Switched to cleaner animation loader (By Leeroy)
 
 <a name="release">
 
