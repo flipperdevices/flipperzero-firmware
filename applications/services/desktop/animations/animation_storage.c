@@ -35,7 +35,7 @@ const char* const anim_style_filenames[AnimStyleCount] = {
     "%s/manifest_SAO.txt",        "%s/manifest_Science.txt",
     "%s/manifest_SJUMP.txt",      "%s/manifest_Squatch.txt",
     "%s/manifest_Stock.txt",      "%s/manifest_Virus.txt",
-    "%s/manifest_WatchDogs.txt",
+    "%s/manifest_WatchDogs.txt",  "%s/manifest_Leeroy.txt",
 };
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);

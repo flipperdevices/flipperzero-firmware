@@ -17,7 +17,7 @@ const char* const anim_style_names[AnimStyleCount] = {
     "Anime+420", "Anime+420+18", "BMO",     "Cherry 18+", "Corp Logos",    "Custom 1", "Custom 2",
     "DBZ",       "Digim0n",      "Dolphin", "Hackz",      "Mario",         "Marvel",   "NYAN",
     "One Piece", "P0kemon",      "RM 18+",  "RM Select",  "RM Select 18+", "SAO",      "Science",
-    "SJUMP",     "Squatch",      "Stock",   "Virus",      "WatchDogs",
+    "SJUMP",     "Squatch",      "Stock",   "Virus",      "WatchDogs",     "Leeroy",
 };
 
 #define BATTERY_VIEW_COUNT 7
