@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Smooth Mouse Acceleration in BT and USB Mouse (By Leeroy)](https://github.com/LeeroysHub/RM-Flipper/commit/b86b359f1dd96aae6322d8091924202ae7ac8208)
 - Removed: SubGHz: [Oregon2 (thanks to haisenteck) (From Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai) (Functionality can be found in Weather Station app)
 - Updated: [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [add acurite-986 protocol #72 (By lagomorph)](https://github.com/flipperdevices/flipperzero-good-faps/pull/72)
+- CFW Settings: Passport: Fixed issue with Background image selection (By RogueMaster)
 
 <a name="release">
 
