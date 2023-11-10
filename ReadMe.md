@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Lowered less common AM_Q preset option so it does not interfere with normal SubGHz Read RAW config (By RogueMaster)
 - Updated: [Hangman v1.2 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - [Smooth Mouse Acceleration in BT and USB Mouse (By Leeroy)](https://github.com/LeeroysHub/RM-Flipper/commit/b86b359f1dd96aae6322d8091924202ae7ac8208)
+- Removed: SubGHz: [Oregon2 (thanks to haisenteck) (From Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai) (Functionality can be found in Weather Station app)
 
 <a name="release">
 
@@ -212,7 +213,6 @@ $ ./fbt dolphin_ext
 - SubGHz: New frequency analyzer [(By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1501) [feedback mode (by darmiel)](https://github.com/darmiel/flipper-playlist/tree/feat/stealth-frequency-analyzer) [Quiet Mode (by Himura2la)](https://github.com/ClusterM/flipperzero-firmware/pull/1) [New frequency analyzer #1557 (By ClusterM)](https://github.com/flipperdevices/flipperzero-firmware/pull/1557)
 - SubGHz: Nicer SubGHz Chat via [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) with "chat" command (Thanks ESurge and qqMajikpp)
 - SubGHz: OFW PR [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
-- SubGHz: [Oregon2 (thanks to haisenteck) (From Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai)
 - SubGHz: Protocols An-Motors, Keeloq BFT Mitto, Came Atomo, FAAC SLH (Spa), HCS101, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware) Check out new [instructions](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/SubGHzRemoteProg.md)
 - SubGHz: Region Locked -  To transmit to outside ranges (Unlock), use the CFW Settings or Extend Range app under Applications=>Settings.
 - SubGHz: [Transmit Indicator before Out of Region Frequency Use (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e24d4a0689db555ae083fec23a471e878adb6cd4)
