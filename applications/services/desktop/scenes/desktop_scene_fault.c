@@ -16,7 +16,7 @@ void desktop_scene_fault_on_enter(void* context) {
     popup_set_context(popup, desktop);
     popup_set_header(
         popup,
-        "Flipper crashed\n and was rebooted",
+        "Leeroy's Flipper crashed\n and was rebooted",
         60,
         14 + STATUS_BAR_Y_SHIFT,
         AlignCenter,

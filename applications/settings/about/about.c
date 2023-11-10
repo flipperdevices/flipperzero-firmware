@@ -58,13 +58,15 @@ static DialogMessageButton address_screen(DialogsApp* dialogs, DialogMessage* me
 static DialogMessageButton compliance_screen(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    const char* screen_text = "For all compliance\n"
-                              "certificates please visit:\n"
-                              "www.flipp.dev/compliance";
+    const char* screen_header = "Hack the Planet!";
+    const char* screen_text = "Don't be a skid\n"
+                              "but have fun flippin!";
 
-    dialog_message_set_text(message, screen_text, 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, screen_header, 27, 5, AlignLeft, AlignTop);
+    dialog_message_set_text(message, screen_text, 27, 18, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_header(message, NULL, 0, 0, AlignLeft, AlignTop);
 
     return result;
 }

@@ -31,44 +31,6 @@ typedef enum {
 } MenuStyle;
 
 typedef enum {
-    AnimStyleNone,
-    AnimStyleDefault,
-    AnimStyleMinimal,
-    AnimStyle420,
-    AnimStyle42018,
-    AnimStyleALL,
-    AnimStyleAnime,
-    AnimStyleAnime420,
-    AnimStyleAnime42018,
-    AnimStyleBMO,
-    AnimStyleCherry,
-    AnimStyleCorpLogos,
-    AnimStyleCustom1,
-    AnimStyleCustom2,
-    AnimStyleDBZ,
-    AnimStyleDigim0n,
-    AnimStyleDolphin,
-    AnimStyleHackz,
-    AnimStyleMario,
-    AnimStyleMarvel,
-    AnimStyleNYAN,
-    AnimStyleOnePiece,
-    AnimStyleP0kemon,
-    AnimStyleRM18,
-    AnimStyleRMSelect,
-    AnimStyleRMSelect18,
-    AnimStyleSAO,
-    AnimStyleScience,
-    AnimStyleSJUMP,
-    AnimStyleSquatch,
-    AnimStyleStock,
-    AnimStyleVirus,
-    AnimStyleWatchDogs,
-    AnimStyleLeeroy,
-    AnimStyleCount,
-} AnimStyle;
-
-typedef enum {
     SpiDefault, // cs on pa4
     SpiExtra, // cs on pc3
     SpiCount,
