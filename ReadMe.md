@@ -33,7 +33,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-10 02:32 EST`
 - [Switched to cleaner animation loader (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b651299ee1968cfa2b8b82f894b0375a8455e039)
 - [Changed a few minor text strings to shutdown and update (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/dd6f294157d78f3e9b8694cf263e48eaa98f0966)
-- OFW: [Infrared remote button index support #3180 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3180) (Added to refactors build)
+- [New NFC MF Keys (By z3r0l1nk)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8d1d955a4a49b76980750c2dd728d69c1382394)
+- Assets: [Included sample Infrared remote and IR file for Vizio (has a different button set than Roku - By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/552fc71d86533976eba6312670788a1bc849344a)
+- UL PR: [Fix naming in iButton #649 (By krolchonok)](https://github.com/DarkFlippers/unleashed-firmware/pull/649)
 
 ## IN THIS BRANCH:
 
