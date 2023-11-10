@@ -45,7 +45,6 @@
 #include "kinggates_stylo_4k.h"
 #include "bin_raw.h"
 #include "x10.h"
-#include "oregon2.h"
 #include "genie.h"
 #include "honeywell.h"
 

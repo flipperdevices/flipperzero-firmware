@@ -149,7 +149,7 @@ void hangman_render_callback(Canvas* canvas, void* ctx) {
 
     if(app->menu_show) {
         hangman_draw_menu(canvas, app);
-    } else {
+    } else if(app->lang != NULL) {
         hangman_draw_word(canvas, app);
         hangman_draw_gallows(canvas, app);
         hangman_draw_keyboard(canvas, app);
@@ -174,18 +174,20 @@ void hangman_input_callback(InputEvent* input_event, void* ctx) {
 
 void hangman_choice_letter(HangmanApp* app) {
     if(strchr(app->word, app->lang->letters[app->pos] + app->lang->first_letter_offset) == NULL) {
-        app->gallows_state++;
-        app->opened[app->pos] = HangmanOpenedNotFound;
+        if(app->opened[app->pos] != HangmanOpenedNotFound) {
+            app->gallows_state++;
+            app->opened[app->pos] = HangmanOpenedNotFound;
 
-        if(app->gallows_state >= HANGMAN_GALLOWS_MAX_STATE - 1) {
-            app->eog = HangmanGameLoose;
+            if(app->gallows_state >= HANGMAN_GALLOWS_MAX_STATE - 1) {
+                app->eog = HangmanGameLoose;
 
-            // Open the non-guessed letters
-            for(uint8_t i = 0; i < strlen(app->word); i++) {
-                int letter = app->word[i] - app->lang->first_letter_offset;
+                // Open the non-guessed letters
+                for(uint8_t i = 0; i < strlen(app->word); i++) {
+                    int letter = app->word[i] - app->lang->first_letter_offset;
 
-                if(app->opened[letter] != HangmanOpenedFound) {
-                    app->opened[letter] = HangmanOpenedNotFound;
+                    if(app->opened[letter] != HangmanOpenedFound) {
+                        app->opened[letter] = HangmanOpenedNotFound;
+                    }
                 }
             }
         }
