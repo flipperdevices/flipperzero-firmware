@@ -93,6 +93,7 @@ void nfc_magic_scene_write_on_enter(void* context) {
             instance->gen1a_poller, nfc_mafic_scene_write_gen1_poller_callback, instance);
     } else {
         instance->gen4_poller = gen4_poller_alloc(instance->nfc);
+        gen4_poller_set_password(instance->gen4_poller, instance->gen4_password);
         gen4_poller_start(
             instance->gen4_poller, nfc_mafic_scene_write_gen4_poller_callback, instance);
     }

@@ -194,6 +194,7 @@ NfcCommand gen4_poller_wipe_handler(Gen4Poller* instance) {
                 instance->state = Gen4PollerStateFail;
                 break;
             }
+            instance->password = 0;
             error = gen4_poller_write_block(
                 instance, instance->password, instance->current_block, gen4_poller_default_block_0);
             if(error != Gen4PollerErrorNone) {

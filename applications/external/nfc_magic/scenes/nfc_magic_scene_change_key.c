@@ -59,6 +59,7 @@ void nfc_magic_scene_change_key_on_enter(void* context) {
     nfc_magic_app_blink_start(instance);
 
     instance->gen4_poller = gen4_poller_alloc(instance->nfc);
+    gen4_poller_set_password(instance->gen4_poller, instance->gen4_password);
     gen4_poller_start(
         instance->gen4_poller, nfc_mafic_scene_change_key_gen4_poller_callback, instance);
 }
@@ -83,6 +84,7 @@ bool nfc_magic_scene_change_key_on_event(void* context, SceneManagerEvent event)
             nfc_magic_scene_change_key_setup_view(instance);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerSuccess) {
+            instance->gen4_password = instance->gen4_password_new;
             scene_manager_next_scene(instance->scene_manager, NfcMagicSceneSuccess);
             consumed = true;
         } else if(event.event == NfcMagicCustomEventWorkerFail) {
