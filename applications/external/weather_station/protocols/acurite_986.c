@@ -8,12 +8,13 @@
  *
  *     0110 0100 | 1010 1011 | 0110 0010 | 0000 0000 | 0111 0110
  *     tttt tttt | IIII IIII | iiii iiii | nbuu uuuu | cccc cccc
+ * - t: temperature in °F
  * - I: identification (high byte)
  * - i: identification (low byte)
+ * - n: sensor number
+ * - b: battery low flag to indicate low battery voltage
+ * - u: unknown
  * - c: CRC (CRC-8 poly 0x07, little-endian)
- * - u: unknown;
- * - b: battery low; flag to indicate low battery voltage
- * - t: Temperature; in °F
  *
  *  bits are sent and shown above LSB first
  *  identification changes on battery switch
