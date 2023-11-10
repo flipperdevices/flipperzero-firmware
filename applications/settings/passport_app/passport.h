@@ -72,7 +72,7 @@ static const Icon* const* portraitsMoody[3] = {portrait_happy, portrait_ok, port
 
 static const char* const moods[MOOD_SET_COUNT][16] = {
     {},
-    {"Joyful",
+    {"Chill",
      "Good",
      "Satisfied",
      "Happy",
@@ -82,12 +82,12 @@ static const char* const moods[MOOD_SET_COUNT][16] = {
      "Tired",
      "Bored",
      "Sad",
-     "Disappointed",
+     "Depressed",
      "Annoyed",
      "Grumpy",
      "Upset",
      "Angry",
-     "Furious"},
+     "Manic"},
     {"Stoned",
      "Baked",
      "Ripped",
