@@ -64,6 +64,7 @@ typedef enum {
     AnimStyleStock,
     AnimStyleVirus,
     AnimStyleWatchDogs,
+    AnimStyleLeeroy,
     AnimStyleCount,
 } AnimStyle;
 

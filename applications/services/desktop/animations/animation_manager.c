@@ -15,7 +15,7 @@
 
 #define TAG "AnimationManager"
 
-#define HARDCODED_ANIMATION_NAME "wrenchathome_F0Pattern_128x64"
+#define HARDCODED_ANIMATION_NAME "RM_W33dRain_128x64"
 #define NO_SD_ANIMATION_NAME "L1_NoSd_128x49"
 #define BAD_BATTERY_ANIMATION_NAME "L1_BadBattery_128x47"
 
