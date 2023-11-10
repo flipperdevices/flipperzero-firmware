@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1107-1320-0.93.1-1120ee6.tgz&channel=RM1107-1320-0.93.1-1120ee6&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1107-1320-0.93.1-1120ee6-NoAnim.tgz&channel=RM1107-1320-0.93.1-1120ee6-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1109-2320-0.93.1-47964c5.tgz&channel=RM1109-2320-0.93.1-47964c5&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1109-2320-0.93.1-47964c5-NoAnim.tgz&channel=RM1109-2320-0.93.1-47964c5-NoAnim&version=0.93.1)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -29,17 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1109-2243-0.93.1-c129f73](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-09 22:43 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-09 22:43 EST`
-- These PRs are in our [refactors branch](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/refactors) for testing: [NFC refactoring #3050](https://github.com/flipperdevices/flipperzero-firmware/pull/3050) [MF DESFire Fixes #3167](https://github.com/flipperdevices/flipperzero-firmware/pull/3167) [NFC RC fixes #3165](https://github.com/flipperdevices/flipperzero-firmware/pull/3165) [Fix crash on files > 64B #3166](https://github.com/flipperdevices/flipperzero-firmware/pull/3166) [fix crash after st25tb save #3170](https://github.com/flipperdevices/flipperzero-firmware/pull/3170) [fbt: reworked assets & resources handling #3160](https://github.com/flipperdevices/flipperzero-firmware/pull/3160) [fbt: SD card resource handling speedup #3178](https://github.com/flipperdevices/flipperzero-firmware/pull/3178) [fbt: source collection improvements #3181](https://github.com/flipperdevices/flipperzero-firmware/pull/3181) [Furi, FuriHal: remove FreeRTOS headers leaks #3179](https://github.com/flipperdevices/flipperzero-firmware/pull/3179) [Dolphin: Extreme butthurt loop fix #3184](https://github.com/flipperdevices/flipperzero-firmware/pull/3184) [Fix crash when exiting write mode #3191](https://github.com/flipperdevices/flipperzero-firmware/pull/3191) [fbt: dist improvements #3186](https://github.com/flipperdevices/flipperzero-firmware/pull/3186)
-- Updated: [Pokemon Trading v1.4 (By EstebanFuentealba & kbembedded)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [Authenticator/TOTP v5.7.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Lowered less common AM_Q preset option so it does not interfere with normal SubGHz Read RAW config (By RogueMaster)
-- Updated: [Hangman v1.2 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
-- [Smooth Mouse Acceleration in BT and USB Mouse (By Leeroy)](https://github.com/LeeroysHub/RM-Flipper/commit/b86b359f1dd96aae6322d8091924202ae7ac8208)
-- Removed: SubGHz: [Oregon2 (thanks to haisenteck) (From Korai-Labs / ankris812)](https://github.com/Korai-Labs/Korai) (Functionality can be found in Weather Station app)
-- Updated: [Weather Station (By Skorpionm)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/weather_station) [add acurite-986 protocol #72 (By lagomorph)](https://github.com/flipperdevices/flipperzero-good-faps/pull/72)
-- CFW Settings: Passport: Fixed issue with Background image selection (By RogueMaster)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-09 23:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-09 23:20 EST`
 
 <a name="release">
 
@@ -492,4 +483,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1107-1320-0.93.1-1120ee6.tgz&channel=RM1107-1320-0.93.1-1120ee6&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1107-1320-0.93.1-1120ee6-NoAnim.tgz&channel=RM1107-1320-0.93.1-1120ee6-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1109-2320-0.93.1-47964c5.tgz&channel=RM1109-2320-0.93.1-47964c5&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1109-2320-0.93.1-47964c5-NoAnim.tgz&channel=RM1109-2320-0.93.1-47964c5-NoAnim&version=0.93.1)
