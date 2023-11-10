@@ -13,7 +13,6 @@ class TestRfid(BaseCase):
     @pytest.mark.smoke
     def test_rfid_menu(self, nav):
         nav.rfid.go_into()
-        menu = nav.get_menu_list()
         menu_ref = [
             "Read",
             "Saved",
@@ -21,7 +20,7 @@ class TestRfid(BaseCase):
             "Extra Actions",
         ]
 
-        assert menu == menu_ref, "RFID menu list is wrong"
+        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "RFID menu list is wrong"
 
         nav.go_to_main_screen()
 
@@ -113,7 +112,6 @@ class TestRfid(BaseCase):
         nav.rfid.go_into()
         nav.go_to("Add Manually")
         nav.press_ok()
-        menu = nav.get_menu_list()
         menu_ref = [
             "EM-Micro EM4100",
             "HID H10301",
@@ -122,20 +120,20 @@ class TestRfid(BaseCase):
             "Kantech IoProxXSF",
             "AWID",
             "FECAVA FDX-A",
-            "ISO FDX-A",
+            "ISO FDX-B",
             "Generic HIDProx",
             "Generic HIDExt",
             "Farpointe Pyramid",
             "Viking",
             "Jablotron",
             "Paradox",
-            "NA PACStanley",
+            "N/A PAC/Stanley",
             "Keri",
             "Gallagher",
-            "Honeywell Nextwatch",
+            "Honeywell Nexwatch",
         ]
 
-        assert menu == menu_ref, "RFID Add manually option list is wrong"
+        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "RFID Add manually option list is wrong"
 
         nav.go_to_main_screen()
 
@@ -144,7 +142,6 @@ class TestRfid(BaseCase):
         nav.rfid.go_into()
         nav.go_to("Add Manually")
         nav.press_ok()
-        menu = nav.get_first_item(browser=True)
         menu_ref = [
             "EM-Micro EM4100",
             "HID H10301",
@@ -153,22 +150,20 @@ class TestRfid(BaseCase):
             "Kantech IoProxXSF",
             "AWID",
             "FECAVA FDX-A",
-            "ISO FDX-A",
+            "ISO FDX-B",
             "Generic HIDProx",
             "Generic HIDExt",
             "Farpointe Pyramid",
             "Viking",
             "Jablotron",
             "Paradox",
-            "NA PACStanley",
+            "N/A PAC/Stanley",
             "Keri",
             "Gallagher",
+            "Honeywell Nexwatch",
         ]
 
-        assert menu, "RFID Add manually option list is empty"
-        assert all([item in menu_ref for item in menu]) and bool(
-            menu
-        ), "RFID Add manually option list is wrong"
+        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "RFID Add manually option list is wrong"
 
         nav.go_to_main_screen()
 
@@ -177,13 +172,12 @@ class TestRfid(BaseCase):
         nav.rfid.go_into()
         nav.go_to("Extra Actions")
         nav.press_ok()
-        menu = nav.get_menu_list()
         menu_ref = [
-            "Read ASK",
-            "Read PSK",
-            "Read RAW RFID",
+            "Read ASK (Animal, Ordina...",
+            "Read PSK (Indala)",
+            "Read RAW RFID data",
         ]
 
-        assert menu == menu_ref, "RFID Add manually option list is wrong"
+        assert nav.get_menu_list(ref = nav.get_ref_from_list(menu_ref, nav.font_haxrcorp_4089, invert = 1)) == menu_ref, "RFID Add manually option list is wrong"
 
         nav.go_to_main_screen()

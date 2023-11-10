@@ -343,29 +343,37 @@ class Navigator:
 
         return menus
 
-    def go_to(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
+    def go_to(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down", timeout = 20):
         if not (target in self.imRef.keys()):
             self.logger.info("Going to " + target)
             self.logger.info("No ref for target, generating from text" + target)
             ref = self.get_ref_all_fonts(target)
             state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
 
-            while (len(state) == 0):
+            start_time = time.time()
+            while start_time + timeout > time.time():
                 if direction == "down":
                     self.press_down()
                 elif direction == "up":
                     self.press_up()
                 state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
+                if len(state) != 0:
+                    return 0
+            return -1
         else:
             state = self.get_current_state(area=area, timeout = 0.3)
             self.logger.info("Going to " + target)
 
-            while (not (target in state)):
+            start_time = time.time()
+            while start_time + timeout > time.time():
                 if direction == "down":
                     self.press_down()
                 elif direction == "up":
                     self.press_up()
                 state = self.get_current_state(area=area, timeout = 0.5)
+                if target in state:
+                    return 0
+            return -1
 
     def open(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):
         self.go_to(target, area, direction)
@@ -413,20 +421,11 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        while start_time + 10 > time.time():
-            state = self.get_current_state(timeout=0.5, area=(15, 64, 0, 128))
-
-            if not (state == []):
-                if state[0] in files:
-                    self.logger.warning("File not found!")
-                    return -1
-                if state[0] == "browser_" + filename:
-                    break
-                files.append(state[0])
-            self.press_down()
-        if start_time + 10 <= time.time():
-            self.logger.warning("File not found! (timeout)")
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 20)
+        if result == -1:
+            self.logger.warning("File not found!")
             return -1
+
         self.press_ok()
         self.go_to("browser_Run in app", area=(15, 64, 0, 128))
         self.press_ok()
@@ -460,18 +459,8 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        while start_time + 10 > time.time():
-            state = self.get_current_state(timeout=0.5, area=(15, 64, 0, 128))
-
-            if not (state == []):
-                if state[0] in files:
-                    self.logger.warning("File not found!")
-                    return -1
-                if state[0] == "browser_" + filename:
-                    break
-                files.append(state[0])
-            self.press_down()
-        if start_time + 10 <= time.time():
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 20)
+        if result == -1:
             self.logger.warning("File not found! (timeout)")
             return -1
 

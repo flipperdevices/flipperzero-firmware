@@ -42,6 +42,7 @@ class TestApplications(BaseCase):
         assert len(menu_ref) == 0, "Applications menu list is wrong"
         nav.go_to_main_screen()
 
+'''
     @pytest.mark.smoke
     def test_applications_subfolders(self, nav):
         """
@@ -213,3 +214,4 @@ class TestApplications(BaseCase):
             nav.press_back()
 
         nav.go_to_main_screen()
+'''

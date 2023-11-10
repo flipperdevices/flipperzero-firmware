@@ -17,6 +17,7 @@ pluggy==1.0.0
 protobuf==4.21.12
 pyserial==3.5
 pytest==7.2.0
+pillow==9.5.0
 six==1.16.0
 termcolor==2.1.0
 tomli==2.0.1

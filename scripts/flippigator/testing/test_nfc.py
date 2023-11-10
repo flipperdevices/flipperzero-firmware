@@ -209,8 +209,6 @@ class TestNfc(BaseCase):
         nav.nfc.go_into()
         nav.go_to("Debug")
         nav.press_ok()
-
-        menu = nav.get_menu_list()
         menu_ref = [
             "Field"
         ]
