@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1109-2243-0.93.1-c129f73](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-10 01:37 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-10 01:37 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-10 02:26 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-10 02:26 EST`
 - [Switched to cleaner animation loader (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b651299ee1968cfa2b8b82f894b0375a8455e039)
 - [Changed a few minor text strings to shutdown and update (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/dd6f294157d78f3e9b8694cf263e48eaa98f0966)
 
@@ -72,6 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ShapShup v1.2 (By derskythe)](https://github.com/derskythe/flipperzero-shapshup)
 - OFW PR: [NFC: Felica UID emulation #3190 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3190)
 - OFW: [Fix NFC unit tests #3192 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3192)
+- OFW: [Infrared remote button index support #3180 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3180)
 
 <a name="release">
 
