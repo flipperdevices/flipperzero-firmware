@@ -29,9 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1109-2243-0.93.1-c129f73](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-09 23:20 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-09 23:20 EST`
-- Switched to cleaner animation loader (By Leeroy)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-10 01:37 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-10 01:37 EST`
+- [Switched to cleaner animation loader (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b651299ee1968cfa2b8b82f894b0375a8455e039)
+- [Changed a few minor text strings to shutdown and update (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/dd6f294157d78f3e9b8694cf263e48eaa98f0966)
 
 <a name="release">
 
@@ -97,7 +98,7 @@ $ ./fbt dolphin_ext
 ## All Changes and Features
 
 - Animations: [Added Custom 1 and Custom 2 options to CFW Settings-Interface-Desktop-Animations to allow for two custom user defined background sets. Edit dolphin/manifest_Custom1.txt and dolphin/manifest_Custom2.txt on your SD Card in order to change these custom sets. (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3e52a6f26d8fc9e25149dd7cb4622f0eaaa339db)
-- Animations: [CFW Settings for Desktop Animations Set Selector (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d07f27fd259ce049ca7b928a9dd3e8242a769d01) [Copy this to SD dolphin folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher)
+- Animations: [CFW Settings for Desktop Animations Set Selector (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d07f27fd259ce049ca7b928a9dd3e8242a769d01) [Copy this to SD dolphin folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-ManifestSwitcher) [Switched to cleaner animation loader (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b651299ee1968cfa2b8b82f894b0375a8455e039)
 - Animations: Hold Center to change Flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Animations: iButton and RFID P0kem0n images [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/)
 - Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to qqMajiKpp](https://github.com/qqmajikpp/)
