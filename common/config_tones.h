@@ -1,6 +1,11 @@
 #pragma once
 
-float freqs_values[] = {
+/**
+ * @brief    The frequency of the tones in HZ.
+ * @details  The index of the tone in this array is the same as
+ *  the index of the tone in the tone_names array.
+*/
+float tone_values[] = {
     0.000000, // Off
     130.813, // C3
     138.591, // C#3
@@ -49,7 +54,12 @@ float freqs_values[] = {
     1661.22, // G#6
 };
 
-char* freq_names[] = {
+/**
+ * @brief    The names of the tones.
+ * @details  The index of the tone in this array is the same as
+ *  the index of the tone in the tone_values array.
+*/
+char* tone_names[] = {
     "Off", "C3",  "C#3", "D3",  "D#3", "E3", "F3",  "F#3", "G3",  "G#3", "A3",  "A#3",
     "B3",  "C#4", "D4",  "D#4", "E4",  "F4", "F#4", "G4",  "G#4", "A4",  "A#4", "B4",
     "C5",  "C#5", "D5",  "D#5", "E5",  "F5", "F#5", "G5",  "G#5", "A5",  "A#5", "B5",

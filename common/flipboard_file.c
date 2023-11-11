@@ -19,6 +19,11 @@
 
 #define TAG "FlipboardFile"
 
+/**
+ * @brief    Check if a directory exists, create it if it doesn't.
+ * @param    storage    The storage to use.
+ * @param    dir        The directory to check.
+*/
 static void ensure_dir_exists(Storage* storage, char* dir) {
     if(!storage_dir_exists(storage, dir)) {
         FURI_LOG_I(TAG, "Creating directory: %s", dir);
@@ -26,11 +31,20 @@ static void ensure_dir_exists(Storage* storage, char* dir) {
     }
 }
 
+/**
+ * @brief   Check if the save folder exists, create it if it doesn't.
+ * @param   storage    The storage to use.
+*/
 static void ensure_save_folder_exists(Storage* storage) {
     ensure_dir_exists(storage, FLIPBOARD_APPS_DATA_FOLDER);
     ensure_dir_exists(storage, FLIPBOARD_SAVE_FOLDER);
 }
 
+/**
+ * @brief    Save the flipboard model to the settings file.
+ * @param    model    The flipboard model to save.
+ * @param    fields   The fields to save.
+*/
 bool flipboard_model_save(FlipboardModel* model, KeySettingModelFields fields) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -81,12 +95,16 @@ bool flipboard_model_save(FlipboardModel* model, KeySettingModelFields fields) {
     } while(false);
 
     flipper_format_free(format);
-    furi_string_free(file_path);
     furi_string_free(buffer);
+    furi_string_free(file_path);
     furi_record_close(RECORD_STORAGE);
     return success;
 }
 
+/**
+ * @brief    Load the flipboard model from the settings file.
+ * @param    model    The flipboard model to populate.
+*/
 bool flipboard_model_load(FlipboardModel* model) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);

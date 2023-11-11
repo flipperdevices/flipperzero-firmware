@@ -32,8 +32,8 @@ static void color_down_changed(VariableItem* item) {
 static void tone_changed(VariableItem* item) {
     KeySettingModel* ksm = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    key_setting_model_set_frequency(ksm, freqs_values[index]);
-    variable_item_set_current_value_text(item, freq_names[index]);
+    key_setting_model_set_frequency(ksm, tone_values[index]);
+    variable_item_set_current_value_text(item, tone_names[index]);
 }
 
 static void keystroke_changed(VariableItem* item) {
@@ -101,10 +101,10 @@ static void populate_variable_item_list_frequency(
     VariableItemChangeCallback callback,
     float frequency) {
     VariableItem* item =
-        variable_item_list_add(key_config->item_list, label, COUNT_OF(freq_names), callback, ksm);
+        variable_item_list_add(key_config->item_list, label, COUNT_OF(tone_names), callback, ksm);
     uint8_t index = 0;
-    for(size_t i = 0; i < COUNT_OF(freqs_values); i++) {
-        float diff = frequency - freqs_values[i];
+    for(size_t i = 0; i < COUNT_OF(tone_values); i++) {
+        float diff = frequency - tone_values[i];
         if(diff < 0.0f) diff = -diff;
         if(diff < 1.0f) {
             index = i;
@@ -112,7 +112,7 @@ static void populate_variable_item_list_frequency(
         }
     }
     variable_item_set_current_value_index(item, index);
-    variable_item_set_current_value_text(item, freq_names[index]);
+    variable_item_set_current_value_text(item, tone_names[index]);
 }
 
 static uint8_t

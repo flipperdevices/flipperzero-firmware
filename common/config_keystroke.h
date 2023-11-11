@@ -2,6 +2,11 @@
 
 #include <furi_hal.h>
 
+/**
+ * @brief    The HID values of the keystrokes.
+ * @details  The index of the keystroke in this array is the same as
+ *  the index of the keystroke in the keystroke_names array.
+*/
 uint16_t keystroke_values[] = {
     HID_KEYBOARD_NONE, // Not mapped
     1, // Delay
@@ -278,6 +283,11 @@ uint16_t keystroke_values[] = {
     // HID_KEYBOARD_LANG_9, // HID_KEYBOARD_LANG_9
 };
 
+/**
+ * @brief    The HID values of the keystrokes.
+ * @details  The index of the keystroke in this array is the same as
+ *  the index of the keystroke in the keystroke_names array.
+*/
 char* keystroke_names[] = {
     "None",      "Delay",
 
@@ -361,5 +371,9 @@ char* keystroke_names[] = {
     // "LANG 9",
 };
 
+/**
+ * @brief    The number of times to repeat the keystroke.
+ * @details  This array should start at value 0, and increment by 1s. 
+*/
 char* keystroke_count_names[] =
     {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"};

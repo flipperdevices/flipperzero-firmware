@@ -7,13 +7,13 @@
 
 /**
  * @brief This method handles Flipper D-Pad input when in the FlipboardBlinky mode.
- * @param event The InputEvent* to handle.
- * @param context The Flipboard* context.
+ * @param _event The InputEvent* to handle.
+ * @param _context The Flipboard* context.
  * @return true if the key event was handled, false otherwise.
  */
-bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
-    UNUSED(event);
-    UNUSED(context);
+bool flipboard_view_flip_keyboard_input(InputEvent* _event, void* _context) {
+    UNUSED(_event);
+    UNUSED(_context);
     return false;
 }
 
@@ -279,11 +279,11 @@ void flipboard_blinky_model_free(FlipboardBlinkyModel* fbm) {
 
 /**
  * @brief This method is invoked when the FlipboardBlinky app is launched.
- * @param p Unused.
+ * @param _p Unused.
  * @return 0.
 */
-int32_t flipboard_blinky_app(void* p) {
-    UNUSED(p);
+int32_t flipboard_blinky_app(void* _p) {
+    UNUSED(_p);
 
     KeySettingModelFields fields = KeySettingModelFieldNone;
     bool single_mode_button = true;
