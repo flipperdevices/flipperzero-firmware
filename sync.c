@@ -320,13 +320,15 @@ void do_sync(UART_TerminalApp *app) {
         /* Initialise sync buffer */
         memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
         app->syncBufLen = 0;
+        uart_terminal_uart_tx((uint8_t *)"\n", 1);
+        
         /* Register callback to receive data */
         uart_terminal_uart_set_handle_rx_data_cb(app->uart, uart_terminal_sync_rx_data_cb);
         /* Execute Sync */
-        uart_terminal_uart_tx((uint8_t *)"sync\n", 5);
-        //char purgeString[] = "(0:2)(1:8)(2:32)(3:20)(4:1)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:11)(12:-95)(13:90)\n";
+    //    uart_terminal_uart_tx((uint8_t *)"sync\n", 5);
+        char purgeString[] = "(0:2)(1:8)(2:32)(3:20)(4:1)(5:40:91:51:BB:AC:7D)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:11)(12:-95)(13:90)\n";
         //char purgeString[] = "(5:40:91:51:BB:AC:7D)\n";
         //uint8_t *purgeBytes = (uint8_t *)purgeString;
-        //uart_terminal_sync_rx_data_cb(purgeBytes, strlen(purgeString), app);
+        uart_terminal_sync_rx_data_cb((uint8_t *)purgeString, strlen(purgeString), app);
     }
 }

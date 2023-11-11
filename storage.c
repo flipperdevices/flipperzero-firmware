@@ -108,7 +108,7 @@ bool writeSettingsToFile(UART_TerminalApp *app, File *file) {
         strcpy(&(fBuffer[bufLen]), strBuffer);
         bufLen += strlen(strBuffer);        
     }
-    return storage_file_write(file, strBuffer, bufLen);
+    return storage_file_write(file, fBuffer, bufLen);
 }
 
 void close_file(File *file) {
@@ -144,7 +144,8 @@ bool save_settings(UART_TerminalApp *app) {
         close_file(file);
         return false;
     } */
-
+    /* Flush write cache */
+    storage_file_sync(file);
     close_file(file);
     return true;
 }

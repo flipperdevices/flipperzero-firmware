@@ -160,7 +160,7 @@ static void uart_terminal_scene_settings_var_list_enter_callback(void* context, 
     } else if (!strcmp(item->actual_commands[selected_option_index], "sync")) {
         do_sync(app);
     } else if (!strcmp(item->actual_commands[selected_option_index], "save")) {
-        //save_settings(app);
+        save_settings(app);
     } else if (!strcmp(item->actual_commands[selected_option_index], "load")) {
         //load_settings(app);
     } else {
