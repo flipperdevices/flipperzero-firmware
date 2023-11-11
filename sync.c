@@ -314,17 +314,25 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     uint16_t promptIdx = 1;
     for ( ; promptIdx < len && buf[promptIdx] != '>'; ++promptIdx) { }
     if (promptIdx < len) {
-
-     //if (buf[len - 1] == ' ' && buf[len - 2] == '>') {
-         app->syncComplete = true;
-         /* Process sync elements */
-         if (!syncProcessResponse(app)) {
-             // TODO: Display modal dialogue reporting failure
-         }
-         memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
-         app->syncBufLen = 0;
-         /* De-register the sync callback */
-         uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
+        /* If app->syncBuffer contains 'z' (for "Unrecognized command") call
+           sync a second time */
+        uint16_t zIdx = 0;
+        for ( ; zIdx < app->syncBufLen && app->syncBuffer[zIdx] != 'z'; ++zIdx) { }
+        if (zIdx < app->syncBufLen) {
+            memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+            app->syncBufLen = 0;
+            uart_terminal_uart_tx("sync\n", 5);
+        } else {
+             app->syncComplete = true;
+             /* Process sync elements */
+             if (!syncProcessResponse(app)) {
+                 // TODO: Display modal dialogue reporting failure
+             }
+             memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+             app->syncBufLen = 0;
+             /* De-register the sync callback */
+             uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
+        }
      }
 
      storage_file_sync(file);
@@ -358,12 +366,16 @@ void do_sync(UART_TerminalApp *app) {
         memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
         app->syncBufLen = 0;
         /* Init */
+        uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
         uart_terminal_uart_tx((uint8_t *)"\n", 1);
         
         /* Register callback to receive data */
         uart_terminal_uart_set_handle_rx_data_cb(app->uart, uart_terminal_sync_rx_data_cb);
         /* Execute Sync */
         uart_terminal_uart_tx((uint8_t *)"sync\n", 5);
+
+        // perhaps start a timer here of 1 or 2 seconds. If syncBuffer contains "Unrecognized" then sync again
+
         //char purgeString[] = "(0:2)(1:8)(2:32)(3:20)(4:1)(5:40:91:51:BB:AC:7D)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:11)(12:-95)(13:90)\n";
         //uart_terminal_sync_rx_data_cb((uint8_t *)purgeString, strlen(purgeString), app);
 //    }
