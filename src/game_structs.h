@@ -5,13 +5,15 @@
 #include <furi_hal.h>
 
 enum ThreadsMessageType {
-    SAVE_AND_EXIT // Request to exit the program, save the state and quit the thread
+    SAVE_AND_EXIT, // Request to exit the program, save the state and quit the thread
+    RESET_STATE // Reset the persisted state and return to the main view
 };
 
 /* Request from main thread to be processed by secondary thread */
 struct ThreadsMessage {
     enum ThreadsMessageType type;
-    InputKey key; // Filled if type == BUTTON_PRESSED
+    // Filled with other field in case there's the need
+    // to pass an argument for a specific message type
 };
 
 enum LifeStage {

@@ -49,6 +49,12 @@ int32_t secondary_thread(void *ctx)
                     FURI_LOG_T(LOG_TAG, "Received termination message");
                     persist_state(context->game_state);
                     return 0;
+                case RESET_STATE:
+                    FURI_LOG_T(LOG_TAG, "Received reset state request");
+                    reset_state(context->game_state);
+                    context->game_state->next_animation_index = 0;
+                    go_back_to_main_scene(context);
+                    break;
                 default:
                     furi_crash("Unexpected game event type");
             }

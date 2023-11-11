@@ -10,6 +10,9 @@ void start_gui_and_block(struct ApplicationContext *);
 /* Change scene to the main view after init is finished */
 void switch_to_main_scene(struct ApplicationContext *);
 
+/* Go back to main scene that was previously loaded */
+void go_back_to_main_scene(struct ApplicationContext *);
+
 /* Send an event to whichever is the active scene at the
  * moment. */
 void send_tick_to_scene(struct ApplicationContext *);

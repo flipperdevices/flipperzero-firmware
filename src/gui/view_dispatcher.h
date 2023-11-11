@@ -1,10 +1,13 @@
 #ifndef __VIEW_DISPATCHER_H__
 #define __VIEW_DISPATCHER_H__
 
+/* Types of view modules used by the application */
 enum ViewTypes {
-    LoadingType,
-    ButtonType,
-    MenuType
+    loading_type, // First view while loading the saved state
+    button_type, // Main screen
+    variable_item_list_type, // Settings
+    dialog_type, // Reset screen
+    text_box_type // About screen
 };
 
 /* When view_dispatcer receives events, they are sent directly

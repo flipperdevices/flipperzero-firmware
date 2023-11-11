@@ -9,6 +9,13 @@
 
 /* Log strings */
 #define LOG_TAG "Matagotchi"
+static const char ABOUT_TEXT[] = "Matagotchi\n"
+                                 "by MrModd\n"
+                                 "\n"
+                                 "This application is released\n"
+                                 "under the GPLv3 license\n"
+                                 "For more info visit\n"
+                                 "github.com/MrModd/Matagotchi";
 
 /* Game state file info */
 #define GAME_STATE_STORAGE_FILENAME "matagotchi.save"

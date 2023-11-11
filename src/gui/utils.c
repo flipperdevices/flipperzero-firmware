@@ -19,6 +19,10 @@ void switch_to_main_scene(struct ApplicationContext *context) {
     scene_manager_next_scene(context->scene_manager, scene_main);
 }
 
+void go_back_to_main_scene(struct ApplicationContext *context) {
+    scene_manager_search_and_switch_to_previous_scene(context->scene_manager, scene_main);
+}
+
 void send_tick_to_scene(struct ApplicationContext *context) {
     scene_manager_handle_tick_event(context->scene_manager);
 }

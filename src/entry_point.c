@@ -3,6 +3,12 @@
 #include <gui/view_dispatcher.h>
 #include <gui/view.h>
 
+#include <gui/modules/loading.h>
+#include <gui/modules/button_panel.h>
+#include <gui/modules/variable_item_list.h>
+#include <gui/modules/dialog_ex.h>
+#include <gui/modules/text_box.h>
+
 #include <core/thread.h>
 #include <core/message_queue.h>
 
@@ -23,7 +29,9 @@ static void init_gui(struct ApplicationContext *context) {
     // Init modules
     context->loading_module = loading_alloc(); // Loading screen while reading persisted status
     context->button_module = button_panel_alloc(); // Home screen
-    context->menu_module = menu_alloc(); // Settings page
+    context->variable_item_list_module = variable_item_list_alloc(); // Settings page
+    context->dialog_ex_module = dialog_ex_alloc(); // Reset screen
+    context->text_box_module = text_box_alloc(); // About screen
 
     // Init ViewDispatcher
     context->view_dispatcher = view_dispatcher_alloc();
@@ -36,15 +44,21 @@ static void init_gui(struct ApplicationContext *context) {
 
     // Attach modules to view_dispatcher
     view_dispatcher_add_view(context->view_dispatcher,
-                             LoadingType,
+                             loading_type,
                              loading_get_view(context->loading_module));
     view_dispatcher_add_view(context->view_dispatcher,
-                             ButtonType,
+                             button_type,
                              button_panel_get_view(context->button_module));
     view_set_orientation(button_panel_get_view(context->button_module), ViewOrientationHorizontal);
     view_dispatcher_add_view(context->view_dispatcher,
-                             MenuType,
-                             menu_get_view(context->menu_module));
+                             variable_item_list_type,
+                             variable_item_list_get_view(context->variable_item_list_module));
+    view_dispatcher_add_view(context->view_dispatcher,
+                             dialog_type,
+                             dialog_ex_get_view(context->dialog_ex_module));
+    view_dispatcher_add_view(context->view_dispatcher,
+                             text_box_type,
+                             text_box_get_view(context->text_box_module));
 
     // Init GUI and attach the view_dispatcher to it
     context->gui = furi_record_open(RECORD_GUI);
@@ -55,7 +69,9 @@ static void init_gui(struct ApplicationContext *context) {
 
 static void free_gui(struct ApplicationContext *context) {
     view_dispatcher_free(context->view_dispatcher);
-    menu_free(context->menu_module);
+    text_box_free(context->text_box_module);
+    dialog_ex_free(context->dialog_ex_module);
+    variable_item_list_free(context->variable_item_list_module);
     button_panel_free(context->button_module);
     loading_free(context->loading_module);
     scene_manager_free(context->scene_manager);

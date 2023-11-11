@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "feature_management.h"
 #include "save_restore.h"
+#include "game_structs.h"
 
 static uint32_t get_current_timestamp() {
     FuriHalRtcDateTime current_time;
@@ -18,16 +19,19 @@ static void fast_forward_state(struct GameState *game_state) {
     process_events(game_state, events);
 }
 
+static void init_persistent_state_object(struct GameState *game_state) {
+    // Init the struct with default values
+    uint32_t current_timestamp = get_current_timestamp();
+    game_state->persistent.stage = EGG;
+
+    // Init every individual feature
+    init_xp(game_state, current_timestamp);
+}
+
 void init_state(struct GameState *game_state) {
     // Try to load the state from the storage
     if(!load_from_file(&game_state->persistent)) {
-        uint32_t current_timestamp = get_current_timestamp();
-
-        // Failed, init the struct with default values
-        game_state->persistent.stage = EGG;
-
-        // Init every individual feature
-        init_xp(game_state, current_timestamp);
+        init_persistent_state_object(game_state);
     } else {
         // State loaded from file. Actualize it up to
         // the current timestamp.
@@ -42,6 +46,10 @@ void persist_state(struct GameState *game_state) {
     if (!result) {
         furi_crash("Unable to save to storage");
     }
+}
+
+void reset_state(struct GameState *game_state) {
+    init_persistent_state_object(game_state);
 }
 
 static void _generate_new_random_event(uint32_t timestamp, struct GameState *game_state, struct GameEvents *game_events) {
