@@ -1,4 +1,5 @@
 #include "storage.h"
+#include <lib/print/wrappers.h>
 
 #define TAG "Gravity"
 #define FILENAME_SETTINGS "gravity.settings"
@@ -25,40 +26,40 @@ bool writeSettingsToFile(UART_TerminalApp *app, File *file) {
 
     memset(fBuffer, '\0', FILEBUFFER_SIZE);
     for (GravitySyncItem i = 0; i < GRAVITY_SYNC_ITEM_COUNT; ++i) {
-        sprintf(strBuffer, "(%d:", i);
+        snprintf(strBuffer, FILEBUFFER_SIZE, "(%d:", i);
         strcpy(&(fBuffer[bufLen]), strBuffer);
         bufLen += strlen(strBuffer);
         switch (i) {
             case GRAVITY_SYNC_HOP_ON:
-                sprintf(strBuffer, "%d)", app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_HOP_STATUS]);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_HOP_STATUS]);
                 break;
             case GRAVITY_SYNC_SSID_MIN:
                 /* If menu item's 'Get' option is "Get" then we have no value - Use default */
                 if (strcmp(settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET], STRINGS_GET)) {
-                    sprintf(strBuffer, "%s)", settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET]);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%s)", settings[SETTINGS_MENU_SSID_MIN].options_menu[OPTIONS_SSID_MIN_GET]);
                 } else {
-                    sprintf(strBuffer, "%d)", DEFAULT_SSID_MIN);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", DEFAULT_SSID_MIN);
                 }
                 break;
             case GRAVITY_SYNC_SSID_MAX:
                 if (strcmp(settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET], STRINGS_GET)) {
-                    sprintf(strBuffer, "%s)", settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET]);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%s)", settings[SETTINGS_MENU_SSID_MAX].options_menu[OPTIONS_SSID_MAX_GET]);
                 } else {
-                    sprintf(strBuffer, "%d)", DEFAULT_SSID_MAX);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", DEFAULT_SSID_MAX);
                 }
                 break;
             case GRAVITY_SYNC_SSID_COUNT:
                 if (strcmp(settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET], STRINGS_GET)) {
-                    sprintf(strBuffer, "%s)", settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET]);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%s)", settings[SETTINGS_MENU_SSID_DEFAULT].options_menu[OPTIONS_SSID_DEFAULT_GET]);
                 } else {
-                    sprintf(strBuffer, "%d)", DEFAULT_SSID_COUNT);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", DEFAULT_SSID_COUNT);
                 }
                 break;
             case GRAVITY_SYNC_CHANNEL:
                 /* Happily, the channel number is the same as the channel index */
                 // TODO: If the "Get" option is removed this won't be true anymore and all of sync
                 //       will need to be refactored
-                sprintf(strBuffer, "%d)", app->channel);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", app->channel);
                 break;
             case GRAVITY_SYNC_MAC: ;
                 char strTemp[NUM_MAC_BYTES * 3];
@@ -66,39 +67,39 @@ bool writeSettingsToFile(UART_TerminalApp *app, File *file) {
                     FURI_LOG_E(TAG, "Failed to stringify MAC to save settings, abandoning save");
                     return false;
                 }
-                sprintf(strBuffer, "%s)", strTemp);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%s)", strTemp);
                 break;
             case GRAVITY_SYNC_ATTACK_MILLIS:
                 if (strcmp(settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET], STRINGS_GET)) {
-                    sprintf(strBuffer, "%s)", settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET]);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%s)", settings[SETTINGS_MENU_ATTACK_MILLIS].options_menu[OPTIONS_ATTACK_MILLIS_GET]);
                 } else {
-                    sprintf(strBuffer, "%d)", DEFAULT_ATTACK_MILLIS);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", DEFAULT_ATTACK_MILLIS);
                 }
                 break;
             case GRAVITY_SYNC_MAC_RAND:
-                sprintf(strBuffer, "%d)", app->mac_rand);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", app->mac_rand);
                 break;
             case GRAVITY_SYNC_PKT_EXPIRY:
                 if (strcmp(settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET], STRINGS_GET)) {
-                    sprintf(strBuffer, "%s)", settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET]);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%s)", settings[SETTINGS_MENU_PKT_EXPIRY].options_menu[OPTIONS_PKT_EXPIRY_GET]);
                 } else {
-                    sprintf(strBuffer, "%d)", DEFAULT_PKT_EXPIRY);
+                    snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", DEFAULT_PKT_EXPIRY);
                 }
                 break;
             case GRAVITY_SYNC_HOP_MODE:
-                sprintf(strBuffer, "%d)", app->hopMode);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", app->hopMode);
                 break;
             case GRAVITY_SYNC_DICT_DISABLED:
-                sprintf(strBuffer, "%d)", app->dict_disabled);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", app->dict_disabled);
                 break;
             case GRAVITY_SYNC_PURGE_STRAT:
-                sprintf(strBuffer, "%d)", app->purgeStrategy);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", app->purgeStrategy);
                 break;
             case GRAVITY_SYNC_PURGE_RSSI_MAX:
-                sprintf(strBuffer, "%d)", app->purgeRSSI);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", app->purgeRSSI);
                 break;
             case GRAVITY_SYNC_PURGE_AGE_MIN:
-                sprintf(strBuffer, "%d)", app->purgeAge);
+                snprintf(strBuffer, FILEBUFFER_SIZE, "%d)", app->purgeAge);
                 break;
             default:
                 //
