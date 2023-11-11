@@ -30,3 +30,16 @@ typedef struct FlipboardBlinkyModel {
     uint8_t max_effect_id;
     uint32_t show_details_counter;
 } FlipboardBlinkyModel;
+
+enum LedColors {
+    LedColorBlack = 0x000000,
+    LedColorRed = 0xFF0000,
+    LedColorOrange = 0xFF1F00,
+    LedColorYellow = 0xFF7F00,
+    LedColorGreen = 0x00FF00,
+    LedColorCyan = 0x00FFFF,
+    LedColorBlue = 0x0000FF,
+    LedColorViolet = 0x1F00FF,
+    LedColorMagenta = 0x7F00FF,
+    LedColorWhite = 0xFFFFFF,
+};

@@ -2,18 +2,23 @@
 #include "app_config.h"
 #include "app_keyboard_layout.h"
 
-/*
-This method handles Flipper D-Pad input when in the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method handles Flipper D-Pad input when in the FlipboardKeyboard mode.
+ * @param event The InputEvent* to handle.
+ * @param context The Flipboard* context.
+ * @return true if the key event was handled, false otherwise.
+ */
 bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
     UNUSED(event);
     UNUSED(context);
     return false;
 }
 
-/*
-This method handles drawing when in the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method handles drawing when in the FlipboardKeyboard mode.
+ * @param canvas The canvas to draw on.
+ * @param model The FlipboardModelRef* context.
+ */
 void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     static uint8_t counter = 0;
 
@@ -38,9 +43,13 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     // canvas_draw_icon(canvas, 64, 42, &I_glyph_1_7x9);
 }
 
-/*
-This method handles FlipBoard key input when in the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method handles FlipBoard button input when in the FlipboardKeyboard mode.
+ * @param context The Flipboard* context.
+ * @param old_key The previous key state.
+ * @param new_key The new key state.
+ * @return true if the key event was handled, false otherwise.
+ */
 bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key) {
     Flipboard* app = (Flipboard*)context;
     FlipboardModel* model = flipboard_get_model(app);
@@ -49,17 +58,18 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
     FURI_LOG_D(TAG, "SW EVENT: old=%d new=%d reduced=%d", old_key, new_key, reduced_new_key);
 
     KeySettingModel* ksm = flipboard_model_get_key_setting_model(model, reduced_new_key);
+    flipboard_model_set_colors(model, ksm, new_key);
     flipboard_model_send_keystrokes(model, ksm);
     flipboard_model_send_text(model, ksm);
     flipboard_model_play_tone(model, ksm);
-    flipboard_model_set_colors(model, ksm, new_key);
 
     return true;
 }
 
-/*
-This method is invoked when entering the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method is invoked when entering the FlipboardKeyboard mode.
+ * @param context The Flipboard* context.
+ */
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     flipboard_model_set_key_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
@@ -67,9 +77,10 @@ void flipboard_enter_callback(void* context) {
     flipboard_model_set_gui_refresh_speed_ms(fm, 100);
 }
 
-/*
-This method is invoked when exiting the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method is invoked when exiting the FlipboardKeyboard mode.
+ * @param context The Flipboard* context.
+ */
 void flipboard_exit_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     flipboard_model_set_colors(fm, NULL, 0x0);
@@ -77,9 +88,11 @@ void flipboard_exit_callback(void* context) {
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
 }
 
-/*
-This method configures the View* used for FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method configures the View* used for FlipboardKeyboard mode.
+ * @param context The Flipboard* context.
+ * @return View* for FlipboardKeyboard mode.
+ */
 View* get_primary_view(void* context) {
     FlipboardModel* model = flipboard_get_model((Flipboard*)context);
     View* view_primary = view_alloc();
@@ -95,6 +108,11 @@ View* get_primary_view(void* context) {
     return view_primary;
 }
 
+/**
+ * @brief This method is invoked when the FlipboardKeyboard app is launched.
+ * @param p Unused.
+ * @return 0.
+ */
 int32_t flipboard_keyboard_app(void* p) {
     UNUSED(p);
 

@@ -5,18 +5,23 @@
 #include <gui/modules/widget.h>
 #include <furi.h>
 
-/*
-This method handles Flipper D-Pad input when in the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method handles Flipper D-Pad input when in the FlipboardBlinky mode.
+ * @param event The InputEvent* to handle.
+ * @param context The Flipboard* context.
+ * @return true if the key event was handled, false otherwise.
+ */
 bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
     UNUSED(event);
     UNUSED(context);
     return false;
 }
 
-/*
-This method handles drawing when in the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method handles drawing when in the FlipboardBlinky mode.
+ * @param canvas The canvas to draw on.
+ * @param model The FlipboardModelRef* context.
+ */
 void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     FlipboardModelRef* my_model = (FlipboardModelRef*)model;
     canvas_set_font(canvas, FontPrimary);
@@ -41,19 +46,10 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     }
 }
 
-enum LedColors {
-    LedColorBlack = 0x000000,
-    LedColorRed = 0xFF0000,
-    LedColorOrange = 0xFF1F00,
-    LedColorYellow = 0xFF7F00,
-    LedColorGreen = 0x00FF00,
-    LedColorCyan = 0x00FFFF,
-    LedColorBlue = 0x0000FF,
-    LedColorViolet = 0x1F00FF,
-    LedColorMagenta = 0x7F00FF,
-    LedColorWhite = 0xFFFFFF,
-};
-
+/**
+ * @brief This method sets the effect to its initial state.
+ * @param model The FlipboardModel* context.
+ */
 void flipboard_reset_effect(FlipboardModel* model) {
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
     fbm->effect_counter = 0;
@@ -97,6 +93,10 @@ void flipboard_reset_effect(FlipboardModel* model) {
     }
 }
 
+/**
+ * @brief This method updates the effect to the step.
+ * @param model The FlipboardModel* context.
+ */
 void flipboard_do_effect(FlipboardModel* model) {
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
     FlipboardLeds* leds = flipboard_model_get_leds(model);
@@ -137,9 +137,13 @@ void flipboard_do_effect(FlipboardModel* model) {
     flipboard_leds_update(leds);
 }
 
-/*
-This method handles FlipBoard key input when in the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method handles FlipBoard key input when in the FlipboardBlinky mode.
+ * @param context The Flipboard* context.
+ * @param old_key The previous key state.
+ * @param new_key The new key state.
+ * @return true if the key event was handled, false otherwise.
+ */
 bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key) {
     Flipboard* app = (Flipboard*)context;
     FlipboardModel* model = flipboard_get_model(app);
@@ -191,14 +195,20 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
     return true;
 }
 
+/**
+ * @brief This method is invoked when the timer ticks.  Do the next step in the effect.
+ * @param context The FlipboardModel* context.
+ */
 void flipboard_tick_callback(void* context) {
     FlipboardModel* model = (FlipboardModel*)context;
     flipboard_do_effect(model);
 }
 
-/*
-This method is invoked when entering the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method is invoked when entering the FlipboardBlinky mode.
+ * @param context The Flipboard* context.
+ * @return true if the key event was handled, false otherwise.
+ */
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
@@ -207,9 +217,11 @@ void flipboard_enter_callback(void* context) {
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
 }
 
-/*
-This method is invoked when exiting the FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method is invoked when exiting the FlipboardBlinky mode.
+ * @param context The Flipboard* context.
+ * @return true if the key event was handled, false otherwise.
+ */
 void flipboard_exit_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
@@ -219,9 +231,11 @@ void flipboard_exit_callback(void* context) {
     flipboard_model_set_colors(fm, NULL, 0x0);
 }
 
-/*
-This method configures the View* used for FlipboardKeyboard mode.
-*/
+/**
+ * @brief This method configures the View* used for FlipboardBlinky mode.
+ * @param context The Flipboard* context.
+ * @return View* for FlipboardBlinky mode.
+ */
 View* get_primary_view(void* context) {
     FlipboardModel* model = flipboard_get_model((Flipboard*)context);
     View* view_primary = view_alloc();
@@ -237,6 +251,11 @@ View* get_primary_view(void* context) {
     return view_primary;
 }
 
+/**
+ * @brief This method is invoked to allocate a FlipboardBlinkyModel*.
+ * @param context The FlipboardModel* context.
+ * @return FlipboardBlinkyModel*.
+*/
 FlipboardBlinkyModel* flipboard_blinky_model_alloc(FlipboardModel* context) {
     FlipboardBlinkyModel* fbm = malloc(sizeof(FlipboardBlinkyModel));
     fbm->timer = furi_timer_alloc(flipboard_tick_callback, FuriTimerTypePeriodic, context);
@@ -247,6 +266,10 @@ FlipboardBlinkyModel* flipboard_blinky_model_alloc(FlipboardModel* context) {
     return fbm;
 }
 
+/**
+ * @brief This method is invoked to free a FlipboardBlinkyModel*.
+ * @param fbm The FlipboardBlinkyModel* to free.
+*/
 void flipboard_blinky_model_free(FlipboardBlinkyModel* fbm) {
     if(fbm->timer) {
         furi_timer_free(fbm->timer);
@@ -254,6 +277,11 @@ void flipboard_blinky_model_free(FlipboardBlinkyModel* fbm) {
     free(fbm);
 }
 
+/**
+ * @brief This method is invoked when the FlipboardBlinky app is launched.
+ * @param p Unused.
+ * @return 0.
+*/
 int32_t flipboard_blinky_app(void* p) {
     UNUSED(p);
 
@@ -278,6 +306,7 @@ int32_t flipboard_blinky_app(void* p) {
         widget, 0, 0, 128, 64, "TODO: Add config screen!\n\nPress BACK for now.");
     view_set_previous_callback(widget_get_view(widget), flipboard_navigation_show_app_menu);
     flipboard_override_config_view(app, widget_get_view(widget));
+
     FlipboardModel* model = flipboard_get_model(app);
     FlipboardBlinkyModel* fbm = flipboard_blinky_model_alloc(model);
     flipboard_model_set_custom_data(model, fbm);
