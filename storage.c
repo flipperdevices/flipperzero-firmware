@@ -98,7 +98,7 @@ bool writeSettingsToFile(UART_TerminalApp *app, File *file) {
                 sprintf(strBuffer, "%d)", app->purgeRSSI);
                 break;
             case GRAVITY_SYNC_PURGE_AGE_MIN:
-                sprintf(strBuffer, app->purgeAge);
+                sprintf(strBuffer, "%d)", app->purgeAge);
                 break;
             default:
                 //
@@ -107,7 +107,7 @@ bool writeSettingsToFile(UART_TerminalApp *app, File *file) {
         strcpy(&(fBuffer[bufLen]), strBuffer);
         bufLen += strlen(strBuffer);        
     }
-    return storage_write_to_file(file, strBuffer, bufLen);
+    return storage_file_write(file, strBuffer, bufLen);
 }
 
 void close_file(File *file) {
