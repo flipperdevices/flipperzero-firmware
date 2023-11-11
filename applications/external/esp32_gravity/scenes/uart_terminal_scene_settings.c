@@ -2,10 +2,26 @@
 #include <dolphin/dolphin.h>
 
 UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
+    {"Synchronise",
+     {"Load From ESP32", "Save To Flipper", "Load From Flipper"},
+     3,
+     {"sync", "save", "load"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP,
+     false},
+    {"Hop Mode",
+     {"Get", "Sequential", "Random"},
+     3,
+     {"get HOP_MODE", "set HOP_MODE SEQUENTIAL", "set HOP_MODE RANDOM"},
+     NO_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP,
+     false},
     {"Hop",
-     {"Status", "On", "Off", "Sequential", "Random", "Default", "Set "},
-     7,
-     {"hop", "hop on", "hop off", "hop sequential", "hop random", "hop default", "hop "},
+     {"Status", "On", "Off", "Default", "Set "},
+     5,
+     {"hop", "hop on", "hop off", "hop default", "hop "},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP,
@@ -70,15 +86,7 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
      FOCUS_CONSOLE_START,
      NO_TIP,
      false},
-    {"MAC", {"Get", "Set"}, 2, {"get MAC", "set"}, TOGGLE_ARGS, FOCUS_CONSOLE_START, NO_TIP, false},
-    {"Attack Pkts",
-     {"Get", "Set"},
-     2,
-     {"get ATTACK_PKTS", "set ATTACK_PKTS "},
-     TOGGLE_ARGS,
-     FOCUS_CONSOLE_START,
-     NO_TIP,
-     false},
+    {"MAC", {""}, 1, {"mac"}, TOGGLE_ARGS, FOCUS_CONSOLE_START, NO_TIP, true},
     {"Attack Millis",
      {"Get", "Set"},
      2,
@@ -103,14 +111,6 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
      FOCUS_CONSOLE_START,
      NO_TIP,
      false},
-    {"Hop Mode",
-     {"Get", "Sequential", "Random"},
-     3,
-     {"get HOP_MODE", "set HOP_MODE SEQUENTIAL", "set HOP_MODE RANDOM"},
-     NO_ARGS,
-     FOCUS_CONSOLE_START,
-     NO_TIP,
-     false},
     {"Disable SSID Dictionary",
      {"Get", "Random Words", "Random Chars"},
      3,
@@ -121,25 +121,25 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
      false},
     {"Purge Strategy", {"Set"}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP, true},
     {"BLE Purge Strategy",
-     {"Get", "Set"},
-     2,
-     {"get BLE_PURGE_STRAT", "set BLE_PURGE_STRAT "},
+     {"Get"},
+     1,
+     {"get BLE_PURGE_STRAT"},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_START,
      NO_TIP,
      false},
     {"BLE Purge Max RSSI",
-     {"Get", "Set"},
-     2,
-     {"get BLE_PURGE_MAX_RSSI", "set BLE_PURGE_MAX_RSSI "},
+     {"Get"},
+     1,
+     {"get BLE_PURGE_MAX_RSSI"},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_START,
      NO_TIP,
      false},
     {"BLE Purge Min Age",
-     {"Get", "Set"},
-     2,
-     {"get BLE_PURGE_MIN_AGE", "set BLE_PURGE_MIN_AGE "},
+     {"Get"},
+     1,
+     {"get BLE_PURGE_MIN_AGE"},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_START,
      NO_TIP,
@@ -147,12 +147,7 @@ UART_TerminalItem settings[NUM_SETTINGS_ITEMS] = {
 
 static void displaySubmenu(UART_TerminalApp* app, UART_TerminalItem* item) {
     int newScene = -1;
-    if(!strcmp(item->item_string, "Get")) {
-        // Get Settings menu
-        //newScene = UART_TerminalSceneSettingsGet;
-    } else if(!strcmp(item->item_string, "Set")) {
-        //newScene = UART_TerminalSceneSettingsSet;
-    } else if(!strcmp(item->item_string, "Purge Strategy")) {
+    if(!strcmp(item->item_string, "Purge Strategy")) {
         newScene = UART_TerminalScenePurge;
     } else if(!strcmp(item->item_string, "MAC")) {
         newScene = UART_TerminalSceneSettingsMac;
@@ -160,8 +155,6 @@ static void displaySubmenu(UART_TerminalApp* app, UART_TerminalItem* item) {
     if(newScene < 0) {
         return;
     }
-    scene_manager_set_scene_state(
-        app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_index);
     scene_manager_next_scene(app->scene_manager, newScene);
 }
 
@@ -170,18 +163,52 @@ static void uart_terminal_scene_settings_var_list_enter_callback(void* context, 
     furi_assert(context);
     UART_TerminalApp* app = context;
     UART_TerminalItem* item = NULL;
-    const int selected_option_index = app->selected_option_index[index];
-
+    const int selected_option_index = app->selected_menu_options[GRAVITY_MENU_SETTINGS][index];
     furi_assert(index < NUM_SETTINGS_ITEMS);
+    app->selected_menu_items[GRAVITY_MENU_SETTINGS] = index;
+
     item = &settings[index];
 
     /* Are we displaying a submenu or executing something? */
-    /* The MAC menu item only uses a submenu for setting */
-    if(item->isSubMenu || (!strcmp(item->item_string, "MAC") &&
-                           !strcmp(item->actual_commands[selected_option_index], "set"))) {
+    if(item->isSubMenu) {
         /* Display next scene */
         displaySubmenu(app, item);
+    } else if(!strcmp(item->actual_commands[selected_option_index], "sync")) {
+        do_sync(app);
+    } else if(!strcmp(item->actual_commands[selected_option_index], "save")) {
+        //save_settings(app);
+    } else if(!strcmp(item->actual_commands[selected_option_index], "load")) {
+        //load_settings(app);
     } else {
+        /* Update data model if necessary */
+        switch(app->selected_menu_items[GRAVITY_MENU_SETTINGS]) {
+        case SETTINGS_MENU_CHANNEL:
+            /* Channel is selected - Update channel */
+            app->channel =
+                app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_CHANNEL];
+            break;
+        case SETTINGS_MENU_MAC_RAND:
+            /* Set MAC randomisation true if "On" is selected. If "Off" (or otherwise) set it off */
+            app->mac_rand =
+                (app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_MAC_RAND] ==
+                 OPTIONS_MAC_RAND_ON);
+            break;
+        case SETTINGS_MENU_HOP_MODE:
+            if(app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_HOP_MODE] ==
+               OPTIONS_HOP_MODE_RANDOM) {
+                app->hopMode = HOP_MODE_RANDOM;
+            } else { /* Default to sequential hopping */
+                app->hopMode = HOP_MODE_SEQUENTIAL;
+            }
+            break;
+        case SETTINGS_MENU_DICT_DISABLE:
+            app->dict_disabled =
+                (app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_DICT_DISABLE] ==
+                 OPTIONS_DICT_CHARS);
+            break;
+        default:
+            break;
+        }
         /* Run a command */
         dolphin_deed(DolphinDeedGpioUartBridge);
         furi_assert(selected_option_index < item->num_options_menu);
@@ -189,7 +216,6 @@ static void uart_terminal_scene_settings_var_list_enter_callback(void* context, 
         /* Don't clear screen if command is an empty string */
         app->is_command = (strlen(app->selected_tx_string) > 0);
         app->is_custom_tx_string = false;
-        app->selected_menu_index = index;
         app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
                                        (selected_option_index == 0) :
                                        item->focus_console;
@@ -221,15 +247,17 @@ static void uart_terminal_scene_settings_var_list_change_callback(VariableItem* 
     UART_TerminalApp* app = variable_item_get_context(item);
     furi_assert(app);
 
-    if(app->selected_menu_index >= NUM_SETTINGS_ITEMS) {
-        app->selected_menu_index = 0;
+    if(app->selected_menu_items[GRAVITY_MENU_SETTINGS] >= NUM_SETTINGS_ITEMS) {
+        app->selected_menu_items[GRAVITY_MENU_SETTINGS] = 0;
     }
 
-    const UART_TerminalItem* menu_item = &settings[app->selected_menu_index];
+    const UART_TerminalItem* menu_item =
+        &settings[app->selected_menu_items[GRAVITY_MENU_SETTINGS]];
     uint8_t item_index = variable_item_get_current_value_index(item);
     furi_assert(item_index < menu_item->num_options_menu);
     variable_item_set_current_value_text(item, menu_item->options_menu[item_index]);
-    app->selected_option_index[app->selected_menu_index] = item_index;
+    app->selected_menu_options[GRAVITY_MENU_SETTINGS]
+                              [app->selected_menu_items[GRAVITY_MENU_SETTINGS]] = item_index;
 }
 
 /* Callback on entering the scene (initialisation) */
@@ -249,20 +277,13 @@ void uart_terminal_scene_settings_on_enter(void* context) {
             settings[i].num_options_menu,
             uart_terminal_scene_settings_var_list_change_callback,
             app);
-        /* When transitioning between views app->selected_option_index[i] may
-           be referencing a different view's options menu, and may be out of
-           bounds of mainmenu[i].options_menu[].
-           If that is the case, use 0 instead */
-        if(app->selected_option_index[i] >= settings[i].num_options_menu) {
-            app->selected_option_index[i] = 0;
-        }
-        variable_item_set_current_value_index(item, app->selected_option_index[i]);
+        variable_item_set_current_value_index(
+            item, app->selected_menu_options[GRAVITY_MENU_SETTINGS][i]);
         variable_item_set_current_value_text(
-            item, settings[i].options_menu[app->selected_option_index[i]]);
+            item, settings[i].options_menu[app->selected_menu_options[GRAVITY_MENU_SETTINGS][i]]);
     }
     variable_item_list_set_selected_item(
-        var_item_list,
-        scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneSettings));
+        var_item_list, app->selected_menu_items[GRAVITY_MENU_SETTINGS]);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewSettingsMenu);
 }
@@ -274,18 +295,16 @@ bool uart_terminal_scene_settings_on_event(void* context, SceneManagerEvent even
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        int nextScene = 0;
         if(event.event == UART_TerminalEventStartKeyboard) {
-            scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewTextInput);
+            nextScene = UART_TerminalAppViewTextInput;
         } else if(event.event == UART_TerminalEventStartConsole) {
-            scene_manager_set_scene_state(
-                app->scene_manager, UART_TerminalSceneSettings, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, UART_TerminalAppViewConsoleOutput);
+            nextScene = UART_TerminalAppViewConsoleOutput;
         }
+        scene_manager_next_scene(app->scene_manager, nextScene);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-        app->selected_menu_index =
+        app->selected_menu_items[GRAVITY_MENU_SETTINGS] =
             variable_item_list_get_selected_item_index(app->settings_menu_list);
         consumed = true;
     }

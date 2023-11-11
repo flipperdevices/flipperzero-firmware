@@ -3,6 +3,41 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+/* Convert the specified string to a byte array
+   bMac must be a pointer to initialised memory of the required size.
+   For a MAC this is 6 bytes, although the function supports string
+   arrays of arbitrary length.
+*/
+bool mac_string_to_bytes(char* strMac, uint8_t* bMac) {
+    uint8_t nBytes = (strlen(strMac) + 1) / 3;
+    if(nBytes == 0) {
+        return false;
+    }
+    char* pStrMac = strMac;
+    /* Use strtol to get the next number in the string and append to bMac */
+    for(int i = 0; i < nBytes; ++i, ++pStrMac) { /* ++pStrMac will skip the bounding ':' and */
+        bMac[i] = strtol(pStrMac, &pStrMac, 10); /*  move to the first digit of the next byte */
+    }
+    return true;
+}
+
+/* Convert the specified byte array to a string representing
+   a MAC address. strMac must be a pointer initialised to
+   contain at least 18 bytes (MAC + '\0') */
+bool mac_bytes_to_string(uint8_t* bMac, char* strMac) {
+    snprintf(
+        strMac,
+        NUM_MAC_BYTES * 3,
+        "%02X:%02X:%02X:%02X:%02X:%02X",
+        bMac[0],
+        bMac[1],
+        bMac[2],
+        bMac[3],
+        bMac[4],
+        bMac[5]);
+    return true;
+}
+
 static bool uart_terminal_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     UART_TerminalApp* app = context;
@@ -51,11 +86,6 @@ UART_TerminalApp* uart_terminal_app_alloc() {
         app->view_dispatcher,
         Gravity_AppViewTargetsMenu,
         variable_item_list_get_view(app->targets_menu_list));
-    app->targets_scan_menu_list = variable_item_list_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        Gravity_AppViewTargetsScanMenu,
-        variable_item_list_get_view(app->targets_scan_menu_list));
     app->packets_menu_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -108,14 +138,17 @@ UART_TerminalApp* uart_terminal_app_alloc() {
         Gravity_AppViewSettingsMac,
         byte_input_get_view(app->settings_mac_bytes));
 
-    for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
-        app->selected_option_index[i] = 0;
+    for(int j = 0; j < GRAVITY_MENU_COUNT; ++j) {
+        for(int i = 0; i < MAX_MENU_ITEMS; ++i) {
+            app->selected_menu_options[j][i] = 0;
+        }
+        app->selected_menu_items[j] = 0;
     }
     /* Initialise MAC bytes to 00:00:00:00:00:00 */
     // TODO : Get and use the device's real MAC
-    for(int i = 0; i < NUM_MAC_BYTES; ++i) {
-        app->mac_bytes[i] = 0;
-    }
+    // for (int i=0; i < NUM_MAC_BYTES; ++i) {
+    //     app->mac_bytes[i] = 20;
+    // }
 
     app->text_box = text_box_alloc();
     view_dispatcher_add_view(
@@ -133,6 +166,7 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     app->purgeStrategy = 0;
     app->purgeAge = 0;
     app->purgeRSSI = 0;
+    app->syncBufLen = 0;
 
     scene_manager_next_scene(app->scene_manager, UART_TerminalSceneMain);
 
@@ -147,7 +181,6 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewMainMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewTargetsMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewTargetsScanMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPacketsMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPacketsDeauthMenu);
     view_dispatcher_remove_view(app->view_dispatcher, Gravity_AppViewPacketsFuzzMenu);
@@ -172,11 +205,13 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     // Close records
     furi_record_close(RECORD_GUI);
 
-    if(app->free_command) {
+    if(app->free_command && app->selected_tx_string != NULL) {
         free(app->selected_tx_string);
+        app->selected_tx_string = NULL;
         app->free_command = false;
     }
 
+    syncCleanup();
     free(app);
 }
 
@@ -185,6 +220,8 @@ int32_t uart_terminal_app(void* p) {
     UART_TerminalApp* uart_terminal_app = uart_terminal_app_alloc();
 
     uart_terminal_app->uart = uart_terminal_uart_init(uart_terminal_app);
+
+    do_sync(uart_terminal_app);
 
     view_dispatcher_run(uart_terminal_app->view_dispatcher);
 

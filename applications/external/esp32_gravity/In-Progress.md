@@ -1,17 +1,23 @@
 * Finish restructuring menus
     * Maybe a UI for stalk
-* Add selected_options_index[NUM_PURGE_ITEMS] to UART_TerminalItem
-    * Change UART_TerminalApp.selected_option_index[MAX_MENU_ITEMS] to int**
-    - Will no longer need purgeLoadFromMemory()
-    - Enter callbacks set app->selected_option_index to scene->selected_option_index
-    - Perhaps store a ref to selected_tx_string in UART_TerminalItem or a global, and only free selected_tx_string in the exit function of relevant scenes
-
-* Re-implement console/command execution
-* Re-implement cls/clear screen
+* header text in text input box is full of overlapping text, even after slimming help text right down. Why???
+* Ability to save and load settings to/from Flipper (no choice of filename)
+* Ability to save and load data to/from flipper (no choice of filename)
+* Options that display their value instead of 'get' don't need multiple options - just select it to set
+* When saving settings display directory contents along with 'New File...', allowing you to overwrite existing file or create new (.settings extension)
+* When loading settings display directory contents, allowing any file to be selected
+* When saving data display directory contents along with 'New File...', allowing you to overwrite existing file or create new (.gravity extension)
+* When loading data display directory contents, allowing any file to be selected
 * Refactor console logic - to keep console recording during menu navigation
-* Flipper protocol for ESP32-Gravity to allow more sophisticated UIs
-    * e.g. get all settings info, in bytes, from a single command
+* Replace view, select and selected UIs with a menu list (menu list, not variable item list)
+  * A single UI for the 3 features
+  * View (choice between AP, STA, BT, BT Services, Selected AP, Selected STA, Selected BT, Selected Services [can I select services?])
+  * Selected items are indicated on the UI. Perhaps hide indicator when viewing selected items
+  * Select implemented with OK button
 * Just In Time view memory allocation (now that there are lots of them)
+
+esp32 command: sync
+Return all settings in a fixed, parseable format. (<syncItem>:<value>)+
 
 ST25RFAL002/timer.h timerDelay(uint16_t millis)
 ST25RFAL002/platform.h platformDelay(millis)
