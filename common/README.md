@@ -6,7 +6,7 @@ File names are prefixed with the component name, e.g. `app_menu_i.h` is the priv
 
 ## app_menu_i.h
 
-This is the private header for the `app_menu` component.  It is included by `app_menu.h` and should not be included by any other files.
+This is the private header for the `app_menu` component.  It is included by `app_menu.c` and should not be included by any other files.
 
 This file defines the AppMenu structure.  It is a specializations of the `submenu` component, and is used to display the main menu of the application.
 
@@ -23,6 +23,8 @@ It uses a dynamic ViewIdsArray to store the view ids of the menu items.  The vie
 ## app_menu.h
 
 This is the public header for the `app_menu` component.  It is included by `app_menu.c` and should be included by any other files that need to use the `app_menu` component.
+
+`FLIPBOARD_APP_MENU_VIEW_ID` must be 0 and match FlipboardViewAppMenuId.
 
 ## backlight.c
 
@@ -60,3 +62,18 @@ This file defines the tones that can be played by the buzzer.  Items in `tone_na
 
 This is the public header for the `flipboard_file` component.  It is included by `flipboard_file.c` and should be included by any other files that need to use the `flipboard_file` component.
 
+## flipboard_i.h
+
+This is the private header for the `flipboard` component.  It is included by `flipboard.c` and should not be included by any other files.
+
+This file defines the Flipboard structure; which contains the View Dispatcher, the UI components and the FlipboardModel.
+
+This file also defines the FlipboardViewId enum, which is used to identify the views in the application.
+
+## flipboard_model_i.h
+
+This is the private header for the `flipboard_model` component.  It is included by `flipboard_model.c` and should not be included by any other files.
+
+## flipboard_model_ref.h
+
+This is a thin wrapper around FlipboardModel.  It is used to pass a reference to the model to the UI components.

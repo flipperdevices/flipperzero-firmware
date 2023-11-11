@@ -3,6 +3,7 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 
+// NOTE: FlipboardViewAppMenuId should also be 0.
 #define FLIPBOARD_APP_MENU_VIEW_ID 0
 
 typedef struct AppMenu AppMenu;
