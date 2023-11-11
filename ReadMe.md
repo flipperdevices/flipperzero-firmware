@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Assets: [Included sample Infrared remote and IR file for Vizio (has a different button set than Roku - By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/552fc71d86533976eba6312670788a1bc849344a)
 - UL PR: [Fix naming in iButton #649 (By krolchonok)](https://github.com/DarkFlippers/unleashed-firmware/pull/649)
 - Updated: [ESP32 Gravity v0.6 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
+- Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 
 <a name="release">
 
