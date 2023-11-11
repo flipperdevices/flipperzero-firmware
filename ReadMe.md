@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1109-2243-0.93.1-c129f73](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-10 14:50 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-10 14:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-10 20:18 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-10 20:18 EST`
 - [Switched to cleaner animation loader (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b651299ee1968cfa2b8b82f894b0375a8455e039)
 - [Changed a few minor text strings to shutdown and update (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/dd6f294157d78f3e9b8694cf263e48eaa98f0966)
 - [New NFC MF Keys (By z3r0l1nk)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8d1d955a4a49b76980750c2dd728d69c1382394)
