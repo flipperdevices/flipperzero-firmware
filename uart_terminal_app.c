@@ -21,6 +21,15 @@ bool mac_string_to_bytes(char *strMac, uint8_t *bMac) {
     return true;
 }
 
+/* Convert the specified byte array to a string representing
+   a MAC address. strMac must be a pointer initialised to
+   contain at least 18 bytes (MAC + '\0') */
+bool mac_bytes_to_string(uint8_t *bMac, char *strMac) {
+    sprintf(strMac, "%02X:%02X:%02X:%02X:%02X:%02X", bMac[0],
+            bMac[1], bMac[2], bMac[3], bMac[4], bMac[5]);
+    return true;
+}
+
 static bool uart_terminal_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     UART_TerminalApp* app = context;

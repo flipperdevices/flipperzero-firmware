@@ -157,11 +157,6 @@ void uart_terminal_scene_main_on_enter(void* context) {
     }
     variable_item_list_set_selected_item(var_item_list, app->selected_menu_items[GRAVITY_MENU_MAIN]);
 
-    /* Automatically retrieve setting and state information from Flipper if this has
-       not already occurred
-    */
-    //do_sync(app);
-
     view_dispatcher_switch_to_view(app->view_dispatcher, Gravity_AppViewMainMenu);
 }
 

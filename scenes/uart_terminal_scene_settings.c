@@ -159,7 +159,34 @@ static void uart_terminal_scene_settings_var_list_enter_callback(void* context, 
         displaySubmenu(app, item);
     } else if (!strcmp(item->actual_commands[selected_option_index], "sync")) {
         do_sync(app);
+    } else if (!strcmp(item->actual_commands[selected_option_index], "save")) {
+        //save_settings(app);
+    } else if (!strcmp(item->actual_commands[selected_option_index], "load")) {
+        //load_settings(app);
     } else {
+        /* Update data model if necessary */
+        switch (app->selected_menu_items[GRAVITY_MENU_SETTINGS]) {
+            case SETTINGS_MENU_CHANNEL:
+                /* Channel is selected - Update channel */
+                app->channel = app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_CHANNEL];
+                break;
+            case SETTINGS_MENU_MAC_RAND:
+                /* Set MAC randomisation true if "On" is selected. If "Off" (or otherwise) set it off */
+                app->mac_rand = (app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_MAC_RAND] == OPTIONS_MAC_RAND_ON);
+                break;
+            case SETTINGS_MENU_HOP_MODE:
+                if (app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_HOP_MODE] == OPTIONS_HOP_MODE_RANDOM) {
+                    app->hopMode = HOP_MODE_RANDOM;
+                } else { /* Default to sequential hopping */
+                    app->hopMode = HOP_MODE_SEQUENTIAL;
+                }
+                break;
+            case SETTINGS_MENU_DICT_DISABLE:
+                app->dict_disabled = (app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_DICT_DISABLE] == OPTIONS_DICT_CHARS);
+                break;
+            default:
+                break;
+        }
         /* Run a command */
         dolphin_deed(DolphinDeedGpioUartBridge);
         furi_assert(selected_option_index < item->num_options_menu);

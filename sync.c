@@ -109,7 +109,8 @@ bool syncProcessResponse(UART_TerminalApp *app) {
                 break;
             case GRAVITY_SYNC_CHANNEL:
                 // set channel
-                app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_CHANNEL] = strtol(tokenValue, NULL, 10);
+                app->channel = strtol(tokenValue, NULL, 10);
+                app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_CHANNEL] = app->channel;
                 break;
             case GRAVITY_SYNC_MAC: ;
                 // set MAC
@@ -131,7 +132,13 @@ bool syncProcessResponse(UART_TerminalApp *app) {
             case GRAVITY_SYNC_MAC_RAND:
                 // set value
                 tokenInt = strtol(tokenValue, NULL, 10);
-                app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_MAC_RAND] = tokenInt;
+                if ((bool)tokenInt) {
+                    app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_MAC_RAND] = OPTIONS_MAC_RAND_ON;
+                    app->mac_rand = true;
+                } else {
+                    app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_MAC_RAND] = OPTIONS_MAC_RAND_OFF;
+                    app->mac_rand = false;
+                }
                 break;
             case GRAVITY_SYNC_PKT_EXPIRY:
                 /* Free the label if it's already been changed by sync */
@@ -161,6 +168,7 @@ bool syncProcessResponse(UART_TerminalApp *app) {
                         // TODO: Error
                         break;
                 }
+                app->hopMode = tokenInt;
                 app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_HOP_MODE] = currentHopMode;
                 break;
             case GRAVITY_SYNC_DICT_DISABLED:
@@ -173,6 +181,7 @@ bool syncProcessResponse(UART_TerminalApp *app) {
                 } else {
                     newVal = OPTIONS_DICT_WORDS;
                 }
+                app->dict_disabled = scrambled;
                 app->selected_menu_options[GRAVITY_MENU_SETTINGS][SETTINGS_MENU_DICT_DISABLE] = newVal;
                 break;
             case GRAVITY_SYNC_PURGE_STRAT:

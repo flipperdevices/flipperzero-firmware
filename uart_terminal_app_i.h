@@ -110,6 +110,7 @@ enum PurgeMenuItems {
 
 char *strToken(char *cmdLine, char sep, int tokenNum);
 bool mac_string_to_bytes(char *strMac, uint8_t *bMac);
+bool mac_bytes_to_string(uint8_t *bMac, char *strMac);
 bool syncProcessResponse(UART_TerminalApp *app);
 
 struct UART_TerminalApp {
@@ -147,6 +148,10 @@ struct UART_TerminalApp {
     int purgeAge;
     int purgeRSSI;
     uint8_t mac_bytes[NUM_MAC_BYTES];
+    uint8_t channel;
+    bool mac_rand;
+    HopMode hopMode;
+    bool dict_disabled;
 
     uint8_t syncBuffer[SYNC_BUFFER_SIZE];
     int syncBufLen;
