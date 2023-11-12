@@ -1,2 +1,3 @@
-void scrambleReplace ();
-char *printData ();
+void scrambleReplace();
+void genScramble();
+char* printData();
