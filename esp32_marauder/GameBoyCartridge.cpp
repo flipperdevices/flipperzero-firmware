@@ -672,20 +672,20 @@ void GameBoyCartridge::readROM_GB()
     transferJSON.clear();
     this->romEndAddress = 0x7FFF;
     this->romAddress = 0;
-    this->romStartBank = 0;
+    this->romStartBank = 1;
     this->processedProgressBar = 0;
     
     // M161 banks are double size and start with 0
-    // if (this->romType == 0x104) {
-    //     this->romStartBank = 0;
-    //     this->romBanks >>= 1;
-    //     this->romEndAddress = 0x7FFF;
-    // }
-    // // MBC6 banks are half size
-    // else if (this->romType == 32) {
-    //     this->romBanks <<= 1;
-    //     this->romEndAddress = 0x3FFF;
-    // }
+    if (this->romType == 0x104) {
+        this->romStartBank = 0;
+        this->romBanks >>= 1;
+        this->romEndAddress = 0x7FFF;
+    }
+    // MBC6 banks are half size
+    else if (this->romType == 32) {
+        this->romBanks <<= 1;
+        this->romEndAddress = 0x3FFF;
+    }
 
 
     this->totalProgressBar = (uint32_t)(this->romBanks) * 16384;
@@ -748,24 +748,24 @@ void GameBoyCartridge::readROM_GB()
     */
     
    
-    word romAddress = 0;
-    word romEndAddress;
-    uint32_t processedProgressBar = 0;
-  uint32_t totalProgressBar = (uint32_t)(this->romBanks)*16384;
-    for (word currBank = romStartBank; currBank < romBanks; currBank++) {
+    // word romAddress = 0;
+    // word romEndAddress;
+    // uint32_t processedProgressBar = 0;
+  this->totalProgressBar = (uint32_t)(this->romBanks)*16384;
+    for (word currBank = this->currentBank; currBank < this->romBanks; currBank++) {
     // Second bank starts at 0x4000
     if (currBank > 1) {
-      romAddress = 0x4000;
+      this->romAddress = 0x4000;
 
       // MBC6 banks are half size
       if (this->romType == 32) {
-        romEndAddress = 0x5FFF;
+        this->romEndAddress = 0x5FFF;
       }
     }
 
     // Set ROM bank for M161
     if (this->romType == 0x104) {
-      romAddress = 0;
+      this->romAddress = 0;
       // Set CS2(PH0) to LOW
       // PORTH &= ~(1 << 0);
       cs2Pin_low;
@@ -822,7 +822,7 @@ void GameBoyCartridge::readROM_GB()
           this->write_byte_GB(0x1fff, 0x7a);
 
           // for every 4Mbits ROM, restart from 0x0000
-          romAddress = 0x0000;
+          this->romAddress = 0x0000;
           currBank++;
         } else {
           this->write_byte_GB(0x6000, 0);
@@ -843,15 +843,14 @@ void GameBoyCartridge::readROM_GB()
     }
     
     // Read banks and save to SD
-    while (romAddress <= romEndAddress) {
-      for (int i = 0; i < 512; i++) {
-        char hexbuffer[3]; // Se reserva espacio para almacenar el valor hexadecimal y el carácter nulo
-        sdBuffer[i] = this->read_byte_GB(romAddress + i);
-        
+    while (this->romAddress <= this->romEndAddress) {
+      for (int i = 0; i < 64; i++) {
+        // char hexbuffer[3]; // Se reserva espacio para almacenar el valor hexadecimal y el carácter nulo
+        this->sdBuffer[i] = this->read_byte_GB(this->romAddress + i);
       }
-      Serial.write(sdBuffer, 512);
-      romAddress += 512;
-      processedProgressBar += 512;
+      Serial1.write(this->sdBuffer, 64);
+      this->romAddress += 64;
+      this->processedProgressBar += 64;
       //transferJSON["progress"] = processedProgressBar * 100 / totalProgressBar;
 
       //Serial.print("JSON:");
@@ -860,8 +859,20 @@ void GameBoyCartridge::readROM_GB()
       // Serial.print(processedProgressBar * 100 / totalProgressBar );
       // Serial.println("%");
     }
+
+    
     
   }
+    transferJSON.clear();
+    transferJSON["type"] = "success";
+    transferJSON["total"] = this->totalProgressBar;
+    transferJSON["transfered"] = this->processedProgressBar;
+    transferJSON["progress"] = this->processedProgressBar * 100 / this->totalProgressBar;
+    transferJSON["romBanks"] = this->romBanks;
+    delay(200);
+    Serial.print("JSON:");
+    serializeJson(transferJSON, Serial);
+    Serial.println();
 }
 
 byte GameBoyCartridge::readByteSRAM_GB(uint16_t myAddress)

@@ -28,7 +28,6 @@ class Settings {
 
     template <typename T>
     T saveSetting(String key, bool value);
-    bool saveStringSetting(String key, String value);
 
     bool toggleSetting(String key);
     String getSettingType(String key);

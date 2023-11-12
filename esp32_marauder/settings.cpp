@@ -19,7 +19,7 @@ bool Settings::begin() {
     
     if (!settingsFile) {
       settingsFile.close();
-      // Serial.println(F("Could not find settings file"));
+      Serial.println(F("Could not find settings file"));
       if (this->createDefaultSettings(SPIFFS))
         return true;
       else
@@ -27,7 +27,7 @@ bool Settings::begin() {
     }
   }
   else {
-    // Serial.println("Settings file does not exist");
+    Serial.println("Settings file does not exist");
     if (this->createDefaultSettings(SPIFFS))
       return true;
     else
@@ -157,49 +157,7 @@ bool Settings::saveSetting<bool>(String key, bool value) {
     
       this->json_settings_string = settings_string;
     
-      // this->printJsonSettings(settings_string);
-      
-      return true;
-    }
-  }
-  return false;
-}
-
-
-bool Settings::saveStringSetting(String key, String value) {
-  DynamicJsonDocument json(1024); // ArduinoJson v6
-  if (deserializeJson(json, this->json_settings_string)) {
-    Serial.println("\nCould not parse json");
-  }
-
-  String settings_string;
-
-  for (int i = 0; i < json["Settings"].size(); i++) {
-    if (json["Settings"][i]["name"].as<String>() == key) {
-      json["Settings"][i]["value"] = value;
-
-      // Serial.println("Saving setting...");
-
-      File settingsFile = SPIFFS.open("/settings.json", FILE_WRITE);
-
-      if (!settingsFile) {
-        Serial.println(F("Failed to create settings file"));
-        return false;
-      }
-
-      if (serializeJson(json, settingsFile) == 0) {
-        Serial.println(F("Failed to write to file"));
-      }
-      if (serializeJson(json, settings_string) == 0) {
-        Serial.println(F("Failed to write to string"));
-      }
-    
-      // Close the file
-      settingsFile.close();
-    
-      this->json_settings_string = settings_string;
-    
-      // this->printJsonSettings(settings_string);
+      this->printJsonSettings(settings_string);
       
       return true;
     }
@@ -282,7 +240,7 @@ void Settings::printJsonSettings(String json_string) {
 }
 
 bool Settings::createDefaultSettings(fs::FS &fs) {
-  // Serial.println(F("Creating default settings file: settings.json"));
+  Serial.println(F("Creating default settings file: settings.json"));
   
   File settingsFile = fs.open("/settings.json", FILE_WRITE);
 
@@ -330,31 +288,12 @@ bool Settings::createDefaultSettings(fs::FS &fs) {
   jsonBuffer["Settings"][3]["range"]["min"] = false;
   jsonBuffer["Settings"][3]["range"]["max"] = true;
 
-
-  jsonBuffer["Settings"][4]["name"] = "TelegramSSID";
-  jsonBuffer["Settings"][4]["type"] = "String";
-  jsonBuffer["Settings"][4]["value"] = "";
-  jsonBuffer["Settings"][4]["range"]["min"] = false;
-  jsonBuffer["Settings"][4]["range"]["max"] = false;
-
-  jsonBuffer["Settings"][5]["name"] = "TelegramPassword";
-  jsonBuffer["Settings"][5]["type"] = "String";
-  jsonBuffer["Settings"][5]["value"] = "";
-  jsonBuffer["Settings"][5]["range"]["min"] = false;
-  jsonBuffer["Settings"][5]["range"]["max"] = false;
-
-  jsonBuffer["Settings"][6]["name"] = "TelegramToken";
-  jsonBuffer["Settings"][6]["type"] = "String";
-  jsonBuffer["Settings"][6]["value"] = "";
-  jsonBuffer["Settings"][6]["range"]["min"] = false;
-  jsonBuffer["Settings"][6]["range"]["max"] = false;
-
   //jsonBuffer.printTo(settingsFile);
   if (serializeJson(jsonBuffer, settingsFile) == 0) {
-    // Serial.println(F("Failed to write to file"));
+    Serial.println(F("Failed to write to file"));
   }
   if (serializeJson(jsonBuffer, settings_string) == 0) {
-    // Serial.println(F("Failed to write to string"));
+    Serial.println(F("Failed to write to string"));
   }
 
   // Close the file
@@ -362,7 +301,7 @@ bool Settings::createDefaultSettings(fs::FS &fs) {
 
   this->json_settings_string = settings_string;
 
-  // this->printJsonSettings(settings_string);
+  this->printJsonSettings(settings_string);
 
   return true;
 }

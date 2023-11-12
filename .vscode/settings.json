@@ -56,6 +56,13 @@
         "ctype.h": "c",
         "gb_cartridge_app.h": "c",
         "string.h": "c",
-        "gba_cartridge_scene.h": "c"
+        "gba_cartridge_scene.h": "c",
+        "stddef.h": "c",
+        "param.h": "c",
+        "stdbool.h": "c",
+        "__tree": "cpp",
+        "set": "cpp",
+        "xmodem_transmitter.h": "c",
+        "sstream": "cpp"
     }
 }

@@ -43,6 +43,8 @@ https://www.online-utility.org/image/convert/to/XBM
   #include "flipperLED.h"
 #elif defined(XIAO_ESP32_S3)
   #include "xiaoLED.h"
+#elif defined(MARAUDER_M5STICKC)
+  #include "stickcLED.h"
 #else
   #include "LedInterface.h"
 #endif
@@ -125,6 +127,8 @@ CommandLine cli_obj;
   flipperLED flipper_led;
 #elif defined(XIAO_ESP32_S3)
   xiaoLED xiao_led;
+#elif defined(MARAUDER_M5STICKC)
+  stickcLED stickc_led;
 #else
   LedInterface led_obj;
 #endif
@@ -199,7 +203,7 @@ void setup()
     axp192_obj.begin();
   #endif
   
-  pinMode(FLASH_BUTTON, INPUT);
+  //pinMode(FLASH_BUTTON, INPUT);
 
   #ifdef HAS_SCREEN
     pinMode(TFT_BL, OUTPUT);

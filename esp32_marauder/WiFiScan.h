@@ -36,6 +36,8 @@
   #include "flipperLED.h"
 #elif defined(XIAO_ESP32_S3)
   #include "xiaoLED.h"
+#elif defined(MARAUDER_M5STICKC)
+  #include "stickcLED.h"
 #else
   #include "LedInterface.h"
 #endif
@@ -108,6 +110,8 @@ extern Settings settings_obj;
   extern flipperLED flipper_led;
 #elif defined(XIAO_ESP32_S3)
   extern xiaoLED xiao_led;
+#elif defined(MARAUDER_M5STICKC)
+  extern stickcLED stickc_led;
 #else
   extern LedInterface led_obj;
 #endif

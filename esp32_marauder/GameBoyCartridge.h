@@ -20,6 +20,7 @@ class GameBoyCartridge {
   private:
     uint8_t startRomBuffer[385];
     char gameTitle[17];
+    uint8_t sdBuffer[64];
     
     uint16_t cartridgeType;
     uint16_t romSize;
