@@ -321,7 +321,7 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
         if (zIdx < app->syncBufLen) {
             memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
             app->syncBufLen = 0;
-            uart_terminal_uart_tx("sync\n", 5);
+            uart_terminal_uart_tx((uint8_t *)"sync\n", 5);
         } else {
              app->syncComplete = true;
              /* Process sync elements */

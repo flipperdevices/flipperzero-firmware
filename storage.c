@@ -165,7 +165,12 @@ bool load_settings(UART_TerminalApp *app) {
     }
 
     bytesRead = storage_file_read(file, buffer, bufferSize);
-    // Parse file
+    
+    /* It would be a minor miracle if this worked */
+    memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+    app->syncBufLen = bytesRead;
+    strncpy((char *)app->syncBuffer, buffer, SYNC_BUFFER_SIZE);
+    syncProcessResponse(app);
 
     close_file(file);
     return true;
@@ -199,6 +204,7 @@ bool load_data(UART_TerminalApp *app) {
     uint16_t bufferSize = 1024;
     char buffer[bufferSize];
     uint16_t bytesRead;
+    UNUSED(bytesRead);
 
     Storage *storage = furi_record_open(RECORD_STORAGE);
     File *file = storage_file_alloc(storage);
