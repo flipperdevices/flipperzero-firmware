@@ -15,5 +15,5 @@ App(
     fap_description="An app to play RTTL music files",
     fap_icon_assets="icons",
     fap_libs=["music_worker"],
-    fap_file_assets="files"
+    fap_file_assets="files",
 )

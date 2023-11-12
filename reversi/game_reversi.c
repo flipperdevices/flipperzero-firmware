@@ -325,7 +325,7 @@ int32_t game_reversi_app() {
                 furi_mutex_acquire(app_state.mutex, FuriWaitForever);
                 app_state.selected_menu_item = 0;
                 app_state.screen = AppScreenMenu;
-                
+
                 furi_mutex_release(app_state.mutex);
                 view_port_update(view_port);
                 continue;
