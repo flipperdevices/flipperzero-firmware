@@ -193,6 +193,315 @@ const struct {
     {0x0703F0, "LG HBS-1120"},
     {0x0803F0, "LG HBS-1125"},
     {0x0903F0, "LG HBS-2000"},
+    {0x0102F0, "JBL Everest 110GA"},
+    {0x0202F0, "JBL Everest 110GA"},
+    {0x0302F0, "JBL Everest 310GA"},
+    {0x0402F0, "JBL Everest 310GA"},
+    {0x0502F0, "JBL Everest 310GA"},
+    {0x060000, "Google Pixel Buds"},
+    {0x070000, "Android Auto"},
+    {0x0702F0, "JBL Everest 710GA"},
+    {0x071C74, "JBL Flip 6"},
+    {0x080000, "Foocorp Foophones"},
+    {0x0802F0, "JBL Everest 710GA"},
+    {0x090000, "Test Android TV"},
+    {0x0A0000, "Test 00000a - Anti-Spoofing"},
+    {0x0B0000, "Google Gphones"},
+    {0x0C0000, "Google Gphones"},
+    {0x0DC6BF, "My Awesome Device II"},
+    {0x0DC95C, "Sony WH-1000XM3"},
+    {0x0DEC2B, "Emporio Armani EA Connected"},
+    {0x0E138D, "WF-SP800N"},
+    {0x0EC95C, "Sony WI-C600N"},
+    {0x0ECE95, "Philips TAT3508"},
+    {0x0F0993, "COUMI TWS-834A"},
+    {0x0F1B8D, "JBL VIBE BEAM"},
+    {0x0F232A, "JBL TUNE BUDS"},
+    {0x0F2D16, "WH-CH520"},
+    {0x20A19B, "WF-SP800N"},
+    {0x20C95C, "Sony WF-SP700N"},
+    {0x20CC2C, "SRS-XB43"},
+    {0x213C8C, "DIZO Wireless Power"},
+    {0x21521D, "boAt Rockerz 355 (Green)"},
+    {0x21A04E, "oraimo FreePods Pro"},
+    {0x2D7A23, "WF-1000XM4"},
+    {0x350000, "Test 000035"},
+    {0x470000, "Arduino 101"},
+    {0x480000, "Fast Pair Headphones"},
+    {0x490000, "Fast Pair Headphones"},
+    {0x5BA9B5, "WF-SP800N"},
+    {0x5BACD6, "Bose QC Ultra Earbuds"},
+    {0x5BD6C9, "JBL TUNE225TWS"},
+    {0x5BE3D4, "JBL Flip 6"},
+    {0x5C0206, "UA | JBL TWS STREAK"},
+    {0x5C0C84, "JBL TUNE225TWS"},
+    {0x5C4833, "WH-CH720N"},
+    {0x5C4A7E, "LG HBS-XL7"},
+    {0x5C55E7, "TCL MOVEAUDIO S200"},
+    {0x5C7CDC, "WH-1000XM5"},
+    {0x5C8AA5, "JBL LIVE220BT"},
+    {0x5CC900, "Sony WF-1000X"},
+    {0x5CC901, "Sony WF-1000X"},
+    {0x5CC902, "Sony WH-1000XM2"},
+    {0x5CC903, "Sony WH-1000XM2"},
+    {0x5CC904, "Sony WI-1000X"},
+    {0x5CC905, "Sony WI-1000X"},
+    {0x5CC906, "Sony WH-1000XM2"},
+    {0x5CC907, "Sony WH-1000XM2"},
+    {0x5CC908, "Sony WI-1000X"},
+    {0x5CC909, "Sony WI-1000X"},
+    {0x5CC90A, "Sony WH-1000XM3"},
+    {0x5CC90B, "Sony WH-1000XM3"},
+    {0x5CC90C, "Sony WH-1000XM3"},
+    {0x5CC90D, "Sony WH-1000XM3"},
+    {0x5CC90E, "Sony WI-C600N"},
+    {0x5CC90F, "Sony WI-C600N"},
+    {0x5CC910, "Sony WI-C600N"},
+    {0x5CC911, "Sony WI-C600N"},
+    {0x5CC912, "Sony WI-C600N"},
+    {0x5CC913, "Sony WI-C600N"},
+    {0x5CC914, "Sony WI-SP600N"},
+    {0x5CC915, "Sony WI-SP600N"},
+    {0x5CC916, "Sony WI-SP600N"},
+    {0x5CC917, "Sony WI-SP600N"},
+    {0x5CC918, "Sony WI-SP600N"},
+    {0x5CC919, "Sony WI-SP600N"},
+    {0x5CC91A, "Sony WI-SP600N"},
+    {0x5CC91B, "Sony WI-SP600N"},
+    {0x5CC91C, "Sony WI-SP600N"},
+    {0x5CC91D, "Sony WI-SP600N"},
+    {0x5CC91E, "Sony WF-SP700N"},
+    {0x5CC91F, "Sony WF-SP700N"},
+    {0x5CC920, "Sony WF-SP700N"},
+    {0x5CC921, "Sony WF-SP700N"},
+    {0x5CC922, "Sony WF-SP700N"},
+    {0x5CC923, "Sony WF-SP700N"},
+    {0x5CC924, "Sony WF-SP700N"},
+    {0x5CC925, "Sony WF-SP700N"},
+    {0x5CC926, "Sony WF-SP700N"},
+    {0x5CC927, "Sony WF-SP700N"},
+    {0x5CC928, "Sony WH-H900N"},
+    {0x5CC929, "Sony WH-H900N"},
+    {0x5CC92A, "Sony WH-H900N"},
+    {0x5CC92B, "Sony WH-H900N"},
+    {0x5CC92C, "Sony WH-H900N"},
+    {0x5CC92D, "Sony WH-H900N"},
+    {0x5CC92E, "Sony WH-H900N"},
+    {0x5CC92F, "Sony WH-H900N"},
+    {0x5CC930, "Sony WH-H900N"},
+    {0x5CC931, "Sony WH-H900N"},
+    {0x5CC932, "Sony WH-CH700N"},
+    {0x5CC933, "Sony WH-CH700N"},
+    {0x5CC934, "Sony WH-CH700N"},
+    {0x5CC935, "Sony WH-CH700N"},
+    {0x5CC936, "Sony WH-CH700N"},
+    {0x5CC937, "Sony WH-CH700N"},
+    {0x5CC938, "Sony WF-1000XM3"},
+    {0x5CC939, "Sony WF-1000XM3"},
+    {0x5CC93A, "Sony WF-1000XM3"},
+    {0x5CC93B, "Sony WF-1000XM3"},
+    {0x5CC93C, "Sony WH-XB700"},
+    {0x5CC93D, "Sony WH-XB700"},
+    {0x5CC93E, "Sony WH-XB700"},
+    {0x5CC93F, "Sony WH-XB700"},
+    {0x5CC940, "Sony WH-XB900N"},
+    {0x5CC941, "Sony WH-XB900N"},
+    {0x5CC942, "Sony WH-XB900N"},
+    {0x5CC943, "Sony WH-XB900N"},
+    {0x5CC944, "Sony WH-XB900N"},
+    {0x5CC945, "Sony WH-XB900N"},
+    {0x5CEE3C, "Fitbit Charge 4"},
+    {0x6AD226, "TicWatch Pro 3"},
+    {0x6B1C64, "Pixel Buds"},
+    {0x6B8C65, "oraimo FreePods 4"},
+    {0x6B9304, "Nokia SB-101"},
+    {0x6BA5C3, "Jabra Elite 4"},
+    {0x6C42C0, "TWS05"},
+    {0x6C4DE5, "JBL LIVE PRO 2 TWS"},
+    {0x718FA4, "JBL LIVE300TWS"},
+    {0x89BAD5, "Galaxy A23 5G"},
+    {0x8A31B7, "Bose QC Ultra Headphones"},
+    {0x8A3D00, "Cleer FLOW Ⅱ"},
+    {0x8A3D01, "Cleer EDGE Voice"},
+    {0x8A8F23, "WF-1000XM5"},
+    {0x8AADAE, "JLab GO Work 2"},
+    {0x8B0A91, "Jabra Elite 5"},
+    {0x8B5A7B, "TicWatch Pro 3 GPS"},
+    {0x8B66AB, "Pixel Buds A-Series"},
+    {0x8BB0A0, "Nokia Solo Bud+"},
+    {0x8BF79A, "Oladance Whisper E1"},
+    {0x8C07D2, "Jabra Elite 4 Active"},
+    {0x8C1706, "YY7861E"},
+    {0x8C4236, "GLIDiC mameBuds"},
+    {0x8C6B6A, "realme Buds Air 3S"},
+    {0x8CAD81, "KENWOOD WS-A1"},
+    {0x8CB05C, "JBL LIVE PRO+ TWS"},
+    {0x8CD10F, "realme Buds Air Pro"},
+    {0x8D13B9, "BLE-TWS"},
+    {0x8D16EA, "Galaxy M14 5G"},
+    {0x8D5B67, "Pixel 90c"},
+    {0x8E14D7, "LG-TONE-TFP8"},
+    {0x8E1996, "Galaxy A24 5g"},
+    {0x8E4666, "Oladance Wearable Stereo"},
+    {0x8E5550, "boAt Airdopes 511v2"},
+    {0x9101F0, "Jabra Elite 2"},
+    {0x9128CB, "TCL MOVEAUDIO Neo"},
+    {0x913B0C, "YH-E700B"},
+    {0x915CFA, "Galaxy A14"},
+    {0x9171BE, "Jabra Evolve2 65 Flex"},
+    {0x917E46, "LinkBuds"},
+    {0x91AA00, "Beoplay E8 2.0"},
+    {0x91AA01, "Beoplay H9 3rd Generation"},
+    {0x91AA02, "B&O Earset"},
+    {0x91AA03, "B&O Beoplay H8i"},
+    {0x91AA04, "Beoplay H4"},
+    {0x91AA05, "B&O Beoplay E6"},
+    {0x91BD38, "LG HBS-FL7"},
+    {0x91C813, "JBL TUNE770NC"},
+    {0x91DABC, "SRS-XB33"},
+    {0x92255E, "LG-TONE-FP6"},
+    {0x989D0A, "Set up your new Pixel 2"},
+    {0x9939BC, "ATH-SQ1TW"},
+    {0x994374, "EDIFIER W320TN"},
+    {0x997B4A, "UA | JBL True Wireless Flash X"},
+    {0x99C87B, "WH-H810 (h.ear)"},
+    {0x99D7EA, "oraimo OpenCirclet"},
+    {0x99F098, "Galaxy S22 Ultra"},
+    {0x9A408A, "MOTO BUDS 065"},
+    {0x9A9BDD, "WH-XB910N"},
+    {0x9ADB11, "Pixel Buds Pro"},
+    {0x9AEEA4, "LG HBS-FN4"},
+    {0x9B7339, "AKG N9 Hybrid"},
+    {0x9B735A, "JBL RFL FLOW PRO"},
+    {0x9B9872, "Hyundai"},
+    {0x9BC64D, "JBL TUNE225TWS"},
+    {0x9BE931, "WI-C100"},
+    {0x9C0AF7, "JBL VIBE BUDS"},
+    {0x9C3997, "ATH-M50xBT2"},
+    {0x9C4058, "JBL WAVE FLEX"},
+    {0x9C6BC0, "LinkBuds S"},
+    {0x9C888B, "WH-H910N (h.ear)"},
+    {0x9C98DB, "JBL TUNE225TWS"},
+    {0x9CA277, "YY2963"},
+    {0x9CB5F3, "WH-1000XM5"},
+    {0x9CB881, "soundcore Motion 300"},
+    {0x9CD0F3, "LG HBS-TFN7"},
+    {0x9CE3C7, "EDIFIER NeoBuds Pro 2"},
+    {0x9CEFD1, "SRS-XG500"},
+    {0x9CF08F, "JLab Epic Air ANC"},
+    {0x9D00A6, "Urbanears Juno"},
+    {0x9D7D42, "Galaxy S20"},
+    {0x9DB896, "Your BMW"},
+    {0xA7E52B, "Bose NC 700 Headphones"},
+    {0xA7EF76, "JBL CLUB PRO+ TWS"},
+    {0xA8001A, "JBL CLUB ONE"},
+    {0xA83C10, "adidas Z.N.E. 01"},
+    {0xA8658F, "ROCKSTER GO"},
+    {0xA8845A, "oraimo FreePods 4"},
+    {0xA88B69, "WF-SP800N"},
+    {0xA8A00E, "Nokia CB-201"},
+    {0xA8A72A, "JBL LIVE670NC"},
+    {0xA8C636, "JBL TUNE660NC"},
+    {0xA8CAAD, "Galaxy F04"},
+    {0xA8E353, "JBL TUNE BEAM"},
+    {0xA8F96D, "JBL ENDURANCE RUN 2 WIRELESS"},
+    {0xA90358, "JBL LIVE220BT"},
+    {0xA92498, "JBL WAVE BUDS"},
+    {0xA9394A, "JBL TUNE230NC TWS"},
+    {0xC6936A, "JBL LIVE PRO+ TWS"},
+    {0xC69AFD, "WF-H800 (h.ear)"},
+    {0xC6ABEA, "UA | JBL True Wireless Flash X"},
+    {0xC6EC5F, "SRS-XE300"},
+    {0xC7736C, "Philips PH805"},
+    {0xC79B91, "Jabra Evolve2 75"},
+    {0xC7A267, "Fake Test Mouse"},
+    {0xC7D620, "JBL Pulse 5"},
+    {0xC7FBCC, "JBL VIBE FLEX"},
+    {0xC8162A, "LinkBuds S"},
+    {0xC85D7A, "JBL ENDURANCE PEAK II"},
+    {0xC8777E, "Jaybird Vista 2"},
+    {0xC878AA, "SRS-XV800"},
+    {0xC8C641, "Redmi Buds 4 Lite"},
+    {0xC8D335, "WF-1000XM4"},
+    {0xC8E228, "Pixel Buds Pro"},
+    {0xC9186B, "WF-1000XM4"},
+    {0xC9836A, "JBL Xtreme 4"},
+    {0xCA7030, "ATH-TWX7"},
+    {0xCAB6B8, "ATH-M20xBT"},
+    {0xCAF511, "Jaybird Vista 2"},
+    {0xCB093B, "Urbanears Juno"},
+    {0xCB529D, "soundcore Glow"},
+    {0xCC438E, "WH-1000XM4"},
+    {0xCC5F29, "JBL TUNE660NC"},
+    {0xCC754F, "YY2963"},
+    {0xCC93A5, "Sync"},
+    {0xCCBB7E, "MIDDLETON"},
+    {0xCD8256, "Bose NC 700 Headphones"},
+    {0xD446A7, "WH-1000XM5"},
+    {0xD5A59E, "Jabra Elite Speaker"},
+    {0xD5B5F7, "MOTO BUDS 600 ANC"},
+    {0xD5C6CE, "realme TechLife Buds T100"},
+    {0xD654CD, "JBL Xtreme 4"},
+    {0xD65F4E, "Philips Fidelio T2"},
+    {0xD69B2B, "TONE-T80S"},
+    {0xD6C195, "LG HBS-SL5"},
+    {0xD6E870, "Beoplay EX"},
+    {0xD6EE84, "Rockerz 255 Max"},
+    {0xD7102F, "ATH-SQ1TW SVN"},
+    {0xD7E3EB, "Cleer HALO"},
+    {0xD8058C, "MOTIF II A.N.C."},
+    {0xD820EA, "WH-XB910N"},
+    {0xD87A3E, "Pixel Buds Pro"},
+    {0xD8F3BA, "WH-1000XM5"},
+    {0xD8F4E8, "realme Buds T100"},
+    {0xD90617, "Redmi Buds 4 Active"},
+    {0xD933A7, "JBL ENDURANCE PEAK 3"},
+    {0xD9414F, "JBL SOUNDGEAR SENSE"},
+    {0xD97EBA, "JBL TUNE125TWS"},
+    {0xD9964B, "JBL TUNE670NC"},
+    {0xDA0F83, "SPACE"},
+    {0xDA4577, "Jabra Elite 4 Active"},
+    {0xDA5200, "blackbox TRIP II"},
+    {0xDAD3A6, "Jabra Elite 10"},
+    {0xDADE43, "Chromebox"},
+    {0xDAE096, "adidas RPT-02 SOL"},
+    {0xDB8AC7, "LG TONE-FREE"},
+    {0xDBE5B1, "WF-1000XM4"},
+    {0xDC5249, "WH-H810 (h.ear)"},
+    {0xDCF33C, "JBL REFLECT MINI NC"},
+    {0xDD4EC0, "OPPO Enco Air3 Pro"},
+    {0xDE215D, "WF-C500"},
+    {0xDE577F, "Teufel AIRY TWS 2"},
+    {0xDEC04C, "SUMMIT"},
+    {0xDEDD6F, "soundcore Space One"},
+    {0xDEE8C0, "Ear (2)"},
+    {0xDEEA86, "Xiaomi Buds 4 Pro"},
+    {0xDEF234, "WH-H810 (h.ear)"},
+    {0xDF01E3, "Sync"},
+    {0xDF271C, "Big Bang e Gen 3"},
+    {0xDF42DE, "TAG Heuer Calibre E4 42mm"},
+    {0xDF4B02, "SRS-XB13"},
+    {0xDF9BA4, "Bose NC 700 Headphones"},
+    {0xDFD433, "JBL REFLECT AERO"},
+    {0xE020C1, "soundcore Motion 300"},
+    {0xE06116, "LinkBuds S"},
+    {0xE07634, "OnePlus Buds Z"},
+    {0xE09172, "JBL TUNE BEAM"},
+    {0xE4E457, "Galaxy S20 5G"},
+    {0xE5440B, "TAG Heuer Calibre E4 45mm"},
+    {0xE57363, "Oladance Wearable Stereo"},
+    {0xE57B57, "Super Device"},
+    {0xE5B4B0, "WF-1000XM5"},
+    {0xE5B91B, "SRS-XB33"},
+    {0xE5E2E9, "Zone Wireless 2"},
+    {0xE64613, "JBL WAVE BEAM"},
+    {0xE64CC6, "Set up your new Pixel 3 XL"},
+    {0xE69877, "JBL REFLECT AERO"},
+    {0xE6E37E, "realme Buds  Air 5 Pro"},
+    {0xE6E771, "ATH-CKS50TW"},
+    {0xE6E8B8, "POCO Pods"},
+    {0xE750CE, "Jabra Evolve2 75"},
+    {0xF52494, "JBL LIVE PRO+ TWS"},
 
     // Custom debug popups
     {0xD99CA1, "Flipper Zero"},
@@ -211,7 +520,7 @@ const struct {
     {0xE2106F, "FBI"},
     {0xB37A62, "Tesla"},
 };
-const uint8_t models_count = COUNT_OF(models);
+const uint16_t models_count = COUNT_OF(models);
 
 static const char* get_name(const Payload* payload) {
     UNUSED(payload);
@@ -280,56 +589,36 @@ static void config_callback(void* _ctx, uint32_t index) {
         break;
     }
 }
-static void model_changed(VariableItem* item) {
-    Payload* payload = variable_item_get_context(item);
-    FastpairCfg* cfg = &payload->cfg.fastpair;
-    uint8_t index = variable_item_get_current_value_index(item);
-    if(index) {
-        index--;
-        payload->mode = PayloadModeValue;
-        cfg->model = models[index].value;
-        variable_item_set_current_value_text(item, models[index].name);
-    } else {
-        payload->mode = PayloadModeRandom;
-        variable_item_set_current_value_text(item, "Random");
-    }
-}
 static void extra_config(Ctx* ctx) {
     Payload* payload = &ctx->attack->payload;
     FastpairCfg* cfg = &payload->cfg.fastpair;
     VariableItemList* list = ctx->variable_item_list;
     VariableItem* item;
-    size_t value_index;
 
-    item = variable_item_list_add(list, "Model Code", models_count + 1, model_changed, payload);
+    item = variable_item_list_add(list, "Model Code", 0, NULL, NULL);
     const char* model_name = NULL;
     char model_name_buf[9];
     switch(payload->mode) {
     case PayloadModeRandom:
     default:
         model_name = "Random";
-        value_index = 0;
         break;
     case PayloadModeValue:
-        for(uint8_t i = 0; i < models_count; i++) {
+        for(uint16_t i = 0; i < models_count; i++) {
             if(cfg->model == models[i].value) {
                 model_name = models[i].name;
-                value_index = i + 1;
                 break;
             }
         }
         if(!model_name) {
             snprintf(model_name_buf, sizeof(model_name_buf), "%06lX", cfg->model);
             model_name = model_name_buf;
-            value_index = models_count + 1;
         }
         break;
     case PayloadModeBruteforce:
         model_name = "Bruteforce";
-        value_index = models_count + 1;
         break;
     }
-    variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, model_name);
 
     variable_item_list_add(list, "Requires Google services", 0, NULL, NULL);
@@ -390,7 +679,7 @@ void scene_fastpair_model_on_enter(void* _ctx) {
     }
 
     bool found = false;
-    for(uint8_t i = 0; i < models_count; i++) {
+    for(uint16_t i = 0; i < models_count; i++) {
         submenu_add_item(submenu, models[i].name, i + 1, model_callback, ctx);
         if(!found && payload->mode == PayloadModeValue && cfg->model == models[i].value) {
             found = true;
