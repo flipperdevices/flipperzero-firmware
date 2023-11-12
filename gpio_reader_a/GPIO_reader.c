@@ -21,6 +21,7 @@ typedef struct {
 } PluginState;
 
 static void render_callback(Canvas* const canvas, void* ctx) {
+    furi_assert(ctx);
     const PluginState* plugin_state = ctx;
     furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
 
@@ -133,13 +134,10 @@ int32_t GPIO_reader_app(void* p) {
                     }
                 }
             }
-            // } else {
-            //     FURI_LOG_D("GPIO_reader", "FuriMessageQueue: event timeout");
-            // event timeout
         }
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);
