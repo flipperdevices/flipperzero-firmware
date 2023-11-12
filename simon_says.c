@@ -69,6 +69,7 @@ typedef struct {
 
     uint32_t last_button_press_tick;
     NotificationApp* notification;
+    FuriMutex* mutex;
 } SimonData;
 
 /* ============================== Sequences ============================== */
@@ -189,25 +190,25 @@ void draw_current_score(Canvas* canvas, const SimonData* simon_data) {
     canvas_draw_str_aligned(canvas, SCREEN_XRES / 2 + 4, 2, AlignCenter, AlignTop, str_score);
 }
 
-void play_sound_up(SimonData* const app) {
+void play_sound_up(const SimonData* app) {
     if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
         furi_hal_speaker_start(NOTE_UP, app->volume);
     }
 }
 
-void play_sound_down(SimonData* const app) {
+void play_sound_down(const SimonData* app) {
     if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
         furi_hal_speaker_start(NOTE_DOWN, app->volume);
     }
 }
 
-void play_sound_left(SimonData* const app) {
+void play_sound_left(const SimonData* app) {
     if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
         furi_hal_speaker_start(NOTE_LEFT, app->volume);
     }
 }
 
-void play_sound_right(SimonData* const app) {
+void play_sound_right(const SimonData* app) {
     if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
         furi_hal_speaker_start(NOTE_RIGHT, app->volume);
     }
@@ -222,13 +223,10 @@ void stop_sound() {
 
 /* Main Render Function */
 void simon_draw_callback(Canvas* canvas, void* ctx) {
-    SimonData* const simon_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(simon_state == NULL) {
-        if(DEBUG_MSG) FURI_LOG_E(TAG, "[simon_draw_callback] Null simon state");
-        return;
-    }
+    furi_assert(ctx);
+    const SimonData* simon_state = ctx;
+    furi_mutex_acquire(simon_state->mutex, FuriWaitForever);
 
-    UNUSED(ctx);
     canvas_clear(canvas);
 
     // ######################### Main Menu #########################
@@ -358,7 +356,7 @@ void simon_draw_callback(Canvas* canvas, void* ctx) {
     //TODO
 
     //release the mutex
-    release_mutex((ValueMutex*)ctx, simon_state);
+    furi_mutex_release(simon_state->mutex);
 }
 
 /* ======================== Input Handling ============================== */
@@ -556,8 +554,9 @@ int32_t simon_says_app_entry(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     SimonData* simon_state = malloc(sizeof(SimonData));
-    ValueMutex simon_state_value_mutex;
-    if(!init_mutex(&simon_state_value_mutex, simon_state, sizeof(SimonData))) {
+
+    simon_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!simon_state->mutex) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(simon_state);
         return -1;
@@ -565,7 +564,7 @@ int32_t simon_says_app_entry(void* p) {
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, simon_draw_callback, &simon_state_value_mutex);
+    view_port_draw_callback_set(view_port, simon_draw_callback, simon_state);
     view_port_input_callback_set(view_port, simon_input_callback, event_queue);
 
     // Register view port in GUI
@@ -578,7 +577,7 @@ int32_t simon_says_app_entry(void* p) {
     InputEvent input;
 
     // Show Main Menu Screen
-    load_game(simon_state);
+    //load_game(simon_state);
     restart_game_after_gameover(simon_state);
     simon_state->gameState = mainMenu;
 
@@ -587,15 +586,16 @@ int32_t simon_says_app_entry(void* p) {
 
         FuriStatus q_status = furi_message_queue_get(
             event_queue, &input, simon_state->numberOfMillisecondsBeforeShapeDisappears);
+        furi_mutex_acquire(simon_state->mutex, FuriWaitForever);
 
         if(q_status == FuriStatusOk) {
-            FURI_LOG_D(TAG, "Got input event: %d", input.key);
+            //FURI_LOG_D(TAG, "Got input event: %d", input.key);
             //break out of the loop if the back key is pressed
             if(input.key == InputKeyBack && input.type == InputTypeLong) {
                 // Save high score before quitting
-                if(simon_state->is_new_highscore) {
-                    save_game(simon_state);
-                }
+                //if(simon_state->is_new_highscore) {
+                //  save_game(simon_state);
+                //}
                 break;
             }
 
@@ -636,12 +636,10 @@ int32_t simon_says_app_entry(void* p) {
                         break;
                     }
                 } else {
-                    FURI_LOG_D(TAG, "Input type is not short");
+                    //FURI_LOG_D(TAG, "Input type is not short");
                     simon_state->set_board_neutral = true;
                 }
             }
-        } else {
-            FURI_LOG_E(TAG, "cannot get message from queue\r\n");
         }
 
         // @todo Animation Loop for debug
@@ -650,6 +648,7 @@ int32_t simon_says_app_entry(void* p) {
         //     simon_state->set_board_neutral = !simon_state->set_board_neutral;
         // }
 
+        furi_mutex_release(simon_state->mutex);
         view_port_update(view_port);
     }
 
@@ -658,9 +657,10 @@ int32_t simon_says_app_entry(void* p) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    free(simon_state);
+    furi_mutex_free(simon_state->mutex);
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
+    free(simon_state);
 
     return 0;
 }
