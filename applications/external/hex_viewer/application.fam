@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="hex_viewer_app",
     stack_size=2 * 1024,
-    fap_icon="icons/hex_10px.png",
+    fap_icon="icons/hex_10px.bmp",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="hex_viewer",
     fap_category="Tools",
