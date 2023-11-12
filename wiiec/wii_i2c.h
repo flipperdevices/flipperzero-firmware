@@ -25,7 +25,7 @@
 // When we read:  After we send the read command, we wait for i2cReadWait uS before reading the data
 //
 
-// firmware/targets/f7/furi_hal/furi_hal_i2c_types.h
+// targets/f7/furi_hal/furi_hal_i2c_types.h
 #define i2cBus (&furi_hal_i2c_handle_external) // FZ external i2c bus
 #define i2cAddr (ec_i2cAddr << 1)
 #define i2cTimeout (3) // in mS

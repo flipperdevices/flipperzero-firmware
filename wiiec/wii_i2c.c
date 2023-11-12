@@ -170,7 +170,7 @@ bool ecInit(wiiEC_t* pec, const uint8_t* encKey) {
 #if 0 //! i2c workaround
 	// May become relevant when the i2c issues are resolved
 	// Take control of the i2c bus [which returns void !?]
-	// --> firmware/targets/f7/furi_hal/furi_hal_i2c.c
+	// --> targets/f7/furi_hal/furi_hal_i2c.c
 	furi_hal_i2c_acquire(i2cBus);
 #endif
 
