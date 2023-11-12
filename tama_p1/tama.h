@@ -4,7 +4,7 @@
 #include "tamalib/tamalib.h"
 
 #define TAG "TamaP1"
-#define TAMA_ROM_PATH APP_DATA_PATH("rom.bin")
+#define TAMA_ROM_PATH APP_ASSETS_PATH("rom.bin")
 #define TAMA_SCREEN_SCALE_FACTOR 2
 #define TAMA_LCD_ICON_SIZE 14
 #define TAMA_LCD_ICON_MARGIN 1
