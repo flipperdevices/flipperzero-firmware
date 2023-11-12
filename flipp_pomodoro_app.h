@@ -12,8 +12,7 @@
 #include "modules/flipp_pomodoro.h"
 #include "modules/flipp_pomodoro_statistics.h"
 
-typedef enum
-{
+typedef enum {
     // Reserve first 100 events for button types and indexes, starting from 0
     FlippPomodoroAppCustomEventStageSkip = 100,
     FlippPomodoroAppCustomEventStageComplete, // By Expiration
@@ -23,20 +22,18 @@ typedef enum
     FlippPomodoroAppCustomEventResumeTimer,
 } FlippPomodoroAppCustomEvent;
 
-typedef struct
-{
-    SceneManager *scene_manager;
-    ViewDispatcher *view_dispatcher;
-    Gui *gui;
-    NotificationApp *notification_app;
-    FlippPomodoroTimerView *timer_view;
-    FlippPomodoroInfoView *info_view;
-    FlippPomodoroState *state;
-    FlippPomodoroStatistics *statistics;
+typedef struct {
+    SceneManager* scene_manager;
+    ViewDispatcher* view_dispatcher;
+    Gui* gui;
+    NotificationApp* notification_app;
+    FlippPomodoroTimerView* timer_view;
+    FlippPomodoroInfoView* info_view;
+    FlippPomodoroState* state;
+    FlippPomodoroStatistics* statistics;
 } FlippPomodoroApp;
 
-typedef enum
-{
+typedef enum {
     FlippPomodoroAppViewTimer,
     FlippPomodoroAppViewInfo,
 } FlippPomodoroAppView;
