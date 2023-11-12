@@ -15,6 +15,7 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexMouse,
     HidSubmenuIndexMouseClicker,
     HidSubmenuIndexMouseJiggler,
+    HidSubmenuIndexPtt,
 };
 
 static void hid_submenu_callback(void* context, uint32_t index) {
@@ -52,6 +53,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexMouseJiggler) {
         app->view_id = HidViewMouseJiggler;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouseJiggler);
+    } else if(index == HidSubmenuIndexPtt) {
+        app->view_id = HidViewPtt;
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewPtt);
     }
 }
 
@@ -74,6 +78,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
     hid_mouse_clicker_set_connected_status(hid->hid_mouse_clicker, connected);
     hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
+    hid_ptt_set_connected_status(hid->hid_ptt, connected);
     hid_tikshorts_set_connected_status(hid->hid_tikshorts, connected);
 }
 
@@ -156,6 +161,8 @@ Hid* hid_alloc(HidTransport transport) {
         HidSubmenuIndexMouseJiggler,
         hid_submenu_callback,
         app);
+    submenu_add_item(
+        app->device_type_submenu, "PTT", HidSubmenuIndexPtt, hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->device_type_submenu), hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->device_type_submenu));
@@ -238,6 +245,12 @@ Hid* hid_app_alloc_view(void* context) {
         HidViewMouseJiggler,
         hid_mouse_jiggler_get_view(app->hid_mouse_jiggler));
 
+    // Ptt view
+    app->hid_ptt = hid_ptt_alloc(app);
+    view_set_previous_callback(hid_ptt_get_view(app->hid_ptt), hid_exit_confirm_view);
+    view_dispatcher_add_view(
+      app->view_dispatcher, HidViewPtt, hid_ptt_get_view(app->hid_ptt));
+
     return app;
 }
 
@@ -270,6 +283,8 @@ void hid_free(Hid* app) {
     hid_mouse_clicker_free(app->hid_mouse_clicker);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouseJiggler);
     hid_mouse_jiggler_free(app->hid_mouse_jiggler);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewPtt);
+    hid_ptt_free(app->hid_ptt);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikShorts);
     hid_tikshorts_free(app->hid_tikshorts);
     view_dispatcher_free(app->view_dispatcher);
