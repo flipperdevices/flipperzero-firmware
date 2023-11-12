@@ -1636,8 +1636,8 @@ int32_t nrf24scan_app(void* p) {
             }
         }
 
-        view_port_update(APP->view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(APP->view_port);
     }
     nrf24_set_idle(nrf24_HANDLE);
     if(log_arr_idx && (log_to_file == 1 || log_to_file == 2)) {
