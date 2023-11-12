@@ -47,7 +47,8 @@ typedef struct {
 } Coleco;
 
 static void render_callback(Canvas* const canvas, void* context) {
-    Coleco* coleco = (Coleco*)context;
+    furi_assert(context);
+    Coleco* coleco = context;
     furi_mutex_acquire(coleco->mutex, FuriWaitForever);
 
     if(coleco->dpad) {
@@ -350,10 +351,6 @@ int32_t coleco_app(void* p) {
                 view_port_update(view_port);
             }
         }
-        // else
-        // {
-        //   FURI_LOG_D("Coleco", "FuriMessageQueue: event timeout");
-        // }
 
         furi_mutex_release(coleco->mutex);
     }
