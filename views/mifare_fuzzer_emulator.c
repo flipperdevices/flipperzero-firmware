@@ -5,9 +5,9 @@
 // Screen is 128 × 64 pixels
 
 /// @brief mifare_fuzzer_emulator_set_callback
-/// @param mifare_fuzzer_emulator 
-/// @param callback 
-/// @param context 
+/// @param mifare_fuzzer_emulator
+/// @param callback
+/// @param context
 void mifare_fuzzer_emulator_set_callback(
     MifareFuzzerEmulator* mifare_fuzzer_emulator,
     MifareFuzzerEmulatorCallback callback,
@@ -20,8 +20,8 @@ void mifare_fuzzer_emulator_set_callback(
 }
 
 /// @brief mifare_fuzzer_emulator_draw_callback
-/// @param canvas 
-/// @param _model 
+/// @param canvas
+/// @param _model
 static void mifare_fuzzer_emulator_draw_callback(Canvas* canvas, void* _model) {
     MifareFuzzerEmulatorModel* model = _model;
     FuriString* furi_string = furi_string_alloc();
@@ -40,7 +40,7 @@ static void mifare_fuzzer_emulator_draw_callback(Canvas* canvas, void* _model) {
     char uid_char[3];
     cpos = 0;
     for(uint8_t i = 0; i < model->nfc_dev_data.uid_len; i++) {
-        if (i > 0) {
+        if(i > 0) {
             uid[cpos] = ':';
             cpos++;
         }
@@ -56,17 +56,17 @@ static void mifare_fuzzer_emulator_draw_callback(Canvas* canvas, void* _model) {
     // Secondary font
     canvas_set_font(canvas, FontSecondary);
     // Card
-    canvas_draw_str(canvas,   4, 22, "c:");
-    canvas_draw_str(canvas,  15, 22, model->mifare_card_dsc);
+    canvas_draw_str(canvas, 4, 22, "c:");
+    canvas_draw_str(canvas, 15, 22, model->mifare_card_dsc);
     // Timing
     furi_string_printf(furi_string, "%d", model->ticks_between_cards);
-    canvas_draw_str(canvas,  90, 22, "t:");
+    canvas_draw_str(canvas, 90, 22, "t:");
     canvas_draw_str(canvas, 100, 22, furi_string_get_cstr(furi_string));
     // Attack
-    canvas_draw_str(canvas,   4, 33, "a:");
-    canvas_draw_str(canvas,  15, 33, model->attack_dsc);
+    canvas_draw_str(canvas, 4, 33, "a:");
+    canvas_draw_str(canvas, 15, 33, model->attack_dsc);
 
-    if (!model->is_attacking) {
+    if(!model->is_attacking) {
         elements_button_left(canvas, "t-1");
         elements_button_center(canvas, "Start");
         elements_button_right(canvas, "t+1");
@@ -80,9 +80,9 @@ static void mifare_fuzzer_emulator_draw_callback(Canvas* canvas, void* _model) {
 }
 
 /// @brief mifare_fuzzer_emulator_input_callback
-/// @param event 
-/// @param context 
-/// @return 
+/// @param event
+/// @param context
+/// @return
 static bool mifare_fuzzer_emulator_input_callback(InputEvent* event, void* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_emulator_input_callback()");
     furi_assert(context);
@@ -91,13 +91,15 @@ static bool mifare_fuzzer_emulator_input_callback(InputEvent* event, void* conte
 
     if(event->type == InputTypeShort) {
         if(event->key == InputKeyRight) {
-            if (!mifare_fuzzer_emulator->is_attacking) {
-                mifare_fuzzer_emulator->callback(MifareFuzzerEventIncrementTicks, mifare_fuzzer_emulator->context);
+            if(!mifare_fuzzer_emulator->is_attacking) {
+                mifare_fuzzer_emulator->callback(
+                    MifareFuzzerEventIncrementTicks, mifare_fuzzer_emulator->context);
             };
             consumed = true;
         } else if(event->key == InputKeyLeft) {
-            if (!mifare_fuzzer_emulator->is_attacking) {
-                mifare_fuzzer_emulator->callback(MifareFuzzerEventDecrementTicks, mifare_fuzzer_emulator->context);
+            if(!mifare_fuzzer_emulator->is_attacking) {
+                mifare_fuzzer_emulator->callback(
+                    MifareFuzzerEventDecrementTicks, mifare_fuzzer_emulator->context);
             };
             consumed = true;
         } else if(event->key == InputKeyUp) {
@@ -105,23 +107,22 @@ static bool mifare_fuzzer_emulator_input_callback(InputEvent* event, void* conte
         } else if(event->key == InputKeyDown) {
             consumed = true;
         } else if(event->key == InputKeyOk) {
-
             // Toggle attack
-            if (mifare_fuzzer_emulator->is_attacking) {
+            if(mifare_fuzzer_emulator->is_attacking) {
                 mifare_fuzzer_emulator->is_attacking = false;
-                mifare_fuzzer_emulator->callback(MifareFuzzerEventStopAttack, mifare_fuzzer_emulator->context);
+                mifare_fuzzer_emulator->callback(
+                    MifareFuzzerEventStopAttack, mifare_fuzzer_emulator->context);
             } else {
                 mifare_fuzzer_emulator->is_attacking = true;
-                mifare_fuzzer_emulator->callback(MifareFuzzerEventStartAttack, mifare_fuzzer_emulator->context);
+                mifare_fuzzer_emulator->callback(
+                    MifareFuzzerEventStartAttack, mifare_fuzzer_emulator->context);
             }
 
             with_view_model(
                 mifare_fuzzer_emulator->view,
-                MifareFuzzerEmulatorModel* model,
-                {
-                    model->is_attacking = mifare_fuzzer_emulator->is_attacking;
-                }, true
-            );
+                MifareFuzzerEmulatorModel * model,
+                { model->is_attacking = mifare_fuzzer_emulator->is_attacking; },
+                true);
 
             consumed = true;
         }
@@ -131,7 +132,7 @@ static bool mifare_fuzzer_emulator_input_callback(InputEvent* event, void* conte
 }
 
 /// @brief mifare_fuzzer_emulator_enter_callback
-/// @param context 
+/// @param context
 static void mifare_fuzzer_emulator_enter_callback(void* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_emulator_enter_callback()");
     furi_assert(context);
@@ -141,40 +142,34 @@ static void mifare_fuzzer_emulator_enter_callback(void* context) {
     mifare_fuzzer_emulator->is_attacking = false;
     with_view_model(
         mifare_fuzzer_emulator->view,
-        MifareFuzzerEmulatorModel* model,
-        {
-            model->is_attacking = false;
-        },
-        true
-    );
-
+        MifareFuzzerEmulatorModel * model,
+        { model->is_attacking = false; },
+        true);
 }
 
 /// @brief mifare_fuzzer_emulator_alloc
-/// @return 
+/// @return
 MifareFuzzerEmulator* mifare_fuzzer_emulator_alloc() {
     MifareFuzzerEmulator* mifare_fuzzer_emulator = malloc(sizeof(MifareFuzzerEmulator));
     mifare_fuzzer_emulator->view = view_alloc();
     view_set_context(mifare_fuzzer_emulator->view, mifare_fuzzer_emulator);
-    view_allocate_model(mifare_fuzzer_emulator->view, ViewModelTypeLocking, sizeof(MifareFuzzerEmulatorModel));
+    view_allocate_model(
+        mifare_fuzzer_emulator->view, ViewModelTypeLocking, sizeof(MifareFuzzerEmulatorModel));
     view_set_draw_callback(mifare_fuzzer_emulator->view, mifare_fuzzer_emulator_draw_callback);
     view_set_input_callback(mifare_fuzzer_emulator->view, mifare_fuzzer_emulator_input_callback);
     view_set_enter_callback(mifare_fuzzer_emulator->view, mifare_fuzzer_emulator_enter_callback);
 
     with_view_model(
         mifare_fuzzer_emulator->view,
-        MifareFuzzerEmulatorModel* model,
-        {
-            model->title = "Mifare Fuzzer (emulator)";
-        },
-        true
-    );
+        MifareFuzzerEmulatorModel * model,
+        { model->title = "Mifare Fuzzer (emulator)"; },
+        true);
 
     return mifare_fuzzer_emulator;
 }
 
 /// @brief mifare_fuzzer_emulator_free
-/// @param context 
+/// @param context
 void mifare_fuzzer_emulator_free(MifareFuzzerEmulator* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_emulator_free()");
     furi_assert(context);
@@ -195,23 +190,25 @@ void mifare_fuzzer_emulator_free(MifareFuzzerEmulator* context) {
 }
 
 /// @brief mifare_fuzzer_emulator_get_view
-/// @param mifare_fuzzer_emulator 
-/// @return 
+/// @param mifare_fuzzer_emulator
+/// @return
 View* mifare_fuzzer_emulator_get_view(MifareFuzzerEmulator* mifare_fuzzer_emulator) {
     furi_assert(mifare_fuzzer_emulator);
     return mifare_fuzzer_emulator->view;
 }
 
 /// @brief Set card type
-/// @param mifare_fuzzer_emulator 
-/// @param mifare_card 
-void mifare_fuzzer_emulator_set_card(MifareFuzzerEmulator* mifare_fuzzer_emulator, MifareCard mifare_card) {
+/// @param mifare_fuzzer_emulator
+/// @param mifare_card
+void mifare_fuzzer_emulator_set_card(
+    MifareFuzzerEmulator* mifare_fuzzer_emulator,
+    MifareCard mifare_card) {
     furi_assert(mifare_fuzzer_emulator);
     furi_assert(mifare_card);
 
     with_view_model(
         mifare_fuzzer_emulator->view,
-        MifareFuzzerEmulatorModel* model,
+        MifareFuzzerEmulatorModel * model,
         {
             model->mifare_card = mifare_card;
             switch(mifare_card) {
@@ -226,21 +223,21 @@ void mifare_fuzzer_emulator_set_card(MifareFuzzerEmulator* mifare_fuzzer_emulato
                 break;
             }
         },
-        true
-    );
-
+        true);
 }
 
 /// @brief Set attack type
-/// @param mifare_fuzzer_emulator 
-/// @param mifare_attack 
-void mifare_fuzzer_emulator_set_attack(MifareFuzzerEmulator* mifare_fuzzer_emulator, MifareFuzzerAttack mifare_attack) {
+/// @param mifare_fuzzer_emulator
+/// @param mifare_attack
+void mifare_fuzzer_emulator_set_attack(
+    MifareFuzzerEmulator* mifare_fuzzer_emulator,
+    MifareFuzzerAttack mifare_attack) {
     furi_assert(mifare_fuzzer_emulator);
     furi_assert(mifare_attack);
 
     with_view_model(
         mifare_fuzzer_emulator->view,
-        MifareFuzzerEmulatorModel* model,
+        MifareFuzzerEmulatorModel * model,
         {
             model->attack = mifare_attack;
             switch(mifare_attack) {
@@ -255,53 +252,50 @@ void mifare_fuzzer_emulator_set_attack(MifareFuzzerEmulator* mifare_fuzzer_emula
                 break;
             }
         },
-        true
-    );
-
+        true);
 }
 
 /// @brief mifare_fuzzer_emulator_set_nfc_dev_data
-/// @param mifare_fuzzer_emulator 
-/// @param nfc_dev_data 
-void mifare_fuzzer_emulator_set_nfc_dev_data(MifareFuzzerEmulator* mifare_fuzzer_emulator, FuriHalNfcDevData nfc_dev_data) {
+/// @param mifare_fuzzer_emulator
+/// @param nfc_dev_data
+void mifare_fuzzer_emulator_set_nfc_dev_data(
+    MifareFuzzerEmulator* mifare_fuzzer_emulator,
+    FuriHalNfcDevData nfc_dev_data) {
     furi_assert(mifare_fuzzer_emulator);
 
     with_view_model(
         mifare_fuzzer_emulator->view,
-        MifareFuzzerEmulatorModel* model,
-        {
-            model->nfc_dev_data = nfc_dev_data;
-        }, true
-    );
+        MifareFuzzerEmulatorModel * model,
+        { model->nfc_dev_data = nfc_dev_data; },
+        true);
 }
 
-
 /// @brief mifare_fuzzer_emulator_set_ticks_between_cards
-/// @param mifare_fuzzer_emulator 
-/// @param ticks 
-void mifare_fuzzer_emulator_set_ticks_between_cards(MifareFuzzerEmulator* mifare_fuzzer_emulator, uint8_t ticks) {
+/// @param mifare_fuzzer_emulator
+/// @param ticks
+void mifare_fuzzer_emulator_set_ticks_between_cards(
+    MifareFuzzerEmulator* mifare_fuzzer_emulator,
+    uint8_t ticks) {
     furi_assert(mifare_fuzzer_emulator);
 
     with_view_model(
         mifare_fuzzer_emulator->view,
-        MifareFuzzerEmulatorModel* model,
-        {
-            model->ticks_between_cards = ticks;
-        }, true
-    );
+        MifareFuzzerEmulatorModel * model,
+        { model->ticks_between_cards = ticks; },
+        true);
 }
 
 /// @brief mifare_fuzzer_emulator_set_tick_num
-/// @param mifare_fuzzer_emulator 
-/// @param tick_num 
-void mifare_fuzzer_emulator_set_tick_num(MifareFuzzerEmulator* mifare_fuzzer_emulator, uint8_t tick_num) {
+/// @param mifare_fuzzer_emulator
+/// @param tick_num
+void mifare_fuzzer_emulator_set_tick_num(
+    MifareFuzzerEmulator* mifare_fuzzer_emulator,
+    uint8_t tick_num) {
     furi_assert(mifare_fuzzer_emulator);
 
     with_view_model(
         mifare_fuzzer_emulator->view,
-        MifareFuzzerEmulatorModel* model,
-        {
-            model->tick_num = tick_num;
-        }, true
-    );
+        MifareFuzzerEmulatorModel * model,
+        { model->tick_num = tick_num; },
+        true);
 }
