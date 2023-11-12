@@ -225,6 +225,7 @@ void stop_sound() {
 
 /* Main Render Function */
 void simon_draw_callback(Canvas* canvas, void* ctx) {
+    furi_assert(ctx);
     const SimonData* simon_state = ctx;
     furi_mutex_acquire(simon_state->mutex, FuriWaitForever);
 
@@ -550,6 +551,7 @@ int32_t simon_says_app_entry(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     SimonData* simon_state = malloc(sizeof(SimonData));
+
     simon_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!simon_state->mutex) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
@@ -635,8 +637,6 @@ int32_t simon_says_app_entry(void* p) {
                     simon_state->set_board_neutral = true;
                 }
             }
-            // } else {
-            //     FURI_LOG_E(TAG, "cannot get message from queue\r\n");
         }
 
         // @todo Animation Loop for debug
@@ -645,8 +645,8 @@ int32_t simon_says_app_entry(void* p) {
         //     simon_state->set_board_neutral = !simon_state->set_board_neutral;
         // }
 
-        view_port_update(view_port);
         furi_mutex_release(simon_state->mutex);
+        view_port_update(view_port);
     }
 
     stop_sound();
