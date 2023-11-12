@@ -3,8 +3,8 @@
 
 #include "settings_scene.h"
 #include "scenes.h"
-#include "../flipper_structs.h"
-#include "../constants.h"
+#include "../../flipper_structs.h"
+#include "../../constants.h"
 
 enum ButtonIndexes {
     reset_game,

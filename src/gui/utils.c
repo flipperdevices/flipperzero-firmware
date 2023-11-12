@@ -2,8 +2,8 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
-#include "scenes.h"
 #include "utils.h"
+#include "scenes/scenes.h"
 #include "../constants.h"
 
 void start_gui_and_block(struct ApplicationContext *context) {

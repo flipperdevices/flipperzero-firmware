@@ -4,9 +4,8 @@
 
 #include "reset_scene.h"
 #include "scenes.h"
-#include "../constants.h"
-#include "../flipper_structs.h"
-#include "../state_management.h"
+#include "../../constants.h"
+#include "../../flipper_structs.h"
 
 static void reset_result_callback(DialogExResult result, void *ctx) {
     struct ApplicationContext *context = (struct ApplicationContext *)ctx;

@@ -3,8 +3,8 @@
 
 #include "loading_scene.h"
 #include "scenes.h"
-#include "../flipper_structs.h"
-#include "../constants.h"
+#include "../../flipper_structs.h"
+#include "../../constants.h"
 
 void scene_loading_on_enter(void *ctx) {
     struct ApplicationContext *context = (struct ApplicationContext *)ctx;

@@ -16,7 +16,7 @@
 
 #include "flipper_structs.h"
 #include "game_structs.h"
-#include "gui/scenes.h"
+#include "gui/scenes/scenes.h"
 #include "gui/view_dispatcher.h"
 #include "threads.h"
 
