@@ -1,5 +1,5 @@
-#ifndef __ARHA_FLIPPERAPP_DEMO
-#define __ARHA_FLIPPERAPP_DEMO
+#ifndef __SWD_PROBE_APP_H
+#define __SWD_PROBE_APP_H
 
 #include <stdint.h>
 #include <stdbool.h>
