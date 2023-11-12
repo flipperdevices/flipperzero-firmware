@@ -10,6 +10,7 @@
 #define DEFAULT_ATTACK_MILLIS 50
 #define DEFAULT_PKT_EXPIRY 0 /* Don't expire */
 #define FILEBUFFER_SIZE 128
+#define DATABUFFER_SIZE 4096
 
 /* Essentially the reverse of do_sync() from sync.c - Take all settings
    from Flipper-Gravity and write them to a file on the Flipper, using
@@ -176,6 +177,13 @@ bool load_settings(UART_TerminalApp *app) {
     return true;
 }
 
+bool writeDataToFile(UART_TerminalApp *app, File *file) {
+    int bufLen = 0;
+    uint8_t *dataBuffer[DATABUFFER_SIZE];
+
+    memset(dataBuffer, 0x00, DATABUFFER_SIZE);
+}
+
 bool save_data(UART_TerminalApp *app) {
     Storage *storage = furi_record_open(RECORD_STORAGE);
     File *file = storage_file_alloc(storage);
@@ -190,11 +198,17 @@ bool save_data(UART_TerminalApp *app) {
         close_file(file);
         return false;
     }
-    if (!storage_file_write(file, "bar", strlen("bar"))) {
+
+    if (!writeDataToFile(app, file)) {
         FURI_LOG_E(TAG, "Failed to write data");
         close_file(file);
         return false;
     }
+    // if (!storage_file_write(file, "bar", strlen("bar"))) {
+    //     FURI_LOG_E(TAG, "Failed to write data");
+    //     close_file(file);
+    //     return false;
+    // }
 
     close_file(file);
     return true;
