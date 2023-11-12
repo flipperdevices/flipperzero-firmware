@@ -9,4 +9,7 @@ App(
     fap_category="Tools",
     fap_icon="icons/passgen_icon.png",
     fap_icon_assets="icons",
+    fap_author="@anakod & @henrygab",
+    fap_version="1.2",
+    fap_description="Simple password generator",
 )
