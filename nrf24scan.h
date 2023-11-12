@@ -9,32 +9,31 @@
 #include <notification/notification_messages.h>
 
 typedef enum {
-	EventTypeTick,
-	EventTypeKey,
+    EventTypeTick,
+    EventTypeKey,
 } EventType;
 
 typedef struct {
-	EventType type;
-	InputEvent input;
+    EventType type;
+    InputEvent input;
 } PluginEvent;
 
 typedef struct {
-	FuriMutex* mutex;
+    FuriMutex* mutex;
 } PluginState;
 
 struct FOUND {
-	uint8_t addr_size;
-	uint8_t addr[5];
-	uint16_t total;
+    uint8_t addr_size;
+    uint8_t addr[5];
+    uint16_t total;
 };
 
 typedef struct {
     Gui* gui;
     FuriMessageQueue* event_queue;
     ViewPort* view_port;
-	Storage* storage;
-	NotificationApp* notification;
+    Storage* storage;
+    NotificationApp* notification;
     uint8_t* log_arr;
-	struct FOUND *found;
+    struct FOUND* found;
 } Nrf24Scan;
-
