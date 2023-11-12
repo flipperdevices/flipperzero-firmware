@@ -140,10 +140,10 @@ static void hid_movie_process_press(HidMovie* hid_movie, InputEvent* event) {
                 hid_hal_consumer_key_press(hid_movie->hid, HID_CONSUMER_VOLUME_DECREMENT);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = true;
-                hid_hal_consumer_key_press(hid_movie->hid, HID_KEYBOARD_LEFT_ARROW);
+                hid_hal_keyboard_press(hid_movie->hid, HID_KEYBOARD_LEFT_ARROW);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = true;
-                hid_hal_consumer_key_press(hid_movie->hid, HID_KEYBOARD_RIGHT_ARROW);
+                hid_hal_keyboard_press(hid_movie->hid, HID_KEYBOARD_RIGHT_ARROW);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = true;
                 hid_hal_consumer_key_press(hid_movie->hid, HID_CONSUMER_PLAY_PAUSE);
@@ -167,10 +167,10 @@ static void hid_movie_process_release(HidMovie* hid_movie, InputEvent* event) {
                 hid_hal_consumer_key_release(hid_movie->hid, HID_CONSUMER_VOLUME_DECREMENT);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = false;
-                hid_hal_consumer_key_release(hid_movie->hid, HID_CONSUMER_SCAN_PREVIOUS_TRACK);
+                hid_hal_keyboard_release(hid_movie->hid, HID_KEYBOARD_LEFT_ARROW);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = false;
-                hid_hal_consumer_key_release(hid_movie->hid, HID_CONSUMER_SCAN_NEXT_TRACK);
+                hid_hal_keyboard_release(hid_movie->hid, HID_KEYBOARD_RIGHT_ARROW);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = false;
                 hid_hal_consumer_key_release(hid_movie->hid, HID_CONSUMER_PLAY_PAUSE);
