@@ -46,7 +46,11 @@ const Icon *decode_image(const struct GameState *game_state) {
                 return &I_adult_00_60x60;
             }
         case DEAD:
-            return &I_dead_00_60x60;
+            if(next_index % 2) {
+                return &I_dead_01_60x60;
+            } else {
+                return &I_dead_00_60x60;
+            }
         default:
             furi_crash("Unexpected stage in decode_image");
     }
