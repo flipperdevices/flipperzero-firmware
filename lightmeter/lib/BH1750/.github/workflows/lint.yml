@@ -1,0 +1,26 @@
+name: Lint test FAP with library
+
+on:
+  pull_request:    
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout test app
+        uses: actions/checkout@v3
+        with:
+          repository: oleksiikutuzov/flipperzero-BH1750-test
+         
+      - name: Checkout library
+        uses: actions/checkout@v3
+        with:
+          path: lib/BH1750
+
+      - name: Lint
+        uses: oleksiikutuzov/flipperzero-ufbt-action@v2
+        with:
+          lint_only: true
