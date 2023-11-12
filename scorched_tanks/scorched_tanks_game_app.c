@@ -251,6 +251,7 @@ static void scorched_tanks_draw_tank(Canvas* const canvas, uint8_t x, uint8_t y,
 }
 
 static void scorched_tanks_render_callback(Canvas* const canvas, void* ctx) {
+    furi_assert(ctx);
     const Game* game_state = ctx;
     furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
@@ -528,8 +529,8 @@ int32_t scorched_tanks_game_app(void* p) {
             scorched_tanks_calculate_trajectory(game_state);
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);
