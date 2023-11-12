@@ -291,6 +291,7 @@ int32_t slotmachine_app(void* p) {
 
             if(!checkIsSpinning(slotmachine)) {
                 if(input.key == InputKeyBack) {
+                    highscores_save();
                     // exit on back button
                     furi_mutex_release(slotmachine->model_mutex);
                     break;
@@ -318,6 +319,9 @@ int32_t slotmachine_app(void* p) {
                     if(slotmachine->bet - 10 > 0) {
                         slotmachine->bet -= 10;
                     }
+                } else if(input.key == InputKeyLeft && input.type == InputTypeLong) {
+                    memset(&highscore, 0, sizeof(highscore));
+                    highscores_save();
                 }
             }
 
