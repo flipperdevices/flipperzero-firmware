@@ -44,20 +44,20 @@ static void init_gui(struct ApplicationContext *context) {
 
     // Attach modules to view_dispatcher
     view_dispatcher_add_view(context->view_dispatcher,
-                             loading_type,
+                             scene_loading,
                              loading_get_view(context->loading_module));
     view_dispatcher_add_view(context->view_dispatcher,
-                             button_type,
+                             scene_main,
                              button_panel_get_view(context->button_module));
     view_set_orientation(button_panel_get_view(context->button_module), ViewOrientationHorizontal);
     view_dispatcher_add_view(context->view_dispatcher,
-                             variable_item_list_type,
+                             scene_settings,
                              variable_item_list_get_view(context->variable_item_list_module));
     view_dispatcher_add_view(context->view_dispatcher,
-                             dialog_type,
+                             scene_reset,
                              dialog_ex_get_view(context->dialog_ex_module));
     view_dispatcher_add_view(context->view_dispatcher,
-                             text_box_type,
+                             scene_about,
                              text_box_get_view(context->text_box_module));
 
     // Init GUI and attach the view_dispatcher to it
@@ -68,13 +68,25 @@ static void init_gui(struct ApplicationContext *context) {
 }
 
 static void free_gui(struct ApplicationContext *context) {
+    /* Free the view_dispatcher */
+    view_dispatcher_remove_view(context->view_dispatcher, scene_about);
+    view_dispatcher_remove_view(context->view_dispatcher, scene_reset);
+    view_dispatcher_remove_view(context->view_dispatcher, scene_settings);
+    view_dispatcher_remove_view(context->view_dispatcher, scene_main);
+    view_dispatcher_remove_view(context->view_dispatcher, scene_loading);
     view_dispatcher_free(context->view_dispatcher);
+
+    /* Free the modules */
     text_box_free(context->text_box_module);
     dialog_ex_free(context->dialog_ex_module);
     variable_item_list_free(context->variable_item_list_module);
     button_panel_free(context->button_module);
     loading_free(context->loading_module);
+
+    /* Free the scene_manager */
     scene_manager_free(context->scene_manager);
+
+    /* Lastly unregister the GUI */
     furi_record_close(RECORD_GUI);
 }
 
