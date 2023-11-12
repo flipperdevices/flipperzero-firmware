@@ -10,6 +10,7 @@ App(
         "notification",
         "dialogs",
     ],
+    resources="resources",
     provides=[],
     stack_size=6 * 1024,
     order=64,  # keep it at the bottom of the list while still WIP
