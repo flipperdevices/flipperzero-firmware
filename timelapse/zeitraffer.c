@@ -422,6 +422,7 @@ int32_t zeitraffer_app(void* p) {
     } while(0);
 
     flipper_format_free(save);
+
     furi_record_close(RECORD_STORAGE);
 
     // Очищаем таймер
