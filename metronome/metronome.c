@@ -54,7 +54,8 @@ typedef struct {
 } MetronomeState;
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    const MetronomeState* metronome_state = (MetronomeState*)ctx;
+    furi_assert(ctx);
+    const MetronomeState* metronome_state = ctx;
     furi_mutex_acquire(metronome_state->mutex, FuriWaitForever);
 
     FuriString* tempStr = furi_string_alloc();
@@ -140,8 +141,10 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 
 static void timer_callback(void* ctx) {
     // this is where we go BEEP!
-    MetronomeState* metronome_state = (MetronomeState*)ctx;
+    furi_assert(ctx);
+    MetronomeState* metronome_state = ctx;
     furi_mutex_acquire(metronome_state->mutex, FuriWaitForever);
+
     metronome_state->current_beat++;
     if(metronome_state->current_beat > metronome_state->beats_per_bar) {
         metronome_state->current_beat = 1;
@@ -378,8 +381,8 @@ int32_t metronome_app() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(metronome_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);
