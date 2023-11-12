@@ -270,7 +270,7 @@ bool gb_cartridge_scene_2_input(InputEvent* event, void* context) {
 void gb_cartridge_scene_2_exit(void* context) {
     furi_assert(context);
     GBCartridge* app = context;
-
+    // furi_hal_power_enable_otg();
     // Automatically stop the scan when exiting view
     // uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
     // furi_delay_ms(50);
@@ -283,7 +283,7 @@ void gb_cartridge_scene_2_enter(void* context) {
     GBCartridge* app = (GBCartridge*)instance->context;
     //  backlight on
     notification_message(app->notification, &sequence_display_backlight_enforce_on);
-
+    // furi_hal_power_disable_otg();
     UNUSED(app);
     // dolphin_deed(DolphinDeedPluginStart);
     with_view_model(
