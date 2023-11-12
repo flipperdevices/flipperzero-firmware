@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include <minmea.h>
+#include "minmea.h"
 #include "gps_uart.h"
 
 typedef enum {
