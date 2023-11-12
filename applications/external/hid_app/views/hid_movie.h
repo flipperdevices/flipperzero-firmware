@@ -2,9 +2,10 @@
 
 #include <gui/view.h>
 
+typedef struct Hid Hid;
 typedef struct HidMovie HidMovie;
 
-HidMovie* hid_movie_alloc();
+HidMovie* hid_movie_alloc(Hid* bt_hid);
 
 void hid_movie_free(HidMovie* hid_movie);
 
