@@ -26,8 +26,8 @@
         ((((dip >> 0xE) & 0x3) == check_dip) ? '*' : '_')
 
 static const SubGhzBlockConst subghz_protocol_mastercode_const = {
-    .te_short = 1050,
-    .te_long = 2100,
+    .te_short = 1072,
+    .te_long = 2145,
     .te_delta = 150,
     .min_count_bit_for_found = 36,
 };
@@ -142,7 +142,7 @@ static bool
         instance->encoder.upload[index++] = level_duration_make(
             false,
             (uint32_t)subghz_protocol_mastercode_const.te_short +
-                subghz_protocol_mastercode_const.te_long * 8);
+                subghz_protocol_mastercode_const.te_short * 13);
     } else {
         //send bit 0
         instance->encoder.upload[index++] =
@@ -150,7 +150,7 @@ static bool
         instance->encoder.upload[index++] = level_duration_make(
             false,
             (uint32_t)subghz_protocol_mastercode_const.te_long +
-                subghz_protocol_mastercode_const.te_long * 8);
+                subghz_protocol_mastercode_const.te_short * 13);
     }
     return true;
 }
@@ -232,8 +232,8 @@ void subghz_protocol_decoder_mastercode_feed(void* context, bool level, uint32_t
 
     switch(instance->decoder.parser_step) {
     case MastercodeDecoderStepReset:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_mastercode_const.te_short * 16) <
-                        subghz_protocol_mastercode_const.te_delta * 8)) {
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_mastercode_const.te_short * 15) <
+                        subghz_protocol_mastercode_const.te_delta * 15)) {
             instance->decoder.parser_step = MastercodeDecoderStepSaveDuration;
             instance->decoder.decode_data = 0;
             instance->decoder.decode_count_bit = 0;
@@ -267,8 +267,8 @@ void subghz_protocol_decoder_mastercode_feed(void* context, bool level, uint32_t
                 subghz_protocol_blocks_add_bit(&instance->decoder, 1);
                 instance->decoder.parser_step = MastercodeDecoderStepSaveDuration;
             } else if(
-                DURATION_DIFF(duration, subghz_protocol_mastercode_const.te_short * 16) <
-                subghz_protocol_mastercode_const.te_delta * 8) {
+                DURATION_DIFF(duration, subghz_protocol_mastercode_const.te_short * 15) <
+                subghz_protocol_mastercode_const.te_delta * 15) {
                 if((DURATION_DIFF(
                         instance->decoder.te_last, subghz_protocol_mastercode_const.te_short) <
                     subghz_protocol_mastercode_const.te_delta)) {
@@ -346,13 +346,13 @@ void subghz_protocol_decoder_mastercode_get_string(void* context, FuriString* ou
     furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
-        "Key:%09lX   Btn %X\r\n"
+        "Key:%llX   Btn %X\r\n"
         "  +:   " DIP_PATTERN "\r\n"
         "  o:   " DIP_PATTERN "\r\n"
         "  -:   " DIP_PATTERN "\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
-        (uint32_t)(instance->generic.data & 0x0FFFFFFFFF),
+        (uint64_t)(instance->generic.data),
         instance->generic.btn,
         SHOW_DIP_P(instance->generic.serial, DIP_P),
         SHOW_DIP_P(instance->generic.serial, DIP_O),
