@@ -502,7 +502,7 @@ int32_t zero_tracker_app(void* p) {
 
     while(1) {
         TrackerMessage message;
-        FuriStatus status = furi_message_queue_get(queue, &message, portMAX_DELAY);
+        FuriStatus status = furi_message_queue_get(queue, &message, FuriWaitForever);
         if(status == FuriStatusOk) {
             if(message.type == TrackerPositionChanged) {
                 uint8_t order_list_index = message.data.position.order_list_index;

@@ -2,8 +2,6 @@
 #include "helpers/hardware_worker.h"
 #include "protocol_i.h"
 
-#include <timer.h>
-
 #include <lib/toolbox/hex.h>
 #include <toolbox/stream/stream.h>
 #include <toolbox/stream/buffered_file_stream.h>

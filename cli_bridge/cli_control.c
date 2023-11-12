@@ -5,6 +5,7 @@
 #include <cli/cli_vcp.h>
 #include <furi/core/thread_i.h>
 #include "cligui_main_i.h"
+#include <loader/loader_i.h>
 #include <FreeRTOS.h>
 
 volatile bool gotCallbackSet = false;

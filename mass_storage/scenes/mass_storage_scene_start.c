@@ -13,14 +13,13 @@ static void mass_storage_scene_start_variable_item_list_callback(void* context, 
 void mass_storage_scene_start_on_enter(void* context) {
     MassStorageApp* app = context;
     VariableItemList* variable_item_list = app->variable_item_list;
-    VariableItem* item;
 
     variable_item_list_add(variable_item_list, "Select Disk Image", 0, NULL, app);
 
     variable_item_list_add(variable_item_list, "Create Disk Image", 0, NULL, app);
 
     variable_item_list_set_enter_callback(
-        variable_item_list, mass_storage_scene_create_image_variable_item_list_callback, app);
+        variable_item_list, mass_storage_scene_start_variable_item_list_callback, app);
 
     variable_item_list_set_header(variable_item_list, "USB Mass Storage");
 

@@ -14,7 +14,7 @@
 #include "scenes/nfc_maker_scene.h"
 #include <lib/flipper_format/flipper_format.h>
 #include <toolbox/name_generator.h>
-#include <applications/main/nfc/nfc_i.h>
+#include <applications/main/nfc/nfc_app_i.h>
 #include <furi_hal_bt.h>
 
 #define MAC_INPUT_LEN GAP_MAC_ADDR_SIZE

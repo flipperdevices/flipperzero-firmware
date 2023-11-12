@@ -7,7 +7,7 @@ App(
     requires=["gui", "storage"],
     stack_size=2 * 1024,
     order=215,
-    fap_file_assets="files"
+    fap_file_assets="files",
     fap_icon="tamaIcon4.png",
     fap_category="Games",
 )

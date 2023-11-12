@@ -2,7 +2,6 @@
 #include "cli_control.h"
 #include "text_input.h"
 #include "console_output.h"
-#include <loader/loader_i.h>
 #include <gui/view_dispatcher_i.h>
 
 static bool cligui_custom_event_cb(void* context, uint32_t event) {

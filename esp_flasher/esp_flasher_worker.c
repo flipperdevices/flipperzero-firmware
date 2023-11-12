@@ -351,7 +351,7 @@ void esp_flasher_worker_stop_thread(EspFlasherApp* app) {
 }
 
 esp_loader_error_t loader_port_read(uint8_t* data, uint16_t size, uint32_t timeout) {
-    size_t read = furi_stream_buffer_receive(flash_rx_stream, data, size, pdMS_TO_TICKS(timeout));
+    size_t read = furi_stream_buffer_receive(flash_rx_stream, data, size, timeout);
     if(read < size) {
         return ESP_LOADER_ERROR_TIMEOUT;
     } else {
@@ -396,7 +396,7 @@ void loader_port_delay_ms(uint32_t ms) {
 
 void loader_port_start_timer(uint32_t ms) {
     _remaining_time = ms;
-    furi_timer_start(timer, pdMS_TO_TICKS(1));
+    furi_timer_start(timer, 1);
 }
 
 uint32_t loader_port_remaining_time(void) {
