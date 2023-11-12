@@ -18,7 +18,7 @@ static const char ABOUT_TEXT[] = "Matagotchi\n"
                                  "For more info visit\n"
                                  "github.com/MrModd/Matagotchi";
 
-static const char LIFE_STAGE_STRING[][5] = {"Egg",
+static const char LIFE_STAGE_STRING[][6] = {"Egg",
                                             "Baby",
                                             "Child",
                                             "Teen",
