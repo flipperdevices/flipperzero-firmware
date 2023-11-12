@@ -133,6 +133,7 @@ static void replay(TuningForkState* tuning_fork_state) {
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
+    furi_assert(ctx);
     TuningForkState* tuning_fork_state = ctx;
     furi_mutex_acquire(tuning_fork_state->mutex, FuriWaitForever);
 
@@ -385,12 +386,10 @@ int32_t tuning_fork_app() {
                     }
                 }
             }
-            // } else {
-            //   FURI_LOG_D("TuningFork", "FuriMessageQueue: event timeout");
         }
 
-        view_port_update(view_port);
         furi_mutex_release(tuning_fork_state->mutex);
+        view_port_update(view_port);
     }
 
     view_port_enabled_set(view_port, false);
