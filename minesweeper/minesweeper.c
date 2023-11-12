@@ -6,7 +6,8 @@
 
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>
-#include <m-string.h>
+
+#include <dolphin/dolphin.h>
 
 #include "assets.h"
 
@@ -70,6 +71,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     furi_assert(ctx);
     const Minesweeper* minesweeper_state = ctx;
     furi_mutex_acquire(minesweeper_state->mutex, FuriWaitForever);
+
     FuriString* mineStr;
     FuriString* timeStr;
     mineStr = furi_string_alloc();
@@ -199,7 +201,6 @@ static void place_flag(Minesweeper* minesweeper_state) {
 
 static bool game_lost(Minesweeper* minesweeper_state) {
     // returns true if the player wants to restart, otherwise false
-
     DialogMessage* message = dialog_message_alloc();
 
     dialog_message_set_header(message, "Game Over", 64, 3, AlignCenter, AlignTop);
@@ -236,6 +237,9 @@ static bool game_won(Minesweeper* minesweeper_state) {
     dialog_message_set_text(
         message, furi_string_get_cstr(tempStr), 64, 32, AlignCenter, AlignCenter);
     dialog_message_set_buttons(message, NULL, "Play again", NULL);
+
+    // Call dolphin deed when we win the game
+    dolphin_deed(DolphinDeedPluginGameWin);
 
     DialogMessageButton choice = dialog_message_show(minesweeper_state->dialogs, message);
     dialog_message_free(message);
@@ -350,7 +354,6 @@ static void minesweeper_state_init(Minesweeper* const minesweeper_state) {
 
 int32_t minesweeper_app(void* p) {
     UNUSED(p);
-
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
     Minesweeper* minesweeper_state = malloc(sizeof(Minesweeper));
@@ -391,6 +394,9 @@ int32_t minesweeper_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+    // Call dolphin deed on game start
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     PluginEvent event;
     for(bool processing = true; processing;) {
