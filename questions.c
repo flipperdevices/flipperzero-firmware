@@ -41,8 +41,7 @@ QuestionApp* q_app_alloc() {
 
     app->q_main_view = q_main_view_alloc();
     view_set_previous_callback(app->q_main_view->view, q_go_to_menu);
-    view_dispatcher_add_view(
-        app->view_dispatcher, QuestionViewMain, app->q_main_view->view);
+    view_dispatcher_add_view(app->view_dispatcher, QuestionViewMain, app->q_main_view->view);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, QuestionViewSubmenu);
 
