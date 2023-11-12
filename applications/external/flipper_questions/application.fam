@@ -3,20 +3,17 @@ App(
     name="Questions",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="questions_app",
-    cdefines=["APP_QUESTIONS"],
     stack_size=1 * 1024,
-    requires=[
-        "gui",
-    ],
     fap_icon="icon.png",
     fap_category="Games",
-    fap_version=(1,0),
-    fap_author="@nikilark",
-    fap_description="Questions to better know each other",
     fap_extbuild=(
         ExtFile(
             path="${FAP_SRC_DIR}/qdb.h",
             command="python3 ${FAP_SRC_DIR}/generate_questions.py ${FAP_SRC_DIR}",
         ),
     ),
+    fap_author="nikilark",
+    fap_weburl="https://github.com/nikilark/flipper_questions",
+    fap_version=(1,0),
+    fap_description="Questions to better know each other",
 )
