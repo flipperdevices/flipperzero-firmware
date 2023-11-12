@@ -2,9 +2,8 @@
 
 Ported Nested attacks from Proxmark3 (Iceman fork)
 
-## Download
-
-[![FlipC.org](https://flipc.org/AloneLiberty/FlipperNested/badge?branch=dev)](https://flipc.org/AloneLiberty/FlipperNested?branch=dev)
+This is not original Repo of this app! Please follow this link to find latest original source and support the author!
+[Flipper (Mifare) Nested (by AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 
 ## Currently supported attacks
 
@@ -14,7 +13,7 @@ Ported Nested attacks from Proxmark3 (Iceman fork)
 
 ## Warning
 
-App is still in early development, so there may be bugs. Your Flipper Zero may randomly crash/froze. Please create issue if you find any bugs (one bug = one issue).
+App is still in early development, so there may be bugs. Your Flipper Zero may randomly crash/froze. Please create issue if you find any bugs (one bug = one issue). In original repo! - https://github.com/AloneLiberty/FlipperNested
 
 ## Disclaimer
 
@@ -36,4 +35,4 @@ For frequently asked questions, please refer to the FAQ: [EN](https://github.com
 
 ## Contacts
 
-Telegram: [@libertydev](https://t.me/libertydev)
+Find here: https://github.com/AloneLiberty/FlipperNested
