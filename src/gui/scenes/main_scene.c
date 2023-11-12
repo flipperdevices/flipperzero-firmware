@@ -4,13 +4,14 @@
 
 #include "main_scene.h"
 #include "scenes.h"
-#include "../game_decoder.h"
 #include "matagotchi_icons.h"
+#include "../game_decoder.h"
 #include "../../flipper_structs.h"
 #include "../../constants.h"
 
 enum ButtonIndex {
     settings_button,
+    info_button,
     candy_button
 };
 
@@ -42,9 +43,17 @@ static void scene_main_refresh_view(ButtonPanel *button_panel, struct Applicatio
                           main_button_pressed_callback,
                           context);
     button_panel_add_item(button_panel,
-                          candy_button, // Index
+                          info_button, // Index
                           1, 0, // Location in the matrix declared above (x, y)
                           102, 6, // Coordinates where to draw the icon (x, y)
+                          &I_info_icon_20x20, // Icon
+                          &I_info_icon_hover_20x20, // Icon when cursor over it
+                          main_button_pressed_callback,
+                          context);
+    button_panel_add_item(button_panel,
+                          candy_button, // Index
+                          0, 1, // Location in the matrix declared above (x, y)
+                          70, 38, // Coordinates where to draw the icon (x, y)
                           &I_candy_icon_20x20, // Icon
                           &I_candy_icon_hover_20x20, // Icon when cursor over it
                           main_button_pressed_callback,
@@ -85,6 +94,8 @@ bool scene_main_on_event(void *ctx, SceneManagerEvent event) {
             // Handle button pressed
             if (index == settings_button) {
                 scene_manager_next_scene(context->scene_manager, scene_settings);
+            } else if (index == info_button) {
+                scene_manager_next_scene(context->scene_manager, scene_status);
             } else if (index == candy_button) {
                 // TODO
             }

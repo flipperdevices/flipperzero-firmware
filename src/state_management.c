@@ -76,3 +76,15 @@ bool process_events(struct GameState *game_state, struct GameEvents game_events)
 
     return new_events;
 }
+
+void get_state_str(const struct GameState *game_state, char *str, size_t size) {
+    size_t copied = 0;
+    copied = snprintf(str, size,
+                      "Stage: %s\n",
+                      LIFE_STAGE_STRING[game_state->persistent.stage]);
+
+    // Append every individual feature
+    str += copied;
+    size -= copied;
+    copied = get_text_xp(game_state, str, size);
+}

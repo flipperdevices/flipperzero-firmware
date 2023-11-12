@@ -61,3 +61,9 @@ bool apply_xp(struct GameState *game_state, struct GameEvents game_events) {
     game_state->persistent.last_recorded_xp_update = game_events.xp_timestamp;
     return state_updated;
 }
+
+int get_text_xp(const struct GameState *game_state, char *str, size_t size) {
+    return snprintf(str, size, "XP: %lu/%lu",
+                    game_state->persistent.xp,
+                    MAX_XP_PER_STAGE[game_state->persistent.stage]);
+}
