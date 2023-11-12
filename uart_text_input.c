@@ -418,7 +418,7 @@ static void uart_text_input_handle_ok(
     }
 
     if(shift) {
-        if (0 == strcmp(model->header, mode_AT)){
+        if(0 == strcmp(model->header, mode_AT)) {
             selected = char_to_lowercase(selected);
         } else {
             selected = char_to_uppercase(selected);

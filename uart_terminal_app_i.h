@@ -18,7 +18,6 @@
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
 #define UART_CH (FuriHalUartIdUSART1)
 
-
 struct UART_TerminalApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
