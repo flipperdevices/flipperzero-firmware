@@ -728,13 +728,10 @@ int32_t roots_of_life_game_app(void* p) {
                     }
                 }
             }
-            // } else {
-            //     // Event timeout
-            //     FURI_LOG_D(TAG, "furi_message_queue: Event timeout");
         }
 
-        view_port_update(view_port);
         furi_mutex_release(state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);
