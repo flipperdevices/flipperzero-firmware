@@ -49,6 +49,11 @@ bool syncProcessResponse(UART_TerminalApp* app) {
     char tokenValue[18] = "";
     char* newGet = NULL;
 
+    /* Skip over any extraneous data */
+    while(nextToken[0] != '(' && nextToken[0] != '\0') {
+        ++nextToken;
+    }
+
     /* syncNextToken will set nextIndex to -1 after last token returned */
     while(syncNextToken(&nextToken, &tokenItem, tokenValue)) {
         switch(tokenItem) {
@@ -287,7 +292,29 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     UART_TerminalApp* app = context;
 
+    /* Append buf and len to log file */
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+    if(!storage_file_open(file, APP_DATA_PATH("gravity.log"), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        FURI_LOG_E("SYNC", "Failed to open gravity.log for writing");
+        storage_file_free(file);
+        furi_record_close(RECORD_STORAGE);
+    } else {
+        storage_file_write(file, "In callback with args:\n", strlen("In callback with args:\n"));
+        storage_file_write(file, (char*)buf, len);
+        storage_file_write(file, "\n\n", 2);
+        // storage_file_sync(file);
+        // storage_file_close(file);
+        // storage_file_free(file);
+        // furi_record_close(RECORD_STORAGE);
+    }
+
     if(len == 0 || buf == NULL) {
+        storage_file_write(file, "empty buffer\n", strlen("empty buffer\n"));
+        storage_file_sync(file);
+        storage_file_close(file);
+        storage_file_free(file);
+        furi_record_close(RECORD_STORAGE);
         return;
     }
 
@@ -304,7 +331,7 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
         copyLen = len;
     }
     /* Append buf to syncBuffer */
-    memcpy(app->syncBuffer + sizeof(char) * app->syncBufLen, buf, copyLen);
+    memcpy(app->syncBuffer + app->syncBufLen, buf, copyLen);
     app->syncBufLen += copyLen;
 
     /* Wait until all data has been received before processing anything, otherwise
@@ -312,18 +339,38 @@ void uart_terminal_sync_rx_data_cb(uint8_t* buf, size_t len, void* context) {
        issued by the sync process
     */
 
-    /* Sync is complete when a newline is encountered */
-    if(buf[len - 1] == '\n') {
-        app->syncComplete = true;
-        /* Process sync elements */
-        if(!syncProcessResponse(app)) {
-            // TODO: Display modal dialogue reporting failure
-        }
-        memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
-        app->syncBufLen = 0;
-        /* De-register the sync callback */
-        uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
+    /* Sync is complete when a command prompt is encountered (and it's
+       not at the beginning of the response) */
+    uint16_t promptIdx = 1;
+    for(; promptIdx < len && buf[promptIdx] != '>'; ++promptIdx) {
     }
+    if(promptIdx < len) {
+        /* If app->syncBuffer contains 'z' (for "Unrecognized command") call
+           sync a second time */
+        uint16_t zIdx = 0;
+        for(; zIdx < app->syncBufLen && app->syncBuffer[zIdx] != 'z'; ++zIdx) {
+        }
+        if(zIdx < app->syncBufLen) {
+            memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+            app->syncBufLen = 0;
+            uart_terminal_uart_tx((uint8_t*)"sync\n", 5);
+        } else {
+            app->syncComplete = true;
+            /* Process sync elements */
+            if(!syncProcessResponse(app)) {
+                // TODO: Display modal dialogue reporting failure
+            }
+            memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+            app->syncBufLen = 0;
+            /* De-register the sync callback */
+            uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
+        }
+    }
+
+    storage_file_sync(file);
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
 }
 
 /* Free options labels that have been modified by Sync to replace the "Get" option label */
@@ -351,17 +398,22 @@ void syncCleanup() {
 }
 
 void do_sync(UART_TerminalApp* app) {
-    if(!app->syncComplete) {
-        /* Initialise sync buffer */
-        memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
-        app->syncBufLen = 0;
-        /* Register callback to receive data */
-        uart_terminal_uart_set_handle_rx_data_cb(app->uart, uart_terminal_sync_rx_data_cb);
-        /* Execute Sync */
-        uart_terminal_uart_tx((uint8_t*)"sync\n", 5);
-        //char purgeString[] = "(0:2)(1:8)(2:32)(3:20)(4:1)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:11)(12:-95)(13:90)\n";
-        //char purgeString[] = "(5:40:91:51:BB:AC:7D)\n";
-        //uint8_t *purgeBytes = (uint8_t *)purgeString;
-        //uart_terminal_sync_rx_data_cb(purgeBytes, strlen(purgeString), app);
-    }
+    //    if (!app->syncComplete) {
+    /* Initialise sync buffer */
+    memset(app->syncBuffer, '\0', SYNC_BUFFER_SIZE);
+    app->syncBufLen = 0;
+    /* Init */
+    uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
+    uart_terminal_uart_tx((uint8_t*)"\n", 1);
+
+    /* Register callback to receive data */
+    uart_terminal_uart_set_handle_rx_data_cb(app->uart, uart_terminal_sync_rx_data_cb);
+    /* Execute Sync */
+    uart_terminal_uart_tx((uint8_t*)"sync\n", 5);
+
+    // perhaps start a timer here of 1 or 2 seconds. If syncBuffer contains "Unrecognized" then sync again
+
+    //char purgeString[] = "(0:2)(1:8)(2:32)(3:20)(4:1)(5:40:91:51:BB:AC:7D)(6:5)(7:1)(8:0.000000)(9:0)(10:0)(11:11)(12:-95)(13:90)\n";
+    //uart_terminal_sync_rx_data_cb((uint8_t *)purgeString, strlen(purgeString), app);
+    //    }
 }

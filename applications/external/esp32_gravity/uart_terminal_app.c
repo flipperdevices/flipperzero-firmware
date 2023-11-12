@@ -16,7 +16,7 @@ bool mac_string_to_bytes(char* strMac, uint8_t* bMac) {
     char* pStrMac = strMac;
     /* Use strtol to get the next number in the string and append to bMac */
     for(int i = 0; i < nBytes; ++i, ++pStrMac) { /* ++pStrMac will skip the bounding ':' and */
-        bMac[i] = strtol(pStrMac, &pStrMac, 10); /*  move to the first digit of the next byte */
+        bMac[i] = strtol(pStrMac, &pStrMac, 16); /*  move to the first digit of the next byte */
     }
     return true;
 }

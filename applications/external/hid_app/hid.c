@@ -10,6 +10,7 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexKeyboard,
     HidSubmenuIndexNumpad,
     HidSubmenuIndexMedia,
+    HidSubmenuIndexMovie,
     HidSubmenuIndexTikShorts,
     HidSubmenuIndexMouse,
     HidSubmenuIndexMouseClicker,
@@ -37,6 +38,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexMedia) {
         app->view_id = HidViewMedia;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMedia);
+    } else if(index == HidSubmenuIndexMovie) {
+        app->view_id = HidViewMovie;
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMovie);
     } else if(index == HidSubmenuIndexMouse) {
         app->view_id = HidViewMouse;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouse);
@@ -70,6 +74,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_keyboard_set_connected_status(hid->hid_keyboard, connected);
     hid_numpad_set_connected_status(hid->hid_numpad, connected);
     hid_media_set_connected_status(hid->hid_media, connected);
+    hid_movie_set_connected_status(hid->hid_movie, connected);
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
     hid_mouse_clicker_set_connected_status(hid->hid_mouse_clicker, connected);
     hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
@@ -132,6 +137,8 @@ Hid* hid_alloc(HidTransport transport) {
         app->device_type_submenu, "Numpad", HidSubmenuIndexNumpad, hid_submenu_callback, app);
     submenu_add_item(
         app->device_type_submenu, "Media", HidSubmenuIndexMedia, hid_submenu_callback, app);
+    submenu_add_item(
+        app->device_type_submenu, "Movie", HidSubmenuIndexMovie, hid_submenu_callback, app);
     submenu_add_item(
         app->device_type_submenu, "Mouse", HidSubmenuIndexMouse, hid_submenu_callback, app);
     if(app->transport == HidTransportBle) {
@@ -202,6 +209,12 @@ Hid* hid_app_alloc_view(void* context) {
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMedia, hid_media_get_view(app->hid_media));
 
+    // Movie view
+    app->hid_movie = hid_movie_alloc(app);
+    view_set_previous_callback(hid_movie_get_view(app->hid_movie), hid_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, HidViewMovie, hid_movie_get_view(app->hid_movie));
+
     // TikTok / YT Shorts view
     app->hid_tikshorts = hid_tikshorts_alloc(app);
     view_set_previous_callback(hid_tikshorts_get_view(app->hid_tikshorts), hid_exit_confirm_view);
@@ -262,6 +275,8 @@ void hid_free(Hid* app) {
     hid_numpad_free(app->hid_numpad);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMedia);
     hid_media_free(app->hid_media);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewMovie);
+    hid_movie_free(app->hid_movie);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouse);
     hid_mouse_free(app->hid_mouse);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouseClicker);
@@ -293,7 +308,7 @@ void hid_hal_keyboard_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_press(event);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -304,7 +319,7 @@ void hid_hal_keyboard_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release(event);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -315,7 +330,7 @@ void hid_hal_keyboard_release_all(Hid* instance) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release_all();
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -326,7 +341,7 @@ void hid_hal_consumer_key_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_consumer_key_press(event);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -337,7 +352,7 @@ void hid_hal_consumer_key_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_consumer_key_release(event);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -348,7 +363,7 @@ void hid_hal_consumer_key_release_all(Hid* instance) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release_all();
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -359,7 +374,7 @@ void hid_hal_mouse_move(Hid* instance, int8_t dx, int8_t dy) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_move(dx, dy);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -370,7 +385,7 @@ void hid_hal_mouse_scroll(Hid* instance, int8_t delta) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_scroll(delta);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -381,7 +396,7 @@ void hid_hal_mouse_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_press(event);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -392,7 +407,7 @@ void hid_hal_mouse_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_release(event);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -404,7 +419,7 @@ void hid_hal_mouse_release_all(Hid* instance) {
         furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
         furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
     } else {
-        furi_crash();
+        furi_crash(NULL);
     }
 }
 
@@ -449,7 +464,9 @@ int32_t hid_ble_app(void* p) {
 
     furi_record_close(RECORD_STORAGE);
 
-    furi_check(bt_set_profile(app->bt, BtProfileHidKeyboard));
+    if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
+        FURI_LOG_E(TAG, "Failed to switch to HID profile");
+    }
 
     furi_hal_bt_start_advertising();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
@@ -465,7 +482,9 @@ int32_t hid_ble_app(void* p) {
 
     bt_keys_storage_set_default_path(app->bt);
 
-    furi_check(bt_set_profile(app->bt, BtProfileSerial));
+    if(!bt_set_profile(app->bt, BtProfileSerial)) {
+        FURI_LOG_E(TAG, "Failed to switch to Serial profile");
+    }
 
     hid_free(app);
 
