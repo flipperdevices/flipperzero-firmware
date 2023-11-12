@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include <jetpack_game_icons.h>
+#include <jetpack_joyride_icons.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/icon_animation.h>
@@ -17,8 +17,9 @@
 
 #include "includes/game_state.h"
 
-#define TAG "Jetpack Game"
-#define SAVING_FILENAME APP_DATA_PATH("jetpack.save")
+#define TAG "Jetpack Joyride"
+#define SAVING_DIRECTORY "/ext/apps/Games"
+#define SAVING_FILENAME SAVING_DIRECTORY "/jetpack.save"
 static GameState* global_state;
 
 typedef enum {
@@ -40,7 +41,6 @@ static SaveGame save_game;
 
 static bool storage_game_state_load() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_migrate(storage, EXT_PATH("apps/Games/jetpack.save"), SAVING_FILENAME);
     File* file = storage_file_alloc(storage);
 
     uint16_t bytes_readed = 0;
@@ -54,6 +54,12 @@ static bool storage_game_state_load() {
 
 static void storage_game_state_save() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
+        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
+            return;
+        }
+    }
 
     File* file = storage_file_alloc(storage);
     if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
@@ -354,8 +360,8 @@ int32_t jetpack_game_app(void* p) {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(game_state->mutex);
+        view_port_update(view_port);
     }
 
     furi_timer_free(timer);
