@@ -55,6 +55,9 @@ void nfc_magic_worker_start(
     furi_assert(magic_dev);
     furi_assert(dev_data);
 
+    furi_hal_nfc_deinit();
+    furi_hal_nfc_init();
+
     nfc_magic_worker->callback = callback;
     nfc_magic_worker->context = context;
     nfc_magic_worker->magic_dev = magic_dev;
