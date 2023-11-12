@@ -13,7 +13,6 @@
 #define STATE_FILE_VERSION 2
 #define TAMA_SAVE_PATH EXT_PATH("tama_p1/save.bin")
 
-
 typedef struct {
     FuriThread* thread;
     hal_t hal;
