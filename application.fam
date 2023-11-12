@@ -8,7 +8,7 @@ App(
         "dialogs",
     ],
     stack_size=2 * 1024,
-    fap_icon="icons/hex_10px.png",
+    fap_icon="icons/hex_10px.bmp",
     fap_icon_assets="icons",
     fap_category="Tools",
 )
