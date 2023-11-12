@@ -8,7 +8,9 @@ This application is still under initial development
 
 # TODO
 
-* Add ability to delete the state in settings
-* Add about page in settings
-* Add hp feature
+* Add hp feature (hungriness)
 * Add animations for stage up
+* Add sound
+* Add vibration
+* Add sickness feature
+* Add happyness feature
