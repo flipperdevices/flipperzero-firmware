@@ -72,6 +72,7 @@ void protoview_rx_callback(bool level, uint32_t duration, void* context) {
 /* Setup the CC1101 to start receiving using a background worker. */
 uint32_t radio_rx(ProtoViewApp* app) {
     furi_assert(app);
+
     if(!subghz_devices_is_frequency_valid(app->radio_device, app->frequency)) {
         furi_crash(TAG " Incorrect RX frequency.");
     }
@@ -84,6 +85,7 @@ uint32_t radio_rx(ProtoViewApp* app) {
 
     subghz_devices_flush_rx(app->radio_device);
     subghz_devices_set_rx(app->radio_device);
+
     if(!app->txrx->debug_timer_sampling) {
         subghz_devices_start_async_rx(app->radio_device, protoview_rx_callback, NULL);
     } else {

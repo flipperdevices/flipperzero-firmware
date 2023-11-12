@@ -176,6 +176,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     subghz_devices_reset(app->radio_device);
     subghz_devices_idle(app->radio_device);
+
     app->running = 1;
 
     return app;
