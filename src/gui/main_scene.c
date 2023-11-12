@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <gui/modules/button_panel.h>
+#include "custom_modules/button_panel.h"
 #include <gui/view_dispatcher.h>
 
 #include "main_scene.h"
@@ -22,6 +22,8 @@ static void main_button_pressed_callback(void *ctx, uint32_t index) {
 }
 
 static void scene_main_refresh_view(ButtonPanel *button_panel, struct ApplicationContext *context) {
+    uint16_t x, y;
+    button_panel_get_selection(button_panel, &x, &y);
     button_panel_reset(button_panel);
 
     // Setting up the layout of the view
@@ -47,6 +49,8 @@ static void scene_main_refresh_view(ButtonPanel *button_panel, struct Applicatio
                           &I_candy_icon_hover_20x20, // Icon when cursor over it
                           main_button_pressed_callback,
                           context);
+
+    button_panel_set_selection(button_panel, x, y);
 }
 
 void scene_main_on_enter(void *ctx) {

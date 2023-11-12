@@ -4,7 +4,7 @@
 #include <gui/view.h>
 
 #include <gui/modules/loading.h>
-#include <gui/modules/button_panel.h>
+#include "gui/custom_modules/button_panel.h"
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/text_box.h>

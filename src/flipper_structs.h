@@ -5,7 +5,7 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/loading.h>
-#include <gui/modules/button_panel.h>
+#include "gui/custom_modules/button_panel.h" // Custom version of this module
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/text_box.h>
