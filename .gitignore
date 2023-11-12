@@ -50,8 +50,3 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-
-# uFBT
-.vscode
-.clang-format
-dist/
