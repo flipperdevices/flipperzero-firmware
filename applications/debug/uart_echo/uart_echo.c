@@ -1,12 +1,13 @@
 #include <furi.h>
+#include <furi_hal.h>
+
 #include <gui/gui.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
 #include <gui/elements.h>
-#include <furi_hal_uart.h>
-#include <furi_hal_console.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
+
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 #define LINES_ON_SCREEN 6
 #define COLUMNS_ON_SCREEN 21
@@ -22,6 +23,7 @@ typedef struct {
     View* view;
     FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
+    FuriHalSerialHandle* serial_handle;
 } UartEchoApp;
 
 typedef struct {
@@ -159,7 +161,7 @@ static int32_t uart_echo_worker(void* context) {
                 uint8_t data[64];
                 length = furi_stream_buffer_receive(app->rx_stream, data, 64, 0);
                 if(length > 0) {
-                    furi_hal_uart_tx(FuriHalUartIdUSART1, data, length);
+                    furi_hal_serial_tx(app->serial_handle, data, length);
                     with_view_model(
                         app->view,
                         UartDumpModel * model,
@@ -221,9 +223,10 @@ static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, baudrate);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalUartIdUSART1);
+    furi_check(app->serial_handle);
+    furi_hal_serial_init(app->serial_handle, baudrate);
+    furi_hal_serial_set_irq_cb(app->serial_handle, uart_echo_on_irq_cb, app);
 
     return app;
 }
@@ -231,11 +234,12 @@ static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
 static void uart_echo_app_free(UartEchoApp* app) {
     furi_assert(app);
 
-    furi_hal_console_enable(); // this will also clear IRQ callback so thread is no longer referenced
-
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
+
+    furi_hal_serial_deinit(app->serial_handle);
+    furi_hal_serial_control_release(app->serial_handle);
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);

@@ -58,7 +58,7 @@ When not using the API, these peripherals MUST be enabled by the user code and t
 | SPI2          | --                    |
 | I2C1          | `furi_hal_i2c.h`      |
 | I2C3          | --                    |
-| USART1        | `furi_hal_uart.h`     |
+| USART1        | `furi_hal_serial.h`     |
 | LPUART1       | --                    |
 | USB           | `furi_hal_usb.h`      |
 
