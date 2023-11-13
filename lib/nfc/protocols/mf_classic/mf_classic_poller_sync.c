@@ -1,3 +1,4 @@
+#include "mf_classic_poller_sync.h"
 #include "mf_classic_poller_i.h"
 
 #include <nfc/nfc_poller.h>
@@ -220,7 +221,7 @@ static MfClassicError mf_classic_poller_cmd_execute(Nfc* nfc, MfClassicPollerCon
     return poller_ctx->error;
 }
 
-MfClassicError mf_classic_poller_collect_nt(
+MfClassicError mf_classic_poller_sync_collect_nt(
     Nfc* nfc,
     uint8_t block_num,
     MfClassicKeyType key_type,
@@ -244,7 +245,7 @@ MfClassicError mf_classic_poller_collect_nt(
     return error;
 }
 
-MfClassicError mf_classic_poller_auth(
+MfClassicError mf_classic_poller_sync_auth(
     Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
@@ -271,7 +272,7 @@ MfClassicError mf_classic_poller_auth(
     return error;
 }
 
-MfClassicError mf_classic_poller_read_block(
+MfClassicError mf_classic_poller_sync_read_block(
     Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
@@ -297,7 +298,7 @@ MfClassicError mf_classic_poller_read_block(
     return error;
 }
 
-MfClassicError mf_classic_poller_write_block(
+MfClassicError mf_classic_poller_sync_write_block(
     Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
@@ -320,7 +321,7 @@ MfClassicError mf_classic_poller_write_block(
     return error;
 }
 
-MfClassicError mf_classic_poller_read_value(
+MfClassicError mf_classic_poller_sync_read_value(
     Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
@@ -346,7 +347,7 @@ MfClassicError mf_classic_poller_read_value(
     return error;
 }
 
-MfClassicError mf_classic_poller_change_value(
+MfClassicError mf_classic_poller_sync_change_value(
     Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
@@ -458,7 +459,7 @@ NfcCommand mf_classic_poller_read_callback(NfcGenericEvent event, void* context)
 }
 
 MfClassicError
-    mf_classic_poller_read(Nfc* nfc, const MfClassicDeviceKeys* keys, MfClassicData* data) {
+    mf_classic_poller_sync_read(Nfc* nfc, const MfClassicDeviceKeys* keys, MfClassicData* data) {
     furi_assert(nfc);
     furi_assert(keys);
     furi_assert(data);
@@ -495,7 +496,7 @@ MfClassicError
     return error;
 }
 
-MfClassicError mf_classic_poller_detect_type(Nfc* nfc, MfClassicType* type) {
+MfClassicError mf_classic_poller_sync_detect_type(Nfc* nfc, MfClassicType* type) {
     furi_assert(nfc);
     furi_assert(type);
 
@@ -509,7 +510,7 @@ MfClassicError mf_classic_poller_detect_type(Nfc* nfc, MfClassicType* type) {
 
     size_t i = 0;
     for(i = 0; i < COUNT_OF(mf_classic_verify_block); i++) {
-        error = mf_classic_poller_collect_nt(
+        error = mf_classic_poller_sync_collect_nt(
             nfc, mf_classic_verify_block[MfClassicTypeNum - i - 1], MfClassicKeyTypeA, NULL);
         if(error == MfClassicErrorNone) {
             *type = MfClassicTypeNum - i - 1;

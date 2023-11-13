@@ -344,7 +344,7 @@ static void mf_classic_reader() {
     MfClassicBlock block = {};
     MfClassicKey key = {.data = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
 
-    mf_classic_poller_read_block(poller, 0, &key, MfClassicKeyTypeA, &block);
+    mf_classic_poller_sync_read_block(poller, 0, &key, MfClassicKeyTypeA, &block);
 
     nfc_listener_stop(mfc_listener);
     nfc_listener_free(mfc_listener);
@@ -372,8 +372,8 @@ static void mf_classic_write() {
     furi_hal_random_fill_buf(block_write.data, sizeof(MfClassicBlock));
     MfClassicKey key = {.data = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
 
-    mf_classic_poller_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
-    mf_classic_poller_read_block(poller, 1, &key, MfClassicKeyTypeA, &block_read);
+    mf_classic_poller_sync_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
+    mf_classic_poller_sync_read_block(poller, 1, &key, MfClassicKeyTypeA, &block_read);
 
     nfc_listener_stop(mfc_listener);
     nfc_listener_free(mfc_listener);
@@ -402,16 +402,16 @@ static void mf_classic_value_block() {
     mf_classic_value_to_block(value, 1, &block_write);
 
     MfClassicError error = MfClassicErrorNone;
-    error = mf_classic_poller_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
+    error = mf_classic_poller_sync_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
     mu_assert(error == MfClassicErrorNone, "Write failed");
 
     int32_t data = 200;
     int32_t new_value = 0;
-    error = mf_classic_poller_change_value(poller, 1, &key, MfClassicKeyTypeA, data, &new_value);
+    error = mf_classic_poller_sync_change_value(poller, 1, &key, MfClassicKeyTypeA, data, &new_value);
     mu_assert(error == MfClassicErrorNone, "Value increment failed");
     mu_assert(new_value == value + data, "Value not match");
 
-    error = mf_classic_poller_change_value(poller, 1, &key, MfClassicKeyTypeA, -data, &new_value);
+    error = mf_classic_poller_sync_change_value(poller, 1, &key, MfClassicKeyTypeA, -data, &new_value);
     mu_assert(error == MfClassicErrorNone, "Value decrement failed");
     mu_assert(new_value == value, "Value not match");
 
