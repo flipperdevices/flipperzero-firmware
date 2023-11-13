@@ -470,7 +470,7 @@ int32_t tetris_game_app() {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     furi_mutex_free(tetris_state->mutex);
-    furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal)
+    furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     free(newPiece);
     free(tetris_state);
 
