@@ -446,7 +446,7 @@ static bool input_callback(InputEvent* input, void* _ctx) {
         with_view_model(
             state->main_view, State * *model, { (*model)->lock_warning = true; }, true);
         if(state->lock_count == 0) {
-            furi_timer_start(state->lock_timer, pdMS_TO_TICKS(1000));
+            furi_timer_start(state->lock_timer, 1000);
         }
         if(input->type == InputTypeShort && input->key == InputKeyBack) {
             state->lock_count++;

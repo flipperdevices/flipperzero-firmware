@@ -246,7 +246,7 @@ static void vb_migrate_scene_from_app_set_state(VbMigrate* inst, FromAppState st
             // Save the tag
             inst->next_id = vb_migrate_get_next_id(inst, inst->text_store, inst->next_id, false);
             FuriString* save_path = furi_string_alloc_printf(
-                VB_MIGRATE_CAPTURE_FORMAT, inst->next_id, NFC_APP_FILENAME_EXTENSION);
+                VB_MIGRATE_CAPTURE_FORMAT, inst->next_id, NFC_APP_EXTENSION);
             if(vb_migrate_save_nfc(inst, inst->text_store, furi_string_get_cstr(save_path))) {
                 view_dispatcher_send_custom_event(
                     inst->view_dispatcher, FromAppEventTypeCaptureSaveSuccess);

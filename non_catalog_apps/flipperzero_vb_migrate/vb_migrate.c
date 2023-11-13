@@ -103,7 +103,7 @@ bool vb_migrate_delete(VbMigrate* inst, const char* dev_name, bool whole_vb) {
             while(storage_dir_read(dir_handle, &file_info, name, sizeof(name))) {
                 // Files that is .nfc, but is not template
                 if(!(file_info.flags & FSF_DIRECTORY) &&
-                   strstr(name, NFC_APP_FILENAME_EXTENSION) &&
+                   strstr(name, NFC_APP_EXTENSION) &&
                    !strstr(name, VB_MIGRATE_TEMPLATE_NAME)) {
                     furi_string_printf(file_path, "%s/%s", furi_string_get_cstr(dir_path), name);
                     deleted =
@@ -132,7 +132,7 @@ int vb_migrate_count_captured_mons(VbMigrate* inst, const char* dev_name) {
         char name[256];
         while(storage_dir_read(dir_handle, &file_info, name, sizeof(name))) {
             // Files that is .nfc, but is not template
-            if(!(file_info.flags & FSF_DIRECTORY) && strstr(name, NFC_APP_FILENAME_EXTENSION) &&
+            if(!(file_info.flags & FSF_DIRECTORY) && strstr(name, NFC_APP_EXTENSION) &&
                !strstr(name, VB_MIGRATE_TEMPLATE_NAME))
                 ++count;
         }
@@ -154,7 +154,7 @@ int vb_migrate_get_next_id(VbMigrate* inst, const char* dev_name, int i, bool is
             "%s/" VB_MIGRATE_CAPTURE_FORMAT,
             furi_string_get_cstr(dir_path),
             i,
-            NFC_APP_FILENAME_EXTENSION);
+            NFC_APP_EXTENSION);
         bool exit_cond =
             storage_common_stat(inst->storage, furi_string_get_cstr(file_path), NULL) ==
             FSE_NOT_EXIST;
@@ -169,15 +169,14 @@ int vb_migrate_get_next_id(VbMigrate* inst, const char* dev_name, int i, bool is
 }
 
 void vb_migrate_show_loading_popup(VbMigrate* inst, bool show) {
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
 
     if(show) {
         // Raise timer priority so that animations can play
-        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
         view_dispatcher_switch_to_view(inst->view_dispatcher, VbMigrateViewLoading);
     } else {
         // Restore default timer priority
-        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
 }
 
