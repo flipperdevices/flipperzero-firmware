@@ -190,8 +190,7 @@ static NfcCommand mf_classic_poller_cmd_callback(NfcGenericEvent event, void* co
 
     MfClassicPollerContext* poller_context = context;
     Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
-    Iso14443_3aPoller* iso14443_3a_poller = event.instance;
-    MfClassicPoller* mfc_poller = mf_classic_poller_alloc(iso14443_3a_poller);
+    MfClassicPoller* mfc_poller = event.instance;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         poller_context->error = mf_classic_poller_cmd_handlers[poller_context->cmd_type](
@@ -202,8 +201,6 @@ static NfcCommand mf_classic_poller_cmd_callback(NfcGenericEvent event, void* co
 
     furi_thread_flags_set(poller_context->thread_id, MF_CLASSIC_POLLER_COMPLETE_EVENT);
 
-    mf_classic_poller_free(mfc_poller);
-
     return NfcCommandStop;
 }
 
@@ -212,8 +209,8 @@ static MfClassicError mf_classic_poller_cmd_execute(Nfc* nfc, MfClassicPollerCon
 
     poller_ctx->thread_id = furi_thread_get_current_id();
 
-    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolIso14443_3a);
-    nfc_poller_start(poller, mf_classic_poller_cmd_callback, poller_ctx);
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolMfClassic);
+    nfc_poller_start_custom(poller, mf_classic_poller_cmd_callback, poller_ctx);
     furi_thread_flags_wait(MF_CLASSIC_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     furi_thread_flags_clear(MF_CLASSIC_POLLER_COMPLETE_EVENT);
 
