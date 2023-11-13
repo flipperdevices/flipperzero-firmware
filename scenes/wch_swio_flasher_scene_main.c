@@ -59,6 +59,12 @@ void wch_swio_flasher_scene_main_on_enter(void* context) {
         WchSwioFlasherSceneWiring,
         wch_swio_flasher_scene_main_submenu_callback,
         app);
+    submenu_add_item(
+        submenu,
+        "About",
+        WchSwioFlasherSceneAbout,
+        wch_swio_flasher_scene_main_submenu_callback,
+        app);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(app->scene_manager, WchSwioFlasherSceneMain));
@@ -82,6 +88,9 @@ bool wch_swio_flasher_scene_main_on_event(void* context, SceneManagerEvent event
             consumed = true;
         } else if(event.event == WchSwioFlasherSceneWiring) {
             scene_manager_next_scene(app->scene_manager, WchSwioFlasherSceneWiring);
+            consumed = true;
+        } else if(event.event == WchSwioFlasherSceneAbout) {
+            scene_manager_next_scene(app->scene_manager, WchSwioFlasherSceneAbout);
             consumed = true;
         }
     }

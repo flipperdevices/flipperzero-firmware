@@ -29,30 +29,26 @@ SOFTWARE.
 #include "../wch_swio_flasher.h"
 #include "wch_swio_flasher_scene.h"
 
-void wch_swio_flasher_scene_wiring_on_enter(void* context) {
+void wch_swio_flasher_scene_about_on_enter(void* context) {
     WchSwioFlasherApp* app = context;
 
-    widget_add_icon_element(app->views.widget, 0, 0, &I_wiring_128x64);
+    widget_add_string_element(
+        app->views.widget, 63, 2, AlignCenter, AlignTop, FontPrimary, "WCH Flasher v1.0");
 
     widget_add_string_element(
-        app->views.widget, 118, 7, AlignCenter, AlignCenter, FontSecondary, "GND");
+        app->views.widget, 63, 24, AlignCenter, AlignCenter, FontSecondary, "author");
+    widget_add_string_element(
+        app->views.widget, 63, 33, AlignCenter, AlignCenter, FontPrimary, "github.com/sukvojte");
 
     widget_add_string_element(
-        app->views.widget, 92, 7, AlignCenter, AlignCenter, FontSecondary, "SWIO");
-
+        app->views.widget, 63, 48, AlignCenter, AlignCenter, FontSecondary, "with support by");
     widget_add_string_element(
-        app->views.widget, 62, 7, AlignCenter, AlignCenter, FontSecondary, "RST");
-
-    widget_add_string_element(
-        app->views.widget, 10, 7, AlignCenter, AlignCenter, FontSecondary, "3V3");
-
-    widget_add_string_element(
-        app->views.widget, 50, 31, AlignCenter, AlignCenter, FontSecondary, "1k resistor");
+        app->views.widget, 63, 58, AlignCenter, AlignCenter, FontSecondary, "github.com/ah01");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, WchSwioFlasherViewWidget);
 }
 
-bool wch_swio_flasher_scene_wiring_on_event(void* context, SceneManagerEvent event) {
+bool wch_swio_flasher_scene_about_on_event(void* context, SceneManagerEvent event) {
     WchSwioFlasherApp* app = context;
     UNUSED(app);
     bool consumed = false;
@@ -64,7 +60,7 @@ bool wch_swio_flasher_scene_wiring_on_event(void* context, SceneManagerEvent eve
     return consumed;
 }
 
-void wch_swio_flasher_scene_wiring_on_exit(void* context) {
+void wch_swio_flasher_scene_about_on_exit(void* context) {
     WchSwioFlasherApp* app = context;
     widget_reset(app->views.widget);
 }
