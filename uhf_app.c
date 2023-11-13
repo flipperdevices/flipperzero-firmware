@@ -182,15 +182,14 @@ void uhf_blink_stop(UHFApp* uhf_app) {
 
 void uhf_show_loading_popup(void* ctx, bool show) {
     UHFApp* uhf_app = ctx;
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
 
     if(show) {
         // Raise timer priority so that animations can play
-        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
         view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewLoading);
     } else {
         // Restore default timer priority
-        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
     }
 }
 
