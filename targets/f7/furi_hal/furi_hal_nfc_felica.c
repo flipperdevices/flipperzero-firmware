@@ -63,6 +63,11 @@ static FuriHalNfcError furi_hal_nfc_felica_listener_init(FuriHalSpiBusHandle* ha
 
     st25r3916_write_reg(
         handle,
+        ST25R3916_REG_PASSIVE_TARGET,
+        ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a | ST25R3916_REG_PASSIVE_TARGET_fdel_2);
+
+    st25r3916_write_reg(
+        handle,
         ST25R3916_REG_OP_CONTROL,
         ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
             ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
@@ -101,7 +106,7 @@ static FuriHalNfcError furi_hal_nfc_felica_listener_init(FuriHalSpiBusHandle* ha
         handle,
         ST25R3916_REG_CORR_CONF1,
         ST25R3916_REG_CORR_CONF1_corr_s6 | ST25R3916_REG_CORR_CONF1_corr_s4 |
-            ST25R3916_REG_CORR_CONF1_corr_s3);
+            ST25R3916_REG_CORR_CONF1_corr_s2);
 
     // Sleep mode disable, 424kHz mode off
     st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0x00);
