@@ -6,12 +6,12 @@ App(
     stack_size=1 * 1024,
     fap_icon="icon.png",
     fap_category="Games",
-    fap_extbuild=(
-        ExtFile(
-            path="${FAP_SRC_DIR}/qdb.h",
-            command="python3 ${FAP_SRC_DIR}/generate_questions.py ${FAP_SRC_DIR}",
-        ),
-    ),
+    # fap_extbuild=(
+    #     ExtFile(
+    #         path="${FAP_SRC_DIR}/qdb.h",
+    #         command="python3 ${FAP_SRC_DIR}/generate_questions.py ${FAP_SRC_DIR}",
+    #     ),
+    # ),
     fap_author="nikilark",
     fap_weburl="https://github.com/nikilark/flipper_questions",
     fap_version=(1,0),
