@@ -6,5 +6,6 @@ App(
     icon="A_Clock_14",
     stack_size=2 * 1024,
     fap_icon="clock.png",
+    resources="resources",
     fap_category="Tools",
 )

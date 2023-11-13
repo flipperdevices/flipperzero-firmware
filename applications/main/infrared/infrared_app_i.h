@@ -113,6 +113,7 @@ struct InfraredApp {
     DialogEx* dialog_ex; /**< Standard view for displaying dialogs. */
     ButtonMenu* button_menu; /**< Custom view for interacting with IR remotes. */
     Popup* popup; /**< Standard view for displaying messages. */
+    VariableItemList* variable_item_list;
 
     ViewStack* view_stack; /**< Standard view for displaying stacked interfaces. */
     InfraredDebugView* debug_view; /**< Custom view for displaying debug information. */
@@ -144,6 +145,7 @@ typedef enum {
     InfraredViewStack,
     InfraredViewDebugView,
     InfraredViewMove,
+    InfraredViewVariableItemList,
 } InfraredView;
 
 /**
