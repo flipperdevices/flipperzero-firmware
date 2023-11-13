@@ -1,3 +1,5 @@
+#pragma once
+
 #include <furi.h>
 #include <gui/gui.h>
 
@@ -11,7 +13,12 @@ typedef void (*TransitionCallback)(int from, int to, void*);
 typedef struct Scene Scene;
 typedef struct SceneManager SceneManager;
 
-Scene* scene_alloc(RenderCallback render_callback, TickCallback tick_callback, InputCallback input_callback, TransitionCallback transition_callback, void* context);
+Scene* scene_alloc(
+    RenderCallback render_callback,
+    TickCallback tick_callback,
+    InputCallback input_callback,
+    TransitionCallback transition_callback,
+    void* context);
 void scene_destroy(Scene* s);
 
 SceneManager* scene_manager_alloc_auto();

@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef FLIPPERZERO_FIRMWARE_TOOLS_H
 #define FLIPPERZERO_FIRMWARE_TOOLS_H
 
