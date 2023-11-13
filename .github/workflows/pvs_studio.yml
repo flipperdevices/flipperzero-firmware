@@ -10,6 +10,7 @@ env:
   TARGETS: f7
   DEFAULT_TARGET: f7
   FBT_TOOLCHAIN_PATH: /runner/_work
+  FBT_GIT_SUBMODULE_SHALLOW: 1
 
 jobs:
   analyse_c_cpp:
@@ -20,7 +21,7 @@ jobs:
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
