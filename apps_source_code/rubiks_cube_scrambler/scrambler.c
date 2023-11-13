@@ -22,11 +22,8 @@ struct GetScramble {
 struct GetScramble a; // Its object
 
 // Function prototypes to avoid bugs
-void scrambleReplace();
-void genScramble();
 void valid();
 int getRand(int upr, int lwr);
-char* printData();
 void writeToFile();
 
 // Main function
