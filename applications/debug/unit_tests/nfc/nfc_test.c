@@ -182,8 +182,8 @@ MU_TEST(iso14443_3a_reader) {
 
     Iso14443_3aData iso14443_3a_poller_data = {};
     mu_assert(
-        iso14443_3a_poller_read(poller, &iso14443_3a_poller_data) == Iso14443_3aErrorNone,
-        "iso14443_3a_poller_read() failed");
+        iso14443_3a_poller_sync_read(poller, &iso14443_3a_poller_data) == Iso14443_3aErrorNone,
+        "iso14443_3a_poller_sync_read() failed");
 
     nfc_listener_stop(iso3_listener);
     mu_assert(

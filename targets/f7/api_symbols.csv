@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,v,47.0,,
+Version,+,48.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -119,7 +119,7 @@ Header,+,lib/nfc/nfc_scanner.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h,,
 Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h,,
-Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_sync_api.h,,
+Header,+,lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_sync.h,,
 Header,+,lib/nfc/protocols/iso14443_3b/iso14443_3b.h,,
 Header,+,lib/nfc/protocols/iso14443_3b/iso14443_3b_poller.h,,
 Header,+,lib/nfc/protocols/iso14443_4a/iso14443_4a.h,,
@@ -1863,8 +1863,8 @@ Function,+,iso14443_3a_get_sak,uint8_t,const Iso14443_3aData*
 Function,+,iso14443_3a_get_uid,const uint8_t*,"const Iso14443_3aData*, size_t*"
 Function,+,iso14443_3a_is_equal,_Bool,"const Iso14443_3aData*, const Iso14443_3aData*"
 Function,+,iso14443_3a_load,_Bool,"Iso14443_3aData*, FlipperFormat*, uint32_t"
-Function,+,iso14443_3a_poller_read,Iso14443_3aError,"Nfc*, Iso14443_3aData*"
 Function,+,iso14443_3a_poller_send_standard_frame,Iso14443_3aError,"Iso14443_3aPoller*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,iso14443_3a_poller_sync_read,Iso14443_3aError,"Nfc*, Iso14443_3aData*"
 Function,+,iso14443_3a_poller_txrx,Iso14443_3aError,"Iso14443_3aPoller*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,+,iso14443_3a_reset,void,Iso14443_3aData*
 Function,+,iso14443_3a_save,_Bool,"const Iso14443_3aData*, FlipperFormat*"
