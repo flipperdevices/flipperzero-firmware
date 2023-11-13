@@ -4,7 +4,7 @@
 
 #include <nfc/nfc_device.h>
 #include <nfc/helpers/nfc_util.h>
-#include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
+#include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #define TAG "Plantain"
 

@@ -7,10 +7,10 @@
 #include <nfc/nfc_poller.h>
 #include <nfc/nfc_listener.h>
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
-#include <nfc/protocols/iso14443_3a/iso14443_3a_poller_sync_api.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a_poller_sync.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
-#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync_api.h>
-#include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
+#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync.h>
+#include <nfc/protocols/mf_classic/mf_classic_poller_sync.h>
 
 #include <nfc/helpers/nfc_dict.h>
 #include <nfc/nfc.h>
