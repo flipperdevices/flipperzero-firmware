@@ -26,6 +26,10 @@ extern "C" {
  */
 typedef struct NfcPoller NfcPoller;
 
+typedef NfcGenericEvent NfcGenericEventEx;
+
+typedef NfcGenericCallback NfcGenericCallbackEx;
+
 /**
  * @brief Allocate an NfcPoller instance.
  *
@@ -57,7 +61,17 @@ void nfc_poller_free(NfcPoller* instance);
  */
 void nfc_poller_start(NfcPoller* instance, NfcGenericCallback callback, void* context);
 
-void nfc_poller_start_custom(NfcPoller* instance, NfcGenericCallback callback, void* context);
+/**
+ * @brief Start an NfcPoller instance in extended mode.
+ *
+ * When nfc poller is started in custom mode, callback will be called with parent protocol events
+ * and protocol instance. This mode enables to make custom poller state machines.
+ *
+ * @param[in,out] instance pointer to the instance to be started.
+ * @param[in] callback pointer to a user-defined callback function which will receive events.
+ * @param[in] context pointer to a user-specific context (will be passed to the callback).
+ */
+void nfc_poller_start_ex(NfcPoller* instance, NfcGenericCallbackEx callback, void* context);
 
 /**
  * @brief Stop an NfcPoller instance.
