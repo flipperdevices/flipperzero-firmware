@@ -37,7 +37,7 @@ jobs:
         run: |
           source scripts/toolchain/fbtenv.sh
           rm -rf build/latest/resources/dolphin
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send build/latest/resources /ext
+          python3 scripts/storage.py -f send build/latest/resources /ext
 
       - name: 'Run units and validate results'
         id: run_units
