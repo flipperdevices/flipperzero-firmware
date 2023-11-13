@@ -75,3 +75,4 @@ RM*-*.zip
 RM*-*.txt
 RM*-*-*/
 RM-*.sh
+/%SystemDrive%
