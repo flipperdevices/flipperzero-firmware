@@ -1,7 +1,4 @@
 #include "hid_ptt.h"
-#include <furi.h>
-#include <furi_hal_bt_hid.h>
-#include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
 #include "../hid.h"
 
@@ -20,21 +17,21 @@ typedef struct {
     bool right_pressed;
     bool down_pressed;
     bool ok_pressed;
-    bool connected;
     bool back_pressed;
+    bool connected;
     HidTransport transport;
 } HidPttModel;
 
 static void hid_ptt_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
     canvas_draw_triangle(canvas, x, y, 5, 3, dir);
     if(dir == CanvasDirectionBottomToTop) {
-        canvas_draw_dot(canvas, x, y - 1);
+        canvas_draw_line(canvas, x, y + 6, x, y - 1);
     } else if(dir == CanvasDirectionTopToBottom) {
-        canvas_draw_dot(canvas, x, y + 1);
+        canvas_draw_line(canvas, x, y - 6, x, y + 1);
     } else if(dir == CanvasDirectionRightToLeft) {
-        canvas_draw_dot(canvas, x - 1, y);
+        canvas_draw_line(canvas, x + 6, y, x - 1, y);
     } else if(dir == CanvasDirectionLeftToRight) {
-        canvas_draw_dot(canvas, x + 1, y);
+        canvas_draw_line(canvas, x - 6, y, x + 1, y);
     }
 }
 
@@ -52,132 +49,203 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     }
 
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "PTT");
-    canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(canvas, 0, 12, AlignLeft, AlignTop, "Google Meet");
-    elements_multiline_text_aligned(canvas, 0, 22, AlignLeft, AlignTop, "Mac");
+    elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Ptt");
 
-    // Keypad circles
-    canvas_draw_icon(canvas, 58, 3, &I_OutCircles_70x51);
+    canvas_draw_icon(canvas, 68, 2, &I_Pin_back_arrow_10x8);
+    canvas_set_font(canvas, FontSecondary);
+    elements_multiline_text_aligned(canvas, 127, 3, AlignRight, AlignTop, "Hold to exit");
 
     // Up
+    canvas_draw_icon(canvas, 21, 24, &I_Button_18x18);
     if(model->up_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 68, 6, &I_S_UP_31x15);
-        canvas_set_bitmap_mode(canvas, 0);
+        elements_slightly_rounded_box(canvas, 24, 26, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 79, 9, &I_Volup_8x6);
+    hid_ptt_draw_arrow(canvas, 30, 30, CanvasDirectionBottomToTop);
     canvas_set_color(canvas, ColorBlack);
 
     // Down
+    canvas_draw_icon(canvas, 21, 45, &I_Button_18x18);
     if(model->down_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 68, 36, &I_S_DOWN_31x15);
-        canvas_set_bitmap_mode(canvas, 0);
+        elements_slightly_rounded_box(canvas, 24, 47, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 80, 41, &I_Voldwn_6x6);
+    hid_ptt_draw_arrow(canvas, 30, 55, CanvasDirectionTopToBottom);
     canvas_set_color(canvas, ColorBlack);
 
     // Left
+    canvas_draw_icon(canvas, 0, 45, &I_Button_18x18);
     if(model->left_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 61, 13, &I_S_LEFT_15x31);
-        canvas_set_bitmap_mode(canvas, 0);
+        elements_slightly_rounded_box(canvas, 3, 47, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    hid_ptt_draw_arrow(canvas, 65, 28, CanvasDirectionRightToLeft);
-    hid_ptt_draw_arrow(canvas, 70, 28, CanvasDirectionRightToLeft);
+    hid_ptt_draw_arrow(canvas, 7, 53, CanvasDirectionRightToLeft);
     canvas_set_color(canvas, ColorBlack);
 
     // Right
+    canvas_draw_icon(canvas, 42, 45, &I_Button_18x18);
     if(model->right_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 91, 13, &I_S_RIGHT_15x31);
-        canvas_set_bitmap_mode(canvas, 0);
+        elements_slightly_rounded_box(canvas, 45, 47, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    hid_ptt_draw_arrow(canvas, 96, 28, CanvasDirectionLeftToRight);
-    hid_ptt_draw_arrow(canvas, 101, 28, CanvasDirectionLeftToRight);
+    hid_ptt_draw_arrow(canvas, 53, 53, CanvasDirectionLeftToRight);
     canvas_set_color(canvas, ColorBlack);
 
     // Ok
+    canvas_draw_icon(canvas, 63, 25, &I_Space_65x18);
     if(model->ok_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 74, 19, &I_Pressed_Button_19x19);
-        canvas_set_bitmap_mode(canvas, 0);
+        elements_slightly_rounded_box(canvas, 66, 27, 60, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    hid_ptt_draw_arrow(canvas, 80, 28, CanvasDirectionLeftToRight);
-    canvas_draw_line(canvas, 84, 26, 84, 30);
-    canvas_draw_line(canvas, 86, 26, 86, 30);
+    canvas_draw_icon(canvas, 74, 29, &I_Ok_btn_9x9);
+    elements_multiline_text_aligned(canvas, 91, 36, AlignLeft, AlignBottom, "Space");
     canvas_set_color(canvas, ColorBlack);
 
-    // Exit
+    // Back
+    canvas_draw_icon(canvas, 63, 45, &I_Space_65x18);
     if(model->back_pressed) {
-        canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 107, 33, &I_Pressed_Button_19x19);
-        canvas_set_bitmap_mode(canvas, 0);
+        elements_slightly_rounded_box(canvas, 66, 47, 60, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 111, 38, &I_Pin_back_arrow_10x10);
+    canvas_draw_icon(canvas, 74, 49, &I_Pin_back_arrow_10x8);
+    elements_multiline_text_aligned(canvas, 91, 57, AlignLeft, AlignBottom, "Back");
+}
+
+static void hid_ptt_draw_vertical_callback(Canvas* canvas, void* context) {
+    furi_assert(context);
+    HidPttModel* model = context;
+
+    // Header
+    canvas_set_font(canvas, FontPrimary);
+    if(model->transport == HidTransportBle) {
+        if(model->connected) {
+            canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
+        } else {
+            canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
+        }
+
+        elements_multiline_text_aligned(canvas, 20, 3, AlignLeft, AlignTop, "Ptt");
+    } else {
+        elements_multiline_text_aligned(canvas, 12, 3, AlignLeft, AlignTop, "Ptt");
+    }
+
+    canvas_draw_icon(canvas, 2, 18, &I_Pin_back_arrow_10x8);
+    canvas_set_font(canvas, FontSecondary);
+    elements_multiline_text_aligned(canvas, 15, 19, AlignLeft, AlignTop, "Hold to exit");
+
+    const uint8_t x_2 = 23;
+    const uint8_t x_1 = 2;
+    const uint8_t x_3 = 44;
+
+    const uint8_t y_1 = 44;
+    const uint8_t y_2 = 65;
+
+    // Up
+    canvas_draw_icon(canvas, x_2, y_1, &I_Button_18x18);
+    if(model->up_pressed) {
+        elements_slightly_rounded_box(canvas, x_2 + 3, y_1 + 2, 13, 13);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    hid_ptt_draw_arrow(canvas, x_2 + 9, y_1 + 6, CanvasDirectionBottomToTop);
     canvas_set_color(canvas, ColorBlack);
 
-    canvas_draw_icon(canvas, 0, 54, &I_Pin_back_arrow_10x8);
-    canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(canvas, 13, 62, AlignLeft, AlignBottom, "Hold to exit");
+    // Down
+    canvas_draw_icon(canvas, x_2, y_2, &I_Button_18x18);
+    if(model->down_pressed) {
+        elements_slightly_rounded_box(canvas, x_2 + 3, y_2 + 2, 13, 13);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    hid_ptt_draw_arrow(canvas, x_2 + 9, y_2 + 10, CanvasDirectionTopToBottom);
+    canvas_set_color(canvas, ColorBlack);
+
+    // Left
+    canvas_draw_icon(canvas, x_1, y_2, &I_Button_18x18);
+    if(model->left_pressed) {
+        elements_slightly_rounded_box(canvas, x_1 + 3, y_2 + 2, 13, 13);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    hid_ptt_draw_arrow(canvas, x_1 + 7, y_2 + 8, CanvasDirectionRightToLeft);
+    canvas_set_color(canvas, ColorBlack);
+
+    // Right
+    canvas_draw_icon(canvas, x_3, y_2, &I_Button_18x18);
+    if(model->right_pressed) {
+        elements_slightly_rounded_box(canvas, x_3 + 3, y_2 + 2, 13, 13);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    hid_ptt_draw_arrow(canvas, x_3 + 11, y_2 + 8, CanvasDirectionLeftToRight);
+    canvas_set_color(canvas, ColorBlack);
+
+    // Ok
+    canvas_draw_icon(canvas, 2, 86, &I_Space_60x18);
+    if(model->ok_pressed) {
+        elements_slightly_rounded_box(canvas, 5, 88, 55, 13);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    canvas_draw_icon(canvas, 11, 90, &I_Ok_btn_9x9);
+    elements_multiline_text_aligned(canvas, 26, 98, AlignLeft, AlignBottom, "Space");
+    canvas_set_color(canvas, ColorBlack);
+
+    // Back
+    canvas_draw_icon(canvas, 2, 107, &I_Space_60x18);
+    if(model->back_pressed) {
+        elements_slightly_rounded_box(canvas, 5, 109, 55, 13);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    canvas_draw_icon(canvas, 11, 111, &I_Pin_back_arrow_10x8);
+    elements_multiline_text_aligned(canvas, 26, 119, AlignLeft, AlignBottom, "Back");
 }
 
-static void hid_ptt_process_press(HidPtt* hid_ptt, InputEvent* event) {
+static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
     with_view_model(
         hid_ptt->view,
         HidPttModel * model,
         {
-            if(event->key == InputKeyUp) {
-                model->up_pressed = true;
-                hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
-            } else if(event->key == InputKeyDown) {
-                model->down_pressed = true;
-                hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_DECREMENT);
-            } else if(event->key == InputKeyLeft) {
-                model->left_pressed = true;
-                hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_LEFT_ARROW);
-            } else if(event->key == InputKeyRight) {
-                model->right_pressed = true;
-                hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_RIGHT_ARROW);
-            } else if(event->key == InputKeyOk) {
-                model->ok_pressed = true;
-                hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_PLAY_PAUSE);
-            } else if(event->key == InputKeyBack) {
-                model->back_pressed = true;
-            }
-        },
-        true);
-}
-
-static void hid_ptt_process_release(HidPtt* hid_ptt, InputEvent* event) {
-    with_view_model(
-        hid_ptt->view,
-        HidPttModel * model,
-        {
-            if(event->key == InputKeyUp) {
-                model->up_pressed = false;
-                hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
-            } else if(event->key == InputKeyDown) {
-                model->down_pressed = false;
-                hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_VOLUME_DECREMENT);
-            } else if(event->key == InputKeyLeft) {
-                model->left_pressed = false;
-                hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_LEFT_ARROW);
-            } else if(event->key == InputKeyRight) {
-                model->right_pressed = false;
-                hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_RIGHT_ARROW);
-            } else if(event->key == InputKeyOk) {
-                model->ok_pressed = false;
-                hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_PLAY_PAUSE);
-            } else if(event->key == InputKeyBack) {
-                model->back_pressed = false;
+            if(event->type == InputTypePress) {
+                if(event->key == InputKeyUp) {
+                    model->up_pressed = true;
+                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_UP_ARROW);
+                } else if(event->key == InputKeyDown) {
+                    model->down_pressed = true;
+                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_DOWN_ARROW);
+                } else if(event->key == InputKeyLeft) {
+                    model->left_pressed = true;
+                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_LEFT_ARROW);
+                } else if(event->key == InputKeyRight) {
+                    model->right_pressed = true;
+                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_RIGHT_ARROW);
+                } else if(event->key == InputKeyOk) {
+                    model->ok_pressed = true;
+                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+                } else if(event->key == InputKeyBack) {
+                    model->back_pressed = true;
+                }
+            } else if(event->type == InputTypeRelease) {
+                if(event->key == InputKeyUp) {
+                    model->up_pressed = false;
+                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_UP_ARROW);
+                } else if(event->key == InputKeyDown) {
+                    model->down_pressed = false;
+                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_DOWN_ARROW);
+                } else if(event->key == InputKeyLeft) {
+                    model->left_pressed = false;
+                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_LEFT_ARROW);
+                } else if(event->key == InputKeyRight) {
+                    model->right_pressed = false;
+                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_RIGHT_ARROW);
+                } else if(event->key == InputKeyOk) {
+                    model->ok_pressed = false;
+                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+                } else if(event->key == InputKeyBack) {
+                    model->back_pressed = false;
+                }
+            } else if(event->type == InputTypeShort) {
+                if(event->key == InputKeyBack) {
+                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_DELETE);
+                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_DELETE);
+                    hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_AC_BACK);
+                    hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_AC_BACK);
+                }
             }
         },
         true);
@@ -188,13 +256,13 @@ static bool hid_ptt_input_callback(InputEvent* event, void* context) {
     HidPtt* hid_ptt = context;
     bool consumed = false;
 
-    if(event->type == InputTypePress) {
-        hid_ptt_process_press(hid_ptt, event);
-        consumed = true;
-    } else if(event->type == InputTypeRelease) {
-        hid_ptt_process_release(hid_ptt, event);
+    if(event->type == InputTypeLong && event->key == InputKeyBack) {
+        hid_hal_keyboard_release_all(hid_ptt->hid);
+    } else {
+        hid_ptt_process(hid_ptt, event);
         consumed = true;
     }
+
     return consumed;
 }
 
@@ -228,4 +296,17 @@ void hid_ptt_set_connected_status(HidPtt* hid_ptt, bool connected) {
     furi_assert(hid_ptt);
     with_view_model(
         hid_ptt->view, HidPttModel * model, { model->connected = connected; }, true);
+}
+
+void hid_ptt_set_orientation(HidPtt* hid_ptt, bool vertical) {
+    furi_assert(hid_ptt);
+
+    if(vertical) {
+        view_set_draw_callback(hid_ptt->view, hid_ptt_draw_vertical_callback);
+        view_set_orientation(hid_ptt->view, ViewOrientationVerticalFlip);
+
+    } else {
+        view_set_draw_callback(hid_ptt->view, hid_ptt_draw_callback);
+        view_set_orientation(hid_ptt->view, ViewOrientationHorizontal);
+    }
 }
