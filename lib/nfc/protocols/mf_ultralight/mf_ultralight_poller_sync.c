@@ -32,40 +32,40 @@ typedef MfUltralightError (*MfUltralightPollerCmdHandler)(
 MfUltralightError mf_ultralight_poller_read_page_handler(
     MfUltralightPoller* poller,
     MfUltralightPollerContextData* data) {
-    return mf_ultralight_poller_async_read_page(
+    return mf_ultralight_poller_read_page(
         poller, data->read_cmd.start_page, &data->read_cmd.data);
 }
 
 MfUltralightError mf_ultralight_poller_write_page_handler(
     MfUltralightPoller* poller,
     MfUltralightPollerContextData* data) {
-    return mf_ultralight_poller_async_write_page(
+    return mf_ultralight_poller_write_page(
         poller, data->write_cmd.page_to_write, &data->write_cmd.page);
 }
 
 MfUltralightError mf_ultralight_poller_read_version_handler(
     MfUltralightPoller* poller,
     MfUltralightPollerContextData* data) {
-    return mf_ultralight_poller_async_read_version(poller, &data->version);
+    return mf_ultralight_poller_read_version(poller, &data->version);
 }
 
 MfUltralightError mf_ultralight_poller_read_signature_handler(
     MfUltralightPoller* poller,
     MfUltralightPollerContextData* data) {
-    return mf_ultralight_poller_async_read_signature(poller, &data->signature);
+    return mf_ultralight_poller_read_signature(poller, &data->signature);
 }
 
 MfUltralightError mf_ultralight_poller_read_counter_handler(
     MfUltralightPoller* poller,
     MfUltralightPollerContextData* data) {
-    return mf_ultralight_poller_async_read_counter(
+    return mf_ultralight_poller_read_counter(
         poller, data->counter_cmd.counter_num, &data->counter_cmd.data);
 }
 
 MfUltralightError mf_ultralight_poller_read_tearing_flag_handler(
     MfUltralightPoller* poller,
     MfUltralightPollerContextData* data) {
-    return mf_ultralight_poller_async_read_tearing_flag(
+    return mf_ultralight_poller_read_tearing_flag(
         poller, data->tearing_flag_cmd.tearing_flag_num, &data->tearing_flag_cmd.data);
 }
 

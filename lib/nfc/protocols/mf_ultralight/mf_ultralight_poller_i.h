@@ -103,42 +103,42 @@ bool mf_ultralight_poller_ntag_i2c_addr_lin_to_tag(
     uint8_t* tag,
     uint8_t* pages_left);
 
-MfUltralightError mf_ultralight_poller_async_auth_pwd(
+MfUltralightError mf_ultralight_poller_auth_pwd(
     MfUltralightPoller* instance,
     MfUltralightPollerAuthContext* data);
 
-MfUltralightError mf_ultralight_poller_async_authenticate(MfUltralightPoller* instance);
+MfUltralightError mf_ultralight_poller_authenticate(MfUltralightPoller* instance);
 
-MfUltralightError mf_ultralight_poller_async_read_page(
+MfUltralightError mf_ultralight_poller_read_page(
     MfUltralightPoller* instance,
     uint8_t start_page,
     MfUltralightPageReadCommandData* data);
 
-MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
+MfUltralightError mf_ultralight_poller_read_page_from_sector(
     MfUltralightPoller* instance,
     uint8_t sector,
     uint8_t tag,
     MfUltralightPageReadCommandData* data);
 
-MfUltralightError mf_ultralight_poller_async_write_page(
+MfUltralightError mf_ultralight_poller_write_page(
     MfUltralightPoller* instance,
     uint8_t page,
     MfUltralightPage* data);
 
-MfUltralightError mf_ultralight_poller_async_read_version(
+MfUltralightError mf_ultralight_poller_read_version(
     MfUltralightPoller* instance,
     MfUltralightVersion* data);
 
-MfUltralightError mf_ultralight_poller_async_read_signature(
+MfUltralightError mf_ultralight_poller_read_signature(
     MfUltralightPoller* instance,
     MfUltralightSignature* data);
 
-MfUltralightError mf_ultralight_poller_async_read_counter(
+MfUltralightError mf_ultralight_poller_read_counter(
     MfUltralightPoller* instance,
     uint8_t counter_num,
     MfUltralightCounter* data);
 
-MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
+MfUltralightError mf_ultralight_poller_read_tearing_flag(
     MfUltralightPoller* instance,
     uint8_t tearing_falg_num,
     MfUltralightTearingFlag* data);

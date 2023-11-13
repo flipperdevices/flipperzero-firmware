@@ -33,7 +33,7 @@ typedef MfClassicError (
 static MfClassicError mf_classic_poller_collect_nt_handler(
     MfClassicPoller* poller,
     MfClassicPollerContextData* data) {
-    return mf_classic_async_get_nt(
+    return mf_classic_poller_get_nt(
         poller,
         data->collect_nt_context.block,
         data->collect_nt_context.key_type,
@@ -42,7 +42,7 @@ static MfClassicError mf_classic_poller_collect_nt_handler(
 
 static MfClassicError
     mf_classic_poller_auth_handler(MfClassicPoller* poller, MfClassicPollerContextData* data) {
-    return mf_classic_async_auth(
+    return mf_classic_poller_auth(
         poller,
         data->auth_context.block_num,
         &data->auth_context.key,
@@ -56,7 +56,7 @@ static MfClassicError mf_classic_poller_read_block_handler(
     MfClassicError error = MfClassicErrorNone;
 
     do {
-        error = mf_classic_async_auth(
+        error = mf_classic_poller_auth(
             poller,
             data->read_block_context.block_num,
             &data->read_block_context.key,
@@ -64,11 +64,11 @@ static MfClassicError mf_classic_poller_read_block_handler(
             NULL);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_async_read_block(
+        error = mf_classic_poller_read_block(
             poller, data->read_block_context.block_num, &data->read_block_context.block);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_async_halt(poller);
+        error = mf_classic_poller_halt(poller);
         if(error != MfClassicErrorNone) break;
 
     } while(false);
@@ -82,7 +82,7 @@ static MfClassicError mf_classic_poller_write_block_handler(
     MfClassicError error = MfClassicErrorNone;
 
     do {
-        error = mf_classic_async_auth(
+        error = mf_classic_poller_auth(
             poller,
             data->read_block_context.block_num,
             &data->read_block_context.key,
@@ -90,11 +90,11 @@ static MfClassicError mf_classic_poller_write_block_handler(
             NULL);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_async_write_block(
+        error = mf_classic_poller_write_block(
             poller, data->write_block_context.block_num, &data->write_block_context.block);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_async_halt(poller);
+        error = mf_classic_poller_halt(poller);
         if(error != MfClassicErrorNone) break;
 
     } while(false);
@@ -108,7 +108,7 @@ static MfClassicError mf_classic_poller_read_value_handler(
     MfClassicError error = MfClassicErrorNone;
 
     do {
-        error = mf_classic_async_auth(
+        error = mf_classic_poller_auth(
             poller,
             data->read_value_context.block_num,
             &data->read_value_context.key,
@@ -117,7 +117,7 @@ static MfClassicError mf_classic_poller_read_value_handler(
         if(error != MfClassicErrorNone) break;
 
         MfClassicBlock block = {};
-        error = mf_classic_async_read_block(poller, data->read_value_context.block_num, &block);
+        error = mf_classic_poller_read_block(poller, data->read_value_context.block_num, &block);
         if(error != MfClassicErrorNone) break;
 
         if(!mf_classic_block_to_value(&block, &data->read_value_context.value, NULL)) {
@@ -125,7 +125,7 @@ static MfClassicError mf_classic_poller_read_value_handler(
             break;
         }
 
-        error = mf_classic_async_halt(poller);
+        error = mf_classic_poller_halt(poller);
         if(error != MfClassicErrorNone) break;
 
     } while(false);
@@ -139,7 +139,7 @@ static MfClassicError mf_classic_poller_change_value_handler(
     MfClassicError error = MfClassicErrorNone;
 
     do {
-        error = mf_classic_async_auth(
+        error = mf_classic_poller_auth(
             poller,
             data->change_value_context.block_num,
             &data->change_value_context.key,
@@ -147,21 +147,21 @@ static MfClassicError mf_classic_poller_change_value_handler(
             NULL);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_async_value_cmd(
+        error = mf_classic_poller_value_cmd(
             poller,
             data->change_value_context.block_num,
             data->change_value_context.value_cmd,
             data->change_value_context.data);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_async_value_transfer(poller, data->change_value_context.block_num);
+        error = mf_classic_poller_value_transfer(poller, data->change_value_context.block_num);
         if(error != MfClassicErrorNone) break;
 
         MfClassicBlock block = {};
-        error = mf_classic_async_read_block(poller, data->change_value_context.block_num, &block);
+        error = mf_classic_poller_read_block(poller, data->change_value_context.block_num, &block);
         if(error != MfClassicErrorNone) break;
 
-        error = mf_classic_async_halt(poller);
+        error = mf_classic_poller_halt(poller);
         if(error != MfClassicErrorNone) break;
 
         if(!mf_classic_block_to_value(&block, &data->change_value_context.new_value, NULL)) {
