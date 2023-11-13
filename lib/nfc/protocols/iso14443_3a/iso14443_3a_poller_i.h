@@ -39,15 +39,9 @@ typedef enum {
     Iso14443_3aPollerStateActivated,
 } Iso14443_3aPollerState;
 
-typedef enum {
-    Iso14443_3aPollerConfigStateIdle,
-    Iso14443_3aPollerConfigStateDone,
-} Iso14443_3aPollerConfigState;
-
 struct Iso14443_3aPoller {
     Nfc* nfc;
     Iso14443_3aPollerState state;
-    Iso14443_3aPollerConfigState config_state;
     Iso14443_3aPollerColRes col_res;
     Iso14443_3aData* data;
     BitBuffer* tx_buffer;
