@@ -38,83 +38,6 @@ static void hid_ptt_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirec
 static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     HidPttModel* model = context;
-
-    // Header
-    if(model->transport == HidTransportBle) {
-        if(model->connected) {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
-        } else {
-            canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
-        }
-    }
-
-    canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Ptt");
-
-    canvas_draw_icon(canvas, 68, 2, &I_Pin_back_arrow_10x8);
-    canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(canvas, 127, 3, AlignRight, AlignTop, "Hold to exit");
-
-    // Up
-    canvas_draw_icon(canvas, 21, 24, &I_Button_18x18);
-    if(model->up_pressed) {
-        elements_slightly_rounded_box(canvas, 24, 26, 13, 13);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    hid_ptt_draw_arrow(canvas, 30, 30, CanvasDirectionBottomToTop);
-    canvas_set_color(canvas, ColorBlack);
-
-    // Down
-    canvas_draw_icon(canvas, 21, 45, &I_Button_18x18);
-    if(model->down_pressed) {
-        elements_slightly_rounded_box(canvas, 24, 47, 13, 13);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    hid_ptt_draw_arrow(canvas, 30, 55, CanvasDirectionTopToBottom);
-    canvas_set_color(canvas, ColorBlack);
-
-    // Left
-    canvas_draw_icon(canvas, 0, 45, &I_Button_18x18);
-    if(model->left_pressed) {
-        elements_slightly_rounded_box(canvas, 3, 47, 13, 13);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    hid_ptt_draw_arrow(canvas, 7, 53, CanvasDirectionRightToLeft);
-    canvas_set_color(canvas, ColorBlack);
-
-    // Right
-    canvas_draw_icon(canvas, 42, 45, &I_Button_18x18);
-    if(model->right_pressed) {
-        elements_slightly_rounded_box(canvas, 45, 47, 13, 13);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    hid_ptt_draw_arrow(canvas, 53, 53, CanvasDirectionLeftToRight);
-    canvas_set_color(canvas, ColorBlack);
-
-    // Ok
-    canvas_draw_icon(canvas, 63, 25, &I_Space_65x18);
-    if(model->ok_pressed) {
-        elements_slightly_rounded_box(canvas, 66, 27, 60, 13);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    canvas_draw_icon(canvas, 74, 29, &I_Ok_btn_9x9);
-    elements_multiline_text_aligned(canvas, 91, 36, AlignLeft, AlignBottom, "Space");
-    canvas_set_color(canvas, ColorBlack);
-
-    // Back
-    canvas_draw_icon(canvas, 63, 45, &I_Space_65x18);
-    if(model->back_pressed) {
-        elements_slightly_rounded_box(canvas, 66, 47, 60, 13);
-        canvas_set_color(canvas, ColorWhite);
-    }
-    canvas_draw_icon(canvas, 74, 49, &I_Pin_back_arrow_10x8);
-    elements_multiline_text_aligned(canvas, 91, 57, AlignLeft, AlignBottom, "Back");
-}
-
-static void hid_ptt_draw_vertical_callback(Canvas* canvas, void* context) {
-    furi_assert(context);
-    HidPttModel* model = context;
-
     // Header
     canvas_set_font(canvas, FontPrimary);
     if(model->transport == HidTransportBle) {
@@ -274,10 +197,10 @@ HidPtt* hid_ptt_alloc(Hid* hid) {
     view_allocate_model(hid_ptt->view, ViewModelTypeLocking, sizeof(HidPttModel));
     view_set_draw_callback(hid_ptt->view, hid_ptt_draw_callback);
     view_set_input_callback(hid_ptt->view, hid_ptt_input_callback);
+    view_set_orientation(hid_ptt->view, ViewOrientationVerticalFlip);
 
     with_view_model(
         hid_ptt->view, HidPttModel * model, { model->transport = hid->transport; }, true);
-
     return hid_ptt;
 }
 
@@ -296,17 +219,4 @@ void hid_ptt_set_connected_status(HidPtt* hid_ptt, bool connected) {
     furi_assert(hid_ptt);
     with_view_model(
         hid_ptt->view, HidPttModel * model, { model->connected = connected; }, true);
-}
-
-void hid_ptt_set_orientation(HidPtt* hid_ptt, bool vertical) {
-    furi_assert(hid_ptt);
-
-    if(vertical) {
-        view_set_draw_callback(hid_ptt->view, hid_ptt_draw_vertical_callback);
-        view_set_orientation(hid_ptt->view, ViewOrientationVerticalFlip);
-
-    } else {
-        view_set_draw_callback(hid_ptt->view, hid_ptt_draw_callback);
-        view_set_orientation(hid_ptt->view, ViewOrientationHorizontal);
-    }
 }
