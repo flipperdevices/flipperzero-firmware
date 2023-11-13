@@ -1,3 +1,5 @@
+#pragma once
+
 #include "tracker_engine_defs.h"
 #include <stdbool.h>
 #include <stdio.h>
