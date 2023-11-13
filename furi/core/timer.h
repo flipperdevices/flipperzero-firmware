@@ -88,6 +88,12 @@ typedef enum {
  */
 void furi_timer_set_thread_priority(FuriTimerThreadPriority priority);
 
+/** Get currently executing timer name
+ *
+ * @return     The pointer to the timer name, or NULL
+ */
+const char* furi_timer_get_current_name();
+
 #ifdef __cplusplus
 }
 #endif

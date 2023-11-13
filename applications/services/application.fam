@@ -9,6 +9,5 @@ App(
         "desktop",
         "loader",
         "power",
-        "onewire_srv",
     ],
 )
