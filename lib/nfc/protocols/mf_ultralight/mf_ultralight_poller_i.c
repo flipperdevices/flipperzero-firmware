@@ -191,9 +191,8 @@ MfUltralightError mf_ultralight_poller_write_page(
     return ret;
 }
 
-MfUltralightError mf_ultralight_poller_read_version(
-    MfUltralightPoller* instance,
-    MfUltralightVersion* data) {
+MfUltralightError
+    mf_ultralight_poller_read_version(MfUltralightPoller* instance, MfUltralightVersion* data) {
     MfUltralightError ret = MfUltralightErrorNone;
     Iso14443_3aError error = Iso14443_3aErrorNone;
 
@@ -221,9 +220,8 @@ MfUltralightError mf_ultralight_poller_read_version(
     return ret;
 }
 
-MfUltralightError mf_ultralight_poller_read_signature(
-    MfUltralightPoller* instance,
-    MfUltralightSignature* data) {
+MfUltralightError
+    mf_ultralight_poller_read_signature(MfUltralightPoller* instance, MfUltralightSignature* data) {
     MfUltralightError ret = MfUltralightErrorNone;
     Iso14443_3aError error = Iso14443_3aErrorNone;
 

@@ -63,8 +63,7 @@ static Iso14443_3bError iso14443_3b_poller_frame_exchange(
     return ret;
 }
 
-Iso14443_3bError
-    iso14443_3b_poller_activate(Iso14443_3bPoller* instance, Iso14443_3bData* data) {
+Iso14443_3bError iso14443_3b_poller_activate(Iso14443_3bPoller* instance, Iso14443_3bData* data) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 

@@ -396,8 +396,7 @@ static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance
             uint32_t pass = nfc_util_bytes2num(
                 instance->auth_context.password.data, sizeof(MfUltralightAuthPassword));
             FURI_LOG_D(TAG, "Trying to authenticate with password %08lX", pass);
-            instance->error =
-                mf_ultralight_poller_auth_pwd(instance, &instance->auth_context);
+            instance->error = mf_ultralight_poller_auth_pwd(instance, &instance->auth_context);
             if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Auth success");
                 instance->auth_context.auth_success = true;
@@ -478,8 +477,7 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
                 MF_ULTRALIGHT_DEFAULT_PASSWORD,
                 sizeof(MfUltralightAuthPassword),
                 instance->auth_context.password.data);
-            instance->error =
-                mf_ultralight_poller_auth_pwd(instance, &instance->auth_context);
+            instance->error = mf_ultralight_poller_auth_pwd(instance, &instance->auth_context);
             if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Default password detected");
                 nfc_util_num2bytes(
@@ -572,8 +570,7 @@ static bool mf_ultralight_poller_detect(NfcGenericEvent event, void* context) {
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         MfUltralightPageReadCommandData read_page_cmd_data = {};
-        MfUltralightError error =
-            mf_ultralight_poller_read_page(instance, 0, &read_page_cmd_data);
+        MfUltralightError error = mf_ultralight_poller_read_page(instance, 0, &read_page_cmd_data);
         protocol_detected = (error == MfUltralightErrorNone);
         iso14443_3a_poller_halt(instance->iso14443_3a_poller);
     }

@@ -50,8 +50,7 @@ static NfcCommand slix_poller_handler_idle(SlixPoller* instance) {
 }
 
 static NfcCommand slix_poller_handler_get_nfc_system_info(SlixPoller* instance) {
-    instance->error =
-        slix_poller_get_nxp_system_info(instance, &instance->data->system_info);
+    instance->error = slix_poller_get_nxp_system_info(instance, &instance->data->system_info);
     if(instance->error == SlixErrorNone) {
         instance->poller_state = SlixPollerStateReadSignature;
     } else {

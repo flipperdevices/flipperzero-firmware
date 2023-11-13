@@ -32,8 +32,7 @@ typedef MfUltralightError (*MfUltralightPollerCmdHandler)(
 MfUltralightError mf_ultralight_poller_read_page_handler(
     MfUltralightPoller* poller,
     MfUltralightPollerContextData* data) {
-    return mf_ultralight_poller_read_page(
-        poller, data->read_cmd.start_page, &data->read_cmd.data);
+    return mf_ultralight_poller_read_page(poller, data->read_cmd.start_page, &data->read_cmd.data);
 }
 
 MfUltralightError mf_ultralight_poller_write_page_handler(
@@ -119,7 +118,8 @@ static MfUltralightError
     return poller_ctx->error;
 }
 
-MfUltralightError mf_ultralight_poller_sync_read_page(Nfc* nfc, uint16_t page, MfUltralightPage* data) {
+MfUltralightError
+    mf_ultralight_poller_sync_read_page(Nfc* nfc, uint16_t page, MfUltralightPage* data) {
     furi_assert(nfc);
     furi_assert(data);
 
@@ -190,8 +190,10 @@ MfUltralightError mf_ultralight_poller_sync_read_signature(Nfc* nfc, MfUltraligh
     return error;
 }
 
-MfUltralightError
-    mf_ultralight_poller_sync_read_counter(Nfc* nfc, uint8_t counter_num, MfUltralightCounter* data) {
+MfUltralightError mf_ultralight_poller_sync_read_counter(
+    Nfc* nfc,
+    uint8_t counter_num,
+    MfUltralightCounter* data) {
     furi_assert(nfc);
     furi_assert(data);
 

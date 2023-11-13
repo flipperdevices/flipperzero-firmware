@@ -180,8 +180,7 @@ St25tbError st25tb_poller_activate(St25tbPoller* instance, St25tbData* data) {
         if(!read_blocks) {
             break;
         }
-        ret = st25tb_poller_read_block(
-            instance, &data->system_otp_block, ST25TB_SYSTEM_OTP_BLOCK);
+        ret = st25tb_poller_read_block(instance, &data->system_otp_block, ST25TB_SYSTEM_OTP_BLOCK);
     } while(false);
 
     return ret;

@@ -75,8 +75,7 @@ static NfcCommand mf_desfire_poller_handler_read_version(MfDesfirePoller* instan
 }
 
 static NfcCommand mf_desfire_poller_handler_read_free_memory(MfDesfirePoller* instance) {
-    instance->error =
-        mf_desfire_poller_read_free_memory(instance, &instance->data->free_memory);
+    instance->error = mf_desfire_poller_read_free_memory(instance, &instance->data->free_memory);
     if(instance->error == MfDesfireErrorNone) {
         FURI_LOG_D(TAG, "Read free memory success");
         instance->state = MfDesfirePollerStateReadMasterKeySettings;

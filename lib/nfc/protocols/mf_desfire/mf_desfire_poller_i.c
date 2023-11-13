@@ -74,8 +74,7 @@ MfDesfireError mf_desfire_send_chunks(
     return error;
 }
 
-MfDesfireError
-    mf_desfire_poller_read_version(MfDesfirePoller* instance, MfDesfireVersion* data) {
+MfDesfireError mf_desfire_poller_read_version(MfDesfirePoller* instance, MfDesfireVersion* data) {
     furi_assert(instance);
 
     bit_buffer_reset(instance->input_buffer);
@@ -118,9 +117,8 @@ MfDesfireError
     return error;
 }
 
-MfDesfireError mf_desfire_poller_read_key_settings(
-    MfDesfirePoller* instance,
-    MfDesfireKeySettings* data) {
+MfDesfireError
+    mf_desfire_poller_read_key_settings(MfDesfirePoller* instance, MfDesfireKeySettings* data) {
     furi_assert(instance);
 
     bit_buffer_reset(instance->input_buffer);
@@ -219,8 +217,7 @@ MfDesfireError mf_desfire_poller_select_application(
     return error;
 }
 
-MfDesfireError
-    mf_desfire_poller_read_file_ids(MfDesfirePoller* instance, SimpleArray* data) {
+MfDesfireError mf_desfire_poller_read_file_ids(MfDesfirePoller* instance, SimpleArray* data) {
     furi_assert(instance);
 
     bit_buffer_reset(instance->input_buffer);
@@ -290,8 +287,7 @@ MfDesfireError mf_desfire_poller_read_file_settings_multi(
 
     for(uint32_t i = 0; i < file_id_count; ++i) {
         const MfDesfireFileId file_id = *(const MfDesfireFileId*)simple_array_cget(file_ids, i);
-        error = mf_desfire_poller_read_file_settings(
-            instance, file_id, simple_array_get(data, i));
+        error = mf_desfire_poller_read_file_settings(instance, file_id, simple_array_get(data, i));
         if(error != MfDesfireErrorNone) break;
     }
 
@@ -421,9 +417,8 @@ MfDesfireError mf_desfire_poller_read_file_data_multi(
     return error;
 }
 
-MfDesfireError mf_desfire_poller_read_application(
-    MfDesfirePoller* instance,
-    MfDesfireApplication* data) {
+MfDesfireError
+    mf_desfire_poller_read_application(MfDesfirePoller* instance, MfDesfireApplication* data) {
     furi_assert(instance);
     furi_assert(data);
 
@@ -468,8 +463,7 @@ MfDesfireError mf_desfire_poller_read_applications(
 
     for(uint32_t i = 0; i < app_id_count; ++i) {
         do {
-            error = mf_desfire_poller_select_application(
-                instance, simple_array_cget(app_ids, i));
+            error = mf_desfire_poller_select_application(instance, simple_array_cget(app_ids, i));
             if(error != MfDesfireErrorNone) break;
 
             MfDesfireApplication* current_app = simple_array_get(data, i);

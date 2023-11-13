@@ -243,8 +243,8 @@ NfcCommand mf_classic_poller_handler_read_block(MfClassicPoller* instance) {
         }
 
         // Read block from tag
-        error =
-            mf_classic_poller_read_block(instance, write_ctx->current_block, &write_ctx->tag_block);
+        error = mf_classic_poller_read_block(
+            instance, write_ctx->current_block, &write_ctx->tag_block);
         if(error != MfClassicErrorNone) {
             FURI_LOG_D(TAG, "Failed to read block %d", write_ctx->current_block);
             instance->state = MfClassicPollerStateFail;

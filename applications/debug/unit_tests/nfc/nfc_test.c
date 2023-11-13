@@ -407,11 +407,13 @@ static void mf_classic_value_block() {
 
     int32_t data = 200;
     int32_t new_value = 0;
-    error = mf_classic_poller_sync_change_value(poller, 1, &key, MfClassicKeyTypeA, data, &new_value);
+    error =
+        mf_classic_poller_sync_change_value(poller, 1, &key, MfClassicKeyTypeA, data, &new_value);
     mu_assert(error == MfClassicErrorNone, "Value increment failed");
     mu_assert(new_value == value + data, "Value not match");
 
-    error = mf_classic_poller_sync_change_value(poller, 1, &key, MfClassicKeyTypeA, -data, &new_value);
+    error =
+        mf_classic_poller_sync_change_value(poller, 1, &key, MfClassicKeyTypeA, -data, &new_value);
     mu_assert(error == MfClassicErrorNone, "Value decrement failed");
     mu_assert(new_value == value, "Value not match");
 

@@ -80,8 +80,7 @@ static Iso15693_3Error iso15693_3_poller_frame_exchange(
     return ret;
 }
 
-Iso15693_3Error
-    iso15693_3_poller_activate(Iso15693_3Poller* instance, Iso15693_3Data* data) {
+Iso15693_3Error iso15693_3_poller_activate(Iso15693_3Poller* instance, Iso15693_3Data* data) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
@@ -165,9 +164,8 @@ Iso15693_3Error iso15693_3_poller_inventory(Iso15693_3Poller* instance, uint8_t*
     return ret;
 }
 
-Iso15693_3Error iso15693_3_poller_get_system_info(
-    Iso15693_3Poller* instance,
-    Iso15693_3SystemInfo* data) {
+Iso15693_3Error
+    iso15693_3_poller_get_system_info(Iso15693_3Poller* instance, Iso15693_3SystemInfo* data) {
     furi_assert(instance);
     furi_assert(data);
 

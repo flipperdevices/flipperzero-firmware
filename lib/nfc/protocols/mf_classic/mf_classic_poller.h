@@ -119,8 +119,10 @@ MfClassicError mf_classic_poller_auth(
 
 MfClassicError mf_classic_poller_halt(MfClassicPoller* instance);
 
-MfClassicError
-    mf_classic_poller_read_block(MfClassicPoller* instance, uint8_t block_num, MfClassicBlock* data);
+MfClassicError mf_classic_poller_read_block(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicBlock* data);
 
 MfClassicError mf_classic_poller_write_block(
     MfClassicPoller* instance,
