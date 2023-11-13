@@ -20,7 +20,6 @@ steps:
     pull: never
     commands:
       - git clone --branch dev https://github.com/DarkFlippers/unleashed-firmware.git
-      - rm -rf unleashed-firmware/assets/resources/apps/
       - rm -rf unleashed-firmware/build/
       - rm -rf unleashed-firmware/dist/
       - rm -rf unleashed-firmware/.sconsign.dblite
@@ -31,8 +30,10 @@ steps:
       - ./fbt COMPACT=1 DEBUG=0 updater_package
       - mkdir artifacts-base
       - mkdir artifacts-totp
-      - mv assets/resources/apps/* artifacts-base/
-      - mv assets/resources/apps_data/totp/* artifacts-totp/
+      - mkdir dist/f7-C/f7-update-local/resources
+      - tar zxvf dist/f7-C/f7-update-local/resources.tar -C dist/f7-C/f7-update-local/resources
+      - mv dist/f7-C/f7-update-local/resources/apps/* artifacts-base/
+      - mv dist/f7-C/f7-update-local/resources/apps_data/totp/* artifacts-totp/
       - ls -laS artifacts-base
       - ls -laS artifacts-totp
       - ls -laS artifacts-totp/plugins
@@ -58,7 +59,6 @@ steps:
     image: hfdj/fztools
     pull: never
     commands:
-      - rm -rf unleashed-firmware/assets/resources/apps/
       - rm -rf unleashed-firmware/build/
       - rm -rf unleashed-firmware/dist/
       - rm -rf unleashed-firmware/.sconsign.dblite
@@ -69,7 +69,9 @@ steps:
       - export FBT_GIT_SUBMODULE_SHALLOW=1
       - ./fbt COMPACT=1 DEBUG=0 updater_package
       - mkdir artifacts-extra
-      - mv assets/resources/apps/* artifacts-extra/
+      - mkdir dist/f7-C/f7-update-local/resources
+      - tar zxvf dist/f7-C/f7-update-local/resources.tar -C dist/f7-C/f7-update-local/resources
+      - mv dist/f7-C/f7-update-local/resources/apps/* artifacts-extra/
       - ls -laS artifacts-extra
       - rm -f artifacts-extra/GPIO/gpio.fap
       - rm -f artifacts-extra/iButton/ibutton.fap
