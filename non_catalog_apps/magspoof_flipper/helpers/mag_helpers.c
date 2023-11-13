@@ -68,9 +68,9 @@ void play_halfbit(bool value, MagSetting* setting) {
         //(value) ? furi_hal_nfc_ll_txrx_on() : furi_hal_nfc_ll_txrx_off();
 
         if(last_value == 2 || value != (bool)last_value) {
-            furi_hal_nfc_ll_txrx_on();
+            //furi_hal_nfc_ll_txrx_on();
             //furi_delay_us(64);
-            furi_hal_nfc_ll_txrx_off();
+            //furi_hal_nfc_ll_txrx_off();
         }
         break;
     case MagTxCC1101_434:
@@ -204,7 +204,7 @@ bool tx_init(MagSetting* setting) {
         tx_init_rfid();
         break;
     case MagTxStateNFC:
-        furi_hal_nfc_exit_sleep();
+        //furi_hal_nfc_exit_sleep();
         break;
     case MagTxCC1101_434:
         tx_init_rf(434000000);
@@ -245,8 +245,8 @@ bool tx_deinit(MagSetting* setting) {
         tx_deinit_rfid();
         break;
     case MagTxStateNFC:
-        furi_hal_nfc_ll_txrx_off();
-        furi_hal_nfc_start_sleep();
+        //furi_hal_nfc_ll_txrx_off();
+        //furi_hal_nfc_start_sleep();
         break;
     case MagTxCC1101_434:
     case MagTxCC1101_868:
