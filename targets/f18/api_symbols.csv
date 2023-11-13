@@ -1376,7 +1376,7 @@ Function,+,furi_pubsub_subscribe,FuriPubSubSubscription*,"FuriPubSub*, FuriPubSu
 Function,+,furi_pubsub_unsubscribe,void,"FuriPubSub*, FuriPubSubSubscription*"
 Function,+,furi_record_close,void,const char*
 Function,+,furi_record_create,void,"const char*, void*"
-Function,-,furi_record_destroy,_Bool,const char*
+Function,+,furi_record_destroy,_Bool,const char*
 Function,+,furi_record_exists,_Bool,const char*
 Function,-,furi_record_init,void,
 Function,+,furi_record_open,void*,const char*
