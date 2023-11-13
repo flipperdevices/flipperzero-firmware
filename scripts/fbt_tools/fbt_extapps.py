@@ -58,7 +58,8 @@ class AppBuilder:
         )
         self.app_env.Append(
             CPPDEFINES=[
-                ("FAP_VERSION", f'"{".".join(map(str, self.app.fap_version))}"')
+                ("FAP_VERSION", f'"{".".join(map(str, self.app.fap_version))}"'),
+                *self.app.cdefines,
             ],
         )
         self.app_env.VariantDir(self.app_work_dir, self.app._appdir, duplicate=False)
@@ -143,8 +144,8 @@ class AppBuilder:
             self.app._assets_dirs = [self.app._appdir.Dir(self.app.fap_file_assets)]
 
         self.app_env.Append(
-            LIBS=[*self.app.fap_libs, *self.private_libs],
-            CPPPATH=[self.app_work_dir, self.app._appdir],
+            LIBS=[*self.app.fap_libs, *self.private_libs, *self.app.fap_libs],
+            CPPPATH=[self.app_env.Dir(self.app_work_dir), self.app._appdir],
         )
 
         app_sources = self.app_env.GatherSources(
