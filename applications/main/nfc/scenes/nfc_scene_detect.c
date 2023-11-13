@@ -1,4 +1,5 @@
 #include "../nfc_app_i.h"
+#include <nfc_icons.h>
 #include <dolphin/dolphin.h>
 
 void nfc_scene_detect_scan_callback(NfcScannerEvent event, void* context) {

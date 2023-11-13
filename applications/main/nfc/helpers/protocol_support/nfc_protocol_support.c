@@ -12,6 +12,7 @@
 
 #include "nfc_protocol_support_defs.h"
 #include "nfc_protocol_support_gui_common.h"
+#include <nfc_icons.h>
 
 /**
  * @brief Common scene entry handler.
