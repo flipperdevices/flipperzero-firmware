@@ -56,19 +56,6 @@ struct Iso14443_3aPoller {
 
 const Iso14443_3aData* iso14443_3a_poller_get_data(Iso14443_3aPoller* instance);
 
-Iso14443_3aError iso14443_3a_poller_check_presence(Iso14443_3aPoller* instance);
-
-Iso14443_3aError
-    iso14443_3a_poller_activate(Iso14443_3aPoller* instance, Iso14443_3aData* iso14443_3a_data);
-
-Iso14443_3aError iso14443_3a_poller_halt(Iso14443_3aPoller* instance);
-
-Iso14443_3aError iso14443_3a_poller_txrx_custom_parity(
-    Iso14443_3aPoller* instance,
-    const BitBuffer* tx_buffer,
-    BitBuffer* rx_buffer,
-    uint32_t fwt);
-
 #ifdef __cplusplus
 }
 #endif

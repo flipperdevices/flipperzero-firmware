@@ -37,6 +37,19 @@ Iso14443_3aError iso14443_3a_poller_send_standard_frame(
     BitBuffer* rx_buffer,
     uint32_t fwt);
 
+Iso14443_3aError iso14443_3a_poller_txrx_custom_parity(
+    Iso14443_3aPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt);
+
+Iso14443_3aError iso14443_3a_poller_check_presence(Iso14443_3aPoller* instance);
+
+Iso14443_3aError
+    iso14443_3a_poller_activate(Iso14443_3aPoller* instance, Iso14443_3aData* iso14443_3a_data);
+
+Iso14443_3aError iso14443_3a_poller_halt(Iso14443_3aPoller* instance);
+
 #ifdef __cplusplus
 }
 #endif

@@ -24,6 +24,13 @@ typedef struct {
     Iso14443_4bPollerEventData* data;
 } Iso14443_4bPollerEvent;
 
+Iso14443_4bError iso14443_4b_poller_send_block(
+    Iso14443_4bPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer);
+
+Iso14443_4bError iso14443_4b_poller_halt(Iso14443_4bPoller* instance);
+
 #ifdef __cplusplus
 }
 #endif

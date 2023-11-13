@@ -24,6 +24,16 @@ typedef struct {
     SlixPollerEventData* data;
 } SlixPollerEvent;
 
+SlixError slix_poller_send_frame(
+    SlixPoller* instance,
+    const BitBuffer* tx_data,
+    BitBuffer* rx_data,
+    uint32_t fwt);
+
+SlixError slix_poller_get_nxp_system_info(SlixPoller* instance, SlixSystemInfo* data);
+
+SlixError slix_poller_read_signature(SlixPoller* instance, SlixSignature* data);
+
 #ifdef __cplusplus
 }
 #endif

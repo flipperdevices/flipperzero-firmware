@@ -53,8 +53,6 @@ FelicaError felica_poller_polling(
     const FelicaPollerPollingCommand* cmd,
     FelicaPollerPollingResponse* resp);
 
-FelicaError felica_poller_activate(FelicaPoller* instance, FelicaData* data);
-
 #ifdef __cplusplus
 }
 #endif

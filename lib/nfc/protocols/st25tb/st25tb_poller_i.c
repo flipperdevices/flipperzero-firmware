@@ -187,7 +187,7 @@ St25tbError st25tb_poller_activate(St25tbPoller* instance, St25tbData* data) {
     return ret;
 }
 
-St25tbError st25tb_poller_get_uid(St25tbPoller* instance, uint8_t uid[ST25TB_UID_SIZE]) {
+St25tbError st25tb_poller_get_uid(St25tbPoller* instance, uint8_t* uid) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 

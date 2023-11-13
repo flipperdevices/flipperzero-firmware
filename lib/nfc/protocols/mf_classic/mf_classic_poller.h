@@ -104,6 +104,37 @@ typedef struct {
     MfClassicPollerEventData* data;
 } MfClassicPollerEvent;
 
+MfClassicError mf_classic_poller_get_nt(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicNt* nt);
+
+MfClassicError mf_classic_poller_auth(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    MfClassicAuthContext* data);
+
+MfClassicError mf_classic_poller_halt(MfClassicPoller* instance);
+
+MfClassicError
+    mf_classic_poller_read_block(MfClassicPoller* instance, uint8_t block_num, MfClassicBlock* data);
+
+MfClassicError mf_classic_poller_write_block(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicBlock* data);
+
+MfClassicError mf_classic_poller_value_cmd(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicValueCommand cmd,
+    int32_t data);
+
+MfClassicError mf_classic_poller_value_transfer(MfClassicPoller* instance, uint8_t block_num);
+
 #ifdef __cplusplus
 }
 #endif

@@ -25,6 +25,8 @@ typedef struct {
     FelicaPollerEventData* data;
 } FelicaPollerEvent;
 
+FelicaError felica_poller_activate(FelicaPoller* instance, FelicaData* data);
+
 #ifdef __cplusplus
 }
 #endif
