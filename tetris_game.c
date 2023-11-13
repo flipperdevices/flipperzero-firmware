@@ -366,9 +366,7 @@ int32_t tetris_game_app() {
     }
 
     // Not doing this eventually causes issues with TimerSvc due to not sleeping/yielding enough in this task
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
-
-    vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+    furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
 
     ViewPort* view_port = view_port_alloc();
     view_port_set_orientation(view_port, ViewPortOrientationVertical);
@@ -472,7 +470,7 @@ int32_t tetris_game_app() {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     furi_mutex_free(tetris_state->mutex);
-    vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal)
     free(newPiece);
     free(tetris_state);
 
