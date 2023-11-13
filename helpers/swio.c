@@ -52,7 +52,6 @@ WchSwioFlasher_SWIO* WchSwioFlasher_SWIO_create() {
 WchSwioFlasher_Error WchSwioFlasher_SWIO_hw_reset(WchSwioFlasher_SWIO* handle) {
     UNUSED(handle);
     furi_hal_gpio_write(&SWI_GPIO, true);
-
     furi_hal_gpio_write(&SWI_HW_RST_GPIO, false);
     furi_delay_ms(50);
     furi_hal_gpio_write(&SWI_HW_RST_GPIO, true);
@@ -68,13 +67,16 @@ void WchSwioFlasher_SWIO_destroy(WchSwioFlasher_SWIO* handle) {
 WchSwioFlasher_Error WchSwioFlasher_SWIO_init(WchSwioFlasher_SWIO* handle) {
     UNUSED(handle);
 
-    CHECK_ERR_M(
-        WchSwioFlasher_SWIO_write(handle, WCH_DM_SHDWCFGR, 0x5AA50400),
-        "unable to write magic to SHDWCFGR");
+    // Do it twice for sure
+    for(uint8_t i = 0; i < 2; i++) {
+        CHECK_ERR_M(
+            WchSwioFlasher_SWIO_write(handle, WCH_DM_SHDWCFGR, 0x5AA50400),
+            "unable to write magic to SHDWCFGR");
 
-    CHECK_ERR_M(
-        WchSwioFlasher_SWIO_write(handle, WCH_DM_CFGR, 0x5AA50400),
-        "unable to write magic to CFGR");
+        CHECK_ERR_M(
+            WchSwioFlasher_SWIO_write(handle, WCH_DM_CFGR, 0x5AA50400),
+            "unable to write magic to CFGR");
+    }
 
     uint32_t cpbr = 0;
     CHECK_ERR_M(WchSwioFlasher_SWIO_read(handle, WCH_DM_CPBR, &cpbr), "unable to read CPBR");
