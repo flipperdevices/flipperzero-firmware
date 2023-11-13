@@ -210,8 +210,8 @@ static void mf_ultralight_reader_test(const char* path) {
     nfc_listener_start(mfu_listener, NULL, NULL);
 
     MfUltralightData* mfu_data = mf_ultralight_alloc();
-    MfUltralightError error = mf_ultralight_poller_read_card(poller, mfu_data);
-    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+    MfUltralightError error = mf_ultralight_poller_sync_read_card(poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_read_card() failed");
 
     nfc_listener_stop(mfu_listener);
     nfc_listener_free(mfu_listener);
@@ -259,8 +259,8 @@ MU_TEST(ntag_213_locked_reader) {
     nfc_listener_start(mfu_listener, NULL, NULL);
 
     MfUltralightData* mfu_data = mf_ultralight_alloc();
-    MfUltralightError error = mf_ultralight_poller_read_card(poller, mfu_data);
-    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+    MfUltralightError error = mf_ultralight_poller_sync_read_card(poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_read_card() failed");
 
     nfc_listener_stop(mfu_listener);
     nfc_listener_free(mfu_listener);
@@ -297,8 +297,8 @@ static void mf_ultralight_write() {
     MfUltralightData* mfu_data = mf_ultralight_alloc();
 
     // Initial read
-    MfUltralightError error = mf_ultralight_poller_read_card(poller, mfu_data);
-    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+    MfUltralightError error = mf_ultralight_poller_sync_read_card(poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_read_card() failed");
 
     mu_assert(
         mf_ultralight_is_equal(mfu_data, nfc_device_get_data(nfc_device, NfcProtocolMfUltralight)),
@@ -310,13 +310,13 @@ static void mf_ultralight_write() {
         FURI_LOG_D(TAG, "Writing page %d", i);
         furi_hal_random_fill_buf(page.data, sizeof(MfUltralightPage));
         mfu_data->page[i] = page;
-        error = mf_ultralight_poller_write_page(poller, i, &page);
-        mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_write_page() failed");
+        error = mf_ultralight_poller_sync_write_page(poller, i, &page);
+        mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_write_page() failed");
     }
 
     // Verification read
-    error = mf_ultralight_poller_read_card(poller, mfu_data);
-    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+    error = mf_ultralight_poller_sync_read_card(poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_sync_read_card() failed");
 
     nfc_listener_stop(mfu_listener);
     const MfUltralightData* mfu_listener_data =
