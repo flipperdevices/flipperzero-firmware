@@ -183,6 +183,7 @@ void subghz_scene_receiver_on_enter(void* context) {
     }
     furi_string_free(item_name);
     furi_string_free(item_time);
+
     subghz_view_receiver_set_callback(
         subghz->subghz_receiver, subghz_scene_receiver_callback, subghz);
     subghz_txrx_set_rx_callback(subghz->txrx, subghz_scene_add_to_history_callback, subghz);

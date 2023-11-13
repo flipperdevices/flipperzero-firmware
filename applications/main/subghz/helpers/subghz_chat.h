@@ -1,5 +1,5 @@
 #pragma once
-#include <applications/main/subghz/subghz_i.h>
+#include "../subghz_i.h"
 #include <lib/subghz/devices/devices.h>
 #include <cli/cli.h>
 
