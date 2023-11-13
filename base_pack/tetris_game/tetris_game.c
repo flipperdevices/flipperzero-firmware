@@ -7,14 +7,18 @@
 #include <furi_hal_resources.h>
 #include <furi_hal_gpio.h>
 #include <dolphin/dolphin.h>
+#include "tetris_icons.h"
 
 #define BORDER_OFFSET 1
 #define MARGIN_OFFSET 3
 #define BLOCK_HEIGHT 6
 #define BLOCK_WIDTH 6
 
-#define FIELD_WIDTH 11
-#define FIELD_HEIGHT 24
+#define FIELD_WIDTH 10
+#define FIELD_HEIGHT 20
+
+#define FIELD_X_OFFSET 3
+#define FIELD_Y_OFFSET 20
 
 #define MAX_FALL_SPEED 500
 #define MIN_FALL_SPEED 100
@@ -62,10 +66,12 @@ static Piece shapes[] = {
     {.p = {{5, 1}, {5, 0}, {6, 0}, {6, 1}}, .rotIdx = 0, .offsetType = OffsetTypeO} // O
 };
 
-typedef enum { GameStatePlaying, GameStateGameOver } GameState;
+typedef enum { GameStatePlaying, GameStateGameOver, GameStatePaused } GameState;
 
 typedef struct {
     bool playField[FIELD_HEIGHT][FIELD_WIDTH];
+    bool bag[7];
+    uint8_t next_id;
     Piece currPiece;
     uint16_t numLines;
     uint16_t fallSpeed;
@@ -85,45 +91,90 @@ typedef struct {
 } TetrisEvent;
 
 static void tetris_game_draw_border(Canvas* const canvas) {
-    canvas_draw_line(canvas, 0, 0, 0, 127);
-    canvas_draw_line(canvas, 0, 127, 63, 127);
-    canvas_draw_line(canvas, 63, 127, 63, 0);
+    canvas_draw_line(
+        canvas,
+        FIELD_X_OFFSET,
+        FIELD_Y_OFFSET,
+        FIELD_X_OFFSET,
+        FIELD_Y_OFFSET + FIELD_HEIGHT * 5 + 7);
+    canvas_draw_line(
+        canvas,
+        FIELD_X_OFFSET,
+        FIELD_Y_OFFSET + FIELD_HEIGHT * 5 + 7,
+        FIELD_X_OFFSET + FIELD_WIDTH * 5 + 8,
+        FIELD_Y_OFFSET + FIELD_HEIGHT * 5 + 7);
+    canvas_draw_line(
+        canvas,
+        FIELD_X_OFFSET + FIELD_WIDTH * 5 + 8,
+        FIELD_Y_OFFSET + FIELD_HEIGHT * 5 + 7,
+        FIELD_X_OFFSET + FIELD_WIDTH * 5 + 8,
+        FIELD_Y_OFFSET);
 
-    canvas_draw_line(canvas, 2, 0, 2, 125);
-    canvas_draw_line(canvas, 2, 125, 61, 125);
-    canvas_draw_line(canvas, 61, 125, 61, 0);
+    canvas_draw_line(
+        canvas,
+        FIELD_X_OFFSET + 2,
+        FIELD_Y_OFFSET + 0,
+        FIELD_X_OFFSET + 2,
+        FIELD_Y_OFFSET + FIELD_HEIGHT * 5 + 5);
+    canvas_draw_line(
+        canvas,
+        FIELD_X_OFFSET + 2,
+        FIELD_Y_OFFSET + FIELD_HEIGHT * 5 + 5,
+        FIELD_X_OFFSET + FIELD_WIDTH * 5 + 6,
+        FIELD_Y_OFFSET + FIELD_HEIGHT * 5 + 5);
+    canvas_draw_line(
+        canvas,
+        FIELD_X_OFFSET + FIELD_WIDTH * 5 + 6,
+        FIELD_Y_OFFSET + FIELD_HEIGHT * 5 + 5,
+        FIELD_X_OFFSET + FIELD_WIDTH * 5 + 6,
+        FIELD_Y_OFFSET);
+}
+
+static void tetris_game_draw_block(Canvas* const canvas, uint16_t xOffset, uint16_t yOffset) {
+    canvas_draw_rframe(
+        canvas,
+        BORDER_OFFSET + MARGIN_OFFSET + xOffset,
+        BORDER_OFFSET + MARGIN_OFFSET + yOffset - 1,
+        BLOCK_WIDTH,
+        BLOCK_HEIGHT,
+        1);
+    canvas_draw_dot(
+        canvas,
+        BORDER_OFFSET + MARGIN_OFFSET + xOffset + 2,
+        BORDER_OFFSET + MARGIN_OFFSET + yOffset + 1);
+    canvas_draw_dot(
+        canvas,
+        BORDER_OFFSET + MARGIN_OFFSET + xOffset + 3,
+        BORDER_OFFSET + MARGIN_OFFSET + yOffset + 1);
+    canvas_draw_dot(
+        canvas,
+        BORDER_OFFSET + MARGIN_OFFSET + xOffset + 2,
+        BORDER_OFFSET + MARGIN_OFFSET + yOffset + 2);
 }
 
 static void tetris_game_draw_playfield(Canvas* const canvas, const TetrisState* tetris_state) {
-    // Playfield: 11 x 24
-
     for(int y = 0; y < FIELD_HEIGHT; y++) {
         for(int x = 0; x < FIELD_WIDTH; x++) {
             if(tetris_state->playField[y][x]) {
-                uint16_t xOffset = x * 5;
-                uint16_t yOffset = y * 5;
-
-                canvas_draw_rframe(
+                tetris_game_draw_block(
                     canvas,
-                    BORDER_OFFSET + MARGIN_OFFSET + xOffset,
-                    BORDER_OFFSET + MARGIN_OFFSET + yOffset - 1,
-                    BLOCK_WIDTH,
-                    BLOCK_HEIGHT,
-                    1);
-                canvas_draw_dot(
-                    canvas,
-                    BORDER_OFFSET + MARGIN_OFFSET + xOffset + 2,
-                    BORDER_OFFSET + MARGIN_OFFSET + yOffset + 1);
-                canvas_draw_dot(
-                    canvas,
-                    BORDER_OFFSET + MARGIN_OFFSET + xOffset + 3,
-                    BORDER_OFFSET + MARGIN_OFFSET + yOffset + 1);
-                canvas_draw_dot(
-                    canvas,
-                    BORDER_OFFSET + MARGIN_OFFSET + xOffset + 2,
-                    BORDER_OFFSET + MARGIN_OFFSET + yOffset + 2);
+                    FIELD_X_OFFSET + x * (BLOCK_WIDTH - 1),
+                    FIELD_Y_OFFSET + y * (BLOCK_HEIGHT - 1));
             }
         }
+    }
+}
+
+static void tetris_game_draw_next_piece(Canvas* const canvas, const TetrisState* tetris_state) {
+    Piece* next_piece = &shapes[tetris_state->next_id];
+    for(int i = 0; i < 4; i++) {
+        uint8_t x = next_piece->p[i].x;
+        uint8_t y = next_piece->p[i].y;
+
+        tetris_game_draw_block(
+            canvas,
+            FIELD_X_OFFSET + x * (BLOCK_WIDTH - 1) - (BLOCK_WIDTH * 4),
+            y * (BLOCK_HEIGHT - 1));
     }
 }
 
@@ -134,12 +185,13 @@ static void tetris_game_render_callback(Canvas* const canvas, void* ctx) {
 
     tetris_game_draw_border(canvas);
     tetris_game_draw_playfield(canvas, tetris_state);
+    tetris_game_draw_next_piece(canvas, tetris_state);
 
     // Show score on the game field
-    if(tetris_state->gameState == GameStatePlaying) {
+    if(tetris_state->gameState == GameStatePlaying || tetris_state->gameState == GameStatePaused) {
         char buffer2[6];
         snprintf(buffer2, sizeof(buffer2), "%u", tetris_state->numLines);
-        canvas_draw_str_aligned(canvas, 58, 10, AlignRight, AlignBottom, buffer2);
+        canvas_draw_str_aligned(canvas, 62, 10, AlignRight, AlignBottom, buffer2);
     }
 
     if(tetris_state->gameState == GameStateGameOver) {
@@ -158,6 +210,22 @@ static void tetris_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 32, 73, AlignCenter, AlignBottom, buffer);
     }
+
+    if(tetris_state->gameState == GameStatePaused) {
+        // 128 x 64
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, 1, 52, 62, 24);
+
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_frame(canvas, 1, 52, 62, 24);
+
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 4, 63, "Paused");
+
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 4, 73, "hold      to quit");
+        canvas_draw_icon(canvas, 22, 66, &I_Pin_back_arrow_10x8);
+    }
     furi_mutex_release(tetris_state->mutex);
 }
 
@@ -168,13 +236,42 @@ static void tetris_game_input_callback(InputEvent* input_event, FuriMessageQueue
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+static uint8_t tetris_game_get_next_piece(TetrisState* tetris_state) {
+    bool full = true;
+    for(int i = 0; i < 7; i++) {
+        if(!tetris_state->bag[i]) {
+            full = false;
+            break;
+        }
+    }
+    if(full == true) {
+        for(int i = 0; i < 7; i++) {
+            tetris_state->bag[i] = false;
+        }
+    }
+
+    int next_piece = rand() % 7;
+    while(tetris_state->bag[next_piece]) {
+        next_piece = rand() % 7;
+    }
+    tetris_state->bag[next_piece] = true;
+    int result = tetris_state->next_id;
+    tetris_state->next_id = next_piece;
+
+    return result;
+}
+
 static void tetris_game_init_state(TetrisState* tetris_state) {
     tetris_state->gameState = GameStatePlaying;
     tetris_state->numLines = 0;
     tetris_state->fallSpeed = MAX_FALL_SPEED;
     memset(tetris_state->playField, 0, sizeof(tetris_state->playField));
+    memset(tetris_state->bag, 0, sizeof(tetris_state->bag));
 
-    memcpy(&tetris_state->currPiece, &shapes[rand() % 7], sizeof(tetris_state->currPiece));
+    // init next_piece display
+    tetris_game_get_next_piece(tetris_state);
+    int next_piece_id = tetris_game_get_next_piece(tetris_state);
+    memcpy(&tetris_state->currPiece, &shapes[next_piece_id], sizeof(tetris_state->currPiece));
 
     furi_timer_start(tetris_state->timer, tetris_state->fallSpeed);
 }
@@ -294,7 +391,8 @@ static void tetris_game_update_timer_callback(FuriMessageQueue* event_queue) {
 
 static void
     tetris_game_process_step(TetrisState* tetris_state, Piece* newPiece, bool wasDownMove) {
-    if(tetris_state->gameState == GameStateGameOver) return;
+    if(tetris_state->gameState == GameStateGameOver || tetris_state->gameState == GameStatePaused)
+        return;
 
     tetris_game_remove_curr_piece(tetris_state);
 
@@ -335,7 +433,8 @@ static void
             }
 
             // Check for game over
-            Piece* spawnedPiece = &shapes[rand() % 7];
+            int next_piece_id = tetris_game_get_next_piece(tetris_state);
+            Piece* spawnedPiece = &shapes[next_piece_id];
             if(!tetris_game_is_valid_pos(tetris_state, spawnedPiece->p)) {
                 tetris_state->gameState = GameStateGameOver;
             } else {
@@ -439,7 +538,21 @@ int32_t tetris_game_app() {
                         }
                         break;
                     case InputKeyBack:
-                        processing = false;
+                        if(event.input.type == InputTypeLong) {
+                            processing = false;
+                        } else if(event.input.type == InputTypePress) {
+                            switch(tetris_state->gameState) {
+                            case GameStatePaused:
+                                tetris_state->gameState = GameStatePlaying;
+                                break;
+                            case GameStatePlaying:
+                                tetris_state->gameState = GameStatePaused;
+                                break;
+
+                            default:
+                                break;
+                            }
+                        }
                         break;
                     default:
                         break;
