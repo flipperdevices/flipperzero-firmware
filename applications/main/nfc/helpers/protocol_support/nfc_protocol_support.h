@@ -78,7 +78,6 @@
 #include <gui/scene_manager.h>
 
 #include "nfc_protocol_support_common.h"
-#include <nfc_icons.h>
 
 /**
  * @brief Abstract interface for on_enter() scene handler.
