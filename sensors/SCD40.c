@@ -19,16 +19,10 @@
 
 // Some information may be seen on https://github.com/sparkfun/SparkFun_SCD30_Arduino_Library
 
-#include "SCD30.h"
+#include "SCD40.h"
 #include "../interfaces/I2CSensor.h"
 #include "../interfaces/endianness.h"
 //#include <3rdparty/everest/include/everest/kremlin/c_endianness.h>
-
-bool unitemp_SCD40_alloc(Sensor* sensor, char* args);
-bool unitemp_SCD40_init(Sensor* sensor);
-bool unitemp_SCD40_deinit(Sensor* sensor);
-UnitempStatus unitemp_SCD40_update(Sensor* sensor);
-bool unitemp_SCD40_free(Sensor* sensor);
 
 const SensorType SCD40 = {
     .typename = "SCD40",
@@ -185,7 +179,7 @@ static bool getSettingValue(Sensor* sensor, uint16_t registerAddress, uint16_t* 
     return loadWord(bytes, val);
 }
 
-// Get 18 bytes from SCD30
+// Get 18 bytes from SCD40
 // Updates global variables with floats
 // Returns true if success
 static bool readMeasurement(Sensor* sensor) {
