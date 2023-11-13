@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdlib.h>
 #include <string.h>
 #include <storage/storage.h>
@@ -16,7 +18,6 @@
 
 void hex_viewer_save_settings(void* context);
 void hex_viewer_read_settings(void* context);
-
 
 bool hex_viewer_open_file(void* context, const char* file_path);
 bool hex_viewer_read_file(void* context);

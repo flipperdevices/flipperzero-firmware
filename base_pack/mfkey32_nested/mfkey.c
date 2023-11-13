@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <storage/storage.h>
-#include <lib/nfc/helpers/mf_classic_dict.h>
+#include <toolbox/stream/buffered_file_stream.h>
 #include <lib/toolbox/args.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <dolphin/dolphin.h>
@@ -50,10 +50,10 @@
 #define CONST_M2_1 (LF_POLY_ODD << 1)
 #define CONST_M1_2 (LF_POLY_ODD)
 #define CONST_M2_2 (LF_POLY_EVEN << 1 | 1)
-#define BIT(x, n) ((x) >> (n) & 1)
+#define BIT(x, n) ((x) >> (n)&1)
 #define BEBIT(x, n) BIT(x, (n) ^ 24)
 #define SWAPENDIAN(x) \
-    ((x) = ((x) >> 8 & 0xff00ff) | ((x) & 0xff00ff) << 8, (x) = (x) >> 16 | (x) << 16)
+    ((x) = ((x) >> 8 & 0xff00ff) | ((x)&0xff00ff) << 8, (x) = (x) >> 16 | (x) << 16)
 //#define SIZEOF(arr) sizeof(arr) / sizeof(*arr)
 
 static int eta_round_time = 56;
@@ -148,10 +148,15 @@ typedef struct {
     size_t remaining_nonces;
 } MfClassicNonceArray;
 
-struct MfClassicDict {
+typedef enum {
+    MfClassicDictTypeSystem,
+    MfClassicDictTypeUser,
+} MfClassicDictType;
+
+typedef struct {
     Stream* stream;
     uint32_t total_keys;
-};
+} MfClassicDict;
 
 static const uint8_t table[256] = {
     0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3,
