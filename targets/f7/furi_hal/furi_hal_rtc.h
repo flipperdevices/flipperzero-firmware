@@ -136,12 +136,28 @@ void furi_hal_rtc_set_log_level(uint8_t level);
  */
 uint8_t furi_hal_rtc_get_log_level();
 
+/** Set logging device
+ *
+ * @param[in]  device  The device
+ */
 void furi_hal_rtc_set_log_device(FuriHalRtcLogDevice device);
 
+/** Get logging device
+ *
+ * @return     The furi hal rtc log device.
+ */
 FuriHalRtcLogDevice furi_hal_rtc_get_log_device();
 
+/** Set logging baud rate
+ *
+ * @param[in]  baud_rate  The baud rate
+ */
 void furi_hal_rtc_set_log_baud_rate(FuriHalRtcLogBaudRate baud_rate);
 
+/** Get logging baud rate
+ *
+ * @return     The furi hal rtc log baud rate.
+ */
 FuriHalRtcLogBaudRate furi_hal_rtc_get_log_baud_rate();
 
 /** Set RTC Flag
