@@ -1,3 +1,2 @@
-.vscode/
-venv/
-.clang-format
+/.vscode/
+/venv/

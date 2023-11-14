@@ -78,7 +78,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         if(isInfiniteScan)
             canvas_draw_str(canvas, 37, 8, "scanning...");
         else
-        canvas_draw_str(canvas, 37, 8, "scanning");
+            canvas_draw_str(canvas, 37, 8, "scanning");
 
     } else {
         if(showFreq) {
@@ -136,9 +136,9 @@ static int32_t scanner(void* context) {
                 }
                 if(nrf24values[i] > 50 && !isInfiniteScan) {
                     stopNrfScan = true; //stop, bc maxed, but only when not infinite
+                }
             }
         }
-    }
         furi_delay_ms(1);
         //for screen refresh.
     }
