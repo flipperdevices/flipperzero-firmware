@@ -21,6 +21,7 @@ typedef struct {
     bool muted;
     bool ptt_pressed;
     bool connected;
+    bool is_mac_os;
     HidTransport transport;
 } HidPttModel;
 
@@ -44,14 +45,16 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 3, 96, &I_ButtonDown_7x4);
 
     // OS selection
-    elements_slightly_rounded_box(canvas, 0, 106, 21, 11);
-    canvas_set_color(canvas, ColorWhite);
+    elements_slightly_rounded_box(canvas, model->is_mac_os ? 0 : 26, 106, model->is_mac_os ? 21 : 26, 11);
+    canvas_set_color(canvas, model->is_mac_os ? ColorWhite : ColorBlack);
     elements_multiline_text_aligned(canvas, 2, 108, AlignLeft, AlignTop, "Mac");
     canvas_set_color(canvas, ColorBlack);
-    elements_multiline_text_aligned(canvas, 24, 108, AlignLeft, AlignTop, "|");
+    elements_multiline_text_aligned(canvas, 23, 108, AlignLeft, AlignTop, "|");
+    canvas_set_color(canvas, model->is_mac_os ? ColorBlack : ColorWhite);
     elements_multiline_text_aligned(canvas, 28, 108, AlignLeft, AlignTop, "Linux");
     canvas_set_color(canvas, ColorBlack);
 
+    // Exit label
     canvas_draw_icon(canvas, 3, 121, &I_ButtonLeft_4x7);
     elements_multiline_text_aligned(canvas, 9, 121, AlignLeft, AlignTop, "Hold to exit");
 
@@ -192,13 +195,16 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
             } else if(event->type == InputTypeShort) {
                 if(event->key == InputKeyOk && !model->ptt_pressed ) { // no changes if PTT is pressed
                     model->muted = !model->muted;
-                    //  + d
                     hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
                     hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
                 } else if(event->key == InputKeyRight) {
-                    //  + d
-                    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
-                    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+                    if (!model->ptt_pressed){
+                        hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+                        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+                    } else {
+                        model->is_mac_os = !model->is_mac_os;
+                        notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                    }
                 }
             } else if(event->type == InputTypeLong) {
                 if(event->key == InputKeyLeft) {
@@ -210,6 +216,7 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
                 } else if(event->key == InputKeyOk && !model->ptt_pressed ) { // no changes if PTT is pressed
                     // Change local mic status
                     model->muted = !model->muted;
+                    notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
                 }
             }
             //LED
@@ -244,6 +251,7 @@ HidPtt* hid_ptt_alloc(Hid* hid) {
         hid_ptt->view, HidPttModel * model, {
             model->transport = hid->transport;
             model->muted = false; // assume we're not muted
+            model->is_mac_os = true;
         }, true);
     return hid_ptt;
 }
