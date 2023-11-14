@@ -64,20 +64,38 @@ typedef enum {
 } FuriHalRtcRegister;
 
 typedef enum {
-    FuriHalRtcLocaleUnitsMetric = 0, /**< Metric measurement units */
-    FuriHalRtcLocaleUnitsImperial = 1, /**< Imperial measurement units */
+    FuriHalRtcLocaleUnitsMetric = 0x0, /**< Metric measurement units */
+    FuriHalRtcLocaleUnitsImperial = 0x1, /**< Imperial measurement units */
 } FuriHalRtcLocaleUnits;
 
 typedef enum {
-    FuriHalRtcLocaleTimeFormat24h = 0, /**< 24-hour format */
-    FuriHalRtcLocaleTimeFormat12h = 1, /**< 12-hour format */
+    FuriHalRtcLocaleTimeFormat24h = 0x0, /**< 24-hour format */
+    FuriHalRtcLocaleTimeFormat12h = 0x1, /**< 12-hour format */
 } FuriHalRtcLocaleTimeFormat;
 
 typedef enum {
-    FuriHalRtcLocaleDateFormatDMY = 0, /**< Day/Month/Year */
-    FuriHalRtcLocaleDateFormatMDY = 1, /**< Month/Day/Year */
-    FuriHalRtcLocaleDateFormatYMD = 2, /**< Year/Month/Day */
+    FuriHalRtcLocaleDateFormatDMY = 0x0, /**< Day/Month/Year */
+    FuriHalRtcLocaleDateFormatMDY = 0x1, /**< Month/Day/Year */
+    FuriHalRtcLocaleDateFormatYMD = 0x2, /**< Year/Month/Day */
 } FuriHalRtcLocaleDateFormat;
+
+typedef enum {
+    FuriHalRtcLogDeviceUsart = 0x0, /**< Default: USART */
+    FuriHalRtcLogDeviceLpuart = 0x1, /**< Default: LPUART */
+    FuriHalRtcLogDeviceReserved = 0x2, /**< Reserved for future use */
+    FuriHalRtcLogDeviceNone = 0x3, /**< None, disable serial logging */
+} FuriHalRtcLogDevice;
+
+typedef enum {
+    FuriHalRtcLogBaudRate230400 = 0x0, /**< 230400 baud */
+    FuriHalRtcLogBaudRate9600 = 0x1, /**< 9600 baud */
+    FuriHalRtcLogBaudRate38400 = 0x2, /**< 38400 baud */
+    FuriHalRtcLogBaudRate57600 = 0x3, /**< 57600 baud */
+    FuriHalRtcLogBaudRate115200 = 0x4, /**< 115200 baud */
+    FuriHalRtcLogBaudRate460800 = 0x5, /**< 460800 baud */
+    FuriHalRtcLogBaudRate921600 = 0x6, /**< 921600 baud */
+    FuriHalRtcLogBaudRate1843200 = 0x7, /**< 1843200 baud */
+} FuriHalRtcLogBaudRate;
 
 /** Early initialization */
 void furi_hal_rtc_init_early();
@@ -117,6 +135,14 @@ void furi_hal_rtc_set_log_level(uint8_t level);
  * @return     The Log Level value
  */
 uint8_t furi_hal_rtc_get_log_level();
+
+void furi_hal_rtc_set_log_device(FuriHalRtcLogDevice device);
+
+FuriHalRtcLogDevice furi_hal_rtc_get_log_device();
+
+void furi_hal_rtc_set_log_baud_rate(FuriHalRtcLogBaudRate baud_rate);
+
+FuriHalRtcLogBaudRate furi_hal_rtc_get_log_baud_rate();
 
 /** Set RTC Flag
  *

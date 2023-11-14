@@ -76,13 +76,11 @@ static const CdcCallbacks cdc_cb = {
 
 static int32_t usb_uart_tx_thread(void* context);
 
-static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void usb_uart_on_irq_cb(uint8_t data, void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
 
-    if(ev == UartIrqEventRXNE) {
-        furi_stream_buffer_send(usb_uart->rx_stream, &data, 1, 0);
-        furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
-    }
+    furi_stream_buffer_send(usb_uart->rx_stream, &data, 1, 0);
+    furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
 }
 
 static void usb_uart_vcp_init(UsbUartBridge* usb_uart, uint8_t vcp_ch) {
@@ -118,13 +116,13 @@ static void usb_uart_serial_init(UsbUartBridge* usb_uart, uint8_t uart_ch) {
     furi_assert(usb_uart->serial_handle);
 
     furi_hal_serial_init(usb_uart->serial_handle, 115200);
-    furi_hal_serial_set_irq_cb(usb_uart->serial_handle, usb_uart_on_irq_cb, usb_uart);
+    furi_hal_serial_set_rx_callback(usb_uart->serial_handle, usb_uart_on_irq_cb, usb_uart);
 }
 
 static void usb_uart_serial_deinit(UsbUartBridge* usb_uart) {
     furi_assert(usb_uart->serial_handle);
 
-    furi_hal_serial_set_irq_cb(usb_uart->serial_handle, NULL, NULL);
+    furi_hal_serial_set_rx_callback(usb_uart->serial_handle, NULL, NULL);
     furi_hal_serial_deinit(usb_uart->serial_handle);
     furi_hal_serial_control_release(usb_uart->serial_handle);
 }

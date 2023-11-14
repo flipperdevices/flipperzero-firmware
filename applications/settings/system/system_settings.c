@@ -30,6 +30,24 @@ static void log_level_changed(VariableItem* item) {
     furi_hal_rtc_set_log_level(log_level_value[index]);
 }
 
+const char* const log_device_text[] = {
+    "USART",
+    "LPUART",
+    "None",
+};
+
+const uint32_t log_device_value[] = {
+    FuriHalRtcLogDeviceUsart,
+    FuriHalRtcLogDeviceLpuart,
+    FuriHalRtcLogDeviceNone};
+
+static void log_device_changed(VariableItem* item) {
+    // SystemSettings* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, log_device_text[index]);
+    furi_hal_rtc_set_log_device(log_device_value[index]);
+}
+
 const char* const debug_text[] = {
     "OFF",
     "ON",
@@ -226,6 +244,13 @@ SystemSettings* system_settings_alloc() {
         furi_hal_rtc_get_log_level(), log_level_value, COUNT_OF(log_level_text));
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, log_level_text[value_index]);
+
+    item = variable_item_list_add(
+        app->var_item_list, "Log Device", COUNT_OF(log_device_text), log_device_changed, app);
+    value_index = value_index_uint32(
+        furi_hal_rtc_get_log_device(), log_device_value, COUNT_OF(log_device_text));
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, log_device_text[value_index]);
 
     item = variable_item_list_add(
         app->var_item_list, "Debug", COUNT_OF(debug_text), debug_changed, app);

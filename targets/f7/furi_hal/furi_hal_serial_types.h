@@ -6,12 +6,13 @@
  * UART channels
  */
 typedef enum {
-    FuriHalUartIdUSART1,
-    FuriHalUartIdLPUART1,
-    FuriHalUartIdMax,
-} FuriHalUartId;
+    FuriHalSerialIdUsart,
+    FuriHalSerialIdLpuart,
+
+    FuriHalSerialIdMax,
+} FuriHalSerialId;
 
 typedef struct {
-    FuriHalUartId id;
-    bool is_used;
+    FuriHalSerialId id;
+    bool in_use;
 } FuriHalSerialHandle;

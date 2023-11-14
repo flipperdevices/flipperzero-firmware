@@ -1,9 +1,7 @@
 /**
  * @file furi_hal_serial.h
- * @version 1.0
- * @date 2021-11-19
  * 
- * UART HAL api interface
+ * Serial HAL API
  */
 #pragma once
 
@@ -16,72 +14,90 @@
 extern "C" {
 #endif
 
-/**
- * UART events
- */
-typedef enum {
-    UartIrqEventRXNE,
-} UartIrqEvent;
-
-/**
- * Init UART
- * Configures GPIO to UART function, сonfigures UART hardware, enables UART hardware
- * @param channel UART channel
- * @param baud baudrate
+/** Initialize Serial
+ *
+ * Configures GPIO, configures and enables transceiver.
+ *
+ * @param      handle  Serial handle
+ * @param      baud    baud rate
  */
 void furi_hal_serial_init(FuriHalSerialHandle* handle, uint32_t baud);
 
-/**
- * Deinit UART
- * Configures GPIO to analog, clears callback and callback context, disables UART hardware
- * @param channel UART channel
+/** De-initialize Serial
+ *
+ * Configures GPIO to analog, clears callback and callback context, disables
+ * hardware
+ *
+ * @param      handle  Serial handle
  */
 void furi_hal_serial_deinit(FuriHalSerialHandle* handle);
 
-/**
- * Suspend UART operation
- * Disables UART hardware, settings and callbacks are preserved
- * @param channel UART channel
+/** Suspend operation
+ *
+ * Suspend hardware, settings and callbacks are preserved
+ *
+ * @param      handle  Serial handle
  */
 void furi_hal_serial_suspend(FuriHalSerialHandle* handle);
 
-/**
- * Resume UART operation
- * Resumes UART hardware from suspended state
- * @param channel UART channel
+/** Resume operation
+ *
+ * Resumes hardware from suspended state
+ *
+ * @param      handle  Serial handle
  */
 void furi_hal_serial_resume(FuriHalSerialHandle* handle);
 
-/**
- * Changes UART baudrate
- * @param channel UART channel
- * @param baud baudrate
+/** Changes baud rate
+ *
+ * @param      handle  Serial handle
+ * @param      baud    baud rate
  */
 void furi_hal_serial_set_br(FuriHalSerialHandle* handle, uint32_t baud);
 
-/**
- * Transmits data
- * @param channel UART channel
- * @param buffer data
- * @param buffer_size data size (in bytes)
+/** Transmits data in semi-blocking mode
+ *
+ * Fills transmission pipe with data, returns as soon as all bytes from buffer
+ * are in the pipe.
+ *
+ * Real transmission will be completed later. Use
+ * `furi_hal_serial_tx_wait_complete` to wait for completion if you need it.
+ *
+ * @param      handle       Serial handle
+ * @param      buffer       data
+ * @param      buffer_size  data size (in bytes)
  */
 void furi_hal_serial_tx(FuriHalSerialHandle* handle, const uint8_t* buffer, size_t buffer_size);
 
-/** Flush transmission pipe. Ensures that all data has been sent.
+/** Wait transmission complete.
  *
- * @param      handle  UART channel
+ * Ensures that all data has been sent.
+ *
+ * @param      handle  Serial handle
  */
 void furi_hal_serial_tx_wait_complete(FuriHalSerialHandle* handle);
 
-/**
- * Sets UART event callback
- * @param channel UART channel
- * @param callback callback pointer
- * @param context callback context
+/** Receive callback
+ *
+ * @warning    Callback will be called in interrupt context, ensure thread
+ *             safety on your side.
+ *
+ * @param      data     Received data
+ * @param      context  Callback context provided earlier
  */
-void furi_hal_serial_set_irq_cb(
+typedef void (*FuriHalSerialRxCallback)(uint8_t data, void* context);
+
+/** Sets Serial Receive callback
+ *
+ * @warning Callback will be called in interrupt context, ensure thread safety on your side
+ *
+ * @param      handle    Serial handle
+ * @param      callback  callback pointer
+ * @param      context   callback context
+ */
+void furi_hal_serial_set_rx_callback(
     FuriHalSerialHandle* handle,
-    void (*callback)(UartIrqEvent event, uint8_t data, void* context),
+    FuriHalSerialRxCallback callback,
     void* context);
 
 #ifdef __cplusplus

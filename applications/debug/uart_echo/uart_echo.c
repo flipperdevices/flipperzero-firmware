@@ -93,14 +93,12 @@ static uint32_t uart_echo_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void uart_echo_on_irq_cb(uint8_t data, void* context) {
     furi_assert(context);
     UartEchoApp* app = context;
 
-    if(ev == UartIrqEventRXNE) {
-        furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
-        furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
-    }
+    furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
+    furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventRx);
 }
 
 static void uart_echo_push_to_list(UartDumpModel* model, const char data) {
@@ -223,10 +221,10 @@ static UartEchoApp* uart_echo_app_alloc(uint32_t baudrate) {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    app->serial_handle = furi_hal_serial_control_acquire(FuriHalUartIdUSART1);
+    app->serial_handle = furi_hal_serial_control_acquire(FuriHalSerialIdUsart);
     furi_check(app->serial_handle);
     furi_hal_serial_init(app->serial_handle, baudrate);
-    furi_hal_serial_set_irq_cb(app->serial_handle, uart_echo_on_irq_cb, app);
+    furi_hal_serial_set_rx_callback(app->serial_handle, uart_echo_on_irq_cb, app);
 
     return app;
 }

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,45.0,,
+Version,+,45.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -163,6 +163,7 @@ Header,+,targets/f7/furi_hal/furi_hal_idle_timer.h,,
 Header,+,targets/f7/furi_hal/furi_hal_interrupt.h,,
 Header,+,targets/f7/furi_hal/furi_hal_os.h,,
 Header,+,targets/f7/furi_hal/furi_hal_pwm.h,,
+Header,+,targets/f7/furi_hal/furi_hal_rtc.h,,
 Header,+,targets/f7/furi_hal/furi_hal_serial.h,,
 Header,+,targets/f7/furi_hal/furi_hal_serial_control.h,,
 Header,+,targets/f7/furi_hal/furi_hal_serial_types.h,,
@@ -185,7 +186,6 @@ Header,+,targets/furi_hal_include/furi_hal_mpu.h,,
 Header,+,targets/furi_hal_include/furi_hal_power.h,,
 Header,+,targets/furi_hal_include/furi_hal_random.h,,
 Header,+,targets/furi_hal_include/furi_hal_region.h,,
-Header,+,targets/furi_hal_include/furi_hal_rtc.h,,
 Header,+,targets/furi_hal_include/furi_hal_sd.h,,
 Header,+,targets/furi_hal_include/furi_hal_speaker.h,,
 Header,+,targets/furi_hal_include/furi_hal_spi.h,,
@@ -1233,6 +1233,8 @@ Function,+,furi_hal_rtc_get_heap_track_mode,FuriHalRtcHeapTrackMode,
 Function,+,furi_hal_rtc_get_locale_dateformat,FuriHalRtcLocaleDateFormat,
 Function,+,furi_hal_rtc_get_locale_timeformat,FuriHalRtcLocaleTimeFormat,
 Function,+,furi_hal_rtc_get_locale_units,FuriHalRtcLocaleUnits,
+Function,+,furi_hal_rtc_get_log_baud_rate,FuriHalRtcLogBaudRate,
+Function,+,furi_hal_rtc_get_log_device,FuriHalRtcLogDevice,
 Function,+,furi_hal_rtc_get_log_level,uint8_t,
 Function,+,furi_hal_rtc_get_pin_fails,uint32_t,
 Function,+,furi_hal_rtc_get_register,uint32_t,FuriHalRtcRegister
@@ -1250,6 +1252,8 @@ Function,+,furi_hal_rtc_set_heap_track_mode,void,FuriHalRtcHeapTrackMode
 Function,+,furi_hal_rtc_set_locale_dateformat,void,FuriHalRtcLocaleDateFormat
 Function,+,furi_hal_rtc_set_locale_timeformat,void,FuriHalRtcLocaleTimeFormat
 Function,+,furi_hal_rtc_set_locale_units,void,FuriHalRtcLocaleUnits
+Function,+,furi_hal_rtc_set_log_baud_rate,void,FuriHalRtcLogBaudRate
+Function,+,furi_hal_rtc_set_log_device,void,FuriHalRtcLogDevice
 Function,+,furi_hal_rtc_set_log_level,void,uint8_t
 Function,+,furi_hal_rtc_set_pin_fails,void,uint32_t
 Function,+,furi_hal_rtc_set_register,void,"FuriHalRtcRegister, uint32_t"
@@ -1263,17 +1267,18 @@ Function,+,furi_hal_sd_max_mount_retry_count,uint8_t,
 Function,+,furi_hal_sd_presence_init,void,
 Function,+,furi_hal_sd_read_blocks,FuriStatus,"uint32_t*, uint32_t, uint32_t"
 Function,+,furi_hal_sd_write_blocks,FuriStatus,"const uint32_t*, uint32_t, uint32_t"
-Function,+,furi_hal_serial_control_acquire,FuriHalSerialHandle*,FuriHalUartId
+Function,+,furi_hal_serial_control_acquire,FuriHalSerialHandle*,FuriHalSerialId
 Function,+,furi_hal_serial_control_deinit,void,
 Function,+,furi_hal_serial_control_init,void,
 Function,+,furi_hal_serial_control_release,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_control_resume,void,
+Function,+,furi_hal_serial_control_set_logging_config,void,"FuriHalSerialId, uint32_t"
 Function,+,furi_hal_serial_control_suspend,void,
 Function,+,furi_hal_serial_deinit,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_init,void,"FuriHalSerialHandle*, uint32_t"
 Function,+,furi_hal_serial_resume,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_set_br,void,"FuriHalSerialHandle*, uint32_t"
-Function,+,furi_hal_serial_set_irq_cb,void,"FuriHalSerialHandle*, void (*)(UartIrqEvent, uint8_t, void*), void*"
+Function,+,furi_hal_serial_set_rx_callback,void,"FuriHalSerialHandle*, FuriHalSerialRxCallback, void*"
 Function,+,furi_hal_serial_suspend,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_tx,void,"FuriHalSerialHandle*, const uint8_t*, size_t"
 Function,+,furi_hal_serial_tx_wait_complete,void,FuriHalSerialHandle*
