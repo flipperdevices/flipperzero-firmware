@@ -29,10 +29,10 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
         action = button_monitor_get_last_status(bm);
     }
 
-    const Icon* icon1 = (action & 1) ? &I_Down_hvr_25x27 : &I_Up_25x27;
-    const Icon* icon2 = (action & 2) ? &I_Down_hvr_25x27 : &I_Up_25x27;
-    const Icon* icon3 = (action & 4) ? &I_Down_hvr_25x27 : &I_Up_25x27;
-    const Icon* icon4 = (action & 8) ? &I_Down_hvr_25x27 : &I_Up_25x27;
+    const Icon* icon1 = (action & 1) ? &I_fb_Down_hvr_25x27 : &I_fb_Up_25x27;
+    const Icon* icon2 = (action & 2) ? &I_fb_Down_hvr_25x27 : &I_fb_Up_25x27;
+    const Icon* icon3 = (action & 4) ? &I_fb_Down_hvr_25x27 : &I_fb_Up_25x27;
+    const Icon* icon4 = (action & 8) ? &I_fb_Down_hvr_25x27 : &I_fb_Up_25x27;
     furi_string_printf(action_text, "%02d", action);
 
     canvas_set_bitmap_mode(canvas, 1);
