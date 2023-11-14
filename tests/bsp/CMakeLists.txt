@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
 if(NOT TEST_FAMILIES)
-    set(TEST_FAMILIES F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 MP1 U5 WB WL)
+    set(TEST_FAMILIES C0 F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 MP1 U5 WB WL)
 endif()
 
 # Nucleo boards can have different devices on it
+set(DEVICE_STM32C0xx_Nucleo C031C6)
 set(DEVICE_STM32F0xx_Nucleo_32 F031K6)
 set(DEVICE_STM32F0xx_Nucleo F030R8)
 set(DEVICE_STM32F1xx_Nucleo F103RB)
