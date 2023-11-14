@@ -1,5 +1,6 @@
 #include "hid_ptt.h"
 #include <gui/elements.h>
+#include <notification/notification_messages.h>
 #include "../hid.h"
 #include "../views.h"
 
@@ -20,6 +21,7 @@ typedef struct {
     bool ok_pressed;
     bool back_pressed;
     bool connected;
+    bool muted;
     HidTransport transport;
 } HidPttModel;
 
@@ -47,10 +49,6 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
         }
-
-        elements_multiline_text_aligned(canvas, 20, 3, AlignLeft, AlignTop, "Ptt");
-    } else {
-        elements_multiline_text_aligned(canvas, 12, 3, AlignLeft, AlignTop, "Ptt");
     }
 
     canvas_draw_icon(canvas, 2, 18, &I_Pin_back_arrow_10x8);
@@ -128,52 +126,54 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
-                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_UP_ARROW);
+                    hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
-                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_DOWN_ARROW);
+                    hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_DECREMENT);
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
-                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_LEFT_ARROW);
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = true;
-                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_RIGHT_ARROW);
-                } else if(event->key == InputKeyOk) {
-                    model->ok_pressed = true;
-                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+                // } else if(event->key == InputKeyOk) {
+                //     model->ok_pressed = true;
                 } else if(event->key == InputKeyBack) {
+                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
                     model->back_pressed = true;
                 }
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = false;
-                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_UP_ARROW);
+                    hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = false;
-                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_DOWN_ARROW);
+                    hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_VOLUME_DECREMENT);
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = false;
-                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_LEFT_ARROW);
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = false;
-                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_RIGHT_ARROW);
-                } else if(event->key == InputKeyOk) {
-                    model->ok_pressed = false;
-                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+                // } else if(event->key == InputKeyOk) {
+                //     model->ok_pressed = false;
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = false;
+                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
                 }
             } else if(event->type == InputTypeShort) {
-                if(event->key == InputKeyBack) {
-                    hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_DELETE);
-                    hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_DELETE);
-                    hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_AC_BACK);
-                    hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_AC_BACK);
+                if(event->key == InputKeyOk) {
+                    //  + d
+                    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
+                    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
+                }
+                if(event->key == InputKeyRight) {
+                    //  + d
+                    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+                    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
                 }
             } else if(event->type == InputTypeLong && event->key == InputKeyLeft) {
                 model->left_pressed = false;
                 hid_hal_keyboard_release_all(hid_ptt->hid);
                 view_dispatcher_switch_to_view(hid_ptt->hid->view_dispatcher, HidViewSubmenu);
+                // sequence_double_vibro to notify that we quit PTT
+                notification_message(hid_ptt->hid->notifications, &sequence_double_vibro);
             }
         },
         true);
@@ -198,7 +198,10 @@ HidPtt* hid_ptt_alloc(Hid* hid) {
     view_set_orientation(hid_ptt->view, ViewOrientationVerticalFlip);
 
     with_view_model(
-        hid_ptt->view, HidPttModel * model, { model->transport = hid->transport; }, true);
+        hid_ptt->view, HidPttModel * model, {
+            model->transport = hid->transport;
+            model->muted = false; // assume we're not muted
+        }, true);
     return hid_ptt;
 }
 
