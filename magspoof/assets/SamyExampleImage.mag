@@ -1,0 +1,7 @@
+Filetype: Flipper Mag device
+Version: 1
+# Mag device track data
+# Data matching image example in Samy's repo, for ease of comparison
+Track 1: %B426684131234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?
+Track 2: ;426684131234567=230188855555555555555?
+Track 3: 
