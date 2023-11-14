@@ -250,7 +250,7 @@ HidPtt* hid_ptt_alloc(Hid* hid) {
     with_view_model(
         hid_ptt->view, HidPttModel * model, {
             model->transport = hid->transport;
-            model->muted = false; // assume we're not muted
+            model->muted = true; // assume we're muted
             model->is_mac_os = true;
         }, true);
     return hid_ptt;
