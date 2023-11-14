@@ -330,21 +330,21 @@ static void populate_variable_item_list(ButtonConfig* button_config, ButtonModel
     variable_item_list_reset(button_config->item_list);
     uint8_t item_index = 0;
 
-    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldColorUp) {
+    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldColorDown) {
         populate_variable_item_list_color(
-            button_config, bm, "Color up", color_up_changed, button_model_get_color_up(bm));
+            button_config, bm, "Press color", color_down_changed, button_model_get_color_down(bm));
         item_index++;
     }
 
-    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldColorDown) {
+    if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldColorUp) {
         populate_variable_item_list_color(
-            button_config, bm, "Color down", color_down_changed, button_model_get_color_down(bm));
+            button_config, bm, "Release color", color_up_changed, button_model_get_color_up(bm));
         item_index++;
     }
 
     if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldFrequency) {
         populate_variable_item_list_frequency(
-            button_config, bm, "Frequency", tone_changed, button_model_get_frequency(bm));
+            button_config, bm, "Music note", tone_changed, button_model_get_frequency(bm));
         item_index++;
     }
 
@@ -434,7 +434,7 @@ ButtonConfig* button_config_alloc(
     int display_count = 0;
     for(int i = 1; i < 16;) {
         display_count++;
-        furi_string_printf(button_name, "Button %d (", display_count);
+        furi_string_printf(button_name, "Action %d (", display_count);
         if(i == 15) {
             furi_string_cat_printf(button_name, "all buttons");
         } else {
@@ -478,7 +478,7 @@ ButtonConfig* button_config_alloc(
             i++;
         }
     }
-    submenu_set_header(button_config->menu_buttons, "Configure Button");
+    submenu_set_header(button_config->menu_buttons, "Configure Action");
 
     return button_config;
 }
