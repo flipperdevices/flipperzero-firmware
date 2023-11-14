@@ -2,7 +2,6 @@
 
 #include "mag_device.h"
 //#include "helpers/mag_helpers.h"
-#include "helpers/mag_text_input.h"
 #include "helpers/mag_types.h"
 
 #include <furi.h>
@@ -51,7 +50,6 @@ typedef struct {
     uint32_t us_interpacket;
 } MagSetting;
 
-
 typedef struct {
     ViewDispatcher* view_dispatcher;
     Gui* gui;
@@ -76,15 +74,12 @@ typedef struct {
     Widget* widget;
     VariableItemList* variable_item_list;
 
-    // Custom views
-    Mag_TextInput* mag_text_input;
-
     // UART
     FuriThread* uart_rx_thread;
     FuriStreamBuffer* uart_rx_stream;
     uint8_t uart_rx_buf[UART_RX_BUF_SIZE + 1];
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
-    
+
     char uart_text_input_store[UART_TERMINAL_TEXT_INPUT_STORE_SIZE + 1];
     FuriString* uart_text_box_store;
     size_t uart_text_box_store_strlen;
