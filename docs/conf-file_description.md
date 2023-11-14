@@ -163,7 +163,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 <summary><h3 style="display: inline">AutomationKbLayout</h3></summary>
 <p>
 
-**Type:** enum (available options are `0`, `1`)
+**Type:** enum (available options are `0`, `1`, `2`)
 
 **Default value:** `0`
 
@@ -171,7 +171,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 * `0` - QWERTY
 * `1` - AZERTY
-* `3` - QWERTZ
+* `2` - QWERTZ
 
 </p>
 </details>
