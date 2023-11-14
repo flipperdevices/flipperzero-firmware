@@ -1,6 +1,0 @@
-.vscode/**
-.vscode
-dist/debug/
-.editorconfig
-*.txt
-dist/simon_says.fap
