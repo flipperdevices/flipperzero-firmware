@@ -1,0 +1,16 @@
+App(
+    appid="wch_swio_flasher",
+    name="WHC SWIO Flasher",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="wch_swio_flasher_app",
+    stack_size=2 * 1024,
+    fap_libs=["assets"],
+    fap_category="Tools",
+    # Optional values
+    fap_version="1.0",
+    fap_icon="wch_swio_flasher.png",  # 10x10 1-bit PNG
+    fap_description="A WHC CH32V003 debugger/flasher tool",
+    fap_author="Vojtech Suk",
+    fap_weburl="https://github.com/sukvojte/wch_swio_flasher",
+    fap_icon_assets="images",  # Image assets to compile for this application
+)

@@ -1,0 +1,6 @@
+ADD_SCENE(wch_swio_flasher, main, Main)
+ADD_SCENE(wch_swio_flasher, debugger, Debugger)
+ADD_SCENE(wch_swio_flasher, flash, Flash)
+ADD_SCENE(wch_swio_flasher, wiring, Wiring)
+ADD_SCENE(wch_swio_flasher, about, About)
+ADD_SCENE(wch_swio_flasher, file_browser, FileBrowser)
