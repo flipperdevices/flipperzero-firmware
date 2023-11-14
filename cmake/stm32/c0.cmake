@@ -3,8 +3,8 @@ set(STM32_C0_TYPES
     C031xx
 )
 set(STM32_C0_TYPE_MATCH 
-    "C011.."
-    "C031.."
+    "C011.[46]"
+    "C031.[46]"
 )
 set(STM32_C0_RAM_SIZES 
      6K
