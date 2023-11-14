@@ -11,8 +11,8 @@ set(STM32_C0_RAM_SIZES
     12K
 )
 set(STM32_C0_CCRAM_SIZES 
-     0K  0K
-     0K  0K
+     0K
+     0K
 )
 
 stm32_util_create_family_targets(C0)
