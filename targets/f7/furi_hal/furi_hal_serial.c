@@ -1,4 +1,6 @@
 #include <furi_hal_serial.h>
+#include "furi_hal_serial_types_i.h"
+
 #include <stdbool.h>
 #include <stm32wbxx_ll_lpuart.h>
 #include <stm32wbxx_ll_usart.h>

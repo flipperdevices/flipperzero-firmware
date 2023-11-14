@@ -1,5 +1,7 @@
 #include "furi_hal_serial_control.h"
+#include "furi_hal_serial_types_i.h"
 #include "furi_hal_serial.h"
+
 #include <furi.h>
 #include <toolbox/api_lock.h>
 
@@ -138,6 +140,7 @@ void furi_hal_serial_control_init(void) {
     // Allocate resources
     furi_hal_serial_control = malloc(sizeof(FuriHalSerialControl));
     furi_hal_serial_control->handles[FuriHalSerialIdUsart].id = FuriHalSerialIdUsart;
+    furi_hal_serial_control->handles[FuriHalSerialIdLpuart].id = FuriHalSerialIdLpuart;
     furi_hal_serial_control->queue =
         furi_message_queue_alloc(8, sizeof(FuriHalSerialControlMessage));
     furi_hal_serial_control->thread =

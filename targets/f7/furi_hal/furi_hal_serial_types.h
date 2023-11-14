@@ -12,7 +12,4 @@ typedef enum {
     FuriHalSerialIdMax,
 } FuriHalSerialId;
 
-typedef struct {
-    FuriHalSerialId id;
-    bool in_use;
-} FuriHalSerialHandle;
+typedef struct FuriHalSerialHandle FuriHalSerialHandle;
