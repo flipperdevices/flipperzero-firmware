@@ -557,9 +557,9 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
     packet[i++] = 0x16; // AD Type (Service Data)
     packet[i++] = 0x2C; // Service UUID (Google LLC, FastPair)
     packet[i++] = 0xFE; // ...
-    packet[i++] = (model >> 0x10) & 0xFF;
-    packet[i++] = (model >> 0x08) & 0xFF;
-    packet[i++] = (model >> 0x00) & 0xFF;
+    packet[i++] = (model >> 0x10) & 0xFF; // Device Model
+    packet[i++] = (model >> 0x08) & 0xFF; // ...
+    packet[i++] = (model >> 0x00) & 0xFF; // ...
 
     packet[i++] = 2; // Size
     packet[i++] = 0x0A; // AD Type (Tx Power Level)

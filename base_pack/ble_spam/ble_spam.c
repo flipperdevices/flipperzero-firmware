@@ -33,7 +33,6 @@ static Attack attacks[] = {
                 .cfg.continuity =
                     {
                         .type = ContinuityTypeCustomCrash,
-                        .data = {},
                     },
             },
     },
@@ -47,7 +46,6 @@ static Attack attacks[] = {
                 .cfg.continuity =
                     {
                         .type = ContinuityTypeNearbyAction,
-                        .data = {},
                     },
             },
     },
@@ -61,7 +59,6 @@ static Attack attacks[] = {
                 .cfg.continuity =
                     {
                         .type = ContinuityTypeProximityPair,
-                        .data = {},
                     },
             },
     },
@@ -85,7 +82,6 @@ static Attack attacks[] = {
                 .cfg.easysetup =
                     {
                         .type = EasysetupTypeBuds,
-                        .data = {},
                     },
             },
     },
@@ -99,7 +95,6 @@ static Attack attacks[] = {
                 .cfg.easysetup =
                     {
                         .type = EasysetupTypeWatch,
-                        .data = {},
                     },
             },
     },
@@ -111,6 +106,32 @@ static Attack attacks[] = {
             {
                 .random_mac = true,
                 .cfg.swiftpair = {},
+            },
+    },
+    {
+        .title = "Vibrate 'em All",
+        .text = "Activate all LoveSpouse toys",
+        .protocol = &protocol_lovespouse,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg.lovespouse =
+                    {
+                        .state = LovespouseStatePlay,
+                    },
+            },
+    },
+    {
+        .title = "Denial of Pleasure",
+        .text = "Disable all LoveSpouse toys",
+        .protocol = &protocol_lovespouse,
+        .payload =
+            {
+                .random_mac = true,
+                .cfg.lovespouse =
+                    {
+                        .state = LovespouseStateStop,
+                    },
             },
     },
 };
@@ -354,7 +375,7 @@ static void draw_callback(Canvas* canvas, void* _ctx) {
             "App+Spam: \e#WillyJL\e# XFW\n"
             "Apple+Crash: \e#ECTO-1A\e#\n"
             "Android+Win: \e#Spooks4576\e#\n"
-            "                                   Version \e#4.1\e#",
+            "                                   Version \e#4.2\e#",
             false);
         break;
     default: {
