@@ -22,7 +22,6 @@ bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
  */
 void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     FlipboardModelRef* my_model = (FlipboardModelRef*)model;
-
     ButtonMonitor* bm = flipboard_model_get_button_monitor(my_model->model);
     uint8_t last = 0;
     if(bm != NULL) {
@@ -30,17 +29,19 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
     }
 
     canvas_set_bitmap_mode(canvas, 1);
-
-    canvas_draw_icon(canvas, 6, 19, (last & 1) ? &I_Down_hvr_25x27 : &I_Up_25x27);
-    canvas_draw_icon(canvas, 36, 19, (last & 2) ? &I_Down_hvr_25x27 : &I_Up_25x27);
-    canvas_draw_icon(canvas, 67, 19, (last & 4) ? &I_Down_hvr_25x27 : &I_Up_25x27);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 21, 12, "PRESS BUTTONS");
+    canvas_draw_icon(canvas, 5, 19, (last & 1) ? &I_Down_hvr_25x27 : &I_Up_25x27);
+    canvas_draw_icon(canvas, 36, 19, (last & 2) ? &I_Down_hvr_25x27 : &I_Up_25x27);
+    canvas_draw_icon(canvas, 67, 19, (last & 4) ? &I_Down_hvr_25x27 : &I_Up_25x27);
     canvas_draw_icon(canvas, 98, 19, (last & 8) ? &I_Down_hvr_25x27 : &I_Up_25x27);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 29, 61, "ACTION:");
+    canvas_draw_str(canvas, 33, 60, "ACTION:");
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 77, 61, "05");
+    FuriString* str = furi_string_alloc();
+    furi_string_printf(str, "%02d", last);
+    canvas_draw_str(canvas, 84, 60, furi_string_get_cstr(str));
+    furi_string_free(str);
 }
 
 /**
@@ -119,8 +120,8 @@ int32_t flipboard_keyboard_app(void* p) {
 
     ButtonModelFields fields = ButtonModelFieldAll;
     bool single_mode_button = false;
-    bool attach_keyboard = true;
-    //bool attach_keyboard = false;
+    //bool attach_keyboard = true;
+    bool attach_keyboard = false;
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,
