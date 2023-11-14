@@ -7,6 +7,6 @@ App(
     fap_icon="weather_station_10px.png",
     fap_category="Sub-GHz",
     fap_icon_assets="images",
-    fap_version="1.1",
+    fap_version="1.2",
     fap_description="Receive weather data from a wide range of supported Sub-1GHz remote sensor",
 )
