@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1112-1653-0.93.9-3034550](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-13 21:37 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-13 21:37 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-13 23:04 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-13 23:04 EST`
 - [Switched to cleaner animation loader (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b651299ee1968cfa2b8b82f894b0375a8455e039)
 - [Changed a few minor text strings to shutdown and update (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/dd6f294157d78f3e9b8694cf263e48eaa98f0966)
 - [New NFC MF Keys (By z3r0l1nk)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8d1d955a4a49b76980750c2dd728d69c1382394)
@@ -83,6 +83,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [NFC: Felica UID emulation #3190 (By RebornedBrain)](https://github.com/flipperdevices/flipperzero-firmware/pull/3190)
 - A few apps got minor fixes (By WIlly-JL): [Brainfuck v1.1 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck), [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge), [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker), [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker), [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) & [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
 - Add nfc dynamic default save name to new app (By Willy-JL)
+- Misc app fixes (By xMasterX)
 
 <a name="release">
 

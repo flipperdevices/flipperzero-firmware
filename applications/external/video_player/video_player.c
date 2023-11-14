@@ -156,7 +156,7 @@ int32_t video_player_app(void* p) {
 
         player->playing = true;
 
-        furi_timer_set_thread_priority(FuriThreadPriorityIdle);
+        furi_thread_set_current_priority(FuriThreadPriorityIdle);
 
         while(!(player->quit)) {
             furi_check(

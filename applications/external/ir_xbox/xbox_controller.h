@@ -9,7 +9,6 @@
 
 #include <gui/modules/submenu.h>
 #include <infrared_worker.h>
-#include <infrared_transmit.h>
 #include <gui/modules/dialog_ex.h>
 
 #include "views/xbox_controller_view.h"

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <furi.h>
 #include <gui/gui.h>
 
