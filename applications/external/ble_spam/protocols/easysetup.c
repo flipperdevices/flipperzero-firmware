@@ -125,10 +125,10 @@ void make_packet(uint8_t* out_size, uint8_t** out_packet, Payload* payload) {
         packet[i++] = 0x21;
         packet[i++] = 0x01;
         packet[i++] = 0x09;
-        packet[i++] = (model >> 0x10) & 0xFF;
-        packet[i++] = (model >> 0x08) & 0xFF;
-        packet[i++] = 0x01;
-        packet[i++] = (model >> 0x00) & 0xFF;
+        packet[i++] = (model >> 0x10) & 0xFF; // Buds Model / Color (?)
+        packet[i++] = (model >> 0x08) & 0xFF; // ...
+        packet[i++] = 0x01; // ... (Always static?)
+        packet[i++] = (model >> 0x00) & 0xFF; // ...
         packet[i++] = 0x06;
         packet[i++] = 0x3C;
         packet[i++] = 0x94;
@@ -175,7 +175,7 @@ void make_packet(uint8_t* out_size, uint8_t** out_packet, Payload* payload) {
         packet[i++] = 0x00;
         packet[i++] = 0x00;
         packet[i++] = 0x43;
-        packet[i++] = (model >> 0x00) & 0xFF;
+        packet[i++] = (model >> 0x00) & 0xFF; // Watch Model / Color (?)
         break;
     }
     default:
