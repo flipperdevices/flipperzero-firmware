@@ -1,14 +1,13 @@
 #pragma once
 
-#include "flipboard.h"
-
 #include <gui/view_dispatcher.h>
 #include <gui/modules/widget.h>
 #include "app_menu.h"
+#include "button_config.h"
+#include "flipboard.h"
 #include "flipboard_model.h"
-#include "key_config.h"
-#include "leds.h"
 #include "keyboard.h"
+#include "leds.h"
 
 /**
  * @brief    The flipboard struct.
@@ -19,7 +18,7 @@ struct Flipboard {
     ViewDispatcher* view_dispatcher;
 
     AppMenu* app_menu;
-    KeyConfig* key_config;
+    ButtonConfig* button_config;
     View* view_primary;
     Widget* widget_about;
 
@@ -35,7 +34,7 @@ typedef enum {
     FlipboardViewConfigureId,
     FlipboardViewConfigureSubviewId,
     FlipboardViewConfigureTextInputId,
-    FlipboardViewConfigureKeyboardInputId,
+    FlipboardViewConfigureKeystrokeSelectorId,
 
     FlipboardViewAboutId,
     FlipboardViewPrimaryId,

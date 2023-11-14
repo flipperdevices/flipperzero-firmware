@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @file app_menu.h
+ * @brief This file contains the AppMenu type and related functions.
+ * @details This file contains the AppMenu type and related functions.
+ * The app_menu module is used to create and show the main application menu.
+ */
+
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 

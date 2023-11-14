@@ -1,12 +1,11 @@
 #pragma once
 
-#include "flipboard_model.h"
-
 #include "flipboard_file.h"
+#include "flipboard_model.h"
 #include "backlight.h"
-#include "leds.h"
+#include "button_monitor.h"
 #include "keyboard.h"
-#include "key_monitor.h"
+#include "leds.h"
 #include "speaker.h"
 
 #include <gui/gui.h>
@@ -16,11 +15,11 @@
  * @details  This struct contains all the data needed for the flipboard model.
  */
 struct FlipboardModel {
-    // KeySettingModel for each of the button combinations
-    KeySettingModel* key_setting_model[16];
+    // ButtonModel for each of the button combinations
+    ButtonModel* button_model[16];
 
-    // The fields of the KeySettingModel that are currently active
-    KeySettingModelFields key_setting_model_fields;
+    // The fields of the ButtonModel that are currently active
+    ButtonModelFields button_model_fields;
 
     // The name of the model (used for saving and loading)
     char* name;
@@ -31,8 +30,8 @@ struct FlipboardModel {
     // LED driver
     FlipboardLeds* leds;
 
-    // Key monitor that detects button presses
-    KeyMonitor* key_monitor;
+    // Button monitor that detects button presses
+    ButtonMonitor* button_monitor;
 
     // Speaker driver
     Speaker* speaker;

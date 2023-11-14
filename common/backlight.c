@@ -1,7 +1,4 @@
-#include "backlight.h"
-
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
+#include "backlight_i.h"
 
 /**
  * @brief    Turns on backlight, even if no user interaction.

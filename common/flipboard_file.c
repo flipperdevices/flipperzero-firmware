@@ -2,7 +2,7 @@
 #include <storage/storage.h>
 #include <flipper_format.h>
 
-#include "key_setting_model.h"
+#include "button_model.h"
 
 #define BUY_MSG "Buy your Flipboard at"
 #define FLIPBOARD_URL "https://tindie.com/stores/MakeItHackin"
@@ -15,7 +15,7 @@
 #define FLIPBOARD_SAVE_EXTENSION ".txt"
 
 #define FLIPBOARD_HEADER "Flipper Flipboard File"
-#define FLIPBOARD_VERSION 1
+#define FLIPBOARD_VERSION 2
 
 #define TAG "FlipboardFile"
 
@@ -45,7 +45,7 @@ static void ensure_save_folder_exists(Storage* storage) {
  * @param    model    The flipboard model to save.
  * @param    fields   The fields to save.
 */
-bool flipboard_model_save(FlipboardModel* model, KeySettingModelFields fields) {
+bool flipboard_model_save(FlipboardModel* model, ButtonModelFields fields) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* file_path = furi_string_alloc();
@@ -85,9 +85,8 @@ bool flipboard_model_save(FlipboardModel* model, KeySettingModelFields fields) {
         }
 
         for(int i = 0; i < 16; i++) {
-            if(flipboard_model_get_key_setting_model(model, i) != NULL) {
-                key_setting_model_save(
-                    flipboard_model_get_key_setting_model(model, i), format, fields);
+            if(flipboard_model_get_button_model(model, i) != NULL) {
+                button_model_save(flipboard_model_get_button_model(model, i), format, fields);
             }
         }
 
@@ -119,7 +118,7 @@ bool flipboard_model_load(FlipboardModel* model) {
     FlipperFormat* format = flipper_format_file_alloc(storage);
 
     for(size_t i = 0; i < 16; i++) {
-        flipboard_model_set_key_setting_model(model, i, NULL);
+        flipboard_model_set_button_model(model, i, NULL);
     }
 
     do {
@@ -145,24 +144,23 @@ bool flipboard_model_load(FlipboardModel* model) {
             break;
         }
         for(size_t i = 0; i < 16; i++) {
-            flipboard_model_set_key_setting_model(
-                model, i, key_setting_model_alloc_from_ff(i, format));
-        }
-
-        for(size_t i = 1; i < 16;) {
-            if(flipboard_model_get_key_setting_model(model, i) == NULL) {
-                flipboard_model_set_key_setting_model(model, i, key_setting_model_alloc(i));
-            }
-
-            if(flipboard_model_get_single_button_mode(model)) {
-                i = i << 1;
-            } else {
-                i++;
-            }
+            flipboard_model_set_button_model(model, i, button_model_alloc_from_ff(i, format));
         }
 
         success = true;
     } while(false);
+
+    for(size_t i = 1; i < 16;) {
+        if(flipboard_model_get_button_model(model, i) == NULL) {
+            flipboard_model_set_button_model(model, i, button_model_alloc(i));
+        }
+
+        if(flipboard_model_get_single_button_mode(model)) {
+            i = i << 1;
+        } else {
+            i++;
+        }
+    }
 
     flipper_format_free(format);
     furi_string_free(file_path);

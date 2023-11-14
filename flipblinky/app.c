@@ -212,7 +212,7 @@ void flipboard_tick_callback(void* context) {
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
-    flipboard_model_set_key_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
+    flipboard_model_set_button_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
 }
@@ -226,7 +226,7 @@ void flipboard_exit_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
     furi_timer_stop(fbm->timer);
-    flipboard_model_set_key_monitor(fm, NULL, NULL);
+    flipboard_model_set_button_monitor(fm, NULL, NULL);
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
     flipboard_model_set_colors(fm, NULL, 0x0);
 }
@@ -284,8 +284,10 @@ void flipboard_blinky_model_free(FlipboardBlinkyModel* fbm) {
 */
 int32_t flipboard_blinky_app(void* _p) {
     UNUSED(_p);
+    furi_check(COUNT_OF(color_names));
+    furi_check(COUNT_OF(color_values));
 
-    KeySettingModelFields fields = KeySettingModelFieldNone;
+    ButtonModelFields fields = ButtonModelFieldNone;
     bool single_mode_button = true;
     bool attach_keyboard = false;
 

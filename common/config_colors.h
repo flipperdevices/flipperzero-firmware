@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @file   config_colors.h
+ * @brief  The configuration of the colors.
+ * @details  The configuration of the LED colors. Feel free to add more colors, 
+ * but be sure to add them to the color_names and color_values arrays.
+*/
+
 #include <furi.h>
 
 /**

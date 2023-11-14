@@ -31,9 +31,9 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 22, 30, "BUTTONS");
     }
 
-    KeyMonitor* km = flipboard_model_get_key_monitor(my_model->model);
-    if(km != NULL) {
-        uint8_t last = key_monitor_get_last_status(km);
+    ButtonMonitor* bm = flipboard_model_get_button_monitor(my_model->model);
+    if(bm != NULL) {
+        uint8_t last = button_monitor_get_last_status(bm);
         FuriString* str = furi_string_alloc();
         furi_string_printf(str, "%02X   %02x", last, counter++);
         canvas_draw_str(canvas, 55, 50, furi_string_get_cstr(str));
@@ -50,18 +50,19 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
  * @param new_key The new key state.
  * @return true if the key event was handled, false otherwise.
  */
-bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key) {
+bool flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_button) {
     Flipboard* app = (Flipboard*)context;
     FlipboardModel* model = flipboard_get_model(app);
-    uint8_t reduced_new_key = flipboard_model_reduce(model, new_key, false);
+    uint8_t reduced_new_button = flipboard_model_reduce(model, new_button, false);
 
-    FURI_LOG_D(TAG, "SW EVENT: old=%d new=%d reduced=%d", old_key, new_key, reduced_new_key);
+    FURI_LOG_D(
+        TAG, "SW EVENT: old=%d new=%d reduced=%d", old_button, new_button, reduced_new_button);
 
-    KeySettingModel* ksm = flipboard_model_get_key_setting_model(model, reduced_new_key);
-    flipboard_model_set_colors(model, ksm, new_key);
-    flipboard_model_send_keystrokes(model, ksm);
-    flipboard_model_send_text(model, ksm);
-    flipboard_model_play_tone(model, ksm);
+    ButtonModel* bsm = flipboard_model_get_button_model(model, reduced_new_button);
+    flipboard_model_set_colors(model, bsm, new_button);
+    flipboard_model_send_keystrokes(model, bsm);
+    flipboard_model_send_text(model, bsm);
+    flipboard_model_play_tone(model, bsm);
 
     return true;
 }
@@ -72,7 +73,7 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
  */
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
-    flipboard_model_set_key_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
+    flipboard_model_set_button_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     flipboard_model_set_colors(fm, NULL, 0x0);
     flipboard_model_set_gui_refresh_speed_ms(fm, 100);
 }
@@ -84,7 +85,7 @@ void flipboard_enter_callback(void* context) {
 void flipboard_exit_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     flipboard_model_set_colors(fm, NULL, 0x0);
-    flipboard_model_set_key_monitor(fm, NULL, NULL);
+    flipboard_model_set_button_monitor(fm, NULL, NULL);
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
 }
 
@@ -116,7 +117,7 @@ View* get_primary_view(void* context) {
 int32_t flipboard_keyboard_app(void* p) {
     UNUSED(p);
 
-    KeySettingModelFields fields = KeySettingModelFieldAll;
+    ButtonModelFields fields = ButtonModelFieldAll;
     bool single_mode_button = false;
     bool attach_keyboard = true;
     //bool attach_keyboard = false;

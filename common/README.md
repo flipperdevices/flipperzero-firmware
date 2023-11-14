@@ -4,76 +4,79 @@ This repository contains common code used by Flipboard projects.  Please let us 
 
 File names are prefixed with the component name, e.g. `app_menu_i.h` is the private header for the `app_menu` component, while `app_menu.h` is the public header.
 
-## app_menu_i.h
+## app_menu
 
-This is the private header for the `app_menu` component.  It is included by `app_menu.c` and should not be included by any other files.
+The AppMenu module is used to create and show the main application menu.
 
-This file defines the AppMenu structure.  It is a specializations of the `submenu` component, and is used to display the main menu of the application.
+## backlight
 
-It uses a dynamic ViewIdsArray to store the view ids of the menu items.  The view ids are stored in the order they are added to the menu, and the menu items are displayed in the same order.
+The Backlight module is responsible for controlling the backlight.  You can turn the backlight on, off, or force it off.
 
-## app_menu.c
+## button_config
 
-`app_menu_alloc(ViewDispatcher*)` is used to allocate an AppMenu.  When your application exits, it should call `app_menu_free(AppMenu*)` to free the resources.
+The ButtonConfig module is used to configure the buttons on the flipboard.
 
-`app_menu_add_item(AppMenu*, char* name, View* view, uint32_t view_id)` is used to add a menu item to the menu.  The menu item will be displayed in the order it is added to the menu.
+## button_model
 
-`app_menu_show(AppMenu*)` is used to display the menu.  If the user presses the back button, it will return `VIEW_ID_NONE` (exiting the application).
+This ButtonModel  type is used to store the settings for a button. For example the color, frequency, message, and keystrokes to use when a button is pressed.
 
-## app_menu.h
+- _TODO: Should this allow for extra data to be stored with the button?_
 
-This is the public header for the `app_menu` component.  It is included by `app_menu.c` and should be included by any other files that need to use the `app_menu` component.
+## button_monitor
 
-`FLIPBOARD_APP_MENU_VIEW_ID` must be 0 and match FlipboardViewAppMenuId.
+The ButtonMonitor module is used to monitor the buttons on the flipboard. When a button is pressed, the ButtonMonitor will call the callback function.
 
-## backlight.c
+## config_colors
 
-`backlight_on` keeps the backlight on even if there is no user interaction.
+config_colors.h contains the configuration of the LED colors. Feel free to add more colors, but be sure to add them to the color_names and color_values arrays.
 
-`backlight_off` turns the backlight off once there is no user interaction.
+## config_keystroke
 
-`backlight_force_off` turns off the backlight.
+config_keystroke.h contains the configuration of the keystrokes.  You can add new keystrokes here, and they will be available in the config.  There is a limit of 256 keystrokes.  Be sure to update the keystroke_names array with the name of the keystroke.  The keystroke_values array contains the HID values of the keystrokes.  The index of the keystroke in this array is the same as the index of the keystroke in the keystroke_names array.  The keystroke_count_names array contains the number of times to repeat the keystroke.  This array should start at value 0, and increment by 1s.
 
-## backlight.h
+## config_tones
 
-This is the public header for the `backlight` component.  It is included by `backlight.c` and should be included by any other files that need to use the `backlight` component.
+config_tones.h contains the configuration of the tones.  The tones are a set of frequencies that can be played on the buzzer.  The tones (in Hz) are defined in the tone_values array.  The index of the tone in this array is the same as the index of the tone in the tone_names array.
 
-## config_colors.h
+## flipboard
 
-This file defines the colors of the LEDs.  If you add additional colors, please be sure to add to add three locations.  The order of items in color_names and color_values must match.
+Typically you will create a Flipboard application in your main function like this:
+```c
+     Flipboard* app = flipboard_alloc(...);
+     view_dispatcher_run(flipboard_get_view_dispatcher(app));
+     flipboard_free(app);
+```
+  
+If you have custom configuration, you can use `flipboard_override_config_view`.  If you have custom data, you can use `flipboard_model_set_custom_data`.
 
-## config_keystroke.h
+## flipboard_file
 
-This file defines all of the HID keys that can be sent to the host.  Items in `keystroke_names` and `keystroke_values` must match.  There is also a limit to the number of items allowed, so you should not add more than 255 items.
+The FlipboardFile module is used to read and write configuration files for flipboard apps.
 
-For example, you could remove `F20` and add `LANG 5`; but be sure to update `keystroke_names` and `keystroke_values` to match.
+## flipboard_model
 
-## config_tones.h
+The FlipboardModel contains all the data needed for the flipboard application.  There are methods to get and set the data & to perform actions with the data, like sending text, playing tones, etc.
 
-This file defines the tones that can be played by the buzzer.  Items in `tone_names` and `tone_values` must match.  There is also a limit to the number of items allowed, so you should not add more than 255 items.
+## flipboard_model_ref
 
-## flipboard_file.c
+FlipboardModelRef is a reference to a FlipboardModel, used to pass a FlipboardModel to UI components that cant take a pointer to an existing FlipboardModel.
 
-`flipboard_model_save` saves the model to the file system (SD card/apps_data/flipboard/{appname}.txt).
+## keyboard
 
-`flipboard_model_load` loads the model from the file system.
+A Keyboard module is used to send key codes to the host using the USB cable connected to the Flipper Zero.
 
-## flipboard_file.h
+## keystroke_selector
 
-This is the public header for the `flipboard_file` component.  It is included by `flipboard_file.c` and should be included by any other files that need to use the `flipboard_file` component.
+The KeystrokeSelector module is used to select a keystroke. The view will display a grid of keys. The user can scroll through the keys using the dpad buttons. The user can select a key by pressing the OK button. The view will call a callback when a key is selected.
 
-## flipboard_i.h
+## leds
 
-This is the private header for the `flipboard` component.  It is included by `flipboard.c` and should not be included by any other files.
+The Leds module is used to control the addressable LEDs on the flipboard, and also the status LED.
 
-This file defines the Flipboard structure; which contains the View Dispatcher, the UI components and the FlipboardModel.
+## menu_callback
 
-This file also defines the FlipboardViewId enum, which is used to identify the views in the application.
+The MenuCallback module is used to return a specific view id from ViewNavigationCallback. The id is matched by a large switch so it can only handle a limited number of values (if to large of id is requested, the 0 view will be returned).
 
-## flipboard_model_i.h
+## speaker
 
-This is the private header for the `flipboard_model` component.  It is included by `flipboard_model.c` and should not be included by any other files.
-
-## flipboard_model_ref.h
-
-This is a thin wrapper around FlipboardModel.  It is used to pass a reference to the model to the UI components.
+The Speaker module is used to play tones on the internal Flipper Zero speaker.

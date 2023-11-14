@@ -1,11 +1,19 @@
 #include "leds_i.h"
 
+// Bit-banging the WS2812b LEDs is a bit tricky. The timing is very strict.
+// Hopefully, we will update to a better solution in the future.
 #define DWT_CYCCNT (0xE0001004UL)
 typedef struct {
     volatile uint32_t COUNT; /*!< E0001000 + Offset: 0x004 (R/W)  Cycle Count Register */
 } DWT_Internal;
 #define DWT_ACCESS ((DWT_Internal*)DWT_CYCCNT)
 
+/**
+ * @brief Allocates a FlipboardLeds struct.
+ * @details This method allocates a FlipboardLeds struct.  This is used to
+ * control the addressable LEDs on the flipboard.
+ * @return The allocated FlipboardLeds struct.
+*/
 FlipboardLeds* flipboard_leds_alloc() {
     FlipboardLeds* leds = malloc(sizeof(FlipboardLeds));
     furi_hal_gpio_init_simple(pin_ws2812_leds, GpioModeOutputPushPull);
@@ -14,6 +22,26 @@ FlipboardLeds* flipboard_leds_alloc() {
     return leds;
 }
 
+/**
+ * @brief Frees a FlipboardLeds struct.
+ * @param leds The FlipboardLeds struct to free.
+*/
+void flipboard_leds_free(FlipboardLeds* leds) {
+    for(int i = 0; i < (1 << LED_COUNT); i++) {
+        flipboard_leds_set(leds, i, 0);
+    }
+    flipboard_leds_update(leds);
+
+    furi_hal_gpio_init_simple(pin_ws2812_leds, GpioModeAnalog);
+    furi_hal_gpio_init_simple(pin_status_led, GpioModeAnalog);
+}
+
+/**
+ * @brief Resets the LEDs to their default colors.
+ * @details This method resets the LEDs data to their default color pattern.
+ * You must still call flipboard_leds_update to update the LEDs.
+ * @param leds The FlipboardLeds struct to reset.
+*/
 void flipboard_leds_reset(FlipboardLeds* leds) {
     leds->color[0] = 0x2000FF;
     leds->color[1] = 0xFF0000;
@@ -21,6 +49,13 @@ void flipboard_leds_reset(FlipboardLeds* leds) {
     leds->color[3] = 0x0000FF;
 }
 
+/**
+ * @brief Sets the color of the LEDs.
+ * @details This method sets the color of the LEDs.
+ * @param leds The FlipboardLeds struct to set the color of.
+ * @param led The LED to set the color of.
+ * @param color The color to set the LED to (Hex value: RRGGBB).
+*/
 void flipboard_leds_set(FlipboardLeds* leds, LedIds led, uint32_t color) {
     if(led & LedId1) {
         leds->color[0] = color;
@@ -36,22 +71,13 @@ void flipboard_leds_set(FlipboardLeds* leds, LedIds led, uint32_t color) {
     }
 }
 
-void flipboard_status_led(FlipboardLeds* leds, bool glow) {
-    UNUSED(leds);
-    furi_hal_gpio_write(pin_status_led, glow);
-}
-
-void flipboard_leds_free(FlipboardLeds* leds) {
-    for(int i = 0; i < (1 << LED_COUNT); i++) {
-        flipboard_leds_set(leds, i, 0);
-    }
-    flipboard_leds_update(leds);
-
-    furi_hal_gpio_init_simple(pin_ws2812_leds, GpioModeAnalog);
-    furi_hal_gpio_init_simple(pin_status_led, GpioModeAnalog);
-}
-
+/**
+ * @brief Updates the LEDs.
+ * @details This method changes the LEDs to the colors set by flipboard_leds_set.
+ * @param leds The FlipboardLeds struct to update.
+*/
 void flipboard_leds_update(FlipboardLeds* leds) {
+    // TODO: Update to use something more stable, like using LL_TIM or something?
     furi_hal_gpio_write(pin_ws2812_leds, false);
     uint8_t bits[4 * 8 * 3 * 2];
     for(int led = 0, i = 0; led < 4; led++) {
@@ -96,4 +122,15 @@ void flipboard_leds_update(FlipboardLeds* leds) {
     furi_kernel_unlock();
 
     furi_delay_ms(50);
+}
+
+/**
+ * @brief Sets the status LED.
+ * @details This method sets the status LED to the specified state.
+ * @param leds The FlipboardLeds struct to set the status LED of.
+ * @param glow True to turn the status LED on, false to turn it off.
+*/
+void flipboard_status_led(FlipboardLeds* leds, bool glow) {
+    UNUSED(leds);
+    furi_hal_gpio_write(pin_status_led, glow);
 }

@@ -1,6 +1,15 @@
 #pragma once
 
 /**
+ * @file    config_tones.h
+ * @brief   Configuration file for the tones.
+ * @details This file contains the configuration of the tones.  The tones are
+ * a set of frequencies that can be played on the buzzer.  The tones (in Hz) are
+ * defined in the tone_values array.  The index of the tone in this array is
+ * the same as the index of the tone in the tone_names array.
+*/
+
+/**
  * @brief    The frequency of the tones in HZ.
  * @details  The index of the tone in this array is the same as
  *  the index of the tone in the tone_names array.

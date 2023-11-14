@@ -1,5 +1,18 @@
 #pragma once
 
+/**
+ * @file     config_keystroke.h
+ * @brief    The configuration of the keystrokes.
+ * @details  This file contains the configuration of the keystrokes.  You can
+ * add new keystrokes here, and they will be available in the config.  There
+ * is a limit of 256 keystrokes.  Be sure to update the keystroke_names array
+ * with the name of the keystroke.  The keystroke_values array contains the
+ * HID values of the keystrokes.  The index of the keystroke in this array is
+ * the same as the index of the keystroke in the keystroke_names array.  The
+ * keystroke_count_names array contains the number of times to repeat the
+ * keystroke.  This array should start at value 0, and increment by 1s.
+*/
+
 #include <furi_hal.h>
 
 /**

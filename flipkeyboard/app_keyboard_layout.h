@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../common/keyboard_input.h"
+#include "../common/keystroke_selector.h"
 
-KeyboardInputKey shift_keys[] = {
+KeystrokeSelectorKey shift_keys[] = {
     {},
     {},
     {},
@@ -109,7 +109,7 @@ KeyboardInputKey shift_keys[] = {
     //
 };
 
-KeyboardInputKey keys[] = {
+KeystrokeSelectorKey keys[] = {
     {.code = HID_KEYBOARD_F1, .ch = '1', .icon = NULL},
     {.code = HID_KEYBOARD_F1, .ch = '1', .icon = NULL},
     {.code = HID_KEYBOARD_F2, .ch = '2', .icon = NULL},

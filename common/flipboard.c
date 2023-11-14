@@ -1,15 +1,29 @@
 #include "flipboard_i.h"
 
+/**
+ * @brief Allocates a new Flipboard application.
+ * @param app_name The name of the application.
+ * @param primary_item_name The name of the primary action (the purpose of your app).
+ * @param about_text The text to display in the about view.
+ * @param fields The fields to display in the button model.
+ * @param single_mode_button Whether to display the button model in single mode.
+ * @param attach_keyboard Whether to attach the keyboard to the application.
+ * @param keys The keys to display in the keystroke selector.
+ * @param shift_keys The shift keys to display in the keystroke selector.
+ * @param rows The number of rows to display in the keystroke selector.
+ * @param get_primary_view Callback to get the primary view of the application.
+ * @return A pointer to the allocated Flipboard application.
+*/
 Flipboard* flipboard_alloc(
     char* app_name,
     char* primary_item_name,
     char* about_text,
-    KeySettingModelFields fields,
+    ButtonModelFields fields,
     bool single_mode_button,
     bool attach_keyboard,
-    KeyboardInputKey* keyboard_keys,
-    KeyboardInputKey* keyboard_shift_keys,
-    uint8_t keyboard_rows,
+    KeystrokeSelectorKey* keys,
+    KeystrokeSelectorKey* shift_keys,
+    uint8_t rows,
     GetPrimaryView get_primary_view) {
     Flipboard* app = (Flipboard*)malloc(sizeof(Flipboard));
     app->model = flipboard_model_alloc(app_name, single_mode_button, fields);
@@ -24,13 +38,14 @@ Flipboard* flipboard_alloc(
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
 
-    app->key_config = key_config_alloc(
-        app->model, FlipboardViewConfigureId, keyboard_keys, keyboard_shift_keys, keyboard_rows);
+    app->button_config =
+        button_config_alloc(app->model, FlipboardViewConfigureId, keys, shift_keys, rows);
 
-    key_config_register_dispatcher(app->key_config, app->view_dispatcher);
-    key_config_register_variable_item_list(app->key_config, FlipboardViewConfigureSubviewId);
-    key_config_register_text_input(app->key_config, FlipboardViewConfigureTextInputId);
-    key_config_register_keyboard_input(app->key_config, FlipboardViewConfigureKeyboardInputId);
+    button_config_register_dispatcher(app->button_config, app->view_dispatcher);
+    button_config_register_variable_item_list(app->button_config, FlipboardViewConfigureSubviewId);
+    button_config_register_text_input(app->button_config, FlipboardViewConfigureTextInputId);
+    button_config_register_keystroke_selector(
+        app->button_config, FlipboardViewConfigureKeystrokeSelectorId);
 
     app->view_primary = get_primary_view(app);
 
@@ -38,8 +53,8 @@ Flipboard* flipboard_alloc(
     app_menu_add_item(
         app->app_menu,
         "Config",
-        key_config_get_view(app->key_config),
-        key_config_get_view_id(app->key_config));
+        button_config_get_view(app->button_config),
+        button_config_get_view_id(app->button_config));
 
     app_menu_add_item(app->app_menu, primary_item_name, app->view_primary, FlipboardViewPrimaryId);
 
@@ -54,39 +69,16 @@ Flipboard* flipboard_alloc(
     return app;
 }
 
-FlipboardModel* flipboard_get_model(Flipboard* app) {
-    return app->model;
-}
-
-ViewDispatcher* flipboard_get_view_dispatcher(Flipboard* app) {
-    return app->view_dispatcher;
-}
-
-View* flipboard_get_primary_view(Flipboard* app) {
-    return app->view_primary;
-}
-
-void flipboard_override_config_view(Flipboard* app, View* view) {
-    if(app->key_config) {
-        key_config_free(app->key_config);
-        app->key_config = NULL;
-    }
-    view_dispatcher_remove_view(app->view_dispatcher, FlipboardViewConfigureId);
-    view_dispatcher_add_view(app->view_dispatcher, FlipboardViewConfigureId, view);
-    
-}
-
-uint32_t flipboard_navigation_show_app_menu(void* context) {
-    UNUSED(context);
-    return FLIPBOARD_APP_MENU_VIEW_ID;
-}
-
+/**
+ * @brief Frees a Flipboard application.
+ * @param app The Flipboard application to free.
+*/
 void flipboard_free(Flipboard* app) {
     flipboard_model_free(app->model);
 
     view_free(app->view_primary);
-    if(app->key_config) {
-        key_config_free(app->key_config);
+    if(app->button_config) {
+        button_config_free(app->button_config);
     }
     widget_free(app->widget_about);
     app_menu_free(app->app_menu);
@@ -95,4 +87,55 @@ void flipboard_free(Flipboard* app) {
     furi_record_close(RECORD_GUI);
 
     free(app);
+}
+
+/**
+ * @brief Gets the model of a Flipboard application.
+ * @param app The Flipboard application.
+ * @return A pointer to the model of the Flipboard application.
+*/
+FlipboardModel* flipboard_get_model(Flipboard* app) {
+    return app->model;
+}
+
+/**
+ * @brief Gets the view dispatcher of a Flipboard application.
+ * @param app The Flipboard application.
+ * @return A pointer to the view dispatcher of the Flipboard application.
+*/
+ViewDispatcher* flipboard_get_view_dispatcher(Flipboard* app) {
+    return app->view_dispatcher;
+}
+
+/**
+ * @brief Gets the primary view of a Flipboard application.
+ * @param app The Flipboard application.
+ * @return A pointer to the primary view of the Flipboard application.
+*/
+View* flipboard_get_primary_view(Flipboard* app) {
+    return app->view_primary;
+}
+
+/**
+ * @brief Overrides the config view of a Flipboard application.
+ * @param app The Flipboard application.
+ * @param view The view to override the config view with.
+*/
+void flipboard_override_config_view(Flipboard* app, View* view) {
+    if(app->button_config) {
+        button_config_free(app->button_config);
+        app->button_config = NULL;
+    }
+    view_dispatcher_remove_view(app->view_dispatcher, FlipboardViewConfigureId);
+    view_dispatcher_add_view(app->view_dispatcher, FlipboardViewConfigureId, view);
+}
+
+/**
+ * @brief Gets the button model of a Flipboard application.
+ * @param app The Flipboard application.
+ * @return The view id for the application menu (it should be 0.)
+*/
+uint32_t flipboard_navigation_show_app_menu(void* context) {
+    UNUSED(context);
+    return FLIPBOARD_APP_MENU_VIEW_ID;
 }
