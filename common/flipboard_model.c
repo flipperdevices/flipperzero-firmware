@@ -287,14 +287,14 @@ void flipboard_model_play_tone(FlipboardModel* model, ButtonModel* bm) {
 void flipboard_model_set_colors(FlipboardModel* model, ButtonModel* bm, uint8_t new_key) {
     FlipboardLeds* leds = flipboard_model_get_leds(model);
     uint32_t color = bm ? button_model_get_color_down(bm) : 0xFFFFFF;
-    ButtonModel* ksm1 = flipboard_model_get_button_model(model, SwitchId1);
-    ButtonModel* ksm2 = flipboard_model_get_button_model(model, SwitchId2);
-    ButtonModel* ksm3 = flipboard_model_get_button_model(model, SwitchId3);
-    ButtonModel* ksm4 = flipboard_model_get_button_model(model, SwitchId4);
-    uint32_t color1 = ksm1 ? button_model_get_color_up(ksm1) : 0x000000;
-    uint32_t color2 = ksm2 ? button_model_get_color_up(ksm2) : 0x000000;
-    uint32_t color3 = ksm3 ? button_model_get_color_up(ksm3) : 0x000000;
-    uint32_t color4 = ksm4 ? button_model_get_color_up(ksm4) : 0x000000;
+    ButtonModel* bm1 = flipboard_model_get_button_model(model, SwitchId1);
+    ButtonModel* bm2 = flipboard_model_get_button_model(model, SwitchId2);
+    ButtonModel* bm3 = flipboard_model_get_button_model(model, SwitchId3);
+    ButtonModel* bm4 = flipboard_model_get_button_model(model, SwitchId4);
+    uint32_t color1 = bm1 ? button_model_get_color_up(bm1) : 0x000000;
+    uint32_t color2 = bm2 ? button_model_get_color_up(bm2) : 0x000000;
+    uint32_t color3 = bm3 ? button_model_get_color_up(bm3) : 0x000000;
+    uint32_t color4 = bm4 ? button_model_get_color_up(bm4) : 0x000000;
     color1 = (new_key & LedId1) ? color : color1;
     color2 = (new_key & LedId2) ? color : color2;
     color3 = (new_key & LedId3) ? color : color3;

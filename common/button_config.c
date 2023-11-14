@@ -1,15 +1,15 @@
 #include "button_config_i.h"
 
-static void populate_variable_item_list(ButtonConfig* button_config, ButtonModel* bsm);
+static void populate_variable_item_list(ButtonConfig* button_config, ButtonModel* bm);
 
 /**
  * @brief color_up_changed is called when the color up setting is changed.
  * @param item The VariableItem that was changed.
  */
 static void color_up_changed(VariableItem* item) {
-    ButtonModel* bsm = variable_item_get_context(item);
+    ButtonModel* bm = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    button_model_set_color_up(bsm, color_values[index]);
+    button_model_set_color_up(bm, color_values[index]);
     variable_item_set_current_value_text(item, color_names[index]);
 }
 
@@ -18,9 +18,9 @@ static void color_up_changed(VariableItem* item) {
  * @param item The VariableItem that was changed.
  */
 static void color_down_changed(VariableItem* item) {
-    ButtonModel* bsm = variable_item_get_context(item);
+    ButtonModel* bm = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    button_model_set_color_down(bsm, color_values[index]);
+    button_model_set_color_down(bm, color_values[index]);
     variable_item_set_current_value_text(item, color_names[index]);
 }
 
@@ -29,9 +29,9 @@ static void color_down_changed(VariableItem* item) {
  * @param item The VariableItem that was changed.
  */
 static void tone_changed(VariableItem* item) {
-    ButtonModel* bsm = variable_item_get_context(item);
+    ButtonModel* bm = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    button_model_set_frequency(bsm, tone_values[index]);
+    button_model_set_frequency(bm, tone_values[index]);
     variable_item_set_current_value_text(item, tone_names[index]);
 }
 
@@ -40,13 +40,13 @@ static void tone_changed(VariableItem* item) {
  * @details maps a menu item index into to keystroke index.  Determining the
  * index relies on the fact that the menu items are added in the order of
  * Keystroke, Count, Keystroke, Count, etc.  and then finally Add Keystroke.
- * @param bsm The ButtonModel.
+ * @param bm The ButtonModel.
  * @return The keystroke index
 */
-static uint8_t keystroke_item_index(ButtonModel* bsm) {
-    ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bsm);
-    uint8_t add_item_index = button_model_get_keystroke_index(bsm);
-    uint8_t count = button_model_get_keystrokes_count(bsm);
+static uint8_t keystroke_item_index(ButtonModel* bm) {
+    ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
+    uint8_t add_item_index = button_model_get_keystroke_index(bm);
+    uint8_t count = button_model_get_keystrokes_count(bm);
     uint8_t offset = add_item_index - (count * 2);
     uint8_t selected_item_index =
         variable_item_list_get_selected_item_index(button_config->item_list);
@@ -60,12 +60,12 @@ static uint8_t keystroke_item_index(ButtonModel* bsm) {
  * @param item The VariableItem that was changed.
  */
 static void keystroke_changed(VariableItem* item) {
-    ButtonModel* bsm = variable_item_get_context(item);
+    ButtonModel* bm = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    uint8_t item_index = keystroke_item_index(bsm);
-    Keystroke ks = button_model_get_keystroke(bsm, item_index);
+    uint8_t item_index = keystroke_item_index(bm);
+    Keystroke ks = button_model_get_keystroke(bm, item_index);
     FURI_LOG_D("Flipboard", "ks.button_code=%d .count=%d", ks.button_code, ks.count);
-    button_model_set_keystroke(bsm, item_index, keystroke_values[index], ks.count);
+    button_model_set_keystroke(bm, item_index, keystroke_values[index], ks.count);
     variable_item_set_current_value_text(item, keystroke_names[index]);
 }
 
@@ -74,12 +74,12 @@ static void keystroke_changed(VariableItem* item) {
  * @param item The VariableItem that was changed.
 */
 static void keystroke_count_changed(VariableItem* item) {
-    ButtonModel* bsm = variable_item_get_context(item);
+    ButtonModel* bm = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-    uint8_t item_index = keystroke_item_index(bsm);
-    Keystroke ks = button_model_get_keystroke(bsm, item_index);
+    uint8_t item_index = keystroke_item_index(bm);
+    Keystroke ks = button_model_get_keystroke(bm, item_index);
     FURI_LOG_D("Flipboard", "ks.button_code=%d .count=%d", ks.button_code, ks.count);
-    button_model_set_keystroke(bsm, item_index, ks.button_code, index);
+    button_model_set_keystroke(bm, item_index, ks.button_code, index);
     variable_item_set_current_value_text(item, keystroke_count_names[index]);
 }
 
@@ -89,19 +89,19 @@ static void keystroke_count_changed(VariableItem* item) {
  * adds a VariableItem (config) to the VariableItemList.  It sets the current
  * value index to the index of the color passed in, if it finds a match.
  * @param button_config The ButtonConfig.
- * @param bsm The ButtonModel.
+ * @param bm The ButtonModel.
  * @param label The label for the setting.
  * @param callback The callback for when the setting is changed.
  * @param initial_color The initial color in HEX to default to (RRGGBB).
 */
 static void populate_variable_item_list_color(
     ButtonConfig* button_config,
-    ButtonModel* bsm,
+    ButtonModel* bm,
     char* label,
     VariableItemChangeCallback callback,
     uint32_t initial_color) {
     VariableItem* item = variable_item_list_add(
-        button_config->item_list, label, COUNT_OF(color_names), callback, bsm);
+        button_config->item_list, label, COUNT_OF(color_names), callback, bm);
     uint8_t index = 0;
     for(size_t i = 0; i < COUNT_OF(color_values); i++) {
         if(initial_color == color_values[i]) {
@@ -119,19 +119,19 @@ static void populate_variable_item_list_color(
  * It sets the current value index to the index of the frequency passed in, if
  * it finds a match.
  * @param button_config The ButtonConfig.
- * @param bsm The ButtonModel.
+ * @param bm The ButtonModel.
  * @param label The label for the setting.
  * @param callback The callback for when the setting is changed.
  * @param frequency The initial frequency to default to.
 */
 static void populate_variable_item_list_frequency(
     ButtonConfig* button_config,
-    ButtonModel* bsm,
+    ButtonModel* bm,
     char* label,
     VariableItemChangeCallback callback,
     float frequency) {
     VariableItem* item = variable_item_list_add(
-        button_config->item_list, label, COUNT_OF(tone_names), callback, bsm);
+        button_config->item_list, label, COUNT_OF(tone_names), callback, bm);
     uint8_t index = 0;
     for(size_t i = 0; i < COUNT_OF(tone_values); i++) {
         float diff = frequency - tone_values[i];
@@ -148,17 +148,17 @@ static void populate_variable_item_list_frequency(
 /**
  * @brief populate_variable_item_list_keystrokes adds keystroke and count configurations.
  * @param button_config The ButtonConfig.
- * @param bsm The ButtonModel.
+ * @param bm The ButtonModel.
  * @return The number of lines added.
 */
 static uint8_t
-    populate_variable_item_list_keystrokes(ButtonConfig* button_config, ButtonModel* bsm) {
+    populate_variable_item_list_keystrokes(ButtonConfig* button_config, ButtonModel* bm) {
     uint8_t lines_added = 0;
 
-    uint8_t count = button_model_get_keystrokes_count(bsm);
+    uint8_t count = button_model_get_keystrokes_count(bm);
 
     for(int j = 0; j < count; j++) {
-        Keystroke ks = button_model_get_keystroke(bsm, j);
+        Keystroke ks = button_model_get_keystroke(bm, j);
         FURI_LOG_D("Flipboard", "POPULATE ks.button_code=%d .count=%d", ks.button_code, ks.count);
 
         VariableItem* item = variable_item_list_add(
@@ -166,7 +166,7 @@ static uint8_t
             "Keystroke",
             COUNT_OF(keystroke_names),
             keystroke_changed,
-            bsm);
+            bm);
         lines_added++;
         uint8_t index = 0;
         for(size_t i = 0; i < COUNT_OF(keystroke_names); i++) {
@@ -183,7 +183,7 @@ static uint8_t
             "Count",
             COUNT_OF(keystroke_count_names),
             keystroke_count_changed,
-            bsm);
+            bm);
         lines_added++;
         index = COUNT_OF(keystroke_count_names) - 1;
         for(size_t i = 0; i < COUNT_OF(keystroke_count_names); i++) {
@@ -204,10 +204,10 @@ static uint8_t
  * @param context The ButtonModel.
  */
 static void message_updated(void* context) {
-    ButtonModel* bsm = (ButtonModel*)context;
-    ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bsm);
+    ButtonModel* bm = (ButtonModel*)context;
+    ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
     furi_assert(button_config);
-    button_model_set_message(bsm, button_model_get_temp_buffer(bsm));
+    button_model_set_message(bm, button_model_get_temp_buffer(bm));
     view_dispatcher_switch_to_view(
         button_config->view_dispatcher, button_config->view_item_list_id);
 }
@@ -218,13 +218,13 @@ static void message_updated(void* context) {
  * @param context The ButtonModel.
 */
 static void keystroke_selector_callback(uint16_t button_code, void* context) {
-    ButtonModel* bsm = (ButtonModel*)context;
-    ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bsm);
-    uint8_t item = button_model_get_temp_index(bsm);
-    Keystroke ks = button_model_get_keystroke(bsm, item);
+    ButtonModel* bm = (ButtonModel*)context;
+    ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
+    uint8_t item = button_model_get_temp_index(bm);
+    Keystroke ks = button_model_get_keystroke(bm, item);
     if(ks.button_code != button_code) {
-        button_model_set_keystroke(bsm, (uint8_t)item, button_code, ks.count);
-        populate_variable_item_list(button_config, bsm);
+        button_model_set_keystroke(bm, (uint8_t)item, button_code, ks.count);
+        populate_variable_item_list(button_config, bm);
     }
     view_dispatcher_switch_to_view(
         button_config->view_dispatcher, button_config->view_item_list_id);
@@ -239,21 +239,21 @@ static void keystroke_selector_callback(uint16_t button_code, void* context) {
  * @param index The index of the item that was clicked.
 */
 static void item_clicked(void* context, uint32_t index) {
-    ButtonModel* bsm = (ButtonModel*)context;
-    uint8_t message_index = button_model_get_message_index(bsm);
+    ButtonModel* bm = (ButtonModel*)context;
+    uint8_t message_index = button_model_get_message_index(bm);
     if(index == message_index) {
         FURI_LOG_D("Flipboard", "Message index clicked");
-        ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bsm);
+        ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
         furi_assert(button_config);
 
         text_input_set_header_text(button_config->text_input, "Enter message");
-        if(button_model_get_message(bsm)) {
+        if(button_model_get_message(bm)) {
             strncpy(
-                button_model_get_temp_buffer(bsm),
-                furi_string_get_cstr(button_model_get_message(bsm)),
-                button_model_get_temp_buffer_size(bsm) - 1);
+                button_model_get_temp_buffer(bm),
+                furi_string_get_cstr(button_model_get_message(bm)),
+                button_model_get_temp_buffer_size(bm) - 1);
         } else {
-            button_model_get_temp_buffer(bsm)[0] = 0;
+            button_model_get_temp_buffer(bm)[0] = 0;
         }
 
         view_set_previous_callback(
@@ -263,9 +263,9 @@ static void item_clicked(void* context, uint32_t index) {
         text_input_set_result_callback(
             button_config->text_input,
             message_updated,
-            bsm,
-            button_model_get_temp_buffer(bsm),
-            button_model_get_temp_buffer_size(bsm),
+            bm,
+            button_model_get_temp_buffer(bm),
+            button_model_get_temp_buffer_size(bm),
             false);
 
         view_dispatcher_switch_to_view(
@@ -274,15 +274,15 @@ static void item_clicked(void* context, uint32_t index) {
         return;
     }
 
-    uint8_t keystroke_index = button_model_get_keystroke_index(bsm);
+    uint8_t keystroke_index = button_model_get_keystroke_index(bm);
     if(index == keystroke_index) {
         FURI_LOG_D("Flipboard", "Keystroke index clicked");
-        ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bsm);
+        ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
 
         uint16_t keycode = 0;
-        button_model_append_keystroke(bsm, keycode, 1);
+        button_model_append_keystroke(bm, keycode, 1);
 
-        populate_variable_item_list(button_config, bsm);
+        populate_variable_item_list(button_config, bm);
         return;
     }
 
@@ -294,7 +294,7 @@ static void item_clicked(void* context, uint32_t index) {
         }
 
         item = item / 2;
-        ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bsm);
+        ButtonConfig* button_config = (ButtonConfig*)button_model_get_button_config(bm);
         if(button_config->keystroke_selector == NULL) {
             return;
         }
@@ -303,11 +303,11 @@ static void item_clicked(void* context, uint32_t index) {
             keystroke_selector_get_view(button_config->keystroke_selector),
             get_menu_callback(button_config->view_item_list_id));
 
-        Keystroke keystroke = button_model_get_keystroke(bsm, (uint8_t)item);
+        Keystroke keystroke = button_model_get_keystroke(bm, (uint8_t)item);
         keystroke_selector_set_key(button_config->keystroke_selector, keystroke.button_code);
-        button_model_set_temp_index(bsm, (uint8_t)item);
+        button_model_set_temp_index(bm, (uint8_t)item);
         keystroke_selector_set_callback(
-            button_config->keystroke_selector, keystroke_selector_callback, bsm);
+            button_config->keystroke_selector, keystroke_selector_callback, bm);
 
         view_dispatcher_switch_to_view(
             button_config->view_dispatcher, button_config->view_keystroke_selector_id);
@@ -324,43 +324,43 @@ static void item_clicked(void* context, uint32_t index) {
  * by resetting the list.  Then it adds the items based on the fields in the
  * ButtonConfig and the ButtonModel.
  * @param button_config The ButtonConfig.
- * @param bsm The ButtonModel.
+ * @param bm The ButtonModel.
 */
-static void populate_variable_item_list(ButtonConfig* button_config, ButtonModel* bsm) {
+static void populate_variable_item_list(ButtonConfig* button_config, ButtonModel* bm) {
     variable_item_list_reset(button_config->item_list);
     uint8_t item_index = 0;
 
     if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldColorUp) {
         populate_variable_item_list_color(
-            button_config, bsm, "Color up", color_up_changed, button_model_get_color_up(bsm));
+            button_config, bm, "Color up", color_up_changed, button_model_get_color_up(bm));
         item_index++;
     }
 
     if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldColorDown) {
         populate_variable_item_list_color(
-            button_config, bsm, "Color down", color_down_changed, button_model_get_color_down(bsm));
+            button_config, bm, "Color down", color_down_changed, button_model_get_color_down(bm));
         item_index++;
     }
 
     if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldFrequency) {
         populate_variable_item_list_frequency(
-            button_config, bsm, "Frequency", tone_changed, button_model_get_frequency(bsm));
+            button_config, bm, "Frequency", tone_changed, button_model_get_frequency(bm));
         item_index++;
     }
 
     if(flipboard_model_get_button_model_fields(button_config->model) & ButtonModelFieldMessage) {
         variable_item_list_add(button_config->item_list, "Message", 0, NULL, NULL);
-        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bsm);
-        button_model_set_message_index(bsm, item_index);
+        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
+        button_model_set_message_index(bm, item_index);
         item_index++;
     }
 
     if(flipboard_model_get_button_model_fields(button_config->model) &
        ButtonModelFieldKeystrokes) {
-        item_index += populate_variable_item_list_keystrokes(button_config, bsm);
+        item_index += populate_variable_item_list_keystrokes(button_config, bm);
         variable_item_list_add(button_config->item_list, "Add Keystroke", 0, NULL, NULL);
-        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bsm);
-        button_model_set_keystroke_index(bsm, item_index);
+        variable_item_list_set_enter_callback(button_config->item_list, item_clicked, bm);
+        button_model_set_keystroke_index(bm, item_index);
         item_index++;
     }
 }
@@ -377,16 +377,16 @@ static void populate_variable_item_list(ButtonConfig* button_config, ButtonModel
 static void item_callback(void* context, uint32_t index) {
     ButtonConfig* button_config = (ButtonConfig*)context;
     FlipboardModel* model = button_config->model;
-    ButtonModel* bsm = flipboard_model_get_button_model(model, index);
-    if(!bsm) {
-        FURI_LOG_E("TAG", "Index=%ld bsm=NULL", index);
+    ButtonModel* bm = flipboard_model_get_button_model(model, index);
+    if(!bm) {
+        FURI_LOG_E("TAG", "Index=%ld bm=NULL", index);
     } else {
-        FURI_LOG_D("TAG", "Index=%ld KSM.button_id=%d", index, button_model_get_button_id(bsm));
+        FURI_LOG_D("TAG", "Index=%ld bm.button_id=%d", index, button_model_get_button_id(bm));
     }
 
-    furi_assert(bsm && button_model_get_button_id(bsm) == index);
-    button_model_set_button_config(bsm, button_config);
-    populate_variable_item_list(button_config, bsm);
+    furi_assert(bm && button_model_get_button_id(bm) == index);
+    button_model_set_button_config(bm, button_config);
+    populate_variable_item_list(button_config, bm);
     variable_item_list_set_selected_item(button_config->item_list, 0);
 
     if(button_config->view_dispatcher) {

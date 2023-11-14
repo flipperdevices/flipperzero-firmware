@@ -10,7 +10,7 @@
 
 struct KeystrokeSelector {
     View* view_keystroke_selector;
-    ButtonModel* bsm;
+    ButtonModel* bm;
 };
 
 typedef struct KeystrokeSelectorModel {

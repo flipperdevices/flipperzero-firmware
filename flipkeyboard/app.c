@@ -58,11 +58,11 @@ bool flipboard_debounced_switch(void* context, uint8_t old_button, uint8_t new_b
     FURI_LOG_D(
         TAG, "SW EVENT: old=%d new=%d reduced=%d", old_button, new_button, reduced_new_button);
 
-    ButtonModel* bsm = flipboard_model_get_button_model(model, reduced_new_button);
-    flipboard_model_set_colors(model, bsm, new_button);
-    flipboard_model_send_keystrokes(model, bsm);
-    flipboard_model_send_text(model, bsm);
-    flipboard_model_play_tone(model, bsm);
+    ButtonModel* bm = flipboard_model_get_button_model(model, reduced_new_button);
+    flipboard_model_set_colors(model, bm, new_button);
+    flipboard_model_send_keystrokes(model, bm);
+    flipboard_model_send_text(model, bm);
+    flipboard_model_play_tone(model, bm);
 
     return true;
 }
