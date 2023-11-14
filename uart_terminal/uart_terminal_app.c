@@ -56,11 +56,9 @@ UART_TerminalApp* uart_terminal_app_alloc() {
     app->text_box_store = furi_string_alloc();
     furi_string_reserve(app->text_box_store, UART_TERMINAL_TEXT_BOX_STORE_SIZE);
 
-    app->text_input = uart_text_input_alloc();
+    app->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        UART_TerminalAppViewTextInput,
-        uart_text_input_get_view(app->text_input));
+        app->view_dispatcher, UART_TerminalAppViewTextInput, text_input_get_view(app->text_input));
 
     scene_manager_next_scene(app->scene_manager, UART_TerminalSceneStart);
 
@@ -76,7 +74,7 @@ void uart_terminal_app_free(UART_TerminalApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, UART_TerminalAppViewTextInput);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
-    uart_text_input_free(app->text_input);
+    text_input_free(app->text_input);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

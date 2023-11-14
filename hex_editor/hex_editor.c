@@ -12,19 +12,18 @@
 #include <toolbox/stream/file_stream.h>
 
 #include <hex_editor_icons.h>
-// #include <assets_icons.h>
+#include <assets_icons.h>
 
 #define TAG "HexEditor"
 
 typedef struct {
-    // uint8_t file_bytes[HEX_editor_LINES_ON_SCREEN][HEX_editor_BYTES_PER_LINE];
     uint32_t file_offset;
     uint32_t file_read_bytes;
     uint32_t file_size;
     uint8_t string_offset;
     char editable_char;
     Stream* stream;
-    bool mode; // Print address or content
+    bool mode;
 } HexEditorModel;
 
 typedef struct {
@@ -41,15 +40,12 @@ typedef struct {
 } HexEditor;
 
 static void draw_callback(Canvas* canvas, void* ctx) {
-    // UNUSED(ctx);
     HexEditor* hex_editor = ctx;
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 0, 10, "Line and mode:");
-    // elements_button_right(canvas, "Info");
 
-    // // elements_string_fit_width(canvas, buffer, 100);
     canvas_set_font(canvas, FontSecondary);
 
     canvas_draw_str_aligned(
@@ -59,10 +55,6 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         AlignLeft,
         AlignBottom,
         furi_string_get_cstr(hex_editor->buffer) + hex_editor->model->string_offset);
-    // elements_scrollable_text_line(
-    //     canvas, 0, 20, 128, hex_editor->buffer, hex_editor->model->string_offset, false);
-
-    // canvas_draw_line(canvas, 3, 20, 5, 30);
 
     canvas_draw_icon(canvas, 0, 20, &I_Pin_arrow_up_7x9);
 
@@ -153,31 +145,6 @@ static bool hex_editor_open_file(HexEditor* hex_editor, const char* file_path) {
     return isOk;
 }
 
-// static bool hex_editor_read_file(HexEditor* hex_editor) {
-//     furi_assert(hex_editor);
-//     furi_assert(hex_editor->model->stream);
-//     // furi_assert(hex_editor->model->file_offset % hex_editor_BYTES_PER_LINE == 0);
-
-//     memset(hex_editor->model->file_bytes, 0x0, hex_editor_BUF_SIZE);
-//     bool isOk = true;
-
-//     do {
-//         uint32_t offset = hex_editor->model->file_offset;
-//         if(!stream_seek(hex_editor->model->stream, offset, true)) {
-//             FURI_LOG_E(TAG, "Unable to seek stream");
-//             isOk = false;
-//             break;
-//         }
-
-//         hex_editor->model->file_read_bytes = stream_read(
-//             hex_editor->model->stream,
-//             (uint8_t*)hex_editor->model->file_bytes,
-//             hex_editor_BUF_SIZE);
-//     } while(false);
-
-//     return isOk;
-// }
-
 int32_t hex_editor_app(void* p) {
     UNUSED(p);
 
@@ -186,15 +153,11 @@ int32_t hex_editor_app(void* p) {
     FuriString* file_path;
     file_path = furi_string_alloc();
 
-    // furi_string_printf(
-    //     hex_editor->buffer,
-    //     "qqqqq1231231232343454565676urtfgsdfascesc\nasdqwe\new ra sssssssssssssssssssssssssqqqqqqqqqqq1231231232343454565676urtfgsdfascesc\nq2e");
-
     do {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            furi_string_set(file_path, "/any");
+            furi_string_set(file_path, STORAGE_EXT_PATH_PREFIX);
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(&browser_options, "*", &I_edit_10px);
@@ -269,10 +232,6 @@ int32_t hex_editor_app(void* p) {
                         stream_seek_to_char(
                             hex_editor->model->stream, '\n', StreamDirectionBackward);
 
-                        // if(!stream_seek(hex_editor->model->stream, -1, StreamOffsetFromCurrent)) {
-                        //     FURI_LOG_E(TAG, "Unable to seek stream");
-                        //     break;
-                        // }
                         if(!stream_seek_to_char(
                                hex_editor->model->stream, '\n', StreamDirectionBackward)) {
                             stream_rewind(hex_editor->model->stream);

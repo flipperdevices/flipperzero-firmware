@@ -23,17 +23,17 @@ Rename this to `rom.bin`.
 
 Building
 --------
-Move this folder into flippers `applications/plugins/tama_p1`. 
+Move this folder into flippers `applications_user/TAMA-P1`. 
 
 
 Launching the app, directly from console to flipper: 
 ```
-./fbt launch_app APPSRC=applications/plugins/tama_p1
+./fbt launch_app APPSRC=applications_user/TAMA-P1
 ```
 
 Run the following to compile icons:
 ```
-scripts/assets.py icons applications/plugins/tama_p1/icons applications/plugins/tama_p1/compiled
+scripts/assets.py icons applications_user/TAMA-P1/icons applications_user/TAMA-P1/compiled
 ```
 
 Note: you may also need to add `-Wno-unused-parameter` to `CCFLAGS` in
@@ -46,7 +46,7 @@ it is easy to add direct logging after running the application:
 ```
 `python .\serial_logger.py`
 
-`./fbt launch_app APPSRC=applications/plugins/tama_p1; python .\serial_logger.py`
+`./fbt launch_app APPSRC=applications_user\TAMA-P1;  python .\serial_logger.py`
 ```
 Alternatively, follow the directions here: https://flipper.atmanos.com/docs/debugging/viewing/
 

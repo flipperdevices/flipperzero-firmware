@@ -80,6 +80,8 @@ static void showVer(Canvas* const canvas) {
     show(canvas, 4, 59, VER_MAJ, SHOW_SET_BLK);
     canvas_draw_frame(canvas, 8, 62, 2, 2);
     show(canvas, 11, 59, VER_MIN, SHOW_SET_BLK);
+    canvas_draw_frame(canvas, 15, 62, 2, 2);
+    show(canvas, 18, 59, VER_SUB, SHOW_SET_BLK);
 }
 
 //+============================================================================
@@ -94,9 +96,10 @@ static void cbDraw(Canvas* const canvas, void* ctx) {
     furi_assert(canvas);
     furi_assert(ctx);
 
-    // Try to acquire the mutex for the plugin state variables, timeout = 25mS
     state_t* state = ctx;
-    furi_mutex_acquire(state->mutex, FuriWaitForever);
+
+    // Try to acquire the mutex for the plugin state variables, timeout = 25mS
+    if(furi_mutex_acquire(state->mutex, 25) != FuriStatusOk) return;
 
     switch(state->scene) {
     //---------------------------------------------------------------------
@@ -344,8 +347,7 @@ int32_t wii_ec_anal(void) {
         goto bail;
     }
     // 5. Create a mutex for (reading/writing) the plugin state variables
-    state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(!state->mutex) {
+    if(!(state->mutex = furi_mutex_alloc(FuriMutexTypeNormal))) {
         ERROR(wii_errs[(error = ERR_NO_MUTEX)]);
         goto bail;
     }
@@ -434,7 +436,10 @@ int32_t wii_ec_anal(void) {
             // Read successful
 
             // *** Try to lock the plugin state variables ***
-            furi_mutex_acquire(state->mutex, FuriWaitForever);
+            if(furi_mutex_acquire(state->mutex, FuriWaitForever) != FuriStatusOk) {
+                ERROR(wii_errs[(error = ERR_MUTEX_BLOCK)]);
+                goto bail;
+            }
 
             // *** Handle events ***
             switch(msg.id) {
@@ -449,13 +454,13 @@ int32_t wii_ec_anal(void) {
 
             //---------------------------------------------
             case EVID_WIIEC: // WiiMote Perhipheral
-                evWiiEC(&msg, state); //) redraw = true;
+                evWiiEC(&msg, state);
                 break;
 
             //---------------------------------------------
             case EVID_KEY: // Key events
                 patBacklight(state);
-                evKey(&msg, state); //) redraw = true;
+                evKey(&msg, state);
                 break;
 
             //---------------------------------------------
@@ -469,7 +474,10 @@ int32_t wii_ec_anal(void) {
             }
 
             // *** Try to release the plugin state variables ***
-            furi_mutex_release(state->mutex);
+            if(furi_mutex_release(state->mutex) != FuriStatusOk) {
+                ERROR(wii_errs[(error = ERR_MUTEX_RELEASE)]);
+                goto bail;
+            }
 
             // *** Update the GUI screen via the viewport ***
             view_port_update(vpp);
@@ -507,7 +515,10 @@ bail:
     }
 
     // 5. Free the mutex
-    furi_mutex_free(state->mutex);
+    if(state && state->mutex) {
+        furi_mutex_free(state->mutex);
+        state->mutex = NULL;
+    }
 
     // 4. Free up state pointer(s)
     // none

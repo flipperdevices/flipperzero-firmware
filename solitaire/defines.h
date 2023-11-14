@@ -23,11 +23,11 @@ typedef enum {
     GameStateGameOver,
     GameStateStart,
     GameStatePlay,
-    GameStateAnimate
+    GameStateAnimate,
 } PlayState;
 
 typedef struct {
-    uint8_t *buffer;
+    uint8_t* buffer;
     Card card;
     int8_t deck;
     int indexes[4];
@@ -58,6 +58,6 @@ typedef struct {
     uint8_t selectColumn;
     int8_t selected_card;
     CardAnimation animation;
-    uint8_t *buffer;
+    uint8_t* buffer;
     FuriMutex* mutex;
 } GameState;

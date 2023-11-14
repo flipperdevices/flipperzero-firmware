@@ -18,7 +18,7 @@
 #define MAX_CHANNEL 125
 #define MAX_ADDR 6
 
-#define SCAN_APP_PATH_FOLDER "/ext/nrf24scan"
+#define SCAN_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define SETTINGS_FILENAME "addresses.txt" // Settings file format (1 parameter per line):
 // SNIFF - if present then sniff mode
 // Rate: 0/1/2 - rate in Mbps (=0.25/1/2)
@@ -1371,6 +1371,7 @@ int32_t nrf24scan_app(void* p) {
     gui_add_view_port(APP->gui, APP->view_port, GuiLayerFullscreen);
     APP->notification = furi_record_open(RECORD_NOTIFICATION);
     APP->storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(APP->storage, EXT_PATH("nrf24scan"), SCAN_APP_PATH_FOLDER);
     storage_common_mkdir(APP->storage, SCAN_APP_PATH_FOLDER);
     Stream* file_stream = file_stream_alloc(APP->storage);
     FuriString* path = furi_string_alloc();

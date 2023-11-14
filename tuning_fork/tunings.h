@@ -129,13 +129,9 @@ const TUNING BassDropA5 = {
     {{"String 1", G2}, {"String 2", D2}, {"String 3", A1}, {"String 4", E1}, {"String 5", A0}}};
 
 const TUNING UkuleleStandard4 = {
-    "Ukulele Standard 4", 4, {
-    {"String 1", A4},
-    {"String 2", E4},
-    {"String 3", C4},
-    {"String 4", G4}
-  }
-};
+    "Ukulele Standard 4",
+    4,
+    {{"String 1", A4}, {"String 2", E4}, {"String 3", C4}, {"String 4", G4}}};
 
 #define TUNINGS_COUNT 15
 
@@ -156,7 +152,6 @@ TUNING TuningList[TUNINGS_COUNT] = {
     BassDropD4,
     BassD4,
     BassDropA5,
-    UkuleleStandard4
-};
+    UkuleleStandard4};
 
 #endif //TUNINGS

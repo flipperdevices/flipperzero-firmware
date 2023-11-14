@@ -8,7 +8,17 @@
 #include "ufbt_def.h"
 #endif
 
+#ifndef TOTP_TARGET_FIRMWARE
+#if defined(TARGET_FIRMWARE_OFFICIAL) || defined(FW_ORIGIN_Official)
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
+#elif defined(TARGET_FIRMWARE_UNLEASHED) || defined(FW_ORIGIN_Unleashed)
 #define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_XTREME_UL
+#elif defined(TARGET_FIRMWARE_XTREME) || defined(FW_ORIGIN_Xtreme)
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_XTREME_UL
+#else
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
+#endif
+#endif
 
 // Application automatic lock timeout if user IDLE. (ticks)
 #ifndef TOTP_AUTO_LOCK_IDLE_TIMEOUT_SEC

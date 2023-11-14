@@ -1,7 +1,10 @@
 #include "esp_flasher_app_i.h"
 #include "esp_flasher_uart.h"
 
-#define UART_CH (FuriHalUartIdUSART1)
+#include <xtreme.h>
+
+#define UART_CH \
+    (xtreme_settings.uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 #define BAUDRATE (115200)
 
 struct EspFlasherUart {
@@ -52,6 +55,7 @@ static int32_t uart_worker(void* context) {
         }
     }
 
+    furi_hal_uart_set_irq_cb(uart->channel, NULL, NULL);
     furi_stream_buffer_free(uart->rx_stream);
 
     return 0;
@@ -96,7 +100,6 @@ void esp_flasher_uart_free(EspFlasherUart* uart) {
     furi_thread_join(uart->rx_thread);
     furi_thread_free(uart->rx_thread);
 
-    furi_hal_uart_set_irq_cb(uart->channel, NULL, NULL);
     if(uart->channel == FuriHalUartIdLPUART1) {
         furi_hal_uart_deinit(uart->channel);
     }

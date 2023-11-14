@@ -56,7 +56,8 @@ typedef struct eventMsg {
 // Access to this memory is controlled by mutex
 //
 typedef struct state {
-    FuriMutex* mutex;
+    FuriMutex* mutex; // mutex for using this struct
+
     bool run; // true : plugin is running
 
     bool timerEn; // controller scanning enabled

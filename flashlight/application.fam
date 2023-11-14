@@ -1,6 +1,6 @@
 App(
     appid="flashlight",
-    name="Flashlight",
+    name="[LED] Flashlight",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flashlight_app",
     cdefines=["APP_FLASHLIGHT"],

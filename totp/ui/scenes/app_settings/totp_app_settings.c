@@ -15,6 +15,8 @@
 #include "../../../workers/bt_type_code/bt_type_code.h"
 #endif
 
+#include <assets_icons.h>
+
 #define FONT_TEST_STR_LENGTH (7)
 
 static const char* YES_NO_LIST[] = {"NO", "YES"};

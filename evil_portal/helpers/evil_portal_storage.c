@@ -13,6 +13,12 @@ void evil_portal_read_index_html(void* context) {
     Storage* storage = evil_portal_open_storage();
     FileInfo fi;
 
+    if(!storage_common_exists(storage, EVIL_PORTAL_INDEX_SAVE_PATH)) {
+        FuriString* tmp = furi_string_alloc_set(EVIL_PORTAL_INDEX_DEFAULT_PATH);
+        evil_portal_replace_index_html(tmp);
+        furi_string_free(tmp);
+    }
+
     if(storage_common_stat(storage, EVIL_PORTAL_INDEX_SAVE_PATH, &fi) == FSE_OK) {
         File* index_html = storage_file_alloc(storage);
         if(storage_file_open(

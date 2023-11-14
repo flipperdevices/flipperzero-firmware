@@ -6,11 +6,11 @@ void brainfuck_scene_file_select_on_enter(void* context) {
     DialogsApp* dialogs = furi_record_open("dialogs");
     FuriString* path;
     path = furi_string_alloc();
-    furi_string_set(path, "/ext/brainfuck");
+    furi_string_set(path, STORAGE_APP_DATA_PATH_PREFIX);
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, ".b", &I_bfico);
-    browser_options.base_path = "/ext/brainfuck";
+    browser_options.base_path = STORAGE_APP_DATA_PATH_PREFIX;
     browser_options.hide_ext = false;
 
     bool selected = dialog_file_browser_show(dialogs, path, path, &browser_options);

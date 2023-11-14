@@ -1,0 +1,14 @@
+name: C/C++ CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: sudo apt-get install -y clang-tools check cmake
+    - name: cmake
+      run: "( rm -rf build && mkdir build && cd build && cmake .. && make && CTEST_OUTPUT_ON_FAILURE=1 make 
+test && echo OK )"

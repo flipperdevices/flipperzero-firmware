@@ -64,11 +64,9 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->text_box_store = furi_string_alloc();
     furi_string_reserve(app->text_box_store, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE);
 
-    app->text_input = wifi_text_input_alloc();
+    app->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        WifiMarauderAppViewTextInput,
-        wifi_text_input_get_view(app->text_input));
+        app->view_dispatcher, WifiMarauderAppViewTextInput, text_input_get_view(app->text_input));
 
     app->widget = widget_alloc();
     view_dispatcher_add_view(
@@ -148,7 +146,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     widget_free(app->widget);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
-    wifi_text_input_free(app->text_input);
+    text_input_free(app->text_input);
     submenu_free(app->submenu);
     variable_item_list_free(app->var_item_list);
     storage_file_free(app->capture_file);
@@ -161,7 +159,9 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     scene_manager_free(app->scene_manager);
 
     wifi_marauder_uart_free(app->uart);
-    wifi_marauder_uart_free(app->lp_uart);
+    if(app->ok_to_save_pcaps) {
+        wifi_marauder_uart_free(app->lp_uart);
+    }
 
     // Close records
     furi_record_close(RECORD_GUI);
@@ -187,8 +187,12 @@ int32_t wifi_marauder_app(void* p) {
     wifi_marauder_make_app_folder(wifi_marauder_app);
     wifi_marauder_load_settings(wifi_marauder_app);
 
-    wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
-    wifi_marauder_app->lp_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
+    if(wifi_marauder_app->ok_to_save_pcaps) {
+        wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
+        wifi_marauder_app->lp_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
+    } else {
+        wifi_marauder_app->uart = wifi_marauder_xtreme_uart_init(wifi_marauder_app);
+    }
 
     view_dispatcher_run(wifi_marauder_app->view_dispatcher);
 

@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+env:
+  firmware_version: '0.88.0'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Flipper Zero Firmware
+        uses: actions/checkout@v3
+        with:
+          repository: 'flipperdevices/flipperzero-firmware'
+          ref: ${{ env.firmware_version }}
+          submodules: true
+      - name: Checkout FlipBIP
+        uses: actions/checkout@v3
+        with:
+          path: 'applications_user/FlipBIP'
+      - name: Build FAPs
+        run: ./fbt COMPACT=1 DEBUG=0 faps
+      - name: Check FlipBIP Built
+        run: test -f build/f7-firmware-C/.extapps/flipbip.fap
+      - name: Get Tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+        with:
+          strip_v: false
+      - name: Publish FlipBIP
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            build/f7-firmware-C/.extapps/flipbip.fap
+            applications_user/FlipBIP/README.md
+          name: ${{steps.tag.outputs.tag}}
+          body: Built against Flipper Zero firmware v${{ env.firmware_version }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true

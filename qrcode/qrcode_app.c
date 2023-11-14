@@ -11,7 +11,7 @@
 #include "qrcode.h"
 
 #define TAG "qrcode"
-#define QRCODE_FOLDER EXT_PATH("qrcodes")
+#define QRCODE_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define QRCODE_EXTENSION ".qrcode"
 #define QRCODE_FILETYPE "QRCode"
 #define QRCODE_FILE_VERSION 1
@@ -744,6 +744,10 @@ int32_t qrcode_app(void* p) {
     QRCodeApp* instance = qrcode_app_alloc();
     FuriString* file_path = furi_string_alloc();
 
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("qrcodes"), QRCODE_FOLDER);
+    furi_record_close(RECORD_STORAGE);
+
     do {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
@@ -771,122 +775,123 @@ int32_t qrcode_app(void* p) {
         }
 
         InputEvent input;
-        while(furi_message_queue_get(instance->input_queue, &input, FuriWaitForever) ==
-              FuriStatusOk) {
-            furi_check(furi_mutex_acquire(instance->mutex, FuriWaitForever) == FuriStatusOk);
+        while(1) {
+            if(furi_message_queue_get(instance->input_queue, &input, 100) == FuriStatusOk) {
+                furi_check(furi_mutex_acquire(instance->mutex, FuriWaitForever) == FuriStatusOk);
 
-            if(input.key == InputKeyBack) {
-                if(instance->message) {
-                    furi_string_free(instance->message);
-                    instance->message = NULL;
-                }
-                if(instance->qrcode) {
-                    qrcode_free(instance->qrcode);
-                    instance->qrcode = NULL;
-                }
-                instance->loading = true;
-                instance->edit = false;
-                furi_mutex_release(instance->mutex);
-                break;
-            } else if(input.key == InputKeyRight) {
-                instance->show_stats = true;
-            } else if(input.key == InputKeyLeft) {
-                instance->show_stats = false;
-            } else if(instance->show_stats && !instance->loading && instance->qrcode) {
-                if(input.key == InputKeyUp) {
-                    if(!instance->edit) {
-                        instance->selected_idx = MAX(0, instance->selected_idx - 1);
-                    } else {
-                        if(instance->selected_idx == 0 &&
-                           instance->set_mode < instance->max_mode) {
-                            instance->set_mode++;
-                        } else if(
-                            instance->selected_idx == 1 &&
-                            instance->set_version < MAX_QRCODE_VERSION) {
-                            instance->set_version++;
-                        } else if(instance->selected_idx == 2) {
-                            uint8_t max_ecc = instance->set_version == instance->min_version ?
-                                                  instance->max_ecc_at_min_version :
-                                                  ECC_HIGH;
-                            if(instance->set_ecc < max_ecc) {
-                                instance->set_ecc++;
-                            }
-                        }
+                if(input.key == InputKeyBack) {
+                    if(instance->message) {
+                        furi_string_free(instance->message);
+                        instance->message = NULL;
                     }
-                } else if(input.key == InputKeyDown) {
-                    if(!instance->edit) {
-                        instance->selected_idx = MIN(2, instance->selected_idx + 1);
-                    } else {
-                        if(instance->selected_idx == 0 &&
-                           instance->set_mode > instance->min_mode) {
-                            instance->set_mode--;
-                        } else if(
-                            instance->selected_idx == 1 &&
-                            instance->set_version > instance->min_version) {
-                            instance->set_version--;
-                            if(instance->set_version == instance->min_version) {
-                                instance->set_ecc =
-                                    MIN(instance->set_ecc, instance->max_ecc_at_min_version);
-                            }
-                        } else if(instance->selected_idx == 2 && instance->set_ecc > 0) {
-                            instance->set_ecc--;
-                        }
+                    if(instance->qrcode) {
+                        qrcode_free(instance->qrcode);
+                        instance->qrcode = NULL;
                     }
-                } else if(input.key == InputKeyOk) {
-                    if(instance->edit && (instance->set_mode != instance->qrcode->mode ||
-                                          instance->set_version != instance->qrcode->version ||
-                                          instance->set_ecc != instance->qrcode->ecc)) {
-                        uint8_t orig_min_version = instance->min_version;
-                        uint8_t orig_max_ecc_at_min_version = instance->max_ecc_at_min_version;
-                        if(instance->set_mode != instance->qrcode->mode) {
-                            uint16_t len = (uint16_t)furi_string_size(instance->message);
-                            uint8_t min_version = 0;
-                            uint8_t max_ecc_at_min_version = 0;
-                            if(find_min_version_max_ecc(
-                                   len,
-                                   instance->set_mode,
-                                   &min_version,
-                                   &max_ecc_at_min_version)) {
-                                if(instance->set_version < min_version) {
-                                    instance->set_version = min_version;
-                                }
-                                if(instance->set_version == min_version &&
-                                   instance->set_ecc > max_ecc_at_min_version) {
-                                    instance->set_ecc = max_ecc_at_min_version;
-                                }
-                                instance->min_version = min_version;
-                                instance->max_ecc_at_min_version = max_ecc_at_min_version;
-                            } else {
-                                instance->set_mode = instance->qrcode->mode;
-                            }
-                        }
-
-                        QRCode* qrcode = instance->qrcode;
-                        instance->loading = true;
-
-                        if(rebuild_qrcode(
-                               instance,
-                               instance->set_mode,
-                               instance->set_version,
-                               instance->set_ecc)) {
-                            qrcode_free(qrcode);
+                    instance->loading = true;
+                    instance->edit = false;
+                    furi_mutex_release(instance->mutex);
+                    break;
+                } else if(input.key == InputKeyRight) {
+                    instance->show_stats = true;
+                } else if(input.key == InputKeyLeft) {
+                    instance->show_stats = false;
+                } else if(instance->show_stats && !instance->loading && instance->qrcode) {
+                    if(input.key == InputKeyUp) {
+                        if(!instance->edit) {
+                            instance->selected_idx = MAX(0, instance->selected_idx - 1);
                         } else {
-                            FURI_LOG_E(TAG, "Could not rebuild qrcode");
-                            instance->qrcode = qrcode;
-                            instance->set_mode = qrcode->mode;
-                            instance->set_version = qrcode->version;
-                            instance->set_ecc = qrcode->ecc;
-                            instance->min_version = orig_min_version;
-                            instance->max_ecc_at_min_version = orig_max_ecc_at_min_version;
+                            if(instance->selected_idx == 0 &&
+                               instance->set_mode < instance->max_mode) {
+                                instance->set_mode++;
+                            } else if(
+                                instance->selected_idx == 1 &&
+                                instance->set_version < MAX_QRCODE_VERSION) {
+                                instance->set_version++;
+                            } else if(instance->selected_idx == 2) {
+                                uint8_t max_ecc = instance->set_version == instance->min_version ?
+                                                      instance->max_ecc_at_min_version :
+                                                      ECC_HIGH;
+                                if(instance->set_ecc < max_ecc) {
+                                    instance->set_ecc++;
+                                }
+                            }
                         }
+                    } else if(input.key == InputKeyDown) {
+                        if(!instance->edit) {
+                            instance->selected_idx = MIN(2, instance->selected_idx + 1);
+                        } else {
+                            if(instance->selected_idx == 0 &&
+                               instance->set_mode > instance->min_mode) {
+                                instance->set_mode--;
+                            } else if(
+                                instance->selected_idx == 1 &&
+                                instance->set_version > instance->min_version) {
+                                instance->set_version--;
+                                if(instance->set_version == instance->min_version) {
+                                    instance->set_ecc =
+                                        MIN(instance->set_ecc, instance->max_ecc_at_min_version);
+                                }
+                            } else if(instance->selected_idx == 2 && instance->set_ecc > 0) {
+                                instance->set_ecc--;
+                            }
+                        }
+                    } else if(input.key == InputKeyOk) {
+                        if(instance->edit && (instance->set_mode != instance->qrcode->mode ||
+                                              instance->set_version != instance->qrcode->version ||
+                                              instance->set_ecc != instance->qrcode->ecc)) {
+                            uint8_t orig_min_version = instance->min_version;
+                            uint8_t orig_max_ecc_at_min_version = instance->max_ecc_at_min_version;
+                            if(instance->set_mode != instance->qrcode->mode) {
+                                uint16_t len = (uint16_t)furi_string_size(instance->message);
+                                uint8_t min_version = 0;
+                                uint8_t max_ecc_at_min_version = 0;
+                                if(find_min_version_max_ecc(
+                                       len,
+                                       instance->set_mode,
+                                       &min_version,
+                                       &max_ecc_at_min_version)) {
+                                    if(instance->set_version < min_version) {
+                                        instance->set_version = min_version;
+                                    }
+                                    if(instance->set_version == min_version &&
+                                       instance->set_ecc > max_ecc_at_min_version) {
+                                        instance->set_ecc = max_ecc_at_min_version;
+                                    }
+                                    instance->min_version = min_version;
+                                    instance->max_ecc_at_min_version = max_ecc_at_min_version;
+                                } else {
+                                    instance->set_mode = instance->qrcode->mode;
+                                }
+                            }
 
-                        instance->loading = false;
+                            QRCode* qrcode = instance->qrcode;
+                            instance->loading = true;
+
+                            if(rebuild_qrcode(
+                                   instance,
+                                   instance->set_mode,
+                                   instance->set_version,
+                                   instance->set_ecc)) {
+                                qrcode_free(qrcode);
+                            } else {
+                                FURI_LOG_E(TAG, "Could not rebuild qrcode");
+                                instance->qrcode = qrcode;
+                                instance->set_mode = qrcode->mode;
+                                instance->set_version = qrcode->version;
+                                instance->set_ecc = qrcode->ecc;
+                                instance->min_version = orig_min_version;
+                                instance->max_ecc_at_min_version = orig_max_ecc_at_min_version;
+                            }
+
+                            instance->loading = false;
+                        }
+                        instance->edit = !instance->edit;
                     }
-                    instance->edit = !instance->edit;
                 }
-            }
 
-            furi_mutex_release(instance->mutex);
+                furi_mutex_release(instance->mutex);
+            }
             view_port_update(instance->view_port);
         }
 

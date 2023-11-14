@@ -3,8 +3,11 @@
 #include <dialogs/dialogs.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <core/string.h>
 #include <stdlib.h>
 #include "bpm_tapper_icons.h"
+
+#include <assets_icons.h>
 
 typedef enum {
     EventTypeTick,
@@ -175,6 +178,7 @@ static void bpm_state_init(BPMTapper* const plugin_state) {
     q = malloc(sizeof(queue));
     init_queue(q);
     plugin_state->tap_queue = q;
+    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
 int32_t bpm_tapper_app(void* p) {
@@ -186,7 +190,6 @@ int32_t bpm_tapper_app(void* p) {
     // setup
     bpm_state_init(bpm_state);
 
-    bpm_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!bpm_state->mutex) {
         FURI_LOG_E("BPM-Tapper", "cannot create mutex\r\n");
         free(bpm_state);

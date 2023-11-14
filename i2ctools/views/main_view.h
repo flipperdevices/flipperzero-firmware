@@ -4,6 +4,8 @@
 #include <i2ctools_icons.h>
 #define APP_NAME "I2C Tools"
 
+#include <assets_icons.h>
+
 #define SCAN_MENU_TEXT "Scan"
 #define SCAN_MENU_X 90
 #define SCAN_MENU_Y 7

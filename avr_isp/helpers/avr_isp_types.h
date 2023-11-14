@@ -5,7 +5,7 @@
 
 #define AVR_ISP_VERSION_APP "0.1"
 #define AVR_ISP_DEVELOPED "SkorP"
-#define AVR_ISP_GITHUB "https://github.com/flipperdevices/flipperzero-firmware"
+#define AVR_ISP_GITHUB "https://github.com/flipperdevices/flipperzero-good-faps"
 
 #define AVR_ISP_APP_FILE_VERSION 1
 #define AVR_ISP_APP_FILE_TYPE "Flipper Dump AVR"

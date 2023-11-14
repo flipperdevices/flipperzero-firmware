@@ -193,11 +193,11 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
         case InputKeyBack: {
             // Set the camera flash to off.
             uint8_t flash_off = 'f';
-            furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_off, 1);
+            furi_hal_uart_tx(UART_CH, &flash_off, 1);
             furi_delay_ms(50);
             // Stop camera stream.
             uint8_t stop_camera = 's';
-            furi_hal_uart_tx(FuriHalUartIdUSART1, &stop_camera, 1);
+            furi_hal_uart_tx(UART_CH, &stop_camera, 1);
             // Go back to the main menu.
             with_view_model(
                 instance->view,
@@ -292,11 +292,11 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
                     // Save picture directly to ESP32-CAM.
                     // @todo - Add this functionality.
                     // data[0] = 'P';
-                    // furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+                    // furi_hal_uart_tx(UART_CH, data, 1);
 
                     // if(model->flash) {
                     //     data[0] = 'F';
-                    //     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+                    //     furi_hal_uart_tx(UART_CH, data, 1);
                     //     furi_delay_ms(50);
                     // }
 
@@ -320,7 +320,7 @@ static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
 
         if(data[0] != 'X') {
             // Send `data` to the ESP32-CAM.
-            furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+            furi_hal_uart_tx(UART_CH, data, 1);
         }
     }
     return true;
@@ -331,12 +331,12 @@ static void camera_suite_view_camera_exit(void* context) {
 
     // Set the camera flash to off.
     uint8_t flash_off = 'f';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_off, 1);
+    furi_hal_uart_tx(UART_CH, &flash_off, 1);
     furi_delay_ms(50);
 
     // Stop camera stream.
     uint8_t stop_camera = 's';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &stop_camera, 1);
+    furi_hal_uart_tx(UART_CH, &stop_camera, 1);
     furi_delay_ms(50);
 }
 
@@ -351,28 +351,28 @@ static void camera_suite_view_camera_enter(void* context) {
 
     // Start camera stream.
     uint8_t start_camera = 'S';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &start_camera, 1);
+    furi_hal_uart_tx(UART_CH, &start_camera, 1);
     furi_delay_ms(75);
 
     // Get/set dither type.
     uint8_t dither_type = instance_context->dither;
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &dither_type, 1);
+    furi_hal_uart_tx(UART_CH, &dither_type, 1);
     furi_delay_ms(75);
 
     // Make sure the camera is not inverted.
     uint8_t invert_camera = 'i';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &invert_camera, 1);
+    furi_hal_uart_tx(UART_CH, &invert_camera, 1);
     furi_delay_ms(75);
 
     // Toggle flash on or off based on the current state. This will keep the
     // flash on initially. However we're toggling it for now on input.
     uint8_t flash_state = instance_context->flash ? 'F' : 'f';
-    furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_state, 1);
+    furi_hal_uart_tx(UART_CH, &flash_state, 1);
     furi_delay_ms(75);
 
     // Make sure we start with the flash off.
     // uint8_t flash_state = 'f';
-    // furi_hal_uart_tx(FuriHalUartIdUSART1, &flash_state, 1);
+    // furi_hal_uart_tx(UART_CH, &flash_state, 1);
     // furi_delay_ms(75);
 
     with_view_model(
@@ -521,13 +521,17 @@ CameraSuiteViewCamera* camera_suite_view_camera_alloc() {
     furi_thread_start(instance->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
+    if(UART_CH == UART_CH) {
+        furi_hal_console_disable();
+    } else if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_init(UART_CH, 230400);
+    }
 
     // 115200 is the default baud rate for the ESP32-CAM.
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400);
+    furi_hal_uart_set_br(UART_CH, 230400);
 
     // Enable UART1 and set the IRQ callback.
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, camera_on_irq_cb, instance);
+    furi_hal_uart_set_irq_cb(UART_CH, camera_on_irq_cb, instance);
 
     return instance;
 }
@@ -536,7 +540,7 @@ void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     furi_assert(instance);
 
     // Remove the IRQ callback.
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
+    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
 
     // Free the worker thread.
     furi_thread_free(instance->worker_thread);
@@ -545,7 +549,11 @@ void camera_suite_view_camera_free(CameraSuiteViewCamera* instance) {
     furi_stream_buffer_free(instance->rx_stream);
 
     // Re-enable the console.
-    // furi_hal_console_enable();
+    if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_deinit(UART_CH);
+    } else {
+        furi_hal_console_enable();
+    }
 
     with_view_model(
         instance->view, UartDumpModel * model, { UNUSED(model); }, true);

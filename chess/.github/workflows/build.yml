@@ -20,11 +20,13 @@ jobs:
           repository: 'flipperdevices/flipperzero-firmware'
           ref: ${{ env.firmware_version }}
           submodules: true
-      - name: Checkout flip-chess
+      - name: Checkout flipper-chess
         uses: actions/checkout@v3
         with:
           path: 'applications_user/flipper-chess'
       - name: Build FAPs
         run: ./fbt COMPACT=1 DEBUG=0 faps
-      - name: Check flip-chess Built
-        run: test -f build/f7-firmware-C/.extapps/flipchess.fap
+      - name: Check flipper-chess Built
+        run: test -f build/f7-firmware-C/.extapps/chess.fap
+      - name: Check flipper-chess Size
+        run: ls -l --block-size=K build/f7-firmware-C/.extapps/chess.fap

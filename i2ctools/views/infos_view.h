@@ -3,6 +3,8 @@
 #include <gui/gui.h>
 #include <i2ctools_icons.h>
 
+#include <assets_icons.h>
+
 #define INFOS_TEXT "INFOS"
 
 void draw_infos_view(Canvas* canvas);

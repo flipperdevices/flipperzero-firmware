@@ -1,7 +1,16 @@
-# magspoof_flipper
+# magspoof_flipper by Zachary Weiss
 WIP of MagSpoof for the Flipper Zero. Basic TX of saved files confirmed working against an MSR90 with an external H-bridge module mirroring Samy Kamkar's design. RFID coil output weaker; able to be picked up/detected by more compact mag readers such as Square, but yet to have success with it being decoded/parsed properly. Additional investigation into alternate internal TX options (CC1101, ST25R3916, piezo) underway; tentatively, RFID coil + speaker (`LF + P` config setting) results in the strongest internal TX tested to date but still weaker than a dedicated external module or an actual card swipe (and sounds like a dial-up modem from hell). Sample files with test data are included in `assets` for anyone wishing to experiment.
 
 Disclaimer: use responsibly, and at your own risk. While in my testing, I've seen no reason to believe this could damage the RFID (or other) hardware, this is inherently driving the coil in ways it was not designed or intended for; I take no responsibility for fried/bricked Flippers. Similarly, please only use this with magstripe cards and mag readers you own — this is solely meant as a proof of concept for educational purposes. I neither condone nor am sympathetic to malicious uses of my code.
+
+## Hummus's Fork
+I made this fork initially to add reading capability using UART magnetic card readers.
+
+Things that changed in this fork:
+- Added a basic card reading ability
+- Added a function to parse a new MagDevice from a Card String (%Track1?;Track2;Track3?;)
+- Swapped the pins between A6 to A7 on the card that I'm using, might add this to configuration scene later on
+- Adapted some of the APIs to the most recent firmware changes.
 
 ## Optional GPIO TX Module
 For those desiring better TX than the internal RFID coil can offer, one can build the module below, consisting of an H-bridge, a capacitor, and a coil.

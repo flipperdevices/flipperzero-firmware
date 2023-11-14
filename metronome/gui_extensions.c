@@ -1,6 +1,8 @@
 #include <gui/canvas.h>
 #include <gui/icon_i.h>
-#include <metronome_icons.h>
+#include "metronome_icons.h"
+
+#include <assets_icons.h>
 
 //lib can only do bottom left/right
 void elements_button_top_left(Canvas* canvas, const char* str) {

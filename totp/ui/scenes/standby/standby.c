@@ -2,6 +2,8 @@
 #include <totp_icons.h>
 #include "../../constants.h"
 
+#include <assets_icons.h>
+
 void totp_scene_standby_render(Canvas* const canvas) {
     canvas_draw_icon(canvas, SCREEN_WIDTH - 56, SCREEN_HEIGHT - 48, &I_DolphinCommon_56x48);
 

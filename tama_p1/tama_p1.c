@@ -720,6 +720,7 @@ static void tama_p1_init(TamaApp* const ctx) {
 
     // Load ROM
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("tama_p1"), STORAGE_APP_DATA_PATH_PREFIX);
     FileInfo fi;
     if(storage_common_stat(storage, TAMA_ROM_PATH, &fi) == FSE_OK) {
         File* rom_file = storage_file_alloc(storage);
@@ -835,9 +836,9 @@ int32_t tama_p1_app(void* p) {
                 btn_state_t tama_btn_state = 0; // BTN_STATE_RELEASED is 0
 
                 if(in_menu) {
-                    // if(menu_cursor == 2 &&
-                    // (event.input.key == InputKeyUp || event.input.key == InputKeyDown)) {
-                    // tama_btn_state = BTN_STATE_RELEASED;
+                    // if(menu_cursor >= 2 &&
+                    //    (event.input.key == InputKeyUp || event.input.key == InputKeyDown)) {
+                    //     tama_btn_state = BTN_STATE_RELEASED;
                     // }
                     if(event.input.key == InputKeyBack) {
                         tama_btn_state = BTN_STATE_RELEASED;
@@ -1133,7 +1134,7 @@ int32_t tama_p1_app(void* p) {
                             break;
                         }
                     }
-                } else { // out of menu // TODO: clean up code -.-
+                } else { // out of menu
                     if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                         if(speed != 1) {
                             speed = 1;

@@ -124,8 +124,12 @@ int32_t evil_portal_app(void* p) {
     UNUSED(p);
     Evil_PortalApp* evil_portal_app = evil_portal_app_alloc();
 
-    uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    // turn off 5v, so it gets reset on startup
+    if(otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
+    uint8_t attempts = 0;
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);

@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+env:
+  firmware_version: '0.88.0'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Flipper Zero Firmware
+        uses: actions/checkout@v3
+        with:
+          repository: 'flipperdevices/flipperzero-firmware'
+          ref: ${{ env.firmware_version }}
+          submodules: true
+      - name: Checkout FlipBIP
+        uses: actions/checkout@v3
+        with:
+          path: 'applications_user/FlipBIP'
+      - name: Build FAPs
+        run: ./fbt COMPACT=1 DEBUG=0 faps
+      - name: Check FlipBIP Built
+        run: test -f build/f7-firmware-C/.extapps/flipbip.fap
+      - name: Check FlipBIP Size
+        run: ls -l --block-size=K build/f7-firmware-C/.extapps/flipbip.fap

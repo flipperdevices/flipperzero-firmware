@@ -26,6 +26,8 @@
 
 #include "nfc_magic_icons.h"
 
+#include <assets_icons.h>
+
 #include <nfc/nfc.h>
 #include <nfc/nfc_device.h>
 

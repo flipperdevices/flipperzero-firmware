@@ -84,6 +84,7 @@ typedef struct {
 
     int rerolls;
     int score;
+
     FuriMutex* mutex;
 } GameState;
 
@@ -740,11 +741,12 @@ int32_t roots_of_life_game_app(void* p) {
     furi_record_close(RECORD_NOTIFICATION);
     view_port_free(view_port);
     furi_mutex_free(state->mutex);
+
 free_and_exit:
-    furi_message_queue_free(event_queue);
     //FURI_LOG_D(TAG, "Quitting game...");
     game_state_free(state);
     free(state);
+    furi_message_queue_free(event_queue);
 
     return return_code;
 }

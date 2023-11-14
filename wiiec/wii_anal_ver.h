@@ -5,5 +5,6 @@
 
 #define VER_MAJ &img_3x5_1
 #define VER_MIN &img_3x5_0
+#define VER_SUB &img_3x5_1
 
 #endif //WII_ANAL_VER_H_

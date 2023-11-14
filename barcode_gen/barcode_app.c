@@ -1,6 +1,7 @@
 #include "barcode_app.h"
 
 #include "barcode_app_icons.h"
+#include <assets_icons.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <notification/notification_app.h>

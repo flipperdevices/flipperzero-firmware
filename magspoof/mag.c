@@ -92,11 +92,6 @@ static Mag* mag_alloc() {
     view_dispatcher_add_view(
         mag->view_dispatcher, MagViewTextInput, text_input_get_view(mag->text_input));
 
-    // Custom Mag Text Input
-    mag->mag_text_input = mag_text_input_alloc();
-    view_dispatcher_add_view(
-        mag->view_dispatcher, MagViewMagTextInput, mag_text_input_get_view(mag->mag_text_input));
-
     return mag;
 }
 
@@ -147,10 +142,6 @@ static void mag_free(Mag* mag) {
     // TextInput
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewTextInput);
     text_input_free(mag->text_input);
-
-    // Custom Mag TextInput
-    view_dispatcher_remove_view(mag->view_dispatcher, MagViewMagTextInput);
-    mag_text_input_free(mag->mag_text_input);
 
     // View Dispatcher
     view_dispatcher_free(mag->view_dispatcher);
