@@ -163,8 +163,8 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
         }
 
         packet[i++] = prefix; // Prefix (paired 0x01 new 0x07 airtag 0x05)
-        packet[i++] = (model >> 0x08) & 0xFF;
-        packet[i++] = (model >> 0x00) & 0xFF;
+        packet[i++] = (model >> 0x08) & 0xFF; // Device Model
+        packet[i++] = (model >> 0x00) & 0xFF; // ...
         packet[i++] = 0x55; // Status
         packet[i++] = ((rand() % 10) << 4) + (rand() % 10); // Buds Battery Level
         packet[i++] = ((rand() % 8) << 4) + (rand() % 10); // Charing Status and Battery Case Level
@@ -238,8 +238,8 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
             if(action == 0x09 && rand() % 2) flags = 0x40; // Glitched 'Setup New Device'
         }
 
-        packet[i++] = flags;
-        packet[i++] = action;
+        packet[i++] = flags; // Action Flags
+        packet[i++] = action; // Action Type
         furi_hal_random_fill_buf(&packet[i], 3); // Authentication Tag
         i += 3;
         break;
@@ -264,13 +264,13 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
 
         i -= 2; // Override segment header
         packet[i++] = ContinuityTypeNearbyAction; // Continuity Type
-        packet[i++] = 0x05; // Continuity Size
-        packet[i++] = flags;
-        packet[i++] = action;
+        packet[i++] = 5; // Continuity Size
+        packet[i++] = flags; // Action Flags
+        packet[i++] = action; // Action Type
         furi_hal_random_fill_buf(&packet[i], 3); // Authentication Tag
         i += 3;
 
-        packet[i++] = 0x00; // Terminator (?)
+        packet[i++] = 0x00; // Additional Action Data Terminator (?)
         packet[i++] = 0x00; // ...
 
         packet[i++] = ContinuityTypeNearbyInfo; // Continuity Type (?)

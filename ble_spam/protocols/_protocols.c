@@ -2,8 +2,9 @@
 
 const Protocol* protocols[] = {
     &protocol_continuity,
-    &protocol_fastpair,
     &protocol_easysetup,
+    &protocol_fastpair,
+    &protocol_lovespouse,
     &protocol_swiftpair,
 };
 

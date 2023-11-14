@@ -45,7 +45,7 @@ static void make_packet(uint8_t* _size, uint8_t** _packet, Payload* payload) {
     packet[i++] = 0x03; // Microsoft Beacon ID
     packet[i++] = 0x00; // Microsoft Beacon Sub Scenario
     packet[i++] = 0x80; // Reserved RSSI Byte
-    memcpy(&packet[i], name, name_len);
+    memcpy(&packet[i], name, name_len); // Device Name
     i += name_len;
 
     *_size = size;
