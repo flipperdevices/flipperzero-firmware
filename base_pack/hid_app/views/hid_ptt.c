@@ -38,11 +38,22 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         }
     }
 
-    canvas_draw_icon(canvas, 5, 121, &I_ButtonLeft_4x7);
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(canvas, 2, 103, AlignLeft, AlignTop, "google meet");
-    elements_multiline_text_aligned(canvas, 2, 112, AlignLeft, AlignTop, "mac");
-    elements_multiline_text_aligned(canvas, 15, 121, AlignLeft, AlignTop, "Hold to exit");
+    canvas_draw_icon(canvas, 3, 81, &I_ButtonUp_7x4);
+    elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "google meet");
+    canvas_draw_icon(canvas, 3, 96, &I_ButtonDown_7x4);
+
+    // OS selection
+    elements_slightly_rounded_box(canvas, 0, 106, 21, 11);
+    canvas_set_color(canvas, ColorWhite);
+    elements_multiline_text_aligned(canvas, 2, 108, AlignLeft, AlignTop, "Mac");
+    canvas_set_color(canvas, ColorBlack);
+    elements_multiline_text_aligned(canvas, 24, 108, AlignLeft, AlignTop, "|");
+    elements_multiline_text_aligned(canvas, 28, 108, AlignLeft, AlignTop, "Linux");
+    canvas_set_color(canvas, ColorBlack);
+
+    canvas_draw_icon(canvas, 3, 121, &I_ButtonLeft_4x7);
+    elements_multiline_text_aligned(canvas, 9, 121, AlignLeft, AlignTop, "Hold to exit");
 
     const uint8_t x_2 = 27;
     const uint8_t x_1 = 8;
@@ -58,7 +69,11 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         elements_slightly_rounded_box(canvas, x_2 + 3, y_1 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, x_2 + 5, y_1 + 5, &I_Volup_8x6);
+    if(model->ptt_pressed) {
+        canvas_draw_icon(canvas, x_2 + 6, y_1 + 7, &I_ButtonUp_7x4);
+    } else {
+        canvas_draw_icon(canvas, x_2 + 5, y_1 + 5, &I_Volup_8x6);
+    }
     canvas_set_color(canvas, ColorBlack);
 
     // Down
@@ -67,7 +82,11 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         elements_slightly_rounded_box(canvas, x_2 + 3, y_3 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, x_2 + 6, y_3 + 5, &I_Voldwn_6x6);
+    if(model->ptt_pressed) {
+        canvas_draw_icon(canvas, x_2 + 6, y_3 + 7, &I_ButtonDown_7x4);
+    } else {
+        canvas_draw_icon(canvas, x_2 + 6, y_3 + 5, &I_Voldwn_6x6);
+    }
     canvas_set_color(canvas, ColorBlack);
 
     // Left
@@ -76,7 +95,14 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         elements_slightly_rounded_box(canvas, x_1 + 3, y_2 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, x_1 + 7, y_2 + 5, &I_ButtonLeft_4x7);
+    if (model->ptt_pressed) {
+        // canvas_draw_icon(canvas, x_1 + 8, y_2 + 5, &I_ButtonRight_4x7);
+        canvas_set_font(canvas, FontPrimary);
+        elements_multiline_text_aligned(canvas, x_1 + 7, y_2 + 4, AlignLeft, AlignTop, "?");
+        canvas_set_font(canvas, FontSecondary);
+    } else {
+        canvas_draw_icon(canvas, x_1 + 7, y_2 + 5, &I_ButtonLeft_4x7);
+    }
     canvas_set_color(canvas, ColorBlack);
 
     // Right / Camera
@@ -85,29 +111,37 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         elements_slightly_rounded_box(canvas, x_3 + 3, y_2 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
-    canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
+    if(!model->ptt_pressed) {
+        canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
+        canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
+    } else {
+        elements_multiline_text_aligned(canvas, x_3 + 4, y_2 + 5, AlignLeft, AlignTop, "OS");
+    }
     canvas_set_color(canvas, ColorBlack);
 
     // Ok / Mic
     canvas_draw_icon(canvas, x_2, y_2, &I_Button_18x18);
+    canvas_draw_icon(canvas, x_2 + 5, y_2 + 4, &I_Mic_btn_8x10);
     if(model->muted && !model->ptt_pressed) {
         canvas_draw_line(canvas, x_2 + 3, y_2 + 2, x_2 + 3 + 13, y_2 + 2 + 13);
-        canvas_draw_line(canvas, x_2 + 4, y_2 + 2, x_2 + 4 + 13, y_2 + 2 + 13);
+        canvas_draw_line(canvas, x_2 + 2, y_2 + 2, x_2 + 2 + 13, y_2 + 2 + 13);
         canvas_draw_line(canvas, x_2 + 3, y_2 + 2 + 13, x_2 + 3 + 13, y_2 + 2);
-        canvas_draw_line(canvas, x_2 + 4, y_2 + 2 + 13, x_2 + 4 + 13, y_2 + 2);
+        canvas_draw_line(canvas, x_2 + 2, y_2 + 2 + 13, x_2 + 2 + 13, y_2 + 2);
     }
-    canvas_draw_icon(canvas, x_2 + 5, y_2 + 4, &I_Mic_btn_9x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Back / PTT
-    canvas_draw_icon(canvas, x_2, 0, &I_Space_60x18);
+    canvas_draw_icon(canvas, x_2, 0, &I_BtnFrameLeft_3x18);
+    canvas_draw_icon(canvas, x_2 + 35, 0, &I_BtnFrameRight_2x18);
+    canvas_draw_line(canvas, x_2 + 3, 0,  x_2 + 34, 0);
+    canvas_draw_line(canvas, x_2 + 3, 16, x_2 + 34, 16);
+    canvas_draw_line(canvas, x_2 + 3, 17, x_2 + 34, 17);
     if(model->ptt_pressed) {
-        elements_slightly_rounded_box(canvas, x_2+3, 0+2, 30, 13);
+        elements_slightly_rounded_box(canvas, x_2+3, 0+2, 32, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, x_2+3, 0+4, &I_Pin_back_arrow_10x8);
-    elements_multiline_text_aligned(canvas, x_2+15, 0+12, AlignLeft, AlignBottom, "PTT");
+    canvas_draw_icon(canvas, x_2+4, 0+4, &I_Pin_back_arrow_rotated_8x10);
+    elements_multiline_text_aligned(canvas, x_2+16, 0+12, AlignLeft, AlignBottom, "PTT");
 }
 
 static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
