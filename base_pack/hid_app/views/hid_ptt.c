@@ -1,6 +1,7 @@
 #include "hid_ptt.h"
 #include <gui/elements.h>
 #include "../hid.h"
+#include "../views.h"
 
 #include "hid_icons.h"
 
@@ -169,6 +170,10 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
                     hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_AC_BACK);
                     hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_AC_BACK);
                 }
+            } else if(event->type == InputTypeLong && event->key == InputKeyLeft) {
+                model->left_pressed = false;
+                hid_hal_keyboard_release_all(hid_ptt->hid);
+                view_dispatcher_switch_to_view(hid_ptt->hid->view_dispatcher, HidViewSubmenu);
             }
         },
         true);
@@ -177,15 +182,8 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
 static bool hid_ptt_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     HidPtt* hid_ptt = context;
-    bool consumed = false;
-
-    if(event->type == InputTypeLong && event->key == InputKeyBack) {
-        hid_hal_keyboard_release_all(hid_ptt->hid);
-    } else {
-        hid_ptt_process(hid_ptt, event);
-        consumed = true;
-    }
-
+    bool consumed = true;
+    hid_ptt_process(hid_ptt, event);
     return consumed;
 }
 
