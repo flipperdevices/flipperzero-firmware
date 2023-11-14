@@ -1,6 +1,6 @@
 #!/bin/bash
 # Parse API Version from api_symbols.csv
-FILE=unleashed-firmware/firmware/targets/f7/api_symbols.csv
+FILE=unleashed-firmware/targets/f7/api_symbols.csv
 OLDIFS=$IFS
 IFS=','
 [ ! -f $FILE ] && { echo "$FILE not found"; exit 99; }
