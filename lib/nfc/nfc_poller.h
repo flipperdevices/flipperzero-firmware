@@ -26,11 +26,28 @@ extern "C" {
  */
 typedef struct NfcPoller NfcPoller;
 
+/**
+ * @brief Extended generic Nfc event type.
+ *
+ * An extended generic Nfc event contains protocol poller and it's parent protocol event data.
+ * If protocol has no parent, then events are produced by Nfc instance.
+ *
+ * The parent_event_data field is protocol-specific and should be cast to the appropriate type before use.
+ */
 typedef struct {
-    NfcGenericInstance* poller;
-    NfcGenericEventData* parent_event_data;
+    NfcGenericInstance* poller; /**< Pointer to the protocol poller. */
+    NfcGenericEventData* parent_event_data /**< Pointer to the protocol's parent poller event data. */;
 } NfcGenericEventEx;
 
+/**
+ * @brief Extended generic Nfc event callback type.
+ *
+ * A function of this type must be passed as the callback parameter upon extended start of a poller.
+ *
+ * @param [in] event Nfc  extended generic event, passed by value, complete with protocol type and data.
+ * @param [in,out] context pointer to the user-specific context (set when starting a poller/listener instance).
+ * @returns the command which the event producer must execute.
+ */
 typedef NfcCommand (*NfcGenericCallbackEx)(NfcGenericEventEx event, void* context);
 
 /**
@@ -67,7 +84,7 @@ void nfc_poller_start(NfcPoller* instance, NfcGenericCallback callback, void* co
 /**
  * @brief Start an NfcPoller instance in extended mode.
  *
- * When nfc poller is started in custom mode, callback will be called with parent protocol events
+ * When nfc poller is started in extended mode, callback will be called with parent protocol events
  * and protocol instance. This mode enables to make custom poller state machines.
  *
  * @param[in,out] instance pointer to the instance to be started.
