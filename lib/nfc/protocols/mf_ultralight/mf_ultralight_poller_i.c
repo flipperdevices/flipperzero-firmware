@@ -161,7 +161,7 @@ MfUltralightError mf_ultralight_poller_read_page(
 MfUltralightError mf_ultralight_poller_write_page(
     MfUltralightPoller* instance,
     uint8_t page,
-    MfUltralightPage* data) {
+    const MfUltralightPage* data) {
     MfUltralightError ret = MfUltralightErrorNone;
     Iso14443_3aError error = Iso14443_3aErrorNone;
 

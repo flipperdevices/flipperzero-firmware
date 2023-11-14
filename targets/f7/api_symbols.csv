@@ -2242,7 +2242,7 @@ Function,+,mf_ultralight_poller_sync_read_signature,MfUltralightError,"Nfc*, MfU
 Function,+,mf_ultralight_poller_sync_read_tearing_flag,MfUltralightError,"Nfc*, uint8_t, MfUltralightTearingFlag*"
 Function,+,mf_ultralight_poller_sync_read_version,MfUltralightError,"Nfc*, MfUltralightVersion*"
 Function,+,mf_ultralight_poller_sync_write_page,MfUltralightError,"Nfc*, uint16_t, MfUltralightPage*"
-Function,+,mf_ultralight_poller_write_page,MfUltralightError,"MfUltralightPoller*, uint8_t, MfUltralightPage*"
+Function,+,mf_ultralight_poller_write_page,MfUltralightError,"MfUltralightPoller*, uint8_t, const MfUltralightPage*"
 Function,+,mf_ultralight_reset,void,MfUltralightData*
 Function,+,mf_ultralight_save,_Bool,"const MfUltralightData*, FlipperFormat*"
 Function,+,mf_ultralight_set_uid,_Bool,"MfUltralightData*, const uint8_t*, size_t"
