@@ -1,6 +1,7 @@
 #include "app.h"
 #include "app_config.h"
 #include "app_keyboard_layout.h"
+#include <assets_icons.h>
 
 /**
  * @brief This method handles Flipper D-Pad input when in the FlipboardKeyboard mode.
@@ -20,27 +21,26 @@ bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
  * @param model The FlipboardModelRef* context.
  */
 void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
-    static uint8_t counter = 0;
-
     FlipboardModelRef* my_model = (FlipboardModelRef*)model;
-    canvas_draw_str(canvas, 2, 15, "PRESS FLIPBOARD");
-
-    if(flipboard_model_get_single_button_mode(my_model->model)) {
-        canvas_draw_str(canvas, 22, 30, "BUTTON");
-    } else {
-        canvas_draw_str(canvas, 22, 30, "BUTTONS");
-    }
 
     ButtonMonitor* bm = flipboard_model_get_button_monitor(my_model->model);
+    uint8_t last = 0;
     if(bm != NULL) {
-        uint8_t last = button_monitor_get_last_status(bm);
-        FuriString* str = furi_string_alloc();
-        furi_string_printf(str, "%02X   %02x", last, counter++);
-        canvas_draw_str(canvas, 55, 50, furi_string_get_cstr(str));
-        furi_string_free(str);
+        last = button_monitor_get_last_status(bm);
     }
 
-    // canvas_draw_icon(canvas, 64, 42, &I_glyph_1_7x9);
+    canvas_set_bitmap_mode(canvas, 1);
+
+    canvas_draw_icon(canvas, 6, 19, (last & 1) ? &I_Down_hvr_25x27 : &I_Up_25x27);
+    canvas_draw_icon(canvas, 36, 19, (last & 2) ? &I_Down_hvr_25x27 : &I_Up_25x27);
+    canvas_draw_icon(canvas, 67, 19, (last & 4) ? &I_Down_hvr_25x27 : &I_Up_25x27);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 21, 12, "PRESS BUTTONS");
+    canvas_draw_icon(canvas, 98, 19, (last & 8) ? &I_Down_hvr_25x27 : &I_Up_25x27);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 29, 61, "ACTION:");
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 77, 61, "05");
 }
 
 /**
