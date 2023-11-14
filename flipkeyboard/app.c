@@ -21,27 +21,33 @@ bool flipboard_view_flip_keyboard_input(InputEvent* event, void* context) {
  * @param model The FlipboardModelRef* context.
  */
 void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
+    FuriString* action_text = furi_string_alloc();
     FlipboardModelRef* my_model = (FlipboardModelRef*)model;
     ButtonMonitor* bm = flipboard_model_get_button_monitor(my_model->model);
-    uint8_t last = 0;
+    uint8_t action = 0;
     if(bm != NULL) {
-        last = button_monitor_get_last_status(bm);
+        action = button_monitor_get_last_status(bm);
     }
+
+    const Icon* icon1 = (action & 1) ? &I_Down_hvr_25x27 : &I_Up_25x27;
+    const Icon* icon2 = (action & 2) ? &I_Down_hvr_25x27 : &I_Up_25x27;
+    const Icon* icon3 = (action & 4) ? &I_Down_hvr_25x27 : &I_Up_25x27;
+    const Icon* icon4 = (action & 8) ? &I_Down_hvr_25x27 : &I_Up_25x27;
+    furi_string_printf(action_text, "%02d", action);
 
     canvas_set_bitmap_mode(canvas, 1);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 21, 12, "PRESS BUTTONS");
-    canvas_draw_icon(canvas, 5, 19, (last & 1) ? &I_Down_hvr_25x27 : &I_Up_25x27);
-    canvas_draw_icon(canvas, 36, 19, (last & 2) ? &I_Down_hvr_25x27 : &I_Up_25x27);
-    canvas_draw_icon(canvas, 67, 19, (last & 4) ? &I_Down_hvr_25x27 : &I_Up_25x27);
-    canvas_draw_icon(canvas, 98, 19, (last & 8) ? &I_Down_hvr_25x27 : &I_Up_25x27);
+    canvas_draw_icon(canvas, 5, 19, icon1);
+    canvas_draw_icon(canvas, 36, 19, icon2);
+    canvas_draw_icon(canvas, 67, 19, icon3);
+    canvas_draw_icon(canvas, 98, 19, icon4);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 33, 60, "ACTION:");
     canvas_set_font(canvas, FontPrimary);
-    FuriString* str = furi_string_alloc();
-    furi_string_printf(str, "%02d", last);
-    canvas_draw_str(canvas, 84, 60, furi_string_get_cstr(str));
-    furi_string_free(str);
+    canvas_draw_str(canvas, 84, 60, furi_string_get_cstr(action_text));
+
+    furi_string_free(action_text);
 }
 
 /**
