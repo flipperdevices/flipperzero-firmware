@@ -26,9 +26,12 @@ extern "C" {
  */
 typedef struct NfcPoller NfcPoller;
 
-typedef NfcGenericEvent NfcGenericEventEx;
+typedef struct {
+    NfcGenericInstance* poller;
+    NfcGenericEventData* parent_event_data;
+} NfcGenericEventEx;
 
-typedef NfcGenericCallback NfcGenericCallbackEx;
+typedef NfcCommand (*NfcGenericCallbackEx)(NfcGenericEventEx event, void* context);
 
 /**
  * @brief Allocate an NfcPoller instance.

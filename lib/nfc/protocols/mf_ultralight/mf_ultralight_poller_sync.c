@@ -80,14 +80,13 @@ static const MfUltralightPollerCmdHandler
 };
 
 static NfcCommand mf_ultralight_poller_cmd_callback(NfcGenericEventEx event, void* context) {
-    furi_assert(event.instance);
-    furi_assert(event.protocol == NfcProtocolIso14443_3a);
-    furi_assert(event.event_data);
+    furi_assert(event.poller);
+    furi_assert(event.parent_event_data);
     furi_assert(context);
 
     MfUltralightPollerContext* poller_context = context;
-    Iso14443_3aPollerEvent* iso14443_3a_event = event.event_data;
-    MfUltralightPoller* mfu_poller = event.instance;
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.parent_event_data;
+    MfUltralightPoller* mfu_poller = event.poller;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         poller_context->error = mf_ultralight_poller_cmd_handlers[poller_context->cmd_type](

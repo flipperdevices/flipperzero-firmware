@@ -136,12 +136,10 @@ static NfcCommand nfc_poller_start_ex_tail_callback(NfcGenericEvent event, void*
 
     NfcPoller* instance = context;
     NfcCommand command = NfcCommandContinue;
-    NfcProtocol parent_protocol = nfc_protocol_get_parent(instance->protocol);
 
     NfcGenericEventEx poller_event = {
-        .protocol = parent_protocol,
-        .instance = instance->list.tail->poller,
-        .event_data = event.event_data,
+        .poller = instance->list.tail->poller,
+        .parent_event_data = event.event_data,
     };
 
     command = instance->callback(poller_event, instance->context);
@@ -159,9 +157,8 @@ static NfcCommand nfc_poller_start_ex_head_callback(NfcEvent event, void* contex
 
     if(parent_protocol == NfcProtocolInvalid) {
         NfcGenericEventEx poller_event = {
-            .protocol = NfcProtocolInvalid,
-            .instance = instance->list.tail->poller,
-            .event_data = &event,
+            .poller = instance->list.tail->poller,
+            .parent_event_data = &event,
         };
 
         command = instance->callback(poller_event, instance->context);
