@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,45.2,,
+Version,+,46.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2285,10 +2285,10 @@ Function,-,utoa,char*,"unsigned, char*, int"
 Function,+,validator_is_file_alloc_init,ValidatorIsFile*,"const char*, const char*, const char*"
 Function,+,validator_is_file_callback,_Bool,"const char*, FuriString*, void*"
 Function,+,validator_is_file_free,void,ValidatorIsFile*
-Function,+,value_index_bool,uint8_t,"const _Bool, const _Bool[], uint8_t"
-Function,+,value_index_float,uint8_t,"const float, const float[], uint8_t"
-Function,+,value_index_int32,uint8_t,"const int32_t, const int32_t[], uint8_t"
-Function,+,value_index_uint32,uint8_t,"const uint32_t, const uint32_t[], uint8_t"
+Function,+,value_index_bool,size_t,"const _Bool, const _Bool[], size_t"
+Function,+,value_index_float,size_t,"const float, const float[], size_t"
+Function,+,value_index_int32,size_t,"const int32_t, const int32_t[], size_t"
+Function,+,value_index_uint32,size_t,"const uint32_t, const uint32_t[], size_t"
 Function,+,variable_item_get_context,void*,VariableItem*
 Function,+,variable_item_get_current_value_index,uint8_t,VariableItem*
 Function,+,variable_item_list_add,VariableItem*,"VariableItemList*, const char*, uint8_t, VariableItemChangeCallback, void*"
