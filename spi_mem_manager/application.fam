@@ -1,0 +1,18 @@
+App(
+    appid="spi_mem_manager",
+    name="SPI Mem Manager",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="spi_mem_app",
+    requires=["gui"],
+    stack_size=1 * 2048,
+    fap_description="Application for reading and writing 25-series SPI memory chips",
+    fap_version="1.0",
+    fap_icon="images/Dip8_10px.png",
+    fap_category="GPIO",
+    fap_icon_assets="images",
+    fap_private_libs=[
+        Lib(
+            name="spi",
+        ),
+    ],
+)
