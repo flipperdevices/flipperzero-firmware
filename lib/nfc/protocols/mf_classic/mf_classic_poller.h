@@ -142,7 +142,8 @@ typedef union {
     MfClassicPollerEventDataDictAttackNextSector next_sector_data; /**< Next sector context. */
     MfClassicPollerEventDataKeyRequest key_request_data; /**< Key request context. */
     MfClassicPollerEventDataUpdate data_update; /**< Data update context. */
-    MfClassicPollerEventDataReadSectorRequest read_sector_request_data; /**< Read sector request context. */
+    MfClassicPollerEventDataReadSectorRequest
+        read_sector_request_data; /**< Read sector request context. */
     MfClassicPollerEventKeyAttackData key_attack_data; /**< Key attack context. */
     MfClassicPollerEventDataSectorTrailerRequest sec_tr_data; /**< Sector trailer request context. */
     MfClassicPollerEventDataWriteBlockRequest write_block_data; /**< Write block request context. */

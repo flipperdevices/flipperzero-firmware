@@ -26,7 +26,7 @@ typedef enum {
  * @brief Iso14443_3b poller event data.
  */
 typedef union {
-    Iso14443_3bError error;  /**< Error code indicating card activation fail reason. */
+    Iso14443_3bError error; /**< Error code indicating card activation fail reason. */
 } Iso14443_3bPollerEventData;
 
 /**

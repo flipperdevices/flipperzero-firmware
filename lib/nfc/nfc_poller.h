@@ -36,7 +36,8 @@ typedef struct NfcPoller NfcPoller;
  */
 typedef struct {
     NfcGenericInstance* poller; /**< Pointer to the protocol poller. */
-    NfcGenericEventData* parent_event_data /**< Pointer to the protocol's parent poller event data. */;
+    NfcGenericEventData*
+        parent_event_data /**< Pointer to the protocol's parent poller event data. */;
 } NfcGenericEventEx;
 
 /**
