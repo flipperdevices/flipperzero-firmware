@@ -485,6 +485,7 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
                     sizeof(MfUltralightAuthPassword),
                     config->password.data);
                 config->pack = instance->auth_context.pack;
+                instance->auth_context.auth_success = true;
             }
         }
 
@@ -494,6 +495,9 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
             // original card
             config->auth0 = instance->pages_read;
             config->access.prot = true;
+        } else if(!instance->auth_context.auth_success) {
+            instance->pages_read -= 2;
+            instance->data->pages_read -= 2;
         }
     } while(false);
 
