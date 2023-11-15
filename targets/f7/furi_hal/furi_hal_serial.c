@@ -90,7 +90,7 @@ static void furi_hal_serial_usart_dma_rx_isr() {
 
 static void furi_hal_serial_usart_init_dma_rx(void) {
     /* USART1_RX_DMA Init */
-    furi_check(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr != NULL);
+    furi_check(furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr == NULL);
     furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_index_write = 0;
     furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_index_read = 0;
     furi_hal_serial[FuriHalSerialIdUsart].buffer_rx_ptr = malloc(FURI_HAL_SERIAL_DMA_BUFFER_SIZE);
@@ -191,7 +191,7 @@ static void furi_hal_serial_lpuart_irq_callback() {
     if(LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)) {
         if(furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback) {
             furi_hal_serial[FuriHalSerialIdLpuart].rx_byte_callback(
-                furi_hal_serial[FuriHalSerialIdUsart].handle,
+                furi_hal_serial[FuriHalSerialIdLpuart].handle,
                 LL_LPUART_ReceiveData8(LPUART1),
                 furi_hal_serial[FuriHalSerialIdLpuart].context);
         }
@@ -199,7 +199,7 @@ static void furi_hal_serial_lpuart_irq_callback() {
         LL_LPUART_ClearFlag_IDLE(LPUART1);
         if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
             furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
-                furi_hal_serial[FuriHalSerialIdUsart].handle,
+                furi_hal_serial[FuriHalSerialIdLpuart].handle,
                 FuriHalSerialDmaRxEventEnd,
                 furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                 furi_hal_serial[FuriHalSerialIdLpuart].context);
@@ -221,7 +221,7 @@ static void furi_hal_serial_lpuart_dma_rx_isr() {
             FURI_HAL_SERIAL_DMA_BUFFER_SIZE / 4)) {
             if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
-                    furi_hal_serial[FuriHalSerialIdUsart].handle,
+                    furi_hal_serial[FuriHalSerialIdLpuart].handle,
                     FuriHalSerialDmaRxEventRx,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                     furi_hal_serial[FuriHalSerialIdLpuart].context);
@@ -235,7 +235,7 @@ static void furi_hal_serial_lpuart_dma_rx_isr() {
            FURI_HAL_SERIAL_DMA_BUFFER_SIZE * 3 / 4) {
             if(furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback) {
                 furi_hal_serial[FuriHalSerialIdLpuart].rx_dma_callback(
-                    furi_hal_serial[FuriHalSerialIdUsart].handle,
+                    furi_hal_serial[FuriHalSerialIdLpuart].handle,
                     FuriHalSerialDmaRxEventRx,
                     furi_hal_serial_dma_bytes_available(FuriHalSerialIdLpuart),
                     furi_hal_serial[FuriHalSerialIdLpuart].context);
@@ -249,7 +249,7 @@ static void furi_hal_serial_lpuart_dma_rx_isr() {
 
 static void furi_hal_serial_lpuart_init_dma_rx(void) {
     /* LPUART1_RX_DMA Init */
-    furi_check(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr != NULL);
+    furi_check(furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr == NULL);
     furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_index_write = 0;
     furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_index_read = 0;
     furi_hal_serial[FuriHalSerialIdLpuart].buffer_rx_ptr = malloc(FURI_HAL_SERIAL_DMA_BUFFER_SIZE);
