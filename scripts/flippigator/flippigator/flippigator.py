@@ -155,7 +155,7 @@ class Navigator:
             fy=self._scale,
             interpolation=cv.INTER_NEAREST,
         ) 
-        cv.imshow(phrase, display_image)
+        #cv.imshow(phrase, display_image)
         return result
 
     def get_ref_from_list(self, ref_list, font, invert = 0):
@@ -352,13 +352,13 @@ class Navigator:
 
             start_time = time.time()
             while start_time + timeout > time.time():
+                state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
+                if len(state) != 0:
+                    return 0
                 if direction == "down":
                     self.press_down()
                 elif direction == "up":
                     self.press_up()
-                state = self.get_current_state(area=area, timeout = 0.1, ref = ref)
-                if len(state) != 0:
-                    return 0
             return -1
         else:
             state = self.get_current_state(area=area, timeout = 0.3)
@@ -366,13 +366,13 @@ class Navigator:
 
             start_time = time.time()
             while start_time + timeout > time.time():
+                state = self.get_current_state(area=area, timeout = 0.5)
+                if target in state:
+                    return 0
                 if direction == "down":
                     self.press_down()
                 elif direction == "up":
                     self.press_up()
-                state = self.get_current_state(area=area, timeout = 0.5)
-                if target in state:
-                    return 0
             return -1
 
     def open(self, target, area=(0, 64, 0, 128), direction: Optional[str] = "down"):

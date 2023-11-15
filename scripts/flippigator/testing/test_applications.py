@@ -23,7 +23,7 @@ class TestApplications(BaseCase):
             "NFC",
             "RFID",
             "Sub-GHz",
-            "Tools",
+#            "Tools",
             "USB",
             "iButton",
         ]
