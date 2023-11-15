@@ -22,8 +22,17 @@ typedef struct {
     bool ptt_pressed;
     bool connected;
     bool is_mac_os;
+    uint32_t appIndex;
     HidTransport transport;
 } HidPttModel;
+
+enum HidPttAppIndex {
+    HidPttAppIndexGoogleMeet,
+    HidPttAppIndexZoom,
+    HidPttAppIndexFaceTime,
+    HidPttAppIndexSkype,
+    HidPttAppIndexSize,
+};
 
 static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -41,7 +50,15 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_icon(canvas, 3, 81, &I_ButtonUp_7x4);
-    elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "google meet");
+    if(model->appIndex == HidPttAppIndexGoogleMeet) {
+        elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "Google Meet");
+    } else if(model->appIndex == HidPttAppIndexZoom) {
+        elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "Zoom");
+    } else if(model->appIndex == HidPttAppIndexFaceTime) {
+        elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "FaceTime");
+    } else if(model->appIndex == HidPttAppIndexSkype) {
+        elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "Skype");
+    }
     canvas_draw_icon(canvas, 3, 96, &I_ButtonDown_7x4);
 
     // OS selection
@@ -49,10 +66,12 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     canvas_set_color(canvas, model->is_mac_os ? ColorWhite : ColorBlack);
     elements_multiline_text_aligned(canvas, 2, 108, AlignLeft, AlignTop, "Mac");
     canvas_set_color(canvas, ColorBlack);
-    elements_multiline_text_aligned(canvas, 23, 108, AlignLeft, AlignTop, "|");
-    canvas_set_color(canvas, model->is_mac_os ? ColorBlack : ColorWhite);
-    elements_multiline_text_aligned(canvas, 28, 108, AlignLeft, AlignTop, "Linux");
-    canvas_set_color(canvas, ColorBlack);
+    if (model->appIndex != HidPttAppIndexFaceTime) {
+        elements_multiline_text_aligned(canvas, 23, 108, AlignLeft, AlignTop, "|");
+        canvas_set_color(canvas, model->is_mac_os ? ColorBlack : ColorWhite);
+        elements_multiline_text_aligned(canvas, 28, 108, AlignLeft, AlignTop, "Linux");
+        canvas_set_color(canvas, ColorBlack);
+    }
 
     // Exit label
     canvas_draw_icon(canvas, 3, 121, &I_ButtonLeft_4x7);
@@ -115,8 +134,10 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         canvas_set_color(canvas, ColorWhite);
     }
     if(!model->ptt_pressed) {
-        canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
-        canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
+        if (model->appIndex != HidPttAppIndexFaceTime) {
+            canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
+            canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
+        }
     } else {
         elements_multiline_text_aligned(canvas, x_3 + 4, y_2 + 5, AlignLeft, AlignTop, "OS");
     }
@@ -147,6 +168,100 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     elements_multiline_text_aligned(canvas, x_2+16, 0+12, AlignLeft, AlignBottom, "PTT");
 }
 
+static void hid_ptt_trigger_mute(HidPtt* hid_ptt, HidPttModel * model) {
+    if(model->appIndex == HidPttAppIndexGoogleMeet && model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D );
+    } else if(model->appIndex == HidPttAppIndexGoogleMeet && !model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_D);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_D );
+    } else if(model->appIndex == HidPttAppIndexZoom && model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_A );
+    } else if(model->appIndex == HidPttAppIndexFaceTime) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
+    } else if(model->appIndex == HidPttAppIndexSkype && model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
+    } else if(model->appIndex == HidPttAppIndexSkype && !model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M );
+    }
+}
+
+static void hid_ptt_trigger_camera(HidPtt* hid_ptt, HidPttModel * model) {
+    if(model->appIndex == HidPttAppIndexGoogleMeet && model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E );
+    } else if(model->appIndex == HidPttAppIndexGoogleMeet && !model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_E);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_E );
+    } else if(model->appIndex == HidPttAppIndexZoom && model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_V );
+    } else if(model->appIndex == HidPttAppIndexZoom && !model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_V);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_ALT | HID_KEYBOARD_V );
+    } else if(model->appIndex == HidPttAppIndexSkype && model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K );
+    } else if(model->appIndex == HidPttAppIndexSkype && !model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_K );
+    }
+}
+
+static void hid_ptt_start_ptt(HidPtt* hid_ptt, HidPttModel * model) {
+    if(model->appIndex == HidPttAppIndexGoogleMeet) {
+        hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+    } else if(model->appIndex == HidPttAppIndexZoom) {
+        hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+    } else if(model->appIndex == HidPttAppIndexFaceTime) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
+    } else if(model->appIndex == HidPttAppIndexSkype && model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
+    } else if(model->appIndex == HidPttAppIndexSkype && !model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M );   
+    }
+}
+
+static void hid_ptt_stop_ptt(HidPtt* hid_ptt, HidPttModel * model) {
+    if(model->appIndex == HidPttAppIndexGoogleMeet) {
+        hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+    } else if(model->appIndex == HidPttAppIndexZoom) {
+        hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+    } else if(model->appIndex == HidPttAppIndexFaceTime) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
+    } else if(model->appIndex == HidPttAppIndexSkype && model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI| KEY_MOD_LEFT_SHIFT | HID_KEYBOARD_M );
+    } else if(model->appIndex == HidPttAppIndexSkype && !model->is_mac_os) {
+        hid_hal_keyboard_press(  hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M);
+        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_CTRL | HID_KEYBOARD_M );
+    }
+}
+
+// Supports only ±1
+static void hid_ptt_shift_app(HidPttModel * model, int shift) {
+    int i = (short) model->appIndex;
+    if (i + shift >= HidPttAppIndexSize) {
+        model->appIndex = 0;
+    } else if(i + shift <= 0) {
+        model->appIndex = HidPttAppIndexSize - 1;
+    } else {
+        model->appIndex += shift;
+    }
+    // Avoid showing facetime if not macos
+    if (model->appIndex == HidPttAppIndexFaceTime && !model->is_mac_os) {
+        hid_ptt_shift_app(model, shift);
+    }
+}
+
 static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
     with_view_model(
         hid_ptt->view,
@@ -155,10 +270,20 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
-                    hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
+                    if (!model->ptt_pressed){
+                        hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
+                    } else {
+                        hid_ptt_shift_app(model, 1);
+                        notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                    }
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
-                    hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_DECREMENT);
+                    if (!model->ptt_pressed){
+                        hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_DECREMENT);
+                    } else {
+                        hid_ptt_shift_app(model, - 1);
+                        notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                    }
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
                 } else if(event->key == InputKeyRight) {
@@ -166,16 +291,20 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
                 } else if(event->key == InputKeyBack) {
                     model->ptt_pressed = true;
                     if (model->muted) {
-                        hid_hal_keyboard_press(hid_ptt->hid, HID_KEYBOARD_SPACEBAR);
+                        hid_ptt_start_ptt(hid_ptt, model);
                     }
                 }
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = false;
-                    hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
+                    if (!model->ptt_pressed){
+                        hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
+                    }
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = false;
-                    hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_VOLUME_DECREMENT);
+                    if (!model->ptt_pressed){
+                        hid_hal_consumer_key_release(hid_ptt->hid, HID_CONSUMER_VOLUME_DECREMENT);
+                    }
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = false;
                 } else if(event->key == InputKeyRight) {
@@ -184,26 +313,24 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
                 } else if(event->key == InputKeyBack) {
                     model->ptt_pressed = false;
                     if (model->muted) {
-                        hid_hal_keyboard_release(hid_ptt->hid, HID_KEYBOARD_SPACEBAR); // release PTT
+                        hid_ptt_stop_ptt(hid_ptt, model);
                     } else {
-                        // mute
-                        hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
-                        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D );
+                        hid_ptt_trigger_mute(hid_ptt, model);
                         model->muted = true;
                     }
                 }
             } else if(event->type == InputTypeShort) {
                 if(event->key == InputKeyOk && !model->ptt_pressed ) { // no changes if PTT is pressed
                     model->muted = !model->muted;
-                    hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
-                    hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_D);
+                    hid_ptt_trigger_mute(hid_ptt, model);
                 } else if(event->key == InputKeyRight) {
                     if (!model->ptt_pressed){
-                        hid_hal_keyboard_press(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
-                        hid_hal_keyboard_release(hid_ptt->hid, KEY_MOD_LEFT_GUI | HID_KEYBOARD_E);
+                        hid_ptt_trigger_camera(hid_ptt, model);
                     } else {
-                        model->is_mac_os = !model->is_mac_os;
-                        notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                        if (model->appIndex != HidPttAppIndexFaceTime) {
+                            model->is_mac_os = !model->is_mac_os;
+                            notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                        }
                     }
                 }
             } else if(event->type == InputTypeLong) {
