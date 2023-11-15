@@ -36,6 +36,8 @@
   #include "flipperLED.h"
 #elif defined(XIAO_ESP32_S3)
   #include "xiaoLED.h"
+#elif defined(MARAUDER_M5STICKC)
+  #include "stickcLED.h"
 #else
   #include "LedInterface.h"
 #endif
@@ -83,6 +85,7 @@
 #define BT_SCAN_WAR_DRIVE_CONT 35
 #define BT_ATTACK_SOUR_APPLE 36
 #define BT_ATTACK_SWIFTPAIR_SPAM 37
+#define BT_ATTACK_SPAM_ALL 38
 
 #define GRAPH_REFRESH 100
 
@@ -108,6 +111,8 @@ extern Settings settings_obj;
   extern flipperLED flipper_led;
 #elif defined(XIAO_ESP32_S3)
   extern xiaoLED xiao_led;
+#elif defined(MARAUDER_M5STICKC)
+  extern stickcLED stickc_led;
 #else
   extern LedInterface led_obj;
 #endif

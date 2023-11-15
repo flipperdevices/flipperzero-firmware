@@ -22,7 +22,7 @@
   //#define XIAO_ESP32_S3
   //// END BOARD TARGETS
 
-  #define MARAUDER_VERSION "v0.13.3"
+  #define MARAUDER_VERSION "v0.13.4"
 
  //// BOARD FEATURES
   #ifdef MARAUDER_M5STICKC
@@ -30,13 +30,13 @@
     #define HAS_BATTERY
     #define HAS_BT
     #define HAS_BUTTONS
-    #define HAS_NEOPIXEL_LED
+    //#define HAS_NEOPIXEL_LED
     #define HAS_PWR_MGMT
     #define HAS_SCREEN
     #define HAS_SD
     #define USE_SD
     #define HAS_TEMP_SENSOR
-    //#define HAS_GPS
+    #define HAS_GPS
   #endif
 
   #ifdef MARAUDER_MINI
@@ -239,8 +239,8 @@
       #define TFT_CS 5
       #define TFT_DC 23
       #define TFT_RST 18
-      #define TFT_BL 10
-      #define TOUCH_CS 10
+      #define TFT_BL -1
+      #define TOUCH_CS -1
       //#define SD_CS 1
 
       #define SCREEN_BUFFER
@@ -825,6 +825,11 @@
       #endif
       #define GPS_TX 9
       #define GPS_RX 21
+      #define mac_history_len 512
+    #elif defined(MARAUDER_M5STICKC)
+      #define GPS_SERIAL_INDEX 1
+      #define GPS_TX 33
+      #define GPS_RX 32
       #define mac_history_len 512
     #endif
   #else
