@@ -12,6 +12,7 @@ GT-WT03
 Acurite 592TXR
 Acurite-606TX
 Acurite-606TXC
+Acurite-986
 LaCrosse_TX
 TX141THBv2
 Oregon-v1
