@@ -126,8 +126,8 @@ int32_t flipboard_keyboard_app(void* p) {
 
     ButtonModelFields fields = ButtonModelFieldAll;
     bool single_mode_button = false;
-    //bool attach_keyboard = true;
-    bool attach_keyboard = false;
+    bool attach_keyboard = true;
+    //bool attach_keyboard = false;
 
     Flipboard* app = flipboard_alloc(
         FLIPBOARD_APP_NAME,
