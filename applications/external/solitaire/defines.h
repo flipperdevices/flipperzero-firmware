@@ -19,7 +19,12 @@ typedef struct {
     InputEvent input;
 } AppEvent;
 
-typedef enum { GameStateGameOver, GameStateStart, GameStatePlay, GameStateAnimate } PlayState;
+typedef enum {
+    GameStateGameOver,
+    GameStateStart,
+    GameStatePlay,
+    GameStateAnimate,
+} PlayState;
 
 typedef struct {
     uint8_t* buffer;

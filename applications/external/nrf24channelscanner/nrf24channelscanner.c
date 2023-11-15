@@ -257,13 +257,15 @@ int32_t nrf24channelscanner_main(void* p) {
         }
     }
     nrf24_deinit();
-    furi_message_queue_free(event_queue);
-    gui_remove_view_port(gui, view_port);
-    view_port_free(view_port);
-    furi_record_close(RECORD_GUI);
+
     //turn off 5v
     if(furi_hal_power_is_otg_enabled() && !otg_was_enabled) {
         furi_hal_power_disable_otg();
     }
+
+    furi_message_queue_free(event_queue);
+    gui_remove_view_port(gui, view_port);
+    view_port_free(view_port);
+    furi_record_close(RECORD_GUI);
     return 0;
 }
