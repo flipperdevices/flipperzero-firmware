@@ -258,6 +258,7 @@ HidPtt* hid_ptt_alloc(Hid* hid) {
 
 void hid_ptt_free(HidPtt* hid_ptt) {
     furi_assert(hid_ptt);
+    notification_message(hid_ptt->hid->notifications, &sequence_reset_red);
     view_free(hid_ptt->view);
     free(hid_ptt);
 }
