@@ -117,8 +117,10 @@ class FlipperApplication:
                 self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
             except ValueError:
                 raise FlipperManifestException(
-                    f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
+                    f"Invalid version '{self.fap_version}'. Must be in the form 'major.minor'"
                 )
+            if len(self.fap_version) < 2:
+                raise ValueError("Not enough version components")
 
 
 class AppManager:
