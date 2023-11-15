@@ -115,36 +115,59 @@ MU_TEST(storage_file_open_close) {
     furi_record_close(RECORD_STORAGE);
 }
 
+static bool storage_file_read_write_test(File* file, uint8_t* data, size_t test_size) {
+    const char* filename = UNIT_TESTS_PATH("storage_chunk.test");
+
+    // fill with pattern
+    for(size_t i = 0; i < test_size; i++) {
+        data[i] = (i % UINT8_MAX);
+    }
+
+    bool result = false;
+    do {
+        if(!storage_file_open(file, filename, FSAM_WRITE, FSOM_CREATE_ALWAYS)) break;
+        if(test_size != storage_file_write(file, data, test_size)) break;
+        storage_file_close(file);
+
+        // reset data
+        memset(data, 0, test_size);
+
+        if(!storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) break;
+        if(test_size != storage_file_read(file, data, test_size)) break;
+        storage_file_close(file);
+
+        // check that data is correct
+        for(size_t i = 0; i < test_size; i++) {
+            if(data[i] != (i % UINT8_MAX)) {
+                break;
+            }
+        }
+
+        result = true;
+    } while(false);
+
+    return result;
+}
+
 MU_TEST(storage_file_read_write_64k) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
-    size_t size = 64 * 1024;
+    size_t size_1k = 1024;
+    size_t size_64k = size_1k + size_1k * 63;
+    size_t size_65k = size_64k + size_1k;
+    size_t size_max = size_65k + 8;
+
     size_t max_ram_block = memmgr_heap_get_max_free_block();
 
-    if(max_ram_block < size) {
-        mu_warn("Not enough RAM for 64k block test");
+    if(max_ram_block < size_max) {
+        mu_warn("Not enough RAM for >64k block test");
     } else {
-        uint8_t* data = malloc(size);
-        // fill with 1 2 3 4 5 6 7 8 pattern
-        for(size_t i = 0; i < size; i++) {
-            data[i] = (i % 8) + 1;
-        }
-
-        mu_check(storage_file_open(
-            file, UNIT_TESTS_PATH("storage_64k.test"), FSAM_WRITE, FSOM_CREATE_ALWAYS));
-        mu_check(storage_file_write(file, data, size) == size);
-        mu_check(storage_file_close(file));
-
-        mu_check(storage_file_open(
-            file, UNIT_TESTS_PATH("storage_64k.test"), FSAM_READ, FSOM_OPEN_EXISTING));
-        mu_check(storage_file_read(file, data, size) == size);
-        mu_check(storage_file_close(file));
-
-        for(size_t i = 0; i < size; i++) {
-            mu_assert_int_eq(data[i], (i % 8) + 1);
-        }
-
+        uint8_t* data = malloc(size_max);
+        mu_check(storage_file_read_write_test(file, data, size_1k));
+        mu_check(storage_file_read_write_test(file, data, size_64k));
+        mu_check(storage_file_read_write_test(file, data, size_65k));
+        mu_check(storage_file_read_write_test(file, data, size_max));
         free(data);
     }
 
