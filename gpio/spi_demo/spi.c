@@ -26,7 +26,7 @@ void read_w25q32_spi() {
             command_read_memory[3],
             data_response_str);
     } else {
-        FURI_LOG_E(TAG, "FAILED - read_id_spi failed.");
+        FURI_LOG_E(TAG, "FAILED - furi_hal_spi_bus_trx failed.");
     }
 
     furi_hal_spi_release(spi);
