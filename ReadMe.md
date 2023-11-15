@@ -50,7 +50,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed: NFC: Some [NFC FeliCa support (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2093) (Felica support readded by NFC refactoring)
 - OFW: [NFC refactoring #3050 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/3050)
 - Removed due to refactor needed: [Enhanced Sub-Ghz Chat v1.1 (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
-- Removed due to refactor needed: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
 - Removed due to refactor needed: [Mifare Fuzzer v1.1 (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
 - Removed due to refactor needed: [Mifare Nested v1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - Removed due to refactor needed: [NFC Crocodile (By Firemoon777)](https://github.com/Firemoon777/NfcCrocodile)
@@ -86,6 +85,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - A few apps got minor fixes (By WIlly-JL): [Brainfuck v1.1 (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck), [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge), [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker), [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker), [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) & [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
 - Add nfc dynamic default save name to new app (By Willy-JL)
 - Misc app fixes (By xMasterX)
+- Uncommented: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper) Works without NFC.
 
 <a name="release">
 
