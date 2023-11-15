@@ -120,7 +120,7 @@ def LoadAppManifest(env, entry):
                 disk_node = entry
 
             raise FlipperManifestException(
-                f"App folder '{disk_node.abspath}': missing manifest ({APP_MANIFEST_NAME})"
+                f"App folder '{disk_node.abspath}': missing manifest ({FlipperApplication.APP_MANIFEST_DEFAULT_NAME})"
             )
 
         app_manifest_file_path = manifest_glob[0].rfile().abspath
