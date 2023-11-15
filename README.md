@@ -1,6 +1,10 @@
 # MALVEKE - *GAME BOY* Tools for Flipper Zero 🐬
 
+
 ***GAME BOY*** Tools for Flipper Zero
+
+**Get one:** [Tindie Store](https://www.tindie.com/products/efuentealba/malveke-game-boy-tools-for-flipper-zero/)
+
 
 <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/logo.png">
