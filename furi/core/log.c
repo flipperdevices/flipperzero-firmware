@@ -39,6 +39,8 @@ void furi_log_init() {
 }
 
 bool furi_log_add_handler(FuriLogHandler handler) {
+    furi_check(handler.callback);
+
     bool ret = true;
 
     furi_check(furi_mutex_acquire(furi_log.mutex, FuriWaitForever) == FuriStatusOk);
