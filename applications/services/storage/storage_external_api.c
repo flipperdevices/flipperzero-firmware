@@ -139,7 +139,7 @@ bool storage_file_close(File* file) {
     return S_RETURN_BOOL;
 }
 
-uint16_t storage_file_read_undelying(File* file, void* buff, uint16_t bytes_to_read) {
+static uint16_t storage_file_read_underlying(File* file, void* buff, uint16_t bytes_to_read) {
     if(bytes_to_read == 0) {
         return 0;
     }
@@ -159,7 +159,8 @@ uint16_t storage_file_read_undelying(File* file, void* buff, uint16_t bytes_to_r
     return S_RETURN_UINT16;
 }
 
-uint16_t storage_file_write_undelying(File* file, const void* buff, uint16_t bytes_to_write) {
+static uint16_t
+    storage_file_write_underlying(File* file, const void* buff, uint16_t bytes_to_write) {
     if(bytes_to_write == 0) {
         return 0;
     }
@@ -185,7 +186,7 @@ size_t storage_file_read(File* file, void* buff, size_t to_read) {
     const size_t max_chunk = UINT16_MAX;
     do {
         const size_t chunk = MIN((to_read - total), max_chunk);
-        size_t read = storage_file_read_undelying(file, buff + total, chunk);
+        size_t read = storage_file_read_underlying(file, buff + total, chunk);
         total += read;
 
         if(storage_file_get_error(file) != FSE_OK || read != chunk) {
@@ -202,7 +203,7 @@ size_t storage_file_write(File* file, const void* buff, size_t to_write) {
     const size_t max_chunk = UINT16_MAX;
     do {
         const size_t chunk = MIN((to_write - total), max_chunk);
-        size_t written = storage_file_write_undelying(file, buff + total, chunk);
+        size_t written = storage_file_write_underlying(file, buff + total, chunk);
         total += written;
 
         if(storage_file_get_error(file) != FSE_OK || written != chunk) {
