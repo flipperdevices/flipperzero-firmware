@@ -70,7 +70,7 @@ def generate(env, **kw):
             "RANLIB",
             "STRIP",
             "GDB",
-            "GDBPY",
+            "GDBPY3",
             "OBJDUMP",
         ],
     )
