@@ -58,7 +58,7 @@ class AppBuilder:
         )
         self.app_env.Append(
             CPPDEFINES=[
-                ("FAP_VERSION", f'"{".".join(map(str, self.app.fap_version))}"'),
+                ("FAP_VERSION", f'\\"{".".join(map(str, self.app.fap_version))}\\"'),
                 *self.app.cdefines,
             ],
         )
