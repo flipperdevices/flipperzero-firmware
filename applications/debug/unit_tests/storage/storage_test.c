@@ -115,11 +115,52 @@ MU_TEST(storage_file_open_close) {
     furi_record_close(RECORD_STORAGE);
 }
 
+MU_TEST(storage_file_read_write_64k) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+
+    size_t size = 64 * 1024;
+    size_t max_ram_block = memmgr_heap_get_max_free_block();
+
+    if(max_ram_block < size) {
+        mu_warn("Not enough RAM for 64k block test");
+    } else {
+        uint8_t* data = malloc(size);
+        // fill with 1 2 3 4 5 6 7 8 pattern
+        for(size_t i = 0; i < size; i++) {
+            data[i] = (i % 8) + 1;
+        }
+
+        mu_check(storage_file_open(
+            file, UNIT_TESTS_PATH("storage_64k.test"), FSAM_WRITE, FSOM_CREATE_ALWAYS));
+        mu_check(storage_file_write(file, data, size) == size);
+        mu_check(storage_file_close(file));
+
+        mu_check(storage_file_open(
+            file, UNIT_TESTS_PATH("storage_64k.test"), FSAM_READ, FSOM_OPEN_EXISTING));
+        mu_check(storage_file_read(file, data, size) == size);
+        mu_check(storage_file_close(file));
+
+        for(size_t i = 0; i < size; i++) {
+            mu_assert_int_eq(data[i], (i % 8) + 1);
+        }
+
+        free(data);
+    }
+
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+}
+
 MU_TEST_SUITE(storage_file) {
     storage_file_open_lock_setup();
     MU_RUN_TEST(storage_file_open_close);
     MU_RUN_TEST(storage_file_open_lock);
     storage_file_open_lock_teardown();
+}
+
+MU_TEST_SUITE(storage_file_64k) {
+    MU_RUN_TEST(storage_file_read_write_64k);
 }
 
 MU_TEST(storage_dir_open_close) {
@@ -640,6 +681,7 @@ MU_TEST_SUITE(test_md5_calc_suite) {
 
 int run_minunit_test_storage() {
     MU_RUN_SUITE(storage_file);
+    MU_RUN_SUITE(storage_file_64k);
     MU_RUN_SUITE(storage_dir);
     MU_RUN_SUITE(storage_rename);
     MU_RUN_SUITE(test_data_path);
