@@ -93,8 +93,9 @@ static uint32_t uart_echo_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void uart_echo_on_irq_cb(uint8_t data, void* context) {
+static void uart_echo_on_irq_cb(FuriHalSerialHandle* handle, uint8_t data, void* context) {
     furi_assert(context);
+    UNUSED(handle);
     UartEchoApp* app = context;
 
     furi_stream_buffer_send(app->rx_stream, &data, 1, 0);

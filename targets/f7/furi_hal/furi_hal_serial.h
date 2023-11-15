@@ -81,11 +81,11 @@ void furi_hal_serial_tx_wait_complete(FuriHalSerialHandle* handle);
  *
  * @warning    Callback will be called in interrupt context, ensure thread
  *             safety on your side.
- *
+ * @param      handle   Serial handle
  * @param      data     Received data
  * @param      context  Callback context provided earlier
  */
-typedef void (*FuriHalSerialRxCallback)(uint8_t data, void* context);
+typedef void (*FuriHalSerialRxCallback)(FuriHalSerialHandle* handle, uint8_t data, void* context);
 
 /** Sets Serial Receive callback
  *
@@ -99,6 +99,53 @@ void furi_hal_serial_set_rx_callback(
     FuriHalSerialHandle* handle,
     FuriHalSerialRxCallback callback,
     void* context);
+
+/* DMA based Serial API */
+
+#define FURI_HAL_SERIAL_DMA_BUFFER_SIZE (256u)
+
+/** Serial DMA events */
+typedef enum {
+    FuriHalSerialDmaRxEventRx,
+    FuriHalSerialDmaRxEventEnd,
+} FuriHalSerialDmaRxEvent;
+
+/** Receive DMA callback
+ *
+ * @warning    DMA Callback will be called in interrupt context, ensure thread
+ *             safety on your side.
+ * @param      handle       Serial handle
+ * @param      ev           FuriHalSerialDmaRxEvent
+ * @param      data_len     Received data
+ * @param      context      Callback context provided earlier
+ */
+typedef void (*FuriHalSerialDmaRxCallback)(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDmaRxEvent ev,
+    size_t data_len,
+    void* context);
+
+/**
+ * Sets Serial event callback receive DMA
+ * @param   handle      Serial handle
+ * @param   callback    callback pointer
+ * @param   context     callback context
+ */
+void furi_hal_serial_dma_start(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDmaRxCallback callback,
+    void* context);
+
+/** Get data Serial receive DMA
+ * @warning   This function is called only from the callback FuriHalSerialDmaRxCallback
+ *  
+ * @param   handle      Serial handle
+ * @param   data        pointer to data buffer
+ * @param   len         get data size (in bytes)
+ *
+ * @return     size actual data receive (in bytes)
+ */
+size_t furi_hal_serial_dma_rx(FuriHalSerialHandle* handle, uint8_t* data, size_t len);
 
 #ifdef __cplusplus
 }
