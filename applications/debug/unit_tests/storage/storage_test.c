@@ -120,7 +120,7 @@ static bool storage_file_read_write_test(File* file, uint8_t* data, size_t test_
 
     // fill with pattern
     for(size_t i = 0; i < test_size; i++) {
-        data[i] = (i % UINT8_MAX);
+        data[i] = (i % 113);
     }
 
     bool result = false;
@@ -138,7 +138,7 @@ static bool storage_file_read_write_test(File* file, uint8_t* data, size_t test_
 
         // check that data is correct
         for(size_t i = 0; i < test_size; i++) {
-            if(data[i] != (i % UINT8_MAX)) {
+            if(data[i] != (i % 113)) {
                 break;
             }
         }
