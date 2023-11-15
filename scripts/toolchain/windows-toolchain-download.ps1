@@ -6,8 +6,8 @@ $download_dir = (Get-Item "$PSScriptRoot\..\..").FullName
 $toolchain_version = $args[0]
 $toolchain_target_path = $args[1]
 
-$toolchain_url = "https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-x86_64-windows-flipper-$toolchain_version.zip"
-$toolchain_dist_folder = "gcc-arm-none-eabi-10.3-x86_64-windows-flipper"
+$toolchain_url = "https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-12.3-x86_64-windows-flipper-$toolchain_version.zip"
+$toolchain_dist_folder = "gcc-arm-none-eabi-12.3-x86_64-windows-flipper"
 $toolchain_zip = "$toolchain_dist_folder-$toolchain_version.zip"
 
 $toolchain_zip_temp_path = "$download_dir\$toolchain_zip"
