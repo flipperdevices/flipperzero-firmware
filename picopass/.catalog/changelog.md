@@ -1,3 +1,5 @@
+## 1.8
+ - Minimal changes for recent API updates
 ## 1.7
  - Rework application with new NFC API
 ## 1.6
