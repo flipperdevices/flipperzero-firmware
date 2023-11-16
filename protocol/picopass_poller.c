@@ -7,7 +7,7 @@
 typedef NfcCommand (*PicopassPollerStateHandler)(PicopassPoller* instance);
 
 static void picopass_poller_reset(PicopassPoller* instance) {
-  UNUSED(instance);
+    UNUSED(instance);
 }
 
 NfcCommand picopass_poller_request_mode_handler(PicopassPoller* instance) {
@@ -58,7 +58,6 @@ NfcCommand picopass_poller_select_handler(PicopassPoller* instance) {
 
     return command;
 }
-
 
 NfcCommand picopass_poller_success_handler(PicopassPoller* instance) {
     NfcCommand command = NfcCommandContinue;

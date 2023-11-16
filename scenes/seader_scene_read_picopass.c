@@ -40,8 +40,8 @@ void seader_scene_read_picopass_on_exit(void* context) {
     Seader* seader = context;
 
     if(seader->picopass_poller) {
-      picopass_poller_stop(seader->picopass_poller);
-      picopass_poller_free(seader->picopass_poller);
+        picopass_poller_stop(seader->picopass_poller);
+        picopass_poller_free(seader->picopass_poller);
     }
 
     // Clear view

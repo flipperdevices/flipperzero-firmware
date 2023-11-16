@@ -232,7 +232,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
         message.consumed += 2 + 10 + message.dwLength + 1;
 
         if(message.dwLength == 0) {
-          /*
+            /*
             FURI_LOG_D(
                 TAG,
                 "CCID [%d|%d] type: %02x, status: %02x, error: %02x",
@@ -243,7 +243,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 message.bError);
                 */
         } else {
-          /*
+            /*
             FURI_LOG_D(
                 TAG,
                 "CCID [%d|%d] %ld: %s",

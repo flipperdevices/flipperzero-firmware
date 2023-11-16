@@ -470,11 +470,8 @@ NfcCommand seader_iso15693_transmit(
     */
     NfcCommand ret = NfcCommandContinue;
 
-
-
     return ret;
 }
-
 
 /* Assumes this is called in the context of the NFC API callback */
 NfcCommand seader_iso14443a_transmit(
@@ -494,8 +491,10 @@ NfcCommand seader_iso14443a_transmit(
 
     do {
         // bit_buffer_reset(tx_buffer);
-        bit_buffer_append_bytes(tx_buffer, buffer, len); // TODO: could this be a `bit_buffer_copy_bytes` ?
-        Iso14443_4aError error = iso14443_4a_poller_send_block((Iso14443_4aPoller*)seader->poller, tx_buffer, rx_buffer);
+        bit_buffer_append_bytes(
+            tx_buffer, buffer, len); // TODO: could this be a `bit_buffer_copy_bytes` ?
+        Iso14443_4aError error = iso14443_4a_poller_send_block(
+            (Iso14443_4aPoller*)seader->poller, tx_buffer, rx_buffer);
         if(error != Iso14443_4aErrorNone) {
             FURI_LOG_W(TAG, "iso14443_4a_poller_send_block error %d", error);
             ret = NfcCommandStop;
@@ -505,7 +504,6 @@ NfcCommand seader_iso14443a_transmit(
         FURI_LOG_I(TAG, "NFC incoming %d bytes", bit_buffer_get_size_bytes(rx_buffer));
 
         // TODO: send it back to the SAM
-
 
     } while(false);
     bit_buffer_free(tx_buffer);
@@ -640,7 +638,7 @@ bool seader_process_success_response_i(Seader* seader, uint8_t* apdu, size_t len
 #endif
         seader_worker_state_machine(seader, payload);
     } else {
-      FURI_LOG_D(TAG, "Failed to decode APDU payload");
+        FURI_LOG_D(TAG, "Failed to decode APDU payload");
     }
 
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
@@ -651,25 +649,24 @@ bool seader_process_success_response(Seader* seader, uint8_t* apdu, size_t len) 
     SeaderWorker* seader_worker = seader->worker;
 
     // FIXME: use a more semantic method to break nfc related stuff out
-    if (seader->poller || seader->picopass_poller) {
-      FURI_LOG_I(TAG, "New SAM Message, %d bytes", len);
-      uint32_t space = furi_message_queue_get_space(seader_worker->messages);
-      if(space > 0) {
-          BitBuffer* buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
-          bit_buffer_append_bytes(buffer, apdu, len);
+    if(seader->poller || seader->picopass_poller) {
+        FURI_LOG_I(TAG, "New SAM Message, %d bytes", len);
+        uint32_t space = furi_message_queue_get_space(seader_worker->messages);
+        if(space > 0) {
+            BitBuffer* buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
+            bit_buffer_append_bytes(buffer, apdu, len);
 
-          if (furi_mutex_acquire(seader_worker->mq_mutex, FuriWaitForever) == FuriStatusOk) {
-            furi_message_queue_put(seader_worker->messages, buffer, FuriWaitForever);
-            furi_mutex_release(seader_worker->mq_mutex);
-          }
-          //bit_buffer_free(buffer);
-      }
+            if(furi_mutex_acquire(seader_worker->mq_mutex, FuriWaitForever) == FuriStatusOk) {
+                furi_message_queue_put(seader_worker->messages, buffer, FuriWaitForever);
+                furi_mutex_release(seader_worker->mq_mutex);
+            }
+            //bit_buffer_free(buffer);
+        }
     } else {
-      seader_process_success_response_i(seader, apdu, len);
+        seader_process_success_response_i(seader, apdu, len);
     }
     return true;
 }
-
 
 bool seader_process_apdu(Seader* seader, uint8_t* apdu, size_t len) {
     SeaderWorker* seader_worker = seader->worker;
@@ -739,11 +736,17 @@ int32_t seader_worker_task(void* context) {
     return 0;
 }
 
-
-NfcCommand seader_worker_card_detect(Seader* seader, uint8_t sak, uint8_t* atqa, const uint8_t* uid, uint8_t uid_len, uint8_t* ats, uint8_t ats_len) {
-  UNUSED(ats);
-  UNUSED(ats_len);
-  SeaderWorker* seader_worker = seader->worker;
+NfcCommand seader_worker_card_detect(
+    Seader* seader,
+    uint8_t sak,
+    uint8_t* atqa,
+    const uint8_t* uid,
+    uint8_t uid_len,
+    uint8_t* ats,
+    uint8_t ats_len) {
+    UNUSED(ats);
+    UNUSED(ats_len);
+    SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
     CardDetails_t* cardDetails = 0;
     cardDetails = calloc(1, sizeof *cardDetails);
@@ -751,25 +754,24 @@ NfcCommand seader_worker_card_detect(Seader* seader, uint8_t sak, uint8_t* atqa,
 
     OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)uid, uid_len);
 
-    if (sak != 0 && atqa != NULL) {
-    uint8_t protocolBytes[] = {0x00, FrameProtocol_nfc};
-    OCTET_STRING_fromBuf(
-        &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
+    if(sak != 0 && atqa != NULL) {
+        uint8_t protocolBytes[] = {0x00, FrameProtocol_nfc};
+        OCTET_STRING_fromBuf(
+            &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
     } else {
-    uint8_t protocolBytes[] = {0x00, FrameProtocol_iclass};
-    OCTET_STRING_fromBuf(
-        &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
-
+        uint8_t protocolBytes[] = {0x00, FrameProtocol_iclass};
+        OCTET_STRING_fromBuf(
+            &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
     }
 
-    if (sak > 0) {
-    OCTET_STRING_t sak_string = {.buf = &sak, .size = 1};
-    cardDetails->sak = &sak_string;
+    if(sak > 0) {
+        OCTET_STRING_t sak_string = {.buf = &sak, .size = 1};
+        cardDetails->sak = &sak_string;
     }
 
-    if (atqa != NULL) {
-    OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
-    cardDetails->atqa = &atqa_string;
+    if(atqa != NULL) {
+        OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
+        cardDetails->atqa = &atqa_string;
     }
 
     seader_send_card_detected(seader_uart, cardDetails);
@@ -813,36 +815,37 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
                 nfc_device_get_data(seader->nfc_device, NfcProtocolIso14443_3a);
             uint8_t sak = iso14443_3a_get_sak(iso14443_3a_data);
 
-            seader_worker_card_detect(seader, sak, (uint8_t*)iso14443_3a_data->atqa, uid, uid_len, NULL, 0);
+            seader_worker_card_detect(
+                seader, sak, (uint8_t*)iso14443_3a_data->atqa, uid, uid_len, NULL, 0);
 
             nfc_set_fdt_poll_fc(event.instance, SEADER_POLLER_MAX_FWT);
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
             stage = SeaderPollerEventTypeConversation;
         } else if(stage == SeaderPollerEventTypeConversation) {
+            if(furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
+                furi_thread_set_current_priority(FuriThreadPriorityHighest);
+                uint32_t count = furi_message_queue_get_count(seader_worker->messages);
+                if(count > 0) {
+                    FURI_LOG_D(TAG, "Conversation: %ld messages", count);
 
-          if (furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
-            furi_thread_set_current_priority(FuriThreadPriorityHighest);
-            uint32_t count = furi_message_queue_get_count(seader_worker->messages);
-            if(count > 0) {
-                FURI_LOG_D(TAG, "Conversation: %ld messages", count);
+                    BitBuffer* message = bit_buffer_alloc(
+                        furi_message_queue_get_message_size(seader_worker->messages));
+                    FuriStatus status =
+                        furi_message_queue_get(seader_worker->messages, message, FuriWaitForever);
+                    if(status != FuriStatusOk) {
+                        FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
+                        return NfcCommandStop;
+                    }
+                    size_t len = bit_buffer_get_size_bytes(message);
+                    uint8_t* payload = (uint8_t*)bit_buffer_get_data(message);
+                    FURI_LOG_D(TAG, "Conversation: message length %d: %p", len, payload);
 
-                BitBuffer* message = bit_buffer_alloc(furi_message_queue_get_message_size(seader_worker->messages));
-                FuriStatus status =
-                    furi_message_queue_get(seader_worker->messages, message, FuriWaitForever);
-                if(status != FuriStatusOk) {
-                    FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
-                    return NfcCommandStop;
+                    seader_process_success_response_i(seader, payload, len);
+                    //bit_buffer_free(message);
                 }
-                size_t len = bit_buffer_get_size_bytes(message);
-                uint8_t* payload = (uint8_t*)bit_buffer_get_data(message);
-                FURI_LOG_D(TAG, "Conversation: message length %d: %p", len, payload);
-
-                seader_process_success_response_i(seader, payload, len);
-                //bit_buffer_free(message);
+                furi_mutex_release(seader_worker->mq_mutex);
             }
-            furi_mutex_release(seader_worker->mq_mutex);
-          }
-          furi_thread_set_current_priority(FuriThreadPriorityLowest);
+            furi_thread_set_current_priority(FuriThreadPriorityLowest);
             // TESTING
             //return NfcCommandStop;
 
@@ -865,55 +868,50 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
     PicopassPoller* instance = seader->picopass_poller;
 
     if(event.type == PicopassPollerEventTypeSuccess) {
-      FURI_LOG_D(TAG, "PicopassPollerEventTypeSuccess");
+        FURI_LOG_D(TAG, "PicopassPollerEventTypeSuccess");
 
-      if(stage == SeaderPollerEventTypeCardDetect) {
+        if(stage == SeaderPollerEventTypeCardDetect) {
             FURI_LOG_D(TAG, "Card Detect");
 
-            uint8_t *csn = picopass_poller_get_csn(instance);
+            uint8_t* csn = picopass_poller_get_csn(instance);
 
             seader_worker_card_detect(seader, 0, NULL, csn, sizeof(PicopassSerialNum), NULL, 0);
 
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
             stage = SeaderPollerEventTypeConversation;
 
-      } else if(stage == SeaderPollerEventTypeConversation) {
+        } else if(stage == SeaderPollerEventTypeConversation) {
+            if(furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
+                furi_thread_set_current_priority(FuriThreadPriorityHighest);
+                uint32_t count = furi_message_queue_get_count(seader_worker->messages);
+                if(count > 0) {
+                    FURI_LOG_D(TAG, "Conversation: %ld messages", count);
 
-          if (furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
-            furi_thread_set_current_priority(FuriThreadPriorityHighest);
-            uint32_t count = furi_message_queue_get_count(seader_worker->messages);
-            if(count > 0) {
-                FURI_LOG_D(TAG, "Conversation: %ld messages", count);
+                    BitBuffer* message = bit_buffer_alloc(
+                        furi_message_queue_get_message_size(seader_worker->messages));
+                    FuriStatus status =
+                        furi_message_queue_get(seader_worker->messages, message, FuriWaitForever);
+                    if(status != FuriStatusOk) {
+                        FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
+                        return NfcCommandStop;
+                    }
+                    size_t len = bit_buffer_get_size_bytes(message);
+                    uint8_t* payload = (uint8_t*)bit_buffer_get_data(message);
+                    FURI_LOG_D(TAG, "Conversation: message length %d: %p", len, payload);
 
-                BitBuffer* message = bit_buffer_alloc(furi_message_queue_get_message_size(seader_worker->messages));
-                FuriStatus status =
-                    furi_message_queue_get(seader_worker->messages, message, FuriWaitForever);
-                if(status != FuriStatusOk) {
-                    FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
-                    return NfcCommandStop;
+                    seader_process_success_response_i(seader, payload, len);
+                    //bit_buffer_free(message);
                 }
-                size_t len = bit_buffer_get_size_bytes(message);
-                uint8_t* payload = (uint8_t*)bit_buffer_get_data(message);
-                FURI_LOG_D(TAG, "Conversation: message length %d: %p", len, payload);
+                furi_mutex_release(seader_worker->mq_mutex);
 
-                seader_process_success_response_i(seader, payload, len);
-                //bit_buffer_free(message);
+                stage = SeaderPollerEventTypeComplete;
             }
-            furi_mutex_release(seader_worker->mq_mutex);
 
-            stage = SeaderPollerEventTypeComplete;
-          }
-
-
-      } else if(stage == SeaderPollerEventTypeComplete) {
-          FURI_LOG_D(TAG, "Complete");
-          return NfcCommandStop;
-      }
-
-
-
+        } else if(stage == SeaderPollerEventTypeComplete) {
+            FURI_LOG_D(TAG, "Complete");
+            return NfcCommandStop;
+        }
     }
 
     return command;
 }
-
