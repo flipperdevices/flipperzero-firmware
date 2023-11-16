@@ -34,7 +34,7 @@ typedef enum {
 /** SubGhz state */
 typedef enum {
     SubGhzStateInit, /**< Init pending */
-
+    SubGhzStateBroken, /**< Chip power-on self test failed */
     SubGhzStateIdle, /**< Idle, energy save mode */
 
     SubGhzStateAsyncRx, /**< Async RX started */
