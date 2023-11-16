@@ -48,30 +48,39 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         }
     }
 
+    // App selection
+    const uint8_t y_app = 78;
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_icon(canvas, 3, 80, &I_ButtonUp_7x4);
+    canvas_draw_icon(canvas, 0, y_app, &I_ButtonLeft_4x7);
     if(model->appIndex == HidPttAppIndexGoogleMeet) {
-        elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "Google Meet");
+        elements_multiline_text_aligned(canvas, 7, y_app, AlignLeft, AlignTop, "Google Meet");
     } else if(model->appIndex == HidPttAppIndexZoom) {
-        elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "Zoom");
+        elements_multiline_text_aligned(canvas, 7, y_app, AlignLeft, AlignTop, "Zoom");
     } else if(model->appIndex == HidPttAppIndexFaceTime) {
-        elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "FaceTime");
+        elements_multiline_text_aligned(canvas, 7, y_app, AlignLeft, AlignTop, "FaceTime");
     } else if(model->appIndex == HidPttAppIndexSkype) {
-        elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "Skype");
+        elements_multiline_text_aligned(canvas, 7, y_app, AlignLeft, AlignTop, "Skype");
     }
-    canvas_draw_icon(canvas, 3, 96, &I_ButtonDown_7x4);
+    canvas_draw_icon(canvas, 60, y_app, &I_ButtonRight_4x7);
 
     // OS selection
-    elements_slightly_rounded_box(canvas, model->is_mac_os ? 0 : 26, 106, model->is_mac_os ? 21 : 26, 11);
+    const uint8_t y_os = 88;
+    elements_slightly_rounded_box(canvas, model->is_mac_os ? 0 : 26, y_os, model->is_mac_os ? 21 : 26, 11);
     canvas_set_color(canvas, model->is_mac_os ? ColorWhite : ColorBlack);
-    elements_multiline_text_aligned(canvas, 2, 108, AlignLeft, AlignTop, "Mac");
+    elements_multiline_text_aligned(canvas, 2, y_os + 1, AlignLeft, AlignTop, "Mac");
     canvas_set_color(canvas, ColorBlack);
     if (model->appIndex != HidPttAppIndexFaceTime) {
-        elements_multiline_text_aligned(canvas, 23, 108, AlignLeft, AlignTop, "|");
+        elements_multiline_text_aligned(canvas, 23, y_os + 2, AlignLeft, AlignTop, "|");
         canvas_set_color(canvas, model->is_mac_os ? ColorBlack : ColorWhite);
-        elements_multiline_text_aligned(canvas, 28, 108, AlignLeft, AlignTop, "Linux");
+        elements_multiline_text_aligned(canvas, 28, y_os + 2, AlignLeft, AlignTop, "Linux");
         canvas_set_color(canvas, ColorBlack);
     }
+
+    // Mic label
+    const uint8_t y_mic = 102;
+    canvas_draw_icon(canvas, 19, y_mic - 1, &I_Ok_btn_9x9);
+    elements_multiline_text_aligned(canvas, 0, y_mic, AlignLeft, AlignTop, "Hold      to sync");
+    elements_multiline_text_aligned(canvas, 20, y_mic+10, AlignLeft, AlignTop, "mic status");
 
     // Exit label
     canvas_draw_icon(canvas, 20, 121, &I_ButtonLeft_4x7);
@@ -92,7 +101,9 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         canvas_set_color(canvas, ColorWhite);
     }
     if(model->ptt_pressed) {
-        canvas_draw_icon(canvas, x_2 + 6, y_1 + 7, &I_ButtonUp_7x4);
+        if (model->appIndex != HidPttAppIndexFaceTime) {
+            elements_multiline_text_aligned(canvas, x_2 + 4, y_1 + 5, AlignLeft, AlignTop, "OS");
+        }
     } else {
         canvas_draw_icon(canvas, x_2 + 5, y_1 + 5, &I_Volup_8x6);
     }
@@ -104,42 +115,35 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         elements_slightly_rounded_box(canvas, x_2 + 3, y_3 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    if(model->ptt_pressed) {
-        canvas_draw_icon(canvas, x_2 + 6, y_3 + 7, &I_ButtonDown_7x4);
-    } else {
+    if(!model->ptt_pressed) {
         canvas_draw_icon(canvas, x_2 + 6, y_3 + 5, &I_Voldwn_6x6);
     }
     canvas_set_color(canvas, ColorBlack);
 
     // Left
     canvas_draw_icon(canvas, x_1, y_2, &I_Button_18x18);
-    if(model->left_pressed) {
+    if(model->left_pressed) {                                             
         elements_slightly_rounded_box(canvas, x_1 + 3, y_2 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
     if (model->ptt_pressed) {
-        // Show help
-        // canvas_set_font(canvas, FontPrimary);
-        // elements_multiline_text_aligned(canvas, x_1 + 7, y_2 + 4, AlignLeft, AlignTop, "?");
-        // canvas_set_font(canvas, FontSecondary);
-    } else {
         canvas_draw_icon(canvas, x_1 + 7, y_2 + 5, &I_ButtonLeft_4x7);
+    } else {  
+        canvas_draw_icon(canvas, x_1 + 4, y_2 + 5, &I_Pin_back_arrow_10x8);
     }
     canvas_set_color(canvas, ColorBlack);
 
     // Right / Camera
     canvas_draw_icon(canvas, x_3, y_2, &I_Button_18x18);
     if(model->right_pressed) {
-        elements_slightly_rounded_box(canvas, x_3 + 3, y_2 + 2, 13, 13);
+        elements_slightly_rounded_box(canvas, x_3 + 7, y_2 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
     if(!model->ptt_pressed) {
-        if (model->appIndex != HidPttAppIndexFaceTime) {
-            canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
-            canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
-        }
+        canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
+        canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
     } else {
-        elements_multiline_text_aligned(canvas, x_3 + 4, y_2 + 5, AlignLeft, AlignTop, "OS");
+        canvas_draw_icon(canvas, x_3 + 8, y_2 + 5, &I_ButtonRight_4x7);
     }
     canvas_set_color(canvas, ColorBlack);
 
@@ -273,8 +277,10 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
                     if (!model->ptt_pressed){
                         hid_hal_consumer_key_press(hid_ptt->hid, HID_CONSUMER_VOLUME_INCREMENT);
                     } else {
-                        hid_ptt_shift_app(model, 1);
-                        notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                        if (model->appIndex != HidPttAppIndexFaceTime) {
+                            model->is_mac_os = !model->is_mac_os;
+                            notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                        }
                     }
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
@@ -286,8 +292,16 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
                     }
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
+                    if (model->ptt_pressed){
+                        hid_ptt_shift_app(model, 1);
+                        notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                    }
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = true;
+                    if (model->ptt_pressed){
+                        hid_ptt_shift_app(model, - 1);
+                        notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
+                    }
                 } else if(event->key == InputKeyBack) {
                     model->ptt_pressed = true;
                     if (model->muted) {
@@ -326,20 +340,17 @@ static void hid_ptt_process(HidPtt* hid_ptt, InputEvent* event) {
                 } else if(event->key == InputKeyRight) {
                     if (!model->ptt_pressed){
                         hid_ptt_trigger_camera(hid_ptt, model);
-                    } else {
-                        if (model->appIndex != HidPttAppIndexFaceTime) {
-                            model->is_mac_os = !model->is_mac_os;
-                            notification_message(hid_ptt->hid->notifications, &sequence_single_vibro);
-                        }
                     }
                 }
             } else if(event->type == InputTypeLong) {
                 if(event->key == InputKeyLeft) {
                     model->left_pressed = false;
-                    hid_hal_keyboard_release_all(hid_ptt->hid);
-                    view_dispatcher_switch_to_view(hid_ptt->hid->view_dispatcher, HidViewSubmenu);
-                    // sequence_double_vibro to notify that we quit PTT
-                    notification_message(hid_ptt->hid->notifications, &sequence_double_vibro);
+                    if (!model->ptt_pressed){
+                        hid_hal_keyboard_release_all(hid_ptt->hid);
+                        view_dispatcher_switch_to_view(hid_ptt->hid->view_dispatcher, HidViewSubmenu);
+                        // sequence_double_vibro to notify that we quit PTT
+                        notification_message(hid_ptt->hid->notifications, &sequence_double_vibro);
+                    }
                 } else if(event->key == InputKeyOk && !model->ptt_pressed ) { // no changes if PTT is pressed
                     // Change local mic status
                     model->muted = !model->muted;
