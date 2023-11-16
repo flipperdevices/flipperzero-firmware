@@ -1,8 +1,8 @@
 from PIL import Image, ImageFont, ImageDraw
 
-text = "Debug"
+text = "BN0"
 #font = ImageFont.load("./flippigator/fonts/helvB08.pil")
-font = ImageFont.truetype("./flippigator/fonts/haxrcorp_4089.ttf", size = 15)
+font = ImageFont.truetype("./flippigator/fonts/haxrcorp_4089.ttf", size = 16)
 #font = ImageFont.load_path("FuBar-Bold.pil")  # searches for a bitmap font along the Python path.
 img = Image.new("L", font.getsize(text), 255)
 dctx = ImageDraw.Draw(img)

@@ -139,13 +139,19 @@ class Navigator:
         cv.imshow(self._window_name, display_image)
         key = cv.waitKey(1)
 
-    def get_ref_from_string(self, phrase, font, invert = 0):
+    def get_img_from_string(self, phrase, font, invert = 0, no_space = 0):
         self.logger.debug("Generated template for '" + phrase + "'")
-        result = Image.new("L", font.getsize(phrase+"  "), 255)
+        if no_space == 0:
+            result = Image.new("L", font.getsize(phrase+"  "), 255)
+        else:
+            result = Image.new("L", font.getsize(phrase), 255)
         dctx = ImageDraw.Draw(result)
         dctx.text((0, 0), phrase+"  ", font=font)
         result = numpy.array(result)
-        result = result[1:, :]
+        if font == self.font_helvB08:
+            result = result[3:, :]
+        else:
+            result = result[2:, :]
         if invert:
             result = cv.bitwise_not(result)
         display_image = cv.resize(
@@ -155,29 +161,34 @@ class Navigator:
             fy=self._scale,
             interpolation=cv.INTER_NEAREST,
         ) 
-        #cv.imshow(phrase, display_image)
+        #cv.imshow(str(phrase) + " " + str(font), display_image)
         return result
+
+    def get_ref_from_string(self, phrase, font, invert = 0, no_space = 0):
+        ref_dict = dict()
+        ref_dict.update({"phrase": self.get_img_from_string(phrase, font, invert, no_space)})
+        return ref_dict
 
     def get_ref_from_list(self, ref_list, font, invert = 0):
         ref_dict = dict()
         for i in ref_list:
-            ref_dict.update({i: self.get_ref_from_string(i, font, invert)})
+            ref_dict.update({i: self.get_img_from_string(i, font, invert)})
         return ref_dict
 
     def get_ref_all_fonts(self, phrase):
         ref_dict = dict()
-        ref_dict.update({"gen0": self.get_ref_from_string(phrase, self.font_helvB08, 0)})
-        #ref_dict.update({1: self.get_ref_from_string(phrase, self.font_helvB08, 1)})
-        #ref_dict.update({2: self.get_ref_from_string(phrase, self.font_haxrcorp_4089, 0)})
-        ref_dict.update({"gen1": self.get_ref_from_string(phrase, self.font_haxrcorp_4089, 1)})
-        #ref_dict.update({4: self.get_ref_from_string(phrase, self.font_profont22, 0)})
-        ref_dict.update({"gen2": self.get_ref_from_string(phrase, self.font_profont22, 1)})
-        #ref_dict.update({6: self.get_ref_from_string(phrase, self.font_profont11, 0)})
-        ref_dict.update({"gen3": self.get_ref_from_string(phrase, self.font_profont11, 1)})
+        ref_dict.update({"gen0": self.get_img_from_string(phrase, self.font_helvB08, 0)})
+        #ref_dict.update({1: self.get_img_from_string(phrase, self.font_helvB08, 1)})
+        #ref_dict.update({2: self.get_img_from_string(phrase, self.font_haxrcorp_4089, 0)})
+        ref_dict.update({"gen1": self.get_img_from_string(phrase, self.font_haxrcorp_4089, 1)})
+        #ref_dict.update({4: self.get_img_from_string(phrase, self.font_profont22, 0)})
+        ref_dict.update({"gen2": self.get_img_from_string(phrase, self.font_profont22, 1)})
+        #ref_dict.update({6: self.get_img_from_string(phrase, self.font_profont11, 0)})
+        ref_dict.update({"gen3": self.get_img_from_string(phrase, self.font_profont11, 1)})
         return ref_dict
 
     def recog_ref(self, ref=None, area=(0, 64, 0, 128)):
-        if ref == None:
+        if ref is None:
             ref = self.imRef
         # self.updateScreen()
         temp_pic_list = list()
@@ -239,7 +250,7 @@ class Navigator:
 
         return found_ic
 
-    def get_current_state(self, timeout: float = 5, ref=None, area=(0, 64, 0, 128)):
+    def get_current_state(self, timeout: float = 2, ref=None, area=(0, 64, 0, 128)):
         if ref is None:
             ref = self.imRef
         self.update_screen()
@@ -258,7 +269,7 @@ class Navigator:
     def wait_for_state(self, state, timeout=5) -> int:
         start_time = time.time()
         while start_time + timeout > time.time():
-            cur_state = self.get_current_state()
+            cur_state = self.get_current_state(timeout=0.1)
             if state in cur_state:
                 return 0
         return -1
@@ -384,9 +395,9 @@ class Navigator:
         self.press_back()
         self.press_back()
         time.sleep(0.1)  # try to fix freeze while emilating Mfc1K
-        state = self.get_current_state()
+        state = self.get_current_state(timeout = 0.1)
         while not ("SDcardIcon" in state):
-            state = self.get_current_state()
+            state = self.get_current_state(timeout = 0.1)
             if "ExitLeft" in state:
                 self.press_left()
             else:
@@ -421,7 +432,7 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 20)
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 15)
         if result == -1:
             self.logger.warning("File not found!")
             return -1
@@ -459,7 +470,7 @@ class Navigator:
         files = list()
         start_time = time.time()
 
-        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 20)
+        result = self.go_to(filename, area=(15, 64, 0, 128), timeout = 15)
         if result == -1:
             self.logger.warning("File not found! (timeout)")
             return -1
