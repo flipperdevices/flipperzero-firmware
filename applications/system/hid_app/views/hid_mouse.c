@@ -20,6 +20,7 @@ typedef struct {
     bool left_mouse_held;
     bool right_mouse_pressed;
     bool connected;
+    uint8_t acceleration;
     HidTransport transport;
 } HidMouseModel;
 
@@ -49,61 +50,67 @@ static void hid_mouse_draw_callback(Canvas* canvas, void* context) {
     }
 
     // Keypad circles
-    canvas_draw_icon(canvas, 64, 8, &I_Circles_47x47);
+    canvas_draw_icon(canvas, 58, 3, &I_OutCircles_70x51);
 
     // Up
     if(model->up_pressed) {
         canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 81, 9, &I_Pressed_Button_13x13);
+        canvas_draw_icon(canvas, 68, 6, &I_S_UP_31x15);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 84, 10, &I_Pin_arrow_up_7x9);
+    canvas_draw_icon(canvas, 80, 8, &I_Pin_arrow_up_7x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Down
     if(model->down_pressed) {
         canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 81, 41, &I_Pressed_Button_13x13);
+        canvas_draw_icon(canvas, 68, 36, &I_S_DOWN_31x15);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 84, 43, &I_Pin_arrow_down_7x9);
+    canvas_draw_icon(canvas, 80, 40, &I_Pin_arrow_down_7x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Left
     if(model->left_pressed) {
         canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 65, 25, &I_Pressed_Button_13x13);
+        canvas_draw_icon(canvas, 61, 13, &I_S_LEFT_15x31);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 67, 28, &I_Pin_arrow_left_9x7);
+    canvas_draw_icon(canvas, 63, 25, &I_Pin_arrow_left_9x7);
     canvas_set_color(canvas, ColorBlack);
 
     // Right
     if(model->right_pressed) {
         canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 97, 25, &I_Pressed_Button_13x13);
+        canvas_draw_icon(canvas, 91, 13, &I_S_RIGHT_15x31);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 99, 28, &I_Pin_arrow_right_9x7);
+    canvas_draw_icon(canvas, 95, 25, &I_Pin_arrow_right_9x7);
     canvas_set_color(canvas, ColorBlack);
 
     // Ok
     if(model->left_mouse_pressed) {
-        canvas_draw_icon(canvas, 81, 25, &I_Ok_btn_pressed_13x13);
-    } else {
-        canvas_draw_icon(canvas, 83, 27, &I_Left_mouse_icon_9x9);
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_draw_icon(canvas, 74, 19, &I_Pressed_Button_19x19);
+        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_color(canvas, ColorWhite);
     }
+    canvas_draw_icon(canvas, 79, 24, &I_Left_mouse_icon_9x9);
+    canvas_set_color(canvas, ColorBlack);
 
     // Back
     if(model->right_mouse_pressed) {
-        canvas_draw_icon(canvas, 108, 48, &I_Ok_btn_pressed_13x13);
-    } else {
-        canvas_draw_icon(canvas, 110, 50, &I_Right_mouse_icon_9x9);
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_draw_icon(canvas, 107, 33, &I_Pressed_Button_19x19);
+        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_color(canvas, ColorWhite);
     }
+    canvas_draw_icon(canvas, 112, 38, &I_Right_mouse_icon_9x9);
+    canvas_set_color(canvas, ColorBlack);
 }
 
 static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
@@ -111,6 +118,11 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
         hid_mouse->view,
         HidMouseModel * model,
         {
+            model->acceleration = (event->type == InputTypePress)   ? 1 :
+                                  (event->type == InputTypeRelease) ? 0 :
+                                  (model->acceleration >= 20)       ? 20 :
+                                                                      model->acceleration + 1;
+
             if(event->key == InputKeyBack) {
                 if(event->type == InputTypeShort) {
                     hid_hal_mouse_press(hid_mouse->hid, HID_MOUSE_BTN_RIGHT);
@@ -142,7 +154,8 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->right_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, MOUSE_MOVE_SHORT, 0);
                 } else if(event->type == InputTypeRepeat) {
-                    hid_hal_mouse_move(hid_mouse->hid, MOUSE_MOVE_LONG, 0);
+                    for(uint8_t i = model->acceleration; i > 1; i -= 2)
+                        hid_hal_mouse_move(hid_mouse->hid, MOUSE_MOVE_LONG, 0);
                 } else if(event->type == InputTypeRelease) {
                     model->right_pressed = false;
                 }
@@ -151,7 +164,8 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->left_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, -MOUSE_MOVE_SHORT, 0);
                 } else if(event->type == InputTypeRepeat) {
-                    hid_hal_mouse_move(hid_mouse->hid, -MOUSE_MOVE_LONG, 0);
+                    for(uint8_t i = model->acceleration; i > 1; i -= 2)
+                        hid_hal_mouse_move(hid_mouse->hid, -MOUSE_MOVE_LONG, 0);
                 } else if(event->type == InputTypeRelease) {
                     model->left_pressed = false;
                 }
@@ -160,7 +174,9 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->down_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, 0, MOUSE_MOVE_SHORT);
                 } else if(event->type == InputTypeRepeat) {
-                    hid_hal_mouse_move(hid_mouse->hid, 0, MOUSE_MOVE_LONG);
+                    for(uint8_t i = model->acceleration; i > 1; i -= 2)
+                        hid_hal_mouse_move(hid_mouse->hid, 0, MOUSE_MOVE_LONG);
+
                 } else if(event->type == InputTypeRelease) {
                     model->down_pressed = false;
                 }
@@ -169,7 +185,8 @@ static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
                     model->up_pressed = true;
                     hid_hal_mouse_move(hid_mouse->hid, 0, -MOUSE_MOVE_SHORT);
                 } else if(event->type == InputTypeRepeat) {
-                    hid_hal_mouse_move(hid_mouse->hid, 0, -MOUSE_MOVE_LONG);
+                    for(uint8_t i = model->acceleration; i > 1; i -= 2)
+                        hid_hal_mouse_move(hid_mouse->hid, 0, -MOUSE_MOVE_LONG);
                 } else if(event->type == InputTypeRelease) {
                     model->up_pressed = false;
                 }
