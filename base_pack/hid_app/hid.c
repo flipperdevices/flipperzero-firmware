@@ -1,6 +1,7 @@
 #include "hid.h"
 #include "views.h"
 #include <notification/notification_messages.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "HidApp"
 
@@ -313,7 +314,7 @@ void hid_hal_keyboard_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_press(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -324,7 +325,7 @@ void hid_hal_keyboard_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -335,7 +336,7 @@ void hid_hal_keyboard_release_all(Hid* instance) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release_all();
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -346,7 +347,7 @@ void hid_hal_consumer_key_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_consumer_key_press(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -357,7 +358,7 @@ void hid_hal_consumer_key_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_consumer_key_release(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -368,7 +369,7 @@ void hid_hal_consumer_key_release_all(Hid* instance) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_kb_release_all();
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -379,7 +380,7 @@ void hid_hal_mouse_move(Hid* instance, int8_t dx, int8_t dy) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_move(dx, dy);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -390,7 +391,7 @@ void hid_hal_mouse_scroll(Hid* instance, int8_t delta) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_scroll(delta);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -401,7 +402,7 @@ void hid_hal_mouse_press(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_press(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -412,7 +413,7 @@ void hid_hal_mouse_release(Hid* instance, uint16_t event) {
     } else if(instance->transport == HidTransportUsb) {
         furi_hal_hid_mouse_release(event);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -424,7 +425,7 @@ void hid_hal_mouse_release_all(Hid* instance) {
         furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
         furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
     } else {
-        furi_crash(NULL);
+        furi_crash();
     }
 }
 
@@ -437,6 +438,8 @@ int32_t hid_usb_app(void* p) {
     furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
 
     bt_hid_connection_status_changed_callback(BtStatusConnected, app);
+
+    dolphin_deed(DolphinDeedPluginStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
@@ -469,12 +472,12 @@ int32_t hid_ble_app(void* p) {
 
     furi_record_close(RECORD_STORAGE);
 
-    if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
-        FURI_LOG_E(TAG, "Failed to switch to HID profile");
-    }
+    furi_check(bt_set_profile(app->bt, BtProfileHidKeyboard));
 
     furi_hal_bt_start_advertising();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
+
+    dolphin_deed(DolphinDeedPluginStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
@@ -487,9 +490,7 @@ int32_t hid_ble_app(void* p) {
 
     bt_keys_storage_set_default_path(app->bt);
 
-    if(!bt_set_profile(app->bt, BtProfileSerial)) {
-        FURI_LOG_E(TAG, "Failed to switch to Serial profile");
-    }
+    furi_check(bt_set_profile(app->bt, BtProfileSerial));
 
     hid_free(app);
 
