@@ -118,10 +118,10 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
         canvas_set_color(canvas, ColorWhite);
     }
     if (model->ptt_pressed) {
-        // canvas_draw_icon(canvas, x_1 + 8, y_2 + 5, &I_ButtonRight_4x7);
-        canvas_set_font(canvas, FontPrimary);
-        elements_multiline_text_aligned(canvas, x_1 + 7, y_2 + 4, AlignLeft, AlignTop, "?");
-        canvas_set_font(canvas, FontSecondary);
+        // Show help
+        // canvas_set_font(canvas, FontPrimary);
+        // elements_multiline_text_aligned(canvas, x_1 + 7, y_2 + 4, AlignLeft, AlignTop, "?");
+        // canvas_set_font(canvas, FontSecondary);
     } else {
         canvas_draw_icon(canvas, x_1 + 7, y_2 + 5, &I_ButtonLeft_4x7);
     }
