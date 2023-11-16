@@ -62,13 +62,13 @@ void uhf_scene_read_tag_success_on_enter(void* ctx) {
     }
     widget_add_button_element(
         uhf_app->widget,
-        GuiButtonTypeRight,
+        GuiButtonTypeLeft,
         "More",
         uhf_scene_read_card_success_widget_callback,
         uhf_app);
     widget_add_button_element(
         uhf_app->widget,
-        GuiButtonTypeLeft,
+        GuiButtonTypeRight,
         "Exit",
         uhf_scene_read_card_success_widget_callback,
         uhf_app);
@@ -85,10 +85,10 @@ bool uhf_scene_read_tag_success_on_event(void* ctx, SceneManagerEvent event) {
     }
     if(event.type == SceneManagerEventTypeCustom) {
         // if 'exit' is pressed go back to home screen
-        if(event.event == GuiButtonTypeLeft) {
+        if(event.event == GuiButtonTypeRight) {
             consumed = scene_manager_search_and_switch_to_previous_scene(
                 uhf_app->scene_manager, UHFSceneStart);
-        } else if(event.event == GuiButtonTypeRight) {
+        } else if(event.event == GuiButtonTypeLeft) {
             scene_manager_next_scene(uhf_app->scene_manager, UHFSceneTagMenu);
             consumed = true;
         } else if(event.event == GuiButtonTypeCenter) {

@@ -25,25 +25,33 @@ void subghz_scene_start_on_enter(void* context) {
     }
 
     submenu_add_item(
-        subghz->submenu, "Read", SubmenuIndexRead, subghz_scene_start_submenu_callback, subghz);
+        subghz->submenu,
+        "Frequency Analyzer",
+        SubmenuIndexFrequencyAnalyzer,
+        subghz_scene_start_submenu_callback,
+        subghz);
     submenu_add_item(
         subghz->submenu,
-        "Read RAW",
+        "Read and Decode",
+        SubmenuIndexRead,
+        subghz_scene_start_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Record Signal (RAW)",
         SubmenuIndexReadRAW,
         subghz_scene_start_submenu_callback,
         subghz);
     submenu_add_item(
-        subghz->submenu, "Saved", SubmenuIndexSaved, subghz_scene_start_submenu_callback, subghz);
-    submenu_add_item(
         subghz->submenu,
-        "Add Manually",
-        SubmenuIndexAddManually,
+        "Saved Signals",
+        SubmenuIndexSaved,
         subghz_scene_start_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Frequency Analyzer",
-        SubmenuIndexFrequencyAnalyzer,
+        "Add Remote Manually",
+        SubmenuIndexAddManually,
         subghz_scene_start_submenu_callback,
         subghz);
     submenu_add_item(

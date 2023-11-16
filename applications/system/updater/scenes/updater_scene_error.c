@@ -9,7 +9,7 @@ void updater_scene_error_callback(GuiButtonType result, InputType type, void* co
         return;
     }
 
-    if(result == GuiButtonTypeLeft) {
+    if(result == GuiButtonTypeRight) {
         view_dispatcher_send_custom_event(
             updater->view_dispatcher, UpdaterCustomEventCancelUpdate);
     }
@@ -19,7 +19,7 @@ void updater_scene_error_on_enter(void* context) {
     Updater* updater = (Updater*)context;
 
     widget_add_button_element(
-        updater->widget, GuiButtonTypeLeft, "Exit", updater_scene_error_callback, updater);
+        updater->widget, GuiButtonTypeRight, "Exit", updater_scene_error_callback, updater);
 
     widget_add_string_multiline_element(
         updater->widget, 64, 13, AlignCenter, AlignCenter, FontPrimary, "Error");

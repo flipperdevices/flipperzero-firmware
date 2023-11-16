@@ -5,9 +5,9 @@ void subghz_scene_need_saving_callback(GuiButtonType result, InputType type, voi
     furi_assert(context);
     SubGhz* subghz = context;
 
-    if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
+    if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneStay);
-    } else if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
+    } else if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(subghz->view_dispatcher, SubGhzCustomEventSceneExit);
     }
 }
@@ -27,9 +27,9 @@ void subghz_scene_need_saving_on_enter(void* context) {
         "All unsaved data\nwill be lost!");
 
     widget_add_button_element(
-        subghz->widget, GuiButtonTypeRight, "Stay", subghz_scene_need_saving_callback, subghz);
+        subghz->widget, GuiButtonTypeLeft, "Stay", subghz_scene_need_saving_callback, subghz);
     widget_add_button_element(
-        subghz->widget, GuiButtonTypeLeft, "Exit", subghz_scene_need_saving_callback, subghz);
+        subghz->widget, GuiButtonTypeRight, "Exit", subghz_scene_need_saving_callback, subghz);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 }
