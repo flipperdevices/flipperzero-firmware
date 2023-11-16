@@ -2,7 +2,7 @@
 set -e
 
 if [ "${1}" = "" ] || [ "${2}" = "" ] || [ "${3}" = "" ] || [ "${4}" = "" ] || [ "${5}" = "" ]; then
-    echo "Usage: <path> <repo> <branch> <subdir> <action>"
+    echo "Usage: <path> <repo url> <branch> <subdir> <action>"
     exit
 fi
 path="${1}"

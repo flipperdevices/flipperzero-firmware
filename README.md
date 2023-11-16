@@ -21,6 +21,6 @@ That's why the commit history for our repo is so huge, it contains all the commi
 
 To make updating more manageable, we have added another layer on top of subtrees:
 - set it up by running `git config --local include.path ../.utils/gitconfig`
-- add a new app with `git add-subtree <path> <repo> <branch> [subdir]`, this will pull the history and create `path/.gitsubtree` to remember the url, branch and subdir
+- add a new app with `git add-subtree <path> <repo url> <branch> [subdir]`, this will pull the history and create `path/.gitsubtree` to remember the url, branch and subdir
 - run `git update-subtree` to pull updates based on the current subtree directory
 - or run `git bulk-update-subtrees` to do it for all subtrees
