@@ -8,10 +8,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: RC channel
-            sdk-channel: rc
           - name: release channel
             sdk-channel: release
+          - name: RC channel
+            sdk-channel: rc
+          - name: dev channel
+            sdk-channel: dev
 
     name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
