@@ -49,7 +49,7 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     }
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_icon(canvas, 3, 81, &I_ButtonUp_7x4);
+    canvas_draw_icon(canvas, 3, 80, &I_ButtonUp_7x4);
     if(model->appIndex == HidPttAppIndexGoogleMeet) {
         elements_multiline_text_aligned(canvas, 0, 86, AlignLeft, AlignTop, "Google Meet");
     } else if(model->appIndex == HidPttAppIndexZoom) {
@@ -74,8 +74,8 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     }
 
     // Exit label
-    canvas_draw_icon(canvas, 3, 121, &I_ButtonLeft_4x7);
-    elements_multiline_text_aligned(canvas, 9, 121, AlignLeft, AlignTop, "Hold to exit");
+    canvas_draw_icon(canvas, 20, 121, &I_ButtonLeft_4x7);
+    elements_multiline_text_aligned(canvas, 0, 121, AlignLeft, AlignTop, "Hold    to exit");
 
     const uint8_t x_2 = 27;
     const uint8_t x_1 = 8;
