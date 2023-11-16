@@ -65,14 +65,16 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
 
     // OS selection
     const uint8_t y_os = 88;
-    elements_slightly_rounded_box(canvas, model->is_mac_os ? 0 : 26, y_os, model->is_mac_os ? 21 : 26, 11);
+    const uint8_t x_os = 7;
+    // elements_slightly_rounded_box(canvas, model->is_mac_os ? 0 : 26, y_os, model->is_mac_os ? 21 : 26, 11);
+    elements_slightly_rounded_box(canvas, model->is_mac_os ? x_os : x_os + 26, y_os, model->is_mac_os ? 21 : 26, 11);
     canvas_set_color(canvas, model->is_mac_os ? ColorWhite : ColorBlack);
-    elements_multiline_text_aligned(canvas, 2, y_os + 1, AlignLeft, AlignTop, "Mac");
+    elements_multiline_text_aligned(canvas, x_os + 2, y_os + 1, AlignLeft, AlignTop, "Mac");
     canvas_set_color(canvas, ColorBlack);
     if (model->appIndex != HidPttAppIndexFaceTime) {
-        elements_multiline_text_aligned(canvas, 23, y_os + 2, AlignLeft, AlignTop, "|");
+        elements_multiline_text_aligned(canvas, x_os + 23, y_os + 2, AlignLeft, AlignTop, "|");
         canvas_set_color(canvas, model->is_mac_os ? ColorBlack : ColorWhite);
-        elements_multiline_text_aligned(canvas, 28, y_os + 2, AlignLeft, AlignTop, "Linux");
+        elements_multiline_text_aligned(canvas, x_os + 28, y_os + 2, AlignLeft, AlignTop, "Linux");
         canvas_set_color(canvas, ColorBlack);
     }
 
@@ -86,13 +88,13 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 20, 121, &I_ButtonLeft_4x7);
     elements_multiline_text_aligned(canvas, 0, 121, AlignLeft, AlignTop, "Hold    to exit");
 
-    const uint8_t x_2 = 27;
-    const uint8_t x_1 = 8;
-    const uint8_t x_3 = 46;
+    const uint8_t x_1 = 4;
+    const uint8_t x_2 = x_1 + 19;
+    const uint8_t x_3 = x_2 + 19;
 
     const uint8_t y_1 = 19;
-    const uint8_t y_2 = 38;
-    const uint8_t y_3 = 57;
+    const uint8_t y_2 = y_1 + 19;
+    const uint8_t y_3 = y_2 + 19;
 
     // Up
     canvas_draw_icon(canvas, x_2, y_1, &I_Button_18x18);
@@ -136,12 +138,14 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     // Right / Camera
     canvas_draw_icon(canvas, x_3, y_2, &I_Button_18x18);
     if(model->right_pressed) {
-        elements_slightly_rounded_box(canvas, x_3 + 7, y_2 + 2, 13, 13);
+        elements_slightly_rounded_box(canvas, x_3 + 3, y_2 + 2, 13, 13);
         canvas_set_color(canvas, ColorWhite);
     }
     if(!model->ptt_pressed) {
-        canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
-        canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
+        if (model->appIndex != HidPttAppIndexFaceTime) {
+            canvas_draw_icon(canvas, x_3 + 11, y_2 + 5, &I_ButtonLeft_4x7);
+            canvas_draw_box(canvas, x_3 + 4, y_2 + 5, 7, 7);
+        }
     } else {
         canvas_draw_icon(canvas, x_3 + 8, y_2 + 5, &I_ButtonRight_4x7);
     }
@@ -159,17 +163,19 @@ static void hid_ptt_draw_callback(Canvas* canvas, void* context) {
     canvas_set_color(canvas, ColorBlack);
 
     // Back / PTT
-    canvas_draw_icon(canvas, x_2, 0, &I_BtnFrameLeft_3x18);
-    canvas_draw_icon(canvas, x_2 + 35, 0, &I_BtnFrameRight_2x18);
-    canvas_draw_line(canvas, x_2 + 3, 0,  x_2 + 34, 0);
-    canvas_draw_line(canvas, x_2 + 3, 16, x_2 + 34, 16);
-    canvas_draw_line(canvas, x_2 + 3, 17, x_2 + 34, 17);
+    const uint8_t x_ppt = x_2;
+    const uint8_t x_ppt_margin = 4;
+    canvas_draw_icon(canvas, x_ppt, 0, &I_BtnFrameLeft_3x18);
+    canvas_draw_icon(canvas, x_ppt + 35 + x_ppt_margin, 0, &I_BtnFrameRight_2x18);
+    canvas_draw_line(canvas, x_ppt + 3, 0,  x_ppt + 34 + x_ppt_margin, 0);
+    canvas_draw_line(canvas, x_ppt + 3, 16, x_ppt + 34 + x_ppt_margin, 16);
+    canvas_draw_line(canvas, x_ppt + 3, 17, x_ppt + 34 + x_ppt_margin, 17);
     if(model->ptt_pressed) {
-        elements_slightly_rounded_box(canvas, x_2+3, 0+2, 32, 13);
+        elements_slightly_rounded_box(canvas, x_ppt + 3, 2, 32 + x_ppt_margin, 13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, x_2+4, 0+4, &I_Pin_back_arrow_rotated_8x10);
-    elements_multiline_text_aligned(canvas, x_2+16, 0+12, AlignLeft, AlignBottom, "PTT");
+    canvas_draw_icon(canvas, x_ppt + 4 + x_ppt_margin / 2, 4, &I_Pin_back_arrow_rotated_8x10);
+    elements_multiline_text_aligned(canvas, x_ppt + 16 + x_ppt_margin / 2, 12, AlignLeft, AlignBottom, "PTT");
 }
 
 static void hid_ptt_trigger_mute(HidPtt* hid_ptt, HidPttModel * model) {
