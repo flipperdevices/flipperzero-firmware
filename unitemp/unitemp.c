@@ -224,6 +224,7 @@ static bool unitemp_alloc(void) {
 
     //Открытие хранилища (?)
     app->storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(app->storage, EXT_PATH("unitemp"), APP_PATH_FOLDER);
 
     //Уведомления
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
