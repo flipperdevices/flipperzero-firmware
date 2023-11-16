@@ -17,8 +17,6 @@ typedef enum {
 
 typedef enum {
     PicopassPollerModeRead,
-    PicopassPollerModeWrite,
-    PicopassPollerModeWriteKey,
 } PicopassPollerMode;
 
 typedef struct {
@@ -48,6 +46,7 @@ void picopass_poller_start(
     void* context);
 
 void picopass_poller_stop(PicopassPoller* instance);
+uint8_t* picopass_poller_get_csn(PicopassPoller* instance);
 
 #ifdef __cplusplus
 }

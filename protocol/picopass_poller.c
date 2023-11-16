@@ -155,3 +155,9 @@ void picopass_poller_free(PicopassPoller* instance) {
     bit_buffer_free(instance->tmp_buffer);
     free(instance);
 }
+
+uint8_t* picopass_poller_get_csn(PicopassPoller* instance) {
+    furi_assert(instance);
+
+    return instance->serial_num.data;
+}

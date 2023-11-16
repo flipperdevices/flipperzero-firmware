@@ -7,7 +7,7 @@
 
 #define APDU_HEADER_LEN 5
 #define ASN1_PREFIX 6
-//#define ASN1_DEBUG true
+#define ASN1_DEBUG true
 
 #define RFAL_PICOPASS_TXRX_FLAGS                                                    \
     (FURI_HAL_NFC_LL_TXRX_FLAGS_CRC_TX_MANUAL | FURI_HAL_NFC_LL_TXRX_FLAGS_AGC_ON | \
@@ -485,6 +485,8 @@ NfcCommand seader_iso14443a_transmit(
     uint8_t format[3]) {
     UNUSED(timeout);
     UNUSED(format);
+    UNUSED(seader);
+    UNUSED(buffer);
 
     BitBuffer* tx_buffer = bit_buffer_alloc(len);
     BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
@@ -492,19 +494,20 @@ NfcCommand seader_iso14443a_transmit(
 
     do {
         // bit_buffer_reset(tx_buffer);
-        bit_buffer_append_bytes(tx_buffer, buffer, len);
-        //NfcError error = iso14443_4a_poller_send_block(seader->poller, tx_buffer, rx_buffer);
-        NfcError error = nfc_poller_trx(seader->nfc, tx_buffer, rx_buffer, SEADER_POLLER_MAX_FWT);
-        if(error != NfcErrorNone) {
-            FURI_LOG_W(TAG, "nfc_poller_trx error %d", error);
+        bit_buffer_append_bytes(tx_buffer, buffer, len); // TODO: could this be a `bit_buffer_copy_bytes` ?
+        Iso14443_4aError error = iso14443_4a_poller_send_block((Iso14443_4aPoller*)seader->poller, tx_buffer, rx_buffer);
+        if(error != Iso14443_4aErrorNone) {
+            FURI_LOG_W(TAG, "iso14443_4a_poller_send_block error %d", error);
             ret = NfcCommandStop;
             break;
         }
 
         FURI_LOG_I(TAG, "NFC incoming %d bytes", bit_buffer_get_size_bytes(rx_buffer));
 
-    } while(false);
+        // TODO: send it back to the SAM
 
+
+    } while(false);
     bit_buffer_free(tx_buffer);
     bit_buffer_free(rx_buffer);
 
@@ -747,15 +750,27 @@ NfcCommand seader_worker_card_detect(Seader* seader, uint8_t sak, uint8_t* atqa,
     assert(cardDetails);
 
     OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)uid, uid_len);
+
+    if (sak != 0 && atqa != NULL) {
     uint8_t protocolBytes[] = {0x00, FrameProtocol_nfc};
     OCTET_STRING_fromBuf(
         &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
+    } else {
+    uint8_t protocolBytes[] = {0x00, FrameProtocol_iclass};
+    OCTET_STRING_fromBuf(
+        &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
 
+    }
+
+    if (sak > 0) {
     OCTET_STRING_t sak_string = {.buf = &sak, .size = 1};
     cardDetails->sak = &sak_string;
+    }
 
+    if (atqa != NULL) {
     OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
     cardDetails->atqa = &atqa_string;
+    }
 
     seader_send_card_detected(seader_uart, cardDetails);
 
@@ -782,6 +797,8 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
     SeaderWorker* seader_worker = seader->worker;
 
     const Iso14443_4aPollerEvent* iso14443_4a_event = event.event_data;
+    const Iso14443_4aPoller* iso14443_4a_poller = event.instance;
+    UNUSED(iso14443_4a_poller);
 
     if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
         if(stage == SeaderPollerEventTypeCardDetect) {
@@ -797,7 +814,6 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
             uint8_t sak = iso14443_3a_get_sak(iso14443_3a_data);
 
             seader_worker_card_detect(seader, sak, (uint8_t*)iso14443_3a_data->atqa, uid, uid_len, NULL, 0);
-
 
             nfc_set_fdt_poll_fc(event.instance, SEADER_POLLER_MAX_FWT);
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
@@ -845,10 +861,25 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
     NfcCommand command = NfcCommandContinue;
 
     Seader* seader = context;
-    UNUSED(seader);
+    PicopassPoller* instance = seader->picopass_poller;
 
     if(event.type == PicopassPollerEventTypeSuccess) {
       FURI_LOG_D(TAG, "PicopassPollerEventTypeSuccess");
+
+      //if(stage == SeaderPollerEventTypeCardDetect) {
+
+
+            FURI_LOG_D(TAG, "Card Detect");
+
+            uint8_t *csn = picopass_poller_get_csn(instance);
+
+            seader_worker_card_detect(seader, 0, NULL, csn, sizeof(PicopassSerialNum), NULL, 0);
+
+            furi_thread_set_current_priority(FuriThreadPriorityLowest);
+            //stage = SeaderPollerEventTypeConversation;
+
+
+
     }
 
     return command;
