@@ -6,7 +6,8 @@ typedef enum {
     ButtonIndexNA = 0,
 } ButtonIndex;
 
-static void xremote_scene_ir_remote_button_menu_callback(void* context, int32_t index, InputType type) {
+static void
+    xremote_scene_ir_remote_button_menu_callback(void* context, int32_t index, InputType type) {
     XRemote* app = context;
 
     uint16_t custom_type;
@@ -41,7 +42,7 @@ void xremote_scene_ir_remote_on_enter(void* context) {
     }
 
     button_menu_set_header(button_menu, "Select Cmd");
-    const int16_t button_index = 
+    const int16_t button_index =
         (signed)scene_manager_get_scene_state(app->scene_manager, XRemoteViewIdIrRemote);
     button_menu_set_selected_item(button_menu, button_index);
 
@@ -51,15 +52,16 @@ void xremote_scene_ir_remote_on_enter(void* context) {
 bool xremote_scene_ir_remote_on_event(void* context, SceneManagerEvent event) {
     XRemote* app = context;
     bool consumed = false;
-    
+
     if(event.type == SceneManagerEventTypeCustom) {
         const uint16_t custom_type = xremote_custom_menu_event_get_type(event.event);
         const int16_t button_index = xremote_custom_menu_event_get_value(event.event);
-        if (custom_type == XRemoteCustomEventMenuAddIrSelected) {
+        if(custom_type == XRemoteCustomEventMenuAddIrSelected) {
             scene_manager_set_scene_state(
                 app->scene_manager, XRemoteSceneIrRemote, (unsigned)button_index);
-            
-            InfraredRemoteButton* ir_button = xremote_ir_remote_get_button(app->ir_remote_buffer, button_index);
+
+            InfraredRemoteButton* ir_button =
+                xremote_ir_remote_get_button(app->ir_remote_buffer, button_index);
             const char* button_name = xremote_ir_remote_button_get_name(ir_button);
             InfraredSignal* signal = xremote_ir_remote_button_get_signal(ir_button);
 
@@ -68,7 +70,7 @@ bool xremote_scene_ir_remote_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         }
     }
-    
+
     return consumed;
 }
 

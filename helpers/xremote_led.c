@@ -2,7 +2,7 @@
 
 void xremote_led_set_rgb(void* context, int red, int green, int blue) {
     XRemote* app = context;
-    if (app->led != 1) {
+    if(app->led != 1) {
         return;
     }
     NotificationMessage notification_led_message_1;
@@ -23,7 +23,8 @@ void xremote_led_set_rgb(void* context, int red, int green, int blue) {
         NULL,
     };
     notification_message(app->notification, &notification_sequence);
-    furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set    
+    furi_thread_flags_wait(
+        0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
 }
 
 void xremote_led_reset(void* context) {
@@ -31,6 +32,7 @@ void xremote_led_reset(void* context) {
     notification_message(app->notification, &sequence_reset_red);
     notification_message(app->notification, &sequence_reset_green);
     notification_message(app->notification, &sequence_reset_blue);
-    
-    furi_thread_flags_wait(0, FuriFlagWaitAny, 300); //Delay, prevent removal from RAM before LED value set    
+
+    furi_thread_flags_wait(
+        0, FuriFlagWaitAny, 300); //Delay, prevent removal from RAM before LED value set
 }

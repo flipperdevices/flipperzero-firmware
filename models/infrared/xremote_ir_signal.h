@@ -25,10 +25,10 @@ bool xremote_ir_signal_is_valid(InfraredSignal* signal);
 void xremote_ir_signal_set_signal(InfraredSignal* signal, const InfraredSignal* other);
 
 void xremote_ir_signal_set_raw_signal(
-    InfraredSignal* signal, 
-    const uint32_t* timings, 
-    size_t timings_size, 
-    uint32_t frequency, 
+    InfraredSignal* signal,
+    const uint32_t* timings,
+    size_t timings_size,
+    uint32_t frequency,
     float duty_cycle);
 InfraredRawSignal* xremote_ir_signal_get_raw_signal(InfraredSignal* signal);
 
