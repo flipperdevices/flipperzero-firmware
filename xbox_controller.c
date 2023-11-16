@@ -1,3 +1,6 @@
+#include <infrared_worker.h>
+#include <infrared_transmit.h>
+
 #include "xbox_controller.h"
 
 #define TAG "XboxControllerApp"
