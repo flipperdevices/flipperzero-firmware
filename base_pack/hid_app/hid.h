@@ -23,8 +23,8 @@
 #include "views/hid_movie.h"
 #include "views/hid_mouse.h"
 #include "views/hid_mouse_jiggler.h"
-#include "views/hid_tikshorts.h"
 #include "views/hid_mouse_clicker.h"
+#include "views/hid_tikshorts.h"
 #include "views/hid_ptt.h"
 
 #define HID_BT_KEYS_STORAGE_NAME ".bt_hid.keys"
