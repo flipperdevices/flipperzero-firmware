@@ -20,9 +20,9 @@ void rgb_led_submenu_callback(void* context, uint32_t index) {
 void rgb_led_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
     RgbLed* app = context;
-    if(result == DialogExResultLeft) {
+    if(result == DialogExResultRight) {
         view_dispatcher_stop(app->view_dispatcher);
-    } else if(result == DialogExResultRight) {
+    } else if(result == DialogExResultLeft) {
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id); // Show last view
     } else if(result == DialogExResultCenter) {
         view_dispatcher_switch_to_view(app->view_dispatcher, RgbLedViewSubmenu);
@@ -65,8 +65,8 @@ RgbLed* rgb_led_app_alloc() {
     app->dialog = dialog_ex_alloc();
     dialog_ex_set_result_callback(app->dialog, rgb_led_dialog_callback);
     dialog_ex_set_context(app->dialog, app);
-    dialog_ex_set_left_button_text(app->dialog, "Exit");
-    dialog_ex_set_right_button_text(app->dialog, "Stay");
+    dialog_ex_set_right_button_text(app->dialog, "Exit");
+    dialog_ex_set_left_button_text(app->dialog, "Stay");
     dialog_ex_set_center_button_text(app->dialog, "Menu");
     dialog_ex_set_header(app->dialog, "Close Current App?", 16, 12, AlignLeft, AlignTop);
     view_dispatcher_add_view(

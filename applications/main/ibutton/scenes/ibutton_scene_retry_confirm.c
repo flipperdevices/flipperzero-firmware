@@ -15,9 +15,9 @@ void ibutton_scene_retry_confirm_on_enter(void* context) {
     Widget* widget = ibutton->widget;
 
     widget_add_button_element(
-        widget, GuiButtonTypeLeft, "Exit", ibutton_scene_retry_confirm_widget_callback, ibutton);
+        widget, GuiButtonTypeRight, "Exit", ibutton_scene_retry_confirm_widget_callback, ibutton);
     widget_add_button_element(
-        widget, GuiButtonTypeRight, "Stay", ibutton_scene_retry_confirm_widget_callback, ibutton);
+        widget, GuiButtonTypeLeft, "Stay", ibutton_scene_retry_confirm_widget_callback, ibutton);
     widget_add_string_element(
         widget, 64, 19, AlignCenter, AlignBottom, FontPrimary, "Retry Reading?");
     widget_add_string_element(
@@ -35,9 +35,9 @@ bool ibutton_scene_retry_confirm_on_event(void* context, SceneManagerEvent event
         consumed = true; // Ignore Back button presses
     } else if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
-        if(event.event == GuiButtonTypeLeft) {
+        if(event.event == GuiButtonTypeRight) {
             scene_manager_search_and_switch_to_previous_scene(scene_manager, iButtonSceneRead);
-        } else if(event.event == GuiButtonTypeRight) {
+        } else if(event.event == GuiButtonTypeLeft) {
             scene_manager_previous_scene(scene_manager);
         }
     }

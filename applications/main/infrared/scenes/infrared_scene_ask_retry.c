@@ -13,9 +13,9 @@ void infrared_scene_ask_retry_on_enter(void* context) {
     dialog_ex_set_text(
         dialog_ex, "All unsaved data\nwill be lost!", 64, 25, AlignCenter, AlignTop);
     dialog_ex_set_icon(dialog_ex, 0, 0, NULL);
-    dialog_ex_set_left_button_text(dialog_ex, "Exit");
+    dialog_ex_set_right_button_text(dialog_ex, "Exit");
     dialog_ex_set_center_button_text(dialog_ex, NULL);
-    dialog_ex_set_right_button_text(dialog_ex, "Stay");
+    dialog_ex_set_left_button_text(dialog_ex, "Stay");
     dialog_ex_set_result_callback(dialog_ex, infrared_scene_dialog_result_callback);
     dialog_ex_set_context(dialog_ex, context);
 
@@ -30,10 +30,10 @@ bool infrared_scene_ask_retry_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeBack) {
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == DialogExResultLeft) {
+        if(event.event == DialogExResultRight) {
             scene_manager_search_and_switch_to_previous_scene(scene_manager, InfraredSceneLearn);
             consumed = true;
-        } else if(event.event == DialogExResultRight) {
+        } else if(event.event == DialogExResultLeft) {
             scene_manager_previous_scene(scene_manager);
             consumed = true;
         }

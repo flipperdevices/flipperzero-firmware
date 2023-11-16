@@ -5,9 +5,9 @@
 void battery_test_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
     BatteryTestApp* app = context;
-    if(result == DialogExResultLeft) {
+    if(result == DialogExResultRight) {
         view_dispatcher_stop(app->view_dispatcher);
-    } else if(result == DialogExResultRight) {
+    } else if(result == DialogExResultLeft) {
         view_dispatcher_switch_to_view(app->view_dispatcher, BatteryTestAppViewBatteryInfo);
     }
 }
@@ -58,8 +58,8 @@ BatteryTestApp* battery_test_alloc() {
 
     app->dialog = dialog_ex_alloc();
     dialog_ex_set_header(app->dialog, "Close Battery Test?", 64, 12, AlignCenter, AlignTop);
-    dialog_ex_set_left_button_text(app->dialog, "Exit");
-    dialog_ex_set_right_button_text(app->dialog, "Stay");
+    dialog_ex_set_right_button_text(app->dialog, "Exit");
+    dialog_ex_set_left_button_text(app->dialog, "Stay");
     dialog_ex_set_result_callback(app->dialog, battery_test_dialog_callback);
     dialog_ex_set_context(app->dialog, app);
 
