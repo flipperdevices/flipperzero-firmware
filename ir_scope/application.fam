@@ -1,0 +1,13 @@
+App(
+    appid="ir_scope",
+    name="IR Scope",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ir_scope_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="ir_scope.png",
+    fap_category="Infrared",
+    fap_author="@kallanreed",
+    fap_version="1.2",
+    fap_description="App allows to see incoming IR signals.",
+)
