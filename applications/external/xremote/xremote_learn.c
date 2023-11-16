@@ -129,9 +129,9 @@ static void xremote_learn_exit_dialog_alloc(
     dialog_ex_set_text(learn_ctx->dialog_ex, dialog_text, 64, 25, AlignCenter, AlignTop);
     dialog_ex_set_icon(learn_ctx->dialog_ex, 0, 0, NULL);
 
-    dialog_ex_set_left_button_text(learn_ctx->dialog_ex, "Exit");
+    dialog_ex_set_right_button_text(learn_ctx->dialog_ex, "Exit");
     dialog_ex_set_center_button_text(learn_ctx->dialog_ex, "Save");
-    dialog_ex_set_right_button_text(learn_ctx->dialog_ex, "Stay");
+    dialog_ex_set_left_button_text(learn_ctx->dialog_ex, "Stay");
 
     dialog_ex_set_result_callback(learn_ctx->dialog_ex, callback);
     dialog_ex_set_context(learn_ctx->dialog_ex, learn_ctx);
@@ -146,9 +146,9 @@ static void xremote_learn_dialog_exit_callback(DialogExResult result, void* cont
     XRemoteLearnContext* learn_ctx = (XRemoteLearnContext*)context;
     xremote_learn_switch_to_view(learn_ctx, XRemoteViewSubmenu);
 
-    if(result == DialogExResultLeft)
+    if(result == DialogExResultRight)
         xremote_learn_send_event(learn_ctx, XRemoteEventSignalExit);
-    else if(result == DialogExResultRight)
+    else if(result == DialogExResultLeft)
         xremote_learn_send_event(learn_ctx, XRemoteEventSignalRetry);
     else if(result == DialogExResultCenter)
         xremote_learn_send_event(learn_ctx, XRemoteEventSignalFinish);
