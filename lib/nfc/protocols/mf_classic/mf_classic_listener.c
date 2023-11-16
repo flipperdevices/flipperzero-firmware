@@ -34,6 +34,7 @@ static void mf_classic_listener_reset_state(MfClassicListener* instance) {
     instance->cmd_in_progress = false;
     instance->current_cmd_handler_idx = 0;
     instance->transfer_value = 0;
+    instance->transfer_valid = false;
     instance->value_cmd = MfClassicValueCommandInvalid;
 }
 
@@ -337,6 +338,7 @@ static MfClassicListenerCommand
                &instance->data->block[block_num], &instance->transfer_value, NULL)) {
             break;
         }
+        instance->transfer_valid = true;
 
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
@@ -382,6 +384,7 @@ static MfClassicListenerCommand
         }
 
         instance->transfer_value += data;
+        instance->transfer_valid = true;
 
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
@@ -411,6 +414,7 @@ static MfClassicListenerCommand
         mf_classic_value_to_block(
             instance->transfer_value, block_num, &instance->data->block[block_num]);
         instance->transfer_value = 0;
+        instance->transfer_valid = false;
 
         command = MfClassicListenerCommandAck;
     } while(false);
@@ -581,7 +585,14 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
         if(mfc_command == MfClassicListenerCommandAck) {
             mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_ACK);
         } else if(mfc_command == MfClassicListenerCommandNack) {
-            mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_NACK);
+            // Calculate nack based on the transfer buffer validity
+            uint8_t nack = MF_CLASSIC_CMD_NACK;
+            if(!instance->transfer_valid) {
+                nack += MF_CLASSIC_CMD_NACK_TRANSFER_INVALID;
+            }
+            // TODO: check CRC and add MF_CLASSIC_CMD_NACK_CRC_ERROR if incorrect
+
+            mf_classic_listener_send_short_frame(instance, nack);
         } else if(mfc_command == MfClassicListenerCommandSilent) {
             command = NfcCommandReset;
         } else if(mfc_command == MfClassicListenerCommandSleep) {
