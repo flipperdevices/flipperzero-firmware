@@ -15,7 +15,13 @@ struct = f"typedef {char_type} q_char;\n" + "typedef struct QuestionList {const 
 for file in [os.path.join(qustions_path, entry) for entry in os.listdir(qustions_path)]:
 	if not os.path.isfile(file):
 		continue
-	with open(file, 'r') as f:
+	with open(file, 'r+') as f:
+		f.seek(0, 2)	## go to the end of the file
+		f.seek(f.tell() - 1)	## go to the last character
+		last_char = f.read()	## read the last character
+		if last_char == '\n':	## if the last character is a newline:
+			f.truncate(f.tell() - 1)	## remove the last character
+		f.seek(0, 0)	#go back to the start of the file
 		lists[os.path.splitext(os.path.basename(file))[0]] = f.read().split('\n')
 
 def create_arrays():
