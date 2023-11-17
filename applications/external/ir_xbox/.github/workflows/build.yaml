@@ -5,7 +5,17 @@ on: [push]
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
-    name: 'ufbt: Build'
+    strategy:
+      matrix:
+        include:
+          - name: release channel
+            sdk-channel: release
+          - name: RC channel
+            sdk-channel: rc
+          - name: dev channel
+            sdk-channel: dev
+
+    name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -14,7 +24,7 @@ jobs:
         uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
         id: build-app
         with:
-          sdk-channel: release
+          sdk-channel: ${{ matrix.sdk-channel }}
 
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
