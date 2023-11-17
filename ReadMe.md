@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1109-2320-0.93.1-47964c5.tgz&channel=RM1109-2320-0.93.1-47964c5&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1109-2320-0.93.1-47964c5-NoAnim.tgz&channel=RM1109-2320-0.93.1-47964c5-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1116-2235-0.93.9-01fc449.tgz&channel=RM1116-2235-0.93.9-01fc449&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1116-2235-0.93.9-01fc449-NoAnim.tgz&channel=RM1116-2235-0.93.9-01fc449-NoAnim&version=0.93.9)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -29,24 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1116-2205-0.93.9-a0c1058](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-16 22:05 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-16 22:05 EST`
-- [Switched to cleaner animation loader (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b651299ee1968cfa2b8b82f894b0375a8455e039)
-- [Changed a few minor text strings to shutdown and update (By Leeroy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/dd6f294157d78f3e9b8694cf263e48eaa98f0966)
-- OFW: [Infrared remote button index support #3180 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3180) (Added to refactors build)
-- [New NFC MF Keys (By z3r0l1nk)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8d1d955a4a49b76980750c2dd728d69c1382394)
-- Assets: [Included sample Infrared remote and IR file for Vizio (has a different button set than Roku - By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/552fc71d86533976eba6312670788a1bc849344a)
-- UL PR: [Fix naming in iButton #649 (By krolchonok)](https://github.com/DarkFlippers/unleashed-firmware/pull/649)
-- Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- UL PR: Updated: [Bluetooth/USB Remote v1.6 (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330) [Added movie menu + minor tunes #26 (By hryamzik)](https://github.com/xMasterX/all-the-plugins/pull/26)
-- Updated: [ESP32 Gravity v1.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
-- Added: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
-- Updated: [BLE Spam v4.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw)
-- Added: [WHC SWIO Flasher v1.0 (By sukvojte)](https://github.com/sukvojte/wch_swio_flasher)
-- OFW: [Add Mastercode SubGHz Protocol #3187 (By flipperzelebro)](https://github.com/flipperdevices/flipperzero-firmware/pull/3187)
-- Updated: [XRemote v1.1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote) (Minor Change)
-- Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate) (Minor Change)
-- [Fix Authenticator Exit to Short Press to be inline with other FAPS (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/e178f2e5d70d4fdefee5e6e70e74dacc158a5de3)
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-16 22:35 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-16 22:35 EST`
 
 <a name="release">
 
@@ -502,4 +486,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1109-2320-0.93.1-47964c5.tgz&channel=RM1109-2320-0.93.1-47964c5&version=0.93.1) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1109-2320-0.93.1-47964c5-NoAnim.tgz&channel=RM1109-2320-0.93.1-47964c5-NoAnim&version=0.93.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1116-2235-0.93.9-01fc449.tgz&channel=RM1116-2235-0.93.9-01fc449&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1116-2235-0.93.9-01fc449-NoAnim.tgz&channel=RM1116-2235-0.93.9-01fc449-NoAnim&version=0.93.9)
