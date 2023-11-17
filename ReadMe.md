@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Add Mastercode SubGHz Protocol #3187 (By flipperzelebro)](https://github.com/flipperdevices/flipperzero-firmware/pull/3187)
 - Updated: [XRemote v1.1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote) (Minor Change)
 - Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate) (Minor Change)
+- [Fix Authenticator Exit to Short Press to be inline with other FAPS (By LeeroysHub)](https://github.com/LeeroysHub/RM-Flipper/commit/e178f2e5d70d4fdefee5e6e70e74dacc158a5de3)
 
 <a name="release">
 
