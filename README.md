@@ -2,14 +2,10 @@
 
  <div style="text-align:center"><img src="Misc/ledpulser/assets/flipper_logo_orange.png"/></div>
 
-## What Apps do I have here 
-
-## Tools
-- Cross Remote: An app to chain Infrared and SubGhz commands and run them with on click<br>
-(in Development)
-
-## Games
-- Color Guess: For designers/webworkers. Guess the HEX value of the color shown on the LED light<br>
+## Apps removed from this Repo
+I reduced this Repo to the more basic apps I made for testing. Previously included Apps now have their own repository
+- [Cross Remote](https://github.com/leedave/flipper-zero-cross-remote)
+- [Color Guess](https://github.com/leedave/flipper-zero-color-guess)
 
 ## Misc (Stuff I did to learn from)
 - Orgamotron: Added new vibro modes to the app orginally developed by qqmajikpp<br>
