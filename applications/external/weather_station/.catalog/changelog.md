@@ -1,6 +1,6 @@
 ## 1.2
  - Add protocol Acurite-986
- - Functions for working with delays have been changed
+ - Minimal changes for recent API updates
 ## 1.1
  - Add protocol Auriol_AHFL
 ## 1.0
