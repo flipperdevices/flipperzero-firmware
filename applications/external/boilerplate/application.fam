@@ -1,0 +1,17 @@
+App(
+    appid="boilerplate",
+    name="FAP Boilerplate",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="boilerplate_app",
+    cdefines=["APP_BOILERPLATE"],
+    requires=[
+        "gui",
+        "storage",
+    ],
+    stack_size=2 * 1024,
+    order=10,
+    fap_libs=["assets"],
+    fap_icon="icons/boilerplate_10px.png",
+    fap_icon_assets="icons",
+    fap_category="Misc",
+)
