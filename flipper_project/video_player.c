@@ -4,6 +4,7 @@
 
 #include <video_player_icons.h>
 #include <furi.h>
+#include <furi/core/thread.h>
 #include <furi_hal.h>
 #include <cli/cli.h>
 #include <gui/gui.h>
@@ -156,7 +157,8 @@ int32_t video_player_app(void* p) {
 
         player->playing = true;
 
-        vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
+        //vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
+        furi_thread_set_current_priority(FuriThreadPriorityIdle);
 
         while(!(player->quit)) {
             furi_check(
