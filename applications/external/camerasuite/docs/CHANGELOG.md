@@ -1,10 +1,23 @@
 ## Roadmap
 
-- Store images to onboard ESP32-CAM SD card (currently in progress, #24).
+- Store images to onboard ESP32-CAM SD card (partially completed, #24).
 - Camera preview GUI overlay (#21).
 - Full screen 90 degree and 270 degree fill (#6).
 
-## v1.3 (current)
+## v1.4
+
+- Add RC builds to repo.
+- Improve FAP code.
+- Improve Firmware code (requires reflash).
+- Improve Firmware flashing utility code.
+- Improve GitHub actions code.
+- Look to mitigate issue "Mirrored Image" #27.
+
+## v1.3.1 (patch)
+
+- Addressed new linting issue with "ufbt" tools.
+
+## v1.3
 
 - Important: Firmware Update Required! Ensure you update your firmware to fully utilize the new features. Backwards compatibility should be ok.
 - New Feature: Introducing the Firmware Flash utility, simplifying the firmware flashing process. Refer to the project readme for detailed instructions. (Closes #26)

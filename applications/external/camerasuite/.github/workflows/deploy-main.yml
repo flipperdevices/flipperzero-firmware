@@ -21,6 +21,9 @@ jobs:
           - name: release
             sdk-channel: release
 
+          - name: rc
+            sdk-channel: rc
+
     name: "ufbt: Build for ${{ matrix.name }}"
     steps:
       - name: Checkout

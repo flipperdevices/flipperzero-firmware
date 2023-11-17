@@ -17,6 +17,7 @@
 ## Table of Contents <a name="index"></a>
 
 - [Introduction](#intro)
+- [YouTube](#youtube)
 - [Hardware Requirements](#hardware-requirements)
 - [Hardware Installation](#hardware-installation)
 - [Firmware Installation](#firmware-installation)
@@ -41,6 +42,26 @@ Discover a new dimension of possibilities by connecting your ESP32-CAM module wi
 - **Personalize Your Experience:** Tailor your camera settings with ease. Adjust camera orientation, experiment with various dithering options, and toggle flash, haptic feedback, sound effects, and LED effects to match your preferences. Feel free to use this as a flashlight too, it's pretty bright and good at blinding yourself unexpectedly!
 
 There will be many more features added in the future! If you have any ideas or suggestions, please let me know by opening an issue [here][issues-link].
+
+<p align="right">[ <a href="#index">Back to top</a> ]</p>
+
+## YouTube <a name="youtube"></a>
+
+This section is dedicated to all the fans that have made videos of this project! Thank you! If you have a video you'd like to share, please let me know by opening an issue [here][issues-link].
+
+<details>
+
+<summary>Expand for videos</summary>
+
+<br />
+
+**Flipper Zero ESP32 CAM Camera Module** - by TAKEAPART
+
+[![Flipper Zero ESP32 CAM Camera Module - TAKEAPART](https://img.youtube.com/vi/cEl5UnWH_Ok/0.jpg)](https://www.youtube.com/watch?v=cEl5UnWH_Ok)
+
+</details>
+
+
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
