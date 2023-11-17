@@ -2821,7 +2821,6 @@ Function,+,storage_file_close,_Bool,File*
 Function,+,storage_file_copy_to_file,_Bool,"File*, File*, size_t"
 Function,+,storage_file_eof,_Bool,File*
 Function,+,storage_file_exists,_Bool,"Storage*, const char*"
-Function,+,storage_file_expand,_Bool,"File*, uint64_t"
 Function,+,storage_file_free,void,File*
 Function,+,storage_file_get_error,FS_Error,File*
 Function,+,storage_file_get_error_desc,const char*,File*
