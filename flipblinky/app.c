@@ -52,30 +52,11 @@ void flipboard_view_flip_keyboard_draw(Canvas* canvas, void* model) {
  */
 void flipboard_reset_effect(FlipboardModel* model) {
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
-    fbm->effect_counter = 0;
 
-    if(fbm->effect_id == 1) {
-        fbm->colors[0] = LedColorRed;
-        fbm->colors[1] = LedColorWhite;
-        fbm->colors[2] = LedColorRed;
-        fbm->colors[3] = LedColorBlue;
-    } else if(fbm->effect_id == 2) {
-        fbm->colors[0] = LedColorYellow;
-        fbm->colors[1] = LedColorOrange;
-        fbm->colors[2] = LedColorYellow;
-        fbm->colors[3] = LedColorOrange;
-    } else if(fbm->effect_id == 3) {
-        fbm->colors[0] = LedColorGreen;
-        fbm->colors[1] = LedColorBlue;
-        fbm->colors[2] = LedColorMagenta;
-        fbm->colors[3] = LedColorBlack;
-    } else if(fbm->effect_id == 4) {
-        fbm->colors[4] = LedColorViolet;
-        fbm->colors[5] = LedColorRed;
-    } else if(fbm->effect_id == 5) {
-        // Random colors
-    } else {
-        for(int i = 0; i < 5; i++) {
+    switch(fbm->effect_id) {
+    case 1:
+        // Off
+        for(size_t i = 0; i < COUNT_OF(fbm->colors); i++) {
             fbm->colors[i] = LedColorBlack;
         }
         FlipboardLeds* leds = flipboard_model_get_leds(model);
@@ -84,9 +65,50 @@ void flipboard_reset_effect(FlipboardModel* model) {
         flipboard_leds_set(leds, LedId3, fbm->colors[2]);
         flipboard_leds_set(leds, LedId4, fbm->colors[3]);
         flipboard_leds_update(leds);
+        break;
+
+    case 2:
+        // LEDs will be set in effect.  Populate Fill+Highligh colors.
+        fbm->colors[4] = LedColorViolet; // Fill color
+        fbm->colors[5] = LedColorRed; // Highlight color
+        fbm->effect_counter = 0; // Set effect counter to initial value.
+        break;
+
+    case 3:
+        // Random colors, set in the effect
+        break;
+
+    case 4:
+        fbm->colors[0] = LedColorRed;
+        fbm->colors[1] = LedColorWhite;
+        fbm->colors[2] = LedColorRed;
+        fbm->colors[3] = LedColorBlue;
+        break;
+
+    case 5:
+        fbm->colors[0] = LedColorYellow;
+        fbm->colors[1] = LedColorOrange;
+        fbm->colors[2] = LedColorYellow;
+        fbm->colors[3] = LedColorOrange;
+        break;
+
+    case 6:
+        fbm->colors[0] = LedColorGreen;
+        fbm->colors[1] = LedColorBlue;
+        fbm->colors[2] = LedColorMagenta;
+        fbm->colors[3] = LedColorBlack;
+        break;
+
+    default:
+        FURI_LOG_D(TAG, "Unknown effect_id=%d", fbm->effect_id);
+        fbm->colors[0] = LedColorRed;
+        fbm->colors[1] = LedColorRed;
+        fbm->colors[2] = LedColorRed;
+        fbm->colors[3] = LedColorRed;
+        break;
     }
 
-    if(fbm->effect_id == fbm->max_effect_id) {
+    if(fbm->effect_id == 1) {
         backlight_force_off();
     } else {
         backlight_on();
@@ -101,33 +123,50 @@ void flipboard_do_effect(FlipboardModel* model) {
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(model);
     FlipboardLeds* leds = flipboard_model_get_leds(model);
 
-    if(fbm->effect_id == fbm->max_effect_id) {
+    switch(fbm->effect_id) {
+    case 1:
+        // All LEDs are off, so don't do any effect.
         return;
-    } else if(fbm->effect_id == fbm->max_effect_id - 1) {
-        // Random color
-        for(int i = 0; i < 4; i++) {
-            fbm->colors[i] = rand() % 0xFFFFFF;
-        }
-    } else if(fbm->effect_id == fbm->max_effect_id - 2) {
+
+    case 2:
+        // Set all of the LEDs to the color specified in the fill color (colors[4])
         for(int i = 0; i < 4; i++) {
             fbm->colors[i] = fbm->colors[4];
         }
+        // For 0 set 1st LED, 1 set 2nd LED, 2 set 3rd LED, 3 set 4th LED.
         if(fbm->effect_counter < 4) {
             fbm->colors[fbm->effect_counter] = fbm->colors[5];
         } else {
+            // 4 set 3rd LED (6-4=index 2), 5 set 2nd LED (6-5=index 1)
             fbm->colors[6 - fbm->effect_counter] = fbm->colors[5];
         }
+        // Increment effect counter, then make sure counter is 0 to 5.
         fbm->effect_counter++;
         if(fbm->effect_counter >= 6) {
             fbm->effect_counter = 0;
         }
-    } else {
-        // Scroll colors
-        uint32_t tmp = fbm->colors[0];
-        for(int i = 0; i < 3; i++) {
-            fbm->colors[i] = fbm->colors[i + 1];
+        break;
+
+    case 3:
+        // Set each of the 4 LEDs to a random color
+        for(int i = 0; i < 4; i++) {
+            uint8_t red = rand() % 0xFF;
+            uint8_t green = rand() % 0xFF;
+            uint8_t blue = rand() % 0xFF;
+            fbm->colors[i] = red << 16 | green << 8 | blue;
         }
-        fbm->colors[3] = tmp;
+        break;
+
+    default:
+        // By default, the effects scroll the visible colors
+        {
+            uint32_t tmp = fbm->colors[0];
+            for(int i = 0; i < 3; i++) {
+                fbm->colors[i] = fbm->colors[i + 1];
+            }
+            fbm->colors[3] = tmp;
+            break;
+        }
     }
 
     flipboard_leds_set(leds, LedId1, fbm->colors[0]);
@@ -177,6 +216,7 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
             fbm->effect_id = fbm->max_effect_id;
         }
         fbm->show_details_counter = detail_counter_ticks;
+        flipboard_reset_effect(model);
     } else if(new_key == 8) {
         // Next effect
         fbm->effect_id++;
@@ -186,8 +226,8 @@ bool flipboard_debounced_switch(void* context, uint8_t old_key, uint8_t new_key)
         fbm->show_details_counter = detail_counter_ticks;
         flipboard_reset_effect(model);
     } else if(new_key == 12) {
-        // Max effect
-        fbm->effect_id = fbm->max_effect_id;
+        // Our first effect is off.
+        fbm->effect_id = 1;
         fbm->show_details_counter = detail_counter_ticks;
         flipboard_reset_effect(model);
     }
@@ -212,6 +252,8 @@ void flipboard_tick_callback(void* context) {
 void flipboard_enter_callback(void* context) {
     FlipboardModel* fm = flipboard_get_model((Flipboard*)context);
     FlipboardBlinkyModel* fbm = flipboard_model_get_custom_data(fm);
+    fbm->effect_id = 2;
+    flipboard_reset_effect(fm);
     flipboard_model_set_button_monitor(fm, flipboard_debounced_switch, (Flipboard*)context);
     furi_timer_start(fbm->timer, furi_ms_to_ticks(fbm->period_ms));
     flipboard_model_set_gui_refresh_speed_ms(fm, 0);
@@ -312,6 +354,7 @@ int32_t flipboard_blinky_app(void* _p) {
     FlipboardModel* model = flipboard_get_model(app);
     FlipboardBlinkyModel* fbm = flipboard_blinky_model_alloc(model);
     flipboard_model_set_custom_data(model, fbm);
+    fbm->effect_id = 2;
     flipboard_reset_effect(model);
 
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
