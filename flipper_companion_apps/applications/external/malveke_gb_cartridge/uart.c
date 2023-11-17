@@ -32,7 +32,7 @@ void uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     Uart* uart = (Uart*)context;
 
     if(ev == UartIrqEventRXNE) {
-        furi_stream_buffer_send(uart->rx_stream, &data,  sizeof(data), 0);
+        furi_stream_buffer_send(uart->rx_stream, &data,  1, 0);
         furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
     }
 }
@@ -103,11 +103,15 @@ static int32_t uart_worker(void* context) {
                 do {
                     uint8_t data[64];
                     length = furi_stream_buffer_receive(uart->rx_stream, data, 64, 0);
-                    // FURI_LOG_I("UART", "[in]: %s", (char*)data);
+                    
                     if(length > 0) {
+                        
                         for(size_t i = 0; i < length; i++) {
                             uart_echo_push_to_list(uart, data[i]);
+                            // FURI_LOG_I("UART", "[in]: %c - %d", (const char)data[i], data[i]);
                         }
+
+                        
                     }
                 } while(length > 0);
             } else if(uart->channel == LP_UART_CH) {
@@ -145,7 +149,7 @@ Uart*
     furi_thread_set_callback(uart->rx_thread, uart_worker);
     furi_thread_start(uart->rx_thread);
     if(channel == FuriHalUartIdUSART1) {
-        furi_hal_console_disable();
+        // furi_hal_console_disable();
     } else if(channel == FuriHalUartIdLPUART1) {
         furi_hal_uart_init(channel, BAUDRATE);
     }

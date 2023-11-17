@@ -57,6 +57,11 @@ GBCartridge* gb_cartridge_app_app_alloc() {
     app->uart = usart_init(app);
     app->lp_uart = lp_uart_init(app);
     
+    FURI_LOG_I(TAG, "Hola1!");
+    FURI_LOG_D(TAG, "Hola2!");
+    FURI_LOG_E(TAG, "Hola3!");
+    FURI_LOG_W(TAG, "Hola4!");
+    
     view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdMenu, variable_item_list_get_view(app->submenu));
     app->gb_cartridge_startscreen = gb_cartridge_startscreen_alloc();
     view_dispatcher_add_view(app->view_dispatcher, GBCartridgeViewIdStartscreen, gb_cartridge_startscreen_get_view(app->gb_cartridge_startscreen));

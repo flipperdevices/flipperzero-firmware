@@ -1,6 +1,8 @@
 #include "GameBoyCartridge.h"
 #include "save.h"
 #include "soc/rtc_wdt.h"
+#include "GameboyServer.h"
+#include <FS.h>
 
 
 GameBoyCartridge::GameBoyCartridge()
@@ -991,9 +993,19 @@ void GameBoyCartridge::serial_transmit(uint8_t data) {
 }
 // Read 1-128 bytes from the Serial 
 void GameBoyCartridge::serial_read_bytes(uint8_t count) {
+    memset(this->receivedBuffer, 0, sizeof(this->receivedBuffer));
 	for (uint8_t x = 0; x < count; x++) {
 		this->receivedBuffer[x] = this->serial_receive();
 	}
+}
+
+uint8_t* GameBoyCartridge::serial_read_64_bytes(uint8_t count) {
+    uint8_t* receivedBuffer = new uint8_t[count];
+    for (uint8_t x = 0; x < count; x++) {
+        while (Serial.available() <= 0);
+        receivedBuffer[x] = Serial.read();
+    }
+    return receivedBuffer;
 }
 // Read from Serial until a 0 (string terminator byte) is received
 void GameBoyCartridge::serial_read_chars() {
@@ -1036,41 +1048,524 @@ void GameBoyCartridge::writeByteSRAM_GB(uint16_t address, uint8_t data) {
     delayMicroseconds(10);
 }
 
-void GameBoyCartridge::test(uint16_t maxBufferSize) {
+String GameBoyCartridge::getSerialInput() {
+  String input = "";
 
-    uint8_t sav_file[maxBufferSize];
-    memset(sav_file, 0, maxBufferSize);  // Inicializar el arreglo con ceros
-    size_t currentIndex = 0;
-    uint16_t counter = 0;
-    int bytesRead = 0;
+  if (Serial.available() > 0)
+    input = Serial.readStringUntil('\n');
 
-    // while(Serial.available() <= 0);
-    Serial.flush();
-    String input = "";
-    while(true) {
-        if (Serial.available() > 0) {
-            sav_file[bytesRead] = Serial.read();
-            bytesRead++;
+  input.trim();
+  return input;
+}
+void GameBoyCartridge::read_and_store_chunk(uint32_t offset, uint8_t* buffer_chunk, size_t chunk_size) {
+    // Prepare JSON request
+    transferJSON.clear();
+    transferJSON["type"] = "read";
+    transferJSON["offset"] = offset;
+    transferJSON["value"] = chunk_size;
 
-            // Si has leído la cantidad de datos esperada
-            if (bytesRead == maxBufferSize) {
-                // Has guardado todos los datos en sav_file
+    // Serialize JSON request
+    Serial.print("JSON:");
+    serializeJson(transferJSON, Serial);
+    Serial.println();
+    // Serial.flush();
+
+    int chunk_index = 0;
+
+    // Read and process JSON response
+    while (true) {
+        // Check if data is available
+        if (Serial.available() >= 0) {
+            // Allocate the JSON document
+            DynamicJsonDocument doc(512);
+
+            // Read the JSON document from the serial port
+            DeserializationError err = deserializeJson(doc, Serial);
+
+            if (err == DeserializationError::Ok) {
+                int items[16];
+                copyArray(doc["resolutions"].as<JsonArray>(), items);
+
+                // Copy items to the buffer_chunk
+                for (int i = 0; i < sizeof(items) && chunk_index < chunk_size; i++) {
+                    buffer_chunk[chunk_index] = items[i];
+                    chunk_index++;
+                }
+
+                // Break out of the loop after processing the JSON response
                 break;
+            } else {
+                // Print error and flush serial buffer
+                while (Serial.available() > 0)
+                    Serial.read();
             }
         }
-            
-        // if(Serial.available() > 0) {
-            // for (uint8_t x = 0; x < 64; x++) {
-                // this->receivedBuffer[counter + x] = Serial.read();
-                // sav_file[counter] = this->serial_receive();
-                // sav_file[counter] = (uint8_t)Serial.read();
-                // currentIndex++; 
+    }
+}
+void GameBoyCartridge::read_and_store_chunks(uint32_t startOffset, uint8_t* buffer, size_t chunkSize, size_t numChunks) {
+    for (size_t i = 0; i < numChunks; i++) {
+        // Calculate the offset for each chunk
+        uint32_t offset = startOffset + i * chunkSize;
+
+        // Call the readAndStoreChunk function for each chunk
+        this->read_and_store_chunk(offset, buffer + i * chunkSize, chunkSize);
+    }
+}
+void GameBoyCartridge::read_serial_bytes(uint32_t startOffset, size_t chunkSize, uint8_t* buffer) {
+    //  solicita N bytes
+    Serial.flush();
+    transferJSON.clear();
+    transferJSON["type"] = "read";
+    transferJSON["offset"] = startOffset; // 0
+    transferJSON["value"] = chunkSize; // 64
+    Serial.print("JSON:");
+    serializeJson(transferJSON, Serial);
+    Serial.println();
+    // Serial.flush();
+
+    while(true) {
+        if (Serial.available() > 0) {
+            int rlen = Serial.readBytesUntil('\n', buffer, chunkSize);
+            if(rlen == chunkSize)
+                break;
+        }
+    }
+
+}
+void GameBoyCartridge::test(uint16_t maxBufferSize) {
+
+
+    const char *fileName = "/ram.sav"; // Nombre del archivo en SPIFFS
+    
+    // const int chunkSize = 64; // Tamaño del chunk
+    if (!SPIFFS.begin()) {
+        Serial.println("Error al montar SPIFFS");
+        return;
+    }
+   // Abrir el archivo en modo de lectura
+    File file = SPIFFS.open(fileName, FILE_READ);
+    if (!file) {
+        Serial.println("Error al abrir el archivo en SPIFFS para lectura");
+        return;
+    }
+    Serial.println("Existe el archivo ram.sav");
+    Serial.print("Size: ");
+    Serial.println(file.size());
+
+    int count = 0; // Contador para los bytes impresos
+
+    // Leer y mostrar el contenido en hexadecimal (16 bytes por fila)
+    while (file.available()) {
+        if (count == 16) {
+            Serial.println(); // Salto de línea cada 16 bytes
+            count = 0;
+        }
+        uint8_t byteRead = file.read(); // Leer un byte del archivo
+
+        // Imprimir en hexadecimal
+        if (byteRead < 0x10) {
+            Serial.print("0"); // Añadir un 0 para un solo dígito hexadecimal
+        }
+        Serial.print(byteRead, HEX); // Imprimir el byte en hexadecimal
+        Serial.print(" ");
+        
+        count++;
+    }
+
+    // Cerrar el archivo
+    file.close();
+
+    // // Serial.flush();
+    // // Serial1.flush();
+    // // uint8_t sav_file[maxBufferSize];
+    // uint8_t buffer[maxBufferSize];
+    // this->read_serial_bytes (0, maxBufferSize /*64*/, buffer);
+    // // prints the received data
+    // Serial.print("I received: ");
+    // for(int i = 0; i < maxBufferSize; i++)
+    //     Serial.print(buffer[i]);
+    /*
+    uint16_t i = 0;
+    // Read and process JSON response
+    while (true) {
+        // String input = this->getSerialInput();
+        // if (input.length() >= 5 && input.startsWith("start")) {
+            int bytesReadThisIteration = min(64, maxBufferSize - i);
+            // Check if data is available
+            this->serial_read_bytes(bytesReadThisIteration);
+            for(size_t x = 0; x < bytesReadThisIteration; x++) {
+                sav_file[i] = this->receivedBuffer[x];
+                i++;
+            }
+
+            Serial.flush();
+            // transferJSON.clear();
+            // transferJSON["type"] = "ack";
+            // transferJSON["offset"] = i;
+            // transferJSON["value"] = bytesReadThisIteration;
+            // Serial.print("JSON:");
+            // serializeJson(transferJSON, Serial);
+            // Serial.println();
+        // }
+       
+
+    
+        if(i == maxBufferSize) {
+            break;
+        }
+    }
+    */
+    // for(size_t i = 0; i < maxBufferSize; i+=64) {
+    //     // Example usage
+    //     size_t chunkSize = 16;
+    //     size_t numChunks = 4;
+    //     uint8_t buffer[64];
+
+    //     // Make four calls to readAndStoreChunk and accumulate the data in the buffer
+    //     this->read_and_store_chunks(i, buffer, chunkSize, numChunks);
+    // }
+
+    // Serial.flush();
+    // transferJSON.clear();
+    // transferJSON["type"] = "success";
+    // Serial.print("JSON:");
+    // serializeJson(transferJSON, Serial);
+    // Serial.println();
+    
+    /*
+    WiFi.mode(WIFI_AP);
+    gbStartAP("Tester", "12345678");
+    Serial.println("OK startAP");
+    _server.on("/image", HTTP_GET, [](AsyncWebServerRequest *request) {
+        AsyncResponseStream *response = request->beginResponseStream("text/html");
+        for (int i = 0; i < sizeof(sav_file); i++) {
+            if (i % 16 == 0) {
+                response->print("\n"); // Add a vertical bar to separate each line
+            }
+            response->print(" ");
+            char hexCar[3];
+            snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[i]); // 00
+            response->print(hexCar);
+        }
+        request->send(response);
+    });
+    _server.begin();
+    */
+
+
+    /*
+    Serial.println("OK name");
+    WiFi.mode(WIFI_AP);
+    gbStartAP("Tester", "12345678");
+    Serial.println("OK startAP");
+    _server.on("/image", HTTP_GET,  [ maxBufferSize, buffer](AsyncWebServerRequest *request){
+        AsyncResponseStream *response = request->beginResponseStream("text/html");
+        // uint8_t* sav_file = this->serial_read_64_bytes();
+        // response->write(sav_file, 64);
+        
+        // for (size_t i = 0; i < maxBufferSize; i++) {
+            // if (i % 16 == 0) {
+            //     response->print("\n"); // Add a vertical bar to separate each line
             // }
+            // response->print(" ");
+            //  char hexCar[3];
+            // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[i]); // 00
+            // response->print(hexCar);
+        // }
+        for(int i = 0; i < sizeof(buffer); i++) {
+            if (i % 16 == 0) {
+                response->print("\n"); // Add a vertical bar to separate each line
+            }
 
-            
-            counter++;
+            response->print(" ");
+            char hexCar[3];
+            snprintf(hexCar, sizeof(hexCar), "%02X", buffer[i]); // 00
+            response->print(hexCar);
+        }
+        // JsonArray resolutions = doc["resolutions"].as<JsonArray>();
 
-        if (counter >= maxBufferSize-1) {
+        
+        // Imprimir los valores de "resolutions" en el servidor
+        
+        
+        
+        request->send(response);
+    });
+    _server.begin();
+    */
+    /*
+    // while(true) {
+        // int bytesReadThisIteration = min(64, maxBufferSize - bytesRead);
+        // this->serial_read_bytes(bytesReadThisIteration);
+        // for(int i = 0; i < bytesReadThisIteration; i++) {
+        //     sav_file[bytesRead] = (uint8_t)this->receivedBuffer[i];
+        //     bytesRead++;
+        //     // Serial.write(0xff);
+        // }
+    // transferJSON.clear();
+    // transferJSON["type"] = "success";
+    // Serial.print("JSON:");
+    // serializeJson(transferJSON, Serial);
+    // Serial.println();
+        // bytesReadThisIteration = min(64, maxBufferSize - bytesRead);
+        // this->serial_read_bytes(bytesReadThisIteration);
+        // for(int i = 0; i < bytesReadThisIteration; i++) {
+        //     sav_file[bytesRead] = (uint8_t)this->receivedBuffer[i];
+        //     bytesRead++;
+        //     // Serial.write(0xff);
+        // }
+        // if (bytesRead >= maxBufferSize-1) {
+        //     break;
+        // }
+    // }
+    // transferJSON.clear();
+    // transferJSON["type"] = "success";
+    // Serial.print("JSON:");
+    // serializeJson(transferJSON, Serial);
+    // Serial.println();
+    // delay(200);
+
+    int bytesReadThisIteration = 8;
+    
+    
+    // for(int i = 0; i < 64; i += 8) {
+        transferJSON.clear();
+        transferJSON["type"] = "read";
+        transferJSON["offset"] = 64;
+        transferJSON["value"] = 16;
+        Serial.print("JSON:");
+        serializeJson(transferJSON, Serial);
+        Serial.println();
+        // delay(10);
+        Serial.flush();
+
+
+        //  https://arduinojson.org/v6/how-to/do-serial-communication-between-two-boards/
+        while(true) {
+            // Check if the other Arduino is transmitting
+            if (Serial.available() >= 0) 
+            {
+                // Allocate the JSON document
+                // This one must be bigger than the sender's because it must store the strings
+                StaticJsonDocument<512> doc;
+
+                // Read the JSON document from the "link" serial port
+                DeserializationError err = deserializeJson(doc, Serial);
+
+                if (err == DeserializationError::Ok) 
+                {
+                    Serial.println("OK Deserialization json");
+                    // Print the values
+                    int items[16];
+                    copyArray(doc["resolutions"].as<JsonArray>(), items);
+                    Serial.println("OK copyArray");
+                    const char* name = doc["name"].as<const char*>();
+
+                    Serial.println("OK name");
+                    WiFi.mode(WIFI_AP);
+                    gbStartAP("Tester", "12345678");
+                    Serial.println("OK startAP");
+                    _server.on("/image", HTTP_GET,  [ maxBufferSize, name, items](AsyncWebServerRequest *request){
+                        AsyncResponseStream *response = request->beginResponseStream("text/html");
+                        // uint8_t* sav_file = this->serial_read_64_bytes();
+                        // response->write(sav_file, 64);
+                        
+                        // for (size_t i = 0; i < maxBufferSize; i++) {
+                            // if (i % 16 == 0) {
+                            //     response->print("\n"); // Add a vertical bar to separate each line
+                            // }
+                            // response->print(" ");
+                            //  char hexCar[3];
+                            // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[i]); // 00
+                            // response->print(hexCar);
+                        // }
+                        response->print(name);
+                        response->print("\n");
+                        
+                        for(int i = 0; i < sizeof(items); i++) {
+                            if (i % 16 == 0) {
+                                response->print("\n"); // Add a vertical bar to separate each line
+                            }
+
+                            response->print(" ");
+                            char hexCar[3];
+                            snprintf(hexCar, sizeof(hexCar), "%02X", items[i]); // 00
+                            response->print(hexCar);
+                        }
+                        // JsonArray resolutions = doc["resolutions"].as<JsonArray>();
+
+                        
+                        // Imprimir los valores de "resolutions" en el servidor
+                        
+                        
+                        
+                        request->send(response);
+                    });
+                    _server.begin();
+                    
+                    // break;
+                } 
+                else 
+                {
+                    // Print error to the "debug" serial port
+                    // Serial.print("deserializeJson() returned ");
+                    // Serial.println(err.c_str());
+                
+                    // Flush all bytes in the "link" serial port buffer
+                    while (Serial.available() > 0)
+                        Serial.read();
+                }
+            }
+        }
+    //    uint8_t* sav_file = this->serial_read_64_bytes();
+        // for(int i = 0; i < bytesReadThisIteration; i++) {
+        //     sav_file[bytesRead] = (uint8_t)this->receivedBuffer[i];
+        //     bytesRead++;
+        // }
+    // }
+    
+
+    // WiFi.mode(WIFI_AP);
+    // gbStartAP("Tester", "12345678");
+    // _server.on("/image", HTTP_GET,  [maxBufferSize, this](AsyncWebServerRequest *request){
+    //     AsyncResponseStream *response = request->beginResponseStream("application/msgpack");
+    //     // uint8_t* sav_file = this->serial_read_64_bytes();
+    //     // response->write(sav_file, 64);
+        
+    //     // for (size_t i = 0; i < maxBufferSize; i++) {
+    //         // if (i % 16 == 0) {
+    //         //     response->print("\n"); // Add a vertical bar to separate each line
+    //         // }
+    //         // response->print(" ");
+    //         //  char hexCar[3];
+    //         // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[i]); // 00
+    //         // response->print(hexCar);
+    //     // }
+    //     response->print(" ");
+    //     request->send(response);
+    // });
+    // _server.begin();
+    */
+}
+void GameBoyCartridge::restoreRAM(uint16_t maxBufferSize, const int chunkSize) {
+    // Serial.print("Max Size: ");
+    // Serial.print(maxBufferSize);
+    // Serial.print("Chunk Size: ");
+    // Serial.println(chunkSize);
+    unit8_t save_buffer[maxBufferSize];
+    unsigned int save_buffer_pos = 0;
+    int bytesRead = 0;
+    
+    // //  32768
+    // const char *fileName = "/ram.sav"; // Nombre del archivo en SPIFFS
+    // // const int chunkSize = 64; // Tamaño del chunk
+    // if (!SPIFFS.begin()) {
+    //     Serial.println("Error al montar SPIFFS");
+    //     return;
+    // }
+
+    // // Verificar si el archivo existe antes de eliminarlo
+    // if (SPIFFS.exists(fileName)) {
+    //     // Eliminar el archivo si existe
+    //     if (SPIFFS.remove(fileName)) {
+    //         // Serial.println("Archivo eliminado exitosamente");
+    //     } else {
+    //         Serial.println("Error al eliminar el archivo");
+    //     }
+    // }
+
+
+    
+
+    // File file = SPIFFS.open(fileName, FILE_WRITE);
+    // if (!file) {
+    //     Serial.println("Error al abrir el archivo en SPIFFS para escritura");
+    //     return;
+    // }
+    // Supongamos que el tamaño total del buffer es múltiplo de chunkSize
+    // int totalChunks = maxBufferSize / chunkSize;
+    /*
+    // Escribir los chunks en el archivo
+    for (int i = 0; i < maxBufferSize; i += 64) {
+        uint8_t buffer[64];
+        // Tu código para leer un chunk desde alguna fuente (por ejemplo, puerto serie)
+        // Suponiendo que 'this->read_serial_bytes' es una función que llena el buffer desde alguna fuente
+        this->read_serial_bytes(i, 64, buffer);
+        // delay(200);
+
+        // Escribir el chunk en el archivo
+        file.write(buffer, 64);
+    }
+    */
+    // Serial.flush(); 
+
+//    uint16_t totalReadedSize = 0;
+    // for(int i = 0; i < maxBufferSize /chunkSize; i++) {
+    while(true) {
+        if (Serial.available()) {
+            // uint8_t buffer[chunkSize];
+            char inByte = Serial.read();
+            if(inByte == '\n') {
+                break;
+            }
+            save_buffer[save_buffer_pos] = inByte;
+            save_buffer_pos++;
+            // int size = Serial.readBytesUntil('\n', buffer, chunkSize);
+            // Serial.write(size);
+            // buffer[chunkSize] = '\0';
+            // if(size>0) {
+            // file.write((uint8_t)inByte, 1);
+            // file.flush();
+            // totalReadedSize += 1;
+                // transferJSON.clear();
+                // transferJSON["type"] = "ack";
+                // transferJSON["value"] = totalReadedSize; // 0
+                // Serial.print("JSON:");
+                // serializeJson(transferJSON, Serial);
+                // Serial.println();
+            // }
+        } else {
+            // Si no hay suficientes datos, podrías agregar un delay corto aquí
+            // delay(1); // Por ejemplo, espera 10 milisegundos antes de volver a verificar
+        }
+        // if(totalReadedSize == maxBufferSize)
+        //     break;
+    }
+    transferJSON.clear();
+    transferJSON["type"] = "success";
+    Serial.print("JSON:");
+    serializeJson(transferJSON, Serial);
+    Serial.println();
+    
+    // Cerrar el archivo
+    // file.close();
+    // file = SPIFFS.open(fileName, FILE_READ);
+    
+    // this->read_serial_bytes (0, maxBufferSize /*64*/, buffer);
+
+
+    
+    
+    /*
+    uint8_t sav_file[maxBufferSize];
+    // memset(sav_file, 0, maxBufferSize);  // Inicializar el arreglo con ceros
+    size_t currentIndex = 0;
+    uint16_t counter = 0;
+    
+    uint16_t to_read = maxBufferSize;
+
+
+    String input = "";
+    
+
+    while(true) {
+        int bytesReadThisIteration = min(64, maxBufferSize - bytesRead);
+        this->serial_read_bytes(bytesReadThisIteration);
+        for(int i = 0; i < bytesReadThisIteration; i++) {
+            sav_file[bytesRead] = (uint8_t)this->receivedBuffer[i];
+            bytesRead++;
+        }
+        if (bytesRead >= maxBufferSize-1) {
             break;
         }
     }
@@ -1079,24 +1574,8 @@ void GameBoyCartridge::test(uint16_t maxBufferSize) {
     Serial.print("JSON:");
     serializeJson(transferJSON, Serial);
     Serial.println();
+    */
 
-    WiFi.mode(WIFI_AP);
-    gbStartAP("Tester", "12345678");
-    _server.on("/image", HTTP_GET,  [maxBufferSize, &sav_file](AsyncWebServerRequest *request){
-        AsyncResponseStream *response = request->beginResponseStream("text/html");
-        for (size_t i = 0; i < maxBufferSize; i++) {
-            if (i % 16 == 0) {
-                response->print("\n"); // Add a vertical bar to separate each line
-            }
-            response->print(" ");
-            response->printf("%02X", sav_file[i]);
-        }
-        request->send(response);
-    });
-    _server.begin();
-}
-void GameBoyCartridge::restoreRAM(size_t maxBufferSize) {
-    
     pinMode(GAMEBOY_RST, OUTPUT);
     pinMode(GAMEBOY_CLK, OUTPUT);
     pinMode(GAMEBOY_WR, OUTPUT);
@@ -1122,6 +1601,9 @@ void GameBoyCartridge::restoreRAM(size_t maxBufferSize) {
 
     delay(400);
     digitalWrite(GAMEBOY_RST, HIGH);
+
+    //  Load ROM header
+    // this->headerROM_GB(false);
 
     if(this->ramEndAddress > 0) {
 
@@ -1154,6 +1636,48 @@ void GameBoyCartridge::restoreRAM(size_t maxBufferSize) {
             
             for (word sramAddress = 0xA000; sramAddress <= this->ramEndAddress; sramAddress++)
             {   
+                // this->writeByteSRAM_GB(sramAddress, file.read());
+                this->writeByteSRAM_GB(sramAddress, save_buffer[x]);
+                
+                // uint8_t buffer[64];
+                // Serial.println("Solicita 64");
+                // Serial.flush();
+                // this->read_serial_bytes (x, 64, buffer);
+                // Serial.flush();
+                // // Example usage
+                // size_t chunkSize = 16;
+                // size_t numChunks = 4;
+                // uint8_t buffer[64];
+
+                // Make four calls to readAndStoreChunk and accumulate the data in the buffer
+                // this->read_and_store_chunks(x, buffer, chunkSize, numChunks);
+                // for(int i = 0; i < 64; i++) {
+                //     this->writeByteSRAM_GB(sramAddress+i, buffer[x]);
+                //     x++;
+                // }
+                x++;
+                /*
+                transferJSON.clear();
+                transferJSON["type"] = "read";
+                transferJSON["offset"] = 64 * x;
+                transferJSON["value"] = 8;
+                Serial.print("JSON:");
+                serializeJson(transferJSON, Serial);
+                Serial.println();
+                // delay(10);
+                Serial.flush();
+                
+                int bytesReadThisIteration = min(64, maxBufferSize - bytesRead);
+                this->serial_read_bytes(bytesReadThisIteration);
+                
+                
+                for(int i = 0; i < bytesReadThisIteration; i++) {
+
+                    
+                    // sav_file[bytesRead] = (uint8_t)this->receivedBuffer[i];
+                    this->writeByteSRAM_GB(sramAddress,  (uint8_t)this->receivedBuffer[i]);
+                    bytesRead++;
+                }*/
                 /*
                 while(Serial.available() <= 0);
                 // if (Serial.available() > 0) {
@@ -1165,15 +1689,22 @@ void GameBoyCartridge::restoreRAM(size_t maxBufferSize) {
                 }
                 // }
                 */
-               this->writeByteSRAM_GB(sramAddress,  save_gb[x]);
-               x++;
+               /*
+                int bytesReadThisIteration = min(64, maxBufferSize - bytesRead);
+                uint8_t* sav_file = this->serial_read_64_bytes(bytesReadThisIteration);
+                for (uint8_t i = 0; i < 64; i++) {
+                    this->writeByteSRAM_GB(sramAddress,  sav_file[i]);
+                    bytesRead += 64;
+                }
+                */
             }
 
             this->dataBusAsInput();
         }
 
         this->ramDisable();
-        // free(sav_file);
+        // file.close();
+        // free(buffer);
         transferJSON.clear();
         transferJSON["type"] = "success";
         Serial.print("JSON:");
@@ -1181,202 +1712,6 @@ void GameBoyCartridge::restoreRAM(size_t maxBufferSize) {
         Serial.println();
 
     }
-    /*
-    uint8_t sav_file[maxBufferSize];
-    // memset(sav_file, 0, maxBufferSize);  // Inicializar el arreglo con ceros
-    size_t currentIndex = 0;
-    uint16_t counter = 0;
-    // transferJSON.clear();
-    // transferJSON["type"] = "ack";
-
-    // transferJSON["str"] = String(maxBufferSize);
-
-    // Serial.print("JSON:");
-    // serializeJson(transferJSON, Serial);
-    // Serial.println();
-    while (1) {
-        if (Serial.available()) {
-            for (uint8_t x = 0; x < 64; x++) {
-                // this->receivedBuffer[counter + x] = Serial.read();
-                sav_file[counter + x] = Serial.read();
-                currentIndex++; 
-            }
-            counter += 64;
-            
-            // transferJSON.clear();
-            // transferJSON["type"] = "ack";
-            // String hexString = "";
-            // char hexCar[3];
-            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[0]); // 00
-            // hexString += hexCar;
-            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[1]); // 00
-            // hexString += hexCar;    
-            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[58]); // E1
-            // hexString += hexCar;
-            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[59]); // 00
-            // hexString += hexCar;
-            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[60]); // 38
-            // hexString += hexCar;
-            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[61]); // 05
-            // hexString += hexCar;
-            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[62]); // 08
-            // hexString += hexCar;
-            // snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[63]); // 00
-            // hexString += hexCar;
-
-            // transferJSON["str"] = hexString;
-
-            // Serial.print("JSON:");
-            // serializeJson(transferJSON, Serial);
-            // Serial.println();
-            
-            delayMicroseconds(10);
-            transferJSON.clear();
-            transferJSON["type"] = "ack";
-            String hexString = "";
-            char hexCar[3];
-            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[0]); // 00
-            hexString += hexCar;
-            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[1]); // 00
-            hexString += hexCar;    
-            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[58]); // E1
-            hexString += hexCar;
-            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[59]); // 00
-            hexString += hexCar;
-            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[60]); // 38
-            hexString += hexCar;
-            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[61]); // 05
-            hexString += hexCar;
-            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[62]); // 08
-            hexString += hexCar;
-            snprintf(hexCar, sizeof(hexCar), "%02X", this->receivedBuffer[63]); // 00
-            hexString += hexCar;
-            transferJSON["str"] = hexString;
-
-            Serial.print("JSON:");
-            serializeJson(transferJSON, Serial);
-            Serial.println();
-        }
-        if (counter >= maxBufferSize-1) {
-            break;
-        }
-    }
-
-    transferJSON.clear();
-    transferJSON["type"] = "success";
-    
-    // String hexString = "";
-    // char hexCar[3];
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[58]); // E1
-    // hexString += hexCar;
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[59]); // 00
-    // hexString += hexCar;
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[60]); // 38
-    // hexString += hexCar;
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[61]); // 05
-    // hexString += hexCar;
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[62]); // 08
-    // hexString += hexCar;
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[63]); // 00
-    // hexString += hexCar;
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[64]); // 00
-    // hexString += hexCar;
-
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[17257]); // 83
-    // hexString += hexCar;
-
-
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[26048]); // C8
-    // hexString += hexCar;
-
-
-    // snprintf(hexCar, sizeof(hexCar), "%02X", sav_file[30670]); // FF
-    // hexString += hexCar;
-
-    // transferJSON["str"] = hexString;
-   transferJSON["str"] = "end";
-    Serial.print("JSON:");
-    serializeJson(transferJSON, Serial);
-    Serial.println();
-    /*
-    // Serial1.flush();
-    pinMode(GAMEBOY_RST, OUTPUT);
-    pinMode(GAMEBOY_CLK, OUTPUT);
-    pinMode(GAMEBOY_WR, OUTPUT);
-    pinMode(GAMEBOY_RD, OUTPUT);
-    pinMode(GAMEBOY_CS, OUTPUT);
-
-    // Set Control Pins to Output RST(PH0) CLK(PH1) CS(PH3) WR(PH5) RD(PH6)
-    for (uint32_t i = 0; i < sizeof(ADDRESS_GB_GBC_PINS)/sizeof(ADDRESS_GB_GBC_PINS[0]); i++)
-    {
-        pinMode(ADDRESS_GB_GBC_PINS[i], OUTPUT);
-    }
-    // Set Data Pins (D0-D7) to Input
-    for (uint32_t i = 0; i < sizeof(DATA_GB_GBC_PINS)/sizeof(DATA_GB_GBC_PINS[0]); i++)
-    {
-        pinMode(DATA_GB_GBC_PINS[i], INPUT);
-    }
-
-    digitalWrite(GAMEBOY_CLK, LOW);
-    digitalWrite(GAMEBOY_RST, LOW);
-    digitalWrite(GAMEBOY_WR, HIGH);
-    digitalWrite(GAMEBOY_RD, HIGH);
-    digitalWrite(GAMEBOY_CS, HIGH);
-
-    delay(100);
-    digitalWrite(GAMEBOY_RST, HIGH);
-
-
-    // this->ramEndAddress = 0xC000;
-    if(this->ramEndAddress > 0) {
-
-        // this->gb_mode();
-        // this->rd_wr_mreq_reset();
-        this->totalRamBytes = (this->sramBanks) * 8192;
-        this->currentAddress = 0xA000;
-
-        // MBC2 Fix
-        this->read_byte_GB(0x0134);
-        
-        // Enable SRAM for MBC1
-        if (this->romType <= 4 || (this->romType >= 11 && this->romType <= 13)) {
-            this->write_byte_GB(0x6000, 1); // Set RAM Mode
-        }
-        // Initialise MBC
-        //  EnableRAM
-        this->ramEnable();
-        this->currentBank = 0;
-
-
-        // Switch RAM banks
-        uint8_t x = 0;
-        for (uint8_t currBank = 0; currBank < this->sramBanks; currBank++) {
-            this->dataBusAsOutput();
-            this->write_byte_GB(0x4000, currBank);
-            this->dataBusAsInput();
-            // Write RAM
-            this->dataBusAsOutput();
-            
-            for (word sramAddress = 0xA000; sramAddress <= this->ramEndAddress; sramAddress++)
-            {
-                this->writeByteSRAM_GB(sramAddress,  this->receivedBuffer[x]);
-                x++;
-            }
-
-            this->dataBusAsInput();
-        }
-
-        this->ramDisable();
-        free(sav_file);
-        transferJSON.clear();
-        transferJSON["type"] = "success";
-        Serial.print("JSON:");
-        serializeJson(transferJSON, Serial);
-        Serial.println();
-
-    }
-    */
-    
 }
 // void GameBoyCartridge::startReadRAM_GB() {
 
@@ -1847,7 +2182,7 @@ void GameBoyCartridge::main()
                 // uint8_t read_byte = this->read_byte_GB(this->romAddress);
                 // Serial1.write(sdBuffer, 512);
                 Serial.write(sdBuffer, 512);
-                Serial.flush();
+                // Serial.flush();
                 this->romAddress += 1;
                 this->processedProgressBar += 1;
 

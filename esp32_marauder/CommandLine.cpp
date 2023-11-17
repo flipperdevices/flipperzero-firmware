@@ -882,14 +882,16 @@ void CommandLine::runCommand(String input) {
                 } else {
 
                   int fileSize = cmd_args.get(cont_sw + 1).toInt();
+                  const int chunkSize = cmd_args.get(cont_sw + 2).toInt();
                   
 
 
                   //  START WRITE
                   //  https://github.com/sanni/cartreader/blob/6b0ded69c7f160e7171cfa40ed6c0b23606a4434/Cart_Reader/GB.ino#L88
                   //  https://www.insidegadgets.com/2011/04/07/gbcartread-arduino-based-gameboy-cart-reader-%e2%80%93-part-3-write-to-ram/
-                  gameboy_cartridge.restoreRAM(fileSize);
-                }
+                  // gameboy_cartridge.test(fileSize);
+                  gameboy_cartridge.restoreRAM(fileSize, chunkSize);
+                } 
               } else {
                 //  ROM
                 //  TODO:
@@ -933,8 +935,8 @@ void CommandLine::runCommand(String input) {
           gameboy_cartridge.headerROM_GB(true);
         }
       } else {
-        int fileSize = cmd_args.get(cont_sw + 1).toInt();
-        gameboy_cartridge.test(fileSize);
+        // int fileSize = cmd_args.get(cont_sw + 1).toInt();
+        gameboy_cartridge.test(0);
       }
 
       

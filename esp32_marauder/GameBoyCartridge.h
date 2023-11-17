@@ -12,6 +12,15 @@
 #include "GameboyServer.h"
 
 
+#ifndef MAX
+#define MAX(a, b) ((a) > (b)) ? (a) : (b)
+#endif
+
+#ifndef MIN
+#define MIN(a, b) ((a) < (b)) ? (a) : (b)
+#endif
+
+
 extern Buffer buffer_obj;
 
 
@@ -39,7 +48,7 @@ class GameBoyCartridge {
     word romStartBank = 1;
     unsigned long totalRamBytesReceived = 0;
     unsigned long totalRamBytes;
-    uint8_t receivedBuffer[129];
+    uint8_t receivedBuffer[64];
     uint16_t currentAddress = 0;
 
 
@@ -69,9 +78,13 @@ class GameBoyCartridge {
     void serial_transmit(uint8_t data);
     // Read 1-128 bytes from the Serial 
     void serial_read_bytes(uint8_t count);
+    uint8_t* serial_read_64_bytes(uint8_t count);
     // Read from Serial until a 0 (string terminator byte) is received
     void serial_read_chars();
-
+    void read_and_store_chunk(uint32_t offset, uint8_t* buffer_chunk, size_t chunk_size);
+    void read_and_store_chunks(uint32_t startOffset, uint8_t* buffer, size_t chunkSize, size_t numChunks);
+    void read_serial_bytes(uint32_t startOffset, size_t chunkSize, uint8_t* buffer);
+    String getSerialInput();
 
   public:
     GameBoyCartridge();
@@ -89,7 +102,7 @@ class GameBoyCartridge {
     // void endWriteRAM_GB();
     // void startReadRAM_GB();
     // void endReadRAM_GB();
-    void restoreRAM(size_t maxBufferSize);
+    void restoreRAM(uint16_t maxBufferSize, const int chunkSize);
 
     bool isWrittingRAM();
     bool isWrittingROM();
