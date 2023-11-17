@@ -22,7 +22,7 @@ static PicopassError picopass_poller_process_error(NfcError error) {
     return ret;
 }
 
-static PicopassError picopass_poller_send_frame(
+PicopassError picopass_poller_send_frame(
     PicopassPoller* instance,
     BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
