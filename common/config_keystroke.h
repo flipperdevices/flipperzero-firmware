@@ -303,7 +303,7 @@ uint16_t keystroke_values[] = {
 */
 char* keystroke_names[] = {
     "None",
-    "Delay 100ms",
+    "Delay",
 
     "L-CTRL",
     "R-CTRL",
