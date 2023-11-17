@@ -55,22 +55,17 @@ static FuriHalNfcError furi_hal_nfc_felica_poller_deinit(FuriHalSpiBusHandle* ha
 
 static FuriHalNfcError furi_hal_nfc_felica_listener_init(FuriHalSpiBusHandle* handle) {
     furi_assert(handle);
-    // Enable Target Felica mode, AM modulation
-    st25r3916_write_reg(
-        handle,
-        ST25R3916_REG_MODE,
-        ST25R3916_REG_MODE_targ_targ | ST25R3916_REG_MODE_om2 | ST25R3916_REG_MODE_tr_am);
-
-    st25r3916_write_reg(
-        handle,
-        ST25R3916_REG_PASSIVE_TARGET,
-        ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a | ST25R3916_REG_PASSIVE_TARGET_fdel_2);
-
     st25r3916_write_reg(
         handle,
         ST25R3916_REG_OP_CONTROL,
         ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
             ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
+
+    // Enable Target Felica mode, AM modulation
+    st25r3916_write_reg(
+        handle,
+        ST25R3916_REG_MODE,
+        ST25R3916_REG_MODE_targ_targ | ST25R3916_REG_MODE_om2 | ST25R3916_REG_MODE_tr_am);
 
     st25r3916_change_reg_bits(
         handle,
@@ -95,11 +90,7 @@ static FuriHalNfcError furi_hal_nfc_felica_listener_init(FuriHalSpiBusHandle* ha
     // No gain reduction on AM and PM channels
     st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF4, 0x00);
     // 10% ASK modulation
-    st25r3916_change_reg_bits(
-        handle,
-        ST25R3916_REG_TX_DRIVER,
-        ST25R3916_REG_TX_DRIVER_am_mod_mask,
-        ST25R3916_REG_TX_DRIVER_am_mod_10percent);
+    st25r3916_write_reg(handle, ST25R3916_REG_TX_DRIVER, ST25R3916_REG_TX_DRIVER_am_mod_10percent);
 
     // Correlator setup
     st25r3916_write_reg(
@@ -122,10 +113,14 @@ static FuriHalNfcError furi_hal_nfc_felica_listener_init(FuriHalSpiBusHandle* ha
          ST25R3916_IRQ_MASK_WU_A);
     // Clear interrupts
     st25r3916_get_irq(handle);
+
+    st25r3916_write_reg(
+        handle,
+        ST25R3916_REG_PASSIVE_TARGET,
+        ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a | ST25R3916_REG_PASSIVE_TARGET_d_ac_ap2p |
+            ST25R3916_REG_PASSIVE_TARGET_fdel_1);
     // Enable interrupts
     st25r3916_mask_irq(handle, ~interrupts);
-    // Enable auto collision resolution
-    st25r3916_clear_reg_bits(handle, ST25R3916_REG_PASSIVE_TARGET, 0);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SENSE);
 
     return FuriHalNfcErrorNone;
