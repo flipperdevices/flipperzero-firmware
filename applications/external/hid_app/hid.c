@@ -220,7 +220,7 @@ Hid* hid_app_alloc_view(void* context) {
     view_set_previous_callback(hid_media_get_view(app->hid_media), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMedia, hid_media_get_view(app->hid_media));
-    
+
     // Movie view
     app->hid_movie = hid_movie_alloc(app);
     view_set_previous_callback(hid_movie_get_view(app->hid_movie), hid_menu_view);
@@ -241,8 +241,7 @@ Hid* hid_app_alloc_view(void* context) {
 
     // Mouse clicker view
     app->hid_mouse_clicker = hid_mouse_clicker_alloc(app);
-    view_set_previous_callback(
-        hid_mouse_clicker_get_view(app->hid_mouse_clicker), hid_menu_view);
+    view_set_previous_callback(hid_mouse_clicker_get_view(app->hid_mouse_clicker), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher,
         HidViewMouseClicker,
@@ -250,8 +249,7 @@ Hid* hid_app_alloc_view(void* context) {
 
     // Mouse jiggler view
     app->hid_mouse_jiggler = hid_mouse_jiggler_alloc(app);
-    view_set_previous_callback(
-        hid_mouse_jiggler_get_view(app->hid_mouse_jiggler), hid_menu_view);
+    view_set_previous_callback(hid_mouse_jiggler_get_view(app->hid_mouse_jiggler), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher,
         HidViewMouseJiggler,
@@ -266,8 +264,7 @@ Hid* hid_app_alloc_view(void* context) {
     // Ptt view
     app->hid_ptt = hid_ptt_alloc(app);
     view_set_previous_callback(hid_ptt_get_view(app->hid_ptt), hid_menu_view);
-    view_dispatcher_add_view(
-      app->view_dispatcher, HidViewPtt, hid_ptt_get_view(app->hid_ptt));
+    view_dispatcher_add_view(app->view_dispatcher, HidViewPtt, hid_ptt_get_view(app->hid_ptt));
 
     return app;
 }
