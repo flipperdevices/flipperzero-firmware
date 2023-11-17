@@ -15,7 +15,7 @@
 
 ## v1.3.1 (patch)
 
-- Addressed new linting issue with `ufbt` tools.
+- Addressed new linting issue with "ufbt" tools.
 
 ## v1.3
 
