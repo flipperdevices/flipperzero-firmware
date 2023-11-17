@@ -9,8 +9,6 @@
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
 
-// extern const Icon* digits[17];
-
 struct ColorGuessPlay {
     View* view;
     ColorGuessPlayCallback callback;
