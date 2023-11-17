@@ -15,8 +15,7 @@
 #include "input/sequence.h"
 #include "input/songinfo.h"
 
-extern bool audio_modes_values[];
-extern char* audio_modes_text[];
+void return_from_keyboard_callback(void* ctx);
 
 void overwrite_file_widget_yes_input_callback(GuiButtonType result, InputType type, void* ctx);
 void overwrite_file_widget_no_input_callback(GuiButtonType result, InputType type, void* ctx);

@@ -4,6 +4,7 @@
 
 #include "video_player_icons.h"
 #include <furi.h>
+#include <furi/core/thread.h>
 #include <furi_hal.h>
 #include <cli/cli.h>
 #include <gui/gui.h>

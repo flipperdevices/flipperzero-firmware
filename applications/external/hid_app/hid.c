@@ -87,26 +87,9 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_ptt_set_connected_status(hid->hid_ptt, connected);
 }
 
-static void hid_dialog_callback(DialogExResult result, void* context) {
-    furi_assert(context);
-    Hid* app = context;
-    if(result == DialogExResultLeft) {
-        view_dispatcher_stop(app->view_dispatcher);
-    } else if(result == DialogExResultRight) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id); // Show last view
-    } else if(result == DialogExResultCenter) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
-    }
-}
-
 static uint32_t hid_menu_view(void* context) {
     UNUSED(context);
     return HidViewSubmenu;
-}
-
-static uint32_t hid_exit_confirm_view(void* context) {
-    UNUSED(context);
-    return HidViewExitConfirm;
 }
 
 static uint32_t hid_exit(void* context) {
@@ -186,16 +169,6 @@ Hid* hid_alloc(HidTransport transport) {
 Hid* hid_app_alloc_view(void* context) {
     furi_assert(context);
     Hid* app = context;
-    // Dialog view
-    app->dialog = dialog_ex_alloc();
-    dialog_ex_set_result_callback(app->dialog, hid_dialog_callback);
-    dialog_ex_set_context(app->dialog, app);
-    dialog_ex_set_left_button_text(app->dialog, "Exit");
-    dialog_ex_set_right_button_text(app->dialog, "Stay");
-    dialog_ex_set_center_button_text(app->dialog, "Menu");
-    dialog_ex_set_header(app->dialog, "Close Current App?", 16, 12, AlignLeft, AlignTop);
-    view_dispatcher_add_view(
-        app->view_dispatcher, HidViewExitConfirm, dialog_ex_get_view(app->dialog));
 
     // Keynote view
     app->hid_keynote = hid_keynote_alloc(app);
@@ -229,13 +202,13 @@ Hid* hid_app_alloc_view(void* context) {
 
     // TikTok / YT Shorts view
     app->hid_tikshorts = hid_tikshorts_alloc(app);
-    view_set_previous_callback(hid_tikshorts_get_view(app->hid_tikshorts), hid_exit_confirm_view);
+    view_set_previous_callback(hid_tikshorts_get_view(app->hid_tikshorts), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewTikShorts, hid_tikshorts_get_view(app->hid_tikshorts));
 
     // Mouse view
     app->hid_mouse = hid_mouse_alloc(app);
-    view_set_previous_callback(hid_mouse_get_view(app->hid_mouse), hid_exit_confirm_view);
+    view_set_previous_callback(hid_mouse_get_view(app->hid_mouse), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMouse, hid_mouse_get_view(app->hid_mouse));
 
@@ -280,8 +253,6 @@ void hid_free(Hid* app) {
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, HidViewSubmenu);
     submenu_free(app->device_type_submenu);
-    view_dispatcher_remove_view(app->view_dispatcher, HidViewExitConfirm);
-    dialog_ex_free(app->dialog);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewKeynote);
     hid_keynote_free(app->hid_keynote);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewKeyboard);

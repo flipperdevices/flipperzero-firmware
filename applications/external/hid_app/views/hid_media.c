@@ -188,12 +188,15 @@ static bool hid_media_input_callback(InputEvent* event, void* context) {
     HidMedia* hid_media = context;
     bool consumed = false;
 
-    if(event->type == InputTypePress) {
-        hid_media_process_press(hid_media, event);
+    if(event->type == InputTypeLong && event->key == InputKeyBack) {
+        hid_hal_keyboard_release_all(hid_media->hid);
+    } else {
         consumed = true;
-    } else if(event->type == InputTypeRelease) {
-        hid_media_process_release(hid_media, event);
-        consumed = true;
+        if(event->type == InputTypePress) {
+            hid_media_process_press(hid_media, event);
+        } else if(event->type == InputTypeRelease) {
+            hid_media_process_release(hid_media, event);
+        }
     }
     return consumed;
 }

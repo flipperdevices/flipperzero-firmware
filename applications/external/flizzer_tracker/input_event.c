@@ -4,6 +4,9 @@
 
 #define AUDIO_MODES_COUNT 2
 
+extern bool audio_modes_values[];
+extern char* audio_modes_text[];
+
 void return_from_keyboard_callback(void* ctx) {
     FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
 
