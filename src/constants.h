@@ -38,7 +38,12 @@ static const uint32_t MAX_XP_PER_STAGE[] = {1,    // EGG
                                             40,   // TEEN
                                             100,  // ADULT
                                             0};   // DEAD
+/* Experience */
 #define NEW_XP_FREQUENCY 120 // One new XP every 120 seconds
 #define NEW_XP_PROBABILITY 70 // 70% of probability of getting a new XP
+/* Hunger */
+#define MAX_HP 100
+#define LOSE_HP_FREQUENCY 600 // Lose one HP every 600 seconds
+#define NEW_HP_PROBABILITY 80 // 80% of probability of losing an HP
 
 #endif

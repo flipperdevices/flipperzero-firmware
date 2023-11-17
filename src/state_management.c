@@ -26,6 +26,7 @@ static void init_persistent_state_object(struct GameState *game_state) {
 
     // Init every individual feature
     init_xp(game_state, current_timestamp);
+    init_hp(game_state, current_timestamp);
 }
 
 void init_state(struct GameState *game_state) {
@@ -60,6 +61,7 @@ static void _generate_new_random_event(uint32_t timestamp, struct GameState *gam
     }
     // Check every individual feature
     check_xp(game_state, timestamp, game_events);
+    check_hp(game_state, timestamp, game_events);
 }
 
 void generate_new_random_events(struct GameState *game_state, struct GameEvents *game_events) {
@@ -73,6 +75,7 @@ bool process_events(struct GameState *game_state, struct GameEvents game_events)
 
     // Process every individual feature
     new_events |= apply_xp(game_state, game_events);
+    new_events |= apply_hp(game_state, game_events);
 
     return new_events;
 }
@@ -87,4 +90,10 @@ void get_state_str(const struct GameState *game_state, char *str, size_t size) {
     str += copied;
     size -= copied;
     copied = get_text_xp(game_state, str, size);
+    str += copied;
+    size -= copied;
+    copied = snprintf(str, size, "\n");
+    str += copied;
+    size -= copied;
+    copied = get_text_hp(game_state, str, size);
 }

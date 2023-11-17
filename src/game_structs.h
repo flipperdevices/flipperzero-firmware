@@ -31,6 +31,9 @@ struct PersistentGameState {
     // Feature XP
     uint32_t xp;
     uint32_t last_recorded_xp_update; // Timestamp converted from FuriHalRtcDateTime
+    // Feature HP
+    uint32_t hp;
+    uint32_t last_recorded_hp_update; // Same as above
 };
 
 /* Internal state of the game. Some of the info are persisted on
@@ -44,5 +47,7 @@ struct GameState {
 struct GameEvents {
     uint32_t xp; // How many new XP to assign
     uint32_t xp_timestamp; // New timestamp to use in the GameState
+    int32_t hp; // How many HP to add or remove
+    uint32_t hp_timestamp; // Timestamp to use in the GameState
 };
 #endif

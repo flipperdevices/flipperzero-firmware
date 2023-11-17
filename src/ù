@@ -148,7 +148,7 @@ bool apply_hp(struct GameState *game_state, struct GameEvents game_events) {
 
     game_state->persistent.last_recorded_hp_update = game_events.hp_timestamp;
     if (hp != 0) {
-        FURI_LOG_D(LOG_TAG, "apply_hp(): new total is %lu HP", game_state->persistent.hp);
+        FURI_LOG_D(LOG_TAG, "New HP total is %lu", game_state->persistent.hp);
         correct_state_xp(game_state, game_events.hp_timestamp);
         return true;
     }

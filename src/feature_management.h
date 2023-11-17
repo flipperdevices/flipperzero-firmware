@@ -33,4 +33,10 @@ void check_xp(const struct GameState *, uint32_t, struct GameEvents *);
 bool apply_xp(struct GameState *, struct GameEvents);
 int get_text_xp(const struct GameState *, char *, size_t);
 
+// Hunger
+void init_hp(struct GameState *, uint32_t);
+void check_hp(const struct GameState *, uint32_t, struct GameEvents *);
+bool apply_hp(struct GameState *, struct GameEvents);
+int get_text_hp(const struct GameState *, char *, size_t);
+
 #endif
