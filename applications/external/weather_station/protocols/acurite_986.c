@@ -105,10 +105,10 @@ void ws_protocol_decoder_acurite_986_reset(void* context) {
 static bool ws_protocol_acurite_986_check(WSProtocolDecoderAcurite_986* instance) {
     if(!instance->decoder.decode_data) return false;
     uint8_t msg[] = {
-    instance->decoder.decode_data >> 32,
-    instance->decoder.decode_data >> 24,
-    instance->decoder.decode_data >> 16,
-    instance->decoder.decode_data >> 8 };
+        instance->decoder.decode_data >> 32,
+        instance->decoder.decode_data >> 24,
+        instance->decoder.decode_data >> 16,
+        instance->decoder.decode_data >> 8};
 
     uint8_t crc = subghz_protocol_blocks_crc8(msg, 4, 0x07, 0x00);
     return (crc == (instance->decoder.decode_data & 0xFF));
@@ -122,7 +122,8 @@ static void ws_protocol_acurite_986_remote_controller(WSBlockGeneric* instance) 
     int temp;
 
     instance->id = subghz_protocol_blocks_reverse_key(instance->data >> 24, 8);
-    instance->id = (instance->id << 8) | subghz_protocol_blocks_reverse_key(instance->data >> 16, 8);
+    instance->id = (instance->id << 8) |
+                   subghz_protocol_blocks_reverse_key(instance->data >> 16, 8);
     instance->battery_low = (instance->data >> 14) & 1;
     instance->channel = ((instance->data >> 15) & 1) + 1;
 
@@ -152,7 +153,7 @@ void ws_protocol_decoder_acurite_986_feed(void* context, bool level, uint32_t du
 
     case Acurite_986DecoderStepSync1:
         if(DURATION_DIFF(duration, ws_protocol_acurite_986_const.te_long) <
-                         ws_protocol_acurite_986_const.te_delta * 15) {
+           ws_protocol_acurite_986_const.te_delta * 15) {
             if(!level) {
                 instance->decoder.parser_step = Acurite_986DecoderStepSync2;
             }
@@ -163,7 +164,7 @@ void ws_protocol_decoder_acurite_986_feed(void* context, bool level, uint32_t du
 
     case Acurite_986DecoderStepSync2:
         if(DURATION_DIFF(duration, ws_protocol_acurite_986_const.te_long) <
-                         ws_protocol_acurite_986_const.te_delta * 15) {
+           ws_protocol_acurite_986_const.te_delta * 15) {
             if(!level) {
                 instance->decoder.parser_step = Acurite_986DecoderStepSync3;
             }
@@ -174,7 +175,7 @@ void ws_protocol_decoder_acurite_986_feed(void* context, bool level, uint32_t du
 
     case Acurite_986DecoderStepSync3:
         if(DURATION_DIFF(duration, ws_protocol_acurite_986_const.te_long) <
-                         ws_protocol_acurite_986_const.te_delta * 15) {
+           ws_protocol_acurite_986_const.te_delta * 15) {
             if(!level) {
                 instance->decoder.parser_step = Acurite_986DecoderStepSaveDuration;
             }
@@ -195,7 +196,7 @@ void ws_protocol_decoder_acurite_986_feed(void* context, bool level, uint32_t du
     case Acurite_986DecoderStepCheckDuration:
         if(!level) {
             if(DURATION_DIFF(duration, ws_protocol_acurite_986_const.te_short) <
-                             ws_protocol_acurite_986_const.te_delta * 10) {
+               ws_protocol_acurite_986_const.te_delta * 10) {
                 if(duration < ws_protocol_acurite_986_const.te_short) {
                     subghz_protocol_blocks_add_bit(&instance->decoder, 0);
                     instance->decoder.parser_step = Acurite_986DecoderStepSaveDuration;
@@ -206,8 +207,9 @@ void ws_protocol_decoder_acurite_986_feed(void* context, bool level, uint32_t du
             } else {
                 //Found syncPostfix
                 instance->decoder.parser_step = Acurite_986DecoderStepReset;
-                if((instance->decoder.decode_count_bit == ws_protocol_acurite_986_const.min_count_bit_for_found) &&
-                    ws_protocol_acurite_986_check(instance)) {
+                if((instance->decoder.decode_count_bit ==
+                    ws_protocol_acurite_986_const.min_count_bit_for_found) &&
+                   ws_protocol_acurite_986_check(instance)) {
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
                     ws_protocol_acurite_986_remote_controller(&instance->generic);
@@ -245,9 +247,7 @@ SubGhzProtocolStatus
     furi_assert(context);
     WSProtocolDecoderAcurite_986* instance = context;
     return ws_block_generic_deserialize_check_count_bit(
-        &instance->generic,
-        flipper_format,
-        ws_protocol_acurite_986_const.min_count_bit_for_found);
+        &instance->generic, flipper_format, ws_protocol_acurite_986_const.min_count_bit_for_found);
 }
 
 void ws_protocol_decoder_acurite_986_get_string(void* context, FuriString* output) {
