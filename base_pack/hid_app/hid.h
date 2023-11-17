@@ -22,8 +22,8 @@
 #include "views/hid_media.h"
 #include "views/hid_movie.h"
 #include "views/hid_mouse.h"
-#include "views/hid_mouse_jiggler.h"
 #include "views/hid_mouse_clicker.h"
+#include "views/hid_mouse_jiggler.h"
 #include "views/hid_tikshorts.h"
 #include "views/hid_ptt.h"
 
