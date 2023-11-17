@@ -4,21 +4,22 @@ This application allows you to read the data from Sub-GHz weather sensors and di
 
 ## Supported Protocols
 
+inFactory-TH
+ThermoPRO-TX4
+Nexus-TH
+GT-WT02
+GT-WT03
 Acurite 592TXR
 Acurite-606TX
 Acurite-606TXC
-AmbientWeather
-Auriol AHFL
-Avriol HG06061
-GT-WT02
-GT-WT03
-inFactory-TH
+Acurite-986
 LaCrosse_TX
-Nexus-TH
+TX141THBv2
 Oregon-v1
 Oregon2
 Oregon3
-ThermoPRO-TX4
-TX141THBv2
+AmbientWeather
+Avriol HG06061
 TX8300
 Wendox W6276
+Auriol AHFL
