@@ -86,6 +86,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Add nfc dynamic default save name to new app (By Willy-JL)
 - Misc app fixes (By xMasterX)
 - Uncommented: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper) Works without NFC.
+- Updated: [IR Xbox Controller v1.2 (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
+- Updated: [XRemote v1.1.2 (By kala13x)](https://github.com/kala13x/flipper-xremote)
 
 <a name="release">
 
@@ -418,7 +420,7 @@ $ ./fbt dolphin_ext
 - [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) `works for Sony cameras`
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [IR Scope (By kallanreed)](https://github.com/kallanreed/unleashed-firmware/tree/dev/applications/external/ir_scope)
-- [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
+- [IR Xbox Controller v1.2 (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - [J305 Geiger Counter v1.1 (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Lightmeter v1.2 (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`
