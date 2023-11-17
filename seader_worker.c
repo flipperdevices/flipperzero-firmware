@@ -452,10 +452,7 @@ void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t l
     ASN_STRUCT_FREE(asn_DEF_Response, response);
 }
 
-NfcCommand seader_iso15693_transmit(
-    Seader* seader,
-    uint8_t* buffer,
-    size_t len) {
+NfcCommand seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
     UNUSED(seader);
     UNUSED(buffer);
     UNUSED(len);
@@ -471,29 +468,32 @@ NfcCommand seader_iso15693_transmit(
     //seader_worker_fake_epurse_update(buffer, rxBuffer, &recvLen);
 
     do {
-        bit_buffer_append_bytes(tx_buffer, buffer, len); // TODO: could this be a `bit_buffer_copy_bytes` ?
-                                                     //
+        bit_buffer_append_bytes(
+            tx_buffer, buffer, len); // TODO: could this be a `bit_buffer_copy_bytes` ?
+            //
         PicopassError error = picopass_poller_send_frame(
             seader->picopass_poller, tx_buffer, rx_buffer, SEADER_POLLER_MAX_FWT);
-        if (error == PicopassErrorIncorrectCrc) {
-          error = PicopassErrorNone;
+        if(error == PicopassErrorIncorrectCrc) {
+            error = PicopassErrorNone;
         }
         FURI_LOG_I(TAG, "picopass_poller_send_frame %d", error);
 
         if(error != PicopassErrorNone) {
-          ret = NfcCommandStop;
-          break;
+            ret = NfcCommandStop;
+            break;
         }
 
         FURI_LOG_I(TAG, "picopass incoming %d bytes", bit_buffer_get_size_bytes(rx_buffer));
 
         // seader_capture_sio(buffer, len, rxBuffer, credential);
-        seader_send_nfc_rx(seader_uart, (uint8_t*)bit_buffer_get_data(rx_buffer), bit_buffer_get_size_bytes(rx_buffer));
+        seader_send_nfc_rx(
+            seader_uart,
+            (uint8_t*)bit_buffer_get_data(rx_buffer),
+            bit_buffer_get_size_bytes(rx_buffer));
 
     } while(false);
     bit_buffer_free(tx_buffer);
     bit_buffer_free(rx_buffer);
-
 
     return ret;
 }
@@ -562,13 +562,12 @@ NfcCommand seader_parse_nfc_command_transmit(Seader* seader, NFCSend_t* nfcSend)
 #endif
 
     if(frameProtocol == FrameProtocol_iclass) {
-        return seader_iso15693_transmit(
-            seader, nfcSend->data.buf, nfcSend->data.size);
+        return seader_iso15693_transmit(seader, nfcSend->data.buf, nfcSend->data.size);
     } else if(frameProtocol == FrameProtocol_nfc) {
         return seader_iso14443a_transmit(
             seader, nfcSend->data.buf, nfcSend->data.size, (uint16_t)timeOut, nfcSend->format->buf);
     } else {
-      FURI_LOG_W(TAG, "unknown frame protocol %lx", frameProtocol);
+        FURI_LOG_W(TAG, "unknown frame protocol %lx", frameProtocol);
     }
     return NfcCommandContinue;
 }
@@ -886,7 +885,6 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
     PicopassPoller* instance = seader->picopass_poller;
 
     if(event.type == PicopassPollerEventTypeSuccess) {
-
         if(stage == SeaderPollerEventTypeCardDetect) {
             FURI_LOG_D(TAG, "Card Detect");
 
@@ -925,12 +923,13 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
 
                 //stage = SeaderPollerEventTypeComplete;
             } else {
-              furi_delay_ms(10);
+                furi_delay_ms(10);
             }
 
         } else if(stage == SeaderPollerEventTypeComplete) {
             FURI_LOG_D(TAG, "Complete");
-            view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
+            view_dispatcher_send_custom_event(
+                seader->view_dispatcher, SeaderCustomEventWorkerExit);
             ret = NfcCommandStop;
         }
     }

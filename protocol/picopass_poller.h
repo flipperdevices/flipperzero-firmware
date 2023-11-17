@@ -48,7 +48,11 @@ void picopass_poller_start(
 void picopass_poller_stop(PicopassPoller* instance);
 uint8_t* picopass_poller_get_csn(PicopassPoller* instance);
 
-PicopassError picopass_poller_send_frame(PicopassPoller* instance, BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt_fc);
+PicopassError picopass_poller_send_frame(
+    PicopassPoller* instance,
+    BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt_fc);
 
 #ifdef __cplusplus
 }
