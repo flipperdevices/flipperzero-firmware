@@ -256,8 +256,6 @@ void GameboyLiveCamera::readPicture(bool is_thumbnail)
             }
             Serial1.print(c); // Imprimir el valor de c para colores 2 o 3
         }
-
-        ++y;
         Serial1.flush();
     }
     this->setWaitMode();
