@@ -17,12 +17,13 @@ struct ThreadsMessage {
 };
 
 enum LifeStage {
-    EGG = 0,
-    BABY = 1,
-    CHILD = 2,
-    TEEN = 3,
-    ADULT = 4,
-    DEAD = 5
+    EGG,
+    BABY,
+    CHILD,
+    TEEN,
+    ADULT,
+    DEAD,
+    LIFE_STAGES_NUM
 };
 
 struct PersistentGameState {

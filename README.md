@@ -8,7 +8,6 @@ This application is still under initial development
 
 # TODO
 
-* Refactor icons into a struct
 * Add hp feature (hungriness)
 * Add animations for stage up
 * Add sound
