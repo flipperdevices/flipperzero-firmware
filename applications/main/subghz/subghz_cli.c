@@ -926,47 +926,6 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     furi_string_free(cmd);
 }
 
-static bool
-    subghz_on_system_start_istream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
-    File* file = istream->state;
-    size_t ret = storage_file_read(file, buf, count);
-    return (count == ret);
-}
-
-static bool subghz_on_system_start_istream_decode_band(
-    pb_istream_t* stream,
-    const pb_field_t* field,
-    void** arg) {
-    (void)field;
-    FuriHalRegion* region = *arg;
-
-    PB_Region_Band band = {0};
-    if(!pb_decode(stream, PB_Region_Band_fields, &band)) {
-        FURI_LOG_E("SubGhzOnStart", "PB Region band decode error: %s", PB_GET_ERROR(stream));
-        return false;
-    }
-
-    region->bands_count += 1;
-    region = realloc( //-V701
-        region,
-        sizeof(FuriHalRegion) + sizeof(FuriHalRegionBand) * region->bands_count);
-    size_t pos = region->bands_count - 1;
-    region->bands[pos].start = band.start;
-    region->bands[pos].end = band.end;
-    region->bands[pos].power_limit = band.power_limit;
-    region->bands[pos].duty_cycle = band.duty_cycle;
-    *arg = region;
-
-    FURI_LOG_I(
-        "SubGhzOnStart",
-        "Add allowed band: start %luHz, stop %luHz, power_limit %ddBm, duty_cycle %u%%",
-        band.start,
-        band.end,
-        band.power_limit,
-        band.duty_cycle);
-    return true;
-}
-
 void subghz_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open(RECORD_CLI);
