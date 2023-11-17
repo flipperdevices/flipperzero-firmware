@@ -7,7 +7,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-
 typedef struct XboxControllerView XboxControllerView;
 
 XboxControllerView* xbox_controller_view_alloc();

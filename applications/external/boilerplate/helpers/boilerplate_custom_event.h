@@ -41,7 +41,8 @@ static inline uint32_t boilerplate_custom_menu_event_pack(uint16_t type, int16_t
     BoilerplateCustomEventMenu event = {.content = {.type = type, .value = value}};
     return event.packed_value;
 }
-static inline void boilerplate_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
+static inline void
+    boilerplate_custom_menu_event_unpack(uint32_t packed_value, uint16_t* type, int16_t* value) {
     BoilerplateCustomEventMenu event = {.packed_value = packed_value};
     if(type) *type = event.content.type;
     if(value) *value = event.content.value;
