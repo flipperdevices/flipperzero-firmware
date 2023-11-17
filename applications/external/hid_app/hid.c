@@ -16,6 +16,7 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexMouseClicker,
     HidSubmenuIndexMouseJiggler,
     HidSubmenuIndexCamera,
+    HidSubmenuIndexPtt,
 };
 
 static void hid_submenu_callback(void* context, uint32_t index) {
@@ -56,6 +57,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexCamera) {
         app->view_id = HidViewCamera;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewCamera);
+    } else if(index == HidSubmenuIndexPtt) {
+        app->view_id = HidViewPtt;
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewPtt);
     }
 }
 
@@ -80,6 +84,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
     hid_tikshorts_set_connected_status(hid->hid_tikshorts, connected);
     hid_camera_set_connected_status(hid->hid_camera, connected);
+    hid_ptt_set_connected_status(hid->hid_ptt, connected);
 }
 
 static void hid_dialog_callback(DialogExResult result, void* context) {
@@ -92,6 +97,11 @@ static void hid_dialog_callback(DialogExResult result, void* context) {
     } else if(result == DialogExResultCenter) {
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewSubmenu);
     }
+}
+
+static uint32_t hid_menu_view(void* context) {
+    UNUSED(context);
+    return HidViewSubmenu;
 }
 
 static uint32_t hid_exit_confirm_view(void* context) {
@@ -163,6 +173,8 @@ Hid* hid_alloc(HidTransport transport) {
         app);
     submenu_add_item(
         app->device_type_submenu, "Camera", HidSubmenuIndexCamera, hid_submenu_callback, app);
+    submenu_add_item(
+        app->device_type_submenu, "PTT", HidSubmenuIndexPtt, hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->device_type_submenu), hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->device_type_submenu));
@@ -187,31 +199,31 @@ Hid* hid_app_alloc_view(void* context) {
 
     // Keynote view
     app->hid_keynote = hid_keynote_alloc(app);
-    view_set_previous_callback(hid_keynote_get_view(app->hid_keynote), hid_exit_confirm_view);
+    view_set_previous_callback(hid_keynote_get_view(app->hid_keynote), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewKeynote, hid_keynote_get_view(app->hid_keynote));
 
     // Keyboard view
     app->hid_keyboard = hid_keyboard_alloc(app);
-    view_set_previous_callback(hid_keyboard_get_view(app->hid_keyboard), hid_exit_confirm_view);
+    view_set_previous_callback(hid_keyboard_get_view(app->hid_keyboard), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewKeyboard, hid_keyboard_get_view(app->hid_keyboard));
 
     //Numpad keyboard view
     app->hid_numpad = hid_numpad_alloc(app);
-    view_set_previous_callback(hid_numpad_get_view(app->hid_numpad), hid_exit_confirm_view);
+    view_set_previous_callback(hid_numpad_get_view(app->hid_numpad), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewNumpad, hid_numpad_get_view(app->hid_numpad));
 
     // Media view
     app->hid_media = hid_media_alloc(app);
-    view_set_previous_callback(hid_media_get_view(app->hid_media), hid_exit_confirm_view);
+    view_set_previous_callback(hid_media_get_view(app->hid_media), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMedia, hid_media_get_view(app->hid_media));
-
+    
     // Movie view
     app->hid_movie = hid_movie_alloc(app);
-    view_set_previous_callback(hid_movie_get_view(app->hid_movie), hid_exit_confirm_view);
+    view_set_previous_callback(hid_movie_get_view(app->hid_movie), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMovie, hid_movie_get_view(app->hid_movie));
 
@@ -230,7 +242,7 @@ Hid* hid_app_alloc_view(void* context) {
     // Mouse clicker view
     app->hid_mouse_clicker = hid_mouse_clicker_alloc(app);
     view_set_previous_callback(
-        hid_mouse_clicker_get_view(app->hid_mouse_clicker), hid_exit_confirm_view);
+        hid_mouse_clicker_get_view(app->hid_mouse_clicker), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher,
         HidViewMouseClicker,
@@ -239,7 +251,7 @@ Hid* hid_app_alloc_view(void* context) {
     // Mouse jiggler view
     app->hid_mouse_jiggler = hid_mouse_jiggler_alloc(app);
     view_set_previous_callback(
-        hid_mouse_jiggler_get_view(app->hid_mouse_jiggler), hid_exit_confirm_view);
+        hid_mouse_jiggler_get_view(app->hid_mouse_jiggler), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher,
         HidViewMouseJiggler,
@@ -247,9 +259,15 @@ Hid* hid_app_alloc_view(void* context) {
 
     // Camera view
     app->hid_camera = hid_camera_alloc(app);
-    view_set_previous_callback(hid_camera_get_view(app->hid_camera), hid_exit_confirm_view);
+    view_set_previous_callback(hid_camera_get_view(app->hid_camera), hid_menu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewCamera, hid_camera_get_view(app->hid_camera));
+
+    // Ptt view
+    app->hid_ptt = hid_ptt_alloc(app);
+    view_set_previous_callback(hid_ptt_get_view(app->hid_ptt), hid_menu_view);
+    view_dispatcher_add_view(
+      app->view_dispatcher, HidViewPtt, hid_ptt_get_view(app->hid_ptt));
 
     return app;
 }
@@ -287,6 +305,8 @@ void hid_free(Hid* app) {
     hid_tikshorts_free(app->hid_tikshorts);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewCamera);
     hid_camera_free(app->hid_camera);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewPtt);
+    hid_ptt_free(app->hid_ptt);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records
