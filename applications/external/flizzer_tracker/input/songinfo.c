@@ -2,6 +2,8 @@
 
 #include "../diskop.h"
 
+extern void return_from_keyboard_callback(void* ctx);
+
 void edit_songinfo_param(FlizzerTrackerApp* tracker, uint8_t selected_param, int8_t delta) {
     if(!(tracker->current_digit)) {
         delta *= 16;
