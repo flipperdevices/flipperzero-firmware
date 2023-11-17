@@ -79,4 +79,3 @@ typedef enum {
 
 void xremote_popup_closed_callback(void* context);
 void xremote_text_input_callback(void* context);
-void xremote_show_loading_popup(XRemote* xremote, bool show);

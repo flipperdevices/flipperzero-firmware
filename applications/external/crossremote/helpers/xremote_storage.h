@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../xremote.h"
 
 #define XREMOTE_SETTINGS_FILE_VERSION 1

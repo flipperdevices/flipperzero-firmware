@@ -18,10 +18,8 @@ void xremote_scene_sg_list_on_enter(void* context) {
         view_set_orientation(view_stack_get_view(app->view_stack), ViewOrientationVertical);
         view_dispatcher_switch_to_view(app->view_dispatcher, XRemoteViewIdStack);
 
-        xremote_show_loading_popup(app, true);
         xremote_sg_remote_load(app->sg_remote_buffer, app->file_path);
         //xremote_ir_remote_load(app->ir_remote_buffer, app->file_path);
-        xremote_show_loading_popup(app, false);
         cross_remote_add_subghz(app->cross_remote, app->sg_remote_buffer);
     }
 
