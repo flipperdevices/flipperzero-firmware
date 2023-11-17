@@ -18,9 +18,7 @@ void xremote_scene_ir_list_on_enter(void* context) {
         view_set_orientation(view_stack_get_view(app->view_stack), ViewOrientationVertical);
         view_dispatcher_switch_to_view(app->view_dispatcher, XRemoteViewIdStack);
 
-        xremote_show_loading_popup(app, true);
         xremote_ir_remote_load(app->ir_remote_buffer, app->file_path);
-        xremote_show_loading_popup(app, false);
     }
 
     if(success) {

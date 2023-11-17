@@ -24,7 +24,7 @@
 #include <gui/modules/button_panel.h>
 #include <gui/modules/variable_item_list.h>
 
-//#include <lib/subghz/protocols/protocol_items.h> //not found
+//#include <lib/subghz/protocols/protocol_items.h> //Not found
 
 #include <input/input.h>
 #include <notification/notification_messages.h>
