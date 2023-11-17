@@ -36,14 +36,17 @@ void process_serial_commands() {
         case 'I':
             camera_model.isInvertEnabled = true;
             break;
-        case 'P': // Staged future feature.
-            // save_picture_to_sd_card();
+        case 'P':
+            // save_picture_to_sd_card(); // @todo
             break;
         case 's': // Stop stream.
             turn_flash_off();
+            set_camera_model_defaults();
+            set_camera_defaults();
             camera_model.isStreamEnabled = false;
             break;
         case 'S': // Start stream.
+            turn_flash_off();
             set_camera_model_defaults();
             set_camera_defaults();
             camera_model.isStreamEnabled = true;
