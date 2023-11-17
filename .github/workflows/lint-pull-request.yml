@@ -7,16 +7,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Build with ufbt
         # Flipper Zero ufbt action
         # https://github.com/flipperdevices/flipperzero-ufbt-action
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.3
         id: build-app
         with:
           app-dir: ./fap
           sdk-channel: dev
+
       - name: Lint sources
-        uses: flipperdevices/flipperzero-ufbt-action@v0.1.2
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.3
         with:
           skip-setup: true
           task: lint

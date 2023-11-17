@@ -3,7 +3,7 @@
 /** The camera configuration model. */
 camera_config_t camera_config;
 
-void initialize_camera_config() {
+void set_camera_config_defaults() {
     // Set initial camera configurations.
     camera_config.ledc_channel = LEDC_CHANNEL_0;
     camera_config.ledc_timer = LEDC_TIMER_0;

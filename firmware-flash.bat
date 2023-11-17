@@ -22,7 +22,12 @@ echo https://github.com/CodyTolene/Flipper-Zero-Camera-Suite
 echo.
 echo ------------------------------------------------------------------------------
 echo Before you begin please make sure your Flipper Zero is plugged into your PC.
-echo Then on your Flipper Zero, open the GPIO menu and select USB-UART Bridge.
+echo Then on your Flipper Zero, open the GPIO menu and select USB-UART Bridge. In
+echo the USB-UART Bridge config menu, make sure the following configuration is set:
+echo - USB Channel = 1 (on newer firmware)
+echo - Baudrate = Host
+echo - UART Pins = 13,14
+echo - RTS/DTR Pins = None
 echo ------------------------------------------------------------------------------
 echo.
 pause
@@ -112,7 +117,7 @@ arduino-cli %CONFIG_FILE% upload -p %PORT_NUMBER% --fqbn !SELECTED_BOARD! %FIRMW
 if !ERRORLEVEL! EQU 0 (
     goto :uploadSuccess
 ) else (
-    if !RETRY_COUNT! lss 5 (
+    if !RETRY_COUNT! lss 3 (
         set /a RETRY_COUNT+=1
         goto :uploadLoop
     ) else (
@@ -181,6 +186,17 @@ if %ERRORLEVEL% EQU 0 (
     if /i "!TRY_COMPILE_AGAIN!"=="Y" (
         goto :compileFirmware
     )
+    echo Cleaning up...
+    echo Restoring default configs...
+    arduino-cli %CONFIG_FILE% config set directories.data C:\temp\arduino-cli\data
+    arduino-cli %CONFIG_FILE% config set directories.downloads C:\temp\arduino-cli\staging
+    arduino-cli %CONFIG_FILE% config set directories.user C:\temp\arduino-cli\user
+    set /p DELETE_TEMP="Would you like to delete the temporary files? (Y/N): "
+    if /i "!DELETE_TEMP!"=="Y" (
+        rmdir /s /q %CLI_TEMP%
+    )
+    echo Cleanup completed, press any key to exit.
+    echo.
     pause
     exit /b
 )

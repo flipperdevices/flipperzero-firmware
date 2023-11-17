@@ -8,7 +8,7 @@
 /** The camera configuration model. */
 extern camera_config_t camera_config;
 
-/** Initialize the camera configuration. */
-void initialize_camera_config();
+/** Set the camera configuration defaults. */
+void set_camera_config_defaults();
 
 #endif
