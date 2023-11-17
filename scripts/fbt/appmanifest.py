@@ -170,7 +170,7 @@ class AppManager:
             for app_property in (
                 "fap_extbuild",
                 "fap_private_libs",
-            ):
+            ):  # , "fap_icon_assets"): TODO: Find a workaround for subghz_remote app
                 if kw.get(app_property):
                     raise FlipperManifestException(
                         f"App {kw.get('appid')} of type {apptype} must not have '{app_property}' in manifest"
