@@ -10,6 +10,6 @@ App(
     fap_category="Infrared",
     fap_author="Leedave",
     fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications",
-    fap_version=(0, 8),
+    fap_version="0.9",
     fap_description="One-Click, sends multiple commands",
 )
