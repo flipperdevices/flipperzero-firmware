@@ -33,6 +33,15 @@ typedef enum {
     SeaderWorkerEventStartReading,
 } SeaderWorkerEvent;
 
+typedef enum {
+    SeaderPollerEventTypeCardDetect,
+    SeaderPollerEventTypeConversation,
+    SeaderPollerEventTypeComplete,
+
+    SeaderPollerEventTypeSuccess,
+    SeaderPollerEventTypeFail,
+} SeaderPollerEventType;
+
 typedef void (*SeaderWorkerCallback)(SeaderWorkerEvent event, void* context);
 
 SeaderWorker* seader_worker_alloc();

@@ -13,6 +13,7 @@ void seader_scene_read_picopass_on_enter(void* context) {
     // Start worker
     view_dispatcher_switch_to_view(seader->view_dispatcher, SeaderViewPopup);
 
+    seader->worker->stage = SeaderPollerEventTypeCardDetect;
     seader_credential_clear(seader->credential);
     seader->picopass_poller = picopass_poller_alloc(seader->nfc);
     picopass_poller_start(seader->picopass_poller, seader_worker_poller_callback_picopass, seader);

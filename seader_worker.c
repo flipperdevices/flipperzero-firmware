@@ -73,6 +73,7 @@ void seader_worker_start(
     furi_assert(seader_worker);
     furi_assert(uart);
 
+    seader_worker->stage = SeaderPollerEventTypeCardDetect;
     seader_worker->callback = callback;
     seader_worker->context = context;
     seader_worker->uart = uart;
@@ -86,9 +87,7 @@ void seader_worker_stop(SeaderWorker* seader_worker) {
        seader_worker->state == SeaderWorkerStateReady) {
         return;
     }
-    // seader_worker_disable_field();
-    // nfc_poller_stop(poller);
-    // nfc_poller_free(poller);
+
     seader_worker_change_state(seader_worker, SeaderWorkerStateStop);
     furi_thread_join(seader_worker->thread);
 }
@@ -817,17 +816,6 @@ NfcCommand seader_worker_card_detect(
     return NfcCommandContinue;
 }
 
-typedef enum {
-    SeaderPollerEventTypeCardDetect,
-    SeaderPollerEventTypeConversation,
-    SeaderPollerEventTypeComplete,
-
-    SeaderPollerEventTypeSuccess,
-    SeaderPollerEventTypeFail,
-} SeaderPollerEventType;
-
-SeaderPollerEventType stage = SeaderPollerEventTypeCardDetect;
-
 SeaderPollerEventType
     seader_worker_poller_conversation(Seader* seader, const Iso14443_4aPoller* iso14443_4a_poller) {
     SeaderPollerEventType stage = SeaderPollerEventTypeConversation;
@@ -875,12 +863,13 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
     NfcCommand ret = NfcCommandContinue;
 
     Seader* seader = context;
+    SeaderWorker* seader_worker = seader->worker;
 
     const Iso14443_4aPollerEvent* iso14443_4a_event = event.event_data;
     const Iso14443_4aPoller* iso14443_4a_poller = event.instance;
 
     if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
-        if(stage == SeaderPollerEventTypeCardDetect) {
+        if(seader_worker->stage == SeaderPollerEventTypeCardDetect) {
             FURI_LOG_D(TAG, "Card Detect");
             requestPacs = true;
 
@@ -899,10 +888,10 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
 
             // nfc_set_fdt_poll_fc(event.instance, SEADER_POLLER_MAX_FWT);
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
-            stage = SeaderPollerEventTypeConversation;
-        } else if(stage == SeaderPollerEventTypeConversation) {
-            stage = seader_worker_poller_conversation(seader, iso14443_4a_poller);
-        } else if(stage == SeaderPollerEventTypeComplete) {
+            seader_worker->stage = SeaderPollerEventTypeConversation;
+        } else if(seader_worker->stage == SeaderPollerEventTypeConversation) {
+            seader_worker->stage = seader_worker_poller_conversation(seader, iso14443_4a_poller);
+        } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
             FURI_LOG_D(TAG, "Complete");
             ret = NfcCommandStop;
         }
@@ -924,20 +913,20 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
 
     if(event.type == PicopassPollerEventTypeRequestMode) {
         // Is this a good place to reset?
-        stage = SeaderPollerEventTypeCardDetect;
+        seader_worker->stage = SeaderPollerEventTypeCardDetect;
         requestPacs = true;
     } else if(event.type == PicopassPollerEventTypeCardDetected) {
         // No-op. I can't actually get the CSN at this point it seems.
     } else if(event.type == PicopassPollerEventTypeSuccess) {
-        if(stage == SeaderPollerEventTypeCardDetect) {
+        if(seader_worker->stage == SeaderPollerEventTypeCardDetect) {
             FURI_LOG_D(TAG, "Card Detect");
             uint8_t* csn = picopass_poller_get_csn(instance);
             seader_worker_card_detect(seader, 0, NULL, csn, sizeof(PicopassSerialNum), NULL, 0);
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
-            stage = SeaderPollerEventTypeConversation;
-        } else if(stage == SeaderPollerEventTypeConversation) {
-            stage = seader_worker_poller_conversation(seader, NULL);
-        } else if(stage == SeaderPollerEventTypeComplete) {
+            seader_worker->stage = SeaderPollerEventTypeConversation;
+        } else if(seader_worker->stage == SeaderPollerEventTypeConversation) {
+            seader_worker->stage = seader_worker_poller_conversation(seader, NULL);
+        } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
             FURI_LOG_D(TAG, "Complete");
             ret = NfcCommandStop;
         }

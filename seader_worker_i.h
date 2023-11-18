@@ -27,6 +27,7 @@ struct SeaderWorker {
     SeaderWorkerCallback callback;
     void* context;
 
+    SeaderPollerEventType stage;
     SeaderWorkerState state;
 };
 
