@@ -1,5 +1,5 @@
-#include "interrupt.h"
-#include "cpu.h"
+#include "emulator_interrupt.h"
+#include "emulator_cpu.h"
 
 static int enabled;
 static int pending;

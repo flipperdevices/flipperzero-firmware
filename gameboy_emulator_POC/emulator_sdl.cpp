@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "SPI.h"
-#include "sdl.h"
+#include "emulator_sdl.h"
 // #include "Adafruit_GFX.h"
 
 #define GAMEBOY_HEIGHT 160

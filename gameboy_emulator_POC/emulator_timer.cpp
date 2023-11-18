@@ -1,6 +1,6 @@
-#include "timer.h"
-#include "interrupt.h"
-#include "cpu.h"
+#include "emulator_timer.h"
+#include "emulator_interrupt.h"
+#include "emulator_cpu.h"
 
 static unsigned int prev_time;
 static unsigned int elapsed;

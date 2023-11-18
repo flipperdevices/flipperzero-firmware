@@ -1,6 +1,6 @@
-#include "mbc.h"
-#include "mem.h"
-#include "rom.h"
+#include "emulator_mbc.h"
+#include "emulator_mem.h"
+#include "emulator_rom.h"
 
 enum {
 	NO_FILTER_WRITE,

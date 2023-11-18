@@ -6,7 +6,7 @@ extern "C" {
 
 #endif
 
-#include "rom.h"
+#include "emulator_rom.h"
 void mem_init(void);
 unsigned char mem_get_byte(unsigned short);
 unsigned short mem_get_word(unsigned short);

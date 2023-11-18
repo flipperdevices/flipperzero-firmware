@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include "mem.h"
-#include "rom.h"
-#include "interrupt.h"
+#include "emulator_mem.h"
+#include "emulator_rom.h"
+#include "emulator_interrupt.h"
 
 #define set_HL(x) do {unsigned int macro = (x); c.L = macro&0xFF; c.H = macro>>8;} while(0)
 #define set_BC(x) do {unsigned int macro = (x); c.C = macro&0xFF; c.B = macro>>8;} while(0)

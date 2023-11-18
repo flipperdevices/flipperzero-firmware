@@ -1,9 +1,9 @@
 #include <Arduino.h>
-#include "lcd.h"
-#include "cpu.h"
-#include "interrupt.h"
-#include "sdl.h"
-#include "mem.h"
+#include "emulator_lcd.h"
+#include "emulator_cpu.h"
+#include "emulator_interrupt.h"
+#include "emulator_sdl.h"
+#include "emulator_mem.h"
 
 
 static int lcd_line;

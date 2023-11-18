@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "rom.h"
+#include "emulator_rom.h"
 
 const unsigned char *bytes;
 unsigned int mapper;

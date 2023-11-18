@@ -1,13 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
-#include "mem.h"
-#include "rom.h"
-#include "lcd.h"
-#include "mbc.h"
-#include "interrupt.h"
-#include "timer.h"
-#include "sdl.h"
-#include "cpu.h"
+#include "emulator_mem.h"
+#include "emulator_rom.h"
+#include "emulator_lcd.h"
+#include "emulator_mbc.h"
+#include "emulator_interrupt.h"
+#include "emulator_timer.h"
+#include "emulator_sdl.h"
+#include "emulator_cpu.h"
 
 
 static unsigned char *mem;

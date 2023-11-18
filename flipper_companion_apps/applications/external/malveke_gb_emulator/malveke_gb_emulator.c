@@ -50,24 +50,36 @@ static bool malveke_gb_emulator_view_input_callback(InputEvent* event, void* con
     UNUSED(instance);
     if (event->type == InputTypePress){
         if (event->key == InputKeyUp){
-            const char gblivecamera_command_enable_dithering[] = "U\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_enable_dithering, strlen(gblivecamera_command_enable_dithering));
+            const char gbemulator_command_up[] = "U\n";
+            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_up, strlen(gbemulator_command_up));
         }
         else if (event->key == InputKeyDown){
-            const char gblivecamera_command_disable_dithering[] = "D\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_disable_dithering, strlen(gblivecamera_command_disable_dithering));
+            const char gbemulator_command_down[] = "D\n";
+            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_down, strlen(gbemulator_command_down));
         }
         else if (event->key == InputKeyRight){
-            const char gblivecamera_command_increase_exposure[] = ">\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_increase_exposure, strlen(gblivecamera_command_increase_exposure));
+            const char gbemulator_command_right[] = ">\n";
+            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_right, strlen(gbemulator_command_right));
         }
         else if (event->key == InputKeyLeft){
-            const char gblivecamera_command_decrease_exposure[] = "<\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command_decrease_exposure, strlen(gblivecamera_command_decrease_exposure));
+            const char gbemulator_command_left[] = "<\n";
+            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_left, strlen(gbemulator_command_left));
         }
         else if (event->key == InputKeyOk){
-           const char gblivecamera_command[] = "S\n";
-            furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gblivecamera_command, strlen(gblivecamera_command));    
+            with_view_model(
+                instance->view,
+                UartDumpModel * model,
+                {
+                    if(!model->initialized) {
+                        model->initialized = true;
+                    } else {
+                        const char gbemulator_command_OK[] = "S\n";
+                        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_OK, strlen(gbemulator_command_OK));  
+                    }
+                },
+                false);
+
+            
         }
     }
     return false;
@@ -112,7 +124,7 @@ static void process_ringbuffer(UartDumpModel* model, uint8_t byte) {
 
     //// 2. Phase: flushing the ringbuffer to the framebuffer
     model->ringbuffer_index = 0; // Let's reset the ringbuffer
-    model->initialized = true; // We've successfully established the connection
+    // model->initialized = true; // We've successfully established the connection
     size_t row_start_index = model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
 
     if (row_start_index > LAST_ROW_INDEX){ // Failsafe
