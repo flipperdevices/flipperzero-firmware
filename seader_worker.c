@@ -627,6 +627,9 @@ bool seader_worker_state_machine(Seader* seader, Payload_t* payload, bool online
         break;
     case Payload_PR_errorResponse:
         FURI_LOG_W(TAG, "Error Response");
+        if(seader->worker->callback) {
+            seader->worker->callback(SeaderWorkerEventFail, seader->worker->context);
+        }
         processed = true;
         break;
     default:
@@ -762,23 +765,20 @@ NfcCommand seader_worker_card_detect(
     OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)uid, uid_len);
 
     if(sak != 0 && atqa != NULL) {
-        uint8_t protocolBytes[] = {0x00, FrameProtocol_nfc};
+        uint8_t protocol_bytes[] = {0x00, FrameProtocol_nfc};
         OCTET_STRING_fromBuf(
-            &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
-    } else {
-        uint8_t protocolBytes[] = {0x00, FrameProtocol_iclass};
-        OCTET_STRING_fromBuf(
-            &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
-    }
+            &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
 
-    if(sak > 0) {
         OCTET_STRING_t sak_string = {.buf = &sak, .size = 1};
         cardDetails->sak = &sak_string;
-    }
 
-    if(atqa != NULL) {
         OCTET_STRING_t atqa_string = {.buf = atqa, .size = 2};
         cardDetails->atqa = &atqa_string;
+
+    } else {
+        uint8_t protocol_bytes[] = {0x00, FrameProtocol_iclass};
+        OCTET_STRING_fromBuf(
+            &cardDetails->protocol, (const char*)protocol_bytes, sizeof(protocol_bytes));
     }
 
     seader_send_card_detected(seader_uart, cardDetails);
@@ -832,9 +832,8 @@ SeaderPollerEventType seader_worker_poller_conversation(Seader* seader) {
             //bit_buffer_free(message);
         }
         furi_mutex_release(seader_worker->mq_mutex);
-
-        //stage = SeaderPollerEventTypeComplete;
     } else {
+        furi_delay_ms(100);
         furi_thread_set_current_priority(FuriThreadPriorityLowest);
     }
 
@@ -869,11 +868,10 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
             seader_worker_card_detect(
                 seader, sak, (uint8_t*)iso14443_3a_data->atqa, uid, uid_len, NULL, 0);
 
-            nfc_set_fdt_poll_fc(event.instance, SEADER_POLLER_MAX_FWT);
+            // nfc_set_fdt_poll_fc(event.instance, SEADER_POLLER_MAX_FWT);
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
             stage = SeaderPollerEventTypeConversation;
         } else if(stage == SeaderPollerEventTypeConversation) {
-            FURI_LOG_D(TAG, "14a conversation");
             stage = seader_worker_poller_conversation(seader);
         } else if(stage == SeaderPollerEventTypeComplete) {
             FURI_LOG_D(TAG, "Complete");
