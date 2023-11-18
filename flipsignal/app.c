@@ -112,7 +112,6 @@ static void flipboard_model_send_signal(FlipboardModel* model, ButtonModel* bm) 
     }
 
     uint8_t btn = button_model_get_button_id(bm);
-    FURI_LOG_D(TAG, "TODO: Send signal %d.SUB", btn);
 
     view_dispatcher_send_custom_event(view_dispatcher, btn);
 }

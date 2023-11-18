@@ -1,9 +1,13 @@
 #include <furi.h>
 #include <lib/subghz/transmitter.h>
-#include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
-#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 #include <flipper_format/flipper_format_i.h>
 #include <lib/subghz/protocols/protocol_items.h>
+
+#define FIRMWARE_SUBGHZ_UPDATED 1
+
+#ifdef FIRMWARE_SUBGHZ_UPDATED
+#include <applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h>
+#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 #include <devices/devices.h>
 
 static void subghz_radio_device_power_on() {
@@ -80,3 +84,15 @@ void send_signal(
     subghz_transmitter_free(transmitter);
     subghz_environment_free(environment);
 }
+#else
+void send_signal(
+    char* protocol,
+    uint32_t frequency,
+    FuriString* sub_file_contents,
+    bool use_external_radio) {
+    FURI_LOG_D("FlipSignal", "TODO: Send %s signal", protocol);
+    UNUSED(use_external_radio);
+    UNUSED(frequency);
+    UNUSED(sub_file_contents);
+}
+#endif
