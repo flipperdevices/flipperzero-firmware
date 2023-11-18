@@ -231,6 +231,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
         }
         message.consumed += 2 + 10 + message.dwLength + 1;
 
+        /*
         if(message.dwLength == 0) {
             FURI_LOG_D(
                 TAG,
@@ -249,6 +250,7 @@ size_t seader_ccid_process(Seader* seader, uint8_t* cmd, size_t cmd_len) {
                 message.dwLength,
                 display);
         }
+        */
 
         //0306 81 00000000 0000 0200 01 87
         //0306 81 00000000 0000 0100 01 84

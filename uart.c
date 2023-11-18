@@ -166,7 +166,7 @@ int32_t seader_uart_tx_thread(void* context) {
                 for(uint8_t i = 0; i < seader_uart->tx_len; i++) {
                     snprintf(display + (i * 2), sizeof(display), "%02x", seader_uart->tx_buf[i]);
                 }
-                FURI_LOG_I(TAG, "SEND %d bytes: %s", seader_uart->tx_len, display);
+                // FURI_LOG_I(TAG, "SEND %d bytes: %s", seader_uart->tx_len, display);
                 seader_uart->st.tx_cnt += seader_uart->tx_len;
                 furi_hal_uart_tx(
                     seader_uart->cfg.uart_ch, seader_uart->tx_buf, seader_uart->tx_len);
