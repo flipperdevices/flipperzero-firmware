@@ -87,10 +87,10 @@ Join in on the fun and contribute to the development. You could add new function
 - [ ] Application GAME BOY Printer
 - [ ] Play a GAME BOY ROM in Flipper Zero
 
-## News
-- https://www.hackster.io/news/esteban-fuentealba-s-malveke-turns-the-flipper-zero-into-a-nintendo-game-boy-powerhouse-f36fc1d079a2
-- https://www.fayerwayer.com/internet/2023/11/14/flipper-zero-el-llamado-tamagotchi-de-los-hackers-se-mete-en-el-mundo-de-las-consolas-de-videojuegos/
-- https://computerhoy.com/ciberseguridad/flipper-zero-tiene-nuevo-objetivo-consolas-videojuegos-1335020
+## Press
+- [Hackster](https://www.hackster.io/news/esteban-fuentealba-s-malveke-turns-the-flipper-zero-into-a-nintendo-game-boy-powerhouse-f36fc1d079a2)
+- [Computer Hoy](https://computerhoy.com/ciberseguridad/flipper-zero-tiene-nuevo-objetivo-consolas-videojuegos-1335020)
+- [FayerWayer](https://www.fayerwayer.com/internet/2023/11/14/flipper-zero-el-llamado-tamagotchi-de-los-hackers-se-mete-en-el-mundo-de-las-consolas-de-videojuegos/)
 
 ## Acknowledgements
 This project builds upon the excellent work of [Just Call Me Koko](https://github.com/justcallmekoko/), the [ESP32Marauder](https://github.com/justcallmekoko/ESP32Marauder)
