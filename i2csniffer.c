@@ -57,6 +57,7 @@ void SDAcallback(void* _i2c_sniffer) {
         }
         i2c_sniffer->frame_index++;
         if(i2c_sniffer->frame_index >= MAX_RECORDS) {
+            //save_sniffer_data(i2c_sniffer);
             clear_sniffer_buffers(i2c_sniffer);
         }
     }

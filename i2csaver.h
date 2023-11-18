@@ -2,7 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <lib/toolbox/random_name.h>
+#include <lib/toolbox/name_generator.h>
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
 

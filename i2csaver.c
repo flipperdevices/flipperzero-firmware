@@ -1,6 +1,6 @@
 #include "i2csaver.h"
 
-bool i2c_save_file(const char* content) {
+bool Bi2c_save_file(const char* content) {
     bool to_return = false;
     // We need a storage struct (gain accesso to the filesystem API )
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -23,7 +23,7 @@ bool i2c_save_file(const char* content) {
 
     // Create random file name with date
     char* file_name = (char*)malloc(sizeof(char) * I2CTOOLS_FILE_NAME_SIZE);
-    set_random_name(file_name, I2CTOOLS_FILE_NAME_SIZE);
+    name_generator_make_random(file_name, I2CTOOLS_FILE_NAME_SIZE);
 
     // Create save path
     size_t savePathSize =
