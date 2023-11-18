@@ -141,25 +141,6 @@ static int seader_asn_to_string(const void* buffer, size_t size, void* app_key) 
     return 0;
 }
 
-bool seader_read_nfc(SeaderUartBridge* seader_uart) {
-    UNUSED(seader_uart);
-    return false;
-}
-
-bool seader_detect_nfc(SeaderWorker* seader_worker) {
-    SeaderUartBridge* seader_uart = seader_worker->uart;
-
-    while(seader_worker->state == SeaderWorkerStateRead14a) {
-        // Card found
-        if(seader_read_nfc(seader_uart)) {
-            return true;
-        }
-
-        furi_delay_ms(100);
-    }
-    return false;
-}
-
 void seader_send_payload(
     SeaderUartBridge* seader_uart,
     Payload_t* payload,
@@ -930,7 +911,6 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
             stage = SeaderPollerEventTypeConversation;
         } else if(stage == SeaderPollerEventTypeConversation) {
-            FURI_LOG_D(TAG, "picopass conversation");
             stage = seader_worker_poller_conversation(seader);
         } else if(stage == SeaderPollerEventTypeComplete) {
             FURI_LOG_D(TAG, "Complete");

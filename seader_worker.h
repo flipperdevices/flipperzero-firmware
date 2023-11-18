@@ -15,8 +15,6 @@ typedef enum {
     SeaderWorkerStateReady,
     // Main worker states
     SeaderWorkerStateCheckSam,
-    SeaderWorkerStateReadPicopass,
-    SeaderWorkerStateRead14a,
     // Transition
     SeaderWorkerStateStop,
 } SeaderWorkerState;
