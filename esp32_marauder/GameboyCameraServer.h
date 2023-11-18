@@ -8,6 +8,7 @@
 #include "GameboyServer.h"
 #include "Gameboy.h"
 #include "configs.h"
+#include "gameboy_server_link_camera_assets.h"
 
 class GameBoyCameraServer {
   private:

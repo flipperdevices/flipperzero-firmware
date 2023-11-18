@@ -5,9 +5,3 @@ This template should help get you started developing with Vue 3 in Vite. The tem
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
-
-
-##  Resources
-- GB Color Animation http://bchanx.com/animated-gameboy-in-css-blog
-- GBA Startup https://codepen.io/rvervuurt/pen/bdZQrE
-- GB DMG https://manzdev.github.io/twitch-gameboy-css/

@@ -207,48 +207,29 @@ void GameBoyCameraServer::stop()
     WiFi.softAPdisconnect (true);
     _server.end(); 
     this->runGameBoyCameraServer = false;
+    ESP.restart();  /*ESP restart function*/
 }
 void GameBoyCameraServer::start()
 {
     transferJSON.clear();
-    _index_html = gameboy_camera_index_html_gz;
-    _index_html_len = gameboy_camera_index_html_gz_len;
+    _index_html = index_html_gz;
+    _index_html_len = index_html_gz_len;
     WiFi.mode(WIFI_AP);
     gbStartAP("[MALVEKE] Flipper GB Cam", "12345678");
 
+
+    _server.on("/favicon.ico.gz", HTTP_GET, [](AsyncWebServerRequest *request){
+        AsyncWebServerResponse *response = request->beginResponse_P(200, "image/x-icon", favicon_ico_gz, favicon_ico_gz_len);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
+    _server.on("/malveke_pattern.png.gz", HTTP_GET, [](AsyncWebServerRequest *request){
+        AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", malveke_pattern_png_gz, malveke_pattern_png_gz_len);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });
     _server.on("/image", HTTP_GET, onImageRequestWrapper);
     _server.on("/reset", HTTP_GET, onResetRequestWrapper);
-    // respond to GET requests on URL /heap
-    _server.on("/assets/main.js", HTTP_GET, [](AsyncWebServerRequest *request){
-        AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", assets_main_js_gz, assets_main_js_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
-        request->send(response);
-    });
-    // _server.on("/assets/_plugin-vue_export-helper.js", HTTP_GET, [](AsyncWebServerRequest *request){
-    //     AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", assets__plugin_vue_export_helper_js_gz, assets__plugin_vue_export_helper_js_gz_len);
-    //     response->addHeader("Content-Encoding", "gzip");
-    //     request->send(response);
-    // });
-    // _server.on("/assets/_plugin-vue_export-helper.css", HTTP_GET, [](AsyncWebServerRequest *request){
-    //     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", assets__plugin_vue_export_helper_css_gz, assets__plugin_vue_export_helper_css_gz_len);
-    //     response->addHeader("Content-Encoding", "gzip");
-    //     request->send(response);
-    // });
-    // _server.on("/assets/Input.js", HTTP_GET, [](AsyncWebServerRequest *request){
-    //     AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", assets_Input_js_gz, assets_Input_js_gz_len);
-    //     response->addHeader("Content-Encoding", "gzip");
-    //     request->send(response);
-    // });
-    _server.on("/assets/Select.js", HTTP_GET, [](AsyncWebServerRequest *request){
-        AsyncWebServerResponse *response = request->beginResponse_P(200, "application/javascript", assets_Select_js_gz, assets_Select_js_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
-        request->send(response);
-    });
-    _server.on("/assets/index.css", HTTP_GET, [](AsyncWebServerRequest *request){
-        AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", assets_index_css_gz, assets_index_css_gz_len);
-        response->addHeader("Content-Encoding", "gzip");
-        request->send(response);
-    });
     _server.addHandler(new GameboyCaptiveRequestHandler()).setFilter(ON_AP_FILTER);
     _server.begin();
 

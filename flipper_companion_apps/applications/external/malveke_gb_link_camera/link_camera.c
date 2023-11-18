@@ -91,24 +91,39 @@ static void view_draw_callback(Canvas* canvas, void* _model) {
     }
     
 
-    if (!model->initialized){
-        canvas_clear(canvas);
-        canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 8, 12, "Waiting MALVEKE Board...");
-        // canvas_draw_str(canvas, 20, 24, "VCC - 3V3/5V");
-        // canvas_draw_str(canvas, 20, 34, "GND - GND");
-        // canvas_draw_str(canvas, 20, 44, "U0R - TX");
-        // canvas_draw_str(canvas, 20, 54, "U0T - RX");
-    }
+    // if (!model->initialized){
+    //     canvas_clear(canvas);
+    //     canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
+    //     canvas_set_font(canvas, FontSecondary);
+    //     canvas_draw_str(canvas, 8, 12, "Waiting MALVEKE Board...");
+    //     // canvas_draw_str(canvas, 20, 24, "VCC - 3V3/5V");
+    //     // canvas_draw_str(canvas, 20, 34, "GND - GND");
+    //     // canvas_draw_str(canvas, 20, 44, "U0R - TX");
+    //     // canvas_draw_str(canvas, 20, 54, "U0T - RX");
+    // }
 }
 static bool view_input_callback(InputEvent* event, void* context) {
     LinkCameraApp* instance = context;
     UNUSED(instance);
     if (event->type == InputTypePress){
-        if (event->key == InputKeyOk){
-            uart_tx((uint8_t*)("c"), 1);
-            uart_tx((uint8_t*)("\n"), 1);
+        if (event->key == InputKeyBack){
+            const char gbcameraserver_command[] = "gbcameraserver -s\n";
+            uart_tx((uint8_t*)gbcameraserver_command, strlen(gbcameraserver_command));
+
+            furi_hal_power_disable_external_3_3v();
+            furi_delay_ms(100);
+            furi_hal_power_enable_external_3_3v();
+            furi_delay_ms(200);
+        } else  if (event->key == InputKeyOk){
+            const char gbcameraserver_command[] = "gbcameraserver -i\n";
+            uart_tx((uint8_t*)gbcameraserver_command, strlen(gbcameraserver_command));
+             with_view_model(
+                instance->view,
+                LinkCameraModel * model,
+                {
+                    model->initialized = true;
+                },
+                true);
         }
     }
     return false;
@@ -201,22 +216,7 @@ static LinkCameraApp* link_camera_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, 0, app->view);
     view_dispatcher_switch_to_view(app->view_dispatcher, 0);
 
-    furi_hal_power_disable_external_3_3v();
-    furi_delay_ms(100);
-    furi_hal_power_enable_external_3_3v();
-    furi_delay_ms(200);
-
-    with_view_model(
-        app->view,
-        LinkCameraModel * model,
-        {
-            model->initialized = true;
-        },
-        true);
-    uart_tx((uint8_t*)("c"), 1);
-    uart_tx((uint8_t*)("\n"), 1);
-
-    
+   
 
     return app;
 }

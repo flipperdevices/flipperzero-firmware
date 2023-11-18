@@ -63,6 +63,24 @@
         "__tree": "cpp",
         "set": "cpp",
         "xmodem_transmitter.h": "c",
-        "sstream": "cpp"
-    }
+        "sstream": "cpp",
+        "algorithm": "cpp",
+        "__tuple": "c",
+        "compare": "c",
+        "typeinfo": "c",
+        "iosfwd": "c",
+        "__config": "cpp"
+    },
+    "idf.espIdfPath": "/Users/estebanfuentealba/esp/esp-idf",
+    "idf.pythonBinPath": "/Users/estebanfuentealba/.espressif/python_env/idf4.4_py3.9_env/bin/python",
+    "idf.toolsPath": "/Users/estebanfuentealba/.espressif",
+    "idf.customExtraPaths": "/Users/estebanfuentealba/.espressif/tools/xtensa-esp-elf-gdb/11.2_20220823/xtensa-esp-elf-gdb/bin:/Users/estebanfuentealba/.espressif/tools/riscv32-esp-elf-gdb/11.2_20220823/riscv32-esp-elf-gdb/bin:/Users/estebanfuentealba/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin:/Users/estebanfuentealba/.espressif/tools/xtensa-esp32s2-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32s2-elf/bin:/Users/estebanfuentealba/.espressif/tools/xtensa-esp32s3-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32s3-elf/bin:/Users/estebanfuentealba/.espressif/tools/riscv32-esp-elf/esp-2021r2-patch5-8.4.0/riscv32-esp-elf/bin:/Users/estebanfuentealba/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/Users/estebanfuentealba/.espressif/tools/cmake/3.23.1/CMake.app/Contents/bin:/Users/estebanfuentealba/.espressif/tools/openocd-esp32/v0.12.0-esp32-20230419/openocd-esp32/bin:/Users/estebanfuentealba/.espressif/tools/ninja/1.10.2",
+    "idf.customExtraVars": {
+        "OPENOCD_SCRIPTS": "/Users/estebanfuentealba/.espressif/tools/openocd-esp32/v0.12.0-esp32-20230419/openocd-esp32/share/openocd/scripts"
+    },
+    "idf.gitPath": "git",
+    "idf.adapterTargetName": "esp32s2",
+    "idf.openOcdConfigs": [
+        "board/esp32s2-bridge.cfg"
+    ]
 }

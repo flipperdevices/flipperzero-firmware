@@ -1452,7 +1452,7 @@ void GameBoyCartridge::restoreRAM(uint16_t maxBufferSize, const int chunkSize) {
     // Serial.print(maxBufferSize);
     // Serial.print("Chunk Size: ");
     // Serial.println(chunkSize);
-    unit8_t save_buffer[maxBufferSize];
+    uint8_t save_buffer[maxBufferSize];
     unsigned int save_buffer_pos = 0;
     int bytesRead = 0;
     

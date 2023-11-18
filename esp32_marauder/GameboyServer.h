@@ -12,7 +12,6 @@
 #include <vector>
 #include <string>
 
-#include "gameboy_server_assets.h"
 
 #define MAX_HTML_SIZE 20000
 

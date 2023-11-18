@@ -28,17 +28,17 @@ function getAllFiles(dirPath) {
     return fileList;
   }
 
-export default function GenerateCHeaders(options = {}) {
+export default function GenerateCHeaders(options = {filename : 'gameboy_server_assets'}) {
 
-    const { filename = 'gameboy_server_assets.h' } = options;
+    const { filename } = options;
 
     return {
       name: 'file-list-plugin',
       generateBundle(_, bundle) {
         const distPath = path.resolve(__dirname, '../dist');
-        const outputFile = path.resolve(__dirname , `../../${filename}`);
+        const outputFile = path.resolve(__dirname , `../../../${filename}.h`);
         const fileList = getAllFiles(distPath).join('\n');
-        fs.writeFileSync(outputFile, `#ifndef gameboy_server_assets_h\n#define gameboy_server_assets_h\n\n${fileList}\n#endif`, 'utf-8');
+        fs.writeFileSync(outputFile, `#ifndef ${filename}_h\n#define ${filename}_h\n\n${fileList}\n#endif`, 'utf-8');
       },
     };
 };
