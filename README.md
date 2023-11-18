@@ -55,7 +55,7 @@
 - Includes Marauder ESP32 (v0.12.0).
 
 
-## Flipper faps
+## Flipper faps (WIP)
 - [[MALVEKE] GAME BOY Cartridge  (GB/GBC)](./flipper_companion_apps/applications/external/malveke_gb_cartridge/README.md)
 - [[MALVEKE] GAME BOY ADVANCE Cartridge](./flipper_companion_apps/applications/external/malveke_gba_cartridge/README.md)
 - [MALVEKE] GAME BOY Camera Viewer 
@@ -63,7 +63,7 @@
 - [[MALVEKE] GAME BOY Camera Link Cable Transfer](./flipper_companion_apps/applications/external/malveke_gb_link_camera/README.md)
 - [MALVEKE] GAME BOY Printer Link Cable Transfer
 - [MALVEKE] GAME BOY Logo Generator
-- [MALVEKE] Pokemon Trading
+- [[MALVEKE] Pokemon Trading](./flipper_companion_apps/applications/external/malveke_pokemon_trading/README.md)
 - [[MALVEKE] GAME BOY Emulator (POC)](./flipper_companion_apps/applications/external/malveke_gb_emulator/README.md)
 
 ## Contributors

@@ -82,7 +82,7 @@
 #include <furi_hal.h>
 
 #include <gui/view.h>
-#include <pokemon_icons.h>
+#include <malveke_pokemon_trading_icons.h>
 
 #include "../pokemon_app.h"
 #include "trade_patch_list.h"

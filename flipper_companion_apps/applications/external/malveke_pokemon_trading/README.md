@@ -1,18 +1,22 @@
-# 🐬 Flipper Zero - Pokemon Trading in Game Boy
+# [MALVEKE] Pokemon Trading
 
-<p align="center">
-<a target="_blank" href="https://www.reddit.com/r/flipperzero/comments/121ncot/flipper_zero_game_boy_pokemon_trading/">
-  <img align="center" alt="Flipper Zero - Pokemon Trading Game Boy" src="./docs/images/youtube.png" />
-  </a>
-  <br />
-</p>
+
+<figure>
+    <img src="./docs/images/youtube.png" />
+    <figcaption>MALVEKE Prototype V2.3</figcaption>
+</figure>
 
 <div align="center">
 
-**FW Official** | **FW Unleashed** | **FW RogueMaster** | **FW Xtreme**
+**Official** | **Unleashed** | **RogueMaster** | **Xtreme**
 :- | :- | :- | :- 
-[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main)|[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main&firmware=unleashed)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main&firmware=unleashed)|[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main&firmware=roguemaster)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main&firmware=roguemaster)|[![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main&firmware=xtreme)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main&firmware=xtreme)
+[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_pokemon_trading&branch=main)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_pokemon_trading&branch=main)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_pokemon_trading&branch=main&firmware=unleashed)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_pokemon_trading&branch=main&firmware=unleashed)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_pokemon_trading&branch=main&firmware=roguemaster)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_pokemon_trading&branch=main&firmware=roguemaster)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_pokemon_trading&branch=main&firmware=xtreme)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_pokemon_trading&branch=main&firmware=xtreme)
 </div>
+<br>
+
+<p align='center'>
+<a href="https://www.tindie.com/stores/efuentealba/?ref=offsite_badges&utm_source=sellers_efuentealba&utm_medium=badges&utm_campaign=badge_large"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
+</p>
 
 ## Introduction
 
@@ -20,29 +24,9 @@ This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generacti
 
 It currently trades a Pokemon based on your choice of Pokemon, Level, Stats and 4 Moves.
 
-## Installation Directions
+## MALVEKE for Flipper Zero with Cable Link.
 
-This project is intended to be overlaid on top of an existing firmware repo,  in my case the **Release 0.79.1** version.
-
-- Clone the [Flipper Zero firmware repository](https://github.com/flipperdevices/flipperzero-firmware). Refer to [this tutorial](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/firmware/updating/README.md) for updating the firmware.
-- Copy the "pokemon" folder into the `/applications_user/pokemon` folder in your firmware.
-- Run the command `fbt launch` to run it on your Flipper Zero.
-
-```bash
-./fbt launch APPSRC=pokemon
-```
-
-- NOTE: If you only want to generate the fap file, you must run the following command.
-
-```bash
-./fbt fap_pokemon
-```
-
-And use [**qFlipper**](https://flipperzero.one/update) to copy the generated **pokemon.fap** file to the `SD Card/apps/Game Boy` folder.
-
-<p align='center'>
-<img src="./docs/images/qFlipper.png" width="400" /><br />
-</p>
+Connect your ***GAME BOY*** through the link cable to the `EXT1` port on the **MALVEKE** board.
 
 ## Instructions for use.
 
@@ -251,66 +235,6 @@ _An example GB SPI transfer. Here, the master sends 0xD9 (217) and the slave sen
 <br />
 
 You can learn more about it in the following video. [**Analyzing the Different Versions of the Link Cable**](https://youtu.be/h1KKkCfzOws?t=151).
-
-## Board for Flipper Zero with PortData EXT Link.
-
-For the Flipper Zero board, a [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) and a 2x8  [prototype board](https://es.aliexpress.com/item/32478242317.html) were used.
-
-<p align='center'>
-<br />
-<img src="./docs/images/EXT-Link.png" width="400" /><br />
-</p>
-
-_PortData EXT Link for Game Boy Color, Game Boy Pocket, GBC, GBP, GBL._
-
-<p align='center'>
-<br />
-<img src="./docs/images/pcb.png" width="400" /><br />
-</p>
-<p align='center'>
-<br />
-<img src="./docs/images/flipper-zero-pcb.png" width="400" /><br />
-</p>
-I used 33kΩ resistor on CLK, but it's optional, it can be connected directly.
-
-
-## Connection: Flipper Zero GPIO - Game Boy
-
-The pins should be connected as follows:
-
-<p align='center'>
-<br />
-<img src="./docs/images/wgbl-0.png" width="400" /><br />
-</p>
-
-<picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/images/GPIO-GBPIN_light-v2.png">
-    <source media="(prefers-color-scheme: light)" srcset="./docs/images/GPIO-GBPIN-v2.png">
-    <img
-        alt="Connect Flipper Zero GPIO to Game Boy Pins"
-        src="./docs/images/GPIO-GBPIN-v2.png">
-</picture>
-
-| Cable Game Link (Socket) | Flipper Zero GPIO |
-| ------------------------ | ----------------- |
-| 6 (GND)                  | 8 (GND)           |
-| 5 (CLK)                  | 6 (B2)            |
-| 3 (SI)                   | 7 (C3)            |
-| 2 (SO)                   | 5 (B3)            |
-
-## Connect to Flipper Zero without Socket PortData EXT Link
-
-It's possible to cut a cable directly without using a socket, but it's important to note that the cable is a crossover cable SI-SO.
-
-<p align='center'>
-<br />
-<img src="./docs/images/cut-cable-v3.png" width="400" /><br />
-</p>
-
-*"Cable Game Link" cut and directly connected to the Flipper Zero pins.*
-
-**NOTE**: Don't rely on the cable colors as they may vary depending on the manufacturer. Use a multimeter to measure continuity and identify which cable corresponds to each pin.
-
 
 
 ## GUI

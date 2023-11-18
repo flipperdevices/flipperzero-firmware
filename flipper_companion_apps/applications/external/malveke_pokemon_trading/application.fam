@@ -1,5 +1,5 @@
 App(
-    appid="malveke_pokemon",
+    appid="malveke_pokemon_trading",
     name="[MALVEKE] Pokemon Trading",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="pokemon_app",
