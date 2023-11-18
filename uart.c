@@ -71,6 +71,7 @@ size_t seader_uart_process_buffer(Seader* seader, uint8_t* cmd, size_t cmd_len) 
 int32_t seader_uart_worker(void* context) {
     Seader* seader = (Seader*)context;
     SeaderUartBridge* seader_uart = seader->uart;
+    furi_thread_set_current_priority(FuriThreadPriorityHighest);
 
     memcpy(&seader_uart->cfg, &seader_uart->cfg_new, sizeof(SeaderUartConfig));
 
@@ -153,6 +154,7 @@ int32_t seader_uart_tx_thread(void* context) {
     Seader* seader = (Seader*)context;
     SeaderUartBridge* seader_uart = seader->uart;
 
+    furi_thread_set_current_priority(FuriThreadPriorityHighest);
     while(1) {
         uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_TX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
