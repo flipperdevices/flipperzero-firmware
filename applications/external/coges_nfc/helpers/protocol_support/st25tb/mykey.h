@@ -23,7 +23,8 @@ typedef enum {
 #define get_vendor(b1, b2) (get_block(b1) << 16 | (get_block(b2) & 0x0000FFFF))
 #define get_master_key(uid, vendor_id) ((uid) * ((vendor_id) + 1))
 #define get_is_bound(vendor_id) ((vendor_id) != MYKEY_DEFAULT_VENDOR_ID)
-#define get_encryption_key(master_key, count_down_counter)((master_key) * ((count_down_counter) + 1))
+#define get_encryption_key(master_key, count_down_counter) \
+    ((master_key) * ((count_down_counter) + 1))
 
 uint32_t encode_decode_block(uint32_t input);
 uint32_t st25tb_get_block_value(uint32_t block);

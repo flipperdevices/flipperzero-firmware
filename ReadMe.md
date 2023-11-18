@@ -36,9 +36,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Color Guess v1.2 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - OFW PR: [HID app: added latest changes + PTT #3223 (By hryamzik)](https://github.com/flipperdevices/flipperzero-firmware/pull/3223)
 - Updated: [Hangman v1.3 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
-- Updated: [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [BLE Spam v4.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Added 25 Devices (By Mr-Proxy-source), Devices Sorted & Deduped (By RogueMaster)
 - Updated: [Video Player v0.1 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
+- Updated: [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 
 ## IN THIS BRANCH:
 
@@ -92,6 +92,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Magic v1.2 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) [Nfc Magic rework #67 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/67) [NFC Magic fix gen4 detection #71 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/71)
 - Updated: [PicoPass (iClass) v1.8 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
+- Added: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/)
 
 <a name="release">
 
@@ -370,6 +371,7 @@ $ ./fbt dolphin_ext
 - [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
 - [Clock (By kowalski7cc)](https://github.com/kowalski7cc/flipperzero-firmware/tree/clock-v1)
 - [Coffee-EEPROM (By wh00hw)](https://github.com/wh00hw/Coffee-EEPROM-FAP) For ethical pentest only.
+- [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/)
 - [Continuity Tester (By benallen-dev)](https://github.com/benallen-dev/flipper-zero-apps/tree/main/continuity)
 - [Control 7-segment display with Flipper Zero (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Cookie Clicker v1.0 (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/hid/hid_cookie)
