@@ -64,6 +64,7 @@
 - [MALVEKE] GAME BOY Printer Link Cable Transfer
 - [MALVEKE] GAME BOY Logo Generator
 - [MALVEKE] Pokemon Trading
+- [[MALVEKE] GAME BOY Emulator (POC)](./flipper_companion_apps/applications/external/malveke_gb_emulator/README.md)
 
 ## Contributors
 [![Contributors](https://contrib.rocks/image?repo=EstebanFuentealba/MALVEKE-Flipper-Zero)](https://github.com/EstebanFuentealba/MALVEKE-Flipper-Zero/graphs/contributors)
@@ -85,6 +86,11 @@ Join in on the fun and contribute to the development. You could add new function
 - [ ] Documentation
 - [ ] Application GAME BOY Printer
 - [ ] Play a GAME BOY ROM in Flipper Zero
+
+## News
+- https://www.hackster.io/news/esteban-fuentealba-s-malveke-turns-the-flipper-zero-into-a-nintendo-game-boy-powerhouse-f36fc1d079a2
+- https://www.fayerwayer.com/internet/2023/11/14/flipper-zero-el-llamado-tamagotchi-de-los-hackers-se-mete-en-el-mundo-de-las-consolas-de-videojuegos/
+- https://computerhoy.com/ciberseguridad/flipper-zero-tiene-nuevo-objetivo-consolas-videojuegos-1335020
 
 ## Acknowledgements
 This project builds upon the excellent work of [Just Call Me Koko](https://github.com/justcallmekoko/), the [ESP32Marauder](https://github.com/justcallmekoko/ESP32Marauder)
