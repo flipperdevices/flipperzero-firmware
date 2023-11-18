@@ -87,9 +87,9 @@
 #include "../pokemon_app.h"
 #include "trade_patch_list.h"
 
-#define GAME_BOY_CLK gpio_ext_pb2
-#define GAME_BOY_SI gpio_ext_pc3
-#define GAME_BOY_SO gpio_ext_pb3
+#define GAME_BOY_CLK gpio_ext_pb3
+#define GAME_BOY_SI gpio_ext_pa6
+#define GAME_BOY_SO gpio_ext_pa7
 
 #define DELAY_MICROSECONDS 15
 #define PKMN_BLANK 0x00
