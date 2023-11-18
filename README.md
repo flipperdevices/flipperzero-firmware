@@ -42,6 +42,9 @@ Global schema:
 
 <p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schema.jpg" width=75% height=75%></p>
 
+**Note:** Polarity of the geiger tube may be different on your board
+
+
 UI of the application:
 
 <p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper3.png" width=33% height=33%></p>
