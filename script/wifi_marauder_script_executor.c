@@ -14,7 +14,6 @@ void _send_line_break() {
     wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
 }
 
-
 void _send_channel_select(int channel) {
     char command[30];
     _send_line_break();
@@ -138,9 +137,8 @@ void _wifi_marauder_script_execute_sniff_esp(
 }
 
 void _wifi_marauder_script_execute_sniff_pmkid(
-        WifiMarauderScriptStageSniffPmkid* stage,
-        WifiMarauderScriptWorker* worker) {
-
+    WifiMarauderScriptStageSniffPmkid* stage,
+    WifiMarauderScriptWorker* worker) {
     // If channel hopping is enabled, loop through channels 1-11
     if(stage->hop_channels) {
         for(int i = 1; i <= 11; i++) {
@@ -162,8 +160,8 @@ void _wifi_marauder_script_execute_sniff_pmkid(
         int len = strlen(attack_command);
 
         if(stage->channel > 0) {
-            len +=
-                    snprintf(attack_command + len, sizeof(attack_command) - len, " -c %d", stage->channel);
+            len += snprintf(
+                attack_command + len, sizeof(attack_command) - len, " -c %d", stage->channel);
         }
 
         if(stage->force_deauth) {
