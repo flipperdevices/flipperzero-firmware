@@ -24,7 +24,7 @@
 </p>
 
 
-**GAME BOY** Tools for Flipper Zero. The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi, it allows you to connect all GAME BOY peripherals and additional accessories such as NRF24, CC1101, and GPS..
+**GAME BOY** Tools for Flipper Zero. The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi. MALVEKE allows you to connect all GAME BOY peripherals and additional accessories such as NRF24, CC1101, and GPS.
 
 <table>
   <tbody>
