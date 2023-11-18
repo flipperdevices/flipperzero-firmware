@@ -428,9 +428,58 @@ void seader_send_nfc_rx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t l
     ASN_STRUCT_FREE(asn_DEF_Response, response);
 }
 
+static uint16_t seader_worker_picopass_update_ccitt(uint16_t crcSeed, uint8_t dataByte) {
+    uint16_t crc = crcSeed;
+    uint8_t dat = dataByte;
+
+    dat ^= (uint8_t)(crc & 0xFFU);
+    dat ^= (dat << 4);
+
+    crc = (crc >> 8) ^ (((uint16_t)dat) << 8) ^ (((uint16_t)dat) << 3) ^ (((uint16_t)dat) >> 4);
+
+    return crc;
+}
+
+static uint16_t seader_worker_picopass_calculate_ccitt(
+    uint16_t preloadValue,
+    const uint8_t* buf,
+    uint16_t length) {
+    uint16_t crc = preloadValue;
+    uint16_t index;
+
+    for(index = 0; index < length; index++) {
+        crc = seader_worker_picopass_update_ccitt(crc, buf[index]);
+    }
+
+    return crc;
+}
+
 /*
-FuriHalNfcReturn
-    seader_worker_fake_epurse_update(uint8_t* buffer, uint8_t* rxBuffer, uint16_t* recvLen) {
+void seader_capture_sio(
+    uint8_t* buffer,
+    size_t len,
+    uint8_t* rxBuffer,
+    SeaderCredential* credential) {
+    if(memcmp(buffer, read4Block6, len) == 0 && rxBuffer[0] == 0x30) {
+        memcpy(credential->sio, rxBuffer, 32);
+    } else if(memcmp(buffer, read4Block10, len) == 0 && rxBuffer[0] == 0x30) {
+        memcpy(credential->sio, rxBuffer, 32);
+    } else if(memcmp(buffer, read4Block9, len) == 0) {
+        memcpy(credential->sio + 32, rxBuffer + 8, 24);
+    } else if(memcmp(buffer, read4Block13, len) == 0) {
+        memcpy(credential->sio + 32, rxBuffer + 8, 24);
+    }
+}
+*/
+
+uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
+uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
+uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
+uint8_t read4Block13[] = {0x06, 0x0D, 0x96, 0xE8};
+uint8_t updateBlock2[] = {0x87, 0x02}; // TODO
+
+PicopassError seader_worker_fake_epurse_update(BitBuffer* tx_buffer, BitBuffer* rx_buffer) {
+    const uint8_t* buffer = bit_buffer_get_data(tx_buffer);
     uint8_t fake_response[10];
     memset(fake_response, 0, sizeof(fake_response));
     memcpy(fake_response + 0, buffer + 6, 4);
@@ -439,17 +488,16 @@ FuriHalNfcReturn
     uint16_t crc = seader_worker_picopass_calculate_ccitt(0xE012, fake_response, 8);
     memcpy(fake_response + 8, &crc, sizeof(uint16_t));
 
-    memcpy(rxBuffer, fake_response, sizeof(fake_response));
-    *recvLen = sizeof(fake_response);
+    bit_buffer_append_bytes(rx_buffer, fake_response, sizeof(fake_response));
 
     memset(display, 0, sizeof(display));
     for(uint8_t i = 0; i < sizeof(fake_response); i++) {
         snprintf(display + (i * 2), sizeof(display), "%02x", fake_response[i]);
     }
     FURI_LOG_I(TAG, "Fake update E-Purse response: %s", display);
-    return FuriHalNfcReturnOk;
+
+    return PicopassErrorNone;
 }
-*/
 
 void seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
     UNUSED(seader);
@@ -462,14 +510,18 @@ void seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
     BitBuffer* tx_buffer = bit_buffer_alloc(len);
     BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
 
-    //seader_worker_fake_epurse_update(buffer, rxBuffer, &recvLen);
+    PicopassError error = PicopassErrorNone;
 
     do {
         bit_buffer_append_bytes(
             tx_buffer, buffer, len); // TODO: could this be a `bit_buffer_copy_bytes` ?
-        //
-        PicopassError error = picopass_poller_send_frame(
-            seader->picopass_poller, tx_buffer, rx_buffer, SEADER_POLLER_MAX_FWT);
+
+        if(memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
+            error = seader_worker_fake_epurse_update(tx_buffer, rx_buffer);
+        } else {
+            error = picopass_poller_send_frame(
+                seader->picopass_poller, tx_buffer, rx_buffer, SEADER_POLLER_MAX_FWT);
+        }
         if(error == PicopassErrorIncorrectCrc) {
             error = PicopassErrorNone;
         }
@@ -486,6 +538,7 @@ void seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
             bit_buffer_get_size_bytes(rx_buffer));
 
     } while(false);
+
     bit_buffer_free(tx_buffer);
     bit_buffer_free(rx_buffer);
 }
