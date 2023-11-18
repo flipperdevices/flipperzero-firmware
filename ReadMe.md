@@ -39,6 +39,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [BLE Spam v4.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Added 25 Devices (By Mr-Proxy-source), Devices Sorted & Deduped (By RogueMaster)
 - Updated: [Video Player v0.1 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
+- Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
+- Updated: [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 
 <a name="release">
 
