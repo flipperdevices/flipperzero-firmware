@@ -7,6 +7,7 @@
 
 typedef struct SeaderWorker SeaderWorker;
 typedef struct CCID_Message CCID_Message;
+typedef struct SeaderAPDU SeaderAPDU;
 
 typedef enum {
     // Init states

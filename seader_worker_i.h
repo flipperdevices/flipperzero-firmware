@@ -14,7 +14,7 @@
 #include <SamVersion.h>
 
 #define SEADER_POLLER_MAX_FWT (200000U)
-#define SEADER_POLLER_MAX_BUFFER_SIZE (64U)
+#define SEADER_POLLER_MAX_BUFFER_SIZE (255U)
 
 struct SeaderWorker {
     FuriThread* thread;
@@ -29,6 +29,11 @@ struct SeaderWorker {
 
     SeaderPollerEventType stage;
     SeaderWorkerState state;
+};
+
+struct SeaderAPDU {
+    size_t len;
+    uint8_t buf[SEADER_POLLER_MAX_BUFFER_SIZE];
 };
 
 void seader_worker_change_state(SeaderWorker* seader_worker, SeaderWorkerState state);

@@ -35,7 +35,7 @@ SeaderWorker* seader_worker_alloc() {
     // Worker thread attributes
     seader_worker->thread =
         furi_thread_alloc_ex("SeaderWorker", 8192, seader_worker_task, seader_worker);
-    seader_worker->messages = furi_message_queue_alloc(2, SEADER_UART_RX_BUF_SIZE);
+    seader_worker->messages = furi_message_queue_alloc(2, sizeof(SeaderAPDU));
     seader_worker->mq_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     seader_worker->callback = NULL;
@@ -739,14 +739,14 @@ bool seader_process_success_response(Seader* seader, uint8_t* apdu, size_t len) 
         FURI_LOG_I(TAG, "Queue New SAM Message, %d bytes", len);
         uint32_t space = furi_message_queue_get_space(seader_worker->messages);
         if(space > 0) {
-            BitBuffer* buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
-            bit_buffer_append_bytes(buffer, apdu, len);
+            SeaderAPDU seaderApdu = {};
+            seaderApdu.len = len;
+            memcpy(seaderApdu.buf, apdu, len);
 
             if(furi_mutex_acquire(seader_worker->mq_mutex, FuriWaitForever) == FuriStatusOk) {
-                furi_message_queue_put(seader_worker->messages, buffer, FuriWaitForever);
+                furi_message_queue_put(seader_worker->messages, &seaderApdu, FuriWaitForever);
                 furi_mutex_release(seader_worker->mq_mutex);
             }
-            //bit_buffer_free(buffer);
         }
     }
     return true;
@@ -762,14 +762,14 @@ bool seader_process_apdu(Seader* seader, uint8_t* apdu, size_t len) {
     for(uint8_t i = 0; i < len; i++) {
         snprintf(display + (i * 2), sizeof(display), "%02x", apdu[i]);
     }
-    FURI_LOG_I(TAG, "APDU: %s", display);
+    // FURI_LOG_I(TAG, "APDU: %s", display);
 
     uint8_t SW1 = apdu[len - 2];
     uint8_t SW2 = apdu[len - 1];
 
     switch(SW1) {
     case 0x61:
-        FURI_LOG_I(TAG, "Request %d bytes", SW2);
+        // FURI_LOG_I(TAG, "Request %d bytes", SW2);
         GET_RESPONSE[4] = SW2;
         seader_ccid_XfrBlock(seader_uart, GET_RESPONSE, sizeof(GET_RESPONSE));
         return true;
@@ -858,10 +858,9 @@ SeaderPollerEventType
         if(count > 0) {
             FURI_LOG_D(TAG, "Conversation: %ld messages", count);
 
-            BitBuffer* message =
-                bit_buffer_alloc(furi_message_queue_get_message_size(seader_worker->messages));
+            SeaderAPDU seaderApdu = {};
             FuriStatus status =
-                furi_message_queue_get(seader_worker->messages, message, FuriWaitForever);
+                furi_message_queue_get(seader_worker->messages, &seaderApdu, FuriWaitForever);
             if(status != FuriStatusOk) {
                 FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
                 if(seader_worker->callback) {
@@ -869,16 +868,14 @@ SeaderPollerEventType
                 }
                 return SeaderPollerEventTypeComplete;
             }
-            size_t len = bit_buffer_get_size_bytes(message);
-            uint8_t* payload = (uint8_t*)bit_buffer_get_data(message);
-            FURI_LOG_D(TAG, "Conversation: message length %d", len);
+            FURI_LOG_D(TAG, "Conversation: message length %d", seaderApdu.len);
 
-            if(seader_process_success_response_i(seader, payload, len, true, iso14443_4a_poller)) {
+            if(seader_process_success_response_i(
+                   seader, seaderApdu.buf, seaderApdu.len, true, iso14443_4a_poller)) {
             } else {
                 FURI_LOG_I(TAG, "Response false");
                 stage = SeaderPollerEventTypeComplete;
             }
-            //bit_buffer_free(message);
         }
         furi_mutex_release(seader_worker->mq_mutex);
     } else {

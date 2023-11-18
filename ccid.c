@@ -125,7 +125,7 @@ void seader_ccid_XfrBlockToSlot(
 
     memcpy(seader_uart->tx_buf + 2 + 10, data, len);
     seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10 + len);
-    FURI_LOG_I(TAG, "seader_ccid_XfrBlock %d bytes", seader_uart->tx_len);
+    // FURI_LOG_I(TAG, "seader_ccid_XfrBlock %d bytes", seader_uart->tx_len);
 
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
