@@ -9,7 +9,7 @@
     "hardcoded to 433MHz and\n"                \
     "action 1:Princeton 52811C\n"              \
     "action 2:Princeton 528114\n"              \
-    "action 3:Sec+1.0\n"
+    "action 3:Sec+1.0\n"                       \
     "Optimized for FlipBoard\n"                \
     "v1.1 hardware --\n"                       \
     "see link below to order!\n"               \

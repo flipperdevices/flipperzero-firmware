@@ -51,6 +51,7 @@ static void flipboard_view_flip_signal_draw(Canvas* canvas, void* model) {
 }
 
 static bool x(void* context, uint32_t event) {
+    UNUSED(context);
     if(event == 1) {
         FuriString* sub_file_contents = furi_string_alloc();
         furi_string_printf(
