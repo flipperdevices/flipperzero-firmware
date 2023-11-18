@@ -304,7 +304,7 @@ bool seader_unpack_pacs(
         char pacDebug[384] = {0};
         (&asn_DEF_PAC)->op->print_struct(&asn_DEF_PAC, pac, 1, seader_asn_to_string, pacDebug);
         if(strlen(pacDebug) > 0) {
-            // FURI_LOG_D(TAG, "Received pac: %s", pacDebug);
+            FURI_LOG_D(TAG, "Received pac: %s", pacDebug);
 
             memset(display, 0, sizeof(display));
             if(seader_credential->sio[0] == 0x30) {
@@ -312,7 +312,7 @@ bool seader_unpack_pacs(
                     snprintf(
                         display + (i * 2), sizeof(display), "%02x", seader_credential->sio[i]);
                 }
-                // FURI_LOG_D(TAG, "SIO %s", display);
+                FURI_LOG_D(TAG, "SIO %s", display);
             }
         }
 
@@ -563,7 +563,6 @@ NfcCommand seader_parse_nfc_command_transmit(Seader* seader, NFCSend_t* nfcSend)
     long timeOut = nfcSend->timeOut;
     Protocol_t protocol = nfcSend->protocol;
     FrameProtocol_t frameProtocol = protocol.buf[1];
-    FURI_LOG_D(TAG, "seader_parse_nfc_command_transmit %ld", frameProtocol);
 
 #ifdef ASN1_DEBUG
     memset(display, 0, sizeof(display));
@@ -616,8 +615,6 @@ NfcCommand seader_parse_nfc_off(SeaderUartBridge* seader_uart) {
 }
 
 NfcCommand seader_parse_nfc_command(Seader* seader, NFCCommand_t* nfcCommand) {
-    // TODO: THIS IS WHERE I WANT TO PUSH EVENTS TO MESSAGE QUEUE
-
     SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
     switch(nfcCommand->present) {
@@ -636,7 +633,6 @@ NfcCommand seader_parse_nfc_command(Seader* seader, NFCCommand_t* nfcCommand) {
 
 bool seader_worker_state_machine(Seader* seader, Payload_t* payload, bool online) {
     SeaderWorker* seader_worker = seader->worker;
-    FURI_LOG_D(TAG, "seader_worker_state_machine");
     bool processed = false;
 
     switch(payload->present) {
@@ -673,15 +669,19 @@ bool seader_process_success_response_i(Seader* seader, uint8_t* apdu, size_t len
     asn_dec_rval_t rval =
         asn_decode(0, ATS_DER, &asn_DEF_Payload, (void**)&payload, apdu + 6, len - 6);
     if(rval.code == RC_OK) {
+        processed = seader_worker_state_machine(seader, payload, online);
+
 #ifdef ASN1_DEBUG
-        memset(payloadDebug, 0, sizeof(payloadDebug));
-        (&asn_DEF_Payload)
-            ->op->print_struct(&asn_DEF_Payload, payload, 1, seader_asn_to_string, payloadDebug);
-        if(strlen(payloadDebug) > 0) {
-            FURI_LOG_D(TAG, "Received payload: %s", payloadDebug);
+        if(processed) {
+            memset(payloadDebug, 0, sizeof(payloadDebug));
+            (&asn_DEF_Payload)
+                ->op->print_struct(
+                    &asn_DEF_Payload, payload, 1, seader_asn_to_string, payloadDebug);
+            if(strlen(payloadDebug) > 0) {
+                FURI_LOG_D(TAG, "Received payload: %s", payloadDebug);
+            }
         }
 #endif
-        processed = seader_worker_state_machine(seader, payload, online);
     } else {
         FURI_LOG_D(TAG, "Failed to decode APDU payload");
     }
@@ -773,7 +773,7 @@ int32_t seader_worker_task(void* context) {
             // seader_nfc_scene_field_on_exit();
         }
     }
-    // FURI_LOG_D(TAG, "Worker Task Complete");
+    FURI_LOG_D(TAG, "Worker Task Complete");
     seader_worker_change_state(seader_worker, SeaderWorkerStateReady);
 
     return 0;
@@ -935,6 +935,8 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
         // Is this a good place to reset?
         stage = SeaderPollerEventTypeCardDetect;
         requestPacs = true;
+    } else if(event.type == PicopassPollerEventTypeCardDetected) {
+        // No-op. I can't actually get the CSN at this point it seems.
     } else if(event.type == PicopassPollerEventTypeSuccess) {
         if(stage == SeaderPollerEventTypeCardDetect) {
             FURI_LOG_D(TAG, "Card Detect");
