@@ -13,6 +13,7 @@ void seader_scene_read_picopass_on_enter(void* context) {
     // Start worker
     view_dispatcher_switch_to_view(seader->view_dispatcher, SeaderViewPopup);
 
+    seader_credential_clear(seader->credential);
     seader->picopass_poller = picopass_poller_alloc(seader->nfc);
     picopass_poller_start(seader->picopass_poller, seader_worker_poller_callback_picopass, seader);
 
@@ -25,7 +26,6 @@ bool seader_scene_read_picopass_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SeaderCustomEventWorkerExit) {
-            seader_credential_clear(seader->credential);
             seader->credential->type = SeaderCredentialTypePicopass;
             scene_manager_next_scene(seader->scene_manager, SeaderSceneReadCardSuccess);
             consumed = true;

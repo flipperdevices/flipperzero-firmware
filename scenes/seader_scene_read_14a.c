@@ -15,7 +15,7 @@ void seader_scene_read_14a_on_enter(void* context) {
 
     seader->poller = nfc_poller_alloc(seader->nfc, NfcProtocolIso14443_4a);
 
-    //nfc_config(seader->nfc, NfcModePoller, NfcTechIso14443a);
+    seader_credential_clear(seader->credential);
     nfc_poller_start(seader->poller, seader_worker_poller_callback_iso14443_4a, seader);
 
     seader_blink_start(seader);
@@ -27,7 +27,6 @@ bool seader_scene_read_14a_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SeaderCustomEventWorkerExit) {
-            seader_credential_clear(seader->credential);
             seader->credential->type = SeaderCredentialType14A;
             scene_manager_next_scene(seader->scene_manager, SeaderSceneReadCardSuccess);
             consumed = true;
