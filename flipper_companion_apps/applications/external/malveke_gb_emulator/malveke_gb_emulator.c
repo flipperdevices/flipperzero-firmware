@@ -70,12 +70,8 @@ static bool malveke_gb_emulator_view_input_callback(InputEvent* event, void* con
                 instance->view,
                 UartDumpModel * model,
                 {
-                    if(!model->initialized) {
-                        model->initialized = true;
-                    } else {
-                        const char gbemulator_command_OK[] = "S\n";
-                        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_OK, strlen(gbemulator_command_OK));  
-                    }
+                    const char gbemulator_command_OK[] = "S\n";
+                    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)gbemulator_command_OK, strlen(gbemulator_command_OK));  
                 },
                 false);
 
@@ -124,7 +120,7 @@ static void process_ringbuffer(UartDumpModel* model, uint8_t byte) {
 
     //// 2. Phase: flushing the ringbuffer to the framebuffer
     model->ringbuffer_index = 0; // Let's reset the ringbuffer
-    // model->initialized = true; // We've successfully established the connection
+    model->initialized = true; // We've successfully established the connection
     size_t row_start_index = model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
 
     if (row_start_index > LAST_ROW_INDEX){ // Failsafe
