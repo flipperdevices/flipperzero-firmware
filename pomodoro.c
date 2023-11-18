@@ -71,12 +71,6 @@ Pomodoro* pomodoro_app_alloc() {
     app->submenu = submenu_alloc();
     submenu_add_item(
         app->submenu,
-        "5217: 52 work 17 rest",
-        PomodoroSubmenuIndex52,
-        pomodoro_submenu_callback,
-        app);
-    submenu_add_item(
-        app->submenu,
         "Classic: 25 work 5 rest",
         PomodoroSubmenuIndex25,
         pomodoro_submenu_callback,
@@ -91,6 +85,12 @@ Pomodoro* pomodoro_app_alloc() {
         app->submenu,
         "Sprint: 10 work 2 rest",
         PomodoroSubmenuIndex10,
+        pomodoro_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "5217: 52 work 17 rest",
+        PomodoroSubmenuIndex52,
         pomodoro_submenu_callback,
         app);
     view_set_previous_callback(submenu_get_view(app->submenu), pomodoro_exit);
