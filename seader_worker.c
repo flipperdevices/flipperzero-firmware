@@ -627,8 +627,9 @@ bool seader_worker_state_machine(Seader* seader, Payload_t* payload, bool online
         break;
     case Payload_PR_nfcCommand:
         if(online) {
-            seader_parse_nfc_command(seader, &payload->choice.nfcCommand);
-            processed = true;
+            NfcCommand c = seader_parse_nfc_command(seader, &payload->choice.nfcCommand);
+            // Cheating and using processed flag during online mode to indicate if this was the end of the interaction
+            processed = (c == NfcCommandContinue);
         }
         break;
     case Payload_PR_errorResponse:
@@ -816,12 +817,12 @@ typedef enum {
 
 SeaderPollerEventType stage = SeaderPollerEventTypeCardDetect;
 
-NfcCommand seader_worker_poller_conversation(Seader* seader) {
-    NfcCommand ret = NfcCommandContinue;
+SeaderPollerEventType seader_worker_poller_conversation(Seader* seader) {
+    SeaderPollerEventType stage = SeaderPollerEventTypeConversation;
     SeaderWorker* seader_worker = seader->worker;
 
     if(furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
-        // furi_thread_set_current_priority(FuriThreadPriorityHighest);
+        furi_thread_set_current_priority(FuriThreadPriorityHighest);
         uint32_t count = furi_message_queue_get_count(seader_worker->messages);
         if(count > 0) {
             FURI_LOG_D(TAG, "Conversation: %ld messages", count);
@@ -832,7 +833,7 @@ NfcCommand seader_worker_poller_conversation(Seader* seader) {
                 furi_message_queue_get(seader_worker->messages, message, FuriWaitForever);
             if(status != FuriStatusOk) {
                 FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
-                return NfcCommandStop;
+                return SeaderPollerEventTypeComplete;
             }
             size_t len = bit_buffer_get_size_bytes(message);
             uint8_t* payload = (uint8_t*)bit_buffer_get_data(message);
@@ -840,7 +841,8 @@ NfcCommand seader_worker_poller_conversation(Seader* seader) {
 
             if(seader_process_success_response_i(seader, payload, len, true)) {
             } else {
-                ret = NfcCommandStop;
+                FURI_LOG_I(TAG, "Response false");
+                stage = SeaderPollerEventTypeComplete;
             }
             //bit_buffer_free(message);
         }
@@ -848,10 +850,10 @@ NfcCommand seader_worker_poller_conversation(Seader* seader) {
 
         //stage = SeaderPollerEventTypeComplete;
     } else {
-        furi_delay_ms(10);
+        furi_thread_set_current_priority(FuriThreadPriorityLowest);
     }
 
-    return ret;
+    return stage;
 }
 
 NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void* context) {
@@ -884,7 +886,7 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
             stage = SeaderPollerEventTypeConversation;
         } else if(stage == SeaderPollerEventTypeConversation) {
-            ret = seader_worker_poller_conversation(seader);
+            stage = seader_worker_poller_conversation(seader);
 
             // stage = SeaderPollerEventTypeComplete;
         } else if(stage == SeaderPollerEventTypeComplete) {
@@ -916,8 +918,7 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
 
         } else if(stage == SeaderPollerEventTypeConversation) {
             FURI_LOG_D(TAG, "picopass conversation");
-
-            ret = seader_worker_poller_conversation(seader);
+            stage = seader_worker_poller_conversation(seader);
         } else if(stage == SeaderPollerEventTypeComplete) {
             FURI_LOG_D(TAG, "Complete");
             view_dispatcher_send_custom_event(
