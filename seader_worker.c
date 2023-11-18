@@ -68,17 +68,14 @@ void seader_worker_start(
     SeaderWorker* seader_worker,
     SeaderWorkerState state,
     SeaderUartBridge* uart,
-    SeaderCredential* credential,
     SeaderWorkerCallback callback,
     void* context) {
     furi_assert(seader_worker);
     furi_assert(uart);
-    furi_assert(credential);
 
     seader_worker->callback = callback;
     seader_worker->context = context;
     seader_worker->uart = uart;
-    seader_worker->credential = credential;
     seader_worker_change_state(seader_worker, state);
     furi_thread_start(seader_worker->thread);
 }
@@ -376,9 +373,10 @@ bool seader_parse_version(SeaderWorker* seader_worker, uint8_t* buf, size_t size
     return rtn;
 }
 
-bool seader_parse_sam_response(SeaderWorker* seader_worker, SamResponse_t* samResponse) {
+bool seader_parse_sam_response(Seader* seader, SamResponse_t* samResponse) {
+    SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
-    SeaderCredential* credential = seader_worker->credential;
+    SeaderCredential* credential = seader->credential;
 
     if(samResponse->size == 0) {
         if(requestPacs) {
@@ -408,10 +406,10 @@ bool seader_parse_sam_response(SeaderWorker* seader_worker, SamResponse_t* samRe
     return false;
 }
 
-bool seader_parse_response(SeaderWorker* seader_worker, Response_t* response) {
+bool seader_parse_response(Seader* seader, Response_t* response) {
     switch(response->present) {
     case Response_PR_samResponse:
-        seader_parse_sam_response(seader_worker, &response->choice.samResponse);
+        seader_parse_sam_response(seader, &response->choice.samResponse);
         break;
     default:
         break;
@@ -632,12 +630,11 @@ NfcCommand seader_parse_nfc_command(Seader* seader, NFCCommand_t* nfcCommand) {
 }
 
 bool seader_worker_state_machine(Seader* seader, Payload_t* payload, bool online) {
-    SeaderWorker* seader_worker = seader->worker;
     bool processed = false;
 
     switch(payload->present) {
     case Payload_PR_response:
-        seader_parse_response(seader_worker, &payload->choice.response);
+        seader_parse_response(seader, &payload->choice.response);
         processed = true;
         break;
     case Payload_PR_nfcCommand:
@@ -756,24 +753,9 @@ int32_t seader_worker_task(void* context) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
 
     if(seader_worker->state == SeaderWorkerStateCheckSam) {
+        FURI_LOG_D(TAG, "Check for SAM");
         seader_ccid_check_for_sam(seader_uart);
-    } else if(seader_worker->state == SeaderWorkerStateReadPicopass) {
-        FURI_LOG_D(TAG, "Read Picopass");
-        requestPacs = true;
-        seader_credential_clear(seader_worker->credential);
-        seader_worker->credential->type = SeaderCredentialTypePicopass;
-    } else if(seader_worker->state == SeaderWorkerStateRead14a) {
-        FURI_LOG_D(TAG, "Read 14a");
-        requestPacs = true;
-        seader_credential_clear(seader_worker->credential);
-        seader_worker->credential->type = SeaderCredentialType14A;
-        // seader_nfc_scene_field_on_enter();
-        if(!seader_detect_nfc(seader_worker)) {
-            // Turn off if cancelled / no card found
-            // seader_nfc_scene_field_on_exit();
-        }
     }
-    FURI_LOG_D(TAG, "Worker Task Complete");
     seader_worker_change_state(seader_worker, SeaderWorkerStateReady);
 
     return 0;
@@ -891,6 +873,8 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
     if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
         if(stage == SeaderPollerEventTypeCardDetect) {
             FURI_LOG_D(TAG, "Card Detect");
+            requestPacs = true;
+
             nfc_device_set_data(
                 seader->nfc_device, NfcProtocolIso14443_4a, nfc_poller_get_data(seader->poller));
 
@@ -908,6 +892,7 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
             stage = SeaderPollerEventTypeConversation;
         } else if(stage == SeaderPollerEventTypeConversation) {
+            FURI_LOG_D(TAG, "14a conversation");
             stage = seader_worker_poller_conversation(seader);
         } else if(stage == SeaderPollerEventTypeComplete) {
             FURI_LOG_D(TAG, "Complete");

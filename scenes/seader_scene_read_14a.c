@@ -27,6 +27,7 @@ bool seader_scene_read_14a_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SeaderCustomEventWorkerExit) {
+            seader_credential_clear(seader->credential);
             seader->credential->type = SeaderCredentialType14A;
             scene_manager_next_scene(seader->scene_manager, SeaderSceneReadCardSuccess);
             consumed = true;

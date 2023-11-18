@@ -47,7 +47,6 @@ void seader_worker_start(
     SeaderWorker* seader_worker,
     SeaderWorkerState state,
     SeaderUartBridge* uart,
-    SeaderCredential* credential,
     SeaderWorkerCallback callback,
     void* context);
 

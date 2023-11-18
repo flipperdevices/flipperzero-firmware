@@ -24,7 +24,6 @@ struct SeaderWorker {
     FuriMutex* mq_mutex;
 
     SeaderUartBridge* uart;
-    SeaderCredential* credential;
     SeaderWorkerCallback callback;
     void* context;
 

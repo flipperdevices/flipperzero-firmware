@@ -35,7 +35,6 @@ void seader_scene_start_on_enter(void* context) {
         seader->worker,
         SeaderWorkerStateCheckSam,
         seader->uart,
-        seader->credential,
         seader_sam_check_worker_callback,
         seader);
     view_dispatcher_switch_to_view(seader->view_dispatcher, SeaderViewPopup);

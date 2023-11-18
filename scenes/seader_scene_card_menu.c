@@ -16,8 +16,7 @@ void seader_scene_card_menu_submenu_callback(void* context, uint32_t index) {
 
 void seader_scene_card_menu_on_enter(void* context) {
     Seader* seader = context;
-    SeaderWorker* seader_worker = seader->worker;
-    SeaderCredential* credential = seader_worker->credential;
+    SeaderCredential* credential = seader->credential;
     Submenu* submenu = seader->submenu;
 
     submenu_add_item(
