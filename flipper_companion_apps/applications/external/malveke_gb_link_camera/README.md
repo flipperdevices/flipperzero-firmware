@@ -9,6 +9,10 @@
 [![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_gb_link_camera&branch=main)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_gb_link_camera&branch=main)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_gb_link_camera&branch=main&firmware=unleashed)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_gb_link_camera&branch=main&firmware=unleashed)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_gb_link_camera&branch=main&firmware=roguemaster)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_gb_link_camera&branch=main&firmware=roguemaster)|[![FlipC.org](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero/badge?root=flipper_companion_apps/malveke_gb_link_camera&branch=main&firmware=xtreme)](https://flipc.org/EstebanFuentealba/MALVEKE-Flipper-Zero?root=flipper_companion_apps/malveke_gb_link_camera&branch=main&firmware=xtreme)
 </div>
 
+<p align='center'>
+<a href="https://www.tindie.com/stores/efuentealba/?ref=offsite_badges&utm_source=sellers_efuentealba&utm_medium=badges&utm_campaign=badge_large"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
+</p>
+
 Extract your  ***GAME BOY*** Camera picture via WIFI, so they can be easily shared with your phone, tablet or pc. Easy to use, just hook up to your ***GAME BOY*** and print as usual, the device will store the images and share them on a web server via WIFI. You will need a printer cable or gameboy Color link cable.
 <br>
 
