@@ -1,6 +1,6 @@
 App(
-    appid="pokemon",
-    name="Pokemon Trading",
+    appid="malveke_pokemon",
+    name="[MALVEKE] Pokemon Trading",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="pokemon_app",
     requires=["gui"],
