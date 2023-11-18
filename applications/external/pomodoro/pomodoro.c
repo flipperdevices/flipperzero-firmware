@@ -7,6 +7,7 @@ enum PomodoroDebugSubmenuIndex {
     PomodoroSubmenuIndex10,
     PomodoroSubmenuIndex25,
     PomodoroSubmenuIndex50,
+    PomodoroSubmenuIndex52,
 };
 
 static void pomodoro_view_dispatcher_update_callback(void* context) {
@@ -43,6 +44,10 @@ void pomodoro_submenu_callback(void* context, uint32_t index) {
     if(index == PomodoroSubmenuIndex50) {
         app->view_id = PomodoroView50;
         view_dispatcher_switch_to_view(app->view_dispatcher, PomodoroView50);
+    }
+    if(index == PomodoroSubmenuIndex52) {
+        app->view_id = PomodoroView52;
+        view_dispatcher_switch_to_view(app->view_dispatcher, PomodoroView52);
     }
 }
 
@@ -105,6 +110,12 @@ Pomodoro* pomodoro_app_alloc() {
         PomodoroSubmenuIndex10,
         pomodoro_submenu_callback,
         app);
+    submenu_add_item(
+        app->submenu,
+        "5217: 52 work 17 rest",
+        PomodoroSubmenuIndex52,
+        pomodoro_submenu_callback,
+        app);
     view_set_previous_callback(submenu_get_view(app->submenu), pomodoro_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, PomodoroViewSubmenu, submenu_get_view(app->submenu));
@@ -138,6 +149,12 @@ Pomodoro* pomodoro_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, PomodoroView10, pomodoro_10_get_view(app->pomodoro_10));
 
+    // 52 minutes view
+    app->pomodoro_52 = pomodoro_52_alloc();
+    view_set_previous_callback(pomodoro_52_get_view(app->pomodoro_52), pomodoro_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, PomodoroView52, pomodoro_52_get_view(app->pomodoro_52));
+
     // TODO switch to menu after Media is done
     app->view_id = PomodoroViewSubmenu;
     view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
@@ -162,6 +179,8 @@ void pomodoro_app_free(Pomodoro* app) {
     pomodoro_50_free(app->pomodoro_50);
     view_dispatcher_remove_view(app->view_dispatcher, PomodoroView10);
     pomodoro_10_free(app->pomodoro_10);
+    view_dispatcher_remove_view(app->view_dispatcher, PomodoroView52);
+    pomodoro_52_free(app->pomodoro_52);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records
