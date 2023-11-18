@@ -10,6 +10,7 @@ void clear_sniffer_buffers(i2cSniffer* i2c_sniffer) {
         i2c_sniffer->frames[i].bit_index = 0;
         i2c_sniffer->frames[i].data_index = 0;
     }
+    i2c_sniffer->saved = false;
     i2c_sniffer->frame_index = 0;
     i2c_sniffer->state = I2C_BUS_FREE;
     i2c_sniffer->first = true;
@@ -56,6 +57,7 @@ void SDAcallback(void* _i2c_sniffer) {
         }
         i2c_sniffer->frame_index++;
         if(i2c_sniffer->frame_index >= MAX_RECORDS) {
+            //save_sniffer_data(i2c_sniffer);
             clear_sniffer_buffers(i2c_sniffer);
         }
     }
@@ -88,6 +90,7 @@ i2cSniffer* i2c_sniffer_alloc() {
     i2c_sniffer->started = false;
     i2c_sniffer->row_index = 0;
     i2c_sniffer->menu_index = 0;
+    i2c_sniffer->must_save = false;
     clear_sniffer_buffers(i2c_sniffer);
     return i2c_sniffer;
 }
@@ -98,4 +101,45 @@ void i2c_sniffer_free(i2cSniffer* i2c_sniffer) {
         stop_interrupts();
     }
     free(i2c_sniffer);
+}
+
+bool save_sniffer_data(i2cSniffer* i2c_sniffer) {
+    furi_assert(i2c_sniffer);
+    size_t content_size = sizeof(i2cFrame) * (i2c_sniffer->frame_index + 1);
+    char* content = (char*)malloc(content_size);
+    snprintf(content, content_size, "%s\n", "i2c sniffer logs");
+    size_t content_offset = strlen(content);
+
+    for(size_t i = 0; i < i2c_sniffer->frame_index; i++) {
+        content_offset = strlen(content);
+        if((int)(i2c_sniffer->frames[i].data[0]) % 2 == 0) {
+            snprintf(content + content_offset, content_size - content_offset, "%d: Write\n", i);
+        } else {
+            snprintf(content + content_offset, content_size - content_offset, "%d: Read\n", i);
+        }
+        content_offset = strlen(content);
+        snprintf(
+            content + content_offset,
+            content_size - content_offset,
+            "%d: Address: 0x%02x\n",
+            i,
+            (int)(i2c_sniffer->frames[i].data[0] >> 1));
+        for(size_t j = 1; j <= i2c_sniffer->frames->data_index; j++) {
+            content_offset = strlen(content);
+            snprintf(
+                content + content_offset,
+                content_size - content_offset,
+                "%d: Data: 0x%02x\n",
+                i,
+                (int)(i2c_sniffer->frames[i].data[j]));
+        }
+        content_offset = strlen(content);
+        snprintf(content + content_offset, content_size - content_offset, "\n");
+    }
+    bool result = i2c_save_file(content);
+    if(result) {
+        i2c_sniffer->saved = true;
+    }
+    free(content);
+    return result;
 }
