@@ -454,12 +454,17 @@ static uint16_t seader_worker_picopass_calculate_ccitt(
     return crc;
 }
 
-/*
-void seader_capture_sio(
-    uint8_t* buffer,
-    size_t len,
-    uint8_t* rxBuffer,
-    SeaderCredential* credential) {
+uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
+uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
+uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
+uint8_t read4Block13[] = {0x06, 0x0D, 0x96, 0xE8};
+uint8_t updateBlock2[] = {0x87, 0x02}; // TODO
+
+void seader_capture_sio(BitBuffer* tx_buffer, BitBuffer* rx_buffer, SeaderCredential* credential) {
+    const uint8_t* buffer = bit_buffer_get_data(tx_buffer);
+    size_t len = bit_buffer_get_size_bytes(tx_buffer);
+    const uint8_t* rxBuffer = bit_buffer_get_data(rx_buffer);
+
     if(memcmp(buffer, read4Block6, len) == 0 && rxBuffer[0] == 0x30) {
         memcpy(credential->sio, rxBuffer, 32);
     } else if(memcmp(buffer, read4Block10, len) == 0 && rxBuffer[0] == 0x30) {
@@ -470,13 +475,6 @@ void seader_capture_sio(
         memcpy(credential->sio + 32, rxBuffer + 8, 24);
     }
 }
-*/
-
-uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
-uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
-uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
-uint8_t read4Block13[] = {0x06, 0x0D, 0x96, 0xE8};
-uint8_t updateBlock2[] = {0x87, 0x02}; // TODO
 
 PicopassError seader_worker_fake_epurse_update(BitBuffer* tx_buffer, BitBuffer* rx_buffer) {
     const uint8_t* buffer = bit_buffer_get_data(tx_buffer);
@@ -513,8 +511,7 @@ void seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
     PicopassError error = PicopassErrorNone;
 
     do {
-        bit_buffer_append_bytes(
-            tx_buffer, buffer, len); // TODO: could this be a `bit_buffer_copy_bytes` ?
+        bit_buffer_append_bytes(tx_buffer, buffer, len);
 
         if(memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
             error = seader_worker_fake_epurse_update(tx_buffer, rx_buffer);
@@ -531,7 +528,7 @@ void seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
             break;
         }
 
-        // seader_capture_sio(buffer, len, rxBuffer, credential);
+        seader_capture_sio(tx_buffer, rx_buffer, seader->credential);
         seader_send_nfc_rx(
             seader_uart,
             (uint8_t*)bit_buffer_get_data(rx_buffer),
@@ -564,9 +561,7 @@ void seader_iso14443a_transmit(
     BitBuffer* rx_buffer = bit_buffer_alloc(SEADER_POLLER_MAX_BUFFER_SIZE);
 
     do {
-        // bit_buffer_reset(tx_buffer);
-        bit_buffer_append_bytes(
-            tx_buffer, buffer, len); // TODO: could this be a `bit_buffer_copy_bytes` ?
+        bit_buffer_append_bytes(tx_buffer, buffer, len);
 
         Iso14443_4aError error = iso14443_4a_poller_send_block(
             (Iso14443_4aPoller*)iso14443_4a_poller, tx_buffer, rx_buffer);
@@ -575,9 +570,6 @@ void seader_iso14443a_transmit(
             seader_worker->stage = SeaderPollerEventTypeFail;
             break;
         }
-
-        FURI_LOG_I(TAG, "NFC incoming %d bytes", bit_buffer_get_size_bytes(rx_buffer));
-        //    iso14443_4a_copy(instance->data->iso14443_4a_data, iso14443_4a_poller_get_data(instance->iso14443_4a_poller));
 
         seader_send_nfc_rx(
             seader_uart,
