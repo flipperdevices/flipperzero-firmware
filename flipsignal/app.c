@@ -1,6 +1,8 @@
 #include "app.h"
 #include "app_config.h"
 
+#include <devices/devices.h>
+
 /**
  * @brief This method handles Flipper D-Pad input when in the FlipboardSignal mode.
  * @param event The InputEvent* to handle.
@@ -48,11 +50,59 @@ static void flipboard_view_flip_signal_draw(Canvas* canvas, void* model) {
     furi_string_free(action_text);
 }
 
+static bool x(void* context, uint32_t event) {
+    if(event == 1) {
+        FuriString* sub_file_contents = furi_string_alloc();
+        furi_string_printf(
+            sub_file_contents,
+            "Filetype: Flipper SubGhz Key File\r\n"
+            "Version: 1\r\n"
+            "Frequency: 433920000\r\n"
+            "Preset: FuriHalSubGhzPresetOok650Async\r\n"
+            "Protocol: Princeton\r\n"
+            "Bit: 24\r\n"
+            "Key: 00 00 00 00 00 52 81 1C\r\n"
+            "TE: 157\r\n");
+        send_signal("Princeton", 433920000, sub_file_contents, false);
+        furi_string_free(sub_file_contents);
+    } else if(event == 2) {
+        FuriString* sub_file_contents = furi_string_alloc();
+        furi_string_printf(
+            sub_file_contents,
+            "Filetype: Flipper SubGhz Key File\r\n"
+            "Version: 1\r\n"
+            "Frequency: 433920000\r\n"
+            "Preset: FuriHalSubGhzPresetOok650Async\r\n"
+            "Protocol: Princeton\r\n"
+            "Bit: 24\r\n"
+            "Key: 00 00 00 00 00 52 81 14\r\n"
+            "TE: 157\r\n");
+        send_signal("Princeton", 433920000, sub_file_contents, false);
+        furi_string_free(sub_file_contents);
+    } else if(event == 4) {
+        FuriString* sub_file_contents = furi_string_alloc();
+        furi_string_printf(
+            sub_file_contents,
+            "Filetype: Flipper SubGhz Key File\r\n"
+            "Version: 1\r\n"
+            "Frequency: 433920000\r\n"
+            "Preset: FuriHalSubGhzPresetOok650Async\r\n"
+            "Protocol: Security+ 1.0\r\n"
+            "Bit: 42\r\n"
+            "Key: 63 A4 A7 6D E6 00 00 00\r\n");
+        send_signal("Security+ 1.0", 433920000, sub_file_contents, false);
+        furi_string_free(sub_file_contents);
+    }
+
+    return true;
+}
+
 /**
  * @brief This method transmits a signal associated with the button.
  * @param model The FlipboardModel* context.
  * @param bm The ButtonModel* context.
  */
+static ViewDispatcher* view_dispatcher = NULL;
 static void flipboard_model_send_signal(FlipboardModel* model, ButtonModel* bm) {
     UNUSED(model);
     if(bm == NULL) {
@@ -60,7 +110,10 @@ static void flipboard_model_send_signal(FlipboardModel* model, ButtonModel* bm) 
         return;
     }
 
-    FURI_LOG_D(TAG, "TODO: Send signal %d.SUB", button_model_get_button_id(bm));
+    uint8_t btn = button_model_get_button_id(bm);
+    FURI_LOG_D(TAG, "TODO: Send signal %d.SUB", btn);
+
+    view_dispatcher_send_custom_event(view_dispatcher, btn);
 }
 
 /**
@@ -150,6 +203,8 @@ int32_t flipboard_signal_app(void* p) {
         NULL,
         0,
         get_primary_view);
+    view_dispatcher = flipboard_get_view_dispatcher(app);
+    view_dispatcher_set_custom_event_callback(flipboard_get_view_dispatcher(app), x);
     view_dispatcher_run(flipboard_get_view_dispatcher(app));
     flipboard_free(app);
 

@@ -22,3 +22,5 @@
 #include "../common/keyboard.h"
 #include "../common/leds.h"
 #include "../common/speaker.h"
+
+#include "./signal.h"
