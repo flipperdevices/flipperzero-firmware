@@ -68,6 +68,14 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
     </p>
 
 - Now, on your ***GAME BOY***, connect the Link Cable to **MALVEKE** `EXT2` port and proceed to print images as usual; they will appear in the web browser.
+
+
+    <p align='center'>
+        <br />
+        <img src="../../../../assets/GAME-BOY-MALVEKE-connection-EXT2.png" width="400" />
+        <br />
+    </p>
+
     <p align='center'>
         <br />
         <img src="./docs/images/gbp-6.png" width="400" />

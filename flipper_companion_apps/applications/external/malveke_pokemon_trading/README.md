@@ -31,7 +31,7 @@ Connect your ***GAME BOY*** through the link cable to the `EXT1` port on the **M
 
 <p align='center'>
     <br />
-    <img src="./docs/images/gameboy-malveke-connection.png" width="400" />
+    <img src="../../../../assets/GAME-BOY-MALVEKE-connection-EXT1.png" width="400" />
     <br />
 </p>
 
