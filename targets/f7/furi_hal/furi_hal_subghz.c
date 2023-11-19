@@ -77,6 +77,10 @@ void furi_hal_subghz_init() {
     furi_hal_gpio_init(&FURI_HAL_SUBGHZ_TX_GPIO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 #endif
 
+#ifdef FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO
+    furi_hal_subghz_set_async_mirror_pin(&FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO);
+#endif
+
     // Reset
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     cc1101_reset(&furi_hal_spi_bus_handle_subghz);
@@ -514,7 +518,7 @@ static FuriHalSubGhzAsyncTx furi_hal_subghz_async_tx = {0};
 static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
     furi_assert(furi_hal_subghz.state == SubGhzStateAsyncTx);
     while(samples > 0) {
-        bool is_odd = samples % 2;
+        bool is_odd = !(samples % 2);
         LevelDuration ld;
         if(level_duration_is_reset(furi_hal_subghz_async_tx.carry_ld)) {
             ld = furi_hal_subghz_async_tx.callback(furi_hal_subghz_async_tx.callback_context);
@@ -558,7 +562,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
 
             uint32_t duration = level_duration_get_duration(ld);
             furi_assert(duration > 0);
-            *buffer = duration;
+            *buffer = duration - 1;
             buffer++;
             samples--;
 
@@ -596,12 +600,10 @@ static void furi_hal_subghz_async_tx_timer_isr() {
         LL_TIM_ClearFlag_UPDATE(TIM2);
         if(LL_TIM_GetAutoReload(TIM2) == 0) {
             if(furi_hal_subghz.state == SubGhzStateAsyncTx) {
-                furi_hal_subghz.state = SubGhzStateAsyncTxLast;
-                LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
-            } else if(furi_hal_subghz.state == SubGhzStateAsyncTxLast) {
-                furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
                 //forcibly pulls the pin to the ground so that there is no carrier
                 furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
+                LL_DMA_DisableChannel(SUBGHZ_DMA_CH1_DEF);
+                furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
                 LL_TIM_DisableCounter(TIM2);
             } else {
                 furi_crash();
@@ -654,14 +656,11 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_hal_bus_enable(FuriHalBusTIM2);
 
     // Configure TIM2
-    LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler = 64 - 1;
-    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = 1000;
-    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-    LL_TIM_Init(TIM2, &TIM_InitStruct);
+    LL_TIM_SetPrescaler(TIM2, 64 - 1);
+    LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
+    LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
-    LL_TIM_EnableARRPreload(TIM2);
+    LL_TIM_DisableARRPreload(TIM2);
 
     // Configure TIM2 CH2
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
@@ -681,16 +680,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     LL_TIM_EnableDMAReq_UPDATE(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
-
-    // Start counter
     LL_TIM_GenerateEvent_UPDATE(TIM2);
-#ifdef FURI_HAL_SUBGHZ_TX_GPIO
-    furi_hal_gpio_write(&FURI_HAL_SUBGHZ_TX_GPIO, true);
-#endif
-    furi_hal_subghz_tx();
-
-    LL_TIM_SetCounter(TIM2, 0);
-    LL_TIM_EnableCounter(TIM2);
 
     // Start debug
     if(furi_hal_subghz_start_debug()) {
@@ -713,6 +703,16 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
         LL_DMA_SetDataLength(SUBGHZ_DMA_CH2_DEF, 2);
         LL_DMA_EnableChannel(SUBGHZ_DMA_CH2_DEF);
     }
+
+    // Start counter
+#ifdef FURI_HAL_SUBGHZ_TX_GPIO
+    furi_hal_gpio_write(&FURI_HAL_SUBGHZ_TX_GPIO, true);
+#endif
+    furi_hal_subghz_tx();
+    //subtract the delay for starting DMA and updating the first ARR value
+    LL_TIM_SetAutoReload(TIM2, LL_TIM_GetAutoReload(TIM2) - 80);
+    LL_TIM_SetCounter(TIM2, 0);
+    LL_TIM_EnableCounter(TIM2);
 
     return true;
 }
