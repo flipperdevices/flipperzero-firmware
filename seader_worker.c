@@ -35,7 +35,7 @@ SeaderWorker* seader_worker_alloc() {
     // Worker thread attributes
     seader_worker->thread =
         furi_thread_alloc_ex("SeaderWorker", 8192, seader_worker_task, seader_worker);
-    seader_worker->messages = furi_message_queue_alloc(2, sizeof(SeaderAPDU));
+    seader_worker->messages = furi_message_queue_alloc(3, sizeof(SeaderAPDU));
     seader_worker->mq_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     seader_worker->callback = NULL;
@@ -691,7 +691,6 @@ bool seader_process_success_response_i(
     payload = calloc(1, sizeof *payload);
     assert(payload);
     bool processed = false;
-    FURI_LOG_D(TAG, "seader_process_success_response_i [%s]", online ? "online" : "offline");
 
     asn_dec_rval_t rval =
         asn_decode(0, ATS_DER, &asn_DEF_Payload, (void**)&payload, apdu + 6, len - 6);
@@ -775,6 +774,7 @@ bool seader_process_apdu(Seader* seader, uint8_t* apdu, size_t len) {
 }
 
 void seader_worker_process_sam_message(Seader* seader, CCID_Message* message) {
+    // TODO: inline seader_process_apdu
     seader_process_apdu(seader, message->payload, message->dwLength);
 }
 
@@ -844,7 +844,7 @@ void seader_worker_poller_conversation(Seader* seader, const Iso14443_4aPoller* 
         furi_thread_set_current_priority(FuriThreadPriorityHighest);
         uint32_t count = furi_message_queue_get_count(seader_worker->messages);
         if(count > 0) {
-            FURI_LOG_D(TAG, "Conversation: %ld messages", count);
+            FURI_LOG_D(TAG, "MessageQueue: %ld messages", count);
 
             SeaderAPDU seaderApdu = {};
             FuriStatus status =
@@ -853,7 +853,6 @@ void seader_worker_poller_conversation(Seader* seader, const Iso14443_4aPoller* 
                 FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
                 seader_worker->stage = SeaderPollerEventTypeComplete;
             }
-            FURI_LOG_D(TAG, "Conversation: message length %d", seaderApdu.len);
 
             if(seader_process_success_response_i(
                    seader, seaderApdu.buf, seaderApdu.len, true, iso14443_4a_poller)) {
@@ -865,7 +864,6 @@ void seader_worker_poller_conversation(Seader* seader, const Iso14443_4aPoller* 
         }
         furi_mutex_release(seader_worker->mq_mutex);
     } else {
-        // furi_delay_ms(100);
         furi_thread_set_current_priority(FuriThreadPriorityLowest);
     }
 }
@@ -901,7 +899,6 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
         } else if(seader_worker->stage == SeaderPollerEventTypeConversation) {
             seader_worker_poller_conversation(seader, iso14443_4a_poller);
         } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
-            FURI_LOG_D(TAG, "Complete");
             ret = NfcCommandStop;
         }
     } else {
