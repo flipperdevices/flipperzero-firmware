@@ -1,0 +1,16 @@
+# qv. https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppManifests.md
+
+App(
+    appid="extra_demo",
+    name="Extra Demo",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="extra_demo",
+    cdefines=["APP_EXTRA_DEMO"],
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="icon.png",
+    fap_category="Misc",
+)
