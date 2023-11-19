@@ -6,7 +6,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dialogs/dialogs.h>
-#include <dolphin/dolphin.h>
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
