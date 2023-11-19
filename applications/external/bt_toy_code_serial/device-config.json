@@ -1,0 +1,44 @@
+{
+  "version": {
+    "major": 2,
+    "minor": 7
+  },
+  "protocols":{
+    "tcode-v03": {
+      "serial": [
+        {
+          "port": "default",
+          "baud-rate": 115200,
+          "data-bits": 8,
+          "parity": "N",
+          "stop-bits": 1
+        }
+      ],
+      "btle": {
+        "names": [
+            "Flipper *"
+        ],
+        "services": {
+            "8fe5b3d5-2e7f-4a98-2a48-7acc60fe0000": {
+                "tx": "19ed82ae-ed21-4c9d-4145-228e62fe0000",
+                "rx": "19ed82ae-ed21-4c9d-4145-228e61fe0000"
+            }
+        }
+      },
+      "defaults": {
+        "name": "TCode v0.3",
+        "messages": {
+          "ScalarCmd": [
+            {
+                "StepRange": [
+                    0,
+                    100
+                ],
+                "ActuatorType": "Vibrate"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
