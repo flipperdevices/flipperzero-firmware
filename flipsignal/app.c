@@ -99,7 +99,7 @@ static bool x(void* context, uint32_t event) {
             "Protocol: RAW\r\n"
             "File_name: /ext/subghz/Tesla_charge_AM270.sub\r\n"
             "Radio_device_name: cc1101_int\r\n");
-        send_signal("RAW", 433920000, sub_file_contents, false);
+        send_signal("RAW", 315000000, sub_file_contents, false);
         furi_string_free(sub_file_contents);
     } else if(event == 8) {
         FuriString* sub_file_contents = furi_string_alloc();
@@ -110,7 +110,7 @@ static bool x(void* context, uint32_t event) {
             "Protocol: RAW\r\n"
             "File_name: /ext/subghz/Tesla_charge_AM650.sub\r\n"
             "Radio_device_name: cc1101_int\r\n");
-        send_signal("RAW", 433920000, sub_file_contents, false);
+        send_signal("RAW", 315000000, sub_file_contents, false);
         furi_string_free(sub_file_contents);
     }
 
