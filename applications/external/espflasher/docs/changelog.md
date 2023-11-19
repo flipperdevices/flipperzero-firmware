@@ -1,3 +1,8 @@
+## v1.3
+
+No functionality changes. Fixed the build by removing deprecated API calls that weren't needed.
+
+
 ## v1.2
 
 Firmware switching! The app now supports flashing two different firmware apps to slot A and slot B and uses the otadata partition (initialized by boot_app0) to switch between them. Make sure your firmwares are compiled to use the same partition table to avoid issues!
