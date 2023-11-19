@@ -8,7 +8,10 @@ typedef struct MonthPicker MonthPicker;
 
 typedef void (*MonthPickerCallback)(CalendarAppCustomEvent event, void* context);
 
-void calendar_month_picker_set_callback(MonthPicker* calendar_month_picker, MonthPickerCallback callback, void* context);
+void calendar_month_picker_set_callback(
+    MonthPicker* calendar_month_picker,
+    MonthPickerCallback callback,
+    void* context);
 
 MonthPicker* calendar_month_picker_alloc(VariableSharedContext* variable_shared_context);
 

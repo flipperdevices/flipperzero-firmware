@@ -14,7 +14,3 @@ git clone https://github.com/Adiras/flipperzero-calendar.git
 
 - To launch app on Flipper, run `./fbt launch APPSRC=applications_user\flipperzero-calendar`
 - To build app without uploading it to Flipper, use `./fbt build APPSRC=applications_user\flipperzero-calendar`
-
-# Versioning
-
-This project use [CalVer](https://calver.org)  for versioning. For the versions available, see the [releases](https://github.com/Adiras/flipperzero-calendar/releases) on this repository.

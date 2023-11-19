@@ -52,29 +52,26 @@ CalendarApp* calendar_app_alloc() {
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Views
-    app->calendar_year_picker = calendar_year_picker_alloc(
-        app->variable_shared_context);
+    app->calendar_year_picker = calendar_year_picker_alloc(app->variable_shared_context);
     view_dispatcher_add_view(
         app->view_dispatcher,
         CalendarAppViewYearPicker,
-        calendar_year_picker_get_view(app->calendar_year_picker));  
+        calendar_year_picker_get_view(app->calendar_year_picker));
 
-    app->calendar_month_picker = calendar_month_picker_alloc(
-        app->variable_shared_context);
+    app->calendar_month_picker = calendar_month_picker_alloc(app->variable_shared_context);
     view_dispatcher_add_view(
         app->view_dispatcher,
         CalendarAppViewMonthPicker,
-        calendar_month_picker_get_view(app->calendar_month_picker));  
+        calendar_month_picker_get_view(app->calendar_month_picker));
 
-    app->calendar_month_browser = calendar_month_browser_alloc(
-        app->variable_shared_context);
+    app->calendar_month_browser = calendar_month_browser_alloc(app->variable_shared_context);
     view_dispatcher_add_view(
         app->view_dispatcher,
         CalendarAppViewMonthBrowser,
         calendar_month_browser_get_view(app->calendar_month_browser));
 
     scene_manager_next_scene(app->scene_manager, CalendarSceneYearPicker);
-    
+
     return app;
 }
 
@@ -82,16 +79,13 @@ void calendar_app_free(CalendarApp* app) {
     furi_assert(app);
 
     // Views
-    view_dispatcher_remove_view(
-        app->view_dispatcher, CalendarAppViewYearPicker);
+    view_dispatcher_remove_view(app->view_dispatcher, CalendarAppViewYearPicker);
     calendar_year_picker_free(app->calendar_year_picker);
 
-    view_dispatcher_remove_view(
-        app->view_dispatcher, CalendarAppViewMonthPicker);
+    view_dispatcher_remove_view(app->view_dispatcher, CalendarAppViewMonthPicker);
     calendar_month_picker_free(app->calendar_month_picker);
 
-    view_dispatcher_remove_view(
-        app->view_dispatcher, CalendarAppViewMonthBrowser);
+    view_dispatcher_remove_view(app->view_dispatcher, CalendarAppViewMonthBrowser);
     calendar_month_browser_free(app->calendar_month_browser);
 
     // View dispatcher

@@ -8,7 +8,10 @@ typedef struct YearPicker YearPicker;
 
 typedef void (*YearPickerCallback)(CalendarAppCustomEvent event, void* context);
 
-void calendar_year_picker_set_callback(YearPicker* calendar_year_picker, YearPickerCallback callback, void* context);
+void calendar_year_picker_set_callback(
+    YearPicker* calendar_year_picker,
+    YearPickerCallback callback,
+    void* context);
 
 YearPicker* calendar_year_picker_alloc(VariableSharedContext* variable_shared_context);
 

@@ -13,10 +13,10 @@ bool calendar_scene_month_picker_on_event(void* context, SceneManagerEvent event
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-            case CalendarAppCustomEventMontPicked:
-                scene_manager_next_scene(app->scene_manager, CalendarSceneMonthBrowser);
-                consumed = true;
-                break;
+        case CalendarAppCustomEventMontPicked:
+            scene_manager_next_scene(app->scene_manager, CalendarSceneMonthBrowser);
+            consumed = true;
+            break;
         }
     }
 

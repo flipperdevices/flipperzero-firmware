@@ -40,40 +40,35 @@ int8_t get_first_day_of_week(int16_t year, int8_t month) {
     int16_t a = (14 - month) / 12;
     int16_t y = year - a;
     int16_t m = month + 12 * a - 2;
-    return (1 + y + y / 4 - y / 100 + y / 100 + 31 * m / 12 - 1 ) % 7;
+    return (1 + y + y / 4 - y / 100 + y / 100 + 31 * m / 12 - 1) % 7;
 }
 
 static void calendar_month_browser_draw_callback(Canvas* canvas, MonthBrowserViewModel* model) {
     furi_assert(canvas);
 
-    int8_t days_in_month = get_days_in_month(
-        model->year_selected, model->month_selected);
-    
-    int8_t first_day_of_week = get_first_day_of_week(
-        model->year_selected, model->month_selected);
+    int8_t days_in_month = get_days_in_month(model->year_selected, model->month_selected);
+
+    int8_t first_day_of_week = get_first_day_of_week(model->year_selected, model->month_selected);
 
     canvas_draw_str(canvas, 6, 8, "Su   Mo   Tu   We   Th   Fr   Sa");
     canvas_set_font(canvas, FontKeyboard);
 
-    for (int8_t week = 1; week <= GRID_TEMPLATE_ROWS; week++) {
-        for (int8_t day_of_week = 1; day_of_week <= GRID_TEMPLATE_COLUMNS; day_of_week++) {
-            
+    for(int8_t week = 1; week <= GRID_TEMPLATE_ROWS; week++) {
+        for(int8_t day_of_week = 1; day_of_week <= GRID_TEMPLATE_COLUMNS; day_of_week++) {
             int8_t day = (week - 1) * GRID_TEMPLATE_COLUMNS + day_of_week - first_day_of_week;
 
-            if (day > days_in_month)
-                continue;
+            if(day > days_in_month) continue;
 
-            if (week == 1 && day_of_week <= first_day_of_week)
-                continue;
+            if(week == 1 && day_of_week <= first_day_of_week) continue;
 
             char day_str[5] = {0};
             snprintf(day_str, sizeof(day_str), "%d", day);
             canvas_draw_str_aligned(
-                canvas, 
-                GRID_OFFSET_X + day_of_week * COLUMN_GAP_PX, 
-                GRID_OFFSET_Y + week * ROW_GAP_PX, 
-                AlignRight, 
-                AlignBottom, 
+                canvas,
+                GRID_OFFSET_X + day_of_week * COLUMN_GAP_PX,
+                GRID_OFFSET_Y + week * ROW_GAP_PX,
+                AlignRight,
+                AlignBottom,
                 day_str);
         }
     }
@@ -88,8 +83,9 @@ void calendar_month_browser_alloc_enter_callback(void* context) {
         calendar_month_browser->view,
         MonthBrowserViewModel * model,
         {
-            model->year_selected = calendar_month_browser->variable_shared_context->year_selected;  
-            model->month_selected = calendar_month_browser->variable_shared_context->month_selected;
+            model->year_selected = calendar_month_browser->variable_shared_context->year_selected;
+            model->month_selected =
+                calendar_month_browser->variable_shared_context->month_selected;
         },
         true);
 }
@@ -100,12 +96,15 @@ MonthBrowser* calendar_month_browser_alloc(VariableSharedContext* variable_share
     MonthBrowser* calendar_month_browser = malloc(sizeof(MonthBrowser));
     calendar_month_browser->variable_shared_context = variable_shared_context;
     calendar_month_browser->view = view_alloc();
-    
-    view_allocate_model(calendar_month_browser->view, ViewModelTypeLocking, sizeof(MonthBrowserViewModel));
-    view_set_context(calendar_month_browser->view, calendar_month_browser);
-    view_set_draw_callback(calendar_month_browser->view, (ViewDrawCallback)calendar_month_browser_draw_callback);
 
-    view_set_enter_callback(calendar_month_browser->view, calendar_month_browser_alloc_enter_callback);
+    view_allocate_model(
+        calendar_month_browser->view, ViewModelTypeLocking, sizeof(MonthBrowserViewModel));
+    view_set_context(calendar_month_browser->view, calendar_month_browser);
+    view_set_draw_callback(
+        calendar_month_browser->view, (ViewDrawCallback)calendar_month_browser_draw_callback);
+
+    view_set_enter_callback(
+        calendar_month_browser->view, calendar_month_browser_alloc_enter_callback);
 
     return calendar_month_browser;
 }
