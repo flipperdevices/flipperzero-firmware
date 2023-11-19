@@ -1,15 +1,9 @@
 App(
-    appid="ExtendRange",
+    appid="extendrange",
     name="Extend Range",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="extend_range_app",
-    cdefines=["EXTEND_RANGE"],
-    requires=[
-        "gui",
-        "storage",
-    ],
     stack_size=1 * 1024,
-    order=20,
     fap_icon="extend_range_10px.png",
-    fap_category="Misc",
+    fap_category="Settings",
 )
