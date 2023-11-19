@@ -1,10 +1,5 @@
 #pragma once
 
-#include "helpers/camera_suite_storage.h"
-#include "scenes/camera_suite_scene.h"
-#include "views/camera_suite_view_guide.h"
-#include "views/camera_suite_view_start.h"
-#include "views/camera_suite_view_camera.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
@@ -16,6 +11,12 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdlib.h>
+
+#include "scenes/camera_suite_scene.h"
+#include "views/camera_suite_view_guide.h"
+#include "views/camera_suite_view_start.h"
+#include "views/camera_suite_view_camera.h"
+#include "helpers/camera_suite_storage.h"
 
 #define TAG "Camera Suite"
 

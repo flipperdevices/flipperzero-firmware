@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../helpers/camera_suite_custom_event.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_console.h>
@@ -15,6 +14,8 @@
 #include <notification/notification_messages.h>
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
+
+#include "../helpers/camera_suite_custom_event.h"
 
 #include <xtreme.h>
 
@@ -59,9 +60,9 @@ typedef struct CameraSuiteViewCamera {
 } CameraSuiteViewCamera;
 
 typedef struct UartDumpModel {
-    bool flash;
-    bool initialized;
-    bool inverted;
+    bool is_dithering_enabled;
+    bool is_initialized;
+    bool is_inverted;
     int rotation_angle;
     uint32_t orientation;
     uint8_t pixels[FRAME_BUFFER_LENGTH];
