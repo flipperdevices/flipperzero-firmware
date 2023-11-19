@@ -21,7 +21,6 @@ static void about_view_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_str_aligned(canvas, 0, 50, AlignLeft, AlignTop, "press back");
 }
 
-
 AboutView* about_view_alloc() {
     AboutView* about_view = malloc(sizeof(AboutView));
     about_view->view = view_alloc();

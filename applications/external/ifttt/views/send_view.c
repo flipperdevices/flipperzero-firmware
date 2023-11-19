@@ -29,19 +29,19 @@ static void Shake(void) {
 void send_serial_command_send(ESerialCommand command) {
     uint8_t data[1] = {0};
 
-   char name[10] = "send";
-   int length = strlen(name);
-   for (int i = 0; i < length; i++){
-    switch(command) {
-      case ESerialCommand_Send:
-        data[0] = name[i];
-        break;
+    char name[10] = "send";
+    int length = strlen(name);
+    for(int i = 0; i < length; i++) {
+        switch(command) {
+        case ESerialCommand_Send:
+            data[0] = name[i];
+            break;
         default:
-        return;
-    };
+            return;
+        }
 
-    furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
-   }
+        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+    }
 }
 
 static void send_view_draw_callback(Canvas* canvas, void* context) {
