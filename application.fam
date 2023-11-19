@@ -1,0 +1,10 @@
+App(
+    appid="flipper_aid",
+    name="Flipper Aid",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="flipper_aid_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=20,
+    fap_category="Debug",
+)
