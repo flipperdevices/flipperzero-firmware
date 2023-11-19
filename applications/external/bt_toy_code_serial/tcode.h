@@ -43,7 +43,6 @@ typedef struct {
     uint16_t speed_per_hundred_milliseconds;
 } TCodeMagnitudeSpeedCommand;
 
-
 typedef struct {
     TCodeCommandType command_type;
     union {
@@ -56,8 +55,7 @@ typedef struct {
 
 typedef struct {
     uint16_t size;
-    TCodeCommand *commands;
+    TCodeCommand* commands;
 } TCodeCommandArray;
 
-
-TCodeCommandArray tcode_decode(uint8_t *buffer, uint16_t size);
+TCodeCommandArray tcode_decode(uint8_t* buffer, uint16_t size);
