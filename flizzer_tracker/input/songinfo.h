@@ -11,4 +11,3 @@
 #include "../util.h"
 
 void songinfo_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event);
-void return_from_keyboard_callback(void* ctx);
