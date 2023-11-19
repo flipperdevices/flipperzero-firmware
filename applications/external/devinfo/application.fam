@@ -1,9 +1,0 @@
-App(
-    appid="device_info",
-    name="Device Info",
-    apptype=FlipperAppType.EXTERNAL,
-    entry_point="devdump_app",
-    stack_size=2 * 1024,
-    fap_category="Tools",
-    fap_icon="devdump.png",
-)
