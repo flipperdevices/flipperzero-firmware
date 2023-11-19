@@ -487,7 +487,11 @@ PicopassError seader_worker_fake_epurse_update(BitBuffer* tx_buffer, BitBuffer* 
     return PicopassErrorNone;
 }
 
-void seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
+void seader_iso15693_transmit(
+    Seader* seader,
+    PicopassPoller* picopass_poller,
+    uint8_t* buffer,
+    size_t len) {
     UNUSED(seader);
     UNUSED(buffer);
     UNUSED(len);
@@ -507,7 +511,7 @@ void seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
             error = seader_worker_fake_epurse_update(tx_buffer, rx_buffer);
         } else {
             error = picopass_poller_send_frame(
-                seader->picopass_poller, tx_buffer, rx_buffer, SEADER_POLLER_MAX_FWT);
+                picopass_poller, tx_buffer, rx_buffer, SEADER_POLLER_MAX_FWT);
         }
         if(error == PicopassErrorIncorrectCrc) {
             error = PicopassErrorNone;
@@ -533,11 +537,11 @@ void seader_iso15693_transmit(Seader* seader, uint8_t* buffer, size_t len) {
 /* Assumes this is called in the context of the NFC API callback */
 void seader_iso14443a_transmit(
     Seader* seader,
+    Iso14443_4aPoller* iso14443_4a_poller,
     uint8_t* buffer,
     size_t len,
     uint16_t timeout,
-    uint8_t format[3],
-    const Iso14443_4aPoller* iso14443_4a_poller) {
+    uint8_t format[3]) {
     UNUSED(timeout);
     UNUSED(format);
 
@@ -553,8 +557,8 @@ void seader_iso14443a_transmit(
     do {
         bit_buffer_append_bytes(tx_buffer, buffer, len);
 
-        Iso14443_4aError error = iso14443_4a_poller_send_block(
-            (Iso14443_4aPoller*)iso14443_4a_poller, tx_buffer, rx_buffer);
+        Iso14443_4aError error =
+            iso14443_4a_poller_send_block(iso14443_4a_poller, tx_buffer, rx_buffer);
         if(error != Iso14443_4aErrorNone) {
             FURI_LOG_W(TAG, "iso14443_4a_poller_send_block error %d", error);
             seader_worker->stage = SeaderPollerEventTypeFail;
@@ -574,7 +578,7 @@ void seader_iso14443a_transmit(
 void seader_parse_nfc_command_transmit(
     Seader* seader,
     NFCSend_t* nfcSend,
-    const Iso14443_4aPoller* iso14443_4a_poller) {
+    SeaderPollerContainer* spc) {
     long timeOut = nfcSend->timeOut;
     Protocol_t protocol = nfcSend->protocol;
     FrameProtocol_t frameProtocol = protocol.buf[1];
@@ -595,15 +599,16 @@ void seader_parse_nfc_command_transmit(
 #endif
 
     if(frameProtocol == FrameProtocol_iclass) {
-        seader_iso15693_transmit(seader, nfcSend->data.buf, nfcSend->data.size);
+        seader_iso15693_transmit(
+            seader, spc->picopass_poller, nfcSend->data.buf, nfcSend->data.size);
     } else if(frameProtocol == FrameProtocol_nfc) {
         seader_iso14443a_transmit(
             seader,
+            spc->iso14443_4a_poller,
             nfcSend->data.buf,
             nfcSend->data.size,
             (uint16_t)timeOut,
-            nfcSend->format->buf,
-            iso14443_4a_poller);
+            nfcSend->format->buf);
     } else {
         FURI_LOG_W(TAG, "unknown frame protocol %lx", frameProtocol);
     }
@@ -631,15 +636,12 @@ void seader_parse_nfc_off(SeaderUartBridge* seader_uart) {
     ASN_STRUCT_FREE(asn_DEF_NFCResponse, nfcResponse);
 }
 
-void seader_parse_nfc_command(
-    Seader* seader,
-    NFCCommand_t* nfcCommand,
-    const Iso14443_4aPoller* iso14443_4a_poller) {
+void seader_parse_nfc_command(Seader* seader, NFCCommand_t* nfcCommand, SeaderPollerContainer* spc) {
     SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
     switch(nfcCommand->present) {
     case NFCCommand_PR_nfcSend:
-        seader_parse_nfc_command_transmit(seader, &nfcCommand->choice.nfcSend, iso14443_4a_poller);
+        seader_parse_nfc_command_transmit(seader, &nfcCommand->choice.nfcSend, spc);
         break;
     case NFCCommand_PR_nfcOff:
         seader_parse_nfc_off(seader_uart);
@@ -655,7 +657,7 @@ bool seader_worker_state_machine(
     Seader* seader,
     Payload_t* payload,
     bool online,
-    const Iso14443_4aPoller* iso14443_4a_poller) {
+    SeaderPollerContainer* spc) {
     bool processed = false;
 
     switch(payload->present) {
@@ -665,7 +667,7 @@ bool seader_worker_state_machine(
         break;
     case Payload_PR_nfcCommand:
         if(online) {
-            seader_parse_nfc_command(seader, &payload->choice.nfcCommand, iso14443_4a_poller);
+            seader_parse_nfc_command(seader, &payload->choice.nfcCommand, spc);
             processed = true;
         }
         break;
@@ -686,7 +688,7 @@ bool seader_process_success_response_i(
     uint8_t* apdu,
     size_t len,
     bool online,
-    const Iso14443_4aPoller* iso14443_4a_poller) {
+    SeaderPollerContainer* spc) {
     Payload_t* payload = 0;
     payload = calloc(1, sizeof *payload);
     assert(payload);
@@ -695,7 +697,7 @@ bool seader_process_success_response_i(
     asn_dec_rval_t rval =
         asn_decode(0, ATS_DER, &asn_DEF_Payload, (void**)&payload, apdu + 6, len - 6);
     if(rval.code == RC_OK) {
-        processed = seader_worker_state_machine(seader, payload, online, iso14443_4a_poller);
+        processed = seader_worker_state_machine(seader, payload, online, spc);
 
 #ifdef ASN1_DEBUG
         if(processed) {
@@ -837,7 +839,7 @@ NfcCommand seader_worker_card_detect(
     return NfcCommandContinue;
 }
 
-void seader_worker_poller_conversation(Seader* seader, const Iso14443_4aPoller* iso14443_4a_poller) {
+void seader_worker_poller_conversation(Seader* seader, SeaderPollerContainer* spc) {
     SeaderWorker* seader_worker = seader->worker;
 
     if(furi_mutex_acquire(seader_worker->mq_mutex, 0) == FuriStatusOk) {
@@ -855,7 +857,7 @@ void seader_worker_poller_conversation(Seader* seader, const Iso14443_4aPoller* 
             }
 
             if(seader_process_success_response_i(
-                   seader, seaderApdu.buf, seaderApdu.len, true, iso14443_4a_poller)) {
+                   seader, seaderApdu.buf, seaderApdu.len, true, spc)) {
                 // no-op
             } else {
                 FURI_LOG_I(TAG, "Response false");
@@ -876,7 +878,7 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
     SeaderWorker* seader_worker = seader->worker;
 
     const Iso14443_4aPollerEvent* iso14443_4a_event = event.event_data;
-    const Iso14443_4aPoller* iso14443_4a_poller = event.instance;
+    SeaderPollerContainer spc = {.iso14443_4a_poller = event.instance};
 
     if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
         if(seader_worker->stage == SeaderPollerEventTypeCardDetect) {
@@ -897,7 +899,7 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
             seader_worker->stage = SeaderPollerEventTypeConversation;
         } else if(seader_worker->stage == SeaderPollerEventTypeConversation) {
-            seader_worker_poller_conversation(seader, iso14443_4a_poller);
+            seader_worker_poller_conversation(seader, &spc);
         } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
             ret = NfcCommandStop;
         }
@@ -915,7 +917,9 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
 
     Seader* seader = context;
     SeaderWorker* seader_worker = seader->worker;
+    // I know this is is passing the same thing that is on seader all the way down, but I prefer the symmetry between the 15a and iso15 stuff
     PicopassPoller* instance = seader->picopass_poller;
+    SeaderPollerContainer spc = {.picopass_poller = instance};
 
     if(event.type == PicopassPollerEventTypeSuccess) {
         if(seader_worker->stage == SeaderPollerEventTypeCardDetect) {
@@ -924,7 +928,7 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
             seader_worker->stage = SeaderPollerEventTypeConversation;
         } else if(seader_worker->stage == SeaderPollerEventTypeConversation) {
-            seader_worker_poller_conversation(seader, NULL);
+            seader_worker_poller_conversation(seader, &spc);
         } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
             ret = NfcCommandStop;
         }

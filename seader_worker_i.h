@@ -36,6 +36,11 @@ struct SeaderAPDU {
     uint8_t buf[SEADER_POLLER_MAX_BUFFER_SIZE];
 };
 
+struct SeaderPollerContainer {
+    Iso14443_4aPoller* iso14443_4a_poller;
+    PicopassPoller* picopass_poller;
+};
+
 void seader_worker_change_state(SeaderWorker* seader_worker, SeaderWorkerState state);
 
 int32_t seader_worker_task(void* context);
