@@ -802,6 +802,9 @@ NfcCommand seader_worker_card_detect(
     UNUSED(ats);
     UNUSED(ats_len);
 
+    // We're telling the SAM we've seen a new card, so reset out requestPacs check
+    requestPacs = true;
+
     SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader_worker->uart;
     CardDetails_t* cardDetails = 0;
@@ -879,9 +882,6 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
 
     if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
         if(seader_worker->stage == SeaderPollerEventTypeCardDetect) {
-            FURI_LOG_D(TAG, "Card Detect");
-            requestPacs = true;
-
             nfc_device_set_data(
                 seader->nfc_device, NfcProtocolIso14443_4a, nfc_poller_get_data(seader->poller));
 
@@ -920,15 +920,8 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
     SeaderWorker* seader_worker = seader->worker;
     PicopassPoller* instance = seader->picopass_poller;
 
-    if(event.type == PicopassPollerEventTypeRequestMode) {
-        // Is this a good place to reset?
-        seader_worker->stage = SeaderPollerEventTypeCardDetect;
-        requestPacs = true;
-    } else if(event.type == PicopassPollerEventTypeCardDetected) {
-        // No-op. I can't actually get the CSN at this point it seems.
-    } else if(event.type == PicopassPollerEventTypeSuccess) {
+    if(event.type == PicopassPollerEventTypeSuccess) {
         if(seader_worker->stage == SeaderPollerEventTypeCardDetect) {
-            FURI_LOG_D(TAG, "Card Detect");
             uint8_t* csn = picopass_poller_get_csn(instance);
             seader_worker_card_detect(seader, 0, NULL, csn, sizeof(PicopassSerialNum), NULL, 0);
             furi_thread_set_current_priority(FuriThreadPriorityLowest);
@@ -936,10 +929,10 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
         } else if(seader_worker->stage == SeaderPollerEventTypeConversation) {
             seader_worker_poller_conversation(seader, NULL);
         } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
-            FURI_LOG_D(TAG, "Complete");
             ret = NfcCommandStop;
         }
     } else if(event.type == PicopassPollerEventTypeFail) {
+        ret = NfcCommandStop;
     } else {
         FURI_LOG_D(TAG, "picopass event type %x", event.type);
     }
