@@ -28,6 +28,13 @@ It currently trades a Pokemon based on your choice of Pokemon, Level, Stats and 
 
 Connect your ***GAME BOY*** through the link cable to the `EXT1` port on the **MALVEKE** board.
 
+
+<p align='center'>
+    <br />
+    <img src="./docs/images/gameboy-malveke-connection.png" width="400" />
+    <br />
+</p>
+
 ## Instructions for use.
 
 These instructions assume that you are starting at the Flipper Zero desktop. Otherwise, press the Back button until you are at the desktop.
