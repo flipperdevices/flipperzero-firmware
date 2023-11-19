@@ -1,0 +1,20 @@
+App(
+    appid="apple_ble_spam",
+    name="Apple BLE Spam",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="apple_ble_spam",
+    requires=["gui"],
+    stack_size=5 * 1024,
+    fap_icon="apple_10px.png",
+    fap_category="Bluetooth",
+    fap_icon_assets="icons",
+    fap_private_libs=[
+        Lib(
+            name="continuity",
+        ),
+    ],
+    fap_author="@Willy-JL & @ECTO-1A",  # Plus research from @ECTO-1A @xMasterX and @techryptic
+    fap_version="1.2",
+    fap_description="Spam Apple devices with annoying popups and notifications via BLE packets",
+)
