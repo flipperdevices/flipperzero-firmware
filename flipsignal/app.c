@@ -82,16 +82,35 @@ static bool x(void* context, uint32_t event) {
         furi_string_free(sub_file_contents);
     } else if(event == 4) {
         FuriString* sub_file_contents = furi_string_alloc();
+        // furi_string_printf(
+        //     sub_file_contents,
+        //     "Filetype: Flipper SubGhz Key File\r\n"
+        //     "Version: 1\r\n"
+        //     "Frequency: 433920000\r\n"
+        //     "Preset: FuriHalSubGhzPresetOok650Async\r\n"
+        //     "Protocol: Security+ 1.0\r\n"
+        //     "Bit: 42\r\n"
+        //     "Key: 63 A4 A7 6D E6 00 00 00\r\n");
+        // send_signal("Security+ 1.0", 433920000, sub_file_contents, false);
         furi_string_printf(
             sub_file_contents,
-            "Filetype: Flipper SubGhz Key File\r\n"
+            "Filetype: RAW File Load\r\n"
             "Version: 1\r\n"
-            "Frequency: 433920000\r\n"
-            "Preset: FuriHalSubGhzPresetOok650Async\r\n"
-            "Protocol: Security+ 1.0\r\n"
-            "Bit: 42\r\n"
-            "Key: 63 A4 A7 6D E6 00 00 00\r\n");
-        send_signal("Security+ 1.0", 433920000, sub_file_contents, false);
+            "Protocol: RAW\r\n"
+            "File_name: /ext/subghz/Tesla_charge_AM270.sub\r\n"
+            "Radio_device_name: cc1101_int\r\n");
+        send_signal("RAW", 433920000, sub_file_contents, false);
+        furi_string_free(sub_file_contents);
+    } else if(event == 8) {
+        FuriString* sub_file_contents = furi_string_alloc();
+        furi_string_printf(
+            sub_file_contents,
+            "Filetype: RAW File Load\r\n"
+            "Version: 1\r\n"
+            "Protocol: RAW\r\n"
+            "File_name: /ext/subghz/Tesla_charge_AM650.sub\r\n"
+            "Radio_device_name: cc1101_int\r\n");
+        send_signal("RAW", 433920000, sub_file_contents, false);
         furi_string_free(sub_file_contents);
     }
 

@@ -7,9 +7,11 @@
     "Signal! Quickly send to\n"                \
     "and device! CURRENTLY\n"                  \
     "hardcoded to 433MHz and\n"                \
-    "action 1:Princeton 52811C\n"              \
-    "action 2:Princeton 528114\n"              \
-    "action 3:Sec+1.0\n"                       \
+    "action...\n"                              \
+    "1:Princeton 52811C\n"                     \
+    "2:Princeton 528114\n"                     \
+    "3:Tesla_charge_AM270.sub\n"               \
+    "4:Tesla_charge_AM650.sub\n"               \
     "Optimized for FlipBoard\n"                \
     "v1.1 hardware --\n"                       \
     "see link below to order!\n"               \
