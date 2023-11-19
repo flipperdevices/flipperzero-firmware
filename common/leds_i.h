@@ -6,11 +6,13 @@
 #include <furi_hal_usb_hid.h>
 
 #include "leds.h"
+#include "led_driver.h"
 
 // The WS2812b LEDs that are connected to PC3.
 #define LED_COUNT 4
 struct FlipboardLeds {
     uint32_t color[LED_COUNT];
+    LedDriver* led_driver;
 };
 const GpioPin* const pin_ws2812_leds = &gpio_ext_pc3;
 

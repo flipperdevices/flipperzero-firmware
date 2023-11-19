@@ -1,5 +1,11 @@
 #include "leds_i.h"
 
+#ifdef USE_LED_DRIVER
+#undef USE_LED_DRIVER
+#endif
+// Uncomment the next line to use the LED driver instead of bit-banging the LEDs.
+// #define USE_LED_DRIVER 1
+
 // Bit-banging the WS2812b LEDs is a bit tricky. The timing is very strict.
 // Hopefully, we will update to a better solution in the future.
 #define DWT_CYCCNT (0xE0001004UL)
@@ -16,7 +22,12 @@ typedef struct {
 */
 FlipboardLeds* flipboard_leds_alloc() {
     FlipboardLeds* leds = malloc(sizeof(FlipboardLeds));
+#ifdef USE_LED_DRIVER
+    leds->led_driver = led_driver_alloc(LED_COUNT, pin_ws2812_leds);
+#else
     furi_hal_gpio_init_simple(pin_ws2812_leds, GpioModeOutputPushPull);
+    leds->led_driver = NULL;
+#endif
     furi_hal_gpio_init_simple(pin_status_led, GpioModeOutputPushPull);
     flipboard_leds_reset(leds);
     return leds;
@@ -31,6 +42,9 @@ void flipboard_leds_free(FlipboardLeds* leds) {
         flipboard_leds_set(leds, i, 0);
     }
     flipboard_leds_update(leds);
+    if(leds->led_driver) {
+        led_driver_free(leds->led_driver);
+    }
 
     furi_hal_gpio_init_simple(pin_ws2812_leds, GpioModeAnalog);
     furi_hal_gpio_init_simple(pin_status_led, GpioModeAnalog);
@@ -77,7 +91,13 @@ void flipboard_leds_set(FlipboardLeds* leds, LedIds led, uint32_t color) {
  * @param leds The FlipboardLeds struct to update.
 */
 void flipboard_leds_update(FlipboardLeds* leds) {
-    // TODO: Update to use something more stable, like using LL_TIM or something?
+#ifdef USE_LED_DRIVER
+    for(int i = 0; i < LED_COUNT; i++) {
+        led_driver_set_led(leds->led_driver, i, leds->color[i]);
+    }
+    led_driver_transmit(leds->led_driver);
+    led_driver_transmit(leds->led_driver);
+#else
     furi_hal_gpio_write(pin_ws2812_leds, false);
     uint8_t bits[4 * 8 * 3 * 2];
     for(int led = 0, i = 0; led < 4; led++) {
@@ -122,6 +142,7 @@ void flipboard_leds_update(FlipboardLeds* leds) {
     furi_kernel_unlock();
 
     furi_delay_ms(50);
+#endif
 }
 
 /**
