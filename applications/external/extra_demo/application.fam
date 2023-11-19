@@ -1,9 +1,0 @@
-App(
-    appid="extra_demo",
-    name="Extra Demo",
-    apptype=FlipperAppType.EXTERNAL,
-    entry_point="extra_demo",
-    stack_size=2 * 1024,
-    fap_icon="icon.png",
-    fap_category="Tools",
-)
