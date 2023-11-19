@@ -25,25 +25,26 @@ typedef struct {
     FuriString* status;
 } CoffeeContext;
 
-
 static void coffee_render_callback(Canvas* const canvas, void* ctx) {
     CoffeeContext* context = ctx;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-     if(context->credit >= 0.0){
-        furi_string_printf(context->msg, "Credit: %.2f EUR", (double) context->credit);
+    if(context->credit >= 0.0) {
+        furi_string_printf(context->msg, "Credit: %.2f EUR", (double)context->credit);
         elements_button_left(canvas, "Load");
         elements_button_right(canvas, "Save");
         elements_button_center(canvas, "Edit (Hold)");
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, furi_string_get_cstr(context->msg));
+        canvas_draw_str_aligned(
+            canvas, 64, 8, AlignCenter, AlignCenter, furi_string_get_cstr(context->msg));
 
-    }else{
+    } else {
         furi_string_printf(context->status, "EEPROM not connected!");
-    }   
+    }
     canvas_set_font(canvas, FontKeyboard);
-    canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, furi_string_get_cstr(context->status));
+    canvas_draw_str_aligned(
+        canvas, 64, 26, AlignCenter, AlignCenter, furi_string_get_cstr(context->status));
 }
 
 /* This function is called from the GUI thread. All it does is put the event
@@ -68,15 +69,12 @@ static CoffeeContext* coffee_context_alloc() {
     return context;
 }
 
-
-void load_file_dump(){
-
+void load_file_dump() {
     FuriString* file_path = furi_string_alloc();
 
     do {
         DialogsFileBrowserOptions browser_options;
-        dialog_file_browser_set_basic_options(
-            &browser_options, ".bin", NULL);
+        dialog_file_browser_set_basic_options(&browser_options, ".bin", NULL);
         browser_options.hide_ext = false;
         browser_options.base_path = "/ext";
 
@@ -93,7 +91,8 @@ void load_file_dump(){
         // Allocate file
         File* file = storage_file_alloc(storage);
         // Open file, write data and close it
-        if(!storage_file_open(file, furi_string_get_cstr(file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        if(!storage_file_open(
+               file, furi_string_get_cstr(file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_E(TAG, "Failed to open file");
         }
         uint8_t buffer[256] = {0};
@@ -105,7 +104,7 @@ void load_file_dump(){
             read += ret;
             ret = storage_file_read(file, temp, sizeof(temp) - 1);
             for(size_t i = 0; i < ret; i++) {
-                buffer[i+read] = temp[i];
+                buffer[i + read] = temp[i];
             }
         } while(ret > 0);
         storage_file_close(file);
@@ -115,27 +114,28 @@ void load_file_dump(){
 
         // Close storage
         furi_record_close(RECORD_STORAGE);
-        if (read % 128 == 0){
+        if(read % 128 == 0) {
             FuriString* dump = furi_string_alloc();
             FURI_LOG_E(TAG, "START READ DUMP");
-            for (size_t i = 0; i < read; i++){
+            for(size_t i = 0; i < read; i++) {
                 furi_string_cat_printf(dump, "%.2X", buffer[i]);
             }
             FURI_LOG_E(TAG, "%s", furi_string_get_cstr(dump));
             FURI_LOG_E(TAG, "END READ DUMP");
-            write_dump(buffer, (size_t) read);
+            write_dump(buffer, (size_t)read);
             break;
         }
     } while(1);
 }
 
-FuriString* save_file_dump(float credit){
+FuriString* save_file_dump(float credit) {
     char file_name_buf[64];
     name_generator_make_random(file_name_buf, 64);
-        // Open storag
+    // Open storag
     char* file_path = APP_DATA_PATH("Dump");
 
-    FuriString* file_name = furi_string_alloc_printf("%s_%s_%d.bin", file_path, file_name_buf, (int) (credit * 100));
+    FuriString* file_name =
+        furi_string_alloc_printf("%s_%s_%d.bin", file_path, file_name_buf, (int)(credit * 100));
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     // Allocate file
@@ -180,66 +180,83 @@ static void coffee_run(CoffeeContext* context) {
             furi_message_queue_get(context->event_queue, &event, FuriWaitForever);
 
         if(status == FuriStatusOk) {
-           if(event.type == InputTypePress) {
-                    switch(event.key) {
-                    case InputKeyUp:
-                        if(context->editor_mode && context->credit + context->digit_editor <= MAX_CREDIT){
-                            context->credit += context->digit_editor;
-                            FURI_LOG_E(TAG, "%.2f   %.2f", (double) context->credit, (double) context->digit_editor);
-                        }
-                        break;
-                    case InputKeyDown:
-                        if(context->editor_mode && context->credit - context->digit_editor >= MIN_CREDIT){
-                            context->credit -= context->digit_editor;
-                            FURI_LOG_E(TAG, "%.2f   %.2f", (double) context->credit, (double) context->digit_editor);
-                        }
-                        break;
-                    case InputKeyMAX:
-                        break;
-                    case InputKeyRight:
-                         if(context->editor_mode && context->digit_editor >= 0.01){
-                            context->digit_editor /= 10;
-                            FURI_LOG_E(TAG, "%.2f   %.2f", (double) context->credit, (double) context->digit_editor);
-                        }else {
-                            save_file_dump(context->credit);
-                            furi_string_printf(context->status, "Dump saved!");
-                        }
-                        break;
-                    case InputKeyLeft:
-                        if(context->editor_mode && context->digit_editor <= 100){
-                            context->digit_editor *= 10;
-                            FURI_LOG_E(TAG, "%.2f   %.2f", (double) context->credit, (double) context->digit_editor);
-                        }else{
-                            //virgin();
-                            load_file_dump();
-                            context->credit = read_credit();
-                            furi_string_printf(context->status, "Dump write done!");
-                        }
-                        break;
-                    case InputKeyOk:
-                        if(context->editor_mode){
-                            write_credit(context->credit);
-                            context->credit = read_credit();
-                            furi_string_printf(context->status, "Write done!");
-                            context->editor_mode = false;
-                        }
-                        break;
-                    case InputKeyBack:
-                        if(context->editor_mode){
-                            furi_string_reset(context->status);
-                            context->editor_mode = false;
-                        }else{
-                            is_running = false;
-                        }
-                        break;
+            if(event.type == InputTypePress) {
+                switch(event.key) {
+                case InputKeyUp:
+                    if(context->editor_mode &&
+                       context->credit + context->digit_editor <= MAX_CREDIT) {
+                        context->credit += context->digit_editor;
+                        FURI_LOG_E(
+                            TAG,
+                            "%.2f   %.2f",
+                            (double)context->credit,
+                            (double)context->digit_editor);
                     }
-                }else if(event.type == InputTypeLong && event.key == InputKeyOk){
-                        furi_string_printf(context->status, "Editor Mode");
-                        context->editor_mode = true;
+                    break;
+                case InputKeyDown:
+                    if(context->editor_mode &&
+                       context->credit - context->digit_editor >= MIN_CREDIT) {
+                        context->credit -= context->digit_editor;
+                        FURI_LOG_E(
+                            TAG,
+                            "%.2f   %.2f",
+                            (double)context->credit,
+                            (double)context->digit_editor);
+                    }
+                    break;
+                case InputKeyMAX:
+                    break;
+                case InputKeyRight:
+                    if(context->editor_mode && context->digit_editor >= 0.01) {
+                        context->digit_editor /= 10;
+                        FURI_LOG_E(
+                            TAG,
+                            "%.2f   %.2f",
+                            (double)context->credit,
+                            (double)context->digit_editor);
+                    } else {
+                        save_file_dump(context->credit);
+                        furi_string_printf(context->status, "Dump saved!");
+                    }
+                    break;
+                case InputKeyLeft:
+                    if(context->editor_mode && context->digit_editor <= 100) {
+                        context->digit_editor *= 10;
+                        FURI_LOG_E(
+                            TAG,
+                            "%.2f   %.2f",
+                            (double)context->credit,
+                            (double)context->digit_editor);
+                    } else {
+                        //virgin();
+                        load_file_dump();
+                        context->credit = read_credit();
+                        furi_string_printf(context->status, "Dump write done!");
+                    }
+                    break;
+                case InputKeyOk:
+                    if(context->editor_mode) {
+                        write_credit(context->credit);
+                        context->credit = read_credit();
+                        furi_string_printf(context->status, "Write done!");
+                        context->editor_mode = false;
+                    }
+                    break;
+                case InputKeyBack:
+                    if(context->editor_mode) {
+                        furi_string_reset(context->status);
+                        context->editor_mode = false;
+                    } else {
+                        is_running = false;
+                    }
+                    break;
                 }
+            } else if(event.type == InputTypeLong && event.key == InputKeyOk) {
+                furi_string_printf(context->status, "Editor Mode");
+                context->editor_mode = true;
+            }
         }
     }
-
 }
 
 /* Release the unused resources and deallocate memory */
