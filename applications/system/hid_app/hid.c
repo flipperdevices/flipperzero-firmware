@@ -79,7 +79,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
     hid_mouse_clicker_set_connected_status(hid->hid_mouse_clicker, connected);
     hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
-    hid_ptt_set_connected_status(hid->hid_ptt, connected);
+    // hid_ptt_set_connected_status(hid->hid_ptt, connected);
     hid_tikshorts_set_connected_status(hid->hid_tikshorts, connected);
 }
 
@@ -151,7 +151,7 @@ Hid* hid_alloc(HidTransport transport) {
         hid_submenu_callback,
         app);
     submenu_add_item(
-        app->device_type_submenu, "PTT", HidSubmenuIndexPtt, hid_submenu_callback, app);
+        app->device_type_submenu, "PushToTalk", HidSubmenuIndexPtt, hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->device_type_submenu), hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->device_type_submenu));
@@ -224,7 +224,7 @@ Hid* hid_app_alloc_view(void* context) {
         HidViewMouseJiggler,
         hid_mouse_jiggler_get_view(app->hid_mouse_jiggler));
 
-    // Ptt view
+    // PushToTalk view
     app->hid_ptt = hid_ptt_alloc(app);
     view_set_previous_callback(hid_ptt_get_view(app->hid_ptt), hid_menu_view);
     view_dispatcher_add_view(
