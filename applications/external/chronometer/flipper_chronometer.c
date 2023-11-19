@@ -30,8 +30,7 @@ typedef struct {
     uint8_t hour;
 } mutexStruct;
 
-static void draw_callback(Canvas* canvas, void* ctx) 
-{
+static void draw_callback(Canvas* canvas, void* ctx) {
     mutexStruct* mutexVal = ctx;
     mutexStruct mutexDraw;
     furi_mutex_acquire(mutexVal->mutex, FuriWaitForever);
@@ -40,16 +39,22 @@ static void draw_callback(Canvas* canvas, void* ctx)
 
     char buffer[16];
     canvas_set_font(canvas, FontBigNumbers);
-    snprintf(buffer, sizeof(buffer), "%02u:%02u:%02lu", mutexDraw.hour, mutexDraw.minute, mutexDraw.timer / 64000000);
-    canvas_draw_str_aligned(canvas, 5, SCREEN_SIZE_Y/2 + 5, AlignLeft, AlignBottom, buffer);
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%02u:%02u:%02lu",
+        mutexDraw.hour,
+        mutexDraw.minute,
+        mutexDraw.timer / 64000000);
+    canvas_draw_str_aligned(canvas, 5, SCREEN_SIZE_Y / 2 + 5, AlignLeft, AlignBottom, buffer);
 
     canvas_set_font(canvas, FontPrimary);
     snprintf(buffer, sizeof(buffer), "%03lu", (mutexDraw.timer % 64000000) / 64000);
-    canvas_draw_str_aligned(canvas, SCREEN_SIZE_X - 5, SCREEN_SIZE_Y/2, AlignRight, AlignBottom, buffer);
+    canvas_draw_str_aligned(
+        canvas, SCREEN_SIZE_X - 5, SCREEN_SIZE_Y / 2, AlignRight, AlignBottom, buffer);
 }
 
-static void input_callback(InputEvent* input_event, void* ctx) 
-{
+static void input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
     EventApp event = {.type = EventTypeInput, .input = *input_event};
@@ -64,8 +69,7 @@ static void clock_tick(void* ctx) {
     furi_message_queue_put(queue, &event, 0);
 }
 
-int32_t flipper_chronometer_app() 
-{
+int32_t flipper_chronometer_app() {
     // 64 MHz
     furi_hal_bus_enable(FuriHalBusTIM2);
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
@@ -85,7 +89,7 @@ int32_t flipper_chronometer_app()
 
     uint32_t previousTimer = 0;
 
-    mutexVal.mutex= furi_mutex_alloc(FuriMutexTypeNormal);
+    mutexVal.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!mutexVal.mutex) {
         furi_message_queue_free(event_queue);
         return 255;
@@ -102,39 +106,32 @@ int32_t flipper_chronometer_app()
 
     uint8_t enableChrono = 0;
 
-    while(1) 
-    {
+    while(1) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, FuriWaitForever);
-        
+
         uint8_t screenRefresh = 0;
 
-        if (event_status == FuriStatusOk)
-        {   
-            if(event.type == EventTypeInput) 
-            {
-                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) 
-                {
+        if(event_status == FuriStatusOk) {
+            if(event.type == EventTypeInput) {
+                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                     break;
-                }
-                else if (event.input.key == InputKeyOk && event.input.type == InputTypeShort)
-                {
-                    if (enableChrono == 1)
-                    {
+                } else if(event.input.key == InputKeyOk && event.input.type == InputTypeShort) {
+                    if(enableChrono == 1) {
                         LL_TIM_DisableCounter(TIM2);
                         furi_timer_stop(timer);
                         enableChrono = 0;
-                    }
-                    else
-                    {
+                    } else {
                         LL_TIM_EnableCounter(TIM2);
-                        furi_timer_start(timer, 43); // better to use prime number as timer for millisecond refresh effect
+                        furi_timer_start(
+                            timer,
+                            43); // better to use prime number as timer for millisecond refresh effect
                         enableChrono = 1;
                     }
 
                     screenRefresh = 1;
-                }
-                else if (enableChrono == 0 && event.input.key == InputKeyOk && event.input.type == InputTypeLong)
-                {
+                } else if(
+                    enableChrono == 0 && event.input.key == InputKeyOk &&
+                    event.input.type == InputTypeLong) {
                     LL_TIM_SetCounter(TIM2, 0);
                     furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
                     mutexVal.minute = 0;
@@ -144,30 +141,23 @@ int32_t flipper_chronometer_app()
 
                     screenRefresh = 1;
                 }
-            }
-            else if (event.type == ClockEventTypeTick)
-            {
+            } else if(event.type == ClockEventTypeTick) {
                 screenRefresh = 1;
             }
         }
 
-        if (screenRefresh == 1)
-        {
+        if(screenRefresh == 1) {
             furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
             previousTimer = mutexVal.timer;
             mutexVal.timer = TIM2->CNT;
-            if (mutexVal.timer < previousTimer)
-            {
-                if (mutexVal.minute < 59) mutexVal.minute++;
-                else
-                {
-                    if (mutexVal.hour < 99)
-                    {
+            if(mutexVal.timer < previousTimer) {
+                if(mutexVal.minute < 59)
+                    mutexVal.minute++;
+                else {
+                    if(mutexVal.hour < 99) {
                         mutexVal.hour++;
                         mutexVal.minute = 0;
-                    }
-                    else
-                    {
+                    } else {
                         LL_TIM_DisableCounter(TIM2);
                         mutexVal.timer = 3839999999;
                         furi_timer_stop(timer);
