@@ -25,16 +25,16 @@ void message_queue_free(MessageQueue* queue) {
 
 bool message_queue_has_message(MessageQueue* queue) {
     // Make sure readPtr is at the beginning of a message
-    if (*(queue->readPtr) != PWNAGOTCHI_PROTOCOL_START) {
+    if(*(queue->readPtr) != PWNAGOTCHI_PROTOCOL_START) {
         return false;
     }
 
     // Now keep looking forward through the queue until we hit a 0 or the end byte
     bool alreadyWrapped = false;
-    for (uint8_t* cursor = queue->readPtr; ; cursor++) {
+    for(uint8_t* cursor = queue->readPtr;; cursor++) {
         // Let's check if we should wrap around
-        if (cursor >= queue->messageQueue + queue->queueSize) {
-            if (alreadyWrapped) {
+        if(cursor >= queue->messageQueue + queue->queueSize) {
+            if(alreadyWrapped) {
                 return false;
             }
             cursor = queue->messageQueue;
@@ -42,10 +42,9 @@ bool message_queue_has_message(MessageQueue* queue) {
         }
 
         // Otherwise see if we're at an end byte
-        if (*cursor == PWNAGOTCHI_PROTOCOL_END) {
+        if(*cursor == PWNAGOTCHI_PROTOCOL_END) {
             return true;
-        }
-        else if (*cursor == 0x00) {
+        } else if(*cursor == 0x00) {
             return false;
         }
     }
@@ -58,7 +57,7 @@ void message_queue_push_byte(MessageQueue* queue, uint8_t data) {
     queue->writePtr += 1;
 
     // Check to make sure we didn't exceed the size
-    if (queue->writePtr >= queue->messageQueue + queue->queueSize) {
+    if(queue->writePtr >= queue->messageQueue + queue->queueSize) {
         // Then start writing over the front again
         queue->writePtr = queue->messageQueue;
     }
@@ -94,7 +93,7 @@ bool message_queue_validate(MessageQueue* queue) {
 }
 
 bool message_queue_pop_message(MessageQueue* queue, PwnCommand* dest) {
-    if (!message_queue_has_message(queue)) {
+    if(!message_queue_has_message(queue)) {
         return false;
     }
 
@@ -107,15 +106,15 @@ bool message_queue_pop_message(MessageQueue* queue, PwnCommand* dest) {
     // Everything folowing is arguments until we hit the end
     // We'll count up the number of bytes in the transmission to know how many to wipe
     int argCount;
-    for (argCount = 0; argCount < PWNAGOTCHI_PROTOCOL_ARGS_MAX; argCount++) {
+    for(argCount = 0; argCount < PWNAGOTCHI_PROTOCOL_ARGS_MAX; argCount++) {
         uint8_t* bytePtr = queue->readPtr + 2 + argCount;
 
         // Wrap around if needed
-        if (bytePtr >= queue->messageQueue + queue->queueSize) {
+        if(bytePtr >= queue->messageQueue + queue->queueSize) {
             bytePtr = queue->messageQueue;
         }
 
-        if (*bytePtr == PWNAGOTCHI_PROTOCOL_END) {
+        if(*bytePtr == PWNAGOTCHI_PROTOCOL_END) {
             break;
         }
 
@@ -132,7 +131,7 @@ bool message_queue_pop_message(MessageQueue* queue, PwnCommand* dest) {
     queue->readPtr += messageSize;
 
     // Check if we are overflowing!
-    if (queue->readPtr >= queue->messageQueue + queue->queueSize) {
+    if(queue->readPtr >= queue->messageQueue + queue->queueSize) {
         // Then start reading back from the front
         queue->readPtr = queue->messageQueue;
     }
