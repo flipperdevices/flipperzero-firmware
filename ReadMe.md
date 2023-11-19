@@ -29,8 +29,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM1118-1636-0.93.9-c5ab1c0](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-18 16:36 EST`
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-18 16:36 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-18 22:10 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-18 22:10 EST`
 - Updated: [Cross Remote v0.9 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - Updated: [ESP32 Camera Suite v1.4 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [Color Guess v1.2 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
@@ -56,7 +56,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed due to refactor needed: [NFC Magic Gen1 v1.1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - Removed due to refactor needed: [NFC Magic Gen4 v1.2 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/all-the-plugins)
 - Removed due to refactor needed: [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
-- Removed due to refactor needed: [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
 - Removed due to refactor needed: [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - Removed due to refactor needed: [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - OFW: [MF DESFire Fixes #3167 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/3167)
@@ -97,6 +96,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [PicoPass (iClass) v1.8 (By Bettse)](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/picopass) [Picopass rework. Part 1 #68 (By gornekich)](https://github.com/flipperdevices/flipperzero-good-faps/pull/68)
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
 - Added: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/)
+- Refactor Update: [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
@@ -455,6 +455,7 @@ $ ./fbt dolphin_ext
 - [Mx2125 Step Counter v1.0 (By 47lecoste a.k.a. grugnoymeme)](https://github.com/grugnoymeme/flipperzero-stepcounter-fap)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
 - [NFC Magic v1.2 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+- [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock v1.1 (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [Notes for FZ WIP (By AdrianN001)](https://github.com/AdrianN001/Flipper-Zero-Note-Application)
 - [NRF Sniff v1.1 (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
@@ -541,7 +542,6 @@ $ ./fbt dolphin_ext
 - [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
-- [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
 - [TAS Playback (By rcombs)](https://github.com/rcombs/tas-playback)
 - [VB Migration Assistant v1.2 (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
