@@ -1,6 +1,5 @@
 #include "camera.h"
 
-
 static void camera_view_draw_callback(Canvas* canvas, void* _model) {
     UartDumpModel* model = _model;
 
@@ -20,7 +19,7 @@ static void camera_view_draw_callback(Canvas* canvas, void* _model) {
         }
     }
 
-    if (!model->initialized){
+    if(!model->initialized) {
         canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 8, 12, "Connect the ESP32-CAM");
@@ -66,22 +65,26 @@ static void save_image(void* context) {
     get_timefilename(file_name);
 
     // this functions open a file, using write access and creates new file if not exist.
-    bool result = storage_file_open(file, furi_string_get_cstr(file_name), FSAM_WRITE, FSOM_OPEN_ALWAYS);
+    bool result =
+        storage_file_open(file, furi_string_get_cstr(file_name), FSAM_WRITE, FSOM_OPEN_ALWAYS);
     //bool result = storage_file_open(file, EXT_PATH("DCIM/test.bmp"), FSAM_WRITE, FSOM_OPEN_ALWAYS);
     furi_string_free(file_name);
 
-    if (result){
+    if(result) {
         storage_file_write(file, bitmap_header, BITMAP_HEADER_LENGTH);
-        with_view_model(app->view, UartDumpModel * model, {
-            int8_t row_buffer[ROW_BUFFER_LENGTH];
-            for (size_t i = 64; i > 0; --i) {
-                for (size_t j = 0; j < ROW_BUFFER_LENGTH; ++j){
-                    row_buffer[j] = model->pixels[((i-1)*ROW_BUFFER_LENGTH) + j];
+        with_view_model(
+            app->view,
+            UartDumpModel * model,
+            {
+                int8_t row_buffer[ROW_BUFFER_LENGTH];
+                for(size_t i = 64; i > 0; --i) {
+                    for(size_t j = 0; j < ROW_BUFFER_LENGTH; ++j) {
+                        row_buffer[j] = model->pixels[((i - 1) * ROW_BUFFER_LENGTH) + j];
+                    }
+                    storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
                 }
-                storage_file_write(file, row_buffer, ROW_BUFFER_LENGTH);
-            }
-            
-        }, false);
+            },
+            false);
     }
 
     // Closing the "file descriptor"
@@ -94,26 +97,22 @@ static void save_image(void* context) {
 }
 
 static bool camera_view_input_callback(InputEvent* event, void* context) {
-    if (event->type == InputTypePress){
+    if(event->type == InputTypePress) {
         uint8_t data[1];
-        if (event->key == InputKeyUp){
+        if(event->key == InputKeyUp) {
             data[0] = 'C';
-        }
-        else if (event->key == InputKeyDown){
+        } else if(event->key == InputKeyDown) {
             data[0] = 'c';
-        }
-        else if (event->key == InputKeyRight){
+        } else if(event->key == InputKeyRight) {
             data[0] = '>';
-        }
-        else if (event->key == InputKeyLeft){
+        } else if(event->key == InputKeyLeft) {
             data[0] = '<';
-        }
-        else if (event->key == InputKeyOk){
+        } else if(event->key == InputKeyOk) {
             save_image(context);
         }
         furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
     }
-    
+
     return false;
 }
 
@@ -134,34 +133,38 @@ static void camera_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 
 static void process_ringbuffer(UartDumpModel* model, uint8_t byte) {
     //// 1. Phase: filling the ringbuffer
-    if (model->ringbuffer_index == 0 && byte != 'Y'){ // First char has to be 'Y' in the buffer.
+    if(model->ringbuffer_index == 0 && byte != 'Y') { // First char has to be 'Y' in the buffer.
         return;
     }
-    
-    if (model->ringbuffer_index == 1 && byte != ':'){ // Second char has to be ':' in the buffer or reset.
+
+    if(model->ringbuffer_index == 1 &&
+       byte != ':') { // Second char has to be ':' in the buffer or reset.
         model->ringbuffer_index = 0;
         process_ringbuffer(model, byte);
         return;
     }
 
-    model->row_ringbuffer[model->ringbuffer_index] = byte; // Assign current byte to the ringbuffer;
+    model->row_ringbuffer[model->ringbuffer_index] =
+        byte; // Assign current byte to the ringbuffer;
     ++model->ringbuffer_index; // Increment the ringbuffer index
 
-    if (model->ringbuffer_index < RING_BUFFER_LENGTH){ // Let's wait 'till the buffer fills.
+    if(model->ringbuffer_index < RING_BUFFER_LENGTH) { // Let's wait 'till the buffer fills.
         return;
     }
 
     //// 2. Phase: flushing the ringbuffer to the framebuffer
     model->ringbuffer_index = 0; // Let's reset the ringbuffer
     model->initialized = true; // We've successfully established the connection
-    size_t row_start_index = model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
+    size_t row_start_index =
+        model->row_ringbuffer[2] * ROW_BUFFER_LENGTH; // Third char will determine the row number
 
-    if (row_start_index > LAST_ROW_INDEX){ // Failsafe
+    if(row_start_index > LAST_ROW_INDEX) { // Failsafe
         row_start_index = 0;
     }
 
-    for (size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
-        model->pixels[row_start_index + i] = model->row_ringbuffer[i+3]; // Writing the remaining 16 bytes into the frame buffer
+    for(size_t i = 0; i < ROW_BUFFER_LENGTH; ++i) {
+        model->pixels[row_start_index + i] =
+            model->row_ringbuffer[i + 3]; // Writing the remaining 16 bytes into the frame buffer
     }
 }
 
@@ -186,7 +189,8 @@ static int32_t camera_worker(void* context) {
                     //furi_hal_uart_tx(FuriHalUartIdUSART1, data, length);
                     with_view_model(
                         app->view,
-                        UartDumpModel * model, {
+                        UartDumpModel * model,
+                        {
                             for(size_t i = 0; i < length; i++) {
                                 process_ringbuffer(model, data[i]);
                             }
@@ -196,7 +200,8 @@ static int32_t camera_worker(void* context) {
             } while(length > 0);
 
             notification_message(app->notification, &sequence_notification);
-            with_view_model(app->view, UartDumpModel * model, { UNUSED(model); }, true);
+            with_view_model(
+                app->view, UartDumpModel * model, { UNUSED(model); }, true);
         }
     }
 
