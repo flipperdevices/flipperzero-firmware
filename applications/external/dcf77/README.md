@@ -1,3 +1,4 @@
+#  DCF77 Master Wall Clock?
 # Flipper DCF77
 Sends the DCF77 time signal (badly) on the 125khz LFRFID antenna. This should allow you to update [radio clocks](https://en.wikipedia.org/wiki/Radio_clock). You can send it at the original 77.5kHz, but I've had better range using 155kHz. The baseband signal is output on C3.
 
