@@ -143,22 +143,15 @@ static void usping_measure(PluginState* const plugin_state) {
     furi_hal_gpio_write(&gpio_usart_tx, false);
     furi_hal_gpio_init(&gpio_usart_tx, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
-
-
-
-
     //FURI_CRITICAL_ENTER();
     // 10 ms pulse on TX
     furi_hal_gpio_write(&gpio_usart_tx, true);
     furi_delay_ms(10);
     furi_hal_gpio_write(&gpio_usart_tx, false);
 
-
-
     // change TX > RX
     furi_hal_gpio_write(&gpio_usart_tx, false);
     furi_hal_gpio_init(&gpio_usart_tx, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
-
 
     const uint32_t start = furi_get_tick();
 
@@ -247,8 +240,8 @@ int32_t usping_app() {
             }
         }
 
-        view_port_update(view_port);
         furi_mutex_release(plugin_state->mutex);
+        view_port_update(view_port);
     }
 
     if(furi_hal_power_is_otg_enabled()) {
@@ -263,7 +256,7 @@ int32_t usping_app() {
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn7USART1);
- 
+
     furi_hal_console_enable();
 
     view_port_enabled_set(view_port, false);
