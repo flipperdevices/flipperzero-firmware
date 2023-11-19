@@ -146,11 +146,27 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
             }
         }
 
+        bool send_html = false;
+        uint8_t* the_html = NULL;
+        size_t html_size = 0;
+        if(app->selected_tx_string && strncmp(
+                                          "evilportal -c sethtmlstr",
+                                          app->selected_tx_string,
+                                          strlen("evilportal -c sethtmlstr")) == 0) {
+            send_html = wifi_marauder_ep_read_html_file(app, &the_html, &html_size);
+        }
+
         // Send command with newline '\n'
         if(app->selected_tx_string) {
             wifi_marauder_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
             wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+            if(send_html && the_html) {
+                wifi_marauder_uart_tx(the_html, html_size);
+                wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+                free(the_html);
+                send_html = false;
+            }
         }
 
         // Run the script if the file with the script has been opened
