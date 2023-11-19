@@ -1,2 +1,0 @@
-ADD_SCENE(lovespouse_mode, LovespouseMode)
-ADD_SCENE(lovespouse_mode_custom, LovespouseModeCustom)
