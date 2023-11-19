@@ -1,0 +1,11 @@
+App(
+    appid="gpio_controller",
+    name="GPIO Controller",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_controller_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_category="GPIO",
+    fap_icon="icon10px.png",
+    fap_icon_assets="images"
+)
