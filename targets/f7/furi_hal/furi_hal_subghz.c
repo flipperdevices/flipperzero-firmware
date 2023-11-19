@@ -17,6 +17,7 @@
 #define TAG "FuriHalSubGhz"
 
 static uint32_t furi_hal_subghz_debug_gpio_buff[2];
+#define SUBGHZ_TIM_ARR_LATENCY 80
 
 /* DMA Channels definition */
 #define SUBGHZ_DMA DMA2
@@ -709,8 +710,12 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     furi_hal_gpio_write(&FURI_HAL_SUBGHZ_TX_GPIO, true);
 #endif
     furi_hal_subghz_tx();
+
     //subtract the delay for starting DMA and updating the first ARR value
-    LL_TIM_SetAutoReload(TIM2, LL_TIM_GetAutoReload(TIM2) - 80);
+    uint32_t arr_temp = LL_TIM_GetAutoReload(TIM2);
+    if(arr_temp > SUBGHZ_TIM_ARR_LATENCY)
+        LL_TIM_SetAutoReload(TIM2, LL_TIM_GetAutoReload(TIM2) - SUBGHZ_TIM_ARR_LATENCY);
+
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
 
