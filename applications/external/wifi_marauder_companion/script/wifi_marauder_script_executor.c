@@ -22,7 +22,7 @@ void _send_line_break(bool save_pcaps) {
     }
 }
 
-void _send_channel_select(int channel) {
+void _send_channel_select(int channel, bool save_pcaps) {
     char command[30];
     _send_line_break(save_pcaps);
     snprintf(command, sizeof(command), "channel -s %d\n", channel);
