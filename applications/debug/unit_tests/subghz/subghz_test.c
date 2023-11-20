@@ -231,7 +231,7 @@ typedef struct {
     size_t pos;
 } SubGhzHalAsyncTxTest;
 
-#define SUBGHZ_HAL_TEST_DURATION 1
+#define SUBGHZ_HAL_TEST_DURATION 2
 
 static LevelDuration subghz_hal_async_tx_test_yield(void* context) {
     SubGhzHalAsyncTxTest* test = context;
@@ -334,6 +334,8 @@ bool subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestType type) {
 
     while(!furi_hal_subghz_is_async_tx_complete()) {
         if(furi_hal_cortex_timer_is_expired(timer)) {
+            furi_hal_subghz_stop_async_tx();
+            furi_hal_subghz_sleep();
             return false;
         }
         furi_delay_ms(10);

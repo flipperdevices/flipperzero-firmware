@@ -38,7 +38,6 @@ typedef enum {
     SubGhzStateAsyncRx, /**< Async RX started */
 
     SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
-    SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
     SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
 
 } SubGhzState;
@@ -82,7 +81,7 @@ void furi_hal_subghz_init() {
 #endif
 
 #ifdef FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO
-    furi_hal_subghz_set_async_mirror_pin(&FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO);
+        furi_hal_subghz_set_async_mirror_pin(&FURI_HAL_SUBGHZ_ASYNC_MIRROR_GPIO);
 #endif
 
         // Reset
@@ -752,7 +751,6 @@ bool furi_hal_subghz_is_async_tx_complete() {
 void furi_hal_subghz_stop_async_tx() {
     furi_assert(
         furi_hal_subghz.state == SubGhzStateAsyncTx ||
-        furi_hal_subghz.state == SubGhzStateAsyncTxLast ||
         furi_hal_subghz.state == SubGhzStateAsyncTxEnd);
 
     // Shutdown radio
