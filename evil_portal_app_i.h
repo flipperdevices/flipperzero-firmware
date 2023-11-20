@@ -25,18 +25,13 @@
 #define SET_AP_CMD "setap"
 #define RESET_CMD "reset"
 
-#define HTML_EXTENSION ".html"
-#define HTML_FOLDER ANY_PATH("apps_data/evil_portal/html")
-
 struct Evil_PortalApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
     FuriString* portal_logs;
-    const char* command_queue[1];
-    int command_index;
-    bool has_command_queue;
+    FuriMutex* portal_logs_mutex;
 
     FuriString* text_box_store;
     size_t text_box_store_strlen;
@@ -57,11 +52,12 @@ struct Evil_PortalApp {
     bool is_custom_tx_string;
     bool focus_console_start;
     bool show_stopscan_tip;
-    bool sent_ap;
-    bool sent_html;
     bool sent_reset;
     int BAUDRATE;
     char text_store[2][128 + 1];
+
+    bool capture_line;
+    FuriString* captured_line;
 
     uint8_t* index_html;
     uint8_t* ap_name;
