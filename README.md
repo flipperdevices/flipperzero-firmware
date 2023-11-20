@@ -1,6 +1,6 @@
 # Flipboard
 
-<img src="./flipkeyboard/gallery/banner.png">
+<img src="./images/banner.png">
 
 The FlipBoard v1.1 is a versatile device for the Flipper Zero that can enable all kinds of features. It has 4 buttons that connect via separate GPIO pins, so you can react to any combinations of button up/down events. Each button has a 24-bit color LED that is programmable using the WS2812b protocol. There is also a small single-color LED on the board you can use, for example, to signal a status change.
 
@@ -12,6 +12,7 @@ You can order your FlipBoard from [https://tindie.com/stores/MakeItHackin](https
 
 - [FlipKeyboard](./flipkeyboard/README.md)
 - [FlipBlinky](./flipblinky/README.md)
+- [FlipSignal](./flipsignal/README.md)
 
 ## Support
 
