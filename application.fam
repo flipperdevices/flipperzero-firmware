@@ -1,6 +1,6 @@
 App(
-    appid="dev_esp32_gravity",
-    name="DEV Gravity",
+    appid="esp32_gravity",
+    name="Gravity",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_terminal_app",
     requires=["gui"],
