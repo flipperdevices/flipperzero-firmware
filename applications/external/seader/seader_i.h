@@ -111,6 +111,11 @@ struct Seader {
     NfcDevice* nfc_device;
 };
 
+struct SeaderPollerContainer {
+    Iso14443_4aPoller* iso14443_4a_poller;
+    PicopassPoller* picopass_poller;
+};
+
 typedef enum {
     SeaderViewMenu,
     SeaderViewPopup,

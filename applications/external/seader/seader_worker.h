@@ -2,13 +2,13 @@
 
 #include <lib/nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
 
+#include "sam_api.h"
 #include "seader_credential.h"
 #include "seader_bridge.h"
 
 typedef struct SeaderWorker SeaderWorker;
 typedef struct CCID_Message CCID_Message;
 typedef struct SeaderAPDU SeaderAPDU;
-typedef struct SeaderPollerContainer SeaderPollerContainer;
 
 typedef enum {
     // Init states
