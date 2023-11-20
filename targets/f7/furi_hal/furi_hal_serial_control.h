@@ -41,6 +41,19 @@ void furi_hal_serial_control_release(FuriHalSerialHandle* handle);
  */
 void furi_hal_serial_control_set_logging_config(FuriHalSerialId serial_id, uint32_t baud_rate);
 
+/**
+ * @brief TODO: Work in progess
+ */
+typedef void (*FuriHalSerialControlExpansionCallback)(void* context);
+
+/**
+ * @brief TODO: Work in progess
+ */
+void furi_hal_serial_control_set_expansion_callback(
+    FuriHalSerialId serial_id,
+    FuriHalSerialControlExpansionCallback callback,
+    void* context);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,6 +1,7 @@
 #include "furi_hal_serial_control.h"
 #include "furi_hal_serial_types_i.h"
 #include "furi_hal_serial.h"
+#include "furi_hal_resources.h"
 
 #include <furi.h>
 #include <toolbox/api_lock.h>
@@ -14,6 +15,8 @@ typedef enum {
     FuriHalSerialControlMessageTypeAcquire,
     FuriHalSerialControlMessageTypeRelease,
     FuriHalSerialControlMessageTypeLogging,
+    FuriHalSerialControlMessageTypeSetExpCallback,
+    FuriHalSerialControlMessageTypeExpIrq,
 } FuriHalSerialControlMessageType;
 
 typedef struct {
@@ -29,6 +32,12 @@ typedef struct {
 } FuriHalSerialControlMessageInputLogging;
 
 typedef struct {
+    const FuriHalSerialId id;
+    const FuriHalSerialControlExpansionCallback callback;
+    void* context;
+} FuriHalSerialControlMessageExpCallback;
+
+typedef struct {
     FuriHalSerialHandle handles[FuriHalSerialIdMax];
     FuriMessageQueue* queue;
     FuriThread* thread;
@@ -38,6 +47,10 @@ typedef struct {
     uint32_t log_config_serial_baud_rate;
     FuriLogHandler log_handler;
     FuriHalSerialHandle* log_serial;
+
+    // Expansion detection
+    FuriHalSerialControlExpansionCallback expansion_cb;
+    void* expansion_ctx;
 } FuriHalSerialControl;
 
 FuriHalSerialControl* furi_hal_serial_control = NULL;
@@ -63,6 +76,14 @@ static void furi_hal_serial_control_log_set_handle(FuriHalSerialHandle* handle) 
         furi_hal_serial_control->log_handler.context = furi_hal_serial_control->log_serial;
         furi_log_add_handler(furi_hal_serial_control->log_handler);
     }
+}
+
+static void furi_hal_serial_control_expansion_irq_callback(void* context) {
+    UNUSED(context);
+
+    FuriHalSerialControlMessage message;
+    message.type = FuriHalSerialControlMessageTypeExpIrq;
+    furi_message_queue_put(furi_hal_serial_control->queue, &message, 0);
 }
 
 static int32_t furi_hal_serial_control_thread(void* args) {
@@ -127,6 +148,29 @@ static int32_t furi_hal_serial_control_thread(void* args) {
             }
             furi_hal_serial_control_log_set_handle(handle);
             api_lock_unlock(message.api_lock);
+        } else if(message.type == FuriHalSerialControlMessageTypeSetExpCallback) {
+            // TODO: Track if a callback was already set for another handle
+            FuriHalSerialControlMessageExpCallback* message_input = message.input;
+            FuriHalSerialHandle* handle = &furi_hal_serial_control->handles[message_input->id];
+            const GpioPin* gpio = message_input->id == FuriHalSerialIdUsart ? &gpio_usart_rx :
+                                                                              &gpio_ext_pc0;
+            if(message_input->callback) {
+                furi_hal_serial_disable_direction(handle, FuriHalSerialDirectionRx);
+                furi_hal_gpio_add_int_callback(
+                    gpio, furi_hal_serial_control_expansion_irq_callback, NULL);
+                furi_hal_gpio_init(gpio, GpioModeInterruptFall, GpioPullUp, GpioSpeedLow);
+            } else {
+                furi_hal_gpio_remove_int_callback(gpio);
+                furi_hal_serial_enable_direction(handle, FuriHalSerialDirectionRx);
+            }
+            furi_hal_serial_control->expansion_cb = message_input->callback;
+            furi_hal_serial_control->expansion_ctx = message_input->context;
+            api_lock_unlock(message.api_lock);
+        } else if(message.type == FuriHalSerialControlMessageTypeExpIrq) {
+            if(furi_hal_serial_control->expansion_cb) {
+                void* context = furi_hal_serial_control->expansion_ctx;
+                furi_hal_serial_control->expansion_cb(context);
+            }
         } else {
             furi_crash("Invalid parameter");
         }
@@ -144,7 +188,7 @@ void furi_hal_serial_control_init(void) {
     furi_hal_serial_control->queue =
         furi_message_queue_alloc(8, sizeof(FuriHalSerialControlMessage));
     furi_hal_serial_control->thread =
-        furi_thread_alloc_ex("SerialControlDriver", 512, furi_hal_serial_control_thread, NULL);
+        furi_thread_alloc_ex("SerialControlDriver", 1024, furi_hal_serial_control_thread, NULL);
     furi_thread_mark_as_service(furi_hal_serial_control->thread);
     furi_thread_set_priority(furi_hal_serial_control->thread, FuriThreadPriorityHighest);
     furi_hal_serial_control->log_config_serial_id = FuriHalSerialIdMax;
@@ -226,6 +270,25 @@ void furi_hal_serial_control_set_logging_config(FuriHalSerialId serial_id, uint3
     };
     FuriHalSerialControlMessage message;
     message.type = FuriHalSerialControlMessageTypeLogging;
+    message.api_lock = api_lock_alloc_locked();
+    message.input = &message_input;
+    furi_message_queue_put(furi_hal_serial_control->queue, &message, FuriWaitForever);
+    api_lock_wait_unlock_and_free(message.api_lock);
+}
+
+void furi_hal_serial_control_set_expansion_callback(
+    FuriHalSerialId serial_id,
+    FuriHalSerialControlExpansionCallback callback,
+    void* context) {
+    furi_check(serial_id <= FuriHalSerialIdMax);
+
+    FuriHalSerialControlMessageExpCallback message_input = {
+        .id = serial_id,
+        .callback = callback,
+        .context = context,
+    };
+    FuriHalSerialControlMessage message;
+    message.type = FuriHalSerialControlMessageTypeSetExpCallback;
     message.api_lock = api_lock_alloc_locked();
     message.input = &message_input;
     furi_message_queue_put(furi_hal_serial_control->queue, &message, FuriWaitForever);

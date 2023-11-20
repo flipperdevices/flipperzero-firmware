@@ -100,6 +100,22 @@ void furi_hal_serial_set_rx_callback(
     FuriHalSerialRxCallback callback,
     void* context);
 
+// TODO: Work in progress
+
+/**
+ * @brief
+ */
+void furi_hal_serial_enable_direction(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDirection direction);
+
+/**
+ * @brief
+ */
+void furi_hal_serial_disable_direction(
+    FuriHalSerialHandle* handle,
+    FuriHalSerialDirection direction);
+
 #ifdef __cplusplus
 }
 #endif
