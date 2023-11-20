@@ -8,11 +8,10 @@ App(
         "dialogs",
     ],
     stack_size=2 * 1024,
-    order=20,
-    fap_icon="icons/hex_10px.png",
+    fap_icon="icons/hex_10px.bmp",
     fap_icon_assets="icons",
     fap_category="Tools",
     fap_author="@QtRoS",
     fap_version="2.0",
-    fap_description="App allows to view various files as HEX.",
+    fap_description="App allows to view various files as HEX",
 )
