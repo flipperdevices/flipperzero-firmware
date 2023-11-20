@@ -10,9 +10,19 @@ static const SubGhzBlockConst pocsag_const = {
     .te_short = 833,
     .te_delta = 100,
 };
+static const SubGhzBlockConst pocsag512_const = {
+    .te_short = 1950,
+    .te_long = 1950,
+    .te_delta = 120,
+};
+static const SubGhzBlockConst pocsag2400_const = {
+    .te_short = 410,
+    .te_long = 410,
+    .te_delta = 60,
+};
 
 // Minimal amount of sync bits (interleaving zeros and ones)
-#define POCSAG_MIN_SYNC_BITS 32
+#define POCSAG_MIN_SYNC_BITS 24
 #define POCSAG_CW_BITS 32
 #define POCSAG_CW_MASK 0xFFFFFFFF
 #define POCSAG_FRAME_SYNC_CODE 0x7CD215D8
@@ -45,6 +55,9 @@ struct SubGhzProtocolDecoderPocsag {
 
     // Done messages, ready to be serialized/deserialized
     FuriString* done_msg;
+
+    SubGhzBlockConst* pocsag_timing;
+    uint32_t version;
 };
 
 typedef struct SubGhzProtocolDecoderPocsag SubGhzProtocolDecoderPocsag;
@@ -64,6 +77,7 @@ void* subghz_protocol_decoder_pocsag_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
     instance->msg = furi_string_alloc();
     instance->done_msg = furi_string_alloc();
+    instance->pocsag_timing = NULL; //not synced yet
     if(instance->generic.result_msg == NULL) {
         instance->generic.result_msg = furi_string_alloc();
     }
@@ -179,6 +193,38 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
     // reset state - waiting for 32 bits of interleaving 1s and 0s
     if(instance->decoder.parser_step == PocsagDecoderStepReset) {
         if(DURATION_DIFF(duration, pocsag_const.te_short) < pocsag_const.te_delta) {
+            if(instance->pocsag_timing != &pocsag_const) {
+                //timing changed, so reset before, and override
+                subghz_protocol_decoder_pocsag_reset(context);
+                instance->pocsag_timing = (SubGhzBlockConst*)&pocsag_const;
+                instance->version = 1200;
+            }
+            // POCSAG signals are inverted
+            subghz_protocol_blocks_add_bit(&instance->decoder, !level);
+
+            if(instance->decoder.decode_count_bit == POCSAG_MIN_SYNC_BITS) {
+                instance->decoder.parser_step = PocsagDecoderStepFoundSync;
+            }
+        } else if(DURATION_DIFF(duration, pocsag512_const.te_short) < pocsag512_const.te_delta) {
+            if(instance->pocsag_timing != &pocsag512_const) {
+                //timing changed, so reset before, and override
+                subghz_protocol_decoder_pocsag_reset(context);
+                instance->pocsag_timing = (SubGhzBlockConst*)&pocsag512_const;
+                instance->version = 512;
+            }
+            // POCSAG signals are inverted
+            subghz_protocol_blocks_add_bit(&instance->decoder, !level);
+
+            if(instance->decoder.decode_count_bit == POCSAG_MIN_SYNC_BITS) {
+                instance->decoder.parser_step = PocsagDecoderStepFoundSync;
+            }
+        } else if(DURATION_DIFF(duration, pocsag2400_const.te_short) < pocsag2400_const.te_delta) {
+            if(instance->pocsag_timing != &pocsag2400_const) {
+                //timing changed, so reset before, and override
+                subghz_protocol_decoder_pocsag_reset(context);
+                instance->pocsag_timing = (SubGhzBlockConst*)&pocsag2400_const;
+                instance->version = 2400;
+            }
             // POCSAG signals are inverted
             subghz_protocol_blocks_add_bit(&instance->decoder, !level);
 
@@ -191,12 +237,12 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         return;
     }
 
-    int bits_count = duration / pocsag_const.te_short;
-    uint32_t extra = duration - pocsag_const.te_short * bits_count;
+    int bits_count = duration / instance->pocsag_timing->te_short;
+    uint32_t extra = duration - instance->pocsag_timing->te_short * bits_count;
 
-    if(DURATION_DIFF(extra, pocsag_const.te_short) < pocsag_const.te_delta)
+    if(DURATION_DIFF(extra, instance->pocsag_timing->te_short) < instance->pocsag_timing->te_delta)
         bits_count++;
-    else if(extra > pocsag_const.te_delta) {
+    else if(extra > instance->pocsag_timing->te_delta) {
         // in non-reset state we faced the error signal - we reached the end of the packet, flush data
         if(furi_string_size(instance->done_msg) > 0) {
             if(instance->base.callback)
@@ -305,6 +351,11 @@ SubGhzProtocolStatus subghz_protocol_decoder_pocsag_serialize(
         return SubGhzProtocolStatusError;
     }
 
+    if(!flipper_format_write_uint32(flipper_format, "PocsagVer", &instance->version, 1)) {
+        FURI_LOG_E(TAG, "Error adding PocsagVer");
+        return SubGhzProtocolStatusError;
+    }
+
     uint8_t* s = (uint8_t*)furi_string_get_cstr(instance->done_msg);
     if(!flipper_format_write_hex(flipper_format, "Msg", s, msg_len)) {
         FURI_LOG_E(TAG, "Error adding Msg");
@@ -331,6 +382,9 @@ SubGhzProtocolStatus
             FURI_LOG_E(TAG, "Missing MsgLen");
             break;
         }
+        //optional, so compatible backwards
+        instance->version = 1200;
+        flipper_format_read_uint32(flipper_format, "PocsagVer", &instance->version, 1);
 
         buf = malloc(msg_len);
         if(!flipper_format_read_hex(flipper_format, "Msg", buf, msg_len)) {
@@ -349,7 +403,9 @@ SubGhzProtocolStatus
 void subhz_protocol_decoder_pocsag_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
-    furi_string_cat_printf(output, "%s\r\n", instance->generic.protocol_name);
+    furi_string_cat_printf(
+        output, "%s %lu\r\n", instance->generic.protocol_name, instance->version);
+    furi_string_cat_printf(output, "Addr: %lu\r\n", instance->ric);
     furi_string_cat(output, instance->done_msg);
 }
 
@@ -364,6 +420,14 @@ const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
     .get_string = subhz_protocol_decoder_pocsag_get_string,
 };
 
+const SubGhzProtocolEncoder subghz_protocol_pocsag_encoder = {
+    .alloc = NULL,
+    .free = NULL,
+    .deserialize = NULL,
+    .stop = NULL,
+    .yield = NULL,
+};
+
 const SubGhzProtocol subghz_protocol_pocsag = {
     .name = SUBGHZ_PROTOCOL_POCSAG_NAME,
     .type = SubGhzProtocolTypeStatic,
@@ -371,4 +435,5 @@ const SubGhzProtocol subghz_protocol_pocsag = {
             SubGhzProtocolFlag_Load,
 
     .decoder = &subghz_protocol_pocsag_decoder,
+    .encoder = &subghz_protocol_pocsag_encoder,
 };
