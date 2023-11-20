@@ -17,16 +17,13 @@ char* hangman_get_random_word(const char* dict_file) {
             if(!seek_result) {
                 stream_rewind(stream);
             }
-
-            stream_read_line(stream, line);
-        } else {
-            stream_read_line(stream, line);
         }
+        stream_read_line(stream, line);
     } else {
         furi_crash(NULL);
     }
 
-    furi_string_trim(line);
+    furi_string_trim(line, "\n");
 
     char* word = strdup(furi_string_get_cstr(line));
     furi_string_free(line);
