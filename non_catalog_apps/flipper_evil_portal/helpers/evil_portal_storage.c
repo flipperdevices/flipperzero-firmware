@@ -13,6 +13,12 @@ void evil_portal_read_index_html(void* context) {
     Storage* storage = evil_portal_open_storage();
     FileInfo fi;
 
+    /*if(!storage_common_exists(storage, EVIL_PORTAL_INDEX_SAVE_PATH)) {
+        FuriString* tmp = furi_string_alloc_set(EVIL_PORTAL_INDEX_DEFAULT_PATH);
+        evil_portal_replace_index_html(tmp);
+        furi_string_free(tmp);
+    }*/
+
     if(storage_common_stat(storage, EVIL_PORTAL_INDEX_SAVE_PATH, &fi) == FSE_OK) {
         File* index_html = storage_file_alloc(storage);
         if(storage_file_open(
@@ -77,7 +83,7 @@ void evil_portal_read_ap_name(void* context) {
     if(storage_common_stat(storage, EVIL_PORTAL_AP_SAVE_PATH, &fi) == FSE_OK) {
         File* ap_name = storage_file_alloc(storage);
         if(storage_file_open(ap_name, EVIL_PORTAL_AP_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            app->ap_name = malloc((size_t)fi.size);
+            app->ap_name = malloc((size_t)fi.size + 1);
             uint8_t* buf_ptr = app->ap_name;
             size_t read = 0;
             while(read < fi.size) {
@@ -87,6 +93,8 @@ void evil_portal_read_ap_name(void* context) {
                 read += now_read;
                 buf_ptr += now_read;
             }
+            *buf_ptr = '\0';
+            buf_ptr++;
             free(buf_ptr);
         }
         storage_file_close(ap_name);
@@ -148,8 +156,7 @@ void write_logs(FuriString* portal_logs) {
     File* file = storage_file_alloc(storage);
 
     if(storage_file_open(file, seq_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        storage_file_write(
-            file, furi_string_get_cstr(portal_logs), furi_string_utf8_length(portal_logs));
+        storage_file_write(file, furi_string_get_cstr(portal_logs), furi_string_size(portal_logs));
     }
     storage_file_close(file);
     storage_file_free(file);

@@ -25,12 +25,12 @@ static void evil_portal_app_tick_event_callback(void* context) {
 Evil_PortalApp* evil_portal_app_alloc() {
     Evil_PortalApp* app = malloc(sizeof(Evil_PortalApp));
 
-    app->sent_html = false;
-    app->sent_ap = false;
     app->sent_reset = false;
-    app->has_command_queue = false;
-    app->command_index = 0;
     app->portal_logs = furi_string_alloc();
+    app->portal_logs_mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
+
+    app->capture_line = false;
+    app->captured_line = furi_string_alloc();
 
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
@@ -82,12 +82,6 @@ Evil_PortalApp* evil_portal_app_alloc() {
 }
 
 void evil_portal_app_free(Evil_PortalApp* app) {
-    // save latest logs
-    if(furi_string_utf8_length(app->portal_logs) > 0) {
-        write_logs(app->portal_logs);
-        furi_string_free(app->portal_logs);
-    }
-
     // Send reset event to dev board
     evil_portal_uart_tx((uint8_t*)(RESET_CMD), strlen(RESET_CMD));
     evil_portal_uart_tx((uint8_t*)("\n"), 1);
@@ -111,6 +105,17 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 
     evil_portal_uart_free(app->uart);
 
+    // save latest logs
+    furi_mutex_acquire(app->portal_logs_mutex, FuriWaitForever);
+    if(furi_string_size(app->portal_logs) > 0) {
+        write_logs(app->portal_logs);
+        furi_string_free(app->portal_logs);
+    }
+    furi_mutex_release(app->portal_logs_mutex);
+    furi_mutex_free(app->portal_logs_mutex);
+
+    furi_string_free(app->captured_line);
+
     // Close records
     furi_record_close(RECORD_GUI);
 
@@ -124,8 +129,12 @@ int32_t evil_portal_app(void* p) {
     UNUSED(p);
     Evil_PortalApp* evil_portal_app = evil_portal_app_alloc();
 
-    uint8_t attempts = 0;
     bool otg_was_enabled = furi_hal_power_is_otg_enabled();
+    // turn off 5v, so it gets reset on startup
+    if(otg_was_enabled) {
+        furi_hal_power_disable_otg();
+    }
+    uint8_t attempts = 0;
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
         furi_hal_power_enable_otg();
         furi_delay_ms(10);

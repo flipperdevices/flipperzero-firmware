@@ -160,7 +160,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | ESP32-C6 Gravity terminal | ![GPIO Badge] | [by chris-bc](https://github.com/chris-bc/Flipper-Gravity) |  | ![None Badge] |
 | IFTTT Virtual Button for ESP8266 | ![GPIO Badge] | [by Ferrazzi](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) | Fixes [by Willy-JL](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/ae321fb5f4c616d3965546926b1b4b446eef8d86) | ![None Badge] |
 | Wifi Deauth v2 for ESP8266 | ![GPIO Badge] | [by Timmotools](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) |  | ![None Badge] |
-| Evil captive portal | ![GPIO Badge] | [by bigbrodude6119](https://github.com/bigbrodude6119/flipper-zero-evil-portal) | WIP -> +2 new features [by leedave](https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename) | ![None Badge] |
+| Evil captive portal | ![GPIO Badge] | [by bigbrodude6119](https://github.com/bigbrodude6119/flipper-zero-evil-portal) | WIP -> +2 new features [by leedave](https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename) + Fixed and modded [by Willy-JL](https://github.com/Flipper-XFW/Xtreme-Firmware/tree/dev/applications/external/evil_portal) | ![None Badge] |
 | Flashlight | ![GPIO Badge] | [by xMasterX](https://github.com/xMasterX/flipper-flashlight) |  | [![UFW Badge]](https://lab.flipper.net/apps/flashlight) |
 | Pwnagotchi->Flipper interface | ![GPIO Badge] | [by Matt-London](https://github.com/Matt-London/pwnagotchi-flipper) |  | ![None Badge] |
 | Geiger Counter | ![GPIO Badge] | [by nmrr](https://github.com/nmrr/flipperzero-geigercounter) | works with external module! | [![UFW Badge]](https://lab.flipper.net/apps/flipper_geiger) |
