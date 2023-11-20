@@ -601,7 +601,6 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
             if(!instance->transfer_valid) {
                 nack += MF_CLASSIC_CMD_NACK_TRANSFER_INVALID;
             }
-            // TODO: check CRC and add MF_CLASSIC_CMD_NACK_CRC_ERROR if incorrect
 
             mf_classic_listener_send_short_frame(instance, nack);
         } else if(mfc_command == MfClassicListenerCommandSilent) {
