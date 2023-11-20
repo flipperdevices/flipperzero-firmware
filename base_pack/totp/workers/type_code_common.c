@@ -67,10 +67,9 @@ void totp_type_code_worker_execute_automation(
     const char* code_buffer,
     uint8_t code_buffer_size,
     TokenAutomationFeature features,
-    AutomationKeyboardLayout keyboard_layout) {
-    furi_delay_ms(500);
-    uint8_t i = 0;
-    char cb_char;
+    AutomationKeyboardLayout keyboard_layout,
+    uint16_t initial_delay) {
+    furi_delay_ms(initial_delay);
 
     const uint8_t* keyboard_layout_dict;
     switch(keyboard_layout) {
@@ -90,6 +89,8 @@ void totp_type_code_worker_execute_automation(
 
     uint32_t keystroke_delay = get_keystroke_delay(features);
 
+    char cb_char;
+    uint8_t i = 0;
     while(i < code_buffer_size && (cb_char = code_buffer[i]) != 0) {
         uint8_t char_index = CONVERT_CHAR_TO_DIGIT(cb_char);
         if(char_index > 9) {
