@@ -11,7 +11,7 @@ Usage:
   totp notify [<notification>...]
   totp (timezone | tz) [<timezone>]
   totp reset
-  totp automation [-k <layout>] [<automation>...]
+  totp automation [-k <layout>] [-w <delay>] [<automation>...]
 
 Commands:
   help, h, ?       Show command usage help
@@ -54,4 +54,4 @@ Options:
   -f             Force command to do not ask user for interactive confirmation
   -c <slot>      New crypto key slot. Must be between 12 and 100
   -k <layout>    Automation keyboard layout. Must be one of: QWERTY, AZERTY, QWERTZ
-  
+  -w <delay>     Automation initial delay in seconds. Must be positive float value [default: 0.5]

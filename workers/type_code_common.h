@@ -13,6 +13,7 @@ typedef bool (*TOTP_AUTOMATION_KEY_HANDLER)(uint16_t key);
  * @param code_buffer_size code buffer size
  * @param features automation features
  * @param keyboard_layout keyboard layout to be used
+ * @param initial_delay initial delay before starting automation
  */
 void totp_type_code_worker_execute_automation(
     TOTP_AUTOMATION_KEY_HANDLER key_press_fn,
@@ -20,4 +21,5 @@ void totp_type_code_worker_execute_automation(
     const char* code_buffer,
     uint8_t code_buffer_size,
     TokenAutomationFeature features,
-    AutomationKeyboardLayout keyboard_layout);
+    AutomationKeyboardLayout keyboard_layout,
+    uint16_t initial_delay);
