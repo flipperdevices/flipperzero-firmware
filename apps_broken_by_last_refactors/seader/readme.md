@@ -22,6 +22,15 @@ Put SAM ([USA](https://www.cdw.com/product/hp-sim-for-hid-iclass-for-hip2-reader
 
 Optionally 3d print a [case designed by sean](https://www.printables.com/model/543149-case-for-flipper-zero-devboard-smart2click-samsim)
 
+#### Connections
+
+| Smart Card 2 Click | Flipper     |
+| ------------------ | ----------- |
+| 5v                 | 1           |
+| GND                | 8 / 11 / 18 |
+| TX                 | 16          |
+| RX                 | 15          |
+
 ## Development
 
 ### To Build App

@@ -564,7 +564,7 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
                 target = __builtin_bswap64((cred->credential | sentinel | header) << 4) >>
                          (64 - 48);
             } else {
-                target = __builtin_bswap64((cred->credential | sentinel) << 4) >> (64 - 48);
+                target = __builtin_bswap64(cred->credential << 4) >> (64 - 48);
             }
         } else {
             //8 bytes

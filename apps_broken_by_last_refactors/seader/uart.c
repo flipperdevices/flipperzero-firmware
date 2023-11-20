@@ -39,7 +39,6 @@ void seader_uart_set_baudrate(SeaderUartBridge* seader_uart, uint32_t baudrate) 
 }
 
 size_t seader_uart_process_buffer(Seader* seader, uint8_t* cmd, size_t cmd_len) {
-    SeaderWorker* seader_worker = seader->worker;
     SeaderUartBridge* seader_uart = seader->uart;
     if(cmd_len < 2) {
         return cmd_len;
@@ -47,7 +46,7 @@ size_t seader_uart_process_buffer(Seader* seader, uint8_t* cmd, size_t cmd_len) 
 
     size_t consumed = 0;
     do {
-        consumed = seader_ccid_process(seader_worker, cmd, cmd_len);
+        consumed = seader_ccid_process(seader, cmd, cmd_len);
 
         if(consumed > 0) {
             memset(cmd, 0, consumed);
@@ -72,6 +71,7 @@ size_t seader_uart_process_buffer(Seader* seader, uint8_t* cmd, size_t cmd_len) 
 int32_t seader_uart_worker(void* context) {
     Seader* seader = (Seader*)context;
     SeaderUartBridge* seader_uart = seader->uart;
+    furi_thread_set_current_priority(FuriThreadPriorityHighest);
 
     memcpy(&seader_uart->cfg, &seader_uart->cfg_new, sizeof(SeaderUartConfig));
 
@@ -154,6 +154,7 @@ int32_t seader_uart_tx_thread(void* context) {
     Seader* seader = (Seader*)context;
     SeaderUartBridge* seader_uart = seader->uart;
 
+    furi_thread_set_current_priority(FuriThreadPriorityHighest);
     while(1) {
         uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_TX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
@@ -161,13 +162,11 @@ int32_t seader_uart_tx_thread(void* context) {
         if(events & WorkerEvtTxStop) break;
         if(events & WorkerEvtSamRx) {
             if(seader_uart->tx_len > 0) {
-                /*
                 char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
                 for(uint8_t i = 0; i < seader_uart->tx_len; i++) {
                     snprintf(display + (i * 2), sizeof(display), "%02x", seader_uart->tx_buf[i]);
                 }
-                FURI_LOG_I(TAG, "SEND %d bytes: %s", seader_uart->tx_len, display);
-                */
+                // FURI_LOG_I(TAG, "SEND %d bytes: %s", seader_uart->tx_len, display);
                 seader_uart->st.tx_cnt += seader_uart->tx_len;
                 furi_hal_uart_tx(
                     seader_uart->cfg.uart_ch, seader_uart->tx_buf, seader_uart->tx_len);

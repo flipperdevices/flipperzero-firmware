@@ -1,5 +1,5 @@
 #include "../seader_i.h"
-#include <toolbox/name_generator.h>
+#include <lib/toolbox/name_generator.h>
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 
@@ -16,7 +16,7 @@ void seader_scene_save_name_on_enter(void* context) {
     TextInput* text_input = seader->text_input;
     bool cred_name_empty = false;
     if(!strcmp(seader->credential->name, "")) {
-        name_generator_make_auto(seader->text_store, sizeof(seader->text_store), "Seader");
+        name_generator_make_random(seader->text_store, sizeof(seader->text_store));
         cred_name_empty = true;
     } else {
         seader_text_store_set(seader, seader->credential->name);
