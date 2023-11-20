@@ -4,7 +4,7 @@
 #undef USE_LED_DRIVER
 #endif
 // Uncomment the next line to use the LED driver instead of bit-banging the LEDs.
-#define USE_LED_DRIVER 1
+//#define USE_LED_DRIVER 1
 
 // Bit-banging the WS2812b LEDs is a bit tricky. The timing is very strict.
 // Hopefully, we will update to a better solution in the future.
