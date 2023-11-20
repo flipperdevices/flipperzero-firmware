@@ -1274,9 +1274,12 @@ Function,+,furi_hal_serial_control_deinit,void,
 Function,+,furi_hal_serial_control_init,void,
 Function,+,furi_hal_serial_control_release,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_control_resume,void,
+Function,+,furi_hal_serial_control_set_expansion_callback,void,"FuriHalSerialId, FuriHalSerialControlExpansionCallback, void*"
 Function,+,furi_hal_serial_control_set_logging_config,void,"FuriHalSerialId, uint32_t"
 Function,+,furi_hal_serial_control_suspend,void,
 Function,+,furi_hal_serial_deinit,void,FuriHalSerialHandle*
+Function,+,furi_hal_serial_disable_direction,void,"FuriHalSerialHandle*, FuriHalSerialDirection"
+Function,+,furi_hal_serial_enable_direction,void,"FuriHalSerialHandle*, FuriHalSerialDirection"
 Function,+,furi_hal_serial_init,void,"FuriHalSerialHandle*, uint32_t"
 Function,+,furi_hal_serial_resume,void,FuriHalSerialHandle*
 Function,+,furi_hal_serial_set_br,void,"FuriHalSerialHandle*, uint32_t"
