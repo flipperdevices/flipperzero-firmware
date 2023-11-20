@@ -1,0 +1,5 @@
+.vscode/
+dist/
+.clang-format
+venv/
+.DS_Store
