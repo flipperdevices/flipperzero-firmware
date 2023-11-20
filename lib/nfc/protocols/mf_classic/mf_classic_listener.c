@@ -273,6 +273,17 @@ static MfClassicListenerCommand mf_classic_listener_write_block_second_part_hand
 
         if(mf_classic_is_sector_trailer(block_num)) {
             MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)&block;
+
+            // Check if any writing is allowed
+            if(!mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionKeyAWrite) &&
+               !mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionKeyBWrite) &&
+               !mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionACWrite)) {
+                break;
+            }
+
             if(mf_classic_is_allowed_access(
                    instance->data, block_num, key_type, MfClassicActionKeyAWrite)) {
                 bit_buffer_write_bytes_mid(buff, sec_tr->key_a.data, 0, sizeof(MfClassicKey));
