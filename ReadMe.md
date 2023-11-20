@@ -13,7 +13,7 @@ Apps contains changes needed to compile them on latest firmware, fixes has been 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `13 Nov 19:35 GMT +3`
+### Apps checked & updated at `21 Nov 00:22 GMT +3`
 
 
 # Default pack
@@ -113,6 +113,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 |---|:---:|---|---|:---:|
 | BT Camera Trigger | ![BT Badge] | [by Nem0oo](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger) |  | [![UFW Badge]](https://lab.flipper.net/apps/bt_trigger) |
 | BT Serial Example | ![BT Badge] | [by maybe-hello-world](https://github.com/maybe-hello-world/fbs) |  | ![None Badge] |
+| Bluetooth remote Keynote for Kodi | ![GPIO Badge] | [by coded-with-claws](https://github.com/coded-with-claws/flipperzero-tools) | read more details in original repo | ![None Badge] |
 | 4 in row | ![Games Badge] | [by leo-need-more-coffee](https://github.com/leo-need-more-coffee/flipperzero-4inrow) |  | [![UFW Badge]](https://lab.flipper.net/apps/4inrow) |
 | Asteroids | ![Games Badge] | [by antirez & SimplyMinimal](https://github.com/antirez/flipper-asteroids) | Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Asteroids) all changes can be found by clicking on [this link](https://github.com/SimplyMinimal/FlipperZero-Asteroids) | [![UFW Badge]](https://lab.flipper.net/apps/asteroids) |
 | Chess Clock | ![Games Badge] | [by ihatecsv](https://github.com/ihatecsv/flipper_chess_clock) |  | ![None Badge] |
@@ -148,6 +149,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Ultimate Tic-Tac-Toe | ![Games Badge] | [by Racso](https://github.com/Racso/fzero-apps/tree/main) |  | [![Author Badge]](https://lab.flipper.net/apps/racso_ultimate_tic_tac_toe) |
 | Zero! | ![Games Badge] | [by Racso](https://github.com/Racso/fzero-apps/tree/main) |  | [![Author Badge]](https://lab.flipper.net/apps/racso_zero) |
 | Sokoban | ![Games Badge] | [by Racso](https://github.com/Racso/fzero-apps/tree/main) |  | [![Author Badge]](https://lab.flipper.net/apps/racso_sokoban) |
+| Игра «Виселица» («Балда») | ![Games Badge] | [by bolknote](https://github.com/bolknote/Flipper-Zero-Hangman-Game) |  | ![None Badge] |
+| City Bloxx | ![Games Badge] | [by Milk-Cool](https://github.com/Milk-Cool/fz-citybloxx) |  | ![None Badge] |
 | Air Mouse | ![GPIO Badge] | [by ginkage](https://github.com/ginkage/FlippAirMouse/) |  | [![Author Badge]](https://lab.flipper.net/apps/air_mouse) |
 | Plantower PMSx003 sensor reader | ![GPIO Badge] | [by 3cky](https://github.com/3cky/flipperzero-airmon) |  | [![UFW Badge]](https://lab.flipper.net/apps/airmon) |
 | Bar code scanner emulator via COM port | ![GPIO Badge] | [by polarikus](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) |  | ![None Badge] |
@@ -191,6 +194,10 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | Mx2125 - Step Counter | ![GPIO Badge] | [by grugnoymeme](https://github.com/grugnoymeme/flipperzero-stepcounter-fap) |  | ![None Badge] |
 | TEA5767 Radio control | ![GPIO Badge] | [original by victormico](https://github.com/victormico/flipperzero-radio/tree/main) | new version [by coolshrimp](https://coolshrimp/flipperzero-firmware-wPlugins/) | ![None Badge] |
 | Coffee EEPROM | ![GPIO Badge] | [by wh00hw](https://github.com/wh00hw/Coffee-EEPROM-FAP) | read more details in original repo | ![None Badge] |
+| WHC CH32V003 debugger/flasher | ![GPIO Badge] | [by sukvojte](https://github.com/sukvojte/wch_swio_flasher) | read more details in original repo | ![None Badge] |
+| NRF24 Sniffer MS | ![GPIO Badge] | [by coded-with-claws](https://github.com/coded-with-claws/flipperzero-tools) | read more details in original repo | ![None Badge] |
+| NRF24 Mouse Jacker MS | ![GPIO Badge] | [by coded-with-claws](https://github.com/coded-with-claws/flipperzero-tools) | read more details in original repo | ![None Badge] |
+| SD-SPI | ![GPIO Badge] | [by Gl1tchub](https://github.com/Gl1tchub/Flipperzero-SD-SPI) | read more details in original repo | ![None Badge] |
 | IR Remote | ![IR Badge] | [by Hong5489](https://github.com/Hong5489/ir_remote) | improvements [by friebel](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [by d4ve10](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option) | ![None Badge] |
 | IR Intervalometer | ![IR Badge] | [by Nitepone](https://github.com/Nitepone/flipper-intervalometer) |  | [![UFW Badge]](https://lab.flipper.net/apps/sony_intervalometer) |
 | IR Xbox Controller | ![IR Badge] | [by gebeto](https://github.com/gebeto/flipper-xbox-controller) |  | [![Author Badge]](https://lab.flipper.net/apps/xbox_controller) |
@@ -213,6 +220,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 | (Q)M100 UHF RFID | ![RFID Badge] | [by frux-c](https://github.com/frux-c/uhf_rfid) | WIP -> (+Added icon by @xMasterX) | ![None Badge] |
 | Enhanced Sub-GHz Chat | ![SubGhz Badge] | [by twisted-pear](https://github.com/twisted-pear/esubghz_chat) |  | ![None Badge] |
 | TPMS Reader | ![SubGhz Badge] | [by wosk](https://github.com/wosk/flipperzero-tpms/tree/main) |  | ![None Badge] |
+| ShapShup | ![SubGhz Badge] | [by derskythe](https://github.com/derskythe/flipperzero-shapshup) | RAW files preview (+fixed app exit) | ![None Badge] |
 | Analog Clock | ![Tools Badge] | [by scrolltex](https://github.com/scrolltex/flipper_analog_clock) |  | [![UFW Badge]](https://lab.flipper.net/apps/analog_clock) |
 | Brainfuck interpreter | ![Tools Badge] | [by nymda](https://github.com/nymda/FlipperZeroBrainfuck) |  | [![UFW Badge]](https://lab.flipper.net/apps/brainfuck) |
 | Ceasar Cipher | ![Tools Badge] | [by panki27](https://github.com/panki27/caesar-cipher) |  | [![UFW Badge]](https://lab.flipper.net/apps/caesar_cipher) |
