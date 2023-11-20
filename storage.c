@@ -208,7 +208,12 @@ bool load_settings(UART_TerminalApp* app) {
     syncProcessResponse(app);
 
     close_file(file);
-    return true;
+    /* Another nod to the person with the insane compiler */
+    if(app->is_command) {
+        return true;
+    } else {
+        return true;
+    }
 }
 
 bool writeDataToFile(UART_TerminalApp* app, File* file) {
@@ -249,7 +254,11 @@ bool save_data(UART_TerminalApp* app) {
     // // }
 
     // close_file(file);
-    return true;
+    if(app->is_command) {
+        return true;
+    } else {
+        return true;
+    }
 }
 
 bool load_data(UART_TerminalApp* app) {
@@ -271,5 +280,9 @@ bool load_data(UART_TerminalApp* app) {
     // // Parse file
 
     // close_file(file);
-    return true;
+    if(app->is_command) {
+        return true;
+    } else {
+        return true;
+    }
 }
