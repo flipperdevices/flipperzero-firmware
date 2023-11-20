@@ -12,7 +12,6 @@ char* hangman_get_random_word(const char* dict_file) {
 
         if(offset > 0) {
             bool seek_result = stream_seek(stream, offset, StreamOffsetFromStart) &&
-                               stream_seek_to_char(stream, '\n', StreamDirectionForward) &&
                                stream_read_line(stream, line);
 
             if(!seek_result) {
