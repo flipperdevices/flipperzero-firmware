@@ -186,13 +186,19 @@ static bool hid_movie_input_callback(InputEvent* event, void* context) {
     HidMovie* hid_movie = context;
     bool consumed = false;
 
-    if(event->type == InputTypePress) {
-        hid_movie_process_press(hid_movie, event);
+    if(event->type == InputTypeLong && event->key == InputKeyBack) {
+        hid_hal_keyboard_release_all(hid_movie->hid);
+    } else {
         consumed = true;
-    } else if(event->type == InputTypeRelease) {
-        hid_movie_process_release(hid_movie, event);
-        consumed = true;
+        if(event->type == InputTypePress) {
+            hid_movie_process_press(hid_movie, event);
+            consumed = true;
+        } else if(event->type == InputTypeRelease) {
+            hid_movie_process_release(hid_movie, event);
+            consumed = true;
+        }
     }
+
     return consumed;
 }
 
