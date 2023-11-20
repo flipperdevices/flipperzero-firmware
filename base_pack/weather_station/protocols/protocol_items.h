@@ -8,6 +8,7 @@
 #include "gt_wt_03.h"
 #include "acurite_606tx.h"
 #include "acurite_609txc.h"
+#include "acurite_986.h"
 #include "lacrosse_tx.h"
 #include "lacrosse_tx141thbv2.h"
 #include "oregon2.h"
