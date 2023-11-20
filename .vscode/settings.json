@@ -69,7 +69,10 @@
         "compare": "c",
         "typeinfo": "c",
         "iosfwd": "c",
-        "__config": "cpp"
+        "__config": "cpp",
+        "pokemon_menu.h": "c",
+        "trade.h": "c",
+        "select_pokemon.h": "c"
     },
     "idf.espIdfPath": "/Users/estebanfuentealba/esp/esp-idf",
     "idf.pythonBinPath": "/Users/estebanfuentealba/.espressif/python_env/idf4.4_py3.9_env/bin/python",
