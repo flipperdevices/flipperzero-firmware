@@ -6,7 +6,6 @@
 #include "scenes/wifi_marauder_scene.h"
 #include "wifi_marauder_custom_event.h"
 #include "wifi_marauder_uart.h"
-#include "wifi_marauder_ep.h"
 #include "file/sequential_file.h"
 #include "script/wifi_marauder_script.h"
 #include "script/wifi_marauder_script_worker.h"
@@ -35,14 +34,13 @@
 #define LP_UART_CH (FuriHalUartIdLPUART1)
 #define BAUDRATE (115200)
 
-#define NUM_MENU_ITEMS (24)
+#define NUM_MENU_ITEMS (23)
 
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
 
 #define MARAUDER_APP_FOLDER_USER "apps_data/marauder"
 #define MARAUDER_APP_FOLDER EXT_PATH(MARAUDER_APP_FOLDER_USER)
-#define MARAUDER_APP_FOLDER_HTML MARAUDER_APP_FOLDER "/html"
 #define MARAUDER_APP_FOLDER_PCAPS MARAUDER_APP_FOLDER "/pcaps"
 #define MARAUDER_APP_FOLDER_LOGS MARAUDER_APP_FOLDER "/logs"
 #define MARAUDER_APP_FOLDER_USER_PCAPS MARAUDER_APP_FOLDER_USER "/pcaps"
