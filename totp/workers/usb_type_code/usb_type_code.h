@@ -36,13 +36,15 @@ enum TotpUsbTypeCodeWorkerEvents {
  * @param code_buffer_size code buffer size
  * @param code_buffer_sync code buffer synchronization primitive
  * @param keyboard_layout keyboard layout to be used
+ * @param initial_delay initial delay before starting automation
  * @return worker context
  */
 TotpUsbTypeCodeWorkerContext* totp_usb_type_code_worker_start(
     char* code_buffer,
     uint8_t code_buffer_size,
     FuriMutex* code_buffer_sync,
-    AutomationKeyboardLayout keyboard_layout);
+    AutomationKeyboardLayout keyboard_layout,
+    uint16_t initial_delay);
 
 /**
  * @brief Stops USB token input automation worker
