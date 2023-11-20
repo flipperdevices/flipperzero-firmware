@@ -179,9 +179,12 @@ bool load_settings(UART_TerminalApp *app) {
 
 bool writeDataToFile(UART_TerminalApp *app, File *file) {
     int bufLen = 0;
-    uint8_t *dataBuffer[DATABUFFER_SIZE];
+    uint8_t dataBuffer[DATABUFFER_SIZE];
 
     memset(dataBuffer, 0x00, DATABUFFER_SIZE);
+    (void)(bufLen);
+
+    return true;
 }
 
 bool save_data(UART_TerminalApp *app) {
