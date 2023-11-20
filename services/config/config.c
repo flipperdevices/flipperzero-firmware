@@ -177,6 +177,10 @@ static bool totp_open_config_file(Storage* storage, FlipperFormat** file) {
         flipper_format_write_uint32(
             fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, &tmp_uint32, 1);
 
+        tmp_uint32 = 500;
+        flipper_format_write_uint32(
+            fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_INITIAL_DELAY, &tmp_uint32, 1);
+
         tmp_uint32 = 0; //-V1048
         flipper_format_write_uint32(fff_data_file, TOTP_CONFIG_KEY_FONT, &tmp_uint32, 1);
 
@@ -262,6 +266,12 @@ bool totp_config_file_update_automation_method(const PluginState* plugin_state) 
             break;
         }
 
+        tmp_uint32 = plugin_state->automation_initial_delay;
+        if(!flipper_format_insert_or_update_uint32(
+               file, TOTP_CONFIG_KEY_AUTOMATION_INITIAL_DELAY, &tmp_uint32, 1)) {
+            break;
+        }
+
         update_result = true;
     } while(false);
 
@@ -297,6 +307,12 @@ bool totp_config_file_update_user_settings(const PluginState* plugin_state) {
         tmp_uint32 = plugin_state->automation_kb_layout;
         if(!flipper_format_insert_or_update_uint32(
                file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, &tmp_uint32, 1)) {
+            break;
+        }
+
+        tmp_uint32 = plugin_state->automation_initial_delay;
+        if(!flipper_format_insert_or_update_uint32(
+               file, TOTP_CONFIG_KEY_AUTOMATION_INITIAL_DELAY, &tmp_uint32, 1)) {
             break;
         }
 
@@ -495,6 +511,17 @@ bool totp_config_file_load(PluginState* const plugin_state) {
         }
 
         plugin_state->automation_kb_layout = tmp_uint32;
+
+        if(!flipper_format_rewind(fff_data_file)) {
+            break;
+        }
+
+        if(!flipper_format_read_uint32(
+               fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_INITIAL_DELAY, &tmp_uint32, 1)) {
+            tmp_uint32 = 500;
+        }
+
+        plugin_state->automation_initial_delay = tmp_uint32;
 
         if(!flipper_format_rewind(fff_data_file)) {
             break;
