@@ -55,13 +55,15 @@ void totp_bt_type_code_worker_free(TotpBtTypeCodeWorkerContext* context);
  * @param code_buffer_size code buffer size
  * @param code_buffer_sync code buffer synchronization primitive
  * @param keyboard_layout keyboard layout to be used
+ * @param initial_delay initial delay before starting automation
  */
 void totp_bt_type_code_worker_start(
     TotpBtTypeCodeWorkerContext* context,
     char* code_buffer,
     uint8_t code_buffer_size,
     FuriMutex* code_buffer_sync,
-    AutomationKeyboardLayout keyboard_layout);
+    AutomationKeyboardLayout keyboard_layout,
+    uint16_t initial_delay);
 
 /**
  * @brief Stops bluetooth token input automation worker

@@ -38,6 +38,7 @@ typedef enum {
     VibroSwitch,
     AutomationSwitch,
     BadKeyboardLayoutSelect,
+    AutomationDelaySelect,
     ConfirmButton
 } Control;
 
@@ -53,7 +54,31 @@ typedef struct {
     uint8_t active_font_index;
     FontInfo* active_font;
     uint8_t total_fonts_count;
+    uint16_t automation_initial_delay;
+    char automation_initial_delay_formatted[10];
 } SceneState;
+
+static void two_digit_to_str(int8_t num, char* str) {
+    char* s = str;
+    if(num < 0) {
+        *(s++) = '-';
+        num = -num;
+    }
+
+    uint8_t d1 = (num / 10) % 10;
+    uint8_t d2 = num % 10;
+    *(s++) = CONVERT_DIGIT_TO_CHAR(d1);
+    *(s++) = CONVERT_DIGIT_TO_CHAR(d2);
+    *(s++) = '\0';
+}
+
+static void update_formatted_automation_initial_delay(SceneState* scene_state) {
+    snprintf(
+        &scene_state->automation_initial_delay_formatted[0],
+        sizeof(scene_state->automation_initial_delay_formatted),
+        "%.1f sec.",
+        (double)(scene_state->automation_initial_delay / 1000.0f));
+}
 
 void totp_scene_app_settings_activate(PluginState* plugin_state) {
     SceneState* scene_state = malloc(sizeof(SceneState));
@@ -71,6 +96,7 @@ void totp_scene_app_settings_activate(PluginState* plugin_state) {
     scene_state->automation_kb_layout =
         MIN(plugin_state->automation_kb_layout, COUNT_OF(BAD_KB_LAYOUT_LIST) - 1);
 
+    scene_state->automation_initial_delay = plugin_state->automation_initial_delay;
     scene_state->total_fonts_count = totp_font_provider_get_fonts_count();
     scene_state->active_font_index = plugin_state->active_font_index;
     scene_state->active_font = totp_font_info_alloc();
@@ -78,20 +104,8 @@ void totp_scene_app_settings_activate(PluginState* plugin_state) {
         scene_state->active_font_index = 0;
         totp_font_provider_get_font(scene_state->active_font_index, scene_state->active_font);
     }
-}
 
-static void two_digit_to_str(int8_t num, char* str) {
-    char* s = str;
-    if(num < 0) {
-        *(s++) = '-';
-        num = -num;
-    }
-
-    uint8_t d1 = (num / 10) % 10;
-    uint8_t d2 = num % 10;
-    *(s++) = CONVERT_DIGIT_TO_CHAR(d1);
-    *(s++) = CONVERT_DIGIT_TO_CHAR(d2);
-    *(s++) = '\0';
+    update_formatted_automation_initial_delay(scene_state);
 }
 
 void totp_scene_app_settings_render(Canvas* const canvas, const PluginState* plugin_state) {
@@ -178,31 +192,53 @@ void totp_scene_app_settings_render(Canvas* const canvas, const PluginState* plu
             canvas, 0, 192 - scene_state->y_offset, AlignLeft, AlignTop, "Automation");
         canvas_set_font(canvas, FontSecondary);
 
+        int group_offset = 0;
+
+        if(scene_state->selected_control <= AutomationSwitch) {
+            canvas_draw_str_aligned(
+                canvas,
+                0,
+                209 - scene_state->y_offset - group_offset,
+                AlignLeft,
+                AlignTop,
+                "Method:");
+            ui_control_select_render(
+                canvas,
+                36,
+                202 - scene_state->y_offset - group_offset,
+                SCREEN_WIDTH - 36 - UI_CONTROL_VSCROLL_WIDTH,
+                AUTOMATION_LIST[scene_state->automation_method],
+                scene_state->selected_control == AutomationSwitch);
+        } else {
+            group_offset += 18;
+        }
+
         canvas_draw_str_aligned(
-            canvas, 0, 209 - scene_state->y_offset, AlignLeft, AlignTop, "Method:");
+            canvas, 0, 227 - scene_state->y_offset - group_offset, AlignLeft, AlignTop, "Layout:");
+
         ui_control_select_render(
             canvas,
             36,
-            202 - scene_state->y_offset,
-            SCREEN_WIDTH - 36 - UI_CONTROL_VSCROLL_WIDTH,
-            AUTOMATION_LIST[scene_state->automation_method],
-            scene_state->selected_control == AutomationSwitch);
-
-        canvas_draw_str_aligned(
-            canvas, 0, 227 - scene_state->y_offset, AlignLeft, AlignTop, "Layout:");
-
-        ui_control_select_render(
-            canvas,
-            36,
-            220 - scene_state->y_offset,
+            220 - scene_state->y_offset - group_offset,
             SCREEN_WIDTH - 36 - UI_CONTROL_VSCROLL_WIDTH,
             BAD_KB_LAYOUT_LIST[scene_state->automation_kb_layout],
             scene_state->selected_control == BadKeyboardLayoutSelect);
 
+        canvas_draw_str_aligned(
+            canvas, 0, 245 - scene_state->y_offset - group_offset, AlignLeft, AlignTop, "Delay:");
+
+        ui_control_select_render(
+            canvas,
+            36,
+            238 - scene_state->y_offset - group_offset,
+            SCREEN_WIDTH - 36 - UI_CONTROL_VSCROLL_WIDTH,
+            &scene_state->automation_initial_delay_formatted[0],
+            scene_state->selected_control == AutomationDelaySelect);
+
         ui_control_button_render(
             canvas,
             SCREEN_WIDTH_CENTER - 24,
-            242 - scene_state->y_offset,
+            260 - scene_state->y_offset - group_offset,
             48,
             13,
             "Confirm",
@@ -291,6 +327,14 @@ bool totp_scene_app_settings_handle_event(
                     0,
                     COUNT_OF(BAD_KB_LAYOUT_LIST) - 1,
                     RollOverflowBehaviorRoll);
+            } else if(scene_state->selected_control == AutomationDelaySelect) {
+                totp_roll_value_uint16_t(
+                    &scene_state->automation_initial_delay,
+                    500,
+                    0,
+                    60000,
+                    RollOverflowBehaviorStop);
+                update_formatted_automation_initial_delay(scene_state);
             }
             break;
         case InputKeyLeft:
@@ -327,6 +371,14 @@ bool totp_scene_app_settings_handle_event(
                     0,
                     COUNT_OF(BAD_KB_LAYOUT_LIST) - 1,
                     RollOverflowBehaviorRoll);
+            } else if(scene_state->selected_control == AutomationDelaySelect) {
+                totp_roll_value_uint16_t(
+                    &scene_state->automation_initial_delay,
+                    -500,
+                    0,
+                    60000,
+                    RollOverflowBehaviorStop);
+                update_formatted_automation_initial_delay(scene_state);
             }
             break;
         case InputKeyOk:
@@ -343,6 +395,7 @@ bool totp_scene_app_settings_handle_event(
                 plugin_state->automation_method = scene_state->automation_method;
                 plugin_state->active_font_index = scene_state->active_font_index;
                 plugin_state->automation_kb_layout = scene_state->automation_kb_layout;
+                plugin_state->automation_initial_delay = scene_state->automation_initial_delay;
 
                 if(!totp_config_file_update_user_settings(plugin_state)) {
                     totp_dialogs_config_updating_error(plugin_state);

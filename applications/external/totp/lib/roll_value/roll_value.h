@@ -57,3 +57,14 @@ TOTP_ROLL_VALUE_FN_HEADER(uint8_t, int8_t);
  * @param overflow_behavior defines what to do when value reaches constraint value
  */
 TOTP_ROLL_VALUE_FN_HEADER(size_t, int16_t);
+
+/**
+ * @brief Rolls \c uint16_t \p value using \p min and \p max as an value constraints with \p step step.
+ *        When value reaches constraint value \p overflow_behavior defines what to do next.
+ * @param[in,out] value value to roll
+ * @param step step to be used to change value
+ * @param min minimal possible value
+ * @param max maximum possible value
+ * @param overflow_behavior defines what to do when value reaches constraint value
+ */
+TOTP_ROLL_VALUE_FN_HEADER(uint16_t, int16_t);
