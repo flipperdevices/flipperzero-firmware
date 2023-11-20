@@ -1,6 +1,0 @@
-[submodule "base_pack/subbrute"]
-	path = base_pack/subbrute
-	url = https://github.com/DarkFlippers/flipperzero-subbrute.git
-[submodule "base_pack/multi_fuzzer"]
-	path = base_pack/multi_fuzzer
-	url = https://github.com/DarkFlippers/Multi_Fuzzer.git

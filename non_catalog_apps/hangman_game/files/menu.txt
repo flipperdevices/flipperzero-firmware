@@ -1,4 +1,0 @@
-English
-english.bolk
-Русский
-russian.bolk
