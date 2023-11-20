@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/keystroke_selector.h"
+#include "./common/keystroke_selector.h"
 
 KeystrokeSelectorKey shift_keys[] = {
     {},
