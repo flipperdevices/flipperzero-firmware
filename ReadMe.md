@@ -42,7 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - Updated: [i2c Tools v1.2 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
-- Updated: [WiFi (Marauder) v6.4 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
+- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 - Many more apps changed to use subtrees (By RogueMaster)
 - Updated: [ESP Flasher v1.3 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` - Support for Deep Sleep (By Sil333033)
@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Reverted to: [WiFi (Marauder) v6.4 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) for this build. My apologies to those that had issues.
 - Updated: [Hangman v1.3 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Authenticator/TOTP v5.8.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 
 <a name="release">
 
