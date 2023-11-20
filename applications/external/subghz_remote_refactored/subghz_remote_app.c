@@ -1,4 +1,5 @@
 #include "subghz_remote_app_i.h"
+#include <lib/toolbox/version.h>
 
 static bool subghz_remote_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
