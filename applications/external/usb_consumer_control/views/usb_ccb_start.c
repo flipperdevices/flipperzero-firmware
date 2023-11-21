@@ -388,16 +388,14 @@ HID_CONSUMER hidConsumerArray[] = {
     {0x299, "AC_MERGE"},
     {0x29A, "AC_SPLIT"},
     {0x29B, "AC_DISRIBUTE_HORIZONTALLY"},
-    {0x29C, "AC_DISTRIBUTE_VERTICALLY"}
-};
+    {0x29C, "AC_DISTRIBUTE_VERTICALLY"}};
 
 const int hidConsumerArraySize = sizeof(hidConsumerArray) / sizeof(hidConsumerArray[0]);
 
 void strrev(char* arr, int start, int end) {
     char temp;
 
-    if (start >= end)
-        return;
+    if(start >= end) return;
 
     temp = *(arr + start);
     *(arr + start) = *(arr + end);
@@ -408,32 +406,28 @@ void strrev(char* arr, int start, int end) {
     strrev(arr, start, end);
 }
 
-char *itoa(int number, char *arr, int base){
+char* itoa(int number, char* arr, int base) {
     int i = 0, r, negative = 0;
 
-    if (number == 0)
-    {
+    if(number == 0) {
         arr[i] = '0';
         arr[i + 1] = '\0';
         return arr;
     }
 
-    if (number < 0 && base == 10)
-    {
+    if(number < 0 && base == 10) {
         number *= -1;
         negative = 1;
     }
 
-    while (number != 0)
-    {
+    while(number != 0) {
         r = number % base;
         arr[i] = (r > 9) ? (r - 10) + 'a' : r + '0';
         i++;
         number /= base;
     }
 
-    if (negative)
-    {
+    if(negative) {
         arr[i] = '-';
         i++;
     }
@@ -447,7 +441,7 @@ char *itoa(int number, char *arr, int base){
 
 // Function to convert a single hex digit to its character representation
 char hexDigitToChar(uint8_t digit) {
-    if (digit < 10) {
+    if(digit < 10) {
         return '0' + digit;
     } else {
         return 'A' + (digit - 10);
@@ -459,13 +453,13 @@ void uint16ToHexString(uint16_t value, char* hexString) {
     hexString[0] = '0';
     hexString[1] = 'x';
     int startIndex = 2;
-    for (int i = 3; i >= 0; --i) {
+    for(int i = 3; i >= 0; --i) {
         uint8_t digit = (value >> (i * 4)) & 0xF;
-        if (digit != 0 || startIndex != 2) {
+        if(digit != 0 || startIndex != 2) {
             hexString[startIndex++] = hexDigitToChar(digit);
         }
     }
-    if (startIndex == 2) { // If there are no non-zero digits, display at least "0x0"
+    if(startIndex == 2) { // If there are no non-zero digits, display at least "0x0"
         hexString[startIndex++] = '0';
     }
     hexString[startIndex] = '\0';
@@ -482,7 +476,7 @@ int currentSubsetIndex = 13;
 
 // Array to store indexes of different CCB subsets
 // The idea would be to try using these different subsets against different types of devices
-int hidConsumerSubsets[] = { 
+int hidConsumerSubsets[] = {
     0, // Generic Consumer Control Device
     7, // Numeric Key Pad
     10, // General Controls
@@ -503,35 +497,35 @@ int hidConsumerSubsets[] = {
 const int hidConsumerSubsetsSize = sizeof(hidConsumerSubsets) / sizeof(hidConsumerSubsets[0]);
 
 const char* getConsumerSubsetName(int i) {
-    if (i >= 0 && i < 7) {
+    if(i >= 0 && i < 7) {
         return "Generic Consumer Control";
-    } else if (i >= 7 && i < 10) {
+    } else if(i >= 7 && i < 10) {
         return "Numeric Key Pad";
-    } else if (i >= 10 && i < 17) {
+    } else if(i >= 10 && i < 17) {
         return "General Controls";
-    } else if (i >= 17 && i < 26) {
+    } else if(i >= 17 && i < 26) {
         return "Menu Controls";
-    } else if (i >= 26 && i < 33) {
+    } else if(i >= 26 && i < 33) {
         return "Display Controls";
-    } else if (i >= 33 && i < 69) {
+    } else if(i >= 33 && i < 69) {
         return "Selection Controls";
-    } else if (i >= 69 && i < 87) {
+    } else if(i >= 69 && i < 87) {
         return "Transport Controls";
-    } else if (i >= 87 && i < 100) {
+    } else if(i >= 87 && i < 100) {
         return "Search Controls";
-    } else if (i >= 100 && i < 111) {
+    } else if(i >= 100 && i < 111) {
         return "Audio Controls";
-    } else if (i >= 111 && i < 117) {
+    } else if(i >= 111 && i < 117) {
         return "Speed Controls";
-    } else if (i >= 117 && i < 131) {
+    } else if(i >= 117 && i < 131) {
         return "Home and Security Controls";
-    } else if (i >= 131 && i < 148) {
+    } else if(i >= 131 && i < 148) {
         return "Speaker Channels";
-    } else if (i >= 148 && i < 153) {
+    } else if(i >= 148 && i < 153) {
         return "PC Theatre";
-    } else if (i >= 153 && i < 224) {
+    } else if(i >= 153 && i < 224) {
         return "Application Launch Buttons";
-    } else if (i >= 224) {
+    } else if(i >= 224) {
         return "GUI Application Controls";
     }
     // Won't ever happen though
@@ -556,7 +550,11 @@ static void usb_ccb_start_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_str(canvas, 0, 38, "Current key subset:");
     canvas_draw_str(canvas, 0, 46, getConsumerSubsetName(i));
 
-    canvas_draw_str(canvas, 0, 56, is_running ? "Sent:                HID_CONSUMER_" : "Next:                HID_CONSUMER_");
+    canvas_draw_str(
+        canvas,
+        0,
+        56,
+        is_running ? "Sent:                HID_CONSUMER_" : "Next:                HID_CONSUMER_");
     canvas_draw_str(canvas, 24, 56, hexString);
     canvas_draw_str(canvas, 0, 64, hidConsumerArray[i].name);
 
@@ -566,7 +564,7 @@ static void usb_ccb_start_draw_callback(Canvas* canvas, void* context) {
         furi_delay_us(autofire_delay * 500);
         furi_hal_hid_consumer_key_press(consumer_key);
         furi_delay_us(2000); // Hold the key pressed for a short amount of time
-        
+
         // Stop sending the consumer control button
         furi_hal_hid_consumer_key_release(consumer_key);
         furi_delay_us(autofire_delay * 500);
@@ -575,8 +573,8 @@ static void usb_ccb_start_draw_callback(Canvas* canvas, void* context) {
         i += 1;
 
         // Stop once we've cycled all consumer control buttons
-        if(i == hidConsumerArraySize){
-            i = 0; 
+        if(i == hidConsumerArraySize) {
+            i = 0;
             is_running = false;
         }
     }
@@ -588,14 +586,15 @@ static void usb_ccb_start_process(UsbCcbStart* usb_ccb_start, InputEvent* event)
         usb_ccb_start->view,
         UsbCcbStartModel * model,
         {
-            if (event->type == InputTypeLong) {
-                if (event->key == InputKeyRight) {
+            if(event->type == InputTypeLong) {
+                if(event->key == InputKeyRight) {
                     model->right_pressed = true;
                     currentSubsetIndex = (currentSubsetIndex + 1) % hidConsumerSubsetsSize;
                     i = hidConsumerSubsets[currentSubsetIndex];
-                } else if (event->key == InputKeyLeft) {
+                } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
-                    currentSubsetIndex = (currentSubsetIndex - 1 + hidConsumerSubsetsSize) % hidConsumerSubsetsSize;
+                    currentSubsetIndex =
+                        (currentSubsetIndex - 1 + hidConsumerSubsetsSize) % hidConsumerSubsetsSize;
                     i = hidConsumerSubsets[currentSubsetIndex];
                 }
             } else if(event->type == InputTypePress) {
@@ -608,7 +607,7 @@ static void usb_ccb_start_process(UsbCcbStart* usb_ccb_start, InputEvent* event)
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
                     if(autofire_delay > 0) {
-                            autofire_delay -= 100;
+                        autofire_delay -= 100;
                     }
                 } else if(event->key == InputKeyUp) {
                     model->up_pressed = true;
@@ -637,7 +636,6 @@ static void usb_ccb_start_process(UsbCcbStart* usb_ccb_start, InputEvent* event)
                 if(event->key == InputKeyBack) {
                 }
             }
-            
         },
         true);
 }
@@ -682,5 +680,6 @@ View* usb_ccb_start_get_view(UsbCcbStart* usb_ccb_start) {
 
 void usb_ccb_start_set_connected_status(UsbCcbStart* usb_ccb_start, bool connected) {
     furi_assert(usb_ccb_start);
-    with_view_model(usb_ccb_start->view, UsbCcbStartModel * model, { model->connected = connected; }, true);
+    with_view_model(
+        usb_ccb_start->view, UsbCcbStartModel * model, { model->connected = connected; }, true);
 }

@@ -35,7 +35,7 @@ static bool usb_ccb_about_input_callback(InputEvent* event, void* context) {
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
         furi_hal_hid_kb_release_all();
-    } 
+    }
 
     return consumed;
 }
@@ -64,5 +64,6 @@ View* usb_ccb_about_get_view(UsbCcbAbout* usb_ccb_about) {
 
 void usb_ccb_about_set_connected_status(UsbCcbAbout* usb_ccb_about, bool connected) {
     furi_assert(usb_ccb_about);
-    with_view_model(usb_ccb_about->view, UsbCcbAboutModel * model, { model->connected = connected; }, true);
+    with_view_model(
+        usb_ccb_about->view, UsbCcbAboutModel * model, { model->connected = connected; }, true);
 }
