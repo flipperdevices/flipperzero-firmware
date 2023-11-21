@@ -188,7 +188,7 @@ class WiFiScan
     #endif
 
     //String connected_network = "";
-    const String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
+    const String alfa = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789-=[];',./`\\_+{}:\"<>?~|!@#$%^&*()";
 
     const char* rick_roll[8] = {
       "01 Never gonna give you up",

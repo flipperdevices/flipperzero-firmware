@@ -61,8 +61,20 @@ void EvilPortal::setupServer() {
   });
   Serial.println("web server up");
 }
+void EvilPortal::setHtmlFromSerial() {
+  Serial.println("Setting HTML from serial...");
+  const char *htmlStr = Serial.readString().c_str();
+  strncpy(index_html, htmlStr, strlen(htmlStr));
+  this->has_html = true;
+  this->using_serial_html = true;
+  Serial.println("html set");
+}
 
 bool EvilPortal::setHtml() {
+  if (this->using_serial_html) {
+    Serial.println("html previously set");
+    return true;
+  }
   Serial.println("Setting HTML...");
   #ifndef WRITE_PACKETS_SERIAL
     File html_file = sd_obj.getFile("/" + this->target_html_name);

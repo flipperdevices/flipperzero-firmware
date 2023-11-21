@@ -22,7 +22,7 @@
   //#define XIAO_ESP32_S3
   //// END BOARD TARGETS
 
-  #define MARAUDER_VERSION "v0.13.4"
+ #define MARAUDER_VERSION "v0.13.5"
 
  //// BOARD FEATURES
   #ifdef MARAUDER_M5STICKC

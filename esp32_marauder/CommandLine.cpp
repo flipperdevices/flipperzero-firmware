@@ -501,6 +501,7 @@ void CommandLine::runCommand(String input) {
           if (html_sw != -1) {
             String target_html_name = cmd_args.get(html_sw + 1);
             evil_portal_obj.target_html_name = target_html_name;
+            evil_portal_obj.using_serial_html = false;
             Serial.println("Set html file as " + evil_portal_obj.target_html_name);
           }
           //else {
@@ -517,7 +518,11 @@ void CommandLine::runCommand(String input) {
         else if (et_command == "sethtml") {
           String target_html_name = cmd_args.get(cmd_sw + 2);
           evil_portal_obj.target_html_name = target_html_name;
+          evil_portal_obj.using_serial_html = false;
           Serial.println("Set html file as " + evil_portal_obj.target_html_name);
+        }
+        else if (et_command == "sethtmlstr") {
+          evil_portal_obj.setHtmlFromSerial();
         }
         else if (et_command == "setap") {
 
