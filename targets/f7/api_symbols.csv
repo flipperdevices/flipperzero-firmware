@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,46.0,,
+Version,+,47.0,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -90,7 +90,9 @@ Header,+,lib/libusb_stm32/inc/usb_std.h,,
 Header,+,lib/libusb_stm32/inc/usb_tmc.h,,
 Header,+,lib/libusb_stm32/inc/usbd_core.h,,
 Header,+,lib/mbedtls/include/mbedtls/des.h,,
+Header,+,lib/mbedtls/include/mbedtls/md5.h,,
 Header,+,lib/mbedtls/include/mbedtls/sha1.h,,
+Header,+,lib/mbedtls/include/mbedtls/sha256.h,,
 Header,+,lib/micro-ecc/uECC.h,,
 Header,+,lib/mlib/m-algo.h,,
 Header,+,lib/mlib/m-array.h,,
@@ -200,13 +202,11 @@ Header,+,lib/toolbox/float_tools.h,,
 Header,+,lib/toolbox/hex.h,,
 Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
-Header,+,lib/toolbox/md5.h,,
 Header,+,lib/toolbox/name_generator.h,,
 Header,+,lib/toolbox/path.h,,
 Header,+,lib/toolbox/pretty_format.h,,
 Header,+,lib/toolbox/protocols/protocol_dict.h,,
 Header,+,lib/toolbox/saved_struct.h,,
-Header,+,lib/toolbox/sha256.h,,
 Header,+,lib/toolbox/simple_array.h,,
 Header,+,lib/toolbox/stream/buffered_file_stream.h,,
 Header,+,lib/toolbox/stream/file_stream.h,,
@@ -2072,23 +2072,34 @@ Function,-,mbedtls_des_key_set_parity,void,unsigned char[8]
 Function,-,mbedtls_des_setkey,void,"uint32_t[32], const unsigned char[8]"
 Function,-,mbedtls_des_setkey_dec,int,"mbedtls_des_context*, const unsigned char[8]"
 Function,-,mbedtls_des_setkey_enc,int,"mbedtls_des_context*, const unsigned char[8]"
+Function,-,mbedtls_internal_md5_process,int,"mbedtls_md5_context*, const unsigned char[64]"
 Function,-,mbedtls_internal_sha1_process,int,"mbedtls_sha1_context*, const unsigned char[64]"
+Function,-,mbedtls_internal_sha256_process,int,"mbedtls_sha256_context*, const unsigned char[64]"
+Function,-,mbedtls_md5,int,"const unsigned char*, size_t, unsigned char[16]"
+Function,-,mbedtls_md5_clone,void,"mbedtls_md5_context*, const mbedtls_md5_context*"
+Function,-,mbedtls_md5_finish,int,"mbedtls_md5_context*, unsigned char[16]"
+Function,-,mbedtls_md5_free,void,mbedtls_md5_context*
+Function,-,mbedtls_md5_init,void,mbedtls_md5_context*
+Function,-,mbedtls_md5_starts,int,mbedtls_md5_context*
+Function,-,mbedtls_md5_update,int,"mbedtls_md5_context*, const unsigned char*, size_t"
 Function,-,mbedtls_platform_zeroize,void,"void*, size_t"
-Function,+,mbedtls_sha1,int,"const unsigned char*, size_t, unsigned char[20]"
+Function,-,mbedtls_sha1,int,"const unsigned char*, size_t, unsigned char[20]"
 Function,-,mbedtls_sha1_clone,void,"mbedtls_sha1_context*, const mbedtls_sha1_context*"
 Function,-,mbedtls_sha1_finish,int,"mbedtls_sha1_context*, unsigned char[20]"
 Function,-,mbedtls_sha1_free,void,mbedtls_sha1_context*
 Function,-,mbedtls_sha1_init,void,mbedtls_sha1_context*
 Function,-,mbedtls_sha1_starts,int,mbedtls_sha1_context*
 Function,-,mbedtls_sha1_update,int,"mbedtls_sha1_context*, const unsigned char*, size_t"
+Function,-,mbedtls_sha256,int,"const unsigned char*, size_t, unsigned char*, int"
+Function,-,mbedtls_sha256_clone,void,"mbedtls_sha256_context*, const mbedtls_sha256_context*"
+Function,-,mbedtls_sha256_finish,int,"mbedtls_sha256_context*, unsigned char*"
+Function,-,mbedtls_sha256_free,void,mbedtls_sha256_context*
+Function,-,mbedtls_sha256_init,void,mbedtls_sha256_context*
+Function,-,mbedtls_sha256_starts,int,"mbedtls_sha256_context*, int"
+Function,-,mbedtls_sha256_update,int,"mbedtls_sha256_context*, const unsigned char*, size_t"
 Function,-,mblen,int,"const char*, size_t"
 Function,-,mbstowcs,size_t,"wchar_t*, const char*, size_t"
 Function,-,mbtowc,int,"wchar_t*, const char*, size_t"
-Function,+,md5,void,"const unsigned char*, size_t, unsigned char[16]"
-Function,+,md5_finish,void,"md5_context*, unsigned char[16]"
-Function,+,md5_process,void,"md5_context*, const unsigned char[64]"
-Function,+,md5_starts,void,md5_context*
-Function,+,md5_update,void,"md5_context*, const unsigned char*, size_t"
 Function,-,memccpy,void*,"void*, const void*, int, size_t"
 Function,+,memchr,void*,"const void*, int, size_t"
 Function,+,memcmp,int,"const void*, const void*, size_t"
@@ -2576,11 +2587,6 @@ Function,-,setkey,void,const char*
 Function,-,setlinebuf,int,FILE*
 Function,-,setstate,char*,char*
 Function,-,setvbuf,int,"FILE*, char*, int, size_t"
-Function,+,sha256,void,"const unsigned char*, unsigned int, unsigned char[32]"
-Function,+,sha256_finish,void,"sha256_context*, unsigned char[32]"
-Function,+,sha256_process,void,sha256_context*
-Function,+,sha256_start,void,sha256_context*
-Function,+,sha256_update,void,"sha256_context*, const unsigned char*, unsigned int"
 Function,+,signal_reader_alloc,SignalReader*,"const GpioPin*, uint32_t"
 Function,+,signal_reader_free,void,SignalReader*
 Function,+,signal_reader_set_polarity,void,"SignalReader*, SignalReaderPolarity"

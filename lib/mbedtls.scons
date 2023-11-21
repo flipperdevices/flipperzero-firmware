@@ -2,12 +2,15 @@ Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/mbedtls",
+        # "#/lib/mbedtls",
         "#/lib/mbedtls/include",
     ],
     SDK_HEADERS=[
         File("mbedtls/include/mbedtls/des.h"),
         File("mbedtls/include/mbedtls/sha1.h"),
+        File("mbedtls/include/mbedtls/sha256.h"),
+        File("mbedtls/include/mbedtls/md5.h"),
+        # File("mbedtls/include/mbedtls/sha1.h"),
     ],
     CPPDEFINES=[("MBEDTLS_CONFIG_FILE", '\\"mbedtls_cfg.h\\"')],
 )
