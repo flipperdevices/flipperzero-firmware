@@ -1,6 +1,10 @@
 # MALVEKE - *GAME BOY* Tools for Flipper Zero 🐬
 
+
 ***GAME BOY*** Tools for Flipper Zero
+
+**Get one:** [Tindie Store](https://www.tindie.com/products/efuentealba/malveke-game-boy-tools-for-flipper-zero/)
+
 
 <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./assets/logo.png">
@@ -20,7 +24,7 @@
 </p>
 
 
-**GAME BOY** Tools for Flipper Zero. The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi, it allows you to connect all GAME BOY peripherals and additional accessories such as NRF24, CC1101, and GPS..
+**GAME BOY** Tools for Flipper Zero. The perfect companion for your Flipper Zero. Equipped with ESP32 for WiFi. MALVEKE allows you to connect all GAME BOY peripherals and additional accessories such as NRF24, CC1101, and GPS.
 
 <table>
   <tbody>
@@ -49,10 +53,9 @@
 - It can also integrate games like `Pokemon` into the ecosystem.
 - Use **GAME BOY CAMERA** like Camera
 - Extra modules
-    - Slot for `NRF24`
-    - Slot for `CC1101`.
+    - Slot for `NRF24`/`CC1101`.
     - Slot for `GPS NEO-6M` Module (wardrive)
-- Includes Marauder ESP32 (v0.12.0).
+- Includes Marauder ESP32 (v0.13.0).
 
 
 ## Flipper faps (WIP)
