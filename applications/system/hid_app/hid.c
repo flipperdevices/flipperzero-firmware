@@ -79,7 +79,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
     hid_mouse_clicker_set_connected_status(hid->hid_mouse_clicker, connected);
     hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
-    // hid_ptt_set_connected_status(hid->hid_ptt, connected);
+    hid_ptt_set_connected_status(hid->hid_ptt, connected);
     hid_tikshorts_set_connected_status(hid->hid_tikshorts, connected);
 }
 
