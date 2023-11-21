@@ -149,7 +149,7 @@ Uart*
     furi_thread_set_callback(uart->rx_thread, uart_worker);
     furi_thread_start(uart->rx_thread);
     if(channel == FuriHalUartIdUSART1) {
-        // furi_hal_console_disable();
+        furi_hal_console_disable(); //  Disable console for UART <-> Serial transfer, TODO: Pass transfer RAM to Serial1/LPUART1
     } else if(channel == FuriHalUartIdLPUART1) {
         furi_hal_uart_init(channel, BAUDRATE);
     }

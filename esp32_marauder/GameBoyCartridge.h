@@ -102,12 +102,12 @@ class GameBoyCartridge {
     // void endWriteRAM_GB();
     // void startReadRAM_GB();
     // void endReadRAM_GB();
-    void restoreRAM(uint16_t maxBufferSize, const int chunkSize);
+    void restoreRAM(int maxBufferSize);
 
     bool isWrittingRAM();
     bool isWrittingROM();
     bool isRestoringRAM();
-    void test(uint16_t maxBufferSize);
+    void test(int maxBufferSize);
 };
 
 #endif

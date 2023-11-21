@@ -41,7 +41,7 @@
 #define UI_PROGRESS_COLS 8
 #define UI_PROGRESS_ROWS 4
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 64
 
 #ifndef MAX
 #define MAX(a, b) ((a) > (b)) ? (a) : (b)
