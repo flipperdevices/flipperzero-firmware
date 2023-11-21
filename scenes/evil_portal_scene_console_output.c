@@ -6,10 +6,6 @@ void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void
     furi_assert(context);
     Evil_PortalApp* app = context;
 
-    if(app->capture_line) {
-        furi_string_cat_printf(app->captured_line, "%s", buf);
-    }
-
     // If text box store gets too big, then truncate it
     app->text_box_store_strlen += len;
     if(app->text_box_store_strlen >= EVIL_PORTAL_TEXT_BOX_STORE_SIZE - 1) {
@@ -20,6 +16,10 @@ void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void
     // Null-terminate buf and append to text box store
     buf[len] = '\0';
     furi_string_cat_printf(app->text_box_store, "%s", buf);
+
+    if(app->capture_line) {
+        furi_string_cat_printf(app->captured_line, "%s", buf);
+    }
 
     text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
 }
@@ -121,17 +121,19 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             furi_string_printf(data, "setap=%s\n", (char*)app->ap_name);
             furi_string_reset(app->captured_line);
             evil_portal_uart_tx((uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
-            // For some reason evil portal messes up "ap set" with newlines and random letters, "p set" works
-            for(uint8_t t = 0; t < 20 && !captured(app, "p set"); t++) furi_delay_ms(100);
-            bool icanhazmarauder = !captured(app, "p set"); // Evil portal didn't respond
+            // TODO: move timeouts and commands elsewhere, can't block input cycle
+            for(uint8_t t = 0; t < 69 && !captured(app, "ap set") && !captured(app, "\n>"); t++)
+                furi_delay_ms(100);
+            bool icanhazmarauder = !captured(app, "ap set") && // Evil portal didn't respond
+                                   captured(app, "\n>"); // Marauder did respond
             // Not evil portal, set up marauder
             if(icanhazmarauder) {
-                furi_string_printf(data, "clearlist -s\nssid -a -n '%s'\n", app->ap_name);
+                furi_string_printf(data, "clearlist -a -s -c\nssid -a -n '%s'\n", app->ap_name);
                 furi_string_reset(app->captured_line);
                 evil_portal_uart_tx(
                     (uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
                 // Marauder echoes the command, maybe still init so wait a while for echo
-                for(uint8_t t = 0; t < 42 && !captured(app, (char*)app->ap_name); t++)
+                for(uint8_t t = 0; t < 10 && !captured(app, (char*)app->ap_name); t++)
                     furi_delay_ms(100);
             }
             free(app->ap_name);
@@ -142,18 +144,17 @@ void evil_portal_scene_console_output_on_enter(void* context) {
                 evil_portal_uart_tx(
                     (uint8_t*)("evilportal -c sethtmlstr\n"),
                     strlen("evilportal -c sethtmlstr\n"));
-                for(uint8_t t = 0; t < 5 && !captured(app, "Setting HTML from serial..."); t++)
+                for(uint8_t t = 0; t < 10 && !captured(app, "\n>") &&
+                                   !captured(app, "Setting HTML from serial...");
+                    t++)
                     furi_delay_ms(100);
                 // Check for active attack
-                if(captured(app, ">") && !captured(app, "Setting HTML from serial...")) {
-                    furi_string_reset(app->captured_line);
-                } else {
+                if(!(captured(app, "\n>") && !captured(app, "Setting HTML from serial..."))) {
                     furi_string_reset(app->captured_line);
                     evil_portal_uart_tx(app->index_html, strlen((char*)app->index_html));
                     evil_portal_uart_tx((uint8_t*)("\n"), 1);
-                    for(uint8_t t = 0; t < 15 && !captured(app, "html set"); t++)
+                    for(uint8_t t = 0; t < 20 && !captured(app, "html set"); t++)
                         furi_delay_ms(100);
-                    furi_delay_ms(100);
                     evil_portal_uart_tx(
                         (uint8_t*)("evilportal -c start\n"), strlen("evilportal -c start\n"));
                 }
@@ -172,8 +173,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
         } else if(0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
             evil_portal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            evil_portal_uart_tx((uint8_t*)("\n"), 1);
-            evil_portal_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+            evil_portal_uart_tx((uint8_t*)("\nstopscan\n"), strlen("\nstopscan\n"));
         } else if(1 == strncmp("help", app->selected_tx_string, strlen("help"))) {
             evil_portal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
