@@ -52,7 +52,7 @@ void wiegand_save(void *context)
         storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
         furi_string_printf(buffer, "Bits: %d\n", bit_count);
         storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
-        furi_string_printf(buffer, "RAW_Data: ");
+        furi_string_printf(buffer, "PACS_Binary: ");
 
         for (int i = 0; i < bit_count; i++)
         {
