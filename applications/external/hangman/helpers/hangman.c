@@ -83,7 +83,9 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     uint8_t h = canvas_current_font_height(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    for(uint8_t i = 0, x = center_x; i < strlen(app->word); i++) {
+    uint8_t word_len = strlen(app->word);
+
+    for(uint8_t i = 0, x = center_x; i < word_len; i++) {
         if(app->opened[app->word[i] - app->lang->first_letter_offset]) {
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_glyph(
