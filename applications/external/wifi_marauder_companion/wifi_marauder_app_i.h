@@ -22,18 +22,10 @@
 #include <gui/modules/widget.h>
 #include "wifi_marauder_text_input.h"
 
-#include "esp32_wifi_marauder_icons.h"
+#include <esp32_wifi_marauder_icons.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>
-#include <cfw.h>
-
-#define CFW_UART_CH \
-    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
-
-#define US_ART_CH (FuriHalUartIdUSART1)
-#define LP_UART_CH (FuriHalUartIdLPUART1)
-#define BAUDRATE (115200)
 
 #define NUM_MENU_ITEMS (24)
 
@@ -88,7 +80,7 @@ struct WifiMarauderApp {
     int open_log_file_num_pages;
 
     WifiMarauderUart* uart;
-    WifiMarauderUart* pcap_uart;
+    WifiMarauderUart* lp_uart;
     int selected_menu_index;
     int selected_option_index[NUM_MENU_ITEMS];
     const char* selected_tx_string;

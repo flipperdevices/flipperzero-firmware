@@ -4,7 +4,7 @@
 
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/totp")
 #define CONFIG_FILE_HEADER "Flipper TOTP plugin config file"
-#define CONFIG_FILE_ACTUAL_VERSION (10)
+#define CONFIG_FILE_ACTUAL_VERSION (11)
 
 #define TOTP_CONFIG_KEY_TIMEZONE "Timezone"
 #define TOTP_CONFIG_KEY_TOKEN_NAME "TokenName"
@@ -21,6 +21,7 @@
 #define TOTP_CONFIG_KEY_NOTIFICATION_METHOD "NotificationMethod"
 #define TOTP_CONFIG_KEY_AUTOMATION_METHOD "AutomationMethod"
 #define TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT "AutomationKbLayout"
+#define TOTP_CONFIG_KEY_AUTOMATION_INITIAL_DELAY "AutomationInitialDelay"
 #define TOTP_CONFIG_KEY_FONT "Font"
 #define TOTP_CONFIG_KEY_CRYPTO_VERSION "CryptoVersion"
 #define TOTP_CONFIG_KEY_CRYPTO_KEY_SLOT "CryptoKeySlot"

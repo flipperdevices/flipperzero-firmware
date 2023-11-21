@@ -1,0 +1,14 @@
+App(
+    appid="usb_ccb",
+    name="USB Consumer Control",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="usb_ccb_app",
+    stack_size=1 * 1024,
+    fap_category="USB",
+    fap_icon="usb_ccb_10px.png",
+    # fap_author="piraija",
+    fap_author="WithSecureLabs",
+    fap_weburl="https://github.com/WithSecureLabs/usb-consumer-control",
+    fap_version="1.0",
+    fap_description="Application for sending Consumer Control Button (CCB) presses as a USB HID device. This is useful for researching how various devices handle USB CCBs, for example in the context of kiosk breakouts.",
+)

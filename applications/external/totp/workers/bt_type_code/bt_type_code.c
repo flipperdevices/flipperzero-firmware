@@ -35,6 +35,7 @@ struct TotpBtTypeCodeWorkerContext {
     uint8_t previous_bt_mac[TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN];
 #endif
     AutomationKeyboardLayout keyboard_layout;
+    uint16_t initial_delay;
 };
 
 static inline bool totp_type_code_worker_stop_requested() {
@@ -76,7 +77,8 @@ static void totp_type_code_worker_type_code(TotpBtTypeCodeWorkerContext* context
             context->code_buffer,
             context->code_buffer_size,
             context->flags,
-            context->keyboard_layout);
+            context->keyboard_layout,
+            context->initial_delay);
         furi_mutex_release(context->code_buffer_sync);
     }
 }
@@ -123,12 +125,14 @@ void totp_bt_type_code_worker_start(
     char* code_buffer,
     uint8_t code_buffer_size,
     FuriMutex* code_buffer_sync,
-    AutomationKeyboardLayout keyboard_layout) {
+    AutomationKeyboardLayout keyboard_layout,
+    uint16_t initial_delay) {
     furi_check(context != NULL);
     context->code_buffer = code_buffer;
     context->code_buffer_size = code_buffer_size;
     context->code_buffer_sync = code_buffer_sync;
     context->keyboard_layout = keyboard_layout;
+    context->initial_delay = initial_delay;
     context->thread = furi_thread_alloc();
     furi_thread_set_name(context->thread, "TOTPBtHidWorker");
     furi_thread_set_stack_size(context->thread, 1024);

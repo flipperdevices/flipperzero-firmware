@@ -46,6 +46,13 @@ void uart_terminal_scene_settings_mac_input_callback(void* context) {
 
 void uart_terminal_scene_settings_mac_changed_callback(void* context) {
     // Do nothing?
+    /* Github issue 19 - Warnings being treated as errors. Context is unused
+       It shouldn't generate a warning but it does for the issue reporter.
+       This code probably won't stick around for long
+    */
+    if(context != NULL) {
+        return;
+    }
 }
 
 void uart_terminal_scene_settings_mac_on_enter(void* context) {
@@ -81,4 +88,8 @@ bool uart_terminal_scene_settings_mac_on_event(void* context, SceneManagerEvent 
 
 void uart_terminal_scene_settings_mac_on_exit(void* context) {
     // Do nothing?
+    /* Same story as on_changed */
+    if(context != NULL) {
+        return;
+    }
 }

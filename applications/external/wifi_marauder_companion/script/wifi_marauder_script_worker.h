@@ -15,7 +15,6 @@ typedef struct WifiMarauderScriptWorker {
     void (*callback_stage)(WifiMarauderScriptStage*, void*);
     void* context;
     bool is_running;
-    bool save_pcaps;
 } WifiMarauderScriptWorker;
 
 /**
