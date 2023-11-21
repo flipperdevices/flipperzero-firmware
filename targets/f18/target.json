@@ -29,11 +29,11 @@
         "one_wire",
         "music_worker",
         "misc",
+        "mbedtls",
         "flipper_application",
         "flipperformat",
         "toolbox",
         "flipper18"
-
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",
