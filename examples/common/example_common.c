@@ -76,6 +76,20 @@ extern const uint32_t ESP32_H2_hello_world_bin_size;
 extern const uint8_t  ESP32_H2_partition_table_bin[];
 extern const uint32_t ESP32_H2_partition_table_bin_size;
 
+extern const uint8_t  ESP32_C2_bootloader_bin[];
+extern const uint32_t ESP32_C2_bootloader_bin_size;
+extern const uint8_t  ESP32_C2_hello_world_bin[];
+extern const uint32_t ESP32_C2_hello_world_bin_size;
+extern const uint8_t  ESP32_C2_partition_table_bin[];
+extern const uint32_t ESP32_C2_partition_table_bin_size;
+
+extern const uint8_t  ESP32_C3_bootloader_bin[];
+extern const uint32_t ESP32_C3_bootloader_bin_size;
+extern const uint8_t  ESP32_C3_hello_world_bin[];
+extern const uint32_t ESP32_C3_hello_world_bin_size;
+extern const uint8_t  ESP32_C3_partition_table_bin[];
+extern const uint32_t ESP32_C3_partition_table_bin_size;
+
 extern const uint8_t  ESP32_C6_bootloader_bin[];
 extern const uint32_t ESP32_C6_bootloader_bin_size;
 extern const uint8_t  ESP32_C6_hello_world_bin[];
@@ -134,6 +148,26 @@ void get_example_binaries(target_chip_t target, example_binaries_t *bins)
         bins->part.addr = PARTITION_ADDRESS;
         bins->app.data  = ESP32_H2_hello_world_bin;
         bins->app.size  = ESP32_H2_hello_world_bin_size;
+        bins->app.addr  = APPLICATION_ADDRESS;
+    } else if (target == ESP32C2_CHIP){
+        bins->boot.data = ESP32_C2_bootloader_bin;
+        bins->boot.size = ESP32_C2_bootloader_bin_size;
+        bins->boot.addr = BOOTLOADER_ADDRESS_V1;
+        bins->part.data = ESP32_C2_partition_table_bin;
+        bins->part.size = ESP32_C2_partition_table_bin_size;
+        bins->part.addr = PARTITION_ADDRESS;
+        bins->app.data  = ESP32_C2_hello_world_bin;
+        bins->app.size  = ESP32_C2_hello_world_bin_size;
+        bins->app.addr  = APPLICATION_ADDRESS;
+    } else if (target == ESP32C3_CHIP){
+        bins->boot.data = ESP32_C3_bootloader_bin;
+        bins->boot.size = ESP32_C3_bootloader_bin_size;
+        bins->boot.addr = BOOTLOADER_ADDRESS_V1;
+        bins->part.data = ESP32_C3_partition_table_bin;
+        bins->part.size = ESP32_C3_partition_table_bin_size;
+        bins->part.addr = PARTITION_ADDRESS;
+        bins->app.data  = ESP32_C3_hello_world_bin;
+        bins->app.size  = ESP32_C3_hello_world_bin_size;
         bins->app.addr  = APPLICATION_ADDRESS;
     } else if (target == ESP32C6_CHIP){
         bins->boot.data = ESP32_C6_bootloader_bin;
