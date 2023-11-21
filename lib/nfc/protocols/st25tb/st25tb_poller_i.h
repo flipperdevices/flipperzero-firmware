@@ -1,6 +1,5 @@
 #pragma once
 
-#include "protocols/st25tb/st25tb.h"
 #include "st25tb_poller.h"
 
 #ifdef __cplusplus
@@ -11,11 +10,10 @@ extern "C" {
 
 typedef enum {
     St25tbPollerStateIdle,
-    St25tbPollerStateInitiateInProgress,
-    St25tbPollerStateInitiateFailed,
-    St25tbPollerStateActivationInProgress,
-    St25tbPollerStateActivationFailed,
-    St25tbPollerStateActivated,
+    St25tbPollerStateSelected,
+    St25tbPollerStateRead,
+
+    St25tbPollerStateNum,
 } St25tbPollerState;
 
 struct St25tbPoller {

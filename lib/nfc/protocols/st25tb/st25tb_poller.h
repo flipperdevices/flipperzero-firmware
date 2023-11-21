@@ -14,6 +14,7 @@ typedef struct St25tbPoller St25tbPoller;
 typedef enum {
     St25tbPollerEventTypeError,
     St25tbPollerEventTypeReady,
+    St25tbPollerEventTypeReadSuccessful,
 } St25tbPollerEventType;
 
 typedef struct {
@@ -31,9 +32,11 @@ St25tbError st25tb_poller_send_frame(
     BitBuffer* rx_buffer,
     uint32_t fwt);
 
-St25tbError st25tb_poller_initiate(St25tbPoller* instance, uint8_t* chip_id);
+St25tbError st25tb_poller_initiate(St25tbPoller* instance, uint8_t* chip_id_ptr);
 
-St25tbError st25tb_poller_activate(St25tbPoller* instance, St25tbData* data);
+St25tbError st25tb_poller_select(St25tbPoller* instance, uint8_t* chip_id_ptr);
+
+St25tbError st25tb_poller_read(St25tbPoller* instance, St25tbData* data);
 
 St25tbError st25tb_poller_get_uid(St25tbPoller* instance, uint8_t* uid);
 
