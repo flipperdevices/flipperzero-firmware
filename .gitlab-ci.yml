@@ -11,9 +11,9 @@ workflow:
     - if: "$CI_COMMIT_BRANCH"
 
 variables:
-  STM32_CUBE_F4_REPO: https://github.com/STMicroelectronics/STM32CubeF4
-  STM32_CUBE_F4_REPO_TAG: v1.26.2
-  ARM_TOOLCHAIN_URL: https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2?revision=05382cca-1721-44e1-ae19-1e7c3dc96118&la=en&hash=D7C9D18FCA2DD9F894FD9F3C3DC9228498FA281A
+  STM32_CUBE_H7_REPO: https://github.com/STMicroelectronics/STM32CubeH7
+  STM32_CUBE_H7_REPO_TAG: v1.11.1
+  ARM_TOOLCHAIN_URL: https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz?rev=e434b9ea4afc4ed7998329566b764309&hash=CA590209F5774EE1C96E6450E14A3E26
   QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
   ZEPHYR_REPO: https://github.com/zephyrproject-rtos/zephyr.git
   ZEPHYR_REPO_REV: v3.5.0
@@ -74,13 +74,13 @@ build_stm32:
   script:
     - cd $CI_PROJECT_DIR
     - git submodule update --init
-    - git clone --depth=1 -b ${STM32_CUBE_F4_REPO_TAG} ${STM32_CUBE_F4_REPO}
-    - wget --no-verbose -O gcc-arm-none-eabi.tar.bz2 ${ARM_TOOLCHAIN_URL}
-    - tar -xjf gcc-arm-none-eabi.tar.bz2
-    - mv gcc-arm-none-eabi-* gcc-arm-none-eabi
+    - git clone --depth=1 -b ${STM32_CUBE_H7_REPO_TAG} ${STM32_CUBE_H7_REPO}
+    - wget --no-verbose -O gcc-arm-none-eabi.tar.xz ${ARM_TOOLCHAIN_URL}
+    - tar xf gcc-arm-none-eabi.tar.xz
+    - mv arm-gnu-toolchain-* gcc-arm-none-eabi
     - mkdir $CI_PROJECT_DIR/examples/stm32_example/build
     - cd $CI_PROJECT_DIR/examples/stm32_example/build
-    - cmake -DTOOLCHAIN_PREFIX=$CI_PROJECT_DIR/gcc-arm-none-eabi -DSTM32Cube_DIR=$CI_PROJECT_DIR/STM32CubeF4 -G Ninja ..
+    - cmake -DSTM32_TOOLCHAIN_PATH=$CI_PROJECT_DIR/gcc-arm-none-eabi -DSTM32_CUBE_H7_PATH=$CI_PROJECT_DIR/STM32CubeH7 -G Ninja ..
     - cmake --build .
 
 build_zephyr:

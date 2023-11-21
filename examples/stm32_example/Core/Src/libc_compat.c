@@ -13,14 +13,28 @@
 #include <sys/unistd.h>
 #include <sys/time.h>
 
-#if defined STM32F1
+#if defined STM32C0
+# include <stm32c0xx_hal.h>
+#elif defined STM32F0
+# include <stm32f0xx_hal.h>
+#elif defined STM32F1
 # include <stm32f1xx_hal.h>
 #elif defined STM32F2
 # include <stm32f2xx_hal.h>
+#elif defined STM32F3
+# include <stm32f3xx_hal.h>
 #elif defined STM32F4
 # include <stm32f4xx_hal.h>
+#elif defined STM32F7
+# include <stm32f7xx_hal.h>
 #elif defined STM32G0
 # include <stm32g0xx_hal.h>
+#elif defined STM32G4
+# include <stm32g4xx_hal.h>
+#elif defined STM32H5
+#include <stm32h5xx_hal.h>
+#elif defined STM32H7
+#include <stm32h7xx_hal.h>
 #endif
 
 extern uint32_t __get_MSP(void);
