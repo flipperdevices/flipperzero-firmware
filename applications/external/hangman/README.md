@@ -8,6 +8,5 @@ The rules are very simple – "Flipper" guesses a word, you have to guess it by 
 ![По-английски](https://github.com/bolknote/Flipper-Zero-Hangman-Game/assets/392509/7c33ba65-9e0f-42a4-92bd-b3801c03aef4)
 
 * Programmer: Evgeny Stepanischev (@bolknote) 
-* Illustrator: Eva Stepanischeva
-* README, DIALOG and BUTTONS UPDATED TO ENGLISH (By RogueMaster)
-* HANGMAN IMAGE FIXED (By RogueMaster)
+* Illustrator: Eva Stepanischeva (7 years)
+* README, DIALOG and BUTTONS UPDATED TO ENGLISH, HANGMAN IMAGE COLOR FIXED & ANIME DICTIONARY (By RogueMaster)
