@@ -30,7 +30,6 @@ void ensure_dir_exists(Storage *storage)
         FURI_LOG_I(TAG, "Directory exists: %s", WIEGAND_SAVE_FOLDER);
     }
 }
-
 void wiegand_save(void *context)
 {
     App *app = context;
@@ -54,12 +53,25 @@ void wiegand_save(void *context)
         furi_string_printf(buffer, "Bits: %d\n", bit_count);
         storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
         furi_string_printf(buffer, "RAW_Data: ");
+
         for (int i = 0; i < bit_count; i++)
         {
             furi_string_cat_printf(buffer, "%d", data[i] ? 1 : 0);
         }
+
         furi_string_push_back(buffer, '\n');
         storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
+
+        furi_string_printf(buffer, "PM3_Command: hf ic encode --bin ");
+
+        for (int i = 0; i < bit_count; i++)
+        {
+            furi_string_cat_printf(buffer, "%d", data[i] ? 1 : 0);
+        }
+
+        furi_string_cat_printf(buffer, " --ki 0\n");
+        storage_file_write(data_file, furi_string_get_cstr(buffer), furi_string_size(buffer));
+
         storage_file_close(data_file);
     }
 
