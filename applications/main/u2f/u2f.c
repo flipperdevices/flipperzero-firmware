@@ -28,13 +28,13 @@ typedef enum {
 typedef struct {
     uint8_t format;
     uint8_t xy[64];
-} __attribute__((packed)) U2fPubKey;
+} FURI_PACKED U2fPubKey;
 
 typedef struct {
     uint8_t len;
     uint8_t hash[32];
     uint8_t nonce[32];
-} __attribute__((packed)) U2fKeyHandle;
+} FURI_PACKED U2fKeyHandle;
 
 typedef struct {
     uint8_t cla;
@@ -44,14 +44,14 @@ typedef struct {
     uint8_t len[3];
     uint8_t challenge[32];
     uint8_t app_id[32];
-} __attribute__((packed)) U2fRegisterReq;
+} FURI_PACKED U2fRegisterReq;
 
 typedef struct {
     uint8_t reserved;
     U2fPubKey pub_key;
     U2fKeyHandle key_handle;
     uint8_t cert[];
-} __attribute__((packed)) U2fRegisterResp;
+} FURI_PACKED U2fRegisterResp;
 
 typedef struct {
     uint8_t cla;
@@ -62,13 +62,13 @@ typedef struct {
     uint8_t challenge[32];
     uint8_t app_id[32];
     U2fKeyHandle key_handle;
-} __attribute__((packed)) U2fAuthReq;
+} FURI_PACKED U2fAuthReq;
 
 typedef struct {
     uint8_t user_present;
     uint32_t counter;
     uint8_t signature[];
-} __attribute__((packed)) U2fAuthResp;
+} FURI_PACKED U2fAuthResp;
 
 static const uint8_t ver_str[] = {"U2F_V2"};
 

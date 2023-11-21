@@ -34,7 +34,7 @@ const uint8_t trampoline_code_little_endian[TRAMPOLINE_CODE_SIZE] =
 typedef struct {
     uint8_t code[TRAMPOLINE_CODE_SIZE];
     uint32_t addr;
-} __attribute__((packed)) JMPTrampoline;
+} FURI_PACKED JMPTrampoline;
 
 /**************************************************************************************************/
 /********************************************* Caches *********************************************/

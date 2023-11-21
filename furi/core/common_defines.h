@@ -17,6 +17,10 @@ extern "C" {
 #define FURI_WEAK __attribute__((weak))
 #endif
 
+#ifndef FURI_PACKED
+#define FURI_PACKED __attribute__((packed))
+#endif
+
 #ifndef FURI_IS_IRQ_MASKED
 #define FURI_IS_IRQ_MASKED() (__get_PRIMASK() != 0U)
 #endif
