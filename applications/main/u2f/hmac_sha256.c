@@ -27,7 +27,6 @@
  */
 #include <stdint.h>
 
-#include "sha256.h"
 #include "hmac_sha256.h"
 
 static void _hmac_sha256_init(const hmac_context* ctx) {

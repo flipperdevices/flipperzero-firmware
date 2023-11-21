@@ -9,6 +9,7 @@ env.Append(
         File("mbedtls/include/mbedtls/des.h"),
         File("mbedtls/include/mbedtls/sha1.h"),
     ],
+    CPPDEFINES=[("MBEDTLS_CONFIG_FILE", '\\"mbedtls_cfg.h\\"')],
 )
 
 
@@ -20,15 +21,14 @@ libenv.AppendUnique(
         # Required for lib to be linkable with .faps
         "-mword-relocations",
         "-mlong-calls",
+        # Crappy code :)
+        "-Wno-redundant-decls",
     ],
 )
 
-sources = [
-    "mbedtls/library/des.c",
-    "mbedtls/library/sha1.c",
-    "mbedtls/library/platform_util.c",
-]
+sources = libenv.GlobRecursive("*.c*", "mbedtls/library")
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+Depends(sources, File("mbedtls_cfg.h"))
 libenv.Install("${LIB_DIST_DIR}", lib)
 Return("lib")
