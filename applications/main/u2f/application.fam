@@ -6,8 +6,25 @@ App(
     stack_size=2 * 1024,
     icon="A_U2F_14",
     order=80,
+    sources=["*.c", "!u2f_new.c"],
     resources="resources",
-    fap_libs=["assets"],
+    fap_libs=["assets", "mbedtls"],
+    fap_category="USB",
+    fap_icon="icon.png",
+    provides=["u2f_new"],
+)
+
+App(
+    appid="u2f_new",
+    name="U2F NEW",
+    apptype=FlipperAppType.MENUEXTERNAL,
+    entry_point="u2f_app",
+    stack_size=2 * 1024,
+    icon="A_U2F_14",
+    order=80,
+    sources=["*.c", "!u2f.c"],
+    resources="resources",
+    fap_libs=["assets", "mbedtls"],
     fap_category="USB",
     fap_icon="icon.png",
 )

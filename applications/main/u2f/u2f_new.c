@@ -6,9 +6,10 @@
 #include <furi_hal_random.h>
 #include <littlefs/lfs_util.h> // for lfs_tobe32
 
-#include "toolbox/sha256.h"
+// #include "toolbox/sha256.h"
 #include "hmac_sha256.h"
 #include <micro-ecc/uECC.h>
+#include <mbedtls/sha256.h>
 
 #define TAG "U2f"
 #define WORKER_TAG TAG "Worker"
@@ -202,7 +203,7 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     U2F->user_present = false;
 
     hmac_sha256_context hmac_ctx;
-    sha256_context sha_ctx;
+    // sha256_context sha_ctx;
 
     handle.len = 32 * 2;
     // Generate random nonce
@@ -226,13 +227,30 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
 
     // Generate signature
     uint8_t reserved_byte = 0;
-    sha256_start(&sha_ctx);
-    sha256_update(&sha_ctx, &reserved_byte, 1);
-    sha256_update(&sha_ctx, req->app_id, 32);
-    sha256_update(&sha_ctx, req->challenge, 32);
-    sha256_update(&sha_ctx, handle.hash, handle.len);
-    sha256_update(&sha_ctx, (uint8_t*)&pub_key, 65);
-    sha256_finish(&sha_ctx, hash);
+
+    mbedtls_sha256_context sha_ctx;
+
+    // sha256_start(&sha_ctx);
+    mbedtls_sha256_init(&sha_ctx);
+    mbedtls_sha256_starts(&sha_ctx, 0);
+
+    // sha256_update(&sha_ctx, &reserved_byte, 1);
+    mbedtls_sha256_update(&sha_ctx, &reserved_byte, 1);
+
+    // sha256_update(&sha_ctx, req->app_id, 32);
+    mbedtls_sha256_update(&sha_ctx, req->app_id, 32);
+
+    // sha256_update(&sha_ctx, req->challenge, 32);
+    mbedtls_sha256_update(&sha_ctx, req->challenge, 32);
+
+    // sha256_update(&sha_ctx, handle.hash, handle.len);
+    mbedtls_sha256_update(&sha_ctx, handle.hash, handle.len);
+
+    // sha256_update(&sha_ctx, (uint8_t*)&pub_key, 65);
+    mbedtls_sha256_update(&sha_ctx, (uint8_t*)&pub_key, 65);
+
+    // sha256_finish(&sha_ctx, hash);
+    mbedtls_sha256_finish(&sha_ctx, hash);
 
     uECC_sign(U2F->cert_key, hash, 32, signature, U2F->p_curve);
 
