@@ -4,7 +4,6 @@ Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/fnv1a_hash",
         "#/lib/heatshrink",
         "#/lib/micro-ecc",
         "#/lib/nanopb",
@@ -28,8 +27,6 @@ libenv.ApplyLibFlags()
 sources = []
 
 libs_recurse = [
-    "micro-ecc",
-    "u8g2",
     "update_util",
 ]
 
@@ -37,7 +34,9 @@ for lib in libs_recurse:
     sources += libenv.GlobRecursive("*.c*", lib)
 
 libs_plain = [
+    "u8g2",
     "nanopb",
+    "micro-ecc",
 ]
 
 for lib in libs_plain:
