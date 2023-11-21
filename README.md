@@ -1,4 +1,7 @@
 # ublox
+
+![Flipper Zero connected to a u-blox GPS, running the u-blox app](screenshots/flipper_ublox.jpg)
+
 Flipper Zero app to read from a u-blox GPS over I2C. This app can
 display data, log a path to a KML file, and sync the Flipper's time to
 GPS time. Get the app and see more info on the Flipper app hub!
