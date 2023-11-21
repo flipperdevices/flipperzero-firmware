@@ -6,10 +6,9 @@
 #include <furi_hal_random.h>
 #include <littlefs/lfs_util.h> // for lfs_tobe32
 
-// #include "toolbox/sha256.h"
-#include "hmac_sha256.h"
 #include <micro-ecc/uECC.h>
 #include <mbedtls/sha256.h>
+#include <mbedtls/md.h>
 
 #define TAG "U2f"
 #define WORKER_TAG TAG "Worker"
@@ -202,24 +201,26 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     }
     U2F->user_present = false;
 
-    hmac_sha256_context hmac_ctx;
-    // sha256_context sha_ctx;
-
     handle.len = 32 * 2;
     // Generate random nonce
     furi_hal_random_fill_buf(handle.nonce, 32);
 
+    mbedtls_md_context_t hmac_ctx;
+    mbedtls_md_init(&hmac_ctx);
+    mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
+    mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key));
+
     // Generate private key
-    hmac_sha256_init(&hmac_ctx, U2F->device_key);
-    hmac_sha256_update(&hmac_ctx, req->app_id, 32);
-    hmac_sha256_update(&hmac_ctx, handle.nonce, 32);
-    hmac_sha256_finish(&hmac_ctx, U2F->device_key, private);
+    mbedtls_md_hmac_update(&hmac_ctx, req->app_id, 32);
+    mbedtls_md_hmac_update(&hmac_ctx, handle.nonce, sizeof(handle.nonce));
+    mbedtls_md_hmac_finish(&hmac_ctx, private);
+
+    mbedtls_md_hmac_reset(&hmac_ctx);
 
     // Generate private key handle
-    hmac_sha256_init(&hmac_ctx, U2F->device_key);
-    hmac_sha256_update(&hmac_ctx, private, 32);
-    hmac_sha256_update(&hmac_ctx, req->app_id, 32);
-    hmac_sha256_finish(&hmac_ctx, U2F->device_key, handle.hash);
+    mbedtls_md_hmac_update(&hmac_ctx, private, sizeof(private));
+    mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
+    mbedtls_md_hmac_finish(&hmac_ctx, handle.hash);
 
     // Generate public key
     pub_key.format = 0x04; // Uncompressed point
@@ -230,26 +231,15 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
 
     mbedtls_sha256_context sha_ctx;
 
-    // sha256_start(&sha_ctx);
     mbedtls_sha256_init(&sha_ctx);
     mbedtls_sha256_starts(&sha_ctx, 0);
 
-    // sha256_update(&sha_ctx, &reserved_byte, 1);
     mbedtls_sha256_update(&sha_ctx, &reserved_byte, 1);
-
-    // sha256_update(&sha_ctx, req->app_id, 32);
     mbedtls_sha256_update(&sha_ctx, req->app_id, 32);
-
-    // sha256_update(&sha_ctx, req->challenge, 32);
     mbedtls_sha256_update(&sha_ctx, req->challenge, 32);
-
-    // sha256_update(&sha_ctx, handle.hash, handle.len);
     mbedtls_sha256_update(&sha_ctx, handle.hash, handle.len);
-
-    // sha256_update(&sha_ctx, (uint8_t*)&pub_key, 65);
     mbedtls_sha256_update(&sha_ctx, (uint8_t*)&pub_key, 65);
 
-    // sha256_finish(&sha_ctx, hash);
     mbedtls_sha256_finish(&sha_ctx, hash);
 
     uECC_sign(U2F->cert_key, hash, 32, signature, U2F->p_curve);
@@ -270,8 +260,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     U2fAuthResp* resp = (U2fAuthResp*)buf;
     uint8_t priv_key[32];
     uint8_t mac_control[32];
-    hmac_sha256_context hmac_ctx;
-    sha256_context sha_ctx;
+    // hmac_sha256_context hmac_ctx;
     uint8_t flags = 0;
     uint8_t hash[32];
     uint8_t signature[64];
@@ -299,24 +288,34 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     be_u2f_counter = lfs_tobe32(U2F->counter + 1);
 
     // Generate hash
-    sha256_start(&sha_ctx);
-    sha256_update(&sha_ctx, req->app_id, 32);
-    sha256_update(&sha_ctx, &flags, 1);
-    sha256_update(&sha_ctx, (uint8_t*)&(be_u2f_counter), 4);
-    sha256_update(&sha_ctx, req->challenge, 32);
-    sha256_finish(&sha_ctx, hash);
+    mbedtls_sha256_context sha_ctx;
+
+    mbedtls_sha256_init(&sha_ctx);
+    mbedtls_sha256_starts(&sha_ctx, 0);
+
+    mbedtls_sha256_update(&sha_ctx, req->app_id, 32);
+    mbedtls_sha256_update(&sha_ctx, &flags, 1);
+    mbedtls_sha256_update(&sha_ctx, (uint8_t*)&(be_u2f_counter), 4);
+    mbedtls_sha256_update(&sha_ctx, req->challenge, 32);
+
+    mbedtls_sha256_finish(&sha_ctx, hash);
+
+    mbedtls_md_context_t hmac_ctx;
+    mbedtls_md_init(&hmac_ctx);
+    mbedtls_md_setup(&hmac_ctx, mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), 1);
+    mbedtls_md_hmac_starts(&hmac_ctx, U2F->device_key, sizeof(U2F->device_key));
 
     // Recover private key
-    hmac_sha256_init(&hmac_ctx, U2F->device_key);
-    hmac_sha256_update(&hmac_ctx, req->app_id, 32);
-    hmac_sha256_update(&hmac_ctx, req->key_handle.nonce, 32);
-    hmac_sha256_finish(&hmac_ctx, U2F->device_key, priv_key);
+    mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
+    mbedtls_md_hmac_update(&hmac_ctx, req->key_handle.nonce, sizeof(req->key_handle.nonce));
+    mbedtls_md_hmac_finish(&hmac_ctx, priv_key);
+
+    mbedtls_md_hmac_reset(&hmac_ctx);
 
     // Generate and verify private key handle
-    hmac_sha256_init(&hmac_ctx, U2F->device_key);
-    hmac_sha256_update(&hmac_ctx, priv_key, 32);
-    hmac_sha256_update(&hmac_ctx, req->app_id, 32);
-    hmac_sha256_finish(&hmac_ctx, U2F->device_key, mac_control);
+    mbedtls_md_hmac_update(&hmac_ctx, priv_key, sizeof(priv_key));
+    mbedtls_md_hmac_update(&hmac_ctx, req->app_id, sizeof(req->app_id));
+    mbedtls_md_hmac_finish(&hmac_ctx, mac_control);
 
     if(memcmp(req->key_handle.hash, mac_control, 32) != 0) {
         FURI_LOG_W(TAG, "Wrong handle!");
