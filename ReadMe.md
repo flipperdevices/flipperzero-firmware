@@ -56,6 +56,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: fix ibutton info display (By krolchonok)
 - Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
 - Updated: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
+- Updated: [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c) [Improve VideoPoker bet management #30 (By dsmatilla)](https://github.com/xMasterX/all-the-plugins/pull/30)
 
 <a name="release">
 
@@ -299,7 +300,7 @@ $ ./fbt dolphin_ext
 - [Tic-Tac-Toe Multi v1.1 (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 - [Tic Tac Toe v1.1 (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Ultimate Tic-Tac-Toe (By Racso)](https://github.com/Racso/fzero-apps)
-- [Video Poker v1.1 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
+- [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Yatzee v1.1 (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 - [Zero v1.3 (By Racso)](https://github.com/Racso/fzero-apps)
 - [Zombiez v1.1 (Reworked By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/240) [(Original By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
