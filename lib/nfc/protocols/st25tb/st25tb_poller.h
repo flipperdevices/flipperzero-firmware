@@ -3,8 +3,6 @@
 #include "st25tb.h"
 #include <lib/nfc/nfc.h>
 
-#include <nfc/nfc_poller.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,6 +40,9 @@ St25tbError st25tb_poller_get_uid(St25tbPoller* instance, uint8_t* uid);
 
 St25tbError
     st25tb_poller_read_block(St25tbPoller* instance, uint32_t* block, uint8_t block_number);
+
+St25tbError
+    st25tb_poller_write_block(St25tbPoller* instance, uint32_t block, uint8_t block_number);
 
 St25tbError st25tb_poller_halt(St25tbPoller* instance);
 

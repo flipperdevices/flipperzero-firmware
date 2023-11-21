@@ -2,6 +2,8 @@
 
 #include "st25tb_poller.h"
 
+#include <nfc/nfc_poller.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

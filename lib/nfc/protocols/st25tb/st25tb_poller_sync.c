@@ -1,5 +1,5 @@
 #include "st25tb_poller_sync.h"
-#include "st25tb_poller.h"
+#include "st25tb_poller_i.h"
 
 
 #define ST25TB_POLLER_FLAG_COMMAND_COMPLETE (1UL << 0)
@@ -8,6 +8,7 @@ typedef enum {
     St25tbPollerCmdTypeDetectType,
     St25tbPollerCmdTypeRead,
     St25tbPollerCmdTypeReadBlock,
+    St25tbPollerCmdTypeWriteBlock,
 
     St25tbPollerCmdTypeNum,
 } St25tbPollerCmdType;
@@ -25,10 +26,16 @@ typedef struct {
     uint32_t* block;
 } St25tbPollerCmdReadBlockData;
 
+typedef struct {
+    uint8_t block_num;
+    uint32_t block;
+} St25tbPollerCmdWriteBlockData;
+
 typedef union {
     St25tbPollerCmdDetectTypeData detect_type;
     St25tbPollerCmdReadData read;
     St25tbPollerCmdReadBlockData read_block;
+    St25tbPollerCmdWriteBlockData write_block;
 } St25tbPollerCmdData;
 
 typedef struct {
@@ -59,10 +66,17 @@ static St25tbError
         poller, data->read_block.block, data->read_block.block_num);
 }
 
+static St25tbError
+    st25tb_poller_write_block_handler(St25tbPoller* poller, St25tbPollerCmdData* data) {
+    return st25tb_poller_write_block(
+        poller, data->write_block.block, data->write_block.block_num);
+}
+
 static St25tbPollerCmdHandler st25tb_poller_cmd_handlers[St25tbPollerCmdTypeNum] = {
     [St25tbPollerCmdTypeDetectType] = st25tb_poller_detect_handler,
     [St25tbPollerCmdTypeRead] = st25tb_poller_read_handler,
     [St25tbPollerCmdTypeReadBlock] = st25tb_poller_read_block_handler,
+    [St25tbPollerCmdTypeWriteBlock] = st25tb_poller_write_block_handler,
 };
 
 static NfcCommand st25tb_poller_cmd_callback(NfcGenericEvent event, void* context) {
@@ -108,6 +122,21 @@ St25tbError st25tb_poller_sync_read_block(Nfc* nfc, uint8_t block_num, uint32_t*
         .cmd_data =
             {
                 .read_block =
+                    {
+                        .block = block,
+                        .block_num = block_num,
+                    },
+            },
+    };
+    return st25tb_poller_cmd_execute(nfc, &poller_context);
+}
+
+St25tbError st25tb_poller_sync_write_block(Nfc* nfc, uint8_t block_num, uint32_t block) {
+    St25tbPollerContext poller_context = {
+        .cmd_type = St25tbPollerCmdTypeWriteBlock,
+        .cmd_data =
+            {
+                .write_block =
                     {
                         .block = block,
                         .block_num = block_num,
