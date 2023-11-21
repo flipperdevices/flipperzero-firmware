@@ -46,11 +46,11 @@ void boilerplate_scene_2_draw(Canvas* canvas, BoilerplateScene2Model* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "Scene 2: Input Examples"); 
+    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "Scene 2: Input Examples");
     canvas_set_font(canvas, FontSecondary);
-    char *strInput = malloc(15);
+    char* strInput = malloc(15);
     strcpy(strInput, buttonText[model->screen_text]);
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, strInput); 
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, strInput);
     free(strInput);
 }
 
@@ -61,146 +61,146 @@ static void boilerplate_scene_2_model_init(BoilerplateScene2Model* const model) 
 bool boilerplate_scene_2_input(InputEvent* event, void* context) {
     furi_assert(context);
     BoilerplateScene2* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        UNUSED(model);
-                        boilerplate_stop_all_sound(instance->context);
-                        instance->callback(BoilerplateCustomEventScene2Back, instance->context);
-                        boilerplate_play_long_bump(instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyUp:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 6;
-                        boilerplate_play_bad_bump(instance->context);
-                        boilerplate_stop_all_sound(instance->context);
-                        boilerplate_led_set_rgb(instance->context, 255, 0, 255);
-                    },
-                    true);
-                break;
-            case InputKeyDown:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 7;
-                        boilerplate_play_bad_bump(instance->context);
-                        boilerplate_stop_all_sound(instance->context);
-                        boilerplate_led_set_rgb(instance->context, 255, 255, 0);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 8;
-                        boilerplate_play_bad_bump(instance->context);
-                        boilerplate_stop_all_sound(instance->context);
-                        boilerplate_led_set_rgb(instance->context, 0, 255, 255);
-                    },
-                    true);
-                break;
-            case InputKeyRight:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 9;
-                        boilerplate_play_bad_bump(instance->context);
-                        boilerplate_stop_all_sound(instance->context);
-                        boilerplate_led_set_rgb(instance->context, 255, 0, 0);
-                    },
-                    true);
-                break;
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 10;
-                        boilerplate_play_bad_bump(instance->context);
-                        boilerplate_stop_all_sound(instance->context);
-                        boilerplate_led_set_rgb(instance->context, 255, 255, 255);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    UNUSED(model);
+                    boilerplate_stop_all_sound(instance->context);
+                    instance->callback(BoilerplateCustomEventScene2Back, instance->context);
+                    boilerplate_play_long_bump(instance->context);
+                },
+                true);
+            break;
+        case InputKeyUp:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 6;
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 255, 0, 255);
+                },
+                true);
+            break;
+        case InputKeyDown:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 7;
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 255, 255, 0);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 8;
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 0, 255, 255);
+                },
+                true);
+            break;
+        case InputKeyRight:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 9;
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 255, 0, 0);
+                },
+                true);
+            break;
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 10;
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 255, 255, 255);
+                },
+                true);
+            break;
+        case InputKeyMAX:
+            break;
         }
-    } else if (event->type == InputTypePress) {
-         switch(event->key) {
-            case InputKeyUp:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 1;
-                        boilerplate_play_happy_bump(instance->context);
-                        boilerplate_play_input_sound(instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyDown:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 2;
-                        boilerplate_play_happy_bump(instance->context);
-                        boilerplate_play_input_sound(instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 3;
-                        boilerplate_play_happy_bump(instance->context);
-                        boilerplate_play_input_sound(instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyRight:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 4;
-                        boilerplate_play_happy_bump(instance->context);
-                        boilerplate_play_input_sound(instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene2Model * model,
-                    {
-                        model->screen_text = 5;
-                        boilerplate_play_happy_bump(instance->context);
-                        boilerplate_play_input_sound(instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyBack:
-            case InputKeyMAX:
-                break;
+    } else if(event->type == InputTypePress) {
+        switch(event->key) {
+        case InputKeyUp:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 1;
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
+                },
+                true);
+            break;
+        case InputKeyDown:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 2;
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 3;
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
+                },
+                true);
+            break;
+        case InputKeyRight:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 4;
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
+                },
+                true);
+            break;
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                BoilerplateScene2Model * model,
+                {
+                    model->screen_text = 5;
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
+                },
+                true);
+            break;
+        case InputKeyBack:
+        case InputKeyMAX:
+            break;
         }
     }
-    
+
     return true;
 }
 
@@ -229,17 +229,14 @@ BoilerplateScene2* boilerplate_scene_2_alloc() {
     with_view_model(
         instance->view,
         BoilerplateScene2Model * model,
-        {
-            boilerplate_scene_2_model_init(model);
-        },
+        { boilerplate_scene_2_model_init(model); },
         true);
-    
+
     return instance;
 }
 
 void boilerplate_scene_2_free(BoilerplateScene2* instance) {
     furi_assert(instance);
-
 
     view_free(instance->view);
     free(instance);
@@ -248,7 +245,5 @@ void boilerplate_scene_2_free(BoilerplateScene2* instance) {
 View* boilerplate_scene_2_get_view(BoilerplateScene2* instance) {
     furi_assert(instance);
 
-
     return instance->view;
 }
-

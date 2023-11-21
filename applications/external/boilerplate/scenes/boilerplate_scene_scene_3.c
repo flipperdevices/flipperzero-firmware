@@ -26,7 +26,8 @@ static void boilerplate_scene_3_callback(void* context, int32_t index, InputType
     } else {
         furi_crash("Unexpected Input Type");
     }
-    view_dispatcher_send_custom_event(app->view_dispatcher, boilerplate_custom_menu_event_pack(custom_type, index));
+    view_dispatcher_send_custom_event(
+        app->view_dispatcher, boilerplate_custom_menu_event_pack(custom_type, index));
 }
 
 void boilerplate_scene_scene_3_on_enter(void* context) {
@@ -64,7 +65,7 @@ void boilerplate_scene_scene_3_on_enter(void* context) {
         boilerplate_scene_3_callback,
         ButtonMenuItemTypeControl,
         context);
-    
+
     button_menu_add_item(
         button_menu,
         "Button",
@@ -97,32 +98,32 @@ bool boilerplate_scene_scene_3_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         const uint16_t custom_type = boilerplate_custom_menu_event_get_type(event.event);
         const int16_t button_index = boilerplate_custom_menu_event_get_value(event.event);
-        if (custom_type == BoilerplateCustomEventMenuSelected) {
+        if(custom_type == BoilerplateCustomEventMenuSelected) {
             switch(button_index) {
-                case ButtonIndexButton1:
-                    boilerplate_play_happy_bump(app);
-                    boilerplate_led_set_rgb(app, 255, 0, 0);
-                    break;
-                case ButtonIndexButton2:
-                    boilerplate_play_happy_bump(app);
-                    boilerplate_led_set_rgb(app, 0, 255, 0);
-                    break;
-                case ButtonIndexButton3:
-                    boilerplate_play_happy_bump(app);
-                    boilerplate_led_set_rgb(app, 0, 0, 255);
-                    break;
-                case ButtonIndexControl1:
-                    boilerplate_play_bad_bump(app);
-                    boilerplate_led_set_rgb(app, 255, 0, 255);
-                    break;
-                case ButtonIndexControl2:
-                    boilerplate_play_bad_bump(app);
-                    boilerplate_led_set_rgb(app, 255, 255, 0);
-                    break;
-                case ButtonIndexControl3:
-                    boilerplate_play_bad_bump(app);
-                    boilerplate_led_set_rgb(app, 0, 255, 255);
-                    break;
+            case ButtonIndexButton1:
+                boilerplate_play_happy_bump(app);
+                boilerplate_led_set_rgb(app, 255, 0, 0);
+                break;
+            case ButtonIndexButton2:
+                boilerplate_play_happy_bump(app);
+                boilerplate_led_set_rgb(app, 0, 255, 0);
+                break;
+            case ButtonIndexButton3:
+                boilerplate_play_happy_bump(app);
+                boilerplate_led_set_rgb(app, 0, 0, 255);
+                break;
+            case ButtonIndexControl1:
+                boilerplate_play_bad_bump(app);
+                boilerplate_led_set_rgb(app, 255, 0, 255);
+                break;
+            case ButtonIndexControl2:
+                boilerplate_play_bad_bump(app);
+                boilerplate_led_set_rgb(app, 255, 255, 0);
+                break;
+            case ButtonIndexControl3:
+                boilerplate_play_bad_bump(app);
+                boilerplate_led_set_rgb(app, 0, 255, 255);
+                break;
             }
             consumed = true;
         }
@@ -138,4 +139,3 @@ void boilerplate_scene_scene_3_on_exit(void* context) {
     notification_message(app->notification, &sequence_reset_green);
     notification_message(app->notification, &sequence_reset_blue);
 }
-

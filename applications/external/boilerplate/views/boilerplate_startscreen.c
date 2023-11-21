@@ -10,7 +10,6 @@ struct BoilerplateStartscreen {
     void* context;
 };
 
-
 typedef struct {
     int some_value;
 } BoilerplateStartscreenModel;
@@ -30,11 +29,11 @@ void boilerplate_startscreen_draw(Canvas* canvas, BoilerplateStartscreenModel* m
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Start Screen"); 
+    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Start Screen");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Explain your app"); 
+    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Explain your app");
     canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, "on this screen");
-    elements_button_center(canvas, "Start"); 
+    elements_button_center(canvas, "Start");
 }
 
 static void boilerplate_startscreen_model_init(BoilerplateStartscreenModel* const model) {
@@ -42,36 +41,36 @@ static void boilerplate_startscreen_model_init(BoilerplateStartscreenModel* cons
 }
 
 bool boilerplate_startscreen_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     BoilerplateStartscreen* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    BoilerplateStartscreenModel * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(BoilerplateCustomEventStartscreenBack, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-            case InputKeyRight:
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    BoilerplateStartscreenModel* model,
-                    {
-                        UNUSED(model);
-                        instance->callback(BoilerplateCustomEventStartscreenOk, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                BoilerplateStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(BoilerplateCustomEventStartscreenBack, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                BoilerplateStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(BoilerplateCustomEventStartscreenOk, instance->context);
+                },
+                true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
     return true;
@@ -87,11 +86,8 @@ void boilerplate_startscreen_enter(void* context) {
     with_view_model(
         instance->view,
         BoilerplateStartscreenModel * model,
-        {
-            boilerplate_startscreen_model_init(model);
-        },
-        true
-    );
+        { boilerplate_startscreen_model_init(model); },
+        true);
 }
 
 BoilerplateStartscreen* boilerplate_startscreen_alloc() {
@@ -107,12 +103,9 @@ BoilerplateStartscreen* boilerplate_startscreen_alloc() {
     with_view_model(
         instance->view,
         BoilerplateStartscreenModel * model,
-        {
-            boilerplate_startscreen_model_init(model);
-        },
-        true
-    );
-    
+        { boilerplate_startscreen_model_init(model); },
+        true);
+
     return instance;
 }
 
@@ -120,12 +113,7 @@ void boilerplate_startscreen_free(BoilerplateStartscreen* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        BoilerplateStartscreenModel * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, BoilerplateStartscreenModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
@@ -134,4 +122,3 @@ View* boilerplate_startscreen_get_view(BoilerplateStartscreen* instance) {
     furi_assert(instance);
     return instance->view;
 }
-
