@@ -12,7 +12,7 @@ char* hangman_get_random_word(const char* dict_file) {
 
         if(offset > 0) {
             CONST seek_result = stream_seek(stream, offset, StreamOffsetFromStart) &&
-                               stream_read_line(stream, line);
+                                stream_read_line(stream, line);
 
             if(!seek_result) {
                 stream_rewind(stream);
@@ -76,7 +76,7 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
     canvas_set_custom_u8g2_font(canvas, u8g2_font_6x13B_t_cyrillic);
 
     CONST glyph_w = canvas_glyph_width(canvas, ' ');
-    CONST gap = app->lang->keyboard_gap;
+    CONST gap = app->lang->word_letters_gap;
 
     CONST center_x = (canvas_width(canvas) - (glyph_w + gap) * strlen(app->word)) / 2;
 
@@ -99,7 +99,7 @@ void hangman_draw_word(Canvas* canvas, HangmanApp* app) {
         canvas_set_color(canvas, ColorXOR);
         canvas_draw_glyph(canvas, x, h + 1, '_');
 
-        x += glyph_w + app->lang->keyboard_gap;
+        x += glyph_w + gap;
     }
 }
 
@@ -269,7 +269,7 @@ HangmanLangConfig* hangman_load_config(char* meta_file) {
     }
     config->dict_file = hangman_add_asset_path(furi_string_get_cstr(line));
     config->keyboard_cols = hangman_read_int(stream);
-    config->keyboard_gap = hangman_read_int(stream);
+    config->word_letters_gap = hangman_read_int(stream);
     config->first_letter_offset = hangman_read_int(stream);
 
     // letters
