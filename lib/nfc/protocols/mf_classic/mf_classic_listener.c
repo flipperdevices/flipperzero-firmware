@@ -349,8 +349,8 @@ static MfClassicListenerCommand
                &instance->data->block[block_num], &instance->transfer_value, NULL)) {
             break;
         }
-        instance->transfer_valid = true;
 
+        instance->transfer_valid = true;
         instance->cmd_in_progress = true;
         instance->current_cmd_handler_idx++;
         command = MfClassicListenerCommandAck;

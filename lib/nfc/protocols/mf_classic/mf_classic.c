@@ -606,7 +606,7 @@ static bool mf_classic_is_allowed_access_sector_trailer(
     uint8_t* access_bits_arr = sec_tr->access_bits.data;
     uint8_t AC = ((access_bits_arr[1] >> 5) & 0x04) | ((access_bits_arr[2] >> 2) & 0x02) |
                  ((access_bits_arr[2] >> 7) & 0x01);
-    FURI_LOG_D("NFC", "AC: %02X", AC);
+    FURI_LOG_T("NFC", "AC: %02X", AC);
 
     switch(action) {
     case MfClassicActionKeyARead: {
