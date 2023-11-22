@@ -182,6 +182,8 @@ void seader_worker_poller_conversation(Seader* seader, SeaderPollerContainer* sp
             if(status != FuriStatusOk) {
                 FURI_LOG_W(TAG, "furi_message_queue_get fail %d", status);
                 seader_worker->stage = SeaderPollerEventTypeComplete;
+                view_dispatcher_send_custom_event(
+                    seader->view_dispatcher, SeaderCustomEventWorkerExit);
             }
 
             if(seader_process_success_response_i(
