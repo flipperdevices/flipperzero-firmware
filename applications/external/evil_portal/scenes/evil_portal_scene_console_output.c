@@ -1,6 +1,6 @@
 #include "../evil_portal_app_i.h"
 #include "../helpers/evil_portal_storage.h"
-#include "../helpers/evil_portal_commands.h"
+#include <m-string.h>
 
 void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
@@ -17,7 +17,15 @@ void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void
     buf[len] = '\0';
     furi_string_cat_printf(app->text_box_store, "%s", buf);
 
-    view_dispatcher_send_custom_event(app->view_dispatcher, Evil_PortalEventRefreshConsoleOutput);
+    if(app->capture_line) {
+        furi_string_cat_printf(app->captured_line, "%s", buf);
+    }
+
+    text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
+}
+
+static inline bool captured(Evil_PortalApp* app, const char* str) {
+    return furi_string_search_str(app->captured_line, str) != STRING_FAILURE;
 }
 
 void evil_portal_scene_console_output_on_enter(void* context) {
@@ -54,8 +62,10 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             const char* help_msg = "Logs saved.\n\n";
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
-            write_logs(app->storage, app->portal_logs);
+            furi_mutex_acquire(app->portal_logs_mutex, FuriWaitForever);
+            write_logs(app->portal_logs);
             furi_string_reset(app->portal_logs);
+            furi_mutex_release(app->portal_logs_mutex);
             if(app->show_stopscan_tip) {
                 const char* msg = "Press BACK to return\n";
                 furi_string_cat_str(app->text_box_store, msg);
@@ -74,11 +84,9 @@ void evil_portal_scene_console_output_on_enter(void* context) {
         }
 
         if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
-            app->command_queue[0] = SET_AP_CMD;
-            app->has_command_queue = true;
-            app->command_index = 0;
             if(app->show_stopscan_tip) {
-                const char* msg = "Starting portal\nIf no response press\nBACK to return\n";
+                const char* msg =
+                    "Starting portal\nMarauder takes a few secs to start\nPress BACK to return\n";
                 furi_string_cat_str(app->text_box_store, msg);
                 app->text_box_store_strlen += strlen(msg);
             }
@@ -105,13 +113,67 @@ void evil_portal_scene_console_output_on_enter(void* context) {
 
     if(app->is_command && app->selected_tx_string) {
         if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
-            app->sent_html = evil_portal_set_html(app->storage, EVIL_PORTAL_INDEX_SAVE_PATH);
+            FuriString* data = furi_string_alloc();
+            app->capture_line = true;
+
+            evil_portal_read_ap_name(context);
+            // Test evil portal syntax and response, marauder ignores it
+            furi_string_printf(data, "setap=%s\n", (char*)app->ap_name);
+            furi_string_reset(app->captured_line);
+            evil_portal_uart_tx((uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
+            // TODO: move timeouts and commands elsewhere, can't block input cycle
+            for(uint8_t t = 0; t < 69 && !captured(app, "ap set") && !captured(app, "\n>"); t++)
+                furi_delay_ms(100);
+            bool icanhazmarauder = !captured(app, "ap set") && // Evil portal didn't respond
+                                   captured(app, "\n>"); // Marauder did respond
+            // Not evil portal, set up marauder
+            if(icanhazmarauder) {
+                furi_string_printf(data, "clearlist -a -s -c\nssid -a -n '%s'\n", app->ap_name);
+                furi_string_reset(app->captured_line);
+                evil_portal_uart_tx(
+                    (uint8_t*)(furi_string_get_cstr(data)), furi_string_size(data));
+                // Marauder echoes the command, maybe still init so wait a while for echo
+                for(uint8_t t = 0; t < 10 && !captured(app, (char*)app->ap_name); t++)
+                    furi_delay_ms(100);
+            }
+            free(app->ap_name);
+
+            evil_portal_read_index_html(context);
+            if(icanhazmarauder) {
+                furi_string_reset(app->captured_line);
+                evil_portal_uart_tx(
+                    (uint8_t*)("evilportal -c sethtmlstr\n"),
+                    strlen("evilportal -c sethtmlstr\n"));
+                for(uint8_t t = 0; t < 10 && !captured(app, "\n>") &&
+                                   !captured(app, "Setting HTML from serial...");
+                    t++)
+                    furi_delay_ms(100);
+                // Check for active attack
+                if(!(captured(app, "\n>") && !captured(app, "Setting HTML from serial..."))) {
+                    furi_string_reset(app->captured_line);
+                    evil_portal_uart_tx(app->index_html, strlen((char*)app->index_html));
+                    evil_portal_uart_tx((uint8_t*)("\n"), 1);
+                    for(uint8_t t = 0; t < 20 && !captured(app, "html set"); t++)
+                        furi_delay_ms(100);
+                    evil_portal_uart_tx(
+                        (uint8_t*)("evilportal -c start\n"), strlen("evilportal -c start\n"));
+                }
+            } else {
+                furi_string_set(data, "sethtml=");
+                furi_string_cat(data, (char*)app->index_html);
+                evil_portal_uart_tx(
+                    (uint8_t*)(furi_string_get_cstr(data)), strlen(furi_string_get_cstr(data)));
+                evil_portal_uart_tx((uint8_t*)("\n"), 1);
+            }
+
+            free(app->index_html);
+            app->capture_line = false;
+            furi_string_reset(app->captured_line);
+            furi_string_free(data);
         } else if(0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
-            app->sent_html = false;
-            app->sent_ap = false;
             evil_portal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-            evil_portal_uart_tx((uint8_t*)("\n"), 1);
+            evil_portal_uart_tx((uint8_t*)("\nstopscan\n"), strlen("\nstopscan\n"));
         } else if(1 == strncmp("help", app->selected_tx_string, strlen("help"))) {
             evil_portal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
@@ -121,14 +183,11 @@ void evil_portal_scene_console_output_on_enter(void* context) {
 }
 
 bool evil_portal_scene_console_output_on_event(void* context, SceneManagerEvent event) {
-    Evil_PortalApp* app = context;
+    UNUSED(context);
 
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom) {
-        text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
-        consumed = true;
-    } else if(event.type == SceneManagerEventTypeTick) {
+    if(event.type == SceneManagerEventTypeTick) {
         consumed = true;
     }
 

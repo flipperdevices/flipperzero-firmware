@@ -18,7 +18,7 @@ void evil_portal_show_loading_popup(Evil_PortalApp* app, bool show) {
 void evil_portal_scene_select_html_on_enter(void* context) {
     Evil_PortalApp* app = context;
     DialogsFileBrowserOptions browser_options;
-    evil_portal_create_html_folder_if_not_exists(app->storage);
+    evil_portal_create_html_folder_if_not_exists();
 
     dialog_file_browser_set_basic_options(&browser_options, HTML_EXTENSION, &I_evil_portal_10px);
     browser_options.base_path = HTML_FOLDER;
@@ -34,16 +34,11 @@ void evil_portal_scene_select_html_on_enter(void* context) {
     if(success) {
         //Replace HTML File
         evil_portal_show_loading_popup(app, true);
-        evil_portal_replace_index_html(app->storage, app->file_path);
+        evil_portal_replace_index_html(app->file_path);
         evil_portal_show_loading_popup(app, false);
     }
 
-    if(success) {
-        scene_manager_search_and_switch_to_previous_scene(
-            app->scene_manager, Evil_PortalSceneStart);
-    } else {
-        scene_manager_previous_scene(app->scene_manager);
-    }
+    scene_manager_search_and_switch_to_previous_scene(app->scene_manager, Evil_PortalSceneStart);
 }
 
 bool evil_portal_scene_select_html_on_event(void* context, SceneManagerEvent event) {

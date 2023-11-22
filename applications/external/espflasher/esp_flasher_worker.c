@@ -372,8 +372,6 @@ void loader_port_reset_target(void) {
 }
 
 void loader_port_enter_bootloader(void) {
-    // adapted from custom usb-jtag-serial reset in esptool
-    // (works on official wifi dev board)
     // Also support for the Multi-fucc and Xeon boards
     furi_hal_gpio_write(&gpio_swclk, false);
     furi_hal_power_disable_otg();
@@ -381,6 +379,9 @@ void loader_port_enter_bootloader(void) {
     furi_hal_power_enable_otg();
     furi_hal_gpio_init_simple(&gpio_swclk, GpioModeAnalog);
     loader_port_delay_ms(100);
+
+    // adapted from custom usb-jtag-serial reset in esptool
+    // (works on official wifi dev board)
     _setDTR(true);
     loader_port_delay_ms(SERIAL_FLASHER_RESET_HOLD_TIME_MS);
     _setRTS(true);

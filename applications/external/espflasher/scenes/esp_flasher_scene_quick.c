@@ -4,9 +4,8 @@ enum QuickState {
     QuickStart,
     QuickWifidevS2,
     QuickWifidevS2Blackmagic,
-    QuickWifidevS2Dualboot,
+    QuickWifidevS2Marauder,
     QuickDevproWroom,
-    QuickDevproWroomEvilportal,
     QuickDevproWroomMarauder,
 };
 
@@ -42,7 +41,7 @@ void esp_flasher_scene_quick_on_enter(void* context) {
             app);
         break;
     case QuickWifidevS2Blackmagic:
-    case QuickWifidevS2Dualboot:
+    case QuickWifidevS2Marauder:
         submenu_set_header(submenu, "Choose Firmware:");
         submenu_add_item(
             submenu,
@@ -52,23 +51,16 @@ void esp_flasher_scene_quick_on_enter(void* context) {
             app);
         submenu_add_item(
             submenu,
-            "Evil Portal + Marauder",
-            QuickWifidevS2Dualboot,
+            "Marauder (has Evil Portal)",
+            QuickWifidevS2Marauder,
             esp_flasher_scene_quick_submenu_callback,
             app);
         break;
-    case QuickDevproWroomEvilportal:
     case QuickDevproWroomMarauder:
         submenu_set_header(submenu, "Choose Firmware:");
         submenu_add_item(
             submenu,
-            "Evil Portal",
-            QuickDevproWroomEvilportal,
-            esp_flasher_scene_quick_submenu_callback,
-            app);
-        submenu_add_item(
-            submenu,
-            "Marauder",
+            "Marauder (has Evil Portal)",
             QuickDevproWroomMarauder,
             esp_flasher_scene_quick_submenu_callback,
             app);
@@ -106,26 +98,23 @@ bool esp_flasher_scene_quick_on_event(void* context, SceneManagerEvent event) {
             flash = false;
             break;
         case QuickWifidevS2Blackmagic:
-            boot = APP_DATA_PATH("assets/wifidev-s2/blackmagic/bootloader.bin");
-            part = APP_DATA_PATH("assets/wifidev-s2/blackmagic/partition-table.bin");
-            firm = APP_DATA_PATH("assets/wifidev-s2/blackmagic/blackmagic.bin");
+            boot = APP_DATA_PATH("assets/blackmagic/bootloader.bin");
+            part = APP_DATA_PATH("assets/blackmagic/partition-table.bin");
+            firm = APP_DATA_PATH("assets/blackmagic/blackmagic.bin");
             enter_bootloader = true;
             break;
-        case QuickWifidevS2Dualboot:
-            boot = APP_DATA_PATH("assets/wifidev-s2/dualboot.bin");
+        case QuickWifidevS2Marauder:
+            boot = APP_DATA_PATH("assets/marauder/WifidevS2/esp32_marauder.ino.bootloader.bin");
+            part = APP_DATA_PATH("assets/marauder/esp32_marauder.ino.partitions.bin");
+            app0 = APP_DATA_PATH("assets/marauder/boot_app0.bin");
+            firm = APP_DATA_PATH("assets/marauder/WifidevS2/esp32_marauder_flipper_sd_serial.bin");
             enter_bootloader = true;
-            break;
-        case QuickDevproWroomEvilportal:
-            boot = APP_DATA_PATH("assets/devpro-wroom/evilportal/EvilPortal.ino.bootloader.bin");
-            part = APP_DATA_PATH("assets/devpro-wroom/evilportal/EvilPortal.ino.partitions.bin");
-            app0 = APP_DATA_PATH("assets/devpro-wroom/boot_app0.bin");
-            firm = APP_DATA_PATH("assets/devpro-wroom/evilportal/EvilPortal.ino.bin");
             break;
         case QuickDevproWroomMarauder:
-            boot = APP_DATA_PATH("assets/devpro-wroom/marauder/bootloader.bin");
-            part = APP_DATA_PATH("assets/devpro-wroom/marauder/partitions.bin");
-            app0 = APP_DATA_PATH("assets/devpro-wroom/boot_app0.bin");
-            firm = APP_DATA_PATH("assets/devpro-wroom/marauder/marauder_dev_board_pro.bin");
+            boot = APP_DATA_PATH("assets/marauder/DevproWroom/esp32_marauder.ino.bootloader.bin");
+            part = APP_DATA_PATH("assets/marauder/esp32_marauder.ino.partitions.bin");
+            app0 = APP_DATA_PATH("assets/marauder/boot_app0.bin");
+            firm = APP_DATA_PATH("assets/marauder/DevproWroom/esp32_marauder_dev_board_pro.bin");
             break;
         default:
             flash = false;

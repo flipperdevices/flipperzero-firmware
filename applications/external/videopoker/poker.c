@@ -717,6 +717,9 @@ int32_t video_poker_app(void* p) {
             if(event.type == InputTypePress) {
                 switch(event.key) {
                 case InputKeyUp:
+                    if(poker_player->GameState == 1) {
+                        poker_player->bet = poker_player->score;
+                    }
                     Shake();
                     break;
                 case InputKeyDown:
@@ -733,6 +736,8 @@ int32_t video_poker_app(void* p) {
                     if(poker_player->GameState == 1) {
                         if(poker_player->bet >= poker_player->minbet + 10) {
                             poker_player->bet -= 10;
+                        } else {
+                            poker_player->bet = poker_player->score;
                         }
                     } else if(poker_player->selected > 0 && poker_player->GameState == 2) {
                         poker_player->selected--;
@@ -743,8 +748,10 @@ int32_t video_poker_app(void* p) {
                     break;
                 case InputKeyRight:
                     if(poker_player->GameState == 1) {
-                        if(poker_player->bet < poker_player->score + 10) {
+                        if(poker_player->bet < poker_player->score) {
                             poker_player->bet += 10;
+                        } else {
+                            poker_player->bet = poker_player->minbet;
                         }
                     }
                     if(poker_player->selected < 4 && poker_player->GameState == 2) {

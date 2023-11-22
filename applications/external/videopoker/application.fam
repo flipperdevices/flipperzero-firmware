@@ -8,6 +8,7 @@ App(
     fap_category="Games",
     fap_author="PixlEmly",
     fap_weburl="https://github.com/PixlEmly",
-    fap_version=(1, 1),
+    # 1.2: [Improve VideoPoker bet management #30 (By dsmatilla)](https://github.com/xMasterX/all-the-plugins/pull/30)
+    fap_version=(1, 2),
     fap_description="Video poker is a casino game based on five-card draw poker",
 )
