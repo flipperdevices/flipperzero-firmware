@@ -20,9 +20,6 @@ App(
             name="base32",
         ),
         Lib(
-            name="timezone_utils",
-        ),
-        Lib(
             name="polyfills",
         ),
         Lib(
