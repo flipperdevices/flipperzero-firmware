@@ -231,9 +231,9 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
         } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
             ret = NfcCommandStop;
         }
-    } else {
-        // add failure callback if failure type
-        FURI_LOG_D(TAG, "14a event type %x", iso14443_4a_event->type);
+    } else if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeError) {
+        ret = NfcCommandStop;
+        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
     }
 
     return ret;
@@ -249,7 +249,9 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
     PicopassPoller* instance = seader->picopass_poller;
     SeaderPollerContainer spc = {.picopass_poller = instance};
 
-    if(event.type == PicopassPollerEventTypeSuccess) {
+    if(event.type == PicopassPollerEventTypeCardDetected) {
+        seader_worker->stage = SeaderPollerEventTypeCardDetect;
+    } else if(event.type == PicopassPollerEventTypeSuccess) {
         if(seader_worker->stage == SeaderPollerEventTypeCardDetect) {
             uint8_t* csn = picopass_poller_get_csn(instance);
             seader_worker_card_detect(seader, 0, NULL, csn, sizeof(PicopassSerialNum), NULL, 0);
@@ -262,6 +264,7 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
         }
     } else if(event.type == PicopassPollerEventTypeFail) {
         ret = NfcCommandStop;
+        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
     } else {
         FURI_LOG_D(TAG, "picopass event type %x", event.type);
     }
