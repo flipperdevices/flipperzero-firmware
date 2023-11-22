@@ -9,6 +9,7 @@
 #include "../../types/common.h"
 #include "../../types/token_info.h"
 #include "../../config/app/config.h"
+#include "../kb_layouts/kb_layout_provider.h"
 #include "../crypto/crypto_facade.h"
 #include "../crypto/constants.h"
 #include "migrations/common_migration.h"
@@ -173,7 +174,7 @@ static bool totp_open_config_file(Storage* storage, FlipperFormat** file) {
         flipper_format_write_uint32(
             fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_METHOD, &tmp_uint32, 1);
 
-        tmp_uint32 = AutomationKeyboardLayoutQWERTY;
+        tmp_uint32 = TOTP_DEFAULT_KB_LAYOUT;
         flipper_format_write_uint32(
             fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, &tmp_uint32, 1);
 
@@ -507,7 +508,7 @@ bool totp_config_file_load(PluginState* const plugin_state) {
 
         if(!flipper_format_read_uint32(
                fff_data_file, TOTP_CONFIG_KEY_AUTOMATION_KB_LAYOUT, &tmp_uint32, 1)) {
-            tmp_uint32 = AutomationKeyboardLayoutQWERTY;
+            tmp_uint32 = TOTP_DEFAULT_KB_LAYOUT;
         }
 
         plugin_state->automation_kb_layout = tmp_uint32;

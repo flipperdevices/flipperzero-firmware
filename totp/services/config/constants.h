@@ -4,7 +4,7 @@
 
 #define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/totp")
 #define CONFIG_FILE_HEADER "Flipper TOTP plugin config file"
-#define CONFIG_FILE_ACTUAL_VERSION (11)
+#define CONFIG_FILE_ACTUAL_VERSION (12)
 
 #define TOTP_CONFIG_KEY_TIMEZONE "Timezone"
 #define TOTP_CONFIG_KEY_TOKEN_NAME "TokenName"

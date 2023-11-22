@@ -4,6 +4,7 @@
 #include "../../cli_shared_methods.h"
 #include "../../cli_plugin_interface.h"
 #include "../../../services/config/config.h"
+#include "../../../services/kb_layouts/kb_layout_provider.h"
 #include "../../../ui/scene_director.h"
 #include "../../../config/app/config.h"
 
@@ -13,9 +14,6 @@
 #ifdef TOTP_BADBT_AUTOMATION_ENABLED
 #define TOTP_CLI_COMMAND_AUTOMATION_METHOD_BT "bt"
 #endif
-#define TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTY "QWERTY"
-#define TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_AZERTY "AZERTY"
-#define TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTZ "QWERTZ"
 #define TOTP_CLI_COMMAND_AUTOMATION_ARG_KB_LAYOUT_PREFIX "-k"
 #define TOTP_CLI_COMMAND_AUTOMATION_ARG_INITIAL_DELAY_PREFIX "-w"
 
@@ -46,44 +44,14 @@ static void print_method(AutomationMethod method, const char* color) {
 }
 
 static void print_kb_layout(AutomationKeyboardLayout layout, const char* color) {
-    char* layoutToPrint;
-    switch(layout) {
-    case AutomationKeyboardLayoutQWERTY:
-        layoutToPrint = TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTY;
-        break;
-    case AutomationKeyboardLayoutAZERTY:
-        layoutToPrint = TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_AZERTY;
-        break;
-    case AutomationKeyboardLayoutQWERTZ:
-        layoutToPrint = TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTZ;
-        break;
-    default:
-        furi_crash("Unknown automation keyboard layout");
-        break;
-    }
-
-    TOTP_CLI_PRINTF_COLORFUL(color, "%s", layoutToPrint);
+    char layoutToPrint[TOTP_KB_LAYOUT_NAME_MAX_LENGTH + 1];
+    totp_kb_layout_provider_get_layout_name(layout, &layoutToPrint[0], sizeof(layoutToPrint));
+    TOTP_CLI_PRINTF_COLORFUL(color, "%s", &layoutToPrint[0]);
 }
 
 static void print_initial_delay(uint16_t initial_delay, const char* color) {
     double delay_sec = initial_delay / 1000.0;
     TOTP_CLI_PRINTF_COLORFUL(color, "%.1f", delay_sec);
-}
-
-static bool
-    parse_automation_keyboard_layout(const FuriString* str, AutomationKeyboardLayout* out) {
-    bool result = true;
-    if(furi_string_cmpi_str(str, TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTY) == 0) {
-        *out = AutomationKeyboardLayoutQWERTY;
-    } else if(furi_string_cmpi_str(str, TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_AZERTY) == 0) {
-        *out = AutomationKeyboardLayoutAZERTY;
-    } else if(furi_string_cmpi_str(str, TOTP_CLI_COMMAND_AUTOMATION_LAYOUT_QWERTZ) == 0) {
-        *out = AutomationKeyboardLayoutQWERTZ;
-    } else {
-        result = false;
-    }
-
-    return result;
 }
 
 static void handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
@@ -113,7 +81,8 @@ static void handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
 #endif
         else if(furi_string_cmpi_str(temp_str, TOTP_CLI_COMMAND_AUTOMATION_ARG_KB_LAYOUT_PREFIX) == 0) {
             if(!args_read_string_and_trim(args, temp_str) ||
-               !parse_automation_keyboard_layout(temp_str, &new_kb_layout)) {
+               !totp_kb_layout_provider_get_layout_by_name(
+                   furi_string_get_cstr(temp_str), &new_kb_layout)) {
                 args_valid = false;
                 break;
             }
