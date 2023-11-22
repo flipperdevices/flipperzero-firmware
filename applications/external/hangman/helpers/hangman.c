@@ -60,10 +60,13 @@ void hangman_draw_keyboard(Canvas* canvas, HangmanApp* app) {
             }
 
             if(n == app->pos) {
-                canvas_draw_glyph(canvas, x - 1, y, ch); // Made bold
+                canvas_draw_box(canvas, x - 1, y - glyph_h + 2, glyph_w + 1, glyph_h);
+                canvas_set_color(canvas, ColorXOR);
+                canvas_draw_glyph(canvas, x, y, ch);
+                canvas_set_color(canvas, ColorBlack);
+            } else {
+                canvas_draw_glyph(canvas, x, y, ch);
             }
-
-            canvas_draw_glyph(canvas, x, y, ch);
 
             if(app->opened[n]) {
                 canvas_set_custom_u8g2_font(canvas, u8g2_font_6x12_t_cyrillic);
