@@ -233,9 +233,6 @@ NfcCommand seader_worker_poller_callback_iso14443_4a(NfcGenericEvent event, void
         } else if(seader_worker->stage == SeaderPollerEventTypeComplete) {
             ret = NfcCommandStop;
         }
-    } else if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeError) {
-        ret = NfcCommandStop;
-        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
     }
 
     return ret;
@@ -266,7 +263,7 @@ NfcCommand seader_worker_poller_callback_picopass(PicopassPollerEvent event, voi
         }
     } else if(event.type == PicopassPollerEventTypeFail) {
         ret = NfcCommandStop;
-        view_dispatcher_send_custom_event(seader->view_dispatcher, SeaderCustomEventWorkerExit);
+        FURI_LOG_W(TAG, "PicopassPollerEventTypeFail");
     } else {
         FURI_LOG_D(TAG, "picopass event type %x", event.type);
     }
