@@ -2692,7 +2692,6 @@ Function,+,st25tb_load,_Bool,"St25tbData*, FlipperFormat*, uint32_t"
 Function,+,st25tb_poller_get_uid,St25tbError,"St25tbPoller*, uint8_t*"
 Function,+,st25tb_poller_halt,St25tbError,St25tbPoller*
 Function,+,st25tb_poller_initiate,St25tbError,"St25tbPoller*, uint8_t*"
-Function,+,st25tb_poller_read,St25tbError,"St25tbPoller*, St25tbData*"
 Function,+,st25tb_poller_read_block,St25tbError,"St25tbPoller*, uint32_t*, uint8_t"
 Function,+,st25tb_poller_select,St25tbError,"St25tbPoller*, uint8_t*"
 Function,+,st25tb_poller_send_frame,St25tbError,"St25tbPoller*, const BitBuffer*, BitBuffer*, uint32_t"

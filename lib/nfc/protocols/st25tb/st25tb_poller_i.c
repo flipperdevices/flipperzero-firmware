@@ -309,7 +309,7 @@ St25tbError st25tb_poller_halt(St25tbPoller* instance) {
             break;
         }
 
-        instance->state = St25tbPollerStateIdle;
+        instance->state = St25tbPollerStateSelect;
     } while(false);
 
     return ret;

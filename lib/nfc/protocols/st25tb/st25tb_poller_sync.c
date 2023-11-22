@@ -1,12 +1,10 @@
 #include "st25tb_poller_sync.h"
 #include "st25tb_poller_i.h"
 
-
 #define ST25TB_POLLER_FLAG_COMMAND_COMPLETE (1UL << 0)
 
 typedef enum {
     St25tbPollerCmdTypeDetectType,
-    St25tbPollerCmdTypeRead,
     St25tbPollerCmdTypeReadBlock,
     St25tbPollerCmdTypeWriteBlock,
 
@@ -43,7 +41,7 @@ typedef struct {
     St25tbError error;
     St25tbPollerCmdType cmd_type;
     St25tbPollerCmdData cmd_data;
-} St25tbPollerContext;
+} St25tbPollerSyncContext;
 
 typedef St25tbError (*St25tbPollerCmdHandler)(St25tbPoller* poller, St25tbPollerCmdData* data);
 
@@ -56,25 +54,18 @@ static St25tbError st25tb_poller_detect_handler(St25tbPoller* poller, St25tbPoll
     return error;
 }
 
-static St25tbError st25tb_poller_read_handler(St25tbPoller* poller, St25tbPollerCmdData* data) {
-    return st25tb_poller_read(poller, data->read.data);
-}
-
 static St25tbError
     st25tb_poller_read_block_handler(St25tbPoller* poller, St25tbPollerCmdData* data) {
-    return st25tb_poller_read_block(
-        poller, data->read_block.block, data->read_block.block_num);
+    return st25tb_poller_read_block(poller, data->read_block.block, data->read_block.block_num);
 }
 
 static St25tbError
     st25tb_poller_write_block_handler(St25tbPoller* poller, St25tbPollerCmdData* data) {
-    return st25tb_poller_write_block(
-        poller, data->write_block.block, data->write_block.block_num);
+    return st25tb_poller_write_block(poller, data->write_block.block, data->write_block.block_num);
 }
 
 static St25tbPollerCmdHandler st25tb_poller_cmd_handlers[St25tbPollerCmdTypeNum] = {
     [St25tbPollerCmdTypeDetectType] = st25tb_poller_detect_handler,
-    [St25tbPollerCmdTypeRead] = st25tb_poller_read_handler,
     [St25tbPollerCmdTypeReadBlock] = st25tb_poller_read_block_handler,
     [St25tbPollerCmdTypeWriteBlock] = st25tb_poller_write_block_handler,
 };
@@ -85,7 +76,7 @@ static NfcCommand st25tb_poller_cmd_callback(NfcGenericEvent event, void* contex
     furi_assert(event.instance);
     furi_assert(event.protocol == NfcProtocolSt25tb);
 
-    St25tbPollerContext* poller_context = context;
+    St25tbPollerSyncContext* poller_context = context;
     St25tbPoller* st25tb_poller = event.instance;
     St25tbPollerEvent* st25tb_event = event.event_data;
 
@@ -101,7 +92,8 @@ static NfcCommand st25tb_poller_cmd_callback(NfcGenericEvent event, void* contex
     return NfcCommandStop;
 }
 
-static St25tbError st25tb_poller_cmd_execute(Nfc* nfc, St25tbPollerContext* poller_ctx) {
+static St25tbError st25tb_poller_cmd_execute(Nfc* nfc, St25tbPollerSyncContext* poller_ctx) {
+    furi_assert(nfc);
     furi_assert(poller_ctx->cmd_type < St25tbPollerCmdTypeNum);
     poller_ctx->thread_id = furi_thread_get_current_id();
 
@@ -117,7 +109,8 @@ static St25tbError st25tb_poller_cmd_execute(Nfc* nfc, St25tbPollerContext* poll
 }
 
 St25tbError st25tb_poller_sync_read_block(Nfc* nfc, uint8_t block_num, uint32_t* block) {
-    St25tbPollerContext poller_context = {
+    furi_assert(block);
+    St25tbPollerSyncContext poller_context = {
         .cmd_type = St25tbPollerCmdTypeReadBlock,
         .cmd_data =
             {
@@ -132,7 +125,7 @@ St25tbError st25tb_poller_sync_read_block(Nfc* nfc, uint8_t block_num, uint32_t*
 }
 
 St25tbError st25tb_poller_sync_write_block(Nfc* nfc, uint8_t block_num, uint32_t block) {
-    St25tbPollerContext poller_context = {
+    St25tbPollerSyncContext poller_context = {
         .cmd_type = St25tbPollerCmdTypeWriteBlock,
         .cmd_data =
             {
@@ -147,7 +140,8 @@ St25tbError st25tb_poller_sync_write_block(Nfc* nfc, uint8_t block_num, uint32_t
 }
 
 St25tbError st25tb_poller_sync_detect_type(Nfc* nfc, St25tbType* type) {
-    St25tbPollerContext poller_context = {
+    furi_assert(type);
+    St25tbPollerSyncContext poller_context = {
         .cmd_type = St25tbPollerCmdTypeDetectType,
         .cmd_data =
             {
@@ -160,9 +154,42 @@ St25tbError st25tb_poller_sync_detect_type(Nfc* nfc, St25tbType* type) {
     return st25tb_poller_cmd_execute(nfc, &poller_context);
 }
 
+static NfcCommand nfc_scene_read_poller_callback_st25tb(NfcGenericEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.event_data);
+    furi_assert(event.instance);
+    furi_assert(event.protocol == NfcProtocolSt25tb);
+
+    St25tbPollerSyncContext* poller_context = context;
+    St25tbPollerEvent* st25tb_event = event.event_data;
+
+    NfcCommand command = NfcCommandContinue;
+    if(st25tb_event->type == St25tbPollerEventTypeRequestMode) {
+        st25tb_event->data->mode_request.mode = St25tbPollerModeRead;
+    } else if(
+        st25tb_event->type == St25tbPollerEventTypeSuccess ||
+        st25tb_event->type == St25tbPollerEventTypeFailure) {
+        if(st25tb_event->type == St25tbPollerEventTypeSuccess) {
+            memcpy(
+                poller_context->cmd_data.read.data,
+                st25tb_poller_get_data(event.instance),
+                sizeof(St25tbData));
+        } else {
+            poller_context->error = st25tb_event->data->error;
+        }
+        command = NfcCommandStop;
+        furi_thread_flags_set(poller_context->thread_id, ST25TB_POLLER_FLAG_COMMAND_COMPLETE);
+    }
+
+    return command;
+}
+
 St25tbError st25tb_poller_sync_read(Nfc* nfc, St25tbData* data) {
-    St25tbPollerContext poller_context = {
-        .cmd_type = St25tbPollerCmdTypeRead,
+    furi_assert(nfc);
+    furi_assert(data);
+
+    St25tbPollerSyncContext poller_context = {
+        .thread_id = furi_thread_get_current_id(),
         .cmd_data =
             {
                 .read =
@@ -171,5 +198,14 @@ St25tbError st25tb_poller_sync_read(Nfc* nfc, St25tbData* data) {
                     },
             },
     };
-    return st25tb_poller_cmd_execute(nfc, &poller_context);
+
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolSt25tb);
+    nfc_poller_start(poller, nfc_scene_read_poller_callback_st25tb, &poller_context);
+    furi_thread_flags_wait(ST25TB_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
+    furi_thread_flags_clear(ST25TB_POLLER_FLAG_COMMAND_COMPLETE);
+
+    nfc_poller_stop(poller);
+    nfc_poller_free(poller);
+
+    return poller_context.error;
 }
