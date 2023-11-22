@@ -6,6 +6,8 @@ Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
 Header,+,applications/services/dialogs/dialogs.h,,
 Header,+,applications/services/dolphin/dolphin.h,,
+Header,+,applications/services/expansion/expansion.h,,
+Header,+,applications/services/expansion/expansion_frame.h,,
 Header,+,applications/services/gui/elements.h,,
 Header,+,applications/services/gui/gui.h,,
 Header,+,applications/services/gui/icon_i.h,,
@@ -880,6 +882,10 @@ Function,-,exp10f,float,float
 Function,-,exp2,double,double
 Function,-,exp2f,float,float
 Function,-,exp2l,long double,long double
+Function,+,expansion_disable,void,Expansion*
+Function,+,expansion_enable,void,"Expansion*, FuriHalSerialId"
+Function,+,expansion_frame_decode,_Bool,"ExpansionFrame*, ExpansionFrameReceiveCallback, void*"
+Function,+,expansion_frame_encode,_Bool,"const ExpansionFrame*, ExpansionFrameSendCallback, void*"
 Function,-,expf,float,float
 Function,-,expl,long double,long double
 Function,-,explicit_bzero,void,"void*, size_t"

@@ -1,35 +1,39 @@
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define EXPANSION_MAX_DATA_SIZE (64)
+
 typedef enum {
-    ExpansionFrameTypeHeartbeat = 0x0,
-    ExpansionFrameTypeError = 0x1,
-    ExpansionFrameTypeHold = 0x02,
-    ExpansionFrameTypeBaudRate = 0x03,
-    ExpansionFrameTypeData = 0x04,
+    ExpansionFrameTypeHeartbeat = 1,
+    ExpansionFrameTypeStatus = 2,
+    ExpansionFrameTypeHold = 3,
+    ExpansionFrameTypeBaudRate = 4,
+    ExpansionFrameTypeControl = 5,
+    ExpansionFrameTypeData = 6,
+    ExpansionFrameTypeReserved,
 } ExpansionFrameType;
 
 typedef enum {
     ExpansionFrameErrorNone = 0x00,
     ExpansionFrameErrorUnknown = 0x01,
-} ExpansionFrameErrorType;
+} ExpansionFrameError;
 
 typedef enum {
-    ExpansionFrameRpcCommandStart = 0x00,
-    ExpansionFrameRpcCommandStop = 0x01,
-    ExpansionFrameRpcCommandRestart = 0x02,
-} ExpansionFrameRpcCommand;
+    ExpansionFrameControlCommandStartRpc = 0x00,
+    ExpansionFrameControlCommandStopRpc = 0x01,
+} ExpansionFrameControlCommand;
 
 #pragma pack(push, 1)
 
 typedef struct {
-    uint8_t leader : 4;
-    uint8_t type : 4;
+    uint8_t type;
 } ExpansionFrameHeader;
 
 typedef struct {
@@ -37,39 +41,51 @@ typedef struct {
 
 typedef struct {
     uint8_t error;
-} ExpansionFrameError;
+} ExpansionFrameStatus;
 
 typedef struct {
-    uint32_t estimate_us;
+    uint32_t eta_us;
 } ExpansionFrameHold;
 
 typedef struct {
-    uint32_t baud_rate;
+    uint32_t baud;
 } ExpansionFrameBaudRate;
 
 typedef struct {
     uint8_t command;
-} ExpansionFrameRpc;
+} ExpansionFrameControl;
 
 typedef struct {
-    uint16_t num;
     uint16_t size;
-    uint8_t data[];
+    uint8_t bytes[EXPANSION_MAX_DATA_SIZE];
 } ExpansionFrameData;
 
 typedef struct {
     ExpansionFrameHeader header;
     union {
         ExpansionFrameHeartbeat heartbeat;
-        ExpansionFrameError error;
+        ExpansionFrameStatus status;
         ExpansionFrameHold hold;
         ExpansionFrameBaudRate baud_rate;
-        ExpansionFrameRpc rpc;
+        ExpansionFrameControl control;
         ExpansionFrameData data;
-    };
+    } content;
 } ExpansionFrame;
 
 #pragma pack(pop)
+
+typedef size_t (*ExpansionFrameReceiveCallback)(uint8_t* data, size_t data_size, void* context);
+typedef size_t (*ExpansionFrameSendCallback)(const uint8_t* data, size_t data_size, void* context);
+
+bool expansion_frame_decode(
+    ExpansionFrame* frame,
+    ExpansionFrameReceiveCallback receive,
+    void* context);
+
+bool expansion_frame_encode(
+    const ExpansionFrame* frame,
+    ExpansionFrameSendCallback send,
+    void* context);
 
 #ifdef __cplusplus
 }
