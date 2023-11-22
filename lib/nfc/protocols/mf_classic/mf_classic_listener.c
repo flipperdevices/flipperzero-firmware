@@ -155,7 +155,7 @@ static MfClassicListenerCommand
         uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nt.data, sizeof(MfClassicNt));
         uint32_t secret_poller = ar_num ^ crypto1_word(instance->crypto, 0, 0);
         if(secret_poller != prng_successor(nt_num, 64)) {
-            FURI_LOG_D(
+            FURI_LOG_T(
                 TAG, "Wrong reader key: %08lX != %08lX", secret_poller, prng_successor(nt_num, 64));
             mf_classic_listener_reset_state(instance);
             break;
