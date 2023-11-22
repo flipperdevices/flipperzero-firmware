@@ -2,16 +2,17 @@
 #include "../helpers/evil_portal_storage.h"
 
 void evil_portal_show_loading_popup(Evil_PortalApp* app, bool show) {
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
     ViewStack* view_stack = app->view_stack;
     Loading* loading = app->loading;
     if(show) {
         // Raise timer priority so that animations can play
-        furi_timer_set_thread_priority(FuriTimerThreadPriorityElevated);
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
         view_stack_add_view(view_stack, loading_get_view(loading));
     } else {
         view_stack_remove_view(view_stack, loading_get_view(loading));
         // Restore default timer priority
-        furi_timer_set_thread_priority(FuriTimerThreadPriorityNormal);
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
     }
 }
 
