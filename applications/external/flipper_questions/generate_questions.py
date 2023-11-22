@@ -16,7 +16,7 @@ for file in [os.path.join(qustions_path, entry) for entry in os.listdir(qustions
 	if not os.path.isfile(file):
 		continue
 	with open(file, 'r') as f:
-		lists[os.path.splitext(os.path.basename(file))[0]] = f.read().split('\n')
+		lists[os.path.splitext(os.path.basename(file))[0]] = [line for line in f.read().split('\n') if line and not line.isspace()]
 
 def create_arrays():
 	def replace_specials(l):
