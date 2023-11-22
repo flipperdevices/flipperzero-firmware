@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1116-2235-0.93.9-01fc449.tgz&channel=RM1116-2235-0.93.9-01fc449&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1116-2235-0.93.9-01fc449-NoAnim.tgz&channel=RM1116-2235-0.93.9-01fc449-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1122-1715-0.93.9-5358c54.tgz&channel=RM1122-1715-0.93.9-5358c54&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1122-1715-0.93.9-5358c54-NoAnim.tgz&channel=RM1122-1715-0.93.9-5358c54-NoAnim&version=0.93.9)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,36 +31,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-11-22 16:54 EST`
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2023-11-22 16:54 EST`
-- Updated: [Cross Remote v0.9 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
-- Updated: [ESP32 Camera Suite v1.4 (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- Updated: [Color Guess v1.2 (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
-- OFW PR: [HID app: added latest changes + PTT #3223 (By hryamzik)](https://github.com/flipperdevices/flipperzero-firmware/pull/3223)
-- Updated: [BLE Spam v4.2 (By Willy-JL & ECTO-1A & Spooks4576 with research from xMasterX; OFW API thanks to noproto)](https://github.com/noproto/apple_ble_spam_ofw) - Added 25 Devices (By Mr-Proxy-source), Devices Sorted & Deduped (By RogueMaster)
-- Updated: [Video Player v0.1 (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
-- Updated: [Flizzer Tracker v0.4 (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
-- Updated: [HEX Viewer v2.0 (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- Updated: [Pomodoro Timer v1.2 (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
-- Updated: [i2c Tools v1.2 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
-- Many more apps changed to use subtrees (By RogueMaster)
-- Updated: [ESP Flasher v1.3 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
-- Updated: [GPS v1.2 (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` - Support for Deep Sleep (By Sil333033)
-- Updated: [Sub-GHz Remote (Refactored) + Configurator v1.3 (By gid9798)](https://github.com/DarkFlippers/SubGHz_Remote)
-- Updated: [SPI Mem Manager v1.2 (By drunkbatya)-OFW](https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/spi_mem_manager) [Add XT25F128B details to the SPI memory manager app #74 (By dshcherb)](https://github.com/flipperdevices/flipperzero-good-faps/pull/74)
-- Updated: [WiFi (Marauder) v6.5 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
-- Updated: [ESP32 Gravity v1.0 (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
-- Added: [USB Consumer Control (By WithSecureLabs)](https://github.com/WithSecureLabs/usb-consumer-control)
-- Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) - Decoder by htotoo
-- UL: fix ibutton info display (By krolchonok)
-- Updated: [Questions v1.0 (By nikilark)](https://github.com/nikilark/flipper_questions)
-- Updated: [Video Poker v1.2 (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c) [Improve VideoPoker bet management #30 (By dsmatilla)](https://github.com/xMasterX/all-the-plugins/pull/30)
-- UL: [SubGHz fix feature name (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f8546937c0fc6be5f1d94b8ba95f3adc486ed950)
-- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [UL Version](https://github.com/xMasterX/all-the-plugins/tree/dev/non_catalog_apps/flipper_evil_portal)
-- Updated: [ESP Flasher v1.3 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) Tweaks and Images (By Willy-JL)
-- Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) - Fix subghz pocsag memory leak (By Willy-JL)
-- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - [Fix Cross Compatability Current VS NFC Refactors branch (By Leedave)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/49/commits/735b84d6d24578551fe92d69657899350800db1a)
-- Updated: [Authenticator/TOTP v5.9.0 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [Hangman v1.4 (By Evgeny Stepanischev & Eva Stepanischeva)](https://github.com/bolknote/Flipper-Zero-Hangman-Game)
-- Updated: [HEX Editor v1.2 (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 
 ## IN THIS BRANCH:
 
@@ -573,4 +543,4 @@ $ ./fbt dolphin_ext
 - [Desktop Favorite Binds To Allow Opening Custom Game Menu. Whomever can complete this gets 3 months of subscriber builds. Patrons can DM me to add their monthly towards this bounty.](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/756)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1116-2235-0.93.9-01fc449.tgz&channel=RM1116-2235-0.93.9-01fc449&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1116-2235-0.93.9-01fc449-NoAnim.tgz&channel=RM1116-2235-0.93.9-01fc449-NoAnim&version=0.93.9)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1122-1715-0.93.9-5358c54.tgz&channel=RM1122-1715-0.93.9-5358c54&version=0.93.9) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM1122-1715-0.93.9-5358c54-NoAnim.tgz&channel=RM1122-1715-0.93.9-5358c54-NoAnim&version=0.93.9)
