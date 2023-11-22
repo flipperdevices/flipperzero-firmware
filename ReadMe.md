@@ -109,6 +109,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [USB Mass Storage v1.3 (By nminaylov)](https://github.com/flipperdevices/flipperzero-good-faps/tree/nm/usb_mass_storage_app/mass_storage) [Based on OFW#1060 (By kevinwallace)](https://github.com/flipperdevices/flipperzero-firmware/pull/1060)
 - Added: [COGES NFC (For Coffee Machines) (By OFW + haisenteck)](https://github.com/haisenteck/flipperzero-Haisenteck/)
 - Refactor Update: [NFC Seader v1.3 (By bettse)](https://github.com/bettse/seader)
+- UL: [NFC Parsers bugfixes for Troyka and Social Card (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/655)
 
 <a name="release">
 
