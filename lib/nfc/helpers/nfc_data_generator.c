@@ -334,16 +334,16 @@ static void
     data->iso14443_3a_data->sak = 0x00;
     // Calculate the proper ATQA and SAK
     if(uid_len == 7) {
-        data->iso14443_3a_data->atqa[0] ^= 0x40;
+        data->iso14443_3a_data->atqa[0] |= 0x40;
     }
     if(type == MfClassicType1k) {
-        data->iso14443_3a_data->atqa[0] ^= 0x04;
+        data->iso14443_3a_data->atqa[0] |= 0x04;
         data->iso14443_3a_data->sak = 0x08;
     } else if(type == MfClassicType4k) {
-        data->iso14443_3a_data->atqa[0] ^= 0x02;
+        data->iso14443_3a_data->atqa[0] |= 0x02;
         data->iso14443_3a_data->sak = 0x18;
     } else if(type == MfClassicTypeMini) {
-        data->iso14443_3a_data->atqa[0] ^= 0x08;
+        data->iso14443_3a_data->atqa[0] |= 0x08;
         data->iso14443_3a_data->sak = 0x09;
     }
     data->type = type;
