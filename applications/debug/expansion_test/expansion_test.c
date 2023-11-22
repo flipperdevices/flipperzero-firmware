@@ -12,7 +12,7 @@
 #include <flipper.pb.h>
 
 #include <expansion/expansion.h>
-#include <expansion/expansion_frame.h>
+#include <expansion/expansion_protocol.h>
 
 #define TAG "ExpansionTest"
 

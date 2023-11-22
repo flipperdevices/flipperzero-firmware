@@ -1,7 +1,7 @@
 #include "../minunit.h"
 
 #include <furi.h>
-#include <expansion/expansion_frame_i.h>
+#include <expansion/expansion_protocol.h>
 
 MU_TEST(test_expansion_encoded_size) {
     ExpansionFrame frame;

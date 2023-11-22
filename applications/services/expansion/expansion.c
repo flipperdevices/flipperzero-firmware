@@ -1,4 +1,4 @@
-#include "expansion_i.h"
+#include "expansion.h"
 
 #include <furi_hal_serial.h>
 #include <furi_hal_serial_control.h>
@@ -8,7 +8,7 @@
 #include <rpc/rpc.h>
 
 #include "expansion_settings.h"
-#include "expansion_frame.h"
+#include "expansion_protocol.h"
 
 #define TAG "ExpansionSrv"
 
