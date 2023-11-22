@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz fix feature name (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f8546937c0fc6be5f1d94b8ba95f3adc486ed950)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [UL Version](https://github.com/xMasterX/all-the-plugins/tree/dev/non_catalog_apps/flipper_evil_portal)
 - Updated: [ESP Flasher v1.3 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher) Tweaks and Images (By Willy-JL)
+- Updated: [POCSAG Pager v1.1 (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) - Fix subghz pocsag memory leak (By Willy-JL)
 
 <a name="release">
 
